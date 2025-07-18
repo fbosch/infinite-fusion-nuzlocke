@@ -1,3 +1,12 @@
+description: Quality and security guidelines for the Infinite Fusion Nuzlocke tracker
+globs: ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx"]
+alwaysApply: true
+
+---
+
+# Quality and Security Guidelines
+Rules for ensuring code quality, security, and maintainability.
+
 ## Error Handling
 - Implement proper error boundaries
 - Use try-catch for data operations
@@ -19,7 +28,7 @@
 ## Documentation
 - Update README.md with project-specific information
 - Document complex algorithms and data structures
-- Add inline comments for business logic
+- Add inline comments only for complex business logic that cannot be made self-documenting
 - Keep API documentation up to date
 
 ## Git Workflow
@@ -29,11 +38,7 @@
 - Document breaking changes
 
 ## Environment Setup
-- Use Node.js 18+ for development
+- Use Node.js 17+ for development
 - Install dependencies with `pnpm install`
 - Set up proper environment variables
 - Configure IDE for TypeScript and ESLint
-description:
-globs:
-alwaysApply: false
----

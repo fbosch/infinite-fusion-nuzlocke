@@ -1,3 +1,9 @@
+description: Data persistence, state management, and storage requirements
+globs: ["src/**/*.ts", "src/**/*.tsx"]
+alwaysApply: true
+
+---
+
 # Data Persistence and State Management
 Rules for handling data persistence, state management, and run storage.
 
@@ -57,11 +63,3 @@ interface NuzlockeRun {
 - Handle data export/import securely
 - Provide data deletion options
 - Comply with privacy regulations
-description: Data persistence, state management, and storage requirements
-globs: ["src/**/*.ts", "src/**/*.tsx"]
-alwaysApply: true
----
-description:
-globs:
-alwaysApply: false
----

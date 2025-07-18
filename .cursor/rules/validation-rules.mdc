@@ -1,3 +1,9 @@
+description: Validation rules and business logic for ensuring Nuzlocke run integrity
+globs: ["src/**/*.ts", "tests/**/*.ts"]
+alwaysApply: true
+
+---
+
 # Validation and Business Logic Rules
 Rules for validating Nuzlocke run integrity and enforcing game rules.
 
@@ -52,11 +58,3 @@ Rules for validating Nuzlocke run integrity and enforcing game rules.
 - **On Load**: Validate when loading run data
 - **On Action**: Validate before critical actions (catching, fainting, etc.)
 - **On Import**: Validate imported data before accepting
-description: Validation rules and business logic for ensuring Nuzlocke run integrity
-globs: ["src/**/*.ts", "tests/**/*.ts"]
-alwaysApply: true
----
-description:
-globs:
-alwaysApply: false
----

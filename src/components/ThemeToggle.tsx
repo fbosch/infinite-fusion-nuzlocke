@@ -2,20 +2,18 @@
 
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Sun, Moon, Monitor, Circle, } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // useEffect only runs on the client, so now we can safely show the UI
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    console.log(theme)
+  if (!mounted || !resolvedTheme) {
     return (
       <button className="p-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
         <Monitor className="w-5 h-5" />
@@ -35,11 +33,11 @@ export default function ThemeToggle() {
 
   const getThemeIcon = () => {
     if (theme === 'light') {
-      return <Sun className="w-5 h-5" />;
+      return <Sun className="w-5 h-5 text-yellow-600" />;
     } else if (theme === 'dark') {
-      return <Moon className="w-5 h-5" />;
+      return <Moon className="w-5 h-5 text-blue-300" />;
     } else {
-      return <Monitor className="w-5 h-5" />;
+      return <Monitor className="w-5 h-5 " />;
     }
   };
 

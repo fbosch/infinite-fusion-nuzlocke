@@ -1,3 +1,9 @@
+description: Infinite Fusion specific mechanics and fusion tracking requirements
+globs: ["src/**/*.ts", "src/**/*.tsx"]
+alwaysApply: true
+
+---
+
 # Infinite Fusion Mechanics
 Special rules and features specific to Pokémon Infinite Fusion that must be implemented.
 
@@ -33,11 +39,3 @@ Special rules and features specific to Pokémon Infinite Fusion that must be imp
 - Handle different fusion forms and appearances
 - Track fusion-specific abilities and moves
 - Support both Classic and Remix fusion mechanics
-description: Infinite Fusion specific mechanics and fusion tracking requirements
-globs: ["src/**/*.ts", "src/**/*.tsx"]
-alwaysApply: true
----
-description:
-globs:
-alwaysApply: false
----

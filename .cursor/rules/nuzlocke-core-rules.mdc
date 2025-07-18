@@ -1,3 +1,9 @@
+description: Core Nuzlocke rules that must be implemented for a valid Nuzlocke run
+globs: ["src/**/*.ts", "src/**/*.tsx"]
+alwaysApply: true
+
+---
+
 # Core Nuzlocke Rules
 These are the fundamental Nuzlocke rules that must be implemented in the tracker.
 
@@ -32,11 +38,3 @@ These are the fundamental Nuzlocke rules that must be implemented in the tracker
 - Prevent using fainted Pokémon in battles
 - Require nicknames for all caught Pokémon
 - Validate logical progression through areas
-description: Core Nuzlocke rules that must be implemented for a valid Nuzlocke run
-globs: ["src/**/*.ts", "src/**/*.tsx"]
-alwaysApply: true
----
-description:
-globs:
-alwaysApply: false
----

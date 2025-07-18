@@ -1,3 +1,9 @@
+description: Zod v4 validation best practices and usage guidelines for the Infinite Fusion Nuzlocke tracker
+globs: ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts"]
+alwaysApply: true
+
+---
+
 # Zod Validation Rules
 Rules for using Zod v4 for data validation and type safety in the Infinite Fusion Nuzlocke tracker.
 
@@ -197,16 +203,3 @@ return result.data;
 - **Integration Tests**: Test data loading and validation
 - **Error Tests**: Test error handling and messages
 - **Performance Tests**: Ensure validation performance meets requirements
-
-description: Zod v4 validation best practices and usage guidelines for the Infinite Fusion Nuzlocke tracker
-globs: ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts"]
-alwaysApply: true
----
-description:
-globs:
-alwaysApply: false
----
-description:
-globs:
-alwaysApply: false
----

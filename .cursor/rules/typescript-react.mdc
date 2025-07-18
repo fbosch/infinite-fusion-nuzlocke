@@ -19,7 +19,7 @@
   - PascalCase for components and types
   - kebab-case for file names
 - Write self-documenting code with clear variable names
-- Add JSDoc comments for complex functions
+- Add JSDoc comments only for complex functions that cannot be made self-documenting
 
 ## Performance Considerations
 - Use Next.js optimizations (Turbopack in development)

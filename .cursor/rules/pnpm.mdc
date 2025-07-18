@@ -1,3 +1,9 @@
+description: Package management guidelines requiring pnpm usage
+globs: ["package.json", "pnpm-lock.yaml", "**/*.json"]
+alwaysApply: true
+
+---
+
 # Package Management Rule
 
 Always use `pnpm` for package management operations:

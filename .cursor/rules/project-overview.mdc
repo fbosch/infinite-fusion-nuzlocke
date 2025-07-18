@@ -1,3 +1,9 @@
+description: Project overview and technology stack for the Infinite Fusion Nuzlocke tracker
+globs: ["**/*"]
+alwaysApply: true
+
+---
+
 # Project Overview
 This is a Next.js 15 project with TypeScript, Tailwind CSS, and Vitest for testing. The project appears to be related to Pokémon Infinite Fusion and Nuzlocke challenges.
 
@@ -22,7 +28,3 @@ This is a Next.js 15 project with TypeScript, Tailwind CSS, and Vitest for testi
 - Run tests before committing: `pnpm test:run`
 - Use `pnpm dev` for development with Turbopack
 - Refresh data with: `pnpm data:refresh`
-description:
-globs:
-alwaysApply: false
----

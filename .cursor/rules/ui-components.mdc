@@ -1,3 +1,9 @@
+description: UI components and design requirements for the Nuzlocke tracker
+globs: ["src/**/*.tsx", "src/**/*.css"]
+alwaysApply: true
+
+---
+
 # UI Components for Nuzlocke Tracker
 Essential UI components that need to be implemented for the Nuzlocke tracker.
 
@@ -46,11 +52,3 @@ Essential UI components that need to be implemented for the Nuzlocke tracker.
 - Use route encounter data for validation
 - Integrate with location data for progress tracking
 - Support both Classic and Remix encounter tables
-description: UI components and design requirements for the Nuzlocke tracker
-globs: ["src/**/*.tsx", "src/**/*.css"]
-alwaysApply: true
----
-description:
-globs:
-alwaysApply: false
----

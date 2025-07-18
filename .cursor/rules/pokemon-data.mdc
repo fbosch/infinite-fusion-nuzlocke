@@ -1,3 +1,12 @@
+description: Pokémon data management and API integration guidelines
+globs: ["src/**/*.ts", "src/**/*.tsx", "data/**/*.json", "scripts/**/*.ts"]
+alwaysApply: true
+
+---
+
+# Pokémon Data Management
+Rules for handling Pokémon data, API integration, and game-specific data requirements.
+
 ## Data Handling
 - Validate Pokémon data integrity
 - Use proper error handling for data scraping
@@ -53,7 +62,3 @@
 - Some Pokémon are unobtainable (e.g., Musharna appears as NPC but cannot be caught)
 - Pokémon learnsets are based on Generation VII mechanics
 - Additional Pokémon from Generations 3-7 do not match their official Pokédex numbers
-description:
-globs:
-alwaysApply: false
----
