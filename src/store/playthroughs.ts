@@ -1,5 +1,6 @@
 import { proxy, subscribe } from 'valtio';
 import { z } from 'zod';
+import { get, set, del, keys } from 'idb-keyval';
 
 // Zod schema for a single playthrough
 export const PlaythroughSchema = z.object({
@@ -25,65 +26,24 @@ const defaultState: PlaythroughsState = {
   activePlaythroughId: undefined,
 };
 
-// IndexedDB configuration
-const DB_NAME = 'nuzlocke-playthroughs-db';
-const DB_VERSION = 1;
-const STORE_NAME = 'playthroughs';
+// Storage keys
+const PLAYTHROUGHS_KEY = 'playthroughs';
+const ACTIVE_PLAYTHROUGH_KEY = 'activePlaythroughId';
 
-// IndexedDB helper functions
-const openDB = (): Promise<IDBDatabase> => {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
-
-    request.onupgradeneeded = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-      }
-    };
-  });
-};
-
+// IndexedDB helper functions using idb-keyval
 const saveToIndexedDB = async (state: PlaythroughsState): Promise<void> => {
   if (typeof window === 'undefined') return;
 
   try {
-    const db = await openDB();
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-
-    // Clear existing data
-    await new Promise<void>((resolve, reject) => {
-      const clearRequest = store.clear();
-      clearRequest.onsuccess = () => resolve();
-      clearRequest.onerror = () => reject(clearRequest.error);
-    });
-
-    // Save playthroughs
-    for (const playthrough of state.playthroughs) {
-      await new Promise<void>((resolve, reject) => {
-        const addRequest = store.add(playthrough);
-        addRequest.onsuccess = () => resolve();
-        addRequest.onerror = () => reject(addRequest.error);
-      });
-    }
+    // Save playthroughs array
+    await set(PLAYTHROUGHS_KEY, state.playthroughs);
 
     // Save active playthrough ID
     if (state.activePlaythroughId) {
-      await new Promise<void>((resolve, reject) => {
-        const addRequest = store.add({
-          id: 'activePlaythroughId',
-          value: state.activePlaythroughId
-        });
-        addRequest.onsuccess = () => resolve();
-        addRequest.onerror = () => reject(addRequest.error);
-      });
+      await set(ACTIVE_PLAYTHROUGH_KEY, state.activePlaythroughId);
+    } else {
+      await del(ACTIVE_PLAYTHROUGH_KEY);
     }
-
-    db.close();
   } catch (error) {
     console.warn('Failed to save playthroughs to IndexedDB:', error);
   }
@@ -93,49 +53,32 @@ const loadFromIndexedDB = async (): Promise<PlaythroughsState> => {
   if (typeof window === 'undefined') return defaultState;
 
   try {
-    const db = await openDB();
-    const transaction = db.transaction([STORE_NAME], 'readonly');
-    const store = transaction.objectStore(STORE_NAME);
-
+    // Load playthroughs array
+    const playthroughsData = await get(PLAYTHROUGHS_KEY);
     const playthroughs: Playthrough[] = [];
-    let activePlaythroughId: string | undefined;
 
-    return new Promise((resolve, reject) => {
-      const request = store.getAll();
-
-      request.onsuccess = () => {
-        const results = request.result;
-
-        for (const item of results) {
-          if (item.id === 'activePlaythroughId') {
-            activePlaythroughId = item.value;
-          } else {
-            // Validate each playthrough with Zod
-            try {
-              const playthrough = PlaythroughSchema.parse(item);
-              playthroughs.push(playthrough);
-            } catch (error) {
-              console.warn('Invalid playthrough data found:', error);
-            }
-          }
+    if (Array.isArray(playthroughsData)) {
+      for (const item of playthroughsData) {
+        try {
+          const playthrough = PlaythroughSchema.parse(item);
+          playthroughs.push(playthrough);
+        } catch (error) {
+          console.warn('Invalid playthrough data found:', error);
         }
+      }
+    }
 
-        const state: PlaythroughsState = {
-          playthroughs,
-          activePlaythroughId,
-        };
+    // Load active playthrough ID
+    const activePlaythroughId = await get(ACTIVE_PLAYTHROUGH_KEY);
 
-        // Validate the entire state
-        const validatedState = PlaythroughsSchema.parse(state);
-        db.close();
-        resolve(validatedState);
-      };
+    const state: PlaythroughsState = {
+      playthroughs,
+      activePlaythroughId: activePlaythroughId || undefined,
+    };
 
-      request.onerror = () => {
-        db.close();
-        reject(request.error);
-      };
-    });
+    // Validate the entire state
+    const validatedState = PlaythroughsSchema.parse(state);
+    return validatedState;
   } catch (error) {
     console.warn('Failed to load playthroughs from IndexedDB:', error);
     return defaultState;
