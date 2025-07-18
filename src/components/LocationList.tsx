@@ -215,7 +215,6 @@ export default function LocationList() {
                         options={pokemonOptions}
                         value={selectedPokemon}
                         onChange={(pokemon) => handleEncounterSelect(routeId, pokemon)}
-                        placeholder={`Select Pokemon for ${row.original.name}...`}
                       />
                     </td>
                   );
