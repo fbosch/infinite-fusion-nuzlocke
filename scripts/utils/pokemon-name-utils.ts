@@ -154,7 +154,5 @@ export function isPotentialPokemonName(text: string): boolean {
     /^\d+%$/           // Percentages
   ];
 
-
-
   return !excludePatterns.some(pattern => pattern.test(trimmed));
 } 

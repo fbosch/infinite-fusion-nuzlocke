@@ -26,14 +26,6 @@ interface RouteEncounters {
   pokemonIds: number[]; // These are custom Infinite Fusion IDs
 }
 
-
-
-
-
-
-
-
-
 async function scrapeWildEncounters(url: string, isRemix: boolean = false): Promise<RouteEncounters[]> {
   ConsoleFormatter.printHeader('Scraping Wild Encounters', 'Scraping wild encounter data from the wiki');
   try {
