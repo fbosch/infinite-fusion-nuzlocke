@@ -1,20 +1,22 @@
 
 import LocationList from '@/components/LocationList';
+import Settings from '@/components/Settings';
 
 export default function Home() {
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900">
       <main className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-4">
+        <h1 className="text-4xl font-bold mb-8 text-gray-900 dark:text-white">
           Infinite Fusion Nuzlocke Tracker
         </h1>
-        <p className="text-lg text-gray-600 mb-8">
-          Welcome to your Pokémon Infinite Fusion Nuzlocke tracker!
-        </p>
 
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Available Locations</h2>
-          <LocationList />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <LocationList />
+          </div>
+          <div className="lg:col-span-1">
+            <Settings />
+          </div>
         </div>
       </main>
     </div>

@@ -21,9 +21,11 @@
     "@types/cli-progress": "^3.11.6",
     "cli-progress": "^3.12.0",
     "next": "15.4.1",
+    "next-themes": "^0.4.6",
     "pokedex-promise-v2": "^4.2.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "valtio": "^2.1.5",
     "zod": "^4.0.5"
   },
   "devDependencies": {

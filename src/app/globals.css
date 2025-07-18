@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #3b82f6;
+  --color-primary-dark: #1d4ed8;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Ensure dark mode works with Tailwind v4 */
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
 }
