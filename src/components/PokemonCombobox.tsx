@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useCallback, useDeferredValue, startTransition } from 'react';
 import { Search, Check } from 'lucide-react';
-import { Combobox, ComboboxInput, ComboboxOptions } from '@headlessui/react';
+import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption, ComboboxButton } from '@headlessui/react';
 import { FixedSizeList as List } from 'react-window';
 import clsx from 'clsx';
 import { getNationalDexIdFromInfiniteFusionId } from '@/loaders/pokemon';
@@ -21,75 +21,62 @@ export function getPokemonSpriteUrl(pokemonId: number): string {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${spriteId}.png`;
 }
 
-// Virtualized Pokemon Option Component
-const VirtualizedPokemonOption = React.memo(({
+// Pokemon Option Component
+const PokemonOption = React.memo(({
   pokemon,
   selected,
-  active,
-  onSelect,
-  index
 }: {
   pokemon: PokemonOption;
   selected: boolean;
-  active: boolean;
-  onSelect: () => void;
-  index: number;
 }) => (
-  <div
-    id={`pokemon-option-${index}`}
+  <ComboboxOption
+    value={pokemon}
     className={clsx(
       'relative cursor-default select-none py-2 pr-4 pl-13',
+      "hover:bg-gray-100 dark:hover:bg-gray-700",
       {
-        'bg-blue-600 text-white': active,
-        'text-gray-900 dark:text-gray-100': !active
+        'bg-blue-400 text-white': selected,
+        'text-gray-900 dark:text-gray-100': !selected
       }
     )}
-    onClick={onSelect}
-    onKeyDown={(e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        onSelect();
-      }
-    }}
-    role="option"
-    aria-selected={selected}
-    aria-label={`${pokemon.name}${selected ? ' (selected)' : ''}`}
-    tabIndex={active ? 0 : -1}
   >
-    <div className="flex items-center gap-4 cursor-pointer">
-      {/* Pokemon Sprite */}
-      <img
-        src={getPokemonSpriteUrl(pokemon.id)}
-        alt={pokemon.name}
-        className="w-12 h-12 object-contain object-center scale-180 antialiased"
-        loading="lazy"
-        decoding="async"
-      />
-      <span className={clsx('block truncate', {
-        'font-medium': selected,
-        'font-normal': !selected
-      })}>
-        {pokemon.name}
-      </span>
-    </div>
-    {selected ? (
-      <span
-        className="absolute inset-y-0 left-2 flex items-center pl-2"
-        aria-hidden="true"
-      >
-        <Check className={clsx("w-6 h-6", {
-          'text-white': active,
-          'text-blue-400': !active
-        })} aria-hidden="true" />
-      </span>
-    ) : null}
-  </div>
+    {({ selected }) => (
+      <>
+        <div className={"flex items-center gap-8"}>
+          <img
+            src={getPokemonSpriteUrl(pokemon.id)}
+            alt={pokemon.name}
+            className="w-10 h-10 object-contain object-center scale-180 antialiased"
+            loading="lazy"
+            decoding="async"
+          />
+          <span className={clsx('block truncate ', {
+            'font-medium': selected,
+            'font-normal': !selected
+          })}>
+            {pokemon.name}
+          </span>
+        </div>
+        {selected ? (
+          <span
+            className="absolute inset-y-0 left-2 flex items-center pl-2"
+            aria-hidden="true"
+          >
+            <Check className={clsx("w-6 h-6", {
+              'text-white': selected,
+              'text-blue-400': !selected
+            })} aria-hidden="true" />
+          </span>
+        ) : null}
+      </>
+    )}
+  </ComboboxOption>
 ));
 
-VirtualizedPokemonOption.displayName = 'VirtualizedPokemonOption';
+PokemonOption.displayName = 'PokemonOption';
 
-// Virtualized List Component for Combobox Options
-const VirtualizedComboboxOptions = React.memo(({
+// Virtualized Pokemon Options Component
+const VirtualizedPokemonOptions = React.memo(({
   options,
   selectedValue,
   onSelect,
@@ -105,8 +92,9 @@ const VirtualizedComboboxOptions = React.memo(({
   const itemCount = options.length;
   const listHeight = Math.min(itemCount * itemHeight, maxHeight);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
+  const listRef = React.useRef<List>(null);
 
-  // Reset active index when options change
+  // Reset active index when options change, but preserve scroll position
   React.useEffect(() => {
     setActiveIndex(-1);
   }, [options]);
@@ -118,27 +106,72 @@ const VirtualizedComboboxOptions = React.memo(({
 
     return (
       <div style={style}>
-        <VirtualizedPokemonOption
-          pokemon={pokemon}
-          selected={isSelected}
-          active={isActive}
-          onSelect={() => onSelect(pokemon)}
-          index={index}
-        />
+        <ComboboxOption
+          value={pokemon}
+          className={clsx(
+            'relative cursor-pointer select-none py-2 pr-4 pl-13',
+            "hover:bg-gray-100 dark:hover:bg-gray-700",
+            {
+              'bg-blue-600': isActive,
+              'text-gray-900 dark:text-gray-100': !isActive
+            }
+          )}
+        >
+          {({ selected }) => (
+            <>
+              <div className={"flex items-center gap-8"}>
+                <img
+                  src={getPokemonSpriteUrl(pokemon.id)}
+                  alt={pokemon.name}
+                  className="w-10 h-10 object-contain object-center scale-180 antialiased"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span className={clsx('block truncate ', {
+                  'font-medium': selected,
+                  'font-normal': !selected
+                })}>
+                  {pokemon.name}
+                </span>
+              </div>
+              {selected ? (
+                <span
+                  className="absolute inset-y-0 left-2 flex items-center pl-2"
+                  aria-hidden="true"
+                >
+                  <Check className={clsx("w-6 h-6", {
+                    'text-white': isActive,
+                    'text-blue-400': !isActive
+                  })} aria-hidden="true" />
+                </span>
+              ) : null}
+            </>
+          )}
+        </ComboboxOption>
       </div>
     );
-  }, [options, selectedValue, onSelect, activeIndex]);
+  }, [options, selectedValue, activeIndex]);
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
-        setActiveIndex(prev => Math.min(prev + 1, itemCount - 1));
+        const nextIndex = Math.min(activeIndex + 1, itemCount - 1);
+        setActiveIndex(nextIndex);
+        // Scroll to the active item
+        if (listRef.current && nextIndex >= 0) {
+          listRef.current.scrollToItem(nextIndex, 'smart');
+        }
         break;
       case 'ArrowUp':
         event.preventDefault();
-        setActiveIndex(prev => Math.max(prev - 1, 0));
+        const prevIndex = Math.max(activeIndex - 1, 0);
+        setActiveIndex(prevIndex);
+        // Scroll to the active item
+        if (listRef.current && prevIndex >= 0) {
+          listRef.current.scrollToItem(prevIndex, 'smart');
+        }
         break;
       case 'Enter':
       case ' ':
@@ -169,20 +202,16 @@ const VirtualizedComboboxOptions = React.memo(({
       role="listbox"
       aria-label="Pokemon options"
       aria-activedescendant={activeIndex >= 0 ? `pokemon-option-${activeIndex}` : undefined}
+      className="outline-none"
     >
       <List
+        ref={listRef}
         height={listHeight}
         itemCount={itemCount}
         itemSize={itemHeight}
         width="100%"
-        className="scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
+        className="scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent outline-none"
         overscanCount={5} // Render 5 items above and below the visible area for smoother scrolling
-        onItemsRendered={({ visibleStartIndex }) => {
-          // Update active index when items are rendered
-          if (activeIndex === -1 && visibleStartIndex >= 0) {
-            setActiveIndex(visibleStartIndex);
-          }
-        }}
       >
         {Row}
       </List>
@@ -190,7 +219,7 @@ const VirtualizedComboboxOptions = React.memo(({
   );
 });
 
-VirtualizedComboboxOptions.displayName = 'VirtualizedComboboxOptions';
+VirtualizedPokemonOptions.displayName = 'VirtualizedPokemonOptions';
 
 // Pokemon Combobox Component - Memoized for performance with virtualization
 export const PokemonCombobox = React.memo(({
@@ -225,10 +254,7 @@ export const PokemonCombobox = React.memo(({
     }
   }, [onChange]);
 
-  // Handle option selection from virtualized list
-  const handleOptionSelect = useCallback((pokemon: PokemonOption) => {
-    onChange(pokemon);
-  }, [onChange]);
+
 
   return (
     <Combobox value={value || null} onChange={handleChange} disabled={disabled} immediate>
@@ -252,17 +278,10 @@ export const PokemonCombobox = React.memo(({
                 startTransition(() => setQuery(value));
               }
             }}
-            onClick={() => {
-              // Reopen dropdown when clicking on focused input
-              const comboboxButton = document.querySelector('[data-headlessui-state]') as HTMLElement;
-              if (comboboxButton) {
-                comboboxButton.click();
-              }
-            }}
           />
-          <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+          <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-2">
             <Search className="h-4 w-4 text-gray-400" aria-hidden="true" />
-          </div>
+          </ComboboxButton>
         </div>
         <ComboboxOptions
           className={clsx(
@@ -271,10 +290,10 @@ export const PokemonCombobox = React.memo(({
             "border border-gray-400 dark:border-gray-600"
           )}
         >
-          <VirtualizedComboboxOptions
+          <VirtualizedPokemonOptions
             options={filteredOptions}
             selectedValue={value || null}
-            onSelect={handleOptionSelect}
+            onSelect={onChange}
             itemHeight={60}
             maxHeight={240}
           />
