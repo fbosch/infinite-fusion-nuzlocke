@@ -61,7 +61,6 @@ async function getOrLoadPokemonData(): Promise<Map<string, number>> {
     }
 
     globalPokemonNameToId = nameToIdMap;
-    ConsoleFormatter.success(`Loaded ${pokemonArray.length} Pokemon for name lookup (cached globally)`);
     return nameToIdMap;
   } catch (error) {
     ConsoleFormatter.error(`Error loading Pokemon data: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -118,6 +117,7 @@ function findPokemonId(text: string, nameToIdMap: Map<string, number>): number |
 }
 
 async function scrapeWildEncounters(url: string, isRemix: boolean = false): Promise<RouteEncounters[]> {
+  ConsoleFormatter.printHeader('Scraping Wild Encounters', 'Scraping wild encounter data from the wiki');
   try {
     const modeType = isRemix ? 'Remix' : 'Classic';
 
@@ -244,8 +244,7 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
 
     progressBar.update(allElements.length, { status: 'Scanning complete!' });
     progressBar.stop();
-
-    ConsoleFormatter.success(`${modeType} scraping complete! Found ${routes.length} unique routes`);
+    ConsoleFormatter.success(`${modeType} scraping complete!`);
 
     return routes;
 
@@ -257,7 +256,6 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
 
 async function main() {
   const startTime = Date.now();
-  ConsoleFormatter.printHeader('Scraping Wild Encounters', 'Scraping wild encounter data from the wiki');
 
   try {
     const dataDir = path.join(process.cwd(), 'data');
@@ -301,8 +299,8 @@ async function main() {
       { label: 'Unique Classic Pokemon', value: uniqueClassicPokemon, color: 'yellow' },
       { label: 'Classic data saved to', value: classicPath, color: 'cyan' },
       { label: 'Classic file size', value: ConsoleFormatter.formatFileSize(classicStats.size), color: 'cyan' },
-      { label: 'Remix data saved to', value: remixPath, color: 'cyan' },
       { label: 'Unique Remix Pokemon', value: uniqueRemixPokemon, color: 'yellow' },
+      { label: 'Remix data saved to', value: remixPath, color: 'cyan' },
       { label: 'Remix file size', value: ConsoleFormatter.formatFileSize(remixStats.size), color: 'cyan' },
       { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
     ]);
