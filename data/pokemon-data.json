@@ -1,0 +1,9347 @@
+[
+  {
+    "id": 1,
+    "nationalDexId": 1,
+    "name": "Bulbasaur",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 2,
+    "nationalDexId": 2,
+    "name": "Ivysaur",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 3,
+    "nationalDexId": 3,
+    "name": "Venusaur",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 4,
+    "nationalDexId": 4,
+    "name": "Charmander",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 5,
+    "nationalDexId": 5,
+    "name": "Charmeleon",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 6,
+    "nationalDexId": 6,
+    "name": "Charizard",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 7,
+    "nationalDexId": 7,
+    "name": "Squirtle",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 8,
+    "nationalDexId": 8,
+    "name": "Wartortle",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 9,
+    "nationalDexId": 9,
+    "name": "Blastoise",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 10,
+    "nationalDexId": 10,
+    "name": "Caterpie",
+    "types": [
+      {
+        "name": "bug"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 11,
+    "nationalDexId": 11,
+    "name": "Metapod",
+    "types": [
+      {
+        "name": "bug"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 12,
+    "nationalDexId": 12,
+    "name": "Butterfree",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 13,
+    "nationalDexId": 13,
+    "name": "Weedle",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 14,
+    "nationalDexId": 14,
+    "name": "Kakuna",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 15,
+    "nationalDexId": 15,
+    "name": "Beedrill",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 16,
+    "nationalDexId": 16,
+    "name": "Pidgey",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 17,
+    "nationalDexId": 17,
+    "name": "Pidgeotto",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 18,
+    "nationalDexId": 18,
+    "name": "Pidgeot",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 19,
+    "nationalDexId": 19,
+    "name": "Rattata",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 20,
+    "nationalDexId": 20,
+    "name": "Raticate",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 21,
+    "nationalDexId": 21,
+    "name": "Spearow",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 22,
+    "nationalDexId": 22,
+    "name": "Fearow",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 23,
+    "nationalDexId": 23,
+    "name": "Ekans",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 24,
+    "nationalDexId": 24,
+    "name": "Arbok",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 25,
+    "nationalDexId": 25,
+    "name": "Pikachu",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 26,
+    "nationalDexId": 26,
+    "name": "Raichu",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 27,
+    "nationalDexId": 27,
+    "name": "Sandshrew",
+    "types": [
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 28,
+    "nationalDexId": 28,
+    "name": "Sandslash",
+    "types": [
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 29,
+    "nationalDexId": 29,
+    "name": "Nidoran♀",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 30,
+    "nationalDexId": 30,
+    "name": "Nidorina",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 31,
+    "nationalDexId": 31,
+    "name": "Nidoqueen",
+    "types": [
+      {
+        "name": "poison"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 32,
+    "nationalDexId": 32,
+    "name": "Nidoran♂",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 33,
+    "nationalDexId": 33,
+    "name": "Nidorino",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 34,
+    "nationalDexId": 34,
+    "name": "Nidoking",
+    "types": [
+      {
+        "name": "poison"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 35,
+    "nationalDexId": 35,
+    "name": "Clefairy",
+    "types": [
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 36,
+    "nationalDexId": 36,
+    "name": "Clefable",
+    "types": [
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 37,
+    "nationalDexId": 37,
+    "name": "Vulpix",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 38,
+    "nationalDexId": 38,
+    "name": "Ninetales",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 39,
+    "nationalDexId": 39,
+    "name": "Jigglypuff",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 40,
+    "nationalDexId": 40,
+    "name": "Wigglytuff",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 41,
+    "nationalDexId": 41,
+    "name": "Zubat",
+    "types": [
+      {
+        "name": "poison"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 42,
+    "nationalDexId": 42,
+    "name": "Golbat",
+    "types": [
+      {
+        "name": "poison"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 43,
+    "nationalDexId": 43,
+    "name": "Oddish",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 44,
+    "nationalDexId": 44,
+    "name": "Gloom",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 45,
+    "nationalDexId": 45,
+    "name": "Vileplume",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 46,
+    "nationalDexId": 46,
+    "name": "Paras",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 47,
+    "nationalDexId": 47,
+    "name": "Parasect",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 48,
+    "nationalDexId": 48,
+    "name": "Venonat",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 49,
+    "nationalDexId": 49,
+    "name": "Venomoth",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 50,
+    "nationalDexId": 50,
+    "name": "Diglett",
+    "types": [
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 51,
+    "nationalDexId": 51,
+    "name": "Dugtrio",
+    "types": [
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 52,
+    "nationalDexId": 52,
+    "name": "Meowth",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 53,
+    "nationalDexId": 53,
+    "name": "Persian",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 54,
+    "nationalDexId": 54,
+    "name": "Psyduck",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 55,
+    "nationalDexId": 55,
+    "name": "Golduck",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 56,
+    "nationalDexId": 56,
+    "name": "Mankey",
+    "types": [
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 57,
+    "nationalDexId": 57,
+    "name": "Primeape",
+    "types": [
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 58,
+    "nationalDexId": 58,
+    "name": "Growlithe",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 59,
+    "nationalDexId": 59,
+    "name": "Arcanine",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 60,
+    "nationalDexId": 60,
+    "name": "Poliwag",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 61,
+    "nationalDexId": 61,
+    "name": "Poliwhirl",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 62,
+    "nationalDexId": 62,
+    "name": "Poliwrath",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 63,
+    "nationalDexId": 63,
+    "name": "Abra",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 64,
+    "nationalDexId": 64,
+    "name": "Kadabra",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 65,
+    "nationalDexId": 65,
+    "name": "Alakazam",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 66,
+    "nationalDexId": 66,
+    "name": "Machop",
+    "types": [
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 67,
+    "nationalDexId": 67,
+    "name": "Machoke",
+    "types": [
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 68,
+    "nationalDexId": 68,
+    "name": "Machamp",
+    "types": [
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 69,
+    "nationalDexId": 69,
+    "name": "Bellsprout",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 70,
+    "nationalDexId": 70,
+    "name": "Weepinbell",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 71,
+    "nationalDexId": 71,
+    "name": "Victreebel",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 72,
+    "nationalDexId": 72,
+    "name": "Tentacool",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 73,
+    "nationalDexId": 73,
+    "name": "Tentacruel",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 74,
+    "nationalDexId": 74,
+    "name": "Geodude",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 75,
+    "nationalDexId": 75,
+    "name": "Graveler",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 76,
+    "nationalDexId": 76,
+    "name": "Golem",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 77,
+    "nationalDexId": 77,
+    "name": "Ponyta",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 78,
+    "nationalDexId": 78,
+    "name": "Rapidash",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 79,
+    "nationalDexId": 79,
+    "name": "Slowpoke",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 80,
+    "nationalDexId": 80,
+    "name": "Slowbro",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 81,
+    "nationalDexId": 81,
+    "name": "Magnemite",
+    "types": [
+      {
+        "name": "electric"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 82,
+    "nationalDexId": 82,
+    "name": "Magneton",
+    "types": [
+      {
+        "name": "electric"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 83,
+    "nationalDexId": 83,
+    "name": "Farfetch'd",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 84,
+    "nationalDexId": 84,
+    "name": "Doduo",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 85,
+    "nationalDexId": 85,
+    "name": "Dodrio",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 86,
+    "nationalDexId": 86,
+    "name": "Seel",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 87,
+    "nationalDexId": 87,
+    "name": "Dewgong",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "ice"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 88,
+    "nationalDexId": 88,
+    "name": "Grimer",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 89,
+    "nationalDexId": 89,
+    "name": "Muk",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 90,
+    "nationalDexId": 90,
+    "name": "Shellder",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 91,
+    "nationalDexId": 91,
+    "name": "Cloyster",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "ice"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 92,
+    "nationalDexId": 92,
+    "name": "Gastly",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 93,
+    "nationalDexId": 93,
+    "name": "Haunter",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 94,
+    "nationalDexId": 94,
+    "name": "Gengar",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 95,
+    "nationalDexId": 95,
+    "name": "Onix",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 96,
+    "nationalDexId": 96,
+    "name": "Drowzee",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 97,
+    "nationalDexId": 97,
+    "name": "Hypno",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 98,
+    "nationalDexId": 98,
+    "name": "Krabby",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 99,
+    "nationalDexId": 99,
+    "name": "Kingler",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 100,
+    "nationalDexId": 100,
+    "name": "Voltorb",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 101,
+    "nationalDexId": 101,
+    "name": "Electrode",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 102,
+    "nationalDexId": 102,
+    "name": "Exeggcute",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 103,
+    "nationalDexId": 103,
+    "name": "Exeggutor",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 104,
+    "nationalDexId": 104,
+    "name": "Cubone",
+    "types": [
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 105,
+    "nationalDexId": 105,
+    "name": "Marowak",
+    "types": [
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 106,
+    "nationalDexId": 106,
+    "name": "Hitmonlee",
+    "types": [
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 107,
+    "nationalDexId": 107,
+    "name": "Hitmonchan",
+    "types": [
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 108,
+    "nationalDexId": 108,
+    "name": "Lickitung",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 109,
+    "nationalDexId": 109,
+    "name": "Koffing",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 110,
+    "nationalDexId": 110,
+    "name": "Weezing",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 111,
+    "nationalDexId": 111,
+    "name": "Rhyhorn",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 112,
+    "nationalDexId": 112,
+    "name": "Rhydon",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 113,
+    "nationalDexId": 113,
+    "name": "Chansey",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 114,
+    "nationalDexId": 114,
+    "name": "Tangela",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 115,
+    "nationalDexId": 115,
+    "name": "Kangaskhan",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 116,
+    "nationalDexId": 116,
+    "name": "Horsea",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 117,
+    "nationalDexId": 117,
+    "name": "Seadra",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 118,
+    "nationalDexId": 118,
+    "name": "Goldeen",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 119,
+    "nationalDexId": 119,
+    "name": "Seaking",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 120,
+    "nationalDexId": 120,
+    "name": "Staryu",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 121,
+    "nationalDexId": 121,
+    "name": "Starmie",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 122,
+    "nationalDexId": 122,
+    "name": "Mr. Mime",
+    "types": [
+      {
+        "name": "psychic"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 123,
+    "nationalDexId": 123,
+    "name": "Scyther",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 124,
+    "nationalDexId": 124,
+    "name": "Jynx",
+    "types": [
+      {
+        "name": "ice"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 125,
+    "nationalDexId": 125,
+    "name": "Electabuzz",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 126,
+    "nationalDexId": 126,
+    "name": "Magmar",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 127,
+    "nationalDexId": 127,
+    "name": "Pinsir",
+    "types": [
+      {
+        "name": "bug"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 128,
+    "nationalDexId": 128,
+    "name": "Tauros",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 129,
+    "nationalDexId": 129,
+    "name": "Magikarp",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 130,
+    "nationalDexId": 130,
+    "name": "Gyarados",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 131,
+    "nationalDexId": 131,
+    "name": "Lapras",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "ice"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 132,
+    "nationalDexId": 132,
+    "name": "Ditto",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 133,
+    "nationalDexId": 133,
+    "name": "Eevee",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 134,
+    "nationalDexId": 134,
+    "name": "Vaporeon",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 135,
+    "nationalDexId": 135,
+    "name": "Jolteon",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 136,
+    "nationalDexId": 136,
+    "name": "Flareon",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 137,
+    "nationalDexId": 137,
+    "name": "Porygon",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 138,
+    "nationalDexId": 138,
+    "name": "Omanyte",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 139,
+    "nationalDexId": 139,
+    "name": "Omastar",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 140,
+    "nationalDexId": 140,
+    "name": "Kabuto",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 141,
+    "nationalDexId": 141,
+    "name": "Kabutops",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 142,
+    "nationalDexId": 142,
+    "name": "Aerodactyl",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 143,
+    "nationalDexId": 143,
+    "name": "Snorlax",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 144,
+    "nationalDexId": 144,
+    "name": "Articuno",
+    "types": [
+      {
+        "name": "ice"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 145,
+    "nationalDexId": 145,
+    "name": "Zapdos",
+    "types": [
+      {
+        "name": "electric"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 146,
+    "nationalDexId": 146,
+    "name": "Moltres",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 147,
+    "nationalDexId": 147,
+    "name": "Dratini",
+    "types": [
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 148,
+    "nationalDexId": 148,
+    "name": "Dragonair",
+    "types": [
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 149,
+    "nationalDexId": 149,
+    "name": "Dragonite",
+    "types": [
+      {
+        "name": "dragon"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 150,
+    "nationalDexId": 150,
+    "name": "Mewtwo",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 151,
+    "nationalDexId": 151,
+    "name": "Mew",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": true,
+      "generation": "generation-i"
+    }
+  },
+  {
+    "id": 152,
+    "nationalDexId": 152,
+    "name": "Chikorita",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 153,
+    "nationalDexId": 153,
+    "name": "Bayleef",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 154,
+    "nationalDexId": 154,
+    "name": "Meganium",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 155,
+    "nationalDexId": 155,
+    "name": "Cyndaquil",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 156,
+    "nationalDexId": 156,
+    "name": "Quilava",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 157,
+    "nationalDexId": 157,
+    "name": "Typhlosion",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 158,
+    "nationalDexId": 158,
+    "name": "Totodile",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 159,
+    "nationalDexId": 159,
+    "name": "Croconaw",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 160,
+    "nationalDexId": 160,
+    "name": "Feraligatr",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 161,
+    "nationalDexId": 161,
+    "name": "Sentret",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 162,
+    "nationalDexId": 162,
+    "name": "Furret",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 163,
+    "nationalDexId": 163,
+    "name": "Hoothoot",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 164,
+    "nationalDexId": 164,
+    "name": "Noctowl",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 165,
+    "nationalDexId": 165,
+    "name": "Ledyba",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 166,
+    "nationalDexId": 166,
+    "name": "Ledian",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 167,
+    "nationalDexId": 167,
+    "name": "Spinarak",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 168,
+    "nationalDexId": 168,
+    "name": "Ariados",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 169,
+    "nationalDexId": 169,
+    "name": "Crobat",
+    "types": [
+      {
+        "name": "poison"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 170,
+    "nationalDexId": 170,
+    "name": "Chinchou",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 171,
+    "nationalDexId": 171,
+    "name": "Lanturn",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 172,
+    "nationalDexId": 172,
+    "name": "Pichu",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 173,
+    "nationalDexId": 173,
+    "name": "Cleffa",
+    "types": [
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 174,
+    "nationalDexId": 174,
+    "name": "Igglybuff",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 175,
+    "nationalDexId": 175,
+    "name": "Togepi",
+    "types": [
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 176,
+    "nationalDexId": 176,
+    "name": "Togetic",
+    "types": [
+      {
+        "name": "fairy"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 177,
+    "nationalDexId": 177,
+    "name": "Natu",
+    "types": [
+      {
+        "name": "psychic"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 178,
+    "nationalDexId": 178,
+    "name": "Xatu",
+    "types": [
+      {
+        "name": "psychic"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 179,
+    "nationalDexId": 179,
+    "name": "Mareep",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 180,
+    "nationalDexId": 180,
+    "name": "Flaaffy",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 181,
+    "nationalDexId": 181,
+    "name": "Ampharos",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 182,
+    "nationalDexId": 182,
+    "name": "Bellossom",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 183,
+    "nationalDexId": 183,
+    "name": "Marill",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 184,
+    "nationalDexId": 184,
+    "name": "Azumarill",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 185,
+    "nationalDexId": 185,
+    "name": "Sudowoodo",
+    "types": [
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 186,
+    "nationalDexId": 186,
+    "name": "Politoed",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 187,
+    "nationalDexId": 187,
+    "name": "Hoppip",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 188,
+    "nationalDexId": 188,
+    "name": "Skiploom",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 189,
+    "nationalDexId": 189,
+    "name": "Jumpluff",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 190,
+    "nationalDexId": 190,
+    "name": "Aipom",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 191,
+    "nationalDexId": 191,
+    "name": "Sunkern",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 192,
+    "nationalDexId": 192,
+    "name": "Sunflora",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 193,
+    "nationalDexId": 193,
+    "name": "Yanma",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 194,
+    "nationalDexId": 194,
+    "name": "Wooper",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 195,
+    "nationalDexId": 195,
+    "name": "Quagsire",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 196,
+    "nationalDexId": 196,
+    "name": "Espeon",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 197,
+    "nationalDexId": 197,
+    "name": "Umbreon",
+    "types": [
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 198,
+    "nationalDexId": 198,
+    "name": "Murkrow",
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 199,
+    "nationalDexId": 199,
+    "name": "Slowking",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 200,
+    "nationalDexId": 200,
+    "name": "Misdreavus",
+    "types": [
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 201,
+    "nationalDexId": 201,
+    "name": "Unown",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 202,
+    "nationalDexId": 202,
+    "name": "Wobbuffet",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 203,
+    "nationalDexId": 203,
+    "name": "Girafarig",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 204,
+    "nationalDexId": 204,
+    "name": "Pineco",
+    "types": [
+      {
+        "name": "bug"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 205,
+    "nationalDexId": 205,
+    "name": "Forretress",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 206,
+    "nationalDexId": 206,
+    "name": "Dunsparce",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 207,
+    "nationalDexId": 207,
+    "name": "Gligar",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 208,
+    "nationalDexId": 208,
+    "name": "Steelix",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 209,
+    "nationalDexId": 209,
+    "name": "Snubbull",
+    "types": [
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 210,
+    "nationalDexId": 210,
+    "name": "Granbull",
+    "types": [
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 211,
+    "nationalDexId": 211,
+    "name": "Qwilfish",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 212,
+    "nationalDexId": 212,
+    "name": "Scizor",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 213,
+    "nationalDexId": 213,
+    "name": "Shuckle",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 214,
+    "nationalDexId": 214,
+    "name": "Heracross",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 215,
+    "nationalDexId": 215,
+    "name": "Sneasel",
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "ice"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 216,
+    "nationalDexId": 216,
+    "name": "Teddiursa",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 217,
+    "nationalDexId": 217,
+    "name": "Ursaring",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 218,
+    "nationalDexId": 218,
+    "name": "Slugma",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 219,
+    "nationalDexId": 219,
+    "name": "Magcargo",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 220,
+    "nationalDexId": 220,
+    "name": "Swinub",
+    "types": [
+      {
+        "name": "ice"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 221,
+    "nationalDexId": 221,
+    "name": "Piloswine",
+    "types": [
+      {
+        "name": "ice"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 222,
+    "nationalDexId": 222,
+    "name": "Corsola",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 223,
+    "nationalDexId": 223,
+    "name": "Remoraid",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 224,
+    "nationalDexId": 224,
+    "name": "Octillery",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 225,
+    "nationalDexId": 225,
+    "name": "Delibird",
+    "types": [
+      {
+        "name": "ice"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 226,
+    "nationalDexId": 226,
+    "name": "Mantine",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 227,
+    "nationalDexId": 227,
+    "name": "Skarmory",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 228,
+    "nationalDexId": 228,
+    "name": "Houndour",
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 229,
+    "nationalDexId": 229,
+    "name": "Houndoom",
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 230,
+    "nationalDexId": 230,
+    "name": "Kingdra",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 231,
+    "nationalDexId": 231,
+    "name": "Phanpy",
+    "types": [
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 232,
+    "nationalDexId": 232,
+    "name": "Donphan",
+    "types": [
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 233,
+    "nationalDexId": 233,
+    "name": "Porygon2",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 234,
+    "nationalDexId": 234,
+    "name": "Stantler",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 235,
+    "nationalDexId": 235,
+    "name": "Smeargle",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 236,
+    "nationalDexId": 236,
+    "name": "Tyrogue",
+    "types": [
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 237,
+    "nationalDexId": 237,
+    "name": "Hitmontop",
+    "types": [
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 238,
+    "nationalDexId": 238,
+    "name": "Smoochum",
+    "types": [
+      {
+        "name": "ice"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 239,
+    "nationalDexId": 239,
+    "name": "Elekid",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 240,
+    "nationalDexId": 240,
+    "name": "Magby",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 241,
+    "nationalDexId": 241,
+    "name": "Miltank",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 242,
+    "nationalDexId": 242,
+    "name": "Blissey",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 243,
+    "nationalDexId": 243,
+    "name": "Raikou",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 244,
+    "nationalDexId": 244,
+    "name": "Entei",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 245,
+    "nationalDexId": 245,
+    "name": "Suicune",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 246,
+    "nationalDexId": 246,
+    "name": "Larvitar",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 247,
+    "nationalDexId": 247,
+    "name": "Pupitar",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 248,
+    "nationalDexId": 248,
+    "name": "Tyranitar",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 249,
+    "nationalDexId": 249,
+    "name": "Lugia",
+    "types": [
+      {
+        "name": "psychic"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 250,
+    "nationalDexId": 250,
+    "name": "Ho-oh",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 251,
+    "nationalDexId": 251,
+    "name": "Celebi",
+    "types": [
+      {
+        "name": "psychic"
+      },
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": true,
+      "generation": "generation-ii"
+    }
+  },
+  {
+    "id": 252,
+    "nationalDexId": 298,
+    "name": "Azurill",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 253,
+    "nationalDexId": 360,
+    "name": "Wynaut",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 254,
+    "nationalDexId": 424,
+    "name": "Ambipom",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 255,
+    "nationalDexId": 429,
+    "name": "Mismagius",
+    "types": [
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 256,
+    "nationalDexId": 430,
+    "name": "Honchkrow",
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 257,
+    "nationalDexId": 438,
+    "name": "Bonsly",
+    "types": [
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 258,
+    "nationalDexId": 439,
+    "name": "Mime Jr.",
+    "types": [
+      {
+        "name": "psychic"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 259,
+    "nationalDexId": 440,
+    "name": "Happiny",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 260,
+    "nationalDexId": 446,
+    "name": "Munchlax",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 261,
+    "nationalDexId": 458,
+    "name": "Mantyke",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 262,
+    "nationalDexId": 461,
+    "name": "Weavile",
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "ice"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 263,
+    "nationalDexId": 462,
+    "name": "Magnezone",
+    "types": [
+      {
+        "name": "electric"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 264,
+    "nationalDexId": 463,
+    "name": "Lickilicky",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 265,
+    "nationalDexId": 464,
+    "name": "Rhyperior",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 266,
+    "nationalDexId": 465,
+    "name": "Tangrowth",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 267,
+    "nationalDexId": 466,
+    "name": "Electivire",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 268,
+    "nationalDexId": 467,
+    "name": "Magmortar",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 269,
+    "nationalDexId": 468,
+    "name": "Togekiss",
+    "types": [
+      {
+        "name": "fairy"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 270,
+    "nationalDexId": 469,
+    "name": "Yanmega",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 271,
+    "nationalDexId": 470,
+    "name": "Leafeon",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 272,
+    "nationalDexId": 471,
+    "name": "Glaceon",
+    "types": [
+      {
+        "name": "ice"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 273,
+    "nationalDexId": 472,
+    "name": "Gliscor",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 274,
+    "nationalDexId": 473,
+    "name": "Mamoswine",
+    "types": [
+      {
+        "name": "ice"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 275,
+    "nationalDexId": 474,
+    "name": "Porygon-Z",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 276,
+    "nationalDexId": 252,
+    "name": "Treecko",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 277,
+    "nationalDexId": 253,
+    "name": "Grovyle",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 278,
+    "nationalDexId": 254,
+    "name": "Sceptile",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 279,
+    "nationalDexId": 255,
+    "name": "Torchic",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 280,
+    "nationalDexId": 256,
+    "name": "Combusken",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 281,
+    "nationalDexId": 257,
+    "name": "Blaziken",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 282,
+    "nationalDexId": 258,
+    "name": "Mudkip",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 283,
+    "nationalDexId": 259,
+    "name": "Marshtomp",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 284,
+    "nationalDexId": 260,
+    "name": "Swampert",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 285,
+    "nationalDexId": 280,
+    "name": "Ralts",
+    "types": [
+      {
+        "name": "psychic"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 286,
+    "nationalDexId": 281,
+    "name": "Kirlia",
+    "types": [
+      {
+        "name": "psychic"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 287,
+    "nationalDexId": 282,
+    "name": "Gardevoir",
+    "types": [
+      {
+        "name": "psychic"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 288,
+    "nationalDexId": 475,
+    "name": "Gallade",
+    "types": [
+      {
+        "name": "psychic"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 289,
+    "nationalDexId": 292,
+    "name": "Shedinja",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 290,
+    "nationalDexId": 352,
+    "name": "Kecleon",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 291,
+    "nationalDexId": 374,
+    "name": "Beldum",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 292,
+    "nationalDexId": 375,
+    "name": "Metang",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 293,
+    "nationalDexId": 376,
+    "name": "Metagross",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 294,
+    "nationalDexId": 399,
+    "name": "Bidoof",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 295,
+    "nationalDexId": 442,
+    "name": "Spiritomb",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 296,
+    "nationalDexId": 448,
+    "name": "Lucario",
+    "types": [
+      {
+        "name": "fighting"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 297,
+    "nationalDexId": 443,
+    "name": "Gible",
+    "types": [
+      {
+        "name": "dragon"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 298,
+    "nationalDexId": 444,
+    "name": "Gabite",
+    "types": [
+      {
+        "name": "dragon"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 299,
+    "nationalDexId": 445,
+    "name": "Garchomp",
+    "types": [
+      {
+        "name": "dragon"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 300,
+    "nationalDexId": 303,
+    "name": "Mawile",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 301,
+    "nationalDexId": 345,
+    "name": "Lileep",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 302,
+    "nationalDexId": 346,
+    "name": "Cradily",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 303,
+    "nationalDexId": 347,
+    "name": "Anorith",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "bug"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 304,
+    "nationalDexId": 348,
+    "name": "Armaldo",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "bug"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 305,
+    "nationalDexId": 408,
+    "name": "Cranidos",
+    "types": [
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 306,
+    "nationalDexId": 409,
+    "name": "Rampardos",
+    "types": [
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 307,
+    "nationalDexId": 410,
+    "name": "Shieldon",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 308,
+    "nationalDexId": 411,
+    "name": "Bastiodon",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 309,
+    "nationalDexId": 289,
+    "name": "Slaking",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 310,
+    "nationalDexId": 359,
+    "name": "Absol",
+    "types": [
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 311,
+    "nationalDexId": 355,
+    "name": "Duskull",
+    "types": [
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 312,
+    "nationalDexId": 356,
+    "name": "Dusclops",
+    "types": [
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 313,
+    "nationalDexId": 477,
+    "name": "Dusknoir",
+    "types": [
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 314,
+    "nationalDexId": 321,
+    "name": "Wailord",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 315,
+    "nationalDexId": 493,
+    "name": "Arceus",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": true,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 316,
+    "nationalDexId": 387,
+    "name": "Turtwig",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 317,
+    "nationalDexId": 388,
+    "name": "Grotle",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 318,
+    "nationalDexId": 389,
+    "name": "Torterra",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 319,
+    "nationalDexId": 390,
+    "name": "Chimchar",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 320,
+    "nationalDexId": 391,
+    "name": "Monferno",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 321,
+    "nationalDexId": 392,
+    "name": "Infernape",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 322,
+    "nationalDexId": 393,
+    "name": "Piplup",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 323,
+    "nationalDexId": 394,
+    "name": "Prinplup",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 324,
+    "nationalDexId": 395,
+    "name": "Empoleon",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 325,
+    "nationalDexId": 299,
+    "name": "Nosepass",
+    "types": [
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 326,
+    "nationalDexId": 476,
+    "name": "Probopass",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 327,
+    "nationalDexId": 679,
+    "name": "Honedge",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 328,
+    "nationalDexId": 680,
+    "name": "Doublade",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 329,
+    "nationalDexId": 681,
+    "name": "Aegislash",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 330,
+    "nationalDexId": 624,
+    "name": "Pawniard",
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 331,
+    "nationalDexId": 625,
+    "name": "Bisharp",
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 332,
+    "nationalDexId": 405,
+    "name": "Luxray",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 333,
+    "nationalDexId": 306,
+    "name": "Aggron",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 334,
+    "nationalDexId": 330,
+    "name": "Flygon",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 335,
+    "nationalDexId": 350,
+    "name": "Milotic",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 336,
+    "nationalDexId": 373,
+    "name": "Salamence",
+    "types": [
+      {
+        "name": "dragon"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 337,
+    "nationalDexId": 601,
+    "name": "Klinklang",
+    "types": [
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 338,
+    "nationalDexId": 571,
+    "name": "Zoroark",
+    "types": [
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 339,
+    "nationalDexId": 700,
+    "name": "Sylveon",
+    "types": [
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 340,
+    "nationalDexId": 382,
+    "name": "Kyogre",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 341,
+    "nationalDexId": 383,
+    "name": "Groudon",
+    "types": [
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 342,
+    "nationalDexId": 384,
+    "name": "Rayquaza",
+    "types": [
+      {
+        "name": "dragon"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 343,
+    "nationalDexId": 483,
+    "name": "Dialga",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 344,
+    "nationalDexId": 484,
+    "name": "Palkia",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 345,
+    "nationalDexId": 487,
+    "name": "Giratina",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 346,
+    "nationalDexId": 486,
+    "name": "Regigigas",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 347,
+    "nationalDexId": 491,
+    "name": "Darkrai",
+    "types": [
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": true,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 348,
+    "nationalDexId": 649,
+    "name": "Genesect",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": true,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 349,
+    "nationalDexId": 643,
+    "name": "Reshiram",
+    "types": [
+      {
+        "name": "dragon"
+      },
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 350,
+    "nationalDexId": 644,
+    "name": "Zekrom",
+    "types": [
+      {
+        "name": "dragon"
+      },
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 351,
+    "nationalDexId": 646,
+    "name": "Kyurem",
+    "types": [
+      {
+        "name": "dragon"
+      },
+      {
+        "name": "ice"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 352,
+    "nationalDexId": 407,
+    "name": "Roserade",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 353,
+    "nationalDexId": 426,
+    "name": "Drifblim",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 354,
+    "nationalDexId": 428,
+    "name": "Lopunny",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 355,
+    "nationalDexId": 286,
+    "name": "Breloom",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 356,
+    "nationalDexId": 291,
+    "name": "Ninjask",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 357,
+    "nationalDexId": 354,
+    "name": "Banette",
+    "types": [
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 358,
+    "nationalDexId": 479,
+    "name": "Rotom",
+    "types": [
+      {
+        "name": "electric"
+      },
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 359,
+    "nationalDexId": 579,
+    "name": "Reuniclus",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 360,
+    "nationalDexId": 547,
+    "name": "Whimsicott",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 361,
+    "nationalDexId": 553,
+    "name": "Krookodile",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 362,
+    "nationalDexId": 563,
+    "name": "Cofagrigus",
+    "types": [
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 363,
+    "nationalDexId": 596,
+    "name": "Galvantula",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 364,
+    "nationalDexId": 598,
+    "name": "Ferrothorn",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 365,
+    "nationalDexId": 607,
+    "name": "Litwick",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 366,
+    "nationalDexId": 608,
+    "name": "Lampent",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 367,
+    "nationalDexId": 609,
+    "name": "Chandelure",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 368,
+    "nationalDexId": 612,
+    "name": "Haxorus",
+    "types": [
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 369,
+    "nationalDexId": 623,
+    "name": "Golurk",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 370,
+    "nationalDexId": 771,
+    "name": "Pyukumuku",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 371,
+    "nationalDexId": 707,
+    "name": "Klefki",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 372,
+    "nationalDexId": 663,
+    "name": "Talonflame",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 373,
+    "nationalDexId": 778,
+    "name": "Mimikyu",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 374,
+    "nationalDexId": 637,
+    "name": "Volcarona",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 375,
+    "nationalDexId": 633,
+    "name": "Deino",
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 376,
+    "nationalDexId": 634,
+    "name": "Zweilous",
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 377,
+    "nationalDexId": 635,
+    "name": "Hydreigon",
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 378,
+    "nationalDexId": 380,
+    "name": "Latias",
+    "types": [
+      {
+        "name": "dragon"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 379,
+    "nationalDexId": 381,
+    "name": "Latios",
+    "types": [
+      {
+        "name": "dragon"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 380,
+    "nationalDexId": 386,
+    "name": "Deoxys",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": true,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 381,
+    "nationalDexId": 385,
+    "name": "Jirachi",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": true,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 382,
+    "nationalDexId": 290,
+    "name": "Nincada",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 383,
+    "nationalDexId": 400,
+    "name": "Bibarel",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 384,
+    "nationalDexId": 447,
+    "name": "Riolu",
+    "types": [
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 385,
+    "nationalDexId": 287,
+    "name": "Slakoth",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 386,
+    "nationalDexId": 288,
+    "name": "Vigoroth",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 387,
+    "nationalDexId": 320,
+    "name": "Wailmer",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 388,
+    "nationalDexId": 403,
+    "name": "Shinx",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 389,
+    "nationalDexId": 404,
+    "name": "Luxio",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 390,
+    "nationalDexId": 304,
+    "name": "Aron",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 391,
+    "nationalDexId": 305,
+    "name": "Lairon",
+    "types": [
+      {
+        "name": "steel"
+      },
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 392,
+    "nationalDexId": 328,
+    "name": "Trapinch",
+    "types": [
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 393,
+    "nationalDexId": 329,
+    "name": "Vibrava",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 394,
+    "nationalDexId": 349,
+    "name": "Feebas",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 395,
+    "nationalDexId": 371,
+    "name": "Bagon",
+    "types": [
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 396,
+    "nationalDexId": 372,
+    "name": "Shelgon",
+    "types": [
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 397,
+    "nationalDexId": 599,
+    "name": "Klink",
+    "types": [
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 398,
+    "nationalDexId": 600,
+    "name": "Klang",
+    "types": [
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 399,
+    "nationalDexId": 570,
+    "name": "Zorua",
+    "types": [
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 400,
+    "nationalDexId": 406,
+    "name": "Budew",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 401,
+    "nationalDexId": 315,
+    "name": "Roselia",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 402,
+    "nationalDexId": 425,
+    "name": "Drifloon",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 403,
+    "nationalDexId": 427,
+    "name": "Buneary",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 404,
+    "nationalDexId": 285,
+    "name": "Shroomish",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 405,
+    "nationalDexId": 353,
+    "name": "Shuppet",
+    "types": [
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 406,
+    "nationalDexId": 577,
+    "name": "Solosis",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 407,
+    "nationalDexId": 578,
+    "name": "Duosion",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 408,
+    "nationalDexId": 546,
+    "name": "Cottonee",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 409,
+    "nationalDexId": 551,
+    "name": "Sandile",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 410,
+    "nationalDexId": 552,
+    "name": "Krokorok",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 411,
+    "nationalDexId": 562,
+    "name": "Yamask",
+    "types": [
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 412,
+    "nationalDexId": 595,
+    "name": "Joltik",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 413,
+    "nationalDexId": 597,
+    "name": "Ferroseed",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 414,
+    "nationalDexId": 610,
+    "name": "Axew",
+    "types": [
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 415,
+    "nationalDexId": 611,
+    "name": "Fraxure",
+    "types": [
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 416,
+    "nationalDexId": 622,
+    "name": "Golett",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 417,
+    "nationalDexId": 661,
+    "name": "Fletchling",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 418,
+    "nationalDexId": 662,
+    "name": "Fletchinder",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 419,
+    "nationalDexId": 636,
+    "name": "Larvesta",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 420,
+    "nationalDexId": 618,
+    "name": "Stunfisk",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 421,
+    "nationalDexId": 302,
+    "name": "Sableye",
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 422,
+    "nationalDexId": 543,
+    "name": "Venipede",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 423,
+    "nationalDexId": 544,
+    "name": "Whirlipede",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 424,
+    "nationalDexId": 545,
+    "name": "Scolipede",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 425,
+    "nationalDexId": 696,
+    "name": "Tyrunt",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 426,
+    "nationalDexId": 697,
+    "name": "Tyrantrum",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 427,
+    "nationalDexId": 361,
+    "name": "Snorunt",
+    "types": [
+      {
+        "name": "ice"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 428,
+    "nationalDexId": 362,
+    "name": "Glalie",
+    "types": [
+      {
+        "name": "ice"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 429,
+    "nationalDexId": 478,
+    "name": "Froslass",
+    "types": [
+      {
+        "name": "ice"
+      },
+      {
+        "name": "ghost"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 430,
+    "nationalDexId": 741,
+    "name": "Oricorio Baile Style",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 431,
+    "nationalDexId": 741,
+    "name": "Oricorio Pom-Pom Style",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 432,
+    "nationalDexId": 741,
+    "name": "Oricorio Pa'u Style",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 433,
+    "nationalDexId": 741,
+    "name": "Oricorio Sensu Style",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 434,
+    "nationalDexId": 568,
+    "name": "Trubbish",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 435,
+    "nationalDexId": 569,
+    "name": "Garbodor",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 436,
+    "nationalDexId": 318,
+    "name": "Carvanha",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 437,
+    "nationalDexId": 319,
+    "name": "Sharpedo",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 438,
+    "nationalDexId": 708,
+    "name": "Phantump",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 439,
+    "nationalDexId": 709,
+    "name": "Trevenant",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 440,
+    "nationalDexId": 714,
+    "name": "Noibat",
+    "types": [
+      {
+        "name": "flying"
+      },
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 441,
+    "nationalDexId": 715,
+    "name": "Noivern",
+    "types": [
+      {
+        "name": "flying"
+      },
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 442,
+    "nationalDexId": 333,
+    "name": "Swablu",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 443,
+    "nationalDexId": 334,
+    "name": "Altaria",
+    "types": [
+      {
+        "name": "dragon"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 444,
+    "nationalDexId": 704,
+    "name": "Goomy",
+    "types": [
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 445,
+    "nationalDexId": 705,
+    "name": "Sliggoo",
+    "types": [
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 446,
+    "nationalDexId": 706,
+    "name": "Goodra",
+    "types": [
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 447,
+    "nationalDexId": 377,
+    "name": "Regirock",
+    "types": [
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 448,
+    "nationalDexId": 378,
+    "name": "Regice",
+    "types": [
+      {
+        "name": "ice"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 449,
+    "nationalDexId": 379,
+    "name": "Registeel",
+    "types": [
+      {
+        "name": "steel"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 450,
+    "nationalDexId": 800,
+    "name": "Necrozma",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 451,
+    "nationalDexId": 759,
+    "name": "Stufful",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 452,
+    "nationalDexId": 760,
+    "name": "Bewear",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 453,
+    "nationalDexId": 781,
+    "name": "Dhelmise",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 454,
+    "nationalDexId": 747,
+    "name": "Mareanie",
+    "types": [
+      {
+        "name": "poison"
+      },
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 455,
+    "nationalDexId": 748,
+    "name": "Toxapex",
+    "types": [
+      {
+        "name": "poison"
+      },
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 456,
+    "nationalDexId": 701,
+    "name": "Hawlucha",
+    "types": [
+      {
+        "name": "fighting"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 457,
+    "nationalDexId": 331,
+    "name": "Cacnea",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 458,
+    "nationalDexId": 332,
+    "name": "Cacturne",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 459,
+    "nationalDexId": 769,
+    "name": "Sandygast",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 460,
+    "nationalDexId": 770,
+    "name": "Palossand",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 461,
+    "nationalDexId": 698,
+    "name": "Amaura",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "ice"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 462,
+    "nationalDexId": 699,
+    "name": "Aurorus",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "ice"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 463,
+    "nationalDexId": 744,
+    "name": "Rockruff",
+    "types": [
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 464,
+    "nationalDexId": 745,
+    "name": "Lycanroc Midday Form",
+    "types": [
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 465,
+    "nationalDexId": 745,
+    "name": "Lycanroc Midnight Form",
+    "types": [
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 466,
+    "nationalDexId": 648,
+    "name": "Meloetta Aria Form",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": true,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 467,
+    "nationalDexId": 648,
+    "name": "Meloetta Pirouette Form",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": true,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 468,
+    "nationalDexId": 488,
+    "name": "Cresselia",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 469,
+    "nationalDexId": 779,
+    "name": "Bruxish",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 470,
+    "nationalDexId": 800,
+    "name": "Necrozma Ultra",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": true,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 471,
+    "nationalDexId": 782,
+    "name": "Jangmo-o",
+    "types": [
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 472,
+    "nationalDexId": 783,
+    "name": "Hakamo-o",
+    "types": [
+      {
+        "name": "dragon"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 473,
+    "nationalDexId": 784,
+    "name": "Kommo-o",
+    "types": [
+      {
+        "name": "dragon"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 474,
+    "nationalDexId": 767,
+    "name": "Wimpod",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 475,
+    "nationalDexId": 768,
+    "name": "Golisopod",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 476,
+    "nationalDexId": 753,
+    "name": "Fomantis",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 477,
+    "nationalDexId": 754,
+    "name": "Lurantis",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 478,
+    "nationalDexId": 703,
+    "name": "Carbink",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 479,
+    "nationalDexId": 650,
+    "name": "Chespin",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 480,
+    "nationalDexId": 651,
+    "name": "Quilladin",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 481,
+    "nationalDexId": 652,
+    "name": "Chesnaught",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 482,
+    "nationalDexId": 653,
+    "name": "Fennekin",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 483,
+    "nationalDexId": 654,
+    "name": "Braixen",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 484,
+    "nationalDexId": 655,
+    "name": "Delphox",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 485,
+    "nationalDexId": 656,
+    "name": "Froakie",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 486,
+    "nationalDexId": 657,
+    "name": "Frogadier",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 487,
+    "nationalDexId": 658,
+    "name": "Greninja",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 488,
+    "nationalDexId": 324,
+    "name": "Torkoal",
+    "types": [
+      {
+        "name": "fire"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 489,
+    "nationalDexId": 710,
+    "name": "Pumpkaboo",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 490,
+    "nationalDexId": 711,
+    "name": "Gourgeist",
+    "types": [
+      {
+        "name": "ghost"
+      },
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 491,
+    "nationalDexId": 684,
+    "name": "Swirlix",
+    "types": [
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 492,
+    "nationalDexId": 685,
+    "name": "Slurpuff",
+    "types": [
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 493,
+    "nationalDexId": 559,
+    "name": "Scraggy",
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 494,
+    "nationalDexId": 560,
+    "name": "Scrafty",
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v"
+    }
+  },
+  {
+    "id": 495,
+    "nationalDexId": 270,
+    "name": "Lotad",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 496,
+    "nationalDexId": 271,
+    "name": "Lombre",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 497,
+    "nationalDexId": 272,
+    "name": "Ludicolo",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 498,
+    "nationalDexId": 774,
+    "name": "Minior Meteor Form",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 499,
+    "nationalDexId": 774,
+    "name": "Minior Core Form",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vii"
+    }
+  },
+  {
+    "id": 500,
+    "nationalDexId": 719,
+    "name": "Diancie",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "fairy"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": true,
+      "generation": "generation-vi"
+    }
+  },
+  {
+    "id": 501,
+    "nationalDexId": 370,
+    "name": "Luvdisc",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 502,
+    "nationalDexId": 261,
+    "name": "Poochyena",
+    "types": [
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 503,
+    "nationalDexId": 262,
+    "name": "Mightyena",
+    "types": [
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 504,
+    "nationalDexId": 263,
+    "name": "Zigzagoon",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 505,
+    "nationalDexId": 264,
+    "name": "Linoone",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 506,
+    "nationalDexId": 265,
+    "name": "Wurmple",
+    "types": [
+      {
+        "name": "bug"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 507,
+    "nationalDexId": 266,
+    "name": "Silcoon",
+    "types": [
+      {
+        "name": "bug"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 508,
+    "nationalDexId": 267,
+    "name": "Beautifly",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 509,
+    "nationalDexId": 268,
+    "name": "Cascoon",
+    "types": [
+      {
+        "name": "bug"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 510,
+    "nationalDexId": 269,
+    "name": "Dustox",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 511,
+    "nationalDexId": 273,
+    "name": "Seedot",
+    "types": [
+      {
+        "name": "grass"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 512,
+    "nationalDexId": 274,
+    "name": "Nuzleaf",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 513,
+    "nationalDexId": 275,
+    "name": "Shiftry",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 514,
+    "nationalDexId": 276,
+    "name": "Taillow",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 515,
+    "nationalDexId": 277,
+    "name": "Swellow",
+    "types": [
+      {
+        "name": "normal"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 516,
+    "nationalDexId": 278,
+    "name": "Wingull",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 517,
+    "nationalDexId": 279,
+    "name": "Pelipper",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 518,
+    "nationalDexId": 283,
+    "name": "Surskit",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 519,
+    "nationalDexId": 284,
+    "name": "Masquerain",
+    "types": [
+      {
+        "name": "bug"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 520,
+    "nationalDexId": 293,
+    "name": "Whismur",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 521,
+    "nationalDexId": 294,
+    "name": "Loudred",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 522,
+    "nationalDexId": 295,
+    "name": "Exploud",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 523,
+    "nationalDexId": 296,
+    "name": "Makuhita",
+    "types": [
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 524,
+    "nationalDexId": 297,
+    "name": "Hariyama",
+    "types": [
+      {
+        "name": "fighting"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 525,
+    "nationalDexId": 300,
+    "name": "Skitty",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 526,
+    "nationalDexId": 301,
+    "name": "Delcatty",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 527,
+    "nationalDexId": 307,
+    "name": "Meditite",
+    "types": [
+      {
+        "name": "fighting"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 528,
+    "nationalDexId": 308,
+    "name": "Medicham",
+    "types": [
+      {
+        "name": "fighting"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 529,
+    "nationalDexId": 309,
+    "name": "Electrike",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 530,
+    "nationalDexId": 310,
+    "name": "Manectric",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 531,
+    "nationalDexId": 311,
+    "name": "Plusle",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 532,
+    "nationalDexId": 312,
+    "name": "Minun",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 533,
+    "nationalDexId": 313,
+    "name": "Volbeat",
+    "types": [
+      {
+        "name": "bug"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 534,
+    "nationalDexId": 314,
+    "name": "Illumise",
+    "types": [
+      {
+        "name": "bug"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 535,
+    "nationalDexId": 316,
+    "name": "Gulpin",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 536,
+    "nationalDexId": 317,
+    "name": "Swalot",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 537,
+    "nationalDexId": 322,
+    "name": "Numel",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 538,
+    "nationalDexId": 323,
+    "name": "Camerupt",
+    "types": [
+      {
+        "name": "fire"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 539,
+    "nationalDexId": 325,
+    "name": "Spoink",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 540,
+    "nationalDexId": 326,
+    "name": "Grumpig",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 541,
+    "nationalDexId": 327,
+    "name": "Spinda",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 542,
+    "nationalDexId": 335,
+    "name": "Zangoose",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 543,
+    "nationalDexId": 336,
+    "name": "Seviper",
+    "types": [
+      {
+        "name": "poison"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 544,
+    "nationalDexId": 337,
+    "name": "Lunatone",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 545,
+    "nationalDexId": 338,
+    "name": "Solrock",
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 546,
+    "nationalDexId": 339,
+    "name": "Barboach",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 547,
+    "nationalDexId": 340,
+    "name": "Whiscash",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "ground"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 548,
+    "nationalDexId": 341,
+    "name": "Corphish",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 549,
+    "nationalDexId": 342,
+    "name": "Crawdaunt",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "dark"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 550,
+    "nationalDexId": 343,
+    "name": "Baltoy",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 551,
+    "nationalDexId": 344,
+    "name": "Claydol",
+    "types": [
+      {
+        "name": "ground"
+      },
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 552,
+    "nationalDexId": 351,
+    "name": "Castform",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 553,
+    "nationalDexId": 351,
+    "name": "Castform Sunny",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 554,
+    "nationalDexId": 351,
+    "name": "Castform Rainy",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 555,
+    "nationalDexId": 351,
+    "name": "Castform Snowy",
+    "types": [
+      {
+        "name": "normal"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 556,
+    "nationalDexId": 357,
+    "name": "Tropius",
+    "types": [
+      {
+        "name": "grass"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 557,
+    "nationalDexId": 433,
+    "name": "Chingling",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iv"
+    }
+  },
+  {
+    "id": 558,
+    "nationalDexId": 358,
+    "name": "Chimecho",
+    "types": [
+      {
+        "name": "psychic"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 559,
+    "nationalDexId": 363,
+    "name": "Spheal",
+    "types": [
+      {
+        "name": "ice"
+      },
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 560,
+    "nationalDexId": 364,
+    "name": "Sealeo",
+    "types": [
+      {
+        "name": "ice"
+      },
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 561,
+    "nationalDexId": 365,
+    "name": "Walrein",
+    "types": [
+      {
+        "name": "ice"
+      },
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 562,
+    "nationalDexId": 366,
+    "name": "Clamperl",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 563,
+    "nationalDexId": 367,
+    "name": "Huntail",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 564,
+    "nationalDexId": 368,
+    "name": "Gorebyss",
+    "types": [
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  },
+  {
+    "id": 565,
+    "nationalDexId": 369,
+    "name": "Relicanth",
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "rock"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-iii"
+    }
+  }
+]
