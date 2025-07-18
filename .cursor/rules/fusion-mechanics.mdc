@@ -1,0 +1,43 @@
+# Infinite Fusion Mechanics
+Special rules and features specific to Pokémon Infinite Fusion that must be implemented.
+
+## Fusion-Specific Features
+1. **DNA Splicers**: Track usage of DNA Splicers for fusion
+2. **Head/Body Combinations**: Track which head/body combinations have been used
+3. **Fusion Stats**: Track stats and abilities of fused Pokémon
+4. **Triple Fusions**: Support for Kyurem triple fusions in postgame
+
+## Fusion Tracking Requirements
+- Track which Pokémon have been fused
+- Store head/body combinations for each fusion
+- Calculate and display fusion stats
+- Track fusion abilities and moves
+- Support unfusing and re-fusing mechanics
+
+## Data Structures for Fusion
+- `FusionData`: Head/body combination with resulting stats
+- `FusionHistory`: Track all fusions made during the run
+- `FusionCalculator`: Calculate fusion stats and abilities
+- `TripleFusion`: Special handling for Kyurem triple fusions
+
+## Fusion-Specific Rules
+- Track DNA Splicer usage and availability
+- Validate fusion combinations (some may be impossible)
+- Handle fusion name generation
+- Track fusion sprites and appearances
+- Support fusion evolution mechanics
+
+## Implementation Notes
+- Use the 501 base Pokémon for fusion calculations
+- Support 251,001 possible fusion combinations
+- Handle different fusion forms and appearances
+- Track fusion-specific abilities and moves
+- Support both Classic and Remix fusion mechanics
+description: Infinite Fusion specific mechanics and fusion tracking requirements
+globs: ["src/**/*.ts", "src/**/*.tsx"]
+alwaysApply: true
+---
+description:
+globs:
+alwaysApply: false
+---

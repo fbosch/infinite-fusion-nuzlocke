@@ -1,0 +1,42 @@
+# Core Nuzlocke Rules
+These are the fundamental Nuzlocke rules that must be implemented in the tracker.
+
+## Essential Nuzlocke Rules
+1. **First Encounter Rule**: Only catch the first Pokémon encountered in each new area
+2. **Fainting = Death**: Pokémon that faint cannot be used again and must be released or boxed
+3. **Nickname Rule**: All Pokémon must be nicknamed to create emotional attachment
+
+## Implementation Requirements
+- Track which areas have been visited and what was caught
+- Prevent multiple catches from the same area
+- Mark Pokémon as "dead" when they faint
+- Require nicknames for all caught Pokémon
+- Maintain a "death box" for fainted Pokémon
+- Validate that dead Pokémon cannot be used in battles
+
+## State Management
+- Track current team with nicknames, levels, and status
+- Maintain encounter history per route/area
+- Store fainted Pokémon separately from active team
+- Track game progress (current location, gym badges)
+
+## Data Structures Needed
+- `NuzlockeRun`: Overall run state
+- `TeamMember`: Individual Pokémon with nickname, status, level
+- `EncounterHistory`: Track what was caught in each area
+- `DeathBox`: Collection of fainted Pokémon
+- `GameProgress`: Current location, badges, etc.
+
+## Validation Rules
+- Ensure only one catch per area
+- Prevent using fainted Pokémon in battles
+- Require nicknames for all caught Pokémon
+- Validate logical progression through areas
+description: Core Nuzlocke rules that must be implemented for a valid Nuzlocke run
+globs: ["src/**/*.ts", "src/**/*.tsx"]
+alwaysApply: true
+---
+description:
+globs:
+alwaysApply: false
+---
