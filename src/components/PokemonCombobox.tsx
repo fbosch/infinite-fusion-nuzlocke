@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useMemo, useCallback, useDeferredValue, startTransition } from 'react';
+import React, { useState, useMemo, useDeferredValue, startTransition } from 'react';
 import { Search, Check } from 'lucide-react';
 import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption, ComboboxButton } from '@headlessui/react';
-import { FixedSizeList as List } from 'react-window';
 import clsx from 'clsx';
 import { getNationalDexIdFromInfiniteFusionId } from '@/loaders/pokemon';
 
@@ -22,7 +21,7 @@ export function getPokemonSpriteUrl(pokemonId: number): string {
 }
 
 // Pokemon Option Component
-const PokemonOption = React.memo(({
+const PokemonOption = ({
   pokemon,
   selected,
 }: {
@@ -71,53 +70,39 @@ const PokemonOption = React.memo(({
       </>
     )}
   </ComboboxOption>
-));
+);
 
-PokemonOption.displayName = 'PokemonOption';
-
-// Virtualized Pokemon Options Component
-const VirtualizedPokemonOptions = React.memo(({
-  options,
-  selectedValue,
-  onSelect,
-  itemHeight = 60,
-  maxHeight = 240
+// Pokemon Options Component
+const PokemonOptions = ({
+  options
 }: {
   options: PokemonOption[];
-  selectedValue: PokemonOption | null;
-  onSelect: (pokemon: PokemonOption) => void;
-  itemHeight?: number;
-  maxHeight?: number;
 }) => {
-  const itemCount = options.length;
-  const listHeight = Math.min(itemCount * itemHeight, maxHeight);
-  const [activeIndex, setActiveIndex] = useState<number>(-1);
-  const listRef = React.useRef<List>(null);
-
-  // Reset active index when options change, but preserve scroll position
-  React.useEffect(() => {
-    setActiveIndex(-1);
-  }, [options]);
-
-  const Row = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
-    const pokemon = options[index];
-    const isSelected = selectedValue?.id === pokemon.id;
-    const isActive = index === activeIndex;
-
+  if (options.length === 0) {
     return (
-      <div style={style}>
+      <div className="relative cursor-default select-none px-4 py-2 text-gray-700 dark:text-gray-300">
+        No Pokemon found.
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+      {options.map((pokemon) => (
         <ComboboxOption
+          key={pokemon.id}
           value={pokemon}
-          className={clsx(
-            'relative cursor-pointer select-none py-2 pr-4 pl-13',
+          className={({ active, selected }) => clsx(
+            'relative cursor-pointer select-none py-2 pr-4 pl-13 content-visibility-auto',
             "hover:bg-gray-100 dark:hover:bg-gray-700",
             {
-              'bg-blue-600': isActive,
-              'text-gray-900 dark:text-gray-100': !isActive
+              'bg-blue-600 text-white': active,
+              'text-gray-900 dark:text-gray-100': !active
             }
           )}
+          style={{ containIntrinsicSize: '0 60px' }}
         >
-          {({ selected }) => (
+          {({ selected, active }) => (
             <>
               <div className={"flex items-center gap-8"}>
                 <img
@@ -140,89 +125,21 @@ const VirtualizedPokemonOptions = React.memo(({
                   aria-hidden="true"
                 >
                   <Check className={clsx("w-6 h-6", {
-                    'text-white': isActive,
-                    'text-blue-400': !isActive
+                    'text-white': active,
+                    'text-blue-400': !active
                   })} aria-hidden="true" />
                 </span>
               ) : null}
             </>
           )}
         </ComboboxOption>
-      </div>
-    );
-  }, [options, selectedValue, activeIndex]);
-
-  // Handle keyboard navigation
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    switch (event.key) {
-      case 'ArrowDown':
-        event.preventDefault();
-        const nextIndex = Math.min(activeIndex + 1, itemCount - 1);
-        setActiveIndex(nextIndex);
-        // Scroll to the active item
-        if (listRef.current && nextIndex >= 0) {
-          listRef.current.scrollToItem(nextIndex, 'smart');
-        }
-        break;
-      case 'ArrowUp':
-        event.preventDefault();
-        const prevIndex = Math.max(activeIndex - 1, 0);
-        setActiveIndex(prevIndex);
-        // Scroll to the active item
-        if (listRef.current && prevIndex >= 0) {
-          listRef.current.scrollToItem(prevIndex, 'smart');
-        }
-        break;
-      case 'Enter':
-      case ' ':
-        event.preventDefault();
-        if (activeIndex >= 0 && activeIndex < options.length) {
-          onSelect(options[activeIndex]);
-        }
-        break;
-      case 'Escape':
-        event.preventDefault();
-        // Close the combobox (this will be handled by Headless UI)
-        break;
-    }
-  }, [itemCount, activeIndex, options, onSelect]);
-
-  if (itemCount === 0) {
-    return (
-      <div className="relative cursor-default select-none px-4 py-2 text-gray-700 dark:text-gray-300">
-        No Pokemon found.
-      </div>
-    );
-  }
-
-  return (
-    <div
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      role="listbox"
-      aria-label="Pokemon options"
-      aria-activedescendant={activeIndex >= 0 ? `pokemon-option-${activeIndex}` : undefined}
-      className="outline-none"
-    >
-      <List
-        ref={listRef}
-        height={listHeight}
-        itemCount={itemCount}
-        itemSize={itemHeight}
-        width="100%"
-        className="scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent outline-none"
-        overscanCount={5} // Render 5 items above and below the visible area for smoother scrolling
-      >
-        {Row}
-      </List>
+      ))}
     </div>
   );
-});
+};
 
-VirtualizedPokemonOptions.displayName = 'VirtualizedPokemonOptions';
-
-// Pokemon Combobox Component - Memoized for performance with virtualization
-export const PokemonCombobox = React.memo(({
+// Pokemon Combobox Component
+export const PokemonCombobox = ({
   options,
   value,
   onChange,
@@ -237,7 +154,6 @@ export const PokemonCombobox = React.memo(({
 }) => {
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
-  const [isOpen, setIsOpen] = useState(false);
 
   // Memoize filtered options to prevent recalculation on every render
   const filteredOptions = useMemo(() => {
@@ -248,11 +164,11 @@ export const PokemonCombobox = React.memo(({
   }, [options, deferredQuery]);
 
   // Optimized onChange handler without startTransition for immediate response
-  const handleChange = useCallback((newValue: PokemonOption | null | undefined) => {
+  const handleChange = (newValue: PokemonOption | null | undefined) => {
     if (newValue) {
       onChange(newValue);
     }
-  }, [onChange]);
+  };
 
 
 
@@ -290,17 +206,9 @@ export const PokemonCombobox = React.memo(({
             "border border-gray-400 dark:border-gray-600"
           )}
         >
-          <VirtualizedPokemonOptions
-            options={filteredOptions}
-            selectedValue={value || null}
-            onSelect={onChange}
-            itemHeight={60}
-            maxHeight={240}
-          />
+          <PokemonOptions options={filteredOptions} />
         </ComboboxOptions>
       </div>
     </Combobox>
   );
-});
-
-PokemonCombobox.displayName = 'PokemonCombobox'; 
+}; 
