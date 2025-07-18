@@ -8,11 +8,11 @@ import {
   getSortedRowModel,
   SortingState,
 } from '@tanstack/react-table';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
-import { getLocationsSortedByOrder, getEncountersByRouteId, getPokemonNameMap, getNationalDexIdFromInfiniteFusionId } from '@/loaders';
+import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
-import { PokemonCombobox, type PokemonOption, getPokemonSpriteUrl } from './PokemonCombobox';
+import { PokemonCombobox, type PokemonOption } from './PokemonCombobox';
 
 const columnHelper = createColumnHelper<Location>();
 
@@ -60,41 +60,12 @@ export default function LocationList() {
   });
 
   // Optimized encounter selection handler for immediate response
-  const handleEncounterSelect = useCallback((routeId: number, pokemon: PokemonOption | null) => {
+  const handleEncounterSelect = (routeId: number, pokemon: PokemonOption | null) => {
     setEncounters(prev => ({
       ...prev,
       [routeId]: pokemon
     }));
-  }, []);
-
-  // Memoize Pokemon name map to prevent recalculation
-  const pokemonNameMap = useMemo(() => getPokemonNameMap(), []);
-
-  // Lazy load encounter data only when needed
-  const [encounterData, setEncounterData] = useState<Map<number, PokemonOption[]>>(new Map());
-
-  const loadEncounterData = useCallback((routeId: number) => {
-    if (encounterData.has(routeId)) return encounterData.get(routeId);
-
-    try {
-      const encounter = getEncountersByRouteId(routeId, 'classic');
-      if (encounter) {
-        const pokemonOptions: PokemonOption[] = encounter.pokemonIds
-          .map(id => ({
-            id,
-            name: pokemonNameMap.get(id) || `Unknown Pokemon (${id})`,
-            spriteUrl: getPokemonSpriteUrl(getNationalDexIdFromInfiniteFusionId(id) || 0)
-          }))
-          .filter(pokemon => pokemon.name !== `Unknown Pokemon (${pokemon.id})`);
-
-        setEncounterData(prev => new Map(prev).set(routeId, pokemonOptions));
-        return pokemonOptions;
-      }
-    } catch (error) {
-      console.error(`Error loading encounter data for route ${routeId}:`, error);
-    }
-    return [];
-  }, [encounterData, pokemonNameMap]);
+  };
 
   // Show loading state if no data
   if (!data || data.length === 0) {
@@ -188,21 +159,6 @@ export default function LocationList() {
                     );
                   }
 
-                  const pokemonOptions = encounterData.get(routeId) || loadEncounterData(routeId);
-                  if (!pokemonOptions || pokemonOptions.length === 0) {
-                    return (
-                      <td
-                        key={cell.id}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
-                        role="cell"
-                      >
-                        <span className="text-gray-400 dark:text-gray-500 italic">
-                          No encounters
-                        </span>
-                      </td>
-                    );
-                  }
-
                   const selectedPokemon = encounters[routeId] || null;
 
                   return (
@@ -212,7 +168,7 @@ export default function LocationList() {
                       role="cell"
                     >
                       <PokemonCombobox
-                        options={pokemonOptions}
+                        routeId={routeId}
                         value={selectedPokemon}
                         onChange={(pokemon) => handleEncounterSelect(routeId, pokemon)}
                       />

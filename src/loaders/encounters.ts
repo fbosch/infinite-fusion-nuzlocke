@@ -1,6 +1,4 @@
 import { z } from 'zod';
-import classicEncountersData from '@data/route-encounters-classic.json';
-import remixEncountersData from '@data/route-encounters-remix.json';
 
 // Zod schema for route encounter data
 export const RouteEncounterSchema = z.object({
@@ -13,19 +11,37 @@ export type RouteEncounter = z.infer<typeof RouteEncounterSchema>;
 
 export const RouteEncountersArraySchema = z.array(RouteEncounterSchema);
 
-// Data loaders for encounters
-export function getClassicEncounters(): RouteEncounter[] {
+// Cache for loaded data
+let classicEncountersCache: RouteEncounter[] | null = null;
+let remixEncountersCache: RouteEncounter[] | null = null;
+
+// Data loaders for encounters with dynamic imports
+export async function getClassicEncounters(): Promise<RouteEncounter[]> {
+  if (classicEncountersCache) {
+    return classicEncountersCache;
+  }
+
   try {
-    return RouteEncountersArraySchema.parse(classicEncountersData);
+    const classicEncountersData = await import('@data/route-encounters-classic.json');
+    const data = RouteEncountersArraySchema.parse(classicEncountersData.default);
+    classicEncountersCache = data;
+    return data;
   } catch (error) {
     console.error('Failed to validate classic encounters data:', error);
     throw new Error('Invalid classic encounters data format');
   }
 }
 
-export function getRemixEncounters(): RouteEncounter[] {
+export async function getRemixEncounters(): Promise<RouteEncounter[]> {
+  if (remixEncountersCache) {
+    return remixEncountersCache;
+  }
+
   try {
-    return RouteEncountersArraySchema.parse(remixEncountersData);
+    const remixEncountersData = await import('@data/route-encounters-remix.json');
+    const data = RouteEncountersArraySchema.parse(remixEncountersData.default);
+    remixEncountersCache = data;
+    return data;
   } catch (error) {
     console.error('Failed to validate remix encounters data:', error);
     throw new Error('Invalid remix encounters data format');
@@ -33,19 +49,19 @@ export function getRemixEncounters(): RouteEncounter[] {
 }
 
 // Get encounters by route ID
-export function getEncountersByRouteId(routeId: number, gameMode: 'classic' | 'remix' = 'classic'): RouteEncounter | null {
-  const encounters = gameMode === 'classic' ? getClassicEncounters() : getRemixEncounters();
+export async function getEncountersByRouteId(routeId: number, gameMode: 'classic' | 'remix' = 'classic'): Promise<RouteEncounter | null> {
+  const encounters = gameMode === 'classic' ? await getClassicEncounters() : await getRemixEncounters();
   return encounters.find(encounter => encounter.routeId === routeId) || null;
 }
 
 // Get all encounters for a specific game mode
-export function getEncounters(gameMode: 'classic' | 'remix' = 'classic'): RouteEncounter[] {
-  return gameMode === 'classic' ? getClassicEncounters() : getRemixEncounters();
+export async function getEncounters(gameMode: 'classic' | 'remix' = 'classic'): Promise<RouteEncounter[]> {
+  return gameMode === 'classic' ? await getClassicEncounters() : await getRemixEncounters();
 }
 
 // Create a map of routeId to encounter for quick lookup
-export function getEncountersMap(gameMode: 'classic' | 'remix' = 'classic'): Map<number, RouteEncounter> {
-  const encounters = getEncounters(gameMode);
+export async function getEncountersMap(gameMode: 'classic' | 'remix' = 'classic'): Promise<Map<number, RouteEncounter>> {
+  const encounters = await getEncounters(gameMode);
   const encounterMap = new Map<number, RouteEncounter>();
 
   encounters.forEach(encounter => {

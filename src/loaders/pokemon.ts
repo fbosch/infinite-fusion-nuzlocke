@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import pokemonData from '@data/pokemon-data.json';
 
 // Zod schema for Pokemon type
 export const PokemonTypeSchema = z.object({
@@ -51,10 +50,20 @@ export type EvolutionData = z.infer<typeof EvolutionDataSchema>;
 
 export const PokemonArraySchema = z.array(PokemonSchema);
 
-// Data loader for Pokemon
-export function getPokemon(): Pokemon[] {
+// Cache for loaded Pokemon data
+let pokemonCache: Pokemon[] | null = null;
+
+// Data loader for Pokemon with dynamic import
+export async function getPokemon(): Promise<Pokemon[]> {
+  if (pokemonCache) {
+    return pokemonCache;
+  }
+
   try {
-    return PokemonArraySchema.parse(pokemonData);
+    const pokemonData = await import('@data/pokemon-data.json');
+    const data = PokemonArraySchema.parse(pokemonData.default);
+    pokemonCache = data;
+    return data;
   } catch (error) {
     console.error('Failed to validate Pokemon data:', error);
     throw new Error('Invalid Pokemon data format');
@@ -62,20 +71,20 @@ export function getPokemon(): Pokemon[] {
 }
 
 // Get Pokemon by ID
-export function getPokemonById(id: number): Pokemon | null {
-  const pokemon = getPokemon();
+export async function getPokemonById(id: number): Promise<Pokemon | null> {
+  const pokemon = await getPokemon();
   return pokemon.find(p => p.id === id) || null;
 }
 
 // Get Pokemon by name
-export function getPokemonByName(name: string): Pokemon | null {
-  const pokemon = getPokemon();
+export async function getPokemonByName(name: string): Promise<Pokemon | null> {
+  const pokemon = await getPokemon();
   return pokemon.find(p => p.name.toLowerCase() === name.toLowerCase()) || null;
 }
 
 // Get Pokemon names by IDs
-export function getPokemonNamesByIds(ids: number[]): string[] {
-  const pokemon = getPokemon();
+export async function getPokemonNamesByIds(ids: number[]): Promise<string[]> {
+  const pokemon = await getPokemon();
   const pokemonMap = new Map(pokemon.map(p => [p.id, p.name]));
 
   return ids
@@ -84,8 +93,8 @@ export function getPokemonNamesByIds(ids: number[]): string[] {
 }
 
 // Create a map of Pokemon ID to name for quick lookup
-export function getPokemonNameMap(): Map<number, string> {
-  const pokemon = getPokemon();
+export async function getPokemonNameMap(): Promise<Map<number, string>> {
+  const pokemon = await getPokemon();
   const nameMap = new Map<number, string>();
 
   pokemon.forEach(p => {
@@ -96,16 +105,16 @@ export function getPokemonNameMap(): Map<number, string> {
 }
 
 // Get Pokemon by type
-export function getPokemonByType(type: string): Pokemon[] {
-  const pokemon = getPokemon();
+export async function getPokemonByType(type: string): Promise<Pokemon[]> {
+  const pokemon = await getPokemon();
   return pokemon.filter(p =>
     p.types.some(t => t.name.toLowerCase() === type.toLowerCase())
   );
 }
 
 // Get all Pokemon types
-export function getAllPokemonTypes(): string[] {
-  const pokemon = getPokemon();
+export async function getAllPokemonTypes(): Promise<string[]> {
+  const pokemon = await getPokemon();
   const typeSet = new Set<string>();
 
   pokemon.forEach(p => {
@@ -116,27 +125,27 @@ export function getAllPokemonTypes(): string[] {
 }
 
 // Get National Pokédex number from Infinite Fusion ID
-export function getNationalDexIdFromInfiniteFusionId(infiniteFusionId: number): number | null {
-  const pokemon = getPokemonById(infiniteFusionId);
+export async function getNationalDexIdFromInfiniteFusionId(infiniteFusionId: number): Promise<number | null> {
+  const pokemon = await getPokemonById(infiniteFusionId);
   return pokemon?.nationalDexId || null;
 }
 
 // Get Infinite Fusion ID from National Pokédex number
-export function getInfiniteFusionIdFromNationalDexId(nationalDexId: number): number | null {
-  const pokemon = getPokemon();
+export async function getInfiniteFusionIdFromNationalDexId(nationalDexId: number): Promise<number | null> {
+  const pokemon = await getPokemon();
   const found = pokemon.find(p => p.nationalDexId === nationalDexId);
   return found?.id || null;
 }
 
 // Get Pokemon by National Pokédex number
-export function getPokemonByNationalDexId(nationalDexId: number): Pokemon | null {
-  const pokemon = getPokemon();
+export async function getPokemonByNationalDexId(nationalDexId: number): Promise<Pokemon | null> {
+  const pokemon = await getPokemon();
   return pokemon.find(p => p.nationalDexId === nationalDexId) || null;
 }
 
 // Create a map of National Pokédex ID to Infinite Fusion ID for quick lookup
-export function getNationalDexToInfiniteFusionMap(): Map<number, number> {
-  const pokemon = getPokemon();
+export async function getNationalDexToInfiniteFusionMap(): Promise<Map<number, number>> {
+  const pokemon = await getPokemon();
   const map = new Map<number, number>();
 
   pokemon.forEach(p => {
@@ -147,8 +156,8 @@ export function getNationalDexToInfiniteFusionMap(): Map<number, number> {
 }
 
 // Create a map of Infinite Fusion ID to National Pokédex ID for quick lookup
-export function getInfiniteFusionToNationalDexMap(): Map<number, number> {
-  const pokemon = getPokemon();
+export async function getInfiniteFusionToNationalDexMap(): Promise<Map<number, number>> {
+  const pokemon = await getPokemon();
   const map = new Map<number, number>();
 
   pokemon.forEach(p => {
