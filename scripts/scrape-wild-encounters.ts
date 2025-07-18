@@ -16,8 +16,20 @@ interface RouteEncounters {
   pokemonIds: number[]; // These are custom Infinite Fusion IDs
 }
 
-// Load Pokemon data and create name-to-custom-ID mapping
-async function loadPokemonData(): Promise<Map<string, number>> {
+// Pre-compile regex patterns for better performance
+const ROUTE_PATTERN = /^(Route \d+|Viridian Forest|Secret Garden|Hidden Forest|Viridian River)/i;
+const ROUTE_ID_PATTERN = /\(ID\s+(\d+)\)/i;
+const ROUTE_CLEAN_PATTERN = /\s*\(ID\s+\d+\)\s*$/i;
+
+// Global Pokemon data cache - load once, use twice
+let globalPokemonNameToId: Map<string, number> | null = null;
+
+// Load Pokemon data once and cache it globally
+async function getOrLoadPokemonData(): Promise<Map<string, number>> {
+  if (globalPokemonNameToId) {
+    return globalPokemonNameToId;
+  }
+
   try {
     ConsoleFormatter.info('Loading Pokemon data for name lookup...');
     const dataPath = path.join(process.cwd(), 'data', 'pokemon-data.json');
@@ -27,7 +39,7 @@ async function loadPokemonData(): Promise<Map<string, number>> {
     const nameToIdMap = new Map<string, number>();
 
     for (const pokemon of pokemonArray) {
-      // Store various name formats for matching
+      // Store various name formats for matching (keep original simple approach)
       const cleanName = pokemon.name.toLowerCase().replace(/[^a-z]/g, '');
       nameToIdMap.set(pokemon.name, pokemon.id);
       nameToIdMap.set(pokemon.name.toLowerCase(), pokemon.id);
@@ -49,7 +61,8 @@ async function loadPokemonData(): Promise<Map<string, number>> {
       });
     }
 
-    ConsoleFormatter.success(`Loaded ${pokemonArray.length} Pokemon for name lookup`);
+    globalPokemonNameToId = nameToIdMap;
+    ConsoleFormatter.success(`Loaded ${pokemonArray.length} Pokemon for name lookup (cached globally)`);
     return nameToIdMap;
   } catch (error) {
     ConsoleFormatter.error(`Error loading Pokemon data: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -59,18 +72,16 @@ async function loadPokemonData(): Promise<Map<string, number>> {
 
 // Function to clean route names for deduplication
 function cleanRouteName(routeName: string): string {
-  return routeName
-    .replace(/\s*\(ID\s+\d+\)\s*$/i, '') // Remove (ID 123) suffix
-    .trim();
+  return routeName.replace(ROUTE_CLEAN_PATTERN, '').trim();
 }
 
 // Function to extract route ID from text like "Route 1 (ID 78)"
 function extractRouteId(routeName: string): number | undefined {
-  const match = routeName.match(/\(ID\s+(\d+)\)/i);
+  const match = routeName.match(ROUTE_ID_PATTERN);
   return match ? parseInt(match[1], 10) : undefined;
 }
 
-// Function to find Pokemon custom ID by name with fuzzy matching
+// Function to find Pokemon custom ID by name with fuzzy matching (keep original simple approach)
 function findPokemonId(text: string, nameToIdMap: Map<string, number>): number | null {
   // Try different variations of the text
   const variations = [
@@ -127,14 +138,14 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
     );
 
     const $ = cheerio.load(html);
-    const pokemonNameToId = await loadPokemonData();
+    const pokemonNameToId = await getOrLoadPokemonData(); // Use cached data
 
     // Focus on main content area
     const mainContent = $('.mw-parser-output');
     const routes: RouteEncounters[] = [];
     const routesSeen = new Set<string>(); // Track cleaned route names
 
-    // Find route headings - look for text patterns
+    // Find route headings - back to original approach but with pre-compiled regex
     const allElements = mainContent.find('*');
     ConsoleFormatter.working(`Scanning ${allElements.length} elements for routes...`);
 
@@ -150,8 +161,8 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
         progressBar.update(index, { status: `Scanning elements... (${routesProcessed} routes found)` });
       }
 
-      // Look for route patterns
-      if (fullText.match(/^(Route \d+|Viridian Forest|Secret Garden|Hidden Forest|Viridian River)/i)) {
+      // Look for route patterns - use pre-compiled regex
+      if (ROUTE_PATTERN.test(fullText)) {
         // Make sure this isn't deeply nested content (allow some basic formatting)
         const children = $element.children();
         if (children.length <= 2) {
@@ -179,8 +190,8 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
             current = current.next();
             const currentText = current.text().trim();
 
-            // Stop if we hit another route
-            if (currentText.match(/^(Route \d+|Viridian Forest|Secret Garden|Hidden Forest|Viridian River)/i)) {
+            // Stop if we hit another route - use pre-compiled regex
+            if (ROUTE_PATTERN.test(currentText)) {
               break;
             }
 
@@ -191,7 +202,7 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
                 $(table).find('td, th').each((cellIndex: number, cell: any) => {
                   const cellText = $(cell).text().trim();
 
-                  // Skip headers and non-Pokemon content
+                  // Skip headers and non-Pokemon content (keep original simple approach)
                   if (cellText &&
                     cellText.length >= 3 &&
                     cellText.length <= 20 &&
@@ -253,24 +264,39 @@ async function main() {
     const dataDir = path.join(process.cwd(), 'data');
     await fs.mkdir(dataDir, { recursive: true });
 
-    // Scrape Classic encounters
-    ConsoleFormatter.printSection('🏞️ Scraping Classic Mode Encounters');
-    const classicRoutes = await scrapeWildEncounters(WILD_ENCOUNTERS_CLASSIC_URL, false);
+    // OPTIMIZATION: Load Pokemon data once before scraping
+    await getOrLoadPokemonData();
 
-    ConsoleFormatter.printSection('🎮 Scraping Remix Mode Encounters');
-    const remixRoutes = await scrapeWildEncounters(WILD_ENCOUNTERS_REMIX_URL, true);
+    // OPTIMIZATION: Scrape both modes in parallel
+    ConsoleFormatter.printSection('🚀 Scraping Both Modes in Parallel');
 
-    // Write separate files
+    const [classicRoutes, remixRoutes] = await Promise.all([
+      (async () => {
+        ConsoleFormatter.info('🏞️ Starting Classic Mode...');
+        return scrapeWildEncounters(WILD_ENCOUNTERS_CLASSIC_URL, false);
+      })(),
+      (async () => {
+        ConsoleFormatter.info('🎮 Starting Remix Mode...');
+        return scrapeWildEncounters(WILD_ENCOUNTERS_REMIX_URL, true);
+      })()
+    ]);
+
+    // Write separate files in parallel
     ConsoleFormatter.info('Saving encounter data to files...');
     const classicPath = path.join(dataDir, 'route-encounters-classic.json');
     const remixPath = path.join(dataDir, 'route-encounters-remix.json');
 
-    await fs.writeFile(classicPath, JSON.stringify(classicRoutes, null, 2));
-    await fs.writeFile(remixPath, JSON.stringify(remixRoutes, null, 2));
+    await Promise.all([
+      fs.writeFile(classicPath, JSON.stringify(classicRoutes, null, 2)),
+      fs.writeFile(remixPath, JSON.stringify(remixRoutes, null, 2))
+    ]);
 
-    // Get file stats
-    const classicStats = await fs.stat(classicPath);
-    const remixStats = await fs.stat(remixPath);
+    // Get file stats in parallel
+    const [classicStats, remixStats] = await Promise.all([
+      fs.stat(classicPath),
+      fs.stat(remixPath)
+    ]);
+
     const duration = Date.now() - startTime;
 
     // Calculate totals
@@ -297,6 +323,9 @@ async function main() {
   } catch (error) {
     ConsoleFormatter.error(`Fatal error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     process.exit(1);
+  } finally {
+    // Clear global cache to free memory
+    globalPokemonNameToId = null;
   }
 }
 
