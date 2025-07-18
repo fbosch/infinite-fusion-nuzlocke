@@ -8,8 +8,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "pokedex": "pnpm --sequential /^pokedex:.*/",
     "pokedex:scrape": "jiti scripts/scrape-pokedex.ts",
-    "pokemon:fetch": "jiti scripts/fetch-pokemon-data.ts"
+    "pokedex:fetch": "jiti scripts/fetch-pokemon-data.ts",
+    "encounters:scrape": "jiti scripts/scrape-wild-encounters.ts",
+    "data:refresh": "pnpm --sequential --stream pokedex encounters:scrape"
   },
   "dependencies": {
     "next": "15.4.1",

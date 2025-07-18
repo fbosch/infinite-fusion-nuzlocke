@@ -6,7 +6,9 @@ import path from 'path';
 
 const POKEDEX_URL = 'https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex';
 
-async function scrapePokeDexNumbers(): Promise<number[]> {
+export type DexEntry = { id: number, name: string };
+
+async function scrapeDexEntries(): Promise<{ id: number, name: string }[]> {
   try {
     console.log('Fetching Pokédex page...');
 
@@ -23,35 +25,35 @@ async function scrapePokeDexNumbers(): Promise<number[]> {
     const $ = cheerio.load(html);
 
     // Extract dex numbers from the table
-    const dexNumbers: number[] = [];
+    const dexEntries: { id: number, name: string }[] = [];
 
     // Look for table rows with dex numbers
     // The structure appears to be: first column contains the dex number
     $('table tr').each((index: number, element: any) => {
       const firstCell = $(element).find('td').first();
       const dexText = firstCell.text().trim();
+      const thirdCell = $(element).find('td').eq(2);
+      const nameText = thirdCell.text().trim();
 
       // Check if this looks like a dex number (should be a number)
       const dexNumber = parseInt(dexText);
       if (!isNaN(dexNumber) && dexNumber > 0) {
-        dexNumbers.push(dexNumber);
+        dexEntries.push({
+          id: dexNumber,
+          name: nameText
+        });
       }
     });
 
     // Remove duplicates and sort
-    const uniqueDexNumbers = [...new Set(dexNumbers)].sort((a, b) => a - b);
 
-    console.log(`Found ${uniqueDexNumbers.length} unique Pokédex entries.`);
-    console.log(`Range: ${Math.min(...uniqueDexNumbers)} - ${Math.max(...uniqueDexNumbers)}`);
+    console.log(`Found ${dexEntries.length} unique Pokédex entries.`);
 
     // Write to JSON file
     const outputPath = path.join(process.cwd(), '/data/base-entries.json');
-    await fs.writeFile(outputPath, JSON.stringify(uniqueDexNumbers, null, 2));
+    await fs.writeFile(outputPath, JSON.stringify(dexEntries, null, 2));
 
-    console.log(`✅ Successfully scraped ${uniqueDexNumbers.length} Pokédex numbers!`);
-    console.log(`📁 Output saved to: ${outputPath}`);
-
-    return uniqueDexNumbers;
+    return dexEntries;
 
   } catch (error) {
     console.error('❌ Error scraping Pokédex:', error instanceof Error ? error.message : 'Unknown error');
@@ -60,4 +62,4 @@ async function scrapePokeDexNumbers(): Promise<number[]> {
 }
 
 // Run the scraper
-scrapePokeDexNumbers(); 
+scrapeDexEntries(); 
