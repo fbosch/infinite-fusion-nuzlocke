@@ -9,7 +9,7 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import React, { useState, useMemo, useCallback, useDeferredValue, startTransition } from 'react';
-import { ChevronUp, ChevronDown, ChevronsUpDown, Search } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronsUpDown, Search, Check } from 'lucide-react';
 import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react';
 import { getLocationsSortedByOrder, getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
 import type { Location } from '@/loaders/locations';
@@ -101,6 +101,13 @@ const PokemonCombobox = React.memo(({
                 startTransition(() => setQuery(value));
               }
             }}
+            onClick={() => {
+              // Reopen dropdown when clicking on focused input
+              const comboboxButton = document.querySelector('[data-headlessui-state]') as HTMLElement;
+              if (comboboxButton) {
+                comboboxButton.click();
+              }
+            }}
           />
           <div className="absolute inset-y-0 right-0 flex items-center pr-2">
             <Search className="h-4 w-4 text-gray-400" aria-hidden="true" />
@@ -118,7 +125,7 @@ const PokemonCombobox = React.memo(({
                 value={pokemon}
                 className={({ active }) =>
                   clsx(
-                    'relative cursor-default select-none py-2 pl-10 pr-4',
+                    'relative cursor-default select-none py-2 pr-4 pl-10',
                     {
                       'bg-blue-600 text-white': active,
                       'text-gray-900 dark:text-gray-100': !active
@@ -128,12 +135,14 @@ const PokemonCombobox = React.memo(({
               >
                 {({ selected, active }) => (
                   <>
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-4 cursor-pointer">
                       {/* Pokemon Sprite */}
                       <img
                         src={pokemon.spriteUrl}
                         alt={pokemon.name}
-                        className="w-8 h-8 mr-2 object-contain"
+                        className="w-12 h-12 object-contain object-center scale-180 antialiased"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <span className={clsx('block truncate', {
                         'font-medium': selected,
@@ -145,14 +154,14 @@ const PokemonCombobox = React.memo(({
                     {selected ? (
                       <span
                         className={clsx(
-                          'absolute inset-y-0 left-0 flex items-center pl-2',
+                          'absolute inset-y-0 left-2 flex items-center pl-2',
                           {
                             'text-white': active,
                             'text-blue-600': !active
                           }
                         )}
                       >
-                        <div className="w-2 h-2 bg-current rounded-full" />
+                        <Check className="w-6 h-6" aria-hidden="true" />
                       </span>
                     ) : null}
                   </>
