@@ -198,6 +198,151 @@ describe('Data Integrity Tests', () => {
     })
   })
 
+  describe('Pokemon Data Structure', () => {
+    let pokemonData: any[];
+
+    beforeAll(async () => {
+      const dataDir = path.join(process.cwd(), 'data');
+      const pokemonDataFile = await fs.readFile(path.join(dataDir, 'pokemon-data.json'), 'utf-8');
+      pokemonData = JSON.parse(pokemonDataFile);
+    });
+
+    it('should have valid evolution data structure for all Pokemon', () => {
+      const invalidEvolutionData: string[] = [];
+
+      pokemonData.forEach(pokemon => {
+        // Check if evolution field exists and is an object
+        if (pokemon.evolution !== undefined && typeof pokemon.evolution !== 'object') {
+          invalidEvolutionData.push(`${pokemon.name}: evolution field is not an object`);
+          return;
+        }
+
+        // If evolution data exists, validate its structure
+        if (pokemon.evolution) {
+          // Check evolves_to array
+          if (!Array.isArray(pokemon.evolution.evolves_to)) {
+            invalidEvolutionData.push(`${pokemon.name}: evolves_to is not an array`);
+          }
+
+          // Check evolves_from (optional)
+          if (pokemon.evolution.evolves_from && typeof pokemon.evolution.evolves_from !== 'object') {
+            invalidEvolutionData.push(`${pokemon.name}: evolves_from is not an object`);
+          }
+
+          // Validate evolution details
+          pokemon.evolution.evolves_to.forEach((evolution: any, index: number) => {
+            if (!evolution.id || !evolution.name) {
+              invalidEvolutionData.push(`${pokemon.name}: evolution ${index} missing id or name`);
+            }
+            if (typeof evolution.id !== 'number' || evolution.id <= 0) {
+              invalidEvolutionData.push(`${pokemon.name}: evolution ${index} has invalid id`);
+            }
+          });
+
+          if (pokemon.evolution.evolves_from) {
+            const from = pokemon.evolution.evolves_from;
+            if (!from.id || !from.name) {
+              invalidEvolutionData.push(`${pokemon.name}: evolves_from missing id or name`);
+            }
+            if (typeof from.id !== 'number' || from.id <= 0) {
+              invalidEvolutionData.push(`${pokemon.name}: evolves_from has invalid id`);
+            }
+          }
+        }
+      });
+
+      if (invalidEvolutionData.length > 0) {
+        throw new Error(`Invalid evolution data found:\n${invalidEvolutionData.join('\n')}`);
+      }
+
+      expect(invalidEvolutionData).toHaveLength(0);
+    });
+
+    it('should have valid species data structure for all Pokemon', () => {
+      const invalidSpeciesData: string[] = [];
+
+      pokemonData.forEach(pokemon => {
+        if (!pokemon.species) {
+          invalidSpeciesData.push(`${pokemon.name}: missing species data`);
+          return;
+        }
+
+        // Check required species fields
+        if (typeof pokemon.species.is_legendary !== 'boolean') {
+          invalidSpeciesData.push(`${pokemon.name}: is_legendary is not a boolean`);
+        }
+        if (typeof pokemon.species.is_mythical !== 'boolean') {
+          invalidSpeciesData.push(`${pokemon.name}: is_mythical is not a boolean`);
+        }
+        if (pokemon.species.generation !== null && typeof pokemon.species.generation !== 'string') {
+          invalidSpeciesData.push(`${pokemon.name}: generation is not a string or null`);
+        }
+
+        // Check evolution_chain if present
+        if (pokemon.species.evolution_chain && typeof pokemon.species.evolution_chain.url !== 'string') {
+          invalidSpeciesData.push(`${pokemon.name}: evolution_chain.url is not a string`);
+        }
+      });
+
+      if (invalidSpeciesData.length > 0) {
+        throw new Error(`Invalid species data found:\n${invalidSpeciesData.join('\n')}`);
+      }
+
+      expect(invalidSpeciesData).toHaveLength(0);
+    });
+
+    it('should have consistent Pokemon IDs across all data', () => {
+      const invalidIds: string[] = [];
+
+      pokemonData.forEach(pokemon => {
+        if (!Number.isInteger(pokemon.id) || pokemon.id <= 0) {
+          invalidIds.push(`${pokemon.name}: invalid id ${pokemon.id}`);
+        }
+        if (!Number.isInteger(pokemon.nationalDexId) || pokemon.nationalDexId <= 0) {
+          invalidIds.push(`${pokemon.name}: invalid nationalDexId ${pokemon.nationalDexId}`);
+        }
+      });
+
+      if (invalidIds.length > 0) {
+        throw new Error(`Invalid Pokemon IDs found:\n${invalidIds.join('\n')}`);
+      }
+
+      expect(invalidIds).toHaveLength(0);
+    });
+
+    it('should have correct evolution data for specific Pokemon', () => {
+      // Test Eevee's evolution data
+      const eevee = pokemonData.find(p => p.name === 'Eevee');
+      expect(eevee).toBeDefined();
+      expect(eevee?.evolution).toBeDefined();
+      expect(eevee?.evolution.evolves_to).toBeInstanceOf(Array);
+      expect(eevee?.evolution.evolves_to.length).toBeGreaterThan(0);
+
+      // Check that Eevee has multiple evolution options
+      const evolutionNames = eevee?.evolution.evolves_to.map((e: any) => e.name) || [];
+      expect(evolutionNames).toContain('vaporeon');
+      expect(evolutionNames).toContain('jolteon');
+      expect(evolutionNames).toContain('flareon');
+
+      // Test a final evolution (Venusaur)
+      const venusaur = pokemonData.find(p => p.name === 'Venusaur');
+      expect(venusaur).toBeDefined();
+      expect(venusaur?.evolution).toBeDefined();
+      expect(venusaur?.evolution.evolves_to).toBeInstanceOf(Array);
+      expect(venusaur?.evolution.evolves_to.length).toBe(0); // Final evolution
+      expect(venusaur?.evolution.evolves_from).toBeDefined();
+      expect(venusaur?.evolution.evolves_from.name).toBe('ivysaur');
+
+      // Test a base Pokemon (Bulbasaur)
+      const bulbasaur = pokemonData.find(p => p.name === 'Bulbasaur');
+      expect(bulbasaur).toBeDefined();
+      expect(bulbasaur?.evolution).toBeDefined();
+      expect(bulbasaur?.evolution.evolves_to).toBeInstanceOf(Array);
+      expect(bulbasaur?.evolution.evolves_to.length).toBeGreaterThan(0);
+      expect(bulbasaur?.evolution.evolves_from).toBeUndefined(); // Base Pokemon
+    });
+  });
+
   describe('Data Consistency', () => {
     it('should have consistent routeId values between locations and encounters', () => {
       const locationRouteIds = new Set(

@@ -41,8 +41,56 @@ describe('Data Loading Utilities', () => {
 
   describe('loadPokemonData', () => {
     const mockPokemonData = [
-      { id: 1, name: 'Bulbasaur', types: [{ name: 'grass' }], species: { is_legendary: false, is_mythical: false, generation: 'generation-i' } },
-      { id: 25, name: 'Pikachu', types: [{ name: 'electric' }], species: { is_legendary: false, is_mythical: false, generation: 'generation-i' } }
+      {
+        id: 1,
+        nationalDexId: 1,
+        name: 'Bulbasaur',
+        types: [{ name: 'grass' }],
+        species: {
+          is_legendary: false,
+          is_mythical: false,
+          generation: 'generation-i',
+          evolution_chain: { url: 'https://pokeapi.co/api/v2/evolution-chain/1/' }
+        },
+        evolution: {
+          evolves_to: [
+            {
+              id: 2,
+              name: 'ivysaur',
+              min_level: 16,
+              trigger: 'level-up'
+            }
+          ]
+        }
+      },
+      {
+        id: 25,
+        nationalDexId: 25,
+        name: 'Pikachu',
+        types: [{ name: 'electric' }],
+        species: {
+          is_legendary: false,
+          is_mythical: false,
+          generation: 'generation-i',
+          evolution_chain: { url: 'https://pokeapi.co/api/v2/evolution-chain/10/' }
+        },
+        evolution: {
+          evolves_to: [
+            {
+              id: 26,
+              name: 'raichu',
+              item: 'thunder-stone',
+              trigger: 'use-item'
+            }
+          ],
+          evolves_from: {
+            id: 172,
+            name: 'pichu',
+            min_level: 10,
+            trigger: 'level-up'
+          }
+        }
+      }
     ];
 
     it('should load Pokemon data successfully', async () => {
@@ -110,8 +158,22 @@ describe('Data Loading Utilities', () => {
 
   describe('loadPokemonNameMap', () => {
     const mockPokemonData = [
-      { id: 1, name: 'Bulbasaur', types: [], species: {} },
-      { id: 25, name: 'Pikachu', types: [], species: {} }
+      {
+        id: 1,
+        nationalDexId: 1,
+        name: 'Bulbasaur',
+        types: [],
+        species: {},
+        evolution: {}
+      },
+      {
+        id: 25,
+        nationalDexId: 25,
+        name: 'Pikachu',
+        types: [],
+        species: {},
+        evolution: {}
+      }
     ];
 
     it('should load and build Pokemon name map', async () => {

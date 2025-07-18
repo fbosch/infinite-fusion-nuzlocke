@@ -1,0 +1,39 @@
+## Error Handling
+- Implement proper error boundaries
+- Use try-catch for data operations
+- Provide meaningful error messages
+- Log errors appropriately for debugging
+
+## Accessibility
+- Use semantic HTML elements
+- Implement proper ARIA labels
+- Ensure keyboard navigation works
+- Test with screen readers
+
+## Security
+- Validate all user inputs
+- Sanitize data from external sources
+- Use environment variables for sensitive data
+- Implement proper CORS policies if needed
+
+## Documentation
+- Update README.md with project-specific information
+- Document complex algorithms and data structures
+- Add inline comments for business logic
+- Keep API documentation up to date
+
+## Git Workflow
+- Use conventional commit messages
+- Keep commits focused and atomic
+- Update .gitignore for build artifacts
+- Document breaking changes
+
+## Environment Setup
+- Use Node.js 18+ for development
+- Install dependencies with `pnpm install`
+- Set up proper environment variables
+- Configure IDE for TypeScript and ESLint
+description:
+globs:
+alwaysApply: false
+---

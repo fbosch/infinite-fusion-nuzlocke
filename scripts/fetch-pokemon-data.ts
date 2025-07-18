@@ -13,6 +13,106 @@ const P = new Pokedex({
   timeout: 30 * 1000 // 30 second timeout
 });
 
+// Cache for evolution chains to avoid duplicate API calls
+const evolutionChainCache = new Map<number, any>();
+
+async function fetchEvolutionChain(chainId: number): Promise<any> {
+  if (evolutionChainCache.has(chainId)) {
+    return evolutionChainCache.get(chainId);
+  }
+
+  try {
+    const chainData = await P.getEvolutionChainById(chainId);
+    evolutionChainCache.set(chainId, chainData);
+    return chainData;
+  } catch (error) {
+    ConsoleFormatter.warn(`Failed to fetch evolution chain ${chainId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return null;
+  }
+}
+
+function extractEvolutionData(chainData: any, pokemonName: string): EvolutionData | undefined {
+  if (!chainData || !chainData.chain) {
+    return undefined;
+  }
+
+  const evolutionData: EvolutionData = {
+    evolves_to: []
+  };
+
+  // Helper function to find Pokemon in evolution chain
+  function findPokemonInChain(chain: any, targetName: string): any {
+    if (chain.species.name === targetName) {
+      return chain;
+    }
+
+    for (const evolution of chain.evolves_to || []) {
+      const found = findPokemonInChain(evolution, targetName);
+      if (found) return found;
+    }
+
+    return null;
+  }
+
+  // Helper function to get evolution details
+  function getEvolutionDetails(evolution: any): EvolutionDetail {
+    const details: EvolutionDetail = {
+      id: parseInt(evolution.species.url.split('/').slice(-2)[0]),
+      name: evolution.species.name
+    };
+
+    if (evolution.evolution_details && evolution.evolution_details.length > 0) {
+      const detail = evolution.evolution_details[0];
+
+      if (detail.min_level) details.min_level = detail.min_level;
+      if (detail.item) details.item = detail.item.name;
+      if (detail.location) details.location = detail.location.name;
+      if (detail.trigger) details.trigger = detail.trigger.name;
+
+      // Handle special conditions
+      if (detail.min_happiness) details.condition = `Happiness: ${detail.min_happiness}`;
+      if (detail.min_affection) details.condition = `Affection: ${detail.min_affection}`;
+      if (detail.time_of_day) details.condition = `Time: ${detail.time_of_day}`;
+      if (detail.known_move_type) details.condition = `Knows ${detail.known_move_type.name} move`;
+      if (detail.held_item_type) details.condition = `Holding ${detail.held_item_type.name}`;
+    }
+
+    return details;
+  }
+
+  // Find the Pokemon in the chain
+  const pokemonInChain = findPokemonInChain(chainData.chain, pokemonName);
+  if (!pokemonInChain) {
+    return undefined;
+  }
+
+  // Get evolutions from this Pokemon
+  for (const evolution of pokemonInChain.evolves_to || []) {
+    evolutionData.evolves_to.push(getEvolutionDetails(evolution));
+  }
+
+  // Find what this Pokemon evolves from
+  function findPreEvolution(chain: any, targetName: string, parent: any = null): any {
+    if (chain.species.name === targetName) {
+      return parent;
+    }
+
+    for (const evolution of chain.evolves_to || []) {
+      const found = findPreEvolution(evolution, targetName, chain);
+      if (found) return found;
+    }
+
+    return null;
+  }
+
+  const preEvolution = findPreEvolution(chainData.chain, pokemonName);
+  if (preEvolution) {
+    evolutionData.evolves_from = getEvolutionDetails(preEvolution);
+  }
+
+  return evolutionData;
+}
+
 interface PokemonType {
   name: string;
 }
@@ -21,6 +121,24 @@ interface PokemonSpeciesData {
   is_legendary: boolean;
   is_mythical: boolean;
   generation: string | null;
+  evolution_chain?: {
+    url: string;
+  };
+}
+
+interface EvolutionDetail {
+  id: number;
+  name: string;
+  trigger?: string;
+  min_level?: number;
+  item?: string;
+  location?: string;
+  condition?: string;
+}
+
+interface EvolutionData {
+  evolves_from?: EvolutionDetail;
+  evolves_to: EvolutionDetail[];
 }
 
 export interface ProcessedPokemonData {
@@ -28,7 +146,8 @@ export interface ProcessedPokemonData {
   nationalDexId: number;
   name: string;
   types: PokemonType[];
-  species: PokemonSpeciesData
+  species: PokemonSpeciesData;
+  evolution?: EvolutionData;
 }
 
 async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
@@ -170,7 +289,10 @@ async function processBatch(
     const speciesResults = await P.getPokemonSpeciesByName(pokemonIds);
 
     // Process results
-    const results: ProcessedPokemonData[] = batchEntries.map((item, index): ProcessedPokemonData => {
+    const results: ProcessedPokemonData[] = [];
+
+    for (let index = 0; index < batchEntries.length; index++) {
+      const item = batchEntries[index];
       const pokemon = pokemonResults[index];
       const species = speciesResults[index];
 
@@ -178,7 +300,17 @@ async function processBatch(
         throw new Error(`Missing data for "${item.entry.name}" (API name: ${item.normalizedName}) (ID ${item.entry.id})`);
       }
 
-      return {
+      // Fetch evolution data if available
+      let evolutionData: EvolutionData | undefined;
+      if (species.evolution_chain?.url) {
+        const chainId = parseInt(species.evolution_chain.url.split('/').slice(-2)[0]);
+        const chainData = await fetchEvolutionChain(chainId);
+        if (chainData) {
+          evolutionData = extractEvolutionData(chainData, pokemon.species.name);
+        }
+      }
+
+      results.push({
         id: item.entry.id,
         nationalDexId: pokemon.id,
         name: item.entry.name, // Keep original name from Infinite Fusion
@@ -189,9 +321,11 @@ async function processBatch(
           is_legendary: species.is_legendary,
           is_mythical: species.is_mythical,
           generation: species.generation?.name || null,
-        }
-      };
-    });
+          evolution_chain: species.evolution_chain
+        },
+        evolution: evolutionData
+      });
+    }
 
     return results;
 
@@ -218,6 +352,16 @@ async function processBatch(
 
           batchProgressBar.update(i + chunkIndex + 1, { status: `Fetched ${item.entry.name}` });
 
+          // Fetch evolution data if available
+          let evolutionData: EvolutionData | undefined;
+          if (species.evolution_chain?.url) {
+            const chainId = parseInt(species.evolution_chain.url.split('/').slice(-2)[0]);
+            const chainData = await fetchEvolutionChain(chainId);
+            if (chainData) {
+              evolutionData = extractEvolutionData(chainData, pokemon.species.name);
+            }
+          }
+
           return {
             id: item.entry.id,
             nationalDexId: pokemon.id,
@@ -229,7 +373,9 @@ async function processBatch(
               is_legendary: species.is_legendary,
               is_mythical: species.is_mythical,
               generation: species.generation?.name || null,
-            }
+              evolution_chain: species.evolution_chain
+            },
+            evolution: evolutionData
           };
         } catch (error) {
           batchProgressBar.update(i + chunkIndex + 1, { status: `Failed: ${item.entry.name}` });
