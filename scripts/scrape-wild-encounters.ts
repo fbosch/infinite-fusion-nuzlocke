@@ -4,6 +4,7 @@ import * as cheerio from 'cheerio';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import type { ProcessedPokemonData } from './fetch-pokemon-data';
 
 const WILD_ENCOUNTERS_CLASSIC_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters';
 const WILD_ENCOUNTERS_REMIX_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters/Remix';
@@ -14,33 +15,22 @@ interface RouteEncounters {
   pokemonIds: number[]; // These are custom Infinite Fusion IDs
 }
 
-interface PokemonData {
-  customId: number;
-  nationalDexId: number;
-  name: string;
-  types: Array<{ name: string }>;
-  species: {
-    is_legendary: boolean;
-    is_mythical: boolean;
-    generation: string;
-  };
-}
 
 // Load Pokemon data and create name-to-custom-ID mapping
 async function loadPokemonData(): Promise<Map<string, number>> {
   try {
     const dataPath = path.join(process.cwd(), 'data', 'pokemon-data.json');
     const data = await fs.readFile(dataPath, 'utf8');
-    const pokemonArray: PokemonData[] = JSON.parse(data);
+    const pokemonArray: ProcessedPokemonData[] = JSON.parse(data);
 
     const nameToIdMap = new Map<string, number>();
 
     for (const pokemon of pokemonArray) {
       // Store various name formats for matching
       const cleanName = pokemon.name.toLowerCase().replace(/[^a-z]/g, '');
-      nameToIdMap.set(pokemon.name, pokemon.customId);
-      nameToIdMap.set(pokemon.name.toLowerCase(), pokemon.customId);
-      nameToIdMap.set(cleanName, pokemon.customId);
+      nameToIdMap.set(pokemon.name, pokemon.id);
+      nameToIdMap.set(pokemon.name.toLowerCase(), pokemon.id);
+      nameToIdMap.set(cleanName, pokemon.id);
 
       // Also handle special characters and variations
       const variations = [
@@ -52,9 +42,9 @@ async function loadPokemonData(): Promise<Map<string, number>> {
       ];
 
       variations.forEach(variation => {
-        nameToIdMap.set(variation, pokemon.customId);
-        nameToIdMap.set(variation.toLowerCase(), pokemon.customId);
-        nameToIdMap.set(variation.toLowerCase().replace(/[^a-z]/g, ''), pokemon.customId);
+        nameToIdMap.set(variation, pokemon.id);
+        nameToIdMap.set(variation.toLowerCase(), pokemon.id);
+        nameToIdMap.set(variation.toLowerCase().replace(/[^a-z]/g, ''), pokemon.id);
       });
     }
 

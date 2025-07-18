@@ -8,13 +8,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pokedex": "pnpm --sequential /^pokedex:.*/",
+    "pokedex": "pnpm run pokedex:scrape && pnpm run pokedex:fetch",
     "pokedex:scrape": "jiti scripts/scrape-pokedex.ts",
     "pokedex:fetch": "jiti scripts/fetch-pokemon-data.ts",
     "encounters:scrape": "jiti scripts/scrape-wild-encounters.ts",
-    "data:refresh": "pnpm --sequential --stream pokedex encounters:scrape"
+    "data:refresh": "pnpm run pokedex && pnpm run encounters:scrape"
   },
   "dependencies": {
+    "@types/cli-progress": "^3.11.6",
+    "cli-progress": "^3.12.0",
     "next": "15.4.1",
     "pokedex-promise-v2": "^4.2.1",
     "react": "19.1.0",
