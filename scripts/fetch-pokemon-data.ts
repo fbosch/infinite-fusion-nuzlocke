@@ -35,9 +35,6 @@ async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
   const startTime = Date.now();
 
   try {
-    // Header
-    ConsoleFormatter.printHeader('Infinite Fusion Pokemon Data Fetcher', 'Fetching Pokemon data from PokéAPI');
-
     ConsoleFormatter.info('Loading Pokemon entries...');
 
     // Read the pokemon entries with custom IDs and names

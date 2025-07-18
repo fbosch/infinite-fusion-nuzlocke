@@ -13,8 +13,6 @@ async function scrapeDexEntries(): Promise<{ id: number, name: string }[]> {
   const startTime = Date.now();
 
   try {
-    ConsoleFormatter.printHeader('Infinite Fusion Pokédex Scraper', 'Scraping Pokédex entries from the wiki');
-
     // Fetch the webpage
     const response = await ConsoleFormatter.withSpinner(
       'Fetching Pokédex page...',

@@ -5,6 +5,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import type { ProcessedPokemonData } from './fetch-pokemon-data';
+import { ConsoleFormatter } from './console-utils';
 
 const WILD_ENCOUNTERS_CLASSIC_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters';
 const WILD_ENCOUNTERS_REMIX_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters/Remix';
@@ -15,10 +16,10 @@ interface RouteEncounters {
   pokemonIds: number[]; // These are custom Infinite Fusion IDs
 }
 
-
 // Load Pokemon data and create name-to-custom-ID mapping
 async function loadPokemonData(): Promise<Map<string, number>> {
   try {
+    ConsoleFormatter.info('Loading Pokemon data for name lookup...');
     const dataPath = path.join(process.cwd(), 'data', 'pokemon-data.json');
     const data = await fs.readFile(dataPath, 'utf8');
     const pokemonArray: ProcessedPokemonData[] = JSON.parse(data);
@@ -48,10 +49,10 @@ async function loadPokemonData(): Promise<Map<string, number>> {
       });
     }
 
-    console.log(`Loaded ${pokemonArray.length} Pokemon for name lookup`);
+    ConsoleFormatter.success(`Loaded ${pokemonArray.length} Pokemon for name lookup`);
     return nameToIdMap;
   } catch (error) {
-    console.error('Error loading Pokemon data:', error instanceof Error ? error.message : 'Unknown error');
+    ConsoleFormatter.error(`Error loading Pokemon data: ${error instanceof Error ? error.message : 'Unknown error'}`);
     throw error;
   }
 }
@@ -109,15 +110,21 @@ function findPokemonId(text: string, nameToIdMap: Map<string, number>): number |
 async function scrapeWildEncounters(url: string, isRemix: boolean = false): Promise<RouteEncounters[]> {
   try {
     const modeType = isRemix ? 'Remix' : 'Classic';
-    console.log(`Fetching ${modeType} Wild Encounters page...`);
 
-    const response = await fetch(url);
+    // Fetch the webpage
+    const response = await ConsoleFormatter.withSpinner(
+      `Fetching ${modeType} Wild Encounters page...`,
+      () => fetch(url)
+    );
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const html = await response.text();
-    console.log('Page fetched successfully. Parsing HTML...');
+    const html = await ConsoleFormatter.withSpinner(
+      'Parsing HTML content...',
+      () => response.text()
+    );
 
     const $ = cheerio.load(html);
     const pokemonNameToId = await loadPokemonData();
@@ -129,11 +136,19 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
 
     // Find route headings - look for text patterns
     const allElements = mainContent.find('*');
-    console.log(`Scanning ${allElements.length} elements for routes...`);
+    ConsoleFormatter.working(`Scanning ${allElements.length} elements for routes...`);
+
+    let routesProcessed = 0;
+    const progressBar = ConsoleFormatter.createMiniProgressBar(allElements.length, 'Scanning for routes...');
 
     allElements.each((index: number, element: any) => {
       const $element = $(element);
       const fullText = $element.text().trim();
+
+      // Update progress periodically
+      if (index % 100 === 0) {
+        progressBar.update(index, { status: `Scanning elements... (${routesProcessed} routes found)` });
+      }
 
       // Look for route patterns
       if (fullText.match(/^(Route \d+|Viridian Forest|Secret Garden|Hidden Forest|Viridian River)/i)) {
@@ -146,12 +161,12 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
 
           // Skip if we've already processed this route
           if (routesSeen.has(cleanedRouteName)) {
-            console.log(`Skipping duplicate: ${cleanedRouteName}`);
             return;
           }
           routesSeen.add(cleanedRouteName);
 
-          console.log(`Processing: ${cleanedRouteName}${routeId ? ` (ID: ${routeId})` : ''}`);
+          routesProcessed++;
+          progressBar.update(index, { status: `Processing: ${cleanedRouteName}` });
 
           // Find Pokemon data near this route
           const pokemonIds = new Set<number>();
@@ -172,8 +187,6 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
             // Extract Pokemon from tables
             const tables = current.is('table') ? current : current.find('table');
             if (tables.length > 0) {
-              console.log(`  Found table(s), extracting Pokemon...`);
-
               tables.each((tableIndex: number, table: any) => {
                 $(table).find('td, th').each((cellIndex: number, cell: any) => {
                   const cellText = $(cell).text().trim();
@@ -195,7 +208,6 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
                     const pokemonId = findPokemonId(cellText, pokemonNameToId);
                     if (pokemonId) {
                       pokemonIds.add(pokemonId);
-                      console.log(`    Found: ${cellText} (Custom ID: ${pokemonId})`);
                     }
                   }
                 });
@@ -206,7 +218,6 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
           }
 
           const sortedIds = Array.from(pokemonIds).sort((a, b) => a - b);
-          console.log(`  ${cleanedRouteName}: ${sortedIds.length} Pokemon found\n`);
 
           const routeData: RouteEncounters = {
             routeName: cleanedRouteName,
@@ -222,44 +233,69 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
       }
     });
 
-    console.log(`\n${modeType} scraping complete!`);
-    console.log(`Total unique routes: ${routes.length}`);
-    console.log(`Total encounters: ${routes.reduce((sum, route) => sum + route.pokemonIds.length, 0)}`);
-    console.log(`Unique Pokemon: ${new Set(routes.flatMap(route => route.pokemonIds)).size}`);
+    progressBar.update(allElements.length, { status: 'Scanning complete!' });
+    progressBar.stop();
+
+    ConsoleFormatter.success(`${modeType} scraping complete! Found ${routes.length} unique routes`);
 
     return routes;
 
   } catch (error) {
-    console.error(`❌ Error scraping ${isRemix ? 'Remix' : 'Classic'} encounters:`, error instanceof Error ? error.message : 'Unknown error');
+    ConsoleFormatter.error(`Error scraping ${isRemix ? 'Remix' : 'Classic'} encounters: ${error instanceof Error ? error.message : 'Unknown error'}`);
     throw error;
   }
 }
 
 async function main() {
+  const startTime = Date.now();
+
   try {
     const dataDir = path.join(process.cwd(), 'data');
     await fs.mkdir(dataDir, { recursive: true });
 
     // Scrape Classic encounters
-    console.log('=== SCRAPING CLASSIC ENCOUNTERS ===');
+    ConsoleFormatter.printSection('🏞️ Scraping Classic Mode Encounters');
     const classicRoutes = await scrapeWildEncounters(WILD_ENCOUNTERS_CLASSIC_URL, false);
 
-    console.log('\n=== SCRAPING REMIX ENCOUNTERS ===');
+    ConsoleFormatter.printSection('🎮 Scraping Remix Mode Encounters');
     const remixRoutes = await scrapeWildEncounters(WILD_ENCOUNTERS_REMIX_URL, true);
 
     // Write separate files
+    ConsoleFormatter.info('Saving encounter data to files...');
     const classicPath = path.join(dataDir, 'route-encounters-classic.json');
     const remixPath = path.join(dataDir, 'route-encounters-remix.json');
 
     await fs.writeFile(classicPath, JSON.stringify(classicRoutes, null, 2));
     await fs.writeFile(remixPath, JSON.stringify(remixRoutes, null, 2));
 
-    console.log(`\n✅ Successfully scraped wild encounters!`);
-    console.log(`📁 Classic: ${classicPath} (${classicRoutes.length} routes)`);
-    console.log(`📁 Remix: ${remixPath} (${remixRoutes.length} routes)`);
+    // Get file stats
+    const classicStats = await fs.stat(classicPath);
+    const remixStats = await fs.stat(remixPath);
+    const duration = Date.now() - startTime;
+
+    // Calculate totals
+    const totalRoutes = classicRoutes.length + remixRoutes.length;
+    const totalClassicEncounters = classicRoutes.reduce((sum, route) => sum + route.pokemonIds.length, 0);
+    const totalRemixEncounters = remixRoutes.reduce((sum, route) => sum + route.pokemonIds.length, 0);
+    const totalEncounters = totalClassicEncounters + totalRemixEncounters;
+    const uniqueClassicPokemon = new Set(classicRoutes.flatMap(route => route.pokemonIds)).size;
+    const uniqueRemixPokemon = new Set(remixRoutes.flatMap(route => route.pokemonIds)).size;
+
+    // Success summary
+    ConsoleFormatter.printSummary('Wild Encounters Scraping Complete!', [
+      { label: '📁 Classic data saved to', value: classicPath, color: 'cyan' },
+      { label: '📁 Remix data saved to', value: remixPath, color: 'cyan' },
+      { label: '📊 Total routes processed', value: totalRoutes, color: 'green' },
+      { label: '👾 Total encounters', value: totalEncounters, color: 'green' },
+      { label: '🌟 Unique Classic Pokemon', value: uniqueClassicPokemon, color: 'yellow' },
+      { label: '🌟 Unique Remix Pokemon', value: uniqueRemixPokemon, color: 'yellow' },
+      { label: '🗂️  Classic file size', value: ConsoleFormatter.formatFileSize(classicStats.size), color: 'cyan' },
+      { label: '🗂️  Remix file size', value: ConsoleFormatter.formatFileSize(remixStats.size), color: 'cyan' },
+      { label: '⏱️  Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
+    ]);
 
   } catch (error) {
-    console.error('❌ Fatal error:', error instanceof Error ? error.message : 'Unknown error');
+    ConsoleFormatter.error(`Fatal error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     process.exit(1);
   }
 }
