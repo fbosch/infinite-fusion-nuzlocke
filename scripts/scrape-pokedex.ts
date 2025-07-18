@@ -10,6 +10,7 @@ const POKEDEX_URL = 'https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex';
 export type DexEntry = { id: number, name: string };
 
 async function scrapeDexEntries(): Promise<{ id: number, name: string }[]> {
+  ConsoleFormatter.printHeader('Scraping Pokédex', 'Scraping Pokédex entries from the wiki');
   const startTime = Date.now();
 
   try {
@@ -66,10 +67,10 @@ async function scrapeDexEntries(): Promise<{ id: number, name: string }[]> {
 
     // Success summary
     ConsoleFormatter.printSummary('Pokédex Scraping Complete!', [
-      { label: '📁 Output saved to', value: outputPath, color: 'cyan' },
-      { label: '📊 Total entries', value: dexEntries.length, color: 'green' },
-      { label: '🗂️  File size', value: ConsoleFormatter.formatFileSize(fileStats.size), color: 'cyan' },
-      { label: '⏱️  Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
+      { label: 'Output saved to', value: outputPath, color: 'cyan' },
+      { label: 'Total entries', value: dexEntries.length, color: 'green' },
+      { label: 'File size', value: ConsoleFormatter.formatFileSize(fileStats.size), color: 'cyan' },
+      { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
     ]);
 
     return dexEntries;

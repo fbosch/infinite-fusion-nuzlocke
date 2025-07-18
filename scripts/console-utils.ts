@@ -5,11 +5,11 @@
  * across all scripts in the project. It ensures a professional and unified console experience.
  * 
  * Features:
- * - 🎨 Color-coded console messages with ANSI escape codes
- * - 📊 Progress bars with ETA and status updates
- * - ⚡ Loading spinners for indeterminate operations
- * - 📋 Professional summary formatting
- * - 🗂️ File size and duration formatting utilities
+ * - Color-coded console messages with ANSI escape codes
+ * - Progress bars with ETA and status updates
+ * - Loading spinners for indeterminate operations
+ * - Professional summary formatting
+ * - File size and duration formatting utilities
  * 
  * Usage:
  * ```typescript

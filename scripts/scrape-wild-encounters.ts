@@ -31,7 +31,6 @@ async function getOrLoadPokemonData(): Promise<Map<string, number>> {
   }
 
   try {
-    ConsoleFormatter.info('Loading Pokemon data for name lookup...');
     const dataPath = path.join(process.cwd(), 'data', 'pokemon-data.json');
     const data = await fs.readFile(dataPath, 'utf8');
     const pokemonArray: ProcessedPokemonData[] = JSON.parse(data);
@@ -147,7 +146,6 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
 
     // Find route headings - back to original approach but with pre-compiled regex
     const allElements = mainContent.find('*');
-    ConsoleFormatter.working(`Scanning ${allElements.length} elements for routes...`);
 
     let routesProcessed = 0;
     const progressBar = ConsoleFormatter.createMiniProgressBar(allElements.length, 'Scanning for routes...');
@@ -259,24 +257,19 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
 
 async function main() {
   const startTime = Date.now();
+  ConsoleFormatter.printHeader('Scraping Wild Encounters', 'Scraping wild encounter data from the wiki');
 
   try {
     const dataDir = path.join(process.cwd(), 'data');
     await fs.mkdir(dataDir, { recursive: true });
 
-    // OPTIMIZATION: Load Pokemon data once before scraping
-    await getOrLoadPokemonData();
-
-    // OPTIMIZATION: Scrape both modes in parallel
-    ConsoleFormatter.printSection('🚀 Scraping Both Modes in Parallel');
-
     const [classicRoutes, remixRoutes] = await Promise.all([
       (async () => {
-        ConsoleFormatter.info('🏞️ Starting Classic Mode...');
+        ConsoleFormatter.info('Scraping Classic Mode encounters...');
         return scrapeWildEncounters(WILD_ENCOUNTERS_CLASSIC_URL, false);
       })(),
       (async () => {
-        ConsoleFormatter.info('🎮 Starting Remix Mode...');
+        ConsoleFormatter.info('Scraping Remix Mode encounters...');
         return scrapeWildEncounters(WILD_ENCOUNTERS_REMIX_URL, true);
       })()
     ]);
@@ -300,24 +293,18 @@ async function main() {
     const duration = Date.now() - startTime;
 
     // Calculate totals
-    const totalRoutes = classicRoutes.length + remixRoutes.length;
-    const totalClassicEncounters = classicRoutes.reduce((sum, route) => sum + route.pokemonIds.length, 0);
-    const totalRemixEncounters = remixRoutes.reduce((sum, route) => sum + route.pokemonIds.length, 0);
-    const totalEncounters = totalClassicEncounters + totalRemixEncounters;
     const uniqueClassicPokemon = new Set(classicRoutes.flatMap(route => route.pokemonIds)).size;
     const uniqueRemixPokemon = new Set(remixRoutes.flatMap(route => route.pokemonIds)).size;
 
     // Success summary
     ConsoleFormatter.printSummary('Wild Encounters Scraping Complete!', [
-      { label: '📁 Classic data saved to', value: classicPath, color: 'cyan' },
-      { label: '📁 Remix data saved to', value: remixPath, color: 'cyan' },
-      { label: '📊 Total routes processed', value: totalRoutes, color: 'green' },
-      { label: '👾 Total encounters', value: totalEncounters, color: 'green' },
-      { label: '🌟 Unique Classic Pokemon', value: uniqueClassicPokemon, color: 'yellow' },
-      { label: '🌟 Unique Remix Pokemon', value: uniqueRemixPokemon, color: 'yellow' },
-      { label: '🗂️  Classic file size', value: ConsoleFormatter.formatFileSize(classicStats.size), color: 'cyan' },
-      { label: '🗂️  Remix file size', value: ConsoleFormatter.formatFileSize(remixStats.size), color: 'cyan' },
-      { label: '⏱️  Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
+      { label: 'Unique Classic Pokemon', value: uniqueClassicPokemon, color: 'yellow' },
+      { label: 'Classic data saved to', value: classicPath, color: 'cyan' },
+      { label: 'Classic file size', value: ConsoleFormatter.formatFileSize(classicStats.size), color: 'cyan' },
+      { label: 'Remix data saved to', value: remixPath, color: 'cyan' },
+      { label: 'Unique Remix Pokemon', value: uniqueRemixPokemon, color: 'yellow' },
+      { label: 'Remix file size', value: ConsoleFormatter.formatFileSize(remixStats.size), color: 'cyan' },
+      { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
     ]);
 
   } catch (error) {

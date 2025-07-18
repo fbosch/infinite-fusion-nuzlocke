@@ -32,6 +32,7 @@ export interface ProcessedPokemonData {
 }
 
 async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
+  ConsoleFormatter.printHeader('Fetching Pokemon Data', 'Fetching Pokemon data from PokéAPI');
   const startTime = Date.now();
 
   try {
@@ -108,10 +109,10 @@ async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
 
     // Success summary
     ConsoleFormatter.printSummary('Pokemon Data Fetch Complete!', [
-      { label: '📁 Output saved to', value: outputPath, color: 'cyan' },
-      { label: '📊 Total Pokemon', value: pokemonData.length, color: 'green' },
-      { label: '🗂️  File size', value: ConsoleFormatter.formatFileSize(fileStats.size), color: 'cyan' },
-      { label: '⏱️  Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
+      { label: 'Output saved to', value: outputPath, color: 'cyan' },
+      { label: 'Total Pokemon', value: pokemonData.length, color: 'green' },
+      { label: 'File size', value: ConsoleFormatter.formatFileSize(fileStats.size), color: 'cyan' },
+      { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
     ]);
 
     return pokemonData;
