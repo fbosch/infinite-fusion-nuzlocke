@@ -1,0 +1,173 @@
+---
+description: Rules for using icons consistently throughout the Infinite Fusion Nuzlocke tracker.
+globs: []
+alwaysApply: true
+---
+
+# Icon Usage Guidelines
+Rules for using icons consistently throughout the Infinite Fusion Nuzlocke tracker.
+
+## Icon Library Standards
+
+### Primary Icon Library
+- **Use Lucide React**: Always prefer Lucide React icons over UTF-8 symbols or other icon libraries
+- **Consistent Styling**: Use consistent sizing classes (e.g., `h-4 w-4`, `h-5 w-5`) for all icons
+- **Theme Support**: Icons automatically adapt to dark/light themes
+- **Accessibility**: Lucide icons are designed with accessibility in mind
+
+### Icon Import Pattern
+```typescript
+// Good: Import specific icons from lucide-react
+import { ChevronUp, ChevronDown, ChevronsUpDown, Sun, Moon } from 'lucide-react';
+
+// Bad: Using UTF-8 symbols
+const sortIcon = '↑'; // Don't use this
+const themeIcon = '☀️'; // Don't use this
+```
+
+## Common Icon Use Cases
+
+### Sorting and Navigation
+- **Ascending Sort**: Use `ChevronUp` instead of `↑`
+- **Descending Sort**: Use `ChevronDown` instead of `↓`
+- **Unsorted/Default**: Use `ChevronsUpDown` instead of `↕`
+- **Expand/Collapse**: Use `ChevronRight`/`ChevronDown` for accordions
+
+### Status and Actions
+- **Success**: Use `Check` or `CheckCircle`
+- **Error**: Use `X` or `AlertCircle`
+- **Warning**: Use `AlertTriangle`
+- **Info**: Use `Info`
+- **Loading**: Use `Loader2` with animation
+
+### Theme and Settings
+- **Light Mode**: Use `Sun`
+- **Dark Mode**: Use `Moon`
+- **System Theme**: Use `Monitor`
+- **Settings**: Use `Settings`
+
+### Pokemon and Game Icons
+- **Pokeball**: Use `Circle` or custom SVG if needed
+- **Health**: Use `Heart` for HP indicators
+- **Level**: Use `TrendingUp` for level indicators
+- **Type Icons**: Use custom SVG or appropriate Lucide icons
+
+## Icon Implementation Examples
+
+### Sorting Indicators
+```typescript
+// Good: Using Lucide icons for sorting
+{header.column.getIsSorted() === 'asc' ? (
+  <ChevronUp className="h-4 w-4" />
+) : header.column.getIsSorted() === 'desc' ? (
+  <ChevronDown className="h-4 w-4" />
+) : (
+  <ChevronsUpDown className="h-4 w-4" />
+)}
+
+// Bad: Using UTF-8 symbols
+{{
+  asc: '↑',
+  desc: '↓',
+}[header.column.getIsSorted() as string] ?? '↕'}
+```
+
+### Theme Toggle
+```typescript
+// Good: Using Lucide icons
+import { Sun, Moon, Monitor } from 'lucide-react';
+
+const ThemeIcon = ({ theme }: { theme: string }) => {
+  switch (theme) {
+    case 'light': return <Sun className="h-5 w-5" />;
+    case 'dark': return <Moon className="h-5 w-5" />;
+    default: return <Monitor className="h-5 w-5" />;
+  }
+};
+
+// Bad: Using UTF-8 symbols
+const themeIcon = theme === 'light' ? '☀️' : theme === 'dark' ? '🌙' : '🖥️';
+```
+
+## Icon Sizing Guidelines
+
+### Standard Sizes
+- **Small**: `h-3 w-3` (12px) - for inline text icons
+- **Medium**: `h-4 w-4` (16px) - for most UI elements
+- **Large**: `h-5 w-5` (20px) - for buttons and prominent elements
+- **Extra Large**: `h-6 w-6` (24px) - for headers and important actions
+
+### Responsive Sizing
+```typescript
+// Use responsive classes when needed
+<ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" />
+```
+
+## Accessibility Considerations
+
+### Icon Accessibility
+- **Semantic Meaning**: Choose icons that clearly represent their function
+- **Screen Readers**: Icons should be accompanied by text labels when possible
+- **Color Contrast**: Ensure icons have sufficient contrast in both themes
+- **Focus Indicators**: Icons in interactive elements should have focus states
+
+### Best Practices
+```typescript
+// Good: Icon with accessible label
+<button aria-label="Toggle theme">
+  <Sun className="h-5 w-5" />
+</button>
+
+// Good: Icon with visible text
+<div className="flex items-center space-x-2">
+  <Check className="h-4 w-4 text-green-500" />
+  <span>Successfully saved</span>
+</div>
+```
+
+## Performance Considerations
+
+### Icon Optimization
+- **Tree Shaking**: Import specific icons to enable tree shaking
+- **Bundle Size**: Lucide React is lightweight and optimized
+- **Caching**: Icons are cached efficiently by the browser
+- **Consistency**: Using one icon library reduces bundle size
+
+### Import Patterns
+```typescript
+// Good: Import only needed icons
+import { ChevronUp, ChevronDown } from 'lucide-react';
+
+// Bad: Import entire library (if available)
+import * as LucideIcons from 'lucide-react';
+```
+
+## Migration Guidelines
+
+### From UTF-8 Symbols
+1. **Identify Usage**: Find all UTF-8 symbols in the codebase
+2. **Map to Lucide**: Replace with appropriate Lucide icons
+3. **Update Styling**: Add proper sizing and theme classes
+4. **Test Accessibility**: Ensure proper screen reader support
+
+### Common Replacements
+- `↑` → `ChevronUp`
+- `↓` → `ChevronDown`
+- `↕` → `ChevronsUpDown`
+- `→` → `ArrowRight`
+- `←` → `ArrowLeft`
+- `☀️` → `Sun`
+- `🌙` → `Moon`
+- `✓` → `Check`
+- `✗` → `X`
+
+## Code Review Checklist
+
+### Icon Review Points
+- [ ] Uses Lucide React icons instead of UTF-8 symbols
+- [ ] Has appropriate sizing classes
+- [ ] Includes accessibility attributes when needed
+- [ ] Works in both light and dark themes
+- [ ] Has consistent styling with other icons
+- [ ] Uses semantic icon choices
+- [ ] Imports only necessary icons

@@ -18,6 +18,7 @@
     "data:refresh": "pnpm run pokedex && pnpm run encounters:scrape && pnpm run test:run"
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
     "@types/cli-progress": "^3.11.6",
     "cli-progress": "^3.12.0",
     "clsx": "^2.1.1",
