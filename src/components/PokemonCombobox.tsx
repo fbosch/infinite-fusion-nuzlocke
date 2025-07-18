@@ -143,7 +143,7 @@ export const PokemonCombobox = ({
   options,
   value,
   onChange,
-  placeholder = "Select Pokémon",
+  placeholder = "Select Pokemon",
   disabled = false
 }: {
   options: PokemonOption[];
@@ -189,7 +189,7 @@ export const PokemonCombobox = ({
             className={clsx(
               "w-full px-3 py-2 text-sm border rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer",
               "border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-400",
-              (value || query) && "pr-16" // Add padding for clear button
+              value && "pl-12" // Add padding for sprite when value is selected
             )}
             placeholder={placeholder}
             displayValue={(pokemon: PokemonOption | null | undefined) => pokemon?.name || ''}
@@ -206,20 +206,16 @@ export const PokemonCombobox = ({
               }
             }}
           />
-          {(value || query) && (
-            <button
-              type="button"
-              className="absolute inset-y-0 right-8 flex items-center pr-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 z-10"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onChange(null);
-                setQuery('');
-              }}
-              aria-label="Clear input"
-            >
-              <X className="h-4 w-4" />
-            </button>
+          {value && (
+            <div className="absolute inset-y-0 left-3 flex items-center">
+              <img
+                src={getPokemonSpriteUrl(value.id)}
+                alt={value.name}
+                className="w-6 h-6 object-contain object-center scale-180 antialiased"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
           )}
           <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-2">
             <Search className="h-4 w-4 text-gray-400" aria-hidden="true" />
