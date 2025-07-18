@@ -113,4 +113,47 @@ export function getAllPokemonTypes(): string[] {
   });
 
   return Array.from(typeSet).sort();
+}
+
+// Get National Pokédex number from Infinite Fusion ID
+export function getNationalDexIdFromInfiniteFusionId(infiniteFusionId: number): number | null {
+  const pokemon = getPokemonById(infiniteFusionId);
+  return pokemon?.nationalDexId || null;
+}
+
+// Get Infinite Fusion ID from National Pokédex number
+export function getInfiniteFusionIdFromNationalDexId(nationalDexId: number): number | null {
+  const pokemon = getPokemon();
+  const found = pokemon.find(p => p.nationalDexId === nationalDexId);
+  return found?.id || null;
+}
+
+// Get Pokemon by National Pokédex number
+export function getPokemonByNationalDexId(nationalDexId: number): Pokemon | null {
+  const pokemon = getPokemon();
+  return pokemon.find(p => p.nationalDexId === nationalDexId) || null;
+}
+
+// Create a map of National Pokédex ID to Infinite Fusion ID for quick lookup
+export function getNationalDexToInfiniteFusionMap(): Map<number, number> {
+  const pokemon = getPokemon();
+  const map = new Map<number, number>();
+
+  pokemon.forEach(p => {
+    map.set(p.nationalDexId, p.id);
+  });
+
+  return map;
+}
+
+// Create a map of Infinite Fusion ID to National Pokédex ID for quick lookup
+export function getInfiniteFusionToNationalDexMap(): Map<number, number> {
+  const pokemon = getPokemon();
+  const map = new Map<number, number>();
+
+  pokemon.forEach(p => {
+    map.set(p.id, p.nationalDexId);
+  });
+
+  return map;
 } 

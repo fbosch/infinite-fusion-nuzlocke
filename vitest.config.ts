@@ -4,9 +4,10 @@ import path from 'path'
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'node',
+    environment: 'happy-dom',
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    exclude: ['node_modules', 'dist', '.next']
+    exclude: ['node_modules', 'dist', '.next'],
+    setupFiles: ['./src/test/setup.ts']
   },
   resolve: {
     alias: {
