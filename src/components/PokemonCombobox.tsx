@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useMemo, useDeferredValue, startTransition, useCallback } from 'react';
+import React, { useState, useMemo, useDeferredValue, startTransition, useCallback, useEffect } from 'react';
 import { Search, Check, X, Loader2 } from 'lucide-react';
 import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption, ComboboxButton } from '@headlessui/react';
 import clsx from 'clsx';
-import { getNationalDexIdFromInfiniteFusionId } from '@/loaders/pokemon';
+import Image from 'next/image';
+import { getNationalDexIdFromInfiniteFusionId, getInfiniteFusionToNationalDexMap } from '@/loaders/pokemon';
 import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
 
 // Pokemon option type
@@ -13,11 +14,34 @@ export interface PokemonOption {
   name: string;
 }
 
+// Global cache for National Dex ID mapping
+let nationalDexMapping: Map<number, number> | null = null;
+let mappingPromise: Promise<void> | null = null;
+
+// Initialize the National Dex mapping
+export async function initializeSpriteMapping(): Promise<void> {
+  if (nationalDexMapping) {
+    return; // Already loaded
+  }
+
+  if (mappingPromise) {
+    return mappingPromise; // Already loading
+  }
+
+  mappingPromise = getInfiniteFusionToNationalDexMap().then(map => {
+    nationalDexMapping = map;
+    mappingPromise = null;
+  });
+
+  return mappingPromise;
+}
+
 // Get Pokemon sprite URL (sync version for immediate use)
 export function getPokemonSpriteUrl(pokemonId: number): string {
-  // For now, use the pokemonId directly since we can't make this async
-  // The sprite URL will still work with the Infinite Fusion ID
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png`;
+  // Use National Dex ID if mapping is available, otherwise fallback to original ID
+  const nationalDexId = nationalDexMapping?.get(pokemonId);
+  const spriteId = nationalDexId || pokemonId;
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${spriteId}.png`;
 }
 
 // Async version for when we need the actual National Dex ID
@@ -31,6 +55,8 @@ export async function getPokemonSpriteUrlAsync(pokemonId: number): Promise<strin
     return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png`;
   }
 }
+
+
 
 // Pokemon Option Component
 const PokemonOption = ({
@@ -54,12 +80,14 @@ const PokemonOption = ({
     {({ selected }) => (
       <>
         <div className={"flex items-center gap-8"}>
-          <img
+          <Image
             src={getPokemonSpriteUrl(pokemon.id)}
             alt={pokemon.name}
-            className="w-10 h-10 object-contain object-center scale-180 antialiased"
+            width={40}
+            height={40}
+            className="object-contain object-center scale-180 image-render-high-quality"
             loading="lazy"
-            decoding="async"
+            unoptimized
           />
           <span className={clsx('block truncate ', {
             'font-medium': selected,
@@ -87,39 +115,10 @@ const PokemonOption = ({
 // Pokemon Options Component
 const PokemonOptions = ({
   options,
-  isLoading,
-  error
 }: {
   options: PokemonOption[];
-  isLoading?: boolean;
-  error?: string | null;
 }) => {
-  if (isLoading) {
-    return (
-      <div className="relative cursor-default select-none px-4 py-8 text-center">
-        <div className="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span>Loading Pokemon...</span>
-        </div>
-      </div>
-    );
-  }
 
-  if (error) {
-    return (
-      <div className="relative cursor-default select-none px-4 py-2 text-red-600 dark:text-red-400">
-        Error loading Pokemon: {error}
-      </div>
-    );
-  }
-
-  if (options.length === 0) {
-    return (
-      <div className="relative cursor-default select-none px-4 py-2 text-gray-700 dark:text-gray-300">
-        No Pokemon found.
-      </div>
-    );
-  }
 
   return (
     <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
@@ -140,12 +139,14 @@ const PokemonOptions = ({
           {({ selected, active }) => (
             <>
               <div className={"flex items-center gap-8"}>
-                <img
+                <Image
                   src={getPokemonSpriteUrl(pokemon.id)}
                   alt={pokemon.name}
-                  className="w-10 h-10 object-contain object-center scale-180 antialiased"
+                  width={40}
+                  height={40}
+                  className="object-contain object-center scale-180 image-render-high-quality"
                   loading="lazy"
-                  decoding="async"
+                  unoptimized
                 />
                 <span className={clsx('block truncate', {
                   'font-medium': selected,
@@ -198,6 +199,11 @@ export const PokemonCombobox = ({
   const [error, setError] = useState<string | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [pokemonNameMap, setPokemonNameMap] = useState<Map<number, string> | null>(null);
+
+  // Initialize sprite mapping on component mount
+  useEffect(() => {
+    initializeSpriteMapping().catch(console.error);
+  }, []);
 
   // Async function to load encounter data
   const loadEncounterData = useCallback(async () => {
@@ -297,13 +303,15 @@ export const PokemonCombobox = ({
             onClick={handleInteraction}
           />
           {value && (
-            <div className="absolute inset-y-0 left-3 flex items-center">
-              <img
+            <div className="absolute inset-y-0 left-1.5 flex items-center">
+              <Image
                 src={getPokemonSpriteUrl(value.id)}
                 alt={value.name}
-                className="w-6 h-6 object-contain object-center scale-180 antialiased"
-                loading="lazy"
-                decoding="async"
+                width={40}
+                height={40}
+                className="object-center object-contain"
+                quality={70}
+                priority={true}
               />
             </div>
           )}
@@ -324,8 +332,6 @@ export const PokemonCombobox = ({
         >
           <PokemonOptions
             options={filteredOptions}
-            isLoading={isLoading}
-            error={error}
           />
         </ComboboxOptions>
       </div>

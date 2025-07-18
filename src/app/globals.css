@@ -75,3 +75,24 @@ body {
   contain-intrinsic-size: 0 500px;
   /* Adjust height as needed */
 }
+
+/* Image rendering utilities for pixel art sprites */
+.image-render-pixelated {
+  image-rendering: pixelated;
+}
+
+.image-render-crisp-edges {
+  image-rendering: crisp-edges;
+}
+
+.image-render-auto {
+  image-rendering: auto;
+}
+
+.image-render-smooth {
+  image-rendering: smooth;
+}
+
+.image-render-high-quality {
+  image-rendering: high-quality;
+}
