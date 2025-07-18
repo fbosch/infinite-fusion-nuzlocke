@@ -30,6 +30,24 @@ const defaultState: PlaythroughsState = {
 const PLAYTHROUGHS_KEY = 'playthroughs';
 const ACTIVE_PLAYTHROUGH_KEY = 'activePlaythroughId';
 
+// Helper functions
+const generatePlaythroughId = (): string => {
+  return `playthrough_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
+const getCurrentTimestamp = (): number => {
+  return Date.now();
+};
+
+// Default playthrough creation
+const createDefaultPlaythrough = (): Playthrough => ({
+  id: generatePlaythroughId(),
+  name: 'My Nuzlocke Run',
+  remixMode: false,
+  createdAt: getCurrentTimestamp(),
+  updatedAt: getCurrentTimestamp(),
+});
+
 // IndexedDB helper functions using idb-keyval
 const saveToIndexedDB = async (state: PlaythroughsState): Promise<void> => {
   if (typeof window === 'undefined') return;
@@ -71,6 +89,23 @@ const loadFromIndexedDB = async (): Promise<PlaythroughsState> => {
     // Load active playthrough ID
     const activePlaythroughId = await get(ACTIVE_PLAYTHROUGH_KEY);
 
+    // If no playthroughs exist, create a default one
+    if (playthroughs.length === 0) {
+      const defaultPlaythrough = createDefaultPlaythrough();
+      playthroughs.push(defaultPlaythrough);
+
+      const state: PlaythroughsState = {
+        playthroughs,
+        activePlaythroughId: defaultPlaythrough.id,
+      };
+
+      // Save the default playthrough to IndexedDB
+      await saveToIndexedDB(state);
+
+      const validatedState = PlaythroughsSchema.parse(state);
+      return validatedState;
+    }
+
     const state: PlaythroughsState = {
       playthroughs,
       activePlaythroughId: activePlaythroughId || undefined,
@@ -107,15 +142,6 @@ if (typeof window !== 'undefined') {
 }
 
 export { playthroughsStore };
-
-// Helper functions
-const generatePlaythroughId = (): string => {
-  return `playthrough_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-};
-
-const getCurrentTimestamp = (): number => {
-  return Date.now();
-};
 
 // Playthrough actions
 export const playthroughActions = {
@@ -234,7 +260,9 @@ export const playthroughActions = {
   resetAllPlaythroughs: () => {
     if (typeof window === 'undefined') return;
 
-    playthroughsStore.playthroughs = [];
-    playthroughsStore.activePlaythroughId = undefined;
+    // Create a new default playthrough instead of leaving empty
+    const defaultPlaythrough = createDefaultPlaythrough();
+    playthroughsStore.playthroughs = [defaultPlaythrough];
+    playthroughsStore.activePlaythroughId = defaultPlaythrough.id;
   },
 }; 

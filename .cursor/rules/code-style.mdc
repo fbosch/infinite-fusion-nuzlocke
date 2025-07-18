@@ -69,3 +69,41 @@ alwaysApply: true
 - If a function does multiple things, consider splitting it
 - If a variable name needs a comment to explain it, choose a better name
 - If you're not sure if something is clear, err on the side of being more explicit
+
+### CSS Class Management
+- **Use clsx for conditional class names**: Always use `clsx` instead of template literals for conditional CSS classes
+- **Clean conditional logic**: Use `clsx()` to combine static and conditional classes for better readability
+- **Avoid string concatenation**: Don't use template literals or string concatenation for dynamic classes
+- **Group related classes**: Use clsx to group base classes, conditional classes, and responsive classes clearly
+
+### clsx Usage Examples
+```typescript
+// Good: Using clsx with object syntax (preferred)
+className={clsx(
+  'base-class',
+  {
+    'active-class': isActive,
+    'disabled-class': isDisabled
+  }
+)}
+
+// Good: Multiple conditions with object syntax
+className={clsx(
+  'flex items-center',
+  {
+    'bg-blue-500 text-white': isActive,
+    'bg-gray-500 text-gray-900': !isActive,
+    'opacity-50 cursor-not-allowed': disabled
+  }
+)}
+
+// Bad: Using template literals
+className={`base-class ${isActive ? 'active-class' : ''} ${isDisabled ? 'disabled-class' : ''}`}
+
+// Avoid: Boolean conditions (less readable)
+className={clsx(
+  'base-class',
+  isActive && 'active-class',
+  isDisabled && 'disabled-class'
+)}
+```
