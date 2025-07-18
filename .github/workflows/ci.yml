@@ -90,7 +90,7 @@ jobs:
     - name: Run data integrity tests on fresh data
       run: |
         echo "🧪 Validating data integrity..."
-        pnpm run test:run
+        pnpm vitest run tests/data-integrity.test.ts
         
     - name: Display data summary
       run: |
