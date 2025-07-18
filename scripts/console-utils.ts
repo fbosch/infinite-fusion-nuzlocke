@@ -9,7 +9,6 @@
  * - Progress bars with ETA and status updates
  * - Loading spinners for indeterminate operations
  * - Professional summary formatting
- * - File size and duration formatting utilities
  * 
  * Usage:
  * ```typescript
@@ -23,6 +22,7 @@
  */
 
 import * as cliProgress from 'cli-progress';
+import { formatFileSize, formatDuration } from './utils/format-utils';
 
 // Simple color functions using ANSI escape codes
 export const colors = {
@@ -185,24 +185,13 @@ export class ConsoleFormatter {
    * Format file size in human readable format
    */
   static formatFileSize(bytes: number): string {
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let size = bytes;
-    let unitIndex = 0;
-
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-
-    return `${size.toFixed(1)} ${units[unitIndex]}`;
+    return formatFileSize(bytes);
   }
 
   /**
    * Format duration in human readable format
    */
   static formatDuration(ms: number): string {
-    if (ms < 1000) return `${ms}ms`;
-    if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
-    return `${(ms / 60000).toFixed(1)}m`;
+    return formatDuration(ms);
   }
 } 

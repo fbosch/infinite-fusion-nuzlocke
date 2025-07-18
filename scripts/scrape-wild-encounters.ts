@@ -4,8 +4,18 @@ import * as cheerio from 'cheerio';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import type { ProcessedPokemonData } from './fetch-pokemon-data';
 import { ConsoleFormatter } from './console-utils';
+import {
+  findPokemonId,
+  isPotentialPokemonName,
+  type PokemonNameMap
+} from './utils/pokemon-name-utils';
+import {
+  isRoutePattern,
+  processRouteName
+} from './utils/route-utils';
+import { loadPokemonNameMap, type DexEntry } from './utils/data-loading-utils';
+import type { ProcessedPokemonData } from './fetch-pokemon-data';
 
 const WILD_ENCOUNTERS_CLASSIC_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters';
 const WILD_ENCOUNTERS_REMIX_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters/Remix';
@@ -16,105 +26,13 @@ interface RouteEncounters {
   pokemonIds: number[]; // These are custom Infinite Fusion IDs
 }
 
-// Pre-compile regex patterns for better performance
-const ROUTE_PATTERN = /^(Route \d+|Viridian Forest|Secret Garden|Hidden Forest|Viridian River)/i;
-const ROUTE_ID_PATTERN = /\(ID\s+(\d+)\)/i;
-const ROUTE_CLEAN_PATTERN = /\s*\(ID\s+\d+\)\s*$/i;
 
-// Global Pokemon data cache - load once, use twice
-let globalPokemonNameToId: Map<string, number> | null = null;
 
-// Load Pokemon data once and cache it globally
-async function getOrLoadPokemonData(): Promise<Map<string, number>> {
-  if (globalPokemonNameToId) {
-    return globalPokemonNameToId;
-  }
 
-  try {
-    const dataPath = path.join(process.cwd(), 'data', 'pokemon-data.json');
-    const data = await fs.readFile(dataPath, 'utf8');
-    const pokemonArray: ProcessedPokemonData[] = JSON.parse(data);
 
-    const nameToIdMap = new Map<string, number>();
 
-    for (const pokemon of pokemonArray) {
-      // Store various name formats for matching (keep original simple approach)
-      const cleanName = pokemon.name.toLowerCase().replace(/[^a-z]/g, '');
-      nameToIdMap.set(pokemon.name, pokemon.id);
-      nameToIdMap.set(pokemon.name.toLowerCase(), pokemon.id);
-      nameToIdMap.set(cleanName, pokemon.id);
 
-      // Also handle special characters and variations
-      const variations = [
-        pokemon.name.replace(/♀/g, 'F').replace(/♂/g, 'M'),
-        pokemon.name.replace(/♀/g, '').replace(/♂/g, ''),
-        pokemon.name.replace(/\./g, ''),
-        pokemon.name.replace(/'/g, ''),
-        pokemon.name.replace(/\s+/g, '')
-      ];
 
-      variations.forEach(variation => {
-        nameToIdMap.set(variation, pokemon.id);
-        nameToIdMap.set(variation.toLowerCase(), pokemon.id);
-        nameToIdMap.set(variation.toLowerCase().replace(/[^a-z]/g, ''), pokemon.id);
-      });
-    }
-
-    globalPokemonNameToId = nameToIdMap;
-    return nameToIdMap;
-  } catch (error) {
-    ConsoleFormatter.error(`Error loading Pokemon data: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    throw error;
-  }
-}
-
-// Function to clean route names for deduplication
-function cleanRouteName(routeName: string): string {
-  return routeName.replace(ROUTE_CLEAN_PATTERN, '').trim();
-}
-
-// Function to extract route ID from text like "Route 1 (ID 78)"
-function extractRouteId(routeName: string): number | undefined {
-  const match = routeName.match(ROUTE_ID_PATTERN);
-  return match ? parseInt(match[1], 10) : undefined;
-}
-
-// Function to find Pokemon custom ID by name with fuzzy matching (keep original simple approach)
-function findPokemonId(text: string, nameToIdMap: Map<string, number>): number | null {
-  // Try different variations of the text
-  const variations = [
-    text,                                     // Original: "Pidgey"
-    text.toLowerCase(),                       // Lowercase: "pidgey"
-    text.toLowerCase().replace(/[^a-z]/g, ''), // Clean: "pidgey"
-    text.trim(),                             // Trimmed
-    text.trim().toLowerCase(),               // Trimmed lowercase
-    text.replace(/♀/g, 'F').replace(/♂/g, 'M'), // Gender symbols to letters
-    text.replace(/♀/g, '').replace(/♂/g, ''), // Remove gender symbols
-    text.replace(/\./g, ''),                 // Remove dots
-    text.replace(/'/g, ''),                  // Remove apostrophes
-    text.replace(/\s+/g, '')                 // Remove spaces
-  ];
-
-  for (const variation of variations) {
-    if (nameToIdMap.has(variation)) {
-      return nameToIdMap.get(variation)!;
-    }
-
-    // Also try lowercase version of each variation
-    const lowerVariation = variation.toLowerCase();
-    if (nameToIdMap.has(lowerVariation)) {
-      return nameToIdMap.get(lowerVariation)!;
-    }
-
-    // And clean version
-    const cleanVariation = lowerVariation.replace(/[^a-z]/g, '');
-    if (nameToIdMap.has(cleanVariation)) {
-      return nameToIdMap.get(cleanVariation)!;
-    }
-  }
-
-  return null;
-}
 
 async function scrapeWildEncounters(url: string, isRemix: boolean = false): Promise<RouteEncounters[]> {
   ConsoleFormatter.printHeader('Scraping Wild Encounters', 'Scraping wild encounter data from the wiki');
@@ -137,7 +55,7 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
     );
 
     const $ = cheerio.load(html);
-    const pokemonNameToId = await getOrLoadPokemonData(); // Use cached data
+    const pokemonNameMap = await loadPokemonNameMap(); // Use cached data
 
     // Focus on main content area
     const mainContent = $('.mw-parser-output');
@@ -159,14 +77,13 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
         progressBar.update(index, { status: `Scanning elements... (${routesProcessed} routes found)` });
       }
 
-      // Look for route patterns - use pre-compiled regex
-      if (ROUTE_PATTERN.test(fullText)) {
+      // Look for route patterns
+      if (isRoutePattern(fullText)) {
         // Make sure this isn't deeply nested content (allow some basic formatting)
         const children = $element.children();
         if (children.length <= 2) {
 
-          const cleanedRouteName = cleanRouteName(fullText);
-          const routeId = extractRouteId(fullText);
+          const { cleanName: cleanedRouteName, routeId } = processRouteName(fullText);
 
           // Skip if we've already processed this route
           if (routesSeen.has(cleanedRouteName)) {
@@ -188,8 +105,8 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
             current = current.next();
             const currentText = current.text().trim();
 
-            // Stop if we hit another route - use pre-compiled regex
-            if (ROUTE_PATTERN.test(currentText)) {
+            // Stop if we hit another route
+            if (isRoutePattern(currentText)) {
               break;
             }
 
@@ -200,21 +117,11 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
                 $(table).find('td, th').each((cellIndex: number, cell: any) => {
                   const cellText = $(cell).text().trim();
 
-                  // Skip headers and non-Pokemon content (keep original simple approach)
-                  if (cellText &&
-                    cellText.length >= 3 &&
-                    cellText.length <= 20 &&
-                    !cellText.includes('Level') &&
-                    !cellText.includes('Rate') &&
-                    !cellText.includes('%') &&
-                    !cellText.includes('Type') &&
-                    !cellText.includes('Pokémon') &&
-                    !/^\d+$/.test(cellText) &&
-                    !/^\d+-\d+$/.test(cellText) &&
-                    !/^\d+%$/.test(cellText)) {
+                  // Skip headers and non-Pokemon content
+                  if (isPotentialPokemonName(cellText)) {
 
                     // Try to find Pokemon by name (returns custom ID)
-                    const pokemonId = findPokemonId(cellText, pokemonNameToId);
+                    const pokemonId = findPokemonId(cellText, pokemonNameMap);
                     if (pokemonId) {
                       pokemonIds.add(pokemonId);
                     }
@@ -308,9 +215,6 @@ async function main() {
   } catch (error) {
     ConsoleFormatter.error(`Fatal error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     process.exit(1);
-  } finally {
-    // Clear global cache to free memory
-    globalPokemonNameToId = null;
   }
 }
 
