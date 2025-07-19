@@ -162,7 +162,6 @@ export async function getPokemonById(id: number): Promise<Pokemon | null> {
   return pokemon.find(p => p.id === id) || null;
 }
 
-
 // Get Pokemon by name
 export async function getPokemonByName(name: string): Promise<Pokemon | null> {
   const pokemon = await getPokemon();

@@ -79,17 +79,23 @@ export default function Home() {
                 </svg>
               </figure>
               <h1 className='ml-4'>
-                <span
-                  className='block text-sm sm:text-lg font-medium bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'
-                >
+                <span className='block text-sm sm:text-lg font-medium bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'>
                   Pokémon Infinite Fusion
                 </span>
                 <div className='flex items-center space-x-1'>
-                  <Sparkle className='size-4' strokeWidth={2} fill='currentColor' />
+                  <Sparkle
+                    className='size-4'
+                    strokeWidth={2}
+                    fill='currentColor'
+                  />
                   <span className='block text-lg sm:text-xl font-bold text-gray-900 dark:text-white'>
                     Nuzlocke Tracker
                   </span>
-                  <Sparkle className='size-4' strokeWidth={2} fill='currentColor' />
+                  <Sparkle
+                    className='size-4'
+                    strokeWidth={2}
+                    fill='currentColor'
+                  />
                 </div>
               </h1>
             </div>
