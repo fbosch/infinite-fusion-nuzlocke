@@ -172,9 +172,9 @@ const PokemonOptions = ({
         'scrollbar-track-transparent py-1'
       )}
     >
-      {options.map(pokemon => (
+      {options.map((pokemon, index) => (
         <ComboboxOption
-          key={pokemon.id}
+          key={`${pokemon.id}-${index}`}
           value={pokemon}
           className={({ active }) =>
             clsx(
@@ -187,7 +187,7 @@ const PokemonOptions = ({
               }
             )
           }
-          style={{ containIntrinsicSize: '0 60px' }}
+          style={{ containIntrinsicSize: '0 56px' }}
         >
           {({ selected }) => (
             <>
@@ -198,7 +198,7 @@ const PokemonOptions = ({
                   width={40}
                   height={40}
                   className='object-contain object-center scale-180 image-render-high-quality'
-                  loading='lazy'
+                  loading={index < 5 || isRoutePokemon(pokemon.id) ? 'eager' : 'lazy'}
                   unoptimized
                 />
                 <span
@@ -461,6 +461,7 @@ export const PokemonCombobox = ({
                 className='object-center object-contain'
                 quality={70}
                 priority={true}
+                loading='eager'
               />
             </div>
           )}
