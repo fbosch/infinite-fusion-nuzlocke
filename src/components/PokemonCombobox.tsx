@@ -152,7 +152,7 @@ const PokemonOptions = ({
     e.dataTransfer.effectAllowed = 'copy';
     dragActions.startDrag(pokemonName, comboboxId || '', null);
   };
-  
+
   if (options.length === 0) {
     return (
       <div className='max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent'>
@@ -508,11 +508,11 @@ export const PokemonCombobox = ({
               );
 
               if (foundPokemon) {
-                            const pokemonOption: PokemonOption = {
-              id: foundPokemon.id,
-              name: pokemonName,
-              nationalDexId: foundPokemon.nationalDexId,
-            };
+                const pokemonOption: PokemonOption = {
+                  id: foundPokemon.id,
+                  name: pokemonName,
+                  nationalDexId: foundPokemon.nationalDexId,
+                };
                 onChange(pokemonOption);
 
                 // If this is from a different combobox, clear the source

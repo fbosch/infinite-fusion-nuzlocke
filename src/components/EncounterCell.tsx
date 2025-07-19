@@ -110,4 +110,4 @@ export function EncounterCell({
       </div>
     </td>
   );
-} 
+}

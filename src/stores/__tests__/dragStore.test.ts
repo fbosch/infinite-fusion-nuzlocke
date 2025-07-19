@@ -41,7 +41,7 @@ describe('Drag Store', () => {
       nationalDexId: 25,
     };
     dragActions.startDrag('Pikachu', 'combobox-1', pokemon);
-    
+
     expect(dragStore.currentDragData).toBe('Pikachu');
     expect(dragStore.currentDragSource).toBe('combobox-1');
     expect(dragStore.currentDragValue).toEqual(pokemon);
@@ -50,10 +50,10 @@ describe('Drag Store', () => {
   it('should clear drag state', () => {
     // Set some values first
     dragActions.startDrag('Pikachu', 'combobox-1', null);
-    
+
     // Clear them
     dragActions.clearDrag();
-    
+
     expect(dragStore.currentDragData).toBeNull();
     expect(dragStore.currentDragSource).toBeNull();
     expect(dragStore.currentDragValue).toBeNull();
@@ -63,9 +63,9 @@ describe('Drag Store', () => {
     dragActions.setDragData(null);
     dragActions.setDragSource(null);
     dragActions.setDragValue(null);
-    
+
     expect(dragStore.currentDragData).toBeNull();
     expect(dragStore.currentDragSource).toBeNull();
     expect(dragStore.currentDragValue).toBeNull();
   });
-}); 
+});

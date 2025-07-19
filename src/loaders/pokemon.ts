@@ -115,14 +115,16 @@ export async function getPokemonFuseInstance(): Promise<Fuse<PokemonOption>> {
 }
 
 // Function to get evolution IDs for a specific Pokemon
-export async function getPokemonEvolutionIds(pokemonId: number): Promise<number[]> {
+export async function getPokemonEvolutionIds(
+  pokemonId: number
+): Promise<number[]> {
   const pokemon = await getPokemon();
   const targetPokemon = pokemon.find(p => p.id === pokemonId);
-  
+
   if (!targetPokemon?.evolution?.evolves_to) {
     return [];
   }
-  
+
   return targetPokemon.evolution.evolves_to.map(e => e.id);
 }
 

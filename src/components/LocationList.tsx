@@ -9,11 +9,7 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import React, { useState, useMemo, startTransition } from 'react';
-import {
-  ChevronUp,
-  ChevronDown,
-  ChevronsUpDown,
-} from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
 import { EncounterCell } from './EncounterCell';
