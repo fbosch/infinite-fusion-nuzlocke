@@ -2,7 +2,7 @@ import { z } from 'zod';
 import Fuse from 'fuse.js';
 import type { IFuseOptions } from 'fuse.js';
 
-// Pokemon option type for fuzzy search
+// Pokemon option type for search results
 export interface PokemonOption {
   id: number;
   name: string;
@@ -67,7 +67,7 @@ export const PokemonArraySchema = z.array(PokemonSchema);
 // Cache for loaded Pokemon data
 let pokemonCache: Pokemon[] | null = null;
 
-// Shared Fuse instance for fuzzy search
+// Shared Fuse instance for name-only fuzzy search (faster)
 let pokemonFuseInstance: Fuse<PokemonOption> | null = null;
 
 // Data loader for Pokemon with dynamic import
@@ -87,7 +87,7 @@ export async function getPokemon(): Promise<Pokemon[]> {
   }
 }
 
-// Get shared Fuse instance for fuzzy search
+// Get shared Fuse instance for name-only fuzzy search (faster)
 export async function getPokemonFuseInstance(): Promise<Fuse<PokemonOption>> {
   if (pokemonFuseInstance) {
     return pokemonFuseInstance;
@@ -101,7 +101,7 @@ export async function getPokemonFuseInstance(): Promise<Fuse<PokemonOption>> {
   }));
 
   const fuseOptions: IFuseOptions<PokemonOption> = {
-    keys: ['name'],
+    keys: ['name'], // Only search by name for better performance
     threshold: 0.3, // Lower threshold = more strict matching
     distance: 100, // Allow for more distance between matched characters
     includeScore: true, // Include match scores for sorting
@@ -112,6 +112,33 @@ export async function getPokemonFuseInstance(): Promise<Fuse<PokemonOption>> {
 
   pokemonFuseInstance = new Fuse(pokemonOptions, fuseOptions);
   return pokemonFuseInstance;
+}
+
+// Smart search function that handles both name and ID searches
+export async function searchPokemon(query: string): Promise<PokemonOption[]> {
+  const pokemon = await getPokemon();
+  
+  // Check if query is a number (for ID searches)
+  const isNumericQuery = /^\d+$/.test(query.trim());
+  
+  if (isNumericQuery) {
+    // Exact search for IDs - much faster than fuzzy search
+    const queryNum = parseInt(query, 10);
+    const results = pokemon
+      .filter(p => p.id === queryNum || p.nationalDexId === queryNum)
+      .map(p => ({
+        id: p.id,
+        name: p.name,
+        nationalDexId: p.nationalDexId,
+      }));
+    return results;
+  } else {
+    // Fuzzy search for names
+    const fuse = await getPokemonFuseInstance();
+    const searchResults = fuse.search(query);
+    const results = searchResults.map(result => result.item);
+    return results;
+  }
 }
 
 // Get Pokemon by ID

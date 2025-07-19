@@ -33,6 +33,7 @@ import {
   getInfiniteFusionToNationalDexMap,
   getPokemon,
   getPokemonFuseInstance,
+  searchPokemon,
   type PokemonOption,
 } from '@/loaders/pokemon';
 import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
@@ -302,8 +303,8 @@ export const PokemonCombobox = ({
     loadRouteEncounterData();
   }, [loadRouteEncounterData]);
 
-  // Fuzzy search function using shared Fuse instance
-  const performFuzzySearch = useCallback(
+  // Smart search function that handles both name and ID searches
+  const performSmartSearch = useCallback(
     async (
       searchQuery: string,
       pokemonList: PokemonOption[]
@@ -313,17 +314,16 @@ export const PokemonCombobox = ({
       }
 
       try {
-        const fuseInstance = await getPokemonFuseInstance();
-        const searchResults = fuseInstance.search(searchQuery);
-        const resultItems = searchResults.map(result => result.item);
-
+        // Use the smart search function that handles both numeric and text searches
+        const allResults = await searchPokemon(searchQuery);
+        
         // Filter results to only include Pokemon from the provided list
-        return resultItems.filter(item =>
+        return allResults.filter(item =>
           pokemonList.some(pokemon => pokemon.id === item.id)
         );
       } catch (err) {
-        console.error('Error performing fuzzy search:', err);
-        // Fallback to simple search if Fuse instance is not available
+        console.error('Error performing smart search:', err);
+        // Fallback to simple search if smart search is not available
         return pokemonList.filter(pokemon =>
           pokemon.name.toLowerCase().includes(searchQuery.toLowerCase())
         );
@@ -334,7 +334,7 @@ export const PokemonCombobox = ({
 
   const [fuzzyResults, setFuzzyResults] = useState<PokemonOption[]>([]);
 
-  // Perform fuzzy search when query changes
+  // Perform smart search when query changes
   useEffect(() => {
     if (deferredQuery === '') {
       setFuzzyResults([]);
@@ -344,36 +344,49 @@ export const PokemonCombobox = ({
     const performSearch = async () => {
       const allPokemon = await getPokemon();
       const nonRoutePokemon = allPokemon.filter(p => !isRoutePokemon(p.id));
-      const results = await performFuzzySearch(deferredQuery, nonRoutePokemon);
+      const results = await performSmartSearch(deferredQuery, nonRoutePokemon);
       startTransition(() => {
         setFuzzyResults(results);
       })
     };
 
       performSearch();
-  }, [deferredQuery, isRoutePokemon, performFuzzySearch]);
+  }, [deferredQuery, isRoutePokemon, performSmartSearch]);
 
-  // Combine route matches with fuzzy results
+  // Combine route matches with smart search results
   const finalOptions = useMemo(() => {
     if (deferredQuery === '') {
       return routeEncounterData;
     }
 
-    // For route Pokemon, use exact string matching
-    const routeMatches = routeEncounterData.filter(pokemon =>
-      pokemon.name.toLowerCase().includes(deferredQuery.toLowerCase())
-    );
+    // Check if query is numeric for route Pokemon
+    const isNumericQuery = /^\d+$/.test(deferredQuery.trim());
+    
+    let routeMatches: PokemonOption[] = [];
+    
+    if (isNumericQuery) {
+      // For numeric queries, check both ID and National Dex ID
+      const queryNum = parseInt(deferredQuery, 10);
+      routeMatches = routeEncounterData.filter(pokemon =>
+        pokemon.id === queryNum || pokemon.nationalDexId === queryNum
+      );
+    } else {
+      // For text queries, use name matching
+      routeMatches = routeEncounterData.filter(pokemon =>
+        pokemon.name.toLowerCase().includes(deferredQuery.toLowerCase())
+      );
+    }
 
-    // Combine results: route matches first, then fuzzy results
+    // Combine results: route matches first, then smart search results
     const allResults = [...routeMatches, ...fuzzyResults];
 
-    // Sort: route Pokemon first, then by fuzzy search relevance
+    // Sort: route Pokemon first, then by search relevance
     return allResults.sort((a, b) => {
       // First prioritize route Pokemon
       if (isRoutePokemon(a.id) && !isRoutePokemon(b.id)) return -1;
       if (!isRoutePokemon(a.id) && isRoutePokemon(b.id)) return 1;
 
-      // For non-route Pokemon, maintain fuzzy search order (already sorted by relevance)
+      // For non-route Pokemon, maintain search order (already sorted by relevance)
       return 0;
     });
   }, [routeEncounterData, fuzzyResults, deferredQuery, isRoutePokemon]);
