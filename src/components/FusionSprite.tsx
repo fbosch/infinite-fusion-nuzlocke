@@ -45,6 +45,7 @@ export function FusionSprite({
   className 
 }: FusionSpriteProps) {
   const imageRef = useRef<HTMLImageElement>(null);
+  const shadowRef = useRef<HTMLDivElement>(null);
   const hoverRef = useRef<boolean>(false);
   const { head, body, isFusion } = encounterData;
   
@@ -79,17 +80,33 @@ export function FusionSprite({
      if (imageRef.current) {
        // Cancel any running animations so the new one will replay
        imageRef.current.getAnimations().forEach(anim => anim.cancel());
+       if (shadowRef.current) {
+         shadowRef.current.getAnimations().forEach(anim => anim.cancel());
+       }
+       
        const animateSprite = () => {
          const animation = imageRef.current?.animate([
            { transform: 'translateY(0px)' },
            { transform: 'translateY(-4px)' },
            { transform: 'translateY(0px)' },
          ], {
-           duration: 250,
+           duration: 300,
            easing: 'linear',
            playbackRate: 1,
            iterations: 1,
          });
+         
+         const shadowAnimation = shadowRef.current?.animate([
+           { transform: 'translateY(-40%) translateX(-50%) scale(1)' },
+           { transform: 'translateY(-38%) translateX(-50%) scale(1.03)' },
+           { transform: 'translateY(-40%) translateX(-50%) scale(1)' },
+         ], {
+           duration: 300,
+           easing: 'linear',
+           playbackRate: 1,
+           iterations: 1,
+         });
+         
          if (animation) {
            animation.onfinish = () => {
              if (hoverRef.current) {
@@ -105,6 +122,8 @@ export function FusionSprite({
     onMouseLeave={() => {
       hoverRef.current = false;
       const animation = imageRef.current?.getAnimations();
+      const shadowAnimation = shadowRef.current?.getAnimations();
+      
       if (animation) {
         animation.forEach(a => { 
             if (a.playState === 'running') {
@@ -112,19 +131,29 @@ export function FusionSprite({
             }
         });
       }
+      
+      if (shadowAnimation) {
+        shadowAnimation.forEach(a => { 
+            if (a.playState === 'running') {
+              a.updatePlaybackRate(-1);
+            }
+        });
+      }
     }}
     >
-      <div className='relative'>
+      <div className='relative w-full flex justify-center'>
           <div 
+            ref={shadowRef}
             className='absolute opacity-60'
             style={{ 
               width: spriteSize * 0.6, 
               height: spriteSize * 0.3,
               borderRadius: '50%',
-              bottom: -spriteSize * 0.1,
-              left: spriteSize * 0.2,
-              transform: 'translateY(-40%) translateX(%)',
-              background: 'radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 70%, transparent 100%)'
+              bottom: -spriteSize * 0.18,
+              left: '50%',
+              transformOrigin: 'center',
+              transform: 'translateY(-40%) translateX(-50%)',
+              background: 'radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)'
             }}
           />
         {/* Sprite positioned above the shadow */}
