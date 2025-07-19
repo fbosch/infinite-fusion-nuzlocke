@@ -230,18 +230,16 @@ export function FusionSprite({
         </div>
       </a>
       {nicknameText && (
-        <div className='mt-4 text-center absolute bottom-0 translate-y-7'>
+        <div className='mt-4 text-center absolute bottom-0 translate-y-9'>
+          {/*
+            Use a subtle background and gentle shadow for readability on light mode
+            while preserving a clean look in dark mode. Avoid heavy pixel-style
+            outlines that looked too harsh against the light background.
+          */}
           <span
-            className='text-sm font-mono text-black dark:text-white truncate max-w-full block tracking-wide'
+            className='text-sm font-mono truncate max-w-full block tracking-wide px-1 rounded text-gray-900 dark:text-white bg-white/80 dark:bg-transparent'
             style={{
-              textShadow: `
-              2px 2px 0 #000,
-              1px 1px 0 #000,
-              0 1px 0 #000,
-              1px 0 0 #000,
-              2px 0 0 #000,
-              0 2px 0 #000
-            `,
+              textShadow: '0 1px 1px rgba(0,0,0,0.15)',
             }}
           >
             {nicknameText}
