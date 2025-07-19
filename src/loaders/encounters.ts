@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { getStarterPokemonByGameMode } from './starters';
 
 // Zod schema for route encounter data
 export const RouteEncounterSchema = z.object({
@@ -61,6 +62,13 @@ export async function getEncountersByRouteId(
   routeId: number | null | undefined,
   gameMode: 'classic' | 'remix' = 'classic'
 ): Promise<RouteEncounter | null> {
+  if (routeId === 0) {
+    return {
+      routeName: 'Starter',
+      pokemonIds: await getStarterPokemonByGameMode(gameMode),
+      routeId: 0,
+    };
+  }
   const encounters =
     gameMode === 'classic'
       ? await getClassicEncounters()

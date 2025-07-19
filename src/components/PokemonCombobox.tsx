@@ -264,6 +264,7 @@ export const PokemonCombobox = ({
   // Predicate function to check if a Pokemon is in the current route
   const isRoutePokemon = useCallback(
     (pokemonId: number): boolean => {
+      if (routeId === 0)  return false 
       return routeEncounterData.some(pokemon => pokemon.id === pokemonId);
     },
     [routeEncounterData]
