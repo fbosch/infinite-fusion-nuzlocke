@@ -9,7 +9,7 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import React, { useState, useMemo, startTransition, useCallback } from 'react';
-import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronsUpDown, X } from 'lucide-react';
 import clsx from 'clsx';
 import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
@@ -83,6 +83,37 @@ export default function LocationList() {
       enableSorting: false,
       size: 700, // Increased width for fusion comboboxes
     }),
+    columnHelper.display({
+      id: 'reset',
+      header: '',
+      enableSorting: false,
+      cell: props => {
+        const routeId = props.row.original.routeId;
+        const hasEncounter = encounters[routeId] && (
+          encounters[routeId].head || encounters[routeId].body
+        );
+        
+        return (
+          <button
+            type='button'
+            onClick={() => handleResetEncounter(routeId)}
+            disabled={!hasEncounter}
+            className={clsx(
+              'size-8 flex items-center justify-center rounded-md transition-colors cursor-pointer',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2',
+              'disabled:opacity-30 disabled:cursor-not-allowed',
+              'text-gray-400 hover:text-red-600 hover:bg-red-50',
+              'dark:text-gray-500 dark:hover:text-red-400 dark:hover:bg-red-900/20'
+            )}
+            aria-label={`Reset encounter for ${props.row.original.name}`}
+            title='Reset encounter'
+          >
+            <X className='size-4' />
+          </button>
+        );
+      },
+      size: 60, // Width for reset column
+    }),
   ], [encounters]);
 
   const table = useReactTable({
@@ -96,6 +127,15 @@ export default function LocationList() {
     getSortedRowModel: getSortedRowModel(),
     enableSorting: true,
   });
+
+  // Reset encounter handler
+  const handleResetEncounter = (routeId: number) => {
+    setEncounters(prev => {
+      const newEncounters = { ...prev };
+      delete newEncounters[routeId];
+      return newEncounters;
+    });
+  };
 
   // Optimized encounter selection handler for immediate response
   const handleEncounterSelect = (
