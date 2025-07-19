@@ -1,6 +1,6 @@
 import { proxy, subscribe } from 'valtio';
 import { z } from 'zod';
-import { get, set, del, keys } from 'idb-keyval';
+import { get, set, del } from 'idb-keyval';
 
 // Zod schema for a single playthrough
 export const PlaythroughSchema = z.object({
@@ -121,7 +121,7 @@ const loadFromIndexedDB = async (): Promise<PlaythroughsState> => {
 };
 
 // Create the playthroughs store with proper SSR handling
-let playthroughsStore: any;
+let playthroughsStore: PlaythroughsState;
 
 if (typeof window !== 'undefined') {
   // Client-side: Initialize with default state first, then load from IndexedDB

@@ -11,6 +11,8 @@
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "validate": "pnpm format:check && pnpm lint",
+    "validate:fix": "pnpm format && pnpm lint:fix",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",

@@ -1,0 +1,310 @@
+# Code Quality and Linting Rules
+
+## Prettier Integration
+
+### Formatting Standards
+
+- **Always use Prettier for code formatting**
+- **Format on save is enabled**
+- **Use single quotes for strings**
+- **Use semicolons at the end of statements**
+- **Maximum line width: 80 characters**
+- **2 spaces for indentation**
+- **Use trailing commas in objects and arrays**
+- **JSX single quotes for attributes**
+
+### Prettier Configuration
+
+```json
+{
+  "semi": true,
+  "trailingComma": "es5",
+  "singleQuote": true,
+  "printWidth": 80,
+  "tabWidth": 2,
+  "useTabs": false,
+  "bracketSpacing": true,
+  "bracketSameLine": false,
+  "arrowParens": "avoid",
+  "endOfLine": "lf",
+  "quoteProps": "as-needed",
+  "jsxSingleQuote": true,
+  "proseWrap": "preserve"
+}
+```
+
+## ESLint Integration
+
+### Linting Standards
+
+- **Run ESLint on save**
+- **Show ESLint errors and warnings in real-time**
+- **Auto-fix ESLint issues when possible**
+- **Follow TypeScript strict mode rules**
+- **Follow React best practices**
+- **Follow Next.js conventions**
+
+### ESLint Configuration
+
+- Uses `eslint-config-prettier` to disable ESLint rules that conflict with Prettier
+- Uses `eslint-plugin-prettier` for Prettier integration
+- Extends Next.js core web vitals and TypeScript rules
+- Enforces Prettier formatting as ESLint errors
+- Prevents conflicts between ESLint and Prettier formatting rules
+
+## Validation Commands
+
+### Automated Validation
+
+```bash
+# Check both formatting and linting
+pnpm validate
+
+# Fix formatting and auto-fix linting issues
+pnpm validate:fix
+
+# Individual commands
+pnpm format:check  # Check Prettier formatting
+pnpm format        # Format with Prettier
+pnpm lint          # Run ESLint
+pnpm lint:fix      # Auto-fix ESLint issues
+```
+
+### Pre-commit Integration
+
+- Pre-commit hooks run `pnpm validate` before commits
+- Prevents commits with code quality issues
+- Provides helpful error messages and fix suggestions
+
+## Code Style Guidelines
+
+### General Principles
+
+- Write clean, readable, and maintainable code
+- Follow the principle of least surprise
+- Prefer simplicity over cleverness
+- Write code for humans, not just machines
+- Use meaningful variable and function names
+
+### Naming Conventions
+
+- Use descriptive names that explain what the code does
+- Follow established conventions for the language/framework
+- Avoid abbreviations unless they're widely understood
+- Use consistent casing patterns throughout the codebase
+- Choose names that make the code self-documenting
+
+### Code Structure
+
+- Keep functions and methods focused on a single responsibility
+- Limit function length to what can be understood at a glance
+- Use early returns to reduce nesting
+- Group related code together
+- Separate concerns appropriately
+
+### Comments and Documentation
+
+- **Comments should only be included when complexity necessitates them**
+- **Prefer self-documenting code over comments**
+- **When comments are needed, explain the "why" not the "what"**
+- **Keep comments up to date with code changes**
+- **Use comments for business logic, edge cases, and non-obvious decisions**
+
+## TypeScript Guidelines
+
+### Type Safety
+
+- Use strict TypeScript configuration
+- Prefer explicit types over `any`
+- Use proper type annotations for function parameters and return types
+- Leverage TypeScript's type inference where appropriate
+- Use interfaces for object shapes and types for unions/primitives
+
+### Type Validation
+
+- Use Zod for runtime type validation
+- Validate data on load and before saving
+- Handle type errors gracefully
+- Provide meaningful error messages for validation failures
+
+## React Guidelines
+
+### Component Standards
+
+- Use functional components with hooks
+- Prefer composition over inheritance
+- Use proper prop types and interfaces
+- Keep components focused and reusable
+- Use React.memo for performance optimization when needed
+
+### State Management
+
+- Use Valtio for global state management
+- Keep state minimal and normalized
+- Use proper error boundaries
+- Handle loading and error states gracefully
+
+## CSS Class Management
+
+### Tailwind CSS Guidelines
+
+- **Use clsx for conditional class names**
+- **Avoid template literals for dynamic classes**
+- **Group related classes clearly**
+- **Use Tailwind CSS utility classes consistently**
+
+### clsx Usage Examples
+
+```typescript
+// Good: Using clsx with object syntax (preferred)
+className={clsx(
+  'base-class',
+  {
+    'active-class': isActive,
+    'disabled-class': isDisabled
+  }
+)}
+
+// Good: Multiple conditions with object syntax
+className={clsx(
+  'flex items-center',
+  {
+    'bg-blue-500 text-white': isActive,
+    'bg-gray-500 text-gray-900': !isActive,
+    'opacity-50 cursor-not-allowed': disabled
+  }
+)}
+
+// Bad: Using template literals
+className={`base-class ${isActive ? 'active-class' : ''} ${isDisabled ? 'disabled-class' : ''}`}
+```
+
+## Testing Guidelines
+
+### Test Standards
+
+- Write unit tests for utility functions
+- Test both success and error cases
+- Use descriptive test names
+- Mock external dependencies appropriately
+- Test edge cases and boundary conditions
+
+### Test Organization
+
+- Place test files alongside source files or in `tests/` directory
+- Use `.test.ts` or `.spec.ts` extensions
+- Follow the same directory structure as source files
+- Group related tests in describe blocks
+
+## Git Workflow
+
+### Commit Standards
+
+- Use conventional commit messages
+- Keep commits focused and atomic
+- Run validation before committing: `pnpm validate`
+- Fix linting issues before committing
+
+### Pre-commit Hooks
+
+- Automatically run `pnpm validate` before commits
+- Prevent commits with code quality issues
+- Provide helpful error messages and fix suggestions
+
+## IDE Configuration
+
+### Editor Setup
+
+- Enable format on save
+- Enable ESLint on save
+- Show Prettier errors in the editor
+- Use the project's Prettier and ESLint configurations
+- Configure TypeScript strict mode
+
+### VS Code Extensions
+
+- Prettier - Code formatter
+- ESLint
+- TypeScript and JavaScript Language Features
+
+## Error Handling
+
+### Validation Errors
+
+- Implement proper error boundaries
+- Use try-catch for data operations
+- Provide meaningful error messages
+- Log errors appropriately for debugging
+- Handle edge cases gracefully
+
+### Linting Errors
+
+- Fix auto-fixable issues automatically
+- Manually fix issues that can't be auto-fixed
+- Use `pnpm lint:fix` for quick fixes
+- Review and understand all linting warnings
+
+## Performance Considerations
+
+### Code Quality Impact
+
+- Lazy load large datasets
+- Implement virtual scrolling for long lists
+- Cache frequently accessed data
+- Optimize re-renders with React.memo
+- Use web workers for heavy calculations
+
+### Validation Performance
+
+- ESLint and Prettier are fast and efficient
+- Validation runs quickly on save
+- Pre-commit hooks don't significantly slow down workflow
+
+## Common Issues and Solutions
+
+### Formatting Conflicts
+
+- Run `pnpm format` to resolve Prettier conflicts
+- Use `pnpm validate:fix` for automatic fixes
+- Check `.prettierignore` for excluded files
+
+### Linting Errors
+
+- Use `pnpm lint:fix` for auto-fixable issues
+- Manually fix issues that can't be auto-fixed
+- Review ESLint configuration for rule customization
+
+### TypeScript Errors
+
+- Fix type issues manually
+- Use proper type annotations
+- Leverage TypeScript's type inference
+- Use Zod for runtime validation
+
+## Best Practices
+
+### Before Committing
+
+1. Run `pnpm validate` to check code quality
+2. Fix any issues found by the validation
+3. Use `pnpm validate:fix` to automatically fix many issues
+4. Manually fix any remaining issues that can't be auto-fixed
+
+### During Development
+
+- Use your editor's Prettier and ESLint extensions for real-time feedback
+- Configure your editor to format on save
+- Run validation before pushing code
+
+### Code Review
+
+- Review for readability and maintainability
+- Check that the code follows established patterns
+- Ensure error handling is appropriate
+- Verify that the code solves the intended problem
+- Look for opportunities to simplify or improve
+  description:
+  globs:
+  alwaysApply: false
+
+---

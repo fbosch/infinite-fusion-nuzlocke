@@ -29,9 +29,7 @@ import {
 } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
-import Fuse from 'fuse.js';
 import {
-  getNationalDexIdFromInfiniteFusionId,
   getInfiniteFusionToNationalDexMap,
   getPokemon,
   getPokemonFuseInstance,
@@ -148,7 +146,9 @@ const PokemonOptions = ({
           <div className='text-gray-500 dark:text-gray-400'>
             {query ? (
               <>
-                <p className='text-sm'>No Pokemon found for "{query}"</p>
+                <p className='text-sm'>
+                  No Pokemon found for &quot;{query}&quot;
+                </p>
                 <p className='text-xs mt-1'>Try a different search term</p>
               </>
             ) : (
@@ -172,7 +172,7 @@ const PokemonOptions = ({
         <ComboboxOption
           key={pokemon.id}
           value={pokemon}
-          className={({ active, selected }) =>
+          className={({ active }) =>
             clsx(
               'relative cursor-pointer select-none py-2 px-4 content-visibility-auto',
               'rounded-md mx-2',
@@ -257,7 +257,6 @@ export const PokemonCombobox = ({
   );
   const [allPokemonData, setAllPokemonData] = useState<PokemonOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Track what data has been loaded
   const [hasLoadedRouteData, setHasLoadedRouteData] = useState(false);
@@ -281,7 +280,6 @@ export const PokemonCombobox = ({
     if (!shouldLoadRouteData) return;
 
     setIsLoading(true);
-    setError(null);
 
     try {
       // Load Pokemon data, name map, and encounter data in parallel
@@ -302,14 +300,9 @@ export const PokemonCombobox = ({
         });
 
         setRouteEncounterData(pokemonOptions);
-      } else {
-        setError('No encounters found for this route');
       }
     } catch (err) {
       console.error(`Error loading encounter data for route ${routeId}:`, err);
-      setError(
-        err instanceof Error ? err.message : 'Failed to load Pokemon data'
-      );
     } finally {
       setIsLoading(false);
       setHasLoadedRouteData(true);
@@ -321,7 +314,6 @@ export const PokemonCombobox = ({
     if (!shouldLoadAllPokemon) return;
 
     setIsLoading(true);
-    setError(null);
 
     try {
       const allPokemon = await getPokemon();
@@ -334,9 +326,6 @@ export const PokemonCombobox = ({
       setAllPokemonData(pokemonOptions);
     } catch (err) {
       console.error('Error loading all Pokemon data:', err);
-      setError(
-        err instanceof Error ? err.message : 'Failed to load Pokemon data'
-      );
     } finally {
       setIsLoading(false);
       setHasLoadedAllPokemon(true);
