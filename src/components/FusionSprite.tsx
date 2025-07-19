@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef} from 'react';
 import Image from 'next/image';
 import type { PokemonOption } from '@/loaders/pokemon';
 import clsx from 'clsx';
@@ -44,6 +44,8 @@ export function FusionSprite({
   size = 'md',
   className 
 }: FusionSpriteProps) {
+  const imageRef = useRef<HTMLImageElement>(null);
+  const hoverRef = useRef<boolean>(false);
   const { head, body, isFusion } = encounterData;
   
   if (!head && !body) return null;
@@ -70,9 +72,50 @@ export function FusionSprite({
   }, [head,body])
   
   return (
-    <a href={link} target='_blank' rel='noopener noreferrer' className='cursor-help' draggable={false} title='Open Pokedex'>
+    <a href={link} target='_blank' rel='noopener noreferrer' className='cursor-help' draggable={false} title='Open Pokedex'
+    
+    onMouseEnter={() => {
+      hoverRef.current = true;
+     if (imageRef.current) {
+       // Cancel any running animations so the new one will replay
+       imageRef.current.getAnimations().forEach(anim => anim.cancel());
+       const animateSprite = () => {
+         const animation = imageRef.current?.animate([
+           { transform: 'translateY(0px)' },
+           { transform: 'translateY(-4px)' },
+           { transform: 'translateY(0px)' },
+         ], {
+           duration: 250,
+           easing: 'linear',
+           playbackRate: 1,
+           iterations: 1,
+         });
+         if (animation) {
+           animation.onfinish = () => {
+             if (hoverRef.current) {
+               animateSprite();
+             }
+           };
+         }
+       };
+       animateSprite();
+     }
+      
+    }}
+    onMouseLeave={() => {
+      console.log('stop animation')
+      hoverRef.current = false;
+      const animation = imageRef.current?.getAnimations();
+      if (animation) {
+        animation.forEach(a => { 
+            if (a.playState === 'running') {
+              a.updatePlaybackRate(-1);
+            }
+        });
+      }
+    }}
+    >
       <div className='relative'>
-                  {/* Oval shadow at the bottom of the sprite */}
           <div 
             className='absolute opacity-60'
             style={{ 
@@ -88,6 +131,7 @@ export function FusionSprite({
         {/* Sprite positioned above the shadow */}
         <div className='relative z-10'>
           <Image
+            ref={imageRef}
             src={spriteUrl}
             alt={altText}
             width={spriteSize}
