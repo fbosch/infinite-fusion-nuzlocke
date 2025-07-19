@@ -665,7 +665,7 @@ export const PokemonCombobox = ({
                 height={40}
                 className={clsx(
                   'object-center object-contain cursor-grab active:cursor-grabbing',
-                  dragPreview && 'opacity-60' // Make preview sprite opaque
+                  dragPreview && 'opacity-60 pointer-none' // Make preview sprite opaque
                 )}
                 quality={70}
                 priority={true}

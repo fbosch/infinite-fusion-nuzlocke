@@ -23,11 +23,11 @@ function getSpriteUrl(head: PokemonOption | null, body: PokemonOption | null, is
   const pokemon = head || body;
   if (!pokemon) return '';
   
-  if (!isFusion || !body) {
+  if (!isFusion || !body || !head) {
     return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
   }
   
-  return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${head!.nationalDexId}.${body.nationalDexId}.png`;
+  return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${head.nationalDexId}.${body.nationalDexId}.png`;
 }
 
 function getAltText(head: PokemonOption | null, body: PokemonOption | null, isFusion: boolean): string {
@@ -35,8 +35,8 @@ function getAltText(head: PokemonOption | null, body: PokemonOption | null, isFu
   if (!pokemon) return '';
   
   if (!isFusion) return pokemon.name;
-  if (!body) return `${pokemon.name} (fusion preview)`;
-  return `${head!.name}/${body.name} fusion`;
+  if (!body || !head) return `${pokemon.name} (fusion preview)`;
+  return `${head.name}/${body.name} fusion`;
 }
 
 export function PokemonSprite({ 

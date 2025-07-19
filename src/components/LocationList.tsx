@@ -10,6 +10,7 @@ import {
 } from '@tanstack/react-table';
 import React, { useState, useMemo, startTransition } from 'react';
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import clsx from 'clsx';
 import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
 import { EncounterCell } from './EncounterCell';
@@ -56,6 +57,7 @@ export default function LocationList() {
     columnHelper.display({
       id: 'sprite',
       header: '',
+      enableSorting: false,
       cell: props => {
         const routeId = props.row.original.routeId;
         const encounterData = encounters[routeId] || {
@@ -203,7 +205,10 @@ export default function LocationList() {
                 return (
                   <th
                     key={header.id}
-                    className='px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset'
+                    className={clsx(
+                      'px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset',
+                      header.column.getCanSort() && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
+                    )}
                     style={{
                       width: `${header.column.getSize()}px`,
                       minWidth: `${header.column.getSize()}px`,
