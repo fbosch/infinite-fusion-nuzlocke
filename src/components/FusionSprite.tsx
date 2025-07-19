@@ -70,7 +70,7 @@ export function FusionSprite({
   }, [head,body])
   
   return (
-    <a href={link} target='_blank' rel='noopener noreferrer' className='cursor-help' draggable={false}>
+    <a href={link} target='_blank' rel='noopener noreferrer' className='cursor-help' draggable={false} title='Open Pokedex'>
     <Image
       src={spriteUrl}
       alt={altText}
@@ -80,6 +80,12 @@ export function FusionSprite({
       loading='eager'
       unoptimized
       draggable={false}
+      onError={(e) => {
+        const target = e.target as HTMLImageElement;
+        if (head && body) {
+          target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.nationalDexId}.${body.nationalDexId}.png`
+        }
+      }}
     /></a>
   );
 } 
