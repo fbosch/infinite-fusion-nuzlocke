@@ -12,7 +12,8 @@ import React, { useState, useMemo, startTransition } from 'react';
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
-import { PokemonCombobox, type PokemonOption } from './PokemonCombobox';
+import { PokemonCombobox } from './PokemonCombobox';
+import type { PokemonOption } from '@/loaders/pokemon';
 
 const columnHelper = createColumnHelper<Location>();
 

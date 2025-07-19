@@ -1,4 +1,13 @@
 import { z } from 'zod';
+import Fuse from 'fuse.js';
+import type { IFuseOptions } from 'fuse.js';
+
+// Pokemon option type for fuzzy search
+export interface PokemonOption {
+  id: number;
+  name: string;
+  nationalDexId: number;
+}
 
 // Zod schema for Pokemon type
 export const PokemonTypeSchema = z.object({
@@ -53,6 +62,9 @@ export const PokemonArraySchema = z.array(PokemonSchema);
 // Cache for loaded Pokemon data
 let pokemonCache: Pokemon[] | null = null;
 
+// Shared Fuse instance for fuzzy search
+let pokemonFuseInstance: Fuse<PokemonOption> | null = null;
+
 // Data loader for Pokemon with dynamic import
 export async function getPokemon(): Promise<Pokemon[]> {
   if (pokemonCache) {
@@ -68,6 +80,33 @@ export async function getPokemon(): Promise<Pokemon[]> {
     console.error('Failed to validate Pokemon data:', error);
     throw new Error('Invalid Pokemon data format');
   }
+}
+
+// Get shared Fuse instance for fuzzy search
+export async function getPokemonFuseInstance(): Promise<Fuse<PokemonOption>> {
+  if (pokemonFuseInstance) {
+    return pokemonFuseInstance;
+  }
+
+  const pokemon = await getPokemon();
+  const pokemonOptions: PokemonOption[] = pokemon.map(p => ({
+    id: p.id,
+    name: p.name,
+    nationalDexId: p.nationalDexId,
+  }));
+
+  const fuseOptions: IFuseOptions<PokemonOption> = {
+    keys: ['name'],
+    threshold: 0.3, // Lower threshold = more strict matching
+    distance: 100, // Allow for more distance between matched characters
+    includeScore: true, // Include match scores for sorting
+    minMatchCharLength: 2, // Minimum characters that must match
+    shouldSort: true, // Sort by relevance
+    findAllMatches: true, // Find all matches, not just the first
+  };
+
+  pokemonFuseInstance = new Fuse(pokemonOptions, fuseOptions);
+  return pokemonFuseInstance;
 }
 
 // Get Pokemon by ID

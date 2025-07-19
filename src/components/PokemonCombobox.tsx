@@ -1,18 +1,24 @@
 'use client';
 
+/**
+ * PokemonCombobox Component
+ * 
+ * IMPORTANT RULE: Always use National Dex IDs for sprite URLs, never fall back to Infinite Fusion IDs.
+ * Infinite Fusion IDs and National Dex IDs are different and using the wrong one will result in
+ * incorrect sprite URLs (e.g., showing wrong Pokemon sprites).
+ * 
+ * - Infinite Fusion ID: Used for game logic and data storage
+ * - National Dex ID: Used for sprite URLs and external API calls
+ */
+
 import React, { useState, useMemo, useDeferredValue, startTransition, useCallback, useEffect } from 'react';
 import { Search, Check, X, Loader2 } from 'lucide-react';
 import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption, ComboboxButton } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
-import { getNationalDexIdFromInfiniteFusionId, getInfiniteFusionToNationalDexMap } from '@/loaders/pokemon';
+import Fuse from 'fuse.js';
+import { getNationalDexIdFromInfiniteFusionId, getInfiniteFusionToNationalDexMap, getPokemon, getPokemonFuseInstance, type PokemonOption } from '@/loaders/pokemon';
 import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
-
-// Pokemon option type
-export interface PokemonOption {
-  id: number;
-  name: string;
-}
 
 // Global cache for National Dex ID mapping
 let nationalDexMapping: Map<number, number> | null = null;
@@ -36,33 +42,29 @@ export async function initializeSpriteMapping(): Promise<void> {
   return mappingPromise;
 }
 
-// Get Pokemon sprite URL (sync version for immediate use)
-export function getPokemonSpriteUrl(pokemonId: number): string {
-  // Use National Dex ID if mapping is available, otherwise fallback to original ID
-  const nationalDexId = nationalDexMapping?.get(pokemonId);
-  const spriteId = nationalDexId || pokemonId;
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${spriteId}.png`;
+
+
+// Get Pokemon sprite URL from PokemonOption
+export function getPokemonSpriteUrlFromOption(pokemon: PokemonOption): string {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
 }
 
 // Async version for when we need the actual National Dex ID
 export async function getPokemonSpriteUrlAsync(pokemonId: number): Promise<string> {
-  try {
-    const nationalDexId = await getNationalDexIdFromInfiniteFusionId(pokemonId);
-    const spriteId = nationalDexId || pokemonId; // Fallback to original ID if conversion fails
-    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${spriteId}.png`;
-  } catch (error) {
-    console.error('Error getting National Dex ID:', error);
-    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png`;
-  }
+  const nationalDexId = await getNationalDexIdFromInfiniteFusionId(pokemonId);
+  const spriteId = nationalDexId; // Fallback to original ID if conversion fails
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${spriteId}.png`;
 }
 
 // Pokemon Option Component
 const PokemonOption = ({
   pokemon,
   selected,
+  isRoutePokemon,
 }: {
   pokemon: PokemonOption;
   selected: boolean;
+  isRoutePokemon: boolean;
 }) => (
   <ComboboxOption
     value={pokemon}
@@ -79,7 +81,7 @@ const PokemonOption = ({
       <>
         <div className={"flex items-center gap-8"}>
           <Image
-            src={getPokemonSpriteUrl(pokemon.id)}
+            src={getPokemonSpriteUrlFromOption(pokemon)}
             alt={pokemon.name}
             width={40}
             height={40}
@@ -93,6 +95,11 @@ const PokemonOption = ({
           })}>
             {pokemon.name}
           </span>
+          {isRoutePokemon && (
+            <span className="ml-auto text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">
+              Route
+            </span>
+          )}
         </div>
         {selected ? (
           <span
@@ -113,8 +120,10 @@ const PokemonOption = ({
 // Pokemon Options Component
 const PokemonOptions = ({
   options,
+  isRoutePokemonPredicate,
 }: {
   options: PokemonOption[];
+  isRoutePokemonPredicate: (pokemonId: number) => boolean;
 }) => {
   return (
     <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
@@ -136,7 +145,7 @@ const PokemonOptions = ({
             <>
               <div className={"flex items-center gap-8"}>
                 <Image
-                  src={getPokemonSpriteUrl(pokemon.id)}
+                  src={getPokemonSpriteUrlFromOption(pokemon)}
                   alt={pokemon.name}
                   width={40}
                   height={40}
@@ -150,6 +159,11 @@ const PokemonOptions = ({
                 })}>
                   {pokemon.name}
                 </span>
+                {isRoutePokemonPredicate(pokemon.id) && (
+                  <span className="ml-auto text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">
+                    Route
+                  </span>
+                )}
               </div>
               {selected ? (
                 <span
@@ -189,38 +203,52 @@ export const PokemonCombobox = ({
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
 
-  // Simplified state - only track what's necessary
-  const [encounterData, setEncounterData] = useState<PokemonOption[]>([]);
+  // State for route encounters and all Pokemon
+  const [routeEncounterData, setRouteEncounterData] = useState<PokemonOption[]>([]);
+  const [allPokemonData, setAllPokemonData] = useState<PokemonOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Computed values instead of stored state
-  const hasLoaded = encounterData.length > 0;
-  const shouldLoad = routeId && !hasLoaded && !isLoading;
+  // Track what data has been loaded
+  const [hasLoadedRouteData, setHasLoadedRouteData] = useState(false);
+  const [hasLoadedAllPokemon, setHasLoadedAllPokemon] = useState(false);
 
-  // Async function to load encounter data
-  const loadEncounterData = useCallback(async () => {
-    if (!shouldLoad) return;
+  // Computed values
+  const shouldLoadRouteData = routeId && !hasLoadedRouteData && !isLoading;
+  const shouldLoadAllPokemon = deferredQuery !== '' && !hasLoadedAllPokemon && !isLoading;
+
+  // Predicate function to check if a Pokemon is in the current route
+  const isRoutePokemon = useCallback((pokemonId: number): boolean => {
+    return routeEncounterData.some(pokemon => pokemon.id === pokemonId);
+  }, [routeEncounterData]);
+
+  // Async function to load route encounter data
+  const loadRouteEncounterData = useCallback(async () => {
+    if (!shouldLoadRouteData) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      // Load Pokemon name map and encounter data in parallel
-      const [nameMap, encounter] = await Promise.all([
+      // Load Pokemon data, name map, and encounter data in parallel
+      const [allPokemon, nameMap, encounter] = await Promise.all([
+        getPokemon(),
         getPokemonNameMap(),
         getEncountersByRouteId(routeId, gameMode)
       ]);
 
       if (encounter) {
         const pokemonOptions: PokemonOption[] = encounter.pokemonIds
-          .map(id => ({
-            id,
-            name: nameMap.get(id) || `Unknown Pokemon (${id})`,
-          }))
-          .filter(pokemon => pokemon.name !== `Unknown Pokemon (${pokemon.id})`);
+          .map(id => {
+            const pokemon = allPokemon.find(p => p.id === id);
+            return {
+              id,
+              name: nameMap.get(id) || `Unknown Pokemon (${id})`,
+              nationalDexId: pokemon?.nationalDexId || 0
+            };
+          })
 
-        setEncounterData(pokemonOptions);
+        setRouteEncounterData(pokemonOptions);
       } else {
         setError('No encounters found for this route');
       }
@@ -229,23 +257,137 @@ export const PokemonCombobox = ({
       setError(err instanceof Error ? err.message : 'Failed to load Pokemon data');
     } finally {
       setIsLoading(false);
+      setHasLoadedRouteData(true);
     }
-  }, [routeId, gameMode, shouldLoad]);
+  }, [routeId, gameMode, shouldLoadRouteData]);
 
-  // Load data when combobox opens or when user starts typing
+  // Async function to load all Pokemon data
+  const loadAllPokemonData = useCallback(async () => {
+    if (!shouldLoadAllPokemon) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const allPokemon = await getPokemon();
+      const pokemonOptions: PokemonOption[] = allPokemon.map(pokemon => ({
+        id: pokemon.id,
+        name: pokemon.name,
+        nationalDexId: pokemon.nationalDexId,
+      }));
+
+      setAllPokemonData(pokemonOptions);
+    } catch (err) {
+      console.error('Error loading all Pokemon data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load Pokemon data');
+    } finally {
+      setIsLoading(false);
+      setHasLoadedAllPokemon(true);
+    }
+  }, [shouldLoadAllPokemon]);
+
+  // Load route data when combobox opens or when user starts typing
   const handleInteraction = useCallback(() => {
-    if (shouldLoad) {
-      loadEncounterData();
+    if (shouldLoadRouteData) {
+      loadRouteEncounterData();
     }
-  }, [shouldLoad, loadEncounterData]);
+  }, [shouldLoadRouteData, loadRouteEncounterData]);
 
-  // Memoize filtered options to prevent recalculation on every render
+  // Load all Pokemon data when user starts searching
+  useEffect(() => {
+    if (shouldLoadAllPokemon) {
+      loadAllPokemonData();
+    }
+  }, [shouldLoadAllPokemon, loadAllPokemonData]);
+
+  // Fuzzy search function using shared Fuse instance
+  const performFuzzySearch = useCallback(async (searchQuery: string, pokemonList: PokemonOption[]): Promise<PokemonOption[]> => {
+    if (!searchQuery.trim()) {
+      return pokemonList;
+    }
+
+    try {
+      const fuseInstance = await getPokemonFuseInstance();
+      const searchResults = fuseInstance.search(searchQuery);
+      const resultItems = searchResults.map(result => result.item);
+
+      // Filter results to only include Pokemon from the provided list
+      return resultItems.filter(item =>
+        pokemonList.some(pokemon => pokemon.id === item.id)
+      );
+    } catch (err) {
+      console.error('Error performing fuzzy search:', err);
+      // Fallback to simple search if Fuse instance is not available
+      return pokemonList.filter(pokemon =>
+        pokemon.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+  }, []);
+
+  // Memoize filtered options with fuzzy search and prioritization logic
   const filteredOptions = useMemo(() => {
-    if (deferredQuery === '') return encounterData;
-    return encounterData.filter((pokemon) =>
+    // If no search query, show only route encounters
+    if (deferredQuery === '') {
+      return routeEncounterData;
+    }
+
+    // For route Pokemon, use exact string matching
+    const routeMatches = routeEncounterData.filter(pokemon =>
       pokemon.name.toLowerCase().includes(deferredQuery.toLowerCase())
     );
-  }, [encounterData, deferredQuery]);
+
+    // For non-route Pokemon, use fuzzy search
+    const nonRoutePokemon = allPokemonData.filter(p => !isRoutePokemon(p.id));
+
+    // Note: This will be handled in a useEffect since fuzzy search is now async
+    return [...routeMatches, ...nonRoutePokemon];
+  }, [routeEncounterData, allPokemonData, deferredQuery, isRoutePokemon]);
+
+  // State for fuzzy search results
+  const [fuzzyResults, setFuzzyResults] = useState<PokemonOption[]>([]);
+
+  // Perform fuzzy search when query changes
+  useEffect(() => {
+    if (deferredQuery === '') {
+      setFuzzyResults([]);
+      return;
+    }
+
+    const performSearch = async () => {
+      const nonRoutePokemon = allPokemonData.filter(p => !isRoutePokemon(p.id));
+      const results = await performFuzzySearch(deferredQuery, nonRoutePokemon);
+      setFuzzyResults(results);
+    };
+
+    if (allPokemonData.length > 0) {
+      performSearch();
+    }
+  }, [deferredQuery, allPokemonData, isRoutePokemon, performFuzzySearch]);
+
+  // Combine route matches with fuzzy results
+  const finalOptions = useMemo(() => {
+    if (deferredQuery === '') {
+      return routeEncounterData;
+    }
+
+    // For route Pokemon, use exact string matching
+    const routeMatches = routeEncounterData.filter(pokemon =>
+      pokemon.name.toLowerCase().includes(deferredQuery.toLowerCase())
+    );
+
+    // Combine results: route matches first, then fuzzy results
+    const allResults = [...routeMatches, ...fuzzyResults];
+
+    // Sort: route Pokemon first, then by fuzzy search relevance
+    return allResults.sort((a, b) => {
+      // First prioritize route Pokemon
+      if (isRoutePokemon(a.id) && !isRoutePokemon(b.id)) return -1;
+      if (!isRoutePokemon(a.id) && isRoutePokemon(b.id)) return 1;
+
+      // For non-route Pokemon, maintain fuzzy search order (already sorted by relevance)
+      return 0;
+    });
+  }, [routeEncounterData, fuzzyResults, deferredQuery, isRoutePokemon]);
 
   // Optimized onChange handler without startTransition for immediate response
   const handleChange = useCallback((newValue: PokemonOption | null | undefined) => {
@@ -289,6 +431,7 @@ export const PokemonCombobox = ({
             placeholder={placeholder}
             displayValue={(pokemon: PokemonOption | null | undefined) => pokemon?.name || ''}
             spellCheck={false}
+            autoComplete="off"
             onChange={handleInputChange}
             onFocus={handleInteraction}
             onClick={handleInteraction}
@@ -297,7 +440,7 @@ export const PokemonCombobox = ({
           {value && (
             <div className="absolute inset-y-0 left-1.5 flex items-center">
               <Image
-                src={getPokemonSpriteUrl(value.id)}
+                src={getPokemonSpriteUrlFromOption(value)}
                 alt={value.name}
                 width={40}
                 height={40}
@@ -323,7 +466,8 @@ export const PokemonCombobox = ({
           )}
         >
           <PokemonOptions
-            options={filteredOptions}
+            options={finalOptions}
+            isRoutePokemonPredicate={isRoutePokemon}
           />
         </ComboboxOptions>
       </div>
