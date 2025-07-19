@@ -16,7 +16,7 @@ export default function ThemeToggle() {
   if (!mounted || !resolvedTheme) {
     return (
       <button
-        className='p-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset'
+        className='p-2 rounded-md bg-gray-100 border border-gray-300 text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-500'
         aria-label='Theme toggle (loading)'
         disabled
       >
@@ -44,11 +44,11 @@ export default function ThemeToggle() {
 
   const getThemeIcon = () => {
     if (theme === 'light') {
-      return <Sun className='w-5 h-5 text-yellow-600' />;
+      return <Sun className='w-5 h-5' />;
     } else if (theme === 'dark') {
-      return <Moon className='w-5 h-5 text-blue-300' />;
+      return <Moon className='w-5 h-5' />;
     } else {
-      return <Monitor className='w-5 h-5 ' />;
+      return <Monitor className='w-5 h-5' />;
     }
   };
 
@@ -68,10 +68,12 @@ export default function ThemeToggle() {
       onKeyDown={handleKeyDown}
       className={clsx(
         'p-2 rounded-md transition-colors',
-        'bg-gray-200 text-gray-600 hover:bg-gray-300',
-        'dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600',
+        'bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600',
+        'border border-gray-300 hover:border-blue-300',
+        'dark:bg-gray-700 dark:hover:bg-blue-900/20 dark:text-gray-400 dark:hover:text-blue-400',
+        'dark:border-gray-600 dark:hover:border-blue-400',
         'hover:cursor-pointer',
-        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset'
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1'
       )}
       aria-label={getThemeLabel()}
       title={getThemeLabel()}
