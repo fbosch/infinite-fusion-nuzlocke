@@ -70,13 +70,6 @@
     "description": "Nugget Bridge north of Cerulean City"
   },
   {
-    "name": "Route 25",
-    "routeId": null,
-    "order": 11,
-    "region": "Kanto",
-    "description": "Bill's house area"
-  },
-  {
     "name": "Route 5",
     "routeId": 12,
     "order": 12,

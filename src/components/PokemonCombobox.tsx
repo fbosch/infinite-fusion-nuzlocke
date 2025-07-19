@@ -19,7 +19,7 @@ import React, {
   useCallback,
   useEffect,
 } from 'react';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, Loader2, Search } from 'lucide-react';
 import {
   Combobox,
   ComboboxInput,
@@ -153,7 +153,10 @@ const PokemonOptions = ({
                 <p className='text-xs mt-1'>Try a different search term</p>
               </>
             ) : (
-              <p className='text-sm'>No Pokemon available</p>
+              <p className='text-sm flex items-center gap-2 justify-center py-2'>
+                <Search className='w-4 h-4' />
+                <span>Search for Pokemon</span>
+              </p>
             )}
           </div>
         </div>
