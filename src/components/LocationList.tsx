@@ -189,9 +189,9 @@ export default function LocationList() {
                   <th
                     key={header.id}
                     className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset'
-                    style={{ 
+                    style={{
                       width: `${header.column.getSize()}px`,
-                      minWidth: `${header.column.getSize()}px`
+                      minWidth: `${header.column.getSize()}px`,
                     }}
                     onClick={header.column.getToggleSortingHandler()}
                     onKeyDown={e => {

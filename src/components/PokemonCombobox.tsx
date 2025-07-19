@@ -21,7 +21,6 @@ import Image from 'next/image';
 import {
   getInfiniteFusionToNationalDexMap,
   getPokemon,
-  getPokemonFuseInstance,
   searchPokemon,
   type PokemonOption,
 } from '@/loaders/pokemon';
@@ -34,6 +33,7 @@ let mappingPromise: Promise<void> | null = null;
 // Global drag state for cross-component communication
 let currentDragData: string | null = null;
 let currentDragSource: string | null = null;
+let currentDragValue: PokemonOption | null | undefined = null;
 
 // Initialize the National Dex mapping
 export async function initializeSpriteMapping(): Promise<void> {
@@ -75,6 +75,7 @@ const PokemonOption = ({
     e.dataTransfer.effectAllowed = 'copy';
     currentDragData = pokemon.name;
     currentDragSource = comboboxId || null; // Track the source combobox
+    currentDragValue = null; // Reset drag value for option drags
   };
 
   return (
@@ -156,6 +157,7 @@ const PokemonOptions = ({
     e.dataTransfer.effectAllowed = 'copy';
     currentDragData = pokemonName;
     currentDragSource = comboboxId || null; // Track the source combobox
+    currentDragValue = null; // Reset drag value for option drags
   };
 
   if (options.length === 0) {
@@ -462,47 +464,82 @@ export const PokemonCombobox = ({
         const isFromDifferentCombobox =
           currentDragSource && currentDragSource !== comboboxId;
 
-        // Set the query to trigger search
-        setQuery(pokemonName);
-        // Find the Pokemon by name and set it as the value
-        const findPokemonByName = async () => {
-          try {
-            const allPokemon = await getPokemon();
-            const nameMap = await getPokemonNameMap();
+        // Check if both comboboxes have values for switching
+        // This will work for any two different comboboxes (like head/body) that both have values
+        const canSwitch =
+          isFromDifferentCombobox &&
+          currentDragValue &&
+          value &&
+          currentDragValue.name !== value.name;
 
-            // Find Pokemon by name (case insensitive)
-            const foundPokemon = allPokemon.find(
-              p =>
-                nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
-            );
+        if (canSwitch && currentDragValue) {
+          // Switch values between the two comboboxes
+          const targetValue = value;
+          const sourceValue = currentDragValue;
 
-            if (foundPokemon) {
-              const pokemonOption: PokemonOption = {
-                id: foundPokemon.id,
-                name: pokemonName,
-                nationalDexId: foundPokemon.nationalDexId,
-              };
-              onChange(pokemonOption);
+          console.log('Switching values:', {
+            from: currentDragSource,
+            to: comboboxId,
+            sourceValue: sourceValue.name,
+            targetValue: targetValue.name,
+          });
 
-              // If this is from a different combobox, clear the source
-              if (isFromDifferentCombobox) {
-                // Dispatch a custom event to notify the source combobox to clear
-                window.dispatchEvent(
-                  new CustomEvent('clearCombobox', {
-                    detail: { comboboxId: currentDragSource },
-                  })
-                );
+          // Set this combobox to the source value
+          onChange(sourceValue);
+
+          // Dispatch a custom event to set the source combobox to this value
+          window.dispatchEvent(
+            new CustomEvent('switchCombobox', {
+              detail: {
+                comboboxId: currentDragSource,
+                value: targetValue,
+              },
+            })
+          );
+        } else {
+          // Original logic for normal drag and drop
+          // Set the query to trigger search
+          setQuery(pokemonName);
+          // Find the Pokemon by name and set it as the value
+          const findPokemonByName = async () => {
+            try {
+              const allPokemon = await getPokemon();
+              const nameMap = await getPokemonNameMap();
+
+              // Find Pokemon by name (case insensitive)
+              const foundPokemon = allPokemon.find(
+                p =>
+                  nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
+              );
+
+              if (foundPokemon) {
+                const pokemonOption: PokemonOption = {
+                  id: foundPokemon.id,
+                  name: pokemonName,
+                  nationalDexId: foundPokemon.nationalDexId,
+                };
+                onChange(pokemonOption);
+
+                // If this is from a different combobox, clear the source
+                if (isFromDifferentCombobox) {
+                  // Dispatch a custom event to notify the source combobox to clear
+                  window.dispatchEvent(
+                    new CustomEvent('clearCombobox', {
+                      detail: { comboboxId: currentDragSource },
+                    })
+                  );
+                }
               }
+            } catch (err) {
+              console.error('Error finding Pokemon by name:', err);
             }
-          } catch (err) {
-            console.error('Error finding Pokemon by name:', err);
-          }
-        };
+          };
 
-        findPokemonByName();
+          findPokemonByName();
+        }
       }
     },
-    [onChange, comboboxId]
+    [onChange, comboboxId, value]
   );
 
   const handleDragOver = useCallback(
@@ -553,9 +590,10 @@ export const PokemonCombobox = ({
     // Clear global drag data when drag ends
     currentDragData = null;
     currentDragSource = null;
+    currentDragValue = null;
   }, []);
 
-  // Listen for clear events from other comboboxes
+  // Listen for clear and switch events from other comboboxes
   useEffect(() => {
     const handleClearEvent = (event: CustomEvent) => {
       if (event.detail.comboboxId === comboboxId) {
@@ -564,12 +602,34 @@ export const PokemonCombobox = ({
       }
     };
 
+    const handleSwitchEvent = (event: CustomEvent) => {
+      console.log('Received switch event:', {
+        targetComboboxId: event.detail.comboboxId,
+        currentComboboxId: comboboxId,
+        value: event.detail.value?.name,
+      });
+      
+      if (event.detail.comboboxId === comboboxId) {
+        console.log('Applying switch value to combobox:', comboboxId);
+        onChange(event.detail.value);
+        setQuery('');
+      }
+    };
+
     window.addEventListener('clearCombobox', handleClearEvent as EventListener);
+    window.addEventListener(
+      'switchCombobox',
+      handleSwitchEvent as EventListener
+    );
 
     return () => {
       window.removeEventListener(
         'clearCombobox',
         handleClearEvent as EventListener
+      );
+      window.removeEventListener(
+        'switchCombobox',
+        handleSwitchEvent as EventListener
       );
     };
   }, [comboboxId, onChange]);
@@ -633,6 +693,7 @@ export const PokemonCombobox = ({
                   e.dataTransfer.effectAllowed = 'copy';
                   currentDragData = (dragPreview || value)!.name;
                   currentDragSource = comboboxId || null; // Track the source combobox
+                  currentDragValue = value || null; // Store the current value for potential switching
                 }}
               />
             </div>
