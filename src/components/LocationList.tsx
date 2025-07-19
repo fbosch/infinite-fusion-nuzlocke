@@ -9,7 +9,13 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import React, { useState, useMemo, startTransition } from 'react';
-import { ChevronUp, ChevronDown, ChevronsUpDown, Dna, DnaOff } from 'lucide-react';
+import {
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown,
+  Dna,
+  DnaOff,
+} from 'lucide-react';
 import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
 import { PokemonCombobox } from './PokemonCombobox';
@@ -44,9 +50,9 @@ interface EncounterData {
 
 export default function LocationList() {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [encounters, setEncounters] = useState<
-    Record<number, EncounterData>
-  >({});
+  const [encounters, setEncounters] = useState<Record<number, EncounterData>>(
+    {}
+  );
 
   // Memoize the data to prevent unnecessary re-computations
   const data = useMemo(() => {
@@ -78,8 +84,12 @@ export default function LocationList() {
   ) => {
     startTransition(() => {
       setEncounters(prev => {
-        const currentEncounter = prev[routeId] || { head: null, body: null, isFusion: false };
-        
+        const currentEncounter = prev[routeId] || {
+          head: null,
+          body: null,
+          isFusion: false,
+        };
+
         if (currentEncounter.isFusion) {
           // For fusions, update the specified field
           return {
@@ -109,9 +119,13 @@ export default function LocationList() {
   const handleFusionToggle = (routeId: number) => {
     startTransition(() => {
       setEncounters(prev => {
-        const currentEncounter = prev[routeId] || { head: null, body: null, isFusion: false };
+        const currentEncounter = prev[routeId] || {
+          head: null,
+          body: null,
+          isFusion: false,
+        };
         const newIsFusion = !currentEncounter.isFusion;
-        
+
         if (newIsFusion) {
           // Converting to fusion - existing Pokemon becomes the head (fusion base)
           return {
@@ -219,8 +233,14 @@ export default function LocationList() {
                 // Special handling for encounter column
                 if (cell.column.id === 'routeId') {
                   const routeId = cell.getValue() as number;
-                  const encounterData = encounters[routeId] || { head: null, body: null, isFusion: false };
-                  const selectedPokemon = encounterData.isFusion ? encounterData.body : encounterData.head;
+                  const encounterData = encounters[routeId] || {
+                    head: null,
+                    body: null,
+                    isFusion: false,
+                  };
+                  const selectedPokemon = encounterData.isFusion
+                    ? encounterData.body
+                    : encounterData.head;
                   const isFusion = encounterData.isFusion;
 
                   return (
@@ -241,9 +261,14 @@ export default function LocationList() {
                                   routeId={routeId}
                                   value={encounterData.head}
                                   onChange={pokemon =>
-                                    handleEncounterSelect(routeId, pokemon, 'head')
+                                    handleEncounterSelect(
+                                      routeId,
+                                      pokemon,
+                                      'head'
+                                    )
                                   }
                                   placeholder='Select head Pokemon'
+                                  comboboxId={`${routeId}-head`}
                                 />
                               </div>
                               <div className='flex-1'>
@@ -254,9 +279,14 @@ export default function LocationList() {
                                   routeId={routeId}
                                   value={encounterData.body}
                                   onChange={pokemon =>
-                                    handleEncounterSelect(routeId, pokemon, 'body')
+                                    handleEncounterSelect(
+                                      routeId,
+                                      pokemon,
+                                      'body'
+                                    )
                                   }
                                   placeholder='Select body Pokemon'
+                                  comboboxId={`${routeId}-body`}
                                 />
                               </div>
                             </div>
@@ -267,6 +297,7 @@ export default function LocationList() {
                               onChange={pokemon =>
                                 handleEncounterSelect(routeId, pokemon)
                               }
+                              comboboxId={`${routeId}-single`}
                             />
                           )}
                         </div>
@@ -280,14 +311,20 @@ export default function LocationList() {
                             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
                             'disabled:opacity-50 disabled:cursor-not-allowed bg-white',
                             {
-                              'dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 border-gray-300 hover:bg-red-500 hover:border-red-600': isFusion,
-                              'bg-white border-gray-300 text-gray-700 hover:bg-green-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-green-700': !isFusion,
+                              'dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 border-gray-300 hover:bg-red-500 hover:border-red-600':
+                                isFusion,
+                              'bg-white border-gray-300 text-gray-700 hover:bg-green-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-green-700':
+                                !isFusion,
                             }
                           )}
                           aria-label={`Toggle fusion for ${selectedPokemon?.name || 'Pokemon'}`}
                           title={isFusion ? 'Unfuse' : 'Fuse'}
                         >
-                          {isFusion ? <DnaOff className='size-6 group-hover:text-white' /> : <Dna className='size-6 group-hover:text-white' />}
+                          {isFusion ? (
+                            <DnaOff className='size-6 group-hover:text-white' />
+                          ) : (
+                            <Dna className='size-6 group-hover:text-white' />
+                          )}
                         </button>
                       </div>
                     </td>

@@ -117,10 +117,10 @@ export async function getPokemonFuseInstance(): Promise<Fuse<PokemonOption>> {
 // Smart search function that handles both name and ID searches
 export async function searchPokemon(query: string): Promise<PokemonOption[]> {
   const pokemon = await getPokemon();
-  
+
   // Check if query is a number (for ID searches)
   const isNumericQuery = /^\d+$/.test(query.trim());
-  
+
   if (isNumericQuery) {
     // Exact search for IDs - much faster than fuzzy search
     const queryNum = parseInt(query, 10);

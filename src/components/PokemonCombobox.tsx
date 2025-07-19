@@ -44,6 +44,7 @@ let mappingPromise: Promise<void> | null = null;
 
 // Global drag state for cross-component communication
 let currentDragData: string | null = null;
+let currentDragSource: string | null = null;
 
 // Initialize the National Dex mapping
 export async function initializeSpriteMapping(): Promise<void> {
@@ -73,15 +74,18 @@ const PokemonOption = ({
   pokemon,
   selected,
   isRoutePokemon,
+  comboboxId,
 }: {
   pokemon: PokemonOption;
   selected: boolean;
   isRoutePokemon: boolean;
+  comboboxId: string;
 }) => {
   const handleDragStart = (e: React.DragEvent<HTMLImageElement>) => {
     e.dataTransfer.setData('text/plain', pokemon.name);
     e.dataTransfer.effectAllowed = 'copy';
     currentDragData = pokemon.name;
+    currentDragSource = comboboxId || null; // Track the source combobox
   };
 
   return (
@@ -148,15 +152,21 @@ const PokemonOptions = ({
   options,
   isRoutePokemon,
   query,
+  comboboxId,
 }: {
   options: PokemonOption[];
   isRoutePokemon: (pokemonId: number) => boolean;
   query: string;
+  comboboxId: string;
 }) => {
-  const handleDragStart = (e: React.DragEvent<HTMLImageElement>, pokemonName: string) => {
+  const handleDragStart = (
+    e: React.DragEvent<HTMLImageElement>,
+    pokemonName: string
+  ) => {
     e.dataTransfer.setData('text/plain', pokemonName);
     e.dataTransfer.effectAllowed = 'copy';
     currentDragData = pokemonName;
+    currentDragSource = comboboxId || null; // Track the source combobox
   };
 
   if (options.length === 0) {
@@ -217,10 +227,12 @@ const PokemonOptions = ({
                   width={40}
                   height={40}
                   className='object-contain object-center scale-180 image-render-high-quality cursor-grab active:cursor-grabbing'
-                  loading={index < 5 || isRoutePokemon(pokemon.id) ? 'eager' : 'lazy'}
+                  loading={
+                    index < 5 || isRoutePokemon(pokemon.id) ? 'eager' : 'lazy'
+                  }
                   unoptimized
                   draggable
-                  onDragStart={(e) => handleDragStart(e, pokemon.name)}
+                  onDragStart={e => handleDragStart(e, pokemon.name)}
                 />
                 <span
                   className={clsx('block truncate flex-1', {
@@ -265,6 +277,7 @@ export const PokemonCombobox = ({
   placeholder = 'Select Pokemon',
   disabled = false,
   gameMode = 'classic',
+  comboboxId,
 }: {
   routeId?: number;
   value: PokemonOption | null | undefined;
@@ -272,6 +285,7 @@ export const PokemonCombobox = ({
   placeholder?: string;
   disabled?: boolean;
   gameMode?: 'classic' | 'remix';
+  comboboxId?: string;
 }) => {
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
@@ -285,7 +299,7 @@ export const PokemonCombobox = ({
   // Predicate function to check if a Pokemon is in the current route
   const isRoutePokemon = useCallback(
     (pokemonId: number): boolean => {
-      if (routeId === 0)  return false 
+      if (routeId === 0) return false;
       return routeEncounterData.some(pokemon => pokemon.id === pokemonId);
     },
     [routeEncounterData]
@@ -322,7 +336,6 @@ export const PokemonCombobox = ({
     }
   }, [routeId, gameMode]);
 
-
   // Load route data when combobox opens or when user starts typing
   const handleInteraction = useCallback(() => {
     loadRouteEncounterData();
@@ -341,7 +354,7 @@ export const PokemonCombobox = ({
       try {
         // Use the smart search function that handles both numeric and text searches
         const allResults = await searchPokemon(searchQuery);
-        
+
         // Filter results to only include Pokemon from the provided list
         return allResults.filter(item =>
           pokemonList.some(pokemon => pokemon.id === item.id)
@@ -373,10 +386,10 @@ export const PokemonCombobox = ({
       const results = await performSmartSearch(deferredQuery, nonRoutePokemon);
       startTransition(() => {
         setFuzzyResults(results);
-      })
+      });
     };
 
-      performSearch();
+    performSearch();
   }, [deferredQuery, isRoutePokemon, performSmartSearch]);
 
   // Combine route matches with smart search results
@@ -387,14 +400,14 @@ export const PokemonCombobox = ({
 
     // Check if query is numeric for route Pokemon
     const isNumericQuery = /^\d+$/.test(deferredQuery.trim());
-    
+
     let routeMatches: PokemonOption[] = [];
-    
+
     if (isNumericQuery) {
       // For numeric queries, check both ID and National Dex ID
       const queryNum = parseInt(deferredQuery, 10);
-      routeMatches = routeEncounterData.filter(pokemon =>
-        pokemon.id === queryNum || pokemon.nationalDexId === queryNum
+      routeMatches = routeEncounterData.filter(
+        pokemon => pokemon.id === queryNum || pokemon.nationalDexId === queryNum
       );
     } else {
       // For text queries, use name matching
@@ -455,6 +468,11 @@ export const PokemonCombobox = ({
       if (pokemonName) {
         // Clear the preview
         setDragPreview(null);
+
+        // Check if this drop is from a different combobox
+        const isFromDifferentCombobox =
+          currentDragSource && currentDragSource !== comboboxId;
+
         // Set the query to trigger search
         setQuery(pokemonName);
         // Find the Pokemon by name and set it as the value
@@ -462,12 +480,13 @@ export const PokemonCombobox = ({
           try {
             const allPokemon = await getPokemon();
             const nameMap = await getPokemonNameMap();
-            
+
             // Find Pokemon by name (case insensitive)
-            const foundPokemon = allPokemon.find(p => 
-              nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
+            const foundPokemon = allPokemon.find(
+              p =>
+                nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
             );
-            
+
             if (foundPokemon) {
               const pokemonOption: PokemonOption = {
                 id: foundPokemon.id,
@@ -475,52 +494,66 @@ export const PokemonCombobox = ({
                 nationalDexId: foundPokemon.nationalDexId,
               };
               onChange(pokemonOption);
+
+              // If this is from a different combobox, clear the source
+              if (isFromDifferentCombobox) {
+                // Dispatch a custom event to notify the source combobox to clear
+                window.dispatchEvent(
+                  new CustomEvent('clearCombobox', {
+                    detail: { comboboxId: currentDragSource },
+                  })
+                );
+              }
             }
           } catch (err) {
             console.error('Error finding Pokemon by name:', err);
           }
         };
-        
+
         findPokemonByName();
       }
     },
-    [onChange]
+    [onChange, comboboxId]
   );
 
-  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
-    
-    // Show preview of what will be dropped using global drag data
-    const pokemonName = currentDragData;
-    if (pokemonName && (!dragPreview || dragPreview.name !== pokemonName)) {
-      // Find the Pokemon by name to create a proper preview
-      const findPokemonForPreview = async () => {
-        try {
-          const allPokemon = await getPokemon();
-          const nameMap = await getPokemonNameMap();
-          
-          // Find Pokemon by name (case insensitive)
-          const foundPokemon = allPokemon.find(p => 
-            nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
-          );
-          
-          if (foundPokemon) {
-            const pokemonOption: PokemonOption = {
-              id: foundPokemon.id,
-              name: pokemonName,
-              nationalDexId: foundPokemon.nationalDexId,
-            };
-            setDragPreview(pokemonOption);
+  const handleDragOver = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+
+      // Show preview of what will be dropped using global drag data
+      const pokemonName = currentDragData;
+      if (pokemonName && (!dragPreview || dragPreview.name !== pokemonName)) {
+        // Find the Pokemon by name to create a proper preview
+        const findPokemonForPreview = async () => {
+          try {
+            const allPokemon = await getPokemon();
+            const nameMap = await getPokemonNameMap();
+
+            // Find Pokemon by name (case insensitive)
+            const foundPokemon = allPokemon.find(
+              p =>
+                nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
+            );
+
+            if (foundPokemon) {
+              const pokemonOption: PokemonOption = {
+                id: foundPokemon.id,
+                name: pokemonName,
+                nationalDexId: foundPokemon.nationalDexId,
+              };
+              setDragPreview(pokemonOption);
+            }
+          } catch (err) {
+            console.error('Error finding Pokemon for preview:', err);
           }
-        } catch (err) {
-          console.error('Error finding Pokemon for preview:', err);
-        }
-      };
-      
-      findPokemonForPreview();
-    }
-  }, [dragPreview]);
+        };
+
+        findPokemonForPreview();
+      }
+    },
+    [dragPreview]
+  );
 
   const handleDragLeave = useCallback(() => {
     // Clear preview when dragging away
@@ -530,7 +563,27 @@ export const PokemonCombobox = ({
   const handleDragEnd = useCallback(() => {
     // Clear global drag data when drag ends
     currentDragData = null;
+    currentDragSource = null;
   }, []);
+
+  // Listen for clear events from other comboboxes
+  useEffect(() => {
+    const handleClearEvent = (event: CustomEvent) => {
+      if (event.detail.comboboxId === comboboxId) {
+        onChange(null);
+        setQuery('');
+      }
+    };
+
+    window.addEventListener('clearCombobox', handleClearEvent as EventListener);
+
+    return () => {
+      window.removeEventListener(
+        'clearCombobox',
+        handleClearEvent as EventListener
+      );
+    };
+  }, [comboboxId, onChange]);
 
   return (
     <Combobox
@@ -540,7 +593,7 @@ export const PokemonCombobox = ({
       immediate
     >
       <div className='relative'>
-        <div 
+        <div
           className='relative'
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -553,7 +606,8 @@ export const PokemonCombobox = ({
               'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-400',
               'focus:cursor-text hover:cursor-pointer',
               (value || dragPreview) && 'pl-12', // Add padding for sprite when value is selected or previewing
-              dragPreview && 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60' // Highlight when showing preview with opacity
+              dragPreview &&
+                'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60' // Highlight when showing preview with opacity
             )}
             placeholder={placeholder}
             displayValue={(pokemon: PokemonOption | null | undefined) => {
@@ -582,10 +636,14 @@ export const PokemonCombobox = ({
                 priority={true}
                 loading='eager'
                 draggable
-                onDragStart={(e) => {
-                  e.dataTransfer.setData('text/plain', (dragPreview || value)!.name);
+                onDragStart={e => {
+                  e.dataTransfer.setData(
+                    'text/plain',
+                    (dragPreview || value)!.name
+                  );
                   e.dataTransfer.effectAllowed = 'copy';
                   currentDragData = (dragPreview || value)!.name;
+                  currentDragSource = comboboxId || null; // Track the source combobox
                 }}
               />
             </div>
@@ -610,6 +668,7 @@ export const PokemonCombobox = ({
             options={finalOptions}
             isRoutePokemon={isRoutePokemon}
             query={deferredQuery}
+            comboboxId={comboboxId || ''} // Provide a default value for comboboxId
           />
         </ComboboxOptions>
       </div>

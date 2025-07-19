@@ -71,9 +71,11 @@ describe('Locations', () => {
     it('should return locations sorted by order', () => {
       const sortedLocations = getLocationsSortedByOrder();
       expect(sortedLocations).toBeInstanceOf(Array);
-      
+
       for (let i = 1; i < sortedLocations.length; i++) {
-        expect(sortedLocations[i].order).toBeGreaterThanOrEqual(sortedLocations[i - 1].order);
+        expect(sortedLocations[i].order).toBeGreaterThanOrEqual(
+          sortedLocations[i - 1].order
+        );
       }
     });
   });
@@ -83,108 +85,136 @@ describe('Locations', () => {
       vi.clearAllMocks();
     });
 
-         describe('getLocationEncounters', () => {
-       it('should return starter Pokémon for starter location in classic mode', async () => {
-         const mockStarterPokemon = [1, 4, 7];
-         vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(mockStarterPokemon);
+    describe('getLocationEncounters', () => {
+      it('should return starter Pokémon for starter location in classic mode', async () => {
+        const mockStarterPokemon = [1, 4, 7];
+        vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(
+          mockStarterPokemon
+        );
 
-         const locations = getLocations();
-         const starterLocation = locations.find(loc => loc.routeId === 0);
-         expect(starterLocation).not.toBeNull();
+        const locations = getLocations();
+        const starterLocation = locations.find(loc => loc.routeId === 0);
+        expect(starterLocation).not.toBeNull();
 
-         if (starterLocation) {
-           const encounters = await getLocationEncounters(starterLocation, 'classic');
-           expect(encounters).toEqual(mockStarterPokemon);
-           expect(getStarterPokemonByGameMode).toHaveBeenCalledWith('classic');
-         }
-       });
+        if (starterLocation) {
+          const encounters = await getLocationEncounters(
+            starterLocation,
+            'classic'
+          );
+          expect(encounters).toEqual(mockStarterPokemon);
+          expect(getStarterPokemonByGameMode).toHaveBeenCalledWith('classic');
+        }
+      });
 
-             it('should return starter Pokémon for starter location in remix mode', async () => {
-         const mockStarterPokemon = [1, 4, 7, 152, 155, 158, 276, 279, 282, 316, 319, 322, 479, 482, 485];
-         vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(mockStarterPokemon);
+      it('should return starter Pokémon for starter location in remix mode', async () => {
+        const mockStarterPokemon = [
+          1, 4, 7, 152, 155, 158, 276, 279, 282, 316, 319, 322, 479, 482, 485,
+        ];
+        vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(
+          mockStarterPokemon
+        );
 
-         const locations = getLocations();
-         const starterLocation = locations.find(loc => loc.routeId === 0);
-         expect(starterLocation).not.toBeNull();
+        const locations = getLocations();
+        const starterLocation = locations.find(loc => loc.routeId === 0);
+        expect(starterLocation).not.toBeNull();
 
-         if (starterLocation) {
-           const encounters = await getLocationEncounters(starterLocation, 'remix');
-           expect(encounters).toEqual(mockStarterPokemon);
-           expect(getStarterPokemonByGameMode).toHaveBeenCalledWith('remix');
-         }
-       });
+        if (starterLocation) {
+          const encounters = await getLocationEncounters(
+            starterLocation,
+            'remix'
+          );
+          expect(encounters).toEqual(mockStarterPokemon);
+          expect(getStarterPokemonByGameMode).toHaveBeenCalledWith('remix');
+        }
+      });
 
-       it('should return empty array for non-starter locations', async () => {
-         const locations = getLocations();
-         const nonStarterLocation = locations.find(loc => loc.routeId !== 0);
-         expect(nonStarterLocation).toBeDefined();
+      it('should return empty array for non-starter locations', async () => {
+        const locations = getLocations();
+        const nonStarterLocation = locations.find(loc => loc.routeId !== 0);
+        expect(nonStarterLocation).toBeDefined();
 
-         if (nonStarterLocation) {
-           const encounters = await getLocationEncounters(nonStarterLocation, 'classic');
-           expect(encounters).toEqual([]);
-         }
-       });
-     });
+        if (nonStarterLocation) {
+          const encounters = await getLocationEncounters(
+            nonStarterLocation,
+            'classic'
+          );
+          expect(encounters).toEqual([]);
+        }
+      });
+    });
 
-     describe('getLocationsWithEncounters', () => {
-       it('should return locations with encounters', async () => {
-         const mockStarterPokemon = [1, 4, 7];
-         vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(mockStarterPokemon);
+    describe('getLocationsWithEncounters', () => {
+      it('should return locations with encounters', async () => {
+        const mockStarterPokemon = [1, 4, 7];
+        vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(
+          mockStarterPokemon
+        );
 
-         const locationsWithEncounters = await getLocationsWithEncounters('classic');
-         expect(locationsWithEncounters).toBeInstanceOf(Array);
-         expect(locationsWithEncounters.length).toBeGreaterThan(0);
+        const locationsWithEncounters =
+          await getLocationsWithEncounters('classic');
+        expect(locationsWithEncounters).toBeInstanceOf(Array);
+        expect(locationsWithEncounters.length).toBeGreaterThan(0);
 
-         // Check that starter location has encounters
-         const starterLocationWithEncounters = locationsWithEncounters.find(
-           loc => loc.routeId === 0
-         );
-         expect(starterLocationWithEncounters).toBeDefined();
-         expect(starterLocationWithEncounters?.encounters).toEqual(mockStarterPokemon);
-       });
-     });
+        // Check that starter location has encounters
+        const starterLocationWithEncounters = locationsWithEncounters.find(
+          loc => loc.routeId === 0
+        );
+        expect(starterLocationWithEncounters).toBeDefined();
+        expect(starterLocationWithEncounters?.encounters).toEqual(
+          mockStarterPokemon
+        );
+      });
+    });
 
-     describe('hasLocationEncounters', () => {
-       it('should return true for starter location', async () => {
-         const mockStarterPokemon = [1, 4, 7];
-         vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(mockStarterPokemon);
+    describe('hasLocationEncounters', () => {
+      it('should return true for starter location', async () => {
+        const mockStarterPokemon = [1, 4, 7];
+        vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(
+          mockStarterPokemon
+        );
 
-         const locations = getLocations();
-         const starterLocation = locations.find(loc => loc.routeId === 0);
-         expect(starterLocation).not.toBeNull();
+        const locations = getLocations();
+        const starterLocation = locations.find(loc => loc.routeId === 0);
+        expect(starterLocation).not.toBeNull();
 
-         if (starterLocation) {
-           const hasEncounters = await hasLocationEncounters(starterLocation, 'classic');
-           expect(hasEncounters).toBe(true);
-         }
-       });
+        if (starterLocation) {
+          const hasEncounters = await hasLocationEncounters(
+            starterLocation,
+            'classic'
+          );
+          expect(hasEncounters).toBe(true);
+        }
+      });
 
-       it('should return false for non-starter locations', async () => {
-         const locations = getLocations();
-         const nonStarterLocation = locations.find(loc => loc.routeId !== 0);
-         expect(nonStarterLocation).toBeDefined();
+      it('should return false for non-starter locations', async () => {
+        const locations = getLocations();
+        const nonStarterLocation = locations.find(loc => loc.routeId !== 0);
+        expect(nonStarterLocation).toBeDefined();
 
-         if (nonStarterLocation) {
-           const hasEncounters = await hasLocationEncounters(nonStarterLocation, 'classic');
-           expect(hasEncounters).toBe(false);
-         }
-       });
-     });
+        if (nonStarterLocation) {
+          const hasEncounters = await hasLocationEncounters(
+            nonStarterLocation,
+            'classic'
+          );
+          expect(hasEncounters).toBe(false);
+        }
+      });
+    });
 
-     describe('Starter Location Identification', () => {
-       it('should identify starter location by routeId 0', () => {
-         const locations = getLocations();
-         const starterLocation = locations.find(loc => loc.routeId === 0);
-         expect(starterLocation).not.toBeNull();
-         expect(starterLocation?.name).toBe('Starter');
-       });
+    describe('Starter Location Identification', () => {
+      it('should identify starter location by routeId 0', () => {
+        const locations = getLocations();
+        const starterLocation = locations.find(loc => loc.routeId === 0);
+        expect(starterLocation).not.toBeNull();
+        expect(starterLocation?.name).toBe('Starter');
+      });
 
-       it('should identify non-starter locations correctly', () => {
-         const locations = getLocations();
-         const nonStarterLocation = locations.find(loc => loc.routeId !== 0);
-         expect(nonStarterLocation).toBeDefined();
-         expect(nonStarterLocation?.routeId).not.toBe(0);
-       });
-     });
+      it('should identify non-starter locations correctly', () => {
+        const locations = getLocations();
+        const nonStarterLocation = locations.find(loc => loc.routeId !== 0);
+        expect(nonStarterLocation).toBeDefined();
+        expect(nonStarterLocation?.routeId).not.toBe(0);
+      });
+    });
   });
 });

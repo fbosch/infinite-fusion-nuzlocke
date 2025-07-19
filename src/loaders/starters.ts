@@ -38,4 +38,4 @@ export async function getStarterPokemonByGameMode(
 ): Promise<number[]> {
   const starters = await getStarterPokemon();
   return starters[gameMode];
-} 
+}
