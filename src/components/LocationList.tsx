@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   SortingState,
 } from '@tanstack/react-table';
-import React, { useState, useMemo, startTransition } from 'react';
+import React, { useState, useMemo, startTransition, useCallback } from 'react';
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import clsx from 'clsx';
 import { getLocationsSortedByOrder } from '@/loaders';
@@ -134,6 +134,54 @@ export default function LocationList() {
       });
   };
 
+  // Enhanced encounter selection handler that can create fusions
+  const handleEncounterSelectWithFusion = (
+    routeId: number,
+    pokemon: PokemonOption | null,
+    field: 'head' | 'body' = 'head',
+    shouldCreateFusion: boolean = false
+  ) => {
+      setEncounters(prev => {
+        const currentEncounter = prev[routeId] || {
+          head: null,
+          body: null,
+          isFusion: false,
+        };
+
+        if (shouldCreateFusion) {
+          // Creating a new fusion
+          return {
+            ...prev,
+            [routeId]: {
+              head: field === 'head' ? pokemon : currentEncounter.head,
+              body: field === 'body' ? pokemon : currentEncounter.body,
+              isFusion: true,
+            },
+          };
+        } else if (currentEncounter.isFusion) {
+          // For existing fusions, update the specified field
+          return {
+            ...prev,
+            [routeId]: {
+              head: field === 'head' ? pokemon : currentEncounter.head,
+              body: field === 'body' ? pokemon : currentEncounter.body,
+              isFusion: true,
+            },
+          };
+        } else {
+          // For regular encounters, just set the head
+          return {
+            ...prev,
+            [routeId]: {
+              head: pokemon,
+              body: null,
+              isFusion: false,
+            },
+          };
+        }
+      });
+  };
+
   // Fusion toggle handler
   const handleFusionToggle = (routeId: number) => {
     startTransition(() => {
@@ -167,6 +215,31 @@ export default function LocationList() {
       });
     });
   };
+
+  // Handle fusion creation from drag and drop
+  const handleCreateFusion = useCallback((event: CustomEvent) => {
+    const { routeId, head, body } = event.detail;
+    
+    setEncounters(prev => {
+      return {
+        ...prev,
+        [routeId]: {
+          head,
+          body,
+          isFusion: true,
+        },
+      };
+    });
+  }, []);
+
+  // Listen for fusion creation events
+  React.useEffect(() => {
+    window.addEventListener('createFusion', handleCreateFusion as EventListener);
+    
+    return () => {
+      window.removeEventListener('createFusion', handleCreateFusion as EventListener);
+    };
+  }, [handleCreateFusion]);
 
   // Show loading state if no data
   if (!data || data.length === 0) {

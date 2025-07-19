@@ -1,10 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Dna, DnaOff } from 'lucide-react';
 import { PokemonCombobox } from './PokemonCombobox';
 import type { PokemonOption } from '@/loaders/pokemon';
 import clsx from 'clsx';
+import { useSnapshot } from 'valtio';
+import { dragStore, dragActions } from '@/stores/dragStore';
 
 // Type for encounter data with fusion status
 interface EncounterData {
@@ -34,6 +36,103 @@ export function EncounterCell({
     ? encounterData.body
     : encounterData.head;
   const isFusion = encounterData.isFusion;
+  const dragSnapshot = useSnapshot(dragStore);
+
+  // Handle drop on fusion button
+  const handleFusionDrop = useCallback(
+    (e: React.DragEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const pokemonName = e.dataTransfer.getData('text/plain');
+      if (!pokemonName) return;
+
+      // Check if this drop is from a different combobox
+      const isFromDifferentCombobox =
+        dragSnapshot.currentDragSource &&
+        dragSnapshot.currentDragSource !== `${routeId}-single` &&
+        dragSnapshot.currentDragSource !== `${routeId}-head` &&
+        dragSnapshot.currentDragSource !== `${routeId}-body`;
+
+      if (!isFromDifferentCombobox) return;
+
+      // Only allow dropping if this row is not already a fusion and has an existing encounter
+      if (isFusion || !selectedPokemon) return;
+
+      // Find the Pokémon by name
+      const findPokemonByName = async () => {
+        try {
+          const { getPokemon, getPokemonNameMap } = await import('@/loaders/pokemon');
+          const allPokemon = await getPokemon();
+          const nameMap = await getPokemonNameMap();
+
+          // Find Pokemon by name (case insensitive)
+          const foundPokemon = allPokemon.find(
+            p =>
+              nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
+          );
+
+          if (foundPokemon) {
+            const pokemonOption: PokemonOption = {
+              id: foundPokemon.id,
+              name: pokemonName,
+              nationalDexId: foundPokemon.nationalDexId,
+            };
+
+            // Create fusion: existing Pokémon becomes head, dropped Pokémon becomes body
+            const existingPokemon = selectedPokemon;
+            if (existingPokemon) {
+              // Use a custom event to handle fusion creation
+              window.dispatchEvent(
+                new CustomEvent('createFusion', {
+                  detail: {
+                    routeId,
+                    head: existingPokemon,
+                    body: pokemonOption,
+                  },
+                })
+              );
+            }
+
+            // Clear the source combobox
+            if (dragSnapshot.currentDragSource) {
+              window.dispatchEvent(
+                new CustomEvent('clearCombobox', {
+                  detail: { comboboxId: dragSnapshot.currentDragSource },
+                })
+              );
+            }
+          }
+        } catch (err) {
+          console.error('Error finding Pokemon by name:', err);
+        }
+      };
+
+      findPokemonByName();
+    },
+    [routeId, isFusion, selectedPokemon, onEncounterSelect, onFusionToggle, dragSnapshot.currentDragSource]
+  );
+
+  const handleFusionDragOver = useCallback(
+    (e: React.DragEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Only allow drop if this row is not already a fusion, has an existing encounter, and drag is from different source
+      const isFromDifferentCombobox =
+        dragSnapshot.currentDragSource &&
+        dragSnapshot.currentDragSource !== `${routeId}-single` &&
+        dragSnapshot.currentDragSource !== `${routeId}-head` &&
+        dragSnapshot.currentDragSource !== `${routeId}-body`;
+
+      if (!isFusion && selectedPokemon && isFromDifferentCombobox) {
+        e.dataTransfer.dropEffect = 'copy';
+      } else {
+        e.dataTransfer.dropEffect = 'none';
+      }
+    },
+    [routeId, isFusion, selectedPokemon, dragSnapshot.currentDragSource]
+  );
 
   return (
     <td
@@ -87,6 +186,8 @@ export function EncounterCell({
         <button
           type='button'
           onClick={() => onFusionToggle(routeId)}
+          onDrop={handleFusionDrop}
+          onDragOver={handleFusionDragOver}
           className={clsx(
             'group',
             'size-12.25 flex items-center justify-center self-end',
@@ -98,6 +199,12 @@ export function EncounterCell({
                 isFusion,
               'bg-white border-gray-300 text-gray-700 hover:bg-green-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-green-700':
                 !isFusion,
+              // Add visual feedback for drag over when not a fusion and has an existing encounter
+              'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20':
+                !isFusion && selectedPokemon && dragSnapshot.currentDragSource && 
+                dragSnapshot.currentDragSource !== `${routeId}-single` &&
+                dragSnapshot.currentDragSource !== `${routeId}-head` &&
+                dragSnapshot.currentDragSource !== `${routeId}-body`,
             }
           )}
           aria-label={`Toggle fusion for ${selectedPokemon?.name || 'Pokemon'}`}
