@@ -255,17 +255,7 @@ export const PokemonCombobox = ({
   const [routeEncounterData, setRouteEncounterData] = useState<PokemonOption[]>(
     []
   );
-  const [allPokemonData, setAllPokemonData] = useState<PokemonOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Track what data has been loaded
-  const [hasLoadedRouteData, setHasLoadedRouteData] = useState(false);
-  const [hasLoadedAllPokemon, setHasLoadedAllPokemon] = useState(false);
-
-  // Computed values
-  const shouldLoadRouteData = routeId && !hasLoadedRouteData && !isLoading;
-  const shouldLoadAllPokemon =
-    deferredQuery !== '' && !hasLoadedAllPokemon && !isLoading;
 
   // Predicate function to check if a Pokemon is in the current route
   const isRoutePokemon = useCallback(
@@ -277,8 +267,6 @@ export const PokemonCombobox = ({
 
   // Async function to load route encounter data
   const loadRouteEncounterData = useCallback(async () => {
-    if (!shouldLoadRouteData) return;
-
     setIsLoading(true);
 
     try {
@@ -305,46 +293,14 @@ export const PokemonCombobox = ({
       console.error(`Error loading encounter data for route ${routeId}:`, err);
     } finally {
       setIsLoading(false);
-      setHasLoadedRouteData(true);
     }
-  }, [routeId, gameMode, shouldLoadRouteData]);
+  }, [routeId, gameMode]);
 
-  // Async function to load all Pokemon data
-  const loadAllPokemonData = useCallback(async () => {
-    if (!shouldLoadAllPokemon) return;
-
-    setIsLoading(true);
-
-    try {
-      const allPokemon = await getPokemon();
-      const pokemonOptions: PokemonOption[] = allPokemon.map(pokemon => ({
-        id: pokemon.id,
-        name: pokemon.name,
-        nationalDexId: pokemon.nationalDexId,
-      }));
-
-      setAllPokemonData(pokemonOptions);
-    } catch (err) {
-      console.error('Error loading all Pokemon data:', err);
-    } finally {
-      setIsLoading(false);
-      setHasLoadedAllPokemon(true);
-    }
-  }, [shouldLoadAllPokemon]);
 
   // Load route data when combobox opens or when user starts typing
   const handleInteraction = useCallback(() => {
-    if (shouldLoadRouteData) {
-      loadRouteEncounterData();
-    }
-  }, [shouldLoadRouteData, loadRouteEncounterData]);
-
-  // Load all Pokemon data when user starts searching
-  useEffect(() => {
-    if (shouldLoadAllPokemon) {
-      loadAllPokemonData();
-    }
-  }, [shouldLoadAllPokemon, loadAllPokemonData]);
+    loadRouteEncounterData();
+  }, [loadRouteEncounterData]);
 
   // Fuzzy search function using shared Fuse instance
   const performFuzzySearch = useCallback(
@@ -386,15 +342,16 @@ export const PokemonCombobox = ({
     }
 
     const performSearch = async () => {
-      const nonRoutePokemon = allPokemonData.filter(p => !isRoutePokemon(p.id));
+      const allPokemon = await getPokemon();
+      const nonRoutePokemon = allPokemon.filter(p => !isRoutePokemon(p.id));
       const results = await performFuzzySearch(deferredQuery, nonRoutePokemon);
-      setFuzzyResults(results);
+      startTransition(() => {
+        setFuzzyResults(results);
+      })
     };
 
-    if (allPokemonData.length > 0) {
       performSearch();
-    }
-  }, [deferredQuery, allPokemonData, isRoutePokemon, performFuzzySearch]);
+  }, [deferredQuery, isRoutePokemon, performFuzzySearch]);
 
   // Combine route matches with fuzzy results
   const finalOptions = useMemo(() => {
