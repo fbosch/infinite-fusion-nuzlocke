@@ -12,7 +12,7 @@
  */
 
 import React, { useState, useMemo, useDeferredValue, startTransition, useCallback, useEffect } from 'react';
-import { Search, Check, X, Loader2 } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption, ComboboxButton } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -147,13 +147,20 @@ const PokemonOptions = ({
   }
 
   return (
-    <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+    <div
+      className={clsx(
+        "max-h-60 overflow-y-auto space-y-2",
+        "scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600",
+        "scrollbar-track-transparent py-1"
+      )}
+    >
       {options.map((pokemon) => (
         <ComboboxOption
           key={pokemon.id}
           value={pokemon}
           className={({ active, selected }) => clsx(
             'relative cursor-pointer select-none py-2 pr-4 pl-13 content-visibility-auto',
+            "rounded-md mx-2",
             {
               'bg-blue-600 text-white ': active,
               'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700': !active
@@ -444,8 +451,9 @@ export const PokemonCombobox = ({
         <div className="relative">
           <ComboboxInput
             className={clsx(
-              "w-full px-3 py-2 text-sm border rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer",
+              "w-full px-3 py-3.5 text-sm border rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed",
               "border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-400",
+              "focus:cursor-text hover:cursor-pointer",
               value && "pl-12" // Add padding for sprite when value is selected
             )}
             placeholder={placeholder}
@@ -474,7 +482,7 @@ export const PokemonCombobox = ({
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-gray-400" aria-hidden="true" />
             ) : (
-              <Search className="h-4 w-4 text-gray-400" aria-hidden="true" />
+              null
             )}
           </ComboboxButton>
         </div>
