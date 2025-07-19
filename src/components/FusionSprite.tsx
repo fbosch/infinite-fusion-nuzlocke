@@ -103,7 +103,6 @@ export function FusionSprite({
       
     }}
     onMouseLeave={() => {
-      console.log('stop animation')
       hoverRef.current = false;
       const animation = imageRef.current?.getAnimations();
       if (animation) {
