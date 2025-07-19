@@ -78,10 +78,10 @@ export default function Home() {
                 </svg>
               </figure>
               <h1 className='ml-4'>
-                <span className='block text-sm sm:text-lg font-bold text-cyan-500 dark:text-cyan-400'>
+                <span className='block text-sm sm:text-lg font-medium text-cyan-500 dark:text-cyan-400'>
                   Pokémon Infinite Fusion
                 </span>
-                <span className='block text-lg sm:text-xl font-medium text-gray-900 dark:text-white'>
+                <span className='block text-lg sm:text-xl font-bold text-gray-900 dark:text-white'>
                   Nuzlocke Tracker
                 </span>
               </h1>

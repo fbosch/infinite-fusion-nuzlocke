@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { DotGothic16 } from 'next/font/google';
+import { DotGothic16, IBM_Plex_Sans } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
@@ -10,6 +10,14 @@ const dotGothic16 = DotGothic16({
   weight: ['400'],
   display: 'swap',
   variable: '--font-dotgothic16',
+});
+
+// Primary sans-serif font for body text
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  display: 'swap',
+  variable: '--font-ibmplex',
 });
 
 export const metadata: Metadata = {
@@ -27,12 +35,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en' suppressHydrationWarning className={dotGothic16.variable}>
+    <html
+      lang='en'
+      suppressHydrationWarning
+      className={`${dotGothic16.variable} ${ibmPlexSans.variable}`}
+    >
       <head>
         <meta name='theme-color' content='#1f2937' />
         <meta name='color-scheme' content='light dark' />
       </head>
-      <body className='antialiased'>
+      <body className='antialiased font-sans'>
         <ThemeProvider>{children}</ThemeProvider>
         <ServiceWorkerRegistration />
       </body>

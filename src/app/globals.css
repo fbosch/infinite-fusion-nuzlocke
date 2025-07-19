@@ -3,7 +3,7 @@
 @theme {
   --color-primary: #3b82f6;
   --color-primary-dark: #1d4ed8;
-  --font-family-sans:
+  --font-family-sans: var(--font-ibmplex),
     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-family-mono: var(--font-dotgothic16), 'Courier New', monospace;
 }
