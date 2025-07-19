@@ -77,7 +77,6 @@ export default function LocationList() {
     pokemon: PokemonOption | null,
     field: 'head' | 'body' = 'head'
   ) => {
-    startTransition(() => {
       setEncounters(prev => {
         const currentEncounter = prev[routeId] || {
           head: null,
@@ -107,7 +106,6 @@ export default function LocationList() {
           };
         }
       });
-    });
   };
 
   // Fusion toggle handler
