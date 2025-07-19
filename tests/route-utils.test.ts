@@ -4,7 +4,7 @@ import {
   cleanRouteName,
   extractRouteId,
   processRouteName,
-  ROUTE_PATTERNS
+  ROUTE_PATTERNS,
 } from '../scripts/utils/route-utils';
 
 describe('Route Processing Utilities', () => {
@@ -139,14 +139,14 @@ describe('Route Processing Utilities', () => {
       const result = processRouteName('Route 1 (ID 78)');
       expect(result).toEqual({
         cleanName: 'Route 1',
-        routeId: 78
+        routeId: 78,
       });
     });
 
     it('should process route without ID', () => {
       const result = processRouteName('Route 1');
       expect(result).toEqual({
-        cleanName: 'Route 1'
+        cleanName: 'Route 1',
       });
     });
 
@@ -154,14 +154,14 @@ describe('Route Processing Utilities', () => {
       const result = processRouteName('Viridian Forest (ID 12)');
       expect(result).toEqual({
         cleanName: 'Viridian Forest',
-        routeId: 12
+        routeId: 12,
       });
     });
 
     it('should handle empty input', () => {
       const result = processRouteName('');
       expect(result).toEqual({
-        cleanName: ''
+        cleanName: '',
       });
     });
 
@@ -182,4 +182,4 @@ describe('Route Processing Utilities', () => {
       expect(result.routeId).toBe(156);
     });
   });
-}); 
+});

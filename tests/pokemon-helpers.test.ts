@@ -5,7 +5,7 @@ import {
   getPokemonByNationalDexId,
   getPokemonById,
   getNationalDexToInfiniteFusionMap,
-  getInfiniteFusionToNationalDexMap
+  getInfiniteFusionToNationalDexMap,
 } from '@/loaders/pokemon';
 
 describe('Pokemon ID Conversion Helpers', () => {
@@ -69,7 +69,9 @@ describe('Pokemon ID Conversion Helpers', () => {
       // Test that converting back and forth gives the same result
       const originalId = 1; // Bulbasaur
       const nationalDexId = getNationalDexIdFromInfiniteFusionId(originalId);
-      const convertedBackId = getInfiniteFusionIdFromNationalDexId(nationalDexId!);
+      const convertedBackId = getInfiniteFusionIdFromNationalDexId(
+        nationalDexId!
+      );
 
       expect(convertedBackId).toBe(originalId);
     });
@@ -79,7 +81,9 @@ describe('Pokemon ID Conversion Helpers', () => {
 
       testIds.forEach(id => {
         const nationalDexId = getNationalDexIdFromInfiniteFusionId(id);
-        const convertedBackId = getInfiniteFusionIdFromNationalDexId(nationalDexId!);
+        const convertedBackId = getInfiniteFusionIdFromNationalDexId(
+          nationalDexId!
+        );
 
         expect(convertedBackId).toBe(id);
       });
@@ -121,4 +125,4 @@ describe('Pokemon ID Conversion Helpers', () => {
       }
     });
   });
-}); 
+});

@@ -11,7 +11,7 @@ export interface PokemonOption {
 
 // Zod schema for Pokemon type
 export const PokemonTypeSchema = z.object({
-  name: z.string().min(1, { error: "Type name is required" }),
+  name: z.string().min(1, { error: 'Type name is required' }),
 });
 
 // Zod schema for Pokemon species
@@ -19,15 +19,17 @@ export const PokemonSpeciesSchema = z.object({
   is_legendary: z.boolean(),
   is_mythical: z.boolean(),
   generation: z.string().nullable(),
-  evolution_chain: z.object({
-    url: z.string().url({ error: "Invalid evolution chain URL" }),
-  }).nullable(),
+  evolution_chain: z
+    .object({
+      url: z.string().url({ error: 'Invalid evolution chain URL' }),
+    })
+    .nullable(),
 });
 
 // Zod schema for evolution detail
 export const EvolutionDetailSchema = z.object({
-  id: z.number().int().positive({ error: "Evolution ID must be positive" }),
-  name: z.string().min(1, { error: "Evolution name is required" }),
+  id: z.number().int().positive({ error: 'Evolution ID must be positive' }),
+  name: z.string().min(1, { error: 'Evolution name is required' }),
   min_level: z.number().int().positive().optional(),
   trigger: z.string().optional(),
   item: z.string().optional(),
@@ -43,9 +45,12 @@ export const EvolutionDataSchema = z.object({
 
 // Zod schema for Pokemon data
 export const PokemonSchema = z.object({
-  id: z.number().int().positive({ error: "Pokemon ID must be positive" }),
-  nationalDexId: z.number().int().positive({ error: "National Dex ID must be positive" }),
-  name: z.string().min(1, { error: "Pokemon name is required" }),
+  id: z.number().int().positive({ error: 'Pokemon ID must be positive' }),
+  nationalDexId: z
+    .number()
+    .int()
+    .positive({ error: 'National Dex ID must be positive' }),
+  name: z.string().min(1, { error: 'Pokemon name is required' }),
   types: z.array(PokemonTypeSchema),
   species: PokemonSpeciesSchema,
   evolution: EvolutionDataSchema.optional(),
@@ -164,26 +169,34 @@ export async function getAllPokemonTypes(): Promise<string[]> {
 }
 
 // Get National Pokédex number from Infinite Fusion ID
-export async function getNationalDexIdFromInfiniteFusionId(infiniteFusionId: number): Promise<number | null> {
+export async function getNationalDexIdFromInfiniteFusionId(
+  infiniteFusionId: number
+): Promise<number | null> {
   const pokemon = await getPokemonById(infiniteFusionId);
   return pokemon?.nationalDexId || null;
 }
 
 // Get Infinite Fusion ID from National Pokédex number
-export async function getInfiniteFusionIdFromNationalDexId(nationalDexId: number): Promise<number | null> {
+export async function getInfiniteFusionIdFromNationalDexId(
+  nationalDexId: number
+): Promise<number | null> {
   const pokemon = await getPokemon();
   const found = pokemon.find(p => p.nationalDexId === nationalDexId);
   return found?.id || null;
 }
 
 // Get Pokemon by National Pokédex number
-export async function getPokemonByNationalDexId(nationalDexId: number): Promise<Pokemon | null> {
+export async function getPokemonByNationalDexId(
+  nationalDexId: number
+): Promise<Pokemon | null> {
   const pokemon = await getPokemon();
   return pokemon.find(p => p.nationalDexId === nationalDexId) || null;
 }
 
 // Create a map of National Pokédex ID to Infinite Fusion ID for quick lookup
-export async function getNationalDexToInfiniteFusionMap(): Promise<Map<number, number>> {
+export async function getNationalDexToInfiniteFusionMap(): Promise<
+  Map<number, number>
+> {
   const pokemon = await getPokemon();
   const map = new Map<number, number>();
 
@@ -195,7 +208,9 @@ export async function getNationalDexToInfiniteFusionMap(): Promise<Map<number, n
 }
 
 // Create a map of Infinite Fusion ID to National Pokédex ID for quick lookup
-export async function getInfiniteFusionToNationalDexMap(): Promise<Map<number, number>> {
+export async function getInfiniteFusionToNationalDexMap(): Promise<
+  Map<number, number>
+> {
   const pokemon = await getPokemon();
   const map = new Map<number, number>();
 
@@ -204,4 +219,4 @@ export async function getInfiniteFusionToNationalDexMap(): Promise<Map<number, n
   });
 
   return map;
-} 
+}

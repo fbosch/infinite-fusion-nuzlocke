@@ -5,7 +5,7 @@ import {
   formatNumber,
   formatPercentage,
   truncateText,
-  padString
+  padString,
 } from '../scripts/utils/format-utils';
 
 describe('Format Utilities', () => {
@@ -222,4 +222,4 @@ describe('Format Utilities', () => {
       expect(padString('test', 10, 'invalid' as any)).toBe('test      '); // Falls back to left
     });
   });
-}); 
+});

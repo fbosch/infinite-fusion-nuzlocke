@@ -8,7 +8,7 @@ import {
   checkDataFiles,
   clearDataCache,
   getCacheStatus,
-  type DexEntry
+  type DexEntry,
 } from '../scripts/utils/data-loading-utils';
 
 // Mock fs and path modules
@@ -50,7 +50,9 @@ describe('Data Loading Utilities', () => {
           is_legendary: false,
           is_mythical: false,
           generation: 'generation-i',
-          evolution_chain: { url: 'https://pokeapi.co/api/v2/evolution-chain/1/' }
+          evolution_chain: {
+            url: 'https://pokeapi.co/api/v2/evolution-chain/1/',
+          },
         },
         evolution: {
           evolves_to: [
@@ -58,10 +60,10 @@ describe('Data Loading Utilities', () => {
               id: 2,
               name: 'ivysaur',
               min_level: 16,
-              trigger: 'level-up'
-            }
-          ]
-        }
+              trigger: 'level-up',
+            },
+          ],
+        },
       },
       {
         id: 25,
@@ -72,7 +74,9 @@ describe('Data Loading Utilities', () => {
           is_legendary: false,
           is_mythical: false,
           generation: 'generation-i',
-          evolution_chain: { url: 'https://pokeapi.co/api/v2/evolution-chain/10/' }
+          evolution_chain: {
+            url: 'https://pokeapi.co/api/v2/evolution-chain/10/',
+          },
         },
         evolution: {
           evolves_to: [
@@ -80,17 +84,17 @@ describe('Data Loading Utilities', () => {
               id: 26,
               name: 'raichu',
               item: 'thunder-stone',
-              trigger: 'use-item'
-            }
+              trigger: 'use-item',
+            },
           ],
           evolves_from: {
             id: 172,
             name: 'pichu',
             min_level: 10,
-            trigger: 'level-up'
-          }
-        }
-      }
+            trigger: 'level-up',
+          },
+        },
+      },
     ];
 
     it('should load Pokemon data successfully', async () => {
@@ -99,7 +103,10 @@ describe('Data Loading Utilities', () => {
       const result = await loadPokemonData();
 
       expect(result).toEqual(mockPokemonData);
-      expect(mockFs.readFile).toHaveBeenCalledWith('/mock/project/data/pokemon-data.json', 'utf8');
+      expect(mockFs.readFile).toHaveBeenCalledWith(
+        '/mock/project/data/pokemon-data.json',
+        'utf8'
+      );
     });
 
     it('should cache Pokemon data on subsequent calls', async () => {
@@ -130,29 +137,37 @@ describe('Data Loading Utilities', () => {
       // Mock invalid data - not an array
       mockFs.readFile.mockResolvedValue(JSON.stringify({ invalid: 'data' }));
 
-      await expect(loadPokemonData()).rejects.toThrow('Pokemon data file does not contain an array');
+      await expect(loadPokemonData()).rejects.toThrow(
+        'Pokemon data file does not contain an array'
+      );
     });
 
     it('should validate individual Pokemon entries', async () => {
       const invalidPokemonData = [
         { id: 1, name: 'Valid' },
-        { id: null, name: 'Invalid' } // Missing id
+        { id: null, name: 'Invalid' }, // Missing id
       ];
       mockFs.readFile.mockResolvedValue(JSON.stringify(invalidPokemonData));
 
-      await expect(loadPokemonData()).rejects.toThrow('Invalid Pokemon data entry: missing id or name');
+      await expect(loadPokemonData()).rejects.toThrow(
+        'Invalid Pokemon data entry: missing id or name'
+      );
     });
 
     it('should handle file read errors', async () => {
       mockFs.readFile.mockRejectedValue(new Error('File not found'));
 
-      await expect(loadPokemonData()).rejects.toThrow('Error loading Pokemon data: File not found');
+      await expect(loadPokemonData()).rejects.toThrow(
+        'Error loading Pokemon data: File not found'
+      );
     });
 
     it('should handle JSON parse errors', async () => {
       mockFs.readFile.mockResolvedValue('invalid json');
 
-      await expect(loadPokemonData()).rejects.toThrow('Error loading Pokemon data:');
+      await expect(loadPokemonData()).rejects.toThrow(
+        'Error loading Pokemon data:'
+      );
     });
   });
 
@@ -164,7 +179,7 @@ describe('Data Loading Utilities', () => {
         name: 'Bulbasaur',
         types: [],
         species: {},
-        evolution: {}
+        evolution: {},
       },
       {
         id: 25,
@@ -172,8 +187,8 @@ describe('Data Loading Utilities', () => {
         name: 'Pikachu',
         types: [],
         species: {},
-        evolution: {}
-      }
+        evolution: {},
+      },
     ];
 
     it('should load and build Pokemon name map', async () => {
@@ -214,7 +229,7 @@ describe('Data Loading Utilities', () => {
   describe('loadDexEntries', () => {
     const mockDexEntries: DexEntry[] = [
       { id: 1, name: 'Bulbasaur' },
-      { id: 25, name: 'Pikachu' }
+      { id: 25, name: 'Pikachu' },
     ];
 
     it('should load dex entries successfully', async () => {
@@ -223,7 +238,10 @@ describe('Data Loading Utilities', () => {
       const result = await loadDexEntries();
 
       expect(result).toEqual(mockDexEntries);
-      expect(mockFs.readFile).toHaveBeenCalledWith('/mock/project/data/base-entries.json', 'utf8');
+      expect(mockFs.readFile).toHaveBeenCalledWith(
+        '/mock/project/data/base-entries.json',
+        'utf8'
+      );
     });
 
     it('should cache dex entries on subsequent calls', async () => {
@@ -242,17 +260,21 @@ describe('Data Loading Utilities', () => {
     it('should validate dex entries structure', async () => {
       mockFs.readFile.mockResolvedValue(JSON.stringify({ invalid: 'data' }));
 
-      await expect(loadDexEntries()).rejects.toThrow('Dex entries file does not contain an array');
+      await expect(loadDexEntries()).rejects.toThrow(
+        'Dex entries file does not contain an array'
+      );
     });
 
     it('should validate individual dex entries', async () => {
       const invalidDexEntries = [
         { id: 1, name: 'Valid' },
-        { id: null, name: 'Invalid' }
+        { id: null, name: 'Invalid' },
       ];
       mockFs.readFile.mockResolvedValue(JSON.stringify(invalidDexEntries));
 
-      await expect(loadDexEntries()).rejects.toThrow('Invalid dex entry: missing id or name');
+      await expect(loadDexEntries()).rejects.toThrow(
+        'Invalid dex entry: missing id or name'
+      );
     });
   });
 
@@ -268,22 +290,35 @@ describe('Data Loading Utilities', () => {
         dexEntries: true,
         classicEncounters: true,
         remixEncounters: true,
-        locations: true
+        locations: true,
       });
 
       expect(mockFs.access).toHaveBeenCalledTimes(5);
-      expect(mockFs.access).toHaveBeenCalledWith('/mock/project/data/pokemon-data.json');
-      expect(mockFs.access).toHaveBeenCalledWith('/mock/project/data/base-entries.json');
-      expect(mockFs.access).toHaveBeenCalledWith('/mock/project/data/route-encounters-classic.json');
-      expect(mockFs.access).toHaveBeenCalledWith('/mock/project/data/route-encounters-remix.json');
-      expect(mockFs.access).toHaveBeenCalledWith('/mock/project/data/locations.json');
+      expect(mockFs.access).toHaveBeenCalledWith(
+        '/mock/project/data/pokemon-data.json'
+      );
+      expect(mockFs.access).toHaveBeenCalledWith(
+        '/mock/project/data/base-entries.json'
+      );
+      expect(mockFs.access).toHaveBeenCalledWith(
+        '/mock/project/data/route-encounters-classic.json'
+      );
+      expect(mockFs.access).toHaveBeenCalledWith(
+        '/mock/project/data/route-encounters-remix.json'
+      );
+      expect(mockFs.access).toHaveBeenCalledWith(
+        '/mock/project/data/locations.json'
+      );
     });
 
     it('should handle missing files', async () => {
       // Mock some files as missing
-      mockFs.access.mockImplementation(async (filePath) => {
+      mockFs.access.mockImplementation(async filePath => {
         const pathStr = String(filePath);
-        if (pathStr.includes('pokemon-data.json') || pathStr.includes('locations.json')) {
+        if (
+          pathStr.includes('pokemon-data.json') ||
+          pathStr.includes('locations.json')
+        ) {
           throw new Error('File not found');
         }
         return undefined;
@@ -296,7 +331,7 @@ describe('Data Loading Utilities', () => {
         dexEntries: true,
         classicEncounters: true,
         remixEncounters: true,
-        locations: false
+        locations: false,
       });
     });
   });
@@ -333,11 +368,13 @@ describe('Data Loading Utilities', () => {
       expect(status).toEqual({
         pokemonData: false,
         pokemonNameMap: false,
-        dexEntries: false
+        dexEntries: false,
       });
 
       // Load Pokemon data
-      mockFs.readFile.mockResolvedValue(JSON.stringify([{ id: 1, name: 'Test' }]));
+      mockFs.readFile.mockResolvedValue(
+        JSON.stringify([{ id: 1, name: 'Test' }])
+      );
       await loadPokemonData();
 
       status = getCacheStatus();
@@ -365,16 +402,24 @@ describe('Data Loading Utilities', () => {
 
   describe('error handling', () => {
     it('should provide meaningful error messages', async () => {
-      mockFs.readFile.mockRejectedValue(new Error('ENOENT: no such file or directory'));
+      mockFs.readFile.mockRejectedValue(
+        new Error('ENOENT: no such file or directory')
+      );
 
-      await expect(loadPokemonData()).rejects.toThrow('Error loading Pokemon data: ENOENT: no such file or directory');
-      await expect(loadDexEntries()).rejects.toThrow('Error loading dex entries: ENOENT: no such file or directory');
+      await expect(loadPokemonData()).rejects.toThrow(
+        'Error loading Pokemon data: ENOENT: no such file or directory'
+      );
+      await expect(loadDexEntries()).rejects.toThrow(
+        'Error loading dex entries: ENOENT: no such file or directory'
+      );
     });
 
     it('should handle non-Error objects', async () => {
       mockFs.readFile.mockRejectedValue('String error');
 
-      await expect(loadPokemonData()).rejects.toThrow('Error loading Pokemon data: Unknown error');
+      await expect(loadPokemonData()).rejects.toThrow(
+        'Error loading Pokemon data: Unknown error'
+      );
     });
   });
-}); 
+});

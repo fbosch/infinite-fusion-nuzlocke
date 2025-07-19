@@ -3,11 +3,14 @@ import locationsData from '@data/locations.json';
 
 // Zod schema for location data
 export const LocationSchema = z.object({
-  name: z.string().min(1, { error: "Location name is required" }),
+  name: z.string().min(1, { error: 'Location name is required' }),
   routeId: z.number().nullable(),
-  order: z.number().int().positive({ error: "Order must be a positive integer" }),
-  region: z.string().min(1, { error: "Region is required" }),
-  description: z.string().min(1, { error: "Description is required" }),
+  order: z
+    .number()
+    .int()
+    .positive({ error: 'Order must be a positive integer' }),
+  region: z.string().min(1, { error: 'Region is required' }),
+  description: z.string().min(1, { error: 'Description is required' }),
 });
 
 export type Location = z.infer<typeof LocationSchema>;
@@ -44,4 +47,4 @@ export function getLocationsBySpecificRegion(region: string): Location[] {
 
 export function getLocationsSortedByOrder(): Location[] {
   return getLocations().sort((a, b) => a.order - b.order);
-} 
+}

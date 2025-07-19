@@ -128,7 +128,7 @@ if (typeof window !== 'undefined') {
   playthroughsStore = proxy<PlaythroughsState>(defaultState);
 
   // Load data from IndexedDB asynchronously
-  loadFromIndexedDB().then((loadedState) => {
+  loadFromIndexedDB().then(loadedState => {
     Object.assign(playthroughsStore, loadedState);
   });
 
@@ -171,9 +171,11 @@ export const playthroughActions = {
   getActivePlaythrough: (): Playthrough | null => {
     if (!playthroughsStore.activePlaythroughId) return null;
 
-    return playthroughsStore.playthroughs.find(
-      (p: Playthrough) => p.id === playthroughsStore.activePlaythroughId
-    ) || null;
+    return (
+      playthroughsStore.playthroughs.find(
+        (p: Playthrough) => p.id === playthroughsStore.activePlaythroughId
+      ) || null
+    );
   },
 
   // Set active playthrough
@@ -238,9 +240,10 @@ export const playthroughActions = {
 
       // If we deleted the active playthrough, set a new active one
       if (playthroughsStore.activePlaythroughId === playthroughId) {
-        playthroughsStore.activePlaythroughId = playthroughsStore.playthroughs.length > 0
-          ? playthroughsStore.playthroughs[0].id
-          : undefined;
+        playthroughsStore.activePlaythroughId =
+          playthroughsStore.playthroughs.length > 0
+            ? playthroughsStore.playthroughs[0].id
+            : undefined;
       }
     }
   },
@@ -265,4 +268,4 @@ export const playthroughActions = {
     playthroughsStore.playthroughs = [defaultPlaythrough];
     playthroughsStore.activePlaythroughId = defaultPlaythrough.id;
   },
-}; 
+};

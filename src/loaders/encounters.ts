@@ -2,9 +2,11 @@ import { z } from 'zod';
 
 // Zod schema for route encounter data
 export const RouteEncounterSchema = z.object({
-  routeName: z.string().min(1, { error: "Route name is required" }),
-  pokemonIds: z.array(z.number().int().positive({ error: "Pokemon ID must be positive" })),
-  routeId: z.number().int().positive({ error: "Route ID must be positive" }),
+  routeName: z.string().min(1, { error: 'Route name is required' }),
+  pokemonIds: z.array(
+    z.number().int().positive({ error: 'Pokemon ID must be positive' })
+  ),
+  routeId: z.number().int().positive({ error: 'Route ID must be positive' }),
 });
 
 export type RouteEncounter = z.infer<typeof RouteEncounterSchema>;
@@ -22,8 +24,12 @@ export async function getClassicEncounters(): Promise<RouteEncounter[]> {
   }
 
   try {
-    const classicEncountersData = await import('@data/route-encounters-classic.json');
-    const data = RouteEncountersArraySchema.parse(classicEncountersData.default);
+    const classicEncountersData = await import(
+      '@data/route-encounters-classic.json'
+    );
+    const data = RouteEncountersArraySchema.parse(
+      classicEncountersData.default
+    );
     classicEncountersCache = data;
     return data;
   } catch (error) {
@@ -38,7 +44,9 @@ export async function getRemixEncounters(): Promise<RouteEncounter[]> {
   }
 
   try {
-    const remixEncountersData = await import('@data/route-encounters-remix.json');
+    const remixEncountersData = await import(
+      '@data/route-encounters-remix.json'
+    );
     const data = RouteEncountersArraySchema.parse(remixEncountersData.default);
     remixEncountersCache = data;
     return data;
@@ -49,18 +57,30 @@ export async function getRemixEncounters(): Promise<RouteEncounter[]> {
 }
 
 // Get encounters by route ID
-export async function getEncountersByRouteId(routeId: number, gameMode: 'classic' | 'remix' = 'classic'): Promise<RouteEncounter | null> {
-  const encounters = gameMode === 'classic' ? await getClassicEncounters() : await getRemixEncounters();
+export async function getEncountersByRouteId(
+  routeId: number,
+  gameMode: 'classic' | 'remix' = 'classic'
+): Promise<RouteEncounter | null> {
+  const encounters =
+    gameMode === 'classic'
+      ? await getClassicEncounters()
+      : await getRemixEncounters();
   return encounters.find(encounter => encounter.routeId === routeId) || null;
 }
 
 // Get all encounters for a specific game mode
-export async function getEncounters(gameMode: 'classic' | 'remix' = 'classic'): Promise<RouteEncounter[]> {
-  return gameMode === 'classic' ? await getClassicEncounters() : await getRemixEncounters();
+export async function getEncounters(
+  gameMode: 'classic' | 'remix' = 'classic'
+): Promise<RouteEncounter[]> {
+  return gameMode === 'classic'
+    ? await getClassicEncounters()
+    : await getRemixEncounters();
 }
 
 // Create a map of routeId to encounter for quick lookup
-export async function getEncountersMap(gameMode: 'classic' | 'remix' = 'classic'): Promise<Map<number, RouteEncounter>> {
+export async function getEncountersMap(
+  gameMode: 'classic' | 'remix' = 'classic'
+): Promise<Map<number, RouteEncounter>> {
   const encounters = await getEncounters(gameMode);
   const encounterMap = new Map<number, RouteEncounter>();
 
@@ -69,4 +89,4 @@ export async function getEncountersMap(gameMode: 'classic' | 'remix' = 'classic'
   });
 
   return encounterMap;
-} 
+}

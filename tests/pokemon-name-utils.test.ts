@@ -5,7 +5,7 @@ import {
   findPokemonId,
   normalizePokemonNameForAPI,
   isPotentialPokemonName,
-  type PokemonNameMap
+  type PokemonNameMap,
 } from '../scripts/utils/pokemon-name-utils';
 
 describe('Pokemon Name Utilities', () => {
@@ -32,8 +32,8 @@ describe('Pokemon Name Utilities', () => {
       const variations = createNameVariations("Farfetch'd");
 
       expect(variations).toContain("Farfetch'd");
-      expect(variations).toContain("Farfetchd");
-      expect(variations).toContain("farfetchd");
+      expect(variations).toContain('Farfetchd');
+      expect(variations).toContain('farfetchd');
     });
 
     it('should handle names with dots', () => {
@@ -64,7 +64,7 @@ describe('Pokemon Name Utilities', () => {
       { id: 25, name: 'Pikachu' },
       { id: 32, name: 'Nidoran♂' },
       { id: 29, name: 'Nidoran♀' },
-      { id: 122, name: 'Mr. Mime' }
+      { id: 122, name: 'Mr. Mime' },
     ];
 
     let nameMap: PokemonNameMap;
@@ -98,7 +98,7 @@ describe('Pokemon Name Utilities', () => {
       const invalidData = [
         { id: null, name: 'Invalid' },
         { id: 1, name: null },
-        { id: 2, name: '' }
+        { id: 2, name: '' },
       ];
       const map = buildPokemonNameMap(invalidData as any);
       expect(map.nameToId.size).toBe(0);
@@ -112,7 +112,7 @@ describe('Pokemon Name Utilities', () => {
       { id: 25, name: 'Pikachu' },
       { id: 83, name: "Farfetch'd" },
       { id: 122, name: 'Mr. Mime' },
-      { id: 29, name: 'Nidoran♀' }
+      { id: 29, name: 'Nidoran♀' },
     ];
 
     let nameMap: PokemonNameMap;
@@ -175,10 +175,18 @@ describe('Pokemon Name Utilities', () => {
     });
 
     it('should handle special Pokemon forms', () => {
-      expect(normalizePokemonNameForAPI('Aegislash Blade Forme')).toBe('aegislash-shield');
-      expect(normalizePokemonNameForAPI('Oricorio (Baile Style)')).toBe('oricorio-baile');
-      expect(normalizePokemonNameForAPI('Deoxys Normal Forme')).toBe('deoxys-normal');
-      expect(normalizePokemonNameForAPI('Gourgeist Large Size')).toBe('gourgeist-average');
+      expect(normalizePokemonNameForAPI('Aegislash Blade Forme')).toBe(
+        'aegislash-shield'
+      );
+      expect(normalizePokemonNameForAPI('Oricorio (Baile Style)')).toBe(
+        'oricorio-baile'
+      );
+      expect(normalizePokemonNameForAPI('Deoxys Normal Forme')).toBe(
+        'deoxys-normal'
+      );
+      expect(normalizePokemonNameForAPI('Gourgeist Large Size')).toBe(
+        'gourgeist-average'
+      );
       expect(normalizePokemonNameForAPI('Castform (Normal)')).toBe('castform');
     });
 
@@ -203,7 +211,9 @@ describe('Pokemon Name Utilities', () => {
     });
 
     it('should reject too long names', () => {
-      expect(isPotentialPokemonName('ThisIsWayTooLongToBeAPokemonName')).toBe(false);
+      expect(isPotentialPokemonName('ThisIsWayTooLongToBeAPokemonName')).toBe(
+        false
+      );
     });
 
     it('should reject metadata terms', () => {
@@ -232,4 +242,4 @@ describe('Pokemon Name Utilities', () => {
       expect(isPotentialPokemonName('123456789012345678901')).toBe(false); // 21 chars
     });
   });
-}); 
+});

@@ -1,32 +1,27 @@
-
 import LocationList from '@/components/LocationList';
 import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Home() {
   return (
-    <div className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900">
+    <div className='min-h-screen p-8 bg-gray-50 dark:bg-gray-900'>
       {/* Skip link for keyboard navigation */}
       <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-md z-50"
+        href='#main-content'
+        className='sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-md z-50'
       >
         Skip to main content
       </a>
 
-      <main
-        id="main-content"
-        className="max-w-4xl mx-auto"
-        role="main"
-      >
-        <header className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+      <main id='main-content' className='max-w-4xl mx-auto' role='main'>
+        <header className='flex items-center justify-between mb-8'>
+          <h1 className='text-4xl font-bold text-gray-900 dark:text-white'>
             Infinite Fusion Nuzlocke Tracker
           </h1>
           <ThemeToggle />
         </header>
 
-        <section aria-labelledby="locations-heading">
-          <h2 id="locations-heading" className="sr-only">
+        <section aria-labelledby='locations-heading'>
+          <h2 id='locations-heading' className='sr-only'>
             Game Locations
           </h2>
           <LocationList />
