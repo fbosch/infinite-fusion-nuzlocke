@@ -55,6 +55,8 @@ export function getPokemonSpriteUrlFromOption(pokemon: PokemonOption): string {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
 }
 
+
+
 // Pokemon Option Component
 const PokemonOption = ({
   pokemon,
@@ -278,6 +280,18 @@ export const PokemonCombobox = ({
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
   const dragSnapshot = useSnapshot(dragStore);
+  
+  // Local nickname state for smooth typing
+  const [localNickname, setLocalNickname] = useState(value?.nickname || '');
+  
+  // Sync local nickname when value changes (but not during typing)
+  useEffect(() => {
+    if (value?.nickname !== localNickname) {
+      setLocalNickname(value?.nickname || '');
+    }
+  }, [value?.nickname]);
+  
+
 
   // State for route encounters and all Pokemon
   const [routeEncounterData, setRouteEncounterData] = useState<PokemonOption[]>(
@@ -449,17 +463,22 @@ export const PokemonCombobox = ({
     [onChange]
   );
 
-  // Handle nickname input change
+  // Handle nickname input change with local state
   const handleNicknameChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const newNickname = event.target.value;
+      // Update local state immediately for responsive typing
+      setLocalNickname(newNickname);
+      
       if (value) {
-        // Update the PokemonOption with the new nickname
-        const updatedPokemon: PokemonOption = {
-          ...value,
-          nickname: newNickname,
-        };
-        onChange(updatedPokemon);
+        // Use startTransition to defer the state update
+        startTransition(() => {
+          const updatedPokemon: PokemonOption = {
+            ...value,
+            nickname: newNickname,
+          };
+          onChange(updatedPokemon);
+        });
       }
     },
     [value, onChange]
@@ -623,6 +642,8 @@ export const PokemonCombobox = ({
     dragActions.clearDrag();
   }, []);
 
+
+
   // Listen for clear and switch events from other comboboxes
   useEffect(() => {
     const handleClearEvent = (event: CustomEvent) => {
@@ -658,7 +679,7 @@ export const PokemonCombobox = ({
   }, [comboboxId, onChange]);
 
   return (
-    <div className='space-y-2'>
+    <div className=''>
       <Combobox
         value={value || null}
         onChange={handleChange}
@@ -675,8 +696,9 @@ export const PokemonCombobox = ({
           >
             <ComboboxInput
               className={clsx(
-                'w-full px-3 py-3.5 text-sm border rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
-                'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-400',
+                'rounded-t-md rounded-b-none border',
+                'w-full px-3 py-3.5 text-sm  bg-white text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
+                'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
                 'focus:cursor-text hover:cursor-pointer',
                 (value || dragPreview) && 'pl-12', // Add padding for sprite when value is selected or previewing
                 dragPreview &&
@@ -735,7 +757,7 @@ export const PokemonCombobox = ({
           </div>
           <ComboboxOptions
             className={clsx(
-              'absolute z-10 mt-1 w-full overflow-hidden rounded-md py-1 text-base shadow-lg focus:outline-none sm:text-sm',
+              'absolute z-20 w-full overflow-hidden rounded-b-md py-1 text-base shadow-lg focus:outline-none sm:text-sm',
               'bg-white dark:bg-gray-800',
               'border border-gray-400 dark:border-gray-600'
             )}
@@ -753,13 +775,14 @@ export const PokemonCombobox = ({
       {showNickname && (
         <input
           type='text'
-          value={value?.nickname || ''}
+          value={localNickname}
           onChange={handleNicknameChange}
           placeholder={nicknamePlaceholder}
           disabled={disabled || !value}
           className={clsx(
-            'w-full px-3 py-3.5 text-sm border rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
-            'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-400',
+            'rounded-b-md rounded-t-none relative',
+            'w-full px-3 py-3.5 text-sm border rounded-md bg-white text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
+            'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
             'placeholder-gray-500 dark:placeholder-gray-400'
           )}
           maxLength={12}
