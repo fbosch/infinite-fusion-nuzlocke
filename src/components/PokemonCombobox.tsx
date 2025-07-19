@@ -18,6 +18,7 @@ import {
 } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
+import { useSnapshot } from 'valtio';
 import {
   getInfiniteFusionToNationalDexMap,
   getPokemon,
@@ -25,15 +26,11 @@ import {
   type PokemonOption,
 } from '@/loaders/pokemon';
 import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
+import { dragStore, dragActions } from '@/stores/dragStore';
 
 // Global cache for National Dex ID mapping
 let nationalDexMapping: Map<number, number> | null = null;
 let mappingPromise: Promise<void> | null = null;
-
-// Global drag state for cross-component communication
-let currentDragData: string | null = null;
-let currentDragSource: string | null = null;
-let currentDragValue: PokemonOption | null | undefined = null;
 
 // Initialize the National Dex mapping
 export async function initializeSpriteMapping(): Promise<void> {
@@ -73,9 +70,7 @@ const PokemonOption = ({
   const handleDragStart = (e: React.DragEvent<HTMLImageElement>) => {
     e.dataTransfer.setData('text/plain', pokemon.name);
     e.dataTransfer.effectAllowed = 'copy';
-    currentDragData = pokemon.name;
-    currentDragSource = comboboxId || null; // Track the source combobox
-    currentDragValue = null; // Reset drag value for option drags
+    dragActions.startDrag(pokemon.name, comboboxId || '', null);
   };
 
   return (
@@ -155,9 +150,7 @@ const PokemonOptions = ({
   ) => {
     e.dataTransfer.setData('text/plain', pokemonName);
     e.dataTransfer.effectAllowed = 'copy';
-    currentDragData = pokemonName;
-    currentDragSource = comboboxId || null; // Track the source combobox
-    currentDragValue = null; // Reset drag value for option drags
+    dragActions.startDrag(pokemonName, comboboxId || '', null);
   };
 
   if (options.length === 0) {
@@ -280,6 +273,7 @@ export const PokemonCombobox = ({
 }) => {
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
+  const dragSnapshot = useSnapshot(dragStore);
 
   // State for route encounters and all Pokemon
   const [routeEncounterData, setRouteEncounterData] = useState<PokemonOption[]>(
@@ -293,7 +287,7 @@ export const PokemonCombobox = ({
       if (routeId === 0) return false;
       return routeEncounterData.some(pokemon => pokemon.id === pokemonId);
     },
-    [routeEncounterData]
+    [routeEncounterData, routeId]
   );
 
   // Async function to load route encounter data
@@ -462,20 +456,21 @@ export const PokemonCombobox = ({
 
         // Check if this drop is from a different combobox
         const isFromDifferentCombobox =
-          currentDragSource && currentDragSource !== comboboxId;
+          dragSnapshot.currentDragSource &&
+          dragSnapshot.currentDragSource !== comboboxId;
 
         // Check if both comboboxes have values for switching
         // This will work for any two different comboboxes (like head/body) that both have values
         const canSwitch =
           isFromDifferentCombobox &&
-          currentDragValue &&
+          dragSnapshot.currentDragValue &&
           value &&
-          currentDragValue.name !== value.name;
+          dragSnapshot.currentDragValue.name !== value.name;
 
-        if (canSwitch && currentDragValue) {
+        if (canSwitch && dragSnapshot.currentDragValue) {
           // Switch values between the two comboboxes
           const targetValue = value;
-          const sourceValue = currentDragValue;
+          const sourceValue = dragSnapshot.currentDragValue;
 
           // Set this combobox to the source value
           onChange(sourceValue);
@@ -484,7 +479,7 @@ export const PokemonCombobox = ({
           window.dispatchEvent(
             new CustomEvent('switchCombobox', {
               detail: {
-                comboboxId: currentDragSource,
+                comboboxId: dragSnapshot.currentDragSource,
                 value: targetValue,
               },
             })
@@ -518,7 +513,7 @@ export const PokemonCombobox = ({
                   // Dispatch a custom event to notify the source combobox to clear
                   window.dispatchEvent(
                     new CustomEvent('clearCombobox', {
-                      detail: { comboboxId: currentDragSource },
+                      detail: { comboboxId: dragSnapshot.currentDragSource },
                     })
                   );
                 }
@@ -532,7 +527,7 @@ export const PokemonCombobox = ({
         }
       }
     },
-    [onChange, comboboxId, value]
+    [onChange, comboboxId, value, dragSnapshot]
   );
 
   const handleDragOver = useCallback(
@@ -541,7 +536,7 @@ export const PokemonCombobox = ({
       e.dataTransfer.dropEffect = 'copy';
 
       // Show preview of what will be dropped using global drag data
-      const pokemonName = currentDragData;
+      const pokemonName = dragSnapshot.currentDragData;
       if (pokemonName && (!dragPreview || dragPreview.name !== pokemonName)) {
         // Find the Pokemon by name to create a proper preview
         const findPokemonForPreview = async () => {
@@ -571,7 +566,7 @@ export const PokemonCombobox = ({
         findPokemonForPreview();
       }
     },
-    [dragPreview]
+    [dragPreview, dragSnapshot.currentDragData]
   );
 
   const handleDragLeave = useCallback(() => {
@@ -581,9 +576,7 @@ export const PokemonCombobox = ({
 
   const handleDragEnd = useCallback(() => {
     // Clear global drag data when drag ends
-    currentDragData = null;
-    currentDragSource = null;
-    currentDragValue = null;
+    dragActions.clearDrag();
   }, []);
 
   // Listen for clear and switch events from other comboboxes
@@ -596,14 +589,7 @@ export const PokemonCombobox = ({
     };
 
     const handleSwitchEvent = (event: CustomEvent) => {
-      console.log('Received switch event:', {
-        targetComboboxId: event.detail.comboboxId,
-        currentComboboxId: comboboxId,
-        value: event.detail.value?.name,
-      });
-      
       if (event.detail.comboboxId === comboboxId) {
-        console.log('Applying switch value to combobox:', comboboxId);
         onChange(event.detail.value);
         setQuery('');
       }
@@ -684,9 +670,11 @@ export const PokemonCombobox = ({
                     (dragPreview || value)!.name
                   );
                   e.dataTransfer.effectAllowed = 'copy';
-                  currentDragData = (dragPreview || value)!.name;
-                  currentDragSource = comboboxId || null; // Track the source combobox
-                  currentDragValue = value || null; // Store the current value for potential switching
+                  dragActions.startDrag(
+                    (dragPreview || value)!.name,
+                    comboboxId || '',
+                    value || null
+                  );
                 }}
               />
             </div>
