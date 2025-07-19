@@ -52,8 +52,6 @@ export function FusionSprite({
   const hoverRef = useRef<boolean>(false);
   const { head, body, isFusion } = encounterData;
   
-  if (!head && !body) return null;
-  
   const spriteUrl = getSpriteUrl(head, body, isFusion);
   const altText = getAltText(head, body, isFusion);
   const spriteSize = SPRITE_SIZES[size];
@@ -74,6 +72,9 @@ export function FusionSprite({
     return `https://infinitefusiondex.com/details/${head.id}.${body.id}`
     }
   }, [head,body])
+  
+  // Early return after all hooks
+  if (!head && !body) return null;
   
   return (
     <a href={link} target='_blank' rel='noopener noreferrer' className='cursor-help' draggable={false} title='Open Pokedex'

@@ -42,7 +42,7 @@ export default function LocationList() {
     }
   }, []);
 
-  // Define columns inside the component to access encounters state
+  // Define columns outside of component to prevent recreation
   const columns = useMemo(() => [
     columnHelper.accessor('name', {
       header: 'Location',
@@ -58,22 +58,7 @@ export default function LocationList() {
       id: 'sprite',
       header: '',
       enableSorting: false,
-      cell: props => {
-        const routeId = props.row.original.routeId;
-        const encounterData = encounters[routeId] || {
-          head: null,
-          body: null,
-          isFusion: false,
-        };
-        
-        return (
-            <FusionSprite
-              encounterData={encounterData}
-              size='lg'
-              className='scale-150'
-            />
-        );
-      },
+      cell: () => null, // Handled in render loop
       size: 80, // Width for sprite column
     }),
     columnHelper.accessor('routeId', {
@@ -87,34 +72,10 @@ export default function LocationList() {
       id: 'reset',
       header: '',
       enableSorting: false,
-      cell: props => {
-        const routeId = props.row.original.routeId;
-        const hasEncounter = encounters[routeId] && (
-          encounters[routeId].head || encounters[routeId].body
-        );
-        
-        return (
-          <button
-            type='button'
-            onClick={() => handleResetEncounter(routeId)}
-            disabled={!hasEncounter}
-            className={clsx(
-              'size-8 flex items-center justify-center rounded-md transition-colors cursor-pointer',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2',
-              'disabled:opacity-30 disabled:cursor-not-allowed',
-              'text-gray-400 hover:text-red-600 hover:bg-red-50',
-              'dark:text-gray-500 dark:hover:text-red-400 dark:hover:bg-red-900/20'
-            )}
-            aria-label={`Reset encounter for ${props.row.original.name}`}
-            title='Reset encounter'
-          >
-            <X className='size-4' />
-          </button>
-        );
-      },
+      cell: () => null, // Handled in render loop
       size: 60, // Width for reset column
     }),
-  ], [encounters]);
+  ], []); // Remove encounters dependency
 
   const table = useReactTable({
     data,
@@ -126,19 +87,23 @@ export default function LocationList() {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     enableSorting: true,
+    // Performance optimizations
+    enableColumnResizing: false,
+    enableRowSelection: false,
+    enableMultiSort: false,
   });
 
-  // Reset encounter handler
-  const handleResetEncounter = (routeId: number) => {
+  // Reset encounter handler - memoized to prevent re-renders
+  const handleResetEncounter = useCallback((routeId: number) => {
     setEncounters(prev => {
       const newEncounters = { ...prev };
       delete newEncounters[routeId];
       return newEncounters;
     });
-  };
+  }, []);
 
   // Optimized encounter selection handler for immediate response
-  const handleEncounterSelect = (
+  const handleEncounterSelect = useCallback((
     routeId: number,
     pokemon: PokemonOption | null,
     field: 'head' | 'body' = 'head'
@@ -172,10 +137,10 @@ export default function LocationList() {
           };
         }
       });
-  };
+  }, []);
 
   // Enhanced encounter selection handler that can create fusions
-  const handleEncounterSelectWithFusion = (
+  const handleEncounterSelectWithFusion = useCallback((
     routeId: number,
     pokemon: PokemonOption | null,
     field: 'head' | 'body' = 'head',
@@ -220,10 +185,10 @@ export default function LocationList() {
           };
         }
       });
-  };
+  }, []);
 
   // Fusion toggle handler
-  const handleFusionToggle = (routeId: number) => {
+  const handleFusionToggle = useCallback((routeId: number) => {
     startTransition(() => {
       setEncounters(prev => {
         const currentEncounter = prev[routeId] || {
@@ -254,12 +219,13 @@ export default function LocationList() {
         }
       });
     });
-  };
+  }, []);
 
   // Handle fusion creation from drag and drop
   const handleCreateFusion = useCallback((event: CustomEvent) => {
     const { routeId, head, body } = event.detail;
-    
+   
+    startTransition(() => {
     setEncounters(prev => {
       return {
         ...prev,
@@ -268,7 +234,8 @@ export default function LocationList() {
           body,
           isFusion: true,
         },
-      };
+        };
+      });
     });
   }, []);
 
@@ -365,11 +332,11 @@ export default function LocationList() {
           {table.getRowModel().rows.map(row => (
             <tr
               key={row.id}
-              className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colorsa'
+              className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
               role='row'
             >
               {row.getVisibleCells().map(cell => {
-                const routeId = cell.getValue() as number;
+                const routeId = row.original.routeId;
                 const encounterData = encounters[routeId] || {
                   head: null,
                   body: null,
@@ -386,6 +353,52 @@ export default function LocationList() {
                       onEncounterSelect={handleEncounterSelect}
                       onFusionToggle={handleFusionToggle}
                     />
+                  );
+                }
+
+                // Special handling for sprite column to avoid re-renders
+                if (cell.column.id === 'sprite') {
+                  return (
+                    <td
+                      key={cell.id}
+                      className='px-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
+                      role='cell'
+                    >
+                      <FusionSprite
+                        encounterData={encounterData}
+                        size='lg'
+                        className='scale-150'
+                      />
+                    </td>
+                  );
+                }
+
+                // Special handling for reset column to avoid re-renders
+                if (cell.column.id === 'reset') {
+                  const hasEncounter = encounterData.head || encounterData.body;
+                  return (
+                    <td
+                      key={cell.id}
+                      className='px-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
+                      role='cell'
+                    >
+                      <button
+                        type='button'
+                        onClick={() => handleResetEncounter(routeId)}
+                        disabled={!hasEncounter}
+                        className={clsx(
+                          'size-8 flex items-center justify-center rounded-md transition-colors cursor-pointer',
+                          'focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2',
+                          'disabled:opacity-30 disabled:cursor-not-allowed',
+                          'text-gray-400 hover:text-red-600 hover:bg-red-50',
+                          'dark:text-gray-500 dark:hover:text-red-400 dark:hover:bg-red-900/20'
+                        )}
+                        aria-label={`Reset encounter for ${row.original.name}`}
+                        title='Reset encounter'
+                      >
+                        <X className='size-4' />
+                      </button>
+                    </td>
                   );
                 }
 

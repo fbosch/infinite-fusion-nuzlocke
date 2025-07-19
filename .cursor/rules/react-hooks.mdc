@@ -1,0 +1,159 @@
+# React Hook Rules
+
+Rules for using React hooks correctly and avoiding common pitfalls.
+
+## Core Hook Rules
+
+### Hook Order Consistency
+
+- **Always call hooks in the same order**: Hooks must be called in the same order on every render
+- **Never call hooks conditionally**: Don't call hooks inside loops, conditions, or nested functions
+- **Call hooks at the top level**: Only call hooks from React function components or custom hooks
+
+### Early Returns and Hooks
+
+- **Early returns must come after all hooks**: If a component needs to return early, do it after all hooks have been called
+- **Never return before hooks**: This breaks the Rules of Hooks and causes runtime errors
+
+### Correct Pattern
+
+```typescript
+// ✅ Good: All hooks called before early return
+function MyComponent({ data }: Props) {
+  const [state, setState] = useState(null);
+  const memoizedValue = useMemo(() => computeValue(data), [data]);
+  const ref = useRef(null);
+
+  // Early return after all hooks
+  if (!data) return null;
+
+  return <div>{memoizedValue}</div>;
+}
+```
+
+### Incorrect Pattern
+
+```typescript
+// ❌ Bad: Early return before hooks
+function MyComponent({ data }: Props) {
+  if (!data) return null; // This breaks hook order!
+
+  const [state, setState] = useState(null);
+  const memoizedValue = useMemo(() => computeValue(data), [data]);
+
+  return <div>{memoizedValue}</div>;
+}
+```
+
+## Hook Dependencies
+
+### useEffect Dependencies
+
+- **Include all dependencies**: Every value from component scope used inside useEffect should be in the dependency array
+- **Use exhaustive-deps ESLint rule**: Enable this rule to catch missing dependencies
+- **Avoid infinite loops**: Be careful with object/array dependencies that change on every render
+
+### useMemo and useCallback Dependencies
+
+- **Include all referenced values**: Any value from component scope used in the callback should be in dependencies
+- **Don't over-optimize**: Only use these hooks when performance is actually an issue
+- **Consider useCallback for event handlers**: Especially when passing to child components
+
+## Custom Hook Rules
+
+### Naming Convention
+
+- **Start with 'use'**: All custom hooks must start with 'use' (e.g., `usePokemonData`)
+- **Descriptive names**: Hook names should clearly indicate their purpose
+
+### Custom Hook Structure
+
+```typescript
+// ✅ Good custom hook pattern
+function usePokemonData(pokemonId: number) {
+  const [data, setData] = useState<Pokemon | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    if (!pokemonId) return;
+
+    setLoading(true);
+    fetchPokemon(pokemonId)
+      .then(setData)
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, [pokemonId]);
+
+  return { data, loading, error };
+}
+```
+
+## Common Hook Mistakes
+
+### Avoid These Patterns
+
+- **Conditional hook calls**: Never call hooks inside if statements
+- **Hooks in loops**: Never call hooks inside for loops or while loops
+- **Hooks in nested functions**: Never call hooks inside regular functions
+- **Early returns before hooks**: Never return from component before all hooks are called
+
+### Performance Considerations
+
+- **Don't overuse useMemo/useCallback**: Only use when there's a measurable performance benefit
+- **Use React.memo for expensive components**: Wrap components that re-render unnecessarily
+- **Consider useReducer for complex state**: When state logic becomes complex
+
+## Testing Hooks
+
+### Testing Custom Hooks
+
+- **Use @testing-library/react-hooks**: For testing custom hooks in isolation
+- **Test all hook states**: Loading, success, error, and edge cases
+- **Mock external dependencies**: Mock API calls and external services
+
+### Testing Components with Hooks
+
+- **Test hook interactions**: Ensure hooks work together correctly
+- **Test state changes**: Verify that state updates happen as expected
+- **Test cleanup**: Ensure useEffect cleanup functions work properly
+
+## Debugging Hook Issues
+
+### Common Error Messages
+
+- **"React has detected a change in the order of Hooks"**: Usually means early return before hooks
+- **"Hooks can only be called inside the body of a function component"**: Hook called outside component
+- **"Rules of Hooks"**: General hook rule violation
+
+### Debugging Steps
+
+1. **Check for early returns**: Ensure all hooks are called before any returns
+2. **Verify hook order**: Make sure hooks are called in the same order every time
+3. **Check conditional logic**: Ensure no hooks are called conditionally
+4. **Review dependencies**: Check useEffect, useMemo, and useCallback dependencies
+
+## Best Practices
+
+### Hook Organization
+
+- **Group related hooks**: Keep related state and effects together
+- **Order consistently**: Use a consistent order (state, effects, refs, custom hooks)
+- **Extract complex logic**: Move complex hook logic to custom hooks
+
+### State Management
+
+- **Use appropriate state types**: useState for simple state, useReducer for complex state
+- **Avoid prop drilling**: Use Context or state management libraries for deep prop passing
+- **Keep state minimal**: Only store what's necessary in component state
+
+### Effect Cleanup
+
+- **Always clean up effects**: Return cleanup functions from useEffect when needed
+- **Handle component unmounting**: Clean up subscriptions, timers, and event listeners
+- **Use AbortController**: For canceling fetch requests on unmount
+  description:
+  globs:
+  alwaysApply: false
+
+---
