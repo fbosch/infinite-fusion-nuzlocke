@@ -117,8 +117,7 @@ export default function LocationList() {
           return {
             ...prev,
             [routeId]: {
-              head: currentEncounter.head,
-              body: null,
+              ...currentEncounter,
               isFusion: true,
             },
           };
@@ -127,8 +126,7 @@ export default function LocationList() {
           return {
             ...prev,
             [routeId]: {
-              head: currentEncounter.head || currentEncounter.body,
-              body: null,
+              ...currentEncounter,
               isFusion: false,
             },
           };
