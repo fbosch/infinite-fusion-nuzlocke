@@ -180,7 +180,7 @@ export function EncounterCell({
             <div className='flex items-center gap-2'>
               <div className='flex-1 relative'>
                 <span className='absolute -top-6 left-0 text-xs font-medium text-gray-500 dark:text-gray-400'>
-                  Head:
+                  Head
                 </span>
                 <PokemonCombobox
                   routeId={routeId}
@@ -215,7 +215,7 @@ export function EncounterCell({
               </div>
               <div className='flex-1 relative'>
                 <span className='absolute -top-6 left-0 text-xs font-medium text-gray-500 dark:text-gray-400'>
-                  Body:
+                  Body
                 </span>
                 <PokemonCombobox
                   routeId={routeId}

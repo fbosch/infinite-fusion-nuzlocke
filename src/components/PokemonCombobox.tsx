@@ -887,7 +887,9 @@ export const PokemonCombobox = ({
                       'border border-gray-300 dark:border-gray-600',
                       'z-50'
                     )}>
-                      <div className='px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600'>
+                      <div className={clsx(
+                        'px-3 pb-2 pt-1 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600',
+                      )}>
                         Choose Evolution
                       </div>
                       {availableEvolutions.map((evolution) => (
@@ -913,7 +915,6 @@ export const PokemonCombobox = ({
                             unoptimized
                           />
                           <span className='font-medium'>{evolution.name}</span>
-                          <Atom className='w-3 h-3 ml-auto text-blue-500 dark:text-blue-400' />
                         </button>
                       ))}
                     </div>
