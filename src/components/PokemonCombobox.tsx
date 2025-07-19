@@ -56,8 +56,6 @@ export async function getPokemonSpriteUrlAsync(pokemonId: number): Promise<strin
   }
 }
 
-
-
 // Pokemon Option Component
 const PokemonOption = ({
   pokemon,
@@ -118,8 +116,6 @@ const PokemonOptions = ({
 }: {
   options: PokemonOption[];
 }) => {
-
-
   return (
     <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
       {options.map((pokemon) => (
@@ -193,35 +189,28 @@ export const PokemonCombobox = ({
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
 
-  // Async data loading state
+  // Simplified state - only track what's necessary
   const [encounterData, setEncounterData] = useState<PokemonOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasLoaded, setHasLoaded] = useState(false);
-  const [pokemonNameMap, setPokemonNameMap] = useState<Map<number, string> | null>(null);
 
-  // Initialize sprite mapping on component mount
-  useEffect(() => {
-    initializeSpriteMapping().catch(console.error);
-  }, []);
+  // Computed values instead of stored state
+  const hasLoaded = encounterData.length > 0;
+  const shouldLoad = routeId && !hasLoaded && !isLoading;
 
   // Async function to load encounter data
   const loadEncounterData = useCallback(async () => {
-    if (!routeId || hasLoaded || isLoading) return;
+    if (!shouldLoad) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      // Load Pokemon name map asynchronously first
-      let nameMap = pokemonNameMap;
-      if (!nameMap) {
-        nameMap = await getPokemonNameMap();
-        setPokemonNameMap(nameMap);
-      }
-
-      // Load encounter data asynchronously
-      const encounter = await getEncountersByRouteId(routeId, gameMode);
+      // Load Pokemon name map and encounter data in parallel
+      const [nameMap, encounter] = await Promise.all([
+        getPokemonNameMap(),
+        getEncountersByRouteId(routeId, gameMode)
+      ]);
 
       if (encounter) {
         const pokemonOptions: PokemonOption[] = encounter.pokemonIds
@@ -232,7 +221,6 @@ export const PokemonCombobox = ({
           .filter(pokemon => pokemon.name !== `Unknown Pokemon (${pokemon.id})`);
 
         setEncounterData(pokemonOptions);
-        setHasLoaded(true);
       } else {
         setError('No encounters found for this route');
       }
@@ -242,14 +230,14 @@ export const PokemonCombobox = ({
     } finally {
       setIsLoading(false);
     }
-  }, [routeId, gameMode, pokemonNameMap, hasLoaded, isLoading]);
+  }, [routeId, gameMode, shouldLoad]);
 
   // Load data when combobox opens or when user starts typing
   const handleInteraction = useCallback(() => {
-    if (!hasLoaded && !isLoading) {
+    if (shouldLoad) {
       loadEncounterData();
     }
-  }, [hasLoaded, isLoading, loadEncounterData]);
+  }, [shouldLoad, loadEncounterData]);
 
   // Memoize filtered options to prevent recalculation on every render
   const filteredOptions = useMemo(() => {
@@ -260,7 +248,7 @@ export const PokemonCombobox = ({
   }, [encounterData, deferredQuery]);
 
   // Optimized onChange handler without startTransition for immediate response
-  const handleChange = (newValue: PokemonOption | null | undefined) => {
+  const handleChange = useCallback((newValue: PokemonOption | null | undefined) => {
     // Only set a value if there's actually a selection
     if (newValue) {
       onChange(newValue);
@@ -268,7 +256,20 @@ export const PokemonCombobox = ({
       // Allow clearing the selection
       onChange(null);
     }
-  };
+  }, [onChange]);
+
+  // Memoize input change handler
+  const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    if (value === '') {
+      // Clear the selection when input is cleared
+      onChange(null);
+      setQuery(value);
+    } else {
+      // Deferred update for typing
+      startTransition(() => setQuery(value));
+    }
+  }, [onChange]);
 
   return (
     <Combobox
@@ -288,19 +289,10 @@ export const PokemonCombobox = ({
             placeholder={placeholder}
             displayValue={(pokemon: PokemonOption | null | undefined) => pokemon?.name || ''}
             spellCheck={false}
-            onChange={(event) => {
-              const value = event.target.value;
-              if (value === '') {
-                // Clear the selection when input is cleared
-                onChange(null);
-                setQuery(value);
-              } else {
-                // Deferred update for typing
-                startTransition(() => setQuery(value));
-              }
-            }}
+            onChange={handleInputChange}
             onFocus={handleInteraction}
             onClick={handleInteraction}
+            onMouseEnter={handleInteraction}
           />
           {value && (
             <div className="absolute inset-y-0 left-1.5 flex items-center">
