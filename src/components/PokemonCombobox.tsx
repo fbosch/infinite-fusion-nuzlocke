@@ -152,7 +152,7 @@ const PokemonOptions = ({
     e.dataTransfer.effectAllowed = 'copy';
     dragActions.startDrag(pokemonName, comboboxId || '', null);
   };
-
+  
   if (options.length === 0) {
     return (
       <div className='max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent'>
@@ -309,7 +309,6 @@ export const PokemonCombobox = ({
             id,
             name: nameMap.get(id) || `Unknown Pokemon (${id})`,
             nationalDexId: pokemon?.nationalDexId || 0,
-            evolutionIds: pokemon?.evolution?.evolves_to ? [...pokemon.evolution.evolves_to.map(e => e.id)] : undefined,
           };
         });
 
@@ -478,7 +477,6 @@ export const PokemonCombobox = ({
             id: sourceValue.id,
             name: sourceValue.name,
             nationalDexId: sourceValue.nationalDexId,
-            evolutionIds: sourceValue.evolutionIds ? [...sourceValue.evolutionIds] : undefined,
           };
 
           // Set this combobox to the source value
@@ -514,7 +512,6 @@ export const PokemonCombobox = ({
               id: foundPokemon.id,
               name: pokemonName,
               nationalDexId: foundPokemon.nationalDexId,
-              evolutionIds: foundPokemon.evolution?.evolves_to ? [...foundPokemon.evolution.evolves_to.map(e => e.id)] : undefined,
             };
                 onChange(pokemonOption);
 
@@ -565,7 +562,6 @@ export const PokemonCombobox = ({
                 id: foundPokemon.id,
                 name: pokemonName,
                 nationalDexId: foundPokemon.nationalDexId,
-                evolutionIds: foundPokemon.evolution?.evolves_to ? [...foundPokemon.evolution.evolves_to.map(e => e.id)] : undefined,
               };
               setDragPreview(pokemonOption);
             }

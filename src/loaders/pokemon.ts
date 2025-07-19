@@ -7,7 +7,6 @@ export interface PokemonOption {
   id: number;
   name: string;
   nationalDexId: number;
-  evolutionIds?: number[]; // IDs of next evolutions
 }
 
 // Zod schema for Pokemon type
@@ -99,7 +98,6 @@ export async function getPokemonFuseInstance(): Promise<Fuse<PokemonOption>> {
     id: p.id,
     name: p.name,
     nationalDexId: p.nationalDexId,
-    evolutionIds: p.evolution?.evolves_to ? [...p.evolution.evolves_to.map(e => e.id)] : undefined,
   }));
 
   const fuseOptions: IFuseOptions<PokemonOption> = {
@@ -114,6 +112,18 @@ export async function getPokemonFuseInstance(): Promise<Fuse<PokemonOption>> {
 
   pokemonFuseInstance = new Fuse(pokemonOptions, fuseOptions);
   return pokemonFuseInstance;
+}
+
+// Function to get evolution IDs for a specific Pokemon
+export async function getPokemonEvolutionIds(pokemonId: number): Promise<number[]> {
+  const pokemon = await getPokemon();
+  const targetPokemon = pokemon.find(p => p.id === pokemonId);
+  
+  if (!targetPokemon?.evolution?.evolves_to) {
+    return [];
+  }
+  
+  return targetPokemon.evolution.evolves_to.map(e => e.id);
 }
 
 // Smart search function that handles both name and ID searches
@@ -132,7 +142,6 @@ export async function searchPokemon(query: string): Promise<PokemonOption[]> {
         id: p.id,
         name: p.name,
         nationalDexId: p.nationalDexId,
-        evolutionIds: p.evolution?.evolves_to ? [...p.evolution.evolves_to.map(e => e.id)] : undefined,
       }));
     return results;
   } else {
