@@ -159,22 +159,7 @@ export default function LocationList() {
                 // Special handling for encounter column
                 if (cell.column.id === 'routeId') {
                   const routeId = cell.getValue() as number;
-                  if (!routeId) {
-                    return (
-                      <td
-                        key={cell.id}
-                        className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
-                        role='cell'
-                      >
-                        <span className='text-gray-400 dark:text-gray-500 italic'>
-                          No encounters
-                        </span>
-                      </td>
-                    );
-                  }
-
                   const selectedPokemon = encounters[routeId] || null;
-
                   return (
                     <td
                       key={cell.id}
