@@ -53,7 +53,7 @@ export function FusionSprite({
   const spriteSize = SPRITE_SIZES[size];
   
   const imageClasses = clsx(
-    'object-fill object-center image-render-pixelated',
+    'object-fill object-center image-render-pixelated origin-top -translate-y-1/9',
     className
   );
   
@@ -71,21 +71,40 @@ export function FusionSprite({
   
   return (
     <a href={link} target='_blank' rel='noopener noreferrer' className='cursor-help' draggable={false} title='Open Pokedex'>
-    <Image
-      src={spriteUrl}
-      alt={altText}
-      width={spriteSize}
-      height={spriteSize}
-      className={imageClasses}
-      loading='eager'
-      unoptimized
-      draggable={false}
-      onError={(e) => {
-        const target = e.target as HTMLImageElement;
-        if (head && body) {
-          target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.nationalDexId}.${body.nationalDexId}.png`
-        }
-      }}
-    /></a>
+      <div className='relative'>
+                  {/* Oval shadow at the bottom of the sprite */}
+          <div 
+            className='absolute opacity-60'
+            style={{ 
+              width: spriteSize * 0.6, 
+              height: spriteSize * 0.3,
+              borderRadius: '50%',
+              bottom: -spriteSize * 0.1,
+              left: spriteSize * 0.2,
+              transform: 'translateY(-40%) translateX(%)',
+              background: 'radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 70%, transparent 100%)'
+            }}
+          />
+        {/* Sprite positioned above the shadow */}
+        <div className='relative z-10'>
+          <Image
+            src={spriteUrl}
+            alt={altText}
+            width={spriteSize}
+            height={spriteSize}
+            className={imageClasses}
+            loading='eager'
+            unoptimized
+            draggable={false}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              if (head && body) {
+                target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.nationalDexId}.${body.nationalDexId}.png`
+              }
+            }}
+          />
+        </div>
+      </div>
+    </a>
   );
 } 

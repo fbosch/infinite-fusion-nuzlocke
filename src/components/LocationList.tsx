@@ -279,7 +279,7 @@ export default function LocationList() {
                 return (
                   <td
                     key={cell.id}
-                    className=' whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
+                    className='px-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
                     role='cell'
                     aria-label={`${cell.column.columnDef.header as string}: ${flexRender(cell.column.columnDef.cell, cell.getContext())}`}
                   >

@@ -12,7 +12,7 @@ export default function Home() {
         Skip to main content
       </a>
 
-      <main id='main-content' className='max-w-4xl mx-auto' role='main'>
+      <main id='main-content' className='max-w-[1200px] mx-auto' role='main'>
         <header className='flex items-center justify-between mb-8'>
           <h1 className='text-4xl font-bold text-gray-900 dark:text-white'>
             Infinite Fusion Nuzlocke Tracker
