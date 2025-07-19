@@ -14,7 +14,7 @@ import clsx from 'clsx';
 import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
 import { EncounterCell } from './EncounterCell';
-import { PokemonSprite } from './PokemonSprite';
+import { FusionSprite } from './FusionSprite';
 import type { PokemonOption } from '@/loaders/pokemon';
 
 const columnHelper = createColumnHelper<Location>();
@@ -67,7 +67,7 @@ export default function LocationList() {
         };
         
         return (
-            <PokemonSprite
+            <FusionSprite
               encounterData={encounterData}
               size='lg'
               className='scale-150'
