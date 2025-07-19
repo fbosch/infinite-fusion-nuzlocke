@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback } from 'react';
-import { Dna, DnaOff } from 'lucide-react';
+import { ArrowLeftRight, Dna, DnaOff, RotateCcw } from 'lucide-react';
 import { PokemonCombobox } from './PokemonCombobox';
 import type { PokemonOption } from '@/loaders/pokemon';
 import clsx from 'clsx';
@@ -37,6 +37,19 @@ export function EncounterCell({
     : encounterData.head;
   const isFusion = encounterData.isFusion;
   const dragSnapshot = useSnapshot(dragStore);
+
+  // Handle flip button click
+  const handleFlip = useCallback(() => {
+    if (!isFusion) return;
+
+    // Swap head and body (works even if one is empty)
+    const newHead = encounterData.body;
+    const newBody = encounterData.head;
+
+    // Update both fields
+    onEncounterSelect(routeId, newHead, 'head');
+    onEncounterSelect(routeId, newBody, 'body');
+  }, [isFusion, encounterData.head, encounterData.body, routeId, onEncounterSelect]);
 
   // Handle drop on fusion button
   const handleFusionDrop = useCallback(
@@ -144,7 +157,7 @@ export function EncounterCell({
       <div className='flex flex-row justify-center gap-2'>
         <div className='flex-1'>
           {isFusion ? (
-            <div className='flex items-start gap-2'>
+            <div className='flex items-center gap-2'>
               <div className='flex-1 relative'>
                 <span className='absolute -top-6 left-0 text-xs font-medium text-gray-500 dark:text-gray-400'>
                   Head:
@@ -158,6 +171,26 @@ export function EncounterCell({
                   placeholder='Select head Pokemon'
                   comboboxId={`${routeId}-head`}
                 />
+              </div>
+              <div className='flex flex-col items-center justify-center gap-1'>
+                <button
+                  type='button'
+                  onClick={handleFlip}
+                  disabled={!encounterData.head && !encounterData.body}
+                  className={clsx(
+                    'group',
+                    'size-8 flex items-center justify-center',
+                    'p-1.5 rounded-md border transition-all duration-200 cursor-pointer',
+                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+                    'disabled:opacity-50 disabled:cursor-not-allowed',
+                    'bg-white border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-400',
+                    'dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-blue-900/20'
+                  )}
+                  aria-label='Flip head and body Pokemon'
+                  title='Reverse fusion'
+                >
+                  <ArrowLeftRight className='size-4 group-hover:text-blue-600 dark:group-hover:text-blue-400' />
+                </button>
               </div>
               <div className='flex-1 relative'>
                 <span className='absolute -top-6 left-0 text-xs font-medium text-gray-500 dark:text-gray-400'>
@@ -203,8 +236,7 @@ export function EncounterCell({
               'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20':
                 !isFusion && selectedPokemon && dragSnapshot.currentDragSource && 
                 dragSnapshot.currentDragSource !== `${routeId}-single` &&
-                dragSnapshot.currentDragSource !== `${routeId}-head` &&
-                dragSnapshot.currentDragSource !== `${routeId}-body`,
+                dragSnapshot.currentDragSource !== `${routeId}-head` && dragSnapshot.isDragging,
             }
           )}
           aria-label={`Toggle fusion for ${selectedPokemon?.name || 'Pokemon'}`}

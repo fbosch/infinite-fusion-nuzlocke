@@ -5,12 +5,14 @@ export interface DragState {
   currentDragData: string | null;
   currentDragSource: string | null;
   currentDragValue: PokemonOption | null | undefined;
+  isDragging: boolean;
 }
 
 export const dragStore = proxy<DragState>({
   currentDragData: null,
   currentDragSource: null,
   currentDragValue: null,
+  isDragging: false,
 });
 
 // Actions for managing drag state
@@ -27,6 +29,10 @@ export const dragActions = {
     dragStore.currentDragValue = value;
   },
 
+  setIsDragging: (dragging: boolean) => {
+    dragStore.isDragging = dragging;
+  },
+
   startDrag: (
     data: string,
     source: string,
@@ -35,11 +41,13 @@ export const dragActions = {
     dragStore.currentDragData = data;
     dragStore.currentDragSource = source;
     dragStore.currentDragValue = value;
+    dragStore.isDragging = true;
   },
 
   clearDrag: () => {
     dragStore.currentDragData = null;
     dragStore.currentDragSource = null;
     dragStore.currentDragValue = null;
+    dragStore.isDragging = false;
   },
 };
