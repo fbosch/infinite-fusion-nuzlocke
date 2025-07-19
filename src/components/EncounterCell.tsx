@@ -49,7 +49,13 @@ export function EncounterCell({
     // Update both fields
     onEncounterSelect(routeId, newHead, 'head');
     onEncounterSelect(routeId, newBody, 'body');
-  }, [isFusion, encounterData.head, encounterData.body, routeId, onEncounterSelect]);
+  }, [
+    isFusion,
+    encounterData.head,
+    encounterData.body,
+    routeId,
+    onEncounterSelect,
+  ]);
 
   // Handle drop on fusion button
   const handleFusionDrop = useCallback(
@@ -75,14 +81,15 @@ export function EncounterCell({
       // Find the Pokémon by name
       const findPokemonByName = async () => {
         try {
-          const { getPokemon, getPokemonNameMap } = await import('@/loaders/pokemon');
+          const { getPokemon, getPokemonNameMap } = await import(
+            '@/loaders/pokemon'
+          );
           const allPokemon = await getPokemon();
           const nameMap = await getPokemonNameMap();
 
           // Find Pokemon by name (case insensitive)
           const foundPokemon = allPokemon.find(
-            p =>
-              nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
+            p => nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
           );
 
           if (foundPokemon) {
@@ -123,7 +130,14 @@ export function EncounterCell({
 
       findPokemonByName();
     },
-    [routeId, isFusion, selectedPokemon, onEncounterSelect, onFusionToggle, dragSnapshot.currentDragSource]
+    [
+      routeId,
+      isFusion,
+      selectedPokemon,
+      onEncounterSelect,
+      onFusionToggle,
+      dragSnapshot.currentDragSource,
+    ]
   );
 
   const handleFusionDragOver = useCallback(
@@ -153,12 +167,10 @@ export function EncounterCell({
     dragActions.clearDrag();
   }, []);
 
-
-
   return (
     <td
       className={clsx(
-        'px-6 pt-8 pb-6 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100',
+        'px-6 pt-8 pb-6 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
       )}
       role='cell'
     >
@@ -247,8 +259,8 @@ export function EncounterCell({
                 !isFusion,
               // Add visual feedback for drag over when not a fusion and has an existing encounter
               'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20':
-                !isFusion && 
-                selectedPokemon && 
+                !isFusion &&
+                selectedPokemon &&
                 dragSnapshot.isDragging &&
                 dragSnapshot.currentDragSource &&
                 dragSnapshot.currentDragSource !== `${routeId}-single` &&

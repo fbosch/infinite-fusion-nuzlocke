@@ -43,7 +43,7 @@ export const dragActions = {
   ) => {
     // Initialize global handlers on first use
     dragActions._initializeGlobalHandlers();
-    
+
     dragStore.currentDragData = data;
     dragStore.currentDragSource = source;
     dragStore.currentDragValue = value;

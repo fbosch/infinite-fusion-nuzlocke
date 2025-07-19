@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useRef} from 'react';
+import React, { useMemo, useRef } from 'react';
 import Image from 'next/image';
 import type { PokemonOption } from '@/loaders/pokemon';
 import clsx from 'clsx';
@@ -20,56 +20,69 @@ interface FusionSpriteProps {
 const SPRITE_SIZES = { sm: 32, md: 48, lg: 64, xl: 96 } as const;
 
 // Transparent 1x1 pixel data URL to prevent empty image flashing
-const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+const TRANSPARENT_PIXEL =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
-function getSpriteUrl(head: PokemonOption | null, body: PokemonOption | null, isFusion: boolean): string {
+function getSpriteUrl(
+  head: PokemonOption | null,
+  body: PokemonOption | null,
+  isFusion: boolean
+): string {
   const pokemon = head || body;
   if (!pokemon) return TRANSPARENT_PIXEL;
-  
+
   if (!isFusion || !body || !head) {
     return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
   }
-  
+
   return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${head.id}.${body.id}.png`;
 }
 
-function getAltText(head: PokemonOption | null, body: PokemonOption | null, isFusion: boolean): string {
+function getAltText(
+  head: PokemonOption | null,
+  body: PokemonOption | null,
+  isFusion: boolean
+): string {
   const pokemon = head || body;
   if (!pokemon) return '';
-  
+
   if (!isFusion) return pokemon.name;
   if (!body || !head) return `${pokemon.name} (fusion preview)`;
   return `${head.name}/${body.name} fusion`;
 }
 
-function getNicknameText(head: PokemonOption | null, body: PokemonOption | null, isFusion: boolean): string {
+function getNicknameText(
+  head: PokemonOption | null,
+  body: PokemonOption | null,
+  isFusion: boolean
+): string {
   if (!isFusion) {
     // Single Pokémon - show nickname if available, otherwise show name
     const pokemon = head || body;
     if (!pokemon) return '';
     return pokemon.nickname || pokemon.name;
   }
-  
+
   // Fusion case
   if (!head || !body) {
     const pokemon = head || body;
     if (!pokemon) return '';
     return pokemon.nickname || pokemon.name;
   }
-  
+
   return head.nickname || body.nickname || head.name || body.name;
 }
 
-export function FusionSprite({ 
-  encounterData, 
+export function FusionSprite({
+  encounterData,
   size = 'md',
-  className 
+  className,
 }: FusionSpriteProps) {
   const imageRef = useRef<HTMLImageElement>(null);
   const shadowRef = useRef<HTMLDivElement>(null);
   const hoverRef = useRef<boolean>(false);
   const { head, body, isFusion } = encounterData;
-  
+
   // Calculate all values before early return to maintain hook order
   const spriteUrl = getSpriteUrl(head, body, isFusion);
   const altText = getAltText(head, body, isFusion);
@@ -79,106 +92,119 @@ export function FusionSprite({
     'object-fill object-center image-render-pixelated origin-top -translate-y-1/9',
     className
   );
-  
+
   const link = useMemo(() => {
     if (head && !body) {
-      return `https://infinitefusiondex.com/details/${head.id}`
+      return `https://infinitefusiondex.com/details/${head.id}`;
     }
     if (!head && body) {
-      return `https://infinitefusiondex.com/details/${body.id}`
+      return `https://infinitefusiondex.com/details/${body.id}`;
     }
     if (head && body) {
-    return `https://infinitefusiondex.com/details/${head.id}.${body.id}`
+      return `https://infinitefusiondex.com/details/${head.id}.${body.id}`;
     }
-  }, [head,body])
-  
+  }, [head, body]);
+
   if (!head && !body) return null;
-  
+
   return (
-    <div className="flex flex-col items-center">
-      <a href={link} target='_blank' rel='noopener noreferrer' className='cursor-help' draggable={false} title='Open Pokedex'
-      
-      onMouseEnter={() => {
-        hoverRef.current = true;
-       if (imageRef.current) {
-         // Cancel any running animations so the new one will replay
-         imageRef.current.getAnimations().forEach(anim => anim.cancel());
-         if (shadowRef.current) {
-           shadowRef.current.getAnimations().forEach(anim => anim.cancel());
-         }
-         
-         const animateSprite = () => {
-           const animation = imageRef.current?.animate([
-             { transform: 'translateY(0px)' },
-             { transform: 'translateY(-4px)' },
-             { transform: 'translateY(0px)' },
-           ], {
-             duration: 400,
-             easing: 'linear',
-             playbackRate: 1,
-             iterations: 1,
-           });
-           
-           const shadowAnimation = shadowRef.current?.animate([
-             { transform: 'translateY(-40%) translateX(-60%) scale(1)' },
-             { transform: 'translateY(-38%) translateX(-60%) scale(1.03)' },
-             { transform: 'translateY(-40%) translateX(-60%) scale(1)' },
-           ], {
-             duration: 400,
-             easing: 'linear',
-             playbackRate: 1,
-             iterations: 1,
-           });
-           
-           if (animation) {
-             animation.onfinish = () => {
-               if (hoverRef.current) {
-                 animateSprite();
-               }
-             };
-           }
-         };
-         animateSprite();
-       }
-        
-      }}
-      onMouseLeave={() => {
-        hoverRef.current = false;
-        const animation = imageRef.current?.getAnimations();
-        const shadowAnimation = shadowRef.current?.getAnimations();
-        
-        if (animation) {
-          animation.forEach(a => { 
+    <div className='flex flex-col items-center'>
+      <a
+        href={link}
+        target='_blank'
+        rel='noopener noreferrer'
+        className='cursor-help'
+        draggable={false}
+        title='Open Pokedex'
+        onMouseEnter={() => {
+          hoverRef.current = true;
+          if (imageRef.current) {
+            // Cancel any running animations so the new one will replay
+            imageRef.current.getAnimations().forEach(anim => anim.cancel());
+            if (shadowRef.current) {
+              shadowRef.current.getAnimations().forEach(anim => anim.cancel());
+            }
+
+            const animateSprite = () => {
+              const animation = imageRef.current?.animate(
+                [
+                  { transform: 'translateY(0px)' },
+                  { transform: 'translateY(-4px)' },
+                  { transform: 'translateY(0px)' },
+                ],
+                {
+                  duration: 400,
+                  easing: 'linear',
+                  playbackRate: 1,
+                  iterations: 1,
+                }
+              );
+
+              const shadowAnimation = shadowRef.current?.animate(
+                [
+                  { transform: 'translateY(-40%) translateX(-60%) scale(1)' },
+                  {
+                    transform: 'translateY(-38%) translateX(-60%) scale(1.03)',
+                  },
+                  { transform: 'translateY(-40%) translateX(-60%) scale(1)' },
+                ],
+                {
+                  duration: 400,
+                  easing: 'linear',
+                  playbackRate: 1,
+                  iterations: 1,
+                }
+              );
+
+              if (animation) {
+                animation.onfinish = () => {
+                  if (hoverRef.current) {
+                    animateSprite();
+                  }
+                };
+              }
+            };
+            animateSprite();
+          }
+        }}
+        onMouseLeave={() => {
+          hoverRef.current = false;
+          const animation = imageRef.current?.getAnimations();
+          const shadowAnimation = shadowRef.current?.getAnimations();
+
+          if (animation) {
+            animation.forEach(a => {
               if (a.playState === 'running') {
                 a.updatePlaybackRate(-1);
               }
-          });
-        }
-        
-        if (shadowAnimation) {
-          shadowAnimation.forEach(a => { 
+            });
+          }
+
+          if (shadowAnimation) {
+            shadowAnimation.forEach(a => {
               if (a.playState === 'running') {
                 a.updatePlaybackRate(-1);
               }
-          });
-        }
-      }}
+            });
+          }
+        }}
       >
         <div className='relative w-full flex justify-center'>
-            <div 
-              ref={shadowRef}
-              className='absolute opacity-60 dark:opacity-90'
-              style={{ 
-                width: spriteSize * 0.55, 
-                height: spriteSize * 0.2,
-                borderRadius: '50%',
-                bottom: -spriteSize * 0.15,
-                left: '50%',
-                transformOrigin: 'center',
-                transform: 'translateY(-40%) translateX(-60%)',
-                background: 'radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)'
-              }}
-            />
+          <div
+            ref={shadowRef}
+            className='absolute opacity-60 dark:opacity-90'
+            style={{
+              width: spriteSize * 0.55,
+              height: spriteSize * 0.2,
+              borderRadius: '50%',
+              bottom: -spriteSize * 0.15,
+              left: '50%',
+              transformOrigin: 'center',
+              transform: 'translateY(-40%) translateX(-60%)',
+              background:
+                'radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)',
+            }}
+          />
           {/* Sprite positioned above the shadow */}
           <div className='relative z-10'>
             <Image
@@ -191,12 +217,12 @@ export function FusionSprite({
               loading='eager'
               unoptimized
               draggable={false}
-              placeholder="blur"
+              placeholder='blur'
               blurDataURL={TRANSPARENT_PIXEL}
-              onError={(e) => {
+              onError={e => {
                 const target = e.target as HTMLImageElement;
                 if (head && body) {
-                  target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}.png`
+                  target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}.png`;
                 }
               }}
             />
@@ -204,21 +230,24 @@ export function FusionSprite({
         </div>
       </a>
       {nicknameText && (
-        <div className="mt-4 text-center max-w-fit translate-y-4.5">
-          <span className="text-sm font-mono text-black dark:text-white truncate max-w-full block tracking-wide" style={{
-            textShadow: `
+        <div className='mt-4 text-center max-w-fit translate-y-4.5'>
+          <span
+            className='text-sm font-mono text-black dark:text-white truncate max-w-full block tracking-wide'
+            style={{
+              textShadow: `
               2px 2px 0 #000,
               1px 1px 0 #000,
               0 1px 0 #000,
               1px 0 0 #000,
               2px 0 0 #000,
               0 2px 0 #000
-            `
-          }}>
+            `,
+            }}
+          >
             {nicknameText}
           </span>
         </div>
       )}
     </div>
   );
-} 
+}

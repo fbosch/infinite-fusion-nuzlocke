@@ -55,8 +55,6 @@ export function getPokemonSpriteUrlFromOption(pokemon: PokemonOption): string {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
 }
 
-
-
 // Pokemon Option Component
 const PokemonOption = ({
   pokemon,
@@ -280,18 +278,16 @@ export const PokemonCombobox = ({
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
   const dragSnapshot = useSnapshot(dragStore);
-  
+
   // Local nickname state for smooth typing
   const [localNickname, setLocalNickname] = useState(value?.nickname || '');
-  
+
   // Sync local nickname when value changes (but not during typing)
   useEffect(() => {
     if (value?.nickname !== localNickname) {
       setLocalNickname(value?.nickname || '');
     }
   }, [value?.nickname]);
-  
-
 
   // State for route encounters and all Pokemon
   const [routeEncounterData, setRouteEncounterData] = useState<PokemonOption[]>(
@@ -469,7 +465,7 @@ export const PokemonCombobox = ({
       const newNickname = event.target.value;
       // Update local state immediately for responsive typing
       setLocalNickname(newNickname);
-      
+
       if (value) {
         // Use startTransition to defer the state update
         startTransition(() => {
@@ -535,7 +531,7 @@ export const PokemonCombobox = ({
           // Use the full PokemonOption from drag store if available
           if (dragSnapshot.currentDragValue) {
             onChange(dragSnapshot.currentDragValue);
-            
+
             // If this is from a different combobox, clear the source
             if (isFromDifferentCombobox) {
               // Dispatch a custom event to notify the source combobox to clear
@@ -556,7 +552,8 @@ export const PokemonCombobox = ({
                 // Find Pokemon by name (case insensitive)
                 const foundPokemon = allPokemon.find(
                   p =>
-                    nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
+                    nameMap.get(p.id)?.toLowerCase() ===
+                    pokemonName.toLowerCase()
                 );
 
                 if (foundPokemon) {
@@ -596,10 +593,17 @@ export const PokemonCombobox = ({
       e.dataTransfer.dropEffect = 'copy';
 
       // Show preview of what will be dropped using global drag data
-      if (dragSnapshot.currentDragValue && (!dragPreview || dragPreview.name !== dragSnapshot.currentDragValue.name)) {
+      if (
+        dragSnapshot.currentDragValue &&
+        (!dragPreview ||
+          dragPreview.name !== dragSnapshot.currentDragValue.name)
+      ) {
         // Use the full PokemonOption from drag store for preview
         setDragPreview(dragSnapshot.currentDragValue);
-      } else if (dragSnapshot.currentDragData && (!dragPreview || dragPreview.name !== dragSnapshot.currentDragData)) {
+      } else if (
+        dragSnapshot.currentDragData &&
+        (!dragPreview || dragPreview.name !== dragSnapshot.currentDragData)
+      ) {
         // Fallback to name-based search if drag value is not available
         const pokemonName = dragSnapshot.currentDragData;
         const findPokemonForPreview = async () => {
@@ -641,8 +645,6 @@ export const PokemonCombobox = ({
     // Clear global drag data when drag ends
     dragActions.clearDrag();
   }, []);
-
-
 
   // Listen for clear and switch events from other comboboxes
   useEffect(() => {
@@ -771,7 +773,7 @@ export const PokemonCombobox = ({
           </ComboboxOptions>
         </div>
       </Combobox>
-      
+
       {showNickname && (
         <input
           type='text'

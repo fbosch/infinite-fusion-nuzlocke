@@ -14,8 +14,7 @@ const dotGothic16 = DotGothic16({
 
 export const metadata: Metadata = {
   title: 'Infinite Fusion Nuzlocke Tracker',
-  description:
-    'Track your Pokémon Infinite Fusion Nuzlocke run',
+  description: 'Track your Pokémon Infinite Fusion Nuzlocke run',
   keywords:
     'Pokémon, Infinite Fusion, Nuzlocke, tracker, game, locations, team',
   authors: [{ name: 'Infinite Fusion Nuzlocke Tracker' }],

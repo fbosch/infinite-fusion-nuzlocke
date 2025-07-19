@@ -43,39 +43,42 @@ export default function LocationList() {
   }, []);
 
   // Define columns outside of component to prevent recreation
-  const columns = useMemo(() => [
-    columnHelper.accessor('name', {
-      header: 'Location',
-      cell: info => (
-        <span className='font-medium text-gray-900 dark:text-white'>
-          {info.getValue()}
-        </span>
-      ),
-      enableSorting: true,
-      size: 20, // Fixed width for location column
-    }),
-    columnHelper.display({
-      id: 'sprite',
-      header: '',
-      enableSorting: false,
-      cell: () => null, // Handled in render loop
-      size: 120, // Width for sprite column
-    }),
-    columnHelper.accessor('routeId', {
-      id: 'encounter',
-      header: 'Encounter',
-      cell: info => info.getValue(),
-      enableSorting: false,
-      size: 700, // Increased width for fusion comboboxes
-    }),
-    columnHelper.display({
-      id: 'reset',
-      header: '',
-      enableSorting: false,
-      cell: () => null, // Handled in render loop
-      size: 60, // Width for reset column
-    }),
-  ], []); // Remove encounters dependency
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('name', {
+        header: 'Location',
+        cell: info => (
+          <span className='font-medium text-gray-900 dark:text-white'>
+            {info.getValue()}
+          </span>
+        ),
+        enableSorting: true,
+        size: 20, // Fixed width for location column
+      }),
+      columnHelper.display({
+        id: 'sprite',
+        header: '',
+        enableSorting: false,
+        cell: () => null, // Handled in render loop
+        size: 120, // Width for sprite column
+      }),
+      columnHelper.accessor('routeId', {
+        id: 'encounter',
+        header: 'Encounter',
+        cell: info => info.getValue(),
+        enableSorting: false,
+        size: 700, // Increased width for fusion comboboxes
+      }),
+      columnHelper.display({
+        id: 'reset',
+        header: '',
+        enableSorting: false,
+        cell: () => null, // Handled in render loop
+        size: 60, // Width for reset column
+      }),
+    ],
+    []
+  ); // Remove encounters dependency
 
   const table = useReactTable({
     data,
@@ -103,11 +106,12 @@ export default function LocationList() {
   }, []);
 
   // Optimized encounter selection handler for immediate response
-  const handleEncounterSelect = useCallback((
-    routeId: number,
-    pokemon: PokemonOption | null,
-    field: 'head' | 'body' = 'head'
-  ) => {
+  const handleEncounterSelect = useCallback(
+    (
+      routeId: number,
+      pokemon: PokemonOption | null,
+      field: 'head' | 'body' = 'head'
+    ) => {
       setEncounters(prev => {
         const currentEncounter = prev[routeId] || {
           head: null,
@@ -137,15 +141,18 @@ export default function LocationList() {
           };
         }
       });
-  }, []);
+    },
+    []
+  );
 
   // Enhanced encounter selection handler that can create fusions
-  const handleEncounterSelectWithFusion = useCallback((
-    routeId: number,
-    pokemon: PokemonOption | null,
-    field: 'head' | 'body' = 'head',
-    shouldCreateFusion: boolean = false
-  ) => {
+  const handleEncounterSelectWithFusion = useCallback(
+    (
+      routeId: number,
+      pokemon: PokemonOption | null,
+      field: 'head' | 'body' = 'head',
+      shouldCreateFusion: boolean = false
+    ) => {
       setEncounters(prev => {
         const currentEncounter = prev[routeId] || {
           head: null,
@@ -185,7 +192,9 @@ export default function LocationList() {
           };
         }
       });
-  }, []);
+    },
+    []
+  );
 
   // Fusion toggle handler
   const handleFusionToggle = useCallback((routeId: number) => {
@@ -211,8 +220,13 @@ export default function LocationList() {
           return {
             ...prev,
             [routeId]: {
-              head: currentEncounter.head ? currentEncounter.head : currentEncounter.body,
-              body: currentEncounter.head && currentEncounter.body ? currentEncounter.body : null,
+              head: currentEncounter.head
+                ? currentEncounter.head
+                : currentEncounter.body,
+              body:
+                currentEncounter.head && currentEncounter.body
+                  ? currentEncounter.body
+                  : null,
               isFusion: false,
             },
           };
@@ -224,16 +238,16 @@ export default function LocationList() {
   // Handle fusion creation from drag and drop
   const handleCreateFusion = useCallback((event: CustomEvent) => {
     const { routeId, head, body } = event.detail;
-   
+
     startTransition(() => {
-    setEncounters(prev => {
-      return {
-        ...prev,
-        [routeId]: {
-          head,
-          body,
-          isFusion: true,
-        },
+      setEncounters(prev => {
+        return {
+          ...prev,
+          [routeId]: {
+            head,
+            body,
+            isFusion: true,
+          },
         };
       });
     });
@@ -241,10 +255,16 @@ export default function LocationList() {
 
   // Listen for fusion creation events
   React.useEffect(() => {
-    window.addEventListener('createFusion', handleCreateFusion as EventListener);
-    
+    window.addEventListener(
+      'createFusion',
+      handleCreateFusion as EventListener
+    );
+
     return () => {
-      window.removeEventListener('createFusion', handleCreateFusion as EventListener);
+      window.removeEventListener(
+        'createFusion',
+        handleCreateFusion as EventListener
+      );
     };
   }, [handleCreateFusion]);
 
@@ -287,7 +307,8 @@ export default function LocationList() {
                     key={header.id}
                     className={clsx(
                       'px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset',
-                      header.column.getCanSort() && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
+                      header.column.getCanSort() &&
+                        'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                     )}
                     style={{
                       width: `${header.column.getSize()}px`,
@@ -330,10 +351,7 @@ export default function LocationList() {
         </thead>
         <tbody className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700'>
           {table.getRowModel().rows.map(row => (
-            <tr
-              key={row.id}
-              role='row'
-            >
+            <tr key={row.id} role='row'>
               {row.getVisibleCells().map(cell => {
                 const routeId = row.original.routeId;
                 const encounterData = encounters[routeId] || {

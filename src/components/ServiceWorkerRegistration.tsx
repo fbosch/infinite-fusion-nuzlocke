@@ -6,7 +6,7 @@ export function ServiceWorkerRegistration() {
   useEffect(() => {
     const registerServiceWorker = async () => {
       console.log('Attempting to register service worker...');
-      
+
       if (!('serviceWorker' in navigator)) {
         console.log('Service Worker not supported');
         return;
@@ -15,7 +15,7 @@ export function ServiceWorkerRegistration() {
       try {
         console.log('Registering service worker at /sw.js');
         const registration = await navigator.serviceWorker.register('/sw.js', {
-          scope: '/'
+          scope: '/',
         });
 
         console.log('Service Worker registered successfully:', registration);
@@ -25,7 +25,10 @@ export function ServiceWorkerRegistration() {
           const newWorker = registration.installing;
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              if (
+                newWorker.state === 'installed' &&
+                navigator.serviceWorker.controller
+              ) {
                 console.log('New service worker available');
               }
             });
@@ -36,7 +39,6 @@ export function ServiceWorkerRegistration() {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('Service Worker controller changed');
         });
-
       } catch (error) {
         console.error('Service Worker registration failed:', error);
       }
@@ -46,4 +48,4 @@ export function ServiceWorkerRegistration() {
   }, []);
 
   return null; // This component doesn't render anything
-} 
+}

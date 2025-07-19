@@ -20,17 +20,23 @@ export class ServiceWorkerManager {
 
     try {
       this.swRegistration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
+        scope: '/',
       });
 
-      console.log('Service Worker registered successfully:', this.swRegistration);
+      console.log(
+        'Service Worker registered successfully:',
+        this.swRegistration
+      );
 
       // Handle updates
       this.swRegistration.addEventListener('updatefound', () => {
         const newWorker = this.swRegistration!.installing;
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            if (
+              newWorker.state === 'installed' &&
+              navigator.serviceWorker.controller
+            ) {
               console.log('New service worker available');
             }
           });
@@ -82,4 +88,4 @@ export class ServiceWorkerManager {
 if (typeof window !== 'undefined') {
   const swManager = ServiceWorkerManager.getInstance();
   swManager.register().catch(console.error);
-} 
+}
