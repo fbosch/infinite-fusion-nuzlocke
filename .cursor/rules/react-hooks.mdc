@@ -1,3 +1,7 @@
+---
+alwaysApply: true
+---
+
 # React Hook Rules
 
 Rules for using React hooks correctly and avoiding common pitfalls.
@@ -152,8 +156,3 @@ function usePokemonData(pokemonId: number) {
 - **Always clean up effects**: Return cleanup functions from useEffect when needed
 - **Handle component unmounting**: Clean up subscriptions, timers, and event listeners
 - **Use AbortController**: For canceling fetch requests on unmount
-  description:
-  globs:
-  alwaysApply: false
-
----

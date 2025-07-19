@@ -1,9 +1,11 @@
 # React State Management Guidelines
+
 Rules for efficient state management and avoiding unnecessary effects in React components.
 
 ## Minimize useState and useEffect Usage
 
 ### Core Principle
+
 - **Prefer alternatives to useState/useEffect**: Use more performant alternatives when possible
 - **Avoid unnecessary state**: Don't use state for values that can be derived from props or other state
 - **Eliminate redundant effects**: Many effects can be replaced with event handlers or derived values
@@ -11,15 +13,16 @@ Rules for efficient state management and avoiding unnecessary effects in React c
 ### Common Anti-Patterns to Avoid
 
 #### 1. Synchronizing State with Props
+
 ```typescript
 // ❌ Bad: Synchronizing state with props
 function UserProfile({ user }) {
   const [name, setName] = useState(user.name);
-  
+
   useEffect(() => {
     setName(user.name);
   }, [user.name]);
-  
+
   return <div>{name}</div>;
 }
 
@@ -30,42 +33,44 @@ function UserProfile({ user }) {
 ```
 
 #### 2. Computing Derived State
+
 ```typescript
 // ❌ Bad: Storing computed values in state
 function TodoList({ todos }) {
   const [filteredTodos, setFilteredTodos] = useState([]);
-  
+
   useEffect(() => {
     setFilteredTodos(todos.filter(todo => !todo.completed));
   }, [todos]);
-  
+
   return <div>{filteredTodos.map(todo => <TodoItem key={todo.id} todo={todo} />)}</div>;
 }
 
 // ✅ Good: Compute values during render
 function TodoList({ todos }) {
   const filteredTodos = todos.filter(todo => !todo.completed);
-  
+
   return <div>{filteredTodos.map(todo => <TodoItem key={todo.id} todo={todo} />)}</div>;
 }
 ```
 
 #### 3. Event Handlers Instead of Effects
+
 ```typescript
 // ❌ Bad: Using effect for user interactions
 function SearchBox() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
-  
+
   useEffect(() => {
     if (query.trim() === '') {
       setResults([]);
       return;
     }
-    
+
     fetchSearchResults(query).then(setResults);
   }, [query]);
-  
+
   return (
     <div>
       <input value={query} onChange={e => setQuery(e.target.value)} />
@@ -78,26 +83,26 @@ function SearchBox() {
 function SearchBox() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
-  
+
   const handleSearch = async (searchQuery: string) => {
     if (searchQuery.trim() === '') {
       setResults([]);
       return;
     }
-    
+
     const searchResults = await fetchSearchResults(searchQuery);
     setResults(searchResults);
   };
-  
+
   return (
     <div>
-      <input 
-        value={query} 
+      <input
+        value={query}
         onChange={e => {
           const newQuery = e.target.value;
           setQuery(newQuery);
           handleSearch(newQuery);
-        }} 
+        }}
       />
       <SearchResults results={results} />
     </div>
@@ -108,43 +113,46 @@ function SearchBox() {
 ### Better Alternatives
 
 #### 1. Use useMemo for Expensive Calculations
+
 ```typescript
 // ✅ Good: Memoize expensive calculations
 function PokemonTeam({ pokemon }) {
   const teamStats = useMemo(() => {
     return calculateTeamStats(pokemon);
   }, [pokemon]);
-  
+
   return <TeamStats stats={teamStats} />;
 }
 ```
 
 #### 2. Use useCallback for Stable References
+
 ```typescript
 // ✅ Good: Stable callback references
 function PokemonCard({ pokemon, onSelect }) {
   const handleSelect = useCallback(() => {
     onSelect(pokemon.id);
   }, [pokemon.id, onSelect]);
-  
+
   return <button onClick={handleSelect}>{pokemon.name}</button>;
 }
 ```
 
 #### 3. Use useReducer for Complex State
+
 ```typescript
 // ✅ Good: Use reducer for complex state logic
 function NuzlockeTracker() {
   const [state, dispatch] = useReducer(nuzlockeReducer, initialState);
-  
+
   const catchPokemon = useCallback((pokemon) => {
     dispatch({ type: 'CATCH_POKEMON', payload: pokemon });
   }, []);
-  
+
   const faintPokemon = useCallback((pokemonId) => {
     dispatch({ type: 'FAINT_POKEMON', payload: pokemonId });
   }, []);
-  
+
   return (
     <div>
       <Team team={state.team} onFaint={faintPokemon} />
@@ -157,18 +165,20 @@ function NuzlockeTracker() {
 ### When to Use useEffect
 
 #### Valid Use Cases
+
 - **Data fetching**: Loading data from APIs
 - **Subscriptions**: Setting up and cleaning up subscriptions
 - **DOM measurements**: Reading DOM properties
 - **Synchronizing with external systems**: Browser APIs, third-party libraries
 
 #### Example of Valid useEffect
+
 ```typescript
 // ✅ Good: Valid use of useEffect for data fetching
 function PokemonList() {
   const [pokemon, setPokemon] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     async function fetchPokemon() {
       try {
@@ -181,12 +191,12 @@ function PokemonList() {
         setLoading(false);
       }
     }
-    
+
     fetchPokemon();
   }, []); // Empty dependency array for initial load only
-  
+
   if (loading) return <div>Loading...</div>;
-  
+
   return <div>{pokemon.map(p => <PokemonCard key={p.id} pokemon={p} />)}</div>;
 }
 ```
@@ -194,21 +204,25 @@ function PokemonList() {
 ### Performance Guidelines
 
 #### 1. Avoid State for Derived Values
+
 - Don't store values that can be computed from existing state or props
 - Use `useMemo` for expensive calculations
 - Pass computed values as props to child components
 
 #### 2. Use Event Handlers for User Interactions
+
 - Handle user input directly in event handlers
 - Avoid effects for responding to user actions
 - Use debouncing/throttling for search inputs
 
 #### 3. Prefer Composition Over State
+
 - Pass data down as props instead of managing state in multiple components
 - Use context for truly global state
 - Keep state as close to where it's used as possible
 
 #### 4. Batch Related State Updates
+
 ```typescript
 // ✅ Good: Batch related state updates
 function PokemonForm({ onSubmit }) {
@@ -217,18 +231,18 @@ function PokemonForm({ onSubmit }) {
     level: 1,
     moves: []
   });
-  
+
   const updateForm = useCallback((updates) => {
     setFormData(prev => ({ ...prev, ...updates }));
   }, []);
-  
+
   return (
     <form onSubmit={handleSubmit}>
-      <input 
+      <input
         value={formData.name}
         onChange={e => updateForm({ name: e.target.value })}
       />
-      <input 
+      <input
         type="number"
         value={formData.level}
         onChange={e => updateForm({ level: parseInt(e.target.value) })}
@@ -241,6 +255,7 @@ function PokemonForm({ onSubmit }) {
 ### Code Review Checklist
 
 #### State Management Review
+
 - [ ] Avoids unnecessary useState for derived values
 - [ ] Uses event handlers instead of effects for user interactions
 - [ ] Uses useMemo for expensive calculations
@@ -251,6 +266,7 @@ function PokemonForm({ onSubmit }) {
 - [ ] Uses composition over state when possible
 
 #### Effect Review
+
 - [ ] Effect is necessary (not a derived value or user interaction)
 - [ ] Effect has proper cleanup if needed
 - [ ] Effect dependencies are correct and minimal
@@ -260,25 +276,30 @@ function PokemonForm({ onSubmit }) {
 ### Migration Strategy
 
 #### Step 1: Identify Unnecessary State
+
 - Look for state that mirrors props
 - Find state that can be computed from other state
 - Identify effects that respond to user interactions
 
 #### Step 2: Replace with Better Alternatives
+
 - Use props directly instead of synchronized state
 - Compute values during render instead of storing them
 - Use event handlers instead of effects for user actions
 
 #### Step 3: Optimize Performance
+
 - Add useMemo for expensive calculations
 - Use useCallback for stable references
 - Consider useReducer for complex state logic
 
 #### Step 4: Test and Validate
+
 - Ensure functionality remains the same
 - Verify performance improvements
 - Test edge cases and error conditions
-description:
-globs:
-alwaysApply: false
+  description:
+  globs:
+  alwaysApply: false
+
 ---

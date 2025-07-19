@@ -59,7 +59,7 @@ export default function LocationList() {
       header: '',
       enableSorting: false,
       cell: () => null, // Handled in render loop
-      size: 80, // Width for sprite column
+      size: 120, // Width for sprite column
     }),
     columnHelper.accessor('routeId', {
       id: 'encounter',

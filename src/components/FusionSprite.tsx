@@ -42,6 +42,24 @@ function getAltText(head: PokemonOption | null, body: PokemonOption | null, isFu
   return `${head.name}/${body.name} fusion`;
 }
 
+function getNicknameText(head: PokemonOption | null, body: PokemonOption | null, isFusion: boolean): string {
+  if (!isFusion) {
+    // Single Pokémon - show nickname if available, otherwise show name
+    const pokemon = head || body;
+    if (!pokemon) return '';
+    return pokemon.nickname || pokemon.name;
+  }
+  
+  // Fusion case
+  if (!head || !body) {
+    const pokemon = head || body;
+    if (!pokemon) return '';
+    return pokemon.nickname || pokemon.name;
+  }
+  
+  return head.nickname || body.nickname || head.name || body.name;
+}
+
 export function FusionSprite({ 
   encounterData, 
   size = 'md',
@@ -52,10 +70,11 @@ export function FusionSprite({
   const hoverRef = useRef<boolean>(false);
   const { head, body, isFusion } = encounterData;
   
+  // Calculate all values before early return to maintain hook order
   const spriteUrl = getSpriteUrl(head, body, isFusion);
   const altText = getAltText(head, body, isFusion);
+  const nicknameText = getNicknameText(head, body, isFusion);
   const spriteSize = SPRITE_SIZES[size];
-  
   const imageClasses = clsx(
     'object-fill object-center image-render-pixelated origin-top -translate-y-1/9',
     className
@@ -73,116 +92,124 @@ export function FusionSprite({
     }
   }, [head,body])
   
-  // Early return after all hooks
   if (!head && !body) return null;
   
   return (
-    <a href={link} target='_blank' rel='noopener noreferrer' className='cursor-help' draggable={false} title='Open Pokedex'
-    
-    onMouseEnter={() => {
-      hoverRef.current = true;
-     if (imageRef.current) {
-       // Cancel any running animations so the new one will replay
-       imageRef.current.getAnimations().forEach(anim => anim.cancel());
-       if (shadowRef.current) {
-         shadowRef.current.getAnimations().forEach(anim => anim.cancel());
-       }
-       
-       const animateSprite = () => {
-         const animation = imageRef.current?.animate([
-           { transform: 'translateY(0px)' },
-           { transform: 'translateY(-4px)' },
-           { transform: 'translateY(0px)' },
-         ], {
-           duration: 300,
-           easing: 'linear',
-           playbackRate: 1,
-           iterations: 1,
-         });
-         
-         const shadowAnimation = shadowRef.current?.animate([
-           { transform: 'translateY(-40%) translateX(-60%) scale(1)' },
-           { transform: 'translateY(-38%) translateX(-60%) scale(1.03)' },
-           { transform: 'translateY(-40%) translateX(-60%) scale(1)' },
-         ], {
-           duration: 300,
-           easing: 'linear',
-           playbackRate: 1,
-           iterations: 1,
-         });
-         
-         if (animation) {
-           animation.onfinish = () => {
-             if (hoverRef.current) {
-               animateSprite();
-             }
-           };
+    <div className="flex flex-col items-center">
+      <a href={link} target='_blank' rel='noopener noreferrer' className='cursor-help' draggable={false} title='Open Pokedex'
+      
+      onMouseEnter={() => {
+        hoverRef.current = true;
+       if (imageRef.current) {
+         // Cancel any running animations so the new one will replay
+         imageRef.current.getAnimations().forEach(anim => anim.cancel());
+         if (shadowRef.current) {
+           shadowRef.current.getAnimations().forEach(anim => anim.cancel());
          }
-       };
-       animateSprite();
-     }
-      
-    }}
-    onMouseLeave={() => {
-      hoverRef.current = false;
-      const animation = imageRef.current?.getAnimations();
-      const shadowAnimation = shadowRef.current?.getAnimations();
-      
-      if (animation) {
-        animation.forEach(a => { 
-            if (a.playState === 'running') {
-              a.updatePlaybackRate(-1);
-            }
-        });
-      }
-      
-      if (shadowAnimation) {
-        shadowAnimation.forEach(a => { 
-            if (a.playState === 'running') {
-              a.updatePlaybackRate(-1);
-            }
-        });
-      }
-    }}
-    >
-      <div className='relative w-full flex justify-center'>
-          <div 
-            ref={shadowRef}
-            className='absolute opacity-60 dark:opacity-90'
-            style={{ 
-              width: spriteSize * 0.55, 
-              height: spriteSize * 0.2,
-              borderRadius: '50%',
-              bottom: -spriteSize * 0.15,
-              left: '50%',
-              transformOrigin: 'center',
-              transform: 'translateY(-40%) translateX(-60%)',
-              background: 'radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)'
-            }}
-          />
-        {/* Sprite positioned above the shadow */}
-        <div className='relative z-10'>
-          <Image
-            ref={imageRef}
-            src={spriteUrl}
-            alt={altText}
-            width={spriteSize}
-            height={spriteSize}
-            className={imageClasses}
-            loading='eager'
-            unoptimized
-            draggable={false}
-            placeholder="blur"
-            blurDataURL={TRANSPARENT_PIXEL}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              if (head && body) {
-                target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}.png`
+         
+         const animateSprite = () => {
+           const animation = imageRef.current?.animate([
+             { transform: 'translateY(0px)' },
+             { transform: 'translateY(-4px)' },
+             { transform: 'translateY(0px)' },
+           ], {
+             duration: 300,
+             easing: 'linear',
+             playbackRate: 1,
+             iterations: 1,
+           });
+           
+           const shadowAnimation = shadowRef.current?.animate([
+             { transform: 'translateY(-40%) translateX(-60%) scale(1)' },
+             { transform: 'translateY(-38%) translateX(-60%) scale(1.03)' },
+             { transform: 'translateY(-40%) translateX(-60%) scale(1)' },
+           ], {
+             duration: 300,
+             easing: 'linear',
+             playbackRate: 1,
+             iterations: 1,
+           });
+           
+           if (animation) {
+             animation.onfinish = () => {
+               if (hoverRef.current) {
+                 animateSprite();
+               }
+             };
+           }
+         };
+         animateSprite();
+       }
+        
+      }}
+      onMouseLeave={() => {
+        hoverRef.current = false;
+        const animation = imageRef.current?.getAnimations();
+        const shadowAnimation = shadowRef.current?.getAnimations();
+        
+        if (animation) {
+          animation.forEach(a => { 
+              if (a.playState === 'running') {
+                a.updatePlaybackRate(-1);
               }
-            }}
-          />
+          });
+        }
+        
+        if (shadowAnimation) {
+          shadowAnimation.forEach(a => { 
+              if (a.playState === 'running') {
+                a.updatePlaybackRate(-1);
+              }
+          });
+        }
+      }}
+      >
+        <div className='relative w-full flex justify-center'>
+            <div 
+              ref={shadowRef}
+              className='absolute opacity-60 dark:opacity-90'
+              style={{ 
+                width: spriteSize * 0.55, 
+                height: spriteSize * 0.2,
+                borderRadius: '50%',
+                bottom: -spriteSize * 0.15,
+                left: '50%',
+                transformOrigin: 'center',
+                transform: 'translateY(-40%) translateX(-60%)',
+                background: 'radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)'
+              }}
+            />
+          {/* Sprite positioned above the shadow */}
+          <div className='relative z-10'>
+            <Image
+              ref={imageRef}
+              src={spriteUrl}
+              alt={altText}
+              width={spriteSize}
+              height={spriteSize}
+              className={imageClasses}
+              loading='eager'
+              unoptimized
+              draggable={false}
+              placeholder="blur"
+              blurDataURL={TRANSPARENT_PIXEL}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (head && body) {
+                  target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}.png`
+                }
+              }}
+            />
+          </div>
         </div>
-      </div>
-    </a>
+      </a>
+      {nicknameText && (
+        <div className="mt-4 text-center">
+          <span className="text-lg font-mono text-gray-700 dark:text-gray-200 truncate max-w-full block">
+            {nicknameText}
+          </span>
+        </div>
+      )}
+    </div>
   );
 } 
