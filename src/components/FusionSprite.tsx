@@ -30,7 +30,7 @@ function getSpriteUrl(head: PokemonOption | null, body: PokemonOption | null, is
     return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
   }
   
-  return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${head.nationalDexId}.${body.nationalDexId}.png`;
+  return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${head.id}.${body.id}.png`;
 }
 
 function getAltText(head: PokemonOption | null, body: PokemonOption | null, isFusion: boolean): string {
@@ -100,9 +100,9 @@ export function FusionSprite({
          });
          
          const shadowAnimation = shadowRef.current?.animate([
-           { transform: 'translateY(-40%) translateX(-50%) scale(1)' },
-           { transform: 'translateY(-38%) translateX(-50%) scale(1.03)' },
-           { transform: 'translateY(-40%) translateX(-50%) scale(1)' },
+           { transform: 'translateY(-40%) translateX(-60%) scale(1)' },
+           { transform: 'translateY(-38%) translateX(-60%) scale(1.03)' },
+           { transform: 'translateY(-40%) translateX(-60%) scale(1)' },
          ], {
            duration: 300,
            easing: 'linear',
@@ -147,15 +147,15 @@ export function FusionSprite({
       <div className='relative w-full flex justify-center'>
           <div 
             ref={shadowRef}
-            className='absolute opacity-60'
+            className='absolute opacity-60 dark:opacity-90'
             style={{ 
-              width: spriteSize * 0.6, 
-              height: spriteSize * 0.3,
+              width: spriteSize * 0.55, 
+              height: spriteSize * 0.2,
               borderRadius: '50%',
-              bottom: -spriteSize * 0.18,
+              bottom: -spriteSize * 0.15,
               left: '50%',
               transformOrigin: 'center',
-              transform: 'translateY(-40%) translateX(-50%)',
+              transform: 'translateY(-40%) translateX(-60%)',
               background: 'radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)'
             }}
           />
