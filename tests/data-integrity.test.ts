@@ -38,9 +38,9 @@ describe('Data Integrity Tests', () => {
 
   describe('Route Encounter Coverage', () => {
     it('should have encounter data for every location with a routeId in classic mode', () => {
-      // Get all locations that have a routeId
+      // Get all locations that have a routeId (excluding starter Pokemon routeId 0)
       const locationsWithRouteId = locations.filter(
-        loc => loc.routeId !== null
+        loc => loc.routeId !== null && loc.routeId !== 0
       );
 
       // Create a map of routeId to classic encounters for quick lookup
@@ -72,9 +72,9 @@ describe('Data Integrity Tests', () => {
     });
 
     it('should have encounter data for every location with a routeId in remix mode', () => {
-      // Get all locations that have a routeId
+      // Get all locations that have a routeId (excluding starter Pokemon routeId 0)
       const locationsWithRouteId = locations.filter(
-        loc => loc.routeId !== null
+        loc => loc.routeId !== null && loc.routeId !== 0
       );
 
       // Create a map of routeId to remix encounters for quick lookup
@@ -106,19 +106,19 @@ describe('Data Integrity Tests', () => {
     });
 
     it('should not have orphaned encounter data (encounters without corresponding locations)', () => {
-      // Get all routeIds from locations
+      // Get all routeIds from locations (excluding starter Pokemon routeId 0)
       const locationRouteIds = new Set(
-        locations.filter(loc => loc.routeId !== null).map(loc => loc.routeId!)
+        locations.filter(loc => loc.routeId !== null && loc.routeId !== 0).map(loc => loc.routeId!)
       );
 
-      // Check classic encounters
+      // Check classic encounters (excluding routeId 0)
       const orphanedClassicEncounters = classicEncounters.filter(
-        encounter => !locationRouteIds.has(encounter.routeId)
+        encounter => encounter.routeId !== 0 && !locationRouteIds.has(encounter.routeId)
       );
 
-      // Check remix encounters
+      // Check remix encounters (excluding routeId 0)
       const orphanedRemixEncounters = remixEncounters.filter(
-        encounter => !locationRouteIds.has(encounter.routeId)
+        encounter => encounter.routeId !== 0 && !locationRouteIds.has(encounter.routeId)
       );
 
       const errors: string[] = [];
@@ -401,13 +401,15 @@ describe('Data Integrity Tests', () => {
   describe('Data Consistency', () => {
     it('should have consistent routeId values between locations and encounters', () => {
       const locationRouteIds = new Set(
-        locations.filter(loc => loc.routeId !== null).map(loc => loc.routeId!)
+        locations.filter(loc => loc.routeId !== null && loc.routeId !== 0).map(loc => loc.routeId!)
       );
 
       const classicRouteIds = new Set(
-        classicEncounters.map(enc => enc.routeId)
+        classicEncounters.filter(enc => enc.routeId !== 0).map(enc => enc.routeId)
       );
-      const remixRouteIds = new Set(remixEncounters.map(enc => enc.routeId));
+      const remixRouteIds = new Set(
+        remixEncounters.filter(enc => enc.routeId !== 0).map(enc => enc.routeId)
+      );
 
       // Check if all location routeIds exist in both encounter sets
       const missingInClassic = [...locationRouteIds].filter(
