@@ -121,10 +121,31 @@ const PokemonOption = ({
 const PokemonOptions = ({
   options,
   isRoutePokemonPredicate,
+  query,
 }: {
   options: PokemonOption[];
   isRoutePokemonPredicate: (pokemonId: number) => boolean;
+  query: string;
 }) => {
+  if (options.length === 0) {
+    return (
+      <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+        <div className="relative cursor-default select-none py-2 px-4 text-center">
+          <div className="text-gray-500 dark:text-gray-400">
+            {query ? (
+              <>
+                <p className="text-sm">No Pokemon found for "{query}"</p>
+                <p className="text-xs mt-1">Try a different search term</p>
+              </>
+            ) : (
+              <p className="text-sm">No Pokemon available</p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
       {options.map((pokemon) => (
@@ -133,10 +154,9 @@ const PokemonOptions = ({
           value={pokemon}
           className={({ active, selected }) => clsx(
             'relative cursor-pointer select-none py-2 pr-4 pl-13 content-visibility-auto',
-            "hover:bg-gray-100 dark:hover:bg-gray-700",
             {
-              'bg-blue-600 text-white': active,
-              'text-gray-900 dark:text-gray-100': !active
+              'bg-blue-600 text-white ': active,
+              'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700': !active
             }
           )}
           style={{ containIntrinsicSize: '0 60px' }}
@@ -468,6 +488,7 @@ export const PokemonCombobox = ({
           <PokemonOptions
             options={finalOptions}
             isRoutePokemonPredicate={isRoutePokemon}
+            query={deferredQuery}
           />
         </ComboboxOptions>
       </div>
