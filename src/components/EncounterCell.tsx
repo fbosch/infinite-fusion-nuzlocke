@@ -147,6 +147,14 @@ export function EncounterCell({
     [routeId, isFusion, selectedPokemon, dragSnapshot.currentDragSource]
   );
 
+  // Handle drag end to clear drag state if it ends on this element
+  const handleFusionDragEnd = useCallback(() => {
+    // Clear drag state when drag ends on this element
+    dragActions.clearDrag();
+  }, []);
+
+
+
   return (
     <td
       className={clsx(
@@ -221,6 +229,7 @@ export function EncounterCell({
           onClick={() => onFusionToggle(routeId)}
           onDrop={handleFusionDrop}
           onDragOver={handleFusionDragOver}
+          onDragEnd={handleFusionDragEnd}
           className={clsx(
             'group',
             'size-12.25 flex items-center justify-center self-end',
@@ -234,9 +243,13 @@ export function EncounterCell({
                 !isFusion,
               // Add visual feedback for drag over when not a fusion and has an existing encounter
               'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20':
-                !isFusion && selectedPokemon && dragSnapshot.currentDragSource && 
+                !isFusion && 
+                selectedPokemon && 
+                dragSnapshot.isDragging &&
+                dragSnapshot.currentDragSource &&
                 dragSnapshot.currentDragSource !== `${routeId}-single` &&
-                dragSnapshot.currentDragSource !== `${routeId}-head` && dragSnapshot.isDragging,
+                dragSnapshot.currentDragSource !== `${routeId}-head` &&
+                dragSnapshot.currentDragSource !== `${routeId}-body`,
             }
           )}
           aria-label={`Toggle fusion for ${selectedPokemon?.name || 'Pokemon'}`}

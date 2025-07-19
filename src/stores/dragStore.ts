@@ -1,6 +1,9 @@
 import { proxy } from 'valtio';
 import type { PokemonOption } from '@/loaders/pokemon';
 
+// Track if global handlers have been initialized
+let globalHandlersInitialized = false;
+
 export interface DragState {
   currentDragData: string | null;
   currentDragSource: string | null;
@@ -38,6 +41,9 @@ export const dragActions = {
     source: string,
     value: PokemonOption | null | undefined
   ) => {
+    // Initialize global handlers on first use
+    dragActions._initializeGlobalHandlers();
+    
     dragStore.currentDragData = data;
     dragStore.currentDragSource = source;
     dragStore.currentDragValue = value;
@@ -49,5 +55,25 @@ export const dragActions = {
     dragStore.currentDragSource = null;
     dragStore.currentDragValue = null;
     dragStore.isDragging = false;
+  },
+
+  // Initialize global drag end handlers (called automatically)
+  _initializeGlobalHandlers: () => {
+    if (typeof window === 'undefined' || globalHandlersInitialized) return;
+
+    const handleGlobalDragEnd = () => {
+      // Small delay to ensure all drag events have completed
+      setTimeout(() => {
+        if (dragStore.isDragging) {
+          dragActions.clearDrag();
+        }
+      }, 100);
+    };
+
+    // Add global event listeners for drag end
+    document.addEventListener('dragend', handleGlobalDragEnd);
+    document.addEventListener('drop', handleGlobalDragEnd);
+
+    globalHandlersInitialized = true;
   },
 };

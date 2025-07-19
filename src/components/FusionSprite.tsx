@@ -19,9 +19,12 @@ interface FusionSpriteProps {
 
 const SPRITE_SIZES = { sm: 32, md: 48, lg: 64, xl: 96 } as const;
 
+// Transparent 1x1 pixel data URL to prevent empty image flashing
+const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
 function getSpriteUrl(head: PokemonOption | null, body: PokemonOption | null, isFusion: boolean): string {
   const pokemon = head || body;
-  if (!pokemon) return '';
+  if (!pokemon) return TRANSPARENT_PIXEL;
   
   if (!isFusion || !body || !head) {
     return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
@@ -168,6 +171,8 @@ export function FusionSprite({
             loading='eager'
             unoptimized
             draggable={false}
+            placeholder="blur"
+            blurDataURL={TRANSPARENT_PIXEL}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               if (head && body) {
