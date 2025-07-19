@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   SortingState,
 } from '@tanstack/react-table';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, startTransition } from 'react';
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
@@ -61,10 +61,12 @@ export default function LocationList() {
 
   // Optimized encounter selection handler for immediate response
   const handleEncounterSelect = (routeId: number, pokemon: PokemonOption | null) => {
-    setEncounters(prev => ({
-      ...prev,
-      [routeId]: pokemon
-    }));
+    startTransition(() => {
+      setEncounters(prev => ({
+        ...prev,
+        [routeId]: pokemon
+      }));
+    });
   };
 
   // Show loading state if no data
