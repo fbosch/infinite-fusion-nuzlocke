@@ -37,15 +37,17 @@ export function EncounterCell({
 
   return (
     <td
-      className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
+      className={clsx(
+        'px-6 pt-8 pb-6 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100',
+      )}
       role='cell'
     >
       <div className='flex flex-row justify-center gap-2'>
         <div className='flex-1'>
           {isFusion ? (
             <div className='flex items-start gap-2'>
-              <div className='flex-1'>
-                <span className='text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1'>
+              <div className='flex-1 relative'>
+                <span className='absolute -top-6 left-0 text-xs font-medium text-gray-500 dark:text-gray-400'>
                   Head:
                 </span>
                 <PokemonCombobox
@@ -58,8 +60,8 @@ export function EncounterCell({
                   comboboxId={`${routeId}-head`}
                 />
               </div>
-              <div className='flex-1'>
-                <span className='text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1'>
+              <div className='flex-1 relative'>
+                <span className='absolute -top-6 left-0 text-xs font-medium text-gray-500 dark:text-gray-400'>
                   Body:
                 </span>
                 <PokemonCombobox
