@@ -177,6 +177,7 @@ export function EncounterCell({
                     onEncounterSelect(routeId, pokemon, 'head')
                   }
                   placeholder='Select head Pokemon'
+                  nicknamePlaceholder='Enter head nickname'
                   comboboxId={`${routeId}-head`}
                 />
               </div>
@@ -211,6 +212,7 @@ export function EncounterCell({
                     onEncounterSelect(routeId, pokemon, 'body')
                   }
                   placeholder='Select body Pokemon'
+                  nicknamePlaceholder='Enter body nickname'
                   comboboxId={`${routeId}-body`}
                 />
               </div>
@@ -220,6 +222,8 @@ export function EncounterCell({
               routeId={routeId}
               value={selectedPokemon}
               onChange={pokemon => onEncounterSelect(routeId, pokemon)}
+              placeholder='Select Pokemon'
+              nicknamePlaceholder='Enter nickname'
               comboboxId={`${routeId}-single`}
             />
           )}

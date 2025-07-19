@@ -7,6 +7,7 @@ export interface PokemonOption {
   id: number;
   name: string;
   nationalDexId: number;
+  nickname?: string;
 }
 
 // Zod schema for Pokemon type
