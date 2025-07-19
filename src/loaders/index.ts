@@ -4,3 +4,5 @@ export * from './locations';
 export * from './encounters';
 // Export Pokemon data functions and types
 export * from './pokemon';
+// Export starter Pokemon data functions and types
+export * from './starters';
