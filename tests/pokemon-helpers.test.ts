@@ -37,7 +37,8 @@ describe('Pokemon ID Conversion Helpers', () => {
     });
 
     it('should return null for invalid National Pokédex number', async () => {
-      const infiniteFusionId = await getInfiniteFusionIdFromNationalDexId(999999);
+      const infiniteFusionId =
+        await getInfiniteFusionIdFromNationalDexId(999999);
       expect(infiniteFusionId).toBeNull();
     });
 
@@ -68,7 +69,8 @@ describe('Pokemon ID Conversion Helpers', () => {
     it('should maintain consistency between conversion functions', async () => {
       // Test that converting back and forth gives the same result
       const originalId = 1; // Bulbasaur
-      const nationalDexId = await getNationalDexIdFromInfiniteFusionId(originalId);
+      const nationalDexId =
+        await getNationalDexIdFromInfiniteFusionId(originalId);
       const convertedBackId = await getInfiniteFusionIdFromNationalDexId(
         nationalDexId!
       );
