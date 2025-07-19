@@ -58,7 +58,7 @@ export async function getRemixEncounters(): Promise<RouteEncounter[]> {
 
 // Get encounters by route ID
 export async function getEncountersByRouteId(
-  routeId: number,
+  routeId: number | null | undefined,
   gameMode: 'classic' | 'remix' = 'classic'
 ): Promise<RouteEncounter | null> {
   const encounters =
