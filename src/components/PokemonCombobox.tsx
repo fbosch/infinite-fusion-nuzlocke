@@ -42,18 +42,9 @@ export async function initializeSpriteMapping(): Promise<void> {
   return mappingPromise;
 }
 
-
-
 // Get Pokemon sprite URL from PokemonOption
 export function getPokemonSpriteUrlFromOption(pokemon: PokemonOption): string {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
-}
-
-// Async version for when we need the actual National Dex ID
-export async function getPokemonSpriteUrlAsync(pokemonId: number): Promise<string> {
-  const nationalDexId = await getNationalDexIdFromInfiniteFusionId(pokemonId);
-  const spriteId = nationalDexId; // Fallback to original ID if conversion fails
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${spriteId}.png`;
 }
 
 // Pokemon Option Component
@@ -69,7 +60,7 @@ const PokemonOption = ({
   <ComboboxOption
     value={pokemon}
     className={clsx(
-      'relative cursor-default select-none py-2 pr-4 pl-13',
+      'relative cursor-default select-none py-2 px-4',
       "hover:bg-gray-100 dark:hover:bg-gray-700",
       {
         'bg-blue-400 text-white': selected,
@@ -89,29 +80,28 @@ const PokemonOption = ({
             loading="lazy"
             unoptimized
           />
-          <span className={clsx('block truncate ', {
+          <span className={clsx('block truncate flex-1', {
             'font-medium': selected,
             'font-normal': !selected
           })}>
             {pokemon.name}
           </span>
-          {isRoutePokemon && (
-            <span className="ml-auto text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">
-              Route
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {isRoutePokemon && (
+              <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">
+                Route
+              </span>
+            )}
+            <div className="w-5 h-5 flex items-center justify-center">
+              {selected && (
+                <Check className={clsx("w-5 h-5", {
+                  'text-white': selected,
+                  'text-blue-400': !selected
+                })} aria-hidden="true" />
+              )}
+            </div>
+          </div>
         </div>
-        {selected ? (
-          <span
-            className="absolute inset-y-0 left-2 flex items-center pl-2"
-            aria-hidden="true"
-          >
-            <Check className={clsx("w-6 h-6", {
-              'text-white': selected,
-              'text-blue-400': !selected
-            })} aria-hidden="true" />
-          </span>
-        ) : null}
       </>
     )}
   </ComboboxOption>
@@ -120,11 +110,11 @@ const PokemonOption = ({
 // Pokemon Options Component
 const PokemonOptions = ({
   options,
-  isRoutePokemonPredicate,
+  isRoutePokemon,
   query,
 }: {
   options: PokemonOption[];
-  isRoutePokemonPredicate: (pokemonId: number) => boolean;
+  isRoutePokemon: (pokemonId: number) => boolean;
   query: string;
 }) => {
   if (options.length === 0) {
@@ -159,7 +149,7 @@ const PokemonOptions = ({
           key={pokemon.id}
           value={pokemon}
           className={({ active, selected }) => clsx(
-            'relative cursor-pointer select-none py-2 pr-4 pl-13 content-visibility-auto',
+            'relative cursor-pointer select-none py-2 px-4 content-visibility-auto',
             "rounded-md mx-2",
             {
               'bg-blue-600 text-white ': active,
@@ -168,7 +158,7 @@ const PokemonOptions = ({
           )}
           style={{ containIntrinsicSize: '0 60px' }}
         >
-          {({ selected, active }) => (
+          {({ selected }) => (
             <>
               <div className={"flex items-center gap-8"}>
                 <Image
@@ -180,29 +170,28 @@ const PokemonOptions = ({
                   loading="lazy"
                   unoptimized
                 />
-                <span className={clsx('block truncate', {
+                <span className={clsx('block truncate flex-1', {
                   'font-medium': selected,
                   'font-normal': !selected
                 })}>
                   {pokemon.name}
                 </span>
-                {isRoutePokemonPredicate(pokemon.id) && (
-                  <span className="ml-auto text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">
-                    Route
-                  </span>
-                )}
+                <div className="flex items-center gap-3">
+                  {isRoutePokemon(pokemon.id) && (
+                    <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">
+                      Route
+                    </span>
+                  )}
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    {selected && (
+                      <Check className={clsx("w-5 h-5", {
+                        'text-white': selected,
+                        'text-blue-400': !selected
+                      })} aria-hidden="true" />
+                    )}
+                  </div>
+                </div>
               </div>
-              {selected ? (
-                <span
-                  className="absolute inset-y-0 left-2 flex items-center pl-2"
-                  aria-hidden="true"
-                >
-                  <Check className={clsx("w-6 h-6", {
-                    'text-white': active,
-                    'text-blue-400': !active
-                  })} aria-hidden="true" />
-                </span>
-              ) : null}
             </>
           )}
         </ComboboxOption>
@@ -351,26 +340,6 @@ export const PokemonCombobox = ({
     }
   }, []);
 
-  // Memoize filtered options with fuzzy search and prioritization logic
-  const filteredOptions = useMemo(() => {
-    // If no search query, show only route encounters
-    if (deferredQuery === '') {
-      return routeEncounterData;
-    }
-
-    // For route Pokemon, use exact string matching
-    const routeMatches = routeEncounterData.filter(pokemon =>
-      pokemon.name.toLowerCase().includes(deferredQuery.toLowerCase())
-    );
-
-    // For non-route Pokemon, use fuzzy search
-    const nonRoutePokemon = allPokemonData.filter(p => !isRoutePokemon(p.id));
-
-    // Note: This will be handled in a useEffect since fuzzy search is now async
-    return [...routeMatches, ...nonRoutePokemon];
-  }, [routeEncounterData, allPokemonData, deferredQuery, isRoutePokemon]);
-
-  // State for fuzzy search results
   const [fuzzyResults, setFuzzyResults] = useState<PokemonOption[]>([]);
 
   // Perform fuzzy search when query changes
@@ -495,7 +464,7 @@ export const PokemonCombobox = ({
         >
           <PokemonOptions
             options={finalOptions}
-            isRoutePokemonPredicate={isRoutePokemon}
+            isRoutePokemon={isRoutePokemon}
             query={deferredQuery}
           />
         </ComboboxOptions>
