@@ -778,9 +778,8 @@ export const PokemonCombobox = ({
           value={localNickname}
           onChange={handleNicknameChange}
           placeholder={nicknamePlaceholder}
-          disabled={disabled || !value}
           className={clsx(
-            'rounded-b-md rounded-t-none relative',
+            'rounded-b-md border-t-0 rounded-t-none relative',
             'w-full px-3 py-3.5 text-sm border rounded-md bg-white text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
             'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
             'placeholder-gray-500 dark:placeholder-gray-400'

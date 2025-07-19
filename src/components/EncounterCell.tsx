@@ -236,7 +236,7 @@ export function EncounterCell({
           onDragEnd={handleFusionDragEnd}
           className={clsx(
             'group',
-            'size-12.25 flex items-center justify-center self-end',
+            'size-12.25 flex items-center justify-center self-center',
             'p-2 rounded-md border transition-all duration-200 cursor-pointer',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
             'disabled:opacity-50 disabled:cursor-not-allowed bg-white',
