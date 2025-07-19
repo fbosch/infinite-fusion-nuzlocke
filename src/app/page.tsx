@@ -14,7 +14,7 @@ export default function Home() {
 
       <main id='main-content' className='max-w-[1200px] mx-auto' role='main'>
         <header className='flex items-center justify-between mb-8'>
-          <h1 className='text-4xl font-bold text-gray-900 dark:text-white'>
+          <h1 className='text-4xl font-bold text-gray-900 dark:text-white font-mono'>
             Infinite Fusion Nuzlocke Tracker
           </h1>
           <ThemeToggle />
