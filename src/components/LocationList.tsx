@@ -155,11 +155,11 @@ export default function LocationList() {
             },
           };
         } else {
-          // Converting from fusion - use head as the Pokemon
           return {
             ...prev,
             [routeId]: {
-              ...currentEncounter,
+              head: currentEncounter.head || currentEncounter.body,
+              body: currentEncounter.body,
               isFusion: false,
             },
           };
