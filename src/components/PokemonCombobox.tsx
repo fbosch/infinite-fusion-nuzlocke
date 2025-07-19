@@ -852,13 +852,13 @@ export const PokemonCombobox = ({
                     disabled={isLoadingEvolutions}
                     className={clsx(
                       'flex items-center justify-center gap-1 px-2 py-1 rounded-md',
-                      'bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium',
-                      'border border-blue-600 dark:border-blue-400',
+                      'bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 text-xs font-medium',
+                      'border border-gray-300 hover:border-blue-300 dark:border-gray-600 dark:hover:border-blue-400',
                       'transition-colors duration-200',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
                       'disabled:opacity-50 disabled:cursor-not-allowed',
-                      'dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus-visible:ring-blue-500',
-                      showEvolutionMenu && 'bg-blue-600 dark:bg-blue-700',
+                      'dark:bg-gray-700 dark:hover:bg-blue-900/20 dark:text-gray-400 dark:hover:text-blue-400',
+                      showEvolutionMenu && 'bg-blue-50 text-blue-600 border-blue-300 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-400',
                       'hover:cursor-pointer'
                     )}
                     title={
@@ -894,6 +894,7 @@ export const PokemonCombobox = ({
                         <button
                           key={evolution.id}
                           type='button'
+                          title={`Evolve to ${evolution.name}`}
                           onClick={() => handleEvolution(evolution)}
                           className={clsx(
                             'w-full flex items-center gap-3 px-3 py-2 text-sm hover:cursor-pointer',
