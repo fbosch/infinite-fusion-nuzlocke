@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { EncounterCell } from './EncounterCell';
+import { EncounterCell } from '../EncounterCell';
 import { dragStore, dragActions } from '@/stores/dragStore';
 import type { PokemonOption } from '@/loaders/pokemon';
 

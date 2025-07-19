@@ -62,14 +62,14 @@ export function FusionSprite({
   
   const link = useMemo(() => {
     if (head && !body) {
-      return `https://infinitefusiondex.com/details/${head.nationalDexId}`
+      return `https://infinitefusiondex.com/details/${head.id}`
     }
     if (!head && body) {
-      return `https://infinitefusiondex.com/details/${body.nationalDexId}`
+      return `https://infinitefusiondex.com/details/${body.id}`
     }
-      if (head && body) {
-    return `https://infinitefusiondex.com/details/${head.nationalDexId}.${body.nationalDexId}`
-      }
+    if (head && body) {
+    return `https://infinitefusiondex.com/details/${head.id}.${body.id}`
+    }
   }, [head,body])
   
   return (
@@ -171,7 +171,7 @@ export function FusionSprite({
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               if (head && body) {
-                target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.nationalDexId}.${body.nationalDexId}.png`
+                target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}.png`
               }
             }}
           />
