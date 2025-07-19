@@ -42,6 +42,9 @@ import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
 let nationalDexMapping: Map<number, number> | null = null;
 let mappingPromise: Promise<void> | null = null;
 
+// Global drag state for cross-component communication
+let currentDragData: string | null = null;
+
 // Initialize the National Dex mapping
 export async function initializeSpriteMapping(): Promise<void> {
   if (nationalDexMapping) {
@@ -74,61 +77,71 @@ const PokemonOption = ({
   pokemon: PokemonOption;
   selected: boolean;
   isRoutePokemon: boolean;
-}) => (
-  <ComboboxOption
-    value={pokemon}
-    className={clsx(
-      'relative cursor-default select-none py-2 px-4',
-      'hover:bg-gray-100 dark:hover:bg-gray-700',
-      {
-        'bg-blue-400 text-white': selected,
-        'text-gray-900 dark:text-gray-100': !selected,
-      }
-    )}
-  >
-    {({ selected }) => (
-      <>
-        <div className={'flex items-center gap-8'}>
-          <Image
-            src={getPokemonSpriteUrlFromOption(pokemon)}
-            alt={pokemon.name}
-            width={40}
-            height={40}
-            className='object-contain object-center scale-180 image-render-high-quality'
-            loading='lazy'
-            unoptimized
-          />
-          <span
-            className={clsx('block truncate flex-1', {
-              'font-medium': selected,
-              'font-normal': !selected,
-            })}
-          >
-            {pokemon.name}
-          </span>
-          <div className='flex items-center gap-2'>
-            {isRoutePokemon && (
-              <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
-                Route
-              </span>
-            )}
-            <div className='w-5 h-5 flex items-center justify-center'>
-              {selected && (
-                <Check
-                  className={clsx('w-5 h-5', {
-                    'text-white': selected,
-                    'text-blue-400': !selected,
-                  })}
-                  aria-hidden='true'
-                />
+}) => {
+  const handleDragStart = (e: React.DragEvent<HTMLImageElement>) => {
+    e.dataTransfer.setData('text/plain', pokemon.name);
+    e.dataTransfer.effectAllowed = 'copy';
+    currentDragData = pokemon.name;
+  };
+
+  return (
+    <ComboboxOption
+      value={pokemon}
+      className={clsx(
+        'relative cursor-default select-none py-2 px-4',
+        'hover:bg-gray-100 dark:hover:bg-gray-700',
+        {
+          'bg-blue-400 text-white': selected,
+          'text-gray-900 dark:text-gray-100': !selected,
+        }
+      )}
+    >
+      {({ selected }) => (
+        <>
+          <div className={'flex items-center gap-8'}>
+            <Image
+              src={getPokemonSpriteUrlFromOption(pokemon)}
+              alt={pokemon.name}
+              width={40}
+              height={40}
+              className='object-contain object-center scale-180 image-render-high-quality cursor-grab active:cursor-grabbing'
+              loading='lazy'
+              unoptimized
+              draggable
+              onDragStart={handleDragStart}
+            />
+            <span
+              className={clsx('block truncate flex-1', {
+                'font-medium': selected,
+                'font-normal': !selected,
+              })}
+            >
+              {pokemon.name}
+            </span>
+            <div className='flex items-center gap-2'>
+              {isRoutePokemon && (
+                <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
+                  Route
+                </span>
               )}
+              <div className='w-5 h-5 flex items-center justify-center'>
+                {selected && (
+                  <Check
+                    className={clsx('w-5 h-5', {
+                      'text-white': selected,
+                      'text-blue-400': !selected,
+                    })}
+                    aria-hidden='true'
+                  />
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </>
-    )}
-  </ComboboxOption>
-);
+        </>
+      )}
+    </ComboboxOption>
+  );
+};
 
 // Pokemon Options Component
 const PokemonOptions = ({
@@ -140,6 +153,12 @@ const PokemonOptions = ({
   isRoutePokemon: (pokemonId: number) => boolean;
   query: string;
 }) => {
+  const handleDragStart = (e: React.DragEvent<HTMLImageElement>, pokemonName: string) => {
+    e.dataTransfer.setData('text/plain', pokemonName);
+    e.dataTransfer.effectAllowed = 'copy';
+    currentDragData = pokemonName;
+  };
+
   if (options.length === 0) {
     return (
       <div className='max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent'>
@@ -197,9 +216,11 @@ const PokemonOptions = ({
                   alt={pokemon.name}
                   width={40}
                   height={40}
-                  className='object-contain object-center scale-180 image-render-high-quality'
+                  className='object-contain object-center scale-180 image-render-high-quality cursor-grab active:cursor-grabbing'
                   loading={index < 5 || isRoutePokemon(pokemon.id) ? 'eager' : 'lazy'}
                   unoptimized
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, pokemon.name)}
                 />
                 <span
                   className={clsx('block truncate flex-1', {
@@ -337,6 +358,7 @@ export const PokemonCombobox = ({
   );
 
   const [fuzzyResults, setFuzzyResults] = useState<PokemonOption[]>([]);
+  const [dragPreview, setDragPreview] = useState<PokemonOption | null>(null);
 
   // Perform smart search when query changes
   useEffect(() => {
@@ -425,6 +447,91 @@ export const PokemonCombobox = ({
     [onChange]
   );
 
+  // Handle drop events on the input
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      const pokemonName = e.dataTransfer.getData('text/plain');
+      if (pokemonName) {
+        // Clear the preview
+        setDragPreview(null);
+        // Set the query to trigger search
+        setQuery(pokemonName);
+        // Find the Pokemon by name and set it as the value
+        const findPokemonByName = async () => {
+          try {
+            const allPokemon = await getPokemon();
+            const nameMap = await getPokemonNameMap();
+            
+            // Find Pokemon by name (case insensitive)
+            const foundPokemon = allPokemon.find(p => 
+              nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
+            );
+            
+            if (foundPokemon) {
+              const pokemonOption: PokemonOption = {
+                id: foundPokemon.id,
+                name: pokemonName,
+                nationalDexId: foundPokemon.nationalDexId,
+              };
+              onChange(pokemonOption);
+            }
+          } catch (err) {
+            console.error('Error finding Pokemon by name:', err);
+          }
+        };
+        
+        findPokemonByName();
+      }
+    },
+    [onChange]
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    
+    // Show preview of what will be dropped using global drag data
+    const pokemonName = currentDragData;
+    if (pokemonName && (!dragPreview || dragPreview.name !== pokemonName)) {
+      // Find the Pokemon by name to create a proper preview
+      const findPokemonForPreview = async () => {
+        try {
+          const allPokemon = await getPokemon();
+          const nameMap = await getPokemonNameMap();
+          
+          // Find Pokemon by name (case insensitive)
+          const foundPokemon = allPokemon.find(p => 
+            nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
+          );
+          
+          if (foundPokemon) {
+            const pokemonOption: PokemonOption = {
+              id: foundPokemon.id,
+              name: pokemonName,
+              nationalDexId: foundPokemon.nationalDexId,
+            };
+            setDragPreview(pokemonOption);
+          }
+        } catch (err) {
+          console.error('Error finding Pokemon for preview:', err);
+        }
+      };
+      
+      findPokemonForPreview();
+    }
+  }, [dragPreview]);
+
+  const handleDragLeave = useCallback(() => {
+    // Clear preview when dragging away
+    setDragPreview(null);
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    // Clear global drag data when drag ends
+    currentDragData = null;
+  }, []);
+
   return (
     <Combobox
       value={value || null}
@@ -433,18 +540,26 @@ export const PokemonCombobox = ({
       immediate
     >
       <div className='relative'>
-        <div className='relative'>
+        <div 
+          className='relative'
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDragEnd={handleDragEnd}
+        >
           <ComboboxInput
             className={clsx(
               'w-full px-3 py-3.5 text-sm border rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
               'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-400',
               'focus:cursor-text hover:cursor-pointer',
-              value && 'pl-12' // Add padding for sprite when value is selected
+              (value || dragPreview) && 'pl-12', // Add padding for sprite when value is selected or previewing
+              dragPreview && 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60' // Highlight when showing preview with opacity
             )}
             placeholder={placeholder}
-            displayValue={(pokemon: PokemonOption | null | undefined) =>
-              pokemon?.name || ''
-            }
+            displayValue={(pokemon: PokemonOption | null | undefined) => {
+              const displayPokemon = dragPreview || pokemon;
+              return displayPokemon?.name || '';
+            }}
             spellCheck={false}
             autoComplete='off'
             onChange={handleInputChange}
@@ -452,17 +567,26 @@ export const PokemonCombobox = ({
             onClick={handleInteraction}
             onMouseEnter={handleInteraction}
           />
-          {value && (
+          {(value || dragPreview) && (
             <div className='absolute inset-y-0 left-1.5 flex items-center'>
               <Image
-                src={getPokemonSpriteUrlFromOption(value)}
-                alt={value.name}
+                src={getPokemonSpriteUrlFromOption(dragPreview || value!)}
+                alt={(dragPreview || value)!.name}
                 width={40}
                 height={40}
-                className='object-center object-contain'
+                className={clsx(
+                  'object-center object-contain cursor-grab active:cursor-grabbing',
+                  dragPreview && 'opacity-60' // Make preview sprite opaque
+                )}
                 quality={70}
                 priority={true}
                 loading='eager'
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.setData('text/plain', (dragPreview || value)!.name);
+                  e.dataTransfer.effectAllowed = 'copy';
+                  currentDragData = (dragPreview || value)!.name;
+                }}
               />
             </div>
           )}
