@@ -309,6 +309,7 @@ export const PokemonCombobox = ({
             id,
             name: nameMap.get(id) || `Unknown Pokemon (${id})`,
             nationalDexId: pokemon?.nationalDexId || 0,
+            evolutionIds: pokemon?.evolution?.evolves_to ? [...pokemon.evolution.evolves_to.map(e => e.id)] : undefined,
           };
         });
 
@@ -472,8 +473,16 @@ export const PokemonCombobox = ({
           const targetValue = value;
           const sourceValue = dragSnapshot.currentDragValue;
 
+          // Convert readonly arrays to mutable arrays for the source value
+          const mutableSourceValue: PokemonOption = {
+            id: sourceValue.id,
+            name: sourceValue.name,
+            nationalDexId: sourceValue.nationalDexId,
+            evolutionIds: sourceValue.evolutionIds ? [...sourceValue.evolutionIds] : undefined,
+          };
+
           // Set this combobox to the source value
-          onChange(sourceValue);
+          onChange(mutableSourceValue);
 
           // Dispatch a custom event to set the source combobox to this value
           window.dispatchEvent(
@@ -501,11 +510,12 @@ export const PokemonCombobox = ({
               );
 
               if (foundPokemon) {
-                const pokemonOption: PokemonOption = {
-                  id: foundPokemon.id,
-                  name: pokemonName,
-                  nationalDexId: foundPokemon.nationalDexId,
-                };
+                            const pokemonOption: PokemonOption = {
+              id: foundPokemon.id,
+              name: pokemonName,
+              nationalDexId: foundPokemon.nationalDexId,
+              evolutionIds: foundPokemon.evolution?.evolves_to ? [...foundPokemon.evolution.evolves_to.map(e => e.id)] : undefined,
+            };
                 onChange(pokemonOption);
 
                 // If this is from a different combobox, clear the source
@@ -555,6 +565,7 @@ export const PokemonCombobox = ({
                 id: foundPokemon.id,
                 name: pokemonName,
                 nationalDexId: foundPokemon.nationalDexId,
+                evolutionIds: foundPokemon.evolution?.evolves_to ? [...foundPokemon.evolution.evolves_to.map(e => e.id)] : undefined,
               };
               setDragPreview(pokemonOption);
             }

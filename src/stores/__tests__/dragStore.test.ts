@@ -29,6 +29,7 @@ describe('Drag Store', () => {
       id: 25,
       name: 'Pikachu',
       nationalDexId: 25,
+      evolutionIds: [26],
     };
     dragActions.setDragValue(pokemon);
     expect(dragStore.currentDragValue).toEqual(pokemon);
@@ -39,6 +40,7 @@ describe('Drag Store', () => {
       id: 25,
       name: 'Pikachu',
       nationalDexId: 25,
+      evolutionIds: [26],
     };
     dragActions.startDrag('Pikachu', 'combobox-1', pokemon);
     
