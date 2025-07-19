@@ -1,5 +1,6 @@
 import LocationList from '@/components/LocationList';
 import ThemeToggle from '@/components/ThemeToggle';
+import { Sparkle } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -78,12 +79,18 @@ export default function Home() {
                 </svg>
               </figure>
               <h1 className='ml-4'>
-                <span className='block text-sm sm:text-lg font-medium text-cyan-500 dark:text-cyan-400'>
+                <span
+                  className='block text-sm sm:text-lg font-medium bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'
+                >
                   Pokémon Infinite Fusion
                 </span>
-                <span className='block text-lg sm:text-xl font-bold text-gray-900 dark:text-white'>
-                  Nuzlocke Tracker
-                </span>
+                <div className='flex items-center space-x-1'>
+                  <Sparkle className='size-4' strokeWidth={2} fill='currentColor' />
+                  <span className='block text-lg sm:text-xl font-bold text-gray-900 dark:text-white'>
+                    Nuzlocke Tracker
+                  </span>
+                  <Sparkle className='size-4' strokeWidth={2} fill='currentColor' />
+                </div>
               </h1>
             </div>
             <ThemeToggle />

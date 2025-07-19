@@ -55,7 +55,7 @@ function getNicknameText(
   head: PokemonOption | null,
   body: PokemonOption | null,
   isFusion: boolean
-): string {
+): string | undefined {
   if (!isFusion) {
     // Single Pokémon - show nickname if available, otherwise show name
     const pokemon = head || body;
@@ -70,7 +70,7 @@ function getNicknameText(
     return pokemon.nickname || pokemon.name;
   }
 
-  return head.nickname || body.nickname || head.name || body.name;
+  return head.nickname || body.nickname;
 }
 
 export function FusionSprite({
@@ -108,7 +108,7 @@ export function FusionSprite({
   if (!head && !body) return null;
 
   return (
-    <div className='flex flex-col items-center'>
+    <div className='flex flex-col items-center relative'>
       <a
         href={link}
         target='_blank'
@@ -230,7 +230,7 @@ export function FusionSprite({
         </div>
       </a>
       {nicknameText && (
-        <div className='mt-4 text-center max-w-fit translate-y-4.5'>
+        <div className='mt-4 text-center absolute bottom-0 translate-y-7'>
           <span
             className='text-sm font-mono text-black dark:text-white truncate max-w-full block tracking-wide'
             style={{
