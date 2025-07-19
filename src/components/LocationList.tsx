@@ -52,7 +52,7 @@ export default function LocationList() {
         </span>
       ),
       enableSorting: true,
-      size: 40, // Fixed width for location column
+      size: 20, // Fixed width for location column
     }),
     columnHelper.display({
       id: 'sprite',
@@ -74,7 +74,7 @@ export default function LocationList() {
             />
         );
       },
-      size: 90, // Width for sprite column
+      size: 80, // Width for sprite column
     }),
     columnHelper.accessor('routeId', {
       id: 'encounter',
