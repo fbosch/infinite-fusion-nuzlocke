@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: 'raw.githubusercontent.com',
         pathname: '/PokeAPI/sprites/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'ifd-spaces.sfo2.cdn.digitaloceanspaces.com',
+        pathname: '/custom/**',
+      },
     ],
   },
 };

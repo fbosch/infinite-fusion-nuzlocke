@@ -13,28 +13,10 @@ import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
 import { EncounterCell } from './EncounterCell';
+import { PokemonSprite } from './PokemonSprite';
 import type { PokemonOption } from '@/loaders/pokemon';
 
 const columnHelper = createColumnHelper<Location>();
-
-const columns = [
-  columnHelper.accessor('name', {
-    header: 'Location',
-    cell: info => (
-      <span className='font-medium text-gray-900 dark:text-white'>
-        {info.getValue()}
-      </span>
-    ),
-    enableSorting: true,
-    size: 200, // Fixed width for location column
-  }),
-  columnHelper.accessor('routeId', {
-    header: 'Encounter',
-    cell: info => info.getValue(),
-    enableSorting: false,
-    size: 700, // Increased width for fusion comboboxes
-  }),
-];
 
 // Type for encounter data with fusion status
 interface EncounterData {
@@ -58,6 +40,48 @@ export default function LocationList() {
       return [];
     }
   }, []);
+
+  // Define columns inside the component to access encounters state
+  const columns = useMemo(() => [
+    columnHelper.accessor('name', {
+      header: 'Location',
+      cell: info => (
+        <span className='font-medium text-gray-900 dark:text-white'>
+          {info.getValue()}
+        </span>
+      ),
+      enableSorting: true,
+      size: 40, // Fixed width for location column
+    }),
+    columnHelper.display({
+      id: 'sprite',
+      header: '',
+      cell: props => {
+        const routeId = props.row.original.routeId;
+        const encounterData = encounters[routeId] || {
+          head: null,
+          body: null,
+          isFusion: false,
+        };
+        
+        return (
+            <PokemonSprite
+              encounterData={encounterData}
+              size='lg'
+              className='scale-150'
+            />
+        );
+      },
+      size: 90, // Width for sprite column
+    }),
+    columnHelper.accessor('routeId', {
+      id: 'encounter',
+      header: 'Encounter',
+      cell: info => info.getValue(),
+      enableSorting: false,
+      size: 700, // Increased width for fusion comboboxes
+    }),
+  ], [encounters]);
 
   const table = useReactTable({
     data,
@@ -179,7 +203,7 @@ export default function LocationList() {
                 return (
                   <th
                     key={header.id}
-                    className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset'
+                    className='px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset'
                     style={{
                       width: `${header.column.getSize()}px`,
                       minWidth: `${header.column.getSize()}px`,
@@ -223,19 +247,19 @@ export default function LocationList() {
           {table.getRowModel().rows.map(row => (
             <tr
               key={row.id}
-              className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
+              className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colorsa'
               role='row'
             >
               {row.getVisibleCells().map(cell => {
-                // Special handling for encounter column
-                if (cell.column.id === 'routeId') {
-                  const routeId = cell.getValue() as number;
-                  const encounterData = encounters[routeId] || {
-                    head: null,
-                    body: null,
-                    isFusion: false,
-                  };
+                const routeId = cell.getValue() as number;
+                const encounterData = encounters[routeId] || {
+                  head: null,
+                  body: null,
+                  isFusion: false,
+                };
 
+                // Special handling for encounter column
+                if (cell.column.id === 'encounter') {
                   return (
                     <EncounterCell
                       key={cell.id}
@@ -250,7 +274,7 @@ export default function LocationList() {
                 return (
                   <td
                     key={cell.id}
-                    className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
+                    className=' whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
                     role='cell'
                     aria-label={`${cell.column.columnDef.header as string}: ${flexRender(cell.column.columnDef.cell, cell.getContext())}`}
                   >

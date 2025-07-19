@@ -210,7 +210,7 @@ const PokemonOptions = ({
                   alt={pokemon.name}
                   width={40}
                   height={40}
-                  className='object-contain object-center scale-180 image-render-high-quality cursor-grab active:cursor-grabbing'
+                  className='object-contain object-center scale-140 image-render-high-quality cursor-grab active:cursor-grabbing'
                   loading={
                     index < 5 || isRoutePokemon(pokemon.id) ? 'eager' : 'lazy'
                   }
