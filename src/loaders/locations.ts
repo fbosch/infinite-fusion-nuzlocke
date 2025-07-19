@@ -1,10 +1,11 @@
 import { z } from 'zod';
 import locationsData from '@data/locations.json';
+import { getStarterPokemonByGameMode } from './starters';
 
 // Zod schema for location data
 export const LocationSchema = z.object({
   name: z.string().min(1, { error: 'Location name is required' }),
-  routeId: z.number().nullable(),
+  routeId: z.number().int().min(0, { error: 'Route ID must be non-negative' }),
   order: z
     .number()
     .int()
@@ -47,4 +48,45 @@ export function getLocationsBySpecificRegion(region: string): Location[] {
 
 export function getLocationsSortedByOrder(): Location[] {
   return getLocations().sort((a, b) => a.order - b.order);
+}
+
+// Special handling for starter Pokémon encounters
+export async function getLocationEncounters(
+  location: Location,
+  gameMode: 'classic' | 'remix' = 'classic'
+): Promise<number[]> {
+  // Special case for starter location (routeId 0)
+  if (location.routeId === 0) {
+    return await getStarterPokemonByGameMode(gameMode);
+  }
+
+  // For other locations, return empty array (encounters handled separately)
+  return [];
+}
+
+// Get all locations with their available encounters
+export async function getLocationsWithEncounters(
+  gameMode: 'classic' | 'remix' = 'classic'
+): Promise<Array<Location & { encounters: number[] }>> {
+  const locations = getLocationsSortedByOrder();
+  const locationsWithEncounters = [];
+
+  for (const location of locations) {
+    const encounters = await getLocationEncounters(location, gameMode);
+    locationsWithEncounters.push({
+      ...location,
+      encounters,
+    });
+  }
+
+  return locationsWithEncounters;
+}
+
+// Check if a location has encounters available
+export async function hasLocationEncounters(
+  location: Location,
+  gameMode: 'classic' | 'remix' = 'classic'
+): Promise<boolean> {
+  const encounters = await getLocationEncounters(location, gameMode);
+  return encounters.length > 0;
 }

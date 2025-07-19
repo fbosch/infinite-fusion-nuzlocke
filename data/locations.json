@@ -1,7 +1,7 @@
 [
   {
     "name": "Starter",
-    "routeId": null,
+    "routeId": 0,
     "order": 1,
     "region": "Kanto",
     "description": "Choose your starter Pokémon in Professor Oak's Lab"
