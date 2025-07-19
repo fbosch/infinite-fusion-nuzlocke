@@ -113,7 +113,7 @@ export function FusionSprite({
              { transform: 'translateY(-4px)' },
              { transform: 'translateY(0px)' },
            ], {
-             duration: 300,
+             duration: 400,
              easing: 'linear',
              playbackRate: 1,
              iterations: 1,
@@ -124,7 +124,7 @@ export function FusionSprite({
              { transform: 'translateY(-38%) translateX(-60%) scale(1.03)' },
              { transform: 'translateY(-40%) translateX(-60%) scale(1)' },
            ], {
-             duration: 300,
+             duration: 400,
              easing: 'linear',
              playbackRate: 1,
              iterations: 1,
@@ -187,7 +187,7 @@ export function FusionSprite({
               alt={altText}
               width={spriteSize}
               height={spriteSize}
-              className={imageClasses}
+              className={clsx(imageClasses, 'select-none')}
               loading='eager'
               unoptimized
               draggable={false}
@@ -204,8 +204,17 @@ export function FusionSprite({
         </div>
       </a>
       {nicknameText && (
-        <div className="mt-4 text-center">
-          <span className="text-lg font-mono text-gray-700 dark:text-gray-200 truncate max-w-full block">
+        <div className="mt-4 text-center max-w-fit">
+          <span className="text-sm font-mono text-black dark:text-white truncate max-w-full block tracking-wide" style={{
+            textShadow: `
+              2px 2px 0 #000,
+              1px 1px 0 #000,
+              0 1px 0 #000,
+              1px 0 0 #000,
+              2px 0 0 #000,
+              0 2px 0 #000
+            `
+          }}>
             {nicknameText}
           </span>
         </div>
