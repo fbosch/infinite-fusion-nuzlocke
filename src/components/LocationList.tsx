@@ -9,7 +9,7 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import React, { useState, useMemo, startTransition } from 'react';
-import { ChevronUp, ChevronDown, ChevronsUpDown, Zap } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronsUpDown, Dna, DnaOff } from 'lucide-react';
 import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
 import { PokemonCombobox } from './PokemonCombobox';
@@ -276,26 +276,26 @@ export default function LocationList() {
                           type='button'
                           onClick={() => handleFusionToggle(routeId)}
                           className={clsx(
-                            'size-12.5 flex items-center justify-center self-end',
+                            'group',
+                            'size-12.25 flex items-center justify-center self-end',
                             'p-2 rounded-md border transition-all duration-200 cursor-pointer',
-                            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-                            'disabled:opacity-50 disabled:cursor-not-allowed',
+                            'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+                            'disabled:opacity-50 disabled:cursor-not-allowed bg-white',
                             {
-                              'bg-blue-500 border-blue-500 text-white hover:bg-blue-600 hover:border-blue-600': isFusion,
-                              'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700': !isFusion,
+                              'dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 border-gray-300 hover:bg-red-500 hover:border-red-600': isFusion,
+                              'bg-white border-gray-300 text-gray-700 hover:bg-green-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-green-700': !isFusion,
                             }
                           )}
                           aria-label={`Toggle fusion for ${selectedPokemon?.name || 'Pokemon'}`}
                           title={isFusion ? 'Unfuse' : 'Fuse'}
                         >
-                          <Zap className='h-4 w-4' />
+                          {isFusion ? <DnaOff className='size-6 group-hover:text-white' /> : <Dna className='size-6 group-hover:text-white' />}
                         </button>
                       </div>
                     </td>
                   );
                 }
 
-                // Default cell rendering
                 return (
                   <td
                     key={cell.id}
