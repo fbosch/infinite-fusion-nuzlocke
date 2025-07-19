@@ -1,16 +1,5 @@
 'use client';
 
-/**
- * PokemonCombobox Component
- *
- * IMPORTANT RULE: Always use National Dex IDs for sprite URLs, never fall back to Infinite Fusion IDs.
- * Infinite Fusion IDs and National Dex IDs are different and using the wrong one will result in
- * incorrect sprite URLs (e.g., showing wrong Pokemon sprites).
- *
- * - Infinite Fusion ID: Used for game logic and data storage
- * - National Dex ID: Used for sprite URLs and external API calls
- */
-
 import React, {
   useState,
   useMemo,

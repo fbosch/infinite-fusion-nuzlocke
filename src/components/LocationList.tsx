@@ -33,11 +33,13 @@ const columns = [
       </span>
     ),
     enableSorting: true,
+    size: 200, // Fixed width for location column
   }),
   columnHelper.accessor('routeId', {
     header: 'Encounter',
     cell: info => info.getValue(),
     enableSorting: false,
+    size: 700, // Increased width for fusion comboboxes
   }),
 ];
 
@@ -167,7 +169,7 @@ export default function LocationList() {
   return (
     <div className='overflow-x-auto'>
       <table
-        className='min-w-full divide-y divide-gray-200 dark:divide-gray-700'
+        className='w-full divide-y divide-gray-200 dark:divide-gray-700'
         role='table'
         aria-label='Locations table'
       >
@@ -187,6 +189,10 @@ export default function LocationList() {
                   <th
                     key={header.id}
                     className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset'
+                    style={{ 
+                      width: `${header.column.getSize()}px`,
+                      minWidth: `${header.column.getSize()}px`
+                    }}
                     onClick={header.column.getToggleSortingHandler()}
                     onKeyDown={e => {
                       if (e.key === 'Enter' || e.key === ' ') {
