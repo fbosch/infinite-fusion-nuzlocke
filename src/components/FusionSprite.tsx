@@ -204,7 +204,7 @@ export function FusionSprite({
         </div>
       </a>
       {nicknameText && (
-        <div className="mt-4 text-center max-w-fit">
+        <div className="mt-4 text-center max-w-fit translate-y-4.5">
           <span className="text-sm font-mono text-black dark:text-white truncate max-w-full block tracking-wide" style={{
             textShadow: `
               2px 2px 0 #000,

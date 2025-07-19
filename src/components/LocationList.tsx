@@ -332,7 +332,6 @@ export default function LocationList() {
           {table.getRowModel().rows.map(row => (
             <tr
               key={row.id}
-              className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
               role='row'
             >
               {row.getVisibleCells().map(cell => {
