@@ -284,9 +284,9 @@ export default function LocationList() {
   }
 
   return (
-    <div className='overflow-x-auto'>
+    <div className='overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'>
       <table
-        className='w-full divide-y divide-gray-200 dark:divide-gray-700'
+        className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700'
         role='table'
         aria-label='Locations table'
       >
@@ -306,7 +306,7 @@ export default function LocationList() {
                   <th
                     key={header.id}
                     className={clsx(
-                      'px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset',
+                      'px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset',
                       header.column.getCanSort() &&
                         'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                     )}
@@ -327,10 +327,12 @@ export default function LocationList() {
                     aria-label={`${header.column.columnDef.header as string} column. Click to sort.`}
                   >
                     <div className='flex items-center space-x-1'>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                      <div>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </div>
                       {header.column.getCanSort() && (
                         <span className='text-gray-400' aria-hidden='true'>
                           {header.column.getIsSorted() === 'asc' ? (
@@ -351,7 +353,11 @@ export default function LocationList() {
         </thead>
         <tbody className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700'>
           {table.getRowModel().rows.map(row => (
-            <tr key={row.id} role='row'>
+            <tr
+              key={row.id}
+              role='row'
+              className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
+            >
               {row.getVisibleCells().map(cell => {
                 const routeId = row.original.routeId;
                 const encounterData = encounters[routeId] || {
@@ -378,7 +384,7 @@ export default function LocationList() {
                   return (
                     <td
                       key={cell.id}
-                      className='px-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
+                      className='px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
                       role='cell'
                     >
                       <FusionSprite
@@ -396,7 +402,7 @@ export default function LocationList() {
                   return (
                     <td
                       key={cell.id}
-                      className='px-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
+                      className='px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
                       role='cell'
                     >
                       <button
@@ -422,7 +428,7 @@ export default function LocationList() {
                 return (
                   <td
                     key={cell.id}
-                    className='px-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
+                    className='px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
                     role='cell'
                     aria-label={`${cell.column.columnDef.header as string}: ${flexRender(cell.column.columnDef.cell, cell.getContext())}`}
                   >

@@ -18,7 +18,7 @@ export default function Home() {
         className='max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8'
         role='main'
       >
-        <header className='py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 mb-4'>
+        <header className='py-3 sm:py-4 mb-4'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center'>
               <figure className='w-14'>
@@ -96,7 +96,7 @@ export default function Home() {
             <ThemeToggle />
           </div>
         </header>
-        <section aria-labelledby='locations-heading'>
+        <section aria-labelledby='locations-heading' className='pb-10'>
           <h2 id='locations-heading' className='sr-only'>
             Game Locations
           </h2>
