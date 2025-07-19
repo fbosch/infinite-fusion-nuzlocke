@@ -9,11 +9,12 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import React, { useState, useMemo, startTransition } from 'react';
-import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronsUpDown, Zap } from 'lucide-react';
 import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
 import { PokemonCombobox } from './PokemonCombobox';
 import type { PokemonOption } from '@/loaders/pokemon';
+import clsx from 'clsx';
 
 const columnHelper = createColumnHelper<Location>();
 
@@ -34,10 +35,17 @@ const columns = [
   }),
 ];
 
+// Type for encounter data with fusion status
+interface EncounterData {
+  head: PokemonOption | null;
+  body: PokemonOption | null;
+  isFusion: boolean;
+}
+
 export default function LocationList() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [encounters, setEncounters] = useState<
-    Record<number, PokemonOption | null>
+    Record<number, EncounterData>
   >({});
 
   // Memoize the data to prevent unnecessary re-computations
@@ -65,13 +73,67 @@ export default function LocationList() {
   // Optimized encounter selection handler for immediate response
   const handleEncounterSelect = (
     routeId: number,
-    pokemon: PokemonOption | null
+    pokemon: PokemonOption | null,
+    field: 'head' | 'body' = 'head'
   ) => {
     startTransition(() => {
-      setEncounters(prev => ({
-        ...prev,
-        [routeId]: pokemon,
-      }));
+      setEncounters(prev => {
+        const currentEncounter = prev[routeId] || { head: null, body: null, isFusion: false };
+        
+        if (currentEncounter.isFusion) {
+          // For fusions, update the specified field
+          return {
+            ...prev,
+            [routeId]: {
+              head: field === 'head' ? pokemon : currentEncounter.head,
+              body: field === 'body' ? pokemon : currentEncounter.body,
+              isFusion: true,
+            },
+          };
+        } else {
+          // For regular encounters, just set the head
+          return {
+            ...prev,
+            [routeId]: {
+              head: pokemon,
+              body: null,
+              isFusion: false,
+            },
+          };
+        }
+      });
+    });
+  };
+
+  // Fusion toggle handler
+  const handleFusionToggle = (routeId: number) => {
+    startTransition(() => {
+      setEncounters(prev => {
+        const currentEncounter = prev[routeId] || { head: null, body: null, isFusion: false };
+        const newIsFusion = !currentEncounter.isFusion;
+        
+        if (newIsFusion) {
+          // Converting to fusion - existing Pokemon becomes the head (fusion base)
+          return {
+            ...prev,
+            [routeId]: {
+              head: currentEncounter.head,
+              body: null,
+              isFusion: true,
+            },
+          };
+        } else {
+          // Converting from fusion - use head as the Pokemon
+          return {
+            ...prev,
+            [routeId]: {
+              head: currentEncounter.head || currentEncounter.body,
+              body: null,
+              isFusion: false,
+            },
+          };
+        }
+      });
     });
   };
 
@@ -159,20 +221,76 @@ export default function LocationList() {
                 // Special handling for encounter column
                 if (cell.column.id === 'routeId') {
                   const routeId = cell.getValue() as number;
-                  const selectedPokemon = encounters[routeId] || null;
+                  const encounterData = encounters[routeId] || { head: null, body: null, isFusion: false };
+                  const selectedPokemon = encounterData.isFusion ? encounterData.body : encounterData.head;
+                  const isFusion = encounterData.isFusion;
+
                   return (
                     <td
                       key={cell.id}
                       className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
                       role='cell'
                     >
-                      <PokemonCombobox
-                        routeId={routeId}
-                        value={selectedPokemon}
-                        onChange={pokemon =>
-                          handleEncounterSelect(routeId, pokemon)
-                        }
-                      />
+                      <div className='flex  flex-row justify-center gap-2'>
+                        <div className='flex-1'>
+                          {isFusion ? (
+                            <div className='flex items-start gap-2'>
+                              <div className='flex-1'>
+                                <span className='text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1'>
+                                  Head:
+                                </span>
+                                <PokemonCombobox
+                                  routeId={routeId}
+                                  value={encounterData.head}
+                                  onChange={pokemon =>
+                                    handleEncounterSelect(routeId, pokemon, 'head')
+                                  }
+                                  placeholder='Select head Pokemon'
+                                />
+                              </div>
+                              <div className='flex-1'>
+                                <span className='text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1'>
+                                  Body:
+                                </span>
+                                <PokemonCombobox
+                                  routeId={routeId}
+                                  value={encounterData.body}
+                                  onChange={pokemon =>
+                                    handleEncounterSelect(routeId, pokemon, 'body')
+                                  }
+                                  placeholder='Select body Pokemon'
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            <PokemonCombobox
+                              routeId={routeId}
+                              value={selectedPokemon}
+                              onChange={pokemon =>
+                                handleEncounterSelect(routeId, pokemon)
+                              }
+                            />
+                          )}
+                        </div>
+                        <button
+                          type='button'
+                          onClick={() => handleFusionToggle(routeId)}
+                          className={clsx(
+                            'size-12.5 flex items-center justify-center self-end',
+                            'p-2 rounded-md border transition-all duration-200 cursor-pointer',
+                            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+                            'disabled:opacity-50 disabled:cursor-not-allowed',
+                            {
+                              'bg-blue-500 border-blue-500 text-white hover:bg-blue-600 hover:border-blue-600': isFusion,
+                              'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700': !isFusion,
+                            }
+                          )}
+                          aria-label={`Toggle fusion for ${selectedPokemon?.name || 'Pokemon'}`}
+                          title={isFusion ? 'Unfuse' : 'Fuse'}
+                        >
+                          <Zap className='h-4 w-4' />
+                        </button>
+                      </div>
                     </td>
                   );
                 }
