@@ -319,7 +319,7 @@ export default function LocationList() {
                   <th
                     key={header.id}
                     className={clsx(
-                      'px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset',
+                      'px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset',
                       header.column.getCanSort() && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                     )}
                     style={{
