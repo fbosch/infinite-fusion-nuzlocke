@@ -477,13 +477,6 @@ export const PokemonCombobox = ({
           const targetValue = value;
           const sourceValue = currentDragValue;
 
-          console.log('Switching values:', {
-            from: currentDragSource,
-            to: comboboxId,
-            sourceValue: sourceValue.name,
-            targetValue: targetValue.name,
-          });
-
           // Set this combobox to the source value
           onChange(sourceValue);
 
