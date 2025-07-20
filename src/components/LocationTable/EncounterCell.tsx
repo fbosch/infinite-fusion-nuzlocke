@@ -74,9 +74,9 @@ export function EncounterCell({
       // Check if this drop is from a different combobox
       const isFromDifferentCombobox =
         dragSnapshot.currentDragSource &&
-        dragSnapshot.currentDragSource !== `${routeId}-single` &&
-        dragSnapshot.currentDragSource !== `${routeId}-head` &&
-        dragSnapshot.currentDragSource !== `${routeId}-body`;
+        dragSnapshot.currentDragSource !== `${locationId}-single` &&
+        dragSnapshot.currentDragSource !== `${locationId}-head` &&
+        dragSnapshot.currentDragSource !== `${locationId}-body`;
 
       if (!isFromDifferentCombobox) return;
 
@@ -115,13 +115,10 @@ export function EncounterCell({
               );
             }
 
-            // Clear the source combobox
+            // Clear the source location
             if (dragSnapshot.currentDragSource) {
-              window.dispatchEvent(
-                new CustomEvent('clearCombobox', {
-                  detail: { comboboxId: dragSnapshot.currentDragSource },
-                })
-              );
+              const { locationId: sourceLocationId } = playthroughActions.getLocationFromComboboxId(dragSnapshot.currentDragSource);
+              playthroughActions.clearEncounterFromLocation(sourceLocationId);
             }
           }
         } catch (err) {
@@ -132,7 +129,6 @@ export function EncounterCell({
       findPokemonByName();
     },
     [
-      routeId,
       isFusion,
       selectedPokemon,
       dragSnapshot.currentDragSource,
@@ -143,6 +139,9 @@ export function EncounterCell({
   // Handle drag over
   const handleFusionDragOver = useCallback(
     (e: React.DragEvent<HTMLButtonElement>) => {
+      // Always prevent default to allow drop events to fire
+      e.preventDefault();
+
       // Only allow drop if this row is not already a fusion and has an existing encounter
       if (isFusion || !selectedPokemon) {
         e.dataTransfer.dropEffect = 'none';
@@ -152,18 +151,18 @@ export function EncounterCell({
       // Check if drag is from a different combobox
       const isFromDifferentCombobox =
         dragSnapshot.currentDragSource &&
-        dragSnapshot.currentDragSource !== `${routeId}-single` &&
-        dragSnapshot.currentDragSource !== `${routeId}-head` &&
-        dragSnapshot.currentDragSource !== `${routeId}-body`;
+        dragSnapshot.currentDragSource !== `${locationId}-single` &&
+        dragSnapshot.currentDragSource !== `${locationId}-head` &&
+        dragSnapshot.currentDragSource !== `${locationId}-body`;
+      
 
       if (isFromDifferentCombobox) {
-        e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
       } else {
         e.dataTransfer.dropEffect = 'none';
       }
     },
-    [isFusion, selectedPokemon, dragSnapshot.currentDragSource, routeId]
+    [isFusion, selectedPokemon, dragSnapshot.currentDragSource, locationId]
   );
 
   // Handle drag end
@@ -193,7 +192,7 @@ export function EncounterCell({
                   onChange={pokemon => handleEncounterSelect(pokemon, 'head')}
                   placeholder='Select head Pokemon'
                   nicknamePlaceholder='Enter head nickname'
-                  comboboxId={`${routeId}-head`}
+                  comboboxId={`${locationId}-head`}
                 />
               </div>
               <button
@@ -216,7 +215,7 @@ export function EncounterCell({
                   onChange={pokemon => handleEncounterSelect(pokemon, 'body')}
                   placeholder='Select body Pokemon'
                   nicknamePlaceholder='Enter body nickname'
-                  comboboxId={`${routeId}-body`}
+                  comboboxId={`${locationId}-body`}
                 />
               </div>
             </div>
@@ -228,7 +227,7 @@ export function EncounterCell({
               onChange={pokemon => handleEncounterSelect(pokemon)}
               placeholder='Select Pokemon'
               nicknamePlaceholder='Enter nickname'
-              comboboxId={`${routeId}-single`}
+              comboboxId={`${locationId}-single`}
             />
           )}
         </div>
@@ -249,15 +248,15 @@ export function EncounterCell({
                 isFusion,
               'bg-white border-gray-300 text-gray-700 hover:bg-green-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-green-700':
                 !isFusion,
-              // Add visual feedback for drag over when not a fusion and has an existing encounter
+              // Add visualfeedback for drag over when not a fusion and has an existing encounter
               'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20':
                 !isFusion &&
                 selectedPokemon &&
                 dragSnapshot.isDragging &&
                 dragSnapshot.currentDragSource &&
-                dragSnapshot.currentDragSource !== `${routeId}-single` &&
-                dragSnapshot.currentDragSource !== `${routeId}-head` &&
-                dragSnapshot.currentDragSource !== `${routeId}-body`,
+                dragSnapshot.currentDragSource !== `${locationId}-single` &&
+                dragSnapshot.currentDragSource !== `${locationId}-head` &&
+                dragSnapshot.currentDragSource !== `${locationId}-body`,
             }
           )}
           aria-label={`Toggle fusion for ${selectedPokemon?.name || 'Pokemon'}`}

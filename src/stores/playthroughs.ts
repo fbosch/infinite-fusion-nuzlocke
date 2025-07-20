@@ -488,4 +488,72 @@ export const playthroughActions = {
     if (typeof window === 'undefined') return;
     await saveToIndexedDB(playthroughsStore);
   },
+
+  // Helper methods for drag and drop operations
+
+  // Clear encounter from a specific location (replaces clearCombobox event)
+  clearEncounterFromLocation: async (locationId: string) => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    if (!activePlaythrough) return;
+
+    delete activePlaythrough.encounters[locationId];
+    activePlaythrough.updatedAt = getCurrentTimestamp();
+  },
+
+  // Move encounter from one location to another (replaces some clearCombobox usage)
+  moveEncounter: async (
+    fromLocationId: string,
+    toLocationId: string,
+    pokemon: z.infer<typeof PokemonOptionSchema>,
+    toField: 'head' | 'body' = 'head'
+  ) => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    if (!activePlaythrough) return;
+
+    // Clear the source location
+    delete activePlaythrough.encounters[fromLocationId];
+
+    // Set the destination
+    await playthroughActions.updateEncounter(toLocationId, pokemon, toField, false);
+  },
+
+  // Swap encounters between two locations (replaces switchCombobox event)
+  swapEncounters: async (
+    locationId1: string,
+    locationId2: string,
+    field1: 'head' | 'body' = 'head',
+    field2: 'head' | 'body' = 'head'
+  ) => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    if (!activePlaythrough) return;
+
+    const encounter1 = activePlaythrough.encounters[locationId1];
+    const encounter2 = activePlaythrough.encounters[locationId2];
+
+    if (!encounter1 || !encounter2) return;
+
+    const pokemon1 = field1 === 'head' ? encounter1.head : encounter1.body;
+    const pokemon2 = field2 === 'head' ? encounter2.head : encounter2.body;
+
+    if (!pokemon1 || !pokemon2) return;
+
+    // Swap the Pokemon
+    await playthroughActions.updateEncounter(locationId1, pokemon2, field1, encounter1.isFusion);
+    await playthroughActions.updateEncounter(locationId2, pokemon1, field2, encounter2.isFusion);
+  },
+
+  // Get location ID from combobox ID (helper for drag operations)
+  getLocationFromComboboxId: (comboboxId: string): { locationId: string; field: 'head' | 'body' } => {
+    if (comboboxId.endsWith('-head')) {
+      return { locationId: comboboxId.replace('-head', ''), field: 'head' };
+    }
+    if (comboboxId.endsWith('-body')) {
+      return { locationId: comboboxId.replace('-body', ''), field: 'body' };
+    }
+    if (comboboxId.endsWith('-single')) {
+      return { locationId: comboboxId.replace('-single', ''), field: 'head' };
+    }
+    // Fallback - assume it's just the location ID
+    return { locationId: comboboxId, field: 'head' };
+  },
 };

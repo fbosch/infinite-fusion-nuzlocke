@@ -35,6 +35,7 @@ import {
 } from '@/loaders/pokemon';
 import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
 import { dragStore, dragActions } from '@/stores/dragStore';
+import { playthroughActions } from '@/stores/playthroughs';
 import { PokemonEvolutionButton } from './PokemonEvolutionButton';
 import { PokemonNicknameInput } from './PokemonNicknameInput';
 import { PokemonStatusInput } from './PokemonStatusInput';
@@ -483,44 +484,23 @@ export const PokemonCombobox = ({
           value &&
           dragSnapshot.currentDragValue.name !== value.name;
 
-        if (canSwitch && dragSnapshot.currentDragValue) {
-          // Switch values between the two comboboxes
-          const targetValue = value;
-          const sourceValue = dragSnapshot.currentDragValue;
+        if (canSwitch && dragSnapshot.currentDragValue && dragSnapshot.currentDragSource) {
+          // Switch values between the two comboboxes using store actions
+          const { locationId: sourceLocationId, field: sourceField } = playthroughActions.getLocationFromComboboxId(dragSnapshot.currentDragSource);
+          const { locationId: targetLocationId, field: targetField } = playthroughActions.getLocationFromComboboxId(comboboxId || '');
 
-          // Convert readonly arrays to mutable arrays for the source value
-          const mutableSourceValue: PokemonOption = {
-            id: sourceValue.id,
-            name: sourceValue.name,
-            nationalDexId: sourceValue.nationalDexId,
-          };
-
-          // Set this combobox to the source value
-          onChange(mutableSourceValue);
-
-          // Dispatch a custom event to set the source combobox to this value
-          window.dispatchEvent(
-            new CustomEvent('switchCombobox', {
-              detail: {
-                comboboxId: dragSnapshot.currentDragSource,
-                value: targetValue,
-              },
-            })
-          );
+          // Use store action to swap encounters
+          playthroughActions.swapEncounters(sourceLocationId, targetLocationId, sourceField, targetField);
         } else {
           // Original logic for normal drag and drop
           // Use the full PokemonOption from drag store if available
           if (dragSnapshot.currentDragValue) {
             onChange(dragSnapshot.currentDragValue);
 
-            // If this is from a different combobox, clear the source
-            if (isFromDifferentCombobox) {
-              // Dispatch a custom event to notify the source combobox to clear
-              window.dispatchEvent(
-                new CustomEvent('clearCombobox', {
-                  detail: { comboboxId: dragSnapshot.currentDragSource },
-                })
-              );
+            // If this is from a different combobox, clear the source location
+            if (isFromDifferentCombobox && dragSnapshot.currentDragSource) {
+              const { locationId: sourceLocationId } = playthroughActions.getLocationFromComboboxId(dragSnapshot.currentDragSource);
+              playthroughActions.clearEncounterFromLocation(sourceLocationId);
             }
           } else {
             // Fallback to name-based search if drag value is not available
@@ -546,14 +526,10 @@ export const PokemonCombobox = ({
                   };
                   onChange(pokemonOption);
 
-                  // If this is from a different combobox, clear the source
-                  if (isFromDifferentCombobox) {
-                    // Dispatch a custom event to notify the source combobox to clear
-                    window.dispatchEvent(
-                      new CustomEvent('clearCombobox', {
-                        detail: { comboboxId: dragSnapshot.currentDragSource },
-                      })
-                    );
+                  // If this is from a different combobox, clear the source location
+                  if (isFromDifferentCombobox && dragSnapshot.currentDragSource) {
+                    const { locationId: sourceLocationId } = playthroughActions.getLocationFromComboboxId(dragSnapshot.currentDragSource);
+                    playthroughActions.clearEncounterFromLocation(sourceLocationId);
                   }
                 }
               } catch (err) {
@@ -628,39 +604,7 @@ export const PokemonCombobox = ({
     dragActions.clearDrag();
   }, []);
 
-  // Listen for clear and switch events from other comboboxes
-  useEffect(() => {
-    const handleClearEvent = (event: CustomEvent) => {
-      if (event.detail.comboboxId === comboboxId) {
-        onChange(null);
-        setQuery('');
-      }
-    };
 
-    const handleSwitchEvent = (event: CustomEvent) => {
-      if (event.detail.comboboxId === comboboxId) {
-        onChange(event.detail.value);
-        setQuery('');
-      }
-    };
-
-    window.addEventListener('clearCombobox', handleClearEvent as EventListener);
-    window.addEventListener(
-      'switchCombobox',
-      handleSwitchEvent as EventListener
-    );
-
-    return () => {
-      window.removeEventListener(
-        'clearCombobox',
-        handleClearEvent as EventListener
-      );
-      window.removeEventListener(
-        'switchCombobox',
-        handleSwitchEvent as EventListener
-      );
-    };
-  }, [comboboxId, onChange]);
 
   return (
     <div className='relative'>
