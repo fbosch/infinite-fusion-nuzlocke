@@ -4,12 +4,10 @@ import React, {
   useState,
   useEffect,
   useCallback,
-  useDeferredValue,
   startTransition,
 } from 'react';
 import clsx from 'clsx';
 import { type PokemonOption } from '@/loaders/pokemon';
-import { useDebounced } from '@/hooks';
 
 interface PokemonNicknameInputProps {
   value: PokemonOption | null | undefined;
@@ -28,7 +26,6 @@ export const PokemonNicknameInput = ({
 }: PokemonNicknameInputProps) => {
   // Local state for immediate UI feedback
   const [localNickname, setLocalNickname] = useState(value?.nickname || '');
-  const debouncedNickname = useDebounced(localNickname, 100);
 
   // Keep track of the Pokemon ID to detect when a different Pokemon is selected
   const currentPokemonId = value?.id;
@@ -49,18 +46,18 @@ export const PokemonNicknameInput = ({
     }
   }, [value, currentPokemonId, lastSyncedPokemonId]);
 
-  // Update parent when debounced value changes
-  useEffect(() => {
-    if (value && debouncedNickname !== value.nickname) {
+  // Helper function to commit changes to parent
+  const commitChanges = useCallback(() => {
+    if (value && localNickname !== value.nickname) {
       startTransition(() => {
         const updatedPokemon: PokemonOption = {
           ...value,
-          nickname: debouncedNickname,
+          nickname: localNickname,
         };
         onChange(updatedPokemon);
       });
     }
-  }, [debouncedNickname, value, onChange]);
+  }, [value, localNickname, onChange]);
 
   // Handle nickname input change (local state only for immediate feedback)
   const handleNicknameChange = useCallback(
@@ -74,14 +71,7 @@ export const PokemonNicknameInput = ({
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === 'Enter') {
-        // Immediately commit the current local nickname
-        if (value && localNickname !== value.nickname) {
-          const updatedPokemon: PokemonOption = {
-            ...value,
-            nickname: localNickname,
-          };
-          onChange(updatedPokemon);
-        }
+        commitChanges();
         event.currentTarget.blur();
       } else if (event.key === 'Escape') {
         // Revert to original value
@@ -89,23 +79,15 @@ export const PokemonNicknameInput = ({
         event.currentTarget.blur();
       }
     },
-    [value, localNickname, onChange]
+    [commitChanges, value]
   );
 
   // Handle blur - commit changes immediately
   const handleBlur = useCallback(() => {
-    if (value && localNickname !== value.nickname) {
-      const updatedPokemon: PokemonOption = {
-        ...value,
-        nickname: localNickname,
-      };
-      onChange(updatedPokemon);
-    }
-  }, [value, localNickname, onChange]);
+    commitChanges();
+  }, [commitChanges]);
 
   const displayValue = dragPreview ? dragPreview.nickname || '' : localNickname;
-
-  const hasUnsavedChanges = value && localNickname !== value.nickname;
 
   return (
     <input
@@ -121,17 +103,12 @@ export const PokemonNicknameInput = ({
         'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
         'placeholder-gray-500 dark:placeholder-gray-400',
         dragPreview && 'opacity-60 pointer-none',
-   
       )}
       maxLength={12}
       disabled={!value || disabled}
       spellCheck={false}
       autoComplete='off'
-      title={
-        hasUnsavedChanges
-          ? 'Press Enter to save or Escape to cancel'
-          : undefined
-      }
+
     />
   );
 };
