@@ -298,7 +298,7 @@ export const PokemonCombobox = ({
   const [localNickname, setLocalNickname] = useState(value?.nickname || '');
   
   // Local status state for smooth selection
-  const [localStatus, setLocalStatus] = useState(value?.status || PokemonStatus.CAPTURED);
+  const [localStatus, setLocalStatus] = useState(value?.status || null);
 
   // Sync local nickname when value changes (but not during typing)
   useEffect(() => {
@@ -310,7 +310,7 @@ export const PokemonCombobox = ({
   // Sync local status when value changes
   useEffect(() => {
     if (value?.status !== localStatus) {
-      setLocalStatus(value?.status || PokemonStatus.CAPTURED);
+      setLocalStatus(value?.status || null);
     }
   }, [value?.status]);
 
@@ -834,20 +834,21 @@ export const PokemonCombobox = ({
             placeholder={nicknamePlaceholder}
             className={clsx(
               'rounded-bl-md border-t-0 border-r-0 rounded-t-none relative',
-              'flex-1 px-3 py-3.5 text-sm border bg-white text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
+              'flex-1 px-3 py-3.5 text-sm border bg-white text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500  disabled:cursor-not-allowed',
               'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
               'placeholder-gray-500 dark:placeholder-gray-400',
               dragPreview && 'opacity-60 pointer-none'
             )}
             maxLength={12}
+            disabled={!value}
             spellCheck={false}
             autoComplete='off'
           />
           <Menu as="div" className="relative">
             <MenuButton
               className={clsx(
-                'rounded-br-md border-t-0 rounded-t-none',
-                'flex items-center justify-between px-3 py-3.5 text-sm border  bg-white text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
+                'rounded-br-md border-t-0 rounded-t-none capitalize',
+                'flex items-center justify-between px-3 py-3.5 text-sm border  bg-white text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500  disabled:cursor-not-allowed',
                 'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
                 'hover:bg-gray-50 dark:hover:bg-gray-700',
                 'min-w-[120px] enabled:hover:cursor-pointer',
@@ -855,18 +856,9 @@ export const PokemonCombobox = ({
               )}
               disabled={!value}
             >
-              {(() => {
-                const currentStatus = dragPreview ? dragPreview.status || PokemonStatus.CAPTURED : localStatus;
-                const statusLabels: Record<PokemonStatusType, string> = {
-                  [PokemonStatus.CAPTURED]: 'Captured',
-                  [PokemonStatus.RECEIVED]: 'Received',
-                  [PokemonStatus.TRADED]: 'Traded',
-                  [PokemonStatus.MISSED]: 'Missed',
-                  [PokemonStatus.STORED]: 'Stored',
-                  [PokemonStatus.DECEASED]: 'Deceased',
-                };
-                return statusLabels[currentStatus];
-              })()}
+              {
+                dragPreview ? dragPreview.status : localStatus ? localStatus : 'Status'
+              }
               <ChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
             </MenuButton>
             <MenuItems className={clsx(
