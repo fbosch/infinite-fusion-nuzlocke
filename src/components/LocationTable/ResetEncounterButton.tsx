@@ -28,8 +28,8 @@ export default function ResetEncounterButton({
           'size-8 flex items-center justify-center rounded-md transition-colors cursor-pointer',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2',
           'disabled:opacity-30 disabled:cursor-not-allowed',
-          'text-gray-400 hover:text-red-600 hover:bg-red-50',
-          'dark:text-gray-500 dark:hover:text-red-400 dark:hover:bg-red-900/20'
+          'text-gray-400 enabled:hover:text-red-600 enabled:hover:bg-red-50',
+          'dark:text-gray-500 dark:enabled:hover:text-red-400 dark:enabled:hover:bg-red-900/20'
         )}
         aria-label={`Reset encounter for ${locationName}`}
         title='Reset encounter'
