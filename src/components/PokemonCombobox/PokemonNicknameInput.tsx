@@ -44,7 +44,7 @@ export const PokemonNicknameInput = ({
           nickname: debouncedNickname,
         };
         onChange(updatedPokemon);
-      })
+      });
     }
   }, [debouncedNickname, value, onChange]);
 
@@ -89,9 +89,7 @@ export const PokemonNicknameInput = ({
     }
   }, [value, localNickname, onChange]);
 
-  const displayValue = dragPreview 
-    ? dragPreview.nickname || '' 
-    : localNickname;
+  const displayValue = dragPreview ? dragPreview.nickname || '' : localNickname;
 
   const hasUnsavedChanges = value && localNickname !== value.nickname;
 
@@ -109,13 +107,18 @@ export const PokemonNicknameInput = ({
         'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
         'placeholder-gray-500 dark:placeholder-gray-400',
         dragPreview && 'opacity-60 pointer-none',
-        hasUnsavedChanges && 'ring-1 ring-orange-300 border-orange-300 dark:ring-orange-500 dark:border-orange-500' // Visual indicator for unsaved changes
+        hasUnsavedChanges &&
+          'ring-1 ring-orange-300 border-orange-300 dark:ring-orange-500 dark:border-orange-500' // Visual indicator for unsaved changes
       )}
       maxLength={12}
       disabled={!value || disabled}
       spellCheck={false}
       autoComplete='off'
-      title={hasUnsavedChanges ? 'Press Enter to save or Escape to cancel' : undefined}
+      title={
+        hasUnsavedChanges
+          ? 'Press Enter to save or Escape to cancel'
+          : undefined
+      }
     />
   );
 };

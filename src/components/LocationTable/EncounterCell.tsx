@@ -4,7 +4,6 @@ import React, { useCallback, startTransition } from 'react';
 import { ArrowLeftRight, Dna, DnaOff } from 'lucide-react';
 import { PokemonCombobox } from '../PokemonCombobox/PokemonCombobox';
 import type { PokemonOption } from '@/loaders/pokemon';
-import type { EncounterData } from '@/loaders/encounters';
 
 import clsx from 'clsx';
 import { useSnapshot } from 'valtio';
@@ -16,10 +15,7 @@ interface EncounterCellProps {
   locationId: string;
 }
 
-export function EncounterCell({
-  routeId,
-  locationId,
-}: EncounterCellProps) {
+export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
   const playthroughSnapshot = useSnapshot(playthroughsStore);
   const activePlaythrough = playthroughSnapshot.playthroughs.find(
     p => p.id === playthroughSnapshot.activePlaythroughId
@@ -29,7 +25,7 @@ export function EncounterCell({
     body: null,
     isFusion: false,
   };
-  
+
   const selectedPokemon = encounterData.isFusion
     ? encounterData.body
     : encounterData.head;
@@ -38,8 +34,8 @@ export function EncounterCell({
 
   // Handle encounter selection
   const handleEncounterSelect = useCallback(
-    async (pokemon: PokemonOption | null, field: 'head' | 'body' = 'head') => {
-      await playthroughActions.updateEncounter(locationId, pokemon, field, false);
+    (pokemon: PokemonOption | null, field: 'head' | 'body' = 'head') => {
+      playthroughActions.updateEncounter(locationId, pokemon, field, false);
     },
     [locationId]
   );
@@ -117,8 +113,14 @@ export function EncounterCell({
 
             // Clear the source location
             if (dragSnapshot.currentDragSource) {
-              const { locationId: sourceLocationId, field: sourceField } = playthroughActions.getLocationFromComboboxId(dragSnapshot.currentDragSource);
-              playthroughActions.clearEncounterFromLocation(sourceLocationId, sourceField);
+              const { locationId: sourceLocationId, field: sourceField } =
+                playthroughActions.getLocationFromComboboxId(
+                  dragSnapshot.currentDragSource
+                );
+              playthroughActions.clearEncounterFromLocation(
+                sourceLocationId,
+                sourceField
+              );
             }
           }
         } catch (err) {
@@ -128,12 +130,7 @@ export function EncounterCell({
 
       findPokemonByName();
     },
-    [
-      isFusion,
-      selectedPokemon,
-      dragSnapshot.currentDragSource,
-      locationId,
-    ]
+    [isFusion, selectedPokemon, dragSnapshot.currentDragSource, locationId]
   );
 
   // Handle drag over

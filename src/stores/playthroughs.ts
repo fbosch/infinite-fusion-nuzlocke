@@ -77,11 +77,14 @@ const serializeForStorage = (obj: any): any => {
 };
 
 // Debounced save mechanism using lodash
-const debouncedSaveToIndexedDB = debounce(async (state: PlaythroughsState): Promise<void> => {
-  if (typeof window === 'undefined') return;
+const debouncedSaveToIndexedDB = debounce(
+  async (state: PlaythroughsState): Promise<void> => {
+    if (typeof window === 'undefined') return;
 
-  saveToIndexedDB(state);
-}, 500); // 500ms delay - adjust as needed
+    saveToIndexedDB(state);
+  },
+  500
+); // 500ms delay - adjust as needed
 
 // Immediate save function for critical operations
 const saveToIndexedDB = async (state: PlaythroughsState): Promise<void> => {
@@ -100,66 +103,84 @@ const saveToIndexedDB = async (state: PlaythroughsState): Promise<void> => {
 };
 
 // Debounced save for individual playthroughs
-const debouncedSavePlaythrough = debounce(async (playthrough: Playthrough): Promise<void> => {
-  if (typeof window === 'undefined') return;
+const debouncedSavePlaythrough = debounce(
+  async (playthrough: Playthrough): Promise<void> => {
+    if (typeof window === 'undefined') return;
 
-  try {
-    const key = playthrough.id;
-    
-    // Use more efficient serialization instead of JSON.parse(JSON.stringify())
-    const plainPlaythrough = serializeForStorage(playthrough);
-    
-    await set(key, plainPlaythrough);
-    
-    // Update the list of playthrough IDs
-    const playthroughIds = (await get('playthrough_ids') || []) as string[];
-    if (!playthroughIds.includes(playthrough.id)) {
-      playthroughIds.push(playthrough.id);
-      await set('playthrough_ids', playthroughIds);
+    try {
+      const key = playthrough.id;
+
+      // Use more efficient serialization instead of JSON.parse(JSON.stringify())
+      const plainPlaythrough = serializeForStorage(playthrough);
+
+      await set(key, plainPlaythrough);
+
+      // Update the list of playthrough IDs
+      const playthroughIds = ((await get('playthrough_ids')) || []) as string[];
+      if (!playthroughIds.includes(playthrough.id)) {
+        playthroughIds.push(playthrough.id);
+        await set('playthrough_ids', playthroughIds);
+      }
+    } catch (error) {
+      console.error(
+        `Failed to save playthrough ${playthrough.id} to IndexedDB:`,
+        error
+      );
+      console.error('Error details:', error);
     }
-  } catch (error) {
-    console.error(`Failed to save playthrough ${playthrough.id} to IndexedDB:`, error);
-    console.error('Error details:', error);
-  }
-}, 500); // 500ms delay for playthrough saves
+  },
+  500
+); // 500ms delay for playthrough saves
 
 // Save individual playthrough to IndexedDB
-const savePlaythroughToIndexedDB = async (playthrough: Playthrough): Promise<void> => {
+const savePlaythroughToIndexedDB = async (
+  playthrough: Playthrough
+): Promise<void> => {
   if (typeof window === 'undefined') return;
 
   try {
     const key = playthrough.id;
-    
+
     // Use more efficient serialization instead of JSON.parse(JSON.stringify())
     const plainPlaythrough = serializeForStorage(playthrough);
-    
+
     await set(key, plainPlaythrough);
-    
+
     // Update the list of playthrough IDs
-    const playthroughIds = (await get('playthrough_ids') || []) as string[];
+    const playthroughIds = ((await get('playthrough_ids')) || []) as string[];
     if (!playthroughIds.includes(playthrough.id)) {
       playthroughIds.push(playthrough.id);
       await set('playthrough_ids', playthroughIds);
     }
   } catch (error) {
-    console.error(`Failed to save playthrough ${playthrough.id} to IndexedDB:`, error);
+    console.error(
+      `Failed to save playthrough ${playthrough.id} to IndexedDB:`,
+      error
+    );
   }
 };
 
 // Delete individual playthrough from IndexedDB
-const deletePlaythroughFromIndexedDB = async (playthroughId: string): Promise<void> => {
+const deletePlaythroughFromIndexedDB = async (
+  playthroughId: string
+): Promise<void> => {
   if (typeof window === 'undefined') return;
 
   try {
     const key = playthroughId;
     await del(key);
-    
+
     // Remove from the list of playthrough IDs
-    const playthroughIds = (await get('playthrough_ids') || []) as string[];
-    const updatedIds = playthroughIds.filter((id: string) => id !== playthroughId);
+    const playthroughIds = ((await get('playthrough_ids')) || []) as string[];
+    const updatedIds = playthroughIds.filter(
+      (id: string) => id !== playthroughId
+    );
     await set('playthrough_ids', updatedIds);
   } catch (error) {
-    console.error(`Failed to delete playthrough ${playthroughId} from IndexedDB:`, error);
+    console.error(
+      `Failed to delete playthrough ${playthroughId} from IndexedDB:`,
+      error
+    );
   }
 };
 
@@ -172,8 +193,9 @@ const loadFromIndexedDB = async (): Promise<PlaythroughsState> => {
     const playthroughs: Playthrough[] = [];
 
     // Try to load individual playthroughs by checking for known keys
-    const knownPlaythroughIds = (await get('playthrough_ids') || []) as string[];
-    
+    const knownPlaythroughIds = ((await get('playthrough_ids')) ||
+      []) as string[];
+
     for (const playthroughId of knownPlaythroughIds) {
       try {
         const key = playthroughId;
@@ -183,7 +205,10 @@ const loadFromIndexedDB = async (): Promise<PlaythroughsState> => {
           playthroughs.push(playthrough);
         }
       } catch (error) {
-        console.error(`Invalid playthrough data found for ID ${playthroughId}:`, error);
+        console.error(
+          `Invalid playthrough data found for ID ${playthroughId}:`,
+          error
+        );
       }
     }
 
@@ -233,13 +258,16 @@ if (typeof window !== 'undefined') {
     cachedActivePlaythrough = null;
     cachedActiveId = undefined;
 
-    window.requestIdleCallback(async () => {
-      debouncedSaveToIndexedDB(playthroughsStore);
-      const activePlaythrough = playthroughActions.getActivePlaythrough();
-      if (activePlaythrough) {
-        debouncedSavePlaythrough(activePlaythrough);
-      }
-    }, { timeout: 5000 });
+    window.requestIdleCallback(
+      async () => {
+        debouncedSaveToIndexedDB(playthroughsStore);
+        const activePlaythrough = playthroughActions.getActivePlaythrough();
+        if (activePlaythrough) {
+          debouncedSavePlaythrough(activePlaythrough);
+        }
+      },
+      { timeout: 5000 }
+    );
   });
 } else {
   // Server-side: Create a dummy store
@@ -276,14 +304,18 @@ export const playthroughActions = {
     if (!playthroughsStore.activePlaythroughId) return null;
 
     // Use simple cache to avoid repeated find() operations
-    if (cachedActiveId === playthroughsStore.activePlaythroughId && cachedActivePlaythrough) {
+    if (
+      cachedActiveId === playthroughsStore.activePlaythroughId &&
+      cachedActivePlaythrough
+    ) {
       return cachedActivePlaythrough;
     }
 
     // Find and cache the active playthrough
-    const found = playthroughsStore.playthroughs.find(
-      (p: Playthrough) => p.id === playthroughsStore.activePlaythroughId
-    ) || null;
+    const found =
+      playthroughsStore.playthroughs.find(
+        (p: Playthrough) => p.id === playthroughsStore.activePlaythroughId
+      ) || null;
 
     if (found) {
       cachedActivePlaythrough = found;
@@ -399,7 +431,7 @@ export const playthroughActions = {
     if (!activePlaythrough) {
       return;
     }
-    
+
     // Set originalLocation if pokemon is provided and doesn't already have one
     const pokemonWithLocation = pokemon
       ? {
@@ -599,7 +631,9 @@ export const playthroughActions = {
   },
 
   // Get location ID from combobox ID (helper for drag operations)
-  getLocationFromComboboxId: (comboboxId: string): { locationId: string; field: 'head' | 'body' } => {
+  getLocationFromComboboxId: (
+    comboboxId: string
+  ): { locationId: string; field: 'head' | 'body' } => {
     if (comboboxId.endsWith('-head')) {
       return { locationId: comboboxId.replace('-head', ''), field: 'head' };
     }

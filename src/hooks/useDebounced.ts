@@ -4,16 +4,16 @@ import { debounce } from 'lodash';
 /**
  * A hook that debounces a value, useful for expensive operations like API calls or complex calculations.
  * Uses lodash debounce function as the baseline implementation.
- * 
+ *
  * @param value - The value to debounce
  * @param delay - The delay in milliseconds (default: 300ms)
  * @returns The debounced value
- * 
+ *
  * @example
  * ```tsx
  * const [searchQuery, setSearchQuery] = useState('');
  * const debouncedSearchQuery = useDebounced(searchQuery, 500);
- * 
+ *
  * // Use debouncedSearchQuery for API calls
  * useEffect(() => {
  *   if (debouncedSearchQuery) {
@@ -46,4 +46,4 @@ export function useDebounced<T>(value: T, delay: number = 300): T {
   }, [debouncedUpdate]);
 
   return debouncedValue;
-} 
+}
