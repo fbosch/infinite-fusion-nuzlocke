@@ -80,16 +80,7 @@ const serializeForStorage = (obj: any): any => {
 const debouncedSaveToIndexedDB = debounce(async (state: PlaythroughsState): Promise<void> => {
   if (typeof window === 'undefined') return;
 
-  try {
-    // Save active playthrough ID
-    if (state.activePlaythroughId) {
-      await set(ACTIVE_PLAYTHROUGH_KEY, state.activePlaythroughId);
-    } else {
-      await del(ACTIVE_PLAYTHROUGH_KEY);
-    }
-  } catch (error) {
-    console.error('Failed to save playthroughs to IndexedDB:', error);
-  }
+  saveToIndexedDB(state);
 }, 500); // 500ms delay - adjust as needed
 
 // Immediate save function for critical operations
