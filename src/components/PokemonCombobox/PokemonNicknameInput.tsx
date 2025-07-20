@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useCallback,
   startTransition,
+  useRef,
 } from 'react';
 import clsx from 'clsx';
 import { type PokemonOption } from '@/loaders/pokemon';
@@ -29,20 +30,19 @@ export const PokemonNicknameInput = ({
 
   // Keep track of the Pokemon ID to detect when a different Pokemon is selected
   const currentPokemonId = value?.id;
-  const [lastSyncedPokemonId, setLastSyncedPokemonId] = useState(currentPokemonId);
+  const lastSyncedPokemonId = useRef(currentPokemonId);
 
   // Sync local state when Pokemon changes (different ID) or when component first mounts
   useEffect(() => {
     if (!value) {
       setLocalNickname('');
-      setLastSyncedPokemonId(undefined);
+      lastSyncedPokemonId.current = undefined;
       return;
     }
-
     // Only sync if this is a different Pokemon than the last one we synced
-    if (currentPokemonId !== lastSyncedPokemonId) {
+    if (currentPokemonId !== lastSyncedPokemonId.current) {
       setLocalNickname(value.nickname || '');
-      setLastSyncedPokemonId(currentPokemonId);
+        lastSyncedPokemonId.current = currentPokemonId;
     }
   }, [value, currentPokemonId, lastSyncedPokemonId]);
 
