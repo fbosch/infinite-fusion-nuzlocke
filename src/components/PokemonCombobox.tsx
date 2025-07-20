@@ -267,6 +267,7 @@ const PokemonOptions = ({
 // Pokemon Combobox Component
 export const PokemonCombobox = ({
   routeId,
+  locationId,
   value,
   onChange,
   placeholder = 'Select Pokemon',
@@ -277,6 +278,7 @@ export const PokemonCombobox = ({
   showNickname = true,
 }: {
   routeId?: number;
+  locationId?: string;
   value: PokemonOption | null | undefined;
   onChange: (value: PokemonOption | null) => void;
   placeholder?: string;
@@ -339,6 +341,7 @@ export const PokemonCombobox = ({
         const evolvedPokemon: PokemonOption = {
           ...evolutionPokemon,
           nickname: value?.nickname || '', // Preserve nickname
+          originalLocation: value?.originalLocation, // Preserve original location
         };
         onChange(evolvedPokemon);
         setShowEvolutionMenu(false);
@@ -348,6 +351,7 @@ export const PokemonCombobox = ({
         const evolvedPokemon: PokemonOption = {
           ...evolution,
           nickname: value?.nickname || '', // Preserve nickname
+          originalLocation: value?.originalLocation, // Preserve original location
         };
         onChange(evolvedPokemon);
       } else if (availableEvolutions.length > 1) {
@@ -386,6 +390,7 @@ export const PokemonCombobox = ({
                 id: evolutionPokemon.id,
                 name: evolutionPokemon.name,
                 nationalDexId: evolutionPokemon.nationalDexId,
+                originalLocation: value?.originalLocation, // Preserve original location
               });
             }
           }
@@ -433,6 +438,7 @@ export const PokemonCombobox = ({
             id,
             name: nameMap.get(id) || `Unknown Pokemon (${id})`,
             nationalDexId: pokemon?.nationalDexId || 0,
+            originalLocation: locationId,
           };
         });
 
@@ -443,7 +449,7 @@ export const PokemonCombobox = ({
     } finally {
       setIsLoading(false);
     }
-  }, [routeId, gameMode]);
+  }, [routeId, gameMode, locationId]);
 
   // Load route data when combobox opens or when user starts typing
   const handleInteraction = useCallback(() => {
@@ -671,6 +677,7 @@ export const PokemonCombobox = ({
                     id: foundPokemon.id,
                     name: pokemonName,
                     nationalDexId: foundPokemon.nationalDexId,
+                    originalLocation: locationId,
                   };
                   onChange(pokemonOption);
 
@@ -694,7 +701,7 @@ export const PokemonCombobox = ({
         }
       }
     },
-    [onChange, comboboxId, value, dragSnapshot]
+    [onChange, comboboxId, value, dragSnapshot, locationId]
   );
 
   const handleDragOver = useCallback(

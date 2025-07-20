@@ -7,6 +7,7 @@ import {
   getLocationEncounters,
   getLocationsWithEncounters,
   hasLocationEncounters,
+  getLocationNameByRouteId,
 } from '../locations';
 import { getStarterPokemonByGameMode } from '../starters';
 
@@ -215,6 +216,23 @@ describe('Locations', () => {
         expect(nonStarterLocation).toBeDefined();
         expect(nonStarterLocation?.routeId).not.toBe(0);
       });
+    });
+  });
+
+  describe('getLocationNameByRouteId', () => {
+    it('should return location name for valid routeId', () => {
+      const locationName = getLocationNameByRouteId(0);
+      expect(locationName).toBe('Starter');
+    });
+
+    it('should return null for invalid routeId', () => {
+      const locationName = getLocationNameByRouteId(99999);
+      expect(locationName).toBeNull();
+    });
+
+    it('should return correct location name for Route 1', () => {
+      const locationName = getLocationNameByRouteId(78);
+      expect(locationName).toBe('Route 1');
     });
   });
 });

@@ -99,8 +99,15 @@ export default function LocationList() {
     (
       routeId: number,
       pokemon: PokemonOption | null,
-      field: 'head' | 'body' = 'head'
+      field: 'head' | 'body' = 'head',
+      locationId?: string
     ) => {
+      // Set originalLocation if pokemon is provided and doesn't already have one
+      const pokemonWithLocation = pokemon ? {
+        ...pokemon,
+        originalLocation: pokemon.originalLocation || locationId,
+      } : pokemon;
+
       setEncounters(prev => {
         const currentEncounter = prev[routeId] || {
           head: null,
@@ -113,8 +120,8 @@ export default function LocationList() {
           return {
             ...prev,
             [routeId]: {
-              head: field === 'head' ? pokemon : currentEncounter.head,
-              body: field === 'body' ? pokemon : currentEncounter.body,
+              head: field === 'head' ? pokemonWithLocation : currentEncounter.head,
+              body: field === 'body' ? pokemonWithLocation : currentEncounter.body,
               isFusion: true,
             },
           };
@@ -123,7 +130,7 @@ export default function LocationList() {
           return {
             ...prev,
             [routeId]: {
-              head: pokemon,
+              head: pokemonWithLocation,
               body: null,
               isFusion: false,
             },
@@ -140,8 +147,15 @@ export default function LocationList() {
       routeId: number,
       pokemon: PokemonOption | null,
       field: 'head' | 'body' = 'head',
-      shouldCreateFusion: boolean = false
+      shouldCreateFusion: boolean = false,
+      locationId?: string
     ) => {
+      // Set originalLocation if pokemon is provided and doesn't already have one
+      const pokemonWithLocation = pokemon ? {
+        ...pokemon,
+        originalLocation: pokemon.originalLocation || locationId,
+      } : pokemon;
+
       setEncounters(prev => {
         const currentEncounter = prev[routeId] || {
           head: null,
@@ -154,8 +168,8 @@ export default function LocationList() {
           return {
             ...prev,
             [routeId]: {
-              head: field === 'head' ? pokemon : currentEncounter.head,
-              body: field === 'body' ? pokemon : currentEncounter.body,
+              head: field === 'head' ? pokemonWithLocation : currentEncounter.head,
+              body: field === 'body' ? pokemonWithLocation : currentEncounter.body,
               isFusion: true,
             },
           };
@@ -164,8 +178,8 @@ export default function LocationList() {
           return {
             ...prev,
             [routeId]: {
-              head: field === 'head' ? pokemon : currentEncounter.head,
-              body: field === 'body' ? pokemon : currentEncounter.body,
+              head: field === 'head' ? pokemonWithLocation : currentEncounter.head,
+              body: field === 'body' ? pokemonWithLocation : currentEncounter.body,
               isFusion: true,
             },
           };
@@ -174,7 +188,7 @@ export default function LocationList() {
           return {
             ...prev,
             [routeId]: {
-              head: pokemon,
+              head: pokemonWithLocation,
               body: null,
               isFusion: false,
             },
@@ -294,7 +308,9 @@ export default function LocationList() {
                 key={row.id}
                 row={row}
                 encounterData={encounterData}
-                onEncounterSelect={handleEncounterSelect}
+                onEncounterSelect={(routeId, pokemon, field) => 
+                  handleEncounterSelect(routeId, pokemon, field, row.original.id)
+                }
                 onFusionToggle={handleFusionToggle}
                 onResetEncounter={handleResetEncounter}
               />

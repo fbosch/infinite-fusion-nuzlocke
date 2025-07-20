@@ -4,6 +4,7 @@ import { getStarterPokemonByGameMode } from './starters';
 
 // Zod schema for location data
 export const LocationSchema = z.object({
+  id: z.string().min(1, { error: 'Location ID is required' }),
   name: z.string().min(1, { error: 'Location name is required' }),
   routeId: z.number().int().min(0, { error: 'Route ID must be non-negative' }),
   order: z
@@ -62,6 +63,26 @@ export async function getLocationEncounters(
 
   // For other locations, return empty array (encounters handled separately)
   return [];
+}
+
+// Get location name by route ID
+export function getLocationNameByRouteId(routeId: number): string | null {
+  const locations = getLocations();
+  const location = locations.find(loc => loc.routeId === routeId);
+  return location ? location.name : null;
+}
+
+// Get location name by ID (guid)
+export function getLocationNameById(id: string): string | null {
+  const locations = getLocations();
+  const location = locations.find(loc => loc.id === id);
+  return location ? location.name : null;
+}
+
+// Get location by route ID
+export function getLocationByRouteId(routeId: number): Location | null {
+  const locations = getLocations();
+  return locations.find(loc => loc.routeId === routeId) || null;
 }
 
 // Get all locations with their available encounters

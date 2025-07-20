@@ -4,13 +4,15 @@ import React, { useCallback } from 'react';
 import { ArrowLeftRight, Dna, DnaOff, RotateCcw } from 'lucide-react';
 import { PokemonCombobox } from '../PokemonCombobox';
 import type { PokemonOption } from '@/loaders/pokemon';
-import type { EncounterData } from '@/types/encounters';
+import type { EncounterData } from '@/loaders/encounters';
+import { getLocationNameByRouteId } from '@/loaders/locations';
 import clsx from 'clsx';
 import { useSnapshot } from 'valtio';
 import { dragStore, dragActions } from '@/stores/dragStore';
 
 interface EncounterCellProps {
   routeId: number;
+  locationId: string;
   encounterData: EncounterData;
   onEncounterSelect: (
     routeId: number,
@@ -22,6 +24,7 @@ interface EncounterCellProps {
 
 export function EncounterCell({
   routeId,
+  locationId,
   encounterData,
   onEncounterSelect,
   onFusionToggle,
@@ -91,6 +94,7 @@ export function EncounterCell({
               id: foundPokemon.id,
               name: pokemonName,
               nationalDexId: foundPokemon.nationalDexId,
+              originalLocation: locationId,
             };
 
             // Create fusion: existing Pokémon becomes head, dropped Pokémon becomes body
@@ -131,6 +135,7 @@ export function EncounterCell({
       onEncounterSelect,
       onFusionToggle,
       dragSnapshot.currentDragSource,
+      locationId,
     ]
   );
 
@@ -178,6 +183,7 @@ export function EncounterCell({
                 </span>
                 <PokemonCombobox
                   routeId={routeId}
+                  locationId={locationId}
                   value={encounterData.head}
                   onChange={pokemon =>
                     onEncounterSelect(routeId, pokemon, 'head')
@@ -213,6 +219,7 @@ export function EncounterCell({
                 </span>
                 <PokemonCombobox
                   routeId={routeId}
+                  locationId={locationId}
                   value={encounterData.body}
                   onChange={pokemon =>
                     onEncounterSelect(routeId, pokemon, 'body')
@@ -226,6 +233,7 @@ export function EncounterCell({
           ) : (
             <PokemonCombobox
               routeId={routeId}
+              locationId={locationId}
               value={selectedPokemon}
               onChange={pokemon => onEncounterSelect(routeId, pokemon)}
               placeholder='Select Pokemon'

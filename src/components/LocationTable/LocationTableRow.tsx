@@ -26,12 +26,18 @@ export default function LocationTableRow({
   onResetEncounter,
 }: LocationTableRowProps) {
   const routeId = row.original.routeId;
+  const locationId = row.original.id;
+  
+  console.log(encounterData)
 
   return (
     <tr
       key={row.id}
       role='row'
-      className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
+      className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors content-visibility-auto'
+      style={{
+        containIntrinsicHeight: '150px'
+      }}
     >
       {row.getVisibleCells().map(cell => {
         // Special handling for encounter column
@@ -40,6 +46,7 @@ export default function LocationTableRow({
             <EncounterCell
               key={cell.id}
               routeId={routeId}
+              locationId={locationId}
               encounterData={encounterData}
               onEncounterSelect={onEncounterSelect}
               onFusionToggle={onFusionToggle}

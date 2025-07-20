@@ -7,8 +7,22 @@ import { dragStore, dragActions } from '@/stores/dragStore';
 import type { PokemonOption } from '@/loaders/pokemon';
 
 // Mock the PokemonCombobox component
-vi.mock('./PokemonCombobox', () => ({
-  PokemonCombobox: ({ value, onChange, placeholder, comboboxId }: any) => (
+vi.mock('../PokemonCombobox', () => ({
+  PokemonCombobox: ({ 
+    value, 
+    onChange, 
+    placeholder, 
+    comboboxId, 
+    routeId, 
+    locationId 
+  }: {
+    value: any;
+    onChange: any;
+    placeholder: string;
+    comboboxId: string;
+    routeId?: number;
+    locationId?: string;
+  }) => (
     <div data-testid={`pokemon-combobox-${comboboxId}`}>
       <input
         data-testid={`combobox-input-${comboboxId}`}
@@ -55,12 +69,62 @@ describe('EncounterCell', () => {
     nationalDexId: id,
   });
 
+  // Wrapper component to provide proper table structure for testing
+  const TableWrapper = ({ children }: { children: React.ReactNode }) => (
+    <table>
+      <tbody>
+        <tr>{children}</tr>
+      </tbody>
+    </table>
+  );
+
+  // Helper function to render EncounterCell with proper table structure
+  const renderEncounterCell = (props: any) => 
+    render(
+      <TableWrapper>
+        <EncounterCell {...props} />
+      </TableWrapper>
+    );
+
+  // Helper function for rerender with proper table structure
+  const rerenderEncounterCell = (rerender: any, props: any) =>
+    rerender(
+      <TableWrapper>
+        <EncounterCell {...props} />
+      </TableWrapper>
+    );
+
   const defaultProps = {
     routeId: 1,
+    locationId: 'test-location-id',
     encounterData: {
       head: createMockPokemon(1, 'Bulbasaur'),
       body: null,
       isFusion: false,
+    },
+    onEncounterSelect: mockOnEncounterSelect,
+    onFusionToggle: mockOnFusionToggle,
+  };
+
+  const singleProps = {
+    routeId: 1,
+    locationId: 'test-location-id',
+    encounterData: {
+      head: createMockPokemon(1, 'Bulbasaur'),
+      body: null,
+      isFusion: false,
+    },
+    onEncounterSelect: mockOnEncounterSelect,
+    onFusionToggle: mockOnFusionToggle,
+  };
+
+  const fusionProps = {
+    routeId: 1,
+    locationId: 'test-location-id',
+    encounterData: {
+      head: createMockPokemon(1, 'Bulbasaur'),
+      body: createMockPokemon(2, 'Ivysaur'),
+      isFusion: true,
     },
     onEncounterSelect: mockOnEncounterSelect,
     onFusionToggle: mockOnFusionToggle,
@@ -77,7 +141,7 @@ describe('EncounterCell', () => {
 
   describe('Rendering', () => {
     it('renders single Pokemon combobox when not a fusion', () => {
-      render(<EncounterCell {...defaultProps} />);
+      renderEncounterCell(singleProps);
 
       expect(
         screen.getByTestId('pokemon-combobox-1-single')
@@ -91,16 +155,7 @@ describe('EncounterCell', () => {
     });
 
     it('renders head and body comboboxes when isFusion is true', () => {
-      const fusionProps = {
-        ...defaultProps,
-        encounterData: {
-          head: createMockPokemon(1, 'Bulbasaur'),
-          body: createMockPokemon(4, 'Charmander'),
-          isFusion: true,
-        },
-      };
-
-      render(<EncounterCell {...fusionProps} />);
+      renderEncounterCell(fusionProps);
 
       expect(screen.getByTestId('pokemon-combobox-1-head')).toBeInTheDocument();
       expect(screen.getByTestId('pokemon-combobox-1-body')).toBeInTheDocument();
@@ -110,32 +165,14 @@ describe('EncounterCell', () => {
     });
 
     it('shows correct labels for head and body in fusion mode', () => {
-      const fusionProps = {
-        ...defaultProps,
-        encounterData: {
-          head: createMockPokemon(1, 'Bulbasaur'),
-          body: createMockPokemon(4, 'Charmander'),
-          isFusion: true,
-        },
-      };
+      renderEncounterCell(fusionProps);
 
-      render(<EncounterCell {...fusionProps} />);
-
-      expect(screen.getByText('Head:')).toBeInTheDocument();
-      expect(screen.getByText('Body:')).toBeInTheDocument();
+      expect(screen.getByText('Head')).toBeInTheDocument();
+      expect(screen.getByText('Body')).toBeInTheDocument();
     });
 
     it('renders flip button in fusion mode', () => {
-      const fusionProps = {
-        ...defaultProps,
-        encounterData: {
-          head: createMockPokemon(1, 'Bulbasaur'),
-          body: createMockPokemon(4, 'Charmander'),
-          isFusion: true,
-        },
-      };
-
-      render(<EncounterCell {...fusionProps} />);
+      renderEncounterCell(fusionProps);
 
       const flipButton = screen.getByRole('button', {
         name: /flip head and body pokemon/i,
@@ -144,7 +181,7 @@ describe('EncounterCell', () => {
     });
 
     it('renders fusion toggle button', () => {
-      render(<EncounterCell {...defaultProps} />);
+      renderEncounterCell(singleProps);
 
       const fusionButton = screen.getByRole('button', {
         name: /toggle fusion for bulbasaur/i,
@@ -156,7 +193,7 @@ describe('EncounterCell', () => {
   describe('Fusion Toggle', () => {
     it('calls onFusionToggle when fusion button is clicked', async () => {
       const user = userEvent.setup();
-      render(<EncounterCell {...defaultProps} />);
+      renderEncounterCell(singleProps);
 
       const fusionButton = screen.getByRole('button', {
         name: /toggle fusion for bulbasaur/i,
@@ -168,7 +205,7 @@ describe('EncounterCell', () => {
 
     it('shows correct icon based on fusion state', () => {
       // Not a fusion
-      const { rerender } = render(<EncounterCell {...defaultProps} />);
+      const { rerender } = renderEncounterCell(singleProps);
       // Check that the fusion button exists (Dna icon is rendered)
       const fusionButton = screen.getByRole('button', {
         name: /toggle fusion for bulbasaur/i,
@@ -176,18 +213,10 @@ describe('EncounterCell', () => {
       expect(fusionButton).toBeInTheDocument();
 
       // Is a fusion
-      const fusionProps = {
-        ...defaultProps,
-        encounterData: {
-          head: createMockPokemon(1, 'Bulbasaur'),
-          body: createMockPokemon(4, 'Charmander'),
-          isFusion: true,
-        },
-      };
-      rerender(<EncounterCell {...fusionProps} />);
+      rerenderEncounterCell(rerender, fusionProps);
       // Check that the fusion button exists (DnaOff icon is rendered)
       const updatedButton = screen.getByRole('button', {
-        name: /toggle fusion for charmander/i,
+        name: /toggle fusion for ivysaur/i,
       });
       expect(updatedButton).toBeInTheDocument();
     });
@@ -196,16 +225,8 @@ describe('EncounterCell', () => {
   describe('Flip Functionality', () => {
     it('calls onEncounterSelect with swapped head and body when flip button is clicked', async () => {
       const user = userEvent.setup();
-      const fusionProps = {
-        ...defaultProps,
-        encounterData: {
-          head: createMockPokemon(1, 'Bulbasaur'),
-          body: createMockPokemon(4, 'Charmander'),
-          isFusion: true,
-        },
-      };
 
-      render(<EncounterCell {...fusionProps} />);
+      renderEncounterCell(fusionProps);
 
       const flipButton = screen.getByRole('button', {
         name: /flip head and body pokemon/i,
@@ -214,7 +235,7 @@ describe('EncounterCell', () => {
 
       expect(mockOnEncounterSelect).toHaveBeenCalledWith(
         1,
-        createMockPokemon(4, 'Charmander'),
+        createMockPokemon(2, 'Ivysaur'),
         'head'
       );
       expect(mockOnEncounterSelect).toHaveBeenCalledWith(
@@ -226,7 +247,7 @@ describe('EncounterCell', () => {
 
     it('does not call onEncounterSelect when flip button is clicked in non-fusion mode', async () => {
       const user = userEvent.setup();
-      render(<EncounterCell {...defaultProps} />);
+      renderEncounterCell(singleProps);
 
       // In non-fusion mode, there should be no flip button
       const flipButton = screen.queryByRole('button', {
@@ -236,8 +257,8 @@ describe('EncounterCell', () => {
     });
 
     it('disables flip button when both head and body are empty', () => {
-      const fusionProps = {
-        ...defaultProps,
+      const emptyFusionProps = {
+        ...fusionProps,
         encounterData: {
           head: null,
           body: null,
@@ -245,7 +266,7 @@ describe('EncounterCell', () => {
         },
       };
 
-      render(<EncounterCell {...fusionProps} />);
+      renderEncounterCell(emptyFusionProps);
 
       const flipButton = screen.getByRole('button', {
         name: /flip head and body pokemon/i,
@@ -263,7 +284,7 @@ describe('EncounterCell', () => {
         createMockPokemon(4, 'Charmander')
       );
 
-      render(<EncounterCell {...defaultProps} />);
+      renderEncounterCell(singleProps);
 
       const fusionButton = screen.getByRole('button', {
         name: /toggle fusion for bulbasaur/i,
@@ -284,11 +305,14 @@ describe('EncounterCell', () => {
         expect(mockDispatchEvent).toHaveBeenCalledWith(
           expect.objectContaining({
             type: 'createFusion',
-            detail: {
+            detail: expect.objectContaining({
               routeId: 1,
-              head: createMockPokemon(1, 'Bulbasaur'),
-              body: createMockPokemon(4, 'Charmander'),
-            },
+              head: expect.objectContaining(createMockPokemon(1, 'Bulbasaur')),
+              body: expect.objectContaining({
+                ...createMockPokemon(4, 'Charmander'),
+                originalLocation: 'test-location-id',
+              }),
+            }),
           })
         );
       });
@@ -301,19 +325,10 @@ describe('EncounterCell', () => {
         createMockPokemon(4, 'Charmander')
       );
 
-      const fusionProps = {
-        ...defaultProps,
-        encounterData: {
-          head: createMockPokemon(1, 'Bulbasaur'),
-          body: createMockPokemon(4, 'Charmander'),
-          isFusion: true,
-        },
-      };
-
-      render(<EncounterCell {...fusionProps} />);
+      renderEncounterCell(fusionProps);
 
       const fusionButton = screen.getByRole('button', {
-        name: /toggle fusion for charmander/i,
+        name: /toggle fusion for ivysaur/i,
       });
 
       const mockDragEvent = {
@@ -337,7 +352,7 @@ describe('EncounterCell', () => {
       );
 
       const emptyProps = {
-        ...defaultProps,
+        ...singleProps,
         encounterData: {
           head: null,
           body: null,
@@ -345,7 +360,7 @@ describe('EncounterCell', () => {
         },
       };
 
-      render(<EncounterCell {...emptyProps} />);
+      renderEncounterCell(emptyProps);
 
       const fusionButton = screen.getByRole('button', {
         name: /toggle fusion for pokemon/i,
@@ -371,7 +386,7 @@ describe('EncounterCell', () => {
         createMockPokemon(4, 'Charmander')
       );
 
-      render(<EncounterCell {...defaultProps} />);
+      renderEncounterCell(singleProps);
 
       const fusionButton = screen.getByRole('button', {
         name: /toggle fusion for bulbasaur/i,
@@ -405,7 +420,7 @@ describe('EncounterCell', () => {
 
   describe('Visual Feedback', () => {
     it('applies correct CSS classes for fusion state', () => {
-      const { rerender } = render(<EncounterCell {...defaultProps} />);
+      const { rerender } = renderEncounterCell(singleProps);
 
       // Not a fusion - should have green hover classes
       const fusionButton = screen.getByRole('button', {
@@ -414,19 +429,11 @@ describe('EncounterCell', () => {
       expect(fusionButton.className).toContain('hover:bg-green-600');
 
       // Is a fusion
-      const fusionProps = {
-        ...defaultProps,
-        encounterData: {
-          head: createMockPokemon(1, 'Bulbasaur'),
-          body: createMockPokemon(4, 'Charmander'),
-          isFusion: true,
-        },
-      };
-      rerender(<EncounterCell {...fusionProps} />);
+      rerenderEncounterCell(rerender, fusionProps);
 
       // Should have red hover classes
       const updatedButton = screen.getByRole('button', {
-        name: /toggle fusion for charmander/i,
+        name: /toggle fusion for ivysaur/i,
       });
       expect(updatedButton.className).toContain('hover:bg-red-500');
     });
@@ -438,7 +445,7 @@ describe('EncounterCell', () => {
         createMockPokemon(4, 'Charmander')
       );
 
-      render(<EncounterCell {...defaultProps} />);
+      renderEncounterCell(singleProps);
 
       const fusionButton = screen.getByRole('button', {
         name: /toggle fusion for bulbasaur/i,
@@ -449,7 +456,7 @@ describe('EncounterCell', () => {
 
   describe('Accessibility', () => {
     it('has correct aria-label for fusion button', () => {
-      render(<EncounterCell {...defaultProps} />);
+      renderEncounterCell(singleProps);
 
       const fusionButton = screen.getByRole('button', {
         name: /toggle fusion for bulbasaur/i,
@@ -461,7 +468,7 @@ describe('EncounterCell', () => {
     });
 
     it('has correct title attribute for fusion button', () => {
-      const { rerender } = render(<EncounterCell {...defaultProps} />);
+      const { rerender } = renderEncounterCell(singleProps);
 
       // Not a fusion
       let fusionButton = screen.getByRole('button', {
@@ -470,33 +477,16 @@ describe('EncounterCell', () => {
       expect(fusionButton).toHaveAttribute('title', 'Fuse');
 
       // Is a fusion
-      const fusionProps = {
-        ...defaultProps,
-        encounterData: {
-          head: createMockPokemon(1, 'Bulbasaur'),
-          body: createMockPokemon(4, 'Charmander'),
-          isFusion: true,
-        },
-      };
-      rerender(<EncounterCell {...fusionProps} />);
+      rerenderEncounterCell(rerender, fusionProps);
 
       fusionButton = screen.getByRole('button', {
-        name: /toggle fusion for charmander/i,
+        name: /toggle fusion for ivysaur/i,
       });
       expect(fusionButton).toHaveAttribute('title', 'Unfuse');
     });
 
     it('has correct aria-label for flip button', () => {
-      const fusionProps = {
-        ...defaultProps,
-        encounterData: {
-          head: createMockPokemon(1, 'Bulbasaur'),
-          body: createMockPokemon(4, 'Charmander'),
-          isFusion: true,
-        },
-      };
-
-      render(<EncounterCell {...fusionProps} />);
+      renderEncounterCell(fusionProps);
 
       const flipButton = screen.getByRole('button', {
         name: /flip head and body pokemon/i,
