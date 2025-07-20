@@ -117,8 +117,8 @@ export function EncounterCell({
 
             // Clear the source location
             if (dragSnapshot.currentDragSource) {
-              const { locationId: sourceLocationId } = playthroughActions.getLocationFromComboboxId(dragSnapshot.currentDragSource);
-              playthroughActions.clearEncounterFromLocation(sourceLocationId);
+              const { locationId: sourceLocationId, field: sourceField } = playthroughActions.getLocationFromComboboxId(dragSnapshot.currentDragSource);
+              playthroughActions.clearEncounterFromLocation(sourceLocationId, sourceField);
             }
           }
         } catch (err) {
@@ -154,10 +154,9 @@ export function EncounterCell({
         dragSnapshot.currentDragSource !== `${locationId}-single` &&
         dragSnapshot.currentDragSource !== `${locationId}-head` &&
         dragSnapshot.currentDragSource !== `${locationId}-body`;
-      
 
       if (isFromDifferentCombobox) {
-        e.dataTransfer.dropEffect = 'move';
+        e.dataTransfer.dropEffect = 'copy';
       } else {
         e.dataTransfer.dropEffect = 'none';
       }

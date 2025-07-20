@@ -499,8 +499,8 @@ export const PokemonCombobox = ({
 
             // If this is from a different combobox, clear the source location
             if (isFromDifferentCombobox && dragSnapshot.currentDragSource) {
-              const { locationId: sourceLocationId } = playthroughActions.getLocationFromComboboxId(dragSnapshot.currentDragSource);
-              playthroughActions.clearEncounterFromLocation(sourceLocationId);
+              const { locationId: sourceLocationId, field: sourceField } = playthroughActions.getLocationFromComboboxId(dragSnapshot.currentDragSource);
+              playthroughActions.clearEncounterFromLocation(sourceLocationId, sourceField);
             }
           } else {
             // Fallback to name-based search if drag value is not available
@@ -528,8 +528,8 @@ export const PokemonCombobox = ({
 
                   // If this is from a different combobox, clear the source location
                   if (isFromDifferentCombobox && dragSnapshot.currentDragSource) {
-                    const { locationId: sourceLocationId } = playthroughActions.getLocationFromComboboxId(dragSnapshot.currentDragSource);
-                    playthroughActions.clearEncounterFromLocation(sourceLocationId);
+                    const { locationId: sourceLocationId, field: sourceField } = playthroughActions.getLocationFromComboboxId(dragSnapshot.currentDragSource);
+                    playthroughActions.clearEncounterFromLocation(sourceLocationId, sourceField);
                   }
                 }
               } catch (err) {

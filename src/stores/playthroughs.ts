@@ -492,11 +492,30 @@ export const playthroughActions = {
   // Helper methods for drag and drop operations
 
   // Clear encounter from a specific location (replaces clearCombobox event)
-  clearEncounterFromLocation: async (locationId: string) => {
+  clearEncounterFromLocation: async (locationId: string, field?: 'head' | 'body') => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
 
-    delete activePlaythrough.encounters[locationId];
+    const encounter = activePlaythrough.encounters[locationId];
+    if (!encounter) return;
+
+    if (!field) {
+      // If no field specified, clear the entire encounter
+      delete activePlaythrough.encounters[locationId];
+    } else {
+      // Clear only the specified field
+      encounter[field] = null;
+
+      // Only remove the entire encounter if it's not a fusion and we're clearing the head
+      // OR if it's a regular encounter (not a fusion) and both are null
+      if (!encounter.isFusion) {
+        if (field === 'head' || (!encounter.head && !encounter.body)) {
+          delete activePlaythrough.encounters[locationId];
+        }
+      }
+      // For fusions, keep the encounter structure even if both head and body are null
+    }
+
     activePlaythrough.updatedAt = getCurrentTimestamp();
   },
 
@@ -537,9 +556,30 @@ export const playthroughActions = {
 
     if (!pokemon1 || !pokemon2) return;
 
-    // Swap the Pokemon
-    await playthroughActions.updateEncounter(locationId1, pokemon2, field1, encounter1.isFusion);
-    await playthroughActions.updateEncounter(locationId2, pokemon1, field2, encounter2.isFusion);
+    // Update originalLocation for swapped Pokemon
+    const pokemon1WithLocation = {
+      ...pokemon1,
+      originalLocation: pokemon1.originalLocation || locationId2,
+    };
+    const pokemon2WithLocation = {
+      ...pokemon2,
+      originalLocation: pokemon2.originalLocation || locationId1,
+    };
+
+    // Directly swap the Pokemon while preserving encounter structure
+    if (field1 === 'head') {
+      encounter1.head = pokemon2WithLocation;
+    } else {
+      encounter1.body = pokemon2WithLocation;
+    }
+
+    if (field2 === 'head') {
+      encounter2.head = pokemon1WithLocation;
+    } else {
+      encounter2.body = pokemon1WithLocation;
+    }
+
+    activePlaythrough.updatedAt = getCurrentTimestamp();
   },
 
   // Get location ID from combobox ID (helper for drag operations)
