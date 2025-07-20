@@ -65,7 +65,7 @@ function getNicknameText(
     return pokemon.nickname || pokemon.name;
   }
 
-  return head.nickname || body.nickname;
+  return head.nickname || body.nickname || `${head.name}/${body.name}`;
 }
 
 export function FusionSprite({
@@ -83,8 +83,15 @@ export function FusionSprite({
   const altText = getAltText(head, body, isFusion);
   const nicknameText = getNicknameText(head, body, isFusion);
   const spriteSize = SPRITE_SIZES[size];
+  
+  // Check if either Pokémon has "missed" status
+  const isMissed = head?.status === 'missed' || body?.status === 'missed';
+  
   const imageClasses = clsx(
     'object-fill object-center image-render-pixelated origin-top -translate-y-1/9',
+    {
+      'grayscale opacity-50': isMissed,
+    },
     className
   );
 
@@ -113,7 +120,7 @@ export function FusionSprite({
         title='Open Pokedex'
         onMouseEnter={() => {
           hoverRef.current = true;
-          if (imageRef.current) {
+          if (imageRef.current && !isMissed) {
             // Cancel any running animations so the new one will replay
             imageRef.current.getAnimations().forEach(anim => anim.cancel());
             if (shadowRef.current) {
