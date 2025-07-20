@@ -99,6 +99,11 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
               name: pokemonName,
               nationalDexId: foundPokemon.nationalDexId,
               originalLocation: locationId,
+              // Preserve existing properties from dragSnapshot if available
+              ...(dragSnapshot.currentDragValue && {
+                nickname: dragSnapshot.currentDragValue.nickname,
+                status: dragSnapshot.currentDragValue.status,
+              }),
             };
 
             // Create fusion: existing Pokémon becomes head, dropped Pokémon becomes body

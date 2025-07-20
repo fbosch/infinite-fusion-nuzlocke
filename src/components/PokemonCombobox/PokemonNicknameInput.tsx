@@ -30,10 +30,24 @@ export const PokemonNicknameInput = ({
   const [localNickname, setLocalNickname] = useState(value?.nickname || '');
   const debouncedNickname = useDebounced(localNickname, 100);
 
-  // Sync local state when external value changes
+  // Keep track of the Pokemon ID to detect when a different Pokemon is selected
+  const currentPokemonId = value?.id;
+  const [lastSyncedPokemonId, setLastSyncedPokemonId] = useState(currentPokemonId);
+
+  // Sync local state when Pokemon changes (different ID) or when component first mounts
   useEffect(() => {
-    setLocalNickname(value?.nickname || '');
-  }, [value?.nickname]);
+    if (!value) {
+      setLocalNickname('');
+      setLastSyncedPokemonId(undefined);
+      return;
+    }
+
+    // Only sync if this is a different Pokemon than the last one we synced
+    if (currentPokemonId !== lastSyncedPokemonId) {
+      setLocalNickname(value.nickname || '');
+      setLastSyncedPokemonId(currentPokemonId);
+    }
+  }, [value, currentPokemonId, lastSyncedPokemonId]);
 
   // Update parent when debounced value changes
   useEffect(() => {
@@ -107,8 +121,7 @@ export const PokemonNicknameInput = ({
         'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
         'placeholder-gray-500 dark:placeholder-gray-400',
         dragPreview && 'opacity-60 pointer-none',
-        hasUnsavedChanges &&
-          'ring-1 ring-orange-300 border-orange-300 dark:ring-orange-500 dark:border-orange-500' // Visual indicator for unsaved changes
+   
       )}
       maxLength={12}
       disabled={!value || disabled}

@@ -542,6 +542,11 @@ export const PokemonCombobox = ({
                     name: pokemonName,
                     nationalDexId: foundPokemon.nationalDexId,
                     originalLocation: locationId,
+                    // Preserve existing properties from dragSnapshot if available
+                    ...(dragSnapshot.currentDragValue && {
+                      nickname: dragSnapshot.currentDragValue.nickname,
+                      status: dragSnapshot.currentDragValue.status,
+                    }),
                   };
                   onChange(pokemonOption);
 
@@ -608,6 +613,12 @@ export const PokemonCombobox = ({
                 id: foundPokemon.id,
                 name: pokemonName,
                 nationalDexId: foundPokemon.nationalDexId,
+                // Preserve existing properties for preview
+                ...(dragSnapshot.currentDragValue && {
+                  nickname: dragSnapshot.currentDragValue.nickname,
+                  status: dragSnapshot.currentDragValue.status,
+                  originalLocation: dragSnapshot.currentDragValue.originalLocation,
+                }),
               };
               setDragPreview(pokemonOption);
             }
