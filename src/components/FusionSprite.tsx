@@ -4,6 +4,7 @@ import React, { useMemo, useRef } from 'react';
 import Image from 'next/image';
 import { PokemonStatus, type PokemonOption } from '@/loaders/pokemon';
 import type { EncounterData } from '@/loaders/encounters';
+import { Skull } from 'lucide-react';
 import clsx from 'clsx';
 
 interface FusionSpriteProps {
@@ -91,6 +92,7 @@ export function FusionSprite({
     'object-fill object-center image-render-pixelated origin-top -translate-y-1/9',
     {
       'grayscale opacity-50': isMissed || isDeceased,
+      'blur-[1px]': isDeceased,
     },
     className
   );
@@ -228,6 +230,24 @@ export function FusionSprite({
                 }
               }}
             />
+            {/* Deceased overlay */}
+            {isDeceased && (
+              <div className='mix-blend-screen'>
+                {/* Line through effect */}
+                <div 
+                  className="absolute inset-0 z-20 pointer-events-none text-black dark:text-white"
+                  style={{
+                    background: 'linear-gradient(45deg, transparent 48.5%, currentColor 48.5%, currentColor 51.5%, transparent 51.5%)',
+                    transform: 'translateY(-40%)',
+                    top: '40%',
+                  }}
+                />
+                {/* Skull icon */}
+                <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+                  <Skull className="h-6 w-6 fill-white dark:fill-black stroke-black dark:stroke-white"  stroke="" strokeWidth={1.5}/>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </a>
