@@ -41,6 +41,10 @@ const defaultState: PlaythroughsState = {
 // Storage keys
 const ACTIVE_PLAYTHROUGH_KEY = 'activePlaythroughId';
 
+// Simple cache for active playthrough to avoid repeated find() calls
+let cachedActivePlaythrough: Playthrough | null = null;
+let cachedActiveId: string | undefined = undefined;
+
 // Helper functions
 const generatePlaythroughId = (): string => {
   return `playthrough_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -60,6 +64,17 @@ const createDefaultPlaythrough = (): Playthrough => ({
   updatedAt: getCurrentTimestamp(),
 });
 
+// More efficient serialization: Use structuredClone when available, fallback to JSON
+const serializeForStorage = (obj: any): any => {
+  if (typeof structuredClone !== 'undefined') {
+    try {
+      return structuredClone(obj);
+    } catch {
+      // Fallback to JSON if structured clone fails
+    }
+  }
+  return JSON.parse(JSON.stringify(obj));
+};
 
 // Debounced save mechanism using lodash
 const debouncedSaveToIndexedDB = debounce(async (state: PlaythroughsState): Promise<void> => {
@@ -100,8 +115,8 @@ const debouncedSavePlaythrough = debounce(async (playthrough: Playthrough): Prom
   try {
     const key = playthrough.id;
     
-    // Convert proxy object to plain object for IndexedDB compatibility
-    const plainPlaythrough = JSON.parse(JSON.stringify(playthrough));
+    // Use more efficient serialization instead of JSON.parse(JSON.stringify())
+    const plainPlaythrough = serializeForStorage(playthrough);
     
     await set(key, plainPlaythrough);
     
@@ -124,8 +139,8 @@ const savePlaythroughToIndexedDB = async (playthrough: Playthrough): Promise<voi
   try {
     const key = playthrough.id;
     
-    // Convert proxy object to plain object for IndexedDB compatibility
-    const plainPlaythrough = JSON.parse(JSON.stringify(playthrough));
+    // Use more efficient serialization instead of JSON.parse(JSON.stringify())
+    const plainPlaythrough = serializeForStorage(playthrough);
     
     await set(key, plainPlaythrough);
     
@@ -165,24 +180,21 @@ const loadFromIndexedDB = async (): Promise<PlaythroughsState> => {
     const activePlaythroughId = await get(ACTIVE_PLAYTHROUGH_KEY);
     const playthroughs: Playthrough[] = [];
 
-    // Try to load from the old format first (for migration)
-   
-      // Try to load individual playthroughs by checking for known keys
-      const knownPlaythroughIds = (await get('playthrough_ids') || []) as string[];
-      
-      for (const playthroughId of knownPlaythroughIds) {
-        try {
-          const key = playthroughId;
-          const playthroughData = await get(key);
-          if (playthroughData) {
-            const playthrough = PlaythroughSchema.parse(playthroughData);
-            playthroughs.push(playthrough);
-          } else {
-          }
-        } catch (error) {
-          console.error(`Invalid playthrough data found for ID ${playthroughId}:`, error);
+    // Try to load individual playthroughs by checking for known keys
+    const knownPlaythroughIds = (await get('playthrough_ids') || []) as string[];
+    
+    for (const playthroughId of knownPlaythroughIds) {
+      try {
+        const key = playthroughId;
+        const playthroughData = await get(key);
+        if (playthroughData) {
+          const playthrough = PlaythroughSchema.parse(playthroughData);
+          playthroughs.push(playthrough);
         }
+      } catch (error) {
+        console.error(`Invalid playthrough data found for ID ${playthroughId}:`, error);
       }
+    }
 
     // If no playthroughs exist, create a default one
     if (playthroughs.length === 0) {
@@ -226,12 +238,14 @@ if (typeof window !== 'undefined') {
 
   // Subscribe to store changes and debounce saves
   subscribe(playthroughsStore, () => {
+    // Clear cache when store changes
+    cachedActivePlaythrough = null;
+    cachedActiveId = undefined;
+
     window.requestIdleCallback(async () => {
       debouncedSaveToIndexedDB(playthroughsStore);
-    const activePlaythrough = playthroughsStore.playthroughs.find(
-      p => p.id === playthroughsStore.activePlaythroughId
-    );
-    if (activePlaythrough) {
+      const activePlaythrough = playthroughActions.getActivePlaythrough();
+      if (activePlaythrough) {
         debouncedSavePlaythrough(activePlaythrough);
       }
     }, { timeout: 5000 });
@@ -246,7 +260,7 @@ export { playthroughsStore };
 // Playthrough actions
 export const playthroughActions = {
   // Create a new playthrough
-  createPlaythrough: async (name: string, remixMode: boolean = false): Promise<string> => {
+  createPlaythrough: (name: string, remixMode: boolean = false): string => {
     const newPlaythrough: Playthrough = {
       id: generatePlaythroughId(),
       name,
@@ -266,19 +280,30 @@ export const playthroughActions = {
     return newPlaythrough.id;
   },
 
-  // Get active playthrough
+  // Get active playthrough with simple caching
   getActivePlaythrough: (): Playthrough | null => {
     if (!playthroughsStore.activePlaythroughId) return null;
 
-    return (
-      playthroughsStore.playthroughs.find(
-        (p: Playthrough) => p.id === playthroughsStore.activePlaythroughId
-      ) || null
-    );
+    // Use simple cache to avoid repeated find() operations
+    if (cachedActiveId === playthroughsStore.activePlaythroughId && cachedActivePlaythrough) {
+      return cachedActivePlaythrough;
+    }
+
+    // Find and cache the active playthrough
+    const found = playthroughsStore.playthroughs.find(
+      (p: Playthrough) => p.id === playthroughsStore.activePlaythroughId
+    ) || null;
+
+    if (found) {
+      cachedActivePlaythrough = found;
+      cachedActiveId = playthroughsStore.activePlaythroughId;
+    }
+
+    return found;
   },
 
   // Set active playthrough
-  setActivePlaythrough: async (playthroughId: string) => {
+  setActivePlaythrough: (playthroughId: string) => {
     const playthrough = playthroughsStore.playthroughs.find(
       (p: Playthrough) => p.id === playthroughId
     );
@@ -289,7 +314,7 @@ export const playthroughActions = {
   },
 
   // Toggle remix mode for active playthrough
-  toggleRemixMode: async () => {
+  toggleRemixMode: () => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (activePlaythrough) {
       activePlaythrough.remixMode = !activePlaythrough.remixMode;
@@ -298,7 +323,7 @@ export const playthroughActions = {
   },
 
   // Set remix mode for active playthrough
-  setRemixMode: async (enabled: boolean) => {
+  setRemixMode: (enabled: boolean) => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (activePlaythrough) {
       activePlaythrough.remixMode = enabled;
@@ -307,7 +332,7 @@ export const playthroughActions = {
   },
 
   // Update playthrough name
-  updatePlaythroughName: async (playthroughId: string, name: string) => {
+  updatePlaythroughName: (playthroughId: string, name: string) => {
     const playthrough = playthroughsStore.playthroughs.find(
       (p: Playthrough) => p.id === playthroughId
     );
@@ -373,7 +398,7 @@ export const playthroughActions = {
   },
 
   // Update encounter for a location
-  updateEncounter: async (
+  updateEncounter: (
     locationId: string,
     pokemon: z.infer<typeof PokemonOptionSchema> | null,
     field: 'head' | 'body' = 'head',
@@ -425,7 +450,7 @@ export const playthroughActions = {
   },
 
   // Reset encounter for a location
-  resetEncounter: async (locationId: string) => {
+  resetEncounter: (locationId: string) => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
 
@@ -434,7 +459,7 @@ export const playthroughActions = {
   },
 
   // Toggle fusion mode for an encounter
-  toggleEncounterFusion: async (locationId: string) => {
+  toggleEncounterFusion: (locationId: string) => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
 
@@ -466,7 +491,7 @@ export const playthroughActions = {
   },
 
   // Create fusion from drag and drop
-  createFusion: async (
+  createFusion: (
     locationId: string,
     head: z.infer<typeof PokemonOptionSchema>,
     body: z.infer<typeof PokemonOptionSchema>
@@ -492,7 +517,7 @@ export const playthroughActions = {
   // Helper methods for drag and drop operations
 
   // Clear encounter from a specific location (replaces clearCombobox event)
-  clearEncounterFromLocation: async (locationId: string, field?: 'head' | 'body') => {
+  clearEncounterFromLocation: (locationId: string, field?: 'head' | 'body') => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
 
@@ -520,7 +545,7 @@ export const playthroughActions = {
   },
 
   // Move encounter from one location to another (replaces some clearCombobox usage)
-  moveEncounter: async (
+  moveEncounter: (
     fromLocationId: string,
     toLocationId: string,
     pokemon: z.infer<typeof PokemonOptionSchema>,
@@ -533,11 +558,11 @@ export const playthroughActions = {
     delete activePlaythrough.encounters[fromLocationId];
 
     // Set the destination
-    await playthroughActions.updateEncounter(toLocationId, pokemon, toField, false);
+    playthroughActions.updateEncounter(toLocationId, pokemon, toField, false);
   },
 
   // Swap encounters between two locations (replaces switchCombobox event)
-  swapEncounters: async (
+  swapEncounters: (
     locationId1: string,
     locationId2: string,
     field1: 'head' | 'body' = 'head',
