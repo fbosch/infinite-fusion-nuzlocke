@@ -1,5 +1,7 @@
 import { X } from 'lucide-react';
 import clsx from 'clsx';
+import { useState } from 'react';
+import ConfirmationDialog from '../ConfirmationDialog';
 
 interface ResetEncounterButtonProps {
   routeId: number;
@@ -14,6 +16,19 @@ export default function ResetEncounterButton({
   hasEncounter,
   onReset,
 }: ResetEncounterButtonProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleButtonClick = () => {
+    setIsDialogOpen(true);
+  };
+
+  const handleConfirm = () => {
+    onReset(routeId);
+  };
+
+  const handleCancel = () => {
+    setIsDialogOpen(false);
+  };
   return (
     <td
       className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top'
@@ -22,7 +37,7 @@ export default function ResetEncounterButton({
     <div className='flex items-center justify-end'>
       <button
         type='button'
-        onClick={() => onReset(routeId)}
+        onClick={handleButtonClick}
         disabled={!hasEncounter}
         className={clsx(
           'size-8 flex items-center justify-center rounded-md transition-colors cursor-pointer',
@@ -37,6 +52,17 @@ export default function ResetEncounterButton({
         <X className='size-4' />
       </button>
 </div>
+
+      <ConfirmationDialog
+        isOpen={isDialogOpen}
+        onClose={handleCancel}
+        onConfirm={handleConfirm}
+        title="Reset Encounter"
+        message={`Are you sure you want to reset the encounter for ${locationName}?`}
+        confirmText="Reset"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </td>
   );
 } 

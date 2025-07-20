@@ -1,7 +1,7 @@
 import { Row, flexRender } from '@tanstack/react-table';
 import type { Location } from '@/loaders/locations';
 import type { PokemonOption } from '@/loaders/pokemon';
-import type { EncounterData } from '@/types/encounters';
+import type { EncounterData } from '@/loaders/encounters';
 import { EncounterCell } from './EncounterCell';
 import { FusionSprite } from '../FusionSprite';
 import ResetEncounterButton from './ResetEncounterButton';

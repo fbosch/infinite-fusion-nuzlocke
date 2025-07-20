@@ -1,6 +1,15 @@
 import { z } from 'zod';
 import { getStarterPokemonByGameMode } from './starters';
-
+import type { PokemonOption } from './pokemon';
+/**
+ * Type for encounter data with fusion status
+ * Used to track Pokemon encounters and their fusion state
+ */
+export interface EncounterData {
+  head: PokemonOption | null;
+  body: PokemonOption | null;
+  isFusion: boolean;
+} 
 // Zod schema for route encounter data
 export const RouteEncounterSchema = z.object({
   routeName: z.string().min(1, { error: 'Route name is required' }),
