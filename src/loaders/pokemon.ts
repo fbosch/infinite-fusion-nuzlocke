@@ -8,6 +8,7 @@ export interface PokemonOption {
   name: string;
   nationalDexId: number;
   nickname?: string;
+  originalLocation?: string;
 }
 
 // Zod schema for Pokemon type
@@ -89,7 +90,7 @@ export async function getPokemon(): Promise<Pokemon[]> {
 }
 
 // Get shared Fuse instance for name-only fuzzy search (faster)
-export async function getPokemonFuseInstance(): Promise<Fuse<PokemonOption>> {
+export async function getPokemonFuseInstance(originalRouteId?: number): Promise<Fuse<PokemonOption>> {
   if (pokemonFuseInstance) {
     return pokemonFuseInstance;
   }
@@ -99,6 +100,7 @@ export async function getPokemonFuseInstance(): Promise<Fuse<PokemonOption>> {
     id: p.id,
     name: p.name,
     nationalDexId: p.nationalDexId,
+    originalRouteId: originalRouteId,
   }));
 
   const fuseOptions: IFuseOptions<PokemonOption> = {
