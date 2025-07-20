@@ -26,12 +26,15 @@ export const PlaythroughsSchema = z.object({
 });
 
 export type Playthrough = z.infer<typeof PlaythroughSchema>;
-export type PlaythroughsState = z.infer<typeof PlaythroughsSchema>;
+export type PlaythroughsState = z.infer<typeof PlaythroughsSchema> & {
+  isLoading: boolean;
+};
 
 // Default state
 const defaultState: PlaythroughsState = {
   playthroughs: [],
   activePlaythroughId: undefined,
+  isLoading: true, // Start in loading state
 };
 
 // Storage keys
@@ -79,12 +82,15 @@ const debouncedSaveToIndexedDB = async (state: PlaythroughsState): Promise<void>
     try {
       savingInProgress = requestIdleCallback(async () => {
         try {
+          // Convert proxy objects to plain objects for IndexedDB compatibility
+          const plainState = JSON.parse(JSON.stringify(state));
+          
           // Save playthroughs array
-          await set(PLAYTHROUGHS_KEY, state.playthroughs);
+          await set(PLAYTHROUGHS_KEY, plainState.playthroughs);
 
           // Save active playthrough ID
-          if (state.activePlaythroughId) {
-            await set(ACTIVE_PLAYTHROUGH_KEY, state.activePlaythroughId);
+          if (plainState.activePlaythroughId) {
+            await set(ACTIVE_PLAYTHROUGH_KEY, plainState.activePlaythroughId);
           } else {
             await del(ACTIVE_PLAYTHROUGH_KEY);
           }
@@ -107,12 +113,15 @@ const saveToIndexedDB = async (state: PlaythroughsState): Promise<void> => {
   if (typeof window === 'undefined') return;
 
   try {
+    // Convert proxy objects to plain objects for IndexedDB compatibility
+    const plainState = JSON.parse(JSON.stringify(state));
+    
     // Save playthroughs array
-    await set(PLAYTHROUGHS_KEY, state.playthroughs);
+    await set(PLAYTHROUGHS_KEY, plainState.playthroughs);
 
     // Save active playthrough ID
-    if (state.activePlaythroughId) {
-      await set(ACTIVE_PLAYTHROUGH_KEY, state.activePlaythroughId);
+    if (plainState.activePlaythroughId) {
+      await set(ACTIVE_PLAYTHROUGH_KEY, plainState.activePlaythroughId);
     } else {
       await del(ACTIVE_PLAYTHROUGH_KEY);
     }
@@ -151,23 +160,23 @@ const loadFromIndexedDB = async (): Promise<PlaythroughsState> => {
       const state: PlaythroughsState = {
         playthroughs,
         activePlaythroughId: defaultPlaythrough.id,
+        isLoading: false,
       };
 
       // Save the default playthrough to IndexedDB immediately
       await saveToIndexedDB(state);
 
-      const validatedState = PlaythroughsSchema.parse(state);
-      return validatedState;
+      return state;
     }
 
     const state: PlaythroughsState = {
       playthroughs,
       activePlaythroughId: activePlaythroughId || undefined,
+      isLoading: false, // No longer loading if playthroughs exist
     };
 
-    // Validate the entire state
-    const validatedState = PlaythroughsSchema.parse(state);
-    return validatedState;
+    // Return the state with loading complete
+    return state;
   } catch (error) {
     console.warn('Failed to load playthroughs from IndexedDB:', error);
     return defaultState;
@@ -184,6 +193,8 @@ if (typeof window !== 'undefined') {
   // Load data from IndexedDB asynchronously
   loadFromIndexedDB().then(loadedState => {
     Object.assign(playthroughsStore, loadedState);
+    // Ensure loading state is set to false
+    playthroughsStore.isLoading = false;
   });
 
   // Subscribe to changes and use debounced save for most updates
@@ -201,7 +212,6 @@ export { playthroughsStore };
 export const playthroughActions = {
   // Create a new playthrough
   createPlaythrough: (name: string, remixMode: boolean = false): string => {
-    if (typeof window === 'undefined') return '';
 
     const newPlaythrough: Playthrough = {
       id: generatePlaythroughId(),
@@ -238,7 +248,6 @@ export const playthroughActions = {
 
   // Set active playthrough
   setActivePlaythrough: (playthroughId: string) => {
-    if (typeof window === 'undefined') return;
 
     const playthrough = playthroughsStore.playthroughs.find(
       (p: Playthrough) => p.id === playthroughId
@@ -253,7 +262,6 @@ export const playthroughActions = {
 
   // Toggle remix mode for active playthrough
   toggleRemixMode: () => {
-    if (typeof window === 'undefined') return;
 
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (activePlaythrough) {
@@ -264,7 +272,6 @@ export const playthroughActions = {
 
   // Set remix mode for active playthrough
   setRemixMode: (enabled: boolean) => {
-    if (typeof window === 'undefined') return;
 
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (activePlaythrough) {
@@ -275,7 +282,6 @@ export const playthroughActions = {
 
   // Update playthrough name
   updatePlaythroughName: (playthroughId: string, name: string) => {
-    if (typeof window === 'undefined') return;
 
     const playthrough = playthroughsStore.playthroughs.find(
       (p: Playthrough) => p.id === playthroughId
@@ -289,7 +295,6 @@ export const playthroughActions = {
 
   // Delete playthrough
   deletePlaythrough: (playthroughId: string) => {
-    if (typeof window === 'undefined') return;
 
     const index = playthroughsStore.playthroughs.findIndex(
       (p: Playthrough) => p.id === playthroughId
@@ -324,7 +329,6 @@ export const playthroughActions = {
 
   // Reset all playthroughs
   resetAllPlaythroughs: () => {
-    if (typeof window === 'undefined') return;
 
     // Create a new default playthrough instead of leaving empty
     const defaultPlaythrough = createDefaultPlaythrough();
@@ -350,7 +354,6 @@ export const playthroughActions = {
     field: 'head' | 'body' = 'head',
     shouldCreateFusion: boolean = false
   ) => {
-    if (typeof window === 'undefined') return;
 
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
@@ -398,7 +401,6 @@ export const playthroughActions = {
 
   // Reset encounter for a location
   resetEncounter: (locationId: string) => {
-    if (typeof window === 'undefined') return;
 
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
@@ -410,7 +412,6 @@ export const playthroughActions = {
 
   // Toggle fusion mode for an encounter
   toggleEncounterFusion: (locationId: string) => {
-    if (typeof window === 'undefined') return;
 
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
@@ -449,7 +450,6 @@ export const playthroughActions = {
     head: z.infer<typeof PokemonOptionSchema>,
     body: z.infer<typeof PokemonOptionSchema>
   ) => {
-    if (typeof window === 'undefined') return;
 
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;

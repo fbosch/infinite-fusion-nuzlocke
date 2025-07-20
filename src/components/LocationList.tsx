@@ -19,11 +19,10 @@ const columnHelper = createColumnHelper<Location>();
 export default function LocationList() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const playthroughSnapshot = useSnapshot(playthroughsStore);
-
-  // Get encounters from the active playthrough (will only update on commit, not during typing)
-  const encounters = useMemo(() => {
-    return playthroughActions.getEncounters();
-  }, [playthroughSnapshot]);
+  const activePlaythrough = playthroughSnapshot.activePlaythroughId;
+  const encounters = playthroughSnapshot.playthroughs.find(
+    p => p.id === activePlaythrough
+  )?.encounters;
 
   // Memoize the data to prevent unnecessary re-computations
   const data = useMemo(() => {
@@ -89,6 +88,22 @@ export default function LocationList() {
     enableMultiSort: false,
   });
 
+  // Show loading state while store is initializing from IndexedDB
+  if (playthroughSnapshot.isLoading) {
+    return (
+      <div
+        className='flex items-center justify-center p-8'
+        role='status'
+        aria-live='polite'
+      >
+        <div className='flex items-center space-x-2 text-gray-500 dark:text-gray-400'>
+          <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500'></div>
+          <span>Loading playthrough data...</span>
+        </div>
+      </div>
+    );
+  }
+
   // Show loading state if no data
   if (!data || data.length === 0) {
     return (
@@ -114,7 +129,7 @@ export default function LocationList() {
         <LocationTableHeader headerGroups={table.getHeaderGroups()} />
         <tbody className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700'>
           {table.getRowModel().rows.map(row => {
-            const encounterData = encounters[row.original.id] || {
+            const encounterData = encounters?.[row.original.id] || {
               head: null,
               body: null,
               isFusion: false,
