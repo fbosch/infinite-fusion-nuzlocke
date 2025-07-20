@@ -26,15 +26,14 @@ const createMockPokemon = (name: string, id: number): PokemonOption => ({
 });
 
 describe('Playthroughs Store - Drag and Drop Operations', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     // Reset store state
     playthroughsStore.playthroughs = [];
     playthroughsStore.activePlaythroughId = undefined;
 
     // Create a test playthrough
-    const playthroughId =
-      await playthroughActions.createPlaythrough('Test Run');
-    await playthroughActions.setActivePlaythrough(playthroughId);
+    const playthroughId = playthroughActions.createPlaythrough('Test Run');
+    playthroughActions.setActivePlaythrough(playthroughId);
   });
 
   describe('getLocationFromComboboxId', () => {
@@ -63,45 +62,35 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
   });
 
   describe('clearEncounterFromLocation', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       // Set up test encounters
       const pikachu = createMockPokemon('Pikachu', 25);
       const charmander = createMockPokemon('Charmander', 4);
 
       // Regular encounter
-      await playthroughActions.updateEncounter('route-1', pikachu);
+      playthroughActions.updateEncounter('route-1', pikachu);
 
       // Fusion encounter
-      await playthroughActions.updateEncounter(
-        'route-2',
-        pikachu,
-        'head',
-        true
-      );
-      await playthroughActions.updateEncounter(
-        'route-2',
-        charmander,
-        'body',
-        false
-      );
+      playthroughActions.updateEncounter('route-2', pikachu, 'head', true);
+      playthroughActions.updateEncounter('route-2', charmander, 'body', false);
     });
 
     it('should clear entire encounter when no field specified', async () => {
-      await playthroughActions.clearEncounterFromLocation('route-1');
+      playthroughActions.clearEncounterFromLocation('route-1');
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters['route-1']).toBeUndefined();
     });
 
     it('should remove regular encounter when clearing head', async () => {
-      await playthroughActions.clearEncounterFromLocation('route-1', 'head');
+      playthroughActions.clearEncounterFromLocation('route-1', 'head');
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters['route-1']).toBeUndefined();
     });
 
     it('should preserve fusion structure when clearing head only', async () => {
-      await playthroughActions.clearEncounterFromLocation('route-2', 'head');
+      playthroughActions.clearEncounterFromLocation('route-2', 'head');
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters['route-2']).toBeDefined();
@@ -112,7 +101,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     });
 
     it('should preserve fusion structure when clearing body only', async () => {
-      await playthroughActions.clearEncounterFromLocation('route-2', 'body');
+      playthroughActions.clearEncounterFromLocation('route-2', 'body');
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters['route-2']).toBeDefined();
@@ -123,8 +112,8 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     });
 
     it('should preserve fusion structure even when both head and body are cleared', async () => {
-      await playthroughActions.clearEncounterFromLocation('route-2', 'head');
-      await playthroughActions.clearEncounterFromLocation('route-2', 'body');
+      playthroughActions.clearEncounterFromLocation('route-2', 'head');
+      playthroughActions.clearEncounterFromLocation('route-2', 'body');
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters['route-2']).toBeDefined();
@@ -134,10 +123,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     });
 
     it('should handle clearing from non-existent location gracefully', async () => {
-      await playthroughActions.clearEncounterFromLocation(
-        'non-existent',
-        'head'
-      );
+      playthroughActions.clearEncounterFromLocation('non-existent', 'head');
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters['non-existent']).toBeUndefined();
@@ -149,10 +135,10 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const pikachu = createMockPokemon('Pikachu', 25);
 
       // Set up source encounter
-      await playthroughActions.updateEncounter('route-1', pikachu);
+      playthroughActions.updateEncounter('route-1', pikachu);
 
       // Move to new location
-      await playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
+      playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters['route-1']).toBeUndefined();
@@ -165,26 +151,11 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const charmander = createMockPokemon('Charmander', 4);
 
       // Set up fusion encounter
-      await playthroughActions.updateEncounter(
-        'route-1',
-        pikachu,
-        'head',
-        true
-      );
-      await playthroughActions.updateEncounter(
-        'route-1',
-        charmander,
-        'body',
-        false
-      );
+      playthroughActions.updateEncounter('route-1', pikachu, 'head', true);
+      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
 
       // Move entire encounter to new location
-      await playthroughActions.moveEncounter(
-        'route-1',
-        'route-2',
-        pikachu,
-        'head'
-      );
+      playthroughActions.moveEncounter('route-1', 'route-2', pikachu, 'head');
 
       const encounters = playthroughActions.getEncounters();
 
@@ -203,11 +174,11 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const charmander = createMockPokemon('Charmander', 4);
 
       // Set up encounters
-      await playthroughActions.updateEncounter('route-1', pikachu);
-      await playthroughActions.updateEncounter('route-2', charmander);
+      playthroughActions.updateEncounter('route-1', pikachu);
+      playthroughActions.updateEncounter('route-2', charmander);
 
       // Swap encounters
-      await playthroughActions.swapEncounters('route-1', 'route-2');
+      playthroughActions.swapEncounters('route-1', 'route-2');
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters['route-1'].head?.name).toBe('Charmander');
@@ -221,38 +192,13 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const bulbasaur = createMockPokemon('Bulbasaur', 1);
 
       // Set up fusion encounters
-      await playthroughActions.updateEncounter(
-        'route-1',
-        pikachu,
-        'head',
-        true
-      );
-      await playthroughActions.updateEncounter(
-        'route-1',
-        charmander,
-        'body',
-        false
-      );
-      await playthroughActions.updateEncounter(
-        'route-2',
-        squirtle,
-        'head',
-        true
-      );
-      await playthroughActions.updateEncounter(
-        'route-2',
-        bulbasaur,
-        'body',
-        false
-      );
+      playthroughActions.updateEncounter('route-1', pikachu, 'head', true);
+      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
+      playthroughActions.updateEncounter('route-2', squirtle, 'head', true);
+      playthroughActions.updateEncounter('route-2', bulbasaur, 'body', false);
 
       // Swap heads between fusions
-      await playthroughActions.swapEncounters(
-        'route-1',
-        'route-2',
-        'head',
-        'head'
-      );
+      playthroughActions.swapEncounters('route-1', 'route-2', 'head', 'head');
 
       const encounters = playthroughActions.getEncounters();
 
@@ -273,27 +219,12 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const squirtle = createMockPokemon('Squirtle', 7);
 
       // Set up encounters
-      await playthroughActions.updateEncounter('route-1', pikachu);
-      await playthroughActions.updateEncounter(
-        'route-2',
-        charmander,
-        'head',
-        true
-      );
-      await playthroughActions.updateEncounter(
-        'route-2',
-        squirtle,
-        'body',
-        false
-      );
+      playthroughActions.updateEncounter('route-1', pikachu);
+      playthroughActions.updateEncounter('route-2', charmander, 'head', true);
+      playthroughActions.updateEncounter('route-2', squirtle, 'body', false);
 
       // Swap regular encounter head with fusion body
-      await playthroughActions.swapEncounters(
-        'route-1',
-        'route-2',
-        'head',
-        'body'
-      );
+      playthroughActions.swapEncounters('route-1', 'route-2', 'head', 'body');
 
       const encounters = playthroughActions.getEncounters();
 
@@ -309,10 +240,10 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
     it('should handle swap with non-existent encounters gracefully', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
-      await playthroughActions.updateEncounter('route-1', pikachu);
+      playthroughActions.updateEncounter('route-1', pikachu);
 
       // Try to swap with non-existent encounter
-      await playthroughActions.swapEncounters('route-1', 'non-existent');
+      playthroughActions.swapEncounters('route-1', 'non-existent');
 
       const encounters = playthroughActions.getEncounters();
 
@@ -325,17 +256,12 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const pikachu = createMockPokemon('Pikachu', 25);
 
       // Set up encounters with one having null head
-      await playthroughActions.updateEncounter('route-1', pikachu);
-      await playthroughActions.updateEncounter(
-        'route-2',
-        pikachu,
-        'head',
-        true
-      );
-      await playthroughActions.clearEncounterFromLocation('route-2', 'head');
+      playthroughActions.updateEncounter('route-1', pikachu);
+      playthroughActions.updateEncounter('route-2', pikachu, 'head', true);
+      playthroughActions.clearEncounterFromLocation('route-2', 'head');
 
       // Try to swap - should not work since route-2 head is null
-      await playthroughActions.swapEncounters('route-1', 'route-2');
+      playthroughActions.swapEncounters('route-1', 'route-2');
 
       const encounters = playthroughActions.getEncounters();
 
@@ -354,11 +280,11 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       pikachu.originalLocation = 'route-1';
       charmander.originalLocation = 'route-2';
 
-      await playthroughActions.updateEncounter('route-1', pikachu);
-      await playthroughActions.updateEncounter('route-2', charmander);
+      playthroughActions.updateEncounter('route-1', pikachu);
+      playthroughActions.updateEncounter('route-2', charmander);
 
       // Swap encounters
-      await playthroughActions.swapEncounters('route-1', 'route-2');
+      playthroughActions.swapEncounters('route-1', 'route-2');
 
       const encounters = playthroughActions.getEncounters();
 
@@ -370,8 +296,8 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     it('should set originalLocation when moving encounters', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
 
-      await playthroughActions.updateEncounter('route-1', pikachu);
-      await playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
+      playthroughActions.updateEncounter('route-1', pikachu);
+      playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters['route-2'].head?.originalLocation).toBeDefined();
@@ -385,9 +311,9 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const pikachu = createMockPokemon('Pikachu', 25);
 
       // These should not throw errors
-      await playthroughActions.clearEncounterFromLocation('route-1');
-      await playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
-      await playthroughActions.swapEncounters('route-1', 'route-2');
+      playthroughActions.clearEncounterFromLocation('route-1');
+      playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
+      playthroughActions.swapEncounters('route-1', 'route-2');
 
       // No encounters should be created
       const encounters = playthroughActions.getEncounters();
@@ -399,28 +325,13 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const charmander = createMockPokemon('Charmander', 4);
 
       // Create fusion
-      await playthroughActions.updateEncounter(
-        'route-1',
-        pikachu,
-        'head',
-        true
-      );
-      await playthroughActions.updateEncounter(
-        'route-1',
-        charmander,
-        'body',
-        false
-      );
+      playthroughActions.updateEncounter('route-1', pikachu, 'head', true);
+      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
 
       // Clear head, then add new head
-      await playthroughActions.clearEncounterFromLocation('route-1', 'head');
+      playthroughActions.clearEncounterFromLocation('route-1', 'head');
       const squirtle = createMockPokemon('Squirtle', 7);
-      await playthroughActions.updateEncounter(
-        'route-1',
-        squirtle,
-        'head',
-        false
-      );
+      playthroughActions.updateEncounter('route-1', squirtle, 'head', false);
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters['route-1'].isFusion).toBe(true);
