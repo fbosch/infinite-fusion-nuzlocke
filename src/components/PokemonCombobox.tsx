@@ -14,6 +14,7 @@ import {
   Loader2,
   Search,
   ArrowUp,
+  ChevronDown,
 } from 'lucide-react';
 import {
   Combobox,
@@ -21,6 +22,10 @@ import {
   ComboboxOptions,
   ComboboxOption,
   ComboboxButton,
+  Menu,
+  MenuButton,
+  MenuItems,
+  MenuItem,
 } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -30,7 +35,9 @@ import {
   getPokemon,
   searchPokemon,
   getPokemonById,
+  PokemonStatus,
   type PokemonOption,
+  type PokemonStatusType,
 } from '@/loaders/pokemon';
 import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
 import { dragStore, dragActions } from '@/stores/dragStore';
@@ -272,7 +279,6 @@ export const PokemonCombobox = ({
   disabled = false,
   gameMode = 'classic',
   comboboxId,
-  showNickname = true,
 }: {
   routeId?: number;
   locationId?: string;
@@ -283,7 +289,6 @@ export const PokemonCombobox = ({
   disabled?: boolean;
   gameMode?: 'classic' | 'remix';
   comboboxId?: string;
-  showNickname?: boolean;
 }) => {
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
@@ -490,6 +495,20 @@ export const PokemonCombobox = ({
           };
           onChange(updatedPokemon);
         });
+      }
+    },
+    [value, onChange]
+  );
+
+  // Handle status selection
+  const handleStatusSelect = useCallback(
+    (newStatus: PokemonStatusType) => {
+      if (value) {
+        const updatedPokemon: PokemonOption = {
+          ...value,
+          status: newStatus,
+        };
+        onChange(updatedPokemon);
       }
     },
     [value, onChange]
@@ -791,25 +810,70 @@ export const PokemonCombobox = ({
           </ComboboxOptions>
         </div>
       </Combobox>
-
-      {showNickname && (
-        <input
-          type='text'
-          value={dragPreview ? dragPreview.nickname : localNickname}
-          onChange={handleNicknameChange}
-          placeholder={nicknamePlaceholder}
-          className={clsx(
-            'rounded-b-md border-t-0 rounded-t-none relative',
-            'w-full px-3 py-3.5 text-sm border rounded-md bg-white text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
-            'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
-            'placeholder-gray-500 dark:placeholder-gray-400',
-            dragPreview && 'opacity-60 pointer-none'
-          )}
-          maxLength={12}
-          spellCheck={false}
-          autoComplete='off'
-        />
-      )}
+        <div className="flex">
+          <input
+            type='text'
+            value={dragPreview ? dragPreview.nickname || '' : localNickname}
+            onChange={handleNicknameChange}
+            placeholder={nicknamePlaceholder}
+            className={clsx(
+              'rounded-bl-md border-t-0 border-r-0 rounded-t-none relative',
+              'flex-1 px-3 py-3.5 text-sm border bg-white text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
+              'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
+              'placeholder-gray-500 dark:placeholder-gray-400',
+              dragPreview && 'opacity-60 pointer-none'
+            )}
+            maxLength={12}
+            spellCheck={false}
+            autoComplete='off'
+          />
+          <Menu as="div" className="relative">
+            <MenuButton
+              className={clsx(
+                'rounded-br-md border-t-0 rounded-t-none',
+                'flex items-center justify-between px-3 py-3.5 text-sm border  bg-white text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
+                'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
+                'hover:bg-gray-50 dark:hover:bg-gray-700',
+                'min-w-[120px] enabled:hover:cursor-pointer',
+                dragPreview && 'opacity-60 pointer-events-none'
+              )}
+              disabled={!value}
+            >
+              {(() => {
+                const currentStatus = dragPreview ? dragPreview.status || PokemonStatus.CAPTURED : value?.status || PokemonStatus.CAPTURED;
+                const statusLabels: Record<PokemonStatusType, string> = {
+                  [PokemonStatus.CAPTURED]: 'Captured',
+                  [PokemonStatus.RECEIVED]: 'Received',
+                  [PokemonStatus.TRADED]: 'Traded',
+                  [PokemonStatus.MISSED]: 'Missed',
+                  [PokemonStatus.STORED]: 'Stored',
+                  [PokemonStatus.DECEASED]: 'Deceased',
+                };
+                return statusLabels[currentStatus];
+              })()}
+              <ChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+            </MenuButton>
+            <MenuItems className={clsx(
+              'absolute right-0 z-10 mt-1 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-gray-300 ring-opacity-5 focus:outline-none',
+              'dark:bg-gray-800 dark:ring-gray-600',
+              'min-w-[120px]'
+            )}>
+              {Object.values(PokemonStatus).map((value: PokemonStatusType) => (
+                <MenuItem key={value}>
+                    <button
+                      onClick={() => handleStatusSelect(value)}
+                      className={clsx(
+                        'group flex w-full items-center px-4 py-2 text-sm hover:cursor-pointer',
+                        'hover:bg-gray-100 dark:hover:bg-gray-700'
+                      )}
+                    >
+                      {value.charAt(0).toUpperCase() + value.slice(1)}
+                    </button>
+                </MenuItem>
+              ))}
+            </MenuItems>
+          </Menu>
+        </div>
     </div>
   );
 };
