@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <main
       id='main-content'
-      className='bg-gray-50 dark:bg-gray-900 min-h-screen max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8'
+      className='max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8'
       role='main'
     >
       <section aria-labelledby='locations-heading' className='pb-10'>
