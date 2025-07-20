@@ -9,19 +9,27 @@ import type { EncounterData } from '@/loaders/encounters';
 import clsx from 'clsx';
 import { useSnapshot } from 'valtio';
 import { dragStore, dragActions } from '@/stores/dragStore';
-import { playthroughActions } from '@/stores/playthroughs';
+import { playthroughsStore, playthroughActions } from '@/stores/playthroughs';
 
 interface EncounterCellProps {
   routeId: number;
   locationId: string;
-  encounterData: EncounterData;
 }
 
 export function EncounterCell({
   routeId,
   locationId,
-  encounterData,
 }: EncounterCellProps) {
+  const playthroughSnapshot = useSnapshot(playthroughsStore);
+  const activePlaythrough = playthroughSnapshot.playthroughs.find(
+    p => p.id === playthroughSnapshot.activePlaythroughId
+  );
+  const encounterData = activePlaythrough?.encounters[locationId] || {
+    head: null,
+    body: null,
+    isFusion: false,
+  };
+  
   const selectedPokemon = encounterData.isFusion
     ? encounterData.body
     : encounterData.head;
@@ -30,8 +38,8 @@ export function EncounterCell({
 
   // Handle encounter selection
   const handleEncounterSelect = useCallback(
-    (pokemon: PokemonOption | null, field: 'head' | 'body' = 'head') => {
-      playthroughActions.updateEncounter(locationId, pokemon, field, false);
+    async (pokemon: PokemonOption | null, field: 'head' | 'body' = 'head') => {
+      await playthroughActions.updateEncounter(locationId, pokemon, field, false);
     },
     [locationId]
   );
