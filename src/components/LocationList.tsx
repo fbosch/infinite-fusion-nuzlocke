@@ -11,7 +11,11 @@ import React, { useState, useMemo, startTransition, useCallback } from 'react';
 import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
 import type { PokemonOption } from '@/loaders/pokemon';
-import { LocationTableHeader, LocationTableRow, type EncounterData } from './LocationTable';
+import {
+  LocationTableHeader,
+  LocationTableRow,
+  type EncounterData,
+} from './LocationTable';
 
 const columnHelper = createColumnHelper<Location>();
 
@@ -103,10 +107,12 @@ export default function LocationList() {
       locationId?: string
     ) => {
       // Set originalLocation if pokemon is provided and doesn't already have one
-      const pokemonWithLocation = pokemon ? {
-        ...pokemon,
-        originalLocation: pokemon.originalLocation || locationId,
-      } : pokemon;
+      const pokemonWithLocation = pokemon
+        ? {
+            ...pokemon,
+            originalLocation: pokemon.originalLocation || locationId,
+          }
+        : pokemon;
 
       setEncounters(prev => {
         const currentEncounter = prev[routeId] || {
@@ -120,8 +126,10 @@ export default function LocationList() {
           return {
             ...prev,
             [routeId]: {
-              head: field === 'head' ? pokemonWithLocation : currentEncounter.head,
-              body: field === 'body' ? pokemonWithLocation : currentEncounter.body,
+              head:
+                field === 'head' ? pokemonWithLocation : currentEncounter.head,
+              body:
+                field === 'body' ? pokemonWithLocation : currentEncounter.body,
               isFusion: true,
             },
           };
@@ -151,10 +159,12 @@ export default function LocationList() {
       locationId?: string
     ) => {
       // Set originalLocation if pokemon is provided and doesn't already have one
-      const pokemonWithLocation = pokemon ? {
-        ...pokemon,
-        originalLocation: pokemon.originalLocation || locationId,
-      } : pokemon;
+      const pokemonWithLocation = pokemon
+        ? {
+            ...pokemon,
+            originalLocation: pokemon.originalLocation || locationId,
+          }
+        : pokemon;
 
       setEncounters(prev => {
         const currentEncounter = prev[routeId] || {
@@ -168,8 +178,10 @@ export default function LocationList() {
           return {
             ...prev,
             [routeId]: {
-              head: field === 'head' ? pokemonWithLocation : currentEncounter.head,
-              body: field === 'body' ? pokemonWithLocation : currentEncounter.body,
+              head:
+                field === 'head' ? pokemonWithLocation : currentEncounter.head,
+              body:
+                field === 'body' ? pokemonWithLocation : currentEncounter.body,
               isFusion: true,
             },
           };
@@ -178,8 +190,10 @@ export default function LocationList() {
           return {
             ...prev,
             [routeId]: {
-              head: field === 'head' ? pokemonWithLocation : currentEncounter.head,
-              body: field === 'body' ? pokemonWithLocation : currentEncounter.body,
+              head:
+                field === 'head' ? pokemonWithLocation : currentEncounter.head,
+              body:
+                field === 'body' ? pokemonWithLocation : currentEncounter.body,
               isFusion: true,
             },
           };
@@ -308,8 +322,13 @@ export default function LocationList() {
                 key={row.id}
                 row={row}
                 encounterData={encounterData}
-                onEncounterSelect={(routeId, pokemon, field) => 
-                  handleEncounterSelect(routeId, pokemon, field, row.original.id)
+                onEncounterSelect={(routeId, pokemon, field) =>
+                  handleEncounterSelect(
+                    routeId,
+                    pokemon,
+                    field,
+                    row.original.id
+                  )
                 }
                 onFusionToggle={handleFusionToggle}
                 onResetEncounter={handleResetEncounter}

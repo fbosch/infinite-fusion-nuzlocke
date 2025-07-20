@@ -8,13 +8,13 @@ import type { PokemonOption } from '@/loaders/pokemon';
 
 // Mock the PokemonCombobox component
 vi.mock('../PokemonCombobox', () => ({
-  PokemonCombobox: ({ 
-    value, 
-    onChange, 
-    placeholder, 
-    comboboxId, 
-    routeId, 
-    locationId 
+  PokemonCombobox: ({
+    value,
+    onChange,
+    placeholder,
+    comboboxId,
+    routeId,
+    locationId,
   }: {
     value: any;
     onChange: any;
@@ -79,7 +79,7 @@ describe('EncounterCell', () => {
   );
 
   // Helper function to render EncounterCell with proper table structure
-  const renderEncounterCell = (props: any) => 
+  const renderEncounterCell = (props: any) =>
     render(
       <TableWrapper>
         <EncounterCell {...props} />

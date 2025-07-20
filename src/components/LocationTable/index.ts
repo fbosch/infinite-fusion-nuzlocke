@@ -5,4 +5,4 @@ export { default as SortableHeaderCell } from './SortableHeaderCell';
 export { default as ConfirmationDialog } from '../ConfirmationDialog';
 
 // Re-export shared types for convenience
-export type { EncounterData } from '@/loaders/encounters'; 
+export type { EncounterData } from '@/loaders/encounters';

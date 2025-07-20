@@ -31,43 +31,49 @@ export default function ConfirmationDialog({
   const variantStyles = {
     danger: {
       icon: 'text-red-600 dark:text-red-400',
-      confirmButton: 'bg-red-600 hover:bg-red-700 focus-visible:ring-red-500 text-white',
+      confirmButton:
+        'bg-red-600 hover:bg-red-700 focus-visible:ring-red-500 text-white',
     },
     warning: {
       icon: 'text-yellow-600 dark:text-yellow-400',
-      confirmButton: 'bg-yellow-600 hover:bg-yellow-700 focus-visible:ring-yellow-500 text-white',
+      confirmButton:
+        'bg-yellow-600 hover:bg-yellow-700 focus-visible:ring-yellow-500 text-white',
     },
     info: {
       icon: 'text-blue-600 dark:text-blue-400',
-      confirmButton: 'bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500 text-white',
+      confirmButton:
+        'bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500 text-white',
     },
   };
 
   const styles = variantStyles[variant];
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+    <Dialog open={isOpen} onClose={onClose} className='relative z-50'>
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/30 dark:bg-black/50" aria-hidden="true" />
+      <div
+        className='fixed inset-0 bg-black/30 dark:bg-black/50'
+        aria-hidden='true'
+      />
 
       {/* Full-screen container to center the panel */}
-      <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-        <DialogPanel className="max-w-md space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-start space-x-3">
+      <div className='fixed inset-0 flex w-screen items-center justify-center p-4'>
+        <DialogPanel className='max-w-md space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6'>
+          <div className='flex items-start space-x-3'>
             <div className={clsx('flex-shrink-0', styles.icon)}>
-              <AlertTriangle className="h-6 w-6" />
+              <AlertTriangle className='h-6 w-6' />
             </div>
-            <div className="flex-1">
-              <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className='flex-1'>
+              <DialogTitle className='text-lg font-semibold text-gray-900 dark:text-white'>
                 {title}
               </DialogTitle>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+              <p className='mt-2 text-sm text-gray-600 dark:text-gray-300'>
                 {message}
               </p>
             </div>
           </div>
 
-          <div className="flex space-x-3 justify-end pt-4">
+          <div className='flex space-x-3 justify-end pt-4'>
             <Button
               onClick={onClose}
               className={clsx(
@@ -94,4 +100,4 @@ export default function ConfirmationDialog({
       </div>
     </Dialog>
   );
-} 
+}

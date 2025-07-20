@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { DotGothic16, IBM_Plex_Sans } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
 import Header from '@/components/Header';
+import { ServiceWorkerInit } from '@/components/ServiceWorkerInit';
 
 // Initialize the DotGothic16 font for monospace utility
 const dotGothic16 = DotGothic16({
@@ -50,7 +50,7 @@ export default function RootLayout({
           <Header />
           {children}
         </ThemeProvider>
-        <ServiceWorkerRegistration />
+        <ServiceWorkerInit />
       </body>
     </html>
   );

@@ -12,23 +12,30 @@ export const PokemonStatus = {
   DECEASED: 'deceased',
 } as const;
 
-export type PokemonStatusType = typeof PokemonStatus[keyof typeof PokemonStatus];
+export type PokemonStatusType =
+  (typeof PokemonStatus)[keyof typeof PokemonStatus];
 
 // Zod schema for Pokemon status
-export const PokemonStatusSchema = z.enum([
-  PokemonStatus.CAPTURED,
-  PokemonStatus.RECEIVED,
-  PokemonStatus.TRADED,
-  PokemonStatus.MISSED,
-  PokemonStatus.STORED,
-  PokemonStatus.DECEASED,
-], { error: 'Invalid Pokemon status' });
+export const PokemonStatusSchema = z.enum(
+  [
+    PokemonStatus.CAPTURED,
+    PokemonStatus.RECEIVED,
+    PokemonStatus.TRADED,
+    PokemonStatus.MISSED,
+    PokemonStatus.STORED,
+    PokemonStatus.DECEASED,
+  ],
+  { error: 'Invalid Pokemon status' }
+);
 
 // Zod schema for Pokemon option (search results)
 export const PokemonOptionSchema = z.object({
   id: z.number().int().positive({ error: 'Pokemon ID must be positive' }),
   name: z.string().min(1, { error: 'Pokemon name is required' }),
-  nationalDexId: z.number().int().positive({ error: 'National Dex ID must be positive' }),
+  nationalDexId: z
+    .number()
+    .int()
+    .positive({ error: 'National Dex ID must be positive' }),
   nickname: z.string().optional(),
   originalLocation: z.string().optional(),
   status: PokemonStatusSchema.optional(),
@@ -116,7 +123,9 @@ export async function getPokemon(): Promise<Pokemon[]> {
 }
 
 // Get shared Fuse instance for name-only fuzzy search (faster)
-export async function getPokemonFuseInstance(originalRouteId?: number): Promise<Fuse<PokemonOption>> {
+export async function getPokemonFuseInstance(
+  originalRouteId?: number
+): Promise<Fuse<PokemonOption>> {
   if (pokemonFuseInstance) {
     return pokemonFuseInstance;
   }

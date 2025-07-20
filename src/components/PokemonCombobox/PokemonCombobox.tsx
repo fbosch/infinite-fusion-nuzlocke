@@ -9,13 +9,7 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
-import {
-  Check,
-  Loader2,
-  Search,
-  ArrowUp,
-  ChevronDown,
-} from 'lucide-react';
+import { Check, Loader2, Search, ArrowUp, ChevronDown } from 'lucide-react';
 import {
   Combobox,
   ComboboxInput,
@@ -42,6 +36,7 @@ import {
 import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
 import { dragStore, dragActions } from '@/stores/dragStore';
 import { PokemonEvolutionButton } from './PokemonEvolutionButton';
+import { PokemonNicknameInput } from './PokemonNicknameInput';
 
 // Global cache for National Dex ID mapping
 let nationalDexMapping: Map<number, number> | null = null;
@@ -294,35 +289,21 @@ export const PokemonCombobox = ({
   const deferredQuery = useDeferredValue(query);
   const dragSnapshot = useSnapshot(dragStore);
 
-  // Local nickname state for smooth typing
-  const [localNickname, setLocalNickname] = useState(value?.nickname || '');
-  
   // Local status state for smooth selection
   const [localStatus, setLocalStatus] = useState(value?.status || null);
-
-  // Sync local nickname when value changes (but not during typing)
-  useEffect(() => {
-    if (value?.nickname !== localNickname) {
-      setLocalNickname(value?.nickname || '');
-    }
-  }, [value?.nickname]);
 
   // Sync local status when value changes
   useEffect(() => {
     if (value?.status !== localStatus) {
       setLocalStatus(value?.status || null);
     }
-  }, [value?.status]);
+  }, [value?.status, localStatus]);
 
   // State for route encounters and all Pokemon
   const [routeEncounterData, setRouteEncounterData] = useState<PokemonOption[]>(
     []
   );
   const [isLoading, setIsLoading] = useState(false);
-
-
-
-
 
   // Predicate function to check if a Pokemon is in the current route
   const isRoutePokemon = useCallback(
@@ -487,27 +468,6 @@ export const PokemonCombobox = ({
       }
     },
     [onChange]
-  );
-
-  // Handle nickname input change with local state
-  const handleNicknameChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newNickname = event.target.value;
-      // Update local state immediately for responsive typing
-      setLocalNickname(newNickname);
-
-      if (value) {
-        // Use startTransition to defer the state update
-        startTransition(() => {
-          const updatedPokemon: PokemonOption = {
-            ...value,
-            nickname: newNickname,
-          };
-          onChange(updatedPokemon);
-        });
-      }
-    },
-    [value, onChange]
   );
 
   // Handle status selection
@@ -750,7 +710,7 @@ export const PokemonCombobox = ({
             <ComboboxInput
               className={clsx(
                 'rounded-t-md rounded-b-none border',
-                'w-full px-3 py-3.5 text-sm  bg-white text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
+                'w-full px-3 py-3.5 text-sm  bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
                 'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
                 'focus:cursor-text hover:cursor-pointer',
                 (value || dragPreview) && 'pl-12', // Add padding for sprite when value is selected or previewing
@@ -826,62 +786,53 @@ export const PokemonCombobox = ({
           </ComboboxOptions>
         </div>
       </Combobox>
-        <div className="flex">
-          <input
-            type='text'
-            value={dragPreview ? dragPreview.nickname || '' : localNickname}
-            onChange={handleNicknameChange}
-            placeholder={nicknamePlaceholder}
+      <div className='flex'>
+        <PokemonNicknameInput
+          value={value}
+          onChange={onChange}
+          placeholder={nicknamePlaceholder}
+          disabled={disabled}
+          dragPreview={dragPreview}
+        />
+        <Menu as='div' className='relative'>
+          <MenuButton
             className={clsx(
-              'rounded-bl-md border-t-0 border-r-0 rounded-t-none relative',
-              'flex-1 px-3 py-3.5 text-sm border bg-white text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500  disabled:cursor-not-allowed',
-              'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
-              'placeholder-gray-500 dark:placeholder-gray-400',
-              dragPreview && 'opacity-60 pointer-none'
+              'rounded-br-md border-t-0 rounded-t-none capitalize',
+              'flex items-center justify-between px-3 py-3.5 text-sm border  bg-white text-gray-900 focus:outline-none focus:ring-1 focus:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500  disabled:cursor-not-allowed',
+              'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-400',
+              'hover:bg-gray-50 dark:hover:bg-gray-700',
+              'min-w-[120px] enabled:hover:cursor-pointer',
+              dragPreview && 'opacity-60 pointer-events-none'
             )}
-            maxLength={12}
             disabled={!value}
-            spellCheck={false}
-            autoComplete='off'
-          />
-          <Menu as="div" className="relative">
-            <MenuButton
-              className={clsx(
-                'rounded-br-md border-t-0 rounded-t-none capitalize',
-                'flex items-center justify-between px-3 py-3.5 text-sm border  bg-white text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500  disabled:cursor-not-allowed',
-                'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
-                'hover:bg-gray-50 dark:hover:bg-gray-700',
-                'min-w-[120px] enabled:hover:cursor-pointer',
-                dragPreview && 'opacity-60 pointer-events-none'
-              )}
-              disabled={!value}
-            >
-              {
-                dragPreview ? dragPreview.status : localStatus ? localStatus : 'Status'
-              }
-              <ChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
-            </MenuButton>
-            <MenuItems className={clsx(
+          >
+            {dragPreview?.status || localStatus || 'Status'}
+            <ChevronDown className='h-4 w-4 text-gray-400' aria-hidden='true' />
+          </MenuButton>
+          <MenuItems
+            className={clsx(
               'absolute right-0 z-10 mt-1 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-gray-300 ring-opacity-5 focus:outline-none',
               'dark:bg-gray-800 dark:ring-gray-600',
               'min-w-[120px]'
-            )}>
-              {Object.values(PokemonStatus).map((value: PokemonStatusType) => (
-                <MenuItem key={value}>
-                    <button
-                      onClick={() => handleStatusSelect(value)}
-                      className={clsx(
-                        'group flex w-full items-center px-4 py-2 text-sm hover:cursor-pointer',
-                        'hover:bg-gray-100 dark:hover:bg-gray-700'
-                      )}
-                    >
-                      {value.charAt(0).toUpperCase() + value.slice(1)}
-                    </button>
-                </MenuItem>
-              ))}
-            </MenuItems>
-          </Menu>
-        </div>
+            )}
+          >
+            {Object.values(PokemonStatus).map((value: PokemonStatusType) => (
+              <MenuItem key={value}>
+                <button
+                  onClick={() => handleStatusSelect(value)}
+                  className={clsx(
+                    'group flex w-full items-center px-4 py-2 text-sm hover:cursor-pointer',
+                    'hover:bg-gray-100 dark:hover:bg-gray-700',
+                    'focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500'
+                  )}
+                >
+                  {value.charAt(0).toUpperCase() + value.slice(1)}
+                </button>
+              </MenuItem>
+            ))}
+          </MenuItems>
+        </Menu>
+      </div>
     </div>
   );
 };

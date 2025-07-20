@@ -71,7 +71,13 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
         setShowEvolutionMenu(!showEvolutionMenu);
       }
     },
-    [availableEvolutions, value?.nickname, value?.originalLocation, onChange, showEvolutionMenu]
+    [
+      availableEvolutions,
+      value?.nickname,
+      value?.originalLocation,
+      onChange,
+      showEvolutionMenu,
+    ]
   );
 
   // Handle evolution button click
@@ -128,7 +134,10 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   }
 
   return (
-    <div className='absolute inset-y-0 right-4 flex items-center' ref={evolutionMenuRef}>
+    <div
+      className='absolute inset-y-0 right-4 flex items-center'
+      ref={evolutionMenuRef}
+    >
       <div className='relative'>
         <button
           type='button'
@@ -208,4 +217,4 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
       </div>
     </div>
   );
-}; 
+};

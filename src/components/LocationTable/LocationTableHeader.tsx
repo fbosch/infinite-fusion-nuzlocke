@@ -6,7 +6,9 @@ interface LocationTableHeaderProps {
   headerGroups: HeaderGroup<Location>[];
 }
 
-export default function LocationTableHeader({ headerGroups }: LocationTableHeaderProps) {
+export default function LocationTableHeader({
+  headerGroups,
+}: LocationTableHeaderProps) {
   return (
     <thead className='bg-gray-50 dark:bg-gray-800'>
       {headerGroups.map(headerGroup => (
@@ -18,4 +20,4 @@ export default function LocationTableHeader({ headerGroups }: LocationTableHeade
       ))}
     </thead>
   );
-} 
+}

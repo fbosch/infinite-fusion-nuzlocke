@@ -9,7 +9,7 @@ export interface EncounterData {
   head: PokemonOption | null;
   body: PokemonOption | null;
   isFusion: boolean;
-} 
+}
 // Zod schema for route encounter data
 export const RouteEncounterSchema = z.object({
   routeName: z.string().min(1, { error: 'Route name is required' }),

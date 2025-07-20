@@ -27,14 +27,14 @@ export default function LocationTableRow({
 }: LocationTableRowProps) {
   const routeId = row.original.routeId;
   const locationId = row.original.id;
-  
+
   return (
     <tr
       key={row.id}
       role='row'
       className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors content-visibility-auto'
       style={{
-        containIntrinsicHeight: '150px'
+        containIntrinsicHeight: '150px',
       }}
     >
       {row.getVisibleCells().map(cell => {
@@ -96,4 +96,4 @@ export default function LocationTableRow({
       })}
     </tr>
   );
-} 
+}

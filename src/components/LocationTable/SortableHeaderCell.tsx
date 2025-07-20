@@ -7,7 +7,9 @@ interface SortableHeaderCellProps {
   header: Header<Location, unknown>;
 }
 
-export default function SortableHeaderCell({ header }: SortableHeaderCellProps) {
+export default function SortableHeaderCell({
+  header,
+}: SortableHeaderCellProps) {
   const isSorted = header.column.getIsSorted();
   const sortDirection =
     isSorted === 'asc'
@@ -42,10 +44,7 @@ export default function SortableHeaderCell({ header }: SortableHeaderCellProps) 
     >
       <div className='flex items-center space-x-1'>
         <div>
-          {flexRender(
-            header.column.columnDef.header,
-            header.getContext()
-          )}
+          {flexRender(header.column.columnDef.header, header.getContext())}
         </div>
         {header.column.getCanSort() && (
           <span className='text-gray-400' aria-hidden='true'>
@@ -61,4 +60,4 @@ export default function SortableHeaderCell({ header }: SortableHeaderCellProps) 
       </div>
     </th>
   );
-} 
+}
