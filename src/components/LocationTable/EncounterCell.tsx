@@ -46,9 +46,7 @@ export function EncounterCell({
 
   // Handle fusion toggle
   const handleFusionToggle = useCallback(() => {
-    startTransition(() => {
-      playthroughActions.toggleEncounterFusion(locationId);
-    });
+    playthroughActions.toggleEncounterFusion(locationId);
   }, [locationId]);
 
   // Handle flip button click
