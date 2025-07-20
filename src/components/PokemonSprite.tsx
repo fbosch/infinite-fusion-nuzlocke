@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import Image from 'next/image';
 import type { PokemonOption } from '@/loaders/pokemon';
-import type { EncounterData } from '@/types/encounters';
+import type { EncounterData } from '@/loaders/encounters';
 import clsx from 'clsx';
 
 interface FusionSpriteProps {
