@@ -7,7 +7,7 @@ import { dragStore, dragActions } from '@/stores/dragStore';
 import type { PokemonOption } from '@/loaders/pokemon';
 
 // Mock the PokemonCombobox component
-vi.mock('../PokemonCombobox', () => ({
+vi.mock('../PokemonCombobox/PokemonCombobox', () => ({
   PokemonCombobox: ({
     value,
     onChange,
@@ -50,6 +50,14 @@ vi.mock('@/loaders/pokemon', () => ({
       [7, 'Squirtle'],
     ])
   ),
+  PokemonStatus: {
+    CAPTURED: 'captured',
+    RECEIVED: 'received',
+    TRADED: 'traded',
+    MISSED: 'missed',
+    STORED: 'stored',
+    DECEASED: 'deceased',
+  },
 }));
 
 // Mock window.dispatchEvent
