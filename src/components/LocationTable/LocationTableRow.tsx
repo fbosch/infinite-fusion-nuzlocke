@@ -28,8 +28,6 @@ export default function LocationTableRow({
   const routeId = row.original.routeId;
   const locationId = row.original.id;
   
-  console.log(encounterData)
-
   return (
     <tr
       key={row.id}

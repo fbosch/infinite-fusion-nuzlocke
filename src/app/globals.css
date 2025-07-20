@@ -21,6 +21,12 @@
 
 body {
   font-family: var(--font-family-sans);
+  background-color: #f9fafb; /* bg-gray-50 */
+  min-height: 100vh;
+}
+
+.dark body {
+  background-color: #111827; /* bg-gray-900 */
 }
 
 /* Ensure dark mode works with Tailwind v4 */

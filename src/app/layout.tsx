@@ -3,6 +3,7 @@ import { DotGothic16, IBM_Plex_Sans } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
+import Header from '@/components/Header';
 
 // Initialize the DotGothic16 font for monospace utility
 const dotGothic16 = DotGothic16({
@@ -45,7 +46,10 @@ export default function RootLayout({
         <meta name='color-scheme' content='light dark' />
       </head>
       <body className='antialiased font-sans'>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <Header />
+          {children}
+        </ThemeProvider>
         <ServiceWorkerRegistration />
       </body>
     </html>
