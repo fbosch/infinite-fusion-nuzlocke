@@ -1,11 +1,19 @@
 import { proxy, subscribe } from 'valtio';
 import { z } from 'zod';
 import { get, set, del } from 'idb-keyval';
+import { PokemonOptionSchema } from '../loaders/pokemon';
+
+export const EncounterDataSchema = z.object({
+  head: PokemonOptionSchema,
+  body: PokemonOptionSchema,
+  isFusion: z.boolean(),
+});
 
 // Zod schema for a single playthrough
 export const PlaythroughSchema = z.object({
   id: z.string(),
   name: z.string(),
+  encounters: z.array(EncounterDataSchema),
   remixMode: z.boolean().default(false),
   createdAt: z.number(),
   updatedAt: z.number(),
@@ -42,7 +50,8 @@ const getCurrentTimestamp = (): number => {
 // Default playthrough creation
 const createDefaultPlaythrough = (): Playthrough => ({
   id: generatePlaythroughId(),
-  name: 'My Nuzlocke Run',
+  name: 'Nuzlocke',
+  encounters: [],
   remixMode: false,
   createdAt: getCurrentTimestamp(),
   updatedAt: getCurrentTimestamp(),
@@ -152,6 +161,7 @@ export const playthroughActions = {
     const newPlaythrough: Playthrough = {
       id: generatePlaythroughId(),
       name,
+      encounters: [],
       remixMode,
       createdAt: getCurrentTimestamp(),
       updatedAt: getCurrentTimestamp(),
