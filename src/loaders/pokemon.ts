@@ -12,6 +12,17 @@ export const PokemonStatus = {
   DECEASED: 'deceased',
 } as const;
 
+// Pokemon status conditions (battle status effects)
+export const PokemonStatusConditions = {
+  HEALTHY: 'healthy',
+  PARALYZED: 'paralyzed',
+  FROZEN: 'frozen',
+  BURNED: 'burned',
+  POISONED: 'poisoned',
+  ASLEEP: 'asleep',
+  FAINTED: 'fainted',
+} as const;
+
 export type PokemonStatusType =
   (typeof PokemonStatus)[keyof typeof PokemonStatus];
 

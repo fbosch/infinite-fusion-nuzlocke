@@ -192,7 +192,7 @@ export function FusionSprite({
               width: spriteSize * 0.55,
               height: spriteSize * 0.2,
               borderRadius: '50%',
-              bottom: -spriteSize * 0.15,
+              bottom: 5,
               left: '50%',
               transformOrigin: 'center',
               transform: 'translateY(-40%) translateX(-60%)',
@@ -201,7 +201,7 @@ export function FusionSprite({
             }}
           />
           {/* Sprite positioned above the shadow */}
-          <div className='relative z-10'>
+          <div className='relative z-10 -translate-y-1/5'>
             <Image
               ref={imageRef}
               src={spriteUrl}
@@ -226,16 +226,8 @@ export function FusionSprite({
       </a>
       {nicknameText && (
         <div className='mt-4 text-center absolute bottom-0 translate-y-6'>
-          {/*
-            Use a subtle background and gentle shadow for readability on light mode
-            while preserving a clean look in dark mode. Avoid heavy pixel-style
-            outlines that looked too harsh against the light background.
-          */}
           <span
-            className='text-sm font-mono truncate max-w-full block tracking-wide px-1 rounded text-gray-900 dark:text-white '
-            style={{
-              textShadow: '0 1px 1px rgba(0,0,0,0.15)',
-            }}
+            className='text-xs font-mono truncate tracking-widest max-w-full block px-1 rounded text-gray-900 dark:text-white '
           >
             {nicknameText}
           </span>
