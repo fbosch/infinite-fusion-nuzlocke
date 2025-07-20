@@ -37,6 +37,7 @@ import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
 import { dragStore, dragActions } from '@/stores/dragStore';
 import { PokemonEvolutionButton } from './PokemonEvolutionButton';
 import { PokemonNicknameInput } from './PokemonNicknameInput';
+import { PokemonStatusInput } from './PokemonStatusInput';
 
 // Global cache for National Dex ID mapping
 let nationalDexMapping: Map<number, number> | null = null;
@@ -289,15 +290,7 @@ export const PokemonCombobox = ({
   const deferredQuery = useDeferredValue(query);
   const dragSnapshot = useSnapshot(dragStore);
 
-  // Local status state for smooth selection
-  const [localStatus, setLocalStatus] = useState(value?.status || null);
 
-  // Sync local status when value changes
-  useEffect(() => {
-    if (value?.status !== localStatus) {
-      setLocalStatus(value?.status || null);
-    }
-  }, [value?.status, localStatus]);
 
   // State for route encounters and all Pokemon
   const [routeEncounterData, setRouteEncounterData] = useState<PokemonOption[]>(
@@ -470,25 +463,7 @@ export const PokemonCombobox = ({
     [onChange]
   );
 
-  // Handle status selection
-  const handleStatusSelect = useCallback(
-    (newStatus: PokemonStatusType) => {
-      // Update local state immediately for responsive UI
-      setLocalStatus(newStatus);
 
-      if (value) {
-        // Use startTransition to defer the state update
-        startTransition(() => {
-          const updatedPokemon: PokemonOption = {
-            ...value,
-            status: newStatus,
-          };
-          onChange(updatedPokemon);
-        });
-      }
-    },
-    [value, onChange]
-  );
 
   // Handle drop events on the input
   const handleDrop = useCallback(
@@ -794,44 +769,12 @@ export const PokemonCombobox = ({
           disabled={disabled}
           dragPreview={dragPreview}
         />
-        <Menu as='div' className='relative'>
-          <MenuButton
-            className={clsx(
-              'rounded-br-md border-t-0 rounded-t-none capitalize',
-              'flex items-center justify-between px-3 py-3.5 text-sm border  bg-white text-gray-900 focus:outline-none focus:ring-1 focus:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500  disabled:cursor-not-allowed',
-              'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-400',
-              'hover:bg-gray-50 dark:hover:bg-gray-700',
-              'min-w-[120px] enabled:hover:cursor-pointer',
-              dragPreview && 'opacity-60 pointer-events-none'
-            )}
-            disabled={!value}
-          >
-            {dragPreview?.status || localStatus || 'Status'}
-            <ChevronDown className='h-4 w-4 text-gray-400' aria-hidden='true' />
-          </MenuButton>
-          <MenuItems
-            className={clsx(
-              'absolute right-0 z-10 mt-1 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-gray-300 ring-opacity-5 focus:outline-none',
-              'dark:bg-gray-800 dark:ring-gray-600',
-              'min-w-[120px]'
-            )}
-          >
-            {Object.values(PokemonStatus).map((value: PokemonStatusType) => (
-              <MenuItem key={value}>
-                <button
-                  onClick={() => handleStatusSelect(value)}
-                  className={clsx(
-                    'group flex w-full items-center px-4 py-2 text-sm hover:cursor-pointer',
-                    'hover:bg-gray-100 dark:hover:bg-gray-700',
-                    'focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500'
-                  )}
-                >
-                  {value.charAt(0).toUpperCase() + value.slice(1)}
-                </button>
-              </MenuItem>
-            ))}
-          </MenuItems>
-        </Menu>
+        <PokemonStatusInput
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          dragPreview={dragPreview}
+        />
       </div>
     </div>
   );
