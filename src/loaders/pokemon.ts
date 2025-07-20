@@ -2,14 +2,40 @@ import { z } from 'zod';
 import Fuse from 'fuse.js';
 import type { IFuseOptions } from 'fuse.js';
 
-// Pokemon option type for search results
-export interface PokemonOption {
-  id: number;
-  name: string;
-  nationalDexId: number;
-  nickname?: string;
-  originalLocation?: string;
-}
+// Status enum for Pokemon tracking
+export const PokemonStatus = {
+  CAPTURED: 'captured',
+  RECEIVED: 'received',
+  TRADED: 'traded',
+  MISSED: 'missed',
+  STORED: 'stored',
+  DECEASED: 'deceased',
+} as const;
+
+export type PokemonStatusType = typeof PokemonStatus[keyof typeof PokemonStatus];
+
+// Zod schema for Pokemon status
+export const PokemonStatusSchema = z.enum([
+  PokemonStatus.CAPTURED,
+  PokemonStatus.RECEIVED,
+  PokemonStatus.TRADED,
+  PokemonStatus.MISSED,
+  PokemonStatus.STORED,
+  PokemonStatus.DECEASED,
+], { error: 'Invalid Pokemon status' });
+
+// Zod schema for Pokemon option (search results)
+export const PokemonOptionSchema = z.object({
+  id: z.number().int().positive({ error: 'Pokemon ID must be positive' }),
+  name: z.string().min(1, { error: 'Pokemon name is required' }),
+  nationalDexId: z.number().int().positive({ error: 'National Dex ID must be positive' }),
+  nickname: z.string().optional(),
+  originalLocation: z.string().optional(),
+  status: PokemonStatusSchema.optional(),
+});
+
+// Pokemon option type for search results (inferred from schema)
+export type PokemonOption = z.infer<typeof PokemonOptionSchema>;
 
 // Zod schema for Pokemon type
 export const PokemonTypeSchema = z.object({
