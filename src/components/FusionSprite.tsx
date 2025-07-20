@@ -2,7 +2,7 @@
 
 import React, { useMemo, useRef } from 'react';
 import Image from 'next/image';
-import type { PokemonOption } from '@/loaders/pokemon';
+import { PokemonStatus, type PokemonOption } from '@/loaders/pokemon';
 import type { EncounterData } from '@/loaders/encounters';
 import clsx from 'clsx';
 
@@ -84,13 +84,13 @@ export function FusionSprite({
   const nicknameText = getNicknameText(head, body, isFusion);
   const spriteSize = SPRITE_SIZES[size];
   
-  // Check if either Pokémon has "missed" status
-  const isMissed = head?.status === 'missed' || body?.status === 'missed';
+  const isMissed = head?.status === PokemonStatus.MISSED || body?.status === PokemonStatus.MISSED
+  const isDeceased = head?.status === PokemonStatus.DECEASED || body?.status === PokemonStatus.DECEASED
   
   const imageClasses = clsx(
     'object-fill object-center image-render-pixelated origin-top -translate-y-1/9',
     {
-      'grayscale opacity-50': isMissed,
+      'grayscale opacity-50': isMissed || isDeceased,
     },
     className
   );
@@ -120,7 +120,7 @@ export function FusionSprite({
         title='Open Pokedex'
         onMouseEnter={() => {
           hoverRef.current = true;
-          if (imageRef.current && !isMissed) {
+          if (imageRef.current && !isMissed && !isDeceased) {
             // Cancel any running animations so the new one will replay
             imageRef.current.getAnimations().forEach(anim => anim.cancel());
             if (shadowRef.current) {
