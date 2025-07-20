@@ -2,7 +2,7 @@
 
 import React, { useCallback } from 'react';
 import { ArrowLeftRight, Dna, DnaOff, RotateCcw } from 'lucide-react';
-import { PokemonCombobox } from '../PokemonCombobox';
+import { PokemonCombobox } from '../PokemonCombobox/PokemonCombobox';
 import type { PokemonOption } from '@/loaders/pokemon';
 import type { EncounterData } from '@/loaders/encounters';
 import { getLocationNameByRouteId } from '@/loaders/locations';
