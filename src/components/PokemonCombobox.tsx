@@ -296,6 +296,9 @@ export const PokemonCombobox = ({
 
   // Local nickname state for smooth typing
   const [localNickname, setLocalNickname] = useState(value?.nickname || '');
+  
+  // Local status state for smooth selection
+  const [localStatus, setLocalStatus] = useState(value?.status || PokemonStatus.CAPTURED);
 
   // Sync local nickname when value changes (but not during typing)
   useEffect(() => {
@@ -303,6 +306,13 @@ export const PokemonCombobox = ({
       setLocalNickname(value?.nickname || '');
     }
   }, [value?.nickname]);
+
+  // Sync local status when value changes
+  useEffect(() => {
+    if (value?.status !== localStatus) {
+      setLocalStatus(value?.status || PokemonStatus.CAPTURED);
+    }
+  }, [value?.status]);
 
   // State for route encounters and all Pokemon
   const [routeEncounterData, setRouteEncounterData] = useState<PokemonOption[]>(
@@ -503,12 +513,18 @@ export const PokemonCombobox = ({
   // Handle status selection
   const handleStatusSelect = useCallback(
     (newStatus: PokemonStatusType) => {
+      // Update local state immediately for responsive UI
+      setLocalStatus(newStatus);
+
       if (value) {
-        const updatedPokemon: PokemonOption = {
-          ...value,
-          status: newStatus,
-        };
-        onChange(updatedPokemon);
+        // Use startTransition to defer the state update
+        startTransition(() => {
+          const updatedPokemon: PokemonOption = {
+            ...value,
+            status: newStatus,
+          };
+          onChange(updatedPokemon);
+        });
       }
     },
     [value, onChange]
@@ -840,7 +856,7 @@ export const PokemonCombobox = ({
               disabled={!value}
             >
               {(() => {
-                const currentStatus = dragPreview ? dragPreview.status || PokemonStatus.CAPTURED : value?.status || PokemonStatus.CAPTURED;
+                const currentStatus = dragPreview ? dragPreview.status || PokemonStatus.CAPTURED : localStatus;
                 const statusLabels: Record<PokemonStatusType, string> = {
                   [PokemonStatus.CAPTURED]: 'Captured',
                   [PokemonStatus.RECEIVED]: 'Received',
