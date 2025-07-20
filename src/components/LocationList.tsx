@@ -21,7 +21,7 @@ const columnHelper = createColumnHelper<Location>();
 
 export default function LocationList() {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [encounters, setEncounters] = useState<Record<number, EncounterData>>(
+  const [encounters, setEncounters] = useState<Record<string, EncounterData>>(
     {}
   );
 
@@ -90,10 +90,10 @@ export default function LocationList() {
   });
 
   // Reset encounter handler - memoized to prevent re-renders
-  const handleResetEncounter = useCallback((routeId: number) => {
+  const handleResetEncounter = useCallback((locationId: string) => {
     setEncounters(prev => {
       const newEncounters = { ...prev };
-      delete newEncounters[routeId];
+      delete newEncounters[locationId];
       return newEncounters;
     });
   }, []);
@@ -101,10 +101,9 @@ export default function LocationList() {
   // Optimized encounter selection handler for immediate response
   const handleEncounterSelect = useCallback(
     (
-      routeId: number,
+      locationId: string,
       pokemon: PokemonOption | null,
-      field: 'head' | 'body' = 'head',
-      locationId?: string
+      field: 'head' | 'body' = 'head'
     ) => {
       // Set originalLocation if pokemon is provided and doesn't already have one
       const pokemonWithLocation = pokemon
@@ -115,7 +114,7 @@ export default function LocationList() {
         : pokemon;
 
       setEncounters(prev => {
-        const currentEncounter = prev[routeId] || {
+        const currentEncounter = prev[locationId] || {
           head: null,
           body: null,
           isFusion: false,
@@ -125,7 +124,7 @@ export default function LocationList() {
           // For fusions, update the specified field
           return {
             ...prev,
-            [routeId]: {
+            [locationId]: {
               head:
                 field === 'head' ? pokemonWithLocation : currentEncounter.head,
               body:
@@ -137,7 +136,7 @@ export default function LocationList() {
           // For regular encounters, just set the head
           return {
             ...prev,
-            [routeId]: {
+            [locationId]: {
               head: pokemonWithLocation,
               body: null,
               isFusion: false,
@@ -152,11 +151,10 @@ export default function LocationList() {
   // Enhanced encounter selection handler that can create fusions
   const handleEncounterSelectWithFusion = useCallback(
     (
-      routeId: number,
+      locationId: string,
       pokemon: PokemonOption | null,
       field: 'head' | 'body' = 'head',
-      shouldCreateFusion: boolean = false,
-      locationId?: string
+      shouldCreateFusion: boolean = false
     ) => {
       // Set originalLocation if pokemon is provided and doesn't already have one
       const pokemonWithLocation = pokemon
@@ -167,7 +165,7 @@ export default function LocationList() {
         : pokemon;
 
       setEncounters(prev => {
-        const currentEncounter = prev[routeId] || {
+        const currentEncounter = prev[locationId] || {
           head: null,
           body: null,
           isFusion: false,
@@ -177,7 +175,7 @@ export default function LocationList() {
           // Creating a new fusion
           return {
             ...prev,
-            [routeId]: {
+            [locationId]: {
               head:
                 field === 'head' ? pokemonWithLocation : currentEncounter.head,
               body:
@@ -189,7 +187,7 @@ export default function LocationList() {
           // For existing fusions, update the specified field
           return {
             ...prev,
-            [routeId]: {
+            [locationId]: {
               head:
                 field === 'head' ? pokemonWithLocation : currentEncounter.head,
               body:
@@ -201,7 +199,7 @@ export default function LocationList() {
           // For regular encounters, just set the head
           return {
             ...prev,
-            [routeId]: {
+            [locationId]: {
               head: pokemonWithLocation,
               body: null,
               isFusion: false,
@@ -214,10 +212,10 @@ export default function LocationList() {
   );
 
   // Fusion toggle handler
-  const handleFusionToggle = useCallback((routeId: number) => {
+  const handleFusionToggle = useCallback((locationId: string) => {
     startTransition(() => {
       setEncounters(prev => {
-        const currentEncounter = prev[routeId] || {
+        const currentEncounter = prev[locationId] || {
           head: null,
           body: null,
           isFusion: false,
@@ -228,22 +226,19 @@ export default function LocationList() {
           // Converting to fusion - existing Pokemon becomes the head (fusion base)
           return {
             ...prev,
-            [routeId]: {
+            [locationId]: {
               ...currentEncounter,
               isFusion: true,
             },
           };
         } else {
+          // When unfusing, preserve all properties of the Pokémon that becomes the single encounter
+          const singlePokemon = currentEncounter.head || currentEncounter.body;
           return {
             ...prev,
-            [routeId]: {
-              head: currentEncounter.head
-                ? currentEncounter.head
-                : currentEncounter.body,
-              body:
-                currentEncounter.head && currentEncounter.body
-                  ? currentEncounter.body
-                  : null,
+            [locationId]: {
+              head: singlePokemon,
+              body: null,
               isFusion: false,
             },
           };
@@ -254,13 +249,13 @@ export default function LocationList() {
 
   // Handle fusion creation from drag and drop
   const handleCreateFusion = useCallback((event: CustomEvent) => {
-    const { routeId, head, body } = event.detail;
+    const { locationId, head, body } = event.detail;
 
     startTransition(() => {
       setEncounters(prev => {
         return {
           ...prev,
-          [routeId]: {
+          [locationId]: {
             head,
             body,
             isFusion: true,
@@ -310,8 +305,7 @@ export default function LocationList() {
         <LocationTableHeader headerGroups={table.getHeaderGroups()} />
         <tbody className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700'>
           {table.getRowModel().rows.map(row => {
-            const routeId = row.original.routeId;
-            const encounterData = encounters[routeId] || {
+            const encounterData = encounters[row.original.id] || {
               head: null,
               body: null,
               isFusion: false,
@@ -322,13 +316,8 @@ export default function LocationList() {
                 key={row.id}
                 row={row}
                 encounterData={encounterData}
-                onEncounterSelect={(routeId, pokemon, field) =>
-                  handleEncounterSelect(
-                    routeId,
-                    pokemon,
-                    field,
-                    row.original.id
-                  )
+                onEncounterSelect={(locationId, pokemon, field) =>
+                  handleEncounterSelect(row.original.id, pokemon, field)
                 }
                 onFusionToggle={handleFusionToggle}
                 onResetEncounter={handleResetEncounter}

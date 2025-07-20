@@ -1,10 +1,31 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, startTransition } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  startTransition,
+} from 'react';
 import clsx from 'clsx';
-import { ChevronDown, Heart, Gift, Zap, X, Archive, Skull, ArrowUpDown, LocateOff, Computer, Check } from 'lucide-react';
+import {
+  ChevronDown,
+  Heart,
+  Gift,
+  Zap,
+  X,
+  Archive,
+  Skull,
+  ArrowUpDown,
+  LocateOff,
+  Computer,
+  Check,
+} from 'lucide-react';
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react';
-import { type PokemonOption, type PokemonStatusType, PokemonStatus } from '@/loaders/pokemon';
+import {
+  type PokemonOption,
+  type PokemonStatusType,
+  PokemonStatus,
+} from '@/loaders/pokemon';
 
 interface PokemonStatusInputProps {
   value: PokemonOption | null | undefined;
@@ -33,17 +54,23 @@ export const PokemonStatusInput = ({
   const getStatusIcon = (status: PokemonStatusType) => {
     switch (status) {
       case 'captured':
-        return <Check className="h-4 w-4 text-gray-600 dark:text-gray-300" />;
+        return <Check className='h-4 w-4 text-gray-600 dark:text-gray-300' />;
       case 'received':
-        return <Gift className="h-4 w-4 text-gray-600 dark:text-gray-300" />;
+        return <Gift className='h-4 w-4 text-gray-600 dark:text-gray-300' />;
       case 'traded':
-        return <ArrowUpDown className="h-4 w-4 text-gray-600 dark:text-gray-300" />;
+        return (
+          <ArrowUpDown className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+        );
       case 'missed':
-        return <LocateOff className="h-4 w-4 text-gray-600 dark:text-gray-300" />;
+        return (
+          <LocateOff className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+        );
       case 'stored':
-        return <Computer className="h-4 w-4 text-gray-600 dark:text-gray-300" />;
+        return (
+          <Computer className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+        );
       case 'deceased':
-        return <Skull className="h-4 w-4 text-gray-600 dark:text-gray-300" />;
+        return <Skull className='h-4 w-4 text-gray-600 dark:text-gray-300' />;
       default:
         return null;
     }
@@ -70,7 +97,7 @@ export const PokemonStatusInput = ({
   );
 
   return (
-    <Menu as="div" className="relative">
+    <Menu as='div' className='relative'>
       <MenuButton
         className={clsx(
           'rounded-br-md border-t-0 rounded-t-none capitalize',
@@ -82,17 +109,22 @@ export const PokemonStatusInput = ({
         )}
         disabled={!value || disabled}
       >
-        <div className="flex items-center gap-2">
-          {(dragPreview?.status || localStatus) && getStatusIcon((dragPreview?.status || localStatus) as PokemonStatusType)}
+        <div className='flex items-center gap-2'>
+          {(dragPreview?.status || localStatus) &&
+            getStatusIcon(
+              (dragPreview?.status || localStatus) as PokemonStatusType
+            )}
           <span>{dragPreview?.status || localStatus || 'Status'}</span>
         </div>
-        <ChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+        <ChevronDown className='h-4 w-4 text-gray-400' aria-hidden='true' />
       </MenuButton>
-      <MenuItems className={clsx(
-        'absolute right-0 z-10 mt-1 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-gray-300 ring-opacity-5 focus:outline-none',
-        'dark:bg-gray-800 dark:ring-gray-600',
-        'min-w-[140px]'
-      )}>
+      <MenuItems
+        className={clsx(
+          'absolute right-0 z-10 mt-1 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-gray-300 ring-opacity-5 focus:outline-none',
+          'dark:bg-gray-800 dark:ring-gray-600',
+          'min-w-[140px]'
+        )}
+      >
         {Object.values(PokemonStatus).map((statusValue: PokemonStatusType) => (
           <MenuItem key={statusValue}>
             <button
@@ -103,9 +135,11 @@ export const PokemonStatusInput = ({
                 'focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500'
               )}
             >
-              <div className="flex items-center gap-2">
+              <div className='flex items-center gap-2'>
                 {getStatusIcon(statusValue)}
-                <span>{statusValue.charAt(0).toUpperCase() + statusValue.slice(1)}</span>
+                <span>
+                  {statusValue.charAt(0).toUpperCase() + statusValue.slice(1)}
+                </span>
               </div>
             </button>
           </MenuItem>
@@ -113,4 +147,4 @@ export const PokemonStatusInput = ({
       </MenuItems>
     </Menu>
   );
-}; 
+};

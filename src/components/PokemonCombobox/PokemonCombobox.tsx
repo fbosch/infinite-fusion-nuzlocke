@@ -290,8 +290,6 @@ export const PokemonCombobox = ({
   const deferredQuery = useDeferredValue(query);
   const dragSnapshot = useSnapshot(dragStore);
 
-
-
   // State for route encounters and all Pokemon
   const [routeEncounterData, setRouteEncounterData] = useState<PokemonOption[]>(
     []
@@ -462,8 +460,6 @@ export const PokemonCombobox = ({
     },
     [onChange]
   );
-
-
 
   // Handle drop events on the input
   const handleDrop = useCallback(

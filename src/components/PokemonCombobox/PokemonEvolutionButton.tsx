@@ -51,19 +51,17 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
       if (evolutionPokemon) {
         // Specific evolution selected
         const evolvedPokemon: PokemonOption = {
+          ...value,
           ...evolutionPokemon,
-          nickname: value?.nickname || '', // Preserve nickname
-          originalLocation: value?.originalLocation, // Preserve original location
         };
         onChange(evolvedPokemon);
         setShowEvolutionMenu(false);
       } else if (availableEvolutions.length === 1) {
         // Single evolution - directly evolve
-        const evolution = availableEvolutions[0];
+        const evolution = availableEvolutions.at(0)!;
         const evolvedPokemon: PokemonOption = {
+          ...value,
           ...evolution,
-          nickname: value?.nickname || '', // Preserve nickname
-          originalLocation: value?.originalLocation, // Preserve original location
         };
         onChange(evolvedPokemon);
       } else if (availableEvolutions.length > 1) {
@@ -71,13 +69,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
         setShowEvolutionMenu(!showEvolutionMenu);
       }
     },
-    [
-      availableEvolutions,
-      value?.nickname,
-      value?.originalLocation,
-      onChange,
-      showEvolutionMenu,
-    ]
+    [availableEvolutions, value, onChange, showEvolutionMenu]
   );
 
   // Handle evolution button click

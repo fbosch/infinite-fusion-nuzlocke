@@ -14,8 +14,8 @@ interface LocationTableRowProps {
     pokemon: PokemonOption | null,
     field?: 'head' | 'body'
   ) => void;
-  onFusionToggle: (routeId: number) => void;
-  onResetEncounter: (routeId: number) => void;
+  onFusionToggle: (locationId: string) => void;
+  onResetEncounter: (locationId: string) => void;
 }
 
 export default function LocationTableRow({
@@ -47,7 +47,7 @@ export default function LocationTableRow({
               locationId={locationId}
               encounterData={encounterData}
               onEncounterSelect={onEncounterSelect}
-              onFusionToggle={onFusionToggle}
+              onFusionToggle={() => onFusionToggle(locationId)}
             />
           );
         }
@@ -78,7 +78,7 @@ export default function LocationTableRow({
               routeId={routeId}
               locationName={row.original.name}
               hasEncounter={!!hasEncounter}
-              onReset={onResetEncounter}
+              onReset={() => onResetEncounter(locationId)}
             />
           );
         }
