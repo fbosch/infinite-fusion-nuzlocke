@@ -1,6 +1,5 @@
 import { Row, flexRender } from '@tanstack/react-table';
 import type { Location } from '@/loaders/locations';
-import type { PokemonOption } from '@/loaders/pokemon';
 import type { EncounterData } from '@/loaders/encounters';
 import { EncounterCell } from './EncounterCell';
 import { FusionSprite } from '../FusionSprite';
@@ -9,21 +8,11 @@ import ResetEncounterButton from './ResetEncounterButton';
 interface LocationTableRowProps {
   row: Row<Location>;
   encounterData: EncounterData;
-  onEncounterSelect: (
-    routeId: number,
-    pokemon: PokemonOption | null,
-    field?: 'head' | 'body'
-  ) => void;
-  onFusionToggle: (locationId: string) => void;
-  onResetEncounter: (locationId: string) => void;
 }
 
 export default function LocationTableRow({
   row,
   encounterData,
-  onEncounterSelect,
-  onFusionToggle,
-  onResetEncounter,
 }: LocationTableRowProps) {
   const routeId = row.original.routeId;
   const locationId = row.original.id;
@@ -46,8 +35,6 @@ export default function LocationTableRow({
               routeId={routeId}
               locationId={locationId}
               encounterData={encounterData}
-              onEncounterSelect={onEncounterSelect}
-              onFusionToggle={() => onFusionToggle(locationId)}
             />
           );
         }
@@ -75,10 +62,9 @@ export default function LocationTableRow({
           return (
             <ResetEncounterButton
               key={cell.id}
-              routeId={routeId}
+              locationId={locationId}
               locationName={row.original.name}
               hasEncounter={!!hasEncounter}
-              onReset={() => onResetEncounter(locationId)}
             />
           );
         }

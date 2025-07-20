@@ -1,34 +1,35 @@
 import { X } from 'lucide-react';
 import clsx from 'clsx';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import ConfirmationDialog from '../ConfirmationDialog';
+import { playthroughActions } from '@/stores/playthroughs';
 
 interface ResetEncounterButtonProps {
-  routeId: number;
+  locationId: string;
   locationName: string;
   hasEncounter: boolean;
-  onReset: (routeId: number) => void;
 }
 
 export default function ResetEncounterButton({
-  routeId,
+  locationId,
   locationName,
   hasEncounter,
-  onReset,
 }: ResetEncounterButtonProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleButtonClick = () => {
+  const handleButtonClick = useCallback(() => {
     setIsDialogOpen(true);
-  };
+  }, []);
 
-  const handleConfirm = () => {
-    onReset(routeId);
-  };
-
-  const handleCancel = () => {
+  const handleConfirm = useCallback(() => {
+    playthroughActions.resetEncounter(locationId);
     setIsDialogOpen(false);
-  };
+  }, [locationId]);
+
+  const handleCancel = useCallback(() => {
+    setIsDialogOpen(false);
+  }, []);
+
   return (
     <td
       className='p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top'

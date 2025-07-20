@@ -7,23 +7,23 @@ import {
   getSortedRowModel,
   SortingState,
 } from '@tanstack/react-table';
-import React, { useState, useMemo, startTransition, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useSnapshot } from 'valtio';
 import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
-import type { PokemonOption } from '@/loaders/pokemon';
-import {
-  LocationTableHeader,
-  LocationTableRow,
-  type EncounterData,
-} from './LocationTable';
+import { LocationTableHeader, LocationTableRow } from './LocationTable';
+import { playthroughsStore, playthroughActions } from '@/stores/playthroughs';
 
 const columnHelper = createColumnHelper<Location>();
 
 export default function LocationList() {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [encounters, setEncounters] = useState<Record<string, EncounterData>>(
-    {}
-  );
+  const playthroughSnapshot = useSnapshot(playthroughsStore);
+
+  // Get encounters from the active playthrough (will only update on commit, not during typing)
+  const encounters = useMemo(() => {
+    return playthroughActions.getEncounters();
+  }, [playthroughSnapshot]);
 
   // Memoize the data to prevent unnecessary re-computations
   const data = useMemo(() => {
@@ -71,7 +71,7 @@ export default function LocationList() {
       }),
     ],
     []
-  ); // Remove encounters dependency
+  );
 
   const table = useReactTable({
     data,
@@ -88,197 +88,6 @@ export default function LocationList() {
     enableRowSelection: false,
     enableMultiSort: false,
   });
-
-  // Reset encounter handler - memoized to prevent re-renders
-  const handleResetEncounter = useCallback((locationId: string) => {
-    setEncounters(prev => {
-      const newEncounters = { ...prev };
-      delete newEncounters[locationId];
-      return newEncounters;
-    });
-  }, []);
-
-  // Optimized encounter selection handler for immediate response
-  const handleEncounterSelect = useCallback(
-    (
-      locationId: string,
-      pokemon: PokemonOption | null,
-      field: 'head' | 'body' = 'head'
-    ) => {
-      // Set originalLocation if pokemon is provided and doesn't already have one
-      const pokemonWithLocation = pokemon
-        ? {
-            ...pokemon,
-            originalLocation: pokemon.originalLocation || locationId,
-          }
-        : pokemon;
-
-      setEncounters(prev => {
-        const currentEncounter = prev[locationId] || {
-          head: null,
-          body: null,
-          isFusion: false,
-        };
-
-        if (currentEncounter.isFusion) {
-          // For fusions, update the specified field
-          return {
-            ...prev,
-            [locationId]: {
-              head:
-                field === 'head' ? pokemonWithLocation : currentEncounter.head,
-              body:
-                field === 'body' ? pokemonWithLocation : currentEncounter.body,
-              isFusion: true,
-            },
-          };
-        } else {
-          // For regular encounters, just set the head
-          return {
-            ...prev,
-            [locationId]: {
-              head: pokemonWithLocation,
-              body: null,
-              isFusion: false,
-            },
-          };
-        }
-      });
-    },
-    []
-  );
-
-  // Enhanced encounter selection handler that can create fusions
-  const handleEncounterSelectWithFusion = useCallback(
-    (
-      locationId: string,
-      pokemon: PokemonOption | null,
-      field: 'head' | 'body' = 'head',
-      shouldCreateFusion: boolean = false
-    ) => {
-      // Set originalLocation if pokemon is provided and doesn't already have one
-      const pokemonWithLocation = pokemon
-        ? {
-            ...pokemon,
-            originalLocation: pokemon.originalLocation || locationId,
-          }
-        : pokemon;
-
-      setEncounters(prev => {
-        const currentEncounter = prev[locationId] || {
-          head: null,
-          body: null,
-          isFusion: false,
-        };
-
-        if (shouldCreateFusion) {
-          // Creating a new fusion
-          return {
-            ...prev,
-            [locationId]: {
-              head:
-                field === 'head' ? pokemonWithLocation : currentEncounter.head,
-              body:
-                field === 'body' ? pokemonWithLocation : currentEncounter.body,
-              isFusion: true,
-            },
-          };
-        } else if (currentEncounter.isFusion) {
-          // For existing fusions, update the specified field
-          return {
-            ...prev,
-            [locationId]: {
-              head:
-                field === 'head' ? pokemonWithLocation : currentEncounter.head,
-              body:
-                field === 'body' ? pokemonWithLocation : currentEncounter.body,
-              isFusion: true,
-            },
-          };
-        } else {
-          // For regular encounters, just set the head
-          return {
-            ...prev,
-            [locationId]: {
-              head: pokemonWithLocation,
-              body: null,
-              isFusion: false,
-            },
-          };
-        }
-      });
-    },
-    []
-  );
-
-  // Fusion toggle handler
-  const handleFusionToggle = useCallback((locationId: string) => {
-    startTransition(() => {
-      setEncounters(prev => {
-        const currentEncounter = prev[locationId] || {
-          head: null,
-          body: null,
-          isFusion: false,
-        };
-        const newIsFusion = !currentEncounter.isFusion;
-
-        if (newIsFusion) {
-          // Converting to fusion - existing Pokemon becomes the head (fusion base)
-          return {
-            ...prev,
-            [locationId]: {
-              ...currentEncounter,
-              isFusion: true,
-            },
-          };
-        } else {
-          // When unfusing, preserve all properties of the Pokémon that becomes the single encounter
-          const singlePokemon = currentEncounter.head || currentEncounter.body;
-          return {
-            ...prev,
-            [locationId]: {
-              head: singlePokemon,
-              body: null,
-              isFusion: false,
-            },
-          };
-        }
-      });
-    });
-  }, []);
-
-  // Handle fusion creation from drag and drop
-  const handleCreateFusion = useCallback((event: CustomEvent) => {
-    const { locationId, head, body } = event.detail;
-
-    startTransition(() => {
-      setEncounters(prev => {
-        return {
-          ...prev,
-          [locationId]: {
-            head,
-            body,
-            isFusion: true,
-          },
-        };
-      });
-    });
-  }, []);
-
-  // Listen for fusion creation events
-  React.useEffect(() => {
-    window.addEventListener(
-      'createFusion',
-      handleCreateFusion as EventListener
-    );
-
-    return () => {
-      window.removeEventListener(
-        'createFusion',
-        handleCreateFusion as EventListener
-      );
-    };
-  }, [handleCreateFusion]);
 
   // Show loading state if no data
   if (!data || data.length === 0) {
@@ -316,11 +125,6 @@ export default function LocationList() {
                 key={row.id}
                 row={row}
                 encounterData={encounterData}
-                onEncounterSelect={(locationId, pokemon, field) =>
-                  handleEncounterSelect(row.original.id, pokemon, field)
-                }
-                onFusionToggle={handleFusionToggle}
-                onResetEncounter={handleResetEncounter}
               />
             );
           })}

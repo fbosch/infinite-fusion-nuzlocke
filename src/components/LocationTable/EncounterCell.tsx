@@ -1,39 +1,47 @@
 'use client';
 
-import React, { useCallback } from 'react';
-import { ArrowLeftRight, Dna, DnaOff, RotateCcw } from 'lucide-react';
+import React, { useCallback, startTransition } from 'react';
+import { ArrowLeftRight, Dna, DnaOff } from 'lucide-react';
 import { PokemonCombobox } from '../PokemonCombobox/PokemonCombobox';
 import type { PokemonOption } from '@/loaders/pokemon';
 import type { EncounterData } from '@/loaders/encounters';
-import { getLocationNameByRouteId } from '@/loaders/locations';
+
 import clsx from 'clsx';
 import { useSnapshot } from 'valtio';
 import { dragStore, dragActions } from '@/stores/dragStore';
+import { playthroughActions } from '@/stores/playthroughs';
 
 interface EncounterCellProps {
   routeId: number;
   locationId: string;
   encounterData: EncounterData;
-  onEncounterSelect: (
-    routeId: number,
-    pokemon: PokemonOption | null,
-    field?: 'head' | 'body'
-  ) => void;
-  onFusionToggle: (routeId: number) => void;
 }
 
 export function EncounterCell({
   routeId,
   locationId,
   encounterData,
-  onEncounterSelect,
-  onFusionToggle,
 }: EncounterCellProps) {
   const selectedPokemon = encounterData.isFusion
     ? encounterData.body
     : encounterData.head;
   const isFusion = encounterData.isFusion;
   const dragSnapshot = useSnapshot(dragStore);
+
+  // Handle encounter selection
+  const handleEncounterSelect = useCallback(
+    (pokemon: PokemonOption | null, field: 'head' | 'body' = 'head') => {
+      playthroughActions.updateEncounter(locationId, pokemon, field, false);
+    },
+    [locationId]
+  );
+
+  // Handle fusion toggle
+  const handleFusionToggle = useCallback(() => {
+    startTransition(() => {
+      playthroughActions.toggleEncounterFusion(locationId);
+    });
+  }, [locationId]);
 
   // Handle flip button click
   const handleFlip = useCallback(() => {
@@ -44,15 +52,9 @@ export function EncounterCell({
     const newBody = encounterData.head;
 
     // Update both fields
-    onEncounterSelect(routeId, newHead, 'head');
-    onEncounterSelect(routeId, newBody, 'body');
-  }, [
-    isFusion,
-    encounterData.head,
-    encounterData.body,
-    routeId,
-    onEncounterSelect,
-  ]);
+    handleEncounterSelect(newHead, 'head');
+    handleEncounterSelect(newBody, 'body');
+  }, [isFusion, encounterData.head, encounterData.body, handleEncounterSelect]);
 
   // Handle drop on fusion button
   const handleFusionDrop = useCallback(
@@ -100,15 +102,10 @@ export function EncounterCell({
             // Create fusion: existing Pokémon becomes head, dropped Pokémon becomes body
             const existingPokemon = selectedPokemon;
             if (existingPokemon) {
-              // Use a custom event to handle fusion creation
-              window.dispatchEvent(
-                new CustomEvent('createFusion', {
-                  detail: {
-                    routeId,
-                    head: existingPokemon,
-                    body: pokemonOption,
-                  },
-                })
+              playthroughActions.createFusion(
+                locationId,
+                existingPokemon,
+                pokemonOption
               );
             }
 
@@ -132,37 +129,39 @@ export function EncounterCell({
       routeId,
       isFusion,
       selectedPokemon,
-      onEncounterSelect,
-      onFusionToggle,
       dragSnapshot.currentDragSource,
       locationId,
     ]
   );
 
+  // Handle drag over
   const handleFusionDragOver = useCallback(
     (e: React.DragEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      e.stopPropagation();
+      // Only allow drop if this row is not already a fusion and has an existing encounter
+      if (isFusion || !selectedPokemon) {
+        e.dataTransfer.dropEffect = 'none';
+        return;
+      }
 
-      // Only allow drop if this row is not already a fusion, has an existing encounter, and drag is from different source
+      // Check if drag is from a different combobox
       const isFromDifferentCombobox =
         dragSnapshot.currentDragSource &&
         dragSnapshot.currentDragSource !== `${routeId}-single` &&
         dragSnapshot.currentDragSource !== `${routeId}-head` &&
         dragSnapshot.currentDragSource !== `${routeId}-body`;
 
-      if (!isFusion && selectedPokemon && isFromDifferentCombobox) {
-        e.dataTransfer.dropEffect = 'copy';
+      if (isFromDifferentCombobox) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
       } else {
         e.dataTransfer.dropEffect = 'none';
       }
     },
-    [routeId, isFusion, selectedPokemon, dragSnapshot.currentDragSource]
+    [isFusion, selectedPokemon, dragSnapshot.currentDragSource, routeId]
   );
 
-  // Handle drag end to clear drag state if it ends on this element
+  // Handle drag end
   const handleFusionDragEnd = useCallback(() => {
-    // Clear drag state when drag ends on this element
     dragActions.clearDrag();
   }, []);
 
@@ -185,34 +184,21 @@ export function EncounterCell({
                   routeId={routeId}
                   locationId={locationId}
                   value={encounterData.head}
-                  onChange={pokemon =>
-                    onEncounterSelect(routeId, pokemon, 'head')
-                  }
+                  onChange={pokemon => handleEncounterSelect(pokemon, 'head')}
                   placeholder='Select head Pokemon'
                   nicknamePlaceholder='Enter head nickname'
                   comboboxId={`${routeId}-head`}
                 />
               </div>
-              <div className='flex flex-col items-center justify-center gap-1'>
-                <button
-                  type='button'
-                  onClick={handleFlip}
-                  disabled={!encounterData.head && !encounterData.body}
-                  className={clsx(
-                    'group',
-                    'size-8 flex items-center justify-center',
-                    'p-1.5 rounded-md border transition-all duration-200 cursor-pointer',
-                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
-                    'disabled:opacity-50 disabled:cursor-not-allowed',
-                    'bg-white border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-400',
-                    'dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-blue-900/20'
-                  )}
-                  aria-label='Flip head and body Pokemon'
-                  title='Reverse fusion'
-                >
-                  <ArrowLeftRight className='size-4 group-hover:text-blue-600 dark:group-hover:text-blue-400' />
-                </button>
-              </div>
+              <button
+                type='button'
+                onClick={handleFlip}
+                className='mt-6 self-start group size-6 flex items-center justify-center p-1 rounded-md border border-gray-300 dark:border-gray-600 transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-500 hover:border-blue-600 bg-white dark:bg-gray-800'
+                aria-label='Flip head and body'
+                title='Flip head and body'
+              >
+                <ArrowLeftRight className='size-4 text-gray-600 dark:text-gray-300 group-hover:text-white' />
+              </button>
               <div className='flex-1 relative'>
                 <span className='absolute -top-6 left-0 text-xs font-medium text-gray-500 dark:text-gray-400'>
                   Body
@@ -221,9 +207,7 @@ export function EncounterCell({
                   routeId={routeId}
                   locationId={locationId}
                   value={encounterData.body}
-                  onChange={pokemon =>
-                    onEncounterSelect(routeId, pokemon, 'body')
-                  }
+                  onChange={pokemon => handleEncounterSelect(pokemon, 'body')}
                   placeholder='Select body Pokemon'
                   nicknamePlaceholder='Enter body nickname'
                   comboboxId={`${routeId}-body`}
@@ -235,7 +219,7 @@ export function EncounterCell({
               routeId={routeId}
               locationId={locationId}
               value={selectedPokemon}
-              onChange={pokemon => onEncounterSelect(routeId, pokemon)}
+              onChange={pokemon => handleEncounterSelect(pokemon)}
               placeholder='Select Pokemon'
               nicknamePlaceholder='Enter nickname'
               comboboxId={`${routeId}-single`}
@@ -244,7 +228,7 @@ export function EncounterCell({
         </div>
         <button
           type='button'
-          onClick={() => onFusionToggle(routeId)}
+          onClick={handleFusionToggle}
           onDrop={handleFusionDrop}
           onDragOver={handleFusionDragOver}
           onDragEnd={handleFusionDragEnd}
