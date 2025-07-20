@@ -16,9 +16,10 @@ export default function ResetEncounterButton({
 }: ResetEncounterButtonProps) {
   return (
     <td
-      className='px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
+      className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top'
       role='cell'
     >
+    <div className='flex items-center justify-end'>
       <button
         type='button'
         onClick={() => onReset(routeId)}
@@ -35,6 +36,7 @@ export default function ResetEncounterButton({
       >
         <X className='size-4' />
       </button>
+</div>
     </td>
   );
 } 

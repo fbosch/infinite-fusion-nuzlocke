@@ -2,7 +2,7 @@ import { Row, flexRender } from '@tanstack/react-table';
 import type { Location } from '@/loaders/locations';
 import type { PokemonOption } from '@/loaders/pokemon';
 import type { EncounterData } from '@/types/encounters';
-import { EncounterCell } from '../EncounterCell';
+import { EncounterCell } from './EncounterCell';
 import { FusionSprite } from '../FusionSprite';
 import ResetEncounterButton from './ResetEncounterButton';
 
@@ -52,7 +52,7 @@ export default function LocationTableRow({
           return (
             <td
               key={cell.id}
-              className='px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
+              className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
               role='cell'
             >
               <FusionSprite

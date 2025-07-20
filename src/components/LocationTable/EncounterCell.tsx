@@ -2,7 +2,7 @@
 
 import React, { useCallback } from 'react';
 import { ArrowLeftRight, Dna, DnaOff, RotateCcw } from 'lucide-react';
-import { PokemonCombobox } from './PokemonCombobox';
+import { PokemonCombobox } from '../PokemonCombobox';
 import type { PokemonOption } from '@/loaders/pokemon';
 import type { EncounterData } from '@/types/encounters';
 import clsx from 'clsx';
@@ -164,7 +164,7 @@ export function EncounterCell({
   return (
     <td
       className={clsx(
-        'px-6 pt-8 pb-6 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
+        'px-4 pt-8.5 pb-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
       )}
       role='cell'
     >
