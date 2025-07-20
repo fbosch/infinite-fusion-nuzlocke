@@ -69,10 +69,7 @@ export async function getEncountersByRouteId(
       routeId: 0,
     };
   }
-  const encounters =
-    gameMode === 'classic'
-      ? await getClassicEncounters()
-      : await getRemixEncounters();
+  const encounters = await getEncounters(gameMode);
   return encounters.find(encounter => encounter.routeId === routeId) || null;
 }
 

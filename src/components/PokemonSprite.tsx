@@ -3,13 +3,8 @@
 import React, { useMemo } from 'react';
 import Image from 'next/image';
 import type { PokemonOption } from '@/loaders/pokemon';
+import type { EncounterData } from '@/types/encounters';
 import clsx from 'clsx';
-
-interface EncounterData {
-  head: PokemonOption | null;
-  body: PokemonOption | null;
-  isFusion: boolean;
-}
 
 interface FusionSpriteProps {
   encounterData: EncounterData;

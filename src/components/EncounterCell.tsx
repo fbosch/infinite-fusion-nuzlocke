@@ -4,16 +4,10 @@ import React, { useCallback } from 'react';
 import { ArrowLeftRight, Dna, DnaOff, RotateCcw } from 'lucide-react';
 import { PokemonCombobox } from './PokemonCombobox';
 import type { PokemonOption } from '@/loaders/pokemon';
+import type { EncounterData } from '@/types/encounters';
 import clsx from 'clsx';
 import { useSnapshot } from 'valtio';
 import { dragStore, dragActions } from '@/stores/dragStore';
-
-// Type for encounter data with fusion status
-interface EncounterData {
-  head: PokemonOption | null;
-  body: PokemonOption | null;
-  isFusion: boolean;
-}
 
 interface EncounterCellProps {
   routeId: number;
