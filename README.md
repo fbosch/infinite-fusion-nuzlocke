@@ -61,3 +61,101 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Tooltips
+
+This project includes a comprehensive tooltip system built with Floating UI that provides accessible, customizable tooltips throughout the application.
+
+### Components
+
+#### Basic Tooltip
+
+```tsx
+import { Tooltip } from '@/components';
+
+<Tooltip content='This is a helpful tooltip'>
+  <button>Hover me</button>
+</Tooltip>;
+```
+
+#### Pokemon Tooltip
+
+```tsx
+import { PokemonTooltip } from '@/components';
+
+const pokemon = {
+  id: 25,
+  name: 'Pikachu',
+  nationalDexId: 25,
+  nickname: 'Sparky',
+  types: ['Electric'],
+  stats: { hp: 35, attack: 55, defense: 40, speed: 90 },
+  abilities: ['Static', 'Lightning Rod'],
+};
+
+<PokemonTooltip pokemon={pokemon}>
+  <div>Pokemon Card</div>
+</PokemonTooltip>;
+```
+
+#### Programmatic Tooltip Hook
+
+```tsx
+import { useTooltip } from '@/hooks';
+
+function MyComponent() {
+  const { refs, getReferenceProps, TooltipWrapper } = useTooltip({
+    placement: 'bottom',
+    delay: 300,
+  });
+
+  return (
+    <>
+      <button ref={refs.setReference} {...getReferenceProps()}>
+        Advanced Button
+      </button>
+      <TooltipWrapper content='Custom tooltip content' />
+    </>
+  );
+}
+```
+
+### Features
+
+- **Accessibility**: Full keyboard navigation, screen reader support, ARIA attributes
+- **Theme Support**: Works with light/dark themes
+- **Smart Positioning**: Automatically flips and adjusts position to stay in viewport
+- **Customizable**: Delay, placement, styling, and content options
+- **Touch Friendly**: Works on mobile devices
+- **Performance Optimized**: Uses Floating UI for efficient positioning
+
+### Props
+
+#### Tooltip Props
+
+- `content`: React.ReactNode - The content to display
+- `children`: React.ReactElement - The trigger element
+- `placement`: 'top' | 'bottom' | 'left' | 'right' - Position relative to trigger
+- `delay`: number - Delay before showing (default: 500ms)
+- `disabled`: boolean - Whether tooltip is disabled
+- `className`: string - Custom CSS classes
+- `showArrow`: boolean - Whether to show arrow (default: true)
+- `maxWidth`: string - Maximum width (default: '300px')
+
+#### PokemonTooltip Props
+
+All Tooltip props plus:
+
+- `pokemon`: PokemonWithDetails - Pokemon data to display
+- `showStats`: boolean - Whether to show base stats (default: true)
+- `showSprite`: boolean - Whether to show Pokemon sprite (default: true)
+- `spriteUrl`: string - Custom sprite URL override
+
+### Usage Examples
+
+You can import and use the tooltip components throughout your application:
+
+```tsx
+import { Tooltip, PokemonTooltip } from '@/components';
+import { useTooltip } from '@/hooks';
+```

@@ -23,6 +23,7 @@
     "data:refresh": "pnpm run pokedex && pnpm run encounters:scrape && pnpm run test:run"
   },
   "dependencies": {
+    "@floating-ui/react": "^0.27.13",
     "@headlessui/react": "^2.2.4",
     "@tanstack/react-table": "^8.21.3",
     "@types/cli-progress": "^3.11.6",
