@@ -31,7 +31,7 @@ export default function ResetEncounterButton({
   };
   return (
     <td
-      className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top'
+      className='p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top'
       role='cell'
     >
     <div className='flex items-center justify-end'>
