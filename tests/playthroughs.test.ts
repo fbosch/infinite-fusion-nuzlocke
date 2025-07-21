@@ -12,7 +12,6 @@ vi.mock('idb-keyval', () => ({
 import {
   playthroughActions,
   playthroughsStore,
-  type Playthrough,
 } from '../src/stores/playthroughs';
 import { PokemonOptionSchema } from '../src/loaders/pokemon';
 
@@ -179,10 +178,10 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
 
       const encounters = playthroughActions.getEncounters();
-      
+
       // Source should be deleted
       expect(encounters['route-1']).toBeUndefined();
-      
+
       // Destination should have the moved Pokemon with preserved nickname
       expect(encounters['route-2']).toBeDefined();
       expect(encounters['route-2'].head?.name).toBe('Pikachu');
@@ -192,7 +191,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     it('should preserve nickname when creating fusions', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
       const charmander = createMockPokemon('Charmander', 4);
-      
+
       // Add nicknames to both Pokemon
       pikachu.nickname = 'Sparky';
       charmander.nickname = 'Flame';
@@ -204,7 +203,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.createFusion('route-1', pikachu, charmander);
 
       const encounters = playthroughActions.getEncounters();
-      
+
       // Verify fusion was created with nicknames preserved
       expect(encounters['route-1']).toBeDefined();
       expect(encounters['route-1'].isFusion).toBe(true);
@@ -219,7 +218,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     it('should preserve nicknames when swapping encounters', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
       const charmander = createMockPokemon('Charmander', 4);
-      
+
       // Add nicknames to both Pokemon
       pikachu.nickname = 'Sparky';
       charmander.nickname = 'Flame';
@@ -232,7 +231,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.swapEncounters('route-1', 'route-2');
 
       const encounters = playthroughActions.getEncounters();
-      
+
       // Verify the Pokemon were swapped and nicknames preserved
       expect(encounters['route-1'].head?.name).toBe('Charmander');
       expect(encounters['route-1'].head?.nickname).toBe('Flame');
@@ -374,8 +373,6 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       expect(encounters['route-2'].head?.originalLocation).toBeDefined();
     });
   });
-
-
 
   describe('edge cases and error handling', () => {
     it('should handle operations on playthrough without active playthrough', async () => {

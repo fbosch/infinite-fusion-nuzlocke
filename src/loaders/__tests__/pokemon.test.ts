@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  getPokemon,
-  searchPokemon,
-  getPokemonEvolutionIds,
-} from '../pokemon';
+import { getPokemon, searchPokemon, getPokemonEvolutionIds } from '../pokemon';
 
 describe('Pokemon Loader with Evolution Data', () => {
   it('should get evolution IDs for specific Pokemon', async () => {
