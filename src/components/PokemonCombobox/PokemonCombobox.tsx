@@ -28,6 +28,7 @@ import {
 } from '@/loaders/pokemon';
 import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
 import { dragStore, dragActions } from '@/stores/dragStore';
+import { playthroughsStore } from '@/stores/playthroughs';
 import { playthroughActions } from '@/stores/playthroughs';
 import { PokemonEvolutionButton } from './PokemonEvolutionButton';
 import { PokemonNicknameInput } from './PokemonNicknameInput';
@@ -281,6 +282,7 @@ export const PokemonCombobox = ({
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
   const dragSnapshot = useSnapshot(dragStore);
+  const playthroughSnapshot = useSnapshot(playthroughsStore);
 
   // Ref to track pending animation frame for drag leave operations
   const dragLeaveAnimationRef = useRef<number | null>(null);
@@ -387,6 +389,36 @@ export const PokemonCombobox = ({
 
     performSearch();
   }, [deferredQuery, isRoutePokemon, performSmartSearch]);
+
+  // Reload encounter data when playthrough data changes
+  useEffect(() => {
+    if (routeId !== undefined && routeId !== 0) {
+      loadRouteEncounterData();
+    }
+  }, [
+    playthroughSnapshot.activePlaythroughId,
+    playthroughSnapshot.playthroughs.find(
+      p => p.id === playthroughSnapshot.activePlaythroughId
+    )?.remixMode,
+    playthroughSnapshot.playthroughs.find(
+      p => p.id === playthroughSnapshot.activePlaythroughId
+    )?.updatedAt,
+    loadRouteEncounterData,
+    routeId,
+  ]);
+
+  // Clear query when value changes to ensure component reflects the new selection
+  useEffect(() => {
+    if (value && query && value.name !== query) {
+      setQuery('');
+    }
+  }, [
+    value?.id,
+    value?.originalLocation,
+    value?.nickname,
+    value?.status,
+    query,
+  ]);
 
   // Combine route matches with smart search results
   const finalOptions = useMemo(() => {

@@ -3,7 +3,7 @@ import { devtools } from 'valtio/utils';
 import { z } from 'zod';
 import { get, set, del } from 'idb-keyval';
 import { debounce } from 'lodash';
-import { PokemonOptionSchema } from '../loaders/pokemon';
+import { PokemonOptionSchema, generatePokemonUID } from '../loaders/pokemon';
 
 export const EncounterDataSchema = z.object({
   head: PokemonOptionSchema.nullable(),
@@ -547,19 +547,22 @@ export const playthroughActions = {
       activePlaythrough.encounters[locationId] = encounter;
     }
 
-    // Set originalLocation if pokemon is provided and doesn't already have one
-    const pokemonWithLocation =
-      pokemon && !pokemon.originalLocation
-        ? { ...pokemon, originalLocation: locationId }
-        : pokemon;
+    // Set originalLocation and UID if pokemon is provided and doesn't already have them
+    const pokemonWithLocationAndUID = pokemon
+      ? {
+          ...pokemon,
+          originalLocation: pokemon.originalLocation || locationId,
+          uid: pokemon.uid || generatePokemonUID(),
+        }
+      : pokemon;
 
     if (shouldCreateFusion || encounter.isFusion) {
       // For fusion encounters, update the specified field and ensure isFusion is true
-      encounter[field] = pokemonWithLocation;
+      encounter[field] = pokemonWithLocationAndUID;
       encounter.isFusion = true;
     } else {
       // For regular encounters, set head and ensure isFusion is false
-      encounter.head = pokemonWithLocation;
+      encounter.head = pokemonWithLocationAndUID;
       encounter.body = null;
       encounter.isFusion = false;
     }

@@ -26,9 +26,11 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
     isFusion: false,
   };
 
-  const selectedPokemon = encounterData.isFusion
-    ? encounterData.body
-    : encounterData.head;
+  // useSnapshot already returns plain objects, so we can use them directly
+  const headPokemon = encounterData.head;
+  const bodyPokemon = encounterData.body;
+
+  const selectedPokemon = encounterData.isFusion ? bodyPokemon : headPokemon;
   const isFusion = encounterData.isFusion;
 
   // Handle encounter selection
@@ -49,13 +51,13 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
     if (!isFusion) return;
 
     // Swap head and body (works even if one is empty)
-    const newHead = encounterData.body;
-    const newBody = encounterData.head;
+    const newHead = bodyPokemon;
+    const newBody = headPokemon;
 
     // Update both fields
     handleEncounterSelect(newHead, 'head');
     handleEncounterSelect(newBody, 'body');
-  }, [isFusion, encounterData.head, encounterData.body, handleEncounterSelect]);
+  }, [isFusion, headPokemon, bodyPokemon, handleEncounterSelect]);
 
   return (
     <td
@@ -73,9 +75,10 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
                   Head
                 </span>
                 <PokemonCombobox
+                  key={headPokemon?.uid || `${locationId}-head-empty`}
                   routeId={routeId}
                   locationId={locationId}
-                  value={encounterData.head}
+                  value={headPokemon}
                   onChange={pokemon => handleEncounterSelect(pokemon, 'head')}
                   placeholder='Select head Pokemon'
                   nicknamePlaceholder='Enter head nickname'
@@ -96,9 +99,10 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
                   Body
                 </span>
                 <PokemonCombobox
+                  key={bodyPokemon?.uid || `${locationId}-body-empty`}
                   routeId={routeId}
                   locationId={locationId}
-                  value={encounterData.body}
+                  value={bodyPokemon}
                   onChange={pokemon => handleEncounterSelect(pokemon, 'body')}
                   placeholder='Select body Pokemon'
                   nicknamePlaceholder='Enter body nickname'
@@ -108,6 +112,7 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
             </div>
           ) : (
             <PokemonCombobox
+              key={selectedPokemon?.uid || `${locationId}-single-empty`}
               routeId={routeId}
               locationId={locationId}
               value={selectedPokemon}

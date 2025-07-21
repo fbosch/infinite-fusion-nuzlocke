@@ -43,6 +43,7 @@
     "react-dom": "19.1.0",
     "react-window": "^1.8.11",
     "tailwind-merge": "^3.3.1",
+    "uuid": "^11.1.0",
     "valtio": "^2.1.5",
     "zod": "^4.0.5"
   },
@@ -57,6 +58,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
     "@vitest/ui": "^3.2.4",
     "cheerio": "^1.0.0",
     "eslint": "^9",

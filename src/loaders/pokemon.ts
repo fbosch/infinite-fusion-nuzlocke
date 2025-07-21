@@ -1,6 +1,12 @@
 import { z } from 'zod';
 import Fuse from 'fuse.js';
 import type { IFuseOptions } from 'fuse.js';
+import { v4 as uuidv4 } from 'uuid';
+
+// Utility function to generate unique identifiers
+export function generatePokemonUID(): string {
+  return uuidv4();
+}
 
 // Status enum for Pokemon tracking
 export const PokemonStatus = {
@@ -50,6 +56,7 @@ export const PokemonOptionSchema = z.object({
   nickname: z.string().optional(),
   originalLocation: z.string().optional(),
   status: PokemonStatusSchema.optional(),
+  uid: z.string().optional(), // Unique identifier for React reconciliation
 });
 
 // Pokemon option type for search results (inferred from schema)
