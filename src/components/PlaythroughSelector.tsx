@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { ChevronDown, Gamepad, Plus } from 'lucide-react';
+import { ChevronDown, Album, Plus } from 'lucide-react';
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react';
 import clsx from 'clsx';
 import {
@@ -91,7 +91,7 @@ export default function PlaythroughSelector({
         onClick={loadAllPlaythroughs}
       >
         <div className='flex items-center gap-2'>
-          <Gamepad className='w-4 h-4 flex-shrink-0' />
+          <Album className='w-4 h-4 flex-shrink-0' />
           <span className='truncate'>
             {activePlaythrough?.name || 'No Playthrough'}
           </span>
