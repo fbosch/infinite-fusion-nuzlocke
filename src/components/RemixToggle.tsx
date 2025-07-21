@@ -52,12 +52,12 @@ export default function RemixToggle() {
         onClick={() => handleToggle('classic')}
         disabled={!activePlaythrough}
         className={clsx(
-          'relative z-10 w-16 py-1.5 text-sm font-medium transition-colors duration-200 text-center',
+          'relative z-10 w-16 py-1.5 text-sm font-medium text-center',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
           !isRemixMode
             ? 'text-gray-900 dark:text-gray-100'
             : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
-          activePlaythrough && 'cursor-pointer'
+          activePlaythrough && 'cursor-pointer transition-colors duration-200'
         )}
         aria-pressed={!isRemixMode}
         aria-label={`Switch to Classic mode${!isRemixMode ? ' (currently selected)' : ''}`}
@@ -70,12 +70,12 @@ export default function RemixToggle() {
         onClick={() => handleToggle('remix')}
         disabled={!activePlaythrough}
         className={clsx(
-          'relative z-10 w-16 py-1.5 text-sm font-medium transition-colors duration-200 text-center',
+          'relative z-10 w-16 py-1.5 text-sm font-medium text-center',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
           isRemixMode
             ? 'text-purple-700 dark:text-purple-300'
             : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
-          activePlaythrough && 'cursor-pointer'
+          activePlaythrough && 'cursor-pointer transition-colors duration-200'
         )}
         aria-pressed={isRemixMode}
         aria-label={`Switch to Remix mode${isRemixMode ? ' (currently selected)' : ''}`}

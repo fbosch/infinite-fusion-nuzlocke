@@ -93,10 +93,10 @@ export function FusionSprite({
     body?.status === PokemonStatus.DECEASED;
 
   const imageClasses = clsx(
-    'object-fill object-center image-render-pixelated origin-top -translate-y-1/9',
+    'object-fill object-center image-render-pixelated origin-top -translate-y-1/9 transition-all duration-200',
     {
-      'grayscale opacity-50': isMissed || isDeceased,
-      'blur-[1px]': isDeceased,
+      'opacity-40': isMissed,
+      'blur-[0.4px] mix-blend-multiply opacity-50 grayscale': isDeceased,
     },
     className
   );
