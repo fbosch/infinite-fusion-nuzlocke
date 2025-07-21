@@ -97,9 +97,10 @@ export const PokemonStatusInput = ({
       <MenuButton
         className={clsx(
           'rounded-br-md border-t-0 rounded-t-none capitalize',
-          'flex items-center justify-between px-4 py-3.5 text-sm border  bg-white text-gray-900 focus:outline-none focus:ring-1 focus:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500  disabled:cursor-not-allowed',
-          'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-400',
-          'hover:bg-gray-50 dark:hover:bg-gray-700',
+          'flex items-center justify-between px-4 py-3.5 text-sm border  bg-white text-gray-400 focus:outline-none focus:ring-1',
+          'focus:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500  disabled:cursor-not-allowed',
+          'border-gray-300 dark:border-gray-600 dark:bg-gray-800 enabled:dark:text-white dark:focus:ring-blue-400',
+          'enabled:hover:bg-gray-50 dark:enabled:hover:bg-gray-700',
           'min-w-[140px] enabled:hover:cursor-pointer',
           dragPreview && 'opacity-60 pointer-events-none'
         )}

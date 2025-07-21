@@ -145,14 +145,14 @@ export function FusionToggleButton({
       onDragEnd={handleFusionDragEnd}
       className={clsx(
         'group',
-        'size-12.25 flex items-center justify-center self-center',
+        'size-10 flex items-center justify-center self-center',
         'p-2 rounded-md border transition-all duration-200 cursor-pointer',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
         'disabled:opacity-50 disabled:cursor-not-allowed bg-white',
         {
           'dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 border-gray-300 hover:bg-red-500 hover:border-red-600':
             isFusion,
-          'bg-white border-gray-300 text-gray-700 hover:bg-green-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-green-700':
+          'bg-white border-gray-300 text-gray-700 hover:bg-green-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-green-700':
             !isFusion,
           'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20':
             !isFusion &&

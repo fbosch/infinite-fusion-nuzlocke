@@ -64,7 +64,7 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
       )}
       role='cell'
     >
-      <div className='flex flex-row justify-center gap-2'>
+      <div className='flex flex-row justify-center gap-4'>
         <div className='flex-1'>
           {isFusion ? (
             <div className='flex items-center gap-2'>
