@@ -34,6 +34,9 @@ export function getLocationsByRegion(): Record<string, Location[]> {
   const grouped: Record<string, Location[]> = {};
 
   locations.forEach(location => {
+    if (!grouped[location.region]) {
+      grouped[location.region] = [];
+    }
     grouped[location.region].push(location);
   });
 
