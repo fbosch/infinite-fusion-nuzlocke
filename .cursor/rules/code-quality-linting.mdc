@@ -1,3 +1,7 @@
+---
+alwaysApply: true
+---
+
 # Code Quality and Linting Rules
 
 ## Prettier Integration
@@ -303,8 +307,3 @@ className={`base-class ${isActive ? 'active-class' : ''} ${isDisabled ? 'disable
 - Ensure error handling is appropriate
 - Verify that the code solves the intended problem
 - Look for opportunities to simplify or improve
-  description:
-  globs:
-  alwaysApply: false
-
----
