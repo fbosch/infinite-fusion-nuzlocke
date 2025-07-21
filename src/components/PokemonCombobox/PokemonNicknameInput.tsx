@@ -42,7 +42,7 @@ export const PokemonNicknameInput = ({
     // Only sync if this is a different Pokemon than the last one we synced
     if (currentPokemonId !== lastSyncedPokemonId.current) {
       setLocalNickname(value.nickname || '');
-        lastSyncedPokemonId.current = currentPokemonId;
+      lastSyncedPokemonId.current = currentPokemonId;
     }
   }, [value, currentPokemonId, lastSyncedPokemonId]);
 
@@ -102,13 +102,12 @@ export const PokemonNicknameInput = ({
         'flex-1 px-3 py-3.5 text-sm border bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:cursor-not-allowed',
         'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
         'placeholder-gray-500 dark:placeholder-gray-400',
-        dragPreview && 'opacity-60 pointer-none',
+        dragPreview && 'opacity-60 pointer-none'
       )}
       maxLength={12}
       disabled={!value || disabled}
       spellCheck={false}
       autoComplete='off'
-
     />
   );
 };

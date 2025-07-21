@@ -9,7 +9,6 @@ import {
   getPokemonByNationalDexId,
   type PokemonOption,
 } from '@/loaders/pokemon';
-import { getPokemonNameMap } from '@/loaders';
 import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
 
 interface PokemonEvolutionButtonProps {
@@ -89,7 +88,6 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
       try {
         const evolutionIds = await getPokemonEvolutionIds(value.id);
         if (evolutionIds.length > 0) {
-          const nameMap = await getPokemonNameMap();
           const evolutions: PokemonOption[] = [];
 
           for (const evolutionId of evolutionIds) {
@@ -144,7 +142,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
             'disabled:opacity-50 disabled:cursor-not-allowed',
             'dark:bg-gray-700 dark:hover:bg-blue-900/20 dark:text-gray-400 dark:hover:text-blue-400',
             showEvolutionMenu &&
-              'bg-blue-50 text-blue-600 border-blue-300 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-400',
+            'bg-blue-50 text-blue-600 border-blue-300 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-400',
             'hover:cursor-pointer'
           )}
           title={

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, startTransition } from 'react';
+import React, { useCallback } from 'react';
 import { ArrowLeftRight, Dna, DnaOff } from 'lucide-react';
 import { PokemonCombobox } from '../PokemonCombobox/PokemonCombobox';
 import type { PokemonOption } from '@/loaders/pokemon';
@@ -135,7 +135,7 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
 
       findPokemonByName();
     },
-    [isFusion, selectedPokemon, dragSnapshot.currentDragSource, locationId]
+    [isFusion, selectedPokemon, dragSnapshot.currentDragSource, dragSnapshot.currentDragValue, locationId]
   );
 
   // Handle drag over

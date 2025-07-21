@@ -12,7 +12,7 @@ import { useSnapshot } from 'valtio';
 import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
 import { LocationTableHeader, LocationTableRow } from './LocationTable';
-import { playthroughsStore, playthroughActions } from '@/stores/playthroughs';
+import { playthroughsStore } from '@/stores/playthroughs';
 
 const columnHelper = createColumnHelper<Location>();
 

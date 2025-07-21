@@ -148,7 +148,7 @@ export function FusionSprite({
                 }
               );
 
-              const shadowAnimation = shadowRef.current?.animate(
+              shadowRef.current?.animate(
                 [
                   { transform: 'translateY(-40%) translateX(-60%) scale(1)' },
                   {

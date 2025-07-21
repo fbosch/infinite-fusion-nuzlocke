@@ -3,7 +3,6 @@ import {
   getPokemon,
   searchPokemon,
   getPokemonEvolutionIds,
-  type PokemonOption,
 } from '../pokemon';
 
 describe('Pokemon Loader with Evolution Data', () => {

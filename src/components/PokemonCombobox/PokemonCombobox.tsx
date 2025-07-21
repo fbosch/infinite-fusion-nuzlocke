@@ -7,19 +7,14 @@ import React, {
   startTransition,
   useCallback,
   useEffect,
-  useRef,
 } from 'react';
-import { Check, Loader2, Search, ArrowUp, ChevronDown } from 'lucide-react';
+import { Check, Loader2, Search } from 'lucide-react';
 import {
   Combobox,
   ComboboxInput,
   ComboboxOptions,
   ComboboxOption,
   ComboboxButton,
-  Menu,
-  MenuButton,
-  MenuItems,
-  MenuItem,
 } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -28,10 +23,7 @@ import {
   getInfiniteFusionToNationalDexMap,
   getPokemon,
   searchPokemon,
-  getPokemonById,
-  PokemonStatus,
   type PokemonOption,
-  type PokemonStatusType,
 } from '@/loaders/pokemon';
 import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
 import { dragStore, dragActions } from '@/stores/dragStore';
@@ -40,11 +32,9 @@ import { PokemonEvolutionButton } from './PokemonEvolutionButton';
 import { PokemonNicknameInput } from './PokemonNicknameInput';
 import { PokemonStatusInput } from './PokemonStatusInput';
 
-// Global cache for National Dex ID mapping
 let nationalDexMapping: Map<number, number> | null = null;
 let mappingPromise: Promise<void> | null = null;
 
-// Initialize the National Dex mapping
 export async function initializeSpriteMapping(): Promise<void> {
   if (nationalDexMapping) {
     return; // Already loaded
@@ -617,7 +607,8 @@ export const PokemonCombobox = ({
                 ...(dragSnapshot.currentDragValue && {
                   nickname: dragSnapshot.currentDragValue.nickname,
                   status: dragSnapshot.currentDragValue.status,
-                  originalLocation: dragSnapshot.currentDragValue.originalLocation,
+                  originalLocation:
+                    dragSnapshot.currentDragValue.originalLocation,
                 }),
               };
               setDragPreview(pokemonOption);
@@ -667,7 +658,7 @@ export const PokemonCombobox = ({
                 'focus:cursor-text hover:cursor-pointer',
                 (value || dragPreview) && 'pl-12', // Add padding for sprite when value is selected or previewing
                 dragPreview &&
-                  'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60' // Highlight when showing preview with opacity
+                'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60' // Highlight when showing preview with opacity
               )}
               placeholder={placeholder}
               displayValue={(pokemon: PokemonOption | null | undefined) => {

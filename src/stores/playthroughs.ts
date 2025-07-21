@@ -65,7 +65,7 @@ const createDefaultPlaythrough = (): Playthrough => ({
 });
 
 // More efficient serialization: Use structuredClone when available, fallback to JSON
-const serializeForStorage = (obj: any): any => {
+const serializeForStorage = (obj: unknown): unknown => {
   if (typeof structuredClone !== 'undefined') {
     try {
       return structuredClone(obj);
@@ -132,33 +132,7 @@ const debouncedSavePlaythrough = debounce(
   500
 ); // 500ms delay for playthrough saves
 
-// Save individual playthrough to IndexedDB
-const savePlaythroughToIndexedDB = async (
-  playthrough: Playthrough
-): Promise<void> => {
-  if (typeof window === 'undefined') return;
 
-  try {
-    const key = playthrough.id;
-
-    // Use more efficient serialization instead of JSON.parse(JSON.stringify())
-    const plainPlaythrough = serializeForStorage(playthrough);
-
-    await set(key, plainPlaythrough);
-
-    // Update the list of playthrough IDs
-    const playthroughIds = ((await get('playthrough_ids')) || []) as string[];
-    if (!playthroughIds.includes(playthrough.id)) {
-      playthroughIds.push(playthrough.id);
-      await set('playthrough_ids', playthroughIds);
-    }
-  } catch (error) {
-    console.error(
-      `Failed to save playthrough ${playthrough.id} to IndexedDB:`,
-      error
-    );
-  }
-};
 
 // Delete individual playthrough from IndexedDB
 const deletePlaythroughFromIndexedDB = async (
@@ -435,9 +409,9 @@ export const playthroughActions = {
     // Set originalLocation if pokemon is provided and doesn't already have one
     const pokemonWithLocation = pokemon
       ? {
-          ...pokemon,
-          originalLocation: pokemon.originalLocation || locationId,
-        }
+        ...pokemon,
+        originalLocation: pokemon.originalLocation || locationId,
+      }
       : pokemon;
 
     const currentEncounter = activePlaythrough.encounters[locationId] || {

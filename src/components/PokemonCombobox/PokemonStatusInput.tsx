@@ -9,11 +9,7 @@ import React, {
 import clsx from 'clsx';
 import {
   ChevronDown,
-  Heart,
   Gift,
-  Zap,
-  X,
-  Archive,
   Skull,
   ArrowUpDown,
   LocateOff,
@@ -48,7 +44,7 @@ export const PokemonStatusInput = ({
     if (value?.status !== localStatus) {
       setLocalStatus(value?.status || null);
     }
-  }, [value?.status]);
+  }, [value?.status, localStatus]);
 
   // Helper function to get status icon
   const getStatusIcon = (status: PokemonStatusType) => {

@@ -26,6 +26,7 @@ export function useDebounced<T>(value: T, delay: number = 300): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   // Create the debounced function using lodash debounce
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedUpdate = useCallback(
     debounce((newValue: T) => {
       setDebouncedValue(newValue);
