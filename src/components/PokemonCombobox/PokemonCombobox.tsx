@@ -422,16 +422,9 @@ export const PokemonCombobox = ({
     });
   }, [routeEncounterData, fuzzyResults, deferredQuery, isRoutePokemon]);
 
-  // Optimized onChange handler without startTransition for immediate response
   const handleChange = useCallback(
     (newValue: PokemonOption | null | undefined) => {
-      // Only set a value if there's actually a selection
-      if (newValue) {
-        onChange(newValue);
-      } else if (!newValue) {
-        // Allow clearing the selection
-        onChange(null);
-      }
+      onChange(newValue || null);
     },
     [onChange]
   );
@@ -461,25 +454,17 @@ export const PokemonCombobox = ({
         // Clear the preview
         setDragPreview(null);
 
-        // Check if this drop is from a different combobox
         const isFromDifferentCombobox =
           dragSnapshot.currentDragSource &&
           dragSnapshot.currentDragSource !== comboboxId;
 
-        // Check if both comboboxes have values for switching
-        // This will work for any two different comboboxes (like head/body) that both have values
         const canSwitch =
           isFromDifferentCombobox &&
           dragSnapshot.currentDragValue &&
           value &&
           dragSnapshot.currentDragValue.name !== value.name;
 
-        if (
-          canSwitch &&
-          dragSnapshot.currentDragValue &&
-          dragSnapshot.currentDragSource
-        ) {
-          // Switch values between the two comboboxes using store actions
+        if (canSwitch && dragSnapshot.currentDragSource) {
           const { locationId: sourceLocationId, field: sourceField } =
             playthroughActions.getLocationFromComboboxId(
               dragSnapshot.currentDragSource
@@ -487,7 +472,6 @@ export const PokemonCombobox = ({
           const { locationId: targetLocationId, field: targetField } =
             playthroughActions.getLocationFromComboboxId(comboboxId || '');
 
-          // Use store action to swap encounters
           playthroughActions.swapEncounters(
             sourceLocationId,
             targetLocationId,
@@ -495,12 +479,9 @@ export const PokemonCombobox = ({
             targetField
           );
         } else {
-          // Original logic for normal drag and drop
-          // Use the full PokemonOption from drag store if available
           if (dragSnapshot.currentDragValue) {
             onChange(dragSnapshot.currentDragValue);
 
-            // If this is from a different combobox, clear the source location
             if (isFromDifferentCombobox && dragSnapshot.currentDragSource) {
               const { locationId: sourceLocationId, field: sourceField } =
                 playthroughActions.getLocationFromComboboxId(
@@ -512,14 +493,12 @@ export const PokemonCombobox = ({
               );
             }
           } else {
-            // Fallback to name-based search if drag value is not available
             setQuery(pokemonName);
             const findPokemonByName = async () => {
               try {
                 const allPokemon = await getPokemon();
                 const nameMap = await getPokemonNameMap();
 
-                // Find Pokemon by name (case insensitive)
                 const foundPokemon = allPokemon.find(
                   p =>
                     nameMap.get(p.id)?.toLowerCase() ===
@@ -532,7 +511,6 @@ export const PokemonCombobox = ({
                     name: pokemonName,
                     nationalDexId: foundPokemon.nationalDexId,
                     originalLocation: locationId,
-                    // Preserve existing properties from dragSnapshot if available
                     ...(dragSnapshot.currentDragValue && {
                       nickname: dragSnapshot.currentDragValue.nickname,
                       status: dragSnapshot.currentDragValue.status,
@@ -540,7 +518,6 @@ export const PokemonCombobox = ({
                   };
                   onChange(pokemonOption);
 
-                  // If this is from a different combobox, clear the source location
                   if (
                     isFromDifferentCombobox &&
                     dragSnapshot.currentDragSource
@@ -573,19 +550,16 @@ export const PokemonCombobox = ({
       e.preventDefault();
       e.dataTransfer.dropEffect = 'copy';
 
-      // Show preview of what will be dropped using global drag data
       if (
         dragSnapshot.currentDragValue &&
         (!dragPreview ||
           dragPreview.name !== dragSnapshot.currentDragValue.name)
       ) {
-        // Use the full PokemonOption from drag store for preview
         setDragPreview(dragSnapshot.currentDragValue);
       } else if (
         dragSnapshot.currentDragData &&
         (!dragPreview || dragPreview.name !== dragSnapshot.currentDragData)
       ) {
-        // Fallback to name-based search if drag value is not available
         const pokemonName = dragSnapshot.currentDragData;
         const findPokemonForPreview = async () => {
           try {
@@ -658,7 +632,7 @@ export const PokemonCombobox = ({
                 'focus:cursor-text hover:cursor-pointer',
                 (value || dragPreview) && 'pl-12', // Add padding for sprite when value is selected or previewing
                 dragPreview &&
-                'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60' // Highlight when showing preview with opacity
+                  'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60' // Highlight when showing preview with opacity
               )}
               placeholder={placeholder}
               displayValue={(pokemon: PokemonOption | null | undefined) => {

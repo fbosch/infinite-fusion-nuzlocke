@@ -1,6 +1,6 @@
 // Service Worker registration utility
 export class ServiceWorkerManager {
-  private static instance: ServiceWorkerManager;
+  private static instance: ServiceWorkerManager | null = null;
   private swRegistration: ServiceWorkerRegistration | null = null;
 
   private constructor() {}

@@ -24,7 +24,6 @@ export default function LocationList() {
     p => p.id === activePlaythrough
   )?.encounters;
 
-  // Memoize the data to prevent unnecessary re-computations
   const data = useMemo(() => {
     try {
       return getLocationsSortedByOrder();
@@ -34,7 +33,6 @@ export default function LocationList() {
     }
   }, []);
 
-  // Define columns outside of component to prevent recreation
   const columns = useMemo(
     () => [
       columnHelper.accessor('name', {
@@ -105,7 +103,7 @@ export default function LocationList() {
   }
 
   // Show loading state if no data
-  if (!data || data.length === 0) {
+  if (data.length === 0) {
     return (
       <div
         className='flex items-center justify-center p-8'

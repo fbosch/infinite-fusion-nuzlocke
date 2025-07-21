@@ -99,24 +99,18 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
               name: pokemonName,
               nationalDexId: foundPokemon.nationalDexId,
               originalLocation: locationId,
-              // Preserve existing properties from dragSnapshot if available
               ...(dragSnapshot.currentDragValue && {
                 nickname: dragSnapshot.currentDragValue.nickname,
                 status: dragSnapshot.currentDragValue.status,
               }),
             };
 
-            // Create fusion: existing Pokémon becomes head, dropped Pokémon becomes body
-            const existingPokemon = selectedPokemon;
-            if (existingPokemon) {
-              playthroughActions.createFusion(
-                locationId,
-                existingPokemon,
-                pokemonOption
-              );
-            }
+            playthroughActions.createFusion(
+              locationId,
+              selectedPokemon,
+              pokemonOption
+            );
 
-            // Clear the source location
             if (dragSnapshot.currentDragSource) {
               const { locationId: sourceLocationId, field: sourceField } =
                 playthroughActions.getLocationFromComboboxId(
@@ -135,7 +129,13 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
 
       findPokemonByName();
     },
-    [isFusion, selectedPokemon, dragSnapshot.currentDragSource, dragSnapshot.currentDragValue, locationId]
+    [
+      isFusion,
+      selectedPokemon,
+      dragSnapshot.currentDragSource,
+      dragSnapshot.currentDragValue,
+      locationId,
+    ]
   );
 
   // Handle drag over
@@ -249,7 +249,6 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
                 isFusion,
               'bg-white border-gray-300 text-gray-700 hover:bg-green-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-green-700':
                 !isFusion,
-              // Add visualfeedback for drag over when not a fusion and has an existing encounter
               'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20':
                 !isFusion &&
                 selectedPokemon &&

@@ -14,7 +14,7 @@ export const EncounterDataSchema = z.object({
 export const PlaythroughSchema = z.object({
   id: z.string(),
   name: z.string(),
-  encounters: z.record(z.string(), EncounterDataSchema),
+  encounters: z.record(z.string(), EncounterDataSchema.nullable()),
   remixMode: z.boolean().default(false),
   createdAt: z.number(),
   updatedAt: z.number(),
@@ -76,7 +76,6 @@ const serializeForStorage = (obj: unknown): unknown => {
   return JSON.parse(JSON.stringify(obj));
 };
 
-// Debounced save mechanism using lodash
 const debouncedSaveToIndexedDB = debounce(
   async (state: PlaythroughsState): Promise<void> => {
     if (typeof window === 'undefined') return;
@@ -102,7 +101,6 @@ const saveToIndexedDB = async (state: PlaythroughsState): Promise<void> => {
   }
 };
 
-// Debounced save for individual playthroughs
 const debouncedSavePlaythrough = debounce(
   async (playthrough: Playthrough): Promise<void> => {
     if (typeof window === 'undefined') return;
@@ -110,7 +108,6 @@ const debouncedSavePlaythrough = debounce(
     try {
       const key = playthrough.id;
 
-      // Use more efficient serialization instead of JSON.parse(JSON.stringify())
       const plainPlaythrough = serializeForStorage(playthrough);
 
       await set(key, plainPlaythrough);
@@ -131,8 +128,6 @@ const debouncedSavePlaythrough = debounce(
   },
   500
 ); // 500ms delay for playthrough saves
-
-
 
 // Delete individual playthrough from IndexedDB
 const deletePlaythroughFromIndexedDB = async (
@@ -389,7 +384,7 @@ export const playthroughActions = {
   // Encounter management actions
 
   // Get encounters for active playthrough
-  getEncounters: (): Record<string, z.infer<typeof EncounterDataSchema>> => {
+  getEncounters: (): Playthrough['encounters'] => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     return activePlaythrough?.encounters || {};
   },
@@ -409,9 +404,9 @@ export const playthroughActions = {
     // Set originalLocation if pokemon is provided and doesn't already have one
     const pokemonWithLocation = pokemon
       ? {
-        ...pokemon,
-        originalLocation: pokemon.originalLocation || locationId,
-      }
+          ...pokemon,
+          originalLocation: pokemon.originalLocation || locationId,
+        }
       : pokemon;
 
     const currentEncounter = activePlaythrough.encounters[locationId] || {
