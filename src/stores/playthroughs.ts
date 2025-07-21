@@ -31,6 +31,7 @@ export const PlaythroughsSchema = z.object({
 export type Playthrough = z.infer<typeof PlaythroughSchema>;
 export type PlaythroughsState = z.infer<typeof PlaythroughsSchema> & {
   isLoading: boolean;
+  isSaving: boolean;
 };
 
 // Default state
@@ -38,6 +39,7 @@ const defaultState: PlaythroughsState = {
   playthroughs: [],
   activePlaythroughId: undefined,
   isLoading: true, // Start in loading state
+  isSaving: false,
 };
 
 // Storage keys
@@ -102,6 +104,8 @@ const debouncedSaveAll = debounce(
     if (typeof window === 'undefined') return;
 
     try {
+      playthroughsStore.isSaving = true;
+
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       const saveOperations: Promise<void>[] = [];
 
@@ -135,19 +139,21 @@ const debouncedSaveAll = debounce(
       await Promise.all(saveOperations);
     } catch (error) {
       console.error('Failed to save to IndexedDB:', error);
+    } finally {
+      playthroughsStore.isSaving = false;
     }
   },
-  500
-); // 500ms delay - adjust as needed
-
-// Keep the old functions for backwards compatibility but mark as deprecated
-const debouncedSaveToIndexedDB = debouncedSaveAll;
+  500,
+  { leading: true }
+);
 
 // Immediate save function for critical operations
 const saveToIndexedDB = async (state: PlaythroughsState): Promise<void> => {
   if (typeof window === 'undefined') return;
 
   try {
+    playthroughsStore.isSaving = true;
+
     // Save active playthrough ID
     if (state.activePlaythroughId) {
       await set(ACTIVE_PLAYTHROUGH_KEY, state.activePlaythroughId);
@@ -156,44 +162,11 @@ const saveToIndexedDB = async (state: PlaythroughsState): Promise<void> => {
     }
   } catch (error) {
     console.error('Failed to save playthroughs to IndexedDB:', error);
+  } finally {
+    playthroughsStore.isSaving = false;
   }
 };
 
-const debouncedSavePlaythrough = debounce(
-  async (playthrough: Playthrough): Promise<void> => {
-    if (typeof window === 'undefined') return;
-
-    try {
-      const plainPlaythrough = serializeForStorage(playthrough);
-      const saveOperations: Promise<void>[] = [
-        set(playthrough.id, plainPlaythrough),
-      ];
-
-      // Check if we need to update playthrough IDs list
-      const updatePlaythroughIds = async () => {
-        const playthroughIds = ((await get('playthrough_ids')) ||
-          []) as string[];
-        if (!playthroughIds.includes(playthrough.id)) {
-          playthroughIds.push(playthrough.id);
-          await set('playthrough_ids', playthroughIds);
-        }
-      };
-      saveOperations.push(updatePlaythroughIds());
-
-      // Execute all save operations in parallel
-      await Promise.all(saveOperations);
-    } catch (error) {
-      console.error(
-        `Failed to save playthrough ${playthrough.id} to IndexedDB:`,
-        error
-      );
-      console.error('Error details:', error);
-    }
-  },
-  500
-); // 500ms delay for playthrough saves
-
-// Lazy loading helpers
 const loadPlaythroughById = async (
   playthroughId: string
 ): Promise<Playthrough | null> => {
@@ -237,6 +210,8 @@ const deletePlaythroughFromIndexedDB = async (
   if (typeof window === 'undefined') return;
 
   try {
+    playthroughsStore.isSaving = true;
+
     // Get current playthrough IDs and prepare delete operations
     const playthroughIds = ((await get('playthrough_ids')) || []) as string[];
     const updatedIds = playthroughIds.filter(
@@ -250,6 +225,8 @@ const deletePlaythroughFromIndexedDB = async (
       `Failed to delete playthrough ${playthroughId} from IndexedDB:`,
       error
     );
+  } finally {
+    playthroughsStore.isSaving = false;
   }
 };
 
@@ -300,6 +277,7 @@ const loadFromIndexedDB = async (): Promise<PlaythroughsState> => {
       playthroughs: [activePlaythrough],
       activePlaythroughId: activePlaythrough.id,
       isLoading: false,
+      isSaving: false,
     };
   } catch (error) {
     console.error('Failed to load playthroughs from IndexedDB:', error);
@@ -659,7 +637,7 @@ export const playthroughActions = {
   // Force immediate save (for critical operations)
   forceSave: async () => {
     if (typeof window === 'undefined') return;
-    await debouncedSaveAll(playthroughsStore);
+    await saveToIndexedDB(playthroughsStore);
   },
 
   // Helper methods for drag and drop operations
@@ -847,4 +825,9 @@ export const useEncounters = (): Playthrough['encounters'] => {
   return useMemo(() => {
     return activePlaythrough?.encounters || {};
   }, [activePlaythrough?.encounters, activePlaythrough?.updatedAt]);
+};
+
+export const useIsSaving = (): boolean => {
+  const snapshot = useSnapshot(playthroughsStore);
+  return snapshot.isSaving;
 };
