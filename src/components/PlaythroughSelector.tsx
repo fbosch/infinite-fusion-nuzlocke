@@ -125,7 +125,7 @@ export default function PlaythroughSelector({
         <MenuItems
           className={clsx(
             'absolute right-0 z-50 mt-2 origin-top-right rounded-md',
-            'bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5',
+            'bg-white dark:bg-gray-800 shadow-lg ring-1 ring-gray-200 dark:ring-gray-600 ring-opacity-5',
             'border border-gray-200 dark:border-gray-600',
             'focus:outline-none',
             'min-w-[260px] max-w-[320px]'
@@ -230,7 +230,7 @@ export default function PlaythroughSelector({
                     'border border-gray-300 dark:border-gray-600 rounded',
                     'bg-white dark:bg-gray-700 text-gray-900 dark:text-white',
                     'placeholder-gray-500 dark:placeholder-gray-400',
-                    'focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500'
+                    'focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500'
                   )}
                   autoFocus
                   maxLength={50}
@@ -241,7 +241,7 @@ export default function PlaythroughSelector({
                   onClick={handleCreatePlaythrough}
                   disabled={!newPlaythroughName.trim()}
                   className={clsx(
-                    'px-2 py-2 text-xs font-medium text-white rounded',
+                    'px-2 py-2 text-xs font-medium text-white rounded cursor-pointer',
                     'bg-blue-600 hover:bg-blue-700 transition-colors',
                     'focus:outline-none focus:ring-1 focus:ring-blue-500',
                     'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600'
