@@ -15,6 +15,78 @@ import { useEncounters, useIsLoading } from '@/stores/playthroughs';
 
 const columnHelper = createColumnHelper<Location>();
 
+// Skeleton loading component that matches the table structure
+function LocationTableSkeleton() {
+  return (
+    <div className='overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'>
+      <table
+        className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700'
+        role='table'
+        aria-label='Loading locations table'
+      >
+        <thead className='bg-gray-50 dark:bg-gray-800'>
+          <tr>
+            <th
+              className='px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
+              style={{ width: '20px', minWidth: '20px' }}
+            >
+              Location
+            </th>
+            <th
+              className='px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
+              style={{ width: '120px', minWidth: '120px' }}
+            ></th>
+            <th
+              className='px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
+              style={{ width: '700px', minWidth: '700px' }}
+            >
+              Encounter
+            </th>
+            <th
+              className='px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
+              style={{ width: '60px', minWidth: '60px' }}
+            ></th>
+          </tr>
+        </thead>
+        <tbody className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700 opacity-30'>
+          {Array.from({ length: 12 }).map((_, index) => (
+            <tr
+              key={index}
+              className='hover:bg-gray-50 h-[150px] dark:hover:bg-gray-800 transition-colors'
+              style={{ containIntrinsicHeight: '150px' }}
+            >
+              {/* Location name column */}
+              <td className='px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
+                <div className='h-5 bg-gray-300 dark:bg-gray-600 rounded animate-pulse w-19'></div>
+              </td>
+
+              {/* Sprite column */}
+              <td className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
+                <div className='size-14 bg-gray-300 dark:bg-gray-600 rounded animate-pulse mx-auto'></div>
+              </td>
+
+              {/* Encounter column */}
+              <td className='px-4 pt-8.5 pb-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
+                <div className='flex flex-row justify-center gap-4 items-center'>
+                  <div className='flex-1'>
+                    <div className='relative'>
+                      <div className='h-24 bg-gray-300 dark:bg-gray-600 rounded animate-pulse'></div>
+                    </div>
+                  </div>
+                  <div className='size-10 bg-gray-300 dark:bg-gray-600 rounded animate-pulse'></div>
+                </div>
+              </td>
+
+              {/* Reset column */}
+              <td className='p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top'></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function LocationList() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const encounters = useEncounters();
@@ -82,20 +154,9 @@ export default function LocationList() {
     enableMultiSort: false,
   });
 
-  // Show loading state while store is initializing from IndexedDB
+  // Show skeleton loading state while store is initializing from IndexedDB
   if (isLoading) {
-    return (
-      <div
-        className='flex items-center justify-center p-8'
-        role='status'
-        aria-live='polite'
-      >
-        <div className='flex items-center space-x-2 text-gray-500 dark:text-gray-400'>
-          <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500'></div>
-          <span>Loading playthrough data...</span>
-        </div>
-      </div>
-    );
+    return <LocationTableSkeleton />;
   }
 
   // Show loading state if no data
