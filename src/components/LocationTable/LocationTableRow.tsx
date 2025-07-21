@@ -34,7 +34,6 @@ export default function LocationTableRow({
               key={cell.id}
               routeId={routeId}
               locationId={locationId}
-              encounterData={encounterData}
             />
           );
         }

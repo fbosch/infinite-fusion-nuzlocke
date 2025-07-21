@@ -1,4 +1,5 @@
 import { proxy, subscribe } from 'valtio';
+import { devtools } from 'valtio/utils';
 import { z } from 'zod';
 import { get, set, del } from 'idb-keyval';
 import { debounce } from 'lodash';
@@ -311,6 +312,11 @@ let playthroughsStore: PlaythroughsState;
 if (typeof window !== 'undefined') {
   // Client-side: Initialize with default state first, then load from IndexedDB
   playthroughsStore = proxy<PlaythroughsState>(defaultState);
+
+  // Add devtools integration for debugging
+  if (process.env.NODE_ENV === 'development') {
+    devtools(playthroughsStore, { name: 'Playthroughs Store' });
+  }
 
   // Load data from IndexedDB asynchronously
   loadFromIndexedDB().then(loadedState => {
