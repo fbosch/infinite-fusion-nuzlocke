@@ -75,7 +75,7 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
                   Head
                 </span>
                 <PokemonCombobox
-                  key={headPokemon?.uid || `${locationId}-head-empty`}
+                  key={`${locationId}-head`}
                   routeId={routeId}
                   locationId={locationId}
                   value={headPokemon}
@@ -99,7 +99,7 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
                   Body
                 </span>
                 <PokemonCombobox
-                  key={bodyPokemon?.uid || `${locationId}-body-empty`}
+                  key={`${locationId}-body`}
                   routeId={routeId}
                   locationId={locationId}
                   value={bodyPokemon}
@@ -112,7 +112,7 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
             </div>
           ) : (
             <PokemonCombobox
-              key={selectedPokemon?.uid || `${locationId}-single-empty`}
+              key={`${locationId}-single`}
               routeId={routeId}
               locationId={locationId}
               value={selectedPokemon}

@@ -119,7 +119,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   }, [value?.id, value?.originalLocation]);
 
   // Don't render if no Pokemon is selected or no evolutions available
-  if (!value || availableEvolutions.length === 0) {
+  if (!value || availableEvolutions.length === 0 || isLoadingEvolutions) {
     return null;
   }
 
@@ -151,13 +151,9 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
               : `Choose evolution (${availableEvolutions.length} options)`
           }
         >
-          {isLoadingEvolutions ? null : (
-            <>
-              <Atom className='w-3 h-3' />
-              {availableEvolutions.length > 1 && (
-                <ChevronDown className='w-3 h-3' />
-              )}
-            </>
+          <Atom className='w-3 h-3' />
+          {availableEvolutions.length > 1 && (
+            <ChevronDown className='w-3 h-3' />
           )}
         </button>
 

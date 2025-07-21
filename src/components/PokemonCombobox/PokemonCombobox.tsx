@@ -9,13 +9,12 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
-import { Check, Loader2, Search } from 'lucide-react';
+import { Check, Search } from 'lucide-react';
 import {
   Combobox,
   ComboboxInput,
   ComboboxOptions,
   ComboboxOption,
-  ComboboxButton,
 } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -287,11 +286,13 @@ export const PokemonCombobox = ({
   // Ref to track pending animation frame for drag leave operations
   const dragLeaveAnimationRef = useRef<number | null>(null);
 
+  // Ref to maintain focus on input
+  const inputRef = useRef<HTMLInputElement>(null);
+
   // State for route encounters and all Pokemon
   const [routeEncounterData, setRouteEncounterData] = useState<PokemonOption[]>(
     []
   );
-  const [isLoading, setIsLoading] = useState(false);
 
   // Predicate function to check if a Pokemon is in the current route
   const isRoutePokemon = useCallback(
@@ -304,8 +305,6 @@ export const PokemonCombobox = ({
 
   // Async function to load route encounter data
   const loadRouteEncounterData = useCallback(async () => {
-    setIsLoading(true);
-
     try {
       // Load Pokemon data, name map, and encounter data in parallel
       const [allPokemon, nameMap, encounter] = await Promise.all([
@@ -329,8 +328,6 @@ export const PokemonCombobox = ({
       }
     } catch (err) {
       console.error(`Error loading encounter data for route ${routeId}:`, err);
-    } finally {
-      setIsLoading(false);
     }
   }, [routeId, gameMode, locationId]);
 
@@ -463,6 +460,11 @@ export const PokemonCombobox = ({
         // Clear the selection when input is cleared
         onChange(null);
         setQuery(value);
+
+        // Maintain focus on the input after clearing
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 0);
       } else {
         // Deferred update for typing
         startTransition(() => setQuery(value));
@@ -668,6 +670,7 @@ export const PokemonCombobox = ({
 
   return (
     <div
+      key={value?.uid}
       className='relative'
       onDrop={handleDrop}
       onDragOver={handleDragOver}
@@ -682,6 +685,7 @@ export const PokemonCombobox = ({
       >
         <div className='relative'>
           <ComboboxInput
+            ref={inputRef}
             className={clsx(
               'rounded-t-md rounded-b-none border',
               'w-full px-3 py-3.5 text-sm  bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
@@ -733,16 +737,7 @@ export const PokemonCombobox = ({
               />
             </div>
           )}
-          {/* Evolution Button */}
           <PokemonEvolutionButton value={value} onChange={onChange} />
-          <ComboboxButton className='absolute inset-y-0 right-0 flex items-center pr-2'>
-            {isLoading ? (
-              <Loader2
-                className='h-4 w-4 animate-spin text-gray-400'
-                aria-hidden='true'
-              />
-            ) : null}
-          </ComboboxButton>
         </div>
         <ComboboxOptions
           className={clsx(
