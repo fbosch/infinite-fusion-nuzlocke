@@ -140,67 +140,60 @@ export default function PlaythroughSelector({
               {allPlaythroughs.map(playthrough => (
                 <MenuItem key={playthrough.id}>
                   {({ focus }) => (
-                    <div
+                    <button
+                      onClick={() => handlePlaythroughSelect(playthrough.id)}
                       className={clsx(
-                        'group relative flex items-center w-full',
+                        'group flex w-full items-center justify-between px-3 py-3 text-sm',
+                        'focus:outline-none text-left transition-colors',
                         focus || activePlaythrough?.id === playthrough.id
-                          ? 'bg-blue-50 dark:bg-blue-900/20'
-                          : 'hover:bg-gray-100 dark:hover:bg-gray-700',
-                        'transition-colors'
+                          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                          : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100'
                       )}
                     >
-                      <button
-                        onClick={() => handlePlaythroughSelect(playthrough.id)}
-                        className={clsx(
-                          'flex w-full items-center justify-between px-3 py-3 text-sm ',
-                          'focus:outline-none flex-1 text-left cursor-pointer',
-                          activePlaythrough?.id === playthrough.id || focus
-                            ? 'text-blue-600 dark:text-blue-400'
-                            : 'text-gray-900 dark:text-gray-100 '
-                        )}
-                      >
-                        <div className='flex items-center gap-2 flex-1 min-w-0'>
-                          <div
-                            className={clsx(
-                              'w-2 h-2 rounded-full flex-shrink-0',
-                              activePlaythrough?.id === playthrough.id
-                                ? 'bg-blue-500'
-                                : 'bg-gray-400'
-                            )}
-                          />
-                          <span className='truncate font-medium'>
-                            {playthrough.name}
-                          </span>
-                          {playthrough.remixMode && (
-                            <span className='text-xs bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded flex-shrink-0 font-medium'>
-                              Remix
-                            </span>
-                          )}
-                        </div>
-                        <div className='flex items-center gap-2'>
-                          <div className='text-xs text-gray-500 dark:text-gray-400 flex-shrink-0'>
-                            {new Date(
-                              playthrough.updatedAt
-                            ).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </button>
-                      {allPlaythroughs.length > 1 && (
-                        <button
-                          onClick={e => handleDeleteClick(playthrough, e)}
+                      <div className='flex items-center gap-2 flex-1 min-w-0'>
+                        <div
                           className={clsx(
-                            'p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity',
-                            'hover:bg-red-100 dark:hover:bg-red-900/20',
-                            'text-gray-400 hover:text-red-600 dark:hover:text-red-400',
-                            'focus:outline-none focus:opacity-100',
-                            'flex-shrink-0 cursor-pointer mr-2 '
+                            'w-2 h-2 rounded-full flex-shrink-0',
+                            activePlaythrough?.id === playthrough.id
+                              ? 'bg-blue-500'
+                              : 'bg-gray-400'
                           )}
-                          title='Delete playthrough'
-                        >
-                          <Trash2 className='w-3 h-3' />
-                        </button>
-                      )}
-                    </div>
+                        />
+                        <span className='truncate font-medium'>
+                          {playthrough.name}
+                        </span>
+                        {playthrough.remixMode && (
+                          <span className='text-xs bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded flex-shrink-0 font-medium'>
+                            Remix
+                          </span>
+                        )}
+                      </div>
+                      <div className='flex items-center gap-2'>
+                        <div className='text-xs text-gray-500 dark:text-gray-400 flex-shrink-0'>
+                          {new Date(playthrough.updatedAt).toLocaleDateString()}
+                        </div>
+                        {allPlaythroughs.length > 1 && (
+                          <span
+                            onClick={e => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              handleDeleteClick(playthrough, e);
+                            }}
+                            className={clsx(
+                              'p-1 ml-1 rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity',
+                              'hover:bg-red-100 dark:hover:bg-red-900/20',
+                              'text-gray-400 hover:text-red-600 dark:hover:text-red-400',
+                              'cursor-pointer'
+                            )}
+                            title='Delete playthrough'
+                            role='button'
+                            aria-label={`Delete ${playthrough.name}`}
+                          >
+                            <Trash2 className='w-3 h-3' />
+                          </span>
+                        )}
+                      </div>
+                    </button>
                   )}
                 </MenuItem>
               ))}
