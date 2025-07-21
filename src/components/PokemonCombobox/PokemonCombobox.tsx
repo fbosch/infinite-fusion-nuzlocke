@@ -598,9 +598,18 @@ export const PokemonCombobox = ({
     [dragPreview, dragSnapshot.currentDragValue, dragSnapshot.currentDragData]
   );
 
-  const handleDragLeave = useCallback(() => {
-    // Clear preview when dragging away
-    setDragPreview(null);
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    // Only clear preview when actually leaving the component, not when moving to child elements
+    const rect = e.currentTarget.getBoundingClientRect();
+    const isLeavingComponent =
+      e.clientX < rect.left ||
+      e.clientX > rect.right ||
+      e.clientY < rect.top ||
+      e.clientY > rect.bottom;
+
+    if (isLeavingComponent) {
+      setDragPreview(null);
+    }
   }, []);
 
   const handleDragEnd = useCallback(() => {
@@ -609,7 +618,13 @@ export const PokemonCombobox = ({
   }, []);
 
   return (
-    <div className='relative'>
+    <div
+      className='relative'
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDragEnd={handleDragEnd}
+    >
       <Combobox
         value={value || null}
         onChange={handleChange}
@@ -617,91 +632,83 @@ export const PokemonCombobox = ({
         immediate
       >
         <div className='relative'>
-          <div
-            className='relative'
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDragEnd={handleDragEnd}
-          >
-            <ComboboxInput
-              className={clsx(
-                'rounded-t-md rounded-b-none border',
-                'w-full px-3 py-3.5 text-sm  bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
-                'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
-                'focus:cursor-text hover:cursor-pointer',
-                (value || dragPreview) && 'pl-12', // Add padding for sprite when value is selected or previewing
-                dragPreview &&
-                  'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60' // Highlight when showing preview with opacity
-              )}
-              placeholder={placeholder}
-              displayValue={(pokemon: PokemonOption | null | undefined) => {
-                const displayPokemon = dragPreview || pokemon;
-                return displayPokemon?.name || '';
-              }}
-              spellCheck={false}
-              autoComplete='off'
-              onChange={handleInputChange}
-              onFocus={handleInteraction}
-              onClick={handleInteraction}
-              onMouseEnter={handleInteraction}
-            />
-            {(value || dragPreview) && (
-              <div className='absolute inset-y-0 left-1.5 flex items-center'>
-                <Image
-                  src={getPokemonSpriteUrlFromOption(dragPreview || value!)}
-                  alt={(dragPreview || value)!.name}
-                  width={40}
-                  height={40}
-                  className={clsx(
-                    'object-center object-contain cursor-grab active:cursor-grabbing',
-                    dragPreview && 'opacity-60 pointer-none' // Make preview sprite opaque
-                  )}
-                  quality={70}
-                  priority={true}
-                  loading='eager'
-                  draggable
-                  onDragStart={e => {
-                    e.dataTransfer.setData(
-                      'text/plain',
-                      (dragPreview || value)!.name
-                    );
-                    e.dataTransfer.effectAllowed = 'copy';
-                    dragActions.startDrag(
-                      (dragPreview || value)!.name,
-                      comboboxId || '',
-                      dragPreview || value || null
-                    );
-                  }}
-                />
-              </div>
-            )}
-            {/* Evolution Button */}
-            <PokemonEvolutionButton value={value} onChange={onChange} />
-            <ComboboxButton className='absolute inset-y-0 right-0 flex items-center pr-2'>
-              {isLoading ? (
-                <Loader2
-                  className='h-4 w-4 animate-spin text-gray-400'
-                  aria-hidden='true'
-                />
-              ) : null}
-            </ComboboxButton>
-          </div>
-          <ComboboxOptions
+          <ComboboxInput
             className={clsx(
-              'absolute z-20 w-full overflow-hidden rounded-b-md py-1 text-base shadow-lg focus:outline-none sm:text-sm',
-              'bg-white dark:bg-gray-800',
-              'border border-gray-400 dark:border-gray-600'
+              'rounded-t-md rounded-b-none border',
+              'w-full px-3 py-3.5 text-sm  bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
+              'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
+              'focus:cursor-text hover:cursor-pointer',
+              (value || dragPreview) && 'pl-12', // Add padding for sprite when value is selected or previewing
+              dragPreview &&
+                'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60' // Highlight when showing preview with opacity
             )}
-          >
-            <PokemonOptions
-              options={finalOptions}
-              isRoutePokemon={isRoutePokemon}
-              query={deferredQuery}
-              comboboxId={comboboxId || ''} // Provide a default value for comboboxId
-            />
-          </ComboboxOptions>
+            placeholder={placeholder}
+            displayValue={(pokemon: PokemonOption | null | undefined) => {
+              const displayPokemon = dragPreview || pokemon;
+              return displayPokemon?.name || '';
+            }}
+            spellCheck={false}
+            autoComplete='off'
+            onChange={handleInputChange}
+            onFocus={handleInteraction}
+            onClick={handleInteraction}
+            onMouseEnter={handleInteraction}
+          />
+          {(value || dragPreview) && (
+            <div className='absolute inset-y-0 left-1.5 flex items-center'>
+              <Image
+                src={getPokemonSpriteUrlFromOption(dragPreview || value!)}
+                alt={(dragPreview || value)!.name}
+                width={40}
+                height={40}
+                className={clsx(
+                  'object-center object-contain cursor-grab active:cursor-grabbing',
+                  dragPreview && 'opacity-60 pointer-none' // Make preview sprite opaque
+                )}
+                quality={70}
+                priority={true}
+                loading='eager'
+                draggable
+                onDragStart={e => {
+                  e.dataTransfer.setData(
+                    'text/plain',
+                    (dragPreview || value)!.name
+                  );
+                  e.dataTransfer.effectAllowed = 'copy';
+                  dragActions.startDrag(
+                    (dragPreview || value)!.name,
+                    comboboxId || '',
+                    dragPreview || value || null
+                  );
+                }}
+              />
+            </div>
+          )}
+          {/* Evolution Button */}
+          <PokemonEvolutionButton value={value} onChange={onChange} />
+          <ComboboxButton className='absolute inset-y-0 right-0 flex items-center pr-2'>
+            {isLoading ? (
+              <Loader2
+                className='h-4 w-4 animate-spin text-gray-400'
+                aria-hidden='true'
+              />
+            ) : null}
+          </ComboboxButton>
         </div>
+        <ComboboxOptions
+          className={clsx(
+            'absolute z-20 w-full overflow-hidden rounded-b-md py-1 text-base shadow-lg focus:outline-none sm:text-sm',
+            'bg-white dark:bg-gray-800',
+            'border border-gray-400 dark:border-gray-600'
+          )}
+        >
+          <PokemonOptions
+            options={finalOptions}
+            isRoutePokemon={isRoutePokemon}
+            query={deferredQuery}
+            comboboxId={comboboxId || ''} // Provide a default value for comboboxId
+          />
+        </ComboboxOptions>
       </Combobox>
       <div className='flex'>
         <PokemonNicknameInput
