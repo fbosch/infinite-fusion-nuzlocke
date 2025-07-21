@@ -57,12 +57,12 @@ function LocationTableSkeleton() {
             >
               {/* Location name column */}
               <td className='px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
-                <div className='h-5 bg-gray-300 dark:bg-gray-600 rounded animate-pulse w-19'></div>
+                <div className='h-5 bg-gray-300 dark:bg-gray-600 rounded animate-pulse w-23'></div>
               </td>
 
               {/* Sprite column */}
               <td className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
-                <div className='size-14 bg-gray-300 dark:bg-gray-600 rounded animate-pulse mx-auto'></div>
+                <div className='size-14 bg-transparee mx-auto'></div>
               </td>
 
               {/* Encounter column */}
