@@ -471,6 +471,40 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       expect(encounters['non-existent'].head).toBeNull();
       expect(encounters['non-existent'].body).toBeNull();
     });
+
+    it('should move body to head when unfusing if head is empty', async () => {
+      const charmander = createMockPokemon('Charmander', 4);
+      charmander.nickname = 'Flame';
+
+      // Create a fusion with only body filled
+      playthroughActions.updateEncounter('route-1', null, 'head', true);
+      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
+
+      let encounters = playthroughActions.getEncounters();
+
+      // Verify initial state: fusion with empty head, filled body
+      const initialEncounter = encounters['route-1'];
+      expect(initialEncounter).toBeDefined();
+      expect(initialEncounter!.isFusion).toBe(true);
+      expect(initialEncounter!.head).toBeNull();
+      expect(initialEncounter!.body).toBeDefined();
+      expect(initialEncounter!.body!.name).toBe('Charmander');
+      expect(initialEncounter!.body!.nickname).toBe('Flame');
+
+      // Toggle fusion off (unfuse)
+      playthroughActions.toggleEncounterFusion('route-1');
+
+      encounters = playthroughActions.getEncounters();
+
+      // Verify body moved to head, body cleared, isFusion false
+      const finalEncounter = encounters['route-1'];
+      expect(finalEncounter).toBeDefined();
+      expect(finalEncounter!.isFusion).toBe(false);
+      expect(finalEncounter!.head).toBeDefined();
+      expect(finalEncounter!.head!.name).toBe('Charmander');
+      expect(finalEncounter!.head!.nickname).toBe('Flame');
+      expect(finalEncounter!.body).toBeNull();
+    });
   });
 
   describe('edge cases and error handling', () => {

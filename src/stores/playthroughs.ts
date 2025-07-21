@@ -14,7 +14,7 @@ export const EncounterDataSchema = z.object({
 export const PlaythroughSchema = z.object({
   id: z.string(),
   name: z.string(),
-  encounters: z.record(z.string(), EncounterDataSchema.nullable()),
+  encounters: z.record(z.string(), EncounterDataSchema),
   remixMode: z.boolean().default(false),
   createdAt: z.number(),
   updatedAt: z.number(),
@@ -581,11 +581,31 @@ export const playthroughActions = {
       isFusion: false,
     };
 
-    // Simply toggle the isFusion flag without modifying head/body
-    activePlaythrough.encounters[locationId] = {
-      ...currentEncounter,
-      isFusion: !currentEncounter.isFusion,
-    };
+    const newIsFusion = !currentEncounter.isFusion;
+
+    // When unfusing (going from fusion to non-fusion)
+    if (currentEncounter.isFusion && !newIsFusion) {
+      // If head is empty but body has data, move body to head
+      if (!currentEncounter.head && currentEncounter.body) {
+        activePlaythrough.encounters[locationId] = {
+          head: currentEncounter.body,
+          body: null,
+          isFusion: false,
+        };
+      } else {
+        // If both slots have data or only head has data, preserve as-is
+        activePlaythrough.encounters[locationId] = {
+          ...currentEncounter,
+          isFusion: false,
+        };
+      }
+    } else {
+      // When fusing (going from non-fusion to fusion) or other cases
+      activePlaythrough.encounters[locationId] = {
+        ...currentEncounter,
+        isFusion: newIsFusion,
+      };
+    }
 
     activePlaythrough.updatedAt = getCurrentTimestamp();
   },

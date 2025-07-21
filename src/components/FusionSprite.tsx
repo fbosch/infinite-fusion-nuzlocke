@@ -262,7 +262,7 @@ export function FusionSprite({
       </a>
       {nicknameText && (
         <div className='mt-4 text-center absolute bottom-0 translate-y-6'>
-          <span className='text-xs font-mono truncate tracking-widest max-w-full block px-1 rounded text-gray-900 dark:text-white '>
+          <span className='text-xs font-mono font-bold truncate tracking-widest max-w-full block px-1 rounded text-gray-900 dark:text-white '>
             {nicknameText}
           </span>
         </div>
