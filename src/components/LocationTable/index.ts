@@ -1,3 +1,5 @@
+export { EncounterCell } from './EncounterCell';
+export { FusionToggleButton } from './FusionToggleButton';
 export { default as LocationTableHeader } from './LocationTableHeader';
 export { default as LocationTableRow } from './LocationTableRow';
 export { default as ResetEncounterButton } from './ResetEncounterButton';
