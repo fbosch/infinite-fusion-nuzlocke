@@ -1,7 +1,6 @@
 import Logo from '@/components/Logo';
 import PlaythroughMenu from '@/components/PlaythroughMenu';
 import ThemeToggle from '@/components/ThemeToggle';
-import { Sparkle } from 'lucide-react';
 
 export default function Header() {
   return (
@@ -20,23 +19,13 @@ export default function Header() {
             <div className='flex items-center'>
               <Logo />
               <h1 className='ml-4'>
-                <span className='block text-sm sm:text-lg font-medium bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'>
+                <span className='block text-sm sm:text-md font-medium bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'>
                   Pokémon Infinite Fusion
                 </span>
-                <div className='flex items-center space-x-1 text-gray-800 dark:text-white'>
-                  <Sparkle
-                    className='size-4'
-                    strokeWidth={2}
-                    fill='currentColor'
-                  />
+                <div className='flex items-center space-x-1 text-gray-800 dark:text-white tracking-tight'>
                   <span className='block text-lg sm:text-xl font-bold'>
                     Nuzlocke Tracker
                   </span>
-                  <Sparkle
-                    className='size-4'
-                    strokeWidth={2}
-                    fill='currentColor'
-                  />
                 </div>
               </h1>
             </div>
