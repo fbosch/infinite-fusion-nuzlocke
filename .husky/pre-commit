@@ -1,15 +1,1 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-# Run code validation before commit
-echo "🔍 Running code validation..."
-pnpm validate
-
-# If validation fails, the commit will be aborted
-if [ $? -ne 0 ]; then
-  echo "❌ Code validation failed. Please fix the issues before committing."
-  echo "💡 You can run 'pnpm validate:fix' to automatically fix many issues."
-  exit 1
-fi
-
-echo "✅ Code validation passed!" 
+pnpm exec lint-staged
