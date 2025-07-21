@@ -24,15 +24,6 @@ export default function PlaythroughSelector({
   const [newPlaythroughName, setNewPlaythroughName] = useState('');
   const allPlaythroughs = useAllPlaythroughs();
 
-  // Load all playthroughs when menu opens
-  const loadAllPlaythroughs = useCallback(async () => {
-    try {
-      await playthroughActions.getAllPlaythroughs();
-    } catch (error) {
-      console.error('Failed to load playthroughs:', error);
-    }
-  }, []);
-
   // Switch to a different playthrough
   const handlePlaythroughSelect = useCallback(async (playthroughId: string) => {
     try {
@@ -56,11 +47,10 @@ export default function PlaythroughSelector({
       setNewPlaythroughName('');
       setShowCreateInput(false);
       // Refresh the list
-      await loadAllPlaythroughs();
     } catch (error) {
       console.error('Failed to create playthrough:', error);
     }
-  }, [newPlaythroughName, activePlaythrough?.remixMode, loadAllPlaythroughs]);
+  }, [newPlaythroughName, activePlaythrough?.remixMode]);
 
   // Handle enter key in create input
   const handleCreateInputKeyDown = useCallback(
@@ -88,7 +78,6 @@ export default function PlaythroughSelector({
           'text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
           'min-w-[140px]'
         )}
-        onClick={loadAllPlaythroughs}
       >
         <div className='flex items-center gap-2'>
           <Album className='w-4 h-4 flex-shrink-0' />
