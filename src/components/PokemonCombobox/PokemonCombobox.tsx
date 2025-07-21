@@ -480,7 +480,7 @@ export const PokemonCombobox = ({
           isFromDifferentCombobox &&
           dragSnapshot.currentDragValue &&
           value &&
-          dragSnapshot.currentDragValue.name !== value.name;
+          dragSnapshot.currentDragValue.uid !== value.uid;
 
         if (canSwitch && dragSnapshot.currentDragSource) {
           const { locationId: sourceLocationId, field: sourceField } =

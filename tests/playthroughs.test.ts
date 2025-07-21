@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
 import type { z } from 'zod';
 
 // Mock IndexedDB operations first
@@ -12,6 +13,12 @@ vi.mock('idb-keyval', () => ({
 import {
   playthroughActions,
   playthroughsStore,
+  useActivePlaythrough,
+  useIsRemixMode,
+  usePlaythroughById,
+  useIsLoading,
+  useEncounters,
+  usePlaythroughsSnapshot,
 } from '../src/stores/playthroughs';
 import { PokemonOptionSchema } from '../src/loaders/pokemon';
 
@@ -339,6 +346,207 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       expect(encounters['route-1'].head?.name).toBe('Pikachu');
       expect(encounters['route-2'].head).toBeNull();
     });
+
+    it('should swap same-species Pokemon correctly (preserving both instances)', async () => {
+      // Create two Pikachu instances with different UIDs and nicknames
+      const pikachu1 = createMockPokemon('Pikachu', 25);
+      const pikachu2 = createMockPokemon('Pikachu', 25);
+
+      // Add different nicknames to distinguish them
+      pikachu1.nickname = 'Sparky';
+      pikachu2.nickname = 'Lightning';
+
+      // Generate UIDs to simulate real behavior
+      pikachu1.uid = 'pikachu_route1_uid_123';
+      pikachu2.uid = 'pikachu_route2_uid_456';
+
+      // Set up encounters with same species but different instances
+      playthroughActions.updateEncounter('route-1', pikachu1);
+      playthroughActions.updateEncounter('route-2', pikachu2);
+
+      const beforeEncounters = playthroughActions.getEncounters();
+
+      // Verify initial setup - both Pokemon should be present with different UIDs
+      expect(beforeEncounters['route-1'].head?.name).toBe('Pikachu');
+      expect(beforeEncounters['route-1'].head?.nickname).toBe('Sparky');
+      expect(beforeEncounters['route-1'].head?.uid).toBe(
+        'pikachu_route1_uid_123'
+      );
+
+      expect(beforeEncounters['route-2'].head?.name).toBe('Pikachu');
+      expect(beforeEncounters['route-2'].head?.nickname).toBe('Lightning');
+      expect(beforeEncounters['route-2'].head?.uid).toBe(
+        'pikachu_route2_uid_456'
+      );
+
+      // Swap the same-species Pokemon
+      playthroughActions.swapEncounters('route-1', 'route-2');
+
+      const afterEncounters = playthroughActions.getEncounters();
+
+      // Both encounters should still exist after swap
+      expect(afterEncounters['route-1']).toBeDefined();
+      expect(afterEncounters['route-2']).toBeDefined();
+
+      // Verify the Pokemon were actually swapped (not lost)
+      expect(afterEncounters['route-1'].head?.name).toBe('Pikachu');
+      expect(afterEncounters['route-1'].head?.nickname).toBe('Lightning');
+      expect(afterEncounters['route-1'].head?.uid).toBe(
+        'pikachu_route2_uid_456'
+      );
+
+      expect(afterEncounters['route-2'].head?.name).toBe('Pikachu');
+      expect(afterEncounters['route-2'].head?.nickname).toBe('Sparky');
+      expect(afterEncounters['route-2'].head?.uid).toBe(
+        'pikachu_route1_uid_123'
+      );
+
+      // This test ensures that same-species Pokemon with different UIDs
+      // are correctly identified as different instances and swapped properly,
+      // preventing the bug where one Pokemon would disappear
+    });
+  });
+
+  describe('Drag and Drop Logic Tests', () => {
+    // Simulate the canSwitch logic from PokemonCombobox
+    const simulateCanSwitchLogic = (
+      isFromDifferentCombobox: boolean,
+      currentDragValue: { uid?: string; name: string } | null,
+      targetValue: { uid?: string; name: string } | null
+    ): boolean => {
+      // This is the FIXED logic that compares by uid instead of name
+      return (
+        isFromDifferentCombobox &&
+        currentDragValue !== null &&
+        targetValue !== null &&
+        currentDragValue.uid !== targetValue.uid
+      );
+    };
+
+    // Simulate the BROKEN logic that was causing the bug
+    const simulateBrokenCanSwitchLogic = (
+      isFromDifferentCombobox: boolean,
+      currentDragValue: { uid?: string; name: string } | null,
+      targetValue: { uid?: string; name: string } | null
+    ): boolean => {
+      // This is the BROKEN logic that compared by name
+      return (
+        isFromDifferentCombobox &&
+        currentDragValue !== null &&
+        targetValue !== null &&
+        currentDragValue.name !== targetValue.name
+      );
+    };
+
+    describe('Fixed canSwitch logic (comparing by uid)', () => {
+      it('should return true when dragging same-species Pokemon with different UIDs', () => {
+        // Create two Pikachu with different UIDs (same species, different instances)
+        const pikachu1 = { name: 'Pikachu', uid: 'pikachu_route1_uid_123' };
+        const pikachu2 = { name: 'Pikachu', uid: 'pikachu_route2_uid_456' };
+
+        const canSwitch = simulateCanSwitchLogic(
+          true, // isFromDifferentCombobox
+          pikachu1, // currentDragValue
+          pikachu2 // targetValue
+        );
+
+        // Should return true because UIDs are different
+        expect(canSwitch).toBe(true);
+      });
+
+      it('should return false when dragging the exact same Pokemon instance', () => {
+        const pikachu = { name: 'Pikachu', uid: 'pikachu_route1_uid_123' };
+
+        const canSwitch = simulateCanSwitchLogic(
+          true, // isFromDifferentCombobox
+          pikachu, // currentDragValue
+          pikachu // targetValue (same instance)
+        );
+
+        // Should return false because it's the same Pokemon instance
+        expect(canSwitch).toBe(false);
+      });
+
+      it('should return true when dragging different species', () => {
+        const pikachu = { name: 'Pikachu', uid: 'pikachu_route1_uid_123' };
+        const charmander = {
+          name: 'Charmander',
+          uid: 'charmander_route2_uid_456',
+        };
+
+        const canSwitch = simulateCanSwitchLogic(
+          true, // isFromDifferentCombobox
+          pikachu, // currentDragValue
+          charmander // targetValue
+        );
+
+        // Should return true because they're different Pokemon
+        expect(canSwitch).toBe(true);
+      });
+    });
+
+    describe('Broken canSwitch logic (comparing by name) - demonstrates the bug', () => {
+      it('should return false when dragging same-species Pokemon (causing the bug)', () => {
+        // Create two Pikachu with different UIDs (same species, different instances)
+        const pikachu1 = { name: 'Pikachu', uid: 'pikachu_route1_uid_123' };
+        const pikachu2 = { name: 'Pikachu', uid: 'pikachu_route2_uid_456' };
+
+        const canSwitch = simulateBrokenCanSwitchLogic(
+          true, // isFromDifferentCombobox
+          pikachu1, // currentDragValue
+          pikachu2 // targetValue
+        );
+
+        // This would return false because names are the same (CAUSING THE BUG)
+        expect(canSwitch).toBe(false);
+      });
+
+      it('should return true when dragging different species (worked fine)', () => {
+        const pikachu = { name: 'Pikachu', uid: 'pikachu_route1_uid_123' };
+        const charmander = {
+          name: 'Charmander',
+          uid: 'charmander_route2_uid_456',
+        };
+
+        const canSwitch = simulateBrokenCanSwitchLogic(
+          true, // isFromDifferentCombobox
+          pikachu, // currentDragValue
+          charmander // targetValue
+        );
+
+        // This would work fine because names are different
+        expect(canSwitch).toBe(true);
+      });
+    });
+
+    describe('Edge cases', () => {
+      it('should handle null values gracefully', () => {
+        const pikachu = { name: 'Pikachu', uid: 'pikachu_route1_uid_123' };
+
+        // Test with null currentDragValue
+        expect(simulateCanSwitchLogic(true, null, pikachu)).toBe(false);
+
+        // Test with null targetValue
+        expect(simulateCanSwitchLogic(true, pikachu, null)).toBe(false);
+
+        // Test with both null
+        expect(simulateCanSwitchLogic(true, null, null)).toBe(false);
+      });
+
+      it('should handle undefined UIDs gracefully', () => {
+        const pikachu1 = { name: 'Pikachu', uid: undefined };
+        const pikachu2 = { name: 'Pikachu', uid: undefined };
+
+        const canSwitch = simulateCanSwitchLogic(
+          true, // isFromDifferentCombobox
+          pikachu1, // currentDragValue
+          pikachu2 // targetValue
+        );
+
+        // Should handle undefined UIDs (they would be considered equal)
+        expect(canSwitch).toBe(false);
+      });
+    });
   });
 
   describe('originalLocation handling', () => {
@@ -540,6 +748,425 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       expect(encounters['route-1'].isFusion).toBe(true);
       expect(encounters['route-1'].head?.name).toBe('Squirtle');
       expect(encounters['route-1'].body?.name).toBe('Charmander');
+    });
+  });
+});
+
+describe('Playthroughs Store - Hooks', () => {
+  beforeEach(() => {
+    // Reset store state before each test
+    playthroughsStore.playthroughs = [];
+    playthroughsStore.activePlaythroughId = undefined;
+    playthroughsStore.isLoading = false;
+  });
+
+  afterEach(() => {
+    // Clean up any side effects
+    vi.clearAllMocks();
+  });
+
+  describe('usePlaythroughsSnapshot', () => {
+    it('should return the store snapshot', () => {
+      const { result } = renderHook(() => usePlaythroughsSnapshot());
+
+      // Should return the current state of the store
+      expect(result.current.playthroughs).toEqual([]);
+      expect(result.current.activePlaythroughId).toBeUndefined();
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    it('should update when store changes', () => {
+      const { result, rerender } = renderHook(() => usePlaythroughsSnapshot());
+
+      // Initial state
+      expect(result.current.playthroughs).toHaveLength(0);
+
+      // Create a playthrough
+      act(() => {
+        const playthroughId = playthroughActions.createPlaythrough(
+          'Test Run',
+          false
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      // Force a re-render to pick up store changes
+      rerender();
+
+      // Should reflect the new state
+      expect(result.current.playthroughs).toHaveLength(1);
+      expect(result.current.playthroughs[0].name).toBe('Test Run');
+      expect(result.current.activePlaythroughId).toBeDefined();
+    });
+  });
+
+  describe('useActivePlaythrough', () => {
+    it('should return null when no active playthrough exists', () => {
+      const { result } = renderHook(() => useActivePlaythrough());
+      expect(result.current).toBeNull();
+    });
+
+    it('should return the active playthrough when one exists', () => {
+      let playthroughId: string;
+
+      // Create and set active playthrough
+      act(() => {
+        playthroughId = playthroughActions.createPlaythrough('Test Run', false);
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      const { result } = renderHook(() => useActivePlaythrough());
+
+      expect(result.current).not.toBeNull();
+      expect(result.current?.name).toBe('Test Run');
+      expect(result.current?.id).toBe(playthroughId!);
+      expect(result.current?.remixMode).toBe(false);
+    });
+
+    it('should update when active playthrough changes', () => {
+      const { result, rerender } = renderHook(() => useActivePlaythrough());
+
+      // Initially null
+      expect(result.current).toBeNull();
+
+      // Create first playthrough
+      act(() => {
+        const playthroughId1 = playthroughActions.createPlaythrough(
+          'First Run',
+          false
+        );
+        playthroughActions.setActivePlaythrough(playthroughId1);
+      });
+
+      rerender();
+      expect(result.current?.name).toBe('First Run');
+
+      // Create second playthrough
+      act(() => {
+        const playthroughId2 = playthroughActions.createPlaythrough(
+          'Second Run',
+          true
+        );
+        // Ensure the new playthrough becomes active
+        playthroughsStore.activePlaythroughId = playthroughId2;
+      });
+
+      rerender();
+      expect(result.current?.name).toBe('Second Run');
+      expect(result.current?.remixMode).toBe(true);
+    });
+
+    it('should update when active playthrough is modified', () => {
+      let playthroughId: string;
+
+      act(() => {
+        playthroughId = playthroughActions.createPlaythrough('Test Run', false);
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      const { result, rerender } = renderHook(() => useActivePlaythrough());
+
+      rerender();
+      expect(result.current?.remixMode).toBe(false);
+
+      // Toggle remix mode
+      act(() => {
+        playthroughActions.toggleRemixMode();
+      });
+
+      rerender();
+      expect(result.current?.remixMode).toBe(true);
+    });
+  });
+
+  describe('useIsRemixMode', () => {
+    it('should return false when no active playthrough exists', () => {
+      const { result } = renderHook(() => useIsRemixMode());
+      expect(result.current).toBe(false);
+    });
+
+    it('should return the remix mode status of the active playthrough', () => {
+      // Create classic mode playthrough
+      act(() => {
+        const playthroughId = playthroughActions.createPlaythrough(
+          'Classic Run',
+          false
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      const { result, rerender } = renderHook(() => useIsRemixMode());
+      rerender();
+      expect(result.current).toBe(false);
+
+      // Toggle to remix mode
+      act(() => {
+        playthroughActions.toggleRemixMode();
+      });
+
+      rerender();
+      expect(result.current).toBe(true);
+    });
+
+    it('should return true for remix mode playthrough', () => {
+      // Create remix mode playthrough
+      act(() => {
+        const playthroughId = playthroughActions.createPlaythrough(
+          'Remix Run',
+          true
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      const { result } = renderHook(() => useIsRemixMode());
+      expect(result.current).toBe(true);
+    });
+  });
+
+  describe('usePlaythroughById', () => {
+    it('should return null for undefined ID', () => {
+      const { result } = renderHook(() => usePlaythroughById(undefined));
+      expect(result.current).toBeNull();
+    });
+
+    it('should return null for non-existent playthrough ID', () => {
+      const { result } = renderHook(() =>
+        usePlaythroughById('non-existent-id')
+      );
+      expect(result.current).toBeNull();
+    });
+
+    it('should return the correct playthrough by ID', () => {
+      let playthroughId1: string;
+      let playthroughId2: string;
+
+      act(() => {
+        playthroughId1 = playthroughActions.createPlaythrough(
+          'First Run',
+          false
+        );
+        playthroughId2 = playthroughActions.createPlaythrough(
+          'Second Run',
+          true
+        );
+      });
+
+      const { result: result1 } = renderHook(() =>
+        usePlaythroughById(playthroughId1)
+      );
+      const { result: result2 } = renderHook(() =>
+        usePlaythroughById(playthroughId2)
+      );
+
+      expect(result1.current?.name).toBe('First Run');
+      expect(result1.current?.remixMode).toBe(false);
+
+      expect(result2.current?.name).toBe('Second Run');
+      expect(result2.current?.remixMode).toBe(true);
+    });
+
+    it('should update when the specific playthrough is modified', () => {
+      let playthroughId: string;
+
+      act(() => {
+        playthroughId = playthroughActions.createPlaythrough('Test Run', false);
+      });
+
+      const { result, rerender } = renderHook(() =>
+        usePlaythroughById(playthroughId!)
+      );
+
+      rerender();
+      expect(result.current?.name).toBe('Test Run');
+      const initialUpdatedAt = result.current?.updatedAt;
+
+      // Update the playthrough name
+      act(() => {
+        playthroughActions.updatePlaythroughName(playthroughId!, 'Updated Run');
+      });
+
+      rerender();
+      // Verify the updatedAt timestamp changed (indicating the update was processed)
+      expect(result.current?.updatedAt).not.toBe(initialUpdatedAt);
+      expect(result.current?.name).toBe('Updated Run');
+    });
+  });
+
+  describe('useIsLoading', () => {
+    it('should return the loading state from the store', () => {
+      const { result, rerender } = renderHook(() => useIsLoading());
+
+      // Initially false (set in beforeEach)
+      expect(result.current).toBe(false);
+
+      // Set loading to true
+      act(() => {
+        playthroughsStore.isLoading = true;
+      });
+
+      rerender();
+      expect(result.current).toBe(true);
+
+      // Set loading back to false
+      act(() => {
+        playthroughsStore.isLoading = false;
+      });
+
+      rerender();
+      expect(result.current).toBe(false);
+    });
+  });
+
+  describe('useEncounters', () => {
+    it('should return empty encounters when no active playthrough exists', () => {
+      const { result } = renderHook(() => useEncounters());
+      expect(result.current).toEqual({});
+    });
+
+    it('should return encounters from the active playthrough', () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+      const charmander = createMockPokemon('Charmander', 4);
+
+      act(() => {
+        const playthroughId = playthroughActions.createPlaythrough(
+          'Test Run',
+          false
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+
+        // Add some encounters
+        playthroughActions.updateEncounter('route-1', pikachu);
+        playthroughActions.updateEncounter('route-2', charmander);
+      });
+
+      const { result } = renderHook(() => useEncounters());
+
+      expect(Object.keys(result.current)).toHaveLength(2);
+      expect(result.current['route-1']?.head?.name).toBe('Pikachu');
+      expect(result.current['route-2']?.head?.name).toBe('Charmander');
+    });
+
+    it('should update when encounters are modified', () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+      const squirtle = createMockPokemon('Squirtle', 7);
+
+      act(() => {
+        const playthroughId = playthroughActions.createPlaythrough(
+          'Test Run',
+          false
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      const { result } = renderHook(() => useEncounters());
+
+      // Initially empty
+      expect(Object.keys(result.current)).toHaveLength(0);
+
+      // Add an encounter
+      act(() => {
+        playthroughActions.updateEncounter('route-1', pikachu);
+      });
+
+      expect(Object.keys(result.current)).toHaveLength(1);
+      expect(result.current['route-1']?.head?.name).toBe('Pikachu');
+
+      // Update the encounter
+      act(() => {
+        playthroughActions.updateEncounter('route-1', squirtle);
+      });
+
+      expect(result.current['route-1']?.head?.name).toBe('Squirtle');
+
+      // Remove the encounter
+      act(() => {
+        playthroughActions.resetEncounter('route-1');
+      });
+
+      expect(Object.keys(result.current)).toHaveLength(0);
+    });
+
+    it('should handle fusion encounters correctly', () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+      const charmander = createMockPokemon('Charmander', 4);
+
+      act(() => {
+        const playthroughId = playthroughActions.createPlaythrough(
+          'Test Run',
+          false
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+
+        // Create a fusion encounter
+        playthroughActions.createFusion('route-1', pikachu, charmander);
+      });
+
+      const { result } = renderHook(() => useEncounters());
+
+      expect(result.current['route-1']?.isFusion).toBe(true);
+      expect(result.current['route-1']?.head?.name).toBe('Pikachu');
+      expect(result.current['route-1']?.body?.name).toBe('Charmander');
+    });
+  });
+
+  describe('Hook performance and memoization', () => {
+    it('should not cause unnecessary re-renders when unrelated data changes', () => {
+      let renderCount = 0;
+
+      act(() => {
+        const playthroughId = playthroughActions.createPlaythrough(
+          'Test Run',
+          false
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      const { result } = renderHook(() => {
+        renderCount++;
+        return useIsRemixMode();
+      });
+
+      const initialRenderCount = renderCount;
+      const initialValue = result.current;
+
+      // Change unrelated store property
+      act(() => {
+        playthroughsStore.isLoading = !playthroughsStore.isLoading;
+      });
+
+      // Should not cause additional renders since remix mode didn't change
+      expect(renderCount).toBe(initialRenderCount);
+      expect(result.current).toBe(initialValue);
+    });
+
+    it('should properly memoize encounters when only metadata changes', () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+      let renderCount = 0;
+
+      act(() => {
+        const playthroughId = playthroughActions.createPlaythrough(
+          'Test Run',
+          false
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+        playthroughActions.updateEncounter('route-1', pikachu);
+      });
+
+      const { result } = renderHook(() => {
+        renderCount++;
+        return useEncounters();
+      });
+
+      const initialRenderCount = renderCount;
+      const initialEncounters = result.current;
+
+      // Change loading state (unrelated to encounters)
+      act(() => {
+        playthroughsStore.isLoading = true;
+      });
+
+      // Encounters should remain the same reference due to memoization
+      expect(result.current).toBe(initialEncounters);
     });
   });
 });

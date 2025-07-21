@@ -1,41 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react';
-import {
-  Settings,
-  ToggleLeft,
-  ToggleRight,
-  Plus,
-  Palette,
-  Gamepad2,
-} from 'lucide-react';
+import { Settings, Plus, Gamepad2 } from 'lucide-react';
 import clsx from 'clsx';
 import {
   playthroughActions,
   useActivePlaythrough,
   useIsRemixMode,
-  useIsLoading,
 } from '@/stores/playthroughs';
 
 export default function PlaythroughMenu() {
-  const [mounted, setMounted] = useState(false);
   const activePlaythrough = useActivePlaythrough();
   const isRemixMode = useIsRemixMode();
-  const isLoading = useIsLoading();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted || isLoading) {
-    return (
-      <div className='flex items-center space-x-3'>
-        <div className='animate-pulse bg-gray-300 dark:bg-gray-600 rounded h-6 w-32'></div>
-        <div className='animate-pulse bg-gray-200 dark:bg-gray-700 rounded h-8 w-8'></div>
-      </div>
-    );
-  }
 
   const handleCreatePlaythrough = () => {
     const playthroughName = prompt('Enter playthrough name:', 'New Nuzlocke');
@@ -58,40 +35,61 @@ export default function PlaythroughMenu() {
         </span>
       </div>
 
-      {/* Remix Mode Toggle - Always Visible */}
-      <button
-        onClick={playthroughActions.toggleRemixMode}
-        disabled={!activePlaythrough}
-        className={clsx(
-          'flex items-center space-x-2 px-3 py-1.5 rounded-md transition-colors text-sm font-medium',
-          'border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
-          isRemixMode
-            ? [
-                'bg-purple-100 text-purple-800 border-purple-300',
-                'hover:bg-purple-200 hover:border-purple-400',
-                'dark:bg-purple-900/30 dark:text-purple-200 dark:border-purple-700',
-                'dark:hover:bg-purple-900/50 dark:hover:border-purple-600',
-              ]
-            : [
-                'bg-gray-100 text-gray-600 border-gray-300',
-                'hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300',
-                'dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600',
-                'dark:hover:bg-blue-900/20 dark:hover:text-blue-400 dark:hover:border-blue-400',
-              ],
-          !activePlaythrough && 'opacity-50 cursor-not-allowed',
-          activePlaythrough && 'hover:cursor-pointer'
-        )}
-        aria-label={`${isRemixMode ? 'Disable' : 'Enable'} Remix Mode`}
-        title={`${isRemixMode ? 'Disable' : 'Enable'} Remix Mode`}
-      >
-        <Palette className='h-4 w-4' />
-        <span>Remix</span>
-        {isRemixMode ? (
-          <ToggleRight className='h-4 w-4' />
-        ) : (
-          <ToggleLeft className='h-4 w-4' />
-        )}
-      </button>
+      {/* Remix Mode Toggle - Segmented Control Style */}
+      <div className='flex items-center'>
+        <div
+          className={clsx(
+            'relative flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1',
+            'border border-gray-200 dark:border-gray-600',
+            !activePlaythrough && 'opacity-50'
+          )}
+        >
+          {/* Background slider */}
+          {activePlaythrough && (
+            <div
+              className={clsx(
+                'absolute top-1 bottom-1 left-1 w-16 bg-white dark:bg-gray-800 rounded-md shadow-sm transition-transform duration-200 ease-out',
+                'border border-gray-200 dark:border-gray-500',
+                isRemixMode ? 'translate-x-16' : 'translate-x-0'
+              )}
+            />
+          )}
+
+          {/* Classic option */}
+          <button
+            onClick={() => !isRemixMode || playthroughActions.toggleRemixMode()}
+            disabled={!activePlaythrough}
+            className={clsx(
+              'relative z-10 w-16 py-1.5 text-sm font-medium transition-colors duration-200 text-center',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
+              !isRemixMode
+                ? 'text-gray-900 dark:text-gray-100'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+              activePlaythrough && 'cursor-pointer'
+            )}
+            aria-pressed={!isRemixMode}
+          >
+            Classic
+          </button>
+
+          {/* Remix option */}
+          <button
+            onClick={() => isRemixMode || playthroughActions.toggleRemixMode()}
+            disabled={!activePlaythrough}
+            className={clsx(
+              'relative z-10 w-16 py-1.5 text-sm font-medium transition-colors duration-200 text-center',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
+              isRemixMode
+                ? 'text-purple-700 dark:text-purple-300'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+              activePlaythrough && 'cursor-pointer'
+            )}
+            aria-pressed={isRemixMode}
+          >
+            Remix
+          </button>
+        </div>
+      </div>
 
       {/* Playthrough Menu */}
       <Menu as='div' className='relative'>

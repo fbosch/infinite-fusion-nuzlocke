@@ -2,7 +2,7 @@
 
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Sun, Moon, Palette } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function ThemeToggle() {
@@ -20,7 +20,7 @@ export default function ThemeToggle() {
         aria-label='Theme toggle (loading)'
         disabled
       >
-        <Monitor className='w-5 h-5' />
+        <Palette className='w-5 h-5' />
       </button>
     );
   }
@@ -48,7 +48,7 @@ export default function ThemeToggle() {
     } else if (theme === 'dark') {
       return <Moon className='w-5 h-5' />;
     } else {
-      return <Monitor className='w-5 h-5' />;
+      return <Palette className='w-5 h-5' />;
     }
   };
 
