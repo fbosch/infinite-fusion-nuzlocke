@@ -16,7 +16,7 @@ export default function ThemeToggle() {
   if (!mounted || !resolvedTheme) {
     return (
       <button
-        className='p-2 rounded-md bg-gray-100 border border-gray-300 text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-500'
+        className='p-2 rounded-md bg-gray-100 border border-gray-300 text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 opacity-50'
         aria-label='Theme toggle (loading)'
         disabled
       >
