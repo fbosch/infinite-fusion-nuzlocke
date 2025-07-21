@@ -7,8 +7,7 @@ import { FusionToggleButton } from './FusionToggleButton';
 import type { PokemonOption } from '@/loaders/pokemon';
 
 import clsx from 'clsx';
-import { useSnapshot } from 'valtio';
-import { playthroughsStore, playthroughActions } from '@/stores/playthroughs';
+import { useEncounters, playthroughActions } from '@/stores/playthroughs';
 
 interface EncounterCellProps {
   routeId: number;
@@ -16,11 +15,8 @@ interface EncounterCellProps {
 }
 
 export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
-  const playthroughSnapshot = useSnapshot(playthroughsStore);
-  const activePlaythrough = playthroughSnapshot.playthroughs.find(
-    p => p.id === playthroughSnapshot.activePlaythroughId
-  );
-  const encounterData = activePlaythrough?.encounters[locationId] || {
+  const encounters = useEncounters();
+  const encounterData = encounters[locationId] || {
     head: null,
     body: null,
     isFusion: false,

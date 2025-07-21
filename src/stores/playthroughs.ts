@@ -1,8 +1,9 @@
-import { proxy, subscribe } from 'valtio';
+import { proxy, subscribe, useSnapshot } from 'valtio';
 import { devtools } from 'valtio/utils';
 import { z } from 'zod';
 import { get, set, del } from 'idb-keyval';
 import { debounce } from 'lodash';
+import { useMemo } from 'react';
 import { PokemonOptionSchema, generatePokemonUID } from '../loaders/pokemon';
 
 export const EncounterDataSchema = z.object({
@@ -752,4 +753,58 @@ export const playthroughActions = {
     // Fallback - assume it's just the location ID
     return { locationId: comboboxId, field: 'head' };
   },
+};
+
+// Reusable hooks for components
+export const usePlaythroughsSnapshot = () => {
+  return useSnapshot(playthroughsStore);
+};
+
+export const useActivePlaythrough = (): Playthrough | null => {
+  const snapshot = useSnapshot(playthroughsStore);
+  const activePlaythroughData = snapshot.playthroughs.find(
+    p => p.id === snapshot.activePlaythroughId
+  );
+
+  return useMemo(() => {
+    return playthroughActions.getActivePlaythrough();
+  }, [activePlaythroughData?.updatedAt]);
+};
+
+export const useIsRemixMode = (): boolean => {
+  const snapshot = useSnapshot(playthroughsStore);
+  const activePlaythroughData = snapshot.playthroughs.find(
+    p => p.id === snapshot.activePlaythroughId
+  );
+
+  return useMemo(() => {
+    return playthroughActions.isRemixModeEnabled();
+  }, [activePlaythroughData?.remixMode]);
+};
+
+export const usePlaythroughById = (
+  playthroughId: string | undefined
+): Playthrough | null => {
+  const snapshot = useSnapshot(playthroughsStore);
+  const playthroughData = snapshot.playthroughs.find(
+    p => p.id === playthroughId
+  );
+
+  return useMemo(() => {
+    if (!playthroughId) return null;
+    return playthroughData || null;
+  }, [playthroughId, playthroughData?.updatedAt]);
+};
+
+export const useIsLoading = (): boolean => {
+  const snapshot = useSnapshot(playthroughsStore);
+  return snapshot.isLoading;
+};
+
+export const useEncounters = (): Playthrough['encounters'] => {
+  const activePlaythrough = useActivePlaythrough();
+
+  return useMemo(() => {
+    return activePlaythrough?.encounters || {};
+  }, [activePlaythrough?.encounters, activePlaythrough?.updatedAt]);
 };

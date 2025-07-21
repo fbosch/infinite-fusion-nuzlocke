@@ -1,4 +1,5 @@
 import Logo from '@/components/Logo';
+import PlaythroughMenu from '@/components/PlaythroughMenu';
 import ThemeToggle from '@/components/ThemeToggle';
 import { Sparkle } from 'lucide-react';
 
@@ -39,7 +40,10 @@ export default function Header() {
                 </div>
               </h1>
             </div>
-            <ThemeToggle />
+            <div className='flex items-center space-x-4'>
+              <PlaythroughMenu />
+              <ThemeToggle />
+            </div>
           </div>
         </header>
       </div>

@@ -27,8 +27,7 @@ import {
 } from '@/loaders/pokemon';
 import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
 import { dragStore, dragActions } from '@/stores/dragStore';
-import { playthroughsStore } from '@/stores/playthroughs';
-import { playthroughActions } from '@/stores/playthroughs';
+import { playthroughActions, useIsRemixMode } from '@/stores/playthroughs';
 import { PokemonEvolutionButton } from './PokemonEvolutionButton';
 import { PokemonNicknameInput } from './PokemonNicknameInput';
 import { PokemonStatusInput } from './PokemonStatusInput';
@@ -281,7 +280,7 @@ export const PokemonCombobox = ({
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
   const dragSnapshot = useSnapshot(dragStore);
-  const playthroughSnapshot = useSnapshot(playthroughsStore);
+  const isRemixMode = useIsRemixMode();
 
   // Ref to track pending animation frame for drag leave operations
   const dragLeaveAnimationRef = useRef<number | null>(null);
@@ -307,10 +306,11 @@ export const PokemonCombobox = ({
   const loadRouteEncounterData = useCallback(async () => {
     try {
       // Load Pokemon data, name map, and encounter data in parallel
+      const currentGameMode = isRemixMode ? 'remix' : 'classic';
       const [allPokemon, nameMap, encounter] = await Promise.all([
         getPokemon(),
         getPokemonNameMap(),
-        getEncountersByRouteId(routeId, gameMode),
+        getEncountersByRouteId(routeId, currentGameMode),
       ]);
 
       if (encounter) {
@@ -329,7 +329,7 @@ export const PokemonCombobox = ({
     } catch (err) {
       console.error(`Error loading encounter data for route ${routeId}:`, err);
     }
-  }, [routeId, gameMode, locationId]);
+  }, [routeId, isRemixMode, locationId]);
 
   // Load route data when combobox opens or when user starts typing
   const handleInteraction = useCallback(() => {
@@ -388,17 +388,7 @@ export const PokemonCombobox = ({
     if (routeId !== undefined && routeId !== 0) {
       loadRouteEncounterData();
     }
-  }, [
-    playthroughSnapshot.activePlaythroughId,
-    playthroughSnapshot.playthroughs.find(
-      p => p.id === playthroughSnapshot.activePlaythroughId
-    )?.remixMode,
-    playthroughSnapshot.playthroughs.find(
-      p => p.id === playthroughSnapshot.activePlaythroughId
-    )?.updatedAt,
-    loadRouteEncounterData,
-    routeId,
-  ]);
+  }, [isRemixMode, loadRouteEncounterData, routeId]);
 
   // Clear query when value changes to ensure component reflects the new selection
 

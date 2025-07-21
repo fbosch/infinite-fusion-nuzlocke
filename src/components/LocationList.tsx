@@ -8,21 +8,17 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import React, { useState, useMemo } from 'react';
-import { useSnapshot } from 'valtio';
 import { getLocationsSortedByOrder } from '@/loaders';
 import type { Location } from '@/loaders/locations';
 import { LocationTableHeader, LocationTableRow } from './LocationTable';
-import { playthroughsStore } from '@/stores/playthroughs';
+import { useEncounters, useIsLoading } from '@/stores/playthroughs';
 
 const columnHelper = createColumnHelper<Location>();
 
 export default function LocationList() {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const playthroughSnapshot = useSnapshot(playthroughsStore);
-  const activePlaythrough = playthroughSnapshot.activePlaythroughId;
-  const encounters = playthroughSnapshot.playthroughs.find(
-    p => p.id === activePlaythrough
-  )?.encounters;
+  const encounters = useEncounters();
+  const isLoading = useIsLoading();
 
   const data = useMemo(() => {
     try {
@@ -87,7 +83,7 @@ export default function LocationList() {
   });
 
   // Show loading state while store is initializing from IndexedDB
-  if (playthroughSnapshot.isLoading) {
+  if (isLoading) {
     return (
       <div
         className='flex items-center justify-center p-8'
