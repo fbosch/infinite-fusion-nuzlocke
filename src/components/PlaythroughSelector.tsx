@@ -143,11 +143,24 @@ export default function PlaythroughSelector({
                     <button
                       onClick={() => handlePlaythroughSelect(playthrough.id)}
                       className={clsx(
-                        'group flex w-full items-center justify-between px-3 py-3 text-sm',
+                        'group flex w-full items-center justify-between px-3 py-3 text-sm cursor-pointer',
                         'focus:outline-none text-left transition-colors',
-                        focus || activePlaythrough?.id === playthrough.id
-                          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                          : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        // Combined: Selected AND focused (most prominent)
+                        focus &&
+                          activePlaythrough?.id === playthrough.id &&
+                          'bg-blue-100 dark:bg-blue-900/35 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300/50 dark:ring-blue-600/50',
+                        // Selected but not focused
+                        !focus &&
+                          activePlaythrough?.id === playthrough.id &&
+                          'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
+                        // Focused but not selected
+                        focus &&
+                          activePlaythrough?.id !== playthrough.id &&
+                          'bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100',
+                        // Default/hover state
+                        !focus &&
+                          activePlaythrough?.id !== playthrough.id &&
+                          'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100'
                       )}
                     >
                       <div className='flex items-center gap-2 flex-1 min-w-0'>
