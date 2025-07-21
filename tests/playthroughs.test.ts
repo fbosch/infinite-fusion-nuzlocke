@@ -374,6 +374,105 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     });
   });
 
+  describe('toggleEncounterFusion', () => {
+    it('should toggle isFusion flag without removing head or body Pokemon', async () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+      const charmander = createMockPokemon('Charmander', 4);
+
+      // Add nicknames to verify they're preserved
+      pikachu.nickname = 'Sparky';
+      charmander.nickname = 'Flame';
+
+      // Create a fusion encounter
+      playthroughActions.updateEncounter('route-1', pikachu, 'head', true);
+      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
+
+      let encounters = playthroughActions.getEncounters();
+
+      // Verify initial fusion state
+      expect(encounters['route-1']).toBeDefined();
+      expect(encounters['route-1']?.isFusion).toBe(true);
+      expect(encounters['route-1']?.head).not.toBeNull();
+      expect(encounters['route-1']?.head?.name).toBe('Pikachu');
+      expect(encounters['route-1']?.head?.nickname).toBe('Sparky');
+      expect(encounters['route-1']?.body).not.toBeNull();
+      expect(encounters['route-1']?.body?.name).toBe('Charmander');
+      expect(encounters['route-1']?.body?.nickname).toBe('Flame');
+
+      // Toggle fusion off (unfuse)
+      playthroughActions.toggleEncounterFusion('route-1');
+
+      encounters = playthroughActions.getEncounters();
+
+      // Verify both Pokemon are preserved but isFusion is false
+      const encounter2 = encounters['route-1'];
+      expect(encounter2).toBeDefined();
+      expect(encounter2!.isFusion).toBe(false);
+      expect(encounter2!.head).toBeDefined();
+      expect(encounter2!.head!.name).toBe('Pikachu');
+      expect(encounter2!.head!.nickname).toBe('Sparky');
+      expect(encounter2!.body).toBeDefined();
+      expect(encounter2!.body!.name).toBe('Charmander');
+      expect(encounter2!.body!.nickname).toBe('Flame');
+
+      // Toggle fusion back on (re-fuse)
+      playthroughActions.toggleEncounterFusion('route-1');
+
+      encounters = playthroughActions.getEncounters();
+
+      // Verify both Pokemon are still preserved and isFusion is true again
+      const encounter3 = encounters['route-1'];
+      expect(encounter3).toBeDefined();
+      expect(encounter3!.isFusion).toBe(true);
+      expect(encounter3!.head).toBeDefined();
+      expect(encounter3!.head!.name).toBe('Pikachu');
+      expect(encounter3!.head!.nickname).toBe('Sparky');
+      expect(encounter3!.body).toBeDefined();
+      expect(encounter3!.body!.name).toBe('Charmander');
+      expect(encounter3!.body!.nickname).toBe('Flame');
+    });
+
+    it('should toggle isFusion from false to true for regular encounter', async () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+      pikachu.nickname = 'Sparky';
+
+      // Create a regular encounter
+      playthroughActions.updateEncounter('route-1', pikachu);
+
+      let encounters = playthroughActions.getEncounters();
+
+      // Verify initial regular encounter state
+      expect(encounters['route-1'].isFusion).toBe(false);
+      expect(encounters['route-1'].head?.name).toBe('Pikachu');
+      expect(encounters['route-1'].head?.nickname).toBe('Sparky');
+      expect(encounters['route-1'].body).toBeNull();
+
+      // Toggle to fusion mode
+      playthroughActions.toggleEncounterFusion('route-1');
+
+      encounters = playthroughActions.getEncounters();
+
+      // Verify head Pokemon is preserved, isFusion is true, body remains null
+      expect(encounters['route-1'].isFusion).toBe(true);
+      expect(encounters['route-1'].head?.name).toBe('Pikachu');
+      expect(encounters['route-1'].head?.nickname).toBe('Sparky');
+      expect(encounters['route-1'].body).toBeNull();
+    });
+
+    it('should handle toggle on non-existent encounter gracefully', async () => {
+      // Try to toggle fusion on non-existent encounter
+      playthroughActions.toggleEncounterFusion('non-existent');
+
+      const encounters = playthroughActions.getEncounters();
+
+      // Should create a new encounter with default values and isFusion true
+      expect(encounters['non-existent']).toBeDefined();
+      expect(encounters['non-existent'].isFusion).toBe(true);
+      expect(encounters['non-existent'].head).toBeNull();
+      expect(encounters['non-existent'].body).toBeNull();
+    });
+  });
+
   describe('edge cases and error handling', () => {
     it('should handle operations on playthrough without active playthrough', async () => {
       playthroughsStore.activePlaythroughId = undefined;
