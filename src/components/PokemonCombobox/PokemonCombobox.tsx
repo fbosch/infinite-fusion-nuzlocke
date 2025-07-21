@@ -345,10 +345,6 @@ export const PokemonCombobox = ({
       searchQuery: string,
       pokemonList: PokemonOption[]
     ): Promise<PokemonOption[]> => {
-      if (!searchQuery.trim()) {
-        return pokemonList;
-      }
-
       try {
         // Use the smart search function that handles both numeric and text searches
         const allResults = await searchPokemon(searchQuery);
@@ -408,17 +404,6 @@ export const PokemonCombobox = ({
   ]);
 
   // Clear query when value changes to ensure component reflects the new selection
-  useEffect(() => {
-    if (value && query && value.name !== query) {
-      setQuery('');
-    }
-  }, [
-    value?.id,
-    value?.originalLocation,
-    value?.nickname,
-    value?.status,
-    query,
-  ]);
 
   // Combine route matches with smart search results
   const finalOptions = useMemo(() => {
@@ -448,14 +433,19 @@ export const PokemonCombobox = ({
     const allResults = [...routeMatches, ...fuzzyResults];
 
     // Sort: route Pokemon first, then by search relevance
-    return allResults.sort((a, b) => {
-      // First prioritize route Pokemon
-      if (isRoutePokemon(a.id) && !isRoutePokemon(b.id)) return -1;
-      if (!isRoutePokemon(a.id) && isRoutePokemon(b.id)) return 1;
+    return allResults
+      .sort((a, b) => {
+        // First prioritize route Pokemon
+        if (isRoutePokemon(a.id) && !isRoutePokemon(b.id)) return -1;
+        if (!isRoutePokemon(a.id) && isRoutePokemon(b.id)) return 1;
 
-      // For non-route Pokemon, maintain search order (already sorted by relevance)
-      return 0;
-    });
+        // For non-route Pokemon, maintain search order (already sorted by relevance)
+        return 0;
+      })
+      .filter(
+        (pokemon, index, self) =>
+          index === self.findIndex(t => t.id === pokemon.id)
+      );
   }, [routeEncounterData, fuzzyResults, deferredQuery, isRoutePokemon]);
 
   const handleChange = useCallback(
