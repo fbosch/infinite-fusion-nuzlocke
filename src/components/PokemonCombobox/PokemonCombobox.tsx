@@ -7,6 +7,7 @@ import React, {
   startTransition,
   useCallback,
   useEffect,
+  useRef,
 } from 'react';
 import { Check, Loader2, Search } from 'lucide-react';
 import {
@@ -280,6 +281,9 @@ export const PokemonCombobox = ({
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
   const dragSnapshot = useSnapshot(dragStore);
+
+  // Ref to track pending animation frame for drag leave operations
+  const dragLeaveAnimationRef = useRef<number | null>(null);
 
   // State for route encounters and all Pokemon
   const [routeEncounterData, setRouteEncounterData] = useState<PokemonOption[]>(
@@ -599,17 +603,40 @@ export const PokemonCombobox = ({
   );
 
   const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    // Only clear preview when actually leaving the component, not when moving to child elements
-    const rect = e.currentTarget.getBoundingClientRect();
+    // Use relatedTarget to check if we're moving to a child element
+    // This is much more performant than getBoundingClientRect()
+    const target = e.currentTarget;
+    const relatedTarget = e.relatedTarget as Node | null;
+
+    // Only clear preview when actually leaving the component
+    // If relatedTarget is null or not contained within our component, we're leaving
     const isLeavingComponent =
-      e.clientX < rect.left ||
-      e.clientX > rect.right ||
-      e.clientY < rect.top ||
-      e.clientY > rect.bottom;
+      !relatedTarget || !target.contains(relatedTarget);
 
     if (isLeavingComponent) {
-      setDragPreview(null);
+      // Cancel any pending animation frame
+      if (dragLeaveAnimationRef.current !== null) {
+        cancelAnimationFrame(dragLeaveAnimationRef.current);
+      }
+
+      // Schedule preview clearing for next animation frame for smoother performance
+      dragLeaveAnimationRef.current = requestAnimationFrame(() => {
+        setDragPreview(null);
+        dragLeaveAnimationRef.current = null;
+      });
     }
+
+    // Alternative optimization: Could also throttle this function if called too frequently
+    // const throttledClearPreview = useCallback(throttle(() => setDragPreview(null), 16), []);
+  }, []);
+
+  // Clean up animation frame on unmount
+  useEffect(() => {
+    return () => {
+      if (dragLeaveAnimationRef.current !== null) {
+        cancelAnimationFrame(dragLeaveAnimationRef.current);
+      }
+    };
   }, []);
 
   const handleDragEnd = useCallback(() => {
