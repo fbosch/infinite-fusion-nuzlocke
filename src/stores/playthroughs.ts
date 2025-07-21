@@ -3,7 +3,7 @@ import { devtools } from 'valtio/utils';
 import { z } from 'zod';
 import { get, set, del } from 'idb-keyval';
 import { debounce } from 'lodash';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { PokemonOptionSchema, generatePokemonUID } from '../loaders/pokemon';
 
 export const EncounterDataSchema = z.object({
@@ -780,6 +780,17 @@ export const usePlaythroughsSnapshot = () => {
 
 export const useAllPlaythroughs = () => {
   const snapshot = useSnapshot(playthroughsStore);
+
+  // Automatically load all playthroughs if we only have one loaded (likely just the active one)
+  // and we're not currently loading
+  React.useEffect(() => {
+    if (!snapshot.isLoading && snapshot.playthroughs.length <= 1) {
+      playthroughActions.getAllPlaythroughs().catch(error => {
+        console.error('Failed to load all playthroughs:', error);
+      });
+    }
+  }, [snapshot.isLoading, snapshot.playthroughs.length]);
+
   return useMemo(() => {
     return snapshot.playthroughs;
   }, [snapshot.playthroughs]);

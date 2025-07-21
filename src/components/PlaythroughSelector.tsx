@@ -81,9 +81,7 @@ export default function PlaythroughSelector({
       >
         <div className='flex items-center gap-2'>
           <Album className='w-4 h-4 flex-shrink-0' />
-          <span className='truncate'>
-            {activePlaythrough?.name || 'No Playthrough'}
-          </span>
+          <span className='truncate'>{activePlaythrough?.name || '...'}</span>
         </div>
         <ChevronDown className='w-4 h-4 flex-shrink-0' />
       </MenuButton>
