@@ -461,23 +461,11 @@ export const playthroughActions = {
       isFusion: false,
     };
 
-    const newIsFusion = !currentEncounter.isFusion;
-
-    if (newIsFusion) {
-      // Converting to fusion - existing Pokemon becomes the head (fusion base)
-      activePlaythrough.encounters[locationId] = {
-        ...currentEncounter,
-        isFusion: true,
-      };
-    } else {
-      // When unfusing, preserve all properties of the Pokémon that becomes the single encounter
-      const singlePokemon = currentEncounter.head || currentEncounter.body;
-      activePlaythrough.encounters[locationId] = {
-        head: singlePokemon,
-        body: null,
-        isFusion: false,
-      };
-    }
+    // Simply toggle the isFusion flag without modifying head/body
+    activePlaythrough.encounters[locationId] = {
+      ...currentEncounter,
+      isFusion: !currentEncounter.isFusion,
+    };
 
     activePlaythrough.updatedAt = getCurrentTimestamp();
   },
