@@ -414,6 +414,8 @@ export const playthroughActions = {
 
     if (playthrough) {
       playthroughsStore.activePlaythroughId = playthroughId;
+      // Force cache invalidation immediately when switching playthroughs
+      invalidateActivePlaythroughCache();
     }
   },
 
@@ -474,8 +476,24 @@ export const playthroughActions = {
     // Load all available playthroughs and merge with currently loaded ones
     const allPlaythroughs = await loadAllPlaythroughs();
 
-    // Update the store with all loaded playthroughs
-    playthroughsStore.playthroughs = allPlaythroughs;
+    // Merge with existing playthroughs instead of replacing the entire array
+    // This preserves Valtio's reactivity
+    const existingIds = new Set(playthroughsStore.playthroughs.map(p => p.id));
+
+    // Add new playthroughs that aren't already loaded
+    for (const playthrough of allPlaythroughs) {
+      if (!existingIds.has(playthrough.id)) {
+        playthroughsStore.playthroughs.push(playthrough);
+      }
+    }
+
+    // Remove playthroughs that no longer exist
+    const loadedIds = new Set(allPlaythroughs.map(p => p.id));
+    for (let i = playthroughsStore.playthroughs.length - 1; i >= 0; i--) {
+      if (!loadedIds.has(playthroughsStore.playthroughs[i].id)) {
+        playthroughsStore.playthroughs.splice(i, 1);
+      }
+    }
 
     return [...allPlaythroughs];
   },
@@ -760,6 +778,13 @@ export const usePlaythroughsSnapshot = () => {
   return useSnapshot(playthroughsStore);
 };
 
+export const useAllPlaythroughs = () => {
+  const snapshot = useSnapshot(playthroughsStore);
+  return useMemo(() => {
+    return snapshot.playthroughs;
+  }, [snapshot.playthroughs]);
+};
+
 export const useActivePlaythrough = (): Playthrough | null => {
   const snapshot = useSnapshot(playthroughsStore);
   const activePlaythroughData = snapshot.playthroughs.find(
@@ -768,7 +793,7 @@ export const useActivePlaythrough = (): Playthrough | null => {
 
   return useMemo(() => {
     return playthroughActions.getActivePlaythrough();
-  }, [activePlaythroughData?.updatedAt]);
+  }, [snapshot.activePlaythroughId, activePlaythroughData?.updatedAt]);
 };
 
 export const useIsRemixMode = (): boolean => {
@@ -779,7 +804,11 @@ export const useIsRemixMode = (): boolean => {
 
   return useMemo(() => {
     return playthroughActions.isRemixModeEnabled();
-  }, [activePlaythroughData?.remixMode]);
+  }, [
+    snapshot.activePlaythroughId,
+    activePlaythroughData?.remixMode,
+    activePlaythroughData?.updatedAt,
+  ]);
 };
 
 export const usePlaythroughById = (
