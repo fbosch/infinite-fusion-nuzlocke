@@ -30,6 +30,7 @@ import {
   getInfiniteFusionToNationalDexMap,
   getPokemon,
   searchPokemon,
+  PokemonStatus,
   type PokemonOption,
 } from '@/loaders/pokemon';
 import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
@@ -770,7 +771,9 @@ export const PokemonCombobox = ({
                   />
                 </div>
               )}
-              {open ? null : (
+              {open ||
+              value?.status === PokemonStatus.DECEASED ||
+              value?.status === PokemonStatus.MISSED ? null : (
                 <PokemonEvolutionButton value={value} onChange={onChange} />
               )}
             </div>
