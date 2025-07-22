@@ -39,7 +39,7 @@ export default function LocationTableSkeleton() {
             >
               {/* Location name column */}
               <td className='px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
-                <div className='h-5 rounded w-19 shimmer'></div>
+                <div className='h-5 rounded w-23 shimmer'></div>
               </td>
 
               {/* Sprite column */}
