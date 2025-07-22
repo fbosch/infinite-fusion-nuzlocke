@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { PokemonStatus, type PokemonOption } from '@/loaders/pokemon';
 import type { EncounterData } from '@/loaders/encounters';
 import clsx from 'clsx';
-import FaintedIcon from './FaintedIcon';
 
 interface FusionSpriteProps {
   encounterData: EncounterData;
@@ -69,11 +68,15 @@ export function FusionSprite({
     head?.status === PokemonStatus.DECEASED ||
     body?.status === PokemonStatus.DECEASED;
 
+  const isStored =
+    head?.status === PokemonStatus.STORED ||
+    body?.status === PokemonStatus.STORED;
+
   const imageClasses = clsx(
     'object-fill object-center image-render-pixelated origin-top -translate-y-1/9 transition-all duration-200',
     {
       'opacity-40': isMissed,
-      'blur-[0.4px] mix-blend-multiply opacity-50 grayscale': isDeceased,
+      'blur-[0.4px]  opacity-50 grayscale': isDeceased,
     },
     className
   );
@@ -213,8 +216,24 @@ export function FusionSprite({
             />
             {/* Deceased overlay */}
             {isDeceased && (
-              <div className='absolute inset-0 z-30 flex items-center justify-center pointer-events-none'>
-                <FaintedIcon className='size-8' />
+              <div className='absolute pixel-shadow -right-1.5 -bottom-3 z-30 bg-red-500 flex items-center justify-center pointer-events-none dark:bg-red-900 h-fit w-fit px-1 rounded-xs '>
+                <span className='pixel-shadow text-xs text-white font-mono'>
+                  FNT
+                </span>
+              </div>
+            )}
+            {isMissed && (
+              <div className='absolute -right-1.5 -bottom-3 z-30 flex items-center justify-center pointer-events-none font-mono'>
+                <span className='dark:pixel-shadow text-gray-500 text-xs dark:text-gray-white'>
+                  ď
+                </span>
+              </div>
+            )}
+            {isStored && (
+              <div className='absolute -right-1.5 -bottom-3 z-30 flex items-center justify-center pointer-events-none font-mono'>
+                <span className='dark:pixel-shadow text-xs dark:text-white'>
+                  Ą
+                </span>
               </div>
             )}
           </div>

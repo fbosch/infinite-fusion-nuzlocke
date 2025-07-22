@@ -20,6 +20,10 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@utility pixel-shadow {
+  filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 1));
+}
+
 body {
   font-family: var(--font-family-sans);
   background-color: #f9fafb;

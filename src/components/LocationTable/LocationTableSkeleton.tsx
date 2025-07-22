@@ -30,7 +30,7 @@ export default function LocationTableSkeleton() {
             ></th>
           </tr>
         </thead>
-        <tbody className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700 opacity-30'>
+        <tbody className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700 opacity-10'>
           {Array.from({ length: 12 }).map((_, index) => (
             <tr
               key={index}
@@ -43,8 +43,8 @@ export default function LocationTableSkeleton() {
               </td>
 
               {/* Sprite column */}
-              <td className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
-                <div className='size-14 rounded-full mx-auto bg-transparent'></div>
+              <td className='whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
+                <div className='size-22 -translate-y-2 translate-x-3 rounded-lg mx-auto shimmer'></div>
               </td>
 
               {/* Encounter column */}
