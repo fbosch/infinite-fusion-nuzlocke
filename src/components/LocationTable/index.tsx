@@ -55,7 +55,7 @@ export default function LocationTable() {
         header: 'Encounter',
         cell: info => info.getValue(),
         enableSorting: false,
-        size: 700, // Increased width for fusion comboboxes
+        size: 400, // Optimized width for fusion comboboxes
       }),
       columnHelper.display({
         id: 'reset',
@@ -107,7 +107,7 @@ export default function LocationTable() {
   return (
     <div className='overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'>
       <table
-        className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700'
+        className='w-full min-w-full table-fixed divide-y divide-gray-200 dark:divide-gray-700'
         role='table'
         aria-label='Locations table'
       >
