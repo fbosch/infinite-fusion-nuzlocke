@@ -39,12 +39,12 @@ export default function LocationTableSkeleton() {
             >
               {/* Location name column */}
               <td className='px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
-                <div className='h-5 bg-gray-300 dark:bg-gray-600 rounded animate-pulse w-19'></div>
+                <div className='h-5 rounded w-19 shimmer'></div>
               </td>
 
               {/* Sprite column */}
               <td className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
-                <div className='size-14 bg-transparent dark:bg-gray-600 rounded-full animate-pulse mx-auto'></div>
+                <div className='size-14 rounded-full mx-auto bg-transparent'></div>
               </td>
 
               {/* Encounter column */}
@@ -52,10 +52,10 @@ export default function LocationTableSkeleton() {
                 <div className='flex flex-row justify-center gap-4 items-center'>
                   <div className='flex-1'>
                     <div className='relative'>
-                      <div className='h-24 bg-gray-300 dark:bg-gray-600 rounded animate-pulse'></div>
+                      <div className='h-24 rounded shimmer'></div>
                     </div>
                   </div>
-                  <div className='size-10 bg-gray-300 dark:bg-gray-600 rounded animate-pulse'></div>
+                  <div className='size-10 rounded shimmer'></div>
                 </div>
               </td>
 

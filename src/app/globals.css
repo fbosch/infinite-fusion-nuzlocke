@@ -21,12 +21,14 @@
 
 body {
   font-family: var(--font-family-sans);
-  background-color: #f9fafb; /* bg-gray-50 */
+  background-color: #f9fafb;
+  /* bg-gray-50 */
   min-height: 100vh;
 }
 
 .dark body {
-  background-color: #111827; /* bg-gray-900 */
+  background-color: #111827;
+  /* bg-gray-900 */
 }
 
 /* Ensure dark mode works with Tailwind v4 */
@@ -113,4 +115,26 @@ body {
 
 .image-render-high-quality {
   image-rendering: high-quality;
+}
+
+/* Shimmer loading animation */
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+
+  100% {
+    background-position: calc(400px + 100%) 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%);
+  background-size: 400px 100%;
+  animation: shimmer 1.8s infinite ease-in-out;
+}
+
+.dark .shimmer {
+  background: linear-gradient(90deg, #374151 0%, #4b5563 50%, #374151 100%);
+  background-size: 400px 100%;
 }
