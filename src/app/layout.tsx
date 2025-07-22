@@ -1,17 +1,9 @@
 import type { Metadata } from 'next';
-import { DotGothic16, IBM_Plex_Sans } from 'next/font/google';
+import { IBM_Plex_Sans } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import Header from '@/components/Header';
 import { ServiceWorkerInit } from '@/components/ServiceWorkerInit';
-
-// Initialize the DotGothic16 font for monospace utility
-const dotGothic16 = DotGothic16({
-  subsets: ['latin'],
-  weight: ['400'],
-  display: 'swap',
-  variable: '--font-dotgothic16',
-});
 
 // Primary sans-serif font for body text
 const ibmPlexSans = IBM_Plex_Sans({
@@ -39,7 +31,7 @@ export default function RootLayout({
     <html
       lang='en'
       suppressHydrationWarning
-      className={`${dotGothic16.variable} ${ibmPlexSans.variable}`}
+      className={`${ibmPlexSans.variable}`}
     >
       <head>
         <meta name='theme-color' content='#1f2937' />
