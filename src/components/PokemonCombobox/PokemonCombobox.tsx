@@ -298,7 +298,8 @@ export const PokemonCombobox = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Floating UI setup
-  const { refs, floatingStyles, update } = useFloating({
+  const { refs, floatingStyles, update, placement } = useFloating({
+    placement: 'bottom-start',
     middleware: [
       offset(0),
       flip({ padding: 8 }),
@@ -725,7 +726,16 @@ export const PokemonCombobox = ({
                   'focus:cursor-text hover:cursor-pointer',
                   (value || dragPreview) && 'pl-12', // Add padding for sprite when value is selected or previewing
                   dragPreview &&
-                    'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60' // Highlight when showing preview with opacity
+                    'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60', // Highlight when showing preview with opacity,
+                  {
+                    'rounded-t-md rounded-b-none ':
+                      open && placement.startsWith('bottom'),
+                    'rounded-b-md rounded-t-none ':
+                      open && placement.startsWith('top'),
+                    'rounded-md':
+                      !placement.startsWith('bottom') &&
+                      !placement.startsWith('top'),
+                  }
                 )}
                 placeholder={placeholder}
                 displayValue={(pokemon: PokemonOption | null | undefined) => {
@@ -777,9 +787,19 @@ export const PokemonCombobox = ({
                   ref={refs.setFloating}
                   style={floatingStyles}
                   className={clsx(
-                    'z-50 overflow-hidden rounded-md py-1 text-base shadow-lg focus:outline-none sm:text-sm',
+                    'z-50 overflow-hidden py-1 text-base shadow-lg focus:outline-none sm:text-sm',
                     'bg-white dark:bg-gray-800',
-                    'border border-gray-400 dark:border-gray-600'
+                    'border border-gray-300 dark:border-gray-600',
+                    // Conditional border radius and borders based on menu placement
+                    {
+                      'rounded-b-md rounded-t-none border-t-0':
+                        placement.startsWith('bottom'),
+                      'rounded-t-md rounded-b-none border-b-0':
+                        placement.startsWith('top'),
+                      'rounded-md':
+                        !placement.startsWith('bottom') &&
+                        !placement.startsWith('top'),
+                    }
                   )}
                 >
                   <PokemonOptions
