@@ -233,12 +233,16 @@ const PokemonOptions = ({
               >
                 {pokemon.name}
               </span>
+
               <div className='flex items-center gap-3'>
                 {isRoutePokemon(pokemon.id) && (
                   <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
                     Route
                   </span>
                 )}
+                <span className='text-xs text-gray-500 dark:text-gray-400'>
+                  {pokemon.id.toString().padStart(3, '0')}
+                </span>
                 <div className='w-5 h-5 flex items-center justify-center'>
                   {selected && (
                     <Check
