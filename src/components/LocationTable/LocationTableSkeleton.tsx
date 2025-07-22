@@ -16,11 +16,11 @@ export default function LocationTableSkeleton() {
             </th>
             <th
               className='px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
-              style={{ width: '120px', minWidth: '120px' }}
+              style={{ width: '137px', minWidth: '137px' }}
             ></th>
             <th
               className='px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
-              style={{ width: '700px', minWidth: '700px' }}
+              style={{ width: '900px', minWidth: '900px' }}
             >
               Encounter
             </th>
@@ -39,7 +39,7 @@ export default function LocationTableSkeleton() {
             >
               {/* Location name column */}
               <td className='px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
-                <div className='h-5 rounded w-23 shimmer'></div>
+                <div className='h-5 rounded w-19 shimmer'></div>
               </td>
 
               {/* Sprite column */}

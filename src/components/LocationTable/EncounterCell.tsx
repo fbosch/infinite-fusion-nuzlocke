@@ -58,15 +58,16 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
   return (
     <td
       className={clsx(
-        'px-4 pt-8.5 pb-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 w-96'
+        'w-96 max-w-96 overflow-x-auto',
+        'px-4 pt-8.5 pb-4 text-sm text-gray-900 dark:text-gray-100 '
       )}
       role='cell'
     >
-      <div className='flex flex-row justify-center gap-4 w-full max-w-full'>
+      <div className='flex flex-row justify-center gap-4 w-full '>
         <div className='flex-1 min-w-0 max-w-full overflow-hidden'>
           {isFusion ? (
-            <div className='flex items-center gap-2 max-w-full'>
-              <div className='flex-1 relative min-w-0 max-w-full'>
+            <div className='flex items-center gap-2 '>
+              <div className='flex-1 relative '>
                 <span className='absolute -top-6 left-0 text-xs font-medium text-gray-500 dark:text-gray-400'>
                   Head
                 </span>
