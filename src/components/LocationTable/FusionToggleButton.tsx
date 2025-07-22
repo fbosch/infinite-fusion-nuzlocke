@@ -136,6 +136,15 @@ export function FusionToggleButton({
     dragActions.clearDrag();
   }, []);
 
+  const isDropAllowed =
+    !isFusion &&
+    selectedPokemon &&
+    dragSnapshot.isDragging &&
+    dragSnapshot.currentDragSource &&
+    dragSnapshot.currentDragSource !== `${locationId}-single` &&
+    dragSnapshot.currentDragSource !== `${locationId}-head` &&
+    dragSnapshot.currentDragSource !== `${locationId}-body`;
+
   return (
     <button
       type='button'
@@ -155,13 +164,7 @@ export function FusionToggleButton({
           'bg-white border-gray-300 text-gray-700 hover:bg-green-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-green-700':
             !isFusion,
           'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20':
-            !isFusion &&
-            selectedPokemon &&
-            dragSnapshot.isDragging &&
-            dragSnapshot.currentDragSource &&
-            dragSnapshot.currentDragSource !== `${locationId}-single` &&
-            dragSnapshot.currentDragSource !== `${locationId}-head` &&
-            dragSnapshot.currentDragSource !== `${locationId}-body`,
+            isDropAllowed,
         }
       )}
       aria-label={`Toggle fusion for ${selectedPokemon?.name || 'Pokemon'}`}
