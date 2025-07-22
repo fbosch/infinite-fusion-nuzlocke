@@ -16,7 +16,6 @@ import {
   useFloating,
   autoUpdate,
   flip,
-  shift,
   FloatingPortal,
 } from '@floating-ui/react';
 import {
@@ -44,7 +43,7 @@ export const PokemonStatusInput = ({
   // Floating UI setup
   const { refs, floatingStyles, placement } = useFloating({
     placement: 'bottom-end',
-    middleware: [flip(), shift()],
+    middleware: [flip()],
     whileElementsMounted: autoUpdate,
   });
 
@@ -115,6 +114,7 @@ export const PokemonStatusInput = ({
               {
                 'rounded-none border-t-0 rounded-b-none':
                   open && placement.startsWith('bottom'),
+                'rounded-br-md': open && placement.startsWith('top'),
                 'rounded-br-md rounded-t-none': !open,
               }
             )}

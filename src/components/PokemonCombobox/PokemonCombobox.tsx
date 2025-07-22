@@ -19,9 +19,7 @@ import {
 import {
   useFloating,
   autoUpdate,
-  offset,
   flip,
-  shift,
   size,
   FloatingPortal,
 } from '@floating-ui/react';
@@ -297,9 +295,7 @@ export const PokemonCombobox = ({
   const { refs, floatingStyles, update, placement } = useFloating({
     placement: 'bottom-start',
     middleware: [
-      offset(0),
       flip({ padding: 8 }),
-      shift({ padding: 8 }),
       size({
         apply({ rects, elements, availableHeight }) {
           Object.assign(elements.floating.style, {
