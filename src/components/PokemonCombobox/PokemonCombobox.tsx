@@ -16,6 +16,15 @@ import {
   ComboboxOptions,
   ComboboxOption,
 } from '@headlessui/react';
+import {
+  useFloating,
+  autoUpdate,
+  offset,
+  flip,
+  shift,
+  size,
+  FloatingPortal,
+} from '@floating-ui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { useSnapshot } from 'valtio';
@@ -287,6 +296,25 @@ export const PokemonCombobox = ({
 
   // Ref to maintain focus on input
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Floating UI setup
+  const { refs, floatingStyles } = useFloating({
+    middleware: [
+      offset(0),
+      flip({ padding: 8 }),
+      shift({ padding: 8 }),
+      size({
+        apply({ rects, elements, availableHeight }) {
+          Object.assign(elements.floating.style, {
+            maxHeight: `${Math.min(240, availableHeight - 8)}px`,
+            minWidth: `${rects.reference.width}px`,
+          });
+        },
+        padding: 8,
+      }),
+    ],
+    whileElementsMounted: autoUpdate,
+  });
 
   // State for route encounters and all Pokemon
   const [routeEncounterData, setRouteEncounterData] = useState<PokemonOption[]>(
@@ -673,76 +701,89 @@ export const PokemonCombobox = ({
         disabled={disabled}
         immediate
       >
-        <div className='relative'>
-          <ComboboxInput
-            ref={inputRef}
-            className={clsx(
-              'rounded-t-md rounded-b-none border',
-              'w-full px-3 py-3.5 text-sm  bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
-              'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
-              'focus:cursor-text hover:cursor-pointer',
-              (value || dragPreview) && 'pl-12', // Add padding for sprite when value is selected or previewing
-              dragPreview &&
-                'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60' // Highlight when showing preview with opacity
-            )}
-            placeholder={placeholder}
-            displayValue={(pokemon: PokemonOption | null | undefined) => {
-              const displayPokemon = dragPreview || pokemon;
-              return displayPokemon?.name || '';
-            }}
-            spellCheck={false}
-            autoComplete='off'
-            onChange={handleInputChange}
-            onFocus={handleInteraction}
-            onClick={handleInteraction}
-            onMouseEnter={handleInteraction}
-          />
-          {(value || dragPreview) && (
-            <div className='absolute inset-y-0 left-1.5 flex items-center'>
-              <Image
-                src={getPokemonSpriteUrlFromOption(dragPreview || value!)}
-                alt={(dragPreview || value)!.name}
-                width={40}
-                height={40}
-                className={clsx(
-                  'object-center object-contain cursor-grab active:cursor-grabbing',
-                  dragPreview && 'opacity-60 pointer-none' // Make preview sprite opaque
-                )}
-                quality={70}
-                priority={true}
-                loading='eager'
-                draggable
-                onDragStart={e => {
-                  e.dataTransfer.setData(
-                    'text/plain',
-                    (dragPreview || value)!.name
-                  );
-                  e.dataTransfer.effectAllowed = 'copy';
-                  dragActions.startDrag(
-                    (dragPreview || value)!.name,
-                    comboboxId || '',
-                    dragPreview || value || null
-                  );
+        {({ open }) => (
+          <>
+            <div className='relative'>
+              <ComboboxInput
+                ref={node => {
+                  inputRef.current = node;
+                  refs.setReference(node);
                 }}
+                className={clsx(
+                  'rounded-t-md rounded-b-none border',
+                  'w-full px-3 py-3.5 text-sm  bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
+                  'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
+                  'focus:cursor-text hover:cursor-pointer',
+                  (value || dragPreview) && 'pl-12', // Add padding for sprite when value is selected or previewing
+                  dragPreview &&
+                    'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60' // Highlight when showing preview with opacity
+                )}
+                placeholder={placeholder}
+                displayValue={(pokemon: PokemonOption | null | undefined) => {
+                  const displayPokemon = dragPreview || pokemon;
+                  return displayPokemon?.name || '';
+                }}
+                spellCheck={false}
+                autoComplete='off'
+                onChange={handleInputChange}
+                onFocus={handleInteraction}
+                onClick={handleInteraction}
+                onMouseEnter={handleInteraction}
               />
+              {(value || dragPreview) && (
+                <div className='absolute inset-y-0 left-1.5 flex items-center'>
+                  <Image
+                    src={getPokemonSpriteUrlFromOption(dragPreview || value!)}
+                    alt={(dragPreview || value)!.name}
+                    width={40}
+                    height={40}
+                    className={clsx(
+                      'object-center object-contain cursor-grab active:cursor-grabbing',
+                      dragPreview && 'opacity-60 pointer-none' // Make preview sprite opaque
+                    )}
+                    quality={70}
+                    priority={true}
+                    loading='eager'
+                    draggable
+                    onDragStart={e => {
+                      e.dataTransfer.setData(
+                        'text/plain',
+                        (dragPreview || value)!.name
+                      );
+                      e.dataTransfer.effectAllowed = 'copy';
+                      dragActions.startDrag(
+                        (dragPreview || value)!.name,
+                        comboboxId || '',
+                        dragPreview || value || null
+                      );
+                    }}
+                  />
+                </div>
+              )}
+              <PokemonEvolutionButton value={value} onChange={onChange} />
             </div>
-          )}
-          <PokemonEvolutionButton value={value} onChange={onChange} />
-        </div>
-        <ComboboxOptions
-          className={clsx(
-            'absolute z-20 w-full overflow-hidden rounded-b-md py-1 text-base shadow-lg focus:outline-none sm:text-sm',
-            'bg-white dark:bg-gray-800',
-            'border border-gray-400 dark:border-gray-600'
-          )}
-        >
-          <PokemonOptions
-            options={finalOptions}
-            isRoutePokemon={isRoutePokemon}
-            query={deferredQuery}
-            comboboxId={comboboxId || ''} // Provide a default value for comboboxId
-          />
-        </ComboboxOptions>
+            {open && (
+              <FloatingPortal>
+                <ComboboxOptions
+                  ref={refs.setFloating}
+                  style={floatingStyles}
+                  className={clsx(
+                    'z-50 overflow-hidden rounded-md py-1 text-base shadow-lg focus:outline-none sm:text-sm',
+                    'bg-white dark:bg-gray-800',
+                    'border border-gray-400 dark:border-gray-600'
+                  )}
+                >
+                  <PokemonOptions
+                    options={finalOptions}
+                    isRoutePokemon={isRoutePokemon}
+                    query={deferredQuery}
+                    comboboxId={comboboxId || ''} // Provide a default value for comboboxId
+                  />
+                </ComboboxOptions>
+              </FloatingPortal>
+            )}
+          </>
+        )}
       </Combobox>
       <div className='flex'>
         <PokemonNicknameInput
