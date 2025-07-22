@@ -23,6 +23,7 @@ import {
   type PokemonStatusType,
   PokemonStatus,
 } from '@/loaders/pokemon';
+import { match } from 'ts-pattern';
 
 interface PokemonStatusInputProps {
   value: PokemonOption | null | undefined;
@@ -56,28 +57,26 @@ export const PokemonStatusInput = ({
 
   // Helper function to get status icon
   const getStatusIcon = (status: PokemonStatusType) => {
-    switch (status) {
-      case 'captured':
-        return <Check className='h-4 w-4 text-gray-600 dark:text-gray-300' />;
-      case 'received':
-        return <Gift className='h-4 w-4 text-gray-600 dark:text-gray-300' />;
-      case 'traded':
-        return (
-          <ArrowUpDown className='h-4 w-4 text-gray-600 dark:text-gray-300' />
-        );
-      case 'missed':
-        return (
-          <LocateOff className='h-4 w-4 text-gray-600 dark:text-gray-300' />
-        );
-      case 'stored':
-        return (
-          <Computer className='h-4 w-4 text-gray-600 dark:text-gray-300' />
-        );
-      case 'deceased':
-        return <Skull className='h-4 w-4 text-gray-600 dark:text-gray-300' />;
-      default:
-        return null;
-    }
+    return match(status)
+      .with(PokemonStatus.CAPTURED, () => (
+        <Check className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+      ))
+      .with(PokemonStatus.RECEIVED, () => (
+        <Gift className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+      ))
+      .with(PokemonStatus.TRADED, () => (
+        <ArrowUpDown className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+      ))
+      .with(PokemonStatus.MISSED, () => (
+        <LocateOff className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+      ))
+      .with(PokemonStatus.STORED, () => (
+        <Computer className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+      ))
+      .with(PokemonStatus.DECEASED, () => (
+        <Skull className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+      ))
+      .otherwise(() => null);
   };
 
   // Handle status selection
@@ -137,7 +136,7 @@ export const PokemonStatusInput = ({
                 ref={refs.setFloating}
                 style={floatingStyles}
                 className={clsx(
-                  'z-50 overflow-hidden py-1 text-base focus:outline-none sm:text-sm',
+                  'z-50 overflow-hidden text-base focus:outline-none sm:text-sm',
                   'bg-white dark:bg-gray-800',
                   'border-gray-300 dark:border-gray-600 border-1',
                   'min-w-[140px]',
@@ -147,37 +146,35 @@ export const PokemonStatusInput = ({
                   }
                 )}
               >
-                <div className='py-1'>
-                  {Object.values(PokemonStatus).map(
-                    (statusValue: PokemonStatusType) => (
-                      <MenuItem key={statusValue}>
-                        {({ focus }) => (
-                          <button
-                            onClick={() => handleStatusSelect(statusValue)}
-                            className={clsx(
-                              'group flex w-full items-center px-4 py-2 text-sm hover:cursor-pointer',
-                              'focus:outline-none text-left',
-                              {
-                                'bg-gray-100 dark:bg-gray-700': focus,
-                                'bg-gray-50 dark:bg-gray-750':
-                                  (dragPreview?.status || localStatus) ===
-                                    statusValue && !focus,
-                              }
-                            )}
-                          >
-                            <div className='flex items-center gap-2'>
-                              {getStatusIcon(statusValue)}
-                              <span>
-                                {statusValue.charAt(0).toUpperCase() +
-                                  statusValue.slice(1)}
-                              </span>
-                            </div>
-                          </button>
-                        )}
-                      </MenuItem>
-                    )
-                  )}
-                </div>
+                {Object.values(PokemonStatus).map(
+                  (statusValue: PokemonStatusType) => (
+                    <MenuItem key={statusValue}>
+                      {({ focus }) => (
+                        <button
+                          onClick={() => handleStatusSelect(statusValue)}
+                          className={clsx(
+                            'group flex w-full items-center px-4 py-2 text-sm hover:cursor-pointer',
+                            'focus:outline-none text-left',
+                            {
+                              'bg-gray-100 dark:bg-gray-700': focus,
+                              'bg-gray-500 dark:bg-gray-600':
+                                (dragPreview?.status || localStatus) ===
+                                  statusValue && !focus,
+                            }
+                          )}
+                        >
+                          <div className='flex items-center gap-2'>
+                            {getStatusIcon(statusValue)}
+                            <span>
+                              {statusValue.charAt(0).toUpperCase() +
+                                statusValue.slice(1)}
+                            </span>
+                          </div>
+                        </button>
+                      )}
+                    </MenuItem>
+                  )
+                )}
               </MenuItems>
             </FloatingPortal>
           )}
