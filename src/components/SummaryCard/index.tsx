@@ -38,19 +38,22 @@ export default function SummaryCard({ encounterData }: SummaryCardProps) {
   return (
     <div className='flex flex-col items-center justify-center relative'>
       {name && (
-        <div className=' text-center absolute top-0  -translate-y-9'>
+        <div className=' text-center absolute top-0 -translate-y-7.5'>
           <span className='text-sm font-medium font-mono truncate max-w-full block px-1 rounded text-gray-900 dark:text-white '>
             {name}
           </span>
         </div>
       )}
-      <div>
-        <FusionSprite
-          encounterData={encounterData}
-          size='lg'
-          className='scale-150 relative translate-y-1/8'
-        />
-      </div>
+      {encounterData.head || encounterData.body ? (
+        <div className='relative top-3'>
+          <div className='size-20 bg-gray-200 rounded-lg absolute inset-0 -translate-y-3 -translate-x-2 opacity-50' />
+          <FusionSprite
+            encounterData={encounterData}
+            size='lg'
+            className='scale-150 relative '
+          />
+        </div>
+      ) : null}
     </div>
   );
 }
