@@ -298,7 +298,7 @@ export const PokemonCombobox = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Floating UI setup
-  const { refs, floatingStyles } = useFloating({
+  const { refs, floatingStyles, update } = useFloating({
     middleware: [
       offset(0),
       flip({ padding: 8 }),
@@ -362,7 +362,11 @@ export const PokemonCombobox = ({
   // Load route data when combobox opens or when user starts typing
   const handleInteraction = useCallback(() => {
     loadRouteEncounterData();
-  }, [loadRouteEncounterData]);
+    // Force floating UI to recalculate position when interaction starts
+    setTimeout(() => {
+      update();
+    }, 0);
+  }, [loadRouteEncounterData, update]);
 
   // Smart search function that handles both name and ID searches
   const performSmartSearch = useCallback(
@@ -681,6 +685,14 @@ export const PokemonCombobox = ({
     };
   }, []);
 
+  // Ensure floating UI reference is properly set
+  useEffect(() => {
+    if (inputRef.current) {
+      refs.setReference(inputRef.current);
+      update();
+    }
+  }, [refs, update]);
+
   const handleDragEnd = useCallback(() => {
     // Clear global drag data when drag ends
     dragActions.clearDrag();
@@ -705,10 +717,7 @@ export const PokemonCombobox = ({
           <>
             <div className='relative'>
               <ComboboxInput
-                ref={node => {
-                  inputRef.current = node;
-                  refs.setReference(node);
-                }}
+                ref={inputRef}
                 className={clsx(
                   'rounded-t-md rounded-b-none border',
                   'w-full px-3 py-3.5 text-sm  bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
