@@ -146,15 +146,21 @@ export function FusionSprite({
   );
 
   const link = useMemo(() => {
-    if (head && !body) {
-      return `https://infinitefusiondex.com/details/${head.id}`;
-    }
-    if (!head && body) {
-      return `https://infinitefusiondex.com/details/${body.id}`;
-    }
-    if (head && body) {
-      return `https://infinitefusiondex.com/details/${head.id}.${body.id}`;
-    }
+    return match([head, body])
+      .with(
+        [P.not(P.nullish), P.nullish],
+        ([head]) => `https://infinitefusiondex.com/details/${head.id}`
+      )
+      .with(
+        [P.nullish, P.not(P.nullish)],
+        ([, body]) => `https://infinitefusiondex.com/details/${body.id}`
+      )
+      .with(
+        [P.not(P.nullish), P.not(P.nullish)],
+        ([head, body]) =>
+          `https://infinitefusiondex.com/details/${head.id}.${body.id}`
+      )
+      .otherwise(() => undefined);
   }, [head, body]);
 
   if (!head && !body) return null;

@@ -32,6 +32,29 @@ interface PokemonStatusInputProps {
   dragPreview?: PokemonOption | null;
 }
 
+const getStatusIcon = (status: PokemonStatusType) => {
+  return match(status)
+    .with(PokemonStatus.CAPTURED, () => (
+      <Check className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+    ))
+    .with(PokemonStatus.RECEIVED, () => (
+      <Gift className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+    ))
+    .with(PokemonStatus.TRADED, () => (
+      <ArrowUpDown className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+    ))
+    .with(PokemonStatus.MISSED, () => (
+      <LocateOff className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+    ))
+    .with(PokemonStatus.STORED, () => (
+      <Computer className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+    ))
+    .with(PokemonStatus.DECEASED, () => (
+      <Skull className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+    ))
+    .otherwise(() => null);
+};
+
 export const PokemonStatusInput = ({
   value,
   onChange,
@@ -54,30 +77,6 @@ export const PokemonStatusInput = ({
       setLocalStatus(value?.status || null);
     }
   }, [value?.status, localStatus]);
-
-  // Helper function to get status icon
-  const getStatusIcon = (status: PokemonStatusType) => {
-    return match(status)
-      .with(PokemonStatus.CAPTURED, () => (
-        <Check className='h-4 w-4 text-gray-600 dark:text-gray-300' />
-      ))
-      .with(PokemonStatus.RECEIVED, () => (
-        <Gift className='h-4 w-4 text-gray-600 dark:text-gray-300' />
-      ))
-      .with(PokemonStatus.TRADED, () => (
-        <ArrowUpDown className='h-4 w-4 text-gray-600 dark:text-gray-300' />
-      ))
-      .with(PokemonStatus.MISSED, () => (
-        <LocateOff className='h-4 w-4 text-gray-600 dark:text-gray-300' />
-      ))
-      .with(PokemonStatus.STORED, () => (
-        <Computer className='h-4 w-4 text-gray-600 dark:text-gray-300' />
-      ))
-      .with(PokemonStatus.DECEASED, () => (
-        <Skull className='h-4 w-4 text-gray-600 dark:text-gray-300' />
-      ))
-      .otherwise(() => null);
-  };
 
   // Handle status selection
   const handleStatusSelect = (newStatus: PokemonStatusType) => {
