@@ -312,14 +312,7 @@ if (typeof window !== 'undefined') {
     if (cachedActiveId !== currentActiveId) {
       invalidateActivePlaythroughCache();
     }
-
-    // Use requestIdleCallback to defer save operations when browser is idle
-    window.requestIdleCallback(
-      () => {
-        debouncedSaveAll(playthroughsStore);
-      },
-      { timeout: 2000 } // Reduced timeout for better responsiveness
-    );
+    debouncedSaveAll(playthroughsStore);
   });
 } else {
   // Server-side: Create a dummy store

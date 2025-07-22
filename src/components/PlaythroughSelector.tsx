@@ -250,7 +250,7 @@ export default function PlaythroughSelector({
                 />
                 <button
                   onClick={handleCreatePlaythrough}
-                  disabled={!newPlaythroughName.trim()}
+                  disabled={Boolean(!newPlaythroughName.trim())}
                   className={clsx(
                     'px-2 py-2 text-xs font-medium text-white rounded cursor-pointer',
                     'bg-blue-600 hover:bg-blue-700 transition-colors',
