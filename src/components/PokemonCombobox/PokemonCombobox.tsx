@@ -97,47 +97,45 @@ const PokemonOption = ({
       )}
     >
       {({ selected }) => (
-        <>
-          <div className={'flex items-center gap-8'}>
-            <Image
-              src={getPokemonSpriteUrlFromOption(pokemon)}
-              alt={pokemon.name}
-              width={40}
-              height={40}
-              className='object-contain object-center scale-180 image-render-high-quality cursor-grab active:cursor-grabbing'
-              loading='lazy'
-              unoptimized
-              draggable
-              onDragStart={handleDragStart}
-            />
-            <span
-              className={clsx('block truncate flex-1', {
-                'font-medium': selected,
-                'font-normal': !selected,
-              })}
-            >
-              {pokemon.name}
-            </span>
-            <div className='flex items-center gap-2'>
-              {isRoutePokemon && (
-                <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
-                  Route
-                </span>
+        <div className={'flex items-center gap-8'}>
+          <Image
+            src={getPokemonSpriteUrlFromOption(pokemon)}
+            alt={pokemon.name}
+            width={40}
+            height={40}
+            className='object-contain object-center scale-180 image-render-high-quality cursor-grab active:cursor-grabbing'
+            loading='lazy'
+            unoptimized
+            draggable
+            onDragStart={handleDragStart}
+          />
+          <span
+            className={clsx('block truncate flex-1', {
+              'font-medium': selected,
+              'font-normal': !selected,
+            })}
+          >
+            {pokemon.name}
+          </span>
+          <div className='flex items-center gap-2'>
+            {isRoutePokemon && (
+              <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
+                Route
+              </span>
+            )}
+            <div className='w-5 h-5 flex items-center justify-center'>
+              {selected && (
+                <Check
+                  className={clsx('w-5 h-5', {
+                    'text-white': selected,
+                    'text-blue-400': !selected,
+                  })}
+                  aria-hidden='true'
+                />
               )}
-              <div className='w-5 h-5 flex items-center justify-center'>
-                {selected && (
-                  <Check
-                    className={clsx('w-5 h-5', {
-                      'text-white': selected,
-                      'text-blue-400': !selected,
-                    })}
-                    aria-hidden='true'
-                  />
-                )}
-              </div>
             </div>
           </div>
-        </>
+        </div>
       )}
     </ComboboxOption>
   );
@@ -214,49 +212,47 @@ const PokemonOptions = ({
           style={{ containIntrinsicSize: '0 56px' }}
         >
           {({ selected }) => (
-            <>
-              <div className={'flex items-center gap-8'}>
-                <Image
-                  src={getPokemonSpriteUrlFromOption(pokemon)}
-                  alt={pokemon.name}
-                  width={40}
-                  height={40}
-                  className='object-contain object-center scale-140 image-render-high-quality cursor-grab active:cursor-grabbing'
-                  loading={
-                    index < 5 || isRoutePokemon(pokemon.id) ? 'eager' : 'lazy'
-                  }
-                  unoptimized
-                  draggable
-                  onDragStart={e => handleDragStart(e, pokemon)}
-                />
-                <span
-                  className={clsx('block truncate flex-1', {
-                    'font-medium': selected,
-                    'font-normal': !selected,
-                  })}
-                >
-                  {pokemon.name}
-                </span>
-                <div className='flex items-center gap-3'>
-                  {isRoutePokemon(pokemon.id) && (
-                    <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
-                      Route
-                    </span>
+            <div className={'flex items-center gap-8'}>
+              <Image
+                src={getPokemonSpriteUrlFromOption(pokemon)}
+                alt={pokemon.name}
+                width={40}
+                height={40}
+                className='object-contain object-center scale-140 image-render-high-quality cursor-grab active:cursor-grabbing'
+                loading={
+                  index < 5 || isRoutePokemon(pokemon.id) ? 'eager' : 'lazy'
+                }
+                unoptimized
+                draggable
+                onDragStart={e => handleDragStart(e, pokemon)}
+              />
+              <span
+                className={clsx('block truncate flex-1', {
+                  'font-medium': selected,
+                  'font-normal': !selected,
+                })}
+              >
+                {pokemon.name}
+              </span>
+              <div className='flex items-center gap-3'>
+                {isRoutePokemon(pokemon.id) && (
+                  <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
+                    Route
+                  </span>
+                )}
+                <div className='w-5 h-5 flex items-center justify-center'>
+                  {selected && (
+                    <Check
+                      className={clsx('w-5 h-5', {
+                        'text-white': selected,
+                        'text-blue-400': !selected,
+                      })}
+                      aria-hidden='true'
+                    />
                   )}
-                  <div className='w-5 h-5 flex items-center justify-center'>
-                    {selected && (
-                      <Check
-                        className={clsx('w-5 h-5', {
-                          'text-white': selected,
-                          'text-blue-400': !selected,
-                        })}
-                        aria-hidden='true'
-                      />
-                    )}
-                  </div>
                 </div>
               </div>
-            </>
+            </div>
           )}
         </ComboboxOption>
       ))}
@@ -701,7 +697,6 @@ export const PokemonCombobox = ({
 
   return (
     <div
-      key={value?.uid}
       className='relative'
       onDrop={handleDrop}
       onDragOver={handleDragOver}
@@ -715,7 +710,7 @@ export const PokemonCombobox = ({
         immediate
       >
         {({ open }) => (
-          <>
+          <div>
             <div className='relative'>
               <ComboboxInput
                 ref={inputRef}
@@ -811,11 +806,12 @@ export const PokemonCombobox = ({
                 </ComboboxOptions>
               </FloatingPortal>
             )}
-          </>
+          </div>
         )}
       </Combobox>
       <div className='flex'>
         <PokemonNicknameInput
+          key={value?.uid + 'nickname'}
           value={value}
           onChange={onChange}
           placeholder={nicknamePlaceholder}
@@ -824,6 +820,7 @@ export const PokemonCombobox = ({
         />
         <PokemonStatusInput
           value={value}
+          key={value?.uid + 'status'}
           onChange={onChange}
           disabled={disabled}
           dragPreview={dragPreview}
