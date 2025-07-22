@@ -4,6 +4,7 @@ import React, { useMemo, useRef } from 'react';
 import Image from 'next/image';
 import { PokemonStatus, type PokemonOption } from '@/loaders/pokemon';
 import type { EncounterData } from '@/loaders/encounters';
+import { match, P } from 'ts-pattern';
 import clsx from 'clsx';
 
 interface FusionSpriteProps {
@@ -17,6 +18,80 @@ const SPRITE_SIZES = { sm: 32, md: 48, lg: 64, xl: 96 } as const;
 // Transparent 1x1 pixel data URL to prevent empty image flashing
 const TRANSPARENT_PIXEL =
   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+// Status state type for pattern matching
+type StatusState = {
+  type: 'normal' | 'missed' | 'deceased' | 'stored';
+  imageClasses: string;
+  overlayContent: React.ReactNode | null;
+  canAnimate: boolean;
+};
+
+function getStatusState(
+  head: PokemonOption | null,
+  body: PokemonOption | null,
+  baseImageClasses: string
+): StatusState {
+  return match([head?.status, body?.status])
+    .with(
+      [PokemonStatus.MISSED, P._],
+      [P._, PokemonStatus.MISSED],
+      [PokemonStatus.MISSED, PokemonStatus.MISSED],
+      () => ({
+        type: 'missed' as const,
+        imageClasses: clsx(baseImageClasses, 'opacity-40'),
+        overlayContent: (
+          <div className='absolute -right-1.5 -bottom-3 z-30 flex items-center justify-center pointer-events-none font-mono'>
+            <span className='dark:pixel-shadow text-gray-500 text-xs dark:text-gray-white'>
+              ď
+            </span>
+          </div>
+        ),
+        canAnimate: false,
+      })
+    )
+    .with(
+      [PokemonStatus.DECEASED, P._],
+      [P._, PokemonStatus.DECEASED],
+      [PokemonStatus.DECEASED, PokemonStatus.DECEASED],
+      () => ({
+        type: 'deceased' as const,
+        imageClasses: clsx(
+          baseImageClasses,
+          'blur-[0.4px] opacity-50 grayscale'
+        ),
+        overlayContent: (
+          <div className='absolute pixel-shadow -right-1.5 -bottom-3 z-30 bg-red-500 flex items-center justify-center pointer-events-none dark:bg-red-900 h-fit w-fit px-1 rounded-xs'>
+            <span className='pixel-shadow text-xs text-white font-mono'>
+              FNT
+            </span>
+          </div>
+        ),
+        canAnimate: false,
+      })
+    )
+    .with(
+      [PokemonStatus.STORED, P._],
+      [P._, PokemonStatus.STORED],
+      [PokemonStatus.STORED, PokemonStatus.STORED],
+      () => ({
+        type: 'stored' as const,
+        imageClasses: baseImageClasses,
+        overlayContent: (
+          <div className='absolute -right-1.5 -bottom-3 z-30 flex items-center justify-center pointer-events-none font-mono'>
+            <span className='dark:pixel-shadow text-xs dark:text-white'>Ą</span>
+          </div>
+        ),
+        canAnimate: true,
+      })
+    )
+    .otherwise(() => ({
+      type: 'normal' as const,
+      imageClasses: baseImageClasses,
+      overlayContent: null,
+      canAnimate: true,
+    }));
+}
 
 function getSpriteUrl(
   head: PokemonOption | null,
@@ -61,24 +136,13 @@ export function FusionSprite({
   const altText = getAltText(head, body, isFusion);
   const spriteSize = SPRITE_SIZES[size];
 
-  const isMissed =
-    head?.status === PokemonStatus.MISSED ||
-    body?.status === PokemonStatus.MISSED;
-  const isDeceased =
-    head?.status === PokemonStatus.DECEASED ||
-    body?.status === PokemonStatus.DECEASED;
+  const baseImageClasses =
+    'object-fill object-center image-render-pixelated origin-top -translate-y-1/9 transition-all duration-200';
 
-  const isStored =
-    head?.status === PokemonStatus.STORED ||
-    body?.status === PokemonStatus.STORED;
-
-  const imageClasses = clsx(
-    'object-fill object-center image-render-pixelated origin-top -translate-y-1/9 transition-all duration-200',
-    {
-      'opacity-40': isMissed,
-      'blur-[0.4px]  opacity-50 grayscale': isDeceased,
-    },
-    className
+  const statusState = getStatusState(
+    head,
+    body,
+    clsx(baseImageClasses, className)
   );
 
   const link = useMemo(() => {
@@ -106,7 +170,7 @@ export function FusionSprite({
         title='Open Pokedex'
         onMouseEnter={() => {
           hoverRef.current = true;
-          if (imageRef.current && !isMissed && !isDeceased) {
+          if (imageRef.current && statusState.canAnimate) {
             // Cancel any running animations so the new one will replay
             imageRef.current.getAnimations().forEach(anim => anim.cancel());
             if (shadowRef.current) {
@@ -201,7 +265,7 @@ export function FusionSprite({
               alt={altText}
               width={spriteSize}
               height={spriteSize}
-              className={clsx(imageClasses, 'select-none')}
+              className={clsx(statusState.imageClasses, 'select-none')}
               loading='eager'
               unoptimized
               draggable={false}
@@ -214,28 +278,8 @@ export function FusionSprite({
                 }
               }}
             />
-            {/* Deceased overlay */}
-            {isDeceased && (
-              <div className='absolute pixel-shadow -right-1.5 -bottom-3 z-30 bg-red-500 flex items-center justify-center pointer-events-none dark:bg-red-900 h-fit w-fit px-1 rounded-xs '>
-                <span className='pixel-shadow text-xs text-white font-mono'>
-                  FNT
-                </span>
-              </div>
-            )}
-            {isMissed && (
-              <div className='absolute -right-1.5 -bottom-3 z-30 flex items-center justify-center pointer-events-none font-mono'>
-                <span className='dark:pixel-shadow text-gray-500 text-xs dark:text-gray-white'>
-                  ď
-                </span>
-              </div>
-            )}
-            {isStored && (
-              <div className='absolute -right-1.5 -bottom-3 z-30 flex items-center justify-center pointer-events-none font-mono'>
-                <span className='dark:pixel-shadow text-xs dark:text-white'>
-                  Ą
-                </span>
-              </div>
-            )}
+            {/* Status overlay */}
+            {statusState.overlayContent}
           </div>
         </div>
       </a>
