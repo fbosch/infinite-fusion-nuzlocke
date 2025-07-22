@@ -162,7 +162,7 @@ const PokemonOptions = ({
 
   if (options.length === 0) {
     return (
-      <div className='max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent'>
+      <div className='h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent'>
         <div className='relative cursor-default select-none py-2 px-4 text-center'>
           <div className='text-gray-500 dark:text-gray-400'>
             {query ? (
@@ -187,7 +187,7 @@ const PokemonOptions = ({
   return (
     <div
       className={clsx(
-        'max-h-60 overflow-y-auto space-y-2',
+        ' overflow-y-auto space-y-2',
         'scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600',
         'scrollbar-track-transparent py-1'
       )}
@@ -299,7 +299,7 @@ export const PokemonCombobox = ({
       size({
         apply({ rects, elements, availableHeight }) {
           Object.assign(elements.floating.style, {
-            maxHeight: `${Math.min(240, availableHeight - 8)}px`,
+            maxHeight: `${Math.min(500, availableHeight - 8)}px`,
             minWidth: `${rects.reference.width}px`,
           });
         },
@@ -778,7 +778,7 @@ export const PokemonCombobox = ({
                   ref={refs.setFloating}
                   style={floatingStyles}
                   className={clsx(
-                    'z-50 overflow-hidden py-1 text-base shadow-lg focus:outline-none sm:text-sm',
+                    'z-50 overflow-y-auto py-1 text-base shadow-lg focus:outline-none sm:text-sm',
                     'bg-white dark:bg-gray-800',
                     'border border-gray-300 dark:border-gray-600',
                     // Conditional border radius and borders based on menu placement
