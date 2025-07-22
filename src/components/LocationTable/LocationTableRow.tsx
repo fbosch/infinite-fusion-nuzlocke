@@ -2,7 +2,7 @@ import { Row, flexRender } from '@tanstack/react-table';
 import type { Location } from '@/loaders/locations';
 import type { EncounterData } from '@/loaders/encounters';
 import { EncounterCell } from './EncounterCell';
-import { FusionSprite } from '../FusionSprite';
+import SummaryCard from '../SummaryCard';
 import ResetEncounterButton from './ResetEncounterButton';
 
 interface LocationTableRowProps {
@@ -46,11 +46,7 @@ export default function LocationTableRow({
               className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
               role='cell'
             >
-              <FusionSprite
-                encounterData={encounterData}
-                size='lg'
-                className='scale-150'
-              />
+              <SummaryCard encounterData={encounterData} />
             </td>
           );
         }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Be_Vietnam_Pro as Font } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import Header from '@/components/Header';
@@ -11,6 +12,11 @@ const font = Font({
   weight: ['400', '800'],
   display: 'swap',
   variable: '--font',
+});
+
+const dsFont = localFont({
+  src: '../../public/pokemon-ds-font.woff2',
+  variable: '--font-mono',
 });
 
 export const metadata: Metadata = {
@@ -28,7 +34,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en' suppressHydrationWarning className={`${font.variable}`}>
+    <html
+      lang='en'
+      suppressHydrationWarning
+      className={`${font.variable} ${dsFont.variable}`}
+    >
       <head>
         <meta name='theme-color' content='#1f2937' />
         <meta name='color-scheme' content='light dark' />

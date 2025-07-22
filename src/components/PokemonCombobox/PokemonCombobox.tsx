@@ -770,7 +770,9 @@ export const PokemonCombobox = ({
                   />
                 </div>
               )}
-              <PokemonEvolutionButton value={value} onChange={onChange} />
+              {open ? null : (
+                <PokemonEvolutionButton value={value} onChange={onChange} />
+              )}
             </div>
             {open && (
               <FloatingPortal>

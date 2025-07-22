@@ -48,7 +48,7 @@ export default function LocationTable() {
         header: '',
         enableSorting: false,
         cell: () => null, // Handled in render loop
-        size: 120, // Width for sprite column
+        size: 200, // Width for sprite column
       }),
       columnHelper.accessor('routeId', {
         id: 'encounter',

@@ -47,28 +47,6 @@ function getAltText(
   return `${head.name}/${body.name} fusion`;
 }
 
-function getNicknameText(
-  head: PokemonOption | null,
-  body: PokemonOption | null,
-  isFusion: boolean
-): string | undefined {
-  if (!isFusion) {
-    // Single Pokémon - show nickname if available, otherwise show name
-    const pokemon = head || body;
-    if (!pokemon) return '';
-    return pokemon.nickname || pokemon.name;
-  }
-
-  // Fusion case
-  if (!head || !body) {
-    const pokemon = head || body;
-    if (!pokemon) return '';
-    return pokemon.nickname || pokemon.name;
-  }
-
-  return head.nickname || body.nickname || `${head.name}/${body.name}`;
-}
-
 export function FusionSprite({
   encounterData,
   size = 'md',
@@ -82,7 +60,6 @@ export function FusionSprite({
   // Calculate all values before early return to maintain hook order
   const spriteUrl = getSpriteUrl(head, body, isFusion);
   const altText = getAltText(head, body, isFusion);
-  const nicknameText = getNicknameText(head, body, isFusion);
   const spriteSize = SPRITE_SIZES[size];
 
   const isMissed =
@@ -243,13 +220,6 @@ export function FusionSprite({
           </div>
         </div>
       </a>
-      {nicknameText && (
-        <div className='mt-4 text-center absolute bottom-0 translate-y-8'>
-          <span className='text-sm font-medium truncate max-w-full block px-1 rounded text-gray-900 dark:text-white '>
-            {nicknameText}
-          </span>
-        </div>
-      )}
     </div>
   );
 }

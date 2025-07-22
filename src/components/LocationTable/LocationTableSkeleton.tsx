@@ -16,7 +16,7 @@ export default function LocationTableSkeleton() {
             </th>
             <th
               className='px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
-              style={{ width: '137px', minWidth: '137px' }}
+              style={{ width: '220px', minWidth: '220px' }}
             ></th>
             <th
               className='px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
