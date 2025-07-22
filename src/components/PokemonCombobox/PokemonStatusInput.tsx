@@ -105,9 +105,10 @@ export const PokemonStatusInput = ({
             ref={refs.setReference}
             className={clsx(
               'border-t-0 capitalize',
-              'flex items-center justify-between px-4 py-3.5 text-sm border bg-white dark:text-gray-400 focus:outline-none focus:ring-1',
+              'flex items-center justify-between px-4 py-3.5 text-sm border bg-white dark:text-gray-400 focus:outline-none focus-visible:ring-1',
+              'focus:outline-none',
               'focus:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:cursor-not-allowed',
-              'border-gray-300 dark:border-gray-600 dark:bg-gray-800 enabled:dark:text-white dark:focus:ring-blue-400',
+              'border-gray-300 dark:border-gray-600 dark:bg-gray-800 enabled:dark:text-white dark:focus-visible:ring-blue-400',
               'enabled:hover:bg-gray-50 dark:enabled:hover:bg-gray-700',
               'min-w-[140px] enabled:hover:cursor-pointer',
               dragPreview && 'opacity-60 pointer-events-none',
