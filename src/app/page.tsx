@@ -1,4 +1,4 @@
-import LocationList from '@/components/LocationList';
+import LocationTable from '@/components/LocationTable';
 
 export default function Home() {
   return (
@@ -11,7 +11,7 @@ export default function Home() {
         <h2 id='locations-heading' className='sr-only'>
           Game Locations
         </h2>
-        <LocationList />
+        <LocationTable />
       </section>
     </main>
   );
