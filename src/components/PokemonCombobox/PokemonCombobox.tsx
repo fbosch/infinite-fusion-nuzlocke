@@ -289,7 +289,7 @@ export const PokemonCombobox = ({
   disabled?: boolean;
   gameMode?: 'classic' | 'remix';
   comboboxId?: string;
-  ref?: React.RefObject<HTMLInputElement>;
+  ref?: React.RefObject<HTMLInputElement | null>;
 }) => {
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
@@ -300,7 +300,7 @@ export const PokemonCombobox = ({
   const dragLeaveAnimationRef = useRef<number | null>(null);
 
   // Ref to maintain focus on input
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   // Floating UI setup
   const { refs, floatingStyles, update, placement } = useFloating({

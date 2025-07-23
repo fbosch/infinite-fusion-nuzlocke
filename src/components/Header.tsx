@@ -15,9 +15,9 @@ export default function Header() {
       <div className='max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8'>
         <header className='py-3 sm:py-4 mb-4'>
           <div className='flex items-center justify-between'>
-            <div className='flex items-center'>
+            <div className='flex items-center gap-3'>
               <Logo />
-              <h1 className='ml-4'>
+              <h1 className='sr-only sm:not-sr-only'>
                 <span className='block text-sm sm:text-md font-medium bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'>
                   Pokémon Infinite Fusion
                 </span>
