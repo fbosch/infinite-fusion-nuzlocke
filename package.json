@@ -29,6 +29,7 @@
     "@tanstack/react-table": "^8.21.3",
     "@types/cli-progress": "^3.11.6",
     "@types/react-window": "^1.8.8",
+    "@vercel/analytics": "^1.5.0",
     "cli-progress": "^3.12.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.6",
