@@ -63,18 +63,22 @@ export function ArtworkVariantButton({
     };
   }, [isFusion, encounterData?.head?.id, encounterData?.body?.id]);
 
-  const handleCycleVariant = React.useCallback(async () => {
-    if (!isFusion || disabled || isLoading) return;
+  const handleCycleVariant = React.useCallback(
+    async (event: React.MouseEvent) => {
+      if (!isFusion || disabled || isLoading) return;
 
-    setIsLoading(true);
-    try {
-      await playthroughActions.cycleArtworkVariant(locationId);
-    } catch (error) {
-      console.error('Failed to cycle artwork variant:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [locationId, isFusion, disabled, isLoading]);
+      const reverse = event.shiftKey;
+      setIsLoading(true);
+      try {
+        await playthroughActions.cycleArtworkVariant(locationId, reverse);
+      } catch (error) {
+        console.error('Failed to cycle artwork variant:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [locationId, isFusion, disabled, isLoading]
+  );
 
   // Don't render if it's not a fusion
   if (!isFusion) return null;
@@ -101,12 +105,12 @@ export function ArtworkVariantButton({
       aria-label={
         isButtonDisabled
           ? `No alternative artwork variants available`
-          : `Cycle artwork variants`
+          : `Cycle artwork variants (hold Shift to reverse)`
       }
       title={
         isButtonDisabled
           ? `No alternative artwork variants available`
-          : `Cycle artwork variants`
+          : `Cycle artwork variants (hold Shift to reverse)`
       }
     >
       <div className='dark:pixel-shadow'>

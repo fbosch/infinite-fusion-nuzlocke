@@ -675,7 +675,7 @@ export const playthroughActions = {
   },
 
   // Cycle through artwork variants for a fusion (with validation)
-  cycleArtworkVariant: async (locationId: string) => {
+  cycleArtworkVariant: async (locationId: string, reverse: boolean = false) => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
 
@@ -705,14 +705,19 @@ export const playthroughActions = {
 
       const currentVariant = encounter.artworkVariant || '';
       const currentIndex = availableVariants.indexOf(currentVariant);
-      const nextIndex = (currentIndex + 1) % availableVariants.length;
+
+      // Calculate next index based on direction
+      const nextIndex = reverse
+        ? (currentIndex - 1 + availableVariants.length) %
+          availableVariants.length
+        : (currentIndex + 1) % availableVariants.length;
 
       const nextVariant = availableVariants[nextIndex];
       encounter.artworkVariant = nextVariant || undefined;
       activePlaythrough.updatedAt = getCurrentTimestamp();
 
       console.log(
-        `Switched to artwork variant: ${nextVariant || 'default'} for fusion ${encounter.head.id}.${encounter.body.id}`
+        `Switched to artwork variant: ${nextVariant || 'default'} for fusion ${encounter.head.id}.${encounter.body.id} (${reverse ? 'reverse' : 'forward'})`
       );
     } catch (error) {
       console.error('Failed to cycle artwork variant:', error);
