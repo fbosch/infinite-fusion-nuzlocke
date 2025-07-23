@@ -3,13 +3,13 @@
 import React, { useState } from 'react';
 import { Loader2, RefreshCwOff, RefreshCcw } from 'lucide-react';
 import clsx from 'clsx';
-import { playthroughActions, useEncounters } from '@/stores/playthroughs';
+import { playthroughActions } from '@/stores/playthroughs';
 import { twMerge } from 'tailwind-merge';
+import { EncounterData } from '../../loaders/encounters';
 
 interface ArtworkVariantButtonProps {
   locationId: string;
-  isFusion: boolean;
-  currentVariant?: string;
+  encounter: EncounterData;
   disabled?: boolean;
   className?: string;
   shouldLoad?: boolean;
@@ -17,39 +17,33 @@ interface ArtworkVariantButtonProps {
 
 export function ArtworkVariantButton({
   locationId,
-  isFusion,
-  currentVariant,
   disabled = false,
+  encounter,
   className,
   shouldLoad,
 }: ArtworkVariantButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
-  const encounters = useEncounters();
-  const encounterData = encounters[locationId];
   const [hasVariants, setHasVariants] = useState<boolean | null>(null);
+  const isFusion = encounter.isFusion && !!encounter.head && !!encounter.body;
 
   React.useEffect(() => {
-    if (
-      !isFusion ||
-      !encounterData?.head ||
-      !encounterData?.body ||
-      !shouldLoad
-    ) {
+    if (!isFusion || !encounter?.head || !encounter?.body || !shouldLoad) {
       return;
     }
+
     const preloadVariants = async () => {
       const { getAvailableArtworkVariants } = await import(
         '@/utils/spriteValidation'
       );
       const availableVariants = await getAvailableArtworkVariants(
-        encounterData.head!.id,
-        encounterData.body!.id
+        encounter.head!.id,
+        encounter.body!.id
       );
 
       setHasVariants(availableVariants.length > 1);
     };
     preloadVariants();
-  }, [isFusion, encounterData?.head?.id, encounterData?.body?.id, shouldLoad]);
+  }, [isFusion, encounter?.head?.id, encounter?.body?.id, shouldLoad]);
 
   const handleCycleVariant = React.useCallback(
     async (event: React.MouseEvent) => {

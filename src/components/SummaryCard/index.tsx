@@ -72,9 +72,10 @@ export default function SummaryCard({
         </Fragment>
       ) : null}
       <ArtworkVariantButton
+        key={`${encounterData.head?.id}-${encounterData.body?.id} `}
         className='absolute bottom-0 right-1/2 -translate-x-6 z-10'
         locationId={locationId}
-        isFusion={encounterData.isFusion}
+        encounter={encounterData}
         shouldLoad={shouldLoad}
       />
       {name && (
