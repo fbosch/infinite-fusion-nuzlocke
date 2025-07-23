@@ -550,6 +550,24 @@ export const playthroughActions = {
       // For fusion encounters, update the specified field and ensure isFusion is true
       encounter[field] = pokemonWithLocationAndUID;
       encounter.isFusion = true;
+
+      // Default behavior: If setting status on one part of a fusion and the other part
+      // doesn't have a status, set both to the same status
+      if (
+        pokemonWithLocationAndUID?.status &&
+        encounter.head &&
+        encounter.body
+      ) {
+        const otherField = field === 'head' ? 'body' : 'head';
+        const otherPokemon = encounter[otherField];
+
+        if (otherPokemon && !otherPokemon.status) {
+          encounter[otherField] = {
+            ...otherPokemon,
+            status: pokemonWithLocationAndUID.status,
+          };
+        }
+      }
     } else {
       // For regular encounters, set head and ensure isFusion is false
       encounter.head = pokemonWithLocationAndUID;
