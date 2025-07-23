@@ -308,10 +308,10 @@ export const PokemonCombobox = ({
     middleware: [
       flip({ padding: 8 }),
       size({
-        apply({ rects, elements, availableHeight }) {
+        apply({ rects, elements, availableHeight, availableWidth }) {
           Object.assign(elements.floating.style, {
             maxHeight: `${Math.min(500, availableHeight - 8)}px`,
-            minWidth: `${rects.reference.width}px`,
+            minWidth: `${Math.min(rects.reference.width, availableWidth - 16)}px`,
           });
         },
         padding: 8,
