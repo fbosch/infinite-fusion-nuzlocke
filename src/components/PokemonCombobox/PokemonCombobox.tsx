@@ -8,7 +8,6 @@ import React, {
   useCallback,
   useEffect,
   useRef,
-  useImperativeHandle,
 } from 'react';
 import { Check, Search } from 'lucide-react';
 import {
@@ -290,7 +289,7 @@ export const PokemonCombobox = ({
   disabled?: boolean;
   gameMode?: 'classic' | 'remix';
   comboboxId?: string;
-  ref?: React.Ref<HTMLInputElement>;
+  ref?: React.RefObject<HTMLInputElement>;
 }) => {
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
@@ -703,17 +702,6 @@ export const PokemonCombobox = ({
     dragActions.clearDrag();
   }, []);
 
-  // Expose focus method to parent components
-  useImperativeHandle(
-    ref,
-    () => ({
-      focus: () => {
-        inputRef.current?.focus();
-      },
-    }),
-    []
-  );
-
   return (
     <div
       className='relative'
@@ -732,7 +720,12 @@ export const PokemonCombobox = ({
           <div>
             <div className='relative'>
               <ComboboxInput
-                ref={inputRef}
+                ref={comboRef => {
+                  inputRef.current = comboRef;
+                  if (ref && 'current' in ref && comboRef) {
+                    ref.current = comboRef;
+                  }
+                }}
                 className={clsx(
                   'rounded-t-md rounded-b-none border',
                   'w-full px-3 py-3.5 text-sm  bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
