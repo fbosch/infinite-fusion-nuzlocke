@@ -274,6 +274,7 @@ export const PokemonCombobox = ({
   locationId,
   value,
   onChange,
+  shouldLoad = false,
   placeholder = 'Select Pokemon',
   nicknamePlaceholder = 'Enter nickname',
   disabled = false,
@@ -284,6 +285,7 @@ export const PokemonCombobox = ({
   locationId?: string;
   value: PokemonOption | null | undefined;
   onChange: (value: PokemonOption | null) => void;
+  shouldLoad?: boolean;
   placeholder?: string;
   nicknamePlaceholder?: string;
   disabled?: boolean;
@@ -366,10 +368,7 @@ export const PokemonCombobox = ({
   // Load route data when combobox opens or when user starts typing
   const handleInteraction = useCallback(() => {
     loadRouteEncounterData();
-    // Force floating UI to recalculate position when interaction starts
-    setTimeout(() => {
-      update();
-    }, 0);
+    window.requestAnimationFrame(update);
   }, [loadRouteEncounterData, update]);
 
   // Smart search function that handles both name and ID searches
@@ -421,10 +420,10 @@ export const PokemonCombobox = ({
 
   // Reload encounter data when playthrough data changes
   useEffect(() => {
-    if (routeId !== undefined && routeId !== 0) {
+    if (routeId !== undefined && routeId !== 0 && shouldLoad) {
       loadRouteEncounterData();
     }
-  }, [isRemixMode, loadRouteEncounterData, routeId]);
+  }, [isRemixMode, loadRouteEncounterData, routeId, shouldLoad]);
 
   // Clear query when value changes to ensure component reflects the new selection
 
@@ -789,7 +788,11 @@ export const PokemonCombobox = ({
               {open ||
               value?.status === PokemonStatus.DECEASED ||
               value?.status === PokemonStatus.MISSED ? null : (
-                <PokemonEvolutionButton value={value} onChange={onChange} />
+                <PokemonEvolutionButton
+                  value={value}
+                  onChange={onChange}
+                  shouldLoad={shouldLoad}
+                />
               )}
             </div>
             {open && (

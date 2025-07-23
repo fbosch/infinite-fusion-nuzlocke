@@ -14,11 +14,13 @@ import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
 interface PokemonEvolutionButtonProps {
   value: PokemonOption | null | undefined;
   onChange: (value: PokemonOption | null) => void;
+  shouldLoad?: boolean;
 }
 
 export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   value,
   onChange,
+  shouldLoad = false,
 }) => {
   const [availableEvolutions, setAvailableEvolutions] = useState<
     PokemonOption[]
@@ -78,6 +80,10 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
 
   // Load evolution data when value changes
   useEffect(() => {
+    if (!shouldLoad) {
+      return;
+    }
+
     const loadEvolutions = async () => {
       if (!value?.id) {
         setAvailableEvolutions([]);
@@ -116,7 +122,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
     };
 
     loadEvolutions();
-  }, [value?.id, value?.originalLocation]);
+  }, [value?.id, value?.originalLocation, shouldLoad]);
 
   // Don't render if no Pokemon is selected or no evolutions available
   if (!value || availableEvolutions.length === 0 || isLoadingEvolutions) {
