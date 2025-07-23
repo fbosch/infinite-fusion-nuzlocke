@@ -5,7 +5,6 @@ import { ArrowLeftRight } from 'lucide-react';
 import { PokemonCombobox } from '../PokemonCombobox/PokemonCombobox';
 import { FusionToggleButton } from './FusionToggleButton';
 import type { PokemonOption } from '@/loaders/pokemon';
-import { useInView } from 'react-intersection-observer';
 
 import clsx from 'clsx';
 import { useEncounters, playthroughActions } from '@/stores/playthroughs';
@@ -13,17 +12,20 @@ import { useEncounters, playthroughActions } from '@/stores/playthroughs';
 interface EncounterCellProps {
   routeId: number;
   locationId: string;
+  shouldLoad?: boolean;
 }
 
-export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
+export function EncounterCell({
+  routeId,
+  locationId,
+  shouldLoad,
+}: EncounterCellProps) {
   const encounters = useEncounters();
   const encounterData = encounters[locationId] || {
     head: null,
     body: null,
     isFusion: false,
   };
-
-  const { ref, inView } = useInView();
 
   // useSnapshot already returns plain objects, so we can use them directly
   const headPokemon = encounterData.head;
@@ -75,7 +77,6 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
         'w-96 max-w-96 overflow-x-auto',
         'px-4 pt-8.5 pb-4 text-sm text-gray-900 dark:text-gray-100 '
       )}
-      ref={ref}
       role='cell'
     >
       <div className='flex flex-row justify-center gap-4 w-full '>
@@ -95,7 +96,7 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
                   placeholder='Select head Pokemon'
                   nicknamePlaceholder='Enter head nickname'
                   comboboxId={`${locationId}-head`}
-                  shouldLoad={inView}
+                  shouldLoad={shouldLoad}
                 />
               </div>
               <button
@@ -121,7 +122,7 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
                   nicknamePlaceholder='Enter body nickname'
                   comboboxId={`${locationId}-body`}
                   ref={bodyComboboxRef}
-                  shouldLoad={inView}
+                  shouldLoad={shouldLoad}
                 />
               </div>
             </div>
@@ -135,7 +136,7 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
               placeholder='Select Pokemon'
               nicknamePlaceholder='Enter nickname'
               comboboxId={`${locationId}-single`}
-              shouldLoad={inView}
+              shouldLoad={shouldLoad}
             />
           )}
         </div>

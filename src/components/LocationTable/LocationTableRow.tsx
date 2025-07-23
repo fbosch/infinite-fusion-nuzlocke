@@ -5,6 +5,7 @@ import { EncounterCell } from './EncounterCell';
 import SummaryCard from '../SummaryCard';
 import ResetEncounterButton from './ResetEncounterButton';
 import { match } from 'ts-pattern';
+import { useInView } from 'react-intersection-observer';
 
 interface LocationTableRowProps {
   row: Row<Location>;
@@ -17,9 +18,11 @@ export default function LocationTableRow({
 }: LocationTableRowProps) {
   const routeId = row.original.routeId;
   const locationId = row.original.id;
+  const { ref, inView } = useInView();
 
   return (
     <tr
+      ref={ref}
       key={row.id}
       role='row'
       className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors content-visibility-auto'
@@ -31,6 +34,7 @@ export default function LocationTableRow({
         match(cell.column.id)
           .with('encounter', () => (
             <EncounterCell
+              shouldLoad={inView}
               key={cell.id}
               routeId={routeId}
               locationId={locationId}
@@ -45,6 +49,7 @@ export default function LocationTableRow({
               <SummaryCard
                 encounterData={encounterData}
                 locationId={locationId}
+                shouldLoad={inView}
               />
             </td>
           ))

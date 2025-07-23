@@ -697,10 +697,9 @@ export const playthroughActions = {
 
       // If no variants available (only default), don't cycle
       if (availableVariants.length <= 1) {
-        console.log(
+        throw new Error(
           `No alternative artwork variants found for fusion ${encounter.head.id}.${encounter.body.id}`
         );
-        return;
       }
 
       const currentVariant = encounter.artworkVariant || '';

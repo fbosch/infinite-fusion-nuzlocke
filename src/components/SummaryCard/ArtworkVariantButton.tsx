@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Loader2, RefreshCwOff, RefreshCcw } from 'lucide-react';
 import clsx from 'clsx';
 import { playthroughActions, useEncounters } from '@/stores/playthroughs';
@@ -12,6 +12,7 @@ interface ArtworkVariantButtonProps {
   currentVariant?: string;
   disabled?: boolean;
   className?: string;
+  shouldLoad?: boolean;
 }
 
 export function ArtworkVariantButton({
@@ -20,62 +21,43 @@ export function ArtworkVariantButton({
   currentVariant,
   disabled = false,
   className,
+  shouldLoad,
 }: ArtworkVariantButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [hasVariants, setHasVariants] = React.useState<boolean | null>(null);
   const encounters = useEncounters();
   const encounterData = encounters[locationId];
+  const [hasVariants, setHasVariants] = useState<boolean | null>(null);
 
-  // Preload available variants when the fusion is created
   React.useEffect(() => {
-    if (!isFusion || !encounterData?.head || !encounterData?.body) {
-      setHasVariants(null);
+    if (
+      !isFusion ||
+      !encounterData?.head ||
+      !encounterData?.body ||
+      !shouldLoad
+    ) {
       return;
     }
-
-    let cancelled = false;
-
     const preloadVariants = async () => {
-      try {
-        const { getAvailableArtworkVariants } = await import(
-          '@/utils/spriteValidation'
-        );
-        const availableVariants = await getAvailableArtworkVariants(
-          encounterData.head!.id,
-          encounterData.body!.id
-        );
+      const { getAvailableArtworkVariants } = await import(
+        '@/utils/spriteValidation'
+      );
+      const availableVariants = await getAvailableArtworkVariants(
+        encounterData.head!.id,
+        encounterData.body!.id
+      );
 
-        if (!cancelled) {
-          setHasVariants(availableVariants.length > 1);
-        }
-      } catch (error) {
-        console.error('Failed to preload variants:', error);
-        if (!cancelled) {
-          setHasVariants(false);
-        }
-      }
+      setHasVariants(availableVariants.length > 1);
     };
-
     preloadVariants();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isFusion, encounterData?.head?.id, encounterData?.body?.id]);
+  }, [isFusion, encounterData?.head?.id, encounterData?.body?.id, shouldLoad]);
 
   const handleCycleVariant = React.useCallback(
     async (event: React.MouseEvent) => {
       if (!isFusion || disabled || isLoading) return;
-
       const reverse = event.shiftKey;
       setIsLoading(true);
-      try {
-        await playthroughActions.cycleArtworkVariant(locationId, reverse);
-      } catch (error) {
-        console.error('Failed to cycle artwork variant:', error);
-      } finally {
-        setIsLoading(false);
-      }
+      await playthroughActions.cycleArtworkVariant(locationId, reverse);
+      setIsLoading(false);
     },
     [locationId, isFusion, disabled, isLoading]
   );
