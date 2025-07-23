@@ -720,7 +720,7 @@ export const PokemonCombobox = ({
                   'w-full px-3 py-3.5 text-sm  bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
                   'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
                   'focus:cursor-text hover:cursor-pointer',
-                  (value || dragPreview) && 'pl-12', // Add padding for sprite when value is selected or previewing
+                  (value || dragPreview) && 'pl-16', // Add padding for sprite when value is selected or previewing
                   dragPreview &&
                     'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60', // Highlight when showing preview with opacity,
                   {
@@ -746,7 +746,7 @@ export const PokemonCombobox = ({
                 onMouseEnter={handleInteraction}
               />
               {(value || dragPreview) && (
-                <div className='absolute inset-y-0 left-1.5 flex items-center'>
+                <div className='absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md'>
                   <Image
                     src={getPokemonSpriteUrlFromOption(dragPreview || value!)}
                     alt={(dragPreview || value)!.name}
