@@ -211,7 +211,7 @@ const PokemonOptions = ({
           style={{ containIntrinsicSize: '0 56px' }}
         >
           {({ selected }) => (
-            <div className={'flex items-center gap-8'}>
+            <div className={'flex items-center gap-8 group'}>
               <Image
                 src={getPokemonSpriteUrlFromOption(pokemon)}
                 alt={pokemon.name}
@@ -233,23 +233,28 @@ const PokemonOptions = ({
               >
                 {pokemon.name}
               </span>
-
               <div className='flex items-center gap-3'>
                 {isRoutePokemon(pokemon.id) && (
                   <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
                     Route
                   </span>
                 )}
-                <span className='text-xs text-gray-500 dark:text-gray-400'>
+                <span
+                  className={clsx(
+                    'text-xs dark:text-gray-400 group-hover:text-white',
+                    {
+                      'group-hover:text-white ': selected,
+                    }
+                  )}
+                >
                   {pokemon.id.toString().padStart(3, '0')}
                 </span>
                 <div className='w-5 h-5 flex items-center justify-center'>
                   {selected && (
                     <Check
-                      className={clsx('w-5 h-5', {
-                        'text-white': selected,
-                        'text-blue-400': !selected,
-                      })}
+                      className={clsx(
+                        'size-5 group-hover:text-white text-blue-400 dark:text-white'
+                      )}
                       aria-hidden='true'
                     />
                   )}

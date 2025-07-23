@@ -155,8 +155,9 @@ export const PokemonStatusInput = ({
                             'group flex w-full items-center px-4 py-2 text-sm hover:cursor-pointer',
                             'focus:outline-none text-left',
                             {
-                              'bg-gray-100 dark:bg-gray-700': focus,
-                              'bg-gray-500 dark:bg-gray-600':
+                              'bg-gray-100 dark:bg-gray-700 focus-visible:ring-1 focus-visible:ring-blue-500 ring-inset':
+                                focus,
+                              'bg-gray-200 dark:bg-gray-600':
                                 (dragPreview?.status || localStatus) ===
                                   statusValue && !focus,
                             }

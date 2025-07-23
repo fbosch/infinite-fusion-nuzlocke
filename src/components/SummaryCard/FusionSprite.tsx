@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { PokemonStatus, type PokemonOption } from '@/loaders/pokemon';
 import type { EncounterData } from '@/loaders/encounters';
 import { match, P } from 'ts-pattern';
-import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 interface FusionSpriteProps {
@@ -23,6 +22,7 @@ const TRANSPARENT_PIXEL =
 // Status state type for pattern matching
 type StatusState = {
   type: 'normal' | 'missed' | 'deceased' | 'stored';
+  wrapperClasses: string;
   imageClasses: string;
   overlayContent: React.ReactNode | null;
   canAnimate: boolean;
@@ -30,8 +30,7 @@ type StatusState = {
 
 function getStatusState(
   head: PokemonOption | null,
-  body: PokemonOption | null,
-  baseImageClasses: string
+  body: PokemonOption | null
 ): StatusState {
   return match([head?.status, body?.status])
     .with(
@@ -40,10 +39,11 @@ function getStatusState(
       [PokemonStatus.MISSED, PokemonStatus.MISSED],
       () => ({
         type: 'missed' as const,
-        imageClasses: clsx(baseImageClasses, 'opacity-40'),
+        wrapperClasses: 'opacity-40',
+        imageClasses: '',
         overlayContent: (
-          <div className='absolute -right-1.5 -bottom-3 z-30 flex items-center justify-center pointer-events-none font-mono'>
-            <span className='dark:pixel-shadow text-gray-500 text-xs dark:text-gray-white'>
+          <div className='absolute -right-1.5 bottom-0 z-5 flex items-center justify-center pointer-events-none font-mono'>
+            <span className='dark:pixel-shadow text-gray-500 text-xs dark:text-gray-400'>
               ď
             </span>
           </div>
@@ -57,9 +57,10 @@ function getStatusState(
       [PokemonStatus.DECEASED, PokemonStatus.DECEASED],
       () => ({
         type: 'deceased' as const,
-        imageClasses: clsx(baseImageClasses, 'opacity-30 saturate-30'),
+        wrapperClasses: 'opacity-30',
+        imageClasses: 'saturate-30',
         overlayContent: (
-          <div className='absolute pixel-shadow -right-1.5 -bottom-3 z-30 bg-red-500 flex items-center justify-center pointer-events-none dark:bg-red-900 h-fit w-fit px-1 rounded-xs'>
+          <div className='absolute pixel-shadow -right-2 bottom-0 z-10 bg-red-500 flex items-center justify-center pointer-events-none dark:bg-red-900 h-fit w-fit px-1 rounded-xs'>
             <span className='pixel-shadow text-xs text-white font-mono'>
               FNT
             </span>
@@ -74,10 +75,13 @@ function getStatusState(
       [PokemonStatus.STORED, PokemonStatus.STORED],
       () => ({
         type: 'stored' as const,
-        imageClasses: baseImageClasses,
+        wrapperClasses: '',
+        imageClasses: '',
         overlayContent: (
-          <div className='absolute -right-1.5 -bottom-3 z-30 flex items-center justify-center pointer-events-none font-mono'>
-            <span className='dark:pixel-shadow text-xs dark:text-white'>Ą</span>
+          <div className='absolute -right-1.5 bottom-0 z-5 flex items-center justify-center pointer-events-none font-mono'>
+            <span className='dark:pixel-shadow text-xs text-gray-500 dark:text-gray-400'>
+              Ą
+            </span>
           </div>
         ),
         canAnimate: true,
@@ -85,7 +89,8 @@ function getStatusState(
     )
     .otherwise(() => ({
       type: 'normal' as const,
-      imageClasses: baseImageClasses,
+      wrapperClasses: '',
+      imageClasses: '',
       overlayContent: null,
       canAnimate: true,
     }));
@@ -135,13 +140,9 @@ export function FusionSprite({
   const spriteSize = SPRITE_SIZES[size];
 
   const baseImageClasses =
-    'object-fill object-center image-render-pixelated origin-top -translate-y-1/9 transition-all duration-200 scale-150';
+    'object-fill object-center image-render-pixelated origin-top -translate-y-1/9 transition-all duration-200 scale-150 select-none';
 
-  const statusState = getStatusState(
-    head,
-    body,
-    clsx(baseImageClasses, className)
-  );
+  const statusState = getStatusState(head, body);
 
   const link = useMemo(() => {
     return match([head, body])
@@ -198,14 +199,13 @@ export function FusionSprite({
 
               shadowRef.current?.animate(
                 [
-                  { transform: 'skewX(-22deg) skewY(-40deg) scale(1) ' },
+                  { transform: 'skewX(-17deg) skewY(-40deg) scale(1) ' },
                   {
                     transform:
-                      'skewX(-22deg) skewY(-40deg) scale(1.03) translateY(-5%)',
-                    opacity: '9%',
-                    blur: '0.4px',
+                      'skewX(-17deg) skewY(-40deg) scale(1.03) translateY(-5%)',
+                    blur: '0.2px',
                   },
-                  { transform: 'skewX(-22deg) skewY(-40deg) scale(1)' },
+                  { transform: 'skewX(-17deg) skewY(-40deg) scale(1)' },
                 ],
                 {
                   duration: 400,
@@ -249,8 +249,12 @@ export function FusionSprite({
         }}
       >
         <div className='relative w-full flex justify-center'>
-          {/* Sprite positioned above the shadow */}
-          <div className='relative z-10 -translate-y-1/5'>
+          <div
+            className={twMerge(
+              'relative z-10 -translate-y-1/5',
+              statusState.wrapperClasses
+            )}
+          >
             <Image
               ref={shadowRef}
               src={spriteUrl}
@@ -259,7 +263,7 @@ export function FusionSprite({
               height={spriteSize}
               className={twMerge(
                 baseImageClasses,
-                'absolute translate-x-[60%] translate-y-[45%] skew-x-[-22deg] skew-y-[-40deg] scale-100 rotate-[34deg] brightness-0 opacity-10'
+                'absolute translate-x-[60%] translate-y-[45%] skew-x-[-17deg] skew-y-[-40deg] scale-100 rotate-[34deg] brightness-0 opacity-10 dark:opacity-15'
               )}
               loading='eager'
               unoptimized
@@ -279,7 +283,7 @@ export function FusionSprite({
               alt={altText}
               width={spriteSize}
               height={spriteSize}
-              className={clsx(statusState.imageClasses, 'select-none')}
+              className={twMerge(baseImageClasses, statusState.imageClasses)}
               loading='eager'
               unoptimized
               draggable={false}
@@ -292,9 +296,8 @@ export function FusionSprite({
                 }
               }}
             />
-            {/* Status overlay */}
-            {statusState.overlayContent}
           </div>
+          {statusState.overlayContent}
         </div>
       </a>
     </div>
