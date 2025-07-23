@@ -6,6 +6,7 @@ import { PokemonStatus, type PokemonOption } from '@/loaders/pokemon';
 import type { EncounterData } from '@/loaders/encounters';
 import { match, P } from 'ts-pattern';
 import clsx from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 interface FusionSpriteProps {
   encounterData: EncounterData;
@@ -56,10 +57,7 @@ function getStatusState(
       [PokemonStatus.DECEASED, PokemonStatus.DECEASED],
       () => ({
         type: 'deceased' as const,
-        imageClasses: clsx(
-          baseImageClasses,
-          'blur-[0.4px] opacity-50 grayscale'
-        ),
+        imageClasses: clsx(baseImageClasses, 'opacity-30 saturate-30'),
         overlayContent: (
           <div className='absolute pixel-shadow -right-1.5 -bottom-3 z-30 bg-red-500 flex items-center justify-center pointer-events-none dark:bg-red-900 h-fit w-fit px-1 rounded-xs'>
             <span className='pixel-shadow text-xs text-white font-mono'>
@@ -137,7 +135,7 @@ export function FusionSprite({
   const spriteSize = SPRITE_SIZES[size];
 
   const baseImageClasses =
-    'object-fill object-center image-render-pixelated origin-top -translate-y-1/9 transition-all duration-200';
+    'object-fill object-center image-render-pixelated origin-top -translate-y-1/9 transition-all duration-200 scale-150';
 
   const statusState = getStatusState(
     head,
@@ -250,7 +248,7 @@ export function FusionSprite({
         <div className='relative w-full flex justify-center'>
           <div
             ref={shadowRef}
-            className='absolute opacity-60 dark:opacity-90'
+            className='absolute opacity-60 dark:opacity-90 hidden'
             style={{
               width: spriteSize * 0.55,
               height: spriteSize * 0.2,
@@ -265,6 +263,27 @@ export function FusionSprite({
           />
           {/* Sprite positioned above the shadow */}
           <div className='relative z-10 -translate-y-1/5'>
+            <Image
+              src={spriteUrl}
+              alt={altText}
+              width={spriteSize}
+              height={spriteSize}
+              className={twMerge(
+                baseImageClasses,
+                'absolute translate-x-[82%] translate-y-[55%] skew-x-[-35deg] skew-y-[-45deg] scale-100 rotate-[30deg] brightness-0 opacity-10'
+              )}
+              loading='eager'
+              unoptimized
+              draggable={false}
+              placeholder='blur'
+              blurDataURL={TRANSPARENT_PIXEL}
+              onError={e => {
+                const target = e.target as HTMLImageElement;
+                if (head && body) {
+                  target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}.png`;
+                }
+              }}
+            />
             <Image
               ref={imageRef}
               src={spriteUrl}
