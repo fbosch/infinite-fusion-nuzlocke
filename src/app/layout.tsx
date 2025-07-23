@@ -5,6 +5,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import Header from '@/components/Header';
 import { ServiceWorkerInit } from '@/components/ServiceWorkerInit';
+import { Analytics } from '@vercel/analytics/next';
 
 // Primary sans-serif font for body text
 const font = Font({
@@ -48,6 +49,7 @@ export default function RootLayout({
           <Header />
           {children}
         </ThemeProvider>
+        <Analytics />
         <ServiceWorkerInit />
       </body>
     </html>
