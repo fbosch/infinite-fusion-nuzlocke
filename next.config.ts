@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         hostname: 'ifd-spaces.sfo2.cdn.digitaloceanspaces.com',
         pathname: '/custom/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'ifd-spaces.sfo2.cdn.digitaloceanspaces.com',
+        pathname: '/generated/**',
+      },
     ],
   },
 };

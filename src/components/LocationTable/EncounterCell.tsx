@@ -120,12 +120,14 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
             />
           )}
         </div>
-        <FusionToggleButton
-          locationId={locationId}
-          isFusion={isFusion}
-          selectedPokemon={selectedPokemon}
-          onToggleFusion={handleFusionToggle}
-        />
+        <div className='flex flex-col gap-2 justify-center'>
+          <FusionToggleButton
+            locationId={locationId}
+            isFusion={isFusion}
+            selectedPokemon={selectedPokemon}
+            onToggleFusion={handleFusionToggle}
+          />
+        </div>
       </div>
     </td>
   );

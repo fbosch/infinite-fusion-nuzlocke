@@ -10,6 +10,7 @@ export const EncounterDataSchema = z.object({
   head: PokemonOptionSchema.nullable(),
   body: PokemonOptionSchema.nullable(),
   isFusion: z.boolean(),
+  artworkVariant: z.string().optional(),
 });
 
 // Zod schema for a single playthrough
@@ -547,9 +548,20 @@ export const playthroughActions = {
       : pokemon;
 
     if (shouldCreateFusion || encounter.isFusion) {
+      // Check if this is changing the fusion composition
+      const wasComplete = encounter.head && encounter.body;
+      const oldPokemon = encounter[field];
+      const isChangingComposition =
+        !oldPokemon || oldPokemon.id !== pokemonWithLocationAndUID?.id;
+
       // For fusion encounters, update the specified field and ensure isFusion is true
       encounter[field] = pokemonWithLocationAndUID;
       encounter.isFusion = true;
+
+      // Reset artwork variant if the fusion composition is changing
+      if (isChangingComposition) {
+        encounter.artworkVariant = undefined;
+      }
 
       // Default behavior: If setting status on one part of a fusion and the other part
       // doesn't have a status, set both to the same status
@@ -573,6 +585,7 @@ export const playthroughActions = {
       encounter.head = pokemonWithLocationAndUID;
       encounter.body = null;
       encounter.isFusion = false;
+      encounter.artworkVariant = undefined; // Reset artwork variant for non-fusion
     }
 
     activePlaythrough.updatedAt = getCurrentTimestamp();
@@ -608,12 +621,14 @@ export const playthroughActions = {
           head: currentEncounter.body,
           body: null,
           isFusion: false,
+          artworkVariant: undefined, // Reset artwork variant when unfusing
         };
       } else {
         // If both slots have data or only head has data, preserve as-is
         activePlaythrough.encounters[locationId] = {
           ...currentEncounter,
           isFusion: false,
+          artworkVariant: undefined, // Reset artwork variant when unfusing
         };
       }
     } else {
@@ -621,6 +636,7 @@ export const playthroughActions = {
       activePlaythrough.encounters[locationId] = {
         ...currentEncounter,
         isFusion: newIsFusion,
+        artworkVariant: undefined, // Reset artwork variant when changing fusion state
       };
     }
 
@@ -640,9 +656,70 @@ export const playthroughActions = {
       head,
       body,
       isFusion: true,
+      artworkVariant: undefined, // Reset artwork variant for new fusion
     };
 
     activePlaythrough.updatedAt = getCurrentTimestamp();
+  },
+
+  // Set artwork variant for an encounter
+  setArtworkVariant: (locationId: string, variant?: string) => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    if (!activePlaythrough) return;
+
+    const encounter = activePlaythrough.encounters[locationId];
+    if (!encounter) return;
+
+    encounter.artworkVariant = variant;
+    activePlaythrough.updatedAt = getCurrentTimestamp();
+  },
+
+  // Cycle through artwork variants for a fusion (with validation)
+  cycleArtworkVariant: async (locationId: string) => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    if (!activePlaythrough) return;
+
+    const encounter = activePlaythrough.encounters[locationId];
+    if (!encounter || !encounter.isFusion || !encounter.head || !encounter.body)
+      return;
+
+    try {
+      // Import the validation utilities dynamically
+      const { getAvailableArtworkVariants } = await import(
+        '@/utils/spriteValidation'
+      );
+
+      // Get available variants for this fusion
+      const availableVariants = await getAvailableArtworkVariants(
+        encounter.head.id,
+        encounter.body.id
+      );
+
+      // If no variants available (only default), don't cycle
+      if (availableVariants.length <= 1) {
+        console.log(
+          `No alternative artwork variants found for fusion ${encounter.head.id}.${encounter.body.id}`
+        );
+        return;
+      }
+
+      const currentVariant = encounter.artworkVariant || '';
+      const currentIndex = availableVariants.indexOf(currentVariant);
+      const nextIndex = (currentIndex + 1) % availableVariants.length;
+
+      const nextVariant = availableVariants[nextIndex];
+      encounter.artworkVariant = nextVariant || undefined;
+      activePlaythrough.updatedAt = getCurrentTimestamp();
+
+      console.log(
+        `Switched to artwork variant: ${nextVariant || 'default'} for fusion ${encounter.head.id}.${encounter.body.id}`
+      );
+    } catch (error) {
+      console.error('Failed to cycle artwork variant:', error);
+      // Fall back to default on error
+      encounter.artworkVariant = undefined;
+      activePlaythrough.updatedAt = getCurrentTimestamp();
+    }
   },
 
   // Force immediate save (for critical operations)
@@ -667,6 +744,11 @@ export const playthroughActions = {
     } else {
       // Clear only the specified field
       encounter[field] = null;
+
+      // Reset artwork variant when clearing part of a fusion
+      if (encounter.isFusion) {
+        encounter.artworkVariant = undefined;
+      }
 
       // Only remove the entire encounter if it's not a fusion and we're clearing the head
       // OR if it's a regular encounter (not a fusion) and both are null
@@ -694,8 +776,14 @@ export const playthroughActions = {
     // Clear the source location
     delete activePlaythrough.encounters[fromLocationId];
 
-    // Set the destination
+    // Set the destination and reset artwork variant since it's a new fusion context
     playthroughActions.updateEncounter(toLocationId, pokemon, toField, false);
+
+    // Reset artwork variant for the destination encounter
+    const destEncounter = activePlaythrough.encounters[toLocationId];
+    if (destEncounter) {
+      destEncounter.artworkVariant = undefined;
+    }
   },
 
   // Swap encounters between two locations (replaces switchCombobox event)
@@ -740,6 +828,10 @@ export const playthroughActions = {
     } else {
       encounter2.body = pokemon1WithLocation;
     }
+
+    // Reset artwork variants since the fusion combinations have changed
+    encounter1.artworkVariant = undefined;
+    encounter2.artworkVariant = undefined;
 
     activePlaythrough.updatedAt = getCurrentTimestamp();
   },

@@ -9,6 +9,7 @@ export interface EncounterData {
   head: PokemonOption | null;
   body: PokemonOption | null;
   isFusion: boolean;
+  artworkVariant?: string; // Alternative artwork variant for fusions (e.g., 'a', 'b', 'c')
 }
 
 // Zod schema for route encounter data

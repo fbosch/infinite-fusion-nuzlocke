@@ -99,7 +99,8 @@ function getStatusState(
 function getSpriteUrl(
   head: PokemonOption | null,
   body: PokemonOption | null,
-  isFusion: boolean
+  isFusion: boolean,
+  artworkVariant?: string
 ): string {
   const pokemon = head || body;
   if (!pokemon) return TRANSPARENT_PIXEL;
@@ -108,7 +109,10 @@ function getSpriteUrl(
     return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
   }
 
-  return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${head.id}.${body.id}.png`;
+  // For fusions, use the artwork variant if available
+  const variantSuffix = artworkVariant ? artworkVariant : '';
+
+  return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${head.id}.${body.id}${variantSuffix}.png`;
 }
 
 function getAltText(
@@ -132,10 +136,10 @@ export function FusionSprite({
   const imageRef = useRef<HTMLImageElement>(null);
   const shadowRef = useRef<HTMLImageElement>(null);
   const hoverRef = useRef<boolean>(false);
-  const { head, body, isFusion } = encounterData;
+  const { head, body, isFusion, artworkVariant } = encounterData;
 
   // Calculate all values before early return to maintain hook order
-  const spriteUrl = getSpriteUrl(head, body, isFusion);
+  const spriteUrl = getSpriteUrl(head, body, isFusion, artworkVariant);
   const altText = getAltText(head, body, isFusion);
   const spriteSize = SPRITE_SIZES[size];
 
@@ -166,13 +170,8 @@ export function FusionSprite({
 
   return (
     <div className='flex flex-col items-center relative'>
-      <a
-        href={link}
-        target='_blank'
-        rel='noopener noreferrer'
-        className='cursor-help'
+      <div
         draggable={false}
-        title='Open Pokedex'
         onMouseEnter={() => {
           hoverRef.current = true;
           if (imageRef.current && statusState.canAnimate) {
@@ -273,7 +272,15 @@ export function FusionSprite({
               onError={e => {
                 const target = e.target as HTMLImageElement;
                 if (head && body) {
-                  target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}.png`;
+                  const variantSuffix = artworkVariant ? artworkVariant : '';
+                  const fallbackUrl = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}${variantSuffix}.png`;
+
+                  // If this is already a fallback URL and it's failing, try without variant
+                  if (target.src.includes('/generated/') && artworkVariant) {
+                    target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}.png`;
+                  } else {
+                    target.src = fallbackUrl;
+                  }
                 }
               }}
             />
@@ -292,14 +299,22 @@ export function FusionSprite({
               onError={e => {
                 const target = e.target as HTMLImageElement;
                 if (head && body) {
-                  target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}.png`;
+                  const variantSuffix = artworkVariant ? artworkVariant : '';
+                  const fallbackUrl = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}${variantSuffix}.png`;
+
+                  // If this is already a fallback URL and it's failing, try without variant
+                  if (target.src.includes('/generated/') && artworkVariant) {
+                    target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}.png`;
+                  } else {
+                    target.src = fallbackUrl;
+                  }
                 }
               }}
             />
           </div>
           {statusState.overlayContent}
         </div>
-      </a>
+      </div>
     </div>
   );
 }

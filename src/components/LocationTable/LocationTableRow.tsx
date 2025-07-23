@@ -5,6 +5,7 @@ import { EncounterCell } from './EncounterCell';
 import SummaryCard from '../SummaryCard';
 import ResetEncounterButton from './ResetEncounterButton';
 import { match } from 'ts-pattern';
+import { ArtworkVariantButton } from './ArtworkVariantButton';
 
 interface LocationTableRowProps {
   row: Row<Location>;
@@ -39,10 +40,15 @@ export default function LocationTableRow({
           .with('sprite', () => (
             <td
               key={cell.id}
-              className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
+              className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group'
               role='cell'
             >
               <SummaryCard encounterData={encounterData} />
+              <ArtworkVariantButton
+                className='absolute bottom-10.5 right-1/2 -translate-x-6 z-10 group-hover:opacity-50 opacity-0 '
+                locationId={locationId}
+                isFusion={encounterData.isFusion}
+              />
             </td>
           ))
           .with('reset', () => {
