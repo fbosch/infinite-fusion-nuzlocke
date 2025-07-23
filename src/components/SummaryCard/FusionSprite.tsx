@@ -125,7 +125,7 @@ export function FusionSprite({
   className,
 }: FusionSpriteProps) {
   const imageRef = useRef<HTMLImageElement>(null);
-  const shadowRef = useRef<HTMLDivElement>(null);
+  const shadowRef = useRef<HTMLImageElement>(null);
   const hoverRef = useRef<boolean>(false);
   const { head, body, isFusion } = encounterData;
 
@@ -198,11 +198,14 @@ export function FusionSprite({
 
               shadowRef.current?.animate(
                 [
-                  { transform: 'translateY(-40%) translateX(-60%) scale(1)' },
+                  { transform: 'skewX(-22deg) skewY(-40deg) scale(1) ' },
                   {
-                    transform: 'translateY(-38%) translateX(-60%) scale(1.03)',
+                    transform:
+                      'skewX(-22deg) skewY(-40deg) scale(1.03) translateY(-5%)',
+                    opacity: '9%',
+                    blur: '0.4px',
                   },
-                  { transform: 'translateY(-40%) translateX(-60%) scale(1)' },
+                  { transform: 'skewX(-22deg) skewY(-40deg) scale(1)' },
                 ],
                 {
                   duration: 400,
@@ -246,36 +249,22 @@ export function FusionSprite({
         }}
       >
         <div className='relative w-full flex justify-center'>
-          <div
-            ref={shadowRef}
-            className='absolute opacity-60 dark:opacity-90 hidden'
-            style={{
-              width: spriteSize * 0.55,
-              height: spriteSize * 0.2,
-              borderRadius: '50%',
-              bottom: 5,
-              left: '50%',
-              transformOrigin: 'center',
-              transform: 'translateY(-40%) translateX(-60%)',
-              background:
-                'radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)',
-            }}
-          />
           {/* Sprite positioned above the shadow */}
           <div className='relative z-10 -translate-y-1/5'>
             <Image
+              ref={shadowRef}
               src={spriteUrl}
               alt={altText}
               width={spriteSize}
               height={spriteSize}
               className={twMerge(
                 baseImageClasses,
-                'absolute translate-x-[82%] translate-y-[55%] skew-x-[-35deg] skew-y-[-45deg] scale-100 rotate-[30deg] brightness-0 opacity-10'
+                'absolute translate-x-[60%] translate-y-[45%] skew-x-[-22deg] skew-y-[-40deg] scale-100 rotate-[34deg] brightness-0 opacity-10'
               )}
               loading='eager'
               unoptimized
               draggable={false}
-              placeholder='blur'
+              placeholder='empty'
               blurDataURL={TRANSPARENT_PIXEL}
               onError={e => {
                 const target = e.target as HTMLImageElement;
