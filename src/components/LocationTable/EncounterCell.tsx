@@ -1,8 +1,11 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { ArrowLeftRight } from 'lucide-react';
-import { PokemonCombobox } from '../PokemonCombobox/PokemonCombobox';
+import {
+  PokemonCombobox,
+  type PokemonComboboxRef,
+} from '../PokemonCombobox/PokemonCombobox';
 import { FusionToggleButton } from './FusionToggleButton';
 import type { PokemonOption } from '@/loaders/pokemon';
 
@@ -29,6 +32,9 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
   const selectedPokemon = encounterData.isFusion ? bodyPokemon : headPokemon;
   const isFusion = encounterData.isFusion;
 
+  // Ref for the body combobox to enable focusing
+  const bodyComboboxRef = useRef<PokemonComboboxRef>(null);
+
   // Handle encounter selection
   const handleEncounterSelect = useCallback(
     (pokemon: PokemonOption | null, field: 'head' | 'body' = 'head') => {
@@ -40,7 +46,15 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
   // Handle fusion toggle
   const handleFusionToggle = useCallback(() => {
     playthroughActions.toggleEncounterFusion(locationId);
-  }, [locationId]);
+
+    // Focus body combobox when toggling to fusion mode if head pokemon exists but body doesn't
+    if (!isFusion && headPokemon && !bodyPokemon) {
+      // Use setTimeout to ensure the UI has updated before focusing
+      setTimeout(() => {
+        bodyComboboxRef.current?.focus();
+      }, 0);
+    }
+  }, [locationId, isFusion, headPokemon, bodyPokemon]);
 
   // Handle flip button click
   const handleFlip = useCallback(() => {
@@ -104,6 +118,7 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
                   placeholder='Select body Pokemon'
                   nicknamePlaceholder='Enter body nickname'
                   comboboxId={`${locationId}-body`}
+                  ref={bodyComboboxRef}
                 />
               </div>
             </div>

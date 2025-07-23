@@ -8,6 +8,7 @@ import React, {
   useCallback,
   useEffect,
   useRef,
+  useImperativeHandle,
 } from 'react';
 import { Check, Search } from 'lucide-react';
 import {
@@ -268,6 +269,11 @@ const PokemonOptions = ({
   );
 };
 
+// Add interface for the exposed methods
+export interface PokemonComboboxRef {
+  focus: () => void;
+}
+
 // Pokemon Combobox Component
 export const PokemonCombobox = ({
   routeId,
@@ -279,6 +285,7 @@ export const PokemonCombobox = ({
   disabled = false,
   gameMode = 'classic',
   comboboxId,
+  ref,
 }: {
   routeId?: number;
   locationId?: string;
@@ -289,6 +296,7 @@ export const PokemonCombobox = ({
   disabled?: boolean;
   gameMode?: 'classic' | 'remix';
   comboboxId?: string;
+  ref?: React.Ref<PokemonComboboxRef>;
 }) => {
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
@@ -700,6 +708,17 @@ export const PokemonCombobox = ({
     // Clear global drag data when drag ends
     dragActions.clearDrag();
   }, []);
+
+  // Expose focus method to parent components
+  useImperativeHandle(
+    ref,
+    () => ({
+      focus: () => {
+        inputRef.current?.focus();
+      },
+    }),
+    []
+  );
 
   return (
     <div

@@ -270,7 +270,7 @@ export default function PlaythroughSelector({
                   setShowCreateInput(true);
                 }}
                 className={clsx(
-                  'group flex w-full items-center gap-2 px-3 py-3 text-sm cursor-pointer',
+                  'group flex w-full items-center gap-2 px-3 py-3 text-sm cursor-pointer rounded-b-md',
                   'hover:bg-gray-100 dark:hover:bg-gray-700',
                   'focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700',
                   'text-gray-700 dark:text-gray-300 transition-colors'

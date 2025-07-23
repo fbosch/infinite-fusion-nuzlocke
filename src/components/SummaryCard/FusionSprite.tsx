@@ -33,42 +33,33 @@ function getStatusState(
   body: PokemonOption | null
 ): StatusState {
   return match([head?.status, body?.status])
-    .with(
-      [PokemonStatus.MISSED, P._],
-      [P._, PokemonStatus.MISSED],
-      [PokemonStatus.MISSED, PokemonStatus.MISSED],
-      () => ({
-        type: 'missed' as const,
-        wrapperClasses: 'opacity-40',
-        imageClasses: '',
-        overlayContent: (
-          <div className='absolute -right-1.5 bottom-0 z-5 flex items-center justify-center pointer-events-none font-mono'>
-            <span className='dark:pixel-shadow text-gray-500 text-xs dark:text-gray-400'>
-              ď
-            </span>
-          </div>
-        ),
-        canAnimate: false,
-      })
-    )
-    .with(
-      [PokemonStatus.DECEASED, P._],
-      [P._, PokemonStatus.DECEASED],
-      [PokemonStatus.DECEASED, PokemonStatus.DECEASED],
-      () => ({
-        type: 'deceased' as const,
-        wrapperClasses: 'opacity-30',
-        imageClasses: 'saturate-30',
-        overlayContent: (
-          <div className='absolute pixel-shadow -right-2 bottom-0 z-10 bg-red-500 flex items-center justify-center pointer-events-none dark:bg-red-900 h-fit w-fit px-1 rounded-xs'>
-            <span className='pixel-shadow text-xs text-white font-mono'>
-              FNT
-            </span>
-          </div>
-        ),
-        canAnimate: false,
-      })
-    )
+    .with([PokemonStatus.MISSED, P._], [P._, PokemonStatus.MISSED], () => ({
+      type: 'missed' as const,
+      wrapperClasses: 'opacity-50',
+      imageClasses: '',
+      overlayContent: (
+        <div
+          className='absolute -right-1.5 bottom-0 z-20 pl-1.5 rounded-sm flex items-center justify-center pointer-events-none font-mono'
+          title='Missed!'
+        >
+          <span className='dark:pixel-shadow text-gray-500 text-xs dark:text-gray-200'>
+            ď
+          </span>
+        </div>
+      ),
+      canAnimate: false,
+    }))
+    .with([PokemonStatus.DECEASED, P._], [P._, PokemonStatus.DECEASED], () => ({
+      type: 'deceased' as const,
+      wrapperClasses: 'opacity-50',
+      imageClasses: 'saturate-30',
+      overlayContent: (
+        <div className='absolute pixel-shadow -right-2 bottom-0 z-10 bg-red-500 flex items-center justify-center pointer-events-none dark:bg-red-900 h-fit w-fit px-1 rounded-xs'>
+          <span className='pixel-shadow text-xs text-white font-mono'>FNT</span>
+        </div>
+      ),
+      canAnimate: false,
+    }))
     .with(
       [PokemonStatus.STORED, P._],
       [P._, PokemonStatus.STORED],
@@ -78,8 +69,8 @@ function getStatusState(
         wrapperClasses: '',
         imageClasses: '',
         overlayContent: (
-          <div className='absolute -right-1.5 bottom-0 z-5 flex items-center justify-center pointer-events-none font-mono'>
-            <span className='dark:pixel-shadow text-xs text-gray-500 dark:text-gray-400'>
+          <div className='absolute -right-1.5 bottom-0 z-10 flex items-center justify-center pointer-events-none font-mono'>
+            <span className='dark:pixel-shadow text-xs text-gray-500 dark:text-white'>
               Ą
             </span>
           </div>
