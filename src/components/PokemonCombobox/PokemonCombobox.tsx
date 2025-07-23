@@ -269,11 +269,6 @@ const PokemonOptions = ({
   );
 };
 
-// Add interface for the exposed methods
-export interface PokemonComboboxRef {
-  focus: () => void;
-}
-
 // Pokemon Combobox Component
 export const PokemonCombobox = ({
   routeId,
@@ -296,7 +291,7 @@ export const PokemonCombobox = ({
   disabled?: boolean;
   gameMode?: 'classic' | 'remix';
   comboboxId?: string;
-  ref?: React.Ref<PokemonComboboxRef>;
+  ref?: React.Ref<HTMLInputElement>;
 }) => {
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);

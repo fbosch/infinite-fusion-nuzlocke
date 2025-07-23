@@ -2,10 +2,7 @@
 
 import React, { useCallback, useRef } from 'react';
 import { ArrowLeftRight } from 'lucide-react';
-import {
-  PokemonCombobox,
-  type PokemonComboboxRef,
-} from '../PokemonCombobox/PokemonCombobox';
+import { PokemonCombobox } from '../PokemonCombobox/PokemonCombobox';
 import { FusionToggleButton } from './FusionToggleButton';
 import type { PokemonOption } from '@/loaders/pokemon';
 
@@ -33,7 +30,7 @@ export function EncounterCell({ routeId, locationId }: EncounterCellProps) {
   const isFusion = encounterData.isFusion;
 
   // Ref for the body combobox to enable focusing
-  const bodyComboboxRef = useRef<PokemonComboboxRef>(null);
+  const bodyComboboxRef = useRef<HTMLInputElement | null>(null);
 
   // Handle encounter selection
   const handleEncounterSelect = useCallback(
