@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Loader2, RefreshCcwDot, RefreshCwOff } from 'lucide-react';
+import { Loader2, RefreshCwOff, RefreshCcw } from 'lucide-react';
 import clsx from 'clsx';
 import { playthroughActions, useEncounters } from '@/stores/playthroughs';
 import { twMerge } from 'tailwind-merge';
@@ -119,7 +119,7 @@ export function ArtworkVariantButton({
         ) : isButtonDisabled ? (
           <RefreshCwOff className='size-3' />
         ) : (
-          <RefreshCcwDot className='size-3' />
+          <RefreshCcw className='size-3' />
         )}
       </div>
     </button>

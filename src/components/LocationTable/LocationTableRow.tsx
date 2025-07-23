@@ -5,7 +5,6 @@ import { EncounterCell } from './EncounterCell';
 import SummaryCard from '../SummaryCard';
 import ResetEncounterButton from './ResetEncounterButton';
 import { match } from 'ts-pattern';
-import { ArtworkVariantButton } from './ArtworkVariantButton';
 
 interface LocationTableRowProps {
   row: Row<Location>;
@@ -43,11 +42,9 @@ export default function LocationTableRow({
               className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group'
               role='cell'
             >
-              <SummaryCard encounterData={encounterData} />
-              <ArtworkVariantButton
-                className='absolute bottom-10.5 right-1/2 -translate-x-6 z-10 '
+              <SummaryCard
+                encounterData={encounterData}
                 locationId={locationId}
-                isFusion={encounterData.isFusion}
               />
             </td>
           ))

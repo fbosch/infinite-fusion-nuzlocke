@@ -3,9 +3,11 @@ import { FusionSprite } from './FusionSprite';
 import { PokemonStatus, type PokemonOption } from '@/loaders/pokemon';
 import { Fragment } from 'react';
 import clsx from 'clsx';
+import { ArtworkVariantButton } from './ArtworkVariantButton';
 
 interface SummaryCardProps {
   encounterData: EncounterData;
+  locationId: string;
 }
 
 function getNicknameText(
@@ -30,7 +32,10 @@ function getNicknameText(
   return head.nickname || body.nickname || `${head.name}/${body.name}`;
 }
 
-export default function SummaryCard({ encounterData }: SummaryCardProps) {
+export default function SummaryCard({
+  encounterData,
+  locationId,
+}: SummaryCardProps) {
   const name = getNicknameText(
     encounterData.head,
     encounterData.body,
@@ -64,10 +69,14 @@ export default function SummaryCard({ encounterData }: SummaryCardProps) {
           />
         </Fragment>
       ) : null}
-
+      <ArtworkVariantButton
+        className='absolute bottom-0 right-1/2 -translate-x-6 z-10'
+        locationId={locationId}
+        isFusion={encounterData.isFusion}
+      />
       {name && (
         <div className='z-5 p-0.5 text-center absolute bottom-0 translate-y-8.5 rounded-sm'>
-          <span className='text-md font-mono truncate max-w-full block px-1 rounded text-gray-900 dark:text-white dark:pixel-shadow'>
+          <span className='text-md font-bold dark:font-normal font-mono truncate max-w-full block px-1 rounded text-gray-900 dark:text-white dark:pixel-shadow'>
             {name}
           </span>
         </div>
