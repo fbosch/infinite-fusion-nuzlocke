@@ -278,7 +278,6 @@ export const PokemonCombobox = ({
   placeholder = 'Select Pokemon',
   nicknamePlaceholder = 'Enter nickname',
   disabled = false,
-  gameMode = 'classic',
   comboboxId,
   ref,
 }: {
