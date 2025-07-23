@@ -685,21 +685,32 @@ export const playthroughActions = {
 
     try {
       // Import the validation utilities dynamically
-      const { getAvailableArtworkVariants } = await import(
-        '@/utils/spriteValidation'
-      );
+      const { getAvailableArtworkVariants, getCachedArtworkVariants } =
+        await import('@/utils/spriteValidation');
 
-      // Get available variants for this fusion
-      const availableVariants = await getAvailableArtworkVariants(
+      // First try to get cached variants to avoid unnecessary HTTP requests
+      let availableVariants = getCachedArtworkVariants(
         encounter.head.id,
         encounter.body.id
       );
 
+      // If not cached, fetch them (this will use sequential checking)
+      if (!availableVariants) {
+        console.log(
+          `Checking variants for fusion ${encounter.head.id}.${encounter.body.id}...`
+        );
+        availableVariants = await getAvailableArtworkVariants(
+          encounter.head.id,
+          encounter.body.id
+        );
+      }
+
       // If no variants available (only default), don't cycle
       if (availableVariants.length <= 1) {
-        throw new Error(
-          `No alternative artwork variants found for fusion ${encounter.head.id}.${encounter.body.id}`
+        console.log(
+          `No alternative artwork variants found for fusion ${encounter.head.id}.${encounter.body.id} (only default available)`
         );
+        return;
       }
 
       const currentVariant = encounter.artworkVariant || '';
@@ -730,6 +741,45 @@ export const playthroughActions = {
   forceSave: async () => {
     if (typeof window === 'undefined') return;
     await saveToIndexedDB(playthroughsStore);
+  },
+
+  // Preload artwork variants for all fusions in the current playthrough
+  preloadArtworkVariants: async () => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    if (!activePlaythrough) return;
+
+    // Get all fusion encounters
+    const fusionEncounters = Object.entries(activePlaythrough.encounters)
+      .filter(
+        ([, encounter]) =>
+          encounter.isFusion && encounter.head && encounter.body
+      )
+      .map(([, encounter]) => ({
+        headId: encounter.head!.id,
+        bodyId: encounter.body!.id,
+      }));
+
+    if (fusionEncounters.length === 0) {
+      console.log('No fusion encounters found to preload variants for');
+      return;
+    }
+
+    console.log(
+      `Preloading artwork variants for ${fusionEncounters.length} fusion encounters...`
+    );
+
+    try {
+      // Import the validation utilities dynamically
+      const { preloadArtworkVariants } = await import(
+        '@/utils/spriteValidation'
+      );
+
+      // Preload variants for all fusions (limited concurrency)
+      await preloadArtworkVariants(fusionEncounters, 2);
+      console.log('Artwork variant preloading completed');
+    } catch (error) {
+      console.error('Failed to preload artwork variants:', error);
+    }
   },
 
   // Helper methods for drag and drop operations
