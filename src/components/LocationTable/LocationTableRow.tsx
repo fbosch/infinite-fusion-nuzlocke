@@ -45,7 +45,7 @@ export default function LocationTableRow({
             >
               <SummaryCard encounterData={encounterData} />
               <ArtworkVariantButton
-                className='absolute bottom-10.5 right-1/2 -translate-x-6 z-10 group-hover:opacity-50 opacity-0 '
+                className='absolute bottom-10.5 right-1/2 -translate-x-6 z-10 '
                 locationId={locationId}
                 isFusion={encounterData.isFusion}
               />

@@ -79,8 +79,6 @@ export function ArtworkVariantButton({
   // Don't render if it's not a fusion
   if (!isFusion) return null;
 
-  const variantLabel = currentVariant ? `#${currentVariant}` : '#default';
-
   const isButtonDisabled = disabled || isLoading || hasVariants === false;
 
   return (
@@ -90,14 +88,13 @@ export function ArtworkVariantButton({
       disabled={isButtonDisabled}
       className={twMerge(
         clsx(
+          'group-hover:opacity-50 opacity-0 focus:opacity-100',
           'transition-opacity duration-200',
-          'size-4 cursor-pointer flex items-center justify-center text-white opacity-50 enabled:hover:opacity-100',
-          'rounded transition-colors',
+          'size-4 cursor-pointer flex items-center justify-center',
+          'rounded-full text-gray-600 dark:text-white',
           'focus:outline-none focus:ring-2 focus:ring-blue-500',
-          {
-            'opacity-50 cursor-not-allowed': isButtonDisabled,
-            'hover:bg-gray-100 dark:hover:bg-gray-700': !isButtonDisabled,
-          }
+          'enabled:hover:bg-gray-400 dark:enabled:hover:bg-gray-600',
+          'disabled:cursor-not-allowed enabled:hover:opacity-100 enabled:hover:text-white'
         ),
         className
       )}
@@ -112,13 +109,15 @@ export function ArtworkVariantButton({
           : `Cycle artwork variants`
       }
     >
-      {isLoading ? (
-        <Loader2 className='size-4 animate-spin' />
-      ) : isButtonDisabled ? (
-        <RefreshCwOff className='size-3' />
-      ) : (
-        <RefreshCcwDot className='size-3' />
-      )}
+      <div className='dark:pixel-shadow'>
+        {isLoading ? (
+          <Loader2 className='size-4 animate-spin' />
+        ) : isButtonDisabled ? (
+          <RefreshCwOff className='size-3' />
+        ) : (
+          <RefreshCcwDot className='size-3' />
+        )}
+      </div>
     </button>
   );
 }
