@@ -686,7 +686,7 @@ export const playthroughActions = {
     try {
       // Import the validation utilities dynamically
       const { getAvailableArtworkVariants, getCachedArtworkVariants } =
-        await import('@/utils/spriteValidation');
+        await import('@/utils/spriteService');
 
       // First try to get cached variants to avoid unnecessary HTTP requests
       let availableVariants = getCachedArtworkVariants(
@@ -770,9 +770,7 @@ export const playthroughActions = {
 
     try {
       // Import the validation utilities dynamically
-      const { preloadArtworkVariants } = await import(
-        '@/utils/spriteValidation'
-      );
+      const { preloadArtworkVariants } = await import('@/utils/spriteService');
 
       // Preload variants for all fusions (limited concurrency)
       await preloadArtworkVariants(fusionEncounters, 2);

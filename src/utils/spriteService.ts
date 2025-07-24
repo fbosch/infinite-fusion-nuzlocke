@@ -198,7 +198,7 @@ class PersistentVariantCache {
 }
 
 const variantCache = new PersistentVariantCache();
-const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 /**
  * Generate variant suffix for a given index
@@ -246,7 +246,6 @@ async function checkVariantsSequentially(
           `Found variant '${variantSuffix}' for fusion ${headId}.${bodyId}`
         );
       } else {
-        // Stop immediately on first missing variant
         console.log(
           `Variant '${variantSuffix}' not found for fusion ${headId}.${bodyId}, stopping check`
         );

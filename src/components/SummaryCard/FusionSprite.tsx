@@ -4,8 +4,10 @@ import React, { useMemo, useRef } from 'react';
 import Image from 'next/image';
 import { PokemonStatus, type PokemonOption } from '@/loaders/pokemon';
 import type { EncounterData } from '@/loaders/encounters';
+import clsx from 'clsx';
 import { match, P } from 'ts-pattern';
 import { twMerge } from 'tailwind-merge';
+import { SquareArrowUpRight } from 'lucide-react';
 
 interface FusionSpriteProps {
   encounterData: EncounterData;
@@ -135,7 +137,7 @@ export function FusionSprite({
   const spriteSize = SPRITE_SIZES[size];
 
   const baseImageClasses =
-    'object-fill object-center image-render-pixelated origin-top -translate-y-1/9 transition-all duration-200 scale-150 select-none';
+    'object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none';
 
   const statusState = getStatusState(head, body);
 
@@ -161,7 +163,11 @@ export function FusionSprite({
 
   return (
     <div className='flex flex-col items-center relative'>
-      <div
+      <a
+        href={link}
+        target='_blank'
+        rel='noopener noreferrer'
+        className='group focus:outline-none'
         draggable={false}
         onMouseEnter={() => {
           hoverRef.current = true;
@@ -241,7 +247,7 @@ export function FusionSprite({
         <div className='relative w-full flex justify-center'>
           <div
             className={twMerge(
-              'relative z-10 -translate-y-1/5',
+              'relative z-10 -translate-y-6',
               statusState.wrapperClasses
             )}
           >
@@ -281,7 +287,11 @@ export function FusionSprite({
               alt={altText}
               width={spriteSize}
               height={spriteSize}
-              className={twMerge(baseImageClasses, statusState.imageClasses)}
+              className={twMerge(
+                baseImageClasses,
+                statusState.imageClasses,
+                'group-focus-visible:ring-1 ring-blue-400 rounded-md'
+              )}
               loading='eager'
               unoptimized
               draggable={false}
@@ -305,7 +315,16 @@ export function FusionSprite({
           </div>
           {statusState.overlayContent}
         </div>
-      </div>
+        <div
+          className={clsx(
+            'absolute -top-4 -right-2 text-blue-400 dark:text-blue-300 z-10 bg-gray-200 dark:bg-gray-800 rounded-sm opacity-0',
+            'group-focus-visible:opacity-100 group-hover:opacity-100 transition-opacity duration-200',
+            'group-focus-visible:ring-1 group-focus-visible:ring-blue-400'
+          )}
+        >
+          <SquareArrowUpRight className='size-4 dark:pixel-shadow' />
+        </div>
+      </a>
     </div>
   );
 }
