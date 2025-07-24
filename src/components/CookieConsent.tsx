@@ -27,35 +27,38 @@ function CookieBanner({
 }: CookieBannerProps) {
   return (
     <div className='p-4'>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center space-x-3'>
-          <Cookie className='h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0' />
+      <div className='grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-6 items-start sm:items-center'>
+        {/* Content section */}
+        <div className='flex items-start space-x-3'>
+          <Cookie className='h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5 sm:mt-0' />
           <div>
             <h3 className='text-base font-semibold text-gray-900 dark:text-white'>
-              We use cookies
+              This site uses cookies
             </h3>
-            <p className='text-sm text-gray-600 dark:text-gray-300'>
-              We use cookies to analyze traffic and improve your experience.
+            <p className='text-sm text-gray-600 dark:text-gray-300 mt-1 sm:mt-0'>
+              Cookies help analyze site traffic and enhance your experience. You
+              can manage your preferences any time.
             </p>
           </div>
         </div>
 
-        <div className='flex items-center space-x-3 ml-4'>
+        {/* Actions section */}
+        <div className='flex flex-col sm:flex-row gap-2 sm:gap-3'>
           <button
             onClick={onAcceptAll}
-            className='bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-3 rounded text-sm transition-colors whitespace-nowrap cursor-pointer'
+            className='bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 sm:py-1.5 px-4 sm:px-3 rounded text-sm transition-colors whitespace-nowrap cursor-pointer order-1 sm:order-1'
           >
             Accept All
           </button>
           <button
             onClick={onOpenSettings}
-            className='bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium py-1.5 px-3 rounded text-sm transition-colors whitespace-nowrap cursor-pointer'
+            className='bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium py-2 sm:py-1.5 px-4 sm:px-3 rounded text-sm transition-colors whitespace-nowrap cursor-pointer order-2 sm:order-2'
           >
             Customize
           </button>
           <button
             onClick={onRejectAll}
-            className='text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 font-medium py-1.5 px-3 text-sm transition-colors whitespace-nowrap cursor-pointer'
+            className='text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 font-medium py-2 sm:py-1.5 px-4 sm:px-3 text-sm transition-colors whitespace-nowrap cursor-pointer border border-gray-300 dark:border-gray-600 sm:border-0 rounded order-3 sm:order-3'
           >
             Reject All
           </button>
@@ -207,8 +210,8 @@ export function CookieConsent() {
       {/* Backdrop overlay - only bottom area */}
       <div className='fixed bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-gray-800/10 to-transparent dark:from-gray-800/20 dark:to-transparent z-40 pointer-events-none' />
 
-      <div className='fixed bottom-0 left-1/2 -translate-x-1/2 z-50 max-w-[1700px] p-4 pointer-events-none'>
-        <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl w-full pointer-events-auto rounded-md'>
+      <div className='fixed bottom-0 lg:bottom-2 w-full lg:max-w-[1000px] lg:left-1/2 lg:-translate-x-1/2'>
+        <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl w-full pointer-events-auto lg:rounded-md'>
           {showSettings ? (
             <CookieSettings
               preferences={preferences}
