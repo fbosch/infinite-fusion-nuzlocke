@@ -30,7 +30,7 @@ function CookieBanner({
       <div className='grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-6 items-start sm:items-center'>
         {/* Content section */}
         <div className='flex items-start space-x-3'>
-          <Cookie className='h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5 sm:mt-0' />
+          <Cookie className='h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1' />
           <div>
             <h3 className='text-base font-semibold text-gray-900 dark:text-white'>
               This site uses cookies
@@ -211,7 +211,7 @@ export function CookieConsent() {
       <div className='fixed bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-gray-800/10 to-transparent dark:from-gray-800/20 dark:to-transparent z-40 pointer-events-none' />
 
       <div className='fixed bottom-0 lg:bottom-2 w-full lg:max-w-[1000px] lg:left-1/2 lg:-translate-x-1/2'>
-        <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl w-full pointer-events-auto lg:rounded-md'>
+        <div className='bg-white dark:bg-gray-800 border-t lg:border border-gray-200 dark:border-gray-700 shadow-xl w-full pointer-events-auto lg:rounded-md'>
           {showSettings ? (
             <CookieSettings
               preferences={preferences}

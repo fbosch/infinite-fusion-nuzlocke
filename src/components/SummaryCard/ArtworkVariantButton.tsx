@@ -39,8 +39,8 @@ export function ArtworkVariantButton({
         '@/utils/spriteService'
       );
       const availableVariants = await getAvailableArtworkVariants(
-        encounter.head!.id,
-        encounter.body!.id
+        encounter?.head?.id,
+        encounter?.body?.id
       );
 
       setHasVariants(availableVariants.length > 1);

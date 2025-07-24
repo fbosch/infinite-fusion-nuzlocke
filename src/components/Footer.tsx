@@ -41,7 +41,7 @@ function ThemeToggle() {
           key={value}
           onClick={() => setTheme(value)}
           className={clsx(
-            'flex items-center justify-center w-7 h-7 rounded transition-all duration-200',
+            'flex items-center justify-center w-7 h-7 rounded transition-all duration-200 cursor-pointer',
             'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400',
             theme === value
               ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'

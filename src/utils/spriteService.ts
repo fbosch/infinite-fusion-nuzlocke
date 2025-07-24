@@ -38,8 +38,8 @@ export async function checkSpriteExists(url: string): Promise<boolean> {
  * Generate sprite URL for a fusion with optional artwork variant
  */
 export function generateFusionSpriteUrl(
-  headId: number,
-  bodyId: number,
+  headId: number | undefined,
+  bodyId: number | undefined,
   variant?: string
 ): string {
   const variantSuffix = variant ? variant : '';
@@ -243,8 +243,8 @@ function generateVariantSuffix(index: number): string {
  * This minimizes HTTP requests by stopping as soon as we hit a 404
  */
 async function checkFusionVariantsSequentially(
-  headId: number,
-  bodyId: number,
+  headId: number | undefined,
+  bodyId: number | undefined,
   maxVariants: number = 100
 ): Promise<string[]> {
   const variants = ['']; // Always include default
@@ -336,8 +336,8 @@ async function checkPokemonVariantsSequentially(
  * Uses sequential checking to minimize HTTP requests by stopping on first 404
  */
 export async function getAvailableArtworkVariants(
-  headId: number,
-  bodyId: number,
+  headId: number | undefined,
+  bodyId: number | undefined,
   maxVariants: number = 10
 ): Promise<string[]> {
   const cacheKey = `${headId}.${bodyId}`;
