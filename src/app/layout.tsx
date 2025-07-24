@@ -5,8 +5,11 @@ import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import Header from '@/components/Header';
 import { ServiceWorkerInit } from '@/components/ServiceWorkerInit';
-import { SpeedInsights } from '@vercel/speed-insights/next';
-import { Analytics } from '@vercel/analytics/next';
+import { CookieConsent } from '@/components/CookieConsent';
+import {
+  ConditionalAnalytics,
+  ConditionalSpeedInsights,
+} from '@/components/ConditionalAnalytics';
 
 // Primary sans-serif font for body text
 const font = Font({
@@ -49,9 +52,10 @@ export default function RootLayout({
         <ThemeProvider>
           <Header />
           {children}
+          <CookieConsent />
         </ThemeProvider>
-        <Analytics />
-        <SpeedInsights />
+        <ConditionalAnalytics />
+        <ConditionalSpeedInsights />
         <ServiceWorkerInit />
       </body>
     </html>
