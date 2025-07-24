@@ -49,6 +49,17 @@ export function generateFusionSpriteUrl(
   return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${headId}.${bodyId}${variantSuffix}.png`;
 }
 
+/**
+ * Generate sprite URL for a single Pokémon with optional artwork variant
+ */
+export function generatePokemonSpriteUrl(
+  pokemonId: number,
+  variant?: string
+): string {
+  const variantSuffix = variant ? variant : '';
+  return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${pokemonId}${variantSuffix}.png`;
+}
+
 // Enhanced cache with metadata about checking status
 interface VariantCacheEntry {
   variants: string[];
@@ -231,10 +242,10 @@ function generateVariantSuffix(index: number): string {
 }
 
 /**
- * Sequential variant checking - stops immediately on first missing variant
+ * Sequential variant checking for fusions - stops immediately on first missing variant
  * This minimizes HTTP requests by stopping as soon as we hit a 404
  */
-async function checkVariantsSequentially(
+async function checkFusionVariantsSequentially(
   headId: number,
   bodyId: number,
   maxVariants: number = 100
@@ -278,6 +289,52 @@ async function checkVariantsSequentially(
 }
 
 /**
+ * Sequential variant checking for single Pokémon - stops immediately on first missing variant
+ * This minimizes HTTP requests by stopping as soon as we hit a 404
+ */
+async function checkPokemonVariantsSequentially(
+  pokemonId: number,
+  maxVariants: number = 100
+): Promise<string[]> {
+  const variants = ['']; // Always include default
+
+  // Check variants one by one, stopping immediately when one doesn't exist
+  for (let i = 1; i < maxVariants; i++) {
+    const variantSuffix = generateVariantSuffix(i);
+    const url = generatePokemonSpriteUrl(pokemonId, variantSuffix);
+
+    try {
+      const exists = await checkSpriteExists(url);
+
+      if (exists) {
+        variants.push(variantSuffix);
+        console.log(
+          `Found variant '${variantSuffix}' for Pokémon ${pokemonId}`
+        );
+      } else {
+        // Stop immediately on first missing variant
+        console.log(
+          `Variant '${variantSuffix}' not found for Pokémon ${pokemonId}, stopping check`
+        );
+        break;
+      }
+    } catch (error) {
+      console.warn(
+        `Error checking variant ${variantSuffix} for Pokémon ${pokemonId}:`,
+        error
+      );
+      // Stop on error as well
+      break;
+    }
+  }
+
+  console.log(
+    `Sequential check complete for Pokémon ${pokemonId}: found ${variants.length} total variants`
+  );
+  return variants;
+}
+
+/**
  * Get available artwork variants for a fusion with optimized sequential checking
  * Uses sequential checking to minimize HTTP requests by stopping on first 404
  */
@@ -308,7 +365,7 @@ export async function getAvailableArtworkVariants(
       );
 
       // Use sequential checking to minimize HTTP requests
-      const variants = await checkVariantsSequentially(
+      const variants = await checkFusionVariantsSequentially(
         headId,
         bodyId,
         maxVariants
@@ -329,6 +386,85 @@ export async function getAvailableArtworkVariants(
       return variants;
     } catch (error) {
       console.error(`Failed to check variants for ${headId}.${bodyId}:`, error);
+
+      // Cache a minimal result to avoid repeated failures
+      const fallbackEntry: VariantCacheEntry = {
+        variants: [''], // Just the default
+        lastChecked: now,
+        isComplete: false,
+      };
+      variantCache.set(cacheKey, fallbackEntry);
+
+      return [''];
+    }
+  })();
+
+  // Store the promise in cache to prevent duplicate requests
+  if (cached) {
+    cached.checkingPromise = checkingPromise;
+  } else {
+    variantCache.set(cacheKey, {
+      variants: [''],
+      lastChecked: 0,
+      isComplete: false,
+      checkingPromise,
+    });
+  }
+
+  return await checkingPromise;
+}
+
+/**
+ * Get available artwork variants for a single Pokémon with optimized sequential checking
+ * Uses sequential checking to minimize HTTP requests by stopping on first 404
+ */
+export async function getAvailablePokemonArtworkVariants(
+  pokemonId: number,
+  maxVariants: number = 100
+): Promise<string[]> {
+  const cacheKey = pokemonId.toString();
+  const now = Date.now();
+
+  // Check if we have a valid cached result
+  const cached = variantCache.get(cacheKey);
+  if (cached && now - cached.lastChecked < CACHE_EXPIRY) {
+    return cached.variants;
+  }
+
+  // If there's already an ongoing check for this Pokémon, wait for it
+  if (cached?.checkingPromise) {
+    return await cached.checkingPromise;
+  }
+
+  // Start the check and cache the promise to avoid duplicate requests
+  const checkingPromise = (async () => {
+    try {
+      console.log(`Checking artwork variants for Pokémon ${pokemonId}...`);
+
+      // Use sequential checking to minimize HTTP requests
+      const variants = await checkPokemonVariantsSequentially(
+        pokemonId,
+        maxVariants
+      );
+
+      console.log(
+        `Found ${variants.length} variants for Pokémon ${pokemonId}: [${variants.join(', ')}]`
+      );
+
+      // Cache the result
+      const cacheEntry: VariantCacheEntry = {
+        variants,
+        lastChecked: now,
+        isComplete: true,
+      };
+      variantCache.set(cacheKey, cacheEntry);
+
+      return variants;
+    } catch (error) {
+      console.error(
+        `Failed to check variants for Pokémon ${pokemonId}:`,
+        error
+      );
 
       // Cache a minimal result to avoid repeated failures
       const fallbackEntry: VariantCacheEntry = {
@@ -442,6 +578,26 @@ export function getCachedArtworkVariants(
   bodyId: number
 ): string[] | null {
   const cacheKey = `${headId}.${bodyId}`;
+  const cached = variantCache.get(cacheKey);
+
+  if (!cached) return null;
+
+  const now = Date.now();
+  if (now - cached.lastChecked > CACHE_EXPIRY) {
+    return null;
+  }
+
+  return cached.variants;
+}
+
+/**
+ * Get cached variants for single Pokémon without making HTTP requests
+ * Returns null if not cached or expired
+ */
+export function getCachedPokemonArtworkVariants(
+  pokemonId: number
+): string[] | null {
+  const cacheKey = `pokemon_${pokemonId}`;
   const cached = variantCache.get(cacheKey);
 
   if (!cached) return null;

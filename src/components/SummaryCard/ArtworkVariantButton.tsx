@@ -24,10 +24,9 @@ export function ArtworkVariantButton({
 }: ArtworkVariantButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [hasVariants, setHasVariants] = useState<boolean | null>(null);
-  const isFusion = encounter.isFusion && !!encounter.head && !!encounter.body;
 
   React.useEffect(() => {
-    if (!isFusion || !encounter?.head || !encounter?.body || !shouldLoad) {
+    if (!encounter?.head || !encounter?.body || !shouldLoad) {
       return;
     }
 
@@ -43,21 +42,18 @@ export function ArtworkVariantButton({
       setHasVariants(availableVariants.length > 1);
     };
     preloadVariants();
-  }, [isFusion, encounter?.head?.id, encounter?.body?.id, shouldLoad]);
+  }, [encounter?.head?.id, encounter?.body?.id, shouldLoad]);
 
   const handleCycleVariant = React.useCallback(
     async (event: React.MouseEvent) => {
-      if (!isFusion || disabled || isLoading) return;
+      if (disabled || isLoading) return;
       const reverse = event.shiftKey;
       setIsLoading(true);
       await playthroughActions.cycleArtworkVariant(locationId, reverse);
       setIsLoading(false);
     },
-    [locationId, isFusion, disabled, isLoading]
+    [locationId, disabled, isLoading]
   );
-
-  // Don't render if it's not a fusion
-  if (!isFusion) return null;
 
   const isButtonDisabled = disabled || isLoading || hasVariants === false;
 

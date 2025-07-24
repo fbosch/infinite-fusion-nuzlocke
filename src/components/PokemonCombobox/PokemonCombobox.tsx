@@ -43,6 +43,9 @@ import { PokemonStatusInput } from './PokemonStatusInput';
 let nationalDexMapping: Map<number, number> | null = null;
 let mappingPromise: Promise<void> | null = null;
 
+const TRANSPARENT_PIXEL =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
 export async function initializeSpriteMapping(): Promise<void> {
   if (nationalDexMapping) {
     return; // Already loaded
@@ -108,6 +111,8 @@ const PokemonOption = ({
             unoptimized
             draggable
             onDragStart={handleDragStart}
+            placeholder='blur'
+            blurDataURL={TRANSPARENT_PIXEL}
           />
           <span
             className={clsx('block truncate flex-1', {
@@ -774,6 +779,8 @@ export const PokemonCombobox = ({
                     quality={70}
                     priority={true}
                     loading='eager'
+                    placeholder='blur'
+                    blurDataURL={TRANSPARENT_PIXEL}
                     draggable
                     onDragStart={e => {
                       e.dataTransfer.setData(

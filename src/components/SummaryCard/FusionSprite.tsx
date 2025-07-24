@@ -98,13 +98,14 @@ function getSpriteUrl(
   const pokemon = head || body;
   if (!pokemon) return TRANSPARENT_PIXEL;
 
-  if (!isFusion || !body || !head) {
-    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
-  }
-
-  // For fusions, use the artwork variant if available
   const variantSuffix = artworkVariant ? artworkVariant : '';
 
+  if (!isFusion || !body || !head) {
+    // For single Pokémon, use the same sprite source with variants support
+    return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${pokemon.id}${variantSuffix}.png`;
+  }
+
+  // For fusions, use head.body pattern with variant
   return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${head.id}.${body.id}${variantSuffix}.png`;
 }
 
@@ -268,8 +269,13 @@ export function FusionSprite({
               blurDataURL={TRANSPARENT_PIXEL}
               onError={e => {
                 const target = e.target as HTMLImageElement;
+                const pokemon = head || body;
+                if (!pokemon) return;
+
+                const variantSuffix = artworkVariant ? artworkVariant : '';
+
                 if (head && body) {
-                  const variantSuffix = artworkVariant ? artworkVariant : '';
+                  // Fusion fallback logic
                   const fallbackUrl = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}${variantSuffix}.png`;
 
                   // If this is already a fallback URL and it's failing, try without variant
@@ -277,6 +283,21 @@ export function FusionSprite({
                     target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}.png`;
                   } else {
                     target.src = fallbackUrl;
+                  }
+                } else {
+                  // Single Pokémon fallback logic
+                  if (target.src.includes('/generated/')) {
+                    // Final fallback to PokeAPI sprites for single Pokémon
+                    target.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
+                  } else if (
+                    target.src.includes('/custom/') &&
+                    artworkVariant
+                  ) {
+                    // Try without variant first
+                    target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${pokemon.id}.png`;
+                  } else {
+                    // Try generated directory
+                    target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${pokemon.id}${variantSuffix}.png`;
                   }
                 }
               }}
@@ -300,8 +321,13 @@ export function FusionSprite({
               blurDataURL={TRANSPARENT_PIXEL}
               onError={e => {
                 const target = e.target as HTMLImageElement;
+                const pokemon = head || body;
+                if (!pokemon) return;
+
+                const variantSuffix = artworkVariant ? artworkVariant : '';
+
                 if (head && body) {
-                  const variantSuffix = artworkVariant ? artworkVariant : '';
+                  // Fusion fallback logic
                   const fallbackUrl = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}${variantSuffix}.png`;
 
                   // If this is already a fallback URL and it's failing, try without variant
@@ -309,6 +335,21 @@ export function FusionSprite({
                     target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}.png`;
                   } else {
                     target.src = fallbackUrl;
+                  }
+                } else {
+                  // Single Pokémon fallback logic
+                  if (target.src.includes('/generated/')) {
+                    // Final fallback to PokeAPI sprites for single Pokémon
+                    target.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
+                  } else if (
+                    target.src.includes('/custom/') &&
+                    artworkVariant
+                  ) {
+                    // Try without variant first
+                    target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${pokemon.id}.png`;
+                  } else {
+                    // Try generated directory
+                    target.src = `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${pokemon.id}${variantSuffix}.png`;
                   }
                 }
               }}
