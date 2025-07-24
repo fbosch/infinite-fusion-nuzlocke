@@ -32,7 +32,7 @@ export function useLocalStorage<T>(
       // Check if the key exists in fallback storage
       fallbackStorage.has(key)
         ? fallbackStorage.get(key) // use cached value
-        : window.localStorage.getItem(key); // otherwise get from localStorage
+        : globalThis.localStorage.getItem(key); // otherwise get from localStorage
 
     return item ? (item as string) : null;
   };
