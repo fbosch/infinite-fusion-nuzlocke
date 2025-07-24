@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { X, Plus } from 'lucide-react';
+import clsx from 'clsx';
 import { playthroughActions, useCustomLocations } from '@/stores/playthroughs';
-import { getCombinedLocationsSortedByOrder } from '@/loaders';
+import { getLocationsSortedWithCustom } from '@/loaders';
 
 interface AddCustomLocationModalProps {
   isOpen: boolean;
@@ -19,119 +21,143 @@ export default function AddCustomLocationModal({
   const customLocations = useCustomLocations();
 
   // Get all locations (default + custom) for placement selection
-  const allLocations = getCombinedLocationsSortedByOrder(customLocations);
+  const allLocations = getLocationsSortedWithCustom(customLocations);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!locationName.trim() || !selectedAfterLocationId) {
       return;
     }
 
-    // Find the selected location to determine region
-    const afterLocation = allLocations.find(
-      loc => loc.id === selectedAfterLocationId
-    );
-    const region = afterLocation?.region || 'Custom';
-
-    const newLocationId = playthroughActions.addCustomLocation(
+    const newLocationId = await playthroughActions.addCustomLocation(
       locationName.trim(),
-      region,
-      `Custom location: ${locationName.trim()}`
+      selectedAfterLocationId
     );
 
-    // Now update the order to place it after the selected location
-    if (newLocationId && afterLocation) {
-      playthroughActions.moveCustomLocationAfter(
-        newLocationId,
-        selectedAfterLocationId
-      );
+    if (newLocationId !== null) {
+      // Reset form and close modal
+      setLocationName('');
+      setSelectedAfterLocationId('');
+      onClose();
     }
-
-    // Reset form and close modal
-    setLocationName('');
-    setSelectedAfterLocationId('');
-    onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-      <div className='bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4'>
-        <div className='flex items-center justify-between mb-4'>
-          <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
-            Add Custom Location
-          </h2>
-          <button
-            onClick={onClose}
-            className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-            aria-label='Close modal'
-          >
-            <X className='h-5 w-5' />
-          </button>
-        </div>
+    <Dialog open={isOpen} onClose={onClose} className='relative z-50'>
+      {/* Backdrop */}
+      <div
+        className='fixed inset-0 bg-black/30 dark:bg-black/50'
+        aria-hidden='true'
+      />
 
-        <form onSubmit={handleSubmit} className='space-y-4'>
-          <div>
-            <label
-              htmlFor='locationName'
-              className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'
-            >
-              Location Name*
-            </label>
-            <input
-              type='text'
-              id='locationName'
-              value={locationName}
-              onChange={e => setLocationName(e.target.value)}
-              required
-              className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
-              placeholder='e.g., Hidden Grotto, Secret Cave'
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor='afterLocation'
-              className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'
-            >
-              Place After*
-            </label>
-            <select
-              id='afterLocation'
-              value={selectedAfterLocationId}
-              onChange={e => setSelectedAfterLocationId(e.target.value)}
-              required
-              className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
-            >
-              <option value=''>Select location to place after...</option>
-              {allLocations.map(location => (
-                <option key={location.id} value={location.id}>
-                  {location.name} ({location.region})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className='flex space-x-3 pt-4'>
+      {/* Full-screen container to center the panel */}
+      <div className='fixed inset-0 flex w-screen items-center justify-center p-4'>
+        <DialogPanel className='max-w-md w-full space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6'>
+          <div className='flex items-center justify-between'>
+            <DialogTitle className='text-xl font-semibold text-gray-900 dark:text-white'>
+              Add Custom Location
+            </DialogTitle>
             <button
-              type='button'
               onClick={onClose}
-              className='flex-1 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors'
+              className={clsx(
+                'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2',
+                'p-1 rounded-md transition-colors'
+              )}
+              aria-label='Close modal'
             >
-              Cancel
-            </button>
-            <button
-              type='submit'
-              className='flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2'
-            >
-              <Plus className='h-4 w-4' />
-              <span>Add Location</span>
+              <X className='h-5 w-5' />
             </button>
           </div>
-        </form>
+
+          <form onSubmit={handleSubmit} className='space-y-4 pt-2'>
+            <div>
+              <label
+                htmlFor='locationName'
+                className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'
+              >
+                Location Name*
+              </label>
+              <input
+                type='text'
+                id='locationName'
+                value={locationName}
+                onChange={e => setLocationName(e.target.value)}
+                required
+                className={clsx(
+                  'w-full px-3 py-2 border rounded-md transition-colors',
+                  'border-gray-300 dark:border-gray-600',
+                  'bg-white dark:bg-gray-700',
+                  'text-gray-900 dark:text-white',
+                  'placeholder-gray-500 dark:placeholder-gray-400',
+                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                  'dark:focus:ring-blue-400 dark:focus:border-blue-400'
+                )}
+                placeholder='e.g., Hidden Grotto, Secret Cave'
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor='afterLocation'
+                className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'
+              >
+                Place After*
+              </label>
+              <select
+                id='afterLocation'
+                value={selectedAfterLocationId}
+                onChange={e => setSelectedAfterLocationId(e.target.value)}
+                required
+                className={clsx(
+                  'w-full px-3 py-2 border rounded-md transition-colors',
+                  'border-gray-300 dark:border-gray-600',
+                  'bg-white dark:bg-gray-700',
+                  'text-gray-900 dark:text-white',
+                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                  'dark:focus:ring-blue-400 dark:focus:border-blue-400'
+                )}
+              >
+                <option value=''>Select location to place after...</option>
+                {allLocations.map(location => (
+                  <option key={location.id} value={location.id}>
+                    {location.name} (
+                    {'region' in location ? location.region : 'Custom'})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className='flex space-x-3 pt-4'>
+              <button
+                type='button'
+                onClick={onClose}
+                className={clsx(
+                  'flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                  'bg-gray-100 hover:bg-gray-200 text-gray-900',
+                  'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2'
+                )}
+              >
+                Cancel
+              </button>
+              <button
+                type='submit'
+                className={clsx(
+                  'flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                  'bg-blue-600 hover:bg-blue-700 text-white',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+                  'flex items-center justify-center space-x-2'
+                )}
+              >
+                <Plus className='h-4 w-4' />
+                <span>Add Location</span>
+              </button>
+            </div>
+          </form>
+        </DialogPanel>
       </div>
-    </div>
+    </Dialog>
   );
 }

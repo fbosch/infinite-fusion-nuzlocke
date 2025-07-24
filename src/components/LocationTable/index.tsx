@@ -8,28 +8,36 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import React, { useState, useMemo } from 'react';
-import { getLocationsSortedByOrder } from '@/loaders';
-import type { Location } from '@/loaders/locations';
+import { getLocationsSortedWithCustom } from '@/loaders';
+import type { CombinedLocation } from '@/loaders/locations';
 import LocationTableHeader from './LocationTableHeader';
 import LocationTableRow from './LocationTableRow';
 import LocationTableSkeleton from './LocationTableSkeleton';
-import { useEncounters, useIsLoading } from '@/stores/playthroughs';
+import AddCustomLocationModal from '../AddCustomLocationModal';
+import {
+  useEncounters,
+  useIsLoading,
+  useCustomLocations,
+} from '@/stores/playthroughs';
 
-const columnHelper = createColumnHelper<Location>();
+const columnHelper = createColumnHelper<CombinedLocation>();
 
 export default function LocationTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [isCustomLocationModalOpen, setIsCustomLocationModalOpen] =
+    useState(false);
   const encounters = useEncounters();
   const isLoading = useIsLoading();
+  const customLocations = useCustomLocations();
 
   const data = useMemo(() => {
     try {
-      return getLocationsSortedByOrder();
+      return getLocationsSortedWithCustom(customLocations);
     } catch (error) {
       console.error('Failed to load locations:', error);
       return [];
     }
-  }, []);
+  }, [customLocations]);
 
   const columns = useMemo(
     () => [
@@ -105,9 +113,9 @@ export default function LocationTable() {
   }
 
   return (
-    <div className='overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'>
+    <div className='rounded-lg overflow-x-auto border border-gray-200 dark:border-gray-700 shadow-sm'>
       <table
-        className='w-full min-w-full  divide-y divide-gray-200 dark:divide-gray-700'
+        className='w-full  min-w-full divide-y divide-gray-200 dark:divide-gray-700'
         role='table'
         aria-label='Locations table'
       >
@@ -130,6 +138,12 @@ export default function LocationTable() {
           })}
         </tbody>
       </table>
+
+      {/* Add Custom Location Modal */}
+      <AddCustomLocationModal
+        isOpen={isCustomLocationModalOpen}
+        onClose={() => setIsCustomLocationModalOpen(false)}
+      />
     </div>
   );
 }

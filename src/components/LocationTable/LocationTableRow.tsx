@@ -1,5 +1,6 @@
 import { Row, flexRender } from '@tanstack/react-table';
-import type { Location } from '@/loaders/locations';
+import type { CombinedLocation } from '@/loaders/locations';
+import { isCustomLocation } from '@/loaders/locations';
 import type { EncounterData } from '@/loaders/encounters';
 import { EncounterCell } from './EncounterCell';
 import SummaryCard from '../SummaryCard';
@@ -8,7 +9,7 @@ import { match } from 'ts-pattern';
 import { useInView } from 'react-intersection-observer';
 
 interface LocationTableRowProps {
-  row: Row<Location>;
+  row: Row<CombinedLocation>;
   encounterData: EncounterData;
 }
 
@@ -16,7 +17,10 @@ export default function LocationTableRow({
   row,
   encounterData,
 }: LocationTableRowProps) {
-  const routeId = row.original.routeId;
+  // For custom locations, routeId should be undefined since they don't have wild encounters
+  const routeId = isCustomLocation(row.original)
+    ? undefined
+    : row.original.routeId;
   const locationId = row.original.id;
   const { ref, inView } = useInView();
 

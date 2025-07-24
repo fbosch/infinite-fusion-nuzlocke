@@ -1,6 +1,6 @@
 import { proxy, subscribe, useSnapshot } from 'valtio';
 import { devtools } from 'valtio/utils';
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 import { get, set, del } from 'idb-keyval';
 import { debounce } from 'lodash';
 import React, { useMemo } from 'react';
@@ -201,7 +201,14 @@ const loadAllPlaythroughs = async (): Promise<Playthrough[]> => {
 
     return results.filter((p): p is Playthrough => p !== null);
   } catch (error) {
-    console.error('Failed to load all playthroughs:', error);
+    console.error(
+      'Failed to load all playthroughs:',
+      error instanceof ZodError
+        ? z.prettifyError(error)
+        : error instanceof Error
+          ? error.message
+          : String(error)
+    );
     return [];
   }
 };
@@ -258,7 +265,11 @@ const loadFromIndexedDB = async (): Promise<PlaythroughsState> => {
       } catch (error) {
         console.error(
           `Failed to load active playthrough ${activePlaythroughId}:`,
-          error
+          error instanceof ZodError
+            ? z.prettifyError(error)
+            : error instanceof Error
+              ? error.message
+              : String(error)
         );
       }
     }
@@ -977,6 +988,147 @@ export const playthroughActions = {
     // Fallback - assume it's just the location ID
     return { locationId: comboboxId, field: 'head' };
   },
+
+  // Custom location management actions
+
+  // Add a custom location to the active playthrough
+  addCustomLocation: async (
+    name: string,
+    afterLocationId: string
+  ): Promise<string | null> => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    if (!activePlaythrough) return null;
+
+    try {
+      const { createCustomLocation } = await import('@/loaders/locations');
+
+      // Ensure customLocations array exists
+      if (!activePlaythrough.customLocations) {
+        activePlaythrough.customLocations = [];
+      }
+
+      const newCustomLocation = createCustomLocation(
+        name,
+        afterLocationId,
+        activePlaythrough.customLocations
+      );
+
+      activePlaythrough.customLocations.push(newCustomLocation);
+      activePlaythrough.updatedAt = getCurrentTimestamp();
+
+      return newCustomLocation.id;
+    } catch (error) {
+      console.error('Failed to add custom location:', error);
+      return null;
+    }
+  },
+
+  // Remove a custom location from the active playthrough
+  removeCustomLocation: (customLocationId: string): boolean => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    if (!activePlaythrough || !activePlaythrough.customLocations) return false;
+
+    const index = activePlaythrough.customLocations.findIndex(
+      loc => loc.id === customLocationId
+    );
+
+    if (index !== -1) {
+      // Remove the custom location
+      activePlaythrough.customLocations.splice(index, 1);
+
+      // Also remove any encounters associated with this custom location
+      if (activePlaythrough.encounters[customLocationId]) {
+        delete activePlaythrough.encounters[customLocationId];
+      }
+
+      activePlaythrough.updatedAt = getCurrentTimestamp();
+      return true;
+    }
+
+    return false;
+  },
+
+  // Update a custom location's name
+  updateCustomLocationName: (
+    customLocationId: string,
+    newName: string
+  ): boolean => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    if (!activePlaythrough || !activePlaythrough.customLocations) return false;
+
+    const customLocation = activePlaythrough.customLocations.find(
+      loc => loc.id === customLocationId
+    );
+
+    if (customLocation) {
+      customLocation.name = newName.trim();
+      activePlaythrough.updatedAt = getCurrentTimestamp();
+      return true;
+    }
+
+    return false;
+  },
+
+  // Get custom locations for the active playthrough
+  getCustomLocations: (): z.infer<typeof CustomLocationSchema>[] => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    return activePlaythrough?.customLocations || [];
+  },
+
+  // Validate if a custom location can be placed after a specific location
+  validateCustomLocationPlacement: async (
+    afterLocationId: string
+  ): Promise<boolean> => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    if (!activePlaythrough) return false;
+
+    try {
+      const { validateCustomLocationPlacement } = await import(
+        '@/loaders/locations'
+      );
+      return validateCustomLocationPlacement(
+        afterLocationId,
+        activePlaythrough.customLocations || []
+      );
+    } catch (error) {
+      console.error('Failed to validate custom location placement:', error);
+      return false;
+    }
+  },
+
+  // Get all available locations for placing custom locations after
+  getAvailableAfterLocations: async () => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+
+    try {
+      const { getAvailableAfterLocations } = await import(
+        '@/loaders/locations'
+      );
+      return getAvailableAfterLocations(
+        activePlaythrough?.customLocations || []
+      );
+    } catch (error) {
+      console.error('Failed to get available after locations:', error);
+      return [];
+    }
+  },
+
+  // Get merged locations (default + custom) for the active playthrough
+  getMergedLocations: async () => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+
+    try {
+      const { getLocationsSortedWithCustom } = await import(
+        '@/loaders/locations'
+      );
+      return getLocationsSortedWithCustom(
+        activePlaythrough?.customLocations || []
+      );
+    } catch (error) {
+      console.error('Failed to get merged locations:', error);
+      return [];
+    }
+  },
 };
 
 // Reusable hooks for components
@@ -1038,7 +1190,7 @@ export const usePlaythroughById = (
 
   return useMemo(() => {
     if (!playthroughId) return null;
-    return playthroughData || null;
+    return structuredClone(playthroughData as Playthrough) || null;
   }, [playthroughId, playthroughData?.updatedAt]);
 };
 
@@ -1058,4 +1210,31 @@ export const useEncounters = (): Playthrough['encounters'] => {
 export const useIsSaving = (): boolean => {
   const snapshot = useSnapshot(playthroughsStore);
   return snapshot.isSaving;
+};
+
+// Custom location hooks
+export const useCustomLocations = (): z.infer<
+  typeof CustomLocationSchema
+>[] => {
+  const activePlaythrough = useActivePlaythrough();
+
+  return useMemo(() => {
+    return activePlaythrough?.customLocations || [];
+  }, [activePlaythrough?.customLocations, activePlaythrough?.updatedAt]);
+};
+
+export const useMergedLocations = () => {
+  const activePlaythrough = useActivePlaythrough();
+
+  return useMemo(() => {
+    return playthroughActions.getMergedLocations();
+  }, [activePlaythrough?.customLocations, activePlaythrough?.updatedAt]);
+};
+
+export const useAvailableAfterLocations = () => {
+  const activePlaythrough = useActivePlaythrough();
+
+  return useMemo(() => {
+    return playthroughActions.getAvailableAfterLocations();
+  }, [activePlaythrough?.customLocations, activePlaythrough?.updatedAt]);
 };

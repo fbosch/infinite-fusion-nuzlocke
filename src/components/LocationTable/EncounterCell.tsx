@@ -10,7 +10,7 @@ import clsx from 'clsx';
 import { useEncounters, playthroughActions } from '@/stores/playthroughs';
 
 interface EncounterCellProps {
-  routeId: number;
+  routeId: number | undefined;
   locationId: string;
   shouldLoad?: boolean;
 }

@@ -1,16 +1,16 @@
 import { HeaderGroup } from '@tanstack/react-table';
-import type { Location } from '@/loaders/locations';
+import type { CombinedLocation } from '@/loaders/locations';
 import SortableHeaderCell from './SortableHeaderCell';
 
 interface LocationTableHeaderProps {
-  headerGroups: HeaderGroup<Location>[];
+  headerGroups: HeaderGroup<CombinedLocation>[];
 }
 
 export default function LocationTableHeader({
   headerGroups,
 }: LocationTableHeaderProps) {
   return (
-    <thead className='bg-gray-50 dark:bg-gray-800'>
+    <thead className='bg-gray-50 dark:bg-gray-800 sticky top-0 z-20 rounded-t-md '>
       {headerGroups.map(headerGroup => (
         <tr key={headerGroup.id}>
           {headerGroup.headers.map(header => (

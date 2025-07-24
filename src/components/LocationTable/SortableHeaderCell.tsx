@@ -1,10 +1,10 @@
 import { Header, flexRender } from '@tanstack/react-table';
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import clsx from 'clsx';
-import type { Location } from '@/loaders/locations';
+import type { CombinedLocation } from '@/loaders/locations';
 
 interface SortableHeaderCellProps {
-  header: Header<Location, unknown>;
+  header: Header<CombinedLocation, unknown>;
 }
 
 export default function SortableHeaderCell({
