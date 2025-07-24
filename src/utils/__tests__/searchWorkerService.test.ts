@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   getSearchWorkerService,
   cleanupSearchWorker,
-} from '../searchWorkerService';
+} from '../../services/searchWorkerService';
 
 // Mock web worker support
 const mockWorker = {

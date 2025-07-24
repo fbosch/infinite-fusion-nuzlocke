@@ -737,7 +737,7 @@ export const playthroughActions = {
         getCachedArtworkVariants,
         getAvailablePokemonArtworkVariants,
         getCachedPokemonArtworkVariants,
-      } = await import('@/utils/spriteService');
+      } = await import('@/services/spriteService');
 
       let availableVariants: string[] | null = null;
 
@@ -859,7 +859,7 @@ export const playthroughActions = {
     try {
       // Import the validation utilities dynamically
       const { preloadArtworkVariants, getAvailablePokemonArtworkVariants } =
-        await import('@/utils/spriteService');
+        await import('@/services/spriteService');
 
       const preloadPromises: Promise<void>[] = [];
 

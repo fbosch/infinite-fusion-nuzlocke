@@ -72,8 +72,28 @@ class SearchWorkerServiceImpl implements SearchWorkerService {
     }>
   ): Promise<void> {
     if (!searchWorker && typeof Worker !== 'undefined') {
-      worker = new Worker('/search-worker.js');
-      searchWorker = Comlink.wrap<SearchWorker>(worker);
+      try {
+        // Use modern webpack approach with new URL() and import.meta.url
+        // Webpack will automatically handle TypeScript compilation
+        worker = new Worker(
+          new URL('@/workers/search.worker.ts', import.meta.url),
+          { type: 'module' }
+        );
+        searchWorker = Comlink.wrap<SearchWorker>(worker);
+      } catch (error) {
+        console.warn(
+          'Modern TypeScript worker failed, trying fallback:',
+          error
+        );
+        // Fallback to the JavaScript worker if TypeScript worker fails
+        try {
+          worker = new Worker('/search-worker.js');
+          searchWorker = Comlink.wrap<SearchWorker>(worker);
+        } catch (fallbackError) {
+          console.error('All worker implementations failed:', fallbackError);
+          return;
+        }
+      }
     }
 
     if (searchWorker) {

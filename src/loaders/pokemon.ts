@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   initializeSearchWorker,
   searchPokemonInWorker,
-} from '@/utils/searchWorkerService';
+} from '@/services/searchWorkerService';
 
 // Utility function to generate unique identifiers
 export function generatePokemonUID(): string {

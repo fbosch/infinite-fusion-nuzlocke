@@ -36,7 +36,7 @@ export function ArtworkVariantButton({
 
     const preloadVariants = async () => {
       const { getAvailableArtworkVariants } = await import(
-        '@/utils/spriteService'
+        '@/services/spriteService'
       );
       const availableVariants = await getAvailableArtworkVariants(
         encounter?.head?.id,

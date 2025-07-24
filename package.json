@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "pnpm run worker:deps && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
@@ -16,7 +16,6 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "worker:deps": "jiti scripts/copy-worker-deps.ts",
     "pokedex": "pnpm run pokedex:scrape && pnpm run pokedex:fetch",
     "pokedex:scrape": "jiti scripts/scrape-pokedex.ts",
     "pokedex:fetch": "jiti scripts/fetch-pokemon-data.ts",
