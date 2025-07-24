@@ -68,6 +68,9 @@ class PersistentVariantCache {
   }
 
   private loadFromStorage(): void {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined' || !globalThis.localStorage) return;
+
     try {
       const stored = localStorage.getItem(PersistentVariantCache.STORAGE_KEY);
       if (!stored) return;
@@ -102,6 +105,9 @@ class PersistentVariantCache {
   }
 
   private saveToStorage(): void {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined' || !globalThis.localStorage) return;
+
     try {
       window.requestAnimationFrame(() => {
         // Convert Map to serializable format, excluding promises
@@ -161,6 +167,9 @@ class PersistentVariantCache {
 
   clearAll(): void {
     this.cache.clear();
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined' || !globalThis.localStorage) return;
+
     try {
       localStorage.removeItem(PersistentVariantCache.STORAGE_KEY);
     } catch (error) {

@@ -32,7 +32,9 @@ export function useLocalStorage<T>(
       // Check if the key exists in fallback storage
       fallbackStorage.has(key)
         ? fallbackStorage.get(key) // use cached value
-        : globalThis.localStorage.getItem(key); // otherwise get from localStorage
+        : (typeof window !== 'undefined' && globalThis.localStorage)
+          ? globalThis.localStorage.getItem(key) // otherwise get from localStorage
+          : null;
 
     return item ? (item as string) : null;
   };
@@ -47,6 +49,11 @@ export function useLocalStorage<T>(
 
   const subscribe = useCallback(
     (onStoreChange: () => void) => {
+      // Return early no-op if not in browser environment
+      if (typeof window === 'undefined') {
+        return () => { };
+      }
+
       const onChange = (localKey: string | null) => {
         if (localKey === key) {
           onStoreChange();
@@ -67,7 +74,12 @@ export function useLocalStorage<T>(
     [key]
   );
 
-  const value = useSyncExternalStore(subscribe, getSnapshot);
+  const getServerSnapshot = (): string | null => {
+    // On server, always return null since localStorage isn't available
+    return null;
+  };
+
+  const value = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const setState = useCallback<React.Dispatch<React.SetStateAction<T>>>(
     (newValue: React.SetStateAction<T>) => {
@@ -78,8 +90,13 @@ export function useLocalStorage<T>(
 
       try {
         initialStorageValue.current = value;
-        localStorage.setItem(key, JSON.stringify(value));
-        fallbackStorage.delete(key);
+        if (typeof window !== 'undefined' && globalThis.localStorage) {
+          localStorage.setItem(key, JSON.stringify(value));
+          fallbackStorage.delete(key);
+        } else {
+          // Store value in fallback storage if not in browser environment
+          fallbackStorage.set(key, value);
+        }
       } catch {
         // Store value in fallback storage if there's an error with localStorage
         fallbackStorage.set(key, value);

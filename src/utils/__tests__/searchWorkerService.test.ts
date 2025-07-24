@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getSearchWorkerService, cleanupSearchWorker } from '../searchWorkerService';
+import {
+  getSearchWorkerService,
+  cleanupSearchWorker,
+} from '../searchWorkerService';
 
 // Mock web worker support
 const mockWorker = {
@@ -15,15 +18,15 @@ vi.mock('comlink', () => ({
     initialize: vi.fn().mockResolvedValue({ success: true, dataCount: 10 }),
     search: vi.fn().mockResolvedValue([
       { id: 1, name: 'Bulbasaur', nationalDexId: 1, score: 0 },
-      { id: 2, name: 'Ivysaur', nationalDexId: 2, score: 0.2 }
+      { id: 2, name: 'Ivysaur', nationalDexId: 2, score: 0.2 },
     ]),
     isReady: vi.fn().mockResolvedValue(true),
     getStats: vi.fn().mockResolvedValue({
       initialized: true,
       dataCount: 10,
-      hasFuseInstance: true
-    })
-  }))
+      hasFuseInstance: true,
+    }),
+  })),
 }));
 
 describe('SearchWorkerService', () => {
@@ -55,7 +58,7 @@ describe('SearchWorkerService', () => {
     const service = getSearchWorkerService();
     const testData = [
       { id: 1, name: 'Bulbasaur', nationalDexId: 1 },
-      { id: 2, name: 'Ivysaur', nationalDexId: 2 }
+      { id: 2, name: 'Ivysaur', nationalDexId: 2 },
     ];
 
     await expect(service.initialize(testData)).resolves.toBeUndefined();
@@ -65,7 +68,7 @@ describe('SearchWorkerService', () => {
     const service = getSearchWorkerService();
     const testData = [
       { id: 1, name: 'Bulbasaur', nationalDexId: 1 },
-      { id: 2, name: 'Ivysaur', nationalDexId: 2 }
+      { id: 2, name: 'Ivysaur', nationalDexId: 2 },
     ];
 
     await service.initialize(testData);
@@ -73,15 +76,13 @@ describe('SearchWorkerService', () => {
 
     expect(results).toEqual([
       { id: 1, name: 'Bulbasaur', nationalDexId: 1, score: 0 },
-      { id: 2, name: 'Ivysaur', nationalDexId: 2, score: 0.2 }
+      { id: 2, name: 'Ivysaur', nationalDexId: 2, score: 0.2 },
     ]);
   });
 
   it('should handle empty search queries', async () => {
     const service = getSearchWorkerService();
-    const testData = [
-      { id: 1, name: 'Bulbasaur', nationalDexId: 1 }
-    ];
+    const testData = [{ id: 1, name: 'Bulbasaur', nationalDexId: 1 }];
 
     await service.initialize(testData);
     const results = await service.search('');
@@ -92,9 +93,7 @@ describe('SearchWorkerService', () => {
 
   it('should check if worker is ready', async () => {
     const service = getSearchWorkerService();
-    const testData = [
-      { id: 1, name: 'Bulbasaur', nationalDexId: 1 }
-    ];
+    const testData = [{ id: 1, name: 'Bulbasaur', nationalDexId: 1 }];
 
     await service.initialize(testData);
     const isReady = await service.isReady();
@@ -104,9 +103,7 @@ describe('SearchWorkerService', () => {
 
   it('should get worker statistics', async () => {
     const service = getSearchWorkerService();
-    const testData = [
-      { id: 1, name: 'Bulbasaur', nationalDexId: 1 }
-    ];
+    const testData = [{ id: 1, name: 'Bulbasaur', nationalDexId: 1 }];
 
     await service.initialize(testData);
     const stats = await service.getStats();
@@ -114,7 +111,7 @@ describe('SearchWorkerService', () => {
     expect(stats).toEqual({
       initialized: true,
       dataCount: 10,
-      hasFuseInstance: true
+      hasFuseInstance: true,
     });
   });
 
@@ -128,9 +125,7 @@ describe('SearchWorkerService', () => {
 
   it('should cleanup properly', async () => {
     const service = getSearchWorkerService();
-    const testData = [
-      { id: 1, name: 'Bulbasaur', nationalDexId: 1 }
-    ];
+    const testData = [{ id: 1, name: 'Bulbasaur', nationalDexId: 1 }];
 
     // Initialize the service first to create the worker
     await service.initialize(testData);
@@ -139,4 +134,4 @@ describe('SearchWorkerService', () => {
     expect(() => cleanupSearchWorker()).not.toThrow();
     expect(mockWorker.terminate).toHaveBeenCalled();
   });
-}); 
+});

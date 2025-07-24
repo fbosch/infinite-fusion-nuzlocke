@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
-import { initializeSearchWorker, searchPokemonInWorker } from '@/utils/searchWorkerService';
+import {
+  initializeSearchWorker,
+  searchPokemonInWorker,
+} from '@/utils/searchWorkerService';
 
 // Utility function to generate unique identifiers
 export function generatePokemonUID(): string {
@@ -129,8 +132,6 @@ export async function getPokemon(): Promise<Pokemon[]> {
   }
 }
 
-
-
 // Function to get evolution IDs for a specific Pokemon
 export async function getPokemonEvolutionIds(
   pokemonId: number
@@ -159,7 +160,9 @@ async function initializePokemonSearchWorker(): Promise<void> {
 
   // Check if web workers are supported
   if (typeof Worker === 'undefined') {
-    console.warn('Web Workers not supported, falling back to main thread search');
+    console.warn(
+      'Web Workers not supported, falling back to main thread search'
+    );
     return Promise.resolve();
   }
 
@@ -171,7 +174,7 @@ async function initializePokemonSearchWorker(): Promise<void> {
       const workerData = pokemon.map(p => ({
         id: p.id,
         name: p.name,
-        nationalDexId: p.nationalDexId
+        nationalDexId: p.nationalDexId,
       }));
 
       await initializeSearchWorker(workerData);
@@ -206,7 +209,10 @@ export async function searchPokemon(query: string): Promise<PokemonOption[]> {
         }));
       }
     } catch (error) {
-      console.warn('Web worker search failed, falling back to main thread:', error);
+      console.warn(
+        'Web worker search failed, falling back to main thread:',
+        error
+      );
     }
   }
 

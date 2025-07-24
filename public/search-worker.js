@@ -38,9 +38,9 @@ const searchWorker = {
     // Fuzzy search for names
     return fuse.search(query).map(result => ({
       ...result.item,
-      score: result.score || 0
+      score: result.score || 0,
     }));
-  }
+  },
 };
 
-Comlink.expose(searchWorker); 
+Comlink.expose(searchWorker);

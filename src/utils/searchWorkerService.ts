@@ -2,11 +2,13 @@ import * as Comlink from 'comlink';
 
 // TypeScript interface for the search worker
 interface SearchWorker {
-  initialize(pokemonList: Array<{
-    id: number;
-    name: string;
-    nationalDexId: number;
-  }>): number;
+  initialize(
+    pokemonList: Array<{
+      id: number;
+      name: string;
+      nationalDexId: number;
+    }>
+  ): number;
 
   search(query: string): Array<{
     id: number;
@@ -19,11 +21,13 @@ interface SearchWorker {
 // Create and initialize search worker
 let searchWorker: Comlink.Remote<SearchWorker> | null = null;
 
-export async function initializeSearchWorker(pokemonData: Array<{
-  id: number;
-  name: string;
-  nationalDexId: number;
-}>): Promise<void> {
+export async function initializeSearchWorker(
+  pokemonData: Array<{
+    id: number;
+    name: string;
+    nationalDexId: number;
+  }>
+): Promise<void> {
   if (!searchWorker && typeof Worker !== 'undefined') {
     const worker = new Worker('/search-worker.js');
     searchWorker = Comlink.wrap<SearchWorker>(worker);
@@ -33,12 +37,14 @@ export async function initializeSearchWorker(pokemonData: Array<{
   }
 }
 
-export async function searchPokemonInWorker(query: string): Promise<Array<{
-  id: number;
-  name: string;
-  nationalDexId: number;
-  score: number;
-}>> {
+export async function searchPokemonInWorker(query: string): Promise<
+  Array<{
+    id: number;
+    name: string;
+    nationalDexId: number;
+    score: number;
+  }>
+> {
   if (!searchWorker) {
     return [];
   }
@@ -49,4 +55,4 @@ export async function searchPokemonInWorker(query: string): Promise<Array<{
     console.error('Search failed:', error);
     return [];
   }
-} 
+}
