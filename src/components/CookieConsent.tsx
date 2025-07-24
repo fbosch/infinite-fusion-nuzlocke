@@ -53,12 +53,12 @@ export function CookieConsent() {
   if (hasConsent) return null;
 
   return (
-    <div className='fixed inset-0 z-50 flex items-end justify-center p-4 pointer-events-none'>
-      <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-w-md w-full pointer-events-auto'>
+    <div className='fixed bottom-0 left-1/2 -translate-x-1/2 z-50 max-w-[1700px] p-4 pointer-events-none'>
+      <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg w-full pointer-events-auto rounded-md'>
         {showSettings ? (
           // Settings View
           <div className='p-6'>
-            <div className='flex items-center justify-between mb-4'>
+            <div className='flex items-center justify-between mb-6'>
               <div className='flex items-center space-x-2'>
                 <Settings className='h-5 w-5 text-blue-600 dark:text-blue-400' />
                 <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
@@ -74,13 +74,13 @@ export function CookieConsent() {
               </button>
             </div>
 
-            <div className='space-y-4 mb-6'>
-              <div className='flex items-center justify-between'>
-                <div>
+            <div className='space-y-6 mb-6'>
+              <div className='flex items-start justify-between'>
+                <div className='flex-1 pr-4'>
                   <h4 className='font-medium text-gray-900 dark:text-white'>
                     Analytics
                   </h4>
-                  <p className='text-sm text-gray-600 dark:text-gray-300'>
+                  <p className='text-sm text-gray-600 dark:text-gray-300 mt-1'>
                     Help us understand how you use our app to improve your
                     experience.
                   </p>
@@ -98,12 +98,12 @@ export function CookieConsent() {
                 </label>
               </div>
 
-              <div className='flex items-center justify-between'>
-                <div>
+              <div className='flex items-start justify-between'>
+                <div className='flex-1 pr-4'>
                   <h4 className='font-medium text-gray-900 dark:text-white'>
                     Performance Monitoring
                   </h4>
-                  <p className='text-sm text-gray-600 dark:text-gray-300'>
+                  <p className='text-sm text-gray-600 dark:text-gray-300 mt-1'>
                     Monitor app performance to identify and fix issues.
                   </p>
                 </div>
@@ -138,40 +138,41 @@ export function CookieConsent() {
           </div>
         ) : (
           // Banner View
-          <div className='p-6'>
-            <div className='flex items-start space-x-3 mb-4'>
-              <Cookie className='h-6 w-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0' />
-              <div>
-                <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-2'>
-                  We use cookies
-                </h3>
-                <p className='text-sm text-gray-600 dark:text-gray-300'>
-                  We use cookies to analyze our traffic and improve your
-                  experience. You can manage your preferences or learn more
-                  about how we use cookies.
-                </p>
+          <div className='p-4'>
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center space-x-3'>
+                <Cookie className='h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0' />
+                <div>
+                  <h3 className='text-base font-semibold text-gray-900 dark:text-white'>
+                    We use cookies
+                  </h3>
+                  <p className='text-sm text-gray-600 dark:text-gray-300'>
+                    We use cookies to analyze traffic and improve your
+                    experience.
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className='flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3'>
-              <button
-                onClick={acceptAll}
-                className='bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors'
-              >
-                Accept All
-              </button>
-              <button
-                onClick={() => setShowSettings(true)}
-                className='bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium py-2 px-4 rounded-md transition-colors'
-              >
-                Customize
-              </button>
-              <button
-                onClick={rejectAll}
-                className='text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 font-medium py-2 px-4 transition-colors'
-              >
-                Reject All
-              </button>
+              <div className='flex items-center space-x-3 ml-4'>
+                <button
+                  onClick={acceptAll}
+                  className='bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-3 rounded text-sm transition-colors whitespace-nowrap'
+                >
+                  Accept All
+                </button>
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className='bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium py-1.5 px-3 rounded text-sm transition-colors whitespace-nowrap'
+                >
+                  Customize
+                </button>
+                <button
+                  onClick={rejectAll}
+                  className='text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 font-medium py-1.5 px-3 text-sm transition-colors whitespace-nowrap'
+                >
+                  Reject All
+                </button>
+              </div>
             </div>
           </div>
         )}
