@@ -5,7 +5,6 @@ import { Menu, X } from 'lucide-react';
 import { Menu as HeadlessMenu, MenuButton, MenuItems } from '@headlessui/react';
 import clsx from 'clsx';
 import PlaythroughMenu from './PlaythroughMenu';
-import ThemeToggle from './ThemeToggle';
 import CookieSettingsButton from './CookieSettingsButton';
 
 export default function MobileMenu() {
@@ -55,12 +54,6 @@ export default function MobileMenu() {
                 <h3 className='text-sm font-semibold text-gray-700 dark:text-gray-300'>
                   Settings
                 </h3>
-                <div className='flex items-center justify-between'>
-                  <span className='text-sm text-gray-600 dark:text-gray-400'>
-                    Theme
-                  </span>
-                  <ThemeToggle />
-                </div>
                 <div className='flex items-center justify-between'>
                   <span className='text-sm text-gray-600 dark:text-gray-400'>
                     Cookie Preferences

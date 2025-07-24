@@ -1,6 +1,5 @@
 import Logo from '@/components/Logo';
 import PlaythroughMenu from '@/components/PlaythroughMenu';
-import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Header() {
   return (
@@ -30,7 +29,6 @@ export default function Header() {
             </div>
             <div className='flex items-center space-x-4'>
               <PlaythroughMenu />
-              <ThemeToggle />
             </div>
           </div>
         </header>
