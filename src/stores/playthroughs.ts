@@ -4,7 +4,8 @@ import { z } from 'zod';
 import { get, set, del } from 'idb-keyval';
 import { debounce } from 'lodash';
 import React, { useMemo } from 'react';
-import { PokemonOptionSchema, generatePokemonUID } from '../loaders/pokemon';
+import { PokemonOptionSchema, generatePokemonUID } from '@/loaders/pokemon';
+import { CustomLocationSchema } from '@/loaders/locations';
 
 export const EncounterDataSchema = z.object({
   head: PokemonOptionSchema.nullable(),
@@ -17,6 +18,7 @@ export const EncounterDataSchema = z.object({
 export const PlaythroughSchema = z.object({
   id: z.string(),
   name: z.string(),
+  customLocations: z.array(CustomLocationSchema).optional(),
   encounters: z.record(z.string(), EncounterDataSchema),
   remixMode: z.boolean().default(false),
   createdAt: z.number(),

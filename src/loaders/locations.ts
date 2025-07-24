@@ -15,6 +15,14 @@ export const LocationSchema = z.object({
   description: z.string().min(1, { error: 'Description is required' }),
 });
 
+export const CustomLocationSchema = z.object({
+  id: z.string().min(1, { error: 'Location ID is required' }),
+  name: z.string().min(1, { error: 'Location name is required' }),
+  placementAfterLocationId: z
+    .string()
+    .min(1, { error: 'Placement after location ID is required' }),
+});
+
 export type Location = z.infer<typeof LocationSchema>;
 
 export const LocationsArraySchema = z.array(LocationSchema);
