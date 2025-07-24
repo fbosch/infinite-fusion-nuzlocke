@@ -5,7 +5,7 @@ import { vi } from 'vitest';
 Object.defineProperty(global, 'window', {
   value: {
     ...global.window,
-    requestIdleCallback: vi.fn((callback, _options) => {
+    requestIdleCallback: vi.fn(callback => {
       setTimeout(callback, 0);
       return 1; // Return a mock ID
     }),

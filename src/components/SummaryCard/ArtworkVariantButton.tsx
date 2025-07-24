@@ -26,7 +26,11 @@ export function ArtworkVariantButton({
   const [hasVariants, setHasVariants] = useState<boolean | null>(null);
 
   React.useEffect(() => {
-    if (!encounter?.head || !encounter?.body || !shouldLoad) {
+    if (
+      encounter?.head === undefined ||
+      encounter?.body === undefined ||
+      !shouldLoad
+    ) {
       return;
     }
 
@@ -41,8 +45,8 @@ export function ArtworkVariantButton({
 
       setHasVariants(availableVariants.length > 1);
     };
-    preloadVariants();
-  }, [encounter?.head?.id, encounter?.body?.id, shouldLoad]);
+    window.requestAnimationFrame(preloadVariants);
+  }, [encounter.head, encounter.body, shouldLoad]);
 
   const handleCycleVariant = React.useCallback(
     async (event: React.MouseEvent) => {

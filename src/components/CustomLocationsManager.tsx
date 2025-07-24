@@ -14,7 +14,7 @@ export default function CustomLocationsManager({
   className = '',
 }: CustomLocationsManagerProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const customLocations = useCustomLocations();
+  const _customLocations = useCustomLocations();
 
   return (
     <div

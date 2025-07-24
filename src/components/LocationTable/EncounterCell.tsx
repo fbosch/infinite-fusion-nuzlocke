@@ -21,7 +21,7 @@ export function EncounterCell({
   shouldLoad,
 }: EncounterCellProps) {
   const encounters = useEncounters();
-  const encounterData = encounters[locationId] || {
+  const encounterData = encounters?.[locationId] || {
     head: null,
     body: null,
     isFusion: false,

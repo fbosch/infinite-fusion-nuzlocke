@@ -18,7 +18,7 @@ export default function CustomLocationsList({
         `Are you sure you want to delete "${locationName}"? This will also remove any encounters associated with it.`
       )
     ) {
-      playthroughActions.deleteCustomLocation(locationId);
+      playthroughActions.removeCustomLocation(locationId);
     }
   };
 
@@ -58,7 +58,7 @@ export default function CustomLocationsList({
                 </span>
               </div>
               <div className='text-sm text-gray-600 dark:text-gray-400'>
-                {location.region} • Order: {location.order}
+                Order: {location.order}
               </div>
             </div>
             <button

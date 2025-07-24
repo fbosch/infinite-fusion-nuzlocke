@@ -567,7 +567,6 @@ export const playthroughActions = {
 
     if (shouldCreateFusion || encounter.isFusion) {
       // Check if this is changing the fusion composition
-      const wasComplete = encounter.head && encounter.body;
       const oldPokemon = encounter[field];
       const isChangingComposition =
         !oldPokemon || oldPokemon.id !== pokemonWithLocationAndUID?.id;

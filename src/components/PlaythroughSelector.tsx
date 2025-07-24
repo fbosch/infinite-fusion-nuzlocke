@@ -195,7 +195,10 @@ export default function PlaythroughSelector({
                               onClick={e => {
                                 e.stopPropagation();
                                 e.preventDefault();
-                                handleDeleteClick(playthrough, e);
+                                handleDeleteClick(
+                                  playthrough as Playthrough,
+                                  e
+                                );
                               }}
                               className={clsx(
                                 'p-1 ml-1 rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity',
