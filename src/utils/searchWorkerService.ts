@@ -10,12 +10,14 @@ interface SearchWorker {
     }>
   ): Promise<{ success: boolean; dataCount: number }>;
 
-  search(query: string): Promise<Array<{
-    id: number;
-    name: string;
-    nationalDexId: number;
-    score: number;
-  }>>;
+  search(query: string): Promise<
+    Array<{
+      id: number;
+      name: string;
+      nationalDexId: number;
+      score: number;
+    }>
+  >;
 
   isReady(): Promise<boolean>;
 
@@ -28,18 +30,22 @@ interface SearchWorker {
 
 // Service interface
 interface SearchWorkerService {
-  initialize(pokemonData: Array<{
-    id: number;
-    name: string;
-    nationalDexId: number;
-  }>): Promise<void>;
+  initialize(
+    pokemonData: Array<{
+      id: number;
+      name: string;
+      nationalDexId: number;
+    }>
+  ): Promise<void>;
 
-  search(query: string): Promise<Array<{
-    id: number;
-    name: string;
-    nationalDexId: number;
-    score: number;
-  }>>;
+  search(query: string): Promise<
+    Array<{
+      id: number;
+      name: string;
+      nationalDexId: number;
+      score: number;
+    }>
+  >;
 
   isReady(): Promise<boolean>;
 
@@ -58,11 +64,13 @@ let searchWorker: Comlink.Remote<SearchWorker> | null = null;
 class SearchWorkerServiceImpl implements SearchWorkerService {
   private initialized = false;
 
-  async initialize(pokemonData: Array<{
-    id: number;
-    name: string;
-    nationalDexId: number;
-  }>): Promise<void> {
+  async initialize(
+    pokemonData: Array<{
+      id: number;
+      name: string;
+      nationalDexId: number;
+    }>
+  ): Promise<void> {
     if (!searchWorker && typeof Worker !== 'undefined') {
       worker = new Worker('/search-worker.js');
       searchWorker = Comlink.wrap<SearchWorker>(worker);
@@ -72,7 +80,9 @@ class SearchWorkerServiceImpl implements SearchWorkerService {
       try {
         const result = await searchWorker.initialize(pokemonData);
         this.initialized = result.success;
-        console.log(`Search worker initialized with ${result.dataCount} Pokemon`);
+        console.log(
+          `Search worker initialized with ${result.dataCount} Pokemon`
+        );
       } catch (error) {
         console.error('Failed to initialize search worker:', error);
         this.initialized = false;
@@ -80,12 +90,14 @@ class SearchWorkerServiceImpl implements SearchWorkerService {
     }
   }
 
-  async search(query: string): Promise<Array<{
-    id: number;
-    name: string;
-    nationalDexId: number;
-    score: number;
-  }>> {
+  async search(query: string): Promise<
+    Array<{
+      id: number;
+      name: string;
+      nationalDexId: number;
+      score: number;
+    }>
+  > {
     if (!searchWorker || !this.initialized) {
       return [];
     }

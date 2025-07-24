@@ -19,7 +19,7 @@ export const PlaythroughSchema = z.object({
   id: z.string(),
   name: z.string(),
   customLocations: z.array(CustomLocationSchema).optional(),
-  encounters: z.record(z.string(), EncounterDataSchema),
+  encounters: z.record(z.string(), EncounterDataSchema).optional(),
   remixMode: z.boolean().default(false),
   createdAt: z.number(),
   updatedAt: z.number(),
@@ -540,6 +540,11 @@ export const playthroughActions = {
       return;
     }
 
+    // Ensure encounters object exists
+    if (!activePlaythrough.encounters) {
+      activePlaythrough.encounters = {};
+    }
+
     // Get or create encounter - avoid unnecessary object creation
     let encounter = activePlaythrough.encounters[locationId];
     if (!encounter) {
@@ -609,6 +614,11 @@ export const playthroughActions = {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
 
+    // Ensure encounters object exists
+    if (!activePlaythrough.encounters) {
+      activePlaythrough.encounters = {};
+    }
+
     delete activePlaythrough.encounters[locationId];
     activePlaythrough.updatedAt = getCurrentTimestamp();
   },
@@ -617,6 +627,11 @@ export const playthroughActions = {
   toggleEncounterFusion: (locationId: string) => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
+
+    // Ensure encounters object exists
+    if (!activePlaythrough.encounters) {
+      activePlaythrough.encounters = {};
+    }
 
     const currentEncounter = activePlaythrough.encounters[locationId] || {
       head: null,
@@ -630,7 +645,7 @@ export const playthroughActions = {
     if (currentEncounter.isFusion && !newIsFusion) {
       // If head is empty but body has data, move body to head
       if (!currentEncounter.head && currentEncounter.body) {
-        activePlaythrough.encounters[locationId] = {
+        activePlaythrough.encounters![locationId] = {
           head: currentEncounter.body,
           body: null,
           isFusion: false,
@@ -638,7 +653,7 @@ export const playthroughActions = {
         };
       } else {
         // If both slots have data or only head has data, preserve as-is
-        activePlaythrough.encounters[locationId] = {
+        activePlaythrough.encounters![locationId] = {
           ...currentEncounter,
           isFusion: false,
           artworkVariant: undefined, // Reset artwork variant when unfusing
@@ -646,7 +661,7 @@ export const playthroughActions = {
       }
     } else {
       // When fusing (going from non-fusion to fusion) or other cases
-      activePlaythrough.encounters[locationId] = {
+      activePlaythrough.encounters![locationId] = {
         ...currentEncounter,
         isFusion: newIsFusion,
         artworkVariant: undefined, // Reset artwork variant when changing fusion state
@@ -665,6 +680,11 @@ export const playthroughActions = {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
 
+    // Ensure encounters object exists
+    if (!activePlaythrough.encounters) {
+      activePlaythrough.encounters = {};
+    }
+
     activePlaythrough.encounters[locationId] = {
       head,
       body,
@@ -680,6 +700,11 @@ export const playthroughActions = {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
 
+    // Ensure encounters object exists
+    if (!activePlaythrough.encounters) {
+      activePlaythrough.encounters = {};
+    }
+
     const encounter = activePlaythrough.encounters[locationId];
     if (!encounter) return;
 
@@ -691,6 +716,11 @@ export const playthroughActions = {
   cycleArtworkVariant: async (locationId: string, reverse: boolean = false) => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
+
+    // Ensure encounters object exists
+    if (!activePlaythrough.encounters) {
+      activePlaythrough.encounters = {};
+    }
 
     const encounter = activePlaythrough.encounters[locationId];
     if (!encounter) return;
@@ -795,6 +825,11 @@ export const playthroughActions = {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
 
+    // Ensure encounters object exists
+    if (!activePlaythrough.encounters) {
+      activePlaythrough.encounters = {};
+    }
+
     // Get all fusion encounters
     const fusionEncounters = Object.entries(activePlaythrough.encounters)
       .filter(
@@ -871,12 +906,17 @@ export const playthroughActions = {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
 
+    // Ensure encounters object exists
+    if (!activePlaythrough.encounters) {
+      activePlaythrough.encounters = {};
+    }
+
     const encounter = activePlaythrough.encounters[locationId];
     if (!encounter) return;
 
     if (!field) {
       // If no field specified, clear the entire encounter
-      delete activePlaythrough.encounters[locationId];
+      delete activePlaythrough.encounters![locationId];
     } else {
       // Clear only the specified field
       encounter[field] = null;
@@ -890,7 +930,7 @@ export const playthroughActions = {
       // OR if it's a regular encounter (not a fusion) and both are null
       if (!encounter.isFusion) {
         if (field === 'head' || (!encounter.head && !encounter.body)) {
-          delete activePlaythrough.encounters[locationId];
+          delete activePlaythrough.encounters![locationId];
         }
       }
       // For fusions, keep the encounter structure even if both head and body are null
@@ -908,6 +948,11 @@ export const playthroughActions = {
   ) => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
+
+    // Ensure encounters object exists
+    if (!activePlaythrough.encounters) {
+      activePlaythrough.encounters = {};
+    }
 
     // Clear the source location
     delete activePlaythrough.encounters[fromLocationId];
@@ -931,6 +976,11 @@ export const playthroughActions = {
   ) => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
+
+    // Ensure encounters object exists
+    if (!activePlaythrough.encounters) {
+      activePlaythrough.encounters = {};
+    }
 
     const encounter1 = activePlaythrough.encounters[locationId1];
     const encounter2 = activePlaythrough.encounters[locationId2];
@@ -1037,7 +1087,10 @@ export const playthroughActions = {
       activePlaythrough.customLocations.splice(index, 1);
 
       // Also remove any encounters associated with this custom location
-      if (activePlaythrough.encounters[customLocationId]) {
+      if (
+        activePlaythrough.encounters &&
+        activePlaythrough.encounters[customLocationId]
+      ) {
         delete activePlaythrough.encounters[customLocationId];
       }
 
