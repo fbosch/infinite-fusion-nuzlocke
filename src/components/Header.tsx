@@ -1,7 +1,6 @@
 import Logo from '@/components/Logo';
 import PlaythroughMenu from '@/components/PlaythroughMenu';
 import ThemeToggle from '@/components/ThemeToggle';
-import CookieSettingsButton from '@/components/CookieSettingsButton';
 
 export default function Header() {
   return (
@@ -31,7 +30,6 @@ export default function Header() {
             </div>
             <div className='flex items-center space-x-4'>
               <PlaythroughMenu />
-              <CookieSettingsButton />
               <ThemeToggle />
             </div>
           </div>

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Cookie } from 'lucide-react';
-import clsx from 'clsx';
 import { CookieSettings } from '@/components/CookieSettings';
 
 export default function CookieSettingsButton() {
@@ -12,20 +11,13 @@ export default function CookieSettingsButton() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className={clsx(
-          'p-2 rounded-md transition-colors',
-          'bg-gray-100 hover:bg-gray-200 text-gray-600',
-          'border border-gray-200 hover:border-gray-300',
-          'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-gray-300',
-          'dark:border-gray-600 dark:hover:border-gray-500',
-          'cursor-pointer',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1'
-        )}
+        className='bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 transition-colors duration-200 text-sm font-medium flex items-center gap-1.5 cursor-pointer'
         aria-label='Cookie preferences'
         title='Cookie preferences'
         type='button'
       >
-        <Cookie className='size-6' />
+        <Cookie className='h-4 w-4' />
+        Cookie Settings
       </button>
 
       <CookieSettings isOpen={isOpen} onClose={() => setIsOpen(false)} />

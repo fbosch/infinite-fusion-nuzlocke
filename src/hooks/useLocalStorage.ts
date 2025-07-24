@@ -32,7 +32,7 @@ export function useLocalStorage<T>(
       // Check if the key exists in fallback storage
       fallbackStorage.has(key)
         ? fallbackStorage.get(key) // use cached value
-        : (typeof window !== 'undefined' && globalThis.localStorage)
+        : typeof window !== 'undefined' && globalThis.localStorage
           ? globalThis.localStorage.getItem(key) // otherwise get from localStorage
           : null;
 
@@ -51,7 +51,7 @@ export function useLocalStorage<T>(
     (onStoreChange: () => void) => {
       // Return early no-op if not in browser environment
       if (typeof window === 'undefined') {
-        return () => { };
+        return () => {};
       }
 
       const onChange = (localKey: string | null) => {
