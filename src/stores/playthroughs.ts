@@ -1189,8 +1189,9 @@ export const usePlaythroughById = (
   );
 
   return useMemo(() => {
-    if (!playthroughId) return null;
-    return structuredClone(playthroughData as Playthrough) || null;
+    if (!playthroughId || !playthroughData) return null;
+    // Valtio snapshots are already immutable, no need to clone
+    return playthroughData as Playthrough;
   }, [playthroughId, playthroughData?.updatedAt]);
 };
 
