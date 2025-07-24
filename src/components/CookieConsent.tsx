@@ -203,7 +203,7 @@ export function CookieConsent() {
   };
 
   // Don't show banner if user has already given consent
-  if (hasConsent) return null;
+  if (hasConsent || typeof window === 'undefined') return null;
 
   return (
     <>
