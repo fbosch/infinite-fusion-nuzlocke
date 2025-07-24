@@ -246,6 +246,7 @@ async function checkVariantsSequentially(
           `Found variant '${variantSuffix}' for fusion ${headId}.${bodyId}`
         );
       } else {
+        // Stop immediately on first missing variant
         console.log(
           `Variant '${variantSuffix}' not found for fusion ${headId}.${bodyId}, stopping check`
         );

@@ -195,13 +195,13 @@ export function FusionSprite({
 
               shadowRef.current?.animate(
                 [
-                  { transform: 'skewX(-17deg) skewY(-40deg) scale(1) ' },
+                  { transform: 'skewX(-5deg) skewY(-30deg) scale(1) ' },
                   {
                     transform:
-                      'skewX(-17deg) skewY(-40deg) scale(1.03) translateY(-5%)',
+                      'skewX(-5deg) skewY(-30deg) scale(1.03) translateY(-5%)',
                     blur: '0.2px',
                   },
-                  { transform: 'skewX(-17deg) skewY(-40deg) scale(1)' },
+                  { transform: 'skewX(-5deg) skewY(-30deg) scale(1)' },
                 ],
                 {
                   duration: 400,
@@ -259,10 +259,11 @@ export function FusionSprite({
               height={spriteSize}
               className={twMerge(
                 baseImageClasses,
-                'absolute translate-x-[60%] translate-y-[45%] skew-x-[-17deg] skew-y-[-40deg] scale-100 rotate-[34deg] brightness-0 opacity-10 dark:opacity-15'
+                'absolute translate-x-[45%] translate-y-[35%] skew-x-[-5deg] skew-y-[-30deg] scale-100 rotate-[24deg] brightness-0 opacity-10 dark:opacity-15'
               )}
               loading='eager'
               unoptimized
+              decoding='async'
               draggable={false}
               placeholder='empty'
               blurDataURL={TRANSPARENT_PIXEL}
@@ -294,6 +295,7 @@ export function FusionSprite({
               )}
               loading='eager'
               unoptimized
+              decoding='async'
               draggable={false}
               placeholder='blur'
               blurDataURL={TRANSPARENT_PIXEL}

@@ -104,6 +104,7 @@ const PokemonOption = ({
             height={40}
             className='object-contain object-center scale-180 image-render-high-quality cursor-grab active:cursor-grabbing'
             loading='lazy'
+            decoding='async'
             unoptimized
             draggable
             onDragStart={handleDragStart}
@@ -221,8 +222,10 @@ const PokemonOptions = ({
                 loading={
                   index < 5 || isRoutePokemon(pokemon.id) ? 'eager' : 'lazy'
                 }
-                unoptimized
                 draggable
+                unoptimized
+                decoding='async'
+                priority={index < 5 || isRoutePokemon(pokemon.id) ? true : false}
                 onDragStart={e => handleDragStart(e, pokemon)}
               />
               <span
@@ -732,7 +735,7 @@ export const PokemonCombobox = ({
                   'focus:cursor-text hover:cursor-pointer',
                   (value || dragPreview) && 'pl-16', // Add padding for sprite when value is selected or previewing
                   dragPreview &&
-                    'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60', // Highlight when showing preview with opacity,
+                  'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60', // Highlight when showing preview with opacity,
                   {
                     'rounded-t-md rounded-b-none ':
                       open && placement.startsWith('bottom'),
@@ -786,8 +789,8 @@ export const PokemonCombobox = ({
                 </div>
               )}
               {open ||
-              value?.status === PokemonStatus.DECEASED ||
-              value?.status === PokemonStatus.MISSED ? null : (
+                value?.status === PokemonStatus.DECEASED ||
+                value?.status === PokemonStatus.MISSED ? null : (
                 <PokemonEvolutionButton
                   value={value}
                   onChange={onChange}

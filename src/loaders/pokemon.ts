@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import Fuse from 'fuse.js';
-import type { IFuseOptions } from 'fuse.js';
 import { v4 as uuidv4 } from 'uuid';
+import { initializeSearchWorker, searchPokemonInWorker } from '@/utils/searchWorkerService';
 
 // Utility function to generate unique identifiers
 export function generatePokemonUID(): string {
@@ -109,8 +108,9 @@ export const PokemonArraySchema = z.array(PokemonSchema);
 // Cache for loaded Pokemon data
 let pokemonCache: Pokemon[] | null = null;
 
-// Shared Fuse instance for name-only fuzzy search (faster)
-let pokemonFuseInstance: Fuse<PokemonOption> | null = null;
+// Track if search worker has been initialized
+let searchWorkerInitialized = false;
+let searchWorkerInitPromise: Promise<void> | null = null;
 
 // Data loader for Pokemon with dynamic import
 export async function getPokemon(): Promise<Pokemon[]> {
@@ -129,35 +129,7 @@ export async function getPokemon(): Promise<Pokemon[]> {
   }
 }
 
-// Get shared Fuse instance for name-only fuzzy search (faster)
-export async function getPokemonFuseInstance(
-  originalRouteId?: number
-): Promise<Fuse<PokemonOption>> {
-  if (pokemonFuseInstance) {
-    return pokemonFuseInstance;
-  }
 
-  const pokemon = await getPokemon();
-  const pokemonOptions: PokemonOption[] = pokemon.map(p => ({
-    id: p.id,
-    name: p.name,
-    nationalDexId: p.nationalDexId,
-    originalRouteId: originalRouteId,
-  }));
-
-  const fuseOptions: IFuseOptions<PokemonOption> = {
-    keys: ['name'], // Only search by name for better performance
-    threshold: 0.3, // Lower threshold = more strict matching
-    distance: 100, // Allow for more distance between matched characters
-    includeScore: true, // Include match scores for sorting
-    minMatchCharLength: 2, // Minimum characters that must match
-    shouldSort: true, // Sort by relevance
-    findAllMatches: true, // Find all matches, not just the first
-  };
-
-  pokemonFuseInstance = new Fuse(pokemonOptions, fuseOptions);
-  return pokemonFuseInstance;
-}
 
 // Function to get evolution IDs for a specific Pokemon
 export async function getPokemonEvolutionIds(
@@ -173,8 +145,72 @@ export async function getPokemonEvolutionIds(
   return targetPokemon.evolution.evolves_to.map(e => e.id);
 }
 
+// Initialize search worker with Pokemon data
+async function initializePokemonSearchWorker(): Promise<void> {
+  // Return existing promise if already initializing
+  if (searchWorkerInitPromise) {
+    return searchWorkerInitPromise;
+  }
+
+  // Return immediately if already initialized
+  if (searchWorkerInitialized) {
+    return Promise.resolve();
+  }
+
+  // Check if web workers are supported
+  if (typeof Worker === 'undefined') {
+    console.warn('Web Workers not supported, falling back to main thread search');
+    return Promise.resolve();
+  }
+
+  searchWorkerInitPromise = (async () => {
+    try {
+      const pokemon = await getPokemon();
+
+      // Transform data for worker
+      const workerData = pokemon.map(p => ({
+        id: p.id,
+        name: p.name,
+        nationalDexId: p.nationalDexId
+      }));
+
+      await initializeSearchWorker(workerData);
+      searchWorkerInitialized = true;
+    } catch (error) {
+      console.error('Failed to initialize search worker:', error);
+      // Don't throw error, fall back to main thread search
+    } finally {
+      searchWorkerInitPromise = null;
+    }
+  })();
+
+  return searchWorkerInitPromise;
+}
+
 // Smart search function that handles both name and ID searches
 export async function searchPokemon(query: string): Promise<PokemonOption[]> {
+  // Try to use web worker first if supported
+  if (typeof Worker !== 'undefined') {
+    try {
+      // Initialize worker if not already done
+      await initializePokemonSearchWorker();
+
+      if (searchWorkerInitialized) {
+        const results = await searchPokemonInWorker(query);
+
+        // Transform worker results to PokemonOption format
+        return results.map(result => ({
+          id: result.id,
+          name: result.name,
+          nationalDexId: result.nationalDexId,
+        }));
+      }
+    } catch (error) {
+      console.warn('Web worker search failed, falling back to main thread:', error);
+    }
+  }
+
+  // Fallback to main thread search
   const pokemon = await getPokemon();
 
   // Check if query is a number (for ID searches)
@@ -192,10 +228,15 @@ export async function searchPokemon(query: string): Promise<PokemonOption[]> {
       }));
     return results;
   } else {
-    // Fuzzy search for names
-    const fuse = await getPokemonFuseInstance();
-    const searchResults = fuse.search(query);
-    const results = searchResults.map(result => result.item);
+    // Simple string search as fallback (when web worker is not available)
+    const results = pokemon
+      .filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
+      .map(p => ({
+        id: p.id,
+        name: p.name,
+        nationalDexId: p.nationalDexId,
+      }))
+      .slice(0, 50); // Limit results to prevent performance issues
     return results;
   }
 }
