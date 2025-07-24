@@ -3,14 +3,11 @@ import CookieSettingsButton from '@/components/CookieSettingsButton';
 export default function Footer() {
   return (
     <footer className='border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 mt-8'>
-      <div className='max-w-7xl mx-auto px-4 py-6'>
+      <div className='max-w-[1500px] mx-auto px-8 py-6'>
         <div className='space-y-4'>
           {/* Top section with button on left and links in center */}
           <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
-            <div className='flex justify-center sm:justify-start'>
-              <CookieSettingsButton />
-            </div>
-            <div className='flex justify-center space-x-6'>
+            <div className='flex flex-col md:flex-row justify-center space-x-6'>
               <a
                 href='https://discord.gg/infinitefusion'
                 target='_blank'
@@ -36,10 +33,13 @@ export default function Footer() {
                 Infinitefusiondex
               </a>
             </div>
+            <div className='flex md:justify-center sm:justify-start items-start'>
+              <CookieSettingsButton />
+            </div>
           </div>
 
           {/* Disclaimer */}
-          <div className='text-center text-sm text-gray-600 dark:text-gray-400 space-y-1'>
+          <div className='md:text-center text-sm text-gray-600 dark:text-gray-400 space-y-1'>
             <p>
               Pokémon and Pokémon character names are trademarks of Nintendo.
             </p>
