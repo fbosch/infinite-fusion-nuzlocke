@@ -124,7 +124,6 @@ function getAltText(
 export function FusionSprite({
   encounterData,
   size = 'md',
-  className,
 }: FusionSpriteProps) {
   const imageRef = useRef<HTMLImageElement>(null);
   const shadowRef = useRef<HTMLImageElement>(null);
@@ -324,7 +323,7 @@ export function FusionSprite({
             'group-focus-visible:ring-1 group-focus-visible:ring-blue-400'
           )}
         >
-          <SquareArrowUpRight className='size-4 dark:pixel-shadow' />
+          <SquareArrowUpRight className='size-4' />
         </div>
       </a>
     </div>

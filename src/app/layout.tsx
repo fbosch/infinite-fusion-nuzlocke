@@ -5,6 +5,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import Header from '@/components/Header';
 import { ServiceWorkerInit } from '@/components/ServiceWorkerInit';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
 
 // Primary sans-serif font for body text
@@ -50,6 +51,7 @@ export default function RootLayout({
           {children}
         </ThemeProvider>
         <Analytics />
+        <SpeedInsights />
         <ServiceWorkerInit />
       </body>
     </html>
