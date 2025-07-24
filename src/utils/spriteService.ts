@@ -4,36 +4,33 @@
  */
 export async function checkSpriteExists(url: string): Promise<boolean> {
   return new Promise(resolve => {
-    window.requestAnimationFrame(() => {
-      const img = new Image();
-      let resolved = false;
+    const img = new Image();
+    let resolved = false;
 
-      const resolveOnce = (result: boolean) => {
-        if (!resolved) {
-          resolved = true;
-          resolve(result);
-        }
-      };
+    const resolveOnce = (result: boolean) => {
+      if (!resolved) {
+        resolved = true;
+        resolve(result);
+      }
+    };
 
-      // Set a timeout to avoid hanging on slow networks
-      const timeout = setTimeout(() => {
-        resolveOnce(false);
-      }, 3000); // Reduced to 3 second timeout for faster response
+    // Set a timeout to avoid hanging on slow networks
+    const timeout = setTimeout(() => {
+      resolveOnce(false);
+    }, 3000); // Reduced to 3 second timeout for faster response
 
-      img.onload = () => {
-        clearTimeout(timeout);
-        resolveOnce(true);
-      };
+    img.onload = () => {
+      clearTimeout(timeout);
+      resolveOnce(true);
+    };
 
-      img.onerror = () => {
-        clearTimeout(timeout);
-        resolveOnce(false);
-      };
+    img.onerror = () => {
+      clearTimeout(timeout);
+      resolveOnce(false);
+    };
 
-      window.requestAnimationFrame(() => {
-        img.src = url;
-      });
-    });
+    img.setAttribute('decoding', 'async');
+    img.src = url;
   });
 }
 
