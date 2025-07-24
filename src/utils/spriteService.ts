@@ -30,6 +30,7 @@ export async function checkSpriteExists(url: string): Promise<boolean> {
     };
 
     img.setAttribute('decoding', 'async');
+    img.setAttribute('crossOrigin', 'anonymous');
     img.src = url;
   });
 }
@@ -243,8 +244,8 @@ function generateVariantSuffix(index: number): string {
 }
 
 /**
- * Sequential variant checking for fusions - stops immediately on first missing variant
- * This minimizes HTTP requests by stopping as soon as we hit a 404
+ * Sequential variant checking for fusions - returns early after first variant found
+ * but continues checking in background to discover all variants
  */
 async function checkFusionVariantsSequentially(
   headId: number | undefined,
@@ -252,8 +253,53 @@ async function checkFusionVariantsSequentially(
   maxVariants: number = 100
 ): Promise<string[]> {
   const variants = ['']; // Always include default
+  const cacheKey =
+    headId && bodyId
+      ? `${headId}.${bodyId}`
+      : ((headId ?? bodyId)?.toString() ?? '');
 
-  // Check variants one by one, stopping immediately when one doesn't exist
+  // Check only the first variant quickly
+  const firstVariantSuffix = generateVariantSuffix(1);
+  const firstUrl = generateFusionSpriteUrl(headId, bodyId, firstVariantSuffix);
+
+  try {
+    const firstExists = await checkSpriteExists(firstUrl);
+
+    if (firstExists) {
+      variants.push(firstVariantSuffix);
+      console.log(
+        `Found first variant '${firstVariantSuffix}' for fusion ${headId}.${bodyId}, starting background check...`
+      );
+    } else {
+      console.log(`No variants found for fusion ${headId}.${bodyId}`);
+    }
+  } catch (error) {
+    console.warn(
+      `Error checking first variant for ${headId}.${bodyId}:`,
+      error
+    );
+  }
+
+  // Always start background check to discover all variants
+  checkAllVariantsInBackground(headId, bodyId, maxVariants, cacheKey);
+
+  console.log(
+    `Returning initial result for ${headId}.${bodyId}: found ${variants.length} total variants`
+  );
+  return variants;
+}
+
+/**
+ * Check all variants in background and update cache
+ */
+async function checkAllVariantsInBackground(
+  headId: number | undefined,
+  bodyId: number | undefined,
+  maxVariants: number,
+  cacheKey: string
+): Promise<void> {
+  const allVariants = ['']; // Always include default
+
   for (let i = 1; i < maxVariants; i++) {
     const variantSuffix = generateVariantSuffix(i);
     const url = generateFusionSpriteUrl(headId, bodyId, variantSuffix);
@@ -262,31 +308,29 @@ async function checkFusionVariantsSequentially(
       const exists = await checkSpriteExists(url);
 
       if (exists) {
-        variants.push(variantSuffix);
+        allVariants.push(variantSuffix);
         console.log(
-          `Found variant '${variantSuffix}' for fusion ${headId}.${bodyId}`
+          `Found variant '${variantSuffix}' for fusion ${headId}.${bodyId} (background)`
         );
       } else {
-        // Stop immediately on first missing variant
         console.log(
-          `Variant '${variantSuffix}' not found for fusion ${headId}.${bodyId}, stopping check`
+          `Background check complete for ${headId}.${bodyId}: found ${allVariants.length} total variants`
         );
         break;
       }
     } catch (error) {
-      console.warn(
-        `Error checking variant ${variantSuffix} for ${headId}.${bodyId}:`,
-        error
-      );
-      // Stop on error as well
+      console.warn(`Error in background check for ${headId}.${bodyId}:`, error);
       break;
     }
   }
 
-  console.log(
-    `Sequential check complete for ${headId}.${bodyId}: found ${variants.length} total variants`
-  );
-  return variants;
+  // Update cache with complete results
+  const completeEntry: VariantCacheEntry = {
+    variants: allVariants,
+    lastChecked: Date.now(),
+    isComplete: true,
+  };
+  variantCache.set(cacheKey, completeEntry);
 }
 
 /**
@@ -337,7 +381,7 @@ async function checkPokemonVariantsSequentially(
 
 /**
  * Get available artwork variants for a fusion with optimized sequential checking
- * Uses sequential checking to minimize HTTP requests by stopping on first 404
+ * Returns early after first variant found, continues checking in background
  */
 export async function getAvailableArtworkVariants(
   headId: number | undefined,
@@ -368,7 +412,7 @@ export async function getAvailableArtworkVariants(
         `Checking artwork variants for fusion ${headId}.${bodyId}...`
       );
 
-      // Use sequential checking to minimize HTTP requests
+      // Use sequential checking with early return and background completion
       const variants = await checkFusionVariantsSequentially(
         headId,
         bodyId,
@@ -376,14 +420,14 @@ export async function getAvailableArtworkVariants(
       );
 
       console.log(
-        `Found ${variants.length} variants for fusion ${headId}.${bodyId}: [${variants.join(', ')}]`
+        `Initial result for fusion ${headId}.${bodyId}: [${variants.join(', ')}]`
       );
 
-      // Cache the result
+      // Cache the initial result (background process will update with complete results)
       const cacheEntry: VariantCacheEntry = {
         variants,
         lastChecked: now,
-        isComplete: true,
+        isComplete: variants.length === 1, // Only complete if just default variant
       };
       variantCache.set(cacheKey, cacheEntry);
 
