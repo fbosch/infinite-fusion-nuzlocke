@@ -45,7 +45,7 @@ export function ArtworkVariantButton({
 
       setHasVariants(availableVariants.length > 1);
     };
-    window.requestAnimationFrame(preloadVariants);
+    preloadVariants();
   }, [encounter.head, encounter.body, shouldLoad]);
 
   const handleCycleVariant = React.useCallback(

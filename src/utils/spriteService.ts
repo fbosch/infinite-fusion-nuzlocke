@@ -43,7 +43,11 @@ export function generateFusionSpriteUrl(
   variant?: string
 ): string {
   const variantSuffix = variant ? variant : '';
-  return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${headId}.${bodyId}${variantSuffix}.png`;
+  const id =
+    headId && bodyId
+      ? `${headId}.${bodyId}`
+      : ((headId ?? bodyId)?.toString() ?? '');
+  return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${id}${variantSuffix}.png`;
 }
 
 /**
@@ -340,7 +344,10 @@ export async function getAvailableArtworkVariants(
   bodyId: number | undefined,
   maxVariants: number = 10
 ): Promise<string[]> {
-  const cacheKey = `${headId}.${bodyId}`;
+  const cacheKey =
+    headId && bodyId
+      ? `${headId}.${bodyId}`
+      : ((headId ?? bodyId)?.toString() ?? '');
   const now = Date.now();
 
   // Check if we have a valid cached result

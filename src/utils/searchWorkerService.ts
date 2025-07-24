@@ -80,9 +80,6 @@ class SearchWorkerServiceImpl implements SearchWorkerService {
       try {
         const result = await searchWorker.initialize(pokemonData);
         this.initialized = result.success;
-        console.log(
-          `Search worker initialized with ${result.dataCount} Pokemon`
-        );
       } catch (error) {
         console.error('Failed to initialize search worker:', error);
         this.initialized = false;
