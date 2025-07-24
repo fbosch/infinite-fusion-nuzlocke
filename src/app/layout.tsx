@@ -4,6 +4,7 @@ import localFont from 'next/font/local';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { ServiceWorkerInit } from '@/components/ServiceWorkerInit';
 import { CookieConsent } from '@/components/CookieConsent';
 import {
@@ -52,6 +53,7 @@ export default function RootLayout({
         <ThemeProvider>
           <Header />
           {children}
+          <Footer />
           <CookieConsent />
         </ThemeProvider>
         <ConditionalAnalytics />
