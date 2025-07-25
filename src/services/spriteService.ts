@@ -6,9 +6,13 @@ import {
   generateSpriteUrl,
 } from '@/lib/spriteCore';
 
+const mainThreadInstance: SpriteService = new SpriteService();
 let instance: Comlink.Remote<SpriteService> | SpriteService | null = null;
 
-async function getInstance() {
+async function getInstance(mainThread = false) {
+  if (mainThread) {
+    return mainThreadInstance;
+  }
   if (instance) {
     return instance;
   }
@@ -18,15 +22,14 @@ async function getInstance() {
       new URL('@/workers/sprite.worker', import.meta.url)
     );
     const SpriteWorker = Comlink.wrap<typeof SpriteService>(worker);
-
     // Create singleton instance
     const spriteService = await new SpriteWorker();
     instance = spriteService;
   } catch (error) {
-    instance = new SpriteService();
+    instance = mainThreadInstance;
     console.error(error);
   }
-  return instance;
+  return instance || mainThreadInstance;
 }
 
 const memoryCache = new Map<string, string[]>();
@@ -35,7 +38,7 @@ const service = {
   getArtworkVariants: async (
     ...args: Parameters<typeof SpriteService.prototype.getArtworkVariants>
   ): Promise<string[]> => {
-    const spriteService = await getInstance();
+    const spriteService = await getInstance(true);
     const key = (
       args[0] && args[1] ? `${args[0]}.${args[1]}` : args[0] || args[1]
     )?.toString();
