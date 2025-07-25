@@ -58,6 +58,9 @@ let cachedActiveId: string | undefined = undefined;
 // Track the last change that might affect the active playthrough
 let lastActivePlaythroughUpdate = 0;
 
+// Cache for sprite service to avoid repeated dynamic imports
+let spriteServiceCache: typeof import('@/services/spriteService') | null = null;
+
 // Helper functions
 const generatePlaythroughId = (): string => {
   return `playthrough_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -751,104 +754,65 @@ export const playthroughActions = {
   // Cycle through artwork variants for encounters (with validation)
   cycleArtworkVariant: async (locationId: string, reverse: boolean = false) => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
-    if (!activePlaythrough) return;
-
-    // Ensure encounters object exists
-    if (!activePlaythrough.encounters) {
-      activePlaythrough.encounters = {};
-    }
+    if (!activePlaythrough?.encounters) return;
 
     const encounter = activePlaythrough.encounters[locationId];
     if (!encounter) return;
 
-    // Check if it's a fusion or single Pokémon
+    // Early validation - determine encounter type and primary Pokémon
     const isFusion = encounter.isFusion && encounter.head && encounter.body;
-    const isSinglePokemon = !encounter.isFusion && encounter.head;
+    const primaryPokemon = encounter.head || encounter.body;
 
-    if (!isFusion && !isSinglePokemon) return;
+    if (!primaryPokemon || (!isFusion && !encounter.head)) return;
 
     try {
-      // Import the validation utilities dynamically
-      const {
-        getAvailableArtworkVariants,
-        getCachedArtworkVariants,
-        getAvailablePokemonArtworkVariants,
-        getCachedPokemonArtworkVariants,
-      } = await import('@/services/spriteService');
+      // Cache the service import to avoid repeated dynamic imports
+      if (!spriteServiceCache) {
+        spriteServiceCache = await import('@/services/spriteService');
+      }
+      const spriteService = spriteServiceCache;
 
+      // Get variants based on encounter type
       let availableVariants: string[] | null = null;
 
       if (isFusion && encounter.head && encounter.body) {
-        // Handle fusion variants
-        // First try to get cached variants to avoid unnecessary HTTP requests
-        availableVariants = await getCachedArtworkVariants(
-          encounter.head.id,
-          encounter.body.id
-        );
-
-        // If not cached, fetch them (this will use sequential checking)
-        if (!availableVariants) {
-          console.log(
-            `Checking variants for fusion ${encounter.head.id}.${encounter.body.id}...`
-          );
-          availableVariants = await getAvailableArtworkVariants(
+        // Try cache first, then fetch if needed
+        availableVariants =
+          (await spriteService.getCachedArtworkVariants(
             encounter.head.id,
             encounter.body.id
-          );
-        }
-      } else if (isSinglePokemon) {
-        // Handle single Pokémon variants
-        // First try to get cached variants to avoid unnecessary HTTP requests
-        availableVariants = await getCachedPokemonArtworkVariants(
-          encounter.head!.id || encounter.body!.id
-        );
-
-        // If not cached, fetch them (this will use sequential checking)
-        if (!availableVariants) {
-          console.log(
-            `Checking variants for Pokémon ${encounter.head!.id || encounter.body!.id}...`
-          );
-          availableVariants = await getAvailablePokemonArtworkVariants(
-            encounter.head!.id || encounter.body!.id
-          );
-        }
+          )) ||
+          (await spriteService.getAvailableArtworkVariants(
+            encounter.head.id,
+            encounter.body.id
+          ));
+      } else {
+        // Single Pokémon variants
+        availableVariants =
+          (await spriteService.getCachedPokemonArtworkVariants(
+            primaryPokemon.id
+          )) ||
+          (await spriteService.getAvailablePokemonArtworkVariants(
+            primaryPokemon.id
+          ));
       }
 
-      if (!availableVariants) return;
+      // Early return if no variants or only default
+      if (!availableVariants || availableVariants.length <= 1) return;
 
-      // If no variants available (only default), don't cycle
-      if (availableVariants.length <= 1) {
-        const entityDesc = isFusion
-          ? `fusion ${encounter.head!.id}.${encounter.body!.id}`
-          : `Pokémon ${encounter.head!.id}`;
-        console.log(
-          `No alternative artwork variants found for ${entityDesc} (only default available)`
-        );
-        return;
-      }
-
+      // Calculate next variant index
       const currentVariant = encounter.artworkVariant || '';
       const currentIndex = availableVariants.indexOf(currentVariant);
-
-      // Calculate next index based on direction
       const nextIndex = reverse
         ? (currentIndex - 1 + availableVariants.length) %
           availableVariants.length
         : (currentIndex + 1) % availableVariants.length;
 
-      const nextVariant = availableVariants[nextIndex];
-      encounter.artworkVariant = nextVariant || undefined;
+      // Update encounter with new variant
+      encounter.artworkVariant = availableVariants[nextIndex] || undefined;
       activePlaythrough.updatedAt = getCurrentTimestamp();
-
-      const entityDesc = isFusion
-        ? `fusion ${encounter.head!.id}.${encounter.body!.id}`
-        : `Pokémon ${encounter.head!.id}`;
-      console.log(
-        `Switched to artwork variant: ${nextVariant || 'default'} for ${entityDesc} (${reverse ? 'reverse' : 'forward'})`
-      );
     } catch (error) {
       console.error('Failed to cycle artwork variant:', error);
-      // Fall back to default on error
       encounter.artworkVariant = undefined;
       activePlaythrough.updatedAt = getCurrentTimestamp();
     }
