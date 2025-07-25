@@ -81,17 +81,7 @@ export class SpriteVariantCache {
       this.processBatchedWrites();
     };
 
-    // Use requestIdleCallback if available (main thread), otherwise setTimeout
-    if (typeof window !== 'undefined' && window.requestIdleCallback) {
-      this.writeTimeoutId = window.requestIdleCallback(processBatch, {
-        timeout: this.BATCH_DELAY * 2, // Fallback timeout
-      }) as unknown as number;
-    } else {
-      this.writeTimeoutId = setTimeout(
-        processBatch,
-        this.BATCH_DELAY
-      ) as unknown as number;
-    }
+    processBatch();
   }
 
   private async processBatchedWrites(): Promise<void> {
@@ -166,51 +156,20 @@ export class SpriteVariantCache {
  * Works in both main thread (using Image) and web workers (using fetch)
  */
 export async function checkSpriteExists(url: string): Promise<boolean> {
-  // Check if we're in a web worker environment
-  const isWorker = typeof window === 'undefined' && typeof self !== 'undefined';
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-  if (isWorker) {
-    // In web worker: use fetch with proper error handling
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-      await fetch(url, {
-        method: 'HEAD',
-        signal: controller.signal,
-        mode: 'no-cors', // Allow cross-origin requests
-      });
-
-      clearTimeout(timeoutId);
-
-      // With no-cors mode, we can't check response.ok
-      // A successful fetch means the resource exists
-      return true;
-    } catch (error) {
-      // Network error, abort, or CORS issue - assume image doesn't exist
-      return false;
-    }
-  } else {
-    // In main thread: use Image object (avoids CORS issues)
-    return new Promise(resolve => {
-      const img = new Image();
-      const timeoutId = setTimeout(() => {
-        img.src = ''; // Cancel the load
-        resolve(false);
-      }, 3000);
-
-      img.onload = () => {
-        clearTimeout(timeoutId);
-        resolve(true);
-      };
-
-      img.onerror = () => {
-        clearTimeout(timeoutId);
-        resolve(false);
-      };
-
-      img.src = url;
+    const response = await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
+    return response.ok; // This will be false for 404s
+  } catch (error) {
+    // Network error, abort, or CORS issue - assume image doesn't exist
+    return false;
   }
 }
 
@@ -286,46 +245,28 @@ export class SpriteService {
     // Check cache first
     const cached = await this.variantCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+      console.log('cached from worker!');
       return cached.variants;
     }
 
-    // Check default variant
-    const variants = [''];
-    const defaultUrl = generateSpriteUrl(headId, bodyId, '');
-    const defaultExists = await checkSpriteExists(defaultUrl);
-
-    if (!defaultExists) {
-      this.variantCache.set(cacheKey, { variants: [], timestamp: Date.now() });
-      return [];
-    }
-
-    // Check first additional variant, then start background check
-    const firstUrl = generateSpriteUrl(headId, bodyId, 'a');
-    if (await checkSpriteExists(firstUrl)) {
-      variants.push('a');
-    }
-
-    // Continue checking in background
-    setTimeout(async () => {
-      try {
-        const allVariants = [''];
-        for (let i = 1; i < maxVariants; i++) {
-          const variant = getVariantSuffix(i);
-          const url = generateSpriteUrl(headId, bodyId, variant);
-          if (await checkSpriteExists(url)) {
-            allVariants.push(variant);
-          } else {
-            break;
-          }
+    const variants: string[] = [];
+    try {
+      for (let i = 0; i < maxVariants; i++) {
+        const variant = getVariantSuffix(i);
+        const url = generateSpriteUrl(headId, bodyId, variant);
+        if (await checkSpriteExists(url)) {
+          variants.push(variant);
+        } else {
+          break;
         }
-        this.variantCache.set(cacheKey, {
-          variants: allVariants,
-          timestamp: Date.now(),
-        });
-      } catch (error) {
-        console.warn('Background variant check failed:', error);
       }
-    }, 0);
+      this.variantCache.set(cacheKey, {
+        variants,
+        timestamp: Date.now(),
+      });
+    } catch (error) {
+      console.warn('Failed to get artwork variants:', error);
+    }
 
     return variants;
   }

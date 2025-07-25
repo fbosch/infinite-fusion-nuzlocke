@@ -26,13 +26,13 @@ export default function LocationTableRow({
 
   return (
     <tr
-      ref={ref}
       key={row.id}
       role='row'
       className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors content-visibility-auto'
       style={{
         containIntrinsicHeight: '150px',
       }}
+      ref={ref}
     >
       {row.getVisibleCells().map(cell =>
         match(cell.column.id)
@@ -53,6 +53,7 @@ export default function LocationTableRow({
               <SummaryCard
                 encounterData={encounterData}
                 locationId={locationId}
+                shouldLoad={inView}
               />
             </td>
           ))

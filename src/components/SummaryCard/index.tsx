@@ -8,6 +8,7 @@ import { ArtworkVariantButton } from './ArtworkVariantButton';
 interface SummaryCardProps {
   encounterData: EncounterData;
   locationId: string;
+  shouldLoad?: boolean;
 }
 
 function getNicknameText(
@@ -35,6 +36,7 @@ function getNicknameText(
 export default function SummaryCard({
   encounterData,
   locationId,
+  shouldLoad,
 }: SummaryCardProps) {
   if (!encounterData.head && !encounterData.body) {
     return null;
@@ -76,6 +78,7 @@ export default function SummaryCard({
         className='absolute bottom-0 right-1/2 -translate-x-6 z-10'
         locationId={locationId}
         encounter={encounterData}
+        shouldLoad={shouldLoad}
       />
       {name && (
         <div className='z-5 p-0.5 text-center absolute bottom-0 translate-y-8.5 rounded-sm'>

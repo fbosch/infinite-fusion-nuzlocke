@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Loader2, RefreshCwOff, RefreshCcw } from 'lucide-react';
 import clsx from 'clsx';
 import { playthroughActions } from '@/stores/playthroughs';
@@ -27,34 +27,18 @@ export function ArtworkVariantButton({
 
   // Check for variants on mount and when encounter changes
   React.useEffect(() => {
-    if (!encounter?.head || !shouldLoad) {
-      setHasVariants(null);
-      return;
-    }
-
+    if (!shouldLoad) return;
     const checkVariants = async () => {
-      const isFusion = encounter.isFusion && encounter.head && encounter.body;
-      const isSinglePokemon = !encounter.isFusion && encounter.head;
-
-      if (!isFusion && !isSinglePokemon) {
-        setHasVariants(null);
-        return;
-      }
-
       try {
         const { default: spriteService } = await import(
           '@/services/spriteService'
         );
 
         let variants: string[] = [];
-        if (isFusion && encounter.head?.id && encounter.body?.id) {
-          variants = await spriteService.getArtworkVariants(
-            encounter.head.id,
-            encounter.body.id
-          );
-        } else if (isSinglePokemon && encounter.head?.id) {
-          variants = await spriteService.getArtworkVariants(encounter.head.id);
-        }
+        variants = await spriteService.getArtworkVariants(
+          encounter.head?.id,
+          encounter.body?.id
+        );
 
         setHasVariants(variants.length > 1);
       } catch (error) {
@@ -68,40 +52,25 @@ export function ArtworkVariantButton({
 
   const handleCycleVariant = React.useCallback(
     async (event: React.MouseEvent) => {
-      if (disabled || isLoading) return;
+      if (disabled || hasVariants === false) return;
       const reverse = event.shiftKey;
-      setIsLoading(true);
 
-      try {
-        await playthroughActions.cycleArtworkVariant(locationId, reverse);
-        if (hasVariants === null) {
-          try {
-            const { default: spriteService } = await import(
-              '@/services/spriteService'
-            );
-
-            const variants = await spriteService.getArtworkVariants(
-              encounter.head?.id,
-              encounter.body?.id
-            );
-
-            setHasVariants(variants.length > 1);
-          } catch (error) {
-            console.warn(
-              'Failed to check artwork variants after cycling:',
-              error
-            );
-            setHasVariants(false);
-          }
-        }
-      } finally {
-        setIsLoading(false);
-      }
+      playthroughActions.cycleArtworkVariant(locationId, reverse);
     },
-    [locationId, disabled, isLoading, hasVariants, encounter]
+    [locationId, disabled, hasVariants]
   );
 
   const isButtonDisabled = disabled || isLoading || hasVariants === false;
+
+  const label = useMemo(() => {
+    if (isLoading) {
+      return 'Loading...';
+    }
+    if (hasVariants === false) {
+      return 'No alternative artwork variants available';
+    }
+    return 'Cycle artwork variants (hold Shift to reverse)';
+  }, [isLoading, hasVariants]);
 
   return (
     <button
@@ -116,23 +85,16 @@ export function ArtworkVariantButton({
           'rounded-full text-gray-600 dark:text-white',
           'focus:outline-none focus:ring-2 focus:ring-blue-500',
           'enabled:hover:bg-gray-400 dark:enabled:hover:bg-gray-600',
-          'disabled:cursor-not-allowed enabled:hover:opacity-100 enabled:hover:text-white'
+          'disabled:cursor-not-allowed enabled:hover:opacity-100 enabled:hover:text-white',
+          { 'opacity-50 group-hover:opacity-100': isLoading }
         ),
         className
       )}
-      aria-label={
-        hasVariants === false
-          ? `No alternative artwork variants available`
-          : `Cycle artwork variants (hold Shift to reverse)`
-      }
-      title={
-        hasVariants === false
-          ? `No alternative artwork variants available`
-          : `Cycle artwork variants (hold Shift to reverse)`
-      }
+      aria-label={label}
+      title={label}
     >
       <div className='dark:pixel-shadow'>
-        {isLoading ? (
+        {isLoading && hasVariants === false ? (
           <Loader2 className='size-4 animate-spin' />
         ) : hasVariants === false ? (
           <RefreshCwOff className='size-3' />
