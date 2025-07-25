@@ -3,7 +3,7 @@
 import CookieSettingsButton from '@/components/CookieSettingsButton';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Sun, Moon, Monitor, Github } from 'lucide-react';
 import clsx from 'clsx';
 
 function ThemeToggle() {
@@ -95,6 +95,14 @@ export default function Footer() {
             <div className='flex items-center gap-3'>
               <ThemeToggle />
               <CookieSettingsButton />
+              <a
+                href='https://github.com/fbosch/infinite-fusion-nuzlocke'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='bg-gray-100 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-md p-1.5 transition-colors  gap-1.5 cursor-pointer'
+              >
+                <Github className='w-4 h-4' />
+              </a>
             </div>
           </div>
 

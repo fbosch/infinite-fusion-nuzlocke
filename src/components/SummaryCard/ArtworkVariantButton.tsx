@@ -26,12 +26,14 @@ export function ArtworkVariantButton({
   const isShiftPressed = useShiftKey();
 
   React.useEffect(() => {
-    if (!shouldLoad) return;
+    if (!shouldLoad || hasVariants !== null) return;
 
     const checkVariants = async () => {
       try {
-        const spriteService = (await import('@/services/spriteService'))
-          .default;
+        const { default: spriteService } = await import(
+          '@/services/spriteService'
+        );
+
         let variants: string[] = [];
         variants = await spriteService.getArtworkVariants(
           encounter?.head?.id,
@@ -46,7 +48,7 @@ export function ArtworkVariantButton({
     };
 
     window.requestIdleCallback(checkVariants, { timeout: 1000 });
-  }, [encounter?.head, encounter?.body, encounter?.isFusion, shouldLoad]);
+  }, [encounter, shouldLoad, hasVariants]);
 
   const handleCycleVariant = React.useCallback(async () => {
     if (disabled || hasVariants === false) return;

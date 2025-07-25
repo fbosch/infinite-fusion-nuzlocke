@@ -36,10 +36,12 @@ const service = {
     ...args: Parameters<typeof SpriteService.prototype.getArtworkVariants>
   ): Promise<string[]> => {
     const spriteService = await getInstance();
-
     const key = (
       args[0] && args[1] ? `${args[0]}.${args[1]}` : args[0] || args[1]
     )?.toString();
+
+    return spriteService.getArtworkVariants(args[0], args[1], args[2], true);
+
     if (key) {
       try {
         if (memoryCache.has(key)) {
@@ -49,7 +51,7 @@ const service = {
           }
         }
         const idbCached = await get(key, spriteStore);
-        if (idbCached) {
+        if (idbCached?.variants?.length > 0) {
           memoryCache.set(key, idbCached.variants);
           return Promise.resolve(idbCached.variants);
         }

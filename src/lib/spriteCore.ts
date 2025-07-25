@@ -159,9 +159,10 @@ export async function checkSpriteExists(url: string): Promise<boolean> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
+    console.log({ url });
 
     const response = await fetch(url, {
-      method: 'HEAD',
+      method: 'GET',
       mode: 'no-cors',
       signal: controller.signal,
     });
@@ -169,6 +170,7 @@ export async function checkSpriteExists(url: string): Promise<boolean> {
     clearTimeout(timeoutId);
     return response.ok; // This will be false for 404s
   } catch (error) {
+    console.warn('Failed to check sprite exists:', error);
     // Network error, abort, or CORS issue - assume image doesn't exist
     return false;
   }
@@ -235,7 +237,8 @@ export class SpriteService {
   async getArtworkVariants(
     headId?: number | null,
     bodyId?: number | null,
-    maxVariants = 50
+    maxVariants = 50,
+    forceRefresh = false
   ): Promise<string[]> {
     if (!headId && !bodyId) return [''];
 
@@ -245,7 +248,11 @@ export class SpriteService {
 
     // Check cache first
     const cached = await this.variantCache.get(cacheKey);
-    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+    if (
+      cached &&
+      !forceRefresh &&
+      Date.now() - cached.timestamp < this.CACHE_DURATION
+    ) {
       console.log('cached from worker!');
       return cached.variants;
     }
