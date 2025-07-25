@@ -802,6 +802,7 @@ export const PokemonCombobox = ({
               value?.status === PokemonStatus.MISSED ? null : (
                 <PokemonEvolutionButton
                   value={value}
+                  key={value?.uid + 'evolution'}
                   onChange={onChange}
                   shouldLoad={shouldLoad}
                 />
