@@ -8,11 +8,10 @@ import {
 
 let instance: Comlink.Remote<SpriteService> | SpriteService | null = null;
 
-async function instantiate() {
+async function getInstance() {
   if (instance) {
     return instance;
   }
-
   try {
     // Create worker and wrap with Comlink
     const worker = new Worker(
@@ -36,7 +35,7 @@ const service = {
   getArtworkVariants: async (
     ...args: Parameters<typeof SpriteService.prototype.getArtworkVariants>
   ): Promise<string[]> => {
-    const spriteService = await instantiate();
+    const spriteService = await getInstance();
 
     const key = (
       args[0] && args[1] ? `${args[0]}.${args[1]}` : args[0] || args[1]
