@@ -156,23 +156,59 @@ export class SpriteVariantCache {
  * Works in both main thread (using Image) and web workers (using fetch)
  */
 export async function checkSpriteExists(url: string): Promise<boolean> {
+  // Try Image approach first in main thread (more reliable for images)
+  if (typeof window !== 'undefined' && typeof Image !== 'undefined') {
+    return new Promise<boolean>(resolve => {
+      const img = new Image();
+      const timeoutId = setTimeout(() => {
+        img.onload = null;
+        img.onerror = null;
+        resolve(false);
+      }, 3000);
+
+      img.onload = () => {
+        clearTimeout(timeoutId);
+        resolve(true);
+      };
+
+      img.onerror = () => {
+        clearTimeout(timeoutId);
+        resolve(false);
+      };
+
+      img.src = url;
+    });
+  }
+
+  // Fallback to fetch for web workers or when Image is not available
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
-    console.log({ url });
 
     const response = await fetch(url, {
-      method: 'GET',
-      mode: 'no-cors',
+      method: 'HEAD',
       signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
-    return response.ok; // This will be false for 404s
+    return response.ok;
   } catch (error) {
-    console.warn('Failed to check sprite exists:', error);
-    // Network error, abort, or CORS issue - assume image doesn't exist
-    return false;
+    // If HEAD fails, try GET (some servers don't support HEAD)
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      return response.ok;
+    } catch (getError) {
+      console.warn('Failed to check sprite exists:', error, getError);
+      return false;
+    }
   }
 }
 
