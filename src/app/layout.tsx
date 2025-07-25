@@ -48,6 +48,10 @@ export default function RootLayout({
       <head>
         <meta name='theme-color' content='#1f2937' />
         <meta name='color-scheme' content='light dark' />
+        <link rel='preconnect' href='https://infinitefusiondex.com' />
+        <link rel='dns-prefetch' href='https://infinitefusiondex.com' />
+        <link rel='preconnect' href='https://raw.githubusercontent.com' />
+        <link rel='dns-prefetch' href='https://raw.githubusercontent.com' />
       </head>
       <body className='antialiased font-sans'>
         <ThemeProvider>

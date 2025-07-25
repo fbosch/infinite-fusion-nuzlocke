@@ -86,7 +86,8 @@ export function ArtworkVariantButton({
     return null;
   }
 
-  const isButtonDisabled = disabled || hasVariants === false;
+  const isButtonDisabled =
+    disabled || hasVariants === false || hasVariants === null;
 
   return (
     <button
