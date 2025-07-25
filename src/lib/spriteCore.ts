@@ -162,7 +162,6 @@ export async function checkSpriteExists(url: string): Promise<boolean> {
       const img = new Image();
 
       img.crossOrigin = 'anonymous';
-      img.referrerPolicy = 'no-referrer';
       img.decoding = 'async';
 
       const timeoutId = setTimeout(() => {
