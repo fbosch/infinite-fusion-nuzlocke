@@ -43,7 +43,6 @@ export function ArtworkVariantButton({
 
       try {
         const { getArtworkVariants } = await import('@/services/spriteService');
-
         let variants: string[] = [];
         if (isFusion && encounter.head?.id && encounter.body?.id) {
           variants = await getArtworkVariants(
@@ -72,27 +71,15 @@ export function ArtworkVariantButton({
 
       try {
         await playthroughActions.cycleArtworkVariant(locationId, reverse);
-
-        // After cycling, check if we discovered that there are no variants
-        if (hasVariants === null && encounter?.head?.id) {
-          const isFusion =
-            encounter.isFusion && encounter.head && encounter.body;
-          const isSinglePokemon = !encounter.isFusion && encounter.head;
-
+        if (hasVariants === null) {
           try {
             const { getArtworkVariants } = await import(
               '@/services/spriteService'
             );
-
-            let variants: string[] = [];
-            if (isFusion && encounter.body?.id) {
-              variants = await getArtworkVariants(
-                encounter.head.id,
-                encounter.body.id
-              );
-            } else if (isSinglePokemon) {
-              variants = await getArtworkVariants(encounter.head.id);
-            }
+            const variants = await getArtworkVariants(
+              encounter.head?.id,
+              encounter.body?.id
+            );
 
             setHasVariants(variants.length > 1);
           } catch (error) {
@@ -107,15 +94,7 @@ export function ArtworkVariantButton({
         setIsLoading(false);
       }
     },
-    [
-      locationId,
-      disabled,
-      isLoading,
-      hasVariants,
-      encounter?.head?.id,
-      encounter?.body?.id,
-      encounter?.isFusion,
-    ]
+    [locationId, disabled, isLoading, hasVariants, encounter]
   );
 
   const isButtonDisabled = disabled || isLoading || hasVariants === false;
