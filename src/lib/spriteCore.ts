@@ -162,44 +162,22 @@ export class SpriteVariantCache {
 }
 
 /**
- * Check if a sprite URL exists using GET request
+ * Check if a sprite URL exists
  */
 export async function checkSpriteExists(url: string): Promise<boolean> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-    // Use GET request with range header to minimize data transfer
     const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Range: 'bytes=0-0', // Request only first byte
-      },
+      method: 'HEAD',
       signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
-
-    // Accept both 200 (full content) and 206 (partial content) as success
-    return response.ok || response.status === 206;
-  } catch (error) {
-    // If range request fails, try simple GET with no-cors mode
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-      await fetch(url, {
-        method: 'GET',
-        mode: 'no-cors',
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-      // If no error thrown, assume success (opaque response)
-      return true;
-    } catch {
-      return false;
-    }
+    return response.ok;
+  } catch {
+    return false;
   }
 }
 
