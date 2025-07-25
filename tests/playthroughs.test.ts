@@ -27,6 +27,13 @@ vi.mock('../src/services/spriteService', () => ({
   },
 }));
 
+// Mock search service to avoid Worker issues in tests
+vi.mock('../src/services/searchService', () => ({
+  default: {
+    search: vi.fn().mockResolvedValue([]),
+  },
+}));
+
 // Now import the modules
 import {
   playthroughActions,
