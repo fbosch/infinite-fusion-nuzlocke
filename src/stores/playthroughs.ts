@@ -557,6 +557,63 @@ export const playthroughActions = {
 
   // Encounter management actions
 
+  // Create encounter data with preferred variant prefilled
+  createEncounterData: async (
+    pokemon: z.infer<typeof PokemonOptionSchema> | null,
+    field: 'head' | 'body' = 'head',
+    shouldCreateFusion: boolean = false
+  ): Promise<z.infer<typeof EncounterDataSchema>> => {
+    const pokemonWithLocationAndUID = pokemon
+      ? {
+          ...pokemon,
+          originalLocation: pokemon.originalLocation || '',
+          uid: pokemon.uid || generatePokemonUID(),
+        }
+      : null;
+
+    // Create base encounter data
+    const encounterData: z.infer<typeof EncounterDataSchema> = {
+      head: null,
+      body: null,
+      isFusion: shouldCreateFusion,
+      updatedAt: getCurrentTimestamp(),
+    };
+
+    // Set the pokemon in the appropriate field
+    if (shouldCreateFusion) {
+      encounterData[field] = pokemonWithLocationAndUID;
+    } else {
+      encounterData.head = pokemonWithLocationAndUID;
+      encounterData.body = null;
+    }
+
+    // Try to get and apply preferred variant
+    try {
+      let preferredVariant: string | undefined;
+
+      if (shouldCreateFusion && encounterData.head && encounterData.body) {
+        // For fusion encounters with both parts
+        preferredVariant = await spriteService.getPreferredVariant(
+          encounterData.head.id,
+          encounterData.body.id
+        );
+      } else if (encounterData.head && !shouldCreateFusion) {
+        // For single Pokemon encounters
+        preferredVariant = await spriteService.getPreferredVariant(
+          encounterData.head.id
+        );
+      }
+
+      if (preferredVariant) {
+        encounterData.artworkVariant = preferredVariant;
+      }
+    } catch (error) {
+      console.warn('Failed to get preferred variant for new encounter:', error);
+    }
+
+    return encounterData;
+  },
+
   // Get encounters for active playthrough
   getEncounters: (): Playthrough['encounters'] => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
@@ -564,7 +621,7 @@ export const playthroughActions = {
   },
 
   // Update encounter for a location
-  updateEncounter: (
+  updateEncounter: async (
     locationId: string,
     pokemon: z.infer<typeof PokemonOptionSchema> | null,
     field: 'head' | 'body' = 'head',
@@ -580,69 +637,90 @@ export const playthroughActions = {
       activePlaythrough.encounters = {};
     }
 
-    // Get or create encounter - avoid unnecessary object creation
+    // Get or create encounter with preferred variant prefilled
     let encounter = activePlaythrough.encounters[locationId];
     if (!encounter) {
-      encounter = {
-        head: null,
-        body: null,
-        isFusion: shouldCreateFusion,
-        updatedAt: getCurrentTimestamp(),
-      };
+      // Pre-create encounter data with preferred variant
+      const encounterData = await playthroughActions.createEncounterData(
+        pokemon,
+        field,
+        shouldCreateFusion
+      );
+      encounter = encounterData;
       activePlaythrough.encounters[locationId] = encounter;
     }
 
-    // Set originalLocation and UID if pokemon is provided and doesn't already have them
-    const pokemonWithLocationAndUID = pokemon
-      ? {
-          ...pokemon,
-          originalLocation: pokemon.originalLocation || locationId,
-          uid: pokemon.uid || generatePokemonUID(),
-        }
-      : pokemon;
+    // If updating existing encounter with new pokemon
+    if (pokemon) {
+      const pokemonWithLocationAndUID = {
+        ...pokemon,
+        originalLocation: pokemon.originalLocation || locationId,
+        uid: pokemon.uid || generatePokemonUID(),
+      };
 
-    if (shouldCreateFusion || encounter.isFusion) {
-      // Check if this is changing the fusion composition
       const oldPokemon = encounter[field];
       const isChangingComposition =
-        !oldPokemon || oldPokemon.id !== pokemonWithLocationAndUID?.id;
+        !oldPokemon || oldPokemon.id !== pokemonWithLocationAndUID.id;
 
-      // For fusion encounters, update the specified field and ensure isFusion is true
-      encounter[field] = pokemonWithLocationAndUID;
-      encounter.isFusion = true;
+      if (shouldCreateFusion || encounter.isFusion) {
+        // For fusion encounters, update the specified field and ensure isFusion is true
+        encounter[field] = pokemonWithLocationAndUID;
+        encounter.isFusion = true;
 
-      // Reset artwork variant if the fusion composition is changing
-      if (isChangingComposition) {
-        encounter.artworkVariant = undefined;
-      }
+        // If composition is changing, try to apply preferred variant
+        if (isChangingComposition && encounter.head && encounter.body) {
+          try {
+            const preferredVariant = await spriteService.getPreferredVariant(
+              encounter.head.id,
+              encounter.body.id
+            );
+            encounter.artworkVariant = preferredVariant;
+          } catch (error) {
+            console.warn('Failed to get preferred variant from cache:', error);
+            encounter.artworkVariant = undefined;
+          }
+        }
 
-      // Default behavior: If setting status on one part of a fusion and the other part
-      // doesn't have a status, set both to the same status
-      if (
-        pokemonWithLocationAndUID?.status &&
-        encounter.head &&
-        encounter.body
-      ) {
-        const otherField = field === 'head' ? 'body' : 'head';
-        const otherPokemon = encounter[otherField];
+        // Default behavior: If setting status on one part of a fusion and the other part
+        // doesn't have a status, set both to the same status
+        if (
+          pokemonWithLocationAndUID.status &&
+          encounter.head &&
+          encounter.body
+        ) {
+          const otherField = field === 'head' ? 'body' : 'head';
+          const otherPokemon = encounter[otherField];
 
-        if (otherPokemon && !otherPokemon.status) {
-          encounter[otherField] = {
-            ...otherPokemon,
-            status: pokemonWithLocationAndUID.status,
-          };
+          if (otherPokemon && !otherPokemon.status) {
+            encounter[otherField] = {
+              ...otherPokemon,
+              status: pokemonWithLocationAndUID.status,
+            };
+          }
+        }
+      } else {
+        // For regular encounters, set head and ensure isFusion is false
+        encounter.head = pokemonWithLocationAndUID;
+        encounter.body = null;
+        encounter.isFusion = false;
+
+        // Try to apply preferred variant for single Pokémon
+        if (isChangingComposition) {
+          try {
+            const preferredVariant = await spriteService.getPreferredVariant(
+              pokemonWithLocationAndUID.id
+            );
+            encounter.artworkVariant = preferredVariant;
+          } catch (error) {
+            console.warn('Failed to get preferred variant from cache:', error);
+            encounter.artworkVariant = undefined;
+          }
         }
       }
-    } else {
-      // For regular encounters, set head and ensure isFusion is false
-      encounter.head = pokemonWithLocationAndUID;
-      encounter.body = null;
-      encounter.isFusion = false;
-      encounter.artworkVariant = undefined; // Reset artwork variant for non-fusion
-    }
 
-    // Update the encounter's timestamp instead of the playthrough's
-    encounter.updatedAt = getCurrentTimestamp();
+      // Update the encounter's timestamp
+      encounter.updatedAt = getCurrentTimestamp();
+    }
   },
 
   // Reset encounter for a location
@@ -723,13 +801,28 @@ export const playthroughActions = {
       activePlaythrough.encounters = {};
     }
 
-    activePlaythrough.encounters[locationId] = {
+    const encounter = {
       head,
       body,
       isFusion: true,
-      artworkVariant: undefined, // Reset artwork variant for new fusion
+      artworkVariant: undefined as string | undefined, // Reset artwork variant for new fusion
       updatedAt: getCurrentTimestamp(),
     };
+
+    activePlaythrough.encounters[locationId] = encounter;
+
+    // Try to set preferred variant for the new fusion
+    spriteService
+      .getPreferredVariant(head.id, body.id)
+      .then((preferredVariant: string | undefined) => {
+        if (preferredVariant && encounter.artworkVariant === undefined) {
+          encounter.artworkVariant = preferredVariant;
+          encounter.updatedAt = getCurrentTimestamp();
+        }
+      })
+      .catch((error: unknown) => {
+        console.warn('Failed to get preferred variant from cache:', error);
+      });
 
     // Note: Encounter timestamp already updated above
   },
@@ -750,6 +843,43 @@ export const playthroughActions = {
     // Update encounter timestamp for artwork variant changes
     encounter.artworkVariant = variant;
     encounter.updatedAt = getCurrentTimestamp();
+
+    // Also set this as the preferred variant in the cache
+    if (variant !== undefined) {
+      spriteService
+        .setPreferredVariant(encounter.head?.id, encounter.body?.id, variant)
+        .catch((error: unknown) => {
+          console.warn('Failed to set preferred variant in cache:', error);
+        });
+    }
+  },
+
+  // Set preferred variant for a Pokémon or fusion (updates cache only, doesn't affect current encounters)
+  setPreferredVariant: async (
+    headId?: number | null,
+    bodyId?: number | null,
+    variant?: string
+  ): Promise<void> => {
+    if (variant !== undefined) {
+      try {
+        await spriteService.setPreferredVariant(headId, bodyId, variant);
+      } catch (error) {
+        console.warn('Failed to set preferred variant in cache:', error);
+      }
+    }
+  },
+
+  // Get preferred variant for a Pokémon or fusion
+  getPreferredVariant: async (
+    headId?: number | null,
+    bodyId?: number | null
+  ): Promise<string | undefined> => {
+    try {
+      return await spriteService.getPreferredVariant(headId, bodyId);
+    } catch (error) {
+      console.warn('Failed to get preferred variant from cache:', error);
+      return undefined;
+    }
   },
 
   // Prefetch adjacent artwork variants for better UX
@@ -852,6 +982,19 @@ export const playthroughActions = {
       const newVariant = availableVariants[nextIndex] || undefined;
       encounter.artworkVariant = newVariant;
       encounter.updatedAt = getCurrentTimestamp();
+
+      // Set the preferred variant in the cache for future use
+      if (newVariant !== undefined) {
+        spriteService
+          .setPreferredVariant(
+            encounter.head?.id,
+            encounter.body?.id,
+            newVariant
+          )
+          .catch((error: unknown) => {
+            console.warn('Failed to set preferred variant in cache:', error);
+          });
+      }
 
       // Prefetch adjacent variants for smoother cycling
       if (availableVariants.length > 2) {
@@ -1009,7 +1152,7 @@ export const playthroughActions = {
   },
 
   // Move encounter from one location to another (replaces some clearCombobox usage)
-  moveEncounter: (
+  moveEncounter: async (
     fromLocationId: string,
     toLocationId: string,
     pokemon: z.infer<typeof PokemonOptionSchema>,
@@ -1027,7 +1170,12 @@ export const playthroughActions = {
     delete activePlaythrough.encounters[fromLocationId];
 
     // Set the destination and reset artwork variant since it's a new fusion context
-    playthroughActions.updateEncounter(toLocationId, pokemon, toField, false);
+    await playthroughActions.updateEncounter(
+      toLocationId,
+      pokemon,
+      toField,
+      false
+    );
 
     // Reset artwork variant for the destination encounter
     const destEncounter = activePlaythrough.encounters[toLocationId];
@@ -1377,4 +1525,47 @@ export const useAvailableAfterLocations = () => {
   return useMemo(() => {
     return playthroughActions.getAvailableAfterLocations();
   }, [activePlaythrough?.customLocations]);
+};
+
+// Hook for preferred variants
+export const usePreferredVariant = (
+  headId?: number | null,
+  bodyId?: number | null
+) => {
+  const [preferredVariant, setPreferredVariantState] = React.useState<
+    string | undefined
+  >(undefined);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    if (!headId && !bodyId) {
+      setPreferredVariantState(undefined);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    playthroughActions
+      .getPreferredVariant(headId, bodyId)
+      .then(variant => {
+        setPreferredVariantState(variant);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [headId, bodyId]);
+
+  const setPreferredVariant = React.useCallback(
+    async (variant?: string) => {
+      await playthroughActions.setPreferredVariant(headId, bodyId, variant);
+      setPreferredVariantState(variant);
+    },
+    [headId, bodyId]
+  );
+
+  return {
+    preferredVariant,
+    setPreferredVariant,
+    isLoading,
+  };
 };

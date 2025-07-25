@@ -25,7 +25,7 @@ export function FusionToggleButton({
 
   // Handle drop on fusion button
   const handleFusionDrop = useCallback(
-    (e: React.DragEvent<HTMLButtonElement>) => {
+    async (e: React.DragEvent<HTMLButtonElement>) => {
       e.preventDefault();
       e.stopPropagation();
 
@@ -70,7 +70,7 @@ export function FusionToggleButton({
               }),
             };
 
-            playthroughActions.createFusion(
+            await playthroughActions.createFusion(
               locationId,
               selectedPokemon,
               pokemonOption

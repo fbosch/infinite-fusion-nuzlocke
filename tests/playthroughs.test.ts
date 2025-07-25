@@ -14,6 +14,19 @@ vi.mock('idb-keyval', () => ({
   })),
 }));
 
+// Mock sprite service to avoid Worker issues in tests
+vi.mock('../src/services/spriteService', () => ({
+  default: {
+    generateSpriteUrl: vi.fn(
+      (headId, bodyId, variant = '') =>
+        `mock-sprite-url-${headId || 'unknown'}-${bodyId || 'unknown'}${variant ? `-${variant}` : ''}`
+    ),
+    getArtworkVariants: vi.fn().mockResolvedValue(['']),
+    getPreferredVariant: vi.fn().mockResolvedValue(undefined),
+    setPreferredVariant: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
 // Now import the modules
 import {
   playthroughActions,
@@ -73,17 +86,27 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
   });
 
   describe('clearEncounterFromLocation', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       // Set up test encounters
       const pikachu = createMockPokemon('Pikachu', 25);
       const charmander = createMockPokemon('Charmander', 4);
 
       // Regular encounter
-      playthroughActions.updateEncounter('route-1', pikachu);
+      await playthroughActions.updateEncounter('route-1', pikachu);
 
       // Fusion encounter
-      playthroughActions.updateEncounter('route-2', pikachu, 'head', true);
-      playthroughActions.updateEncounter('route-2', charmander, 'body', false);
+      await playthroughActions.updateEncounter(
+        'route-2',
+        pikachu,
+        'head',
+        true
+      );
+      await playthroughActions.updateEncounter(
+        'route-2',
+        charmander,
+        'body',
+        false
+      );
     });
 
     it('should clear entire encounter when no field specified', async () => {
@@ -152,10 +175,10 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const pikachu = createMockPokemon('Pikachu', 25);
 
       // Set up source encounter
-      playthroughActions.updateEncounter('route-1', pikachu);
+      await playthroughActions.updateEncounter('route-1', pikachu);
 
       // Move to new location
-      playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
+      await playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -169,11 +192,26 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const charmander = createMockPokemon('Charmander', 4);
 
       // Set up fusion encounter
-      playthroughActions.updateEncounter('route-1', pikachu, 'head', true);
-      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
+      await playthroughActions.updateEncounter(
+        'route-1',
+        pikachu,
+        'head',
+        true
+      );
+      await playthroughActions.updateEncounter(
+        'route-1',
+        charmander,
+        'body',
+        false
+      );
 
       // Move entire encounter to new location
-      playthroughActions.moveEncounter('route-1', 'route-2', pikachu, 'head');
+      await playthroughActions.moveEncounter(
+        'route-1',
+        'route-2',
+        pikachu,
+        'head'
+      );
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -192,10 +230,10 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       pikachu.nickname = 'Sparky';
 
       // Set up source encounter
-      playthroughActions.updateEncounter('route-1', pikachu);
+      await playthroughActions.updateEncounter('route-1', pikachu);
 
       // Move to new location
-      playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
+      await playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -218,10 +256,10 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       charmander.nickname = 'Flame';
 
       // Set up an existing encounter (this becomes the head)
-      playthroughActions.updateEncounter('route-1', pikachu);
+      await playthroughActions.updateEncounter('route-1', pikachu);
 
       // Create fusion: existing Pokemon becomes head, new Pokemon becomes body
-      playthroughActions.createFusion('route-1', pikachu, charmander);
+      await playthroughActions.createFusion('route-1', pikachu, charmander);
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -246,8 +284,8 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       charmander.nickname = 'Flame';
 
       // Set up encounters
-      playthroughActions.updateEncounter('route-1', pikachu);
-      playthroughActions.updateEncounter('route-2', charmander);
+      await playthroughActions.updateEncounter('route-1', pikachu);
+      await playthroughActions.updateEncounter('route-2', charmander);
 
       // Swap encounters
       playthroughActions.swapEncounters('route-1', 'route-2');
@@ -267,8 +305,8 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const charmander = createMockPokemon('Charmander', 4);
 
       // Set up encounters
-      playthroughActions.updateEncounter('route-1', pikachu);
-      playthroughActions.updateEncounter('route-2', charmander);
+      await playthroughActions.updateEncounter('route-1', pikachu);
+      await playthroughActions.updateEncounter('route-2', charmander);
 
       // Swap encounters
       playthroughActions.swapEncounters('route-1', 'route-2');
@@ -286,10 +324,30 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const bulbasaur = createMockPokemon('Bulbasaur', 1);
 
       // Set up fusion encounters
-      playthroughActions.updateEncounter('route-1', pikachu, 'head', true);
-      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
-      playthroughActions.updateEncounter('route-2', squirtle, 'head', true);
-      playthroughActions.updateEncounter('route-2', bulbasaur, 'body', false);
+      await playthroughActions.updateEncounter(
+        'route-1',
+        pikachu,
+        'head',
+        true
+      );
+      await playthroughActions.updateEncounter(
+        'route-1',
+        charmander,
+        'body',
+        false
+      );
+      await playthroughActions.updateEncounter(
+        'route-2',
+        squirtle,
+        'head',
+        true
+      );
+      await playthroughActions.updateEncounter(
+        'route-2',
+        bulbasaur,
+        'body',
+        false
+      );
 
       // Swap heads between fusions
       playthroughActions.swapEncounters('route-1', 'route-2', 'head', 'head');
@@ -314,9 +372,19 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const squirtle = createMockPokemon('Squirtle', 7);
 
       // Set up encounters
-      playthroughActions.updateEncounter('route-1', pikachu);
-      playthroughActions.updateEncounter('route-2', charmander, 'head', true);
-      playthroughActions.updateEncounter('route-2', squirtle, 'body', false);
+      await playthroughActions.updateEncounter('route-1', pikachu);
+      await playthroughActions.updateEncounter(
+        'route-2',
+        charmander,
+        'head',
+        true
+      );
+      await playthroughActions.updateEncounter(
+        'route-2',
+        squirtle,
+        'body',
+        false
+      );
 
       // Swap regular encounter head with fusion body
       playthroughActions.swapEncounters('route-1', 'route-2', 'head', 'body');
@@ -336,7 +404,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
     it('should handle swap with non-existent encounters gracefully', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
-      playthroughActions.updateEncounter('route-1', pikachu);
+      await playthroughActions.updateEncounter('route-1', pikachu);
 
       // Try to swap with non-existent encounter
       playthroughActions.swapEncounters('route-1', 'non-existent');
@@ -353,8 +421,13 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const pikachu = createMockPokemon('Pikachu', 25);
 
       // Set up encounters with one having null head
-      playthroughActions.updateEncounter('route-1', pikachu);
-      playthroughActions.updateEncounter('route-2', pikachu, 'head', true);
+      await playthroughActions.updateEncounter('route-1', pikachu);
+      await playthroughActions.updateEncounter(
+        'route-2',
+        pikachu,
+        'head',
+        true
+      );
       playthroughActions.clearEncounterFromLocation('route-2', 'head');
 
       // Try to swap - should not work since route-2 head is null
@@ -382,8 +455,8 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       pikachu2.uid = 'pikachu_route2_uid_456';
 
       // Set up encounters with same species but different instances
-      playthroughActions.updateEncounter('route-1', pikachu1);
-      playthroughActions.updateEncounter('route-2', pikachu2);
+      await playthroughActions.updateEncounter('route-1', pikachu1);
+      await playthroughActions.updateEncounter('route-2', pikachu2);
 
       const beforeEncounters = playthroughActions.getEncounters();
       expect(beforeEncounters).toBeDefined();
@@ -581,8 +654,8 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       pikachu.originalLocation = 'route-1';
       charmander.originalLocation = 'route-2';
 
-      playthroughActions.updateEncounter('route-1', pikachu);
-      playthroughActions.updateEncounter('route-2', charmander);
+      await playthroughActions.updateEncounter('route-1', pikachu);
+      await playthroughActions.updateEncounter('route-2', charmander);
 
       // Swap encounters
       playthroughActions.swapEncounters('route-1', 'route-2');
@@ -598,8 +671,8 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     it('should set originalLocation when moving encounters', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
 
-      playthroughActions.updateEncounter('route-1', pikachu);
-      playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
+      await playthroughActions.updateEncounter('route-1', pikachu);
+      await playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -617,8 +690,18 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       charmander.nickname = 'Flame';
 
       // Create a fusion encounter
-      playthroughActions.updateEncounter('route-1', pikachu, 'head', true);
-      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
+      await playthroughActions.updateEncounter(
+        'route-1',
+        pikachu,
+        'head',
+        true
+      );
+      await playthroughActions.updateEncounter(
+        'route-1',
+        charmander,
+        'body',
+        false
+      );
 
       let encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -673,7 +756,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       pikachu.nickname = 'Sparky';
 
       // Create a regular encounter
-      playthroughActions.updateEncounter('route-1', pikachu);
+      await playthroughActions.updateEncounter('route-1', pikachu);
 
       let encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -716,8 +799,13 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       charmander.nickname = 'Flame';
 
       // Create a fusion with only body filled
-      playthroughActions.updateEncounter('route-1', null, 'head', true);
-      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
+      await playthroughActions.updateEncounter('route-1', null, 'head', true);
+      await playthroughActions.updateEncounter(
+        'route-1',
+        charmander,
+        'body',
+        false
+      );
 
       let encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -770,13 +858,28 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const charmander = createMockPokemon('Charmander', 4);
 
       // Create fusion
-      playthroughActions.updateEncounter('route-1', pikachu, 'head', true);
-      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
+      await playthroughActions.updateEncounter(
+        'route-1',
+        pikachu,
+        'head',
+        true
+      );
+      await playthroughActions.updateEncounter(
+        'route-1',
+        charmander,
+        'body',
+        false
+      );
 
       // Clear head, then add new head
       playthroughActions.clearEncounterFromLocation('route-1', 'head');
       const squirtle = createMockPokemon('Squirtle', 7);
-      playthroughActions.updateEncounter('route-1', squirtle, 'head', false);
+      await playthroughActions.updateEncounter(
+        'route-1',
+        squirtle,
+        'head',
+        false
+      );
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -787,13 +890,23 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
   });
 
   describe('status synchronization in fusion encounters', () => {
-    it('should sync status to other Pokemon when setting status on one part of fusion', () => {
+    it('should sync status to other Pokemon when setting status on one part of fusion', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
       const charmander = createMockPokemon('Charmander', 4);
 
       // Create a fusion encounter with both head and body
-      playthroughActions.updateEncounter('route-1', pikachu, 'head', true);
-      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
+      await playthroughActions.updateEncounter(
+        'route-1',
+        pikachu,
+        'head',
+        true
+      );
+      await playthroughActions.updateEncounter(
+        'route-1',
+        charmander,
+        'body',
+        false
+      );
 
       // Verify initial state - no status on either Pokemon
       let encounters = playthroughActions.getEncounters();
@@ -803,7 +916,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
       // Set status on head Pokemon
       const pikachuWithStatus = { ...pikachu, status: 'captured' as const };
-      playthroughActions.updateEncounter(
+      await playthroughActions.updateEncounter(
         'route-1',
         pikachuWithStatus,
         'head',
@@ -817,20 +930,30 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       expect(encounters!['route-1'].body?.status).toBe('captured');
     });
 
-    it('should sync status when setting on body Pokemon', () => {
+    it('should sync status when setting on body Pokemon', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
       const charmander = createMockPokemon('Charmander', 4);
 
       // Create a fusion encounter
-      playthroughActions.updateEncounter('route-1', pikachu, 'head', true);
-      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
+      await playthroughActions.updateEncounter(
+        'route-1',
+        pikachu,
+        'head',
+        true
+      );
+      await playthroughActions.updateEncounter(
+        'route-1',
+        charmander,
+        'body',
+        false
+      );
 
       // Set status on body Pokemon
       const charmanderWithStatus = {
         ...charmander,
         status: 'deceased' as const,
       };
-      playthroughActions.updateEncounter(
+      await playthroughActions.updateEncounter(
         'route-1',
         charmanderWithStatus,
         'body',
@@ -844,26 +967,31 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       expect(encounters!['route-1'].body?.status).toBe('deceased');
     });
 
-    it('should not overwrite existing status when other Pokemon already has one', () => {
+    it('should not overwrite existing status when other Pokemon already has one', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
       const charmander = createMockPokemon('Charmander', 4);
 
       // Create head Pokemon with existing status
       const pikachuWithStatus = { ...pikachu, status: 'captured' as const };
-      playthroughActions.updateEncounter(
+      await playthroughActions.updateEncounter(
         'route-1',
         pikachuWithStatus,
         'head',
         true
       );
-      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
+      await playthroughActions.updateEncounter(
+        'route-1',
+        charmander,
+        'body',
+        false
+      );
 
       // Set different status on body Pokemon
       const charmanderWithStatus = {
         ...charmander,
         status: 'deceased' as const,
       };
-      playthroughActions.updateEncounter(
+      await playthroughActions.updateEncounter(
         'route-1',
         charmanderWithStatus,
         'body',
@@ -877,12 +1005,12 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       expect(encounters!['route-1'].body?.status).toBe('deceased');
     });
 
-    it('should not sync status in non-fusion encounters', () => {
+    it('should not sync status in non-fusion encounters', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
 
       // Create a regular (non-fusion) encounter
       const pikachuWithStatus = { ...pikachu, status: 'captured' as const };
-      playthroughActions.updateEncounter(
+      await playthroughActions.updateEncounter(
         'route-1',
         pikachuWithStatus,
         'head',
@@ -897,12 +1025,12 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       expect(encounters!['route-1'].isFusion).toBe(false);
     });
 
-    it('should only sync when both head and body Pokemon exist and one is being updated with status', () => {
+    it('should only sync when both head and body Pokemon exist and one is being updated with status', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
 
       // Create fusion encounter with only head Pokemon
       const pikachuWithStatus = { ...pikachu, status: 'captured' as const };
-      playthroughActions.updateEncounter(
+      await playthroughActions.updateEncounter(
         'route-1',
         pikachuWithStatus,
         'head',
@@ -917,7 +1045,12 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
       // Add body Pokemon without status
       const charmander = createMockPokemon('Charmander', 4);
-      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
+      await playthroughActions.updateEncounter(
+        'route-1',
+        charmander,
+        'body',
+        false
+      );
 
       // Body should NOT automatically get the same status as head when just being added
       // Status sync only happens when updating a Pokemon that has a status
@@ -932,7 +1065,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
         ...charmander,
         status: 'deceased' as const,
       };
-      playthroughActions.updateEncounter(
+      await playthroughActions.updateEncounter(
         'route-1',
         charmanderWithStatus,
         'body',
@@ -946,13 +1079,23 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       expect(encounters!['route-1'].body?.status).toBe('deceased');
     });
 
-    it('should sync status when updating Pokemon in complete fusion where other has no status', () => {
+    it('should sync status when updating Pokemon in complete fusion where other has no status', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
       const charmander = createMockPokemon('Charmander', 4);
 
       // Create fusion encounter with both Pokemon but no status
-      playthroughActions.updateEncounter('route-1', pikachu, 'head', true);
-      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
+      await playthroughActions.updateEncounter(
+        'route-1',
+        pikachu,
+        'head',
+        true
+      );
+      await playthroughActions.updateEncounter(
+        'route-1',
+        charmander,
+        'body',
+        false
+      );
 
       // Verify neither has status initially
       let encounters = playthroughActions.getEncounters();
@@ -962,7 +1105,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
       // Update head with status - should sync to body since body has no status
       const pikachuWithStatus = { ...pikachu, status: 'captured' as const };
-      playthroughActions.updateEncounter(
+      await playthroughActions.updateEncounter(
         'route-1',
         pikachuWithStatus,
         'head',
@@ -976,7 +1119,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       expect(encounters!['route-1'].body?.status).toBe('captured');
     });
 
-    it('should preserve other Pokemon properties during status sync', () => {
+    it('should preserve other Pokemon properties during status sync', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
       const charmander = createMockPokemon('Charmander', 4);
 
@@ -985,12 +1128,22 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       charmander.nickname = 'Flame';
 
       // Create fusion encounter
-      playthroughActions.updateEncounter('route-1', pikachu, 'head', true);
-      playthroughActions.updateEncounter('route-1', charmander, 'body', false);
+      await playthroughActions.updateEncounter(
+        'route-1',
+        pikachu,
+        'head',
+        true
+      );
+      await playthroughActions.updateEncounter(
+        'route-1',
+        charmander,
+        'body',
+        false
+      );
 
       // Set status on head
       const pikachuWithStatus = { ...pikachu, status: 'captured' as const };
-      playthroughActions.updateEncounter(
+      await playthroughActions.updateEncounter(
         'route-1',
         pikachuWithStatus,
         'head',
@@ -1279,20 +1432,20 @@ describe('Playthroughs Store - Hooks', () => {
       expect(result.current).toEqual({});
     });
 
-    it('should return encounters from the active playthrough', () => {
+    it('should return encounters from the active playthrough', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
       const charmander = createMockPokemon('Charmander', 4);
 
-      act(() => {
+      await act(async () => {
         const playthroughId = playthroughActions.createPlaythrough(
           'Test Run',
           false
         );
-        playthroughActions.setActivePlaythrough(playthroughId);
+        await playthroughActions.setActivePlaythrough(playthroughId);
 
         // Add some encounters
-        playthroughActions.updateEncounter('route-1', pikachu);
-        playthroughActions.updateEncounter('route-2', charmander);
+        await playthroughActions.updateEncounter('route-1', pikachu);
+        await playthroughActions.updateEncounter('route-2', charmander);
       });
 
       const { result } = renderHook(() => useEncounters());
@@ -1303,16 +1456,16 @@ describe('Playthroughs Store - Hooks', () => {
       expect(result.current!['route-2']?.head?.name).toBe('Charmander');
     });
 
-    it('should update when encounters are modified', () => {
+    it('should update when encounters are modified', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
       const squirtle = createMockPokemon('Squirtle', 7);
 
-      act(() => {
+      await act(async () => {
         const playthroughId = playthroughActions.createPlaythrough(
           'Test Run',
           false
         );
-        playthroughActions.setActivePlaythrough(playthroughId);
+        await playthroughActions.setActivePlaythrough(playthroughId);
       });
 
       const { result, rerender } = renderHook(() => useEncounters());
@@ -1322,8 +1475,8 @@ describe('Playthroughs Store - Hooks', () => {
       expect(Object.keys(result.current!)).toHaveLength(0);
 
       // Add an encounter
-      act(() => {
-        playthroughActions.updateEncounter('route-1', pikachu);
+      await act(async () => {
+        await playthroughActions.updateEncounter('route-1', pikachu);
       });
 
       rerender();
@@ -1331,8 +1484,8 @@ describe('Playthroughs Store - Hooks', () => {
       expect(result.current!['route-1']?.head?.name).toBe('Pikachu');
 
       // Update the encounter
-      act(() => {
-        playthroughActions.updateEncounter('route-1', squirtle);
+      await act(async () => {
+        await playthroughActions.updateEncounter('route-1', squirtle);
       });
 
       rerender();
@@ -1347,19 +1500,19 @@ describe('Playthroughs Store - Hooks', () => {
       expect(Object.keys(result.current!)).toHaveLength(0);
     });
 
-    it('should handle fusion encounters correctly', () => {
+    it('should handle fusion encounters correctly', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
       const charmander = createMockPokemon('Charmander', 4);
 
-      act(() => {
+      await act(async () => {
         const playthroughId = playthroughActions.createPlaythrough(
           'Test Run',
           false
         );
-        playthroughActions.setActivePlaythrough(playthroughId);
+        await playthroughActions.setActivePlaythrough(playthroughId);
 
         // Create a fusion encounter
-        playthroughActions.createFusion('route-1', pikachu, charmander);
+        await playthroughActions.createFusion('route-1', pikachu, charmander);
       });
 
       const { result } = renderHook(() => useEncounters());

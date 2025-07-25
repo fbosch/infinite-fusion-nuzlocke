@@ -65,6 +65,18 @@ const service = {
     }
     return promise;
   },
+  getPreferredVariant: async (
+    ...args: Parameters<typeof SpriteService.prototype.getPreferredVariant>
+  ): Promise<string | undefined> => {
+    const spriteService = await getInstance();
+    return spriteService.getPreferredVariant(...args);
+  },
+  setPreferredVariant: async (
+    ...args: Parameters<typeof SpriteService.prototype.setPreferredVariant>
+  ): Promise<void> => {
+    const spriteService = await getInstance();
+    return spriteService.setPreferredVariant(...args);
+  },
 } as const;
 
 export default service;

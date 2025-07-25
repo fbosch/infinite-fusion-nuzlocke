@@ -10,14 +10,17 @@ export class SpriteVariantCache {
   // Queue for deferred IndexedDB writes
   private writeQueue = new Map<
     string,
-    { variants: string[]; timestamp: number }
+    { variants: string[]; timestamp: number; preferredVariant?: string }
   >();
   private writeTimeoutId: number | null = null;
   private readonly BATCH_DELAY = 100; // ms to wait before batching writes
 
   async get(
     key: string
-  ): Promise<{ variants: string[]; timestamp: number } | undefined> {
+  ): Promise<
+    | { variants: string[]; timestamp: number; preferredVariant?: string }
+    | undefined
+  > {
     // Check IndexedDB with custom store
     try {
       const entry = await get(key, spriteStore);
@@ -37,14 +40,40 @@ export class SpriteVariantCache {
     return undefined;
   }
 
-  set(key: string, value: { variants: string[]; timestamp: number }): void {
+  set(
+    key: string,
+    value: { variants: string[]; timestamp: number; preferredVariant?: string }
+  ): void {
     // Queue IndexedDB write for deferred processing
     this.queueIndexedDBWrite(key, value);
   }
 
+  async setPreferredVariant(
+    key: string,
+    preferredVariant: string
+  ): Promise<void> {
+    // Get current cache entry
+    const existing = await this.get(key);
+    if (existing) {
+      // Update preferred variant while preserving existing data
+      this.set(key, {
+        ...existing,
+        preferredVariant,
+      });
+    } else {
+      // If no existing entry, create a minimal one with just the preferred variant
+      // The variants array will be populated when getArtworkVariants is called
+      this.set(key, {
+        variants: [],
+        timestamp: Date.now(),
+        preferredVariant,
+      });
+    }
+  }
+
   private queueIndexedDBWrite(
     key: string,
-    value: { variants: string[]; timestamp: number }
+    value: { variants: string[]; timestamp: number; preferredVariant?: string }
   ): void {
     // Add to write queue
     this.writeQueue.set(key, value);
@@ -231,15 +260,53 @@ export class SpriteService {
           break;
         }
       }
+      // Preserve existing preferred variant when updating variants
       this.variantCache.set(cacheKey, {
         variants,
         timestamp: Date.now(),
+        preferredVariant: cached?.preferredVariant,
       });
     } catch (error) {
       console.warn('Failed to get artwork variants:', error);
     }
 
     return variants;
+  }
+
+  /**
+   * Get the preferred variant for a Pokémon or fusion
+   */
+  async getPreferredVariant(
+    headId?: number | null,
+    bodyId?: number | null
+  ): Promise<string | undefined> {
+    if (!headId && !bodyId) return undefined;
+
+    const cacheKey = (
+      headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || ''
+    ).toString();
+
+    const cached = await this.variantCache.get(cacheKey);
+    return cached?.preferredVariant;
+  }
+
+  /**
+   * Set the preferred variant for a Pokémon or fusion
+   */
+  async setPreferredVariant(
+    headId?: number | null,
+    bodyId?: number | null,
+    preferredVariant?: string
+  ): Promise<void> {
+    if (!headId && !bodyId) return;
+
+    const cacheKey = (
+      headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || ''
+    ).toString();
+
+    if (preferredVariant) {
+      await this.variantCache.setPreferredVariant(cacheKey, preferredVariant);
+    }
   }
 
   /**
