@@ -38,7 +38,7 @@ const service = {
   getArtworkVariants: async (
     ...args: Parameters<typeof SpriteService.prototype.getArtworkVariants>
   ): Promise<string[]> => {
-    const spriteService = await getInstance(true);
+    const spriteService = await getInstance(false);
     const key = (
       args[0] && args[1] ? `${args[0]}.${args[1]}` : args[0] || args[1]
     )?.toString();

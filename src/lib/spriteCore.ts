@@ -1,4 +1,5 @@
 import { get, set, del, clear, createStore } from 'idb-keyval';
+import { SpriteVariantsResponse, SpriteVariantsError } from '@/types/sprites';
 
 // Create a custom store for sprite variant cache
 export const spriteStore = createStore('sprite-variants', 'cache');
@@ -295,28 +296,69 @@ export class SpriteService {
       return cached.variants;
     }
 
-    const variants: string[] = [];
     try {
-      for (let i = 0; i < maxVariants; i++) {
-        const variant = getVariantSuffix(i);
-        const url = generateSpriteUrl(headId, bodyId, variant);
-        if (await checkSpriteExists(url)) {
-          variants.push(variant);
-        } else {
-          break;
-        }
+      // Use edge function to get variants (avoids CORS issues)
+      const params = new URLSearchParams();
+      if (headId) params.set('headId', headId.toString());
+      if (bodyId) params.set('bodyId', bodyId.toString());
+
+      const response = await fetch(
+        `/api/sprites/variants?${params.toString()}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch variants: ${response.statusText}`);
       }
+
+      const data: SpriteVariantsResponse | SpriteVariantsError =
+        await response.json();
+
+      // Check if response is an error
+      if ('error' in data) {
+        throw new Error(data.error);
+      }
+
+      const variants = data.variants || [];
+
       // Preserve existing preferred variant when updating variants
       this.variantCache.set(cacheKey, {
         variants,
         timestamp: Date.now(),
         preferredVariant: cached?.preferredVariant,
       });
-    } catch (error) {
-      console.warn('Failed to get artwork variants:', error);
-    }
 
-    return variants;
+      return variants;
+    } catch (error) {
+      console.warn(
+        'Failed to get artwork variants from API, falling back to client-side check:',
+        error
+      );
+
+      // Fallback to client-side checking if API fails
+      const variants: string[] = [];
+      try {
+        for (let i = 0; i < maxVariants; i++) {
+          const variant = getVariantSuffix(i);
+          const url = generateSpriteUrl(headId, bodyId, variant);
+          if (await checkSpriteExists(url)) {
+            variants.push(variant);
+          } else {
+            break;
+          }
+        }
+
+        // Preserve existing preferred variant when updating variants
+        this.variantCache.set(cacheKey, {
+          variants,
+          timestamp: Date.now(),
+          preferredVariant: cached?.preferredVariant,
+        });
+      } catch (fallbackError) {
+        console.warn('Fallback sprite checking also failed:', fallbackError);
+      }
+
+      return variants;
+    }
   }
 
   /**
