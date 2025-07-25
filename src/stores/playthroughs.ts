@@ -1332,9 +1332,8 @@ export const useEncounters = (): Playthrough['encounters'] => {
     p => p.id === snapshot.activePlaythroughId
   );
 
-  return useMemo(() => {
-    return activePlaythrough?.encounters || {};
-  }, [activePlaythrough?.encounters]);
+  // Valtio snapshots are already reactive, no need for additional memoization
+  return activePlaythrough?.encounters || {};
 };
 
 // Hook for subscribing to a specific encounter - only rerenders when that encounter changes
@@ -1344,9 +1343,8 @@ export const useEncounter = (locationId: string) => {
     p => p.id === snapshot.activePlaythroughId
   );
 
-  return useMemo(() => {
-    return activePlaythrough?.encounters?.[locationId] || null;
-  }, [activePlaythrough?.encounters, locationId]);
+  // Valtio snapshots are already reactive to deep changes
+  return activePlaythrough?.encounters?.[locationId] || null;
 };
 
 export const useIsSaving = (): boolean => {

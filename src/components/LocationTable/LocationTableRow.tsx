@@ -42,6 +42,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
         match(cell.column.id)
           .with('encounter', () => (
             <EncounterCell
+              key={cell.id}
               shouldLoad={inView}
               routeId={routeId}
               locationId={locationId}
@@ -49,6 +50,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
           ))
           .with('sprite', () => (
             <td
+              key={cell.id}
               className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group'
               role='cell'
             >
@@ -59,6 +61,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
             const hasEncounter = encounterData.head || encounterData.body;
             return (
               <ResetEncounterButton
+                key={cell.id}
                 locationId={locationId}
                 locationName={row.original.name}
                 hasEncounter={!!hasEncounter}
@@ -67,6 +70,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
           })
           .otherwise(() => (
             <td
+              key={cell.id}
               className='px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
               role='cell'
               aria-label={`${cell.column.columnDef.header as string}: ${flexRender(cell.column.columnDef.cell, cell.getContext())}`}
