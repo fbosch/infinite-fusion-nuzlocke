@@ -16,6 +16,7 @@ export const EncounterDataSchema = z.object({
   body: PokemonOptionSchema.nullable(),
   isFusion: z.boolean(),
   artworkVariant: z.string().optional(),
+  updatedAt: z.number(),
 });
 
 // Zod schema for a single playthrough
@@ -586,6 +587,7 @@ export const playthroughActions = {
         head: null,
         body: null,
         isFusion: shouldCreateFusion,
+        updatedAt: getCurrentTimestamp(),
       };
       activePlaythrough.encounters[locationId] = encounter;
     }
@@ -639,7 +641,8 @@ export const playthroughActions = {
       encounter.artworkVariant = undefined; // Reset artwork variant for non-fusion
     }
 
-    activePlaythrough.updatedAt = getCurrentTimestamp();
+    // Update the encounter's timestamp instead of the playthrough's
+    encounter.updatedAt = getCurrentTimestamp();
   },
 
   // Reset encounter for a location
@@ -653,7 +656,7 @@ export const playthroughActions = {
     }
 
     delete activePlaythrough.encounters[locationId];
-    activePlaythrough.updatedAt = getCurrentTimestamp();
+    // Note: No need to update timestamp since encounter is deleted
   },
 
   // Toggle fusion mode for an encounter
@@ -683,6 +686,7 @@ export const playthroughActions = {
           body: null,
           isFusion: false,
           artworkVariant: undefined, // Reset artwork variant when unfusing
+          updatedAt: getCurrentTimestamp(),
         };
       } else {
         // If both slots have data or only head has data, preserve as-is
@@ -698,10 +702,11 @@ export const playthroughActions = {
         ...currentEncounter,
         isFusion: newIsFusion,
         artworkVariant: undefined, // Reset artwork variant when changing fusion state
+        updatedAt: getCurrentTimestamp(),
       };
     }
 
-    activePlaythrough.updatedAt = getCurrentTimestamp();
+    // Note: Encounter timestamp already updated above
   },
 
   // Create fusion from drag and drop
@@ -723,9 +728,10 @@ export const playthroughActions = {
       body,
       isFusion: true,
       artworkVariant: undefined, // Reset artwork variant for new fusion
+      updatedAt: getCurrentTimestamp(),
     };
 
-    activePlaythrough.updatedAt = getCurrentTimestamp();
+    // Note: Encounter timestamp already updated above
   },
 
   // Set artwork variant for an encounter
@@ -741,8 +747,9 @@ export const playthroughActions = {
     const encounter = activePlaythrough.encounters[locationId];
     if (!encounter) return;
 
+    // Update encounter timestamp for artwork variant changes
     encounter.artworkVariant = variant;
-    activePlaythrough.updatedAt = getCurrentTimestamp();
+    encounter.updatedAt = getCurrentTimestamp();
   },
 
   // Prefetch adjacent artwork variants for better UX
@@ -841,10 +848,10 @@ export const playthroughActions = {
           availableVariants.length
         : (currentIndex + 1) % availableVariants.length;
 
-      // Update encounter with new variant
+      // Update encounter with new variant and timestamp
       const newVariant = availableVariants[nextIndex] || undefined;
       encounter.artworkVariant = newVariant;
-      activePlaythrough.updatedAt = getCurrentTimestamp();
+      encounter.updatedAt = getCurrentTimestamp();
 
       // Prefetch adjacent variants for smoother cycling
       if (availableVariants.length > 2) {
@@ -862,7 +869,7 @@ export const playthroughActions = {
     } catch (error) {
       console.error('Failed to cycle artwork variant:', error);
       encounter.artworkVariant = undefined;
-      activePlaythrough.updatedAt = getCurrentTimestamp();
+      encounter.updatedAt = getCurrentTimestamp();
     }
   },
 
@@ -974,6 +981,7 @@ export const playthroughActions = {
     if (!field) {
       // If no field specified, clear the entire encounter
       delete activePlaythrough.encounters![locationId];
+      // No encounter timestamp to update since it's deleted
     } else {
       // Clear only the specified field
       encounter[field] = null;
@@ -988,12 +996,16 @@ export const playthroughActions = {
       if (!encounter.isFusion) {
         if (field === 'head' || (!encounter.head && !encounter.body)) {
           delete activePlaythrough.encounters![locationId];
+          // No encounter timestamp to update since it's deleted
+        } else {
+          // Update encounter timestamp for partial clearing
+          encounter.updatedAt = getCurrentTimestamp();
         }
+      } else {
+        // For fusions, keep the encounter structure and update timestamp
+        encounter.updatedAt = getCurrentTimestamp();
       }
-      // For fusions, keep the encounter structure even if both head and body are null
     }
-
-    activePlaythrough.updatedAt = getCurrentTimestamp();
   },
 
   // Move encounter from one location to another (replaces some clearCombobox usage)
@@ -1021,6 +1033,7 @@ export const playthroughActions = {
     const destEncounter = activePlaythrough.encounters[toLocationId];
     if (destEncounter) {
       destEncounter.artworkVariant = undefined;
+      destEncounter.updatedAt = getCurrentTimestamp();
     }
   },
 
@@ -1076,7 +1089,10 @@ export const playthroughActions = {
     encounter1.artworkVariant = undefined;
     encounter2.artworkVariant = undefined;
 
-    activePlaythrough.updatedAt = getCurrentTimestamp();
+    // Update both encounter timestamps since they were swapped
+    const timestamp = getCurrentTimestamp();
+    encounter1.updatedAt = timestamp;
+    encounter2.updatedAt = timestamp;
   },
 
   // Get location ID from combobox ID (helper for drag operations)
@@ -1311,11 +1327,26 @@ export const useIsLoading = (): boolean => {
 };
 
 export const useEncounters = (): Playthrough['encounters'] => {
-  const activePlaythrough = useActivePlaythrough();
+  const snapshot = useSnapshot(playthroughsStore);
+  const activePlaythrough = snapshot.playthroughs.find(
+    p => p.id === snapshot.activePlaythroughId
+  );
 
   return useMemo(() => {
     return activePlaythrough?.encounters || {};
-  }, [activePlaythrough?.encounters, activePlaythrough?.updatedAt]);
+  }, [activePlaythrough?.encounters]);
+};
+
+// Hook for subscribing to a specific encounter - only rerenders when that encounter changes
+export const useEncounter = (locationId: string) => {
+  const snapshot = useSnapshot(playthroughsStore);
+  const activePlaythrough = snapshot.playthroughs.find(
+    p => p.id === snapshot.activePlaythroughId
+  );
+
+  return useMemo(() => {
+    return activePlaythrough?.encounters?.[locationId] || null;
+  }, [activePlaythrough?.encounters, locationId]);
 };
 
 export const useIsSaving = (): boolean => {
@@ -1331,7 +1362,7 @@ export const useCustomLocations = (): z.infer<
 
   return useMemo(() => {
     return activePlaythrough?.customLocations || [];
-  }, [activePlaythrough?.customLocations, activePlaythrough?.updatedAt]);
+  }, [activePlaythrough?.customLocations]);
 };
 
 export const useMergedLocations = () => {
@@ -1339,7 +1370,7 @@ export const useMergedLocations = () => {
 
   return useMemo(() => {
     return playthroughActions.getMergedLocations();
-  }, [activePlaythrough?.customLocations, activePlaythrough?.updatedAt]);
+  }, [activePlaythrough?.customLocations]);
 };
 
 export const useAvailableAfterLocations = () => {
@@ -1347,5 +1378,5 @@ export const useAvailableAfterLocations = () => {
 
   return useMemo(() => {
     return playthroughActions.getAvailableAfterLocations();
-  }, [activePlaythrough?.customLocations, activePlaythrough?.updatedAt]);
+  }, [activePlaythrough?.customLocations]);
 };

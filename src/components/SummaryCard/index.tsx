@@ -1,12 +1,11 @@
-import { EncounterData } from '@/loaders';
 import { FusionSprite } from './FusionSprite';
 import { PokemonStatus, type PokemonOption } from '@/loaders/pokemon';
 import { Fragment } from 'react';
 import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
+import { useEncounter } from '@/stores/playthroughs';
 
 interface SummaryCardProps {
-  encounterData: EncounterData;
   locationId: string;
   shouldLoad?: boolean;
 }
@@ -34,11 +33,13 @@ function getNicknameText(
 }
 
 export default function SummaryCard({
-  encounterData,
   locationId,
   shouldLoad,
 }: SummaryCardProps) {
-  if (!encounterData.head && !encounterData.body) {
+  // Get encounter data directly - only this card will rerender when this encounter changes
+  const encounterData = useEncounter(locationId);
+
+  if (!encounterData?.head && !encounterData?.body) {
     return null;
   }
 
@@ -68,16 +69,15 @@ export default function SummaryCard({
           }}
         />
         <FusionSprite
-          encounterData={encounterData}
+          locationId={locationId}
           size='lg'
           className='scale-150 relative'
         />
       </Fragment>
       <ArtworkVariantButton
-        key={`${encounterData.head?.id}-${encounterData.body?.id} `}
+        key={`${encounterData?.head?.id}-${encounterData?.body?.id} `}
         className='absolute bottom-0 right-1/2 -translate-x-6 z-10'
         locationId={locationId}
-        encounter={encounterData}
         shouldLoad={shouldLoad}
       />
       {name && (

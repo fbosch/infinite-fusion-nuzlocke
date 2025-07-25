@@ -3,13 +3,11 @@
 import React, { useMemo, useState } from 'react';
 import { Loader2, RefreshCwOff, RefreshCcw } from 'lucide-react';
 import clsx from 'clsx';
-import { playthroughActions } from '@/stores/playthroughs';
+import { playthroughActions, useEncounter } from '@/stores/playthroughs';
 import { twMerge } from 'tailwind-merge';
-import { EncounterData } from '../../loaders/encounters';
 
 interface ArtworkVariantButtonProps {
   locationId: string;
-  encounter: EncounterData;
   disabled?: boolean;
   className?: string;
   shouldLoad?: boolean;
@@ -18,21 +16,20 @@ interface ArtworkVariantButtonProps {
 export function ArtworkVariantButton({
   locationId,
   disabled = false,
-  encounter,
   className,
   shouldLoad,
 }: ArtworkVariantButtonProps) {
+  // Get encounter data directly - only this button will rerender when this encounter changes
+  const encounter = useEncounter(locationId);
   const [hasVariants, setHasVariants] = useState<boolean | null>(null);
 
-  // Check for variants on mount and when encounter changes
   React.useEffect(() => {
-    if (!shouldLoad) return;
+    if (!shouldLoad || !encounter?.head) return;
+
     const checkVariants = async () => {
       try {
-        const { default: spriteService } = await import(
-          '@/services/spriteService'
-        );
-
+        const spriteService = (await import('@/services/spriteService'))
+          .default;
         let variants: string[] = [];
         variants = await spriteService.getArtworkVariants(
           encounter.head?.id,
@@ -47,29 +44,48 @@ export function ArtworkVariantButton({
     };
 
     window.requestIdleCallback(checkVariants, { timeout: 1000 });
-  }, [encounter.head, encounter.body, encounter.isFusion, shouldLoad]);
+  }, [encounter?.head, encounter?.body, encounter?.isFusion, shouldLoad]);
 
   const handleCycleVariant = React.useCallback(
     async (event: React.MouseEvent) => {
       if (disabled || hasVariants === false) return;
       const reverse = event.shiftKey;
 
-      playthroughActions.cycleArtworkVariant(locationId, reverse);
+      try {
+        await playthroughActions.cycleArtworkVariant(locationId, reverse);
+      } catch (error) {
+        console.error('Failed to cycle artwork variant:', error);
+      }
     },
-    [locationId, disabled, hasVariants]
+    [disabled, hasVariants, locationId]
   );
 
-  const isButtonDisabled = disabled || hasVariants === false;
+  const buttonIcon = useMemo(() => {
+    if (hasVariants === null) {
+      return <Loader2 className='animate-spin size-4' />;
+    }
+    if (hasVariants === false) {
+      return <RefreshCwOff className='size-4' />;
+    }
+    return <RefreshCcw className='size-4' />;
+  }, [hasVariants]);
 
   const label = useMemo(() => {
     if (hasVariants === null) {
-      return 'Loading...';
+      return 'Checking for artwork variants...';
     }
     if (hasVariants === false) {
-      return 'No alternative artwork variants available';
+      return 'No artwork variants available';
     }
     return 'Cycle artwork variants (hold Shift to reverse)';
   }, [hasVariants]);
+
+  // Don't show button if no encounter exists
+  if (!encounter) {
+    return null;
+  }
+
+  const isButtonDisabled = disabled || hasVariants === false;
 
   return (
     <button
@@ -92,15 +108,7 @@ export function ArtworkVariantButton({
       aria-label={label}
       title={label}
     >
-      <div className='dark:pixel-shadow'>
-        {hasVariants === null ? (
-          <Loader2 className='size-4 animate-spin' />
-        ) : hasVariants === false ? (
-          <RefreshCwOff className='size-3' />
-        ) : (
-          <RefreshCcw className='size-3' />
-        )}
-      </div>
+      <div className='dark:pixel-shadow'>{buttonIcon}</div>
     </button>
   );
 }

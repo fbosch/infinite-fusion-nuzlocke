@@ -14,11 +14,7 @@ import LocationTableHeader from './LocationTableHeader';
 import LocationTableRow from './LocationTableRow';
 import LocationTableSkeleton from './LocationTableSkeleton';
 import AddCustomLocationModal from '../AddCustomLocationModal';
-import {
-  useEncounters,
-  useIsLoading,
-  useCustomLocations,
-} from '@/stores/playthroughs';
+import { useIsLoading, useCustomLocations } from '@/stores/playthroughs';
 
 const columnHelper = createColumnHelper<CombinedLocation>();
 
@@ -26,7 +22,6 @@ export default function LocationTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isCustomLocationModalOpen, setIsCustomLocationModalOpen] =
     useState(false);
-  const encounters = useEncounters();
   const isLoading = useIsLoading();
   const customLocations = useCustomLocations();
 
@@ -121,21 +116,9 @@ export default function LocationTable() {
       >
         <LocationTableHeader headerGroups={table.getHeaderGroups()} />
         <tbody className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700'>
-          {table.getRowModel().rows.map(row => {
-            const encounterData = encounters?.[row.original.id] || {
-              head: null,
-              body: null,
-              isFusion: false,
-            };
-
-            return (
-              <LocationTableRow
-                key={row.id}
-                row={row}
-                encounterData={encounterData}
-              />
-            );
-          })}
+          {table.getRowModel().rows.map(row => (
+            <LocationTableRow key={row.id} row={row} />
+          ))}
         </tbody>
       </table>
 

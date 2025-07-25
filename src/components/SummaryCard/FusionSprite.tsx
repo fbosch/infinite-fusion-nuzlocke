@@ -3,14 +3,14 @@
 import React, { useMemo, useRef } from 'react';
 import Image from 'next/image';
 import { PokemonStatus, type PokemonOption } from '@/loaders/pokemon';
-import type { EncounterData } from '@/loaders/encounters';
 import clsx from 'clsx';
 import { match, P } from 'ts-pattern';
 import { twMerge } from 'tailwind-merge';
 import { SquareArrowUpRight } from 'lucide-react';
+import { useEncounter } from '@/stores/playthroughs';
 
 interface FusionSpriteProps {
-  encounterData: EncounterData;
+  locationId: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
@@ -122,14 +122,19 @@ function getAltText(
   return `${head.name}/${body.name} fusion`;
 }
 
-export function FusionSprite({
-  encounterData,
-  size = 'md',
-}: FusionSpriteProps) {
+export function FusionSprite({ locationId, size = 'md' }: FusionSpriteProps) {
   const imageRef = useRef<HTMLImageElement>(null);
   const shadowRef = useRef<HTMLImageElement>(null);
   const hoverRef = useRef<boolean>(false);
-  const { head, body, isFusion, artworkVariant } = encounterData;
+
+  // Get encounter data directly - only this sprite will rerender when this encounter changes
+  const encounterData = useEncounter(locationId);
+  const { head, body, isFusion, artworkVariant } = encounterData || {
+    head: null,
+    body: null,
+    isFusion: false,
+    artworkVariant: undefined,
+  };
 
   // Calculate all values before early return to maintain hook order
   const spriteUrl = getSpriteUrl(head, body, isFusion, artworkVariant);

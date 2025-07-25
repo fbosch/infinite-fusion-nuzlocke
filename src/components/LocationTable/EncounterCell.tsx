@@ -7,7 +7,7 @@ import { FusionToggleButton } from './FusionToggleButton';
 import type { PokemonOption } from '@/loaders/pokemon';
 
 import clsx from 'clsx';
-import { useEncounters, playthroughActions } from '@/stores/playthroughs';
+import { useEncounter, playthroughActions } from '@/stores/playthroughs';
 
 interface EncounterCellProps {
   routeId: number | undefined;
@@ -20,11 +20,12 @@ export function EncounterCell({
   locationId,
   shouldLoad,
 }: EncounterCellProps) {
-  const encounters = useEncounters();
-  const encounterData = encounters?.[locationId] || {
+  // Get encounter data directly - only this cell will rerender when this encounter changes
+  const encounterData = useEncounter(locationId) || {
     head: null,
     body: null,
     isFusion: false,
+    updatedAt: Date.now(),
   };
 
   // useSnapshot already returns plain objects, so we can use them directly
