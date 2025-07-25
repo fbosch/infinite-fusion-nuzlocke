@@ -1,9 +1,6 @@
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  initializeSearchWorker,
-  searchPokemonInWorker,
-} from '@/services/searchWorkerService';
+import searchService from '@/services/searchService';
 
 // Utility function to generate unique identifiers
 export function generatePokemonUID(): string {
@@ -111,9 +108,9 @@ export const PokemonArraySchema = z.array(PokemonSchema);
 // Cache for loaded Pokemon data
 let pokemonCache: Pokemon[] | null = null;
 
-// Track if search worker has been initialized
-let searchWorkerInitialized = false;
-let searchWorkerInitPromise: Promise<void> | null = null;
+// Track if search service has been initialized
+let searchServiceInitialized = false;
+let searchServiceInitPromise: Promise<void> | null = null;
 
 // Data loader for Pokemon with dynamic import
 export async function getPokemon(): Promise<Pokemon[]> {
@@ -160,74 +157,60 @@ export async function getPokemonPreEvolutionId(
   return targetPokemon.evolution.evolves_from.id;
 }
 
-// Initialize search worker with Pokemon data
-async function initializePokemonSearchWorker(): Promise<void> {
+// Initialize search service with Pokemon data
+async function initializePokemonSearchService(): Promise<void> {
   // Return existing promise if already initializing
-  if (searchWorkerInitPromise) {
-    return searchWorkerInitPromise;
+  if (searchServiceInitPromise) {
+    return searchServiceInitPromise;
   }
 
   // Return immediately if already initialized
-  if (searchWorkerInitialized) {
+  if (searchServiceInitialized) {
     return Promise.resolve();
   }
 
-  // Check if web workers are supported
-  if (typeof Worker === 'undefined') {
-    console.warn(
-      'Web Workers not supported, falling back to main thread search'
-    );
-    return Promise.resolve();
-  }
-
-  searchWorkerInitPromise = (async () => {
+  searchServiceInitPromise = (async () => {
     try {
       const pokemon = await getPokemon();
 
-      // Transform data for worker
-      const workerData = pokemon.map(p => ({
+      // Transform data for search service
+      const searchData = pokemon.map(p => ({
         id: p.id,
         name: p.name,
         nationalDexId: p.nationalDexId,
       }));
 
-      await initializeSearchWorker(workerData);
-      searchWorkerInitialized = true;
+      await searchService.initialize(searchData);
+      searchServiceInitialized = true;
     } catch (error) {
-      console.error('Failed to initialize search worker:', error);
+      console.error('Failed to initialize search service:', error);
       // Don't throw error, fall back to main thread search
     } finally {
-      searchWorkerInitPromise = null;
+      searchServiceInitPromise = null;
     }
   })();
 
-  return searchWorkerInitPromise;
+  return searchServiceInitPromise;
 }
 
 // Smart search function that handles both name and ID searches
 export async function searchPokemon(query: string): Promise<PokemonOption[]> {
-  // Try to use web worker first if supported
-  if (typeof Worker !== 'undefined') {
-    try {
-      // Initialize worker if not already done
-      await initializePokemonSearchWorker();
+  try {
+    // Initialize search service if not already done
+    await initializePokemonSearchService();
 
-      if (searchWorkerInitialized) {
-        const results = await searchPokemonInWorker(query);
-
-        // Transform worker results to PokemonOption format
-        return results.map(result => ({
-          id: result.id,
-          name: result.name,
-          nationalDexId: result.nationalDexId,
-        }));
-      }
-    } catch (error) {
-      console.warn(
-        'Web worker search failed, falling back to main thread:',
-        error
-      );
+    if (searchServiceInitialized) {
+      const results = await searchService.search(query);
+      
+      // Transform search results to PokemonOption format
+      return results.map(result => ({
+        id: result.id,
+        name: result.name,
+        nationalDexId: result.nationalDexId,
+      }));
     }
+  } catch (error) {
+    console.warn('Search service failed, falling back to main thread:', error);
   }
 
   // Fallback to main thread search
@@ -248,7 +231,7 @@ export async function searchPokemon(query: string): Promise<PokemonOption[]> {
       }));
     return results;
   } else {
-    // Simple string search as fallback (when web worker is not available)
+    // Simple string search as fallback
     const results = pokemon
       .filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
       .map(p => ({
