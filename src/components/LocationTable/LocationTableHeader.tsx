@@ -10,7 +10,7 @@ export default function LocationTableHeader({
   headerGroups,
 }: LocationTableHeaderProps) {
   return (
-    <thead className='bg-gray-50 dark:bg-gray-800 sticky top-0 z-20 rounded-t-md '>
+    <thead className='bg-gray-50 dark:bg-gray-800'>
       {headerGroups.map(headerGroup => (
         <tr key={headerGroup.id}>
           {headerGroup.headers.map(header => (

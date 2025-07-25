@@ -113,19 +113,21 @@ export default function LocationTable() {
   }
 
   return (
-    <div className='overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'>
-      <table
-        className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700'
-        role='table'
-        aria-label='Locations table'
-      >
-        <LocationTableHeader headerGroups={table.getHeaderGroups()} />
-        <tbody className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700'>
-          {table.getRowModel().rows.map(row => (
-            <LocationTableRow key={row.id} row={row} />
-          ))}
-        </tbody>
-      </table>
+    <div className='overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'>
+      <div className='max-h-[90vh] overflow-auto scrollbar-thin overscroll-none'>
+        <table
+          className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700'
+          role='table'
+          aria-label='Locations table'
+        >
+          <LocationTableHeader headerGroups={table.getHeaderGroups()} />
+          <tbody className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700'>
+            {table.getRowModel().rows.map(row => (
+              <LocationTableRow key={row.id} row={row} />
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* Add Custom Location Modal */}
       <AddCustomLocationModal
