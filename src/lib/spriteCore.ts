@@ -292,7 +292,6 @@ export class SpriteService {
       !forceRefresh &&
       Date.now() - cached.timestamp < this.CACHE_DURATION
     ) {
-      console.log('cached from worker!');
       return cached.variants;
     }
 

@@ -1,17 +1,15 @@
 import * as Comlink from 'comlink';
-import { get } from 'idb-keyval';
-import {
-  SpriteService,
-  spriteStore,
-  generateSpriteUrl,
-} from '@/lib/spriteCore';
+import { SpriteService, generateSpriteUrl } from '@/lib/spriteCore';
 
-const mainThreadInstance: SpriteService = new SpriteService();
+let mainThreadInstance: SpriteService | null = null;
 let instance: Comlink.Remote<SpriteService> | SpriteService | null = null;
 
 async function getInstance(mainThread = false) {
   if (mainThread) {
-    return mainThreadInstance;
+    if (!mainThreadInstance) {
+      mainThreadInstance = new SpriteService();
+    }
+    return mainThreadInstance as SpriteService;
   }
   if (instance) {
     return instance;
@@ -29,54 +27,28 @@ async function getInstance(mainThread = false) {
     instance = mainThreadInstance;
     console.error(error);
   }
-  return instance || mainThreadInstance;
+  return instance || (mainThreadInstance as SpriteService);
 }
 
-const memoryCache = new Map<string, string[]>();
 const service = {
   generateSpriteUrl,
   getArtworkVariants: async (
     ...args: Parameters<typeof SpriteService.prototype.getArtworkVariants>
   ): Promise<string[]> => {
-    const spriteService = await getInstance(false);
-    const key = (
-      args[0] && args[1] ? `${args[0]}.${args[1]}` : args[0] || args[1]
-    )?.toString();
-
-    if (key) {
-      try {
-        if (memoryCache.has(key)) {
-          const value = memoryCache.get(key);
-          if (value) {
-            return Promise.resolve(value);
-          }
-        }
-        const idbCached = await get(key, spriteStore);
-        if (idbCached?.variants?.length > 0) {
-          memoryCache.set(key, idbCached.variants);
-          return Promise.resolve(idbCached.variants);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    const promise = spriteService.getArtworkVariants(...args);
-    if (key) {
-      promise.then(value => {
-        memoryCache.set(key, value);
-      });
-    }
-    return promise;
+    const spriteService = await getInstance(true);
+    return spriteService.getArtworkVariants(...args);
   },
   getPreferredVariant: async (
     ...args: Parameters<typeof SpriteService.prototype.getPreferredVariant>
   ): Promise<string | undefined> => {
+    // Use main thread instance for IndexedDB operations
     const spriteService = await getInstance();
     return spriteService.getPreferredVariant(...args);
   },
   setPreferredVariant: async (
     ...args: Parameters<typeof SpriteService.prototype.setPreferredVariant>
   ): Promise<void> => {
+    // Use main thread instance for IndexedDB operations
     const spriteService = await getInstance();
     return spriteService.setPreferredVariant(...args);
   },

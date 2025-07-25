@@ -268,6 +268,8 @@ export function FusionSprite({ locationId, size = 'md' }: FusionSpriteProps) {
               )}
               loading='eager'
               unoptimized
+              referrerPolicy='no-referrer'
+              crossOrigin='anonymous'
               decoding='async'
               draggable={false}
               placeholder='empty'
@@ -313,6 +315,8 @@ export function FusionSprite({ locationId, size = 'md' }: FusionSpriteProps) {
               alt={altText}
               width={spriteSize}
               height={spriteSize}
+              referrerPolicy='no-referrer'
+              crossOrigin='anonymous'
               className={twMerge(
                 baseImageClasses,
                 statusState.imageClasses,
