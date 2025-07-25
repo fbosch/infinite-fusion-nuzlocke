@@ -65,6 +65,7 @@
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
     "@vitest/ui": "^3.2.4",
+    "@zeit/next-workers": "^1.0.0",
     "cheerio": "^1.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.4.1",
@@ -79,7 +80,8 @@
     "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "worker-loader": "^3.0.8"
   },
   "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39",
   "lint-staged": {
