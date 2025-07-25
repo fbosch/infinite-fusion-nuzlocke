@@ -752,51 +752,53 @@ export const playthroughActions = {
       activePlaythrough.encounters = {};
     }
 
-    const currentEncounter = activePlaythrough.encounters[locationId] || {
+    // Get existing encounter or create default
+    const currentEncounter = activePlaythrough.encounters[locationId];
+    const existingEncounter = currentEncounter || {
       head: null,
       body: null,
       isFusion: false,
+      updatedAt: getCurrentTimestamp(),
     };
 
-    const newIsFusion = !currentEncounter.isFusion;
+    const newIsFusion = !existingEncounter.isFusion;
 
     // When unfusing (going from fusion to non-fusion)
-    if (currentEncounter.isFusion && !newIsFusion) {
+    if (existingEncounter.isFusion && !newIsFusion) {
       // If head is empty but body has data, move body to head
-      if (!currentEncounter.head && currentEncounter.body) {
-        activePlaythrough.encounters![locationId] = {
-          head: currentEncounter.body,
+      if (!existingEncounter.head && existingEncounter.body) {
+        activePlaythrough.encounters[locationId] = {
+          head: existingEncounter.body,
           body: null,
           isFusion: false,
           artworkVariant: await playthroughActions.getPreferredVariant(
-            currentEncounter.body?.id
+            existingEncounter.body?.id
           ),
           updatedAt: getCurrentTimestamp(),
         };
       } else {
         // If both slots have data or only head has data, preserve as-is
-        activePlaythrough.encounters![locationId] = {
-          ...currentEncounter,
+        activePlaythrough.encounters[locationId] = {
+          ...existingEncounter,
           isFusion: false,
           artworkVariant: await playthroughActions.getPreferredVariant(
-            currentEncounter.head?.id
+            existingEncounter.head?.id
           ),
+          updatedAt: getCurrentTimestamp(),
         };
       }
     } else {
       // When fusing (going from non-fusion to fusion) or other cases
-      activePlaythrough.encounters![locationId] = {
-        ...currentEncounter,
+      activePlaythrough.encounters[locationId] = {
+        ...existingEncounter,
         isFusion: newIsFusion,
         artworkVariant: await playthroughActions.getPreferredVariant(
-          currentEncounter.head?.id,
-          currentEncounter.body?.id
+          existingEncounter.head?.id,
+          existingEncounter.body?.id
         ),
         updatedAt: getCurrentTimestamp(),
       };
     }
-
-    // Note: Encounter timestamp already updated above
   },
 
   // Create fusion from drag and drop

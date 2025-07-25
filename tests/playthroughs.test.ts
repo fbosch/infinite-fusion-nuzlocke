@@ -717,7 +717,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       expect(encounters!['route-1']?.body?.nickname).toBe('Flame');
 
       // Toggle fusion off (unfuse)
-      playthroughActions.toggleEncounterFusion('route-1');
+      await playthroughActions.toggleEncounterFusion('route-1');
 
       encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -734,7 +734,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       expect(encounter2!.body!.nickname).toBe('Flame');
 
       // Toggle fusion back on (re-fuse)
-      playthroughActions.toggleEncounterFusion('route-1');
+      await playthroughActions.toggleEncounterFusion('route-1');
 
       encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -768,7 +768,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       expect(encounters!['route-1'].body).toBeNull();
 
       // Toggle to fusion mode
-      playthroughActions.toggleEncounterFusion('route-1');
+      await playthroughActions.toggleEncounterFusion('route-1');
 
       encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -782,7 +782,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
     it('should handle toggle on non-existent encounter gracefully', async () => {
       // Try to toggle fusion on non-existent encounter
-      playthroughActions.toggleEncounterFusion('non-existent');
+      await playthroughActions.toggleEncounterFusion('non-existent');
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -820,7 +820,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       expect(initialEncounter!.body!.nickname).toBe('Flame');
 
       // Toggle fusion off (unfuse)
-      playthroughActions.toggleEncounterFusion('route-1');
+      await playthroughActions.toggleEncounterFusion('route-1');
 
       encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
