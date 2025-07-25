@@ -201,7 +201,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
           )}
           title={
             isDevolutionMode
-              ? `Devolve to ${availablePreEvolution.name}${!hasEvolutions ? ' (final evolution)' : ''}`
+              ? `Devolve to ${availablePreEvolution.name}`
               : availableEvolutions.length === 1
                 ? `Evolve to ${availableEvolutions[0].name}`
                 : hasEvolutions

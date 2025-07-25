@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Loader2, RefreshCwOff, RefreshCcw } from 'lucide-react';
+import { Loader2, RefreshCwOff, RefreshCcw, RefreshCw } from 'lucide-react';
 import clsx from 'clsx';
 import { playthroughActions, useEncounter } from '@/stores/playthroughs';
+import { useShiftKey } from '@/hooks/useKeyPressed';
 import { twMerge } from 'tailwind-merge';
 
 interface ArtworkVariantButtonProps {
@@ -22,6 +23,7 @@ export function ArtworkVariantButton({
   // Get encounter data directly - only this button will rerender when this encounter changes
   const encounter = useEncounter(locationId);
   const [hasVariants, setHasVariants] = useState<boolean | null>(null);
+  const isShiftPressed = useShiftKey();
 
   React.useEffect(() => {
     if (!shouldLoad) return;
@@ -46,29 +48,28 @@ export function ArtworkVariantButton({
     window.requestIdleCallback(checkVariants, { timeout: 1000 });
   }, [encounter?.head, encounter?.body, encounter?.isFusion, shouldLoad]);
 
-  const handleCycleVariant = React.useCallback(
-    async (event: React.MouseEvent) => {
-      if (disabled || hasVariants === false) return;
-      const reverse = event.shiftKey;
+  const handleCycleVariant = React.useCallback(async () => {
+    if (disabled || hasVariants === false) return;
 
-      try {
-        await playthroughActions.cycleArtworkVariant(locationId, reverse);
-      } catch (error) {
-        console.error('Failed to cycle artwork variant:', error);
-      }
-    },
-    [disabled, hasVariants, locationId]
-  );
+    try {
+      await playthroughActions.cycleArtworkVariant(locationId, isShiftPressed);
+    } catch (error) {
+      console.error('Failed to cycle artwork variant:', error);
+    }
+  }, [disabled, hasVariants, locationId, isShiftPressed]);
 
   const buttonIcon = useMemo(() => {
     if (hasVariants === null) {
-      return <Loader2 className='animate-spin size-4' />;
+      return <Loader2 className='animate-spin size-3' />;
     }
     if (hasVariants === false) {
-      return <RefreshCwOff className='size-4' />;
+      return <RefreshCwOff className='size-3' />;
     }
-    return <RefreshCcw className='size-4' />;
-  }, [hasVariants]);
+    if (isShiftPressed) {
+      return <RefreshCcw className='size-3' />;
+    }
+    return <RefreshCw className='size-3' />;
+  }, [hasVariants, isShiftPressed]);
 
   const label = useMemo(() => {
     if (hasVariants === null) {
@@ -98,17 +99,22 @@ export function ArtworkVariantButton({
           'transition-opacity duration-200',
           'size-4 cursor-pointer flex items-center justify-center',
           'rounded-full text-gray-600 dark:text-white',
-          'focus:outline-none focus:ring-2 focus:ring-blue-500',
-          'enabled:hover:bg-gray-400 dark:enabled:hover:bg-gray-600',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
           'disabled:cursor-not-allowed enabled:hover:opacity-100 enabled:hover:text-white',
-          { 'group-hover:opacity-100': hasVariants === null }
+          {
+            'group-hover:opacity-100': hasVariants === null,
+            'enabled:hover:bg-blue-400 enabled:focus:bg-blue-400 enabled:dark:hover:bg-blue-600 enabled:dark:focus:bg-blue-600':
+              !isShiftPressed,
+            'enabled:hover:bg-orange-400 enabled:focus:bg-orange-400 enabled:dark:hover:bg-orange-700 enabled:dark:focus:bg-orange-700':
+              isShiftPressed,
+          }
         ),
         className
       )}
       aria-label={label}
       title={label}
     >
-      <div className='dark:pixel-shadow'>{buttonIcon}</div>
+      <div className=''>{buttonIcon}</div>
     </button>
   );
 }
