@@ -142,7 +142,7 @@ export function FusionSprite({ locationId, size = 'md' }: FusionSpriteProps) {
   const spriteSize = SPRITE_SIZES[size];
 
   const baseImageClasses =
-    'object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none';
+    'object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none transform-gpu';
 
   const statusState = getStatusState(head, body);
 

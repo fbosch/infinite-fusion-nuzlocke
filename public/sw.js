@@ -97,13 +97,13 @@ async function handleImageRequest(request) {
   try {
     const response = await fetch(request);
 
-    // Only cache successful responses
-    if (response.status === 200) {
+    // Only cache successful responses for GET requests
+    if (response.status === 200 && request.method === 'GET') {
       const responseClone = response.clone();
       cache.put(request, responseClone);
       return response;
     } else {
-      // Don't cache failed responses, just return them
+      // Don't cache failed responses or non-GET requests, just return them
       return response;
     }
   } catch (error) {
@@ -138,6 +138,7 @@ async function handleNavigationRequest(request) {
 
 // Check if request should be cached
 function shouldCache(request) {
+  if (request.method !== 'GET') return false;
   const url = new URL(request.url);
 
   // Cache images from specific domains
