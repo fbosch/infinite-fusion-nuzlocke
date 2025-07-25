@@ -1,9 +1,17 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Atom, ChevronDown, Undo2 } from 'lucide-react';
 import clsx from 'clsx';
 import Image from 'next/image';
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react';
+import {
+  useFloating,
+  autoUpdate,
+  flip,
+  size,
+  FloatingPortal,
+} from '@floating-ui/react';
 import {
   getPokemonEvolutionIds,
   getPokemonPreEvolutionId,
@@ -30,31 +38,31 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   const [availablePreEvolution, setAvailablePreEvolution] =
     useState<PokemonOption | null>(null);
   const [isLoadingEvolutions, setIsLoadingEvolutions] = useState(false);
-  const [showEvolutionMenu, setShowEvolutionMenu] = useState(false);
   const isShiftPressed = useShiftKey();
-  const evolutionMenuRef = useRef<HTMLDivElement>(null);
+
+  // Floating UI setup for portal positioning
+  const { refs, floatingStyles, update, placement } = useFloating({
+    placement: 'bottom-end',
+    middleware: [
+      flip({ padding: 8 }),
+      size({
+        apply({ elements, availableHeight, availableWidth }) {
+          Object.assign(elements.floating.style, {
+            maxHeight: `${Math.min(300, availableHeight - 8)}px`,
+            minWidth: '200px',
+            maxWidth: `${availableWidth - 16}px`,
+          });
+        },
+        padding: 8,
+      }),
+    ],
+    whileElementsMounted: autoUpdate,
+  });
 
   const hasEvolutions = availableEvolutions.length > 0;
   const hasPreEvolution = !!availablePreEvolution;
   const isDevolutionMode =
     (isShiftPressed && hasPreEvolution) || (!hasEvolutions && hasPreEvolution);
-
-  // Close evolution menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        evolutionMenuRef.current &&
-        !evolutionMenuRef.current.contains(event.target as Node)
-      ) {
-        setShowEvolutionMenu(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   // Handle evolution/devolution selection
   const handleEvolution = useCallback(
@@ -66,7 +74,6 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
           ...evolutionPokemon,
         };
         onChange(evolvedPokemon);
-        setShowEvolutionMenu(false);
       } else if (isDevolution && availablePreEvolution) {
         // Devolution - go to pre-evolution
         const devolvedPokemon: PokemonOption = {
@@ -82,22 +89,13 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
           ...evolution,
         };
         onChange(evolvedPokemon);
-      } else if (availableEvolutions.length > 1) {
-        // Multiple evolutions - show menu
-        setShowEvolutionMenu(!showEvolutionMenu);
       }
     },
-    [
-      availableEvolutions,
-      availablePreEvolution,
-      value,
-      onChange,
-      showEvolutionMenu,
-    ]
+    [availableEvolutions, availablePreEvolution, value, onChange]
   );
 
-  // Handle evolution button click
-  const handleEvolutionButtonClick = useCallback(() => {
+  // Handle evolution button click for single evolution or devolution
+  const handleDirectAction = useCallback(() => {
     handleEvolution(undefined, isDevolutionMode);
   }, [handleEvolution, isDevolutionMode]);
 
@@ -173,15 +171,13 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
     return null;
   }
 
-  return (
-    <div
-      className='absolute inset-y-0 right-4 flex items-center'
-      ref={evolutionMenuRef}
-    >
-      <div className='relative'>
+  // For single evolution or devolution mode, render a simple button
+  if (isDevolutionMode || availableEvolutions.length === 1) {
+    return (
+      <div className='absolute inset-y-0 right-4 flex items-center'>
         <button
           type='button'
-          onClick={handleEvolutionButtonClick}
+          onClick={handleDirectAction}
           disabled={isLoadingEvolutions}
           className={clsx(
             'flex items-center justify-center gap-1 px-2 py-1 rounded-md',
@@ -201,12 +197,8 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
           )}
           title={
             isDevolutionMode
-              ? `Devolve to ${availablePreEvolution.name}`
-              : availableEvolutions.length === 1
-                ? `Evolve to ${availableEvolutions[0].name}`
-                : hasEvolutions
-                  ? `Choose evolution (${availableEvolutions.length} options)`
-                  : 'No evolutions available'
+              ? `Devolve to ${availablePreEvolution?.name}`
+              : `Evolve to ${availableEvolutions[0]?.name}`
           }
         >
           {isDevolutionMode ? (
@@ -214,57 +206,88 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
           ) : (
             <Atom className='w-3 h-3' />
           )}
-          {!isDevolutionMode && availableEvolutions.length > 1 && (
-            <ChevronDown className='w-3 h-3' />
-          )}
         </button>
+      </div>
+    );
+  }
 
-        {/* Evolution dropdown menu */}
-        {showEvolutionMenu &&
-          availableEvolutions.length > 1 &&
-          !isDevolutionMode && (
+  // For multiple evolutions, render Menu with dropdown
+  return (
+    <div className='absolute inset-y-0 right-4 flex items-center'>
+      <Menu>
+        <MenuButton
+          ref={refs.setReference}
+          disabled={isLoadingEvolutions}
+          className={clsx(
+            'flex items-center justify-center gap-1 px-2 py-1 rounded-md',
+            'bg-gray-100 text-gray-600 text-xs font-medium',
+            'border border-gray-300 hover:border-blue-300 dark:border-gray-600 dark:hover:border-blue-400',
+            'transition-colors duration-200',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
+            'disabled:opacity-50 disabled:cursor-not-allowed',
+            'dark:bg-gray-700 dark:hover:bg-blue-900/20 dark:text-gray-400 dark:hover:text-blue-400',
+            'hover:cursor-pointer',
+            'hover:bg-blue-100 hover:text-blue-600 hover:border-blue-300 dark:bg-blue-900/20 dark:hover:text-blue-400 dark:hover:border-blue-400',
+            'data-[open]:bg-blue-100 data-[open]:text-blue-600 data-[open]:border-blue-300 dark:data-[open]:bg-blue-900/20 dark:data-[open]:text-blue-400 dark:data-[open]:border-blue-400'
+          )}
+          title={`Choose evolution (${availableEvolutions.length} options)`}
+          onFocus={() => update()}
+        >
+          <Atom className='w-3 h-3' />
+          <ChevronDown className='w-3 h-3' />
+        </MenuButton>
+
+        <FloatingPortal>
+          <MenuItems
+            ref={refs.setFloating}
+            style={floatingStyles}
+            className={clsx(
+              'z-50 py-1 text-base shadow-lg focus:outline-none sm:text-sm',
+              'bg-white dark:bg-gray-800',
+              'border border-gray-300 dark:border-gray-600',
+              'rounded-md'
+            )}
+          >
             <div
               className={clsx(
-                'absolute top-full right-0 mt-1 py-1 min-w-48',
-                'bg-white dark:bg-gray-800 rounded-md shadow-lg',
-                'border border-gray-300 dark:border-gray-600',
-                'z-50'
+                'px-3 pb-2 pt-1 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600'
               )}
             >
-              <div
-                className={clsx(
-                  'px-3 pb-2 pt-1 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600'
-                )}
-              >
-                Choose Evolution
-              </div>
-              {availableEvolutions.map(evolution => (
-                <button
-                  key={evolution.id}
-                  type='button'
-                  title={`Evolve to ${evolution.name}`}
-                  onClick={() => handleEvolution(evolution)}
-                  className={clsx(
-                    'w-full flex items-center gap-3 px-3 py-2 text-sm hover:cursor-pointer',
-                    'hover:bg-gray-100 dark:hover:bg-gray-700',
-                    'text-gray-900 dark:text-gray-100 text-left',
-                    'focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700'
-                  )}
-                >
-                  <Image
-                    src={getPokemonSpriteUrlFromOption(evolution)}
-                    alt={evolution.name}
-                    width={32}
-                    height={32}
-                    className='object-contain object-center'
-                    loading='eager'
-                  />
-                  <span className='font-medium'>{evolution.name}</span>
-                </button>
-              ))}
+              Choose Evolution
             </div>
-          )}
-      </div>
+            {availableEvolutions.map(evolution => (
+              <MenuItem key={evolution.id}>
+                {({ focus }) => (
+                  <button
+                    type='button'
+                    title={`Evolve to ${evolution.name}`}
+                    onClick={() => handleEvolution(evolution)}
+                    className={clsx(
+                      'w-full flex items-center gap-3 px-3 py-2 text-sm hover:cursor-pointer',
+                      'text-gray-900 dark:text-gray-100 text-left',
+                      'focus:outline-none',
+                      {
+                        'bg-blue-600 text-white': focus,
+                        'hover:bg-gray-100 dark:hover:bg-gray-700': !focus,
+                      }
+                    )}
+                  >
+                    <Image
+                      src={getPokemonSpriteUrlFromOption(evolution)}
+                      alt={evolution.name}
+                      width={32}
+                      height={32}
+                      className='object-contain object-center'
+                      loading='eager'
+                    />
+                    <span className='font-medium'>{evolution.name}</span>
+                  </button>
+                )}
+              </MenuItem>
+            ))}
+          </MenuItems>
+        </FloatingPortal>
+      </Menu>
     </div>
   );
 };
