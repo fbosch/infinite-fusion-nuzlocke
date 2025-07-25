@@ -1,5 +1,6 @@
 const CACHE_NAME = 'infinite-fusion-cache-v1';
 const IMAGE_CACHE_NAME = 'infinite-fusion-images-v1';
+const POKEMON_IMAGE_CACHE_NAME = 'pokemon-images-v1';
 
 // URLs to cache immediately
 const urlsToCache = ['/'];
@@ -10,18 +11,87 @@ const imageDomains = [
   'ifd-spaces.sfo2.cdn.digitaloceanspaces.com',
 ];
 
-// Install event - cache essential resources
+// Function to get Pokemon image URLs
+async function getPokemonImageUrls() {
+  try {
+    const response = await fetch('/pokemon-ids.json');
+    const pokemonIds = await response.json();
+    
+    return pokemonIds.map(nationalDexId => 
+      `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${nationalDexId}.png`
+    );
+  } catch (error) {
+    console.error('Service Worker: Failed to fetch Pokemon IDs', error);
+    return [];
+  }
+}
+
+// Function to prefetch Pokemon images in batches
+async function prefetchPokemonImages() {
+  const imageUrls = await getPokemonImageUrls();
+  const cache = await caches.open(POKEMON_IMAGE_CACHE_NAME);
+  
+  console.log(`Service Worker: Starting to prefetch ${imageUrls.length} Pokemon images`);
+  
+  // Process images in batches to avoid overwhelming the network
+  const batchSize = 10;
+  let successCount = 0;
+  let errorCount = 0;
+  
+  for (let i = 0; i < imageUrls.length; i += batchSize) {
+    const batch = imageUrls.slice(i, i + batchSize);
+    
+    const batchPromises = batch.map(async (url) => {
+      try {
+        // Check if already cached
+        const cachedResponse = await cache.match(url);
+        if (cachedResponse) {
+          successCount++;
+          return;
+        }
+        
+        const response = await fetch(url);
+        if (response.ok) {
+          await cache.put(url, response.clone());
+          successCount++;
+        } else {
+          errorCount++;
+          console.warn(`Service Worker: Failed to fetch image ${url} - Status: ${response.status}`);
+        }
+      } catch (error) {
+        errorCount++;
+        console.warn(`Service Worker: Error fetching image ${url}:`, error);
+      }
+    });
+    
+    await Promise.allSettled(batchPromises);
+    
+    // Log progress every 50 images
+    if ((i + batchSize) % 50 === 0 || i + batchSize >= imageUrls.length) {
+      console.log(`Service Worker: Prefetched ${Math.min(i + batchSize, imageUrls.length)}/${imageUrls.length} Pokemon images (${successCount} success, ${errorCount} errors)`);
+    }
+  }
+  
+  console.log(`Service Worker: Pokemon image prefetching complete. ${successCount} successful, ${errorCount} errors`);
+}
+
+// Install event - cache essential resources and prefetch Pokemon images
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then(cache => {
-        console.log('Service Worker: Caching essential files');
-        return cache.addAll(urlsToCache);
-      })
-      .catch(error => {
-        console.error('Service Worker: Failed to cache essential files', error);
-      })
+    Promise.all([
+      // Cache essential files
+      caches
+        .open(CACHE_NAME)
+        .then(cache => {
+          console.log('Service Worker: Caching essential files');
+          return cache.addAll(urlsToCache);
+        })
+        .catch(error => {
+          console.error('Service Worker: Failed to cache essential files', error);
+        }),
+      // Prefetch Pokemon images
+      prefetchPokemonImages()
+    ])
   );
 });
 
@@ -31,7 +101,11 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME && cacheName !== IMAGE_CACHE_NAME) {
+          if (
+            cacheName !== CACHE_NAME && 
+            cacheName !== IMAGE_CACHE_NAME && 
+            cacheName !== POKEMON_IMAGE_CACHE_NAME
+          ) {
             console.log('Service Worker: Deleting old cache', cacheName);
             return caches.delete(cacheName);
           }
@@ -85,7 +159,15 @@ self.addEventListener('fetch', event => {
 
 // Handle image requests with cache-first strategy
 async function handleImageRequest(request) {
-  const cache = await caches.open(IMAGE_CACHE_NAME);
+  const url = new URL(request.url);
+  
+  // Check if this is a Pokemon sprite from GitHub
+  const isPokemonSprite = url.hostname === 'raw.githubusercontent.com' && 
+    url.pathname.includes('/sprites/pokemon/');
+  
+  // Use Pokemon image cache for Pokemon sprites, general image cache for others
+  const cacheName = isPokemonSprite ? POKEMON_IMAGE_CACHE_NAME : IMAGE_CACHE_NAME;
+  const cache = await caches.open(cacheName);
 
   // Try cache first
   const cachedResponse = await cache.match(request);
@@ -157,9 +239,60 @@ self.addEventListener('message', event => {
   }
 
   if (event.data && event.data.type === 'GET_CACHE_SIZE') {
-    event.ports[0].postMessage({
-      type: 'CACHE_SIZE',
-      size: 'Calculating...', // You can implement actual cache size calculation here
+    getCacheSize().then(size => {
+      event.ports[0].postMessage({
+        type: 'CACHE_SIZE',
+        size: size,
+      });
+    });
+  }
+
+  if (event.data && event.data.type === 'GET_POKEMON_CACHE_STATUS') {
+    getPokemonCacheStatus().then(status => {
+      event.ports[0].postMessage({
+        type: 'POKEMON_CACHE_STATUS',
+        status: status,
+      });
     });
   }
 });
+
+// Calculate cache sizes
+async function getCacheSize() {
+  try {
+    const cacheNames = await caches.keys();
+    let totalSize = 0;
+    
+    for (const cacheName of cacheNames) {
+      const cache = await caches.open(cacheName);
+      const requests = await cache.keys();
+      totalSize += requests.length;
+    }
+    
+    return `${totalSize} items cached`;
+  } catch (error) {
+    return 'Unable to calculate cache size';
+  }
+}
+
+// Get Pokemon cache status
+async function getPokemonCacheStatus() {
+  try {
+    const cache = await caches.open(POKEMON_IMAGE_CACHE_NAME);
+    const cachedRequests = await cache.keys();
+    const imageUrls = await getPokemonImageUrls();
+    
+    return {
+      total: imageUrls.length,
+      cached: cachedRequests.length,
+      percentage: Math.round((cachedRequests.length / imageUrls.length) * 100)
+    };
+  } catch (error) {
+    return {
+      total: 0,
+      cached: 0,
+      percentage: 0,
+      error: 'Unable to get cache status'
+    };
+  }
+}
