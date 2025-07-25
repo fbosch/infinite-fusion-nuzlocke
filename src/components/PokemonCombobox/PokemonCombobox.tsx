@@ -483,6 +483,7 @@ export const PokemonCombobox = ({
   const handleChange = useCallback(
     (newValue: PokemonOption | null | undefined) => {
       onChange(newValue || null);
+      setQuery('');
     },
     [onChange]
   );
