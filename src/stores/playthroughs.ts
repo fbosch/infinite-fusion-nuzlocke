@@ -128,6 +128,8 @@ const debouncedSaveAll = debounce(
 
       // Save the active playthrough data if it exists
       if (activePlaythrough) {
+        // Update timestamp right before saving to avoid blocking UI updates
+        activePlaythrough.updatedAt = getCurrentTimestamp();
         const plainPlaythrough = serializeForStorage(activePlaythrough);
         saveOperations.push(
           set(activePlaythrough.id, plainPlaythrough, playthroughsStore_idb)
@@ -155,7 +157,7 @@ const debouncedSaveAll = debounce(
       playthroughsStore.isSaving = false;
     }
   },
-  500,
+  200,
   { leading: true }
 );
 
@@ -443,7 +445,8 @@ export const playthroughActions = {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (activePlaythrough) {
       activePlaythrough.remixMode = !activePlaythrough.remixMode;
-      activePlaythrough.updatedAt = getCurrentTimestamp();
+      // Don't update timestamp immediately for UI toggles - let the debounced save handle it
+      // This makes the UI more responsive for rapid toggles
     }
   },
 
@@ -1441,17 +1444,10 @@ export const useActivePlaythrough = (): Playthrough | null => {
 
 export const useIsRemixMode = (): boolean => {
   const snapshot = useSnapshot(playthroughsStore);
-  const activePlaythroughData = snapshot.playthroughs.find(
+  const activePlaythrough = snapshot.playthroughs.find(
     p => p.id === snapshot.activePlaythroughId
   );
-
-  return useMemo(() => {
-    return playthroughActions.isRemixModeEnabled();
-  }, [
-    snapshot.activePlaythroughId,
-    activePlaythroughData?.remixMode,
-    activePlaythroughData?.updatedAt,
-  ]);
+  return activePlaythrough?.remixMode || false;
 };
 
 export const usePlaythroughById = (
@@ -1508,7 +1504,7 @@ export const useCustomLocations = (): z.infer<
 
   return useMemo(() => {
     return activePlaythrough?.customLocations || [];
-  }, [activePlaythrough?.customLocations]);
+  }, [activePlaythrough?.customLocations, activePlaythrough?.updatedAt]);
 };
 
 export const useMergedLocations = () => {
@@ -1516,7 +1512,7 @@ export const useMergedLocations = () => {
 
   return useMemo(() => {
     return playthroughActions.getMergedLocations();
-  }, [activePlaythrough?.customLocations]);
+  }, [activePlaythrough?.customLocations, activePlaythrough?.updatedAt]);
 };
 
 export const useAvailableAfterLocations = () => {
@@ -1524,7 +1520,7 @@ export const useAvailableAfterLocations = () => {
 
   return useMemo(() => {
     return playthroughActions.getAvailableAfterLocations();
-  }, [activePlaythrough?.customLocations]);
+  }, [activePlaythrough?.customLocations, activePlaythrough?.updatedAt]);
 };
 
 // Hook for preferred variants

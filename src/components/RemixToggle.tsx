@@ -8,21 +8,24 @@ import {
   useIsRemixMode,
 } from '@/stores/playthroughs';
 
-export default function RemixToggle() {
+const RemixToggle = React.memo(function RemixToggle() {
   const activePlaythrough = useActivePlaythrough();
   const isRemixMode = useIsRemixMode();
 
-  const handleToggle = (targetMode: 'classic' | 'remix') => {
-    if (!activePlaythrough) return;
+  const handleToggle = React.useCallback(
+    (targetMode: 'classic' | 'remix') => {
+      if (!activePlaythrough) return;
 
-    const shouldToggle =
-      (targetMode === 'remix' && !isRemixMode) ||
-      (targetMode === 'classic' && isRemixMode);
-
-    if (shouldToggle) {
-      playthroughActions.toggleRemixMode();
-    }
-  };
+      // Simplified logic - just check if we need to change mode
+      if (
+        (targetMode === 'remix' && !isRemixMode) ||
+        (targetMode === 'classic' && isRemixMode)
+      ) {
+        playthroughActions.toggleRemixMode();
+      }
+    },
+    [activePlaythrough, isRemixMode]
+  );
 
   return (
     <fieldset
@@ -40,7 +43,7 @@ export default function RemixToggle() {
       {activePlaythrough && (
         <div
           className={clsx(
-            'absolute top-1 bottom-1 left-1 w-16 bg-white dark:bg-gray-800 rounded-md shadow-sm transition-transform duration-200 ease-out',
+            'absolute top-1 bottom-1 left-1 w-16 bg-white dark:bg-gray-800 rounded-md shadow-sm transition-transform duration-150 ease-out',
             'border border-gray-200 dark:border-gray-500',
             isRemixMode ? 'translate-x-16' : 'translate-x-0'
           )}
@@ -57,7 +60,7 @@ export default function RemixToggle() {
           !isRemixMode
             ? 'text-gray-900 dark:text-gray-100'
             : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
-          activePlaythrough && 'cursor-pointer transition-colors duration-200'
+          activePlaythrough && 'cursor-pointer transition-colors duration-150'
         )}
         aria-pressed={!isRemixMode}
         aria-label={`Switch to Classic mode${!isRemixMode ? ' (currently selected)' : ''}`}
@@ -75,7 +78,7 @@ export default function RemixToggle() {
           isRemixMode
             ? 'text-purple-700 dark:text-purple-300'
             : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
-          activePlaythrough && 'cursor-pointer transition-colors duration-200'
+          activePlaythrough && 'cursor-pointer transition-colors duration-150'
         )}
         aria-pressed={isRemixMode}
         aria-label={`Switch to Remix mode${isRemixMode ? ' (currently selected)' : ''}`}
@@ -92,4 +95,6 @@ export default function RemixToggle() {
       </div>
     </fieldset>
   );
-}
+});
+
+export default RemixToggle;
