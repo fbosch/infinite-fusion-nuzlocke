@@ -1,7 +1,7 @@
 import { get, set, del, clear, createStore } from 'idb-keyval';
 
 // Create a custom store for sprite variant cache
-const spriteStore = createStore('sprite-variants', 'cache');
+export const spriteStore = createStore('sprite-variants', 'cache');
 
 // Universal cache implementation that works in both main thread and workers
 export class SpriteVariantCache {

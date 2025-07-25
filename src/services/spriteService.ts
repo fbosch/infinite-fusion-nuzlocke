@@ -1,5 +1,6 @@
 import * as Comlink from 'comlink';
-import { SpriteService } from '@/lib/spriteCore';
+import { get } from 'idb-keyval';
+import { SpriteService, spriteStore } from '@/lib/spriteCore';
 
 // Create worker and wrap with Comlink
 const worker = new Worker(new URL('@/workers/sprite.worker', import.meta.url));
@@ -16,8 +17,20 @@ const service = {
     const key = (
       args[0] && args[1] ? `${args[0]}.${args[1]}` : args[0] || args[1]
     )?.toString();
-    if (key && memoryCache.has(key)) {
-      return Promise.resolve(memoryCache.get(key)!);
+    if (key) {
+      try {
+        if (memoryCache.has(key)) {
+          console.log('cached from memory!');
+          return Promise.resolve(memoryCache.get(key)!);
+        }
+        const idbCached = await get(key, spriteStore);
+        if (idbCached) {
+          memoryCache.set(key, Promise.resolve(idbCached.variants));
+          return Promise.resolve(idbCached.variants);
+        }
+      } catch (error) {
+        console.error(error);
+      }
     }
     const promise = spriteService.getArtworkVariants(...args);
     if (key) {
