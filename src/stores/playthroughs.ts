@@ -596,13 +596,13 @@ export const playthroughActions = {
 
       if (shouldCreateFusion && encounterData.head && encounterData.body) {
         // For fusion encounters with both parts
-        preferredVariant = await spriteService.getPreferredVariant(
+        preferredVariant = await playthroughActions.getPreferredVariant(
           encounterData.head.id,
           encounterData.body.id
         );
       } else if (encounterData.head && !shouldCreateFusion) {
         // For single Pokemon encounters
-        preferredVariant = await spriteService.getPreferredVariant(
+        preferredVariant = await playthroughActions.getPreferredVariant(
           encounterData.head.id
         );
       }
@@ -673,10 +673,11 @@ export const playthroughActions = {
         // If composition is changing, try to apply preferred variant
         if (isChangingComposition && encounter.head && encounter.body) {
           try {
-            const preferredVariant = await spriteService.getPreferredVariant(
-              encounter.head.id,
-              encounter.body.id
-            );
+            const preferredVariant =
+              await playthroughActions.getPreferredVariant(
+                encounter.head.id,
+                encounter.body.id
+              );
             encounter.artworkVariant = preferredVariant;
           } catch (error) {
             console.warn('Failed to get preferred variant from cache:', error);
@@ -710,9 +711,10 @@ export const playthroughActions = {
         // Try to apply preferred variant for single Pokémon
         if (isChangingComposition) {
           try {
-            const preferredVariant = await spriteService.getPreferredVariant(
-              pokemonWithLocationAndUID.id
-            );
+            const preferredVariant =
+              await playthroughActions.getPreferredVariant(
+                pokemonWithLocationAndUID.id
+              );
             encounter.artworkVariant = preferredVariant;
           } catch (error) {
             console.warn('Failed to get preferred variant from cache:', error);
@@ -741,7 +743,7 @@ export const playthroughActions = {
   },
 
   // Toggle fusion mode for an encounter
-  toggleEncounterFusion: (locationId: string) => {
+  toggleEncounterFusion: async (locationId: string) => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
 
@@ -766,7 +768,9 @@ export const playthroughActions = {
           head: currentEncounter.body,
           body: null,
           isFusion: false,
-          artworkVariant: undefined, // Reset artwork variant when unfusing
+          artworkVariant: await playthroughActions.getPreferredVariant(
+            currentEncounter.body?.id
+          ),
           updatedAt: getCurrentTimestamp(),
         };
       } else {
@@ -774,7 +778,9 @@ export const playthroughActions = {
         activePlaythrough.encounters![locationId] = {
           ...currentEncounter,
           isFusion: false,
-          artworkVariant: undefined, // Reset artwork variant when unfusing
+          artworkVariant: await playthroughActions.getPreferredVariant(
+            currentEncounter.head?.id
+          ),
         };
       }
     } else {
@@ -782,7 +788,10 @@ export const playthroughActions = {
       activePlaythrough.encounters![locationId] = {
         ...currentEncounter,
         isFusion: newIsFusion,
-        artworkVariant: undefined, // Reset artwork variant when changing fusion state
+        artworkVariant: await playthroughActions.getPreferredVariant(
+          currentEncounter.head?.id,
+          currentEncounter.body?.id
+        ),
         updatedAt: getCurrentTimestamp(),
       };
     }
@@ -791,7 +800,7 @@ export const playthroughActions = {
   },
 
   // Create fusion from drag and drop
-  createFusion: (
+  createFusion: async (
     locationId: string,
     head: z.infer<typeof PokemonOptionSchema>,
     body: z.infer<typeof PokemonOptionSchema>
@@ -808,26 +817,14 @@ export const playthroughActions = {
       head,
       body,
       isFusion: true,
-      artworkVariant: undefined as string | undefined, // Reset artwork variant for new fusion
+      artworkVariant: await playthroughActions.getPreferredVariant(
+        head.id,
+        body.id
+      ),
       updatedAt: getCurrentTimestamp(),
     };
 
     activePlaythrough.encounters[locationId] = encounter;
-
-    // Try to set preferred variant for the new fusion
-    spriteService
-      .getPreferredVariant(head.id, body.id)
-      .then((preferredVariant: string | undefined) => {
-        if (preferredVariant && encounter.artworkVariant === undefined) {
-          encounter.artworkVariant = preferredVariant;
-          encounter.updatedAt = getCurrentTimestamp();
-        }
-      })
-      .catch((error: unknown) => {
-        console.warn('Failed to get preferred variant from cache:', error);
-      });
-
-    // Note: Encounter timestamp already updated above
   },
 
   // Set artwork variant for an encounter
@@ -1183,13 +1180,17 @@ export const playthroughActions = {
     // Reset artwork variant for the destination encounter
     const destEncounter = activePlaythrough.encounters[toLocationId];
     if (destEncounter) {
-      destEncounter.artworkVariant = undefined;
+      destEncounter.artworkVariant =
+        await playthroughActions.getPreferredVariant(
+          destEncounter.head?.id,
+          destEncounter.body?.id
+        );
       destEncounter.updatedAt = getCurrentTimestamp();
     }
   },
 
   // Swap encounters between two locations (replaces switchCombobox event)
-  swapEncounters: (
+  swapEncounters: async (
     locationId1: string,
     locationId2: string,
     field1: 'head' | 'body' = 'head',
@@ -1236,9 +1237,20 @@ export const playthroughActions = {
       encounter2.body = pokemon1WithLocation;
     }
 
+    const [variant1, variant2] = await Promise.all([
+      spriteService.getPreferredVariant(
+        encounter1.head?.id,
+        encounter1.body?.id
+      ),
+      spriteService.getPreferredVariant(
+        encounter2.head?.id,
+        encounter2.body?.id
+      ),
+    ]);
+
     // Reset artwork variants since the fusion combinations have changed
-    encounter1.artworkVariant = undefined;
-    encounter2.artworkVariant = undefined;
+    encounter1.artworkVariant = variant1;
+    encounter2.artworkVariant = variant2;
 
     // Update both encounter timestamps since they were swapped
     const timestamp = getCurrentTimestamp();
