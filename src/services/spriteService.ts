@@ -40,8 +40,6 @@ const service = {
       args[0] && args[1] ? `${args[0]}.${args[1]}` : args[0] || args[1]
     )?.toString();
 
-    return spriteService.getArtworkVariants(args[0], args[1], args[2], true);
-
     if (key) {
       try {
         if (memoryCache.has(key)) {
