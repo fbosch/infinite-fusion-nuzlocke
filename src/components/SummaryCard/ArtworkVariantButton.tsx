@@ -24,7 +24,7 @@ export function ArtworkVariantButton({
   const [hasVariants, setHasVariants] = useState<boolean | null>(null);
 
   React.useEffect(() => {
-    if (!shouldLoad || !encounter?.head) return;
+    if (!shouldLoad) return;
 
     const checkVariants = async () => {
       try {
@@ -32,8 +32,8 @@ export function ArtworkVariantButton({
           .default;
         let variants: string[] = [];
         variants = await spriteService.getArtworkVariants(
-          encounter.head?.id,
-          encounter.body?.id
+          encounter?.head?.id,
+          encounter?.body?.id
         );
 
         setHasVariants(variants.length > 1);
