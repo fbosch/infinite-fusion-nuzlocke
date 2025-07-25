@@ -3,11 +3,11 @@ import { defineConfig } from 'vitest/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  plugins: [tsconfigPaths()],
   test: {
     globals: true,
     projects: [
       {
+        plugins: [tsconfigPaths()],
         test: {
           name: 'browser',
           include: ['**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
@@ -24,6 +24,7 @@ export default defineConfig({
         },
       },
       {
+        plugins: [tsconfigPaths()],
         test: {
           name: 'react-hooks',
           include: ['**/playthroughs.test.ts'],
@@ -31,6 +32,7 @@ export default defineConfig({
         },
       },
       {
+        plugins: [tsconfigPaths()],
         test: {
           name: 'node',
           include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],

@@ -162,6 +162,7 @@ export async function checkSpriteExists(url: string): Promise<boolean> {
 
     const response = await fetch(url, {
       method: 'HEAD',
+      mode: 'no-cors',
       signal: controller.signal,
     });
 
