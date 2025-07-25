@@ -160,8 +160,6 @@ export async function checkSpriteExists(url: string): Promise<boolean> {
   if (typeof window !== 'undefined' && typeof Image !== 'undefined') {
     return new Promise<boolean>(resolve => {
       const img = new Image();
-
-      img.crossOrigin = 'anonymous';
       img.decoding = 'async';
 
       const timeoutId = setTimeout(() => {
