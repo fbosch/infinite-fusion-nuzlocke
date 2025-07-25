@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useSyncExternalStore, useMemo } from 'react';
 
 // Global state for all keys
 const keyStates = new Map<string, boolean>();
@@ -17,7 +17,7 @@ function getTotalSubscriptions(): number {
 }
 
 // Subscribe function for useSyncExternalStore
-function subscribe(key: string) {
+function createSubscribe(key: string) {
   return (listener: () => void) => {
     // Initialize key state if not exists
     if (!keyStates.has(key)) {
@@ -69,7 +69,7 @@ function subscribe(key: string) {
 }
 
 // Get current state for a specific key
-function getSnapshot(key: string) {
+function createGetSnapshot(key: string) {
   return () => keyStates.get(key) ?? false;
 }
 
@@ -128,11 +128,13 @@ function notifyListeners(key: string) {
  * @returns {boolean} True if the specified key is currently pressed, false otherwise
  */
 export function useKeyPressed(key: string): boolean {
-  return useSyncExternalStore(
-    subscribe(key),
-    getSnapshot(key),
-    getServerSnapshot
-  );
+  // Memoize the subscribe function to prevent re-subscriptions
+  const subscribe = useMemo(() => createSubscribe(key), [key]);
+
+  // Memoize the getSnapshot function to prevent unnecessary re-evaluations
+  const getSnapshot = useMemo(() => createGetSnapshot(key), [key]);
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 /**
