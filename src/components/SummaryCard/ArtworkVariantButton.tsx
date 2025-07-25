@@ -25,38 +25,103 @@ export function ArtworkVariantButton({
   const [isLoading, setIsLoading] = React.useState(false);
   const [hasVariants, setHasVariants] = useState<boolean | null>(null);
 
+  // Check cached variants without making HTTP requests
   React.useEffect(() => {
-    if (
-      encounter?.head === undefined ||
-      encounter?.body === undefined ||
-      !shouldLoad
-    ) {
+    if (!encounter?.head || !shouldLoad) {
+      setHasVariants(null);
       return;
     }
 
-    const preloadVariants = async () => {
-      const { getAvailableArtworkVariants } = await import(
-        '@/services/spriteService'
-      );
-      const availableVariants = await getAvailableArtworkVariants(
-        encounter?.head?.id,
-        encounter?.body?.id
-      );
+    const checkCachedVariants = async () => {
+      const isFusion = encounter.isFusion && encounter.head && encounter.body;
+      const isSinglePokemon = !encounter.isFusion && encounter.head;
 
-      setHasVariants(availableVariants.length > 1);
+      if (!isFusion && !isSinglePokemon) {
+        setHasVariants(null);
+        return;
+      }
+
+      if (isFusion && encounter.head?.id && encounter.body?.id) {
+        const { getCachedArtworkVariants } = await import(
+          '@/services/spriteService'
+        );
+        const cachedVariants = await getCachedArtworkVariants(
+          encounter.head.id,
+          encounter.body.id
+        );
+
+        // Only update state if we have cached data
+        if (cachedVariants !== null) {
+          setHasVariants(cachedVariants.length > 1);
+        }
+      } else if (isSinglePokemon && encounter.head?.id) {
+        const { getCachedPokemonArtworkVariants } = await import(
+          '@/services/spriteService'
+        );
+        const cachedVariants = await getCachedPokemonArtworkVariants(
+          encounter.head.id
+        );
+
+        // Only update state if we have cached data
+        if (cachedVariants !== null) {
+          setHasVariants(cachedVariants.length > 1);
+        }
+      }
     };
-    preloadVariants();
-  }, [encounter.head, encounter.body, shouldLoad]);
+    checkCachedVariants();
+  }, [encounter.head, encounter.body, encounter.isFusion, shouldLoad]);
 
   const handleCycleVariant = React.useCallback(
     async (event: React.MouseEvent) => {
       if (disabled || isLoading) return;
       const reverse = event.shiftKey;
       setIsLoading(true);
-      await playthroughActions.cycleArtworkVariant(locationId, reverse);
-      setIsLoading(false);
+
+      try {
+        await playthroughActions.cycleArtworkVariant(locationId, reverse);
+
+        // After cycling, check if we discovered that there are no variants
+        if (hasVariants === null && encounter?.head?.id) {
+          const isFusion =
+            encounter.isFusion && encounter.head && encounter.body;
+          const isSinglePokemon = !encounter.isFusion && encounter.head;
+
+          if (isFusion && encounter.body?.id) {
+            const { getCachedArtworkVariants } = await import(
+              '@/services/spriteService'
+            );
+            const cachedVariants = await getCachedArtworkVariants(
+              encounter.head.id,
+              encounter.body.id
+            );
+            if (cachedVariants !== null) {
+              setHasVariants(cachedVariants.length > 1);
+            }
+          } else if (isSinglePokemon) {
+            const { getCachedPokemonArtworkVariants } = await import(
+              '@/services/spriteService'
+            );
+            const cachedVariants = await getCachedPokemonArtworkVariants(
+              encounter.head.id
+            );
+            if (cachedVariants !== null) {
+              setHasVariants(cachedVariants.length > 1);
+            }
+          }
+        }
+      } finally {
+        setIsLoading(false);
+      }
     },
-    [locationId, disabled, isLoading]
+    [
+      locationId,
+      disabled,
+      isLoading,
+      hasVariants,
+      encounter?.head?.id,
+      encounter?.body?.id,
+      encounter?.isFusion,
+    ]
   );
 
   const isButtonDisabled = disabled || isLoading || hasVariants === false;
@@ -79,12 +144,12 @@ export function ArtworkVariantButton({
         className
       )}
       aria-label={
-        isButtonDisabled
+        hasVariants === false
           ? `No alternative artwork variants available`
           : `Cycle artwork variants (hold Shift to reverse)`
       }
       title={
-        isButtonDisabled
+        hasVariants === false
           ? `No alternative artwork variants available`
           : `Cycle artwork variants (hold Shift to reverse)`
       }
@@ -92,7 +157,7 @@ export function ArtworkVariantButton({
       <div className='dark:pixel-shadow'>
         {isLoading ? (
           <Loader2 className='size-4 animate-spin' />
-        ) : isButtonDisabled ? (
+        ) : hasVariants === false ? (
           <RefreshCwOff className='size-3' />
         ) : (
           <RefreshCcw className='size-3' />

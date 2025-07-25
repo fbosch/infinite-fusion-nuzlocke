@@ -2,6 +2,11 @@
  * Check if a sprite URL exists by attempting to load it
  * Returns a promise that resolves to true if the image exists, false otherwise
  */
+import { get, set, del, clear, entries, createStore } from 'idb-keyval';
+
+// Create a custom store for sprite variant cache
+const spritesStore = createStore('sprites', 'variant-cache');
+
 export async function checkSpriteExists(url: string): Promise<boolean> {
   return new Promise(resolve => {
     const img = new Image();
@@ -70,148 +75,202 @@ interface VariantCacheEntry {
   checkingPromise?: Promise<string[]>; // Track ongoing checks to avoid duplicates
 }
 
-// Persistent cache using localStorage
+// Persistent cache using IndexedDB
 class PersistentVariantCache {
-  private static readonly STORAGE_KEY = 'pokemon-fusion-variant-cache';
+  private static readonly CACHE_KEY_PREFIX = 'pokemon-fusion-variant-cache-';
   private static readonly CACHE_VERSION = 1;
+  private static readonly METADATA_KEY = 'cache-metadata';
   private cache = new Map<string, VariantCacheEntry>();
+  private initPromise: Promise<void> | null = null;
 
   constructor() {
-    this.loadFromStorage();
+    this.initPromise = this.loadFromStorage();
   }
 
-  private loadFromStorage(): void {
-    // Check if we're in a browser environment
-    if (typeof window === 'undefined' || !globalThis.localStorage) return;
-
-    try {
-      const stored = localStorage.getItem(PersistentVariantCache.STORAGE_KEY);
-      if (!stored) return;
-
-      const parsed = JSON.parse(stored);
-
-      // Check version compatibility
-      if (parsed.version !== PersistentVariantCache.CACHE_VERSION) {
-        console.log('Cache version mismatch, clearing cache');
-        this.clearAll();
-        return;
-      }
-
-      // Restore cache entries (excluding promises which can't be serialized)
-      const entries = parsed.entries || [];
-      for (const [key, entry] of entries) {
-        this.cache.set(key, {
-          variants: entry.variants,
-          lastChecked: entry.lastChecked,
-          isComplete: entry.isComplete,
-          // Don't restore checkingPromise - it will be recreated if needed
-        });
-      }
-
-      console.log(
-        `Loaded ${this.cache.size} variant cache entries from localStorage`
-      );
-    } catch (error) {
-      console.warn('Failed to load variant cache from localStorage:', error);
-      this.clearAll();
+  private async ensureInitialized(): Promise<void> {
+    if (this.initPromise) {
+      await this.initPromise;
+      this.initPromise = null;
     }
   }
 
-  private saveToStorage(): void {
-    // Check if we're in a browser environment
-    if (typeof window === 'undefined' || !globalThis.localStorage) return;
-
+  private async loadFromStorage(): Promise<void> {
     try {
-      window.requestAnimationFrame(() => {
-        // Convert Map to serializable format, excluding promises
-        const entries = Array.from(this.cache.entries()).map(([key, entry]) => [
-          key,
-          {
+      // Check metadata for version compatibility
+      const metadata = await get(
+        PersistentVariantCache.METADATA_KEY,
+        spritesStore
+      );
+
+      if (
+        metadata &&
+        metadata.version !== PersistentVariantCache.CACHE_VERSION
+      ) {
+        console.log('Cache version mismatch, clearing cache');
+        await this.clearAll();
+        return;
+      }
+
+      // Load all cache entries
+      const allEntries = await entries(spritesStore);
+      let loadedCount = 0;
+
+      for (const [key, entry] of allEntries) {
+        if (
+          typeof key === 'string' &&
+          key.startsWith(PersistentVariantCache.CACHE_KEY_PREFIX)
+        ) {
+          const cacheKey = key.replace(
+            PersistentVariantCache.CACHE_KEY_PREFIX,
+            ''
+          );
+          this.cache.set(cacheKey, {
             variants: entry.variants,
             lastChecked: entry.lastChecked,
             isComplete: entry.isComplete,
-            // Exclude checkingPromise from serialization
-          },
-        ]);
+          });
+          loadedCount++;
+        }
+      }
 
-        const toStore = {
-          version: PersistentVariantCache.CACHE_VERSION,
-          entries,
-          savedAt: Date.now(),
-        };
-
-        localStorage.setItem(
-          PersistentVariantCache.STORAGE_KEY,
-          JSON.stringify(toStore)
-        );
-      });
+      console.log(
+        `Loaded ${loadedCount} variant cache entries from IndexedDB sprites store`
+      );
     } catch (error) {
-      console.warn('Failed to save variant cache to localStorage:', error);
+      console.warn('Failed to load variant cache from IndexedDB:', error);
+      await this.clearAll();
+    }
+  }
+
+  private async saveToStorage(
+    key: string,
+    entry: VariantCacheEntry
+  ): Promise<void> {
+    try {
+      // Save the specific entry
+      const storageKey = PersistentVariantCache.CACHE_KEY_PREFIX + key;
+      await set(
+        storageKey,
+        {
+          variants: entry.variants,
+          lastChecked: entry.lastChecked,
+          isComplete: entry.isComplete,
+          // Exclude checkingPromise from serialization
+        },
+        spritesStore
+      );
+
+      // Update metadata
+      await set(
+        PersistentVariantCache.METADATA_KEY,
+        {
+          version: PersistentVariantCache.CACHE_VERSION,
+          lastSaved: Date.now(),
+        },
+        spritesStore
+      );
+    } catch (error) {
+      console.warn('Failed to save variant cache to IndexedDB:', error);
       // Handle quota exceeded or other storage errors gracefully
     }
   }
 
-  get(key: string): VariantCacheEntry | undefined {
+  async get(key: string): Promise<VariantCacheEntry | undefined> {
+    await this.ensureInitialized();
     return this.cache.get(key);
   }
 
-  set(key: string, entry: VariantCacheEntry): void {
+  async set(key: string, entry: VariantCacheEntry): Promise<void> {
+    await this.ensureInitialized();
     this.cache.set(key, entry);
-    // Save to localStorage after updating cache
-    this.saveToStorage();
+    // Save to IndexedDB after updating cache
+    await this.saveToStorage(key, entry);
   }
 
-  has(key: string): boolean {
+  async has(key: string): Promise<boolean> {
+    await this.ensureInitialized();
     return this.cache.has(key);
   }
 
-  delete(key: string): boolean {
+  async delete(key: string): Promise<boolean> {
+    await this.ensureInitialized();
     const result = this.cache.delete(key);
     if (result) {
-      this.saveToStorage();
+      try {
+        const storageKey = PersistentVariantCache.CACHE_KEY_PREFIX + key;
+        await del(storageKey, spritesStore);
+      } catch (error) {
+        console.warn('Failed to delete from IndexedDB:', error);
+      }
     }
     return result;
   }
 
-  clear(): void {
+  async clear(): Promise<void> {
+    await this.ensureInitialized();
     this.cache.clear();
-    this.saveToStorage();
-  }
-
-  clearAll(): void {
-    this.cache.clear();
-    // Check if we're in a browser environment
-    if (typeof window === 'undefined' || !globalThis.localStorage) return;
 
     try {
-      localStorage.removeItem(PersistentVariantCache.STORAGE_KEY);
+      // Clear all cache entries from IndexedDB
+      const allEntries = await entries(spritesStore);
+      const deletePromises = [];
+
+      for (const [key] of allEntries) {
+        if (
+          typeof key === 'string' &&
+          key.startsWith(PersistentVariantCache.CACHE_KEY_PREFIX)
+        ) {
+          deletePromises.push(del(key, spritesStore));
+        }
+      }
+
+      await Promise.all(deletePromises);
+      await del(PersistentVariantCache.METADATA_KEY, spritesStore);
     } catch (error) {
-      console.warn('Failed to clear localStorage:', error);
+      console.warn('Failed to clear IndexedDB:', error);
     }
   }
 
-  entries(): IterableIterator<[string, VariantCacheEntry]> {
-    return this.cache.entries();
+  async clearAll(): Promise<void> {
+    this.cache.clear();
+
+    try {
+      await clear();
+    } catch (error) {
+      console.warn('Failed to clear IndexedDB:', error);
+    }
   }
 
-  get size(): number {
+  async entries(): Promise<Array<[string, VariantCacheEntry]>> {
+    await this.ensureInitialized();
+    return Array.from(this.cache.entries());
+  }
+
+  async size(): Promise<number> {
+    await this.ensureInitialized();
     return this.cache.size;
   }
 
   // Clean up expired entries and save
-  clearExpired(expiryTime: number): number {
+  async clearExpired(expiryTime: number): Promise<number> {
+    await this.ensureInitialized();
     const now = Date.now();
     let cleared = 0;
 
+    const keysToDelete = [];
     for (const [key, entry] of this.cache.entries()) {
       if (now - entry.lastChecked > expiryTime) {
-        this.cache.delete(key);
-        cleared++;
+        keysToDelete.push(key);
       }
     }
 
+    // Delete expired entries
+    for (const key of keysToDelete) {
+      await this.delete(key);
+      cleared++;
+    }
+
     if (cleared > 0) {
-      this.saveToStorage();
       console.log(`Cleared ${cleared} expired cache entries`);
     }
 
@@ -330,7 +389,7 @@ async function checkAllVariantsInBackground(
     lastChecked: Date.now(),
     isComplete: true,
   };
-  variantCache.set(cacheKey, completeEntry);
+  await variantCache.set(cacheKey, completeEntry);
 }
 
 /**
@@ -395,7 +454,7 @@ export async function getAvailableArtworkVariants(
   const now = Date.now();
 
   // Check if we have a valid cached result
-  const cached = variantCache.get(cacheKey);
+  const cached = await variantCache.get(cacheKey);
   if (cached && now - cached.lastChecked < CACHE_EXPIRY) {
     return cached.variants;
   }
@@ -429,7 +488,7 @@ export async function getAvailableArtworkVariants(
         lastChecked: now,
         isComplete: variants.length === 1, // Only complete if just default variant
       };
-      variantCache.set(cacheKey, cacheEntry);
+      await variantCache.set(cacheKey, cacheEntry);
 
       return variants;
     } catch (error) {
@@ -441,7 +500,7 @@ export async function getAvailableArtworkVariants(
         lastChecked: now,
         isComplete: false,
       };
-      variantCache.set(cacheKey, fallbackEntry);
+      await variantCache.set(cacheKey, fallbackEntry);
 
       return [''];
     }
@@ -451,7 +510,7 @@ export async function getAvailableArtworkVariants(
   if (cached) {
     cached.checkingPromise = checkingPromise;
   } else {
-    variantCache.set(cacheKey, {
+    await variantCache.set(cacheKey, {
       variants: [''],
       lastChecked: 0,
       isComplete: false,
@@ -474,7 +533,7 @@ export async function getAvailablePokemonArtworkVariants(
   const now = Date.now();
 
   // Check if we have a valid cached result
-  const cached = variantCache.get(cacheKey);
+  const cached = await variantCache.get(cacheKey);
   if (cached && now - cached.lastChecked < CACHE_EXPIRY) {
     return cached.variants;
   }
@@ -505,7 +564,7 @@ export async function getAvailablePokemonArtworkVariants(
         lastChecked: now,
         isComplete: true,
       };
-      variantCache.set(cacheKey, cacheEntry);
+      await variantCache.set(cacheKey, cacheEntry);
 
       return variants;
     } catch (error) {
@@ -520,7 +579,7 @@ export async function getAvailablePokemonArtworkVariants(
         lastChecked: now,
         isComplete: false,
       };
-      variantCache.set(cacheKey, fallbackEntry);
+      await variantCache.set(cacheKey, fallbackEntry);
 
       return [''];
     }
@@ -530,7 +589,7 @@ export async function getAvailablePokemonArtworkVariants(
   if (cached) {
     cached.checkingPromise = checkingPromise;
   } else {
-    variantCache.set(cacheKey, {
+    await variantCache.set(cacheKey, {
       variants: [''],
       lastChecked: 0,
       isComplete: false,
@@ -580,7 +639,7 @@ export async function preloadArtworkVariants(
 /**
  * Get cache statistics for debugging
  */
-export function getVariantCacheStats(): {
+export async function getVariantCacheStats(): Promise<{
   size: number;
   entries: Array<{
     key: string;
@@ -588,8 +647,8 @@ export function getVariantCacheStats(): {
     lastChecked: Date;
     isComplete: boolean;
   }>;
-} {
-  const entries = Array.from(variantCache.entries()).map(([key, entry]) => ({
+}> {
+  const entries = (await variantCache.entries()).map(([key, entry]) => ({
     key,
     variants: entry.variants.length,
     lastChecked: new Date(entry.lastChecked),
@@ -597,7 +656,7 @@ export function getVariantCacheStats(): {
   }));
 
   return {
-    size: variantCache.size,
+    size: await variantCache.size(),
     entries,
   };
 }
@@ -605,15 +664,15 @@ export function getVariantCacheStats(): {
 /**
  * Clear expired cache entries
  */
-export function clearExpiredCache(): number {
-  return variantCache.clearExpired(CACHE_EXPIRY);
+export async function clearExpiredCache(): Promise<number> {
+  return await variantCache.clearExpired(CACHE_EXPIRY);
 }
 
 /**
  * Clear the variant cache (useful for testing or if variants change)
  */
-export function clearVariantCache(): void {
-  variantCache.clearAll();
+export async function clearVariantCache(): Promise<void> {
+  await variantCache.clearAll();
   console.log('Cleared all variant cache entries');
 }
 
@@ -621,12 +680,12 @@ export function clearVariantCache(): void {
  * Get cached variants without making HTTP requests
  * Returns null if not cached or expired
  */
-export function getCachedArtworkVariants(
+export async function getCachedArtworkVariants(
   headId: number,
   bodyId: number
-): string[] | null {
+): Promise<string[] | null> {
   const cacheKey = `${headId}.${bodyId}`;
-  const cached = variantCache.get(cacheKey);
+  const cached = await variantCache.get(cacheKey);
 
   if (!cached) return null;
 
@@ -642,18 +701,10 @@ export function getCachedArtworkVariants(
  * Get cached variants for single Pokémon without making HTTP requests
  * Returns null if not cached or expired
  */
-export function getCachedPokemonArtworkVariants(
+export async function getCachedPokemonArtworkVariants(
   pokemonId: number
-): string[] | null {
-  const cacheKey = `pokemon_${pokemonId}`;
-  const cached = variantCache.get(cacheKey);
-
+): Promise<string[] | null> {
+  const cached = await variantCache.get(pokemonId.toString());
   if (!cached) return null;
-
-  const now = Date.now();
-  if (now - cached.lastChecked > CACHE_EXPIRY) {
-    return null;
-  }
-
   return cached.variants;
 }

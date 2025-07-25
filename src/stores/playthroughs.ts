@@ -1,11 +1,14 @@
 import { proxy, subscribe, useSnapshot } from 'valtio';
 import { devtools } from 'valtio/utils';
 import { z, ZodError } from 'zod';
-import { get, set, del } from 'idb-keyval';
+import { get, set, del, createStore } from 'idb-keyval';
 import { debounce } from 'lodash';
 import React, { useMemo } from 'react';
 import { PokemonOptionSchema, generatePokemonUID } from '@/loaders/pokemon';
 import { CustomLocationSchema } from '@/loaders/locations';
+
+// Create a custom store for playthroughs data
+const playthroughsStore_idb = createStore('playthroughs', 'data');
 
 export const EncounterDataSchema = z.object({
   head: PokemonOptionSchema.nullable(),
@@ -115,24 +118,32 @@ const debouncedSaveAll = debounce(
       // Save active playthrough ID
       if (state.activePlaythroughId) {
         saveOperations.push(
-          set(ACTIVE_PLAYTHROUGH_KEY, state.activePlaythroughId)
+          set(
+            ACTIVE_PLAYTHROUGH_KEY,
+            state.activePlaythroughId,
+            playthroughsStore_idb
+          )
         );
       } else {
-        saveOperations.push(del(ACTIVE_PLAYTHROUGH_KEY));
+        saveOperations.push(del(ACTIVE_PLAYTHROUGH_KEY, playthroughsStore_idb));
       }
 
       // Save the active playthrough data if it exists
       if (activePlaythrough) {
         const plainPlaythrough = serializeForStorage(activePlaythrough);
-        saveOperations.push(set(activePlaythrough.id, plainPlaythrough));
+        saveOperations.push(
+          set(activePlaythrough.id, plainPlaythrough, playthroughsStore_idb)
+        );
 
         // Check if we need to update playthrough IDs list
         const updatePlaythroughIds = async () => {
-          const playthroughIds = ((await get('playthrough_ids')) ||
-            []) as string[];
+          const playthroughIds = ((await get(
+            'playthrough_ids',
+            playthroughsStore_idb
+          )) || []) as string[];
           if (!playthroughIds.includes(activePlaythrough.id)) {
             playthroughIds.push(activePlaythrough.id);
-            await set('playthrough_ids', playthroughIds);
+            await set('playthrough_ids', playthroughIds, playthroughsStore_idb);
           }
         };
         saveOperations.push(updatePlaythroughIds());
@@ -159,9 +170,13 @@ const saveToIndexedDB = async (state: PlaythroughsState): Promise<void> => {
 
     // Save active playthrough ID
     if (state.activePlaythroughId) {
-      await set(ACTIVE_PLAYTHROUGH_KEY, state.activePlaythroughId);
+      await set(
+        ACTIVE_PLAYTHROUGH_KEY,
+        state.activePlaythroughId,
+        playthroughsStore_idb
+      );
     } else {
-      await del(ACTIVE_PLAYTHROUGH_KEY);
+      await del(ACTIVE_PLAYTHROUGH_KEY, playthroughsStore_idb);
     }
   } catch (error) {
     console.error('Failed to save playthroughs to IndexedDB:', error);
@@ -176,7 +191,7 @@ const loadPlaythroughById = async (
   if (typeof window === 'undefined') return null;
 
   try {
-    const playthroughData = await get(playthroughId);
+    const playthroughData = await get(playthroughId, playthroughsStore_idb);
     if (playthroughData) {
       return PlaythroughSchema.parse(playthroughData);
     }
@@ -191,8 +206,10 @@ const loadAllPlaythroughs = async (): Promise<Playthrough[]> => {
   if (typeof window === 'undefined') return [];
 
   try {
-    const availablePlaythroughIds = ((await get('playthrough_ids')) ||
-      []) as string[];
+    const availablePlaythroughIds = ((await get(
+      'playthrough_ids',
+      playthroughsStore_idb
+    )) || []) as string[];
 
     // Load all playthroughs in parallel
     const playthroughPromises =
@@ -223,13 +240,19 @@ const deletePlaythroughFromIndexedDB = async (
     playthroughsStore.isSaving = true;
 
     // Get current playthrough IDs and prepare delete operations
-    const playthroughIds = ((await get('playthrough_ids')) || []) as string[];
+    const playthroughIds = ((await get(
+      'playthrough_ids',
+      playthroughsStore_idb
+    )) || []) as string[];
     const updatedIds = playthroughIds.filter(
       (id: string) => id !== playthroughId
     );
 
     // Run delete and update operations in parallel
-    await Promise.all([del(playthroughId), set('playthrough_ids', updatedIds)]);
+    await Promise.all([
+      del(playthroughId, playthroughsStore_idb),
+      set('playthrough_ids', updatedIds, playthroughsStore_idb),
+    ]);
   } catch (error) {
     console.error(
       `Failed to delete playthrough ${playthroughId} from IndexedDB:`,
@@ -246,8 +269,10 @@ const loadFromIndexedDB = async (): Promise<PlaythroughsState> => {
   try {
     // Load active playthrough ID and available playthrough IDs in parallel
     const [activePlaythroughId, availablePlaythroughIds] = await Promise.all([
-      get(ACTIVE_PLAYTHROUGH_KEY),
-      get('playthrough_ids').then(ids => (ids || []) as string[]),
+      get(ACTIVE_PLAYTHROUGH_KEY, playthroughsStore_idb),
+      get('playthrough_ids', playthroughsStore_idb).then(
+        ids => (ids || []) as string[]
+      ),
     ]);
 
     let activePlaythrough: Playthrough | null = null;
@@ -258,7 +283,10 @@ const loadFromIndexedDB = async (): Promise<PlaythroughsState> => {
       availablePlaythroughIds.includes(activePlaythroughId)
     ) {
       try {
-        const playthroughData = await get(activePlaythroughId);
+        const playthroughData = await get(
+          activePlaythroughId,
+          playthroughsStore_idb
+        );
         if (playthroughData) {
           activePlaythrough = PlaythroughSchema.parse(playthroughData);
         }
@@ -280,9 +308,17 @@ const loadFromIndexedDB = async (): Promise<PlaythroughsState> => {
 
       // Save the new default playthrough immediately - all operations in parallel
       await Promise.all([
-        set(activePlaythrough.id, serializeForStorage(activePlaythrough)),
-        set('playthrough_ids', [activePlaythrough.id]),
-        set(ACTIVE_PLAYTHROUGH_KEY, activePlaythrough.id),
+        set(
+          activePlaythrough.id,
+          serializeForStorage(activePlaythrough),
+          playthroughsStore_idb
+        ),
+        set('playthrough_ids', [activePlaythrough.id], playthroughsStore_idb),
+        set(
+          ACTIVE_PLAYTHROUGH_KEY,
+          activePlaythrough.id,
+          playthroughsStore_idb
+        ),
       ]);
     }
 
@@ -488,7 +524,8 @@ export const playthroughActions = {
     if (typeof window === 'undefined') return [];
 
     try {
-      return ((await get('playthrough_ids')) || []) as string[];
+      return ((await get('playthrough_ids', playthroughsStore_idb)) ||
+        []) as string[];
     } catch (error) {
       console.error('Failed to get available playthrough IDs:', error);
       return [];
@@ -744,7 +781,7 @@ export const playthroughActions = {
       if (isFusion && encounter.head && encounter.body) {
         // Handle fusion variants
         // First try to get cached variants to avoid unnecessary HTTP requests
-        availableVariants = getCachedArtworkVariants(
+        availableVariants = await getCachedArtworkVariants(
           encounter.head.id,
           encounter.body.id
         );
@@ -759,16 +796,20 @@ export const playthroughActions = {
             encounter.body.id
           );
         }
-      } else if (isSinglePokemon && encounter.head) {
+      } else if (isSinglePokemon) {
         // Handle single Pokémon variants
         // First try to get cached variants to avoid unnecessary HTTP requests
-        availableVariants = getCachedPokemonArtworkVariants(encounter.head.id);
+        availableVariants = await getCachedPokemonArtworkVariants(
+          encounter.head!.id || encounter.body!.id
+        );
 
         // If not cached, fetch them (this will use sequential checking)
         if (!availableVariants) {
-          console.log(`Checking variants for Pokémon ${encounter.head.id}...`);
+          console.log(
+            `Checking variants for Pokémon ${encounter.head!.id || encounter.body!.id}...`
+          );
           availableVariants = await getAvailablePokemonArtworkVariants(
-            encounter.head.id
+            encounter.head!.id || encounter.body!.id
           );
         }
       }

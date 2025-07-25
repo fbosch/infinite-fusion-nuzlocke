@@ -4,9 +4,14 @@ import type { z } from 'zod';
 
 // Mock IndexedDB operations first
 vi.mock('idb-keyval', () => ({
-  get: vi.fn(),
-  set: vi.fn(),
-  del: vi.fn(),
+  get: vi.fn().mockResolvedValue(undefined),
+  set: vi.fn().mockResolvedValue(undefined),
+  del: vi.fn().mockResolvedValue(undefined),
+  createStore: vi.fn(() => ({
+    // Mock store object that can be passed as second parameter
+    name: 'mock-store',
+    storeName: 'mock-object-store',
+  })),
 }));
 
 // Now import the modules
