@@ -25,14 +25,14 @@ export function ArtworkVariantButton({
   const [isLoading, setIsLoading] = React.useState(false);
   const [hasVariants, setHasVariants] = useState<boolean | null>(null);
 
-  // Check cached variants without making HTTP requests
+  // Check for variants on mount and when encounter changes
   React.useEffect(() => {
     if (!encounter?.head || !shouldLoad) {
       setHasVariants(null);
       return;
     }
 
-    const checkCachedVariants = async () => {
+    const checkVariants = async () => {
       const isFusion = encounter.isFusion && encounter.head && encounter.body;
       const isSinglePokemon = !encounter.isFusion && encounter.head;
 
@@ -41,34 +41,27 @@ export function ArtworkVariantButton({
         return;
       }
 
-      if (isFusion && encounter.head?.id && encounter.body?.id) {
-        const { getCachedArtworkVariants } = await import(
-          '@/services/spriteService'
-        );
-        const cachedVariants = await getCachedArtworkVariants(
-          encounter.head.id,
-          encounter.body.id
-        );
+      try {
+        const { getArtworkVariants } = await import('@/services/spriteService');
 
-        // Only update state if we have cached data
-        if (cachedVariants !== null) {
-          setHasVariants(cachedVariants.length > 1);
+        let variants: string[] = [];
+        if (isFusion && encounter.head?.id && encounter.body?.id) {
+          variants = await getArtworkVariants(
+            encounter.head.id,
+            encounter.body.id
+          );
+        } else if (isSinglePokemon && encounter.head?.id) {
+          variants = await getArtworkVariants(encounter.head.id);
         }
-      } else if (isSinglePokemon && encounter.head?.id) {
-        const { getCachedPokemonArtworkVariants } = await import(
-          '@/services/spriteService'
-        );
-        const cachedVariants = await getCachedPokemonArtworkVariants(
-          encounter.head.id
-        );
 
-        // Only update state if we have cached data
-        if (cachedVariants !== null) {
-          setHasVariants(cachedVariants.length > 1);
-        }
+        setHasVariants(variants.length > 1);
+      } catch (error) {
+        console.warn('Failed to check artwork variants:', error);
+        setHasVariants(false);
       }
     };
-    checkCachedVariants();
+
+    checkVariants();
   }, [encounter.head, encounter.body, encounter.isFusion, shouldLoad]);
 
   const handleCycleVariant = React.useCallback(
@@ -86,27 +79,28 @@ export function ArtworkVariantButton({
             encounter.isFusion && encounter.head && encounter.body;
           const isSinglePokemon = !encounter.isFusion && encounter.head;
 
-          if (isFusion && encounter.body?.id) {
-            const { getCachedArtworkVariants } = await import(
+          try {
+            const { getArtworkVariants } = await import(
               '@/services/spriteService'
             );
-            const cachedVariants = await getCachedArtworkVariants(
-              encounter.head.id,
-              encounter.body.id
-            );
-            if (cachedVariants !== null) {
-              setHasVariants(cachedVariants.length > 1);
+
+            let variants: string[] = [];
+            if (isFusion && encounter.body?.id) {
+              variants = await getArtworkVariants(
+                encounter.head.id,
+                encounter.body.id
+              );
+            } else if (isSinglePokemon) {
+              variants = await getArtworkVariants(encounter.head.id);
             }
-          } else if (isSinglePokemon) {
-            const { getCachedPokemonArtworkVariants } = await import(
-              '@/services/spriteService'
+
+            setHasVariants(variants.length > 1);
+          } catch (error) {
+            console.warn(
+              'Failed to check artwork variants after cycling:',
+              error
             );
-            const cachedVariants = await getCachedPokemonArtworkVariants(
-              encounter.head.id
-            );
-            if (cachedVariants !== null) {
-              setHasVariants(cachedVariants.length > 1);
-            }
+            setHasVariants(false);
           }
         }
       } finally {

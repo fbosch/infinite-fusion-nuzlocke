@@ -776,25 +776,16 @@ export const playthroughActions = {
       let availableVariants: string[] | null = null;
 
       if (isFusion && encounter.head && encounter.body) {
-        // Try cache first, then fetch if needed
-        availableVariants =
-          (await spriteService.getCachedArtworkVariants(
-            encounter.head.id,
-            encounter.body.id
-          )) ||
-          (await spriteService.getAvailableArtworkVariants(
-            encounter.head.id,
-            encounter.body.id
-          ));
+        // Fusion variants
+        availableVariants = await spriteService.getArtworkVariants(
+          encounter.head.id,
+          encounter.body.id
+        );
       } else {
         // Single Pokémon variants
-        availableVariants =
-          (await spriteService.getCachedPokemonArtworkVariants(
-            primaryPokemon.id
-          )) ||
-          (await spriteService.getAvailablePokemonArtworkVariants(
-            primaryPokemon.id
-          ));
+        availableVariants = await spriteService.getArtworkVariants(
+          primaryPokemon.id
+        );
       }
 
       // Early return if no variants or only default
@@ -834,69 +825,73 @@ export const playthroughActions = {
       activePlaythrough.encounters = {};
     }
 
-    // Get all fusion encounters
-    const fusionEncounters = Object.entries(activePlaythrough.encounters)
-      .filter(
-        ([, encounter]) =>
-          encounter.isFusion && encounter.head && encounter.body
-      )
-      .map(([, encounter]) => ({
-        headId: encounter.head!.id,
-        bodyId: encounter.body!.id,
-      }));
+    // Get all encounters that need variant preloading
+    const encountersToPreload = Object.entries(
+      activePlaythrough.encounters
+    ).filter(([, encounter]) => {
+      // Include fusion encounters with both head and body
+      if (encounter.isFusion && encounter.head && encounter.body) {
+        return true;
+      }
+      // Include single Pokémon encounters
+      if (!encounter.isFusion && encounter.head) {
+        return true;
+      }
+      return false;
+    });
 
-    // Get all single Pokémon encounters
-    const pokemonEncounters = Object.entries(activePlaythrough.encounters)
-      .filter(([, encounter]) => !encounter.isFusion && encounter.head)
-      .map(([, encounter]) => ({
-        pokemonId: encounter.head!.id,
-      }));
-
-    if (fusionEncounters.length === 0 && pokemonEncounters.length === 0) {
+    if (encountersToPreload.length === 0) {
       console.log('No encounters found to preload variants for');
       return;
     }
 
     console.log(
-      `Preloading artwork variants for ${fusionEncounters.length} fusion encounters and ${pokemonEncounters.length} Pokémon encounters...`
+      `Preloading artwork variants for ${encountersToPreload.length} encounters...`
     );
 
     try {
-      // Import the validation utilities dynamically
-      const { preloadArtworkVariants, getAvailablePokemonArtworkVariants } =
-        await import('@/services/spriteService');
+      // Import the sprite service
+      const { getArtworkVariants } = await import('@/services/spriteService');
 
-      const preloadPromises: Promise<void>[] = [];
+      // Process encounters in small batches to avoid overwhelming the server
+      const batchSize = 3;
+      for (let i = 0; i < encountersToPreload.length; i += batchSize) {
+        const batch = encountersToPreload.slice(i, i + batchSize);
 
-      // Preload variants for all fusions (limited concurrency)
-      if (fusionEncounters.length > 0) {
-        preloadPromises.push(preloadArtworkVariants(fusionEncounters, 2));
-      }
-
-      // Preload variants for single Pokémon (limited concurrency)
-      if (pokemonEncounters.length > 0) {
-        for (let i = 0; i < pokemonEncounters.length; i += 2) {
-          const batch = pokemonEncounters.slice(i, i + 2);
-
-          const batchPromises = batch.map(({ pokemonId }) =>
-            getAvailablePokemonArtworkVariants(pokemonId).catch(error => {
+        const batchPromises = batch.map(([, encounter]) => {
+          if (encounter.isFusion && encounter.head && encounter.body) {
+            // Fusion encounter
+            return getArtworkVariants(
+              encounter.head.id,
+              encounter.body.id
+            ).catch((error: unknown) => {
               console.warn(
-                `Failed to preload variants for Pokémon ${pokemonId}:`,
+                `Failed to preload fusion variants ${encounter.head!.id}.${encounter.body!.id}:`,
                 error
               );
-            })
-          );
-
-          preloadPromises.push(Promise.all(batchPromises).then(() => {}));
-
-          // Add a small delay between batches to be respectful to the server
-          if (i + 2 < pokemonEncounters.length) {
-            await new Promise(resolve => setTimeout(resolve, 100));
+            });
+          } else if (encounter.head) {
+            // Single Pokémon encounter
+            return getArtworkVariants(encounter.head.id).catch(
+              (error: unknown) => {
+                console.warn(
+                  `Failed to preload Pokémon variants ${encounter.head!.id}:`,
+                  error
+                );
+              }
+            );
           }
+          return Promise.resolve();
+        });
+
+        await Promise.all(batchPromises);
+
+        // Add a small delay between batches to be respectful to the server
+        if (i + batchSize < encountersToPreload.length) {
+          await new Promise(resolve => setTimeout(resolve, 200));
         }
       }
 
-      await Promise.all(preloadPromises);
       console.log('Artwork variant preloading completed');
     } catch (error) {
       console.error('Failed to preload artwork variants:', error);
