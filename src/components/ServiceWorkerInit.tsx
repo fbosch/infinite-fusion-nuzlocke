@@ -5,7 +5,7 @@ import { ServiceWorkerManager } from '@/utils/serviceWorker';
 
 export function ServiceWorkerInit() {
   useEffect(() => {
-    console.log('ServiceWorkerInit: Component mounted, starting registration...');
+    console.debug('ServiceWorkerInit: Component mounted, starting registration...');
     
     // Initialize service worker manager
     const swManager = ServiceWorkerManager.getInstance();
@@ -14,15 +14,15 @@ export function ServiceWorkerInit() {
     swManager.register()
       .then(registration => {
         if (registration) {
-          console.log('ServiceWorkerInit: Registration successful:', registration);
+          console.debug('ServiceWorkerInit: Registration successful:', registration);
           
           // Test the service worker after it takes control
           const testServiceWorker = () => {
-            console.log('ServiceWorkerInit: Testing service worker with a variants API call...');
+            console.debug('ServiceWorkerInit: Testing service worker with a variants API call...');
             fetch('/api/sprites/variants?headId=1&bodyId=2')
               .then(response => response.json())
               .then(data => {
-                console.log('ServiceWorkerInit: Test API call response:', data);
+                console.debug('ServiceWorkerInit: Test API call response:', data);
               })
               .catch(error => {
                 console.error('ServiceWorkerInit: Test API call failed:', error);
@@ -31,26 +31,26 @@ export function ServiceWorkerInit() {
           
           // If service worker is already controlling, test immediately
           if (navigator.serviceWorker.controller) {
-            console.log('ServiceWorkerInit: Service worker already controlling, testing now');
+            console.debug('ServiceWorkerInit: Service worker already controlling, testing now');
             testServiceWorker();
           } else {
-            console.log('ServiceWorkerInit: Waiting for service worker to take control...');
+            console.debug('ServiceWorkerInit: Waiting for service worker to take control...');
             // Wait for service worker to take control
             navigator.serviceWorker.addEventListener('controllerchange', () => {
-              console.log('ServiceWorkerInit: Service worker took control, running test');
+              console.debug('ServiceWorkerInit: Service worker took control, running test');
               testServiceWorker();
             }, { once: true });
             
             // Fallback: test after 3 seconds anyway
             setTimeout(() => {
               if (!navigator.serviceWorker.controller) {
-                console.log('ServiceWorkerInit: Service worker still not controlling, testing anyway...');
+                console.debug('ServiceWorkerInit: Service worker still not controlling, testing anyway...');
                 testServiceWorker();
               }
             }, 3000);
           }
         } else {
-          console.log('ServiceWorkerInit: Registration returned null (not supported or failed)');
+          console.debug('ServiceWorkerInit: Registration returned null (not supported or failed)');
         }
       })
       .catch(error => {

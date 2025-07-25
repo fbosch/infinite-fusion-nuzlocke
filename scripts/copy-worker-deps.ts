@@ -22,13 +22,13 @@ const dependencies = [
   }
 ];
 
-console.log('📦 Copying web worker dependencies...\n');
+console.debug('📦 Copying web worker dependencies...\n');
 
 // Ensure public directory exists
 const publicDir = join(projectRoot, 'public');
 if (!existsSync(publicDir)) {
   mkdirSync(publicDir, { recursive: true });
-  console.log('✅ Created public directory');
+  console.debug('✅ Created public directory');
 }
 
 // Copy each dependency
@@ -42,8 +42,8 @@ dependencies.forEach(({ source, destination, description }) => {
     }
 
     copyFileSync(sourcePath, destPath);
-    console.log(`✅ Copied ${description}`);
-    console.log(`   ${source} → ${destination}`);
+    console.debug(`✅ Copied ${description}`);
+    console.debug(`   ${source} → ${destination}`);
   } catch (error) {
     console.error(`❌ Failed to copy ${description}:`);
     console.error(`   ${error instanceof Error ? error.message : String(error)}`);
@@ -51,5 +51,5 @@ dependencies.forEach(({ source, destination, description }) => {
   }
 });
 
-console.log('\n🎉 All web worker dependencies copied successfully!');
-console.log('📝 Remember to run this script after updating dependencies.'); 
+console.debug('\n🎉 All web worker dependencies copied successfully!');
+console.debug('📝 Remember to run this script after updating dependencies.'); 

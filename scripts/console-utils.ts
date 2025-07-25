@@ -73,11 +73,11 @@ export class ConsoleFormatter {
    * Print a beautiful header for a script
    */
   static printHeader(title: string, subtitle?: string) {
-    console.log(colors.bold.magenta(`\n🔄 ${title}`));
-    console.log(colors.gray('═'.repeat(50)));
+    console.debug(colors.bold.magenta(`\n🔄 ${title}`));
+    console.debug(colors.gray('═'.repeat(50)));
     if (subtitle) {
-      console.log(colors.gray(subtitle));
-      console.log(colors.gray('─'.repeat(50)));
+      console.debug(colors.gray(subtitle));
+      console.debug(colors.gray('─'.repeat(50)));
     }
   }
 
@@ -85,28 +85,28 @@ export class ConsoleFormatter {
    * Print a section header
    */
   static printSection(title: string) {
-    console.log(colors.cyan(`\n${title}`));
+    console.debug(colors.cyan(`\n${title}`));
   }
 
   /**
    * Print success message
    */
   static success(message: string) {
-    console.log(colors.green(`✓ ${message}`));
+    console.debug(colors.green(`✓ ${message}`));
   }
 
   /**
    * Print info message
    */
   static info(message: string) {
-    console.log(colors.yellow(`📖 ${message}`));
+    console.debug(colors.yellow(`📖 ${message}`));
   }
 
   /**
    * Print working/processing message
    */
   static working(message: string) {
-    console.log(colors.cyan(`🔄 ${message}`));
+    console.debug(colors.cyan(`🔄 ${message}`));
   }
 
   /**
@@ -127,16 +127,16 @@ export class ConsoleFormatter {
    * Print completion summary
    */
   static printSummary(title: string, items: Array<{ label: string; value: string | number; color?: keyof typeof colors }>) {
-    console.log(colors.gray('═'.repeat(50)));
-    console.log(colors.bold.green(`🎉 ${title}`));
-    console.log(colors.gray('═'.repeat(50)));
+    console.debug(colors.gray('═'.repeat(50)));
+    console.debug(colors.bold.green(`🎉 ${title}`));
+    console.debug(colors.gray('═'.repeat(50)));
 
     items.forEach(({ label, value, color = 'white' }) => {
       const colorFunc = colors[color as keyof typeof colors] as (str: string) => string;
-      console.log(colors.white(`${label}: ${colorFunc(value.toString())}`));
+      console.debug(colors.white(`${label}: ${colorFunc(value.toString())}`));
     });
 
-    console.log(colors.gray('═'.repeat(50)));
+    console.debug(colors.gray('═'.repeat(50)));
   }
 
   /**

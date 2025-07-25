@@ -31,7 +31,7 @@ async function prefetchPokemonImages() {
   const imageUrls = await getPokemonImageUrls();
   const cache = await caches.open(POKEMON_IMAGE_CACHE_NAME);
   
-  console.log(`Service Worker: Starting to prefetch ${imageUrls.length} Pokemon images`);
+  console.debug(`Service Worker: Starting to prefetch ${imageUrls.length} Pokemon images`);
   
   // Process images in batches to avoid overwhelming the network
   const batchSize = 10;
@@ -68,11 +68,11 @@ async function prefetchPokemonImages() {
     
     // Log progress every 50 images
     if ((i + batchSize) % 50 === 0 || i + batchSize >= imageUrls.length) {
-      console.log(`Service Worker: Prefetched ${Math.min(i + batchSize, imageUrls.length)}/${imageUrls.length} Pokemon images (${successCount} success, ${errorCount} errors)`);
+      console.debug(`Service Worker: Prefetched ${Math.min(i + batchSize, imageUrls.length)}/${imageUrls.length} Pokemon images (${successCount} success, ${errorCount} errors)`);
     }
   }
   
-  console.log(`Service Worker: Pokemon image prefetching complete. ${successCount} successful, ${errorCount} errors`);
+  console.debug(`Service Worker: Pokemon image prefetching complete. ${successCount} successful, ${errorCount} errors`);
 }
 
 // Install event - cache essential resources and prefetch Pokemon images
@@ -83,7 +83,7 @@ self.addEventListener('install', event => {
       caches
         .open(CACHE_NAME)
         .then(cache => {
-          console.log('Service Worker: Caching essential files');
+          console.debug('Service Worker: Caching essential files');
           return cache.addAll(urlsToCache);
         })
         .catch(error => {
@@ -106,7 +106,7 @@ self.addEventListener('activate', event => {
             cacheName !== IMAGE_CACHE_NAME && 
             cacheName !== POKEMON_IMAGE_CACHE_NAME
           ) {
-            console.log('Service Worker: Deleting old cache', cacheName);
+            console.debug('Service Worker: Deleting old cache', cacheName);
             return caches.delete(cacheName);
           }
         })

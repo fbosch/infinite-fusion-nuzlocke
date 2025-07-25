@@ -1048,11 +1048,11 @@ export const playthroughActions = {
     });
 
     if (encountersToPreload.length === 0) {
-      console.log('No encounters found to preload variants for');
+      console.debug('No encounters found to preload variants for');
       return;
     }
 
-    console.log(
+    console.debug(
       `Preloading artwork variants for ${encountersToPreload.length} encounters...`
     );
 
@@ -1100,7 +1100,7 @@ export const playthroughActions = {
         }
       }
 
-      console.log('Artwork variant preloading completed');
+      console.debug('Artwork variant preloading completed');
     } catch (error) {
       console.error('Failed to preload artwork variants:', error);
     }

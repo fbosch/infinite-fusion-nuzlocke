@@ -13,26 +13,26 @@ export class ServiceWorkerManager {
   }
 
   async register(): Promise<ServiceWorkerRegistration | null> {
-    console.log('ServiceWorkerManager: Starting registration process...');
+    console.debug('ServiceWorkerManager: Starting registration process...');
     
     if (!('serviceWorker' in navigator)) {
-      console.log('ServiceWorkerManager: Service Worker not supported in this browser');
+      console.debug('ServiceWorkerManager: Service Worker not supported in this browser');
       return null;
     }
 
-    console.log('ServiceWorkerManager: Service Worker supported, attempting to register /sw.js');
+    console.debug('ServiceWorkerManager: Service Worker supported, attempting to register /sw.js');
 
     try {
       this.swRegistration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
       });
 
-      console.log(
+      console.debug(
         'ServiceWorkerManager: Registration successful:',
         this.swRegistration
       );
       
-      console.log('ServiceWorkerManager: Current service worker state:', {
+      console.debug('ServiceWorkerManager: Current service worker state:', {
         installing: this.swRegistration.installing?.state,
         waiting: this.swRegistration.waiting?.state,
         active: this.swRegistration.active?.state,
@@ -40,17 +40,17 @@ export class ServiceWorkerManager {
 
       // Handle updates
       this.swRegistration.addEventListener('updatefound', () => {
-        console.log('ServiceWorkerManager: Update found, new worker installing');
+        console.debug('ServiceWorkerManager: Update found, new worker installing');
         const newWorker = this.swRegistration!.installing;
         if (newWorker) {
-          console.log('ServiceWorkerManager: New worker state:', newWorker.state);
+          console.debug('ServiceWorkerManager: New worker state:', newWorker.state);
           newWorker.addEventListener('statechange', () => {
-            console.log('ServiceWorkerManager: New worker state changed to:', newWorker.state);
+            console.debug('ServiceWorkerManager: New worker state changed to:', newWorker.state);
             if (
               newWorker.state === 'installed' &&
               navigator.serviceWorker.controller
             ) {
-              console.log('ServiceWorkerManager: New service worker available and ready');
+              console.debug('ServiceWorkerManager: New service worker available and ready');
             }
           });
         }
@@ -58,22 +58,22 @@ export class ServiceWorkerManager {
 
       // Log current controller state
       if (navigator.serviceWorker.controller) {
-        console.log('ServiceWorkerManager: Active service worker controller found');
+        console.debug('ServiceWorkerManager: Active service worker controller found');
       } else {
-        console.log('ServiceWorkerManager: No active service worker controller - waiting for control');
+        console.debug('ServiceWorkerManager: No active service worker controller - waiting for control');
       }
 
       // Listen for when the service worker takes control
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        console.log('ServiceWorkerManager: Service worker now controlling the page!');
+        console.debug('ServiceWorkerManager: Service worker now controlling the page!');
         if (navigator.serviceWorker.controller) {
-          console.log('ServiceWorkerManager: Controller is now active, fetch events will be intercepted');
+          console.debug('ServiceWorkerManager: Controller is now active, fetch events will be intercepted');
         }
       });
 
       // Force activation if the service worker is waiting
       if (this.swRegistration.waiting) {
-        console.log('ServiceWorkerManager: Service worker is waiting, sending skipWaiting message');
+        console.debug('ServiceWorkerManager: Service worker is waiting, sending skipWaiting message');
         this.swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
       }
 
@@ -89,7 +89,7 @@ export class ServiceWorkerManager {
       try {
         await this.swRegistration.unregister();
         this.swRegistration = null;
-        console.log('Service Worker unregistered');
+        console.debug('Service Worker unregistered');
         return true;
       } catch (error) {
         console.error('Service Worker unregistration failed:', error);
@@ -106,7 +106,7 @@ export class ServiceWorkerManager {
         await Promise.all(
           cacheNames.map(cacheName => caches.delete(cacheName))
         );
-        console.log('All caches cleared');
+        console.debug('All caches cleared');
       } catch (error) {
         console.error('Failed to clear caches:', error);
       }
