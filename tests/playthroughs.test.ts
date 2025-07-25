@@ -90,36 +90,40 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.clearEncounterFromLocation('route-1');
 
       const encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1']).toBeUndefined();
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1']).toBeUndefined();
     });
 
     it('should remove regular encounter when clearing head', async () => {
       playthroughActions.clearEncounterFromLocation('route-1', 'head');
 
       const encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1']).toBeUndefined();
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1']).toBeUndefined();
     });
 
     it('should preserve fusion structure when clearing head only', async () => {
       playthroughActions.clearEncounterFromLocation('route-2', 'head');
 
       const encounters = playthroughActions.getEncounters();
-      expect(encounters['route-2']).toBeDefined();
-      expect(encounters['route-2'].isFusion).toBe(true);
-      expect(encounters['route-2'].head).toBeNull();
-      expect(encounters['route-2'].body).toBeDefined();
-      expect(encounters['route-2'].body?.name).toBe('Charmander');
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-2']).toBeDefined();
+      expect(encounters!['route-2'].isFusion).toBe(true);
+      expect(encounters!['route-2'].head).toBeNull();
+      expect(encounters!['route-2'].body).toBeDefined();
+      expect(encounters!['route-2'].body?.name).toBe('Charmander');
     });
 
     it('should preserve fusion structure when clearing body only', async () => {
       playthroughActions.clearEncounterFromLocation('route-2', 'body');
 
       const encounters = playthroughActions.getEncounters();
-      expect(encounters['route-2']).toBeDefined();
-      expect(encounters['route-2'].isFusion).toBe(true);
-      expect(encounters['route-2'].head).toBeDefined();
-      expect(encounters['route-2'].head?.name).toBe('Pikachu');
-      expect(encounters['route-2'].body).toBeNull();
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-2']).toBeDefined();
+      expect(encounters!['route-2'].isFusion).toBe(true);
+      expect(encounters!['route-2'].head).toBeDefined();
+      expect(encounters!['route-2'].head?.name).toBe('Pikachu');
+      expect(encounters!['route-2'].body).toBeNull();
     });
 
     it('should preserve fusion structure even when both head and body are cleared', async () => {
@@ -127,17 +131,19 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.clearEncounterFromLocation('route-2', 'body');
 
       const encounters = playthroughActions.getEncounters();
-      expect(encounters['route-2']).toBeDefined();
-      expect(encounters['route-2'].isFusion).toBe(true);
-      expect(encounters['route-2'].head).toBeNull();
-      expect(encounters['route-2'].body).toBeNull();
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-2']).toBeDefined();
+      expect(encounters!['route-2'].isFusion).toBe(true);
+      expect(encounters!['route-2'].head).toBeNull();
+      expect(encounters!['route-2'].body).toBeNull();
     });
 
     it('should handle clearing from non-existent location gracefully', async () => {
       playthroughActions.clearEncounterFromLocation('non-existent', 'head');
 
       const encounters = playthroughActions.getEncounters();
-      expect(encounters['non-existent']).toBeUndefined();
+      expect(encounters).toBeDefined();
+      expect(encounters!['non-existent']).toBeUndefined();
     });
   });
 
@@ -152,9 +158,10 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
 
       const encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1']).toBeUndefined();
-      expect(encounters['route-2']).toBeDefined();
-      expect(encounters['route-2'].head?.name).toBe('Pikachu');
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1']).toBeUndefined();
+      expect(encounters!['route-2']).toBeDefined();
+      expect(encounters!['route-2'].head?.name).toBe('Pikachu');
     });
 
     it('should move entire encounter from one location to another', async () => {
@@ -169,13 +176,14 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.moveEncounter('route-1', 'route-2', pikachu, 'head');
 
       const encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Source should be deleted
-      expect(encounters['route-1']).toBeUndefined();
+      expect(encounters!['route-1']).toBeUndefined();
 
       // Destination should have the moved Pokemon
-      expect(encounters['route-2']).toBeDefined();
-      expect(encounters['route-2'].head?.name).toBe('Pikachu');
+      expect(encounters!['route-2']).toBeDefined();
+      expect(encounters!['route-2'].head?.name).toBe('Pikachu');
     });
 
     it('should preserve nickname when moving Pokemon', async () => {
@@ -190,14 +198,15 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
 
       const encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Source should be deleted
-      expect(encounters['route-1']).toBeUndefined();
+      expect(encounters!['route-1']).toBeUndefined();
 
       // Destination should have the moved Pokemon with preserved nickname
-      expect(encounters['route-2']).toBeDefined();
-      expect(encounters['route-2'].head?.name).toBe('Pikachu');
-      expect(encounters['route-2'].head?.nickname).toBe('Sparky');
+      expect(encounters!['route-2']).toBeDefined();
+      expect(encounters!['route-2'].head?.name).toBe('Pikachu');
+      expect(encounters!['route-2'].head?.nickname).toBe('Sparky');
     });
 
     it('should preserve nickname when creating fusions', async () => {
@@ -215,14 +224,15 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.createFusion('route-1', pikachu, charmander);
 
       const encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Verify fusion was created with nicknames preserved
-      expect(encounters['route-1']).toBeDefined();
-      expect(encounters['route-1'].isFusion).toBe(true);
-      expect(encounters['route-1'].head?.name).toBe('Pikachu');
-      expect(encounters['route-1'].head?.nickname).toBe('Sparky');
-      expect(encounters['route-1'].body?.name).toBe('Charmander');
-      expect(encounters['route-1'].body?.nickname).toBe('Flame');
+      expect(encounters!['route-1']).toBeDefined();
+      expect(encounters!['route-1'].isFusion).toBe(true);
+      expect(encounters!['route-1'].head?.name).toBe('Pikachu');
+      expect(encounters!['route-1'].head?.nickname).toBe('Sparky');
+      expect(encounters!['route-1'].body?.name).toBe('Charmander');
+      expect(encounters!['route-1'].body?.nickname).toBe('Flame');
     });
   });
 
@@ -243,12 +253,13 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.swapEncounters('route-1', 'route-2');
 
       const encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Verify the Pokemon were swapped and nicknames preserved
-      expect(encounters['route-1'].head?.name).toBe('Charmander');
-      expect(encounters['route-1'].head?.nickname).toBe('Flame');
-      expect(encounters['route-2'].head?.name).toBe('Pikachu');
-      expect(encounters['route-2'].head?.nickname).toBe('Sparky');
+      expect(encounters!['route-1'].head?.name).toBe('Charmander');
+      expect(encounters!['route-1'].head?.nickname).toBe('Flame');
+      expect(encounters!['route-2'].head?.name).toBe('Pikachu');
+      expect(encounters!['route-2'].head?.nickname).toBe('Sparky');
     });
 
     it('should swap Pokemon between two regular encounters', async () => {
@@ -263,8 +274,9 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.swapEncounters('route-1', 'route-2');
 
       const encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1'].head?.name).toBe('Charmander');
-      expect(encounters['route-2'].head?.name).toBe('Pikachu');
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1'].head?.name).toBe('Charmander');
+      expect(encounters!['route-2'].head?.name).toBe('Pikachu');
     });
 
     it('should swap specific fields between fusion encounters', async () => {
@@ -283,16 +295,17 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.swapEncounters('route-1', 'route-2', 'head', 'head');
 
       const encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Check route-1: should have Squirtle head, Charmander body
-      expect(encounters['route-1'].head?.name).toBe('Squirtle');
-      expect(encounters['route-1'].body?.name).toBe('Charmander');
-      expect(encounters['route-1'].isFusion).toBe(true);
+      expect(encounters!['route-1'].head?.name).toBe('Squirtle');
+      expect(encounters!['route-1'].body?.name).toBe('Charmander');
+      expect(encounters!['route-1'].isFusion).toBe(true);
 
       // Check route-2: should have Pikachu head, Bulbasaur body
-      expect(encounters['route-2'].head?.name).toBe('Pikachu');
-      expect(encounters['route-2'].body?.name).toBe('Bulbasaur');
-      expect(encounters['route-2'].isFusion).toBe(true);
+      expect(encounters!['route-2'].head?.name).toBe('Pikachu');
+      expect(encounters!['route-2'].body?.name).toBe('Bulbasaur');
+      expect(encounters!['route-2'].isFusion).toBe(true);
     });
 
     it('should swap head with body between different encounters', async () => {
@@ -309,15 +322,16 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.swapEncounters('route-1', 'route-2', 'head', 'body');
 
       const encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Check route-1: should have Squirtle
-      expect(encounters['route-1'].head?.name).toBe('Squirtle');
-      expect(encounters['route-1'].isFusion).toBe(false);
+      expect(encounters!['route-1'].head?.name).toBe('Squirtle');
+      expect(encounters!['route-1'].isFusion).toBe(false);
 
       // Check route-2: should have Charmander head, Pikachu body
-      expect(encounters['route-2'].head?.name).toBe('Charmander');
-      expect(encounters['route-2'].body?.name).toBe('Pikachu');
-      expect(encounters['route-2'].isFusion).toBe(true);
+      expect(encounters!['route-2'].head?.name).toBe('Charmander');
+      expect(encounters!['route-2'].body?.name).toBe('Pikachu');
+      expect(encounters!['route-2'].isFusion).toBe(true);
     });
 
     it('should handle swap with non-existent encounters gracefully', async () => {
@@ -328,10 +342,11 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.swapEncounters('route-1', 'non-existent');
 
       const encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Original encounter should be unchanged
-      expect(encounters['route-1'].head?.name).toBe('Pikachu');
-      expect(encounters['non-existent']).toBeUndefined();
+      expect(encounters!['route-1'].head?.name).toBe('Pikachu');
+      expect(encounters!['non-existent']).toBeUndefined();
     });
 
     it('should handle swap with null Pokemon gracefully', async () => {
@@ -346,10 +361,11 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.swapEncounters('route-1', 'route-2');
 
       const encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Encounters should be unchanged
-      expect(encounters['route-1'].head?.name).toBe('Pikachu');
-      expect(encounters['route-2'].head).toBeNull();
+      expect(encounters!['route-1'].head?.name).toBe('Pikachu');
+      expect(encounters!['route-2'].head).toBeNull();
     });
 
     it('should swap same-species Pokemon correctly (preserving both instances)', async () => {
@@ -370,17 +386,18 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.updateEncounter('route-2', pikachu2);
 
       const beforeEncounters = playthroughActions.getEncounters();
+      expect(beforeEncounters).toBeDefined();
 
       // Verify initial setup - both Pokemon should be present with different UIDs
-      expect(beforeEncounters['route-1'].head?.name).toBe('Pikachu');
-      expect(beforeEncounters['route-1'].head?.nickname).toBe('Sparky');
-      expect(beforeEncounters['route-1'].head?.uid).toBe(
+      expect(beforeEncounters!['route-1'].head?.name).toBe('Pikachu');
+      expect(beforeEncounters!['route-1'].head?.nickname).toBe('Sparky');
+      expect(beforeEncounters!['route-1'].head?.uid).toBe(
         'pikachu_route1_uid_123'
       );
 
-      expect(beforeEncounters['route-2'].head?.name).toBe('Pikachu');
-      expect(beforeEncounters['route-2'].head?.nickname).toBe('Lightning');
-      expect(beforeEncounters['route-2'].head?.uid).toBe(
+      expect(beforeEncounters!['route-2'].head?.name).toBe('Pikachu');
+      expect(beforeEncounters!['route-2'].head?.nickname).toBe('Lightning');
+      expect(beforeEncounters!['route-2'].head?.uid).toBe(
         'pikachu_route2_uid_456'
       );
 
@@ -388,21 +405,22 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.swapEncounters('route-1', 'route-2');
 
       const afterEncounters = playthroughActions.getEncounters();
+      expect(afterEncounters).toBeDefined();
 
       // Both encounters should still exist after swap
-      expect(afterEncounters['route-1']).toBeDefined();
-      expect(afterEncounters['route-2']).toBeDefined();
+      expect(afterEncounters!['route-1']).toBeDefined();
+      expect(afterEncounters!['route-2']).toBeDefined();
 
       // Verify the Pokemon were actually swapped (not lost)
-      expect(afterEncounters['route-1'].head?.name).toBe('Pikachu');
-      expect(afterEncounters['route-1'].head?.nickname).toBe('Lightning');
-      expect(afterEncounters['route-1'].head?.uid).toBe(
+      expect(afterEncounters!['route-1'].head?.name).toBe('Pikachu');
+      expect(afterEncounters!['route-1'].head?.nickname).toBe('Lightning');
+      expect(afterEncounters!['route-1'].head?.uid).toBe(
         'pikachu_route2_uid_456'
       );
 
-      expect(afterEncounters['route-2'].head?.name).toBe('Pikachu');
-      expect(afterEncounters['route-2'].head?.nickname).toBe('Sparky');
-      expect(afterEncounters['route-2'].head?.uid).toBe(
+      expect(afterEncounters!['route-2'].head?.name).toBe('Pikachu');
+      expect(afterEncounters!['route-2'].head?.nickname).toBe('Sparky');
+      expect(afterEncounters!['route-2'].head?.uid).toBe(
         'pikachu_route1_uid_123'
       );
 
@@ -570,10 +588,11 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.swapEncounters('route-1', 'route-2');
 
       const encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // originalLocation should be updated or preserved
-      expect(encounters['route-1'].head?.originalLocation).toBeDefined();
-      expect(encounters['route-2'].head?.originalLocation).toBeDefined();
+      expect(encounters!['route-1'].head?.originalLocation).toBeDefined();
+      expect(encounters!['route-2'].head?.originalLocation).toBeDefined();
     });
 
     it('should set originalLocation when moving encounters', async () => {
@@ -583,7 +602,8 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
 
       const encounters = playthroughActions.getEncounters();
-      expect(encounters['route-2'].head?.originalLocation).toBeDefined();
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-2'].head?.originalLocation).toBeDefined();
     });
   });
 
@@ -601,24 +621,26 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.updateEncounter('route-1', charmander, 'body', false);
 
       let encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Verify initial fusion state
-      expect(encounters['route-1']).toBeDefined();
-      expect(encounters['route-1']?.isFusion).toBe(true);
-      expect(encounters['route-1']?.head).not.toBeNull();
-      expect(encounters['route-1']?.head?.name).toBe('Pikachu');
-      expect(encounters['route-1']?.head?.nickname).toBe('Sparky');
-      expect(encounters['route-1']?.body).not.toBeNull();
-      expect(encounters['route-1']?.body?.name).toBe('Charmander');
-      expect(encounters['route-1']?.body?.nickname).toBe('Flame');
+      expect(encounters!['route-1']).toBeDefined();
+      expect(encounters!['route-1']?.isFusion).toBe(true);
+      expect(encounters!['route-1']?.head).not.toBeNull();
+      expect(encounters!['route-1']?.head?.name).toBe('Pikachu');
+      expect(encounters!['route-1']?.head?.nickname).toBe('Sparky');
+      expect(encounters!['route-1']?.body).not.toBeNull();
+      expect(encounters!['route-1']?.body?.name).toBe('Charmander');
+      expect(encounters!['route-1']?.body?.nickname).toBe('Flame');
 
       // Toggle fusion off (unfuse)
       playthroughActions.toggleEncounterFusion('route-1');
 
       encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Verify both Pokemon are preserved but isFusion is false
-      const encounter2 = encounters['route-1'];
+      const encounter2 = encounters!['route-1'];
       expect(encounter2).toBeDefined();
       expect(encounter2!.isFusion).toBe(false);
       expect(encounter2!.head).toBeDefined();
@@ -632,9 +654,10 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.toggleEncounterFusion('route-1');
 
       encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Verify both Pokemon are still preserved and isFusion is true again
-      const encounter3 = encounters['route-1'];
+      const encounter3 = encounters!['route-1'];
       expect(encounter3).toBeDefined();
       expect(encounter3!.isFusion).toBe(true);
       expect(encounter3!.head).toBeDefined();
@@ -653,23 +676,25 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.updateEncounter('route-1', pikachu);
 
       let encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Verify initial regular encounter state
-      expect(encounters['route-1'].isFusion).toBe(false);
-      expect(encounters['route-1'].head?.name).toBe('Pikachu');
-      expect(encounters['route-1'].head?.nickname).toBe('Sparky');
-      expect(encounters['route-1'].body).toBeNull();
+      expect(encounters!['route-1'].isFusion).toBe(false);
+      expect(encounters!['route-1'].head?.name).toBe('Pikachu');
+      expect(encounters!['route-1'].head?.nickname).toBe('Sparky');
+      expect(encounters!['route-1'].body).toBeNull();
 
       // Toggle to fusion mode
       playthroughActions.toggleEncounterFusion('route-1');
 
       encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Verify head Pokemon is preserved, isFusion is true, body remains null
-      expect(encounters['route-1'].isFusion).toBe(true);
-      expect(encounters['route-1'].head?.name).toBe('Pikachu');
-      expect(encounters['route-1'].head?.nickname).toBe('Sparky');
-      expect(encounters['route-1'].body).toBeNull();
+      expect(encounters!['route-1'].isFusion).toBe(true);
+      expect(encounters!['route-1'].head?.name).toBe('Pikachu');
+      expect(encounters!['route-1'].head?.nickname).toBe('Sparky');
+      expect(encounters!['route-1'].body).toBeNull();
     });
 
     it('should handle toggle on non-existent encounter gracefully', async () => {
@@ -677,12 +702,13 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.toggleEncounterFusion('non-existent');
 
       const encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Should create a new encounter with default values and isFusion true
-      expect(encounters['non-existent']).toBeDefined();
-      expect(encounters['non-existent'].isFusion).toBe(true);
-      expect(encounters['non-existent'].head).toBeNull();
-      expect(encounters['non-existent'].body).toBeNull();
+      expect(encounters!['non-existent']).toBeDefined();
+      expect(encounters!['non-existent'].isFusion).toBe(true);
+      expect(encounters!['non-existent'].head).toBeNull();
+      expect(encounters!['non-existent'].body).toBeNull();
     });
 
     it('should move body to head when unfusing if head is empty', async () => {
@@ -694,9 +720,10 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.updateEncounter('route-1', charmander, 'body', false);
 
       let encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Verify initial state: fusion with empty head, filled body
-      const initialEncounter = encounters['route-1'];
+      const initialEncounter = encounters!['route-1'];
       expect(initialEncounter).toBeDefined();
       expect(initialEncounter!.isFusion).toBe(true);
       expect(initialEncounter!.head).toBeNull();
@@ -708,9 +735,10 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.toggleEncounterFusion('route-1');
 
       encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
 
       // Verify body moved to head, body cleared, isFusion false
-      const finalEncounter = encounters['route-1'];
+      const finalEncounter = encounters!['route-1'];
       expect(finalEncounter).toBeDefined();
       expect(finalEncounter!.isFusion).toBe(false);
       expect(finalEncounter!.head).toBeDefined();
@@ -733,7 +761,8 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
       // No encounters should be created
       const encounters = playthroughActions.getEncounters();
-      expect(Object.keys(encounters)).toHaveLength(0);
+      expect(encounters).toBeDefined();
+      expect(Object.keys(encounters!)).toHaveLength(0);
     });
 
     it('should preserve encounter structure when performing multiple operations', async () => {
@@ -750,9 +779,10 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       playthroughActions.updateEncounter('route-1', squirtle, 'head', false);
 
       const encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1'].isFusion).toBe(true);
-      expect(encounters['route-1'].head?.name).toBe('Squirtle');
-      expect(encounters['route-1'].body?.name).toBe('Charmander');
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1'].isFusion).toBe(true);
+      expect(encounters!['route-1'].head?.name).toBe('Squirtle');
+      expect(encounters!['route-1'].body?.name).toBe('Charmander');
     });
   });
 
@@ -767,8 +797,9 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
       // Verify initial state - no status on either Pokemon
       let encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1'].head?.status).toBeUndefined();
-      expect(encounters['route-1'].body?.status).toBeUndefined();
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1'].head?.status).toBeUndefined();
+      expect(encounters!['route-1'].body?.status).toBeUndefined();
 
       // Set status on head Pokemon
       const pikachuWithStatus = { ...pikachu, status: 'captured' as const };
@@ -781,8 +812,9 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
       // Both Pokemon should now have the same status
       encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1'].head?.status).toBe('captured');
-      expect(encounters['route-1'].body?.status).toBe('captured');
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1'].head?.status).toBe('captured');
+      expect(encounters!['route-1'].body?.status).toBe('captured');
     });
 
     it('should sync status when setting on body Pokemon', () => {
@@ -807,8 +839,9 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
       // Both Pokemon should now have the same status
       const encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1'].head?.status).toBe('deceased');
-      expect(encounters['route-1'].body?.status).toBe('deceased');
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1'].head?.status).toBe('deceased');
+      expect(encounters!['route-1'].body?.status).toBe('deceased');
     });
 
     it('should not overwrite existing status when other Pokemon already has one', () => {
@@ -839,8 +872,9 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
       // Each Pokemon should keep its own status (no synchronization)
       const encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1'].head?.status).toBe('captured');
-      expect(encounters['route-1'].body?.status).toBe('deceased');
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1'].head?.status).toBe('captured');
+      expect(encounters!['route-1'].body?.status).toBe('deceased');
     });
 
     it('should not sync status in non-fusion encounters', () => {
@@ -857,9 +891,10 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
       // Only head should have status, body should be null
       const encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1'].head?.status).toBe('captured');
-      expect(encounters['route-1'].body).toBeNull();
-      expect(encounters['route-1'].isFusion).toBe(false);
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1'].head?.status).toBe('captured');
+      expect(encounters!['route-1'].body).toBeNull();
+      expect(encounters!['route-1'].isFusion).toBe(false);
     });
 
     it('should only sync when both head and body Pokemon exist and one is being updated with status', () => {
@@ -876,8 +911,9 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
       // Only head should have status since body doesn't exist yet
       let encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1'].head?.status).toBe('captured');
-      expect(encounters['route-1'].body).toBeNull();
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1'].head?.status).toBe('captured');
+      expect(encounters!['route-1'].body).toBeNull();
 
       // Add body Pokemon without status
       const charmander = createMockPokemon('Charmander', 4);
@@ -886,8 +922,9 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       // Body should NOT automatically get the same status as head when just being added
       // Status sync only happens when updating a Pokemon that has a status
       encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1'].head?.status).toBe('captured');
-      expect(encounters['route-1'].body?.status).toBeUndefined();
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1'].head?.status).toBe('captured');
+      expect(encounters!['route-1'].body?.status).toBeUndefined();
 
       // Now if we update the body with a status, it should sync to head if head had no status
       // But since head already has status, no sync should occur
@@ -904,8 +941,9 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
       // Each should keep their own status (no overwriting)
       encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1'].head?.status).toBe('captured');
-      expect(encounters['route-1'].body?.status).toBe('deceased');
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1'].head?.status).toBe('captured');
+      expect(encounters!['route-1'].body?.status).toBe('deceased');
     });
 
     it('should sync status when updating Pokemon in complete fusion where other has no status', () => {
@@ -918,8 +956,9 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
       // Verify neither has status initially
       let encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1'].head?.status).toBeUndefined();
-      expect(encounters['route-1'].body?.status).toBeUndefined();
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1'].head?.status).toBeUndefined();
+      expect(encounters!['route-1'].body?.status).toBeUndefined();
 
       // Update head with status - should sync to body since body has no status
       const pikachuWithStatus = { ...pikachu, status: 'captured' as const };
@@ -932,8 +971,9 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
       // Both should now have the same status
       encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1'].head?.status).toBe('captured');
-      expect(encounters['route-1'].body?.status).toBe('captured');
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1'].head?.status).toBe('captured');
+      expect(encounters!['route-1'].body?.status).toBe('captured');
     });
 
     it('should preserve other Pokemon properties during status sync', () => {
@@ -959,10 +999,11 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
 
       // Verify all properties are preserved
       const encounters = playthroughActions.getEncounters();
-      expect(encounters['route-1'].head?.nickname).toBe('Sparky');
-      expect(encounters['route-1'].head?.status).toBe('captured');
-      expect(encounters['route-1'].body?.nickname).toBe('Flame');
-      expect(encounters['route-1'].body?.status).toBe('captured');
+      expect(encounters).toBeDefined();
+      expect(encounters!['route-1'].head?.nickname).toBe('Sparky');
+      expect(encounters!['route-1'].head?.status).toBe('captured');
+      expect(encounters!['route-1'].body?.nickname).toBe('Flame');
+      expect(encounters!['route-1'].body?.status).toBe('captured');
     });
   });
 });
@@ -1256,9 +1297,10 @@ describe('Playthroughs Store - Hooks', () => {
 
       const { result } = renderHook(() => useEncounters());
 
-      expect(Object.keys(result.current)).toHaveLength(2);
-      expect(result.current['route-1']?.head?.name).toBe('Pikachu');
-      expect(result.current['route-2']?.head?.name).toBe('Charmander');
+      expect(result.current).toBeDefined();
+      expect(Object.keys(result.current!)).toHaveLength(2);
+      expect(result.current!['route-1']?.head?.name).toBe('Pikachu');
+      expect(result.current!['route-2']?.head?.name).toBe('Charmander');
     });
 
     it('should update when encounters are modified', () => {
@@ -1276,29 +1318,30 @@ describe('Playthroughs Store - Hooks', () => {
       const { result } = renderHook(() => useEncounters());
 
       // Initially empty
-      expect(Object.keys(result.current)).toHaveLength(0);
+      expect(result.current).toBeDefined();
+      expect(Object.keys(result.current!)).toHaveLength(0);
 
       // Add an encounter
       act(() => {
         playthroughActions.updateEncounter('route-1', pikachu);
       });
 
-      expect(Object.keys(result.current)).toHaveLength(1);
-      expect(result.current['route-1']?.head?.name).toBe('Pikachu');
+      expect(Object.keys(result.current!)).toHaveLength(1);
+      expect(result.current!['route-1']?.head?.name).toBe('Pikachu');
 
       // Update the encounter
       act(() => {
         playthroughActions.updateEncounter('route-1', squirtle);
       });
 
-      expect(result.current['route-1']?.head?.name).toBe('Squirtle');
+      expect(result.current!['route-1']?.head?.name).toBe('Squirtle');
 
       // Remove the encounter
       act(() => {
         playthroughActions.resetEncounter('route-1');
       });
 
-      expect(Object.keys(result.current)).toHaveLength(0);
+      expect(Object.keys(result.current!)).toHaveLength(0);
     });
 
     it('should handle fusion encounters correctly', () => {
@@ -1318,9 +1361,10 @@ describe('Playthroughs Store - Hooks', () => {
 
       const { result } = renderHook(() => useEncounters());
 
-      expect(result.current['route-1']?.isFusion).toBe(true);
-      expect(result.current['route-1']?.head?.name).toBe('Pikachu');
-      expect(result.current['route-1']?.body?.name).toBe('Charmander');
+      expect(result.current).toBeDefined();
+      expect(result.current!['route-1']?.isFusion).toBe(true);
+      expect(result.current!['route-1']?.head?.name).toBe('Pikachu');
+      expect(result.current!['route-1']?.body?.name).toBe('Charmander');
     });
   });
 
