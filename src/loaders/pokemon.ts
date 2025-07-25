@@ -108,10 +108,6 @@ export const PokemonArraySchema = z.array(PokemonSchema);
 // Cache for loaded Pokemon data
 let pokemonCache: Pokemon[] | null = null;
 
-// Track if search service has been initialized
-let searchServiceInitialized = false;
-let searchServiceInitPromise: Promise<void> | null = null;
-
 // Data loader for Pokemon with dynamic import
 export async function getPokemon(): Promise<Pokemon[]> {
   if (pokemonCache) {
@@ -157,58 +153,11 @@ export async function getPokemonPreEvolutionId(
   return targetPokemon.evolution.evolves_from.id;
 }
 
-// Initialize search service with Pokemon data
-async function initializePokemonSearchService(): Promise<void> {
-  // Return existing promise if already initializing
-  if (searchServiceInitPromise) {
-    return searchServiceInitPromise;
-  }
-
-  // Return immediately if already initialized
-  if (searchServiceInitialized) {
-    return Promise.resolve();
-  }
-
-  searchServiceInitPromise = (async () => {
-    try {
-      const pokemon = await getPokemon();
-
-      // Transform data for search service
-      const searchData = pokemon.map(p => ({
-        id: p.id,
-        name: p.name,
-        nationalDexId: p.nationalDexId,
-      }));
-
-      await searchService.initialize(searchData);
-      searchServiceInitialized = true;
-    } catch (error) {
-      console.error('Failed to initialize search service:', error);
-      // Don't throw error, fall back to main thread search
-    } finally {
-      searchServiceInitPromise = null;
-    }
-  })();
-
-  return searchServiceInitPromise;
-}
-
 // Smart search function that handles both name and ID searches
 export async function searchPokemon(query: string): Promise<PokemonOption[]> {
   try {
-    // Initialize search service if not already done
-    await initializePokemonSearchService();
-
-    if (searchServiceInitialized) {
-      const results = await searchService.search(query);
-      
-      // Transform search results to PokemonOption format
-      return results.map(result => ({
-        id: result.id,
-        name: result.name,
-        nationalDexId: result.nationalDexId,
-      }));
-    }
+    const results = await searchService.search(query);
+    return results;
   } catch (error) {
     console.warn('Search service failed, falling back to main thread:', error);
   }
