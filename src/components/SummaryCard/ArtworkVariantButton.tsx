@@ -22,7 +22,6 @@ export function ArtworkVariantButton({
   className,
   shouldLoad,
 }: ArtworkVariantButtonProps) {
-  const [isLoading, setIsLoading] = React.useState(false);
   const [hasVariants, setHasVariants] = useState<boolean | null>(null);
 
   // Check for variants on mount and when encounter changes
@@ -47,7 +46,7 @@ export function ArtworkVariantButton({
       }
     };
 
-    checkVariants();
+    window.requestIdleCallback(checkVariants, { timeout: 1000 });
   }, [encounter.head, encounter.body, encounter.isFusion, shouldLoad]);
 
   const handleCycleVariant = React.useCallback(
@@ -60,17 +59,17 @@ export function ArtworkVariantButton({
     [locationId, disabled, hasVariants]
   );
 
-  const isButtonDisabled = disabled || isLoading || hasVariants === false;
+  const isButtonDisabled = disabled || hasVariants === false;
 
   const label = useMemo(() => {
-    if (isLoading) {
+    if (hasVariants === null) {
       return 'Loading...';
     }
     if (hasVariants === false) {
       return 'No alternative artwork variants available';
     }
     return 'Cycle artwork variants (hold Shift to reverse)';
-  }, [isLoading, hasVariants]);
+  }, [hasVariants]);
 
   return (
     <button
@@ -86,7 +85,7 @@ export function ArtworkVariantButton({
           'focus:outline-none focus:ring-2 focus:ring-blue-500',
           'enabled:hover:bg-gray-400 dark:enabled:hover:bg-gray-600',
           'disabled:cursor-not-allowed enabled:hover:opacity-100 enabled:hover:text-white',
-          { 'opacity-50 group-hover:opacity-100': isLoading }
+          { 'opacity-50 group-hover:opacity-100': hasVariants === null }
         ),
         className
       )}
@@ -94,7 +93,7 @@ export function ArtworkVariantButton({
       title={label}
     >
       <div className='dark:pixel-shadow'>
-        {isLoading && hasVariants === false ? (
+        {hasVariants === null ? (
           <Loader2 className='size-4 animate-spin' />
         ) : hasVariants === false ? (
           <RefreshCwOff className='size-3' />
