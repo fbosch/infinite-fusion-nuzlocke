@@ -6,10 +6,6 @@ export const spriteStore = createStore('sprite-variants', 'cache');
 // Universal cache implementation that works in both main thread and workers
 export class SpriteVariantCache {
   private static readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-  private memoryCache = new Map<
-    string,
-    { variants: string[]; timestamp: number }
-  >();
 
   // Queue for deferred IndexedDB writes
   private writeQueue = new Map<
@@ -22,18 +18,6 @@ export class SpriteVariantCache {
   async get(
     key: string
   ): Promise<{ variants: string[]; timestamp: number } | undefined> {
-    // Check memory cache first
-    const memoryEntry = this.memoryCache.get(key);
-    if (memoryEntry) {
-      const now = Date.now();
-      if (now - memoryEntry.timestamp < SpriteVariantCache.CACHE_DURATION) {
-        return memoryEntry;
-      } else {
-        // Expired, remove from memory
-        this.memoryCache.delete(key);
-      }
-    }
-
     // Check IndexedDB with custom store
     try {
       const entry = await get(key, spriteStore);
@@ -41,7 +25,6 @@ export class SpriteVariantCache {
         const now = Date.now();
         if (now - entry.timestamp < SpriteVariantCache.CACHE_DURATION) {
           // Cache in memory for faster access
-          this.memoryCache.set(key, entry);
           return entry;
         } else {
           // Expired, remove from IndexedDB
@@ -51,14 +34,10 @@ export class SpriteVariantCache {
     } catch (error) {
       console.warn('Failed to read from IndexedDB cache:', error);
     }
-
     return undefined;
   }
 
   set(key: string, value: { variants: string[]; timestamp: number }): void {
-    // Update memory cache immediately (synchronous, fast)
-    this.memoryCache.set(key, value);
-
     // Queue IndexedDB write for deferred processing
     this.queueIndexedDBWrite(key, value);
   }
@@ -74,14 +53,11 @@ export class SpriteVariantCache {
     if (this.writeTimeoutId !== null) {
       clearTimeout(this.writeTimeoutId);
     }
-
-    // Schedule batched write using idle callback or timeout
-    const processBatch = () => {
+    // Schedule batched write using timeout
+    setTimeout(() => {
       this.writeTimeoutId = null;
       this.processBatchedWrites();
-    };
-
-    processBatch();
+    }, this.BATCH_DELAY);
   }
 
   private async processBatchedWrites(): Promise<void> {
@@ -112,7 +88,6 @@ export class SpriteVariantCache {
   }
 
   async clear(): Promise<void> {
-    this.memoryCache.clear();
     this.writeQueue.clear();
 
     // Cancel pending writes
@@ -130,10 +105,6 @@ export class SpriteVariantCache {
     } catch (error) {
       console.warn('Failed to clear IndexedDB cache:', error);
     }
-  }
-
-  size(): number {
-    return this.memoryCache.size;
   }
 
   // Expose method to manually flush pending writes (useful for testing or cleanup)
@@ -279,30 +250,10 @@ export class SpriteService {
   }
 
   /**
-   * Get cache size for debugging
-   */
-  getCacheSize(): number {
-    return this.variantCache.size();
-  }
-
-  /**
    * Manually flush pending IndexedDB writes
    * Useful for ensuring data is persisted before page unload or during testing
    */
   async flushCache(): Promise<void> {
     await this.variantCache.flush();
-  }
-
-  /**
-   * Get service stats for debugging
-   */
-  getStats(): {
-    cacheSize: number;
-    initialized: boolean;
-  } {
-    return {
-      cacheSize: this.variantCache.size(),
-      initialized: true,
-    };
   }
 }

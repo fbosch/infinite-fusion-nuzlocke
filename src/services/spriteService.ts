@@ -9,7 +9,7 @@ const SpriteWorker = Comlink.wrap<typeof SpriteService>(worker);
 // Create singleton instance
 const spriteService = await new SpriteWorker();
 
-const memoryCache = new Map<string, Promise<string[]>>();
+const memoryCache = new Map<string, string[]>();
 const service = {
   getArtworkVariants: async (
     ...args: Parameters<typeof spriteService.getArtworkVariants>
@@ -20,12 +20,14 @@ const service = {
     if (key) {
       try {
         if (memoryCache.has(key)) {
-          console.log('cached from memory!');
-          return Promise.resolve(memoryCache.get(key)!);
+          const value = memoryCache.get(key);
+          if (value) {
+            return Promise.resolve(value);
+          }
         }
         const idbCached = await get(key, spriteStore);
         if (idbCached) {
-          memoryCache.set(key, Promise.resolve(idbCached.variants));
+          memoryCache.set(key, idbCached.variants);
           return Promise.resolve(idbCached.variants);
         }
       } catch (error) {
@@ -34,7 +36,9 @@ const service = {
     }
     const promise = spriteService.getArtworkVariants(...args);
     if (key) {
-      memoryCache.set(key, promise);
+      promise.then(value => {
+        memoryCache.set(key, value);
+      });
     }
     return promise;
   },
