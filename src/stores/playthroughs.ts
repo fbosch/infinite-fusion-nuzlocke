@@ -58,9 +58,6 @@ let cachedActiveId: string | undefined = undefined;
 // Track the last change that might affect the active playthrough
 let lastActivePlaythroughUpdate = 0;
 
-// Cache for sprite service to avoid repeated dynamic imports
-let spriteServiceCache: typeof import('@/services/spriteService') | null = null;
-
 // Helper functions
 const generatePlaythroughId = (): string => {
   return `playthrough_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -767,10 +764,9 @@ export const playthroughActions = {
 
     try {
       // Cache the service import to avoid repeated dynamic imports
-      if (!spriteServiceCache) {
-        spriteServiceCache = await import('@/services/spriteService');
-      }
-      const spriteService = spriteServiceCache;
+      const { default: spriteService } = await import(
+        '@/services/spriteService'
+      );
 
       // Get variants based on encounter type
       let availableVariants: string[] | null = null;
@@ -851,7 +847,9 @@ export const playthroughActions = {
 
     try {
       // Import the sprite service
-      const { getArtworkVariants } = await import('@/services/spriteService');
+      const { default: spriteService } = await import(
+        '@/services/spriteService'
+      );
 
       // Process encounters in small batches to avoid overwhelming the server
       const batchSize = 3;
@@ -861,25 +859,24 @@ export const playthroughActions = {
         const batchPromises = batch.map(([, encounter]) => {
           if (encounter.isFusion && encounter.head && encounter.body) {
             // Fusion encounter
-            return getArtworkVariants(
-              encounter.head.id,
-              encounter.body.id
-            ).catch((error: unknown) => {
-              console.warn(
-                `Failed to preload fusion variants ${encounter.head!.id}.${encounter.body!.id}:`,
-                error
-              );
-            });
+            return spriteService
+              .getArtworkVariants(encounter.head.id, encounter.body.id)
+              .catch((error: unknown) => {
+                console.warn(
+                  `Failed to preload fusion variants ${encounter.head!.id}.${encounter.body!.id}:`,
+                  error
+                );
+              });
           } else if (encounter.head) {
             // Single Pokémon encounter
-            return getArtworkVariants(encounter.head.id).catch(
-              (error: unknown) => {
+            return spriteService
+              .getArtworkVariants(encounter.head.id)
+              .catch((error: unknown) => {
                 console.warn(
                   `Failed to preload Pokémon variants ${encounter.head!.id}:`,
                   error
                 );
-              }
-            );
+              });
           }
           return Promise.resolve();
         });

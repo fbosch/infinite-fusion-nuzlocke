@@ -42,15 +42,18 @@ export function ArtworkVariantButton({
       }
 
       try {
-        const { getArtworkVariants } = await import('@/services/spriteService');
+        const { default: spriteService } = await import(
+          '@/services/spriteService'
+        );
+
         let variants: string[] = [];
         if (isFusion && encounter.head?.id && encounter.body?.id) {
-          variants = await getArtworkVariants(
+          variants = await spriteService.getArtworkVariants(
             encounter.head.id,
             encounter.body.id
           );
         } else if (isSinglePokemon && encounter.head?.id) {
-          variants = await getArtworkVariants(encounter.head.id);
+          variants = await spriteService.getArtworkVariants(encounter.head.id);
         }
 
         setHasVariants(variants.length > 1);
@@ -73,10 +76,11 @@ export function ArtworkVariantButton({
         await playthroughActions.cycleArtworkVariant(locationId, reverse);
         if (hasVariants === null) {
           try {
-            const { getArtworkVariants } = await import(
+            const { default: spriteService } = await import(
               '@/services/spriteService'
             );
-            const variants = await getArtworkVariants(
+
+            const variants = await spriteService.getArtworkVariants(
               encounter.head?.id,
               encounter.body?.id
             );
