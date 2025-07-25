@@ -11,6 +11,7 @@ import {
   type PokemonOption,
 } from '@/loaders/pokemon';
 import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
+import { useShiftKey } from '@/hooks/useKeyPressed';
 
 interface PokemonEvolutionButtonProps {
   value: PokemonOption | null | undefined;
@@ -30,36 +31,13 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
     useState<PokemonOption | null>(null);
   const [isLoadingEvolutions, setIsLoadingEvolutions] = useState(false);
   const [showEvolutionMenu, setShowEvolutionMenu] = useState(false);
-  const [isShiftPressed, setIsShiftPressed] = useState(false);
+  const isShiftPressed = useShiftKey();
   const evolutionMenuRef = useRef<HTMLDivElement>(null);
 
   const hasEvolutions = availableEvolutions.length > 0;
   const hasPreEvolution = !!availablePreEvolution;
   const isDevolutionMode =
     (isShiftPressed && hasPreEvolution) || (!hasEvolutions && hasPreEvolution);
-
-  // Track shift key state
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Shift') {
-        setIsShiftPressed(true);
-      }
-    };
-
-    const handleKeyUp = (event: KeyboardEvent) => {
-      if (event.key === 'Shift') {
-        setIsShiftPressed(false);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
-    };
-  }, []);
 
   // Close evolution menu when clicking outside
   useEffect(() => {
@@ -208,22 +186,22 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
           className={clsx(
             'flex items-center justify-center gap-1 px-2 py-1 rounded-md',
             'bg-gray-100 text-gray-600 text-xs font-medium',
-            'border border-gray-300 dark:border-gray-600',
+            'border border-gray-300 hover:border-blue-300 dark:border-gray-600 dark:hover:border-blue-400',
             'transition-colors duration-200',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            'dark:bg-gray-700 dark:text-gray-400',
+            'dark:bg-gray-700 dark:hover:bg-blue-900/20 dark:text-gray-400 dark:hover:text-blue-400',
             'hover:cursor-pointer',
             {
-              'hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 dark:hover:border-orange-400 dark:hover:text-orange-400 dark:hover:bg-orange-900/20':
+              'hover:bg-orange-100 hover:text-orange-600 hover:border-orange-300 dark:hover:bg-orange-900/20 dark:hover:text-orange-400 dark:hover:border-orange-400':
                 isDevolutionMode,
-              'bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20':
+              'hover:bg-blue-100 hover:text-blue-600 hover:border-blue-300 dark:bg-blue-900/20 dark:hover:text-blue-400 dark:hover:border-blue-400':
                 !isDevolutionMode,
             }
           )}
           title={
             isDevolutionMode
-              ? `Devolve to ${availablePreEvolution.name}`
+              ? `Devolve to ${availablePreEvolution.name}${!hasEvolutions ? ' (final evolution)' : ''}`
               : availableEvolutions.length === 1
                 ? `Evolve to ${availableEvolutions[0].name}`
                 : hasEvolutions
