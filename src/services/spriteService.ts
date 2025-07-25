@@ -8,36 +8,20 @@ import { get, set, del, clear, entries, createStore } from 'idb-keyval';
 const spritesStore = createStore('sprites', 'variant-cache');
 
 export async function checkSpriteExists(url: string): Promise<boolean> {
-  return new Promise(resolve => {
-    const img = new Image();
-    let resolved = false;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-    const resolveOnce = (result: boolean) => {
-      if (!resolved) {
-        resolved = true;
-        resolve(result);
-      }
-    };
+    const response = await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal,
+    });
 
-    // Set a timeout to avoid hanging on slow networks
-    const timeout = setTimeout(() => {
-      resolveOnce(false);
-    }, 3000); // Reduced to 3 second timeout for faster response
-
-    img.onload = () => {
-      clearTimeout(timeout);
-      resolveOnce(true);
-    };
-
-    img.onerror = () => {
-      clearTimeout(timeout);
-      resolveOnce(false);
-    };
-
-    img.setAttribute('decoding', 'async');
-    img.setAttribute('crossOrigin', 'anonymous');
-    img.src = url;
-  });
+    clearTimeout(timeoutId);
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
 }
 
 /**
