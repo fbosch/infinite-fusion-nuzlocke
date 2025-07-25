@@ -1,6 +1,10 @@
 import * as Comlink from 'comlink';
 import { get } from 'idb-keyval';
-import { SpriteService, spriteStore } from '@/lib/spriteCore';
+import {
+  SpriteService,
+  spriteStore,
+  generateSpriteUrl,
+} from '@/lib/spriteCore';
 
 // Create worker and wrap with Comlink
 const worker = new Worker(new URL('@/workers/sprite.worker', import.meta.url));
@@ -11,6 +15,7 @@ const spriteService = await new SpriteWorker();
 
 const memoryCache = new Map<string, string[]>();
 const service = {
+  generateSpriteUrl,
   getArtworkVariants: async (
     ...args: Parameters<typeof spriteService.getArtworkVariants>
   ): Promise<string[]> => {

@@ -6,6 +6,7 @@ import { debounce } from 'lodash';
 import React, { useMemo } from 'react';
 import { PokemonOptionSchema, generatePokemonUID } from '@/loaders/pokemon';
 import { CustomLocationSchema } from '@/loaders/locations';
+import spriteService from '@/services/spriteService';
 
 // Create a custom store for playthroughs data
 const playthroughsStore_idb = createStore('playthroughs', 'data');
@@ -55,9 +56,6 @@ const ACTIVE_PLAYTHROUGH_KEY = 'activePlaythroughId';
 let cachedActivePlaythrough: Playthrough | null = null;
 let cachedActiveId: string | undefined = undefined;
 
-// Track the last change that might affect the active playthrough
-let lastActivePlaythroughUpdate = 0;
-
 // Helper functions
 const generatePlaythroughId = (): string => {
   return `playthrough_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -71,7 +69,6 @@ const getCurrentTimestamp = (): number => {
 const invalidateActivePlaythroughCache = () => {
   cachedActivePlaythrough = null;
   cachedActiveId = undefined;
-  lastActivePlaythroughUpdate = Date.now();
 };
 
 // Check if cache is still valid
@@ -748,6 +745,72 @@ export const playthroughActions = {
     activePlaythrough.updatedAt = getCurrentTimestamp();
   },
 
+  // Prefetch adjacent artwork variants for better UX
+  prefetchAdjacentVariants: async (
+    headId?: number,
+    bodyId?: number,
+    currentVariant?: string,
+    availableVariants?: string[]
+  ) => {
+    try {
+      // Get available variants if not provided
+      const variants =
+        availableVariants ||
+        (await spriteService.getArtworkVariants(headId, bodyId));
+
+      // Early return if no variants or only one variant
+      if (!variants || variants.length <= 1) return;
+
+      // Find current variant index
+      const currentIndex = variants.indexOf(currentVariant || '');
+
+      // Calculate adjacent indices (next and previous)
+      const nextIndex = (currentIndex + 1) % variants.length;
+      const prevIndex = (currentIndex - 1 + variants.length) % variants.length;
+
+      // Get the adjacent variants
+      const adjacentVariants = [
+        variants[nextIndex],
+        variants[prevIndex],
+      ].filter(variant => variant && variant !== currentVariant);
+
+      // Prefetch the adjacent variant images
+      const prefetchPromises = adjacentVariants.map(variant => () => {
+        try {
+          const imageUrl = spriteService.generateSpriteUrl(
+            headId,
+            bodyId,
+            variant
+          );
+          // Create new Image object to trigger prefetch
+          const img = new Image();
+          img.setAttribute('decoding', 'async');
+          img.src = imageUrl;
+          // Optionally handle load/error events
+          img.onload = () => {
+            console.debug(`Prefetched variant: ${variant}`);
+          };
+          img.onerror = () => {
+            console.warn(`Failed to prefetch variant: ${variant}`);
+          };
+        } catch (error) {
+          console.warn(`Failed to get URL for variant ${variant}:`, error);
+        }
+      });
+
+      window.requestIdleCallback(
+        () => {
+          prefetchPromises.forEach(p => p());
+        },
+        { timeout: 1000 }
+      );
+
+      // Execute prefetch operations in parallel (no need for await since we're just triggering prefetch)
+    } catch (error) {
+      console.warn('Failed to prefetch adjacent variants:', error);
+    }
+  },
+
   // Cycle through artwork variants for encounters (with validation)
   cycleArtworkVariant: async (locationId: string, reverse: boolean = false) => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
@@ -779,8 +842,23 @@ export const playthroughActions = {
         : (currentIndex + 1) % availableVariants.length;
 
       // Update encounter with new variant
-      encounter.artworkVariant = availableVariants[nextIndex] || undefined;
+      const newVariant = availableVariants[nextIndex] || undefined;
+      encounter.artworkVariant = newVariant;
       activePlaythrough.updatedAt = getCurrentTimestamp();
+
+      // Prefetch adjacent variants for smoother cycling
+      if (availableVariants.length > 2) {
+        playthroughActions
+          .prefetchAdjacentVariants(
+            encounter.head?.id,
+            encounter.body?.id,
+            newVariant,
+            availableVariants
+          )
+          .catch(error => {
+            console.warn('Failed to prefetch adjacent variants:', error);
+          });
+      }
     } catch (error) {
       console.error('Failed to cycle artwork variant:', error);
       encounter.artworkVariant = undefined;

@@ -85,7 +85,7 @@ export function ArtworkVariantButton({
           'focus:outline-none focus:ring-2 focus:ring-blue-500',
           'enabled:hover:bg-gray-400 dark:enabled:hover:bg-gray-600',
           'disabled:cursor-not-allowed enabled:hover:opacity-100 enabled:hover:text-white',
-          { 'opacity-50 group-hover:opacity-100': hasVariants === null }
+          { 'group-hover:opacity-100': hasVariants === null }
         ),
         className
       )}
