@@ -53,7 +53,6 @@ export default function LocationTableRow({
               <SummaryCard
                 encounterData={encounterData}
                 locationId={locationId}
-                shouldLoad={inView}
               />
             </td>
           ))
