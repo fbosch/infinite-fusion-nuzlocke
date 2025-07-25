@@ -175,14 +175,14 @@ const PokemonOptions = ({
             {query ? (
               <>
                 <p className='text-sm'>
-                  No Pokemon found for &quot;{query}&quot;
+                  No Pokémon found for &quot;{query}&quot;
                 </p>
                 <p className='text-xs mt-1'>Try a different search term</p>
               </>
             ) : (
               <p className='text-sm flex items-center gap-2 justify-center py-2'>
                 <Search className='w-4 h-4' />
-                <span>Search for Pokemon</span>
+                <span>Search for Pokémon</span>
               </p>
             )}
           </div>

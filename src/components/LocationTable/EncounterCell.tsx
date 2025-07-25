@@ -94,8 +94,8 @@ export function EncounterCell({
                   locationId={locationId}
                   value={headPokemon}
                   onChange={pokemon => handleEncounterSelect(pokemon, 'head')}
-                  placeholder='Select head Pokemon'
-                  nicknamePlaceholder='Enter head nickname'
+                  placeholder='Select Pokémon'
+                  nicknamePlaceholder='Enter nickname'
                   comboboxId={`${locationId}-head`}
                   shouldLoad={shouldLoad}
                 />
@@ -119,8 +119,8 @@ export function EncounterCell({
                   locationId={locationId}
                   value={bodyPokemon}
                   onChange={pokemon => handleEncounterSelect(pokemon, 'body')}
-                  placeholder='Select body Pokemon'
-                  nicknamePlaceholder='Enter body nickname'
+                  placeholder='Select Pokémon'
+                  nicknamePlaceholder='Enter nickname'
                   comboboxId={`${locationId}-body`}
                   ref={bodyComboboxRef}
                   shouldLoad={shouldLoad}
@@ -134,7 +134,7 @@ export function EncounterCell({
               locationId={locationId}
               value={selectedPokemon}
               onChange={pokemon => handleEncounterSelect(pokemon)}
-              placeholder='Select Pokemon'
+              placeholder='Select Pokémon'
               nicknamePlaceholder='Enter nickname'
               comboboxId={`${locationId}-single`}
               shouldLoad={shouldLoad}
