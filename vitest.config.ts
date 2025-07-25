@@ -1,19 +1,38 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vitest/config';
-import path from 'path';
+import tsconfigPaths from 'vite-tsconfig-paths';
+
 
 export default defineConfig({
+  plugins: [tsconfigPaths()],
   test: {
     globals: true,
-    environment: 'happy-dom',
-    include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    exclude: ['node_modules', 'dist', '.next'],
     setupFiles: ['./src/test/setup.ts'],
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@data': path.resolve(__dirname, './data'),
-      '@loaders': path.resolve(__dirname, './src/loaders'),
-    },
+    projects: [
+      {
+        test: {
+          name: 'browser',
+          include: ['**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+          browser: {
+            enabled: true,
+            provider: 'playwright',
+            headless: true,
+            instances: [
+              {
+                browser: 'chromium',
+              },
+            ],
+          },
+        },
+      },
+      {
+        test: {
+          name: 'node',
+          include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+          exclude: ['**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}', 'node_modules', 'dist', '.next'],
+          environment: 'node',
+        },
+      },
+    ],
   },
 });
