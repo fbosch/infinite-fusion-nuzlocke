@@ -756,33 +756,16 @@ export const playthroughActions = {
     const encounter = activePlaythrough.encounters[locationId];
     if (!encounter) return;
 
-    // Early validation - determine encounter type and primary Pokémon
-    const isFusion = encounter.isFusion && encounter.head && encounter.body;
-    const primaryPokemon = encounter.head || encounter.body;
-
-    if (!primaryPokemon || (!isFusion && !encounter.head)) return;
-
     try {
       // Cache the service import to avoid repeated dynamic imports
       const { default: spriteService } = await import(
         '@/services/spriteService'
       );
 
-      // Get variants based on encounter type
-      let availableVariants: string[] | null = null;
-
-      if (isFusion && encounter.head && encounter.body) {
-        // Fusion variants
-        availableVariants = await spriteService.getArtworkVariants(
-          encounter.head.id,
-          encounter.body.id
-        );
-      } else {
-        // Single Pokémon variants
-        availableVariants = await spriteService.getArtworkVariants(
-          primaryPokemon.id
-        );
-      }
+      const availableVariants = await spriteService.getArtworkVariants(
+        encounter.head?.id,
+        encounter.body?.id
+      );
 
       // Early return if no variants or only default
       if (!availableVariants || availableVariants.length <= 1) return;
