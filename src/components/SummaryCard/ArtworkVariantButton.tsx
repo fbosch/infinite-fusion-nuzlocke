@@ -104,7 +104,7 @@ export function ArtworkVariantButton({
           'disabled:cursor-not-allowed enabled:hover:opacity-100 enabled:hover:text-white',
           {
             'group-hover:opacity-100': hasVariants === null,
-            'enabled:hover:bg-blue-400 enabled:focus:bg-blue-400 enabled:dark:hover:bg-blue-600 enabled:dark:focus:bg-blue-600':
+            'enabled:hover:bg-blue-400 enabled:focus:bg-blue-400 enabled:dark:hover:bg-blue-600 enabled:dark:focus:bg-blue-600 enabled:focus:text-white':
               !isShiftPressed,
             'enabled:hover:bg-orange-400 enabled:focus:bg-orange-400 enabled:dark:hover:bg-orange-700 enabled:dark:focus:bg-orange-700':
               isShiftPressed,

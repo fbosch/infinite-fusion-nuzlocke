@@ -68,11 +68,7 @@ export default function SummaryCard({
             background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
           }}
         />
-        <FusionSprite
-          locationId={locationId}
-          size='lg'
-          className='scale-150 relative'
-        />
+        <FusionSprite locationId={locationId} size='lg' />
       </Fragment>
       <ArtworkVariantButton
         key={`${encounterData?.head?.id}-${encounterData?.body?.id} `}
@@ -82,7 +78,7 @@ export default function SummaryCard({
       />
       {name && (
         <div className='z-5 p-0.5 text-center absolute bottom-0 translate-y-8.5 rounded-sm'>
-          <span className='text-md font-semibold dark:font-normal font-mono truncate max-w-full block px-1 rounded text-gray-900 dark:text-white dark:pixel-shadow'>
+          <span className='text-md  dark:font-normal font-mono truncate max-w-full block px-1 rounded text-gray-900 dark:text-white dark:pixel-shadow'>
             {name}
           </span>
         </div>

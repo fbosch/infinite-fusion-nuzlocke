@@ -32,7 +32,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
     <tr
       key={row.id}
       role='row'
-      className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors content-visibility-auto'
+      className='hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors content-visibility-auto'
       style={{
         containIntrinsicHeight: '150px',
       }}
