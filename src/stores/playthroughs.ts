@@ -653,7 +653,7 @@ export const playthroughActions = {
       activePlaythrough.encounters[locationId] = encounter;
     }
 
-    // If updating existing encounter with new pokemon
+    // Handle both setting and clearing pokemon
     if (pokemon) {
       const pokemonWithLocationAndUID = {
         ...pokemon,
@@ -721,6 +721,33 @@ export const playthroughActions = {
             encounter.artworkVariant = undefined;
           }
         }
+      }
+
+      // Update the encounter's timestamp
+      encounter.updatedAt = getCurrentTimestamp();
+    } else {
+      // Handle clearing pokemon (when pokemon is null)
+      encounter[field] = null;
+
+      // Reset artwork variant when clearing part of a fusion or single pokemon
+      if (encounter.isFusion) {
+        // For fusions, reset artwork variant since composition changed
+        encounter.artworkVariant = undefined;
+        if (encounter.head && encounter.body) {
+          try {
+            const preferredVariant =
+              await playthroughActions.getPreferredVariant(
+                encounter.head.id,
+                encounter.body.id
+              );
+            encounter.artworkVariant = preferredVariant;
+          } catch (error) {
+            console.warn('Failed to get preferred variant from cache:', error);
+          }
+        }
+      } else {
+        // For single pokemon encounters, clear artwork variant
+        encounter.artworkVariant = undefined;
       }
 
       // Update the encounter's timestamp

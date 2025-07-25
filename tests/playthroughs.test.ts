@@ -843,6 +843,132 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     });
   });
 
+  describe('Fusion flip bug prevention', () => {
+    it('should prevent duplication when flipping fusion with head Pokemon and empty body', async () => {
+      const pidgey = createMockPokemon('Pidgey', 16);
+      pidgey.nickname = 'Birdy';
+
+      // Create a fusion encounter with head Pokemon and empty body
+      await playthroughActions.updateEncounter('route-1', pidgey, 'head', true);
+
+      let encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
+
+      // Verify initial state: fusion with filled head, empty body
+      const initialEncounter = encounters!['route-1'];
+      expect(initialEncounter).toBeDefined();
+      expect(initialEncounter!.isFusion).toBe(true);
+      expect(initialEncounter!.head).toBeDefined();
+      expect(initialEncounter!.head!.name).toBe('Pidgey');
+      expect(initialEncounter!.head!.nickname).toBe('Birdy');
+      expect(initialEncounter!.body).toBeNull();
+
+      // Simulate flip by manually calling updateEncounter with null/Pokemon
+      // This replicates what happens in EncounterCell when flip button is clicked
+      await playthroughActions.updateEncounter('route-1', null, 'head', false);
+      await playthroughActions.updateEncounter(
+        'route-1',
+        pidgey,
+        'body',
+        false
+      );
+
+      encounters = playthroughActions.getEncounters();
+      expect(encounters).toBeDefined();
+
+      // Verify flip worked correctly: head is null, body has the Pokemon
+      const flippedEncounter = encounters!['route-1'];
+      expect(flippedEncounter).toBeDefined();
+      expect(flippedEncounter!.isFusion).toBe(true);
+      expect(flippedEncounter!.head).toBeNull(); // Should be cleared, not duplicated
+      expect(flippedEncounter!.body).toBeDefined();
+      expect(flippedEncounter!.body!.name).toBe('Pidgey');
+      expect(flippedEncounter!.body!.nickname).toBe('Birdy');
+
+      // Ensure no duplication occurred - exactly one Pokemon instance should exist
+      const headPokemon = flippedEncounter!.head;
+      const bodyPokemon = flippedEncounter!.body;
+
+      expect(headPokemon).toBeNull();
+      expect(bodyPokemon).not.toBeNull();
+
+      // Count total Pokemon in this encounter (should be exactly 1)
+      const totalPokemon = [headPokemon, bodyPokemon].filter(
+        p => p !== null
+      ).length;
+      expect(totalPokemon).toBe(1);
+    });
+
+    it('should handle clearing fields properly without leaving remnants', async () => {
+      const charmander = createMockPokemon('Charmander', 4);
+      charmander.nickname = 'Flame';
+
+      // Create regular encounter
+      await playthroughActions.updateEncounter('route-1', charmander);
+
+      let encounters = playthroughActions.getEncounters();
+      expect(encounters!['route-1'].head?.name).toBe('Charmander');
+      expect(encounters!['route-1'].body).toBeNull();
+
+      // Clear the encounter by setting to null
+      await playthroughActions.updateEncounter('route-1', null, 'head', false);
+
+      encounters = playthroughActions.getEncounters();
+
+      // Should properly clear the field
+      expect(encounters!['route-1'].head).toBeNull();
+      expect(encounters!['route-1'].body).toBeNull();
+    });
+
+    it('should handle fusion field clearing without affecting other field', async () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+      const squirtle = createMockPokemon('Squirtle', 7);
+
+      pikachu.nickname = 'Sparky';
+      squirtle.nickname = 'Turtle';
+
+      // Create fusion with both head and body
+      await playthroughActions.updateEncounter(
+        'route-1',
+        pikachu,
+        'head',
+        true
+      );
+      await playthroughActions.updateEncounter(
+        'route-1',
+        squirtle,
+        'body',
+        false
+      );
+
+      let encounters = playthroughActions.getEncounters();
+      expect(encounters!['route-1'].head?.name).toBe('Pikachu');
+      expect(encounters!['route-1'].body?.name).toBe('Squirtle');
+
+      // Clear only the head field
+      await playthroughActions.updateEncounter('route-1', null, 'head', false);
+
+      encounters = playthroughActions.getEncounters();
+
+      // Head should be cleared, body should remain unchanged
+      expect(encounters!['route-1'].head).toBeNull();
+      expect(encounters!['route-1'].body).toBeDefined();
+      expect(encounters!['route-1'].body!.name).toBe('Squirtle');
+      expect(encounters!['route-1'].body!.nickname).toBe('Turtle');
+      expect(encounters!['route-1'].isFusion).toBe(true);
+
+      // Clear only the body field
+      await playthroughActions.updateEncounter('route-1', null, 'body', false);
+
+      encounters = playthroughActions.getEncounters();
+
+      // Both should now be cleared
+      expect(encounters!['route-1'].head).toBeNull();
+      expect(encounters!['route-1'].body).toBeNull();
+      expect(encounters!['route-1'].isFusion).toBe(true);
+    });
+  });
+
   describe('edge cases and error handling', () => {
     it('should handle operations on playthrough without active playthrough', async () => {
       playthroughsStore.activePlaythroughId = undefined;
