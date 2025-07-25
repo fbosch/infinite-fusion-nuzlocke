@@ -146,6 +146,20 @@ export async function getPokemonEvolutionIds(
   return targetPokemon.evolution.evolves_to.map(e => e.id);
 }
 
+// Function to get pre-evolution ID for a specific Pokemon
+export async function getPokemonPreEvolutionId(
+  pokemonId: number
+): Promise<number | null> {
+  const pokemon = await getPokemon();
+  const targetPokemon = pokemon.find(p => p.id === pokemonId);
+
+  if (!targetPokemon?.evolution?.evolves_from) {
+    return null;
+  }
+
+  return targetPokemon.evolution.evolves_from.id;
+}
+
 // Initialize search worker with Pokemon data
 async function initializePokemonSearchWorker(): Promise<void> {
   // Return existing promise if already initializing

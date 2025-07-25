@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { getPokemon, searchPokemon, getPokemonEvolutionIds } from '../pokemon';
+import {
+  getPokemon,
+  searchPokemon,
+  getPokemonEvolutionIds,
+  getPokemonPreEvolutionId,
+} from '../pokemon';
 
 describe('Pokemon Loader with Evolution Data', () => {
   it('should get evolution IDs for specific Pokemon', async () => {
@@ -34,6 +39,36 @@ describe('Pokemon Loader with Evolution Data', () => {
       venusaurOption!.id
     );
     expect(venusaurEvolutionIds).toEqual([]); // No evolutions
+  });
+
+  it('should get pre-evolution ID for specific Pokemon', async () => {
+    // Test with Ivysaur - should devolve to Bulbasaur
+    const ivysaurResults = await searchPokemon('Ivysaur');
+    const ivysaurOption = ivysaurResults.find(p => p.name === 'Ivysaur');
+    expect(ivysaurOption).toBeDefined();
+
+    const preEvolutionId = await getPokemonPreEvolutionId(ivysaurOption!.id);
+    expect(preEvolutionId).toBe(1); // Bulbasaur's ID
+
+    // Test with Venusaur - should devolve to Ivysaur
+    const venusaurResults = await searchPokemon('Venusaur');
+    const venusaurOption = venusaurResults.find(p => p.name === 'Venusaur');
+    expect(venusaurOption).toBeDefined();
+
+    const venusaurPreEvolutionId = await getPokemonPreEvolutionId(
+      venusaurOption!.id
+    );
+    expect(venusaurPreEvolutionId).toBe(2); // Ivysaur's ID
+
+    // Test with Bulbasaur - should have no pre-evolution (base Pokemon)
+    const bulbasaurResults = await searchPokemon('Bulbasaur');
+    const bulbasaurOption = bulbasaurResults.find(p => p.name === 'Bulbasaur');
+    expect(bulbasaurOption).toBeDefined();
+
+    const bulbasaurPreEvolutionId = await getPokemonPreEvolutionId(
+      bulbasaurOption!.id
+    );
+    expect(bulbasaurPreEvolutionId).toBeNull(); // No pre-evolution
   });
 
   it('should handle Pokemon with multiple evolution options', async () => {

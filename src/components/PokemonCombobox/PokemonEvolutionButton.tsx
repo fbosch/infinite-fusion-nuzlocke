@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Atom, ChevronDown } from 'lucide-react';
+import { Atom, ChevronDown, Undo2 } from 'lucide-react';
 import clsx from 'clsx';
 import Image from 'next/image';
 import {
   getPokemonEvolutionIds,
+  getPokemonPreEvolutionId,
   getPokemonByNationalDexId,
   type PokemonOption,
 } from '@/loaders/pokemon';
@@ -25,9 +26,40 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   const [availableEvolutions, setAvailableEvolutions] = useState<
     PokemonOption[]
   >([]);
+  const [availablePreEvolution, setAvailablePreEvolution] =
+    useState<PokemonOption | null>(null);
   const [isLoadingEvolutions, setIsLoadingEvolutions] = useState(false);
   const [showEvolutionMenu, setShowEvolutionMenu] = useState(false);
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
   const evolutionMenuRef = useRef<HTMLDivElement>(null);
+
+  const hasEvolutions = availableEvolutions.length > 0;
+  const hasPreEvolution = !!availablePreEvolution;
+  const isDevolutionMode =
+    (isShiftPressed && hasPreEvolution) || (!hasEvolutions && hasPreEvolution);
+
+  // Track shift key state
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Shift') {
+        setIsShiftPressed(true);
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (event.key === 'Shift') {
+        setIsShiftPressed(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
 
   // Close evolution menu when clicking outside
   useEffect(() => {
@@ -46,17 +78,24 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
     };
   }, []);
 
-  // Handle evolution selection
+  // Handle evolution/devolution selection
   const handleEvolution = useCallback(
-    (evolutionPokemon?: PokemonOption) => {
+    (evolutionPokemon?: PokemonOption, isDevolution = false) => {
       if (evolutionPokemon) {
-        // Specific evolution selected
+        // Specific evolution/devolution selected
         const evolvedPokemon: PokemonOption = {
           ...value,
           ...evolutionPokemon,
         };
         onChange(evolvedPokemon);
         setShowEvolutionMenu(false);
+      } else if (isDevolution && availablePreEvolution) {
+        // Devolution - go to pre-evolution
+        const devolvedPokemon: PokemonOption = {
+          ...value,
+          ...availablePreEvolution,
+        };
+        onChange(devolvedPokemon);
       } else if (availableEvolutions.length === 1) {
         // Single evolution - directly evolve
         const evolution = availableEvolutions.at(0)!;
@@ -70,62 +109,89 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
         setShowEvolutionMenu(!showEvolutionMenu);
       }
     },
-    [availableEvolutions, value, onChange, showEvolutionMenu]
+    [
+      availableEvolutions,
+      availablePreEvolution,
+      value,
+      onChange,
+      showEvolutionMenu,
+    ]
   );
 
   // Handle evolution button click
   const handleEvolutionButtonClick = useCallback(() => {
-    handleEvolution();
-  }, [handleEvolution]);
+    handleEvolution(undefined, isDevolutionMode);
+  }, [handleEvolution, isDevolutionMode]);
 
-  // Load evolution data when value changes
+  // Load evolution and pre-evolution data when value changes
   useEffect(() => {
     if (!shouldLoad) {
       return;
     }
 
-    const loadEvolutions = async () => {
+    const loadEvolutionData = async () => {
       if (!value?.id) {
         setAvailableEvolutions([]);
+        setAvailablePreEvolution(null);
         return;
       }
 
       setIsLoadingEvolutions(true);
       try {
+        // Load evolutions
         const evolutionIds = await getPokemonEvolutionIds(value.id);
-        if (evolutionIds.length > 0) {
-          const evolutions: PokemonOption[] = [];
+        const evolutions: PokemonOption[] = [];
 
-          for (const evolutionId of evolutionIds) {
-            const evolutionPokemon =
-              await getPokemonByNationalDexId(evolutionId);
-            if (evolutionPokemon) {
-              evolutions.push({
-                id: evolutionPokemon.id,
-                name: evolutionPokemon.name,
-                nationalDexId: evolutionPokemon.nationalDexId,
-                originalLocation: value.originalLocation,
-              });
-            }
+        for (const evolutionId of evolutionIds) {
+          const evolutionPokemon = await getPokemonByNationalDexId(evolutionId);
+          if (evolutionPokemon) {
+            evolutions.push({
+              id: evolutionPokemon.id,
+              name: evolutionPokemon.name,
+              nationalDexId: evolutionPokemon.nationalDexId,
+              originalLocation: value.originalLocation,
+            });
           }
+        }
 
-          setAvailableEvolutions(evolutions);
+        setAvailableEvolutions(evolutions);
+
+        // Load pre-evolution
+        const preEvolutionId = await getPokemonPreEvolutionId(value.id);
+        if (preEvolutionId) {
+          const preEvolutionPokemon =
+            await getPokemonByNationalDexId(preEvolutionId);
+          if (preEvolutionPokemon) {
+            setAvailablePreEvolution({
+              id: preEvolutionPokemon.id,
+              name: preEvolutionPokemon.name,
+              nationalDexId: preEvolutionPokemon.nationalDexId,
+              originalLocation: value.originalLocation,
+            });
+          } else {
+            setAvailablePreEvolution(null);
+          }
         } else {
-          setAvailableEvolutions([]);
+          setAvailablePreEvolution(null);
         }
       } catch (error) {
-        console.error('Error loading evolutions:', error);
+        console.error('Error loading evolution data:', error);
         setAvailableEvolutions([]);
+        setAvailablePreEvolution(null);
       } finally {
         setIsLoadingEvolutions(false);
       }
     };
 
-    loadEvolutions();
+    loadEvolutionData();
   }, [value?.id, value?.originalLocation, shouldLoad]);
 
-  // Don't render if no Pokemon is selected or no evolutions available
-  if (!value || availableEvolutions.length === 0 || isLoadingEvolutions) {
+  // Don't render if no Pokemon is selected or no evolutions/devolutions available
+  if (
+    !value ||
+    (availableEvolutions.length === 0 && !availablePreEvolution) ||
+    isLoadingEvolutions
+  ) {
     return null;
   }
 
@@ -141,71 +207,85 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
           disabled={isLoadingEvolutions}
           className={clsx(
             'flex items-center justify-center gap-1 px-2 py-1 rounded-md',
-            'bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 text-xs font-medium',
-            'border border-gray-300 hover:border-blue-300 dark:border-gray-600 dark:hover:border-blue-400',
+            'bg-gray-100 text-gray-600 text-xs font-medium',
+            'border border-gray-300 dark:border-gray-600',
             'transition-colors duration-200',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            'dark:bg-gray-700 dark:hover:bg-blue-900/20 dark:text-gray-400 dark:hover:text-blue-400',
-            showEvolutionMenu &&
-              'bg-blue-50 text-blue-600 border-blue-300 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-400',
-            'hover:cursor-pointer'
+            'dark:bg-gray-700 dark:text-gray-400',
+            'hover:cursor-pointer',
+            {
+              'hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 dark:hover:border-orange-400 dark:hover:text-orange-400 dark:hover:bg-orange-900/20':
+                isDevolutionMode,
+              'bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20':
+                !isDevolutionMode,
+            }
           )}
           title={
-            availableEvolutions.length === 1
-              ? `Evolve to ${availableEvolutions[0].name}`
-              : `Choose evolution (${availableEvolutions.length} options)`
+            isDevolutionMode
+              ? `Devolve to ${availablePreEvolution.name}`
+              : availableEvolutions.length === 1
+                ? `Evolve to ${availableEvolutions[0].name}`
+                : hasEvolutions
+                  ? `Choose evolution (${availableEvolutions.length} options)`
+                  : 'No evolutions available'
           }
         >
-          <Atom className='w-3 h-3' />
-          {availableEvolutions.length > 1 && (
+          {isDevolutionMode ? (
+            <Undo2 className='w-3 h-3' />
+          ) : (
+            <Atom className='w-3 h-3' />
+          )}
+          {!isDevolutionMode && availableEvolutions.length > 1 && (
             <ChevronDown className='w-3 h-3' />
           )}
         </button>
 
         {/* Evolution dropdown menu */}
-        {showEvolutionMenu && availableEvolutions.length > 1 && (
-          <div
-            className={clsx(
-              'absolute top-full right-0 mt-1 py-1 min-w-48',
-              'bg-white dark:bg-gray-800 rounded-md shadow-lg',
-              'border border-gray-300 dark:border-gray-600',
-              'z-50'
-            )}
-          >
+        {showEvolutionMenu &&
+          availableEvolutions.length > 1 &&
+          !isDevolutionMode && (
             <div
               className={clsx(
-                'px-3 pb-2 pt-1 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600'
+                'absolute top-full right-0 mt-1 py-1 min-w-48',
+                'bg-white dark:bg-gray-800 rounded-md shadow-lg',
+                'border border-gray-300 dark:border-gray-600',
+                'z-50'
               )}
             >
-              Choose Evolution
-            </div>
-            {availableEvolutions.map(evolution => (
-              <button
-                key={evolution.id}
-                type='button'
-                title={`Evolve to ${evolution.name}`}
-                onClick={() => handleEvolution(evolution)}
+              <div
                 className={clsx(
-                  'w-full flex items-center gap-3 px-3 py-2 text-sm hover:cursor-pointer',
-                  'hover:bg-gray-100 dark:hover:bg-gray-700',
-                  'text-gray-900 dark:text-gray-100 text-left',
-                  'focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700'
+                  'px-3 pb-2 pt-1 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600'
                 )}
               >
-                <Image
-                  src={getPokemonSpriteUrlFromOption(evolution)}
-                  alt={evolution.name}
-                  width={32}
-                  height={32}
-                  className='object-contain object-center'
-                  loading='eager'
-                />
-                <span className='font-medium'>{evolution.name}</span>
-              </button>
-            ))}
-          </div>
-        )}
+                Choose Evolution
+              </div>
+              {availableEvolutions.map(evolution => (
+                <button
+                  key={evolution.id}
+                  type='button'
+                  title={`Evolve to ${evolution.name}`}
+                  onClick={() => handleEvolution(evolution)}
+                  className={clsx(
+                    'w-full flex items-center gap-3 px-3 py-2 text-sm hover:cursor-pointer',
+                    'hover:bg-gray-100 dark:hover:bg-gray-700',
+                    'text-gray-900 dark:text-gray-100 text-left',
+                    'focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700'
+                  )}
+                >
+                  <Image
+                    src={getPokemonSpriteUrlFromOption(evolution)}
+                    alt={evolution.name}
+                    width={32}
+                    height={32}
+                    className='object-contain object-center'
+                    loading='eager'
+                  />
+                  <span className='font-medium'>{evolution.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
       </div>
     </div>
   );
