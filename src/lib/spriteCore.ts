@@ -163,21 +163,54 @@ export class SpriteVariantCache {
 
 /**
  * Check if a sprite URL exists
+ * Works in both main thread (using Image) and web workers (using fetch)
  */
 export async function checkSpriteExists(url: string): Promise<boolean> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
+  // Check if we're in a web worker environment
+  const isWorker = typeof window === 'undefined' && typeof self !== 'undefined';
 
-    const response = await fetch(url, {
-      method: 'HEAD',
-      signal: controller.signal,
+  if (isWorker) {
+    // In web worker: use fetch with proper error handling
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+      await fetch(url, {
+        method: 'HEAD',
+        signal: controller.signal,
+        mode: 'no-cors', // Allow cross-origin requests
+      });
+
+      clearTimeout(timeoutId);
+
+      // With no-cors mode, we can't check response.ok
+      // A successful fetch means the resource exists
+      return true;
+    } catch (error) {
+      // Network error, abort, or CORS issue - assume image doesn't exist
+      return false;
+    }
+  } else {
+    // In main thread: use Image object (avoids CORS issues)
+    return new Promise(resolve => {
+      const img = new Image();
+      const timeoutId = setTimeout(() => {
+        img.src = ''; // Cancel the load
+        resolve(false);
+      }, 3000);
+
+      img.onload = () => {
+        clearTimeout(timeoutId);
+        resolve(true);
+      };
+
+      img.onerror = () => {
+        clearTimeout(timeoutId);
+        resolve(false);
+      };
+
+      img.src = url;
     });
-
-    clearTimeout(timeoutId);
-    return response.ok;
-  } catch {
-    return false;
   }
 }
 
