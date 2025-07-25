@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Cookie, Settings } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 
@@ -165,11 +165,16 @@ function CookieSettings({
 
 export function CookieConsent() {
   const [showSettings, setShowSettings] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [hasConsent, setHasConsent] = useLocalStorage('cookie-consent', false);
   const [preferences, setPreferences] = useLocalStorage<ConsentPreferences>(
     'cookie-preferences',
     DEFAULT_PREFERENCES
   );
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const savePreferences = (newPreferences: ConsentPreferences) => {
     setPreferences(newPreferences);
@@ -202,8 +207,8 @@ export function CookieConsent() {
     savePreferences(preferences);
   };
 
-  // Don't show banner if user has already given consent
-  if (hasConsent || typeof window === 'undefined') return null;
+  // Don't show banner if user has already given consent or component hasn't mounted yet
+  if (!mounted || hasConsent) return null;
 
   return (
     <>

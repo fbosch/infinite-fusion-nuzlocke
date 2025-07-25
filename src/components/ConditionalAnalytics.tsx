@@ -1,8 +1,22 @@
 'use client';
 
-import { Analytics } from '@vercel/analytics/next';
-import { SpeedInsights } from '@vercel/speed-insights/next';
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+
+const SpeedInsights = dynamic(
+  () => import('@vercel/speed-insights/next').then(mod => mod.SpeedInsights),
+  {
+    ssr: false,
+  }
+);
+
+const Analytics = dynamic(
+  () => import('@vercel/analytics/next').then(mod => mod.Analytics),
+  {
+    ssr: false,
+  }
+);
 
 interface ConsentPreferences {
   analytics: boolean;
@@ -15,13 +29,18 @@ const DEFAULT_PREFERENCES: ConsentPreferences = {
 };
 
 export function ConditionalAnalytics() {
+  const [mounted, setMounted] = useState(false);
   const [preferences] = useLocalStorage<ConsentPreferences>(
     'cookie-preferences',
     DEFAULT_PREFERENCES
   );
 
-  // Only render Analytics if user has given consent
-  if (!preferences.analytics) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Only render Analytics if component has mounted and user has given consent
+  if (!mounted || !preferences.analytics) {
     return null;
   }
 
@@ -29,13 +48,18 @@ export function ConditionalAnalytics() {
 }
 
 export function ConditionalSpeedInsights() {
+  const [mounted, setMounted] = useState(false);
   const [preferences] = useLocalStorage<ConsentPreferences>(
     'cookie-preferences',
     DEFAULT_PREFERENCES
   );
 
-  // Only render SpeedInsights if user has given consent
-  if (!preferences.speedInsights) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Only render SpeedInsights if component has mounted and user has given consent
+  if (!mounted || !preferences.speedInsights) {
     return null;
   }
 

@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   SortingState,
 } from '@tanstack/react-table';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { getLocationsSortedWithCustom } from '@/loaders';
 import type { CombinedLocation } from '@/loaders/locations';
 import LocationTableHeader from './LocationTableHeader';
@@ -22,8 +22,13 @@ export default function LocationTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isCustomLocationModalOpen, setIsCustomLocationModalOpen] =
     useState(false);
+  const [mounted, setMounted] = useState(false);
   const isLoading = useIsLoading();
   const customLocations = useCustomLocations();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const data = useMemo(() => {
     try {
@@ -87,8 +92,8 @@ export default function LocationTable() {
     enableMultiSort: false,
   });
 
-  // Show skeleton loading state while store is initializing from IndexedDB
-  if (isLoading) {
+  // Show skeleton loading state while component is mounting or store is initializing from IndexedDB
+  if (!mounted || isLoading) {
     return <LocationTableSkeleton />;
   }
 
@@ -108,9 +113,9 @@ export default function LocationTable() {
   }
 
   return (
-    <div className='rounded-lg overflow-x-auto border border-gray-200 dark:border-gray-700 shadow-sm'>
+    <div className='overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'>
       <table
-        className='w-full  min-w-full divide-y divide-gray-200 dark:divide-gray-700'
+        className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700'
         role='table'
         aria-label='Locations table'
       >

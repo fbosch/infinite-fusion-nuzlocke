@@ -23,6 +23,7 @@ const font = Font({
 const dsFont = localFont({
   src: '../../public/pokemon-ds-font.woff2',
   variable: '--font-mono',
+  display: 'block',
 });
 
 export const metadata: Metadata = {
@@ -31,7 +32,6 @@ export const metadata: Metadata = {
   keywords:
     'Pokémon, Infinite Fusion, Nuzlocke, tracker, game, locations, team',
   authors: [{ name: 'Infinite Fusion Nuzlocke Tracker' }],
-  viewport: 'width=device-width, initial-scale=1',
 };
 
 export default function RootLayout({
