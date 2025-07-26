@@ -16,6 +16,7 @@ import {
 import { clsx } from 'clsx';
 import { useState, cloneElement, isValidElement } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { twMerge } from 'tailwind-merge';
 
 interface CursorTooltipProps {
   content: React.ReactNode;
@@ -93,31 +94,28 @@ export function CursorTooltip({
         <AnimatePresence>
           {isOpen && (
             <div
+              className='z-100'
               ref={refs.setFloating}
               style={floatingStyles}
               {...getFloatingProps()}
             >
               <motion.div
-                className={clsx(
-                  // Base styles
-                  'z-50 rounded-md px-3 py-2 text-sm font-medium shadow-lg',
-                  // Pointer events - crucial for cursor following
-                  'pointer-events-none',
-                  // Dark theme styles
-                  'bg-gray-900 text-white dark:bg-gray-700',
-                  // Light theme styles
-                  'border border-gray-200 dark:border-gray-600',
-                  // Max width
-                  'max-w-xs break-words origin-top-left',
-                  // Custom className
+                className={twMerge(
+                  clsx(
+                    'rounded-md px-3 py-2 text-sm font-medium shadow-lg w-max max-w-sm',
+                    'pointer-events-none transform-gpu',
+                    'bg-gray-700 text-white',
+                    'border border-gray-600',
+                    'origin-top-left'
+                  ),
                   className
                 )}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{
-                  duration: 0.15,
-                  ease: 'easeOut',
+                  duration: 0.1,
+                  ease: 'linear',
                 }}
               >
                 {content}

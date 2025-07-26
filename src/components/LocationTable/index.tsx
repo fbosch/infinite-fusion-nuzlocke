@@ -8,14 +8,14 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import React, { useState, useMemo, useEffect } from 'react';
-import { getLocationsSortedWithCustom } from '@/loaders';
+import { getLocationsSortedWithCustom, isCustomLocation } from '@/loaders';
 import type { CombinedLocation } from '@/loaders/locations';
 import LocationTableHeader from './LocationTableHeader';
 import LocationTableRow from './LocationTableRow';
 import LocationTableSkeleton from './LocationTableSkeleton';
 import AddCustomLocationModal from './customLocations/AddCustomLocationModal';
 import { useIsLoading, useCustomLocations } from '@/stores/playthroughs';
-import { PlusIcon } from 'lucide-react';
+import { Info, PlusIcon } from 'lucide-react';
 import clsx from 'clsx';
 import { CursorTooltip } from '../CursorTooltip';
 
@@ -77,10 +77,19 @@ export default function LocationTable() {
           </div>
         ),
         cell: info => (
-          <span className='font-medium text-gray-900 dark:text-white'>
-            <CursorTooltip content={info.getValue()}>
-              <h2 className='text-sm'>{info.getValue()}</h2>
+          <span className='font-medium text-gray-900 dark:text-white flex gap-x-2 items-center'>
+            <CursorTooltip
+              content={
+                <span>
+                  {isCustomLocation(info.row.original)
+                    ? 'Custom Location'
+                    : info.row.original.description}
+                </span>
+              }
+            >
+              <Info className='size-4 text-gray-400 dark:text-gray-600' />
             </CursorTooltip>
+            <h2 className='text-sm'>{info.getValue()}</h2>
           </span>
         ),
         enableSorting: true,
