@@ -205,7 +205,7 @@ const PokemonOptions = ({
           value={pokemon}
           className={({ active }) =>
             clsx(
-              'relative cursor-pointer select-none py-2 px-4 content-visibility-auto',
+              'relative cursor-pointer select-none py-2 px-4 content-visibility-auto contain-intrinsic-height-[56px]',
               'rounded-md mx-2',
               {
                 'bg-blue-600 text-white ': active,
@@ -214,7 +214,6 @@ const PokemonOptions = ({
               }
             )
           }
-          style={{ containIntrinsicSize: '0 56px' }}
         >
           {({ selected }) => (
             <div className={'flex items-center gap-8 group'}>
@@ -836,8 +835,7 @@ export const PokemonCombobox = ({
                   className={clsx(
                     'z-50 overflow-y-auto py-1 text-base shadow-lg focus:outline-none sm:text-sm',
                     'bg-white dark:bg-gray-800',
-                    'border border-gray-300 dark:border-gray-600',
-                    // Conditional border radius and borders based on menu placement
+                    'border border-gray-300 dark:border-gray-600 scrollbar-thin',
                     {
                       'rounded-b-md rounded-t-none border-t-0':
                         placement.startsWith('bottom'),
