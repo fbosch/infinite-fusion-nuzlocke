@@ -24,6 +24,23 @@
   filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 1));
 }
 
+@utility content-visibility-auto {
+  content-visibility: auto;
+}
+
+@utility content-visibility-hidden {
+  content-visibility: hidden;
+}
+
+@utility content-visibility-visible {
+  content-visibility: visible;
+}
+
+@utility contain-intrinsic-height-* {
+  contain-intrinsic-height: --value([length]);
+  contain-intrinsic-height: --value(integer) px;
+}
+
 body {
   font-family: var(--font-family-sans);
   background-color: #f9fafb;
@@ -79,26 +96,6 @@ body {
 
 .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background-color: #6b7280;
-}
-
-/* Content visibility utilities */
-.content-visibility-auto {
-  content-visibility: auto;
-}
-
-.content-visibility-hidden {
-  content-visibility: hidden;
-}
-
-.content-visibility-visible {
-  content-visibility: visible;
-}
-
-/* Content visibility with contain-intrinsic-size for better performance */
-.content-visibility-auto-size {
-  content-visibility: auto;
-  contain-intrinsic-size: 0 500px;
-  /* Adjust height as needed */
 }
 
 /* Image rendering utilities for pixel art sprites */

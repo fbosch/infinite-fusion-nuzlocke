@@ -33,22 +33,11 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
     <tr
       key={row.id}
       role='row'
-      className='hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors content-visibility-auto group/row'
-      style={{
-        containIntrinsicHeight: '150px',
-      }}
+      className='hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors content-visibility-auto group/row contain-intrinsic-height-[150px]'
       ref={ref}
     >
       {row.getVisibleCells().map(cell =>
         match(cell.column.id)
-          .with('encounter', () => (
-            <EncounterCell
-              key={cell.id}
-              shouldLoad={inView}
-              routeId={routeId}
-              locationId={locationId}
-            />
-          ))
           .with('sprite', () => (
             <td
               key={cell.id}
@@ -57,6 +46,14 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
             >
               <SummaryCard locationId={locationId} shouldLoad={inView} />
             </td>
+          ))
+          .with('encounter', () => (
+            <EncounterCell
+              key={cell.id}
+              shouldLoad={inView}
+              routeId={routeId}
+              locationId={locationId}
+            />
           ))
           .with('actions', () => {
             const hasEncounter = !!(encounterData.head || encounterData.body);
@@ -89,7 +86,6 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
               key={cell.id}
               className='px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
               role='cell'
-              aria-label={`${cell.column.columnDef.header as string}: ${flexRender(cell.column.columnDef.cell, cell.getContext())}`}
             >
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </td>

@@ -160,8 +160,6 @@ export default function LocationTable() {
           </tbody>
         </table>
       </div>
-
-      {/* Add Custom Location Modal */}
       <AddCustomLocationModal
         isOpen={isCustomLocationModalOpen}
         onClose={() => setIsCustomLocationModalOpen(false)}
