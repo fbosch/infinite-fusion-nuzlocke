@@ -32,7 +32,7 @@ function ThemeToggle() {
 
   return (
     <div
-      className='flex items-center bg-gray-100 dark:bg-gray-800 rounded-md p-0.5'
+      className='flex items-center bg-gray-100 dark:bg-gray-800 rounded-md p-0.5 content-visibility-auto contain-intrinsic-height-[195px]'
       role='radiogroup'
       aria-label='Theme selection'
     >

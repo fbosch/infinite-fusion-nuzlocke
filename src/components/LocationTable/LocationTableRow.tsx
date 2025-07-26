@@ -2,7 +2,7 @@ import { Row, flexRender } from '@tanstack/react-table';
 import type { CombinedLocation } from '@/loaders/locations';
 import { isCustomLocation } from '@/loaders/locations';
 import { EncounterCell } from './EncounterCell';
-import SummaryCard from '../SummaryCard';
+import PokemonSummaryCard from '../PokemonSummaryCard';
 import ResetEncounterButton from './ResetEncounterButton';
 import RemoveLocationButton from './customLocations/RemoveLocationButton';
 import { match } from 'ts-pattern';
@@ -44,7 +44,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
               className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group'
               role='cell'
             >
-              <SummaryCard locationId={locationId} shouldLoad={inView} />
+              <PokemonSummaryCard locationId={locationId} shouldLoad={inView} />
             </td>
           ))
           .with('encounter', () => (

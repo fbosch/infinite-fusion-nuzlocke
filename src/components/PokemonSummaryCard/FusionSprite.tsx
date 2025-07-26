@@ -19,11 +19,16 @@ interface FusionSpriteProps {
   locationId: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
+  shouldLoad?: boolean;
 }
 
 const SPRITE_SIZES = { sm: 32, md: 48, lg: 64, xl: 96 } as const;
 
-export function FusionSprite({ locationId, size = 'md' }: FusionSpriteProps) {
+export function FusionSprite({
+  locationId,
+  size = 'md',
+  shouldLoad,
+}: FusionSpriteProps) {
   const encounterData = useEncounter(locationId);
   const { head, body, isFusion, artworkVariant } = encounterData || {
     head: null,
@@ -72,9 +77,9 @@ export function FusionSprite({ locationId, size = 'md' }: FusionSpriteProps) {
     src: spriteUrl,
     width: spriteSize,
     height: spriteSize,
-    loading: 'eager' as const,
+    loading: shouldLoad ? ('eager' as const) : ('lazy' as const),
     unoptimized: true,
-    decoding: 'async' as const,
+    decoding: shouldLoad ? ('auto' as const) : ('async' as const),
     draggable: false,
     placeholder: 'blur' as const,
     blurDataURL: TRANSPARENT_PIXEL,

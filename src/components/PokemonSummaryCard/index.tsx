@@ -68,7 +68,11 @@ export default function SummaryCard({
             background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
           }}
         />
-        <FusionSprite locationId={locationId} size='lg' />
+        <FusionSprite
+          locationId={locationId}
+          size='lg'
+          shouldLoad={shouldLoad}
+        />
       </Fragment>
       <ArtworkVariantButton
         key={`${encounterData?.head?.id}-${encounterData?.body?.id} `}
