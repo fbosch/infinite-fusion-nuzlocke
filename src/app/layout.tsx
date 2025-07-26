@@ -2,16 +2,16 @@ import type { Metadata } from 'next';
 import { Be_Vietnam_Pro as Font } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
-import { ThemeProvider } from '@/components/ThemeProvider';
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { ServiceWorkerInit } from '@/components/ServiceWorkerInit';
-import { CookieConsent } from '@/components/cookies/CookieConsent';
+import { CookieConsent } from '@/components/analytics/CookieConsent';
 import {
   ConditionalAnalytics,
   ConditionalSpeedInsights,
-} from '@/components/ConditionalAnalytics';
+} from '@/components/analytics/ConditionalAnalytics';
 
 // Primary sans-serif font for body text
 const font = Font({

@@ -4,7 +4,7 @@ import { isCustomLocation } from '@/loaders/locations';
 import { EncounterCell } from './EncounterCell';
 import SummaryCard from '../SummaryCard';
 import ResetEncounterButton from './ResetEncounterButton';
-import RemoveLocationButton from './RemoveLocationButton';
+import RemoveLocationButton from './customLocations/RemoveLocationButton';
 import { match } from 'ts-pattern';
 import { useInView } from 'react-intersection-observer';
 import { useEncounter } from '@/stores/playthroughs';

@@ -13,7 +13,7 @@ import type { CombinedLocation } from '@/loaders/locations';
 import LocationTableHeader from './LocationTableHeader';
 import LocationTableRow from './LocationTableRow';
 import LocationTableSkeleton from './LocationTableSkeleton';
-import AddCustomLocationModal from '../AddCustomLocationModal';
+import AddCustomLocationModal from './customLocations/AddCustomLocationModal';
 import { useIsLoading, useCustomLocations } from '@/stores/playthroughs';
 import { PlusIcon } from 'lucide-react';
 import clsx from 'clsx';

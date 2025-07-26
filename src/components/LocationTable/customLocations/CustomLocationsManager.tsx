@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import AddCustomLocationModal from './AddCustomLocationModal';
 import CustomLocationsList from './CustomLocationsList';
-import { useCustomLocations } from '@/stores/playthroughs';
 
 interface CustomLocationsManagerProps {
   className?: string;
@@ -14,7 +13,6 @@ export default function CustomLocationsManager({
   className = '',
 }: CustomLocationsManagerProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const _customLocations = useCustomLocations();
 
   return (
     <div
