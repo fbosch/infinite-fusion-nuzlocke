@@ -44,6 +44,7 @@ import {
   useIsLoading,
   useEncounters,
   usePlaythroughsSnapshot,
+  usePreferredVariant,
 } from '../src/stores/playthroughs';
 import { PokemonOptionSchema } from '../src/loaders/pokemon';
 
@@ -1975,6 +1976,699 @@ describe('Playthroughs Store - Hooks', () => {
 
       // Encounters should remain the same reference due to memoization
       expect(result.current).toBe(initialEncounters);
+    });
+  });
+});
+
+describe('Preferred Variant Handling', () => {
+  let mockSpriteService: ReturnType<
+    typeof vi.mocked<typeof import('../src/services/spriteService').default>
+  >;
+
+  beforeEach(async () => {
+    // Reset store state
+    playthroughsStore.playthroughs = [];
+    playthroughsStore.activePlaythroughId = undefined;
+
+    // Get the mocked sprite service
+    mockSpriteService = vi.mocked(
+      (await import('../src/services/spriteService')).default
+    );
+
+    // Reset mock calls
+    vi.clearAllMocks();
+  });
+
+  describe('applyPreferredVariant', () => {
+    it('should apply preferred variant for single Pokémon encounters', async () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+
+      // Mock sprite service to return a preferred variant
+      mockSpriteService.getPreferredVariant.mockResolvedValue('variant-1');
+
+      const encounter = {
+        head: pikachu,
+        body: null,
+        isFusion: false,
+        artworkVariant: undefined,
+        updatedAt: Date.now(),
+      };
+
+      await act(async () => {
+        await playthroughActions.applyPreferredVariant(encounter, true);
+      });
+
+      expect(encounter.artworkVariant).toBe('variant-1');
+      expect(mockSpriteService.getPreferredVariant).toHaveBeenCalledWith(
+        25,
+        undefined
+      );
+    });
+
+    it('should apply preferred variant for fusion encounters', async () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+      const charmander = createMockPokemon('Charmander', 4);
+
+      // Mock sprite service to return a preferred variant
+      mockSpriteService.getPreferredVariant.mockResolvedValue('fusion-variant');
+
+      const encounter = {
+        head: pikachu,
+        body: charmander,
+        isFusion: true,
+        artworkVariant: undefined,
+        updatedAt: Date.now(),
+      };
+
+      await act(async () => {
+        await playthroughActions.applyPreferredVariant(encounter, true);
+      });
+
+      expect(encounter.artworkVariant).toBe('fusion-variant');
+      expect(mockSpriteService.getPreferredVariant).toHaveBeenCalledWith(25, 4);
+    });
+
+    it('should not apply variant if already set and not forced', async () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+
+      const encounter = {
+        head: pikachu,
+        body: null,
+        isFusion: false,
+        artworkVariant: 'existing-variant',
+        updatedAt: Date.now(),
+      };
+
+      await act(async () => {
+        await playthroughActions.applyPreferredVariant(encounter, false);
+      });
+
+      expect(encounter.artworkVariant).toBe('existing-variant');
+      expect(mockSpriteService.getPreferredVariant).not.toHaveBeenCalled();
+    });
+
+    it('should apply variant if forced even when already set', async () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+
+      // Mock sprite service to return a new preferred variant
+      mockSpriteService.getPreferredVariant.mockResolvedValue('new-variant');
+
+      const encounter = {
+        head: pikachu,
+        body: null,
+        isFusion: false,
+        artworkVariant: 'existing-variant',
+        updatedAt: Date.now(),
+      };
+
+      await act(async () => {
+        await playthroughActions.applyPreferredVariant(encounter, true);
+      });
+
+      expect(encounter.artworkVariant).toBe('new-variant');
+      expect(mockSpriteService.getPreferredVariant).toHaveBeenCalledWith(
+        25,
+        undefined
+      );
+    });
+
+    it('should handle errors gracefully and set variant to undefined', async () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+
+      // Mock sprite service to throw an error
+      mockSpriteService.getPreferredVariant.mockRejectedValue(
+        new Error('Service error')
+      );
+
+      const encounter = {
+        head: pikachu,
+        body: null,
+        isFusion: false,
+        artworkVariant: 'existing-variant',
+        updatedAt: Date.now(),
+      };
+
+      await act(async () => {
+        await playthroughActions.applyPreferredVariant(encounter, true);
+      });
+
+      expect(encounter.artworkVariant).toBeUndefined();
+    });
+
+    it('should not apply variant for encounters without head Pokémon', async () => {
+      const encounter = {
+        head: null,
+        body: null,
+        isFusion: false,
+        artworkVariant: undefined,
+        updatedAt: Date.now(),
+      };
+
+      await act(async () => {
+        await playthroughActions.applyPreferredVariant(encounter, true);
+      });
+
+      expect(encounter.artworkVariant).toBeUndefined();
+      expect(mockSpriteService.getPreferredVariant).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('setPreferredVariant', () => {
+    it('should set preferred variant in sprite service', async () => {
+      await act(async () => {
+        await playthroughActions.setPreferredVariant(25, 4, 'test-variant');
+      });
+
+      expect(mockSpriteService.setPreferredVariant).toHaveBeenCalledWith(
+        25,
+        4,
+        'test-variant'
+      );
+    });
+
+    it('should handle errors gracefully when setting preferred variant', async () => {
+      // Mock sprite service to throw an error
+      mockSpriteService.setPreferredVariant.mockRejectedValue(
+        new Error('Service error')
+      );
+
+      await act(async () => {
+        await playthroughActions.setPreferredVariant(25, 4, 'test-variant');
+      });
+
+      // Should not throw, just log warning
+      expect(mockSpriteService.setPreferredVariant).toHaveBeenCalledWith(
+        25,
+        4,
+        'test-variant'
+      );
+    });
+
+    it('should not call sprite service when variant is undefined', async () => {
+      await act(async () => {
+        await playthroughActions.setPreferredVariant(25, 4, undefined);
+      });
+
+      expect(mockSpriteService.setPreferredVariant).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getPreferredVariant', () => {
+    it('should get preferred variant from sprite service', async () => {
+      // Mock sprite service to return a variant
+      mockSpriteService.getPreferredVariant.mockResolvedValue('test-variant');
+
+      const result = await playthroughActions.getPreferredVariant(25, 4);
+
+      expect(result).toBe('test-variant');
+      expect(mockSpriteService.getPreferredVariant).toHaveBeenCalledWith(25, 4);
+    });
+
+    it('should return undefined when sprite service throws error', async () => {
+      // Mock sprite service to throw an error
+      mockSpriteService.getPreferredVariant.mockRejectedValue(
+        new Error('Service error')
+      );
+
+      const result = await playthroughActions.getPreferredVariant(25, 4);
+
+      expect(result).toBeUndefined();
+      expect(mockSpriteService.getPreferredVariant).toHaveBeenCalledWith(25, 4);
+    });
+  });
+
+  describe('setArtworkVariant', () => {
+    beforeEach(async () => {
+      // Set up a test playthrough with an encounter
+      const playthroughId = playthroughActions.createPlaythrough('Test Run');
+      await playthroughActions.setActivePlaythrough(playthroughId);
+
+      const pikachu = createMockPokemon('Pikachu', 25);
+      await playthroughActions.updateEncounter('route-1', pikachu);
+    });
+
+    it('should set artwork variant for an encounter', async () => {
+      await act(async () => {
+        playthroughActions.setArtworkVariant('route-1', 'new-variant');
+      });
+
+      const encounter =
+        playthroughActions.getActivePlaythrough()?.encounters?.['route-1'];
+      expect(encounter?.artworkVariant).toBe('new-variant');
+      expect(encounter?.updatedAt).toBeGreaterThan(0);
+    });
+
+    it('should update preferred variant cache when setting artwork variant', async () => {
+      await act(async () => {
+        playthroughActions.setArtworkVariant('route-1', 'new-variant');
+      });
+
+      expect(mockSpriteService.setPreferredVariant).toHaveBeenCalledWith(
+        25,
+        undefined,
+        'new-variant'
+      );
+    });
+
+    it('should handle errors when updating preferred variant cache', async () => {
+      // Mock sprite service to throw an error
+      mockSpriteService.setPreferredVariant.mockRejectedValue(
+        new Error('Service error')
+      );
+
+      await act(async () => {
+        playthroughActions.setArtworkVariant('route-1', 'new-variant');
+      });
+
+      // Should still set the variant on the encounter
+      const encounter =
+        playthroughActions.getActivePlaythrough()?.encounters?.['route-1'];
+      expect(encounter?.artworkVariant).toBe('new-variant');
+    });
+
+    it('should clear artwork variant when setting to undefined', async () => {
+      // First set a variant
+      await act(async () => {
+        playthroughActions.setArtworkVariant('route-1', 'test-variant');
+      });
+
+      // Then clear it
+      await act(async () => {
+        playthroughActions.setArtworkVariant('route-1', undefined);
+      });
+
+      const encounter =
+        playthroughActions.getActivePlaythrough()?.encounters?.['route-1'];
+      expect(encounter?.artworkVariant).toBeUndefined();
+    });
+  });
+
+  describe('cycleArtworkVariant', () => {
+    beforeEach(async () => {
+      // Set up a test playthrough with an encounter
+      const playthroughId = playthroughActions.createPlaythrough('Test Run');
+      await playthroughActions.setActivePlaythrough(playthroughId);
+
+      const pikachu = createMockPokemon('Pikachu', 25);
+      await playthroughActions.updateEncounter('route-1', pikachu);
+    });
+
+    it('should cycle through available variants forward', async () => {
+      // Mock sprite service to return multiple variants
+      mockSpriteService.getArtworkVariants.mockResolvedValue([
+        '',
+        'variant-1',
+        'variant-2',
+      ]);
+
+      await act(async () => {
+        await playthroughActions.cycleArtworkVariant('route-1', false);
+      });
+
+      const encounter =
+        playthroughActions.getActivePlaythrough()?.encounters?.['route-1'];
+      expect(encounter?.artworkVariant).toBe('variant-1');
+      expect(mockSpriteService.setPreferredVariant).toHaveBeenCalledWith(
+        25,
+        undefined,
+        'variant-1'
+      );
+    });
+
+    it('should cycle through available variants backward', async () => {
+      // Mock sprite service to return multiple variants
+      mockSpriteService.getArtworkVariants.mockResolvedValue([
+        '',
+        'variant-1',
+        'variant-2',
+      ]);
+
+      await act(async () => {
+        await playthroughActions.cycleArtworkVariant('route-1', true);
+      });
+
+      const encounter =
+        playthroughActions.getActivePlaythrough()?.encounters?.['route-1'];
+      expect(encounter?.artworkVariant).toBe('variant-2');
+      expect(mockSpriteService.setPreferredVariant).toHaveBeenCalledWith(
+        25,
+        undefined,
+        'variant-2'
+      );
+    });
+
+    it('should handle single variant gracefully', async () => {
+      // Mock sprite service to return only one variant
+      mockSpriteService.getArtworkVariants.mockResolvedValue(['']);
+
+      await act(async () => {
+        await playthroughActions.cycleArtworkVariant('route-1', false);
+      });
+
+      const encounter =
+        playthroughActions.getActivePlaythrough()?.encounters?.['route-1'];
+      expect(encounter?.artworkVariant).toBeUndefined();
+      expect(mockSpriteService.setPreferredVariant).not.toHaveBeenCalled();
+    });
+
+    it('should handle no variants gracefully', async () => {
+      // Mock sprite service to return no variants
+      mockSpriteService.getArtworkVariants.mockResolvedValue([]);
+
+      await act(async () => {
+        await playthroughActions.cycleArtworkVariant('route-1', false);
+      });
+
+      const encounter =
+        playthroughActions.getActivePlaythrough()?.encounters?.['route-1'];
+      expect(encounter?.artworkVariant).toBeUndefined();
+      expect(mockSpriteService.setPreferredVariant).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors and set variant to undefined', async () => {
+      // Mock sprite service to throw an error
+      mockSpriteService.getArtworkVariants.mockRejectedValue(
+        new Error('Service error')
+      );
+
+      await act(async () => {
+        await playthroughActions.cycleArtworkVariant('route-1', false);
+      });
+
+      const encounter =
+        playthroughActions.getActivePlaythrough()?.encounters?.['route-1'];
+      expect(encounter?.artworkVariant).toBeUndefined();
+    });
+
+    it('should prefetch adjacent variants when cycling', async () => {
+      // Mock sprite service to return multiple variants
+      mockSpriteService.getArtworkVariants.mockResolvedValue([
+        '',
+        'variant-1',
+        'variant-2',
+        'variant-3',
+      ]);
+
+      // Mock Image constructor to track prefetch calls
+      const mockImage = vi.fn().mockImplementation(() => ({
+        setAttribute: vi.fn(),
+        src: '',
+        onload: vi.fn(),
+        onerror: vi.fn(),
+      }));
+      global.Image = mockImage;
+
+      await act(async () => {
+        await playthroughActions.cycleArtworkVariant('route-1', false);
+      });
+
+      // Should have called Image constructor for prefetching
+      // Note: The prefetch happens asynchronously, so we need to wait a bit
+      await new Promise(resolve => setTimeout(resolve, 50));
+      expect(mockImage).toHaveBeenCalled();
+    });
+  });
+
+  describe('prefetchAdjacentVariants', () => {
+    it('should prefetch adjacent variants for better UX', async () => {
+      // Mock Image constructor to track prefetch calls
+      const mockImage = vi.fn().mockImplementation(() => ({
+        setAttribute: vi.fn(),
+        src: '',
+        onload: vi.fn(),
+        onerror: vi.fn(),
+      }));
+      global.Image = mockImage;
+
+      // Mock generateSpriteUrl to return valid URLs
+      mockSpriteService.generateSpriteUrl.mockReturnValue('mock-url');
+
+      await act(async () => {
+        await playthroughActions.prefetchAdjacentVariants(25, 4, 'variant-1', [
+          '',
+          'variant-1',
+          'variant-2',
+        ]);
+      });
+
+      // Wait longer for the async prefetch to complete (uses requestAnimationFrame)
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Should have called Image constructor for prefetching adjacent variants
+      // For current 'variant-1' at index 1, next is 'variant-2' at index 2, prev is '' at index 0
+      // But '' gets filtered out by the filter condition (variant && variant !== currentVariant)
+      // So only 'variant-2' should be prefetched
+      expect(mockImage).toHaveBeenCalled();
+      expect(mockSpriteService.generateSpriteUrl).toHaveBeenCalledWith(
+        25,
+        4,
+        'variant-2'
+      );
+      // '' is filtered out because it's falsy in the filter condition
+      expect(mockSpriteService.generateSpriteUrl).not.toHaveBeenCalledWith(
+        25,
+        4,
+        ''
+      );
+    });
+
+    it('should not prefetch when only one variant available', async () => {
+      const mockImage = vi.fn();
+      global.Image = mockImage;
+
+      await act(async () => {
+        await playthroughActions.prefetchAdjacentVariants(25, 4, 'variant-1', [
+          'variant-1',
+        ]);
+      });
+
+      expect(mockImage).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors gracefully during prefetching', async () => {
+      // Mock Image constructor to track prefetch calls
+      const mockImage = vi.fn().mockImplementation(() => ({
+        setAttribute: vi.fn(),
+        src: '',
+        onload: vi.fn(),
+        onerror: vi.fn(),
+      }));
+      global.Image = mockImage;
+
+      // Mock generateSpriteUrl to throw error for all variants
+      mockSpriteService.generateSpriteUrl.mockImplementation(() => {
+        throw new Error('URL generation error');
+      });
+
+      await act(async () => {
+        await playthroughActions.prefetchAdjacentVariants(25, 4, 'variant-1', [
+          'variant-0',
+          'variant-1',
+          'variant-2',
+        ]);
+      });
+
+      // Wait longer for the async prefetch to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Should not have called Image constructor because generateSpriteUrl throws
+      // The error is caught and logged, but Image constructor is never called
+      expect(mockImage).not.toHaveBeenCalled();
+      expect(mockSpriteService.generateSpriteUrl).toHaveBeenCalledWith(
+        25,
+        4,
+        'variant-2'
+      );
+      expect(mockSpriteService.generateSpriteUrl).toHaveBeenCalledWith(
+        25,
+        4,
+        'variant-0'
+      );
+    });
+  });
+
+  describe('preloadArtworkVariants', () => {
+    beforeEach(async () => {
+      // Set up a test playthrough with multiple encounters
+      const playthroughId = playthroughActions.createPlaythrough('Test Run');
+      await playthroughActions.setActivePlaythrough(playthroughId);
+
+      const pikachu = createMockPokemon('Pikachu', 25);
+      const charmander = createMockPokemon('Charmander', 4);
+
+      await playthroughActions.updateEncounter('route-1', pikachu);
+      await playthroughActions.createFusion('route-2', pikachu, charmander);
+    });
+
+    it('should preload variants for all encounters in the playthrough', async () => {
+      // Mock sprite service to return variants
+      mockSpriteService.getArtworkVariants.mockResolvedValue(['', 'variant-1']);
+
+      await act(async () => {
+        await playthroughActions.preloadArtworkVariants();
+      });
+
+      // Should have called getArtworkVariants for both encounters
+      expect(mockSpriteService.getArtworkVariants).toHaveBeenCalledWith(25); // Single Pokémon
+      expect(mockSpriteService.getArtworkVariants).toHaveBeenCalledWith(25, 4); // Fusion
+    });
+
+    it('should handle errors gracefully for individual encounters', async () => {
+      // Mock sprite service to throw error for fusion but work for single
+      mockSpriteService.getArtworkVariants
+        .mockResolvedValueOnce(['', 'variant-1']) // Single Pokémon
+        .mockRejectedValueOnce(new Error('Fusion error')); // Fusion
+
+      await act(async () => {
+        await playthroughActions.preloadArtworkVariants();
+      });
+
+      // Should still have called for both encounters despite one failing
+      expect(mockSpriteService.getArtworkVariants).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle playthroughs with no encounters', async () => {
+      // Create a new playthrough with no encounters
+      const playthroughId = playthroughActions.createPlaythrough('Empty Run');
+      await playthroughActions.setActivePlaythrough(playthroughId);
+
+      await act(async () => {
+        await playthroughActions.preloadArtworkVariants();
+      });
+
+      expect(mockSpriteService.getArtworkVariants).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('usePreferredVariant hook', () => {
+    it('should return preferred variant and loading state', async () => {
+      // Mock sprite service to return a variant
+      mockSpriteService.getPreferredVariant.mockResolvedValue('test-variant');
+
+      const { result } = renderHook(() => usePreferredVariant(25, 4));
+
+      // Initially should be loading
+      expect(result.current.isLoading).toBe(true);
+      expect(result.current.preferredVariant).toBeUndefined();
+
+      // Wait for the effect to complete
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
+
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.preferredVariant).toBe('test-variant');
+    });
+
+    it('should handle setting preferred variant', async () => {
+      const { result } = renderHook(() => usePreferredVariant(25, 4));
+
+      await act(async () => {
+        await result.current.setPreferredVariant('new-variant');
+      });
+
+      expect(mockSpriteService.setPreferredVariant).toHaveBeenCalledWith(
+        25,
+        4,
+        'new-variant'
+      );
+      expect(result.current.preferredVariant).toBe('new-variant');
+    });
+
+    it('should handle errors when setting preferred variant', async () => {
+      // Mock sprite service to throw an error
+      mockSpriteService.setPreferredVariant.mockRejectedValue(
+        new Error('Service error')
+      );
+
+      const { result } = renderHook(() => usePreferredVariant(25, 4));
+
+      await act(async () => {
+        await result.current.setPreferredVariant('new-variant');
+      });
+
+      // Should still update the local state despite service error
+      expect(result.current.preferredVariant).toBe('new-variant');
+    });
+
+    it('should handle null IDs gracefully', async () => {
+      const { result } = renderHook(() => usePreferredVariant(null, null));
+
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
+
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.preferredVariant).toBeUndefined();
+      expect(mockSpriteService.getPreferredVariant).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Integration with encounter updates', () => {
+    it('should apply preferred variant when creating new encounters', async () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+
+      // Mock sprite service to return a preferred variant
+      mockSpriteService.getPreferredVariant.mockResolvedValue('auto-variant');
+
+      await act(async () => {
+        const playthroughId = playthroughActions.createPlaythrough('Test Run');
+        await playthroughActions.setActivePlaythrough(playthroughId);
+        await playthroughActions.updateEncounter('route-1', pikachu);
+      });
+
+      const encounter =
+        playthroughActions.getActivePlaythrough()?.encounters?.['route-1'];
+      expect(encounter?.artworkVariant).toBe('auto-variant');
+    });
+
+    it('should apply preferred variant when creating fusions', async () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+      const charmander = createMockPokemon('Charmander', 4);
+
+      // Mock sprite service to return a preferred variant
+      mockSpriteService.getPreferredVariant.mockResolvedValue('fusion-variant');
+
+      await act(async () => {
+        const playthroughId = playthroughActions.createPlaythrough('Test Run');
+        await playthroughActions.setActivePlaythrough(playthroughId);
+        await playthroughActions.createFusion('route-1', pikachu, charmander);
+      });
+
+      const encounter =
+        playthroughActions.getActivePlaythrough()?.encounters?.['route-1'];
+      expect(encounter?.artworkVariant).toBe('fusion-variant');
+    });
+
+    it('should reapply preferred variant when encounter composition changes', async () => {
+      const pikachu = createMockPokemon('Pikachu', 25);
+      const charmander = createMockPokemon('Charmander', 4);
+
+      // Mock sprite service to return different variants
+      mockSpriteService.getPreferredVariant
+        .mockResolvedValueOnce('pikachu-variant')
+        .mockResolvedValueOnce('fusion-variant');
+
+      await act(async () => {
+        const playthroughId = playthroughActions.createPlaythrough('Test Run');
+        await playthroughActions.setActivePlaythrough(playthroughId);
+
+        // First create a single Pokémon encounter
+        await playthroughActions.updateEncounter('route-1', pikachu);
+
+        // Then convert to fusion
+        await playthroughActions.updateEncounter(
+          'route-1',
+          charmander,
+          'body',
+          true
+        );
+      });
+
+      const encounter =
+        playthroughActions.getActivePlaythrough()?.encounters?.['route-1'];
+      expect(encounter?.artworkVariant).toBe('fusion-variant');
+      expect(mockSpriteService.getPreferredVariant).toHaveBeenCalledTimes(2);
     });
   });
 });
