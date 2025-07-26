@@ -43,16 +43,10 @@ export default function SortableHeaderCell({
       tabIndex={sortingEnabled ? 0 : -1}
       role='columnheader'
       aria-sort={sortingEnabled ? sortDirection : undefined}
-      aria-label={
-        sortingEnabled
-          ? `${header.column.columnDef.header as string} column. Click to sort.`
-          : `${header.column.columnDef.header as string} column. No sorting available.`
-      }
+      aria-label={sortingEnabled ? `Click to sort.` : ` No sorting available.`}
     >
       <div className='flex items-center space-x-1'>
-        <div>
-          {flexRender(header.column.columnDef.header, header.getContext())}
-        </div>
+        {flexRender(header.column.columnDef.header, header.getContext())}
         {header.column.getCanSort() && (
           <span className='text-gray-400' aria-hidden='true'>
             {header.column.getIsSorted() === 'asc' ? (

@@ -63,7 +63,7 @@ export default function AddCustomLocationModal({
               className={clsx(
                 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2',
-                'p-1 rounded-md transition-colors'
+                'p-1 rounded-md transition-colors cursor-pointer'
               )}
               aria-label='Close modal'
             >
@@ -77,7 +77,7 @@ export default function AddCustomLocationModal({
                 htmlFor='locationName'
                 className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'
               >
-                Location Name*
+                Location Name
               </label>
               <input
                 type='text'
@@ -103,7 +103,7 @@ export default function AddCustomLocationModal({
                 htmlFor='afterLocation'
                 className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'
               >
-                Place After*
+                Place After
               </label>
               <select
                 id='afterLocation'
@@ -111,7 +111,7 @@ export default function AddCustomLocationModal({
                 onChange={e => setSelectedAfterLocationId(e.target.value)}
                 required
                 className={clsx(
-                  'w-full px-3 py-2 border rounded-md transition-colors',
+                  'w-full px-3 py-2 border rounded-md transition-colors cursor-pointer',
                   'border-gray-300 dark:border-gray-600',
                   'bg-white dark:bg-gray-700',
                   'text-gray-900 dark:text-white',
@@ -129,19 +129,7 @@ export default function AddCustomLocationModal({
               </select>
             </div>
 
-            <div className='flex space-x-3 pt-4'>
-              <button
-                type='button'
-                onClick={onClose}
-                className={clsx(
-                  'flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors',
-                  'bg-gray-100 hover:bg-gray-200 text-gray-900',
-                  'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2'
-                )}
-              >
-                Cancel
-              </button>
+            <div className='flex pt-4 flex-row-reverse gap-x-3'>
               <button
                 type='submit'
                 className={clsx(
@@ -153,6 +141,18 @@ export default function AddCustomLocationModal({
               >
                 <Plus className='h-4 w-4' />
                 <span>Add Location</span>
+              </button>
+              <button
+                type='button'
+                onClick={onClose}
+                className={clsx(
+                  'flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer',
+                  'bg-gray-100 hover:bg-gray-200 text-gray-900',
+                  'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2'
+                )}
+              >
+                Cancel
               </button>
             </div>
           </form>

@@ -15,6 +15,8 @@ import LocationTableRow from './LocationTableRow';
 import LocationTableSkeleton from './LocationTableSkeleton';
 import AddCustomLocationModal from '../AddCustomLocationModal';
 import { useIsLoading, useCustomLocations } from '@/stores/playthroughs';
+import { PlusIcon } from 'lucide-react';
+import clsx from 'clsx';
 
 const columnHelper = createColumnHelper<CombinedLocation>();
 
@@ -42,14 +44,43 @@ export default function LocationTable() {
   const columns = useMemo(
     () => [
       columnHelper.accessor('name', {
-        header: 'Location',
+        header: ({ column }) => (
+          <div className='flex items-center w-full'>
+            <span>Location</span>
+            <button
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.stopPropagation();
+                  setIsCustomLocationModalOpen(true);
+                }
+              }}
+              onClick={e => {
+                e.stopPropagation();
+                setIsCustomLocationModalOpen(true);
+              }}
+              className={clsx(
+                'ml-2 p-0.5 rounded-sm transition-colors',
+                'bg-gray-100 hover:bg-gray-200 text-gray-600',
+                'border border-gray-200 hover:border-gray-300',
+                'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-gray-300',
+                'dark:border-gray-600 dark:hover:border-gray-500',
+                'cursor-pointer',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1'
+              )}
+              aria-label='Add custom location'
+              title='Add custom location'
+            >
+              <PlusIcon className='size-2.5' />
+            </button>
+          </div>
+        ),
         cell: info => (
           <span className='font-medium text-gray-900 dark:text-white'>
             {info.getValue()}
           </span>
         ),
         enableSorting: true,
-        size: 20, // Fixed width for location column
+        size: 10, // Fixed width for location column
       }),
       columnHelper.display({
         id: 'sprite',
