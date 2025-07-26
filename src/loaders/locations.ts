@@ -296,3 +296,8 @@ export async function getMergedLocationsWithEncounters(
 
   return locationsWithEncounters;
 }
+
+export function getLocationById(id: string) {
+  const locations = getLocations();
+  return locations.find(loc => loc.id === id) || null;
+}

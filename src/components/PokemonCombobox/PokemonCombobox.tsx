@@ -283,6 +283,7 @@ export const PokemonCombobox = ({
   locationId,
   value,
   onChange,
+  onBeforeClear,
   shouldLoad = false,
   placeholder = 'Select Pokemon',
   nicknamePlaceholder = 'Enter nickname',
@@ -294,6 +295,7 @@ export const PokemonCombobox = ({
   locationId?: string;
   value: PokemonOption | null | undefined;
   onChange: (value: PokemonOption | null) => void;
+  onBeforeClear?: (currentValue: PokemonOption) => Promise<boolean> | boolean;
   shouldLoad?: boolean;
   placeholder?: string;
   nicknamePlaceholder?: string;
@@ -489,12 +491,22 @@ export const PokemonCombobox = ({
 
   // Memoize input change handler
   const handleInputChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value;
-      if (value === '') {
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const inputValue = event.target.value;
+      if (inputValue === '') {
+        // If there's a current value and an onBeforeClear callback, check if clearing should proceed
+        if (value && onBeforeClear) {
+          const shouldClear = await onBeforeClear(value);
+          if (!shouldClear) {
+            // If clearing was cancelled, restore the input value to the pokemon name
+            setQuery(value.name);
+            return;
+          }
+        }
+
         // Clear the selection when input is cleared
         onChange(null);
-        setQuery(value);
+        setQuery(inputValue);
 
         // Maintain focus on the input after clearing
         setTimeout(() => {
@@ -502,10 +514,10 @@ export const PokemonCombobox = ({
         }, 0);
       } else {
         // Deferred update for typing
-        startTransition(() => setQuery(value));
+        startTransition(() => setQuery(inputValue));
       }
     },
-    [onChange]
+    [onChange, value, onBeforeClear]
   );
 
   // Handle drop events on the input
