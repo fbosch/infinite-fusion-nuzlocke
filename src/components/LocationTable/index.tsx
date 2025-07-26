@@ -59,11 +59,12 @@ export default function LocationTable() {
                 setIsCustomLocationModalOpen(true);
               }}
               className={clsx(
-                'ml-2 p-0.5 rounded-sm transition-colors',
-                'bg-gray-100 hover:bg-gray-200 text-gray-600',
-                'border border-gray-200 hover:border-gray-300',
-                'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-gray-300',
-                'dark:border-gray-600 dark:hover:border-gray-500',
+                'ml-2 p-0.5 rounded-sm transition-colors duration-200',
+                'bg-gray-100 text-gray-600',
+                'border border-gray-200',
+                'dark:bg-gray-700 dark:text-gray-400',
+                'dark:border-gray-600',
+                'hover:text-white hover:border-blue-500 hover:bg-blue-600',
                 'cursor-pointer',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1'
               )}
