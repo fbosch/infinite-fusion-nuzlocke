@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef } from 'react';
 
 interface UseAnimatedSpriteOptions {
   canAnimate: boolean;
@@ -9,7 +9,7 @@ export function useAnimatedSprite({ canAnimate }: UseAnimatedSpriteOptions) {
   const shadowRef = useRef<HTMLImageElement>(null);
   const hoverRef = useRef<boolean>(false);
 
-  const handleMouseEnter = useCallback(() => {
+  const handleMouseEnter = () => {
     hoverRef.current = true;
     if (imageRef.current && canAnimate) {
       // Cancel any running animations so the new one will replay
@@ -19,9 +19,7 @@ export function useAnimatedSprite({ canAnimate }: UseAnimatedSpriteOptions) {
       }
 
       const animateSprite = () => {
-        if (!hoverRef.current || !imageRef.current) return;
-
-        const animation = imageRef.current.animate(
+        const animation = imageRef.current?.animate(
           [
             { transform: 'translateY(0px)' },
             { transform: 'translateY(-4px)' },
@@ -53,18 +51,20 @@ export function useAnimatedSprite({ canAnimate }: UseAnimatedSpriteOptions) {
           }
         );
 
-        animation.onfinish = () => {
-          if (hoverRef.current) {
-            window.requestAnimationFrame(animateSprite);
-          }
-        };
+        if (animation) {
+          animation.onfinish = () => {
+            if (hoverRef.current) {
+              window.requestAnimationFrame(animateSprite);
+            }
+          };
+        }
       };
 
       window.requestAnimationFrame(animateSprite);
     }
-  }, [canAnimate]);
+  };
 
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseLeave = () => {
     hoverRef.current = false;
     const animation = imageRef.current?.getAnimations();
     const shadowAnimation = shadowRef.current?.getAnimations();
@@ -86,7 +86,7 @@ export function useAnimatedSprite({ canAnimate }: UseAnimatedSpriteOptions) {
         });
       }
     });
-  }, []);
+  };
 
   return {
     imageRef,
