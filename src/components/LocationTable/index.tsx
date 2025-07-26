@@ -17,6 +17,7 @@ import AddCustomLocationModal from './customLocations/AddCustomLocationModal';
 import { useIsLoading, useCustomLocations } from '@/stores/playthroughs';
 import { PlusIcon } from 'lucide-react';
 import clsx from 'clsx';
+import { CursorTooltip } from '../CursorTooltip';
 
 const columnHelper = createColumnHelper<CombinedLocation>();
 
@@ -77,7 +78,9 @@ export default function LocationTable() {
         ),
         cell: info => (
           <span className='font-medium text-gray-900 dark:text-white'>
-            <h2 className='text-sm'>{info.getValue()}</h2>
+            <CursorTooltip content={info.getValue()}>
+              <h2 className='text-sm'>{info.getValue()}</h2>
+            </CursorTooltip>
           </span>
         ),
         enableSorting: true,

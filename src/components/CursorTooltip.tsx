@@ -10,7 +10,6 @@ import {
   useRole,
   FloatingPortal,
   offset,
-  flip,
   shift,
   autoUpdate,
 } from '@floating-ui/react';
@@ -20,7 +19,6 @@ import { useState, cloneElement, isValidElement } from 'react';
 interface CursorTooltipProps {
   content: React.ReactNode;
   children: React.ReactElement;
-  delay?: number;
   className?: string;
   disabled?: boolean;
 }
@@ -28,7 +26,6 @@ interface CursorTooltipProps {
 export function CursorTooltip({
   content,
   children,
-  delay = 500,
   className,
   disabled = false,
 }: CursorTooltipProps) {
@@ -37,28 +34,26 @@ export function CursorTooltip({
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen,
-    placement: 'top',
+    placement: 'bottom-start', // Position bottom-right relative to cursor point
     middleware: [
-      offset(10),
-      flip({
-        fallbackAxisSideDirection: 'start',
-      }),
-      shift({ padding: 8 }),
+      offset(10), // Small offset from cursor
+      shift({ padding: 8 }), // Keep within viewport
     ],
-    whileElementsMounted: autoUpdate,
+    whileElementsMounted: (referenceEl, floatingEl, update) => {
+      return autoUpdate(referenceEl, floatingEl, update, {
+        animationFrame: true,
+      });
+    },
   });
 
   const clientPoint = useClientPoint(context, {
-    enabled: isOpen,
+    enabled: true, // Always enabled to track mouse, not just when open
     axis: 'both',
   });
 
   const hover = useHover(context, {
     move: false,
-    delay: {
-      open: delay,
-      close: 100,
-    },
+    delay: 0, // Instant show/hide for no lag
     enabled: !disabled,
   });
 
@@ -101,12 +96,12 @@ export function CursorTooltip({
             className={clsx(
               // Base styles
               'z-50 rounded-md px-3 py-2 text-sm font-medium shadow-lg',
+              // Pointer events - crucial for cursor following
+              'pointer-events-none',
               // Dark theme styles
               'bg-gray-900 text-white dark:bg-gray-700',
               // Light theme styles
               'border border-gray-200 dark:border-gray-600',
-              // Animation
-              'animate-in fade-in-0 zoom-in-95 duration-200',
               // Max width
               'max-w-xs break-words',
               // Custom className
