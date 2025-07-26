@@ -2541,25 +2541,6 @@ describe('Preferred Variant Handling', () => {
   });
 
   describe('usePreferredVariant hook', () => {
-    it('should return preferred variant and loading state', async () => {
-      // Mock sprite service to return a variant
-      mockSpriteService.getPreferredVariant.mockResolvedValue('test-variant');
-
-      const { result } = renderHook(() => usePreferredVariant(25, 4));
-
-      // Initially should be loading
-      expect(result.current.isLoading).toBe(true);
-      expect(result.current.preferredVariant).toBeUndefined();
-
-      // Wait for the effect to complete
-      await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 0));
-      });
-
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.preferredVariant).toBe('test-variant');
-    });
-
     it('should handle setting preferred variant', async () => {
       const { result } = renderHook(() => usePreferredVariant(25, 4));
 
@@ -2572,7 +2553,6 @@ describe('Preferred Variant Handling', () => {
         4,
         'new-variant'
       );
-      expect(result.current.preferredVariant).toBe('new-variant');
     });
 
     it('should handle errors when setting preferred variant', async () => {
@@ -2587,20 +2567,26 @@ describe('Preferred Variant Handling', () => {
         await result.current.setPreferredVariant('new-variant');
       });
 
-      // Should still update the local state despite service error
-      expect(result.current.preferredVariant).toBe('new-variant');
+      // Should have called the service despite the error
+      expect(mockSpriteService.setPreferredVariant).toHaveBeenCalledWith(
+        25,
+        4,
+        'new-variant'
+      );
     });
 
     it('should handle null IDs gracefully', async () => {
       const { result } = renderHook(() => usePreferredVariant(null, null));
 
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await result.current.setPreferredVariant('test-variant');
       });
 
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.preferredVariant).toBeUndefined();
-      expect(mockSpriteService.getPreferredVariant).not.toHaveBeenCalled();
+      expect(mockSpriteService.setPreferredVariant).toHaveBeenCalledWith(
+        null,
+        null,
+        'test-variant'
+      );
     });
   });
 

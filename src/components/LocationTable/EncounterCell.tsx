@@ -63,14 +63,9 @@ export function EncounterCell({
   const handleFlip = useCallback(() => {
     if (!isFusion) return;
 
-    // Swap head and body (works even if one is empty)
-    const newHead = bodyPokemon;
-    const newBody = headPokemon;
-
-    // Update both fields
-    handleEncounterSelect(newHead, 'head');
-    handleEncounterSelect(newBody, 'body');
-  }, [isFusion, headPokemon, bodyPokemon, handleEncounterSelect]);
+    // Use the atomic flip function to avoid duplicate preferred variant lookups
+    playthroughActions.flipEncounterFusion(locationId);
+  }, [isFusion, locationId]);
 
   return (
     <td

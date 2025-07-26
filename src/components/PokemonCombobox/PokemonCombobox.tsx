@@ -544,17 +544,25 @@ export const PokemonCombobox = ({
           );
         } else {
           if (dragSnapshot.currentDragValue) {
-            onChange(dragSnapshot.currentDragValue);
-
             if (isFromDifferentCombobox && dragSnapshot.currentDragSource) {
+              // Use atomic move to avoid duplicate intermediate states
               const { locationId: sourceLocationId, field: sourceField } =
                 playthroughActions.getLocationFromComboboxId(
                   dragSnapshot.currentDragSource
                 );
-              playthroughActions.clearEncounterFromLocation(
+              const { locationId: targetLocationId, field: targetField } =
+                playthroughActions.getLocationFromComboboxId(comboboxId || '');
+
+              playthroughActions.moveEncounterAtomic(
                 sourceLocationId,
-                sourceField
+                sourceField,
+                targetLocationId,
+                targetField,
+                dragSnapshot.currentDragValue
               );
+            } else {
+              // Not from different combobox, just set normally
+              onChange(dragSnapshot.currentDragValue);
             }
           } else {
             setQuery(pokemonName);
@@ -580,20 +588,31 @@ export const PokemonCombobox = ({
                       status: dragSnapshot.currentDragValue.status,
                     }),
                   };
-                  onChange(pokemonOption);
 
                   if (
                     isFromDifferentCombobox &&
                     dragSnapshot.currentDragSource
                   ) {
+                    // Use atomic move to avoid duplicate intermediate states
                     const { locationId: sourceLocationId, field: sourceField } =
                       playthroughActions.getLocationFromComboboxId(
                         dragSnapshot.currentDragSource
                       );
-                    playthroughActions.clearEncounterFromLocation(
+                    const { locationId: targetLocationId, field: targetField } =
+                      playthroughActions.getLocationFromComboboxId(
+                        comboboxId || ''
+                      );
+
+                    playthroughActions.moveEncounterAtomic(
                       sourceLocationId,
-                      sourceField
+                      sourceField,
+                      targetLocationId,
+                      targetField,
+                      pokemonOption
                     );
+                  } else {
+                    // Not from different combobox, just set normally
+                    onChange(pokemonOption);
                   }
                 }
               } catch (err) {
