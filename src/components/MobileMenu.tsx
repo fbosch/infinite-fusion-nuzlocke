@@ -5,7 +5,7 @@ import { Menu, X } from 'lucide-react';
 import { Menu as HeadlessMenu, MenuButton, MenuItems } from '@headlessui/react';
 import clsx from 'clsx';
 import PlaythroughMenu from './PlaythroughMenu';
-import CookieSettingsButton from './CookieSettingsButton';
+import CookieSettingsButton from './cookies/CookieSettingsButton';
 
 export default function MobileMenu() {
   return (

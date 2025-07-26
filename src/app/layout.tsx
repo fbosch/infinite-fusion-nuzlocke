@@ -3,10 +3,11 @@ import { Be_Vietnam_Pro as Font } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { ServiceWorkerInit } from '@/components/ServiceWorkerInit';
-import { CookieConsent } from '@/components/CookieConsent';
+import { CookieConsent } from '@/components/cookies/CookieConsent';
 import {
   ConditionalAnalytics,
   ConditionalSpeedInsights,
@@ -55,10 +56,12 @@ export default function RootLayout({
       </head>
       <body className='antialiased font-sans'>
         <ThemeProvider>
-          <Header />
-          {children}
-          <Footer />
-          <CookieConsent />
+          <ErrorBoundary>
+            <Header />
+            {children}
+            <Footer />
+            <CookieConsent />
+          </ErrorBoundary>
         </ThemeProvider>
         <ConditionalAnalytics />
         <ConditionalSpeedInsights />

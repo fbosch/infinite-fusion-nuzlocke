@@ -1,6 +1,6 @@
 'use client';
 
-import CookieSettingsButton from '@/components/CookieSettingsButton';
+import CookieSettingsButton from '@/components/cookies/CookieSettingsButton';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { Sun, Moon, Monitor, Github } from 'lucide-react';
