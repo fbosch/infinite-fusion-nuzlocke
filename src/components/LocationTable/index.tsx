@@ -77,7 +77,7 @@ export default function LocationTable() {
           </div>
         ),
         cell: info => (
-          <span className='font-medium text-gray-900 dark:text-white flex gap-x-2 items-center cursor-help'>
+          <span className='font-medium text-gray-900 dark:text-white flex gap-x-2 items-center'>
             <CursorTooltip
               content={
                 <span>
@@ -87,7 +87,7 @@ export default function LocationTable() {
                 </span>
               }
             >
-              <Info className='size-4 text-gray-400 dark:text-gray-600' />
+              <Info className='size-4 text-gray-400 dark:text-gray-600 cursor-help' />
             </CursorTooltip>
             <h2 className='text-sm'>{info.getValue()}</h2>
           </span>
