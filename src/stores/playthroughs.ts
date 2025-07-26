@@ -373,6 +373,40 @@ export { playthroughsStore };
 
 // Playthrough actions
 export const playthroughActions = {
+  // Helper function to consistently apply and cache preferred variants
+  applyPreferredVariant: async (
+    encounter: z.infer<typeof EncounterDataSchema>,
+    force: boolean = false
+  ): Promise<void> => {
+    try {
+      // Only apply if we don't already have a variant or if forced
+      if (!force && encounter.artworkVariant !== undefined) {
+        return;
+      }
+
+      let preferredVariant: string | undefined;
+
+      if (encounter.isFusion && encounter.head && encounter.body) {
+        // For fusion encounters with both parts
+        preferredVariant = await playthroughActions.getPreferredVariant(
+          encounter.head.id,
+          encounter.body.id
+        );
+      } else if (encounter.head && !encounter.isFusion) {
+        // For single Pokemon encounters
+        preferredVariant = await playthroughActions.getPreferredVariant(
+          encounter.head.id
+        );
+      }
+
+      encounter.artworkVariant = preferredVariant;
+    } catch (error) {
+      console.warn('Failed to apply preferred variant:', error);
+      // Set to undefined on error to ensure consistent state
+      encounter.artworkVariant = undefined;
+    }
+  },
+
   // Create a new playthrough
   createPlaythrough: (name: string, remixMode: boolean = false): string => {
     const newPlaythrough: Playthrough = {
@@ -579,6 +613,7 @@ export const playthroughActions = {
       head: null,
       body: null,
       isFusion: shouldCreateFusion,
+      artworkVariant: undefined,
       updatedAt: getCurrentTimestamp(),
     };
 
@@ -590,29 +625,8 @@ export const playthroughActions = {
       encounterData.body = null;
     }
 
-    // Try to get and apply preferred variant
-    try {
-      let preferredVariant: string | undefined;
-
-      if (shouldCreateFusion && encounterData.head && encounterData.body) {
-        // For fusion encounters with both parts
-        preferredVariant = await playthroughActions.getPreferredVariant(
-          encounterData.head.id,
-          encounterData.body.id
-        );
-      } else if (encounterData.head && !shouldCreateFusion) {
-        // For single Pokemon encounters
-        preferredVariant = await playthroughActions.getPreferredVariant(
-          encounterData.head.id
-        );
-      }
-
-      if (preferredVariant) {
-        encounterData.artworkVariant = preferredVariant;
-      }
-    } catch (error) {
-      console.warn('Failed to get preferred variant for new encounter:', error);
-    }
+    // Apply preferred variant using the helper function
+    await playthroughActions.applyPreferredVariant(encounterData, true);
 
     return encounterData;
   },
@@ -651,6 +665,7 @@ export const playthroughActions = {
       );
       encounter = encounterData;
       activePlaythrough.encounters[locationId] = encounter;
+      return; // Early return since createEncounterData already handles preferred variants
     }
 
     // Handle both setting and clearing pokemon
@@ -670,19 +685,12 @@ export const playthroughActions = {
         encounter[field] = pokemonWithLocationAndUID;
         encounter.isFusion = true;
 
-        // If composition is changing, try to apply preferred variant
-        if (isChangingComposition && encounter.head && encounter.body) {
-          try {
-            const preferredVariant =
-              await playthroughActions.getPreferredVariant(
-                encounter.head.id,
-                encounter.body.id
-              );
-            encounter.artworkVariant = preferredVariant;
-          } catch (error) {
-            console.warn('Failed to get preferred variant from cache:', error);
-            encounter.artworkVariant = undefined;
-          }
+        // Apply preferred variant if composition is changing or we don't have one
+        if (isChangingComposition || !encounter.artworkVariant) {
+          await playthroughActions.applyPreferredVariant(
+            encounter,
+            isChangingComposition
+          );
         }
 
         // Default behavior: If setting status on one part of a fusion and the other part
@@ -708,18 +716,12 @@ export const playthroughActions = {
         encounter.body = null;
         encounter.isFusion = false;
 
-        // Try to apply preferred variant for single Pokémon
-        if (isChangingComposition) {
-          try {
-            const preferredVariant =
-              await playthroughActions.getPreferredVariant(
-                pokemonWithLocationAndUID.id
-              );
-            encounter.artworkVariant = preferredVariant;
-          } catch (error) {
-            console.warn('Failed to get preferred variant from cache:', error);
-            encounter.artworkVariant = undefined;
-          }
+        // Apply preferred variant if composition is changing or we don't have one
+        if (isChangingComposition || !encounter.artworkVariant) {
+          await playthroughActions.applyPreferredVariant(
+            encounter,
+            isChangingComposition
+          );
         }
       }
 
@@ -727,27 +729,12 @@ export const playthroughActions = {
       encounter.updatedAt = getCurrentTimestamp();
     } else {
       // Handle clearing pokemon (when pokemon is null)
+      const wasChangingComposition = encounter[field] !== null;
       encounter[field] = null;
 
-      // Reset artwork variant when clearing part of a fusion or single pokemon
-      if (encounter.isFusion) {
-        // For fusions, reset artwork variant since composition changed
-        encounter.artworkVariant = undefined;
-        if (encounter.head && encounter.body) {
-          try {
-            const preferredVariant =
-              await playthroughActions.getPreferredVariant(
-                encounter.head.id,
-                encounter.body.id
-              );
-            encounter.artworkVariant = preferredVariant;
-          } catch (error) {
-            console.warn('Failed to get preferred variant from cache:', error);
-          }
-        }
-      } else {
-        // For single pokemon encounters, clear artwork variant
-        encounter.artworkVariant = undefined;
+      // Always reapply preferred variant when clearing since composition changes
+      if (wasChangingComposition) {
+        await playthroughActions.applyPreferredVariant(encounter, true);
       }
 
       // Update the encounter's timestamp
@@ -794,37 +781,36 @@ export const playthroughActions = {
     if (existingEncounter.isFusion && !newIsFusion) {
       // If head is empty but body has data, move body to head
       if (!existingEncounter.head && existingEncounter.body) {
-        activePlaythrough.encounters[locationId] = {
+        const newEncounter = {
           head: existingEncounter.body,
           body: null,
           isFusion: false,
-          artworkVariant: await playthroughActions.getPreferredVariant(
-            existingEncounter.body?.id
-          ),
+          artworkVariant: undefined,
           updatedAt: getCurrentTimestamp(),
         };
+        activePlaythrough.encounters[locationId] = newEncounter;
+        await playthroughActions.applyPreferredVariant(newEncounter, true);
       } else {
         // If both slots have data or only head has data, preserve as-is
-        activePlaythrough.encounters[locationId] = {
+        const newEncounter = {
           ...existingEncounter,
           isFusion: false,
-          artworkVariant: await playthroughActions.getPreferredVariant(
-            existingEncounter.head?.id
-          ),
+          artworkVariant: undefined,
           updatedAt: getCurrentTimestamp(),
         };
+        activePlaythrough.encounters[locationId] = newEncounter;
+        await playthroughActions.applyPreferredVariant(newEncounter, true);
       }
     } else {
       // When fusing (going from non-fusion to fusion) or other cases
-      activePlaythrough.encounters[locationId] = {
+      const newEncounter = {
         ...existingEncounter,
         isFusion: newIsFusion,
-        artworkVariant: await playthroughActions.getPreferredVariant(
-          existingEncounter.head?.id,
-          existingEncounter.body?.id
-        ),
+        artworkVariant: undefined,
         updatedAt: getCurrentTimestamp(),
       };
+      activePlaythrough.encounters[locationId] = newEncounter;
+      await playthroughActions.applyPreferredVariant(newEncounter, true);
     }
   },
 
@@ -846,14 +832,12 @@ export const playthroughActions = {
       head,
       body,
       isFusion: true,
-      artworkVariant: await playthroughActions.getPreferredVariant(
-        head.id,
-        body.id
-      ),
+      artworkVariant: undefined,
       updatedAt: getCurrentTimestamp(),
     };
 
     activePlaythrough.encounters[locationId] = encounter;
+    await playthroughActions.applyPreferredVariant(encounter, true);
   },
 
   // Set artwork variant for an encounter
@@ -873,14 +857,12 @@ export const playthroughActions = {
     encounter.artworkVariant = variant;
     encounter.updatedAt = getCurrentTimestamp();
 
-    // Also set this as the preferred variant in the cache
-    if (variant !== undefined) {
-      spriteService
-        .setPreferredVariant(encounter.head?.id, encounter.body?.id, variant)
-        .catch((error: unknown) => {
-          console.warn('Failed to set preferred variant in cache:', error);
-        });
-    }
+    // Always update the preferred variant cache when manually setting variants
+    spriteService
+      .setPreferredVariant(encounter.head?.id, encounter.body?.id, variant)
+      .catch((error: unknown) => {
+        console.warn('Failed to set preferred variant in cache:', error);
+      });
   },
 
   // Set preferred variant for a Pokémon or fusion (updates cache only, doesn't affect current encounters)
@@ -1195,24 +1177,13 @@ export const playthroughActions = {
     // Clear the source location
     delete activePlaythrough.encounters[fromLocationId];
 
-    // Set the destination and reset artwork variant since it's a new fusion context
+    // Set the destination - updateEncounter already handles preferred variants
     await playthroughActions.updateEncounter(
       toLocationId,
       pokemon,
       toField,
       false
     );
-
-    // Reset artwork variant for the destination encounter
-    const destEncounter = activePlaythrough.encounters[toLocationId];
-    if (destEncounter) {
-      destEncounter.artworkVariant =
-        await playthroughActions.getPreferredVariant(
-          destEncounter.head?.id,
-          destEncounter.body?.id
-        );
-      destEncounter.updatedAt = getCurrentTimestamp();
-    }
   },
 
   // Swap encounters between two locations (replaces switchCombobox event)
@@ -1263,20 +1234,11 @@ export const playthroughActions = {
       encounter2.body = pokemon1WithLocation;
     }
 
-    const [variant1, variant2] = await Promise.all([
-      spriteService.getPreferredVariant(
-        encounter1.head?.id,
-        encounter1.body?.id
-      ),
-      spriteService.getPreferredVariant(
-        encounter2.head?.id,
-        encounter2.body?.id
-      ),
+    // Apply preferred variants for both encounters since compositions have changed
+    await Promise.all([
+      playthroughActions.applyPreferredVariant(encounter1, true),
+      playthroughActions.applyPreferredVariant(encounter2, true),
     ]);
-
-    // Reset artwork variants since the fusion combinations have changed
-    encounter1.artworkVariant = variant1;
-    encounter2.artworkVariant = variant2;
 
     // Update both encounter timestamps since they were swapped
     const timestamp = getCurrentTimestamp();
