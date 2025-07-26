@@ -38,7 +38,7 @@ export function CursorTooltip({
     onOpenChange: setIsOpen,
     placement: 'bottom-start', // Position bottom-right relative to cursor point
     middleware: [
-      offset(10), // Small offset from cursor
+      offset({ mainAxis: 20, crossAxis: 20 }),
       shift({ padding: 8 }), // Keep within viewport
     ],
     whileElementsMounted: (referenceEl, floatingEl, update) => {
@@ -91,7 +91,7 @@ export function CursorTooltip({
         })}
 
       <FloatingPortal>
-        <AnimatePresence>
+        <AnimatePresence mode='wait'>
           {isOpen && (
             <div
               className='z-100'
@@ -114,8 +114,8 @@ export function CursorTooltip({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{
-                  duration: 0.1,
-                  ease: 'linear',
+                  duration: 0.05,
+                  ease: 'easeOut',
                 }}
               >
                 {content}

@@ -77,7 +77,7 @@ export default function LocationTable() {
           </div>
         ),
         cell: info => (
-          <span className='font-medium text-gray-900 dark:text-white flex gap-x-2 items-center'>
+          <span className='font-medium text-gray-900 dark:text-white flex gap-x-2 items-center cursor-help'>
             <CursorTooltip
               content={
                 <span>
