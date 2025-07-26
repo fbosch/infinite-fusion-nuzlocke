@@ -15,6 +15,7 @@ import {
 } from '@floating-ui/react';
 import { clsx } from 'clsx';
 import { useState, cloneElement, isValidElement } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface CursorTooltipProps {
   content: React.ReactNode;
@@ -88,31 +89,43 @@ export function CursorTooltip({
           }),
         })}
 
-      {isOpen && (
-        <FloatingPortal>
-          <div
-            ref={refs.setFloating}
-            style={floatingStyles}
-            className={clsx(
-              // Base styles
-              'z-50 rounded-md px-3 py-2 text-sm font-medium shadow-lg',
-              // Pointer events - crucial for cursor following
-              'pointer-events-none',
-              // Dark theme styles
-              'bg-gray-900 text-white dark:bg-gray-700',
-              // Light theme styles
-              'border border-gray-200 dark:border-gray-600',
-              // Max width
-              'max-w-xs break-words',
-              // Custom className
-              className
-            )}
-            {...getFloatingProps()}
-          >
-            {content}
-          </div>
-        </FloatingPortal>
-      )}
+      <FloatingPortal>
+        <AnimatePresence>
+          {isOpen && (
+            <div
+              ref={refs.setFloating}
+              style={floatingStyles}
+              {...getFloatingProps()}
+            >
+              <motion.div
+                className={clsx(
+                  // Base styles
+                  'z-50 rounded-md px-3 py-2 text-sm font-medium shadow-lg',
+                  // Pointer events - crucial for cursor following
+                  'pointer-events-none',
+                  // Dark theme styles
+                  'bg-gray-900 text-white dark:bg-gray-700',
+                  // Light theme styles
+                  'border border-gray-200 dark:border-gray-600',
+                  // Max width
+                  'max-w-xs break-words origin-top-left',
+                  // Custom className
+                  className
+                )}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{
+                  duration: 0.15,
+                  ease: 'easeOut',
+                }}
+              >
+                {content}
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+      </FloatingPortal>
     </>
   );
 }
