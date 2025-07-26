@@ -76,7 +76,7 @@ export default function LocationTable() {
         ),
         cell: info => (
           <span className='font-medium text-gray-900 dark:text-white'>
-            {info.getValue()}
+            <h2 className='text-sm'>{info.getValue()}</h2>
           </span>
         ),
         enableSorting: true,
@@ -97,7 +97,7 @@ export default function LocationTable() {
         size: 900, // Optimized width for fusion comboboxes
       }),
       columnHelper.display({
-        id: 'reset',
+        id: 'actions',
         header: '',
         enableSorting: false,
         cell: () => null, // Handled in render loop

@@ -1287,7 +1287,11 @@ export const playthroughActions = {
         activePlaythrough.customLocations
       );
 
-      activePlaythrough.customLocations.push(newCustomLocation);
+      // Create a new array instead of mutating the existing one to ensure reactivity
+      activePlaythrough.customLocations = [
+        ...activePlaythrough.customLocations,
+        newCustomLocation,
+      ];
       activePlaythrough.updatedAt = getCurrentTimestamp();
 
       return newCustomLocation.id;
@@ -1307,8 +1311,11 @@ export const playthroughActions = {
     );
 
     if (index !== -1) {
-      // Remove the custom location
-      activePlaythrough.customLocations.splice(index, 1);
+      // Create a new array without the custom location to ensure reactivity
+      activePlaythrough.customLocations =
+        activePlaythrough.customLocations.filter(
+          loc => loc.id !== customLocationId
+        );
 
       // Also remove any encounters associated with this custom location
       if (

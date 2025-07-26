@@ -4,6 +4,7 @@ import { isCustomLocation } from '@/loaders/locations';
 import { EncounterCell } from './EncounterCell';
 import SummaryCard from '../SummaryCard';
 import ResetEncounterButton from './ResetEncounterButton';
+import RemoveLocationButton from './RemoveLocationButton';
 import { match } from 'ts-pattern';
 import { useInView } from 'react-intersection-observer';
 import { useEncounter } from '@/stores/playthroughs';
@@ -57,15 +58,30 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
               <SummaryCard locationId={locationId} shouldLoad={inView} />
             </td>
           ))
-          .with('reset', () => {
-            const hasEncounter = encounterData.head || encounterData.body;
+          .with('actions', () => {
+            const hasEncounter = !!(encounterData.head || encounterData.body);
             return (
-              <ResetEncounterButton
+              <td
                 key={cell.id}
-                locationId={locationId}
-                locationName={row.original.name}
-                hasEncounter={!!hasEncounter}
-              />
+                className='p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top'
+                role='cell'
+              >
+                <div className='flex flex-col items-center justify-end gap-1'>
+                  {hasEncounter && (
+                    <ResetEncounterButton
+                      locationId={locationId}
+                      locationName={row.original.name}
+                      hasEncounter={hasEncounter}
+                    />
+                  )}
+                  {isCustomLocation(row.original) && (
+                    <RemoveLocationButton
+                      locationId={locationId}
+                      locationName={row.original.name}
+                    />
+                  )}
+                </div>
+              </td>
             );
           })
           .otherwise(() => (
