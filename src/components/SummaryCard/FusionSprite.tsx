@@ -8,6 +8,7 @@ import { match, P } from 'ts-pattern';
 import { twMerge } from 'tailwind-merge';
 import { SquareArrowUpRight } from 'lucide-react';
 import { useEncounter } from '@/stores/playthroughs';
+
 import {
   getSpriteUrl,
   getAltText,
@@ -92,10 +93,6 @@ function getStatusState(
 }
 
 export function FusionSprite({ locationId, size = 'md' }: FusionSpriteProps) {
-  const imageRef = useRef<HTMLImageElement>(null);
-  const shadowRef = useRef<HTMLImageElement>(null);
-  const hoverRef = useRef<boolean>(false);
-
   // Get encounter data directly - only this sprite will rerender when this encounter changes
   const encounterData = useEncounter(locationId);
   const { head, body, isFusion, artworkVariant } = encounterData || {
@@ -109,11 +106,15 @@ export function FusionSprite({ locationId, size = 'md' }: FusionSpriteProps) {
   const spriteUrl = getSpriteUrl(head, body, isFusion, artworkVariant);
   const altText = getAltText(head, body, isFusion);
   const spriteSize = SPRITE_SIZES[size];
+  const statusState = getStatusState(head, body);
+
+  // Temporary: inline animation for debugging
+  const imageRef = useRef<HTMLImageElement>(null);
+  const shadowRef = useRef<HTMLImageElement>(null);
+  const hoverRef = useRef<boolean>(false);
 
   const baseImageClasses =
     'object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none transform-gpu';
-
-  const statusState = getStatusState(head, body);
 
   const link = useMemo(() => {
     return match([head, body])
@@ -188,12 +189,13 @@ export function FusionSprite({ locationId, size = 'md' }: FusionSpriteProps) {
               if (animation) {
                 animation.onfinish = () => {
                   if (hoverRef.current) {
-                    animateSprite();
+                    window.requestAnimationFrame(animateSprite);
                   }
                 };
               }
             };
-            animateSprite();
+
+            window.requestAnimationFrame(animateSprite);
           }
         }}
         onMouseLeave={() => {
@@ -201,21 +203,23 @@ export function FusionSprite({ locationId, size = 'md' }: FusionSpriteProps) {
           const animation = imageRef.current?.getAnimations();
           const shadowAnimation = shadowRef.current?.getAnimations();
 
-          if (animation) {
-            animation.forEach(a => {
-              if (a.playState === 'running') {
-                a.updatePlaybackRate(-1);
-              }
-            });
-          }
+          window.requestAnimationFrame(() => {
+            if (animation) {
+              animation.forEach(a => {
+                if (a.playState === 'running') {
+                  a.updatePlaybackRate(-1);
+                }
+              });
+            }
 
-          if (shadowAnimation) {
-            shadowAnimation.forEach(a => {
-              if (a.playState === 'running') {
-                a.updatePlaybackRate(-1);
-              }
-            });
-          }
+            if (shadowAnimation) {
+              shadowAnimation.forEach(a => {
+                if (a.playState === 'running') {
+                  a.updatePlaybackRate(-1);
+                }
+              });
+            }
+          });
         }}
       >
         <div className='relative w-full flex justify-center'>
