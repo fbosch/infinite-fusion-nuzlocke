@@ -118,7 +118,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     });
 
     it('should clear entire encounter when no field specified', async () => {
-      playthroughActions.clearEncounterFromLocation('route-1');
+      await playthroughActions.clearEncounterFromLocation('route-1');
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -126,7 +126,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     });
 
     it('should remove regular encounter when clearing head', async () => {
-      playthroughActions.clearEncounterFromLocation('route-1', 'head');
+      await playthroughActions.clearEncounterFromLocation('route-1', 'head');
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -134,7 +134,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     });
 
     it('should preserve fusion structure when clearing head only', async () => {
-      playthroughActions.clearEncounterFromLocation('route-2', 'head');
+      await playthroughActions.clearEncounterFromLocation('route-2', 'head');
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -146,7 +146,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     });
 
     it('should preserve fusion structure when clearing body only', async () => {
-      playthroughActions.clearEncounterFromLocation('route-2', 'body');
+      await playthroughActions.clearEncounterFromLocation('route-2', 'body');
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -158,8 +158,8 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     });
 
     it('should preserve fusion structure even when both head and body are cleared', async () => {
-      playthroughActions.clearEncounterFromLocation('route-2', 'head');
-      playthroughActions.clearEncounterFromLocation('route-2', 'body');
+      await playthroughActions.clearEncounterFromLocation('route-2', 'head');
+      await playthroughActions.clearEncounterFromLocation('route-2', 'body');
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -170,7 +170,10 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
     });
 
     it('should handle clearing from non-existent location gracefully', async () => {
-      playthroughActions.clearEncounterFromLocation('non-existent', 'head');
+      await playthroughActions.clearEncounterFromLocation(
+        'non-existent',
+        'head'
+      );
 
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
@@ -436,7 +439,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
         'head',
         true
       );
-      playthroughActions.clearEncounterFromLocation('route-2', 'head');
+      await playthroughActions.clearEncounterFromLocation('route-2', 'head');
 
       // Try to swap - should not work since route-2 head is null
       playthroughActions.swapEncounters('route-1', 'route-2');
@@ -1226,7 +1229,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       const pikachu = createMockPokemon('Pikachu', 25);
 
       // These should not throw errors
-      playthroughActions.clearEncounterFromLocation('route-1');
+      await playthroughActions.clearEncounterFromLocation('route-1');
       playthroughActions.moveEncounter('route-1', 'route-2', pikachu);
       playthroughActions.swapEncounters('route-1', 'route-2');
 
@@ -1255,7 +1258,7 @@ describe('Playthroughs Store - Drag and Drop Operations', () => {
       );
 
       // Clear head, then add new head
-      playthroughActions.clearEncounterFromLocation('route-1', 'head');
+      await playthroughActions.clearEncounterFromLocation('route-1', 'head');
       const squirtle = createMockPokemon('Squirtle', 7);
       await playthroughActions.updateEncounter(
         'route-1',
@@ -2092,7 +2095,7 @@ describe('Preferred Variant Handling', () => {
       );
     });
 
-    it('should handle errors gracefully and set variant to undefined', async () => {
+    it('should handle errors gracefully and preserve existing variant', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
 
       // Mock sprite service to throw an error
@@ -2112,10 +2115,11 @@ describe('Preferred Variant Handling', () => {
         await playthroughActions.applyPreferredVariant(encounter, true);
       });
 
-      expect(encounter.artworkVariant).toBeUndefined();
+      // Should preserve existing variant on error instead of clearing it
+      expect(encounter.artworkVariant).toBe('existing-variant');
     });
 
-    it('should not apply variant for encounters without head Pokémon', async () => {
+    it('should call getPreferredVariant even for encounters without Pokémon', async () => {
       const encounter = {
         head: null,
         body: null,
@@ -2129,7 +2133,11 @@ describe('Preferred Variant Handling', () => {
       });
 
       expect(encounter.artworkVariant).toBeUndefined();
-      expect(mockSpriteService.getPreferredVariant).not.toHaveBeenCalled();
+      // Should call getPreferredVariant with undefined values
+      expect(mockSpriteService.getPreferredVariant).toHaveBeenCalledWith(
+        undefined,
+        undefined
+      );
     });
   });
 
@@ -2630,19 +2638,30 @@ describe('Preferred Variant Handling', () => {
       const pikachu = createMockPokemon('Pikachu', 25);
       const charmander = createMockPokemon('Charmander', 4);
 
-      // Mock sprite service to return different variants
-      mockSpriteService.getPreferredVariant
-        .mockResolvedValueOnce('pikachu-variant')
-        .mockResolvedValueOnce('fusion-variant');
+      // Mock different variants for different compositions
+      mockSpriteService.getPreferredVariant.mockImplementation(
+        (headId, bodyId) => {
+          if (headId === 25 && !bodyId) return Promise.resolve('pikachu-solo');
+          if (headId === 25 && bodyId === 4)
+            return Promise.resolve('pikachu-charmander-fusion');
+          return Promise.resolve('default-variant');
+        }
+      );
 
       await act(async () => {
         const playthroughId = playthroughActions.createPlaythrough('Test Run');
         await playthroughActions.setActivePlaythrough(playthroughId);
 
-        // First create a single Pokémon encounter
+        // Add single Pokémon first
         await playthroughActions.updateEncounter('route-1', pikachu);
+      });
 
-        // Then convert to fusion
+      let encounter =
+        playthroughActions.getActivePlaythrough()?.encounters?.['route-1'];
+      expect(encounter?.artworkVariant).toBe('pikachu-solo');
+
+      await act(async () => {
+        // Convert to fusion by adding body Pokémon
         await playthroughActions.updateEncounter(
           'route-1',
           charmander,
@@ -2651,10 +2670,161 @@ describe('Preferred Variant Handling', () => {
         );
       });
 
-      const encounter =
+      encounter =
         playthroughActions.getActivePlaythrough()?.encounters?.['route-1'];
-      expect(encounter?.artworkVariant).toBe('fusion-variant');
-      expect(mockSpriteService.getPreferredVariant).toHaveBeenCalledTimes(2);
+      expect(encounter?.artworkVariant).toBe('pikachu-charmander-fusion');
+    });
+
+    // Tests for the specific bugs we fixed
+    describe('Bug Fixes', () => {
+      it('should preserve isFusion flag when dragging into existing fusion encounter', async () => {
+        const pikachu = createMockPokemon('Pikachu', 25);
+
+        await act(async () => {
+          const playthroughId =
+            playthroughActions.createPlaythrough('Test Run');
+          await playthroughActions.setActivePlaythrough(playthroughId);
+
+          // Create empty fusion encounter
+          await playthroughActions.toggleEncounterFusion('route-1');
+        });
+
+        let encounters = playthroughActions.getEncounters();
+        expect(encounters['route-1']!.isFusion).toBe(true);
+        expect(encounters['route-1']!.head).toBeNull();
+
+        await act(async () => {
+          // Drag pokemon into head slot of existing fusion encounter
+          await playthroughActions.moveEncounterAtomic(
+            'route-2',
+            'head',
+            'route-1',
+            'head',
+            pikachu
+          );
+        });
+
+        encounters = playthroughActions.getEncounters();
+        // Should preserve fusion state
+        expect(encounters['route-1']!.isFusion).toBe(true);
+        expect(encounters['route-1']!.head?.id).toBe(25);
+      });
+
+      it('should preserve artwork variant when moving pokemon within same encounter', async () => {
+        const pikachu = createMockPokemon('Pikachu', 25);
+
+        await act(async () => {
+          const playthroughId =
+            playthroughActions.createPlaythrough('Test Run');
+          await playthroughActions.setActivePlaythrough(playthroughId);
+
+          // Create fusion encounter with pokemon in body slot
+          await playthroughActions.updateEncounter(
+            'route-1',
+            pikachu,
+            'body',
+            true
+          );
+          // Set specific artwork variant
+          playthroughActions.setArtworkVariant('route-1', 'preserved-variant');
+        });
+
+        await act(async () => {
+          // Move pokemon from body to head within same encounter
+          await playthroughActions.moveEncounterAtomic(
+            'route-1',
+            'body',
+            'route-1',
+            'head',
+            pikachu
+          );
+        });
+
+        const encounters = playthroughActions.getEncounters();
+        // Should preserve the variant since it's the same pokemon in same encounter
+        expect(encounters['route-1']!.artworkVariant).toBe('preserved-variant');
+        expect(encounters['route-1']!.head?.id).toBe(25);
+        expect(encounters['route-1']!.body).toBeNull();
+      });
+
+      it('should use atomic flip operation to prevent duplicate variant lookups', async () => {
+        const pikachu = createMockPokemon('Pikachu', 25);
+        const charmander = createMockPokemon('Charmander', 4);
+
+        await act(async () => {
+          const playthroughId =
+            playthroughActions.createPlaythrough('Test Run');
+          await playthroughActions.setActivePlaythrough(playthroughId);
+
+          // Create fusion with both head and body
+          await playthroughActions.updateEncounter(
+            'route-1',
+            pikachu,
+            'head',
+            true
+          );
+          await playthroughActions.updateEncounter(
+            'route-1',
+            charmander,
+            'body',
+            true
+          );
+        });
+
+        // Track variant calls to ensure atomicity
+        const getVariantCalls: Array<
+          Parameters<typeof mockSpriteService.getPreferredVariant>
+        > = [];
+        mockSpriteService.getPreferredVariant.mockImplementation((...args) => {
+          getVariantCalls.push(args);
+          return Promise.resolve('flipped-variant');
+        });
+
+        await act(async () => {
+          // Use atomic flip operation
+          await playthroughActions.flipEncounterFusion('route-1');
+        });
+
+        const encounters = playthroughActions.getEncounters();
+
+        // Should have flipped positions
+        expect(encounters['route-1']!.head?.id).toBe(4); // Charmander now in head
+        expect(encounters['route-1']!.body?.id).toBe(25); // Pikachu now in body
+
+        // Should only have one call to getPreferredVariant for the new composition
+        expect(getVariantCalls).toHaveLength(1);
+        expect(getVariantCalls[0]).toEqual([4, 25]); // Charmander head, Pikachu body
+      });
+
+      it('should handle body-only fusion encounters correctly', async () => {
+        const pikachu = createMockPokemon('Pikachu', 25);
+
+        await act(async () => {
+          const playthroughId =
+            playthroughActions.createPlaythrough('Test Run');
+          await playthroughActions.setActivePlaythrough(playthroughId);
+
+          // Create fusion with only body pokemon (empty head)
+          await playthroughActions.updateEncounter(
+            'route-1',
+            pikachu,
+            'body',
+            true
+          );
+        });
+
+        const encounters = playthroughActions.getEncounters();
+
+        expect(encounters['route-1']!.head).toBeNull();
+        expect(encounters['route-1']!.body?.id).toBe(25);
+        expect(encounters['route-1']!.isFusion).toBe(true);
+
+        // Should call getPreferredVariant with null head and pikachu body
+        expect(mockSpriteService.getPreferredVariant).toHaveBeenCalledWith(
+          null,
+          25
+        );
+      });
     });
   });
 });

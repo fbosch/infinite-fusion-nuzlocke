@@ -954,7 +954,7 @@ export const playthroughActions = {
     }
 
     // Clear source first to avoid duplicates
-    playthroughActions.clearEncounterFromLocation(
+    await playthroughActions.clearEncounterFromLocation(
       sourceLocationId,
       sourceField
     );
@@ -1279,7 +1279,10 @@ export const playthroughActions = {
   // Helper methods for drag and drop operations
 
   // Clear encounter from a specific location (replaces clearCombobox event)
-  clearEncounterFromLocation: (locationId: string, field?: 'head' | 'body') => {
+  clearEncounterFromLocation: async (
+    locationId: string,
+    field?: 'head' | 'body'
+  ) => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough) return;
 
@@ -1299,9 +1302,20 @@ export const playthroughActions = {
       // Clear only the specified field
       encounter[field] = null;
 
-      // Reset artwork variant when clearing part of a fusion
+      // When clearing part of a fusion, look up preferred variant for remaining pokemon
       if (encounter.isFusion) {
-        encounter.artworkVariant = undefined;
+        const remainingPokemon =
+          field === 'head' ? encounter.body : encounter.head;
+        if (remainingPokemon) {
+          // Get preferred variant for the remaining pokemon
+          const preferredVariant = await playthroughActions.getPreferredVariant(
+            remainingPokemon.id
+          );
+          encounter.artworkVariant = preferredVariant;
+        } else {
+          // No remaining pokemon, can clear variant
+          encounter.artworkVariant = undefined;
+        }
       }
 
       // Only remove the entire encounter if it's not a fusion and we're clearing the head

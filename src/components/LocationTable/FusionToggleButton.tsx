@@ -81,7 +81,7 @@ export function FusionToggleButton({
                 playthroughActions.getLocationFromComboboxId(
                   dragSnapshot.currentDragSource
                 );
-              playthroughActions.clearEncounterFromLocation(
+              await playthroughActions.clearEncounterFromLocation(
                 sourceLocationId,
                 sourceField
               );
