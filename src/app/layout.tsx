@@ -56,7 +56,7 @@ export default function RootLayout({
       </head>
       <body className='antialiased font-sans'>
         <ThemeProvider>
-          <ErrorBoundary>
+          <ErrorBoundary className='min-h-[100vh]'>
             <Header />
             {children}
             <Footer />

@@ -1,4 +1,5 @@
 import LocationTable from '@/components/LocationTable';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export default function Home() {
   return (
@@ -11,7 +12,9 @@ export default function Home() {
         <h2 id='locations-heading' className='sr-only'>
           Game Locations
         </h2>
-        <LocationTable />
+        <ErrorBoundary className='min-h-[70vh]'>
+          <LocationTable />
+        </ErrorBoundary>
       </section>
     </main>
   );
