@@ -33,7 +33,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
     <tr
       key={row.id}
       role='row'
-      className='hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors content-visibility-auto'
+      className='hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors content-visibility-auto group/row'
       style={{
         containIntrinsicHeight: '150px',
       }}
@@ -66,7 +66,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
                 className='p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top'
                 role='cell'
               >
-                <div className='flex flex-col items-center justify-end gap-1'>
+                <div className='flex flex-col items-center justify-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 group-focus-within/row:opacity-100'>
                   {hasEncounter && (
                     <ResetEncounterButton
                       locationId={locationId}
