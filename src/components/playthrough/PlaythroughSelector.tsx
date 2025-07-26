@@ -11,7 +11,7 @@ import {
   useIsLoading,
   type Playthrough,
 } from '@/stores/playthroughs';
-import ConfirmationDialog from './ConfirmationDialog';
+import ConfirmationDialog from '@/components/ConfirmationDialog';
 
 interface PlaythroughSelectorProps {
   className?: string;

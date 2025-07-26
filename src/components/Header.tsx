@@ -1,5 +1,5 @@
 import Logo from '@/components/Logo';
-import PlaythroughMenu from '@/components/PlaythroughMenu';
+import PlaythroughMenu from '@/components/playthrough/PlaythroughMenu';
 
 export default function Header() {
   return (

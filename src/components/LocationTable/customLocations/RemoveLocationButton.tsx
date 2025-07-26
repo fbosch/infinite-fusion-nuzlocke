@@ -1,7 +1,7 @@
 import { TrashIcon } from 'lucide-react';
 import clsx from 'clsx';
 import { useState, useCallback } from 'react';
-import ConfirmationDialog from '../ConfirmationDialog';
+import ConfirmationDialog from '@/components/ConfirmationDialog';
 import { playthroughActions } from '@/stores/playthroughs';
 
 interface RemoveLocationButtonProps {
