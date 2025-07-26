@@ -964,12 +964,9 @@ export const playthroughActions = {
         }
       });
 
-      window.requestIdleCallback(
-        () => {
-          prefetchPromises.forEach(p => p());
-        },
-        { timeout: 1000 }
-      );
+      window.requestAnimationFrame(() => {
+        prefetchPromises.forEach(p => p());
+      });
 
       // Execute prefetch operations in parallel (no need for await since we're just triggering prefetch)
     } catch (error) {

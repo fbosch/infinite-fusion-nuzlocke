@@ -47,7 +47,7 @@ export function ArtworkVariantButton({
       }
     };
 
-    window.requestIdleCallback(checkVariants, { timeout: 1000 });
+    window.requestAnimationFrame(checkVariants);
   }, [encounter, shouldLoad, hasVariants]);
 
   const handleCycleVariant = React.useCallback(async () => {
