@@ -87,8 +87,6 @@ export class SearchCore {
     }
   }
 
-
-
   /**
    * Search for Pokemon by name or ID
    */

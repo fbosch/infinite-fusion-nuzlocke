@@ -14,13 +14,17 @@ export class ServiceWorkerManager {
 
   async register(): Promise<ServiceWorkerRegistration | null> {
     console.debug('ServiceWorkerManager: Starting registration process...');
-    
+
     if (!('serviceWorker' in navigator)) {
-      console.debug('ServiceWorkerManager: Service Worker not supported in this browser');
+      console.debug(
+        'ServiceWorkerManager: Service Worker not supported in this browser'
+      );
       return null;
     }
 
-    console.debug('ServiceWorkerManager: Service Worker supported, attempting to register /sw.js');
+    console.debug(
+      'ServiceWorkerManager: Service Worker supported, attempting to register /sw.js'
+    );
 
     try {
       this.swRegistration = await navigator.serviceWorker.register('/sw.js', {
@@ -31,7 +35,7 @@ export class ServiceWorkerManager {
         'ServiceWorkerManager: Registration successful:',
         this.swRegistration
       );
-      
+
       console.debug('ServiceWorkerManager: Current service worker state:', {
         installing: this.swRegistration.installing?.state,
         waiting: this.swRegistration.waiting?.state,
@@ -40,17 +44,27 @@ export class ServiceWorkerManager {
 
       // Handle updates
       this.swRegistration.addEventListener('updatefound', () => {
-        console.debug('ServiceWorkerManager: Update found, new worker installing');
+        console.debug(
+          'ServiceWorkerManager: Update found, new worker installing'
+        );
         const newWorker = this.swRegistration!.installing;
         if (newWorker) {
-          console.debug('ServiceWorkerManager: New worker state:', newWorker.state);
+          console.debug(
+            'ServiceWorkerManager: New worker state:',
+            newWorker.state
+          );
           newWorker.addEventListener('statechange', () => {
-            console.debug('ServiceWorkerManager: New worker state changed to:', newWorker.state);
+            console.debug(
+              'ServiceWorkerManager: New worker state changed to:',
+              newWorker.state
+            );
             if (
               newWorker.state === 'installed' &&
               navigator.serviceWorker.controller
             ) {
-              console.debug('ServiceWorkerManager: New service worker available and ready');
+              console.debug(
+                'ServiceWorkerManager: New service worker available and ready'
+              );
             }
           });
         }
@@ -58,22 +72,32 @@ export class ServiceWorkerManager {
 
       // Log current controller state
       if (navigator.serviceWorker.controller) {
-        console.debug('ServiceWorkerManager: Active service worker controller found');
+        console.debug(
+          'ServiceWorkerManager: Active service worker controller found'
+        );
       } else {
-        console.debug('ServiceWorkerManager: No active service worker controller - waiting for control');
+        console.debug(
+          'ServiceWorkerManager: No active service worker controller - waiting for control'
+        );
       }
 
       // Listen for when the service worker takes control
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        console.debug('ServiceWorkerManager: Service worker now controlling the page!');
+        console.debug(
+          'ServiceWorkerManager: Service worker now controlling the page!'
+        );
         if (navigator.serviceWorker.controller) {
-          console.debug('ServiceWorkerManager: Controller is now active, fetch events will be intercepted');
+          console.debug(
+            'ServiceWorkerManager: Controller is now active, fetch events will be intercepted'
+          );
         }
       });
 
       // Force activation if the service worker is waiting
       if (this.swRegistration.waiting) {
-        console.debug('ServiceWorkerManager: Service worker is waiting, sending skipWaiting message');
+        console.debug(
+          'ServiceWorkerManager: Service worker is waiting, sending skipWaiting message'
+        );
         this.swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
       }
 
