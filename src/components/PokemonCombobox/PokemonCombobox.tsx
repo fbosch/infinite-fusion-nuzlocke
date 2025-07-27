@@ -781,7 +781,6 @@ export const PokemonCombobox = React.memo(
       >
         {/* Location highlight overlay */}
         <div className='absolute inset-0 bg-blue-500/20 border-2 border-blue-500/60 rounded-lg pointer-events-none z-10 opacity-0 transition-opacity duration-200 ease-in-out location-highlight-overlay' />
-
         <Combobox
           value={value || null}
           onChange={handleChange}

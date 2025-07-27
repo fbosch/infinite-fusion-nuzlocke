@@ -16,60 +16,6 @@ interface LocationCellProps {
 
 type Pokemon = z.infer<typeof PokemonOptionSchema>;
 
-type EncounterResult =
-  | { type: 'fusion'; head: Pokemon; body: Pokemon }
-  | { type: 'single'; pokemon: Pokemon }
-  | null;
-
-type LocationEncounterInfo = {
-  hasEncounter: boolean;
-  originalEncounter: EncounterResult;
-};
-
-// Optimized function that combines both checks in a single iteration
-const getLocationEncounterInfo = (
-  locationId: string,
-  encounters: ReturnType<typeof useEncounters>
-): LocationEncounterInfo => {
-  if (!encounters) {
-    return { hasEncounter: false, originalEncounter: null };
-  }
-
-  // Single iteration through encounters to find matches
-  for (const [encLocationId, encounter] of Object.entries(encounters)) {
-    const headMatch = encounter.head?.originalLocation === locationId;
-    const bodyMatch = encounter.body?.originalLocation === locationId;
-
-    if (headMatch || bodyMatch) {
-      // Found an encounter for this location
-      let originalEncounter: EncounterResult = null;
-
-      // Determine the encounter type
-      if (headMatch && bodyMatch && encounter.head && encounter.body) {
-        originalEncounter = {
-          type: 'fusion' as const,
-          head: encounter.head,
-          body: encounter.body,
-        };
-      } else if (headMatch && encounter.head) {
-        originalEncounter = {
-          type: 'single' as const,
-          pokemon: encounter.head,
-        };
-      } else if (bodyMatch && encounter.body) {
-        originalEncounter = {
-          type: 'single' as const,
-          pokemon: encounter.body,
-        };
-      }
-
-      return { hasEncounter: true, originalEncounter };
-    }
-  }
-
-  return { hasEncounter: false, originalEncounter: null };
-};
-
 export default function LocationCell({
   location,
   locationName,
@@ -77,33 +23,29 @@ export default function LocationCell({
   const encounters = useEncounters();
   const [isTooltipHovered, setIsTooltipHovered] = useState(false);
 
-  // Memoize the expensive computation
-  const { hasEncounter, originalEncounter } = useMemo(
-    () => getLocationEncounterInfo(location.id, encounters),
-    [location.id, encounters]
-  );
+  // Find all pokemon that originated from this location
+  const locationPokemon = useMemo(() => {
+    if (!encounters) return [];
 
-  // Get all encounter UIDs for this location
-  const encounterUids = useMemo(() => {
-    if (!encounters || !hasEncounter) return [];
+    const pokemon: Pokemon[] = [];
 
-    const uids: string[] = [];
-
-    // Find all encounters that originated from this location
-    for (const [encounterId, encounter] of Object.entries(encounters)) {
-      const headMatch = encounter.head?.originalLocation === location.id;
-      const bodyMatch = encounter.body?.originalLocation === location.id;
-
-      if (headMatch && encounter.head?.uid) {
-        uids.push(encounter.head.uid);
+    // Go through all encounters and find pokemon from this location
+    for (const encounter of Object.values(encounters)) {
+      if (encounter.head?.originalLocation === location.id) {
+        pokemon.push(encounter.head);
       }
-      if (bodyMatch && encounter.body?.uid) {
-        uids.push(encounter.body.uid);
+      if (encounter.body?.originalLocation === location.id) {
+        pokemon.push(encounter.body);
       }
     }
 
-    return uids;
-  }, [encounters, hasEncounter, location.id]);
+    return pokemon;
+  }, [encounters, location.id]);
+
+  const encounterUids = locationPokemon
+    .map(p => p.uid)
+    .filter(Boolean) as string[];
+  const hasEncounter = locationPokemon.length > 0;
 
   // Handle hover effect on encounter Pokémon elements
   useEffect(() => {
@@ -129,45 +71,26 @@ export default function LocationCell({
   }, [isTooltipHovered, encounterUids]);
 
   const getTooltipContent = useMemo(() => {
-    if (hasEncounter && originalEncounter) {
-      const nickname =
-        originalEncounter.type === 'fusion'
-          ? originalEncounter.head.nickname || originalEncounter.body.nickname
-          : originalEncounter.pokemon.nickname;
-
+    if (locationPokemon.length > 0) {
       return (
         <div className='max-w-xs'>
           <div className='text-xs text-gray-400 uppercase tracking-wide mb-1'>
-            Original Encounter
+            {locationPokemon.length === 1
+              ? 'Original Encounter'
+              : 'Original Encounters'}
           </div>
 
-          {originalEncounter.type === 'fusion' ? (
-            // Fusion encounter display
-            <div className='mb-2'>
+          {locationPokemon.map((pokemon, index) => (
+            <div key={index} className='mb-2'>
               <div className='flex-1 min-w-0'>
                 <span className='font-semibold text-white'>
-                  {nickname ? `${nickname} • ` : ''}
-                  <span className='text-gray-300'>
-                    {originalEncounter.head.name}/{originalEncounter.body.name}
-                  </span>
+                  {pokemon.nickname ? `${pokemon.nickname} • ` : ''}
+                  <span className='text-gray-300'>{pokemon.name}</span>
                 </span>
               </div>
             </div>
-          ) : (
-            // Single Pokemon encounter display
-            <div className='mb-2'>
-              <div className='flex-1 min-w-0'>
-                <span className='font-semibold text-white'>
-                  {originalEncounter.pokemon.nickname
-                    ? `${originalEncounter.pokemon.nickname} • `
-                    : ''}
-                  <span className='text-gray-300'>
-                    {originalEncounter.pokemon.name}
-                  </span>
-                </span>
-              </div>
-            </div>
-          )}
+          ))}
+
           <hr className='my-2 border-gray-600' />
           <div className='text-xs text-gray-400'>
             {isCustomLocation(location)
@@ -181,10 +104,10 @@ export default function LocationCell({
     return isCustomLocation(location)
       ? `Custom Location`
       : location.description;
-  }, [hasEncounter, originalEncounter, location]);
+  }, [locationPokemon, location]);
 
   return (
-    <tr className='font-medium text-gray-900 dark:text-white flex gap-x-2 items-center'>
+    <div className='font-medium text-gray-900 dark:text-white flex gap-x-2 items-center'>
       <CursorTooltip
         content={getTooltipContent}
         onMouseEnter={() => setIsTooltipHovered(true)}
@@ -197,6 +120,6 @@ export default function LocationCell({
         )}
       </CursorTooltip>
       <h2 className='text-sm'>{locationName}</h2>
-    </tr>
+    </div>
   );
 }
