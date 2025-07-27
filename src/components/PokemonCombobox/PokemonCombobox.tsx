@@ -777,7 +777,11 @@ export const PokemonCombobox = React.memo(
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDragEnd={handleDragEnd}
+        data-uid={dragPreview?.uid || value?.uid}
       >
+        {/* Location highlight overlay */}
+        <div className='absolute inset-0 bg-blue-500/20 border-2 border-blue-500/60 rounded-lg pointer-events-none z-10 opacity-0 transition-opacity duration-200 ease-in-out location-highlight-overlay' />
+
         <Combobox
           value={value || null}
           onChange={handleChange}
@@ -827,13 +831,12 @@ export const PokemonCombobox = React.memo(
                 {(value || dragPreview) && (
                   <div className='absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md'>
                     <Image
-                      data-uid={dragPreview?.uid || value?.uid}
                       src={getPokemonSpriteUrlFromOption(dragPreview || value!)}
                       alt={(dragPreview || value)!.name}
                       width={40}
                       height={40}
                       className={clsx(
-                        'object-center object-contain cursor-grab active:cursor-grabbing',
+                        'object-center object-contain cursor-grab active:cursor-grabbing rounded-sm transform-gpu',
                         dragPreview && 'opacity-60 pointer-none' // Make preview sprite opaque
                       )}
                       quality={70}

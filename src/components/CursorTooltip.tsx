@@ -23,6 +23,8 @@ interface CursorTooltipProps {
   children: React.ReactElement;
   className?: string;
   disabled?: boolean;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 export function CursorTooltip({
@@ -30,12 +32,22 @@ export function CursorTooltip({
   children,
   className,
   disabled = false,
+  onMouseEnter,
+  onMouseLeave,
 }: CursorTooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
-    onOpenChange: setIsOpen,
+    onOpenChange: open => {
+      setIsOpen(open);
+      // Call the external callbacks when the tooltip state changes
+      if (open) {
+        onMouseEnter?.();
+      } else {
+        onMouseLeave?.();
+      }
+    },
     placement: 'bottom-start', // Position bottom-right relative to cursor point
     middleware: [
       offset({ mainAxis: 20, crossAxis: 20 }),

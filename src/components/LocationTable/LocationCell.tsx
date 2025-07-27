@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { Info, CheckCircle } from 'lucide-react';
 import { useEncounters } from '@/stores/playthroughs';
 import { isCustomLocation } from '@/loaders';
@@ -75,12 +75,58 @@ export default function LocationCell({
   locationName,
 }: LocationCellProps) {
   const encounters = useEncounters();
+  const [isTooltipHovered, setIsTooltipHovered] = useState(false);
 
   // Memoize the expensive computation
   const { hasEncounter, originalEncounter } = useMemo(
     () => getLocationEncounterInfo(location.id, encounters),
     [location.id, encounters]
   );
+
+  // Get all encounter UIDs for this location
+  const encounterUids = useMemo(() => {
+    if (!encounters || !hasEncounter) return [];
+
+    const uids: string[] = [];
+
+    // Find all encounters that originated from this location
+    for (const [encounterId, encounter] of Object.entries(encounters)) {
+      const headMatch = encounter.head?.originalLocation === location.id;
+      const bodyMatch = encounter.body?.originalLocation === location.id;
+
+      if (headMatch && encounter.head?.uid) {
+        uids.push(encounter.head.uid);
+      }
+      if (bodyMatch && encounter.body?.uid) {
+        uids.push(encounter.body.uid);
+      }
+    }
+
+    return uids;
+  }, [encounters, hasEncounter, location.id]);
+
+  // Handle hover effect on encounter Pokémon elements
+  useEffect(() => {
+    encounterUids.forEach(uid => {
+      const element = document.querySelector(
+        `[data-uid="${uid}"]`
+      ) as HTMLElement;
+      if (element) {
+        const overlay = element.querySelector(
+          '.location-highlight-overlay'
+        ) as HTMLElement;
+        if (overlay) {
+          if (isTooltipHovered) {
+            overlay.classList.add('opacity-100');
+            overlay.classList.remove('opacity-0');
+          } else {
+            overlay.classList.add('opacity-0');
+            overlay.classList.remove('opacity-100');
+          }
+        }
+      }
+    });
+  }, [isTooltipHovered, encounterUids]);
 
   const getTooltipContent = useMemo(() => {
     if (hasEncounter && originalEncounter) {
@@ -139,7 +185,11 @@ export default function LocationCell({
 
   return (
     <tr className='font-medium text-gray-900 dark:text-white flex gap-x-2 items-center'>
-      <CursorTooltip content={getTooltipContent}>
+      <CursorTooltip
+        content={getTooltipContent}
+        onMouseEnter={() => setIsTooltipHovered(true)}
+        onMouseLeave={() => setIsTooltipHovered(false)}
+      >
         {hasEncounter ? (
           <CheckCircle className='size-4 text-green-600 cursor-help' />
         ) : (
