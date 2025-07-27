@@ -34,7 +34,7 @@ const getGameModeInfo = (gameMode: GameMode) => {
       return {
         label: 'Random',
         className:
-          'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300',
+          'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300',
       };
     default:
       return null;

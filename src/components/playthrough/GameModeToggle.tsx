@@ -155,7 +155,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
             'relative z-10 w-20 py-1.5 text-sm font-semibold text-center',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
             optimisticMode === 'randomized'
-              ? 'text-green-700 dark:text-green-300'
+              ? 'text-orange-700 dark:text-orange-300'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
             activePlaythrough && 'cursor-pointer transition-colors duration-150'
           )}

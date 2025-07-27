@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import GameModeToggle from './RemixToggle';
+import GameModeToggle from './GameModeToggle';
 import PlaythroughSelector from './PlaythroughSelector';
 
 export default function PlaythroughMenu() {
