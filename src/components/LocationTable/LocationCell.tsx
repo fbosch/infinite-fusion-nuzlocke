@@ -138,7 +138,7 @@ export default function LocationCell({
   }, [hasEncounter, originalEncounter, location]);
 
   return (
-    <span className='font-medium text-gray-900 dark:text-white flex gap-x-2 items-center'>
+    <tr className='font-medium text-gray-900 dark:text-white flex gap-x-2 items-center'>
       <CursorTooltip content={getTooltipContent}>
         {hasEncounter ? (
           <CheckCircle className='size-4 text-green-600 cursor-help' />
@@ -147,6 +147,6 @@ export default function LocationCell({
         )}
       </CursorTooltip>
       <h2 className='text-sm'>{locationName}</h2>
-    </span>
+    </tr>
   );
 }

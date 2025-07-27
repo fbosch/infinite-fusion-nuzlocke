@@ -63,10 +63,13 @@ export function FusionToggleButton({
               id: foundPokemon.id,
               name: pokemonName,
               nationalDexId: foundPokemon.nationalDexId,
-              originalLocation: locationId,
+              // Preserve the original location from the dragged Pokemon, don't overwrite!
+              originalLocation:
+                dragSnapshot.currentDragValue?.originalLocation || locationId,
               ...(dragSnapshot.currentDragValue && {
                 nickname: dragSnapshot.currentDragValue.nickname,
                 status: dragSnapshot.currentDragValue.status,
+                uid: dragSnapshot.currentDragValue.uid,
               }),
             };
 

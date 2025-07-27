@@ -109,6 +109,28 @@ export function EncounterCell({
     [locationId, headPokemon, bodyPokemon, hasValuableData]
   );
 
+  // Create separate memoized handlers to avoid creating new functions on every render
+  const handleHeadChange = useCallback(
+    (pokemon: PokemonOption | null) => {
+      handleEncounterSelect(pokemon, 'head');
+    },
+    [handleEncounterSelect]
+  );
+
+  const handleBodyChange = useCallback(
+    (pokemon: PokemonOption | null) => {
+      handleEncounterSelect(pokemon, 'body');
+    },
+    [handleEncounterSelect]
+  );
+
+  const handleSingleChange = useCallback(
+    (pokemon: PokemonOption | null) => {
+      handleEncounterSelect(pokemon);
+    },
+    [handleEncounterSelect]
+  );
+
   // Handle confirmation dialog confirm action
   const handleConfirmClear = useCallback(() => {
     if (pendingClear) {
@@ -227,7 +249,7 @@ export function EncounterCell({
                     routeId={routeId}
                     locationId={locationId}
                     value={headPokemon}
-                    onChange={pokemon => handleEncounterSelect(pokemon, 'head')}
+                    onChange={handleHeadChange}
                     placeholder='Select Pokémon'
                     nicknamePlaceholder='Enter nickname'
                     comboboxId={`${locationId}-head`}
@@ -253,7 +275,7 @@ export function EncounterCell({
                     routeId={routeId}
                     locationId={locationId}
                     value={bodyPokemon}
-                    onChange={pokemon => handleEncounterSelect(pokemon, 'body')}
+                    onChange={handleBodyChange}
                     placeholder='Select Pokémon'
                     nicknamePlaceholder='Enter nickname'
                     comboboxId={`${locationId}-body`}
@@ -269,7 +291,7 @@ export function EncounterCell({
                 routeId={routeId}
                 locationId={locationId}
                 value={selectedPokemon}
-                onChange={pokemon => handleEncounterSelect(pokemon)}
+                onChange={handleSingleChange}
                 placeholder='Select Pokémon'
                 nicknamePlaceholder='Enter nickname'
                 comboboxId={`${locationId}-single`}

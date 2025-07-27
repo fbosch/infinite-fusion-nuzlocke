@@ -604,7 +604,7 @@ export const playthroughActions = {
     const pokemonWithLocationAndUID = pokemon
       ? {
           ...pokemon,
-          originalLocation: pokemon.originalLocation || locationId || '',
+          originalLocation: pokemon.originalLocation ?? locationId ?? '',
           uid: pokemon.uid || generatePokemonUID(),
         }
       : null;
@@ -695,7 +695,7 @@ export const playthroughActions = {
     if (pokemon) {
       const pokemonWithLocationAndUID = {
         ...pokemon,
-        originalLocation: pokemon.originalLocation || locationId,
+        originalLocation: pokemon.originalLocation ?? locationId,
         uid: pokemon.uid || generatePokemonUID(),
       };
 
@@ -900,7 +900,7 @@ export const playthroughActions = {
     // Pre-fetch the preferred variant for the target encounter to avoid flickering
     const pokemonWithLocationAndUID = {
       ...pokemon,
-      originalLocation: pokemon.originalLocation || targetLocationId,
+      originalLocation: pokemon.originalLocation ?? targetLocationId,
       uid: pokemon.uid || generatePokemonUID(),
     };
 
@@ -993,9 +993,22 @@ export const playthroughActions = {
       activePlaythrough.encounters = {};
     }
 
+    // Preserve originalLocation - never overwrite once set!
+    const headWithLocation = {
+      ...head,
+      originalLocation: head.originalLocation ?? locationId,
+      uid: head.uid || generatePokemonUID(),
+    };
+
+    const bodyWithLocation = {
+      ...body,
+      originalLocation: body.originalLocation ?? locationId,
+      uid: body.uid || generatePokemonUID(),
+    };
+
     const encounter = {
-      head,
-      body,
+      head: headWithLocation,
+      body: bodyWithLocation,
       isFusion: true,
       updatedAt: getCurrentTimestamp(),
     };
@@ -1358,7 +1371,7 @@ export const playthroughActions = {
     // Create the destination encounter with pokemon in the correct field
     const pokemonWithLocationAndUID = {
       ...pokemon,
-      originalLocation: pokemon.originalLocation || toLocationId,
+      originalLocation: pokemon.originalLocation ?? toLocationId,
       uid: pokemon.uid || generatePokemonUID(),
     };
 
@@ -1401,14 +1414,14 @@ export const playthroughActions = {
 
     if (!pokemon1 || !pokemon2) return;
 
-    // Update originalLocation for swapped Pokemon
+    // Preserve originalLocation for swapped Pokemon - never overwrite!
     const pokemon1WithLocation = {
       ...pokemon1,
-      originalLocation: pokemon1.originalLocation || locationId2,
+      originalLocation: pokemon1.originalLocation ?? locationId2,
     };
     const pokemon2WithLocation = {
       ...pokemon2,
-      originalLocation: pokemon2.originalLocation || locationId1,
+      originalLocation: pokemon2.originalLocation ?? locationId1,
     };
 
     // Directly swap the Pokemon
