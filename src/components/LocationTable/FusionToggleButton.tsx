@@ -8,6 +8,8 @@ import { dragStore, dragActions } from '@/stores/dragStore';
 import { playthroughActions } from '@/stores/playthroughs';
 import type { PokemonOption } from '@/loaders/pokemon';
 import { CursorTooltip } from '../CursorTooltip';
+import { DNA_SPLICER_ICON } from '@/misc/items';
+import Image from 'next/image';
 
 interface FusionToggleButtonProps {
   locationId: string;
@@ -173,7 +175,21 @@ export function FusionToggleButton({
       )}
       aria-label={`Toggle fusion for ${selectedPokemon?.name || 'Pokemon'}`}
     >
-      <CursorTooltip content={isFusion ? 'Unfuse' : 'Fuse'} delay={300}>
+      <CursorTooltip
+        content={
+          <div className='flex items-center gap-2'>
+            <Image
+              src={DNA_SPLICER_ICON}
+              alt='DNA Splicer'
+              width={24}
+              height={24}
+              className='object-contain object-center image-rendering-pixelated'
+            />
+            <span className='text-sm'>{isFusion ? 'Unfuse' : 'Fuse'}</span>
+          </div>
+        }
+        delay={300}
+      >
         {isFusion ? (
           <DnaOff className='size-6 group-hover:text-white' />
         ) : (

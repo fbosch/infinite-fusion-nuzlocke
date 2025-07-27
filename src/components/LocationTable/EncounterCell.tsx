@@ -231,105 +231,103 @@ export function EncounterCell({
   }, [isFusion, locationId]);
 
   return (
-    <>
-      <td
-        className={clsx(
-          'w-96 max-w-96 overflow-x-auto',
-          'px-4 pt-8.5 pb-4 text-sm text-gray-900 dark:text-gray-100 '
-        )}
-        role='cell'
-      >
-        <div className='flex flex-row justify-center gap-4 w-full '>
-          <div className='flex-1 min-w-0 max-w-full '>
-            {isFusion ? (
-              <div className='flex items-center gap-2 '>
-                <div className='flex-1 relative '>
-                  <span className='absolute -top-6 left-0 text-xs font-semibold text-gray-500 dark:text-gray-400'>
-                    Head
-                  </span>
-                  <PokemonCombobox
-                    key={`${locationId}-head`}
-                    routeId={routeId}
-                    locationId={locationId}
-                    value={headPokemon}
-                    onChange={handleHeadChange}
-                    placeholder='Select Pokémon'
-                    nicknamePlaceholder='Enter nickname'
-                    comboboxId={`${locationId}-head`}
-                    shouldLoad={shouldLoad}
-                    onBeforeClear={handleBeforeClearHead}
-                  />
-                </div>
-                <CursorTooltip
-                  content={
-                    <div className='flex items-center gap-2'>
-                      <Image
-                        src={DNA_REVERSER_ICON}
-                        alt='DNA Reverser'
-                        width={24}
-                        height={24}
-                        className='object-contain object-center image-rendering-pixelated '
-                      />
-                      <span className='text-sm'>Invert Fusion</span>
-                    </div>
-                  }
-                  delay={300}
-                >
-                  <button
-                    type='button'
-                    onClick={handleFlip}
-                    className='group size-6 flex items-center justify-center p-1 rounded-md border border-gray-300 dark:border-gray-600 transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-500 hover:border-blue-600 bg-white dark:bg-gray-800'
-                    aria-label='Flip head and body'
-                  >
-                    <ArrowLeftRight className='size-4 text-gray-600 dark:text-gray-300 group-hover:text-white' />
-                  </button>
-                </CursorTooltip>
-                <div className='flex-1 relative min-w-0 max-w-full'>
-                  <span className='absolute -top-6 left-0 text-xs font-semibold text-gray-500 dark:text-gray-400'>
-                    Body
-                  </span>
-                  <PokemonCombobox
-                    key={`${locationId}-body`}
-                    routeId={routeId}
-                    locationId={locationId}
-                    value={bodyPokemon}
-                    onChange={handleBodyChange}
-                    placeholder='Select Pokémon'
-                    nicknamePlaceholder='Enter nickname'
-                    comboboxId={`${locationId}-body`}
-                    ref={bodyComboboxRef}
-                    shouldLoad={shouldLoad}
-                    onBeforeClear={handleBeforeClearBody}
-                  />
-                </div>
+    <td
+      className={clsx(
+        'w-96 max-w-96 overflow-x-auto',
+        'px-4 pt-8.5 pb-4 text-sm text-gray-900 dark:text-gray-100 '
+      )}
+      role='cell'
+    >
+      <div className='flex flex-row justify-center gap-4 w-full '>
+        <div className='flex-1 min-w-0 max-w-full '>
+          {isFusion ? (
+            <div className='flex items-center gap-2 '>
+              <div className='flex-1 relative '>
+                <span className='absolute -top-6 left-0 text-xs font-semibold text-gray-500 dark:text-gray-400'>
+                  Head
+                </span>
+                <PokemonCombobox
+                  key={`${locationId}-head`}
+                  routeId={routeId}
+                  locationId={locationId}
+                  value={headPokemon}
+                  onChange={handleHeadChange}
+                  placeholder='Select Pokémon'
+                  nicknamePlaceholder='Enter nickname'
+                  comboboxId={`${locationId}-head`}
+                  shouldLoad={shouldLoad}
+                  onBeforeClear={handleBeforeClearHead}
+                />
               </div>
-            ) : (
-              <PokemonCombobox
-                key={`${locationId}-single`}
-                routeId={routeId}
-                locationId={locationId}
-                value={selectedPokemon}
-                onChange={handleSingleChange}
-                placeholder='Select Pokémon'
-                nicknamePlaceholder='Enter nickname'
-                comboboxId={`${locationId}-single`}
-                shouldLoad={shouldLoad}
-                onBeforeClear={handleBeforeClearSingle}
-              />
-            )}
-          </div>
-          <div className='flex flex-col gap-2 justify-center'>
-            <FusionToggleButton
+              <CursorTooltip
+                placement='bottom'
+                className='origin-top'
+                content={
+                  <div className='flex items-center gap-2'>
+                    <Image
+                      src={DNA_REVERSER_ICON}
+                      alt='DNA Reverser'
+                      width={24}
+                      height={24}
+                      className='object-contain object-center image-rendering-pixelated '
+                    />
+                    <span className='text-sm'>Invert Fusion</span>
+                  </div>
+                }
+                delay={300}
+              >
+                <button
+                  type='button'
+                  onClick={handleFlip}
+                  className='group size-6 flex items-center justify-center p-1 rounded-md border border-gray-300 dark:border-gray-600 transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-500 hover:border-blue-600 bg-white dark:bg-gray-800'
+                  aria-label='Flip head and body'
+                >
+                  <ArrowLeftRight className='size-4 text-gray-600 dark:text-gray-300 group-hover:text-white' />
+                </button>
+              </CursorTooltip>
+              <div className='flex-1 relative min-w-0 max-w-full'>
+                <span className='absolute -top-6 left-0 text-xs font-semibold text-gray-500 dark:text-gray-400'>
+                  Body
+                </span>
+                <PokemonCombobox
+                  key={`${locationId}-body`}
+                  routeId={routeId}
+                  locationId={locationId}
+                  value={bodyPokemon}
+                  onChange={handleBodyChange}
+                  placeholder='Select Pokémon'
+                  nicknamePlaceholder='Enter nickname'
+                  comboboxId={`${locationId}-body`}
+                  ref={bodyComboboxRef}
+                  shouldLoad={shouldLoad}
+                  onBeforeClear={handleBeforeClearBody}
+                />
+              </div>
+            </div>
+          ) : (
+            <PokemonCombobox
+              key={`${locationId}-single`}
+              routeId={routeId}
               locationId={locationId}
-              isFusion={isFusion}
-              selectedPokemon={selectedPokemon}
-              onToggleFusion={handleFusionToggle}
+              value={selectedPokemon}
+              onChange={handleSingleChange}
+              placeholder='Select Pokémon'
+              nicknamePlaceholder='Enter nickname'
+              comboboxId={`${locationId}-single`}
+              shouldLoad={shouldLoad}
+              onBeforeClear={handleBeforeClearSingle}
             />
-          </div>
+          )}
         </div>
-      </td>
-
-      {/* Confirmation Dialog */}
+        <div className='flex flex-col gap-2 justify-center'>
+          <FusionToggleButton
+            locationId={locationId}
+            isFusion={isFusion}
+            selectedPokemon={selectedPokemon}
+            onToggleFusion={handleFusionToggle}
+          />
+        </div>
+      </div>
       <ConfirmationDialog
         isOpen={showConfirmation}
         onClose={handleDialogClose}
@@ -342,6 +340,6 @@ export function EncounterCell({
         cancelText='Keep Data'
         variant='warning'
       />
-    </>
+    </td>
   );
 }

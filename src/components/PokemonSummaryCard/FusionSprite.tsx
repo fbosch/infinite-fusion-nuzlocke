@@ -3,6 +3,7 @@
 import React, { useCallback } from 'react';
 import Image from 'next/image';
 import clsx from 'clsx';
+import { CursorTooltip } from '@/components/CursorTooltip';
 import { twMerge } from 'tailwind-merge';
 import { SquareArrowUpRight } from 'lucide-react';
 import { useEncounter } from '@/stores/playthroughs';
@@ -127,15 +128,25 @@ export function FusionSprite({
           </div>
           {statusState.overlayContent}
         </div>
-        <div
-          className={clsx(
-            'absolute -top-4 -right-2 text-blue-400 dark:text-blue-300 z-10 bg-gray-200 dark:bg-gray-800 rounded-sm opacity-0',
-            'group-focus-visible:opacity-100 group-hover:opacity-100 transition-opacity duration-200',
-            'group-focus-visible:ring-1 group-focus-visible:ring-blue-400'
-          )}
+        <CursorTooltip
+          delay={1000}
+          content={
+            <div className='flex flex-col gap-1'>
+              <span className='text-sm'>Open Pokédex entry in new tab</span>
+              <span className='text-xs text-gray-400'>{link}</span>
+            </div>
+          }
         >
-          <SquareArrowUpRight className='size-4' />
-        </div>
+          <div
+            className={clsx(
+              'absolute -top-4 -right-2 text-blue-400 dark:text-blue-300 z-10 bg-gray-200 dark:bg-gray-800 rounded-sm opacity-0',
+              'group-focus-visible:opacity-100 group-hover:opacity-100 transition-opacity duration-200',
+              'group-focus-visible:ring-1 group-focus-visible:ring-blue-400'
+            )}
+          >
+            <SquareArrowUpRight className='size-4' />
+          </div>
+        </CursorTooltip>
       </a>
     </div>
   );

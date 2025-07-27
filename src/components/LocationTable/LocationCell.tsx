@@ -88,7 +88,7 @@ export default function LocationCell({
                   alt={pokemon.name}
                   width={20}
                   height={20}
-                  className='object-contain object-center image-render-high-quality'
+                  className='scale-170 image-render-high-quality'
                   loading='lazy'
                   unoptimized
                   decoding='async'

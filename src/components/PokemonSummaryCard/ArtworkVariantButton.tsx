@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import { playthroughActions, useEncounter } from '@/stores/playthroughs';
 import { useShiftKey } from '@/hooks/useKeyPressed';
 import { twMerge } from 'tailwind-merge';
+import { CursorTooltip } from '../CursorTooltip';
 
 interface ArtworkVariantButtonProps {
   locationId: string;
@@ -92,32 +93,42 @@ export function ArtworkVariantButton({
     disabled || hasVariants === false || hasVariants === null;
 
   return (
-    <button
-      type='button'
-      onClick={handleCycleVariant}
-      disabled={isButtonDisabled}
-      className={twMerge(
-        clsx(
-          'group-hover:opacity-50 opacity-0 focus:opacity-100',
-          'transition-opacity duration-200',
-          'size-4 cursor-pointer flex items-center justify-center',
-          'rounded-full text-gray-600 dark:text-white',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
-          'disabled:cursor-not-allowed enabled:hover:opacity-100 enabled:hover:text-white',
-          {
-            'group-hover:opacity-100': hasVariants === null,
-            'enabled:hover:bg-blue-400 enabled:focus:bg-blue-400 enabled:dark:hover:bg-blue-600 enabled:dark:focus:bg-blue-600 enabled:focus:text-white':
-              !isShiftPressed,
-            'enabled:hover:bg-orange-400 enabled:focus:bg-orange-400 enabled:dark:hover:bg-orange-700 enabled:dark:focus:bg-orange-700':
-              isShiftPressed,
-          }
-        ),
-        className
-      )}
-      aria-label={label}
-      title={label}
+    <CursorTooltip
+      disabled={!hasVariants}
+      content={
+        <div className='text-sm flex flex-col gap-1'>
+          <div className='font-normal'>Cycle artwork variants</div>
+          <span className='text-xs text-gray-400'>Hold Shift to reverse</span>
+        </div>
+      }
+      delay={1000}
     >
-      <div className=''>{buttonIcon}</div>
-    </button>
+      <button
+        type='button'
+        onClick={handleCycleVariant}
+        disabled={isButtonDisabled}
+        className={twMerge(
+          clsx(
+            'group-hover:opacity-50 opacity-0 focus:opacity-100',
+            'transition-opacity duration-200',
+            'size-4 cursor-pointer flex items-center justify-center',
+            'rounded-full text-gray-600 dark:text-white',
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+            'disabled:cursor-not-allowed enabled:hover:opacity-100 enabled:hover:text-white',
+            {
+              'group-hover:opacity-100': hasVariants === null,
+              'enabled:hover:bg-blue-400 enabled:focus:bg-blue-400 enabled:dark:hover:bg-blue-600 enabled:dark:focus:bg-blue-600 enabled:focus:text-white':
+                !isShiftPressed,
+              'enabled:hover:bg-orange-400 enabled:focus:bg-orange-400 enabled:dark:hover:bg-orange-700 enabled:dark:focus:bg-orange-700':
+                isShiftPressed,
+            }
+          ),
+          className
+        )}
+        aria-label={label}
+      >
+        <div className=''>{buttonIcon}</div>
+      </button>
+    </CursorTooltip>
   );
 }
