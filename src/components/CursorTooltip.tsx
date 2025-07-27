@@ -116,9 +116,9 @@ export function CursorTooltip({
                   clsx(
                     'rounded-md px-3 py-2 text-sm font-medium shadow-lg w-max max-w-sm',
                     'pointer-events-none transform-gpu',
-                    'bg-gray-700 text-white',
+                    'bg-gray-700/50 background-blur text-white',
                     'border border-gray-600',
-                    'origin-top-left'
+                    'origin-top-left backdrop-blur-md'
                   ),
                   className
                 )}

@@ -7,6 +7,7 @@ import {
   useActivePlaythrough,
   useIsRemixMode,
 } from '@/stores/playthroughs';
+import { CursorTooltip } from '../CursorTooltip';
 
 const RemixToggle = React.memo(function RemixToggle() {
   const activePlaythrough = useActivePlaythrough();
@@ -45,8 +46,7 @@ const RemixToggle = React.memo(function RemixToggle() {
       className={clsx(
         'relative flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1',
         'border border-gray-200 dark:border-gray-600',
-        !activePlaythrough && 'opacity-50',
-        isPending && 'pointer-events-none'
+        !activePlaythrough && 'opacity-50'
       )}
       disabled={!activePlaythrough}
       aria-describedby={
@@ -64,54 +64,73 @@ const RemixToggle = React.memo(function RemixToggle() {
           aria-hidden='true'
         />
       )}
-      <button
-        type='button'
-        onClick={() => handleToggle('classic')}
-        disabled={!activePlaythrough || isPending}
-        className={clsx(
-          'relative z-10 w-16 py-1.5 text-sm font-medium text-center',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
-          !optimisticMode
-            ? 'text-gray-900 dark:text-gray-100'
-            : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
-          activePlaythrough &&
-            !isPending &&
-            'cursor-pointer transition-colors duration-150'
-        )}
-        aria-pressed={!optimisticMode}
-        aria-label={`Switch to Classic mode${!optimisticMode ? ' (currently selected)' : ''}`}
+      <CursorTooltip
+        content={
+          <p className='max-w-xs text-xs font-normal'>
+            The default experience for the game. The majority of the early game
+            uses Pokémon from generation 1, but all 501 Pokémon are in this
+            mode.
+          </p>
+        }
       >
-        Classic
-      </button>
-
-      <button
-        type='button'
-        onClick={() => handleToggle('remix')}
-        disabled={!activePlaythrough || isPending}
-        className={clsx(
-          'relative z-10 w-16 py-1.5 text-sm font-medium text-center',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
-          optimisticMode
-            ? 'text-purple-700 dark:text-purple-300'
-            : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
-          activePlaythrough &&
-            !isPending &&
-            'cursor-pointer transition-colors duration-150'
-        )}
-        aria-pressed={optimisticMode}
-        aria-label={`Switch to Remix mode${optimisticMode ? ' (currently selected)' : ''}`}
+        <button
+          type='button'
+          onClick={() => handleToggle('classic')}
+          disabled={!activePlaythrough}
+          className={clsx(
+            'relative z-10 w-16 py-1.5 text-sm font-medium text-center',
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
+            !optimisticMode
+              ? 'text-gray-900 dark:text-gray-100'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+            activePlaythrough && 'cursor-pointer transition-colors duration-150'
+          )}
+          aria-pressed={!optimisticMode}
+          aria-label={`Switch to Classic mode${!optimisticMode ? ' (currently selected)' : ''}`}
+        >
+          Classic
+        </button>
+      </CursorTooltip>
+      <CursorTooltip
+        content={
+          <p className='max-w-xs text-xs font-normal'>
+            A variation of classic mode that adjusts wild encounters, trainers,
+            and gym leaders to frequently use Pokémon introduced after
+            generation 2 in the early game. All of the same Pokémon are
+            available as classic mode.
+          </p>
+        }
       >
-        Remix
-      </button>
-      <div
-        role='status'
-        aria-live='polite'
-        aria-atomic='true'
-        className='sr-only'
-      >
-        {activePlaythrough &&
-          `Game mode: ${optimisticMode ? 'Remix' : 'Classic'}${isPending ? ' (updating...)' : ''}`}
-      </div>
+        <div>
+          <button
+            type='button'
+            onClick={() => handleToggle('remix')}
+            disabled={!activePlaythrough}
+            className={clsx(
+              'relative z-10 w-16 py-1.5 text-sm font-medium text-center',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
+              optimisticMode
+                ? 'text-purple-700 dark:text-purple-300'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+              activePlaythrough &&
+                'cursor-pointer transition-colors duration-150'
+            )}
+            aria-pressed={optimisticMode}
+            aria-label={`Switch to Remix mode${optimisticMode ? ' (currently selected)' : ''}`}
+          >
+            Remix
+          </button>
+          <div
+            role='status'
+            aria-live='polite'
+            aria-atomic='true'
+            className='sr-only'
+          >
+            {activePlaythrough &&
+              `Game mode: ${optimisticMode ? 'Remix' : 'Classic'}${isPending ? ' (updating...)' : ''}`}
+          </div>
+        </div>
+      </CursorTooltip>
     </fieldset>
   );
 });
