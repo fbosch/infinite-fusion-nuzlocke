@@ -133,7 +133,9 @@ export default function LocationCell({
           <Info className='size-4 text-gray-400 dark:text-gray-600 cursor-help' />
         )}
       </CursorTooltip>
-      <h2 className='text-sm'>{locationName}</h2>
+      <h2 className='text-sm truncate max-w-[180px] break-words block'>
+        {locationName}
+      </h2>
     </div>
   );
 }

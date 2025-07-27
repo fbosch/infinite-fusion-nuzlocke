@@ -8,6 +8,7 @@ export default function Home() {
       className='max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8'
       role='main'
     >
+      {/* Locations Table Section */}
       <section aria-labelledby='locations-heading' className='pb-10'>
         <h2 id='locations-heading' className='sr-only'>
           Game Locations
