@@ -68,139 +68,6 @@ export function getPokemonSpriteUrlFromOption(pokemon: PokemonOption): string {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
 }
 
-// Pokemon Options Component
-const PokemonOptions = ({
-  options,
-  isRoutePokemon,
-  query,
-  comboboxId,
-  gameMode,
-}: {
-  options: PokemonOption[];
-  isRoutePokemon: (pokemonId: number) => boolean;
-  query: string;
-  comboboxId: string;
-  gameMode: 'classic' | 'remix' | 'randomized';
-}) => {
-  const handleDragStart = (
-    e: React.DragEvent<HTMLImageElement>,
-    pokemon: PokemonOption
-  ) => {
-    e.dataTransfer.setData('text/plain', pokemon.name);
-    e.dataTransfer.effectAllowed = 'copy';
-    dragActions.startDrag(pokemon.name, comboboxId || '', pokemon);
-  };
-
-  if (options.length === 0) {
-    return (
-      <div className='h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent'>
-        <div className='relative cursor-default select-none py-2 px-4 text-center'>
-          <div className='text-gray-500 dark:text-gray-400'>
-            {query ? (
-              <>
-                <p className='text-sm'>
-                  No Pokémon found for &quot;{query}&quot;
-                </p>
-                <p className='text-xs mt-1'>Try a different search term</p>
-              </>
-            ) : (
-              <p className='text-sm flex items-center gap-2 justify-center py-2'>
-                <Search className='w-4 h-4' />
-                <span>Search for Pokémon</span>
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={clsx(
-        ' overflow-y-auto space-y-2',
-        'scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600',
-        'scrollbar-track-transparent py-1'
-      )}
-    >
-      {options.map((pokemon, index) => (
-        <ComboboxOption
-          key={`${pokemon.id}-${index}`}
-          value={pokemon}
-          className={({ active }) =>
-            clsx(
-              'relative cursor-pointer select-none py-2 px-4 content-visibility-auto contain-intrinsic-height-[56px]',
-              'rounded-md mx-2',
-              {
-                'bg-blue-600 text-white ': active,
-                'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700':
-                  !active,
-              }
-            )
-          }
-        >
-          {({ selected }) => (
-            <div className={'flex items-center gap-8 group'}>
-              <Image
-                src={getPokemonSpriteUrlFromOption(pokemon)}
-                alt={pokemon.name}
-                width={40}
-                height={40}
-                className='object-contain object-center scale-140 image-render-high-quality cursor-grab active:cursor-grabbing'
-                loading={
-                  index < 5 || isRoutePokemon(pokemon.id) ? 'eager' : 'lazy'
-                }
-                draggable
-                unoptimized
-                decoding='async'
-                priority={
-                  index < 5 || isRoutePokemon(pokemon.id) ? true : false
-                }
-                onDragStart={e => handleDragStart(e, pokemon)}
-              />
-              <span
-                className={clsx('block truncate flex-1', {
-                  'font-semibold': selected,
-                  'font-normal': !selected,
-                })}
-              >
-                {pokemon.name}
-              </span>
-              <div className='flex items-center gap-3'>
-                {gameMode !== 'randomized' && isRoutePokemon(pokemon.id) && (
-                  <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
-                    Route
-                  </span>
-                )}
-                <span
-                  className={clsx(
-                    'text-xs dark:text-gray-400 group-hover:text-white',
-                    {
-                      'group-hover:text-white ': selected,
-                    }
-                  )}
-                >
-                  {pokemon.id.toString().padStart(3, '0')}
-                </span>
-                <div className='w-5 h-5 flex items-center justify-center'>
-                  {selected && (
-                    <Check
-                      className={clsx(
-                        'size-5 group-hover:text-white text-blue-400 dark:text-white'
-                      )}
-                      aria-hidden='true'
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </ComboboxOption>
-      ))}
-    </div>
-  );
-};
-
 // Pokemon Combobox Component
 export const PokemonCombobox = React.memo(
   ({
@@ -743,6 +610,9 @@ export const PokemonCombobox = React.memo(
           onChange={handleChange}
           disabled={disabled}
           immediate
+          virtual={
+            finalOptions.length > 30 ? { options: finalOptions } : undefined
+          }
         >
           {({ open }) => (
             <div>
@@ -847,13 +717,204 @@ export const PokemonCombobox = React.memo(
                       }
                     )}
                   >
-                    <PokemonOptions
-                      options={finalOptions}
-                      isRoutePokemon={isRoutePokemon}
-                      query={deferredQuery}
-                      comboboxId={comboboxId || ''} // Provide a default value for comboboxId
-                      gameMode={gameMode}
-                    />
+                    {finalOptions.length === 0 ? (
+                      <div className='relative cursor-default select-none py-2 px-4 text-center'>
+                        <div className='text-gray-500 dark:text-gray-400'>
+                          {deferredQuery ? (
+                            <>
+                              <p className='text-sm'>
+                                No Pokémon found for &quot;{deferredQuery}&quot;
+                              </p>
+                              <p className='text-xs mt-1'>
+                                Try a different search term
+                              </p>
+                            </>
+                          ) : (
+                            <p className='text-sm flex items-center gap-2 justify-center py-2'>
+                              <Search className='w-4 h-4' />
+                              <span>Search for Pokémon</span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ) : finalOptions.length > 30 ? (
+                      // Virtual scrolling for large lists
+                      ({ option: pokemon }) => (
+                        <ComboboxOption
+                          key={`${pokemon.id}-${pokemon.name}`}
+                          value={pokemon}
+                          className={({ active }) =>
+                            clsx(
+                              'relative cursor-pointer select-none py-2 px-4',
+                              'rounded-md mx-2 w-fill',
+                              'content-visibility-auto contain-intrinsic-height-[56px]',
+                              {
+                                'bg-blue-600 text-white ': active,
+                                'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700':
+                                  !active,
+                              }
+                            )
+                          }
+                          style={{ height: '56px' }} // Fixed height for each option
+                        >
+                          {({ selected }) => (
+                            <div className={'flex items-center gap-8 group'}>
+                              <Image
+                                src={getPokemonSpriteUrlFromOption(pokemon)}
+                                alt={pokemon.name}
+                                width={40}
+                                height={40}
+                                className='object-contain object-center scale-140 image-render-high-quality cursor-grab active:cursor-grabbing'
+                                loading='lazy'
+                                draggable
+                                unoptimized
+                                decoding='async'
+                                onDragStart={e => {
+                                  e.dataTransfer.setData(
+                                    'text/plain',
+                                    pokemon.name
+                                  );
+                                  e.dataTransfer.effectAllowed = 'copy';
+                                  dragActions.startDrag(
+                                    pokemon.name,
+                                    comboboxId || '',
+                                    pokemon
+                                  );
+                                }}
+                              />
+                              <span
+                                className={clsx('block truncate flex-1', {
+                                  'font-semibold': selected,
+                                  'font-normal': !selected,
+                                })}
+                              >
+                                {pokemon.name}
+                              </span>
+                              <div className='flex items-center gap-3'>
+                                {gameMode !== 'randomized' &&
+                                  isRoutePokemon(pokemon.id) && (
+                                    <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
+                                      Route
+                                    </span>
+                                  )}
+                                <span
+                                  className={clsx(
+                                    'text-xs dark:text-gray-400 group-hover:text-white',
+                                    {
+                                      'group-hover:text-white ': selected,
+                                    }
+                                  )}
+                                >
+                                  {pokemon.id.toString().padStart(3, '0')}
+                                </span>
+                                <div className='w-5 h-5 flex items-center justify-center'>
+                                  {selected && (
+                                    <Check
+                                      className={clsx(
+                                        'size-5 group-hover:text-white text-blue-400 dark:text-white'
+                                      )}
+                                      aria-hidden='true'
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </ComboboxOption>
+                      )
+                    ) : (
+                      // Regular rendering for small lists
+                      finalOptions.map((pokemon, index) => (
+                        <ComboboxOption
+                          key={`${pokemon.id}-${index}`}
+                          value={pokemon}
+                          className={({ active }) =>
+                            clsx(
+                              'relative cursor-pointer select-none py-2 px-4',
+                              'rounded-md mx-2 w-fill',
+                              {
+                                'bg-blue-600 text-white ': active,
+                                'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700':
+                                  !active,
+                              }
+                            )
+                          }
+                        >
+                          {({ selected }) => (
+                            <div className={'flex items-center gap-8 group'}>
+                              <Image
+                                src={getPokemonSpriteUrlFromOption(pokemon)}
+                                alt={pokemon.name}
+                                width={40}
+                                height={40}
+                                className='object-contain object-center scale-140 image-render-high-quality cursor-grab active:cursor-grabbing'
+                                loading={
+                                  index < 5 || isRoutePokemon(pokemon.id)
+                                    ? 'eager'
+                                    : 'lazy'
+                                }
+                                draggable
+                                unoptimized
+                                decoding='async'
+                                priority={
+                                  index < 5 || isRoutePokemon(pokemon.id)
+                                    ? true
+                                    : false
+                                }
+                                onDragStart={e => {
+                                  e.dataTransfer.setData(
+                                    'text/plain',
+                                    pokemon.name
+                                  );
+                                  e.dataTransfer.effectAllowed = 'copy';
+                                  dragActions.startDrag(
+                                    pokemon.name,
+                                    comboboxId || '',
+                                    pokemon
+                                  );
+                                }}
+                              />
+                              <span
+                                className={clsx('block truncate flex-1', {
+                                  'font-semibold': selected,
+                                  'font-normal': !selected,
+                                })}
+                              >
+                                {pokemon.name}
+                              </span>
+                              <div className='flex items-center gap-3'>
+                                {gameMode !== 'randomized' &&
+                                  isRoutePokemon(pokemon.id) && (
+                                    <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
+                                      Route
+                                    </span>
+                                  )}
+                                <span
+                                  className={clsx(
+                                    'text-xs dark:text-gray-400 group-hover:text-white',
+                                    {
+                                      'group-hover:text-white ': selected,
+                                    }
+                                  )}
+                                >
+                                  {pokemon.id.toString().padStart(3, '0')}
+                                </span>
+                                <div className='w-5 h-5 flex items-center justify-center'>
+                                  {selected && (
+                                    <Check
+                                      className={clsx(
+                                        'size-5 group-hover:text-white text-blue-400 dark:text-white'
+                                      )}
+                                      aria-hidden='true'
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </ComboboxOption>
+                      ))
+                    )}
                   </ComboboxOptions>
                 </FloatingPortal>
               )}
