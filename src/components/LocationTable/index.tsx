@@ -8,16 +8,16 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import React, { useState, useMemo, useEffect } from 'react';
-import { getLocationsSortedWithCustom, isCustomLocation } from '@/loaders';
+import { getLocationsSortedWithCustom } from '@/loaders';
 import type { CombinedLocation } from '@/loaders/locations';
 import LocationTableHeader from './LocationTableHeader';
 import LocationTableRow from './LocationTableRow';
 import LocationTableSkeleton from './LocationTableSkeleton';
 import AddCustomLocationModal from './customLocations/AddCustomLocationModal';
+import LocationCell from './LocationCell';
 import { useIsLoading, useCustomLocations } from '@/stores/playthroughs';
-import { Info, PlusIcon } from 'lucide-react';
+import { PlusIcon } from 'lucide-react';
 import clsx from 'clsx';
-import { CursorTooltip } from '../CursorTooltip';
 
 const columnHelper = createColumnHelper<CombinedLocation>();
 
@@ -77,20 +77,10 @@ export default function LocationTable() {
           </div>
         ),
         cell: info => (
-          <span className='font-medium text-gray-900 dark:text-white flex gap-x-2 items-center'>
-            <CursorTooltip
-              content={
-                <span>
-                  {isCustomLocation(info.row.original)
-                    ? 'Custom Location'
-                    : info.row.original.description}
-                </span>
-              }
-            >
-              <Info className='size-4 text-gray-400 dark:text-gray-600 cursor-help' />
-            </CursorTooltip>
-            <h2 className='text-sm'>{info.getValue()}</h2>
-          </span>
+          <LocationCell
+            location={info.row.original}
+            locationName={info.getValue()}
+          />
         ),
         enableSorting: true,
         size: 10, // Fixed width for location column

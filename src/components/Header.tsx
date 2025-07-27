@@ -17,7 +17,7 @@ export default function Header() {
             <div className='flex items-center gap-3'>
               <Logo />
               <h1 className='sr-only sm:not-sr-only'>
-                <span className='block text-sm sm:text-md font-medium bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'>
+                <span className='block text-sm sm:text-md font-semibold bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'>
                   Pokémon Infinite Fusion
                 </span>
                 <div className='flex items-center space-x-1 text-gray-800 dark:text-white tracking-tight'>

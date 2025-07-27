@@ -744,6 +744,7 @@ export const PokemonCombobox = ({
 
   return (
     <div
+      id={value?.uid}
       className='relative'
       onDrop={handleDrop}
       onDragOver={handleDragOver}
@@ -799,6 +800,7 @@ export const PokemonCombobox = ({
               {(value || dragPreview) && (
                 <div className='absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md'>
                   <Image
+                    data-uid={dragPreview?.uid || value?.uid}
                     src={getPokemonSpriteUrlFromOption(dragPreview || value!)}
                     alt={(dragPreview || value)!.name}
                     width={40}

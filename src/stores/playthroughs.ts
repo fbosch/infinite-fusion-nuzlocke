@@ -598,12 +598,13 @@ export const playthroughActions = {
   createEncounterData: async (
     pokemon: z.infer<typeof PokemonOptionSchema> | null,
     field: 'head' | 'body' = 'head',
-    shouldCreateFusion: boolean = false
+    shouldCreateFusion: boolean = false,
+    locationId?: string
   ): Promise<z.infer<typeof EncounterDataSchema>> => {
     const pokemonWithLocationAndUID = pokemon
       ? {
           ...pokemon,
-          originalLocation: pokemon.originalLocation || '',
+          originalLocation: pokemon.originalLocation || locationId || '',
           uid: pokemon.uid || generatePokemonUID(),
         }
       : null;
@@ -682,7 +683,8 @@ export const playthroughActions = {
       const encounterData = await playthroughActions.createEncounterData(
         pokemon,
         field,
-        shouldCreateFusion
+        shouldCreateFusion,
+        locationId
       );
       encounter = encounterData;
       activePlaythrough.encounters[locationId] = encounter;
