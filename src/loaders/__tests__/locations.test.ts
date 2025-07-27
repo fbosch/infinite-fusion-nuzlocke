@@ -207,7 +207,7 @@ describe('Locations', () => {
         const locations = getLocations();
         const starterLocation = locations.find(loc => loc.routeId === 0);
         expect(starterLocation).not.toBeNull();
-        expect(starterLocation?.name).toBe('Starter');
+        expect(starterLocation?.name).toBe("Oak's Lab");
       });
 
       it('should identify non-starter locations correctly', () => {
@@ -222,7 +222,7 @@ describe('Locations', () => {
   describe('getLocationNameByRouteId', () => {
     it('should return location name for valid routeId', () => {
       const locationName = getLocationNameByRouteId(0);
-      expect(locationName).toBe('Starter');
+      expect(locationName).toBe("Oak's Lab");
     });
 
     it('should return null for invalid routeId', () => {
