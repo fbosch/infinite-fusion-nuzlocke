@@ -7,6 +7,7 @@ import { useSnapshot } from 'valtio';
 import { dragStore, dragActions } from '@/stores/dragStore';
 import { playthroughActions } from '@/stores/playthroughs';
 import type { PokemonOption } from '@/loaders/pokemon';
+import { CursorTooltip } from '../CursorTooltip';
 
 interface FusionToggleButtonProps {
   locationId: string;
@@ -171,13 +172,14 @@ export function FusionToggleButton({
         }
       )}
       aria-label={`Toggle fusion for ${selectedPokemon?.name || 'Pokemon'}`}
-      title={isFusion ? 'Unfuse' : 'Fuse'}
     >
-      {isFusion ? (
-        <DnaOff className='size-6 group-hover:text-white' />
-      ) : (
-        <Dna className='size-6 group-hover:text-white' />
-      )}
+      <CursorTooltip content={isFusion ? 'Unfuse' : 'Fuse'} delay={300}>
+        {isFusion ? (
+          <DnaOff className='size-6 group-hover:text-white' />
+        ) : (
+          <Dna className='size-6 group-hover:text-white' />
+        )}
+      </CursorTooltip>
     </button>
   );
 }

@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { useState, useCallback } from 'react';
 import ConfirmationDialog from '@/components/ConfirmationDialog';
 import { playthroughActions } from '@/stores/playthroughs';
+import { CursorTooltip } from '../../CursorTooltip';
 
 interface RemoveLocationButtonProps {
   locationId: string;
@@ -30,20 +31,25 @@ export default function RemoveLocationButton({
 
   return (
     <>
-      <button
-        type='button'
-        onClick={handleButtonClick}
-        className={clsx(
-          'size-8 flex items-center justify-center rounded-md transition-colors cursor-pointer',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2',
-          'text-gray-400 hover:text-red-600 hover:bg-red-50',
-          'dark:text-gray-500 dark:hover:text-red-400 dark:hover:bg-red-900/20'
-        )}
-        aria-label={`Remove custom location ${locationName}`}
-        title='Remove custom location'
+      <CursorTooltip
+        placement={'bottom-end'}
+        className='origin-top-right'
+        content={'Remove the custom location'}
       >
-        <TrashIcon className='size-4' />
-      </button>
+        <button
+          type='button'
+          onClick={handleButtonClick}
+          className={clsx(
+            'size-8 flex items-center justify-center rounded-md transition-colors cursor-pointer',
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2',
+            'text-gray-400 hover:text-red-600 hover:bg-red-50',
+            'dark:text-gray-500 dark:hover:text-red-400 dark:hover:bg-red-900/20'
+          )}
+          aria-label={`Remove custom location ${locationName}`}
+        >
+          <TrashIcon className='size-4' />
+        </button>
+      </CursorTooltip>
 
       <ConfirmationDialog
         isOpen={isDialogOpen}

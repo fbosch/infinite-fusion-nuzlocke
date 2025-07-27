@@ -2,14 +2,17 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { ArrowLeftRight } from 'lucide-react';
-import { PokemonCombobox } from '../PokemonCombobox/PokemonCombobox';
+import { PokemonCombobox } from '@/components/PokemonCombobox/PokemonCombobox';
 import { FusionToggleButton } from './FusionToggleButton';
-import ConfirmationDialog from '../ConfirmationDialog';
+import ConfirmationDialog from '@/components/ConfirmationDialog';
 import type { PokemonOption } from '@/loaders/pokemon';
 
 import clsx from 'clsx';
 import { useEncounter, playthroughActions } from '@/stores/playthroughs';
 import { getLocationById } from '@/loaders/locations';
+import { CursorTooltip } from '@/components/CursorTooltip';
+import { DNA_REVERSER_ICON } from '@/misc/items';
+import Image from 'next/image';
 
 interface EncounterCellProps {
   routeId: number | undefined;
@@ -257,15 +260,30 @@ export function EncounterCell({
                     onBeforeClear={handleBeforeClearHead}
                   />
                 </div>
-                <button
-                  type='button'
-                  onClick={handleFlip}
-                  className='group size-6 flex items-center justify-center p-1 rounded-md border border-gray-300 dark:border-gray-600 transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-500 hover:border-blue-600 bg-white dark:bg-gray-800'
-                  aria-label='Flip head and body'
-                  title='Flip head and body'
+                <CursorTooltip
+                  content={
+                    <div className='flex items-center gap-2'>
+                      <Image
+                        src={DNA_REVERSER_ICON}
+                        alt='DNA Reverser'
+                        width={24}
+                        height={24}
+                        className='object-contain object-center image-rendering-pixelated '
+                      />
+                      <span className='text-sm'>Invert Fusion</span>
+                    </div>
+                  }
+                  delay={300}
                 >
-                  <ArrowLeftRight className='size-4 text-gray-600 dark:text-gray-300 group-hover:text-white' />
-                </button>
+                  <button
+                    type='button'
+                    onClick={handleFlip}
+                    className='group size-6 flex items-center justify-center p-1 rounded-md border border-gray-300 dark:border-gray-600 transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-500 hover:border-blue-600 bg-white dark:bg-gray-800'
+                    aria-label='Flip head and body'
+                  >
+                    <ArrowLeftRight className='size-4 text-gray-600 dark:text-gray-300 group-hover:text-white' />
+                  </button>
+                </CursorTooltip>
                 <div className='flex-1 relative min-w-0 max-w-full'>
                   <span className='absolute -top-6 left-0 text-xs font-semibold text-gray-500 dark:text-gray-400'>
                     Body

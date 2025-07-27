@@ -65,6 +65,9 @@ const RemixToggle = React.memo(function RemixToggle() {
         />
       )}
       <CursorTooltip
+        placement={'bottom'}
+        className='origin-top'
+        delay={500}
         content={
           <p className='max-w-xs text-xs font-normal'>
             The default experience for the game. The majority of the early game
@@ -92,6 +95,9 @@ const RemixToggle = React.memo(function RemixToggle() {
         </button>
       </CursorTooltip>
       <CursorTooltip
+        placement={'bottom'}
+        delay={500}
+        className='origin-top'
         content={
           <p className='max-w-xs text-xs font-normal'>
             A variation of classic mode that adjusts wild encounters, trainers,

@@ -12,9 +12,10 @@ import {
   offset,
   shift,
   autoUpdate,
+  Placement,
 } from '@floating-ui/react';
 import { clsx } from 'clsx';
-import { useState, cloneElement, isValidElement } from 'react';
+import { useState, cloneElement, isValidElement, startTransition } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { twMerge } from 'tailwind-merge';
 
@@ -22,7 +23,9 @@ interface CursorTooltipProps {
   content: React.ReactNode;
   children: React.ReactElement;
   className?: string;
+  delay?: number;
   disabled?: boolean;
+  placement?: Placement;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
 }
@@ -31,7 +34,9 @@ export function CursorTooltip({
   content,
   children,
   className,
+  delay = 0,
   disabled = false,
+  placement = 'bottom-start',
   onMouseEnter,
   onMouseLeave,
 }: CursorTooltipProps) {
@@ -40,7 +45,9 @@ export function CursorTooltip({
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
     onOpenChange: open => {
-      setIsOpen(open);
+      startTransition(() => {
+        setIsOpen(open);
+      });
       // Call the external callbacks when the tooltip state changes
       if (open) {
         onMouseEnter?.();
@@ -48,26 +55,27 @@ export function CursorTooltip({
         onMouseLeave?.();
       }
     },
-    placement: 'bottom-start', // Position bottom-right relative to cursor point
+    placement: placement, // Position bottom-right relative to cursor point
     middleware: [
       offset({ mainAxis: 20, crossAxis: 20 }),
+
       shift({ padding: 8 }), // Keep within viewport
     ],
     whileElementsMounted: (referenceEl, floatingEl, update) => {
       return autoUpdate(referenceEl, floatingEl, update, {
-        animationFrame: true,
+        animationFrame: isOpen,
       });
     },
   });
 
   const clientPoint = useClientPoint(context, {
-    enabled: true, // Always enabled to track mouse, not just when open
+    enabled: true,
     axis: 'both',
   });
 
   const hover = useHover(context, {
     move: false,
-    delay: 0, // Instant show/hide for no lag
+    delay: isOpen ? 0 : delay,
     enabled: !disabled,
   });
 
@@ -114,11 +122,11 @@ export function CursorTooltip({
               <motion.div
                 className={twMerge(
                   clsx(
-                    'rounded-md px-3 py-2 text-sm font-normalt shadow-lg w-max max-w-sm',
-                    'pointer-events-none transform-gpu',
-                    'bg-gray-700/50 background-blur text-white',
-                    'border border-gray-600',
-                    'origin-top-left backdrop-blur-md'
+                    'rounded-md px-3 py-2 text-sm shadow-xl/5 w-max max-w-sm',
+                    'pointer-events-none transform-gpu bg-white',
+                    'dark:bg-gray-700/80 background-blur dark:text-white text-gray-700',
+                    'border dark:border-gray-600 border-gray-200',
+                    'origin-top-left backdrop-blur-xl'
                   ),
                   className
                 )}

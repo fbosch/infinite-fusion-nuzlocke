@@ -33,7 +33,11 @@ export default function ResetEncounterButton({
 
   return (
     <Fragment>
-      <CursorTooltip content={'Reset the encounter for this location'}>
+      <CursorTooltip
+        placement={'bottom-end'}
+        className='origin-top-right'
+        content={'Reset the encounter for this location'}
+      >
         <button
           type='button'
           onClick={handleButtonClick}

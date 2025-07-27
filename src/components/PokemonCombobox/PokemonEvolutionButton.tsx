@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, Fragment } from 'react';
 import { Atom, ChevronDown, Undo2 } from 'lucide-react';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -20,6 +20,7 @@ import {
 } from '@/loaders/pokemon';
 import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
 import { useShiftKey } from '@/hooks/useKeyPressed';
+import { CursorTooltip } from '../CursorTooltip';
 
 interface PokemonEvolutionButtonProps {
   value: PokemonOption | null | undefined;
@@ -75,11 +76,24 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
           'hover:bg-blue-100 hover:text-blue-600 hover:border-blue-300 dark:bg-blue-900/20 dark:hover:text-blue-400 dark:hover:border-blue-400',
           'data-[open]:bg-blue-100 data-[open]:text-blue-600 data-[open]:border-blue-300 dark:data-[open]:bg-blue-900/20 dark:data-[open]:text-blue-400 dark:data-[open]:border-blue-400'
         )}
-        title={`Choose evolution (${availableEvolutions.length} options)`}
         onFocus={() => update()}
       >
-        <Atom className='w-3 h-3' />
-        <ChevronDown className='w-3 h-3' />
+        <CursorTooltip
+          content={
+            <div className='flex items-center gap-2 text-sm'>
+              <span className='text-sm'>Choose evolution</span>
+              <span className='text-xs text-gray-400'>
+                ({availableEvolutions.length} options)
+              </span>
+            </div>
+          }
+          delay={300}
+        >
+          <div className='flex items-center gap-1'>
+            <Atom className='w-3 h-3' />
+            <ChevronDown className='w-3 h-3' />
+          </div>
+        </CursorTooltip>
       </MenuButton>
 
       <FloatingPortal>
@@ -301,38 +315,83 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   if (isDevolutionMode || availableEvolutions.length === 1) {
     return (
       <div className='absolute inset-y-0 right-4 flex items-center'>
-        <button
-          type='button'
-          onClick={handleDirectAction}
-          disabled={isLoadingEvolutions}
-          className={clsx(
-            'flex items-center justify-center gap-1 px-2 py-1 rounded-md',
-            'bg-gray-100 text-gray-600 text-xs font-semibold',
-            'border border-gray-300 hover:border-blue-300 dark:border-gray-600 dark:hover:border-blue-400',
-            'transition-colors duration-200',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
-            'disabled:opacity-50 disabled:cursor-not-allowed',
-            'dark:bg-gray-700 dark:hover:bg-blue-900/20 dark:text-gray-400 dark:hover:text-blue-400',
-            'hover:cursor-pointer',
-            {
-              'hover:bg-orange-100 hover:text-orange-600 hover:border-orange-300 dark:hover:bg-orange-900/20 dark:hover:text-orange-400 dark:hover:border-orange-400':
-                isDevolutionMode,
-              'hover:bg-blue-100 hover:text-blue-600 hover:border-blue-300 dark:bg-blue-900/20 dark:hover:text-blue-400 dark:hover:border-blue-400':
-                !isDevolutionMode,
-            }
-          )}
-          title={
-            isDevolutionMode
-              ? `Devolve to ${availablePreEvolution?.name}`
-              : `Evolve to ${availableEvolutions[0]?.name}`
+        <CursorTooltip
+          content={
+            <div className='flex items-center gap-2'>
+              <Image
+                src={getPokemonSpriteUrlFromOption(
+                  isDevolutionMode
+                    ? availablePreEvolution!
+                    : availableEvolutions[0]!
+                )}
+                alt={
+                  isDevolutionMode
+                    ? availablePreEvolution?.name || ''
+                    : availableEvolutions[0]?.name || ''
+                }
+                width={32}
+                height={32}
+                className='object-contain object-center'
+                unoptimized
+                decoding='async'
+                loading='eager'
+              />
+              <div className='flex flex-col gap-0.5'>
+                <span>
+                  {isDevolutionMode ? (
+                    <Fragment>
+                      Devolve to{' '}
+                      <span className='font-semibold'>
+                        {availablePreEvolution?.name}
+                      </span>
+                    </Fragment>
+                  ) : (
+                    <Fragment>
+                      Evolve to{' '}
+                      <span className='font-semibold'>
+                        {availableEvolutions[0]?.name}
+                      </span>
+                    </Fragment>
+                  )}
+                </span>
+                {!isDevolutionMode && availablePreEvolution && (
+                  <span className='text-xs text-gray-400'>
+                    Hold shift to devolve
+                  </span>
+                )}
+              </div>
+            </div>
           }
+          delay={300}
         >
-          {isDevolutionMode ? (
-            <Undo2 className='w-3 h-3' />
-          ) : (
-            <Atom className='w-3 h-3' />
-          )}
-        </button>
+          <button
+            type='button'
+            onClick={handleDirectAction}
+            disabled={isLoadingEvolutions}
+            className={clsx(
+              'flex items-center justify-center gap-1 px-2 py-1 rounded-md',
+              'bg-gray-100 text-gray-600 text-xs font-semibold',
+              'border border-gray-300 hover:border-blue-300 dark:border-gray-600 dark:hover:border-blue-400',
+              'transition-colors duration-200',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+              'dark:bg-gray-700 dark:hover:bg-blue-900/20 dark:text-gray-400 dark:hover:text-blue-400',
+              'hover:cursor-pointer',
+              {
+                'hover:bg-orange-100 hover:text-orange-600 hover:border-orange-300 dark:hover:bg-orange-900/20 dark:hover:text-orange-400 dark:hover:border-orange-400':
+                  isDevolutionMode,
+                'hover:bg-blue-100 hover:text-blue-600 hover:border-blue-300 dark:bg-blue-900/20 dark:hover:text-blue-400 dark:hover:border-blue-400':
+                  !isDevolutionMode,
+              }
+            )}
+          >
+            {isDevolutionMode ? (
+              <Undo2 className='w-3 h-3' />
+            ) : (
+              <Atom className='w-3 h-3' />
+            )}
+          </button>
+        </CursorTooltip>
       </div>
     );
   }

@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useMemo, useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Info, CheckCircle } from 'lucide-react';
 import { useEncounters } from '@/stores/playthroughs';
 import { isCustomLocation } from '@/loaders';
+import { getPokemonSpriteUrlFromOption } from '@/components/PokemonCombobox/PokemonCombobox';
 import type { CombinedLocation } from '@/loaders/locations';
 import type { PokemonOptionSchema } from '@/loaders/pokemon';
 import { z } from 'zod';
@@ -74,25 +76,37 @@ export default function LocationCell({
     if (locationPokemon.length > 0) {
       return (
         <div className='max-w-xs'>
-          <div className='text-xs text-gray-400 uppercase tracking-wide mb-1'>
-            {locationPokemon.length === 1
-              ? 'Original Encounter'
-              : 'Original Encounters'}
+          <div className='text-xs dark:text-gray-400 uppercase tracking-wide mb-2'>
+            Original Encounter
           </div>
 
           {locationPokemon.map((pokemon, index) => (
-            <div key={index} className='mb-2'>
+            <div key={index} className='mb-3 flex items-center gap-2'>
+              <div className='flex-shrink-0'>
+                <Image
+                  src={getPokemonSpriteUrlFromOption(pokemon)}
+                  alt={pokemon.name}
+                  width={20}
+                  height={20}
+                  className='object-contain object-center image-render-high-quality'
+                  loading='lazy'
+                  unoptimized
+                  decoding='async'
+                />
+              </div>
               <div className='flex-1 min-w-0'>
-                <span className='font-semibold text-white'>
+                <span className='font-semibold dark:text-white text-gray-900'>
                   {pokemon.nickname ? `${pokemon.nickname} • ` : ''}
-                  <span className='text-gray-300'>{pokemon.name}</span>
+                  <span className='dark:text-gray-300 text-gray-700'>
+                    {pokemon.name}
+                  </span>
                 </span>
               </div>
             </div>
           ))}
 
-          <hr className='my-2 border-gray-600' />
-          <div className='text-xs text-gray-400'>
+          <hr className='my-2 dark:border-gray-600 border-gray-200' />
+          <div className='text-xs dark:text-gray-400 text-gray-400'>
             {isCustomLocation(location)
               ? `Custom Location`
               : location.description}
