@@ -9,7 +9,6 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
-import { Check, Search } from 'lucide-react';
 import {
   Combobox,
   ComboboxInput,
@@ -39,6 +38,8 @@ import { playthroughActions, useGameMode } from '@/stores/playthroughs';
 import { PokemonEvolutionButton } from './PokemonEvolutionButton';
 import { PokemonNicknameInput } from './PokemonNicknameInput';
 import { PokemonStatusInput } from './PokemonStatusInput';
+import { PokemonOptions } from './PokemonOptions';
+import { Check } from 'lucide-react';
 
 let nationalDexMapping: Map<number, number> | null = null;
 let mappingPromise: Promise<void> | null = null;
@@ -703,7 +704,7 @@ export const PokemonCombobox = React.memo(
                     ref={refs.setFloating}
                     style={floatingStyles}
                     className={clsx(
-                      'z-50 overflow-y-auto py-1 text-base shadow-lg focus:outline-none sm:text-sm',
+                      'z-50 overflow-y-auto px-1 py-1 text-base shadow-lg focus:outline-none sm:text-sm',
                       'bg-white dark:bg-gray-800',
                       'border border-gray-300 dark:border-gray-600 scrollbar-thin',
                       {
@@ -717,37 +718,17 @@ export const PokemonCombobox = React.memo(
                       }
                     )}
                   >
-                    {finalOptions.length === 0 ? (
-                      <div className='relative cursor-default select-none py-2 px-4 text-center'>
-                        <div className='text-gray-500 dark:text-gray-400'>
-                          {deferredQuery ? (
-                            <>
-                              <p className='text-sm'>
-                                No Pokémon found for &quot;{deferredQuery}&quot;
-                              </p>
-                              <p className='text-xs mt-1'>
-                                Try a different search term
-                              </p>
-                            </>
-                          ) : (
-                            <p className='text-sm flex items-center gap-2 justify-center py-2'>
-                              <Search className='w-4 h-4' />
-                              <span>Search for Pokémon</span>
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ) : finalOptions.length > 30 ? (
-                      // Virtual scrolling for large lists
-                      ({ option: pokemon }) => (
+                    {finalOptions.length > 50 ? (
+                      // Virtual scrolling is enabled - use render function
+                      ({ option: pokemon }: { option: PokemonOption }) => (
                         <ComboboxOption
                           key={`${pokemon.id}-${pokemon.name}`}
                           value={pokemon}
                           className={({ active }) =>
                             clsx(
                               'relative cursor-pointer select-none py-2 px-4',
-                              'rounded-md mx-2 w-fill',
-                              'content-visibility-auto contain-intrinsic-height-[56px]',
+                              'rounded-md w-full flex items-center',
+                              'h-14',
                               {
                                 'bg-blue-600 text-white ': active,
                                 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700':
@@ -755,10 +736,12 @@ export const PokemonCombobox = React.memo(
                               }
                             )
                           }
-                          style={{ height: '56px' }} // Fixed height for each option
+                          style={{ height: '56px' }}
                         >
                           {({ selected }) => (
-                            <div className={'flex items-center gap-8 group'}>
+                            <div
+                              className={'gap-8 group w-full flex items-center'}
+                            >
                               <Image
                                 src={getPokemonSpriteUrlFromOption(pokemon)}
                                 alt={pokemon.name}
@@ -823,97 +806,14 @@ export const PokemonCombobox = React.memo(
                         </ComboboxOption>
                       )
                     ) : (
-                      // Regular rendering for small lists
-                      finalOptions.map((pokemon, index) => (
-                        <ComboboxOption
-                          key={`${pokemon.id}-${index}`}
-                          value={pokemon}
-                          className={({ active }) =>
-                            clsx(
-                              'relative cursor-pointer select-none py-2 px-4',
-                              'rounded-md mx-2 w-fill',
-                              {
-                                'bg-blue-600 text-white ': active,
-                                'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700':
-                                  !active,
-                              }
-                            )
-                          }
-                        >
-                          {({ selected }) => (
-                            <div className={'flex items-center gap-8 group'}>
-                              <Image
-                                src={getPokemonSpriteUrlFromOption(pokemon)}
-                                alt={pokemon.name}
-                                width={40}
-                                height={40}
-                                className='object-contain object-center scale-140 image-render-high-quality cursor-grab active:cursor-grabbing'
-                                loading={
-                                  index < 5 || isRoutePokemon(pokemon.id)
-                                    ? 'eager'
-                                    : 'lazy'
-                                }
-                                draggable
-                                unoptimized
-                                decoding='async'
-                                priority={
-                                  index < 5 || isRoutePokemon(pokemon.id)
-                                    ? true
-                                    : false
-                                }
-                                onDragStart={e => {
-                                  e.dataTransfer.setData(
-                                    'text/plain',
-                                    pokemon.name
-                                  );
-                                  e.dataTransfer.effectAllowed = 'copy';
-                                  dragActions.startDrag(
-                                    pokemon.name,
-                                    comboboxId || '',
-                                    pokemon
-                                  );
-                                }}
-                              />
-                              <span
-                                className={clsx('block truncate flex-1', {
-                                  'font-semibold': selected,
-                                  'font-normal': !selected,
-                                })}
-                              >
-                                {pokemon.name}
-                              </span>
-                              <div className='flex items-center gap-3'>
-                                {gameMode !== 'randomized' &&
-                                  isRoutePokemon(pokemon.id) && (
-                                    <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
-                                      Route
-                                    </span>
-                                  )}
-                                <span
-                                  className={clsx(
-                                    'text-xs dark:text-gray-400 group-hover:text-white',
-                                    {
-                                      'group-hover:text-white ': selected,
-                                    }
-                                  )}
-                                >
-                                  {pokemon.id.toString().padStart(3, '0')}
-                                </span>
-                                <div className='w-5 h-5 flex items-center justify-center'>
-                                  {selected && (
-                                    <Check
-                                      className={clsx(
-                                        'size-5 group-hover:text-white text-blue-400 dark:text-white'
-                                      )}
-                                      aria-hidden='true'
-                                    />
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </ComboboxOption>
-                      ))
+                      // Virtual scrolling is disabled - use component
+                      <PokemonOptions
+                        finalOptions={finalOptions}
+                        deferredQuery={deferredQuery}
+                        isRoutePokemon={isRoutePokemon}
+                        comboboxId={comboboxId || ''}
+                        gameMode={gameMode}
+                      />
                     )}
                   </ComboboxOptions>
                 </FloatingPortal>
