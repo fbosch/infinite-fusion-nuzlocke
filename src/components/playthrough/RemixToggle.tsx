@@ -70,9 +70,8 @@ const RemixToggle = React.memo(function RemixToggle() {
         delay={500}
         content={
           <p className='max-w-xs text-xs font-normal'>
-            The default experience for the game. The majority of the early game
-            uses Pokémon from generation 1, but all 501 Pokémon are in this
-            mode.
+            Uses the standard encounter tables and route data. The tracker will
+            show traditional Pokémon encounters for each route and location.
           </p>
         }
       >
@@ -100,10 +99,9 @@ const RemixToggle = React.memo(function RemixToggle() {
         className='origin-top'
         content={
           <p className='max-w-xs text-xs font-normal'>
-            A variation of classic mode that adjusts wild encounters, trainers,
-            and gym leaders to frequently use Pokémon introduced after
-            generation 2 in the early game. All of the same Pokémon are
-            available as classic mode.
+            Uses modified encounter tables with different Pokémon availability
+            per route. The tracker will show updated encounters that include
+            more diverse Pokémon in early game areas.
           </p>
         }
       >
