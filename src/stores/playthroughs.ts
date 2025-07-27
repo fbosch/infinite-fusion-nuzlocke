@@ -1703,13 +1703,16 @@ export const useAllPlaythroughs = () => {
 
 export const useActivePlaythrough = (): Playthrough | null => {
   const snapshot = useSnapshot(playthroughsStore);
-  const activePlaythroughData = snapshot.playthroughs.find(
-    p => p.id === snapshot.activePlaythroughId
-  );
 
   return useMemo(() => {
-    return playthroughActions.getActivePlaythrough();
-  }, [snapshot.activePlaythroughId, activePlaythroughData?.updatedAt]);
+    if (!snapshot.activePlaythroughId) return null;
+
+    const activePlaythroughData = snapshot.playthroughs.find(
+      p => p.id === snapshot.activePlaythroughId
+    );
+
+    return (activePlaythroughData as Playthrough) || null;
+  }, [snapshot.activePlaythroughId, snapshot.playthroughs]);
 };
 
 export const useIsRemixMode = (): boolean => {

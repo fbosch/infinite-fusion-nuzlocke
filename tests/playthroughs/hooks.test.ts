@@ -41,7 +41,7 @@ describe('Playthroughs Store - React Hooks', () => {
     });
 
     it('should update when store changes', () => {
-      const { result } = renderHook(() => usePlaythroughsSnapshot());
+      const { result, rerender } = renderHook(() => usePlaythroughsSnapshot());
 
       // Initial state
       expect(result.current.playthroughs).toHaveLength(0);
@@ -51,6 +51,9 @@ describe('Playthroughs Store - React Hooks', () => {
         const id = playthroughActions.createPlaythrough('Test');
         playthroughActions.setActivePlaythrough(id);
       });
+
+      // Force re-render to ensure hook updates
+      rerender();
 
       // Should update
       expect(result.current.playthroughs).toHaveLength(1);
@@ -67,14 +70,14 @@ describe('Playthroughs Store - React Hooks', () => {
     it('should return the active playthrough when one exists', () => {
       // Create and set active playthrough
       setupPlaythroughTest();
-      
+
       const { result } = renderHook(() => useActivePlaythrough());
       expect(result.current).not.toBeNull();
       expect(result.current?.name).toBe('Test Run');
     });
 
     it('should update when active playthrough changes', () => {
-      const { result } = renderHook(() => useActivePlaythrough());
+      const { result, rerender } = renderHook(() => useActivePlaythrough());
 
       // Initially null
       expect(result.current).toBeNull();
@@ -85,6 +88,9 @@ describe('Playthroughs Store - React Hooks', () => {
         playthroughActions.setActivePlaythrough(id1);
       });
 
+      // Force re-render to ensure hook updates
+      rerender();
+
       expect(result.current?.name).toBe('Playthrough 1');
 
       // Create and switch to second playthrough
@@ -92,6 +98,9 @@ describe('Playthroughs Store - React Hooks', () => {
         const id2 = playthroughActions.createPlaythrough('Playthrough 2');
         playthroughActions.setActivePlaythrough(id2);
       });
+
+      // Force re-render again
+      rerender();
 
       expect(result.current?.name).toBe('Playthrough 2');
     });
