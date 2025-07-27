@@ -5,41 +5,51 @@ import clsx from 'clsx';
 import {
   playthroughActions,
   useActivePlaythrough,
-  useIsRemixMode,
+  useGameMode,
+  type GameMode,
 } from '@/stores/playthroughs';
 import { CursorTooltip } from '../CursorTooltip';
 
-const RemixToggle = React.memo(function RemixToggle() {
+const GameModeToggle = React.memo(function GameModeToggle() {
   const activePlaythrough = useActivePlaythrough();
-  const actualIsRemixMode = useIsRemixMode();
+  const actualGameMode = useGameMode();
   const [isPending, startTransition] = useTransition();
 
   // React 19's useOptimistic hook for instant UI updates
   const [optimisticMode, setOptimisticMode] = useOptimistic(
-    actualIsRemixMode,
-    (currentState, newMode: boolean) => newMode
+    actualGameMode,
+    (currentState, newMode: GameMode) => newMode
   );
 
-  const handleToggle = React.useCallback(
-    (targetMode: 'classic' | 'remix') => {
-      if (!activePlaythrough || isPending) return;
-
-      const shouldToggle =
-        (targetMode === 'remix' && !optimisticMode) ||
-        (targetMode === 'classic' && optimisticMode);
-
-      if (!shouldToggle) return;
+  const handleModeSelect = React.useCallback(
+    (targetMode: GameMode) => {
+      if (!activePlaythrough || isPending || optimisticMode === targetMode)
+        return;
 
       startTransition(() => {
         // Optimistic update - instant UI response
-        setOptimisticMode(targetMode === 'remix');
+        setOptimisticMode(targetMode);
 
         // Actual state update
-        playthroughActions.toggleRemixMode();
+        playthroughActions.setGameMode(targetMode);
       });
     },
     [activePlaythrough, optimisticMode, isPending, setOptimisticMode]
   );
+
+  // Calculate background position based on selected mode
+  const getBackgroundPosition = (mode: GameMode): string => {
+    switch (mode) {
+      case 'classic':
+        return 'translate-x-0';
+      case 'remix':
+        return 'translate-x-20'; // 5rem (80px)
+      case 'randomized':
+        return 'translate-x-40'; // 10rem (160px)
+      default:
+        return 'translate-x-0';
+    }
+  };
 
   return (
     <fieldset
@@ -50,20 +60,21 @@ const RemixToggle = React.memo(function RemixToggle() {
       )}
       disabled={!activePlaythrough}
       aria-describedby={
-        !activePlaythrough ? 'remix-toggle-disabled-help' : undefined
+        !activePlaythrough ? 'game-mode-toggle-disabled-help' : undefined
       }
     >
       <legend className='sr-only'>Game Mode Selection</legend>
       {activePlaythrough && (
         <div
           className={clsx(
-            'absolute top-1 bottom-1 left-1 w-16 bg-white dark:bg-gray-800 rounded-md shadow-sm transition-transform duration-150 ease-out',
+            'absolute top-1 bottom-1 left-1 w-20 bg-white dark:bg-gray-800 rounded-md shadow-sm transition-transform duration-200 ease-out',
             'border border-gray-200 dark:border-gray-500',
-            optimisticMode ? 'translate-x-16' : 'translate-x-0'
+            getBackgroundPosition(optimisticMode)
           )}
           aria-hidden='true'
         />
       )}
+
       <CursorTooltip
         placement={'bottom'}
         className='origin-top'
@@ -77,22 +88,23 @@ const RemixToggle = React.memo(function RemixToggle() {
       >
         <button
           type='button'
-          onClick={() => handleToggle('classic')}
+          onClick={() => handleModeSelect('classic')}
           disabled={!activePlaythrough}
           className={clsx(
-            'relative z-10 w-16 py-1.5 text-sm font-semibold text-center',
+            'relative z-10 w-20 py-1.5 text-sm font-semibold text-center',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
-            !optimisticMode
+            optimisticMode === 'classic'
               ? 'text-gray-900 dark:text-gray-100'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
             activePlaythrough && 'cursor-pointer transition-colors duration-150'
           )}
-          aria-pressed={!optimisticMode}
-          aria-label={`Switch to Classic mode${!optimisticMode ? ' (currently selected)' : ''}`}
+          aria-pressed={optimisticMode === 'classic'}
+          aria-label={`Switch to Classic mode${optimisticMode === 'classic' ? ' (currently selected)' : ''}`}
         >
           Classic
         </button>
       </CursorTooltip>
+
       <CursorTooltip
         placement={'bottom'}
         delay={500}
@@ -105,38 +117,66 @@ const RemixToggle = React.memo(function RemixToggle() {
           </p>
         }
       >
-        <div>
-          <button
-            type='button'
-            onClick={() => handleToggle('remix')}
-            disabled={!activePlaythrough}
-            className={clsx(
-              'relative z-10 w-16 py-1.5 text-sm font-semibold text-center',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
-              optimisticMode
-                ? 'text-purple-700 dark:text-purple-300'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
-              activePlaythrough &&
-                'cursor-pointer transition-colors duration-150'
-            )}
-            aria-pressed={optimisticMode}
-            aria-label={`Switch to Remix mode${optimisticMode ? ' (currently selected)' : ''}`}
-          >
-            Remix
-          </button>
-          <div
-            role='status'
-            aria-live='polite'
-            aria-atomic='true'
-            className='sr-only'
-          >
-            {activePlaythrough &&
-              `Game mode: ${optimisticMode ? 'Remix' : 'Classic'}${isPending ? ' (updating...)' : ''}`}
-          </div>
-        </div>
+        <button
+          type='button'
+          onClick={() => handleModeSelect('remix')}
+          disabled={!activePlaythrough}
+          className={clsx(
+            'relative z-10 w-20 py-1.5 text-sm font-semibold text-center',
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
+            optimisticMode === 'remix'
+              ? 'text-purple-700 dark:text-purple-300'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+            activePlaythrough && 'cursor-pointer transition-colors duration-150'
+          )}
+          aria-pressed={optimisticMode === 'remix'}
+          aria-label={`Switch to Remix mode${optimisticMode === 'remix' ? ' (currently selected)' : ''}`}
+        >
+          Remix
+        </button>
       </CursorTooltip>
+
+      <CursorTooltip
+        placement={'bottom'}
+        delay={500}
+        className='origin-top'
+        content={
+          <p className='max-w-xs text-xs font-normal'>
+            Uses randomized encounters where any Pokémon can appear in any
+            location.
+          </p>
+        }
+      >
+        <button
+          type='button'
+          onClick={() => handleModeSelect('randomized')}
+          disabled={!activePlaythrough}
+          className={clsx(
+            'relative z-10 w-20 py-1.5 text-sm font-semibold text-center',
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
+            optimisticMode === 'randomized'
+              ? 'text-green-700 dark:text-green-300'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+            activePlaythrough && 'cursor-pointer transition-colors duration-150'
+          )}
+          aria-pressed={optimisticMode === 'randomized'}
+          aria-label={`Switch to Randomized mode${optimisticMode === 'randomized' ? ' (currently selected)' : ''}`}
+        >
+          Random
+        </button>
+      </CursorTooltip>
+
+      <div
+        role='status'
+        aria-live='polite'
+        aria-atomic='true'
+        className='sr-only'
+      >
+        {activePlaythrough &&
+          `Game mode: ${optimisticMode}${isPending ? ' (updating...)' : ''}`}
+      </div>
     </fieldset>
   );
 });
 
-export default RemixToggle;
+export default GameModeToggle;

@@ -37,7 +37,7 @@ describe('Playthrough Store - Custom Locations', () => {
     // Create a test playthrough
     const playthroughId = playthroughActions.createPlaythrough(
       'Test Run',
-      false
+      'classic'
     );
     playthroughsStore.activePlaythroughId = playthroughId;
 
@@ -384,7 +384,7 @@ describe('Playthrough Store - Custom Locations', () => {
         // Verify the playthrough structure is intact
         expect(activePlaythrough?.id).toBeTruthy();
         expect(activePlaythrough?.name).toBe('Test Run');
-        expect(activePlaythrough?.remixMode).toBe(false);
+        expect(activePlaythrough?.gameMode).toBe('classic');
       }
     });
   });

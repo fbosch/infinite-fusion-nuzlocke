@@ -35,7 +35,7 @@ import {
 } from '@/loaders/pokemon';
 import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
 import { dragStore, dragActions } from '@/stores/dragStore';
-import { playthroughActions, useIsRemixMode } from '@/stores/playthroughs';
+import { playthroughActions, useGameMode } from '@/stores/playthroughs';
 import { PokemonEvolutionButton } from './PokemonEvolutionButton';
 import { PokemonNicknameInput } from './PokemonNicknameInput';
 import { PokemonStatusInput } from './PokemonStatusInput';
@@ -308,7 +308,7 @@ export const PokemonCombobox = React.memo(
     const [query, setQuery] = useState('');
     const deferredQuery = useDeferredValue(query);
     const dragSnapshot = useSnapshot(dragStore);
-    const isRemixMode = useIsRemixMode();
+    const gameMode = useGameMode();
 
     // Ref to track pending timeout for drag leave operations
     const dragLeaveAnimationRef = useRef<number | null>(null);
@@ -355,11 +355,12 @@ export const PokemonCombobox = React.memo(
     const loadRouteEncounterData = useCallback(async () => {
       try {
         // Load Pokemon data, name map, and encounter data in parallel
-        const currentGameMode = isRemixMode ? 'remix' : 'classic';
+        // For randomized mode, fall back to classic encounters as a base
+        const encounterMode = gameMode === 'randomized' ? 'classic' : gameMode;
         const [allPokemon, nameMap, encounter] = await Promise.all([
           getPokemon(),
           getPokemonNameMap(),
-          getEncountersByRouteId(routeId, currentGameMode),
+          getEncountersByRouteId(routeId, encounterMode),
         ]);
 
         if (encounter) {
@@ -383,7 +384,7 @@ export const PokemonCombobox = React.memo(
           err
         );
       }
-    }, [routeId, isRemixMode, locationId]);
+    }, [routeId, gameMode, locationId]);
 
     // Load route data when combobox opens or when user starts typing
     const handleInteraction = useCallback(() => {
@@ -454,7 +455,7 @@ export const PokemonCombobox = React.memo(
       if (routeId !== undefined && routeId !== 0 && shouldLoad) {
         loadRouteEncounterData();
       }
-    }, [isRemixMode, loadRouteEncounterData, routeId, shouldLoad]);
+    }, [gameMode, loadRouteEncounterData, routeId, shouldLoad]);
 
     // Clear query when value changes to ensure component reflects the new selection
 

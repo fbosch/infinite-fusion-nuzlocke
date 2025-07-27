@@ -40,6 +40,8 @@ import {
   playthroughsStore,
   useActivePlaythrough,
   useIsRemixMode,
+  useGameMode,
+  useIsRandomizedMode,
   usePlaythroughById,
   useIsLoading,
   useEncounters,
@@ -1580,7 +1582,7 @@ describe('Playthroughs Store - Hooks', () => {
       act(() => {
         const playthroughId = playthroughActions.createPlaythrough(
           'Test Run',
-          false
+          'classic'
         );
         playthroughActions.setActivePlaythrough(playthroughId);
       });
@@ -1606,7 +1608,10 @@ describe('Playthroughs Store - Hooks', () => {
 
       // Create and set active playthrough
       act(() => {
-        playthroughId = playthroughActions.createPlaythrough('Test Run', false);
+        playthroughId = playthroughActions.createPlaythrough(
+          'Test Run',
+          'classic'
+        );
         playthroughActions.setActivePlaythrough(playthroughId);
       });
 
@@ -1615,7 +1620,7 @@ describe('Playthroughs Store - Hooks', () => {
       expect(result.current).not.toBeNull();
       expect(result.current?.name).toBe('Test Run');
       expect(result.current?.id).toBe(playthroughId!);
-      expect(result.current?.remixMode).toBe(false);
+      expect(result.current?.gameMode).toBe('classic');
     });
 
     it('should update when active playthrough changes', () => {
@@ -1628,7 +1633,7 @@ describe('Playthroughs Store - Hooks', () => {
       act(() => {
         const playthroughId1 = playthroughActions.createPlaythrough(
           'First Run',
-          false
+          'classic'
         );
         playthroughActions.setActivePlaythrough(playthroughId1);
       });
@@ -1640,7 +1645,7 @@ describe('Playthroughs Store - Hooks', () => {
       act(() => {
         const playthroughId2 = playthroughActions.createPlaythrough(
           'Second Run',
-          true
+          'remix'
         );
         // Ensure the new playthrough becomes active
         playthroughsStore.activePlaythroughId = playthroughId2;
@@ -1648,21 +1653,24 @@ describe('Playthroughs Store - Hooks', () => {
 
       rerender();
       expect(result.current?.name).toBe('Second Run');
-      expect(result.current?.remixMode).toBe(true);
+      expect(result.current?.gameMode).toBe('remix');
     });
 
     it('should update when active playthrough is modified', () => {
       let playthroughId: string;
 
       act(() => {
-        playthroughId = playthroughActions.createPlaythrough('Test Run', false);
+        playthroughId = playthroughActions.createPlaythrough(
+          'Test Run',
+          'classic'
+        );
         playthroughActions.setActivePlaythrough(playthroughId);
       });
 
       const { result, rerender } = renderHook(() => useActivePlaythrough());
 
       rerender();
-      expect(result.current?.remixMode).toBe(false);
+      expect(result.current?.gameMode).toBe('classic');
 
       // Toggle remix mode
       act(() => {
@@ -1670,7 +1678,7 @@ describe('Playthroughs Store - Hooks', () => {
       });
 
       rerender();
-      expect(result.current?.remixMode).toBe(true);
+      expect(result.current?.gameMode).toBe('remix');
     });
   });
 
@@ -1685,7 +1693,7 @@ describe('Playthroughs Store - Hooks', () => {
       act(() => {
         const playthroughId = playthroughActions.createPlaythrough(
           'Classic Run',
-          false
+          'classic'
         );
         playthroughActions.setActivePlaythrough(playthroughId);
       });
@@ -1708,13 +1716,409 @@ describe('Playthroughs Store - Hooks', () => {
       act(() => {
         const playthroughId = playthroughActions.createPlaythrough(
           'Remix Run',
-          true
+          'remix'
         );
         playthroughActions.setActivePlaythrough(playthroughId);
       });
 
       const { result } = renderHook(() => useIsRemixMode());
       expect(result.current).toBe(true);
+    });
+  });
+
+  describe('useGameMode', () => {
+    it('should return classic mode by default when no active playthrough exists', () => {
+      const { result } = renderHook(() => useGameMode());
+      expect(result.current).toBe('classic');
+    });
+
+    it('should return the correct game mode for the active playthrough', () => {
+      // Test classic mode
+      act(() => {
+        const playthroughId = playthroughActions.createPlaythrough(
+          'Classic Run',
+          'classic'
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      const { result, rerender } = renderHook(() => useGameMode());
+      rerender();
+      expect(result.current).toBe('classic');
+
+      // Test remix mode
+      act(() => {
+        const playthroughId = playthroughActions.createPlaythrough(
+          'Remix Run',
+          'remix'
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      rerender();
+      expect(result.current).toBe('remix');
+
+      // Test randomized mode
+      act(() => {
+        const playthroughId = playthroughActions.createPlaythrough(
+          'Randomized Run',
+          'randomized'
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      rerender();
+      expect(result.current).toBe('randomized');
+    });
+
+    it('should update when game mode changes', () => {
+      let playthroughId: string;
+
+      act(() => {
+        playthroughId = playthroughActions.createPlaythrough(
+          'Test Run',
+          'classic'
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      const { result, rerender } = renderHook(() => useGameMode());
+
+      rerender();
+      expect(result.current).toBe('classic');
+
+      // Change to remix mode
+      act(() => {
+        playthroughActions.setGameMode('remix');
+      });
+
+      rerender();
+      expect(result.current).toBe('remix');
+
+      // Change to randomized mode
+      act(() => {
+        playthroughActions.setGameMode('randomized');
+      });
+
+      rerender();
+      expect(result.current).toBe('randomized');
+
+      // Cycle back to classic
+      act(() => {
+        playthroughActions.setGameMode('classic');
+      });
+
+      rerender();
+      expect(result.current).toBe('classic');
+    });
+  });
+
+  describe('useIsRandomizedMode', () => {
+    it('should return false when no active playthrough exists', () => {
+      const { result } = renderHook(() => useIsRandomizedMode());
+      expect(result.current).toBe(false);
+    });
+
+    it('should return false for classic mode playthrough', () => {
+      act(() => {
+        const playthroughId = playthroughActions.createPlaythrough(
+          'Classic Run',
+          'classic'
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      const { result } = renderHook(() => useIsRandomizedMode());
+      expect(result.current).toBe(false);
+    });
+
+    it('should return false for remix mode playthrough', () => {
+      act(() => {
+        const playthroughId = playthroughActions.createPlaythrough(
+          'Remix Run',
+          'remix'
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      const { result } = renderHook(() => useIsRandomizedMode());
+      expect(result.current).toBe(false);
+    });
+
+    it('should return true for randomized mode playthrough', () => {
+      act(() => {
+        const playthroughId = playthroughActions.createPlaythrough(
+          'Randomized Run',
+          'randomized'
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      const { result } = renderHook(() => useIsRandomizedMode());
+      expect(result.current).toBe(true);
+    });
+
+    it('should update when switching between game modes', () => {
+      let playthroughId: string;
+
+      act(() => {
+        playthroughId = playthroughActions.createPlaythrough(
+          'Test Run',
+          'classic'
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+
+      const { result, rerender } = renderHook(() => useIsRandomizedMode());
+
+      rerender();
+      expect(result.current).toBe(false);
+
+      // Switch to randomized mode
+      act(() => {
+        playthroughActions.setGameMode('randomized');
+      });
+
+      rerender();
+      expect(result.current).toBe(true);
+
+      // Switch to remix mode
+      act(() => {
+        playthroughActions.setGameMode('remix');
+      });
+
+      rerender();
+      expect(result.current).toBe(false);
+
+      // Switch back to randomized mode
+      act(() => {
+        playthroughActions.setGameMode('randomized');
+      });
+
+      rerender();
+      expect(result.current).toBe(true);
+    });
+  });
+
+  describe('Game Mode Actions', () => {
+    let playthroughId: string;
+
+    beforeEach(() => {
+      act(() => {
+        playthroughId = playthroughActions.createPlaythrough(
+          'Test Run',
+          'classic'
+        );
+        playthroughActions.setActivePlaythrough(playthroughId);
+      });
+    });
+
+    describe('setGameMode', () => {
+      it('should set classic mode', () => {
+        act(() => {
+          playthroughActions.setGameMode('classic');
+        });
+
+        const activePlaythrough = playthroughActions.getActivePlaythrough();
+        expect(activePlaythrough?.gameMode).toBe('classic');
+      });
+
+      it('should set remix mode', () => {
+        act(() => {
+          playthroughActions.setGameMode('remix');
+        });
+
+        const activePlaythrough = playthroughActions.getActivePlaythrough();
+        expect(activePlaythrough?.gameMode).toBe('remix');
+      });
+
+      it('should set randomized mode', () => {
+        act(() => {
+          playthroughActions.setGameMode('randomized');
+        });
+
+        const activePlaythrough = playthroughActions.getActivePlaythrough();
+        expect(activePlaythrough?.gameMode).toBe('randomized');
+      });
+
+      it('should update timestamp when setting game mode', () => {
+        const activePlaythrough = playthroughActions.getActivePlaythrough();
+        const originalTimestamp = activePlaythrough?.updatedAt;
+
+        // Wait a bit to ensure timestamp difference
+        act(() => {
+          playthroughActions.setGameMode('randomized');
+        });
+
+        const updatedPlaythrough = playthroughActions.getActivePlaythrough();
+        expect(updatedPlaythrough?.updatedAt).toBeGreaterThan(
+          originalTimestamp || 0
+        );
+      });
+    });
+
+    describe('cycleGameMode', () => {
+      it('should cycle from classic to remix to randomized and back to classic', () => {
+        // Start with classic mode
+        let activePlaythrough = playthroughActions.getActivePlaythrough();
+        expect(activePlaythrough?.gameMode).toBe('classic');
+
+        // Cycle to remix
+        act(() => {
+          playthroughActions.cycleGameMode();
+        });
+
+        activePlaythrough = playthroughActions.getActivePlaythrough();
+        expect(activePlaythrough?.gameMode).toBe('remix');
+
+        // Cycle to randomized
+        act(() => {
+          playthroughActions.cycleGameMode();
+        });
+
+        activePlaythrough = playthroughActions.getActivePlaythrough();
+        expect(activePlaythrough?.gameMode).toBe('randomized');
+
+        // Cycle back to classic
+        act(() => {
+          playthroughActions.cycleGameMode();
+        });
+
+        activePlaythrough = playthroughActions.getActivePlaythrough();
+        expect(activePlaythrough?.gameMode).toBe('classic');
+      });
+
+      it('should work from any starting mode', () => {
+        // Start with randomized mode
+        act(() => {
+          playthroughActions.setGameMode('randomized');
+        });
+
+        let activePlaythrough = playthroughActions.getActivePlaythrough();
+        expect(activePlaythrough?.gameMode).toBe('randomized');
+
+        // Cycle to classic
+        act(() => {
+          playthroughActions.cycleGameMode();
+        });
+
+        activePlaythrough = playthroughActions.getActivePlaythrough();
+        expect(activePlaythrough?.gameMode).toBe('classic');
+
+        // Cycle to remix
+        act(() => {
+          playthroughActions.cycleGameMode();
+        });
+
+        activePlaythrough = playthroughActions.getActivePlaythrough();
+        expect(activePlaythrough?.gameMode).toBe('remix');
+      });
+    });
+
+    describe('getGameMode', () => {
+      it('should return classic mode by default', () => {
+        const gameMode = playthroughActions.getGameMode();
+        expect(gameMode).toBe('classic');
+      });
+
+      it('should return the current game mode', () => {
+        // Test classic mode
+        expect(playthroughActions.getGameMode()).toBe('classic');
+
+        // Test remix mode
+        act(() => {
+          playthroughActions.setGameMode('remix');
+        });
+        expect(playthroughActions.getGameMode()).toBe('remix');
+
+        // Test randomized mode
+        act(() => {
+          playthroughActions.setGameMode('randomized');
+        });
+        expect(playthroughActions.getGameMode()).toBe('randomized');
+      });
+    });
+
+    describe('isRandomizedModeEnabled', () => {
+      it('should return false for classic mode', () => {
+        act(() => {
+          playthroughActions.setGameMode('classic');
+        });
+        expect(playthroughActions.isRandomizedModeEnabled()).toBe(false);
+      });
+
+      it('should return false for remix mode', () => {
+        act(() => {
+          playthroughActions.setGameMode('remix');
+        });
+        expect(playthroughActions.isRandomizedModeEnabled()).toBe(false);
+      });
+
+      it('should return true for randomized mode', () => {
+        act(() => {
+          playthroughActions.setGameMode('randomized');
+        });
+        expect(playthroughActions.isRandomizedModeEnabled()).toBe(true);
+      });
+    });
+  });
+
+  describe('Playthrough Creation with Game Modes', () => {
+    it('should create playthrough with classic mode by default', () => {
+      const playthroughId = playthroughActions.createPlaythrough('Default Run');
+      const playthrough = playthroughsStore.playthroughs.find(
+        p => p.id === playthroughId
+      );
+      expect(playthrough?.gameMode).toBe('classic');
+    });
+
+    it('should create playthrough with specified classic mode', () => {
+      const playthroughId = playthroughActions.createPlaythrough(
+        'Classic Run',
+        'classic'
+      );
+      const playthrough = playthroughsStore.playthroughs.find(
+        p => p.id === playthroughId
+      );
+      expect(playthrough?.gameMode).toBe('classic');
+    });
+
+    it('should create playthrough with remix mode', () => {
+      const playthroughId = playthroughActions.createPlaythrough(
+        'Remix Run',
+        'remix'
+      );
+      const playthrough = playthroughsStore.playthroughs.find(
+        p => p.id === playthroughId
+      );
+      expect(playthrough?.gameMode).toBe('remix');
+    });
+
+    it('should create playthrough with randomized mode', () => {
+      const playthroughId = playthroughActions.createPlaythrough(
+        'Randomized Run',
+        'randomized'
+      );
+      const playthrough = playthroughsStore.playthroughs.find(
+        p => p.id === playthroughId
+      );
+      expect(playthrough?.gameMode).toBe('randomized');
+    });
+
+    it('should set correct timestamps for new playthroughs', () => {
+      const beforeCreate = Date.now();
+      const playthroughId = playthroughActions.createPlaythrough(
+        'Timestamped Run',
+        'randomized'
+      );
+      const afterCreate = Date.now();
+
+      const playthrough = playthroughsStore.playthroughs.find(
+        p => p.id === playthroughId
+      );
+      expect(playthrough?.createdAt).toBeGreaterThanOrEqual(beforeCreate);
+      expect(playthrough?.createdAt).toBeLessThanOrEqual(afterCreate);
+      expect(playthrough?.updatedAt).toBe(playthrough?.createdAt);
     });
   });
 
@@ -1738,11 +2142,11 @@ describe('Playthroughs Store - Hooks', () => {
       act(() => {
         playthroughId1 = playthroughActions.createPlaythrough(
           'First Run',
-          false
+          'classic'
         );
         playthroughId2 = playthroughActions.createPlaythrough(
           'Second Run',
-          true
+          'remix'
         );
       });
 
@@ -1754,17 +2158,20 @@ describe('Playthroughs Store - Hooks', () => {
       );
 
       expect(result1.current?.name).toBe('First Run');
-      expect(result1.current?.remixMode).toBe(false);
+      expect(result1.current?.gameMode).toBe('classic');
 
       expect(result2.current?.name).toBe('Second Run');
-      expect(result2.current?.remixMode).toBe(true);
+      expect(result2.current?.gameMode).toBe('remix');
     });
 
     it('should update when the specific playthrough is modified', () => {
       let playthroughId: string;
 
       act(() => {
-        playthroughId = playthroughActions.createPlaythrough('Test Run', false);
+        playthroughId = playthroughActions.createPlaythrough(
+          'Test Run',
+          'classic'
+        );
       });
 
       const { result, rerender } = renderHook(() =>
@@ -1825,7 +2232,7 @@ describe('Playthroughs Store - Hooks', () => {
       await act(async () => {
         const playthroughId = playthroughActions.createPlaythrough(
           'Test Run',
-          false
+          'classic'
         );
         await playthroughActions.setActivePlaythrough(playthroughId);
 
@@ -1849,7 +2256,7 @@ describe('Playthroughs Store - Hooks', () => {
       await act(async () => {
         const playthroughId = playthroughActions.createPlaythrough(
           'Test Run',
-          false
+          'classic'
         );
         await playthroughActions.setActivePlaythrough(playthroughId);
       });
@@ -1893,7 +2300,7 @@ describe('Playthroughs Store - Hooks', () => {
       await act(async () => {
         const playthroughId = playthroughActions.createPlaythrough(
           'Test Run',
-          false
+          'classic'
         );
         await playthroughActions.setActivePlaythrough(playthroughId);
 
@@ -1928,7 +2335,7 @@ describe('Playthroughs Store - Hooks', () => {
       act(() => {
         const playthroughId = playthroughActions.createPlaythrough(
           'Test Run',
-          false
+          'classic'
         );
         playthroughActions.setActivePlaythrough(playthroughId);
       });
@@ -1958,7 +2365,7 @@ describe('Playthroughs Store - Hooks', () => {
       act(() => {
         const playthroughId = playthroughActions.createPlaythrough(
           'Test Run',
-          false
+          'classic'
         );
         playthroughActions.setActivePlaythrough(playthroughId);
         playthroughActions.updateEncounter('route-1', pikachu);
