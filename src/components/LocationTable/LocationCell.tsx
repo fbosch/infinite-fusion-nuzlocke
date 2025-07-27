@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Info, CheckCircle } from 'lucide-react';
 import { useEncounters } from '@/stores/playthroughs';
 import { isCustomLocation } from '@/loaders';
@@ -21,68 +21,53 @@ type EncounterResult =
   | { type: 'single'; pokemon: Pokemon }
   | null;
 
-// Helper function to check if a location has been used for any encounters (Nuzlocke rule: one catch per route)
-const hasLocationEncounter = (
-  locationId: string,
-  encounters: ReturnType<typeof useEncounters>
-): boolean => {
-  if (!encounters) return false;
-
-  // Check all encounters across all locations
-  for (const [encLocationId, encounter] of Object.entries(encounters)) {
-    // Check head pokemon
-    if (encounter.head?.originalLocation === locationId) {
-      return true;
-    }
-
-    // Check body pokemon
-    if (encounter.body?.originalLocation === locationId) {
-      return true;
-    }
-  }
-
-  return false;
+type LocationEncounterInfo = {
+  hasEncounter: boolean;
+  originalEncounter: EncounterResult;
 };
 
-// Helper function to find the Pokemon originally encountered at this location
-const getOriginalEncounter = (
+// Optimized function that combines both checks in a single iteration
+const getLocationEncounterInfo = (
   locationId: string,
   encounters: ReturnType<typeof useEncounters>
-): EncounterResult => {
-  if (!encounters) return null;
+): LocationEncounterInfo => {
+  if (!encounters) {
+    return { hasEncounter: false, originalEncounter: null };
+  }
 
-  // Check all encounters across all locations
+  // Single iteration through encounters to find matches
   for (const [encLocationId, encounter] of Object.entries(encounters)) {
     const headMatch = encounter.head?.originalLocation === locationId;
     const bodyMatch = encounter.body?.originalLocation === locationId;
 
-    // If both head and body match the location, it was a fusion encounter
-    if (headMatch && bodyMatch && encounter.head && encounter.body) {
-      return {
-        type: 'fusion' as const,
-        head: encounter.head,
-        body: encounter.body,
-      };
-    }
+    if (headMatch || bodyMatch) {
+      // Found an encounter for this location
+      let originalEncounter: EncounterResult = null;
 
-    // If only head matches
-    if (headMatch && encounter.head) {
-      return {
-        type: 'single' as const,
-        pokemon: encounter.head,
-      };
-    }
+      // Determine the encounter type
+      if (headMatch && bodyMatch && encounter.head && encounter.body) {
+        originalEncounter = {
+          type: 'fusion' as const,
+          head: encounter.head,
+          body: encounter.body,
+        };
+      } else if (headMatch && encounter.head) {
+        originalEncounter = {
+          type: 'single' as const,
+          pokemon: encounter.head,
+        };
+      } else if (bodyMatch && encounter.body) {
+        originalEncounter = {
+          type: 'single' as const,
+          pokemon: encounter.body,
+        };
+      }
 
-    // If only body matches
-    if (bodyMatch && encounter.body) {
-      return {
-        type: 'single' as const,
-        pokemon: encounter.body,
-      };
+      return { hasEncounter: true, originalEncounter };
     }
   }
 
-  return null;
+  return { hasEncounter: false, originalEncounter: null };
 };
 
 export default function LocationCell({
@@ -90,10 +75,14 @@ export default function LocationCell({
   locationName,
 }: LocationCellProps) {
   const encounters = useEncounters();
-  const hasEncounter = hasLocationEncounter(location.id, encounters);
-  const originalEncounter = getOriginalEncounter(location.id, encounters);
 
-  const getTooltipContent = () => {
+  // Memoize the expensive computation
+  const { hasEncounter, originalEncounter } = useMemo(
+    () => getLocationEncounterInfo(location.id, encounters),
+    [location.id, encounters]
+  );
+
+  const getTooltipContent = useMemo(() => {
     if (hasEncounter && originalEncounter) {
       const nickname =
         originalEncounter.type === 'fusion'
@@ -146,11 +135,11 @@ export default function LocationCell({
     return isCustomLocation(location)
       ? `Custom Location`
       : location.description;
-  };
+  }, [hasEncounter, originalEncounter, location]);
 
   return (
     <span className='font-medium text-gray-900 dark:text-white flex gap-x-2 items-center'>
-      <CursorTooltip content={getTooltipContent()}>
+      <CursorTooltip content={getTooltipContent}>
         {hasEncounter ? (
           <CheckCircle className='size-4 text-green-600 cursor-help' />
         ) : (
