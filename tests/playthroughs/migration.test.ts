@@ -1,52 +1,16 @@
-import { describe, it, expect, vi } from 'vitest';
-import type { z } from 'zod';
+// Import mocks first (must be at top level for Vitest hoisting)
+import './mocks';
 
-// Mock IndexedDB operations first
-vi.mock('idb-keyval', () => ({
-  get: vi.fn().mockResolvedValue(undefined),
-  set: vi.fn().mockResolvedValue(undefined),
-  del: vi.fn().mockResolvedValue(undefined),
-  createStore: vi.fn(() => ({
-    // Mock store object that can be passed as second parameter
-    name: 'mock-store',
-    storeName: 'mock-object-store',
-  })),
-}));
+// Import shared setup and utilities
+import {
+  describe,
+  it,
+  expect,
+  PlaythroughSchema,
+  createMockPokemon,
+} from './setup';
 
-// Mock sprite service to avoid Worker issues in tests
-vi.mock('../../src/services/spriteService', () => ({
-  default: {
-    generateSpriteUrl: vi.fn(
-      (headId, bodyId, variant = '') =>
-        `mock-sprite-url-${headId || 'unknown'}-${bodyId || 'unknown'}${variant ? `-${variant}` : ''}`
-    ),
-    getArtworkVariants: vi.fn().mockResolvedValue(['']),
-    getPreferredVariant: vi.fn().mockResolvedValue(undefined),
-    setPreferredVariant: vi.fn().mockResolvedValue(undefined),
-  },
-}));
-
-// Mock search service to avoid Worker issues in tests
-vi.mock('../../src/services/searchService', () => ({
-  default: {
-    search: vi.fn().mockResolvedValue([]),
-  },
-}));
-
-// Now import the modules
-import { PlaythroughSchema } from '../../src/stores/playthroughs';
-import { PokemonOptionSchema } from '../../src/loaders/pokemon';
-
-type PokemonOption = z.infer<typeof PokemonOptionSchema>;
-
-const createMockPokemon = (name: string, id: number): PokemonOption => ({
-  id,
-  name,
-  nationalDexId: id,
-  originalLocation: undefined,
-});
-
-describe('Playthrough Migration Tests', () => {
+describe('Playthroughs Store - Migration Tests', () => {
   describe('remixMode to gameMode migration', () => {
     it('should migrate remixMode: true to gameMode: remix', () => {
       const legacyData = {

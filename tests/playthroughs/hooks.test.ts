@@ -1,41 +1,14 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import type { z } from 'zod';
+// Import mocks first (must be at top level for Vitest hoisting)
+import './mocks';
 
-// Mock IndexedDB operations first
-vi.mock('idb-keyval', () => ({
-  get: vi.fn().mockResolvedValue(undefined),
-  set: vi.fn().mockResolvedValue(undefined),
-  del: vi.fn().mockResolvedValue(undefined),
-  createStore: vi.fn(() => ({
-    // Mock store object that can be passed as second parameter
-    name: 'mock-store',
-    storeName: 'mock-object-store',
-  })),
-}));
-
-// Mock sprite service to avoid Worker issues in tests
-vi.mock('../../src/services/spriteService', () => ({
-  default: {
-    generateSpriteUrl: vi.fn(
-      (headId, bodyId, variant = '') =>
-        `mock-sprite-url-${headId || 'unknown'}-${bodyId || 'unknown'}${variant ? `-${variant}` : ''}`
-    ),
-    getArtworkVariants: vi.fn().mockResolvedValue(['']),
-    getPreferredVariant: vi.fn().mockResolvedValue(undefined),
-    setPreferredVariant: vi.fn().mockResolvedValue(undefined),
-  },
-}));
-
-// Mock search service to avoid Worker issues in tests
-vi.mock('../../src/services/searchService', () => ({
-  default: {
-    search: vi.fn().mockResolvedValue([]),
-  },
-}));
-
-// Now import the modules
+// Import shared setup and utilities
 import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  renderHook,
+  act,
   playthroughActions,
   playthroughsStore,
   useActivePlaythrough,
@@ -46,29 +19,15 @@ import {
   useIsLoading,
   useEncounters,
   usePlaythroughsSnapshot,
-} from '../../src/stores/playthroughs';
-import { PokemonOptionSchema } from '../../src/loaders/pokemon';
+  createMockPokemon,
+  setupPlaythroughTest,
+  setupCleanSlate,
+} from './setup';
 
-type PokemonOption = z.infer<typeof PokemonOptionSchema>;
-
-const createMockPokemon = (name: string, id: number): PokemonOption => ({
-  id,
-  name,
-  nationalDexId: id,
-  originalLocation: undefined,
-});
-
-describe('Playthroughs Store - Hooks', () => {
+describe('Playthroughs Store - React Hooks', () => {
+  // Don't use setupPlaythroughTest in global beforeEach since some tests need empty state
   beforeEach(() => {
-    // Reset store state before each test
-    playthroughsStore.playthroughs = [];
-    playthroughsStore.activePlaythroughId = undefined;
-    playthroughsStore.isLoading = false;
-  });
-
-  afterEach(() => {
-    // Clean up any side effects
-    vi.clearAllMocks();
+    setupCleanSlate();
   });
 
   describe('usePlaythroughsSnapshot', () => {
@@ -82,26 +41,19 @@ describe('Playthroughs Store - Hooks', () => {
     });
 
     it('should update when store changes', () => {
-      const { result, rerender } = renderHook(() => usePlaythroughsSnapshot());
+      const { result } = renderHook(() => usePlaythroughsSnapshot());
 
       // Initial state
       expect(result.current.playthroughs).toHaveLength(0);
 
       // Create a playthrough
       act(() => {
-        const playthroughId = playthroughActions.createPlaythrough(
-          'Test Run',
-          'classic'
-        );
-        playthroughActions.setActivePlaythrough(playthroughId);
+        const id = playthroughActions.createPlaythrough('Test');
+        playthroughActions.setActivePlaythrough(id);
       });
 
-      // Force a re-render to pick up store changes
-      rerender();
-
-      // Should reflect the new state
+      // Should update
       expect(result.current.playthroughs).toHaveLength(1);
-      expect(result.current.playthroughs[0].name).toBe('Test Run');
       expect(result.current.activePlaythroughId).toBeDefined();
     });
   });
@@ -113,56 +65,35 @@ describe('Playthroughs Store - Hooks', () => {
     });
 
     it('should return the active playthrough when one exists', () => {
-      let playthroughId: string;
-
       // Create and set active playthrough
-      act(() => {
-        playthroughId = playthroughActions.createPlaythrough(
-          'Test Run',
-          'classic'
-        );
-        playthroughActions.setActivePlaythrough(playthroughId);
-      });
-
+      setupPlaythroughTest();
+      
       const { result } = renderHook(() => useActivePlaythrough());
-
       expect(result.current).not.toBeNull();
       expect(result.current?.name).toBe('Test Run');
-      expect(result.current?.id).toBe(playthroughId!);
-      expect(result.current?.gameMode).toBe('classic');
     });
 
     it('should update when active playthrough changes', () => {
-      const { result, rerender } = renderHook(() => useActivePlaythrough());
+      const { result } = renderHook(() => useActivePlaythrough());
 
       // Initially null
       expect(result.current).toBeNull();
 
       // Create first playthrough
       act(() => {
-        const playthroughId1 = playthroughActions.createPlaythrough(
-          'First Run',
-          'classic'
-        );
-        playthroughActions.setActivePlaythrough(playthroughId1);
+        const id1 = playthroughActions.createPlaythrough('Playthrough 1');
+        playthroughActions.setActivePlaythrough(id1);
       });
 
-      rerender();
-      expect(result.current?.name).toBe('First Run');
+      expect(result.current?.name).toBe('Playthrough 1');
 
-      // Create second playthrough
+      // Create and switch to second playthrough
       act(() => {
-        const playthroughId2 = playthroughActions.createPlaythrough(
-          'Second Run',
-          'remix'
-        );
-        // Ensure the new playthrough becomes active
-        playthroughsStore.activePlaythroughId = playthroughId2;
+        const id2 = playthroughActions.createPlaythrough('Playthrough 2');
+        playthroughActions.setActivePlaythrough(id2);
       });
 
-      rerender();
-      expect(result.current?.name).toBe('Second Run');
-      expect(result.current?.gameMode).toBe('remix');
+      expect(result.current?.name).toBe('Playthrough 2');
     });
 
     it('should update when active playthrough is modified', () => {

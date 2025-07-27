@@ -1,50 +1,23 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+// Import mocks first (must be at top level for Vitest hoisting)
+import './mocks';
+
+// Import shared setup and utilities
 import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  vi,
+  afterEach,
   playthroughActions,
   playthroughsStore,
-} from '../../src/stores/playthroughs';
+  setupPlaythroughTest,
+} from './setup';
 
-// Mock IndexedDB
-const mockIndexedDB = {
-  get: vi.fn(),
-  set: vi.fn(),
-  del: vi.fn(),
-  clear: vi.fn(),
-};
-
-vi.mock('idb-keyval', () => ({
-  get: (...args: unknown[]) => mockIndexedDB.get(...args),
-  set: (...args: unknown[]) => mockIndexedDB.set(...args),
-  del: (...args: unknown[]) => mockIndexedDB.del(...args),
-  createStore: vi.fn(() => ({})),
-}));
-
-// Mock sprite service to avoid import issues
-vi.mock('@/services/spriteService', () => ({
-  default: {
-    getPreferredVariant: vi.fn(() => Promise.resolve(undefined)),
-    setPreferredVariant: vi.fn(() => Promise.resolve()),
-    getArtworkVariants: vi.fn(() => Promise.resolve([])),
-    generateSpriteUrl: vi.fn(() => ''),
-  },
-}));
-
-describe('Playthrough Store - Custom Locations', () => {
-  beforeEach(async () => {
-    // Reset store state
-    playthroughsStore.playthroughs = [];
-    playthroughsStore.activePlaythroughId = undefined;
-    playthroughsStore.isLoading = false;
-    playthroughsStore.isSaving = false;
-
-    // Create a test playthrough
-    const playthroughId = playthroughActions.createPlaythrough(
-      'Test Run',
-      'classic'
-    );
-    playthroughsStore.activePlaythroughId = playthroughId;
-
-    // Reset mocks
+describe('Playthroughs Store - Custom Locations', () => {
+  beforeEach(() => {
+    setupPlaythroughTest();
+    // Clear mock calls
     vi.clearAllMocks();
   });
 
