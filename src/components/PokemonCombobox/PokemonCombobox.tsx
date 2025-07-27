@@ -68,95 +68,19 @@ export function getPokemonSpriteUrlFromOption(pokemon: PokemonOption): string {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
 }
 
-// Pokemon Option Component
-const PokemonOption = ({
-  pokemon,
-  selected,
-  isRoutePokemon,
-  comboboxId,
-}: {
-  pokemon: PokemonOption;
-  selected: boolean;
-  isRoutePokemon: boolean;
-  comboboxId: string;
-}) => {
-  const handleDragStart = (e: React.DragEvent<HTMLImageElement>) => {
-    e.dataTransfer.setData('text/plain', pokemon.name);
-    e.dataTransfer.effectAllowed = 'copy';
-    dragActions.startDrag(pokemon.name, comboboxId || '', pokemon);
-  };
-
-  return (
-    <ComboboxOption
-      value={pokemon}
-      className={clsx(
-        'relative cursor-default select-none py-2 px-4',
-        'hover:bg-gray-100 dark:hover:bg-gray-700',
-        {
-          'bg-blue-400 text-white': selected,
-          'text-gray-900 dark:text-gray-100': !selected,
-        }
-      )}
-    >
-      {({ selected }) => (
-        <div className={'flex items-center gap-8'}>
-          <Image
-            src={getPokemonSpriteUrlFromOption(pokemon)}
-            alt={pokemon.name}
-            width={40}
-            height={40}
-            className='object-contain object-center scale-180 image-render-high-quality cursor-grab active:cursor-grabbing'
-            loading='lazy'
-            decoding='async'
-            unoptimized
-            draggable
-            onDragStart={handleDragStart}
-            placeholder='blur'
-            blurDataURL={TRANSPARENT_PIXEL}
-          />
-          <span
-            className={clsx('block truncate flex-1', {
-              'font-semibold': selected,
-              'font-normal': !selected,
-            })}
-          >
-            {pokemon.name}
-          </span>
-          <div className='flex items-center gap-2'>
-            {isRoutePokemon && (
-              <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
-                Route
-              </span>
-            )}
-            <div className='w-5 h-5 flex items-center justify-center'>
-              {selected && (
-                <Check
-                  className={clsx('w-5 h-5', {
-                    'text-white': selected,
-                    'text-blue-400': !selected,
-                  })}
-                  aria-hidden='true'
-                />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </ComboboxOption>
-  );
-};
-
 // Pokemon Options Component
 const PokemonOptions = ({
   options,
   isRoutePokemon,
   query,
   comboboxId,
+  gameMode,
 }: {
   options: PokemonOption[];
   isRoutePokemon: (pokemonId: number) => boolean;
   query: string;
   comboboxId: string;
+  gameMode: 'classic' | 'remix' | 'randomized';
 }) => {
   const handleDragStart = (
     e: React.DragEvent<HTMLImageElement>,
@@ -243,7 +167,7 @@ const PokemonOptions = ({
                 {pokemon.name}
               </span>
               <div className='flex items-center gap-3'>
-                {isRoutePokemon(pokemon.id) && (
+                {gameMode !== 'randomized' && isRoutePokemon(pokemon.id) && (
                   <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
                     Route
                   </span>
@@ -355,28 +279,42 @@ export const PokemonCombobox = React.memo(
     const loadRouteEncounterData = useCallback(async () => {
       try {
         // Load Pokemon data, name map, and encounter data in parallel
-        // For randomized mode, fall back to classic encounters as a base
-        const encounterMode = gameMode === 'randomized' ? 'classic' : gameMode;
-        const [allPokemon, nameMap, encounter] = await Promise.all([
+        const [allPokemon, nameMap] = await Promise.all([
           getPokemon(),
           getPokemonNameMap(),
-          getEncountersByRouteId(routeId, encounterMode),
         ]);
 
-        if (encounter) {
-          const pokemonOptions: PokemonOption[] = encounter.pokemonIds.map(
-            id => {
-              const pokemon = allPokemon.find(p => p.id === id);
-              return {
-                id,
-                name: nameMap.get(id) || `Unknown Pokemon (${id})`,
-                nationalDexId: pokemon?.nationalDexId || 0,
-                originalLocation: locationId,
-              };
-            }
+        if (gameMode === 'randomized') {
+          // For randomized mode, show ALL available Pokemon
+          const allPokemonOptions: PokemonOption[] = allPokemon.map(
+            pokemon => ({
+              id: pokemon.id,
+              name: nameMap.get(pokemon.id) || pokemon.name,
+              nationalDexId: pokemon.nationalDexId,
+              originalLocation: locationId,
+            })
           );
 
-          setRouteEncounterData(pokemonOptions);
+          setRouteEncounterData(allPokemonOptions);
+        } else {
+          // For classic/remix modes, load route-specific encounters
+          const encounter = await getEncountersByRouteId(routeId, gameMode);
+
+          if (encounter) {
+            const pokemonOptions: PokemonOption[] = encounter.pokemonIds.map(
+              id => {
+                const pokemon = allPokemon.find(p => p.id === id);
+                return {
+                  id,
+                  name: nameMap.get(id) || `Unknown Pokemon (${id})`,
+                  nationalDexId: pokemon?.nationalDexId || 0,
+                  originalLocation: locationId,
+                };
+              }
+            );
+
+            setRouteEncounterData(pokemonOptions);
+          }
         }
       } catch (err) {
         console.error(
@@ -431,12 +369,17 @@ export const PokemonCombobox = React.memo(
       const timeoutId = setTimeout(async () => {
         try {
           const allPokemon = await getPokemon();
-          const nonRoutePokemon = allPokemon.filter(
-            p => !routePokemonIds.has(p.id)
-          );
+
+          // In randomized mode, all Pokemon are available, so we don't filter
+          // In classic/remix modes, filter out route Pokemon to avoid duplicates
+          const searchPokemon =
+            gameMode === 'randomized'
+              ? allPokemon
+              : allPokemon.filter(p => !routePokemonIds.has(p.id));
+
           const results = await performSmartSearch(
             deferredQuery,
-            nonRoutePokemon
+            searchPokemon
           );
           startTransition(() => {
             setFuzzyResults(results);
@@ -448,7 +391,7 @@ export const PokemonCombobox = React.memo(
       }, 100); // 100ms debounce
 
       return () => clearTimeout(timeoutId);
-    }, [deferredQuery, routePokemonIds, performSmartSearch]);
+    }, [deferredQuery, routePokemonIds, performSmartSearch, gameMode]);
 
     // Reload encounter data when playthrough data changes
     useEffect(() => {
@@ -487,21 +430,32 @@ export const PokemonCombobox = React.memo(
       // Combine results: route matches first, then smart search results
       const allResults = [...routeMatches, ...fuzzyResults];
 
-      // Sort: route Pokemon first, then by search relevance
+      // Sort: in randomized mode, all Pokemon are equally available
+      // In classic/remix modes, prioritize route Pokemon
       return allResults
         .sort((a, b) => {
-          // First prioritize route Pokemon
-          if (isRoutePokemon(a.id) && !isRoutePokemon(b.id)) return -1;
-          if (!isRoutePokemon(a.id) && isRoutePokemon(b.id)) return 1;
-
-          // For non-route Pokemon, maintain search order (already sorted by relevance)
-          return 0;
+          if (gameMode === 'randomized') {
+            // In randomized mode, maintain search relevance order
+            return 0;
+          } else {
+            // In classic/remix modes, prioritize route Pokemon
+            if (isRoutePokemon(a.id) && !isRoutePokemon(b.id)) return -1;
+            if (!isRoutePokemon(a.id) && isRoutePokemon(b.id)) return 1;
+            // For non-route Pokemon, maintain search order (already sorted by relevance)
+            return 0;
+          }
         })
         .filter(
           (pokemon, index, self) =>
             index === self.findIndex(t => t.id === pokemon.id)
         );
-    }, [routeEncounterData, fuzzyResults, deferredQuery, isRoutePokemon]);
+    }, [
+      routeEncounterData,
+      fuzzyResults,
+      deferredQuery,
+      isRoutePokemon,
+      gameMode,
+    ]);
 
     const handleChange = useCallback(
       (newValue: PokemonOption | null | undefined) => {
@@ -898,6 +852,7 @@ export const PokemonCombobox = React.memo(
                       isRoutePokemon={isRoutePokemon}
                       query={deferredQuery}
                       comboboxId={comboboxId || ''} // Provide a default value for comboboxId
+                      gameMode={gameMode}
                     />
                   </ComboboxOptions>
                 </FloatingPortal>
