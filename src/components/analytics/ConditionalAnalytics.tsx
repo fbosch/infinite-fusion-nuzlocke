@@ -1,4 +1,4 @@
-'use client';
+j'use client';
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
@@ -40,7 +40,7 @@ export function ConditionalAnalytics() {
   }, []);
 
   // Only render Analytics if component has mounted and user has given consent
-  if (!mounted || !preferences.analytics) {
+  if (!mounted || !preferences.analytics || process.env.NODE_ENV === 'development') {
     return null;
   }
 
@@ -59,7 +59,7 @@ export function ConditionalSpeedInsights() {
   }, []);
 
   // Only render SpeedInsights if component has mounted and user has given consent
-  if (!mounted || !preferences.speedInsights) {
+  if (!mounted || !preferences.speedInsights || process.env.NODE_ENV === 'development') {
     return null;
   }
 

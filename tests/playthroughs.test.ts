@@ -38,6 +38,7 @@ vi.mock('../src/services/searchService', () => ({
 import {
   playthroughActions,
   playthroughsStore,
+  PlaythroughSchema,
   useActivePlaythrough,
   useIsRemixMode,
   useGameMode,
@@ -3097,8 +3098,9 @@ describe('Preferred Variant Handling', () => {
         });
 
         let encounters = playthroughActions.getEncounters();
-        expect(encounters['route-1']!.isFusion).toBe(true);
-        expect(encounters['route-1']!.head).toBeNull();
+        expect(encounters).toBeDefined();
+        expect(encounters!['route-1']!.isFusion).toBe(true);
+        expect(encounters!['route-1']!.head).toBeNull();
 
         await act(async () => {
           // Drag pokemon into head slot of existing fusion encounter
@@ -3112,9 +3114,10 @@ describe('Preferred Variant Handling', () => {
         });
 
         encounters = playthroughActions.getEncounters();
+        expect(encounters).toBeDefined();
         // Should preserve fusion state
-        expect(encounters['route-1']!.isFusion).toBe(true);
-        expect(encounters['route-1']!.head?.id).toBe(25);
+        expect(encounters!['route-1']!.isFusion).toBe(true);
+        expect(encounters!['route-1']!.head?.id).toBe(25);
       });
 
       it('should preserve artwork variant when moving pokemon within same encounter', async () => {
@@ -3148,10 +3151,11 @@ describe('Preferred Variant Handling', () => {
         });
 
         const encounters = playthroughActions.getEncounters();
+        expect(encounters).toBeDefined();
         // Should preserve the variant since it's the same pokemon in same encounter
-        expect(encounters['route-1']!.artworkVariant).toBe('preserved-variant');
-        expect(encounters['route-1']!.head?.id).toBe(25);
-        expect(encounters['route-1']!.body).toBeNull();
+        expect(encounters!['route-1']!.artworkVariant).toBe('preserved-variant');
+        expect(encounters!['route-1']!.head?.id).toBe(25);
+        expect(encounters!['route-1']!.body).toBeNull();
       });
 
       it('should use atomic flip operation to prevent duplicate variant lookups', async () => {
@@ -3195,8 +3199,9 @@ describe('Preferred Variant Handling', () => {
         const encounters = playthroughActions.getEncounters();
 
         // Should have flipped positions
-        expect(encounters['route-1']!.head?.id).toBe(4); // Charmander now in head
-        expect(encounters['route-1']!.body?.id).toBe(25); // Pikachu now in body
+        expect(encounters).toBeDefined();
+        expect(encounters!['route-1']!.head?.id).toBe(4); // Charmander now in head
+        expect(encounters!['route-1']!.body?.id).toBe(25); // Pikachu now in body
 
         // Should only have one call to getPreferredVariant for the new composition
         expect(getVariantCalls).toHaveLength(1);
@@ -3222,9 +3227,10 @@ describe('Preferred Variant Handling', () => {
 
         const encounters = playthroughActions.getEncounters();
 
-        expect(encounters['route-1']!.head).toBeNull();
-        expect(encounters['route-1']!.body?.id).toBe(25);
-        expect(encounters['route-1']!.isFusion).toBe(true);
+        expect(encounters).toBeDefined();
+        expect(encounters!['route-1']!.head).toBeNull();
+        expect(encounters!['route-1']!.body?.id).toBe(25);
+        expect(encounters!['route-1']!.isFusion).toBe(true);
 
         // Should call getPreferredVariant with null head and pikachu body
         expect(mockSpriteService.getPreferredVariant).toHaveBeenCalledWith(
@@ -3232,6 +3238,175 @@ describe('Preferred Variant Handling', () => {
           25
         );
       });
+    });
+  });
+});
+
+describe('Playthrough Migration Tests', () => {
+  describe('remixMode to gameMode migration', () => {
+    it('should migrate remixMode: true to gameMode: remix', () => {
+      const legacyData = {
+        id: 'test-migration-1',
+        name: 'Legacy Remix Run',
+        remixMode: true,
+        gameMode: 'classic', // Default value
+        encounters: {},
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+
+      const result = PlaythroughSchema.parse(legacyData);
+
+      expect(result.gameMode).toBe('remix');
+      expect(result.name).toBe('Legacy Remix Run');
+      expect(result.id).toBe('test-migration-1');
+      // Verify remixMode field is undefined (not removed from object)
+      expect((result as any).remixMode).toBeUndefined();
+    });
+
+    it('should migrate remixMode: false to gameMode: classic', () => {
+      const legacyData = {
+        id: 'test-migration-2',
+        name: 'Legacy Classic Run',
+        remixMode: false,
+        gameMode: 'classic', // Default value
+        encounters: {},
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+
+      const result = PlaythroughSchema.parse(legacyData);
+
+      expect(result.gameMode).toBe('classic');
+      expect(result.name).toBe('Legacy Classic Run');
+      expect(result.id).toBe('test-migration-2');
+      expect((result as any).remixMode).toBeUndefined();
+    });
+
+    it('should not migrate when gameMode is explicitly set to non-default', () => {
+      const modernData = {
+        id: 'test-migration-3',
+        name: 'Modern Randomized Run',
+        remixMode: true, // Should be ignored
+        gameMode: 'randomized' as const,
+        encounters: {},
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+
+      const result = PlaythroughSchema.parse(modernData);
+
+      // Should preserve explicit gameMode and remove remixMode
+      expect(result.gameMode).toBe('randomized');
+      expect('remixMode' in result).toBe(false);
+    });
+
+    it('should preserve all other fields during migration', () => {
+      const legacyDataWithEncounters = {
+        id: 'test-migration-6',
+        name: 'Legacy Run with Data',
+        remixMode: true,
+        gameMode: 'classic',
+        encounters: {
+          'route-1': {
+            head: createMockPokemon('Pikachu', 25),
+            body: null,
+            isFusion: false,
+            updatedAt: Date.now(),
+          },
+        },
+        customLocations: [
+          {
+            id: 'custom-1',
+            name: 'Custom Route',
+            region: 'Kanto',
+            description: 'Test location',
+            order: 999,
+            routeId: null,
+          },
+        ],
+        createdAt: 1234567890,
+        updatedAt: 1234567891,
+      };
+
+      const result = PlaythroughSchema.parse(legacyDataWithEncounters);
+
+      expect(result.gameMode).toBe('remix');
+      expect((result as any).remixMode).toBeUndefined();
+      expect(result.encounters).toBeDefined();
+      expect(result.encounters!['route-1']).toBeDefined();
+      expect(result.encounters!['route-1'].head?.name).toBe('Pikachu');
+      expect(result.customLocations).toBeDefined();
+      expect(result.customLocations![0].name).toBe('Custom Route');
+      expect(result.createdAt).toBe(1234567890);
+      expect(result.updatedAt).toBe(1234567891);
+    });
+  });
+
+  describe('Schema validation edge cases', () => {
+    it('should handle data without remixMode field (modern format)', () => {
+      const modernData = {
+        id: 'test-missing',
+        name: 'Test Run',
+        gameMode: 'randomized' as const,
+        encounters: {},
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+
+      const result = PlaythroughSchema.parse(modernData);
+
+      expect(result.gameMode).toBe('randomized');
+      expect('remixMode' in result).toBe(false);
+    });
+
+    it('should validate gameMode enum values correctly', () => {
+      const validModes: Array<{ mode: string; expected: boolean }> = [
+        { mode: 'classic', expected: true },
+        { mode: 'remix', expected: true },
+        { mode: 'randomized', expected: true },
+        { mode: 'invalid-mode', expected: false },
+        { mode: '', expected: false },
+      ];
+
+      validModes.forEach(({ mode, expected }) => {
+        const testData = {
+          id: `test-${mode}`,
+          name: 'Test Run',
+          gameMode: mode,
+          encounters: {},
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+
+        const result = PlaythroughSchema.safeParse(testData);
+        expect(result.success).toBe(expected);
+      });
+    });
+
+    it('should handle corrupted migration data gracefully', () => {
+      const corruptedData = {
+        id: 'corrupted-run',
+        name: 'Corrupted Run',
+        remixMode: 'invalid-value', // Invalid type
+        gameMode: 'classic',
+        // Missing required timestamps
+      };
+
+      const result = PlaythroughSchema.safeParse(corruptedData);
+
+      // Should fail validation for corrupted data
+      expect(result.success).toBe(false);
+    });
+
+    it('should successfully create new playthroughs with current schema', () => {
+      // Test that new playthroughs work correctly with the current schema
+      const playthroughId = playthroughActions.createPlaythrough('New Run', 'remix');
+      const playthrough = playthroughsStore.playthroughs.find(p => p.id === playthroughId);
+
+      expect(playthrough?.gameMode).toBe('remix');
+      expect(playthrough?.name).toBe('New Run');
+      expect('remixMode' in (playthrough || {})).toBe(false);
     });
   });
 });
