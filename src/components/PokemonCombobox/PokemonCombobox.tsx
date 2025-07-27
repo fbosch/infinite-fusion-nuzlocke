@@ -310,7 +310,7 @@ export const PokemonCombobox = React.memo(
     const dragSnapshot = useSnapshot(dragStore);
     const isRemixMode = useIsRemixMode();
 
-    // Ref to track pending animation frame for drag leave operations
+    // Ref to track pending timeout for drag leave operations
     const dragLeaveAnimationRef = useRef<number | null>(null);
 
     // Ref to maintain focus on input
@@ -545,6 +545,8 @@ export const PokemonCombobox = React.memo(
     const handleDrop = useCallback(
       (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
+        e.stopPropagation(); // Prevent event bubbling to parent elements
+
         const pokemonName = e.dataTransfer.getData('text/plain');
         if (pokemonName) {
           // Clear the preview
@@ -669,7 +671,14 @@ export const PokemonCombobox = React.memo(
     const handleDragOver = useCallback(
       (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
+        e.stopPropagation(); // Prevent event bubbling
         e.dataTransfer.dropEffect = 'copy';
+
+        // Cancel any pending drag leave timeout since we're now hovering over this component
+        if (dragLeaveAnimationRef.current !== null) {
+          clearTimeout(dragLeaveAnimationRef.current);
+          dragLeaveAnimationRef.current = null;
+        }
 
         if (
           dragSnapshot.currentDragValue &&
@@ -721,37 +730,28 @@ export const PokemonCombobox = React.memo(
 
     const handleDragLeave = useCallback(
       (e: React.DragEvent<HTMLDivElement>) => {
-        // Use relatedTarget to check if we're moving to a child element
-        // This is much more performant than getBoundingClientRect()
-        const target = e.currentTarget;
-        const relatedTarget = e.relatedTarget as Node | null;
+        e.stopPropagation(); // Prevent event bubbling
 
-        // Only clear preview when actually leaving the component
-        // If relatedTarget is null or not contained within our component, we're leaving
-        const isLeavingComponent =
-          !relatedTarget || !target.contains(relatedTarget);
-
-        if (isLeavingComponent) {
-          // Cancel any pending animation frame
-          if (dragLeaveAnimationRef.current !== null) {
-            cancelAnimationFrame(dragLeaveAnimationRef.current);
-          }
-
-          // Schedule preview clearing for next animation frame for smoother performance
-          dragLeaveAnimationRef.current = requestAnimationFrame(() => {
-            setDragPreview(null);
-            dragLeaveAnimationRef.current = null;
-          });
+        // Cancel any pending timeout
+        if (dragLeaveAnimationRef.current !== null) {
+          clearTimeout(dragLeaveAnimationRef.current);
         }
+
+        // Use a timeout-based approach that works reliably across all browsers
+        // This gives time for dragEnter to fire on the new target before clearing
+        dragLeaveAnimationRef.current = window.setTimeout(() => {
+          setDragPreview(null);
+          dragLeaveAnimationRef.current = null;
+        }, 50); // Short delay to allow for dragEnter on new targets
       },
       []
     );
 
-    // Clean up animation frame on unmount
+    // Clean up timeout on unmount
     useEffect(() => {
       return () => {
         if (dragLeaveAnimationRef.current !== null) {
-          cancelAnimationFrame(dragLeaveAnimationRef.current);
+          clearTimeout(dragLeaveAnimationRef.current);
         }
       };
     }, []);
@@ -767,6 +767,8 @@ export const PokemonCombobox = React.memo(
     const handleDragEnd = useCallback(() => {
       // Clear global drag data when drag ends
       dragActions.clearDrag();
+      // Also clear any lingering drag preview
+      setDragPreview(null);
     }, []);
 
     return (
