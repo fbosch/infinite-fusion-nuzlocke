@@ -116,7 +116,7 @@ const PokemonOption = ({
           />
           <span
             className={clsx('block truncate flex-1', {
-              'font-medium': selected,
+              'font-semibold': selected,
               'font-normal': !selected,
             })}
           >
@@ -236,7 +236,7 @@ const PokemonOptions = ({
               />
               <span
                 className={clsx('block truncate flex-1', {
-                  'font-medium': selected,
+                  'font-semibold': selected,
                   'font-normal': !selected,
                 })}
               >

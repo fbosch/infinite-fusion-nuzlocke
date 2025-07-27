@@ -78,7 +78,7 @@ const RemixToggle = React.memo(function RemixToggle() {
           onClick={() => handleToggle('classic')}
           disabled={!activePlaythrough}
           className={clsx(
-            'relative z-10 w-16 py-1.5 text-sm font-medium text-center',
+            'relative z-10 w-16 py-1.5 text-sm font-semibold text-center',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
             !optimisticMode
               ? 'text-gray-900 dark:text-gray-100'
@@ -107,7 +107,7 @@ const RemixToggle = React.memo(function RemixToggle() {
             onClick={() => handleToggle('remix')}
             disabled={!activePlaythrough}
             className={clsx(
-              'relative z-10 w-16 py-1.5 text-sm font-medium text-center',
+              'relative z-10 w-16 py-1.5 text-sm font-semibold text-center',
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
               optimisticMode
                 ? 'text-purple-700 dark:text-purple-300'

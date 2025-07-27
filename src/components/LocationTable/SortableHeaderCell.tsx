@@ -23,7 +23,7 @@ export default function SortableHeaderCell({
     <th
       key={header.id}
       className={clsx(
-        'sticky top-0 z-20 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset',
+        'sticky top-0 z-20 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset',
         sortingEnabled &&
           'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
       )}

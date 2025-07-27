@@ -106,7 +106,7 @@ export default function PlaythroughSelector({
       <Menu as='div' className={clsx('relative', className)}>
         <MenuButton
           className={clsx(
-            'flex items-center justify-between gap-2 px-3 py-2.5 text-sm font-medium',
+            'flex items-center justify-between gap-2 px-3 py-2.5 text-sm font-semibold',
             'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600',
             'border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500',
             'rounded-md transition-colors cursor-pointer',
@@ -175,11 +175,11 @@ export default function PlaythroughSelector({
                                 : 'bg-gray-400'
                             )}
                           />
-                          <span className='truncate font-medium'>
+                          <span className='truncate font-semibold'>
                             {playthrough.name}
                           </span>
                           {playthrough.remixMode && (
-                            <span className='text-xs bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded flex-shrink-0 font-medium'>
+                            <span className='text-xs bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded flex-shrink-0 font-semibold'>
                               Remix
                             </span>
                           )}
@@ -255,7 +255,7 @@ export default function PlaythroughSelector({
                   onClick={handleCreatePlaythrough}
                   disabled={Boolean(!newPlaythroughName.trim())}
                   className={clsx(
-                    'px-2 py-2 text-xs font-medium text-white rounded cursor-pointer',
+                    'px-2 py-2 text-xs font-semibold text-white rounded cursor-pointer',
                     'bg-blue-600 hover:bg-blue-700 transition-colors',
                     'focus:outline-none focus:ring-1 focus:ring-blue-500',
                     'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600'
@@ -280,7 +280,7 @@ export default function PlaythroughSelector({
                 )}
               >
                 <Plus className='w-4 h-4' />
-                <span className='font-medium'>Create New Playthrough</span>
+                <span className='font-semibold'>Create New Playthrough</span>
               </button>
             </MenuItem>
           )}

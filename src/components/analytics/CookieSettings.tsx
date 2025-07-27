@@ -78,7 +78,7 @@ export function CookieSettings({ isOpen, onClose }: CookieSettingsProps) {
 
             <div className='space-y-6 mb-6'>
               <div>
-                <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-4'>
+                <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-4'>
                   Manage your cookie preferences
                 </h3>
                 <Dialog.Description className='text-sm text-gray-600 dark:text-gray-300 mb-6'>
@@ -91,10 +91,10 @@ export function CookieSettings({ isOpen, onClose }: CookieSettingsProps) {
               <div className='space-y-4'>
                 <div className='border border-gray-200 dark:border-gray-600 rounded-lg p-4'>
                   <div className='flex items-center justify-between mb-2'>
-                    <h4 className='font-medium text-gray-900 dark:text-white'>
+                    <h4 className='font-semibold text-gray-900 dark:text-white'>
                       Essential Cookies
                     </h4>
-                    <div className='text-sm text-gray-500 dark:text-gray-400 font-medium'>
+                    <div className='text-sm text-gray-500 dark:text-gray-400 font-semibold'>
                       Always Active
                     </div>
                   </div>
@@ -107,7 +107,7 @@ export function CookieSettings({ isOpen, onClose }: CookieSettingsProps) {
 
                 <div className='border border-gray-200 dark:border-gray-600 rounded-lg p-4'>
                   <div className='flex items-center justify-between mb-2'>
-                    <h4 className='font-medium text-gray-900 dark:text-white'>
+                    <h4 className='font-semibold text-gray-900 dark:text-white'>
                       Analytics Cookies
                     </h4>
                     <label className='relative inline-flex items-center cursor-pointer'>
@@ -135,7 +135,7 @@ export function CookieSettings({ isOpen, onClose }: CookieSettingsProps) {
 
                 <div className='border border-gray-200 dark:border-gray-600 rounded-lg p-4'>
                   <div className='flex items-center justify-between mb-2'>
-                    <h4 className='font-medium text-gray-900 dark:text-white'>
+                    <h4 className='font-semibold text-gray-900 dark:text-white'>
                       Performance Cookies
                     </h4>
                     <label className='relative inline-flex items-center cursor-pointer'>
@@ -169,13 +169,13 @@ export function CookieSettings({ isOpen, onClose }: CookieSettingsProps) {
             <div className='flex space-x-3'>
               <button
                 onClick={() => savePreferences(localPreferences)}
-                className='flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors cursor-pointer'
+                className='flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-md transition-colors cursor-pointer'
               >
                 Save Preferences
               </button>
               <button
                 onClick={() => savePreferences(DEFAULT_PREFERENCES)}
-                className='flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium py-3 px-4 rounded-md transition-colors cursor-pointer'
+                className='flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold py-3 px-4 rounded-md transition-colors cursor-pointer'
               >
                 Reject All
               </button>

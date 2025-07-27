@@ -10,23 +10,23 @@ export default function LocationTableSkeleton() {
           <thead className='bg-gray-50 dark:bg-gray-800'>
             <tr>
               <th
-                className='px-4 py- text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
+                className='px-4 py- text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider'
                 style={{ width: '125px', minWidth: '125px' }}
               >
                 Location
               </th>
               <th
-                className='px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
+                className='px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider'
                 style={{ width: '220px', minWidth: '220px' }}
               ></th>
               <th
-                className='px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
+                className='px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider'
                 style={{ width: '900px', minWidth: '900px' }}
               >
                 Encounter
               </th>
               <th
-                className='px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
+                className='px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider'
                 style={{ width: '60px', minWidth: '60px' }}
               ></th>
             </tr>

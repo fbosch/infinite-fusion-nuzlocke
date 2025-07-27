@@ -107,7 +107,7 @@ export default function LocationCell({
   }, [locationPokemon, location]);
 
   return (
-    <div className='font-medium text-gray-900 dark:text-white flex gap-x-2 items-center'>
+    <div className='font-semibold text-gray-900 dark:text-white flex gap-x-2 items-center'>
       <CursorTooltip
         content={getTooltipContent}
         onMouseEnter={() => setIsTooltipHovered(true)}

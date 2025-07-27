@@ -71,7 +71,7 @@ export default function Footer() {
                 href='https://discord.gg/infinitefusion'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm font-medium'
+                className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm font-semibold'
               >
                 Join Discord Community
               </a>
@@ -79,7 +79,7 @@ export default function Footer() {
                 href='https://infinitefusion.fandom.com/wiki/Pok%C3%A9mon_Infinite_Fusion_Wiki'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm font-medium'
+                className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm font-semibold'
               >
                 Wiki
               </a>
@@ -87,7 +87,7 @@ export default function Footer() {
                 href='https://infinitefusiondex.com/'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm font-medium'
+                className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm font-semibold'
               >
                 Infinitefusiondex
               </a>
