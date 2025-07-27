@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { playthroughActions, playthroughsStore } from './playthroughs';
+import {
+  playthroughActions,
+  playthroughsStore,
+} from '../../src/stores/playthroughs';
 
 // Mock IndexedDB
 const mockIndexedDB = {

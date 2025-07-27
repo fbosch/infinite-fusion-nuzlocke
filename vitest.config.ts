@@ -27,7 +27,7 @@ export default defineConfig({
         plugins: [tsconfigPaths()],
         test: {
           name: 'react-hooks',
-          include: ['**/playthroughs.test.ts'],
+          include: ['**/playthroughs.test.ts', '**/playthroughs/**/*.test.ts'],
           environment: 'jsdom',
         },
       },
@@ -39,6 +39,7 @@ export default defineConfig({
           exclude: [
             '**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
             '**/playthroughs.test.ts',
+            '**/playthroughs/**/*.test.ts',
             'node_modules',
             'dist',
             '.next',
