@@ -18,6 +18,7 @@ import LocationCell from './LocationCell';
 import { useIsLoading, useCustomLocations } from '@/stores/playthroughs';
 import { PlusIcon } from 'lucide-react';
 import clsx from 'clsx';
+import { CursorTooltip } from '../CursorTooltip';
 
 const columnHelper = createColumnHelper<CombinedLocation>();
 
@@ -48,32 +49,33 @@ export default function LocationTable() {
         header: ({ column }) => (
           <div className='flex items-center w-full'>
             <span>Location</span>
-            <button
-              onKeyDown={e => {
-                if (e.key === 'Enter' || e.key === ' ') {
+            <CursorTooltip content={'Add a custom location'}>
+              <button
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.stopPropagation();
+                    setIsCustomLocationModalOpen(true);
+                  }
+                }}
+                onClick={e => {
                   e.stopPropagation();
                   setIsCustomLocationModalOpen(true);
-                }
-              }}
-              onClick={e => {
-                e.stopPropagation();
-                setIsCustomLocationModalOpen(true);
-              }}
-              className={clsx(
-                'ml-2 p-0.5 rounded-sm transition-colors duration-200',
-                'bg-gray-100 text-gray-600',
-                'border border-gray-200',
-                'dark:bg-gray-700 dark:text-gray-400',
-                'dark:border-gray-600',
-                'hover:text-white hover:border-blue-500 hover:bg-blue-600',
-                'cursor-pointer',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1'
-              )}
-              aria-label='Add custom location'
-              title='Add custom location'
-            >
-              <PlusIcon className='size-2.5' />
-            </button>
+                }}
+                className={clsx(
+                  'ml-2 p-0.5 rounded-sm transition-colors duration-200',
+                  'bg-gray-100 text-gray-600',
+                  'border border-gray-200',
+                  'dark:bg-gray-700 dark:text-gray-400',
+                  'dark:border-gray-600',
+                  'hover:text-white hover:border-blue-500 hover:bg-blue-600',
+                  'cursor-pointer',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1'
+                )}
+                aria-label='Add custom location'
+              >
+                <PlusIcon className='size-2.5' />
+              </button>
+            </CursorTooltip>
           </div>
         ),
         cell: info => (

@@ -114,7 +114,7 @@ export function CursorTooltip({
               <motion.div
                 className={twMerge(
                   clsx(
-                    'rounded-md px-3 py-2 text-sm font-medium shadow-lg w-max max-w-sm',
+                    'rounded-md px-3 py-2 text-sm font-normalt shadow-lg w-max max-w-sm',
                     'pointer-events-none transform-gpu',
                     'bg-gray-700/50 background-blur text-white',
                     'border border-gray-600',
