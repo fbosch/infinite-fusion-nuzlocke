@@ -30,7 +30,7 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
       value={pokemon}
       className={({ active }) =>
         clsx(
-          'relative cursor-pointer select-none py-2 px-4 content-visibility-auto',
+          'relative cursor-pointer select-none py-2 px-4 my-1 content-visibility-auto',
           'rounded-md w-full flex items-center',
           'h-14',
           {

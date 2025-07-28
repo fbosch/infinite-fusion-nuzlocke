@@ -343,7 +343,7 @@ export const PokemonCombobox = React.memo(
                     style={floatingStyles}
                     className={clsx(
                       'z-50 overflow-y-auto px-1 py-1 text-base shadow-lg focus:outline-none sm:text-sm',
-                      'bg-white dark:bg-gray-800',
+                      'bg-white dark:bg-gray-800 gap-x-2',
                       'border border-gray-300 dark:border-gray-600 scrollbar-thin',
                       {
                         'rounded-b-md rounded-t-none border-t-0':

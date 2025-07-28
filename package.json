@@ -27,6 +27,7 @@
     "@floating-ui/react": "^0.27.13",
     "@headlessui/react": "^2.2.4",
     "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.13.12",
     "@types/cli-progress": "^3.11.6",
     "@types/react-window": "^1.8.8",
     "@vercel/analytics": "^1.5.0",
