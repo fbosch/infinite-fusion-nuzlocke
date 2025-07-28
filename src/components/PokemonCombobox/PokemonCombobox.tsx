@@ -6,7 +6,6 @@ import React, {
   useDeferredValue,
   startTransition,
   useCallback,
-  useEffect,
   useRef,
 } from 'react';
 import { Combobox, ComboboxInput, ComboboxOptions } from '@headlessui/react';
@@ -112,12 +111,11 @@ export const PokemonCombobox = React.memo(
     });
 
     // Use the encounter data hook
-    const { routeEncounterData, isRoutePokemon, loadRouteEncounterData } =
-      useEncounterData({
-        routeId,
-        locationId,
-        enabled: shouldLoad,
-      });
+    const { routeEncounterData, isRoutePokemon } = useEncounterData({
+      routeId,
+      locationId,
+      enabled: shouldLoad,
+    });
 
     // Use the search hook
     const { results } = usePokemonSearch({
@@ -142,12 +140,6 @@ export const PokemonCombobox = React.memo(
       ],
       whileElementsMounted: autoUpdate,
     });
-
-    // Load route data when combobox opens or when user starts typing
-    const handleInteraction = useCallback(() => {
-      loadRouteEncounterData();
-      // Floating UI will auto-update via whileElementsMounted: autoUpdate
-    }, [loadRouteEncounterData]);
 
     // Combine route matches with smart search results
     const finalOptions = useMemo(() => {
@@ -237,14 +229,6 @@ export const PokemonCombobox = React.memo(
       [onChange, value, onBeforeClear]
     );
 
-    // Ensure floating UI reference is properly set
-    useEffect(() => {
-      if (inputRef.current) {
-        refs.setReference(inputRef.current);
-        update();
-      }
-    }, [refs, update]);
-
     return (
       <div
         id={value?.uid}
@@ -267,10 +251,19 @@ export const PokemonCombobox = React.memo(
             <div>
               <div className='relative'>
                 <ComboboxInput
+                  key={comboboxId}
                   ref={comboRef => {
-                    inputRef.current = comboRef;
-                    if (ref && 'current' in ref && comboRef) {
-                      ref.current = comboRef;
+                    if (comboRef) {
+                      inputRef.current = comboRef;
+                      refs.setReference(comboRef);
+                      update();
+                      if (
+                        ref &&
+                        'current' in ref &&
+                        typeof ref.current === 'function'
+                      ) {
+                        ref.current = comboRef;
+                      }
                     }
                   }}
                   className={clsx(
@@ -299,9 +292,6 @@ export const PokemonCombobox = React.memo(
                   spellCheck={false}
                   autoComplete='off'
                   onChange={handleInputChange}
-                  onFocus={handleInteraction}
-                  onClick={handleInteraction}
-                  onMouseEnter={handleInteraction}
                 />
                 {(value || dragPreview) && (
                   <div className='absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md'>
