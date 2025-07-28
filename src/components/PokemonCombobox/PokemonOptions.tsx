@@ -15,6 +15,7 @@ interface PokemonOptionsProps {
   isRoutePokemon: (pokemonId: number) => boolean;
   comboboxId: string;
   gameMode: 'classic' | 'remix' | 'randomized';
+  useComboboxWrapper?: boolean;
 }
 
 interface PokemonOptionProps {
@@ -24,6 +25,89 @@ interface PokemonOptionProps {
   comboboxId: string;
   gameMode: 'classic' | 'remix' | 'randomized';
   style?: React.CSSProperties;
+  disabled?: boolean;
+  useComboboxWrapper?: boolean;
+  className?: string;
+  onClick?: (pokemon: PokemonOptionType) => void;
+}
+
+interface PokemonOptionContentProps {
+  pokemon: PokemonOptionType;
+  index: number;
+  isRoutePokemon: (pokemonId: number) => boolean;
+  comboboxId: string;
+  gameMode: 'classic' | 'remix' | 'randomized';
+  isActive?: boolean;
+  isSelected?: boolean;
+}
+
+// Extracted content component that can be reused
+function PokemonOptionContent({
+  pokemon,
+  index,
+  isRoutePokemon,
+  comboboxId,
+  gameMode,
+  isActive = false,
+  isSelected = false,
+}: PokemonOptionContentProps) {
+  return (
+    <div className={'gap-8 group w-full flex items-center'}>
+      <Image
+        src={getPokemonSpriteUrlFromOption(pokemon)}
+        alt={pokemon.name}
+        width={40}
+        height={40}
+        className='object-contain object-center scale-140 image-render-high-quality cursor-grab active:cursor-grabbing'
+        loading={index < 5 || isRoutePokemon(pokemon.id) ? 'eager' : 'lazy'}
+        draggable
+        unoptimized
+        decoding='async'
+        priority={index < 5 || isRoutePokemon(pokemon.id) ? true : false}
+        onDragStart={e => {
+          e.dataTransfer.setData('text/plain', pokemon.name);
+          e.dataTransfer.effectAllowed = 'copy';
+          dragActions.startDrag(pokemon.name, comboboxId || '', pokemon);
+        }}
+      />
+      <span
+        className={clsx(
+          'block truncate flex-1',
+          'group-data-selected:font-semibold',
+          'not:group-data-selected:font-normal',
+          isSelected && 'font-semibold'
+        )}
+      >
+        {pokemon.name}
+      </span>
+      <div className='flex items-center gap-3'>
+        {gameMode !== 'randomized' && isRoutePokemon(pokemon.id) && (
+          <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
+            Route
+          </span>
+        )}
+        <span
+          className={clsx(
+            'text-xs dark:text-gray-400',
+            isActive &&
+              'group-hover:text-white group-data-selected:group-hover:text-white'
+          )}
+        >
+          {pokemon.id.toString().padStart(3, '0')}
+        </span>
+        <div className='w-5 h-5 flex items-center justify-center'>
+          <Check
+            className={clsx(
+              'size-5 text-blue-400 dark:text-white',
+              isActive && 'group-hover:text-white',
+              isSelected ? 'visible' : 'invisible group-data-selected:visible'
+            )}
+            aria-hidden='true'
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function PokemonOption({
@@ -33,82 +117,75 @@ export function PokemonOption({
   comboboxId,
   gameMode,
   style,
+  disabled,
+  useComboboxWrapper = true,
+  className,
+  onClick,
 }: PokemonOptionProps) {
-  return (
-    <ComboboxOption
-      key={`${pokemon.id}-${pokemon.name}-${index}`}
-      value={pokemon}
-      className={({ active }) =>
-        clsx(
-          'relative cursor-pointer select-none py-2 px-4 my-1 content-visibility-auto',
-          'rounded-md w-full flex items-center',
-          'h-14',
-          {
-            'bg-blue-600 text-white ': active,
-            'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700':
-              !active,
-          }
-        )
-      }
-      style={style}
-    >
-      {({ selected }) => (
-        <div className={'gap-8 group w-full flex items-center'}>
-          <Image
-            src={getPokemonSpriteUrlFromOption(pokemon)}
-            alt={pokemon.name}
-            width={40}
-            height={40}
-            className='object-contain object-center scale-140 image-render-high-quality cursor-grab active:cursor-grabbing'
-            loading={index < 5 || isRoutePokemon(pokemon.id) ? 'eager' : 'lazy'}
-            draggable
-            unoptimized
-            decoding='async'
-            priority={index < 5 || isRoutePokemon(pokemon.id) ? true : false}
-            onDragStart={e => {
-              e.dataTransfer.setData('text/plain', pokemon.name);
-              e.dataTransfer.effectAllowed = 'copy';
-              dragActions.startDrag(pokemon.name, comboboxId || '', pokemon);
-            }}
+  const baseClassName = clsx(
+    'relative cursor-pointer select-none py-2 px-4 my-1 content-visibility-auto',
+    'rounded-md w-full flex items-center',
+    'h-14 group',
+    className
+  );
+
+  if (useComboboxWrapper) {
+    return (
+      <ComboboxOption
+        key={`${pokemon.id}-${pokemon.name}-${index}`}
+        value={pokemon}
+        className={({ active }) =>
+          clsx(
+            baseClassName,
+            {
+              // Disable active state when user is scrolling to prevent auto-scroll
+              'bg-blue-600 text-white ': active,
+              'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700':
+                !active,
+            },
+            className
+          )
+        }
+        style={style}
+        disabled={disabled}
+      >
+        {({ active, selected }) => (
+          <PokemonOptionContent
+            pokemon={pokemon}
+            index={index}
+            isRoutePokemon={isRoutePokemon}
+            comboboxId={comboboxId}
+            gameMode={gameMode}
+            isActive={active}
+            isSelected={selected}
           />
-          <span
-            className={clsx('block truncate flex-1', {
-              'font-semibold': selected,
-              'font-normal': !selected,
-            })}
-          >
-            {pokemon.name}
-          </span>
-          <div className='flex items-center gap-3'>
-            {gameMode !== 'randomized' && isRoutePokemon(pokemon.id) && (
-              <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
-                Route
-              </span>
-            )}
-            <span
-              className={clsx(
-                'text-xs dark:text-gray-400 group-hover:text-white',
-                {
-                  'group-hover:text-white ': selected,
-                }
-              )}
-            >
-              {pokemon.id.toString().padStart(3, '0')}
-            </span>
-            <div className='w-5 h-5 flex items-center justify-center'>
-              {selected && (
-                <Check
-                  className={clsx(
-                    'size-5 group-hover:text-white text-blue-400 dark:text-white'
-                  )}
-                  aria-hidden='true'
-                />
-              )}
-            </div>
-          </div>
-        </div>
+        )}
+      </ComboboxOption>
+    );
+  }
+
+  // Render without ComboboxOption wrapper
+  return (
+    <div
+      className={clsx(
+        baseClassName,
+        'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700',
+        className
       )}
-    </ComboboxOption>
+      style={style}
+      onClick={() => onClick?.(pokemon)}
+      aria-role='option'
+      tabIndex={disabled ? -1 : 0}
+      aria-disabled={disabled}
+    >
+      <PokemonOptionContent
+        pokemon={pokemon}
+        index={index}
+        isRoutePokemon={isRoutePokemon}
+        comboboxId={comboboxId}
+        gameMode={gameMode}
+      />
+    </div>
   );
 }
 
@@ -118,6 +195,7 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
   isRoutePokemon,
   comboboxId,
   gameMode,
+  useComboboxWrapper = true,
 }) => {
   if (finalOptions.length === 0) {
     return (
@@ -150,6 +228,7 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
       isRoutePokemon={isRoutePokemon}
       comboboxId={comboboxId}
       gameMode={gameMode}
+      useComboboxWrapper={useComboboxWrapper}
     />
   ));
 };
