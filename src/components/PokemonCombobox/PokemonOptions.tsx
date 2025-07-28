@@ -30,7 +30,7 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
       value={pokemon}
       className={({ active }) =>
         clsx(
-          'relative cursor-pointer select-none py-2 px-4',
+          'relative cursor-pointer select-none py-2 px-4 content-visibility-auto',
           'rounded-md w-full flex items-center',
           'h-14',
           {
@@ -40,7 +40,6 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
           }
         )
       }
-      style={{ height: '56px' }}
     >
       {({ selected }) => (
         <div className={'gap-8 group w-full flex items-center'}>
