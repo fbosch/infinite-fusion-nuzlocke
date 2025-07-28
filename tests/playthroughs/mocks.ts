@@ -30,4 +30,4 @@ vi.mock('../../src/services/searchService', () => ({
   default: {
     search: vi.fn().mockResolvedValue([]),
   },
-})); 
+}));

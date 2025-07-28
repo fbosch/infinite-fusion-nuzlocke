@@ -21,12 +21,9 @@ import clsx from 'clsx';
 import Image from 'next/image';
 import {
   getInfiniteFusionToNationalDexMap,
-  getPokemon,
-  searchPokemon,
   PokemonStatus,
   type PokemonOption,
 } from '@/loaders/pokemon';
-import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
 import { dragActions } from '@/stores/dragStore';
 import { useGameMode } from '@/stores/playthroughs';
 import { PokemonEvolutionButton } from './PokemonEvolutionButton';
@@ -34,6 +31,8 @@ import { PokemonNicknameInput } from './PokemonNicknameInput';
 import { PokemonStatusInput } from './PokemonStatusInput';
 import { PokemonOptions } from './PokemonOptions';
 import { useComboboxDragAndDrop } from './useComboboxDragAndDrop';
+import { useEncounterData } from './useEncounterData';
+import { usePokemonSearch } from './usePokemonSearch';
 
 let nationalDexMapping: Map<number, number> | null = null;
 let mappingPromise: Promise<void> | null = null;
@@ -112,6 +111,20 @@ export const PokemonCombobox = React.memo(
       onChange,
     });
 
+    // Use the encounter data hook
+    const { routeEncounterData, isRoutePokemon, loadRouteEncounterData } =
+      useEncounterData({
+        routeId,
+        locationId,
+        enabled: shouldLoad,
+      });
+
+    // Use the search hook
+    const { results } = usePokemonSearch({
+      query: deferredQuery,
+      isRoutePokemon,
+    });
+
     // Floating UI setup
     const { refs, floatingStyles, update, placement } = useFloating({
       placement: 'bottom-start',
@@ -130,148 +143,11 @@ export const PokemonCombobox = React.memo(
       whileElementsMounted: autoUpdate,
     });
 
-    // State for route encounters and all Pokemon
-    const [routeEncounterData, setRouteEncounterData] = useState<
-      PokemonOption[]
-    >([]);
-
-    // Create a stable Set of route Pokemon IDs for better performance
-    const routePokemonIds = useMemo(() => {
-      if (routeId === 0) return new Set<number>();
-      return new Set(routeEncounterData.map(pokemon => pokemon.id));
-    }, [routeEncounterData, routeId]);
-
-    // Predicate function to check if a Pokemon is in the current route
-    const isRoutePokemon = useCallback(
-      (pokemonId: number): boolean => routePokemonIds.has(pokemonId),
-      [routePokemonIds]
-    );
-
-    // Async function to load route encounter data
-    const loadRouteEncounterData = useCallback(async () => {
-      try {
-        // Load Pokemon data, name map, and encounter data in parallel
-        const [allPokemon, nameMap] = await Promise.all([
-          getPokemon(),
-          getPokemonNameMap(),
-        ]);
-
-        if (gameMode === 'randomized') {
-          // For randomized mode, show ALL available Pokemon
-          const allPokemonOptions: PokemonOption[] = allPokemon.map(
-            pokemon => ({
-              id: pokemon.id,
-              name: nameMap.get(pokemon.id) || pokemon.name,
-              nationalDexId: pokemon.nationalDexId,
-              originalLocation: locationId,
-            })
-          );
-
-          setRouteEncounterData(allPokemonOptions);
-        } else {
-          // For classic/remix modes, load route-specific encounters
-          const encounter = await getEncountersByRouteId(routeId, gameMode);
-
-          if (encounter) {
-            const pokemonOptions: PokemonOption[] = encounter.pokemonIds.map(
-              id => {
-                const pokemon = allPokemon.find(p => p.id === id);
-                return {
-                  id,
-                  name: nameMap.get(id) || `Unknown Pokemon (${id})`,
-                  nationalDexId: pokemon?.nationalDexId || 0,
-                  originalLocation: locationId,
-                };
-              }
-            );
-
-            setRouteEncounterData(pokemonOptions);
-          }
-        }
-      } catch (err) {
-        console.error(
-          `Error loading encounter data for route ${routeId}:`,
-          err
-        );
-      }
-    }, [routeId, gameMode, locationId]);
-
     // Load route data when combobox opens or when user starts typing
     const handleInteraction = useCallback(() => {
       loadRouteEncounterData();
       // Floating UI will auto-update via whileElementsMounted: autoUpdate
     }, [loadRouteEncounterData]);
-
-    // Smart search function that handles both name and ID searches
-    const performSmartSearch = useCallback(
-      async (
-        searchQuery: string,
-        pokemonList: PokemonOption[]
-      ): Promise<PokemonOption[]> => {
-        try {
-          // Use the smart search function that handles both numeric and text searches
-          const allResults = await searchPokemon(searchQuery);
-
-          // Filter results to only include Pokemon from the provided list
-          return allResults.filter(item =>
-            pokemonList.some(pokemon => pokemon.id === item.id)
-          );
-        } catch (err) {
-          console.error('Error performing smart search:', err);
-          // Fallback to simple search if smart search is not available
-          return pokemonList.filter(pokemon =>
-            pokemon.name.toLowerCase().includes(searchQuery.toLowerCase())
-          );
-        }
-      },
-      []
-    );
-
-    const [fuzzyResults, setFuzzyResults] = useState<PokemonOption[]>([]);
-
-    // Perform smart search when query changes
-    useEffect(() => {
-      if (deferredQuery === '') {
-        setFuzzyResults([]);
-        return;
-      }
-
-      // Debounce search for better performance
-      const timeoutId = setTimeout(async () => {
-        try {
-          const allPokemon = await getPokemon();
-
-          // In randomized mode, all Pokemon are available, so we don't filter
-          // In classic/remix modes, filter out route Pokemon to avoid duplicates
-          const searchPokemon =
-            gameMode === 'randomized'
-              ? allPokemon
-              : allPokemon.filter(p => !routePokemonIds.has(p.id));
-
-          const results = await performSmartSearch(
-            deferredQuery,
-            searchPokemon
-          );
-          startTransition(() => {
-            setFuzzyResults(results);
-          });
-        } catch (err) {
-          console.error('Search error:', err);
-          setFuzzyResults([]);
-        }
-      }, 100); // 100ms debounce
-
-      return () => clearTimeout(timeoutId);
-    }, [deferredQuery, routePokemonIds, performSmartSearch, gameMode]);
-
-    // Reload encounter data when playthrough data changes
-    useEffect(() => {
-      if (routeId !== undefined && routeId !== 0 && shouldLoad) {
-        loadRouteEncounterData();
-      }
-    }, [gameMode, loadRouteEncounterData, routeId, shouldLoad]);
-
-    // Clear query when value changes to ensure component reflects the new selection
 
     // Combine route matches with smart search results
     const finalOptions = useMemo(() => {
@@ -299,7 +175,7 @@ export const PokemonCombobox = React.memo(
       }
 
       // Combine results: route matches first, then smart search results
-      const allResults = [...routeMatches, ...fuzzyResults];
+      const allResults = [...routeMatches, ...results];
 
       // Sort: in randomized mode, all Pokemon are equally available
       // In classic/remix modes, prioritize route Pokemon
@@ -320,13 +196,7 @@ export const PokemonCombobox = React.memo(
           (pokemon, index, self) =>
             index === self.findIndex(t => t.id === pokemon.id)
         );
-    }, [
-      routeEncounterData,
-      fuzzyResults,
-      deferredQuery,
-      isRoutePokemon,
-      gameMode,
-    ]);
+    }, [routeEncounterData, results, deferredQuery, isRoutePokemon, gameMode]);
 
     const handleChange = useCallback(
       (newValue: PokemonOption | null | undefined) => {

@@ -34,7 +34,7 @@ export const createMockPokemon = (name: string, id: number): PokemonOption => ({
 export const setupCleanSlate = () => {
   // Clear all mocks
   vi.clearAllMocks();
-  
+
   // Reset store state completely
   playthroughsStore.playthroughs = [];
   playthroughsStore.activePlaythroughId = undefined;
@@ -45,11 +45,11 @@ export const setupCleanSlate = () => {
 // Common test setup function that creates a playthrough
 export const setupPlaythroughTest = () => {
   setupCleanSlate();
-  
+
   // Create a test playthrough
   const playthroughId = playthroughActions.createPlaythrough('Test Run');
   playthroughActions.setActivePlaythrough(playthroughId);
-  
+
   return playthroughId;
 };
 
