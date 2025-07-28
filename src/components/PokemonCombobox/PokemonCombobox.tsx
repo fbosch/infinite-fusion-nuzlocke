@@ -243,7 +243,9 @@ export const PokemonCombobox = React.memo(
       getScrollElement: () => optionsRef.current,
       estimateSize: () => 56,
       enabled: shouldVirtualize,
-      overscan: 20,
+      overscan: 30,
+      scrollPaddingEnd: 32,
+      scrollPaddingStart: 32,
     });
 
     return (

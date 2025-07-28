@@ -15,7 +15,6 @@ interface PokemonOptionsProps {
   isRoutePokemon: (pokemonId: number) => boolean;
   comboboxId: string;
   gameMode: 'classic' | 'remix' | 'randomized';
-  useComboboxWrapper?: boolean;
 }
 
 interface PokemonOptionProps {
@@ -26,9 +25,7 @@ interface PokemonOptionProps {
   gameMode: 'classic' | 'remix' | 'randomized';
   style?: React.CSSProperties;
   disabled?: boolean;
-  useComboboxWrapper?: boolean;
   className?: string;
-  onClick?: (pokemon: PokemonOptionType) => void;
 }
 
 interface PokemonOptionContentProps {
@@ -118,9 +115,7 @@ export function PokemonOption({
   gameMode,
   style,
   disabled,
-  useComboboxWrapper = true,
   className,
-  onClick,
 }: PokemonOptionProps) {
   const baseClassName = clsx(
     'relative cursor-pointer select-none py-2 px-4 my-1 content-visibility-auto',
@@ -129,63 +124,37 @@ export function PokemonOption({
     className
   );
 
-  if (useComboboxWrapper) {
-    return (
-      <ComboboxOption
-        key={`${pokemon.id}-${pokemon.name}-${index}`}
-        value={pokemon}
-        className={({ active }) =>
-          clsx(
-            baseClassName,
-            {
-              // Disable active state when user is scrolling to prevent auto-scroll
-              'bg-blue-600 text-white ': active,
-              'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700':
-                !active,
-            },
-            className
-          )
-        }
-        style={style}
-        disabled={disabled}
-      >
-        {({ active, selected }) => (
-          <PokemonOptionContent
-            pokemon={pokemon}
-            index={index}
-            isRoutePokemon={isRoutePokemon}
-            comboboxId={comboboxId}
-            gameMode={gameMode}
-            isActive={active}
-            isSelected={selected}
-          />
-        )}
-      </ComboboxOption>
-    );
-  }
-
-  // Render without ComboboxOption wrapper
   return (
-    <div
-      className={clsx(
-        baseClassName,
-        'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700',
-        className
-      )}
+    <ComboboxOption
+      key={`${pokemon.id}-${pokemon.name}-${index}`}
+      value={pokemon}
+      className={({ active }) =>
+        clsx(
+          baseClassName,
+          {
+            // Disable active state when user is scrolling to prevent auto-scroll
+            'bg-blue-600 text-white ': active,
+            'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700':
+              !active,
+          },
+          className
+        )
+      }
       style={style}
-      onClick={() => onClick?.(pokemon)}
-      aria-role='option'
-      tabIndex={disabled ? -1 : 0}
-      aria-disabled={disabled}
+      disabled={disabled}
     >
-      <PokemonOptionContent
-        pokemon={pokemon}
-        index={index}
-        isRoutePokemon={isRoutePokemon}
-        comboboxId={comboboxId}
-        gameMode={gameMode}
-      />
-    </div>
+      {({ active, selected }) => (
+        <PokemonOptionContent
+          pokemon={pokemon}
+          index={index}
+          isRoutePokemon={isRoutePokemon}
+          comboboxId={comboboxId}
+          gameMode={gameMode}
+          isActive={active}
+          isSelected={selected}
+        />
+      )}
+    </ComboboxOption>
   );
 }
 
