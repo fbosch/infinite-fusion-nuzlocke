@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { dragStore, dragActions } from '../dragStore';
-import type { PokemonOption } from '@/loaders/pokemon';
+import type { PokemonOptionType } from '@/loaders/pokemon';
 
 describe('Drag Store', () => {
   beforeEach(() => {
@@ -25,7 +25,7 @@ describe('Drag Store', () => {
   });
 
   it('should set drag value correctly', () => {
-    const pokemon: PokemonOption = {
+    const pokemon: PokemonOptionType = {
       id: 25,
       name: 'Pikachu',
       nationalDexId: 25,
@@ -35,7 +35,7 @@ describe('Drag Store', () => {
   });
 
   it('should start drag with all parameters', () => {
-    const pokemon: PokemonOption = {
+    const pokemon: PokemonOptionType = {
       id: 25,
       name: 'Pikachu',
       nationalDexId: 25,

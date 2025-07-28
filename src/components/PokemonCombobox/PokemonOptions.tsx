@@ -6,25 +6,35 @@ import { ComboboxOption } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { dragActions } from '@/stores/dragStore';
-import { type PokemonOption } from '@/loaders/pokemon';
+import { type PokemonOptionType } from '@/loaders/pokemon';
 import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
 
 interface PokemonOptionsProps {
-  finalOptions: PokemonOption[];
+  finalOptions: PokemonOptionType[];
   deferredQuery: string;
   isRoutePokemon: (pokemonId: number) => boolean;
   comboboxId: string;
   gameMode: 'classic' | 'remix' | 'randomized';
 }
 
-export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
-  finalOptions,
-  deferredQuery,
+interface PokemonOptionProps {
+  pokemon: PokemonOptionType;
+  index: number;
+  isRoutePokemon: (pokemonId: number) => boolean;
+  comboboxId: string;
+  gameMode: 'classic' | 'remix' | 'randomized';
+  style?: React.CSSProperties;
+}
+
+export function PokemonOption({
+  pokemon,
+  index,
   isRoutePokemon,
   comboboxId,
   gameMode,
-}) => {
-  const renderPokemonOption = (pokemon: PokemonOption, index: number) => (
+  style,
+}: PokemonOptionProps) {
+  return (
     <ComboboxOption
       key={`${pokemon.id}-${pokemon.name}-${index}`}
       value={pokemon}
@@ -40,6 +50,7 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
           }
         )
       }
+      style={style}
     >
       {({ selected }) => (
         <div className={'gap-8 group w-full flex items-center'}>
@@ -99,7 +110,15 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
       )}
     </ComboboxOption>
   );
+}
 
+export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
+  finalOptions,
+  deferredQuery,
+  isRoutePokemon,
+  comboboxId,
+  gameMode,
+}) => {
   if (finalOptions.length === 0) {
     return (
       <div className='relative cursor-default select-none py-2 px-4 text-center'>
@@ -122,10 +141,17 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
     );
   }
 
-  // Regular rendering for non-virtual mode
-  return finalOptions.map((pokemon, index) =>
-    renderPokemonOption(pokemon, index)
-  );
+  // Use the PokemonOption component
+  return finalOptions.map((pokemon, index) => (
+    <PokemonOption
+      key={`${pokemon.id}-${pokemon.name}-${index}`}
+      pokemon={pokemon}
+      index={index}
+      isRoutePokemon={isRoutePokemon}
+      comboboxId={comboboxId}
+      gameMode={gameMode}
+    />
+  ));
 };
 
 PokemonOptions.displayName = 'PokemonOptions';

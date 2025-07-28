@@ -48,7 +48,7 @@ export const PokemonOptionSchema = z.object({
 });
 
 // Pokemon option type for search results (inferred from schema)
-export type PokemonOption = z.infer<typeof PokemonOptionSchema>;
+export type PokemonOptionType = z.infer<typeof PokemonOptionSchema>;
 
 // Zod schema for Pokemon type
 export const PokemonTypeSchema = z.object({
@@ -154,7 +154,9 @@ export async function getPokemonPreEvolutionId(
 }
 
 // Smart search function that handles both name and ID searches
-export async function searchPokemon(query: string): Promise<PokemonOption[]> {
+export async function searchPokemon(
+  query: string
+): Promise<PokemonOptionType[]> {
   try {
     const results = await searchService.search(query);
     return results;

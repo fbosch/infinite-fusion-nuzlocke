@@ -16,21 +16,21 @@ import {
   getPokemonEvolutionIds,
   getPokemonPreEvolutionId,
   getPokemonByNationalDexId,
-  type PokemonOption,
+  type PokemonOptionType,
 } from '@/loaders/pokemon';
 import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
 import { useShiftKey } from '@/hooks/useKeyPressed';
 import { CursorTooltip } from '../CursorTooltip';
 
 interface PokemonEvolutionButtonProps {
-  value: PokemonOption | null | undefined;
-  onChange: (value: PokemonOption | null) => void;
+  value: PokemonOptionType | null | undefined;
+  onChange: (value: PokemonOptionType | null) => void;
   shouldLoad?: boolean;
 }
 
 interface EvolutionDropdownProps {
-  availableEvolutions: PokemonOption[];
-  onSelectEvolution: (evolution: PokemonOption) => void;
+  availableEvolutions: PokemonOptionType[];
+  onSelectEvolution: (evolution: PokemonOptionType) => void;
   isLoadingEvolutions: boolean;
 }
 
@@ -158,10 +158,10 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   shouldLoad = false,
 }) => {
   const [availableEvolutions, setAvailableEvolutions] = useState<
-    PokemonOption[]
+    PokemonOptionType[]
   >([]);
   const [availablePreEvolution, setAvailablePreEvolution] =
-    useState<PokemonOption | null>(null);
+    useState<PokemonOptionType | null>(null);
   const [isLoadingEvolutions, setIsLoadingEvolutions] = useState(false);
   const isShiftPressed = useShiftKey();
 
@@ -172,17 +172,17 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
 
   // Handle evolution/devolution selection
   const handleEvolution = useCallback(
-    (evolutionPokemon?: PokemonOption, isDevolution = false) => {
+    (evolutionPokemon?: PokemonOptionType, isDevolution = false) => {
       if (evolutionPokemon) {
         // Specific evolution/devolution selected
-        const evolvedPokemon: PokemonOption = {
+        const evolvedPokemon: PokemonOptionType = {
           ...value,
           ...evolutionPokemon,
         };
         onChange(evolvedPokemon);
       } else if (isDevolution && availablePreEvolution) {
         // Devolution - go to pre-evolution
-        const devolvedPokemon: PokemonOption = {
+        const devolvedPokemon: PokemonOptionType = {
           ...value,
           ...availablePreEvolution,
         };
@@ -190,7 +190,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
       } else if (availableEvolutions.length === 1) {
         // Single evolution - directly evolve
         const evolution = availableEvolutions.at(0)!;
-        const evolvedPokemon: PokemonOption = {
+        const evolvedPokemon: PokemonOptionType = {
           ...value,
           ...evolution,
         };
@@ -233,7 +233,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
         const evolutionIds = await getPokemonEvolutionIds(value.id);
         if (isCancelled) return;
 
-        const evolutions: PokemonOption[] = [];
+        const evolutions: PokemonOptionType[] = [];
 
         for (const evolutionId of evolutionIds) {
           const evolutionPokemon = await getPokemonByNationalDexId(evolutionId);

@@ -1,13 +1,13 @@
 import { z } from 'zod';
 import { getStarterPokemonByGameMode } from './starters';
-import type { PokemonOption } from './pokemon';
+import type { PokemonOptionType } from './pokemon';
 /**
  * Type for encounter data with fusion status
  * Used to track Pokemon encounters and their fusion state
  */
 export interface EncounterData {
-  head: PokemonOption | null;
-  body: PokemonOption | null;
+  head: PokemonOptionType | null;
+  body: PokemonOptionType | null;
   isFusion: boolean;
   artworkVariant?: string; // Alternative artwork variant for fusions (e.g., 'a', 'b', 'c')
 }

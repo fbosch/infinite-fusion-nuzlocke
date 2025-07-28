@@ -21,17 +21,18 @@ import Image from 'next/image';
 import {
   getInfiniteFusionToNationalDexMap,
   PokemonStatus,
-  type PokemonOption,
+  type PokemonOptionType,
 } from '@/loaders/pokemon';
 import { dragActions } from '@/stores/dragStore';
 import { useGameMode } from '@/stores/playthroughs';
 import { PokemonEvolutionButton } from './PokemonEvolutionButton';
 import { PokemonNicknameInput } from './PokemonNicknameInput';
 import { PokemonStatusInput } from './PokemonStatusInput';
-import { PokemonOptions } from './PokemonOptions';
 import { useComboboxDragAndDrop } from './useComboboxDragAndDrop';
 import { useEncounterData } from './useEncounterData';
 import { usePokemonSearch } from './usePokemonSearch';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { PokemonOption } from './PokemonOptions';
 
 let nationalDexMapping: Map<number, number> | null = null;
 let mappingPromise: Promise<void> | null = null;
@@ -57,7 +58,9 @@ export async function initializeSpriteMapping(): Promise<void> {
 }
 
 // Get Pokemon sprite URL from PokemonOption
-export function getPokemonSpriteUrlFromOption(pokemon: PokemonOption): string {
+export function getPokemonSpriteUrlFromOption(
+  pokemon: PokemonOptionType
+): string {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
 }
 
@@ -78,9 +81,11 @@ export const PokemonCombobox = React.memo(
   }: {
     routeId?: number;
     locationId?: string;
-    value: PokemonOption | null | undefined;
-    onChange: (value: PokemonOption | null) => void;
-    onBeforeClear?: (currentValue: PokemonOption) => Promise<boolean> | boolean;
+    value: PokemonOptionType | null | undefined;
+    onChange: (value: PokemonOptionType | null) => void;
+    onBeforeClear?: (
+      currentValue: PokemonOptionType
+    ) => Promise<boolean> | boolean;
     shouldLoad?: boolean;
     placeholder?: string;
     nicknamePlaceholder?: string;
@@ -95,6 +100,7 @@ export const PokemonCombobox = React.memo(
 
     // Ref to maintain focus on input
     const inputRef = useRef<HTMLInputElement | null>(null);
+    const optionsRef = useRef<HTMLDivElement | null>(null);
 
     // Use the drag and drop hook
     const {
@@ -150,7 +156,7 @@ export const PokemonCombobox = React.memo(
       // Check if query is numeric for route Pokemon
       const isNumericQuery = /^\d+$/.test(deferredQuery.trim());
 
-      let routeMatches: PokemonOption[] = [];
+      let routeMatches: PokemonOptionType[] = [];
 
       if (isNumericQuery) {
         // For numeric queries, check both ID and National Dex ID
@@ -191,7 +197,7 @@ export const PokemonCombobox = React.memo(
     }, [routeEncounterData, results, deferredQuery, isRoutePokemon, gameMode]);
 
     const handleChange = useCallback(
-      (newValue: PokemonOption | null | undefined) => {
+      (newValue: PokemonOptionType | null | undefined) => {
         onChange(newValue || null);
         setQuery('');
       },
@@ -228,6 +234,12 @@ export const PokemonCombobox = React.memo(
       },
       [onChange, value, onBeforeClear]
     );
+
+    const virtualizer = useVirtualizer({
+      count: finalOptions.length,
+      getScrollElement: () => optionsRef.current,
+      estimateSize: () => 60,
+    });
 
     return (
       <div
@@ -285,7 +297,9 @@ export const PokemonCombobox = React.memo(
                     }
                   )}
                   placeholder={placeholder}
-                  displayValue={(pokemon: PokemonOption | null | undefined) => {
+                  displayValue={(
+                    pokemon: PokemonOptionType | null | undefined
+                  ) => {
                     const displayPokemon = dragPreview || pokemon;
                     return displayPokemon?.name || '';
                   }}
@@ -338,11 +352,20 @@ export const PokemonCombobox = React.memo(
               </div>
               {open && (
                 <FloatingPortal>
-                  <ComboboxOptions
-                    ref={refs.setFloating}
-                    style={floatingStyles}
+                  <div
+                    ref={ref => {
+                      if (ref) {
+                        optionsRef.current = ref;
+                        refs.setFloating(ref);
+                      }
+                    }}
+                    style={{
+                      ...floatingStyles,
+                      height: `${virtualizer.getTotalSize()}px`,
+                    }}
                     className={clsx(
-                      'z-50 overflow-y-auto px-1 py-1 text-base shadow-lg focus:outline-none sm:text-sm',
+                      'max-h-[500px] h-full overflow-y-auto z-50 relative',
+                      'px-1 py-1 text-base shadow-lg focus:outline-none sm:text-sm',
                       'bg-white dark:bg-gray-800 gap-x-2',
                       'border border-gray-300 dark:border-gray-600 scrollbar-thin',
                       {
@@ -356,14 +379,27 @@ export const PokemonCombobox = React.memo(
                       }
                     )}
                   >
-                    <PokemonOptions
-                      finalOptions={finalOptions}
-                      deferredQuery={deferredQuery}
-                      isRoutePokemon={isRoutePokemon}
-                      comboboxId={comboboxId || ''}
-                      gameMode={gameMode}
-                    />
-                  </ComboboxOptions>
+                    <ComboboxOptions className='flex flex-row items-center'>
+                      {virtualizer.getVirtualItems().map(virtualItem => (
+                        <PokemonOption
+                          key={virtualItem.key}
+                          pokemon={finalOptions[virtualItem.index]}
+                          index={virtualItem.index}
+                          isRoutePokemon={isRoutePokemon}
+                          comboboxId={comboboxId || ''}
+                          gameMode={gameMode}
+                          style={{
+                            position: 'absolute',
+                            top: '0',
+                            left: '0.5rem',
+                            width: 'calc(100% - 16px)',
+                            height: `${virtualItem.size}px`,
+                            transform: `translateY(${virtualItem.start}px)`,
+                          }}
+                        />
+                      ))}
+                    </ComboboxOptions>
+                  </div>
                 </FloatingPortal>
               )}
             </div>

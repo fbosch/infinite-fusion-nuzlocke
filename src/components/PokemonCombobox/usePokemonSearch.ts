@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import {
   getPokemon,
   searchPokemon,
-  type PokemonOption,
+  type PokemonOptionType,
 } from '@/loaders/pokemon';
 import { useGameMode } from '@/stores/playthroughs';
 
@@ -15,7 +15,7 @@ export function usePokemonSearch({
   query,
   isRoutePokemon,
 }: UsePokemonSearchOptions) {
-  const [results, setFuzzyResults] = useState<PokemonOption[]>([]);
+  const [results, setFuzzyResults] = useState<PokemonOptionType[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<Error | null>(null);
   const gameMode = useGameMode();
@@ -24,8 +24,8 @@ export function usePokemonSearch({
   const performSmartSearch = useCallback(
     async (
       searchQuery: string,
-      pokemonList: PokemonOption[]
-    ): Promise<PokemonOption[]> => {
+      pokemonList: PokemonOptionType[]
+    ): Promise<PokemonOptionType[]> => {
       try {
         // Use the smart search function that handles both numeric and text searches
         const allResults = await searchPokemon(searchQuery);

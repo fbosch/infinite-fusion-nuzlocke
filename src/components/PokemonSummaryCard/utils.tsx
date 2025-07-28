@@ -1,4 +1,4 @@
-import { PokemonStatus, type PokemonOption } from '@/loaders/pokemon';
+import { PokemonStatus, type PokemonOptionType } from '@/loaders/pokemon';
 import { match, P } from 'ts-pattern';
 
 export const QUESTION_MARK =
@@ -9,8 +9,8 @@ export const TRANSPARENT_PIXEL =
   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 export function getNicknameText(
-  head: PokemonOption | null,
-  body: PokemonOption | null,
+  head: PokemonOptionType | null,
+  body: PokemonOptionType | null,
   isFusion: boolean
 ): string | undefined {
   if (!isFusion) {
@@ -31,8 +31,8 @@ export function getNicknameText(
 }
 
 export function getSpriteUrl(
-  head: PokemonOption | null,
-  body: PokemonOption | null,
+  head: PokemonOptionType | null,
+  body: PokemonOptionType | null,
   isFusion: boolean,
   artworkVariant?: string
 ): string {
@@ -51,8 +51,8 @@ export function getSpriteUrl(
 }
 
 export function getAltText(
-  head: PokemonOption | null,
-  body: PokemonOption | null,
+  head: PokemonOptionType | null,
+  body: PokemonOptionType | null,
   isFusion: boolean
 ): string {
   const pokemon = head || body;
@@ -74,8 +74,8 @@ export async function validateImageUrl(url: string): Promise<boolean> {
 
 export async function getNextFallbackUrl(
   currentSrc: string,
-  head: PokemonOption | null,
-  body: PokemonOption | null,
+  head: PokemonOptionType | null,
+  body: PokemonOptionType | null,
   artworkVariant?: string
 ): Promise<string | null> {
   const pokemon = head || body;
@@ -147,8 +147,8 @@ type StatusState = {
 };
 
 export function getStatusState(
-  head: PokemonOption | null,
-  body: PokemonOption | null
+  head: PokemonOptionType | null,
+  body: PokemonOptionType | null
 ): StatusState {
   return match([head?.status, body?.status])
     .with([PokemonStatus.MISSED, P._], [P._, PokemonStatus.MISSED], () => ({

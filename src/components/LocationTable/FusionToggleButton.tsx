@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import { useSnapshot } from 'valtio';
 import { dragStore, dragActions } from '@/stores/dragStore';
 import { playthroughActions } from '@/stores/playthroughs';
-import type { PokemonOption } from '@/loaders/pokemon';
+import type { PokemonOptionType } from '@/loaders/pokemon';
 import { CursorTooltip } from '../CursorTooltip';
 import { DNA_SPLICER_ICON } from '@/misc/items';
 import Image from 'next/image';
@@ -14,7 +14,7 @@ import Image from 'next/image';
 interface FusionToggleButtonProps {
   locationId: string;
   isFusion: boolean;
-  selectedPokemon: PokemonOption | null;
+  selectedPokemon: PokemonOptionType | null;
   onToggleFusion: () => void;
 }
 
@@ -62,7 +62,7 @@ export function FusionToggleButton({
           );
 
           if (foundPokemon) {
-            const pokemonOption: PokemonOption = {
+            const pokemonOption: PokemonOptionType = {
               id: foundPokemon.id,
               name: pokemonName,
               nationalDexId: foundPokemon.nationalDexId,

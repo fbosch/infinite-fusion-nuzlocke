@@ -19,17 +19,17 @@ import {
   FloatingPortal,
 } from '@floating-ui/react';
 import {
-  type PokemonOption,
+  type PokemonOptionType,
   type PokemonStatusType,
   PokemonStatus,
 } from '@/loaders/pokemon';
 import { match } from 'ts-pattern';
 
 interface PokemonStatusInputProps {
-  value: PokemonOption | null | undefined;
-  onChange: (value: PokemonOption | null) => void;
+  value: PokemonOptionType | null | undefined;
+  onChange: (value: PokemonOptionType | null) => void;
   disabled?: boolean;
-  dragPreview?: PokemonOption | null;
+  dragPreview?: PokemonOptionType | null;
 }
 
 const getStatusIcon = (status: PokemonStatusType) => {
@@ -86,7 +86,7 @@ export const PokemonStatusInput = ({
     if (value) {
       // Use startTransition to defer the state update
       startTransition(() => {
-        const updatedPokemon: PokemonOption = {
+        const updatedPokemon: PokemonOptionType = {
           ...value,
           status: newStatus,
         };

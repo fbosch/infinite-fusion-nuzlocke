@@ -3,13 +3,13 @@ import { useSnapshot } from 'valtio';
 import { dragStore, dragActions } from '@/stores/dragStore';
 import { playthroughActions } from '@/stores/playthroughs';
 import { getPokemon, getPokemonNameMap } from '@/loaders';
-import type { PokemonOption } from '@/loaders/pokemon';
+import type { PokemonOptionType } from '@/loaders/pokemon';
 
 interface UseComboboxDragAndDropProps {
   comboboxId?: string;
   locationId?: string;
-  value: PokemonOption | null | undefined;
-  onChange: (value: PokemonOption | null) => void;
+  value: PokemonOptionType | null | undefined;
+  onChange: (value: PokemonOptionType | null) => void;
 }
 
 export function useComboboxDragAndDrop({
@@ -19,7 +19,9 @@ export function useComboboxDragAndDrop({
   onChange,
 }: UseComboboxDragAndDropProps) {
   const dragSnapshot = useSnapshot(dragStore);
-  const [dragPreview, setDragPreview] = useState<PokemonOption | null>(null);
+  const [dragPreview, setDragPreview] = useState<PokemonOptionType | null>(
+    null
+  );
 
   // Ref to track pending timeout for drag leave operations
   const dragLeaveAnimationRef = useRef<number | null>(null);
@@ -94,7 +96,7 @@ export function useComboboxDragAndDrop({
                 );
 
                 if (foundPokemon) {
-                  const pokemonOption: PokemonOption = {
+                  const pokemonOption: PokemonOptionType = {
                     id: foundPokemon.id,
                     name: pokemonName,
                     nationalDexId: foundPokemon.nationalDexId,
@@ -179,7 +181,7 @@ export function useComboboxDragAndDrop({
             );
 
             if (foundPokemon) {
-              const pokemonOption: PokemonOption = {
+              const pokemonOption: PokemonOptionType = {
                 id: foundPokemon.id,
                 name: pokemonName,
                 nationalDexId: foundPokemon.nationalDexId,

@@ -8,14 +8,14 @@ import React, {
   useRef,
 } from 'react';
 import clsx from 'clsx';
-import { type PokemonOption } from '@/loaders/pokemon';
+import { type PokemonOptionType } from '@/loaders/pokemon';
 
 interface PokemonNicknameInputProps {
-  value: PokemonOption | null | undefined;
-  onChange: (value: PokemonOption | null) => void;
+  value: PokemonOptionType | null | undefined;
+  onChange: (value: PokemonOptionType | null) => void;
   placeholder?: string;
   disabled?: boolean;
-  dragPreview?: PokemonOption | null;
+  dragPreview?: PokemonOptionType | null;
 }
 
 export const PokemonNicknameInput = ({
@@ -50,7 +50,7 @@ export const PokemonNicknameInput = ({
   const commitChanges = useCallback(() => {
     if (value && localNickname !== value.nickname) {
       startTransition(() => {
-        const updatedPokemon: PokemonOption = {
+        const updatedPokemon: PokemonOptionType = {
           ...value,
           nickname: localNickname,
         };

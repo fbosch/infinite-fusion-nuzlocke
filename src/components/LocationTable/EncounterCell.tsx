@@ -5,7 +5,7 @@ import { ArrowLeftRight } from 'lucide-react';
 import { PokemonCombobox } from '@/components/PokemonCombobox/PokemonCombobox';
 import { FusionToggleButton } from './FusionToggleButton';
 import ConfirmationDialog from '@/components/ConfirmationDialog';
-import type { PokemonOption } from '@/loaders/pokemon';
+import type { PokemonOptionType } from '@/loaders/pokemon';
 
 import clsx from 'clsx';
 import { useEncounter, playthroughActions } from '@/stores/playthroughs';
@@ -22,7 +22,7 @@ interface EncounterCellProps {
 
 interface PendingClear {
   field: 'head' | 'body';
-  pokemon: PokemonOption;
+  pokemon: PokemonOptionType;
 }
 
 export function EncounterCell({
@@ -60,7 +60,7 @@ export function EncounterCell({
 
   // Check if a pokemon has valuable data that would be lost when clearing
   const hasValuableData = useCallback(
-    (pokemon: PokemonOption | null): boolean => {
+    (pokemon: PokemonOptionType | null): boolean => {
       if (!pokemon) return false;
       return !!(pokemon.nickname || pokemon.status);
     },
@@ -69,7 +69,7 @@ export function EncounterCell({
 
   // Generate confirmation message based on what data would be lost
   const getConfirmationMessage = useCallback(
-    (pokemon: PokemonOption): string => {
+    (pokemon: PokemonOptionType): string => {
       const dataItems: string[] = [];
       if (pokemon.status)
         dataItems.push(
@@ -92,7 +92,7 @@ export function EncounterCell({
 
   // Handle encounter selection with confirmation for clearing valuable data
   const handleEncounterSelect = useCallback(
-    (pokemon: PokemonOption | null, field: 'head' | 'body' = 'head') => {
+    (pokemon: PokemonOptionType | null, field: 'head' | 'body' = 'head') => {
       // If we're clearing a pokemon (setting to null)
       if (pokemon === null) {
         const currentPokemon = field === 'head' ? headPokemon : bodyPokemon;
@@ -114,21 +114,21 @@ export function EncounterCell({
 
   // Create separate memoized handlers to avoid creating new functions on every render
   const handleHeadChange = useCallback(
-    (pokemon: PokemonOption | null) => {
+    (pokemon: PokemonOptionType | null) => {
       handleEncounterSelect(pokemon, 'head');
     },
     [handleEncounterSelect]
   );
 
   const handleBodyChange = useCallback(
-    (pokemon: PokemonOption | null) => {
+    (pokemon: PokemonOptionType | null) => {
       handleEncounterSelect(pokemon, 'body');
     },
     [handleEncounterSelect]
   );
 
   const handleSingleChange = useCallback(
-    (pokemon: PokemonOption | null) => {
+    (pokemon: PokemonOptionType | null) => {
       handleEncounterSelect(pokemon);
     },
     [handleEncounterSelect]
@@ -165,7 +165,7 @@ export function EncounterCell({
 
   // Create separate handlers for head and body clearing
   const handleBeforeClearHead = useCallback(
-    (currentValue: PokemonOption): Promise<boolean> => {
+    (currentValue: PokemonOptionType): Promise<boolean> => {
       return new Promise(resolve => {
         if (hasValuableData(currentValue)) {
           setPendingClear({ field: 'head', pokemon: currentValue });
@@ -180,7 +180,7 @@ export function EncounterCell({
   );
 
   const handleBeforeClearBody = useCallback(
-    (currentValue: PokemonOption): Promise<boolean> => {
+    (currentValue: PokemonOptionType): Promise<boolean> => {
       return new Promise(resolve => {
         if (hasValuableData(currentValue)) {
           setPendingClear({ field: 'body', pokemon: currentValue });
@@ -195,7 +195,7 @@ export function EncounterCell({
   );
 
   const handleBeforeClearSingle = useCallback(
-    (currentValue: PokemonOption): Promise<boolean> => {
+    (currentValue: PokemonOptionType): Promise<boolean> => {
       return new Promise(resolve => {
         if (hasValuableData(currentValue)) {
           setPendingClear({ field: 'head', pokemon: currentValue });

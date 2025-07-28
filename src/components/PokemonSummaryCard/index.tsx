@@ -1,5 +1,5 @@
 import { FusionSprite } from './FusionSprite';
-import { PokemonStatus, type PokemonOption } from '@/loaders/pokemon';
+import { PokemonStatus, type PokemonOptionType } from '@/loaders/pokemon';
 import { Fragment } from 'react';
 import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
@@ -11,8 +11,8 @@ interface SummaryCardProps {
 }
 
 function getNicknameText(
-  head: PokemonOption | null,
-  body: PokemonOption | null,
+  head: PokemonOptionType | null,
+  body: PokemonOptionType | null,
   isFusion: boolean
 ): string | undefined {
   if (!isFusion) {

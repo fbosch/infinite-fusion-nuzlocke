@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { getPokemon, type PokemonOption } from '@/loaders/pokemon';
+import { getPokemon, type PokemonOptionType } from '@/loaders/pokemon';
 import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
 import { useGameMode } from '@/stores/playthroughs';
 
@@ -14,9 +14,9 @@ export function useEncounterData({
   locationId,
   enabled = false,
 }: UseEncounterDataOptions) {
-  const [routeEncounterData, setRouteEncounterData] = useState<PokemonOption[]>(
-    []
-  );
+  const [routeEncounterData, setRouteEncounterData] = useState<
+    PokemonOptionType[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const gameMode = useGameMode();
@@ -52,12 +52,14 @@ export function useEncounterData({
 
       if (gameMode === 'randomized') {
         // For randomized mode, show ALL available Pokemon
-        const allPokemonOptions: PokemonOption[] = allPokemon.map(pokemon => ({
-          id: pokemon.id,
-          name: nameMap.get(pokemon.id) || pokemon.name,
-          nationalDexId: pokemon.nationalDexId,
-          originalLocation: locationId,
-        }));
+        const allPokemonOptions: PokemonOptionType[] = allPokemon.map(
+          pokemon => ({
+            id: pokemon.id,
+            name: nameMap.get(pokemon.id) || pokemon.name,
+            nationalDexId: pokemon.nationalDexId,
+            originalLocation: locationId,
+          })
+        );
 
         setRouteEncounterData(allPokemonOptions);
       } else {
@@ -66,7 +68,7 @@ export function useEncounterData({
         const encounter = await getEncountersByRouteId(routeId, gameMode);
 
         if (encounter) {
-          const pokemonOptions: PokemonOption[] = encounter.pokemonIds.map(
+          const pokemonOptions: PokemonOptionType[] = encounter.pokemonIds.map(
             id => {
               const pokemon = allPokemon.find(p => p.id === id);
               return {
