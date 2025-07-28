@@ -35,7 +35,7 @@ export function useEncounterData({
 
   // Async function to load route encounter data
   const loadRouteEncounterData = useCallback(async () => {
-    if (!routeId || routeId === 0) {
+    if (!routeId && routeId !== 0) {
       setRouteEncounterData([]);
       return;
     }
@@ -62,6 +62,7 @@ export function useEncounterData({
         setRouteEncounterData(allPokemonOptions);
       } else {
         // For classic/remix modes, load route-specific encounters
+        // This includes starter Pokemon for routeId 0
         const encounter = await getEncountersByRouteId(routeId, gameMode);
 
         if (encounter) {
@@ -95,7 +96,7 @@ export function useEncounterData({
 
   // Load route data when dependencies change
   useEffect(() => {
-    if (routeId !== undefined && routeId !== 0 && enabled) {
+    if (routeId !== undefined && enabled) {
       loadRouteEncounterData();
     }
   }, [gameMode, loadRouteEncounterData, routeId, enabled]);
