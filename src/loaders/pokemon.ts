@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import { useQuery } from '@tanstack/react-query';
-import searchService from '@/services/searchService';
+import pokemonApiService from '@/services/pokemonApiService';
 import ms from 'ms';
 
 // Utility function to generate unique identifiers
@@ -108,22 +108,15 @@ export type EvolutionData = z.infer<typeof EvolutionDataSchema>;
 export const PokemonArraySchema = z.array(PokemonSchema);
 
 // Cache for loaded Pokemon data
-let pokemonCache: Pokemon[] | null = null;
+const pokemonCache: Pokemon[] | null = null;
 
-// Data loader for Pokemon with dynamic import
+// Update the getPokemon function to use the API service
 export async function getPokemon(): Promise<Pokemon[]> {
-  if (pokemonCache) {
-    return pokemonCache;
-  }
-
   try {
-    const pokemonData = await import('@data/pokemon-data.json');
-    const data = PokemonArraySchema.parse(pokemonData.default);
-    pokemonCache = data;
-    return data;
+    return await pokemonApiService.getAllPokemon();
   } catch (error) {
-    console.error('Failed to validate Pokemon data:', error);
-    throw new Error('Invalid Pokemon data format');
+    console.error('Failed to fetch Pokemon data:', error);
+    throw new Error('Failed to load Pokemon data');
   }
 }
 
@@ -195,58 +188,33 @@ export async function isPokemonPreEvolution(
   }
 }
 
-// Smart search function that handles both name and ID searches
+// Update searchPokemon to use the API service
 export async function searchPokemon(
   query: string
 ): Promise<PokemonOptionType[]> {
-  // Early return for empty queries
-  if (!query?.trim()) {
-    return [];
-  }
-
-  const trimmedQuery = query.trim();
-
-  // Check if query is a number (for ID searches) - use synchronous search
-  const isNumericQuery = /^\d+$/.test(trimmedQuery);
-
-  if (isNumericQuery) {
-    // Synchronous search for IDs - much faster than async worker
-    const pokemon = await getPokemon();
-    const queryNum = parseInt(trimmedQuery, 10);
-    const results = pokemon
-      .filter(p => p.id === queryNum || p.nationalDexId === queryNum)
-      .map(p => ({
-        id: p.id,
-        name: p.name,
-        nationalDexId: p.nationalDexId,
-      }));
-    return results;
-  }
-
-  // For text queries, try the worker first, fallback to synchronous search
   try {
-    return await searchService.search(trimmedQuery);
-  } catch (error) {
-    console.warn('Search service failed, falling back to main thread:', error);
-  }
+    const pokemon = await pokemonApiService.searchPokemon(query, 50);
 
-  // Fallback to synchronous search for better performance
-  const pokemon = await getPokemon();
-  const results = pokemon
-    .filter(p => p.name.toLowerCase().includes(trimmedQuery.toLowerCase()))
-    .map(p => ({
+    return pokemon.map(p => ({
       id: p.id,
       name: p.name,
       nationalDexId: p.nationalDexId,
-    }))
-    .slice(0, 50); // Limit results to prevent performance issues
-  return results;
+      uid: generatePokemonUID(),
+    }));
+  } catch (error) {
+    console.error('Failed to search Pokemon:', error);
+    return [];
+  }
 }
 
-// Get Pokemon by ID
+// Update getPokemonById to use the API service
 export async function getPokemonById(id: number): Promise<Pokemon | null> {
-  const pokemon = await getPokemon();
-  return pokemon.find(p => p.id === id) || null;
+  try {
+    return await pokemonApiService.getPokemonById(id);
+  } catch (error) {
+    console.error(`Failed to fetch Pokemon with ID ${id}:`, error);
+    return null;
+  }
 }
 
 // Get Pokemon by name
@@ -255,46 +223,55 @@ export async function getPokemonByName(name: string): Promise<Pokemon | null> {
   return pokemon.find(p => p.name.toLowerCase() === name.toLowerCase()) || null;
 }
 
-// Get Pokemon names by IDs
+// Update getPokemonNamesByIds to use the API service
 export async function getPokemonNamesByIds(ids: number[]): Promise<string[]> {
-  const pokemon = await getPokemon();
-  const pokemonMap = new Map(pokemon.map(p => [p.id, p.name]));
-
-  return ids
-    .map(id => pokemonMap.get(id))
-    .filter((name): name is string => name !== undefined);
+  try {
+    const pokemon = await pokemonApiService.getPokemonByIds(ids);
+    return pokemon.map(p => p.name);
+  } catch (error) {
+    console.error('Failed to fetch Pokemon names by IDs:', error);
+    return [];
+  }
 }
 
-// Create a map of Pokemon ID to name for quick lookup
+// Update getPokemonNameMap to use the API service
 export async function getPokemonNameMap(): Promise<Map<number, string>> {
-  const pokemon = await getPokemon();
-  const nameMap = new Map<number, string>();
-
-  pokemon.forEach(p => {
-    nameMap.set(p.id, p.name);
-  });
-
-  return nameMap;
+  try {
+    const pokemon = await pokemonApiService.getAllPokemon();
+    return new Map(pokemon.map(p => [p.id, p.name]));
+  } catch (error) {
+    console.error('Failed to fetch Pokemon name map:', error);
+    return new Map();
+  }
 }
 
-// Get Pokemon by type
+// Update getPokemonByType to use the API service
 export async function getPokemonByType(type: string): Promise<Pokemon[]> {
-  const pokemon = await getPokemon();
-  return pokemon.filter(p =>
-    p.types.some(t => t.name.toLowerCase() === type.toLowerCase())
-  );
+  try {
+    return await pokemonApiService.getPokemonByType(type);
+  } catch (error) {
+    console.error(`Failed to fetch Pokemon by type ${type}:`, error);
+    return [];
+  }
 }
 
-// Get all Pokemon types
+// Update getAllPokemonTypes to use the API service
 export async function getAllPokemonTypes(): Promise<string[]> {
-  const pokemon = await getPokemon();
-  const typeSet = new Set<string>();
+  try {
+    const pokemon = await pokemonApiService.getAllPokemon();
+    const typeSet = new Set<string>();
 
-  pokemon.forEach(p => {
-    p.types.forEach(t => typeSet.add(t.name));
-  });
+    pokemon.forEach(p => {
+      p.types.forEach(type => {
+        typeSet.add(type.name);
+      });
+    });
 
-  return Array.from(typeSet).sort();
+    return Array.from(typeSet).sort();
+  } catch (error) {
+    console.error('Failed to fetch Pokemon types:', error);
+    return [];
+  }
 }
 
 // Get National Pokédex number from Infinite Fusion ID
@@ -350,34 +327,71 @@ export async function getInfiniteFusionToNationalDexMap(): Promise<
   return map;
 }
 
-// React hook for getting all Pokemon data
+// React Query hooks for Pokemon data
 export function useAllPokemon() {
-  return useQuery<Pokemon[]>({
+  return useQuery({
     queryKey: ['pokemon', 'all'],
-    queryFn: getPokemon,
-    staleTime: ms('1d'),
-    gcTime: ms('30m'),
+    queryFn: () => pokemonApiService.getAllPokemon(),
+    staleTime: ms('5m'), // Consider data fresh for 5 minutes
+    gcTime: ms('10m'), // Keep in cache for 10 minutes
   });
 }
 
-// React hook for getting a specific Pokemon by ID
 export function usePokemonById(id: number) {
   return useQuery({
     queryKey: ['pokemon', 'byId', id],
-    queryFn: () => getPokemonById(id),
+    queryFn: () => pokemonApiService.getPokemonById(id),
     enabled: !!id,
-    staleTime: Infinity,
-    gcTime: ms('30m'),
+    staleTime: ms('5m'),
+    gcTime: ms('10m'),
   });
 }
 
-// React hook for getting Pokemon name map
 export function usePokemonNameMap() {
   return useQuery({
     queryKey: ['pokemon', 'nameMap'],
-    queryFn: getPokemonNameMap,
-    staleTime: Infinity,
+    queryFn: () =>
+      pokemonApiService
+        .getAllPokemon()
+        .then(pokemon => new Map(pokemon.map(p => [p.id, p.name]))),
+    staleTime: ms('5m'),
+    gcTime: ms('10m'),
+  });
+}
+
+export function usePokemonSearch(query: string) {
+  return useQuery({
+    queryKey: ['pokemon', 'search', query],
+    queryFn: () =>
+      pokemonApiService.searchPokemon(query, 50).then(pokemon =>
+        pokemon.map(p => ({
+          id: p.id,
+          name: p.name,
+          nationalDexId: p.nationalDexId,
+          uid: generatePokemonUID(),
+        }))
+      ),
+    enabled: !!query && query.length > 0,
+    staleTime: ms('2m'),
+    gcTime: ms('5m'),
+  });
+}
+
+export function usePokemonByType(type: string) {
+  return useQuery({
+    queryKey: ['pokemon', 'byType', type],
+    queryFn: () => pokemonApiService.getPokemonByType(type),
+    enabled: !!type,
+    staleTime: ms('5m'),
+    gcTime: ms('10m'),
+  });
+}
+
+export function usePokemonCount() {
+  return useQuery({
+    queryKey: ['pokemon', 'count'],
+    queryFn: () => pokemonApiService.getPokemonCount(),
+    staleTime: ms('10m'),
     gcTime: ms('30m'),
-    placeholderData: new Map(),
   });
 }
