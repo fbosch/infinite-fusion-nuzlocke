@@ -22,13 +22,13 @@ export default function LocationTableSkeleton() {
               <th
                 className={clsx(
                   'px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider',
-                  'w-[165px] min-w-[165px] md:w-[185px] md:min-w-[185px]'
+                  'w-[155px] min-w-[155px] 2xl:w-[185px] 2xl:min-w-[185px]'
                 )}
               ></th>
               <th
                 className={clsx(
                   'px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider',
-                  'w-[400px] min-w-[400px] md:w-[900px] md:min-w-[900px]'
+                  'w-[62.5vw] min-w-[62.5vw] 2xl:w-[900px] 2xl:min-w-[900px]'
                 )}
               >
                 Encounter

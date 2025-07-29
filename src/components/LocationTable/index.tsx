@@ -40,7 +40,7 @@ export default function LocationTable() {
   const [mounted, setMounted] = useState(false);
   const isLoading = useIsLoading();
   const customLocations = useCustomLocations();
-  const smallScreen = useBreakpointSmallerThan('lg');
+  const smallScreen = useBreakpointSmallerThan('2xl');
 
   useEffect(() => {
     setMounted(true);
