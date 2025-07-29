@@ -103,13 +103,13 @@ export function CursorTooltip({
 
   // Handle animation states and callbacks
   useEffect(() => {
-    // Clear any existing exit animation
-    if (exitAnimationRef.current) {
-      cancelAnimationFrame(exitAnimationRef.current);
-      exitAnimationRef.current = null;
-    }
-
     if (isOpen) {
+      // Clear any existing exit animation when opening
+      if (exitAnimationRef.current) {
+        cancelAnimationFrame(exitAnimationRef.current);
+        exitAnimationRef.current = null;
+      }
+
       // Start enter animation immediately when isOpen becomes true
       startTransition(() => {
         setIsVisible(true);
@@ -117,14 +117,19 @@ export function CursorTooltip({
       });
       onMouseEnter?.();
     } else {
-      // Start exit animation and wait for it to complete before removing from DOM
-      isAnimatingRef.current = false;
-      exitAnimationRef.current = requestAnimationFrame(() => {
-        setIsVisible(false);
-      });
-      onMouseLeave?.();
+      // Only start exit animation if we're currently visible
+      if (isVisible) {
+        isAnimatingRef.current = false;
+        exitAnimationRef.current = requestAnimationFrame(() => {
+          // Add a small delay to allow the exit animation to play
+          setTimeout(() => {
+            setIsVisible(false);
+          }, 150); // Match the CSS animation duration
+        });
+        onMouseLeave?.();
+      }
     }
-  }, [isOpen, onMouseEnter, onMouseLeave]);
+  }, [isOpen, isVisible, onMouseEnter, onMouseLeave]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -144,8 +149,8 @@ export function CursorTooltip({
           }),
         })}
 
-      <FloatingPortal>
-        {isVisible && (
+      {isVisible && (
+        <FloatingPortal>
           <div
             className='z-100'
             ref={refs.setFloating}
@@ -173,8 +178,8 @@ export function CursorTooltip({
               {content}
             </div>
           </div>
-        )}
-      </FloatingPortal>
+        </FloatingPortal>
+      )}
     </>
   );
 }
