@@ -2,7 +2,7 @@ import { proxy, subscribe, useSnapshot } from 'valtio';
 import { devtools } from 'valtio/utils';
 import { z, ZodError } from 'zod';
 import { get, set, del, createStore } from 'idb-keyval';
-import { debounce } from 'lodash';
+import { debounce } from 'es-toolkit';
 import React, { useMemo } from 'react';
 import { PokemonOptionSchema, generatePokemonUID } from '@/loaders/pokemon';
 import { CustomLocationSchema } from '@/loaders/locations';
@@ -180,7 +180,7 @@ const debouncedSaveAll = debounce(
     }
   },
   200,
-  { leading: true }
+  { edges: ['leading'] }
 );
 
 // Immediate save function for critical operations
