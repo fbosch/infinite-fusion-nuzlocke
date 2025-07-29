@@ -20,16 +20,12 @@ interface GiftPokemon {
   pokemonId: number;
   location: string;
   level?: number;
-  notes?: string;
   requirements?: string;
 }
 
 interface TradePokemon {
   pokemonId: number;
-  askingForId: number;
-  askingFor: string;
   location: string;
-  notes?: string;
   requirements?: string;
 }
 
@@ -37,30 +33,40 @@ describe('Data Integrity Tests', () => {
   let locations: Location[];
   let classicEncounters: RouteEncounter[];
   let remixEncounters: RouteEncounter[];
-  let gifts: GiftPokemon[];
-  let trades: TradePokemon[];
+  let classicGifts: GiftPokemon[];
+  let remixGifts: GiftPokemon[];
+  let classicTrades: TradePokemon[];
+  let remixTrades: TradePokemon[];
 
   beforeAll(async () => {
     const dataDir = path.join(process.cwd(), 'data');
 
     // Load all data files
-    const [locationsData, classicData, remixData, giftsData, tradesData] =
-      await Promise.all([
-        fs.readFile(path.join(dataDir, 'locations.json'), 'utf-8'),
-        fs.readFile(
-          path.join(dataDir, 'route-encounters-classic.json'),
-          'utf-8'
-        ),
-        fs.readFile(path.join(dataDir, 'route-encounters-remix.json'), 'utf-8'),
-        fs.readFile(path.join(dataDir, 'gifts.json'), 'utf-8'),
-        fs.readFile(path.join(dataDir, 'trades.json'), 'utf-8'),
-      ]);
+    const [
+      locationsData,
+      classicData,
+      remixData,
+      classicGiftsData,
+      remixGiftsData,
+      classicTradesData,
+      remixTradesData,
+    ] = await Promise.all([
+      fs.readFile(path.join(dataDir, 'locations.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'route-encounters-classic.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'route-encounters-remix.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'gifts-classic.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'gifts-remix.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'trades-classic.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'trades-remix.json'), 'utf-8'),
+    ]);
 
     locations = JSON.parse(locationsData);
     classicEncounters = JSON.parse(classicData);
     remixEncounters = JSON.parse(remixData);
-    gifts = JSON.parse(giftsData);
-    trades = JSON.parse(tradesData);
+    classicGifts = JSON.parse(classicGiftsData);
+    remixGifts = JSON.parse(remixGiftsData);
+    classicTrades = JSON.parse(classicTradesData);
+    remixTrades = JSON.parse(remixTradesData);
   });
 
   describe('Route Encounter Coverage', () => {
@@ -525,12 +531,24 @@ describe('Data Integrity Tests', () => {
     it('should have valid Pokemon IDs in all gift entries', () => {
       const invalidGifts: string[] = [];
 
-      gifts.forEach((gift, index) => {
+      classicGifts.forEach((gift, index) => {
         if (!Number.isInteger(gift.pokemonId)) {
-          invalidGifts.push(`Gift ${index}: pokemonId is not an integer`);
+          invalidGifts.push(
+            `Classic Gift ${index}: pokemonId is not an integer`
+          );
         }
         if (gift.pokemonId === 0) {
-          invalidGifts.push(`Gift ${index}: pokemonId cannot be 0`);
+          invalidGifts.push(`Classic Gift ${index}: pokemonId cannot be 0`);
+        }
+        // Allow negative IDs for special cases (eggs, fossils, etc.)
+      });
+
+      remixGifts.forEach((gift, index) => {
+        if (!Number.isInteger(gift.pokemonId)) {
+          invalidGifts.push(`Remix Gift ${index}: pokemonId is not an integer`);
+        }
+        if (gift.pokemonId === 0) {
+          invalidGifts.push(`Remix Gift ${index}: pokemonId cannot be 0`);
         }
         // Allow negative IDs for special cases (eggs, fossils, etc.)
       });
@@ -547,15 +565,31 @@ describe('Data Integrity Tests', () => {
     it('should have valid level values in gift entries', () => {
       const invalidLevels: string[] = [];
 
-      gifts.forEach((gift, index) => {
+      classicGifts.forEach((gift, index) => {
         if (gift.level !== undefined) {
           if (!Number.isInteger(gift.level)) {
-            invalidLevels.push(`Gift ${index}: level is not an integer`);
+            invalidLevels.push(
+              `Classic Gift ${index}: level is not an integer`
+            );
           }
           // Allow levels up to 9999 for special cases (like Game Corner prizes)
           if (gift.level < 1 || gift.level > 9999) {
             invalidLevels.push(
-              `Gift ${index}: level ${gift.level} is out of valid range (1-9999)`
+              `Classic Gift ${index}: level ${gift.level} is out of valid range (1-9999)`
+            );
+          }
+        }
+      });
+
+      remixGifts.forEach((gift, index) => {
+        if (gift.level !== undefined) {
+          if (!Number.isInteger(gift.level)) {
+            invalidLevels.push(`Remix Gift ${index}: level is not an integer`);
+          }
+          // Allow levels up to 9999 for special cases (like Game Corner prizes)
+          if (gift.level < 1 || gift.level > 9999) {
+            invalidLevels.push(
+              `Remix Gift ${index}: level ${gift.level} is out of valid range (1-9999)`
             );
           }
         }
@@ -573,9 +607,19 @@ describe('Data Integrity Tests', () => {
     it('should have non-empty location names for all gifts', () => {
       const invalidLocations: string[] = [];
 
-      gifts.forEach((gift, index) => {
+      classicGifts.forEach((gift, index) => {
         if (!gift.location || gift.location.trim() === '') {
-          invalidLocations.push(`Gift ${index}: missing or empty location`);
+          invalidLocations.push(
+            `Classic Gift ${index}: missing or empty location`
+          );
+        }
+      });
+
+      remixGifts.forEach((gift, index) => {
+        if (!gift.location || gift.location.trim() === '') {
+          invalidLocations.push(
+            `Remix Gift ${index}: missing or empty location`
+          );
         }
       });
 
@@ -589,7 +633,7 @@ describe('Data Integrity Tests', () => {
     });
 
     it('should have valid special case Pokemon IDs', () => {
-      const specialCases = gifts.filter(gift => gift.pokemonId < 0);
+      const specialCases = classicGifts.filter(gift => gift.pokemonId < 0);
       const validSpecialIds = [-1, -2]; // Eggs, Fossils
 
       const invalidSpecialCases = specialCases.filter(
@@ -611,24 +655,52 @@ describe('Data Integrity Tests', () => {
     it('should have consistent data structure across all gift entries', () => {
       const invalidStructure: string[] = [];
 
-      gifts.forEach((gift, index) => {
+      classicGifts.forEach((gift, index) => {
         if (typeof gift.pokemonId !== 'number') {
-          invalidStructure.push(`Gift ${index}: pokemonId is not a number`);
+          invalidStructure.push(
+            `Classic Gift ${index}: pokemonId is not a number`
+          );
         }
         if (typeof gift.location !== 'string') {
-          invalidStructure.push(`Gift ${index}: location is not a string`);
+          invalidStructure.push(
+            `Classic Gift ${index}: location is not a string`
+          );
         }
         if (gift.level !== undefined && typeof gift.level !== 'number') {
-          invalidStructure.push(`Gift ${index}: level is not a number`);
+          invalidStructure.push(`Classic Gift ${index}: level is not a number`);
         }
-        if (gift.notes !== undefined && typeof gift.notes !== 'string') {
-          invalidStructure.push(`Gift ${index}: notes is not a string`);
+
+        if (
+          gift.requirements !== undefined &&
+          typeof gift.requirements !== 'string'
+        ) {
+          invalidStructure.push(
+            `Classic Gift ${index}: requirements is not a string`
+          );
+        }
+      });
+
+      remixGifts.forEach((gift, index) => {
+        if (typeof gift.pokemonId !== 'number') {
+          invalidStructure.push(
+            `Remix Gift ${index}: pokemonId is not a number`
+          );
+        }
+        if (typeof gift.location !== 'string') {
+          invalidStructure.push(
+            `Remix Gift ${index}: location is not a string`
+          );
+        }
+        if (gift.level !== undefined && typeof gift.level !== 'number') {
+          invalidStructure.push(`Remix Gift ${index}: level is not a number`);
         }
         if (
           gift.requirements !== undefined &&
           typeof gift.requirements !== 'string'
         ) {
-          invalidStructure.push(`Gift ${index}: requirements is not a string`);
+          invalidStructure.push(
+            `Remix Gift ${index}: requirements is not a string`
+          );
         }
       });
 
@@ -646,18 +718,27 @@ describe('Data Integrity Tests', () => {
     it('should have valid Pokemon IDs in all trade entries', () => {
       const invalidTrades: string[] = [];
 
-      trades.forEach((trade, index) => {
+      classicTrades.forEach((trade, index) => {
         if (!Number.isInteger(trade.pokemonId)) {
-          invalidTrades.push(`Trade ${index}: pokemonId is not an integer`);
-        }
-        if (!Number.isInteger(trade.askingForId)) {
-          invalidTrades.push(`Trade ${index}: askingForId is not an integer`);
+          invalidTrades.push(
+            `Classic Trade ${index}: pokemonId is not an integer`
+          );
         }
         if (trade.pokemonId <= 0) {
-          invalidTrades.push(`Trade ${index}: pokemonId cannot be <= 0`);
+          invalidTrades.push(
+            `Classic Trade ${index}: pokemonId cannot be <= 0`
+          );
         }
-        if (trade.askingForId <= 0) {
-          invalidTrades.push(`Trade ${index}: askingForId cannot be <= 0`);
+      });
+
+      remixTrades.forEach((trade, index) => {
+        if (!Number.isInteger(trade.pokemonId)) {
+          invalidTrades.push(
+            `Remix Trade ${index}: pokemonId is not an integer`
+          );
+        }
+        if (trade.pokemonId <= 0) {
+          invalidTrades.push(`Remix Trade ${index}: pokemonId cannot be <= 0`);
         }
       });
 
@@ -673,9 +754,19 @@ describe('Data Integrity Tests', () => {
     it('should have non-empty location names for all trades', () => {
       const invalidLocations: string[] = [];
 
-      trades.forEach((trade, index) => {
+      classicTrades.forEach((trade, index) => {
         if (!trade.location || trade.location.trim() === '') {
-          invalidLocations.push(`Trade ${index}: missing or empty location`);
+          invalidLocations.push(
+            `Classic Trade ${index}: missing or empty location`
+          );
+        }
+      });
+
+      remixTrades.forEach((trade, index) => {
+        if (!trade.location || trade.location.trim() === '') {
+          invalidLocations.push(
+            `Remix Trade ${index}: missing or empty location`
+          );
         }
       });
 
@@ -688,50 +779,48 @@ describe('Data Integrity Tests', () => {
       expect(invalidLocations).toHaveLength(0);
     });
 
-    it('should have non-empty askingFor text for all trades', () => {
-      const invalidAskingFor: string[] = [];
-
-      trades.forEach((trade, index) => {
-        if (!trade.askingFor || trade.askingFor.trim() === '') {
-          invalidAskingFor.push(
-            `Trade ${index}: missing or empty askingFor text`
-          );
-        }
-      });
-
-      if (invalidAskingFor.length > 0) {
-        throw new Error(
-          `Invalid trade askingFor text found:\n${invalidAskingFor.join('\n')}`
-        );
-      }
-
-      expect(invalidAskingFor).toHaveLength(0);
-    });
-
     it('should have consistent data structure across all trade entries', () => {
       const invalidStructure: string[] = [];
 
-      trades.forEach((trade, index) => {
+      classicTrades.forEach((trade, index) => {
         if (typeof trade.pokemonId !== 'number') {
-          invalidStructure.push(`Trade ${index}: pokemonId is not a number`);
-        }
-        if (typeof trade.askingForId !== 'number') {
-          invalidStructure.push(`Trade ${index}: askingForId is not a number`);
-        }
-        if (typeof trade.askingFor !== 'string') {
-          invalidStructure.push(`Trade ${index}: askingFor is not a string`);
+          invalidStructure.push(
+            `Classic Trade ${index}: pokemonId is not a number`
+          );
         }
         if (typeof trade.location !== 'string') {
-          invalidStructure.push(`Trade ${index}: location is not a string`);
-        }
-        if (trade.notes !== undefined && typeof trade.notes !== 'string') {
-          invalidStructure.push(`Trade ${index}: notes is not a string`);
+          invalidStructure.push(
+            `Classic Trade ${index}: location is not a string`
+          );
         }
         if (
           trade.requirements !== undefined &&
           typeof trade.requirements !== 'string'
         ) {
-          invalidStructure.push(`Trade ${index}: requirements is not a string`);
+          invalidStructure.push(
+            `Classic Trade ${index}: requirements is not a string`
+          );
+        }
+      });
+
+      remixTrades.forEach((trade, index) => {
+        if (typeof trade.pokemonId !== 'number') {
+          invalidStructure.push(
+            `Remix Trade ${index}: pokemonId is not a number`
+          );
+        }
+        if (typeof trade.location !== 'string') {
+          invalidStructure.push(
+            `Remix Trade ${index}: location is not a string`
+          );
+        }
+        if (
+          trade.requirements !== undefined &&
+          typeof trade.requirements !== 'string'
+        ) {
+          invalidStructure.push(
+            `Remix Trade ${index}: requirements is not a string`
+          );
         }
       });
 
@@ -744,28 +833,53 @@ describe('Data Integrity Tests', () => {
       expect(invalidStructure).toHaveLength(0);
     });
 
-    it('should have unique trade combinations', () => {
-      const tradeKeys = new Set<string>();
-      const duplicates: string[] = [];
+    it('should have unique trade combinations within each mode', () => {
+      // Check Classic trades for duplicates
+      const classicTradeKeys = new Set<string>();
+      const classicDuplicates: string[] = [];
 
-      trades.forEach((trade, index) => {
-        const key = `${trade.pokemonId}-${trade.askingForId}-${trade.location}`;
-        if (tradeKeys.has(key)) {
-          duplicates.push(
-            `Trade ${index}: duplicate combination ${trade.askingFor} for ${trade.location}`
+      classicTrades.forEach((trade, index) => {
+        const key = `${trade.pokemonId}-${trade.location}`;
+        if (classicTradeKeys.has(key)) {
+          classicDuplicates.push(
+            `Classic Trade ${index}: duplicate combination for ${trade.location}`
           );
         } else {
-          tradeKeys.add(key);
+          classicTradeKeys.add(key);
         }
       });
 
-      if (duplicates.length > 0) {
-        throw new Error(
-          `Duplicate trade combinations found:\n${duplicates.join('\n')}`
+      // Check Remix trades for duplicates
+      const remixTradeKeys = new Set<string>();
+      const remixDuplicates: string[] = [];
+
+      remixTrades.forEach((trade, index) => {
+        const key = `${trade.pokemonId}-${trade.location}`;
+        if (remixTradeKeys.has(key)) {
+          remixDuplicates.push(
+            `Remix Trade ${index}: duplicate combination for ${trade.location}`
+          );
+        } else {
+          remixTradeKeys.add(key);
+        }
+      });
+
+      const errors: string[] = [];
+      if (classicDuplicates.length > 0) {
+        errors.push(
+          `Classic trade duplicates:\n${classicDuplicates.join('\n')}`
         );
       }
+      if (remixDuplicates.length > 0) {
+        errors.push(`Remix trade duplicates:\n${remixDuplicates.join('\n')}`);
+      }
 
-      expect(duplicates).toHaveLength(0);
+      if (errors.length > 0) {
+        throw new Error(errors.join('\n\n'));
+      }
+
+      expect(classicDuplicates).toHaveLength(0);
+      expect(remixDuplicates).toHaveLength(0);
     });
   });
 
@@ -775,17 +889,35 @@ describe('Data Integrity Tests', () => {
       const invalidTradeLocations: string[] = [];
 
       // Check gift locations
-      gifts.forEach((gift, index) => {
+      classicGifts.forEach((gift, index) => {
         if (!gift.location || gift.location.trim() === '') {
-          invalidGiftLocations.push(`Gift ${index}: missing or empty location`);
+          invalidGiftLocations.push(
+            `Classic Gift ${index}: missing or empty location`
+          );
+        }
+      });
+
+      remixGifts.forEach((gift, index) => {
+        if (!gift.location || gift.location.trim() === '') {
+          invalidGiftLocations.push(
+            `Remix Gift ${index}: missing or empty location`
+          );
         }
       });
 
       // Check trade locations
-      trades.forEach((trade, index) => {
+      classicTrades.forEach((trade, index) => {
         if (!trade.location || trade.location.trim() === '') {
           invalidTradeLocations.push(
-            `Trade ${index}: missing or empty location`
+            `Classic Trade ${index}: missing or empty location`
+          );
+        }
+      });
+
+      remixTrades.forEach((trade, index) => {
+        if (!trade.location || trade.location.trim() === '') {
+          invalidTradeLocations.push(
+            `Remix Trade ${index}: missing or empty location`
           );
         }
       });
@@ -812,16 +944,22 @@ describe('Data Integrity Tests', () => {
 
     it('should have reasonable data volume', () => {
       // Check that we have a reasonable number of gifts and trades
-      expect(gifts.length).toBeGreaterThan(0);
-      expect(trades.length).toBeGreaterThan(0);
-      expect(gifts.length).toBeLessThan(1000); // Sanity check
-      expect(trades.length).toBeLessThan(1000); // Sanity check
+      expect(classicGifts.length).toBeGreaterThan(0);
+      expect(remixGifts.length).toBeGreaterThan(0);
+      expect(classicTrades.length).toBeGreaterThan(0);
+      expect(remixTrades.length).toBeGreaterThan(0);
+      expect(classicGifts.length).toBeLessThan(1000); // Sanity check
+      expect(remixGifts.length).toBeLessThan(1000); // Sanity check
+      expect(classicTrades.length).toBeLessThan(1000); // Sanity check
+      expect(remixTrades.length).toBeLessThan(1000); // Sanity check
     });
 
     it('should have consistent location naming patterns', () => {
       const locationNames = new Set(locations.map(loc => loc.name));
-      const giftLocations = new Set(gifts.map(gift => gift.location));
-      const tradeLocations = new Set(trades.map(trade => trade.location));
+      const giftLocations = new Set(classicGifts.map(gift => gift.location));
+      const tradeLocations = new Set(
+        classicTrades.map(trade => trade.location)
+      );
 
       const allLocations = new Set([...giftLocations, ...tradeLocations]);
       const locationNameVariations = new Map<string, string[]>();

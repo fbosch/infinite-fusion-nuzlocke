@@ -1,0 +1,86 @@
+[
+  {
+    "pokemonId": 1,
+    "location": "Pallet Town"
+  },
+  {
+    "pokemonId": 123,
+    "location": "Celadon Game Corner"
+  },
+  {
+    "pokemonId": 131,
+    "location": "Silph Co."
+  },
+  {
+    "pokemonId": 138,
+    "location": "Mt. Moon"
+  },
+  {
+    "pokemonId": 140,
+    "location": "Mt. Moon"
+  },
+  {
+    "pokemonId": 174,
+    "location": "Kanto Daycare"
+  },
+  {
+    "pokemonId": 194,
+    "location": "Cerulean City"
+  },
+  {
+    "pokemonId": 238,
+    "location": "Kanto Daycare"
+  },
+  {
+    "pokemonId": 252,
+    "location": "Kanto Daycare"
+  },
+  {
+    "pokemonId": 261,
+    "location": "Kanto Daycare"
+  },
+  {
+    "pokemonId": 285,
+    "location": "National Park"
+  },
+  {
+    "pokemonId": 291,
+    "location": "Violet City"
+  },
+  {
+    "pokemonId": 297,
+    "location": "Dragon's Den"
+  },
+  {
+    "pokemonId": 301,
+    "location": "S.S. Anne"
+  },
+  {
+    "pokemonId": 303,
+    "location": "S.S. Anne"
+  },
+  {
+    "pokemonId": 307,
+    "location": "Celadon Cafe"
+  },
+  {
+    "pokemonId": 327,
+    "location": "Rock Tunnel"
+  },
+  {
+    "pokemonId": 330,
+    "location": "Knot Island"
+  },
+  {
+    "pokemonId": 425,
+    "location": "Saffron Restaurant"
+  },
+  {
+    "pokemonId": 454,
+    "location": "Bond Bridge"
+  },
+  {
+    "pokemonId": 461,
+    "location": "Saffron Restaurant"
+  }
+]
