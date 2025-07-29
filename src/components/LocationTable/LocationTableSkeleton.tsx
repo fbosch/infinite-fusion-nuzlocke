@@ -1,6 +1,6 @@
 export default function LocationTableSkeleton() {
   return (
-    <div className='overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'>
+    <div className='overflow-hidden sm:rounded-lg sm:border sm:border-gray-200 sm:dark:border-gray-700 sm:shadow-sm'>
       <div className='max-h-[90vh] overflow-hidden'>
         <table
           className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700'
