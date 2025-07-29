@@ -191,14 +191,14 @@ async function handlePokemonApiRequest(request) {
   // If not in cache, fetch from network
   try {
     const response = await fetch(request);
-    
+
     // Only cache successful responses
     if (response.status === 200) {
       const responseClone = response.clone();
       cache.put(request, responseClone);
       console.debug('Service Worker: Cached Pokemon API response');
     }
-    
+
     return response;
   } catch (error) {
     console.error('Service Worker: Failed to fetch Pokemon API:', error);

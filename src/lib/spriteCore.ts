@@ -297,7 +297,8 @@ export class SpriteService {
 
     try {
       // Use edge function to get variants (avoids CORS issues)
-      const id = headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
+      const id =
+        headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
       const params = new URLSearchParams();
       params.set('id', id.toString());
 

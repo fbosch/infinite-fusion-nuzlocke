@@ -142,14 +142,14 @@ export class ServiceWorkerManager {
   }
 
   async getCacheSize(): Promise<string> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!navigator.serviceWorker.controller) {
         resolve('Service worker not active');
         return;
       }
 
       const messageChannel = new MessageChannel();
-      messageChannel.port1.onmessage = (event) => {
+      messageChannel.port1.onmessage = event => {
         if (event.data.type === 'CACHE_SIZE') {
           resolve(event.data.size);
         }
@@ -168,7 +168,7 @@ export class ServiceWorkerManager {
     percentage: number;
     error?: string;
   }> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!navigator.serviceWorker.controller) {
         resolve({
           total: 0,
@@ -180,7 +180,7 @@ export class ServiceWorkerManager {
       }
 
       const messageChannel = new MessageChannel();
-      messageChannel.port1.onmessage = (event) => {
+      messageChannel.port1.onmessage = event => {
         if (event.data.type === 'POKEMON_CACHE_STATUS') {
           resolve(event.data.status);
         }
@@ -198,7 +198,7 @@ export class ServiceWorkerManager {
     endpoints: string[];
     error?: string;
   }> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!navigator.serviceWorker.controller) {
         resolve({
           total: 0,
@@ -209,7 +209,7 @@ export class ServiceWorkerManager {
       }
 
       const messageChannel = new MessageChannel();
-      messageChannel.port1.onmessage = (event) => {
+      messageChannel.port1.onmessage = event => {
         if (event.data.type === 'API_CACHE_STATUS') {
           resolve(event.data.status);
         }
@@ -223,14 +223,14 @@ export class ServiceWorkerManager {
   }
 
   async clearApiCache(): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!navigator.serviceWorker.controller) {
         resolve();
         return;
       }
 
       const messageChannel = new MessageChannel();
-      messageChannel.port1.onmessage = (event) => {
+      messageChannel.port1.onmessage = event => {
         if (event.data.type === 'API_CACHE_CLEARED') {
           resolve();
         }

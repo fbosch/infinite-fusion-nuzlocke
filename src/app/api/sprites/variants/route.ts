@@ -82,7 +82,10 @@ export async function GET(request: NextRequest) {
     // Validate id format (should be like "25.125" or just "25")
     if (!/^\d+(\.\d+)?$/.test(id)) {
       return NextResponse.json(
-        { error: 'Invalid id format. Expected format: "headId" or "headId.bodyId"' },
+        {
+          error:
+            'Invalid id format. Expected format: "headId" or "headId.bodyId"',
+        },
         { status: 400 }
       );
     }
