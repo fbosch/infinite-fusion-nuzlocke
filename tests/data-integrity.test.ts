@@ -76,7 +76,8 @@ describe('Data Integrity Tests', () => {
       const locationNames = locations
         .filter(loc => {
           const isStarter = loc.name === 'Starter';
-          const isSpecialLocation = loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION;
+          const isSpecialLocation =
+            loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION;
           return !isStarter && !isSpecialLocation;
         })
         .map(loc => loc.name);
@@ -114,7 +115,8 @@ describe('Data Integrity Tests', () => {
       const locationNames = locations
         .filter(loc => {
           const isStarter = loc.name === 'Starter';
-          const isSpecialLocation = loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION;
+          const isSpecialLocation =
+            loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION;
           return !isStarter && !isSpecialLocation;
         })
         .map(loc => loc.name);
@@ -157,12 +159,16 @@ describe('Data Integrity Tests', () => {
 
       // Check classic encounters (excluding Starter)
       const orphanedClassicEncounters = classicEncounters.filter(
-        encounter => encounter.routeName !== 'Starter' && !locationNames.has(encounter.routeName)
+        encounter =>
+          encounter.routeName !== 'Starter' &&
+          !locationNames.has(encounter.routeName)
       );
 
       // Check remix encounters (excluding Starter)
       const orphanedRemixEncounters = remixEncounters.filter(
-        encounter => encounter.routeName !== 'Starter' && !locationNames.has(encounter.routeName)
+        encounter =>
+          encounter.routeName !== 'Starter' &&
+          !locationNames.has(encounter.routeName)
       );
 
       const errors: string[] = [];
@@ -213,9 +219,7 @@ describe('Data Integrity Tests', () => {
       // Check remix encounters
       remixEncounters.forEach(encounter => {
         if (!encounter.pokemonIds || encounter.pokemonIds.length === 0) {
-          invalidRemixEncounters.push(
-            `${encounter.routeName} has no Pokemon`
-          );
+          invalidRemixEncounters.push(`${encounter.routeName} has no Pokemon`);
         } else {
           encounter.pokemonIds.forEach(pokemonId => {
             if (!Number.isInteger(pokemonId) || pokemonId <= 0) {
@@ -447,7 +451,11 @@ describe('Data Integrity Tests', () => {
     it('should have consistent routeName values between locations and encounters', () => {
       const locationNames = new Set(
         locations
-          .filter(loc => loc.name !== 'Starter' && loc.name !== SPECIAL_LOCATIONS.STARTER_LOCATION)
+          .filter(
+            loc =>
+              loc.name !== 'Starter' &&
+              loc.name !== SPECIAL_LOCATIONS.STARTER_LOCATION
+          )
           .map(loc => loc.name)
       );
 
@@ -1050,7 +1058,7 @@ describe('Data Integrity Tests', () => {
       expect(viridianForest?.pokemonIds.length).toBeLessThan(20); // Should not have too many Pokemon
 
       // Verify it has some expected Pokemon (may differ from classic)
-      const hasCommonPokemon = viridianForest?.pokemonIds.some(id => 
+      const hasCommonPokemon = viridianForest?.pokemonIds.some(id =>
         [10, 11, 13, 14, 16, 52, 163, 165, 172, 404].includes(id)
       );
       expect(hasCommonPokemon).toBe(true);
@@ -1157,8 +1165,8 @@ describe('Data Integrity Tests', () => {
 
       // Check classic encounters
       classicEncounters.forEach(encounter => {
-        const isSorted = encounter.pokemonIds.every((id, index) => 
-          index === 0 || id >= encounter.pokemonIds[index - 1]
+        const isSorted = encounter.pokemonIds.every(
+          (id, index) => index === 0 || id >= encounter.pokemonIds[index - 1]
         );
         if (!isSorted) {
           unsortedRoutes.push(
@@ -1169,8 +1177,8 @@ describe('Data Integrity Tests', () => {
 
       // Check remix encounters
       remixEncounters.forEach(encounter => {
-        const isSorted = encounter.pokemonIds.every((id, index) => 
-          index === 0 || id >= encounter.pokemonIds[index - 1]
+        const isSorted = encounter.pokemonIds.every(
+          (id, index) => index === 0 || id >= encounter.pokemonIds[index - 1]
         );
         if (!isSorted) {
           unsortedRoutes.push(

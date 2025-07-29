@@ -97,8 +97,9 @@ describe('Playthroughs Store - Custom Locations', () => {
 
       while (retryCount < maxRetries && !timestampUpdated) {
         updatedPlaythrough = playthroughActions.getActivePlaythrough();
-        timestampUpdated = (updatedPlaythrough?.updatedAt || 0) > originalTimestamp;
-        
+        timestampUpdated =
+          (updatedPlaythrough?.updatedAt || 0) > originalTimestamp;
+
         if (!timestampUpdated) {
           retryCount++;
           // Wait a bit longer between retries

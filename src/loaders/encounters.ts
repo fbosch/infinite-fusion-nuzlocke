@@ -81,7 +81,9 @@ export async function getEncountersByRouteName(
   }
 
   const encounters = await getEncounters(gameMode);
-  return encounters.find(encounter => encounter.routeName === routeName) || null;
+  return (
+    encounters.find(encounter => encounter.routeName === routeName) || null
+  );
 }
 
 // Get all encounters for a specific game mode

@@ -59,8 +59,8 @@ export function getLocationsByRegion(region: string): Location[] {
 // Get locations by specific region (case-insensitive)
 export function getLocationsBySpecificRegion(region: string): Location[] {
   const normalizedRegion = region.toLowerCase();
-  return getLocations().filter(location => 
-    location.region.toLowerCase() === normalizedRegion
+  return getLocations().filter(
+    location => location.region.toLowerCase() === normalizedRegion
   );
 }
 
@@ -118,7 +118,8 @@ export async function getLocationsWithEncounters(
   gameMode: 'classic' | 'remix' = 'classic'
 ): Promise<Array<Location & { encounters: number[] }>> {
   const locations = getLocations();
-  const locationsWithEncounters: Array<Location & { encounters: number[] }> = [];
+  const locationsWithEncounters: Array<Location & { encounters: number[] }> =
+    [];
 
   for (const location of locations) {
     const encounters = await getLocationEncountersById(location.id, gameMode);

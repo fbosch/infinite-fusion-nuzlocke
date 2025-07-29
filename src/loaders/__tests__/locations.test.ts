@@ -158,7 +158,9 @@ describe('Locations', () => {
         );
 
         const locations = getLocations();
-        const starterLocation = locations.find(loc => loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION);
+        const starterLocation = locations.find(
+          loc => loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION
+        );
         expect(starterLocation).not.toBeNull();
 
         if (starterLocation) {
@@ -178,7 +180,7 @@ describe('Locations', () => {
           routeId: 99999, // Use a high number that won't exist
           order: 999,
           region: 'Kanto',
-          description: 'A mock location for testing'
+          description: 'A mock location for testing',
         };
 
         const hasEncounters = await hasLocationEncounters(
@@ -192,16 +194,22 @@ describe('Locations', () => {
     describe('Starter Location Identification', () => {
       it('should identify starter location by GUID', () => {
         const locations = getLocations();
-        const starterLocation = locations.find(loc => loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION);
+        const starterLocation = locations.find(
+          loc => loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION
+        );
         expect(starterLocation).not.toBeNull();
         expect(starterLocation?.name).toBe("Oak's Lab");
       });
 
       it('should identify non-starter locations correctly', () => {
         const locations = getLocations();
-        const nonStarterLocation = locations.find(loc => loc.id !== SPECIAL_LOCATIONS.STARTER_LOCATION);
+        const nonStarterLocation = locations.find(
+          loc => loc.id !== SPECIAL_LOCATIONS.STARTER_LOCATION
+        );
         expect(nonStarterLocation).toBeDefined();
-        expect(nonStarterLocation?.id).not.toBe(SPECIAL_LOCATIONS.STARTER_LOCATION);
+        expect(nonStarterLocation?.id).not.toBe(
+          SPECIAL_LOCATIONS.STARTER_LOCATION
+        );
       });
     });
   });

@@ -39,7 +39,7 @@ export function useEncounterData({
   const loadRouteEncounterData = useCallback(async () => {
     // Determine the route name to use
     let targetRouteName = routeName;
-    
+
     // If we have a locationId but no routeName, convert locationId to routeName
     if (!targetRouteName && locationId) {
       // Special case for starter location
@@ -70,7 +70,10 @@ export function useEncounterData({
         getPokemon(),
         getPokemonNameMap(),
       ]);
-      const encounter = await getEncountersByRouteName(targetRouteName, gameMode);
+      const encounter = await getEncountersByRouteName(
+        targetRouteName,
+        gameMode
+      );
       if (encounter) {
         const pokemonOptions: PokemonOptionType[] = encounter.pokemonIds.map(
           id => {
@@ -89,7 +92,10 @@ export function useEncounterData({
         setRouteEncounterData([]);
       }
     } catch (err) {
-      console.error(`Error loading encounter data for route ${targetRouteName}:`, err);
+      console.error(
+        `Error loading encounter data for route ${targetRouteName}:`,
+        err
+      );
       setError(
         err instanceof Error ? err : new Error('Failed to load encounter data')
       );
