@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { dragActions } from '@/stores/dragStore';
 import {
   type PokemonOptionType,
-  isEggPokemon,
+  isEgg,
   getEncounterDisplayName,
 } from '@/loaders/pokemon';
 import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
@@ -52,7 +52,6 @@ function PokemonOptionContent({
   isActive = false,
   isSelected = false,
 }: PokemonOptionContentProps) {
-  const isEgg = isEggPokemon(pokemon);
   const displayName = getEncounterDisplayName(pokemon);
 
   return (
@@ -62,7 +61,7 @@ function PokemonOptionContent({
         alt={pokemon.name}
         width={40}
         height={40}
-        className='object-contain object-center scale-140 image-render-high-quality cursor-grab active:cursor-grabbing'
+        className='object-contain object-center scale-140 image-render-high-quality'
         loading={index < 5 || isRoutePokemon(pokemon.id) ? 'eager' : 'lazy'}
         draggable
         unoptimized
@@ -90,7 +89,7 @@ function PokemonOptionContent({
             Route
           </span>
         )}
-        {isEgg ? null : (
+        {isEgg(pokemon) ? null : (
           <span
             className={clsx(
               'text-xs dark:text-gray-400',

@@ -25,6 +25,7 @@ import {
   useAllPokemon,
   isPokemonEvolution,
   isPokemonPreEvolution,
+  isEgg,
 } from '@/loaders/pokemon';
 import { dragActions } from '@/stores/dragStore';
 import { useActivePlaythrough, useGameMode } from '@/stores/playthroughs';
@@ -65,9 +66,9 @@ export function getPokemonSpriteUrlFromOption(
   pokemon: PokemonOptionType
 ): string {
   // Handle special Egg encounter
-  if (pokemon.id === -1 && pokemon.name === 'Egg') {
-    // Use a placeholder egg sprite or a custom egg image
-    return '/images/egg.webp'; // You can replace this with an actual egg sprite URL
+  if (isEgg(pokemon)) {
+    // Use a simple data URL for an egg icon
+    return '/images/egg.png';
   }
 
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
@@ -251,8 +252,11 @@ export const PokemonCombobox = React.memo(
             const isEvolution = await isPokemonEvolution(value, newValue);
             const isPreEvolution = await isPokemonPreEvolution(value, newValue);
 
-            // Only check for overwrite confirmation if it's not an evolution or devolution
-            if (!isEvolution && !isPreEvolution) {
+            // Check if this is an egg hatching (replacing egg with regular pokemon)
+            const isEggHatching = isEgg(value) && !isEgg(newValue);
+
+            // Only check for overwrite confirmation if it's not an evolution, devolution, or egg hatching
+            if (!isEvolution && !isPreEvolution && !isEggHatching) {
               const shouldOverwrite = await onBeforeOverwrite(value, newValue);
               if (!shouldOverwrite) {
                 // If overwrite was cancelled, don't proceed with the change

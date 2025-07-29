@@ -10,7 +10,7 @@ export function generatePokemonUID(): string {
 }
 
 // Utility function to check if a Pokemon is an Egg
-export function isEggPokemon(pokemon: PokemonOptionType): boolean {
+export function isEgg(pokemon: PokemonOptionType): boolean {
   return pokemon.id === -1 && pokemon.name === 'Egg';
 }
 
@@ -31,7 +31,7 @@ export function createEggEncounter(
 
 // Utility function to get encounter display name
 export function getEncounterDisplayName(encounter: PokemonOptionType): string {
-  if (isEggPokemon(encounter)) {
+  if (isEgg(encounter)) {
     return encounter.nickname || 'Egg';
   }
   return encounter.nickname || encounter.name;
