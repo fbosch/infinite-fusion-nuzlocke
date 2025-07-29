@@ -473,6 +473,7 @@ export function EncounterCell({
                   shouldLoad={shouldLoad}
                   onBeforeClear={handleBeforeClearHead}
                   onBeforeOverwrite={handleBeforeOverwriteHead}
+                  isFusion={isFusion}
                 />
               </div>
               <CursorTooltip
@@ -518,6 +519,7 @@ export function EncounterCell({
                   shouldLoad={shouldLoad}
                   onBeforeClear={handleBeforeClearBody}
                   onBeforeOverwrite={handleBeforeOverwriteBody}
+                  isFusion={isFusion}
                 />
               </div>
             </div>
@@ -534,6 +536,7 @@ export function EncounterCell({
               shouldLoad={shouldLoad}
               onBeforeClear={handleBeforeClearSingle}
               onBeforeOverwrite={handleBeforeOverwriteSingle}
+              isFusion={isFusion}
             />
           )}
         </div>

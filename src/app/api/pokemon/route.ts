@@ -14,6 +14,24 @@ const QuerySchema = z.object({
     .optional(), // Limit results
 });
 
+// Special Egg Pokemon entry
+const EGG_POKEMON = {
+  id: -1,
+  nationalDexId: -1,
+  name: 'Egg',
+  types: [{ name: 'Normal' }],
+  species: {
+    is_legendary: false,
+    is_mythical: false,
+    generation: null,
+    evolution_chain: null,
+  },
+  evolution: {
+    evolves_to: [],
+    evolves_from: undefined,
+  },
+};
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -32,7 +50,11 @@ export async function GET(request: NextRequest) {
     }
 
     const { ids, search, type, limit } = validatedQuery.data;
-    let filteredData = pokemonData as z.infer<typeof PokemonSchema>[];
+
+    // Start with regular Pokemon data and add the Egg
+    let filteredData = [...pokemonData, EGG_POKEMON] as z.infer<
+      typeof PokemonSchema
+    >[];
 
     // Filter by IDs if provided
     if (ids) {
@@ -76,7 +98,7 @@ export async function GET(request: NextRequest) {
       {
         data: validatedData.data,
         count: validatedData.data.length,
-        total: pokemonData.length,
+        total: pokemonData.length + 1, // +1 for the Egg
       },
       {
         headers: {

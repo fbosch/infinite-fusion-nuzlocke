@@ -10,7 +10,7 @@ import type { PokemonOptionType } from '@/loaders/pokemon';
 import { CursorTooltip } from '../CursorTooltip';
 import { DNA_SPLICER_ICON } from '@/misc/items';
 import Image from 'next/image';
-import { useAllPokemon, usePokemonNameMap } from '@/loaders/pokemon';
+import { useAllPokemon, usePokemonNameMap, isEgg } from '@/loaders/pokemon';
 
 interface FusionToggleButtonProps {
   locationId: string;
@@ -49,6 +49,9 @@ export function FusionToggleButton({
 
       // Only allow dropping if this row is not already a fusion and has an existing encounter
       if (isFusion || !selectedPokemon) return;
+
+      // Prevent dropping if the button is disabled (Egg in non-fusion mode)
+      if (!isFusion && selectedPokemon && isEgg(selectedPokemon)) return;
 
       // Find the Pokémon by name
       const findPokemonByName = async () => {
@@ -120,6 +123,12 @@ export function FusionToggleButton({
         return;
       }
 
+      // Prevent drop if the button is disabled (Egg in non-fusion mode)
+      if (!isFusion && selectedPokemon && isEgg(selectedPokemon)) {
+        e.dataTransfer.dropEffect = 'none';
+        return;
+      }
+
       // Check if drag is from a different combobox
       const isFromDifferentCombobox =
         dragSnapshot.currentDragSource &&
@@ -144,11 +153,17 @@ export function FusionToggleButton({
   const isDropAllowed =
     !isFusion &&
     selectedPokemon &&
+    !isEgg(selectedPokemon) &&
     dragSnapshot.isDragging &&
     dragSnapshot.currentDragSource &&
     dragSnapshot.currentDragSource !== `${locationId}-single` &&
     dragSnapshot.currentDragSource !== `${locationId}-head` &&
     dragSnapshot.currentDragSource !== `${locationId}-body`;
+
+  // Disable fusion toggle if not in fusion mode and the selected pokemon is an Egg
+  const isDisabled = Boolean(
+    !isFusion && selectedPokemon && isEgg(selectedPokemon)
+  );
 
   return (
     <button
@@ -157,22 +172,32 @@ export function FusionToggleButton({
       onDrop={handleFusionDrop}
       onDragOver={handleFusionDragOver}
       onDragEnd={handleFusionDragEnd}
+      disabled={isDisabled}
       className={clsx(
         'group',
         'size-10 flex items-center justify-center self-center',
-        'p-2 rounded-md border transition-all duration-200 cursor-pointer',
+        'p-2 rounded-md border transition-all duration-200',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
-        'disabled:opacity-50 disabled:cursor-not-allowed bg-white',
         {
-          'dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 border-gray-300 hover:bg-red-500 hover:border-red-600':
+          // Fusion mode (enabled)
+          'cursor-pointer bg-white border-gray-300 text-gray-700 hover:bg-red-500 hover:border-red-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300':
             isFusion,
-          'bg-white border-gray-300 text-gray-700 hover:bg-green-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-green-700':
-            !isFusion,
+          // Non-fusion mode (enabled)
+          'cursor-pointer bg-white border-gray-300 text-gray-700 hover:bg-green-700 hover:border-green-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-green-700':
+            !isFusion && !isDisabled,
+          // Disabled state
+          'cursor-not-allowed bg-gray-100 border-gray-200 text-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-500':
+            isDisabled,
+          // Drop allowed indicator
           'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20':
-            isDropAllowed,
+            isDropAllowed && !isDisabled,
         }
       )}
-      aria-label={`Toggle fusion for ${selectedPokemon?.name || 'Pokemon'}`}
+      aria-label={
+        isDisabled
+          ? 'Cannot fuse Eggs'
+          : `Toggle fusion for ${selectedPokemon?.name || 'Pokemon'}`
+      }
     >
       <CursorTooltip
         content={
@@ -184,15 +209,31 @@ export function FusionToggleButton({
               height={24}
               className='object-contain object-center image-rendering-pixelated'
             />
-            <span className='text-sm'>{isFusion ? 'Unfuse' : 'Fuse'}</span>
+            <span className='text-sm'>
+              {isDisabled ? 'Cannot fuse Eggs' : isFusion ? 'Unfuse' : 'Fuse'}
+            </span>
           </div>
         }
         delay={300}
       >
         {isFusion ? (
-          <DnaOff className='size-6 group-hover:text-white' />
+          <DnaOff
+            className={clsx(
+              'size-6',
+              isDisabled
+                ? 'text-gray-400 dark:text-gray-500'
+                : 'group-hover:text-white'
+            )}
+          />
         ) : (
-          <Dna className='size-6 group-hover:text-white' />
+          <Dna
+            className={clsx(
+              'size-6',
+              isDisabled
+                ? 'text-gray-400 dark:text-gray-500'
+                : 'group-hover:text-white'
+            )}
+          />
         )}
       </CursorTooltip>
     </button>

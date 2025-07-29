@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { getPokemon, type PokemonOptionType } from '@/loaders/pokemon';
 import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
-import { useGameMode, useCustomLocations } from '@/stores/playthroughs';
+import { useGameMode } from '@/stores/playthroughs';
 
 interface UseEncounterDataOptions {
   routeId?: number;
@@ -20,14 +20,6 @@ export function useEncounterData({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const gameMode = useGameMode();
-  const customLocations = useCustomLocations();
-
-  // Check if this is a custom location by looking in the customLocations array
-  const isCustomLocationFlag = useCallback(() => {
-    if (!locationId) return false;
-
-    return customLocations.some(customLoc => customLoc.id === locationId);
-  }, [locationId, customLocations]);
 
   // Predicate function to check if a Pokemon is in the current route
   const isRoutePokemon = useCallback(
