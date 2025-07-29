@@ -341,12 +341,16 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
                   {isDevolutionMode ? (
                     <Fragment>
                       Devolve to{' '}
-                      <span className=''>{availablePreEvolution?.name}</span>
+                      <span className='font-semibold'>
+                        {availablePreEvolution?.name}
+                      </span>
                     </Fragment>
                   ) : (
                     <Fragment>
                       Evolve to{' '}
-                      <span className=''>{availableEvolutions[0]?.name}</span>
+                      <span className='font-semibold'>
+                        {availableEvolutions[0]?.name}
+                      </span>
                     </Fragment>
                   )}
                 </span>

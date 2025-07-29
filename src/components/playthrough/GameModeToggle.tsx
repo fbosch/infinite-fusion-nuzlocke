@@ -55,7 +55,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
     <fieldset
       className={clsx(
         'relative flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 sm:p-1',
-        'border border-gray-200 dark:border-gray-600',
+        'border border-gray-200 dark:border-gray-600 font-medium',
         'h-[36px] sm:h-[42px] w-[180px] sm:w-auto',
         !activePlaythrough && 'opacity-50'
       )}

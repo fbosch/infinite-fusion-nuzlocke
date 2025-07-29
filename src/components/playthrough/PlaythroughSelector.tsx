@@ -143,7 +143,7 @@ export default function PlaythroughSelector({
         >
           <div className='flex items-center gap-2 min-w-0 flex-1 overflow-hidden'>
             <Album className='w-4 h-4 flex-shrink-0' />
-            <span className='truncate min-w-0'>
+            <span className='truncate min-w-0 font-medium'>
               {activePlaythrough?.name || '...'}
             </span>
           </div>
@@ -164,7 +164,7 @@ export default function PlaythroughSelector({
           {/* Current playthroughs section */}
           {allPlaythroughs.length > 0 && (
             <>
-              <div className='px-3 py-2 sm:py-2 text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600'>
+              <div className='px-3 py-2 sm:py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600'>
                 Playthroughs
               </div>
               {allPlaythroughs
@@ -302,7 +302,7 @@ export default function PlaythroughSelector({
                   onClick={handleCreatePlaythrough}
                   disabled={Boolean(!newPlaythroughName.trim())}
                   className={clsx(
-                    'px-3 py-1.5 sm:px-2 sm:py-2 text-xs  text-white rounded cursor-pointer',
+                    'px-3 py-1.5 sm:px-2 sm:py-2 text-xs font-medium text-white rounded cursor-pointer',
                     'bg-blue-600 hover:bg-blue-700 transition-colors',
                     'focus:outline-none focus:ring-1 focus:ring-blue-500',
                     'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600',
