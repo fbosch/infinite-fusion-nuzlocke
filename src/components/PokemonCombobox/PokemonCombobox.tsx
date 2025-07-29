@@ -341,11 +341,7 @@ export const PokemonCombobox = React.memo(
                       inputRef.current = comboRef;
                       refs.setReference(comboRef);
                       update();
-                      if (
-                        ref &&
-                        'current' in ref &&
-                        typeof ref.current === 'function'
-                      ) {
+                      if (ref && 'current' in ref) {
                         ref.current = comboRef;
                       }
                     }
