@@ -64,7 +64,28 @@ function ThemeToggle() {
 export default function Footer() {
   const { ref, inView } = useInView({
     threshold: 0.5,
+    triggerOnce: true,
   });
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Determine the color scheme based on the current theme
+  const getColorScheme = () => {
+    if (!mounted) return 'no-preference: light; light: light; dark: dark;';
+
+    switch (resolvedTheme) {
+      case 'light':
+        return 'light';
+      case 'dark':
+        return 'dark';
+      default:
+        return 'no-preference: light; light: light; dark: dark;';
+    }
+  };
 
   return (
     <footer
@@ -110,7 +131,7 @@ export default function Footer() {
               >
                 <GitHubButton
                   href='https://github.com/fbosch/infinite-fusion-nuzlocke'
-                  data-color-scheme='no-preference: light; light: light; dark: dark;'
+                  data-color-scheme={getColorScheme()}
                   data-icon='octicon-star'
                   data-size='large'
                   data-show-count='true'
@@ -120,7 +141,7 @@ export default function Footer() {
                 </GitHubButton>
                 <GitHubButton
                   href='https://github.com/fbosch/infinite-fusion-nuzlocke/issues'
-                  data-color-scheme='no-preference: light; light: light; dark: dark;'
+                  data-color-scheme={getColorScheme()}
                   data-icon='octicon-issue-opened'
                   data-size='large'
                   data-show-count='true'
