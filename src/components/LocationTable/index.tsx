@@ -163,10 +163,10 @@ export default function LocationTable() {
   }
 
   return (
-    <div className='overflow-hidden xl:rounded-lg border border-gray-200 dark:border-gray-700 xl:shadow-sm'>
+    <div className='overflow-hidden xl:rounded-lg border-y md:border border-gray-200 dark:border-gray-700 xl:shadow-sm'>
       <div className='max-h-[90vh] overflow-auto scrollbar-thin overscroll-x-none'>
         <table
-          className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700'
+          className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700 overscroll-x-contain overscroll-y-auto'
           role='table'
           aria-label='Locations table'
         >

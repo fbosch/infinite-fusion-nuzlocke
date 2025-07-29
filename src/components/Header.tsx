@@ -11,10 +11,10 @@ export default function Header() {
         Skip to main content
       </a>
 
-      <div className='max-w-[1500px] mx-auto px-4 sm:px-6 xl:px-0'>
+      <div className='max-w-[1500px] mx-auto px-4 sm:px-6 md:px-4 '>
         <header className='py-2 sm:py-3 sm:pt-6 mb-2 sm:mb-4'>
           <div className='flex flex-row gap-2 sm:gap-3 lg:gap-4'>
-            <div className='flex flex-1  items-center gap-2 sm:gap-3 self-start'>
+            <div className='flex flex-1 items-center gap-2 sm:gap-3 self-start'>
               <Logo className='w-16 mt-4 sm:mt-0 sm:w-14' />
               <h1 className='sr-only sm:not-sr-only'>
                 <span className='block tracking-[0.01em] text-xs font-medium sm:text-[0.85rem] font-600 bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'>
