@@ -33,7 +33,6 @@ import { useEncounterData } from './useEncounterData';
 import { usePokemonSearch } from './usePokemonSearch';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { PokemonOption, PokemonOptions } from './PokemonOptions';
-import { useDebounce } from 'use-debounce';
 
 let nationalDexMapping: Map<number, number> | null = null;
 let mappingPromise: Promise<void> | null = null;
@@ -97,14 +96,6 @@ export const PokemonCombobox = React.memo(
   }) => {
     const [query, setQuery] = useState('');
     const deferredQuery = useDeferredValue(query);
-    const [debouncedQuery] = useDebounce(
-      deferredQuery,
-      deferredQuery.length > 3 ? 50 : 250,
-      {
-        leading: false,
-        trailing: true,
-      }
-    );
     const gameMode = useGameMode();
 
     // Ref to maintain focus on input
@@ -134,7 +125,7 @@ export const PokemonCombobox = React.memo(
 
     // Use the search hook
     const { data: results = [] } = usePokemonSearch({
-      query: debouncedQuery,
+      query: deferredQuery,
     });
 
     // Floating UI setup

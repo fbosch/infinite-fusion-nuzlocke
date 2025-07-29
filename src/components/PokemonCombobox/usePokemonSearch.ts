@@ -1,8 +1,4 @@
-import {
-  keepPreviousData,
-  QueryOptions,
-  useQuery,
-} from '@tanstack/react-query';
+import { QueryOptions, useQuery } from '@tanstack/react-query';
 import {
   PokemonOptionType,
   searchPokemon,
@@ -25,7 +21,6 @@ export function usePokemonSearch({
   const gameMode = useGameMode();
   const { data: allPokemon = [] } = useAllPokemon();
 
-  // Search query
   return useQuery<PokemonOptionType[], Error>({
     queryKey: ['pokemon', 'search', gameMode, query],
     queryFn: async () => {
@@ -48,9 +43,15 @@ export function usePokemonSearch({
       return data?.filter(p => p.id !== 0) ?? [];
     },
     enabled: query.length > 0 && allPokemon.length > 0,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    placeholderData: keepPreviousData,
+    staleTime: 30000, // 30 seconds
+    gcTime: 60000, // 1 minute
+    placeholderData: previousData => {
+      return (
+        previousData?.filter(p =>
+          p.name.toLowerCase().includes(query.toLowerCase())
+        ) ?? []
+      );
+    },
     ...queryOptions,
   });
 }
