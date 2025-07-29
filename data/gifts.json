@@ -1,0 +1,260 @@
+[
+  {
+    "pokemonId": 1,
+    "location": "Pallet Town",
+    "notes": "Starter Pokémon",
+    "level": 5
+  },
+  {
+    "pokemonId": 137,
+    "location": "Any PC",
+    "notes": "Expand\nRandom chance (based on step count) when accessing a PC\n\n\n\nCollapse\nThe game keeps track of the total steps taken. If the player accesses a PC when the steps are divisible by 200, a Porygon will be added to the player's party (or first available PC storage space if the party is full). Afterwards the total steps counter will increase by 1 so the event can't be instantly repeated.",
+    "level": 1
+  },
+  {
+    "pokemonId": 501,
+    "location": "Viridian City",
+    "notes": "Pokemart, Second Playthroughs only",
+    "level": 5
+  },
+  {
+    "pokemonId": 204,
+    "location": "Pewter City",
+    "notes": "Quest Reward",
+    "level": 5
+  },
+  {
+    "pokemonId": 741,
+    "location": "Pewter City",
+    "notes": "Quest Reward",
+    "level": 15
+  },
+  {
+    "pokemonId": 129,
+    "location": "Route 3",
+    "notes": "Sold for is 500 Pokedollars",
+    "level": 5
+  },
+  {
+    "pokemonId": 138,
+    "location": "Mt. Moon",
+    "notes": "Helix Fossil"
+  },
+  {
+    "pokemonId": -1,
+    "location": "Route 5",
+    "notes": "From breeder trainer, 4 possible random fusion Pokemon",
+    "level": 1
+  },
+  {
+    "pokemonId": 175,
+    "location": "Kanto Daycare",
+    "notes": "Daycare Egg",
+    "level": 1
+  },
+  {
+    "pokemonId": 194,
+    "location": "Vermillion City",
+    "notes": "Quest Reward",
+    "level": 15
+  },
+  {
+    "pokemonId": 301,
+    "location": "S.S. Anne",
+    "notes": "Root Fossil, Fossil Maniac 2nd Encounter"
+  },
+  {
+    "pokemonId": 488,
+    "location": "S.S. Anne",
+    "notes": "From a sailor, after the third Gym",
+    "level": 20
+  },
+  {
+    "pokemonId": 142,
+    "location": "Pewter City",
+    "notes": "Old Amber, Quest Reward"
+  },
+  {
+    "pokemonId": -2,
+    "location": "Pewter City Museum",
+    "notes": "Revive Fossils except the Old Amber",
+    "level": 1
+  },
+  {
+    "pokemonId": 137,
+    "location": "Bill's Lighthouse",
+    "notes": "From Bill after the third Gym",
+    "level": 20
+  },
+  {
+    "pokemonId": 327,
+    "location": "Rock Tunnel",
+    "level": 10
+  },
+  {
+    "pokemonId": 66,
+    "location": "Rock Tunnel",
+    "notes": "As Egg, Hiker's Gift",
+    "level": 1
+  },
+  {
+    "pokemonId": 74,
+    "location": "Rock Tunnel",
+    "notes": "As Egg, Hiker's Gift",
+    "level": 1
+  },
+  {
+    "pokemonId": 253,
+    "location": "Lavender Town",
+    "notes": "As Egg",
+    "level": 1
+  },
+  {
+    "pokemonId": -1,
+    "location": "Route 8",
+    "notes": "From breeder trainer, 10 possible random fusion Pokemon",
+    "level": 1
+  },
+  {
+    "pokemonId": 133,
+    "location": "Celadon City",
+    "notes": "Top floor of Celadon Condominiums",
+    "level": 20
+  },
+  {
+    "pokemonId": 63,
+    "location": "Celadon Game Corner",
+    "notes": "200 Coins",
+    "level": 9
+  },
+  {
+    "pokemonId": 35,
+    "location": "Celadon Game Corner",
+    "level": 750
+  },
+  {
+    "pokemonId": 127,
+    "location": "Celadon Game Corner",
+    "level": 4000
+  },
+  {
+    "pokemonId": 123,
+    "location": "Celadon Game Corner",
+    "level": 4000
+  },
+  {
+    "pokemonId": 147,
+    "location": "Celadon Game Corner",
+    "level": 6000
+  },
+  {
+    "pokemonId": 137,
+    "location": "Celadon Game Corner",
+    "level": 9999
+  },
+  {
+    "pokemonId": 305,
+    "location": "Celadon Cafe",
+    "notes": "Skull Fossil, Fossil Maniac 3rd Encounter"
+  },
+  {
+    "pokemonId": 131,
+    "location": "Silph Co.",
+    "level": 25
+  },
+  {
+    "pokemonId": 152,
+    "location": "Silph Co.",
+    "notes": "From the President after Silph Co",
+    "level": 15
+  },
+  {
+    "pokemonId": 425,
+    "location": "Saffron Restaurant",
+    "notes": "Jaw Fossil, Fossil Maniac 4th Encounter"
+  },
+  {
+    "pokemonId": 107,
+    "location": "Fighting Dojo",
+    "notes": "Fighting Dojo",
+    "level": 40
+  },
+  {
+    "pokemonId": 235,
+    "location": "Saffron Nightclub",
+    "notes": "Quest Reward",
+    "level": 40
+  },
+  {
+    "pokemonId": -2,
+    "location": "Cinnabar Lab",
+    "notes": "Reviving any Fossil you found",
+    "level": 35
+  },
+  {
+    "pokemonId": 138,
+    "location": "Cinnabar Island",
+    "notes": "Helix Fossil, Quest Reward, opposite from the first choice"
+  },
+  {
+    "pokemonId": 152,
+    "location": "Goldenrod City",
+    "notes": "Elm's assistant",
+    "level": 15
+  },
+  {
+    "pokemonId": 276,
+    "location": "Pallet Town",
+    "notes": "Professor Oak, after getting 12 Badges and before getting 16th Badge",
+    "level": 5
+  },
+  {
+    "pokemonId": 285,
+    "location": "National Park",
+    "notes": "As Egg",
+    "level": 1
+  },
+  {
+    "pokemonId": 291,
+    "location": "Violet City",
+    "level": 5
+  },
+  {
+    "pokemonId": -2,
+    "location": "Rock Smash",
+    "notes": "Rock Smash fossils are only available after the Elite Four"
+  },
+  {
+    "pokemonId": 152,
+    "location": "New Bark Town",
+    "level": 15
+  },
+  {
+    "pokemonId": 296,
+    "location": "Blackthorn City",
+    "notes": "Quest Reward",
+    "level": 45
+  },
+  {
+    "pokemonId": 297,
+    "location": "Dragon's Den",
+    "level": 25
+  },
+  {
+    "pokemonId": 330,
+    "location": "Knot Island",
+    "notes": "As Eggs brought with Heart Scales",
+    "level": 1
+  },
+  {
+    "pokemonId": 316,
+    "location": "Kin Island",
+    "notes": "Obtain the other two starters you didn't choose",
+    "level": 20
+  },
+  {
+    "pokemonId": 454,
+    "location": "Bond Bridge",
+    "level": 30
+  }
+]

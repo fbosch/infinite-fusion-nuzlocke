@@ -1,0 +1,182 @@
+[
+  {
+    "pokemonId": 69,
+    "askingForId": 21,
+    "askingFor": "Spearow",
+    "location": "Viridian City"
+  },
+  {
+    "pokemonId": 236,
+    "askingForId": 56,
+    "askingFor": "Mankey",
+    "location": "Pewter City"
+  },
+  {
+    "pokemonId": 193,
+    "askingForId": 46,
+    "askingFor": "Paras",
+    "location": "Cerulean City"
+  },
+  {
+    "pokemonId": 60,
+    "askingForId": 19,
+    "askingFor": "Rattata",
+    "location": "Route 5"
+  },
+  {
+    "pokemonId": 79,
+    "askingForId": 52,
+    "askingFor": "Meowth",
+    "location": "Vermillion City"
+  },
+  {
+    "pokemonId": 54,
+    "askingForId": 52,
+    "askingFor": "Meowth",
+    "location": "Vermillion City"
+  },
+  {
+    "pokemonId": 83,
+    "askingForId": 21,
+    "askingFor": "Spearow",
+    "location": "Vermillion City"
+  },
+  {
+    "pokemonId": 100,
+    "askingForId": 23,
+    "askingFor": "Ekans",
+    "location": "Pokemon Fan Club"
+  },
+  {
+    "pokemonId": 102,
+    "askingForId": 100,
+    "askingFor": "Voltorb",
+    "location": "Pokemon Fan Club"
+  },
+  {
+    "pokemonId": 84,
+    "askingForId": 100,
+    "askingFor": "Voltorb",
+    "location": "Pokemon Fan Club"
+  },
+  {
+    "pokemonId": 86,
+    "askingForId": 96,
+    "askingFor": "Drowzee",
+    "location": "S.S. Anne"
+  },
+  {
+    "pokemonId": 58,
+    "askingForId": 90,
+    "askingFor": "Shellder",
+    "location": "S.S. Anne"
+  },
+  {
+    "pokemonId": 122,
+    "askingForId": 63,
+    "askingFor": "Abra",
+    "location": "Route 2"
+  },
+  {
+    "pokemonId": 179,
+    "askingForId": 48,
+    "askingFor": "Venonat",
+    "location": "Route 11 Gate"
+  },
+  {
+    "pokemonId": 77,
+    "askingForId": 26,
+    "askingFor": "Raichu",
+    "location": "Celadon City"
+  },
+  {
+    "pokemonId": 239,
+    "askingForId": 133,
+    "askingFor": "Eevee",
+    "location": "Celadon City"
+  },
+  {
+    "pokemonId": 240,
+    "askingForId": 133,
+    "askingFor": "Eevee",
+    "location": "Celadon City"
+  },
+  {
+    "pokemonId": 214,
+    "askingForId": 127,
+    "askingFor": "Pinsir",
+    "location": "Safari Zone"
+  },
+  {
+    "pokemonId": 227,
+    "askingForId": 85,
+    "askingFor": "Dodrio",
+    "location": "Cinnabar Island"
+  },
+  {
+    "pokemonId": 86,
+    "askingForId": 77,
+    "askingFor": "Ponyta",
+    "location": "Cinnabar Laboratory"
+  },
+  {
+    "pokemonId": 113,
+    "askingForId": 36,
+    "askingFor": "Clefable",
+    "location": "Cinnabar Laboratory"
+  },
+  {
+    "pokemonId": 101,
+    "askingForId": 26,
+    "askingFor": "Raichu",
+    "location": "Cinnabar Laboratory"
+  },
+  {
+    "pokemonId": 246,
+    "askingForId": 147,
+    "askingFor": "Dratini",
+    "location": "Crimson City"
+  },
+  {
+    "pokemonId": 282,
+    "askingForId": 7,
+    "askingFor": "Squirtle",
+    "location": "Pallet Town"
+  },
+  {
+    "pokemonId": 276,
+    "askingForId": 1,
+    "askingFor": "Bulbasaur",
+    "location": "Pallet Town"
+  },
+  {
+    "pokemonId": 279,
+    "askingForId": 4,
+    "askingFor": "Charmander",
+    "location": "Pallet Town"
+  },
+  {
+    "pokemonId": 215,
+    "askingForId": 108,
+    "askingFor": "Lickitung",
+    "location": "Goldenrod City"
+  },
+  {
+    "pokemonId": 279,
+    "askingForId": 155,
+    "askingFor": "Cyadaquil",
+    "location": "New Bark Town"
+  },
+  {
+    "pokemonId": 282,
+    "askingForId": 158,
+    "askingFor": "Totodile",
+    "location": "New Bark Town"
+  },
+  {
+    "pokemonId": 276,
+    "askingForId": 152,
+    "askingFor": "Chikorita",
+    "location": "New Bark Town"
+  }
+]
