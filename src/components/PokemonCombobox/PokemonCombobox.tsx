@@ -64,6 +64,12 @@ export async function initializeSpriteMapping(): Promise<void> {
 export function getPokemonSpriteUrlFromOption(
   pokemon: PokemonOptionType
 ): string {
+  // Handle special Egg encounter
+  if (pokemon.id === -1 && pokemon.name === 'Egg') {
+    // Use a placeholder egg sprite or a custom egg image
+    return '/images/egg.webp'; // You can replace this with an actual egg sprite URL
+  }
+
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
 }
 

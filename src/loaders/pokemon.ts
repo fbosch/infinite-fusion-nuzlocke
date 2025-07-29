@@ -9,6 +9,34 @@ export function generatePokemonUID(): string {
   return uuidv4();
 }
 
+// Utility function to check if a Pokemon is an Egg
+export function isEggPokemon(pokemon: PokemonOptionType): boolean {
+  return pokemon.id === -1 && pokemon.name === 'Egg';
+}
+
+// Utility function to create an Egg encounter
+export function createEggEncounter(
+  locationId?: string,
+  nickname?: string
+): PokemonOptionType {
+  return {
+    id: -1,
+    name: 'Egg',
+    nationalDexId: -1,
+    nickname,
+    originalLocation: locationId,
+    uid: generatePokemonUID(),
+  };
+}
+
+// Utility function to get encounter display name
+export function getEncounterDisplayName(encounter: PokemonOptionType): string {
+  if (isEggPokemon(encounter)) {
+    return encounter.nickname || 'Egg';
+  }
+  return encounter.nickname || encounter.name;
+}
+
 // Status enum for Pokemon tracking
 export const PokemonStatus = {
   CAPTURED: 'captured',
@@ -37,12 +65,11 @@ export const PokemonStatusSchema = z.enum(
 
 // Zod schema for Pokemon option (search results)
 export const PokemonOptionSchema = z.object({
-  id: z.number().int().positive({ error: 'Pokemon ID must be positive' }),
+  id: z.number().int({ error: 'Pokemon ID must be an integer' }),
   name: z.string().min(1, { error: 'Pokemon name is required' }),
   nationalDexId: z
     .number()
-    .int()
-    .positive({ error: 'National Dex ID must be positive' }),
+    .int({ error: 'National Dex ID must be an integer' }),
   nickname: z.string().optional(),
   originalLocation: z.string().optional(),
   status: PokemonStatusSchema.optional(),
@@ -88,11 +115,10 @@ export const EvolutionDataSchema = z.object({
 
 // Zod schema for Pokemon data
 export const PokemonSchema = z.object({
-  id: z.number().int().positive({ error: 'Pokemon ID must be positive' }),
+  id: z.number().int({ error: 'Pokemon ID must be an integer' }),
   nationalDexId: z
     .number()
-    .int()
-    .positive({ error: 'National Dex ID must be positive' }),
+    .int({ error: 'National Dex ID must be an integer' }),
   name: z.string().min(1, { error: 'Pokemon name is required' }),
   types: z.array(PokemonTypeSchema),
   species: PokemonSpeciesSchema,

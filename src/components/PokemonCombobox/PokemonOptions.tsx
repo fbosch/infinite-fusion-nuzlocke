@@ -6,7 +6,11 @@ import { ComboboxOption } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { dragActions } from '@/stores/dragStore';
-import { type PokemonOptionType } from '@/loaders/pokemon';
+import {
+  type PokemonOptionType,
+  isEggPokemon,
+  getEncounterDisplayName,
+} from '@/loaders/pokemon';
 import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
 
 interface PokemonOptionsProps {
@@ -48,6 +52,9 @@ function PokemonOptionContent({
   isActive = false,
   isSelected = false,
 }: PokemonOptionContentProps) {
+  const isEgg = isEggPokemon(pokemon);
+  const displayName = getEncounterDisplayName(pokemon);
+
   return (
     <div className={'gap-8 group w-full flex items-center'}>
       <Image
@@ -75,7 +82,7 @@ function PokemonOptionContent({
           isSelected && ''
         )}
       >
-        {pokemon.name}
+        {displayName}
       </span>
       <div className='flex items-center gap-3'>
         {gameMode !== 'randomized' && isRoutePokemon(pokemon.id) && (
@@ -83,15 +90,17 @@ function PokemonOptionContent({
             Route
           </span>
         )}
-        <span
-          className={clsx(
-            'text-xs dark:text-gray-400',
-            isActive &&
-              'group-hover:text-white group-data-selected:group-hover:text-white'
-          )}
-        >
-          {pokemon.id.toString().padStart(3, '0')}
-        </span>
+        {isEgg ? null : (
+          <span
+            className={clsx(
+              'text-xs dark:text-gray-400',
+              isActive &&
+                'group-hover:text-white group-data-selected:group-hover:text-white'
+            )}
+          >
+            {pokemon.id.toString().padStart(3, '0')}
+          </span>
+        )}
         <div className='w-5 h-5 flex items-center justify-center'>
           <Check
             className={clsx(

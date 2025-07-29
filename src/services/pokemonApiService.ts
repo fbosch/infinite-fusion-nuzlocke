@@ -126,6 +126,22 @@ class PokemonApiService {
     // Create mock Pokemon data for testing
     const mockPokemon: Pokemon[] = [
       {
+        id: -1,
+        nationalDexId: -1,
+        name: 'Egg',
+        types: [{ name: 'Normal' }],
+        species: {
+          is_legendary: false,
+          is_mythical: false,
+          generation: null,
+          evolution_chain: null,
+        },
+        evolution: {
+          evolves_to: [],
+          evolves_from: undefined,
+        },
+      },
+      {
         id: 1,
         nationalDexId: 1,
         name: 'Bulbasaur',
