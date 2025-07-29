@@ -73,6 +73,10 @@ interface PokemonComboboxProps {
   onBeforeClear?: (
     currentValue: PokemonOptionType
   ) => Promise<boolean> | boolean;
+  onBeforeOverwrite?: (
+    currentValue: PokemonOptionType,
+    newValue: PokemonOptionType
+  ) => Promise<boolean> | boolean;
   shouldLoad?: boolean;
   placeholder?: string;
   nicknamePlaceholder?: string;
@@ -90,6 +94,7 @@ export const PokemonCombobox = React.memo(
     value,
     onChange,
     onBeforeClear,
+    onBeforeOverwrite,
     shouldLoad = false,
     placeholder = 'Select Pokemon',
     nicknamePlaceholder = 'Enter nickname',
