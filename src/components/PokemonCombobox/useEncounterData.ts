@@ -1,16 +1,18 @@
 import { useState, useCallback, useEffect } from 'react';
 import { getPokemon, type PokemonOptionType } from '@/loaders/pokemon';
-import { getEncountersByRouteId, getPokemonNameMap } from '@/loaders';
+import { getEncountersByRouteName, getPokemonNameMap } from '@/loaders';
+import { getLocationById } from '@/loaders/locations';
+import { isStarterLocation } from '@/constants/special-locations';
 import { useGameMode } from '@/stores/playthroughs';
 
 interface UseEncounterDataOptions {
-  routeId?: number;
+  routeName?: string;
   locationId?: string;
   enabled?: boolean;
 }
 
 export function useEncounterData({
-  routeId,
+  routeName,
   locationId,
   enabled = false,
 }: UseEncounterDataOptions) {
@@ -35,7 +37,23 @@ export function useEncounterData({
 
   // Async function to load route encounter data
   const loadRouteEncounterData = useCallback(async () => {
-    if (!routeId && routeId !== 0) {
+    // Determine the route name to use
+    let targetRouteName = routeName;
+    
+    // If we have a locationId but no routeName, convert locationId to routeName
+    if (!targetRouteName && locationId) {
+      // Special case for starter location
+      if (isStarterLocation(locationId)) {
+        targetRouteName = 'Starter';
+      } else {
+        const location = getLocationById(locationId);
+        if (location) {
+          targetRouteName = location.name;
+        }
+      }
+    }
+
+    if (!targetRouteName) {
       setRouteEncounterData([]);
       return;
     }
@@ -52,7 +70,7 @@ export function useEncounterData({
         getPokemon(),
         getPokemonNameMap(),
       ]);
-      const encounter = await getEncountersByRouteId(routeId, gameMode);
+      const encounter = await getEncountersByRouteName(targetRouteName, gameMode);
       if (encounter) {
         const pokemonOptions: PokemonOptionType[] = encounter.pokemonIds.map(
           id => {
@@ -71,7 +89,7 @@ export function useEncounterData({
         setRouteEncounterData([]);
       }
     } catch (err) {
-      console.error(`Error loading encounter data for route ${routeId}:`, err);
+      console.error(`Error loading encounter data for route ${targetRouteName}:`, err);
       setError(
         err instanceof Error ? err : new Error('Failed to load encounter data')
       );
@@ -79,14 +97,14 @@ export function useEncounterData({
     } finally {
       setIsLoading(false);
     }
-  }, [routeId, gameMode, locationId]);
+  }, [routeName, locationId, gameMode]);
 
   // Load route data when dependencies change
   useEffect(() => {
-    if (routeId !== undefined && enabled) {
+    if ((routeName !== undefined || locationId !== undefined) && enabled) {
       loadRouteEncounterData();
     }
-  }, [gameMode, loadRouteEncounterData, routeId, enabled]);
+  }, [gameMode, loadRouteEncounterData, routeName, locationId, enabled]);
 
   return {
     routeEncounterData,

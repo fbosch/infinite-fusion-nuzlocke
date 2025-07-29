@@ -75,7 +75,6 @@ export function getPokemonSpriteUrlFromOption(
 }
 
 interface PokemonComboboxProps {
-  routeId?: number;
   locationId?: string;
   value: PokemonOptionType | null | undefined;
   onChange: (value: PokemonOptionType | null) => void;
@@ -99,7 +98,6 @@ interface PokemonComboboxProps {
 // Pokemon Combobox Component
 export const PokemonCombobox = React.memo(
   ({
-    routeId,
     locationId,
     value,
     onChange,
@@ -144,7 +142,6 @@ export const PokemonCombobox = React.memo(
 
     // Use the encounter data hook (now handles custom locations automatically)
     const { routeEncounterData, isRoutePokemon } = useEncounterData({
-      routeId,
       locationId,
       enabled: shouldLoad && !isCustomLocation && gameMode !== 'randomized',
     });

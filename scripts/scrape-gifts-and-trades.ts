@@ -310,7 +310,6 @@ async function main() {
       { label: 'Remix unique gift locations', value: remixGiftLocations, color: 'yellow' },
       { label: 'Remix trades found', value: remixData.trades.length, color: 'yellow' },
       { label: 'Remix unique trade locations', value: remixTradeLocations, color: 'yellow' },
-
       { label: 'Files saved', value: files.map(f => f.path).join(', '), color: 'cyan' },
       { label: 'Total file size', value: ConsoleFormatter.formatFileSize(fileStats.reduce((sum, stat) => sum + stat.size, 0)), color: 'cyan' },
       { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }

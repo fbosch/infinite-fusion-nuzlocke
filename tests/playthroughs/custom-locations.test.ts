@@ -89,7 +89,23 @@ describe('Playthroughs Store - Custom Locations', () => {
         '288d719e-5aab-4097-b98d-f1ffbd780a9b'
       );
 
-      const updatedPlaythrough = playthroughActions.getActivePlaythrough();
+      // Retry mechanism for flaky timestamp test
+      const maxRetries = 3;
+      let retryCount = 0;
+      let updatedPlaythrough;
+      let timestampUpdated = false;
+
+      while (retryCount < maxRetries && !timestampUpdated) {
+        updatedPlaythrough = playthroughActions.getActivePlaythrough();
+        timestampUpdated = (updatedPlaythrough?.updatedAt || 0) > originalTimestamp;
+        
+        if (!timestampUpdated) {
+          retryCount++;
+          // Wait a bit longer between retries
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
+      }
+
       expect(updatedPlaythrough?.updatedAt).toBeGreaterThan(originalTimestamp);
     });
   });

@@ -3,7 +3,6 @@
 import * as cheerio from 'cheerio';
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { ConsoleFormatter } from './console-utils';
 import {
   findPokemonId,
@@ -20,7 +19,6 @@ const WILD_ENCOUNTERS_REMIX_URL = 'https://infinitefusion.fandom.com/wiki/Wild_E
 
 interface RouteEncounters {
   routeName: string;
-  routeId?: number;
   pokemonIds: number[]; // These are custom Infinite Fusion IDs
 }
 
@@ -73,7 +71,7 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
         const children = $element.children();
         if (children.length <= 2) {
 
-          const { cleanName: cleanedRouteName, routeId } = processRouteName(fullText);
+          const { cleanName: cleanedRouteName } = processRouteName(fullText);
 
           // Skip if we've already processed this route
           if (routesSeen.has(cleanedRouteName)) {
@@ -88,7 +86,7 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
           const pokemonIds = new Set<number>();
           let current = $element;
           let steps = 0;
-          const maxSteps = 25;
+          const maxSteps = 10; // Much more limited search scope
 
           // Search through next siblings
           while (steps < maxSteps && current.next().length > 0) {
@@ -100,24 +98,24 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
               break;
             }
 
-            // Extract Pokemon from tables
+            // Look for the first table that appears after this route heading
             const tables = current.is('table') ? current : current.find('table');
             if (tables.length > 0) {
-              tables.each((tableIndex: number, table: any) => {
-                $(table).find('td, th').each((cellIndex: number, cell: any) => {
-                  const cellText = $(cell).text().trim();
+              // Only process the first table we find for this route
+              const firstTable = $(tables[0]);
+              firstTable.find('td, th').each((cellIndex: number, cell: any) => {
+                const cellText = $(cell).text().trim();
 
-                  // Skip headers and non-Pokemon content
-                  if (isPotentialPokemonName(cellText)) {
-
-                    // Try to find Pokemon by name (returns custom ID)
-                    const pokemonId = findPokemonId(cellText, pokemonNameMap);
-                    if (pokemonId) {
-                      pokemonIds.add(pokemonId);
-                    }
+                // Skip headers and non-Pokemon content
+                if (isPotentialPokemonName(cellText)) {
+                  // Try to find Pokemon by name (returns custom ID)
+                  const pokemonId = findPokemonId(cellText, pokemonNameMap);
+                  if (pokemonId) {
+                    pokemonIds.add(pokemonId);
                   }
-                });
+                }
               });
+              break; // Stop after processing the first table
             }
 
             steps++;
@@ -129,10 +127,6 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
             routeName: cleanedRouteName,
             pokemonIds: sortedIds
           };
-
-          if (routeId !== undefined) {
-            routeData.routeId = routeId;
-          }
 
           routes.push(routeData);
         }
@@ -192,29 +186,18 @@ async function main() {
 
     const duration = Date.now() - startTime;
 
-    // Calculate totals
-    const uniqueClassicPokemon = new Set(classicRoutes.flatMap(route => route.pokemonIds)).size;
-    const uniqueRemixPokemon = new Set(remixRoutes.flatMap(route => route.pokemonIds)).size;
-
-    // Success summary
-    ConsoleFormatter.printSummary('Wild Encounters Scraping Complete!', [
-      { label: 'Unique Classic Pokemon', value: uniqueClassicPokemon, color: 'yellow' },
-      { label: 'Classic data saved to', value: classicPath, color: 'cyan' },
-      { label: 'Classic file size', value: ConsoleFormatter.formatFileSize(classicStats.size), color: 'cyan' },
-      { label: 'Unique Remix Pokemon', value: uniqueRemixPokemon, color: 'yellow' },
-      { label: 'Remix data saved to', value: remixPath, color: 'cyan' },
-      { label: 'Remix file size', value: ConsoleFormatter.formatFileSize(remixStats.size), color: 'cyan' },
-      { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
-    ]);
+    ConsoleFormatter.success(`Scraping completed successfully!`);
+    ConsoleFormatter.info(`Classic encounters: ${classicRoutes.length} routes (${(classicStats.size / 1024).toFixed(1)} KB)`);
+    ConsoleFormatter.info(`Remix encounters: ${remixRoutes.length} routes (${(remixStats.size / 1024).toFixed(1)} KB)`);
+    ConsoleFormatter.info(`Total duration: ${(duration / 1000).toFixed(2)}s`);
 
   } catch (error) {
-    ConsoleFormatter.error(`Fatal error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    ConsoleFormatter.error(`Scraping failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     process.exit(1);
   }
 }
 
-// Check if this script is being run directly
-const __filename = fileURLToPath(import.meta.url);
-if (process.argv[1] === __filename) {
+// Run the script
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 } 

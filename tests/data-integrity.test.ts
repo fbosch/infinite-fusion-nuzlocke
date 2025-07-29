@@ -1,8 +1,10 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import fs from 'fs/promises';
 import path from 'path';
+import { SPECIAL_LOCATIONS } from '@/constants/special-locations';
 
 interface Location {
+  id: string;
   name: string;
   routeId: number | null;
   order: number;
@@ -13,7 +15,6 @@ interface Location {
 interface RouteEncounter {
   routeName: string;
   pokemonIds: number[];
-  routeId: number;
 }
 
 interface GiftPokemon {
@@ -70,30 +71,34 @@ describe('Data Integrity Tests', () => {
   });
 
   describe('Route Encounter Coverage', () => {
-    it('should have encounter data for every location with a routeId in classic mode', () => {
-      // Get all locations that have a routeId (excluding starter Pokemon routeId 0)
-      const locationsWithRouteId = locations.filter(
-        loc => loc.routeId !== null && loc.routeId !== 0
-      );
+    it('should have encounter data for every location in classic mode', () => {
+      // Get all location names (excluding starter Pokemon and special locations)
+      const locationNames = locations
+        .filter(loc => {
+          const isStarter = loc.name === 'Starter';
+          const isSpecialLocation = loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION;
+          return !isStarter && !isSpecialLocation;
+        })
+        .map(loc => loc.name);
 
-      // Create a map of routeId to classic encounters for quick lookup
-      const classicRouteIdMap = new Map<number, RouteEncounter>();
+      // Create a map of routeName to classic encounters for quick lookup
+      const classicRouteNameMap = new Map<string, RouteEncounter>();
       classicEncounters.forEach(encounter => {
-        classicRouteIdMap.set(encounter.routeId, encounter);
+        classicRouteNameMap.set(encounter.routeName, encounter);
       });
 
-      const missingEncounters: Location[] = [];
+      const missingEncounters: string[] = [];
 
-      // Check each location with routeId
-      locationsWithRouteId.forEach(location => {
-        if (!classicRouteIdMap.has(location.routeId!)) {
-          missingEncounters.push(location);
+      // Check each location name
+      locationNames.forEach(locationName => {
+        if (!classicRouteNameMap.has(locationName)) {
+          missingEncounters.push(locationName);
         }
       });
 
       if (missingEncounters.length > 0) {
         const missingDetails = missingEncounters
-          .map(loc => `- ${loc.name} (routeId: ${loc.routeId})`)
+          .map(name => `- ${name}`)
           .join('\n');
 
         throw new Error(
@@ -104,30 +109,34 @@ describe('Data Integrity Tests', () => {
       expect(missingEncounters).toHaveLength(0);
     });
 
-    it('should have encounter data for every location with a routeId in remix mode', () => {
-      // Get all locations that have a routeId (excluding starter Pokemon routeId 0)
-      const locationsWithRouteId = locations.filter(
-        loc => loc.routeId !== null && loc.routeId !== 0
-      );
+    it('should have encounter data for every location in remix mode', () => {
+      // Get all location names (excluding starter Pokemon and special locations)
+      const locationNames = locations
+        .filter(loc => {
+          const isStarter = loc.name === 'Starter';
+          const isSpecialLocation = loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION;
+          return !isStarter && !isSpecialLocation;
+        })
+        .map(loc => loc.name);
 
-      // Create a map of routeId to remix encounters for quick lookup
-      const remixRouteIdMap = new Map<number, RouteEncounter>();
+      // Create a map of routeName to remix encounters for quick lookup
+      const remixRouteNameMap = new Map<string, RouteEncounter>();
       remixEncounters.forEach(encounter => {
-        remixRouteIdMap.set(encounter.routeId, encounter);
+        remixRouteNameMap.set(encounter.routeName, encounter);
       });
 
-      const missingEncounters: Location[] = [];
+      const missingEncounters: string[] = [];
 
-      // Check each location with routeId
-      locationsWithRouteId.forEach(location => {
-        if (!remixRouteIdMap.has(location.routeId!)) {
-          missingEncounters.push(location);
+      // Check each location name
+      locationNames.forEach(locationName => {
+        if (!remixRouteNameMap.has(locationName)) {
+          missingEncounters.push(locationName);
         }
       });
 
       if (missingEncounters.length > 0) {
         const missingDetails = missingEncounters
-          .map(loc => `- ${loc.name} (routeId: ${loc.routeId})`)
+          .map(name => `- ${name}`)
           .join('\n');
 
         throw new Error(
@@ -139,37 +148,35 @@ describe('Data Integrity Tests', () => {
     });
 
     it('should not have orphaned encounter data (encounters without corresponding locations)', () => {
-      // Get all routeIds from locations (excluding starter Pokemon routeId 0)
-      const locationRouteIds = new Set(
+      // Get all location names (excluding special locations since they're not wild encounter locations)
+      const locationNames = new Set(
         locations
-          .filter(loc => loc.routeId !== null && loc.routeId !== 0)
-          .map(loc => loc.routeId!)
+          .filter(loc => loc.id !== SPECIAL_LOCATIONS.STARTER_LOCATION)
+          .map(loc => loc.name)
       );
 
-      // Check classic encounters (excluding routeId 0)
+      // Check classic encounters (excluding Starter)
       const orphanedClassicEncounters = classicEncounters.filter(
-        encounter =>
-          encounter.routeId !== 0 && !locationRouteIds.has(encounter.routeId)
+        encounter => encounter.routeName !== 'Starter' && !locationNames.has(encounter.routeName)
       );
 
-      // Check remix encounters (excluding routeId 0)
+      // Check remix encounters (excluding Starter)
       const orphanedRemixEncounters = remixEncounters.filter(
-        encounter =>
-          encounter.routeId !== 0 && !locationRouteIds.has(encounter.routeId)
+        encounter => encounter.routeName !== 'Starter' && !locationNames.has(encounter.routeName)
       );
 
       const errors: string[] = [];
 
       if (orphanedClassicEncounters.length > 0) {
         const orphanedDetails = orphanedClassicEncounters
-          .map(enc => `- ${enc.routeName} (routeId: ${enc.routeId})`)
+          .map(enc => `- ${enc.routeName}`)
           .join('\n');
         errors.push(`Orphaned classic encounters:\n${orphanedDetails}`);
       }
 
       if (orphanedRemixEncounters.length > 0) {
         const orphanedDetails = orphanedRemixEncounters
-          .map(enc => `- ${enc.routeName} (routeId: ${enc.routeId})`)
+          .map(enc => `- ${enc.routeName}`)
           .join('\n');
         errors.push(`Orphaned remix encounters:\n${orphanedDetails}`);
       }
@@ -190,13 +197,13 @@ describe('Data Integrity Tests', () => {
       classicEncounters.forEach(encounter => {
         if (!encounter.pokemonIds || encounter.pokemonIds.length === 0) {
           invalidClassicEncounters.push(
-            `${encounter.routeName} (routeId: ${encounter.routeId}) has no Pokemon`
+            `${encounter.routeName} has no Pokemon`
           );
         } else {
           encounter.pokemonIds.forEach(pokemonId => {
             if (!Number.isInteger(pokemonId) || pokemonId <= 0) {
               invalidClassicEncounters.push(
-                `${encounter.routeName} (routeId: ${encounter.routeId}) has invalid Pokemon ID: ${pokemonId}`
+                `${encounter.routeName} has invalid Pokemon ID: ${pokemonId}`
               );
             }
           });
@@ -207,13 +214,13 @@ describe('Data Integrity Tests', () => {
       remixEncounters.forEach(encounter => {
         if (!encounter.pokemonIds || encounter.pokemonIds.length === 0) {
           invalidRemixEncounters.push(
-            `${encounter.routeName} (routeId: ${encounter.routeId}) has no Pokemon`
+            `${encounter.routeName} has no Pokemon`
           );
         } else {
           encounter.pokemonIds.forEach(pokemonId => {
             if (!Number.isInteger(pokemonId) || pokemonId <= 0) {
               invalidRemixEncounters.push(
-                `${encounter.routeName} (routeId: ${encounter.routeId}) has invalid Pokemon ID: ${pokemonId}`
+                `${encounter.routeName} has invalid Pokemon ID: ${pokemonId}`
               );
             }
           });
@@ -437,39 +444,33 @@ describe('Data Integrity Tests', () => {
   });
 
   describe('Data Consistency', () => {
-    it('should have consistent routeId values between locations and encounters', () => {
-      const locationRouteIds = new Set(
+    it('should have consistent routeName values between locations and encounters', () => {
+      const locationNames = new Set(
         locations
-          .filter(loc => loc.routeId !== null && loc.routeId !== 0)
-          .map(loc => loc.routeId!)
+          .filter(loc => loc.name !== 'Starter' && loc.name !== SPECIAL_LOCATIONS.STARTER_LOCATION)
+          .map(loc => loc.name)
       );
 
-      const classicRouteIds = new Set(
+      const classicRouteNames = new Set(
         classicEncounters
-          .filter(enc => enc.routeId !== 0)
-          .map(enc => enc.routeId)
+          .filter(enc => enc.routeName !== 'Starter')
+          .map(enc => enc.routeName)
       );
-      const remixRouteIds = new Set(
-        remixEncounters.filter(enc => enc.routeId !== 0).map(enc => enc.routeId)
+      const remixRouteNames = new Set(
+        remixEncounters
+          .filter(enc => enc.routeName !== 'Starter')
+          .map(enc => enc.routeName)
       );
 
-      // Check if all location routeIds exist in both encounter sets
-      const missingInClassic = [...locationRouteIds].filter(
-        id => !classicRouteIds.has(id)
-      );
-      const missingInRemix = [...locationRouteIds].filter(
-        id => !remixRouteIds.has(id)
+      // Check if all encounter routeNames exist in location names
+      const missingInLocations = [...classicRouteNames].filter(
+        name => !locationNames.has(name)
       );
 
       const errors: string[] = [];
-      if (missingInClassic.length > 0) {
+      if (missingInLocations.length > 0) {
         errors.push(
-          `RouteIds missing in classic encounters: ${missingInClassic.join(', ')}`
-        );
-      }
-      if (missingInRemix.length > 0) {
-        errors.push(
-          `RouteIds missing in remix encounters: ${missingInRemix.join(', ')}`
+          `Route names in encounters missing from locations: ${missingInLocations.join(', ')}`
         );
       }
 
@@ -477,44 +478,43 @@ describe('Data Integrity Tests', () => {
         throw new Error(errors.join('\n'));
       }
 
-      expect(missingInClassic).toHaveLength(0);
-      expect(missingInRemix).toHaveLength(0);
+      expect(missingInLocations).toHaveLength(0);
     });
 
-    it('should have unique routeIds in each encounter file', () => {
-      // Check for duplicate routeIds in classic encounters
-      const classicRouteIds: number[] = [];
-      const classicDuplicates: number[] = [];
+    it('should have unique routeNames in each encounter file', () => {
+      // Check for duplicate routeNames in classic encounters
+      const classicRouteNames: string[] = [];
+      const classicDuplicates: string[] = [];
 
       classicEncounters.forEach(encounter => {
-        if (classicRouteIds.includes(encounter.routeId)) {
-          classicDuplicates.push(encounter.routeId);
+        if (classicRouteNames.includes(encounter.routeName)) {
+          classicDuplicates.push(encounter.routeName);
         } else {
-          classicRouteIds.push(encounter.routeId);
+          classicRouteNames.push(encounter.routeName);
         }
       });
 
-      // Check for duplicate routeIds in remix encounters
-      const remixRouteIds: number[] = [];
-      const remixDuplicates: number[] = [];
+      // Check for duplicate routeNames in remix encounters
+      const remixRouteNames: string[] = [];
+      const remixDuplicates: string[] = [];
 
       remixEncounters.forEach(encounter => {
-        if (remixRouteIds.includes(encounter.routeId)) {
-          remixDuplicates.push(encounter.routeId);
+        if (remixRouteNames.includes(encounter.routeName)) {
+          remixDuplicates.push(encounter.routeName);
         } else {
-          remixRouteIds.push(encounter.routeId);
+          remixRouteNames.push(encounter.routeName);
         }
       });
 
       const errors: string[] = [];
       if (classicDuplicates.length > 0) {
         errors.push(
-          `Duplicate routeIds in classic encounters: ${[...new Set(classicDuplicates)].join(', ')}`
+          `Duplicate route names in classic encounters: ${[...new Set(classicDuplicates)].join(', ')}`
         );
       }
       if (remixDuplicates.length > 0) {
         errors.push(
-          `Duplicate routeIds in remix encounters: ${[...new Set(remixDuplicates)].join(', ')}`
+          `Duplicate route names in remix encounters: ${[...new Set(remixDuplicates)].join(', ')}`
         );
       }
 
@@ -1021,6 +1021,213 @@ describe('Data Integrity Tests', () => {
       // For now, just log the inconsistencies without failing the test
       // since this is more of a data quality check than a critical error
       expect(true).toBe(true); // Always pass, but log warnings
+    });
+  });
+
+  describe('Route Encounter Validation', () => {
+    it('should have correct Pokemon for Viridian Forest in classic mode', () => {
+      const viridianForest = classicEncounters.find(
+        encounter => encounter.routeName === 'Viridian Forest'
+      );
+
+      expect(viridianForest).toBeDefined();
+      expect(viridianForest?.pokemonIds).toBeDefined();
+      expect(viridianForest?.pokemonIds.length).toBe(10); // Should have exactly 10 Pokemon
+
+      // Expected Pokemon IDs for Viridian Forest (classic mode)
+      const expectedPokemonIds = [10, 11, 13, 14, 16, 52, 163, 165, 172, 404];
+      expect(viridianForest?.pokemonIds).toEqual(expectedPokemonIds);
+    });
+
+    it('should have correct Pokemon for Viridian Forest in remix mode', () => {
+      const viridianForest = remixEncounters.find(
+        encounter => encounter.routeName === 'Viridian Forest'
+      );
+
+      expect(viridianForest).toBeDefined();
+      expect(viridianForest?.pokemonIds).toBeDefined();
+      expect(viridianForest?.pokemonIds.length).toBeGreaterThan(0);
+      expect(viridianForest?.pokemonIds.length).toBeLessThan(20); // Should not have too many Pokemon
+
+      // Verify it has some expected Pokemon (may differ from classic)
+      const hasCommonPokemon = viridianForest?.pokemonIds.some(id => 
+        [10, 11, 13, 14, 16, 52, 163, 165, 172, 404].includes(id)
+      );
+      expect(hasCommonPokemon).toBe(true);
+    });
+
+    it('should have reasonable Pokemon counts for all routes', () => {
+      const unreasonableCounts: string[] = [];
+
+      // Check classic encounters
+      classicEncounters.forEach(encounter => {
+        if (encounter.pokemonIds.length === 0) {
+          unreasonableCounts.push(
+            `${encounter.routeName} (classic): has no Pokemon`
+          );
+        } else if (encounter.pokemonIds.length > 50) {
+          unreasonableCounts.push(
+            `${encounter.routeName} (classic): has ${encounter.pokemonIds.length} Pokemon (suspiciously high)`
+          );
+        }
+      });
+
+      // Check remix encounters
+      remixEncounters.forEach(encounter => {
+        if (encounter.pokemonIds.length === 0) {
+          unreasonableCounts.push(
+            `${encounter.routeName} (remix): has no Pokemon`
+          );
+        } else if (encounter.pokemonIds.length > 50) {
+          unreasonableCounts.push(
+            `${encounter.routeName} (remix): has ${encounter.pokemonIds.length} Pokemon (suspiciously high)`
+          );
+        }
+      });
+
+      if (unreasonableCounts.length > 0) {
+        throw new Error(
+          `Unreasonable Pokemon counts found:\n${unreasonableCounts.join('\n')}`
+        );
+      }
+
+      expect(unreasonableCounts).toHaveLength(0);
+    });
+
+    it('should have specific Pokemon for key early routes', () => {
+      // Test Route 1 (should have common early Pokemon)
+      const route1 = classicEncounters.find(
+        encounter => encounter.routeName === 'Route 1'
+      );
+      expect(route1).toBeDefined();
+      expect(route1?.pokemonIds.length).toBeGreaterThan(0);
+      expect(route1?.pokemonIds.length).toBeLessThan(20);
+
+      // Test Route 2 (should have common early Pokemon)
+      const route2 = classicEncounters.find(
+        encounter => encounter.routeName === 'Route 2'
+      );
+      expect(route2).toBeDefined();
+      expect(route2?.pokemonIds.length).toBeGreaterThan(0);
+      expect(route2?.pokemonIds.length).toBeLessThan(20);
+
+      // Test Route 22 (should have starter Pokemon)
+      const route22 = classicEncounters.find(
+        encounter => encounter.routeName === 'Route 22'
+      );
+      expect(route22).toBeDefined();
+      expect(route22?.pokemonIds.length).toBeGreaterThan(0);
+      expect(route22?.pokemonIds.length).toBeLessThan(20);
+    });
+
+    it('should not have duplicate Pokemon within the same route', () => {
+      const routesWithDuplicates: string[] = [];
+
+      // Check classic encounters
+      classicEncounters.forEach(encounter => {
+        const uniqueIds = new Set(encounter.pokemonIds);
+        if (uniqueIds.size !== encounter.pokemonIds.length) {
+          routesWithDuplicates.push(
+            `${encounter.routeName} (classic): has duplicate Pokemon`
+          );
+        }
+      });
+
+      // Check remix encounters
+      remixEncounters.forEach(encounter => {
+        const uniqueIds = new Set(encounter.pokemonIds);
+        if (uniqueIds.size !== encounter.pokemonIds.length) {
+          routesWithDuplicates.push(
+            `${encounter.routeName} (remix): has duplicate Pokemon`
+          );
+        }
+      });
+
+      if (routesWithDuplicates.length > 0) {
+        throw new Error(
+          `Routes with duplicate Pokemon found:\n${routesWithDuplicates.join('\n')}`
+        );
+      }
+
+      expect(routesWithDuplicates).toHaveLength(0);
+    });
+
+    it('should have sorted Pokemon IDs for all routes', () => {
+      const unsortedRoutes: string[] = [];
+
+      // Check classic encounters
+      classicEncounters.forEach(encounter => {
+        const isSorted = encounter.pokemonIds.every((id, index) => 
+          index === 0 || id >= encounter.pokemonIds[index - 1]
+        );
+        if (!isSorted) {
+          unsortedRoutes.push(
+            `${encounter.routeName} (classic): Pokemon IDs are not sorted`
+          );
+        }
+      });
+
+      // Check remix encounters
+      remixEncounters.forEach(encounter => {
+        const isSorted = encounter.pokemonIds.every((id, index) => 
+          index === 0 || id >= encounter.pokemonIds[index - 1]
+        );
+        if (!isSorted) {
+          unsortedRoutes.push(
+            `${encounter.routeName} (remix): Pokemon IDs are not sorted`
+          );
+        }
+      });
+
+      if (unsortedRoutes.length > 0) {
+        throw new Error(
+          `Routes with unsorted Pokemon IDs found:\n${unsortedRoutes.join('\n')}`
+        );
+      }
+
+      expect(unsortedRoutes).toHaveLength(0);
+    });
+
+    it('should have valid Pokemon IDs that exist in the Pokemon data', async () => {
+      const dataDir = path.join(process.cwd(), 'data');
+      const pokemonDataFile = await fs.readFile(
+        path.join(dataDir, 'shared', 'pokemon-data.json'),
+        'utf-8'
+      );
+      const pokemonData = JSON.parse(pokemonDataFile);
+
+      const validPokemonIds = new Set(pokemonData.map((p: any) => p.id)); // eslint-disable-line @typescript-eslint/no-explicit-any
+      const invalidPokemonIds: string[] = [];
+
+      // Check classic encounters
+      classicEncounters.forEach(encounter => {
+        encounter.pokemonIds.forEach(pokemonId => {
+          if (!validPokemonIds.has(pokemonId)) {
+            invalidPokemonIds.push(
+              `${encounter.routeName} (classic): invalid Pokemon ID ${pokemonId}`
+            );
+          }
+        });
+      });
+
+      // Check remix encounters
+      remixEncounters.forEach(encounter => {
+        encounter.pokemonIds.forEach(pokemonId => {
+          if (!validPokemonIds.has(pokemonId)) {
+            invalidPokemonIds.push(
+              `${encounter.routeName} (remix): invalid Pokemon ID ${pokemonId}`
+            );
+          }
+        });
+      });
+
+      if (invalidPokemonIds.length > 0) {
+        throw new Error(
+          `Invalid Pokemon IDs found in encounters:\n${invalidPokemonIds.join('\n')}`
+        );
+      }
+
+      expect(invalidPokemonIds).toHaveLength(0);
     });
   });
 });

@@ -1,27 +1,24 @@
 import { z } from 'zod';
 import locationsData from '@data/shared/locations.json';
-import { getStarterPokemonByGameMode } from './starters';
 
-// Zod schema for location data
+// Location schema
 export const LocationSchema = z.object({
   id: z.string().min(1, { error: 'Location ID is required' }),
   name: z.string().min(1, { error: 'Location name is required' }),
-  routeId: z.number().int().min(0, { error: 'Route ID must be non-negative' }),
-  order: z
-    .number()
-    .int()
-    .positive({ error: 'Order must be a positive integer' }),
+  order: z.number().int().positive({ error: 'Order must be positive' }),
   region: z.string().min(1, { error: 'Region is required' }),
   description: z.string().min(1, { error: 'Description is required' }),
 });
 
+export type Location = z.infer<typeof LocationSchema>;
+
+// Custom location schema
 export const CustomLocationSchema = z.object({
   id: z.string().min(1, { error: 'Location ID is required' }),
   name: z.string().min(1, { error: 'Location name is required' }),
   order: z.number().positive({ error: 'Order must be a positive number' }),
 });
 
-export type Location = z.infer<typeof LocationSchema>;
 export type CustomLocation = z.infer<typeof CustomLocationSchema>;
 
 // Combined type for locations that can be either default or custom
@@ -29,115 +26,119 @@ export type CombinedLocation = Location | (CustomLocation & { isCustom: true });
 
 export const LocationsArraySchema = z.array(LocationSchema);
 
-// Cache for parsed locations to avoid expensive re-parsing
-let cachedLocations: Location[] | null = null;
+// Validate and load locations
+function loadLocations(): Location[] {
+  const result = z.array(LocationSchema).safeParse(locationsData);
+  if (!result.success) {
+    console.error('Invalid locations data:', result.error.issues);
+    throw new Error('Invalid locations data');
+  }
+  return result.data;
+}
 
-// Simple data loader for locations with caching
+// Cache the locations
+let locationsCache: Location[] | null = null;
+
 export function getLocations(): Location[] {
-  // Return cached result if available
-  if (cachedLocations !== null) {
-    return cachedLocations;
+  if (!locationsCache) {
+    locationsCache = loadLocations();
   }
-
-  try {
-    // Parse and validate locations data
-    const parsedLocations = LocationsArraySchema.parse(locationsData);
-
-    // Cache the result for future calls
-    cachedLocations = parsedLocations;
-
-    return parsedLocations;
-  } catch (error) {
-    console.error('Failed to validate locations data:', error);
-    throw new Error('Invalid locations data format');
-  }
+  return locationsCache;
 }
 
 // Function to clear cache if needed (for testing or data updates)
 export function clearLocationsCache(): void {
-  cachedLocations = null;
+  locationsCache = null;
 }
 
-export function getLocationsByRegion(): Record<string, Location[]> {
-  const locations = getLocations();
-  const grouped: Record<string, Location[]> = {};
-
-  locations.forEach(location => {
-    if (!grouped[location.region]) {
-      grouped[location.region] = [];
-    }
-    grouped[location.region].push(location);
-  });
-
-  return grouped;
-}
-
-export function getLocationsBySpecificRegion(region: string): Location[] {
+// Get locations by region
+export function getLocationsByRegion(region: string): Location[] {
   return getLocations().filter(location => location.region === region);
 }
 
+// Get locations by specific region (case-insensitive)
+export function getLocationsBySpecificRegion(region: string): Location[] {
+  const normalizedRegion = region.toLowerCase();
+  return getLocations().filter(location => 
+    location.region.toLowerCase() === normalizedRegion
+  );
+}
+
+// Get locations sorted by order
 export function getLocationsSortedByOrder(): Location[] {
   return getLocations().sort((a, b) => a.order - b.order);
 }
 
-// Special handling for starter Pokémon encounters
-export async function getLocationEncounters(
-  location: Location,
+// Get encounters for a location by its name
+export async function getLocationEncountersByName(
+  locationName: string,
   gameMode: 'classic' | 'remix' = 'classic'
 ): Promise<number[]> {
-  // Special case for starter location (routeId 0)
-  if (location.routeId === 0) {
+  // Find the location by name to get its ID
+  const location = getLocations().find(loc => loc.name === locationName);
+  if (!location) {
+    return [];
+  }
+
+  // Special case for starter location
+  if (isStarterLocation(location.id)) {
     return await getStarterPokemonByGameMode(gameMode);
   }
 
-  // For other locations, return empty array (encounters handled separately)
-  return [];
+  // Import encounters and find by route name
+  const { getEncountersByRouteName } = await import('./encounters');
+  const encounter = await getEncountersByRouteName(locationName, gameMode);
+  return encounter?.pokemonIds || [];
 }
 
-// Get location name by route ID
-export function getLocationNameByRouteId(routeId: number): string | null {
-  const locations = getLocations();
-  const location = locations.find(loc => loc.routeId === routeId);
-  return location ? location.name : null;
-}
+// Get encounters for a location by its ID
+export async function getLocationEncountersById(
+  locationId: string,
+  gameMode: 'classic' | 'remix' = 'classic'
+): Promise<number[]> {
+  // Find the location by ID
+  const location = getLocations().find(loc => loc.id === locationId);
+  if (!location) {
+    return [];
+  }
 
-// Get location name by ID (guid)
-export function getLocationNameById(id: string): string | null {
-  const locations = getLocations();
-  const location = locations.find(loc => loc.id === id);
-  return location ? location.name : null;
-}
+  // Special case for starter location
+  if (isStarterLocation(locationId)) {
+    return await getStarterPokemonByGameMode(gameMode);
+  }
 
-// Get location by route ID
-export function getLocationByRouteId(routeId: number): Location | null {
-  const locations = getLocations();
-  return locations.find(loc => loc.routeId === routeId) || null;
+  // Import encounters and find by route name
+  const { getEncountersByRouteName } = await import('./encounters');
+  const encounter = await getEncountersByRouteName(location.name, gameMode);
+  return encounter?.pokemonIds || [];
 }
 
 // Get all locations with their available encounters
 export async function getLocationsWithEncounters(
   gameMode: 'classic' | 'remix' = 'classic'
 ): Promise<Array<Location & { encounters: number[] }>> {
-  const locations = getLocationsSortedByOrder();
-  const locationsWithEncounters = [];
+  const locations = getLocations();
+  const locationsWithEncounters: Array<Location & { encounters: number[] }> = [];
 
   for (const location of locations) {
-    const encounters = await getLocationEncounters(location, gameMode);
-    locationsWithEncounters.push({
-      ...location,
-      encounters,
-    });
+    const encounters = await getLocationEncountersById(location.id, gameMode);
+    if (encounters.length > 0) {
+      locationsWithEncounters.push({
+        ...location,
+        encounters,
+      });
+    }
   }
 
   return locationsWithEncounters;
 }
 
-// Check if a location has encounters available
+// Check if a location has encounters
 export async function hasLocationEncounters(
   location: Location,
   gameMode: 'classic' | 'remix' = 'classic'
 ): Promise<boolean> {
-  const encounters = await getLocationEncounters(location, gameMode);
+  const encounters = await getLocationEncountersById(location.id, gameMode);
   return encounters.length > 0;
 }
 
@@ -322,7 +323,7 @@ export async function getMergedLocationsWithEncounters(
 
     // Only default locations have encounters (custom locations are user-defined)
     if (!isCustomLocation(location)) {
-      encounters = await getLocationEncounters(location, gameMode);
+      encounters = await getLocationEncountersByName(location.name, gameMode);
     }
 
     locationsWithEncounters.push({
@@ -338,3 +339,7 @@ export function getLocationById(id?: string) {
   const locations = getLocations();
   return locations.find(loc => loc.id === id) || null;
 }
+
+// Import the special location functions
+import { isStarterLocation } from '@/constants/special-locations';
+import { getStarterPokemonByGameMode } from './starters';
