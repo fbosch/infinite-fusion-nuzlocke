@@ -5,7 +5,7 @@ import {
   useAllPokemon,
 } from '@/loaders/pokemon';
 import { useGameMode } from '@/stores/playthroughs';
-import { useDebounced } from '@/hooks/useDebounced';
+import { useDebounce } from 'use-debounce';
 
 interface UsePokemonSearchOptions {
   query: string;
@@ -23,7 +23,11 @@ export function usePokemonSearch({
   const { data: allPokemon = [] } = useAllPokemon();
 
   // Debounce the query to reduce search frequency
-  const debouncedQuery = useDebounced(query, 50);
+  const [debouncedQuery] = useDebounce(query, 50, {
+    maxWait: 250,
+    leading: true,
+    trailing: true,
+  });
 
   return useQuery<PokemonOptionType[], Error>({
     queryKey: ['pokemon', 'search', gameMode, debouncedQuery],
