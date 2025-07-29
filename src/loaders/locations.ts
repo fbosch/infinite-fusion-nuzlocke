@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import locationsData from '@data/locations.json';
+import locationsData from '@data/shared/locations.json';
 import { getStarterPokemonByGameMode } from './starters';
 
 // Zod schema for location data

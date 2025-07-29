@@ -158,7 +158,7 @@ async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
     ConsoleFormatter.info('Loading Pokemon entries...');
 
     // Read the pokemon entries with custom IDs and names
-    const pokemonEntriesPath = path.join(process.cwd(), 'data/base-entries.json');
+    const pokemonEntriesPath = path.join(process.cwd(), 'data/shared/base-entries.json');
     const pokemonEntriesData = await fs.readFile(pokemonEntriesPath, 'utf8');
     const pokemonEntries: DexEntry[] = JSON.parse(pokemonEntriesData);
 
@@ -220,7 +220,12 @@ async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
 
     // Write to JSON file
     ConsoleFormatter.info('Saving data to file...');
-    const outputPath = path.join(process.cwd(), 'data/pokemon-data.json');
+    const outputPath = path.join(process.cwd(), 'data/shared/pokemon-data.json');
+    
+    // Ensure the shared directory exists
+    const sharedDir = path.dirname(outputPath);
+    await fs.mkdir(sharedDir, { recursive: true });
+
     await fs.writeFile(outputPath, JSON.stringify(pokemonData, null, 2));
 
     // Generate lightweight Pokemon IDs file for service worker

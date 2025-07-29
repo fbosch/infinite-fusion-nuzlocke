@@ -59,7 +59,12 @@ async function scrapeDexEntries(): Promise<{ id: number, name: string }[]> {
 
     // Write to JSON file
     ConsoleFormatter.info('Saving entries to file...');
-    const outputPath = path.join(process.cwd(), '/data/base-entries.json');
+    const outputPath = path.join(process.cwd(), 'data/shared/base-entries.json');
+    
+    // Ensure the shared directory exists
+    const sharedDir = path.dirname(outputPath);
+    await fs.mkdir(sharedDir, { recursive: true });
+    
     await fs.writeFile(outputPath, JSON.stringify(dexEntries, null, 2));
 
     const fileStats = await fs.stat(outputPath);

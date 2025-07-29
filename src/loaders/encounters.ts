@@ -36,9 +36,7 @@ export async function getClassicEncounters(): Promise<RouteEncounter[]> {
   }
 
   try {
-    const classicEncountersData = await import(
-      '@data/route-encounters-classic.json'
-    );
+    const classicEncountersData = await import('@data/classic/encounters.json');
     const data = RouteEncountersArraySchema.parse(
       classicEncountersData.default
     );
@@ -56,9 +54,7 @@ export async function getRemixEncounters(): Promise<RouteEncounter[]> {
   }
 
   try {
-    const remixEncountersData = await import(
-      '@data/route-encounters-remix.json'
-    );
+    const remixEncountersData = await import('@data/remix/encounters.json');
     const data = RouteEncountersArraySchema.parse(remixEncountersData.default);
     remixEncountersCache = data;
     return data;

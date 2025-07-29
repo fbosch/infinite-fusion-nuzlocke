@@ -7,19 +7,23 @@ async function analyzeLocations() {
   try {
     const dataDir = path.join(process.cwd(), 'data');
     
-    // Read all data files
-    const gifts = JSON.parse(await fs.readFile(path.join(dataDir, 'gifts.json'), 'utf8'));
-    const trades = JSON.parse(await fs.readFile(path.join(dataDir, 'trades.json'), 'utf8'));
-    const locations = JSON.parse(await fs.readFile(path.join(dataDir, 'locations.json'), 'utf8'));
+    // Read all data files from new structure
+    const classicGifts = JSON.parse(await fs.readFile(path.join(dataDir, 'classic/gifts.json'), 'utf8'));
+    const classicTrades = JSON.parse(await fs.readFile(path.join(dataDir, 'classic/trades.json'), 'utf8'));
+    const remixGifts = JSON.parse(await fs.readFile(path.join(dataDir, 'remix/gifts.json'), 'utf8'));
+    const remixTrades = JSON.parse(await fs.readFile(path.join(dataDir, 'remix/trades.json'), 'utf8'));
+    const locations = JSON.parse(await fs.readFile(path.join(dataDir, 'shared/locations.json'), 'utf8'));
 
     // Collect all location names
     const allLocations = new Set<string>();
 
-    // From gifts
-    gifts.forEach((gift: any) => allLocations.add(gift.location));  
+    // From classic gifts and trades
+    classicGifts.forEach((gift: any) => allLocations.add(gift.location));  
+    classicTrades.forEach((trade: any) => allLocations.add(trade.location));  
 
-    // From trades  
-    trades.forEach((trade: any) => allLocations.add(trade.location));  
+    // From remix gifts and trades
+    remixGifts.forEach((gift: any) => allLocations.add(gift.location));  
+    remixTrades.forEach((trade: any) => allLocations.add(trade.location));  
 
     // From locations
     locations.forEach((loc: any) => allLocations.add(loc.name));  
@@ -44,12 +48,16 @@ async function analyzeLocations() {
 
     // Count locations by source
     console.log('\nLocation counts by source:');
-    const giftLocations = new Set(gifts.map((g: any) => g.location));  
-    const tradeLocations = new Set(trades.map((t: any) => t.location));  
+    const classicGiftLocations = new Set(classicGifts.map((g: any) => g.location));  
+    const classicTradeLocations = new Set(classicTrades.map((t: any) => t.location));  
+    const remixGiftLocations = new Set(remixGifts.map((g: any) => g.location));  
+    const remixTradeLocations = new Set(remixTrades.map((t: any) => t.location));  
     const locationNames = new Set(locations.map((l: any) => l.name));  
     
-    console.log(`  - Gifts: ${giftLocations.size} unique locations`);
-    console.log(`  - Trades: ${tradeLocations.size} unique locations`);
+    console.log(`  - Classic Gifts: ${classicGiftLocations.size} unique locations`);
+    console.log(`  - Classic Trades: ${classicTradeLocations.size} unique locations`);
+    console.log(`  - Remix Gifts: ${remixGiftLocations.size} unique locations`);
+    console.log(`  - Remix Trades: ${remixTradeLocations.size} unique locations`);
     console.log(`  - Locations: ${locationNames.size} unique locations`);
     console.log(`  - Total unique: ${allLocations.size} locations`);
 

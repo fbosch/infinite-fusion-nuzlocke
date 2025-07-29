@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import pokemonData from '@data/pokemon-data.json';
+import pokemonData from '@data/shared/pokemon-data.json';
 import { PokemonSchema } from '@/loaders/pokemon';
 import { z } from 'zod';
 

@@ -156,7 +156,12 @@ async function main() {
 
   try {
     const dataDir = path.join(process.cwd(), 'data');
-    await fs.mkdir(dataDir, { recursive: true });
+    const classicDir = path.join(dataDir, 'classic');
+    const remixDir = path.join(dataDir, 'remix');
+    
+    // Create directories
+    await fs.mkdir(classicDir, { recursive: true });
+    await fs.mkdir(remixDir, { recursive: true });
 
     const [classicRoutes, remixRoutes] = await Promise.all([
       (async () => {
@@ -171,8 +176,8 @@ async function main() {
 
     // Write separate files in parallel
     ConsoleFormatter.info('Saving encounter data to files...');
-    const classicPath = path.join(dataDir, 'route-encounters-classic.json');
-    const remixPath = path.join(dataDir, 'route-encounters-remix.json');
+    const classicPath = path.join(classicDir, 'encounters.json');
+    const remixPath = path.join(remixDir, 'encounters.json');
 
     await Promise.all([
       fs.writeFile(classicPath, JSON.stringify(classicRoutes, null, 2)),

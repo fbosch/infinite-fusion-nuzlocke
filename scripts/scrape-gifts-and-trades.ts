@@ -258,7 +258,12 @@ async function main() {
 
   try {
     const dataDir = path.join(process.cwd(), 'data');
-    await fs.mkdir(dataDir, { recursive: true });
+    const classicDir = path.join(dataDir, 'classic');
+    const remixDir = path.join(dataDir, 'remix');
+    
+    // Create directories
+    await fs.mkdir(classicDir, { recursive: true });
+    await fs.mkdir(remixDir, { recursive: true });
 
     // Scrape both Classic and Remix data
     ConsoleFormatter.info('Scraping Classic and Remix Gifts and Trades...');
@@ -272,10 +277,10 @@ async function main() {
     ConsoleFormatter.info('Saving data to files...');
     
     const files = [
-      { path: path.join(dataDir, 'gifts-classic.json'), data: classicData.gifts },
-      { path: path.join(dataDir, 'gifts-remix.json'), data: remixData.gifts },
-      { path: path.join(dataDir, 'trades-classic.json'), data: classicData.trades },
-      { path: path.join(dataDir, 'trades-remix.json'), data: remixData.trades }
+      { path: path.join(classicDir, 'gifts.json'), data: classicData.gifts },
+      { path: path.join(remixDir, 'gifts.json'), data: remixData.gifts },
+      { path: path.join(classicDir, 'trades.json'), data: classicData.trades },
+      { path: path.join(remixDir, 'trades.json'), data: remixData.trades }
     ];
 
     await Promise.all(

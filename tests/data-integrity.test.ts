@@ -51,13 +51,13 @@ describe('Data Integrity Tests', () => {
       classicTradesData,
       remixTradesData,
     ] = await Promise.all([
-      fs.readFile(path.join(dataDir, 'locations.json'), 'utf-8'),
-      fs.readFile(path.join(dataDir, 'route-encounters-classic.json'), 'utf-8'),
-      fs.readFile(path.join(dataDir, 'route-encounters-remix.json'), 'utf-8'),
-      fs.readFile(path.join(dataDir, 'gifts-classic.json'), 'utf-8'),
-      fs.readFile(path.join(dataDir, 'gifts-remix.json'), 'utf-8'),
-      fs.readFile(path.join(dataDir, 'trades-classic.json'), 'utf-8'),
-      fs.readFile(path.join(dataDir, 'trades-remix.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'shared/locations.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'classic/encounters.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'remix/encounters.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'classic/gifts.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'remix/gifts.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'classic/trades.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'remix/trades.json'), 'utf-8'),
     ]);
 
     locations = JSON.parse(locationsData);
@@ -247,7 +247,7 @@ describe('Data Integrity Tests', () => {
     beforeAll(async () => {
       const dataDir = path.join(process.cwd(), 'data');
       const pokemonDataFile = await fs.readFile(
-        path.join(dataDir, 'pokemon-data.json'),
+        path.join(dataDir, 'shared', 'pokemon-data.json'),
         'utf-8'
       );
       pokemonData = JSON.parse(pokemonDataFile);
