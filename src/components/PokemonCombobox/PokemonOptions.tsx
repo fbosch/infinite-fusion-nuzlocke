@@ -6,7 +6,11 @@ import { ComboboxOption } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { dragActions } from '@/stores/dragStore';
-import { type PokemonOptionType } from '@/loaders/pokemon';
+import {
+  type PokemonOptionType,
+  isEgg,
+  getEncounterDisplayName,
+} from '@/loaders/pokemon';
 import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
 
 interface PokemonOptionsProps {
@@ -48,6 +52,8 @@ function PokemonOptionContent({
   isActive = false,
   isSelected = false,
 }: PokemonOptionContentProps) {
+  const displayName = getEncounterDisplayName(pokemon);
+
   return (
     <div className={'gap-8 group w-full flex items-center'}>
       <Image
@@ -55,7 +61,7 @@ function PokemonOptionContent({
         alt={pokemon.name}
         width={40}
         height={40}
-        className='object-contain object-center scale-140 image-render-high-quality cursor-grab active:cursor-grabbing'
+        className='object-contain object-center scale-140 image-render-high-quality'
         loading={index < 5 || isRoutePokemon(pokemon.id) ? 'eager' : 'lazy'}
         draggable
         unoptimized
@@ -75,7 +81,7 @@ function PokemonOptionContent({
           isSelected && ''
         )}
       >
-        {pokemon.name}
+        {displayName}
       </span>
       <div className='flex items-center gap-3'>
         {gameMode !== 'randomized' && isRoutePokemon(pokemon.id) && (
@@ -83,15 +89,17 @@ function PokemonOptionContent({
             Route
           </span>
         )}
-        <span
-          className={clsx(
-            'text-xs dark:text-gray-400',
-            isActive &&
-              'group-hover:text-white group-data-selected:group-hover:text-white'
-          )}
-        >
-          {pokemon.id.toString().padStart(3, '0')}
-        </span>
+        {isEgg(pokemon) ? null : (
+          <span
+            className={clsx(
+              'text-xs dark:text-gray-400',
+              isActive &&
+                'group-hover:text-white group-data-selected:group-hover:text-white'
+            )}
+          >
+            {pokemon.id.toString().padStart(3, '0')}
+          </span>
+        )}
         <div className='w-5 h-5 flex items-center justify-center'>
           <Check
             className={clsx(

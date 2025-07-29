@@ -25,6 +25,7 @@ import {
   useAllPokemon,
   isPokemonEvolution,
   isPokemonPreEvolution,
+  isEgg,
 } from '@/loaders/pokemon';
 import { dragActions } from '@/stores/dragStore';
 import { useActivePlaythrough, useGameMode } from '@/stores/playthroughs';
@@ -64,6 +65,12 @@ export async function initializeSpriteMapping(): Promise<void> {
 export function getPokemonSpriteUrlFromOption(
   pokemon: PokemonOptionType
 ): string {
+  // Handle special Egg encounter
+  if (isEgg(pokemon)) {
+    // Use a simple data URL for an egg icon
+    return '/images/egg.png';
+  }
+
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
 }
 
@@ -86,6 +93,7 @@ interface PokemonComboboxProps {
   gameMode?: 'classic' | 'remix';
   comboboxId?: string;
   ref?: React.RefObject<HTMLInputElement | null>;
+  isFusion?: boolean;
 }
 
 // Pokemon Combobox Component
@@ -103,6 +111,7 @@ export const PokemonCombobox = React.memo(
     disabled = false,
     comboboxId,
     ref,
+    isFusion = false,
   }: PokemonComboboxProps) => {
     const [query, setQuery] = useState('');
     const deferredQuery = useDeferredValue(query);
@@ -171,13 +180,17 @@ export const PokemonCombobox = React.memo(
       if (deferredQuery === '') {
         // In randomized mode or custom location, show all Pokemon
         if (gameMode === 'randomized' || isCustomLocation) {
-          return allPokemon.map(p => ({
-            id: p.id,
-            name: p.name,
-            nationalDexId: p.nationalDexId,
-          }));
+          return allPokemon
+            .map(p => ({
+              id: p.id,
+              name: p.name,
+              nationalDexId: p.nationalDexId,
+            }))
+            .filter(pokemon => !isFusion || !isEgg(pokemon));
         }
-        return routeEncounterData;
+        return routeEncounterData.filter(
+          pokemon => !isFusion || !isEgg(pokemon)
+        );
       }
 
       // Early return if no search results and no route data
@@ -195,17 +208,25 @@ export const PokemonCombobox = React.memo(
         const queryNum = parseInt(deferredQuery, 10);
         routeMatches = routeEncounterData.filter(
           pokemon =>
-            pokemon.id === queryNum || pokemon.nationalDexId === queryNum
+            (pokemon.id === queryNum || pokemon.nationalDexId === queryNum) &&
+            (!isFusion || !isEgg(pokemon))
         );
       } else {
         // For text queries, use name matching
-        routeMatches = routeEncounterData.filter(pokemon =>
-          pokemon.name.toLowerCase().includes(deferredQuery.toLowerCase())
+        routeMatches = routeEncounterData.filter(
+          pokemon =>
+            pokemon.name.toLowerCase().includes(deferredQuery.toLowerCase()) &&
+            (!isFusion || !isEgg(pokemon))
         );
       }
 
+      // Filter search results to exclude eggs when in fusion mode
+      const filteredResults = results.filter(
+        pokemon => !isFusion || !isEgg(pokemon)
+      );
+
       // Combine results: route matches first, then smart search results
-      const allResults = [...routeMatches, ...results];
+      const allResults = [...routeMatches, ...filteredResults];
 
       // Sort: in randomized mode, all Pokemon are equally available
       // In classic/remix modes, prioritize route Pokemon
@@ -234,6 +255,7 @@ export const PokemonCombobox = React.memo(
       gameMode,
       allPokemon,
       isCustomLocation,
+      isFusion,
     ]);
 
     const handleChange = useCallback(
@@ -245,8 +267,11 @@ export const PokemonCombobox = React.memo(
             const isEvolution = await isPokemonEvolution(value, newValue);
             const isPreEvolution = await isPokemonPreEvolution(value, newValue);
 
-            // Only check for overwrite confirmation if it's not an evolution or devolution
-            if (!isEvolution && !isPreEvolution) {
+            // Check if this is an egg hatching (replacing egg with regular pokemon)
+            const isEggHatching = isEgg(value) && !isEgg(newValue);
+
+            // Only check for overwrite confirmation if it's not an evolution, devolution, or egg hatching
+            if (!isEvolution && !isPreEvolution && !isEggHatching) {
               const shouldOverwrite = await onBeforeOverwrite(value, newValue);
               if (!shouldOverwrite) {
                 // If overwrite was cancelled, don't proceed with the change
@@ -263,7 +288,17 @@ export const PokemonCombobox = React.memo(
           }
         }
 
-        onChange(newValue || null);
+        // Special handling for egg hatching: preserve nickname and status
+        let finalValue = newValue;
+        if (value && newValue && isEgg(value) && !isEgg(newValue)) {
+          finalValue = {
+            ...newValue,
+            nickname: value.nickname || newValue.nickname,
+            status: value.status || newValue.status,
+          };
+        }
+
+        onChange(finalValue || null);
         setQuery('');
       },
       [onChange, value, onBeforeOverwrite]

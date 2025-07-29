@@ -1,4 +1,8 @@
-import { PokemonStatus, type PokemonOptionType } from '@/loaders/pokemon';
+import {
+  isEgg,
+  PokemonStatus,
+  type PokemonOptionType,
+} from '@/loaders/pokemon';
 import { match, P } from 'ts-pattern';
 
 export const QUESTION_MARK =
@@ -38,6 +42,9 @@ export function getSpriteUrl(
 ): string {
   const pokemon = head || body;
   if (!pokemon) return TRANSPARENT_PIXEL;
+  if (isEgg(pokemon)) {
+    return '/images/egg.png';
+  }
 
   const variantSuffix = artworkVariant ? artworkVariant : '';
 
