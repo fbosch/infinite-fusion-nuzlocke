@@ -56,6 +56,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
       className={clsx(
         'relative flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 sm:p-1',
         'border border-gray-200 dark:border-gray-600',
+        'h-[36px] sm:h-[42px] w-[180px] sm:w-auto',
         !activePlaythrough && 'opacity-50'
       )}
       disabled={!activePlaythrough}
@@ -67,7 +68,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
       {activePlaythrough && (
         <div
           className={clsx(
-            'absolute top-0.5 sm:top-1 bottom-0.5 sm:bottom-1 left-0.5 sm:left-1 w-14 sm:w-16 md:w-20 bg-white dark:bg-gray-800 rounded-md shadow-sm transition-transform duration-200 ease-out',
+            'absolute top-1 bottom-1 left-0.5 sm:left-1 w-14 sm:w-16 md:w-20 bg-white dark:bg-gray-800 rounded-md shadow-sm transition-transform duration-200 ease-out',
             'border border-gray-200 dark:border-gray-500',
             getBackgroundPosition(optimisticMode)
           )}
@@ -91,7 +92,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
           onClick={() => handleModeSelect('classic')}
           disabled={!activePlaythrough}
           className={clsx(
-            'relative z-10 w-14 sm:w-16 md:w-20 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-center',
+            'relative z-10 w-14 sm:w-16 md:w-20 h-[28px] sm:h-[32px] py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-center',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
             optimisticMode === 'classic'
               ? 'text-gray-900 dark:text-gray-100'
@@ -122,7 +123,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
           onClick={() => handleModeSelect('remix')}
           disabled={!activePlaythrough}
           className={clsx(
-            'relative z-10 w-14 sm:w-16 md:w-20 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-center',
+            'relative z-10 w-14 sm:w-16 md:w-20 h-[28px] sm:h-[32px] py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-center',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
             optimisticMode === 'remix'
               ? 'text-purple-700 dark:text-purple-300'
@@ -152,7 +153,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
           onClick={() => handleModeSelect('randomized')}
           disabled={!activePlaythrough}
           className={clsx(
-            'relative z-10 w-14 sm:w-16 md:w-20 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-center',
+            'relative z-10 w-14 sm:w-16 md:w-20 h-[28px] sm:h-[32px] py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-center',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
             optimisticMode === 'randomized'
               ? 'text-orange-700 dark:text-orange-300'

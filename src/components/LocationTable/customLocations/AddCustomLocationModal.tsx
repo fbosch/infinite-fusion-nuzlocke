@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { playthroughActions, useCustomLocations } from '@/stores/playthroughs';
 import { getLocationsSortedWithCustom } from '@/loaders';
@@ -20,8 +20,11 @@ export default function AddCustomLocationModal({
   const [selectedAfterLocationId, setSelectedAfterLocationId] = useState('');
   const customLocations = useCustomLocations();
 
-  // Get all locations (default + custom) for placement selection
-  const allLocations = getLocationsSortedWithCustom(customLocations);
+  // Only process locations when modal is open to improve performance
+  const allLocations = useMemo(() => {
+    if (!isOpen) return [];
+    return getLocationsSortedWithCustom(customLocations);
+  }, [isOpen, customLocations]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,16 +113,22 @@ export default function AddCustomLocationModal({
                 value={selectedAfterLocationId}
                 onChange={e => setSelectedAfterLocationId(e.target.value)}
                 required
+                disabled={allLocations.length === 0}
                 className={clsx(
                   'w-full px-3 py-2 border rounded-md transition-colors cursor-pointer',
                   'border-gray-300 dark:border-gray-600',
                   'bg-white dark:bg-gray-700',
                   'text-gray-900 dark:text-white',
                   'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                  'dark:focus:ring-blue-400 dark:focus:border-blue-400'
+                  'dark:focus:ring-blue-400 dark:focus:border-blue-400',
+                  'disabled:opacity-50 disabled:cursor-not-allowed'
                 )}
               >
-                <option value=''>Select location to place after...</option>
+                <option value=''>
+                  {allLocations.length === 0
+                    ? 'Loading locations...'
+                    : 'Select location to place after...'}
+                </option>
                 {allLocations.map(location => (
                   <option key={location.id} value={location.id}>
                     {location.name} (
@@ -132,14 +141,20 @@ export default function AddCustomLocationModal({
             <div className='flex pt-4 flex-row-reverse gap-x-3'>
               <button
                 type='submit'
+                disabled={allLocations.length === 0}
                 className={clsx(
                   'flex-1 px-4 py-2 text-sm font-semibold rounded-md transition-colors',
                   'bg-blue-600 hover:bg-blue-700 text-white',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
-                  'flex items-center justify-center space-x-2'
+                  'flex items-center justify-center space-x-2',
+                  'disabled:opacity-50 disabled:cursor-not-allowed'
                 )}
               >
-                <Plus className='h-4 w-4' />
+                {allLocations.length === 0 ? (
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                ) : (
+                  <Plus className='h-4 w-4' />
+                )}
                 <span>Add Location</span>
               </button>
               <button

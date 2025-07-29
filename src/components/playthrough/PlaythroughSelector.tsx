@@ -128,36 +128,43 @@ export default function PlaythroughSelector({
       <Menu as='div' className={clsx('relative', className)}>
         <MenuButton
           className={clsx(
-            'flex items-center justify-between gap-2 px-3 py-2.5 text-sm font-semibold',
+            'flex items-center justify-between gap-2 px-3 py-2 sm:py-2.5 text-sm font-semibold',
             'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600',
             'border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500',
             'rounded-md transition-colors cursor-pointer',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
             'text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            'min-w-[120px] sm:min-w-[140px]'
+            'w-[180px] sm:min-w-[140px] sm:w-auto',
+            'touch-manipulation',
+            'overflow-hidden'
           )}
           disabled={isLoading}
         >
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-2 min-w-0 flex-1 overflow-hidden'>
             <Album className='w-4 h-4 flex-shrink-0' />
-            <span className='truncate'>{activePlaythrough?.name || '...'}</span>
+            <span className='truncate min-w-0'>
+              {activePlaythrough?.name || '...'}
+            </span>
           </div>
           <ChevronDown className='w-4 h-4 flex-shrink-0' />
         </MenuButton>
         <MenuItems
           className={clsx(
-            'absolute right-0 z-50 mt-2 origin-top-right rounded-md',
+            'absolute z-50 mt-2 rounded-md',
             'bg-white dark:bg-gray-800 shadow-lg ring-1 ring-gray-200 dark:ring-gray-600 ring-opacity-5',
             'border border-gray-200 dark:border-gray-600',
             'focus:outline-none',
-            'min-w-[240px] sm:min-w-[260px] max-w-[320px]'
+            'min-w-[240px] sm:min-w-[260px] max-w-[320px]',
+            // Mobile positioning - center on small screens, right-aligned on larger screens
+            'left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0',
+            'origin-top-center sm:origin-top-right'
           )}
         >
           {/* Current playthroughs section */}
           {allPlaythroughs.length > 0 && (
             <>
-              <div className='px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600'>
+              <div className='px-3 py-2 sm:py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600'>
                 Playthroughs
               </div>
               {allPlaythroughs
@@ -177,6 +184,7 @@ export default function PlaythroughSelector({
                           className={clsx(
                             'group flex w-full items-center justify-between px-3 py-3 text-sm cursor-pointer',
                             'focus:outline-none text-left transition-colors',
+                            'touch-manipulation',
                             // Combined: Selected AND focused (most prominent)
                             focus &&
                               activePlaythrough?.id === playthrough.id &&
@@ -204,22 +212,26 @@ export default function PlaythroughSelector({
                                   : 'bg-gray-400'
                               )}
                             />
-                            <span className='truncate font-semibold'>
-                              {playthrough.name}
-                            </span>
-                            {gameModeInfo && (
-                              <span
-                                className={clsx(
-                                  'text-xs px-1.5 py-0.5 rounded flex-shrink-0 font-semibold',
-                                  gameModeInfo.className
+                            <div className='flex flex-col gap-1 flex-1 min-w-0'>
+                              <div className='flex items-center gap-2'>
+                                <span className='truncate font-semibold flex-1'>
+                                  {playthrough.name}
+                                </span>
+                                {gameModeInfo && (
+                                  <span
+                                    className={clsx(
+                                      'text-xs px-1.5 py-0.5 rounded flex-shrink-0 font-semibold',
+                                      gameModeInfo.className
+                                    )}
+                                  >
+                                    {gameModeInfo.label}
+                                  </span>
                                 )}
-                              >
-                                {gameModeInfo.label}
-                              </span>
-                            )}
+                              </div>
+                            </div>
                           </div>
-                          <div className='flex items-center gap-2'>
-                            <div className='text-xs text-gray-500 dark:text-gray-400 flex-shrink-0'>
+                          <div className='flex items-center gap-2 flex-shrink-0'>
+                            <div className='text-xs text-gray-500 dark:text-gray-400 hidden sm:block'>
                               {new Date(
                                 playthrough.updatedAt
                               ).toLocaleDateString()}
@@ -235,10 +247,10 @@ export default function PlaythroughSelector({
                                   );
                                 }}
                                 className={clsx(
-                                  'p-1 ml-1 rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity',
+                                  'p-1.5 rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity',
                                   'hover:bg-red-100 dark:hover:bg-red-900/20',
                                   'text-gray-400 hover:text-red-600 dark:hover:text-red-400',
-                                  'cursor-pointer'
+                                  'cursor-pointer touch-manipulation'
                                 )}
                                 title='Delete playthrough'
                                 role='button'
@@ -260,7 +272,7 @@ export default function PlaythroughSelector({
           {/* Create new playthrough section */}
           {showCreateInput ? (
             <div className='px-1.5 py-1.5'>
-              <div className='flex items-center gap-1.5'>
+              <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5'>
                 <input
                   type='text'
                   value={newPlaythroughName}
@@ -290,10 +302,11 @@ export default function PlaythroughSelector({
                   onClick={handleCreatePlaythrough}
                   disabled={Boolean(!newPlaythroughName.trim())}
                   className={clsx(
-                    'px-2 py-2 text-xs font-semibold text-white rounded cursor-pointer',
+                    'px-3 py-1.5 sm:px-2 sm:py-2 text-xs font-semibold text-white rounded cursor-pointer',
                     'bg-blue-600 hover:bg-blue-700 transition-colors',
                     'focus:outline-none focus:ring-1 focus:ring-blue-500',
-                    'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600'
+                    'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600',
+                    'touch-manipulation'
                   )}
                 >
                   Create
@@ -311,7 +324,8 @@ export default function PlaythroughSelector({
                   'group flex w-full items-center gap-2 px-3 py-3 text-sm cursor-pointer rounded-b-md',
                   'hover:bg-gray-100 dark:hover:bg-gray-700',
                   'focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700',
-                  'text-gray-700 dark:text-gray-300 transition-colors'
+                  'text-gray-700 dark:text-gray-300 transition-colors',
+                  'touch-manipulation'
                 )}
               >
                 <Plus className='w-4 h-4' />
@@ -322,7 +336,7 @@ export default function PlaythroughSelector({
 
           {isLoading && (
             <div className='px-3 py-2 text-sm text-gray-500 dark:text-gray-400 text-center'>
-              Loading playthroughs...
+              Loading...
             </div>
           )}
         </MenuItems>
