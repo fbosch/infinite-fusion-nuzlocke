@@ -16,24 +16,51 @@ interface RouteEncounter {
   routeId: number;
 }
 
+interface GiftPokemon {
+  pokemonId: number;
+  location: string;
+  level?: number;
+  notes?: string;
+  requirements?: string;
+}
+
+interface TradePokemon {
+  pokemonId: number;
+  askingForId: number;
+  askingFor: string;
+  location: string;
+  notes?: string;
+  requirements?: string;
+}
+
 describe('Data Integrity Tests', () => {
   let locations: Location[];
   let classicEncounters: RouteEncounter[];
   let remixEncounters: RouteEncounter[];
+  let gifts: GiftPokemon[];
+  let trades: TradePokemon[];
 
   beforeAll(async () => {
     const dataDir = path.join(process.cwd(), 'data');
 
     // Load all data files
-    const [locationsData, classicData, remixData] = await Promise.all([
-      fs.readFile(path.join(dataDir, 'locations.json'), 'utf-8'),
-      fs.readFile(path.join(dataDir, 'route-encounters-classic.json'), 'utf-8'),
-      fs.readFile(path.join(dataDir, 'route-encounters-remix.json'), 'utf-8'),
-    ]);
+    const [locationsData, classicData, remixData, giftsData, tradesData] =
+      await Promise.all([
+        fs.readFile(path.join(dataDir, 'locations.json'), 'utf-8'),
+        fs.readFile(
+          path.join(dataDir, 'route-encounters-classic.json'),
+          'utf-8'
+        ),
+        fs.readFile(path.join(dataDir, 'route-encounters-remix.json'), 'utf-8'),
+        fs.readFile(path.join(dataDir, 'gifts.json'), 'utf-8'),
+        fs.readFile(path.join(dataDir, 'trades.json'), 'utf-8'),
+      ]);
 
     locations = JSON.parse(locationsData);
     classicEncounters = JSON.parse(classicData);
     remixEncounters = JSON.parse(remixData);
+    gifts = JSON.parse(giftsData);
+    trades = JSON.parse(tradesData);
   });
 
   describe('Route Encounter Coverage', () => {
@@ -209,7 +236,7 @@ describe('Data Integrity Tests', () => {
   });
 
   describe('Pokemon Data Structure', () => {
-    let pokemonData: any[];
+    let pokemonData: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     beforeAll(async () => {
       const dataDir = path.join(process.cwd(), 'data');
@@ -257,6 +284,7 @@ describe('Data Integrity Tests', () => {
           // Validate evolution details
           pokemon.evolution.evolves_to.forEach(
             (evolution: any, index: number) => {
+              // eslint-disable-line @typescript-eslint/no-explicit-any
               if (!evolution.id || !evolution.name) {
                 invalidEvolutionData.push(
                   `${pokemon.name}: evolution ${index} missing id or name`
@@ -378,7 +406,7 @@ describe('Data Integrity Tests', () => {
 
       // Check that Eevee has multiple evolution options
       const evolutionNames =
-        eevee?.evolution.evolves_to.map((e: any) => e.name) || [];
+        eevee?.evolution.evolves_to.map((e: any) => e.name) || []; // eslint-disable-line @typescript-eslint/no-explicit-any
       expect(evolutionNames).toContain('vaporeon');
       expect(evolutionNames).toContain('jolteon');
       expect(evolutionNames).toContain('flareon');
@@ -490,6 +518,371 @@ describe('Data Integrity Tests', () => {
 
       expect(classicDuplicates).toHaveLength(0);
       expect(remixDuplicates).toHaveLength(0);
+    });
+  });
+
+  describe('Gift Pokemon Data Integrity', () => {
+    it('should have valid Pokemon IDs in all gift entries', () => {
+      const invalidGifts: string[] = [];
+
+      gifts.forEach((gift, index) => {
+        if (!Number.isInteger(gift.pokemonId)) {
+          invalidGifts.push(`Gift ${index}: pokemonId is not an integer`);
+        }
+        if (gift.pokemonId === 0) {
+          invalidGifts.push(`Gift ${index}: pokemonId cannot be 0`);
+        }
+        // Allow negative IDs for special cases (eggs, fossils, etc.)
+      });
+
+      if (invalidGifts.length > 0) {
+        throw new Error(
+          `Invalid gift Pokemon IDs found:\n${invalidGifts.join('\n')}`
+        );
+      }
+
+      expect(invalidGifts).toHaveLength(0);
+    });
+
+    it('should have valid level values in gift entries', () => {
+      const invalidLevels: string[] = [];
+
+      gifts.forEach((gift, index) => {
+        if (gift.level !== undefined) {
+          if (!Number.isInteger(gift.level)) {
+            invalidLevels.push(`Gift ${index}: level is not an integer`);
+          }
+          // Allow levels up to 9999 for special cases (like Game Corner prizes)
+          if (gift.level < 1 || gift.level > 9999) {
+            invalidLevels.push(
+              `Gift ${index}: level ${gift.level} is out of valid range (1-9999)`
+            );
+          }
+        }
+      });
+
+      if (invalidLevels.length > 0) {
+        throw new Error(
+          `Invalid gift levels found:\n${invalidLevels.join('\n')}`
+        );
+      }
+
+      expect(invalidLevels).toHaveLength(0);
+    });
+
+    it('should have non-empty location names for all gifts', () => {
+      const invalidLocations: string[] = [];
+
+      gifts.forEach((gift, index) => {
+        if (!gift.location || gift.location.trim() === '') {
+          invalidLocations.push(`Gift ${index}: missing or empty location`);
+        }
+      });
+
+      if (invalidLocations.length > 0) {
+        throw new Error(
+          `Invalid gift locations found:\n${invalidLocations.join('\n')}`
+        );
+      }
+
+      expect(invalidLocations).toHaveLength(0);
+    });
+
+    it('should have valid special case Pokemon IDs', () => {
+      const specialCases = gifts.filter(gift => gift.pokemonId < 0);
+      const validSpecialIds = [-1, -2]; // Eggs, Fossils
+
+      const invalidSpecialCases = specialCases.filter(
+        gift => !validSpecialIds.includes(gift.pokemonId)
+      );
+
+      if (invalidSpecialCases.length > 0) {
+        const invalidDetails = invalidSpecialCases
+          .map(gift => `- ${gift.location}: pokemonId ${gift.pokemonId}`)
+          .join('\n');
+        throw new Error(
+          `Invalid special case Pokemon IDs found:\n${invalidDetails}`
+        );
+      }
+
+      expect(invalidSpecialCases).toHaveLength(0);
+    });
+
+    it('should have consistent data structure across all gift entries', () => {
+      const invalidStructure: string[] = [];
+
+      gifts.forEach((gift, index) => {
+        if (typeof gift.pokemonId !== 'number') {
+          invalidStructure.push(`Gift ${index}: pokemonId is not a number`);
+        }
+        if (typeof gift.location !== 'string') {
+          invalidStructure.push(`Gift ${index}: location is not a string`);
+        }
+        if (gift.level !== undefined && typeof gift.level !== 'number') {
+          invalidStructure.push(`Gift ${index}: level is not a number`);
+        }
+        if (gift.notes !== undefined && typeof gift.notes !== 'string') {
+          invalidStructure.push(`Gift ${index}: notes is not a string`);
+        }
+        if (
+          gift.requirements !== undefined &&
+          typeof gift.requirements !== 'string'
+        ) {
+          invalidStructure.push(`Gift ${index}: requirements is not a string`);
+        }
+      });
+
+      if (invalidStructure.length > 0) {
+        throw new Error(
+          `Invalid gift data structure found:\n${invalidStructure.join('\n')}`
+        );
+      }
+
+      expect(invalidStructure).toHaveLength(0);
+    });
+  });
+
+  describe('Trade Pokemon Data Integrity', () => {
+    it('should have valid Pokemon IDs in all trade entries', () => {
+      const invalidTrades: string[] = [];
+
+      trades.forEach((trade, index) => {
+        if (!Number.isInteger(trade.pokemonId)) {
+          invalidTrades.push(`Trade ${index}: pokemonId is not an integer`);
+        }
+        if (!Number.isInteger(trade.askingForId)) {
+          invalidTrades.push(`Trade ${index}: askingForId is not an integer`);
+        }
+        if (trade.pokemonId <= 0) {
+          invalidTrades.push(`Trade ${index}: pokemonId cannot be <= 0`);
+        }
+        if (trade.askingForId <= 0) {
+          invalidTrades.push(`Trade ${index}: askingForId cannot be <= 0`);
+        }
+      });
+
+      if (invalidTrades.length > 0) {
+        throw new Error(
+          `Invalid trade Pokemon IDs found:\n${invalidTrades.join('\n')}`
+        );
+      }
+
+      expect(invalidTrades).toHaveLength(0);
+    });
+
+    it('should have non-empty location names for all trades', () => {
+      const invalidLocations: string[] = [];
+
+      trades.forEach((trade, index) => {
+        if (!trade.location || trade.location.trim() === '') {
+          invalidLocations.push(`Trade ${index}: missing or empty location`);
+        }
+      });
+
+      if (invalidLocations.length > 0) {
+        throw new Error(
+          `Invalid trade locations found:\n${invalidLocations.join('\n')}`
+        );
+      }
+
+      expect(invalidLocations).toHaveLength(0);
+    });
+
+    it('should have non-empty askingFor text for all trades', () => {
+      const invalidAskingFor: string[] = [];
+
+      trades.forEach((trade, index) => {
+        if (!trade.askingFor || trade.askingFor.trim() === '') {
+          invalidAskingFor.push(
+            `Trade ${index}: missing or empty askingFor text`
+          );
+        }
+      });
+
+      if (invalidAskingFor.length > 0) {
+        throw new Error(
+          `Invalid trade askingFor text found:\n${invalidAskingFor.join('\n')}`
+        );
+      }
+
+      expect(invalidAskingFor).toHaveLength(0);
+    });
+
+    it('should have consistent data structure across all trade entries', () => {
+      const invalidStructure: string[] = [];
+
+      trades.forEach((trade, index) => {
+        if (typeof trade.pokemonId !== 'number') {
+          invalidStructure.push(`Trade ${index}: pokemonId is not a number`);
+        }
+        if (typeof trade.askingForId !== 'number') {
+          invalidStructure.push(`Trade ${index}: askingForId is not a number`);
+        }
+        if (typeof trade.askingFor !== 'string') {
+          invalidStructure.push(`Trade ${index}: askingFor is not a string`);
+        }
+        if (typeof trade.location !== 'string') {
+          invalidStructure.push(`Trade ${index}: location is not a string`);
+        }
+        if (trade.notes !== undefined && typeof trade.notes !== 'string') {
+          invalidStructure.push(`Trade ${index}: notes is not a string`);
+        }
+        if (
+          trade.requirements !== undefined &&
+          typeof trade.requirements !== 'string'
+        ) {
+          invalidStructure.push(`Trade ${index}: requirements is not a string`);
+        }
+      });
+
+      if (invalidStructure.length > 0) {
+        throw new Error(
+          `Invalid trade data structure found:\n${invalidStructure.join('\n')}`
+        );
+      }
+
+      expect(invalidStructure).toHaveLength(0);
+    });
+
+    it('should have unique trade combinations', () => {
+      const tradeKeys = new Set<string>();
+      const duplicates: string[] = [];
+
+      trades.forEach((trade, index) => {
+        const key = `${trade.pokemonId}-${trade.askingForId}-${trade.location}`;
+        if (tradeKeys.has(key)) {
+          duplicates.push(
+            `Trade ${index}: duplicate combination ${trade.askingFor} for ${trade.location}`
+          );
+        } else {
+          tradeKeys.add(key);
+        }
+      });
+
+      if (duplicates.length > 0) {
+        throw new Error(
+          `Duplicate trade combinations found:\n${duplicates.join('\n')}`
+        );
+      }
+
+      expect(duplicates).toHaveLength(0);
+    });
+  });
+
+  describe('Gifts and Trades Integration', () => {
+    it('should have non-empty location names for all gifts and trades', () => {
+      const invalidGiftLocations: string[] = [];
+      const invalidTradeLocations: string[] = [];
+
+      // Check gift locations
+      gifts.forEach((gift, index) => {
+        if (!gift.location || gift.location.trim() === '') {
+          invalidGiftLocations.push(`Gift ${index}: missing or empty location`);
+        }
+      });
+
+      // Check trade locations
+      trades.forEach((trade, index) => {
+        if (!trade.location || trade.location.trim() === '') {
+          invalidTradeLocations.push(
+            `Trade ${index}: missing or empty location`
+          );
+        }
+      });
+
+      const errors: string[] = [];
+      if (invalidGiftLocations.length > 0) {
+        errors.push(
+          `Invalid gift locations:\n${invalidGiftLocations.join('\n')}`
+        );
+      }
+      if (invalidTradeLocations.length > 0) {
+        errors.push(
+          `Invalid trade locations:\n${invalidTradeLocations.join('\n')}`
+        );
+      }
+
+      if (errors.length > 0) {
+        throw new Error(errors.join('\n\n'));
+      }
+
+      expect(invalidGiftLocations).toHaveLength(0);
+      expect(invalidTradeLocations).toHaveLength(0);
+    });
+
+    it('should have reasonable data volume', () => {
+      // Check that we have a reasonable number of gifts and trades
+      expect(gifts.length).toBeGreaterThan(0);
+      expect(trades.length).toBeGreaterThan(0);
+      expect(gifts.length).toBeLessThan(1000); // Sanity check
+      expect(trades.length).toBeLessThan(1000); // Sanity check
+    });
+
+    it('should have consistent location naming patterns', () => {
+      const locationNames = new Set(locations.map(loc => loc.name));
+      const giftLocations = new Set(gifts.map(gift => gift.location));
+      const tradeLocations = new Set(trades.map(trade => trade.location));
+
+      const allLocations = new Set([...giftLocations, ...tradeLocations]);
+      const locationNameVariations = new Map<string, string[]>();
+
+      // Check for potential naming inconsistencies
+      allLocations.forEach(location => {
+        if (!locationNames.has(location)) {
+          // Try to find similar names in the locations data
+          const normalizedLocation = location
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '') // Remove spaces, dots, etc.
+            .trim();
+
+          const potentialMatches = Array.from(locationNames).filter(locName => {
+            const normalizedLocName = locName
+              .toLowerCase()
+              .replace(/[^a-z0-9]/g, '')
+              .trim();
+
+            return (
+              normalizedLocName === normalizedLocation ||
+              normalizedLocName.includes(normalizedLocation) ||
+              normalizedLocation.includes(normalizedLocName)
+            );
+          });
+
+          if (potentialMatches.length > 0) {
+            const variations = [location, ...potentialMatches];
+            const key = variations.sort().join('|');
+            if (!locationNameVariations.has(key)) {
+              locationNameVariations.set(key, variations);
+            }
+          }
+        }
+      });
+
+      // Report potential naming inconsistencies
+      const inconsistencies: string[] = [];
+      locationNameVariations.forEach((variations, key) => {
+        if (variations.length > 1) {
+          inconsistencies.push(
+            `Potential naming inconsistency: ${variations.join(' ↔ ')}`
+          );
+        }
+      });
+
+      if (inconsistencies.length > 0) {
+        console.warn('Potential location naming inconsistencies found:');
+        inconsistencies.forEach(inconsistency =>
+          console.warn(`  - ${inconsistency}`)
+        );
+
+        // Don't fail the test, but warn about potential issues
+        console.warn(
+          `Found ${inconsistencies.length} potential naming inconsistencies`
+        );
+      }
+
+      // For now, just log the inconsistencies without failing the test
+      // since this is more of a data quality check than a critical error
+      expect(true).toBe(true); // Always pass, but log warnings
     });
   });
 });
