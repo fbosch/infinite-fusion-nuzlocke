@@ -5,11 +5,12 @@ import {
 } from '@tanstack/react-query';
 import {
   PokemonOptionType,
-  searchPokemon,
   useAllPokemon,
+  generatePokemonUID,
 } from '@/loaders/pokemon';
 import { useGameMode } from '@/stores/playthroughs';
 import { useDebounce } from 'use-debounce';
+import { SearchCore } from '@/lib/searchCore';
 
 interface UsePokemonSearchOptions {
   query: string;
@@ -37,9 +38,21 @@ export function usePokemonSearch({
     queryKey: ['pokemon', 'search', gameMode, debouncedQuery],
     queryFn: async () => {
       if (debouncedQuery === '') return [];
+
       try {
-        return await searchPokemon(debouncedQuery);
+        // Use SearchCore for local Fuse.js search instead of API calls
+        const searchCore = await SearchCore.create();
+        const searchResults = await searchCore.search(debouncedQuery);
+
+        // Transform SearchCore results to PokemonOptionType format
+        return searchResults.map(result => ({
+          id: result.id,
+          name: result.name,
+          nationalDexId: result.nationalDexId,
+          uid: generatePokemonUID(),
+        }));
       } catch (err) {
+        // Fallback to client-side filtering if SearchCore fails
         return allPokemon
           .filter(pokemon =>
             pokemon.name.toLowerCase().includes(debouncedQuery.toLowerCase())
@@ -48,6 +61,7 @@ export function usePokemonSearch({
             id: p.id,
             name: p.name,
             nationalDexId: p.nationalDexId,
+            uid: generatePokemonUID(),
           }));
       }
     },
@@ -56,6 +70,8 @@ export function usePokemonSearch({
     },
     enabled: allPokemon.length > 0 && debouncedQuery !== '',
     placeholderData: keepPreviousData,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
     ...queryOptions,
   });
 }
