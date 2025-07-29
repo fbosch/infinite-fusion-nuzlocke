@@ -212,7 +212,7 @@ export default function PlaythroughSelector({
                                   : 'bg-gray-400'
                               )}
                             />
-                            <div className='flex flex-col gap-1 flex-1 min-w-0'>
+                            <div className='flex flex-col gap-1 flex-1 min-w-0 mr-1'>
                               <div className='flex items-center gap-2'>
                                 <span className='truncate font-semibold flex-1'>
                                   {playthrough.name}
