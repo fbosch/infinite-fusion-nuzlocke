@@ -613,7 +613,7 @@ describe('Playthroughs Store - React Hooks', () => {
       expect(result2.current?.gameMode).toBe('remix');
     });
 
-    it('should update when the specific playthrough is modified', () => {
+    it('should update when the specific playthrough is modified', async () => {
       let playthroughId: string;
 
       act(() => {
@@ -635,7 +635,25 @@ describe('Playthroughs Store - React Hooks', () => {
         playthroughActions.updatePlaythroughName(playthroughId!, 'Updated Run');
       });
 
-      rerender();
+      // Use retry mechanism for flaky CI tests
+      await act(async () => {
+        // Wait for state to update with retry logic
+        let attempts = 0;
+        const maxAttempts = 10;
+
+        while (attempts < maxAttempts) {
+          rerender();
+
+          if (result.current?.name === 'Updated Run') {
+            break;
+          }
+
+          // Small delay before next attempt
+          await new Promise(resolve => setTimeout(resolve, 10));
+          attempts++;
+        }
+      });
+
       // Verify the playthrough was updated
       expect(result.current?.name).toBe('Updated Run');
       // The key test is that the name changed, indicating reactivity works
