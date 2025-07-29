@@ -235,11 +235,26 @@ export const PokemonCombobox = React.memo(
     ]);
 
     const handleChange = useCallback(
-      (newValue: PokemonOptionType | null | undefined) => {
+      async (newValue: PokemonOptionType | null | undefined) => {
+        // Check if this is an evolution (same ID but different name) or a manual selection
+        if (value && newValue && onBeforeOverwrite) {
+          const isEvolution =
+            value.id === newValue.id && value.name !== newValue.name;
+
+          // Only check for overwrite confirmation if it's not an evolution
+          if (!isEvolution) {
+            const shouldOverwrite = await onBeforeOverwrite(value, newValue);
+            if (!shouldOverwrite) {
+              // If overwrite was cancelled, don't proceed with the change
+              return;
+            }
+          }
+        }
+
         onChange(newValue || null);
         setQuery('');
       },
-      [onChange]
+      [onChange, value, onBeforeOverwrite]
     );
 
     // Memoize input change handler

@@ -213,18 +213,6 @@ export function EncounterCell({
           });
           return;
         }
-      } else {
-        // If we're setting a new pokemon, check if we're overwriting valuable data
-        const currentPokemon = field === 'head' ? headPokemon : bodyPokemon;
-
-        if (currentPokemon && hasValuableData(currentPokemon)) {
-          // Show overwrite confirmation dialog
-          dispatch({
-            type: 'SHOW_OVERWRITE_CONFIRMATION',
-            payload: { field, currentPokemon, newPokemon: pokemon },
-          });
-          return;
-        }
       }
 
       // If no confirmation needed, proceed with the change
@@ -363,6 +351,79 @@ export function EncounterCell({
     [hasValuableData]
   );
 
+  // Create separate handlers for head and body overwrite
+  const handleBeforeOverwriteHead = useCallback(
+    (
+      currentValue: PokemonOptionType,
+      newValue: PokemonOptionType
+    ): Promise<boolean> => {
+      return new Promise(resolve => {
+        if (hasValuableData(currentValue)) {
+          dispatch({
+            type: 'SHOW_OVERWRITE_CONFIRMATION',
+            payload: {
+              field: 'head',
+              currentPokemon: currentValue,
+              newPokemon: newValue,
+            },
+          });
+          pendingOverwriteResolveRef.current = resolve;
+        } else {
+          resolve(true);
+        }
+      });
+    },
+    [hasValuableData]
+  );
+
+  const handleBeforeOverwriteBody = useCallback(
+    (
+      currentValue: PokemonOptionType,
+      newValue: PokemonOptionType
+    ): Promise<boolean> => {
+      return new Promise(resolve => {
+        if (hasValuableData(currentValue)) {
+          dispatch({
+            type: 'SHOW_OVERWRITE_CONFIRMATION',
+            payload: {
+              field: 'body',
+              currentPokemon: currentValue,
+              newPokemon: newValue,
+            },
+          });
+          pendingOverwriteResolveRef.current = resolve;
+        } else {
+          resolve(true);
+        }
+      });
+    },
+    [hasValuableData]
+  );
+
+  const handleBeforeOverwriteSingle = useCallback(
+    (
+      currentValue: PokemonOptionType,
+      newValue: PokemonOptionType
+    ): Promise<boolean> => {
+      return new Promise(resolve => {
+        if (hasValuableData(currentValue)) {
+          dispatch({
+            type: 'SHOW_OVERWRITE_CONFIRMATION',
+            payload: {
+              field: 'head',
+              currentPokemon: currentValue,
+              newPokemon: newValue,
+            },
+          });
+          pendingOverwriteResolveRef.current = resolve;
+        } else {
+          resolve(true);
+        }
+      });
+    },
+    [hasValuableData]
+  );
+
   // Handle fusion toggle
   const handleFusionToggle = useCallback(() => {
     playthroughActions.toggleEncounterFusion(locationId);
@@ -411,6 +472,7 @@ export function EncounterCell({
                   comboboxId={`${locationId}-head`}
                   shouldLoad={shouldLoad}
                   onBeforeClear={handleBeforeClearHead}
+                  onBeforeOverwrite={handleBeforeOverwriteHead}
                 />
               </div>
               <CursorTooltip
@@ -455,6 +517,7 @@ export function EncounterCell({
                   ref={bodyComboboxRef}
                   shouldLoad={shouldLoad}
                   onBeforeClear={handleBeforeClearBody}
+                  onBeforeOverwrite={handleBeforeOverwriteBody}
                 />
               </div>
             </div>
@@ -470,6 +533,7 @@ export function EncounterCell({
               comboboxId={`${locationId}-single`}
               shouldLoad={shouldLoad}
               onBeforeClear={handleBeforeClearSingle}
+              onBeforeOverwrite={handleBeforeOverwriteSingle}
             />
           )}
         </div>
