@@ -283,8 +283,8 @@ describe('Data Integrity Tests', () => {
 
           // Validate evolution details
           pokemon.evolution.evolves_to.forEach(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (evolution: any, index: number) => {
-              // eslint-disable-line @typescript-eslint/no-explicit-any
               if (!evolution.id || !evolution.name) {
                 invalidEvolutionData.push(
                   `${pokemon.name}: evolution ${index} missing id or name`
@@ -860,7 +860,7 @@ describe('Data Integrity Tests', () => {
 
       // Report potential naming inconsistencies
       const inconsistencies: string[] = [];
-      locationNameVariations.forEach((variations, key) => {
+      locationNameVariations.forEach(variations => {
         if (variations.length > 1) {
           inconsistencies.push(
             `Potential naming inconsistency: ${variations.join(' ↔ ')}`

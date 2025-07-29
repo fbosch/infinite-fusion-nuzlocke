@@ -16,13 +16,13 @@ async function analyzeLocations() {
     const allLocations = new Set<string>();
 
     // From gifts
-    gifts.forEach((gift: any) => allLocations.add(gift.location)); // eslint-disable-line @typescript-eslint/no-explicit-any
+    gifts.forEach((gift: any) => allLocations.add(gift.location));  
 
     // From trades  
-    trades.forEach((trade: any) => allLocations.add(trade.location)); // eslint-disable-line @typescript-eslint/no-explicit-any
+    trades.forEach((trade: any) => allLocations.add(trade.location));  
 
     // From locations
-    locations.forEach((loc: any) => allLocations.add(loc.name)); // eslint-disable-line @typescript-eslint/no-explicit-any
+    locations.forEach((loc: any) => allLocations.add(loc.name));  
 
     // Sort and display
     const sortedLocations = Array.from(allLocations).sort();
@@ -44,9 +44,9 @@ async function analyzeLocations() {
 
     // Count locations by source
     console.log('\nLocation counts by source:');
-    const giftLocations = new Set(gifts.map((g: any) => g.location)); // eslint-disable-line @typescript-eslint/no-explicit-any
-    const tradeLocations = new Set(trades.map((t: any) => t.location)); // eslint-disable-line @typescript-eslint/no-explicit-any
-    const locationNames = new Set(locations.map((l: any) => l.name)); // eslint-disable-line @typescript-eslint/no-explicit-any
+    const giftLocations = new Set(gifts.map((g: any) => g.location));  
+    const tradeLocations = new Set(trades.map((t: any) => t.location));  
+    const locationNames = new Set(locations.map((l: any) => l.name));  
     
     console.log(`  - Gifts: ${giftLocations.size} unique locations`);
     console.log(`  - Trades: ${tradeLocations.size} unique locations`);

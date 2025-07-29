@@ -131,7 +131,7 @@ async function scrapeGiftsAndTrades(): Promise<{ gifts: GiftPokemon[]; trades: T
     // Find all sections
     const sections = $('h2, h3');
 
-    sections.each((sectionIndex: number, section: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    sections.each((sectionIndex: number, section: any) => {  
       const $section = $(section);
       const sectionText = $section.text().trim();
 
@@ -161,7 +161,7 @@ async function scrapeGiftsAndTrades(): Promise<{ gifts: GiftPokemon[]; trades: T
           const table = currentElement;
           const rows = table.find('tr');
 
-          rows.each((rowIndex: number, row: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+          rows.each((rowIndex: number, row: any) => {  
             const $row = $(row);
             const cells = $row.find('td');
 
@@ -255,7 +255,7 @@ async function scrapeGiftsAndTrades(): Promise<{ gifts: GiftPokemon[]; trades: T
           const table = currentElement;
           const rows = table.find('tr');
 
-          rows.each((rowIndex: number, row: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+          rows.each((rowIndex: number, row: any) => { 
             const $row = $(row);
             const cells = $row.find('td');
 

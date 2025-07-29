@@ -8,14 +8,12 @@ import { ConsoleFormatter } from './console-utils';
 import {
   findPokemonId,
   isPotentialPokemonName,
-  type PokemonNameMap
 } from './utils/pokemon-name-utils';
 import {
   isRoutePattern,
   processRouteName
 } from './utils/route-utils';
-import { loadPokemonNameMap, type DexEntry } from './utils/data-loading-utils';
-import type { ProcessedPokemonData } from './fetch-pokemon-data';
+import { loadPokemonNameMap } from './utils/data-loading-utils';
 
 const WILD_ENCOUNTERS_CLASSIC_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters';
 const WILD_ENCOUNTERS_REMIX_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters/Remix';
