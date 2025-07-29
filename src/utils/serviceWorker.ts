@@ -140,4 +140,106 @@ export class ServiceWorkerManager {
   getRegistration(): ServiceWorkerRegistration | null {
     return this.swRegistration;
   }
+
+  async getCacheSize(): Promise<string> {
+    return new Promise((resolve) => {
+      if (!navigator.serviceWorker.controller) {
+        resolve('Service worker not active');
+        return;
+      }
+
+      const messageChannel = new MessageChannel();
+      messageChannel.port1.onmessage = (event) => {
+        if (event.data.type === 'CACHE_SIZE') {
+          resolve(event.data.size);
+        }
+      };
+
+      navigator.serviceWorker.controller.postMessage(
+        { type: 'GET_CACHE_SIZE' },
+        [messageChannel.port2]
+      );
+    });
+  }
+
+  async getPokemonCacheStatus(): Promise<{
+    total: number;
+    cached: number;
+    percentage: number;
+    error?: string;
+  }> {
+    return new Promise((resolve) => {
+      if (!navigator.serviceWorker.controller) {
+        resolve({
+          total: 0,
+          cached: 0,
+          percentage: 0,
+          error: 'Service worker not active',
+        });
+        return;
+      }
+
+      const messageChannel = new MessageChannel();
+      messageChannel.port1.onmessage = (event) => {
+        if (event.data.type === 'POKEMON_CACHE_STATUS') {
+          resolve(event.data.status);
+        }
+      };
+
+      navigator.serviceWorker.controller.postMessage(
+        { type: 'GET_POKEMON_CACHE_STATUS' },
+        [messageChannel.port2]
+      );
+    });
+  }
+
+  async getApiCacheStatus(): Promise<{
+    total: number;
+    endpoints: string[];
+    error?: string;
+  }> {
+    return new Promise((resolve) => {
+      if (!navigator.serviceWorker.controller) {
+        resolve({
+          total: 0,
+          endpoints: [],
+          error: 'Service worker not active',
+        });
+        return;
+      }
+
+      const messageChannel = new MessageChannel();
+      messageChannel.port1.onmessage = (event) => {
+        if (event.data.type === 'API_CACHE_STATUS') {
+          resolve(event.data.status);
+        }
+      };
+
+      navigator.serviceWorker.controller.postMessage(
+        { type: 'GET_API_CACHE_STATUS' },
+        [messageChannel.port2]
+      );
+    });
+  }
+
+  async clearApiCache(): Promise<void> {
+    return new Promise((resolve) => {
+      if (!navigator.serviceWorker.controller) {
+        resolve();
+        return;
+      }
+
+      const messageChannel = new MessageChannel();
+      messageChannel.port1.onmessage = (event) => {
+        if (event.data.type === 'API_CACHE_CLEARED') {
+          resolve();
+        }
+      };
+
+      navigator.serviceWorker.controller.postMessage(
+        { type: 'CLEAR_API_CACHE' },
+        [messageChannel.port2]
+      );
+    });
+  }
 }

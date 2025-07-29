@@ -1,6 +1,7 @@
 const CACHE_NAME = 'infinite-fusion-cache-v1';
 const IMAGE_CACHE_NAME = 'infinite-fusion-images-v1';
 const POKEMON_IMAGE_CACHE_NAME = 'pokemon-images-v1';
+const API_CACHE_NAME = 'infinite-fusion-api-v1';
 
 // URLs to cache immediately
 const urlsToCache = ['/'];
@@ -116,7 +117,8 @@ self.addEventListener('activate', event => {
           if (
             cacheName !== CACHE_NAME &&
             cacheName !== IMAGE_CACHE_NAME &&
-            cacheName !== POKEMON_IMAGE_CACHE_NAME
+            cacheName !== POKEMON_IMAGE_CACHE_NAME &&
+            cacheName !== API_CACHE_NAME
           ) {
             console.debug('Service Worker: Deleting old cache', cacheName);
             return caches.delete(cacheName);
@@ -131,6 +133,12 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Handle Pokemon API requests with cache-first strategy
+  if (url.pathname.startsWith('/api/pokemon')) {
+    event.respondWith(handlePokemonApiRequest(request));
+    return;
+  }
 
   // Handle image requests
   if (request.destination === 'image') {
@@ -168,6 +176,44 @@ self.addEventListener('fetch', event => {
       })
   );
 });
+
+// Handle Pokemon API requests with cache-first strategy
+async function handlePokemonApiRequest(request) {
+  const cache = await caches.open(API_CACHE_NAME);
+
+  // Try cache first
+  const cachedResponse = await cache.match(request);
+  if (cachedResponse) {
+    console.debug('Service Worker: Serving Pokemon API from cache');
+    return cachedResponse;
+  }
+
+  // If not in cache, fetch from network
+  try {
+    const response = await fetch(request);
+    
+    // Only cache successful responses
+    if (response.status === 200) {
+      const responseClone = response.clone();
+      cache.put(request, responseClone);
+      console.debug('Service Worker: Cached Pokemon API response');
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Service Worker: Failed to fetch Pokemon API:', error);
+    return new Response(
+      JSON.stringify({ error: 'Service temporarily unavailable' }),
+      {
+        status: 503,
+        statusText: 'Service Unavailable',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+  }
+}
 
 // Handle image requests with cache-first strategy
 async function handleImageRequest(request) {
