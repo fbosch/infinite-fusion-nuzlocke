@@ -448,7 +448,7 @@ export function EncounterCell({
   return (
     <td
       className={clsx(
-        'w-96 max-w-96 overflow-x-auto',
+        'w-full overflow-x-auto',
         'px-4 pt-8.5 pb-4 text-sm text-gray-900 dark:text-gray-100 '
       )}
       role='cell'
