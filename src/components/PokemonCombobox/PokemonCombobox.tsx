@@ -22,6 +22,7 @@ import {
   getInfiniteFusionToNationalDexMap,
   PokemonStatus,
   type PokemonOptionType,
+  useAllPokemon,
 } from '@/loaders/pokemon';
 import { dragActions } from '@/stores/dragStore';
 import { useGameMode } from '@/stores/playthroughs';
@@ -122,11 +123,13 @@ export const PokemonCombobox = React.memo(
       locationId,
       enabled: shouldLoad,
     });
-
     // Use the search hook
     const { data: results = [] } = usePokemonSearch({
       query: deferredQuery,
     });
+
+    // Get all Pokemon for randomized mode
+    const { data: allPokemon = [] } = useAllPokemon();
 
     // Floating UI setup
     const { refs, floatingStyles, update, placement } = useFloating({
@@ -148,8 +151,22 @@ export const PokemonCombobox = React.memo(
 
     // Combine route matches with smart search results
     const finalOptions = useMemo(() => {
+      // Early return for empty query
       if (deferredQuery === '') {
+        // In randomized mode, show all Pokemon when query is empty
+        if (gameMode === 'randomized') {
+          return allPokemon.map(p => ({
+            id: p.id,
+            name: p.name,
+            nationalDexId: p.nationalDexId,
+          }));
+        }
         return routeEncounterData;
+      }
+
+      // Early return if no search results and no route data
+      if (results.length === 0 && routeEncounterData.length === 0) {
+        return [];
       }
 
       // Check if query is numeric for route Pokemon
@@ -193,7 +210,14 @@ export const PokemonCombobox = React.memo(
           (pokemon, index, self) =>
             index === self.findIndex(t => t.id === pokemon.id)
         );
-    }, [routeEncounterData, results, deferredQuery, isRoutePokemon, gameMode]);
+    }, [
+      routeEncounterData,
+      results,
+      deferredQuery,
+      isRoutePokemon,
+      gameMode,
+      allPokemon,
+    ]);
 
     const handleChange = useCallback(
       (newValue: PokemonOptionType | null | undefined) => {
@@ -207,6 +231,10 @@ export const PokemonCombobox = React.memo(
     const handleInputChange = useCallback(
       async (event: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = event.target.value;
+
+        // Always update the query immediately for responsive UI
+        startTransition(() => setQuery(inputValue));
+
         if (inputValue === '') {
           // If there's a current value and an onBeforeClear callback, check if clearing should proceed
           if (value && onBeforeClear) {
@@ -220,15 +248,11 @@ export const PokemonCombobox = React.memo(
 
           // Clear the selection when input is cleared
           onChange(null);
-          setQuery(inputValue);
 
           // Maintain focus on the input after clearing
           setTimeout(() => {
             inputRef.current?.focus();
           }, 0);
-        } else {
-          // Deferred update for typing
-          startTransition(() => setQuery(inputValue));
         }
       },
       [onChange, value, onBeforeClear]

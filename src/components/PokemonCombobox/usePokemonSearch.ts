@@ -5,6 +5,7 @@ import {
   useAllPokemon,
 } from '@/loaders/pokemon';
 import { useGameMode } from '@/stores/playthroughs';
+import { useDebounced } from '@/hooks/useDebounced';
 
 interface UsePokemonSearchOptions {
   query: string;
@@ -21,16 +22,19 @@ export function usePokemonSearch({
   const gameMode = useGameMode();
   const { data: allPokemon = [] } = useAllPokemon();
 
+  // Debounce the query to reduce search frequency
+  const debouncedQuery = useDebounced(query, 50);
+
   return useQuery<PokemonOptionType[], Error>({
-    queryKey: ['pokemon', 'search', gameMode, query],
+    queryKey: ['pokemon', 'search', gameMode, debouncedQuery],
     queryFn: async () => {
-      if (query === '') return [];
+      if (debouncedQuery === '') return [];
       try {
-        return await searchPokemon(query);
+        return await searchPokemon(debouncedQuery);
       } catch (err) {
         return allPokemon
           .filter(pokemon =>
-            pokemon.name.toLowerCase().includes(query.toLowerCase())
+            pokemon.name.toLowerCase().includes(debouncedQuery.toLowerCase())
           )
           .map(p => ({
             id: p.id,
@@ -42,13 +46,11 @@ export function usePokemonSearch({
     select: data => {
       return data?.filter(p => p.id !== 0) ?? [];
     },
-    enabled: query.length > 0 && allPokemon.length > 0,
-    staleTime: 30000, // 30 seconds
-    gcTime: 60000, // 1 minute
+    enabled: allPokemon.length > 0 && debouncedQuery !== '',
     placeholderData: previousData => {
       return (
         previousData?.filter(p =>
-          p.name.toLowerCase().includes(query.toLowerCase())
+          p.name.toLowerCase().includes(debouncedQuery.toLowerCase())
         ) ?? []
       );
     },

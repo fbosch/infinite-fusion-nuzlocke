@@ -159,22 +159,20 @@ export async function getPokemonPreEvolutionId(
 export async function searchPokemon(
   query: string
 ): Promise<PokemonOptionType[]> {
-  try {
-    const results = await searchService.search(query);
-    return results;
-  } catch (error) {
-    console.warn('Search service failed, falling back to main thread:', error);
+  // Early return for empty queries
+  if (!query?.trim()) {
+    return [];
   }
 
-  // Fallback to main thread search
-  const pokemon = await getPokemon();
+  const trimmedQuery = query.trim();
 
-  // Check if query is a number (for ID searches)
-  const isNumericQuery = /^\d+$/.test(query.trim());
+  // Check if query is a number (for ID searches) - use synchronous search
+  const isNumericQuery = /^\d+$/.test(trimmedQuery);
 
   if (isNumericQuery) {
-    // Exact search for IDs - much faster than fuzzy search
-    const queryNum = parseInt(query, 10);
+    // Synchronous search for IDs - much faster than async worker
+    const pokemon = await getPokemon();
+    const queryNum = parseInt(trimmedQuery, 10);
     const results = pokemon
       .filter(p => p.id === queryNum || p.nationalDexId === queryNum)
       .map(p => ({
@@ -183,18 +181,26 @@ export async function searchPokemon(
         nationalDexId: p.nationalDexId,
       }));
     return results;
-  } else {
-    // Simple string search as fallback
-    const results = pokemon
-      .filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
-      .map(p => ({
-        id: p.id,
-        name: p.name,
-        nationalDexId: p.nationalDexId,
-      }))
-      .slice(0, 50); // Limit results to prevent performance issues
-    return results;
   }
+
+  // For text queries, try the worker first, fallback to synchronous search
+  try {
+    return await searchService.search(trimmedQuery);
+  } catch (error) {
+    console.warn('Search service failed, falling back to main thread:', error);
+  }
+
+  // Fallback to synchronous search for better performance
+  const pokemon = await getPokemon();
+  const results = pokemon
+    .filter(p => p.name.toLowerCase().includes(trimmedQuery.toLowerCase()))
+    .map(p => ({
+      id: p.id,
+      name: p.name,
+      nationalDexId: p.nationalDexId,
+    }))
+    .slice(0, 50); // Limit results to prevent performance issues
+  return results;
 }
 
 // Get Pokemon by ID
