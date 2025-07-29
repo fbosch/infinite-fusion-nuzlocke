@@ -16,6 +16,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
+    "analyze": "ANALYZE=true pnpm build",
     "pokedex": "pnpm run pokedex:scrape && pnpm run pokedex:fetch",
     "pokedex:scrape": "jiti scripts/scrape-pokedex.ts",
     "pokedex:fetch": "jiti scripts/fetch-pokemon-data.ts",
@@ -26,6 +27,7 @@
   "dependencies": {
     "@floating-ui/react": "^0.27.13",
     "@headlessui/react": "^2.2.4",
+    "@next/bundle-analyzer": "^15.4.4",
     "@tanstack/react-query": "^5.83.0",
     "@tanstack/react-query-devtools": "^5.83.0",
     "@tanstack/react-table": "^8.21.3",
