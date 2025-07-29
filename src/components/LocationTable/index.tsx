@@ -22,11 +22,13 @@ import dynamic from 'next/dynamic';
 
 const columnHelper = createColumnHelper<CombinedLocation>();
 
+// Dynamically import the modal to reduce initial bundle size
 const AddCustomLocationModal = dynamic(
   () =>
     import('./customLocations/AddCustomLocationModal').then(mod => mod.default),
   {
     ssr: false,
+    loading: () => null,
   }
 );
 
@@ -134,6 +136,10 @@ export default function LocationTable() {
     enableColumnResizing: false,
     enableRowSelection: false,
     enableMultiSort: false,
+    // Disable features we don't use to reduce bundle size
+    enableGlobalFilter: false,
+    enableColumnFilters: false,
+    manualPagination: true,
   });
 
   // Show skeleton loading state while component is mounting or store is initializing from IndexedDB

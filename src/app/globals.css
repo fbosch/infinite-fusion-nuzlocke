@@ -164,3 +164,36 @@ body {
   background: linear-gradient(90deg, #374151 0%, #4b5563 50%, #374151 100%);
   background-size: 400px 100%;
 }
+
+/* Tooltip animations - replicating framer-motion behavior */
+@keyframes tooltipEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes tooltipExit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.tooltip-enter {
+  animation: tooltipEnter 0.05s ease-out forwards;
+  will-change: opacity, transform;
+}
+
+.tooltip-exit {
+  animation: tooltipExit 0.05s ease-out forwards;
+  will-change: opacity, transform;
+}

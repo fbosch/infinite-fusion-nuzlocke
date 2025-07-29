@@ -40,7 +40,6 @@
     "clsx": "^2.1.1",
     "comlink": "^4.4.2",
     "es-toolkit": "^1.39.8",
-    "framer-motion": "^12.23.6",
     "fuse.js": "^7.1.0",
     "idb-keyval": "^6.2.2",
     "lucide-react": "^0.525.0",
