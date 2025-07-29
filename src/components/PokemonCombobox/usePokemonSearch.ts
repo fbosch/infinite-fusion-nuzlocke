@@ -1,4 +1,8 @@
-import { QueryOptions, useQuery } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  QueryOptions,
+  useQuery,
+} from '@tanstack/react-query';
 import {
   PokemonOptionType,
   searchPokemon,
@@ -51,13 +55,7 @@ export function usePokemonSearch({
       return data?.filter(p => p.id !== 0) ?? [];
     },
     enabled: allPokemon.length > 0 && debouncedQuery !== '',
-    placeholderData: previousData => {
-      return (
-        previousData?.filter(p =>
-          p.name.toLowerCase().includes(debouncedQuery.toLowerCase())
-        ) ?? []
-      );
-    },
+    placeholderData: keepPreviousData,
     ...queryOptions,
   });
 }
