@@ -23,12 +23,7 @@ function getVariantSuffix(index: number): string {
 /**
  * Generate sprite URL for a fusion or single Pokémon
  */
-function generateSpriteUrl(
-  headId?: number | null,
-  bodyId?: number | null,
-  variant = ''
-): string {
-  const id = headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
+function generateSpriteUrl(id: string, variant = ''): string {
   return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${id}${variant}.png`;
 }
 
@@ -73,23 +68,26 @@ async function checkSpriteExists(url: string): Promise<boolean> {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const headId = searchParams.get('headId');
-    const bodyId = searchParams.get('bodyId');
+    const id = searchParams.get('id');
     const maxVariants = 50;
 
     // Validate input
-    if (!headId && !bodyId) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'Either headId or bodyId must be provided' },
+        { error: 'id parameter is required' },
         { status: 400 }
       );
     }
 
-    const headIdNum = headId ? parseInt(headId, 10) : null;
-    const bodyIdNum = bodyId ? parseInt(bodyId, 10) : null;
-
-    if ((headId && isNaN(headIdNum!)) || (bodyId && isNaN(bodyIdNum!))) {
-      return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
+    // Validate id format (should be like "25.125" or just "25")
+    if (!/^\d+(\.\d+)?$/.test(id)) {
+      return NextResponse.json(
+        {
+          error:
+            'Invalid id format. Expected format: "headId" or "headId.bodyId"',
+        },
+        { status: 400 }
+      );
     }
 
     const variants: string[] = [];
@@ -97,7 +95,7 @@ export async function GET(request: NextRequest) {
     // Check variants sequentially to maintain order and break early
     for (let i = 0; i < maxVariants; i++) {
       const variant = getVariantSuffix(i);
-      const url = generateSpriteUrl(headIdNum, bodyIdNum, variant);
+      const url = generateSpriteUrl(id, variant);
 
       if (await checkSpriteExists(url)) {
         variants.push(variant);
@@ -110,11 +108,7 @@ export async function GET(request: NextRequest) {
     // Cache response for 24 hours
     const responseData: SpriteVariantsResponse = {
       variants,
-      cacheKey:
-        (headIdNum && bodyIdNum
-          ? `${headIdNum}.${bodyIdNum}`
-          : headIdNum || bodyIdNum
-        )?.toString() || '',
+      cacheKey: id,
       timestamp: Date.now(),
     };
 

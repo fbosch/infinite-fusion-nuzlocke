@@ -1,7 +1,8 @@
 import Fuse, { type IFuseOptions } from 'fuse.js';
 import type { Pokemon } from '@/loaders/pokemon';
+import { pokemonData } from '@/lib/queryClient';
 
-// Define the Pokemon data interface
+// Define the Pokemon data interface for search
 export interface PokemonData {
   id: number;
   name: string;
@@ -25,11 +26,13 @@ export interface SearchStats {
 
 /**
  * Core search functionality that works in both main thread and workers
+ * Now uses centralized query client for data fetching to prevent multiple API calls
  */
 export class SearchCore {
   private fuse: Fuse<PokemonData> | null = null;
   private pokemonData: PokemonData[] | null = null;
   private initialized = false;
+  private initializationPromise: Promise<void> | null = null;
 
   /**
    * Default Fuse.js options for Pokemon search
@@ -59,10 +62,28 @@ export class SearchCore {
   private async initializeWithData(
     customOptions?: Partial<IFuseOptions<PokemonData>>
   ): Promise<void> {
+    // Prevent multiple simultaneous initializations
+    if (this.initializationPromise) {
+      return this.initializationPromise;
+    }
+
+    this.initializationPromise = this._initializeWithData(customOptions);
     try {
-      // Import Pokemon data from the data file
-      const pokemonDataModule = await import('@data/pokemon-data.json');
-      const rawPokemonData = pokemonDataModule.default;
+      await this.initializationPromise;
+    } finally {
+      this.initializationPromise = null;
+    }
+  }
+
+  /**
+   * Actual initialization logic
+   */
+  private async _initializeWithData(
+    customOptions?: Partial<IFuseOptions<PokemonData>>
+  ): Promise<void> {
+    try {
+      // Use the centralized query client to get Pokemon data
+      const rawPokemonData = await pokemonData.getAllPokemon();
 
       // Transform the data to match our PokemonData interface
       this.pokemonData = rawPokemonData.map((pokemon: Pokemon) => ({
@@ -91,6 +112,10 @@ export class SearchCore {
    * Search for Pokemon by name or ID
    */
   async search(query: string): Promise<SearchResult[]> {
+    if (!this.isReadySync()) {
+      await this.initializeWithData();
+    }
+
     if (!this.fuse || !this.pokemonData || !query?.trim()) {
       return [];
     }
@@ -178,6 +203,7 @@ export class SearchCore {
     this.fuse = null;
     this.pokemonData = null;
     this.initialized = false;
+    this.initializationPromise = null;
   }
 
   /**
@@ -207,6 +233,21 @@ export class SearchCore {
       console.error('Failed to update search options:', error);
       return false;
     }
+  }
+
+  /**
+   * Refresh data from the API (useful when data might have changed)
+   */
+  async refreshData(): Promise<void> {
+    // Clear the API service cache to force a fresh fetch
+    const { default: pokemonApiService } = await import(
+      '@/services/pokemonApiService'
+    );
+    pokemonApiService.clearCache();
+
+    // Reset and reinitialize
+    this.reset();
+    await this.initializeWithData();
   }
 }
 

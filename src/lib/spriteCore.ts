@@ -297,9 +297,10 @@ export class SpriteService {
 
     try {
       // Use edge function to get variants (avoids CORS issues)
+      const id =
+        headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
       const params = new URLSearchParams();
-      if (headId) params.set('headId', headId.toString());
-      if (bodyId) params.set('bodyId', bodyId.toString());
+      params.set('id', id.toString());
 
       const response = await fetch(
         `/api/sprites/variants?${params.toString()}`

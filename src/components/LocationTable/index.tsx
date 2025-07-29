@@ -13,14 +13,24 @@ import type { CombinedLocation } from '@/loaders/locations';
 import LocationTableHeader from './LocationTableHeader';
 import LocationTableRow from './LocationTableRow';
 import LocationTableSkeleton from './LocationTableSkeleton';
-import AddCustomLocationModal from './customLocations/AddCustomLocationModal';
 import LocationCell from './LocationCell';
 import { useIsLoading, useCustomLocations } from '@/stores/playthroughs';
 import { PlusIcon } from 'lucide-react';
 import clsx from 'clsx';
 import { CursorTooltip } from '../CursorTooltip';
+import dynamic from 'next/dynamic';
 
 const columnHelper = createColumnHelper<CombinedLocation>();
+
+// Dynamically import the modal to reduce initial bundle size
+const AddCustomLocationModal = dynamic(
+  () =>
+    import('./customLocations/AddCustomLocationModal').then(mod => mod.default),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
 
 export default function LocationTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -46,7 +56,7 @@ export default function LocationTable() {
   const columns = useMemo(
     () => [
       columnHelper.accessor('name', {
-        header: ({ column }) => (
+        header: () => (
           <div className='flex items-center w-full'>
             <span>Location</span>
             <CursorTooltip content={'Add a custom location'}>
@@ -126,6 +136,10 @@ export default function LocationTable() {
     enableColumnResizing: false,
     enableRowSelection: false,
     enableMultiSort: false,
+    // Disable features we don't use to reduce bundle size
+    enableGlobalFilter: false,
+    enableColumnFilters: false,
+    manualPagination: true,
   });
 
   // Show skeleton loading state while component is mounting or store is initializing from IndexedDB
@@ -164,10 +178,12 @@ export default function LocationTable() {
           </tbody>
         </table>
       </div>
-      <AddCustomLocationModal
-        isOpen={isCustomLocationModalOpen}
-        onClose={() => setIsCustomLocationModalOpen(false)}
-      />
+      {isCustomLocationModalOpen && (
+        <AddCustomLocationModal
+          isOpen={isCustomLocationModalOpen}
+          onClose={() => setIsCustomLocationModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

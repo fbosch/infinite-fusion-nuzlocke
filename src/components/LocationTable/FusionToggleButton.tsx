@@ -27,7 +27,7 @@ export function FusionToggleButton({
 }: FusionToggleButtonProps) {
   const dragSnapshot = useSnapshot(dragStore);
   const { data: allPokemon = [] } = useAllPokemon();
-  const { data: nameMap } = usePokemonNameMap();
+  const nameMap = usePokemonNameMap();
 
   // Handle drop on fusion button
   const handleFusionDrop = useCallback(

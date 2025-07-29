@@ -15,9 +15,30 @@ import {
   Placement,
 } from '@floating-ui/react';
 import { clsx } from 'clsx';
-import { useState, cloneElement, isValidElement, startTransition } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import {
+  useState,
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useRef,
+  startTransition,
+} from 'react';
 import { twMerge } from 'tailwind-merge';
+
+// Helper functions to calculate offsets based on placement
+function getMainAxisOffset(placement: Placement): number {
+  if (placement.startsWith('top')) return -16;
+  if (placement.startsWith('bottom')) return 16;
+  if (placement.startsWith('left')) return -16;
+  if (placement.startsWith('right')) return 16;
+  return 8; // Default fallback
+}
+
+function getCrossAxisOffset(placement: Placement): number {
+  if (placement.includes('start')) return 16;
+  if (placement.includes('end')) return -16;
+  return 0; // Default for center alignments
+}
 
 interface CursorTooltipProps {
   content: React.ReactNode;
@@ -41,65 +62,94 @@ export function CursorTooltip({
   onMouseLeave,
 }: CursorTooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const isAnimatingRef = useRef(false);
+  const exitAnimationRef = useRef<number | null>(null);
+  const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { refs, floatingStyles, context } = useFloating({
+    placement,
     open: isOpen,
-    onOpenChange: open => {
-      startTransition(() => {
-        setIsOpen(open);
-      });
-      // Call the external callbacks when the tooltip state changes
-      if (open) {
-        onMouseEnter?.();
-      } else {
-        onMouseLeave?.();
-      }
-    },
-    placement: placement, // Position bottom-right relative to cursor point
+    onOpenChange: setIsOpen,
     middleware: [
-      offset({ mainAxis: 20, crossAxis: 20 }),
-
-      shift({ padding: 8 }), // Keep within viewport
+      offset({
+        mainAxis: getMainAxisOffset(placement),
+        crossAxis: getCrossAxisOffset(placement),
+      }),
+      shift(),
     ],
-    whileElementsMounted: (referenceEl, floatingEl, update) => {
-      return autoUpdate(referenceEl, floatingEl, update, {
-        animationFrame: isOpen,
-      });
-    },
+    whileElementsMounted: autoUpdate,
   });
 
-  const clientPoint = useClientPoint(context, {
-    enabled: true,
+  const clientPointFloating = useClientPoint(context, {
     axis: 'both',
   });
 
   const hover = useHover(context, {
-    move: false,
-    delay: isOpen ? 0 : delay,
+    delay: { open: delay, close: 0 },
     enabled: !disabled,
   });
 
-  const focus = useFocus(context, {
-    enabled: !disabled,
-  });
-
+  const focus = useFocus(context);
   const dismiss = useDismiss(context);
-
-  const role = useRole(context, {
-    role: 'tooltip',
-  });
+  const role = useRole(context);
 
   const { getReferenceProps, getFloatingProps } = useInteractions([
     hover,
     focus,
     dismiss,
     role,
-    clientPoint,
+    clientPointFloating,
   ]);
 
-  if (disabled || !content) {
-    return children;
-  }
+  // Handle animation states and callbacks
+  useEffect(() => {
+    if (isOpen) {
+      // Clear any existing exit animations when opening
+      if (exitAnimationRef.current) {
+        cancelAnimationFrame(exitAnimationRef.current);
+        exitAnimationRef.current = null;
+      }
+      if (exitTimeoutRef.current) {
+        clearTimeout(exitTimeoutRef.current);
+        exitTimeoutRef.current = null;
+      }
+
+      // Start enter animation immediately when isOpen becomes true
+      if (!isVisible) {
+        startTransition(() => {
+          setIsVisible(true);
+          isAnimatingRef.current = true;
+        });
+        onMouseEnter?.();
+      }
+    } else {
+      // Only start exit animation if we're currently visible
+      if (isVisible) {
+        isAnimatingRef.current = false;
+        exitAnimationRef.current = requestAnimationFrame(() => {
+          // Add a small delay to allow the exit animation to play
+          exitTimeoutRef.current = setTimeout(() => {
+            setIsVisible(false);
+            exitTimeoutRef.current = null;
+          }, 150); // Match the CSS animation duration
+        });
+        onMouseLeave?.();
+      }
+    }
+  }, [isOpen, onMouseEnter, onMouseLeave, isVisible]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (exitAnimationRef.current) {
+        cancelAnimationFrame(exitAnimationRef.current);
+      }
+      if (exitTimeoutRef.current) {
+        clearTimeout(exitTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -110,40 +160,37 @@ export function CursorTooltip({
           }),
         })}
 
-      <FloatingPortal>
-        <AnimatePresence mode='wait'>
-          {isOpen && (
+      {isVisible && (
+        <FloatingPortal>
+          <div
+            className='z-100'
+            ref={refs.setFloating}
+            style={floatingStyles}
+            {...getFloatingProps()}
+          >
             <div
-              className='z-100'
-              ref={refs.setFloating}
-              style={floatingStyles}
-              {...getFloatingProps()}
+              className={twMerge(
+                clsx(
+                  'rounded-md px-3 py-2 text-sm shadow-xl/5 w-max max-w-sm dark:pixel-shadow-black-25',
+                  'pointer-events-none transform-gpu bg-white',
+                  'dark:bg-gray-700/80 background-blur dark:text-white text-gray-700',
+                  'border dark:border-gray-600 border-gray-200',
+                  'origin-top-left backdrop-blur-xl',
+                  isAnimatingRef.current ? 'tooltip-enter' : 'tooltip-exit'
+                ),
+                className
+              )}
+              style={{
+                // Ensure the tooltip stays in place during exit animation
+                position: 'relative',
+                zIndex: 1000,
+              }}
             >
-              <motion.div
-                className={twMerge(
-                  clsx(
-                    'rounded-md px-3 py-2 text-sm shadow-xl/5 w-max max-w-sm dark:pixel-shadow-black-25',
-                    'pointer-events-none transform-gpu bg-white',
-                    'dark:bg-gray-700/80 background-blur dark:text-white text-gray-700',
-                    'border dark:border-gray-600 border-gray-200',
-                    'origin-top-left backdrop-blur-xl'
-                  ),
-                  className
-                )}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{
-                  duration: 0.05,
-                  ease: 'easeOut',
-                }}
-              >
-                {content}
-              </motion.div>
+              {content}
             </div>
-          )}
-        </AnimatePresence>
-      </FloatingPortal>
+          </div>
+        </FloatingPortal>
+      )}
     </>
   );
 }
