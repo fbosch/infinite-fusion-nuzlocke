@@ -56,7 +56,7 @@ export default function LocationTable() {
   const columns = useMemo(
     () => [
       columnHelper.accessor('name', {
-        header: ({ column }) => (
+        header: () => (
           <div className='flex items-center w-full'>
             <span>Location</span>
             <CursorTooltip content={'Add a custom location'}>
