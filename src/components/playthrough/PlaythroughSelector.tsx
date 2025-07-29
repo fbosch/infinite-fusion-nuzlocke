@@ -135,7 +135,7 @@ export default function PlaythroughSelector({
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
             'text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            'min-w-[140px]'
+            'min-w-[120px] sm:min-w-[140px]'
           )}
           disabled={isLoading}
         >
@@ -151,7 +151,7 @@ export default function PlaythroughSelector({
             'bg-white dark:bg-gray-800 shadow-lg ring-1 ring-gray-200 dark:ring-gray-600 ring-opacity-5',
             'border border-gray-200 dark:border-gray-600',
             'focus:outline-none',
-            'min-w-[260px] max-w-[320px]'
+            'min-w-[240px] sm:min-w-[260px] max-w-[320px]'
           )}
         >
           {/* Current playthroughs section */}

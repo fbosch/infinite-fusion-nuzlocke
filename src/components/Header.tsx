@@ -13,7 +13,7 @@ export default function Header() {
 
       <div className='max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8'>
         <header className='py-3 sm:pt-6 mb-4'>
-          <div className='flex items-center justify-between'>
+          <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4'>
             <div className='flex items-center gap-3'>
               <Logo />
               <h1 className='sr-only sm:not-sr-only'>
@@ -27,7 +27,7 @@ export default function Header() {
                 </div>
               </h1>
             </div>
-            <div className='flex items-center space-x-4'>
+            <div className='flex items-center justify-center sm:justify-end'>
               <PlaythroughMenu />
             </div>
           </div>
