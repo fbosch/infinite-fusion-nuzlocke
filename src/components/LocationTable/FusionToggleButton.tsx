@@ -6,15 +6,16 @@ import clsx from 'clsx';
 import { useSnapshot } from 'valtio';
 import { dragStore, dragActions } from '@/stores/dragStore';
 import { playthroughActions } from '@/stores/playthroughs';
-import type { PokemonOption } from '@/loaders/pokemon';
+import type { PokemonOptionType } from '@/loaders/pokemon';
 import { CursorTooltip } from '../CursorTooltip';
 import { DNA_SPLICER_ICON } from '@/misc/items';
 import Image from 'next/image';
+import { useAllPokemon, usePokemonNameMap } from '@/loaders/pokemon';
 
 interface FusionToggleButtonProps {
   locationId: string;
   isFusion: boolean;
-  selectedPokemon: PokemonOption | null;
+  selectedPokemon: PokemonOptionType | null;
   onToggleFusion: () => void;
 }
 
@@ -25,6 +26,8 @@ export function FusionToggleButton({
   onToggleFusion,
 }: FusionToggleButtonProps) {
   const dragSnapshot = useSnapshot(dragStore);
+  const { data: allPokemon = [] } = useAllPokemon();
+  const { data: nameMap } = usePokemonNameMap();
 
   // Handle drop on fusion button
   const handleFusionDrop = useCallback(
@@ -50,19 +53,13 @@ export function FusionToggleButton({
       // Find the Pokémon by name
       const findPokemonByName = async () => {
         try {
-          const { getPokemon, getPokemonNameMap } = await import(
-            '@/loaders/pokemon'
-          );
-          const allPokemon = await getPokemon();
-          const nameMap = await getPokemonNameMap();
-
           // Find Pokemon by name (case insensitive)
           const foundPokemon = allPokemon.find(
-            p => nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
+            p => nameMap?.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
           );
 
           if (foundPokemon) {
-            const pokemonOption: PokemonOption = {
+            const pokemonOption: PokemonOptionType = {
               id: foundPokemon.id,
               name: pokemonName,
               nationalDexId: foundPokemon.nationalDexId,
@@ -106,6 +103,8 @@ export function FusionToggleButton({
       dragSnapshot.currentDragSource,
       dragSnapshot.currentDragValue,
       locationId,
+      allPokemon,
+      nameMap,
     ]
   );
 

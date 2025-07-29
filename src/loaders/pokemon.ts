@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
+import { useQuery } from '@tanstack/react-query';
 import searchService from '@/services/searchService';
+import ms from 'ms';
 
 // Utility function to generate unique identifiers
 export function generatePokemonUID(): string {
@@ -48,7 +50,7 @@ export const PokemonOptionSchema = z.object({
 });
 
 // Pokemon option type for search results (inferred from schema)
-export type PokemonOption = z.infer<typeof PokemonOptionSchema>;
+export type PokemonOptionType = z.infer<typeof PokemonOptionSchema>;
 
 // Zod schema for Pokemon type
 export const PokemonTypeSchema = z.object({
@@ -153,24 +155,64 @@ export async function getPokemonPreEvolutionId(
   return targetPokemon.evolution.evolves_from.id;
 }
 
-// Smart search function that handles both name and ID searches
-export async function searchPokemon(query: string): Promise<PokemonOption[]> {
-  try {
-    const results = await searchService.search(query);
-    return results;
-  } catch (error) {
-    console.warn('Search service failed, falling back to main thread:', error);
+// Function to check if newPokemon is an evolution of currentPokemon
+export async function isPokemonEvolution(
+  currentPokemon: PokemonOptionType,
+  newPokemon: PokemonOptionType
+): Promise<boolean> {
+  // If they're the same Pokemon, it's not an evolution
+  if (currentPokemon.id === newPokemon.id) {
+    return false;
   }
 
-  // Fallback to main thread search
-  const pokemon = await getPokemon();
+  try {
+    // Check if newPokemon is an evolution of currentPokemon
+    const evolutionIds = await getPokemonEvolutionIds(currentPokemon.id);
+    return evolutionIds.includes(newPokemon.id);
+  } catch (error) {
+    console.error('Error checking evolution relationship:', error);
+    return false;
+  }
+}
 
-  // Check if query is a number (for ID searches)
-  const isNumericQuery = /^\d+$/.test(query.trim());
+// Function to check if newPokemon is a pre-evolution of currentPokemon
+export async function isPokemonPreEvolution(
+  currentPokemon: PokemonOptionType,
+  newPokemon: PokemonOptionType
+): Promise<boolean> {
+  // If they're the same Pokemon, it's not a pre-evolution
+  if (currentPokemon.id === newPokemon.id) {
+    return false;
+  }
+
+  try {
+    // Check if newPokemon is a pre-evolution of currentPokemon
+    const preEvolutionId = await getPokemonPreEvolutionId(currentPokemon.id);
+    return preEvolutionId === newPokemon.id;
+  } catch (error) {
+    console.error('Error checking pre-evolution relationship:', error);
+    return false;
+  }
+}
+
+// Smart search function that handles both name and ID searches
+export async function searchPokemon(
+  query: string
+): Promise<PokemonOptionType[]> {
+  // Early return for empty queries
+  if (!query?.trim()) {
+    return [];
+  }
+
+  const trimmedQuery = query.trim();
+
+  // Check if query is a number (for ID searches) - use synchronous search
+  const isNumericQuery = /^\d+$/.test(trimmedQuery);
 
   if (isNumericQuery) {
-    // Exact search for IDs - much faster than fuzzy search
-    const queryNum = parseInt(query, 10);
+    // Synchronous search for IDs - much faster than async worker
+    const pokemon = await getPokemon();
+    const queryNum = parseInt(trimmedQuery, 10);
     const results = pokemon
       .filter(p => p.id === queryNum || p.nationalDexId === queryNum)
       .map(p => ({
@@ -179,18 +221,26 @@ export async function searchPokemon(query: string): Promise<PokemonOption[]> {
         nationalDexId: p.nationalDexId,
       }));
     return results;
-  } else {
-    // Simple string search as fallback
-    const results = pokemon
-      .filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
-      .map(p => ({
-        id: p.id,
-        name: p.name,
-        nationalDexId: p.nationalDexId,
-      }))
-      .slice(0, 50); // Limit results to prevent performance issues
-    return results;
   }
+
+  // For text queries, try the worker first, fallback to synchronous search
+  try {
+    return await searchService.search(trimmedQuery);
+  } catch (error) {
+    console.warn('Search service failed, falling back to main thread:', error);
+  }
+
+  // Fallback to synchronous search for better performance
+  const pokemon = await getPokemon();
+  const results = pokemon
+    .filter(p => p.name.toLowerCase().includes(trimmedQuery.toLowerCase()))
+    .map(p => ({
+      id: p.id,
+      name: p.name,
+      nationalDexId: p.nationalDexId,
+    }))
+    .slice(0, 50); // Limit results to prevent performance issues
+  return results;
 }
 
 // Get Pokemon by ID
@@ -298,4 +348,36 @@ export async function getInfiniteFusionToNationalDexMap(): Promise<
   });
 
   return map;
+}
+
+// React hook for getting all Pokemon data
+export function useAllPokemon() {
+  return useQuery<Pokemon[]>({
+    queryKey: ['pokemon', 'all'],
+    queryFn: getPokemon,
+    staleTime: ms('1d'),
+    gcTime: ms('30m'),
+  });
+}
+
+// React hook for getting a specific Pokemon by ID
+export function usePokemonById(id: number) {
+  return useQuery({
+    queryKey: ['pokemon', 'byId', id],
+    queryFn: () => getPokemonById(id),
+    enabled: !!id,
+    staleTime: Infinity,
+    gcTime: ms('30m'),
+  });
+}
+
+// React hook for getting Pokemon name map
+export function usePokemonNameMap() {
+  return useQuery({
+    queryKey: ['pokemon', 'nameMap'],
+    queryFn: getPokemonNameMap,
+    staleTime: Infinity,
+    gcTime: ms('30m'),
+    placeholderData: new Map(),
+  });
 }

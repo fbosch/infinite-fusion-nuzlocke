@@ -149,7 +149,7 @@ export default function LocationTable() {
   }
 
   return (
-    <div className='overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'>
+    <div className='overflow-hidden xl:rounded-lg border border-gray-200 dark:border-gray-700 xl:shadow-sm'>
       <div className='max-h-[90vh] overflow-auto scrollbar-thin overscroll-x-none'>
         <table
           className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700'

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { Be_Vietnam_Pro as Font } from 'next/font/google';
+import { Karla as Font } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
-import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import { Providers } from './providers';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -16,9 +16,9 @@ import {
 // Primary sans-serif font for body text
 const font = Font({
   subsets: ['latin'],
-  weight: ['400', '800'],
+  weight: ['200', '300', '400', '500', '600', '700'],
   display: 'swap',
-  variable: '--font',
+  variable: '--font-family-sans',
 });
 
 const dsFont = localFont({
@@ -72,17 +72,17 @@ export default function RootLayout({
         />
       </head>
       <body className='antialiased font-sans'>
-        <ThemeProvider>
+        <Providers>
           <ErrorBoundary className='min-h-[100vh]'>
             <Header />
             {children}
             <Footer />
             <CookieConsent />
           </ErrorBoundary>
-        </ThemeProvider>
-        <ConditionalAnalytics />
-        <ConditionalSpeedInsights />
-        <ServiceWorkerInit />
+          <ConditionalAnalytics />
+          <ConditionalSpeedInsights />
+          <ServiceWorkerInit />
+        </Providers>
       </body>
     </html>
   );

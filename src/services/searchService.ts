@@ -41,7 +41,10 @@ const getInstance = async (mainThread = false) => {
 
 const service = {
   search: async (query: string) => {
-    const instance = await getInstance();
+    // Use main thread for short queries and numeric queries to reduce worker overhead
+    const useMainThread = query.length <= 3 || /^\d+$/.test(query.trim());
+
+    const instance = await getInstance(useMainThread);
     return instance.search(query);
   },
 };

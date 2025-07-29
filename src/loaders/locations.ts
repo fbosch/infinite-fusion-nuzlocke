@@ -29,14 +29,33 @@ export type CombinedLocation = Location | (CustomLocation & { isCustom: true });
 
 export const LocationsArraySchema = z.array(LocationSchema);
 
-// Simple data loader for locations
+// Cache for parsed locations to avoid expensive re-parsing
+let cachedLocations: Location[] | null = null;
+
+// Simple data loader for locations with caching
 export function getLocations(): Location[] {
+  // Return cached result if available
+  if (cachedLocations !== null) {
+    return cachedLocations;
+  }
+
   try {
-    return LocationsArraySchema.parse(locationsData);
+    // Parse and validate locations data
+    const parsedLocations = LocationsArraySchema.parse(locationsData);
+
+    // Cache the result for future calls
+    cachedLocations = parsedLocations;
+
+    return parsedLocations;
   } catch (error) {
     console.error('Failed to validate locations data:', error);
     throw new Error('Invalid locations data format');
   }
+}
+
+// Function to clear cache if needed (for testing or data updates)
+export function clearLocationsCache(): void {
+  cachedLocations = null;
 }
 
 export function getLocationsByRegion(): Record<string, Location[]> {
@@ -188,14 +207,32 @@ export function mergeLocationsWithCustom(
   defaultLocations: Location[] = getLocations(),
   customLocations: CustomLocation[] = []
 ): CombinedLocation[] {
-  // Convert custom locations to combined type
-  const customAsCombined: CombinedLocation[] = customLocations.map(custom => ({
-    ...custom,
-    isCustom: true as const,
-  }));
+  // Early return if no custom locations
+  if (customLocations.length === 0) {
+    return defaultLocations;
+  }
 
-  // Combine all locations and sort by order
-  const allLocations = [...defaultLocations, ...customAsCombined];
+  // Pre-allocate array size for better performance
+  const totalLength = defaultLocations.length + customLocations.length;
+  const allLocations: CombinedLocation[] = new Array(totalLength);
+
+  // Copy default locations
+  for (let i = 0; i < defaultLocations.length; i++) {
+    allLocations[i] = defaultLocations[i];
+  }
+
+  // Add custom locations with isCustom flag
+  for (let i = 0; i < customLocations.length; i++) {
+    const custom = customLocations[i];
+    allLocations[defaultLocations.length + i] = {
+      id: custom.id,
+      name: custom.name,
+      order: custom.order,
+      isCustom: true as const,
+    };
+  }
+
+  // Sort by order
   return allLocations.sort((a, b) => a.order - b.order);
 }
 
@@ -215,9 +252,9 @@ export function getCombinedLocationsSortedByOrder(
 
 // Helper to check if a location is custom
 export function isCustomLocation(
-  location: CombinedLocation
+  location?: CombinedLocation | null
 ): location is CustomLocation & { isCustom: true } {
-  return 'isCustom' in location && location.isCustom === true;
+  return !!location && 'isCustom' in location && location.isCustom === true;
 }
 
 // Get location by ID from merged locations (including custom)
@@ -297,7 +334,7 @@ export async function getMergedLocationsWithEncounters(
   return locationsWithEncounters;
 }
 
-export function getLocationById(id: string) {
+export function getLocationById(id?: string) {
   const locations = getLocations();
   return locations.find(loc => loc.id === id) || null;
 }

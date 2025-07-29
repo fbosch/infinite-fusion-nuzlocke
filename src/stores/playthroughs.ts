@@ -2,7 +2,7 @@ import { proxy, subscribe, useSnapshot } from 'valtio';
 import { devtools } from 'valtio/utils';
 import { z, ZodError } from 'zod';
 import { get, set, del, createStore } from 'idb-keyval';
-import { debounce } from 'lodash';
+import { debounce } from 'es-toolkit';
 import React, { useMemo } from 'react';
 import { PokemonOptionSchema, generatePokemonUID } from '@/loaders/pokemon';
 import { CustomLocationSchema } from '@/loaders/locations';
@@ -10,6 +10,11 @@ import spriteService from '@/services/spriteService';
 
 // Create a custom store for playthroughs data
 const playthroughsStore_idb = createStore('playthroughs', 'data');
+
+// Game mode enum schema
+export const GameModeSchema = z.enum(['classic', 'remix', 'randomized']);
+
+export type GameMode = z.infer<typeof GameModeSchema>;
 
 export const EncounterDataSchema = z.object({
   head: PokemonOptionSchema.nullable(),
@@ -20,15 +25,32 @@ export const EncounterDataSchema = z.object({
 });
 
 // Zod schema for a single playthrough
-export const PlaythroughSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  customLocations: z.array(CustomLocationSchema).optional(),
-  encounters: z.record(z.string(), EncounterDataSchema).optional(),
-  remixMode: z.boolean().default(false),
-  createdAt: z.number(),
-  updatedAt: z.number(),
-});
+export const PlaythroughSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    customLocations: z.array(CustomLocationSchema).optional(),
+    encounters: z.record(z.string(), EncounterDataSchema).optional(),
+    gameMode: GameModeSchema.default('classic'),
+    // Keep remixMode for backward compatibility during migration
+    remixMode: z.boolean().optional(),
+    createdAt: z.number(),
+    updatedAt: z.number(),
+  })
+  .transform(data => {
+    // Migration logic: if remixMode exists but gameMode is default, migrate
+    if (data.remixMode !== undefined && data.gameMode === 'classic') {
+      return {
+        ...data,
+        gameMode: data.remixMode ? 'remix' : 'classic',
+        remixMode: undefined, // Remove the old field
+      };
+    }
+
+    // Remove remixMode if it exists (clean up)
+    const { remixMode, ...cleanData } = data;
+    return cleanData;
+  });
 
 // Zod schema for the playthroughs store
 export const PlaythroughsSchema = z.object({
@@ -85,7 +107,7 @@ const createDefaultPlaythrough = (): Playthrough => ({
   id: generatePlaythroughId(),
   name: 'Nuzlocke',
   encounters: {},
-  remixMode: false,
+  gameMode: 'classic',
   createdAt: getCurrentTimestamp(),
   updatedAt: getCurrentTimestamp(),
 });
@@ -158,7 +180,7 @@ const debouncedSaveAll = debounce(
     }
   },
   200,
-  { leading: true }
+  { edges: ['leading'] }
 );
 
 // Immediate save function for critical operations
@@ -408,12 +430,12 @@ export const playthroughActions = {
   },
 
   // Create a new playthrough
-  createPlaythrough: (name: string, remixMode: boolean = false): string => {
+  createPlaythrough: (name: string, gameMode: GameMode = 'classic'): string => {
     const newPlaythrough: Playthrough = {
       id: generatePlaythroughId(),
       name,
       encounters: {},
-      remixMode,
+      gameMode,
       createdAt: getCurrentTimestamp(),
       updatedAt: getCurrentTimestamp(),
     };
@@ -474,21 +496,47 @@ export const playthroughActions = {
     }
   },
 
-  // Toggle remix mode for active playthrough
-  toggleRemixMode: () => {
+  // Cycle through game modes for active playthrough
+  cycleGameMode: () => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (activePlaythrough) {
-      activePlaythrough.remixMode = !activePlaythrough.remixMode;
+      const modes = ['classic', 'remix', 'randomized'] as const;
+      const currentIndex = modes.indexOf(
+        activePlaythrough.gameMode as (typeof modes)[number]
+      );
+      const nextIndex = (currentIndex + 1) % modes.length;
+      const nextMode = modes[nextIndex];
+      activePlaythrough.gameMode = nextMode;
       // Don't update timestamp immediately for UI toggles - let the debounced save handle it
       // This makes the UI more responsive for rapid toggles
     }
   },
 
-  // Set remix mode for active playthrough
+  // Toggle remix mode for backward compatibility (will be deprecated)
+  toggleRemixMode: () => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    if (activePlaythrough) {
+      // Convert current mode to boolean logic for backward compatibility
+      const isRemix = activePlaythrough.gameMode === 'remix';
+      activePlaythrough.gameMode = isRemix ? 'classic' : 'remix';
+      // Don't update timestamp immediately for UI toggles - let the debounced save handle it
+    }
+  },
+
+  // Set game mode for active playthrough
+  setGameMode: (gameMode: GameMode) => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    if (activePlaythrough) {
+      activePlaythrough.gameMode = gameMode;
+      activePlaythrough.updatedAt = getCurrentTimestamp();
+    }
+  },
+
+  // Set remix mode for backward compatibility (will be deprecated)
   setRemixMode: (enabled: boolean) => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (activePlaythrough) {
-      activePlaythrough.remixMode = enabled;
+      activePlaythrough.gameMode = enabled ? 'remix' : 'classic';
       activePlaythrough.updatedAt = getCurrentTimestamp();
     }
   },
@@ -575,7 +623,19 @@ export const playthroughActions = {
   // Check if active playthrough has remix mode enabled
   isRemixModeEnabled: (): boolean => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
-    return activePlaythrough?.remixMode || false;
+    return activePlaythrough?.gameMode === 'remix';
+  },
+
+  // Get current game mode
+  getGameMode: (): GameMode => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    return (activePlaythrough?.gameMode as GameMode) || 'classic';
+  },
+
+  // Check if active playthrough is in randomized mode
+  isRandomizedModeEnabled: (): boolean => {
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    return activePlaythrough?.gameMode === 'randomized';
   },
 
   // Reset all playthroughs
@@ -1643,13 +1703,16 @@ export const useAllPlaythroughs = () => {
 
 export const useActivePlaythrough = (): Playthrough | null => {
   const snapshot = useSnapshot(playthroughsStore);
-  const activePlaythroughData = snapshot.playthroughs.find(
-    p => p.id === snapshot.activePlaythroughId
-  );
 
   return useMemo(() => {
-    return playthroughActions.getActivePlaythrough();
-  }, [snapshot.activePlaythroughId, activePlaythroughData?.updatedAt]);
+    if (!snapshot.activePlaythroughId) return null;
+
+    const activePlaythroughData = snapshot.playthroughs.find(
+      p => p.id === snapshot.activePlaythroughId
+    );
+
+    return (activePlaythroughData as Playthrough) || null;
+  }, [snapshot.activePlaythroughId, snapshot.playthroughs]);
 };
 
 export const useIsRemixMode = (): boolean => {
@@ -1657,7 +1720,23 @@ export const useIsRemixMode = (): boolean => {
   const activePlaythrough = snapshot.playthroughs.find(
     p => p.id === snapshot.activePlaythroughId
   );
-  return activePlaythrough?.remixMode || false;
+  return activePlaythrough?.gameMode === 'remix';
+};
+
+export const useGameMode = (): GameMode => {
+  const snapshot = useSnapshot(playthroughsStore);
+  const activePlaythrough = snapshot.playthroughs.find(
+    p => p.id === snapshot.activePlaythroughId
+  );
+  return (activePlaythrough?.gameMode as GameMode) || 'classic';
+};
+
+export const useIsRandomizedMode = (): boolean => {
+  const snapshot = useSnapshot(playthroughsStore);
+  const activePlaythrough = snapshot.playthroughs.find(
+    p => p.id === snapshot.activePlaythroughId
+  );
+  return activePlaythrough?.gameMode === 'randomized';
 };
 
 export const usePlaythroughById = (

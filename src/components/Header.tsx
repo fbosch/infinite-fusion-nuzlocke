@@ -11,23 +11,23 @@ export default function Header() {
         Skip to main content
       </a>
 
-      <div className='max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8'>
-        <header className='py-3 sm:pt-6 mb-4'>
-          <div className='flex items-center justify-between'>
-            <div className='flex items-center gap-3'>
-              <Logo />
+      <div className='max-w-[1500px] mx-auto px-4 sm:px-6 xl:px-0'>
+        <header className='py-2 sm:py-3 sm:pt-6 mb-2 sm:mb-4'>
+          <div className='flex flex-row gap-2 sm:gap-3 lg:gap-4'>
+            <div className='flex flex-1  items-center gap-2 sm:gap-3 self-start'>
+              <Logo className='w-16 mt-4 sm:mt-0 sm:w-14' />
               <h1 className='sr-only sm:not-sr-only'>
-                <span className='block text-sm sm:text-md font-semibold bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'>
+                <span className='block tracking-[0.01em] text-xs font-medium sm:text-[0.85rem] font-600 bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'>
                   Pokémon Infinite Fusion
                 </span>
-                <div className='flex items-center space-x-1 text-gray-800 dark:text-white tracking-tight'>
-                  <span className='block text-lg sm:text-xl font-bold'>
+                <div className='flex items-center text-gray-800 dark:text-white'>
+                  <span className='block text-base sm:text-xl font-medium'>
                     Nuzlocke Tracker
                   </span>
                 </div>
               </h1>
             </div>
-            <div className='flex items-center space-x-4'>
+            <div className='flex flex-1 items-center justify-center sm:justify-end'>
               <PlaythroughMenu />
             </div>
           </div>

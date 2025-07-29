@@ -62,7 +62,7 @@ function ThemeToggle() {
 export default function Footer() {
   return (
     <footer className='border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 mt-8'>
-      <div className='max-w-[1500px] mx-auto px-8 py-6'>
+      <div className='max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-6'>
         <div className='space-y-4'>
           {/* Top section with button on left and links in center */}
           <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
@@ -71,7 +71,7 @@ export default function Footer() {
                 href='https://discord.gg/infinitefusion'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm font-semibold'
+                className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm '
               >
                 Join Discord Community
               </a>
@@ -79,7 +79,7 @@ export default function Footer() {
                 href='https://infinitefusion.fandom.com/wiki/Pok%C3%A9mon_Infinite_Fusion_Wiki'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm font-semibold'
+                className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm '
               >
                 Wiki
               </a>
@@ -87,7 +87,7 @@ export default function Footer() {
                 href='https://infinitefusiondex.com/'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm font-semibold'
+                className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm '
               >
                 Infinitefusiondex
               </a>

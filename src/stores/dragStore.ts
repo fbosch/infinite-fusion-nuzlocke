@@ -1,5 +1,5 @@
 import { proxy } from 'valtio';
-import type { PokemonOption } from '@/loaders/pokemon';
+import type { PokemonOptionType } from '@/loaders/pokemon';
 
 // Track if global handlers have been initialized
 let globalHandlersInitialized = false;
@@ -7,7 +7,7 @@ let globalHandlersInitialized = false;
 export interface DragState {
   currentDragData: string | null;
   currentDragSource: string | null;
-  currentDragValue: PokemonOption | null | undefined;
+  currentDragValue: PokemonOptionType | null | undefined;
   isDragging: boolean;
 }
 
@@ -28,7 +28,7 @@ export const dragActions = {
     dragStore.currentDragSource = source;
   },
 
-  setDragValue: (value: PokemonOption | null | undefined) => {
+  setDragValue: (value: PokemonOptionType | null | undefined) => {
     dragStore.currentDragValue = value;
   },
 
@@ -39,7 +39,7 @@ export const dragActions = {
   startDrag: (
     data: string,
     source: string,
-    value: PokemonOption | null | undefined
+    value: PokemonOptionType | null | undefined
   ) => {
     // Initialize global handlers on first use
     dragActions._initializeGlobalHandlers();

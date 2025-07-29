@@ -66,7 +66,7 @@ export default function ProgressBar({ className }: ProgressBarProps) {
 
       {percentage === 100 && (
         <div className='text-center mt-2'>
-          <span className='text-sm font-medium text-green-600 dark:text-green-400'>
+          <span className='text-sm  text-green-600 dark:text-green-400'>
             🎉 Congratulations! You&apos;ve completed all locations!
           </span>
         </div>
