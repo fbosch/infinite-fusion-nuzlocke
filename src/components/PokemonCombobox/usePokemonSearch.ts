@@ -1,98 +1,56 @@
-import { useState, useCallback, useEffect } from 'react';
 import {
-  getPokemon,
+  keepPreviousData,
+  QueryOptions,
+  useQuery,
+} from '@tanstack/react-query';
+import {
+  PokemonOptionType,
   searchPokemon,
-  type PokemonOptionType,
+  useAllPokemon,
 } from '@/loaders/pokemon';
 import { useGameMode } from '@/stores/playthroughs';
 
 interface UsePokemonSearchOptions {
   query: string;
-  isRoutePokemon: (pokemonId: number) => boolean;
+  queryOptions?: Omit<
+    QueryOptions<PokemonOptionType[], Error>,
+    'queryKey' | 'queryFn'
+  >;
 }
 
 export function usePokemonSearch({
   query,
-  isRoutePokemon,
+  queryOptions = {},
 }: UsePokemonSearchOptions) {
-  const [results, setFuzzyResults] = useState<PokemonOptionType[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchError, setSearchError] = useState<Error | null>(null);
   const gameMode = useGameMode();
+  const { data: allPokemon = [] } = useAllPokemon();
 
-  // Smart search function that handles both name and ID searches
-  const performSmartSearch = useCallback(
-    async (
-      searchQuery: string,
-      pokemonList: PokemonOptionType[]
-    ): Promise<PokemonOptionType[]> => {
+  // Search query
+  return useQuery<PokemonOptionType[], Error>({
+    queryKey: ['pokemon', 'search', gameMode, query],
+    queryFn: async () => {
+      if (query === '') return [];
       try {
-        // Use the smart search function that handles both numeric and text searches
-        const allResults = await searchPokemon(searchQuery);
-
-        // Filter results to only include Pokemon from the provided list
-        return allResults.filter(item =>
-          pokemonList.some(pokemon => pokemon.id === item.id)
-        );
+        return await searchPokemon(query);
       } catch (err) {
-        console.error('Error performing smart search:', err);
-        // Fallback to simple search if smart search is not available
-        return pokemonList.filter(pokemon =>
-          pokemon.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        return allPokemon
+          .filter(pokemon =>
+            pokemon.name.toLowerCase().includes(query.toLowerCase())
+          )
+          .map(p => ({
+            id: p.id,
+            name: p.name,
+            nationalDexId: p.nationalDexId,
+          }));
       }
     },
-    []
-  );
-
-  // Perform smart search when query changes
-  useEffect(() => {
-    if (query === '') {
-      setFuzzyResults([]);
-      setSearchError(null);
-      return;
-    }
-
-    setIsSearching(true);
-    setSearchError(null);
-
-    // Debounce search for better performance
-    const timeoutId = setTimeout(async () => {
-      try {
-        const allPokemon = await getPokemon();
-
-        // In randomized mode, all Pokemon are available, so we don't filter
-        // In classic/remix modes, filter out route Pokemon to avoid duplicates
-        const pokemonToSearch =
-          gameMode === 'randomized'
-            ? allPokemon
-            : allPokemon.filter(p => !isRoutePokemon(p.id));
-
-        const results = await performSmartSearch(query, pokemonToSearch);
-        setFuzzyResults(results);
-      } catch (err) {
-        console.error('Search error:', err);
-        setSearchError(err instanceof Error ? err : new Error('Search failed'));
-        setFuzzyResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 100); // 100ms debounce
-
-    return () => clearTimeout(timeoutId);
-  }, [query, isRoutePokemon, performSmartSearch, gameMode]);
-
-  // Clear search results
-  const clearSearch = useCallback(() => {
-    setFuzzyResults([]);
-    setSearchError(null);
-    setIsSearching(false);
-  }, []);
-
-  return {
-    results,
-    isSearching,
-    searchError,
-    clearSearch,
-  };
+    select: data => {
+      return data?.filter(p => p.id !== 0) ?? [];
+    },
+    enabled: query.length > 0 && allPokemon.length > 0,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    placeholderData: keepPreviousData,
+    ...queryOptions,
+  });
 }

@@ -215,9 +215,9 @@ export function getCombinedLocationsSortedByOrder(
 
 // Helper to check if a location is custom
 export function isCustomLocation(
-  location: CombinedLocation
+  location?: CombinedLocation | null
 ): location is CustomLocation & { isCustom: true } {
-  return 'isCustom' in location && location.isCustom === true;
+  return !!location && 'isCustom' in location && location.isCustom === true;
 }
 
 // Get location by ID from merged locations (including custom)
@@ -297,7 +297,7 @@ export async function getMergedLocationsWithEncounters(
   return locationsWithEncounters;
 }
 
-export function getLocationById(id: string) {
+export function getLocationById(id?: string) {
   const locations = getLocations();
   return locations.find(loc => loc.id === id) || null;
 }

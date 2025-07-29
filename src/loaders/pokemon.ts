@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
+import { useQuery } from '@tanstack/react-query';
 import searchService from '@/services/searchService';
 
 // Utility function to generate unique identifiers
@@ -300,4 +301,47 @@ export async function getInfiniteFusionToNationalDexMap(): Promise<
   });
 
   return map;
+}
+
+// React hook for getting all Pokemon data
+export function useAllPokemon() {
+  return useQuery<Pokemon[]>({
+    queryKey: ['pokemon', 'all'],
+    queryFn: getPokemon,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+  });
+}
+
+// React hook for getting a specific Pokemon by ID
+export function usePokemonById(id: number) {
+  return useQuery({
+    queryKey: ['pokemon', 'byId', id],
+    queryFn: () => getPokemonById(id),
+    enabled: !!id,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
+  });
+}
+
+// React hook for searching Pokemon
+export function usePokemonSearch(query: string) {
+  return useQuery({
+    queryKey: ['pokemon', 'search', query],
+    queryFn: () => searchPokemon(query),
+    enabled: query.length > 0,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+// React hook for getting Pokemon name map
+export function usePokemonNameMap() {
+  return useQuery({
+    queryKey: ['pokemon', 'nameMap'],
+    queryFn: getPokemonNameMap,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
+    placeholderData: new Map(),
+  });
 }

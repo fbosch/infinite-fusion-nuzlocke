@@ -33,6 +33,7 @@ import { useEncounterData } from './useEncounterData';
 import { usePokemonSearch } from './usePokemonSearch';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { PokemonOption, PokemonOptions } from './PokemonOptions';
+import { useDebounce } from 'use-debounce';
 
 let nationalDexMapping: Map<number, number> | null = null;
 let mappingPromise: Promise<void> | null = null;
@@ -96,6 +97,14 @@ export const PokemonCombobox = React.memo(
   }) => {
     const [query, setQuery] = useState('');
     const deferredQuery = useDeferredValue(query);
+    const [debouncedQuery] = useDebounce(
+      deferredQuery,
+      deferredQuery.length > 3 ? 50 : 250,
+      {
+        leading: false,
+        trailing: true,
+      }
+    );
     const gameMode = useGameMode();
 
     // Ref to maintain focus on input
@@ -116,7 +125,7 @@ export const PokemonCombobox = React.memo(
       onChange,
     });
 
-    // Use the encounter data hook
+    // Use the encounter data hook (now handles custom locations automatically)
     const { routeEncounterData, isRoutePokemon } = useEncounterData({
       routeId,
       locationId,
@@ -124,9 +133,8 @@ export const PokemonCombobox = React.memo(
     });
 
     // Use the search hook
-    const { results } = usePokemonSearch({
-      query: deferredQuery,
-      isRoutePokemon,
+    const { data: results = [] } = usePokemonSearch({
+      query: debouncedQuery,
     });
 
     // Floating UI setup
@@ -198,7 +206,6 @@ export const PokemonCombobox = React.memo(
 
     const handleChange = useCallback(
       (newValue: PokemonOptionType | null | undefined) => {
-        console.log('handleChange', newValue);
         onChange(newValue || null);
         setQuery('');
       },
@@ -243,9 +250,9 @@ export const PokemonCombobox = React.memo(
       getScrollElement: () => optionsRef.current,
       estimateSize: () => 56,
       enabled: shouldVirtualize,
-      overscan: 30,
-      scrollPaddingEnd: 32,
-      scrollPaddingStart: 32,
+      overscan: 10,
+      scrollPaddingEnd: 16,
+      scrollPaddingStart: 16,
     });
 
     return (

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Be_Vietnam_Pro as Font } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
-import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import { Providers } from './providers';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -26,7 +26,6 @@ const dsFont = localFont({
   variable: '--font-mono',
   display: 'block',
 });
-
 export const metadata: Metadata = {
   title: 'Infinite Fusion Nuzlocke Tracker',
   description: 'Track your Pokémon Infinite Fusion Nuzlocke run',
@@ -72,17 +71,17 @@ export default function RootLayout({
         />
       </head>
       <body className='antialiased font-sans'>
-        <ThemeProvider>
+        <Providers>
           <ErrorBoundary className='min-h-[100vh]'>
             <Header />
             {children}
             <Footer />
             <CookieConsent />
           </ErrorBoundary>
-        </ThemeProvider>
-        <ConditionalAnalytics />
-        <ConditionalSpeedInsights />
-        <ServiceWorkerInit />
+          <ConditionalAnalytics />
+          <ConditionalSpeedInsights />
+          <ServiceWorkerInit />
+        </Providers>
       </body>
     </html>
   );
