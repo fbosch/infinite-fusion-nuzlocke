@@ -3,8 +3,10 @@
 import CookieSettingsButton from '@/components/analytics/CookieSettingsButton';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import { Sun, Moon, Monitor, Github } from 'lucide-react';
+import { Sun, Moon, Monitor } from 'lucide-react';
 import clsx from 'clsx';
+import { useInView } from 'react-intersection-observer';
+import GitHubButton from 'react-github-btn';
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -16,7 +18,7 @@ function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <div className='flex items-center bg-gray-100 dark:bg-gray-800 rounded-md p-0.5'>
+      <div className='flex items-center bg-gray-100 dark:bg-gray-800 rounded-sm p-0.5'>
         <div className='w-7 h-7 rounded bg-gray-200 dark:bg-gray-700' />
         <div className='w-7 h-7 rounded' />
         <div className='w-7 h-7 rounded' />
@@ -60,8 +62,15 @@ function ThemeToggle() {
 }
 
 export default function Footer() {
+  const { ref, inView } = useInView({
+    threshold: 0.5,
+  });
+
   return (
-    <footer className='border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 mt-8'>
+    <footer
+      ref={ref}
+      className='border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 mt-8'
+    >
       <div className='max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-6'>
         <div className='space-y-4'>
           {/* Top section with button on left and links in center */}
@@ -92,17 +101,36 @@ export default function Footer() {
                 Infinitefusiondex
               </a>
             </div>
-            <div className='flex items-center gap-3'>
+            <div className='flex flex-col sm:flex-row items-center gap-3'>
+              <div
+                className={clsx(
+                  'flex gap-x-3 pt-1.5 sm:pr-3 sm:border-r border-gray-200 dark:border-gray-700',
+                  inView ? 'opacity-100' : 'opacity-0'
+                )}
+              >
+                <GitHubButton
+                  href='https://github.com/fbosch/infinite-fusion-nuzlocke'
+                  data-color-scheme='no-preference: light; light: light; dark: dark;'
+                  data-icon='octicon-star'
+                  data-size='large'
+                  data-show-count='true'
+                  aria-label='Star fbosch/infinite-fusion-nuzlocke on GitHub'
+                >
+                  Star
+                </GitHubButton>
+                <GitHubButton
+                  href='https://github.com/fbosch/infinite-fusion-nuzlocke/issues'
+                  data-color-scheme='no-preference: light; light: light; dark: dark;'
+                  data-icon='octicon-issue-opened'
+                  data-size='large'
+                  data-show-count='true'
+                  aria-label='Issue fbosch/infinite-fusion-nuzlocke on GitHub'
+                >
+                  Issue
+                </GitHubButton>
+              </div>
               <ThemeToggle />
               <CookieSettingsButton />
-              <a
-                href='https://github.com/fbosch/infinite-fusion-nuzlocke'
-                target='_blank'
-                rel='noopener noreferrer'
-                className='bg-gray-100 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-md p-1.5 transition-colors  gap-1.5 cursor-pointer'
-              >
-                <Github className='w-4 h-4' />
-              </a>
             </div>
           </div>
 
