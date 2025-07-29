@@ -183,7 +183,7 @@ export default function PlaythroughSelector({
                           }
                           className={clsx(
                             'group flex w-full items-center justify-between px-3 py-3 text-sm cursor-pointer',
-                            'focus:outline-none text-left transition-colors',
+                            'focus:outline-none text-left transition-color',
                             'touch-manipulation',
                             // Combined: Selected AND focused (most prominent)
                             focus &&
@@ -329,7 +329,7 @@ export default function PlaythroughSelector({
                 )}
               >
                 <Plus className='w-4 h-4' />
-                <span className=''>Create New Playthrough</span>
+                <span className='font-medium'>Create New Playthrough</span>
               </button>
             </MenuItem>
           )}

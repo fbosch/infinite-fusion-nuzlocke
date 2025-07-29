@@ -76,12 +76,12 @@ export default function LocationCell({
     if (locationPokemon.length > 0) {
       return (
         <div className='max-w-xs'>
-          <div className='text-xs dark:text-gray-400 uppercase tracking-wide mb-2'>
+          <div className='text-xs dark:text-gray-400 uppercase tracking-wide mb-2.5 font-medium'>
             Original Encounter
           </div>
 
           {locationPokemon.map((pokemon, index) => (
-            <div key={index} className='mb-3 flex items-center gap-2'>
+            <div key={index} className='mb-3 flex items-center gap-2.5'>
               <div className='flex-shrink-0'>
                 <Image
                   src={getPokemonSpriteUrlFromOption(pokemon)}
@@ -95,9 +95,9 @@ export default function LocationCell({
                 />
               </div>
               <div className='flex-1 min-w-0'>
-                <span className=' dark:text-white text-gray-900'>
+                <span className='font-medium dark:text-white text-gray-900'>
                   {pokemon.nickname ? `${pokemon.nickname} • ` : ''}
-                  <span className='dark:text-gray-300 text-gray-700'>
+                  <span className='dark:text-gray-300 text-gray-700 '>
                     {pokemon.name}
                   </span>
                 </span>
