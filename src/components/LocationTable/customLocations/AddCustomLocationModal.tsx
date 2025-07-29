@@ -58,7 +58,7 @@ export default function AddCustomLocationModal({
       <div className='fixed inset-0 flex w-screen items-center justify-center p-4'>
         <DialogPanel className='max-w-md w-full space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6'>
           <div className='flex items-center justify-between'>
-            <DialogTitle className='text-xl font-semibold text-gray-900 dark:text-white'>
+            <DialogTitle className='text-xl  text-gray-900 dark:text-white'>
               Add Custom Location
             </DialogTitle>
             <button
@@ -78,7 +78,7 @@ export default function AddCustomLocationModal({
             <div>
               <label
                 htmlFor='locationName'
-                className='block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1'
+                className='block text-sm  text-gray-700 dark:text-gray-300 mb-1'
               >
                 Location Name
               </label>
@@ -104,7 +104,7 @@ export default function AddCustomLocationModal({
             <div>
               <label
                 htmlFor='afterLocation'
-                className='block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1'
+                className='block text-sm  text-gray-700 dark:text-gray-300 mb-1'
               >
                 Place After
               </label>
@@ -143,7 +143,7 @@ export default function AddCustomLocationModal({
                 type='submit'
                 disabled={allLocations.length === 0}
                 className={clsx(
-                  'flex-1 px-4 py-2 text-sm font-semibold rounded-md transition-colors',
+                  'flex-1 px-4 py-2 text-sm  rounded-md transition-colors',
                   'bg-blue-600 hover:bg-blue-700 text-white',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
                   'flex items-center justify-center space-x-2',
@@ -161,7 +161,7 @@ export default function AddCustomLocationModal({
                 type='button'
                 onClick={onClose}
                 className={clsx(
-                  'flex-1 px-4 py-2 text-sm font-semibold rounded-md transition-colors cursor-pointer',
+                  'flex-1 px-4 py-2 text-sm  rounded-md transition-colors cursor-pointer',
                   'bg-gray-100 hover:bg-gray-200 text-gray-900',
                   'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2'

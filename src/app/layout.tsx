@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Be_Vietnam_Pro as Font } from 'next/font/google';
+import { Karla as Font } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
 import { Providers } from './providers';
@@ -16,9 +16,9 @@ import {
 // Primary sans-serif font for body text
 const font = Font({
   subsets: ['latin'],
-  weight: ['400', '800'],
+  weight: ['200', '300', '400', '500', '600', '700'],
   display: 'swap',
-  variable: '--font',
+  variable: '--font-family-sans',
 });
 
 const dsFont = localFont({
@@ -26,6 +26,7 @@ const dsFont = localFont({
   variable: '--font-mono',
   display: 'block',
 });
+
 export const metadata: Metadata = {
   title: 'Infinite Fusion Nuzlocke Tracker',
   description: 'Track your Pokémon Infinite Fusion Nuzlocke run',

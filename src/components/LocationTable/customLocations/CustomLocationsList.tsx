@@ -38,7 +38,7 @@ export default function CustomLocationsList({
 
   return (
     <div className={`space-y-3 ${className}`}>
-      <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-4'>
+      <h3 className='text-lg  text-gray-900 dark:text-white mb-4'>
         Custom Locations ({customLocations.length})
       </h3>
 
@@ -50,10 +50,10 @@ export default function CustomLocationsList({
           >
             <div className='flex-1 min-w-0'>
               <div className='flex items-center space-x-2 mb-1'>
-                <h4 className='font-semibold text-gray-900 dark:text-white'>
+                <h4 className=' text-gray-900 dark:text-white'>
                   {location.name}
                 </h4>
-                <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'>
+                <span className='inline-flex items-center px-2 py-0.5 rounded text-xs  bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'>
                   Custom
                 </span>
               </div>

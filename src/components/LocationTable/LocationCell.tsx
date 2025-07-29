@@ -95,7 +95,7 @@ export default function LocationCell({
                 />
               </div>
               <div className='flex-1 min-w-0'>
-                <span className='font-semibold dark:text-white text-gray-900'>
+                <span className=' dark:text-white text-gray-900'>
                   {pokemon.nickname ? `${pokemon.nickname} • ` : ''}
                   <span className='dark:text-gray-300 text-gray-700'>
                     {pokemon.name}
@@ -121,7 +121,7 @@ export default function LocationCell({
   }, [locationPokemon, location]);
 
   return (
-    <div className='font-semibold text-gray-900 dark:text-white flex gap-x-2 items-center'>
+    <div className='text-gray-900 dark:text-white flex gap-x-2 items-center'>
       <CursorTooltip
         content={getTooltipContent}
         onMouseEnter={() => setIsTooltipHovered(true)}

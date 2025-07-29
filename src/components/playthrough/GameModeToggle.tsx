@@ -81,7 +81,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
         className='origin-top'
         delay={500}
         content={
-          <p className='max-w-xs text-xs font-normal'>
+          <p className='max-w-xs text-xs font-normal leading-5'>
             Uses the standard encounter tables and route data. The tracker will
             show traditional Pokémon encounters for each route and location.
           </p>
@@ -92,7 +92,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
           onClick={() => handleModeSelect('classic')}
           disabled={!activePlaythrough}
           className={clsx(
-            'relative z-10 w-14 sm:w-16 md:w-20 h-[28px] sm:h-[32px] py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-center',
+            'relative z-10 w-14 sm:w-16 md:w-20 h-[28px] sm:h-[32px] py-1 sm:py-1.5 text-xs sm:text-sm  text-center',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
             optimisticMode === 'classic'
               ? 'text-gray-900 dark:text-gray-100'
@@ -111,7 +111,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
         delay={500}
         className='origin-top'
         content={
-          <p className='max-w-xs text-xs font-normal'>
+          <p className='max-w-xs text-xs font-normal leading-5'>
             Uses modified encounter tables with different Pokémon availability
             per route. The tracker will show updated encounters that include
             more diverse Pokémon in early game areas.
@@ -123,7 +123,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
           onClick={() => handleModeSelect('remix')}
           disabled={!activePlaythrough}
           className={clsx(
-            'relative z-10 w-14 sm:w-16 md:w-20 h-[28px] sm:h-[32px] py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-center',
+            'relative z-10 w-14 sm:w-16 md:w-20 h-[28px] sm:h-[32px] py-1 sm:py-1.5 text-xs sm:text-sm  text-center',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
             optimisticMode === 'remix'
               ? 'text-purple-700 dark:text-purple-300'
@@ -142,7 +142,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
         delay={500}
         className='origin-top'
         content={
-          <p className='max-w-xs text-xs font-normal'>
+          <p className='max-w-xs text-xs font-normal leading-5'>
             Uses randomized encounters where any Pokémon can appear in any
             location.
           </p>
@@ -153,7 +153,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
           onClick={() => handleModeSelect('randomized')}
           disabled={!activePlaythrough}
           className={clsx(
-            'relative z-10 w-14 sm:w-16 md:w-20 h-[28px] sm:h-[32px] py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-center',
+            'relative z-10 w-14 sm:w-16 md:w-20 h-[28px] sm:h-[32px] py-1 sm:py-1.5 text-xs sm:text-sm  text-center',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-700',
             optimisticMode === 'randomized'
               ? 'text-orange-700 dark:text-orange-300'

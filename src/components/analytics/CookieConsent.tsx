@@ -32,7 +32,7 @@ function CookieBanner({
         <div className='flex items-start space-x-3'>
           <Cookie className='h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1' />
           <div>
-            <h3 className='text-base font-semibold text-gray-900 dark:text-white'>
+            <h3 className='text-base  text-gray-900 dark:text-white'>
               This site uses cookies
             </h3>
             <p className='text-sm text-gray-600 dark:text-gray-300 mt-1 sm:mt-0'>
@@ -46,19 +46,19 @@ function CookieBanner({
         <div className='flex flex-col sm:flex-row gap-2 sm:gap-3'>
           <button
             onClick={onAcceptAll}
-            className='bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 sm:py-1.5 px-4 sm:px-3 rounded text-sm transition-colors whitespace-nowrap cursor-pointer order-1 sm:order-1'
+            className='bg-blue-600 hover:bg-blue-700 text-white  py-2 sm:py-1.5 px-4 sm:px-3 rounded text-sm transition-colors whitespace-nowrap cursor-pointer order-1 sm:order-1'
           >
             Accept All
           </button>
           <button
             onClick={onOpenSettings}
-            className='bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold py-2 sm:py-1.5 px-4 sm:px-3 rounded text-sm transition-colors whitespace-nowrap cursor-pointer order-2 sm:order-2'
+            className='bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white  py-2 sm:py-1.5 px-4 sm:px-3 rounded text-sm transition-colors whitespace-nowrap cursor-pointer order-2 sm:order-2'
           >
             Customize
           </button>
           <button
             onClick={onRejectAll}
-            className='text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 font-semibold py-2 sm:py-1.5 px-4 sm:px-3 text-sm transition-colors whitespace-nowrap cursor-pointer border border-gray-300 dark:border-gray-600 sm:border-0 rounded order-3 sm:order-3'
+            className='text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100  py-2 sm:py-1.5 px-4 sm:px-3 text-sm transition-colors whitespace-nowrap cursor-pointer border border-gray-300 dark:border-gray-600 sm:border-0 rounded order-3 sm:order-3'
           >
             Reject All
           </button>
@@ -88,7 +88,7 @@ function CookieSettings({
       <div className='flex items-center justify-between mb-6'>
         <div className='flex items-center space-x-2'>
           <Settings className='h-5 w-5 text-blue-600 dark:text-blue-400' />
-          <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
+          <h3 className='text-lg  text-gray-900 dark:text-white'>
             Cookie Preferences
           </h3>
         </div>
@@ -104,9 +104,7 @@ function CookieSettings({
       <div className='space-y-6 mb-6'>
         <div className='flex items-start justify-between'>
           <div className='flex-1 pr-4'>
-            <h4 className='font-semibold text-gray-900 dark:text-white'>
-              Analytics
-            </h4>
+            <h4 className=' text-gray-900 dark:text-white'>Analytics</h4>
             <p className='text-sm text-gray-600 dark:text-gray-300 mt-1'>
               Help us understand how you use our app to improve your experience.
             </p>
@@ -124,7 +122,7 @@ function CookieSettings({
 
         <div className='flex items-start justify-between'>
           <div className='flex-1 pr-4'>
-            <h4 className='font-semibold text-gray-900 dark:text-white'>
+            <h4 className=' text-gray-900 dark:text-white'>
               Performance Monitoring
             </h4>
             <p className='text-sm text-gray-600 dark:text-gray-300 mt-1'>
@@ -148,13 +146,13 @@ function CookieSettings({
       <div className='flex space-x-3'>
         <button
           onClick={onSavePreferences}
-          className='flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors cursor-pointer'
+          className='flex-1 bg-blue-600 hover:bg-blue-700 text-white  py-2 px-4 rounded-md transition-colors cursor-pointer'
         >
           Save Preferences
         </button>
         <button
           onClick={onRejectAll}
-          className='flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold py-2 px-4 rounded-md transition-colors cursor-pointer'
+          className='flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white  py-2 px-4 rounded-md transition-colors cursor-pointer'
         >
           Reject All
         </button>

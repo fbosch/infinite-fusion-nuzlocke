@@ -41,7 +41,7 @@ export class ErrorBoundary extends React.Component<
         >
           <div>
             <AlertTriangle className='h-12 w-12 text-destructive mx-auto mb-4' />
-            <h2 className='text-lg font-semibold mb-2'>Something went wrong</h2>
+            <h2 className='text-lg  mb-2'>Something went wrong</h2>
             <p className='text-muted-foreground mb-4'>
               An error occurred while loading this content.
             </p>

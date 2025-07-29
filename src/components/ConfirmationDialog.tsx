@@ -64,7 +64,7 @@ export default function ConfirmationDialog({
               <AlertTriangle className='h-6 w-6' />
             </div>
             <div className='flex-1'>
-              <DialogTitle className='text-lg font-semibold text-gray-900 dark:text-white'>
+              <DialogTitle className='text-lg  text-gray-900 dark:text-white'>
                 {title}
               </DialogTitle>
               <p className='mt-2 text-sm text-gray-600 dark:text-gray-300 break-words max-w-inherit'>
@@ -77,7 +77,7 @@ export default function ConfirmationDialog({
             <Button
               onClick={onClose}
               className={clsx(
-                'px-4 py-2 text-sm font-semibold rounded-md transition-colors',
+                'px-4 py-2 text-sm  rounded-md transition-colors',
                 'bg-gray-100 hover:bg-gray-200 text-gray-900 cursor-pointer',
                 'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2'
@@ -88,7 +88,7 @@ export default function ConfirmationDialog({
             <Button
               onClick={handleConfirm}
               className={clsx(
-                'px-4 py-2 text-sm font-semibold rounded-md transition-colors cursor-pointer',
+                'px-4 py-2 text-sm  rounded-md transition-colors cursor-pointer',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                 styles.confirmButton
               )}

@@ -243,7 +243,7 @@ export function EncounterCell({
           {isFusion ? (
             <div className='flex items-center gap-2 '>
               <div className='flex-1 relative '>
-                <span className='absolute -top-6 left-0 text-xs font-semibold text-gray-500 dark:text-gray-400'>
+                <span className='absolute -top-6 left-0 text-xs  text-gray-500 dark:text-gray-400'>
                   Head
                 </span>
                 <PokemonCombobox
@@ -286,7 +286,7 @@ export function EncounterCell({
                 </button>
               </CursorTooltip>
               <div className='flex-1 relative min-w-0 max-w-full'>
-                <span className='absolute -top-6 left-0 text-xs font-semibold text-gray-500 dark:text-gray-400'>
+                <span className='absolute -top-6 left-0 text-xs  text-gray-500 dark:text-gray-400'>
                   Body
                 </span>
                 <PokemonCombobox

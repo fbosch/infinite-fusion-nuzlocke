@@ -319,7 +319,7 @@ export const PokemonCombobox = React.memo(
                     }
                   }}
                   className={clsx(
-                    'rounded-t-md rounded-b-none border',
+                    'rounded-t-md rounded-b-none border group/input',
                     'w-full px-3 py-3.5 text-sm  bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
                     'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
                     'focus:cursor-text hover:cursor-pointer',
@@ -348,7 +348,12 @@ export const PokemonCombobox = React.memo(
                   onChange={handleInputChange}
                 />
                 {(value || dragPreview) && (
-                  <div className='absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md'>
+                  <div
+                    className={clsx(
+                      'absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md',
+                      'group-focus-within/input:border-blue-500'
+                    )}
+                  >
                     <Image
                       src={getPokemonSpriteUrlFromOption(dragPreview || value!)}
                       alt={(dragPreview || value)!.name}

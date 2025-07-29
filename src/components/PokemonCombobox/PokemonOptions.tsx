@@ -70,9 +70,9 @@ function PokemonOptionContent({
       <span
         className={clsx(
           'block truncate flex-1',
-          'group-data-selected:font-semibold',
+          'group-data-selected:',
           'not:group-data-selected:font-normal',
-          isSelected && 'font-semibold'
+          isSelected && ''
         )}
       >
         {pokemon.name}

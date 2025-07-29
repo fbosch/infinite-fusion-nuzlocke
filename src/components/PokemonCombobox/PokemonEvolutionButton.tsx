@@ -66,7 +66,7 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
         disabled={isLoadingEvolutions}
         className={clsx(
           'flex items-center justify-center gap-1 px-2 py-1 rounded-md',
-          'bg-gray-100 text-gray-600 text-xs font-semibold',
+          'bg-gray-100 text-gray-600 text-xs ',
           'border border-gray-300 hover:border-blue-300 dark:border-gray-600 dark:hover:border-blue-400',
           'transition-colors duration-200',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
@@ -109,7 +109,7 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
         >
           <div
             className={clsx(
-              'px-3 pb-2 pt-1 text-xs font-semibold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600 sticky top-0 bg-white dark:bg-gray-800'
+              'px-3 pb-2 pt-2 text-xs  text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600 sticky top-0 bg-white dark:bg-gray-800'
             )}
           >
             Choose Evolution
@@ -140,7 +140,7 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
                       className='object-contain object-center'
                       loading='eager'
                     />
-                    <span className='font-semibold'>{evolution.name}</span>
+                    <span className=''>{evolution.name}</span>
                   </button>
                 )}
               </MenuItem>
@@ -341,16 +341,12 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
                   {isDevolutionMode ? (
                     <Fragment>
                       Devolve to{' '}
-                      <span className='font-semibold'>
-                        {availablePreEvolution?.name}
-                      </span>
+                      <span className=''>{availablePreEvolution?.name}</span>
                     </Fragment>
                   ) : (
                     <Fragment>
                       Evolve to{' '}
-                      <span className='font-semibold'>
-                        {availableEvolutions[0]?.name}
-                      </span>
+                      <span className=''>{availableEvolutions[0]?.name}</span>
                     </Fragment>
                   )}
                 </span>
@@ -370,7 +366,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
             disabled={isLoadingEvolutions}
             className={clsx(
               'flex items-center justify-center gap-1 px-2 py-1 rounded-md',
-              'bg-gray-100 text-gray-600 text-xs font-semibold',
+              'bg-gray-100 text-gray-600 text-xs ',
               'border border-gray-300 hover:border-blue-300 dark:border-gray-600 dark:hover:border-blue-400',
               'transition-colors duration-200',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
