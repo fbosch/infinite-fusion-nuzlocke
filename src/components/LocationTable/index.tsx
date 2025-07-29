@@ -13,14 +13,22 @@ import type { CombinedLocation } from '@/loaders/locations';
 import LocationTableHeader from './LocationTableHeader';
 import LocationTableRow from './LocationTableRow';
 import LocationTableSkeleton from './LocationTableSkeleton';
-import AddCustomLocationModal from './customLocations/AddCustomLocationModal';
 import LocationCell from './LocationCell';
 import { useIsLoading, useCustomLocations } from '@/stores/playthroughs';
 import { PlusIcon } from 'lucide-react';
 import clsx from 'clsx';
 import { CursorTooltip } from '../CursorTooltip';
+import dynamic from 'next/dynamic';
 
 const columnHelper = createColumnHelper<CombinedLocation>();
+
+const AddCustomLocationModal = dynamic(
+  () =>
+    import('./customLocations/AddCustomLocationModal').then(mod => mod.default),
+  {
+    ssr: false,
+  }
+);
 
 export default function LocationTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -164,10 +172,12 @@ export default function LocationTable() {
           </tbody>
         </table>
       </div>
-      <AddCustomLocationModal
-        isOpen={isCustomLocationModalOpen}
-        onClose={() => setIsCustomLocationModalOpen(false)}
-      />
+      {isCustomLocationModalOpen && (
+        <AddCustomLocationModal
+          isOpen={isCustomLocationModalOpen}
+          onClose={() => setIsCustomLocationModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

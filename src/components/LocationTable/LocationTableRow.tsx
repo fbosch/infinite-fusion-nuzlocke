@@ -1,17 +1,25 @@
 import { Row, flexRender } from '@tanstack/react-table';
 import type { CombinedLocation } from '@/loaders/locations';
 import { isCustomLocation } from '@/loaders/locations';
-import { EncounterCell } from './EncounterCell';
-import PokemonSummaryCard from '../PokemonSummaryCard';
 import ResetEncounterButton from './ResetEncounterButton';
 import RemoveLocationButton from './customLocations/RemoveLocationButton';
 import { match } from 'ts-pattern';
 import { useInView } from 'react-intersection-observer';
 import { useEncounter } from '@/stores/playthroughs';
+import dynamic from 'next/dynamic';
+import { EncounterCell } from './EncounterCell';
+import { Suspense } from 'react';
 
 interface LocationTableRowProps {
   row: Row<CombinedLocation>;
 }
+
+const PokemonSummaryCard = dynamic(
+  () => import('../PokemonSummaryCard').then(mod => mod.default),
+  {
+    ssr: false,
+  }
+);
 
 export default function LocationTableRow({ row }: LocationTableRowProps) {
   // For custom locations, routeId should be undefined since they don't have wild encounters
@@ -44,7 +52,16 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
               className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group'
               role='cell'
             >
-              <PokemonSummaryCard locationId={locationId} shouldLoad={inView} />
+              <Suspense
+                fallback={
+                  <div className='size-22 -translate-y-2 translate-x-3 rounded-lg mx-auto shimmer opacity-10' />
+                }
+              >
+                <PokemonSummaryCard
+                  locationId={locationId}
+                  shouldLoad={inView}
+                />
+              </Suspense>
             </td>
           ))
           .with('encounter', () => (
