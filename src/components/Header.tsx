@@ -17,10 +17,10 @@ export default function Header() {
             <div className='flex flex-1  items-center gap-2 sm:gap-3 self-start'>
               <Logo className='w-16 mt-4 sm:mt-0 sm:w-14' />
               <h1 className='sr-only sm:not-sr-only'>
-                <span className='block text-xs font-medium sm:text-[0.85rem] font-600 bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'>
+                <span className='block tracking-[0.01em] text-xs font-medium sm:text-[0.85rem] font-600 bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'>
                   Pokémon Infinite Fusion
                 </span>
-                <div className='flex items-center space-x-1 text-gray-800 dark:text-white tracking-tight'>
+                <div className='flex items-center text-gray-800 dark:text-white'>
                   <span className='block text-base sm:text-xl font-medium'>
                     Nuzlocke Tracker
                   </span>
