@@ -105,10 +105,10 @@ export default function LocationTable() {
         cell: () => null, // Handled in render loop
         size: smallScreen ? 125 : 200, // Width for sprite column
       }),
-      columnHelper.accessor('routeId', {
+      columnHelper.display({
         id: 'encounter',
         header: 'Encounter',
-        cell: info => info.getValue(),
+        cell: () => null, // Handled in render loop
         enableSorting: false,
         size: smallScreen ? 400 : 900, // Optimized width for fusion comboboxes
       }),

@@ -15,7 +15,6 @@ import { DNA_REVERSER_ICON } from '@/misc/items';
 import Image from 'next/image';
 
 interface EncounterCellProps {
-  routeId: number | undefined;
   locationId: string;
   shouldLoad?: boolean;
 }
@@ -100,11 +99,7 @@ const initialState: ConfirmationState = {
   wasOverwriteConfirmed: false,
 };
 
-export function EncounterCell({
-  routeId,
-  locationId,
-  shouldLoad,
-}: EncounterCellProps) {
+export function EncounterCell({ locationId, shouldLoad }: EncounterCellProps) {
   // Get encounter data directly - only this cell will rerender when this encounter changes
   const encounterData = useEncounter(locationId) || {
     head: null,
@@ -463,7 +458,6 @@ export function EncounterCell({
                 </span>
                 <PokemonCombobox
                   key={`${locationId}-head`}
-                  routeId={routeId}
                   locationId={locationId}
                   value={headPokemon}
                   onChange={handleHeadChange}
@@ -508,7 +502,6 @@ export function EncounterCell({
                 </span>
                 <PokemonCombobox
                   key={`${locationId}-body`}
-                  routeId={routeId}
                   locationId={locationId}
                   value={bodyPokemon}
                   onChange={handleBodyChange}
@@ -526,7 +519,6 @@ export function EncounterCell({
           ) : (
             <PokemonCombobox
               key={`${locationId}-single`}
-              routeId={routeId}
               locationId={locationId}
               value={selectedPokemon}
               onChange={handleSingleChange}

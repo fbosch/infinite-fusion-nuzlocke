@@ -14,10 +14,6 @@ interface LocationTableRowProps {
 }
 
 export default function LocationTableRow({ row }: LocationTableRowProps) {
-  // For custom locations, routeId should be undefined since they don't have wild encounters
-  const routeId = isCustomLocation(row.original)
-    ? undefined
-    : row.original.routeId;
   const locationId = row.original.id;
   const { ref, inView } = useInView();
 
@@ -51,7 +47,6 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
             <EncounterCell
               key={cell.id}
               shouldLoad={inView}
-              routeId={routeId}
               locationId={locationId}
             />
           ))
