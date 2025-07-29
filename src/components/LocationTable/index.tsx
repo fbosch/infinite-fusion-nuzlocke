@@ -19,6 +19,7 @@ import { PlusIcon } from 'lucide-react';
 import clsx from 'clsx';
 import { CursorTooltip } from '../CursorTooltip';
 import dynamic from 'next/dynamic';
+import { useBreakpointSmallerThan } from '../../hooks/useBreakpoint';
 
 const columnHelper = createColumnHelper<CombinedLocation>();
 
@@ -39,6 +40,7 @@ export default function LocationTable() {
   const [mounted, setMounted] = useState(false);
   const isLoading = useIsLoading();
   const customLocations = useCustomLocations();
+  const smallScreen = useBreakpointSmallerThan('2xl');
 
   useEffect(() => {
     setMounted(true);
@@ -95,21 +97,20 @@ export default function LocationTable() {
           />
         ),
         enableSorting: true,
-        size: 10, // Fixed width for location column
       }),
       columnHelper.display({
         id: 'sprite',
         header: '',
         enableSorting: false,
         cell: () => null, // Handled in render loop
-        size: 200, // Width for sprite column
+        size: smallScreen ? 125 : 200, // Width for sprite column
       }),
       columnHelper.accessor('routeId', {
         id: 'encounter',
         header: 'Encounter',
         cell: info => info.getValue(),
         enableSorting: false,
-        size: 900, // Optimized width for fusion comboboxes
+        size: smallScreen ? 400 : 900, // Optimized width for fusion comboboxes
       }),
       columnHelper.display({
         id: 'actions',
@@ -119,7 +120,7 @@ export default function LocationTable() {
         size: 60, // Width for reset column
       }),
     ],
-    []
+    [smallScreen]
   );
 
   const table = useReactTable({
