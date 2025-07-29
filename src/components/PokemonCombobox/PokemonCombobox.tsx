@@ -93,6 +93,7 @@ interface PokemonComboboxProps {
   gameMode?: 'classic' | 'remix';
   comboboxId?: string;
   ref?: React.RefObject<HTMLInputElement | null>;
+  isFusion?: boolean;
 }
 
 // Pokemon Combobox Component
@@ -110,6 +111,7 @@ export const PokemonCombobox = React.memo(
     disabled = false,
     comboboxId,
     ref,
+    isFusion = false,
   }: PokemonComboboxProps) => {
     const [query, setQuery] = useState('');
     const deferredQuery = useDeferredValue(query);
@@ -178,13 +180,17 @@ export const PokemonCombobox = React.memo(
       if (deferredQuery === '') {
         // In randomized mode or custom location, show all Pokemon
         if (gameMode === 'randomized' || isCustomLocation) {
-          return allPokemon.map(p => ({
-            id: p.id,
-            name: p.name,
-            nationalDexId: p.nationalDexId,
-          }));
+          return allPokemon
+            .map(p => ({
+              id: p.id,
+              name: p.name,
+              nationalDexId: p.nationalDexId,
+            }))
+            .filter(pokemon => !isFusion || !isEgg(pokemon));
         }
-        return routeEncounterData;
+        return routeEncounterData.filter(
+          pokemon => !isFusion || !isEgg(pokemon)
+        );
       }
 
       // Early return if no search results and no route data
@@ -202,17 +208,25 @@ export const PokemonCombobox = React.memo(
         const queryNum = parseInt(deferredQuery, 10);
         routeMatches = routeEncounterData.filter(
           pokemon =>
-            pokemon.id === queryNum || pokemon.nationalDexId === queryNum
+            (pokemon.id === queryNum || pokemon.nationalDexId === queryNum) &&
+            (!isFusion || !isEgg(pokemon))
         );
       } else {
         // For text queries, use name matching
-        routeMatches = routeEncounterData.filter(pokemon =>
-          pokemon.name.toLowerCase().includes(deferredQuery.toLowerCase())
+        routeMatches = routeEncounterData.filter(
+          pokemon =>
+            pokemon.name.toLowerCase().includes(deferredQuery.toLowerCase()) &&
+            (!isFusion || !isEgg(pokemon))
         );
       }
 
+      // Filter search results to exclude eggs when in fusion mode
+      const filteredResults = results.filter(
+        pokemon => !isFusion || !isEgg(pokemon)
+      );
+
       // Combine results: route matches first, then smart search results
-      const allResults = [...routeMatches, ...results];
+      const allResults = [...routeMatches, ...filteredResults];
 
       // Sort: in randomized mode, all Pokemon are equally available
       // In classic/remix modes, prioritize route Pokemon
@@ -241,6 +255,7 @@ export const PokemonCombobox = React.memo(
       gameMode,
       allPokemon,
       isCustomLocation,
+      isFusion,
     ]);
 
     const handleChange = useCallback(
