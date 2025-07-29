@@ -164,7 +164,6 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
   isRoutePokemon,
   comboboxId,
   gameMode,
-  useComboboxWrapper = true,
 }) => {
   if (finalOptions.length === 0) {
     return (
@@ -197,7 +196,6 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
       isRoutePokemon={isRoutePokemon}
       comboboxId={comboboxId}
       gameMode={gameMode}
-      useComboboxWrapper={useComboboxWrapper}
     />
   ));
 };
