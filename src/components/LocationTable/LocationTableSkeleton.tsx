@@ -1,3 +1,5 @@
+import clsx from 'clsx';
+
 export default function LocationTableSkeleton() {
   return (
     <div className='overflow-hidden sm:rounded-lg sm:border sm:border-gray-200 sm:dark:border-gray-700 sm:shadow-sm'>
@@ -10,24 +12,32 @@ export default function LocationTableSkeleton() {
           <thead className='bg-gray-50 dark:bg-gray-800'>
             <tr>
               <th
-                className='px-4 py- text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider'
-                style={{ width: '125px', minWidth: '125px' }}
+                className={clsx(
+                  'px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider',
+                  'w-[100px] min-w-[100px]'
+                )}
               >
                 Location
               </th>
               <th
-                className='px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider'
-                style={{ width: '220px', minWidth: '220px' }}
+                className={clsx(
+                  'px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider',
+                  'w-[165px] min-w-[165px] md:w-[185px] md:min-w-[185px]'
+                )}
               ></th>
               <th
-                className='px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider'
-                style={{ width: '900px', minWidth: '900px' }}
+                className={clsx(
+                  'px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider',
+                  'w-[400px] min-w-[400px] md:w-[900px] md:min-w-[900px]'
+                )}
               >
                 Encounter
               </th>
               <th
-                className='px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider'
-                style={{ width: '60px', minWidth: '60px' }}
+                className={clsx(
+                  'px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider',
+                  'w-[60px] min-w-[60px]'
+                )}
               ></th>
             </tr>
           </thead>
@@ -40,7 +50,7 @@ export default function LocationTableSkeleton() {
               >
                 {/* Location name column */}
                 <td className='px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
-                  <div className='h-5 rounded w-19 shimmer'></div>
+                  <div className='h-6 rounded w-19 shimmer'></div>
                 </td>
 
                 {/* Sprite column */}
