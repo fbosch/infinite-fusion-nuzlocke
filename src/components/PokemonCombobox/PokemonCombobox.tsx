@@ -273,7 +273,17 @@ export const PokemonCombobox = React.memo(
           }
         }
 
-        onChange(newValue || null);
+        // Special handling for egg hatching: preserve nickname and status
+        let finalValue = newValue;
+        if (value && newValue && isEgg(value) && !isEgg(newValue)) {
+          finalValue = {
+            ...newValue,
+            nickname: value.nickname || newValue.nickname,
+            status: value.status || newValue.status,
+          };
+        }
+
+        onChange(finalValue || null);
         setQuery('');
       },
       [onChange, value, onBeforeOverwrite]

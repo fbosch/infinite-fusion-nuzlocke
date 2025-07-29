@@ -1,5 +1,9 @@
 import { FusionSprite } from './FusionSprite';
-import { PokemonStatus, type PokemonOptionType } from '@/loaders/pokemon';
+import {
+  isEggId,
+  PokemonStatus,
+  type PokemonOptionType,
+} from '@/loaders/pokemon';
 import { Fragment } from 'react';
 import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
@@ -52,6 +56,9 @@ export default function SummaryCard({
     encounterData.head?.status === PokemonStatus.DECEASED ||
     encounterData.body?.status === PokemonStatus.DECEASED;
 
+  const eitherPokemonIsEgg =
+    isEggId(encounterData.head?.id) || isEggId(encounterData.body?.id);
+
   return (
     <div className='flex flex-col items-center justify-center relative'>
       <Fragment>
@@ -74,12 +81,14 @@ export default function SummaryCard({
           shouldLoad={shouldLoad}
         />
       </Fragment>
-      <ArtworkVariantButton
-        key={`${encounterData?.head?.id}-${encounterData?.body?.id} `}
-        className='absolute bottom-0 right-1/2 -translate-x-6 z-10'
-        locationId={locationId}
-        shouldLoad={shouldLoad}
-      />
+      {eitherPokemonIsEgg ? null : (
+        <ArtworkVariantButton
+          key={`${encounterData?.head?.id}-${encounterData?.body?.id} `}
+          className='absolute bottom-0 right-1/2 -translate-x-6 z-10'
+          locationId={locationId}
+          shouldLoad={shouldLoad}
+        />
+      )}
       {name && (
         <div className='z-5 p-0.5 text-center absolute bottom-0 translate-y-8.5 rounded-sm'>
           <span className='text-md dark:font-normal font-mono truncate max-w-full block px-1 rounded text-gray-900 dark:text-white dark:pixel-shadow tracking-[0.001em]'>

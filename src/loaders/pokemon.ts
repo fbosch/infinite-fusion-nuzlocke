@@ -9,9 +9,9 @@ export function generatePokemonUID(): string {
   return uuidv4();
 }
 
-// Utility function to check if a Pokemon is an Egg
-export function isEgg(pokemon: PokemonOptionType): boolean {
-  return pokemon.id === -1 && pokemon.name === 'Egg';
+export const isEggId = (id: number | undefined): boolean => id === -1;
+export function isEgg(pokemon?: PokemonOptionType): boolean {
+  return isEggId(pokemon?.id);
 }
 
 // Utility function to create an Egg encounter
