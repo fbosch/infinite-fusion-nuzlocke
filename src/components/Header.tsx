@@ -13,8 +13,8 @@ export default function Header() {
 
       <div className='max-w-[1500px] mx-auto px-4 sm:px-6 xl:px-0'>
         <header className='py-2 sm:py-3 sm:pt-6 mb-2 sm:mb-4'>
-          <div className='flex flex-col gap-2 sm:gap-3 lg:gap-4'>
-            <div className='flex flex-1 sm:flex-row items-center gap-2 sm:gap-3 self-start'>
+          <div className='flex flex-row gap-2 sm:gap-3 lg:gap-4'>
+            <div className='flex flex-1  items-center gap-2 sm:gap-3 self-start'>
               <Logo className='w-16 mt-4 sm:mt-0 sm:w-14' />
               <h1 className='sr-only sm:not-sr-only'>
                 <span className='block text-xs sm:text-md font-semibold bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'>
