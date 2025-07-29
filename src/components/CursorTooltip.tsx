@@ -65,6 +65,7 @@ export function CursorTooltip({
   const [isVisible, setIsVisible] = useState(false);
   const isAnimatingRef = useRef(false);
   const exitAnimationRef = useRef<number | null>(null);
+  const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { refs, floatingStyles, context } = useFloating({
     placement,
@@ -104,38 +105,48 @@ export function CursorTooltip({
   // Handle animation states and callbacks
   useEffect(() => {
     if (isOpen) {
-      // Clear any existing exit animation when opening
+      // Clear any existing exit animations when opening
       if (exitAnimationRef.current) {
         cancelAnimationFrame(exitAnimationRef.current);
         exitAnimationRef.current = null;
       }
+      if (exitTimeoutRef.current) {
+        clearTimeout(exitTimeoutRef.current);
+        exitTimeoutRef.current = null;
+      }
 
       // Start enter animation immediately when isOpen becomes true
-      startTransition(() => {
-        setIsVisible(true);
-        isAnimatingRef.current = true;
-      });
-      onMouseEnter?.();
+      if (!isVisible) {
+        startTransition(() => {
+          setIsVisible(true);
+          isAnimatingRef.current = true;
+        });
+        onMouseEnter?.();
+      }
     } else {
       // Only start exit animation if we're currently visible
       if (isVisible) {
         isAnimatingRef.current = false;
         exitAnimationRef.current = requestAnimationFrame(() => {
           // Add a small delay to allow the exit animation to play
-          setTimeout(() => {
+          exitTimeoutRef.current = setTimeout(() => {
             setIsVisible(false);
+            exitTimeoutRef.current = null;
           }, 150); // Match the CSS animation duration
         });
         onMouseLeave?.();
       }
     }
-  }, [isOpen, isVisible, onMouseEnter, onMouseLeave]);
+  }, [isOpen, onMouseEnter, onMouseLeave, isVisible]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (exitAnimationRef.current) {
         cancelAnimationFrame(exitAnimationRef.current);
+      }
+      if (exitTimeoutRef.current) {
+        clearTimeout(exitTimeoutRef.current);
       }
     };
   }, []);
