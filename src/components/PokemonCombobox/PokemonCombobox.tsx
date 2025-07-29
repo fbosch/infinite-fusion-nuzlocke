@@ -23,6 +23,8 @@ import {
   PokemonStatus,
   type PokemonOptionType,
   useAllPokemon,
+  isPokemonEvolution,
+  isPokemonPreEvolution,
 } from '@/loaders/pokemon';
 import { dragActions } from '@/stores/dragStore';
 import { useActivePlaythrough, useGameMode } from '@/stores/playthroughs';
@@ -236,16 +238,26 @@ export const PokemonCombobox = React.memo(
 
     const handleChange = useCallback(
       async (newValue: PokemonOptionType | null | undefined) => {
-        // Check if this is an evolution (same ID but different name) or a manual selection
+        // Check if this is an evolution or devolution
         if (value && newValue && onBeforeOverwrite) {
-          const isEvolution =
-            value.id === newValue.id && value.name !== newValue.name;
+          try {
+            // Check if newValue is an evolution or pre-evolution of value
+            const isEvolution = await isPokemonEvolution(value, newValue);
+            const isPreEvolution = await isPokemonPreEvolution(value, newValue);
 
-          // Only check for overwrite confirmation if it's not an evolution
-          if (!isEvolution) {
+            // Only check for overwrite confirmation if it's not an evolution or devolution
+            if (!isEvolution && !isPreEvolution) {
+              const shouldOverwrite = await onBeforeOverwrite(value, newValue);
+              if (!shouldOverwrite) {
+                // If overwrite was cancelled, don't proceed with the change
+                return;
+              }
+            }
+          } catch (error) {
+            console.error('Error checking evolution relationship:', error);
+            // If we can't determine the evolution relationship, fall back to confirmation
             const shouldOverwrite = await onBeforeOverwrite(value, newValue);
             if (!shouldOverwrite) {
-              // If overwrite was cancelled, don't proceed with the change
               return;
             }
           }

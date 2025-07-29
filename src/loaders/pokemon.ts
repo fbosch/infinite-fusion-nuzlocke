@@ -155,6 +155,46 @@ export async function getPokemonPreEvolutionId(
   return targetPokemon.evolution.evolves_from.id;
 }
 
+// Function to check if newPokemon is an evolution of currentPokemon
+export async function isPokemonEvolution(
+  currentPokemon: PokemonOptionType,
+  newPokemon: PokemonOptionType
+): Promise<boolean> {
+  // If they're the same Pokemon, it's not an evolution
+  if (currentPokemon.id === newPokemon.id) {
+    return false;
+  }
+
+  try {
+    // Check if newPokemon is an evolution of currentPokemon
+    const evolutionIds = await getPokemonEvolutionIds(currentPokemon.id);
+    return evolutionIds.includes(newPokemon.id);
+  } catch (error) {
+    console.error('Error checking evolution relationship:', error);
+    return false;
+  }
+}
+
+// Function to check if newPokemon is a pre-evolution of currentPokemon
+export async function isPokemonPreEvolution(
+  currentPokemon: PokemonOptionType,
+  newPokemon: PokemonOptionType
+): Promise<boolean> {
+  // If they're the same Pokemon, it's not a pre-evolution
+  if (currentPokemon.id === newPokemon.id) {
+    return false;
+  }
+
+  try {
+    // Check if newPokemon is a pre-evolution of currentPokemon
+    const preEvolutionId = await getPokemonPreEvolutionId(currentPokemon.id);
+    return preEvolutionId === newPokemon.id;
+  } catch (error) {
+    console.error('Error checking pre-evolution relationship:', error);
+    return false;
+  }
+}
+
 // Smart search function that handles both name and ID searches
 export async function searchPokemon(
   query: string
