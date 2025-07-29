@@ -25,7 +25,7 @@ import {
   useAllPokemon,
 } from '@/loaders/pokemon';
 import { dragActions } from '@/stores/dragStore';
-import { useGameMode } from '@/stores/playthroughs';
+import { useActivePlaythrough, useGameMode } from '@/stores/playthroughs';
 import { PokemonEvolutionButton } from './PokemonEvolutionButton';
 import { PokemonNicknameInput } from './PokemonNicknameInput';
 import { PokemonStatusInput } from './PokemonStatusInput';
@@ -65,6 +65,23 @@ export function getPokemonSpriteUrlFromOption(
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
 }
 
+interface PokemonComboboxProps {
+  routeId?: number;
+  locationId?: string;
+  value: PokemonOptionType | null | undefined;
+  onChange: (value: PokemonOptionType | null) => void;
+  onBeforeClear?: (
+    currentValue: PokemonOptionType
+  ) => Promise<boolean> | boolean;
+  shouldLoad?: boolean;
+  placeholder?: string;
+  nicknamePlaceholder?: string;
+  disabled?: boolean;
+  gameMode?: 'classic' | 'remix';
+  comboboxId?: string;
+  ref?: React.RefObject<HTMLInputElement | null>;
+}
+
 // Pokemon Combobox Component
 export const PokemonCombobox = React.memo(
   ({
@@ -79,25 +96,11 @@ export const PokemonCombobox = React.memo(
     disabled = false,
     comboboxId,
     ref,
-  }: {
-    routeId?: number;
-    locationId?: string;
-    value: PokemonOptionType | null | undefined;
-    onChange: (value: PokemonOptionType | null) => void;
-    onBeforeClear?: (
-      currentValue: PokemonOptionType
-    ) => Promise<boolean> | boolean;
-    shouldLoad?: boolean;
-    placeholder?: string;
-    nicknamePlaceholder?: string;
-    disabled?: boolean;
-    gameMode?: 'classic' | 'remix';
-    comboboxId?: string;
-    ref?: React.RefObject<HTMLInputElement | null>;
-  }) => {
+  }: PokemonComboboxProps) => {
     const [query, setQuery] = useState('');
     const deferredQuery = useDeferredValue(query);
     const gameMode = useGameMode();
+    const playthrough = useActivePlaythrough();
 
     // Ref to maintain focus on input
     const inputRef = useRef<HTMLInputElement | null>(null);
@@ -117,11 +120,17 @@ export const PokemonCombobox = React.memo(
       onChange,
     });
 
+    const isCustomLocation = useMemo(() => {
+      return playthrough?.customLocations?.some(
+        location => location.id === locationId
+      );
+    }, [playthrough, locationId]);
+
     // Use the encounter data hook (now handles custom locations automatically)
     const { routeEncounterData, isRoutePokemon } = useEncounterData({
       routeId,
       locationId,
-      enabled: shouldLoad,
+      enabled: shouldLoad && !isCustomLocation && gameMode !== 'randomized',
     });
     // Use the search hook
     const { data: results = [] } = usePokemonSearch({
@@ -153,8 +162,8 @@ export const PokemonCombobox = React.memo(
     const finalOptions = useMemo(() => {
       // Early return for empty query
       if (deferredQuery === '') {
-        // In randomized mode, show all Pokemon when query is empty
-        if (gameMode === 'randomized') {
+        // In randomized mode or custom location, show all Pokemon
+        if (gameMode === 'randomized' || isCustomLocation) {
           return allPokemon.map(p => ({
             id: p.id,
             name: p.name,
@@ -217,6 +226,7 @@ export const PokemonCombobox = React.memo(
       isRoutePokemon,
       gameMode,
       allPokemon,
+      isCustomLocation,
     ]);
 
     const handleChange = useCallback(
