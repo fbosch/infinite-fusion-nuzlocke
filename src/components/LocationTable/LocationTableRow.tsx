@@ -44,11 +44,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
             </td>
           ))
           .with('encounter', () => (
-            <EncounterCell
-              key={cell.id}
-              shouldLoad={inView}
-              locationId={locationId}
-            />
+            <EncounterCell key={cell.id} locationId={locationId} />
           ))
           .with('actions', () => {
             const hasEncounter = !!(encounterData.head || encounterData.body);
