@@ -2,6 +2,7 @@
 
 import { Trash2, MapPin } from 'lucide-react';
 import { playthroughActions, useCustomLocations } from '@/stores/playthroughs';
+import { getLocations } from '@/loaders/locations';
 
 interface CustomLocationsListProps {
   className?: string;
@@ -11,6 +12,13 @@ export default function CustomLocationsList({
   className = '',
 }: CustomLocationsListProps) {
   const customLocations = useCustomLocations();
+  const allLocations = getLocations();
+
+  // Helper function to get location name from ID
+  const getLocationName = (locationId: string): string => {
+    const location = allLocations.find(loc => loc.id === locationId);
+    return location?.name || 'Unknown Location';
+  };
 
   const handleDelete = (locationId: string, locationName: string) => {
     if (
@@ -58,7 +66,7 @@ export default function CustomLocationsList({
                 </span>
               </div>
               <div className='text-sm text-gray-600 dark:text-gray-400'>
-                Order: {location.order}
+                After: {getLocationName(location.insertAfterLocationId)}
               </div>
             </div>
             <button

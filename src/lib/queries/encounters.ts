@@ -14,3 +14,11 @@ export const encountersQueries = {
       gcTime: process.env.NODE_ENV === 'development' ? 0 : ms('2h'),
     }),
 };
+
+// Encounters query keys
+export const encountersKeys = {
+  all: ['encounters'] as const,
+  lists: () => [...encountersKeys.all, 'list'] as const,
+  list: (gameMode: 'classic' | 'remix') =>
+    [...encountersKeys.lists(), gameMode] as const,
+};
