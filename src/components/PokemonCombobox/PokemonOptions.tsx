@@ -13,10 +13,51 @@ import {
 } from '@/loaders/pokemon';
 import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
 
+// Source tag component
+interface SourceTagProps {
+  source: 'wild' | 'gift' | 'trade' | null;
+}
+
+function SourceTag({ source }: SourceTagProps) {
+  if (!source) return null;
+
+  const tagConfig = {
+    wild: {
+      text: 'Wild',
+      className:
+        'text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 border border-green-200/60 dark:border-green-700/40',
+    },
+    gift: {
+      text: 'Gift',
+      className:
+        'text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/40',
+    },
+    trade: {
+      text: 'Trade',
+      className:
+        'text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-900/20 border border-orange-200/60 dark:border-orange-700/40',
+    },
+  };
+
+  const config = tagConfig[source];
+
+  return (
+    <span
+      className={clsx(
+        'text-xs px-1.5 py-0.5 rounded-sm font-normal leading-none flex items-center',
+        config.className
+      )}
+    >
+      {config.text}
+    </span>
+  );
+}
+
 interface PokemonOptionsProps {
   finalOptions: PokemonOptionType[];
   deferredQuery: string;
   isRoutePokemon: (pokemonId: number) => boolean;
+  getPokemonSource: (pokemonId: number) => 'wild' | 'gift' | 'trade' | null;
   comboboxId: string;
   gameMode: 'classic' | 'remix' | 'randomized';
 }
@@ -25,6 +66,7 @@ interface PokemonOptionProps {
   pokemon: PokemonOptionType;
   index: number;
   isRoutePokemon: (pokemonId: number) => boolean;
+  getPokemonSource: (pokemonId: number) => 'wild' | 'gift' | 'trade' | null;
   comboboxId: string;
   gameMode: 'classic' | 'remix' | 'randomized';
   style?: React.CSSProperties;
@@ -36,6 +78,7 @@ interface PokemonOptionContentProps {
   pokemon: PokemonOptionType;
   index: number;
   isRoutePokemon: (pokemonId: number) => boolean;
+  getPokemonSource: (pokemonId: number) => 'wild' | 'gift' | 'trade' | null;
   comboboxId: string;
   gameMode: 'classic' | 'remix' | 'randomized';
   isActive?: boolean;
@@ -47,6 +90,7 @@ function PokemonOptionContent({
   pokemon,
   index,
   isRoutePokemon,
+  getPokemonSource,
   comboboxId,
   gameMode,
   isActive = false,
@@ -83,16 +127,14 @@ function PokemonOptionContent({
       >
         {displayName}
       </span>
-      <div className='flex items-center gap-3'>
+      <div className='flex items-center gap-2'>
         {gameMode !== 'randomized' && isRoutePokemon(pokemon.id) && (
-          <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
-            Route
-          </span>
+          <SourceTag source={getPokemonSource(pokemon.id)} />
         )}
         {isEgg(pokemon) ? null : (
           <span
             className={clsx(
-              'text-xs dark:text-gray-400',
+              'text-xs dark:text-gray-400 w-8 text-right font-mono',
               isActive &&
                 'group-hover:text-white group-data-selected:group-hover:text-white'
             )}
@@ -119,6 +161,7 @@ export function PokemonOption({
   pokemon,
   index,
   isRoutePokemon,
+  getPokemonSource,
   comboboxId,
   gameMode,
   style,
@@ -156,6 +199,7 @@ export function PokemonOption({
           pokemon={pokemon}
           index={index}
           isRoutePokemon={isRoutePokemon}
+          getPokemonSource={getPokemonSource}
           comboboxId={comboboxId}
           gameMode={gameMode}
           isActive={active}
@@ -170,6 +214,7 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
   finalOptions,
   deferredQuery,
   isRoutePokemon,
+  getPokemonSource,
   comboboxId,
   gameMode,
 }) => {
@@ -202,6 +247,7 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
       pokemon={pokemon}
       index={index}
       isRoutePokemon={isRoutePokemon}
+      getPokemonSource={getPokemonSource}
       comboboxId={comboboxId}
       gameMode={gameMode}
     />

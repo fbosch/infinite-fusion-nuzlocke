@@ -172,6 +172,15 @@ export const PokemonCombobox = React.memo(
       whileElementsMounted: autoUpdate,
     });
 
+    // Function to get Pokemon source information
+    const getPokemonSource = useCallback(
+      (pokemonId: number): 'wild' | 'gift' | 'trade' | null => {
+        const pokemonData = routeEncounterData.find(p => p.id === pokemonId);
+        return pokemonData?.source || null;
+      },
+      [routeEncounterData]
+    );
+
     // Combine route matches with smart search results
     const finalOptions = useMemo(() => {
       // Early return for empty query
@@ -499,6 +508,7 @@ export const PokemonCombobox = React.memo(
                             index={virtualItem.index}
                             disabled={virtualizer.isScrolling}
                             isRoutePokemon={isRoutePokemon}
+                            getPokemonSource={getPokemonSource}
                             comboboxId={comboboxId || ''}
                             gameMode={gameMode}
                             style={{
@@ -520,6 +530,7 @@ export const PokemonCombobox = React.memo(
                           finalOptions={finalOptions}
                           deferredQuery={deferredQuery}
                           isRoutePokemon={isRoutePokemon}
+                          getPokemonSource={getPokemonSource}
                           gameMode={gameMode}
                         />
                       )}
