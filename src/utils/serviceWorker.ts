@@ -222,6 +222,33 @@ export class ServiceWorkerManager {
     });
   }
 
+  async checkApiEndpointCache(endpoint: string): Promise<{
+    cached: boolean;
+    error?: string;
+  }> {
+    return new Promise(resolve => {
+      if (!navigator.serviceWorker.controller) {
+        resolve({
+          cached: false,
+          error: 'Service worker not active',
+        });
+        return;
+      }
+
+      const messageChannel = new MessageChannel();
+      messageChannel.port1.onmessage = event => {
+        if (event.data.type === 'API_ENDPOINT_CACHE_STATUS') {
+          resolve(event.data.status);
+        }
+      };
+
+      navigator.serviceWorker.controller.postMessage(
+        { type: 'CHECK_API_ENDPOINT_CACHE', endpoint },
+        [messageChannel.port2]
+      );
+    });
+  }
+
   async clearApiCache(): Promise<void> {
     return new Promise(resolve => {
       if (!navigator.serviceWorker.controller) {
