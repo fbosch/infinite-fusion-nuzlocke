@@ -18,21 +18,13 @@ export interface SearchResult extends PokemonData {
 export class SearchCore {
   private fuse: Fuse<PokemonData> | null = null;
   private pokemonData: PokemonData[] | null = null;
+  private initializationPromise: Promise<void> | null = null;
 
   private readonly fuseOptions: IFuseOptions<PokemonData> = {
     // Search in both name and ID fields
     keys: [
       {
         name: 'name',
-        weight: 1.0,
-      },
-      {
-        name: 'id',
-        weight: 0.8,
-      },
-      {
-        name: 'nationalDexId',
-        weight: 0.4,
       },
     ],
     threshold: 0.3,
@@ -49,15 +41,35 @@ export class SearchCore {
   async initialize(): Promise<void> {
     if (this.fuse) return; // Already initialized
 
-    const rawPokemonData = await pokemonData.getAllPokemon();
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+      return;
+    }
 
-    this.pokemonData = rawPokemonData.map((pokemon: Pokemon) => ({
-      id: pokemon.id,
-      name: pokemon.name,
-      nationalDexId: pokemon.nationalDexId,
-    }));
+    this.initializationPromise = (async () => {
+      try {
+        const rawPokemonData = await pokemonData.getAllPokemon();
 
-    this.fuse = new Fuse(this.pokemonData, this.fuseOptions);
+        if (!rawPokemonData || rawPokemonData.length === 0) {
+          throw new Error('No Pokemon data available');
+        }
+
+        this.pokemonData = rawPokemonData.map((pokemon: Pokemon) => ({
+          id: pokemon.id,
+          name: pokemon.name,
+          nationalDexId: pokemon.nationalDexId,
+        }));
+
+        this.fuse = new Fuse(this.pokemonData, this.fuseOptions);
+      } catch (error) {
+        console.error('Failed to initialize SearchCore:', error);
+        throw error;
+      } finally {
+        this.initializationPromise = null;
+      }
+    })();
+
+    await this.initializationPromise;
   }
 
   /**
@@ -85,6 +97,13 @@ export class SearchCore {
       ...result.item,
       score: result.score || 0,
     }));
+  }
+
+  /**
+   * Check if the SearchCore is ready for searching
+   */
+  isReady(): boolean {
+    return this.fuse !== null && this.pokemonData !== null;
   }
 }
 

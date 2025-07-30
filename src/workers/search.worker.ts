@@ -1,15 +1,14 @@
 import { SearchCore } from '@/lib/searchCore';
 import * as Comlink from 'comlink';
 
-let searchCoreInstance: SearchCore | null = null;
+const searchCore = new SearchCore();
 
 const searchAPI = {
   async search(query: string) {
-    if (!searchCoreInstance) {
-      searchCoreInstance = new SearchCore();
-      await searchCoreInstance.initialize();
+    if (!searchCore.isReady()) {
+      await searchCore.initialize();
     }
-    return searchCoreInstance.search(query);
+    return searchCore.search(query);
   },
 };
 

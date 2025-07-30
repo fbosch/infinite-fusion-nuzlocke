@@ -2,14 +2,33 @@ import { SearchCore } from '@/lib/searchCore';
 import * as Comlink from 'comlink';
 
 let mainThreadInstance: SearchCore | null = null;
+let mainThreadInitPromise: Promise<SearchCore> | null = null;
 let instance: Comlink.Remote<SearchCore> | SearchCore | null = null;
 
 const getMainThreadInstance = async () => {
-  if (!mainThreadInstance) {
-    mainThreadInstance = new SearchCore();
-    await mainThreadInstance.initialize();
+  if (mainThreadInstance && mainThreadInstance.isReady()) {
+    return mainThreadInstance;
   }
-  return mainThreadInstance as SearchCore;
+
+  if (mainThreadInitPromise) {
+    return await mainThreadInitPromise;
+  }
+
+  mainThreadInitPromise = (async () => {
+    try {
+      const newInstance = new SearchCore();
+      await newInstance.initialize();
+      mainThreadInstance = newInstance;
+      return newInstance;
+    } catch (error) {
+      console.error('Failed to initialize main thread SearchCore:', error);
+      throw error;
+    } finally {
+      mainThreadInitPromise = null;
+    }
+  })();
+
+  return await mainThreadInitPromise;
 };
 
 const getInstance = async (mainThread = false) => {
@@ -25,7 +44,20 @@ const getInstance = async (mainThread = false) => {
     const worker = new Worker(
       new URL('@/workers/search.worker', import.meta.url)
     );
-    instance = Comlink.wrap<SearchCore>(worker);
+    const wrappedInstance = Comlink.wrap<SearchCore>(worker);
+
+    // Warm up the worker by calling a dummy search to ensure initialization
+    try {
+      await wrappedInstance.search('');
+    } catch (error) {
+      console.warn(
+        'Worker warm-up failed, falling back to main thread:',
+        error
+      );
+      return await getMainThreadInstance();
+    }
+
+    instance = wrappedInstance;
   } catch (error) {
     console.error(
       'Failed to initialize search worker, falling back to main thread:',
@@ -39,8 +71,13 @@ const getInstance = async (mainThread = false) => {
 
 const service = {
   search: async (query: string) => {
-    const instance = await getInstance();
-    return instance.search(query);
+    try {
+      const instance = await getInstance();
+      return instance.search(query);
+    } catch (error) {
+      console.error('Search service failed:', error);
+      return [];
+    }
   },
 };
 
