@@ -1,14 +1,8 @@
 [
   {
-    "routeName": "Bond Bridge",
-    "pokemonIds": [
-      454
-    ]
-  },
-  {
     "routeName": "Celadon Cafe",
     "pokemonIds": [
-      307
+      305
     ]
   },
   {
@@ -24,24 +18,32 @@
     ]
   },
   {
-    "routeName": "Dragon's Den",
-    "pokemonIds": [
-      297
-    ]
-  },
-  {
     "routeName": "Kanto Daycare",
     "pokemonIds": [
       174,
       238,
-      252,
-      261
+      257,
+      259
+    ]
+  },
+  {
+    "routeName": "Kin Island",
+    "pokemonIds": [
+      316,
+      319,
+      322
     ]
   },
   {
     "routeName": "Knot Island",
     "pokemonIds": [
-      330
+      395
+    ]
+  },
+  {
+    "routeName": "Lavender Town",
+    "pokemonIds": [
+      253
     ]
   },
   {
@@ -52,35 +54,24 @@
     ]
   },
   {
-    "routeName": "National Park",
-    "pokemonIds": [
-      285
-    ]
-  },
-  {
     "routeName": "Pallet Town",
     "pokemonIds": [
-      1
+      1,
+      276,
+      279,
+      282
     ]
   },
   {
-    "routeName": "Rock Tunnel",
+    "routeName": "Route 29",
     "pokemonIds": [
-      327
+      294
     ]
   },
   {
     "routeName": "S.S. Anne",
     "pokemonIds": [
-      301,
-      303
-    ]
-  },
-  {
-    "routeName": "Saffron Restaurant",
-    "pokemonIds": [
-      425,
-      461
+      488
     ]
   },
   {
@@ -90,9 +81,9 @@
     ]
   },
   {
-    "routeName": "Violet City",
+    "routeName": "Viridian City",
     "pokemonIds": [
-      291
+      501
     ]
   }
 ]

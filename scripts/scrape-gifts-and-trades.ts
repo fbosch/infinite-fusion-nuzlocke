@@ -173,6 +173,9 @@ async function scrapePokedexForGiftsAndTrades(url: string, mode: 'classic' | 're
     tables.each((tableIndex: number, table: any) => {
       const $table = $(table);
       const rows = $table.find('tr');
+      console.log(`Processing table ${tableIndex} with ${rows.length} rows`);
+
+
 
       rows.each((rowIndex: number, row: any) => {
         const $row = $(row);
@@ -183,11 +186,16 @@ async function scrapePokedexForGiftsAndTrades(url: string, mode: 'classic' | 're
           return;
         }
 
-        // Extract data from cells - location is typically at index 5
+        // Extract data from cells - location index varies by table structure
         const dexCell = cells.eq(0).text().trim();
         const pokemonCell = cells.eq(2).text().trim(); // Pokémon name is at index 2
-        const locationCell = cells.eq(5).text().trim(); // Location is at index 5
-        const notesCell = cells.length > 6 ? cells.eq(6).text().trim() : '';
+        
+        // Different table structures have location at different indices
+        // Gen 1-2 tables: location at index 5
+        // Other Generations table (table 3): location at index 4
+        const locationIndex = tableIndex === 3 ? 4 : 5;
+        const locationCell = cells.eq(locationIndex).text().trim();
+        const notesCell = cells.length > locationIndex + 1 ? cells.eq(locationIndex + 1).text().trim() : '';
 
         // Skip if no Pokémon name found or if it's a header row
         if (!pokemonCell || !isPotentialPokemonName(pokemonCell) || pokemonCell.toLowerCase().includes('pokemon')) {
