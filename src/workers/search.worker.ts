@@ -6,7 +6,8 @@ let searchCoreInstance: SearchCore | null = null;
 const searchAPI = {
   async search(query: string) {
     if (!searchCoreInstance) {
-      searchCoreInstance = await SearchCore.create();
+      searchCoreInstance = new SearchCore();
+      await searchCoreInstance.initialize();
     }
     return searchCoreInstance.search(query);
   },

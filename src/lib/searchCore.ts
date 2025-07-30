@@ -20,16 +20,30 @@ export class SearchCore {
   private pokemonData: PokemonData[] | null = null;
 
   private readonly fuseOptions: IFuseOptions<PokemonData> = {
-    keys: [{ name: 'name', weight: 1.0 }],
-    threshold: 0.5, // Slightly more permissive for better matches
+    // Search in both name and ID fields
+    keys: [
+      {
+        name: 'name',
+        weight: 1.0,
+      },
+      {
+        name: 'id',
+        weight: 0.8,
+      },
+      {
+        name: 'nationalDexId',
+        weight: 0.4,
+      },
+    ],
+    threshold: 0.3,
     includeScore: true,
-    minMatchCharLength: 2, // Allow single character matches for partial typing
+    minMatchCharLength: 1,
+    location: 0,
+    distance: 50,
+    useExtendedSearch: false,
+    findAllMatches: true,
     shouldSort: true,
-    findAllMatches: true, // Find all possible matches
-    useExtendedSearch: false, // Keep simple for better performance
-    ignoreLocation: true, // Ignore where in the string the match occurs
-    distance: 100, // Allow matches even with many characters between
-    ignoreFieldNorm: false, // Consider field length for scoring
+    ignoreLocation: false,
   };
 
   async initialize(): Promise<void> {
@@ -54,9 +68,9 @@ export class SearchCore {
       return [];
     }
 
-    const trimmedQuery = query.trim().toLowerCase();
+    const trimmedQuery = query.trim();
 
-    // Numeric search (by ID)
+    // Numeric search (by ID) - exact match for better performance
     if (/^\d+$/.test(trimmedQuery)) {
       const queryNum = parseInt(trimmedQuery, 10);
       return this.pokemonData
@@ -64,26 +78,13 @@ export class SearchCore {
         .map(p => ({ ...p, score: 0 }));
     }
 
-    // Exact match first (perfect score)
-    const exactMatches = this.pokemonData
-      .filter(p => p.name.toLowerCase() === trimmedQuery)
-      .map(p => ({ ...p, score: 0 }));
+    // Fuzzy search for names - let Fuse.js handle the ranking
+    const results = this.fuse.search(trimmedQuery);
 
-    // Fuzzy search for names
-    const fuzzyResults = this.fuse.search(trimmedQuery);
-    const fuzzyMatches = fuzzyResults.map(result => ({
+    return results.map(result => ({
       ...result.item,
       score: result.score || 0,
     }));
-
-    // Combine and deduplicate results
-    const allResults = [...exactMatches, ...fuzzyMatches];
-    const uniqueResults = allResults.filter(
-      (result, index, self) => index === self.findIndex(r => r.id === result.id)
-    );
-
-    // Limit results to top 20 for performance
-    return uniqueResults.slice(0, 20);
   }
 }
 

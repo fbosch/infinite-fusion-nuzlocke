@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useQuery } from '@tanstack/react-query';
 import { pokemonQueries, pokemonData } from '@/lib/queryClient';
 import { useMemo } from 'react';
+import { SearchCore } from '@/lib/searchCore';
 
 // Utility function to generate unique identifiers
 export function generatePokemonUID(): string {
@@ -205,9 +206,9 @@ export async function searchPokemon(
   query: string
 ): Promise<PokemonOptionType[]> {
   try {
-    const { SearchCore } = await import('@/lib/searchCore');
-    const searchCore = await SearchCore.create();
-    const searchResults = await searchCore.search(query);
+    const searchCore = new SearchCore();
+    await searchCore.initialize();
+    const searchResults = searchCore.search(query);
 
     return searchResults.map(result => ({
       id: result.id,

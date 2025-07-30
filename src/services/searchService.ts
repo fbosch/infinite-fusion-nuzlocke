@@ -1,4 +1,4 @@
-import { type SearchCore } from '@/lib/searchCore';
+import { SearchCore } from '@/lib/searchCore';
 import * as Comlink from 'comlink';
 
 let mainThreadInstance: SearchCore | null = null;
@@ -6,10 +6,8 @@ let instance: Comlink.Remote<SearchCore> | SearchCore | null = null;
 
 const getMainThreadInstance = async () => {
   if (!mainThreadInstance) {
-    const { SearchCore: MainThreadSearchCore } = await import(
-      '@/lib/searchCore'
-    );
-    mainThreadInstance = await MainThreadSearchCore.create();
+    mainThreadInstance = new SearchCore();
+    await mainThreadInstance.initialize();
   }
   return mainThreadInstance as SearchCore;
 };
