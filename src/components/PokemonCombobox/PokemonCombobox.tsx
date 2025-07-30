@@ -33,8 +33,8 @@ import { PokemonEvolutionButton } from './PokemonEvolutionButton';
 import { PokemonNicknameInput } from './PokemonNicknameInput';
 import { PokemonStatusInput } from './PokemonStatusInput';
 import { useComboboxDragAndDrop } from './useComboboxDragAndDrop';
-import { useEncounterData } from './useEncounterData';
-import { usePokemonSearch } from './usePokemonSearch';
+import { useEncountersForLocation } from '@/loaders/encounters';
+import { usePokemonSearch } from '@/loaders/pokemon';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { PokemonOption, PokemonOptions } from './PokemonOptions';
 
@@ -141,7 +141,7 @@ export const PokemonCombobox = React.memo(
     }, [playthrough, locationId]);
 
     // Use the encounter data hook (now handles custom locations automatically)
-    const { routeEncounterData, isRoutePokemon } = useEncounterData({
+    const { routeEncounterData, isRoutePokemon } = useEncountersForLocation({
       locationId,
       enabled: !isCustomLocation && gameMode !== 'randomized',
     });
