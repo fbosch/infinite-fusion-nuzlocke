@@ -1,5 +1,11 @@
 import { z } from 'zod';
 import locationsData from '@data/shared/locations.json';
+import { encountersData, encountersQueries } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
+import { getStarterPokemonByGameMode } from '@/loaders/starters';
+import { isStarterLocation } from '@/constants/special-locations';
+import type { RouteEncounter } from '@/loaders/encounters';
+import { GameMode } from '../stores/playthroughs';
 
 // Location schema
 export const LocationSchema = z.object({
@@ -85,9 +91,9 @@ export async function getLocationEncountersByName(
     return await getStarterPokemonByGameMode(gameMode);
   }
 
-  // Import encounters and find by route name
-  const { getEncountersByRouteName } = await import('./encounters');
-  const encounter = await getEncountersByRouteName(locationName, gameMode);
+  // Get all encounters for the game mode and find the specific route
+  const encounters = await encountersData.getAllEncounters(gameMode);
+  const encounter = encounters.find(e => e.routeName === locationName);
   return encounter?.pokemonIds || [];
 }
 
@@ -107,10 +113,69 @@ export async function getLocationEncountersById(
     return await getStarterPokemonByGameMode(gameMode);
   }
 
-  // Import encounters and find by route name
-  const { getEncountersByRouteName } = await import('./encounters');
-  const encounter = await getEncountersByRouteName(location.name, gameMode);
+  // Use TanStack Query to get encounters
+  const encounters = await encountersData.getAllEncounters(gameMode);
+  const encounter = encounters.find(e => e.routeName === location.name);
   return encounter?.pokemonIds || [];
+}
+
+// Hook variant for getting encounters by location ID
+export function useLocationEncountersById(
+  locationId: string | undefined,
+  gameMode: GameMode
+) {
+  // Find the location by ID
+  const location = getLocations().find(loc => loc.id === locationId);
+  const isStarter = !!locationId && isStarterLocation(locationId);
+  const isRandomized = gameMode == 'randomized';
+
+  const {
+    data: encounters = [],
+    isLoading,
+    error,
+  } = useQuery({
+    ...encountersQueries.all(gameMode as 'remix' | 'classic'),
+    enabled: !isStarter && !isRandomized,
+  });
+
+  // Get starter Pokemon data (always call this hook)
+  const {
+    data: starterPokemon = [],
+    isLoading: starterLoading,
+    error: starterError,
+  } = useQuery({
+    queryKey: ['starter-pokemon', gameMode],
+    queryFn: () => getStarterPokemonByGameMode(gameMode as 'remix' | 'classic'),
+    enabled: isStarter && !isRandomized,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+
+  if (gameMode === 'randomized') {
+    return {
+      pokemonIds: [],
+      isLoading: false,
+      error: null,
+    };
+  }
+
+  if (isStarter) {
+    return {
+      pokemonIds: starterPokemon,
+      isLoading: starterLoading,
+      error: starterError,
+    };
+  }
+
+  const encounter = encounters.find(
+    (e: RouteEncounter) => e.routeName === location?.name
+  );
+
+  return {
+    pokemonIds: encounter?.pokemonIds || [],
+    isLoading,
+    error,
+  };
 }
 
 // Get all locations with their available encounters
@@ -340,7 +405,3 @@ export function getLocationById(id?: string) {
   const locations = getLocations();
   return locations.find(loc => loc.id === id) || null;
 }
-
-// Import the special location functions
-import { isStarterLocation } from '@/constants/special-locations';
-import { getStarterPokemonByGameMode } from './starters';

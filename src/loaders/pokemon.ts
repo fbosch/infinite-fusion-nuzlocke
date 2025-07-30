@@ -390,10 +390,6 @@ export function usePokemonByType(type: string) {
   return useQuery(pokemonQueries.byType(type));
 }
 
-export function usePokemonCount() {
-  return useQuery(pokemonQueries.count());
-}
-
 // Name map hook that transforms existing Pokemon data
 export function usePokemonNameMap() {
   const { data: allPokemon = [] } = useAllPokemon();

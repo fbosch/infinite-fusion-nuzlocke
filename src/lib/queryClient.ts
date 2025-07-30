@@ -1,5 +1,6 @@
 import { QueryClient, queryOptions } from '@tanstack/react-query';
 import pokemonApiService from '@/services/pokemonApiService';
+import encountersApiService from '@/services/encountersApiService';
 import type { Pokemon } from '@/loaders/pokemon';
 import ms from 'ms';
 
@@ -71,28 +72,42 @@ export const pokemonQueries = {
       staleTime: ms('5m'),
       gcTime: ms('10m'),
     }),
+};
 
-  count: () =>
+// Encounters query options
+export const encountersQueries = {
+  byGameMode: (gameMode: 'classic' | 'remix') =>
     queryOptions({
-      queryKey: ['pokemon', 'count'],
-      queryFn: () => pokemonApiService.getPokemonCount(),
-      staleTime: ms('10m'),
-      gcTime: ms('30m'),
+      queryKey: ['encounters', 'byGameMode', gameMode],
+      queryFn: () => encountersApiService.getEncountersByGameMode(gameMode),
+      staleTime: ms('1h'), // 1 hour (encounters change less frequently)
+      gcTime: ms('2h'),
+    }),
+
+  all: (gameMode: 'classic' | 'remix') =>
+    queryOptions({
+      queryKey: ['encounters', 'all', gameMode],
+      queryFn: () => encountersApiService.getEncounters(gameMode),
+      staleTime: ms('1h'),
+      gcTime: ms('2h'),
     }),
 };
 
 // Utility functions for fetching data outside of React components
 export const pokemonData = {
   getAllPokemon: () => queryClient.fetchQuery(pokemonQueries.all()),
-
   getPokemonById: (id: number) =>
     queryClient.fetchQuery(pokemonQueries.byId(id)),
-
   getPokemonByIds: (ids: number[]) =>
     queryClient.fetchQuery(pokemonQueries.byIds(ids)),
-
   getPokemonByType: (type: string) =>
     queryClient.fetchQuery(pokemonQueries.byType(type)),
+};
 
-  getPokemonCount: () => queryClient.fetchQuery(pokemonQueries.count()),
+export const encountersData = {
+  getEncountersByGameMode: (gameMode: 'classic' | 'remix') =>
+    queryClient.fetchQuery(encountersQueries.byGameMode(gameMode)),
+
+  getAllEncounters: (gameMode: 'classic' | 'remix') =>
+    queryClient.fetchQuery(encountersQueries.all(gameMode)),
 };

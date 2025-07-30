@@ -234,21 +234,6 @@ export class SearchCore {
       return false;
     }
   }
-
-  /**
-   * Refresh data from the API (useful when data might have changed)
-   */
-  async refreshData(): Promise<void> {
-    // Clear the API service cache to force a fresh fetch
-    const { default: pokemonApiService } = await import(
-      '@/services/pokemonApiService'
-    );
-    pokemonApiService.clearCache();
-
-    // Reset and reinitialize
-    this.reset();
-    await this.initializeWithData();
-  }
 }
 
 /**

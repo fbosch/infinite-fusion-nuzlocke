@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { getStarterPokemonByGameMode } from './starters';
 import type { PokemonOptionType } from './pokemon';
+import { encountersData } from '@/lib/queryClient';
+
 /**
  * Type for encounter data with fusion status
  * Used to track Pokemon encounters and their fusion state
@@ -24,42 +26,22 @@ export type RouteEncounter = z.infer<typeof RouteEncounterSchema>;
 
 export const RouteEncountersArraySchema = z.array(RouteEncounterSchema);
 
-// Cache for loaded data
-let classicEncountersCache: RouteEncounter[] | null = null;
-let remixEncountersCache: RouteEncounter[] | null = null;
-
-// Data loaders for encounters with dynamic imports
+// Data loaders for encounters using TanStack Query
 export async function getClassicEncounters(): Promise<RouteEncounter[]> {
-  if (classicEncountersCache) {
-    return classicEncountersCache;
-  }
-
   try {
-    const classicEncountersData = await import('@data/classic/encounters.json');
-    const data = RouteEncountersArraySchema.parse(
-      classicEncountersData.default
-    );
-    classicEncountersCache = data;
-    return data;
+    return await encountersData.getAllEncounters('classic');
   } catch (error) {
-    console.error('Failed to validate classic encounters data:', error);
-    throw new Error('Invalid classic encounters data format');
+    console.error('Failed to fetch classic encounters:', error);
+    throw new Error('Failed to load classic encounters data');
   }
 }
 
 export async function getRemixEncounters(): Promise<RouteEncounter[]> {
-  if (remixEncountersCache) {
-    return remixEncountersCache;
-  }
-
   try {
-    const remixEncountersData = await import('@data/remix/encounters.json');
-    const data = RouteEncountersArraySchema.parse(remixEncountersData.default);
-    remixEncountersCache = data;
-    return data;
+    return await encountersData.getAllEncounters('remix');
   } catch (error) {
-    console.error('Failed to validate remix encounters data:', error);
-    throw new Error('Invalid remix encounters data format');
+    console.error('Failed to fetch remix encounters:', error);
+    throw new Error('Failed to load remix encounters data');
   }
 }
 
@@ -80,10 +62,16 @@ export async function getEncountersByRouteName(
     };
   }
 
-  const encounters = await getEncounters(gameMode);
-  return (
-    encounters.find(encounter => encounter.routeName === routeName) || null
-  );
+  try {
+    // Get all encounters for the game mode and find the specific route
+    const encounters = await encountersData.getAllEncounters(gameMode);
+    return (
+      encounters.find(encounter => encounter.routeName === routeName) || null
+    );
+  } catch (error) {
+    console.error(`Failed to fetch encounter for route '${routeName}':`, error);
+    return null;
+  }
 }
 
 // Get all encounters for a specific game mode
@@ -107,4 +95,10 @@ export async function getEncountersMap(
   });
 
   return encounterMap;
+}
+
+// Function to clear cache if needed (for testing or data updates)
+export function clearEncountersCache(): void {
+  // This will be handled by TanStack Query's cache invalidation
+  // You can use queryClient.invalidateQueries(['encounters']) if needed
 }
