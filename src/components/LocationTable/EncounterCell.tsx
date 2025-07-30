@@ -11,7 +11,7 @@ import clsx from 'clsx';
 import { useEncounter, playthroughActions } from '@/stores/playthroughs';
 import { getLocationById } from '@/loaders/locations';
 import { CursorTooltip } from '@/components/CursorTooltip';
-import { DNA_REVERSER_ICON } from '@/misc/items';
+import { DNA_REVERSER_ICON } from '@/constants/items';
 import Image from 'next/image';
 
 interface EncounterCellProps {
