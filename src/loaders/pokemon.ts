@@ -432,7 +432,7 @@ export function usePokemonEvolutionData(pokemonId: number | undefined) {
         preEvolution,
       };
     },
-    enabled: !!pokemonId,
+    enabled: pokemonId !== null && pokemonId !== undefined,
   });
 
   return {

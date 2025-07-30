@@ -70,8 +70,9 @@ export function usePokemonSearch({
     },
     enabled: allPokemon.length > 0 && debouncedQuery !== '',
     placeholderData: keepPreviousData,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Don't cache - always fetch fresh data
+    gcTime: 0, // Don't keep in garbage collection
     ...queryOptions,
+    persister: undefined,
   });
 }
