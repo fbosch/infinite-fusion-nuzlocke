@@ -17,8 +17,8 @@ export const GameModeSchema = z.enum(['classic', 'remix', 'randomized']);
 export type GameMode = z.infer<typeof GameModeSchema>;
 
 export const EncounterDataSchema = z.object({
-  head: PokemonOptionSchema.nullish(),
-  body: PokemonOptionSchema.nullish(),
+  head: PokemonOptionSchema.nullable(),
+  body: PokemonOptionSchema.nullable(),
   isFusion: z.boolean(),
   artworkVariant: z.string().optional(),
   updatedAt: z.number(),
