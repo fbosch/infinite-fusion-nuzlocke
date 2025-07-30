@@ -421,12 +421,12 @@ export const PokemonCombobox = React.memo(
                         'object-center object-contain cursor-grab active:cursor-grabbing rounded-sm transform-gpu',
                         dragPreview && 'opacity-60 pointer-none' // Make preview sprite opaque
                       )}
-                      quality={70}
                       priority={true}
                       loading='eager'
                       placeholder='blur'
                       blurDataURL={TRANSPARENT_PIXEL}
                       draggable
+                      unoptimized
                       onDragStart={e => {
                         e.dataTransfer.setData(
                           'text/plain',
