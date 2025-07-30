@@ -3,6 +3,7 @@ import pokemonApiService from '@/services/pokemonApiService';
 import encountersApiService from '@/services/encountersApiService';
 import type { Pokemon } from '@/loaders/pokemon';
 import ms from 'ms';
+import { queryPersister } from './persistence';
 
 // Create a centralized query client
 export const queryClient = new QueryClient({
@@ -12,6 +13,7 @@ export const queryClient = new QueryClient({
       gcTime: ms('10m'), // 10 minutes
       retry: 2,
       retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+      persister: queryPersister.persisterFn,
     },
   },
 });
