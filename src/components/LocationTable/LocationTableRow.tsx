@@ -17,6 +17,9 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
   const locationId = row.original.id;
   const { ref, inView } = useInView();
 
+  const aboveTheFold = row.index < 8;
+  const shouldLoad = inView || aboveTheFold;
+
   // Get encounter data directly - only this row will rerender when this encounter changes
   const encounterData = useEncounter(locationId) || {
     head: null,
@@ -40,11 +43,18 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
               className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group'
               role='cell'
             >
-              <PokemonSummaryCard locationId={locationId} shouldLoad={inView} />
+              <PokemonSummaryCard
+                locationId={locationId}
+                shouldLoad={shouldLoad}
+              />
             </td>
           ))
           .with('encounter', () => (
-            <EncounterCell key={cell.id} locationId={locationId} />
+            <EncounterCell
+              key={cell.id}
+              locationId={locationId}
+              shouldLoad={shouldLoad}
+            />
           ))
           .with('actions', () => {
             const hasEncounter = !!(encounterData.head || encounterData.body);

@@ -4,7 +4,6 @@ import { encountersData, encountersQueries } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
 import { getStarterPokemonByGameMode } from '@/loaders/starters';
 import { isStarterLocation } from '@/constants/special-locations';
-import type { RouteEncounter } from '@/loaders/encounters';
 import { GameMode } from '../stores/playthroughs';
 
 // Location schema
@@ -167,9 +166,9 @@ export function useLocationEncountersById(
     };
   }
 
-  const encounter = encounters.find(
-    (e: RouteEncounter) => e.routeName === location?.name
-  );
+  const encounter = (
+    encounters && 'data' in encounters ? encounters.data : encounters
+  )?.find(e => e.routeName === location?.name);
 
   return {
     pokemonIds: encounter?.pokemonIds || [],

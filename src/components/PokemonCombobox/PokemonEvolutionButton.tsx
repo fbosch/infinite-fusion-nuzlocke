@@ -158,10 +158,12 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
 export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   value,
   onChange,
+  shouldLoad = true,
 }) => {
   const isShiftPressed = useShiftKey();
   const { evolutions, preEvolution, isLoading } = usePokemonEvolutionData(
-    value?.id
+    value?.id,
+    shouldLoad
   );
 
   // Transform Pokemon data to PokemonOptionType with originalLocation

@@ -16,6 +16,7 @@ import Image from 'next/image';
 
 interface EncounterCellProps {
   locationId: string;
+  shouldLoad?: boolean;
 }
 
 interface PendingClear {
@@ -98,7 +99,10 @@ const initialState: ConfirmationState = {
   wasOverwriteConfirmed: false,
 };
 
-export function EncounterCell({ locationId }: EncounterCellProps) {
+export function EncounterCell({
+  locationId,
+  shouldLoad = true,
+}: EncounterCellProps) {
   // Get encounter data directly - only this cell will rerender when this encounter changes
   const encounterData = useEncounter(locationId) || {
     head: null,
@@ -466,6 +470,7 @@ export function EncounterCell({ locationId }: EncounterCellProps) {
                   onBeforeClear={handleBeforeClearHead}
                   onBeforeOverwrite={handleBeforeOverwriteHead}
                   isFusion={isFusion}
+                  shouldLoad={shouldLoad}
                 />
               </div>
               <CursorTooltip
@@ -510,6 +515,7 @@ export function EncounterCell({ locationId }: EncounterCellProps) {
                   onBeforeClear={handleBeforeClearBody}
                   onBeforeOverwrite={handleBeforeOverwriteBody}
                   isFusion={isFusion}
+                  shouldLoad={shouldLoad}
                 />
               </div>
             </div>
@@ -525,6 +531,7 @@ export function EncounterCell({ locationId }: EncounterCellProps) {
               onBeforeClear={handleBeforeClearSingle}
               onBeforeOverwrite={handleBeforeOverwriteSingle}
               isFusion={isFusion}
+              shouldLoad={shouldLoad}
             />
           )}
         </div>

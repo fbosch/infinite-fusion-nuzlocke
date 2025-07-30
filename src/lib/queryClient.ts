@@ -1,6 +1,7 @@
 import { QueryClient, queryOptions } from '@tanstack/react-query';
 import pokemonApiService from '@/services/pokemonApiService';
 import encountersApiService from '@/services/encountersApiService';
+import spriteService from '@/services/spriteService';
 import type { Pokemon } from '@/loaders/pokemon';
 import ms from 'ms';
 import { queryPersister } from './persistence';
@@ -84,17 +85,38 @@ export const encountersQueries = {
   byGameMode: (gameMode: 'classic' | 'remix') =>
     queryOptions({
       queryKey: ['encounters', 'byGameMode', gameMode],
-      queryFn: () => encountersApiService.getEncountersByGameMode(gameMode),
-      staleTime: ms('1h'), // 1 hour (encounters change less frequently)
+      queryFn: () => encountersApiService.getEncounters(gameMode),
+      enabled: !!gameMode,
+      staleTime: ms('1h'),
       gcTime: ms('2h'),
     }),
 
   all: (gameMode: 'classic' | 'remix') =>
     queryOptions({
       queryKey: ['encounters', 'all', gameMode],
-      queryFn: () => encountersApiService.getEncounters(gameMode),
+      queryFn: () => encountersApiService.getEncountersByGameMode(gameMode),
+      enabled: !!gameMode,
       staleTime: ms('1h'),
       gcTime: ms('2h'),
+    }),
+};
+
+// Sprite query options
+export const spriteQueries = {
+  variants: (headId?: number | null, bodyId?: number | null) =>
+    queryOptions({
+      queryKey: [
+        'sprite',
+        'variants',
+        (headId && bodyId
+          ? `${headId}.${bodyId}`
+          : headId || bodyId
+        )?.toString(),
+      ],
+      queryFn: () => spriteService.getArtworkVariants(headId, bodyId),
+      enabled: !!(headId || bodyId),
+      staleTime: ms('24h'), // Cache variants for 24 hours
+      gcTime: ms('48h'),
     }),
 };
 
@@ -111,8 +133,14 @@ export const pokemonData = {
 
 export const encountersData = {
   getEncountersByGameMode: (gameMode: 'classic' | 'remix') =>
-    queryClient.fetchQuery(encountersQueries.byGameMode(gameMode)),
-
-  getAllEncounters: (gameMode: 'classic' | 'remix') =>
     queryClient.fetchQuery(encountersQueries.all(gameMode)),
+  getAllEncounters: (gameMode: 'classic' | 'remix') =>
+    queryClient
+      .fetchQuery(encountersQueries.all(gameMode))
+      .then(response => response.data),
+};
+
+export const spriteData = {
+  getArtworkVariants: (headId?: number | null, bodyId?: number | null) =>
+    queryClient.fetchQuery(spriteQueries.variants(headId, bodyId)),
 };

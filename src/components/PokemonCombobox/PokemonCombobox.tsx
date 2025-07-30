@@ -92,6 +92,7 @@ interface PokemonComboboxProps {
   comboboxId?: string;
   ref?: React.RefObject<HTMLInputElement | null>;
   isFusion?: boolean;
+  shouldLoad?: boolean;
 }
 
 // Pokemon Combobox Component
@@ -108,6 +109,7 @@ export const PokemonCombobox = React.memo(
     comboboxId,
     ref,
     isFusion = false,
+    shouldLoad = true,
   }: PokemonComboboxProps) => {
     const [query, setQuery] = useState('');
     const deferredQuery = useDeferredValue(query);
@@ -445,7 +447,11 @@ export const PokemonCombobox = React.memo(
                 {open ||
                 value?.status === PokemonStatus.DECEASED ||
                 value?.status === PokemonStatus.MISSED ? null : (
-                  <PokemonEvolutionButton value={value} onChange={onChange} />
+                  <PokemonEvolutionButton
+                    value={value}
+                    onChange={onChange}
+                    shouldLoad={shouldLoad}
+                  />
                 )}
               </div>
               {open && (

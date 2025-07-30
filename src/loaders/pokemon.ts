@@ -401,10 +401,17 @@ export function usePokemonNameMap() {
   return nameMap;
 }
 
-export function usePokemonEvolutionData(pokemonId: number | undefined) {
-  const { data: allPokemon, isLoading } = useAllPokemon();
+export function usePokemonEvolutionData(
+  pokemonId: number | undefined,
+  enabled: boolean = true
+) {
+  const { data: allPokemon, isLoading } = useQuery({
+    ...pokemonQueries.all(),
+    enabled,
+  });
+
   return useMemo(() => {
-    if (!pokemonId || !allPokemon)
+    if (!pokemonId || !allPokemon || !enabled)
       return { evolutions: [], preEvolution: null, isLoading };
 
     const currentPokemon = allPokemon.find(p => p.id === pokemonId);
@@ -429,5 +436,5 @@ export function usePokemonEvolutionData(pokemonId: number | undefined) {
       preEvolution,
       isLoading,
     };
-  }, [allPokemon, pokemonId, isLoading]);
+  }, [allPokemon, pokemonId, isLoading, enabled]);
 }
