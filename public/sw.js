@@ -135,7 +135,11 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
 
   // Handle API requests with cache-first strategy
-  if (url.pathname.startsWith('/api/pokemon') || url.pathname.startsWith('/api/encounters') || url.pathname.startsWith('/api/variants')) {
+  if (
+    url.pathname.startsWith('/api/pokemon') ||
+    url.pathname.startsWith('/api/encounters') ||
+    url.pathname.startsWith('/api/variants')
+  ) {
     event.respondWith(handleApiRequest(request));
     return;
   }
@@ -430,7 +434,7 @@ async function checkApiEndpointCache(endpoint) {
     const cache = await caches.open(API_CACHE_NAME);
     const url = new URL(endpoint, self.location.origin);
     const cachedResponse = await cache.match(url);
-    
+
     return {
       cached: !!cachedResponse,
       endpoint: endpoint,
