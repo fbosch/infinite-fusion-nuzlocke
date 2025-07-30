@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   getPokemon,
   searchPokemon,
@@ -108,19 +108,25 @@ vi.mock('@/lib/queryClient', () => {
   return {
     pokemonData: {
       getAllPokemon: vi.fn().mockResolvedValue(mockPokemonData),
-      getPokemonById: vi.fn().mockImplementation((id: number) =>
-        Promise.resolve(mockPokemonData.find(p => p.id === id) || null)
-      ),
-      getPokemonByIds: vi.fn().mockImplementation((ids: number[]) =>
-        Promise.resolve(mockPokemonData.filter(p => ids.includes(p.id)))
-      ),
-      getPokemonByType: vi.fn().mockImplementation((type: string) =>
-        Promise.resolve(
-          mockPokemonData.filter(p =>
-            p.types.some(t => t.name === type.toLowerCase())
+      getPokemonById: vi
+        .fn()
+        .mockImplementation((id: number) =>
+          Promise.resolve(mockPokemonData.find(p => p.id === id) || null)
+        ),
+      getPokemonByIds: vi
+        .fn()
+        .mockImplementation((ids: number[]) =>
+          Promise.resolve(mockPokemonData.filter(p => ids.includes(p.id)))
+        ),
+      getPokemonByType: vi
+        .fn()
+        .mockImplementation((type: string) =>
+          Promise.resolve(
+            mockPokemonData.filter(p =>
+              p.types.some(t => t.name === type.toLowerCase())
+            )
           )
-        )
-      ),
+        ),
     },
   };
 });
@@ -141,7 +147,7 @@ vi.mock('@/lib/searchCore', () => {
           { id: 135, name: 'Jolteon', nationalDexId: 135 },
           { id: 136, name: 'Flareon', nationalDexId: 136 },
         ];
-        
+
         return mockPokemonData.filter(p =>
           p.name.toLowerCase().includes(query.toLowerCase())
         );
@@ -212,7 +218,7 @@ describe('Pokemon Loader with Evolution Data', () => {
     const bulbasaurPreEvolutionId = await getPokemonPreEvolutionId(
       bulbasaurOption!.id
     );
-    expect(bulbasaurPreEvolutionId).toBeNull(); // No pre-evolution
+    expect(bulbasaurPreEvolutionId).toBe(null); // No pre-evolution
   });
 
   it('should handle Pokemon with multiple evolution options', async () => {
