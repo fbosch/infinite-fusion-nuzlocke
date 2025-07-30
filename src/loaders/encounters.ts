@@ -5,7 +5,6 @@ import type { PokemonOptionType, Pokemon } from './pokemon';
 import { useAllPokemon, usePokemonNameMap } from './pokemon';
 import { encountersData } from '@/lib/queryClient';
 import { useLocationEncountersById } from './locations';
-import { useGameMode } from '@/stores/playthroughs';
 
 /**
  * Type for encounter data with fusion status
@@ -22,7 +21,10 @@ export interface EncounterData {
 export const RouteEncounterSchema = z.object({
   routeName: z.string().min(1, { error: 'Route name is required' }),
   pokemonIds: z.array(
-    z.number().int().positive({ error: 'Pokemon ID must be positive' })
+    z.number().int().refine(
+      (val) => val > 0 || val === -1,
+      { error: 'Pokemon ID must be positive or -1 for egg locations' }
+    )
   ),
 });
 
@@ -111,18 +113,18 @@ export function clearEncountersCache(): void {
 interface UseEncounterDataOptions {
   locationId?: string;
   enabled?: boolean;
+  gameMode?: 'classic' | 'remix';
 }
 
 export function useEncountersForLocation({
   locationId,
   enabled = false,
+  gameMode = 'classic',
 }: UseEncounterDataOptions) {
-  const gameMode = useGameMode();
-
   // Use the hook variant to fetch encounters
   const { pokemonIds, isLoading, error } = useLocationEncountersById(
     enabled ? locationId : undefined,
-    gameMode as 'classic' | 'remix'
+    gameMode
   );
 
   // Use existing hooks for Pokemon data and name map
@@ -133,7 +135,6 @@ export function useEncountersForLocation({
   const routeEncounterData = useMemo((): PokemonOptionType[] => {
     if (
       !enabled ||
-      gameMode === 'randomized' ||
       !pokemonIds.length ||
       !allPokemon.length
     ) {
@@ -149,7 +150,7 @@ export function useEncountersForLocation({
         originalLocation: locationId,
       };
     });
-  }, [pokemonIds, allPokemon, nameMap, gameMode, enabled, locationId]);
+  }, [pokemonIds, allPokemon, nameMap, enabled, locationId]);
 
   // Predicate function to check if a Pokemon is in the current route
   const isRoutePokemon = useCallback(

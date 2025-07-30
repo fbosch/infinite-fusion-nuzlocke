@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       gameMode: searchParams.get('gameMode'),
     });
 
-    const [wild, trade, gift] = await Promise.all([
+    const [wild, trade, gift, eggLocations] = await Promise.all([
       query.gameMode === 'remix'
         ? import('@data/remix/encounters.json')
         : import('@data/classic/encounters.json'),
@@ -25,18 +25,26 @@ export async function GET(request: NextRequest) {
       query.gameMode === 'remix'
         ? import('@data/remix/gifts.json')
         : import('@data/classic/gifts.json'),
+      import('@data/egg-locations.json'),
     ]);
 
     // Validate the data
     const encounters = RouteEncountersArraySchema.parse(wild.default);
     const trades = RouteEncountersArraySchema.parse(trade.default);
     const gifts = RouteEncountersArraySchema.parse(gift.default);
+    const eggLocationsData = eggLocations.default;
+
+    // Create a set of route names that have egg locations
+    const eggRouteNames = new Set(
+      eggLocationsData.locations.map(location => location.routeName)
+    );
 
     // Merge the data by route name
     const allRouteNames = new Set([
       ...encounters.map(e => e.routeName),
       ...trades.map(t => t.routeName),
       ...gifts.map(g => g.routeName),
+      ...eggRouteNames, // Include egg locations
     ]);
 
     // Create a map for quick lookup of each encounter type
@@ -50,10 +58,15 @@ export async function GET(request: NextRequest) {
       const tradePokemon = tradesMap.get(routeName)?.pokemonIds || [];
       const giftPokemon = giftsMap.get(routeName)?.pokemonIds || [];
 
-      // Combine all Pokemon IDs, removing duplicates
+      // Start with all Pokemon IDs, removing duplicates
       const allPokemonIds = [
         ...new Set([...wildPokemon, ...tradePokemon, ...giftPokemon]),
       ];
+
+      // Add -1 if this route has egg locations
+      if (eggRouteNames.has(routeName)) {
+        allPokemonIds.push(-1);
+      }
 
       return {
         routeName,
