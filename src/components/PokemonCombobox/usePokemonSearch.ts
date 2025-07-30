@@ -4,7 +4,6 @@ import {
   useQuery,
 } from '@tanstack/react-query';
 import { PokemonOptionType, useAllPokemon } from '@/loaders/pokemon';
-import { useGameMode } from '@/stores/playthroughs';
 import { useDebounce } from 'use-debounce';
 import searchService from '@/services/searchService';
 
@@ -20,7 +19,6 @@ export function usePokemonSearch({
   query,
   queryOptions = {},
 }: UsePokemonSearchOptions) {
-  const gameMode = useGameMode();
   const { data: allPokemon = [] } = useAllPokemon();
 
   // Debounce the query to reduce search frequency
@@ -31,15 +29,12 @@ export function usePokemonSearch({
   });
 
   return useQuery<PokemonOptionType[], Error>({
-    queryKey: ['pokemon', 'search', gameMode, debouncedQuery],
+    queryKey: ['pokemon', 'search', debouncedQuery],
     queryFn: async () => {
       if (debouncedQuery === '') return [];
 
       try {
-        // Use searchService with web worker for better performance
         const searchResults = await searchService.search(debouncedQuery);
-
-        // Transform search results to PokemonOptionType format
         return searchResults.map(result => ({
           id: result.id,
           name: result.name,
@@ -50,7 +45,6 @@ export function usePokemonSearch({
           'searchService failed, using client-side filtering fallback',
           err
         );
-        // Fallback to client-side filtering if searchService fails
         return allPokemon
           .filter(pokemon =>
             pokemon.name.toLowerCase().includes(debouncedQuery.toLowerCase())
