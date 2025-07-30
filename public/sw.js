@@ -134,9 +134,13 @@ self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Handle Pokemon API requests with cache-first strategy
-  if (url.pathname.startsWith('/api/pokemon')) {
-    event.respondWith(handlePokemonApiRequest(request));
+  // Handle API requests with cache-first strategy
+  if (
+    url.pathname.startsWith('/api/pokemon') ||
+    url.pathname.startsWith('/api/encounters') ||
+    url.pathname.startsWith('/api/variants')
+  ) {
+    event.respondWith(handleApiRequest(request));
     return;
   }
 
@@ -177,14 +181,15 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Handle Pokemon API requests with cache-first strategy
-async function handlePokemonApiRequest(request) {
+// Handle API requests with cache-first strategy
+async function handleApiRequest(request) {
   const cache = await caches.open(API_CACHE_NAME);
+  const url = new URL(request.url);
 
   // Try cache first
   const cachedResponse = await cache.match(request);
   if (cachedResponse) {
-    console.debug('Service Worker: Serving Pokemon API from cache');
+    console.debug('Service Worker: Serving API from cache:', url.pathname);
     return cachedResponse;
   }
 
@@ -196,12 +201,12 @@ async function handlePokemonApiRequest(request) {
     if (response.status === 200) {
       const responseClone = response.clone();
       cache.put(request, responseClone);
-      console.debug('Service Worker: Cached Pokemon API response');
+      console.debug('Service Worker: Cached API response:', url.pathname);
     }
 
     return response;
   } catch (error) {
-    console.error('Service Worker: Failed to fetch Pokemon API:', error);
+    console.error('Service Worker: Failed to fetch API:', url.pathname, error);
     return new Response(
       JSON.stringify({ error: 'Service temporarily unavailable' }),
       {
@@ -316,6 +321,32 @@ self.addEventListener('message', event => {
       });
     });
   }
+
+  if (event.data && event.data.type === 'GET_API_CACHE_STATUS') {
+    getApiCacheStatus().then(status => {
+      event.ports[0].postMessage({
+        type: 'API_CACHE_STATUS',
+        status: status,
+      });
+    });
+  }
+
+  if (event.data && event.data.type === 'CLEAR_API_CACHE') {
+    clearApiCache().then(() => {
+      event.ports[0].postMessage({
+        type: 'API_CACHE_CLEARED',
+      });
+    });
+  }
+
+  if (event.data && event.data.type === 'CHECK_API_ENDPOINT_CACHE') {
+    checkApiEndpointCache(event.data.endpoint).then(status => {
+      event.ports[0].postMessage({
+        type: 'API_ENDPOINT_CACHE_STATUS',
+        status: status,
+      });
+    });
+  }
 });
 
 // Calculate cache sizes
@@ -354,6 +385,66 @@ async function getPokemonCacheStatus() {
       cached: 0,
       percentage: 0,
       error: 'Unable to get cache status',
+    };
+  }
+}
+
+// Get API cache status
+async function getApiCacheStatus() {
+  try {
+    const cache = await caches.open(API_CACHE_NAME);
+    const cachedRequests = await cache.keys();
+    // This is a placeholder. In a real scenario, you'd track specific API endpoints
+    // or the total number of API requests.
+    return {
+      total: 0, // No direct count of API requests here, as it's not tracked per request
+      cached: cachedRequests.length,
+      percentage: 0,
+    };
+  } catch (error) {
+    return {
+      total: 0,
+      cached: 0,
+      percentage: 0,
+      error: 'Unable to get API cache status',
+    };
+  }
+}
+
+// Clear API cache
+async function clearApiCache() {
+  try {
+    const cache = await caches.open(API_CACHE_NAME);
+    await cache.keys().then(keys => {
+      keys.forEach(key => {
+        cache.delete(key);
+      });
+    });
+    console.debug('Service Worker: API cache cleared');
+    return true;
+  } catch (error) {
+    console.error('Service Worker: Failed to clear API cache', error);
+    return false;
+  }
+}
+
+// Check if a specific API endpoint is cached
+async function checkApiEndpointCache(endpoint) {
+  try {
+    const cache = await caches.open(API_CACHE_NAME);
+    const url = new URL(endpoint, self.location.origin);
+    const cachedResponse = await cache.match(url);
+
+    return {
+      cached: !!cachedResponse,
+      endpoint: endpoint,
+    };
+  } catch (error) {
+    console.error('Service Worker: Failed to check API endpoint cache', error);
+    return {
+      cached: false,
+      endpoint: endpoint,
+      error: 'Unable to check cache status',
     };
   }
 }

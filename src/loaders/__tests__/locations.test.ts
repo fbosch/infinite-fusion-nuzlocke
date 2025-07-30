@@ -17,6 +17,43 @@ vi.mock('../starters', () => ({
   getStarterPokemonByGameMode: vi.fn(),
 }));
 
+// Mock the query client encounters data
+vi.mock('@/lib/queryClient', () => {
+  const mockEncountersData = [
+    {
+      routeName: 'Route 1',
+      pokemonIds: [1, 2, 3],
+    },
+    {
+      routeName: 'Route 2', 
+      pokemonIds: [4, 5, 6],
+    },
+    {
+      routeName: 'Viridian Forest',
+      pokemonIds: [7, 8, 9],
+    },
+    {
+      routeName: 'Pewter City',
+      pokemonIds: [10, 11, 12],
+    },
+  ];
+
+  return {
+    encountersData: {
+      getAllEncounters: vi.fn().mockResolvedValue(mockEncountersData),
+      getEncountersByGameMode: vi.fn().mockResolvedValue({
+        data: mockEncountersData,
+      }),
+    },
+    encountersQueries: {
+      all: vi.fn(() => ({
+        queryKey: ['encounters', 'classic'],
+        queryFn: vi.fn().mockResolvedValue(mockEncountersData),
+      })),
+    },
+  };
+});
+
 describe('Locations', () => {
   beforeEach(() => {
     vi.clearAllMocks();
