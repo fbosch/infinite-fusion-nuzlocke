@@ -48,6 +48,7 @@ export const PlaythroughSchema = z
     }
 
     // Remove remixMode if it exists (clean up)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { remixMode, ...cleanData } = data;
     return cleanData;
   });

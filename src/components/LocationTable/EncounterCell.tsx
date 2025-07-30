@@ -16,7 +16,6 @@ import Image from 'next/image';
 
 interface EncounterCellProps {
   locationId: string;
-  shouldLoad?: boolean;
 }
 
 interface PendingClear {
@@ -99,7 +98,7 @@ const initialState: ConfirmationState = {
   wasOverwriteConfirmed: false,
 };
 
-export function EncounterCell({ locationId, shouldLoad }: EncounterCellProps) {
+export function EncounterCell({ locationId }: EncounterCellProps) {
   // Get encounter data directly - only this cell will rerender when this encounter changes
   const encounterData = useEncounter(locationId) || {
     head: null,
@@ -464,7 +463,6 @@ export function EncounterCell({ locationId, shouldLoad }: EncounterCellProps) {
                   placeholder='Select Pokémon'
                   nicknamePlaceholder='Enter nickname'
                   comboboxId={`${locationId}-head`}
-                  shouldLoad={shouldLoad}
                   onBeforeClear={handleBeforeClearHead}
                   onBeforeOverwrite={handleBeforeOverwriteHead}
                   isFusion={isFusion}
@@ -509,7 +507,6 @@ export function EncounterCell({ locationId, shouldLoad }: EncounterCellProps) {
                   nicknamePlaceholder='Enter nickname'
                   comboboxId={`${locationId}-body`}
                   ref={bodyComboboxRef}
-                  shouldLoad={shouldLoad}
                   onBeforeClear={handleBeforeClearBody}
                   onBeforeOverwrite={handleBeforeOverwriteBody}
                   isFusion={isFusion}
@@ -525,7 +522,6 @@ export function EncounterCell({ locationId, shouldLoad }: EncounterCellProps) {
               placeholder='Select Pokémon'
               nicknamePlaceholder='Enter nickname'
               comboboxId={`${locationId}-single`}
-              shouldLoad={shouldLoad}
               onBeforeClear={handleBeforeClearSingle}
               onBeforeOverwrite={handleBeforeOverwriteSingle}
               isFusion={isFusion}

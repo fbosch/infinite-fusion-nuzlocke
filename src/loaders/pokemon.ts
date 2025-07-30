@@ -406,8 +406,15 @@ export function usePokemonEvolutionData(pokemonId: number | undefined) {
   return useMemo(() => {
     if (!pokemonId || !allPokemon)
       return { evolutions: [], preEvolution: null, isLoading };
+
     const currentPokemon = allPokemon.find(p => p.id === pokemonId);
-    if (!currentPokemon) return null;
+    if (!currentPokemon)
+      return {
+        evolutions: [],
+        preEvolution: null,
+        isLoading,
+      };
+
     const evolutionIds =
       currentPokemon.evolution?.evolves_to.map(e => e.id) || [];
     const preEvolutionId = currentPokemon.evolution?.evolves_from?.id || null;
@@ -420,6 +427,7 @@ export function usePokemonEvolutionData(pokemonId: number | undefined) {
     return {
       evolutions,
       preEvolution,
+      isLoading,
     };
   }, [allPokemon, pokemonId, isLoading]);
 }
