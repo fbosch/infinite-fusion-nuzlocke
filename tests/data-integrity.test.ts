@@ -27,6 +27,21 @@ interface LocationTrades {
   pokemonIds: number[];
 }
 
+interface EggLocation {
+  routeName: string;
+  source: 'gifts' | 'nests';
+  description: string;
+}
+
+interface EggLocationsData {
+  totalLocations: number;
+  sources: {
+    gifts: number;
+    nests: number;
+  };
+  locations: EggLocation[];
+}
+
 describe('Data Integrity Tests', () => {
   let locations: Location[];
   let classicEncounters: RouteEncounter[];
@@ -35,6 +50,7 @@ describe('Data Integrity Tests', () => {
   let remixGifts: LocationGifts[];
   let classicTrades: LocationTrades[];
   let remixTrades: LocationTrades[];
+  let eggLocations: EggLocationsData;
 
   beforeAll(async () => {
     const dataDir = path.join(process.cwd(), 'data');
@@ -48,6 +64,7 @@ describe('Data Integrity Tests', () => {
       remixGiftsData,
       classicTradesData,
       remixTradesData,
+      eggLocationsData,
     ] = await Promise.all([
       fs.readFile(path.join(dataDir, 'shared/locations.json'), 'utf-8'),
       fs.readFile(path.join(dataDir, 'classic/encounters.json'), 'utf-8'),
@@ -56,6 +73,7 @@ describe('Data Integrity Tests', () => {
       fs.readFile(path.join(dataDir, 'remix/gifts.json'), 'utf-8'),
       fs.readFile(path.join(dataDir, 'classic/trades.json'), 'utf-8'),
       fs.readFile(path.join(dataDir, 'remix/trades.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'egg-locations.json'), 'utf-8'),
     ]);
 
     locations = JSON.parse(locationsData);
@@ -65,6 +83,7 @@ describe('Data Integrity Tests', () => {
     remixGifts = JSON.parse(remixGiftsData);
     classicTrades = JSON.parse(classicTradesData);
     remixTrades = JSON.parse(remixTradesData);
+    eggLocations = JSON.parse(eggLocationsData);
   });
 
   describe('Route Encounter Coverage', () => {
@@ -690,6 +709,165 @@ describe('Data Integrity Tests', () => {
       // Allow more flexibility for special locations that might not be in the main locations list
       // Many gift/trade locations are special areas not in the main route list
       expect(locationPatterns.size).toBeLessThan(30); // Increased threshold for special locations
+    });
+  });
+
+  describe('Egg Locations Data Integrity', () => {
+    it('should have the correct data structure', () => {
+      expect(eggLocations).toHaveProperty('totalLocations');
+      expect(eggLocations).toHaveProperty('sources');
+      expect(eggLocations).toHaveProperty('locations');
+      expect(Array.isArray(eggLocations.locations)).toBe(true);
+    });
+
+    it('should have correct source counts', () => {
+      expect(eggLocations.sources).toHaveProperty('gifts');
+      expect(eggLocations.sources).toHaveProperty('nests');
+      expect(typeof eggLocations.sources.gifts).toBe('number');
+      expect(typeof eggLocations.sources.nests).toBe('number');
+    });
+
+    it('should have correct total location count', () => {
+      expect(eggLocations.totalLocations).toBe(eggLocations.locations.length);
+      expect(eggLocations.totalLocations).toBe(
+        eggLocations.sources.gifts + eggLocations.sources.nests
+      );
+    });
+
+    it('should have exactly 7 gift locations', () => {
+      const giftLocations = eggLocations.locations.filter(
+        loc => loc.source === 'gifts'
+      );
+      expect(giftLocations.length).toBe(7);
+      expect(eggLocations.sources.gifts).toBe(7);
+    });
+
+    it('should have exactly 9 nest locations', () => {
+      const nestLocations = eggLocations.locations.filter(
+        loc => loc.source === 'nests'
+      );
+      expect(nestLocations.length).toBe(9);
+      expect(eggLocations.sources.nests).toBe(9);
+    });
+
+    it('should have valid location objects', () => {
+      eggLocations.locations.forEach((location, index) => {
+        expect(location).toHaveProperty('routeName');
+        expect(location).toHaveProperty('source');
+        expect(location).toHaveProperty('description');
+
+        expect(typeof location.routeName).toBe('string');
+        expect(typeof location.source).toBe('string');
+        expect(typeof location.description).toBe('string');
+
+        expect(location.routeName.length).toBeGreaterThan(0);
+        expect(location.description.length).toBeGreaterThan(0);
+        expect(['gifts', 'nests']).toContain(location.source);
+      });
+    });
+
+    it('should have unique route names', () => {
+      const routeNames = eggLocations.locations.map(loc => loc.routeName);
+      const uniqueRouteNames = new Set(routeNames);
+      expect(uniqueRouteNames.size).toBe(routeNames.length);
+    });
+
+    it('should contain all expected gift locations', () => {
+      const expectedGiftLocations = [
+        'Kanto Daycare',
+        'Knot Island',
+        'Lavender Town',
+        'National Park',
+        'Pallet Town',
+        'Route 5',
+        'Route 8',
+      ];
+
+      const actualGiftLocations = eggLocations.locations
+        .filter(loc => loc.source === 'gifts')
+        .map(loc => loc.routeName)
+        .sort();
+
+      expect(actualGiftLocations).toEqual(expectedGiftLocations.sort());
+    });
+
+    it('should contain all expected nest locations', () => {
+      const expectedNestLocations = [
+        'Kindle Road',
+        'Rock Tunnel',
+        'Route 15',
+        'Route 23',
+        'Route 34',
+        'Saffron City',
+        'Seafoam Islands',
+        'Secret Garden',
+        'Viridian Forest',
+      ];
+
+      const actualNestLocations = eggLocations.locations
+        .filter(loc => loc.source === 'nests')
+        .map(loc => loc.routeName)
+        .sort();
+
+      expect(actualNestLocations).toEqual(expectedNestLocations.sort());
+    });
+
+    it('should have meaningful descriptions', () => {
+      eggLocations.locations.forEach(location => {
+        expect(location.description.length).toBeGreaterThan(5);
+
+        if (location.source === 'gifts') {
+          expect(location.description).toMatch(/egg|Egg|Pokemon|Pokémon/i);
+        } else if (location.source === 'nests') {
+          expect(location.description).toMatch(/nest|Nest location/i);
+        }
+      });
+    });
+
+    it('should not have any empty or null values', () => {
+      eggLocations.locations.forEach((location, index) => {
+        expect(
+          location.routeName,
+          `Location ${index} has empty routeName`
+        ).toBeTruthy();
+        expect(
+          location.source,
+          `Location ${index} has empty source`
+        ).toBeTruthy();
+        expect(
+          location.description,
+          `Location ${index} has empty description`
+        ).toBeTruthy();
+      });
+    });
+
+    it('should not have any duplicate entries', () => {
+      const seen = new Set<string>();
+
+      eggLocations.locations.forEach(location => {
+        const key = `${location.routeName}-${location.source}`;
+        expect(
+          seen.has(key),
+          `Duplicate entry found: ${location.routeName}`
+        ).toBe(false);
+        seen.add(key);
+      });
+    });
+
+    it('should have properly formatted route names', () => {
+      eggLocations.locations.forEach(location => {
+        // Should not have extra whitespace
+        expect(location.routeName).toBe(location.routeName.trim());
+
+        // Should not have consecutive spaces
+        expect(location.routeName).not.toMatch(/\s{2,}/);
+
+        // Should not start or end with spaces
+        expect(location.routeName).not.toMatch(/^\s|\s$/);
+
+        // Should be properly capitalized (title case allowed)
+        expect(location.routeName).toMatch(/^[A-Z][a-zA-Z\s\d]+$/);
+      });
     });
   });
 });
