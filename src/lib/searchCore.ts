@@ -21,9 +21,9 @@ export class SearchCore {
 
   private readonly fuseOptions: IFuseOptions<PokemonData> = {
     keys: [{ name: 'name', weight: 1.0 }],
-    threshold: 0.4, // Slightly more permissive for better matches
+    threshold: 0.5, // Slightly more permissive for better matches
     includeScore: true,
-    minMatchCharLength: 1, // Allow single character matches for partial typing
+    minMatchCharLength: 2, // Allow single character matches for partial typing
     shouldSort: true,
     findAllMatches: true, // Find all possible matches
     useExtendedSearch: false, // Keep simple for better performance
