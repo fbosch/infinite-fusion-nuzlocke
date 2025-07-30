@@ -12,6 +12,12 @@
     "description": "The road to Viridian City"
   },
   {
+    "id": "b0d831b0-eada-4ae2-8761-d9226404ec41",
+    "name": "Viridian City",
+    "region": "Kanto",
+    "description": "Viridian City is the first town after exiting Route 1."
+  },
+  {
     "id":"a1e59912-1eb5-4b2a-b3b3-e5ae27f66e68",
     "name": "Route 22",
     "region": "Kanto",
@@ -40,6 +46,12 @@
     "name": "Hidden Forest",
     "region": "Kanto",
     "description": "Hidden area in Viridian Forest"
+  },
+  {
+    "id": "2ba36f88-3565-416c-a9ef-346d29a62c8a",
+    "name": "Pewter City",
+    "region": "Kanto",
+    "description": "Pewter City is accessed from the South from Route 2 (After the Forest) and to the East from Route 3 "
   },
   {
     "id": "95829ddb-65b6-473d-8cc8-050597e07a56",

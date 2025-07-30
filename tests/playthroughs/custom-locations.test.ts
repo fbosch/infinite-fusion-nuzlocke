@@ -123,7 +123,7 @@ describe('Playthroughs Store - Custom Locations', () => {
       if (customLocationId) {
         // Remove it
         const result =
-          playthroughActions.removeCustomLocation(customLocationId);
+          await playthroughActions.removeCustomLocation(customLocationId);
 
         expect(result).toBe(true);
         const activePlaythrough = playthroughActions.getActivePlaythrough();
@@ -161,7 +161,7 @@ describe('Playthroughs Store - Custom Locations', () => {
 
         // Remove the custom location
         const result =
-          playthroughActions.removeCustomLocation(customLocationId);
+          await playthroughActions.removeCustomLocation(customLocationId);
 
         expect(result).toBe(true);
         expect(
@@ -170,26 +170,75 @@ describe('Playthroughs Store - Custom Locations', () => {
       }
     });
 
-    it('should return false if custom location does not exist', () => {
-      const result = playthroughActions.removeCustomLocation('non-existent-id');
+    it('should return false if custom location does not exist', async () => {
+      const result =
+        await playthroughActions.removeCustomLocation('non-existent-id');
       expect(result).toBe(false);
     });
 
-    it('should return false if no active playthrough', () => {
+    it('should return false if no active playthrough', async () => {
       playthroughsStore.activePlaythroughId = undefined;
 
-      const result = playthroughActions.removeCustomLocation('custom-id');
+      const result = await playthroughActions.removeCustomLocation('custom-id');
       expect(result).toBe(false);
     });
 
-    it('should return false if customLocations array does not exist', () => {
+    it('should return false if customLocations array does not exist', async () => {
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       if (activePlaythrough) {
         delete activePlaythrough.customLocations;
       }
 
-      const result = playthroughActions.removeCustomLocation('custom-id');
+      const result = await playthroughActions.removeCustomLocation('custom-id');
       expect(result).toBe(false);
+    });
+
+    it('should update dependent locations when removing a custom location', async () => {
+      // Create a chain: Route 1 → Custom A → Custom B → Custom C
+      const customIdA = await playthroughActions.addCustomLocation(
+        'Custom Route A',
+        '288d719e-5aab-4097-b98d-f1ffbd780a9b' // Route 1 ID
+      );
+      expect(customIdA).toBeTruthy();
+
+      if (customIdA) {
+        const customIdB = await playthroughActions.addCustomLocation(
+          'Custom Route B',
+          customIdA
+        );
+        expect(customIdB).toBeTruthy();
+
+        if (customIdB) {
+          const customIdC = await playthroughActions.addCustomLocation(
+            'Custom Route C',
+            customIdB
+          );
+          expect(customIdC).toBeTruthy();
+
+          if (customIdC) {
+            // Verify initial chain
+            let customLocations = playthroughActions.getCustomLocations();
+            expect(customLocations).toHaveLength(3);
+
+            // Remove Custom A (middle will be updated)
+            const removeResult =
+              await playthroughActions.removeCustomLocation(customIdA);
+            expect(removeResult).toBe(true);
+
+            // Verify Custom B now points to Route 1 (where Custom A was pointing)
+            customLocations = playthroughActions.getCustomLocations();
+            expect(customLocations).toHaveLength(2);
+
+            const customB = customLocations.find(loc => loc.id === customIdB);
+            const customC = customLocations.find(loc => loc.id === customIdC);
+
+            expect(customB?.insertAfterLocationId).toBe(
+              '288d719e-5aab-4097-b98d-f1ffbd780a9b'
+            ); // Route 1
+            expect(customC?.insertAfterLocationId).toBe(customIdB); // Still points to Custom B
+          }
+        }
+      }
     });
   });
 
@@ -335,7 +384,8 @@ describe('Playthroughs Store - Custom Locations', () => {
         expect(updatedLocation?.name).toBe('Updated Route 1');
 
         // 5. Remove one custom location
-        const removeResult = playthroughActions.removeCustomLocation(customId2);
+        const removeResult =
+          await playthroughActions.removeCustomLocation(customId2);
         expect(removeResult).toBe(true);
 
         // 6. Verify only one remains

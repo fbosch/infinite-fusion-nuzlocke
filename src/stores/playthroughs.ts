@@ -1567,7 +1567,7 @@ export const playthroughActions = {
   },
 
   // Remove a custom location from the active playthrough
-  removeCustomLocation: (customLocationId: string): boolean => {
+  removeCustomLocation: async (customLocationId: string): Promise<boolean> => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough || !activePlaythrough.customLocations) return false;
 
@@ -1576,11 +1576,16 @@ export const playthroughActions = {
     );
 
     if (index !== -1) {
-      // Create a new array without the custom location to ensure reactivity
-      activePlaythrough.customLocations =
-        activePlaythrough.customLocations.filter(
-          loc => loc.id !== customLocationId
-        );
+      // Import the dependency update function
+      const { updateCustomLocationDependencies } = await import(
+        '@/loaders/locations'
+      );
+
+      // Update dependencies and remove the location in one operation
+      activePlaythrough.customLocations = updateCustomLocationDependencies(
+        customLocationId,
+        activePlaythrough.customLocations
+      );
 
       // Also remove any encounters associated with this custom location
       if (

@@ -287,20 +287,27 @@ export function getCustomLocationInsertIndex(
   afterLocationId: string,
   customLocations: CustomLocation[] = []
 ): number {
-  const allLocations = mergeLocationsWithCustom(
-    getLocations(),
-    customLocations
-  );
+  // To avoid circular dependency with mergeLocationsWithCustom,
+  // we'll just validate that the afterLocationId exists somewhere
+  const defaultLocations = getLocations();
 
-  const afterLocationIndex = allLocations.findIndex(
+  // Check if it's a default location
+  const defaultLocationExists = defaultLocations.some(
     loc => loc.id === afterLocationId
   );
-  if (afterLocationIndex === -1) {
+
+  // Check if it's a custom location
+  const customLocationExists = customLocations.some(
+    loc => loc.id === afterLocationId
+  );
+
+  if (!defaultLocationExists && !customLocationExists) {
     throw new Error(`Location with ID ${afterLocationId} not found`);
   }
 
-  // Return the index where the new location should be inserted (after the found location)
-  return afterLocationIndex + 1;
+  // For the actual insertion, mergeLocationsWithCustom will handle the positioning
+  // This function is now mainly for validation
+  return 0; // Return value not used in current implementation
 }
 
 // Merge default locations with custom locations, inserting at specified positions
@@ -316,29 +323,51 @@ export function mergeLocationsWithCustom(
   // Start with a copy of default locations
   const result: CombinedLocation[] = [...defaultLocations];
 
-  // Sort custom locations by their desired insertion order
-  // (process from end to beginning to maintain correct indices)
-  const sortedCustoms = [...customLocations].sort((a, b) => {
-    const aIndex = result.findIndex(loc => loc.id === a.insertAfterLocationId);
-    const bIndex = result.findIndex(loc => loc.id === b.insertAfterLocationId);
-    return bIndex - aIndex; // Reverse order
-  });
+  // Track unplaced custom locations
+  let unplacedCustoms = [...customLocations];
 
-  // Insert custom locations at their specified positions
-  for (const custom of sortedCustoms) {
-    const afterIndex = result.findIndex(
-      loc => loc.id === custom.insertAfterLocationId
-    );
-    if (afterIndex !== -1) {
-      const customLocation: CombinedLocation = {
-        id: custom.id,
-        name: custom.name,
-        region: 'Custom',
-        description: 'Custom location',
-        isCustom: true as const,
-      };
-      result.splice(afterIndex + 1, 0, customLocation);
+  // Multi-pass algorithm to handle dependencies between custom locations
+  const maxPasses = customLocations.length + 1; // Prevent infinite loops
+  let passCount = 0;
+
+  while (unplacedCustoms.length > 0 && passCount < maxPasses) {
+    const placedInThisPass: CustomLocation[] = [];
+
+    // Try to place each unplaced custom location
+    for (const custom of unplacedCustoms) {
+      const afterIndex = result.findIndex(
+        loc => loc.id === custom.insertAfterLocationId
+      );
+
+      if (afterIndex !== -1) {
+        // Found the location to insert after, place this custom location
+        const customLocation: CombinedLocation = {
+          id: custom.id,
+          name: custom.name,
+          region: 'Custom',
+          description: 'Custom location',
+          isCustom: true as const,
+        };
+        result.splice(afterIndex + 1, 0, customLocation);
+        placedInThisPass.push(custom);
+      }
     }
+
+    // Remove placed locations from unplaced list
+    unplacedCustoms = unplacedCustoms.filter(
+      custom => !placedInThisPass.includes(custom)
+    );
+
+    // If no progress was made, we have circular dependencies or missing references
+    if (placedInThisPass.length === 0 && unplacedCustoms.length > 0) {
+      console.warn(
+        'Custom location dependency error: Could not place custom locations due to circular dependencies or missing references:',
+        unplacedCustoms.map(c => `${c.name} (after ${c.insertAfterLocationId})`)
+      );
+      break;
+    }
+
+    passCount++;
   }
 
   return result;
@@ -406,6 +435,76 @@ export function validateCustomLocationPlacement(
   } catch {
     return false;
   }
+}
+
+// Update custom location dependencies when a custom location is removed
+export function updateCustomLocationDependencies(
+  removedLocationId: string,
+  customLocations: CustomLocation[]
+): CustomLocation[] {
+  // Find the location that the removed location was inserted after
+  const removedLocation = customLocations.find(
+    loc => loc.id === removedLocationId
+  );
+  if (!removedLocation) {
+    // Location doesn't exist, return unchanged
+    return customLocations;
+  }
+
+  const parentLocationId = removedLocation.insertAfterLocationId;
+
+  // Update all locations that depended on the removed location
+  return customLocations
+    .filter(loc => loc.id !== removedLocationId) // Remove the target location
+    .map(loc => {
+      if (loc.insertAfterLocationId === removedLocationId) {
+        // This location depended on the removed one, update it to depend on the parent
+        return {
+          ...loc,
+          insertAfterLocationId: parentLocationId,
+        };
+      }
+      return loc;
+    });
+}
+
+// Get all custom locations that depend on a given location (directly or indirectly)
+export function getCustomLocationDependents(
+  locationId: string,
+  customLocations: CustomLocation[]
+): CustomLocation[] {
+  const dependents: CustomLocation[] = [];
+  const visited = new Set<string>();
+
+  function findDependents(targetId: string): void {
+    // Mark this target as visited to prevent circular references
+    visited.add(targetId);
+
+    const directDependents = customLocations.filter(
+      loc => loc.insertAfterLocationId === targetId && !visited.has(loc.id)
+    );
+
+    for (const dependent of directDependents) {
+      visited.add(dependent.id);
+      dependents.push(dependent);
+      findDependents(dependent.id); // Recursively find dependents of dependents
+    }
+  }
+
+  findDependents(locationId);
+  return dependents;
+}
+
+// Check if removing a custom location would orphan other locations
+export function wouldOrphanLocations(
+  locationId: string,
+  customLocations: CustomLocation[]
+): { wouldOrphan: boolean; dependents: CustomLocation[] } {
+  const dependents = getCustomLocationDependents(locationId, customLocations);
+  return {
+    wouldOrphan: dependents.length > 0,
+    dependents,
+  };
 }
 
 // Get all locations that can be used as "after" locations for custom placement
