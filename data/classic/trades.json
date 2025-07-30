@@ -1,46 +1,53 @@
 [
   {
-    "pokemonId": 69,
-    "location": "Viridian City"
+    "routeName": "Cerulean City",
+    "pokemonIds": [
+      193
+    ]
   },
   {
-    "pokemonId": 79,
-    "location": "Vermillion City"
+    "routeName": "Cinnabar Island",
+    "pokemonIds": [
+      227
+    ]
   },
   {
-    "pokemonId": 83,
-    "location": "Vermillion City"
+    "routeName": "Crimson City",
+    "pokemonIds": [
+      246
+    ]
   },
   {
-    "pokemonId": 84,
-    "location": "Vermillion City"
+    "routeName": "Goldenrod City",
+    "pokemonIds": [
+      215
+    ]
   },
   {
-    "pokemonId": 102,
-    "location": "Vermillion City"
+    "routeName": "Route 2",
+    "pokemonIds": [
+      122
+    ]
   },
   {
-    "pokemonId": 122,
-    "location": "Route 2"
+    "routeName": "Safari Zone A3",
+    "pokemonIds": [
+      214
+    ]
   },
   {
-    "pokemonId": 193,
-    "location": "Cerulean City"
+    "routeName": "Vermillion City",
+    "pokemonIds": [
+      79,
+      83,
+      84,
+      102
+    ]
   },
   {
-    "pokemonId": 214,
-    "location": "Safari Zone A3"
-  },
-  {
-    "pokemonId": 215,
-    "location": "Goldenrod City"
-  },
-  {
-    "pokemonId": 227,
-    "location": "Cinnabar Island"
-  },
-  {
-    "pokemonId": 246,
-    "location": "Crimson City"
+    "routeName": "Viridian City",
+    "pokemonIds": [
+      69
+    ]
   }
 ]

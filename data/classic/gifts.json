@@ -1,86 +1,98 @@
 [
   {
-    "pokemonId": 1,
-    "location": "Pallet Town"
+    "routeName": "Bond Bridge",
+    "pokemonIds": [
+      454
+    ]
   },
   {
-    "pokemonId": 123,
-    "location": "Celadon Game Corner"
+    "routeName": "Celadon Cafe",
+    "pokemonIds": [
+      307
+    ]
   },
   {
-    "pokemonId": 131,
-    "location": "Silph Co."
+    "routeName": "Celadon Game Corner",
+    "pokemonIds": [
+      123
+    ]
   },
   {
-    "pokemonId": 138,
-    "location": "Mt. Moon"
+    "routeName": "Cerulean City",
+    "pokemonIds": [
+      194
+    ]
   },
   {
-    "pokemonId": 140,
-    "location": "Mt. Moon"
+    "routeName": "Dragon's Den",
+    "pokemonIds": [
+      297
+    ]
   },
   {
-    "pokemonId": 174,
-    "location": "Kanto Daycare"
+    "routeName": "Kanto Daycare",
+    "pokemonIds": [
+      174,
+      238,
+      252,
+      261
+    ]
   },
   {
-    "pokemonId": 194,
-    "location": "Cerulean City"
+    "routeName": "Knot Island",
+    "pokemonIds": [
+      330
+    ]
   },
   {
-    "pokemonId": 238,
-    "location": "Kanto Daycare"
+    "routeName": "Mt. Moon",
+    "pokemonIds": [
+      138,
+      140
+    ]
   },
   {
-    "pokemonId": 252,
-    "location": "Kanto Daycare"
+    "routeName": "National Park",
+    "pokemonIds": [
+      285
+    ]
   },
   {
-    "pokemonId": 261,
-    "location": "Kanto Daycare"
+    "routeName": "Pallet Town",
+    "pokemonIds": [
+      1
+    ]
   },
   {
-    "pokemonId": 285,
-    "location": "National Park"
+    "routeName": "Rock Tunnel",
+    "pokemonIds": [
+      327
+    ]
   },
   {
-    "pokemonId": 291,
-    "location": "Violet City"
+    "routeName": "S.S. Anne",
+    "pokemonIds": [
+      301,
+      303
+    ]
   },
   {
-    "pokemonId": 297,
-    "location": "Dragon's Den"
+    "routeName": "Saffron Restaurant",
+    "pokemonIds": [
+      425,
+      461
+    ]
   },
   {
-    "pokemonId": 301,
-    "location": "S.S. Anne"
+    "routeName": "Silph Co.",
+    "pokemonIds": [
+      131
+    ]
   },
   {
-    "pokemonId": 303,
-    "location": "S.S. Anne"
-  },
-  {
-    "pokemonId": 307,
-    "location": "Celadon Cafe"
-  },
-  {
-    "pokemonId": 327,
-    "location": "Rock Tunnel"
-  },
-  {
-    "pokemonId": 330,
-    "location": "Knot Island"
-  },
-  {
-    "pokemonId": 425,
-    "location": "Saffron Restaurant"
-  },
-  {
-    "pokemonId": 454,
-    "location": "Bond Bridge"
-  },
-  {
-    "pokemonId": 461,
-    "location": "Saffron Restaurant"
+    "routeName": "Violet City",
+    "pokemonIds": [
+      291
+    ]
   }
 ]

@@ -103,19 +103,14 @@ function findLocationColumnIndex(cells: cheerio.Cheerio<any>): number {
   return -1;
 }
 
-
-
-interface GiftPokemon {
-  pokemonId: number;
-  location: string;
-  level?: number;
-  requirements?: string;
+interface LocationGifts {
+  routeName: string;
+  pokemonIds: number[];
 }
 
-interface TradePokemon {
-  pokemonId: number;
-  location: string;
-  requirements?: string;
+interface LocationTrades {
+  routeName: string;
+  pokemonIds: number[];
 }
 
 /**
@@ -135,7 +130,31 @@ function extractGiftTradeLocation(locationText: string): string | null {
   return null;
 }
 
-async function scrapePokedexForGiftsAndTrades(url: string, mode: 'classic' | 'remix'): Promise<{ gifts: GiftPokemon[]; trades: TradePokemon[] }> {
+/**
+ * Groups Pokémon by location to create the merged structure
+ */
+function groupPokemonByLocation<T extends { pokemonId: number; location: string }>(
+  items: T[]
+): { routeName: string; pokemonIds: number[] }[] {
+  const locationMap = new Map<string, number[]>();
+  
+  for (const item of items) {
+    if (!locationMap.has(item.location)) {
+      locationMap.set(item.location, []);
+    }
+    locationMap.get(item.location)!.push(item.pokemonId);
+  }
+  
+  // Convert to array and sort by location name
+  return Array.from(locationMap.entries())
+    .map(([routeName, pokemonIds]) => ({
+      routeName,
+      pokemonIds: pokemonIds.sort((a, b) => a - b) // Sort Pokémon IDs numerically
+    }))
+    .sort((a, b) => a.routeName.localeCompare(b.routeName)); // Sort locations alphabetically
+}
+
+async function scrapePokedexForGiftsAndTrades(url: string, mode: 'classic' | 'remix'): Promise<{ gifts: LocationGifts[]; trades: LocationTrades[] }> {
   ConsoleFormatter.printHeader(`Scraping ${mode.toUpperCase()} Gifts and Trades`, `Scraping gift and trade Pokémon data from the ${mode} Pokédex`);
   
   try {
@@ -157,8 +176,8 @@ async function scrapePokedexForGiftsAndTrades(url: string, mode: 'classic' | 're
     const $ = cheerio.load(html);
     const pokemonNameMap = await loadPokemonNameMap();
 
-    const gifts: GiftPokemon[] = [];
-    const trades: TradePokemon[] = [];
+    const gifts: { pokemonId: number; location: string }[] = [];
+    const trades: { pokemonId: number; location: string }[] = [];
     const giftsSeen = new Set<string>();
     const tradesSeen = new Set<string>();
 
@@ -219,12 +238,10 @@ async function scrapePokedexForGiftsAndTrades(url: string, mode: 'classic' | 're
           }
           giftsSeen.add(uniqueKey);
 
-          const gift: GiftPokemon = {
+          gifts.push({
             pokemonId,
             location: specificLocation
-          };
-
-          gifts.push(gift);
+          });
         } else if (isTrade) {
           // Create unique key to avoid duplicates
           const uniqueKey = `${pokemonCell}-${specificLocation}`;
@@ -233,19 +250,21 @@ async function scrapePokedexForGiftsAndTrades(url: string, mode: 'classic' | 're
           }
           tradesSeen.add(uniqueKey);
 
-          const trade: TradePokemon = {
+          trades.push({
             pokemonId,
             location: specificLocation
-          };
-
-          trades.push(trade);
+          });
         }
       });
     });
 
-    ConsoleFormatter.success(`Found ${gifts.length} gift Pokémon and ${trades.length} trades in ${mode} mode`);
+    // Group by location to match encounters.json structure
+    const groupedGifts = groupPokemonByLocation(gifts);
+    const groupedTrades = groupPokemonByLocation(trades);
 
-    return { gifts, trades };
+    ConsoleFormatter.success(`Found ${gifts.length} gift Pokémon in ${groupedGifts.length} locations and ${trades.length} trades in ${groupedTrades.length} locations in ${mode} mode`);
+
+    return { gifts: groupedGifts, trades: groupedTrades };
 
   } catch (error) {
     ConsoleFormatter.error(`Error scraping ${mode} gifts and trades: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -294,22 +313,27 @@ async function main() {
 
     const duration = Date.now() - startTime;
 
-    // Calculate unique locations for each mode
-    const classicGiftLocations = new Set(classicData.gifts.map(gift => gift.location)).size;
-    const classicTradeLocations = new Set(classicData.trades.map(trade => trade.location)).size;
-    const remixGiftLocations = new Set(remixData.gifts.map(gift => gift.location)).size;
-    const remixTradeLocations = new Set(remixData.trades.map(trade => trade.location)).size;
+    // Calculate statistics for summary
+    const classicGiftLocations = classicData.gifts.length;
+    const classicTradeLocations = classicData.trades.length;
+    const remixGiftLocations = remixData.gifts.length;
+    const remixTradeLocations = remixData.trades.length;
+
+    const classicGiftPokemon = classicData.gifts.reduce((sum, location) => sum + location.pokemonIds.length, 0);
+    const classicTradePokemon = classicData.trades.reduce((sum, location) => sum + location.pokemonIds.length, 0);
+    const remixGiftPokemon = remixData.gifts.reduce((sum, location) => sum + location.pokemonIds.length, 0);
+    const remixTradePokemon = remixData.trades.reduce((sum, location) => sum + location.pokemonIds.length, 0);
 
     // Success summary
     ConsoleFormatter.printSummary('Gifts and Trades Scraping Complete!', [
-      { label: 'Classic gifts found', value: classicData.gifts.length, color: 'yellow' },
-      { label: 'Classic unique gift locations', value: classicGiftLocations, color: 'yellow' },
-      { label: 'Classic trades found', value: classicData.trades.length, color: 'yellow' },
-      { label: 'Classic unique trade locations', value: classicTradeLocations, color: 'yellow' },
-      { label: 'Remix gifts found', value: remixData.gifts.length, color: 'yellow' },
-      { label: 'Remix unique gift locations', value: remixGiftLocations, color: 'yellow' },
-      { label: 'Remix trades found', value: remixData.trades.length, color: 'yellow' },
-      { label: 'Remix unique trade locations', value: remixTradeLocations, color: 'yellow' },
+      { label: 'Classic gift locations', value: classicGiftLocations, color: 'yellow' },
+      { label: 'Classic gift Pokémon', value: classicGiftPokemon, color: 'yellow' },
+      { label: 'Classic trade locations', value: classicTradeLocations, color: 'yellow' },
+      { label: 'Classic trade Pokémon', value: classicTradePokemon, color: 'yellow' },
+      { label: 'Remix gift locations', value: remixGiftLocations, color: 'yellow' },
+      { label: 'Remix gift Pokémon', value: remixGiftPokemon, color: 'yellow' },
+      { label: 'Remix trade locations', value: remixTradeLocations, color: 'yellow' },
+      { label: 'Remix trade Pokémon', value: remixTradePokemon, color: 'yellow' },
       { label: 'Files saved', value: files.map(f => f.path).join(', '), color: 'cyan' },
       { label: 'Total file size', value: ConsoleFormatter.formatFileSize(fileStats.reduce((sum, stat) => sum + stat.size, 0)), color: 'cyan' },
       { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
