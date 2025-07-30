@@ -86,27 +86,46 @@ describe('Data Integrity Tests', () => {
 
   describe('Route Encounter Coverage', () => {
     it('should have encounter data for every location in classic mode', () => {
-      // Get all location names (excluding starter Pokemon and special locations)
+      // Locations that legitimately have no encounter data (cities with no wild Pokemon, gifts, or trades)
+      const locationsWithoutEncounters = ['Pewter City'];
+
+      // Get all location names (excluding starter Pokemon, special locations, and cities without encounters)
       const locationNames = locations
         .filter(loc => {
           const isStarter = loc.name === 'Starter';
           const isSpecialLocation =
             loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION;
-          return !isStarter && !isSpecialLocation;
+          const hasNoEncounters = locationsWithoutEncounters.includes(loc.name);
+          return !isStarter && !isSpecialLocation && !hasNoEncounters;
         })
         .map(loc => loc.name);
 
-      // Create a map of routeName to classic encounters for quick lookup
-      const classicRouteNameMap = new Map<string, RouteEncounter>();
+      // Create maps for all types of encounter data
+      const classicEncounterMap = new Map<string, RouteEncounter>();
+      const classicGiftMap = new Map<string, LocationGifts>();
+      const classicTradeMap = new Map<string, LocationTrades>();
+
       classicEncounters.forEach(encounter => {
-        classicRouteNameMap.set(encounter.routeName, encounter);
+        classicEncounterMap.set(encounter.routeName, encounter);
+      });
+
+      classicGifts.forEach(gift => {
+        classicGiftMap.set(gift.routeName, gift);
+      });
+
+      classicTrades.forEach(trade => {
+        classicTradeMap.set(trade.routeName, trade);
       });
 
       const missingEncounters: string[] = [];
 
-      // Check each location name
+      // Check each location name for ANY type of encounter data (wild, gift, or trade)
       locationNames.forEach(locationName => {
-        if (!classicRouteNameMap.has(locationName)) {
+        const hasWildEncounters = classicEncounterMap.has(locationName);
+        const hasGifts = classicGiftMap.has(locationName);
+        const hasTrades = classicTradeMap.has(locationName);
+
+        if (!hasWildEncounters && !hasGifts && !hasTrades) {
           missingEncounters.push(locationName);
         }
       });
@@ -121,27 +140,46 @@ describe('Data Integrity Tests', () => {
     });
 
     it('should have encounter data for every location in remix mode', () => {
-      // Get all location names (excluding starter Pokemon and special locations)
+      // Locations that legitimately have no encounter data (cities with no wild Pokemon, gifts, or trades)
+      const locationsWithoutEncounters = ['Pewter City'];
+
+      // Get all location names (excluding starter Pokemon, special locations, and cities without encounters)
       const locationNames = locations
         .filter(loc => {
           const isStarter = loc.name === 'Starter';
           const isSpecialLocation =
             loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION;
-          return !isStarter && !isSpecialLocation;
+          const hasNoEncounters = locationsWithoutEncounters.includes(loc.name);
+          return !isStarter && !isSpecialLocation && !hasNoEncounters;
         })
         .map(loc => loc.name);
 
-      // Create a map of routeName to remix encounters for quick lookup
-      const remixRouteNameMap = new Map<string, RouteEncounter>();
+      // Create maps for all types of encounter data
+      const remixEncounterMap = new Map<string, RouteEncounter>();
+      const remixGiftMap = new Map<string, LocationGifts>();
+      const remixTradeMap = new Map<string, LocationTrades>();
+
       remixEncounters.forEach(encounter => {
-        remixRouteNameMap.set(encounter.routeName, encounter);
+        remixEncounterMap.set(encounter.routeName, encounter);
+      });
+
+      remixGifts.forEach(gift => {
+        remixGiftMap.set(gift.routeName, gift);
+      });
+
+      remixTrades.forEach(trade => {
+        remixTradeMap.set(trade.routeName, trade);
       });
 
       const missingEncounters: string[] = [];
 
-      // Check each location name
+      // Check each location name for ANY type of encounter data (wild, gift, or trade)
       locationNames.forEach(locationName => {
-        if (!remixRouteNameMap.has(locationName)) {
+        const hasWildEncounters = remixEncounterMap.has(locationName);
+        const hasGifts = remixGiftMap.has(locationName);
+        const hasTrades = remixTradeMap.has(locationName);
+
+        if (!hasWildEncounters && !hasGifts && !hasTrades) {
           missingEncounters.push(locationName);
         }
       });
