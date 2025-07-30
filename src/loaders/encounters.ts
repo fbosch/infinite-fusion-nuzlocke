@@ -21,10 +21,12 @@ export interface EncounterData {
 export const RouteEncounterSchema = z.object({
   routeName: z.string().min(1, { error: 'Route name is required' }),
   pokemonIds: z.array(
-    z.number().int().refine(
-      (val) => val > 0 || val === -1,
-      { error: 'Pokemon ID must be positive or -1 for egg locations' }
-    )
+    z
+      .number()
+      .int()
+      .refine(val => val > 0 || val === -1, {
+        error: 'Pokemon ID must be positive or -1 for egg locations',
+      })
   ),
 });
 
@@ -133,11 +135,7 @@ export function useEncountersForLocation({
 
   // Process encounter data using useMemo
   const routeEncounterData = useMemo((): PokemonOptionType[] => {
-    if (
-      !enabled ||
-      !pokemonIds.length ||
-      !allPokemon.length
-    ) {
+    if (!enabled || !pokemonIds.length || !allPokemon.length) {
       return [];
     }
 
