@@ -400,3 +400,44 @@ export function usePokemonNameMap() {
 
   return nameMap;
 }
+
+export function usePokemonEvolutionData(pokemonId: number | undefined) {
+  const { data: pokemon, isLoading } = useQuery({
+    queryKey: ['pokemon-evolution-data', pokemonId],
+    queryFn: async () => {
+      if (!pokemonId) return null;
+
+      const allPokemon = await pokemonData.getAllPokemon();
+      const currentPokemon = allPokemon.find(p => p.id === pokemonId);
+
+      if (!currentPokemon) return null;
+
+      // Get evolution IDs from the current Pokemon
+      const evolutionIds =
+        currentPokemon.evolution?.evolves_to.map(e => e.id) || [];
+      const preEvolutionId = currentPokemon.evolution?.evolves_from?.id || null;
+
+      // Find evolution Pokemon by their Infinite Fusion IDs
+      const evolutions = allPokemon.filter(p =>
+        evolutionIds.includes(p.nationalDexId)
+      );
+
+      // Find pre-evolution Pokemon by its Infinite Fusion ID
+      const preEvolution = preEvolutionId
+        ? allPokemon.find(p => p.nationalDexId === preEvolutionId) || null
+        : null;
+
+      return {
+        evolutions,
+        preEvolution,
+      };
+    },
+    enabled: !!pokemonId,
+  });
+
+  return {
+    evolutions: pokemon?.evolutions || [],
+    preEvolution: pokemon?.preEvolution || null,
+    isLoading,
+  };
+}

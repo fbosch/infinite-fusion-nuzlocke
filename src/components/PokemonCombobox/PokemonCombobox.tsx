@@ -85,7 +85,6 @@ interface PokemonComboboxProps {
     currentValue: PokemonOptionType,
     newValue: PokemonOptionType
   ) => Promise<boolean> | boolean;
-  shouldLoad?: boolean;
   placeholder?: string;
   nicknamePlaceholder?: string;
   disabled?: boolean;
@@ -103,7 +102,6 @@ export const PokemonCombobox = React.memo(
     onChange,
     onBeforeClear,
     onBeforeOverwrite,
-    shouldLoad = false,
     placeholder = 'Select Pokemon',
     nicknamePlaceholder = 'Enter nickname',
     disabled = false,
@@ -143,7 +141,7 @@ export const PokemonCombobox = React.memo(
     // Use the encounter data hook (now handles custom locations automatically)
     const { routeEncounterData, isRoutePokemon } = useEncounterData({
       locationId,
-      enabled: shouldLoad && !isCustomLocation && gameMode !== 'randomized',
+      enabled: !isCustomLocation && gameMode !== 'randomized',
     });
     // Use the search hook
     const { data: results = [] } = usePokemonSearch({
@@ -447,12 +445,7 @@ export const PokemonCombobox = React.memo(
                 {open ||
                 value?.status === PokemonStatus.DECEASED ||
                 value?.status === PokemonStatus.MISSED ? null : (
-                  <PokemonEvolutionButton
-                    value={value}
-                    key={value?.uid + 'evolution'}
-                    onChange={onChange}
-                    shouldLoad={shouldLoad}
-                  />
+                  <PokemonEvolutionButton value={value} onChange={onChange} />
                 )}
               </div>
               {open && (
