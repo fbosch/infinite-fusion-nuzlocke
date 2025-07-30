@@ -8,6 +8,7 @@ const SpeedInsights = dynamic(
   () => import('@vercel/speed-insights/next').then(mod => mod.SpeedInsights),
   {
     ssr: false,
+    loading: () => null,
   }
 );
 
@@ -15,6 +16,7 @@ const Analytics = dynamic(
   () => import('@vercel/analytics/next').then(mod => mod.Analytics),
   {
     ssr: false,
+    loading: () => null,
   }
 );
 

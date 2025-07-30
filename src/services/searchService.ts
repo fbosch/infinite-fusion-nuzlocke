@@ -1,5 +1,7 @@
 import { SearchCore } from '@/lib/searchCore';
+import { pokemonData } from '@/lib/data';
 import * as Comlink from 'comlink';
+import type { Pokemon } from '@/loaders/pokemon';
 
 let mainThreadInstance: SearchCore | null = null;
 let mainThreadInitPromise: Promise<SearchCore> | null = null;
@@ -17,7 +19,8 @@ const getMainThreadInstance = async () => {
   mainThreadInitPromise = (async () => {
     try {
       const newInstance = new SearchCore();
-      await newInstance.initialize();
+      const allPokemon = await pokemonData.getAllPokemon();
+      await newInstance.initialize(allPokemon);
       mainThreadInstance = newInstance;
       return newInstance;
     } catch (error) {
@@ -44,20 +47,25 @@ const getInstance = async (mainThread = false) => {
     const worker = new Worker(
       new URL('@/workers/search.worker', import.meta.url)
     );
-    const wrappedInstance = Comlink.wrap<SearchCore>(worker);
+    const wrappedInstance = Comlink.wrap(worker) as {
+      initialize: (pokemonData: Pokemon[]) => Promise<void>;
+      search: (query: string) => Promise<Pokemon[]>;
+      isReady: () => Promise<boolean>;
+    };
 
-    // Warm up the worker by calling a dummy search to ensure initialization
+    // Initialize the worker with Pokemon data
     try {
-      await wrappedInstance.search('');
+      const allPokemon = await pokemonData.getAllPokemon();
+      await wrappedInstance.initialize(allPokemon);
     } catch (error) {
       console.warn(
-        'Worker warm-up failed, falling back to main thread:',
+        'Worker initialization failed, falling back to main thread:',
         error
       );
       return await getMainThreadInstance();
     }
 
-    instance = wrappedInstance;
+    instance = wrappedInstance as unknown as SearchCore;
   } catch (error) {
     console.error(
       'Failed to initialize search worker, falling back to main thread:',

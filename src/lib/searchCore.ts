@@ -1,6 +1,5 @@
 import Fuse, { type IFuseOptions } from 'fuse.js';
 import type { Pokemon } from '@/loaders/pokemon';
-import { pokemonData } from '@/lib/queryClient';
 
 export interface PokemonData {
   id: number;
@@ -38,7 +37,7 @@ export class SearchCore {
     ignoreLocation: false,
   };
 
-  async initialize(): Promise<void> {
+  async initialize(rawPokemonData?: Pokemon[]): Promise<void> {
     if (this.fuse) return; // Already initialized
 
     if (this.initializationPromise) {
@@ -48,10 +47,10 @@ export class SearchCore {
 
     this.initializationPromise = (async () => {
       try {
-        const rawPokemonData = await pokemonData.getAllPokemon();
-
         if (!rawPokemonData || rawPokemonData.length === 0) {
-          throw new Error('No Pokemon data available');
+          throw new Error(
+            'Pokemon data must be provided to SearchCore.initialize()'
+          );
         }
 
         this.pokemonData = rawPokemonData.map((pokemon: Pokemon) => ({

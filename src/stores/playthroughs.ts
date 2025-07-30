@@ -5,7 +5,10 @@ import { get, set, del, createStore } from 'idb-keyval';
 import { debounce } from 'es-toolkit';
 import React, { useMemo } from 'react';
 import { PokemonOptionSchema, generatePokemonUID } from '@/loaders/pokemon';
-import { CustomLocationSchema } from '@/loaders/locations';
+import {
+  CustomLocationSchema,
+  createCustomLocation,
+} from '@/loaders/locations';
 import spriteService from '@/services/spriteService';
 
 // Create a custom store for playthroughs data
@@ -1538,8 +1541,6 @@ export const playthroughActions = {
     if (!activePlaythrough) return null;
 
     try {
-      const { createCustomLocation } = await import('@/loaders/locations');
-
       // Ensure customLocations array exists
       if (!activePlaythrough.customLocations) {
         activePlaythrough.customLocations = [];

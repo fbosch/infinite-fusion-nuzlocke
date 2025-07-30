@@ -15,18 +15,30 @@ export async function GET(request: NextRequest) {
       gameMode: searchParams.get('gameMode'),
     });
 
-    const [wild, trade, gift, eggLocations] = await Promise.all([
-      query.gameMode === 'remix'
-        ? import('@data/remix/encounters.json')
-        : import('@data/classic/encounters.json'),
-      query.gameMode === 'remix'
-        ? import('@data/remix/trades.json')
-        : import('@data/classic/trades.json'),
-      query.gameMode === 'remix'
-        ? import('@data/remix/gifts.json')
-        : import('@data/classic/gifts.json'),
+    // Import all data files to avoid conditional dynamic imports that cause webpack circular dependencies
+    const [
+      classicEncounters,
+      remixEncounters,
+      classicTrades,
+      remixTrades,
+      classicGifts,
+      remixGifts,
+      eggLocations,
+    ] = await Promise.all([
+      import('@data/classic/encounters.json'),
+      import('@data/remix/encounters.json'),
+      import('@data/classic/trades.json'),
+      import('@data/remix/trades.json'),
+      import('@data/classic/gifts.json'),
+      import('@data/remix/gifts.json'),
       import('@data/egg-locations.json'),
     ]);
+
+    // Select the appropriate data based on game mode
+    const wild =
+      query.gameMode === 'remix' ? remixEncounters : classicEncounters;
+    const trade = query.gameMode === 'remix' ? remixTrades : classicTrades;
+    const gift = query.gameMode === 'remix' ? remixGifts : classicGifts;
 
     // Validate the data
     const encounters = RouteEncountersArraySchema.parse(wild.default);

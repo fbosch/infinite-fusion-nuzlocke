@@ -3,17 +3,47 @@ import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const nextConfig: NextConfig = {
   webpack: config => {
-    config.module.rules.push({
-      test: /\.worker\.js$/,
-      loader: 'worker-loader',
-      options: {
-        name: 'static/[hash].worker.js',
-        publicPath: '/_next/',
-      },
-    });
-
     // Overcome Webpack referencing `window` in chunks
     config.output.globalObject = `(typeof self !== 'undefined' ? self : this)`;
+
+    // Optimize chunk splitting to reduce circular dependencies
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        chunks: 'all',
+        minSize: 20000,
+        maxSize: 244000,
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            priority: 20,
+            enforce: true,
+          },
+          runtime: {
+            name: 'runtime',
+            chunks: 'all',
+            test: /[\\/](webpack|runtime)[\\/]/,
+            priority: 30,
+            enforce: true,
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 10,
+            reuseExistingChunk: true,
+            enforce: true,
+          },
+          default: {
+            minChunks: 2,
+            priority: -20,
+            reuseExistingChunk: true,
+          },
+        },
+      },
+    };
 
     return config;
   },
