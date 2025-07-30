@@ -12,24 +12,18 @@ const mockDefaultLocations: Location[] = [
   {
     id: 'pallet-town',
     name: 'Pallet Town',
-    routeId: 0,
-    order: 1,
     region: 'Kanto',
     description: 'Starting town',
   },
   {
     id: 'route-1',
     name: 'Route 1',
-    routeId: 1,
-    order: 2,
     region: 'Kanto',
     description: 'First route',
   },
   {
     id: 'viridian-city',
     name: 'Viridian City',
-    routeId: 2,
-    order: 5,
     region: 'Kanto',
     description: 'Green city',
   },
@@ -48,10 +42,18 @@ describe('Custom Location Functionality', () => {
   });
 
   describe('mergeLocationsWithCustom', () => {
-    it('should merge and sort locations by order', () => {
+    it('should merge locations with custom insertions', () => {
       const customLocations: CustomLocation[] = [
-        { id: 'custom-1', name: 'Custom Route A', order: 3 },
-        { id: 'custom-2', name: 'Custom Route B', order: 6 },
+        {
+          id: 'custom-1',
+          name: 'Custom Route A',
+          insertAfterLocationId: 'route-1',
+        },
+        {
+          id: 'custom-2',
+          name: 'Custom Route B',
+          insertAfterLocationId: 'viridian-city',
+        },
       ];
 
       const merged = mergeLocationsWithCustom(
@@ -60,8 +62,9 @@ describe('Custom Location Functionality', () => {
       );
 
       expect(merged).toHaveLength(5);
-      expect(merged.map(l => l.order)).toEqual([1, 2, 3, 5, 6]);
+      // Custom Route A should be after Route 1 (index 2)
       expect(merged[2].name).toBe('Custom Route A');
+      // Custom Route B should be after Viridian City (index 4)
       expect(merged[4].name).toBe('Custom Route B');
     });
 
@@ -73,7 +76,11 @@ describe('Custom Location Functionality', () => {
 
     it('should mark custom locations with isCustom flag', () => {
       const customLocations: CustomLocation[] = [
-        { id: 'custom-1', name: 'Custom Route A', order: 3 },
+        {
+          id: 'custom-1',
+          name: 'Custom Route A',
+          insertAfterLocationId: 'route-1',
+        },
       ];
 
       const merged = mergeLocationsWithCustom(
@@ -93,7 +100,8 @@ describe('Custom Location Functionality', () => {
       const customLocation = {
         id: 'custom-1',
         name: 'Custom',
-        order: 3,
+        region: 'Custom',
+        description: 'Custom location',
         isCustom: true as const,
       };
 
@@ -102,7 +110,12 @@ describe('Custom Location Functionality', () => {
     });
 
     it('should return false for locations without isCustom flag', () => {
-      const normalLocation = { id: 'test', name: 'Test', order: 1 };
+      const normalLocation = {
+        id: 'test',
+        name: 'Test',
+        region: 'Kanto',
+        description: 'Test location',
+      };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(isCustomLocation(normalLocation as any)).toBe(false);
     });

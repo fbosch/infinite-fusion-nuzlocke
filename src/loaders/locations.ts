@@ -10,24 +10,76 @@ import { GameMode } from '../stores/playthroughs';
 export const LocationSchema = z.object({
   id: z.string().min(1, { error: 'Location ID is required' }),
   name: z.string().min(1, { error: 'Location name is required' }),
-  order: z.number().int().positive({ error: 'Order must be positive' }),
   region: z.string().min(1, { error: 'Region is required' }),
   description: z.string().min(1, { error: 'Description is required' }),
 });
 
 export type Location = z.infer<typeof LocationSchema>;
 
-// Custom location schema
-export const CustomLocationSchema = z.object({
+// Legacy custom location schema for migration
+const LegacyCustomLocationSchema = z.object({
   id: z.string().min(1, { error: 'Location ID is required' }),
   name: z.string().min(1, { error: 'Location name is required' }),
   order: z.number().positive({ error: 'Order must be a positive number' }),
 });
 
+// Modern custom location schema
+const ModernCustomLocationSchema = z.object({
+  id: z.string().min(1, { error: 'Location ID is required' }),
+  name: z.string().min(1, { error: 'Location name is required' }),
+  insertAfterLocationId: z
+    .string()
+    .min(1, { error: 'Insert after location ID is required' }),
+});
+
+// Custom location schema with migration support
+export const CustomLocationSchema = z
+  .union([LegacyCustomLocationSchema, ModernCustomLocationSchema])
+  .transform(data => {
+    // If it's a legacy location with order, migrate it
+    if ('order' in data) {
+      return migrateCustomLocationFromOrder(data);
+    }
+    // Otherwise, it's already in the modern format
+    return data as z.infer<typeof ModernCustomLocationSchema>;
+  });
+
+// Migration function to convert order-based custom locations
+function migrateCustomLocationFromOrder(
+  legacyLocation: z.infer<typeof LegacyCustomLocationSchema>
+): z.infer<typeof ModernCustomLocationSchema> {
+  const defaultLocations = getLocations();
+
+  // Find the location that would have been "before" this custom location based on order
+  const beforeLocationIndex = Math.floor(legacyLocation.order) - 1;
+
+  // Ensure we have a valid index
+  const safeIndex = Math.max(
+    0,
+    Math.min(beforeLocationIndex, defaultLocations.length - 1)
+  );
+  const insertAfterLocationId =
+    defaultLocations[safeIndex]?.id || defaultLocations[0]?.id;
+
+  if (!insertAfterLocationId) {
+    throw new Error(
+      'Cannot migrate custom location: no valid location to insert after'
+    );
+  }
+
+  return {
+    id: legacyLocation.id,
+    name: legacyLocation.name,
+    insertAfterLocationId,
+  };
+}
+
 export type CustomLocation = z.infer<typeof CustomLocationSchema>;
 
 // Combined type for locations that can be either default or custom
-export type CombinedLocation = Location | (CustomLocation & { isCustom: true });
+export type CombinedLocation =
+  | Location
+  | (CustomLocation & { region: string; description: string; isCustom: true });
 
 export const LocationsArraySchema = z.array(LocationSchema);
 
@@ -69,9 +121,9 @@ export function getLocationsBySpecificRegion(region: string): Location[] {
   );
 }
 
-// Get locations sorted by order
+// Get locations in their natural order (array position)
 export function getLocationsSortedByOrder(): Location[] {
-  return getLocations().sort((a, b) => a.order - b.order);
+  return getLocations();
 }
 
 // Get encounters for a location by its name
@@ -230,45 +282,28 @@ export function generateCustomLocationId(): string {
   return `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-// Calculate the order for a new custom location after a given location
-export function calculateCustomLocationOrder(
+// Get the index where a custom location should be inserted after a given location
+export function getCustomLocationInsertIndex(
   afterLocationId: string,
   customLocations: CustomLocation[] = []
 ): number {
-  const defaultLocations = getLocations();
   const allLocations = mergeLocationsWithCustom(
-    defaultLocations,
+    getLocations(),
     customLocations
   );
 
-  const afterLocation = allLocations.find(loc => loc.id === afterLocationId);
-  if (!afterLocation) {
+  const afterLocationIndex = allLocations.findIndex(
+    loc => loc.id === afterLocationId
+  );
+  if (afterLocationIndex === -1) {
     throw new Error(`Location with ID ${afterLocationId} not found`);
   }
 
-  // Find the next location in order to determine spacing
-  const currentOrder = afterLocation.order;
-  const nextLocation = allLocations
-    .filter(loc => loc.order > currentOrder)
-    .sort((a, b) => a.order - b.order)[0];
-
-  if (nextLocation) {
-    // Place the custom location between the current and next location
-    const gap = nextLocation.order - currentOrder;
-    if (gap > 1) {
-      // There's space, place it in the middle
-      return currentOrder + Math.floor(gap / 2);
-    } else {
-      // No space, we need to use decimal ordering
-      return currentOrder + 0.5;
-    }
-  } else {
-    // No next location, place it after the current one
-    return currentOrder + 1;
-  }
+  // Return the index where the new location should be inserted (after the found location)
+  return afterLocationIndex + 1;
 }
 
-// Merge default locations with custom locations, sorted by order
+// Merge default locations with custom locations, inserting at specified positions
 export function mergeLocationsWithCustom(
   defaultLocations: Location[] = getLocations(),
   customLocations: CustomLocation[] = []
@@ -278,28 +313,35 @@ export function mergeLocationsWithCustom(
     return defaultLocations;
   }
 
-  // Pre-allocate array size for better performance
-  const totalLength = defaultLocations.length + customLocations.length;
-  const allLocations: CombinedLocation[] = new Array(totalLength);
+  // Start with a copy of default locations
+  const result: CombinedLocation[] = [...defaultLocations];
 
-  // Copy default locations
-  for (let i = 0; i < defaultLocations.length; i++) {
-    allLocations[i] = defaultLocations[i];
+  // Sort custom locations by their desired insertion order
+  // (process from end to beginning to maintain correct indices)
+  const sortedCustoms = [...customLocations].sort((a, b) => {
+    const aIndex = result.findIndex(loc => loc.id === a.insertAfterLocationId);
+    const bIndex = result.findIndex(loc => loc.id === b.insertAfterLocationId);
+    return bIndex - aIndex; // Reverse order
+  });
+
+  // Insert custom locations at their specified positions
+  for (const custom of sortedCustoms) {
+    const afterIndex = result.findIndex(
+      loc => loc.id === custom.insertAfterLocationId
+    );
+    if (afterIndex !== -1) {
+      const customLocation: CombinedLocation = {
+        id: custom.id,
+        name: custom.name,
+        region: 'Custom',
+        description: 'Custom location',
+        isCustom: true as const,
+      };
+      result.splice(afterIndex + 1, 0, customLocation);
+    }
   }
 
-  // Add custom locations with isCustom flag
-  for (let i = 0; i < customLocations.length; i++) {
-    const custom = customLocations[i];
-    allLocations[defaultLocations.length + i] = {
-      id: custom.id,
-      name: custom.name,
-      order: custom.order,
-      isCustom: true as const,
-    };
-  }
-
-  // Sort by order
-  return allLocations.sort((a, b) => a.order - b.order);
+  return result;
 }
 
 // Get merged locations sorted by order for a specific playthrough
@@ -319,7 +361,11 @@ export function getCombinedLocationsSortedByOrder(
 // Helper to check if a location is custom
 export function isCustomLocation(
   location?: CombinedLocation | null
-): location is CustomLocation & { isCustom: true } {
+): location is CustomLocation & {
+  region: string;
+  description: string;
+  isCustom: true;
+} {
   return !!location && 'isCustom' in location && location.isCustom === true;
 }
 
@@ -339,14 +385,13 @@ export function getLocationByIdFromMerged(
 export function createCustomLocation(
   name: string,
   afterLocationId: string,
-  customLocations: CustomLocation[] = []
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _customLocations: CustomLocation[] = []
 ): CustomLocation {
-  const order = calculateCustomLocationOrder(afterLocationId, customLocations);
-
   return {
     id: generateCustomLocationId(),
     name: name.trim(),
-    order,
+    insertAfterLocationId: afterLocationId,
   };
 }
 
@@ -356,7 +401,7 @@ export function validateCustomLocationPlacement(
   customLocations: CustomLocation[] = []
 ): boolean {
   try {
-    calculateCustomLocationOrder(afterLocationId, customLocations);
+    getCustomLocationInsertIndex(afterLocationId, customLocations);
     return true;
   } catch {
     return false;

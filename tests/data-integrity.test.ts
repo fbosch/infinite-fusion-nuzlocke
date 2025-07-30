@@ -6,8 +6,6 @@ import { SPECIAL_LOCATIONS } from '@/constants/special-locations';
 interface Location {
   id: string;
   name: string;
-  routeId: number | null;
-  order: number;
   region: string;
   description: string;
 }

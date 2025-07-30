@@ -25,7 +25,7 @@ vi.mock('@/lib/queryClient', () => {
       pokemonIds: [1, 2, 3],
     },
     {
-      routeName: 'Route 2', 
+      routeName: 'Route 2',
       pokemonIds: [4, 5, 6],
     },
     {
@@ -72,18 +72,16 @@ describe('Locations', () => {
 
       expect(location).toHaveProperty('id');
       expect(location).toHaveProperty('name');
-      expect(location).toHaveProperty('order');
       expect(location).toHaveProperty('region');
       expect(location).toHaveProperty('description');
     });
 
-    it('should return locations sorted by order', () => {
+    it('should return locations in natural order', () => {
       const locations = getLocations();
       const sortedLocations = getLocationsSortedByOrder();
 
-      expect(sortedLocations).toEqual(
-        [...locations].sort((a, b) => a.order - b.order)
-      );
+      // Since we removed order property, they should be in the same order as the original array
+      expect(sortedLocations).toEqual(locations);
     });
   });
 
@@ -214,8 +212,6 @@ describe('Locations', () => {
         const mockLocation = {
           id: 'mock-location-id',
           name: 'Mock City',
-          routeId: 99999, // Use a high number that won't exist
-          order: 999,
           region: 'Kanto',
           description: 'A mock location for testing',
         };

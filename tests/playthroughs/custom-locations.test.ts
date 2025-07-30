@@ -42,7 +42,7 @@ describe('Playthroughs Store - Custom Locations', () => {
         expect(activePlaythrough?.customLocations?.[0]).toMatchObject({
           id: customLocationId,
           name: 'Custom Route',
-          order: expect.any(Number),
+          insertAfterLocationId: expect.any(String),
         });
       }
     });
@@ -371,7 +371,7 @@ describe('Playthroughs Store - Custom Locations', () => {
         expect(customLocations[0]).toMatchObject({
           id: expect.stringMatching(/^custom_/),
           name: 'Test Route',
-          order: expect.any(Number),
+          insertAfterLocationId: expect.any(String),
         });
 
         // Verify the playthrough structure is intact
