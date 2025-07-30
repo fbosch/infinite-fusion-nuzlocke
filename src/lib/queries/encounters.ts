@@ -4,29 +4,12 @@ import ms from 'ms';
 
 // Encounters query options
 export const encountersQueries = {
-  byGameMode: (gameMode: 'classic' | 'remix') =>
-    queryOptions({
-      queryKey: ['encounters', 'byGameMode', gameMode],
-      queryFn: () => encountersApiService.getEncounters(gameMode),
-      enabled: !!gameMode,
-      staleTime: ms('1h'),
-      gcTime: ms('2h'),
-    }),
-
   all: (gameMode: 'classic' | 'remix') =>
     queryOptions({
       queryKey: ['encounters', 'all', gameMode],
       queryFn: () => encountersApiService.getEncountersByGameMode(gameMode),
       enabled: !!gameMode,
-      staleTime: ms('1h'),
-      gcTime: ms('2h'),
+      staleTime: process.env.NODE_ENV === 'development' ? 0 : ms('1h'),
+      gcTime: process.env.NODE_ENV === 'development' ? 0 : ms('2h'),
     }),
-};
-
-// Query key factories for consistent key generation
-export const encountersKeys = {
-  byGameMode: (gameMode: 'classic' | 'remix') =>
-    ['encounters', 'byGameMode', gameMode] as const,
-  all: (gameMode: 'classic' | 'remix') =>
-    ['encounters', 'all', gameMode] as const,
 };

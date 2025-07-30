@@ -1,7 +1,7 @@
 const CACHE_NAME = 'infinite-fusion-cache-v1';
 const IMAGE_CACHE_NAME = 'infinite-fusion-images-v1';
 const POKEMON_IMAGE_CACHE_NAME = 'pokemon-images-v1';
-const API_CACHE_NAME = 'infinite-fusion-api-v1';
+const API_CACHE_NAME = 'infinite-fusion-api-v2';
 
 // URLs to cache immediately
 const urlsToCache = ['/'];
@@ -181,12 +181,34 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Handle API requests with cache-first strategy
+// Handle API requests with network-first strategy in development, cache-first in production
 async function handleApiRequest(request) {
   const cache = await caches.open(API_CACHE_NAME);
   const url = new URL(request.url);
+  const isDevelopment = url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname.includes('local');
 
-  // Try cache first
+  // In development, try network first for fresh data
+  if (isDevelopment) {
+    try {
+      const response = await fetch(request);
+      if (response.status === 200) {
+        const responseClone = response.clone();
+        cache.put(request, responseClone);
+        console.debug('Service Worker: Cached fresh API response (dev):', url.pathname);
+      }
+      return response;
+    } catch (error) {
+      // Fallback to cache in development if network fails
+      const cachedResponse = await cache.match(request);
+      if (cachedResponse) {
+        console.debug('Service Worker: Network failed, serving from cache (dev):', url.pathname);
+        return cachedResponse;
+      }
+      throw error;
+    }
+  }
+
+  // In production, try cache first for performance
   const cachedResponse = await cache.match(request);
   if (cachedResponse) {
     console.debug('Service Worker: Serving API from cache:', url.pathname);
