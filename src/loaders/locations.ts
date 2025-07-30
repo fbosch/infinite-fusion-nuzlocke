@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getStarterPokemonByGameMode } from '@/loaders/starters';
 import { isStarterLocation } from '@/constants/special-locations';
 import { GameMode } from '../stores/playthroughs';
+import type { PokemonEncounter } from './encounters';
 
 // Location schema
 export const LocationSchema = z.object({
@@ -130,7 +131,7 @@ export function getLocationsSortedByOrder(): Location[] {
 export async function getLocationEncountersByName(
   locationName: string,
   gameMode: 'classic' | 'remix' = 'classic'
-): Promise<number[]> {
+): Promise<PokemonEncounter[]> {
   // Find the location by name to get its ID
   const location = getLocations().find(loc => loc.name === locationName);
   if (!location) {
@@ -139,20 +140,21 @@ export async function getLocationEncountersByName(
 
   // Special case for starter location
   if (isStarterLocation(location.id)) {
-    return await getStarterPokemonByGameMode(gameMode);
+    const starterIds = await getStarterPokemonByGameMode(gameMode);
+    return starterIds.map(id => ({ id, source: 'gift' as const }));
   }
 
   // Get all encounters for the game mode and find the specific route
   const encounters = await encountersData.getAllEncounters(gameMode);
   const encounter = encounters.find(e => e.routeName === locationName);
-  return encounter?.pokemonIds || [];
+  return encounter?.pokemon || [];
 }
 
 // Get encounters for a location by its ID
 export async function getLocationEncountersById(
   locationId: string,
   gameMode: 'classic' | 'remix' = 'classic'
-): Promise<number[]> {
+): Promise<PokemonEncounter[]> {
   // Find the location by ID
   const location = getLocations().find(loc => loc.id === locationId);
   if (!location) {
@@ -161,13 +163,14 @@ export async function getLocationEncountersById(
 
   // Special case for starter location
   if (isStarterLocation(locationId)) {
-    return await getStarterPokemonByGameMode(gameMode);
+    const starterIds = await getStarterPokemonByGameMode(gameMode);
+    return starterIds.map(id => ({ id, source: 'gift' as const }));
   }
 
   // Use TanStack Query to get encounters
   const encounters = await encountersData.getAllEncounters(gameMode);
   const encounter = encounters.find(e => e.routeName === location.name);
-  return encounter?.pokemonIds || [];
+  return encounter?.pokemon || [];
 }
 
 // Hook variant for getting encounters by location ID
@@ -204,7 +207,7 @@ export function useLocationEncountersById(
 
   if (gameMode === 'randomized') {
     return {
-      pokemonIds: [],
+      pokemonEncounters: [],
       isLoading: false,
       error: null,
     };
@@ -212,7 +215,7 @@ export function useLocationEncountersById(
 
   if (isStarter) {
     return {
-      pokemonIds: starterPokemon,
+      pokemonEncounters: starterPokemon.map(id => ({ id, source: 'gift' as const })),
       isLoading: starterLoading,
       error: starterError,
     };
@@ -223,7 +226,7 @@ export function useLocationEncountersById(
   )?.find(e => e.routeName === location?.name);
 
   return {
-    pokemonIds: encounter?.pokemonIds || [],
+    pokemonEncounters: encounter?.pokemon || [],
     isLoading,
     error,
   };
@@ -232,9 +235,9 @@ export function useLocationEncountersById(
 // Get all locations with their available encounters
 export async function getLocationsWithEncounters(
   gameMode: 'classic' | 'remix' = 'classic'
-): Promise<Array<Location & { encounters: number[] }>> {
+): Promise<Array<Location & { encounters: PokemonEncounter[] }>> {
   const locations = getLocations();
-  const locationsWithEncounters: Array<Location & { encounters: number[] }> =
+  const locationsWithEncounters: Array<Location & { encounters: PokemonEncounter[] }> =
     [];
 
   for (const location of locations) {
@@ -523,12 +526,12 @@ export function getAvailableAfterLocations(
 export async function getMergedLocationsWithEncounters(
   customLocations: CustomLocation[] = [],
   gameMode: 'classic' | 'remix' = 'classic'
-): Promise<Array<CombinedLocation & { encounters: number[] }>> {
+): Promise<Array<CombinedLocation & { encounters: PokemonEncounter[] }>> {
   const mergedLocations = getLocationsSortedWithCustom(customLocations);
   const locationsWithEncounters = [];
 
   for (const location of mergedLocations) {
-    let encounters: number[] = [];
+    let encounters: PokemonEncounter[] = [];
 
     // Only default locations have encounters (custom locations are user-defined)
     if (!isCustomLocation(location)) {

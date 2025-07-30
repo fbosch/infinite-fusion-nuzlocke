@@ -17,17 +17,25 @@ export interface EncounterData {
   artworkVariant?: string; // Alternative artwork variant for fusions (e.g., 'a', 'b', 'c')
 }
 
+// Zod schema for individual Pokemon encounters
+export const PokemonEncounterSchema = z.object({
+  id: z
+    .number()
+    .int()
+    .refine(val => val > 0 || val === -1, {
+      error: 'Pokemon ID must be positive or -1 for egg locations',
+    }),
+  source: z.enum(['wild', 'gift', 'trade'], {
+    error: 'Source must be wild, gift, or trade',
+  }),
+});
+
+export type PokemonEncounter = z.infer<typeof PokemonEncounterSchema>;
+
 // Zod schema for route encounter data
 export const RouteEncounterSchema = z.object({
   routeName: z.string().min(1, { error: 'Route name is required' }),
-  pokemonIds: z.array(
-    z
-      .number()
-      .int()
-      .refine(val => val > 0 || val === -1, {
-        error: 'Pokemon ID must be positive or -1 for egg locations',
-      })
-  ),
+  pokemon: z.array(PokemonEncounterSchema),
 });
 
 export type RouteEncounter = z.infer<typeof RouteEncounterSchema>;
@@ -64,9 +72,10 @@ export async function getEncountersByRouteName(
 
   // Special case for starter location
   if (routeName === 'Starter') {
+    const starterIds = await getStarterPokemonByGameMode(gameMode);
     return {
       routeName: 'Starter',
-      pokemonIds: await getStarterPokemonByGameMode(gameMode),
+      pokemon: starterIds.map(id => ({ id, source: 'gift' as const })),
     };
   }
 
@@ -124,7 +133,7 @@ export function useEncountersForLocation({
   gameMode = 'classic',
 }: UseEncounterDataOptions) {
   // Use the hook variant to fetch encounters
-  const { pokemonIds, isLoading, error } = useLocationEncountersById(
+  const { pokemonEncounters, isLoading, error } = useLocationEncountersById(
     enabled ? locationId : undefined,
     gameMode
   );
@@ -134,21 +143,22 @@ export function useEncountersForLocation({
   const nameMap = usePokemonNameMap();
 
   // Process encounter data using useMemo
-  const routeEncounterData = useMemo((): PokemonOptionType[] => {
-    if (!enabled || !pokemonIds.length || !allPokemon.length) {
+  const routeEncounterData = useMemo((): (PokemonOptionType & { source: 'wild' | 'gift' | 'trade' })[] => {
+    if (!enabled || !pokemonEncounters.length || !allPokemon.length) {
       return [];
     }
 
-    return pokemonIds.map((id: number) => {
+    return pokemonEncounters.map(({ id, source }) => {
       const pokemon = allPokemon.find((p: Pokemon) => p.id === id);
       return {
         id,
         name: nameMap.get(id) || `Unknown Pokemon (${id})`,
         nationalDexId: pokemon?.nationalDexId || 0,
         originalLocation: locationId,
+        source,
       };
     });
-  }, [pokemonIds, allPokemon, nameMap, enabled, locationId]);
+  }, [pokemonEncounters, allPokemon, nameMap, enabled, locationId]);
 
   // Predicate function to check if a Pokemon is in the current route
   const isRoutePokemon = useCallback(

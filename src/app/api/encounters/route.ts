@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { RouteEncountersArraySchema } from '@/loaders/encounters';
 
+// Temporary schema for the old data format during migration
+const OldRouteEncounterSchema = z.object({
+  routeName: z.string().min(1, { error: 'Route name is required' }),
+  pokemonIds: z.array(z.number().int()),
+});
+const OldRouteEncountersArraySchema = z.array(OldRouteEncounterSchema);
+
 // Query parameter schema
 const QuerySchema = z.object({
   gameMode: z.enum(['classic', 'remix']).optional().default('classic'),
@@ -40,10 +47,10 @@ export async function GET(request: NextRequest) {
     const trade = query.gameMode === 'remix' ? remixTrades : classicTrades;
     const gift = query.gameMode === 'remix' ? remixGifts : classicGifts;
 
-    // Validate the data
-    const encounters = RouteEncountersArraySchema.parse(wild.default);
-    const trades = RouteEncountersArraySchema.parse(trade.default);
-    const gifts = RouteEncountersArraySchema.parse(gift.default);
+    // Validate the data using the old schema (since data files haven't been migrated yet)
+    const encounters = OldRouteEncountersArraySchema.parse(wild.default);
+    const trades = OldRouteEncountersArraySchema.parse(trade.default);
+    const gifts = OldRouteEncountersArraySchema.parse(gift.default);
     const eggLocationsData = eggLocations.default;
 
     // Create a set of route names that have egg locations
@@ -64,32 +71,42 @@ export async function GET(request: NextRequest) {
     const tradesMap = new Map(trades.map(t => [t.routeName, t]));
     const giftsMap = new Map(gifts.map(g => [g.routeName, g]));
 
-    // Merge encounters for each route
+    // Merge encounters for each route with source information
     const mergedEncounters = Array.from(allRouteNames).map(routeName => {
       const wildPokemon = encountersMap.get(routeName)?.pokemonIds || [];
       const tradePokemon = tradesMap.get(routeName)?.pokemonIds || [];
       const giftPokemon = giftsMap.get(routeName)?.pokemonIds || [];
 
-      // Start with all Pokemon IDs, removing duplicates
-      const allPokemonIds = [
-        ...new Set([...wildPokemon, ...tradePokemon, ...giftPokemon]),
+      // Create Pokemon objects with source information
+      const pokemon = [
+        ...wildPokemon.map(id => ({ id, source: 'wild' as const })),
+        ...tradePokemon.map(id => ({ id, source: 'trade' as const })),
+        ...giftPokemon.map(id => ({ id, source: 'gift' as const })),
       ];
 
-      // Add -1 if this route has egg locations
+      // Add egg encounter if this route has egg locations
       if (eggRouteNames.has(routeName)) {
-        allPokemonIds.push(-1);
+        pokemon.push({ id: -1, source: 'gift' as const });
       }
+
+      // Remove duplicates based on both id and source
+      const uniquePokemon = pokemon.filter(
+        (pokemon, index, array) =>
+          array.findIndex(
+            p => p.id === pokemon.id && p.source === pokemon.source
+          ) === index
+      );
 
       return {
         routeName,
-        pokemonIds: allPokemonIds,
+        pokemon: uniquePokemon,
       };
     });
 
     // Sort by route name for consistent ordering
     mergedEncounters.sort((a, b) => a.routeName.localeCompare(b.routeName));
 
-    // Validate the merged data using the original schema
+    // Validate the merged data using the new schema
     const validatedMergedEncounters =
       RouteEncountersArraySchema.parse(mergedEncounters);
 

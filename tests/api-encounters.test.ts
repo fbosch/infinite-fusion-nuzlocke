@@ -40,7 +40,9 @@ describe('Encounters API', () => {
     eggRouteNames.forEach(routeName => {
       const route = data.find((r: any) => r.routeName === routeName);
       if (route) {
-        expect(route.pokemonIds).toContain(-1);
+        const eggPokemon = route.pokemon.find((p: any) => p.id === -1);
+        expect(eggPokemon).toBeTruthy();
+        expect(eggPokemon?.source).toBe('gift');
       }
     });
 
@@ -49,7 +51,8 @@ describe('Encounters API', () => {
       (route: any) => !eggRouteNames.includes(route.routeName)
     );
     nonEggRoutes.forEach((route: any) => {
-      expect(route.pokemonIds).not.toContain(-1);
+      const eggPokemon = route.pokemon.find((p: any) => p.id === -1);
+      expect(eggPokemon).toBeFalsy();
     });
   });
 
@@ -75,7 +78,7 @@ describe('Encounters API', () => {
     expect(Array.isArray(remixData)).toBe(true);
   });
 
-  it('should have valid Pokemon IDs', async () => {
+  it('should have valid Pokemon data with sources', async () => {
     const request = new NextRequest(
       'http://localhost:3000/api/encounters?gameMode=classic'
     );
@@ -84,17 +87,20 @@ describe('Encounters API', () => {
 
     data.forEach((route: any) => {
       expect(route).toHaveProperty('routeName');
-      expect(route).toHaveProperty('pokemonIds');
-      expect(Array.isArray(route.pokemonIds)).toBe(true);
+      expect(route).toHaveProperty('pokemon');
+      expect(Array.isArray(route.pokemon)).toBe(true);
 
-      // All Pokemon IDs should be numbers
-      route.pokemonIds.forEach((id: number) => {
-        expect(typeof id).toBe('number');
+      // All Pokemon should have valid id and source
+      route.pokemon.forEach((pokemon: any) => {
+        expect(pokemon).toHaveProperty('id');
+        expect(pokemon).toHaveProperty('source');
+        expect(typeof pokemon.id).toBe('number');
+        expect(['wild', 'gift', 'trade']).toContain(pokemon.source);
       });
     });
   });
 
-  it('should not have duplicate Pokemon IDs within routes', async () => {
+  it('should not have duplicate Pokemon with same ID and source within routes', async () => {
     const request = new NextRequest(
       'http://localhost:3000/api/encounters?gameMode=classic'
     );
@@ -102,8 +108,9 @@ describe('Encounters API', () => {
     const data = await response.json();
 
     data.forEach((route: any) => {
-      const uniqueIds = new Set(route.pokemonIds);
-      expect(uniqueIds.size).toBe(route.pokemonIds.length);
+      const pokemonKeys = route.pokemon.map((p: any) => `${p.id}-${p.source}`);
+      const uniqueKeys = new Set(pokemonKeys);
+      expect(uniqueKeys.size).toBe(route.pokemon.length);
     });
   });
 });

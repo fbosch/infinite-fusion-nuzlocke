@@ -22,19 +22,35 @@ vi.mock('@/lib/queryClient', () => {
   const mockEncountersData = [
     {
       routeName: 'Route 1',
-      pokemonIds: [1, 2, 3],
+      pokemon: [
+        { id: 1, source: 'wild' },
+        { id: 2, source: 'wild' },
+        { id: 3, source: 'gift' },
+      ],
     },
     {
       routeName: 'Route 2',
-      pokemonIds: [4, 5, 6],
+      pokemon: [
+        { id: 4, source: 'wild' },
+        { id: 5, source: 'trade' },
+        { id: 6, source: 'wild' },
+      ],
     },
     {
       routeName: 'Viridian Forest',
-      pokemonIds: [7, 8, 9],
+      pokemon: [
+        { id: 7, source: 'wild' },
+        { id: 8, source: 'wild' },
+        { id: 9, source: 'wild' },
+      ],
     },
     {
       routeName: 'Pewter City',
-      pokemonIds: [10, 11, 12],
+      pokemon: [
+        { id: 10, source: 'gift' },
+        { id: 11, source: 'trade' },
+        { id: 12, source: 'wild' },
+      ],
     },
   ];
 
@@ -119,6 +135,11 @@ describe('Locations', () => {
     describe('getLocationEncountersByName', () => {
       it('should return starter Pokémon for starter location', async () => {
         const mockStarterPokemon = [1, 4, 7];
+        const expectedEncounters = [
+          { id: 1, source: 'gift' },
+          { id: 4, source: 'gift' },
+          { id: 7, source: 'gift' },
+        ];
         vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(
           mockStarterPokemon
         );
@@ -127,7 +148,7 @@ describe('Locations', () => {
           "Oak's Lab",
           'classic'
         );
-        expect(encounters).toEqual(mockStarterPokemon);
+        expect(encounters).toEqual(expectedEncounters);
       });
 
       it('should return empty array for non-existent location', async () => {
@@ -142,6 +163,11 @@ describe('Locations', () => {
     describe('getLocationEncountersById', () => {
       it('should return starter Pokémon for starter location ID', async () => {
         const mockStarterPokemon = [1, 4, 7];
+        const expectedEncounters = [
+          { id: 1, source: 'gift' },
+          { id: 4, source: 'gift' },
+          { id: 7, source: 'gift' },
+        ];
         vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(
           mockStarterPokemon
         );
@@ -150,7 +176,7 @@ describe('Locations', () => {
           SPECIAL_LOCATIONS.STARTER_LOCATION,
           'classic'
         );
-        expect(encounters).toEqual(mockStarterPokemon);
+        expect(encounters).toEqual(expectedEncounters);
       });
 
       it('should return empty array for non-existent location ID', async () => {
@@ -165,6 +191,11 @@ describe('Locations', () => {
     describe('getLocationsWithEncounters', () => {
       it('should return locations with encounters', async () => {
         const mockStarterPokemon = [1, 4, 7];
+        const expectedEncounters = [
+          { id: 1, source: 'gift' },
+          { id: 4, source: 'gift' },
+          { id: 7, source: 'gift' },
+        ];
         vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(
           mockStarterPokemon
         );
@@ -180,7 +211,7 @@ describe('Locations', () => {
         );
         expect(starterLocationWithEncounters).toBeDefined();
         expect(starterLocationWithEncounters?.encounters).toEqual(
-          mockStarterPokemon
+          expectedEncounters
         );
       });
     });

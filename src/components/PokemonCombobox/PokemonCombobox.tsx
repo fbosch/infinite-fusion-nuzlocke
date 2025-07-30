@@ -144,6 +144,7 @@ export const PokemonCombobox = React.memo(
     const { routeEncounterData, isRoutePokemon } = useEncountersForLocation({
       locationId,
       enabled: !isCustomLocation && gameMode !== 'randomized',
+      gameMode: gameMode === 'randomized' ? 'classic' : gameMode,
     });
     // Use the search hook
     const { data: results = [] } = usePokemonSearch({
