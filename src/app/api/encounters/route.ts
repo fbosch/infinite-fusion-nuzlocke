@@ -15,19 +15,61 @@ export async function GET(request: NextRequest) {
       gameMode: searchParams.get('gameMode'),
     });
 
-    // Load encounters data based on game mode
-    let encountersData;
-    if (query.gameMode === 'remix') {
-      encountersData = await import('@data/remix/encounters.json');
-    } else {
-      encountersData = await import('@data/classic/encounters.json');
-    }
+    const [wild, trade, gift] = await Promise.all([
+      query.gameMode === 'remix'
+        ? import('@data/remix/encounters.json')
+        : import('@data/classic/encounters.json'),
+      query.gameMode === 'remix'
+        ? import('@data/remix/trades.json')
+        : import('@data/classic/trades.json'),
+      query.gameMode === 'remix'
+        ? import('@data/remix/gifts.json')
+        : import('@data/classic/gifts.json'),
+    ]);
 
     // Validate the data
-    const encounters = RouteEncountersArraySchema.parse(encountersData.default);
+    const encounters = RouteEncountersArraySchema.parse(wild.default);
+    const trades = RouteEncountersArraySchema.parse(trade.default);
+    const gifts = RouteEncountersArraySchema.parse(gift.default);
 
-    // Return all encounters for the game mode
-    return NextResponse.json(encounters, {
+    // Merge the data by route name
+    const allRouteNames = new Set([
+      ...encounters.map(e => e.routeName),
+      ...trades.map(t => t.routeName),
+      ...gifts.map(g => g.routeName),
+    ]);
+
+    // Create a map for quick lookup of each encounter type
+    const encountersMap = new Map(encounters.map(e => [e.routeName, e]));
+    const tradesMap = new Map(trades.map(t => [t.routeName, t]));
+    const giftsMap = new Map(gifts.map(g => [g.routeName, g]));
+
+    // Merge encounters for each route
+    const mergedEncounters = Array.from(allRouteNames).map(routeName => {
+      const wildPokemon = encountersMap.get(routeName)?.pokemonIds || [];
+      const tradePokemon = tradesMap.get(routeName)?.pokemonIds || [];
+      const giftPokemon = giftsMap.get(routeName)?.pokemonIds || [];
+
+      // Combine all Pokemon IDs, removing duplicates
+      const allPokemonIds = [
+        ...new Set([...wildPokemon, ...tradePokemon, ...giftPokemon]),
+      ];
+
+      return {
+        routeName,
+        pokemonIds: allPokemonIds,
+      };
+    });
+
+    // Sort by route name for consistent ordering
+    mergedEncounters.sort((a, b) => a.routeName.localeCompare(b.routeName));
+
+    // Validate the merged data using the original schema
+    const validatedMergedEncounters =
+      RouteEncountersArraySchema.parse(mergedEncounters);
+
+    // Return merged encounters for the game mode
+    return NextResponse.json(validatedMergedEncounters, {
       headers: {
         'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
         'Content-Type': 'application/json',

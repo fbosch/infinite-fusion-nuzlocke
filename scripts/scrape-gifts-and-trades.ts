@@ -26,8 +26,6 @@ function findPokemonIdWithSpecialCases(pokemonName: string, pokemonNameMap: impo
   // Handle special cases
   const specialCases: Record<string, number> = {
     'oricorio': 741, // Oricorio (Baile form)
-    'fossil pokemon': -2, // Special case for fossil Pokémon
-    'fossils items': -2, // Special case for fossil items
     'egg': -1, // Special case for eggs
   };
 
@@ -90,18 +88,6 @@ function extractBaseLocation(location: string): string {
     .trim();
 }
 
-/**
- * Finds the location column in the table by looking for cells that contain (gift) or (trade)
- */
-function findLocationColumnIndex(cells: cheerio.Cheerio<any>): number {
-  for (let i = 0; i < cells.length; i++) {
-    const cellText = cells.eq(i).text().toLowerCase();
-    if (cellText.includes('(gift)') || cellText.includes('(trade)')) {
-      return i;
-    }
-  }
-  return -1;
-}
 
 interface LocationGifts {
   routeName: string;
