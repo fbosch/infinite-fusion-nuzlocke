@@ -244,6 +244,7 @@ async function prefetchSpriteVariants(spriteVariantsResponse) {
           }
 
           const response = await fetch(url, {
+            mode: 'no-cors', // Required for DigitalOcean Spaces CORS policy
             priority: 'low', // Use low priority for background requests
           });
 
