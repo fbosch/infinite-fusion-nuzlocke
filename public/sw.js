@@ -29,6 +29,125 @@ async function getPokemonImageUrls() {
   }
 }
 
+// Queue for sprite variant prefetch requests
+let spriteVariantQueue = [];
+let isProcessingSpriteVariants = false;
+
+// Add sprite variants to background queue
+function queueSpriteVariants(spriteVariantsResponse) {
+  if (!spriteVariantsResponse?.variants || !spriteVariantsResponse?.cacheKey) {
+    return;
+  }
+
+  // Check if already queued
+  const isAlreadyQueued = spriteVariantQueue.some(
+    item => item.cacheKey === spriteVariantsResponse.cacheKey
+  );
+
+  if (!isAlreadyQueued) {
+    spriteVariantQueue.push(spriteVariantsResponse);
+    console.debug(`Service Worker: Queued sprite variants for ${spriteVariantsResponse.cacheKey} (queue length: ${spriteVariantQueue.length})`);
+    
+    // Start processing if not already running
+    if (!isProcessingSpriteVariants) {
+      processSpriteVariantQueue().catch(error => {
+        console.warn('Service Worker: Sprite variant queue processing failed:', error);
+      });
+    }
+  }
+}
+
+// Process sprite variant queue in background
+async function processSpriteVariantQueue() {
+  if (isProcessingSpriteVariants || spriteVariantQueue.length === 0) {
+    return;
+  }
+
+  isProcessingSpriteVariants = true;
+  console.debug(`Service Worker: Starting sprite variant queue processing (${spriteVariantQueue.length} items)`);
+
+  // Wait for initial page load and network to be idle
+  await waitForPageLoad();
+  await waitForNetworkIdle();
+
+  const cache = await caches.open(IMAGE_CACHE_NAME);
+  const networkInfo = getNetworkInfo();
+  const batchSize = getBatchSize(networkInfo);
+
+  while (spriteVariantQueue.length > 0) {
+    // Check network conditions before each batch
+    if (!shouldContinuePrefetch()) {
+      console.debug('Service Worker: Pausing sprite variant processing due to network conditions');
+      break;
+    }
+
+    // Wait for network to be idle
+    await waitForNetworkIdle();
+
+    // Take items from queue for this batch
+    const batchItems = spriteVariantQueue.splice(0, Math.min(batchSize, spriteVariantQueue.length));
+    
+    await Promise.allSettled(
+      batchItems.map(async item => {
+        await processSingleSpriteVariantItem(item, cache);
+      })
+    );
+
+    // Add delay between batches
+    if (spriteVariantQueue.length > 0) {
+      await sleep(getDelayBetweenBatches(networkInfo));
+    }
+  }
+
+  isProcessingSpriteVariants = false;
+  console.debug('Service Worker: Sprite variant queue processing complete');
+}
+
+// Process a single sprite variant item
+async function processSingleSpriteVariantItem(item, cache) {
+  const { variants, cacheKey } = item;
+  
+  if (!variants || variants.length === 0) {
+    return;
+  }
+
+  // Generate sprite URLs for all variants
+  const spriteUrls = variants.map(variant => 
+    `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${cacheKey}${variant}.png`
+  );
+
+  let successCount = 0;
+
+  await Promise.allSettled(
+    spriteUrls.map(async url => {
+      try {
+        // Skip if already cached
+        if (await cache.match(url)) {
+          successCount++;
+          return;
+        }
+
+        const response = await fetch(url, {
+          mode: 'no-cors', // Required for DigitalOcean Spaces CORS policy
+          priority: 'low', // Use low priority for background requests
+        });
+
+        if (response.ok) {
+          await cache.put(url, response);
+          successCount++;
+        }
+      } catch (error) {
+        // Silently continue on individual failures
+        console.debug('Service Worker: Failed to prefetch sprite variant:', url, error);
+      }
+    })
+  );
+
+  console.debug(
+    `Service Worker: Cached ${successCount}/${spriteUrls.length} sprite variants for ${cacheKey}`
+  );
+}
+
 // Smart background image prefetching that respects network conditions
 async function prefetchPokemonImages() {
   // Wait for initial page load to complete before starting prefetch
@@ -193,83 +312,6 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Prefetch sprite variant images for a specific Pokemon/fusion
-async function prefetchSpriteVariants(spriteVariantsResponse) {
-  const { variants, cacheKey } = spriteVariantsResponse;
-  
-  if (!variants || variants.length === 0) {
-    console.debug('Service Worker: No sprite variants to prefetch');
-    return;
-  }
-
-  // Check network conditions before starting
-  if (!shouldContinuePrefetch()) {
-    console.debug('Service Worker: Skipping sprite variant prefetch due to network conditions');
-    return;
-  }
-
-  const cache = await caches.open(IMAGE_CACHE_NAME);
-  const networkInfo = getNetworkInfo();
-  const batchSize = getBatchSize(networkInfo);
-  
-  // Generate sprite URLs for all variants
-  const spriteUrls = variants.map(variant => 
-    `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${cacheKey}${variant}.png`
-  );
-
-  console.debug(`Service Worker: Starting prefetch of ${spriteUrls.length} sprite variants for ${cacheKey}`);
-
-  let successCount = 0;
-
-  // Process variants in batches
-  for (let i = 0; i < spriteUrls.length; i += batchSize) {
-    // Wait for network to be idle before each batch
-    await waitForNetworkIdle();
-
-    // Re-check network conditions for each batch
-    if (!shouldContinuePrefetch()) {
-      console.debug('Service Worker: Stopping sprite variant prefetch due to network conditions');
-      break;
-    }
-
-    const batch = spriteUrls.slice(i, i + batchSize);
-
-    await Promise.allSettled(
-      batch.map(async url => {
-        try {
-          // Skip if already cached
-          if (await cache.match(url)) {
-            successCount++;
-            return;
-          }
-
-          const response = await fetch(url, {
-            mode: 'no-cors', // Required for DigitalOcean Spaces CORS policy
-            priority: 'low', // Use low priority for background requests
-          });
-
-          if (response.ok) {
-            await cache.put(url, response);
-            successCount++;
-          }
-        } catch (error) {
-          // Silently continue on individual failures
-          console.debug('Service Worker: Failed to prefetch sprite variant:', url, error);
-        }
-      })
-    );
-
-    // Add delay between batches to be gentle on the network
-    if (i + batchSize < spriteUrls.length) {
-      await sleep(getDelayBetweenBatches(networkInfo));
-    }
-  }
-
-  console.debug(
-    `Service Worker: Sprite variant prefetching complete for ${cacheKey} (${successCount}/${spriteUrls.length} cached)`
-  );
-}
-
 // Install event - cache essential resources and start background prefetching
 self.addEventListener('install', event => {
   console.debug('Service Worker: Installing...');
@@ -330,10 +372,8 @@ self.addEventListener('message', event => {
 
   switch (type) {
     case 'PREFETCH_SPRITE_VARIANTS':
-      // Trigger sprite variant prefetching in the background
-      prefetchSpriteVariants(data).catch(error => {
-        console.warn('Service Worker: Sprite variant prefetch failed:', error);
-      });
+      // Queue sprite variants for background processing
+      queueSpriteVariants(data);
       break;
     
     default:
@@ -360,12 +400,10 @@ async function handleSpriteVariantsRequest(request) {
           
           // Check if this is a successful sprite variants response
           if (data.variants && Array.isArray(data.variants) && data.cacheKey) {
-            console.debug(`Service Worker: Starting sprite variant prefetch for ${data.cacheKey} after API response`);
+            console.debug(`Service Worker: Queueing sprite variants for ${data.cacheKey} after API response`);
             
-            // Trigger prefetching in the background (non-blocking)
-            prefetchSpriteVariants(data).catch(error => {
-              console.warn('Service Worker: Auto sprite variant prefetch failed:', error);
-            });
+            // Queue sprite variants for background processing
+            queueSpriteVariants(data);
           }
         } catch (jsonError) {
           // If JSON parsing fails, just continue without prefetching
