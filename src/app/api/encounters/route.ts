@@ -28,17 +28,17 @@ export async function GET(request: NextRequest) {
 
     console.debug(`API: Raw game mode: ${rawGameMode}, validated: ${gameMode}`);
 
-    // Use the validated game mode for file paths
-    const gameModePath = gameMode;
-
-    console.debug(
-      `API: Loading encounters for game mode: ${gameMode} (path: ${gameModePath})`
-    );
-
+    // Use explicit imports instead of dynamic template literals
     const [wild, trade, gift, eggLocations] = await Promise.all([
-      import(`@data/${gameModePath}/encounters.json`),
-      import(`@data/${gameModePath}/trades.json`),
-      import(`@data/${gameModePath}/gifts.json`),
+      gameMode === 'remix'
+        ? import('@data/remix/encounters.json')
+        : import('@data/classic/encounters.json'),
+      gameMode === 'remix'
+        ? import('@data/remix/trades.json')
+        : import('@data/classic/trades.json'),
+      gameMode === 'remix'
+        ? import('@data/remix/gifts.json')
+        : import('@data/classic/gifts.json'),
       import('@data/egg-locations.json'),
     ]);
 
