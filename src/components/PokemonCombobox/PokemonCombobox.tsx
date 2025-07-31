@@ -18,6 +18,7 @@ import {
 } from '@floating-ui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
+import { Loader2 } from 'lucide-react';
 import {
   getInfiniteFusionToNationalDexMap,
   PokemonStatus,
@@ -150,12 +151,15 @@ export const PokemonCombobox = React.memo(
       gameMode: gameMode === 'randomized' ? 'classic' : gameMode,
     });
     // Use the search hook
-    const { data: results = [] } = usePokemonSearch({
-      query: deferredQuery,
-    });
+    const { data: results = [], isLoading: isSearchLoading } = usePokemonSearch(
+      {
+        query: deferredQuery,
+      }
+    );
 
     // Get all Pokemon for randomized mode
-    const { data: allPokemon = [] } = useAllPokemon();
+    const { data: allPokemon = [], isLoading: isAllPokemonLoading } =
+      useAllPokemon();
 
     // Floating UI setup
     const { refs, floatingStyles, update, placement } = useFloating({
@@ -190,6 +194,10 @@ export const PokemonCombobox = React.memo(
       if (deferredQuery === '') {
         // In randomized mode or custom location, show all Pokemon
         if (gameMode === 'randomized' || isCustomLocation) {
+          // If still loading, return empty array to avoid showing incomplete data
+          if (isAllPokemonLoading) {
+            return [];
+          }
           return allPokemon
             .map(p => ({
               id: p.id,
@@ -266,6 +274,7 @@ export const PokemonCombobox = React.memo(
       allPokemon,
       isCustomLocation,
       isFusion,
+      isAllPokemonLoading,
     ]);
 
     const handleChange = useCallback(
@@ -344,6 +353,25 @@ export const PokemonCombobox = React.memo(
       },
       [onChange, value, onBeforeClear]
     );
+
+    // Determine if we should show loading
+    const isShowingLoading = useMemo(() => {
+      // Show loading when:
+      // 1. No query and all Pokemon are loading (for randomized/custom locations)
+      // 2. There's a query and search is loading, or all Pokemon are loading
+      if (deferredQuery === '') {
+        return (
+          (gameMode === 'randomized' || isCustomLocation) && isAllPokemonLoading
+        );
+      }
+      return isSearchLoading || isAllPokemonLoading;
+    }, [
+      deferredQuery,
+      gameMode,
+      isCustomLocation,
+      isAllPokemonLoading,
+      isSearchLoading,
+    ]);
 
     const shouldVirtualize = finalOptions.length > 30;
 
@@ -503,7 +531,16 @@ export const PokemonCombobox = React.memo(
                         'pointer-events-none': virtualizer.isScrolling,
                       })}
                     >
-                      {shouldVirtualize ? (
+                      {isShowingLoading ? (
+                        <div className='relative cursor-default select-none py-2 px-4 text-center'>
+                          <div className='text-gray-500 dark:text-gray-400'>
+                            <p className='text-sm flex items-center gap-2 justify-center py-2'>
+                              <Loader2 className='w-4 h-4 animate-spin' />
+                              <span>Loading Pokémon...</span>
+                            </p>
+                          </div>
+                        </div>
+                      ) : shouldVirtualize ? (
                         virtualizer.getVirtualItems().map(virtualItem => (
                           <PokemonOption
                             key={virtualItem.key}
@@ -535,6 +572,7 @@ export const PokemonCombobox = React.memo(
                           isRoutePokemon={isRoutePokemon}
                           getPokemonSource={getPokemonSource}
                           gameMode={gameMode}
+                          isLoading={isShowingLoading}
                         />
                       )}
                     </ComboboxOptions>

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowUpDown, Check, Search } from 'lucide-react';
+import { ArrowUpDown, Check, Search, Loader2 } from 'lucide-react';
 import { ComboboxOption } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -70,6 +70,7 @@ interface PokemonOptionsProps {
   getPokemonSource: (pokemonId: number) => EncounterSource | null;
   comboboxId: string;
   gameMode: 'classic' | 'remix' | 'randomized';
+  isLoading?: boolean;
 }
 
 interface PokemonOptionProps {
@@ -225,7 +226,21 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
   getPokemonSource,
   comboboxId,
   gameMode,
+  isLoading = false,
 }) => {
+  if (isLoading) {
+    return (
+      <div className='relative cursor-default select-none py-2 px-4 text-center'>
+        <div className='text-gray-500 dark:text-gray-400'>
+          <p className='text-sm flex items-center gap-2 justify-center py-2'>
+            <Loader2 className='w-4 h-4 animate-spin' />
+            <span>Loading Pokémon...</span>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (finalOptions.length === 0) {
     return (
       <div className='relative cursor-default select-none py-2 px-4 text-center'>
