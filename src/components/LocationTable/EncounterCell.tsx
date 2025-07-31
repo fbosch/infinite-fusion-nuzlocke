@@ -5,7 +5,13 @@ import { ArrowLeftRight } from 'lucide-react';
 import { PokemonCombobox } from '@/components/PokemonCombobox/PokemonCombobox';
 import { FusionToggleButton } from './FusionToggleButton';
 import ConfirmationDialog from '@/components/ConfirmationDialog';
-import type { PokemonOptionType } from '@/loaders/pokemon';
+import type { PokemonOptionType, PokemonStatusType } from '@/loaders/pokemon';
+import { PokemonStatus } from '@/loaders/pokemon';
+import {
+  EncounterSource,
+  useEncountersForLocation,
+} from '@/loaders/encounters';
+import { useGameMode } from '@/stores/playthroughs';
 
 import clsx from 'clsx';
 import { useEncounter, playthroughActions } from '@/stores/playthroughs';
@@ -116,6 +122,24 @@ export function EncounterCell({
   const bodyPokemon = encounterData.body;
 
   const selectedPokemon = encounterData.isFusion ? bodyPokemon : headPokemon;
+
+  // Get game mode and encounter data for source detection
+  const gameMode = useGameMode();
+  const isCustomLocation = false; // Assuming this is handled elsewhere
+  const { routeEncounterData } = useEncountersForLocation({
+    locationId,
+    enabled: !isCustomLocation && gameMode !== 'randomized',
+    gameMode: gameMode === 'randomized' ? 'classic' : gameMode,
+  });
+
+  // Function to get Pokemon source information
+  const getPokemonSource = useCallback(
+    (pokemonId: number): EncounterSource | null => {
+      const pokemonData = routeEncounterData.find(p => p.id === pokemonId);
+      return pokemonData?.source || null;
+    },
+    [routeEncounterData]
+  );
   const isFusion = encounterData.isFusion;
 
   // Use reducer for confirmation dialog state
@@ -271,9 +295,30 @@ export function EncounterCell({
   // Handle overwrite confirmation dialog confirm action
   const handleConfirmOverwrite = useCallback(() => {
     if (confirmationState.pendingOverwrite) {
+      let pokemonToUpdate = confirmationState.pendingOverwrite.newPokemon;
+
+      // Apply default status based on Pokemon source
+      const source = getPokemonSource(pokemonToUpdate.id);
+      let defaultStatus: PokemonStatusType | undefined = pokemonToUpdate.status;
+
+      // Always set appropriate status for gift and trade Pokemon
+      if (source === EncounterSource.GIFT) {
+        defaultStatus = PokemonStatus.RECEIVED;
+      } else if (source === EncounterSource.TRADE) {
+        defaultStatus = PokemonStatus.TRADED;
+      }
+
+      // Update the Pokemon with the correct status if needed
+      if (defaultStatus && defaultStatus !== pokemonToUpdate.status) {
+        pokemonToUpdate = {
+          ...pokemonToUpdate,
+          status: defaultStatus,
+        };
+      }
+
       playthroughActions.updateEncounter(
         locationId,
-        confirmationState.pendingOverwrite.newPokemon,
+        pokemonToUpdate,
         confirmationState.pendingOverwrite.field,
         false
       );
@@ -281,7 +326,7 @@ export function EncounterCell({
 
     // Mark that the user confirmed the action
     dispatch({ type: 'CONFIRM_OVERWRITE' });
-  }, [locationId, confirmationState.pendingOverwrite]);
+  }, [locationId, confirmationState.pendingOverwrite, getPokemonSource]);
 
   // Handle overwrite confirmation dialog cancel/close action
   const handleOverwriteDialogClose = useCallback(() => {

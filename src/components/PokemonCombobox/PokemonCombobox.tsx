@@ -23,6 +23,7 @@ import {
   getInfiniteFusionToNationalDexMap,
   PokemonStatus,
   type PokemonOptionType,
+  type PokemonStatusType,
   useAllPokemon,
   isPokemonEvolution,
   isPokemonPreEvolution,
@@ -317,10 +318,31 @@ export const PokemonCombobox = React.memo(
           };
         }
 
+        // Set default status based on Pokemon source
+        if (finalValue) {
+          const source = getPokemonSource(finalValue.id);
+          let defaultStatus: PokemonStatusType | undefined = finalValue.status;
+
+          // Always set appropriate status for gift and trade Pokemon
+          if (source === EncounterSource.GIFT) {
+            defaultStatus = PokemonStatus.RECEIVED;
+          } else if (source === EncounterSource.TRADE) {
+            defaultStatus = PokemonStatus.TRADED;
+          }
+
+          // Only update if we have a new default status and it's different
+          if (defaultStatus && defaultStatus !== finalValue.status) {
+            finalValue = {
+              ...finalValue,
+              status: defaultStatus,
+            };
+          }
+        }
+
         onChange(finalValue || null);
         setQuery('');
       },
-      [onChange, value, onBeforeOverwrite]
+      [onChange, value, onBeforeOverwrite, getPokemonSource]
     );
 
     // Memoize input change handler
