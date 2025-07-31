@@ -10,7 +10,7 @@ const POKEMON_NESTS_URL = 'https://infinitefusion.fandom.com/wiki/Pok%C3%A9mon_N
 
 interface EggLocation {
   routeName: string;
-  source: 'gifts' | 'nests';
+  source: 'gift' | 'nest';
   description: string;
 }
 
@@ -126,7 +126,7 @@ async function scrapeGiftsAndTradesForEggs(): Promise<EggLocation[]> {
             
             eggLocations.push({
               routeName: cleanedLocation,
-              source: 'gifts',
+              source: 'gift',
               description: `${pokemonCell} - ${notesCell}`.trim()
             });
           }
@@ -202,7 +202,7 @@ async function scrapePokemonNestsForEggs(): Promise<EggLocation[]> {
             
             eggLocations.push({
               routeName: routeName,
-              source: 'nests',
+              source: 'nest',
               description: `Nest location: ${text || title}`
             });
           }
