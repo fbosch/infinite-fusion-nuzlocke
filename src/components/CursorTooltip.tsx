@@ -51,7 +51,7 @@ interface CursorTooltipProps {
   onMouseLeave?: () => void;
 }
 
-export function CursorTooltip({
+function CursorTooltipInner({
   content,
   children,
   className,
@@ -63,6 +63,7 @@ export function CursorTooltip({
 }: CursorTooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [hasMouseEvent, setHasMouseEvent] = useState(false);
   const isAnimatingRef = useRef(false);
   const exitAnimationRef = useRef<number | null>(null);
   const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -81,8 +82,10 @@ export function CursorTooltip({
     whileElementsMounted: autoUpdate,
   });
 
+  // Conditionally use clientPoint to prevent screenX errors in React 19
   const clientPointFloating = useClientPoint(context, {
     axis: 'both',
+    enabled: hasMouseEvent && !disabled,
   });
 
   const hover = useHover(context, {
@@ -90,17 +93,33 @@ export function CursorTooltip({
     enabled: !disabled,
   });
 
+  // Detect mouse events to safely enable clientPoint
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      // Only enable if we have valid mouse coordinates
+      if (
+        event &&
+        typeof event.screenX === 'number' &&
+        typeof event.screenY === 'number'
+      ) {
+        setHasMouseEvent(true);
+      }
+    };
+
+    document.addEventListener('mousemove', handleMouseMove, { once: true });
+    return () => document.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   const focus = useFocus(context);
   const dismiss = useDismiss(context);
   const role = useRole(context);
 
-  const { getReferenceProps, getFloatingProps } = useInteractions([
-    hover,
-    focus,
-    dismiss,
-    role,
-    clientPointFloating,
-  ]);
+  // Only include clientPoint if we've detected proper mouse events
+  const interactions = hasMouseEvent
+    ? [hover, focus, dismiss, role, clientPointFloating]
+    : [hover, focus, dismiss, role];
+
+  const { getReferenceProps, getFloatingProps } = useInteractions(interactions);
 
   // Handle animation states and callbacks
   useEffect(() => {
@@ -193,4 +212,15 @@ export function CursorTooltip({
       )}
     </>
   );
+}
+
+// Error boundary wrapper to catch any floating-ui errors
+export function CursorTooltip(props: CursorTooltipProps) {
+  try {
+    return <CursorTooltipInner {...props} />;
+  } catch (error) {
+    console.warn('CursorTooltip error (falling back to children only):', error);
+    // Fallback: just render children without tooltip functionality
+    return props.children;
+  }
 }
