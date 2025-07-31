@@ -8,7 +8,7 @@ import { dragStore, dragActions } from '@/stores/dragStore';
 import { playthroughActions } from '@/stores/playthroughs';
 import type { PokemonOptionType } from '@/loaders/pokemon';
 import { CursorTooltip } from '../CursorTooltip';
-import { DNA_SPLICER_ICON } from '@/misc/items';
+import { DNA_SPLICER_ICON } from '@/constants/items';
 import Image from 'next/image';
 import { useAllPokemon, usePokemonNameMap, isEgg } from '@/loaders/pokemon';
 

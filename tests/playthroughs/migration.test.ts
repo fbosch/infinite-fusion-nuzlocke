@@ -88,10 +88,7 @@ describe('Playthroughs Store - Migration Tests', () => {
           {
             id: 'custom-1',
             name: 'Custom Route',
-            region: 'Kanto',
-            description: 'Test location',
-            order: 999,
-            routeId: null,
+            insertAfterLocationId: 'some-location-id',
           },
         ],
         createdAt: 1234567890,

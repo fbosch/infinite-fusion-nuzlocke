@@ -1,0 +1,19 @@
+import { useQuery } from '@tanstack/react-query';
+import { spriteQueries } from '@/lib/queryClient';
+import ms from 'ms';
+
+/**
+ * Hook to get artwork variants for a Pokémon or fusion
+ */
+export function useSpriteVariants(
+  headId?: number | null,
+  bodyId?: number | null,
+  enabled: boolean = true
+) {
+  return useQuery({
+    ...spriteQueries.variants(headId, bodyId),
+    staleTime: ms('24h'), // Cache variants for 24 hours
+    gcTime: ms('48h'),
+    enabled: !!(headId || bodyId) && enabled,
+  });
+}

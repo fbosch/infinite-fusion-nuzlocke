@@ -18,10 +18,12 @@ import {
 } from '@floating-ui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
+import { Loader2 } from 'lucide-react';
 import {
   getInfiniteFusionToNationalDexMap,
   PokemonStatus,
   type PokemonOptionType,
+  type PokemonStatusType,
   useAllPokemon,
   isPokemonEvolution,
   isPokemonPreEvolution,
@@ -33,8 +35,11 @@ import { PokemonEvolutionButton } from './PokemonEvolutionButton';
 import { PokemonNicknameInput } from './PokemonNicknameInput';
 import { PokemonStatusInput } from './PokemonStatusInput';
 import { useComboboxDragAndDrop } from './useComboboxDragAndDrop';
-import { useEncounterData } from './useEncounterData';
-import { usePokemonSearch } from './usePokemonSearch';
+import {
+  EncounterSource,
+  useEncountersForLocation,
+} from '@/loaders/encounters';
+import { usePokemonSearch } from '@/loaders/pokemon';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { PokemonOption, PokemonOptions } from './PokemonOptions';
 
@@ -75,7 +80,6 @@ export function getPokemonSpriteUrlFromOption(
 }
 
 interface PokemonComboboxProps {
-  routeId?: number;
   locationId?: string;
   value: PokemonOptionType | null | undefined;
   onChange: (value: PokemonOptionType | null) => void;
@@ -86,7 +90,6 @@ interface PokemonComboboxProps {
     currentValue: PokemonOptionType,
     newValue: PokemonOptionType
   ) => Promise<boolean> | boolean;
-  shouldLoad?: boolean;
   placeholder?: string;
   nicknamePlaceholder?: string;
   disabled?: boolean;
@@ -94,24 +97,24 @@ interface PokemonComboboxProps {
   comboboxId?: string;
   ref?: React.RefObject<HTMLInputElement | null>;
   isFusion?: boolean;
+  shouldLoad?: boolean;
 }
 
 // Pokemon Combobox Component
 export const PokemonCombobox = React.memo(
   ({
-    routeId,
     locationId,
     value,
     onChange,
     onBeforeClear,
     onBeforeOverwrite,
-    shouldLoad = false,
     placeholder = 'Select Pokemon',
     nicknamePlaceholder = 'Enter nickname',
     disabled = false,
     comboboxId,
     ref,
     isFusion = false,
+    shouldLoad = true,
   }: PokemonComboboxProps) => {
     const [query, setQuery] = useState('');
     const deferredQuery = useDeferredValue(query);
@@ -143,18 +146,21 @@ export const PokemonCombobox = React.memo(
     }, [playthrough, locationId]);
 
     // Use the encounter data hook (now handles custom locations automatically)
-    const { routeEncounterData, isRoutePokemon } = useEncounterData({
-      routeId,
+    const { routeEncounterData, isRoutePokemon } = useEncountersForLocation({
       locationId,
-      enabled: shouldLoad && !isCustomLocation && gameMode !== 'randomized',
+      enabled: !isCustomLocation && gameMode !== 'randomized',
+      gameMode: gameMode === 'randomized' ? 'classic' : gameMode,
     });
     // Use the search hook
-    const { data: results = [] } = usePokemonSearch({
-      query: deferredQuery,
-    });
+    const { data: results = [], isLoading: isSearchLoading } = usePokemonSearch(
+      {
+        query: deferredQuery,
+      }
+    );
 
     // Get all Pokemon for randomized mode
-    const { data: allPokemon = [] } = useAllPokemon();
+    const { data: allPokemon = [], isLoading: isAllPokemonLoading } =
+      useAllPokemon();
 
     // Floating UI setup
     const { refs, floatingStyles, update, placement } = useFloating({
@@ -174,12 +180,25 @@ export const PokemonCombobox = React.memo(
       whileElementsMounted: autoUpdate,
     });
 
+    // Function to get Pokemon source information
+    const getPokemonSource = useCallback(
+      (pokemonId: number): EncounterSource | null => {
+        const pokemonData = routeEncounterData.find(p => p.id === pokemonId);
+        return pokemonData?.source || null;
+      },
+      [routeEncounterData]
+    );
+
     // Combine route matches with smart search results
     const finalOptions = useMemo(() => {
       // Early return for empty query
       if (deferredQuery === '') {
         // In randomized mode or custom location, show all Pokemon
         if (gameMode === 'randomized' || isCustomLocation) {
+          // If still loading, return empty array to avoid showing incomplete data
+          if (isAllPokemonLoading) {
+            return [];
+          }
           return allPokemon
             .map(p => ({
               id: p.id,
@@ -256,6 +275,7 @@ export const PokemonCombobox = React.memo(
       allPokemon,
       isCustomLocation,
       isFusion,
+      isAllPokemonLoading,
     ]);
 
     const handleChange = useCallback(
@@ -298,10 +318,31 @@ export const PokemonCombobox = React.memo(
           };
         }
 
+        // Set default status based on Pokemon source
+        if (finalValue) {
+          const source = getPokemonSource(finalValue.id);
+          let defaultStatus: PokemonStatusType | undefined = finalValue.status;
+
+          // Always set appropriate status for gift and trade Pokemon
+          if (source === EncounterSource.GIFT) {
+            defaultStatus = PokemonStatus.RECEIVED;
+          } else if (source === EncounterSource.TRADE) {
+            defaultStatus = PokemonStatus.TRADED;
+          }
+
+          // Only update if we have a new default status and it's different
+          if (defaultStatus && defaultStatus !== finalValue.status) {
+            finalValue = {
+              ...finalValue,
+              status: defaultStatus,
+            };
+          }
+        }
+
         onChange(finalValue || null);
         setQuery('');
       },
-      [onChange, value, onBeforeOverwrite]
+      [onChange, value, onBeforeOverwrite, getPokemonSource]
     );
 
     // Memoize input change handler
@@ -335,6 +376,25 @@ export const PokemonCombobox = React.memo(
       [onChange, value, onBeforeClear]
     );
 
+    // Determine if we should show loading
+    const isShowingLoading = useMemo(() => {
+      // Show loading when:
+      // 1. No query and all Pokemon are loading (for randomized/custom locations)
+      // 2. There's a query and search is loading, or all Pokemon are loading
+      if (deferredQuery === '') {
+        return (
+          (gameMode === 'randomized' || isCustomLocation) && isAllPokemonLoading
+        );
+      }
+      return isSearchLoading || isAllPokemonLoading;
+    }, [
+      deferredQuery,
+      gameMode,
+      isCustomLocation,
+      isAllPokemonLoading,
+      isSearchLoading,
+    ]);
+
     const shouldVirtualize = finalOptions.length > 30;
 
     const virtualizer = useVirtualizer({
@@ -358,7 +418,7 @@ export const PokemonCombobox = React.memo(
         onDragEnd={handleDragEnd}
         data-uid={dragPreview?.uid || value?.uid}
       >
-        {/* Location highlight overlay */}
+        {}
         <div className='absolute inset-0 bg-blue-500/20 border-2 border-blue-500/60 rounded-lg pointer-events-none z-10 opacity-0 transition-opacity duration-200 ease-in-out location-highlight-overlay max-w-screen' />
         <Combobox
           value={value || null}
@@ -426,12 +486,12 @@ export const PokemonCombobox = React.memo(
                         'object-center object-contain cursor-grab active:cursor-grabbing rounded-sm transform-gpu',
                         dragPreview && 'opacity-60 pointer-none' // Make preview sprite opaque
                       )}
-                      quality={70}
                       priority={true}
                       loading='eager'
                       placeholder='blur'
                       blurDataURL={TRANSPARENT_PIXEL}
                       draggable
+                      unoptimized
                       onDragStart={e => {
                         e.dataTransfer.setData(
                           'text/plain',
@@ -452,7 +512,6 @@ export const PokemonCombobox = React.memo(
                 value?.status === PokemonStatus.MISSED ? null : (
                   <PokemonEvolutionButton
                     value={value}
-                    key={value?.uid + 'evolution'}
                     onChange={onChange}
                     shouldLoad={shouldLoad}
                   />
@@ -494,14 +553,25 @@ export const PokemonCombobox = React.memo(
                         'pointer-events-none': virtualizer.isScrolling,
                       })}
                     >
-                      {shouldVirtualize ? (
+                      {isShowingLoading ? (
+                        <div className='relative cursor-default select-none py-2 px-4 text-center'>
+                          <div className='text-gray-500 dark:text-gray-400'>
+                            <p className='text-sm flex items-center gap-2 justify-center py-2'>
+                              <Loader2 className='w-4 h-4 animate-spin' />
+                              <span>Loading Pokémon...</span>
+                            </p>
+                          </div>
+                        </div>
+                      ) : shouldVirtualize ? (
                         virtualizer.getVirtualItems().map(virtualItem => (
                           <PokemonOption
+                            locationId={locationId}
                             key={virtualItem.key}
                             pokemon={finalOptions[virtualItem.index]}
                             index={virtualItem.index}
                             disabled={virtualizer.isScrolling}
                             isRoutePokemon={isRoutePokemon}
+                            getPokemonSource={getPokemonSource}
                             comboboxId={comboboxId || ''}
                             gameMode={gameMode}
                             style={{
@@ -519,11 +589,14 @@ export const PokemonCombobox = React.memo(
                         ))
                       ) : (
                         <PokemonOptions
+                          locationId={locationId}
                           comboboxId={comboboxId || ''}
                           finalOptions={finalOptions}
                           deferredQuery={deferredQuery}
                           isRoutePokemon={isRoutePokemon}
+                          getPokemonSource={getPokemonSource}
                           gameMode={gameMode}
+                          isLoading={isShowingLoading}
                         />
                       )}
                     </ComboboxOptions>

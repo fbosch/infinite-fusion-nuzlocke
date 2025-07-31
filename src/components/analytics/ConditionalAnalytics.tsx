@@ -8,6 +8,7 @@ const SpeedInsights = dynamic(
   () => import('@vercel/speed-insights/next').then(mod => mod.SpeedInsights),
   {
     ssr: false,
+    loading: () => null,
   }
 );
 
@@ -15,6 +16,7 @@ const Analytics = dynamic(
   () => import('@vercel/analytics/next').then(mod => mod.Analytics),
   {
     ssr: false,
+    loading: () => null,
   }
 );
 
@@ -40,11 +42,12 @@ export function ConditionalAnalytics() {
   }, []);
 
   // Only render Analytics if component has mounted and user has given consent
-  if (
-    !mounted ||
-    !preferences.analytics ||
-    process.env.NODE_ENV === 'development'
-  ) {
+  // Disable analytics in development and preview environments
+  const isProduction =
+    process.env.NODE_ENV === 'production' &&
+    process.env.VERCEL_ENV === 'production';
+
+  if (!mounted || !preferences.analytics || !isProduction) {
     return null;
   }
 
@@ -63,11 +66,12 @@ export function ConditionalSpeedInsights() {
   }, []);
 
   // Only render SpeedInsights if component has mounted and user has given consent
-  if (
-    !mounted ||
-    !preferences.speedInsights ||
-    process.env.NODE_ENV === 'development'
-  ) {
+  // Disable speed insights in development and preview environments
+  const isProduction =
+    process.env.NODE_ENV === 'production' &&
+    process.env.VERCEL_ENV === 'production';
+
+  if (!mounted || !preferences.speedInsights || !isProduction) {
     return null;
   }
 

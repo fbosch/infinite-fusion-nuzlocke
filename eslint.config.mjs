@@ -48,6 +48,13 @@ const eslintConfig = [
       ],
     },
   },
+  // Override for scripts directory to allow explicit any types for scraping scripts
+  {
+    files: ['scripts/**/*.{ts,tsx}', '**/*.test.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
 ];
 
 export default eslintConfig;

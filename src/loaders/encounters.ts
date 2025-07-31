@@ -1,6 +1,11 @@
 import { z } from 'zod';
+import { useCallback, useMemo } from 'react';
 import { getStarterPokemonByGameMode } from './starters';
-import type { PokemonOptionType } from './pokemon';
+import type { PokemonOptionType, Pokemon } from './pokemon';
+import { useAllPokemon, usePokemonNameMap } from './pokemon';
+import { encountersData } from '@/lib/queryClient';
+import { useLocationEncountersById } from './locations';
+
 /**
  * Type for encounter data with fusion status
  * Used to track Pokemon encounters and their fusion state
@@ -12,76 +17,85 @@ export interface EncounterData {
   artworkVariant?: string; // Alternative artwork variant for fusions (e.g., 'a', 'b', 'c')
 }
 
+export enum EncounterSource {
+  WILD = 'wild',
+  GIFT = 'gift',
+  TRADE = 'trade',
+  NEST = 'nest',
+}
+
+// Zod schema for individual Pokemon encounters
+export const PokemonEncounterSchema = z.object({
+  id: z
+    .number()
+    .int()
+    .refine(val => val > 0 || val === -1, {
+      error: 'Pokemon ID must be positive or -1 for egg locations',
+    }),
+  source: z.enum(EncounterSource, {
+    error: 'Source must be wild, gift, trade, or nest',
+  }),
+});
+
+export type PokemonEncounter = z.infer<typeof PokemonEncounterSchema>;
+
 // Zod schema for route encounter data
 export const RouteEncounterSchema = z.object({
   routeName: z.string().min(1, { error: 'Route name is required' }),
-  pokemonIds: z.array(
-    z.number().int().positive({ error: 'Pokemon ID must be positive' })
-  ),
-  routeId: z.number().int().positive({ error: 'Route ID must be positive' }),
+  pokemon: z.array(PokemonEncounterSchema),
 });
 
 export type RouteEncounter = z.infer<typeof RouteEncounterSchema>;
 
 export const RouteEncountersArraySchema = z.array(RouteEncounterSchema);
 
-// Cache for loaded data
-let classicEncountersCache: RouteEncounter[] | null = null;
-let remixEncountersCache: RouteEncounter[] | null = null;
-
-// Data loaders for encounters with dynamic imports
+// Data loaders for encounters using TanStack Query
 export async function getClassicEncounters(): Promise<RouteEncounter[]> {
-  if (classicEncountersCache) {
-    return classicEncountersCache;
-  }
-
   try {
-    const classicEncountersData = await import(
-      '@data/route-encounters-classic.json'
-    );
-    const data = RouteEncountersArraySchema.parse(
-      classicEncountersData.default
-    );
-    classicEncountersCache = data;
-    return data;
+    return await encountersData.getAllEncounters('classic');
   } catch (error) {
-    console.error('Failed to validate classic encounters data:', error);
-    throw new Error('Invalid classic encounters data format');
+    console.error('Failed to fetch classic encounters:', error);
+    throw new Error('Failed to load classic encounters data');
   }
 }
 
 export async function getRemixEncounters(): Promise<RouteEncounter[]> {
-  if (remixEncountersCache) {
-    return remixEncountersCache;
-  }
-
   try {
-    const remixEncountersData = await import(
-      '@data/route-encounters-remix.json'
-    );
-    const data = RouteEncountersArraySchema.parse(remixEncountersData.default);
-    remixEncountersCache = data;
-    return data;
+    return await encountersData.getAllEncounters('remix');
   } catch (error) {
-    console.error('Failed to validate remix encounters data:', error);
-    throw new Error('Invalid remix encounters data format');
+    console.error('Failed to fetch remix encounters:', error);
+    throw new Error('Failed to load remix encounters data');
   }
 }
 
-// Get encounters by route ID
-export async function getEncountersByRouteId(
-  routeId: number | null | undefined,
+// Get encounters by route name
+export async function getEncountersByRouteName(
+  routeName: string | null | undefined,
   gameMode: 'classic' | 'remix' = 'classic'
 ): Promise<RouteEncounter | null> {
-  if (routeId === 0) {
+  if (!routeName) {
+    return null;
+  }
+
+  // Special case for starter location
+  if (routeName === 'Starter') {
+    const starterIds = await getStarterPokemonByGameMode(gameMode);
     return {
       routeName: 'Starter',
-      pokemonIds: await getStarterPokemonByGameMode(gameMode),
-      routeId: 0,
+      pokemon: starterIds.map(id => ({ id, source: EncounterSource.GIFT })),
     };
   }
-  const encounters = await getEncounters(gameMode);
-  return encounters.find(encounter => encounter.routeId === routeId) || null;
+
+  try {
+    // Get all encounters for the game mode and find the specific route
+    const encounters = await encountersData.getAllEncounters(gameMode);
+    return (
+      encounters.find(encounter => encounter.routeName === routeName) || null
+    );
+  } catch (error) {
+    console.error(`Failed to fetch encounter for route '${routeName}':`, error);
+    return null;
+  }
 }
 
 // Get all encounters for a specific game mode
@@ -93,16 +107,83 @@ export async function getEncounters(
     : await getRemixEncounters();
 }
 
-// Create a map of routeId to encounter for quick lookup
+// Create a map of routeName to encounter for quick lookup
 export async function getEncountersMap(
   gameMode: 'classic' | 'remix' = 'classic'
-): Promise<Map<number, RouteEncounter>> {
+): Promise<Map<string, RouteEncounter>> {
   const encounters = await getEncounters(gameMode);
-  const encounterMap = new Map<number, RouteEncounter>();
+  const encounterMap = new Map<string, RouteEncounter>();
 
   encounters.forEach(encounter => {
-    encounterMap.set(encounter.routeId, encounter);
+    encounterMap.set(encounter.routeName, encounter);
   });
 
   return encounterMap;
+}
+
+// Function to clear cache if needed (for testing or data updates)
+export function clearEncountersCache(): void {
+  // This will be handled by TanStack Query's cache invalidation
+  // You can use queryClient.invalidateQueries(['encounters']) if needed
+}
+
+// Hook to get processed encounter data for a location
+interface UseEncounterDataOptions {
+  locationId?: string;
+  enabled?: boolean;
+  gameMode?: 'classic' | 'remix';
+}
+
+export function useEncountersForLocation({
+  locationId,
+  enabled = false,
+  gameMode = 'classic',
+}: UseEncounterDataOptions) {
+  // Use the hook variant to fetch encounters
+  const { pokemonEncounters, isLoading, error } = useLocationEncountersById(
+    enabled ? locationId : undefined,
+    gameMode
+  );
+
+  // Use existing hooks for Pokemon data and name map
+  const { data: allPokemon = [] } = useAllPokemon();
+  const nameMap = usePokemonNameMap();
+
+  // Process encounter data using useMemo
+  const routeEncounterData = useMemo((): (PokemonOptionType & {
+    source: EncounterSource;
+  })[] => {
+    if (!enabled || !pokemonEncounters.length || !allPokemon.length) {
+      return [];
+    }
+
+    return pokemonEncounters.map(({ id, source }) => {
+      const pokemon = allPokemon.find((p: Pokemon) => p.id === id);
+      return {
+        id,
+        name: nameMap.get(id) || `Unknown Pokemon (${id})`,
+        nationalDexId: pokemon?.nationalDexId || 0,
+        originalLocation: locationId,
+        source: source as EncounterSource,
+      };
+    });
+  }, [pokemonEncounters, allPokemon, nameMap, enabled, locationId]);
+
+  // Predicate function to check if a Pokemon is in the current route
+  const isRoutePokemon = useCallback(
+    (pokemonId: number): boolean => {
+      const routePokemonIds = new Set(
+        routeEncounterData.map(pokemon => pokemon.id)
+      );
+      return routePokemonIds.has(pokemonId);
+    },
+    [routeEncounterData]
+  );
+
+  return {
+    routeEncounterData,
+    isLoading,
+    error,
+    isRoutePokemon,
+  };
 }

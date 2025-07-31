@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, Fragment } from 'react';
+import React, { useCallback, Fragment, useMemo } from 'react';
 import { Atom, ChevronDown, Undo2 } from 'lucide-react';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -13,10 +13,8 @@ import {
   FloatingPortal,
 } from '@floating-ui/react';
 import {
-  getPokemonEvolutionIds,
-  getPokemonPreEvolutionId,
-  getPokemonByNationalDexId,
   type PokemonOptionType,
+  usePokemonEvolutionData,
 } from '@/loaders/pokemon';
 import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
 import { useShiftKey } from '@/hooks/useKeyPressed';
@@ -118,35 +116,30 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
             {availableEvolutions.map(evolution => (
               <MenuItem key={evolution.id}>
                 {({ focus }) => (
-                  <CursorTooltip
-                    content={`Evolve to ${evolution.name}`}
-                    delay={300}
+                  <button
+                    type='button'
+                    aria-label={`Evolve to ${evolution.name}`}
+                    onClick={() => onSelectEvolution(evolution)}
+                    className={clsx(
+                      'w-full flex items-center gap-3 px-3 py-2 text-sm hover:cursor-pointer rounded-md',
+                      'text-gray-900 dark:text-gray-100 text-left',
+                      'focus:outline-none',
+                      {
+                        'bg-blue-600 text-white': focus,
+                        'hover:bg-gray-100 dark:hover:bg-gray-700': !focus,
+                      }
+                    )}
                   >
-                    <button
-                      type='button'
-                      aria-label={`Evolve to ${evolution.name}`}
-                      onClick={() => onSelectEvolution(evolution)}
-                      className={clsx(
-                        'w-full flex items-center gap-3 px-3 py-2 text-sm hover:cursor-pointer rounded-md',
-                        'text-gray-900 dark:text-gray-100 text-left',
-                        'focus:outline-none',
-                        {
-                          'bg-blue-600 text-white': focus,
-                          'hover:bg-gray-100 dark:hover:bg-gray-700': !focus,
-                        }
-                      )}
-                    >
-                      <Image
-                        src={getPokemonSpriteUrlFromOption(evolution)}
-                        alt={evolution.name}
-                        width={32}
-                        height={32}
-                        className='object-contain object-center'
-                        loading='eager'
-                      />
-                      <span className=''>{evolution.name}</span>
-                    </button>
-                  </CursorTooltip>
+                    <Image
+                      src={getPokemonSpriteUrlFromOption(evolution)}
+                      alt={evolution.name}
+                      width={32}
+                      height={32}
+                      className='object-contain object-center'
+                      loading='eager'
+                    />
+                    <span className=''>{evolution.name}</span>
+                  </button>
                 )}
               </MenuItem>
             ))}
@@ -160,15 +153,34 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
 export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   value,
   onChange,
-  shouldLoad = false,
+  shouldLoad = true,
 }) => {
-  const [availableEvolutions, setAvailableEvolutions] = useState<
-    PokemonOptionType[]
-  >([]);
-  const [availablePreEvolution, setAvailablePreEvolution] =
-    useState<PokemonOptionType | null>(null);
-  const [isLoadingEvolutions, setIsLoadingEvolutions] = useState(false);
   const isShiftPressed = useShiftKey();
+  const { evolutions, preEvolution, isLoading } = usePokemonEvolutionData(
+    value?.id,
+    shouldLoad
+  );
+
+  // Transform Pokemon data to PokemonOptionType with originalLocation
+  const availableEvolutions = useMemo(() => {
+    return evolutions.map(pokemon => ({
+      id: pokemon.id,
+      name: pokemon.name,
+      nationalDexId: pokemon.nationalDexId,
+      originalLocation: value?.originalLocation,
+    }));
+  }, [evolutions, value?.originalLocation]);
+
+  const availablePreEvolution = useMemo(() => {
+    if (!preEvolution) return null;
+
+    return {
+      id: preEvolution.id,
+      name: preEvolution.name,
+      nationalDexId: preEvolution.nationalDexId,
+      originalLocation: value?.originalLocation,
+    };
+  }, [preEvolution, value?.originalLocation]);
 
   const hasEvolutions = availableEvolutions.length > 0;
   const hasPreEvolution = !!availablePreEvolution;
@@ -210,108 +222,11 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
     handleEvolution(undefined, isDevolutionMode);
   }, [handleEvolution, isDevolutionMode]);
 
-  // Load evolution and pre-evolution data when value changes
-  useEffect(() => {
-    if (!shouldLoad) {
-      return;
-    }
-
-    // Immediately clear evolution data when Pokemon changes
-    setAvailableEvolutions([]);
-    setAvailablePreEvolution(null);
-    setIsLoadingEvolutions(true);
-
-    let isCancelled = false;
-
-    const loadEvolutionData = async () => {
-      if (!value?.id) {
-        if (!isCancelled) {
-          setAvailableEvolutions([]);
-          setAvailablePreEvolution(null);
-          setIsLoadingEvolutions(false);
-        }
-        return;
-      }
-
-      try {
-        // Load evolutions
-        const evolutionIds = await getPokemonEvolutionIds(value.id);
-        if (isCancelled) return;
-
-        const evolutions: PokemonOptionType[] = [];
-
-        for (const evolutionId of evolutionIds) {
-          const evolutionPokemon = await getPokemonByNationalDexId(evolutionId);
-          if (isCancelled) return;
-
-          if (evolutionPokemon) {
-            evolutions.push({
-              id: evolutionPokemon.id,
-              name: evolutionPokemon.name,
-              nationalDexId: evolutionPokemon.nationalDexId,
-              originalLocation: value.originalLocation,
-            });
-          }
-        }
-
-        if (!isCancelled) {
-          setAvailableEvolutions(evolutions);
-        }
-
-        // Load pre-evolution
-        const preEvolutionId = await getPokemonPreEvolutionId(value.id);
-        if (isCancelled) return;
-
-        if (preEvolutionId) {
-          const preEvolutionPokemon =
-            await getPokemonByNationalDexId(preEvolutionId);
-          if (isCancelled) return;
-
-          if (preEvolutionPokemon) {
-            if (!isCancelled) {
-              setAvailablePreEvolution({
-                id: preEvolutionPokemon.id,
-                name: preEvolutionPokemon.name,
-                nationalDexId: preEvolutionPokemon.nationalDexId,
-                originalLocation: value.originalLocation,
-              });
-            }
-          } else {
-            if (!isCancelled) {
-              setAvailablePreEvolution(null);
-            }
-          }
-        } else {
-          if (!isCancelled) {
-            setAvailablePreEvolution(null);
-          }
-        }
-      } catch (error) {
-        if (!isCancelled) {
-          console.error('Error loading evolution data:', error);
-          setAvailableEvolutions([]);
-          setAvailablePreEvolution(null);
-        }
-      } finally {
-        if (!isCancelled) {
-          setIsLoadingEvolutions(false);
-        }
-      }
-    };
-
-    loadEvolutionData();
-
-    // Cleanup function to cancel pending operations
-    return () => {
-      isCancelled = true;
-    };
-  }, [value?.id, value?.originalLocation, shouldLoad]);
-
   // Don't render if no Pokemon is selected or no evolutions/devolutions available
   if (
     !value ||
     (availableEvolutions.length === 0 && !availablePreEvolution) ||
-    isLoadingEvolutions
+    isLoading
   ) {
     return null;
   }
@@ -372,7 +287,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
           <button
             type='button'
             onClick={handleDirectAction}
-            disabled={isLoadingEvolutions}
+            disabled={isLoading}
             className={clsx(
               'flex items-center justify-center gap-1 px-2 py-1 rounded-md',
               'bg-gray-100 text-gray-600 text-xs ',
@@ -407,7 +322,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
       <EvolutionDropdown
         availableEvolutions={availableEvolutions}
         onSelectEvolution={handleEvolution}
-        isLoadingEvolutions={isLoadingEvolutions}
+        isLoadingEvolutions={isLoading}
       />
     </div>
   );

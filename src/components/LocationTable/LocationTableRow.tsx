@@ -14,12 +14,11 @@ interface LocationTableRowProps {
 }
 
 export default function LocationTableRow({ row }: LocationTableRowProps) {
-  // For custom locations, routeId should be undefined since they don't have wild encounters
-  const routeId = isCustomLocation(row.original)
-    ? undefined
-    : row.original.routeId;
   const locationId = row.original.id;
   const { ref, inView } = useInView();
+
+  const aboveTheFold = row.index < 8;
+  const shouldLoad = inView || aboveTheFold;
 
   // Get encounter data directly - only this row will rerender when this encounter changes
   const encounterData = useEncounter(locationId) || {
@@ -44,15 +43,17 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
               className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group'
               role='cell'
             >
-              <PokemonSummaryCard locationId={locationId} shouldLoad={inView} />
+              <PokemonSummaryCard
+                locationId={locationId}
+                shouldLoad={shouldLoad}
+              />
             </td>
           ))
           .with('encounter', () => (
             <EncounterCell
               key={cell.id}
-              shouldLoad={inView}
-              routeId={routeId}
               locationId={locationId}
+              shouldLoad={shouldLoad}
             />
           ))
           .with('actions', () => {

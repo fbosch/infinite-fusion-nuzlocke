@@ -1,0 +1,89 @@
+{
+  "totalLocations": 16,
+  "sources": {
+    "gifts": 7,
+    "nests": 9
+  },
+  "locations": [
+    {
+      "routeName": "Kanto Daycare",
+      "source": "gift",
+      "description": "Togepi - Daycare Egg"
+    },
+    {
+      "routeName": "Kindle Road",
+      "source": "nest",
+      "description": "Nest location: Kindle Road"
+    },
+    {
+      "routeName": "Knot Island",
+      "source": "gift",
+      "description": "Pawniard - As Eggs brought with Heart Scales"
+    },
+    {
+      "routeName": "Lavender Town",
+      "source": "gift",
+      "description": "Wynaut - As Egg"
+    },
+    {
+      "routeName": "National Park",
+      "source": "gift",
+      "description": "Ralts - As Egg"
+    },
+    {
+      "routeName": "Pallet Town",
+      "source": "gift",
+      "description": "Bulbasaur - From your sibling after 4 Gyms, an egg of the starter strong against yours"
+    },
+    {
+      "routeName": "Rock Tunnel",
+      "source": "nest",
+      "description": "Nest location: Rock Tunnel"
+    },
+    {
+      "routeName": "Route 15",
+      "source": "nest",
+      "description": "Nest location: Route 15"
+    },
+    {
+      "routeName": "Route 23",
+      "source": "nest",
+      "description": "Nest location: Route 23"
+    },
+    {
+      "routeName": "Route 34",
+      "source": "nest",
+      "description": "Nest location: Route 34"
+    },
+    {
+      "routeName": "Route 5",
+      "source": "gift",
+      "description": "Random Egg - From breeder trainer, 4 possible random fusion Pokemon"
+    },
+    {
+      "routeName": "Route 8",
+      "source": "gift",
+      "description": "Random Egg - From breeder trainer, 10 possible random fusion Pokemon"
+    },
+    {
+      "routeName": "Saffron City",
+      "source": "nest",
+      "description": "Nest location: Saffron City"
+    },
+    {
+      "routeName": "Seafoam Islands",
+      "source": "nest",
+      "description": "Nest location: Seafoam Islands"
+    },
+    {
+      "routeName": "Secret Garden",
+      "source": "nest",
+      "description": "Nest location: Secret Garden"
+    },
+    {
+      "routeName": "Viridian Forest",
+      "source": "nest",
+      "description": "Nest location: Viridian Forest"
+    }
+  ]
+}

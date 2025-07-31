@@ -1,30 +1,98 @@
 'use client';
 
 import React from 'react';
-import { Check, Search } from 'lucide-react';
+import { ArrowUpDown, Check, Search, Loader2, Gift, Egg } from 'lucide-react';
 import { ComboboxOption } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { dragActions } from '@/stores/dragStore';
 import {
   type PokemonOptionType,
-  isEgg,
   getEncounterDisplayName,
+  isEgg,
 } from '@/loaders/pokemon';
 import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
+import { EncounterSource } from '@/loaders/encounters';
+import WildIcon from '@/assets/images/tall-grass.svg';
+import PokeballIcon from '@/assets/images/pokeball.svg';
+import { isStarterLocation } from '@/constants/special-locations';
+interface SourceTagProps {
+  source: EncounterSource | null;
+  locationId: string | undefined;
+}
+
+function SourceTag({ source, locationId }: SourceTagProps) {
+  if (!source) return null;
+
+  const tagConfig: Record<
+    EncounterSource,
+    { text: string; className: string; icon: React.ReactNode; tooltip?: string }
+  > = {
+    [EncounterSource.WILD]: {
+      text: 'Wild',
+      className:
+        'transition-colors duration-200 text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 border border-green-200/60 dark:border-green-700/40 hover:bg-green-100 dark:hover:bg-green-900/70',
+      icon: <WildIcon className='size-3' />,
+    },
+    [EncounterSource.GIFT]: {
+      text: 'Gift',
+      className:
+        'transition-colors duration-200 text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/40 hover:bg-purple-100 dark:hover:bg-purple-900/70',
+      icon: <Gift className='size-3' />,
+    },
+    [EncounterSource.TRADE]: {
+      text: 'Trade',
+      className:
+        'transition-colors duration-200 text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-900/20 border border-orange-200/60 dark:border-orange-700/40 hover:bg-orange-100 dark:hover:bg-orange-900/70',
+      icon: <ArrowUpDown className='size-3' />,
+    },
+    [EncounterSource.NEST]: {
+      text: 'Nest',
+      className:
+        'transition-colors duration-200 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/40 hover:bg-blue-100 dark:hover:bg-blue-900/70',
+      icon: <Egg className='size-3' />,
+    },
+  };
+
+  const config = isStarterLocation(locationId)
+    ? {
+        text: 'Starter',
+        icon: <PokeballIcon className='size-3' />,
+        className:
+          'transition-colors duration-200 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/40 hover:bg-blue-100 dark:hover:bg-blue-900/70',
+      }
+    : tagConfig[source];
+
+  return (
+    <span
+      className={clsx(
+        'text-xs px-1.5 py-0.5 rounded-sm font-normal leading-none flex items-center gap-1',
+        config.className
+      )}
+    >
+      {config.text}
+      {config.icon}
+    </span>
+  );
+}
 
 interface PokemonOptionsProps {
   finalOptions: PokemonOptionType[];
   deferredQuery: string;
+  locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
+  getPokemonSource: (pokemonId: number) => EncounterSource | null;
   comboboxId: string;
   gameMode: 'classic' | 'remix' | 'randomized';
+  isLoading?: boolean;
 }
 
 interface PokemonOptionProps {
   pokemon: PokemonOptionType;
   index: number;
+  locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
+  getPokemonSource: (pokemonId: number) => EncounterSource | null;
   comboboxId: string;
   gameMode: 'classic' | 'remix' | 'randomized';
   style?: React.CSSProperties;
@@ -35,20 +103,23 @@ interface PokemonOptionProps {
 interface PokemonOptionContentProps {
   pokemon: PokemonOptionType;
   index: number;
+  locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
+  getPokemonSource: (pokemonId: number) => EncounterSource | null;
   comboboxId: string;
   gameMode: 'classic' | 'remix' | 'randomized';
   isActive?: boolean;
   isSelected?: boolean;
 }
 
-// Extracted content component that can be reused
 function PokemonOptionContent({
   pokemon,
   index,
   isRoutePokemon,
+  getPokemonSource,
   comboboxId,
   gameMode,
+  locationId,
   isActive = false,
   isSelected = false,
 }: PokemonOptionContentProps) {
@@ -83,23 +154,22 @@ function PokemonOptionContent({
       >
         {displayName}
       </span>
-      <div className='flex items-center gap-3'>
+      <div className='flex items-center gap-2'>
         {gameMode !== 'randomized' && isRoutePokemon(pokemon.id) && (
-          <span className='text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded'>
-            Route
-          </span>
+          <SourceTag
+            source={getPokemonSource(pokemon.id)}
+            locationId={locationId}
+          />
         )}
-        {isEgg(pokemon) ? null : (
-          <span
-            className={clsx(
-              'text-xs dark:text-gray-400',
-              isActive &&
-                'group-hover:text-white group-data-selected:group-hover:text-white'
-            )}
-          >
-            {pokemon.id.toString().padStart(3, '0')}
-          </span>
-        )}
+        <span
+          className={clsx(
+            'text-xs dark:text-gray-400 w-8 text-right inline-block',
+            isActive &&
+              'group-hover:text-white group-data-selected:group-hover:text-white'
+          )}
+        >
+          {isEgg(pokemon) ? '???' : pokemon.id.toString().padStart(3, '0')}
+        </span>
         <div className='w-5 h-5 flex items-center justify-center'>
           <Check
             className={clsx(
@@ -119,10 +189,12 @@ export function PokemonOption({
   pokemon,
   index,
   isRoutePokemon,
+  getPokemonSource,
   comboboxId,
   gameMode,
   style,
   disabled,
+  locationId,
   className,
 }: PokemonOptionProps) {
   const baseClassName = clsx(
@@ -153,9 +225,11 @@ export function PokemonOption({
     >
       {({ active, selected }) => (
         <PokemonOptionContent
+          locationId={locationId}
           pokemon={pokemon}
           index={index}
           isRoutePokemon={isRoutePokemon}
+          getPokemonSource={getPokemonSource}
           comboboxId={comboboxId}
           gameMode={gameMode}
           isActive={active}
@@ -170,9 +244,25 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
   finalOptions,
   deferredQuery,
   isRoutePokemon,
+  getPokemonSource,
+  locationId,
   comboboxId,
   gameMode,
+  isLoading = false,
 }) => {
+  if (isLoading) {
+    return (
+      <div className='relative cursor-default select-none py-2 px-4 text-center'>
+        <div className='text-gray-500 dark:text-gray-400'>
+          <p className='text-sm flex items-center gap-2 justify-center py-2'>
+            <Loader2 className='w-4 h-4 animate-spin' />
+            <span>Loading Pokémon...</span>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (finalOptions.length === 0) {
     return (
       <div className='relative cursor-default select-none py-2 px-4 text-center'>
@@ -201,7 +291,9 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
       key={`${pokemon.id}-${pokemon.name}-${index}`}
       pokemon={pokemon}
       index={index}
+      locationId={locationId}
       isRoutePokemon={isRoutePokemon}
+      getPokemonSource={getPokemonSource}
       comboboxId={comboboxId}
       gameMode={gameMode}
     />

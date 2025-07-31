@@ -1,14 +1,23 @@
 import { SearchCore } from '@/lib/searchCore';
+import type { Pokemon } from '@/loaders/pokemon';
 import * as Comlink from 'comlink';
 
-let searchCoreInstance: SearchCore | null = null;
+const searchCore = new SearchCore();
 
 const searchAPI = {
+  async initialize(pokemonData: Pokemon[]) {
+    await searchCore.initialize(pokemonData);
+  },
+
   async search(query: string) {
-    if (!searchCoreInstance) {
-      searchCoreInstance = await SearchCore.create();
+    if (!searchCore.isReady()) {
+      throw new Error('SearchCore not initialized. Call initialize() first.');
     }
-    return searchCoreInstance.search(query);
+    return searchCore.search(query);
+  },
+
+  isReady() {
+    return searchCore.isReady();
   },
 };
 

@@ -1,8 +1,15 @@
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
-import { useQuery } from '@tanstack/react-query';
+import {
+  useQuery,
+  keepPreviousData,
+  QueryOptions,
+} from '@tanstack/react-query';
+import { useDebounce } from 'use-debounce';
 import { pokemonQueries, pokemonData } from '@/lib/queryClient';
 import { useMemo } from 'react';
+import { SearchCore } from '@/lib/searchCore';
+import searchService from '@/services/searchService';
 
 // Utility function to generate unique identifiers
 export function generatePokemonUID(): string {
@@ -205,9 +212,9 @@ export async function searchPokemon(
   query: string
 ): Promise<PokemonOptionType[]> {
   try {
-    const { SearchCore } = await import('@/lib/searchCore');
-    const searchCore = await SearchCore.create();
-    const searchResults = await searchCore.search(query);
+    const searchCore = new SearchCore();
+    await searchCore.initialize();
+    const searchResults = searchCore.search(query);
 
     return searchResults.map(result => ({
       id: result.id,
@@ -390,10 +397,6 @@ export function usePokemonByType(type: string) {
   return useQuery(pokemonQueries.byType(type));
 }
 
-export function usePokemonCount() {
-  return useQuery(pokemonQueries.count());
-}
-
 // Name map hook that transforms existing Pokemon data
 export function usePokemonNameMap() {
   const { data: allPokemon = [] } = useAllPokemon();
@@ -403,4 +406,104 @@ export function usePokemonNameMap() {
   }, [allPokemon]);
 
   return nameMap;
+}
+
+export function usePokemonEvolutionData(
+  pokemonId: number | undefined,
+  enabled: boolean = true
+) {
+  const { data: allPokemon, isLoading } = useQuery({
+    ...pokemonQueries.all(),
+    enabled,
+  });
+
+  return useMemo(() => {
+    if (!pokemonId || !allPokemon || !enabled)
+      return { evolutions: [], preEvolution: null, isLoading };
+
+    const currentPokemon = allPokemon.find(p => p.id === pokemonId);
+    if (!currentPokemon)
+      return {
+        evolutions: [],
+        preEvolution: null,
+        isLoading,
+      };
+
+    const evolutionIds =
+      currentPokemon.evolution?.evolves_to.map(e => e.id) || [];
+    const preEvolutionId = currentPokemon.evolution?.evolves_from?.id || null;
+    const evolutions = allPokemon.filter(p =>
+      evolutionIds.includes(p.nationalDexId)
+    );
+    const preEvolution = preEvolutionId
+      ? allPokemon.find(p => p.nationalDexId === preEvolutionId) || null
+      : null;
+    return {
+      evolutions,
+      preEvolution,
+      isLoading,
+    };
+  }, [allPokemon, pokemonId, isLoading, enabled]);
+}
+
+// Hook for searching Pokemon with debounced query
+interface UsePokemonSearchOptions {
+  query: string;
+  queryOptions?: Omit<
+    QueryOptions<PokemonOptionType[], Error>,
+    'queryKey' | 'queryFn'
+  >;
+}
+
+export function usePokemonSearch({
+  query,
+  queryOptions = {},
+}: UsePokemonSearchOptions) {
+  const { data: allPokemon = [] } = useAllPokemon();
+
+  // Debounce the query to reduce search frequency
+  const [debouncedQuery] = useDebounce(query, 50, {
+    maxWait: 250,
+    leading: true,
+    trailing: true,
+  });
+
+  return useQuery<PokemonOptionType[], Error>({
+    queryKey: ['pokemon', 'search', debouncedQuery],
+    queryFn: async () => {
+      if (debouncedQuery === '') return [];
+
+      try {
+        const searchResults = await searchService.search(debouncedQuery);
+        return searchResults.map(result => ({
+          id: result.id,
+          name: result.name,
+          nationalDexId: result.nationalDexId,
+        }));
+      } catch (err) {
+        console.warn(
+          'searchService failed, using client-side filtering fallback',
+          err
+        );
+        return allPokemon
+          .filter(pokemon =>
+            pokemon.name.toLowerCase().includes(debouncedQuery.toLowerCase())
+          )
+          .map(p => ({
+            id: p.id,
+            name: p.name,
+            nationalDexId: p.nationalDexId,
+          }));
+      }
+    },
+    select: data => {
+      return data?.filter(p => p.id !== 0) ?? [];
+    },
+    enabled: allPokemon.length > 0 && debouncedQuery !== '',
+    placeholderData: keepPreviousData,
+    staleTime: 0, // Don't cache - always fetch fresh data
+    gcTime: 0, // Don't keep in garbage collection
+    ...queryOptions,
+    persister: undefined,
+  });
 }

@@ -104,7 +104,7 @@ describe('Data Loading Utilities', () => {
 
       expect(result).toEqual(mockPokemonData);
       expect(mockFs.readFile).toHaveBeenCalledWith(
-        '/mock/project/data/pokemon-data.json',
+        '/mock/project/data/shared/pokemon-data.json',
         'utf8'
       );
     });
@@ -239,7 +239,7 @@ describe('Data Loading Utilities', () => {
 
       expect(result).toEqual(mockDexEntries);
       expect(mockFs.readFile).toHaveBeenCalledWith(
-        '/mock/project/data/base-entries.json',
+        '/mock/project/data/shared/base-entries.json',
         'utf8'
       );
     });
@@ -295,19 +295,19 @@ describe('Data Loading Utilities', () => {
 
       expect(mockFs.access).toHaveBeenCalledTimes(5);
       expect(mockFs.access).toHaveBeenCalledWith(
-        '/mock/project/data/pokemon-data.json'
+        '/mock/project/data/shared/pokemon-data.json'
       );
       expect(mockFs.access).toHaveBeenCalledWith(
-        '/mock/project/data/base-entries.json'
+        '/mock/project/data/shared/base-entries.json'
       );
       expect(mockFs.access).toHaveBeenCalledWith(
-        '/mock/project/data/route-encounters-classic.json'
+        '/mock/project/data/classic/encounters.json'
       );
       expect(mockFs.access).toHaveBeenCalledWith(
-        '/mock/project/data/route-encounters-remix.json'
+        '/mock/project/data/remix/encounters.json'
       );
       expect(mockFs.access).toHaveBeenCalledWith(
-        '/mock/project/data/locations.json'
+        '/mock/project/data/shared/locations.json'
       );
     });
 

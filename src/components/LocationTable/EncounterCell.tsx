@@ -5,17 +5,26 @@ import { ArrowLeftRight } from 'lucide-react';
 import { PokemonCombobox } from '@/components/PokemonCombobox/PokemonCombobox';
 import { FusionToggleButton } from './FusionToggleButton';
 import ConfirmationDialog from '@/components/ConfirmationDialog';
-import type { PokemonOptionType } from '@/loaders/pokemon';
+import type { PokemonOptionType, PokemonStatusType } from '@/loaders/pokemon';
+import { PokemonStatus } from '@/loaders/pokemon';
+import {
+  EncounterSource,
+  useEncountersForLocation,
+} from '@/loaders/encounters';
+import { useGameMode } from '@/stores/playthroughs';
 
 import clsx from 'clsx';
-import { useEncounter, playthroughActions } from '@/stores/playthroughs';
+import {
+  useEncounter,
+  playthroughActions,
+  useCustomLocations,
+} from '@/stores/playthroughs';
 import { getLocationById } from '@/loaders/locations';
 import { CursorTooltip } from '@/components/CursorTooltip';
-import { DNA_REVERSER_ICON } from '@/misc/items';
+import { DNA_REVERSER_ICON } from '@/constants/items';
 import Image from 'next/image';
 
 interface EncounterCellProps {
-  routeId: number | undefined;
   locationId: string;
   shouldLoad?: boolean;
 }
@@ -101,9 +110,8 @@ const initialState: ConfirmationState = {
 };
 
 export function EncounterCell({
-  routeId,
   locationId,
-  shouldLoad,
+  shouldLoad = true,
 }: EncounterCellProps) {
   // Get encounter data directly - only this cell will rerender when this encounter changes
   const encounterData = useEncounter(locationId) || {
@@ -118,6 +126,25 @@ export function EncounterCell({
   const bodyPokemon = encounterData.body;
 
   const selectedPokemon = encounterData.isFusion ? bodyPokemon : headPokemon;
+
+  // Get game mode and encounter data for source detection
+  const gameMode = useGameMode();
+  const customLocations = useCustomLocations();
+  const isCustomLocation = customLocations.some(loc => loc.id === locationId);
+  const { routeEncounterData } = useEncountersForLocation({
+    locationId,
+    enabled: !isCustomLocation && gameMode !== 'randomized',
+    gameMode: gameMode === 'randomized' ? 'classic' : gameMode,
+  });
+
+  // Function to get Pokemon source information
+  const getPokemonSource = useCallback(
+    (pokemonId: number): EncounterSource | null => {
+      const pokemonData = routeEncounterData.find(p => p.id === pokemonId);
+      return pokemonData?.source || null;
+    },
+    [routeEncounterData]
+  );
   const isFusion = encounterData.isFusion;
 
   // Use reducer for confirmation dialog state
@@ -192,7 +219,7 @@ export function EncounterCell({
           ? `${currentDataItems.slice(0, -1).join(', ')} and ${currentDataItems[currentDataItems.length - 1]}`
           : currentDataItems[0];
 
-      return `This will replace ${currentPokemon.nickname + ' '}the ${currentPokemon.name}${currentDataText ? ` ${currentDataText}` : ''} with ${newPokemon.name}.`;
+      return `This will replace ${currentPokemon.nickname ? currentPokemon.nickname + ' the ' : ''}${currentPokemon.name}${currentDataText ? ` ${currentDataText}` : ''} with ${newPokemon.name}?`;
     },
     []
   );
@@ -273,9 +300,30 @@ export function EncounterCell({
   // Handle overwrite confirmation dialog confirm action
   const handleConfirmOverwrite = useCallback(() => {
     if (confirmationState.pendingOverwrite) {
+      let pokemonToUpdate = confirmationState.pendingOverwrite.newPokemon;
+
+      // Apply default status based on Pokemon source
+      const source = getPokemonSource(pokemonToUpdate.id);
+      let defaultStatus: PokemonStatusType | undefined = pokemonToUpdate.status;
+
+      // Always set appropriate status for gift and trade Pokemon
+      if (source === EncounterSource.GIFT) {
+        defaultStatus = PokemonStatus.RECEIVED;
+      } else if (source === EncounterSource.TRADE) {
+        defaultStatus = PokemonStatus.TRADED;
+      }
+
+      // Update the Pokemon with the correct status if needed
+      if (defaultStatus && defaultStatus !== pokemonToUpdate.status) {
+        pokemonToUpdate = {
+          ...pokemonToUpdate,
+          status: defaultStatus,
+        };
+      }
+
       playthroughActions.updateEncounter(
         locationId,
-        confirmationState.pendingOverwrite.newPokemon,
+        pokemonToUpdate,
         confirmationState.pendingOverwrite.field,
         false
       );
@@ -283,7 +331,7 @@ export function EncounterCell({
 
     // Mark that the user confirmed the action
     dispatch({ type: 'CONFIRM_OVERWRITE' });
-  }, [locationId, confirmationState.pendingOverwrite]);
+  }, [locationId, confirmationState.pendingOverwrite, getPokemonSource]);
 
   // Handle overwrite confirmation dialog cancel/close action
   const handleOverwriteDialogClose = useCallback(() => {
@@ -463,17 +511,16 @@ export function EncounterCell({
                 </span>
                 <PokemonCombobox
                   key={`${locationId}-head`}
-                  routeId={routeId}
                   locationId={locationId}
                   value={headPokemon}
                   onChange={handleHeadChange}
                   placeholder='Select Pokémon'
                   nicknamePlaceholder='Enter nickname'
                   comboboxId={`${locationId}-head`}
-                  shouldLoad={shouldLoad}
                   onBeforeClear={handleBeforeClearHead}
                   onBeforeOverwrite={handleBeforeOverwriteHead}
                   isFusion={isFusion}
+                  shouldLoad={shouldLoad}
                 />
               </div>
               <CursorTooltip
@@ -508,7 +555,6 @@ export function EncounterCell({
                 </span>
                 <PokemonCombobox
                   key={`${locationId}-body`}
-                  routeId={routeId}
                   locationId={locationId}
                   value={bodyPokemon}
                   onChange={handleBodyChange}
@@ -516,27 +562,26 @@ export function EncounterCell({
                   nicknamePlaceholder='Enter nickname'
                   comboboxId={`${locationId}-body`}
                   ref={bodyComboboxRef}
-                  shouldLoad={shouldLoad}
                   onBeforeClear={handleBeforeClearBody}
                   onBeforeOverwrite={handleBeforeOverwriteBody}
                   isFusion={isFusion}
+                  shouldLoad={shouldLoad}
                 />
               </div>
             </div>
           ) : (
             <PokemonCombobox
               key={`${locationId}-single`}
-              routeId={routeId}
               locationId={locationId}
               value={selectedPokemon}
               onChange={handleSingleChange}
               placeholder='Select Pokémon'
               nicknamePlaceholder='Enter nickname'
               comboboxId={`${locationId}-single`}
-              shouldLoad={shouldLoad}
               onBeforeClear={handleBeforeClearSingle}
               onBeforeOverwrite={handleBeforeOverwriteSingle}
               isFusion={isFusion}
+              shouldLoad={shouldLoad}
             />
           )}
         </div>

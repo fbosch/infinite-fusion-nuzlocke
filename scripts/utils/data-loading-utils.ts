@@ -29,7 +29,7 @@ export async function loadPokemonData(forceReload: boolean = false): Promise<Pro
   }
 
   try {
-    const dataPath = path.join(process.cwd(), 'data', 'pokemon-data.json');
+    const dataPath = path.join(process.cwd(), 'data', 'shared', 'pokemon-data.json');
     const data = await fs.readFile(dataPath, 'utf8');
     const pokemonArray: ProcessedPokemonData[] = JSON.parse(data);
 
@@ -76,7 +76,7 @@ export async function loadDexEntries(forceReload: boolean = false): Promise<DexE
   }
 
   try {
-    const dataPath = path.join(process.cwd(), 'data', 'base-entries.json');
+    const dataPath = path.join(process.cwd(), 'data', 'shared', 'base-entries.json');
     const data = await fs.readFile(dataPath, 'utf8');
     const entries: DexEntry[] = JSON.parse(data);
 
@@ -121,11 +121,11 @@ export async function checkDataFiles(): Promise<{
   };
 
   return {
-    pokemonData: await checkFile('pokemon-data.json'),
-    dexEntries: await checkFile('base-entries.json'),
-    classicEncounters: await checkFile('route-encounters-classic.json'),
-    remixEncounters: await checkFile('route-encounters-remix.json'),
-    locations: await checkFile('locations.json')
+    pokemonData: await checkFile('shared/pokemon-data.json'),
+    dexEntries: await checkFile('shared/base-entries.json'),
+    classicEncounters: await checkFile('classic/encounters.json'),
+    remixEncounters: await checkFile('remix/encounters.json'),
+    locations: await checkFile('shared/locations.json'),
   };
 }
 

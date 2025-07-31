@@ -1,0 +1,89 @@
+[
+  {
+    "routeName": "Celadon Cafe",
+    "pokemonIds": [
+      305
+    ]
+  },
+  {
+    "routeName": "Celadon Game Corner",
+    "pokemonIds": [
+      123
+    ]
+  },
+  {
+    "routeName": "Cerulean City",
+    "pokemonIds": [
+      194
+    ]
+  },
+  {
+    "routeName": "Kanto Daycare",
+    "pokemonIds": [
+      174,
+      238,
+      257,
+      259
+    ]
+  },
+  {
+    "routeName": "Kin Island",
+    "pokemonIds": [
+      316,
+      319,
+      322
+    ]
+  },
+  {
+    "routeName": "Knot Island",
+    "pokemonIds": [
+      395
+    ]
+  },
+  {
+    "routeName": "Lavender Town",
+    "pokemonIds": [
+      253
+    ]
+  },
+  {
+    "routeName": "Mt. Moon",
+    "pokemonIds": [
+      138,
+      140
+    ]
+  },
+  {
+    "routeName": "Pallet Town",
+    "pokemonIds": [
+      1,
+      276,
+      279,
+      282
+    ]
+  },
+  {
+    "routeName": "Route 29",
+    "pokemonIds": [
+      294
+    ]
+  },
+  {
+    "routeName": "S.S. Anne",
+    "pokemonIds": [
+      488
+    ]
+  },
+  {
+    "routeName": "Silph Co.",
+    "pokemonIds": [
+      131
+    ]
+  },
+  {
+    "routeName": "Viridian City",
+    "pokemonIds": [
+      501
+    ]
+  }
+]

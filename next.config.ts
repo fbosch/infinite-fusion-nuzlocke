@@ -2,18 +2,63 @@ import type { NextConfig } from 'next';
 import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const nextConfig: NextConfig = {
-  webpack: config => {
-    config.module.rules.push({
-      test: /\.worker\.js$/,
-      loader: 'worker-loader',
-      options: {
-        name: 'static/[hash].worker.js',
-        publicPath: '/_next/',
+  // Enable Turbopack for faster development builds
+  turbopack: {
+    // Use default Turbopack configuration
+    // Can add custom rules, resolveAlias, resolveExtensions here if needed
+    rules: {
+      '*.svg': {
+        loaders: [
+          {
+            loader: '@svgr/webpack',
+            options: {
+              icon: true,
+              svgoConfig: {
+                plugins: [
+                  {
+                    name: 'preset-default',
+                    params: {
+                      overrides: {
+                        removeViewBox: false,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        as: '*.js',
       },
-    });
+    },
+  },
 
-    // Overcome Webpack referencing `window` in chunks
-    config.output.globalObject = `(typeof self !== 'undefined' ? self : this)`;
+  // Webpack configuration for production builds (Turbopack only works in dev)
+  webpack(config, { isServer }) {
+    // Handle SVG files with SVGR for production builds
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: [
+        {
+          loader: '@svgr/webpack',
+          options: {
+            icon: true,
+            svgoConfig: {
+              plugins: [
+                {
+                  name: 'preset-default',
+                  params: {
+                    overrides: {
+                      removeViewBox: false,
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      ],
+    });
 
     return config;
   },
@@ -35,6 +80,51 @@ const nextConfig: NextConfig = {
         pathname: '/generated/**',
       },
     ],
+  },
+
+  // Optimize static asset caching
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+        ],
+      },
+      {
+        // Cache static assets aggressively
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache fonts
+        source: '/fonts/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache service worker with shorter duration for updates
+        source: '/sw.js',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+    ];
   },
 };
 

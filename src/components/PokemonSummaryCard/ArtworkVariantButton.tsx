@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Loader2, RefreshCwOff, RefreshCcw, RefreshCw } from 'lucide-react';
 import clsx from 'clsx';
 import { playthroughActions, useEncounter } from '@/stores/playthroughs';
 import { useShiftKey } from '@/hooks/useKeyPressed';
 import { twMerge } from 'tailwind-merge';
 import { CursorTooltip } from '../CursorTooltip';
+import { useSpriteVariants } from '@/hooks/useSprite';
 
 interface ArtworkVariantButtonProps {
   locationId: string;
@@ -19,40 +20,24 @@ export function ArtworkVariantButton({
   locationId,
   disabled = false,
   className,
-  shouldLoad,
+  shouldLoad = true,
 }: ArtworkVariantButtonProps) {
   // Get encounter data directly - only this button will rerender when this encounter changes
   const encounter = useEncounter(locationId);
-  const [hasVariants, setHasVariants] = useState<boolean | null>(null);
   const isShiftPressed = useShiftKey();
 
-  React.useEffect(() => {
-    if (!shouldLoad || hasVariants !== null) return;
+  // Use React Query hook for sprite variants
+  const { data: variants, isLoading } = useSpriteVariants(
+    encounter?.head?.id,
+    encounter?.body?.id,
+    shouldLoad
+  );
 
-    const checkVariants = async () => {
-      try {
-        const { default: spriteService } = await import(
-          '@/services/spriteService'
-        );
-
-        let variants: string[] = [];
-        variants = await spriteService.getArtworkVariants(
-          encounter?.head?.id,
-          encounter?.body?.id
-        );
-
-        setHasVariants(variants.length > 1);
-      } catch (error) {
-        console.warn('Failed to check artwork variants:', error);
-        setHasVariants(false);
-      }
-    };
-
-    window.requestAnimationFrame(checkVariants);
-  }, [encounter, shouldLoad, hasVariants]);
+  // Determine if variants are available
+  const hasVariants = variants && variants.length > 1;
 
   const handleCycleVariant = React.useCallback(async () => {
-    if (disabled || hasVariants === false) return;
+    if (disabled || !hasVariants) return;
 
     try {
       await playthroughActions.cycleArtworkVariant(locationId, isShiftPressed);
@@ -62,35 +47,34 @@ export function ArtworkVariantButton({
   }, [disabled, hasVariants, locationId, isShiftPressed]);
 
   const buttonIcon = useMemo(() => {
-    if (hasVariants === null) {
+    if (isLoading) {
       return <Loader2 className='animate-spin size-3' />;
     }
-    if (hasVariants === false) {
+    if (!hasVariants) {
       return <RefreshCwOff className='size-3' />;
     }
     if (isShiftPressed) {
       return <RefreshCcw className='size-3' />;
     }
     return <RefreshCw className='size-3' />;
-  }, [hasVariants, isShiftPressed]);
+  }, [hasVariants, isLoading, isShiftPressed]);
 
   const label = useMemo(() => {
-    if (hasVariants === null) {
+    if (isLoading) {
       return 'Checking for artwork variants...';
     }
-    if (hasVariants === false) {
+    if (!hasVariants) {
       return 'No artwork variants available';
     }
     return 'Cycle artwork variants (hold Shift to reverse)';
-  }, [hasVariants]);
+  }, [hasVariants, isLoading]);
 
   // Don't show button if no encounter exists
   if (!encounter) {
     return null;
   }
 
-  const isButtonDisabled =
-    disabled || hasVariants === false || hasVariants === null;
+  const isButtonDisabled = disabled || !hasVariants || isLoading;
 
   return (
     <CursorTooltip
@@ -116,7 +100,7 @@ export function ArtworkVariantButton({
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
             'disabled:cursor-not-allowed enabled:hover:opacity-100 enabled:hover:text-white',
             {
-              'group-hover:opacity-100': hasVariants === null,
+              'group-hover:opacity-100': isLoading,
               'enabled:hover:bg-blue-400 enabled:focus:bg-blue-400 enabled:dark:hover:bg-blue-600 enabled:dark:focus:bg-blue-600 enabled:focus:text-white':
                 !isShiftPressed,
               'enabled:hover:bg-orange-400 enabled:focus:bg-orange-400 enabled:dark:hover:bg-orange-700 enabled:dark:focus:bg-orange-700':

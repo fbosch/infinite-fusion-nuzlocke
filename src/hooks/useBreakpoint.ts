@@ -16,7 +16,7 @@ const createBreakpointStore = () => {
     // Set up matchMedia listeners if not already done
     if (mediaQueries.length === 0 && typeof window !== 'undefined') {
       // Create media queries for each breakpoint
-      Object.entries(breakpoints).forEach(([breakpoint, width]) => {
+      Object.values(breakpoints).forEach(width => {
         const query = window.matchMedia(`(min-width: ${width}px)`);
         query.addEventListener('change', notify);
         mediaQueries.push(query);

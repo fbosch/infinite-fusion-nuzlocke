@@ -22,7 +22,9 @@ export async function getStarterPokemon(): Promise<StarterPokemon> {
   }
 
   try {
-    const starterPokemonData = await import('@data/starter-pokemon.json');
+    const starterPokemonData = await import(
+      '@data/shared/starter-pokemon.json'
+    );
     const data = StarterPokemonSchema.parse(starterPokemonData.default);
     starterPokemonCache = data;
     return data;

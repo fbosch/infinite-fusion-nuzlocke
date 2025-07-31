@@ -5,8 +5,13 @@ import { get, set, del, createStore } from 'idb-keyval';
 import { debounce } from 'es-toolkit';
 import React, { useMemo } from 'react';
 import { PokemonOptionSchema, generatePokemonUID } from '@/loaders/pokemon';
-import { CustomLocationSchema } from '@/loaders/locations';
+import {
+  CustomLocationSchema,
+  createCustomLocation,
+} from '@/loaders/locations';
 import spriteService from '@/services/spriteService';
+import { queryClient } from '@/lib/queryClient';
+import { spriteKeys } from '@/lib/queries/sprites';
 
 // Create a custom store for playthroughs data
 const playthroughsStore_idb = createStore('playthroughs', 'data');
@@ -48,6 +53,7 @@ export const PlaythroughSchema = z
     }
 
     // Remove remixMode if it exists (clean up)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { remixMode, ...cleanData } = data;
     return cleanData;
   });
@@ -1202,15 +1208,25 @@ export const playthroughActions = {
     if (!encounter) return;
 
     try {
-      // Cache the service import to avoid repeated dynamic imports
-      const { default: spriteService } = await import(
-        '@/services/spriteService'
-      );
-
-      const availableVariants = await spriteService.getArtworkVariants(
+      // First try to get cached variants from React Query
+      const queryKey = spriteKeys.variants(
         encounter.head?.id,
         encounter.body?.id
       );
+      let availableVariants = queryClient.getQueryData<string[]>(queryKey);
+
+      // If not in cache, fetch from service
+      if (!availableVariants) {
+        // Cache the service import to avoid repeated dynamic imports
+        const { default: spriteService } = await import(
+          '@/services/spriteService'
+        );
+
+        availableVariants = await spriteService.getArtworkVariants(
+          encounter.head?.id,
+          encounter.body?.id
+        );
+      }
 
       // Early return if no variants or only default
       if (!availableVariants || availableVariants.length <= 1) return;
@@ -1537,8 +1553,6 @@ export const playthroughActions = {
     if (!activePlaythrough) return null;
 
     try {
-      const { createCustomLocation } = await import('@/loaders/locations');
-
       // Ensure customLocations array exists
       if (!activePlaythrough.customLocations) {
         activePlaythrough.customLocations = [];
@@ -1565,7 +1579,7 @@ export const playthroughActions = {
   },
 
   // Remove a custom location from the active playthrough
-  removeCustomLocation: (customLocationId: string): boolean => {
+  removeCustomLocation: async (customLocationId: string): Promise<boolean> => {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!activePlaythrough || !activePlaythrough.customLocations) return false;
 
@@ -1574,11 +1588,16 @@ export const playthroughActions = {
     );
 
     if (index !== -1) {
-      // Create a new array without the custom location to ensure reactivity
-      activePlaythrough.customLocations =
-        activePlaythrough.customLocations.filter(
-          loc => loc.id !== customLocationId
-        );
+      // Import the dependency update function
+      const { updateCustomLocationDependencies } = await import(
+        '@/loaders/locations'
+      );
+
+      // Update dependencies and remove the location in one operation
+      activePlaythrough.customLocations = updateCustomLocationDependencies(
+        customLocationId,
+        activePlaythrough.customLocations
+      );
 
       // Also remove any encounters associated with this custom location
       if (
