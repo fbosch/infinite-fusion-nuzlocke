@@ -9,7 +9,6 @@ import {
   ArrowUpDown,
   LocateOff,
   Computer,
-  Check,
 } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import {
@@ -24,6 +23,7 @@ import {
   PokemonStatus,
 } from '@/loaders/pokemon';
 import { match } from 'ts-pattern';
+import PokeballIcon from '@/assets/images/pokeball.svg';
 
 interface PokemonStatusInputProps {
   value: PokemonOptionType | null | undefined;
@@ -35,7 +35,7 @@ interface PokemonStatusInputProps {
 const getStatusIcon = (status: PokemonStatusType) => {
   return match(status)
     .with(PokemonStatus.CAPTURED, () => (
-      <Check className='h-4 w-4 text-gray-600 dark:text-gray-300' />
+      <PokeballIcon className='h-4 w-4 text-gray-600 dark:text-gray-300' />
     ))
     .with(PokemonStatus.RECEIVED, () => (
       <Gift className='h-4 w-4 text-gray-600 dark:text-gray-300' />
