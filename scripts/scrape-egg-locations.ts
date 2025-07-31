@@ -301,16 +301,6 @@ async function main() {
       { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
     ]);
 
-    // Print some example locations
-    if (mergedLocations.length > 0) {
-      ConsoleFormatter.printSection('Example Egg Locations:');
-      mergedLocations.slice(0, 5).forEach(location => {
-        ConsoleFormatter.info(`${location.routeName} (${location.source})`);
-      });
-      if (mergedLocations.length > 5) {
-        ConsoleFormatter.info(`... and ${mergedLocations.length - 5} more locations`);
-      }
-    }
 
   } catch (error) {
     ConsoleFormatter.error(`Fatal error: ${error instanceof Error ? error.message : 'Unknown error'}`);

@@ -21,8 +21,9 @@
     "pokedex:scrape": "jiti scripts/scrape-pokedex.ts",
     "pokedex:fetch": "jiti scripts/fetch-pokemon-data.ts",
     "encounters:scrape": "jiti scripts/scrape-wild-encounters.ts",
+    "eggs:scrape": "jiti scripts/scrape-egg-locations.ts",
     "scrape:gifts": "jiti scripts/scrape-gifts-and-trades.ts",
-    "data:refresh": "pnpm run pokedex && pnpm run encounters:scrape && pnpm run scrape:gifts && pnpm run test:run",
+    "data:refresh": "pnpm run pokedex && pnpm run encounters:scrape && pnpm run scrape:gifts && pnpm run eggs:scrape && pnpm run test:run",
     "prepare": "husky"
   },
   "dependencies": {
