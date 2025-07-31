@@ -46,12 +46,17 @@ function queueSpriteVariants(spriteVariantsResponse) {
 
   if (!isAlreadyQueued) {
     spriteVariantQueue.push(spriteVariantsResponse);
-    console.debug(`Service Worker: Queued sprite variants for ${spriteVariantsResponse.cacheKey} (queue length: ${spriteVariantQueue.length})`);
-    
+    console.debug(
+      `Service Worker: Queued sprite variants for ${spriteVariantsResponse.cacheKey} (queue length: ${spriteVariantQueue.length})`
+    );
+
     // Start processing if not already running
     if (!isProcessingSpriteVariants) {
       processSpriteVariantQueue().catch(error => {
-        console.warn('Service Worker: Sprite variant queue processing failed:', error);
+        console.warn(
+          'Service Worker: Sprite variant queue processing failed:',
+          error
+        );
       });
     }
   }
@@ -64,7 +69,9 @@ async function processSpriteVariantQueue() {
   }
 
   isProcessingSpriteVariants = true;
-  console.debug(`Service Worker: Starting sprite variant queue processing (${spriteVariantQueue.length} items)`);
+  console.debug(
+    `Service Worker: Starting sprite variant queue processing (${spriteVariantQueue.length} items)`
+  );
 
   // Wait for initial page load and network to be idle
   await waitForPageLoad();
@@ -77,7 +84,9 @@ async function processSpriteVariantQueue() {
   while (spriteVariantQueue.length > 0) {
     // Check network conditions before each batch
     if (!shouldContinuePrefetch()) {
-      console.debug('Service Worker: Pausing sprite variant processing due to network conditions');
+      console.debug(
+        'Service Worker: Pausing sprite variant processing due to network conditions'
+      );
       break;
     }
 
@@ -85,8 +94,11 @@ async function processSpriteVariantQueue() {
     await waitForNetworkIdle();
 
     // Take items from queue for this batch
-    const batchItems = spriteVariantQueue.splice(0, Math.min(batchSize, spriteVariantQueue.length));
-    
+    const batchItems = spriteVariantQueue.splice(
+      0,
+      Math.min(batchSize, spriteVariantQueue.length)
+    );
+
     await Promise.allSettled(
       batchItems.map(async item => {
         await processSingleSpriteVariantItem(item, cache);
@@ -106,14 +118,15 @@ async function processSpriteVariantQueue() {
 // Process a single sprite variant item
 async function processSingleSpriteVariantItem(item, cache) {
   const { variants, cacheKey } = item;
-  
+
   if (!variants || variants.length === 0) {
     return;
   }
 
   // Generate sprite URLs for all variants
-  const spriteUrls = variants.map(variant => 
-    `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${cacheKey}${variant}.png`
+  const spriteUrls = variants.map(
+    variant =>
+      `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${cacheKey}${variant}.png`
   );
 
   let successCount = 0;
@@ -138,7 +151,11 @@ async function processSingleSpriteVariantItem(item, cache) {
         }
       } catch (error) {
         // Silently continue on individual failures
-        console.debug('Service Worker: Failed to prefetch sprite variant:', url, error);
+        console.debug(
+          'Service Worker: Failed to prefetch sprite variant:',
+          url,
+          error
+        );
       }
     })
   );
@@ -375,7 +392,7 @@ self.addEventListener('message', event => {
       // Queue sprite variants for background processing
       queueSpriteVariants(data);
       break;
-    
+
     default:
       console.debug('Service Worker: Unknown message type:', type);
   }
@@ -388,33 +405,44 @@ async function handleSpriteVariantsRequest(request) {
     const response = await fetch(request);
 
     // Check if the response is successful and contains JSON
-    if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
+    if (
+      response.ok &&
+      response.headers.get('content-type')?.includes('application/json')
+    ) {
       // Clone the response so we can read it for prefetching
       const responseClone = response.clone();
-      
+
       // Return the response immediately to the client
       // Then trigger prefetching in the background (after response is sent)
       setTimeout(async () => {
         try {
           const data = await responseClone.json();
-          
+
           // Check if this is a successful sprite variants response
           if (data.variants && Array.isArray(data.variants) && data.cacheKey) {
-            console.debug(`Service Worker: Queueing sprite variants for ${data.cacheKey} after API response`);
-            
+            console.debug(
+              `Service Worker: Queueing sprite variants for ${data.cacheKey} after API response`
+            );
+
             // Queue sprite variants for background processing
             queueSpriteVariants(data);
           }
         } catch (jsonError) {
           // If JSON parsing fails, just continue without prefetching
-          console.debug('Service Worker: Failed to parse sprite variants response:', jsonError);
+          console.debug(
+            'Service Worker: Failed to parse sprite variants response:',
+            jsonError
+          );
         }
       }, 0); // Execute on next tick after response is returned
     }
 
     return response;
   } catch (error) {
-    console.error('Service Worker: Error handling sprite variants request:', error);
+    console.error(
+      'Service Worker: Error handling sprite variants request:',
+      error
+    );
     // Return a network error response
     return new Response('Network error', { status: 503 });
   }

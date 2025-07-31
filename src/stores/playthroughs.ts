@@ -1209,7 +1209,10 @@ export const playthroughActions = {
 
     try {
       // First try to get cached variants from React Query
-      const queryKey = spriteKeys.variants(encounter.head?.id, encounter.body?.id);
+      const queryKey = spriteKeys.variants(
+        encounter.head?.id,
+        encounter.body?.id
+      );
       let availableVariants = queryClient.getQueryData<string[]>(queryKey);
 
       // If not in cache, fetch from service

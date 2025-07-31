@@ -116,35 +116,30 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
             {availableEvolutions.map(evolution => (
               <MenuItem key={evolution.id}>
                 {({ focus }) => (
-                  <CursorTooltip
-                    content={`Evolve to ${evolution.name}`}
-                    delay={300}
+                  <button
+                    type='button'
+                    aria-label={`Evolve to ${evolution.name}`}
+                    onClick={() => onSelectEvolution(evolution)}
+                    className={clsx(
+                      'w-full flex items-center gap-3 px-3 py-2 text-sm hover:cursor-pointer rounded-md',
+                      'text-gray-900 dark:text-gray-100 text-left',
+                      'focus:outline-none',
+                      {
+                        'bg-blue-600 text-white': focus,
+                        'hover:bg-gray-100 dark:hover:bg-gray-700': !focus,
+                      }
+                    )}
                   >
-                    <button
-                      type='button'
-                      aria-label={`Evolve to ${evolution.name}`}
-                      onClick={() => onSelectEvolution(evolution)}
-                      className={clsx(
-                        'w-full flex items-center gap-3 px-3 py-2 text-sm hover:cursor-pointer rounded-md',
-                        'text-gray-900 dark:text-gray-100 text-left',
-                        'focus:outline-none',
-                        {
-                          'bg-blue-600 text-white': focus,
-                          'hover:bg-gray-100 dark:hover:bg-gray-700': !focus,
-                        }
-                      )}
-                    >
-                      <Image
-                        src={getPokemonSpriteUrlFromOption(evolution)}
-                        alt={evolution.name}
-                        width={32}
-                        height={32}
-                        className='object-contain object-center'
-                        loading='eager'
-                      />
-                      <span className=''>{evolution.name}</span>
-                    </button>
-                  </CursorTooltip>
+                    <Image
+                      src={getPokemonSpriteUrlFromOption(evolution)}
+                      alt={evolution.name}
+                      width={32}
+                      height={32}
+                      className='object-contain object-center'
+                      loading='eager'
+                    />
+                    <span className=''>{evolution.name}</span>
+                  </button>
                 )}
               </MenuItem>
             ))}
