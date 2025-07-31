@@ -20,8 +20,8 @@ export default function RemoveLocationButton({
     setIsDialogOpen(true);
   }, []);
 
-  const handleConfirm = useCallback(() => {
-    playthroughActions.removeCustomLocation(locationId);
+  const handleConfirm = useCallback(async () => {
+    await playthroughActions.removeCustomLocation(locationId);
     setIsDialogOpen(false);
   }, [locationId]);
 

@@ -20,13 +20,13 @@ export default function CustomLocationsList({
     return location?.name || 'Unknown Location';
   };
 
-  const handleDelete = (locationId: string, locationName: string) => {
+  const handleDelete = async (locationId: string, locationName: string) => {
     if (
       confirm(
         `Are you sure you want to delete "${locationName}"? This will also remove any encounters associated with it.`
       )
     ) {
-      playthroughActions.removeCustomLocation(locationId);
+      await playthroughActions.removeCustomLocation(locationId);
     }
   };
 
