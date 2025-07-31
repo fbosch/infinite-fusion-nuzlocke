@@ -2,51 +2,30 @@ import type { NextConfig } from 'next';
 import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const nextConfig: NextConfig = {
-  webpack: config => {
-    // Overcome Webpack referencing `window` in chunks
-    config.output.globalObject = `(typeof self !== 'undefined' ? self : this)`;
-
-    // Optimize chunk splitting to reduce circular dependencies
-    config.optimization = {
-      ...config.optimization,
-      splitChunks: {
-        chunks: 'all',
-        minSize: 20000,
-        maxSize: 244000,
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-            priority: 20,
-            enforce: true,
+  // Enable Turbopack for faster development builds
+  turbopack: {
+    // Use default Turbopack configuration
+    // Can add custom rules, resolveAlias, resolveExtensions here if needed
+    rules: {
+      '*.svg': {
+        loaders: [
+          {
+            loader: '@svgr/webpack',
+            options: {
+              icon: true,
+            },
           },
-          runtime: {
-            name: 'runtime',
-            chunks: 'all',
-            test: /[\\/](webpack|runtime)[\\/]/,
-            priority: 30,
-            enforce: true,
-          },
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'all',
-            priority: 10,
-            reuseExistingChunk: true,
-            enforce: true,
-          },
-          default: {
-            minChunks: 2,
-            priority: -20,
-            reuseExistingChunk: true,
-          },
-        },
+        ],
+        as: '*.js',
       },
-    };
-
-    return config;
+    },
   },
+
+  // Note: Webpack config removed to avoid conflicts with Turbopack
+  // Turbopack handles all optimization automatically and much better than custom webpack configs
+  // The previous webpack optimizations included:
+  // - Global object fix for window chunks issue (not needed with Turbopack)
+  // - Custom chunk splitting (Turbopack handles this automatically and more efficiently)
   images: {
     remotePatterns: [
       {

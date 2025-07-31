@@ -17,6 +17,12 @@ export interface EncounterData {
   artworkVariant?: string; // Alternative artwork variant for fusions (e.g., 'a', 'b', 'c')
 }
 
+export enum EncounterSource {
+  WILD = 'wild',
+  GIFT = 'gift',
+  TRADE = 'trade',
+}
+
 // Zod schema for individual Pokemon encounters
 export const PokemonEncounterSchema = z.object({
   id: z
@@ -25,7 +31,7 @@ export const PokemonEncounterSchema = z.object({
     .refine(val => val > 0 || val === -1, {
       error: 'Pokemon ID must be positive or -1 for egg locations',
     }),
-  source: z.enum(['wild', 'gift', 'trade'], {
+  source: z.enum(EncounterSource, {
     error: 'Source must be wild, gift, or trade',
   }),
 });
@@ -75,7 +81,7 @@ export async function getEncountersByRouteName(
     const starterIds = await getStarterPokemonByGameMode(gameMode);
     return {
       routeName: 'Starter',
-      pokemon: starterIds.map(id => ({ id, source: 'gift' as const })),
+      pokemon: starterIds.map(id => ({ id, source: EncounterSource.GIFT })),
     };
   }
 
@@ -143,7 +149,9 @@ export function useEncountersForLocation({
   const nameMap = usePokemonNameMap();
 
   // Process encounter data using useMemo
-  const routeEncounterData = useMemo((): (PokemonOptionType & { source: 'wild' | 'gift' | 'trade' })[] => {
+  const routeEncounterData = useMemo((): (PokemonOptionType & {
+    source: EncounterSource;
+  })[] => {
     if (!enabled || !pokemonEncounters.length || !allPokemon.length) {
       return [];
     }
@@ -155,7 +163,7 @@ export function useEncountersForLocation({
         name: nameMap.get(id) || `Unknown Pokemon (${id})`,
         nationalDexId: pokemon?.nationalDexId || 0,
         originalLocation: locationId,
-        source,
+        source: source as EncounterSource,
       };
     });
   }, [pokemonEncounters, allPokemon, nameMap, enabled, locationId]);

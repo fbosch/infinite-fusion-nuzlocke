@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getStarterPokemonByGameMode } from '@/loaders/starters';
 import { isStarterLocation } from '@/constants/special-locations';
 import { GameMode } from '../stores/playthroughs';
-import type { PokemonEncounter } from './encounters';
+import { EncounterSource, type PokemonEncounter } from './encounters';
 
 // Location schema
 export const LocationSchema = z.object({
@@ -141,7 +141,7 @@ export async function getLocationEncountersByName(
   // Special case for starter location
   if (isStarterLocation(location.id)) {
     const starterIds = await getStarterPokemonByGameMode(gameMode);
-    return starterIds.map(id => ({ id, source: 'gift' as const }));
+    return starterIds.map(id => ({ id, source: EncounterSource.GIFT }));
   }
 
   // Get all encounters for the game mode and find the specific route
@@ -164,7 +164,7 @@ export async function getLocationEncountersById(
   // Special case for starter location
   if (isStarterLocation(locationId)) {
     const starterIds = await getStarterPokemonByGameMode(gameMode);
-    return starterIds.map(id => ({ id, source: 'gift' as const }));
+    return starterIds.map(id => ({ id, source: EncounterSource.GIFT }));
   }
 
   // Use TanStack Query to get encounters
@@ -215,7 +215,10 @@ export function useLocationEncountersById(
 
   if (isStarter) {
     return {
-      pokemonEncounters: starterPokemon.map(id => ({ id, source: 'gift' as const })),
+      pokemonEncounters: starterPokemon.map(id => ({
+        id,
+        source: EncounterSource.GIFT,
+      })),
       isLoading: starterLoading,
       error: starterError,
     };
@@ -237,8 +240,9 @@ export async function getLocationsWithEncounters(
   gameMode: 'classic' | 'remix' = 'classic'
 ): Promise<Array<Location & { encounters: PokemonEncounter[] }>> {
   const locations = getLocations();
-  const locationsWithEncounters: Array<Location & { encounters: PokemonEncounter[] }> =
-    [];
+  const locationsWithEncounters: Array<
+    Location & { encounters: PokemonEncounter[] }
+  > = [];
 
   for (const location of locations) {
     const encounters = await getLocationEncountersById(location.id, gameMode);

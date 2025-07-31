@@ -33,7 +33,10 @@ import { PokemonEvolutionButton } from './PokemonEvolutionButton';
 import { PokemonNicknameInput } from './PokemonNicknameInput';
 import { PokemonStatusInput } from './PokemonStatusInput';
 import { useComboboxDragAndDrop } from './useComboboxDragAndDrop';
-import { useEncountersForLocation } from '@/loaders/encounters';
+import {
+  EncounterSource,
+  useEncountersForLocation,
+} from '@/loaders/encounters';
 import { usePokemonSearch } from '@/loaders/pokemon';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { PokemonOption, PokemonOptions } from './PokemonOptions';
@@ -174,7 +177,7 @@ export const PokemonCombobox = React.memo(
 
     // Function to get Pokemon source information
     const getPokemonSource = useCallback(
-      (pokemonId: number): 'wild' | 'gift' | 'trade' | null => {
+      (pokemonId: number): EncounterSource | null => {
         const pokemonData = routeEncounterData.find(p => p.id === pokemonId);
         return pokemonData?.source || null;
       },
