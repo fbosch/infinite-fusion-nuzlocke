@@ -565,6 +565,7 @@ export const PokemonCombobox = React.memo(
                       ) : shouldVirtualize ? (
                         virtualizer.getVirtualItems().map(virtualItem => (
                           <PokemonOption
+                            locationId={locationId}
                             key={virtualItem.key}
                             pokemon={finalOptions[virtualItem.index]}
                             index={virtualItem.index}
@@ -588,6 +589,7 @@ export const PokemonCombobox = React.memo(
                         ))
                       ) : (
                         <PokemonOptions
+                          locationId={locationId}
                           comboboxId={comboboxId || ''}
                           finalOptions={finalOptions}
                           deferredQuery={deferredQuery}

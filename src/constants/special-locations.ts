@@ -26,7 +26,8 @@ export function isSpecialLocation(locationId: string): boolean {
 /**
  * Check if a location ID is the starter location
  */
-export function isStarterLocation(locationId: string): boolean {
+export function isStarterLocation(locationId: string | undefined): boolean {
+  if (!locationId) return false;
   return locationId === SPECIAL_LOCATIONS.STARTER_LOCATION;
 }
 

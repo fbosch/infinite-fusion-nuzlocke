@@ -14,11 +14,14 @@ import {
 import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
 import { EncounterSource } from '@/loaders/encounters';
 import WildIcon from '@/assets/images/tall-grass.svg';
+import PokeballIcon from '@/assets/images/pokeball.svg';
+import { isStarterLocation } from '@/constants/special-locations';
 interface SourceTagProps {
   source: EncounterSource | null;
+  locationId: string | undefined;
 }
 
-function SourceTag({ source }: SourceTagProps) {
+function SourceTag({ source, locationId }: SourceTagProps) {
   if (!source) return null;
 
   const tagConfig: Record<
@@ -51,7 +54,14 @@ function SourceTag({ source }: SourceTagProps) {
     },
   };
 
-  const config = tagConfig[source];
+  const config = isStarterLocation(locationId)
+    ? {
+        text: 'Starter',
+        icon: <PokeballIcon className='size-3' />,
+        className:
+          'transition-colors duration-200 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/40 hover:bg-blue-100 dark:hover:bg-blue-900/70',
+      }
+    : tagConfig[source];
 
   return (
     <span
@@ -69,6 +79,7 @@ function SourceTag({ source }: SourceTagProps) {
 interface PokemonOptionsProps {
   finalOptions: PokemonOptionType[];
   deferredQuery: string;
+  locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
   getPokemonSource: (pokemonId: number) => EncounterSource | null;
   comboboxId: string;
@@ -79,6 +90,7 @@ interface PokemonOptionsProps {
 interface PokemonOptionProps {
   pokemon: PokemonOptionType;
   index: number;
+  locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
   getPokemonSource: (pokemonId: number) => EncounterSource | null;
   comboboxId: string;
@@ -91,6 +103,7 @@ interface PokemonOptionProps {
 interface PokemonOptionContentProps {
   pokemon: PokemonOptionType;
   index: number;
+  locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
   getPokemonSource: (pokemonId: number) => EncounterSource | null;
   comboboxId: string;
@@ -106,6 +119,7 @@ function PokemonOptionContent({
   getPokemonSource,
   comboboxId,
   gameMode,
+  locationId,
   isActive = false,
   isSelected = false,
 }: PokemonOptionContentProps) {
@@ -142,7 +156,10 @@ function PokemonOptionContent({
       </span>
       <div className='flex items-center gap-2'>
         {gameMode !== 'randomized' && isRoutePokemon(pokemon.id) && (
-          <SourceTag source={getPokemonSource(pokemon.id)} />
+          <SourceTag
+            source={getPokemonSource(pokemon.id)}
+            locationId={locationId}
+          />
         )}
         <span
           className={clsx(
@@ -177,6 +194,7 @@ export function PokemonOption({
   gameMode,
   style,
   disabled,
+  locationId,
   className,
 }: PokemonOptionProps) {
   const baseClassName = clsx(
@@ -207,6 +225,7 @@ export function PokemonOption({
     >
       {({ active, selected }) => (
         <PokemonOptionContent
+          locationId={locationId}
           pokemon={pokemon}
           index={index}
           isRoutePokemon={isRoutePokemon}
@@ -226,6 +245,7 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
   deferredQuery,
   isRoutePokemon,
   getPokemonSource,
+  locationId,
   comboboxId,
   gameMode,
   isLoading = false,
@@ -271,6 +291,7 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
       key={`${pokemon.id}-${pokemon.name}-${index}`}
       pokemon={pokemon}
       index={index}
+      locationId={locationId}
       isRoutePokemon={isRoutePokemon}
       getPokemonSource={getPokemonSource}
       comboboxId={comboboxId}
