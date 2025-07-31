@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowUpDown, Check, Search, Loader2 } from 'lucide-react';
+import { ArrowUpDown, Check, Search, Loader2, Gift } from 'lucide-react';
 import { ComboboxOption } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -12,9 +12,8 @@ import {
   isEgg,
 } from '@/loaders/pokemon';
 import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
-import WildIcon from '@/assets/images/tall-grass.svg';
-import { Gift } from 'lucide-react';
 import { EncounterSource } from '@/loaders/encounters';
+import WildIcon from '@/assets/images/tall-grass.svg';
 
 // Source tag component
 interface SourceTagProps {

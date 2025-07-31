@@ -33,11 +33,35 @@ const nextConfig: NextConfig = {
     },
   },
 
-  // Note: Webpack config removed to avoid conflicts with Turbopack
-  // Turbopack handles all optimization automatically and much better than custom webpack configs
-  // The previous webpack optimizations included:
-  // - Global object fix for window chunks issue (not needed with Turbopack)
-  // - Custom chunk splitting (Turbopack handles this automatically and more efficiently)
+  // Webpack configuration for production builds (Turbopack only works in dev)
+  webpack(config, { isServer }) {
+    // Handle SVG files with SVGR for production builds
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: [
+        {
+          loader: '@svgr/webpack',
+          options: {
+            icon: true,
+            svgoConfig: {
+              plugins: [
+                {
+                  name: 'preset-default',
+                  params: {
+                    overrides: {
+                      removeViewBox: false,
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      ],
+    });
+
+    return config;
+  },
   images: {
     remotePatterns: [
       {
