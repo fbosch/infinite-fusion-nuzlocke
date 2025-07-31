@@ -214,7 +214,7 @@ export function EncounterCell({
           ? `${currentDataItems.slice(0, -1).join(', ')} and ${currentDataItems[currentDataItems.length - 1]}`
           : currentDataItems[0];
 
-      return `This will replace ${currentPokemon.nickname + ' '}the ${currentPokemon.name}${currentDataText ? ` ${currentDataText}` : ''} with ${newPokemon.name}.`;
+      return `This will replace ${currentPokemon.nickname ? currentPokemon.nickname + ' the ' : ''}${currentPokemon.name}${currentDataText ? ` ${currentDataText}` : ''} with ${newPokemon.name}?`;
     },
     []
   );
