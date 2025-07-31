@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { RouteEncountersArraySchema } from '@/loaders/encounters';
+import {
+  EncounterSource,
+  RouteEncountersArraySchema,
+} from '@/loaders/encounters';
 
 // Temporary schema for the old data format during migration
 const OldRouteEncounterSchema = z.object({
@@ -22,30 +25,15 @@ export async function GET(request: NextRequest) {
       gameMode: searchParams.get('gameMode'),
     });
 
-    // Import all data files to avoid conditional dynamic imports that cause webpack circular dependencies
-    const [
-      classicEncounters,
-      remixEncounters,
-      classicTrades,
-      remixTrades,
-      classicGifts,
-      remixGifts,
-      eggLocations,
-    ] = await Promise.all([
-      import('@data/classic/encounters.json'),
-      import('@data/remix/encounters.json'),
-      import('@data/classic/trades.json'),
-      import('@data/remix/trades.json'),
-      import('@data/classic/gifts.json'),
-      import('@data/remix/gifts.json'),
+    // Conditionally import only the required data files based on game mode
+    const gameModePath = query.gameMode === 'remix' ? 'remix' : 'classic';
+
+    const [wild, trade, gift, eggLocations] = await Promise.all([
+      import(`@data/${gameModePath}/encounters.json`),
+      import(`@data/${gameModePath}/trades.json`),
+      import(`@data/${gameModePath}/gifts.json`),
       import('@data/egg-locations.json'),
     ]);
-
-    // Select the appropriate data based on game mode
-    const wild =
-      query.gameMode === 'remix' ? remixEncounters : classicEncounters;
-    const trade = query.gameMode === 'remix' ? remixTrades : classicTrades;
-    const gift = query.gameMode === 'remix' ? remixGifts : classicGifts;
 
     // Validate the data using the old schema (since data files haven't been migrated yet)
     const encounters = OldRouteEncountersArraySchema.parse(wild.default);
@@ -79,14 +67,23 @@ export async function GET(request: NextRequest) {
 
       // Create Pokemon objects with source information
       const pokemon = [
-        ...wildPokemon.map(id => ({ id, source: 'wild' as const })),
-        ...tradePokemon.map(id => ({ id, source: 'trade' as const })),
-        ...giftPokemon.map(id => ({ id, source: 'gift' as const })),
+        ...wildPokemon.map(id => ({
+          id,
+          source: EncounterSource.WILD as const,
+        })),
+        ...tradePokemon.map(id => ({
+          id,
+          source: EncounterSource.TRADE as const,
+        })),
+        ...giftPokemon.map(id => ({
+          id,
+          source: EncounterSource.GIFT as const,
+        })),
       ];
 
       // Add egg encounter if this route has egg locations
       if (eggRouteNames.has(routeName)) {
-        pokemon.push({ id: -1, source: 'gift' as const });
+        pokemon.push({ id: -1, source: EncounterSource.GIFT as const });
       }
 
       // Remove duplicates based on both id and source

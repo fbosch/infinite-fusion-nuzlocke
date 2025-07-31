@@ -14,8 +14,6 @@ import {
 import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
 import { EncounterSource } from '@/loaders/encounters';
 import WildIcon from '@/assets/images/tall-grass.svg';
-
-// Source tag component
 interface SourceTagProps {
   source: EncounterSource | null;
 }
@@ -95,7 +93,6 @@ interface PokemonOptionContentProps {
   isSelected?: boolean;
 }
 
-// Extracted content component that can be reused
 function PokemonOptionContent({
   pokemon,
   index,
