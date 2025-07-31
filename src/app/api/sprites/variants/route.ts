@@ -28,6 +28,20 @@ function generateSpriteUrl(id: string, variant = ''): string {
 }
 
 /**
+ * Handle CORS preflight requests
+ */
+export async function OPTIONS() {
+  const response = new NextResponse(null, { status: 200 });
+
+  // Set CORS headers
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  return response;
+}
+
+/**
  * Check if a sprite URL exists using fetch
  */
 async function checkSpriteExists(url: string): Promise<boolean> {
@@ -73,21 +87,25 @@ export async function GET(request: NextRequest) {
 
     // Validate input
     if (!id) {
-      return NextResponse.json(
+      const errorResponse = NextResponse.json(
         { error: 'id parameter is required' },
         { status: 400 }
       );
+      errorResponse.headers.set('Access-Control-Allow-Origin', '*');
+      return errorResponse;
     }
 
     // Validate id format (should be like "25.125" or just "25")
     if (!/^\d+(\.\d+)?$/.test(id)) {
-      return NextResponse.json(
+      const errorResponse = NextResponse.json(
         {
           error:
             'Invalid id format. Expected format: "headId" or "headId.bodyId"',
         },
         { status: 400 }
       );
+      errorResponse.headers.set('Access-Control-Allow-Origin', '*');
+      return errorResponse;
     }
 
     const variants: string[] = [];
@@ -113,6 +131,11 @@ export async function GET(request: NextRequest) {
 
     const response = NextResponse.json(responseData);
 
+    // Set CORS headers to allow requests from any origin
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+
     // Set appropriate cache headers based on environment
     response.headers.set(
       'Cache-Control',
@@ -122,9 +145,17 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('Error in sprite variants API:', error);
-    return NextResponse.json(
+
+    const errorResponse = NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
+
+    // Set CORS headers on error response too
+    errorResponse.headers.set('Access-Control-Allow-Origin', '*');
+    errorResponse.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    errorResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+
+    return errorResponse;
   }
 }

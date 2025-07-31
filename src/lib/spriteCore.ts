@@ -199,28 +199,11 @@ export class SpriteService {
 
       return data.variants || [];
     } catch (error) {
-      console.warn(
-        'Failed to get artwork variants from API, falling back to client-side check:',
-        error
-      );
+      console.warn('Failed to get artwork variants from API:', error);
 
-      // Fallback to client-side checking if API fails
-      const variants: string[] = [];
-      try {
-        for (let i = 0; i < maxVariants; i++) {
-          const variant = getVariantSuffix(i);
-          const url = generateSpriteUrl(headId, bodyId, variant);
-          if (await checkSpriteExists(url)) {
-            variants.push(variant);
-          } else {
-            break;
-          }
-        }
-      } catch (fallbackError) {
-        console.warn('Fallback sprite checking also failed:', fallbackError);
-      }
-
-      return variants;
+      // Return empty array to avoid CORS issues with direct CDN access
+      // The API should handle all sprite checking server-side
+      return [''];
     }
   }
 
