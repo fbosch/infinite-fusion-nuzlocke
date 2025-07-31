@@ -185,7 +185,10 @@ self.addEventListener('fetch', event => {
 async function handleApiRequest(request) {
   const cache = await caches.open(API_CACHE_NAME);
   const url = new URL(request.url);
-  const isDevelopment = url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname.includes('local');
+  const isDevelopment =
+    url.hostname === 'localhost' ||
+    url.hostname === '127.0.0.1' ||
+    url.hostname.includes('local');
 
   // In development, try network first for fresh data
   if (isDevelopment) {
@@ -194,14 +197,20 @@ async function handleApiRequest(request) {
       if (response.status === 200) {
         const responseClone = response.clone();
         cache.put(request, responseClone);
-        console.debug('Service Worker: Cached fresh API response (dev):', url.pathname);
+        console.debug(
+          'Service Worker: Cached fresh API response (dev):',
+          url.pathname
+        );
       }
       return response;
     } catch (error) {
       // Fallback to cache in development if network fails
       const cachedResponse = await cache.match(request);
       if (cachedResponse) {
-        console.debug('Service Worker: Network failed, serving from cache (dev):', url.pathname);
+        console.debug(
+          'Service Worker: Network failed, serving from cache (dev):',
+          url.pathname
+        );
         return cachedResponse;
       }
       throw error;
