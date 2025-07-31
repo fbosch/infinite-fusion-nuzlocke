@@ -14,7 +14,11 @@ import {
 import { useGameMode } from '@/stores/playthroughs';
 
 import clsx from 'clsx';
-import { useEncounter, playthroughActions } from '@/stores/playthroughs';
+import {
+  useEncounter,
+  playthroughActions,
+  useCustomLocations,
+} from '@/stores/playthroughs';
 import { getLocationById } from '@/loaders/locations';
 import { CursorTooltip } from '@/components/CursorTooltip';
 import { DNA_REVERSER_ICON } from '@/constants/items';
@@ -125,7 +129,8 @@ export function EncounterCell({
 
   // Get game mode and encounter data for source detection
   const gameMode = useGameMode();
-  const isCustomLocation = false; // Assuming this is handled elsewhere
+  const customLocations = useCustomLocations();
+  const isCustomLocation = customLocations.some(loc => loc.id === locationId);
   const { routeEncounterData } = useEncountersForLocation({
     locationId,
     enabled: !isCustomLocation && gameMode !== 'randomized',
