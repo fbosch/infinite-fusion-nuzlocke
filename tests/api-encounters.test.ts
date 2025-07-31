@@ -17,8 +17,8 @@ describe('Encounters API', () => {
     expect(Array.isArray(data)).toBe(true);
     expect(data.length).toBeGreaterThan(0);
 
-    // Check that routes with egg locations include -1
-    const eggRouteNames = [
+    // Check that routes with egg gift locations include -1 with 'gift' source
+    const eggGiftRouteNames = [
       'Kanto Daycare',
       'Knot Island',
       'Lavender Town',
@@ -26,6 +26,19 @@ describe('Encounters API', () => {
       'Pallet Town',
       'Route 5',
       'Route 8',
+    ];
+
+    eggGiftRouteNames.forEach(routeName => {
+      const route = data.find((r: any) => r.routeName === routeName);
+      if (route) {
+        const eggPokemon = route.pokemon.find((p: any) => p.id === -1);
+        expect(eggPokemon).toBeTruthy();
+        expect(eggPokemon?.source).toBe('gift');
+      }
+    });
+
+    // Check that routes with egg nest locations include -1 with 'nest' source
+    const eggNestRouteNames = [
       'Kindle Road',
       'Rock Tunnel',
       'Route 15',
@@ -37,18 +50,19 @@ describe('Encounters API', () => {
       'Viridian Forest',
     ];
 
-    eggRouteNames.forEach(routeName => {
+    eggNestRouteNames.forEach(routeName => {
       const route = data.find((r: any) => r.routeName === routeName);
       if (route) {
         const eggPokemon = route.pokemon.find((p: any) => p.id === -1);
         expect(eggPokemon).toBeTruthy();
-        expect(eggPokemon?.source).toBe('gift');
+        expect(eggPokemon?.source).toBe('nest');
       }
     });
 
     // Check that routes without egg locations don't have -1
+    const allEggRoutes = [...eggGiftRouteNames, ...eggNestRouteNames];
     const nonEggRoutes = data.filter(
-      (route: any) => !eggRouteNames.includes(route.routeName)
+      (route: any) => !allEggRoutes.includes(route.routeName)
     );
     nonEggRoutes.forEach((route: any) => {
       const eggPokemon = route.pokemon.find((p: any) => p.id === -1);
@@ -95,7 +109,7 @@ describe('Encounters API', () => {
         expect(pokemon).toHaveProperty('id');
         expect(pokemon).toHaveProperty('source');
         expect(typeof pokemon.id).toBe('number');
-        expect(['wild', 'gift', 'trade']).toContain(pokemon.source);
+        expect(['wild', 'gift', 'trade', 'nest']).toContain(pokemon.source);
       });
     });
   });

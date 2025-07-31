@@ -772,7 +772,7 @@ describe('Data Integrity Tests', () => {
 
     it('should have exactly 7 gift locations', () => {
       const giftLocations = eggLocations.locations.filter(
-        loc => loc.source === 'gifts'
+        loc => loc.source === 'gift'
       );
       expect(giftLocations.length).toBe(7);
       expect(eggLocations.sources.gifts).toBe(7);
@@ -780,7 +780,7 @@ describe('Data Integrity Tests', () => {
 
     it('should have exactly 9 nest locations', () => {
       const nestLocations = eggLocations.locations.filter(
-        loc => loc.source === 'nests'
+        loc => loc.source === 'nest'
       );
       expect(nestLocations.length).toBe(9);
       expect(eggLocations.sources.nests).toBe(9);
@@ -798,7 +798,7 @@ describe('Data Integrity Tests', () => {
 
         expect(location.routeName.length).toBeGreaterThan(0);
         expect(location.description.length).toBeGreaterThan(0);
-        expect(['gifts', 'nests']).toContain(location.source);
+        expect(['gift', 'nest']).toContain(location.source);
       });
     });
 
@@ -820,7 +820,7 @@ describe('Data Integrity Tests', () => {
       ];
 
       const actualGiftLocations = eggLocations.locations
-        .filter(loc => loc.source === 'gifts')
+        .filter(loc => loc.source === 'gift')
         .map(loc => loc.routeName)
         .sort();
 
@@ -841,7 +841,7 @@ describe('Data Integrity Tests', () => {
       ];
 
       const actualNestLocations = eggLocations.locations
-        .filter(loc => loc.source === 'nests')
+        .filter(loc => loc.source === 'nest')
         .map(loc => loc.routeName)
         .sort();
 

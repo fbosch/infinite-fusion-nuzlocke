@@ -3,7 +3,7 @@ import eggLocationsData from '../data/egg-locations.json';
 
 interface EggLocation {
   routeName: string;
-  source: 'gifts' | 'nests';
+  source: 'gift' | 'nest';
   description: string;
 }
 
@@ -53,7 +53,7 @@ describe('Egg Locations Data Integrity', () => {
 
         expect(location.routeName.length).toBeGreaterThan(0);
         expect(location.description.length).toBeGreaterThan(0);
-        expect(['gifts', 'nests']).toContain(location.source);
+        expect(['gift', 'nest']).toContain(location.source);
       });
     });
 
@@ -84,17 +84,13 @@ describe('Egg Locations Data Integrity', () => {
 
   describe('Source Counts', () => {
     it('should have exactly 7 gift locations', () => {
-      const giftLocations = data.locations.filter(
-        loc => loc.source === 'gifts'
-      );
+      const giftLocations = data.locations.filter(loc => loc.source === 'gift');
       expect(giftLocations.length).toBe(7);
       expect(data.sources.gifts).toBe(7);
     });
 
     it('should have exactly 9 nest locations', () => {
-      const nestLocations = data.locations.filter(
-        loc => loc.source === 'nests'
-      );
+      const nestLocations = data.locations.filter(loc => loc.source === 'nest');
       expect(nestLocations.length).toBe(9);
       expect(data.sources.nests).toBe(9);
     });
@@ -117,7 +113,7 @@ describe('Egg Locations Data Integrity', () => {
       ];
 
       const actualGiftLocations = data.locations
-        .filter(loc => loc.source === 'gifts')
+        .filter(loc => loc.source === 'gift')
         .map(loc => loc.routeName)
         .sort();
 
@@ -138,7 +134,7 @@ describe('Egg Locations Data Integrity', () => {
       ];
 
       const actualNestLocations = data.locations
-        .filter(loc => loc.source === 'nests')
+        .filter(loc => loc.source === 'nest')
         .map(loc => loc.routeName)
         .sort();
 
@@ -148,9 +144,7 @@ describe('Egg Locations Data Integrity', () => {
 
   describe('Description Validation', () => {
     it('should have meaningful descriptions for gift locations', () => {
-      const giftLocations = data.locations.filter(
-        loc => loc.source === 'gifts'
-      );
+      const giftLocations = data.locations.filter(loc => loc.source === 'gift');
 
       giftLocations.forEach(location => {
         expect(location.description.length).toBeGreaterThan(5);
@@ -159,9 +153,7 @@ describe('Egg Locations Data Integrity', () => {
     });
 
     it('should have meaningful descriptions for nest locations', () => {
-      const nestLocations = data.locations.filter(
-        loc => loc.source === 'nests'
-      );
+      const nestLocations = data.locations.filter(loc => loc.source === 'nest');
 
       nestLocations.forEach(location => {
         expect(location.description.length).toBeGreaterThan(5);
