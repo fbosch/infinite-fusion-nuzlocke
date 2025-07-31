@@ -7,7 +7,7 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       // Conservative default - most data changes occasionally
-      staleTime: ms('5m'), 
+      staleTime: ms('5m'),
       gcTime: ms('30m'), // Increased for better UX
       retry: 2,
       retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),

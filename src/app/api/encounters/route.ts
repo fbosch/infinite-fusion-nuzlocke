@@ -14,19 +14,26 @@ const OldRouteEncountersArraySchema = z.array(OldRouteEncounterSchema);
 
 // Query parameter schema
 const QuerySchema = z.object({
-  gameMode: z.enum(['classic', 'remix']).optional().default('classic'),
+  gameMode: z.enum(['classic', 'remix']).nullable().default('classic'),
 });
 
 export async function GET(request: NextRequest) {
   try {
     // Parse query parameters
     const { searchParams } = new URL(request.url);
-    const query = QuerySchema.parse({
-      gameMode: searchParams.get('gameMode'),
-    });
+    const rawGameMode = searchParams.get('gameMode') || 'classic';
 
-    // Conditionally import only the required data files based on game mode
-    const gameModePath = query.gameMode === 'remix' ? 'remix' : 'classic';
+    // Validate the game mode explicitly
+    const gameMode = rawGameMode === 'remix' ? 'remix' : 'classic';
+
+    console.debug(`API: Raw game mode: ${rawGameMode}, validated: ${gameMode}`);
+
+    // Use the validated game mode for file paths
+    const gameModePath = gameMode;
+
+    console.debug(
+      `API: Loading encounters for game mode: ${gameMode} (path: ${gameModePath})`
+    );
 
     const [wild, trade, gift, eggLocations] = await Promise.all([
       import(`@data/${gameModePath}/encounters.json`),
@@ -119,9 +126,14 @@ export async function GET(request: NextRequest) {
       RouteEncountersArraySchema.parse(mergedEncounters);
 
     // Return merged encounters for the game mode
+    const isDevelopment = process.env.NODE_ENV === 'development';
+
     return NextResponse.json(validatedMergedEncounters, {
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': isDevelopment
+          ? 'public, max-age=30' // 30 seconds in dev for quick iteration
+          : 'public, max-age=3600', // 1 hour in production
       },
     });
   } catch (error) {

@@ -18,7 +18,7 @@ async function getPokemonImageUrls() {
   try {
     const response = await fetch('/pokemon-ids.json');
     const pokemonIds = await response.json();
-    
+
     return pokemonIds.map(
       nationalDexId =>
         `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${nationalDexId}.png`
@@ -33,29 +33,33 @@ async function getPokemonImageUrls() {
 async function prefetchPokemonImages() {
   // Wait for initial page load to complete before starting prefetch
   await waitForPageLoad();
-  
+
   const imageUrls = await getPokemonImageUrls();
   if (imageUrls.length === 0) return;
 
   const cache = await caches.open(POKEMON_IMAGE_CACHE_NAME);
-  console.debug(`Service Worker: Starting background prefetch of ${imageUrls.length} Pokemon images`);
+  console.debug(
+    `Service Worker: Starting background prefetch of ${imageUrls.length} Pokemon images`
+  );
 
   let successCount = 0;
   const networkInfo = getNetworkInfo();
   const batchSize = getBatchSize(networkInfo);
-  
+
   for (let i = 0; i < imageUrls.length; i += batchSize) {
     // Wait for network to be idle before each batch
     await waitForNetworkIdle();
-    
+
     // Check if we should continue based on current network conditions
     if (!shouldContinuePrefetch()) {
-      console.debug('Service Worker: Pausing prefetch due to network conditions');
+      console.debug(
+        'Service Worker: Pausing prefetch due to network conditions'
+      );
       break;
     }
 
     const batch = imageUrls.slice(i, i + batchSize);
-    
+
     await Promise.allSettled(
       batch.map(async url => {
         try {
@@ -68,7 +72,7 @@ async function prefetchPokemonImages() {
           const response = await fetch(url, {
             priority: 'low', // Use low priority for background requests
           });
-          
+
           if (response.ok) {
             await cache.put(url, response);
             successCount++;
@@ -90,7 +94,9 @@ async function prefetchPokemonImages() {
     await sleep(getDelayBetweenBatches(networkInfo));
   }
 
-  console.debug(`Service Worker: Background prefetching complete (${successCount}/${imageUrls.length} cached)`);
+  console.debug(
+    `Service Worker: Background prefetching complete (${successCount}/${imageUrls.length} cached)`
+  );
 }
 
 // Wait for initial page load to complete
@@ -124,7 +130,7 @@ function getNetworkInfo() {
       saveData: connection.saveData || false,
     };
   }
-  
+
   // Fallback for browsers without Network Information API
   return {
     effectiveType: '4g',
@@ -136,7 +142,7 @@ function getNetworkInfo() {
 // Determine batch size based on network conditions
 function getBatchSize(networkInfo) {
   if (networkInfo.saveData) return 3; // Very conservative for data saver
-  
+
   switch (networkInfo.effectiveType) {
     case 'slow-2g':
     case '2g':
@@ -152,33 +158,33 @@ function getBatchSize(networkInfo) {
 // Determine delay between batches based on network conditions
 function getDelayBetweenBatches(networkInfo) {
   if (networkInfo.saveData) return 2000; // 2 second delay for data saver
-  
+
   switch (networkInfo.effectiveType) {
     case 'slow-2g':
     case '2g':
       return 1500; // 1.5 second delay for slow connections
     case '3g':
-      return 800;  // 0.8 second delay for 3G
+      return 800; // 0.8 second delay for 3G
     case '4g':
     default:
-      return 300;  // 0.3 second delay for fast connections
+      return 300; // 0.3 second delay for fast connections
   }
 }
 
 // Check if we should continue prefetching
 function shouldContinuePrefetch() {
   const networkInfo = getNetworkInfo();
-  
+
   // Stop if user enabled data saver
   if (networkInfo.saveData) {
     return false;
   }
-  
+
   // Stop if connection became very slow
   if (networkInfo.effectiveType === 'slow-2g') {
     return false;
   }
-  
+
   return true;
 }
 
@@ -199,7 +205,9 @@ self.addEventListener('install', event => {
         return cache.addAll(urlsToCache);
       })
       .then(() => {
-        console.debug('Service Worker: Essential files cached, starting background image prefetch');
+        console.debug(
+          'Service Worker: Essential files cached, starting background image prefetch'
+        );
         // Start Pokemon image prefetching in the background (non-blocking)
         prefetchPokemonImages().catch(error => {
           console.warn('Service Worker: Background prefetch failed:', error);
@@ -287,13 +295,15 @@ self.addEventListener('fetch', event => {
 // Handle image requests with cache-first strategy
 async function handleImageRequest(request) {
   const url = new URL(request.url);
-  
+
   // Use Pokemon cache for Pokemon sprites, general cache for others
-  const isPokemonSprite = 
-    url.hostname === 'raw.githubusercontent.com' && 
+  const isPokemonSprite =
+    url.hostname === 'raw.githubusercontent.com' &&
     url.pathname.includes('/sprites/pokemon/');
-  
-  const cacheName = isPokemonSprite ? POKEMON_IMAGE_CACHE_NAME : IMAGE_CACHE_NAME;
+
+  const cacheName = isPokemonSprite
+    ? POKEMON_IMAGE_CACHE_NAME
+    : IMAGE_CACHE_NAME;
   const cache = await caches.open(cacheName);
 
   try {
@@ -315,7 +325,7 @@ async function handleImageRequest(request) {
     return response;
   } catch (error) {
     console.warn('Service Worker: Failed to fetch image', request.url, error);
-    
+
     // Return a minimal fallback response
     return new Response('', {
       status: 404,
@@ -334,7 +344,7 @@ async function handleNavigationRequest(request) {
     // Fallback to cached index.html for offline support
     const cache = await caches.open(CACHE_NAME);
     const cachedResponse = await cache.match('/');
-    
+
     if (cachedResponse) {
       return cachedResponse;
     }
@@ -353,7 +363,7 @@ async function handleNavigationRequest(request) {
 // Determine if a static asset should be cached
 function shouldCacheStaticAsset(request) {
   const url = new URL(request.url);
-  
+
   // Cache static assets like CSS, JS, fonts
   return (
     url.pathname.includes('/_next/static/') ||

@@ -94,6 +94,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const isDevelopment = process.env.NODE_ENV === 'development';
+
     return NextResponse.json(
       {
         data: validatedData.data,
@@ -102,6 +104,9 @@ export async function GET(request: NextRequest) {
       },
       {
         headers: {
+          'Cache-Control': isDevelopment
+            ? 'public, max-age=60' // 1 minute in dev
+            : 'public, max-age=86400', // 24 hours in production
           'X-Content-Type-Options': 'nosniff',
           'X-Frame-Options': 'DENY',
           'X-XSS-Protection': '1; mode=block',

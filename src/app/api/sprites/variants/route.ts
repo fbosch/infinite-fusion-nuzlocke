@@ -111,7 +111,15 @@ export async function GET(request: NextRequest) {
       timestamp: Date.now(),
     };
 
-    return NextResponse.json(responseData);
+    const response = NextResponse.json(responseData);
+
+    // Set appropriate cache headers based on environment
+    response.headers.set(
+      'Cache-Control',
+      'public, max-age=86400, stale-while-revalidate=3600' // 24 hours in production
+    );
+
+    return response;
   } catch (error) {
     console.error('Error in sprite variants API:', error);
     return NextResponse.json(
