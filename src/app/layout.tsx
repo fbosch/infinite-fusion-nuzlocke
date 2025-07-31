@@ -57,6 +57,10 @@ export default function RootLayout({
           name='apple-mobile-web-app-title'
           content='Infinite Fusion Nuzlocke Tracker'
         />
+        <meta
+          name='viewport'
+          content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'
+        />
       </head>
       <body className='antialiased font-sans'>
         <Providers>
