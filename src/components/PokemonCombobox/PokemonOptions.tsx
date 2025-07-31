@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowUpDown, Check, Search, Loader2, Gift } from 'lucide-react';
+import { ArrowUpDown, Check, Search, Loader2, Gift, Egg } from 'lucide-react';
 import { ComboboxOption } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -42,6 +42,12 @@ function SourceTag({ source }: SourceTagProps) {
       className:
         'transition-colors duration-200 text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-900/20 border border-orange-200/60 dark:border-orange-700/40 hover:bg-orange-100 dark:hover:bg-orange-900/70',
       icon: <ArrowUpDown className='size-3' />,
+    },
+    [EncounterSource.NEST]: {
+      text: 'Nest',
+      className:
+        'transition-colors duration-200 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/40 hover:bg-blue-100 dark:hover:bg-blue-900/70',
+      icon: <Egg className='size-3' />,
     },
   };
 

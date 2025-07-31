@@ -228,7 +228,7 @@ async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
 
     await fs.writeFile(outputPath, JSON.stringify(pokemonData, null, 2));
 
-    // Generate lightweight Pokemon IDs file for service worker
+    // Generate Pokemon IDs file for service worker prefetching
     ConsoleFormatter.info('Generating Pokemon IDs for service worker...');
     const nationalDexIds = pokemonData
       .map(pokemon => pokemon.nationalDexId)

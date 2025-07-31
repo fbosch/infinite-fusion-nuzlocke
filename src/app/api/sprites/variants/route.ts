@@ -105,22 +105,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Cache response for 24 hours
     const responseData: SpriteVariantsResponse = {
       variants,
       cacheKey: id,
       timestamp: Date.now(),
     };
 
-    const response = NextResponse.json(responseData);
-
-    // Set cache headers
-    response.headers.set(
-      'Cache-Control',
-      'public, max-age=86400, stale-while-revalidate=3600'
-    );
-
-    return response;
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error('Error in sprite variants API:', error);
     return NextResponse.json(

@@ -41,9 +41,16 @@ export async function GET(request: NextRequest) {
     const gifts = OldRouteEncountersArraySchema.parse(gift.default);
     const eggLocationsData = eggLocations.default;
 
-    // Create a set of route names that have egg locations
-    const eggRouteNames = new Set(
-      eggLocationsData.locations.map(location => location.routeName)
+    // Create maps of route names for egg locations by source type
+    const eggGiftRoutes = new Map(
+      eggLocationsData.locations
+        .filter(location => location.source === 'gift')
+        .map(location => [location.routeName, location])
+    );
+    const eggNestRoutes = new Map(
+      eggLocationsData.locations
+        .filter(location => location.source === 'nest')
+        .map(location => [location.routeName, location])
     );
 
     // Merge the data by route name
@@ -51,7 +58,8 @@ export async function GET(request: NextRequest) {
       ...encounters.map(e => e.routeName),
       ...trades.map(t => t.routeName),
       ...gifts.map(g => g.routeName),
-      ...eggRouteNames, // Include egg locations
+      ...eggGiftRoutes.keys(), // Include egg gift locations
+      ...eggNestRoutes.keys(), // Include egg nest locations
     ]);
 
     // Create a map for quick lookup of each encounter type
@@ -66,7 +74,7 @@ export async function GET(request: NextRequest) {
       const giftPokemon = giftsMap.get(routeName)?.pokemonIds || [];
 
       // Create Pokemon objects with source information
-      const pokemon = [
+      const pokemon: Array<{ id: number; source: EncounterSource }> = [
         ...wildPokemon.map(id => ({
           id,
           source: EncounterSource.WILD as const,
@@ -81,9 +89,12 @@ export async function GET(request: NextRequest) {
         })),
       ];
 
-      // Add egg encounter if this route has egg locations
-      if (eggRouteNames.has(routeName)) {
+      // Add egg encounters based on data source type
+      if (eggGiftRoutes.has(routeName)) {
         pokemon.push({ id: -1, source: EncounterSource.GIFT as const });
+      }
+      if (eggNestRoutes.has(routeName)) {
+        pokemon.push({ id: -1, source: EncounterSource.NEST as const });
       }
 
       // Remove duplicates based on both id and source
@@ -110,7 +121,6 @@ export async function GET(request: NextRequest) {
     // Return merged encounters for the game mode
     return NextResponse.json(validatedMergedEncounters, {
       headers: {
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
         'Content-Type': 'application/json',
       },
     });
