@@ -37,6 +37,7 @@ export function FusionSprite({
     isFusion: false,
     artworkVariant: undefined,
   };
+
   const handleImageError = useCallback(
     async (e: React.SyntheticEvent<HTMLImageElement>) => {
       const target = e.target as HTMLImageElement;

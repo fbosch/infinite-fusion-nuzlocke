@@ -10,6 +10,8 @@ import {
   createCustomLocation,
 } from '@/loaders/locations';
 import spriteService from '@/services/spriteService';
+import { queryClient } from '@/lib/queryClient';
+import { spriteKeys } from '@/lib/queries/sprites';
 
 // Create a custom store for playthroughs data
 const playthroughsStore_idb = createStore('playthroughs', 'data');
@@ -1206,15 +1208,22 @@ export const playthroughActions = {
     if (!encounter) return;
 
     try {
-      // Cache the service import to avoid repeated dynamic imports
-      const { default: spriteService } = await import(
-        '@/services/spriteService'
-      );
+      // First try to get cached variants from React Query
+      const queryKey = spriteKeys.variants(encounter.head?.id, encounter.body?.id);
+      let availableVariants = queryClient.getQueryData<string[]>(queryKey);
 
-      const availableVariants = await spriteService.getArtworkVariants(
-        encounter.head?.id,
-        encounter.body?.id
-      );
+      // If not in cache, fetch from service
+      if (!availableVariants) {
+        // Cache the service import to avoid repeated dynamic imports
+        const { default: spriteService } = await import(
+          '@/services/spriteService'
+        );
+
+        availableVariants = await spriteService.getArtworkVariants(
+          encounter.head?.id,
+          encounter.body?.id
+        );
+      }
 
       // Early return if no variants or only default
       if (!availableVariants || availableVariants.length <= 1) return;

@@ -193,6 +193,82 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Prefetch sprite variant images for a specific Pokemon/fusion
+async function prefetchSpriteVariants(spriteVariantsResponse) {
+  const { variants, cacheKey } = spriteVariantsResponse;
+  
+  if (!variants || variants.length === 0) {
+    console.debug('Service Worker: No sprite variants to prefetch');
+    return;
+  }
+
+  // Check network conditions before starting
+  if (!shouldContinuePrefetch()) {
+    console.debug('Service Worker: Skipping sprite variant prefetch due to network conditions');
+    return;
+  }
+
+  const cache = await caches.open(IMAGE_CACHE_NAME);
+  const networkInfo = getNetworkInfo();
+  const batchSize = getBatchSize(networkInfo);
+  
+  // Generate sprite URLs for all variants
+  const spriteUrls = variants.map(variant => 
+    `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${cacheKey}${variant}.png`
+  );
+
+  console.debug(`Service Worker: Starting prefetch of ${spriteUrls.length} sprite variants for ${cacheKey}`);
+
+  let successCount = 0;
+
+  // Process variants in batches
+  for (let i = 0; i < spriteUrls.length; i += batchSize) {
+    // Wait for network to be idle before each batch
+    await waitForNetworkIdle();
+
+    // Re-check network conditions for each batch
+    if (!shouldContinuePrefetch()) {
+      console.debug('Service Worker: Stopping sprite variant prefetch due to network conditions');
+      break;
+    }
+
+    const batch = spriteUrls.slice(i, i + batchSize);
+
+    await Promise.allSettled(
+      batch.map(async url => {
+        try {
+          // Skip if already cached
+          if (await cache.match(url)) {
+            successCount++;
+            return;
+          }
+
+          const response = await fetch(url, {
+            priority: 'low', // Use low priority for background requests
+          });
+
+          if (response.ok) {
+            await cache.put(url, response);
+            successCount++;
+          }
+        } catch (error) {
+          // Silently continue on individual failures
+          console.debug('Service Worker: Failed to prefetch sprite variant:', url, error);
+        }
+      })
+    );
+
+    // Add delay between batches to be gentle on the network
+    if (i + batchSize < spriteUrls.length) {
+      await sleep(getDelayBetweenBatches(networkInfo));
+    }
+  }
+
+  console.debug(
+    `Service Worker: Sprite variant prefetching complete for ${cacheKey} (${successCount}/${spriteUrls.length} cached)`
+  );
+}
+
 // Install event - cache essential resources and start background prefetching
 self.addEventListener('install', event => {
   console.debug('Service Worker: Installing...');
@@ -247,12 +323,76 @@ self.addEventListener('activate', event => {
   );
 });
 
+// Message event - handle communication from client
+self.addEventListener('message', event => {
+  const { type, data } = event.data;
+
+  switch (type) {
+    case 'PREFETCH_SPRITE_VARIANTS':
+      // Trigger sprite variant prefetching in the background
+      prefetchSpriteVariants(data).catch(error => {
+        console.warn('Service Worker: Sprite variant prefetch failed:', error);
+      });
+      break;
+    
+    default:
+      console.debug('Service Worker: Unknown message type:', type);
+  }
+});
+
+// Handle sprite variants API requests and trigger prefetching
+async function handleSpriteVariantsRequest(request) {
+  try {
+    // Forward the request to the API
+    const response = await fetch(request);
+
+    // Check if the response is successful and contains JSON
+    if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
+      // Clone the response so we can read it for prefetching
+      const responseClone = response.clone();
+      
+      // Return the response immediately to the client
+      // Then trigger prefetching in the background (after response is sent)
+      setTimeout(async () => {
+        try {
+          const data = await responseClone.json();
+          
+          // Check if this is a successful sprite variants response
+          if (data.variants && Array.isArray(data.variants) && data.cacheKey) {
+            console.debug(`Service Worker: Starting sprite variant prefetch for ${data.cacheKey} after API response`);
+            
+            // Trigger prefetching in the background (non-blocking)
+            prefetchSpriteVariants(data).catch(error => {
+              console.warn('Service Worker: Auto sprite variant prefetch failed:', error);
+            });
+          }
+        } catch (jsonError) {
+          // If JSON parsing fails, just continue without prefetching
+          console.debug('Service Worker: Failed to parse sprite variants response:', jsonError);
+        }
+      }, 0); // Execute on next tick after response is returned
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Service Worker: Error handling sprite variants request:', error);
+    // Return a network error response
+    return new Response('Network error', { status: 503 });
+  }
+}
+
 // Fetch event - handle requests with simplified logic
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip API requests - let React Query handle them
+  // Intercept sprite variants API requests to trigger prefetching
+  if (url.pathname === '/api/sprites/variants') {
+    event.respondWith(handleSpriteVariantsRequest(request));
+    return;
+  }
+
+  // Skip other API requests - let React Query handle them
   if (url.pathname.startsWith('/api/')) {
     return;
   }
