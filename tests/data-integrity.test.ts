@@ -71,7 +71,7 @@ describe('Data Integrity Tests', () => {
       fs.readFile(path.join(dataDir, 'remix/gifts.json'), 'utf-8'),
       fs.readFile(path.join(dataDir, 'classic/trades.json'), 'utf-8'),
       fs.readFile(path.join(dataDir, 'remix/trades.json'), 'utf-8'),
-      fs.readFile(path.join(dataDir, 'egg-locations.json'), 'utf-8'),
+      fs.readFile(path.join(dataDir, 'shared/egg-locations.json'), 'utf-8'),
     ]);
 
     locations = JSON.parse(locationsData);
