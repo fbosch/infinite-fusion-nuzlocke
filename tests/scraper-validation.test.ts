@@ -6,7 +6,13 @@ import path from 'path';
 // Since it's not exported, we'll test it indirectly through the behavior
 interface PokemonEncounter {
   pokemonId: number;
-  encounterType: 'grass' | 'surf' | 'fishing' | 'special';
+  encounterType:
+    | 'grass'
+    | 'surf'
+    | 'fishing'
+    | 'special'
+    | 'cave'
+    | 'rock_smash';
 }
 
 interface RouteEncounters {

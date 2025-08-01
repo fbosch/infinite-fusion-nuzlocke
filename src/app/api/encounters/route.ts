@@ -118,7 +118,13 @@ export async function GET(request: NextRequest) {
       routeName: string;
       encounters?: Array<{
         pokemonId: number;
-        encounterType: 'grass' | 'surf' | 'fishing' | 'special';
+        encounterType:
+          | 'grass'
+          | 'surf'
+          | 'fishing'
+          | 'special'
+          | 'cave'
+          | 'rock_smash';
       }>;
       pokemonIds?: number[];
     }>;

@@ -178,7 +178,7 @@ function consolidateSubLocations(routes: RouteEncounters[]): RouteEncounters[] {
       routeName,
       encounters: Array.from(uniqueEncounters.values()).sort((a, b) => {
         // Sort by encounter type first, then by pokemon ID
-        const typeOrder = { grass: 0, surf: 1, fishing: 2, special: 3 };
+        const typeOrder = { grass: 0, cave: 1, rock_smash: 2, surf: 3, fishing: 4, special: 5 };
         const typeComparison = typeOrder[a.encounterType] - typeOrder[b.encounterType];
         return typeComparison !== 0 ? typeComparison : a.pokemonId - b.pokemonId;
       })
