@@ -8,20 +8,28 @@
   {
     "routeName": "Celadon Game Corner",
     "pokemonIds": [
-      123
+      35,
+      63,
+      127,
+      147
     ]
   },
   {
-    "routeName": "Cerulean City",
+    "routeName": "Fighting Dojo",
     "pokemonIds": [
-      194
+      106,
+      107,
+      237
     ]
   },
   {
     "routeName": "Kanto Daycare",
     "pokemonIds": [
-      174,
-      238,
+      172,
+      173,
+      175,
+      239,
+      240,
       257,
       259
     ]
@@ -47,25 +55,37 @@
     ]
   },
   {
-    "routeName": "Mt. Moon",
-    "pokemonIds": [
-      138,
-      140
-    ]
-  },
-  {
     "routeName": "Pallet Town",
     "pokemonIds": [
-      1,
+      4,
+      7,
       276,
       279,
       282
     ]
   },
   {
+    "routeName": "PC",
+    "pokemonIds": [
+      137
+    ]
+  },
+  {
+    "routeName": "Pewter City",
+    "pokemonIds": [
+      204
+    ]
+  },
+  {
     "routeName": "Route 29",
     "pokemonIds": [
       294
+    ]
+  },
+  {
+    "routeName": "Route 3",
+    "pokemonIds": [
+      129
     ]
   },
   {
@@ -77,7 +97,9 @@
   {
     "routeName": "Silph Co.",
     "pokemonIds": [
-      131
+      152,
+      155,
+      158
     ]
   },
   {

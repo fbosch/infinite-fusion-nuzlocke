@@ -1,5 +1,11 @@
 [
   {
+    "routeName": "16",
+    "pokemonIds": [
+      143
+    ]
+  },
+  {
     "routeName": "Berry Forest",
     "pokemonIds": [
       338
@@ -20,11 +26,8 @@
   {
     "routeName": "Deep Sea",
     "pokemonIds": [
-      91,
-      130,
-      170,
-      171,
-      226
+      117,
+      119
     ]
   },
   {
@@ -36,23 +39,25 @@
   {
     "routeName": "Mt. Mortar",
     "pokemonIds": [
-      42,
-      75,
-      80,
-      95,
-      169,
-      184,
-      195,
+      20,
+      67,
+      105,
+      202,
+      217,
       325,
       332
     ]
   },
   {
-    "routeName": "Navel Rock",
+    "routeName": "Pokemon Mansion",
     "pokemonIds": [
-      17,
-      21,
-      22
+      126
+    ]
+  },
+  {
+    "routeName": "Power Plant",
+    "pokemonIds": [
+      125
     ]
   },
   {
@@ -62,15 +67,15 @@
     ]
   },
   {
-    "routeName": "Rock Smash",
-    "pokemonIds": [
-      74
-    ]
-  },
-  {
     "routeName": "Rocket Warehouse",
     "pokemonIds": [
       337
+    ]
+  },
+  {
+    "routeName": "Route 36",
+    "pokemonIds": [
+      185
     ]
   },
   {
@@ -82,12 +87,13 @@
   {
     "routeName": "Ruby Chamber",
     "pokemonIds": [
-      219
+      218
     ]
   },
   {
     "routeName": "Safari Zone A5",
     "pokemonIds": [
+      50,
       392
     ]
   },
@@ -95,12 +101,6 @@
     "routeName": "Safari Zone Temple",
     "pokemonIds": [
       362
-    ]
-  },
-  {
-    "routeName": "Seafoam Islands",
-    "pokemonIds": [
-      124
     ]
   },
   {
@@ -113,14 +113,6 @@
     "routeName": "Treasure Beach",
     "pokemonIds": [
       370
-    ]
-  },
-  {
-    "routeName": "Viridian Forest",
-    "pokemonIds": [
-      46,
-      167,
-      168
     ]
   },
   {

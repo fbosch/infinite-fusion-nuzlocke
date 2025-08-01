@@ -1,53 +1,46 @@
 [
   {
-    "routeName": "Cerulean City",
+    "routeName": "Celadon City",
     "pokemonIds": [
-      193
+      77
     ]
   },
   {
     "routeName": "Cinnabar Island",
     "pokemonIds": [
-      227
+      101,
+      113
     ]
   },
   {
-    "routeName": "Crimson City",
+    "routeName": "Pewter City",
     "pokemonIds": [
-      246
+      236
     ]
   },
   {
-    "routeName": "Goldenrod City",
+    "routeName": "Route 11",
     "pokemonIds": [
-      215
+      179
     ]
   },
   {
-    "routeName": "Route 2",
+    "routeName": "Route 5",
     "pokemonIds": [
-      122
+      60
     ]
   },
   {
-    "routeName": "Safari Zone A3",
+    "routeName": "S.S. Anne",
     "pokemonIds": [
-      214
+      58,
+      86
     ]
   },
   {
     "routeName": "Vermillion City",
     "pokemonIds": [
-      79,
-      83,
-      84,
-      102
-    ]
-  },
-  {
-    "routeName": "Viridian City",
-    "pokemonIds": [
-      69
+      100
     ]
   }
 ]

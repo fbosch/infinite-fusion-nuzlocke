@@ -1,8 +1,15 @@
 [
   {
-    "routeName": "Pewter City",
+    "routeName": "Celadon City",
     "pokemonIds": [
-      142
+      133
+    ]
+  },
+  {
+    "routeName": "Route 17",
+    "pokemonIds": [
+      88,
+      89
     ]
   },
   {
@@ -18,9 +25,9 @@
     ]
   },
   {
-    "routeName": "Viridian Forest",
+    "routeName": "Saffron Nightclub",
     "pokemonIds": [
-      15
+      235
     ]
   }
 ]

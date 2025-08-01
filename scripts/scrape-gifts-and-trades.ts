@@ -208,11 +208,12 @@ async function scrapePokedexForSpecialEncounters(url: string, mode: 'classic' | 
         // Extract data from cells - location index varies by table structure
         const _dexCell = cells.eq(0).text().trim();
         const pokemonCell = cells.eq(2).text().trim(); // Pokémon name is at index 2
+
+
         
         // Different table structures have location at different indices
-        // Gen 1-2 tables: location at index 5
-        // Other Generations table (table 3): location at index 4
-        const locationIndex = tableIndex === 3 ? 4 : 5;
+        // All tables: location at index 4 (based on debug analysis)
+        const locationIndex = 4;
         const locationCell = cells.eq(locationIndex).text().trim();
         const _notesCell = cells.length > locationIndex + 1 ? cells.eq(locationIndex + 1).text().trim() : '';
 
@@ -227,6 +228,8 @@ async function scrapePokedexForSpecialEncounters(url: string, mode: 'classic' | 
         const isQuest = locationCell.toLowerCase().includes('(quest)');
         const isStatic = locationCell.toLowerCase().includes('(static)');
 
+
+
         if (!isGift && !isTrade && !isQuest && !isStatic) {
           return;
         }
@@ -238,6 +241,8 @@ async function scrapePokedexForSpecialEncounters(url: string, mode: 'classic' | 
           ConsoleFormatter.warn(`Could not find ID for ${type} Pokémon: ${pokemonCell}`);
           return;
         }
+
+
 
         // Extract the specific location that has the (gift), (trade), (quest), or (static) marker
         const specificLocation = extractSpecialEncounterLocation(locationCell);
