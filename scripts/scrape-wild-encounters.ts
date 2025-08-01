@@ -101,13 +101,7 @@ function isValidRouteName(text: string): boolean {
     return false;
   }
 
-  // Exclude text that's mostly numbers or symbols, but allow valid route patterns
-  const alphaCount = (trimmedText.match(/[a-zA-Z]/g) || []).length;
-  // Special case: allow route names even if they have ID numbers
-  const isValidRoute = /^Route \d+(\s*\(ID\s+-?\d+(?:\.\d+)?\))?$/i.test(trimmedText);
-  if (!isValidRoute && alphaCount < trimmedText.length / 2) {
-    return false;
-  }
+  // Note: Removed alpha character ratio check as it was filtering out valid location names with ID numbers
 
   return true;
 }
@@ -138,6 +132,8 @@ function consolidateSubLocations(routes: RouteEncounters[]): RouteEncounters[] {
     // Find if this route is a sub-location of any existing location
     const parentLocation = findParentLocation(route.routeName, existingLocationNames);
     const baseLocation = parentLocation || route.routeName;
+    
+
     
     if (!locationGroups.has(baseLocation)) {
       locationGroups.set(baseLocation, []);
@@ -246,6 +242,8 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
         progressBar.update(index, { status: `Scanning elements... (${routesProcessed} routes found)` });
       }
 
+
+
       // Look for route patterns
       if (isRoutePattern(fullText) && isValidRouteName(fullText)) {
         // Make sure this isn't deeply nested content (allow some basic formatting)
@@ -271,77 +269,57 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
           routesProcessed++;
           progressBar.update(index, { status: `Processing: ${cleanedRouteName}` });
 
-          // Find Pokemon data near this route
+          // Find Pokemon data in the immediately following table
           const encounters: PokemonEncounter[] = [];
-          let current = $element;
-          let steps = 0;
-          const maxSteps = 15; // Increased to capture more sections
           let currentEncounterType: 'grass' | 'surf' | 'fishing' | 'special' = 'grass'; // Default to grass
 
-          // Search through next siblings
-          while (steps < maxSteps && current.next().length > 0) {
-            current = current.next();
-            const currentText = current.text().trim();
-
-            // Stop if we hit another valid route
-            if (isRoutePattern(currentText) && isValidRouteName(currentText)) {
-              break;
-            }
-
-            // Check for encounter type headers
-            const encounterTypeMatch = detectEncounterType(currentText);
-            if (encounterTypeMatch) {
-              currentEncounterType = encounterTypeMatch;
-            }
-
-            // Look for all tables that appear after this route heading
-            const tables = current.is('table') ? current : current.find('table');
-            if (tables.length > 0) {
-              // Process ALL tables we find for this route
-              tables.each((tableIndex: number, table: any) => {
-                const tableEncounterType = currentEncounterType;
+          // Look for the next table with classes 'IFTable encounterTable'
+          let nextElement = $element.next();
+          while (nextElement.length > 0) {
+            if (nextElement.is('table.IFTable.encounterTable')) {
+              // Found the encounter table for this route - process it
+              $(nextElement).find('tr').each((rowIndex: number, row: any) => {
+                const $row = $(row);
                 
-                // Check for encounter type headers within the table
-                let currentSectionType = tableEncounterType;
+                // Check if this row contains a header that spans multiple columns (encounter type header)
+                const headerCell = $row.find('th[colspan]').first();
+                if (headerCell.length > 0) {
+                  const headerText = headerCell.text().trim();
+                  const detectedType = detectEncounterType(headerText);
+                  if (detectedType) {
+                    currentEncounterType = detectedType;
+                    return; // Skip processing this row for Pokemon
+                  }
+                }
                 
-                $(table).find('tr').each((rowIndex: number, row: any) => {
-                  const $row = $(row);
-                  
-                  // Check if this row contains a header that spans multiple columns (encounter type header)
-                  const headerCell = $row.find('th[colspan]').first();
-                  if (headerCell.length > 0) {
-                    const headerText = headerCell.text().trim();
-                    const detectedType = detectEncounterType(headerText);
-                    if (detectedType) {
-                      currentSectionType = detectedType;
-                      return; // Skip processing this row for Pokemon
+                // Process Pokemon in this row using the current encounter type
+                $row.find('td').each((cellIndex: number, cell: any) => {
+                  const cellText = $(cell).text().trim();
+
+                  // Skip headers and non-Pokemon content
+                  if (isPotentialPokemonName(cellText)) {
+                    // Try to find Pokemon by name (returns custom ID)
+                    const pokemonId = findPokemonId(cellText, pokemonNameMap);
+                    
+                    if (pokemonId) {
+                      encounters.push({
+                        pokemonId,
+                        encounterType: currentEncounterType
+                      });
                     }
                   }
-                  
-                  // Process Pokemon in this row using the current section type
-                  $row.find('td').each((cellIndex: number, cell: any) => {
-                    const cellText = $(cell).text().trim();
-
-                    // Skip headers and non-Pokemon content
-                    if (isPotentialPokemonName(cellText)) {
-                      // Try to find Pokemon by name (returns custom ID)
-                      const pokemonId = findPokemonId(cellText, pokemonNameMap);
-                      
-                      if (pokemonId) {
-                        encounters.push({
-                          pokemonId,
-                          encounterType: currentSectionType
-                        });
-                      }
-                    }
-                  });
                 });
-
-
               });
+              
+              break; // Found and processed one table, stop looking
             }
-
-            steps++;
+            
+            // Stop if we hit another route heading
+            if (isRoutePattern(nextElement.text().trim()) && isValidRouteName(nextElement.text().trim())) {
+              break;
+            }
+            
+            nextElement = nextElement.next();
           }
 
           const routeData: RouteEncounters = {

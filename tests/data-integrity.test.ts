@@ -10,10 +10,25 @@ interface Location {
   description: string;
 }
 
-interface RouteEncounter {
+// New encounter structure with types
+interface PokemonEncounter {
+  pokemonId: number;
+  encounterType: 'grass' | 'surf' | 'fishing' | 'special';
+}
+
+interface EnhancedRouteEncounter {
+  routeName: string;
+  encounters: PokemonEncounter[];
+}
+
+// Legacy structure for backward compatibility
+interface LegacyRouteEncounter {
   routeName: string;
   pokemonIds: number[];
 }
+
+// Union type to handle both formats during migration
+type RouteEncounter = EnhancedRouteEncounter | LegacyRouteEncounter;
 
 interface LocationGifts {
   routeName: string;
@@ -83,6 +98,37 @@ describe('Data Integrity Tests', () => {
     remixTrades = JSON.parse(remixTradesData);
     eggLocations = JSON.parse(eggLocationsData);
   });
+
+  // Utility functions to handle both old and new encounter formats
+  function isEnhancedEncounter(
+    encounter: RouteEncounter
+  ): encounter is EnhancedRouteEncounter {
+    return 'encounters' in encounter && Array.isArray(encounter.encounters);
+  }
+
+  function isLegacyEncounter(
+    encounter: RouteEncounter
+  ): encounter is LegacyRouteEncounter {
+    return 'pokemonIds' in encounter && Array.isArray(encounter.pokemonIds);
+  }
+
+  function getAllPokemonIds(encounter: RouteEncounter): number[] {
+    if (isEnhancedEncounter(encounter)) {
+      return encounter.encounters.map(e => e.pokemonId);
+    } else if (isLegacyEncounter(encounter)) {
+      return encounter.pokemonIds;
+    }
+    return [];
+  }
+
+  function getAllEncounterTypes(
+    encounter: RouteEncounter
+  ): Array<'grass' | 'surf' | 'fishing' | 'special'> {
+    if (isEnhancedEncounter(encounter)) {
+      return encounter.encounters.map(e => e.encounterType);
+    }
+    return []; // Legacy encounters don't have types
+  }
 
   describe('Route Encounter Coverage', () => {
     it('should have encounter data for every location in classic mode', () => {
@@ -201,11 +247,12 @@ describe('Data Integrity Tests', () => {
       );
 
       expect(viridianForest).toBeDefined();
-      expect(viridianForest!.pokemonIds).toContain(10); // Caterpie
-      expect(viridianForest!.pokemonIds).toContain(13); // Weedle
-      expect(viridianForest!.pokemonIds).toContain(16); // Pidgey
+      const pokemonIds = getAllPokemonIds(viridianForest!);
+      expect(pokemonIds).toContain(10); // Caterpie
+      expect(pokemonIds).toContain(13); // Weedle
+      expect(pokemonIds).toContain(16); // Pidgey
       // Note: Rattata (19) is not in Viridian Forest in the current data
-      // expect(viridianForest!.pokemonIds).toContain(19); // Rattata
+      // expect(pokemonIds).toContain(19); // Rattata
     });
 
     it('should have correct Pokemon for Viridian Forest in remix mode', () => {
@@ -214,19 +261,21 @@ describe('Data Integrity Tests', () => {
       );
 
       expect(viridianForest).toBeDefined();
-      expect(viridianForest!.pokemonIds).toContain(10); // Caterpie
-      expect(viridianForest!.pokemonIds).toContain(13); // Weedle
-      expect(viridianForest!.pokemonIds).toContain(16); // Pidgey
+      const pokemonIds = getAllPokemonIds(viridianForest!);
+      expect(pokemonIds).toContain(10); // Caterpie
+      expect(pokemonIds).toContain(13); // Weedle
+      expect(pokemonIds).toContain(16); // Pidgey
       // Note: Rattata (19) is not in Viridian Forest in the current data
-      // expect(viridianForest!.pokemonIds).toContain(19); // Rattata
+      // expect(pokemonIds).toContain(19); // Rattata
     });
 
     it('should have reasonable Pokemon counts for all routes', () => {
       const allEncounters = [...classicEncounters, ...remixEncounters];
 
       allEncounters.forEach(encounter => {
-        expect(encounter.pokemonIds.length).toBeGreaterThan(0);
-        expect(encounter.pokemonIds.length).toBeLessThanOrEqual(50); // Reasonable upper limit
+        const pokemonIds = getAllPokemonIds(encounter);
+        expect(pokemonIds.length).toBeGreaterThan(0);
+        expect(pokemonIds.length).toBeLessThanOrEqual(100); // Increased limit for enhanced data with multiple encounter types
       });
     });
 
@@ -243,28 +292,57 @@ describe('Data Integrity Tests', () => {
       expect(route1Remix).toBeDefined();
 
       // Both should have Pidgey and Rattata
-      expect(route1Classic!.pokemonIds).toContain(16); // Pidgey
-      expect(route1Classic!.pokemonIds).toContain(19); // Rattata
+      const classicPokemonIds = getAllPokemonIds(route1Classic!);
+      expect(classicPokemonIds).toContain(16); // Pidgey
+      expect(classicPokemonIds).toContain(19); // Rattata
       // Note: Remix Route 1 has different Pokemon than classic
-      // expect(route1Remix!.pokemonIds).toContain(16); // Pidgey
-      // expect(route1Remix!.pokemonIds).toContain(19); // Rattata
+      // const remixPokemonIds = getAllPokemonIds(route1Remix!);
+      // expect(remixPokemonIds).toContain(16); // Pidgey
+      // expect(remixPokemonIds).toContain(19); // Rattata
     });
 
-    it('should not have duplicate Pokemon within the same route', () => {
+    it('should handle Pokemon duplicates correctly based on format', () => {
       const allEncounters = [...classicEncounters, ...remixEncounters];
 
       allEncounters.forEach(encounter => {
-        const uniqueIds = new Set(encounter.pokemonIds);
-        expect(uniqueIds.size).toBe(encounter.pokemonIds.length);
+        if (isEnhancedEncounter(encounter)) {
+          // Enhanced format: duplicates are allowed across different encounter types
+          // But pokemon-encounterType combinations should be unique
+          const combinations = encounter.encounters.map(
+            e => `${e.pokemonId}-${e.encounterType}`
+          );
+          const uniqueCombinations = new Set(combinations);
+          expect(uniqueCombinations.size).toBe(combinations.length);
+        } else if (isLegacyEncounter(encounter)) {
+          // Legacy format: no duplicates allowed
+          const pokemonIds = getAllPokemonIds(encounter);
+          const uniqueIds = new Set(pokemonIds);
+          expect(uniqueIds.size).toBe(pokemonIds.length);
+        }
       });
     });
 
-    it('should have sorted Pokemon IDs for all routes', () => {
+    it('should have properly ordered encounters', () => {
       const allEncounters = [...classicEncounters, ...remixEncounters];
 
       allEncounters.forEach(encounter => {
-        const sortedIds = [...encounter.pokemonIds].sort((a, b) => a - b);
-        expect(encounter.pokemonIds).toEqual(sortedIds);
+        if (isEnhancedEncounter(encounter)) {
+          // Enhanced format: encounters should be sorted by encounter type, then by pokemon ID
+          const sorted = [...encounter.encounters].sort((a, b) => {
+            const typeOrder = { grass: 0, surf: 1, fishing: 2, special: 3 };
+            const typeComparison =
+              typeOrder[a.encounterType] - typeOrder[b.encounterType];
+            return typeComparison !== 0
+              ? typeComparison
+              : a.pokemonId - b.pokemonId;
+          });
+          expect(encounter.encounters).toEqual(sorted);
+        } else if (isLegacyEncounter(encounter)) {
+          // Legacy format: Pokemon IDs should be sorted
+          const pokemonIds = getAllPokemonIds(encounter);
+          const sortedIds = [...pokemonIds].sort((a, b) => a - b);
+          expect(pokemonIds).toEqual(sortedIds);
+        }
       });
     });
 
@@ -284,10 +362,160 @@ describe('Data Integrity Tests', () => {
       const allEncounters = [...classicEncounters, ...remixEncounters];
 
       allEncounters.forEach(encounter => {
-        encounter.pokemonIds.forEach(pokemonId => {
+        const pokemonIds = getAllPokemonIds(encounter);
+        pokemonIds.forEach(pokemonId => {
           expect(validPokemonIds.has(pokemonId)).toBe(true);
         });
       });
+    });
+  });
+
+  describe('Enhanced Encounter Type Validation', () => {
+    it('should have consistent data format and detect enhanced encounters', () => {
+      const allEncounters = [...classicEncounters, ...remixEncounters];
+
+      const enhancedEncounters = allEncounters.filter(isEnhancedEncounter);
+      const legacyEncounters = allEncounters.filter(isLegacyEncounter);
+
+      // Log current state for debugging
+      console.log(
+        `Found ${enhancedEncounters.length} enhanced encounters and ${legacyEncounters.length} legacy encounters`
+      );
+
+      // At least we should have some encounters in some format
+      expect(allEncounters.length).toBeGreaterThan(0);
+      expect(enhancedEncounters.length + legacyEncounters.length).toBe(
+        allEncounters.length
+      );
+
+      // If we have enhanced encounters, validate their structure
+      enhancedEncounters.forEach(encounter => {
+        expect(encounter.encounters).toBeDefined();
+        expect(Array.isArray(encounter.encounters)).toBe(true);
+        expect(encounter.encounters.length).toBeGreaterThan(0);
+      });
+
+      // If we have legacy encounters, that's also valid during migration
+      legacyEncounters.forEach(encounter => {
+        expect(encounter.pokemonIds).toBeDefined();
+        expect(Array.isArray(encounter.pokemonIds)).toBe(true);
+        expect(encounter.pokemonIds.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('should have valid encounter types in enhanced format (if present)', () => {
+      const allEncounters = [...classicEncounters, ...remixEncounters];
+      const enhancedEncounters = allEncounters.filter(isEnhancedEncounter);
+      const validEncounterTypes = ['grass', 'surf', 'fishing', 'special'];
+
+      if (enhancedEncounters.length > 0) {
+        enhancedEncounters.forEach(routeEncounter => {
+          routeEncounter.encounters.forEach(encounter => {
+            expect(encounter.pokemonId).toBeDefined();
+            expect(typeof encounter.pokemonId).toBe('number');
+            expect(encounter.pokemonId).toBeGreaterThan(0);
+
+            expect(encounter.encounterType).toBeDefined();
+            expect(validEncounterTypes).toContain(encounter.encounterType);
+          });
+        });
+      } else {
+        console.log(
+          'No enhanced encounters found - test skipped during legacy format period'
+        );
+      }
+    });
+
+    it('should have logical encounter types for water locations (if enhanced format present)', () => {
+      const allEncounters = [...classicEncounters, ...remixEncounters];
+      const enhancedEncounters = allEncounters.filter(isEnhancedEncounter);
+
+      if (enhancedEncounters.length > 0) {
+        // Cities like Cerulean City should have surf/fishing encounters
+        const ceruleanCity = enhancedEncounters.find(
+          e => e.routeName === 'Cerulean City'
+        );
+        if (ceruleanCity) {
+          const encounterTypes = getAllEncounterTypes(ceruleanCity);
+          expect(
+            encounterTypes.some(type => type === 'surf' || type === 'fishing')
+          ).toBe(true);
+        }
+      } else {
+        console.log(
+          'No enhanced encounters found - water location test skipped'
+        );
+      }
+    });
+
+    it('should have grass encounters for routes and forests (if enhanced format present)', () => {
+      const allEncounters = [...classicEncounters, ...remixEncounters];
+      const enhancedEncounters = allEncounters.filter(isEnhancedEncounter);
+
+      if (enhancedEncounters.length > 0) {
+        // Route 1 should have grass encounters
+        const route1 = enhancedEncounters.find(e => e.routeName === 'Route 1');
+        if (route1) {
+          const encounterTypes = getAllEncounterTypes(route1);
+          expect(encounterTypes).toContain('grass');
+        }
+
+        // Viridian Forest should have grass encounters
+        const viridianForest = enhancedEncounters.find(
+          e => e.routeName === 'Viridian Forest'
+        );
+        if (viridianForest) {
+          const encounterTypes = getAllEncounterTypes(viridianForest);
+          expect(encounterTypes).toContain('grass');
+        }
+      } else {
+        console.log(
+          'No enhanced encounters found - grass encounter test skipped'
+        );
+      }
+    });
+
+    it('should not have duplicate pokemon-encounterType combinations within same route (if enhanced format present)', () => {
+      const allEncounters = [...classicEncounters, ...remixEncounters];
+      const enhancedEncounters = allEncounters.filter(isEnhancedEncounter);
+
+      if (enhancedEncounters.length > 0) {
+        enhancedEncounters.forEach(routeEncounter => {
+          const seenCombinations = new Set<string>();
+
+          routeEncounter.encounters.forEach(encounter => {
+            const combination = `${encounter.pokemonId}-${encounter.encounterType}`;
+            expect(seenCombinations.has(combination)).toBe(false);
+            seenCombinations.add(combination);
+          });
+        });
+      } else {
+        console.log(
+          'No enhanced encounters found - duplicate combination test skipped'
+        );
+      }
+    });
+
+    it('should maintain data consistency between modes (if enhanced format present)', () => {
+      const classicEnhanced = classicEncounters.filter(isEnhancedEncounter);
+      const remixEnhanced = remixEncounters.filter(isEnhancedEncounter);
+
+      if (classicEnhanced.length > 0 || remixEnhanced.length > 0) {
+        // Structure should be consistent across both modes
+        [...classicEnhanced, ...remixEnhanced].forEach(encounter => {
+          encounter.encounters.forEach(pokemonEncounter => {
+            expect(typeof pokemonEncounter.pokemonId).toBe('number');
+            expect(typeof pokemonEncounter.encounterType).toBe('string');
+            expect(['grass', 'surf', 'fishing', 'special']).toContain(
+              pokemonEncounter.encounterType
+            );
+          });
+        });
+      } else {
+        console.log(
+          'No enhanced encounters found in either mode - consistency test skipped'
+        );
+      }
     });
   });
 

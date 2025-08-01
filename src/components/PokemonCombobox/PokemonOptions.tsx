@@ -10,6 +10,8 @@ import {
   Egg,
   Scroll,
   LocateFixed,
+  Fish,
+  Waves,
 } from 'lucide-react';
 import { ComboboxOption } from '@headlessui/react';
 import clsx from 'clsx';
@@ -55,13 +57,13 @@ function SourceTag({ sources, locationId }: SourceTagProps) {
       text: 'Surf',
       className:
         'transition-colors duration-200 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/40 hover:bg-blue-100 dark:hover:bg-blue-900/70',
-      icon: <span className='size-3 text-[10px] font-bold'>🌊</span>,
+      icon: <Waves className='size-3' />,
     },
     [EncounterSource.FISHING]: {
       text: 'Fish',
       className:
         'transition-colors duration-200 text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-900/20 border border-teal-200/60 dark:border-teal-700/40 hover:bg-teal-100 dark:hover:bg-teal-900/70',
-      icon: <span className='size-3 text-[10px] font-bold'>🎣</span>,
+      icon: <Fish className='size-3' />,
     },
     [EncounterSource.GIFT]: {
       text: 'Gift',

@@ -8,7 +8,7 @@
 // Pre-compiled regex patterns for better performance
 export const ROUTE_PATTERNS = {
   // More inclusive pattern that captures valid location names while excluding CSS and other content
-  ROUTE_MATCH: /^(Route \d+(?:\s*\(ID\s+-?\d+(?:\.\d+)?\))?|[A-Za-z\s]+(?:City|Town|Forest|Cave|Mountain|Mt\.|Island|Garden|River|Lake|Beach|Tower|Mansion|Building|Center|Zone|Area|Path|Road|Bridge|Tunnel|Valley|Canyon|Plateau|Field|Meadow|Grove|Ruins|Temple|Shrine|Laboratory|Factory|Power Plant|Safari|Park|Stadium|Gym|League|Elite Four|Champion|Victory Road)(?:\s+[A-Za-z0-9\s]+)*(?:\s*\(ID\s+-?\d+(?:\.\d+)?\))?)$/i,
+  ROUTE_MATCH: /^(Route \d+(?:\s*\(ID\s+-?\d+(?:\.\d+)?\))?|[A-Za-z\s]*(?:Mt\.\s+[A-Za-z\s]+|[A-Za-z\s]+(?:City|Town|Forest|Cave|Mountain|Island|Garden|River|Lake|Beach|Tower|Mansion|Building|Center|Zone|Area|Path|Road|Bridge|Tunnel|Valley|Canyon|Plateau|Field|Meadow|Grove|Ruins|Temple|Shrine|Laboratory|Factory|Power Plant|Safari|Park|Stadium|Gym|League|Elite Four|Champion|Victory Road))(?:\s+(?:[A-Za-z0-9\s]+|B?\d+F|Summit|Square|Entrance|Exit|Top|Bottom|Upper|Lower|North|South|East|West|Interior|Exterior|Depths|Hidden|Center|Dark Room|Route \d+ Exit))*(?:\s*\(ID\s+-?\d+(?:\.\d+)?\))?)$/i,
   ROUTE_ID_EXTRACT: /\(ID\s+(-?\d+(?:\.\d+)?)\)/i,
   ROUTE_ID_CLEAN: /\s*\(ID\s+-?\d+(?:\.\d+)?\)\s*$/i
 } as const;
