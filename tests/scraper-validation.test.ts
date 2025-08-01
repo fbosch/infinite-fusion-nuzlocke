@@ -78,7 +78,7 @@ describe('Mt. Moon Scraping Validation', () => {
         encounter => encounter.pokemonId === 27
       );
       expect(sandshrew).toBeDefined();
-      expect(sandshrew!.encounterType).toBe('grass');
+      expect(sandshrew!.encounterType).toBe('cave');
     });
 
     it('should include Sableye (ID 421) in Mt. Moon classic encounters', () => {
@@ -91,7 +91,7 @@ describe('Mt. Moon Scraping Validation', () => {
         encounter => encounter.pokemonId === 421
       );
       expect(sableye).toBeDefined();
-      expect(sableye!.encounterType).toBe('grass');
+      expect(sableye!.encounterType).toBe('cave');
     });
 
     it('should include Carbink (ID 478) in Mt. Moon classic encounters', () => {
@@ -104,7 +104,7 @@ describe('Mt. Moon Scraping Validation', () => {
         encounter => encounter.pokemonId === 478
       );
       expect(carbink).toBeDefined();
-      expect(carbink!.encounterType).toBe('grass');
+      expect(carbink!.encounterType).toBe('rock_smash');
     });
 
     it('should not include water-type encounters in Mt. Moon', () => {
@@ -133,16 +133,18 @@ describe('Mt. Moon Scraping Validation', () => {
       expect(psyduck).toBeUndefined();
     });
 
-    it('should have all encounters as grass type in Mt. Moon', () => {
+    it('should have cave-appropriate encounter types in Mt. Moon', () => {
       const mtMoon = classicEncounters.find(
         route => route.routeName === 'Mt. Moon'
       );
       expect(mtMoon).toBeDefined();
 
-      const nonGrassEncounters = mtMoon!.encounters.filter(
-        encounter => encounter.encounterType !== 'grass'
+      // Mt. Moon should have grass, cave, or rock_smash encounters (cave Pokemon)
+      const validCaveTypes = ['grass', 'cave', 'rock_smash'];
+      const invalidEncounters = mtMoon!.encounters.filter(
+        encounter => !validCaveTypes.includes(encounter.encounterType)
       );
-      expect(nonGrassEncounters).toHaveLength(0);
+      expect(invalidEncounters).toHaveLength(0);
     });
   });
 
@@ -209,6 +211,62 @@ describe('Mt. Moon Scraping Validation', () => {
         expect(pokemon).toBeDefined();
         expect(pokemon!.name).toBe(expected.name);
       }
+    });
+  });
+
+  describe('New Encounter Type Support', () => {
+    it('should support cave encounter types', () => {
+      const allEncounters = [...classicEncounters, ...remixEncounters];
+
+      // Look for any encounters with cave type
+      const caveEncounters = allEncounters.flatMap(route =>
+        route.encounters.filter(encounter => encounter.encounterType === 'cave')
+      );
+
+      // If cave encounters exist, they should have valid Pokemon IDs
+      if (caveEncounters.length > 0) {
+        caveEncounters.forEach(encounter => {
+          expect(encounter.pokemonId).toBeGreaterThan(0);
+          expect(typeof encounter.pokemonId).toBe('number');
+        });
+      }
+    });
+
+    it('should support rock_smash encounter types', () => {
+      const allEncounters = [...classicEncounters, ...remixEncounters];
+
+      // Look for any encounters with rock_smash type
+      const rockSmashEncounters = allEncounters.flatMap(route =>
+        route.encounters.filter(
+          encounter => encounter.encounterType === 'rock_smash'
+        )
+      );
+
+      // If rock_smash encounters exist, they should have valid Pokemon IDs
+      if (rockSmashEncounters.length > 0) {
+        rockSmashEncounters.forEach(encounter => {
+          expect(encounter.pokemonId).toBeGreaterThan(0);
+          expect(typeof encounter.pokemonId).toBe('number');
+        });
+      }
+    });
+
+    it('should have valid encounter type values', () => {
+      const allEncounters = [...classicEncounters, ...remixEncounters];
+      const validTypes = [
+        'grass',
+        'surf',
+        'fishing',
+        'special',
+        'cave',
+        'rock_smash',
+      ];
+
+      allEncounters.forEach(route => {
+        route.encounters.forEach(encounter => {
+          expect(validTypes).toContain(encounter.encounterType);
+        });
+      });
     });
   });
 

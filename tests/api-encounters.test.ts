@@ -111,6 +111,11 @@ describe('Encounters API', () => {
         expect(typeof pokemon.id).toBe('number');
         expect([
           'wild',
+          'grass',
+          'surf',
+          'fishing',
+          'cave',
+          'rock_smash',
           'gift',
           'trade',
           'quest',

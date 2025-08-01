@@ -24,7 +24,6 @@ const NewRouteEncounterSchema = z.object({
 });
 
 const NewRouteEncountersArraySchema = z.array(NewRouteEncounterSchema);
-
 // Temporary schema for the old data format during migration
 const OldRouteEncounterSchema = z.object({
   routeName: z.string().min(1, { error: 'Route name is required' }),
