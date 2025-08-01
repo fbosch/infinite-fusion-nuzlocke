@@ -46,6 +46,9 @@ describe('Route Processing Utilities', () => {
       expect(isRoutePattern('Gym Leader')).toBe(false);
       expect(isRoutePattern('Random Text')).toBe(false);
       expect(isRoutePattern('Route')).toBe(false); // Route without number
+      expect(isRoutePattern('Magnezone')).toBe(false); // Pokemon names should not match
+      expect(isRoutePattern('Pikachu')).toBe(false);
+      expect(isRoutePattern('Charizard')).toBe(false);
     });
 
     it('should handle invalid input', () => {
@@ -57,6 +60,40 @@ describe('Route Processing Utilities', () => {
     it('should handle whitespace', () => {
       expect(isRoutePattern('  Route 1  ')).toBe(true);
       expect(isRoutePattern('\tViridian Forest\n')).toBe(true);
+    });
+
+    describe('Mt. Moon Pattern Matching (Regression Tests)', () => {
+      it('should match all Mt. Moon variants that were previously failing', () => {
+        // These specific patterns were failing before the alpha character ratio fix
+        expect(isRoutePattern('Mt. Moon (ID 102)')).toBe(true);
+        expect(isRoutePattern('Mt. Moon B1F (ID 103)')).toBe(true);
+        expect(isRoutePattern('Mt. Moon B2F (ID 105)')).toBe(true);
+        expect(isRoutePattern('Mt. Moon (ID 767)')).toBe(true);
+        expect(isRoutePattern('Mt. Moon (ID 104)')).toBe(true);
+        expect(isRoutePattern('Mt. Moon Summit (ID 827)')).toBe(true);
+      });
+
+      it('should match Mt. Moon without ID numbers', () => {
+        expect(isRoutePattern('Mt. Moon')).toBe(true);
+        expect(isRoutePattern('Mt. Moon B1F')).toBe(true);
+        expect(isRoutePattern('Mt. Moon B2F')).toBe(true);
+        expect(isRoutePattern('Mt. Moon Dark Room')).toBe(true);
+        expect(isRoutePattern('Mt. Moon Summit')).toBe(true);
+      });
+
+      it('should match other mountain locations', () => {
+        expect(isRoutePattern('Mt. Silver')).toBe(true);
+        expect(isRoutePattern('Mt. Silver (ID 123)')).toBe(true);
+        expect(isRoutePattern('Mt. Coronet')).toBe(true);
+        expect(isRoutePattern('Mt. Battle')).toBe(true);
+      });
+
+      it('should match cave and tunnel locations', () => {
+        expect(isRoutePattern('Rock Tunnel')).toBe(true);
+        expect(isRoutePattern('Rock Tunnel (ID 456)')).toBe(true);
+        expect(isRoutePattern('Cerulean Cave')).toBe(true);
+        expect(isRoutePattern('Victory Road')).toBe(true);
+      });
     });
   });
 
@@ -78,6 +115,21 @@ describe('Route Processing Utilities', () => {
     it('should trim whitespace', () => {
       expect(cleanRouteName('  Route 1 (ID 78)  ')).toBe('Route 1');
       expect(cleanRouteName('Route 1   (ID 78)')).toBe('Route 1');
+    });
+
+    it('should properly clean Mt. Moon variants', () => {
+      // Test all the Mt. Moon patterns that were causing issues
+      expect(cleanRouteName('Mt. Moon (ID 102)')).toBe('Mt. Moon');
+      expect(cleanRouteName('Mt. Moon B1F (ID 103)')).toBe('Mt. Moon B1F');
+      expect(cleanRouteName('Mt. Moon B2F (ID 105)')).toBe('Mt. Moon B2F');
+      expect(cleanRouteName('Mt. Moon (ID 767)')).toBe('Mt. Moon');
+      expect(cleanRouteName('Mt. Moon (ID 104)')).toBe('Mt. Moon');
+      expect(cleanRouteName('Mt. Moon Summit (ID 827)')).toBe(
+        'Mt. Moon Summit'
+      );
+      expect(cleanRouteName('Mt. Moon Dark Room (ID 999)')).toBe(
+        'Mt. Moon Dark Room'
+      );
     });
 
     it('should handle invalid input', () => {
