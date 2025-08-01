@@ -7,7 +7,7 @@
 
 // Pre-compiled regex patterns for better performance
 export const ROUTE_PATTERNS = {
-  ROUTE_MATCH: /^(Route \d+|Viridian Forest|Secret Garden|Hidden Forest|Viridian River)/i,
+  ROUTE_MATCH: /^(Route \d+|Viridian Forest|Secret Garden|Hidden Forest|Viridian River|Mt\. Moon|Mt\. Moon Summit|Mt\. Moon Square|Mt\. Mortar)/i,
   ROUTE_ID_EXTRACT: /\(ID\s+(-?\d+(?:\.\d+)?)\)/i,
   ROUTE_ID_CLEAN: /\s*\(ID\s+-?\d+(?:\.\d+)?\)\s*$/i
 } as const;

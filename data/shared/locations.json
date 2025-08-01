@@ -60,6 +60,12 @@
     "description": "Path to Mt. Moon"
   },
   {
+    "id": "eeceb211-68de-4a8a-a407-9230a16e6899",
+    "name": "Mt. Moon",
+    "region": "Kanto",
+    "description": "Mt. Moon is a mountain in the Kanto region."
+  },
+  {
     "id": "4a8832db-6ef9-4615-946d-e8341bd2af47",
     "name": "Route 4",
     "region": "Kanto",

@@ -2,6 +2,7 @@
 
 import * as cheerio from 'cheerio';
 import fs from 'fs/promises';
+import { readFileSync } from 'fs';
 import path from 'path';
 import { ConsoleFormatter } from './console-utils';
 import {
@@ -20,6 +21,72 @@ const WILD_ENCOUNTERS_REMIX_URL = 'https://infinitefusion.fandom.com/wiki/Wild_E
 interface RouteEncounters {
   routeName: string;
   pokemonIds: number[]; // These are custom Infinite Fusion IDs
+}
+
+/**
+ * Consolidates sub-locations under their parent locations for Nuzlocke rules.
+ * For example: Mt. Moon B1F, Mt. Moon B2F, Mt. Moon Summit -> Mt. Moon
+ */
+function consolidateSubLocations(routes: RouteEncounters[]): RouteEncounters[] {
+  // Load existing locations to use as reference
+  const locationsPath = path.join(process.cwd(), 'data', 'shared', 'locations.json');
+  const locationsData = JSON.parse(readFileSync(locationsPath, 'utf-8'));
+  const existingLocationNames = locationsData.map((loc: any) => loc.name);
+  
+  const locationGroups = new Map<string, Set<number>>();
+
+  for (const route of routes) {
+    // Find if this route is a sub-location of any existing location
+    const parentLocation = findParentLocation(route.routeName, existingLocationNames);
+    const baseLocation = parentLocation || route.routeName;
+    
+    if (!locationGroups.has(baseLocation)) {
+      locationGroups.set(baseLocation, new Set<number>());
+    }
+    
+    // Add all Pokémon IDs to the base location set (automatically deduplicates)
+    for (const pokemonId of route.pokemonIds) {
+      locationGroups.get(baseLocation)!.add(pokemonId);
+    }
+  }
+
+  // Convert back to RouteEncounters format
+  return Array.from(locationGroups.entries()).map(([routeName, pokemonIdSet]) => ({
+    routeName,
+    pokemonIds: Array.from(pokemonIdSet).sort((a, b) => a - b)
+  }));
+}
+
+/**
+ * Finds if a route name is a sub-location of any existing location.
+ * Returns the parent location name if found, null otherwise.
+ */
+function findParentLocation(routeName: string, existingLocations: string[]): string | null {
+  // Define valid sub-location suffixes that indicate a real sub-location
+  const validSubLocationSuffixes = [
+    'B1F', 'B2F', 'B3F', 'B4F', 'B5F',
+    '1F', '2F', '3F', '4F', '5F',
+    'Summit', 'Square', 'Entrance', 'Exit',
+    'Top', 'Bottom', 'Upper', 'Lower',
+    'North', 'South', 'East', 'West',
+    'Interior', 'Exterior', 'Cave', 'Depths',
+    'Hidden', 'Center'
+  ];
+
+  // Check if any existing location is a prefix of the route name
+  for (const location of existingLocations) {
+    if (routeName.startsWith(location) && routeName !== location) {
+      // Get the remainder after the location name
+      const remainder = routeName.substring(location.length).trim();
+      
+      // Only consolidate if the remainder is a valid sub-location suffix
+      if (remainder.length > 0 && validSubLocationSuffixes.some(suffix => remainder === suffix)) {
+        return location;
+      }
+    }
+  }
+  
+  return null;
 }
 
 async function scrapeWildEncounters(url: string, isRemix: boolean = false): Promise<RouteEncounters[]> {
@@ -71,13 +138,16 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
         const children = $element.children();
         if (children.length <= 2) {
 
-          const { cleanName: cleanedRouteName } = processRouteName(fullText);
+          const { cleanName: cleanedRouteName, routeId } = processRouteName(fullText);
 
-          // Skip if we've already processed this route
-          if (routesSeen.has(cleanedRouteName)) {
+          // Create unique identifier that includes both name and ID for duplicate detection
+          const uniqueIdentifier = routeId ? `${cleanedRouteName}#${routeId}` : cleanedRouteName;
+
+          // Skip if we've already processed this exact route (including ID)
+          if (routesSeen.has(uniqueIdentifier)) {
             return;
           }
-          routesSeen.add(cleanedRouteName);
+          routesSeen.add(uniqueIdentifier);
 
           routesProcessed++;
           progressBar.update(index, { status: `Processing: ${cleanedRouteName}` });
@@ -98,24 +168,26 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
               break;
             }
 
-            // Look for the first table that appears after this route heading
+            // Look for all tables that appear after this route heading
             const tables = current.is('table') ? current : current.find('table');
             if (tables.length > 0) {
-              // Only process the first table we find for this route
-              const firstTable = $(tables[0]);
-              firstTable.find('td, th').each((cellIndex: number, cell: any) => {
-                const cellText = $(cell).text().trim();
+              // Process ALL tables we find for this route (not just the first one)
+              tables.each((tableIndex: number, table: any) => {
+                $(table).find('td, th').each((cellIndex: number, cell: any) => {
+                  const cellText = $(cell).text().trim();
 
-                // Skip headers and non-Pokemon content
-                if (isPotentialPokemonName(cellText)) {
-                  // Try to find Pokemon by name (returns custom ID)
-                  const pokemonId = findPokemonId(cellText, pokemonNameMap);
-                  if (pokemonId) {
-                    pokemonIds.add(pokemonId);
+                  // Skip headers and non-Pokemon content
+                  if (isPotentialPokemonName(cellText)) {
+                    // Try to find Pokemon by name (returns custom ID)
+                    const pokemonId = findPokemonId(cellText, pokemonNameMap);
+                    
+                    if (pokemonId) {
+                      pokemonIds.add(pokemonId);
+                    }
                   }
-                }
+                });
               });
-              break; // Stop after processing the first table
+              break; // Stop after processing all tables in this section
             }
 
             steps++;
@@ -128,6 +200,8 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
             pokemonIds: sortedIds
           };
 
+
+
           routes.push(routeData);
         }
       }
@@ -137,7 +211,11 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
     progressBar.stop();
     ConsoleFormatter.success(`${modeType} scraping complete!`);
 
-    return routes;
+    // Consolidate sub-locations under parent locations for Nuzlocke rules
+    const consolidatedRoutes = consolidateSubLocations(routes);
+    ConsoleFormatter.info(`Consolidated ${routes.length} locations into ${consolidatedRoutes.length} unique locations`);
+
+    return consolidatedRoutes;
 
   } catch (error) {
     ConsoleFormatter.error(`Error scraping ${isRemix ? 'Remix' : 'Classic'} encounters: ${error instanceof Error ? error.message : 'Unknown error'}`);
