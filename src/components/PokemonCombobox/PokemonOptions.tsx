@@ -15,6 +15,8 @@ import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
 import { EncounterSource } from '@/loaders/encounters';
 import WildIcon from '@/assets/images/tall-grass.svg';
 import PokeballIcon from '@/assets/images/pokeball.svg';
+
+import NestIcon from '@/assets/images/nest.svg';
 import { isStarterLocation } from '@/constants/special-locations';
 interface SourceTagProps {
   source: EncounterSource | null;
@@ -48,6 +50,12 @@ function SourceTag({ source, locationId }: SourceTagProps) {
     },
     [EncounterSource.NEST]: {
       text: 'Nest',
+      className:
+        'transition-colors duration-200 text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200/60 dark:border-yellow-700/40 hover:bg-yellow-100 dark:hover:bg-yellow-900/70',
+      icon: <NestIcon className='size-3' />,
+    },
+    [EncounterSource.EGG]: {
+      text: 'Egg',
       className:
         'transition-colors duration-200 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/40 hover:bg-blue-100 dark:hover:bg-blue-900/70',
       icon: <Egg className='size-3' />,

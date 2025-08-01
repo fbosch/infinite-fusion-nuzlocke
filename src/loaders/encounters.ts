@@ -22,6 +22,7 @@ export enum EncounterSource {
   GIFT = 'gift',
   TRADE = 'trade',
   NEST = 'nest',
+  EGG = 'egg',
 }
 
 // Zod schema for individual Pokemon encounters
@@ -33,7 +34,7 @@ export const PokemonEncounterSchema = z.object({
       error: 'Pokemon ID must be positive or -1 for egg locations',
     }),
   source: z.enum(EncounterSource, {
-    error: 'Source must be wild, gift, trade, or nest',
+    error: 'Source must be wild, gift, trade, nest, or egg',
   }),
 });
 

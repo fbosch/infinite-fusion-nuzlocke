@@ -12,10 +12,28 @@ const OldRouteEncounterSchema = z.object({
 });
 const OldRouteEncountersArraySchema = z.array(OldRouteEncounterSchema);
 
-// Query parameter schema
-const QuerySchema = z.object({
-  gameMode: z.enum(['classic', 'remix']).nullable().default('classic'),
-});
+// Type for egg location data
+interface EggLocation {
+  routeName: string;
+  source: 'gift' | 'nest';
+  description: string;
+  pokemonName?: string;
+  pokemonId?: number;
+}
+
+interface EggLocationsData {
+  totalLocations: number;
+  sources: {
+    gifts: number;
+    nests: number;
+  };
+  pokemonIdentified: {
+    total: number;
+    fromGifts: number;
+    fromNests: number;
+  };
+  locations: EggLocation[];
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,7 +64,7 @@ export async function GET(request: NextRequest) {
     const encounters = OldRouteEncountersArraySchema.parse(wild.default);
     const trades = OldRouteEncountersArraySchema.parse(trade.default);
     const gifts = OldRouteEncountersArraySchema.parse(gift.default);
-    const eggLocationsData = eggLocations.default;
+    const eggLocationsData = eggLocations.default as EggLocationsData;
 
     // Create maps of route names for egg locations by source type
     const eggGiftRoutes = new Map(
@@ -98,10 +116,28 @@ export async function GET(request: NextRequest) {
 
       // Add egg encounters based on data source type
       if (eggGiftRoutes.has(routeName)) {
+        const eggLocation = eggGiftRoutes.get(routeName)!;
+        // Add the egg itself (represented by id: -1) with GIFT source (where you get the egg)
         pokemon.push({ id: -1, source: EncounterSource.GIFT as const });
+        // Add the actual Pokemon from the egg with EGG source (what hatches from the egg)
+        if (eggLocation.pokemonId && eggLocation.pokemonId > 0) {
+          pokemon.push({
+            id: eggLocation.pokemonId,
+            source: EncounterSource.EGG as const,
+          });
+        }
       }
       if (eggNestRoutes.has(routeName)) {
+        const eggLocation = eggNestRoutes.get(routeName)!;
+        // Add the egg itself (represented by id: -1) with NEST source (where you get the egg)
         pokemon.push({ id: -1, source: EncounterSource.NEST as const });
+        // Add the actual Pokemon from the egg with EGG source (what hatches from the egg)
+        if (eggLocation.pokemonId && eggLocation.pokemonId > 0) {
+          pokemon.push({
+            id: eggLocation.pokemonId,
+            source: EncounterSource.EGG as const,
+          });
+        }
       }
 
       // Remove duplicates based on both id and source
