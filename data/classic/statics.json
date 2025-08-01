@@ -20,14 +20,33 @@
   {
     "routeName": "Creepy House",
     "pokemonIds": [
-      357
+      357,
+      373
+    ]
+  },
+  {
+    "routeName": "Crimson City",
+    "pokemonIds": [
+      300,
+      421
     ]
   },
   {
     "routeName": "Deep Sea",
     "pokemonIds": [
+      91,
       117,
-      119
+      119,
+      130,
+      170,
+      171,
+      226
+    ]
+  },
+  {
+    "routeName": "Destroying Sandcastles",
+    "pokemonIds": [
+      459
     ]
   },
   {
@@ -37,15 +56,62 @@
     ]
   },
   {
+    "routeName": "Ice Cavern",
+    "pokemonIds": [
+      429
+    ]
+  },
+  {
+    "routeName": "Ilex Forest",
+    "pokemonIds": [
+      289
+    ]
+  },
+  {
+    "routeName": "Mt. Moon Summit",
+    "pokemonIds": [
+      498
+    ]
+  },
+  {
     "routeName": "Mt. Mortar",
     "pokemonIds": [
       20,
+      42,
       67,
+      75,
+      80,
+      95,
       105,
+      169,
+      184,
+      195,
       202,
       217,
+      292,
       325,
-      332
+      332,
+      333
+    ]
+  },
+  {
+    "routeName": "Navel Rock",
+    "pokemonIds": [
+      17,
+      21,
+      22
+    ]
+  },
+  {
+    "routeName": "Odd Keystone",
+    "pokemonIds": [
+      295
+    ]
+  },
+  {
+    "routeName": "Old Shipwreck",
+    "pokemonIds": [
+      453
     ]
   },
   {
@@ -67,9 +133,21 @@
     ]
   },
   {
+    "routeName": "Rock Smash",
+    "pokemonIds": [
+      74
+    ]
+  },
+  {
     "routeName": "Rocket Warehouse",
     "pokemonIds": [
       337
+    ]
+  },
+  {
+    "routeName": "Route 18",
+    "pokemonIds": [
+      489
     ]
   },
   {
@@ -87,20 +165,43 @@
   {
     "routeName": "Ruby Chamber",
     "pokemonIds": [
-      218
+      218,
+      219
+    ]
+  },
+  {
+    "routeName": "Safari Zone A3",
+    "pokemonIds": [
+      424
     ]
   },
   {
     "routeName": "Safari Zone A5",
     "pokemonIds": [
       50,
-      392
+      392,
+      409
     ]
   },
   {
     "routeName": "Safari Zone Temple",
     "pokemonIds": [
-      362
+      362,
+      374,
+      416
+    ]
+  },
+  {
+    "routeName": "Saffron City",
+    "pokemonIds": [
+      358,
+      451
+    ]
+  },
+  {
+    "routeName": "Seafoam Islands",
+    "pokemonIds": [
+      124
     ]
   },
   {
@@ -113,6 +214,14 @@
     "routeName": "Treasure Beach",
     "pokemonIds": [
       370
+    ]
+  },
+  {
+    "routeName": "Viridian Forest",
+    "pokemonIds": [
+      46,
+      167,
+      168
     ]
   },
   {

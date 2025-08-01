@@ -1,8 +1,15 @@
 [
   {
+    "routeName": "Bond Bridge",
+    "pokemonIds": [
+      454
+    ]
+  },
+  {
     "routeName": "Celadon Cafe",
     "pokemonIds": [
-      305
+      305,
+      307
     ]
   },
   {
@@ -10,8 +17,21 @@
     "pokemonIds": [
       35,
       63,
+      123,
       127,
       147
+    ]
+  },
+  {
+    "routeName": "Cerulean City",
+    "pokemonIds": [
+      194
+    ]
+  },
+  {
+    "routeName": "Dragon's Den",
+    "pokemonIds": [
+      297
     ]
   },
   {
@@ -27,11 +47,15 @@
     "pokemonIds": [
       172,
       173,
+      174,
       175,
+      238,
       239,
       240,
+      252,
       257,
-      259
+      259,
+      261
     ]
   },
   {
@@ -45,6 +69,7 @@
   {
     "routeName": "Knot Island",
     "pokemonIds": [
+      330,
       395
     ]
   },
@@ -55,8 +80,22 @@
     ]
   },
   {
+    "routeName": "Mt. Moon",
+    "pokemonIds": [
+      138,
+      140
+    ]
+  },
+  {
+    "routeName": "National Park",
+    "pokemonIds": [
+      285
+    ]
+  },
+  {
     "routeName": "Pallet Town",
     "pokemonIds": [
+      1,
       4,
       7,
       276,
@@ -77,6 +116,12 @@
     ]
   },
   {
+    "routeName": "Rock Tunnel",
+    "pokemonIds": [
+      327
+    ]
+  },
+  {
     "routeName": "Route 29",
     "pokemonIds": [
       294
@@ -91,15 +136,31 @@
   {
     "routeName": "S.S. Anne",
     "pokemonIds": [
+      301,
+      303,
       488
+    ]
+  },
+  {
+    "routeName": "Saffron Restaurant",
+    "pokemonIds": [
+      425,
+      461
     ]
   },
   {
     "routeName": "Silph Co.",
     "pokemonIds": [
+      131,
       152,
       155,
       158
+    ]
+  },
+  {
+    "routeName": "Violet City",
+    "pokemonIds": [
+      291
     ]
   },
   {

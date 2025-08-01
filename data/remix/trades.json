@@ -6,10 +6,29 @@
     ]
   },
   {
+    "routeName": "Cerulean City",
+    "pokemonIds": [
+      193
+    ]
+  },
+  {
     "routeName": "Cinnabar Island",
     "pokemonIds": [
       101,
-      113
+      113,
+      227
+    ]
+  },
+  {
+    "routeName": "Crimson City",
+    "pokemonIds": [
+      246
+    ]
+  },
+  {
+    "routeName": "Goldenrod City",
+    "pokemonIds": [
+      215
     ]
   },
   {
@@ -22,6 +41,12 @@
     "routeName": "Route 11",
     "pokemonIds": [
       179
+    ]
+  },
+  {
+    "routeName": "Route 2",
+    "pokemonIds": [
+      122
     ]
   },
   {
@@ -38,9 +63,25 @@
     ]
   },
   {
+    "routeName": "Safari Zone A3",
+    "pokemonIds": [
+      214
+    ]
+  },
+  {
     "routeName": "Vermillion City",
     "pokemonIds": [
-      100
+      79,
+      83,
+      84,
+      100,
+      102
+    ]
+  },
+  {
+    "routeName": "Viridian City",
+    "pokemonIds": [
+      69
     ]
   }
 ]

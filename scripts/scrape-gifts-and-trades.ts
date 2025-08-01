@@ -212,8 +212,9 @@ async function scrapePokedexForSpecialEncounters(url: string, mode: 'classic' | 
 
         
         // Different table structures have location at different indices
-        // All tables: location at index 4 (based on debug analysis)
-        const locationIndex = 4;
+        // Tables 2 (Gen 2) and 3 (Other Generations): location at index 4
+        // Tables 0 and 1 (Gen 1): location at index 5
+        const locationIndex = (tableIndex === 2 || tableIndex === 3) ? 4 : 5;
         const locationCell = cells.eq(locationIndex).text().trim();
         const _notesCell = cells.length > locationIndex + 1 ? cells.eq(locationIndex + 1).text().trim() : '';
 

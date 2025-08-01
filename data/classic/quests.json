@@ -1,8 +1,23 @@
 [
   {
+    "routeName": "Blackthorn City",
+    "pokemonIds": [
+      296
+    ]
+  },
+  {
     "routeName": "Celadon City",
     "pokemonIds": [
       133
+    ]
+  },
+  {
+    "routeName": "Pewter City",
+    "pokemonIds": [
+      142,
+      430,
+      432,
+      433
     ]
   },
   {
@@ -10,6 +25,12 @@
     "pokemonIds": [
       88,
       89
+    ]
+  },
+  {
+    "routeName": "Route 22",
+    "pokemonIds": [
+      493
     ]
   },
   {
@@ -28,6 +49,18 @@
     "routeName": "Saffron Nightclub",
     "pokemonIds": [
       235
+    ]
+  },
+  {
+    "routeName": "Team Rocket HQ",
+    "pokemonIds": [
+      474
+    ]
+  },
+  {
+    "routeName": "Viridian Forest",
+    "pokemonIds": [
+      15
     ]
   }
 ]
