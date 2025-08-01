@@ -8,7 +8,8 @@ import {
   Loader2,
   Gift,
   Egg,
-  HeartHandshake,
+  Scroll,
+  LocateFixed,
 } from 'lucide-react';
 import { ComboboxOption } from '@headlessui/react';
 import clsx from 'clsx';
@@ -72,7 +73,13 @@ function SourceTag({ source, locationId }: SourceTagProps) {
       text: 'Quest',
       className:
         'transition-colors duration-200 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/40 hover:bg-blue-100 dark:hover:bg-blue-900/70',
-      icon: <HeartHandshake className='size-3' />,
+      icon: <Scroll className='size-3' />,
+    },
+    [EncounterSource.STATIC]: {
+      text: 'Static',
+      className:
+        'transition-colors duration-200 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/20 border border-gray-200/60 dark:border-gray-700/40 hover:bg-gray-100 dark:hover:bg-gray-900/70',
+      icon: <LocateFixed className='size-3' />,
     },
   };
 

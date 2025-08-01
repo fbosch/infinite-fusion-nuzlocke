@@ -1,0 +1,134 @@
+[
+  {
+    "routeName": "Berry Forest",
+    "pokemonIds": [
+      338
+    ]
+  },
+  {
+    "routeName": "Cinnabar Island",
+    "pokemonIds": [
+      310
+    ]
+  },
+  {
+    "routeName": "Creepy House",
+    "pokemonIds": [
+      357
+    ]
+  },
+  {
+    "routeName": "Deep Sea",
+    "pokemonIds": [
+      91,
+      130,
+      170,
+      171,
+      226
+    ]
+  },
+  {
+    "routeName": "Flowers",
+    "pokemonIds": [
+      476
+    ]
+  },
+  {
+    "routeName": "Mt. Mortar",
+    "pokemonIds": [
+      42,
+      75,
+      80,
+      95,
+      169,
+      184,
+      195,
+      325,
+      332
+    ]
+  },
+  {
+    "routeName": "Navel Rock",
+    "pokemonIds": [
+      17,
+      21,
+      22
+    ]
+  },
+  {
+    "routeName": "Roaming Sevii Islands",
+    "pokemonIds": [
+      394
+    ]
+  },
+  {
+    "routeName": "Rock Smash",
+    "pokemonIds": [
+      74
+    ]
+  },
+  {
+    "routeName": "Rocket Warehouse",
+    "pokemonIds": [
+      337
+    ]
+  },
+  {
+    "routeName": "Route 46",
+    "pokemonIds": [
+      309
+    ]
+  },
+  {
+    "routeName": "Ruby Chamber",
+    "pokemonIds": [
+      219
+    ]
+  },
+  {
+    "routeName": "Safari Zone A5",
+    "pokemonIds": [
+      392
+    ]
+  },
+  {
+    "routeName": "Safari Zone Temple",
+    "pokemonIds": [
+      362
+    ]
+  },
+  {
+    "routeName": "Seafoam Islands",
+    "pokemonIds": [
+      124
+    ]
+  },
+  {
+    "routeName": "Trash Cans",
+    "pokemonIds": [
+      434
+    ]
+  },
+  {
+    "routeName": "Treasure Beach",
+    "pokemonIds": [
+      370
+    ]
+  },
+  {
+    "routeName": "Viridian Forest",
+    "pokemonIds": [
+      46,
+      167,
+      168
+    ]
+  },
+  {
+    "routeName": "Viridian River",
+    "pokemonIds": [
+      479,
+      482,
+      485
+    ]
+  }
+]

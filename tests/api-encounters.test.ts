@@ -109,9 +109,15 @@ describe('Encounters API', () => {
         expect(pokemon).toHaveProperty('id');
         expect(pokemon).toHaveProperty('source');
         expect(typeof pokemon.id).toBe('number');
-        expect(['wild', 'gift', 'trade', 'quest', 'nest', 'egg']).toContain(
-          pokemon.source
-        );
+        expect([
+          'wild',
+          'gift',
+          'trade',
+          'quest',
+          'static',
+          'nest',
+          'egg',
+        ]).toContain(pokemon.source);
       });
     });
   });
