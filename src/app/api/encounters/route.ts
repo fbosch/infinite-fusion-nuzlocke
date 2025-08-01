@@ -44,8 +44,6 @@ export async function GET(request: NextRequest) {
     // Validate the game mode explicitly
     const gameMode = rawGameMode === 'remix' ? 'remix' : 'classic';
 
-    console.debug(`API: Raw game mode: ${rawGameMode}, validated: ${gameMode}`);
-
     // Use explicit imports instead of dynamic template literals
     const [wild, trade, gift, eggLocations] = await Promise.all([
       gameMode === 'remix'
