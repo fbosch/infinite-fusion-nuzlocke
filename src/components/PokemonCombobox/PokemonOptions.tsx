@@ -28,12 +28,12 @@ import PokeballIcon from '@/assets/images/pokeball.svg';
 import NestIcon from '@/assets/images/nest.svg';
 import { isStarterLocation } from '@/constants/special-locations';
 interface SourceTagProps {
-  source: EncounterSource | null;
+  sources: EncounterSource[];
   locationId: string | undefined;
 }
 
-function SourceTag({ source, locationId }: SourceTagProps) {
-  if (!source) return null;
+function SourceTag({ sources, locationId }: SourceTagProps) {
+  if (!sources.length) return null;
 
   const tagConfig: Record<
     EncounterSource,
@@ -83,25 +83,63 @@ function SourceTag({ source, locationId }: SourceTagProps) {
     },
   };
 
-  const config = isStarterLocation(locationId)
-    ? {
-        text: 'Starter',
-        icon: <PokeballIcon className='size-3' />,
-        className:
-          'transition-colors duration-200 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/40 hover:bg-blue-100 dark:hover:bg-blue-900/70',
-      }
-    : tagConfig[source];
+  // Handle starter location special case
+  if (isStarterLocation(locationId)) {
+    return (
+      <span
+        className={clsx(
+          'text-xs px-1.5 py-0.5 rounded-sm font-normal leading-none flex items-center gap-1',
+          'transition-colors duration-200 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/40 hover:bg-blue-100 dark:hover:bg-blue-900/70'
+        )}
+      >
+        Starter
+        <PokeballIcon className='size-3' />
+      </span>
+    );
+  }
 
+  // For multiple sources, show them as separate tags or combined
+  if (sources.length === 1) {
+    const config = tagConfig[sources[0]];
+    return (
+      <span
+        className={clsx(
+          'text-xs px-1.5 py-0.5 rounded-sm font-normal leading-none flex items-center gap-1',
+          config.className
+        )}
+      >
+        {config.text}
+        {config.icon}
+      </span>
+    );
+  }
+
+  // Multiple sources - show as combined tag with multiple icons
   return (
-    <span
-      className={clsx(
-        'text-xs px-1.5 py-0.5 rounded-sm font-normal leading-none flex items-center gap-1',
-        config.className
-      )}
-    >
-      {config.text}
-      {config.icon}
-    </span>
+    <div className='flex items-center gap-1'>
+      {sources.map(source => {
+        const config = tagConfig[source];
+        return (
+          <span
+            key={source}
+            className={clsx(
+              'text-xs px-1.5 py-0.5 rounded-sm font-normal leading-none flex items-center gap-1',
+              config.className
+            )}
+            title={config.text}
+          >
+            {sources.length > 1 ? (
+              config.icon
+            ) : (
+              <>
+                {config.text}
+                {config.icon}
+              </>
+            )}
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
@@ -110,7 +148,7 @@ interface PokemonOptionsProps {
   deferredQuery: string;
   locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
-  getPokemonSource: (pokemonId: number) => EncounterSource | null;
+  getPokemonSource: (pokemonId: number) => EncounterSource[];
   comboboxId: string;
   gameMode: 'classic' | 'remix' | 'randomized';
   isLoading?: boolean;
@@ -121,7 +159,7 @@ interface PokemonOptionProps {
   index: number;
   locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
-  getPokemonSource: (pokemonId: number) => EncounterSource | null;
+  getPokemonSource: (pokemonId: number) => EncounterSource[];
   comboboxId: string;
   gameMode: 'classic' | 'remix' | 'randomized';
   style?: React.CSSProperties;
@@ -134,7 +172,7 @@ interface PokemonOptionContentProps {
   index: number;
   locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
-  getPokemonSource: (pokemonId: number) => EncounterSource | null;
+  getPokemonSource: (pokemonId: number) => EncounterSource[];
   comboboxId: string;
   gameMode: 'classic' | 'remix' | 'randomized';
   isActive?: boolean;
@@ -186,7 +224,7 @@ function PokemonOptionContent({
       <div className='flex items-center gap-2'>
         {gameMode !== 'randomized' && isRoutePokemon(pokemon.id) && (
           <SourceTag
-            source={getPokemonSource(pokemon.id)}
+            sources={getPokemonSource(pokemon.id)}
             locationId={locationId}
           />
         )}

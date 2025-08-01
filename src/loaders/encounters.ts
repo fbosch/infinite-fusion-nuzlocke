@@ -152,22 +152,36 @@ export function useEncountersForLocation({
   const { data: allPokemon = [] } = useAllPokemon();
   const nameMap = usePokemonNameMap();
 
-  // Process encounter data using useMemo
+  // Process encounter data using useMemo, merging duplicates with multiple sources
   const routeEncounterData = useMemo((): (PokemonOptionType & {
-    source: EncounterSource;
+    sources: EncounterSource[];
   })[] => {
     if (!enabled || !pokemonEncounters.length || !allPokemon.length) {
       return [];
     }
 
-    return pokemonEncounters.map(({ id, source }) => {
+    // Group encounters by Pokemon ID to merge duplicates
+    const encounterMap = new Map<number, EncounterSource[]>();
+
+    pokemonEncounters.forEach(({ id, source }) => {
+      if (!encounterMap.has(id)) {
+        encounterMap.set(id, []);
+      }
+      const sources = encounterMap.get(id)!;
+      if (!sources.includes(source as EncounterSource)) {
+        sources.push(source as EncounterSource);
+      }
+    });
+
+    // Convert back to array with merged sources
+    return Array.from(encounterMap.entries()).map(([id, sources]) => {
       const pokemon = allPokemon.find((p: Pokemon) => p.id === id);
       return {
         id,
         name: nameMap.get(id) || `Unknown Pokemon (${id})`,
         nationalDexId: pokemon?.nationalDexId || 0,
         originalLocation: locationId,
-        source: source as EncounterSource,
+        sources,
       };
     });
   }, [pokemonEncounters, allPokemon, nameMap, enabled, locationId]);
