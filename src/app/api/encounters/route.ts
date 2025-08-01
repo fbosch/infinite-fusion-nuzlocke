@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
         gameMode === 'remix'
           ? import('@data/remix/statics.json')
           : import('@data/classic/statics.json'),
-        import('@data/egg-locations.json'),
+        import('@data/shared/egg-locations.json'),
       ]
     );
 

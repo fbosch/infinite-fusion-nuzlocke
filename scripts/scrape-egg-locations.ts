@@ -445,7 +445,7 @@ async function main() {
 
     // Write to file
     ConsoleFormatter.info('Saving egg locations data...');
-    const outputPath = path.join(dataDir, 'egg-locations.json');
+    const outputPath = path.join(dataDir, 'shared', 'egg-locations.json');
     await fs.writeFile(outputPath, JSON.stringify(eggLocationsData, null, 2));
 
     // Get file stats
