@@ -13,6 +13,10 @@
     ]
   },
   {
+    "routeName": ".mw-parser-output .pokemon-icon{display:inline-block;vertical-align:middle;image-rendering:pixelated;width:32px;height:32px;line-height:1em}.mw-parser-output .pokemon-icon figure{margin:0}.mw-parser-output .pokemon-icon a{display:block;overflow:hidden;width:32px}.mw-parser-output .pokemon-icon>a:only-child,.mw-parser-output .pokemon-icon>figure:only-child,.mw-parser-output .pokemon-icon>figure:only-child a{height:32px}.mw-parser-output .pokemon-icon.fusion-icon>:first-child,.mw-parser-output .pokemon-icon.fusion-icon>figure:first-child>a,.mw-parser-output .pokemon-icon.fusion-icon>:first-child img{display:block;width:32px;height:21px}.mw-parser-output .pokemon-icon.fusion-icon>:last-child,.mw-parser-output .pokemon-icon.fusion-icon>figure:last-child>a,.mw-parser-output .pokemon-icon.fusion-icon>:last-child img{display:block;width:32px;height:11px}.mw-parser-output .pokemon-icon a>img{object-fit:cover;width:100%;height:100%;border:none}.mw-parser-output .pokemon-icon.fusion-icon>:first-child img{object-position:top center}.mw-parser-output .pokemon-icon.fusion-icon>:last-child img{object-position:bottom center}.mw-parser-output .pokemon-icon.triple-fusion-icon a,.mw-parser-output .pokemon-icon.triple-fusion-icon>figure,.mw-parser-output .pokemon-icon.triple-fusion-icon a>img{display:inline-block;height:32px;width:calc(32px/3)}.mw-parser-output .pokemon-icon.triple-fusion-icon>:first-child img{object-position:left center}.mw-parser-output .pokemon-icon.triple-fusion-icon>:nth-child(2) img{object-position:center}.mw-parser-output .pokemon-icon.triple-fusion-icon>:nth-child(3) img{object-position:right center}",
+    "pokemonIds": []
+  },
+  {
     "routeName": "Secret Garden",
     "pokemonIds": [
       10,
@@ -97,6 +101,10 @@
       496,
       501
     ]
+  },
+  {
+    "routeName": "Mareanie",
+    "pokemonIds": []
   },
   {
     "routeName": "Route 4",
@@ -352,6 +360,23 @@
       488,
       501
     ]
+  },
+  {
+    "routeName": "Flooded Cave",
+    "pokemonIds": [
+      79,
+      147,
+      148,
+      194,
+      207,
+      394,
+      454,
+      501
+    ]
+  },
+  {
+    "routeName": "Cave",
+    "pokemonIds": []
   },
   {
     "routeName": "Route 14",
@@ -631,6 +656,12 @@
     ]
   },
   {
+    "routeName": "Bill's garden",
+    "pokemonIds": [
+      201
+    ]
+  },
+  {
     "routeName": "Route 23",
     "pokemonIds": [
       17,
@@ -777,6 +808,218 @@
     ]
   },
   {
+    "routeName": "Pallet Town",
+    "pokemonIds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      54,
+      60,
+      61,
+      79,
+      118,
+      151,
+      371,
+      394,
+      434,
+      436
+    ]
+  },
+  {
+    "routeName": "Cerulean City",
+    "pokemonIds": [
+      54,
+      79,
+      116,
+      117,
+      118,
+      119,
+      129,
+      223,
+      371,
+      434,
+      436,
+      437,
+      453,
+      454,
+      455,
+      469
+    ]
+  },
+  {
+    "routeName": "Vermillion City",
+    "pokemonIds": [
+      54,
+      72,
+      73,
+      79,
+      90,
+      98,
+      116,
+      118,
+      120,
+      129,
+      130,
+      211,
+      222,
+      371,
+      382,
+      434,
+      453,
+      454,
+      474,
+      501
+    ]
+  },
+  {
+    "routeName": "Celadon City",
+    "pokemonIds": [
+      41,
+      52,
+      88,
+      89,
+      109,
+      133,
+      194,
+      198,
+      228,
+      365,
+      371,
+      394,
+      434,
+      454,
+      456,
+      469
+    ]
+  },
+  {
+    "routeName": "Pokemon Tower F3",
+    "pokemonIds": [
+      92,
+      96,
+      104,
+      200,
+      365,
+      405,
+      411
+    ]
+  },
+  {
+    "routeName": "Pokemon Tower F4",
+    "pokemonIds": [
+      92,
+      96,
+      104,
+      200,
+      365,
+      405,
+      411
+    ]
+  },
+  {
+    "routeName": "Pokemon Tower F5",
+    "pokemonIds": [
+      92,
+      96,
+      104,
+      200,
+      295,
+      365,
+      405,
+      411
+    ]
+  },
+  {
+    "routeName": "Pokemon Tower F6",
+    "pokemonIds": [
+      92,
+      96,
+      104,
+      200,
+      255,
+      295,
+      365,
+      405,
+      411
+    ]
+  },
+  {
+    "routeName": "Cinnabar Island",
+    "pokemonIds": [
+      60,
+      98,
+      116,
+      120,
+      170,
+      171,
+      222,
+      223,
+      371,
+      394,
+      434,
+      436,
+      437,
+      453,
+      454,
+      469,
+      488
+    ]
+  },
+  {
+    "routeName": "Crimson City",
+    "pokemonIds": [
+      54,
+      60,
+      72,
+      79,
+      86,
+      90,
+      118,
+      171,
+      211,
+      224,
+      371,
+      394,
+      434,
+      436,
+      437,
+      453,
+      454,
+      455,
+      469
+    ]
+  },
+  {
+    "routeName": "Pokemon Center",
+    "pokemonIds": [
+      17,
+      20,
+      73,
+      90,
+      98,
+      116,
+      119,
+      120,
+      164,
+      170,
+      177,
+      203,
+      206,
+      330,
+      394,
+      434,
+      436,
+      437,
+      454
+    ]
+  },
+  {
     "routeName": "Mt. Moon",
     "pokemonIds": [
       17,
@@ -809,6 +1052,367 @@
     ]
   },
   {
+    "routeName": "Diglett's Cave",
+    "pokemonIds": [
+      25,
+      50,
+      51,
+      147,
+      246,
+      291,
+      297,
+      375,
+      392,
+      395,
+      414,
+      444
+    ]
+  },
+  {
+    "routeName": "Seafoam Islands.old",
+    "pokemonIds": [
+      25,
+      86,
+      90,
+      138,
+      140,
+      142,
+      147,
+      225,
+      301,
+      303,
+      305,
+      307,
+      322,
+      425,
+      428,
+      429,
+      461
+    ]
+  },
+  {
+    "routeName": "Seafoam Islands B1",
+    "pokemonIds": [
+      86,
+      90,
+      225,
+      322,
+      428,
+      429,
+      461
+    ]
+  },
+  {
+    "routeName": "Seafoam Islands B2",
+    "pokemonIds": [
+      124,
+      215,
+      225,
+      272,
+      322,
+      427,
+      428,
+      429,
+      461
+    ]
+  },
+  {
+    "routeName": "Seafoam Islands B3",
+    "pokemonIds": [
+      55,
+      87,
+      124,
+      215,
+      221,
+      225,
+      272,
+      322,
+      427,
+      428,
+      429,
+      461
+    ]
+  },
+  {
+    "routeName": "Seafoam Islands B4",
+    "pokemonIds": [
+      55,
+      60,
+      86,
+      87,
+      90,
+      91,
+      98,
+      99,
+      116,
+      124,
+      131,
+      176,
+      215,
+      221,
+      222,
+      223,
+      272,
+      322,
+      335,
+      394,
+      427,
+      428,
+      429,
+      434,
+      437,
+      461
+    ]
+  },
+  {
+    "routeName": "Rock Tunnel",
+    "pokemonIds": [
+      25,
+      41,
+      66,
+      74,
+      95,
+      104,
+      213,
+      222,
+      300,
+      305,
+      307,
+      390,
+      413,
+      416,
+      421,
+      440,
+      478,
+      493
+    ]
+  },
+  {
+    "routeName": "Pewter Valley",
+    "pokemonIds": [
+      86,
+      90,
+      91,
+      117,
+      130,
+      170,
+      226,
+      437,
+      475,
+      501
+    ]
+  },
+  {
+    "routeName": "Area 1",
+    "pokemonIds": [
+      10,
+      13,
+      32,
+      48,
+      53,
+      60,
+      98,
+      108,
+      111,
+      114,
+      123,
+      127,
+      147,
+      148,
+      183,
+      214,
+      226,
+      276,
+      357,
+      363,
+      384,
+      386,
+      394,
+      395,
+      420,
+      434,
+      436,
+      437,
+      454,
+      455,
+      501
+    ]
+  },
+  {
+    "routeName": "Area 2",
+    "pokemonIds": [
+      30,
+      33,
+      48,
+      53,
+      60,
+      84,
+      98,
+      102,
+      111,
+      113,
+      115,
+      120,
+      123,
+      127,
+      147,
+      148,
+      183,
+      185,
+      226,
+      289,
+      290,
+      356,
+      366,
+      370,
+      386,
+      394,
+      413,
+      414,
+      420,
+      434,
+      436,
+      437,
+      454,
+      455
+    ]
+  },
+  {
+    "routeName": "Area 3",
+    "pokemonIds": [
+      12,
+      15,
+      44,
+      49,
+      54,
+      60,
+      70,
+      98,
+      111,
+      113,
+      123,
+      128,
+      129,
+      147,
+      148,
+      183,
+      205,
+      213,
+      214,
+      226,
+      286,
+      310,
+      355,
+      375,
+      386,
+      434,
+      436,
+      437,
+      452,
+      454,
+      455,
+      469,
+      501
+    ]
+  },
+  {
+    "routeName": "Area 4",
+    "pokemonIds": [
+      47,
+      49,
+      53,
+      60,
+      84,
+      98,
+      102,
+      108,
+      111,
+      113,
+      115,
+      120,
+      123,
+      127,
+      128,
+      147,
+      148,
+      183,
+      192,
+      195,
+      205,
+      214,
+      223,
+      234,
+      246,
+      266,
+      300,
+      355,
+      366,
+      386,
+      394,
+      407,
+      420,
+      434,
+      436,
+      437,
+      454,
+      455,
+      469
+    ]
+  },
+  {
+    "routeName": "Area 5",
+    "pokemonIds": [
+      22,
+      28,
+      60,
+      98,
+      111,
+      120,
+      147,
+      148,
+      183,
+      223,
+      226,
+      335,
+      392,
+      393,
+      409,
+      410,
+      411,
+      416,
+      419,
+      425,
+      434,
+      436,
+      457,
+      471,
+      475,
+      501
+    ]
+  },
+  {
+    "routeName": "Victory Road",
+    "pokemonIds": [
+      25,
+      42,
+      113,
+      148,
+      208,
+      247,
+      262,
+      292,
+      298,
+      331,
+      369,
+      376,
+      391,
+      396,
+      415,
+      445,
+      494
+    ]
+  },
+  {
     "routeName": "Viridian Forest",
     "pokemonIds": [
       10,
@@ -826,6 +1430,318 @@
       453,
       476,
       489
+    ]
+  },
+  {
+    "routeName": "Cerulean Cave",
+    "pokemonIds": [
+      26,
+      42,
+      65,
+      76,
+      90,
+      97,
+      132,
+      147,
+      149,
+      224,
+      242,
+      296,
+      333,
+      338,
+      363,
+      364,
+      367,
+      369,
+      374,
+      394,
+      434,
+      436,
+      437,
+      453,
+      454,
+      455,
+      469,
+      501
+    ]
+  },
+  {
+    "routeName": "Cerulean Cave WTF",
+    "pokemonIds": [
+      26,
+      42,
+      65,
+      76,
+      97,
+      132,
+      242,
+      296,
+      333,
+      338,
+      363,
+      367,
+      369,
+      374,
+      453,
+      455
+    ]
+  },
+  {
+    "routeName": "Mt. Silver",
+    "pokemonIds": [
+      25,
+      31,
+      34,
+      65,
+      68,
+      76,
+      87,
+      94,
+      112,
+      129,
+      131,
+      132,
+      169,
+      208,
+      230,
+      248,
+      265,
+      296,
+      314,
+      329,
+      361,
+      367,
+      426,
+      428,
+      429,
+      437,
+      439,
+      441,
+      443,
+      452,
+      453,
+      455,
+      456,
+      462,
+      490
+    ]
+  },
+  {
+    "routeName": "Power Plant",
+    "pokemonIds": [
+      81,
+      100,
+      135,
+      172,
+      239,
+      292,
+      389,
+      397,
+      420,
+      434
+    ]
+  },
+  {
+    "routeName": "Pokémon Mansion",
+    "pokemonIds": [
+      132,
+      228,
+      229,
+      319,
+      330,
+      365,
+      366,
+      371,
+      397,
+      398,
+      419,
+      425,
+      488
+    ]
+  },
+  {
+    "routeName": "Violet City",
+    "pokemonIds": [
+      60,
+      61,
+      62,
+      130,
+      183,
+      186,
+      201,
+      211,
+      214,
+      286,
+      314,
+      371,
+      394,
+      434,
+      453,
+      469
+    ]
+  },
+  {
+    "routeName": "Cherrygrove City",
+    "pokemonIds": [
+      12,
+      24,
+      26,
+      42,
+      44,
+      45,
+      49,
+      53,
+      56,
+      57,
+      61,
+      62,
+      70,
+      71,
+      102,
+      119,
+      132,
+      143,
+      271,
+      424,
+      452,
+      469
+    ]
+  },
+  {
+    "routeName": "Blackthorn City",
+    "pokemonIds": [
+      61,
+      117,
+      129,
+      147,
+      207,
+      227,
+      232,
+      376,
+      415,
+      434,
+      445,
+      453,
+      456,
+      469
+    ]
+  },
+  {
+    "routeName": "Burned Tower",
+    "pokemonIds": [
+      92,
+      110,
+      136,
+      219,
+      255,
+      295,
+      366,
+      488
+    ]
+  },
+  {
+    "routeName": "Lake of Rage",
+    "pokemonIds": [
+      115,
+      202,
+      204,
+      226,
+      261,
+      439,
+      469,
+      490,
+      496,
+      497
+    ]
+  },
+  {
+    "routeName": "Ilex Forest",
+    "pokemonIds": [
+      49,
+      54,
+      55,
+      61,
+      79,
+      83,
+      116,
+      117,
+      162,
+      169,
+      189,
+      190,
+      204,
+      211,
+      213,
+      214,
+      230,
+      355,
+      382,
+      424,
+      434,
+      438,
+      452,
+      453,
+      489
+    ]
+  },
+  {
+    "routeName": "Union Cave",
+    "pokemonIds": [
+      28,
+      76,
+      119,
+      194,
+      195,
+      208,
+      211,
+      213,
+      434,
+      436,
+      437,
+      441,
+      453,
+      454,
+      478
+    ]
+  },
+  {
+    "routeName": "Union Cave B1",
+    "pokemonIds": [
+      28,
+      76,
+      119,
+      194,
+      195,
+      208,
+      211,
+      213,
+      434,
+      436,
+      437,
+      441,
+      453,
+      454,
+      478
+    ]
+  },
+  {
+    "routeName": "Union Cave B2",
+    "pokemonIds": [
+      28,
+      76,
+      119,
+      194,
+      195,
+      208,
+      211,
+      213,
+      421,
+      434,
+      436,
+      437,
+      441,
+      453,
+      454
     ]
   },
   {
@@ -995,6 +1911,48 @@
     ]
   },
   {
+    "routeName": "Ruins of Alph",
+    "pokemonIds": [
+      54,
+      60,
+      79,
+      118,
+      119,
+      177,
+      183,
+      184,
+      195,
+      201,
+      235,
+      394,
+      416,
+      434,
+      436,
+      453,
+      501
+    ]
+  },
+  {
+    "routeName": "Dark Cave",
+    "pokemonIds": [
+      62,
+      79,
+      118,
+      119,
+      168,
+      202,
+      206,
+      217,
+      300,
+      434,
+      452,
+      453,
+      454,
+      469,
+      494
+    ]
+  },
+  {
     "routeName": "Route 42",
     "pokemonIds": [
       57,
@@ -1045,6 +2003,27 @@
     ]
   },
   {
+    "routeName": "Ice Mountains",
+    "pokemonIds": [
+      215,
+      221,
+      262,
+      272,
+      428,
+      429
+    ]
+  },
+  {
+    "routeName": "Ice Cavern",
+    "pokemonIds": [
+      215,
+      221,
+      272,
+      428,
+      429
+    ]
+  },
+  {
     "routeName": "Route 44",
     "pokemonIds": [
       70,
@@ -1091,6 +2070,21 @@
     ]
   },
   {
+    "routeName": "National Park",
+    "pokemonIds": [
+      12,
+      15,
+      44,
+      46,
+      48,
+      70,
+      123,
+      127,
+      422,
+      474
+    ]
+  },
+  {
     "routeName": "Mt. Mortar",
     "pokemonIds": [
       184,
@@ -1106,6 +2100,276 @@
       453,
       469,
       494
+    ]
+  },
+  {
+    "routeName": "Treasure Beach",
+    "pokemonIds": [
+      25,
+      54,
+      79,
+      98,
+      116,
+      117,
+      129,
+      130,
+      131,
+      134,
+      370,
+      425,
+      434,
+      453,
+      454,
+      459,
+      469,
+      501
+    ]
+  },
+  {
+    "routeName": "Kindle Road",
+    "pokemonIds": [
+      44,
+      70,
+      73,
+      84,
+      90,
+      118,
+      138,
+      140,
+      170,
+      171,
+      195,
+      210,
+      222,
+      301,
+      303,
+      325,
+      370,
+      387,
+      453,
+      454,
+      457,
+      458,
+      459,
+      474,
+      479,
+      485,
+      493,
+      501
+    ]
+  },
+  {
+    "routeName": "Brine Road",
+    "pokemonIds": [
+      55,
+      72,
+      73,
+      90,
+      98,
+      116,
+      120,
+      170,
+      171,
+      188,
+      189,
+      211,
+      222,
+      226,
+      235,
+      356,
+      387,
+      394,
+      459,
+      469,
+      501
+    ]
+  },
+  {
+    "routeName": "Bond bridge",
+    "pokemonIds": [
+      73,
+      101,
+      116,
+      117,
+      211,
+      370,
+      394,
+      453,
+      469
+    ]
+  },
+  {
+    "routeName": "Offshore Road",
+    "pokemonIds": [
+      25,
+      54,
+      55,
+      79,
+      116,
+      147,
+      223,
+      227,
+      246,
+      291,
+      297,
+      375,
+      392,
+      395,
+      414,
+      416,
+      434,
+      436,
+      437,
+      440,
+      441,
+      442,
+      443,
+      444,
+      453,
+      454,
+      455,
+      501
+    ]
+  },
+  {
+    "routeName": "Boon Island",
+    "pokemonIds": [
+      72,
+      84,
+      90,
+      116,
+      170,
+      171,
+      210,
+      211,
+      222,
+      226,
+      232,
+      356,
+      370,
+      394,
+      418,
+      453,
+      457,
+      458,
+      459,
+      501
+    ]
+  },
+  {
+    "routeName": "Kin Island",
+    "pokemonIds": [
+      72,
+      73,
+      90,
+      116,
+      170,
+      222,
+      394,
+      453,
+      455,
+      501
+    ]
+  },
+  {
+    "routeName": "Knot Island",
+    "pokemonIds": [
+      73,
+      90,
+      170,
+      171,
+      183,
+      222,
+      370,
+      387,
+      453,
+      454,
+      469,
+      474,
+      485,
+      501
+    ]
+  },
+  {
+    "routeName": "Chrono Island",
+    "pokemonIds": [
+      72,
+      73,
+      79,
+      90,
+      116,
+      133,
+      170,
+      171,
+      178,
+      206,
+      222,
+      290,
+      310,
+      358,
+      370,
+      394,
+      453,
+      459
+    ]
+  },
+  {
+    "routeName": "Berry Forest",
+    "pokemonIds": [
+      36,
+      48,
+      55,
+      102,
+      143,
+      234,
+      260,
+      266,
+      370,
+      424,
+      501
+    ]
+  },
+  {
+    "routeName": "Mt. Ember",
+    "pokemonIds": [
+      42,
+      77,
+      85,
+      126,
+      208,
+      219,
+      325,
+      353,
+      418,
+      426,
+      482,
+      488
+    ]
+  },
+  {
+    "routeName": "P2 Laboratory",
+    "pokemonIds": [
+      82,
+      116,
+      117,
+      211,
+      230,
+      263,
+      330,
+      394,
+      397,
+      398,
+      501
+    ]
+  },
+  {
+    "routeName": "Magnezone",
+    "pokemonIds": []
+  },
+  {
+    "routeName": "Debug Island",
+    "pokemonIds": [
+      132
     ]
   }
 ]

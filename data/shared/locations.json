@@ -72,6 +72,12 @@
     "description": "After Mt. Moon, path to Cerulean City"
   },
   {
+    "id":"5e4ab76e-a25a-4804-865a-1d6ba341ffe4",
+    "name": "Cerulean City",
+    "region": "Kanto",
+    "description": "This city contains Cerulean City's Gym, with Misty as its leader."
+  },
+  {
     "id": "70b5aa10-2bbe-4d50-a4cd-56097207b1e8",
     "name": "Route 24",
     "region": "Kanto",
