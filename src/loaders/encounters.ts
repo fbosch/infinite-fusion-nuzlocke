@@ -18,7 +18,10 @@ export interface EncounterData {
 }
 
 export enum EncounterSource {
-  WILD = 'wild',
+  WILD = 'wild', // Generic wild (for backward compatibility)
+  GRASS = 'grass', // Wild grass encounters
+  SURF = 'surf', // Surfing encounters
+  FISHING = 'fishing', // Fishing encounters
   GIFT = 'gift',
   TRADE = 'trade',
   QUEST = 'quest',
@@ -35,9 +38,24 @@ export const PokemonEncounterSchema = z.object({
     .refine(val => val > 0 || val === -1, {
       error: 'Pokemon ID must be positive or -1 for egg locations',
     }),
-  source: z.enum(EncounterSource, {
-    error: 'Source must be wild, gift, trade, quest, static, nest, or egg',
-  }),
+  source: z.enum(
+    [
+      EncounterSource.WILD,
+      EncounterSource.GRASS,
+      EncounterSource.SURF,
+      EncounterSource.FISHING,
+      EncounterSource.GIFT,
+      EncounterSource.TRADE,
+      EncounterSource.QUEST,
+      EncounterSource.NEST,
+      EncounterSource.EGG,
+      EncounterSource.STATIC,
+    ],
+    {
+      error:
+        'Source must be wild, grass, surf, fishing, gift, trade, quest, static, nest, or egg',
+    }
+  ),
 });
 
 export type PokemonEncounter = z.infer<typeof PokemonEncounterSchema>;

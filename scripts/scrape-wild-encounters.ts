@@ -18,9 +18,108 @@ import { loadPokemonNameMap } from './utils/data-loading-utils';
 const WILD_ENCOUNTERS_CLASSIC_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters';
 const WILD_ENCOUNTERS_REMIX_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters/Remix';
 
+/**
+ * Detects encounter type from text content like "Surf", "Old Rod", etc.
+ */
+function detectEncounterType(text: string): 'grass' | 'surf' | 'fishing' | 'special' | null {
+  if (!text || typeof text !== 'string') {
+    return null;
+  }
+
+  const normalizedText = text.toLowerCase().trim();
+
+  // Surf encounters - be more specific about surf detection
+  if (normalizedText === 'surf' || 
+      normalizedText.includes('surfing') ||
+      (normalizedText.includes('surf') && !normalizedText.includes('rod'))) {
+    return 'surf';
+  }
+
+  // Fishing encounters - only specific rod types
+  if (normalizedText.includes('old rod') || 
+      normalizedText.includes('good rod') ||
+      normalizedText.includes('super rod') ||
+      normalizedText.includes('fishing rod') ||
+      normalizedText.includes('rod fishing')) {
+    return 'fishing';
+  }
+
+  // Grass encounters
+  if (normalizedText.includes('grass') || 
+      normalizedText.includes('walking') ||
+      normalizedText.includes('wild grass')) {
+    return 'grass';
+  }
+
+  // Special encounters (gift, trade, etc.)
+  if (normalizedText.includes('gift') ||
+      normalizedText.includes('trade') ||
+      normalizedText.includes('special') ||
+      normalizedText.includes('event')) {
+    return 'special';
+  }
+
+  return null;
+}
+
+
+
+/**
+ * Validates if a potential route name is actually a valid route and not CSS or other content
+ */
+function isValidRouteName(text: string): boolean {
+  if (!text || typeof text !== 'string') {
+    return false;
+  }
+
+  const trimmedText = text.trim();
+
+  // Exclude if too long (CSS content is typically very long)
+  if (trimmedText.length > 100) {
+    return false;
+  }
+
+  // Exclude CSS content
+  if (trimmedText.includes('display:') ||
+      trimmedText.includes('width:') ||
+      trimmedText.includes('height:') ||
+      trimmedText.includes('margin:') ||
+      trimmedText.includes('padding:') ||
+      trimmedText.includes('background:') ||
+      trimmedText.includes('border:') ||
+      trimmedText.includes('.mw-parser-output') ||
+      trimmedText.includes('px') ||
+      trimmedText.includes('em') ||
+      trimmedText.includes('{') ||
+      trimmedText.includes('}') ||
+      trimmedText.includes(';')) {
+    return false;
+  }
+
+  // Exclude very short or meaningless text
+  if (trimmedText.length < 3) {
+    return false;
+  }
+
+  // Exclude text that's mostly numbers or symbols, but allow valid route patterns
+  const alphaCount = (trimmedText.match(/[a-zA-Z]/g) || []).length;
+  // Special case: allow route names even if they have ID numbers
+  const isValidRoute = /^Route \d+(\s*\(ID\s+-?\d+(?:\.\d+)?\))?$/i.test(trimmedText);
+  if (!isValidRoute && alphaCount < trimmedText.length / 2) {
+    return false;
+  }
+
+  return true;
+}
+
+interface PokemonEncounter {
+  pokemonId: number; // Custom Infinite Fusion ID
+  encounterType: 'grass' | 'surf' | 'fishing' | 'special';
+}
+
 interface RouteEncounters {
   routeName: string;
-  pokemonIds: number[]; // These are custom Infinite Fusion IDs
+  encounters: PokemonEncounter[];
 }
 
 /**
@@ -33,7 +132,7 @@ function consolidateSubLocations(routes: RouteEncounters[]): RouteEncounters[] {
   const locationsData = JSON.parse(readFileSync(locationsPath, 'utf-8'));
   const existingLocationNames = locationsData.map((loc: any) => loc.name);
   
-  const locationGroups = new Map<string, Set<number>>();
+  const locationGroups = new Map<string, PokemonEncounter[]>();
 
   for (const route of routes) {
     // Find if this route is a sub-location of any existing location
@@ -41,20 +140,35 @@ function consolidateSubLocations(routes: RouteEncounters[]): RouteEncounters[] {
     const baseLocation = parentLocation || route.routeName;
     
     if (!locationGroups.has(baseLocation)) {
-      locationGroups.set(baseLocation, new Set<number>());
+      locationGroups.set(baseLocation, []);
     }
     
-    // Add all Pokémon IDs to the base location set (automatically deduplicates)
-    for (const pokemonId of route.pokemonIds) {
-      locationGroups.get(baseLocation)!.add(pokemonId);
-    }
+    // Add all encounters to the base location (will deduplicate later)
+    locationGroups.get(baseLocation)!.push(...route.encounters);
   }
 
-  // Convert back to RouteEncounters format
-  return Array.from(locationGroups.entries()).map(([routeName, pokemonIdSet]) => ({
-    routeName,
-    pokemonIds: Array.from(pokemonIdSet).sort((a, b) => a - b)
-  }));
+  // Convert back to RouteEncounters format with deduplication
+  return Array.from(locationGroups.entries()).map(([routeName, encounters]) => {
+    // Deduplicate encounters by creating a unique key for each encounter
+    const uniqueEncounters = new Map<string, PokemonEncounter>();
+    
+    for (const encounter of encounters) {
+      const key = `${encounter.pokemonId}-${encounter.encounterType}`;
+      if (!uniqueEncounters.has(key)) {
+        uniqueEncounters.set(key, encounter);
+      }
+    }
+    
+    return {
+      routeName,
+      encounters: Array.from(uniqueEncounters.values()).sort((a, b) => {
+        // Sort by encounter type first, then by pokemon ID
+        const typeOrder = { grass: 0, surf: 1, fishing: 2, special: 3 };
+        const typeComparison = typeOrder[a.encounterType] - typeOrder[b.encounterType];
+        return typeComparison !== 0 ? typeComparison : a.pokemonId - b.pokemonId;
+      })
+    };
+  });
 }
 
 /**
@@ -133,12 +247,17 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
       }
 
       // Look for route patterns
-      if (isRoutePattern(fullText)) {
+      if (isRoutePattern(fullText) && isValidRouteName(fullText)) {
         // Make sure this isn't deeply nested content (allow some basic formatting)
         const children = $element.children();
         if (children.length <= 2) {
 
           const { cleanName: cleanedRouteName, routeId } = processRouteName(fullText);
+
+          // Additional validation on the cleaned name
+          if (!isValidRouteName(cleanedRouteName)) {
+            return;
+          }
 
           // Create unique identifier that includes both name and ID for duplicate detection
           const uniqueIdentifier = routeId ? `${cleanedRouteName}#${routeId}` : cleanedRouteName;
@@ -153,51 +272,81 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
           progressBar.update(index, { status: `Processing: ${cleanedRouteName}` });
 
           // Find Pokemon data near this route
-          const pokemonIds = new Set<number>();
+          const encounters: PokemonEncounter[] = [];
           let current = $element;
           let steps = 0;
-          const maxSteps = 10; // Much more limited search scope
+          const maxSteps = 15; // Increased to capture more sections
+          let currentEncounterType: 'grass' | 'surf' | 'fishing' | 'special' = 'grass'; // Default to grass
 
           // Search through next siblings
           while (steps < maxSteps && current.next().length > 0) {
             current = current.next();
             const currentText = current.text().trim();
 
-            // Stop if we hit another route
-            if (isRoutePattern(currentText)) {
+            // Stop if we hit another valid route
+            if (isRoutePattern(currentText) && isValidRouteName(currentText)) {
               break;
+            }
+
+            // Check for encounter type headers
+            const encounterTypeMatch = detectEncounterType(currentText);
+            if (encounterTypeMatch) {
+              currentEncounterType = encounterTypeMatch;
             }
 
             // Look for all tables that appear after this route heading
             const tables = current.is('table') ? current : current.find('table');
             if (tables.length > 0) {
-              // Process ALL tables we find for this route (not just the first one)
+              // Process ALL tables we find for this route
               tables.each((tableIndex: number, table: any) => {
-                $(table).find('td, th').each((cellIndex: number, cell: any) => {
-                  const cellText = $(cell).text().trim();
-
-                  // Skip headers and non-Pokemon content
-                  if (isPotentialPokemonName(cellText)) {
-                    // Try to find Pokemon by name (returns custom ID)
-                    const pokemonId = findPokemonId(cellText, pokemonNameMap);
-                    
-                    if (pokemonId) {
-                      pokemonIds.add(pokemonId);
+                const tableEncounterType = currentEncounterType;
+                
+                // Check for encounter type headers within the table
+                let currentSectionType = tableEncounterType;
+                
+                $(table).find('tr').each((rowIndex: number, row: any) => {
+                  const $row = $(row);
+                  
+                  // Check if this row contains a header that spans multiple columns (encounter type header)
+                  const headerCell = $row.find('th[colspan]').first();
+                  if (headerCell.length > 0) {
+                    const headerText = headerCell.text().trim();
+                    const detectedType = detectEncounterType(headerText);
+                    if (detectedType) {
+                      currentSectionType = detectedType;
+                      return; // Skip processing this row for Pokemon
                     }
                   }
+                  
+                  // Process Pokemon in this row using the current section type
+                  $row.find('td').each((cellIndex: number, cell: any) => {
+                    const cellText = $(cell).text().trim();
+
+                    // Skip headers and non-Pokemon content
+                    if (isPotentialPokemonName(cellText)) {
+                      // Try to find Pokemon by name (returns custom ID)
+                      const pokemonId = findPokemonId(cellText, pokemonNameMap);
+                      
+                      if (pokemonId) {
+                        encounters.push({
+                          pokemonId,
+                          encounterType: currentSectionType
+                        });
+                      }
+                    }
+                  });
                 });
+
+
               });
-              break; // Stop after processing all tables in this section
             }
 
             steps++;
           }
 
-          const sortedIds = Array.from(pokemonIds).sort((a, b) => a - b);
-
           const routeData: RouteEncounters = {
             routeName: cleanedRouteName,
-            pokemonIds: sortedIds
+            encounters: encounters
           };
 
 

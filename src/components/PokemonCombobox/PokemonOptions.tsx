@@ -45,6 +45,24 @@ function SourceTag({ sources, locationId }: SourceTagProps) {
         'transition-colors duration-200 text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 border border-green-200/60 dark:border-green-700/40 hover:bg-green-100 dark:hover:bg-green-900/70',
       icon: <WildIcon className='size-3' />,
     },
+    [EncounterSource.GRASS]: {
+      text: 'Grass',
+      className:
+        'transition-colors duration-200 text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 border border-green-200/60 dark:border-green-700/40 hover:bg-green-100 dark:hover:bg-green-900/70',
+      icon: <WildIcon className='size-3' />,
+    },
+    [EncounterSource.SURF]: {
+      text: 'Surf',
+      className:
+        'transition-colors duration-200 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/40 hover:bg-blue-100 dark:hover:bg-blue-900/70',
+      icon: <span className='size-3 text-[10px] font-bold'>🌊</span>,
+    },
+    [EncounterSource.FISHING]: {
+      text: 'Fish',
+      className:
+        'transition-colors duration-200 text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-900/20 border border-teal-200/60 dark:border-teal-700/40 hover:bg-teal-100 dark:hover:bg-teal-900/70',
+      icon: <span className='size-3 text-[10px] font-bold'>🎣</span>,
+    },
     [EncounterSource.GIFT]: {
       text: 'Gift',
       className:

@@ -5,12 +5,43 @@ import {
   RouteEncountersArraySchema,
 } from '@/loaders/encounters';
 
+// Schema for the new enhanced data format with encounter types
+const NewPokemonEncounterSchema = z.object({
+  pokemonId: z.number().int(),
+  encounterType: z.enum(['grass', 'surf', 'fishing', 'special']),
+});
+
+const NewRouteEncounterSchema = z.object({
+  routeName: z.string().min(1, { error: 'Route name is required' }),
+  encounters: z.array(NewPokemonEncounterSchema),
+});
+
+const NewRouteEncountersArraySchema = z.array(NewRouteEncounterSchema);
+
 // Temporary schema for the old data format during migration
 const OldRouteEncounterSchema = z.object({
   routeName: z.string().min(1, { error: 'Route name is required' }),
   pokemonIds: z.array(z.number().int()),
 });
 const OldRouteEncountersArraySchema = z.array(OldRouteEncounterSchema);
+
+// Function to map encounter types to encounter sources
+function mapEncounterTypeToSource(
+  encounterType: 'grass' | 'surf' | 'fishing' | 'special'
+): EncounterSource {
+  switch (encounterType) {
+    case 'grass':
+      return EncounterSource.GRASS;
+    case 'surf':
+      return EncounterSource.SURF;
+    case 'fishing':
+      return EncounterSource.FISHING;
+    case 'special':
+      return EncounterSource.STATIC;
+    default:
+      return EncounterSource.WILD;
+  }
+}
 
 // Type for egg location data
 interface EggLocation {
@@ -66,8 +97,28 @@ export async function GET(request: NextRequest) {
       ]
     );
 
-    // Validate the data using the old schema (since data files haven't been migrated yet)
-    const encounters = OldRouteEncountersArraySchema.parse(wild.default);
+    // Try to parse with new schema first, fall back to old schema for backward compatibility
+    let encounters: Array<{
+      routeName: string;
+      encounters?: Array<{
+        pokemonId: number;
+        encounterType: 'grass' | 'surf' | 'fishing' | 'special';
+      }>;
+      pokemonIds?: number[];
+    }>;
+
+    const newWildFormat = NewRouteEncountersArraySchema.safeParse(wild.default);
+    if (newWildFormat.success) {
+      encounters = newWildFormat.data;
+    } else {
+      // Fall back to old format
+      const oldWildFormat = OldRouteEncountersArraySchema.parse(wild.default);
+      encounters = oldWildFormat.map(route => ({
+        routeName: route.routeName,
+        pokemonIds: route.pokemonIds,
+      }));
+    }
+
     const trades = OldRouteEncountersArraySchema.parse(trade.default);
     const gifts = OldRouteEncountersArraySchema.parse(gift.default);
     const quests = OldRouteEncountersArraySchema.parse(quest.default);
@@ -106,18 +157,39 @@ export async function GET(request: NextRequest) {
 
     // Merge encounters for each route with source information
     const mergedEncounters = Array.from(allRouteNames).map(routeName => {
-      const wildPokemon = encountersMap.get(routeName)?.pokemonIds || [];
+      const routeData = encountersMap.get(routeName);
       const tradePokemon = tradesMap.get(routeName)?.pokemonIds || [];
       const giftPokemon = giftsMap.get(routeName)?.pokemonIds || [];
       const questPokemon = questsMap.get(routeName)?.pokemonIds || [];
       const staticPokemon = staticsMap.get(routeName)?.pokemonIds || [];
 
+      // Handle wild Pokemon with the new encounter type system
+      const wildPokemonObjects: Array<{ id: number; source: EncounterSource }> =
+        [];
+
+      if (routeData) {
+        if (routeData.encounters) {
+          // New format: encounters with types
+          wildPokemonObjects.push(
+            ...routeData.encounters.map(encounter => ({
+              id: encounter.pokemonId,
+              source: mapEncounterTypeToSource(encounter.encounterType),
+            }))
+          );
+        } else if (routeData.pokemonIds) {
+          // Old format: just pokemon IDs (treat as generic wild)
+          wildPokemonObjects.push(
+            ...routeData.pokemonIds.map(id => ({
+              id,
+              source: EncounterSource.WILD as const,
+            }))
+          );
+        }
+      }
+
       // Create Pokemon objects with source information
       const pokemon: Array<{ id: number; source: EncounterSource }> = [
-        ...wildPokemon.map(id => ({
-          id,
-          source: EncounterSource.WILD as const,
-        })),
+        ...wildPokemonObjects,
         ...tradePokemon.map(id => ({
           id,
           source: EncounterSource.TRADE as const,
