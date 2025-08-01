@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     const gameMode = rawGameMode === 'remix' ? 'remix' : 'classic';
 
     // Use explicit imports instead of dynamic template literals
-    const [wild, trade, gift, eggLocations] = await Promise.all([
+    const [wild, trade, gift, quest, eggLocations] = await Promise.all([
       gameMode === 'remix'
         ? import('@data/remix/encounters.json')
         : import('@data/classic/encounters.json'),
@@ -55,6 +55,9 @@ export async function GET(request: NextRequest) {
       gameMode === 'remix'
         ? import('@data/remix/gifts.json')
         : import('@data/classic/gifts.json'),
+      gameMode === 'remix'
+        ? import('@data/remix/quests.json')
+        : import('@data/classic/quests.json'),
       import('@data/egg-locations.json'),
     ]);
 
@@ -62,6 +65,7 @@ export async function GET(request: NextRequest) {
     const encounters = OldRouteEncountersArraySchema.parse(wild.default);
     const trades = OldRouteEncountersArraySchema.parse(trade.default);
     const gifts = OldRouteEncountersArraySchema.parse(gift.default);
+    const quests = OldRouteEncountersArraySchema.parse(quest.default);
     const eggLocationsData = eggLocations.default as EggLocationsData;
 
     // Create maps of route names for egg locations by source type
@@ -81,6 +85,7 @@ export async function GET(request: NextRequest) {
       ...encounters.map(e => e.routeName),
       ...trades.map(t => t.routeName),
       ...gifts.map(g => g.routeName),
+      ...quests.map(q => q.routeName),
       ...eggGiftRoutes.keys(), // Include egg gift locations
       ...eggNestRoutes.keys(), // Include egg nest locations
     ]);
@@ -89,12 +94,14 @@ export async function GET(request: NextRequest) {
     const encountersMap = new Map(encounters.map(e => [e.routeName, e]));
     const tradesMap = new Map(trades.map(t => [t.routeName, t]));
     const giftsMap = new Map(gifts.map(g => [g.routeName, g]));
+    const questsMap = new Map(quests.map(q => [q.routeName, q]));
 
     // Merge encounters for each route with source information
     const mergedEncounters = Array.from(allRouteNames).map(routeName => {
       const wildPokemon = encountersMap.get(routeName)?.pokemonIds || [];
       const tradePokemon = tradesMap.get(routeName)?.pokemonIds || [];
       const giftPokemon = giftsMap.get(routeName)?.pokemonIds || [];
+      const questPokemon = questsMap.get(routeName)?.pokemonIds || [];
 
       // Create Pokemon objects with source information
       const pokemon: Array<{ id: number; source: EncounterSource }> = [
@@ -109,6 +116,10 @@ export async function GET(request: NextRequest) {
         ...giftPokemon.map(id => ({
           id,
           source: EncounterSource.GIFT as const,
+        })),
+        ...questPokemon.map(id => ({
+          id,
+          source: EncounterSource.QUEST as const,
         })),
       ];
 

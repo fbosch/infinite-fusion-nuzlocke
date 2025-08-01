@@ -1,0 +1,26 @@
+[
+  {
+    "routeName": "Pewter City",
+    "pokemonIds": [
+      142
+    ]
+  },
+  {
+    "routeName": "S.S. Anne",
+    "pokemonIds": [
+      491
+    ]
+  },
+  {
+    "routeName": "Saffron City",
+    "pokemonIds": [
+      290
+    ]
+  },
+  {
+    "routeName": "Viridian Forest",
+    "pokemonIds": [
+      15
+    ]
+  }
+]

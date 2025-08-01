@@ -1,7 +1,15 @@
 'use client';
 
 import React from 'react';
-import { ArrowUpDown, Check, Search, Loader2, Gift, Egg } from 'lucide-react';
+import {
+  ArrowUpDown,
+  Check,
+  Search,
+  Loader2,
+  Gift,
+  Egg,
+  HeartHandshake,
+} from 'lucide-react';
 import { ComboboxOption } from '@headlessui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -57,8 +65,14 @@ function SourceTag({ source, locationId }: SourceTagProps) {
     [EncounterSource.EGG]: {
       text: 'Egg',
       className:
-        'transition-colors duration-200 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/40 hover:bg-blue-100 dark:hover:bg-blue-900/70',
+        'transition-colors duration-200 text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200/60 dark:border-cyan-700/40 hover:bg-cyan-100 dark:hover:bg-cyan-900/70',
       icon: <Egg className='size-3' />,
+    },
+    [EncounterSource.QUEST]: {
+      text: 'Quest',
+      className:
+        'transition-colors duration-200 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/40 hover:bg-blue-100 dark:hover:bg-blue-900/70',
+      icon: <HeartHandshake className='size-3' />,
     },
   };
 
