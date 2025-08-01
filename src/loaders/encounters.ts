@@ -22,6 +22,8 @@ export enum EncounterSource {
   GRASS = 'grass', // Wild grass encounters
   SURF = 'surf', // Surfing encounters
   FISHING = 'fishing', // Fishing encounters
+  CAVE = 'cave', // Cave encounters
+  ROCK_SMASH = 'rock_smash', // Rock Smash encounters
   GIFT = 'gift',
   TRADE = 'trade',
   QUEST = 'quest',
@@ -44,6 +46,8 @@ export const PokemonEncounterSchema = z.object({
       EncounterSource.GRASS,
       EncounterSource.SURF,
       EncounterSource.FISHING,
+      EncounterSource.CAVE,
+      EncounterSource.ROCK_SMASH,
       EncounterSource.GIFT,
       EncounterSource.TRADE,
       EncounterSource.QUEST,
@@ -53,7 +57,7 @@ export const PokemonEncounterSchema = z.object({
     ],
     {
       error:
-        'Source must be wild, grass, surf, fishing, gift, trade, quest, static, nest, or egg',
+        'Source must be wild, grass, surf, fishing, cave, rock_smash, gift, trade, quest, static, nest, or egg',
     }
   ),
 });

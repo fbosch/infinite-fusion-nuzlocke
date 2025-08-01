@@ -8,7 +8,14 @@ import {
 // Schema for the new enhanced data format with encounter types
 const NewPokemonEncounterSchema = z.object({
   pokemonId: z.number().int(),
-  encounterType: z.enum(['grass', 'surf', 'fishing', 'special']),
+  encounterType: z.enum([
+    'grass',
+    'surf',
+    'fishing',
+    'special',
+    'cave',
+    'rock_smash',
+  ]),
 });
 
 const NewRouteEncounterSchema = z.object({
@@ -27,7 +34,13 @@ const OldRouteEncountersArraySchema = z.array(OldRouteEncounterSchema);
 
 // Function to map encounter types to encounter sources
 function mapEncounterTypeToSource(
-  encounterType: 'grass' | 'surf' | 'fishing' | 'special'
+  encounterType:
+    | 'grass'
+    | 'surf'
+    | 'fishing'
+    | 'special'
+    | 'cave'
+    | 'rock_smash'
 ): EncounterSource {
   switch (encounterType) {
     case 'grass':
@@ -36,6 +49,10 @@ function mapEncounterTypeToSource(
       return EncounterSource.SURF;
     case 'fishing':
       return EncounterSource.FISHING;
+    case 'cave':
+      return EncounterSource.CAVE;
+    case 'rock_smash':
+      return EncounterSource.ROCK_SMASH;
     case 'special':
       return EncounterSource.STATIC;
     default:

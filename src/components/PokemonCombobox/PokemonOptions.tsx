@@ -12,6 +12,8 @@ import {
   LocateFixed,
   Fish,
   Waves,
+  Mountain,
+  Pickaxe,
 } from 'lucide-react';
 import { ComboboxOption } from '@headlessui/react';
 import clsx from 'clsx';
@@ -100,6 +102,20 @@ function SourceTag({ sources, locationId }: SourceTagProps) {
       className:
         'transition-colors duration-200 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/20 border border-gray-200/60 dark:border-gray-700/40 hover:bg-gray-100 dark:hover:bg-gray-900/70',
       icon: <LocateFixed className='size-3' />,
+    },
+    [EncounterSource.CAVE]: {
+      text: 'Cave',
+      className:
+        'transition-colors duration-200 text-stone-700 dark:text-stone-300 bg-stone-50 dark:bg-stone-900/20 border border-stone-200/60 dark:border-stone-700/40 hover:bg-stone-100 dark:hover:bg-stone-900/70',
+      icon: <Mountain className='size-3' />,
+      tooltip: 'Found in caves and underground areas',
+    },
+    [EncounterSource.ROCK_SMASH]: {
+      text: 'Rock Smash',
+      className:
+        'transition-colors duration-200 text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-700/40 hover:bg-amber-100 dark:hover:bg-amber-900/70',
+      icon: <Pickaxe className='size-3' />,
+      tooltip: 'Found by breaking rocks with Rock Smash',
     },
   };
 

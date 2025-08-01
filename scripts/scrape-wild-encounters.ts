@@ -21,7 +21,7 @@ const WILD_ENCOUNTERS_REMIX_URL = 'https://infinitefusion.fandom.com/wiki/Wild_E
 /**
  * Detects encounter type from text content like "Surf", "Old Rod", etc.
  */
-function detectEncounterType(text: string): 'grass' | 'surf' | 'fishing' | 'special' | null {
+function detectEncounterType(text: string): 'grass' | 'surf' | 'fishing' | 'special' | 'cave' | 'rock_smash' | null {
   if (!text || typeof text !== 'string') {
     return null;
   }
@@ -44,10 +44,29 @@ function detectEncounterType(text: string): 'grass' | 'surf' | 'fishing' | 'spec
     return 'fishing';
   }
 
+  // Rock Smash encounters
+  if (normalizedText.includes('rock smash') ||
+      normalizedText.includes('smash rock') ||
+      normalizedText.includes('breaking rocks') ||
+      normalizedText.includes('break rock')) {
+    return 'rock_smash';
+  }
+
+  // Cave encounters
+  if (normalizedText.includes('cave') ||
+      normalizedText.includes('cavern') ||
+      normalizedText.includes('underground') ||
+      normalizedText.includes('tunnel') ||
+      normalizedText.includes('mine') ||
+      normalizedText.includes('grotto')) {
+    return 'cave';
+  }
+
   // Grass encounters
   if (normalizedText.includes('grass') || 
       normalizedText.includes('walking') ||
-      normalizedText.includes('wild grass')) {
+      normalizedText.includes('wild grass') ||
+      normalizedText.includes('overworld')) {
     return 'grass';
   }
 
@@ -108,7 +127,7 @@ function isValidRouteName(text: string): boolean {
 
 interface PokemonEncounter {
   pokemonId: number; // Custom Infinite Fusion ID
-  encounterType: 'grass' | 'surf' | 'fishing' | 'special';
+  encounterType: 'grass' | 'surf' | 'fishing' | 'special' | 'cave' | 'rock_smash';
 }
 
 interface RouteEncounters {
@@ -271,7 +290,7 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
 
           // Find Pokemon data in the immediately following table
           const encounters: PokemonEncounter[] = [];
-          let currentEncounterType: 'grass' | 'surf' | 'fishing' | 'special' = 'grass'; // Default to grass
+          let currentEncounterType: 'grass' | 'surf' | 'fishing' | 'special' | 'cave' | 'rock_smash' = 'grass'; // Default to grass
 
           // Look for the next table with classes 'IFTable encounterTable'
           let nextElement = $element.next();
