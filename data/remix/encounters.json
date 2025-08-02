@@ -2377,6 +2377,91 @@
     ]
   },
   {
+    "routeName": "Cerulean Cape",
+    "encounters": [
+      {
+        "pokemonId": 10,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 13,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 16,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 179,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 187,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 382,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 403,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 406,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 54,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 79,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 454,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 60,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 61,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 118,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 130,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 394,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 434,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 436,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 453,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 454,
+        "encounterType": "fishing"
+      }
+    ]
+  },
+  {
     "routeName": "Route 23",
     "encounters": [
       {
@@ -3888,6 +3973,10 @@
         "encounterType": "cave"
       },
       {
+        "pokemonId": 455,
+        "encounterType": "cave"
+      },
+      {
         "pokemonId": 437,
         "encounterType": "surf"
       },
@@ -3942,75 +4031,6 @@
       {
         "pokemonId": 454,
         "encounterType": "fishing"
-      }
-    ]
-  },
-  {
-    "routeName": "Cerulean Cave WTF",
-    "encounters": [
-      {
-        "pokemonId": 26,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 42,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 65,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 76,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 97,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 132,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 242,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 296,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 333,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 338,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 363,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 367,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 369,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 374,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 453,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 455,
-        "encounterType": "cave"
       }
     ]
   },

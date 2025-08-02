@@ -194,12 +194,12 @@ function findParentLocation(routeName: string, existingLocations: string[]): str
   // Define valid sub-location suffixes that indicate a real sub-location
   const validSubLocationSuffixes = [
     'B1F', 'B2F', 'B3F', 'B4F', 'B5F',
-    '1F', '2F', '3F', '4F', '5F',
+    '1F', '2F', '3F', '4F', '5F', 'WTF',
     'Summit', 'Square', 'Entrance', 'Exit',
     'Top', 'Bottom', 'Upper', 'Lower',
     'North', 'South', 'East', 'West',
     'Interior', 'Exterior', 'Cave', 'Depths',
-    'Hidden', 'Center'
+    'Hidden', 'Center',
   ];
 
   // Check if any existing location is a prefix of the route name

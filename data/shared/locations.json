@@ -282,6 +282,12 @@
     "description": "Cerulean Cave area (post-game)"
   },
   {
+    "id": "70a3365e-447d-4017-9d6d-b17e07269492",
+    "name": "Cerulean Cave",
+    "region": "Kanto",
+    "description": "Cerulean Cave is located near Cerulean City, Surf and climb the waterfall to reach it."
+  },
+  {
     "id": "89ee90cf-2476-427d-b2fe-e008cc795155",
     "name": "Route 10",
     "region": "Kanto",
