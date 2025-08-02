@@ -86,7 +86,6 @@ function detectEncounterType(text: string): 'grass' | 'surf' | 'fishing' | 'spec
  */
 async function scrapeSafariAreaPage(url: string): Promise<RouteEncounters | null> {
   const areaName = url.split('/').pop()?.replace(/_/g, ' ').replace('%28', '(').replace('%29', ')') || 'Unknown Safari Area';
-  ConsoleFormatter.info(`Scraping ${areaName}...`);
 
   try {
     const response = await fetch(url);
@@ -101,7 +100,6 @@ async function scrapeSafariAreaPage(url: string): Promise<RouteEncounters | null
 
     // Get the location name from the page title
     const pageTitle = $('h1.page-header__title, #firstHeading').first().text().trim() || areaName;
-    ConsoleFormatter.info(`Processing: ${pageTitle}`);
 
     const encounters: PokemonEncounter[] = [];
     let currentEncounterType: 'grass' | 'surf' | 'fishing' | 'special' | 'cave' | 'rock_smash' = 'grass';
@@ -109,7 +107,6 @@ async function scrapeSafariAreaPage(url: string): Promise<RouteEncounters | null
     // Find all encounter tables on the page
     $('table.IFTable.encounterTable').each((tableIndex, table) => {
       const $table = $(table);
-      ConsoleFormatter.info(`Found encounter table ${tableIndex + 1} for ${pageTitle}`);
       
       // Look for encounter type headers in the table
       $table.find('tr').each((rowIndex, row) => {
@@ -122,7 +119,6 @@ async function scrapeSafariAreaPage(url: string): Promise<RouteEncounters | null
           const detectedType = detectEncounterType(headerText);
           if (detectedType) {
             currentEncounterType = detectedType;
-            ConsoleFormatter.info(`  Found encounter type: ${currentEncounterType}`);
             return; // Skip processing this row for Pokemon
           }
         }
@@ -148,7 +144,6 @@ async function scrapeSafariAreaPage(url: string): Promise<RouteEncounters | null
     });
 
     if (encounters.length > 0) {
-      ConsoleFormatter.success(`Found ${encounters.length} encounters in ${pageTitle}`);
       return {
         routeName: pageTitle,
         encounters: encounters
@@ -184,10 +179,13 @@ async function main() {
     // Scrape all Safari Zone area pages
     const safariEncounters: RouteEncounters[] = [];
     
+    ConsoleFormatter.info(`Scraping ${SAFARI_ZONE_PAGES.length} Safari Zone areas...`);
+    
     for (const url of SAFARI_ZONE_PAGES) {
       const encounters = await scrapeSafariAreaPage(url);
       if (encounters) {
         safariEncounters.push(encounters);
+        ConsoleFormatter.info(`✓ ${encounters.routeName}: ${encounters.encounters.length} encounters`);
       }
     }
 
@@ -195,6 +193,9 @@ async function main() {
       ConsoleFormatter.warn('No Safari Zone encounters found!');
       return;
     }
+
+    const totalEncounters = safariEncounters.reduce((sum, area) => sum + area.encounters.length, 0);
+    ConsoleFormatter.success(`Successfully scraped ${safariEncounters.length} areas with ${totalEncounters} total encounters`);
 
     // Save Safari Zone encounters to separate files
     ConsoleFormatter.info('Saving Safari Zone encounter data...');
