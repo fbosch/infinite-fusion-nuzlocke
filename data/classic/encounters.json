@@ -2074,6 +2074,51 @@
     ]
   },
   {
+    "routeName": "Tohjo Falls",
+    "encounters": [
+      {
+        "pokemonId": 20,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 42,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 80,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 169,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 79,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 118,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 119,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 118,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 119,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 129,
+        "encounterType": "fishing"
+      }
+    ]
+  },
+  {
     "routeName": "Route 21",
     "encounters": [
       {
@@ -3406,6 +3451,55 @@
     ]
   },
   {
+    "routeName": "Slowpoke Well",
+    "encounters": [
+      {
+        "pokemonId": 42,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 79,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 80,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 199,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 79,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 118,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 129,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 79,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 80,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 129,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 199,
+        "encounterType": "fishing"
+      }
+    ]
+  },
+  {
     "routeName": "Cherrygrove City",
     "encounters": [
       {
@@ -3565,6 +3659,43 @@
       {
         "pokemonId": 200,
         "encounterType": "cave"
+      }
+    ]
+  },
+  {
+    "routeName": "Lake of Rage",
+    "encounters": [
+      {
+        "pokemonId": 17,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 180,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 204,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 294,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 129,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 130,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 129,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 130,
+        "encounterType": "fishing"
       }
     ]
   },

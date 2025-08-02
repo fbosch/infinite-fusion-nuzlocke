@@ -1,4 +1,4 @@
-import { queryOptions } from '@tanstack/react-query';
+import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import pokemonApiService from '@/services/pokemonApiService';
 import ms from 'ms';
 
@@ -10,6 +10,7 @@ export const pokemonQueries = {
       queryFn: () => pokemonApiService.getAllPokemon(),
       staleTime: ms('7d'),
       gcTime: ms('30m'),
+      placeholderData: keepPreviousData,
     }),
 
   byId: (id: number) =>

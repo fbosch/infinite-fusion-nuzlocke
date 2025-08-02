@@ -2846,6 +2846,91 @@
     ]
   },
   {
+    "routeName": "Tohjo Falls",
+    "encounters": [
+      {
+        "pokemonId": 142,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 195,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 306,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 308,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 326,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 426,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 475,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 142,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 195,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 302,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 304,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 437,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 475,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 118,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 131,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 139,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 141,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 434,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 436,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 474,
+        "encounterType": "fishing"
+      }
+    ]
+  },
+  {
     "routeName": "Route 21",
     "encounters": [
       {
@@ -4654,6 +4739,63 @@
     ]
   },
   {
+    "routeName": "Slowpoke Well",
+    "encounters": [
+      {
+        "pokemonId": 79,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 80,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 199,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 273,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 501,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 79,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 118,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 394,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 79,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 80,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 199,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 434,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 501,
+        "encounterType": "fishing"
+      }
+    ]
+  },
+  {
     "routeName": "Cherrygrove City",
     "encounters": [
       {
@@ -4845,6 +4987,59 @@
       {
         "pokemonId": 488,
         "encounterType": "cave"
+      }
+    ]
+  },
+  {
+    "routeName": "Lake of Rage",
+    "encounters": [
+      {
+        "pokemonId": 115,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 202,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 204,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 439,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 490,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 496,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 261,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 469,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 496,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 226,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 261,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 497,
+        "encounterType": "fishing"
       }
     ]
   },
