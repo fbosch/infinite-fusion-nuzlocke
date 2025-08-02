@@ -17,7 +17,7 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "analyze": "ANALYZE=true pnpm build",
-    "scrape": "npm-run-all --parallel scrape:*",
+    "scrape": "npm-run-all --sequential scrape:*",
     "scrape:pokedex": "jiti scripts/scrape-pokedex.ts && jiti scripts/fetch-pokemon-data.ts",
     "scrape:encounters": "jiti scripts/scrape-wild-encounters.ts",
     "scrape:safari": "jiti scripts/scrape-safari-encounters.ts",
