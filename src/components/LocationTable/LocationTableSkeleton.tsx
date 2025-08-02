@@ -14,7 +14,7 @@ export default function LocationTableSkeleton() {
               <th
                 className={clsx(
                   'px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider',
-                  'w-[100px] min-w-[100px]'
+                  'w-[125px]'
                 )}
               >
                 Location
@@ -22,13 +22,13 @@ export default function LocationTableSkeleton() {
               <th
                 className={clsx(
                   'px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider',
-                  'w-[155px] min-w-[155px] 2xl:w-[185px] 2xl:min-w-[185px]'
+                  'w-[155px] 2xl:w-[195px] '
                 )}
               ></th>
               <th
                 className={clsx(
                   'px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider',
-                  'w-[62.5vw] min-w-[62.5vw] 2xl:w-[900px] 2xl:min-w-[900px]'
+                  'w-[62.5vw] 2xl:w-[900px]'
                 )}
               >
                 Encounter
@@ -36,7 +36,7 @@ export default function LocationTableSkeleton() {
               <th
                 className={clsx(
                   'px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider',
-                  'w-[60px] min-w-[60px]'
+                  'w-[60px]'
                 )}
               ></th>
             </tr>
