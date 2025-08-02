@@ -59,6 +59,72 @@ function mapEncounterTypeToSource(
   }
 }
 
+// Function to consolidate Safari Zone areas into a single location for Nuzlocke rules
+function consolidateSafariZoneAreas(
+  safariEncounters: Array<{
+    routeName: string;
+    encounters: Array<{
+      pokemonId: number;
+      encounterType:
+        | 'grass'
+        | 'surf'
+        | 'fishing'
+        | 'special'
+        | 'cave'
+        | 'rock_smash';
+    }>;
+  }>
+): Array<{
+  routeName: string;
+  encounters: Array<{
+    pokemonId: number;
+    encounterType:
+      | 'grass'
+      | 'surf'
+      | 'fishing'
+      | 'special'
+      | 'cave'
+      | 'rock_smash';
+  }>;
+}> {
+  if (safariEncounters.length === 0) {
+    return [];
+  }
+
+  // Consolidate all Safari Zone areas into a single "Safari Zone" location
+  const allSafariEncounters: Array<{
+    pokemonId: number;
+    encounterType:
+      | 'grass'
+      | 'surf'
+      | 'fishing'
+      | 'special'
+      | 'cave'
+      | 'rock_smash';
+  }> = [];
+
+  safariEncounters.forEach(area => {
+    allSafariEncounters.push(...area.encounters);
+  });
+
+  // Remove duplicates based on both pokemonId and encounterType
+  const uniqueEncounters = allSafariEncounters.filter(
+    (encounter, index, array) =>
+      array.findIndex(
+        e =>
+          e.pokemonId === encounter.pokemonId &&
+          e.encounterType === encounter.encounterType
+      ) === index
+  );
+
+  return [
+    {
+      routeName: 'Safari Zone',
+      encounters: uniqueEncounters,
+    },
+  ];
+}
+
 // Type for egg location data
 interface EggLocation {
   routeName: string;
@@ -92,11 +158,14 @@ export async function GET(request: NextRequest) {
     const gameMode = rawGameMode === 'remix' ? 'remix' : 'classic';
 
     // Use explicit imports instead of dynamic template literals
-    const [wild, trade, gift, quest, statics, eggLocations] = await Promise.all(
-      [
+    const [wild, safari, trade, gift, quest, statics, eggLocations] =
+      await Promise.all([
         gameMode === 'remix'
           ? import('@data/remix/encounters.json')
           : import('@data/classic/encounters.json'),
+        gameMode === 'remix'
+          ? import('@data/remix/safari-encounters.json')
+          : import('@data/classic/safari-encounters.json'),
         gameMode === 'remix'
           ? import('@data/remix/trades.json')
           : import('@data/classic/trades.json'),
@@ -110,8 +179,11 @@ export async function GET(request: NextRequest) {
           ? import('@data/remix/statics.json')
           : import('@data/classic/statics.json'),
         import('@data/shared/egg-locations.json'),
-      ]
-    );
+      ]);
+
+    // Parse Safari Zone encounters and consolidate them
+    const safariData = NewRouteEncountersArraySchema.parse(safari.default);
+    const consolidatedSafari = consolidateSafariZoneAreas(safariData);
 
     // Try to parse with new schema first, fall back to old schema for backward compatibility
     let encounters: Array<{
@@ -131,14 +203,17 @@ export async function GET(request: NextRequest) {
 
     const newWildFormat = NewRouteEncountersArraySchema.safeParse(wild.default);
     if (newWildFormat.success) {
-      encounters = newWildFormat.data;
+      // Combine regular encounters with consolidated Safari Zone encounters
+      encounters = [...newWildFormat.data, ...consolidatedSafari];
     } else {
       // Fall back to old format
       const oldWildFormat = OldRouteEncountersArraySchema.parse(wild.default);
-      encounters = oldWildFormat.map(route => ({
+      const oldFormatEncounters = oldWildFormat.map(route => ({
         routeName: route.routeName,
         pokemonIds: route.pokemonIds,
       }));
+      // Add Safari Zone encounters to old format as well
+      encounters = [...oldFormatEncounters, ...consolidatedSafari];
     }
 
     const trades = OldRouteEncountersArraySchema.parse(trade.default);

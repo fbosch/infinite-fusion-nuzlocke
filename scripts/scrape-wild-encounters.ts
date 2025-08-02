@@ -90,24 +90,13 @@ function detectEncounterType(text: string): 'grass' | 'surf' | 'fishing' | 'spec
  */
 function isValidRouteName(text: string): boolean {
   if (!text || typeof text !== 'string') {
-    const debugLocations = ['Pokemon Tower', 'Safari Zone', 'Pokemon Mansion'];
-    if (debugLocations.some(loc => text?.includes?.(loc))) {
-      console.log(`❌ DEBUG: isValidRouteName failed - not string: ${text}`);
-    }
     return false;
   }
 
   const trimmedText = text.trim();
 
-  // DEBUG for target locations
-  const debugLocations = ['Pokemon Tower', 'Safari Zone', 'Pokemon Mansion'];
-  const isDebugLocation = debugLocations.some(loc => trimmedText.includes(loc));
-
   // Exclude if too long (CSS content is typically very long)
   if (trimmedText.length > 100) {
-    if (isDebugLocation) {
-      console.log(`❌ DEBUG: isValidRouteName failed - too long (${trimmedText.length}): ${trimmedText}`);
-    }
     return false;
   }
 
@@ -115,17 +104,11 @@ function isValidRouteName(text: string): boolean {
 
   // Exclude very short or meaningless text
   if (trimmedText.length < 3) {
-    if (isDebugLocation) {
-      console.log(`❌ DEBUG: isValidRouteName failed - too short: ${trimmedText}`);
-    }
     return false;
   }
 
   // Note: Removed alpha character ratio check as it was filtering out valid location names with ID numbers
 
-  if (isDebugLocation) {
-    console.log(`✅ DEBUG: isValidRouteName passed: ${trimmedText}`);
-  }
   return true;
 }
 
@@ -201,6 +184,7 @@ function findParentLocation(routeName: string, existingLocations: string[]): str
     '1F', '2F', '3F', '4F', '5F', 'WTF',
     'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', // Pokemon Tower format
     'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', // Seafoam Islands format
+    '(Area 1)', '(Area 2)', '(Area 3)', '(Area 4)', '(Area 5)', '(Area 6)', // Safari Zone format
     'Summit', 'Square', 'Entrance', 'Exit',
     'Top', 'Bottom', 'Upper', 'Lower',
     'North', 'South', 'East', 'West',
@@ -276,6 +260,16 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
       }
 
 
+
+      // DEBUG: Safari Zone specific detection
+      if (fullText.includes('Safari Zone')) {
+        console.log(`🦁 SAFARI DEBUG: Found text: "${fullText}"`);
+        console.log(`🦁 SAFARI DEBUG: isRoutePattern: ${isRoutePattern(fullText)}`);
+        console.log(`🦁 SAFARI DEBUG: isValidRouteName: ${isValidRouteName(fullText)}`);
+        console.log(`🦁 SAFARI DEBUG: Element tag: ${$element.prop('tagName')}, classes: ${$element.attr('class')}`);
+        console.log(`🦁 SAFARI DEBUG: Children count: ${$element.children().length}`);
+        console.log(`🦁 SAFARI DEBUG: Parent element: ${$element.parent().prop('tagName')}`);
+      }
 
       // Look for route patterns
       if (isRoutePattern(fullText) && isValidRouteName(fullText)) {
