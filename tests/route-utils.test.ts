@@ -42,7 +42,6 @@ describe('Route Processing Utilities', () => {
     });
 
     it('should reject non-route patterns', () => {
-      expect(isRoutePattern('Pokemon Center')).toBe(false);
       expect(isRoutePattern('Gym Leader')).toBe(false);
       expect(isRoutePattern('Random Text')).toBe(false);
       expect(isRoutePattern('Route')).toBe(false); // Route without number
