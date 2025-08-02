@@ -45,7 +45,7 @@ export function ConditionalAnalytics() {
   // Disable analytics in development and preview environments
   const isProduction =
     process.env.NODE_ENV === 'production' &&
-    process.env.VERCEL_ENV === 'production';
+    process.env.NEXT_PUBLIC_VERCEL_ENV === 'production';
 
   if (!mounted || !preferences.analytics || !isProduction) {
     return null;
@@ -69,7 +69,7 @@ export function ConditionalSpeedInsights() {
   // Disable speed insights in development and preview environments
   const isProduction =
     process.env.NODE_ENV === 'production' &&
-    process.env.VERCEL_ENV === 'production';
+    process.env.NEXT_PUBLIC_VERCEL_ENV === 'production';
 
   if (!mounted || !preferences.speedInsights || !isProduction) {
     return null;
