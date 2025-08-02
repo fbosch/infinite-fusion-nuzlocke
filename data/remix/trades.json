@@ -1,5 +1,11 @@
 [
   {
+    "routeName": "Celadon City",
+    "pokemonIds": [
+      77
+    ]
+  },
+  {
     "routeName": "Cerulean City",
     "pokemonIds": [
       193
@@ -8,6 +14,8 @@
   {
     "routeName": "Cinnabar Island",
     "pokemonIds": [
+      101,
+      113,
       227
     ]
   },
@@ -24,9 +32,34 @@
     ]
   },
   {
+    "routeName": "Pewter City",
+    "pokemonIds": [
+      236
+    ]
+  },
+  {
+    "routeName": "Route 11",
+    "pokemonIds": [
+      179
+    ]
+  },
+  {
     "routeName": "Route 2",
     "pokemonIds": [
       122
+    ]
+  },
+  {
+    "routeName": "Route 5",
+    "pokemonIds": [
+      60
+    ]
+  },
+  {
+    "routeName": "S.S. Anne",
+    "pokemonIds": [
+      58,
+      86
     ]
   },
   {
@@ -41,6 +74,7 @@
       79,
       83,
       84,
+      100,
       102
     ]
   },

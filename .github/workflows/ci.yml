@@ -126,10 +126,7 @@ jobs:
 
       - name: Download fresh Pokemon data
         run: |
-          echo "📥 Downloading Pokedex data..."
-          pnpm run pokedex
-          echo "🎯 Scraping wild encounters..."
-          pnpm run encounters:scrape
+          pnpm run scrape
 
       - name: Run data integrity tests on fresh data
         run: |
@@ -140,17 +137,17 @@ jobs:
         run: |
           echo "📊 Data Summary:"
           echo "Pokemon data files:"
-          ls -la data/*.json
+          find data -name "*.json" -type f | sort
           echo ""
           echo "File sizes:"
-          du -h data/*.json
+          find data -name "*.json" -type f -exec du -h {} \;
 
       - name: Upload data artifacts
         uses: actions/upload-artifact@v4
         with:
           name: pokemon-data
           path: |
-            data/*.json
+            data/**/*.json
           retention-days: 30
 
       - name: Check for data changes

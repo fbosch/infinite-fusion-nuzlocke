@@ -79,12 +79,14 @@ function cleanLocationName(location: string): string {
 }
 
 /**
- * Extracts the base location name without the (gift) or (trade) markers
+ * Extracts the base location name without the (gift), (trade), (quest), or (static) markers
  */
 function extractBaseLocation(location: string): string {
   return location
     .replace(/\s*\(gift\)/gi, '')
     .replace(/\s*\(trade\)/gi, '')
+    .replace(/\s*\(quest\)/gi, '')
+    .replace(/\s*\(static\)/gi, '')
     .trim();
 }
 
@@ -99,15 +101,28 @@ interface LocationTrades {
   pokemonIds: number[];
 }
 
+interface LocationQuests {
+  routeName: string;
+  pokemonIds: number[];
+}
+
+interface LocationStatics {
+  routeName: string;
+  pokemonIds: number[];
+}
+
 /**
- * Extracts only the location that has the (gift) or (trade) marker
+ * Extracts only the location that has the (gift), (trade), (quest), or (static) marker
  */
-function extractGiftTradeLocation(locationText: string): string | null {
-  // Split by comma and look for entries with (gift) or (trade)
+function extractSpecialEncounterLocation(locationText: string): string | null {
+  // Split by comma and look for entries with (gift), (trade), (quest), or (static)
   const locations = locationText.split(',').map(loc => loc.trim());
   
   for (const location of locations) {
-    if (location.toLowerCase().includes('(gift)') || location.toLowerCase().includes('(trade)')) {
+    if (location.toLowerCase().includes('(gift)') || 
+        location.toLowerCase().includes('(trade)') || 
+        location.toLowerCase().includes('(quest)') ||
+        location.toLowerCase().includes('(static)')) {
       // Clean the location name
       return cleanLocationName(extractBaseLocation(location));
     }
@@ -140,8 +155,8 @@ function groupPokemonByLocation<T extends { pokemonId: number; location: string 
     .sort((a, b) => a.routeName.localeCompare(b.routeName)); // Sort locations alphabetically
 }
 
-async function scrapePokedexForGiftsAndTrades(url: string, mode: 'classic' | 'remix'): Promise<{ gifts: LocationGifts[]; trades: LocationTrades[] }> {
-  ConsoleFormatter.printHeader(`Scraping ${mode.toUpperCase()} Gifts and Trades`, `Scraping gift and trade Pokémon data from the ${mode} Pokédex`);
+async function scrapePokedexForSpecialEncounters(url: string, mode: 'classic' | 'remix'): Promise<{ gifts: LocationGifts[]; trades: LocationTrades[]; quests: LocationQuests[]; statics: LocationStatics[] }> {
+  ConsoleFormatter.printHeader(`Scraping ${mode.toUpperCase()} Special Encounters`, `Scraping gift, trade, quest, and static Pokémon data from the ${mode} Pokédex`);
   
   try {
     // Fetch the webpage
@@ -164,8 +179,12 @@ async function scrapePokedexForGiftsAndTrades(url: string, mode: 'classic' | 're
 
     const gifts: { pokemonId: number; location: string }[] = [];
     const trades: { pokemonId: number; location: string }[] = [];
+    const quests: { pokemonId: number; location: string }[] = [];
+    const statics: { pokemonId: number; location: string }[] = [];
     const giftsSeen = new Set<string>();
     const tradesSeen = new Set<string>();
+    const questsSeen = new Set<string>();
+    const staticsSeen = new Set<string>();
 
     // Find the main Pokédex table
     const tables = $('table');
@@ -187,38 +206,47 @@ async function scrapePokedexForGiftsAndTrades(url: string, mode: 'classic' | 're
         }
 
         // Extract data from cells - location index varies by table structure
-        const dexCell = cells.eq(0).text().trim();
+        const _dexCell = cells.eq(0).text().trim();
         const pokemonCell = cells.eq(2).text().trim(); // Pokémon name is at index 2
+
+
         
         // Different table structures have location at different indices
-        // Gen 1-2 tables: location at index 5
-        // Other Generations table (table 3): location at index 4
-        const locationIndex = tableIndex === 3 ? 4 : 5;
+        // Tables 2 (Gen 2) and 3 (Other Generations): location at index 4
+        // Tables 0 and 1 (Gen 1): location at index 5
+        const locationIndex = (tableIndex === 2 || tableIndex === 3) ? 4 : 5;
         const locationCell = cells.eq(locationIndex).text().trim();
-        const notesCell = cells.length > locationIndex + 1 ? cells.eq(locationIndex + 1).text().trim() : '';
+        const _notesCell = cells.length > locationIndex + 1 ? cells.eq(locationIndex + 1).text().trim() : '';
 
         // Skip if no Pokémon name found or if it's a header row
         if (!pokemonCell || !isPotentialPokemonName(pokemonCell) || pokemonCell.toLowerCase().includes('pokemon')) {
           return;
         }
 
-        // Check if this is a gift or trade
+        // Check if this is a gift, trade, quest, or static
         const isGift = locationCell.toLowerCase().includes('(gift)');
         const isTrade = locationCell.toLowerCase().includes('(trade)');
+        const isQuest = locationCell.toLowerCase().includes('(quest)');
+        const isStatic = locationCell.toLowerCase().includes('(static)');
 
-        if (!isGift && !isTrade) {
+
+
+        if (!isGift && !isTrade && !isQuest && !isStatic) {
           return;
         }
 
         // Find Pokémon ID
         const pokemonId = findPokemonIdWithSpecialCases(pokemonCell, pokemonNameMap);
         if (!pokemonId) {
-          ConsoleFormatter.warn(`Could not find ID for ${isGift ? 'gift' : 'trade'} Pokémon: ${pokemonCell}`);
+          const type = isGift ? 'gift' : isTrade ? 'trade' : isQuest ? 'quest' : 'static';
+          ConsoleFormatter.warn(`Could not find ID for ${type} Pokémon: ${pokemonCell}`);
           return;
         }
 
-        // Extract the specific location that has the (gift) or (trade) marker
-        const specificLocation = extractGiftTradeLocation(locationCell);
+
+
+        // Extract the specific location that has the (gift), (trade), (quest), or (static) marker
+        const specificLocation = extractSpecialEncounterLocation(locationCell);
         if (!specificLocation) {
           ConsoleFormatter.warn(`Could not extract specific location for ${pokemonCell}`);
           return;
@@ -248,6 +276,30 @@ async function scrapePokedexForGiftsAndTrades(url: string, mode: 'classic' | 're
             pokemonId,
             location: specificLocation
           });
+        } else if (isQuest) {
+          // Create unique key to avoid duplicates
+          const uniqueKey = `${pokemonCell}-${specificLocation}`;
+          if (questsSeen.has(uniqueKey)) {
+            return;
+          }
+          questsSeen.add(uniqueKey);
+
+          quests.push({
+            pokemonId,
+            location: specificLocation
+          });
+        } else if (isStatic) {
+          // Create unique key to avoid duplicates
+          const uniqueKey = `${pokemonCell}-${specificLocation}`;
+          if (staticsSeen.has(uniqueKey)) {
+            return;
+          }
+          staticsSeen.add(uniqueKey);
+
+          statics.push({
+            pokemonId,
+            location: specificLocation
+          });
         }
       });
     });
@@ -255,13 +307,15 @@ async function scrapePokedexForGiftsAndTrades(url: string, mode: 'classic' | 're
     // Group by location to match encounters.json structure
     const groupedGifts = groupPokemonByLocation(gifts);
     const groupedTrades = groupPokemonByLocation(trades);
+    const groupedQuests = groupPokemonByLocation(quests);
+    const groupedStatics = groupPokemonByLocation(statics);
 
-    ConsoleFormatter.success(`Found ${gifts.length} gift Pokémon in ${groupedGifts.length} locations and ${trades.length} trades in ${groupedTrades.length} locations in ${mode} mode`);
+    ConsoleFormatter.success(`Found ${gifts.length} gift Pokémon in ${groupedGifts.length} locations, ${trades.length} trades in ${groupedTrades.length} locations, ${quests.length} quest rewards in ${groupedQuests.length} locations, and ${statics.length} static encounters in ${groupedStatics.length} locations in ${mode} mode`);
 
-    return { gifts: groupedGifts, trades: groupedTrades };
+    return { gifts: groupedGifts, trades: groupedTrades, quests: groupedQuests, statics: groupedStatics };
 
   } catch (error) {
-    ConsoleFormatter.error(`Error scraping ${mode} gifts and trades: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    ConsoleFormatter.error(`Error scraping ${mode} special encounters: ${error instanceof Error ? error.message : 'Unknown error'}`);
     throw error;
   }
 }
@@ -279,11 +333,11 @@ async function main() {
     await fs.mkdir(remixDir, { recursive: true });
 
     // Scrape both Classic and Remix data
-    ConsoleFormatter.info('Scraping Classic and Remix Gifts and Trades...');
+    ConsoleFormatter.info('Scraping Classic and Remix Special Encounters...');
     
     const [classicData, remixData] = await Promise.all([
-      scrapePokedexForGiftsAndTrades(CLASSIC_POKEDEX_URL, 'classic'),
-      scrapePokedexForGiftsAndTrades(REMIX_POKEDEX_URL, 'remix')
+      scrapePokedexForSpecialEncounters(CLASSIC_POKEDEX_URL, 'classic'),
+      scrapePokedexForSpecialEncounters(REMIX_POKEDEX_URL, 'remix')
     ]);
 
     // Write to separate files for each mode
@@ -293,7 +347,11 @@ async function main() {
       { path: path.join(classicDir, 'gifts.json'), data: classicData.gifts },
       { path: path.join(remixDir, 'gifts.json'), data: remixData.gifts },
       { path: path.join(classicDir, 'trades.json'), data: classicData.trades },
-      { path: path.join(remixDir, 'trades.json'), data: remixData.trades }
+      { path: path.join(remixDir, 'trades.json'), data: remixData.trades },
+      { path: path.join(classicDir, 'quests.json'), data: classicData.quests },
+      { path: path.join(remixDir, 'quests.json'), data: remixData.quests },
+      { path: path.join(classicDir, 'statics.json'), data: classicData.statics },
+      { path: path.join(remixDir, 'statics.json'), data: remixData.statics }
     ];
 
     await Promise.all(
@@ -310,24 +368,40 @@ async function main() {
     // Calculate statistics for summary
     const classicGiftLocations = classicData.gifts.length;
     const classicTradeLocations = classicData.trades.length;
+    const classicQuestLocations = classicData.quests.length;
+    const classicStaticLocations = classicData.statics.length;
     const remixGiftLocations = remixData.gifts.length;
     const remixTradeLocations = remixData.trades.length;
+    const remixQuestLocations = remixData.quests.length;
+    const remixStaticLocations = remixData.statics.length;
 
     const classicGiftPokemon = classicData.gifts.reduce((sum, location) => sum + location.pokemonIds.length, 0);
     const classicTradePokemon = classicData.trades.reduce((sum, location) => sum + location.pokemonIds.length, 0);
+    const classicQuestPokemon = classicData.quests.reduce((sum, location) => sum + location.pokemonIds.length, 0);
+    const classicStaticPokemon = classicData.statics.reduce((sum, location) => sum + location.pokemonIds.length, 0);
     const remixGiftPokemon = remixData.gifts.reduce((sum, location) => sum + location.pokemonIds.length, 0);
     const remixTradePokemon = remixData.trades.reduce((sum, location) => sum + location.pokemonIds.length, 0);
+    const remixQuestPokemon = remixData.quests.reduce((sum, location) => sum + location.pokemonIds.length, 0);
+    const remixStaticPokemon = remixData.statics.reduce((sum, location) => sum + location.pokemonIds.length, 0);
 
     // Success summary
-    ConsoleFormatter.printSummary('Gifts and Trades Scraping Complete!', [
+    ConsoleFormatter.printSummary('Special Encounters Scraping Complete!', [
       { label: 'Classic gift locations', value: classicGiftLocations, color: 'yellow' },
       { label: 'Classic gift Pokémon', value: classicGiftPokemon, color: 'yellow' },
       { label: 'Classic trade locations', value: classicTradeLocations, color: 'yellow' },
       { label: 'Classic trade Pokémon', value: classicTradePokemon, color: 'yellow' },
+      { label: 'Classic quest locations', value: classicQuestLocations, color: 'yellow' },
+      { label: 'Classic quest Pokémon', value: classicQuestPokemon, color: 'yellow' },
+      { label: 'Classic static locations', value: classicStaticLocations, color: 'yellow' },
+      { label: 'Classic static Pokémon', value: classicStaticPokemon, color: 'yellow' },
       { label: 'Remix gift locations', value: remixGiftLocations, color: 'yellow' },
       { label: 'Remix gift Pokémon', value: remixGiftPokemon, color: 'yellow' },
       { label: 'Remix trade locations', value: remixTradeLocations, color: 'yellow' },
       { label: 'Remix trade Pokémon', value: remixTradePokemon, color: 'yellow' },
+      { label: 'Remix quest locations', value: remixQuestLocations, color: 'yellow' },
+      { label: 'Remix quest Pokémon', value: remixQuestPokemon, color: 'yellow' },
+      { label: 'Remix static locations', value: remixStaticLocations, color: 'yellow' },
+      { label: 'Remix static Pokémon', value: remixStaticPokemon, color: 'yellow' },
       { label: 'Files saved', value: files.map(f => f.path).join(', '), color: 'cyan' },
       { label: 'Total file size', value: ConsoleFormatter.formatFileSize(fileStats.reduce((sum, stat) => sum + stat.size, 0)), color: 'cyan' },
       { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }

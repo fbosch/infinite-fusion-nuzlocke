@@ -7,7 +7,8 @@
 
 // Pre-compiled regex patterns for better performance
 export const ROUTE_PATTERNS = {
-  ROUTE_MATCH: /^(Route \d+|Viridian Forest|Secret Garden|Hidden Forest|Viridian River)/i,
+  // More inclusive pattern that captures valid location names while excluding CSS and other content
+  ROUTE_MATCH: /^(Route \d+(?:\s*\(ID\s+-?\d+(?:\.\d+)?\))?|Safari Zone A\d+|[A-Za-z\s]*(?:Mt\.\s+[A-Za-z\s]+|[A-Za-z\s]+\b(?:City|Town|Forest|Cave|Mountain|Island|Islands|Garden|River|Lake|Beach|Cape|Tower|Mansion|Building|Center|Zone|Area|Path|Road|Bridge|Tunnel|Valley|Canyon|Plateau|Field|Meadow|Grove|Ruins|Temple|Shrine|Laboratory|Factory|Power Plant|Safari|Park|Stadium|Gym|League|Elite Four|Champion|Victory Road|Sewers|House)\b)(?:\s+(?:[A-Za-z0-9\s]+|B?\d+F|F\d+|A\d+|Summit|Square|Entrance|Exit|Top|Bottom|Upper|Lower|North|South|East|West|Interior|Exterior|Depths|Hidden|Center|Dark Room|Route \d+ Exit|\(Area \d+\)))*(?:\s*\(ID\s+-?\d+(?:\.\d+)?\))?)$/i,
   ROUTE_ID_EXTRACT: /\(ID\s+(-?\d+(?:\.\d+)?)\)/i,
   ROUTE_ID_CLEAN: /\s*\(ID\s+-?\d+(?:\.\d+)?\)\s*$/i
 } as const;

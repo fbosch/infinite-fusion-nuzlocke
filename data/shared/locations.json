@@ -60,16 +60,34 @@
     "description": "Path to Mt. Moon"
   },
   {
+    "id": "eeceb211-68de-4a8a-a407-9230a16e6899",
+    "name": "Mt. Moon",
+    "region": "Kanto",
+    "description": "Mt. Moon is a mountain in the Kanto region."
+  },
+  {
     "id": "4a8832db-6ef9-4615-946d-e8341bd2af47",
     "name": "Route 4",
     "region": "Kanto",
     "description": "After Mt. Moon, path to Cerulean City"
   },
   {
+    "id":"5e4ab76e-a25a-4804-865a-1d6ba341ffe4",
+    "name": "Cerulean City",
+    "region": "Kanto",
+    "description": "This city contains Cerulean City's Gym, with Misty as its leader."
+  },
+  {
     "id": "70b5aa10-2bbe-4d50-a4cd-56097207b1e8",
     "name": "Route 24",
     "region": "Kanto",
     "description": "Nugget Bridge north of Cerulean City"
+  },
+  {
+    "id": "b74b3c29-5c7e-486c-a8a2-788987b024dc",
+    "name": "Cerulean Cape",
+    "region": "Kanto",
+    "description": "contains Bill's Lighthouse. It is connected to Route 25 and Route 23"
   },
   {
     "id": "e635f3bb-be57-40ae-b4ec-1267466c0642",
@@ -84,16 +102,71 @@
     "description": "North of Vermillion City"
   },
   {
-    "id": "0be7b69c-59a4-4923-8cd5-2922b2e3d255",
-    "name": "Route 7",
+
+    "id": "9611b486-0ef9-4f5c-a703-b102a2647c20",
+    "name": "Vermillion City",
     "region": "Kanto",
-    "description": "West of Celadon City"
+    "description": "This city contains Vermillion City's Gym, with Lt. Surge as its leader."
+  },
+  {
+    "id": "60cce3f1-a2e5-4043-9e40-9c08a8ca5370",
+    "name": "Route 11",
+    "region": "Kanto",
+    "description": "East of Vermillion City"
+  },
+  {
+    "id": "ceb1abc4-961a-46dd-aa86-b25b6f94aaff",
+    "name": "Route 9",
+    "region": "Kanto",
+    "description": "East of Cerulean City"
+  },
+  {
+    "id": "64a2f32f-e7ed-4c4a-9515-291b530da28d",
+    "name": "Route 10",
+    "region": "Kanto",
+    "description": "This route is a fork with a PokéCenter in its Center. It connects Route 9, Rock Tunnel and the Power Plant."
+  },
+  {
+    "id": "c9372f33-fdfd-4226-b0bd-d7075612f731",
+    "name": "Rock Tunnel",
+    "region": "Kanto",
+    "description": "Rock Tunnel is a dark cavern which splits the sections of Route 10."
+  },
+  {
+    "id": "b53af7d4-1051-4241-816d-e684c667a2dd",
+    "name": "Lavender Town",
+    "region": "Kanto",
+    "description": "Lavender Town can be accessed from the North by Route 10 (After Rock Tunnel), the West by Route 8, and the South by Route 12."
   },
   {
     "id": "71716dce-89d4-46e5-80bc-c84b7aa96254",
     "name": "Route 8",
     "region": "Kanto",
     "description": "East of Celadon City, path to Lavender Town"
+  },
+  {
+    "id": "0be7b69c-59a4-4923-8cd5-2922b2e3d255",
+    "name": "Route 7",
+    "region": "Kanto",
+    "description": "West of Celadon City"
+  },
+  {
+    "id": "9a150358-4a83-437e-a8c0-90a7719d3e32",
+    "name": "Celadon City",
+    "region": "Kanto",
+    "description": "Celadon City is a big city, with two entries: Route 16 to the West and Route 7 to the East."
+  },
+  {
+    "id": "f1c84583-7bea-4a8c-ba9a-44d9152bbb1f",
+    "name": "Celadon Sewers",
+    "region": "Kanto",
+    "description": "Team Rocket have a hideout within Celadon Sewers."
+  },
+  {
+    "id": "46953d30-f72c-415a-8ddb-5d4013eeaf1f",
+    "name": "Pokemon Tower",
+    "region": "Kanto",
+    "description": "This is a burial ground for Pokémon, located in Lavender Town."
   },
   {
     "id": "3c1499fb-6cc5-4f50-997d-9a43a7ee3d8c",
@@ -126,6 +199,12 @@
     "description": "Cycling Road entrance"
   },
   {
+    "id": "a9cde357-7578-4722-b5dc-95d803a845c7",
+    "name": "Viridian River",
+    "region": "Kanto",
+    "description": "River area near Viridian City"
+  },
+  {
     "id": "61715c14-b1e3-41f4-8fb4-4f840ee98848",
     "name": "Route 17",
     "region": "Kanto",
@@ -138,28 +217,28 @@
     "description": "Cycling Road exit"
   },
   {
-    "id": "15c36391-c04e-4a93-97b2-1ee62bafc4a6",
-    "name": "Route 19",
+    "id": "ec9ab4ce-cbe6-46fc-a3c5-67da561ab4ea",
+    "name": "Fuchsia City",
     "region": "Kanto",
-    "description": "Surfing south from Fuchsia City"
+    "description": "Fuchsia City has the famous Safari Zone, and can be accessed West by Route 18, East by Route 15, and South by Route 19."
   },
   {
-    "id": "26b3f8b0-b7b4-43c8-8859-fdf303920763",
-    "name": "Route 20",
+    "id":"05ab7274-b33c-42da-a07d-bf6ae3cbf9a8",
+    "name": "Safari Zone",
     "region": "Kanto",
-    "description": "Seafoam Islands route"
+    "description": "Safari Zone is a large area in Fuchsia City, with many wild Pokémon to catch."
   },
   {
-    "id": "5cd7db58-da73-4f66-941a-219d7c0d9e29",
-    "name": "Route 21",
+    "id": "8033f454-936a-4702-9766-7f223d8a3070",
+    "name": "Saffron City",
     "region": "Kanto",
-    "description": "South of Pallet Town"
+    "description": "Saffron City is a big city, with two entries: Route 25 to the West and Route 24 to the East."
   },
   {
-    "id": "a9cde357-7578-4722-b5dc-95d803a845c7",
-    "name": "Viridian River",
+    "id": "1a8af28d-41b8-41d6-b652-a222c9d76750",
+    "name": "Creepy House",
     "region": "Kanto",
-    "description": "River area near Viridian City"
+    "description": "The basement is filled with ghost Pokémon, with several small rooms: the main hall, a classroom, a library, a restroom, and a piano room."
   },
   {
     "id": "fa27dcdf-1919-4d8b-870d-2bd49432826e",
@@ -168,34 +247,112 @@
     "description": "Victory Road entrance"
   },
   {
+    "id": "84dda96e-93ca-4b60-a11c-57e4be46537d",
+    "name": "Secret Forest",
+    "region": "Kanto",
+    "description": "The Secret Forest is a secret area you can only enter after obtaining 4 badges. "
+  },
+  {
+    "id": "15c36391-c04e-4a93-97b2-1ee62bafc4a6",
+    "name": "Route 19",
+    "region": "Kanto",
+    "description": "Surfing south from Fuchsia City, contains the Seafoam Islands"
+  },
+  {
+    "id": "26b3f8b0-b7b4-43c8-8859-fdf303920763",
+    "name": "Route 20",
+    "region": "Kanto",
+    "description": "Seafoam Islands route"
+  },
+  {
+    "id": "ebda0fd7-060e-4236-b7ea-445a2b8c133b",
+    "name": "Seafoam Islands",
+    "region": "Kanto",
+    "description": "Seafoam Islands are a group of islands in the Seafoam Islands. They are home to many wild Pokémon, including the legendary Pokémon, Articuno."
+  },
+  {
+    "id": "20337ff7-08a5-44ab-8a92-ef775e06726e",
+    "name": "Cinnabar Island",
+    "region": "Kanto",
+    "description": "This town is accessible from Route 20 or Route 21, or by the Seagallop Ferry"
+  },
+  {
+    "id": "c2cb556c-c392-4353-af65-7f4def0e096b",
+    "name": "Pokemon  Mansion",
+    "region": "Kanto",
+    "description": "Pokémon Mansion was burnt down due to a scientific experiment gone wrong."
+  },
+  {
+    "id": "71a29508-94d1-4ba7-b9b3-1d81fda6a887",
+    "name": "Offshore Road",
+    "region": "Kanto",
+    "description": "Offshore Road is a water route between Kanto's Cinnabar Island and Sevii Islands' Kindle Road."
+  },
+  {
+    "id": "d62302d4-c980-4e3f-b8d9-0204226c106c",
+    "name": "Mt. Ember",
+    "region": "Kanto",
+    "description": "Mt. Ember is a mountain in the Kanto region. It is home to the legendary Pokémon, Moltres."
+  },
+  {
+    "id":  "c6944add-2615-4550-a539-90e7e3364cd6",
+    "name": "Power Plant",
+    "region": "Kanto",
+    "description": "The Power Plant is a large building in the Kanto region. It is home to the legendary Pokémon, Zapdos."
+  },
+  {
+    "id": "5cd7db58-da73-4f66-941a-219d7c0d9e29",
+    "name": "Route 21",
+    "region": "Kanto",
+    "description": "South of Pallet Town"
+  },
+  {
+    "id": "6da49e7b-ccee-4eaa-906c-eaf86eb056ce",
+    "name": "Pallet Town",
+    "region": "Kanto",
+    "description": "Where it all started"
+  },
+  {
     "id": "33232ec5-7e59-4519-b484-258baa4a4028",
     "name": "Route 26",
-    "region": "Johto",
-    "description": "First route in Johto"
+    "region": "Kanto",
+    "description": "Route 26 is a route that connects Route 22, Route 27 to Pokemon League Gate."
   },
   {
     "id": "7b0608c3-08a5-45f0-ab23-019669b9586d",
     "name": "Route 27",
-    "region": "Johto",
-    "description": "Tohjo Falls area"
+    "region": "Kanto",
+    "description": "Route 27 is a route that connects Route 26 to New Bark Town."
+  },
+  {
+    "id": "b49731b2-22ae-4c4b-a1f5-970a8eb5908e",
+    "name": "Tohjo Falls",
+    "region": "Kanto",
+    "description": "Tohjo Falls is connected to Route 27 at several locations. Players pass here to go towards the Pokemon league, and Waterfall is required to access the Western portion."
+  },
+  {
+    "id":"d5b68a17-d9e9-4fe4-a0ab-3a5b46f902d0",
+    "name": "Victory Road",
+    "region": "Kanto",
+    "description": "The final route before the Pokemon League"
   },
   {
     "id": "f3717d7e-9ffa-452d-9dd7-340d11631479",
-    "name": "Route 29",
+    "name": "Goldenrod City",
     "region": "Johto",
-    "description": "Starting route from New Bark Town"
+    "description": "Goldenrod City Features the Radio Tower and the Train Station connecting to Saffron City in Kanto."
   },
   {
     "id": "678f0bb1-6725-4467-922c-4609b5cbd07f",
-    "name": "Route 30",
+    "name": "Route 35",
     "region": "Johto",
-    "description": "North of Cherrygrove City"
+    "description": "Route 35 is a route that connects Goldenrod City to the National Park. There is also a small shortcut to reach Route 36 directly."
   },
   {
     "id": "bf250fc5-c8d8-4c7d-96b7-473910c166ec",
-    "name": "Route 31",
+    "name": "Route 36",
     "region": "Johto",
-    "description": "Dark Cave entrance"
+    "description": "Route 36 is a route that connects Violet City to the National Park, Route 37 and the Ruins of Alph. There is also a small shortcut to reach Route 35 directly without going through the National Park."
   },
   {
     "id": "1c266e7b-d89d-499f-a851-8012fe3976ee",
@@ -205,15 +362,15 @@
   },
   {
     "id": "5d1106b7-66d6-4c05-8ab4-052531e99d8c",
-    "name": "Route 33",
+    "name": "Route 34",
     "region": "Johto",
-    "description": "Union Cave area"
+    "description": "Route 34 is a route that connects Goldenrod City to Ilex Forest."
   },
   {
     "id": "f7180465-7c3c-45bc-8f98-66709cd4b667",
-    "name": "Route 34",
+    "name": "Ilex Forest",
     "region": "Johto",
-    "description": "Ilex Forest entrance"
+    "description": "Ilex Forest is twisted path in a dense forest that connects Route 34 to Azalea Town."
   },
   {
     "id": "fe65d2b5-1999-41f0-a3ec-d074b114f92b",
@@ -223,56 +380,146 @@
   },
   {
     "id": "218bd008-dd8c-4ad2-a45a-e5e6da4d3028",
-    "name": "Route 36",
+    "name": "Azalea Town",
     "region": "Johto",
-    "description": "West of Goldenrod City"
+    "description": "Azalea Town exits West into Ilex Forest and East to Route 33."
+  },
+  {
+    "id": "61d513ac-de5f-4edf-837e-df5eae1b7a04",
+    "name": "Slowpoke Well",
+    "region": "Johto",
+    "description": "Slowpoke Well is a small cave that connects Azalea Town to the National Park. It is home to the legendary Pokémon, Slowpoke."
   },
   {
     "id": "982c7a93-3eac-416c-89d3-d4e564a6f2ae",
-    "name": "Route 37",
+    "name": "Route 33",
     "region": "Johto",
-    "description": "East toward Ecruteak City"
+    "description": "Route 33 is a route that connects Azalea Town to Union Cave."
   },
   {
     "id": "5ad90af9-33ba-46f6-9378-8ba86e6e6cb2",
-    "name": "Route 42",
+    "name": "Union Cave",
     "region": "Johto",
-    "description": "Mt. Silver area"
+    "description": "Union Cave can be accessed by the South from Route 33 and the North from Route 32."
   },
   {
     "id": "ce331651-66c9-4c8b-9484-064239f906dd",
-    "name": "Route 43",
+    "name": "Ruins of Alph",
     "region": "Johto",
-    "description": "Lake of Rage area"
+    "description": "Ruins Of Alph can be accessed from the North by Route 36 and from the East by Route 32."
+  },
+  {
+    "id": "dca32e40-b3d4-49eb-b8a9-e49b7f2c93c5",
+    "name": "Violet City",
+    "region": "Johto",
+    "description": "Violet City can be accessed from the West via Route 36, the South via Route 32, and the East via Route 31."
   },
   {
     "id": "9c1441d2-0468-402c-a6f6-4bbc18f35ac4",
-    "name": "Route 44",
+    "name": "Route 31",
     "region": "Johto",
-    "description": "Ice Path entrance"
+    "description": "Route 31 is a route that connects Violet City to both Route 30 and the Dark Cave."
+  },
+  {
+    "id": "465a1838-d688-4102-bf3d-76660c38b70b",
+    "name": "Dark Cave",
+    "region": "Johto",
+    "description": "Dark Cave is a cave that connects Route 31 to Route 30."
   },
   {
     "id": "d85a5568-cf90-4f63-9a6d-37d6180475d6",
-    "name": "Route 46",
+    "name": "Route 30",
     "region": "Johto",
-    "description": "Mountain route"
+    "description": "Route 30 is a route that connects Route 31 to Cherrygrove City."
+  },
+  {
+    "id": "c15c57d5-aaf5-402d-81c0-85cbebfe33ed",
+    "name": "Cherrygrove City",
+    "region": "Johto",
+    "description": "Cherrygrove City is a small town that can be entered from Route 30 by the North and from Route 29 by the East."
+  },
+  {
+    "id": "e5a0c117-1e1a-4c46-987a-9173a735eeb3",
+    "name": "Route 29",
+    "region": "Johto",
+    "description": "Route 29 is a route that connects Cherrygrove City to New Bark Town. There is an access to Route 46 near the middle of the path."
   },
   {
     "id": "b34bf1c0-2922-4e1d-9b6f-fe6a818c08bf",
-    "name": "Route 9",
+    "name": "Route 46",
     "region": "Kanto",
-    "description": "Cerulean Cave area (post-game)"
+    "description": "Route 46 is a dead-end path that can be accessed from Route 29."
   },
   {
     "id": "89ee90cf-2476-427d-b2fe-e008cc795155",
-    "name": "Route 10",
+    "name": "New Bark Town",
+    "region": "Johto",
+    "description": "New Bark Town is a small town that can be entered from Route 29 by the West and from Route 27 by the East."
+  },
+  {
+    "id": "70a3365e-447d-4017-9d6d-b17e07269492",
+    "name": "Cerulean Cave",
     "region": "Kanto",
-    "description": "Power Plant area (post-game)"
+    "description": "Cerulean Cave is located near Cerulean City, Surf and climb the waterfall to reach it."
   },
   {
     "id": "9f30abb2-b8b8-4000-930d-1db78054873d",
-    "name": "Route 11",
-    "region": "Kanto",
-    "description": "Diglett's Cave area (post-game)"
+    "name": "Blackthorn City",
+    "region": "Johto",
+    "description": "Blackthorn City can be accessed by the Dark Cave from the South and by the Ice Mountains from the North."
+  },
+    {
+    "id": "6c07da4c-4966-4fda-b773-9fe6ba1746e9",
+    "name": "Ice Mountains",
+    "region": "Johto",
+    "description": "Ice Mountains is a chain of mountains that can be accessed by the West from Route 44 and by the East from Blackthorn City."
+  },
+  {
+    "id": "52c69ebe-555f-4519-b4e4-ec019baaa780",
+    "name": "Hall of Origin",
+    "region": "Johto",
+    "description": "The Hall of Origin a location in the sky above Ice Mountains Peak, only accessible by using the Azure Flute obtained from Eusine in Cherrygrove City. "
+  },
+  {
+    "id": "4cd60c9a-d2a6-4a13-8216-855523c19bd8",
+    "name": "Route 44",
+    "region": "Johto",
+    "description": "Route 44 is a route that connects Mahogany Town to Ice Mountains."
+  },
+  {
+    "id": "659e14d0-2fd2-4d06-8ac7-41cd8df5c779",
+    "name": "Mahogany Town",
+    "region": "Johto",
+    "description": "Mahogany Town is a small town, that is accessed from the North via Route 43, the West via Route 42, and the East via Route 44."
+  },
+  {
+    "id": "e8a7b3c2-9f45-4d21-8c56-7e3a9b1d4f82",
+    "name": "Route 42",
+    "region": "Johto",
+    "description": "Route 42 is a route that connects Ecruteak City to Mahogany Town. Mt. Mortar can be accessed from either side."
+  },
+  {
+    "id": "c0b3a25a-d7bc-44b2-b11b-884ebdb0de79",
+    "name": "Mt. Mortar",
+    "region": "Johto",
+    "description": "Mt. Mortar is a dark cave that can only be accessed from Route 42."
+  },
+  {
+    "id": "f2d9c8e1-5a64-4b73-9e28-6f1a8c3b7d95",
+    "name": "Ecruteak City",
+    "region": "Johto",
+    "description": "Ecruteak City can be accessed from the East by Route 42 and from the South by Route 37."
+  },
+  {
+    "id": "1b1df4f9-741d-4325-9c80-288b45fe80a3",
+    "name": "Route 43",
+    "region": "Johto",
+    "description": "Route 43 is a route that connects Mahogany Town to the Lake of Rage."
+  },
+  {
+    "id": "beed6fad-1ddc-4400-a0b1-9fd6895a7a38",
+    "name": "Lake of Rage",
+    "region": "Johto",
+    "description": "The Lake of Rage can be accessed from Route 43."
   }
 ]

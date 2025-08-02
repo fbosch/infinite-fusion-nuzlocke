@@ -182,9 +182,9 @@ export const PokemonCombobox = React.memo(
 
     // Function to get Pokemon source information
     const getPokemonSource = useCallback(
-      (pokemonId: number): EncounterSource | null => {
+      (pokemonId: number): EncounterSource[] => {
         const pokemonData = routeEncounterData.find(p => p.id === pokemonId);
-        return pokemonData?.source || null;
+        return pokemonData?.sources || [];
       },
       [routeEncounterData]
     );
@@ -318,15 +318,15 @@ export const PokemonCombobox = React.memo(
           };
         }
 
-        // Set default status based on Pokemon source
+        // Set default status based on Pokemon sources
         if (finalValue) {
-          const source = getPokemonSource(finalValue.id);
+          const sources = getPokemonSource(finalValue.id);
           let defaultStatus: PokemonStatusType | undefined = finalValue.status;
 
           // Always set appropriate status for gift and trade Pokemon
-          if (source === EncounterSource.GIFT) {
+          if (sources.includes(EncounterSource.GIFT)) {
             defaultStatus = PokemonStatus.RECEIVED;
-          } else if (source === EncounterSource.TRADE) {
+          } else if (sources.includes(EncounterSource.TRADE)) {
             defaultStatus = PokemonStatus.TRADED;
           }
 
