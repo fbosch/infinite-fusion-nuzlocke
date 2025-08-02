@@ -1137,6 +1137,23 @@
     ]
   },
   {
+    "routeName": "Creepy House",
+    "encounters": [
+      {
+        "pokemonId": 365,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 366,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 405,
+        "encounterType": "cave"
+      }
+    ]
+  },
+  {
     "routeName": "Route 16",
     "encounters": [
       {
@@ -2411,6 +2428,84 @@
     ]
   },
   {
+    "routeName": "Celadon Sewers",
+    "encounters": [
+      {
+        "pokemonId": 19,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 20,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 81,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 88,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 89,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 72,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 88,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 89,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 129,
+        "encounterType": "surf"
+      }
+    ]
+  },
+  {
+    "routeName": "Pokemon Tower",
+    "encounters": [
+      {
+        "pokemonId": 20,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 42,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 92,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 93,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 94,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 96,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 104,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 200,
+        "encounterType": "cave"
+      }
+    ]
+  },
+  {
     "routeName": "Cinnabar Island",
     "encounters": [
       {
@@ -2537,6 +2632,91 @@
     ]
   },
   {
+    "routeName": "Pokemon Center",
+    "encounters": [
+      {
+        "pokemonId": 17,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 20,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 21,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 164,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 177,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 203,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 206,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 72,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 73,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 118,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 119,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 54,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 60,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 79,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 90,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 98,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 116,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 120,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 129,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 130,
+        "encounterType": "fishing"
+      }
+    ]
+  },
+  {
     "routeName": "Mt. Moon",
     "encounters": [
       {
@@ -2614,6 +2794,103 @@
       {
         "pokemonId": 478,
         "encounterType": "rock_smash"
+      }
+    ]
+  },
+  {
+    "routeName": "Seafoam Islands",
+    "encounters": [
+      {
+        "pokemonId": 42,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 54,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 55,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 79,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 80,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 86,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 90,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 98,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 124,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 215,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 220,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 42,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 86,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 87,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 90,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 91,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 98,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 99,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 116,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 116,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 117,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 120,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 121,
+        "encounterType": "fishing"
       }
     ]
   },
@@ -3374,112 +3651,6 @@
   },
   {
     "routeName": "Union Cave",
-    "encounters": [
-      {
-        "pokemonId": 20,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 28,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 42,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 75,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 95,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 213,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 194,
-        "encounterType": "surf"
-      },
-      {
-        "pokemonId": 195,
-        "encounterType": "surf"
-      },
-      {
-        "pokemonId": 118,
-        "encounterType": "fishing"
-      },
-      {
-        "pokemonId": 119,
-        "encounterType": "fishing"
-      },
-      {
-        "pokemonId": 129,
-        "encounterType": "fishing"
-      }
-    ]
-  },
-  {
-    "routeName": "Union Cave B1",
-    "encounters": [
-      {
-        "pokemonId": 20,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 28,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 42,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 75,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 95,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 169,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 208,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 213,
-        "encounterType": "cave"
-      },
-      {
-        "pokemonId": 194,
-        "encounterType": "surf"
-      },
-      {
-        "pokemonId": 195,
-        "encounterType": "surf"
-      },
-      {
-        "pokemonId": 118,
-        "encounterType": "fishing"
-      },
-      {
-        "pokemonId": 119,
-        "encounterType": "fishing"
-      },
-      {
-        "pokemonId": 129,
-        "encounterType": "fishing"
-      }
-    ]
-  },
-  {
-    "routeName": "Union Cave B2",
     "encounters": [
       {
         "pokemonId": 20,

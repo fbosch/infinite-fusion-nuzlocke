@@ -18,6 +18,8 @@ import { loadPokemonNameMap } from './utils/data-loading-utils';
 const WILD_ENCOUNTERS_CLASSIC_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters';
 const WILD_ENCOUNTERS_REMIX_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters/Remix';
 
+
+
 /**
  * Detects encounter type from text content like "Surf", "Old Rod", etc.
  */
@@ -88,40 +90,42 @@ function detectEncounterType(text: string): 'grass' | 'surf' | 'fishing' | 'spec
  */
 function isValidRouteName(text: string): boolean {
   if (!text || typeof text !== 'string') {
+    const debugLocations = ['Pokemon Tower', 'Safari Zone', 'Pokemon Mansion'];
+    if (debugLocations.some(loc => text?.includes?.(loc))) {
+      console.log(`❌ DEBUG: isValidRouteName failed - not string: ${text}`);
+    }
     return false;
   }
 
   const trimmedText = text.trim();
 
+  // DEBUG for target locations
+  const debugLocations = ['Pokemon Tower', 'Safari Zone', 'Pokemon Mansion'];
+  const isDebugLocation = debugLocations.some(loc => trimmedText.includes(loc));
+
   // Exclude if too long (CSS content is typically very long)
   if (trimmedText.length > 100) {
+    if (isDebugLocation) {
+      console.log(`❌ DEBUG: isValidRouteName failed - too long (${trimmedText.length}): ${trimmedText}`);
+    }
     return false;
   }
 
-  // Exclude CSS content
-  if (trimmedText.includes('display:') ||
-      trimmedText.includes('width:') ||
-      trimmedText.includes('height:') ||
-      trimmedText.includes('margin:') ||
-      trimmedText.includes('padding:') ||
-      trimmedText.includes('background:') ||
-      trimmedText.includes('border:') ||
-      trimmedText.includes('.mw-parser-output') ||
-      trimmedText.includes('px') ||
-      trimmedText.includes('em') ||
-      trimmedText.includes('{') ||
-      trimmedText.includes('}') ||
-      trimmedText.includes(';')) {
-    return false;
-  }
+  // CSS detection removed - our regex pattern is specific enough
 
   // Exclude very short or meaningless text
   if (trimmedText.length < 3) {
+    if (isDebugLocation) {
+      console.log(`❌ DEBUG: isValidRouteName failed - too short: ${trimmedText}`);
+    }
     return false;
   }
 
   // Note: Removed alpha character ratio check as it was filtering out valid location names with ID numbers
 
+  if (isDebugLocation) {
+    console.log(`✅ DEBUG: isValidRouteName passed: ${trimmedText}`);
+  }
   return true;
 }
 
@@ -195,6 +199,8 @@ function findParentLocation(routeName: string, existingLocations: string[]): str
   const validSubLocationSuffixes = [
     'B1F', 'B2F', 'B3F', 'B4F', 'B5F',
     '1F', '2F', '3F', '4F', '5F', 'WTF',
+    'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', // Pokemon Tower format
+    'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', // Seafoam Islands format
     'Summit', 'Square', 'Entrance', 'Exit',
     'Top', 'Bottom', 'Upper', 'Lower',
     'North', 'South', 'East', 'West',
@@ -256,6 +262,14 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
       const $element = $(element);
       const fullText = $element.text().trim();
 
+      // DEBUG: Early detection of our target locations
+      const debugLocations = ['Pokemon Tower', 'Safari Zone', 'Pokemon Mansion'];
+      const containsDebugLocation = debugLocations.some(loc => fullText.includes(loc));
+      if (containsDebugLocation) {
+        console.log(`👀 DEBUG: Found text containing target location: "${fullText}"`);
+        console.log(`🔍 DEBUG: isRoutePattern: ${isRoutePattern(fullText)}, isValidRouteName: ${isValidRouteName(fullText)}`);
+      }
+
       // Update progress periodically
       if (index % 100 === 0) {
         progressBar.update(index, { status: `Scanning elements... (${routesProcessed} routes found)` });
@@ -276,11 +290,21 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
             return;
           }
 
+          // DEBUG: Log the problematic locations
+          const debugLocations = ['Pokemon Tower', 'Safari Zone', 'Pokemon Mansion'];
+          const isDebugLocation = debugLocations.some(loc => cleanedRouteName.includes(loc));
+          if (isDebugLocation) {
+            console.log(`🔍 DEBUG: Found ${cleanedRouteName} (ID: ${routeId})`);
+          }
+
           // Create unique identifier that includes both name and ID for duplicate detection
           const uniqueIdentifier = routeId ? `${cleanedRouteName}#${routeId}` : cleanedRouteName;
 
           // Skip if we've already processed this exact route (including ID)
           if (routesSeen.has(uniqueIdentifier)) {
+            if (isDebugLocation) {
+              console.log(`⚠️  DEBUG: ${cleanedRouteName} already processed, skipping`);
+            }
             return;
           }
           routesSeen.add(uniqueIdentifier);
@@ -294,8 +318,16 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
 
           // Look for the next table with classes 'IFTable encounterTable'
           let nextElement = $element.next();
-          while (nextElement.length > 0) {
+          let tablesChecked = 0;
+          while (nextElement.length > 0 && tablesChecked < 10) {
+            if (isDebugLocation) {
+              console.log(`🔍 DEBUG: ${cleanedRouteName} - Checking element: ${nextElement.prop('tagName')}, classes: ${nextElement.attr('class')}`);
+            }
+            
             if (nextElement.is('table.IFTable.encounterTable')) {
+              if (isDebugLocation) {
+                console.log(`✅ DEBUG: ${cleanedRouteName} - Found encounter table!`);
+              }
               // Found the encounter table for this route - process it
               $(nextElement).find('tr').each((rowIndex: number, row: any) => {
                 const $row = $(row);
@@ -335,10 +367,18 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
             
             // Stop if we hit another route heading
             if (isRoutePattern(nextElement.text().trim()) && isValidRouteName(nextElement.text().trim())) {
+              if (isDebugLocation) {
+                console.log(`🛑 DEBUG: ${cleanedRouteName} - Stopped at next route: ${nextElement.text().trim()}`);
+              }
               break;
             }
             
+            tablesChecked++;
             nextElement = nextElement.next();
+          }
+
+          if (isDebugLocation) {
+            console.log(`📊 DEBUG: ${cleanedRouteName} - Found ${encounters.length} encounters after checking ${tablesChecked} elements`);
           }
 
           const routeData: RouteEncounters = {
