@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import eggLocationsData from '../data/egg-locations.json';
+import eggLocationsData from '../data/shared/egg-locations.json';
 
 interface EggLocation {
   routeName: string;

@@ -1,14 +1,25 @@
 [
   {
+    "routeName": "Bond Bridge",
+    "pokemonIds": [
+      454
+    ]
+  },
+  {
     "routeName": "Celadon Cafe",
     "pokemonIds": [
-      305
+      305,
+      307
     ]
   },
   {
     "routeName": "Celadon Game Corner",
     "pokemonIds": [
-      123
+      35,
+      63,
+      123,
+      127,
+      147
     ]
   },
   {
@@ -18,12 +29,33 @@
     ]
   },
   {
+    "routeName": "Dragon's Den",
+    "pokemonIds": [
+      297
+    ]
+  },
+  {
+    "routeName": "Fighting Dojo",
+    "pokemonIds": [
+      106,
+      107,
+      237
+    ]
+  },
+  {
     "routeName": "Kanto Daycare",
     "pokemonIds": [
+      172,
+      173,
       174,
+      175,
       238,
+      239,
+      240,
+      252,
       257,
-      259
+      259,
+      261
     ]
   },
   {
@@ -37,6 +69,7 @@
   {
     "routeName": "Knot Island",
     "pokemonIds": [
+      330,
       395
     ]
   },
@@ -54,12 +87,38 @@
     ]
   },
   {
+    "routeName": "National Park",
+    "pokemonIds": [
+      285
+    ]
+  },
+  {
     "routeName": "Pallet Town",
     "pokemonIds": [
       1,
+      4,
+      7,
       276,
       279,
       282
+    ]
+  },
+  {
+    "routeName": "PC",
+    "pokemonIds": [
+      137
+    ]
+  },
+  {
+    "routeName": "Pewter City",
+    "pokemonIds": [
+      204
+    ]
+  },
+  {
+    "routeName": "Rock Tunnel",
+    "pokemonIds": [
+      327
     ]
   },
   {
@@ -69,15 +128,39 @@
     ]
   },
   {
+    "routeName": "Route 3",
+    "pokemonIds": [
+      129
+    ]
+  },
+  {
     "routeName": "S.S. Anne",
     "pokemonIds": [
+      301,
+      303,
       488
+    ]
+  },
+  {
+    "routeName": "Saffron Restaurant",
+    "pokemonIds": [
+      425,
+      461
     ]
   },
   {
     "routeName": "Silph Co.",
     "pokemonIds": [
-      131
+      131,
+      152,
+      155,
+      158
+    ]
+  },
+  {
+    "routeName": "Violet City",
+    "pokemonIds": [
+      291
     ]
   },
   {

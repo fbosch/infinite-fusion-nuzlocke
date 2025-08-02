@@ -1,0 +1,120 @@
+{
+  "totalLocations": 16,
+  "sources": {
+    "gifts": 7,
+    "nests": 9
+  },
+  "pokemonIdentified": {
+    "total": 13,
+    "fromGifts": 5,
+    "fromNests": 8
+  },
+  "locations": [
+    {
+      "routeName": "Kanto Daycare",
+      "source": "gift",
+      "description": "Togepi - Daycare Egg",
+      "pokemonName": "Togepi",
+      "pokemonId": 175
+    },
+    {
+      "routeName": "Kindle Road",
+      "source": "nest",
+      "description": "Trapinch nest location: Kindle Road",
+      "pokemonName": "Trapinch",
+      "pokemonId": 392
+    },
+    {
+      "routeName": "Knot Island",
+      "source": "gift",
+      "description": "Pawniard - As Eggs brought with Heart Scales",
+      "pokemonName": "Pawniard",
+      "pokemonId": 330
+    },
+    {
+      "routeName": "Lavender Town",
+      "source": "gift",
+      "description": "Wynaut - As Egg",
+      "pokemonName": "Wynaut",
+      "pokemonId": 253
+    },
+    {
+      "routeName": "National Park",
+      "source": "gift",
+      "description": "Ralts - As Egg",
+      "pokemonName": "Ralts",
+      "pokemonId": 285
+    },
+    {
+      "routeName": "Pallet Town",
+      "source": "gift",
+      "description": "Bulbasaur - From your sibling after 4 Gyms, an egg of the starter strong against yours",
+      "pokemonName": "Bulbasaur",
+      "pokemonId": 1
+    },
+    {
+      "routeName": "Rock Tunnel",
+      "source": "nest",
+      "description": "Noibat nest location: Rock Tunnel",
+      "pokemonName": "Noibat",
+      "pokemonId": 440
+    },
+    {
+      "routeName": "Route 15",
+      "source": "nest",
+      "description": "Goomy nest location: Route 15",
+      "pokemonName": "Goomy",
+      "pokemonId": 444
+    },
+    {
+      "routeName": "Route 23",
+      "source": "nest",
+      "description": "Swablu nest location: Route 23",
+      "pokemonName": "Swablu",
+      "pokemonId": 442
+    },
+    {
+      "routeName": "Route 34",
+      "source": "nest",
+      "description": "Nest location: Route 34"
+    },
+    {
+      "routeName": "Route 5",
+      "source": "gift",
+      "description": "Random Egg - From breeder trainer, 4 possible random fusion Pokemon"
+    },
+    {
+      "routeName": "Route 8",
+      "source": "gift",
+      "description": "Random Egg - From breeder trainer, 10 possible random fusion Pokemon"
+    },
+    {
+      "routeName": "Saffron City",
+      "source": "nest",
+      "description": "Hawlucha nest location: Saffron City",
+      "pokemonName": "Hawlucha",
+      "pokemonId": 456
+    },
+    {
+      "routeName": "Seafoam Islands",
+      "source": "nest",
+      "description": "Snorunt nest location: Seafoam Islands",
+      "pokemonName": "Snorunt",
+      "pokemonId": 427
+    },
+    {
+      "routeName": "Secret Garden",
+      "source": "nest",
+      "description": "Rockruff nest location: Secret Garden",
+      "pokemonName": "Rockruff",
+      "pokemonId": 463
+    },
+    {
+      "routeName": "Viridian Forest",
+      "source": "nest",
+      "description": "Venipede nest location: Viridian Forest",
+      "pokemonName": "Venipede",
+      "pokemonId": 422
+    }
+  ]
+}

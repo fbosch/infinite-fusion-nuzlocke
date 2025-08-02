@@ -141,7 +141,7 @@ export function EncounterCell({
   const getPokemonSource = useCallback(
     (pokemonId: number): EncounterSource | null => {
       const pokemonData = routeEncounterData.find(p => p.id === pokemonId);
-      return pokemonData?.source || null;
+      return pokemonData?.sources?.[0] || null;
     },
     [routeEncounterData]
   );

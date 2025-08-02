@@ -119,7 +119,7 @@ describe('Custom Location Functionality', () => {
         region: 'Kanto',
         description: 'Test location',
       };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       expect(isCustomLocation(normalLocation as any)).toBe(false);
     });
   });
