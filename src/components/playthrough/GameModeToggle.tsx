@@ -8,12 +8,14 @@ import {
   useGameMode,
   type GameMode,
 } from '@/stores/playthroughs';
-import { CursorTooltip } from '../CursorTooltip';
+import { CursorTooltip } from '@/components/CursorTooltip';
+import { useBreakpointSmallerThan } from '@/hooks/useBreakpoint';
 
 const GameModeToggle = React.memo(function GameModeToggle() {
   const activePlaythrough = useActivePlaythrough();
   const actualGameMode = useGameMode();
   const [isPending, startTransition] = useTransition();
+  const isMobile = useBreakpointSmallerThan('md');
 
   // React 19's useOptimistic hook for instant UI updates
   const [optimisticMode, setOptimisticMode] = useOptimistic(
@@ -79,6 +81,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
       <CursorTooltip
         placement={'bottom'}
         className='origin-top'
+        disabled={isMobile}
         delay={500}
         content={
           <p className='max-w-xs text-xs font-normal leading-5'>
@@ -109,6 +112,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
       <CursorTooltip
         placement={'bottom'}
         delay={500}
+        disabled={isMobile}
         className='origin-top'
         content={
           <p className='max-w-xs text-xs font-normal leading-5'>
@@ -140,6 +144,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
       <CursorTooltip
         placement={'bottom'}
         delay={500}
+        disabled={isMobile}
         className='origin-top'
         content={
           <p className='max-w-xs text-xs font-normal leading-5'>
