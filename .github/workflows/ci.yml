@@ -126,10 +126,7 @@ jobs:
 
       - name: Download fresh Pokemon data
         run: |
-          echo "📥 Downloading Pokedex data..."
-          pnpm run pokedex
-          echo "🎯 Scraping wild encounters..."
-          pnpm run encounters:scrape
+          pnpm run scrape
 
       - name: Run data integrity tests on fresh data
         run: |
