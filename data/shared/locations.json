@@ -493,7 +493,7 @@
     "description": "Mahogany Town is a small town, that is accessed from the North via Route 43, the West via Route 42, and the East via Route 44."
   },
   {
-    "id": "659e14d0-2fd2-4d06-8ac7-41cd8df5c779",
+    "id": "e8a7b3c2-9f45-4d21-8c56-7e3a9b1d4f82",
     "name": "Route 42",
     "region": "Johto",
     "description": "Route 42 is a route that connects Ecruteak City to Mahogany Town. Mt. Mortar can be accessed from either side."
@@ -505,7 +505,7 @@
     "description": "Mt. Mortar is a dark cave that can only be accessed from Route 42."
   },
   {
-    "id": "659e14d0-2fd2-4d06-8ac7-41cd8df5c779",
+    "id": "f2d9c8e1-5a64-4b73-9e28-6f1a8c3b7d95",
     "name": "Ecruteak City",
     "region": "Johto",
     "description": "Ecruteak City can be accessed from the East by Route 42 and from the South by Route 37."

@@ -194,6 +194,70 @@ describe('Data Integrity Tests', () => {
     return []; // Legacy encounters don't have types
   }
 
+  describe('Location Data Integrity', () => {
+    it('should have unique location IDs', () => {
+      const locationIds = locations.map(location => location.id);
+      const uniqueIds = new Set(locationIds);
+
+      expect(uniqueIds.size).toBe(locationIds.length);
+
+      // Find duplicates if any exist
+      const duplicates = locationIds.filter(
+        (id, index) => locationIds.indexOf(id) !== index
+      );
+
+      if (duplicates.length > 0) {
+        const duplicateDetails = duplicates.map(id => {
+          const locationsWithId = locations.filter(loc => loc.id === id);
+          return {
+            id,
+            locations: locationsWithId.map(loc => loc.name),
+          };
+        });
+
+        // Fail with detailed information about duplicates
+        expect(duplicates).toEqual([]);
+        console.error('Duplicate location IDs found:', duplicateDetails);
+      }
+    });
+
+    it('should have valid location structure', () => {
+      locations.forEach(location => {
+        expect(location).toHaveProperty('id');
+        expect(location).toHaveProperty('name');
+        expect(location).toHaveProperty('region');
+        expect(location).toHaveProperty('description');
+
+        expect(typeof location.id).toBe('string');
+        expect(typeof location.name).toBe('string');
+        expect(typeof location.region).toBe('string');
+        expect(typeof location.description).toBe('string');
+
+        expect(location.id.trim()).not.toBe('');
+        expect(location.name.trim()).not.toBe('');
+        expect(location.region.trim()).not.toBe('');
+        expect(location.description.trim()).not.toBe('');
+      });
+    });
+
+    it('should have valid UUID format for location IDs', () => {
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+      locations.forEach(location => {
+        expect(location.id).toMatch(uuidRegex);
+      });
+    });
+
+    it('should have valid regions', () => {
+      const validRegions = ['Kanto', 'Johto'];
+
+      locations.forEach(location => {
+        expect(validRegions).toContain(location.region);
+      });
+    });
+  });
+
   describe('Route Encounter Coverage', () => {
     it('should have encounter data for every location in classic mode', () => {
       // Locations that legitimately have no encounter data (cities with no wild Pokemon, gifts, or trades)
