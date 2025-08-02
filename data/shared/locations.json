@@ -84,6 +84,12 @@
     "description": "Nugget Bridge north of Cerulean City"
   },
   {
+    "id": "b74b3c29-5c7e-486c-a8a2-788987b024dc",
+    "name": "Cerulean Cape",
+    "region": "Kanto",
+    "description": "contains Bill's Lighthouse. It is connected to Route 25 and Route 23"
+  },
+  {
     "id": "e635f3bb-be57-40ae-b4ec-1267466c0642",
     "name": "Route 5",
     "region": "Kanto",
