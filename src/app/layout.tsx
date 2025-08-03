@@ -55,6 +55,8 @@ export default function RootLayout({
         <link rel='dns-prefetch' href='https://raw.githubusercontent.com' />
         <link rel='preconnect' href='https://infinitefusion.fandom.com' />
         <link rel='dns-prefetch' href='https://infinitefusion.fandom.com' />
+        <link rel='preconnect' href='https://www.fusiondex.org' />
+        <link rel='dns-prefetch' href='https://www.fusiondex.org' />
         <meta
           name='apple-mobile-web-app-title'
           content='Infinite Fusion Nuzlocke Tracker'

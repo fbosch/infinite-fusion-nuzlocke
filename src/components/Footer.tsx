@@ -119,7 +119,15 @@ export default function Footer() {
                 rel='noopener noreferrer'
                 className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm '
               >
-                Infinitefusiondex
+                InfiniteDex
+              </a>
+              <a
+                href='https://www.fusiondex.org/'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm '
+              >
+                FusionDex
               </a>
             </div>
             <div className='flex flex-col sm:flex-row items-center gap-3'>

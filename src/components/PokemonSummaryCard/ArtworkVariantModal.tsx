@@ -214,11 +214,15 @@ export function ArtworkVariantModal({
                           <ContextMenu
                             items={[
                               {
-                                label: 'Artist',
+                                label: 'View artist credit on FusionDex',
                                 id: 'artist',
                                 href: `https://www.fusiondex.org/sprite/pif/${spriteId}${variant}`,
+                                target: '_blank',
                                 favicon:
                                   'https://www.fusiondex.org/favicon.ico',
+                                onClick: event => {
+                                  event.stopPropagation();
+                                },
                               },
                             ]}
                           >
