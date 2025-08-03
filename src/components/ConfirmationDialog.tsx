@@ -52,7 +52,7 @@ export default function ConfirmationDialog({
     <Dialog open={isOpen} onClose={onClose} className='relative z-50'>
       {/* Backdrop */}
       <div
-        className='fixed inset-0 bg-black/30 dark:bg-black/50'
+        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px]'
         aria-hidden='true'
       />
 

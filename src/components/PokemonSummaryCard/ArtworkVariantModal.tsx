@@ -130,7 +130,7 @@ export function ArtworkVariantModal({
   return (
     <Dialog open={isOpen} onClose={onClose} className='relative z-50'>
       <div
-        className='fixed inset-0 bg-black/30 dark:bg-black/50'
+        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px]'
         aria-hidden='true'
       />
 
@@ -195,7 +195,7 @@ export function ArtworkVariantModal({
                         }
                       >
                         {({ checked }) => (
-                          <div className='flex flex-col items-center space-y-2 relative'>
+                          <div className='flex flex-col items-center space-y-2 relative user-select-none'>
                             <Image
                               src={spriteUrl}
                               alt={`Artwork variant ${variant || 'default'}`}
@@ -238,7 +238,8 @@ export function ArtworkVariantModal({
                   onClick={handleClearVariant}
                   className={clsx(
                     'px-4 py-2 text-sm rounded-md transition-colors',
-                    'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer',
+                    'bg-gray-100 hover:bg-gray-200 text-gray-900 cursor-pointer',
+                    'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
                     'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
                   )}
                 >

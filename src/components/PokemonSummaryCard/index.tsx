@@ -8,11 +8,18 @@ import { ContextMenu, type ContextMenuItem } from '@/components/ContextMenu';
 import { Fragment, useState } from 'react';
 import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
-import { ArtworkVariantModal } from './ArtworkVariantModal';
 import { useEncounter } from '@/stores/playthroughs';
 import { useMemo } from 'react';
 import { ArrowUpRightSquareIcon, Loader2, Replace } from 'lucide-react';
 import { useSpriteVariants } from '@/hooks/useSprite';
+import dynamic from 'next/dynamic';
+
+const ArtworkVariantModal = dynamic(
+  () => import('./ArtworkVariantModal').then(mod => mod.ArtworkVariantModal),
+  {
+    ssr: false,
+  }
+);
 
 interface SummaryCardProps {
   locationId: string;
