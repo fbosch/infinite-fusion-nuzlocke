@@ -135,18 +135,22 @@ export default function LocationCell({
         )}
       </CursorTooltip>
       <h2 className='text-sm truncate rounded-md focus-within:ring-2 focus-within:ring-blue-400 focus-within:ring-offset-0.5 break-words block'>
-        <a
-          href={
-            isStarterLocation(location.id)
-              ? `https://infinitefusion.fandom.com/wiki/Pallet_Town`
-              : `https://infinitefusion.fandom.com/wiki/${locationName.replace(' ', '_')}`
-          }
-          target='_blank'
-          rel='noopener noreferrer'
-          className='hover:underline focus:outline-none px-0.5'
-        >
-          {locationName}
-        </a>
+        {isCustomLocation(location) ? (
+          locationName
+        ) : (
+          <a
+            href={
+              isStarterLocation(location.id)
+                ? `https://infinitefusion.fandom.com/wiki/Pallet_Town`
+                : `https://infinitefusion.fandom.com/wiki/${locationName.replace(' ', '_')}`
+            }
+            target='_blank'
+            rel='noopener noreferrer'
+            className='hover:underline focus:outline-none px-0.5'
+          >
+            {locationName}
+          </a>
+        )}
       </h2>
     </div>
   );

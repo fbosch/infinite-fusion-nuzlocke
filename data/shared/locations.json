@@ -1,9 +1,9 @@
 [
   {
     "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-    "name": "Oak's Lab",
+    "name": "Starter",
     "region": "Kanto",
-    "description": "Choose your starter Pokémon in Professor Oak's Lab"
+    "description": "Choose your starter Pokémon in Professor Oak's Lab in Pallet Town"
   },
   {
     "id":"288d719e-5aab-4097-b98d-f1ffbd780a9b",
@@ -299,12 +299,6 @@
     "name": "Route 21",
     "region": "Kanto",
     "description": "South of Pallet Town"
-  },
-  {
-    "id": "6da49e7b-ccee-4eaa-906c-eaf86eb056ce",
-    "name": "Pallet Town",
-    "region": "Kanto",
-    "description": "Where it all started"
   },
   {
     "id": "33232ec5-7e59-4519-b484-258baa4a4028",
