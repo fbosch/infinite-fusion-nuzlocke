@@ -1,7 +1,5 @@
-description: Package management guidelines requiring pnpm usage
-globs: ["package.json", "pnpm-lock.yaml", "**/*.json"]
+---
 alwaysApply: true
-
 ---
 
 # Package Management Rule
@@ -15,4 +13,4 @@ Always use `pnpm` for package management operations:
 - Use `pnpm build` instead of `npm run build`
 - Use `pnpm test` instead of `npm test`
 
-This project uses pnpm as the package manager, so all package management commands should use pnpm syntax. 
+This project uses pnpm as the package manager, so all package management commands should use pnpm syntax.

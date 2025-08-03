@@ -1,27 +1,29 @@
-description: Validation rules and business logic for ensuring Nuzlocke run integrity
-globs: ["src/**/*.ts", "tests/**/*.ts"]
+---
 alwaysApply: true
-
 ---
 
 # Validation and Business Logic Rules
+
 Rules for validating Nuzlocke run integrity and enforcing game rules.
 
 ## Core Validation Rules
 
 ### Encounter Validation
+
 - **One Catch Per Area**: Ensure only one Pokémon is caught per route/area
 - **Valid Areas**: Only allow catches in areas that have been reached in progression
 - **Encounter Availability**: Validate that caught Pokémon are available in that area
 - **Game Mode Consistency**: Ensure encounters match the selected game mode (Classic/Remix)
 
 ### Team Validation
+
 - **Nickname Requirement**: All caught Pokémon must have nicknames
 - **Dead Pokémon**: Prevent using fainted Pokémon in battles
 - **Team Size**: Validate team size limits (max 6 active Pokémon)
 - **Level Restrictions**: Check for level caps based on gym badges
 
 ### Fusion Validation
+
 - **Valid Combinations**: Ensure fusion combinations are possible
 - **DNA Splicer Usage**: Track and validate DNA Splicer availability
 - **Fusion Limits**: Check for any fusion restrictions
@@ -30,30 +32,35 @@ Rules for validating Nuzlocke run integrity and enforcing game rules.
 ## Business Logic Rules
 
 ### Progression Validation
+
 - **Route Order**: Ensure logical progression through routes
 - **Gym Badge Requirements**: Validate badge requirements for certain areas
 - **Item Requirements**: Check for required items (HM moves, etc.)
 - **Story Progression**: Validate story-based area unlocks
 
 ### Game State Validation
+
 - **Run Integrity**: Ensure run data is consistent and complete
 - **Data Migration**: Handle updates to data format gracefully
 - **Backup Validation**: Verify backup data integrity
 - **Import Validation**: Validate imported run data
 
 ## Error Handling
+
 - **Graceful Degradation**: Handle missing or corrupted data
 - **User Feedback**: Provide clear error messages
 - **Recovery Options**: Offer ways to fix validation errors
 - **Data Repair**: Provide tools to repair corrupted runs
 
 ## Testing Requirements
+
 - **Unit Tests**: Test all validation functions
 - **Integration Tests**: Test complete run scenarios
 - **Edge Cases**: Test unusual or error conditions
 - **Performance Tests**: Ensure validation doesn't impact performance
 
 ## Validation Triggers
+
 - **On Save**: Validate before saving run data
 - **On Load**: Validate when loading run data
 - **On Action**: Validate before critical actions (catching, fainting, etc.)

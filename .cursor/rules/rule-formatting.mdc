@@ -1,18 +1,8 @@
-# Rule Formatting Guidelines
-Rules for properly formatting Cursor rules and documentation files.
-
-## Rule File Structure
-
-### Required Frontmatter
-All rule files must have frontmatter at the **TOP** of the file with the following structure:
-
-```yaml
 ---
-description: Brief description of what the rule covers
-globs: [] # Array of file patterns this rule applies to (empty for always apply)
-alwaysApply: true/false # Whether this rule should always be applied
+alwaysApply: true
 ---
-```
+
+````
 
 ### Correct Placement
 ```markdown
@@ -24,33 +14,39 @@ alwaysApply: true
 
 # Rule Title
 Rule content goes here...
-```
+````
 
 ### Incorrect Placement
+
 ```markdown
 # Rule Title
+
 Rule content goes here...
 
 description:
 globs:
 alwaysApply: false
+
 ---
 ```
 
 ## Metadata Guidelines
 
 ### Description Field
+
 - **Required**: Every rule must have a description
 - **Concise**: Keep descriptions brief but informative
 - **Clear Purpose**: Explain what the rule covers
 - **Actionable**: Describe what the rule enforces
 
 ### Globs Field
+
 - **Empty Array**: Use `[]` for rules that always apply
 - **File Patterns**: Use patterns like `["*.tsx", "*.ts"]` for specific files
 - **Specific Scope**: Only use globs when rule applies to specific file types
 
 ### AlwaysApply Field
+
 - **True**: For general coding standards and best practices
 - **False**: For specific file types or contexts
 - **Consistent**: Use the same value across similar rules
@@ -58,6 +54,7 @@ alwaysApply: false
 ## Examples
 
 ### General Coding Standards
+
 ```yaml
 ---
 description: General code style and formatting guidelines
@@ -67,19 +64,21 @@ alwaysApply: true
 ```
 
 ### TypeScript Specific
+
 ```yaml
 ---
 description: TypeScript-specific rules and best practices
-globs: ["*.ts", "*.tsx"]
+globs: ['*.ts', '*.tsx']
 alwaysApply: false
 ---
 ```
 
 ### Component Rules
+
 ```yaml
 ---
 description: React component development guidelines
-globs: ["src/components/*.tsx"]
+globs: ['src/components/*.tsx']
 alwaysApply: false
 ---
 ```
@@ -87,18 +86,23 @@ alwaysApply: false
 ## Common Mistakes to Avoid
 
 ### 1. Metadata at Bottom
+
 ❌ **Wrong**: Placing frontmatter at the end of the file
+
 ```markdown
 # Rule Content
+
 Content here...
 
 description: Description
 globs: []
 alwaysApply: false
+
 ---
 ```
 
 ✅ **Correct**: Frontmatter at the top
+
 ```markdown
 ---
 description: Description
@@ -107,11 +111,14 @@ alwaysApply: false
 ---
 
 # Rule Content
+
 Content here...
 ```
 
 ### 2. Missing Required Fields
+
 ❌ **Wrong**: Missing description
+
 ```yaml
 ---
 globs: []
@@ -120,6 +127,7 @@ alwaysApply: true
 ```
 
 ✅ **Correct**: All required fields present
+
 ```yaml
 ---
 description: Clear description of the rule
@@ -129,7 +137,9 @@ alwaysApply: true
 ```
 
 ### 3. Inconsistent Formatting
+
 ❌ **Wrong**: Inconsistent spacing or structure
+
 ```yaml
 ---
 description:Description without space
@@ -139,6 +149,7 @@ alwaysApply:true
 ```
 
 ✅ **Correct**: Proper spacing and structure
+
 ```yaml
 ---
 description: Description with proper spacing
@@ -150,6 +161,7 @@ alwaysApply: true
 ## Validation Checklist
 
 ### Rule File Review
+
 - [ ] Frontmatter is at the top of the file
 - [ ] All required fields are present (description, globs, alwaysApply)
 - [ ] Description is clear and concise
@@ -160,6 +172,7 @@ alwaysApply: true
 - [ ] Rule content follows the frontmatter
 
 ### File Organization
+
 - [ ] Rule files are in `.cursor/rules/` directory
 - [ ] File names are descriptive and use kebab-case
 - [ ] File extensions are `.mdc` for markdown rules
@@ -168,12 +181,14 @@ alwaysApply: true
 ## Enforcement
 
 ### Code Review Process
+
 1. **Check Frontmatter**: Verify metadata is at the top
 2. **Validate Fields**: Ensure all required fields are present
 3. **Review Content**: Check that rule content is clear and actionable
 4. **Test Application**: Verify rule applies correctly to intended files
 
 ### Maintenance
+
 - **Regular Reviews**: Periodically review all rule files for consistency
 - **Update Descriptions**: Keep descriptions current with rule changes
 - **Refactor Scope**: Adjust globs and alwaysApply as needed
@@ -182,18 +197,21 @@ alwaysApply: true
 ## Best Practices
 
 ### Rule Creation
+
 1. **Start with Frontmatter**: Always begin with proper metadata
 2. **Clear Description**: Write a concise but informative description
 3. **Appropriate Scope**: Choose globs and alwaysApply carefully
 4. **Test Application**: Verify the rule applies to intended files
 
 ### Rule Maintenance
+
 1. **Regular Audits**: Review all rules periodically
 2. **Update Descriptions**: Keep descriptions current
 3. **Consolidate Rules**: Merge similar or overlapping rules
 4. **Remove Obsolete**: Delete rules that are no longer relevant
 
 ### Documentation
+
 1. **Clear Examples**: Include good and bad examples
 2. **Actionable Content**: Make rules specific and actionable
 3. **Consistent Format**: Use consistent formatting across all rules
@@ -202,9 +220,11 @@ alwaysApply: true
 ## Official Documentation Reference
 
 ### Cursor Rules Documentation
+
 For comprehensive information about Cursor rules, refer to the [official Cursor documentation](https://docs.cursor.com/context/rules).
 
 ### Key Documentation Sections
+
 - **Rule Types**: Understand Always, Auto Attached, Agent Requested, and Manual rules
 - **Rule Anatomy**: Learn about metadata fields (description, globs, alwaysApply)
 - **Nested Rules**: Organize rules in subdirectories for better scoping
@@ -212,6 +232,7 @@ For comprehensive information about Cursor rules, refer to the [official Cursor 
 - **Examples**: See real-world examples of different rule types
 
 ### When to Consult Official Docs
+
 - **Creating New Rules**: Reference the documentation for proper structure
 - **Rule Types**: Understand when to use each rule type
 - **Scoping Rules**: Learn about glob patterns and file matching
@@ -219,7 +240,9 @@ For comprehensive information about Cursor rules, refer to the [official Cursor 
 - **Troubleshooting**: Find solutions for common rule issues
 
 ### Integration with Project Rules
+
 This project follows the official Cursor rules structure:
+
 - **Location**: `.cursor/rules/` directory
 - **Format**: `.mdc` files with proper frontmatter
 - **Version Control**: All rules are committed to git

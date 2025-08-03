@@ -1,39 +1,43 @@
-description: UI components and design requirements for the Nuzlocke tracker
-globs: ["src/**/*.tsx", "src/**/*.css"]
+---
 alwaysApply: true
-
 ---
 
 # UI Components for Nuzlocke Tracker
+
 Essential UI components that need to be implemented for the Nuzlocke tracker.
 
 ## Core UI Components Needed
 
 ### Team Management
+
 - **Team Display**: Show current team with nicknames, levels, HP, status
 - **Team Editor**: Add/remove Pokémon, update nicknames, mark as fainted
 - **Death Box**: Display fainted Pokémon with cause of death
 - **Team Stats**: Show team statistics and weaknesses
 
 ### Progress Tracking
+
 - **Progress Map**: Visual representation of game progress through regions
 - **Encounter Tracker**: Show which areas have been visited and what was caught
 - **Badge Tracker**: Display gym badges and current progress
 - **Route List**: Interactive list of all routes with encounter status
 
 ### Fusion Interface
+
 - **Fusion Calculator**: Tool to preview fusion combinations
 - **Fusion History**: Track all fusions made during the run
 - **DNA Splicer Tracker**: Track usage and availability
 - **Fusion Gallery**: Display all current fusions
 
 ### Game Management
+
 - **Run Settings**: Choose between Classic/Remix modes
 - **Save/Load System**: Manage multiple Nuzlocke runs
 - **Export/Import**: Share run data with others
 - **Statistics Panel**: Show run statistics and achievements
 
 ## Design Requirements
+
 - Use Tailwind CSS for consistent styling
 - Responsive design for mobile and desktop
 - Dark/light mode support
@@ -41,6 +45,7 @@ Essential UI components that need to be implemented for the Nuzlocke tracker.
 - Smooth animations and transitions
 
 ## Component Structure
+
 - Use Next.js App Router with server components where appropriate
 - Implement client components for interactive features
 - Use React hooks for state management
@@ -48,6 +53,7 @@ Essential UI components that need to be implemented for the Nuzlocke tracker.
 - Add loading states for data fetching
 
 ## Data Integration
+
 - Connect to existing Pokémon data from `data/` directory
 - Use route encounter data for validation
 - Integrate with location data for progress tracking

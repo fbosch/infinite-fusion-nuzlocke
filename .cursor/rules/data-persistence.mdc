@@ -1,9 +1,6 @@
-description: Data persistence, state management, and storage requirements
-globs: ["src/**/*.ts", "src/**/*.tsx"]
-alwaysApply: true
-
 ---
-
+alwaysApply: true
+---
 # Data Persistence and State Management
 Rules for handling data persistence, state management, and run storage.
 

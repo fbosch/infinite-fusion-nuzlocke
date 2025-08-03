@@ -1,4 +1,9 @@
+---
+alwaysApply: true
+---
+
 ## TypeScript Guidelines
+
 - Use strict TypeScript configuration (already configured)
 - Prefer explicit types over `any`
 - Use interface for object shapes, type for unions/primitives
@@ -6,13 +11,9 @@
 - Use proper type imports: `import type { ComponentProps } from 'react'`
 
 ## React/Next.js Patterns
-- Use React 19 features when appropriate
-- Follow Next.js App Router conventions
-- Use Server Components by default, Client Components when needed
-- Implement proper error boundaries and loading states
-- Use Next.js built-in optimizations (fonts, images, etc.)
 
-## Code Quality
+- Use Reuality
+
 - Follow ESLint rules (Next.js + TypeScript config)
 - Use consistent naming conventions:
   - camelCase for variables and functions
@@ -22,11 +23,47 @@
 - Add JSDoc comments only for complex functions that cannot be made self-documenting
 
 ## Performance Considerations
+
 - Use Next.js optimizations (Turbopack in development)
 - Implement proper code splitting
 - Optimize images and assets
 - Use React.memo for expensive components when needed
-description:
-globs:
-alwaysApply: false
----
+  act 19 features when appropriate
+- Follow Next.js App Router conventions
+- Use Server Components by default, Client Components when needed
+- Implement proper error boundaries and loading states
+- Use Next.js built-in optimizations (fonts, images, etc.)
+
+## Code Q## TypeScript Guidelines
+
+- Use strict TypeScript configuration (already configured)
+- Prefer explicit types over `any`
+- Use interface for object shapes, type for unions/primitives
+- Leverage TypeScript path mapping: `@/*` maps to `./src/*`
+- Use proper type imports: `import type { ComponentProps } from 'react'`
+
+## React/Next.js Patterns
+
+- Use Reuality
+
+- Follow ESLint rules (Next.js + TypeScript config)
+- Use consistent naming conventions:
+  - camelCase for variables and functions
+  - PascalCase for components and types
+  - kebab-case for file names
+- Write self-documenting code with clear variable names
+- Add JSDoc comments only for complex functions that cannot be made self-documenting
+
+## Performance Considerations
+
+- Use Next.js optimizations (Turbopack in development)
+- Implement proper code splitting
+- Optimize images and assets
+- Use React.memo for expensive components when needed
+  act 19 features when appropriate
+- Follow Next.js App Router conventions
+- Use Server Components by default, Client Components when needed
+- Implement proper error boundaries and loading states
+- Use Next.js built-in optimizations (fonts, images, etc.)
+
+## Code Q

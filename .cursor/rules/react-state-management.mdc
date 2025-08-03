@@ -1,3 +1,7 @@
+---
+alwaysApply: true
+---
+
 # React State Management Guidelines
 
 Rules for efficient state management and avoiding unnecessary effects in React components.
