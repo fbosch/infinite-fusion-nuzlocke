@@ -1,7 +1,12 @@
 'use client';
 
 import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
+import {
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+  DialogBackdrop,
+} from '@headlessui/react';
 import { RadioGroup, Radio, Field, Label } from '@headlessui/react';
 import { X, Check } from 'lucide-react';
 import clsx from 'clsx';
@@ -128,14 +133,21 @@ export function ArtworkVariantModal({
   }, []);
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className='relative z-50'>
-      <div
-        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px]'
+    <Dialog open={isOpen} onClose={onClose} className='relative z-50 group'>
+      <DialogBackdrop
+        transition
+        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 '
         aria-hidden='true'
       />
 
       <div className='fixed inset-0 flex w-screen items-center justify-center p-4'>
-        <DialogPanel className='max-w-3xl w-full max-h-[80vh] space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col'>
+        <DialogPanel
+          transition
+          className={clsx(
+            'max-w-3xl w-full max-h-[80vh] space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col',
+            'transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98'
+          )}
+        >
           <div className='flex items-center justify-between'>
             <DialogTitle className='text-xl font-semibold text-gray-900 dark:text-white'>
               Select Artwork Variant

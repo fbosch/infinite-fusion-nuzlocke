@@ -50,7 +50,7 @@ export default function AddCustomLocationModal({
     <Dialog open={isOpen} onClose={onClose} className='relative z-70'>
       {/* Backdrop */}
       <div
-        className='fixed inset-0 bg-black/30 dark:bg-black/50'
+        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px]'
         aria-hidden='true'
       />
 
@@ -143,7 +143,7 @@ export default function AddCustomLocationModal({
                 type='submit'
                 disabled={allLocations.length === 0}
                 className={clsx(
-                  'flex-1 px-4 py-2 text-sm  rounded-md transition-colors',
+                  'flex-1 px-4 py-2 text-sm  rounded-md transition-colors cursor-pointer',
                   'bg-blue-600 hover:bg-blue-700 text-white',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
                   'flex items-center justify-center space-x-2',
