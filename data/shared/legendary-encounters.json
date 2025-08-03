@@ -1,0 +1,142 @@
+[
+  {
+    "routeName": "Seafoam Island (Route 20)",
+    "encounters": [
+      144
+    ]
+  },
+  {
+    "routeName": "Power Plant",
+    "encounters": [
+      145
+    ]
+  },
+  {
+    "routeName": "Mt. Ember",
+    "encounters": [
+      146,
+      341
+    ]
+  },
+  {
+    "routeName": "Cerulean Cave",
+    "encounters": [
+      150
+    ]
+  },
+  {
+    "routeName": "Mt. Moon Summit",
+    "encounters": [
+      151
+    ]
+  },
+  {
+    "routeName": "Victory Road",
+    "encounters": [
+      244
+    ]
+  },
+  {
+    "routeName": "Roaming (Johto)",
+    "encounters": [
+      243,
+      245
+    ]
+  },
+  {
+    "routeName": "Navel Rock",
+    "encounters": [
+      249,
+      250
+    ]
+  },
+  {
+    "routeName": "Ilex Forest",
+    "encounters": [
+      251
+    ]
+  },
+  {
+    "routeName": "Deep Sea",
+    "encounters": [
+      340
+    ]
+  },
+  {
+    "routeName": "Sky Pillar",
+    "encounters": [
+      342
+    ]
+  },
+  {
+    "routeName": "Lavender Town",
+    "encounters": [
+      347,
+      468
+    ]
+  },
+  {
+    "routeName": "Hall of Origin",
+    "encounters": [
+      315
+    ]
+  },
+  {
+    "routeName": "P2 Laboratory",
+    "encounters": [
+      348
+    ]
+  },
+  {
+    "routeName": "Bell Tower",
+    "encounters": [
+      349,
+      350
+    ]
+  },
+  {
+    "routeName": "Lake of Rage",
+    "encounters": [
+      351
+    ]
+  },
+  {
+    "routeName": "Roaming (Sevii Islands)",
+    "encounters": [
+      378,
+      379
+    ]
+  },
+  {
+    "routeName": "Birth Island",
+    "encounters": [
+      380
+    ]
+  },
+  {
+    "routeName": "Dream",
+    "encounters": [
+      381
+    ]
+  },
+  {
+    "routeName": "Mt. Moon",
+    "encounters": [
+      450,
+      470
+    ]
+  },
+  {
+    "routeName": "Saffron City",
+    "encounters": [
+      466,
+      467
+    ]
+  },
+  {
+    "routeName": "Pinkan Hollow",
+    "encounters": [
+      500
+    ]
+  }
+]

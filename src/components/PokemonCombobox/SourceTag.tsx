@@ -17,6 +17,7 @@ import { EncounterSource } from '@/loaders/encounters';
 import WildIcon from '@/assets/images/tall-grass.svg';
 import PokeballIcon from '@/assets/images/pokeball.svg';
 import NestIcon from '@/assets/images/nest.svg';
+import LegendaryIcon from '@/assets/images/legendary.svg';
 import { isStarterLocation } from '@/constants/special-locations';
 
 interface SourceTagProps {
@@ -125,7 +126,7 @@ const tagConfig: Record<
   [EncounterSource.GIFT]: {
     text: 'Gift',
     className:
-      'transition-all duration-200 text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/40 hover:bg-purple-100 dark:hover:bg-purple-900/70',
+      'transition-all duration-200 text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 border border-red-200/60 dark:border-red-700/40 hover:bg-red-100 dark:hover:bg-red-900/70',
     icon: <Gift className='size-3' />,
   },
   [EncounterSource.TRADE]: {
@@ -171,5 +172,11 @@ const tagConfig: Record<
       'transition-all duration-200 text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-700/40 hover:bg-amber-100 dark:hover:bg-amber-900/70',
     icon: <Pickaxe className='size-3' />,
     tooltip: 'Found by breaking rocks with Rock Smash',
+  },
+  [EncounterSource.LEGENDARY]: {
+    text: 'Legendary',
+    className:
+      'transition-all duration-200 text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/40 hover:bg-purple-100 dark:hover:bg-purple-900/70',
+    icon: <LegendaryIcon className='size-3' />,
   },
 };

@@ -30,6 +30,7 @@ export enum EncounterSource {
   NEST = 'nest',
   EGG = 'egg',
   STATIC = 'static',
+  LEGENDARY = 'legendary', // Legendary Pokémon encounters
 }
 
 // Zod schema for individual Pokemon encounters
@@ -54,10 +55,11 @@ export const PokemonEncounterSchema = z.object({
       EncounterSource.NEST,
       EncounterSource.EGG,
       EncounterSource.STATIC,
+      EncounterSource.LEGENDARY,
     ],
     {
       error:
-        'Source must be wild, grass, surf, fishing, cave, rock_smash, gift, trade, quest, static, nest, or egg',
+        'Source must be wild, grass, surf, fishing, cave, rock_smash, gift, trade, quest, static, nest, egg, or legendary',
     }
   ),
 });
