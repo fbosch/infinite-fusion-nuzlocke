@@ -349,6 +349,12 @@
     "description": "South of Violet City, fishing area"
   },
   {
+    "id": "7b41cc30-778a-42ce-8327-f6e1bb593fb1",
+    "name": "Ruins of Alph",
+    "region": "Johto",
+    "description": "Ruins Of Alph can be accessed from the North by Route 36 and from the East by Route 32"
+  },
+  {
     "id": "5d1106b7-66d6-4c05-8ab4-052531e99d8c",
     "name": "Route 34",
     "region": "Johto",
