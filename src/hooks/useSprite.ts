@@ -18,9 +18,6 @@ export function useSpriteVariants(
   });
 }
 
-/**
- * Hook to get sprite credits for a Pokémon or fusion
- */
 export function useSpriteCredits(
   headId?: number | null,
   bodyId?: number | null,

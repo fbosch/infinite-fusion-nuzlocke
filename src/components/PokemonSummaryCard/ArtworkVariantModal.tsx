@@ -12,7 +12,7 @@ import { X, Check } from 'lucide-react';
 import clsx from 'clsx';
 import { playthroughActions } from '@/stores/playthroughs';
 import { useSpriteVariants, useSetPrefferedVariant } from '@/hooks/useSprite';
-import { generateSpriteUrl } from '@/lib/spriteCore';
+import { generateSpriteUrl } from '@/lib/sprites';
 import Image from 'next/image';
 import ContextMenu from '../ContextMenu';
 
