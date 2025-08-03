@@ -6095,6 +6095,60 @@
     ]
   },
   {
+    "routeName": "Ice Mountains",
+    "encounters": [
+      {
+        "pokemonId": 215,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 221,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 262,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 272,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 428,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 429,
+        "encounterType": "grass"
+      }
+    ]
+  },
+  {
+    "routeName": "Ice Cavern",
+    "encounters": [
+      {
+        "pokemonId": 215,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 221,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 272,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 428,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 429,
+        "encounterType": "cave"
+      }
+    ]
+  },
+  {
     "routeName": "Route 44",
     "encounters": [
       {

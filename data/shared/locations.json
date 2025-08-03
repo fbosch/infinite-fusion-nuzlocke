@@ -456,6 +456,12 @@
     "region": "Johto",
     "description": "Ice Mountains is a chain of mountains that can be accessed by the West from Route 44 and by the East from Blackthorn City."
   },
+    {
+    "id": "93826d53-6bd9-4135-b193-a0475597179e",
+    "name": "Ice Cavern",
+    "region": "Johto",
+    "description": "Ice Mountains is a chain of mountains that can be accessed by the West from Route 44 and by the East from Blackthorn City."
+  },
   {
     "id": "52c69ebe-555f-4519-b4e4-ec019baaa780",
     "name": "Hall of Origin",
