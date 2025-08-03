@@ -10,7 +10,13 @@ import {
   FloatingFocusManager,
 } from '@floating-ui/react';
 import { clsx } from 'clsx';
-import React, { useState, useRef, cloneElement, isValidElement } from 'react';
+import React, {
+  useState,
+  useRef,
+  cloneElement,
+  isValidElement,
+  useEffect,
+} from 'react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface ContextMenuItem {
@@ -43,9 +49,11 @@ export function ContextMenu({
     y: 0,
   });
   const [isOpen, setIsOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const triggerRef = useRef<HTMLElement>(null);
   const listRef = useRef<Array<HTMLElement | null>>([]);
+  const menuElementRef = useRef<HTMLDivElement>(null);
 
   // Floating UI setup for keyboard navigation
   const { refs, context } = useFloating({
@@ -88,6 +96,33 @@ export function ContextMenu({
     setIsOpen(true);
   };
 
+  // Handle animation states by directly manipulating DOM classes
+  useEffect(() => {
+    if (isOpen) {
+      // Show menu immediately
+      setIsVisible(true);
+
+      // Add enter animation class after a frame
+      requestAnimationFrame(() => {
+        if (menuElementRef.current) {
+          menuElementRef.current.classList.remove('tooltip-exit');
+          menuElementRef.current.classList.add('tooltip-enter');
+        }
+      });
+    } else {
+      // Start exit animation
+      if (menuElementRef.current) {
+        menuElementRef.current.classList.remove('tooltip-enter');
+        menuElementRef.current.classList.add('tooltip-exit');
+
+        // Hide menu after animation completes
+        setTimeout(() => {
+          setIsVisible(false);
+        }, 50); // Match CSS animation duration
+      }
+    }
+  }, [isOpen]);
+
   return (
     <div>
       {/* Custom trigger element */}
@@ -97,12 +132,15 @@ export function ContextMenu({
           onContextMenu: handleContextMenu,
         } as React.HTMLAttributes<HTMLElement>)}
 
-      {/* Render popover in portal when open */}
-      {isOpen && triggerRef.current && (
+      {/* Render popover in portal when visible */}
+      {isVisible && triggerRef.current && (
         <FloatingPortal>
           <FloatingFocusManager context={context} modal={false}>
             <div
-              ref={refs.setFloating}
+              ref={node => {
+                refs.setFloating(node);
+                menuElementRef.current = node;
+              }}
               style={{
                 position: 'absolute',
                 left:
@@ -118,7 +156,7 @@ export function ContextMenu({
                 'min-w-[12rem] rounded-md border border-gray-200 dark:border-gray-700',
                 'bg-white dark:bg-gray-800 shadow-lg shadow-black/10 dark:shadow-black/25',
                 'p-1 backdrop-blur-xl',
-                'animate-in fade-in-0 zoom-in-95 duration-150',
+                'origin-top-left backdrop-blur-xl',
                 'focus:outline-none',
                 className
               )}
@@ -153,9 +191,10 @@ export function ContextMenu({
                     }}
                     className={clsx(
                       'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
-                      'text-sm transition-colors duration-75',
+                      'text-sm transition-colors duration-75 enabled:cursor-pointer',
                       'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
                       'disabled:cursor-not-allowed disabled:opacity-50',
+                      'tooltip-enter',
                       item.variant === 'danger'
                         ? isActive
                           ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
@@ -202,7 +241,7 @@ export function ContextMenu({
       )}
 
       {/* Handle outside clicks and escape key */}
-      {isOpen && (
+      {isVisible && (
         <div
           className='fixed inset-0 z-40'
           onClick={() => setIsOpen(false)}
