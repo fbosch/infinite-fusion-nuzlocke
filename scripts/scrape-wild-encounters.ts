@@ -139,8 +139,6 @@ function consolidateSubLocations(routes: RouteEncounters[]): RouteEncounters[] {
     const parentLocation = findParentLocation(route.routeName, existingLocationNames);
     const baseLocation = parentLocation || route.routeName;
     
-
-    
     if (!locationGroups.has(baseLocation)) {
       locationGroups.set(baseLocation, []);
     }
@@ -335,14 +333,16 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
 
 
 
-          const routeData: RouteEncounters = {
-            routeName: cleanedRouteName,
-            encounters: encounters
-          };
 
-
-
-          routes.push(routeData);
+          if (encounters.length > 0) {
+            const routeData: RouteEncounters = {
+              routeName: cleanedRouteName,
+              encounters: encounters
+            };
+            routes.push(routeData);
+          } else {
+            console.debug('No encounters found for route:', cleanedRouteName);
+          }
         }
       }
     });

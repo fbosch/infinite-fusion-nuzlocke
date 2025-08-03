@@ -122,6 +122,7 @@ describe('Encounters API', () => {
           'static',
           'nest',
           'egg',
+          'legendary',
         ]).toContain(pokemon.source);
       });
     });
