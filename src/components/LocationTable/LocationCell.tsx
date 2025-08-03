@@ -10,6 +10,7 @@ import type { CombinedLocation } from '@/loaders/locations';
 import type { PokemonOptionSchema } from '@/loaders/pokemon';
 import { z } from 'zod';
 import { CursorTooltip } from '../CursorTooltip';
+import { isStarterLocation } from '../../constants/special-locations';
 
 interface LocationCellProps {
   location: CombinedLocation;
@@ -133,8 +134,19 @@ export default function LocationCell({
           <Info className='size-4 text-gray-400 dark:text-gray-600 cursor-help' />
         )}
       </CursorTooltip>
-      <h2 className='text-sm truncate max-w-[180px] break-words block'>
-        {locationName}
+      <h2 className='text-sm truncate rounded-md focus-within:ring-2 focus-within:ring-blue-400 focus-within:ring-offset-0.5 break-words block'>
+        <a
+          href={
+            isStarterLocation(location.id)
+              ? `https://infinitefusion.fandom.com/wiki/Pallet_Town`
+              : `https://infinitefusion.fandom.com/wiki/${locationName.replace(' ', '_')}`
+          }
+          target='_blank'
+          rel='noopener noreferrer'
+          className='hover:underline focus:outline-none px-0.5'
+        >
+          {locationName}
+        </a>
       </h2>
     </div>
   );
