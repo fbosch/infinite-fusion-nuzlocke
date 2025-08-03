@@ -1,4 +1,6 @@
 ---
+description: React hooks best practices including hook order consistency, dependency management, and custom hook patterns
+globs: []
 alwaysApply: true
 ---
 

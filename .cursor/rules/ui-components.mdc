@@ -1,5 +1,7 @@
 ---
-alwaysApply: true
+description: Essential UI components for the Nuzlocke tracker including team management, progress tracking, fusion interface, and game management
+globs: ['src/components/**/*.{ts,tsx}']
+alwaysApply: false
 ---
 
 # UI Components for Nuzlocke Tracker

@@ -1,4 +1,6 @@
 ---
+description: Nuzlocke run validation rules including encounter validation, team validation, fusion validation, and business logic rules
+globs: []
 alwaysApply: true
 ---
 

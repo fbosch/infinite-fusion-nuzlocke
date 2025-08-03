@@ -1,4 +1,6 @@
 ---
+description: Zod v4 validation rules including schema definition, error handling, performance optimization, and testing patterns
+globs: []
 alwaysApply: true
 ---
 

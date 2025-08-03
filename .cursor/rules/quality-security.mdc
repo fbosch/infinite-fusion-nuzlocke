@@ -1,4 +1,6 @@
 ---
+description: Code quality, security, and maintainability guidelines including error handling, accessibility, security practices, and documentation
+globs: []
 alwaysApply: true
 ---
 

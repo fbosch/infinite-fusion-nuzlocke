@@ -1,5 +1,7 @@
 ---
-alwaysApply: true
+description: Pokémon Infinite Fusion mechanics including DNA Splicers, head/body combinations, fusion stats, and triple fusions
+globs: ['src/lib/fusion/**/*.{ts,tsx}', 'src/components/fusion/**/*.{ts,tsx}']
+alwaysApply: false
 ---
 
 # Infinite Fusion Mechanics

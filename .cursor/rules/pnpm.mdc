@@ -1,4 +1,6 @@
 ---
+description: Package management guidelines requiring the use of pnpm for all package operations
+globs: []
 alwaysApply: true
 ---
 

@@ -1,4 +1,6 @@
 ---
+description: Testing strategy and best practices for unit tests, file organization, and test patterns
+globs: ['**/*.test.{js,jsx,ts,tsx}', '**/*.spec.{js,jsx,ts,tsx}']
 alwaysApply: false
 ---
 

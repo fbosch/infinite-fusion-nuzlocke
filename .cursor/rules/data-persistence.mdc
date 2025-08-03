@@ -1,5 +1,7 @@
 ---
-alwaysApply: true
+description: Data persistence and state management rules including run storage, auto-save, export/import, and data validation
+globs: ['src/lib/state/**/*.{ts,tsx}', 'src/hooks/**/*.{ts,tsx}']
+alwaysApply: false
 ---
 
 # Data Persistence and State Management

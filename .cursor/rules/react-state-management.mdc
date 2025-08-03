@@ -1,4 +1,6 @@
 ---
+description: React state management best practices focusing on minimizing useState/useEffect usage and preferring alternatives
+globs: []
 alwaysApply: true
 ---
 
