@@ -15,7 +15,15 @@ import {
   Placement,
 } from '@floating-ui/react';
 import { clsx } from 'clsx';
-import { useState, cloneElement, isValidElement, useRef } from 'react';
+import {
+  useState,
+  cloneElement,
+  isValidElement,
+  useRef,
+  useEffect,
+  useCallback,
+} from 'react';
+import { useWindowVisibility } from '@/hooks/useWindowVisibility';
 import { twMerge } from 'tailwind-merge';
 
 // Helper functions to calculate offsets based on placement
@@ -59,9 +67,10 @@ export function CursorTooltip({
   const isAnimatingRef = useRef(false);
   const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isHoveringRef = useRef(false);
+  const isWindowVisible = useWindowVisibility();
 
   // Handle opening animation
-  const handleOpen = () => {
+  const handleOpen = useCallback(() => {
     // Clear any existing exit animations when opening
     if (exitTimeoutRef.current) {
       clearTimeout(exitTimeoutRef.current);
@@ -74,10 +83,10 @@ export function CursorTooltip({
       isAnimatingRef.current = true;
       onMouseEnter?.();
     }
-  };
+  }, [isVisible, onMouseEnter]);
 
   // Handle closing animation
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     // Only start exit animation if we're currently visible and not hovering
     if (isVisible && !isHoveringRef.current) {
       isAnimatingRef.current = false;
@@ -92,26 +101,35 @@ export function CursorTooltip({
       }, 150); // Match the CSS animation duration
       onMouseLeave?.();
     }
-  };
+  }, [isVisible, isHoveringRef, onMouseLeave]);
 
   // Override the onOpenChange to handle animations
-  const handleOpenChange = (open: boolean) => {
-    isHoveringRef.current = open;
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      isHoveringRef.current = open;
 
-    // If we're trying to open but there's an exit animation running, cancel it
-    if (open && exitTimeoutRef.current) {
-      clearTimeout(exitTimeoutRef.current);
-      exitTimeoutRef.current = null;
-      isAnimatingRef.current = true;
-    }
+      // If we're trying to open but there's an exit animation running, cancel it
+      if (open && exitTimeoutRef.current) {
+        clearTimeout(exitTimeoutRef.current);
+        exitTimeoutRef.current = null;
+        isAnimatingRef.current = true;
+      }
 
-    if (open) {
-      handleOpen();
-    } else {
-      handleClose();
+      if (open) {
+        handleOpen();
+      } else {
+        handleClose();
+      }
+      setIsOpen(open);
+    },
+    [handleOpen, handleClose]
+  );
+
+  useEffect(() => {
+    if (!isWindowVisible && isOpen) {
+      handleOpenChange(false);
     }
-    setIsOpen(open);
-  };
+  }, [isWindowVisible, isOpen, handleOpenChange]);
 
   const { refs, floatingStyles, context } = useFloating({
     placement,

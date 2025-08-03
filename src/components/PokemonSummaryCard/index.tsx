@@ -10,7 +10,7 @@ import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
 import { useEncounter } from '@/stores/playthroughs';
 import { useMemo } from 'react';
-import { ArrowUpRightSquareIcon, DnaOff } from 'lucide-react';
+import { ArrowUpRightSquareIcon } from 'lucide-react';
 
 interface SummaryCardProps {
   locationId: string;
@@ -47,22 +47,41 @@ export default function SummaryCard({
   const encounterData = useEncounter(locationId);
 
   const contextItems = useMemo<ContextMenuItem[]>(() => {
-    const link = `https://infinitefusiondex.com/details/${encounterData?.head?.id && encounterData?.body?.id ? `${encounterData.head.id}.${encounterData.body.id}` : encounterData?.head?.id || encounterData?.body?.id}`;
+    const id =
+      encounterData?.head?.id && encounterData?.body?.id
+        ? `${encounterData.head.id}.${encounterData.body.id}`
+        : encounterData?.head?.id || encounterData?.body?.id;
+    const infinitefusiondexLink = `https://infinitefusiondex.com/details/${id}`;
+    const fusiondexLink = `https://fusiondex.org/${id}/`;
     return [
       {
-        id: 'pokedex',
-        label: 'Open Pokédex entry',
-        href: link,
-        target: '_blank',
-        icon: ArrowUpRightSquareIcon,
+        id: 'change-variant',
+        label: 'Change Variant',
+        onClick: () => {
+          console.log('change variant');
+        },
       },
       {
-        id: 'unfuse',
-        label: 'Unfuse',
-        icon: DnaOff,
-        onClick: () => {
-          console.log('unfuse');
-        },
+        id: 'separate',
+        separator: true,
+      },
+      {
+        id: 'infinitedex',
+        label: 'Open InfiniteDex entry',
+        href: infinitefusiondexLink,
+        target: '_blank',
+        favicon: 'https://infinitefusiondex.com/images/favicon.ico',
+        icon: ArrowUpRightSquareIcon,
+        iconClassName: 'dark:text-blue-300 text-blue-400',
+      },
+      {
+        id: 'fusiondex',
+        label: 'Open FusionDex entry',
+        href: fusiondexLink,
+        target: '_blank',
+        favicon: 'https://www.fusiondex.org/favicon.ico',
+        icon: ArrowUpRightSquareIcon,
+        iconClassName: 'dark:text-blue-300 text-blue-400',
       },
     ];
   }, [encounterData]);

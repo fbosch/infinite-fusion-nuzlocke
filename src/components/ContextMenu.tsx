@@ -10,6 +10,7 @@ import {
   FloatingFocusManager,
 } from '@floating-ui/react';
 import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import React, {
   useState,
   useRef,
@@ -20,6 +21,7 @@ import React, {
   useEffect,
 } from 'react';
 import type { LucideIcon } from 'lucide-react';
+import Image from 'next/image';
 
 // Custom hook for context menu state management
 function useContextMenuState() {
@@ -66,8 +68,10 @@ function useContextMenuState() {
 
 export interface ContextMenuItem {
   id: string;
-  label: string;
+  label?: string;
   icon?: LucideIcon;
+  iconClassName?: string;
+  favicon?: string;
   onClick?: () => void;
   href?: string;
   target?: string;
@@ -262,7 +266,7 @@ export function ContextMenu({
                   return (
                     <div
                       key={`separator-${index}`}
-                      className='my-1 h-px bg-gray-200 dark:bg-gray-600'
+                      className='my-1 h-px bg-gray-200 dark:bg-gray-700/70'
                       role='separator'
                     />
                   );
@@ -296,22 +300,45 @@ export function ContextMenu({
                 );
 
                 const content = (
-                  <>
-                    <div className='flex items-center space-x-2'>
-                      {item.icon && (
-                        <item.icon
-                          className='h-4 w-4 flex-shrink-0'
+                  <div className='flex items-center gap-x-2 w-full'>
+                    {/* Left: favicon and label */}
+                    <div className='flex items-center gap-x-2 min-w-0'>
+                      {item.favicon && item.href && (
+                        <Image
+                          src={item.favicon}
+                          alt=''
+                          loading='lazy'
+                          decoding='async'
+                          className='h-4 w-4 flex-shrink-0 rounded-sm'
+                          width={16}
+                          height={16}
+                          unoptimized
                           aria-hidden='true'
+                          onError={e => {
+                            e.currentTarget.style.display = 'none';
+                          }}
                         />
                       )}
                       <span className='truncate'>{item.label}</span>
                     </div>
-                    {item.shortcut && (
-                      <span className='text-xs opacity-60'>
-                        {item.shortcut}
-                      </span>
-                    )}
-                  </>
+                    {/* Right: shortcut and icon, always aligned to end */}
+                    <div className='flex items-center gap-x-2 ml-auto'>
+                      {item.shortcut && (
+                        <span className='text-xs opacity-60'>
+                          {item.shortcut}
+                        </span>
+                      )}
+                      {item.icon && item.href && (
+                        <item.icon
+                          className={twMerge(
+                            'h-4 w-4 flex-shrink-0',
+                            item.iconClassName
+                          )}
+                          aria-hidden='true'
+                        />
+                      )}
+                    </div>
+                  </div>
                 );
 
                 // Render as link if href is provided
