@@ -64,67 +64,58 @@ export function CursorTooltip({
 }: CursorTooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const isAnimatingRef = useRef(false);
   const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isHoveringRef = useRef(false);
   const isWindowVisible = useWindowVisibility();
 
-  // Handle opening animation
-  const handleOpen = useCallback(() => {
-    // Clear any existing exit animations when opening
+  // Cleanup function to clear timeouts
+  const clearExitTimeout = useCallback(() => {
     if (exitTimeoutRef.current) {
       clearTimeout(exitTimeoutRef.current);
       exitTimeoutRef.current = null;
     }
+  }, []);
 
-    // Start enter animation immediately
-    if (!isVisible) {
-      setIsVisible(true);
-      isAnimatingRef.current = true;
-      onMouseEnter?.();
-    }
-  }, [isVisible, onMouseEnter]);
+  // Handle opening the tooltip
+  const handleOpen = useCallback(() => {
+    clearExitTimeout();
+    setIsVisible(true);
+    setIsOpen(true);
+    onMouseEnter?.();
+  }, [clearExitTimeout, onMouseEnter]);
 
-  // Handle closing animation
+  // Handle closing the tooltip
   const handleClose = useCallback(() => {
-    // Only start exit animation if we're currently visible and not hovering
-    if (isVisible && !isHoveringRef.current) {
-      isAnimatingRef.current = false;
+    setIsOpen(false);
 
-      // Add a small delay to allow the exit animation to play
-      exitTimeoutRef.current = setTimeout(() => {
-        // Double-check we're still not hovering before hiding
-        if (!isHoveringRef.current) {
-          setIsVisible(false);
-        }
-        exitTimeoutRef.current = null;
-      }, 150); // Match the CSS animation duration
-      onMouseLeave?.();
-    }
-  }, [isVisible, isHoveringRef, onMouseLeave]);
+    // Start exit animation
+    exitTimeoutRef.current = setTimeout(() => {
+      setIsVisible(false);
+      exitTimeoutRef.current = null;
+    }, 150); // Match CSS animation duration
 
-  // Override the onOpenChange to handle animations
+    onMouseLeave?.();
+  }, [onMouseLeave]);
+
+  // Handle open/close state changes
   const handleOpenChange = useCallback(
     (open: boolean) => {
-      isHoveringRef.current = open;
-
-      // If we're trying to open but there's an exit animation running, cancel it
-      if (open && exitTimeoutRef.current) {
-        clearTimeout(exitTimeoutRef.current);
-        exitTimeoutRef.current = null;
-        isAnimatingRef.current = true;
-      }
-
       if (open) {
         handleOpen();
       } else {
         handleClose();
       }
-      setIsOpen(open);
     },
     [handleOpen, handleClose]
   );
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      clearExitTimeout();
+    };
+  }, [clearExitTimeout]);
+
+  // Handle window visibility changes
   useEffect(() => {
     if (!isWindowVisible && isOpen) {
       handleOpenChange(false);
@@ -191,7 +182,7 @@ export function CursorTooltip({
                   'dark:bg-gray-700/80 background-blur dark:text-white text-gray-700',
                   'border dark:border-gray-600 border-gray-200',
                   'origin-top-left backdrop-blur-xl',
-                  isAnimatingRef.current ? 'tooltip-enter' : 'tooltip-exit'
+                  isOpen ? 'tooltip-enter' : 'tooltip-exit'
                 ),
                 className
               )}

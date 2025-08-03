@@ -250,7 +250,7 @@ export function ContextMenu({
                 zIndex: 50,
               }}
               className={clsx(
-                'min-w-[12rem] rounded-md border border-gray-200 dark:border-gray-800',
+                'min-w-[12rem] z-70 rounded-md border border-gray-200 dark:border-gray-800',
                 'bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25',
                 'p-1 backdrop-blur-xl',
                 'origin-top-left backdrop-blur-xl',

@@ -43,8 +43,9 @@ export default function SummaryCard({
   locationId,
   shouldLoad,
 }: SummaryCardProps) {
-  // Get encounter data directly - only this card will rerender when this encounter changes
   const encounterData = useEncounter(locationId);
+  const eitherPokemonIsEgg =
+    isEggId(encounterData?.head?.id) || isEggId(encounterData?.body?.id);
 
   const contextItems = useMemo<ContextMenuItem[]>(() => {
     const id =
@@ -56,7 +57,8 @@ export default function SummaryCard({
     return [
       {
         id: 'change-variant',
-        label: 'Change Variant',
+        label: 'Change Preferred Variant',
+        disabled: eitherPokemonIsEgg,
         onClick: () => {
           console.log('change variant');
         },
@@ -91,16 +93,13 @@ export default function SummaryCard({
   }
 
   const name = getNicknameText(
-    encounterData.head,
-    encounterData.body,
-    encounterData.isFusion
+    encounterData?.head,
+    encounterData?.body,
+    encounterData?.isFusion
   );
   const isDeceased =
-    encounterData.head?.status === PokemonStatus.DECEASED ||
-    encounterData.body?.status === PokemonStatus.DECEASED;
-
-  const eitherPokemonIsEgg =
-    isEggId(encounterData.head?.id) || isEggId(encounterData.body?.id);
+    encounterData?.head?.status === PokemonStatus.DECEASED ||
+    encounterData?.body?.status === PokemonStatus.DECEASED;
 
   return (
     <ContextMenu items={contextItems} portalRootId='location-table'>
