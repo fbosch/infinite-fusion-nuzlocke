@@ -10,13 +10,7 @@ import {
   FloatingFocusManager,
 } from '@floating-ui/react';
 import { clsx } from 'clsx';
-import React, {
-  useState,
-  useRef,
-  cloneElement,
-  isValidElement,
-  useEffect,
-} from 'react';
+import React, { useState, useRef, cloneElement, isValidElement } from 'react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface ContextMenuItem {
@@ -93,35 +87,33 @@ export function ContextMenu({
       y: event.clientY - rect.top,
     });
 
+    // Show menu and start enter animation
     setIsOpen(true);
+    setIsVisible(true);
+
+    // Add enter animation class after a frame
+    requestAnimationFrame(() => {
+      if (menuElementRef.current) {
+        menuElementRef.current.classList.remove('tooltip-exit');
+        menuElementRef.current.classList.add('tooltip-enter');
+      }
+    });
   };
 
-  // Handle animation states by directly manipulating DOM classes
-  useEffect(() => {
-    if (isOpen) {
-      // Show menu immediately
-      setIsVisible(true);
+  const handleClose = () => {
+    setIsOpen(false);
 
-      // Add enter animation class after a frame
-      requestAnimationFrame(() => {
-        if (menuElementRef.current) {
-          menuElementRef.current.classList.remove('tooltip-exit');
-          menuElementRef.current.classList.add('tooltip-enter');
-        }
-      });
-    } else {
-      // Start exit animation
-      if (menuElementRef.current) {
-        menuElementRef.current.classList.remove('tooltip-enter');
-        menuElementRef.current.classList.add('tooltip-exit');
+    // Start exit animation
+    if (menuElementRef.current) {
+      menuElementRef.current.classList.remove('tooltip-enter');
+      menuElementRef.current.classList.add('tooltip-exit');
 
-        // Hide menu after animation completes
-        setTimeout(() => {
-          setIsVisible(false);
-        }, 50); // Match CSS animation duration
-      }
+      // Hide menu after animation completes
+      setTimeout(() => {
+        setIsVisible(false);
+      }, 50); // Match CSS animation duration
     }
-  }, [isOpen]);
+  };
 
   return (
     <div>
@@ -210,7 +202,7 @@ export function ContextMenu({
                     onClick={() => {
                       if (!item.disabled) {
                         item.onClick?.();
-                        setIsOpen(false);
+                        handleClose();
                       }
                     }}
                     disabled={item.disabled}
@@ -244,10 +236,10 @@ export function ContextMenu({
       {isVisible && (
         <div
           className='fixed inset-0 z-40'
-          onClick={() => setIsOpen(false)}
+          onClick={handleClose}
           onKeyDown={e => {
             if (e.key === 'Escape') {
-              setIsOpen(false);
+              handleClose();
             }
           }}
         />
