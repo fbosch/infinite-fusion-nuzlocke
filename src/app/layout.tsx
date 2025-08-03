@@ -75,6 +75,8 @@ export default function RootLayout({
           <ConditionalAnalytics />
           <ConditionalSpeedInsights />
           <ServiceWorkerInit />
+          {/* Portal root for context menus */}
+          <div id='context-menu-root' />
         </Providers>
       </body>
     </html>

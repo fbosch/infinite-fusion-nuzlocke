@@ -14,6 +14,7 @@ import { playthroughActions } from '@/stores/playthroughs';
 import { useSpriteVariants, useSetPrefferedVariant } from '@/hooks/useSprite';
 import { generateSpriteUrl } from '@/lib/spriteCore';
 import Image from 'next/image';
+import ContextMenu from '../ContextMenu';
 
 interface ArtworkVariantModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export function ArtworkVariantModal({
   bodyId,
   currentVariant,
 }: ArtworkVariantModalProps) {
+  const spriteId = headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId;
   const [localVariant, setLocalVariant] = useState<string | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -143,6 +145,7 @@ export function ArtworkVariantModal({
       <div className='fixed inset-0 flex w-screen items-center justify-center p-4'>
         <DialogPanel
           transition
+          id='artwork-variant-modal'
           className={clsx(
             'max-w-3xl w-full max-h-[80vh] space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col',
             'transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98'
@@ -183,16 +186,17 @@ export function ArtworkVariantModal({
               <RadioGroup
                 value={displayVariant || ''}
                 onChange={handleSelectVariant}
-                className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto overflow-x-hidden flex-1 min-h-0 scrollbar-thin p-3'
+                data-scroll-container
+                className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto overflow-x-hidden flex-1 min-h-0 scrollbar-thin p-3 relative'
                 aria-label='Artwork variant options'
               >
                 {availableVariants.map(variant => {
                   const spriteUrl = generateSpriteUrl(headId, bodyId, variant);
-
                   return (
                     <Field key={variant} className='contents'>
                       <Radio
                         value={variant}
+                        id={`artwork-variant-${variant}`}
                         className={({ checked }) =>
                           clsx(
                             'relative group p-2 rounded-lg border-2 transition-color duration-200 cursor-pointer',
@@ -207,33 +211,44 @@ export function ArtworkVariantModal({
                         }
                       >
                         {({ checked }) => (
-                          <div className='flex flex-col items-center space-y-2 relative user-select-none'>
-                            <Image
-                              src={spriteUrl}
-                              alt={`Artwork variant ${variant || 'default'}`}
-                              className='w-24 h-24 object-fill image-render-pixelated'
-                              width={100}
-                              height={100}
-                              loading='lazy'
-                              decoding='async'
-                              unoptimized
-                            />
-                            {checked && (
-                              <div className='absolute top-0 right-0 bg-blue-500 text-white rounded-full p-1.5 shadow-lg'>
-                                <Check className='h-3 w-3' />
-                              </div>
-                            )}
-                            <Label className='text-sm font-normal text-gray-400 dark:text-gray-300 cursor-pointer'>
-                              {variant || 'Default'}
-                            </Label>
-                          </div>
+                          <ContextMenu
+                            items={[
+                              {
+                                label: 'Artist',
+                                id: 'artist',
+                                href: `https://www.fusiondex.org/sprite/pif/${spriteId}${variant}`,
+                                favicon:
+                                  'https://www.fusiondex.org/favicon.ico',
+                              },
+                            ]}
+                          >
+                            <div className='flex flex-col items-center space-y-2 relative user-select-none'>
+                              <Image
+                                src={spriteUrl}
+                                alt={`Artwork variant ${variant || 'default'}`}
+                                className='w-24 h-24 object-fill image-render-pixelated'
+                                width={100}
+                                height={100}
+                                loading='lazy'
+                                decoding='async'
+                                unoptimized
+                              />
+                              {checked && (
+                                <div className='absolute top-0 right-0 bg-blue-500 text-white rounded-full p-1.5 shadow-lg'>
+                                  <Check className='h-3 w-3' />
+                                </div>
+                              )}
+                              <Label className='text-sm font-normal text-gray-400 dark:text-gray-300 cursor-pointer'>
+                                {variant || 'Default'}
+                              </Label>
+                            </div>
+                          </ContextMenu>
                         )}
                       </Radio>
                     </Field>
                   );
                 })}
               </RadioGroup>
-
               <div className='flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700'>
                 <button
                   onClick={onClose}

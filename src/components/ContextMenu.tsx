@@ -136,7 +136,7 @@ export function ContextMenu({
     listNavigation,
   ]);
 
-  // Close menu when window becomes hidden or loses focus
+  // Close menu when window becomes hidden, loses focus, or scrolls
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isVisible = document.visibilityState === 'visible';
@@ -159,16 +159,35 @@ export function ContextMenu({
       }
     };
 
+    const handleScroll = () => {
+      if (isOpen) {
+        closeMenu();
+
+        // Start exit animation
+        if (menuElementRef.current) {
+          menuElementRef.current.classList.remove('tooltip-enter');
+          menuElementRef.current.classList.add('tooltip-exit');
+
+          // Hide menu after animation completes
+          setTimeout(() => {
+            hideMenu();
+          }, 50); // Match CSS animation duration
+        }
+      }
+    };
+
     // Add event listeners
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleVisibilityChange);
     window.addEventListener('blur', handleVisibilityChange);
+    window.addEventListener('scroll', handleScroll, true); // Use capture phase to catch all scroll events
 
     // Cleanup
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleVisibilityChange);
       window.removeEventListener('blur', handleVisibilityChange);
+      window.removeEventListener('scroll', handleScroll, true);
     };
   }, [isOpen, closeMenu, hideMenu]);
 
@@ -193,27 +212,9 @@ export function ContextMenu({
     event.preventDefault();
     event.stopPropagation();
 
-    // Store the trigger element for positioning
-    triggerRef.current = event.currentTarget as HTMLElement;
-
-    // Find the scrollable container (if any)
-    const scrollContainer =
-      event.currentTarget.closest('[data-scroll-container]') ||
-      event.currentTarget.closest(
-        '.overflow-auto, .overflow-scroll, .overflow-y-auto, .overflow-y-scroll'
-      ) ||
-      document.documentElement;
-
-    // Get scroll offsets
-    const scrollLeft = scrollContainer.scrollLeft || 0;
-    const scrollTop = scrollContainer.scrollTop || 0;
-
-    const containerRect = scrollContainer.getBoundingClientRect();
-
-    const relativeX = event.clientX - containerRect.left + scrollLeft;
-    const relativeY = event.clientY - containerRect.top + scrollTop;
-
-    openMenu({ x: relativeX, y: relativeY });
+    // Calculate position relative to the viewport
+    const position = { x: event.clientX, y: event.clientY };
+    openMenu(position);
 
     // Add enter animation class after a frame
     requestAnimationFrame(() => {
@@ -229,7 +230,10 @@ export function ContextMenu({
       {/* Custom trigger element */}
       {isValidElement(children) &&
         cloneElement(children, {
-          ref: triggerRef,
+          ref: (node: HTMLElement | null) => {
+            triggerRef.current = node;
+            refs.setReference(node);
+          },
           onContextMenu: handleContextMenu,
         } as React.HTMLAttributes<HTMLElement>)}
 
@@ -243,11 +247,11 @@ export function ContextMenu({
                 menuElementRef.current = node;
               }}
               style={{
-                position: 'absolute',
+                position: 'fixed',
                 left: menuPosition.x,
                 top: menuPosition.y,
                 transformOrigin: 'top left',
-                zIndex: 50,
+                zIndex: 9999,
               }}
               className={clsx(
                 'min-w-[12rem] z-70 rounded-md border border-gray-200 dark:border-gray-800',
