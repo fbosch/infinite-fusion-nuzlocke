@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
+import { RadioGroup, Radio, Field, Label } from '@headlessui/react';
 import { X, Check } from 'lucide-react';
 import clsx from 'clsx';
 import { playthroughActions } from '@/stores/playthroughs';
-import { useSpriteVariants } from '@/hooks/useSprite';
+import { useSpriteVariants, useSetPrefferedVariant } from '@/hooks/useSprite';
 import { generateSpriteUrl } from '@/lib/spriteCore';
+import Image from 'next/image';
 
 interface ArtworkVariantModalProps {
   isOpen: boolean;
@@ -25,6 +27,15 @@ export function ArtworkVariantModal({
   bodyId,
   currentVariant,
 }: ArtworkVariantModalProps) {
+  const [localVariant, setLocalVariant] = useState<string | null>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Use local state for immediate updates, fallback to prop
+  const displayVariant = localVariant ?? currentVariant;
+
+  // Mutation hook for setting preferred variants
+  const setPreferredVariantMutation = useSetPrefferedVariant();
+
   const { data: variants, isLoading } = useSpriteVariants(
     headId,
     bodyId,
@@ -36,50 +47,95 @@ export function ArtworkVariantModal({
     return variants;
   }, [variants]);
 
-  const handleSelectVariant = React.useCallback(
+  // Reset local state when modal opens/closes or currentVariant changes
+  useEffect(() => {
+    if (!isOpen) {
+      setLocalVariant(null);
+    }
+  }, [isOpen]);
+
+  // Debounced save function
+  const debouncedSave = React.useCallback(
     async (variant: string) => {
       try {
         // Set the variant for this specific encounter
         playthroughActions.setArtworkVariant(locationId, variant);
 
         // Also set it as the preferred variant for future encounters
-        await playthroughActions.setPreferredVariant(headId, bodyId, variant);
-
-        onClose();
+        await setPreferredVariantMutation.mutateAsync({
+          headId,
+          bodyId,
+          variant,
+        });
       } catch (error) {
         console.error('Failed to set artwork variant:', error);
       }
     },
-    [locationId, headId, bodyId, onClose]
+    [locationId, headId, bodyId, setPreferredVariantMutation]
+  );
+
+  const handleSelectVariant = React.useCallback(
+    (variant: string) => {
+      // Immediately update the local state for instant UI feedback
+      setLocalVariant(variant);
+
+      // Clear any existing timeout
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+
+      // Set a new timeout to save after 500ms of no changes
+      saveTimeoutRef.current = setTimeout(() => {
+        debouncedSave(variant);
+      }, 500);
+    },
+    [debouncedSave]
   );
 
   const handleClearVariant = React.useCallback(async () => {
+    // Immediately update the local state
+    setLocalVariant('');
+
+    // Clear any existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
     try {
       // Clear the variant for this specific encounter
       playthroughActions.setArtworkVariant(locationId, undefined);
 
       // Also clear the preferred variant
-      await playthroughActions.setPreferredVariant(headId, bodyId, undefined);
+      await setPreferredVariantMutation.mutateAsync({
+        headId,
+        bodyId,
+        variant: undefined,
+      });
 
       onClose();
     } catch (error) {
       console.error('Failed to clear artwork variant:', error);
     }
-  }, [locationId, headId, bodyId, onClose]);
+  }, [locationId, headId, bodyId, onClose, setPreferredVariantMutation]);
 
-  if (!isOpen) return null;
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <Dialog open={isOpen} onClose={onClose} className='relative z-50'>
-      {/* Backdrop */}
       <div
         className='fixed inset-0 bg-black/30 dark:bg-black/50'
         aria-hidden='true'
       />
 
-      {/* Full-screen container to center the panel */}
       <div className='fixed inset-0 flex w-screen items-center justify-center p-4'>
-        <DialogPanel className='max-w-2xl w-full space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6'>
+        <DialogPanel className='max-w-3xl w-full max-h-[80vh] space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col'>
           <div className='flex items-center justify-between'>
             <DialogTitle className='text-xl font-semibold text-gray-900 dark:text-white'>
               Select Artwork Variant
@@ -98,67 +154,77 @@ export function ArtworkVariantModal({
           </div>
 
           {isLoading ? (
-            <div className='flex items-center justify-center py-8'>
+            <div className='flex items-center justify-center py-8 flex-1'>
               <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
               <span className='ml-3 text-gray-600 dark:text-gray-300'>
                 Loading variants...
               </span>
             </div>
           ) : availableVariants.length === 0 ? (
-            <div className='text-center py-8'>
+            <div className='text-center py-8 flex-1'>
               <p className='text-gray-600 dark:text-gray-300'>
                 No artwork variants available for this Pokémon.
               </p>
             </div>
           ) : (
             <>
-              <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-96 overflow-y-auto'>
+              <RadioGroup
+                value={displayVariant || ''}
+                onChange={handleSelectVariant}
+                className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto overflow-x-hidden flex-1 min-h-0 scrollbar-thin p-3'
+                aria-label='Artwork variant options'
+              >
                 {availableVariants.map(variant => {
-                  const isSelected = variant === currentVariant;
                   const spriteUrl = generateSpriteUrl(headId, bodyId, variant);
 
                   return (
-                    <button
-                      key={variant}
-                      onClick={() => handleSelectVariant(variant)}
-                      className={clsx(
-                        'relative group p-2 rounded-lg border-2 transition-all duration-200',
-                        'hover:border-blue-500 hover:shadow-md',
-                        'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
-                        {
-                          'border-blue-500 bg-blue-50 dark:bg-blue-900/20':
-                            isSelected,
-                          'border-gray-200 dark:border-gray-600': !isSelected,
+                    <Field key={variant} className='contents'>
+                      <Radio
+                        value={variant}
+                        className={({ checked }) =>
+                          clsx(
+                            'relative group p-2 rounded-lg border-2 transition-color duration-200 cursor-pointer',
+                            'hover:border-blue-500 hover:shadow-md',
+                            'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+                            {
+                              'border-blue-500 bg-blue-50 dark:bg-blue-900/20':
+                                checked,
+                              'border-gray-200 dark:border-gray-600': !checked,
+                            }
+                          )
                         }
-                      )}
-                      aria-label={`Select variant ${variant || 'default'}`}
-                    >
-                      <div className='flex flex-col items-center space-y-2'>
-                        <div className='relative'>
-                          <img
-                            src={spriteUrl}
-                            alt={`Artwork variant ${variant || 'default'}`}
-                            className='w-16 h-16 object-contain'
-                            loading='lazy'
-                          />
-                          {isSelected && (
-                            <div className='absolute -top-1 -right-1 bg-blue-500 text-white rounded-full p-1'>
-                              <Check className='h-3 w-3' />
-                            </div>
-                          )}
-                        </div>
-                        <span className='text-xs text-gray-600 dark:text-gray-300'>
-                          {variant || 'Default'}
-                        </span>
-                      </div>
-                    </button>
+                      >
+                        {({ checked }) => (
+                          <div className='flex flex-col items-center space-y-2 relative'>
+                            <Image
+                              src={spriteUrl}
+                              alt={`Artwork variant ${variant || 'default'}`}
+                              className='w-24 h-24 object-fill image-render-pixelated'
+                              width={100}
+                              height={100}
+                              loading='lazy'
+                              decoding='async'
+                              unoptimized
+                            />
+                            {checked && (
+                              <div className='absolute top-0 right-0 bg-blue-500 text-white rounded-full p-1.5 shadow-lg'>
+                                <Check className='h-3 w-3' />
+                              </div>
+                            )}
+                            <Label className='text-sm font-normal text-gray-400 dark:text-gray-300 cursor-pointer'>
+                              {variant || 'Default'}
+                            </Label>
+                          </div>
+                        )}
+                      </Radio>
+                    </Field>
                   );
                 })}
-              </div>
+              </RadioGroup>
 
               <div className='flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700'>
                 <button
-                  onClick={handleClearVariant}
+                  onClick={onClose}
                   className={clsx(
                     'px-4 py-2 text-sm rounded-md transition-colors',
                     'bg-gray-100 hover:bg-gray-200 text-gray-900 cursor-pointer',
@@ -166,17 +232,17 @@ export function ArtworkVariantModal({
                     'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2'
                   )}
                 >
-                  Use Default
+                  Cancel
                 </button>
                 <button
-                  onClick={onClose}
+                  onClick={handleClearVariant}
                   className={clsx(
                     'px-4 py-2 text-sm rounded-md transition-colors',
                     'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer',
                     'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
                   )}
                 >
-                  Cancel
+                  Use Default
                 </button>
               </div>
             </>

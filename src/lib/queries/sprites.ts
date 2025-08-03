@@ -1,4 +1,4 @@
-import { queryOptions } from '@tanstack/react-query';
+import { queryOptions, mutationOptions } from '@tanstack/react-query';
 import spriteService from '@/services/spriteService';
 import ms from 'ms';
 
@@ -18,6 +18,24 @@ export const spriteQueries = {
       enabled: !!(headId || bodyId),
       staleTime: ms('24h'), // Cache variants for 24 hours
       gcTime: ms('48h'),
+    }),
+};
+
+// Sprite mutation options
+export const spriteMutations = {
+  setPreferredVariant: () =>
+    mutationOptions({
+      mutationFn: async ({
+        headId,
+        bodyId,
+        variant,
+      }: {
+        headId?: number | null;
+        bodyId?: number | null;
+        variant?: string;
+      }) => {
+        return await spriteService.setPreferredVariant(headId, bodyId, variant);
+      },
     }),
 };
 

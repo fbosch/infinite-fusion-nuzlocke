@@ -71,7 +71,7 @@ export default function SummaryCard({
     return [
       {
         id: 'change-variant',
-        label: 'Change Preferred Variant',
+        label: 'Change Preferred Artwork',
         disabled: eitherPokemonIsEgg || !hasArtVariants,
         icon: isLoadingVariants ? Loader2 : Replace,
         iconClassName: isLoadingVariants ? 'animate-spin' : '',

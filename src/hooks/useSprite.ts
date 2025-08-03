@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { spriteQueries } from '@/lib/queryClient';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { spriteQueries, spriteMutations } from '@/lib/queries/sprites';
 import ms from 'ms';
 
 /**
@@ -16,4 +16,8 @@ export function useSpriteVariants(
     gcTime: ms('48h'),
     enabled: !!(headId || bodyId) && enabled,
   });
+}
+
+export function useSetPrefferedVariant() {
+  return useMutation(spriteMutations.setPreferredVariant());
 }
