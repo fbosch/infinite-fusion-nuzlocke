@@ -15,14 +15,7 @@ import {
   Placement,
 } from '@floating-ui/react';
 import { clsx } from 'clsx';
-import {
-  useState,
-  cloneElement,
-  isValidElement,
-  useEffect,
-  useRef,
-  startTransition,
-} from 'react';
+import { useState, cloneElement, isValidElement, useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 // Helper functions to calculate offsets based on placement
@@ -64,13 +57,53 @@ export function CursorTooltip({
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const isAnimatingRef = useRef(false);
-  const exitAnimationRef = useRef<number | null>(null);
   const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Handle opening animation
+  const handleOpen = () => {
+    // Clear any existing exit animations when opening
+    if (exitTimeoutRef.current) {
+      clearTimeout(exitTimeoutRef.current);
+      exitTimeoutRef.current = null;
+    }
+
+    // Start enter animation immediately
+    if (!isVisible) {
+      setIsVisible(true);
+      isAnimatingRef.current = true;
+      onMouseEnter?.();
+    }
+  };
+
+  // Handle closing animation
+  const handleClose = () => {
+    // Only start exit animation if we're currently visible
+    if (isVisible) {
+      isAnimatingRef.current = false;
+
+      // Add a small delay to allow the exit animation to play
+      exitTimeoutRef.current = setTimeout(() => {
+        setIsVisible(false);
+        exitTimeoutRef.current = null;
+      }, 150); // Match the CSS animation duration
+      onMouseLeave?.();
+    }
+  };
+
+  // Override the onOpenChange to handle animations
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      handleOpen();
+    } else {
+      handleClose();
+    }
+    setIsOpen(open);
+  };
 
   const { refs, floatingStyles, context } = useFloating({
     placement,
     open: isOpen,
-    onOpenChange: setIsOpen,
+    onOpenChange: handleOpenChange,
     middleware: [
       offset({
         mainAxis: getMainAxisOffset(placement),
@@ -101,55 +134,6 @@ export function CursorTooltip({
     role,
     clientPointFloating,
   ]);
-
-  // Handle animation states and callbacks
-  useEffect(() => {
-    if (isOpen) {
-      // Clear any existing exit animations when opening
-      if (exitAnimationRef.current) {
-        cancelAnimationFrame(exitAnimationRef.current);
-        exitAnimationRef.current = null;
-      }
-      if (exitTimeoutRef.current) {
-        clearTimeout(exitTimeoutRef.current);
-        exitTimeoutRef.current = null;
-      }
-
-      // Start enter animation immediately when isOpen becomes true
-      if (!isVisible) {
-        startTransition(() => {
-          setIsVisible(true);
-          isAnimatingRef.current = true;
-        });
-        onMouseEnter?.();
-      }
-    } else {
-      // Only start exit animation if we're currently visible
-      if (isVisible) {
-        isAnimatingRef.current = false;
-        exitAnimationRef.current = requestAnimationFrame(() => {
-          // Add a small delay to allow the exit animation to play
-          exitTimeoutRef.current = setTimeout(() => {
-            setIsVisible(false);
-            exitTimeoutRef.current = null;
-          }, 150); // Match the CSS animation duration
-        });
-        onMouseLeave?.();
-      }
-    }
-  }, [isOpen, onMouseEnter, onMouseLeave, isVisible]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (exitAnimationRef.current) {
-        cancelAnimationFrame(exitAnimationRef.current);
-      }
-      if (exitTimeoutRef.current) {
-        clearTimeout(exitTimeoutRef.current);
-      }
-    };
-  }, []);
 
   return (
     <>
