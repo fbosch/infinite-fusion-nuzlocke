@@ -15,6 +15,7 @@ const NewPokemonEncounterSchema = z.object({
     'special',
     'cave',
     'rock_smash',
+    'pokeradar',
   ]),
 });
 
@@ -49,6 +50,7 @@ function mapEncounterTypeToSource(
     | 'special'
     | 'cave'
     | 'rock_smash'
+    | 'pokeradar'
 ): EncounterSource {
   switch (encounterType) {
     case 'grass':
@@ -63,6 +65,8 @@ function mapEncounterTypeToSource(
       return EncounterSource.ROCK_SMASH;
     case 'special':
       return EncounterSource.STATIC;
+    case 'pokeradar':
+      return EncounterSource.POKERADAR;
     default:
       return EncounterSource.WILD;
   }
@@ -80,7 +84,8 @@ function consolidateSafariZoneAreas(
         | 'fishing'
         | 'special'
         | 'cave'
-        | 'rock_smash';
+        | 'rock_smash'
+        | 'pokeradar';
     }>;
   }>
 ): Array<{
@@ -93,7 +98,8 @@ function consolidateSafariZoneAreas(
       | 'fishing'
       | 'special'
       | 'cave'
-      | 'rock_smash';
+      | 'rock_smash'
+      | 'pokeradar';
   }>;
 }> {
   if (safariEncounters.length === 0) {
@@ -206,7 +212,8 @@ export async function GET(request: NextRequest) {
           | 'fishing'
           | 'special'
           | 'cave'
-          | 'rock_smash';
+          | 'rock_smash'
+          | 'pokeradar';
       }>;
       pokemonIds?: number[];
     }>;

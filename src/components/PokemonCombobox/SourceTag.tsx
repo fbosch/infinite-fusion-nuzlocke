@@ -11,6 +11,7 @@ import {
   Waves,
   Mountain,
   Pickaxe,
+  Radar,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { EncounterSource } from '@/loaders/encounters';
@@ -172,6 +173,12 @@ const tagConfig: Record<
       'transition-all duration-200 text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-700/40 hover:bg-amber-100 dark:hover:bg-amber-900/70',
     icon: <Pickaxe className='size-3' />,
     tooltip: 'Found by breaking rocks with Rock Smash',
+  },
+  [EncounterSource.POKERADAR]: {
+    text: 'Pokéradar',
+    className:
+      'transition-all duration-200 text-lime-700 dark:text-lime-300 bg-lime-50 dark:bg-lime-900/20 border border-lime-200/60 dark:border-lime-700/40 hover:bg-lime-100 dark:hover:bg-lime-900/70',
+    icon: <Radar className='size-3' />,
   },
   [EncounterSource.LEGENDARY]: {
     text: 'Legendary',

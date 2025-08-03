@@ -6,9 +6,6 @@
 
 export const SPECIAL_LOCATIONS = {
   STARTER_LOCATION: 'f47ac10b-58cc-4372-a567-0e02b2c3d479', // Oak's Lab
-  // Add other special locations here as needed
-  // GIFT_LOCATIONS: ["guid-1", "guid-2"],
-  // TRADE_LOCATIONS: ["guid-3", "guid-4"],
 } as const;
 
 export type SpecialLocationType =
@@ -29,17 +26,4 @@ export function isSpecialLocation(locationId: string): boolean {
 export function isStarterLocation(locationId: string | undefined): boolean {
   if (!locationId) return false;
   return locationId === SPECIAL_LOCATIONS.STARTER_LOCATION;
-}
-
-/**
- * Get the encounter type for a special location
- */
-export function getSpecialLocationEncounterType(
-  locationId: string
-): 'starter' | 'gift' | 'trade' | null {
-  if (isStarterLocation(locationId)) {
-    return 'starter';
-  }
-  // Add other special location types here as needed
-  return null;
 }

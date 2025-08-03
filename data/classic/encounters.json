@@ -24,7 +24,7 @@
       },
       {
         "pokemonId": 417,
-        "encounterType": "grass"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -90,7 +90,7 @@
       },
       {
         "pokemonId": 417,
-        "encounterType": "grass"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -365,7 +365,7 @@
       },
       {
         "pokemonId": 382,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -401,12 +401,12 @@
         "encounterType": "grass"
       },
       {
-        "pokemonId": 175,
+        "pokemonId": 216,
         "encounterType": "grass"
       },
       {
-        "pokemonId": 216,
-        "encounterType": "grass"
+        "pokemonId": 175,
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -483,7 +483,7 @@
       },
       {
         "pokemonId": 385,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -540,7 +540,7 @@
       },
       {
         "pokemonId": 402,
-        "encounterType": "grass"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -589,7 +589,7 @@
       },
       {
         "pokemonId": 388,
-        "encounterType": "grass"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -674,7 +674,7 @@
       },
       {
         "pokemonId": 390,
-        "encounterType": "grass"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -759,7 +759,7 @@
       },
       {
         "pokemonId": 397,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -836,7 +836,7 @@
       },
       {
         "pokemonId": 382,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -925,7 +925,7 @@
       },
       {
         "pokemonId": 408,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -1043,7 +1043,7 @@
       },
       {
         "pokemonId": 412,
-        "encounterType": "surf"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -1127,12 +1127,12 @@
         "encounterType": "surf"
       },
       {
-        "pokemonId": 406,
+        "pokemonId": 420,
         "encounterType": "surf"
       },
       {
-        "pokemonId": 420,
-        "encounterType": "surf"
+        "pokemonId": 406,
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -1185,16 +1185,16 @@
         "encounterType": "grass"
       },
       {
-        "pokemonId": 177,
-        "encounterType": "grass"
-      },
-      {
         "pokemonId": 198,
         "encounterType": "grass"
       },
       {
         "pokemonId": 218,
         "encounterType": "grass"
+      },
+      {
+        "pokemonId": 177,
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -1299,7 +1299,7 @@
       },
       {
         "pokemonId": 371,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -1360,7 +1360,7 @@
       },
       {
         "pokemonId": 413,
-        "encounterType": "surf"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -1449,11 +1449,11 @@
       },
       {
         "pokemonId": 408,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       },
       {
         "pokemonId": 412,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -1636,7 +1636,7 @@
       },
       {
         "pokemonId": 294,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -1713,7 +1713,7 @@
       },
       {
         "pokemonId": 403,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -1996,7 +1996,7 @@
       },
       {
         "pokemonId": 384,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -2073,7 +2073,7 @@
       },
       {
         "pokemonId": 310,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -2150,7 +2150,7 @@
       },
       {
         "pokemonId": 310,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -2255,16 +2255,16 @@
         "encounterType": "fishing"
       },
       {
-        "pokemonId": 206,
-        "encounterType": "fishing"
-      },
-      {
         "pokemonId": 223,
         "encounterType": "fishing"
       },
       {
         "pokemonId": 224,
         "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 206,
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -2309,7 +2309,7 @@
       },
       {
         "pokemonId": 400,
-        "encounterType": "grass"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -3260,12 +3260,12 @@
         "encounterType": "fishing"
       },
       {
-        "pokemonId": 395,
+        "pokemonId": 436,
         "encounterType": "fishing"
       },
       {
-        "pokemonId": 436,
-        "encounterType": "fishing"
+        "pokemonId": 395,
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -3398,7 +3398,7 @@
       },
       {
         "pokemonId": 414,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -3531,7 +3531,7 @@
       },
       {
         "pokemonId": 375,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -3656,7 +3656,7 @@
       },
       {
         "pokemonId": 246,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -3765,7 +3765,7 @@
       },
       {
         "pokemonId": 471,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -3863,7 +3863,7 @@
       },
       {
         "pokemonId": 404,
-        "encounterType": "grass"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -4611,7 +4611,7 @@
       },
       {
         "pokemonId": 355,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -4704,12 +4704,12 @@
         "encounterType": "grass"
       },
       {
-        "pokemonId": 185,
+        "pokemonId": 234,
         "encounterType": "grass"
       },
       {
-        "pokemonId": 234,
-        "encounterType": "grass"
+        "pokemonId": 185,
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -4774,7 +4774,7 @@
       },
       {
         "pokemonId": 286,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -4815,7 +4815,7 @@
       },
       {
         "pokemonId": 389,
-        "encounterType": "grass"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -4883,12 +4883,12 @@
         "encounterType": "fishing"
       },
       {
-        "pokemonId": 182,
+        "pokemonId": 186,
         "encounterType": "fishing"
       },
       {
-        "pokemonId": 186,
-        "encounterType": "fishing"
+        "pokemonId": 182,
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -4961,7 +4961,7 @@
       },
       {
         "pokemonId": 383,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -5006,7 +5006,7 @@
       },
       {
         "pokemonId": 294,
-        "encounterType": "grass"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -5108,7 +5108,7 @@
       },
       {
         "pokemonId": 386,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -5173,7 +5173,7 @@
       },
       {
         "pokemonId": 416,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -5410,7 +5410,7 @@
       },
       {
         "pokemonId": 262,
-        "encounterType": "grass"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -5561,7 +5561,7 @@
       },
       {
         "pokemonId": 235,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -5756,7 +5756,7 @@
       },
       {
         "pokemonId": 370,
-        "encounterType": "fishing"
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -6157,12 +6157,12 @@
         "encounterType": "fishing"
       },
       {
-        "pokemonId": 356,
+        "pokemonId": 501,
         "encounterType": "fishing"
       },
       {
-        "pokemonId": 501,
-        "encounterType": "fishing"
+        "pokemonId": 356,
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -6328,10 +6328,6 @@
         "encounterType": "fishing"
       },
       {
-        "pokemonId": 290,
-        "encounterType": "fishing"
-      },
-      {
         "pokemonId": 454,
         "encounterType": "fishing"
       },
@@ -6342,6 +6338,10 @@
       {
         "pokemonId": 501,
         "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 290,
+        "encounterType": "pokeradar"
       }
     ]
   },
@@ -6414,10 +6414,6 @@
         "encounterType": "grass"
       },
       {
-        "pokemonId": 418,
-        "encounterType": "grass"
-      },
-      {
         "pokemonId": 442,
         "encounterType": "grass"
       },
@@ -6448,6 +6444,10 @@
       {
         "pokemonId": 488,
         "encounterType": "cave"
+      },
+      {
+        "pokemonId": 418,
+        "encounterType": "pokeradar"
       }
     ]
   },
