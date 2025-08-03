@@ -1,4 +1,8 @@
-import { SpriteService, generateSpriteUrl } from '@/lib/spriteCore';
+import {
+  SpriteCreditsResponse,
+  SpriteService,
+  generateSpriteUrl,
+} from '@/lib/spriteCore';
 
 const instance = new SpriteService();
 
@@ -18,6 +22,11 @@ const service = {
     ...args: Parameters<typeof SpriteService.prototype.setPreferredVariant>
   ): Promise<void> => {
     return instance.setPreferredVariant(...args);
+  },
+  getSpriteCredits: async (
+    ...args: Parameters<typeof SpriteService.prototype.getSpriteCredits>
+  ): Promise<SpriteCreditsResponse | null> => {
+    return instance.getSpriteCredits(...args);
   },
 } as const;
 

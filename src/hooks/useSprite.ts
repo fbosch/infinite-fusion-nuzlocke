@@ -18,6 +18,20 @@ export function useSpriteVariants(
   });
 }
 
+/**
+ * Hook to get sprite credits for a Pokémon or fusion
+ */
+export function useSpriteCredits(
+  headId?: number | null,
+  bodyId?: number | null,
+  enabled: boolean = true
+) {
+  return useQuery({
+    ...spriteQueries.credits(headId, bodyId),
+    enabled: !!(headId || bodyId) && enabled,
+  });
+}
+
 export function useSetPrefferedVariant() {
   return useMutation(spriteMutations.setPreferredVariant());
 }

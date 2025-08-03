@@ -1,6 +1,15 @@
 import { get, set, createStore } from 'idb-keyval';
 import { SpriteVariantsResponse, SpriteVariantsError } from '@/types/sprites';
 
+// Types for sprite credits API
+export interface SpriteCreditsResponse {
+  [spriteId: string]: string[];
+}
+
+export interface SpriteCreditsError {
+  error: string;
+}
+
 // Create a custom store for preferred variants
 const preferredVariantsStore = createStore('preferred-variants', 'cache');
 
@@ -253,5 +262,65 @@ export class SpriteService {
    */
   async loadPreferredVariants(): Promise<void> {
     await loadPreferredVariants();
+  }
+
+  /**
+   * Get sprite credits for a Pokémon sprite and its variants
+   */
+  async getSpriteCredits(
+    headId?: number | null,
+    bodyId?: number | null
+  ): Promise<SpriteCreditsResponse | null> {
+    if (!headId && !bodyId) return null;
+
+    try {
+      // Generate the sprite ID (same format as other methods)
+      const id =
+        headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
+
+      const response = await fetch(
+        `/api/sprite/artists?id=${encodeURIComponent(id)}`
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch sprite credits: ${response.statusText}`
+        );
+      }
+
+      const data: SpriteCreditsResponse | SpriteCreditsError =
+        await response.json();
+
+      // Check if response is an error
+      if ('error' in data) {
+        throw new Error(
+          typeof data.error === 'string' ? data.error : 'Unknown error'
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.warn('Failed to get sprite credits from API:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get sprite credits for a specific sprite variant
+   */
+  async getVariantSpriteCredits(
+    headId?: number | null,
+    bodyId?: number | null,
+    variant = ''
+  ): Promise<string[] | null> {
+    const allCredits = await this.getSpriteCredits(headId, bodyId);
+    if (!allCredits) return null;
+
+    // Generate the variant key
+    const baseId =
+      headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
+    const variantKey = variant ? `${baseId}${variant}` : baseId;
+
+    return allCredits[variantKey] || null;
   }
 }

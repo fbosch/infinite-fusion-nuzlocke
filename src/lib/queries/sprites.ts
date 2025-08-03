@@ -19,6 +19,22 @@ export const spriteQueries = {
       staleTime: ms('24h'), // Cache variants for 24 hours
       gcTime: ms('48h'),
     }),
+
+  credits: (headId?: number | null, bodyId?: number | null) =>
+    queryOptions({
+      queryKey: [
+        'sprite',
+        'credits',
+        (headId && bodyId
+          ? `${headId}.${bodyId}`
+          : headId || bodyId
+        )?.toString(),
+      ],
+      queryFn: () => spriteService.getSpriteCredits(headId, bodyId),
+      enabled: !!(headId || bodyId),
+      staleTime: ms('3d'),
+      gcTime: ms('48h'),
+    }),
 };
 
 // Sprite mutation options
@@ -37,14 +53,4 @@ export const spriteMutations = {
         return await spriteService.setPreferredVariant(headId, bodyId, variant);
       },
     }),
-};
-
-// Query key factories for consistent key generation
-export const spriteKeys = {
-  variants: (headId?: number | null, bodyId?: number | null) =>
-    [
-      'sprite',
-      'variants',
-      (headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId)?.toString(),
-    ] as const,
 };
