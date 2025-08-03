@@ -58,6 +58,7 @@ export function CursorTooltip({
   const [isVisible, setIsVisible] = useState(false);
   const isAnimatingRef = useRef(false);
   const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isHoveringRef = useRef(false);
 
   // Handle opening animation
   const handleOpen = () => {
@@ -77,13 +78,16 @@ export function CursorTooltip({
 
   // Handle closing animation
   const handleClose = () => {
-    // Only start exit animation if we're currently visible
-    if (isVisible) {
+    // Only start exit animation if we're currently visible and not hovering
+    if (isVisible && !isHoveringRef.current) {
       isAnimatingRef.current = false;
 
       // Add a small delay to allow the exit animation to play
       exitTimeoutRef.current = setTimeout(() => {
-        setIsVisible(false);
+        // Double-check we're still not hovering before hiding
+        if (!isHoveringRef.current) {
+          setIsVisible(false);
+        }
         exitTimeoutRef.current = null;
       }, 150); // Match the CSS animation duration
       onMouseLeave?.();
@@ -92,6 +96,15 @@ export function CursorTooltip({
 
   // Override the onOpenChange to handle animations
   const handleOpenChange = (open: boolean) => {
+    isHoveringRef.current = open;
+
+    // If we're trying to open but there's an exit animation running, cancel it
+    if (open && exitTimeoutRef.current) {
+      clearTimeout(exitTimeoutRef.current);
+      exitTimeoutRef.current = null;
+      isAnimatingRef.current = true;
+    }
+
     if (open) {
       handleOpen();
     } else {
