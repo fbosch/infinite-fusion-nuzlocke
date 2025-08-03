@@ -383,16 +383,19 @@ export function ContextMenu({
                       listRef.current[validIndex] = node;
                     }}
                     className={commonClasses}
-                    onClick={() => {
-                      if (!item.disabled) {
-                        item.onClick?.();
-                        handleClose();
-                      }
-                    }}
                     disabled={item.disabled}
                     role='menuitem'
                     tabIndex={isActive ? 0 : -1}
-                    {...getItemProps()}
+                    {...getItemProps({
+                      onClick: e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (!item.disabled) {
+                          item.onClick?.();
+                          handleClose();
+                        }
+                      },
+                    })}
                   >
                     {content}
                   </button>

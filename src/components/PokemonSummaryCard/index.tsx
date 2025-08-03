@@ -5,9 +5,10 @@ import {
   type PokemonOptionType,
 } from '@/loaders/pokemon';
 import { ContextMenu, type ContextMenuItem } from '@/components/ContextMenu';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
+import { ArtworkVariantModal } from './ArtworkVariantModal';
 import { useEncounter } from '@/stores/playthroughs';
 import { useMemo } from 'react';
 import { ArrowUpRightSquareIcon, Loader2, Replace } from 'lucide-react';
@@ -52,9 +53,12 @@ export default function SummaryCard({
   const { data: variants, isLoading: isLoadingVariants } = useSpriteVariants(
     encounterData?.head?.id,
     encounterData?.body?.id,
-    shouldLoad
+    shouldLoad && !eitherPokemonIsEgg
   );
   const hasArtVariants = variants && variants.length > 1;
+
+  // Modal state
+  const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
 
   const contextItems = useMemo<ContextMenuItem[]>(() => {
     const id =
@@ -63,6 +67,7 @@ export default function SummaryCard({
         : encounterData?.head?.id || encounterData?.body?.id;
     const infinitefusiondexLink = `https://infinitefusiondex.com/details/${id}`;
     const fusiondexLink = `https://fusiondex.org/${id}/`;
+
     return [
       {
         id: 'change-variant',
@@ -71,7 +76,7 @@ export default function SummaryCard({
         icon: isLoadingVariants ? Loader2 : Replace,
         iconClassName: isLoadingVariants ? 'animate-spin' : '',
         onClick: () => {
-          console.log('change variant');
+          setIsVariantModalOpen(true);
         },
       },
       {
@@ -97,7 +102,14 @@ export default function SummaryCard({
         iconClassName: 'dark:text-blue-300 text-blue-400',
       },
     ];
-  }, [encounterData, eitherPokemonIsEgg, hasArtVariants, isLoadingVariants]);
+  }, [
+    encounterData,
+    eitherPokemonIsEgg,
+    hasArtVariants,
+    isLoadingVariants,
+    locationId,
+    variants,
+  ]);
 
   if (!encounterData?.head && !encounterData?.body) {
     return null;
@@ -113,44 +125,55 @@ export default function SummaryCard({
     encounterData?.body?.status === PokemonStatus.DECEASED;
 
   return (
-    <ContextMenu items={contextItems} portalRootId='location-table'>
-      <div className='flex flex-col items-center justify-center relative'>
-        <Fragment>
-          <div
-            className={clsx(
-              'size-22 absolute -translate-y-2 rounded-lg opacity-30 border border-gray-200 dark:border-gray-40 ',
-              {
-                'text-rose-200 dark:text-red-700 dark:mix-blend-color-dodge opacity-90 dark:border-red-800':
-                  isDeceased,
-                'dark:mix-blend-soft-light text-white': !isDeceased,
-              }
-            )}
-            style={{
-              background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
-            }}
-          />
-          <FusionSprite
-            locationId={locationId}
-            size='lg'
-            shouldLoad={shouldLoad}
-          />
-        </Fragment>
-        {eitherPokemonIsEgg ? null : (
-          <ArtworkVariantButton
-            key={`${encounterData?.head?.id}-${encounterData?.body?.id} `}
-            className='absolute bottom-0 right-1/2 -translate-x-6 z-10'
-            locationId={locationId}
-            shouldLoad={shouldLoad}
-          />
-        )}
-        {name && (
-          <div className='z-5 p-0.5 text-center absolute bottom-0 translate-y-8.5 rounded-sm'>
-            <span className='text-md dark:font-normal font-mono truncate max-w-full block px-1 rounded text-gray-900 dark:text-white dark:pixel-shadow tracking-[0.001em]'>
-              {name}
-            </span>
-          </div>
-        )}
-      </div>
-    </ContextMenu>
+    <>
+      <ContextMenu items={contextItems} portalRootId='location-table'>
+        <div className='flex flex-col items-center justify-center relative'>
+          <Fragment>
+            <div
+              className={clsx(
+                'size-22 absolute -translate-y-2 rounded-lg opacity-30 border border-gray-200 dark:border-gray-40 ',
+                {
+                  'text-rose-200 dark:text-red-700 dark:mix-blend-color-dodge opacity-90 dark:border-red-800':
+                    isDeceased,
+                  'dark:mix-blend-soft-light text-white': !isDeceased,
+                }
+              )}
+              style={{
+                background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
+              }}
+            />
+            <FusionSprite
+              locationId={locationId}
+              size='lg'
+              shouldLoad={shouldLoad}
+            />
+          </Fragment>
+          {eitherPokemonIsEgg ? null : (
+            <ArtworkVariantButton
+              key={`${encounterData?.head?.id}-${encounterData?.body?.id} `}
+              className='absolute bottom-0 right-1/2 -translate-x-6 z-10'
+              locationId={locationId}
+              shouldLoad={shouldLoad}
+            />
+          )}
+          {name && (
+            <div className='z-5 p-0.5 text-center absolute bottom-0 translate-y-8.5 rounded-sm'>
+              <span className='text-md dark:font-normal font-mono truncate max-w-full block px-1 rounded text-gray-900 dark:text-white dark:pixel-shadow tracking-[0.001em]'>
+                {name}
+              </span>
+            </div>
+          )}
+        </div>
+      </ContextMenu>
+
+      <ArtworkVariantModal
+        isOpen={isVariantModalOpen}
+        onClose={() => setIsVariantModalOpen(false)}
+        locationId={locationId}
+        headId={encounterData?.head?.id}
+        bodyId={encounterData?.body?.id}
+        currentVariant={encounterData?.artworkVariant}
+      />
+    </>
   );
 }
