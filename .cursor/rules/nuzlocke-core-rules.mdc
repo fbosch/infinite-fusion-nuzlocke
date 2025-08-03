@@ -1,7 +1,6 @@
 ---
 description: Core Nuzlocke challenge rules including first encounter rule, fainting equals death, and nickname requirements
-globs: []
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Core Nuzlocke Rules
