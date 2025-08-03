@@ -301,7 +301,15 @@ export function ContextMenu({
 
                 const content = (
                   <div className='flex items-center gap-x-2 w-full'>
-                    {/* Left: favicon and label */}
+                    {item.icon && !item.href && (
+                      <item.icon
+                        className={twMerge(
+                          'h-4 w-4 flex-shrink-0',
+                          item.iconClassName
+                        )}
+                        aria-hidden='true'
+                      />
+                    )}
                     <div className='flex items-center gap-x-2 min-w-0'>
                       {item.favicon && item.href && (
                         <Image

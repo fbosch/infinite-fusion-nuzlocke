@@ -10,7 +10,7 @@ import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
 import { useEncounter } from '@/stores/playthroughs';
 import { useMemo } from 'react';
-import { ArrowUpRightSquareIcon } from 'lucide-react';
+import { ArrowUpRightSquareIcon, Replace } from 'lucide-react';
 
 interface SummaryCardProps {
   locationId: string;
@@ -59,6 +59,7 @@ export default function SummaryCard({
         id: 'change-variant',
         label: 'Change Preferred Variant',
         disabled: eitherPokemonIsEgg,
+        icon: Replace,
         onClick: () => {
           console.log('change variant');
         },
