@@ -4670,6 +4670,63 @@
     ]
   },
   {
+    "routeName": "Pokémon Mansion",
+    "encounters": [
+      {
+        "pokemonId": 132,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 228,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 229,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 319,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 330,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 365,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 366,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 371,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 397,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 398,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 419,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 425,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 488,
+        "encounterType": "cave"
+      }
+    ]
+  },
+  {
     "routeName": "Violet City",
     "encounters": [
       {
