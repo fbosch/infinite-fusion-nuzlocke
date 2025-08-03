@@ -10,7 +10,8 @@ import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
 import { useEncounter } from '@/stores/playthroughs';
 import { useMemo } from 'react';
-import { ArrowUpRightSquareIcon, Replace } from 'lucide-react';
+import { ArrowUpRightSquareIcon, Loader2, Replace } from 'lucide-react';
+import { useSpriteVariants } from '@/hooks/useSprite';
 
 interface SummaryCardProps {
   locationId: string;
@@ -47,6 +48,14 @@ export default function SummaryCard({
   const eitherPokemonIsEgg =
     isEggId(encounterData?.head?.id) || isEggId(encounterData?.body?.id);
 
+  // Check for art variants
+  const { data: variants, isLoading: isLoadingVariants } = useSpriteVariants(
+    encounterData?.head?.id,
+    encounterData?.body?.id,
+    shouldLoad
+  );
+  const hasArtVariants = variants && variants.length > 1;
+
   const contextItems = useMemo<ContextMenuItem[]>(() => {
     const id =
       encounterData?.head?.id && encounterData?.body?.id
@@ -58,8 +67,9 @@ export default function SummaryCard({
       {
         id: 'change-variant',
         label: 'Change Preferred Variant',
-        disabled: eitherPokemonIsEgg,
-        icon: Replace,
+        disabled: eitherPokemonIsEgg || !hasArtVariants,
+        icon: isLoadingVariants ? Loader2 : Replace,
+        iconClassName: isLoadingVariants ? 'animate-spin' : '',
         onClick: () => {
           console.log('change variant');
         },
@@ -87,7 +97,7 @@ export default function SummaryCard({
         iconClassName: 'dark:text-blue-300 text-blue-400',
       },
     ];
-  }, [encounterData]);
+  }, [encounterData, eitherPokemonIsEgg, hasArtVariants, isLoadingVariants]);
 
   if (!encounterData?.head && !encounterData?.body) {
     return null;

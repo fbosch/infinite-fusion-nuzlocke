@@ -12,6 +12,7 @@ import {
 import spriteService from '@/services/spriteService';
 import { queryClient } from '@/lib/queryClient';
 import { spriteKeys } from '@/lib/queries/sprites';
+import { EncounterData } from '../loaders';
 
 // Create a custom store for playthroughs data
 const playthroughsStore_idb = createStore('playthroughs', 'data');
@@ -1789,7 +1790,7 @@ export const useEncounters = (): Playthrough['encounters'] => {
 };
 
 // Hook for subscribing to a specific encounter - only rerenders when that encounter changes
-export const useEncounter = (locationId: string) => {
+export const useEncounter = (locationId: string): EncounterData | null => {
   const snapshot = useSnapshot(playthroughsStore);
   const activePlaythrough = snapshot.playthroughs.find(
     p => p.id === snapshot.activePlaythroughId
