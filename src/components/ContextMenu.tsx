@@ -72,7 +72,8 @@ export interface ContextMenuItem {
   icon?: LucideIcon;
   iconClassName?: string;
   favicon?: string;
-  onClick?: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onClick?: (event: React.MouseEvent<any>) => void;
   href?: string;
   target?: string;
   disabled?: boolean;
@@ -364,9 +365,9 @@ export function ContextMenu({
                       target={item.target}
                       href={item.href}
                       className={commonClasses}
-                      onClick={() => {
+                      onClick={e => {
                         if (!item.disabled) {
-                          item.onClick?.();
+                          item.onClick?.(e);
                           handleClose();
                         }
                       }}
@@ -395,7 +396,7 @@ export function ContextMenu({
                         e.preventDefault();
                         e.stopPropagation();
                         if (!item.disabled) {
-                          item.onClick?.();
+                          item.onClick?.(e);
                           handleClose();
                         }
                       },

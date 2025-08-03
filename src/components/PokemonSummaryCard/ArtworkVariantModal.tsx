@@ -220,7 +220,9 @@ export function ArtworkVariantModal({
                                 target: '_blank',
                                 favicon:
                                   'https://www.fusiondex.org/favicon.ico',
-                                onClick: event => {
+                                onClick: (
+                                  event: React.MouseEvent<HTMLAnchorElement>
+                                ) => {
                                   event.stopPropagation();
                                 },
                               },
