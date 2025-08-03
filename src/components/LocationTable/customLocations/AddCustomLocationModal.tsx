@@ -1,7 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import {
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+  DialogBackdrop,
+} from '@headlessui/react';
 import { X, Plus, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { playthroughActions, useCustomLocations } from '@/stores/playthroughs';
@@ -19,6 +24,19 @@ export default function AddCustomLocationModal({
   const [locationName, setLocationName] = useState('');
   const [selectedAfterLocationId, setSelectedAfterLocationId] = useState('');
   const customLocations = useCustomLocations();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    } else {
+      setTimeout(() => {
+        setLocationName('');
+      }, 100);
+    }
+  }, [isOpen]);
 
   // Only process locations when modal is open to improve performance
   const allLocations = useMemo(() => {
@@ -47,16 +65,21 @@ export default function AddCustomLocationModal({
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className='relative z-70'>
-      {/* Backdrop */}
-      <div
-        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px]'
+    <Dialog open={isOpen} onClose={onClose} className='relative z-70 group'>
+      <DialogBackdrop
+        transition
+        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100'
         aria-hidden='true'
       />
 
-      {/* Full-screen container to center the panel */}
       <div className='fixed inset-0 flex w-screen items-center justify-center p-4'>
-        <DialogPanel className='max-w-md w-full space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6'>
+        <DialogPanel
+          transition
+          className={clsx(
+            'max-w-md w-full space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6',
+            'transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98'
+          )}
+        >
           <div className='flex items-center justify-between'>
             <DialogTitle className='text-xl  text-gray-900 dark:text-white'>
               Add Custom Location
@@ -84,6 +107,7 @@ export default function AddCustomLocationModal({
               </label>
               <input
                 type='text'
+                ref={inputRef}
                 id='locationName'
                 value={locationName}
                 onChange={e => setLocationName(e.target.value)}
@@ -124,11 +148,7 @@ export default function AddCustomLocationModal({
                   'disabled:opacity-50 disabled:cursor-not-allowed'
                 )}
               >
-                <option value=''>
-                  {allLocations.length === 0
-                    ? 'Loading locations...'
-                    : 'Select location to place after...'}
-                </option>
+                <option value=''>Select location to place after...</option>
                 {allLocations.map(location => (
                   <option key={location.id} value={location.id}>
                     {location.name} (

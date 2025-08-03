@@ -18,7 +18,7 @@ import {
 } from '@floating-ui/react';
 import clsx from 'clsx';
 import Image from 'next/image';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 import {
   getInfiniteFusionToNationalDexMap,
   PokemonStatus,
@@ -516,6 +516,12 @@ export const PokemonCombobox = React.memo(
                     shouldLoad={shouldLoad}
                   />
                 )}
+                {open ? (
+                  <Search
+                    className='absolute right-4 top-1/2 -translate-y-1/2 size-4 text-gray-400 dark:text-gray-600 pointer-events-none'
+                    aria-hidden={true}
+                  />
+                ) : null}
               </div>
               {open && (
                 <FloatingPortal id='location-table'>

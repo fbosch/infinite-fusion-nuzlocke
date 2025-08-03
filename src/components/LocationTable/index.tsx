@@ -132,7 +132,7 @@ export default function LocationTable() {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    enableSorting: true,
+    enableSorting: false,
     // Performance optimizations
     enableColumnResizing: false,
     enableRowSelection: false,
@@ -183,12 +183,10 @@ export default function LocationTable() {
           </tbody>
         </table>
       </div>
-      {isCustomLocationModalOpen && (
-        <AddCustomLocationModal
-          isOpen={isCustomLocationModalOpen}
-          onClose={() => setIsCustomLocationModalOpen(false)}
-        />
-      )}
+      <AddCustomLocationModal
+        isOpen={isCustomLocationModalOpen}
+        onClose={() => setIsCustomLocationModalOpen(false)}
+      />
     </div>
   );
 }

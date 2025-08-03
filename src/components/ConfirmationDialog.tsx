@@ -1,4 +1,10 @@
-import { Dialog, DialogPanel, DialogTitle, Button } from '@headlessui/react';
+import {
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+  Button,
+  DialogBackdrop,
+} from '@headlessui/react';
 import { AlertTriangle } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -49,16 +55,21 @@ export default function ConfirmationDialog({
   const styles = variantStyles[variant];
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className='relative z-50'>
-      {/* Backdrop */}
-      <div
-        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px]'
+    <Dialog open={isOpen} onClose={onClose} className='relative z-50 group'>
+      <DialogBackdrop
+        transition
+        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100'
         aria-hidden='true'
       />
 
-      {/* Full-screen container to center the panel */}
       <div className='fixed inset-0 flex w-screen items-center justify-center p-4'>
-        <DialogPanel className='max-w-md space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6'>
+        <DialogPanel
+          transition
+          className={clsx(
+            'max-w-md space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6',
+            'transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98'
+          )}
+        >
           <div className='flex items-start space-x-3'>
             <div className={clsx('flex-shrink-0', styles.icon)}>
               <AlertTriangle className='h-6 w-6' />
