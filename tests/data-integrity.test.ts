@@ -550,6 +550,7 @@ describe('Data Integrity Tests', () => {
         'special',
         'cave',
         'rock_smash',
+        'pokeradar',
       ];
 
       if (enhancedEncounters.length > 0) {
@@ -657,6 +658,7 @@ describe('Data Integrity Tests', () => {
               'special',
               'cave',
               'rock_smash',
+              'pokeradar',
             ]).toContain(pokemonEncounter.encounterType);
           });
         });

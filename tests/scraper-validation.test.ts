@@ -265,6 +265,7 @@ describe('Mt. Moon Scraping Validation', () => {
         'fishing',
         'special',
         'cave',
+        'pokeradar',
         'rock_smash',
       ];
 
@@ -300,12 +301,6 @@ describe('Mt. Moon Scraping Validation', () => {
     });
 
     it('should not include Route 3 Pokemon that should not be in caves', () => {
-      // Example Pokemon that should be Route 3 specific, not Mt. Moon
-      const route3SpecificPokemon = [
-        16, // Pidgey (should be in grass routes, not caves)
-        21, // Spearow (should be in grass routes, not caves)
-      ];
-
       const mtMoon = classicEncounters.find(
         route => route.routeName === 'Mt. Moon'
       );
