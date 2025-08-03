@@ -4,19 +4,12 @@ import {
   EncounterSource,
   RouteEncountersArraySchema,
 } from '@/loaders/encounters';
+import { EncounterTypeSchema, type EncounterType } from '@/types/encounters';
 
 // Schema for the new enhanced data format with encounter types
 const NewPokemonEncounterSchema = z.object({
   pokemonId: z.number().int(),
-  encounterType: z.enum([
-    'grass',
-    'surf',
-    'fishing',
-    'special',
-    'cave',
-    'rock_smash',
-    'pokeradar',
-  ]),
+  encounterType: EncounterTypeSchema,
 });
 
 const NewRouteEncounterSchema = z.object({
@@ -43,14 +36,7 @@ const LegendaryRouteEncountersArraySchema = z.array(
 
 // Function to map encounter types to encounter sources
 function mapEncounterTypeToSource(
-  encounterType:
-    | 'grass'
-    | 'surf'
-    | 'fishing'
-    | 'special'
-    | 'cave'
-    | 'rock_smash'
-    | 'pokeradar'
+  encounterType: EncounterType
 ): EncounterSource {
   switch (encounterType) {
     case 'grass':
@@ -78,28 +64,14 @@ function consolidateSafariZoneAreas(
     routeName: string;
     encounters: Array<{
       pokemonId: number;
-      encounterType:
-        | 'grass'
-        | 'surf'
-        | 'fishing'
-        | 'special'
-        | 'cave'
-        | 'rock_smash'
-        | 'pokeradar';
+      encounterType: EncounterType;
     }>;
   }>
 ): Array<{
   routeName: string;
   encounters: Array<{
     pokemonId: number;
-    encounterType:
-      | 'grass'
-      | 'surf'
-      | 'fishing'
-      | 'special'
-      | 'cave'
-      | 'rock_smash'
-      | 'pokeradar';
+    encounterType: EncounterType;
   }>;
 }> {
   if (safariEncounters.length === 0) {
@@ -109,13 +81,7 @@ function consolidateSafariZoneAreas(
   // Consolidate all Safari Zone areas into a single "Safari Zone" location
   const allSafariEncounters: Array<{
     pokemonId: number;
-    encounterType:
-      | 'grass'
-      | 'surf'
-      | 'fishing'
-      | 'special'
-      | 'cave'
-      | 'rock_smash';
+    encounterType: EncounterType;
   }> = [];
 
   safariEncounters.forEach(area => {
@@ -206,14 +172,7 @@ export async function GET(request: NextRequest) {
       routeName: string;
       encounters?: Array<{
         pokemonId: number;
-        encounterType:
-          | 'grass'
-          | 'surf'
-          | 'fishing'
-          | 'special'
-          | 'cave'
-          | 'rock_smash'
-          | 'pokeradar';
+        encounterType: EncounterType;
       }>;
       pokemonIds?: number[];
     }>;

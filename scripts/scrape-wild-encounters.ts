@@ -14,6 +14,7 @@ import {
   processRouteName
 } from './utils/route-utils';
 import { loadPokemonNameMap } from './utils/data-loading-utils';
+import { type EncounterType } from './types/encounters';
 
 const WILD_ENCOUNTERS_CLASSIC_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters';
 const WILD_ENCOUNTERS_REMIX_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters/Remix';
@@ -21,7 +22,7 @@ const WILD_ENCOUNTERS_REMIX_URL = 'https://infinitefusion.fandom.com/wiki/Wild_E
 /**
  * Detects encounter type from text content like "Surf", "Old Rod", etc.
  */
-function detectEncounterType(text: string): 'grass' | 'surf' | 'fishing' | 'special' | 'cave' | 'rock_smash' | 'pokeradar' | null {
+function detectEncounterType(text: string): EncounterType | null {
   if (!text || typeof text !== 'string') {
     return null;
   }
@@ -119,7 +120,7 @@ function isValidRouteName(text: string): boolean {
 
 interface PokemonEncounter {
   pokemonId: number; // Custom Infinite Fusion ID
-  encounterType: 'grass' | 'surf' | 'fishing' | 'special' | 'cave' | 'rock_smash' | 'pokeradar';
+  encounterType: EncounterType;
 }
 
 interface RouteEncounters {
@@ -283,7 +284,7 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
 
           // Find Pokemon data in the immediately following table
           const encounters: PokemonEncounter[] = [];
-          let currentEncounterType: 'grass' | 'surf' | 'fishing' | 'special' | 'cave' | 'rock_smash' | 'pokeradar' = 'grass'; // Default to grass
+          let currentEncounterType: EncounterType = 'grass'; // Default to grass
 
           // Look for the next table with classes 'IFTable encounterTable'
           let nextElement = $element.next();

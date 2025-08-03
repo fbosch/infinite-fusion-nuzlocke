@@ -10,16 +10,12 @@ interface Location {
   description: string;
 }
 
+import { type EncounterType } from '../scripts/types/encounters';
+
 // New encounter structure with types
 interface PokemonEncounter {
   pokemonId: number;
-  encounterType:
-    | 'grass'
-    | 'surf'
-    | 'fishing'
-    | 'special'
-    | 'cave'
-    | 'rock_smash';
+  encounterType: EncounterType;
 }
 
 interface EnhancedRouteEncounter {
@@ -185,9 +181,7 @@ describe('Data Integrity Tests', () => {
     return [];
   }
 
-  function getAllEncounterTypes(
-    encounter: RouteEncounter
-  ): Array<'grass' | 'surf' | 'fishing' | 'special' | 'cave' | 'rock_smash'> {
+  function getAllEncounterTypes(encounter: RouteEncounter): EncounterType[] {
     if (isEnhancedEncounter(encounter)) {
       return encounter.encounters.map(e => e.encounterType);
     }
@@ -466,6 +460,7 @@ describe('Data Integrity Tests', () => {
               surf: 3,
               fishing: 4,
               special: 5,
+              pokeradar: 6,
             };
             const typeComparison =
               typeOrder[a.encounterType] - typeOrder[b.encounterType];

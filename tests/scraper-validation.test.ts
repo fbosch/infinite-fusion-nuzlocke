@@ -4,15 +4,11 @@ import path from 'path';
 
 // We need to import the validation function from the scraper
 // Since it's not exported, we'll test it indirectly through the behavior
+import { type EncounterType } from '../scripts/types/encounters';
+
 interface PokemonEncounter {
   pokemonId: number;
-  encounterType:
-    | 'grass'
-    | 'surf'
-    | 'fishing'
-    | 'special'
-    | 'cave'
-    | 'rock_smash';
+  encounterType: EncounterType;
 }
 
 interface RouteEncounters {
