@@ -3,7 +3,7 @@
 import * as cheerio from 'cheerio';
 import fs from 'fs/promises';
 import path from 'path';
-import { ConsoleFormatter } from './console-utils';
+import { ConsoleFormatter } from './utils/console-utils';
 import {
   findPokemonId,
   isPotentialPokemonName,
@@ -18,75 +18,6 @@ const LEGENDARY_POKEMON_URL = 'https://infinitefusion.fandom.com/wiki/Legendary_
 interface LegendaryRoute {
   routeName: string;
   encounters: number[]; // Array of Pokémon IDs
-}
-
-
-
-/**
- * Extracts level from text like "Level: 50" or "Level 50" or just "50"
- */
-function extractLevel(text: string): number | null {
-  // First try to match "Level: 50" or "Level 50"
-  const levelMatch = text.match(/Level[:\s]*(\d+)/i);
-  if (levelMatch) {
-    return parseInt(levelMatch[1], 10);
-  }
-  
-  // If that fails, try to match just a number (for cases where the cell just contains the level)
-  const numberMatch = text.match(/^(\d+)$/);
-  if (numberMatch) {
-    const num = parseInt(numberMatch[1], 10);
-    // Only accept reasonable level ranges (1-100)
-    if (num >= 1 && num <= 100) {
-      return num;
-    }
-  }
-  
-  return null;
-}
-
-/**
- * Extracts HMs needed from text
- */
-function extractHMs(text: string): string[] {
-  const hmMatch = text.match(/HMs? Needed[:\s]*([^|]+)/i);
-  if (hmMatch) {
-    const hmsText = hmMatch[1].trim();
-    if (hmsText.toLowerCase() === 'none') {
-      return [];
-    }
-    return hmsText.split(',').map(hm => hm.trim());
-  }
-  return [];
-}
-
-/**
- * Extracts requirements from text
- */
-function extractRequirements(text: string): string[] {
-  const reqMatch = text.match(/Requirements?[:\s]*([^|]+)/i);
-  if (reqMatch) {
-    const reqText = reqMatch[1].trim();
-    if (reqText.toLowerCase() === 'none') {
-      return [];
-    }
-    return reqText.split(',').map(req => req.trim());
-  }
-  return [];
-}
-
-/**
- * Determines encounter method from location text
- */
-function determineMethod(locationText: string): 'static' | 'roaming' | 'special' {
-  const location = locationText.toLowerCase();
-  if (location.includes('roaming')) {
-    return 'roaming';
-  }
-  if (location.includes('dream') || location.includes('special')) {
-    return 'special';
-  }
-  return 'static';
 }
 
 async function scrapeLegendaryEncounters(): Promise<LegendaryRoute[]> {

@@ -4,7 +4,7 @@ import Pokedex from 'pokedex-promise-v2';
 import fs from 'fs/promises';
 import path from 'path';
 import type { DexEntry } from './scrape-pokedex';
-import { ConsoleFormatter } from './console-utils';
+import { ConsoleFormatter } from './utils/console-utils';
 import * as cliProgress from 'cli-progress';
 
 // Optimized configuration for pokedex-promise-v2

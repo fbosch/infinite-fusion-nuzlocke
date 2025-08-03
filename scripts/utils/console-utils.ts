@@ -22,7 +22,7 @@
  */
 
 import * as cliProgress from 'cli-progress';
-import { formatFileSize, formatDuration } from './utils/format-utils';
+import { formatFileSize, formatDuration } from './format-utils';
 
 // Simple color functions using ANSI escape codes
 export const colors = {

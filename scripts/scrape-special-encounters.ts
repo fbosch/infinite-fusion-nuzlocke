@@ -3,7 +3,7 @@
 import * as cheerio from 'cheerio';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { ConsoleFormatter } from './console-utils';
+import { ConsoleFormatter } from './utils/console-utils';
 import {
   findPokemonId,
   isPotentialPokemonName

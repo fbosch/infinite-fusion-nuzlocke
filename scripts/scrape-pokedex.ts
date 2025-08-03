@@ -3,7 +3,7 @@
 import * as cheerio from 'cheerio';
 import fs from 'fs/promises';
 import path from 'path';
-import { ConsoleFormatter } from './console-utils';
+import { ConsoleFormatter } from './utils/console-utils';
 
 const POKEDEX_URL = 'https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex';
 
