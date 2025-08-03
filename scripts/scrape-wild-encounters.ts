@@ -4,7 +4,7 @@ import * as cheerio from 'cheerio';
 import fs from 'fs/promises';
 import { readFileSync } from 'fs';
 import path from 'path';
-import { ConsoleFormatter } from './console-utils';
+import { ConsoleFormatter } from './utils/console-utils';
 import {
   findPokemonId,
   isPotentialPokemonName,
@@ -14,16 +14,15 @@ import {
   processRouteName
 } from './utils/route-utils';
 import { loadPokemonNameMap } from './utils/data-loading-utils';
+import { type EncounterType } from './types/encounters';
 
 const WILD_ENCOUNTERS_CLASSIC_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters';
 const WILD_ENCOUNTERS_REMIX_URL = 'https://infinitefusion.fandom.com/wiki/Wild_Encounters/Remix';
 
-
-
 /**
  * Detects encounter type from text content like "Surf", "Old Rod", etc.
  */
-function detectEncounterType(text: string): 'grass' | 'surf' | 'fishing' | 'special' | 'cave' | 'rock_smash' | null {
+function detectEncounterType(text: string): EncounterType | null {
   if (!text || typeof text !== 'string') {
     return null;
   }
@@ -80,6 +79,13 @@ function detectEncounterType(text: string): 'grass' | 'surf' | 'fishing' | 'spec
     return 'special';
   }
 
+  // Pokéradar encounters
+  if (normalizedText.includes('pokeradar') ||
+      normalizedText.includes('pokéradar') ||
+      normalizedText.includes('radar')) {
+    return 'pokeradar';
+  }
+
   return null;
 }
 
@@ -114,7 +120,7 @@ function isValidRouteName(text: string): boolean {
 
 interface PokemonEncounter {
   pokemonId: number; // Custom Infinite Fusion ID
-  encounterType: 'grass' | 'surf' | 'fishing' | 'special' | 'cave' | 'rock_smash';
+  encounterType: EncounterType;
 }
 
 interface RouteEncounters {
@@ -138,8 +144,6 @@ function consolidateSubLocations(routes: RouteEncounters[]): RouteEncounters[] {
     // Find if this route is a sub-location of any existing location
     const parentLocation = findParentLocation(route.routeName, existingLocationNames);
     const baseLocation = parentLocation || route.routeName;
-    
-
     
     if (!locationGroups.has(baseLocation)) {
       locationGroups.set(baseLocation, []);
@@ -165,7 +169,7 @@ function consolidateSubLocations(routes: RouteEncounters[]): RouteEncounters[] {
       routeName,
       encounters: Array.from(uniqueEncounters.values()).sort((a, b) => {
         // Sort by encounter type first, then by pokemon ID
-        const typeOrder = { grass: 0, cave: 1, rock_smash: 2, surf: 3, fishing: 4, special: 5 };
+        const typeOrder = { grass: 0, cave: 1, rock_smash: 2, surf: 3, fishing: 4, special: 5, pokeradar: 6 };
         const typeComparison = typeOrder[a.encounterType] - typeOrder[b.encounterType];
         return typeComparison !== 0 ? typeComparison : a.pokemonId - b.pokemonId;
       })
@@ -246,29 +250,9 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
       const $element = $(element);
       const fullText = $element.text().trim();
 
-      // DEBUG: Early detection of our target locations
-      const debugLocations = ['Pokemon Tower', 'Safari Zone', 'Pokemon Mansion'];
-      const containsDebugLocation = debugLocations.some(loc => fullText.includes(loc));
-      if (containsDebugLocation) {
-        console.log(`👀 DEBUG: Found text containing target location: "${fullText}"`);
-        console.log(`🔍 DEBUG: isRoutePattern: ${isRoutePattern(fullText)}, isValidRouteName: ${isValidRouteName(fullText)}`);
-      }
-
       // Update progress periodically
       if (index % 100 === 0) {
         progressBar.update(index, { status: `Scanning elements... (${routesProcessed} routes found)` });
-      }
-
-
-
-      // DEBUG: Safari Zone specific detection
-      if (fullText.includes('Safari Zone')) {
-        console.log(`🦁 SAFARI DEBUG: Found text: "${fullText}"`);
-        console.log(`🦁 SAFARI DEBUG: isRoutePattern: ${isRoutePattern(fullText)}`);
-        console.log(`🦁 SAFARI DEBUG: isValidRouteName: ${isValidRouteName(fullText)}`);
-        console.log(`🦁 SAFARI DEBUG: Element tag: ${$element.prop('tagName')}, classes: ${$element.attr('class')}`);
-        console.log(`🦁 SAFARI DEBUG: Children count: ${$element.children().length}`);
-        console.log(`🦁 SAFARI DEBUG: Parent element: ${$element.parent().prop('tagName')}`);
       }
 
       // Look for route patterns
@@ -284,21 +268,13 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
             return;
           }
 
-          // DEBUG: Log the problematic locations
-          const debugLocations = ['Pokemon Tower', 'Safari Zone', 'Pokemon Mansion'];
-          const isDebugLocation = debugLocations.some(loc => cleanedRouteName.includes(loc));
-          if (isDebugLocation) {
-            console.log(`🔍 DEBUG: Found ${cleanedRouteName} (ID: ${routeId})`);
-          }
+
 
           // Create unique identifier that includes both name and ID for duplicate detection
           const uniqueIdentifier = routeId ? `${cleanedRouteName}#${routeId}` : cleanedRouteName;
 
           // Skip if we've already processed this exact route (including ID)
           if (routesSeen.has(uniqueIdentifier)) {
-            if (isDebugLocation) {
-              console.log(`⚠️  DEBUG: ${cleanedRouteName} already processed, skipping`);
-            }
             return;
           }
           routesSeen.add(uniqueIdentifier);
@@ -308,20 +284,13 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
 
           // Find Pokemon data in the immediately following table
           const encounters: PokemonEncounter[] = [];
-          let currentEncounterType: 'grass' | 'surf' | 'fishing' | 'special' | 'cave' | 'rock_smash' = 'grass'; // Default to grass
+          let currentEncounterType: EncounterType = 'grass'; // Default to grass
 
           // Look for the next table with classes 'IFTable encounterTable'
           let nextElement = $element.next();
           let tablesChecked = 0;
           while (nextElement.length > 0 && tablesChecked < 10) {
-            if (isDebugLocation) {
-              console.log(`🔍 DEBUG: ${cleanedRouteName} - Checking element: ${nextElement.prop('tagName')}, classes: ${nextElement.attr('class')}`);
-            }
-            
             if (nextElement.is('table.IFTable.encounterTable')) {
-              if (isDebugLocation) {
-                console.log(`✅ DEBUG: ${cleanedRouteName} - Found encounter table!`);
-              }
               // Found the encounter table for this route - process it
               $(nextElement).find('tr').each((rowIndex: number, row: any) => {
                 const $row = $(row);
@@ -347,10 +316,10 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
                     const pokemonId = findPokemonId(cellText, pokemonNameMap);
                     
                     if (pokemonId) {
-                      encounters.push({
-                        pokemonId,
-                        encounterType: currentEncounterType
-                      });
+                                              encounters.push({
+                          pokemonId,
+                          encounterType: currentEncounterType
+                        });
                     }
                   }
                 });
@@ -361,9 +330,6 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
             
             // Stop if we hit another route heading
             if (isRoutePattern(nextElement.text().trim()) && isValidRouteName(nextElement.text().trim())) {
-              if (isDebugLocation) {
-                console.log(`🛑 DEBUG: ${cleanedRouteName} - Stopped at next route: ${nextElement.text().trim()}`);
-              }
               break;
             }
             
@@ -371,18 +337,18 @@ async function scrapeWildEncounters(url: string, isRemix: boolean = false): Prom
             nextElement = nextElement.next();
           }
 
-          if (isDebugLocation) {
-            console.log(`📊 DEBUG: ${cleanedRouteName} - Found ${encounters.length} encounters after checking ${tablesChecked} elements`);
+
+
+
+          if (encounters.length > 0) {
+            const routeData: RouteEncounters = {
+              routeName: cleanedRouteName,
+              encounters: encounters
+            };
+            routes.push(routeData);
+          } else {
+            console.debug('No encounters found for route:', cleanedRouteName);
           }
-
-          const routeData: RouteEncounters = {
-            routeName: cleanedRouteName,
-            encounters: encounters
-          };
-
-
-
-          routes.push(routeData);
         }
       }
     });

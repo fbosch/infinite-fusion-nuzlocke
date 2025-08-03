@@ -165,14 +165,17 @@ export default function LocationTable() {
 
   return (
     <div className='overflow-hidden 2xl:rounded-lg border-y md:border border-gray-200 dark:border-gray-700 xl:shadow-sm'>
-      <div className='max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none'>
+      <div className='max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative'>
         <table
           className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700 overscroll-x-contain overscroll-y-auto'
           role='table'
           aria-label='Locations table'
         >
           <LocationTableHeader headerGroups={table.getHeaderGroups()} />
-          <tbody className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700'>
+          <tbody
+            className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700'
+            id='location-table'
+          >
             {table.getRowModel().rows.map(row => (
               <LocationTableRow key={row.id} row={row} />
             ))}

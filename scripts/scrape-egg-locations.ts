@@ -3,7 +3,7 @@
 import * as cheerio from 'cheerio';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { ConsoleFormatter } from './console-utils';
+import { ConsoleFormatter } from './utils/console-utils';
 
 const GIFTS_AND_TRADES_URL = 'https://infinitefusion.fandom.com/wiki/List_of_Gift_Pok%C3%A9mon_and_Trades';
 const POKEMON_NESTS_URL = 'https://infinitefusion.fandom.com/wiki/Pok%C3%A9mon_Nests';

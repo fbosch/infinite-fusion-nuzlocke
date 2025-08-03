@@ -1,9 +1,9 @@
 [
   {
     "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-    "name": "Oak's Lab",
+    "name": "Starter",
     "region": "Kanto",
-    "description": "Choose your starter Pokémon in Professor Oak's Lab"
+    "description": "Choose your starter Pokémon in Professor Oak's Lab in Pallet Town"
   },
   {
     "id":"288d719e-5aab-4097-b98d-f1ffbd780a9b",
@@ -217,12 +217,6 @@
     "description": "Cycling Road exit"
   },
   {
-    "id": "ec9ab4ce-cbe6-46fc-a3c5-67da561ab4ea",
-    "name": "Fuchsia City",
-    "region": "Kanto",
-    "description": "Fuchsia City has the famous Safari Zone, and can be accessed West by Route 18, East by Route 15, and South by Route 19."
-  },
-  {
     "id":"05ab7274-b33c-42da-a07d-bf6ae3cbf9a8",
     "name": "Safari Zone",
     "region": "Kanto",
@@ -248,7 +242,7 @@
   },
   {
     "id": "84dda96e-93ca-4b60-a11c-57e4be46537d",
-    "name": "Secret Forest",
+    "name": "Hidden Forest",
     "region": "Kanto",
     "description": "The Secret Forest is a secret area you can only enter after obtaining 4 badges. "
   },
@@ -278,7 +272,7 @@
   },
   {
     "id": "c2cb556c-c392-4353-af65-7f4def0e096b",
-    "name": "Pokemon  Mansion",
+    "name": "Pokémon Mansion",
     "region": "Kanto",
     "description": "Pokémon Mansion was burnt down due to a scientific experiment gone wrong."
   },
@@ -305,12 +299,6 @@
     "name": "Route 21",
     "region": "Kanto",
     "description": "South of Pallet Town"
-  },
-  {
-    "id": "6da49e7b-ccee-4eaa-906c-eaf86eb056ce",
-    "name": "Pallet Town",
-    "region": "Kanto",
-    "description": "Where it all started"
   },
   {
     "id": "33232ec5-7e59-4519-b484-258baa4a4028",
@@ -361,6 +349,12 @@
     "description": "South of Violet City, fishing area"
   },
   {
+    "id": "7b41cc30-778a-42ce-8327-f6e1bb593fb1",
+    "name": "Ruins of Alph",
+    "region": "Johto",
+    "description": "Ruins Of Alph can be accessed from the North by Route 36 and from the East by Route 32"
+  },
+  {
     "id": "5d1106b7-66d6-4c05-8ab4-052531e99d8c",
     "name": "Route 34",
     "region": "Johto",
@@ -379,12 +373,6 @@
     "description": "National Park area"
   },
   {
-    "id": "218bd008-dd8c-4ad2-a45a-e5e6da4d3028",
-    "name": "Azalea Town",
-    "region": "Johto",
-    "description": "Azalea Town exits West into Ilex Forest and East to Route 33."
-  },
-  {
     "id": "61d513ac-de5f-4edf-837e-df5eae1b7a04",
     "name": "Slowpoke Well",
     "region": "Johto",
@@ -401,12 +389,6 @@
     "name": "Union Cave",
     "region": "Johto",
     "description": "Union Cave can be accessed by the South from Route 33 and the North from Route 32."
-  },
-  {
-    "id": "ce331651-66c9-4c8b-9484-064239f906dd",
-    "name": "Ruins of Alph",
-    "region": "Johto",
-    "description": "Ruins Of Alph can be accessed from the North by Route 36 and from the East by Route 32."
   },
   {
     "id": "dca32e40-b3d4-49eb-b8a9-e49b7f2c93c5",
@@ -474,6 +456,12 @@
     "region": "Johto",
     "description": "Ice Mountains is a chain of mountains that can be accessed by the West from Route 44 and by the East from Blackthorn City."
   },
+    {
+    "id": "93826d53-6bd9-4135-b193-a0475597179e",
+    "name": "Ice Cavern",
+    "region": "Johto",
+    "description": "Ice Mountains is a chain of mountains that can be accessed by the West from Route 44 and by the East from Blackthorn City."
+  },
   {
     "id": "52c69ebe-555f-4519-b4e4-ec019baaa780",
     "name": "Hall of Origin",
@@ -485,12 +473,6 @@
     "name": "Route 44",
     "region": "Johto",
     "description": "Route 44 is a route that connects Mahogany Town to Ice Mountains."
-  },
-  {
-    "id": "659e14d0-2fd2-4d06-8ac7-41cd8df5c779",
-    "name": "Mahogany Town",
-    "region": "Johto",
-    "description": "Mahogany Town is a small town, that is accessed from the North via Route 43, the West via Route 42, and the East via Route 44."
   },
   {
     "id": "e8a7b3c2-9f45-4d21-8c56-7e3a9b1d4f82",
@@ -506,9 +488,9 @@
   },
   {
     "id": "f2d9c8e1-5a64-4b73-9e28-6f1a8c3b7d95",
-    "name": "Ecruteak City",
+    "name": "Burned Tower",
     "region": "Johto",
-    "description": "Ecruteak City can be accessed from the East by Route 42 and from the South by Route 37."
+    "description": "The Burned Tower, formally known as the Brass Tower, is located in Ecruteak City."
   },
   {
     "id": "1b1df4f9-741d-4325-9c80-288b45fe80a3",

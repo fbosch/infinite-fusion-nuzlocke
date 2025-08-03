@@ -3,12 +3,13 @@
 import * as cheerio from 'cheerio';
 import fs from 'fs/promises';
 import path from 'path';
-import { ConsoleFormatter } from './console-utils';
+import { ConsoleFormatter } from './utils/console-utils';
 import {
   findPokemonId,
   isPotentialPokemonName,
 } from './utils/pokemon-name-utils';
 import { loadPokemonNameMap } from './utils/data-loading-utils';
+import { type EncounterType } from './types/encounters';
 
 // Safari Zone area pages
 const SAFARI_ZONE_PAGES = [
@@ -21,7 +22,7 @@ const SAFARI_ZONE_PAGES = [
 
 interface PokemonEncounter {
   pokemonId: number;
-  encounterType: 'grass' | 'surf' | 'fishing' | 'special' | 'cave' | 'rock_smash';
+  encounterType: EncounterType;
 }
 
 interface RouteEncounters {
@@ -32,7 +33,7 @@ interface RouteEncounters {
 /**
  * Detects encounter type from text content like "Surf", "Old Rod", etc.
  */
-function detectEncounterType(text: string): 'grass' | 'surf' | 'fishing' | 'special' | 'cave' | 'rock_smash' | null {
+function detectEncounterType(text: string): EncounterType | null {
   if (!text || typeof text !== 'string') {
     return null;
   }
@@ -102,7 +103,7 @@ async function scrapeSafariAreaPage(url: string): Promise<RouteEncounters | null
     const pageTitle = $('h1.page-header__title, #firstHeading').first().text().trim() || areaName;
 
     const encounters: PokemonEncounter[] = [];
-    let currentEncounterType: 'grass' | 'surf' | 'fishing' | 'special' | 'cave' | 'rock_smash' = 'grass';
+    let currentEncounterType: EncounterType = 'grass';
 
     // Find all encounter tables on the page
     $('table.IFTable.encounterTable').each((tableIndex, table) => {

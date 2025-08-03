@@ -4,18 +4,12 @@ import {
   EncounterSource,
   RouteEncountersArraySchema,
 } from '@/loaders/encounters';
+import { EncounterTypeSchema, type EncounterType } from '@/types/encounters';
 
 // Schema for the new enhanced data format with encounter types
 const NewPokemonEncounterSchema = z.object({
   pokemonId: z.number().int(),
-  encounterType: z.enum([
-    'grass',
-    'surf',
-    'fishing',
-    'special',
-    'cave',
-    'rock_smash',
-  ]),
+  encounterType: EncounterTypeSchema,
 });
 
 const NewRouteEncounterSchema = z.object({
@@ -31,15 +25,18 @@ const OldRouteEncounterSchema = z.object({
 });
 const OldRouteEncountersArraySchema = z.array(OldRouteEncounterSchema);
 
+// Schema for legendary encounters data format
+const LegendaryRouteEncounterSchema = z.object({
+  routeName: z.string().min(1, { error: 'Route name is required' }),
+  encounters: z.array(z.number().int()),
+});
+const LegendaryRouteEncountersArraySchema = z.array(
+  LegendaryRouteEncounterSchema
+);
+
 // Function to map encounter types to encounter sources
 function mapEncounterTypeToSource(
-  encounterType:
-    | 'grass'
-    | 'surf'
-    | 'fishing'
-    | 'special'
-    | 'cave'
-    | 'rock_smash'
+  encounterType: EncounterType
 ): EncounterSource {
   switch (encounterType) {
     case 'grass':
@@ -54,6 +51,8 @@ function mapEncounterTypeToSource(
       return EncounterSource.ROCK_SMASH;
     case 'special':
       return EncounterSource.STATIC;
+    case 'pokeradar':
+      return EncounterSource.POKERADAR;
     default:
       return EncounterSource.WILD;
   }
@@ -65,26 +64,14 @@ function consolidateSafariZoneAreas(
     routeName: string;
     encounters: Array<{
       pokemonId: number;
-      encounterType:
-        | 'grass'
-        | 'surf'
-        | 'fishing'
-        | 'special'
-        | 'cave'
-        | 'rock_smash';
+      encounterType: EncounterType;
     }>;
   }>
 ): Array<{
   routeName: string;
   encounters: Array<{
     pokemonId: number;
-    encounterType:
-      | 'grass'
-      | 'surf'
-      | 'fishing'
-      | 'special'
-      | 'cave'
-      | 'rock_smash';
+    encounterType: EncounterType;
   }>;
 }> {
   if (safariEncounters.length === 0) {
@@ -94,13 +81,7 @@ function consolidateSafariZoneAreas(
   // Consolidate all Safari Zone areas into a single "Safari Zone" location
   const allSafariEncounters: Array<{
     pokemonId: number;
-    encounterType:
-      | 'grass'
-      | 'surf'
-      | 'fishing'
-      | 'special'
-      | 'cave'
-      | 'rock_smash';
+    encounterType: EncounterType;
   }> = [];
 
   safariEncounters.forEach(area => {
@@ -158,7 +139,7 @@ export async function GET(request: NextRequest) {
     const gameMode = rawGameMode === 'remix' ? 'remix' : 'classic';
 
     // Use explicit imports instead of dynamic template literals
-    const [wild, safari, trade, gift, quest, statics, eggLocations] =
+    const [wild, safari, trade, gift, quest, statics, eggLocations, legendary] =
       await Promise.all([
         gameMode === 'remix'
           ? import('@data/remix/encounters.json')
@@ -179,6 +160,7 @@ export async function GET(request: NextRequest) {
           ? import('@data/remix/statics.json')
           : import('@data/classic/statics.json'),
         import('@data/shared/egg-locations.json'),
+        import('@data/shared/legendary-encounters.json'),
       ]);
 
     // Parse Safari Zone encounters and consolidate them
@@ -190,13 +172,7 @@ export async function GET(request: NextRequest) {
       routeName: string;
       encounters?: Array<{
         pokemonId: number;
-        encounterType:
-          | 'grass'
-          | 'surf'
-          | 'fishing'
-          | 'special'
-          | 'cave'
-          | 'rock_smash';
+        encounterType: EncounterType;
       }>;
       pokemonIds?: number[];
     }>;
@@ -221,6 +197,9 @@ export async function GET(request: NextRequest) {
     const quests = OldRouteEncountersArraySchema.parse(quest.default);
     const staticsData = OldRouteEncountersArraySchema.parse(statics.default);
     const eggLocationsData = eggLocations.default as EggLocationsData;
+    const legendaryData = LegendaryRouteEncountersArraySchema.parse(
+      legendary.default
+    );
 
     // Create maps of route names for egg locations by source type
     const eggGiftRoutes = new Map(
@@ -241,6 +220,7 @@ export async function GET(request: NextRequest) {
       ...gifts.map(g => g.routeName),
       ...quests.map(q => q.routeName),
       ...staticsData.map(s => s.routeName),
+      ...legendaryData.map(l => l.routeName),
       ...eggGiftRoutes.keys(), // Include egg gift locations
       ...eggNestRoutes.keys(), // Include egg nest locations
     ]);
@@ -251,6 +231,7 @@ export async function GET(request: NextRequest) {
     const giftsMap = new Map(gifts.map(g => [g.routeName, g]));
     const questsMap = new Map(quests.map(q => [q.routeName, q]));
     const staticsMap = new Map(staticsData.map(s => [s.routeName, s]));
+    const legendaryMap = new Map(legendaryData.map(l => [l.routeName, l]));
 
     // Merge encounters for each route with source information
     const mergedEncounters = Array.from(allRouteNames).map(routeName => {
@@ -259,6 +240,7 @@ export async function GET(request: NextRequest) {
       const giftPokemon = giftsMap.get(routeName)?.pokemonIds || [];
       const questPokemon = questsMap.get(routeName)?.pokemonIds || [];
       const staticPokemon = staticsMap.get(routeName)?.pokemonIds || [];
+      const legendaryPokemon = legendaryMap.get(routeName)?.encounters || [];
 
       // Handle wild Pokemon with the new encounter type system
       const wildPokemonObjects: Array<{ id: number; source: EncounterSource }> =
@@ -302,6 +284,10 @@ export async function GET(request: NextRequest) {
         ...staticPokemon.map(id => ({
           id,
           source: EncounterSource.STATIC as const,
+        })),
+        ...legendaryPokemon.map((id: number) => ({
+          id,
+          source: EncounterSource.LEGENDARY as const,
         })),
       ];
 

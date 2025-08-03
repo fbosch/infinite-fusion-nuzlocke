@@ -122,6 +122,8 @@ describe('Encounters API', () => {
           'static',
           'nest',
           'egg',
+          'legendary',
+          'pokeradar',
         ]).toContain(pokemon.source);
       });
     });

@@ -24,12 +24,14 @@ export enum EncounterSource {
   FISHING = 'fishing', // Fishing encounters
   CAVE = 'cave', // Cave encounters
   ROCK_SMASH = 'rock_smash', // Rock Smash encounters
+  POKERADAR = 'pokeradar', // Pokéradar encounters
   GIFT = 'gift',
   TRADE = 'trade',
   QUEST = 'quest',
   NEST = 'nest',
   EGG = 'egg',
   STATIC = 'static',
+  LEGENDARY = 'legendary', // Legendary Pokémon encounters
 }
 
 // Zod schema for individual Pokemon encounters
@@ -48,16 +50,18 @@ export const PokemonEncounterSchema = z.object({
       EncounterSource.FISHING,
       EncounterSource.CAVE,
       EncounterSource.ROCK_SMASH,
+      EncounterSource.POKERADAR,
       EncounterSource.GIFT,
       EncounterSource.TRADE,
       EncounterSource.QUEST,
       EncounterSource.NEST,
       EncounterSource.EGG,
       EncounterSource.STATIC,
+      EncounterSource.LEGENDARY,
     ],
     {
       error:
-        'Source must be wild, grass, surf, fishing, cave, rock_smash, gift, trade, quest, static, nest, or egg',
+        'Source must be wild, grass, surf, fishing, cave, rock_smash, pokeradar, gift, trade, quest, static, nest, egg, or legendary',
     }
   ),
 });

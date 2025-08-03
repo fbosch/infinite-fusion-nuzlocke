@@ -151,7 +151,7 @@ export default function PlaythroughSelector({
         </MenuButton>
         <MenuItems
           className={clsx(
-            'absolute z-50 mt-2 rounded-md',
+            'absolute z-80 mt-2 rounded-md',
             'bg-white dark:bg-gray-800 shadow-lg ring-1 ring-gray-200 dark:ring-gray-600 ring-opacity-5',
             'border border-gray-200 dark:border-gray-600',
             'focus:outline-none',

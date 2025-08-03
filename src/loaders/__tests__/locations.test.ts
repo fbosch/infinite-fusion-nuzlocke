@@ -145,7 +145,7 @@ describe('Locations', () => {
         );
 
         const encounters = await getLocationEncountersByName(
-          "Oak's Lab",
+          'Starter',
           'classic'
         );
         expect(encounters).toEqual(expectedEncounters);
@@ -262,7 +262,7 @@ describe('Locations', () => {
           loc => loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION
         );
         expect(starterLocation).not.toBeNull();
-        expect(starterLocation?.name).toBe("Oak's Lab");
+        expect(starterLocation?.name).toBe('Starter');
       });
 
       it('should identify non-starter locations correctly', () => {
