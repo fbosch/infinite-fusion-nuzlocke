@@ -9,9 +9,8 @@ import { Fragment } from 'react';
 import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
 import { useEncounter } from '@/stores/playthroughs';
-import PokeballIcon from '@/assets/images/pokeball.svg';
 import { useMemo } from 'react';
-import { DnaOff } from 'lucide-react';
+import { ArrowUpRightSquareIcon, DnaOff } from 'lucide-react';
 
 interface SummaryCardProps {
   locationId: string;
@@ -48,14 +47,14 @@ export default function SummaryCard({
   const encounterData = useEncounter(locationId);
 
   const contextItems = useMemo<ContextMenuItem[]>(() => {
+    const link = `https://infinitefusiondex.com/details/${encounterData?.head?.id && encounterData?.body?.id ? `${encounterData.head.id}.${encounterData.body.id}` : encounterData?.head?.id || encounterData?.body?.id}`;
     return [
       {
         id: 'pokedex',
-        label: 'Pokedex',
-        icon: PokeballIcon,
-        onClick: () => {
-          console.log('pokedex');
-        },
+        label: 'Open Pokédex entry',
+        href: link,
+        target: '_blank',
+        icon: ArrowUpRightSquareIcon,
       },
       {
         id: 'unfuse',
@@ -66,7 +65,7 @@ export default function SummaryCard({
         },
       },
     ];
-  }, []);
+  }, [encounterData]);
 
   if (!encounterData?.head && !encounterData?.body) {
     return null;

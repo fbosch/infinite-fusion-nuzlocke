@@ -10,8 +10,59 @@ import {
   FloatingFocusManager,
 } from '@floating-ui/react';
 import { clsx } from 'clsx';
-import React, { useState, useRef, cloneElement, isValidElement } from 'react';
+import React, {
+  useState,
+  useRef,
+  cloneElement,
+  isValidElement,
+  useCallback,
+  useTransition,
+  useEffect,
+} from 'react';
 import type { LucideIcon } from 'lucide-react';
+
+// Custom hook for context menu state management
+function useContextMenuState() {
+  const [, startTransition] = useTransition();
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
+  const [isOpen, setIsOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  const openMenu = useCallback((position: { x: number; y: number }) => {
+    startTransition(() => {
+      setMenuPosition(position);
+      setIsOpen(true);
+      setIsVisible(true);
+    });
+  }, []);
+
+  const closeMenu = useCallback(() => {
+    startTransition(() => {
+      setIsOpen(false);
+    });
+  }, []);
+
+  const hideMenu = useCallback(() => {
+    startTransition(() => {
+      setIsVisible(false);
+    });
+  }, []);
+
+  return {
+    menuPosition,
+    isOpen,
+    isVisible,
+    activeIndex,
+    setActiveIndex,
+    openMenu,
+    closeMenu,
+    hideMenu,
+  };
+}
 
 export interface ContextMenuItem {
   id: string;
@@ -19,6 +70,7 @@ export interface ContextMenuItem {
   icon?: LucideIcon;
   onClick?: () => void;
   href?: string;
+  target?: string;
   disabled?: boolean;
   variant?: 'default' | 'danger' | 'warning';
   shortcut?: string;
@@ -41,13 +93,17 @@ export function ContextMenu({
   disabled = false,
   portalRootId = 'context-menu-root',
 }: Omit<ContextMenuProps, 'onOpenChange'>) {
-  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
-  const [isOpen, setIsOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const {
+    menuPosition,
+    isOpen,
+    isVisible,
+    activeIndex,
+    setActiveIndex,
+    openMenu,
+    closeMenu,
+    hideMenu,
+  } = useContextMenuState();
+
   const triggerRef = useRef<HTMLElement>(null);
   const listRef = useRef<Array<HTMLElement | null>>([]);
   const menuElementRef = useRef<HTMLDivElement>(null);
@@ -55,7 +111,9 @@ export function ContextMenu({
   // Floating UI setup for keyboard navigation
   const { refs, context } = useFloating({
     open: isOpen,
-    onOpenChange: setIsOpen,
+    onOpenChange: open => {
+      if (!open) closeMenu();
+    },
   });
 
   const dismiss = useDismiss(context);
@@ -73,6 +131,57 @@ export function ContextMenu({
     role,
     listNavigation,
   ]);
+
+  // Close menu when window becomes hidden or loses focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const isVisible = document.visibilityState === 'visible';
+      const isFocused = document.hasFocus();
+      const shouldClose = !isVisible || !isFocused;
+
+      if (shouldClose && isOpen) {
+        closeMenu();
+
+        // Start exit animation
+        if (menuElementRef.current) {
+          menuElementRef.current.classList.remove('tooltip-enter');
+          menuElementRef.current.classList.add('tooltip-exit');
+
+          // Hide menu after animation completes
+          setTimeout(() => {
+            hideMenu();
+          }, 50); // Match CSS animation duration
+        }
+      }
+    };
+
+    // Add event listeners
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleVisibilityChange);
+    window.addEventListener('blur', handleVisibilityChange);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleVisibilityChange);
+      window.removeEventListener('blur', handleVisibilityChange);
+    };
+  }, [isOpen, closeMenu, hideMenu]);
+
+  const handleClose = () => {
+    closeMenu();
+
+    // Start exit animation
+    if (menuElementRef.current) {
+      menuElementRef.current.classList.remove('tooltip-enter');
+      menuElementRef.current.classList.add('tooltip-exit');
+
+      // Hide menu after animation completes
+      setTimeout(() => {
+        hideMenu();
+      }, 50); // Match CSS animation duration
+    }
+  };
 
   const handleContextMenu = (event: React.MouseEvent) => {
     if (disabled) return;
@@ -95,22 +204,12 @@ export function ContextMenu({
     const scrollLeft = scrollContainer.scrollLeft || 0;
     const scrollTop = scrollContainer.scrollTop || 0;
 
-    // Get the container's position relative to viewport
     const containerRect = scrollContainer.getBoundingClientRect();
 
-    // Calculate position relative to the scrollable container
-    const rect = event.currentTarget.getBoundingClientRect();
     const relativeX = event.clientX - containerRect.left + scrollLeft;
     const relativeY = event.clientY - containerRect.top + scrollTop;
 
-    setMenuPosition({
-      x: relativeX,
-      y: relativeY,
-    });
-
-    // Show menu and start enter animation
-    setIsOpen(true);
-    setIsVisible(true);
+    openMenu({ x: relativeX, y: relativeY });
 
     // Add enter animation class after a frame
     requestAnimationFrame(() => {
@@ -119,21 +218,6 @@ export function ContextMenu({
         menuElementRef.current.classList.add('tooltip-enter');
       }
     });
-  };
-
-  const handleClose = () => {
-    setIsOpen(false);
-
-    // Start exit animation
-    if (menuElementRef.current) {
-      menuElementRef.current.classList.remove('tooltip-enter');
-      menuElementRef.current.classList.add('tooltip-exit');
-
-      // Hide menu after animation completes
-      setTimeout(() => {
-        setIsVisible(false);
-      }, 50); // Match CSS animation duration
-    }
   };
 
   return (
@@ -162,8 +246,8 @@ export function ContextMenu({
                 zIndex: 50,
               }}
               className={clsx(
-                'min-w-[12rem] rounded-md border border-gray-200 dark:border-gray-700',
-                'bg-white dark:bg-gray-800 shadow-lg shadow-black/10 dark:shadow-black/25',
+                'min-w-[12rem] rounded-md border border-gray-200 dark:border-gray-800',
+                'bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25',
                 'p-1 backdrop-blur-xl',
                 'origin-top-left backdrop-blur-xl',
                 'focus:outline-none',
@@ -238,6 +322,7 @@ export function ContextMenu({
                       ref={node => {
                         listRef.current[validIndex] = node;
                       }}
+                      target={item.target}
                       href={item.href}
                       className={commonClasses}
                       onClick={() => {
