@@ -1,7 +1,6 @@
-description: Code style guidelines emphasizing clean, readable code and minimal comments
-globs: ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx"]
-alwaysApply: true
-
+---
+globs: *.tsx,*.jsx,*.ts,*.js
+alwaysApply: false
 ---
 
 ## Code Style Guidelines

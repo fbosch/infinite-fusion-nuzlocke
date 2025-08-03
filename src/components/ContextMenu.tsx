@@ -1,0 +1,220 @@
+'use client';
+
+import {
+  FloatingPortal,
+  useFloating,
+  useInteractions,
+  useRole,
+  useDismiss,
+  useListNavigation,
+  FloatingFocusManager,
+} from '@floating-ui/react';
+import { clsx } from 'clsx';
+import React, { useState, useRef, cloneElement, isValidElement } from 'react';
+import type { LucideIcon } from 'lucide-react';
+
+export interface ContextMenuItem {
+  id: string;
+  label: string;
+  icon?: LucideIcon;
+  onClick?: () => void;
+  disabled?: boolean;
+  variant?: 'default' | 'danger' | 'warning';
+  shortcut?: string;
+  separator?: boolean;
+}
+
+export interface ContextMenuProps {
+  children: React.ReactElement;
+  items: ContextMenuItem[];
+  className?: string;
+  disabled?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function ContextMenu({
+  children,
+  items,
+  className,
+  disabled = false,
+}: Omit<ContextMenuProps, 'onOpenChange'>) {
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const triggerRef = useRef<HTMLElement>(null);
+  const listRef = useRef<Array<HTMLElement | null>>([]);
+
+  // Floating UI setup for keyboard navigation
+  const { refs, context } = useFloating({
+    open: isOpen,
+    onOpenChange: setIsOpen,
+  });
+
+  const dismiss = useDismiss(context);
+  const role = useRole(context, { role: 'menu' });
+  const listNavigation = useListNavigation(context, {
+    listRef,
+    activeIndex,
+    selectedIndex: null,
+    onNavigate: setActiveIndex,
+    loop: true,
+  });
+
+  const { getFloatingProps, getItemProps } = useInteractions([
+    dismiss,
+    role,
+    listNavigation,
+  ]);
+
+  const handleContextMenu = (event: React.MouseEvent) => {
+    if (disabled) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Store the trigger element for positioning
+    triggerRef.current = event.currentTarget as HTMLElement;
+
+    // Set menu position relative to the trigger element
+    const rect = event.currentTarget.getBoundingClientRect();
+    setMenuPosition({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    });
+
+    setIsOpen(true);
+  };
+
+  return (
+    <div>
+      {/* Custom trigger element */}
+      {isValidElement(children) &&
+        cloneElement(children, {
+          ref: triggerRef,
+          onContextMenu: handleContextMenu,
+        } as React.HTMLAttributes<HTMLElement>)}
+
+      {/* Render popover in portal when open */}
+      {isOpen && triggerRef.current && (
+        <FloatingPortal>
+          <FloatingFocusManager context={context} modal={false}>
+            <div
+              ref={refs.setFloating}
+              style={{
+                position: 'absolute',
+                left:
+                  triggerRef.current.getBoundingClientRect().left +
+                  menuPosition.x,
+                top:
+                  triggerRef.current.getBoundingClientRect().top +
+                  menuPosition.y,
+                transformOrigin: 'top left',
+                zIndex: 50,
+              }}
+              className={clsx(
+                'min-w-[12rem] rounded-md border border-gray-200 dark:border-gray-700',
+                'bg-white dark:bg-gray-800 shadow-lg shadow-black/10 dark:shadow-black/25',
+                'p-1 backdrop-blur-xl',
+                'animate-in fade-in-0 zoom-in-95 duration-150',
+                'focus:outline-none',
+                className
+              )}
+              role='menu'
+              aria-orientation='vertical'
+              {...getFloatingProps()}
+            >
+              {items.map((item: ContextMenuItem, index: number) => {
+                if (item.separator) {
+                  return (
+                    <div
+                      key={`separator-${index}`}
+                      className='my-1 h-px bg-gray-200 dark:bg-gray-600'
+                      role='separator'
+                    />
+                  );
+                }
+
+                const validItems = items.filter(
+                  i => !i.separator && !i.disabled
+                );
+                const validIndex = validItems.findIndex(
+                  validItem => validItem.id === item.id
+                );
+                const isActive = activeIndex === validIndex;
+
+                return (
+                  <button
+                    key={item.id}
+                    ref={node => {
+                      listRef.current[validIndex] = node;
+                    }}
+                    className={clsx(
+                      'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
+                      'text-sm transition-colors duration-75',
+                      'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+                      'disabled:cursor-not-allowed disabled:opacity-50',
+                      item.variant === 'danger'
+                        ? isActive
+                          ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                          : 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300'
+                        : item.variant === 'warning'
+                          ? isActive
+                            ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
+                            : 'text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-700 dark:hover:text-yellow-300'
+                          : isActive
+                            ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                            : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+                    )}
+                    onClick={() => {
+                      if (!item.disabled) {
+                        item.onClick?.();
+                        setIsOpen(false);
+                      }
+                    }}
+                    disabled={item.disabled}
+                    role='menuitem'
+                    tabIndex={isActive ? 0 : -1}
+                    {...getItemProps()}
+                  >
+                    <div className='flex items-center space-x-2'>
+                      {item.icon && (
+                        <item.icon
+                          className='h-4 w-4 flex-shrink-0'
+                          aria-hidden='true'
+                        />
+                      )}
+                      <span className='truncate'>{item.label}</span>
+                    </div>
+                    {item.shortcut && (
+                      <span className='text-xs opacity-60'>
+                        {item.shortcut}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </FloatingFocusManager>
+        </FloatingPortal>
+      )}
+
+      {/* Handle outside clicks and escape key */}
+      {isOpen && (
+        <div
+          className='fixed inset-0 z-40'
+          onClick={() => setIsOpen(false)}
+          onKeyDown={e => {
+            if (e.key === 'Escape') {
+              setIsOpen(false);
+            }
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+export default ContextMenu;

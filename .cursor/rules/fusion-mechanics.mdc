@@ -1,7 +1,5 @@
-description: Infinite Fusion specific mechanics and fusion tracking requirements
-globs: ["src/**/*.ts", "src/**/*.tsx"]
+---
 alwaysApply: true
-
 ---
 
 # Infinite Fusion Mechanics
