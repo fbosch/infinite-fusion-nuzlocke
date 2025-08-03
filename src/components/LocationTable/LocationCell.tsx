@@ -142,7 +142,7 @@ export default function LocationCell({
             href={
               isStarterLocation(location.id)
                 ? `https://infinitefusion.fandom.com/wiki/Pallet_Town`
-                : `https://infinitefusion.fandom.com/wiki/${locationName.replace(' ', '_')}`
+                : `https://infinitefusion.fandom.com/wiki/${locationName.replaceAll(' ', '_')}`
             }
             target='_blank'
             rel='noopener noreferrer'
