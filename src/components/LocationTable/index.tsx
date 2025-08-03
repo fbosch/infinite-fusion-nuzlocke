@@ -169,6 +169,7 @@ export default function LocationTable() {
         <table
           className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700 overscroll-x-contain overscroll-y-auto'
           role='table'
+          data-scroll-container
           aria-label='Locations table'
         >
           <LocationTableHeader headerGroups={table.getHeaderGroups()} />

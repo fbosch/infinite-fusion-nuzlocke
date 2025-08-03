@@ -85,7 +85,7 @@ export default function SummaryCard({
     isEggId(encounterData.head?.id) || isEggId(encounterData.body?.id);
 
   return (
-    <ContextMenu items={contextItems}>
+    <ContextMenu items={contextItems} portalRootId='location-table'>
       <div className='flex flex-col items-center justify-center relative'>
         <Fragment>
           <div

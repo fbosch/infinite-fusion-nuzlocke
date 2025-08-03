@@ -18,6 +18,7 @@ export interface ContextMenuItem {
   label: string;
   icon?: LucideIcon;
   onClick?: () => void;
+  href?: string;
   disabled?: boolean;
   variant?: 'default' | 'danger' | 'warning';
   shortcut?: string;
@@ -30,6 +31,7 @@ export interface ContextMenuProps {
   className?: string;
   disabled?: boolean;
   onOpenChange?: (open: boolean) => void;
+  portalRootId?: string;
 }
 
 export function ContextMenu({
@@ -37,6 +39,7 @@ export function ContextMenu({
   items,
   className,
   disabled = false,
+  portalRootId = 'context-menu-root',
 }: Omit<ContextMenuProps, 'onOpenChange'>) {
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>({
     x: 0,
@@ -80,11 +83,29 @@ export function ContextMenu({
     // Store the trigger element for positioning
     triggerRef.current = event.currentTarget as HTMLElement;
 
-    // Set menu position relative to the trigger element
+    // Find the scrollable container (if any)
+    const scrollContainer =
+      event.currentTarget.closest('[data-scroll-container]') ||
+      event.currentTarget.closest(
+        '.overflow-auto, .overflow-scroll, .overflow-y-auto, .overflow-y-scroll'
+      ) ||
+      document.documentElement;
+
+    // Get scroll offsets
+    const scrollLeft = scrollContainer.scrollLeft || 0;
+    const scrollTop = scrollContainer.scrollTop || 0;
+
+    // Get the container's position relative to viewport
+    const containerRect = scrollContainer.getBoundingClientRect();
+
+    // Calculate position relative to the scrollable container
     const rect = event.currentTarget.getBoundingClientRect();
+    const relativeX = event.clientX - containerRect.left + scrollLeft;
+    const relativeY = event.clientY - containerRect.top + scrollTop;
+
     setMenuPosition({
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
+      x: relativeX,
+      y: relativeY,
     });
 
     // Show menu and start enter animation
@@ -126,7 +147,7 @@ export function ContextMenu({
 
       {/* Render popover in portal when visible */}
       {isVisible && triggerRef.current && (
-        <FloatingPortal>
+        <FloatingPortal id={portalRootId}>
           <FloatingFocusManager context={context} modal={false}>
             <div
               ref={node => {
@@ -135,12 +156,8 @@ export function ContextMenu({
               }}
               style={{
                 position: 'absolute',
-                left:
-                  triggerRef.current.getBoundingClientRect().left +
-                  menuPosition.x,
-                top:
-                  triggerRef.current.getBoundingClientRect().top +
-                  menuPosition.y,
+                left: menuPosition.x,
+                top: menuPosition.y,
                 transformOrigin: 'top left',
                 zIndex: 50,
               }}
@@ -175,41 +192,27 @@ export function ContextMenu({
                 );
                 const isActive = activeIndex === validIndex;
 
-                return (
-                  <button
-                    key={item.id}
-                    ref={node => {
-                      listRef.current[validIndex] = node;
-                    }}
-                    className={clsx(
-                      'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
-                      'text-sm transition-colors duration-75 enabled:cursor-pointer',
-                      'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
-                      'disabled:cursor-not-allowed disabled:opacity-50',
-                      'tooltip-enter',
-                      item.variant === 'danger'
-                        ? isActive
-                          ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
-                          : 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300'
-                        : item.variant === 'warning'
-                          ? isActive
-                            ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
-                            : 'text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-700 dark:hover:text-yellow-300'
-                          : isActive
-                            ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                            : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
-                    )}
-                    onClick={() => {
-                      if (!item.disabled) {
-                        item.onClick?.();
-                        handleClose();
-                      }
-                    }}
-                    disabled={item.disabled}
-                    role='menuitem'
-                    tabIndex={isActive ? 0 : -1}
-                    {...getItemProps()}
-                  >
+                const commonClasses = clsx(
+                  'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
+                  'text-sm transition-colors duration-75 enabled:cursor-pointer',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+                  'disabled:cursor-not-allowed disabled:opacity-50',
+                  'tooltip-enter',
+                  item.variant === 'danger'
+                    ? isActive
+                      ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                      : 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300'
+                    : item.variant === 'warning'
+                      ? isActive
+                        ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
+                        : 'text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-700 dark:hover:text-yellow-300'
+                      : isActive
+                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                        : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+                );
+
+                const content = (
+                  <>
                     <div className='flex items-center space-x-2'>
                       {item.icon && (
                         <item.icon
@@ -224,6 +227,54 @@ export function ContextMenu({
                         {item.shortcut}
                       </span>
                     )}
+                  </>
+                );
+
+                // Render as link if href is provided
+                if (item.href) {
+                  return (
+                    <a
+                      key={item.id}
+                      ref={node => {
+                        listRef.current[validIndex] = node;
+                      }}
+                      href={item.href}
+                      className={commonClasses}
+                      onClick={() => {
+                        if (!item.disabled) {
+                          item.onClick?.();
+                          handleClose();
+                        }
+                      }}
+                      role='menuitem'
+                      tabIndex={isActive ? 0 : -1}
+                      {...getItemProps()}
+                    >
+                      {content}
+                    </a>
+                  );
+                }
+
+                // Render as button
+                return (
+                  <button
+                    key={item.id}
+                    ref={node => {
+                      listRef.current[validIndex] = node;
+                    }}
+                    className={commonClasses}
+                    onClick={() => {
+                      if (!item.disabled) {
+                        item.onClick?.();
+                        handleClose();
+                      }
+                    }}
+                    disabled={item.disabled}
+                    role='menuitem'
+                    tabIndex={isActive ? 0 : -1}
+                    {...getItemProps()}
+                  >
+                    {content}
                   </button>
                 );
               })}
