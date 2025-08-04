@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogBackdrop,
 } from '@headlessui/react';
-import { RadioGroup, Radio, Field, Label } from '@headlessui/react';
+import { RadioGroup, Radio, Field } from '@headlessui/react';
 import { X, Check, ArrowUpRight } from 'lucide-react';
 import clsx from 'clsx';
 import { playthroughActions } from '@/stores/playthroughs';
@@ -226,62 +226,65 @@ export function ArtworkVariantModal({
                         }
                       >
                         {({ checked }) => (
-                          <ContextMenu
-                            items={[
-                              {
-                                label: 'View on FusionDex',
-                                id: 'artist',
-                                href: `https://www.fusiondex.org/sprite/pif/${spriteId}${variant}`,
-                                target: '_blank',
-                                icon: ArrowUpRight,
-                                iconClassName:
-                                  'dark:text-blue-300 text-blue-400',
-                                favicon:
-                                  'https://www.fusiondex.org/favicon.ico',
-                                onClick: (
-                                  event: React.MouseEvent<HTMLAnchorElement>
-                                ) => {
-                                  event.stopPropagation();
-                                },
-                              },
-                            ]}
-                          >
-                            <figure className='flex flex-col items-center space-y-2 relative user-select-none group/figure'>
-                              <div className=''>
-                                <Image
-                                  src={spriteUrl}
-                                  alt={`Artwork variant ${variant || 'default'}`}
-                                  className='w-24 h-24 object-fill image-render-pixelated'
-                                  width={100}
-                                  height={100}
-                                  loading='lazy'
-                                  decoding='async'
-                                  unoptimized
-                                />
-                                {checked && (
-                                  <div className='absolute top-0.5 right-0.5 bg-blue-500 text-white rounded-full p-1.5 shadow-lg'>
-                                    <Check className='h-3 w-3' />
-                                  </div>
-                                )}
-                              </div>
-                              <figcaption className='w-full text-center px-1'>
-                                <Label className='text-xs font-normal text-gray-500 dark:text-gray-400 cursor-pointer block leading-tight break-words'>
-                                  <div
-                                    className='text-lg transition-colors uppercase absolute -top-1 left-0.5 text-gray-500/40 dark:text-gray-400/30 group-hover/figure:text-blue-500/80 dark:group-hover/figure:text-gray-400/30'
-                                    aria-hidden='true'
-                                  >
-                                    {variant}
-                                  </div>
+                          <figure className='flex flex-col items-center space-y-2 relative user-select-none group/figure'>
+                            <div className=''>
+                              <Image
+                                src={spriteUrl}
+                                alt={`Artwork variant ${variant || 'default'}`}
+                                className='w-24 h-24 object-fill image-render-pixelated'
+                                width={100}
+                                height={100}
+                                loading='lazy'
+                                decoding='async'
+                                unoptimized
+                              />
+                              {checked && (
+                                <div className='absolute top-0.5 right-0.5 bg-blue-500 text-white rounded-full p-1.5 shadow-lg'>
+                                  <Check className='h-3 w-3' />
+                                </div>
+                              )}
+                              <ContextMenu
+                                items={[
+                                  {
+                                    label: 'View on FusionDex',
+                                    id: 'artist',
+                                    href: `https://www.fusiondex.org/sprite/pif/${spriteId}${variant}`,
+                                    target: '_blank',
+                                    icon: ArrowUpRight,
+                                    iconClassName:
+                                      'dark:text-blue-300 text-blue-400',
+                                    favicon:
+                                      'https://www.fusiondex.org/favicon.ico',
+                                    onClick: (
+                                      event: React.MouseEvent<HTMLAnchorElement>
+                                    ) => {
+                                      event.stopPropagation();
+                                    },
+                                  },
+                                ]}
+                              >
+                                <div className='absolute inset-0 bg-transparent' />
+                              </ContextMenu>
+                            </div>
+                            <figcaption className='w-full text-center px-1'>
+                              <div className='text-xs font-normal text-gray-500 dark:text-gray-400 cursor-pointer block leading-tight break-words select-none'>
+                                <div
+                                  className='text-lg transition-colors uppercase absolute -top-1 left-0.5 text-gray-500/40 dark:text-gray-400/30 group-hover/figure:text-blue-500/80 dark:group-hover/figure:text-gray-400/30 pointer-events-none'
+                                  aria-hidden='true'
+                                >
+                                  {variant}
+                                </div>
+                                <div className='pointer-events-none'>
                                   {getFormattedCreditsFromResponse(
                                     credits,
                                     headId,
                                     bodyId,
                                     variant
                                   )}
-                                </Label>
-                              </figcaption>
-                            </figure>
-                          </ContextMenu>
+                                </div>
+                              </div>
+                            </figcaption>
+                          </figure>
                         )}
                       </Radio>
                     </Field>
