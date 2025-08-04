@@ -56,6 +56,7 @@ export function CursorTooltip({
   onMouseLeave,
 }: CursorTooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [animationState, setAnimationState] = useState<
     'entering' | 'entered' | 'exiting'
   >('entering');
@@ -91,9 +92,11 @@ export function CursorTooltip({
     }
   }, [isWindowVisible, isOpen]);
 
-  // Handle animation states and force position update
+  // Handle animation states and mounting/unmounting
   useEffect(() => {
     if (isOpen) {
+      // Mount the tooltip and start entering animation
+      setIsMounted(true);
       setAnimationState('entering');
       // Force immediate position update when tooltip opens
       const timer = setTimeout(() => {
@@ -104,10 +107,16 @@ export function CursorTooltip({
         }
       }, 16);
       return () => clearTimeout(timer);
-    } else {
+    } else if (isMounted) {
+      // Start exit animation
       setAnimationState('exiting');
+      // Unmount after animation completes
+      const timer = setTimeout(() => {
+        setIsMounted(false);
+      }, 100); // Allow time for exit animation
+      return () => clearTimeout(timer);
     }
-  }, [isOpen, refs.floating]);
+  }, [isOpen, isMounted, refs.floating]);
 
   const clientPointFloating = useClientPoint(context, {
     axis: 'both',
@@ -138,12 +147,12 @@ export function CursorTooltip({
         cloneElement(children, {
           ...getReferenceProps({
             ref: refs.setReference,
-            onMouseEnter: () => onMouseEnter?.(),
-            onMouseLeave: () => onMouseLeave?.(),
+            onMouseEnter: onMouseEnter,
+            onMouseLeave: onMouseLeave,
           }),
         })}
 
-      {isOpen && (
+      {isMounted && (
         <FloatingPortal>
           <div
             className='z-110'
