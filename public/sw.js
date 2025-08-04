@@ -1,8 +1,10 @@
 // Simplified Service Worker with Pokemon Image Prefetching
-const CACHE_VERSION = 'v2';
-const CACHE_NAME = `infinite-fusion-cache-${CACHE_VERSION}`;
-const IMAGE_CACHE_NAME = `infinite-fusion-images-${CACHE_VERSION}`;
-const POKEMON_IMAGE_CACHE_NAME = `pokemon-images-${CACHE_VERSION}`;
+// API cache gets cleared on each deployment, images remain persistent
+const BUILD_ID = '__BUILD_ID__'; // Replaced during build
+const API_CACHE_NAME = `infinite-fusion-api-${BUILD_ID}`;
+// Image caches remain static - no versioning needed since images don't change
+const IMAGE_CACHE_NAME = `infinite-fusion-images-v1`;
+const POKEMON_IMAGE_CACHE_NAME = `pokemon-images-v1`;
 
 // Essential URLs to cache immediately
 const urlsToCache = ['/'];
@@ -335,7 +337,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     // Cache essential files first
     caches
-      .open(CACHE_NAME)
+      .open(API_CACHE_NAME)
       .then(cache => {
         console.debug('Service Worker: Caching essential files');
         return cache.addAll(urlsToCache);
@@ -362,18 +364,19 @@ self.addEventListener('activate', event => {
   console.debug('Service Worker: Activating...');
   event.waitUntil(
     Promise.all([
-      // Clean up old caches
+      // Clean up old API caches only (keep image caches)
       caches.keys().then(cacheNames => {
         return Promise.all(
           cacheNames.map(cacheName => {
+            // Only delete old API caches, preserve image caches
             if (
-              cacheName !== CACHE_NAME &&
-              cacheName !== IMAGE_CACHE_NAME &&
-              cacheName !== POKEMON_IMAGE_CACHE_NAME
+              cacheName.startsWith('infinite-fusion-api-') &&
+              cacheName !== API_CACHE_NAME
             ) {
-              console.debug('Service Worker: Deleting old cache', cacheName);
+              console.debug('Service Worker: Deleting old API cache', cacheName);
               return caches.delete(cacheName);
             }
+            // Keep all image caches and current API cache
           })
         );
       }),
@@ -486,7 +489,7 @@ self.addEventListener('fetch', event => {
         // Cache successful responses for static assets
         if (response.status === 200 && shouldCacheStaticAsset(request)) {
           const responseClone = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
+          caches.open(API_CACHE_NAME).then(cache => {
             cache.put(request, responseClone);
           });
         }
@@ -549,7 +552,7 @@ async function handleNavigationRequest(request) {
     return response;
   } catch (error) {
     // Fallback to cached index.html for offline support
-    const cache = await caches.open(CACHE_NAME);
+    const cache = await caches.open(API_CACHE_NAME);
     const cachedResponse = await cache.match('/');
 
     if (cachedResponse) {

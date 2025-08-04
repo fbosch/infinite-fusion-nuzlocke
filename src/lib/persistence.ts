@@ -4,13 +4,13 @@ import {
 } from '@tanstack/query-persist-client-core';
 import { createStore, get, set, del } from 'idb-keyval';
 
-// Cache busting mechanism using Next.js build info
-export const getCacheBuster = () => {
+// Cache busting mechanism using build ID
+const getCacheBuster = () => {
   if (process.env.NODE_ENV === 'development') {
     return Math.floor(Date.now() / (1 * 60 * 1000)); // Updates every minute
   }
 
-  return process.env.NEXT_BUILD_ID || process.env.npm_package_version || 'v1';
+  return process.env.NEXT_PUBLIC_BUILD_ID || 'v1';
 };
 
 const queryStore = createStore('query-client', 'queries');
@@ -29,6 +29,6 @@ export const queryPersister = experimental_createQueryPersister({
   serialize: data => data as unknown as string,
   maxAge:
     process.env.NODE_ENV === 'development'
-      ? 1000 * 60 * 5
-      : 1000 * 60 * 60 * 24 * 7,
+      ? 1000 * 60 * 5 // 5 minutes in dev
+      : 1000 * 60 * 60 * 24 * 7, // 1 week in production
 });
