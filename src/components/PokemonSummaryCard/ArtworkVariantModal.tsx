@@ -8,11 +8,18 @@ import {
   DialogBackdrop,
 } from '@headlessui/react';
 import { RadioGroup, Radio, Field, Label } from '@headlessui/react';
-import { X, Check } from 'lucide-react';
+import { X, Check, ArrowUpRight } from 'lucide-react';
 import clsx from 'clsx';
 import { playthroughActions } from '@/stores/playthroughs';
-import { useSpriteVariants, useSetPrefferedVariant } from '@/hooks/useSprite';
-import { generateSpriteUrl } from '@/lib/sprites';
+import {
+  useSpriteVariants,
+  useSetPrefferedVariant,
+  useSpriteCredits,
+} from '@/hooks/useSprite';
+import {
+  generateSpriteUrl,
+  getFormattedCreditsFromResponse,
+} from '@/lib/sprites';
 import Image from 'next/image';
 import ContextMenu from '../ContextMenu';
 
@@ -43,11 +50,19 @@ export function ArtworkVariantModal({
   // Mutation hook for setting preferred variants
   const setPreferredVariantMutation = useSetPrefferedVariant();
 
-  const { data: variants, isLoading } = useSpriteVariants(
+  const { data: variants, isLoading: variantsLoading } = useSpriteVariants(
     headId,
     bodyId,
     isOpen
   );
+
+  const { data: credits, isLoading: creditsLoading } = useSpriteCredits(
+    headId,
+    bodyId,
+    isOpen
+  );
+
+  const isLoading = creditsLoading || variantsLoading;
 
   const availableVariants = useMemo(() => {
     if (!variants || variants.length <= 1) return [];
@@ -214,10 +229,13 @@ export function ArtworkVariantModal({
                           <ContextMenu
                             items={[
                               {
-                                label: 'View artist credit on FusionDex',
+                                label: 'View on FusionDex',
                                 id: 'artist',
                                 href: `https://www.fusiondex.org/sprite/pif/${spriteId}${variant}`,
                                 target: '_blank',
+                                icon: ArrowUpRight,
+                                iconClassName:
+                                  'dark:text-blue-300 text-blue-400',
                                 favicon:
                                   'https://www.fusiondex.org/favicon.ico',
                                 onClick: (
@@ -228,7 +246,7 @@ export function ArtworkVariantModal({
                               },
                             ]}
                           >
-                            <div className='flex flex-col items-center space-y-2 relative user-select-none'>
+                            <figure className='flex flex-col items-center space-y-2 relative user-select-none'>
                               <Image
                                 src={spriteUrl}
                                 alt={`Artwork variant ${variant || 'default'}`}
@@ -244,10 +262,17 @@ export function ArtworkVariantModal({
                                   <Check className='h-3 w-3' />
                                 </div>
                               )}
-                              <Label className='text-sm font-normal text-gray-400 dark:text-gray-300 cursor-pointer'>
-                                {variant || 'Default'}
-                              </Label>
-                            </div>
+                              <figcaption className='text-sm font-normal text-gray-400 dark:text-gray-300 cursor-pointer'>
+                                <Label className='text-xs font-normal text-gray-400 dark:text-gray-300 cursor-pointer'>
+                                  {getFormattedCreditsFromResponse(
+                                    credits,
+                                    headId,
+                                    bodyId,
+                                    variant
+                                  )}
+                                </Label>
+                              </figcaption>
+                            </figure>
                           </ContextMenu>
                         )}
                       </Radio>

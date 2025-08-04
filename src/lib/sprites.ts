@@ -1,4 +1,5 @@
 import { SpriteVariantsResponse, SpriteVariantsError } from '@/types/sprites';
+import { formatArtistCredits } from '@/utils/formatCredits';
 
 // Types for sprite credits API
 export interface SpriteCreditsResponse {
@@ -118,8 +119,7 @@ export async function checkSpriteExists(url: string): Promise<boolean> {
  */
 export async function getArtworkVariants(
   headId?: number | null,
-  bodyId?: number | null,
-  _maxVariants = 50
+  bodyId?: number | null
 ): Promise<string[]> {
   if (!headId && !bodyId) return [''];
 
@@ -210,4 +210,37 @@ export async function getVariantSpriteCredits(
   const variantKey = variant ? `${baseId}${variant}` : baseId;
 
   return allCredits[variantKey] || null;
+}
+
+/**
+ * Get formatted sprite credits for a specific sprite variant
+ * Returns a human-readable string like "GameFreak, Artist1 and Artist2"
+ */
+export async function getFormattedVariantSpriteCredits(
+  headId?: number | null,
+  bodyId?: number | null,
+  variant = ''
+): Promise<string> {
+  const credits = await getVariantSpriteCredits(headId, bodyId, variant);
+  return formatArtistCredits(credits);
+}
+
+/**
+ * Get formatted sprite credits from a credits response object
+ * Useful when you already have the credits data and just need to format a specific variant
+ */
+export function getFormattedCreditsFromResponse(
+  credits: SpriteCreditsResponse | null | undefined,
+  headId?: number | null,
+  bodyId?: number | null,
+  variant = ''
+): string {
+  if (!credits) return formatArtistCredits(null);
+
+  // Generate the variant key
+  const baseId =
+    headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
+  const variantKey = variant ? `${baseId}${variant}` : baseId;
+
+  return formatArtistCredits(credits[variantKey]);
 }

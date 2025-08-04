@@ -97,7 +97,8 @@ export function ContextMenu({
   className,
   disabled = false,
   portalRootId = 'context-menu-root',
-}: Omit<ContextMenuProps, 'onOpenChange'>) {
+  onOpenChange,
+}: ContextMenuProps) {
   const {
     menuPosition,
     isOpen,
@@ -112,6 +113,10 @@ export function ContextMenu({
   const triggerRef = useRef<HTMLElement>(null);
   const listRef = useRef<Array<HTMLElement | null>>([]);
   const menuElementRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
 
   // Floating UI setup for keyboard navigation
   const { refs, context } = useFloating({

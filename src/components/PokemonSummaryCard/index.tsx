@@ -10,8 +10,8 @@ import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
 import { useEncounter } from '@/stores/playthroughs';
 import { useMemo } from 'react';
-import { ArrowUpRightSquareIcon, Loader2, Replace } from 'lucide-react';
-import { useSpriteVariants } from '@/hooks/useSprite';
+import { ArrowUpRight, Loader2, Replace } from 'lucide-react';
+import { useSpriteVariants, useSpriteCredits } from '@/hooks/useSprite';
 import dynamic from 'next/dynamic';
 
 const ArtworkVariantModal = dynamic(
@@ -64,7 +64,15 @@ export default function SummaryCard({
   );
   const hasArtVariants = variants && variants.length > 1;
 
-  // Modal state
+  // Preload credits for the artwork variants
+  useSpriteCredits(
+    encounterData?.head?.id,
+    encounterData?.body?.id,
+    shouldLoad && !eitherPokemonIsEgg && hasArtVariants
+  );
+
+  const [hasContextMenuBeenOpened, setHasContextMenuBeenOpened] =
+    useState(false);
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
 
   const contextItems = useMemo<ContextMenuItem[]>(() => {
@@ -96,7 +104,7 @@ export default function SummaryCard({
         href: infinitefusiondexLink,
         target: '_blank',
         favicon: 'https://infinitefusiondex.com/images/favicon.ico',
-        icon: ArrowUpRightSquareIcon,
+        icon: ArrowUpRight,
         iconClassName: 'dark:text-blue-300 text-blue-400',
       },
       {
@@ -105,7 +113,7 @@ export default function SummaryCard({
         href: fusiondexLink,
         target: '_blank',
         favicon: 'https://www.fusiondex.org/favicon.ico',
-        icon: ArrowUpRightSquareIcon,
+        icon: ArrowUpRight,
         iconClassName: 'dark:text-blue-300 text-blue-400',
       },
     ];
@@ -133,7 +141,15 @@ export default function SummaryCard({
 
   return (
     <>
-      <ContextMenu items={contextItems} portalRootId='location-table'>
+      <ContextMenu
+        items={contextItems}
+        portalRootId='location-table'
+        onOpenChange={
+          hasContextMenuBeenOpened
+            ? undefined
+            : () => setHasContextMenuBeenOpened(true)
+        }
+      >
         <div className='flex flex-col items-center justify-center relative'>
           <Fragment>
             <div
