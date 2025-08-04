@@ -5,7 +5,7 @@ import {
 import { createStore, get, set, del } from 'idb-keyval';
 
 // Cache busting mechanism using build ID
-const getCacheBuster = () => {
+export const getCacheBuster = () => {
   if (process.env.NODE_ENV === 'development') {
     return Math.floor(Date.now() / (1 * 60 * 1000)); // Updates every minute
   }
