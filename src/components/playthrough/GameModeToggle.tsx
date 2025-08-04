@@ -82,7 +82,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
         placement={'bottom'}
         className='origin-top'
         disabled={isMobile}
-        delay={500}
+        delay={1200}
         content={
           <p className='max-w-xs text-xs font-normal leading-5'>
             Uses the standard encounter tables and route data. The tracker will

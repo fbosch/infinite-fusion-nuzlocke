@@ -81,7 +81,7 @@ export default function SummaryCard({
         ? `${encounterData.head.id}.${encounterData.body.id}`
         : encounterData?.head?.id || encounterData?.body?.id;
     const infinitefusiondexLink = `https://infinitefusiondex.com/details/${id}`;
-    const fusiondexLink = `https://fusiondex.org/${id}/`;
+    const fusiondexLink = `https://fusiondex.org/sprite/pif/${id}${encounterData?.artworkVariant ?? ''}/`;
 
     return [
       {
@@ -91,7 +91,9 @@ export default function SummaryCard({
         icon: isLoadingVariants ? Loader2 : Replace,
         tooltip:
           eitherPokemonIsEgg || !hasArtVariants
-            ? 'No artwork variants available'
+            ? isLoadingVariants
+              ? 'Loading artwork variants...'
+              : 'No artwork variants available'
             : undefined,
         iconClassName: isLoadingVariants ? 'animate-spin' : '',
         onClick: () => {
