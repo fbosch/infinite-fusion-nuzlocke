@@ -141,6 +141,7 @@ export default function SummaryCard({
   return (
     <>
       <ContextMenu
+        disabled={eitherPokemonIsEgg}
         items={contextItems}
         portalRootId='location-table'
         onOpenChange={
