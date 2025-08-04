@@ -1,13 +1,15 @@
-description: Testing strategy and best practices for the Infinite Fusion Nuzlocke tracker
-globs: ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"]
-alwaysApply: true
-
+---
+description: Testing strategy and best practices for unit tests, file organization, and test patterns
+globs: ['**/*.test.{js,jsx,ts,tsx}', '**/*.spec.{js,jsx,ts,tsx}']
+alwaysApply: false
 ---
 
 # Testing Guidelines
+
 Rules for testing strategy, file organization, and best practices.
 
 ## Testing Strategy
+
 - Write unit tests with Vitest
 - Test data integrity and utility functions thoroughly
 - Use descriptive test names that explain the behavior
@@ -15,6 +17,7 @@ Rules for testing strategy, file organization, and best practices.
 - Mock external dependencies appropriately
 
 ## Test File Organization
+
 - Place test files alongside source files or in `tests/` directory
 - Use `.test.ts` or `.spec.ts` extensions
 - Follow the same directory structure as source files
@@ -22,6 +25,7 @@ Rules for testing strategy, file organization, and best practices.
 - Use beforeEach/afterEach for setup and cleanup
 
 ## Testing Best Practices
+
 - Test both success and error cases
 - Mock external APIs and dependencies
 - Use realistic test data

@@ -12,19 +12,6 @@ vi.mock('idb-keyval', () => ({
   })),
 }));
 
-// Mock sprite service to avoid Worker issues in tests
-vi.mock('../../src/services/spriteService', () => ({
-  default: {
-    generateSpriteUrl: vi.fn(
-      (headId, bodyId, variant = '') =>
-        `mock-sprite-url-${headId || 'unknown'}-${bodyId || 'unknown'}${variant ? `-${variant}` : ''}`
-    ),
-    getArtworkVariants: vi.fn().mockResolvedValue(['']),
-    getPreferredVariant: vi.fn().mockResolvedValue(undefined),
-    setPreferredVariant: vi.fn().mockResolvedValue(undefined),
-  },
-}));
-
 // Mock search service to avoid Worker issues in tests
 vi.mock('../../src/services/searchService', () => ({
   default: {

@@ -9,9 +9,14 @@ import {
   CustomLocationSchema,
   createCustomLocation,
 } from '@/loaders/locations';
-import spriteService from '@/services/spriteService';
+import { generateSpriteUrl, getArtworkVariants } from '@/lib/sprites';
+import {
+  getPreferredVariant,
+  setPreferredVariant,
+} from '@/lib/preferredVariants';
 import { queryClient } from '@/lib/queryClient';
 import { spriteKeys } from '@/lib/queries/sprites';
+import { EncounterData } from '../loaders';
 
 // Create a custom store for playthroughs data
 const playthroughsStore_idb = createStore('playthroughs', 'data');
@@ -803,7 +808,15 @@ export const playthroughActions = {
       if (willBeFusion) {
         encounter[field] = pokemonWithLocationAndUID;
         encounter.isFusion = true; // Preserve or set fusion state
-        encounter.artworkVariant = preferredVariant;
+
+        // For fusion encounters, only set preferred variant if we have both head and body
+        // This prevents setting variants for single-position states (head-only or body-only)
+        if (encounter.head && encounter.body) {
+          encounter.artworkVariant = preferredVariant;
+        } else {
+          // For single-position states, reset to undefined
+          encounter.artworkVariant = undefined;
+        }
 
         // Default behavior: If setting status on one part of a fusion and the other part
         // doesn't have a status, set both to the same status
@@ -832,19 +845,49 @@ export const playthroughActions = {
 
       encounter.updatedAt = getCurrentTimestamp();
     } else {
-      // Handle clearing pokemon - pre-fetch variant for remaining pokemon
+      // Handle clearing pokemon
       const remainingPokemon =
         field === 'head' ? encounter.body : encounter.head;
-      let preferredVariant: string | undefined;
 
+      // Clear the field first
+      encounter[field] = null;
+
+      // Reset artwork variant when composition changes significantly
+      // This ensures that when flipping from head-only to body-only (or vice versa),
+      // the artwork variant is reset to undefined
+      encounter.artworkVariant = undefined;
+
+      // Only set a new preferred variant if there's a remaining pokemon
+      // AND we're not changing from head-only to body-only (or vice versa)
       if (remainingPokemon) {
-        preferredVariant = await playthroughActions.getPreferredVariant(
-          remainingPokemon.id
-        );
+        // Check if this is a composition change (head-only to body-only or vice versa)
+        const wasHeadOnly = field === 'body' && !encounter.head; // If clearing body, was it head-only?
+        const wasBodyOnly = field === 'head' && !encounter.body; // If clearing head, was it body-only?
+
+        // If we're changing composition, clear the preferred variant cache for this pokemon
+        if (wasHeadOnly || wasBodyOnly) {
+          // Clear the cache for both head-only and body-only positions of this pokemon
+          await playthroughActions.setPreferredVariant(
+            remainingPokemon.id,
+            null,
+            undefined
+          );
+          await playthroughActions.setPreferredVariant(
+            null,
+            remainingPokemon.id,
+            undefined
+          );
+        } else {
+          // Only set preferred variant if we're not changing composition
+          const preferredVariant = await playthroughActions.getPreferredVariant(
+            remainingPokemon.id
+          );
+          if (preferredVariant !== undefined) {
+            encounter.artworkVariant = preferredVariant;
+          }
+        }
       }
 
-      encounter[field] = null;
-      encounter.artworkVariant = preferredVariant;
       encounter.updatedAt = getCurrentTimestamp();
     }
   },
@@ -1101,11 +1144,11 @@ export const playthroughActions = {
     encounter.updatedAt = getCurrentTimestamp();
 
     // Always update the preferred variant cache when manually setting variants
-    spriteService
-      .setPreferredVariant(encounter.head?.id, encounter.body?.id, variant)
-      .catch((error: unknown) => {
+    setPreferredVariant(encounter.head?.id, encounter.body?.id, variant).catch(
+      (error: unknown) => {
         console.warn('Failed to set preferred variant in cache:', error);
-      });
+      }
+    );
   },
 
   // Set preferred variant for a Pokémon or fusion (updates cache only, doesn't affect current encounters)
@@ -1116,7 +1159,7 @@ export const playthroughActions = {
   ): Promise<void> => {
     if (variant !== undefined) {
       try {
-        await spriteService.setPreferredVariant(headId, bodyId, variant);
+        await setPreferredVariant(headId, bodyId, variant);
       } catch (error) {
         console.warn('Failed to set preferred variant in cache:', error);
       }
@@ -1129,7 +1172,7 @@ export const playthroughActions = {
     bodyId?: number | null
   ): Promise<string | undefined> => {
     try {
-      return await spriteService.getPreferredVariant(headId, bodyId);
+      return getPreferredVariant(headId, bodyId);
     } catch (error) {
       console.warn('Failed to get preferred variant from cache:', error);
       return undefined;
@@ -1146,8 +1189,7 @@ export const playthroughActions = {
     try {
       // Get available variants if not provided
       const variants =
-        availableVariants ||
-        (await spriteService.getArtworkVariants(headId, bodyId));
+        availableVariants || (await getArtworkVariants(headId, bodyId));
 
       // Early return if no variants or only one variant
       if (!variants || variants.length <= 1) return;
@@ -1168,11 +1210,7 @@ export const playthroughActions = {
       // Prefetch the adjacent variant images
       const prefetchPromises = adjacentVariants.map(variant => () => {
         try {
-          const imageUrl = spriteService.generateSpriteUrl(
-            headId,
-            bodyId,
-            variant
-          );
+          const imageUrl = generateSpriteUrl(headId, bodyId, variant);
           // Create new Image object to trigger prefetch
           const img = new Image();
           img.setAttribute('decoding', 'async');
@@ -1215,14 +1253,9 @@ export const playthroughActions = {
       );
       let availableVariants = queryClient.getQueryData<string[]>(queryKey);
 
-      // If not in cache, fetch from service
+      // If not in cache, fetch variants
       if (!availableVariants) {
-        // Cache the service import to avoid repeated dynamic imports
-        const { default: spriteService } = await import(
-          '@/services/spriteService'
-        );
-
-        availableVariants = await spriteService.getArtworkVariants(
+        availableVariants = await getArtworkVariants(
           encounter.head?.id,
           encounter.body?.id
         );
@@ -1246,15 +1279,13 @@ export const playthroughActions = {
 
       // Set the preferred variant in the cache for future use
       if (newVariant !== undefined) {
-        spriteService
-          .setPreferredVariant(
-            encounter.head?.id,
-            encounter.body?.id,
-            newVariant
-          )
-          .catch((error: unknown) => {
-            console.warn('Failed to set preferred variant in cache:', error);
-          });
+        setPreferredVariant(
+          encounter.head?.id,
+          encounter.body?.id,
+          newVariant
+        ).catch((error: unknown) => {
+          console.warn('Failed to set preferred variant in cache:', error);
+        });
       }
 
       // Prefetch adjacent variants for smoother cycling
@@ -1318,11 +1349,6 @@ export const playthroughActions = {
     );
 
     try {
-      // Import the sprite service
-      const { default: spriteService } = await import(
-        '@/services/spriteService'
-      );
-
       // Process encounters in small batches to avoid overwhelming the server
       const batchSize = 3;
       for (let i = 0; i < encountersToPreload.length; i += batchSize) {
@@ -1331,24 +1357,25 @@ export const playthroughActions = {
         const batchPromises = batch.map(([, encounter]) => {
           if (encounter.isFusion && encounter.head && encounter.body) {
             // Fusion encounter
-            return spriteService
-              .getArtworkVariants(encounter.head.id, encounter.body.id)
-              .catch((error: unknown) => {
-                console.warn(
-                  `Failed to preload fusion variants ${encounter.head!.id}.${encounter.body!.id}:`,
-                  error
-                );
-              });
+            return getArtworkVariants(
+              encounter.head.id,
+              encounter.body.id
+            ).catch((error: unknown) => {
+              console.warn(
+                `Failed to preload fusion variants ${encounter.head!.id}.${encounter.body!.id}:`,
+                error
+              );
+            });
           } else if (encounter.head) {
             // Single Pokémon encounter
-            return spriteService
-              .getArtworkVariants(encounter.head.id)
-              .catch((error: unknown) => {
+            return getArtworkVariants(encounter.head.id).catch(
+              (error: unknown) => {
                 console.warn(
                   `Failed to preload Pokémon variants ${encounter.head!.id}:`,
                   error
                 );
-              });
+              }
+            );
           }
           return Promise.resolve();
         });
@@ -1789,7 +1816,7 @@ export const useEncounters = (): Playthrough['encounters'] => {
 };
 
 // Hook for subscribing to a specific encounter - only rerenders when that encounter changes
-export const useEncounter = (locationId: string) => {
+export const useEncounter = (locationId: string): EncounterData | null => {
   const snapshot = useSnapshot(playthroughsStore);
   const activePlaythrough = snapshot.playthroughs.find(
     p => p.id === snapshot.activePlaythroughId

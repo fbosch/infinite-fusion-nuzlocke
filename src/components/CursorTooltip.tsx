@@ -19,10 +19,11 @@ import {
   useState,
   cloneElement,
   isValidElement,
-  useEffect,
   useRef,
-  startTransition,
+  useEffect,
+  useCallback,
 } from 'react';
+import { useWindowVisibility } from '@/hooks/useWindowVisibility';
 import { twMerge } from 'tailwind-merge';
 
 // Helper functions to calculate offsets based on placement
@@ -51,6 +52,8 @@ interface CursorTooltipProps {
   onMouseLeave?: () => void;
 }
 
+type TooltipState = 'closed' | 'opening' | 'open' | 'closing';
+
 export function CursorTooltip({
   content,
   children,
@@ -61,16 +64,86 @@ export function CursorTooltip({
   onMouseEnter,
   onMouseLeave,
 }: CursorTooltipProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  const isAnimatingRef = useRef(false);
-  const exitAnimationRef = useRef<number | null>(null);
-  const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [tooltipState, setTooltipState] = useState<TooltipState>('closed');
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isWindowVisible = useWindowVisibility();
+
+  // Cleanup function to clear timeout
+  const clearCurrentTimeout = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  }, []);
+
+  // Handle opening the tooltip
+  const handleOpen = useCallback(() => {
+    clearCurrentTimeout();
+
+    // Start with opening state (element rendered but hidden)
+    setTooltipState('opening');
+    onMouseEnter?.();
+
+    // If there's a delay, wait before showing
+    if (delay > 0) {
+      timeoutRef.current = setTimeout(() => {
+        setTooltipState('open');
+        timeoutRef.current = null;
+      }, delay);
+    } else {
+      // No delay, show immediately
+      setTooltipState('open');
+    }
+  }, [clearCurrentTimeout, onMouseEnter, delay]);
+
+  // Handle closing the tooltip
+  const handleClose = useCallback(() => {
+    clearCurrentTimeout();
+
+    // Start closing animation
+    setTooltipState('closing');
+
+    // Wait for animation to complete, then close
+    timeoutRef.current = setTimeout(() => {
+      setTooltipState('closed');
+      timeoutRef.current = null;
+    }, 50); // Match CSS animation duration (0.05s)
+
+    onMouseLeave?.();
+  }, [clearCurrentTimeout, onMouseLeave]);
+
+  // Handle open/close state changes
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) {
+        handleOpen();
+      } else {
+        handleClose();
+      }
+    },
+    [handleOpen, handleClose]
+  );
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      clearCurrentTimeout();
+    };
+  }, [clearCurrentTimeout]);
+
+  // Handle window visibility changes
+  useEffect(() => {
+    if (!isWindowVisible && tooltipState !== 'closed') {
+      handleOpenChange(false);
+    }
+  }, [isWindowVisible, tooltipState, handleOpenChange]);
+
+  const isOpen = tooltipState !== 'closed';
 
   const { refs, floatingStyles, context } = useFloating({
     placement,
     open: isOpen,
-    onOpenChange: setIsOpen,
+    onOpenChange: handleOpenChange,
     middleware: [
       offset({
         mainAxis: getMainAxisOffset(placement),
@@ -78,7 +151,13 @@ export function CursorTooltip({
       }),
       shift(),
     ],
-    whileElementsMounted: autoUpdate,
+    whileElementsMounted: (reference, floating, update) => {
+      const cleanup = autoUpdate(reference, floating, update, {
+        layoutShift: true,
+        animationFrame: true,
+      });
+      return cleanup;
+    },
   });
 
   const clientPointFloating = useClientPoint(context, {
@@ -86,7 +165,7 @@ export function CursorTooltip({
   });
 
   const hover = useHover(context, {
-    delay: { open: delay, close: 0 },
+    delay: { open: 0, close: 0 },
     enabled: !disabled,
   });
 
@@ -102,54 +181,7 @@ export function CursorTooltip({
     clientPointFloating,
   ]);
 
-  // Handle animation states and callbacks
-  useEffect(() => {
-    if (isOpen) {
-      // Clear any existing exit animations when opening
-      if (exitAnimationRef.current) {
-        cancelAnimationFrame(exitAnimationRef.current);
-        exitAnimationRef.current = null;
-      }
-      if (exitTimeoutRef.current) {
-        clearTimeout(exitTimeoutRef.current);
-        exitTimeoutRef.current = null;
-      }
-
-      // Start enter animation immediately when isOpen becomes true
-      if (!isVisible) {
-        startTransition(() => {
-          setIsVisible(true);
-          isAnimatingRef.current = true;
-        });
-        onMouseEnter?.();
-      }
-    } else {
-      // Only start exit animation if we're currently visible
-      if (isVisible) {
-        isAnimatingRef.current = false;
-        exitAnimationRef.current = requestAnimationFrame(() => {
-          // Add a small delay to allow the exit animation to play
-          exitTimeoutRef.current = setTimeout(() => {
-            setIsVisible(false);
-            exitTimeoutRef.current = null;
-          }, 150); // Match the CSS animation duration
-        });
-        onMouseLeave?.();
-      }
-    }
-  }, [isOpen, onMouseEnter, onMouseLeave, isVisible]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (exitAnimationRef.current) {
-        cancelAnimationFrame(exitAnimationRef.current);
-      }
-      if (exitTimeoutRef.current) {
-        clearTimeout(exitTimeoutRef.current);
-      }
-    };
-  }, []);
+  if (!content) return children;
 
   return (
     <>
@@ -160,10 +192,10 @@ export function CursorTooltip({
           }),
         })}
 
-      {isVisible && (
+      {isOpen && (
         <FloatingPortal>
           <div
-            className='z-100'
+            className='z-110'
             ref={refs.setFloating}
             style={floatingStyles}
             {...getFloatingProps()}
@@ -176,12 +208,16 @@ export function CursorTooltip({
                   'dark:bg-gray-700/80 background-blur dark:text-white text-gray-700',
                   'border dark:border-gray-600 border-gray-200',
                   'origin-top-left backdrop-blur-xl',
-                  isAnimatingRef.current ? 'tooltip-enter' : 'tooltip-exit'
+                  {
+                    'opacity-0 scale-95': tooltipState === 'opening',
+                    'tooltip-enter': tooltipState === 'open',
+                    'tooltip-exit': tooltipState === 'closing',
+                  }
                 ),
                 className
               )}
               style={{
-                // Ensure the tooltip stays in place during exit animation
+                // Ensure the tooltip stays in place during animations
                 position: 'relative',
                 zIndex: 1000,
               }}

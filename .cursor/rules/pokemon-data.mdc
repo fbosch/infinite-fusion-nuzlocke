@@ -1,19 +1,22 @@
-description: Pokémon data management and API integration guidelines
-globs: ["src/**/*.ts", "src/**/*.tsx", "data/**/*.json", "scripts/**/*.ts"]
-alwaysApply: true
-
+---
+description: Pokémon data management rules including API integration, data handling, and game-specific requirements for Infinite Fusion
+globs: ['src/loaders/**/*.{ts,tsx}', 'src/utils/**/*.{ts,tsx}']
+alwaysApply: false
 ---
 
 # Pokémon Data Management
+
 Rules for handling Pokémon data, API integration, and game-specific data requirements.
 
 ## Data Handling
+
 - Validate Pokémon data integrity
 - Use proper error handling for data scraping
 - Implement type-safe data structures
 - Handle loading and error states gracefully
 
 ## PokéAPI Integration
+
 - Use [PokéAPI](https://pokeapi.co/) as the primary data source for Pokémon information
 - The API serves over 10 billion calls monthly and is free to use
 - Base URL: `https://pokeapi.co/api/v2/`
@@ -30,6 +33,7 @@ Rules for handling Pokémon data, API integration, and game-specific data requir
 - Consider using the GraphQL endpoint for complex queries
 
 ## Specific Patterns for This Project
+
 - Pokémon data should be type-safe and validated
 - Handle fusion mechanics with proper TypeScript types
 - Implement Nuzlocke rules with clear state management
@@ -37,6 +41,7 @@ Rules for handling Pokémon data, API integration, and game-specific data requir
 - Keep data scraping scripts in `scripts/` directory
 
 ## Pokémon Infinite Fusion Game Context
+
 - Based on the [Pokémon Infinite Fusion Wiki walkthrough](https://infinitefusion.fandom.com/wiki/Walkthrough)
 - Features fusion mechanics where Pokémon can be combined using DNA Splicers
 - Includes both Kanto and Johto regions with 16 total gym leaders
@@ -53,6 +58,7 @@ Rules for handling Pokémon data, API integration, and game-specific data requir
 - Includes debug mode unlock through Pokédex completion (501 base Pokémon)
 
 ## Supported Pokémon and Data Sources
+
 - Pokémon data is scraped from the [Pokémon Infinite Fusion Wiki Pokédex](https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex)
 - Includes both [Classic](https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex) and [Remix](https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex/Remix) modes
 - Game includes Pokémon from Generations 1-2 (with official Pokédex numbers) plus select Pokémon from Generations 3-7

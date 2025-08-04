@@ -132,7 +132,7 @@ export default function LocationTable() {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    enableSorting: true,
+    enableSorting: false,
     // Performance optimizations
     enableColumnResizing: false,
     enableRowSelection: false,
@@ -169,6 +169,7 @@ export default function LocationTable() {
         <table
           className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700 overscroll-x-contain overscroll-y-auto'
           role='table'
+          data-scroll-container
           aria-label='Locations table'
         >
           <LocationTableHeader headerGroups={table.getHeaderGroups()} />
@@ -182,12 +183,10 @@ export default function LocationTable() {
           </tbody>
         </table>
       </div>
-      {isCustomLocationModalOpen && (
-        <AddCustomLocationModal
-          isOpen={isCustomLocationModalOpen}
-          onClose={() => setIsCustomLocationModalOpen(false)}
-        />
-      )}
+      <AddCustomLocationModal
+        isOpen={isCustomLocationModalOpen}
+        onClose={() => setIsCustomLocationModalOpen(false)}
+      />
     </div>
   );
 }

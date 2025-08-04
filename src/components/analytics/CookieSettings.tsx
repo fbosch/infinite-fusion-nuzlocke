@@ -1,8 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Dialog } from '@headlessui/react';
+import {
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+  DialogBackdrop,
+} from '@headlessui/react';
 import { Cookie, X } from 'lucide-react';
+import clsx from 'clsx';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 export interface ConsentPreferences {
@@ -52,20 +58,28 @@ export function CookieSettings({ isOpen, onClose }: CookieSettingsProps) {
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className='relative z-50'>
-      {/* Backdrop */}
-      <div className='fixed inset-0 bg-black/50' aria-hidden='true' />
+    <Dialog open={isOpen} onClose={onClose} className='relative z-50 group'>
+      <DialogBackdrop
+        transition
+        className='fixed inset-0 bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100'
+        aria-hidden='true'
+      />
 
-      {/* Full-screen container to center the panel */}
       <div className='fixed inset-0 flex items-center justify-center p-4'>
-        <Dialog.Panel className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-w-lg w-full'>
+        <DialogPanel
+          transition
+          className={clsx(
+            'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-w-lg w-full',
+            'transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98'
+          )}
+        >
           <div className='p-6'>
             <div className='flex items-center justify-between mb-6'>
               <div className='flex items-center space-x-2'>
                 <Cookie className='h-6 w-6 text-blue-600 dark:text-blue-400' />
-                <Dialog.Title className='text-xl  text-gray-900 dark:text-white'>
+                <DialogTitle className='text-xl  text-gray-900 dark:text-white'>
                   Cookie Preferences
-                </Dialog.Title>
+                </DialogTitle>
               </div>
               <button
                 onClick={onClose}
@@ -81,11 +95,11 @@ export function CookieSettings({ isOpen, onClose }: CookieSettingsProps) {
                 <h3 className='text-lg  text-gray-900 dark:text-white mb-4'>
                   Manage your cookie preferences
                 </h3>
-                <Dialog.Description className='text-sm text-gray-600 dark:text-gray-300 mb-6'>
+                <p className='text-sm text-gray-600 dark:text-gray-300 mb-6'>
                   You can enable or disable different types of cookies below.
                   These settings will be saved to your browser and you can
                   change them at any time.
-                </Dialog.Description>
+                </p>
               </div>
 
               <div className='space-y-4'>
@@ -168,20 +182,20 @@ export function CookieSettings({ isOpen, onClose }: CookieSettingsProps) {
 
             <div className='flex space-x-3'>
               <button
-                onClick={() => savePreferences(localPreferences)}
-                className='flex-1 bg-blue-600 hover:bg-blue-700 text-white  py-3 px-4 rounded-md transition-colors cursor-pointer'
-              >
-                Save Preferences
-              </button>
-              <button
                 onClick={() => savePreferences(DEFAULT_PREFERENCES)}
                 className='flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white  py-3 px-4 rounded-md transition-colors cursor-pointer'
               >
                 Reject All
               </button>
+              <button
+                onClick={() => savePreferences(localPreferences)}
+                className='flex-1 bg-blue-600 hover:bg-blue-700 text-white  py-3 px-4 rounded-md transition-colors cursor-pointer'
+              >
+                Save Preferences
+              </button>
             </div>
           </div>
-        </Dialog.Panel>
+        </DialogPanel>
       </div>
     </Dialog>
   );

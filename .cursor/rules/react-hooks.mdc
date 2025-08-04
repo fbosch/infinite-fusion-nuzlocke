@@ -1,4 +1,6 @@
 ---
+description: React hooks best practices including hook order consistency, dependency management, and custom hook patterns
+globs: []
 alwaysApply: true
 ---
 
@@ -156,3 +158,28 @@ function usePokemonData(pokemonId: number) {
 - **Always clean up effects**: Return cleanup functions from useEffect when needed
 - **Handle component unmounting**: Clean up subscriptions, timers, and event listeners
 - **Use AbortController**: For canceling fetch requests on unmount
+
+### Minimize useEffect Usage
+
+- **Avoid useEffect when possible**: Prefer alternatives to useEffect for state synchronization
+- **Use event handlers instead of effects**: Handle user interactions directly in event handlers
+- **Use derived state instead of effects**: Compute values during render instead of storing them in state
+- **Use useMemo for expensive calculations**: Instead of useEffect for computed values
+- **Use useCallback for stable references**: Instead of useEffect for callback stability
+- **Use useReducer for complex state**: Instead of multiple useEffect calls for related state
+
+### When to Use useEffect
+
+- **Data fetching**: Loading data from APIs
+- **Subscriptions**: Setting up and cleaning up subscriptions
+- **DOM measurements**: Reading DOM properties
+- **Synchronizing with external systems**: Browser APIs, third-party libraries
+- **Cleanup operations**: When component unmounts or dependencies change
+
+### Avoid useEffect For
+
+- **State synchronization with props**: Use props directly instead
+- **Derived state**: Compute values during render
+- **User interactions**: Use event handlers instead
+- **Simple state updates**: Use direct state setters
+- **Callback stability**: Use useCallback instead

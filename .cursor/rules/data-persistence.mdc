@@ -1,42 +1,47 @@
-description: Data persistence, state management, and storage requirements
-globs: ["src/**/*.ts", "src/**/*.tsx"]
-alwaysApply: true
-
+---
+description: Data persistence and state management rules including run storage, auto-save, export/import, and data validation
+globs: ['src/lib/state/**/*.{ts,tsx}', 'src/hooks/**/*.{ts,tsx}']
+alwaysApply: false
 ---
 
 # Data Persistence and State Management
+
 Rules for handling data persistence, state management, and run storage.
 
 ## State Management Requirements
+
 - **Run State**: Track current Nuzlocke run with all data
 - **Multiple Runs**: Support for multiple concurrent runs
 - **Auto-Save**: Automatically save run state to prevent data loss
 - **Export/Import**: Share run data between users
 
 ## Data Storage Strategy
+
 - **Local Storage**: Store run data in browser localStorage
 - **IndexedDB**: Use for larger datasets and better performance
 - **Export Format**: JSON format for sharing runs
 - **Backup System**: Automatic backups of run data
 
 ## Run Data Structure
+
 ```typescript
 interface NuzlockeRun {
-  id: string
-  name: string
-  gameMode: 'classic' | 'remix'
-  startDate: Date
-  currentLocation: string
-  badges: string[]
-  team: TeamMember[]
-  deathBox: TeamMember[]
-  encounters: EncounterHistory[]
-  fusions: FusionHistory[]
-  settings: RunSettings
+  id: string;
+  name: string;
+  gameMode: 'classic' | 'remix';
+  startDate: Date;
+  currentLocation: string;
+  badges: string[];
+  team: TeamMember[];
+  deathBox: TeamMember[];
+  encounters: EncounterHistory[];
+  fusions: FusionHistory[];
+  settings: RunSettings;
 }
 ```
 
 ## State Management Patterns
+
 - Use React Context for global state
 - Implement reducer pattern for complex state changes
 - Use custom hooks for state logic
@@ -44,6 +49,7 @@ interface NuzlockeRun {
 - Add undo/redo functionality for critical actions
 
 ## Data Validation
+
 - Validate run data on load
 - Check data integrity before saving
 - Implement migration for data format changes
@@ -51,6 +57,7 @@ interface NuzlockeRun {
 - Provide data recovery options
 
 ## Performance Considerations
+
 - Lazy load large datasets
 - Implement virtual scrolling for long lists
 - Cache frequently accessed data
@@ -58,6 +65,7 @@ interface NuzlockeRun {
 - Use web workers for heavy calculations
 
 ## Security and Privacy
+
 - Encrypt sensitive run data
 - Implement user authentication for cloud storage
 - Handle data export/import securely

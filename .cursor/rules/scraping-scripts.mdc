@@ -1,0 +1,328 @@
+---
+description: Scraping script development guidelines including data fetching, error handling, progress tracking, and file organization patterns
+globs: ['scripts/**/*.{ts,js}']
+alwaysApply: false
+---
+
+# Scraping Script Guidelines
+
+Rules for developing data scraping scripts for the Infinite Fusion Nuzlocke tracker.
+
+## Script Structure and Organization
+
+### File Organization
+
+- **Main Scripts**: Place primary scraping scripts in `scripts/` root
+- **Utilities**: Organize shared utilities in `scripts/utils/`
+- **Types**: Define shared types in `scripts/types/`
+- **Data Output**: Write output files to `data/` directory
+- **Shebang**: Always include `#!/usr/bin/env node` at the top of executable scripts
+
+### Script Naming Convention
+
+- Use descriptive names: `scrape-{data-type}.ts`
+- Use kebab-case for file names
+- Include the data source in the name when relevant
+- Examples: `scrape-pokedex.ts`, `fetch-pokemon-data.ts`, `scrape-wild-encounters.ts`
+
+## Data Fetching Patterns
+
+### API Integration
+
+- **Rate Limiting**: Implement proper delays between API calls
+- **Error Handling**: Use try-catch blocks for all network requests
+- **Retry Logic**: Implement exponential backoff for failed requests
+- **Caching**: Cache responses to avoid duplicate API calls
+- **Timeout**: Set appropriate timeouts for API requests
+
+### Example API Pattern
+
+```typescript
+// Good: Proper API handling with error management
+async function fetchWithRetry<T>(url: string, retries = 3): Promise<T> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await fetch(url, {
+        timeout: 30000,
+        headers: { 'User-Agent': 'Infinite-Fusion-Scraper/1.0' },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      if (i === retries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+    }
+  }
+  throw new Error('Max retries exceeded');
+}
+```
+
+## Console Output and Progress Tracking
+
+### Use ConsoleFormatter
+
+- **Always use ConsoleFormatter**: Import and use the shared console utilities
+- **Progress Bars**: Use progress bars for long-running operations
+- **Color Coding**: Use appropriate colors for different message types
+- **Headers**: Use `printHeader()` for script start
+- **Sections**: Use `printSection()` for major steps
+- **Summary**: Use `printSummary()` for final results
+
+### Example Console Usage
+
+```typescript
+import { ConsoleFormatter } from './utils/console-utils';
+
+// Good: Professional console output
+ConsoleFormatter.printHeader(
+  'Pokemon Data Scraper',
+  'Fetching data from PokeAPI'
+);
+ConsoleFormatter.printSection('Fetching Pokemon Species');
+
+const progressBar = ConsoleFormatter.createProgressBar(totalPokemon);
+// ... processing ...
+progressBar.update(current, { status: `Processing ${pokemonName}` });
+
+ConsoleFormatter.printSummary('Scraping Complete', [
+  { label: 'Pokemon Processed', value: processedCount, color: 'green' },
+  { label: 'Errors', value: errorCount, color: 'red' },
+  { label: 'Output File', value: outputPath, color: 'blue' },
+]);
+```
+
+## Error Handling and Logging
+
+### Error Management
+
+- **Graceful Degradation**: Handle errors without crashing the entire script
+- **Detailed Logging**: Log errors with context and stack traces
+- **Error Recovery**: Implement fallback strategies for failed requests
+- **Data Validation**: Validate scraped data before saving
+- **Partial Success**: Continue processing even if some items fail
+
+### Example Error Handling
+
+```typescript
+// Good: Comprehensive error handling
+try {
+  const data = await fetchPokemonData(pokemonId);
+  if (!data) {
+    ConsoleFormatter.warn(`No data found for Pokemon ${pokemonId}`);
+    return null;
+  }
+  return data;
+} catch (error) {
+  ConsoleFormatter.error(
+    `Failed to fetch Pokemon ${pokemonId}: ${error instanceof Error ? error.message : 'Unknown error'}`
+  );
+  return null;
+}
+```
+
+## Data Processing and Validation
+
+### Data Validation
+
+- **Type Safety**: Use TypeScript interfaces for all data structures
+- **Schema Validation**: Validate data against expected schemas
+- **Data Cleaning**: Clean and normalize scraped data
+- **Duplicate Detection**: Handle duplicate data appropriately
+- **Data Transformation**: Transform data into the required format
+
+### Example Data Processing
+
+```typescript
+// Good: Type-safe data processing
+interface RawPokemonData {
+  id: number;
+  name: string;
+  types: Array<{ type: { name: string } }>;
+}
+
+interface ProcessedPokemonData {
+  id: number;
+  name: string;
+  types: string[];
+}
+
+function processPokemonData(raw: RawPokemonData): ProcessedPokemonData {
+  return {
+    id: raw.id,
+    name: raw.name,
+    types: raw.types.map(t => t.type.name),
+  };
+}
+```
+
+## File I/O and Data Persistence
+
+### File Operations
+
+- **Async Operations**: Use `fs/promises` for file operations
+- **Error Handling**: Handle file system errors gracefully
+- **Backup Strategy**: Create backups before overwriting files
+- **Atomic Writes**: Use temporary files for atomic writes
+- **File Size**: Monitor output file sizes
+
+### Example File Operations
+
+```typescript
+import fs from 'fs/promises';
+import path from 'path';
+
+// Good: Safe file operations
+async function saveData(data: any, filename: string) {
+  const outputPath = path.join(process.cwd(), 'data', filename);
+  const tempPath = `${outputPath}.tmp`;
+
+  try {
+    // Write to temporary file first
+    await fs.writeFile(tempPath, JSON.stringify(data, null, 2));
+
+    // Atomic move to final location
+    await fs.rename(tempPath, outputPath);
+
+    ConsoleFormatter.success(`Data saved to ${outputPath}`);
+  } catch (error) {
+    // Clean up temp file on error
+    try {
+      await fs.unlink(tempPath);
+    } catch {}
+    throw error;
+  }
+}
+```
+
+## Performance Optimization
+
+### Batch Processing
+
+- **Batch Operations**: Process data in batches to manage memory
+- **Concurrency Control**: Limit concurrent operations to avoid rate limits
+- **Memory Management**: Monitor memory usage for large datasets
+- **Progress Tracking**: Show progress for long-running operations
+- **Resource Cleanup**: Clean up resources after processing
+
+### Example Batch Processing
+
+```typescript
+// Good: Batch processing with progress
+async function processBatch<T, R>(
+  items: T[],
+  processor: (item: T) => Promise<R>,
+  batchSize = 10
+): Promise<R[]> {
+  const results: R[] = [];
+  const progressBar = ConsoleFormatter.createProgressBar(items.length);
+
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    const batchResults = await Promise.all(batch.map(item => processor(item)));
+    results.push(...batchResults);
+
+    progressBar.update(Math.min(i + batchSize, items.length));
+    await new Promise(resolve => setTimeout(resolve, 100)); // Rate limiting
+  }
+
+  return results;
+}
+```
+
+## Testing and Validation
+
+### Data Validation
+
+- **Schema Validation**: Validate output data against schemas
+- **Sample Testing**: Test with small datasets first
+- **Edge Cases**: Handle edge cases and error conditions
+- **Data Integrity**: Verify data integrity after processing
+- **Regression Testing**: Ensure changes don't break existing functionality
+
+### Example Validation
+
+```typescript
+// Good: Data validation
+function validatePokemonData(data: any): data is ProcessedPokemonData {
+  return (
+    typeof data.id === 'number' &&
+    typeof data.name === 'string' &&
+    Array.isArray(data.types) &&
+    data.types.every((t: any) => typeof t === 'string')
+  );
+}
+
+// Validate before saving
+if (!validatePokemonData(processedData)) {
+  ConsoleFormatter.error('Invalid data structure');
+  return;
+}
+```
+
+## Script Execution and CLI
+
+### Command Line Interface
+
+- **Argument Parsing**: Use proper argument parsing for CLI options
+- **Help Text**: Provide helpful usage information
+- **Exit Codes**: Use appropriate exit codes for success/failure
+- **Verbose Mode**: Support verbose logging for debugging
+- **Dry Run**: Support dry-run mode for testing
+
+### Example CLI Pattern
+
+```typescript
+#!/usr/bin/env node
+
+import { ConsoleFormatter } from './utils/console-utils';
+
+async function main() {
+  try {
+    ConsoleFormatter.printHeader('Data Scraper', 'Processing...');
+
+    // ... main logic ...
+
+    ConsoleFormatter.success('Script completed successfully');
+    process.exit(0);
+  } catch (error) {
+    ConsoleFormatter.error(
+      `Script failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+    process.exit(1);
+  }
+}
+
+if (require.main === module) {
+  main();
+}
+```
+
+## Best Practices
+
+### Code Organization
+
+- **Modular Design**: Break scripts into reusable functions
+- **Shared Utilities**: Use shared utilities for common operations
+- **Type Safety**: Use TypeScript for all scripts
+- **Documentation**: Document complex logic and business rules
+- **Configuration**: Use configuration files for settings
+
+### Performance Guidelines
+
+- **Memory Efficiency**: Process data in streams for large datasets
+- **Network Efficiency**: Implement proper caching and rate limiting
+- **Error Recovery**: Implement robust error recovery mechanisms
+- **Monitoring**: Add performance monitoring for long-running scripts
+- **Resource Management**: Properly manage file handles and network connections
+
+### Maintenance
+
+- **Version Control**: Keep scripts under version control
+- **Dependencies**: Minimize external dependencies
+- **Updates**: Keep dependencies updated and secure
+- **Documentation**: Maintain up-to-date documentation
+- **Testing**: Test scripts regularly with sample data

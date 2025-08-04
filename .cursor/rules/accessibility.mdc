@@ -1,15 +1,24 @@
+---
+description: Comprehensive accessibility requirements for WCAG 2.1 AA compliance including semantic HTML, ARIA attributes, keyboard navigation, and screen reader support
+globs: []
+alwaysApply: true
+---
+
 # Accessibility Guidelines
+
 Comprehensive accessibility requirements for the Infinite Fusion Nuzlocke tracker to ensure WCAG 2.1 AA compliance.
 
 ## Core Accessibility Principles
 
 ### Universal Design
+
 - **Inclusive Design**: All features must be usable by people with disabilities
 - **Multiple Input Methods**: Support keyboard, mouse, touch, and assistive technologies
 - **Clear Communication**: Provide clear, concise information through multiple channels
 - **Error Prevention**: Design interfaces that prevent errors and provide clear recovery
 
 ### WCAG 2.1 AA Compliance
+
 - **Perceivable**: Information must be presentable to users in ways they can perceive
 - **Operable**: User interface components must be operable
 - **Understandable**: Information and operation of user interface must be understandable
@@ -18,6 +27,7 @@ Comprehensive accessibility requirements for the Infinite Fusion Nuzlocke tracke
 ## Semantic HTML Requirements
 
 ### Proper HTML Structure
+
 ```html
 <!-- Good: Semantic HTML with proper roles -->
 <table role="table" aria-label="Data table">
@@ -41,6 +51,7 @@ Comprehensive accessibility requirements for the Infinite Fusion Nuzlocke tracke
 ```
 
 ### Interactive Elements
+
 - **Buttons**: Use `<button>` elements for all clickable actions
 - **Links**: Use `<a>` elements for navigation
 - **Forms**: Use proper form elements with labels
@@ -49,9 +60,10 @@ Comprehensive accessibility requirements for the Infinite Fusion Nuzlocke tracke
 ## ARIA Attributes and Roles
 
 ### Essential ARIA Attributes
+
 ```typescript
 // Good: Proper ARIA attributes
-<button 
+<button
   aria-label="Sort table by name"
   aria-expanded={isExpanded}
   aria-pressed={isPressed}
@@ -67,6 +79,7 @@ Comprehensive accessibility requirements for the Infinite Fusion Nuzlocke tracke
 ```
 
 ### Common ARIA Patterns
+
 - **aria-label**: Provide descriptive labels for elements
 - **aria-describedby**: Link elements to descriptions
 - **aria-live**: Announce dynamic content changes
@@ -77,6 +90,7 @@ Comprehensive accessibility requirements for the Infinite Fusion Nuzlocke tracke
 ## Keyboard Navigation
 
 ### Tab Order and Focus Management
+
 ```typescript
 // Good: Proper keyboard navigation
 const handleKeyDown = (e: KeyboardEvent) => {
@@ -86,7 +100,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
   }
 };
 
-<button 
+<button
   tabIndex={0}
   onKeyDown={handleKeyDown}
   onFocus={handleFocus}
@@ -96,6 +110,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
 ```
 
 ### Focus Indicators
+
 - **Visible Focus**: All focusable elements must have visible focus indicators
 - **Focus Ring**: Use consistent focus ring styling
 - **Skip Links**: Provide skip links for main content areas
@@ -104,10 +119,11 @@ const handleKeyDown = (e: KeyboardEvent) => {
 ## Screen Reader Support
 
 ### Text Alternatives
+
 ```typescript
 // Good: Descriptive text for screen readers
-<img 
-  src="pokemon-sprite.png" 
+<img
+  src="pokemon-sprite.png"
   alt="Charizard, a fire-type Pokémon with orange and yellow coloring"
 />
 
@@ -117,6 +133,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
 ```
 
 ### Dynamic Content
+
 ```typescript
 // Good: Announce dynamic content changes
 <div aria-live="polite" role="status">
@@ -132,12 +149,14 @@ const handleKeyDown = (e: KeyboardEvent) => {
 ## Color and Visual Design
 
 ### Color Contrast Requirements
+
 - **Normal Text**: Minimum 4.5:1 contrast ratio
 - **Large Text**: Minimum 3:1 contrast ratio
 - **UI Components**: Minimum 3:1 contrast ratio
 - **Focus Indicators**: High contrast focus indicators
 
 ### Color Independence
+
 ```typescript
 // Good: Don't rely solely on color
 <div className="flex items-center space-x-2">
@@ -152,11 +171,12 @@ const handleKeyDown = (e: KeyboardEvent) => {
 ## Form Accessibility
 
 ### Proper Form Structure
+
 ```typescript
 // Good: Proper form labels and structure
 <form>
   <label htmlFor="pokemon-name">Pokemon Name:</label>
-  <input 
+  <input
     id="pokemon-name"
     type="text"
     aria-describedby="name-help"
@@ -167,9 +187,10 @@ const handleKeyDown = (e: KeyboardEvent) => {
 ```
 
 ### Error Handling
+
 ```typescript
 // Good: Clear error messages with ARIA
-<input 
+<input
   aria-invalid={hasError}
   aria-describedby={hasError ? "error-message" : undefined}
 />
@@ -183,6 +204,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
 ## Table Accessibility
 
 ### Data Tables
+
 ```typescript
 // Good: Accessible table structure
 <table role="table" aria-label="Pokemon locations">
@@ -203,6 +225,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
 ```
 
 ### Sortable Tables
+
 - **aria-sort**: Indicate current sort state
 - **Keyboard Navigation**: Support arrow keys for navigation
 - **Sort Announcements**: Announce sort changes to screen readers
@@ -210,10 +233,11 @@ const handleKeyDown = (e: KeyboardEvent) => {
 ## Component Accessibility Patterns
 
 ### Modal Dialogs
+
 ```typescript
 // Good: Accessible modal implementation
-<div 
-  role="dialog" 
+<div
+  role="dialog"
   aria-modal="true"
   aria-labelledby="modal-title"
   aria-describedby="modal-description"
@@ -226,10 +250,11 @@ const handleKeyDown = (e: KeyboardEvent) => {
 ```
 
 ### Dropdown Menus
+
 ```typescript
 // Good: Accessible dropdown
 <div role="combobox" aria-expanded={isOpen} aria-haspopup="listbox">
-  <button 
+  <button
     aria-labelledby="dropdown-label"
     onClick={toggleDropdown}
   >
@@ -238,7 +263,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
   {isOpen && (
     <ul role="listbox" aria-label="Pokemon options">
       {options.map(option => (
-        <li 
+        <li
           key={option.id}
           role="option"
           aria-selected={selectedId === option.id}
@@ -254,6 +279,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
 ## Testing Accessibility
 
 ### Manual Testing Checklist
+
 - [ ] **Keyboard Navigation**: All features work with keyboard only
 - [ ] **Screen Reader**: Test with NVDA, JAWS, or VoiceOver
 - [ ] **Color Contrast**: Verify contrast ratios meet requirements
@@ -262,6 +288,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
 - [ ] **Dynamic Content**: Verify live regions announce changes
 
 ### Automated Testing
+
 ```typescript
 // Use accessibility testing libraries
 import { axe, toHaveNoViolations } from 'jest-axe';
@@ -278,6 +305,7 @@ test('component is accessible', async () => {
 ## Common Accessibility Issues
 
 ### Avoid These Patterns
+
 ```typescript
 // ❌ Bad: Non-semantic click handlers
 <div onClick={handleClick}>Click me</div>
@@ -293,6 +321,7 @@ test('component is accessible', async () => {
 ```
 
 ### Fix These Issues
+
 ```typescript
 // ✅ Good: Proper button element
 <button onClick={handleClick}>Click me</button>
@@ -308,7 +337,7 @@ test('component is accessible', async () => {
 </div>
 
 // ✅ Good: Keyboard support
-<button 
+<button
   onClick={handleAction}
   onKeyDown={(e) => e.key === 'Enter' && handleAction()}
 >
@@ -319,12 +348,14 @@ test('component is accessible', async () => {
 ## Accessibility Resources
 
 ### Tools and Libraries
+
 - **axe-core**: Automated accessibility testing
 - **@axe-core/react**: React-specific accessibility testing
 - **react-aria**: Accessible React components
 - **@radix-ui/react**: Accessible component primitives
 
 ### Documentation
+
 - [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
 - [MDN Accessibility](https://developer.mozilla.org/en-US/docs/Web/Accessibility)
 - [Web.dev Accessibility](https://web.dev/accessibility/)
@@ -332,6 +363,7 @@ test('component is accessible', async () => {
 ## Implementation Guidelines
 
 ### Component Development
+
 1. **Start with Semantic HTML**: Use proper HTML elements
 2. **Add ARIA Attributes**: Include necessary accessibility attributes
 3. **Test Keyboard Navigation**: Ensure full keyboard accessibility
@@ -339,6 +371,7 @@ test('component is accessible', async () => {
 5. **Check Color Contrast**: Ensure sufficient contrast ratios
 
 ### Code Review Process
+
 - [ ] Semantic HTML structure
 - [ ] Proper ARIA attributes
 - [ ] Keyboard navigation support
@@ -348,7 +381,11 @@ test('component is accessible', async () => {
 - [ ] Dynamic content announcements
 
 ### Continuous Improvement
+
 - **Regular Audits**: Conduct accessibility audits
 - **User Testing**: Test with users who have disabilities
+- **Automated Testing**: Use accessibility testing tools
+- **Training**: Educate team on accessibility best practices
+
 - **Automated Testing**: Use accessibility testing tools
 - **Training**: Educate team on accessibility best practices
