@@ -2,6 +2,7 @@ import {
   RouteEncounterSchema,
   RouteEncountersArraySchema,
 } from '@/loaders/encounters';
+import { getCacheBuster } from '@/lib/persistence';
 import { z } from 'zod';
 
 export type RouteEncounter = z.infer<typeof RouteEncounterSchema>;
@@ -32,11 +33,9 @@ class EncountersApiService {
   ): Promise<EncountersApiResponse> {
     const searchParams = new URLSearchParams();
     searchParams.append('gameMode', params.gameMode);
-    
+
     // Add cache busting version parameter
-    const buildId = process.env.NEXT_PUBLIC_BUILD_ID || 
-                   (process.env.NODE_ENV === 'development' ? 'dev' : 'default');
-    searchParams.append('v', buildId);
+    searchParams.append('v', getCacheBuster().toString());
 
     const url = `${this.baseUrl}?${searchParams.toString()}`;
 

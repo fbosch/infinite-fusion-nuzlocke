@@ -1,4 +1,5 @@
 import { PokemonSchema } from '@/loaders/pokemon';
+import { getCacheBuster } from '@/lib/persistence';
 import { z } from 'zod';
 
 export type Pokemon = z.infer<typeof PokemonSchema>;
@@ -49,9 +50,7 @@ class PokemonApiService {
     }
 
     // Add cache busting version parameter
-    const buildId = process.env.NEXT_PUBLIC_BUILD_ID || 
-                   (process.env.NODE_ENV === 'development' ? 'dev' : 'default');
-    searchParams.append('v', buildId);
+    searchParams.append('v', getCacheBuster().toString());
 
     const url = `${this.baseUrl}?${searchParams.toString()}`;
 

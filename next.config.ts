@@ -82,6 +82,14 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  // Expose build ID to client side
+  env: {
+    NEXT_PUBLIC_BUILD_ID:
+      process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ||
+      process.env.NEXT_PUBLIC_BUILD_ID ||
+      `build-${Date.now()}`,
+  },
+
   // Optimize static asset caching
   async headers() {
     return [

@@ -1,5 +1,6 @@
 import { SpriteVariantsResponse, SpriteVariantsError } from '@/types/sprites';
 import { formatArtistCredits } from '@/utils/formatCredits';
+import { getCacheBuster } from '@/lib/persistence';
 
 // Types for sprite credits API
 export interface SpriteCreditsResponse {
@@ -129,11 +130,9 @@ export async function getArtworkVariants(
       headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
     const params = new URLSearchParams();
     params.set('id', id.toString());
-    
+
     // Add cache busting version parameter
-    const buildId = process.env.NEXT_PUBLIC_BUILD_ID || 
-                   (process.env.NODE_ENV === 'development' ? 'dev' : 'default');
-    params.set('v', buildId);
+    params.set('v', getCacheBuster().toString());
 
     const response = await fetch(`/api/sprite/variants?${params.toString()}`);
 
@@ -174,9 +173,8 @@ export async function getSpriteCredits(
       headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
 
     // Add cache busting version parameter
-    const buildId = process.env.NEXT_PUBLIC_BUILD_ID || 
-                   (process.env.NODE_ENV === 'development' ? 'dev' : 'default');
-    
+    const buildId = getCacheBuster().toString();
+
     const response = await fetch(
       `/api/sprite/artists?id=${encodeURIComponent(id)}&v=${encodeURIComponent(buildId)}`
     );

@@ -10,6 +10,7 @@ export const getCacheBuster = () => {
     return Math.floor(Date.now() / (1 * 60 * 1000)); // Updates every minute
   }
 
+  // Use Vercel commit SHA (exposed as NEXT_PUBLIC_BUILD_ID) or fallback
   return process.env.NEXT_PUBLIC_BUILD_ID || 'v1';
 };
 

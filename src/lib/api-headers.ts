@@ -1,20 +1,18 @@
 /**
  * Utility functions for API cache headers with build ID integration
  */
-
-const getBuildId = () => {
-  return process.env.NEXT_PUBLIC_BUILD_ID || 
-         (process.env.NODE_ENV === 'development' ? 'dev' : 'default');
-};
+import { getCacheBuster } from '@/lib/persistence';
 
 /**
  * Create cache headers with ETag based on build ID
  */
-export function createCacheHeaders(options: {
-  maxAge?: number;
-  staleWhileRevalidate?: number;
-  includeETag?: boolean;
-} = {}) {
+export function createCacheHeaders(
+  options: {
+    maxAge?: number;
+    staleWhileRevalidate?: number;
+    includeETag?: boolean;
+  } = {}
+) {
   const {
     maxAge = 3600, // 1 hour default
     staleWhileRevalidate = 300, // 5 minutes default
@@ -26,7 +24,7 @@ export function createCacheHeaders(options: {
   };
 
   if (includeETag) {
-    headers['ETag'] = `"${getBuildId()}"`;
+    headers['ETag'] = `"${getCacheBuster()}"`;
   }
 
   return headers;
@@ -38,7 +36,7 @@ export function createCacheHeaders(options: {
 export function createDevCacheHeaders(maxAge: number = 30) {
   return {
     'Cache-Control': `public, max-age=${maxAge}`,
-    'ETag': `"${getBuildId()}"`,
+    ETag: `"${getCacheBuster()}"`,
   };
 }
 
@@ -48,7 +46,7 @@ export function createDevCacheHeaders(maxAge: number = 30) {
 export function createNoCacheHeaders() {
   return {
     'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache',
-    'Expires': '0',
+    Pragma: 'no-cache',
+    Expires: '0',
   };
 }
