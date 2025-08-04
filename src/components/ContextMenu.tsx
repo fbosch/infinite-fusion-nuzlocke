@@ -22,6 +22,8 @@ import React, {
 } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import Image from 'next/image';
+import { CursorTooltip } from './CursorTooltip';
+import { match } from 'ts-pattern';
 
 // Custom hook for context menu state management
 function useContextMenuState() {
@@ -80,6 +82,7 @@ export interface ContextMenuItem {
   variant?: 'default' | 'danger' | 'warning';
   shortcut?: string;
   separator?: boolean;
+  tooltip?: React.ReactNode;
 }
 
 export interface ContextMenuProps {
@@ -257,12 +260,11 @@ export function ContextMenu({
                 left: menuPosition.x,
                 top: menuPosition.y,
                 transformOrigin: 'top left',
-                zIndex: 9999,
               }}
               className={clsx(
-                'min-w-[12rem] z-70 rounded-md border border-gray-200 dark:border-gray-800',
+                'min-w-[12rem] z-100 rounded-md border border-gray-200 dark:border-gray-800',
                 'bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25',
-                'p-1 backdrop-blur-xl',
+                'p-1 backdrop-blur-xl tooltip-enter',
                 'origin-top-left backdrop-blur-xl',
                 'focus:outline-none',
                 className
@@ -290,23 +292,46 @@ export function ContextMenu({
                 );
                 const isActive = activeIndex === validIndex;
 
-                const commonClasses = clsx(
+                const baseClasses = clsx(
                   'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
                   'text-sm transition-colors duration-75 enabled:cursor-pointer',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
-                  'disabled:cursor-not-allowed disabled:opacity-50',
-                  'tooltip-enter',
-                  item.variant === 'danger'
-                    ? isActive
-                      ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
-                      : 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300'
-                    : item.variant === 'warning'
-                      ? isActive
-                        ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
-                        : 'text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-700 dark:hover:text-yellow-300'
-                      : isActive
-                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                        : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
+                );
+
+                const variantClasses = match<[string | undefined, boolean]>([
+                  item.variant,
+                  isActive,
+                ])
+                  .with(
+                    ['danger', true],
+                    () =>
+                      'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                  )
+                  .with(
+                    ['danger', false],
+                    () =>
+                      'text-red-600 dark:text-red-400 enabled:hover:bg-red-50 enabled:dark:hover:bg-red-900/20 enabled:hover:text-red-700 enabled:dark:hover:text-red-300'
+                  )
+                  .with(
+                    ['warning', true],
+                    () =>
+                      'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
+                  )
+                  .with(
+                    ['warning', false],
+                    () =>
+                      'text-yellow-600 dark:text-yellow-400 enabled:hover:bg-yellow-50 enabled:dark:hover:bg-yellow-900/20 enabled:hover:text-yellow-700 enabled:dark:hover:text-yellow-300'
+                  )
+                  .otherwise(([, active]) =>
+                    active
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                      : 'text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white'
+                  );
+
+                const commonClasses = clsx(
+                  baseClasses,
+                  variantClasses,
+                  item.disabled && '!opacity-75 !cursor-not-allowed'
                 );
 
                 const content = (
@@ -361,7 +386,7 @@ export function ContextMenu({
 
                 // Render as link if href is provided
                 if (item.href) {
-                  return (
+                  const linkElement = (
                     <a
                       key={item.id}
                       ref={node => {
@@ -383,10 +408,26 @@ export function ContextMenu({
                       {content}
                     </a>
                   );
+
+                  // Wrap with tooltip if provided
+                  if (item.tooltip) {
+                    return (
+                      <CursorTooltip
+                        key={item.id}
+                        content={item.tooltip}
+                        placement='right'
+                        delay={500}
+                      >
+                        {linkElement}
+                      </CursorTooltip>
+                    );
+                  }
+
+                  return linkElement;
                 }
 
                 // Render as button
-                return (
+                const buttonElement = (
                   <button
                     key={item.id}
                     ref={node => {
@@ -410,6 +451,22 @@ export function ContextMenu({
                     {content}
                   </button>
                 );
+
+                // Wrap with tooltip if provided
+                if (item.tooltip) {
+                  return (
+                    <CursorTooltip
+                      key={item.id}
+                      content={item.tooltip}
+                      placement='right'
+                      delay={500}
+                    >
+                      {buttonElement}
+                    </CursorTooltip>
+                  );
+                }
+
+                return buttonElement;
               })}
             </div>
           </FloatingFocusManager>

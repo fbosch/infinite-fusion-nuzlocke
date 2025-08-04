@@ -133,7 +133,13 @@ export function CursorTooltip({
       }),
       shift(),
     ],
-    whileElementsMounted: autoUpdate,
+    whileElementsMounted: (reference, floating, update) => {
+      const cleanup = autoUpdate(reference, floating, update, {
+        layoutShift: true,
+        animationFrame: true,
+      });
+      return cleanup;
+    },
   });
 
   const clientPointFloating = useClientPoint(context, {
@@ -141,7 +147,7 @@ export function CursorTooltip({
   });
 
   const hover = useHover(context, {
-    delay: { open: delay, close: 0 },
+    delay: { open: 0, close: 0 },
     enabled: !disabled,
   });
 
@@ -169,7 +175,7 @@ export function CursorTooltip({
       {isVisible && (
         <FloatingPortal>
           <div
-            className='z-100'
+            className='z-110'
             ref={refs.setFloating}
             style={floatingStyles}
             {...getFloatingProps()}

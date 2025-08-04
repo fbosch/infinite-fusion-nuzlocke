@@ -89,6 +89,10 @@ export default function SummaryCard({
         label: 'Change Preferred Artwork',
         disabled: eitherPokemonIsEgg || !hasArtVariants,
         icon: isLoadingVariants ? Loader2 : Replace,
+        tooltip:
+          eitherPokemonIsEgg || !hasArtVariants
+            ? 'No artwork variants available'
+            : undefined,
         iconClassName: isLoadingVariants ? 'animate-spin' : '',
         onClick: () => {
           setIsVariantModalOpen(true);
@@ -117,14 +121,7 @@ export default function SummaryCard({
         iconClassName: 'dark:text-blue-300 text-blue-400',
       },
     ];
-  }, [
-    encounterData,
-    eitherPokemonIsEgg,
-    hasArtVariants,
-    isLoadingVariants,
-    locationId,
-    variants,
-  ]);
+  }, [encounterData, eitherPokemonIsEgg, hasArtVariants, isLoadingVariants]);
 
   if (!encounterData?.head && !encounterData?.body) {
     return null;
