@@ -34,7 +34,7 @@ const nextConfig: NextConfig = {
   },
 
   // Webpack configuration for production builds (Turbopack only works in dev)
-  webpack(config, { webpack }) {
+  webpack(config) {
     // Handle SVG files with SVGR for production builds
     config.module.rules.push({
       test: /\.svg$/,
@@ -59,17 +59,6 @@ const nextConfig: NextConfig = {
         },
       ],
     });
-
-    // Inject build ID into service worker
-    config.plugins.push(
-      new webpack.DefinePlugin({
-        __BUILD_ID__: JSON.stringify(
-          process.env.NEXT_PUBLIC_BUILD_ID ||
-            process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ||
-            `build-${Date.now()}`
-        ),
-      })
-    );
 
     return config;
   },

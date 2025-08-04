@@ -1,6 +1,7 @@
 // Simplified Service Worker with Pokemon Image Prefetching
 // API cache gets cleared on each deployment, images remain persistent
-const BUILD_ID = '__BUILD_ID__'; // Replaced during build
+const BUILD_ID =
+  new URL(self.location).searchParams.get('buildId') || 'default';
 const API_CACHE_NAME = `infinite-fusion-api-${BUILD_ID}`;
 // Image caches remain static - no versioning needed since images don't change
 const IMAGE_CACHE_NAME = `infinite-fusion-images-v1`;
