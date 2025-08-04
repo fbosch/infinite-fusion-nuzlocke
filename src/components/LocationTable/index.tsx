@@ -73,20 +73,20 @@ export default function LocationTable() {
   useEffect(() => {
     if (!mounted || isLoading || data.length === 0) return;
 
-    setTimeout(() => {
+    window.requestAnimationFrame(() => {
       scrollToMostRecentLocation(
-        playthroughActions.getEncounters(),
+        playthroughActions.getEncounters() || {},
         tableContainerRef.current,
         tableRef.current,
         'smooth'
       );
-    }, 100);
+    });
   }, [mounted, isLoading, data.length]);
 
   // Manual scroll handler
   const handleScrollToRecent = useCallback(() => {
     scrollToMostRecentLocation(
-      playthroughActions.getEncounters(),
+      playthroughActions.getEncounters() || {},
       tableContainerRef.current,
       tableRef.current,
       'smooth'

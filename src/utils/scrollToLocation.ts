@@ -1,4 +1,7 @@
-import type { EncounterData } from '@/stores/playthroughs';
+import { z } from 'zod';
+import { EncounterDataSchema } from '@/stores/playthroughs';
+
+type EncounterData = z.infer<typeof EncounterDataSchema>;
 
 /**
  * Find the most recently filled out location based on encounter updatedAt timestamps
