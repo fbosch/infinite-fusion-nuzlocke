@@ -34,6 +34,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
       role='row'
       className='hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors content-visibility-auto group/row contain-intrinsic-height-[150px]'
       ref={ref}
+      data-location-id={locationId}
     >
       {row.getVisibleCells().map(cell =>
         match(cell.column.id)
