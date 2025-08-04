@@ -163,6 +163,8 @@ export function CursorTooltip({
     clientPointFloating,
   ]);
 
+  if (!content) return children;
+
   return (
     <>
       {isValidElement(children) &&

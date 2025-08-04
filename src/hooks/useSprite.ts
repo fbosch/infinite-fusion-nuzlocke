@@ -25,6 +25,8 @@ export function useSpriteCredits(
 ) {
   return useQuery({
     ...spriteQueries.credits(headId, bodyId),
+    staleTime: ms('24h'), // Cache credits for 24 hours
+    gcTime: ms('48h'),
     enabled: !!(headId || bodyId) && enabled,
   });
 }
