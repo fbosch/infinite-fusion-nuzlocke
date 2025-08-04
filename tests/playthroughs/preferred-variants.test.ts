@@ -1,12 +1,16 @@
 // Import mocks first (must be at top level for Vitest hoisting)
 import './mocks';
 
-// Mock preferredVariants module
+// Mock preferredVariants module - fix the mock structure to match actual exports
 import { vi } from 'vitest';
 vi.mock('../../src/lib/preferredVariants', () => ({
   getPreferredVariant: vi.fn(),
   setPreferredVariant: vi.fn(),
+  clearPreferredVariants: vi.fn(),
+  reloadPreferredVariants: vi.fn(),
 }));
+
+// Import the mocked functions
 import {
   getPreferredVariant,
   setPreferredVariant,
@@ -33,6 +37,28 @@ import {
   createMockPokemon,
   setupPlaythroughTest,
 } from './setup';
+
+// Mock sprites module methods that are used in the tests
+vi.mock('../../src/lib/sprites', () => ({
+  generateSpriteUrl: vi.fn(
+    (headId, bodyId, variant = '') =>
+      `mock-sprite-url-${headId || 'unknown'}-${bodyId || 'unknown'}${variant ? `-${variant}` : ''}`
+  ),
+  getArtworkVariants: vi.fn().mockResolvedValue(['']),
+  getSpriteId: vi.fn((headId, bodyId) => {
+    return headId && bodyId
+      ? `${headId}.${bodyId}`
+      : (headId || bodyId || '').toString();
+  }),
+  checkSpriteExists: vi.fn().mockResolvedValue(true),
+  getSpriteCredits: vi.fn().mockResolvedValue(null),
+  getVariantSpriteCredits: vi.fn().mockResolvedValue(null),
+  getFormattedVariantSpriteCredits: vi.fn().mockResolvedValue(''),
+  getFormattedCreditsFromResponse: vi.fn(() => ''),
+  getVariantSuffix: vi.fn(index =>
+    index === 0 ? '' : String.fromCharCode(97 + index - 1)
+  ),
+}));
 
 describe('Playthroughs Store - Preferred Variants', () => {
   beforeEach(() => {
@@ -297,10 +323,13 @@ describe('Playthroughs Store - Preferred Variants', () => {
     });
 
     it('should cycle through available variants forward', async () => {
-      // Mock sprite service to return multiple variants
-      vi.mocked(
-        (await import('../../src/services/spriteService')).default
-      ).getArtworkVariants.mockResolvedValue(['', 'variant-1', 'variant-2']);
+      // Mock sprites module to return multiple variants
+      const sprites = await import('../../src/lib/sprites');
+      vi.mocked(sprites.getArtworkVariants).mockResolvedValue([
+        '',
+        'variant-1',
+        'variant-2',
+      ]);
 
       await act(async () => {
         await playthroughActions.cycleArtworkVariant('route-1', false);
@@ -317,10 +346,13 @@ describe('Playthroughs Store - Preferred Variants', () => {
     });
 
     it('should cycle through available variants backward', async () => {
-      // Mock sprite service to return multiple variants
-      vi.mocked(
-        (await import('../../src/services/spriteService')).default
-      ).getArtworkVariants.mockResolvedValue(['', 'variant-1', 'variant-2']);
+      // Mock sprites module to return multiple variants
+      const sprites = await import('../../src/lib/sprites');
+      vi.mocked(sprites.getArtworkVariants).mockResolvedValue([
+        '',
+        'variant-1',
+        'variant-2',
+      ]);
 
       await act(async () => {
         await playthroughActions.cycleArtworkVariant('route-1', true);
@@ -337,10 +369,9 @@ describe('Playthroughs Store - Preferred Variants', () => {
     });
 
     it('should handle single variant gracefully', async () => {
-      // Mock sprite service to return only one variant
-      vi.mocked(
-        (await import('../../src/services/spriteService')).default
-      ).getArtworkVariants.mockResolvedValue(['']);
+      // Mock sprites module to return only one variant
+      const sprites = await import('../../src/lib/sprites');
+      vi.mocked(sprites.getArtworkVariants).mockResolvedValue(['']);
 
       await act(async () => {
         await playthroughActions.cycleArtworkVariant('route-1', false);
@@ -353,10 +384,9 @@ describe('Playthroughs Store - Preferred Variants', () => {
     });
 
     it('should handle no variants gracefully', async () => {
-      // Mock sprite service to return no variants
-      vi.mocked(
-        (await import('../../src/services/spriteService')).default
-      ).getArtworkVariants.mockResolvedValue([]);
+      // Mock sprites module to return no variants
+      const sprites = await import('../../src/lib/sprites');
+      vi.mocked(sprites.getArtworkVariants).mockResolvedValue([]);
 
       await act(async () => {
         await playthroughActions.cycleArtworkVariant('route-1', false);
@@ -369,10 +399,11 @@ describe('Playthroughs Store - Preferred Variants', () => {
     });
 
     it('should handle errors and set variant to undefined', async () => {
-      // Mock sprite service to throw an error
-      vi.mocked(
-        (await import('../../src/services/spriteService')).default
-      ).getArtworkVariants.mockRejectedValue(new Error('Service error'));
+      // Mock sprites module to throw an error
+      const sprites = await import('../../src/lib/sprites');
+      vi.mocked(sprites.getArtworkVariants).mockRejectedValue(
+        new Error('Service error')
+      );
 
       await act(async () => {
         await playthroughActions.cycleArtworkVariant('route-1', false);
@@ -384,10 +415,9 @@ describe('Playthroughs Store - Preferred Variants', () => {
     });
 
     it('should prefetch adjacent variants when cycling', async () => {
-      // Mock sprite service to return multiple variants
-      vi.mocked(
-        (await import('../../src/services/spriteService')).default
-      ).getArtworkVariants.mockResolvedValue([
+      // Mock sprites module to return multiple variants
+      const sprites = await import('../../src/lib/sprites');
+      vi.mocked(sprites.getArtworkVariants).mockResolvedValue([
         '',
         'variant-1',
         'variant-2',
@@ -426,9 +456,8 @@ describe('Playthroughs Store - Preferred Variants', () => {
       global.Image = mockImage;
 
       // Mock generateSpriteUrl to return valid URLs
-      vi.mocked(
-        (await import('../../src/services/spriteService')).default
-      ).generateSpriteUrl.mockReturnValue('mock-url');
+      const sprites = await import('../../src/lib/sprites');
+      vi.mocked(sprites.generateSpriteUrl).mockReturnValue('mock-url');
 
       await act(async () => {
         await playthroughActions.prefetchAdjacentVariants(25, 4, 'variant-1', [
@@ -446,15 +475,17 @@ describe('Playthroughs Store - Preferred Variants', () => {
       // But '' gets filtered out by the filter condition (variant && variant !== currentVariant)
       // So only 'variant-2' should be prefetched
       expect(mockImage).toHaveBeenCalled();
-      expect(
-        vi.mocked((await import('../../src/services/spriteService')).default)
-          .generateSpriteUrl
-      ).toHaveBeenCalledWith(25, 4, 'variant-2');
+      expect(vi.mocked(sprites.generateSpriteUrl)).toHaveBeenCalledWith(
+        25,
+        4,
+        'variant-2'
+      );
       // '' is filtered out because it's falsy in the filter condition
-      expect(
-        vi.mocked((await import('../../src/services/spriteService')).default)
-          .generateSpriteUrl
-      ).not.toHaveBeenCalledWith(25, 4, '');
+      expect(vi.mocked(sprites.generateSpriteUrl)).not.toHaveBeenCalledWith(
+        25,
+        4,
+        ''
+      );
     });
 
     it('should not prefetch when only one variant available', async () => {
@@ -481,9 +512,8 @@ describe('Playthroughs Store - Preferred Variants', () => {
       global.Image = mockImage;
 
       // Mock generateSpriteUrl to throw error for all variants
-      vi.mocked(
-        (await import('../../src/services/spriteService')).default
-      ).generateSpriteUrl.mockImplementation(() => {
+      const sprites = await import('../../src/lib/sprites');
+      vi.mocked(sprites.generateSpriteUrl).mockImplementation(() => {
         throw new Error('URL generation error');
       });
 
@@ -501,14 +531,16 @@ describe('Playthroughs Store - Preferred Variants', () => {
       // Should not have called Image constructor because generateSpriteUrl throws
       // The error is caught and logged, but Image constructor is never called
       expect(mockImage).not.toHaveBeenCalled();
-      expect(
-        vi.mocked((await import('../../src/services/spriteService')).default)
-          .generateSpriteUrl
-      ).toHaveBeenCalledWith(25, 4, 'variant-2');
-      expect(
-        vi.mocked((await import('../../src/services/spriteService')).default)
-          .generateSpriteUrl
-      ).toHaveBeenCalledWith(25, 4, 'variant-0');
+      expect(vi.mocked(sprites.generateSpriteUrl)).toHaveBeenCalledWith(
+        25,
+        4,
+        'variant-2'
+      );
+      expect(vi.mocked(sprites.generateSpriteUrl)).toHaveBeenCalledWith(
+        25,
+        4,
+        'variant-0'
+      );
     });
   });
 
@@ -526,30 +558,27 @@ describe('Playthroughs Store - Preferred Variants', () => {
     });
 
     it('should preload variants for all encounters in the playthrough', async () => {
-      // Mock sprite service to return variants
-      vi.mocked(
-        (await import('../../src/services/spriteService')).default
-      ).getArtworkVariants.mockResolvedValue(['', 'variant-1']);
+      // Mock sprites module to return variants
+      const sprites = await import('../../src/lib/sprites');
+      vi.mocked(sprites.getArtworkVariants).mockResolvedValue([
+        '',
+        'variant-1',
+      ]);
 
       await act(async () => {
         await playthroughActions.preloadArtworkVariants();
       });
 
       // Should have called getArtworkVariants for both encounters
-      expect(
-        vi.mocked((await import('../../src/services/spriteService')).default)
-          .getArtworkVariants
-      ).toHaveBeenCalledWith(25); // Single Pokémon
-      expect(
-        vi.mocked((await import('../../src/services/spriteService')).default)
-          .getArtworkVariants
-      ).toHaveBeenCalledWith(25, 4); // Fusion
+      expect(vi.mocked(sprites.getArtworkVariants)).toHaveBeenCalledWith(25); // Single Pokémon
+      expect(vi.mocked(sprites.getArtworkVariants)).toHaveBeenCalledWith(25, 4); // Fusion
     });
 
     it('should handle errors gracefully for individual encounters', async () => {
-      // Mock sprite service to throw error for fusion but work for single
-      vi.mocked((await import('../../src/services/spriteService')).default)
-        .getArtworkVariants.mockResolvedValueOnce(['', 'variant-1']) // Single Pokémon
+      // Mock sprites module to throw error for fusion but work for single
+      const sprites = await import('../../src/lib/sprites');
+      vi.mocked(sprites.getArtworkVariants)
+        .mockResolvedValueOnce(['', 'variant-1']) // Single Pokémon
         .mockRejectedValueOnce(new Error('Fusion error')); // Fusion
 
       await act(async () => {
@@ -557,10 +586,7 @@ describe('Playthroughs Store - Preferred Variants', () => {
       });
 
       // Should still have called for both encounters despite one failing
-      expect(
-        vi.mocked((await import('../../src/services/spriteService')).default)
-          .getArtworkVariants
-      ).toHaveBeenCalledTimes(2);
+      expect(vi.mocked(sprites.getArtworkVariants)).toHaveBeenCalledTimes(2);
     });
 
     it('should handle playthroughs with no encounters', async () => {
@@ -572,10 +598,8 @@ describe('Playthroughs Store - Preferred Variants', () => {
         await playthroughActions.preloadArtworkVariants();
       });
 
-      expect(
-        vi.mocked((await import('../../src/services/spriteService')).default)
-          .getArtworkVariants
-      ).not.toHaveBeenCalled();
+      const sprites = await import('../../src/lib/sprites');
+      expect(vi.mocked(sprites.getArtworkVariants)).not.toHaveBeenCalled();
     });
   });
 
@@ -663,11 +687,16 @@ describe('Playthroughs Store - Preferred Variants', () => {
       const charmander = createMockPokemon('Charmander', 4);
 
       // Mock different variants for different compositions
-      mockedGetPreferredVariant.mockImplementation((headId, bodyId) => {
-        if (headId === 25 && !bodyId) return 'pikachu-solo';
-        if (headId === 25 && bodyId === 4) return 'pikachu-charmander-fusion';
-        return 'default-variant';
-      });
+      mockedGetPreferredVariant.mockImplementation(
+        (
+          headId: number | null | undefined,
+          bodyId: number | null | undefined
+        ) => {
+          if (headId === 25 && !bodyId) return 'pikachu-solo';
+          if (headId === 25 && bodyId === 4) return 'pikachu-charmander-fusion';
+          return 'default-variant';
+        }
+      );
 
       await act(async () => {
         const playthroughId = playthroughActions.createPlaythrough('Test Run');
@@ -801,10 +830,15 @@ describe('Playthroughs Store - Preferred Variants', () => {
         const getVariantCalls: Array<
           [number | null | undefined, number | null | undefined]
         > = [];
-        mockedGetPreferredVariant.mockImplementation((headId, bodyId) => {
-          getVariantCalls.push([headId, bodyId]);
-          return 'flipped-variant';
-        });
+        mockedGetPreferredVariant.mockImplementation(
+          (
+            headId: number | null | undefined,
+            bodyId: number | null | undefined
+          ) => {
+            getVariantCalls.push([headId, bodyId]);
+            return 'flipped-variant';
+          }
+        );
 
         await act(async () => {
           // Use atomic flip operation
