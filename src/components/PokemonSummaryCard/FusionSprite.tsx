@@ -54,8 +54,6 @@ export function FusionSprite({
     shouldLoad && hasHovered.current === true && !hasEgg
   );
 
-  console.log(credits);
-
   const credit =
     hasEgg || isLoadingCredits
       ? undefined

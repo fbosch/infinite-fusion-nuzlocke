@@ -52,6 +52,8 @@ interface CursorTooltipProps {
   onMouseLeave?: () => void;
 }
 
+type TooltipState = 'closed' | 'opening' | 'open' | 'closing';
+
 export function CursorTooltip({
   content,
   children,
@@ -62,39 +64,53 @@ export function CursorTooltip({
   onMouseEnter,
   onMouseLeave,
 }: CursorTooltipProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [tooltipState, setTooltipState] = useState<TooltipState>('closed');
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isWindowVisible = useWindowVisibility();
 
-  // Cleanup function to clear timeouts
-  const clearExitTimeout = useCallback(() => {
-    if (exitTimeoutRef.current) {
-      clearTimeout(exitTimeoutRef.current);
-      exitTimeoutRef.current = null;
+  // Cleanup function to clear timeout
+  const clearCurrentTimeout = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
   }, []);
 
   // Handle opening the tooltip
   const handleOpen = useCallback(() => {
-    clearExitTimeout();
-    setIsVisible(true);
-    setIsOpen(true);
+    clearCurrentTimeout();
+
+    // Start with opening state (element rendered but hidden)
+    setTooltipState('opening');
     onMouseEnter?.();
-  }, [clearExitTimeout, onMouseEnter]);
+
+    // If there's a delay, wait before showing
+    if (delay > 0) {
+      timeoutRef.current = setTimeout(() => {
+        setTooltipState('open');
+        timeoutRef.current = null;
+      }, delay);
+    } else {
+      // No delay, show immediately
+      setTooltipState('open');
+    }
+  }, [clearCurrentTimeout, onMouseEnter, delay]);
 
   // Handle closing the tooltip
   const handleClose = useCallback(() => {
-    setIsOpen(false);
+    clearCurrentTimeout();
 
-    // Start exit animation
-    exitTimeoutRef.current = setTimeout(() => {
-      setIsVisible(false);
-      exitTimeoutRef.current = null;
-    }, 150); // Match CSS animation duration
+    // Start closing animation
+    setTooltipState('closing');
+
+    // Wait for animation to complete, then close
+    timeoutRef.current = setTimeout(() => {
+      setTooltipState('closed');
+      timeoutRef.current = null;
+    }, 50); // Match CSS animation duration (0.05s)
 
     onMouseLeave?.();
-  }, [onMouseLeave]);
+  }, [clearCurrentTimeout, onMouseLeave]);
 
   // Handle open/close state changes
   const handleOpenChange = useCallback(
@@ -111,16 +127,18 @@ export function CursorTooltip({
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      clearExitTimeout();
+      clearCurrentTimeout();
     };
-  }, [clearExitTimeout]);
+  }, [clearCurrentTimeout]);
 
   // Handle window visibility changes
   useEffect(() => {
-    if (!isWindowVisible && isOpen) {
+    if (!isWindowVisible && tooltipState !== 'closed') {
       handleOpenChange(false);
     }
-  }, [isWindowVisible, isOpen, handleOpenChange]);
+  }, [isWindowVisible, tooltipState, handleOpenChange]);
+
+  const isOpen = tooltipState !== 'closed';
 
   const { refs, floatingStyles, context } = useFloating({
     placement,
@@ -174,7 +192,7 @@ export function CursorTooltip({
           }),
         })}
 
-      {isVisible && (
+      {isOpen && (
         <FloatingPortal>
           <div
             className='z-110'
@@ -190,12 +208,16 @@ export function CursorTooltip({
                   'dark:bg-gray-700/80 background-blur dark:text-white text-gray-700',
                   'border dark:border-gray-600 border-gray-200',
                   'origin-top-left backdrop-blur-xl',
-                  isOpen ? 'tooltip-enter' : 'tooltip-exit'
+                  {
+                    'opacity-0 scale-95': tooltipState === 'opening',
+                    'tooltip-enter': tooltipState === 'open',
+                    'tooltip-exit': tooltipState === 'closing',
+                  }
                 ),
                 className
               )}
               style={{
-                // Ensure the tooltip stays in place during exit animation
+                // Ensure the tooltip stays in place during animations
                 position: 'relative',
                 zIndex: 1000,
               }}
