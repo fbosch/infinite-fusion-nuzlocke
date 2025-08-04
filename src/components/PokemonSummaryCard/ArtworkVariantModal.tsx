@@ -162,7 +162,7 @@ export function ArtworkVariantModal({
           transition
           id='artwork-variant-modal'
           className={clsx(
-            'max-w-3xl w-full max-h-[80vh] space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col',
+            'max-w-5xl w-full max-h-[80vh] space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col',
             'transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98'
           )}
         >
@@ -202,7 +202,7 @@ export function ArtworkVariantModal({
                 value={displayVariant || ''}
                 onChange={handleSelectVariant}
                 data-scroll-container
-                className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto overflow-x-hidden flex-1 min-h-0 scrollbar-thin p-3 relative'
+                className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-y-auto overflow-x-hidden flex-1 min-h-0 scrollbar-thin p-3 relative'
                 aria-label='Artwork variant options'
               >
                 {availableVariants.map(variant => {
@@ -214,7 +214,7 @@ export function ArtworkVariantModal({
                         id={`artwork-variant-${variant}`}
                         className={({ checked }) =>
                           clsx(
-                            'relative group p-2 rounded-lg border-2 transition-color duration-200 cursor-pointer',
+                            'relative group p-2 rounded-lg border-2 transition-color duration-200 cursor-pointer flex flex-col',
                             'hover:border-blue-500 hover:shadow-md',
                             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
                             {
@@ -246,24 +246,32 @@ export function ArtworkVariantModal({
                               },
                             ]}
                           >
-                            <figure className='flex flex-col items-center space-y-2 relative user-select-none'>
-                              <Image
-                                src={spriteUrl}
-                                alt={`Artwork variant ${variant || 'default'}`}
-                                className='w-24 h-24 object-fill image-render-pixelated'
-                                width={100}
-                                height={100}
-                                loading='lazy'
-                                decoding='async'
-                                unoptimized
-                              />
-                              {checked && (
-                                <div className='absolute top-0 right-0 bg-blue-500 text-white rounded-full p-1.5 shadow-lg'>
-                                  <Check className='h-3 w-3' />
-                                </div>
-                              )}
-                              <figcaption className='text-sm font-normal text-gray-400 dark:text-gray-300 cursor-pointer'>
-                                <Label className='text-xs font-normal text-gray-400 dark:text-gray-300 cursor-pointer'>
+                            <figure className='flex flex-col items-center space-y-2 relative user-select-none group/figure'>
+                              <div className=''>
+                                <Image
+                                  src={spriteUrl}
+                                  alt={`Artwork variant ${variant || 'default'}`}
+                                  className='w-24 h-24 object-fill image-render-pixelated'
+                                  width={100}
+                                  height={100}
+                                  loading='lazy'
+                                  decoding='async'
+                                  unoptimized
+                                />
+                                {checked && (
+                                  <div className='absolute top-0.5 right-0.5 bg-blue-500 text-white rounded-full p-1.5 shadow-lg'>
+                                    <Check className='h-3 w-3' />
+                                  </div>
+                                )}
+                              </div>
+                              <figcaption className='w-full text-center px-1'>
+                                <Label className='text-xs font-normal text-gray-500 dark:text-gray-400 cursor-pointer block leading-tight break-words'>
+                                  <div
+                                    className='text-lg transition-colors uppercase absolute -top-1 left-0.5 text-gray-500/40 dark:text-gray-400/30 group-hover/figure:text-blue-500/80 dark:group-hover/figure:text-gray-400/30'
+                                    aria-hidden='true'
+                                  >
+                                    {variant}
+                                  </div>
                                   {getFormattedCreditsFromResponse(
                                     credits,
                                     headId,
