@@ -48,6 +48,11 @@ class PokemonApiService {
       searchParams.append('limit', params.limit.toString());
     }
 
+    // Add cache busting version parameter
+    const buildId = process.env.NEXT_PUBLIC_BUILD_ID || 
+                   (process.env.NODE_ENV === 'development' ? 'dev' : 'default');
+    searchParams.append('v', buildId);
+
     const url = `${this.baseUrl}?${searchParams.toString()}`;
 
     const response = await fetch(url, {

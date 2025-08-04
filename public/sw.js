@@ -461,7 +461,7 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
 
   // Intercept sprite variants API requests to trigger prefetching
-  if (url.pathname === '/api/sprites/variants') {
+  if (url.pathname === '/api/sprite/variants') {
     event.respondWith(handleSpriteVariantsRequest(request));
     return;
   }

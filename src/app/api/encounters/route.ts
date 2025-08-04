@@ -134,6 +134,7 @@ export async function GET(request: NextRequest) {
     // Parse query parameters
     const { searchParams } = new URL(request.url);
     const rawGameMode = searchParams.get('gameMode') || 'classic';
+    // Ignore cache busting version parameter (v)
 
     // Validate the game mode explicitly
     const gameMode = rawGameMode === 'remix' ? 'remix' : 'classic';

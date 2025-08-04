@@ -6,6 +6,7 @@ const CACHE_DURATION = 60 * 60 * 24 * 14; // 14 days in seconds
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
+  // Ignore cache busting version parameter (v)
 
   if (!id) {
     return NextResponse.json(

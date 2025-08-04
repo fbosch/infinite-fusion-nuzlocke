@@ -129,8 +129,13 @@ export async function getArtworkVariants(
       headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
     const params = new URLSearchParams();
     params.set('id', id.toString());
+    
+    // Add cache busting version parameter
+    const buildId = process.env.NEXT_PUBLIC_BUILD_ID || 
+                   (process.env.NODE_ENV === 'development' ? 'dev' : 'default');
+    params.set('v', buildId);
 
-    const response = await fetch(`/api/sprites/variants?${params.toString()}`);
+    const response = await fetch(`/api/sprite/variants?${params.toString()}`);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch variants: ${response.statusText}`);
@@ -168,8 +173,12 @@ export async function getSpriteCredits(
     const id =
       headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
 
+    // Add cache busting version parameter
+    const buildId = process.env.NEXT_PUBLIC_BUILD_ID || 
+                   (process.env.NODE_ENV === 'development' ? 'dev' : 'default');
+    
     const response = await fetch(
-      `/api/sprite/artists?id=${encodeURIComponent(id)}`
+      `/api/sprite/artists?id=${encodeURIComponent(id)}&v=${encodeURIComponent(buildId)}`
     );
 
     if (!response.ok) {
