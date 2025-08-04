@@ -117,6 +117,7 @@ export function FusionSprite({
       <div className='relative w-full flex justify-center'>
         <CursorTooltip
           disabled={!credit}
+          delay={500}
           content={
             credit ? (
               <div>

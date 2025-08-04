@@ -20,7 +20,7 @@ import React, {
   useTransition,
   useEffect,
 } from 'react';
-import type { LucideIcon } from 'lucide-react';
+import { type LucideIcon } from 'lucide-react';
 import Image from 'next/image';
 import { CursorTooltip } from './CursorTooltip';
 import { match } from 'ts-pattern';
@@ -160,10 +160,9 @@ export function ContextMenu({
           menuElementRef.current.classList.remove('tooltip-enter');
           menuElementRef.current.classList.add('tooltip-exit');
 
-          // Hide menu after animation completes
           setTimeout(() => {
             hideMenu();
-          }, 50); // Match CSS animation duration
+          }, 50);
         }
       }
     };
@@ -177,10 +176,9 @@ export function ContextMenu({
           menuElementRef.current.classList.remove('tooltip-enter');
           menuElementRef.current.classList.add('tooltip-exit');
 
-          // Hide menu after animation completes
           setTimeout(() => {
             hideMenu();
-          }, 50); // Match CSS animation duration
+          }, 50);
         }
       }
     };
