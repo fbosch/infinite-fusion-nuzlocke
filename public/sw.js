@@ -373,7 +373,10 @@ self.addEventListener('activate', event => {
               cacheName.startsWith('infinite-fusion-api-') &&
               cacheName !== API_CACHE_NAME
             ) {
-              console.debug('Service Worker: Deleting old API cache', cacheName);
+              console.debug(
+                'Service Worker: Deleting old API cache',
+                cacheName
+              );
               return caches.delete(cacheName);
             }
             // Keep all image caches and current API cache
