@@ -1,5 +1,6 @@
 import { get, set, createStore } from 'idb-keyval';
 import { getSpriteId } from './sprites';
+import { debounce } from 'es-toolkit';
 
 // Create a custom store for preferred variants
 const preferredVariantsStore = createStore('preferred-variants', 'cache');
@@ -36,6 +37,17 @@ async function savePreferredVariants(): Promise<void> {
   }
 }
 
+/**
+ * Debounced save function to avoid spamming IndexedDB with rapid writes
+ * Wraps the promise to handle errors gracefully
+ */
+const debouncedSave = debounce(() => {
+  savePreferredVariants().catch((error: unknown) => {
+    console.warn('Failed to persist preferred variants to IndexedDB:', error);
+    // TODO: Could implement retry logic or show user notification here
+  });
+}, 200);
+
 // Load preferred variants on module initialization
 if (typeof window !== 'undefined') {
   loadPreferredVariants();
@@ -55,6 +67,8 @@ export function getPreferredVariant(
 
 /**
  * Set the preferred variant for a Pokémon or fusion
+ * Uses optimistic updates - updates in-memory cache immediately,
+ * then saves to IndexedDB in the background
  */
 export async function setPreferredVariant(
   headId?: number | null,
@@ -64,22 +78,29 @@ export async function setPreferredVariant(
   if (!headId && !bodyId) return;
 
   const spriteId = getSpriteId(headId, bodyId);
+
+  // Optimistic update: immediately update in-memory cache
   if (preferredVariant) {
     preferredVariants.set(spriteId, preferredVariant);
   } else {
     preferredVariants.delete(spriteId);
   }
 
-  // Save to IndexedDB
-  await savePreferredVariants();
+  // Save to IndexedDB in background with debouncing (don't await to avoid blocking UI)
+  debouncedSave();
 }
 
 /**
  * Clear all preferred variants
+ * Uses optimistic updates - clears in-memory cache immediately,
+ * then saves to IndexedDB in the background
  */
 export async function clearPreferredVariants(): Promise<void> {
+  // Optimistic update: immediately clear in-memory cache
   preferredVariants.clear();
-  await savePreferredVariants();
+
+  // Save to IndexedDB in background with debouncing (don't await to avoid blocking UI)
+  debouncedSave();
 }
 
 /**
