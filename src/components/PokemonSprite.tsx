@@ -19,7 +19,6 @@ export function PokemonSprite({
   draggable = false,
   ...rest
 }: PokemonSpriteProps) {
-  // Memoize sprite lookup
   const spriteData = useMemo(
     () => spritesheetMetadata.sprites.find(sprite => sprite.id === pokemonId),
     [pokemonId]
@@ -28,29 +27,24 @@ export function PokemonSprite({
   const handleDragStart = useCallback(
     (e: React.DragEvent<HTMLImageElement>) => {
       if (!spriteData || !draggable) return;
-
-      // Create simple drag image using background-image
       const dragElement = document.createElement('div');
       dragElement.style.cssText = `
         width: ${spriteData.width}px;
         height: ${spriteData.height}px;
-        background-image: url(/images/pokemon-spritesheet.png?v=${version});
+        background-image: url(${e.currentTarget.src});
         background-position: -${spriteData.x}px -${spriteData.y}px;
         background-repeat: no-repeat;
         position: absolute;
         top: -1000px;
         image-rendering: pixelated;
       `;
-
       document.body.appendChild(dragElement);
       e.dataTransfer.setDragImage(
         dragElement,
         spriteData.width / 2,
         spriteData.height / 2
       );
-
       setTimeout(() => document.body.removeChild(dragElement), 0);
-
       onDragStart?.(e);
     },
     [spriteData, onDragStart, draggable]
