@@ -55,6 +55,12 @@ async function scrapeDexEntries(): Promise<{ id: number, name: string }[]> {
       }
     });
 
+    // Add the special egg entry with ID -1 (required for egg encounters)
+    dexEntries.unshift({
+      id: -1,
+      name: 'Egg'
+    });
+
     ConsoleFormatter.success(`Found ${dexEntries.length} unique Pokédex entries`);
 
     // Write to JSON file
