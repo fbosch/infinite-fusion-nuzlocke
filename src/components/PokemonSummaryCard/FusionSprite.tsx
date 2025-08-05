@@ -5,7 +5,7 @@ import Image from 'next/image';
 import clsx from 'clsx';
 import { CursorTooltip } from '@/components/CursorTooltip';
 import { twMerge } from 'tailwind-merge';
-import { Palette, SquareArrowUpRight, MousePointer } from 'lucide-react';
+import { Palette, SquareArrowUpRight } from 'lucide-react';
 import { useEncounter } from '@/stores/playthroughs';
 import { useAnimatedSprite } from './useAnimatedSprite';
 import {
@@ -127,26 +127,6 @@ export function FusionSprite({
                     <span>{credit}</span>
                   </div>
                   <div className='w-full h-px bg-gray-200 dark:bg-gray-700 my-1' />
-                  <div className='flex items-center text-xs gap-2'>
-                    <div className='flex items-center gap-1'>
-                      <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
-                        <MousePointer className='size-2.5' />
-                        <span className='font-medium text-xs'>L</span>
-                      </div>
-                      <span className='text-gray-600 dark:text-gray-300 text-xs'>
-                        Pokédex
-                      </span>
-                    </div>
-                    <div className='flex items-center gap-1'>
-                      <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
-                        <MousePointer className='size-2.5' />
-                        <span className='font-medium text-xs'>R</span>
-                      </div>
-                      <span className='text-gray-600 dark:text-gray-300 text-xs'>
-                        Options
-                      </span>
-                    </div>
-                  </div>
                 </div>
               </div>
             ) : undefined

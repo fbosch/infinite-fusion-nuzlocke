@@ -154,8 +154,6 @@ async function processSingleSpriteVariantItem(item, cache) {
   );
 }
 
-
-
 // Wait for initial page load to complete
 function waitForPageLoad() {
   return new Promise(resolve => {
@@ -262,9 +260,7 @@ self.addEventListener('install', event => {
         return cache.addAll(urlsToCache);
       })
       .then(() => {
-        console.debug(
-          'Service Worker: Essential files and spritesheet cached'
-        );
+        console.debug('Service Worker: Essential files and spritesheet cached');
         return self.skipWaiting();
       })
       .catch(error => {
