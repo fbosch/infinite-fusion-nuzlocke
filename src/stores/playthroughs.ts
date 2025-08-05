@@ -16,7 +16,6 @@ import {
 } from '@/lib/preferredVariants';
 import { queryClient } from '@/lib/queryClient';
 import { spriteKeys } from '@/lib/queries/sprites';
-import { EncounterData } from '../loaders';
 
 // Create a custom store for playthroughs data
 const playthroughsStore_idb = createStore('playthroughs', 'data');
@@ -33,6 +32,8 @@ export const EncounterDataSchema = z.object({
   artworkVariant: z.string().optional(),
   updatedAt: z.number(),
 });
+
+export type EncounterData = z.infer<typeof EncounterDataSchema>;
 
 // Zod schema for a single playthrough
 export const PlaythroughSchema = z
