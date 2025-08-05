@@ -1,21 +1,8 @@
 'use client';
 
-import React, {
-  useState,
-  useEffect,
-  startTransition,
-  useCallback,
-} from 'react';
+import React, { useState, useEffect, startTransition } from 'react';
 import clsx from 'clsx';
-import {
-  ChevronDown,
-  Gift,
-  Skull,
-  ArrowUpDown,
-  Computer,
-  MoveRight,
-  Home,
-} from 'lucide-react';
+import { ChevronDown, Gift, Skull, ArrowUpDown, Computer } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import {
   useFloating,
@@ -31,30 +18,12 @@ import {
 import { match } from 'ts-pattern';
 import PokeballIcon from '@/assets/images/pokeball.svg';
 import EscapeIcon from '@/assets/images/escape-cloud.svg';
-import { getLocations, getLocationById } from '@/loaders/locations';
-import {
-  playthroughActions,
-  getActivePlaythrough,
-} from '@/stores/playthroughs';
-import dynamic from 'next/dynamic';
-
-const LocationSelector = dynamic(
-  () =>
-    import('../PokemonSummaryCard/LocationSelector').then(
-      mod => mod.LocationSelector
-    ),
-  {
-    ssr: false,
-  }
-);
 
 interface PokemonStatusInputProps {
   value: PokemonOptionType | null | undefined;
   onChange: (value: PokemonOptionType | null) => void;
   disabled?: boolean;
   dragPreview?: PokemonOptionType | null;
-  locationId?: string;
-  field?: 'head' | 'body';
 }
 
 const getStatusIcon = (status: PokemonStatusType) => {
@@ -85,12 +54,9 @@ export const PokemonStatusInput = ({
   onChange,
   disabled = false,
   dragPreview,
-  locationId,
-  field = 'head',
 }: PokemonStatusInputProps) => {
   // Local status state for smooth selection
   const [localStatus, setLocalStatus] = useState(value?.status || null);
-  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
 
   // Floating UI setup
   const { refs, floatingStyles, placement } = useFloating({
@@ -122,54 +88,6 @@ export const PokemonStatusInput = ({
       });
     }
   };
-
-  // Handle move to location
-  const handleMoveToLocation = async (
-    targetLocationId: string,
-    targetField: 'head' | 'body'
-  ) => {
-    if (!value || !locationId) return;
-
-    // Check if there's already a Pokemon in the target slot
-    const activePlaythrough = getActivePlaythrough();
-    const targetEncounter = activePlaythrough?.encounters?.[targetLocationId];
-    const existingPokemon = targetEncounter
-      ? targetField === 'head'
-        ? targetEncounter.head
-        : targetEncounter.body
-      : null;
-
-    if (existingPokemon) {
-      // If there's already a Pokemon in the target slot, swap them
-      await playthroughActions.swapEncounters(
-        locationId,
-        targetLocationId,
-        field,
-        targetField
-      );
-    } else {
-      // If the target slot is empty, use atomic move to preserve other Pokemon at source
-      await playthroughActions.moveEncounterAtomic(
-        locationId,
-        field,
-        targetLocationId,
-        targetField,
-        value
-      );
-    }
-  };
-
-  // Handle move to original location
-  const handleMoveToOriginalLocation = useCallback(async () => {
-    if (!value || !locationId) return;
-
-    await playthroughActions.moveToOriginalLocation(locationId, field, value);
-  }, [value, locationId, field]);
-
-  // Get available locations (excluding current one)
-  const availableLocations = locationId
-    ? getLocations().filter(location => location.id !== locationId)
-    : [];
 
   return (
     <>
@@ -255,96 +173,12 @@ export const PokemonStatusInput = ({
                       </MenuItem>
                     )
                   )}
-
-                  {/* Add move options if we have a Pokemon and location */}
-                  {value &&
-                    locationId &&
-                    (value.originalLocation !== locationId ||
-                      availableLocations.length > 0) && (
-                      <>
-                        <div className='border-t border-gray-200 dark:border-gray-600 my-1' />
-
-                        {/* Move to original location option */}
-                        {value.originalLocation &&
-                          value.originalLocation !== locationId && (
-                            <MenuItem>
-                              {({ focus }) => {
-                                const originalLocation = getLocationById(
-                                  value.originalLocation!
-                                );
-                                return (
-                                  <button
-                                    onClick={handleMoveToOriginalLocation}
-                                    title={
-                                      originalLocation?.name ||
-                                      'Unknown Location'
-                                    }
-                                    className={clsx(
-                                      'group flex w-full items-center px-4 py-2 text-sm cursor-pointer',
-                                      'focus:outline-none text-left',
-                                      {
-                                        'bg-gray-100 dark:bg-gray-700 focus-visible:ring-1 focus-visible:ring-blue-500 ring-inset':
-                                          focus,
-                                      }
-                                    )}
-                                  >
-                                    <div className='flex items-center gap-2'>
-                                      <Home className='h-4 w-4 text-blue-500' />
-                                      <span>Move to Original Location</span>
-                                    </div>
-                                  </button>
-                                );
-                              }}
-                            </MenuItem>
-                          )}
-
-                        {/* Move to any location option */}
-                        {availableLocations.length > 0 && (
-                          <MenuItem>
-                            {({ focus }) => (
-                              <button
-                                onClick={() => setIsMoveModalOpen(true)}
-                                className={clsx(
-                                  'group flex w-full items-center px-4 py-2 text-sm cursor-pointer',
-                                  'focus:outline-none text-left',
-                                  {
-                                    'bg-gray-100 dark:bg-gray-700 focus-visible:ring-1 focus-visible:ring-blue-500 ring-inset':
-                                      focus,
-                                  }
-                                )}
-                              >
-                                <div className='flex items-center gap-2'>
-                                  <MoveRight className='h-4 w-4 text-emerald-500' />
-                                  <span>Move to Location</span>
-                                </div>
-                              </button>
-                            )}
-                          </MenuItem>
-                        )}
-                      </>
-                    )}
                 </MenuItems>
               </FloatingPortal>
             )}
           </div>
         )}
       </Menu>
-
-      {/* Location Selector Modal */}
-      <LocationSelector
-        isOpen={isMoveModalOpen}
-        onClose={() => setIsMoveModalOpen(false)}
-        currentLocationId={locationId || ''}
-        onSelectLocation={(
-          targetLocationId: string,
-          targetField: 'head' | 'body'
-        ) => {
-          handleMoveToLocation(targetLocationId, targetField);
-          setIsMoveModalOpen(false);
-        }}
-        encounterData={value ? { [field]: value } : null}
-        moveTargetField={field}
-      />
     </>
   );
 };
