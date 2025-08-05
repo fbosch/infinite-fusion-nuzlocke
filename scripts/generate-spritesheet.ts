@@ -12,7 +12,8 @@ const __dirname = path.dirname(__filename);
 
 const BASE_ENTRIES_PATH = path.join(__dirname, '..', 'data', 'shared', 'base-entries.json');
 const SPRITES_DIR = path.join(__dirname, 'sprites', 'pokemon-icons');
-const OUTPUT_DIR = path.join(__dirname, '..', 'src', 'assets', 'images');
+const SPRITESHEET_OUTPUT_DIR = path.join(__dirname, '..', 'public');
+const METADATA_OUTPUT_DIR = path.join(__dirname, '..', 'src', 'assets');
 
 export type PokemonEntry = {
   id: number;
@@ -231,13 +232,20 @@ async function generateSpritesheet(spriteInfos: SpriteInfo[]): Promise<Spriteshe
 
   progressBar.stop();
 
-  // Generate the spritesheet
+  // Generate PNG spritesheet with standard compression
   ConsoleFormatter.working('Compositing spritesheet...');
   
-  const outputPath = path.join(OUTPUT_DIR, 'pokemon-spritesheet.png');
-  await baseImage.composite(compositeOps).png().toFile(outputPath);
+  const spritesheetPath = path.join(SPRITESHEET_OUTPUT_DIR, 'pokemon-spritesheet.png');
+  await baseImage
+    .composite(compositeOps)
+    .png({ 
+      compressionLevel: 9  // Maximum lossless PNG compression
+    })
+    .toFile(spritesheetPath);
+  
+  const outputStats = await fs.stat(spritesheetPath);
 
-  ConsoleFormatter.success(`Spritesheet saved to: ${outputPath}`);
+  ConsoleFormatter.success(`Spritesheet saved to: ${spritesheetPath}`);
 
   // Create metadata
   const metadata: SpritesheetMetadata = {
@@ -252,7 +260,7 @@ async function generateSpritesheet(spriteInfos: SpriteInfo[]): Promise<Spriteshe
   };
 
   // Save metadata
-  const metadataPath = path.join(OUTPUT_DIR, 'pokemon-spritesheet-metadata.json');
+  const metadataPath = path.join(METADATA_OUTPUT_DIR, 'pokemon-spritesheet-metadata.json');
   await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
   
   ConsoleFormatter.success(`Metadata saved to: ${metadataPath}`);
@@ -272,8 +280,9 @@ async function generatePokemonSpritesheet(): Promise<void> {
   const startTime = Date.now();
 
   try {
-    // Ensure output directory exists
-    await fs.mkdir(OUTPUT_DIR, { recursive: true });
+    // Ensure output directories exist
+    await fs.mkdir(SPRITESHEET_OUTPUT_DIR, { recursive: true });
+    await fs.mkdir(METADATA_OUTPUT_DIR, { recursive: true });
 
     // Load sprite data
     const spriteInfos = await loadSpriteData();
@@ -289,7 +298,7 @@ async function generatePokemonSpritesheet(): Promise<void> {
     // Calculate stats
     const duration = Date.now() - startTime;
     const existingSprites = spriteInfos.filter(s => s.exists);
-    const outputStats = await fs.stat(path.join(OUTPUT_DIR, 'pokemon-spritesheet.png'));
+    const outputFile = await fs.stat(path.join(SPRITESHEET_OUTPUT_DIR, 'pokemon-spritesheet.png'));
 
     // Success summary
     ConsoleFormatter.printSummary('Spritesheet Generation Complete!', [
@@ -298,8 +307,9 @@ async function generatePokemonSpritesheet(): Promise<void> {
       { label: 'Missing sprites', value: spriteInfos.length - existingSprites.length, color: 'yellow' },
       { label: 'Grid layout', value: `${metadata.columns}x${metadata.rows}`, color: 'cyan' },
       { label: 'Sheet dimensions', value: `${metadata.sheetWidth}x${metadata.sheetHeight}px`, color: 'cyan' },
-      { label: 'File size', value: ConsoleFormatter.formatFileSize(outputStats.size), color: 'green' },
-      { label: 'Output directory', value: OUTPUT_DIR, color: 'cyan' },
+      { label: 'File size', value: ConsoleFormatter.formatFileSize(outputFile.size), color: 'green' },
+      { label: 'Spritesheet location', value: SPRITESHEET_OUTPUT_DIR, color: 'cyan' },
+      { label: 'Metadata location', value: METADATA_OUTPUT_DIR, color: 'cyan' },
       { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
     ]);
 
