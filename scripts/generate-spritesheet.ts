@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
 
 const BASE_ENTRIES_PATH = path.join(__dirname, '..', 'data', 'shared', 'base-entries.json');
 const SPRITES_DIR = path.join(__dirname, 'sprites', 'pokemon-icons');
-const SPRITESHEET_OUTPUT_DIR = path.join(__dirname, '..', 'public');
+const SPRITESHEET_OUTPUT_DIR = path.join(__dirname, '..', 'public', 'images');
 const METADATA_OUTPUT_DIR = path.join(__dirname, '..', 'src', 'assets');
 
 export type PokemonEntry = {

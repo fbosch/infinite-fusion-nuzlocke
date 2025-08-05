@@ -17,7 +17,6 @@ import {
   FloatingPortal,
 } from '@floating-ui/react';
 import clsx from 'clsx';
-import Image from 'next/image';
 import { Loader2, Search } from 'lucide-react';
 import {
   getInfiniteFusionToNationalDexMap,
@@ -42,6 +41,7 @@ import {
 import { usePokemonSearch } from '@/loaders/pokemon';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { PokemonOption, PokemonOptions } from './PokemonOptions';
+import { PokemonSprite } from '../PokemonSprite';
 
 let nationalDexMapping: Map<number, number> | null = null;
 let mappingPromise: Promise<void> | null = null;
@@ -474,25 +474,18 @@ export const PokemonCombobox = React.memo(
                   <div
                     className={clsx(
                       'absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md',
+                      'size-12.5',
                       'group-focus-within/input:border-blue-500'
                     )}
                   >
-                    <Image
-                      src={getPokemonSpriteUrlFromOption(dragPreview || value!)}
-                      alt={(dragPreview || value)!.name}
-                      width={40}
-                      height={40}
+                    <PokemonSprite
+                      pokemonId={(dragPreview || value)!.id}
                       className={clsx(
-                        'object-center object-contain cursor-grab active:cursor-grabbing rounded-sm transform-gpu',
+                        'cursor-grab -translate-x-1/2 left-1/2 relative top-1/2 translate-y-[-65%]',
                         dragPreview && 'opacity-60 pointer-none' // Make preview sprite opaque
                       )}
-                      priority={true}
-                      loading='eager'
-                      placeholder='blur'
-                      blurDataURL={TRANSPARENT_PIXEL}
-                      draggable
-                      unoptimized
-                      onDragStart={e => {
+                      draggable={true}
+                      onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
                         e.dataTransfer.setData(
                           'text/plain',
                           (dragPreview || value)!.name
