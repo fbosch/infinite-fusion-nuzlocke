@@ -128,6 +128,90 @@ export function normalizePokemonNameForAPI(name: string): string {
 }
 
 /**
+ * Strips form suffixes from Pokemon names to get the base name
+ * Useful for fallback when specific forms don't exist
+ */
+export function stripPokemonFormSuffix(name: string): string {
+  if (!name || typeof name !== 'string') {
+    return '';
+  }
+
+  return name
+    .replace(/\s+(baile|pom-pom|pau|sensu)\s+style$/i, '')
+    .replace(/\s+(midday|midnight|dusk)\s+form$/i, '')
+    .replace(/\s+(aria|pirouette)\s+form$/i, '')
+    .replace(/\s+(meteor|core)\s+form$/i, '')
+    .replace(/\s+(ordinary|resolute)\s+form$/i, '')
+    .replace(/\s+(plant|sandy|trash)\s+cloak$/i, '')
+    .replace(/\s+(heat|wash|frost|fan|mow)\s+rotom$/i, '')
+    .replace(/\s+(land|sky)\s+forme$/i, '')
+    .replace(/\s+(altered|origin)\s+forme$/i, '')
+    .replace(/\s+(incarnate|therian)\s+forme$/i, '')
+    .replace(/\s+(red|blue|yellow|green|orange|indigo|violet)\s+(meteor|core)$/i, '')
+    .replace(/\s+style$/i, '')
+    .replace(/\s+form$/i, '')
+    .replace(/\s+forme$/i, '')
+    .replace(/\s+cloak$/i, '')
+    .replace(/\s+rotom$/i, '')
+    .trim();
+}
+
+/**
+ * Normalizes Pokemon names for PokéSprite repository URLs
+ * PokéSprite uses lowercase names with hyphens for forms
+ */
+export function normalizePokemonNameForSprite(name: string): string {
+  if (!name || typeof name !== 'string') {
+    return '';
+  }
+
+  // Convert to lowercase first
+  const lowerName = name.toLowerCase();
+  
+  // Handle special form names and normalize to PokéSprite conventions
+  return lowerName
+    .replace(/♀/g, '-f')  // Female symbol -> -f
+    .replace(/♂/g, '-m')  // Male symbol -> -m
+    .replace(/\./g, '')    // Remove periods
+    .replace(/'/g, '')     // Remove apostrophes
+    .replace(/é/g, 'e')    // Remove accents
+    
+    // Handle specific form names for PokéSprite compatibility
+    .replace(/\s+baile\s+style/g, '-baile')
+    .replace(/\s+pom-pom\s+style/g, '-pom-pom')
+    .replace(/\s+pau\s+style/g, '-pau')
+    .replace(/\s+sensu\s+style/g, '-sensu')
+    .replace(/\s+midday\s+form/g, '-midday')
+    .replace(/\s+midnight\s+form/g, '-midnight')
+    .replace(/\s+dusk\s+form/g, '-dusk')
+    .replace(/\s+aria\s+form/g, '-aria')
+    .replace(/\s+pirouette\s+form/g, '-pirouette')
+    .replace(/\s+meteor\s+form/g, '-meteor')
+    .replace(/\s+core\s+form/g, '-core')
+    .replace(/\s+ordinary\s+form/g, '')
+    .replace(/\s+resolute\s+form/g, '-resolute')
+    .replace(/\s+plant\s+cloak/g, '-plant')
+    .replace(/\s+sandy\s+cloak/g, '-sandy')
+    .replace(/\s+trash\s+cloak/g, '-trash')
+    .replace(/\s+heat\s+rotom/g, '-heat')
+    .replace(/\s+wash\s+rotom/g, '-wash')
+    .replace(/\s+frost\s+rotom/g, '-frost')
+    .replace(/\s+fan\s+rotom/g, '-fan')
+    .replace(/\s+mow\s+rotom/g, '-mow')
+    .replace(/\s+land\s+forme/g, '-land')
+    .replace(/\s+sky\s+forme/g, '-sky')
+    .replace(/\s+altered\s+forme/g, '-altered')
+    .replace(/\s+origin\s+forme/g, '-origin')
+    .replace(/\s+incarnate\s+forme/g, '-incarnate')
+    .replace(/\s+therian\s+forme/g, '-therian')
+    
+    // General cleanup
+    .replace(/[^a-z0-9-]/g, '-') // Replace other special chars with hyphens
+    .replace(/-+/g, '-')         // Replace multiple hyphens with single hyphen
+    .replace(/^-|-$/g, '');      // Remove leading/trailing hyphens
+}
+
+/**
  * Validates if a text string looks like a Pokemon name (not metadata)
  */
 export function isPotentialPokemonName(text: string): boolean {
