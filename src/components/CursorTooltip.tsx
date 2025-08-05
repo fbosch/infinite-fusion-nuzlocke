@@ -9,10 +9,10 @@ import {
   useDismiss,
   useRole,
   FloatingPortal,
-  offset,
   shift,
   autoUpdate,
   Placement,
+  offset,
 } from '@floating-ui/react';
 import { clsx } from 'clsx';
 import { useState, cloneElement, isValidElement, useEffect } from 'react';
@@ -45,18 +45,23 @@ interface CursorTooltipProps {
   placement?: Placement;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
+  offset?: {
+    mainAxis?: number;
+    crossAxis?: number;
+  };
 }
 
-export function CursorTooltip({
-  content,
-  children,
-  className,
-  delay = 0,
-  disabled = false,
-  placement = 'bottom-start',
-  onMouseEnter,
-  onMouseLeave,
-}: CursorTooltipProps) {
+export function CursorTooltip(props: CursorTooltipProps) {
+  const {
+    content,
+    children,
+    className,
+    delay = 0,
+    disabled = false,
+    placement = 'bottom-start',
+    onMouseEnter,
+    onMouseLeave,
+  } = props;
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [animationState, setAnimationState] = useState<
@@ -71,8 +76,8 @@ export function CursorTooltip({
     onOpenChange: setIsOpen,
     middleware: [
       offset({
-        mainAxis: getMainAxisOffset(placement),
-        crossAxis: getCrossAxisOffset(placement),
+        mainAxis: props.offset?.mainAxis ?? getMainAxisOffset(placement),
+        crossAxis: props.offset?.crossAxis ?? getCrossAxisOffset(placement),
       }),
       shift(),
     ],
