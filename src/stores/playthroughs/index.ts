@@ -54,6 +54,7 @@ export {
   clearEncounterFromLocation,
   moveEncounter,
   swapEncounters,
+  moveToOriginalLocation,
   getLocationFromComboboxId,
 } from './encounters';
 

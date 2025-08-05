@@ -1,6 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, startTransition } from 'react';
+import React, {
+  useState,
+  useEffect,
+  startTransition,
+  useCallback,
+} from 'react';
 import clsx from 'clsx';
 import {
   ChevronDown,
@@ -9,6 +14,7 @@ import {
   ArrowUpDown,
   Computer,
   MoveRight,
+  Home,
 } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import {
@@ -25,7 +31,7 @@ import {
 import { match } from 'ts-pattern';
 import PokeballIcon from '@/assets/images/pokeball.svg';
 import EscapeIcon from '@/assets/images/escape-cloud.svg';
-import { getLocations } from '@/loaders/locations';
+import { getLocations, getLocationById } from '@/loaders/locations';
 import {
   playthroughActions,
   getActivePlaythrough,
@@ -153,6 +159,13 @@ export const PokemonStatusInput = ({
     }
   };
 
+  // Handle move to original location
+  const handleMoveToOriginalLocation = useCallback(async () => {
+    if (!value || !locationId) return;
+
+    await playthroughActions.moveToOriginalLocation(locationId, field, value);
+  }, [value, locationId, field]);
+
   // Get available locations (excluding current one)
   const availableLocations = locationId
     ? getLocations().filter(location => location.id !== locationId)
@@ -243,32 +256,73 @@ export const PokemonStatusInput = ({
                     )
                   )}
 
-                  {/* Add move option if we have a Pokemon and location */}
-                  {value && locationId && availableLocations.length > 0 && (
-                    <>
-                      <div className='border-t border-gray-200 dark:border-gray-600 my-1' />
-                      <MenuItem>
-                        {({ focus }) => (
-                          <button
-                            onClick={() => setIsMoveModalOpen(true)}
-                            className={clsx(
-                              'group flex w-full items-center px-4 py-2 text-sm cursor-pointer',
-                              'focus:outline-none text-left',
-                              {
-                                'bg-gray-100 dark:bg-gray-700 focus-visible:ring-1 focus-visible:ring-blue-500 ring-inset':
-                                  focus,
-                              }
+                  {/* Add move options if we have a Pokemon and location */}
+                  {value &&
+                    locationId &&
+                    (value.originalLocation !== locationId ||
+                      availableLocations.length > 0) && (
+                      <>
+                        <div className='border-t border-gray-200 dark:border-gray-600 my-1' />
+
+                        {/* Move to original location option */}
+                        {value.originalLocation &&
+                          value.originalLocation !== locationId && (
+                            <MenuItem>
+                              {({ focus }) => {
+                                const originalLocation = getLocationById(
+                                  value.originalLocation!
+                                );
+                                return (
+                                  <button
+                                    onClick={handleMoveToOriginalLocation}
+                                    title={
+                                      originalLocation?.name ||
+                                      'Unknown Location'
+                                    }
+                                    className={clsx(
+                                      'group flex w-full items-center px-4 py-2 text-sm cursor-pointer',
+                                      'focus:outline-none text-left',
+                                      {
+                                        'bg-gray-100 dark:bg-gray-700 focus-visible:ring-1 focus-visible:ring-blue-500 ring-inset':
+                                          focus,
+                                      }
+                                    )}
+                                  >
+                                    <div className='flex items-center gap-2'>
+                                      <Home className='h-4 w-4 text-blue-500' />
+                                      <span>Move to Original Location</span>
+                                    </div>
+                                  </button>
+                                );
+                              }}
+                            </MenuItem>
+                          )}
+
+                        {/* Move to any location option */}
+                        {availableLocations.length > 0 && (
+                          <MenuItem>
+                            {({ focus }) => (
+                              <button
+                                onClick={() => setIsMoveModalOpen(true)}
+                                className={clsx(
+                                  'group flex w-full items-center px-4 py-2 text-sm cursor-pointer',
+                                  'focus:outline-none text-left',
+                                  {
+                                    'bg-gray-100 dark:bg-gray-700 focus-visible:ring-1 focus-visible:ring-blue-500 ring-inset':
+                                      focus,
+                                  }
+                                )}
+                              >
+                                <div className='flex items-center gap-2'>
+                                  <MoveRight className='h-4 w-4 text-emerald-500' />
+                                  <span>Move to Location</span>
+                                </div>
+                              </button>
                             )}
-                          >
-                            <div className='flex items-center gap-2'>
-                              <MoveRight className='h-4 w-4 text-emerald-500' />
-                              <span>Move to Location</span>
-                            </div>
-                          </button>
+                          </MenuItem>
                         )}
-                      </MenuItem>
-                    </>
-                  )}
+                      </>
+                    )}
                 </MenuItems>
               </FloatingPortal>
             )}

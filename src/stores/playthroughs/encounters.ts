@@ -921,3 +921,59 @@ export const getLocationFromComboboxId = (
   // Fallback - assume it's just the location ID
   return { locationId: comboboxId, field: 'head' };
 };
+
+// Move Pokemon to its original location with smart slot selection
+export const moveToOriginalLocation = async (
+  sourceLocationId: string,
+  sourceField: 'head' | 'body',
+  pokemon: z.infer<typeof PokemonOptionSchema>
+) => {
+  if (!pokemon.originalLocation) return;
+
+  const originalLocationId = pokemon.originalLocation;
+
+  // Don't move if already at original location
+  if (originalLocationId === sourceLocationId) return;
+
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough) return;
+
+  // Ensure encounters object exists
+  if (!activePlaythrough.encounters) {
+    activePlaythrough.encounters = {};
+  }
+
+  // Check what's at the original location
+  const originalEncounter = activePlaythrough.encounters[originalLocationId];
+  const existingHeadPokemon = originalEncounter?.head;
+  const existingBodyPokemon = originalEncounter?.body;
+
+  // Prefer empty slots first
+  if (!existingHeadPokemon) {
+    // Head slot is empty, move there
+    await moveEncounterAtomic(
+      sourceLocationId,
+      sourceField,
+      originalLocationId,
+      'head',
+      pokemon
+    );
+  } else if (!existingBodyPokemon) {
+    // Head is occupied but body is empty, move to body slot
+    await moveEncounterAtomic(
+      sourceLocationId,
+      sourceField,
+      originalLocationId,
+      'body',
+      pokemon
+    );
+  } else {
+    // Both slots are occupied, swap with the head slot (default behavior)
+    await swapEncounters(
+      sourceLocationId,
+      originalLocationId,
+      sourceField,
+      'head'
+    );
+  }
+};

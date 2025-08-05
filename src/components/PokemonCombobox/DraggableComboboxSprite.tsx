@@ -1,15 +1,15 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import clsx from 'clsx';
-import { Hand, MousePointer, ArrowDownToDot } from 'lucide-react';
+import { Hand, MousePointer, ArrowDownToDot, Home } from 'lucide-react';
 import { type PokemonOptionType } from '@/loaders/pokemon';
 import { dragActions } from '@/stores/dragStore';
 import { PokemonSprite } from '../PokemonSprite';
 import { CursorTooltip } from '../CursorTooltip';
 import spritesheetMetadata from '@/assets/pokemon-spritesheet-metadata.json';
 import ContextMenu, { type ContextMenuItem } from '../ContextMenu';
-import { getLocations } from '@/loaders/locations';
+import { getLocations, getLocationById } from '@/loaders/locations';
 import {
   playthroughActions,
   getActivePlaythrough,
@@ -88,8 +88,34 @@ export function DraggableComboboxSprite({
     }
   };
 
+  // Handle move to original location
+  const handleMoveToOriginalLocation = useCallback(async () => {
+    if (!value || !locationId) return;
+
+    await playthroughActions.moveToOriginalLocation(locationId, field, value);
+  }, [value, locationId, field]);
+
   const menuOptions = useMemo(() => {
     const options: ContextMenuItem[] = [];
+
+    // Add move to original location option if Pokemon has an original location and isn't already there
+    if (
+      value &&
+      locationId &&
+      value.originalLocation &&
+      value.originalLocation !== locationId
+    ) {
+      const originalLocation = getLocationById(value.originalLocation);
+      if (originalLocation) {
+        options.push({
+          id: 'move-to-original',
+          label: 'Move to Original Location',
+          tooltip: originalLocation.name,
+          icon: Home,
+          onClick: handleMoveToOriginalLocation,
+        });
+      }
+    }
 
     // Add move option if we have a Pokemon and location with available destinations
     if (value && locationId && availableLocations.length > 0) {
@@ -97,13 +123,17 @@ export function DraggableComboboxSprite({
         id: 'move',
         label: 'Move to Location',
         icon: ArrowDownToDot,
-        iconClassName: 'text-emerald-500',
         onClick: () => setIsMoveModalOpen(true),
       });
     }
 
     return options;
-  }, [value, locationId, availableLocations.length]);
+  }, [
+    value,
+    locationId,
+    availableLocations.length,
+    handleMoveToOriginalLocation,
+  ]);
 
   if (!pokemon) return null;
 

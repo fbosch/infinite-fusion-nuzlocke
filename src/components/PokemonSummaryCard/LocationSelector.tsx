@@ -94,9 +94,7 @@ function LocationItem({
             </div>
             <p className='text-xs text-amber-600 dark:text-amber-400 font-medium flex gap-x-1'>
               <ArrowUpDown className='w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0' />
-              <span>
-                Will swap with {existingPokemon.name} ({selectedTargetField})
-              </span>
+              <span>Will swap with {existingPokemon.name}</span>
             </p>
           </div>
 
