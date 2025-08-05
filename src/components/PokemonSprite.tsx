@@ -2,6 +2,9 @@ import React, { useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import spritesheetMetadata from '@/assets/pokemon-spritesheet-metadata.json';
 import { twMerge } from 'tailwind-merge';
+import { getCacheBuster } from '../lib/persistence';
+
+const version = getCacheBuster();
 
 interface PokemonSpriteProps extends React.HTMLAttributes<HTMLDivElement> {
   pokemonId: number;
@@ -28,9 +31,9 @@ export function PokemonSprite({
 
       const dragImage = document.createElement('div');
       dragImage.style.cssText = `
-      width: ${spritesheetMetadata.spriteWidth}px;
-      height: ${spritesheetMetadata.spriteHeight}px;
-      background-image: url(/images/pokemon-spritesheet.png);
+      width: ${spriteData.width}px;
+      height: ${spriteData.height}px;
+      background-image: url(/images/pokemon-spritesheet.png?v=${version});
       background-position: -${spriteData.x}px -${spriteData.y}px;
       background-repeat: no-repeat;
       position: absolute;
@@ -42,8 +45,8 @@ export function PokemonSprite({
 
       e.dataTransfer.setDragImage(
         dragImage,
-        spritesheetMetadata.spriteWidth / 2,
-        spritesheetMetadata.spriteHeight / 2
+        spriteData.width / 2,
+        spriteData.height / 2
       );
 
       requestAnimationFrame(() => {
@@ -63,10 +66,10 @@ export function PokemonSprite({
 
   return (
     <Image
-      src='/images/pokemon-spritesheet.png'
+      src={`/images/pokemon-spritesheet.png?v=${version}`}
       alt={`${spriteData.name} sprite`}
-      width={spritesheetMetadata.spriteWidth}
-      height={spritesheetMetadata.spriteHeight}
+      width={spriteData.width}
+      height={spriteData.height}
       className={twMerge('object-none ', className)}
       unoptimized
       loading='eager'
@@ -75,8 +78,8 @@ export function PokemonSprite({
       onDragStart={draggable ? handleDragStart : undefined}
       style={{
         objectPosition: `-${spriteData.x}px -${spriteData.y}px`,
-        minWidth: spritesheetMetadata.spriteWidth,
-        minHeight: spritesheetMetadata.spriteHeight,
+        minWidth: spriteData.width,
+        minHeight: spriteData.height,
         imageRendering: 'pixelated',
       }}
       {...rest}

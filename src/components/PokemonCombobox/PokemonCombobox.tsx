@@ -474,14 +474,14 @@ export const PokemonCombobox = React.memo(
                   <div
                     className={clsx(
                       'absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md',
-                      'size-12.5',
+                      'size-12.5 flex items-center justify-center',
                       'group-focus-within/input:border-blue-500'
                     )}
                   >
                     <PokemonSprite
                       pokemonId={(dragPreview || value)!.id}
                       className={clsx(
-                        'cursor-grab -translate-x-1/2 left-1/2 relative top-1/2 translate-y-[-65%]',
+                        'cursor-grab',
                         dragPreview && 'opacity-60 pointer-none' // Make preview sprite opaque
                       )}
                       draggable={true}

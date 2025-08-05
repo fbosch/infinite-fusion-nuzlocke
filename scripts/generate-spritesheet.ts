@@ -20,11 +20,24 @@ export type PokemonEntry = {
   name: string;
 };
 
+export type SpriteBounds = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
 export type SpriteInfo = {
   id: number;
   name: string;
   filename: string;
   exists: boolean;
+  // Original sprite dimensions
+  originalWidth: number;
+  originalHeight: number;
+  // Actual content bounds within original sprite
+  contentBounds: SpriteBounds | null;
+  // Position in the packed spritesheet
   x: number;
   y: number;
   width: number;
@@ -32,15 +45,75 @@ export type SpriteInfo = {
 };
 
 export type SpritesheetMetadata = {
-  spriteWidth: number;
-  spriteHeight: number;
-  columns: number;
-  rows: number;
+  algorithm: 'compact-bin-packing';
+  version: '2.0';
   totalSprites: number;
+  includedSprites: number;
   sheetWidth: number;
   sheetHeight: number;
+  spaceEfficiency: number;
   sprites: SpriteInfo[];
 };
+
+/**
+ * Rectangle for bin packing algorithm
+ */
+type Rectangle = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  used: boolean;
+  right?: Rectangle;
+  down?: Rectangle;
+};
+
+/**
+ * Simple bin packing algorithm implementation
+ */
+class BinPacker {
+  private root: Rectangle;
+
+  constructor(width: number, height: number) {
+    this.root = { x: 0, y: 0, width, height, used: false };
+  }
+
+  pack(width: number, height: number): Rectangle | null {
+    const node = this.findNode(this.root, width, height);
+    if (node) {
+      return this.splitNode(node, width, height);
+    }
+    return null;
+  }
+
+  private findNode(root: Rectangle, width: number, height: number): Rectangle | null {
+    if (root.used) {
+      return this.findNode(root.right!, width, height) || this.findNode(root.down!, width, height);
+    } else if (width <= root.width && height <= root.height) {
+      return root;
+    }
+    return null;
+  }
+
+  private splitNode(node: Rectangle, width: number, height: number): Rectangle {
+    node.used = true;
+    node.down = {
+      x: node.x,
+      y: node.y + height,
+      width: node.width,
+      height: node.height - height,
+      used: false
+    };
+    node.right = {
+      x: node.x + width,
+      y: node.y,
+      width: node.width - width,
+      height: height,
+      used: false
+    };
+    return node;
+  }
+}
 
 /**
  * Check if a file exists
@@ -51,6 +124,52 @@ async function fileExists(filePath: string): Promise<boolean> {
     return true;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Analyze a sprite to find its actual content bounds
+ */
+async function analyzeSpriteContent(spritePath: string): Promise<SpriteBounds | null> {
+  try {
+    const image = sharp(spritePath);
+    const { data, info } = await image
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    
+    let minX = info.width;
+    let maxX = -1;
+    let minY = info.height;
+    let maxY = -1;
+    
+    // Find bounds of non-transparent pixels
+    for (let y = 0; y < info.height; y++) {
+      for (let x = 0; x < info.width; x++) {
+        const pixelIndex = (y * info.width + x) * info.channels;
+        const alpha = data[pixelIndex + 3];
+        
+        if (alpha > 0) {
+          minX = Math.min(minX, x);
+          maxX = Math.max(maxX, x);
+          minY = Math.min(minY, y);
+          maxY = Math.max(maxY, y);
+        }
+      }
+    }
+    
+    if (maxX === -1) {
+      return null; // Completely transparent
+    }
+    
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX + 1,
+      height: maxY - minY + 1
+    };
+  } catch {
+    return null;
   }
 }
 
@@ -83,10 +202,10 @@ async function findSpriteFile(pokemonName: string): Promise<string | null> {
 }
 
 /**
- * Load Pokemon data and determine sprite files
+ * Load Pokemon data and analyze sprite content
  */
 async function loadSpriteData(): Promise<SpriteInfo[]> {
-  ConsoleFormatter.printSection('Loading Pokemon Data');
+  ConsoleFormatter.printSection('Loading and Analyzing Pokemon Sprites');
   
   // Load Pokemon entries
   const entriesData = await ConsoleFormatter.withSpinner(
@@ -99,39 +218,75 @@ async function loadSpriteData(): Promise<SpriteInfo[]> {
 
   ConsoleFormatter.success(`Loaded ${entriesData.length} Pokemon entries`);
 
-  // Find sprite files for each Pokemon
-  ConsoleFormatter.working('Finding sprite files...');
+  // Process each sprite
+  ConsoleFormatter.working('Analyzing sprite content bounds...');
   const progressBar = ConsoleFormatter.createProgressBar(entriesData.length);
   
   const spriteInfos: SpriteInfo[] = [];
   let foundCount = 0;
   let missingCount = 0;
+  let totalEfficiency = 0;
 
   for (let i = 0; i < entriesData.length; i++) {
     const entry = entriesData[i];
     const filename = await findSpriteFile(entry.name);
     
     if (filename) {
-      foundCount++;
-      spriteInfos.push({
-        id: entry.id,
-        name: entry.name,
-        filename: filename,
-        exists: true,
-        x: 0, // Will be calculated later
-        y: 0, // Will be calculated later
-        width: 0, // Will be determined from actual sprite
-        height: 0, // Will be determined from actual sprite
-      });
+      const spritePath = path.join(SPRITES_DIR, filename);
+      
+      // Get original dimensions
+      const metadata = await sharp(spritePath).metadata();
+      const originalWidth = metadata.width!;
+      const originalHeight = metadata.height!;
+      
+      // Analyze content bounds
+      const contentBounds = await analyzeSpriteContent(spritePath);
+      
+      if (contentBounds) {
+        const efficiency = (contentBounds.width * contentBounds.height) / (originalWidth * originalHeight);
+        totalEfficiency += efficiency;
+        foundCount++;
+        
+        spriteInfos.push({
+          id: entry.id,
+          name: entry.name,
+          filename,
+          exists: true,
+          originalWidth,
+          originalHeight,
+          contentBounds,
+          x: 0, // Will be set during packing
+          y: 0,
+          width: contentBounds.width,
+          height: contentBounds.height,
+        });
+      } else {
+        // Transparent or invalid sprite
+        missingCount++;
+        spriteInfos.push({
+          id: entry.id,
+          name: entry.name,
+          filename,
+          exists: false,
+          originalWidth,
+          originalHeight,
+          contentBounds: null,
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0,
+        });
+      }
     } else {
       missingCount++;
-      ConsoleFormatter.warn(`Missing sprite for: ${entry.name}`);
-      // Still add to maintain order, but mark as non-existent
       spriteInfos.push({
         id: entry.id,
         name: entry.name,
         filename: '',
         exists: false,
+        originalWidth: 0,
+        originalHeight: 0,
+        contentBounds: null,
         x: 0,
         y: 0,
         width: 0,
@@ -139,56 +294,118 @@ async function loadSpriteData(): Promise<SpriteInfo[]> {
       });
     }
 
-    progressBar.update(i + 1, { status: `Found: ${foundCount}, Missing: ${missingCount}` });
+    progressBar.update(i + 1, { 
+      status: `Found: ${foundCount}, Missing: ${missingCount}` 
+    });
   }
 
   progressBar.stop();
+  
+  const avgEfficiency = foundCount > 0 ? (totalEfficiency / foundCount * 100) : 0;
   ConsoleFormatter.success(`Found ${foundCount} sprites, ${missingCount} missing`);
+  ConsoleFormatter.info(`Average content efficiency: ${avgEfficiency.toFixed(1)}%`);
   
   return spriteInfos;
 }
 
 /**
- * Calculate optimal grid layout for spritesheet
+ * Pack sprites using bin packing algorithm
  */
-function calculateGridLayout(totalSprites: number): { columns: number; rows: number } {
-  // Aim for roughly square aspect ratio
-  const sqrt = Math.sqrt(totalSprites);
-  const columns = Math.ceil(sqrt);
-  const rows = Math.ceil(totalSprites / columns);
+function packSprites(sprites: SpriteInfo[]): { width: number; height: number; efficiency: number } {
+  ConsoleFormatter.printSection('Packing Sprites with Bin Packing Algorithm');
   
-  return { columns, rows };
+  const validSprites = sprites.filter(s => s.exists && s.contentBounds);
+  
+  if (validSprites.length === 0) {
+    throw new Error('No valid sprites to pack');
+  }
+
+  // Sort by height descending, then by width descending (improves packing efficiency)
+  validSprites.sort((a, b) => {
+    const heightDiff = b.height - a.height;
+    return heightDiff !== 0 ? heightDiff : b.width - a.width;
+  });
+
+  // Estimate initial canvas size
+  const totalArea = validSprites.reduce((sum, s) => sum + (s.width * s.height), 0);
+  const avgAspectRatio = validSprites.reduce((sum, s) => sum + (s.width / s.height), 0) / validSprites.length;
+  
+  let canvasWidth = Math.ceil(Math.sqrt(totalArea * avgAspectRatio)) + 100; // Add padding
+  let canvasHeight = Math.ceil(totalArea / canvasWidth) + 100;
+
+  // Try packing with progressively larger canvas sizes
+  let packed = false;
+  let attempts = 0;
+  const maxAttempts = 10;
+
+  while (!packed && attempts < maxAttempts) {
+    const packer = new BinPacker(canvasWidth, canvasHeight);
+    let allFit = true;
+
+    // Reset positions
+    validSprites.forEach(sprite => {
+      sprite.x = 0;
+      sprite.y = 0;
+    });
+
+    // Try to pack all sprites
+    for (const sprite of validSprites) {
+      const rect = packer.pack(sprite.width, sprite.height);
+      if (rect) {
+        sprite.x = rect.x;
+        sprite.y = rect.y;
+      } else {
+        allFit = false;
+        break;
+      }
+    }
+
+    if (allFit) {
+      packed = true;
+      
+      // Trim canvas to actual used area
+      const maxX = Math.max(...validSprites.map(s => s.x + s.width));
+      const maxY = Math.max(...validSprites.map(s => s.y + s.height));
+      
+      canvasWidth = maxX;
+      canvasHeight = maxY;
+    } else {
+      // Increase canvas size and try again
+      canvasWidth = Math.ceil(canvasWidth * 1.2);
+      canvasHeight = Math.ceil(canvasHeight * 1.2);
+      attempts++;
+    }
+  }
+
+  if (!packed) {
+    throw new Error('Failed to pack all sprites after multiple attempts');
+  }
+
+  const usedArea = validSprites.reduce((sum, s) => sum + (s.width * s.height), 0);
+  const efficiency = (usedArea / (canvasWidth * canvasHeight)) * 100;
+
+  ConsoleFormatter.success(`Packed ${validSprites.length} sprites into ${canvasWidth}x${canvasHeight} canvas`);
+  ConsoleFormatter.info(`Packing efficiency: ${efficiency.toFixed(1)}%`);
+
+  return { width: canvasWidth, height: canvasHeight, efficiency };
 }
 
 /**
  * Generate the spritesheet image and metadata
  */
 async function generateSpritesheet(spriteInfos: SpriteInfo[]): Promise<SpritesheetMetadata> {
-  ConsoleFormatter.printSection('Generating Spritesheet');
+  ConsoleFormatter.printSection('Generating Compact Spritesheet');
 
-  // Filter out missing sprites for the actual sheet generation
-  const existingSprites = spriteInfos.filter(sprite => sprite.exists);
+  const validSprites = spriteInfos.filter(s => s.exists && s.contentBounds);
   
-  if (existingSprites.length === 0) {
+  if (validSprites.length === 0) {
     throw new Error('No sprites found to generate spritesheet');
   }
 
-  ConsoleFormatter.info(`Generating spritesheet with ${existingSprites.length} sprites`);
+  ConsoleFormatter.info(`Generating spritesheet with ${validSprites.length} sprites`);
 
-  // Determine sprite dimensions by loading the first sprite
-  const firstSpritePath = path.join(SPRITES_DIR, existingSprites[0].filename);
-  const firstSpriteMetadata = await sharp(firstSpritePath).metadata();
-  const spriteWidth = firstSpriteMetadata.width!;
-  const spriteHeight = firstSpriteMetadata.height!;
-
-  ConsoleFormatter.info(`Sprite dimensions: ${spriteWidth}x${spriteHeight}px`);
-
-  // Calculate grid layout
-  const { columns, rows } = calculateGridLayout(existingSprites.length);
-  const sheetWidth = columns * spriteWidth;
-  const sheetHeight = rows * spriteHeight;
-
-  ConsoleFormatter.info(`Grid layout: ${columns}x${rows} (${sheetWidth}x${sheetHeight}px)`);
+  // Pack sprites using bin packing algorithm
+  const { width: sheetWidth, height: sheetHeight, efficiency } = packSprites(spriteInfos);
 
   // Create base image
   const baseImage = sharp({
@@ -200,62 +417,58 @@ async function generateSpritesheet(spriteInfos: SpriteInfo[]): Promise<Spriteshe
     }
   });
 
-  // Prepare composite operations
+  // Prepare composite operations for cropped sprites
   const compositeOps: any[] = [];
-  let spriteIndex = 0;
+  const progressBar = ConsoleFormatter.createProgressBar(validSprites.length);
 
-  const progressBar = ConsoleFormatter.createProgressBar(existingSprites.length);
+  for (let i = 0; i < validSprites.length; i++) {
+    const sprite = validSprites[i];
+    if (!sprite.contentBounds) continue;
 
-  for (const spriteInfo of existingSprites) {
-    const col = spriteIndex % columns;
-    const row = Math.floor(spriteIndex / columns);
-    const x = col * spriteWidth;
-    const y = row * spriteHeight;
+    const spritePath = path.join(SPRITES_DIR, sprite.filename);
+    
+    // Extract only the content area from the original sprite
+    const croppedSprite = await sharp(spritePath)
+      .extract({
+        left: sprite.contentBounds.x,
+        top: sprite.contentBounds.y,
+        width: sprite.contentBounds.width,
+        height: sprite.contentBounds.height
+      })
+      .png()
+      .toBuffer();
 
-    // Update sprite info with position
-    spriteInfo.x = x;
-    spriteInfo.y = y;
-    spriteInfo.width = spriteWidth;
-    spriteInfo.height = spriteHeight;
-
-    // Add to composite operations
-    const spritePath = path.join(SPRITES_DIR, spriteInfo.filename);
     compositeOps.push({
-      input: spritePath,
-      left: x,
-      top: y
+      input: croppedSprite,
+      left: sprite.x,
+      top: sprite.y
     });
 
-    spriteIndex++;
-    progressBar.update(spriteIndex, { status: `Processing ${spriteInfo.name}` });
+    progressBar.update(i + 1, { status: `Processing ${sprite.name}` });
   }
 
   progressBar.stop();
 
-  // Generate PNG spritesheet with standard compression
-  ConsoleFormatter.working('Compositing spritesheet...');
+  // Generate the spritesheet
+  ConsoleFormatter.working('Compositing compact spritesheet...');
   
   const spritesheetPath = path.join(SPRITESHEET_OUTPUT_DIR, 'pokemon-spritesheet.png');
   await baseImage
     .composite(compositeOps)
-    .png({ 
-      compressionLevel: 9  // Maximum lossless PNG compression
-    })
+    .png({ compressionLevel: 9 })
     .toFile(spritesheetPath);
-  
-  const outputStats = await fs.stat(spritesheetPath);
 
   ConsoleFormatter.success(`Spritesheet saved to: ${spritesheetPath}`);
 
   // Create metadata
   const metadata: SpritesheetMetadata = {
-    spriteWidth,
-    spriteHeight,
-    columns,
-    rows,
-    totalSprites: existingSprites.length,
+    algorithm: 'compact-bin-packing',
+    version: '2.0',
+    totalSprites: spriteInfos.length,
+    includedSprites: validSprites.length,
     sheetWidth,
     sheetHeight,
+    spaceEfficiency: efficiency,
     sprites: spriteInfos, // Include all sprites, even missing ones for order preservation
   };
 
@@ -273,8 +486,8 @@ async function generateSpritesheet(spriteInfos: SpriteInfo[]): Promise<Spriteshe
  */
 async function generatePokemonSpritesheet(): Promise<void> {
   ConsoleFormatter.printHeader(
-    'Pokemon Spritesheet Generator',
-    'Creating spritesheet from downloaded Pokemon sprites'
+    'Compact Pokemon Spritesheet Generator',
+    'Creating space-efficient spritesheet using bin packing algorithm'
   );
   
   const startTime = Date.now();
@@ -295,21 +508,31 @@ async function generatePokemonSpritesheet(): Promise<void> {
     // Generate spritesheet
     const metadata = await generateSpritesheet(spriteInfos);
 
+    // Calculate comparison with old grid method
+    const validSprites = spriteInfos.filter(s => s.exists && s.contentBounds);
+    const oldGridColumns = Math.ceil(Math.sqrt(validSprites.length));
+    const oldGridRows = Math.ceil(validSprites.length / oldGridColumns);
+    const oldSheetWidth = oldGridColumns * 68; // Original sprite width
+    const oldSheetHeight = oldGridRows * 56; // Original sprite height
+    const oldArea = oldSheetWidth * oldSheetHeight;
+    const newArea = metadata.sheetWidth * metadata.sheetHeight;
+    const spaceSaving = ((oldArea - newArea) / oldArea * 100);
+
     // Calculate stats
     const duration = Date.now() - startTime;
-    const existingSprites = spriteInfos.filter(s => s.exists);
     const outputFile = await fs.stat(path.join(SPRITESHEET_OUTPUT_DIR, 'pokemon-spritesheet.png'));
 
     // Success summary
-    ConsoleFormatter.printSummary('Spritesheet Generation Complete!', [
+    ConsoleFormatter.printSummary('Compact Spritesheet Generation Complete!', [
       { label: 'Total Pokemon', value: spriteInfos.length, color: 'blue' },
-      { label: 'Sprites included', value: existingSprites.length, color: 'green' },
-      { label: 'Missing sprites', value: spriteInfos.length - existingSprites.length, color: 'yellow' },
-      { label: 'Grid layout', value: `${metadata.columns}x${metadata.rows}`, color: 'cyan' },
-      { label: 'Sheet dimensions', value: `${metadata.sheetWidth}x${metadata.sheetHeight}px`, color: 'cyan' },
+      { label: 'Sprites included', value: metadata.includedSprites, color: 'green' },
+      { label: 'Missing sprites', value: metadata.totalSprites - metadata.includedSprites, color: 'yellow' },
+      { label: 'New dimensions', value: `${metadata.sheetWidth}x${metadata.sheetHeight}px`, color: 'cyan' },
+      { label: 'Old dimensions', value: `${oldSheetWidth}x${oldSheetHeight}px`, color: 'red' },
+      { label: 'Space efficiency', value: `${metadata.spaceEfficiency.toFixed(1)}%`, color: 'green' },
+      { label: 'Space saved', value: `${spaceSaving.toFixed(1)}%`, color: 'green' },
       { label: 'File size', value: ConsoleFormatter.formatFileSize(outputFile.size), color: 'green' },
-      { label: 'Spritesheet location', value: SPRITESHEET_OUTPUT_DIR, color: 'cyan' },
-      { label: 'Metadata location', value: METADATA_OUTPUT_DIR, color: 'cyan' },
+      { label: 'Algorithm', value: metadata.algorithm, color: 'cyan' },
       { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
     ]);
 
