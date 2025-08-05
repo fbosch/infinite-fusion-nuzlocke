@@ -3,7 +3,6 @@
 import React, { useCallback, Fragment, useMemo } from 'react';
 import { Atom, ChevronDown, Undo2 } from 'lucide-react';
 import clsx from 'clsx';
-import Image from 'next/image';
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react';
 import {
   useFloating,
@@ -16,9 +15,9 @@ import {
   type PokemonOptionType,
   usePokemonEvolutionData,
 } from '@/loaders/pokemon';
-import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
 import { useShiftKey } from '@/hooks/useKeyPressed';
 import { CursorTooltip } from '../CursorTooltip';
+import { PokemonSprite } from '../PokemonSprite';
 
 interface PokemonEvolutionButtonProps {
   value: PokemonOptionType | null | undefined;
@@ -130,14 +129,9 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
                       }
                     )}
                   >
-                    <Image
-                      src={getPokemonSpriteUrlFromOption(evolution)}
-                      alt={evolution.name}
-                      width={32}
-                      height={32}
-                      className='object-contain object-center'
-                      loading='eager'
-                    />
+                    <div className='flex items-center justify-center size-8'>
+                      <PokemonSprite pokemonId={evolution.id} />
+                    </div>
                     <span className=''>{evolution.name}</span>
                   </button>
                 )}
@@ -237,25 +231,16 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
       <div className='absolute inset-y-0 right-4 flex items-center'>
         <CursorTooltip
           content={
-            <div className='flex items-center gap-2'>
-              <Image
-                src={getPokemonSpriteUrlFromOption(
-                  isDevolutionMode
-                    ? availablePreEvolution!
-                    : availableEvolutions[0]!
-                )}
-                alt={
-                  isDevolutionMode
-                    ? availablePreEvolution?.name || ''
-                    : availableEvolutions[0]?.name || ''
-                }
-                width={32}
-                height={32}
-                className='object-contain object-center'
-                unoptimized
-                decoding='async'
-                loading='eager'
-              />
+            <div className='flex items-center gap-x-4'>
+              <div className='flex items-center justify-center w-8 h-8'>
+                <PokemonSprite
+                  pokemonId={
+                    isDevolutionMode
+                      ? availablePreEvolution!.id
+                      : availableEvolutions[0]!.id
+                  }
+                />
+              </div>
               <div className='flex flex-col gap-0.5'>
                 <span>
                   {isDevolutionMode ? (

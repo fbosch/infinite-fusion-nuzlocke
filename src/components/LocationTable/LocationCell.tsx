@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useMemo, useEffect, useState } from 'react';
-import Image from 'next/image';
 import { Info, CheckCircle } from 'lucide-react';
 import { useEncounters } from '@/stores/playthroughs';
 import { isCustomLocation } from '@/loaders';
-import { getPokemonSpriteUrlFromOption } from '@/components/PokemonCombobox/PokemonCombobox';
+import { PokemonSprite } from '@/components/PokemonSprite';
 import type { CombinedLocation } from '@/loaders/locations';
 import type { PokemonOptionSchema } from '@/loaders/pokemon';
 import { z } from 'zod';
@@ -83,17 +82,8 @@ export default function LocationCell({
 
           {locationPokemon.map((pokemon, index) => (
             <div key={index} className='mb-3 flex items-center gap-2.5'>
-              <div className='flex-shrink-0'>
-                <Image
-                  src={getPokemonSpriteUrlFromOption(pokemon)}
-                  alt={pokemon.name}
-                  width={20}
-                  height={20}
-                  className='scale-170 image-render-high-quality'
-                  loading='lazy'
-                  unoptimized
-                  decoding='async'
-                />
+              <div className='flex-shrink-0 size-5 justify-center items-center flex'>
+                <PokemonSprite pokemonId={pokemon.id} />
               </div>
               <div className='flex-1 min-w-0'>
                 <span className='font-medium dark:text-white text-gray-900'>
