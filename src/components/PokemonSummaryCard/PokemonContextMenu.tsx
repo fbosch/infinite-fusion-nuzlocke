@@ -74,7 +74,7 @@ export function PokemonContextMenu({
         separator: true,
       },
       {
-        id: 'infinitedx',
+        id: 'infinitefusiondex',
         label: 'Open InfiniteDex entry',
         href: infinitefusiondexLink,
         target: '_blank',

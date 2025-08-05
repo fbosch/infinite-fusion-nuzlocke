@@ -3,7 +3,7 @@ import clsx from 'clsx';
 export default function LocationTableSkeleton() {
   return (
     <div className='overflow-hidden sm:rounded-lg sm:border sm:border-gray-200 sm:dark:border-gray-700 sm:shadow-sm'>
-      <div className='max-h-[90vh] overflow-hidden'>
+      <div className='max-h-[90dvh] overflow-hidden'>
         <table
           className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700'
           role='table'
@@ -42,7 +42,7 @@ export default function LocationTableSkeleton() {
             </tr>
           </thead>
           <tbody className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700 opacity-10'>
-            {Array.from({ length: 16 }).map((_, index) => (
+            {Array.from({ length: 18 }).map((_, index) => (
               <tr
                 key={index}
                 className='hover:bg-gray-50 h-[150px] dark:hover:bg-gray-800 transition-colors'
