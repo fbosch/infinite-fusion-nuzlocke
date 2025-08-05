@@ -241,71 +241,107 @@ export const PokemonCombobox = React.memo(
       isAllPokemonLoading,
     ]);
 
+    // Helper function to check if overwrite should be allowed
+    const shouldAllowOverwrite = useCallback(
+      async (
+        currentValue: PokemonOptionType,
+        newValue: PokemonOptionType
+      ): Promise<boolean> => {
+        try {
+          const [isEvolution, isPreEvolution] = await Promise.all([
+            isPokemonEvolution(currentValue, newValue),
+            isPokemonPreEvolution(currentValue, newValue),
+          ]);
+          const isEggHatching = isEgg(currentValue) && !isEgg(newValue);
+
+          // Allow overwrite for natural progressions without confirmation
+          return isEvolution || isPreEvolution || isEggHatching;
+        } catch (error) {
+          console.error('Error checking evolution relationship:', error);
+          return false; // Err on the side of caution - require confirmation
+        }
+      },
+      []
+    );
+
+    // Helper function to apply egg hatching data preservation
+    const applyEggHatchingPreservation = useCallback(
+      (
+        oldValue: PokemonOptionType,
+        newValue: PokemonOptionType
+      ): PokemonOptionType => {
+        if (!isEgg(oldValue) || isEgg(newValue)) return newValue;
+
+        return {
+          ...newValue,
+          nickname: oldValue.nickname || newValue.nickname,
+          status: oldValue.status || newValue.status,
+        };
+      },
+      []
+    );
+
+    // Helper function to apply default status based on Pokemon source
+    const applyDefaultStatus = useCallback(
+      (pokemon: PokemonOptionType): PokemonOptionType => {
+        const sources = getPokemonSource(pokemon.id);
+        let defaultStatus: PokemonStatusType | undefined = pokemon.status;
+
+        if (sources.includes(EncounterSource.GIFT)) {
+          defaultStatus = PokemonStatus.RECEIVED;
+        } else if (sources.includes(EncounterSource.TRADE)) {
+          defaultStatus = PokemonStatus.TRADED;
+        }
+
+        if (!defaultStatus || defaultStatus === pokemon.status) return pokemon;
+
+        return {
+          ...pokemon,
+          status: defaultStatus,
+        };
+      },
+      [getPokemonSource]
+    );
+
     const handleChange = useCallback(
       async (newValue: PokemonOptionType | null | undefined) => {
-        // Check if this is an evolution or devolution
-        if (value && newValue && onBeforeOverwrite) {
-          try {
-            // Check if newValue is an evolution or pre-evolution of value
-            const isEvolution = await isPokemonEvolution(value, newValue);
-            const isPreEvolution = await isPokemonPreEvolution(value, newValue);
-
-            // Check if this is an egg hatching (replacing egg with regular pokemon)
-            const isEggHatching = isEgg(value) && !isEgg(newValue);
-
-            // Only check for overwrite confirmation if it's not an evolution, devolution, or egg hatching
-            if (!isEvolution && !isPreEvolution && !isEggHatching) {
-              const shouldOverwrite = await onBeforeOverwrite(value, newValue);
-              if (!shouldOverwrite) {
-                // If overwrite was cancelled, don't proceed with the change
-                return;
-              }
-            }
-          } catch (error) {
-            console.error('Error checking evolution relationship:', error);
-            // If we can't determine the evolution relationship, fall back to confirmation
-            const shouldOverwrite = await onBeforeOverwrite(value, newValue);
-            if (!shouldOverwrite) {
-              return;
-            }
-          }
+        // Early return for clearing value
+        if (!newValue) {
+          onChange(null);
+          setQuery('');
+          return;
         }
 
-        // Special handling for egg hatching: preserve nickname and status
-        let finalValue = newValue;
-        if (value && newValue && isEgg(value) && !isEgg(newValue)) {
-          finalValue = {
-            ...newValue,
-            nickname: value.nickname || newValue.nickname,
-            status: value.status || newValue.status,
-          };
+        // Early return if no current value or no overwrite callback
+        if (!value || !onBeforeOverwrite) {
+          const finalValue = applyDefaultStatus(newValue);
+          onChange(finalValue);
+          setQuery('');
+          return;
         }
 
-        // Set default status based on Pokemon sources
-        if (finalValue) {
-          const sources = getPokemonSource(finalValue.id);
-          let defaultStatus: PokemonStatusType | undefined = finalValue.status;
-
-          // Always set appropriate status for gift and trade Pokemon
-          if (sources.includes(EncounterSource.GIFT)) {
-            defaultStatus = PokemonStatus.RECEIVED;
-          } else if (sources.includes(EncounterSource.TRADE)) {
-            defaultStatus = PokemonStatus.TRADED;
-          }
-
-          // Only update if we have a new default status and it's different
-          if (defaultStatus && defaultStatus !== finalValue.status) {
-            finalValue = {
-              ...finalValue,
-              status: defaultStatus,
-            };
-          }
+        // Check if we should allow overwrite without confirmation
+        const allowOverwrite = await shouldAllowOverwrite(value, newValue);
+        if (!allowOverwrite) {
+          const shouldOverwrite = await onBeforeOverwrite(value, newValue);
+          if (!shouldOverwrite) return;
         }
 
-        onChange(finalValue || null);
+        // Apply transformations in order
+        let finalValue = applyEggHatchingPreservation(value, newValue);
+        finalValue = applyDefaultStatus(finalValue);
+
+        onChange(finalValue);
         setQuery('');
       },
-      [onChange, value, onBeforeOverwrite, getPokemonSource]
+      [
+        onChange,
+        value,
+        onBeforeOverwrite,
+        shouldAllowOverwrite,
+        applyEggHatchingPreservation,
+        applyDefaultStatus,
+      ]
     );
 
     // Memoize input change handler

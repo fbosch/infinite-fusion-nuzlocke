@@ -21,20 +21,16 @@ function getNicknameText(
   body: PokemonOptionType | null,
   isFusion: boolean
 ): string | undefined {
-  if (!isFusion) {
-    // Single Pokémon - show nickname if available, otherwise show name
-    const pokemon = head || body;
-    if (!pokemon) return '';
+  // Early return for empty state
+  if (!head && !body) return '';
+
+  // Handle single Pokemon case (non-fusion or partial fusion)
+  if (!isFusion || !head || !body) {
+    const pokemon = head || body!;
     return pokemon.nickname || pokemon.name;
   }
 
-  // Fusion case
-  if (!head || !body) {
-    const pokemon = head || body;
-    if (!pokemon) return '';
-    return pokemon.nickname || pokemon.name;
-  }
-
+  // Handle complete fusion case
   return head.nickname || body.nickname || `${head.name}/${body.name}`;
 }
 
