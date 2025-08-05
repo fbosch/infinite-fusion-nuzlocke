@@ -110,7 +110,7 @@ export function CursorTooltip({
         if (refs.floating.current) {
           refs.floating.current.getBoundingClientRect();
         }
-      }, 16);
+      }, delay || 16);
       return () => clearTimeout(timer);
     } else if (isMounted) {
       // Start exit animation
@@ -121,14 +121,14 @@ export function CursorTooltip({
       }, 100); // Allow time for exit animation
       return () => clearTimeout(timer);
     }
-  }, [isOpen, isMounted, refs.floating]);
+  }, [isOpen, isMounted, refs.floating, delay]);
 
   const clientPointFloating = useClientPoint(context, {
     axis: 'both',
   });
 
   const hover = useHover(context, {
-    delay: { open: delay, close: 0 },
+    delay: { open: 0, close: 0 },
     enabled: !disabled,
   });
 

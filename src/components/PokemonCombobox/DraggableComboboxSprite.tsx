@@ -65,6 +65,7 @@ export function DraggableComboboxSprite({
   return (
     <CursorTooltip
       disabled={!!dragPreview || disabled}
+      delay={500}
       content={
         <div>
           <div className='flex items-center text-xs gap-2'>
@@ -98,6 +99,7 @@ export function DraggableComboboxSprite({
           {
             'cursor-grab': !disabled,
             'cursor-not-allowed opacity-50': disabled,
+            'pointer-events-none': dragPreview || disabled,
           }
         )}
         draggable={!disabled}
@@ -106,7 +108,7 @@ export function DraggableComboboxSprite({
         <PokemonSprite
           pokemonId={pokemon.id}
           className={clsx(
-            dragPreview && 'opacity-60 pointer-none' // Make preview sprite opaque
+            dragPreview && 'opacity-60 pointer-events-none' // Make preview sprite opaque
           )}
           draggable={false}
         />
