@@ -1,5 +1,9 @@
 [
   {
+    "id": -1,
+    "name": "Egg"
+  },
+  {
     "id": 1,
     "name": "Bulbasaur"
   },

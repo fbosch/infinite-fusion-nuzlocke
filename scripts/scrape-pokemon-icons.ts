@@ -12,6 +12,7 @@ const __dirname = path.dirname(__filename);
 const BASE_ENTRIES_PATH = path.join(__dirname, '..', 'data', 'shared', 'base-entries.json');
 const SPRITES_DIR = path.join(__dirname, 'sprites', 'pokemon-icons');
 const ICON_BASE_URL = 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/regular';
+const EGG_SPRITE_URL = 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/egg.png';
 
 export type PokemonEntry = {
   id: number;
@@ -46,6 +47,32 @@ async function downloadImage(icon: PokemonIcon, retries = 3): Promise<boolean> {
   // Check if file already exists
   if (await fileExists(filePath)) {
     return true; // Skip download, file already exists
+  }
+
+  // Special handling for egg sprite (ID -1)
+  if (icon.id === -1) {
+    try {
+      const response = await fetch(EGG_SPRITE_URL, {
+        headers: {
+          'User-Agent': 'Infinite-Fusion-Scraper/1.0'
+        }
+      });
+
+      if (!response.ok) {
+        ConsoleFormatter.error(`Failed to download egg sprite: HTTP ${response.status}`);
+        return false;
+      }
+
+      const buffer = await response.arrayBuffer();
+      await fs.writeFile(filePath, Buffer.from(buffer));
+      return true;
+
+    } catch (error) {
+      ConsoleFormatter.error(
+        `Failed to download egg sprite: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+      return false;
+    }
   }
 
   // Try the full form name first
@@ -146,7 +173,15 @@ async function loadPokemonIcons(): Promise<PokemonIcon[]> {
       };
     });
 
-    ConsoleFormatter.success(`Generated ${icons.length} icon URLs`);
+    // Add the special egg entry with ID -1
+    icons.unshift({
+      id: -1,
+      name: 'Egg',
+      url: EGG_SPRITE_URL,
+      filename: 'egg.png'
+    });
+
+    ConsoleFormatter.success(`Generated ${icons.length} icon URLs (including egg)`);
     return icons;
 
   } catch (error) {

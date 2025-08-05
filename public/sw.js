@@ -1,14 +1,13 @@
-// Simplified Service Worker with Pokemon Image Prefetching
+// Simplified Service Worker with Image Caching
 // API cache gets cleared on each deployment, images remain persistent
 const BUILD_ID =
   new URL(self.location).searchParams.get('buildId') || 'default';
 const API_CACHE_NAME = `infinite-fusion-api-${BUILD_ID}`;
 // Image caches remain static - no versioning needed since images don't change
 const IMAGE_CACHE_NAME = `infinite-fusion-images-v1`;
-const POKEMON_IMAGE_CACHE_NAME = `pokemon-images-v1`;
 
 // Essential URLs to cache immediately
-const urlsToCache = ['/'];
+const urlsToCache = ['/', SPRITESHEET_URL];
 
 // Image domains that we want to cache
 const imageDomains = [
@@ -16,21 +15,8 @@ const imageDomains = [
   'ifd-spaces.sfo2.cdn.digitaloceanspaces.com',
 ];
 
-// Get Pokemon image URLs for prefetching
-async function getPokemonImageUrls() {
-  try {
-    const response = await fetch('/pokemon-ids.json');
-    const pokemonIds = await response.json();
-
-    return pokemonIds.map(
-      nationalDexId =>
-        `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${nationalDexId}.png`
-    );
-  } catch (error) {
-    console.error('Service Worker: Failed to fetch Pokemon IDs', error);
-    return [];
-  }
-}
+// Essential spritesheet to cache immediately (with version for cache busting)
+const SPRITESHEET_URL = `/images/pokemon-spritesheet.png?v=${BUILD_ID}`;
 
 // Queue for sprite variant prefetch requests
 let spriteVariantQueue = [];
@@ -168,75 +154,7 @@ async function processSingleSpriteVariantItem(item, cache) {
   );
 }
 
-// Smart background image prefetching that respects network conditions
-async function prefetchPokemonImages() {
-  // Wait for initial page load to complete before starting prefetch
-  await waitForPageLoad();
 
-  const imageUrls = await getPokemonImageUrls();
-  if (imageUrls.length === 0) return;
-
-  const cache = await caches.open(POKEMON_IMAGE_CACHE_NAME);
-  console.debug(
-    `Service Worker: Starting background prefetch of ${imageUrls.length} Pokemon images`
-  );
-
-  let successCount = 0;
-  const networkInfo = getNetworkInfo();
-  const batchSize = getBatchSize(networkInfo);
-
-  for (let i = 0; i < imageUrls.length; i += batchSize) {
-    // Wait for network to be idle before each batch
-    await waitForNetworkIdle();
-
-    // Check if we should continue based on current network conditions
-    if (!shouldContinuePrefetch()) {
-      console.debug(
-        'Service Worker: Pausing prefetch due to network conditions'
-      );
-      break;
-    }
-
-    const batch = imageUrls.slice(i, i + batchSize);
-
-    await Promise.allSettled(
-      batch.map(async url => {
-        try {
-          // Skip if already cached
-          if (await cache.match(url)) {
-            successCount++;
-            return;
-          }
-
-          const response = await fetch(url, {
-            priority: 'low', // Use low priority for background requests
-          });
-
-          if (response.ok) {
-            await cache.put(url, response);
-            successCount++;
-          }
-        } catch (error) {
-          // Silently continue on individual failures
-        }
-      })
-    );
-
-    // Log progress every 50 images
-    if ((i + batchSize) % 50 === 0 || i + batchSize >= imageUrls.length) {
-      console.debug(
-        `Service Worker: Background prefetched ${Math.min(i + batchSize, imageUrls.length)}/${imageUrls.length} images`
-      );
-    }
-
-    // Add delay between batches to be gentle on the network
-    await sleep(getDelayBetweenBatches(networkInfo));
-  }
-
-  console.debug(
-    `Service Worker: Background prefetching complete (${successCount}/${imageUrls.length} cached)`
-  );
-}
 
 // Wait for initial page load to complete
 function waitForPageLoad() {
@@ -345,12 +263,8 @@ self.addEventListener('install', event => {
       })
       .then(() => {
         console.debug(
-          'Service Worker: Essential files cached, starting background image prefetch'
+          'Service Worker: Essential files and spritesheet cached'
         );
-        // Start Pokemon image prefetching in the background (non-blocking)
-        prefetchPokemonImages().catch(error => {
-          console.warn('Service Worker: Background prefetch failed:', error);
-        });
         return self.skipWaiting();
       })
       .catch(error => {

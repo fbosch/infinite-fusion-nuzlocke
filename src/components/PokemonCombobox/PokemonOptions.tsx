@@ -4,16 +4,14 @@ import React from 'react';
 import { Check, Search, Loader2 } from 'lucide-react';
 import { ComboboxOption } from '@headlessui/react';
 import clsx from 'clsx';
-import Image from 'next/image';
-import { dragActions } from '@/stores/dragStore';
 import {
   type PokemonOptionType,
   getEncounterDisplayName,
   isEgg,
 } from '@/loaders/pokemon';
-import { getPokemonSpriteUrlFromOption } from './PokemonCombobox';
 import { SourceTag } from './SourceTag';
 import { EncounterSource } from '@/loaders/encounters';
+import { PokemonSprite } from '../PokemonSprite';
 
 interface PokemonOptionsProps {
   finalOptions: PokemonOptionType[];
@@ -53,10 +51,8 @@ interface PokemonOptionContentProps {
 
 function PokemonOptionContent({
   pokemon,
-  index,
   isRoutePokemon,
   getPokemonSource,
-  comboboxId,
   gameMode,
   locationId,
   isActive = false,
@@ -65,24 +61,10 @@ function PokemonOptionContent({
   const displayName = getEncounterDisplayName(pokemon);
 
   return (
-    <div className={'gap-8 group w-full flex items-center'}>
-      <Image
-        src={getPokemonSpriteUrlFromOption(pokemon)}
-        alt={pokemon.name}
-        width={40}
-        height={40}
-        className='object-contain object-center scale-140 image-render-high-quality'
-        loading={index < 5 || isRoutePokemon(pokemon.id) ? 'eager' : 'lazy'}
-        draggable
-        unoptimized
-        decoding='async'
-        priority={index < 5 || isRoutePokemon(pokemon.id) ? true : false}
-        onDragStart={e => {
-          e.dataTransfer.setData('text/plain', pokemon.name);
-          e.dataTransfer.effectAllowed = 'copy';
-          dragActions.startDrag(pokemon.name, comboboxId || '', pokemon);
-        }}
-      />
+    <div className={'gap-4 group w-full flex items-center'}>
+      <div className='size-10 flex justify-center items-center'>
+        <PokemonSprite pokemonId={pokemon.id} />
+      </div>
       <span
         className={clsx(
           'block truncate flex-1',
@@ -137,7 +119,7 @@ export function PokemonOption({
   className,
 }: PokemonOptionProps) {
   const baseClassName = clsx(
-    'relative cursor-pointer select-none py-2 px-4 my-1 content-visibility-auto',
+    'relative cursor-pointer select-none p-2 my-1 content-visibility-auto',
     'rounded-md w-full flex items-center',
     'h-14 group',
     className
@@ -191,7 +173,7 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className='relative cursor-default select-none py-2 px-4 text-center'>
+      <div className='relative cursor-default select-none p-2 text-center'>
         <div className='text-gray-500 dark:text-gray-400'>
           <p className='text-sm flex items-center gap-2 justify-center py-2'>
             <Loader2 className='w-4 h-4 animate-spin' />
@@ -204,7 +186,7 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
 
   if (finalOptions.length === 0) {
     return (
-      <div className='relative cursor-default select-none py-2 px-4 text-center'>
+      <div className='relative cursor-default select-none p-2 text-center'>
         <div className='text-gray-500 dark:text-gray-400'>
           {deferredQuery ? (
             <>
