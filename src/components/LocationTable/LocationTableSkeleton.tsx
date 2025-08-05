@@ -42,7 +42,7 @@ export default function LocationTableSkeleton() {
             </tr>
           </thead>
           <tbody className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700 opacity-10'>
-            {Array.from({ length: 12 }).map((_, index) => (
+            {Array.from({ length: 16 }).map((_, index) => (
               <tr
                 key={index}
                 className='hover:bg-gray-50 h-[150px] dark:hover:bg-gray-800 transition-colors'

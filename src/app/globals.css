@@ -21,8 +21,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @utility pixel-shadow-* {
-  text-shadow: 1px 1px 0px --value(--color-*, [color]);
-  filter: drop-shadow(0.03em 0.03em 0px --value(--color-*, [color]));
+  text-shadow: 0.05em 0px 0px --value(--color-*, [color]);
+  filter: drop-shadow(0em 0.08em 0px --value(--color-*, [color]));
 }
 
 @utility content-visibility-auto {
