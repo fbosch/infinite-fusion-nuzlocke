@@ -21,31 +21,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @utility pixel-shadow-* {
-  filter: drop-shadow(1px 1px 0px --value(--color-*, [color]));
-}
-
-@utility pixel-shadow-black-25 {
-  filter: drop-shadow(1px 1px 0px rgb(0 0 0 / 0.25));
-}
-
-@utility pixel-shadow-black-50 {
-  filter: drop-shadow(1px 1px 0px rgb(0 0 0 / 0.5));
-}
-
-@utility pixel-shadow-black-75 {
-  filter: drop-shadow(1px 1px 0px rgb(0 0 0 / 0.75));
-}
-
-@utility pixel-shadow-white-25 {
-  filter: drop-shadow(1px 1px 0px rgb(255 255 255 / 0.25));
-}
-
-@utility pixel-shadow-white-50 {
-  filter: drop-shadow(1px 1px 0px rgb(255 255 255 / 0.5));
-}
-
-@utility pixel-shadow-white-75 {
-  filter: drop-shadow(1px 1px 0px rgb(255 255 255 / 0.75));
+  text-shadow: 1px 1px 0px --value(--color-*, [color]);
+  filter: drop-shadow(0.03em 0.03em 0px --value(--color-*, [color]));
 }
 
 @utility content-visibility-auto {

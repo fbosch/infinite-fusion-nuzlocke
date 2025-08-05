@@ -19,7 +19,6 @@ import {
 import clsx from 'clsx';
 import { Loader2, Search } from 'lucide-react';
 import {
-  getInfiniteFusionToNationalDexMap,
   PokemonStatus,
   type PokemonOptionType,
   type PokemonStatusType,
@@ -42,42 +41,6 @@ import { usePokemonSearch } from '@/loaders/pokemon';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { PokemonOption, PokemonOptions } from './PokemonOptions';
 import { PokemonSprite } from '../PokemonSprite';
-
-let nationalDexMapping: Map<number, number> | null = null;
-let mappingPromise: Promise<void> | null = null;
-
-const TRANSPARENT_PIXEL =
-  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-
-export async function initializeSpriteMapping(): Promise<void> {
-  if (nationalDexMapping) {
-    return; // Already loaded
-  }
-
-  if (mappingPromise) {
-    return mappingPromise;
-  }
-
-  mappingPromise = getInfiniteFusionToNationalDexMap().then(map => {
-    nationalDexMapping = map;
-    mappingPromise = null;
-  });
-
-  return mappingPromise;
-}
-
-// Get Pokemon sprite URL from PokemonOption
-export function getPokemonSpriteUrlFromOption(
-  pokemon: PokemonOptionType
-): string {
-  // Handle special Egg encounter
-  if (isEgg(pokemon)) {
-    // Use a simple data URL for an egg icon
-    return '/images/egg.png';
-  }
-
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
-}
 
 interface PokemonComboboxProps {
   locationId?: string;

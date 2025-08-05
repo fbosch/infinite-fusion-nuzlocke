@@ -103,7 +103,7 @@ export default function SummaryCard({
         )}
         {name && (
           <div className='z-5 p-0.5 text-center absolute bottom-0 translate-y-8.5 rounded-sm'>
-            <span className='text-md dark:font-normal font-mono truncate max-w-full block px-1 rounded text-gray-900 dark:text-white dark:pixel-shadow tracking-[0.001em]'>
+            <span className='text-md dark:font-normal font-mono truncate max-w-full block px-1 rounded text-gray-900 dark:text-white dark:pixel-shadow-black tracking-[0.001em] pixel-shadow-gray-200'>
               {name}
             </span>
           </div>
