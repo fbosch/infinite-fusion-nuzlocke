@@ -142,12 +142,13 @@ export const PokemonStatusInput = ({
         targetField
       );
     } else {
-      // If the target slot is empty, just move the Pokemon
-      await playthroughActions.moveEncounter(
+      // If the target slot is empty, use atomic move to preserve other Pokemon at source
+      await playthroughActions.moveEncounterAtomic(
         locationId,
+        field,
         targetLocationId,
-        value,
-        targetField
+        targetField,
+        value
       );
     }
   };

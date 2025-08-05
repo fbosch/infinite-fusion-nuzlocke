@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import clsx from 'clsx';
-import { Hand, MousePointer, MoveRight } from 'lucide-react';
+import { Hand, MousePointer, ArrowDownToDot } from 'lucide-react';
 import { type PokemonOptionType } from '@/loaders/pokemon';
 import { dragActions } from '@/stores/dragStore';
 import { PokemonSprite } from '../PokemonSprite';
@@ -77,40 +77,29 @@ export function DraggableComboboxSprite({
         targetField
       );
     } else {
-      // If the target slot is empty, just move the Pokemon
-      await playthroughActions.moveEncounter(
+      // If the target slot is empty, use atomic move to preserve other Pokemon at source
+      await playthroughActions.moveEncounterAtomic(
         locationId,
+        field,
         targetLocationId,
-        value,
-        targetField
+        targetField,
+        value
       );
     }
   };
 
   const menuOptions = useMemo(() => {
-    const options: ContextMenuItem[] = [
-      {
-        id: 'pick',
-        label: 'Pick',
-        onClick: () => {},
-      },
-    ];
+    const options: ContextMenuItem[] = [];
 
     // Add move option if we have a Pokemon and location with available destinations
     if (value && locationId && availableLocations.length > 0) {
-      options.push(
-        {
-          id: 'separator',
-          separator: true,
-        },
-        {
-          id: 'move',
-          label: 'Move to Location',
-          icon: MoveRight,
-          iconClassName: 'text-emerald-500',
-          onClick: () => setIsMoveModalOpen(true),
-        }
-      );
+      options.push({
+        id: 'move',
+        label: 'Move to Location',
+        icon: ArrowDownToDot,
+        iconClassName: 'text-emerald-500',
+        onClick: () => setIsMoveModalOpen(true),
+      });
     }
 
     return options;

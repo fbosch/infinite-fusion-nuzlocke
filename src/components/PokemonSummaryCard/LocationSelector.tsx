@@ -70,8 +70,7 @@ function LocationItem({
 
   const renderActionPreview = () => {
     if (existingPokemon) {
-      // This is a swap - check if the result will be a fusion
-      // After swap, we need to check what will remain in the source location
+      // This is a swap - the existing Pokemon will be moved to the source location
       const activePlaythrough = getActivePlaythrough();
       const sourceEncounter =
         activePlaythrough?.encounters?.[currentLocationId];
@@ -81,9 +80,11 @@ function LocationItem({
           : sourceEncounter.head
         : null;
 
-      // After the swap, if there's a Pokemon remaining in the source AND
-      // there's a Pokemon in the other field of the target, it will create a fusion
-      const willCreateFusion = remainingPokemon && otherFieldPokemon;
+      // After the swap, check if there will be a fusion at the target location
+      const willCreateFusionAtTarget = otherFieldPokemon;
+
+      // After the swap, check if there will be a fusion at the source location
+      const willCreateFusionAtSource = remainingPokemon;
 
       return (
         <div className='space-y-3 mt-2'>
@@ -98,16 +99,30 @@ function LocationItem({
               </span>
             </p>
           </div>
-          {willCreateFusion && (
+
+          {willCreateFusionAtTarget && (
             <div className='flex items-center space-x-4'>
-              <div className='flex items-center space-x-4'>
-                <div className='size-5 flex justify-center items-center flex-shrink-0'>
-                  <PokemonSprite pokemonId={otherFieldPokemon.id} />
-                </div>
+              <div className='size-5 flex justify-center items-center flex-shrink-0'>
+                <PokemonSprite pokemonId={otherFieldPokemon.id} />
               </div>
               <p className='text-xs text-purple-600 dark:text-purple-400 font-medium flex gap-x-1'>
                 <Dna className='w-4 h-4 text-purple-500 flex-shrink-0' />
-                <span>Will fuse with {otherFieldPokemon.name}</span>
+                <span>Will fuse with {otherFieldPokemon.name} here</span>
+              </p>
+            </div>
+          )}
+
+          {willCreateFusionAtSource && (
+            <div className='flex items-center space-x-4'>
+              <div className='size-5 flex justify-center items-center flex-shrink-0'>
+                <PokemonSprite pokemonId={remainingPokemon.id} />
+              </div>
+              <p className='text-xs text-green-600 dark:text-green-400 font-medium flex gap-x-1'>
+                <Dna className='w-4 h-4 text-green-500 flex-shrink-0' />
+                <span>
+                  {existingPokemon.name} will fuse with {remainingPokemon.name}{' '}
+                  at source
+                </span>
               </p>
             </div>
           )}
@@ -115,14 +130,12 @@ function LocationItem({
       );
     }
 
-    // Check if moving here will create a fusion
+    // Check if moving here will create a fusion (no existing Pokemon in target slot)
     if (otherFieldPokemon) {
       return (
         <div className='flex items-center space-x-4 mt-2'>
-          <div className='flex items-center space-x-1'>
-            <div className='size-5 flex justify-center items-center flex-shrink-0'>
-              <PokemonSprite pokemonId={otherFieldPokemon.id} />
-            </div>
+          <div className='size-5 flex justify-center items-center flex-shrink-0'>
+            <PokemonSprite pokemonId={otherFieldPokemon.id} />
           </div>
           <p className='text-xs text-purple-600 dark:text-purple-400 font-medium flex gap-x-1'>
             <Dna className='w-4 h-4 text-purple-500 flex-shrink-0' />
@@ -132,7 +145,7 @@ function LocationItem({
       );
     }
 
-    return null;
+    return null; // we don't need redundant text for this
   };
 
   return (
