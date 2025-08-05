@@ -348,12 +348,13 @@ function packSprites(sprites: SpriteInfo[]): { width: number; height: number; ef
       sprite.y = 0;
     });
 
-    // Try to pack all sprites
+    // Try to pack all sprites with padding to prevent bleeding
+    const SPRITE_PADDING = 1; // 1px padding between sprites
     for (const sprite of validSprites) {
-      const rect = packer.pack(sprite.width, sprite.height);
+      const rect = packer.pack(sprite.width + SPRITE_PADDING * 2, sprite.height + SPRITE_PADDING * 2);
       if (rect) {
-        sprite.x = rect.x;
-        sprite.y = rect.y;
+        sprite.x = rect.x + SPRITE_PADDING;
+        sprite.y = rect.y + SPRITE_PADDING;
       } else {
         allFit = false;
         break;
@@ -363,9 +364,9 @@ function packSprites(sprites: SpriteInfo[]): { width: number; height: number; ef
     if (allFit) {
       packed = true;
       
-      // Trim canvas to actual used area
-      const maxX = Math.max(...validSprites.map(s => s.x + s.width));
-      const maxY = Math.max(...validSprites.map(s => s.y + s.height));
+      // Trim canvas to actual used area (including padding)
+      const maxX = Math.max(...validSprites.map(s => s.x + s.width + SPRITE_PADDING));
+      const maxY = Math.max(...validSprites.map(s => s.y + s.height + SPRITE_PADDING));
       
       canvasWidth = maxX;
       canvasHeight = maxY;
