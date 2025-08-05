@@ -22,7 +22,6 @@ export function PokemonSprite({
     [pokemonId]
   );
 
-
   if (!spriteData?.exists) {
     return null;
   }

@@ -18,6 +18,8 @@ import { clsx } from 'clsx';
 import { useState, cloneElement, isValidElement, useEffect } from 'react';
 import { useWindowVisibility } from '@/hooks/useWindowVisibility';
 import { twMerge } from 'tailwind-merge';
+import { useSnapshot } from 'valtio';
+import { dragStore } from '../stores/dragStore';
 
 // Helper functions to calculate offsets based on placement
 function getMainAxisOffset(placement: Placement): number {
@@ -61,6 +63,7 @@ export function CursorTooltip({
     'entering' | 'entered' | 'exiting'
   >('entering');
   const isWindowVisible = useWindowVisibility();
+  const dragSnapshot = useSnapshot(dragStore);
 
   const { refs, floatingStyles, context } = useFloating({
     placement,
@@ -87,10 +90,12 @@ export function CursorTooltip({
 
   // Handle window visibility changes - close tooltip if window becomes hidden
   useEffect(() => {
-    if (!isWindowVisible && isOpen) {
-      setIsOpen(false);
+    if (isOpen) {
+      if (!isWindowVisible || dragSnapshot.isDragging) {
+        setIsOpen(false);
+      }
     }
-  }, [isWindowVisible, isOpen]);
+  }, [isWindowVisible, isOpen, dragSnapshot.isDragging]);
 
   // Handle animation states and mounting/unmounting
   useEffect(() => {

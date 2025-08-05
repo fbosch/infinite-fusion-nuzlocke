@@ -17,7 +17,7 @@ import {
   FloatingPortal,
 } from '@floating-ui/react';
 import clsx from 'clsx';
-import { Loader2, MousePointer, Search } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 import {
   PokemonStatus,
   type PokemonOptionType,
@@ -27,7 +27,7 @@ import {
   isPokemonPreEvolution,
   isEgg,
 } from '@/loaders/pokemon';
-import { dragActions } from '@/stores/dragStore';
+
 import { useActivePlaythrough, useGameMode } from '@/stores/playthroughs';
 import { PokemonEvolutionButton } from './PokemonEvolutionButton';
 import { PokemonNicknameInput } from './PokemonNicknameInput';
@@ -40,9 +40,7 @@ import {
 import { usePokemonSearch } from '@/loaders/pokemon';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { PokemonOption, PokemonOptions } from './PokemonOptions';
-import { PokemonSprite } from '../PokemonSprite';
-import { CursorTooltip } from '../CursorTooltip';
-import spritesheetMetadata from '@/assets/pokemon-spritesheet-metadata.json';
+import { DraggableComboboxSprite } from './DraggableComboboxSprite';
 
 interface PokemonComboboxProps {
   locationId?: string;
@@ -472,93 +470,11 @@ export const PokemonCombobox = React.memo(
                   autoComplete='off'
                   onChange={handleInputChange}
                 />
-                {(value || dragPreview) && (
-                  <CursorTooltip
-                    disabled={!!dragPreview}
-                    content={
-                      <div>
-                        <div className='flex items-center text-xs gap-2'>
-                          <div className='flex items-center gap-1'>
-                            <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
-                              <MousePointer className='size-2.5' />
-                              <span className='font-medium text-xs'>L</span>
-                            </div>
-                            <span className='text-gray-600 dark:text-gray-300 text-xs'>
-                              Pokédex
-                            </span>
-                          </div>
-                          <div className='flex items-center gap-1'>
-                            <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
-                              <MousePointer className='size-2.5' />
-                              <span className='font-medium text-xs'>R</span>
-                            </div>
-                            <span className='text-gray-600 dark:text-gray-300 text-xs'>
-                              Options
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  >
-                    <div
-                      className={clsx(
-                        'absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md',
-                        'size-12.5 flex items-center justify-center',
-                        'group-focus-within/input:border-blue-500',
-                        'cursor-grab'
-                      )}
-                      draggable={true}
-                      onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
-                        const sprite = e.currentTarget.querySelector('img') as HTMLImageElement;
-                        const pokemon = dragPreview || value;
-                        
-                        if (sprite && pokemon) {
-                          const spriteMetadata = spritesheetMetadata.sprites.find(s => s.id === pokemon.id);
-                          
-                          if (spriteMetadata) {
-                            const dragElement = document.createElement('div');
-                            dragElement.style.cssText = `
-                              width: ${spriteMetadata.width}px;
-                              height: ${spriteMetadata.height}px;
-                              background-image: url(${sprite.src});
-                              background-position: -${spriteMetadata.x}px -${spriteMetadata.y}px;
-                              background-repeat: no-repeat;
-                              position: absolute;
-                              top: -1000px;
-                              image-rendering: pixelated;
-                            `;
-                            document.body.appendChild(dragElement);
-                            e.dataTransfer.setDragImage(
-                              dragElement,
-                              spriteMetadata.width / 2,
-                              spriteMetadata.height / 2
-                            );
-                            setTimeout(() => document.body.removeChild(dragElement), 0);
-                          }
-                        }
-                        
-                        e.dataTransfer.setData(
-                          'text/plain',
-                          (dragPreview || value)!.name
-                        );
-                        e.dataTransfer.effectAllowed = 'copy';
-                        dragActions.startDrag(
-                          (dragPreview || value)!.name,
-                          comboboxId || '',
-                          dragPreview || value || null
-                        );
-                      }}
-                    >
-                      <PokemonSprite
-                        pokemonId={(dragPreview || value)!.id}
-                        className={clsx(
-                          dragPreview && 'opacity-60 pointer-none' // Make preview sprite opaque
-                        )}
-                        draggable={false}
-                      />
-                    </div>
-                  </CursorTooltip>
-                )}
+                <DraggableComboboxSprite
+                  value={value}
+                  dragPreview={dragPreview}
+                  comboboxId={comboboxId}
+                />
                 {open ||
                 value?.status === PokemonStatus.DECEASED ||
                 value?.status === PokemonStatus.MISSED ? null : (
