@@ -6,7 +6,7 @@ import { getCacheBuster } from '../lib/persistence';
 
 const version = getCacheBuster();
 
-interface PokemonSpriteProps extends React.HTMLAttributes<HTMLDivElement> {
+interface PokemonSpriteProps extends React.HTMLAttributes<HTMLImageElement> {
   pokemonId: number;
   className?: string;
   draggable?: boolean;
@@ -26,34 +26,30 @@ export function PokemonSprite({
   );
 
   const handleDragStart = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
+    (e: React.DragEvent<HTMLImageElement>) => {
       if (!spriteData || !draggable) return;
 
-      const dragImage = document.createElement('div');
-      dragImage.style.cssText = `
-      width: ${spriteData.width}px;
-      height: ${spriteData.height}px;
-      background-image: url(/images/pokemon-spritesheet.png?v=${version});
-      background-position: -${spriteData.x}px -${spriteData.y}px;
-      background-repeat: no-repeat;
-      position: absolute;
-      top: -1000px;
-      image-rendering: pixelated;
-    `;
+      // Create simple drag image using background-image
+      const dragElement = document.createElement('div');
+      dragElement.style.cssText = `
+        width: ${spriteData.width}px;
+        height: ${spriteData.height}px;
+        background-image: url(/images/pokemon-spritesheet.png?v=${version});
+        background-position: -${spriteData.x}px -${spriteData.y}px;
+        background-repeat: no-repeat;
+        position: absolute;
+        top: -1000px;
+        image-rendering: pixelated;
+      `;
 
-      document.body.appendChild(dragImage);
-
+      document.body.appendChild(dragElement);
       e.dataTransfer.setDragImage(
-        dragImage,
+        dragElement,
         spriteData.width / 2,
         spriteData.height / 2
       );
 
-      requestAnimationFrame(() => {
-        if (document.body.contains(dragImage)) {
-          document.body.removeChild(dragImage);
-        }
-      });
+      setTimeout(() => document.body.removeChild(dragElement), 0);
 
       onDragStart?.(e);
     },
@@ -72,6 +68,7 @@ export function PokemonSprite({
       height={spriteData.height}
       className={twMerge('object-none ', className)}
       unoptimized
+      decoding='async'
       loading='eager'
       priority={true}
       draggable={draggable}
