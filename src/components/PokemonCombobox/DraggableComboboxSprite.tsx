@@ -178,7 +178,7 @@ export function DraggableComboboxSprite({
         <div
           className={clsx(
             'absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md',
-            'size-12.5 flex items-center justify-center',
+            'size-12.5 flex items-center justify-center active:cursor-grabbing',
             'group-focus-within/input:border-blue-500',
             {
               'cursor-grab': !disabled,

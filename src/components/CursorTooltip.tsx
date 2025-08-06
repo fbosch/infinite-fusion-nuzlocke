@@ -24,7 +24,7 @@ import { dragStore } from '../stores/dragStore';
 // Helper functions to calculate offsets based on placement
 function getMainAxisOffset(placement: Placement): number {
   if (placement.startsWith('top')) return -16;
-  if (placement.startsWith('bottom')) return 16;
+  if (placement.startsWith('bottom')) return 8;
   if (placement.startsWith('left')) return -16;
   if (placement.startsWith('right')) return 16;
   return 8; // Default fallback
