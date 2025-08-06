@@ -8,9 +8,15 @@ import {
 } from '@headlessui/react';
 import { useState, useMemo, useCallback } from 'react';
 import { X, MapPin, Search, Dna, ArrowUpDown } from 'lucide-react';
-import { getLocations, type Location } from '@/loaders/locations';
+import {
+  type CombinedLocation,
+  getLocationsSortedWithCustom,
+} from '@/loaders/locations';
 import { type PokemonOptionType } from '@/loaders/pokemon';
-import { getActivePlaythrough } from '@/stores/playthroughs';
+import {
+  getActivePlaythrough,
+  useCustomLocations,
+} from '@/stores/playthroughs';
 import { PokemonSprite } from '../PokemonSprite';
 import BodyIcon from '@/assets/images/body.svg';
 import HeadIcon from '@/assets/images/head.svg';
@@ -33,11 +39,11 @@ interface LocationSelectorProps {
 }
 
 interface LocationItemProps {
-  location: Location;
+  location: CombinedLocation;
   selectedTargetField: 'head' | 'body';
   currentLocationId: string;
   moveTargetField: 'head' | 'body';
-  onSelect: (location: Location) => void;
+  onSelect: (location: CombinedLocation) => void;
 }
 
 interface ActionPreviewProps {
@@ -202,7 +208,9 @@ function LocationItem({
             {location.name}
           </p>
           <p className='text-xs text-gray-500 dark:text-gray-400 truncate'>
-            {location.region} • {location.description}
+            {'isCustom' in location && location.isCustom
+              ? 'Custom location'
+              : `${location.region} • ${location.description}`}
           </p>
           <ActionPreview
             existingPokemon={existingPokemon}
@@ -326,11 +334,14 @@ function useLocationSelector({
     'head' | 'body'
   >(moveTargetField);
 
+  // Get custom locations and create merged locations
+  const customLocations = useCustomLocations();
+
   // Get all locations except the current one
   const availableLocations = useMemo(() => {
-    const allLocations = getLocations();
+    const allLocations = getLocationsSortedWithCustom(customLocations);
     return allLocations.filter(location => location.id !== currentLocationId);
-  }, [currentLocationId]);
+  }, [customLocations, currentLocationId]);
 
   // Filter locations based on search query (including Pokemon names)
   const filteredLocations = useMemo(() => {
@@ -428,7 +439,7 @@ function LocationSelector({
   });
 
   const handleLocationSelect = useCallback(
-    (location: Location) => {
+    (location: CombinedLocation) => {
       onSelectLocation(location.id, selectedTargetField);
       resetState();
     },

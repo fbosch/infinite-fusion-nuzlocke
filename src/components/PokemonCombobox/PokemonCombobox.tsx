@@ -596,8 +596,6 @@ export const PokemonCombobox = React.memo(
             onChange={onChange}
             disabled={disabled}
             dragPreview={dragPreview}
-            locationId={locationId}
-            field={comboboxId?.includes('-body') ? 'body' : 'head'}
           />
         </div>
       </div>
