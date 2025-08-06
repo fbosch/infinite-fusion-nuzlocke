@@ -28,11 +28,23 @@ const dsFont = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'Infinite Fusion Nuzlocke Tracker',
-  description: 'Track your Pokémon Infinite Fusion Nuzlocke run',
-  keywords:
-    'Pokémon, Infinite Fusion, Nuzlocke, tracker, game, locations, team',
-  authors: [{ name: 'Infinite Fusion Nuzlocke Tracker' }],
+  title: {
+    default: 'Infinite Fusion Nuzlocke Tracker',
+    template: '%s | Infinite Fusion Nuzlocke Tracker',
+  },
+  description:
+    'Track your Pokémon Infinite Fusion Nuzlocke run with advanced features including fusion tracking, encounter management, and team building.',
+  keywords: [
+    'Pokémon',
+    'Infinite Fusion',
+    'Nuzlocke',
+    'tracker',
+    'game',
+    'locations',
+    'team',
+    'fusion',
+  ],
+  authors: [{ name: 'Frederik Bosch' }],
 };
 
 export default function RootLayout({
