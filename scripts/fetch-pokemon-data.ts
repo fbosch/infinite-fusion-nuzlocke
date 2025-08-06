@@ -228,29 +228,14 @@ async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
 
     await fs.writeFile(outputPath, JSON.stringify(pokemonData, null, 2));
 
-    // Generate Pokemon IDs file for service worker prefetching
-    ConsoleFormatter.info('Generating Pokemon IDs for service worker...');
-    const nationalDexIds = pokemonData
-      .map(pokemon => pokemon.nationalDexId)
-      .filter(id => id != null)
-      .sort((a, b) => a - b);
-    
-    const uniqueIds = [...new Set(nationalDexIds)];
-    const pokemonIdsPath = path.join(process.cwd(), 'public/pokemon-ids.json');
-    await fs.writeFile(pokemonIdsPath, JSON.stringify(uniqueIds, null, 2));
-
     const fileStats = await fs.stat(outputPath);
-    const pokemonIdsStats = await fs.stat(pokemonIdsPath);
     const duration = Date.now() - startTime;
 
     // Success summary
     ConsoleFormatter.printSummary('Pokemon Data Fetch Complete!', [
       { label: 'Pokemon data saved to', value: outputPath, color: 'cyan' },
-      { label: 'Pokemon IDs saved to', value: pokemonIdsPath, color: 'cyan' },
       { label: 'Total Pokemon', value: pokemonData.length, color: 'green' },
-      { label: 'Unique IDs extracted', value: uniqueIds.length, color: 'green' },
-      { label: 'Main file size', value: ConsoleFormatter.formatFileSize(fileStats.size), color: 'cyan' },
-      { label: 'IDs file size', value: ConsoleFormatter.formatFileSize(pokemonIdsStats.size), color: 'cyan' },
+      { label: 'File size', value: ConsoleFormatter.formatFileSize(fileStats.size), color: 'cyan' },
       { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
     ]);
 

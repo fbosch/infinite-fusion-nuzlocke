@@ -23,67 +23,57 @@ const WILD_ENCOUNTERS_REMIX_URL = 'https://infinitefusion.fandom.com/wiki/Wild_E
  * Detects encounter type from text content like "Surf", "Old Rod", etc.
  */
 function detectEncounterType(text: string): EncounterType | null {
-  if (!text || typeof text !== 'string') {
-    return null;
-  }
+  if (!text || typeof text !== 'string') return null;
 
   const normalizedText = text.toLowerCase().trim();
 
-  // Surf encounters - be more specific about surf detection
-  if (normalizedText === 'surf' || 
-      normalizedText.includes('surfing') ||
-      (normalizedText.includes('surf') && !normalizedText.includes('rod'))) {
-    return 'surf';
-  }
+  // Pattern-based detection for cleaner, more maintainable code
+  const encounterPatterns: Array<{
+    type: EncounterType;
+    patterns: string[];
+    customCheck?: (text: string) => boolean;
+  }> = [
+    {
+      type: 'surf',
+      patterns: ['surfing'],
+      customCheck: (text) =>
+        text === 'surf' || (text.includes('surf') && !text.includes('rod')),
+    },
+    {
+      type: 'fishing',
+      patterns: ['old rod', 'good rod', 'super rod', 'fishing rod', 'rod fishing'],
+    },
+    {
+      type: 'rock_smash',
+      patterns: ['rock smash', 'smash rock', 'breaking rocks', 'break rock'],
+    },
+    {
+      type: 'cave',
+      patterns: ['cave', 'cavern', 'underground', 'tunnel', 'mine', 'grotto'],
+    },
+    {
+      type: 'grass',
+      patterns: ['grass', 'walking', 'wild grass', 'overworld'],
+    },
+    {
+      type: 'special',
+      patterns: ['gift', 'trade', 'special', 'event'],
+    },
+    {
+      type: 'pokeradar',
+      patterns: ['pokeradar', 'pokéradar', 'radar'],
+    },
+  ];
 
-  // Fishing encounters - only specific rod types
-  if (normalizedText.includes('old rod') || 
-      normalizedText.includes('good rod') ||
-      normalizedText.includes('super rod') ||
-      normalizedText.includes('fishing rod') ||
-      normalizedText.includes('rod fishing')) {
-    return 'fishing';
-  }
+  for (const { type, patterns, customCheck } of encounterPatterns) {
+    const hasPattern = patterns.some((pattern) =>
+      normalizedText.includes(pattern)
+    );
+    const passesCustomCheck = !customCheck || customCheck(normalizedText);
 
-  // Rock Smash encounters
-  if (normalizedText.includes('rock smash') ||
-      normalizedText.includes('smash rock') ||
-      normalizedText.includes('breaking rocks') ||
-      normalizedText.includes('break rock')) {
-    return 'rock_smash';
-  }
-
-  // Cave encounters
-  if (normalizedText.includes('cave') ||
-      normalizedText.includes('cavern') ||
-      normalizedText.includes('underground') ||
-      normalizedText.includes('tunnel') ||
-      normalizedText.includes('mine') ||
-      normalizedText.includes('grotto')) {
-    return 'cave';
-  }
-
-  // Grass encounters
-  if (normalizedText.includes('grass') || 
-      normalizedText.includes('walking') ||
-      normalizedText.includes('wild grass') ||
-      normalizedText.includes('overworld')) {
-    return 'grass';
-  }
-
-  // Special encounters (gift, trade, etc.)
-  if (normalizedText.includes('gift') ||
-      normalizedText.includes('trade') ||
-      normalizedText.includes('special') ||
-      normalizedText.includes('event')) {
-    return 'special';
-  }
-
-  // Pokéradar encounters
-  if (normalizedText.includes('pokeradar') ||
-      normalizedText.includes('pokéradar') ||
-      normalizedText.includes('radar')) {
-    return 'pokeradar';
+    if (hasPattern || (customCheck && passesCustomCheck && !hasPattern)) {
+      return type;
+    }
   }
 
   return null;

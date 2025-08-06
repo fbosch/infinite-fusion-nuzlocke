@@ -134,31 +134,37 @@ export async function GET(request: NextRequest) {
     // Parse query parameters
     const { searchParams } = new URL(request.url);
     const rawGameMode = searchParams.get('gameMode') || 'classic';
+    // Ignore cache busting version parameter (v)
 
     // Validate the game mode explicitly
     const gameMode = rawGameMode === 'remix' ? 'remix' : 'classic';
 
-    // Use explicit imports instead of dynamic template literals
+    // Helper function to get the correct imports for game mode
+    const getGameModeImports = (mode: 'classic' | 'remix') => {
+      if (mode === 'remix') {
+        return [
+          import('@data/remix/encounters.json'),
+          import('@data/remix/safari-encounters.json'),
+          import('@data/remix/trades.json'),
+          import('@data/remix/gifts.json'),
+          import('@data/remix/quests.json'),
+          import('@data/remix/statics.json'),
+        ];
+      }
+
+      return [
+        import('@data/classic/encounters.json'),
+        import('@data/classic/safari-encounters.json'),
+        import('@data/classic/trades.json'),
+        import('@data/classic/gifts.json'),
+        import('@data/classic/quests.json'),
+        import('@data/classic/statics.json'),
+      ];
+    };
+
     const [wild, safari, trade, gift, quest, statics, eggLocations, legendary] =
       await Promise.all([
-        gameMode === 'remix'
-          ? import('@data/remix/encounters.json')
-          : import('@data/classic/encounters.json'),
-        gameMode === 'remix'
-          ? import('@data/remix/safari-encounters.json')
-          : import('@data/classic/safari-encounters.json'),
-        gameMode === 'remix'
-          ? import('@data/remix/trades.json')
-          : import('@data/classic/trades.json'),
-        gameMode === 'remix'
-          ? import('@data/remix/gifts.json')
-          : import('@data/classic/gifts.json'),
-        gameMode === 'remix'
-          ? import('@data/remix/quests.json')
-          : import('@data/classic/quests.json'),
-        gameMode === 'remix'
-          ? import('@data/remix/statics.json')
-          : import('@data/classic/statics.json'),
+        ...getGameModeImports(gameMode),
         import('@data/shared/egg-locations.json'),
         import('@data/shared/legendary-encounters.json'),
       ]);

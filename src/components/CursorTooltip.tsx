@@ -9,20 +9,22 @@ import {
   useDismiss,
   useRole,
   FloatingPortal,
-  offset,
   shift,
   autoUpdate,
   Placement,
+  offset,
 } from '@floating-ui/react';
 import { clsx } from 'clsx';
 import { useState, cloneElement, isValidElement, useEffect } from 'react';
 import { useWindowVisibility } from '@/hooks/useWindowVisibility';
 import { twMerge } from 'tailwind-merge';
+import { useSnapshot } from 'valtio';
+import { dragStore } from '../stores/dragStore';
 
 // Helper functions to calculate offsets based on placement
 function getMainAxisOffset(placement: Placement): number {
   if (placement.startsWith('top')) return -16;
-  if (placement.startsWith('bottom')) return 16;
+  if (placement.startsWith('bottom')) return 8;
   if (placement.startsWith('left')) return -16;
   if (placement.startsWith('right')) return 16;
   return 8; // Default fallback
@@ -43,24 +45,30 @@ interface CursorTooltipProps {
   placement?: Placement;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
+  offset?: {
+    mainAxis?: number;
+    crossAxis?: number;
+  };
 }
 
-export function CursorTooltip({
-  content,
-  children,
-  className,
-  delay = 0,
-  disabled = false,
-  placement = 'bottom-start',
-  onMouseEnter,
-  onMouseLeave,
-}: CursorTooltipProps) {
+export function CursorTooltip(props: CursorTooltipProps) {
+  const {
+    content,
+    children,
+    className,
+    delay = 0,
+    disabled = false,
+    placement = 'bottom-start',
+    onMouseEnter,
+    onMouseLeave,
+  } = props;
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [animationState, setAnimationState] = useState<
     'entering' | 'entered' | 'exiting'
   >('entering');
   const isWindowVisible = useWindowVisibility();
+  const dragSnapshot = useSnapshot(dragStore);
 
   const { refs, floatingStyles, context } = useFloating({
     placement,
@@ -68,8 +76,8 @@ export function CursorTooltip({
     onOpenChange: setIsOpen,
     middleware: [
       offset({
-        mainAxis: getMainAxisOffset(placement),
-        crossAxis: getCrossAxisOffset(placement),
+        mainAxis: props.offset?.mainAxis ?? getMainAxisOffset(placement),
+        crossAxis: props.offset?.crossAxis ?? getCrossAxisOffset(placement),
       }),
       shift(),
     ],
@@ -87,10 +95,12 @@ export function CursorTooltip({
 
   // Handle window visibility changes - close tooltip if window becomes hidden
   useEffect(() => {
-    if (!isWindowVisible && isOpen) {
-      setIsOpen(false);
+    if (isOpen) {
+      if (!isWindowVisible || dragSnapshot.isDragging) {
+        setIsOpen(false);
+      }
     }
-  }, [isWindowVisible, isOpen]);
+  }, [isWindowVisible, isOpen, dragSnapshot.isDragging]);
 
   // Handle animation states and mounting/unmounting
   useEffect(() => {
@@ -105,7 +115,7 @@ export function CursorTooltip({
         if (refs.floating.current) {
           refs.floating.current.getBoundingClientRect();
         }
-      }, 16);
+      }, delay || 16);
       return () => clearTimeout(timer);
     } else if (isMounted) {
       // Start exit animation
@@ -116,14 +126,14 @@ export function CursorTooltip({
       }, 100); // Allow time for exit animation
       return () => clearTimeout(timer);
     }
-  }, [isOpen, isMounted, refs.floating]);
+  }, [isOpen, isMounted, refs.floating, delay]);
 
   const clientPointFloating = useClientPoint(context, {
     axis: 'both',
   });
 
   const hover = useHover(context, {
-    delay: { open: delay, close: 0 },
+    delay: { open: 0, close: 0 },
     enabled: !disabled,
   });
 

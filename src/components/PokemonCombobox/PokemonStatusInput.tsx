@@ -90,90 +90,95 @@ export const PokemonStatusInput = ({
   };
 
   return (
-    <Menu>
-      {({ open }) => (
-        <div className='relative'>
-          <MenuButton
-            ref={refs.setReference}
-            className={clsx(
-              'border-t-0 capitalize',
-              'flex items-center justify-between px-4 py-3.5 text-sm border bg-white dark:text-gray-400 focus:outline-none focus-visible:ring-1',
-              'focus:outline-none',
-              'focus:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:cursor-not-allowed',
-              'border-gray-300 dark:border-gray-600 dark:bg-gray-800 enabled:dark:text-white dark:focus-visible:ring-blue-400',
-              'enabled:hover:bg-gray-50 dark:enabled:hover:bg-gray-700',
-              'min-w-[140px] enabled:hover:cursor-pointer',
-              dragPreview && 'opacity-60 pointer-events-none',
-              {
-                'rounded-none border-t-0 rounded-b-none':
-                  open && placement.startsWith('bottom'),
-                'rounded-br-md': open && placement.startsWith('top'),
-                'rounded-br-md rounded-t-none': !open,
-              }
-            )}
-            disabled={!value || disabled}
-          >
-            <div className='flex items-center gap-2'>
-              {(dragPreview?.status || localStatus) &&
-                getStatusIcon(
-                  (dragPreview?.status || localStatus) as PokemonStatusType
-                )}
-              <span>{dragPreview?.status || localStatus || 'Status'}</span>
-            </div>
-            <ChevronDown className='h-4 w-4 text-gray-400' aria-hidden='true' />
-          </MenuButton>
+    <>
+      <Menu>
+        {({ open }) => (
+          <div className='relative'>
+            <MenuButton
+              ref={refs.setReference}
+              className={clsx(
+                'border-t-0 capitalize',
+                'flex items-center justify-between px-4 py-3.5 text-sm border bg-white dark:text-gray-400 focus:outline-none focus-visible:ring-1',
+                'focus:outline-none',
+                'focus:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:cursor-not-allowed',
+                'border-gray-300 dark:border-gray-600 dark:bg-gray-800 enabled:dark:text-white dark:focus-visible:ring-blue-400',
+                'enabled:hover:bg-gray-50 dark:enabled:hover:bg-gray-700',
+                'min-w-[140px] enabled:hover:cursor-pointer',
+                dragPreview && 'opacity-60 pointer-events-none',
+                {
+                  'rounded-none border-t-0 rounded-b-none':
+                    open && placement.startsWith('bottom'),
+                  'rounded-br-md': open && placement.startsWith('top'),
+                  'rounded-br-md rounded-t-none': !open,
+                }
+              )}
+              disabled={!value || disabled}
+            >
+              <div className='flex items-center gap-2'>
+                {(dragPreview?.status || localStatus) &&
+                  getStatusIcon(
+                    (dragPreview?.status || localStatus) as PokemonStatusType
+                  )}
+                <span>{dragPreview?.status || localStatus || 'Status'}</span>
+              </div>
+              <ChevronDown
+                className='h-4 w-4 text-gray-400'
+                aria-hidden='true'
+              />
+            </MenuButton>
 
-          {open && (
-            <FloatingPortal>
-              <MenuItems
-                ref={refs.setFloating}
-                style={floatingStyles}
-                className={clsx(
-                  'z-50 overflow-hidden text-base focus:outline-none sm:text-sm',
-                  'bg-white dark:bg-gray-800',
-                  'border-gray-300 dark:border-gray-600 border-1',
-                  'min-w-[140px]',
-                  {
-                    'rounded-b-md border-t-0': placement.startsWith('bottom'),
-                    'rounded-t-md': placement.startsWith('top'),
-                  }
-                )}
-              >
-                {Object.values(PokemonStatus).map(
-                  (statusValue: PokemonStatusType) => (
-                    <MenuItem key={statusValue}>
-                      {({ focus }) => (
-                        <button
-                          onClick={() => handleStatusSelect(statusValue)}
-                          className={clsx(
-                            'group flex w-full items-center px-4 py-2 text-sm hover:cursor-pointer',
-                            'focus:outline-none text-left',
-                            {
-                              'bg-gray-100 dark:bg-gray-700 focus-visible:ring-1 focus-visible:ring-blue-500 ring-inset':
-                                focus,
-                              'bg-gray-200 dark:bg-gray-600':
-                                (dragPreview?.status || localStatus) ===
-                                  statusValue && !focus,
-                            }
-                          )}
-                        >
-                          <div className='flex items-center gap-2'>
-                            {getStatusIcon(statusValue)}
-                            <span>
-                              {statusValue.charAt(0).toUpperCase() +
-                                statusValue.slice(1)}
-                            </span>
-                          </div>
-                        </button>
-                      )}
-                    </MenuItem>
-                  )
-                )}
-              </MenuItems>
-            </FloatingPortal>
-          )}
-        </div>
-      )}
-    </Menu>
+            {open && (
+              <FloatingPortal>
+                <MenuItems
+                  ref={refs.setFloating}
+                  style={floatingStyles}
+                  className={clsx(
+                    'z-50 overflow-hidden text-base focus:outline-none sm:text-sm',
+                    'bg-white dark:bg-gray-800',
+                    'border-gray-300 dark:border-gray-600 border-1',
+                    'min-w-[140px]',
+                    {
+                      'rounded-b-md border-t-0': placement.startsWith('bottom'),
+                      'rounded-t-md': placement.startsWith('top'),
+                    }
+                  )}
+                >
+                  {Object.values(PokemonStatus).map(
+                    (statusValue: PokemonStatusType) => (
+                      <MenuItem key={statusValue}>
+                        {({ focus }) => (
+                          <button
+                            onClick={() => handleStatusSelect(statusValue)}
+                            className={clsx(
+                              'group flex w-full items-center px-4 py-2 text-sm cursor-pointer',
+                              'focus:outline-none text-left',
+                              {
+                                'bg-gray-100 dark:bg-gray-700 focus-visible:ring-1 focus-visible:ring-blue-500 ring-inset':
+                                  focus,
+                                'bg-gray-200 dark:bg-gray-600':
+                                  (dragPreview?.status || localStatus) ===
+                                    statusValue && !focus,
+                              }
+                            )}
+                          >
+                            <div className='flex items-center gap-2'>
+                              {getStatusIcon(statusValue)}
+                              <span>
+                                {statusValue.charAt(0).toUpperCase() +
+                                  statusValue.slice(1)}
+                              </span>
+                            </div>
+                          </button>
+                        )}
+                      </MenuItem>
+                    )
+                  )}
+                </MenuItems>
+              </FloatingPortal>
+            )}
+          </div>
+        )}
+      </Menu>
+    </>
   );
 };

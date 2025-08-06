@@ -17,10 +17,8 @@ import {
   FloatingPortal,
 } from '@floating-ui/react';
 import clsx from 'clsx';
-import Image from 'next/image';
 import { Loader2, Search } from 'lucide-react';
 import {
-  getInfiniteFusionToNationalDexMap,
   PokemonStatus,
   type PokemonOptionType,
   type PokemonStatusType,
@@ -29,7 +27,7 @@ import {
   isPokemonPreEvolution,
   isEgg,
 } from '@/loaders/pokemon';
-import { dragActions } from '@/stores/dragStore';
+
 import { useActivePlaythrough, useGameMode } from '@/stores/playthroughs';
 import { PokemonEvolutionButton } from './PokemonEvolutionButton';
 import { PokemonNicknameInput } from './PokemonNicknameInput';
@@ -42,42 +40,7 @@ import {
 import { usePokemonSearch } from '@/loaders/pokemon';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { PokemonOption, PokemonOptions } from './PokemonOptions';
-
-let nationalDexMapping: Map<number, number> | null = null;
-let mappingPromise: Promise<void> | null = null;
-
-const TRANSPARENT_PIXEL =
-  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-
-export async function initializeSpriteMapping(): Promise<void> {
-  if (nationalDexMapping) {
-    return; // Already loaded
-  }
-
-  if (mappingPromise) {
-    return mappingPromise;
-  }
-
-  mappingPromise = getInfiniteFusionToNationalDexMap().then(map => {
-    nationalDexMapping = map;
-    mappingPromise = null;
-  });
-
-  return mappingPromise;
-}
-
-// Get Pokemon sprite URL from PokemonOption
-export function getPokemonSpriteUrlFromOption(
-  pokemon: PokemonOptionType
-): string {
-  // Handle special Egg encounter
-  if (isEgg(pokemon)) {
-    // Use a simple data URL for an egg icon
-    return '/images/egg.png';
-  }
-
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`;
-}
+import { DraggableComboboxSprite } from './DraggableComboboxSprite';
 
 interface PokemonComboboxProps {
   locationId?: string;
@@ -278,71 +241,107 @@ export const PokemonCombobox = React.memo(
       isAllPokemonLoading,
     ]);
 
+    // Helper function to check if overwrite should be allowed
+    const shouldAllowOverwrite = useCallback(
+      async (
+        currentValue: PokemonOptionType,
+        newValue: PokemonOptionType
+      ): Promise<boolean> => {
+        try {
+          const [isEvolution, isPreEvolution] = await Promise.all([
+            isPokemonEvolution(currentValue, newValue),
+            isPokemonPreEvolution(currentValue, newValue),
+          ]);
+          const isEggHatching = isEgg(currentValue) && !isEgg(newValue);
+
+          // Allow overwrite for natural progressions without confirmation
+          return isEvolution || isPreEvolution || isEggHatching;
+        } catch (error) {
+          console.error('Error checking evolution relationship:', error);
+          return false; // Err on the side of caution - require confirmation
+        }
+      },
+      []
+    );
+
+    // Helper function to apply egg hatching data preservation
+    const applyEggHatchingPreservation = useCallback(
+      (
+        oldValue: PokemonOptionType,
+        newValue: PokemonOptionType
+      ): PokemonOptionType => {
+        if (!isEgg(oldValue) || isEgg(newValue)) return newValue;
+
+        return {
+          ...newValue,
+          nickname: oldValue.nickname || newValue.nickname,
+          status: oldValue.status || newValue.status,
+        };
+      },
+      []
+    );
+
+    // Helper function to apply default status based on Pokemon source
+    const applyDefaultStatus = useCallback(
+      (pokemon: PokemonOptionType): PokemonOptionType => {
+        const sources = getPokemonSource(pokemon.id);
+        let defaultStatus: PokemonStatusType | undefined = pokemon.status;
+
+        if (sources.includes(EncounterSource.GIFT)) {
+          defaultStatus = PokemonStatus.RECEIVED;
+        } else if (sources.includes(EncounterSource.TRADE)) {
+          defaultStatus = PokemonStatus.TRADED;
+        }
+
+        if (!defaultStatus || defaultStatus === pokemon.status) return pokemon;
+
+        return {
+          ...pokemon,
+          status: defaultStatus,
+        };
+      },
+      [getPokemonSource]
+    );
+
     const handleChange = useCallback(
       async (newValue: PokemonOptionType | null | undefined) => {
-        // Check if this is an evolution or devolution
-        if (value && newValue && onBeforeOverwrite) {
-          try {
-            // Check if newValue is an evolution or pre-evolution of value
-            const isEvolution = await isPokemonEvolution(value, newValue);
-            const isPreEvolution = await isPokemonPreEvolution(value, newValue);
-
-            // Check if this is an egg hatching (replacing egg with regular pokemon)
-            const isEggHatching = isEgg(value) && !isEgg(newValue);
-
-            // Only check for overwrite confirmation if it's not an evolution, devolution, or egg hatching
-            if (!isEvolution && !isPreEvolution && !isEggHatching) {
-              const shouldOverwrite = await onBeforeOverwrite(value, newValue);
-              if (!shouldOverwrite) {
-                // If overwrite was cancelled, don't proceed with the change
-                return;
-              }
-            }
-          } catch (error) {
-            console.error('Error checking evolution relationship:', error);
-            // If we can't determine the evolution relationship, fall back to confirmation
-            const shouldOverwrite = await onBeforeOverwrite(value, newValue);
-            if (!shouldOverwrite) {
-              return;
-            }
-          }
+        // Early return for clearing value
+        if (!newValue) {
+          onChange(null);
+          setQuery('');
+          return;
         }
 
-        // Special handling for egg hatching: preserve nickname and status
-        let finalValue = newValue;
-        if (value && newValue && isEgg(value) && !isEgg(newValue)) {
-          finalValue = {
-            ...newValue,
-            nickname: value.nickname || newValue.nickname,
-            status: value.status || newValue.status,
-          };
+        // Early return if no current value or no overwrite callback
+        if (!value || !onBeforeOverwrite) {
+          const finalValue = applyDefaultStatus(newValue);
+          onChange(finalValue);
+          setQuery('');
+          return;
         }
 
-        // Set default status based on Pokemon sources
-        if (finalValue) {
-          const sources = getPokemonSource(finalValue.id);
-          let defaultStatus: PokemonStatusType | undefined = finalValue.status;
-
-          // Always set appropriate status for gift and trade Pokemon
-          if (sources.includes(EncounterSource.GIFT)) {
-            defaultStatus = PokemonStatus.RECEIVED;
-          } else if (sources.includes(EncounterSource.TRADE)) {
-            defaultStatus = PokemonStatus.TRADED;
-          }
-
-          // Only update if we have a new default status and it's different
-          if (defaultStatus && defaultStatus !== finalValue.status) {
-            finalValue = {
-              ...finalValue,
-              status: defaultStatus,
-            };
-          }
+        // Check if we should allow overwrite without confirmation
+        const allowOverwrite = await shouldAllowOverwrite(value, newValue);
+        if (!allowOverwrite) {
+          const shouldOverwrite = await onBeforeOverwrite(value, newValue);
+          if (!shouldOverwrite) return;
         }
 
-        onChange(finalValue || null);
+        // Apply transformations in order
+        let finalValue = applyEggHatchingPreservation(value, newValue);
+        finalValue = applyDefaultStatus(finalValue);
+
+        onChange(finalValue);
         setQuery('');
       },
-      [onChange, value, onBeforeOverwrite, getPokemonSource]
+      [
+        onChange,
+        value,
+        onBeforeOverwrite,
+        shouldAllowOverwrite,
+        applyEggHatchingPreservation,
+        applyDefaultStatus,
+      ]
     );
 
     // Memoize input change handler
@@ -353,30 +352,31 @@ export const PokemonCombobox = React.memo(
         // Always update the query immediately for responsive UI
         startTransition(() => setQuery(inputValue));
 
-        if (inputValue === '') {
-          // If there's a current value and an onBeforeClear callback, check if clearing should proceed
-          if (value && onBeforeClear) {
-            const shouldClear = await onBeforeClear(value);
-            if (!shouldClear) {
-              // If clearing was cancelled, restore the input value to the pokemon name
-              setQuery(value.name);
-              return;
-            }
-          }
-
-          // Clear the selection when input is cleared
-          onChange(null);
-
-          // Maintain focus on the input after clearing
-          setTimeout(() => {
-            inputRef.current?.focus();
-          }, 0);
+        if (inputValue !== '') {
+          return;
         }
+
+        // If there's a current value and an onBeforeClear callback, check if clearing should proceed
+        if (value && onBeforeClear) {
+          const shouldClear = await onBeforeClear(value);
+          if (!shouldClear) {
+            // If clearing was cancelled, restore the input value to the pokemon name
+            setQuery(value.name);
+            return;
+          }
+        }
+
+        // Clear the selection when input is cleared
+        onChange(null);
+
+        // Maintain focus on the input after clearing
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 0);
       },
       [onChange, value, onBeforeClear]
     );
 
-    // Determine if we should show loading
     const isShowingLoading = useMemo(() => {
       // Show loading when:
       // 1. No query and all Pokemon are loading (for randomized/custom locations)
@@ -470,43 +470,12 @@ export const PokemonCombobox = React.memo(
                   autoComplete='off'
                   onChange={handleInputChange}
                 />
-                {(value || dragPreview) && (
-                  <div
-                    className={clsx(
-                      'absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md',
-                      'group-focus-within/input:border-blue-500'
-                    )}
-                  >
-                    <Image
-                      src={getPokemonSpriteUrlFromOption(dragPreview || value!)}
-                      alt={(dragPreview || value)!.name}
-                      width={40}
-                      height={40}
-                      className={clsx(
-                        'object-center object-contain cursor-grab active:cursor-grabbing rounded-sm transform-gpu',
-                        dragPreview && 'opacity-60 pointer-none' // Make preview sprite opaque
-                      )}
-                      priority={true}
-                      loading='eager'
-                      placeholder='blur'
-                      blurDataURL={TRANSPARENT_PIXEL}
-                      draggable
-                      unoptimized
-                      onDragStart={e => {
-                        e.dataTransfer.setData(
-                          'text/plain',
-                          (dragPreview || value)!.name
-                        );
-                        e.dataTransfer.effectAllowed = 'copy';
-                        dragActions.startDrag(
-                          (dragPreview || value)!.name,
-                          comboboxId || '',
-                          dragPreview || value || null
-                        );
-                      }}
-                    />
-                  </div>
-                )}
+                <DraggableComboboxSprite
+                  value={value}
+                  dragPreview={dragPreview}
+                  comboboxId={comboboxId}
+                  locationId={locationId}
+                />
                 {open ||
                 value?.status === PokemonStatus.DECEASED ||
                 value?.status === PokemonStatus.MISSED ? null : (

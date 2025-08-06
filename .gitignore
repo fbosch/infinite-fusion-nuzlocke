@@ -45,4 +45,7 @@ next-env.d.ts
 /public/comlink.js
 /public/fuse.min.js
 
+# scraping script outputs
+/scripts/sprites/
+
 *.log

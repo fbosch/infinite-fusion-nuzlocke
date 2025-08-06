@@ -34,7 +34,7 @@ const nextConfig: NextConfig = {
   },
 
   // Webpack configuration for production builds (Turbopack only works in dev)
-  webpack(config, { isServer }) {
+  webpack(config) {
     // Handle SVG files with SVGR for production builds
     config.module.rules.push({
       test: /\.svg$/,
@@ -80,6 +80,14 @@ const nextConfig: NextConfig = {
         pathname: '/generated/**',
       },
     ],
+  },
+
+  // Expose build ID to client side
+  env: {
+    NEXT_PUBLIC_BUILD_ID:
+      process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ||
+      process.env.NEXT_PUBLIC_BUILD_ID ||
+      `build-${Date.now()}`,
   },
 
   // Optimize static asset caching

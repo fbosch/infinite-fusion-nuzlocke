@@ -9,7 +9,7 @@ export default function Home() {
         <h2 id='locations-heading' className='sr-only'>
           Game Locations
         </h2>
-        <ErrorBoundary className='min-h-[70vh]'>
+        <ErrorBoundary className='min-h-[70dvh]'>
           <LocationTable />
         </ErrorBoundary>
       </section>

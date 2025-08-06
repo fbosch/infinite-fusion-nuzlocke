@@ -7,19 +7,30 @@ import {
   getSortedRowModel,
   SortingState,
 } from '@tanstack/react-table';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  useCallback,
+} from 'react';
 import { getLocationsSortedWithCustom } from '@/loaders';
 import type { CombinedLocation } from '@/loaders/locations';
 import LocationTableHeader from './LocationTableHeader';
 import LocationTableRow from './LocationTableRow';
 import LocationTableSkeleton from './LocationTableSkeleton';
 import LocationCell from './LocationCell';
-import { useIsLoading, useCustomLocations } from '@/stores/playthroughs';
-import { PlusIcon } from 'lucide-react';
+import {
+  useIsLoading,
+  useCustomLocations,
+  playthroughActions,
+} from '@/stores/playthroughs';
+import { PlusIcon, LocateIcon } from 'lucide-react';
 import clsx from 'clsx';
 import { CursorTooltip } from '../CursorTooltip';
 import dynamic from 'next/dynamic';
 import { useBreakpointSmallerThan } from '../../hooks/useBreakpoint';
+import { scrollToMostRecentLocation } from '@/utils/scrollToLocation';
 
 const columnHelper = createColumnHelper<CombinedLocation>();
 
@@ -42,6 +53,9 @@ export default function LocationTable() {
   const customLocations = useCustomLocations();
   const smallScreen = useBreakpointSmallerThan('2xl');
 
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLTableElement>(null);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -55,39 +69,92 @@ export default function LocationTable() {
     }
   }, [customLocations]);
 
+  // Auto-scroll to recent encounter on page load
+  useEffect(() => {
+    if (!mounted || isLoading || data.length === 0) return;
+
+    window.requestAnimationFrame(() => {
+      scrollToMostRecentLocation(
+        playthroughActions.getEncounters() || {},
+        tableContainerRef.current,
+        tableRef.current,
+        'smooth'
+      );
+    });
+  }, [mounted, isLoading, data.length]);
+
+  // Manual scroll handler
+  const handleScrollToRecent = useCallback(() => {
+    scrollToMostRecentLocation(
+      playthroughActions.getEncounters() || {},
+      tableContainerRef.current,
+      tableRef.current,
+      'smooth'
+    );
+  }, []);
+
   const columns = useMemo(
     () => [
       columnHelper.accessor('name', {
         header: () => (
           <div className='flex items-center w-full'>
             <span>Location</span>
-            <CursorTooltip content={'Add a custom location'}>
-              <button
-                onKeyDown={e => {
-                  if (e.key === 'Enter' || e.key === ' ') {
+            <div className='flex items-center gap-1 ml-2'>
+              <CursorTooltip content={'Scroll to most recent encounter'}>
+                <button
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.stopPropagation();
+                      handleScrollToRecent();
+                    }
+                  }}
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleScrollToRecent();
+                  }}
+                  className={clsx(
+                    'p-0.5 rounded-sm transition-colors duration-200',
+                    'bg-gray-100 text-gray-600',
+                    'border border-gray-200',
+                    'dark:bg-gray-700 dark:text-gray-400',
+                    'dark:border-gray-600',
+                    'hover:text-white hover:border-green-500 hover:bg-green-600',
+                    'cursor-pointer',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1'
+                  )}
+                  aria-label='Scroll to most recent encounter'
+                >
+                  <LocateIcon className='size-2.5' />
+                </button>
+              </CursorTooltip>
+              <CursorTooltip content={'Add a custom location'}>
+                <button
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.stopPropagation();
+                      setIsCustomLocationModalOpen(true);
+                    }
+                  }}
+                  onClick={e => {
                     e.stopPropagation();
                     setIsCustomLocationModalOpen(true);
-                  }
-                }}
-                onClick={e => {
-                  e.stopPropagation();
-                  setIsCustomLocationModalOpen(true);
-                }}
-                className={clsx(
-                  'ml-2 p-0.5 rounded-sm transition-colors duration-200',
-                  'bg-gray-100 text-gray-600',
-                  'border border-gray-200',
-                  'dark:bg-gray-700 dark:text-gray-400',
-                  'dark:border-gray-600',
-                  'hover:text-white hover:border-blue-500 hover:bg-blue-600',
-                  'cursor-pointer',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1'
-                )}
-                aria-label='Add custom location'
-              >
-                <PlusIcon className='size-2.5' />
-              </button>
-            </CursorTooltip>
+                  }}
+                  className={clsx(
+                    'p-0.5 rounded-sm transition-colors duration-200',
+                    'bg-gray-100 text-gray-600',
+                    'border border-gray-200',
+                    'dark:bg-gray-700 dark:text-gray-400',
+                    'dark:border-gray-600',
+                    'hover:text-white hover:border-blue-500 hover:bg-blue-600',
+                    'cursor-pointer',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1'
+                  )}
+                  aria-label='Add custom location'
+                >
+                  <PlusIcon className='size-2.5' />
+                </button>
+              </CursorTooltip>
+            </div>
           </div>
         ),
         cell: info => (
@@ -120,7 +187,7 @@ export default function LocationTable() {
         size: 60, // Width for reset column
       }),
     ],
-    [smallScreen]
+    [smallScreen, handleScrollToRecent]
   );
 
   const table = useReactTable({
@@ -165,8 +232,12 @@ export default function LocationTable() {
 
   return (
     <div className='overflow-hidden 2xl:rounded-lg border-y md:border border-gray-200 dark:border-gray-700 xl:shadow-sm'>
-      <div className='max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative'>
+      <div
+        ref={tableContainerRef}
+        className='max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative scroll-smooth'
+      >
         <table
+          ref={tableRef}
           className='w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700 overscroll-x-contain overscroll-y-auto'
           role='table'
           data-scroll-container

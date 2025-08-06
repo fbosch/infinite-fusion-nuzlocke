@@ -1,0 +1,361 @@
+---
+description: Guidelines for when and how to write code comments, emphasizing self-documenting code over comments
+globs: []
+alwaysApply: true
+---
+
+# Code Comments Guidelines
+
+Rules for writing meaningful comments while prioritizing self-documenting code through clear naming and structure.
+
+## Core Principles
+
+### Self-Documenting Code First
+
+- **Prefer clear naming over comments**: Use descriptive variable and function names
+- **Comments should explain "why", not "what"**: Code should be clear enough to understand what it does
+- **Comments only for complexity**: Add comments when business logic or technical complexity requires explanation
+- **Avoid redundant comments**: Don't comment on self-explanatory code
+
+### When Comments Are Needed
+
+- **Business logic rationale**: Explain why certain decisions were made
+- **Complex algorithms**: Explain non-obvious mathematical or algorithmic logic
+- **Workarounds**: Explain temporary fixes or browser-specific hacks
+- **External constraints**: Explain API limitations or third-party library quirks
+- **Performance considerations**: Explain optimization choices
+
+## Good vs Bad Comments
+
+### ❌ Bad Comments (Redundant)
+
+```typescript
+// Bad: Comments that just repeat the code
+// Set the user name to John
+const userName = 'John';
+
+// Bad: Obvious state updates
+// Set loading to true
+setLoading(true);
+
+// Bad: Describing what the code does
+// Loop through all pokemon
+pokemon.forEach(p => {
+  // Check if pokemon is alive
+  if (p.status !== 'fainted') {
+    // Add to alive list
+    alivePokemon.push(p);
+  }
+});
+
+// Bad: Commenting obvious conditional logic
+// If user exists and is active
+if (user && user.isActive) {
+  // Do something
+  processUser(user);
+}
+```
+
+### ✅ Good Comments (Valuable Context)
+
+```typescript
+// Good: Explain business logic rationale
+// Pokemon with gift source should default to "received" status
+// as they don't need to be caught in the traditional sense
+if (sources.includes(EncounterSource.GIFT)) {
+  defaultStatus = PokemonStatus.RECEIVED;
+}
+
+// Good: Explain complex algorithm or non-obvious logic
+// Use Levenshtein distance for fuzzy matching when exact matches fail
+// This helps users find Pokemon even with slight typos
+const fuzzyMatches = calculateLevenshteinDistance(query, pokemonNames);
+
+// Good: Explain workarounds or external constraints
+// Debounce drag preview updates to reduce expensive operations
+// The Pokemon API lookup is costly and can cause UI lag
+const DRAG_PREVIEW_DEBOUNCE = 16; // ~1 frame at 60fps
+
+// Good: Explain edge cases or special handling
+// Safari Zone encounters need special consolidation because
+// the scraper treats each zone as separate routes but the game
+// considers them as one logical area for Nuzlocke rules
+const consolidatedSafari = consolidateSafariZoneAreas(safariData);
+```
+
+## Self-Documenting Code Patterns
+
+### Use Descriptive Names
+
+```typescript
+// ❌ Bad: Unclear names requiring comments
+// Check if pokemon can evolve
+const canEvolve = checkEvolution(p, level);
+
+// ✅ Good: Self-explanatory names
+const canPokemonEvolveAtLevel = isPokemonReadyForEvolution(
+  pokemon,
+  currentLevel
+);
+```
+
+### Extract Meaningful Functions
+
+```typescript
+// ❌ Bad: Complex inline logic with comments
+// Check if this is a valid encounter for nuzlocke rules
+if (
+  pokemon.location === currentRoute &&
+  !hasCaughtPokemonInRoute(currentRoute) &&
+  pokemon.status === 'wild' &&
+  !isLegendaryPokemon(pokemon)
+) {
+  // Valid encounter
+  allowCapture = true;
+}
+
+// ✅ Good: Extract to self-documenting function
+const isValidNuzlockeEncounter = (pokemon: Pokemon, route: string): boolean => {
+  return (
+    pokemon.location === route &&
+    !hasCaughtPokemonInRoute(route) &&
+    pokemon.status === 'wild' &&
+    !isLegendaryPokemon(pokemon)
+  );
+};
+
+const allowCapture = isValidNuzlockeEncounter(pokemon, currentRoute);
+```
+
+### Use Descriptive Constants
+
+```typescript
+// ❌ Bad: Magic numbers with comments
+// Wait 50ms before clearing drag preview
+// This prevents flickering between drag targets
+setTimeout(clearPreview, 50);
+
+// ✅ Good: Named constants
+const DRAG_LEAVE_DELAY = 50; // Prevent flickering between drag targets
+setTimeout(clearPreview, DRAG_LEAVE_DELAY);
+```
+
+## When Comments Add Value
+
+### Complex Business Logic
+
+```typescript
+// Pokemon fusion stats calculation follows specific rules:
+// - Head Pokemon contributes 2/3 of stats except HP
+// - Body Pokemon contributes 1/3 of stats except HP
+// - HP is averaged between both Pokemon
+// - BST (Base Stat Total) is capped at 600 for game balance
+function calculateFusionStats(
+  headPokemon: Pokemon,
+  bodyPokemon: Pokemon
+): Stats {
+  // Implementation here...
+}
+```
+
+### API Limitations or Workarounds
+
+```typescript
+// The Pokemon API doesn't include Infinite Fusion sprites
+// so we fall back to a custom sprite service for fused Pokemon
+const spriteUrl = isFusion
+  ? await customSpriteService.getFusionSprite(headId, bodyId)
+  : await pokeapi.getPokemonSprite(pokemonId);
+```
+
+### Performance Optimizations
+
+```typescript
+// Use virtual scrolling for large Pokemon lists (1000+ items)
+// to maintain 60fps performance on lower-end devices
+const VirtualizedPokemonList = React.memo(({ pokemon }) => {
+  // Implementation with windowing...
+});
+```
+
+### Regex or Complex Patterns
+
+```typescript
+// Match Pokemon names with various formats:
+// "Charizard" | "Charizard (Mega X)" | "Charizard-X" | "Charizard_X"
+const POKEMON_NAME_PATTERN = /^([A-Za-z]+)(?:\s*[\(\-_]\s*(.+?)[\)]?)?$/;
+```
+
+## Code Review Guidelines
+
+### Remove These Comments
+
+- [ ] Comments that just restate the code
+- [ ] Obvious variable assignments
+- [ ] Simple conditional statements
+- [ ] Basic loop operations
+- [ ] Standard getter/setter methods
+- [ ] Trivial function calls
+
+### Keep These Comments
+
+- [ ] Business logic explanations
+- [ ] Algorithm complexity notes
+- [ ] External API limitations
+- [ ] Performance considerations
+- [ ] Temporary workarounds with TODO items
+- [ ] Edge case handling rationale
+
+## Refactoring Strategy
+
+### Step 1: Identify Redundant Comments
+
+Look for comments that just describe what the code does:
+
+```typescript
+// Set the pokemon name
+const pokemonName = 'Pikachu';
+```
+
+### Step 2: Improve Code Clarity
+
+Make the code self-explanatory through better naming:
+
+```typescript
+const selectedPokemonName = 'Pikachu';
+```
+
+### Step 3: Extract Complex Logic
+
+Move complex operations to well-named functions:
+
+```typescript
+// Before: Complex logic with comments
+// Calculate damage based on type effectiveness and stats
+const damage = Math.floor(((attack * 2 * level) / 50 + 2) * typeMultiplier);
+
+// After: Self-documenting function
+const damage = calculatePokemonDamage(attack, level, typeMultiplier);
+```
+
+### Step 4: Add Valuable Comments
+
+Keep comments that explain the "why" behind business decisions:
+
+```typescript
+// Nuzlocke rules require only one catch per route
+// to maintain the challenge and emotional attachment
+if (hasCaughtPokemonInRoute(route)) {
+  preventCapture();
+}
+```
+
+## JSDoc for Public APIs
+
+### Use JSDoc for Public Functions
+
+```typescript
+/**
+ * Calculates fusion stats according to Infinite Fusion rules.
+ * Head contributes 2/3 of stats (except HP), body contributes 1/3.
+ *
+ * @param headPokemon - The head Pokemon of the fusion
+ * @param bodyPokemon - The body Pokemon of the fusion
+ * @returns Calculated fusion stats with BST cap applied
+ */
+export function calculateFusionStats(
+  headPokemon: Pokemon,
+  bodyPokemon: Pokemon
+): FusionStats {
+  // Implementation...
+}
+```
+
+### Skip JSDoc for Simple Functions
+
+```typescript
+// ❌ Unnecessary JSDoc
+/**
+ * Gets the pokemon name
+ * @param pokemon - The pokemon
+ * @returns The pokemon name
+ */
+function getPokemonName(pokemon: Pokemon): string {
+  return pokemon.name;
+}
+
+// ✅ Self-explanatory function
+function getPokemonName(pokemon: Pokemon): string {
+  return pokemon.name;
+}
+```
+
+## Examples from Codebase
+
+### Good Comment Usage
+
+```typescript
+// Good: Explains debouncing rationale
+// Debounce drag preview updates to reduce expensive operations
+let dragPreviewTimeout: number | null = null;
+const DRAG_PREVIEW_DEBOUNCE = 16; // ~1 frame at 60fps
+
+// Good: Explains business logic
+// Allow overwrite for natural progressions without confirmation
+return isEvolution || isPreEvolution || isEggHatching;
+```
+
+### Comments to Remove
+
+```typescript
+// ❌ Remove: Obvious state update
+// Clear debounced preview immediately
+setDragPreview(null);
+
+// ❌ Remove: Describes what code does
+// Early return for clearing value
+if (!newValue) return;
+
+// ❌ Remove: Obvious conditional
+// Early return if no current value or no overwrite callback
+if (!value || !onBeforeOverwrite) return;
+```
+
+## Tools and Automation
+
+### ESLint Rules
+
+- Consider enabling `no-useless-comment` rules
+- Use `prefer-const` to avoid "variable declaration" comments
+- Enable `naming-convention` rules to enforce descriptive names
+
+### Code Review Checklist
+
+- [ ] Are there comments that just repeat the code?
+- [ ] Can complex logic be extracted to well-named functions?
+- [ ] Do variable names clearly express their purpose?
+- [ ] Are business rules explained where non-obvious?
+- [ ] Are performance decisions documented?
+- [ ] Are external constraints or limitations noted?
+
+## Benefits
+
+### Improved Maintainability
+
+- **Self-documenting code** is easier to update
+- **Fewer outdated comments** that can mislead developers
+- **Better code organization** through meaningful extraction
+
+### Enhanced Readability
+
+- **Focus on important information** in remaining comments
+- **Cleaner codebase** without comment noise
+- **Faster comprehension** through clear naming
+
+### Reduced Technical Debt
+
+- **No comment maintenance** for obvious code
+- **Less cognitive overhead** when reading code
+- **Better refactoring** when code explains itself
+
+By following these guidelines, we maintain clean, self-documenting code while preserving valuable contextual information where it truly adds value.

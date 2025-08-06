@@ -1,25 +1,15 @@
 import { FusionSprite } from './FusionSprite';
+import { PokemonContextMenu } from './PokemonContextMenu';
 import {
   isEggId,
   PokemonStatus,
   type PokemonOptionType,
 } from '@/loaders/pokemon';
-import { ContextMenu, type ContextMenuItem } from '@/components/ContextMenu';
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
 import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
 import { useEncounter } from '@/stores/playthroughs';
-import { useMemo } from 'react';
-import { ArrowUpRight, Loader2, Replace } from 'lucide-react';
-import { useSpriteVariants, useSpriteCredits } from '@/hooks/useSprite';
-import dynamic from 'next/dynamic';
-
-const ArtworkVariantModal = dynamic(
-  () => import('./ArtworkVariantModal').then(mod => mod.ArtworkVariantModal),
-  {
-    ssr: false,
-  }
-);
+import { useSpriteCredits } from '@/hooks/useSprite';
 
 interface SummaryCardProps {
   locationId: string;
@@ -31,20 +21,16 @@ function getNicknameText(
   body: PokemonOptionType | null,
   isFusion: boolean
 ): string | undefined {
-  if (!isFusion) {
-    // Single Pokémon - show nickname if available, otherwise show name
-    const pokemon = head || body;
-    if (!pokemon) return '';
+  // Early return for empty state
+  if (!head && !body) return '';
+
+  // Handle single Pokemon case (non-fusion or partial fusion)
+  if (!isFusion || !head || !body) {
+    const pokemon = head || body!;
     return pokemon.nickname || pokemon.name;
   }
 
-  // Fusion case
-  if (!head || !body) {
-    const pokemon = head || body;
-    if (!pokemon) return '';
-    return pokemon.nickname || pokemon.name;
-  }
-
+  // Handle complete fusion case
   return head.nickname || body.nickname || `${head.name}/${body.name}`;
 }
 
@@ -56,74 +42,12 @@ export default function SummaryCard({
   const eitherPokemonIsEgg =
     isEggId(encounterData?.head?.id) || isEggId(encounterData?.body?.id);
 
-  // Check for art variants
-  const { data: variants, isLoading: isLoadingVariants } = useSpriteVariants(
+  // Preload credits for the artwork variants when they exist
+  useSpriteCredits(
     encounterData?.head?.id,
     encounterData?.body?.id,
     shouldLoad && !eitherPokemonIsEgg
   );
-  const hasArtVariants = variants && variants.length > 1;
-
-  // Preload credits for the artwork variants
-  useSpriteCredits(
-    encounterData?.head?.id,
-    encounterData?.body?.id,
-    shouldLoad && !eitherPokemonIsEgg && hasArtVariants
-  );
-
-  const [hasContextMenuBeenOpened, setHasContextMenuBeenOpened] =
-    useState(false);
-  const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
-
-  const contextItems = useMemo<ContextMenuItem[]>(() => {
-    const id =
-      encounterData?.head?.id && encounterData?.body?.id
-        ? `${encounterData.head.id}.${encounterData.body.id}`
-        : encounterData?.head?.id || encounterData?.body?.id;
-    const infinitefusiondexLink = `https://infinitefusiondex.com/details/${id}`;
-    const fusiondexLink = `https://fusiondex.org/sprite/pif/${id}${encounterData?.artworkVariant ?? ''}/`;
-
-    return [
-      {
-        id: 'change-variant',
-        label: 'Change Preferred Artwork',
-        disabled: eitherPokemonIsEgg || !hasArtVariants,
-        icon: isLoadingVariants ? Loader2 : Replace,
-        tooltip:
-          eitherPokemonIsEgg || !hasArtVariants
-            ? isLoadingVariants
-              ? 'Loading artwork variants...'
-              : 'No artwork variants available'
-            : undefined,
-        iconClassName: isLoadingVariants ? 'animate-spin' : '',
-        onClick: () => {
-          setIsVariantModalOpen(true);
-        },
-      },
-      {
-        id: 'separate',
-        separator: true,
-      },
-      {
-        id: 'infinitedex',
-        label: 'Open InfiniteDex entry',
-        href: infinitefusiondexLink,
-        target: '_blank',
-        favicon: 'https://infinitefusiondex.com/images/favicon.ico',
-        icon: ArrowUpRight,
-        iconClassName: 'dark:text-blue-300 text-blue-400',
-      },
-      {
-        id: 'fusiondex',
-        label: 'Open FusionDex entry',
-        href: fusiondexLink,
-        target: '_blank',
-        favicon: 'https://www.fusiondex.org/favicon.ico',
-        icon: ArrowUpRight,
-        iconClassName: 'dark:text-blue-300 text-blue-400',
-      },
-    ];
-  }, [encounterData, eitherPokemonIsEgg, hasArtVariants, isLoadingVariants]);
 
   if (!encounterData?.head && !encounterData?.body) {
     return null;
@@ -139,64 +63,48 @@ export default function SummaryCard({
     encounterData?.body?.status === PokemonStatus.DECEASED;
 
   return (
-    <>
-      <ContextMenu
-        disabled={eitherPokemonIsEgg}
-        items={contextItems}
-        portalRootId='location-table'
-        onOpenChange={
-          hasContextMenuBeenOpened
-            ? undefined
-            : () => setHasContextMenuBeenOpened(true)
-        }
-      >
-        <div className='flex flex-col items-center justify-center relative'>
-          <Fragment>
-            <div
-              className={clsx(
-                'size-22 absolute -translate-y-2 rounded-lg opacity-30 border border-gray-200 dark:border-gray-40 ',
-                {
-                  'text-rose-200 dark:text-red-700 dark:mix-blend-color-dodge opacity-90 dark:border-red-800':
-                    isDeceased,
-                  'dark:mix-blend-soft-light text-white': !isDeceased,
-                }
-              )}
-              style={{
-                background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
-              }}
-            />
-            <FusionSprite
-              locationId={locationId}
-              size='lg'
-              shouldLoad={shouldLoad}
-            />
-          </Fragment>
-          {eitherPokemonIsEgg ? null : (
-            <ArtworkVariantButton
-              key={`${encounterData?.head?.id}-${encounterData?.body?.id} `}
-              className='absolute bottom-0 right-1/2 -translate-x-6 z-10'
-              locationId={locationId}
-              shouldLoad={shouldLoad}
-            />
-          )}
-          {name && (
-            <div className='z-5 p-0.5 text-center absolute bottom-0 translate-y-8.5 rounded-sm'>
-              <span className='text-md dark:font-normal font-mono truncate max-w-full block px-1 rounded text-gray-900 dark:text-white dark:pixel-shadow tracking-[0.001em]'>
-                {name}
-              </span>
-            </div>
-          )}
-        </div>
-      </ContextMenu>
-
-      <ArtworkVariantModal
-        isOpen={isVariantModalOpen}
-        onClose={() => setIsVariantModalOpen(false)}
-        locationId={locationId}
-        headId={encounterData?.head?.id}
-        bodyId={encounterData?.body?.id}
-        currentVariant={encounterData?.artworkVariant}
-      />
-    </>
+    <PokemonContextMenu
+      locationId={locationId}
+      encounterData={encounterData}
+      shouldLoad={shouldLoad}
+    >
+      <div className='flex flex-col items-center justify-center relative'>
+        <Fragment>
+          <div
+            className={clsx(
+              'size-22 absolute -translate-y-2 rounded-lg opacity-30 border border-gray-200 dark:border-gray-40 ',
+              {
+                'text-rose-200 dark:text-red-700 dark:mix-blend-color-dodge opacity-90 dark:border-red-800':
+                  isDeceased,
+                'dark:mix-blend-soft-light text-white': !isDeceased,
+              }
+            )}
+            style={{
+              background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
+            }}
+          />
+          <FusionSprite
+            locationId={locationId}
+            size='lg'
+            shouldLoad={shouldLoad}
+          />
+        </Fragment>
+        {eitherPokemonIsEgg ? null : (
+          <ArtworkVariantButton
+            key={`${encounterData?.head?.id}-${encounterData?.body?.id} `}
+            className='absolute bottom-0 right-1/2 -translate-x-6 z-10'
+            locationId={locationId}
+            shouldLoad={shouldLoad}
+          />
+        )}
+        {name && (
+          <div className='z-5 p-0.5 text-center absolute bottom-0 translate-y-8.5 rounded-sm'>
+            <span className='text-md dark:font-normal font-mono truncate max-w-full block px-1 rounded text-gray-900 dark:text-white dark:pixel-shadow-black tracking-[0.0025em] pixel-shadow-gray-300'>
+              {name}
+            </span>
+          </div>
+        )}
+      </div>
+    </PokemonContextMenu>
   );
 }

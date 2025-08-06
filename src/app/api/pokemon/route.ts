@@ -12,6 +12,7 @@ const QuerySchema = z.object({
     .string()
     .transform(val => parseInt(val, 10))
     .optional(), // Limit results
+  v: z.string().optional(), // Cache busting version (ignored)
 });
 
 // Special Egg Pokemon entry
