@@ -221,11 +221,29 @@ function LocationItem({
 
     // If the target encounter is not a fusion (isFusion = false),
     // then no fusion will be created regardless of what's in the body slot
+    // UNLESS we're moving an egg or there's an egg in the target location
     if (targetEncounter && !targetEncounter.isFusion) {
+      // For non-fusion encounters, only prevent if there's an egg involved
+      const headPokemon = targetEncounter.head;
+      const bodyPokemon = targetEncounter.body;
+
+      // If moving an egg and there's any Pokemon in the target location
+      if (isMovingPokemonEgg && (headPokemon || bodyPokemon)) {
+        return true;
+      }
+
+      // If there's an egg in the target location and we're moving a Pokemon
+      if (
+        (headPokemon && isEggId(headPokemon.id)) ||
+        (bodyPokemon && isEggId(bodyPokemon.id))
+      ) {
+        return true;
+      }
+
       return false;
     }
 
-    // Check if there's a Pokemon in the opposite slot that would create a fusion
+    // For fusion encounters, check the opposite slot
     const oppositeFieldPokemon = getSlotPokemon(
       location.id,
       selectedTargetField === 'head' ? 'body' : 'head'
