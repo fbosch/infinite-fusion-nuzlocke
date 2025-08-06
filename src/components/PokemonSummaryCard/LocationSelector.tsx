@@ -12,7 +12,7 @@ import {
   type CombinedLocation,
   getLocationsSortedWithCustom,
 } from '@/loaders/locations';
-import { type PokemonOptionType, isEgg } from '@/loaders/pokemon';
+import { type PokemonOptionType, isEggId } from '@/loaders/pokemon';
 import {
   getActivePlaythrough,
   useCustomLocations,
@@ -201,7 +201,7 @@ function LocationItem({
     const encounter = activePlaythrough?.encounters?.[location.id];
     if (!encounter) return false;
 
-    return isEgg(encounter.head) || isEgg(encounter.body);
+    return isEggId(encounter.head?.id) || isEggId(encounter.body?.id);
   }, [location.id]);
 
   return (
