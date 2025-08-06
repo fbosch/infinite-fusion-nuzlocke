@@ -6,7 +6,7 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { X, MapPin, Search, Dna, ArrowUpDown } from 'lucide-react';
 import { getLocations, type Location } from '@/loaders/locations';
 import { type PokemonOptionType } from '@/loaders/pokemon';
@@ -40,8 +40,119 @@ interface LocationItemProps {
   onSelect: (location: Location) => void;
 }
 
+interface ActionPreviewProps {
+  existingPokemon: PokemonOptionType | null;
+  otherFieldPokemon: PokemonOptionType | null;
+  remainingPokemon: PokemonOptionType | null;
+}
+
+interface MovingPokemonInfoProps {
+  movingPokemon: PokemonOptionType;
+  isMovingEntireFusion: boolean;
+  encounterData: {
+    head?: PokemonOptionType | null;
+    body?: PokemonOptionType | null;
+  } | null;
+  moveTargetField: 'head' | 'body';
+  isFusion: boolean;
+}
+
+interface TargetFieldSelectorProps {
+  selectedTargetField: 'head' | 'body';
+  onTargetFieldChange: (field: 'head' | 'body') => void;
+  isMovingEntireFusion: boolean;
+}
+
 export { LocationSelector };
 
+// Helper function to get Pokemon in a specific slot
+function getSlotPokemon(
+  locationId: string,
+  field: 'head' | 'body'
+): PokemonOptionType | null {
+  const activePlaythrough = getActivePlaythrough();
+  const targetEncounter = activePlaythrough?.encounters?.[locationId];
+  return targetEncounter
+    ? field === 'head'
+      ? targetEncounter.head
+      : targetEncounter.body
+    : null;
+}
+
+// Component for rendering action preview (swap/fusion indicators)
+function ActionPreview({
+  existingPokemon,
+  otherFieldPokemon,
+  remainingPokemon,
+}: ActionPreviewProps) {
+  if (!existingPokemon && !otherFieldPokemon) return null;
+
+  if (existingPokemon) {
+    // This is a swap operation
+    const willCreateFusionAtTarget = Boolean(otherFieldPokemon);
+    const willCreateFusionAtSource = Boolean(remainingPokemon);
+
+    return (
+      <div className='space-y-3 mt-2'>
+        <div className='flex items-center space-x-4'>
+          <div className='size-5 flex justify-center items-center flex-shrink-0'>
+            <PokemonSprite pokemonId={existingPokemon.id} />
+          </div>
+          <p className='text-xs text-amber-600 dark:text-amber-400 font-medium flex gap-x-1'>
+            <ArrowUpDown className='w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0' />
+            <span>Will swap with {existingPokemon.name}</span>
+          </p>
+        </div>
+
+        {willCreateFusionAtTarget && (
+          <div className='flex items-center space-x-4'>
+            <div className='size-5 flex justify-center items-center flex-shrink-0'>
+              <PokemonSprite pokemonId={otherFieldPokemon!.id} />
+            </div>
+            <p className='text-xs text-purple-600 dark:text-purple-400 font-medium flex gap-x-1'>
+              <Dna className='w-4 h-4 text-purple-500 flex-shrink-0' />
+              <span>Will fuse with {otherFieldPokemon!.name} here</span>
+            </p>
+          </div>
+        )}
+
+        {willCreateFusionAtSource && (
+          <div className='flex items-center space-x-4'>
+            <div className='size-5 flex justify-center items-center flex-shrink-0'>
+              <PokemonSprite pokemonId={remainingPokemon!.id} />
+            </div>
+            <p className='text-xs text-green-600 dark:text-green-400 font-medium flex gap-x-1'>
+              <Dna className='w-4 h-4 text-green-500 flex-shrink-0' />
+              <span>
+                {existingPokemon.name} will fuse with {remainingPokemon!.name}{' '}
+                at source
+              </span>
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Simple fusion case (no existing Pokemon in target slot)
+  if (otherFieldPokemon) {
+    return (
+      <div className='flex items-center space-x-4 mt-2'>
+        <div className='size-5 flex justify-center items-center flex-shrink-0'>
+          <PokemonSprite pokemonId={otherFieldPokemon.id} />
+        </div>
+        <p className='text-xs text-purple-600 dark:text-purple-400 font-medium flex gap-x-1'>
+          <Dna className='w-4 h-4 text-purple-500 flex-shrink-0' />
+          <span>Will fuse with {otherFieldPokemon.name}</span>
+        </p>
+      </div>
+    );
+  }
+
+  return null;
+}
+
+// Individual location item component
 function LocationItem({
   location,
   selectedTargetField,
@@ -49,104 +160,34 @@ function LocationItem({
   moveTargetField,
   onSelect,
 }: LocationItemProps) {
-  // Helper function to check if a target slot has an existing Pokemon
-  const getSlotPokemon = (locationId: string, field: 'head' | 'body') => {
-    const activePlaythrough = getActivePlaythrough();
-    const targetEncounter = activePlaythrough?.encounters?.[locationId];
-    return targetEncounter
-      ? field === 'head'
-        ? targetEncounter.head
-        : targetEncounter.body
-      : null;
-  };
-
-  const handleSelect = () => {
+  const handleSelect = useCallback(() => {
     onSelect(location);
-  };
+  }, [location, onSelect]);
 
-  const existingPokemon = getSlotPokemon(location.id, selectedTargetField);
-  const otherFieldPokemon = getSlotPokemon(
-    location.id,
-    selectedTargetField === 'head' ? 'body' : 'head'
+  const existingPokemon = useMemo(
+    () => getSlotPokemon(location.id, selectedTargetField),
+    [location.id, selectedTargetField]
   );
 
-  const renderActionPreview = () => {
-    if (existingPokemon) {
-      // This is a swap - the existing Pokemon will be moved to the source location
-      const activePlaythrough = getActivePlaythrough();
-      const sourceEncounter =
-        activePlaythrough?.encounters?.[currentLocationId];
-      const remainingPokemon = sourceEncounter
-        ? moveTargetField === 'head'
-          ? sourceEncounter.body
-          : sourceEncounter.head
-        : null;
+  const otherFieldPokemon = useMemo(
+    () =>
+      getSlotPokemon(
+        location.id,
+        selectedTargetField === 'head' ? 'body' : 'head'
+      ),
+    [location.id, selectedTargetField]
+  );
 
-      // After the swap, check if there will be a fusion at the target location
-      const willCreateFusionAtTarget = otherFieldPokemon;
-
-      // After the swap, check if there will be a fusion at the source location
-      const willCreateFusionAtSource = remainingPokemon;
-
-      return (
-        <div className='space-y-3 mt-2'>
-          <div className='flex items-center space-x-4'>
-            <div className='size-5 flex justify-center items-center flex-shrink-0'>
-              <PokemonSprite pokemonId={existingPokemon.id} />
-            </div>
-            <p className='text-xs text-amber-600 dark:text-amber-400 font-medium flex gap-x-1'>
-              <ArrowUpDown className='w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0' />
-              <span>Will swap with {existingPokemon.name}</span>
-            </p>
-          </div>
-
-          {willCreateFusionAtTarget && (
-            <div className='flex items-center space-x-4'>
-              <div className='size-5 flex justify-center items-center flex-shrink-0'>
-                <PokemonSprite pokemonId={otherFieldPokemon.id} />
-              </div>
-              <p className='text-xs text-purple-600 dark:text-purple-400 font-medium flex gap-x-1'>
-                <Dna className='w-4 h-4 text-purple-500 flex-shrink-0' />
-                <span>Will fuse with {otherFieldPokemon.name} here</span>
-              </p>
-            </div>
-          )}
-
-          {willCreateFusionAtSource && (
-            <div className='flex items-center space-x-4'>
-              <div className='size-5 flex justify-center items-center flex-shrink-0'>
-                <PokemonSprite pokemonId={remainingPokemon.id} />
-              </div>
-              <p className='text-xs text-green-600 dark:text-green-400 font-medium flex gap-x-1'>
-                <Dna className='w-4 h-4 text-green-500 flex-shrink-0' />
-                <span>
-                  {existingPokemon.name} will fuse with {remainingPokemon.name}{' '}
-                  at source
-                </span>
-              </p>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    // Check if moving here will create a fusion (no existing Pokemon in target slot)
-    if (otherFieldPokemon) {
-      return (
-        <div className='flex items-center space-x-4 mt-2'>
-          <div className='size-5 flex justify-center items-center flex-shrink-0'>
-            <PokemonSprite pokemonId={otherFieldPokemon.id} />
-          </div>
-          <p className='text-xs text-purple-600 dark:text-purple-400 font-medium flex gap-x-1'>
-            <Dna className='w-4 h-4 text-purple-500 flex-shrink-0' />
-            <span>Will fuse with {otherFieldPokemon.name}</span>
-          </p>
-        </div>
-      );
-    }
-
-    return null; // we don't need redundant text for this
-  };
+  const remainingPokemon = useMemo(() => {
+    if (!existingPokemon) return null;
+    const activePlaythrough = getActivePlaythrough();
+    const sourceEncounter = activePlaythrough?.encounters?.[currentLocationId];
+    return sourceEncounter
+      ? moveTargetField === 'head'
+        ? sourceEncounter.body
+        : sourceEncounter.head
+      : null;
+  }, [existingPokemon, currentLocationId, moveTargetField]);
 
   return (
     <button
@@ -163,21 +204,123 @@ function LocationItem({
           <p className='text-xs text-gray-500 dark:text-gray-400 truncate'>
             {location.region} • {location.description}
           </p>
-          {renderActionPreview()}
+          <ActionPreview
+            existingPokemon={existingPokemon}
+            otherFieldPokemon={otherFieldPokemon}
+            remainingPokemon={remainingPokemon}
+          />
         </div>
       </div>
     </button>
   );
 }
 
-function LocationSelector({
-  isOpen,
-  onClose,
-  currentLocationId,
-  onSelectLocation,
+// Component for displaying information about the Pokemon being moved
+function MovingPokemonInfo({
+  movingPokemon,
+  isMovingEntireFusion,
   encounterData,
   moveTargetField,
-}: LocationSelectorProps) {
+  isFusion,
+}: MovingPokemonInfoProps) {
+  return (
+    <div className='p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'>
+      <div className='flex items-center space-x-3'>
+        {isMovingEntireFusion ? (
+          <div className='flex items-center space-x-1'>
+            {encounterData?.head && (
+              <div className='w-6 h-6 flex justify-center items-center flex-shrink-0'>
+                <PokemonSprite pokemonId={encounterData.head.id} />
+              </div>
+            )}
+            {encounterData?.body && (
+              <div className='w-6 h-6 flex justify-center items-center flex-shrink-0'>
+                <PokemonSprite pokemonId={encounterData.body.id} />
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className='w-6 h-6 flex justify-center items-center flex-shrink-0'>
+            <PokemonSprite pokemonId={movingPokemon.id} />
+          </div>
+        )}
+        <p className='text-sm font-medium text-gray-900 dark:text-white'>
+          {isMovingEntireFusion ? (
+            <>
+              Moving entire fusion: {encounterData?.head?.name}/
+              {encounterData?.body?.name}
+            </>
+          ) : (
+            <>
+              Moving: {movingPokemon.name}
+              {isFusion && (
+                <> ({moveTargetField === 'head' ? 'Head' : 'Body'})</>
+              )}
+            </>
+          )}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Component for target field selection (head/body)
+function TargetFieldSelector({
+  selectedTargetField,
+  onTargetFieldChange,
+  isMovingEntireFusion,
+}: TargetFieldSelectorProps) {
+  if (isMovingEntireFusion) return null;
+
+  return (
+    <div>
+      <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+        Move to slot:
+      </label>
+      <div className='flex space-x-2'>
+        <button
+          type='button'
+          onClick={() => onTargetFieldChange('head')}
+          className={clsx(
+            'flex-1 px-3 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer',
+            'justify-center flex items-center gap-x-1',
+            selectedTargetField === 'head'
+              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
+          )}
+        >
+          <HeadIcon className='size-5' />
+          <span className='mr-2.5'>Head Slot</span>
+        </button>
+        <button
+          type='button'
+          onClick={() => onTargetFieldChange('body')}
+          className={clsx(
+            'flex-1 px-3 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer',
+            'justify-center flex items-center gap-x-1',
+            selectedTargetField === 'body'
+              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
+          )}
+        >
+          <BodyIcon className='size-5' />
+          <span className='mr-2.5'>Body Slot</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Custom hook for managing location selector logic
+function useLocationSelector({
+  currentLocationId,
+  moveTargetField,
+  encounterData,
+}: {
+  currentLocationId: string;
+  moveTargetField: 'head' | 'body';
+  encounterData: LocationSelectorProps['encounterData'];
+}) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTargetField, setSelectedTargetField] = useState<
     'head' | 'body'
@@ -226,16 +369,6 @@ function LocationSelector({
     });
   }, [availableLocations, searchQuery]);
 
-  const handleLocationSelect = (location: Location) => {
-    onSelectLocation(location.id, selectedTargetField);
-    setSearchQuery(''); // Clear search on selection
-  };
-
-  const handleClose = () => {
-    setSearchQuery('');
-    onClose();
-  };
-
   // Determine what Pokemon is being moved
   const movingPokemon = useMemo(() => {
     if (!encounterData) return null;
@@ -249,8 +382,63 @@ function LocationSelector({
     return encounterData.head || encounterData.body;
   }, [encounterData, moveTargetField]);
 
-  const isFusion = encounterData?.head && encounterData?.body;
+  const isFusion = Boolean(encounterData?.head && encounterData?.body);
   const isMovingEntireFusion = isFusion && moveTargetField === 'head';
+
+  const resetState = useCallback(() => {
+    setSearchQuery('');
+  }, []);
+
+  return {
+    searchQuery,
+    setSearchQuery,
+    selectedTargetField,
+    setSelectedTargetField,
+    filteredLocations,
+    movingPokemon,
+    isMovingEntireFusion,
+    isFusion,
+    resetState,
+  };
+}
+
+// Main LocationSelector component
+function LocationSelector({
+  isOpen,
+  onClose,
+  currentLocationId,
+  onSelectLocation,
+  encounterData,
+  moveTargetField,
+}: LocationSelectorProps) {
+  const {
+    searchQuery,
+    setSearchQuery,
+    selectedTargetField,
+    setSelectedTargetField,
+    filteredLocations,
+    movingPokemon,
+    isMovingEntireFusion,
+    isFusion,
+    resetState,
+  } = useLocationSelector({
+    currentLocationId,
+    moveTargetField,
+    encounterData,
+  });
+
+  const handleLocationSelect = useCallback(
+    (location: Location) => {
+      onSelectLocation(location.id, selectedTargetField);
+      resetState();
+    },
+    [onSelectLocation, selectedTargetField, resetState]
+  );
+
+  const handleClose = useCallback(() => {
+    resetState();
+    onClose();
+  }, [resetState, onClose]);
 
   return (
     <Dialog open={isOpen} onClose={handleClose} className='relative z-50 group'>
@@ -285,85 +473,22 @@ function LocationSelector({
             </button>
           </div>
 
-          {/* Pokemon being moved info */}
           {movingPokemon && (
-            <div className='p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'>
-              <div className='flex items-center space-x-3'>
-                {isMovingEntireFusion ? (
-                  <div className='flex items-center space-x-1'>
-                    {encounterData?.head && (
-                      <div className='w-6 h-6 flex justify-center items-center flex-shrink-0'>
-                        <PokemonSprite pokemonId={encounterData.head.id} />
-                      </div>
-                    )}
-                    {encounterData?.body && (
-                      <div className='w-6 h-6 flex justify-center items-center flex-shrink-0'>
-                        <PokemonSprite pokemonId={encounterData.body.id} />
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className='w-6 h-6 flex justify-center items-center flex-shrink-0'>
-                    <PokemonSprite pokemonId={movingPokemon.id} />
-                  </div>
-                )}
-                <p className='text-sm font-medium text-gray-900 dark:text-white'>
-                  {isMovingEntireFusion ? (
-                    <>
-                      Moving entire fusion: {encounterData?.head?.name}/
-                      {encounterData?.body?.name}
-                    </>
-                  ) : (
-                    <>
-                      Moving: {movingPokemon.name} (
-                      {moveTargetField === 'head' ? 'Head' : 'Body'})
-                    </>
-                  )}
-                </p>
-              </div>
-            </div>
+            <MovingPokemonInfo
+              movingPokemon={movingPokemon}
+              isMovingEntireFusion={isMovingEntireFusion}
+              encounterData={encounterData}
+              moveTargetField={moveTargetField}
+              isFusion={isFusion}
+            />
           )}
 
-          {/* Target field selector for fusions */}
-          {!isMovingEntireFusion && (
-            <div>
-              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                Move to slot:
-              </label>
-              <div className='flex space-x-2'>
-                <button
-                  type='button'
-                  onClick={() => setSelectedTargetField('head')}
-                  className={clsx(
-                    'flex-1 px-3 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer',
-                    'justify-center flex items-center gap-x-1',
-                    selectedTargetField === 'head'
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
-                  )}
-                >
-                  <HeadIcon className='size-5' />
-                  <span className='mr-2.5'>Head Slot</span>
-                </button>
-                <button
-                  type='button'
-                  onClick={() => setSelectedTargetField('body')}
-                  className={clsx(
-                    'flex-1 px-3 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer',
-                    'justify-center flex items-center gap-x-1',
-                    selectedTargetField === 'body'
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
-                  )}
-                >
-                  <BodyIcon className='size-5' />
-                  <span className='mr-2.5'>Body Slot</span>
-                </button>
-              </div>
-            </div>
-          )}
+          <TargetFieldSelector
+            selectedTargetField={selectedTargetField}
+            onTargetFieldChange={setSelectedTargetField}
+            isMovingEntireFusion={isMovingEntireFusion}
+          />
 
-          {/* Search input */}
           <div className='relative'>
             <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
               <Search className='h-4 w-4 text-gray-400' />
@@ -377,7 +502,6 @@ function LocationSelector({
             />
           </div>
 
-          {/* Locations list */}
           <div className='h-[50vh] min-h-96 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg scrollbar-thin'>
             {filteredLocations.length === 0 ? (
               <div className='p-4 text-center text-gray-500 dark:text-gray-400'>
