@@ -10,10 +10,19 @@ import {
 } from 'lucide-react';
 import PokeballIcon from '@/assets/images/pokeball.svg';
 import EscapeIcon from '@/assets/images/escape-cloud.svg';
+import HeadIcon from '@/assets/images/head.svg';
+import BodyIcon from '@/assets/images/body.svg';
 import { useSpriteVariants } from '@/hooks/useSprite';
 import { isEggId, type PokemonOptionType } from '@/loaders/pokemon';
 import { playthroughActions } from '@/stores/playthroughs';
 import dynamic from 'next/dynamic';
+
+const LocationSelector = dynamic(
+  () => import('./LocationSelector').then(mod => mod.LocationSelector),
+  {
+    ssr: false,
+  }
+);
 
 const ArtworkVariantModal = dynamic(
   () => import('./ArtworkVariantModal').then(mod => mod.ArtworkVariantModal),
@@ -53,6 +62,8 @@ export function PokemonContextMenu({
   const [hasContextMenuBeenOpened, setHasContextMenuBeenOpened] =
     useState(false);
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
+  const [isMoveHeadModalOpen, setIsMoveHeadModalOpen] = useState(false);
+  const [isMoveBodyModalOpen, setIsMoveBodyModalOpen] = useState(false);
 
   // Handler to mark both Pokemon in the fusion as deceased
   const handleMarkAsDeceased = useCallback(async () => {
@@ -78,6 +89,78 @@ export function PokemonContextMenu({
   const handleMarkAsReceived = useCallback(async () => {
     await playthroughActions.markEncounterAsReceived(locationId);
   }, [locationId]);
+
+  // Handler for moving head Pokemon
+  const handleMoveHead = useCallback(
+    async (targetLocationId: string, targetField: 'head' | 'body') => {
+      if (!encounterData?.head) return;
+
+      // Check if there's already a Pokemon in the target slot
+      const activePlaythrough = playthroughActions.getActivePlaythrough();
+      const targetEncounter = activePlaythrough?.encounters?.[targetLocationId];
+      const existingPokemon = targetEncounter
+        ? targetField === 'head'
+          ? targetEncounter.head
+          : targetEncounter.body
+        : null;
+
+      if (existingPokemon) {
+        // If there's already a Pokemon in the target slot, swap them
+        await playthroughActions.swapEncounters(
+          locationId,
+          targetLocationId,
+          'head',
+          targetField
+        );
+      } else {
+        // If the target slot is empty, use atomic move to preserve other Pokemon at source
+        await playthroughActions.moveEncounterAtomic(
+          locationId,
+          'head',
+          targetLocationId,
+          targetField,
+          encounterData.head
+        );
+      }
+    },
+    [encounterData?.head, locationId]
+  );
+
+  // Handler for moving body Pokemon
+  const handleMoveBody = useCallback(
+    async (targetLocationId: string, targetField: 'head' | 'body') => {
+      if (!encounterData?.body) return;
+
+      // Check if there's already a Pokemon in the target slot
+      const activePlaythrough = playthroughActions.getActivePlaythrough();
+      const targetEncounter = activePlaythrough?.encounters?.[targetLocationId];
+      const existingPokemon = targetEncounter
+        ? targetField === 'head'
+          ? targetEncounter.head
+          : targetEncounter.body
+        : null;
+
+      if (existingPokemon) {
+        // If there's already a Pokemon in the target slot, swap them
+        await playthroughActions.swapEncounters(
+          locationId,
+          targetLocationId,
+          'body',
+          targetField
+        );
+      } else {
+        // If the target slot is empty, use atomic move to preserve other Pokemon at source
+        await playthroughActions.moveEncounterAtomic(
+          locationId,
+          'body',
+          targetLocationId,
+          targetField,
+          encounterData.body
+        );
+      }
+    },
+    [encounterData?.body, locationId]
+  );
 
   const contextItems = useMemo<ContextMenuItem[]>(() => {
     const id =
@@ -137,7 +220,7 @@ export function PokemonContextMenu({
       ) {
         items.push({
           id: 'move-to-box',
-          label: 'Move to Box',
+          label: 'Mark as Stored',
           icon: Computer,
 
           onClick: handleMoveToBox,
@@ -155,8 +238,8 @@ export function PokemonContextMenu({
         });
       }
 
-      // Show "Mark as Missed" unless already missed
-      if (currentStatus !== 'missed') {
+      // Show "Mark as Missed" only when no status is set on either Pokemon
+      if (!currentStatus) {
         items.push({
           id: 'mark-missed',
           label: 'Mark as Missed',
@@ -175,6 +258,38 @@ export function PokemonContextMenu({
 
           onClick: handleMarkAsReceived,
         });
+      }
+
+      // Add move actions if there are Pokemon
+      if (hasPokemon && !eitherPokemonIsEgg) {
+        items.push({
+          id: 'separator-move',
+          separator: true,
+        });
+
+        // Show "Move Head" if head Pokemon exists
+        if (encounterData?.head) {
+          items.push({
+            id: 'move-head',
+            label: 'Move Head',
+            icon: HeadIcon,
+            onClick: () => {
+              setIsMoveHeadModalOpen(true);
+            },
+          });
+        }
+
+        // Show "Move Body" if body Pokemon exists
+        if (encounterData?.body) {
+          items.push({
+            id: 'move-body',
+            label: 'Move Body',
+            icon: BodyIcon,
+            onClick: () => {
+              setIsMoveBodyModalOpen(true);
+            },
+          });
+        }
       }
     }
 
@@ -216,6 +331,8 @@ export function PokemonContextMenu({
     handleMarkAsCaptured,
     handleMarkAsMissed,
     handleMarkAsReceived,
+    handleMoveHead,
+    handleMoveBody,
   ]);
 
   return (
@@ -240,6 +357,30 @@ export function PokemonContextMenu({
         headId={encounterData?.head?.id}
         bodyId={encounterData?.body?.id}
         currentVariant={encounterData?.artworkVariant}
+      />
+
+      {/* Location Selector for Moving Head */}
+      <LocationSelector
+        isOpen={isMoveHeadModalOpen}
+        onClose={() => setIsMoveHeadModalOpen(false)}
+        currentLocationId={locationId}
+        onSelectLocation={handleMoveHead}
+        encounterData={
+          encounterData?.head ? { head: encounterData.head } : null
+        }
+        moveTargetField='head'
+      />
+
+      {/* Location Selector for Moving Body */}
+      <LocationSelector
+        isOpen={isMoveBodyModalOpen}
+        onClose={() => setIsMoveBodyModalOpen(false)}
+        currentLocationId={locationId}
+        onSelectLocation={handleMoveBody}
+        encounterData={
+          encounterData?.body ? { body: encounterData.body } : null
+        }
+        moveTargetField='body'
       />
     </>
   );
