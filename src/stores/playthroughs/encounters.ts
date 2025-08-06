@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { PokemonOptionSchema, generatePokemonUID } from '@/loaders/pokemon';
+import {
+  PokemonOptionSchema,
+  generatePokemonUID,
+  PokemonStatus,
+} from '@/loaders/pokemon';
 import { generateSpriteUrl, getArtworkVariants } from '@/lib/sprites';
 import {
   getPreferredVariant,
@@ -976,4 +980,86 @@ export const moveToOriginalLocation = async (
       'head'
     );
   }
+};
+
+// Status update actions for both Pokemon in a fusion/encounter
+
+/**
+ * Update both Pokemon in an encounter to the specified status
+ */
+const updateEncounterStatus = async (
+  locationId: string,
+  status: (typeof PokemonStatus)[keyof typeof PokemonStatus]
+): Promise<void> => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough) return;
+
+  // Ensure encounters object exists
+  if (!activePlaythrough.encounters) {
+    activePlaythrough.encounters = {};
+  }
+
+  const encounter = activePlaythrough.encounters[locationId];
+  if (!encounter) return;
+
+  // Update head Pokemon status if it exists
+  if (encounter.head) {
+    const updatedHead = {
+      ...encounter.head,
+      status,
+    };
+    await updateEncounter(locationId, updatedHead, 'head', false);
+  }
+
+  // Update body Pokemon status if it exists
+  if (encounter.body) {
+    const updatedBody = {
+      ...encounter.body,
+      status,
+    };
+    await updateEncounter(locationId, updatedBody, 'body', false);
+  }
+};
+
+/**
+ * Mark both Pokemon in an encounter as deceased
+ */
+export const markEncounterAsDeceased = async (
+  locationId: string
+): Promise<void> => {
+  await updateEncounterStatus(locationId, PokemonStatus.DECEASED);
+};
+
+/**
+ * Move both Pokemon in an encounter to box (stored status)
+ */
+export const moveEncounterToBox = async (locationId: string): Promise<void> => {
+  await updateEncounterStatus(locationId, PokemonStatus.STORED);
+};
+
+/**
+ * Mark both Pokemon in an encounter as captured
+ */
+export const markEncounterAsCaptured = async (
+  locationId: string
+): Promise<void> => {
+  await updateEncounterStatus(locationId, PokemonStatus.CAPTURED);
+};
+
+/**
+ * Mark both Pokemon in an encounter as missed
+ */
+export const markEncounterAsMissed = async (
+  locationId: string
+): Promise<void> => {
+  await updateEncounterStatus(locationId, PokemonStatus.MISSED);
+};
+
+/**
+ * Mark both Pokemon in an encounter as received
+ */
+export const markEncounterAsReceived = async (
+  locationId: string
+): Promise<void> => {
+  await updateEncounterStatus(locationId, PokemonStatus.RECEIVED);
 };

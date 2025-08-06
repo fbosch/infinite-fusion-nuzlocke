@@ -56,6 +56,11 @@ export {
   swapEncounters,
   moveToOriginalLocation,
   getLocationFromComboboxId,
+  markEncounterAsDeceased,
+  moveEncounterToBox,
+  markEncounterAsCaptured,
+  markEncounterAsMissed,
+  markEncounterAsReceived,
 } from './encounters';
 
 // Export custom location actions
