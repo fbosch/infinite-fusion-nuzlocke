@@ -546,8 +546,9 @@ function LocationSelector({
     (location: CombinedLocation) => {
       onSelectLocation(location.id, selectedTargetField);
       resetState();
+      onClose();
     },
-    [onSelectLocation, selectedTargetField, resetState]
+    [onSelectLocation, selectedTargetField, resetState, onClose]
   );
 
   const handleClose = useCallback(() => {
