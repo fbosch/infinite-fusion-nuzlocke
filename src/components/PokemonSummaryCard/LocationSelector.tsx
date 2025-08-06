@@ -12,7 +12,7 @@ import {
   type CombinedLocation,
   getLocationsSortedWithCustom,
 } from '@/loaders/locations';
-import { type PokemonOptionType } from '@/loaders/pokemon';
+import { type PokemonOptionType, isEgg } from '@/loaders/pokemon';
 import {
   getActivePlaythrough,
   useCustomLocations,
@@ -195,11 +195,27 @@ function LocationItem({
       : null;
   }, [existingPokemon, currentLocationId, moveTargetField]);
 
+  // Check if there's an egg in either slot at this location
+  const hasEggInLocation = useMemo(() => {
+    const activePlaythrough = getActivePlaythrough();
+    const encounter = activePlaythrough?.encounters?.[location.id];
+    if (!encounter) return false;
+
+    return isEgg(encounter.head) || isEgg(encounter.body);
+  }, [location.id]);
+
   return (
     <button
       type='button'
       onClick={handleSelect}
-      className='w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 border-b border-gray-200 dark:border-gray-600 last:border-b-0 cursor-pointer'
+      disabled={hasEggInLocation}
+      className={clsx(
+        'w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 border-b border-gray-200 dark:border-gray-600 last:border-b-0',
+        {
+          'cursor-pointer': !hasEggInLocation,
+          'cursor-not-allowed opacity-50': hasEggInLocation,
+        }
+      )}
     >
       <div className='flex items-start space-x-3'>
         <MapPin className='h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0' />
@@ -212,11 +228,18 @@ function LocationItem({
               ? 'Custom location'
               : `${location.region} • ${location.description}`}
           </p>
-          <ActionPreview
-            existingPokemon={existingPokemon}
-            otherFieldPokemon={otherFieldPokemon}
-            remainingPokemon={remainingPokemon}
-          />
+          {hasEggInLocation && (
+            <p className='text-xs text-red-500 dark:text-red-400 mt-1'>
+              Cannot fuse with egg
+            </p>
+          )}
+          {!hasEggInLocation && (
+            <ActionPreview
+              existingPokemon={existingPokemon}
+              otherFieldPokemon={otherFieldPokemon}
+              remainingPokemon={remainingPokemon}
+            />
+          )}
         </div>
       </div>
     </button>
