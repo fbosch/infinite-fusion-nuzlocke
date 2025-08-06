@@ -44,12 +44,14 @@ interface LocationItemProps {
   currentLocationId: string;
   moveTargetField: 'head' | 'body';
   onSelect: (location: CombinedLocation) => void;
+  movingPokemon: PokemonOptionType | null;
 }
 
 interface ActionPreviewProps {
   existingPokemon: PokemonOptionType | null;
   otherFieldPokemon: PokemonOptionType | null;
   remainingPokemon: PokemonOptionType | null;
+  targetLocationId: string;
 }
 
 interface MovingPokemonInfoProps {
@@ -90,12 +92,22 @@ function ActionPreview({
   existingPokemon,
   otherFieldPokemon,
   remainingPokemon,
+  targetLocationId,
 }: ActionPreviewProps) {
+  // Get the target location's fusion status
+  const targetEncounter = useMemo(() => {
+    const activePlaythrough = getActivePlaythrough();
+    return activePlaythrough?.encounters?.[targetLocationId];
+  }, [targetLocationId]);
+
+  const isTargetFusion = targetEncounter?.isFusion ?? false;
+
   if (!existingPokemon && !otherFieldPokemon) return null;
 
   if (existingPokemon) {
     // This is a swap operation
-    const willCreateFusionAtTarget = Boolean(otherFieldPokemon);
+    const willCreateFusionAtTarget =
+      Boolean(otherFieldPokemon) && isTargetFusion;
     const willCreateFusionAtSource = Boolean(remainingPokemon);
 
     return (
@@ -141,7 +153,7 @@ function ActionPreview({
   }
 
   // Simple fusion case (no existing Pokemon in target slot)
-  if (otherFieldPokemon) {
+  if (otherFieldPokemon && isTargetFusion) {
     return (
       <div className='flex items-center space-x-4 mt-2'>
         <div className='size-5 flex justify-center items-center flex-shrink-0'>
@@ -165,6 +177,7 @@ function LocationItem({
   currentLocationId,
   moveTargetField,
   onSelect,
+  movingPokemon,
 }: LocationItemProps) {
   const handleSelect = useCallback(() => {
     onSelect(location);
@@ -195,25 +208,52 @@ function LocationItem({
       : null;
   }, [existingPokemon, currentLocationId, moveTargetField]);
 
-  // Check if there's an egg in either slot at this location
-  const hasEggInLocation = useMemo(() => {
-    const activePlaythrough = getActivePlaythrough();
-    const encounter = activePlaythrough?.encounters?.[location.id];
-    if (!encounter) return false;
+  // Check if this move would result in egg fusion
+  const wouldCreateEggFusion = useMemo(() => {
+    if (!movingPokemon) return false;
 
-    return isEggId(encounter.head?.id) || isEggId(encounter.body?.id);
-  }, [location.id]);
+    // Check if the Pokemon being moved is an egg
+    const isMovingPokemonEgg = isEggId(movingPokemon.id);
+
+    // Get the encounter at the target location to check fusion status
+    const activePlaythrough = getActivePlaythrough();
+    const targetEncounter = activePlaythrough?.encounters?.[location.id];
+
+    // If the target encounter is not a fusion (isFusion = false),
+    // then no fusion will be created regardless of what's in the body slot
+    if (targetEncounter && !targetEncounter.isFusion) {
+      return false;
+    }
+
+    // Check if there's a Pokemon in the opposite slot that would create a fusion
+    const oppositeFieldPokemon = getSlotPokemon(
+      location.id,
+      selectedTargetField === 'head' ? 'body' : 'head'
+    );
+
+    // If moving Pokemon is an egg and there's a Pokemon in the opposite slot, it would create egg fusion
+    if (isMovingPokemonEgg && oppositeFieldPokemon) {
+      return true;
+    }
+
+    // If there's an egg in the opposite slot and we're moving a Pokemon, it would create egg fusion
+    if (oppositeFieldPokemon && isEggId(oppositeFieldPokemon.id)) {
+      return true;
+    }
+
+    return false;
+  }, [movingPokemon, location.id, selectedTargetField]);
 
   return (
     <button
       type='button'
       onClick={handleSelect}
-      disabled={hasEggInLocation}
+      disabled={wouldCreateEggFusion}
       className={clsx(
-        'w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 border-b border-gray-200 dark:border-gray-600 last:border-b-0',
+        'w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-50 dark:focus:bg-gray-700 border-b border-gray-200 dark:border-gray-600 last:border-b-0',
         {
-          'cursor-pointer': !hasEggInLocation,
-          'cursor-not-allowed opacity-50': hasEggInLocation,
+          'cursor-pointer': !wouldCreateEggFusion,
+          'cursor-not-allowed opacity-50': wouldCreateEggFusion,
         }
       )}
     >
@@ -228,16 +268,17 @@ function LocationItem({
               ? 'Custom location'
               : `${location.region} • ${location.description}`}
           </p>
-          {hasEggInLocation && (
+          {wouldCreateEggFusion && (
             <p className='text-xs text-red-500 dark:text-red-400 mt-1'>
               Cannot fuse with egg
             </p>
           )}
-          {!hasEggInLocation && (
+          {!wouldCreateEggFusion && (
             <ActionPreview
               existingPokemon={existingPokemon}
               otherFieldPokemon={otherFieldPokemon}
               remainingPokemon={remainingPokemon}
+              targetLocationId={location.id}
             />
           )}
         </div>
@@ -413,10 +454,32 @@ function useLocationSelector({
     if (moveTargetField === 'body' && encounterData.body) {
       return encounterData.body;
     }
-    return encounterData.head || encounterData.body;
+    return encounterData.head ?? encounterData.body ?? null;
   }, [encounterData, moveTargetField]);
 
-  const isFusion = Boolean(encounterData?.head && encounterData?.body);
+  // Check if the Pokemon being moved is an egg
+  const isMovingPokemonEgg = useMemo(() => {
+    return movingPokemon ? isEggId(movingPokemon.id) : false;
+  }, [movingPokemon]);
+
+  // Determine if this should be treated as a fusion
+  // Disable fusion mode when moving an egg to the head slot
+  const isFusion = useMemo(() => {
+    if (!encounterData?.head || !encounterData?.body) return false;
+
+    // If moving an egg to head slot, disable fusion mode
+    if (moveTargetField === 'head' && isMovingPokemonEgg) {
+      return false;
+    }
+
+    return true;
+  }, [
+    encounterData?.head,
+    encounterData?.body,
+    moveTargetField,
+    isMovingPokemonEgg,
+  ]);
+
   const isMovingEntireFusion = isFusion && moveTargetField === 'head';
 
   const resetState = useCallback(() => {
@@ -552,6 +615,7 @@ function LocationSelector({
                   currentLocationId={currentLocationId}
                   moveTargetField={moveTargetField}
                   onSelect={handleLocationSelect}
+                  movingPokemon={movingPokemon}
                 />
               ))
             )}

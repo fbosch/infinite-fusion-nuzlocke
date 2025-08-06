@@ -3,7 +3,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import clsx from 'clsx';
 import { Hand, MousePointer, ArrowDownToDot, Home } from 'lucide-react';
-import { type PokemonOptionType } from '@/loaders/pokemon';
+import { type PokemonOptionType, isEggId } from '@/loaders/pokemon';
 import { dragActions } from '@/stores/dragStore';
 import { PokemonSprite } from '../PokemonSprite';
 import { CursorTooltip } from '../CursorTooltip';
@@ -51,6 +51,60 @@ export function DraggableComboboxSprite({
   const availableLocations = locationId
     ? getLocations().filter(location => location.id !== locationId)
     : [];
+
+  // Check if moving to original location would create egg fusion
+  const wouldCreateEggFusionAtOriginal = useMemo(() => {
+    if (!value || !value.originalLocation || !locationId) return false;
+
+    // Check if the Pokemon is an egg
+    const isPokemonEgg = isEggId(value.id);
+
+    // Check if there's a Pokemon in the opposite slot at the original location
+    const activePlaythrough = getActivePlaythrough();
+    const originalEncounter =
+      activePlaythrough?.encounters?.[value.originalLocation];
+    if (!originalEncounter) return false;
+
+    // If the original location encounter is not a fusion (isFusion = false),
+    // then no fusion will be created regardless of what's in the body slot
+    // UNLESS we're moving an egg or there's an egg in the target location
+    if (!originalEncounter.isFusion) {
+      // For non-fusion encounters, only prevent if there's an egg involved
+      const headPokemon = originalEncounter.head;
+      const bodyPokemon = originalEncounter.body;
+
+      // If moving an egg and there's any Pokemon in the target location
+      if (isPokemonEgg && (headPokemon || bodyPokemon)) {
+        return true;
+      }
+
+      // If there's an egg in the target location and we're moving a Pokemon
+      if (
+        (headPokemon && isEggId(headPokemon.id)) ||
+        (bodyPokemon && isEggId(bodyPokemon.id))
+      ) {
+        return true;
+      }
+
+      return false;
+    }
+
+    // For fusion encounters, check the opposite slot
+    const oppositeField = field === 'head' ? 'body' : 'head';
+    const oppositePokemon = originalEncounter[oppositeField];
+
+    // If moving Pokemon is an egg and there's a Pokemon in the opposite slot, it would create egg fusion
+    if (isPokemonEgg && oppositePokemon) {
+      return true;
+    }
+
+    // If there's an egg in the opposite slot and we're moving a Pokemon, it would create egg fusion
+    if (oppositePokemon && isEggId(oppositePokemon.id)) {
+      return true;
+    }
+
+    return false;
+  }, [value, locationId, field]);
 
   // Handle move to location
   const handleMoveToLocation = async (
@@ -107,12 +161,16 @@ export function DraggableComboboxSprite({
     ) {
       const originalLocation = getLocationById(value.originalLocation);
       if (originalLocation) {
+        const isDisabled = wouldCreateEggFusionAtOriginal;
         options.push({
           id: 'move-to-original',
           label: 'Move to Original Location',
-          tooltip: originalLocation.name,
+          tooltip: isDisabled
+            ? 'Cannot move to original location - would create egg fusion'
+            : originalLocation.name,
           icon: Home,
           onClick: handleMoveToOriginalLocation,
+          disabled: isDisabled,
         });
       }
     }
@@ -133,6 +191,7 @@ export function DraggableComboboxSprite({
     locationId,
     availableLocations.length,
     handleMoveToOriginalLocation,
+    wouldCreateEggFusionAtOriginal,
   ]);
 
   if (!pokemon) return null;
