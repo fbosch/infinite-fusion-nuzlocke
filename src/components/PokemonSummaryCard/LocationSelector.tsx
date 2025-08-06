@@ -12,6 +12,8 @@ import { getLocations, type Location } from '@/loaders/locations';
 import { type PokemonOptionType } from '@/loaders/pokemon';
 import { getActivePlaythrough } from '@/stores/playthroughs';
 import { PokemonSprite } from '../PokemonSprite';
+import BodyIcon from '@/assets/images/body.svg';
+import HeadIcon from '@/assets/images/head.svg';
 import { clsx } from 'clsx';
 
 interface LocationSelectorProps {
@@ -187,23 +189,46 @@ function LocationSelector({
     return allLocations.filter(location => location.id !== currentLocationId);
   }, [currentLocationId]);
 
-  // Filter locations based on search query
+  // Filter locations based on search query (including Pokemon names)
   const filteredLocations = useMemo(() => {
     if (!searchQuery.trim()) {
       return availableLocations;
     }
 
     const query = searchQuery.toLowerCase();
-    return availableLocations.filter(
-      location =>
+    const activePlaythrough = getActivePlaythrough();
+
+    return availableLocations.filter(location => {
+      // Search by location properties
+      const locationMatch =
         location.name.toLowerCase().includes(query) ||
         location.region.toLowerCase().includes(query) ||
-        location.description.toLowerCase().includes(query)
-    );
+        location.description.toLowerCase().includes(query);
+
+      if (locationMatch) return true;
+
+      // Search by Pokemon names at this location
+      const encounter = activePlaythrough?.encounters?.[location.id];
+      if (encounter) {
+        const headPokemon = encounter.head;
+        const bodyPokemon = encounter.body;
+
+        const pokemonMatch =
+          headPokemon?.name?.toLowerCase().includes(query) ||
+          headPokemon?.nickname?.toLowerCase().includes(query) ||
+          bodyPokemon?.name?.toLowerCase().includes(query) ||
+          bodyPokemon?.nickname?.toLowerCase().includes(query);
+
+        if (pokemonMatch) return true;
+      }
+
+      return false;
+    });
   }, [availableLocations, searchQuery]);
 
   const handleLocationSelect = (location: Location) => {
     onSelectLocation(location.id, selectedTargetField);
+    setSearchQuery(''); // Clear search on selection
   };
 
   const handleClose = () => {
@@ -311,24 +336,28 @@ function LocationSelector({
                   onClick={() => setSelectedTargetField('head')}
                   className={clsx(
                     'flex-1 px-3 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer',
+                    'justify-center flex items-center gap-x-1',
                     selectedTargetField === 'head'
                       ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
                   )}
                 >
-                  Head Slot
+                  <HeadIcon className='size-5' />
+                  <span className='mr-2.5'>Head Slot</span>
                 </button>
                 <button
                   type='button'
                   onClick={() => setSelectedTargetField('body')}
                   className={clsx(
                     'flex-1 px-3 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer',
+                    'justify-center flex items-center gap-x-1',
                     selectedTargetField === 'body'
                       ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
                   )}
                 >
-                  Body Slot
+                  <BodyIcon className='size-5' />
+                  <span className='mr-2.5'>Body Slot</span>
                 </button>
               </div>
             </div>
@@ -341,7 +370,7 @@ function LocationSelector({
             </div>
             <input
               type='text'
-              placeholder='Search locations...'
+              placeholder='Search locations or Pokemon names...'
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className='w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white'
@@ -353,7 +382,7 @@ function LocationSelector({
             {filteredLocations.length === 0 ? (
               <div className='p-4 text-center text-gray-500 dark:text-gray-400'>
                 {searchQuery.trim()
-                  ? 'No locations found matching your search.'
+                  ? 'No locations found matching your search for locations or Pokemon names.'
                   : 'No available locations.'}
               </div>
             ) : (
