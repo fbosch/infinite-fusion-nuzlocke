@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://fusion.nuzlocke.io/sitemap.xml
+
+# Disallow admin or private areas (if any)
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/ 
