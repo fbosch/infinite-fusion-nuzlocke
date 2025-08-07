@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     template: '%s | Infinite Fusion Nuzlocke Tracker',
   },
   description:
-    'Track your Pokémon Infinite Fusion Nuzlocke run with advanced features including fusion tracking, encounter management, and team building.',
+    'Track your Pokémon Infinite Fusion Nuzlocke runs with location-based encounters, multiple playthroughs, and Classic/Remix game modes.',
   keywords: [
     'Pokémon',
     'Infinite Fusion',
@@ -48,6 +48,8 @@ export const metadata: Metadata = {
     'ROM hack',
     'challenge run',
     'gaming tool',
+    'encounter tracking',
+    'playthrough management',
   ],
   authors: [{ name: 'Frederik Bosch' }],
   creator: 'Frederik Bosch',
@@ -63,7 +65,7 @@ export const metadata: Metadata = {
     url: 'https://fusion.nuzlocke.io',
     title: 'Infinite Fusion Nuzlocke Tracker',
     description:
-      'Track your Pokémon Infinite Fusion Nuzlocke run with advanced features including fusion tracking, encounter management, and team building.',
+      'Track your Pokémon Infinite Fusion Nuzlocke runs with location-based encounters, multiple playthroughs, and Classic/Remix game modes.',
     siteName: 'Infinite Fusion Nuzlocke Tracker',
     images: [
       {
@@ -131,7 +133,7 @@ export default function RootLayout({
               '@type': 'WebApplication',
               name: 'Infinite Fusion Nuzlocke Tracker',
               description:
-                'Track your Pokémon Infinite Fusion Nuzlocke run with advanced features including fusion tracking, encounter management, and team building.',
+                'Track your Pokémon Infinite Fusion Nuzlocke runs with location-based encounters, multiple playthroughs, and Classic/Remix game modes.',
               url: 'https://fusion.nuzlocke.io',
               applicationCategory: 'Game',
               operatingSystem: 'Web Browser',
@@ -152,11 +154,14 @@ export default function RootLayout({
               screenshot:
                 'https://fusion.nuzlocke.io/android-chrome-512x512.png',
               featureList: [
-                'Pokémon Infinite Fusion tracking',
-                'Nuzlocke challenge management',
-                'Fusion mechanics support',
-                'Encounter tracking',
-                'Team building tools',
+                'Location-based encounter tracking',
+                'Multiple playthrough management',
+                'Classic and Remix game modes',
+                'Custom location support',
+                'Interactive location table',
+                'Encounter history tracking',
+                'Auto-scroll to recent encounters',
+                'Responsive design for mobile and desktop',
               ],
             }),
           }}
