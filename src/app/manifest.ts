@@ -3,7 +3,7 @@ import type { MetadataRoute } from 'next';
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Infinite Fusion Nuzlocke Tracker',
-    short_name: 'IF Nuzlocke',
+    short_name: 'PIF Nuzlocke',
     description:
       'Track your Pokémon Infinite Fusion Nuzlocke run with advanced features including fusion tracking, encounter management, and team building.',
     start_url: '/',
