@@ -28,6 +28,7 @@ const dsFont = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://fusion.nuzlocke.io'),
   title: {
     default: 'Infinite Fusion Nuzlocke Tracker',
     template: '%s | Infinite Fusion Nuzlocke Tracker',
@@ -43,8 +44,53 @@ export const metadata: Metadata = {
     'locations',
     'team',
     'fusion',
+    'Pokemon',
+    'ROM hack',
+    'challenge run',
+    'gaming tool',
   ],
   authors: [{ name: 'Frederik Bosch' }],
+  creator: 'Frederik Bosch',
+  publisher: 'Infinite Fusion Nuzlocke Tracker',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://fusion.nuzlocke.io',
+    title: 'Infinite Fusion Nuzlocke Tracker',
+    description:
+      'Track your Pokémon Infinite Fusion Nuzlocke run with advanced features including fusion tracking, encounter management, and team building.',
+    siteName: 'Infinite Fusion Nuzlocke Tracker',
+    images: [
+      {
+        url: '/android-chrome-512x512.png',
+        width: 512,
+        height: 512,
+        alt: 'Infinite Fusion Nuzlocke Tracker Logo',
+      },
+    ],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'your-google-verification-code', // Add your Google Search Console verification code
+  },
+  alternates: {
+    canonical: 'https://fusion.nuzlocke.io',
+  },
 };
 
 export default function RootLayout({
@@ -76,6 +122,44 @@ export default function RootLayout({
         <meta
           name='viewport'
           content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'
+        />
+        <script
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebApplication',
+              name: 'Infinite Fusion Nuzlocke Tracker',
+              description:
+                'Track your Pokémon Infinite Fusion Nuzlocke run with advanced features including fusion tracking, encounter management, and team building.',
+              url: 'https://fusion.nuzlocke.io',
+              applicationCategory: 'Game',
+              operatingSystem: 'Web Browser',
+              author: {
+                '@type': 'Person',
+                name: 'Frederik Bosch',
+              },
+              creator: {
+                '@type': 'Person',
+                name: 'Frederik Bosch',
+              },
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'USD',
+              },
+              softwareVersion: '1.0.0',
+              screenshot:
+                'https://fusion.nuzlocke.io/android-chrome-512x512.png',
+              featureList: [
+                'Pokémon Infinite Fusion tracking',
+                'Nuzlocke challenge management',
+                'Fusion mechanics support',
+                'Encounter tracking',
+                'Team building tools',
+              ],
+            }),
+          }}
         />
       </head>
       <body className='antialiased font-sans'>
