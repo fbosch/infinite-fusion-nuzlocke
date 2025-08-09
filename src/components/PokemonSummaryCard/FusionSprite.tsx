@@ -193,7 +193,7 @@ export function FusionSprite({
         </CursorTooltip>
         {showStatusOverlay && statusState.overlayContent}
       </div>
-      {!hasEgg && (
+      {showTooltip && !hasEgg && (
         <CursorTooltip
           delay={1000}
           content={

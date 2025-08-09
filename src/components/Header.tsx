@@ -1,7 +1,18 @@
+'use client';
 import Logo from '@/components/Logo';
 import PlaythroughMenu from '@/components/playthrough/PlaythroughMenu';
+import dynamic from 'next/dynamic';
+import { Computer } from 'lucide-react';
+import { useState } from 'react';
+import clsx from 'clsx';
+
+const PokemonPCSheet = dynamic(() => import('@/components/pc/PokemonPCSheet'), {
+  ssr: false,
+});
 
 export default function Header() {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'box' | 'graveyard'>('box');
   return (
     <div>
       <a
@@ -27,10 +38,37 @@ export default function Header() {
                 </h1>
               </div>
             </div>
-            <PlaythroughMenu />
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                className={clsx(
+                  'p-2 rounded-md border border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
+                  'hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400',
+                  'cursor-pointer'
+                )}
+                aria-label='Open Pokémon PC'
+                onClick={() => setDrawerOpen(true)}
+                title='Pokémon PC'
+              >
+                <Computer className='h-5 w-5' />
+              </button>
+              <div
+                role='separator'
+                aria-orientation='vertical'
+                className='h-5 w-px bg-gray-200 dark:bg-gray-700 mx-1.5'
+                aria-hidden='true'
+              />
+              <PlaythroughMenu />
+            </div>
           </div>
         </header>
       </div>
+      <PokemonPCSheet
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        activeTab={activeTab}
+        onChangeTab={setActiveTab}
+      />
     </div>
   );
 }
