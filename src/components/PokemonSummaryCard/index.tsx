@@ -10,6 +10,8 @@ import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
 import { useEncounter } from '@/stores/playthroughs';
 import { useSpriteCredits } from '@/hooks/useSprite';
+import { CursorTooltip } from '@/components/CursorTooltip';
+import { SquareArrowUpRight } from 'lucide-react';
 
 interface SummaryCardProps {
   locationId: string;
@@ -62,6 +64,23 @@ export default function SummaryCard({
     encounterData?.head?.status === PokemonStatus.DECEASED ||
     encounterData?.body?.status === PokemonStatus.DECEASED;
 
+  const head = encounterData?.head;
+  const body = encounterData?.body;
+  const link = eitherPokemonIsEgg
+    ? '#'
+    : `https://infinitefusiondex.com/details/${head?.id && body?.id ? `${head.id}.${body.id}` : head?.id || body?.id}`;
+
+  const SpriteWrapper = eitherPokemonIsEgg ? 'div' : 'a';
+  const spriteWrapperProps = eitherPokemonIsEgg
+    ? { className: 'group/fusion focus:outline-none', draggable: false }
+    : {
+        href: link,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        className: 'group/fusion focus:outline-none',
+        draggable: false,
+      };
+
   return (
     <PokemonContextMenu
       locationId={locationId}
@@ -83,13 +102,38 @@ export default function SummaryCard({
               background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
             }}
           />
-          <FusionSprite
-            headPokemon={encounterData?.head ?? null}
-            bodyPokemon={encounterData?.body ?? null}
-            isFusion={encounterData?.isFusion}
-            artworkVariant={encounterData?.artworkVariant}
-            shouldLoad={shouldLoad}
-          />
+          <SpriteWrapper {...spriteWrapperProps}>
+            <FusionSprite
+              headPokemon={encounterData?.head ?? null}
+              bodyPokemon={encounterData?.body ?? null}
+              isFusion={encounterData?.isFusion}
+              artworkVariant={encounterData?.artworkVariant}
+              shouldLoad={shouldLoad}
+            />
+            {!eitherPokemonIsEgg && (
+              <CursorTooltip
+                delay={1000}
+                content={
+                  <div className='flex flex-col gap-1'>
+                    <span className='text-sm'>
+                      Open Pokédex entry in new tab
+                    </span>
+                    <span className='text-xs text-gray-400'>{link}</span>
+                  </div>
+                }
+              >
+                <div
+                  className={clsx(
+                    'absolute -top-4 -right-2 text-blue-400 dark:text-blue-300 z-10 bg-gray-200 dark:bg-gray-800 rounded-sm opacity-0',
+                    'group-focus-visible/fusion:opacity-100 group-hover/fusion:opacity-100 transition-opacity duration-200',
+                    'group-focus-visible/fusion:ring-1 group-focus-visible/fusion:ring-blue-400'
+                  )}
+                >
+                  <SquareArrowUpRight className='size-4' />
+                </div>
+              </CursorTooltip>
+            )}
+          </SpriteWrapper>
         </Fragment>
         {eitherPokemonIsEgg ? null : (
           <ArtworkVariantButton

@@ -2,10 +2,10 @@
 
 import React, { useCallback, useRef } from 'react';
 import Image from 'next/image';
-import clsx from 'clsx';
+
 import { CursorTooltip } from '@/components/CursorTooltip';
 import { twMerge } from 'tailwind-merge';
-import { Palette, SquareArrowUpRight, MousePointer } from 'lucide-react';
+import { Palette, MousePointer } from 'lucide-react';
 
 import { useAnimatedSprite } from './useAnimatedSprite';
 import {
@@ -85,10 +85,9 @@ export function FusionSprite({
   );
 
   const statusState = getStatusState(head, body);
-  const { imageRef, shadowRef, handleMouseEnter, handleMouseLeave } =
-    useAnimatedSprite({
-      canAnimate: statusState.canAnimate,
-    });
+  const { imageRef, shadowRef } = useAnimatedSprite({
+    canAnimate: statusState.canAnimate,
+  });
 
   if (!head && !body) return null;
 
@@ -96,10 +95,6 @@ export function FusionSprite({
   const altText = getAltText(head, body, isFusion);
   const baseImageClasses =
     'object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none transform-gpu';
-
-  const link = hasEgg
-    ? '#'
-    : `https://infinitefusiondex.com/details/${head?.id && body?.id ? `${head.id}.${body.id}` : head?.id || body?.id}`;
 
   const imageProps = {
     src: spriteUrl,
@@ -114,8 +109,8 @@ export function FusionSprite({
     onError: handleImageError,
   };
 
-  const content = (
-    <>
+  return (
+    <div className='flex flex-col items-center relative'>
       <div
         className={twMerge('relative w-full flex justify-center', className)}
       >
@@ -181,7 +176,7 @@ export function FusionSprite({
               className={twMerge(
                 baseImageClasses,
                 statusState.imageClasses,
-                'group-focus-visible/fusion:ring-1 group-focus-visible/fusion:ring-blue-400 rounded-md'
+                'rounded-md'
               )}
               {...imageProps}
               alt={altText}
@@ -190,61 +185,6 @@ export function FusionSprite({
         </CursorTooltip>
         {showStatusOverlay && statusState.overlayContent}
       </div>
-      {showTooltip && !hasEgg && (
-        <CursorTooltip
-          delay={1000}
-          content={
-            <div className='flex flex-col gap-1'>
-              <span className='text-sm'>Open Pokédex entry in new tab</span>
-              <span className='text-xs text-gray-400'>{link}</span>
-            </div>
-          }
-        >
-          <div
-            className={clsx(
-              'absolute -top-4 -right-2 text-blue-400 dark:text-blue-300 z-10 bg-gray-200 dark:bg-gray-800 rounded-sm opacity-0',
-              'group-focus-visible/fusion:opacity-100 group-hover/fusion:opacity-100 transition-opacity duration-200',
-              'group-focus-visible/fusion:ring-1 group-focus-visible/fusion:ring-blue-400'
-            )}
-          >
-            <SquareArrowUpRight className='size-4' />
-          </div>
-        </CursorTooltip>
-      )}
-    </>
-  );
-
-  const renderLinkConditionally = (children: React.ReactNode) => {
-    if (hasEgg) {
-      return (
-        <div
-          className='group/fusion focus:outline-none'
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          draggable={false}
-        >
-          {children}
-        </div>
-      );
-    }
-    return (
-      <a
-        href={link}
-        target='_blank'
-        rel='noopener noreferrer'
-        className='group/fusion focus:outline-none'
-        draggable={false}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        {children}
-      </a>
-    );
-  };
-
-  return (
-    <div className='flex flex-col items-center relative'>
-      {renderLinkConditionally(content)}
     </div>
   );
 }
