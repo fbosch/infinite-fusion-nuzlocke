@@ -48,6 +48,7 @@ interface PCEntryItemProps {
   hoverRingClass: string; // e.g., 'hover:ring-blue-400/60'
   fallbackLabel: string; // e.g., 'Stored Pokémon'
   className?: string; // extra classes like size-35 for specific lists
+  onClose: () => void;
 }
 
 function PCEntryItem({
@@ -57,7 +58,12 @@ function PCEntryItem({
   hoverRingClass,
   fallbackLabel,
   className,
+  onClose,
 }: PCEntryItemProps) {
+  const encounters = useEncounters();
+  const currentEncounter = encounters?.[entry.locationId];
+  const isFusion = currentEncounter?.isFusion || false;
+
   const isStoredMode = mode === 'stored';
   const headActive = isStoredMode
     ? entry.head?.status === PokemonStatus.STORED
@@ -73,6 +79,62 @@ function PCEntryItem({
     .filter(Boolean)
     .join(' / ');
 
+  const handleClick = () => {
+    // Close the sheet
+    onClose();
+
+    // Scroll to the Pokemon location after a short delay to ensure the sheet is closed
+    setTimeout(() => {
+      const element = document.querySelector(
+        `[data-location-id="${entry.locationId}"]`
+      );
+      if (element) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+
+        // Determine which combobox(es) to highlight based on the active Pokemon and fusion state
+        const comboboxIds: string[] = [];
+        if (isFusion) {
+          // Fusion encounter - use head/body comboboxes
+          if (headActive && bodyActive) {
+            // Both head and body are active - highlight both comboboxes
+            comboboxIds.push(
+              `${entry.locationId}-head`,
+              `${entry.locationId}-body`
+            );
+          } else if (headActive) {
+            comboboxIds.push(`${entry.locationId}-head`);
+          } else if (bodyActive) {
+            comboboxIds.push(`${entry.locationId}-body`);
+          }
+        } else {
+          // Single encounter - always use single combobox
+          comboboxIds.push(`${entry.locationId}-single`);
+        }
+
+        // Highlight all relevant comboboxes
+        comboboxIds.forEach(comboboxId => {
+          const overlay = document.querySelector(
+            `.location-highlight-overlay[data-combobox-id="${comboboxId}"]`
+          );
+          if (overlay) {
+            // Show the highlight overlay
+            overlay.classList.add('opacity-100');
+            overlay.classList.remove('opacity-0');
+
+            // Remove highlight after 2 seconds
+            setTimeout(() => {
+              overlay.classList.add('opacity-0');
+              overlay.classList.remove('opacity-100');
+            }, 2000);
+          }
+        });
+      }
+    }, 100);
+  };
+
   return (
     <li
       key={entry.locationId}
@@ -82,6 +144,7 @@ function PCEntryItem({
         hoverRingClass,
         className
       )}
+      onClick={handleClick}
     >
       <div className='flex items-center gap-3 p-3'>
         <div className='flex-shrink-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-md'>
@@ -235,7 +298,7 @@ export default function PokemonPCSheet({
                   }
                 >
                   <Boxes className='h-4 w-4' />
-                  <span className='font-medium'>Boxes</span>
+                  <span className='font-medium'>Boxed</span>
                   <span className='ml-1 text-[10px] px-1 rounded bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100'>
                     {stored.length}
                   </span>
@@ -289,6 +352,7 @@ export default function PokemonPCSheet({
                           hoverRingClass='hover:ring-blue-400/60'
                           fallbackLabel='Stored Pokémon'
                           className=''
+                          onClose={onClose}
                         />
                       ))}
                     </ul>
@@ -324,6 +388,7 @@ export default function PokemonPCSheet({
                           hoverRingClass='hover:ring-red-400/60'
                           fallbackLabel='Fainted Pokémon'
                           className=''
+                          onClose={onClose}
                         />
                       ))}
                     </ul>
