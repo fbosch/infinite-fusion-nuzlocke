@@ -19,6 +19,7 @@ import { isEggId } from '../../loaders';
 import { useSpriteCredits } from '@/hooks/useSprite';
 import { formatArtistCredits } from '../../utils/formatCredits';
 import { getSpriteId } from '../../lib/sprites';
+import { type PokemonOptionType } from '@/loaders/pokemon';
 
 interface FusionSpriteProps {
   locationId: string;
@@ -26,6 +27,8 @@ interface FusionSpriteProps {
   shouldLoad?: boolean;
   showStatusOverlay?: boolean;
   showTooltip?: boolean;
+  headPokemon?: PokemonOptionType | null; // Override head Pokemon instead of using locationId lookup
+  bodyPokemon?: PokemonOptionType | null; // Override body Pokemon instead of using locationId lookup
 }
 
 export function FusionSprite({
@@ -34,24 +37,33 @@ export function FusionSprite({
   showStatusOverlay = true,
   showTooltip = true,
   className,
+  headPokemon,
+  bodyPokemon,
 }: FusionSpriteProps) {
   const encounterData = useEncounter(locationId);
   const hasHovered = useRef(false);
-  const spriteId = getSpriteId(
-    encounterData?.head?.id,
-    encounterData?.body?.id
-  );
-  const { head, body, isFusion, artworkVariant } = encounterData || {
-    head: null,
-    body: null,
-    isFusion: false,
-    artworkVariant: undefined,
-  };
+
+  // Use override Pokemon if provided, otherwise fall back to encounter data
+  const hasOverrides = headPokemon !== undefined || bodyPokemon !== undefined;
+  const head = hasOverrides
+    ? (headPokemon ?? null)
+    : (encounterData?.head ?? null);
+  const body = hasOverrides
+    ? (bodyPokemon ?? null)
+    : (encounterData?.body ?? null);
+  const isFusion = hasOverrides
+    ? Boolean(head && body)
+    : (encounterData?.isFusion ?? Boolean(head && body));
+  const artworkVariant = hasOverrides
+    ? undefined
+    : encounterData?.artworkVariant;
+
+  const spriteId = getSpriteId(head?.id, body?.id);
   const hasEgg = isEggId(head?.id) || isEggId(body?.id);
 
   const { data: credits, isLoading: isLoadingCredits } = useSpriteCredits(
-    encounterData?.head?.id,
-    encounterData?.body?.id,
+    head?.id,
+    body?.id,
     shouldLoad && hasHovered.current === true && !hasEgg
   );
 

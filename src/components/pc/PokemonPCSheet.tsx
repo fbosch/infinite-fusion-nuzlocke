@@ -89,9 +89,11 @@ function PCEntryItem({
             <FusionSprite
               locationId={entry.locationId}
               shouldLoad
-              className='top-3'
+              className=''
               showStatusOverlay={false}
               showTooltip={false}
+              headPokemon={entry.head}
+              bodyPokemon={entry.body}
             />
           )}
         </div>
@@ -127,39 +129,49 @@ export default function PokemonPCSheet({
   }, [mergedLocations]);
 
   const deceased: Entry[] = useMemo(() => {
-    return Object.entries(encounters || {})
-      .filter(([, data]) => {
-        const headDead = data?.head?.status === PokemonStatus.DECEASED;
-        const bodyDead = data?.body?.status === PokemonStatus.DECEASED;
-        return headDead || bodyDead;
-      })
-      .map(([locationId, data]) => ({
-        locationId,
-        locationName:
-          idToName.get(locationId) ||
-          getLocationById(locationId)?.name ||
-          'Unknown Location',
-        head: data?.head ?? null,
-        body: data?.body ?? null,
-      }));
+    const entries: Entry[] = [];
+
+    Object.entries(encounters || {}).forEach(([locationId, data]) => {
+      const headDead = data?.head?.status === PokemonStatus.DECEASED;
+      const bodyDead = data?.body?.status === PokemonStatus.DECEASED;
+
+      if (headDead || bodyDead) {
+        entries.push({
+          locationId,
+          locationName:
+            idToName.get(locationId) ||
+            getLocationById(locationId)?.name ||
+            'Unknown Location',
+          head: headDead ? (data?.head ?? null) : null,
+          body: bodyDead ? (data?.body ?? null) : null,
+        });
+      }
+    });
+
+    return entries;
   }, [encounters, idToName]);
 
   const stored: Entry[] = useMemo(() => {
-    return Object.entries(encounters || {})
-      .filter(([, data]) => {
-        const headStored = data?.head?.status === PokemonStatus.STORED;
-        const bodyStored = data?.body?.status === PokemonStatus.STORED;
-        return headStored || bodyStored;
-      })
-      .map(([locationId, data]) => ({
-        locationId,
-        locationName:
-          idToName.get(locationId) ||
-          getLocationById(locationId)?.name ||
-          'Unknown Location',
-        head: data?.head ?? null,
-        body: data?.body ?? null,
-      }));
+    const entries: Entry[] = [];
+
+    Object.entries(encounters || {}).forEach(([locationId, data]) => {
+      const headStored = data?.head?.status === PokemonStatus.STORED;
+      const bodyStored = data?.body?.status === PokemonStatus.STORED;
+
+      if (headStored || bodyStored) {
+        entries.push({
+          locationId,
+          locationName:
+            idToName.get(locationId) ||
+            getLocationById(locationId)?.name ||
+            'Unknown Location',
+          head: headStored ? (data?.head ?? null) : null,
+          body: bodyStored ? (data?.body ?? null) : null,
+        });
+      }
+    });
+
+    return entries;
   }, [encounters, idToName]);
 
   const selectedIndex = activeTab === 'box' ? 0 : 1;
