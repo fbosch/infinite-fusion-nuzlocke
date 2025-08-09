@@ -72,7 +72,10 @@ export default function SummaryCard({
 
   const SpriteWrapper = eitherPokemonIsEgg ? 'div' : 'a';
   const spriteWrapperProps = eitherPokemonIsEgg
-    ? { className: 'group/fusion focus:outline-none', draggable: false }
+    ? {
+        className: 'group/fusion focus:outline-none',
+        draggable: false,
+      }
     : {
         href: link,
         target: '_blank',

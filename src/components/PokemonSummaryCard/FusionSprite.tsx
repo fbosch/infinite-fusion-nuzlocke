@@ -85,9 +85,10 @@ export function FusionSprite({
   );
 
   const statusState = getStatusState(head, body);
-  const { imageRef, shadowRef } = useAnimatedSprite({
-    canAnimate: statusState.canAnimate,
-  });
+  const { imageRef, shadowRef, handleMouseEnter, handleMouseLeave } =
+    useAnimatedSprite({
+      canAnimate: statusState.canAnimate,
+    });
 
   if (!head && !body) return null;
 
@@ -113,6 +114,13 @@ export function FusionSprite({
     <div className='flex flex-col items-center relative'>
       <div
         className={twMerge('relative w-full flex justify-center', className)}
+        onMouseEnter={() => {
+          if (!hasHovered.current) {
+            hasHovered.current = true;
+          }
+          handleMouseEnter();
+        }}
+        onMouseLeave={handleMouseLeave}
       >
         <CursorTooltip
           disabled={!credit || !showTooltip}
@@ -152,10 +160,6 @@ export function FusionSprite({
           }
         >
           <div
-            onMouseEnter={() => {
-              if (hasHovered.current) return;
-              hasHovered.current = true;
-            }}
             className={twMerge(
               'relative z-10 -translate-y-6',
               statusState.wrapperClasses
