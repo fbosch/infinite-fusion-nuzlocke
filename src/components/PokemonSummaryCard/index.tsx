@@ -77,7 +77,7 @@ export default function SummaryCard({
         href: link,
         target: '_blank',
         rel: 'noopener noreferrer',
-        className: 'group/fusion focus:outline-none',
+        className: 'group/fusion focus:outline-none relative',
         draggable: false,
       };
 
