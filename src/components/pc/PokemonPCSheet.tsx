@@ -13,7 +13,7 @@ import {
   TabPanels,
 } from '@headlessui/react';
 import clsx from 'clsx';
-import { Skull, X, Computer, Boxes } from 'lucide-react';
+import { Skull, X, Boxes, Box } from 'lucide-react';
 import { useEncounters, useCustomLocations } from '@/stores/playthroughs';
 import { PokemonStatus, type PokemonOptionType } from '@/loaders/pokemon';
 import {
@@ -329,7 +329,7 @@ export default function PokemonPCSheet({
                       role='status'
                       aria-live='polite'
                     >
-                      <Computer
+                      <Box
                         className='h-10 w-10 opacity-50 mb-3'
                         aria-hidden='true'
                       />
