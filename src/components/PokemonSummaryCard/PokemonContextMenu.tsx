@@ -13,7 +13,6 @@ import EscapeIcon from '@/assets/images/escape-cloud.svg';
 import HeadIcon from '@/assets/images/head.svg';
 import BodyIcon from '@/assets/images/body.svg';
 import { useSpriteVariants } from '@/hooks/useSprite';
-import { usePreferredVariant } from '@/hooks/usePreferredVariant';
 import { isEggId, type PokemonOptionType } from '@/loaders/pokemon';
 import { playthroughActions } from '@/stores/playthroughs';
 import { getDisplayPokemon } from './utils';
@@ -69,12 +68,7 @@ export function PokemonContextMenu({
   );
   const hasArtVariants = variants && variants.length > 1;
 
-  // Get preferred variant from global cache
-  const artworkVariant = usePreferredVariant(
-    encounterData?.head ?? null,
-    encounterData?.body ?? null,
-    encounterData?.isFusion ?? false
-  );
+  // Preferred variant now resolved inside FusionSprite via suspense query
 
   const [hasContextMenuBeenOpened, setHasContextMenuBeenOpened] =
     useState(false);

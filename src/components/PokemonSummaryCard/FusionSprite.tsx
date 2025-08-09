@@ -16,7 +16,7 @@ import {
   getStatusState,
 } from './utils';
 import { isEggId } from '../../loaders';
-import { usePreferredVariantQuery, useSpriteCredits } from '@/hooks/useSprite';
+import { usePreferredVariantSuspenseQuery, useSpriteCredits } from '@/hooks/useSprite';
 import { formatArtistCredits } from '../../utils/formatCredits';
 import { getSpriteId } from '../../lib/sprites';
 import { type PokemonOptionType } from '@/loaders/pokemon';
@@ -58,11 +58,10 @@ export function FusionSprite({
   );
 
   // Preferred variant via suspense query (unless eggs)
-  const { data: preferredVariant } = usePreferredVariantQuery(
+  const { data: preferredVariant } = usePreferredVariantSuspenseQuery(
     head?.id,
     body?.id,
     {
-      suspense: true,
       enabled: !!(head || body) && !!shouldLoad && !hasEgg,
     }
   );

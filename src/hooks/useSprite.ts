@@ -1,8 +1,4 @@
-import {
-  useQuery,
-  useMutation,
-  type UseQueryOptions,
-} from '@tanstack/react-query';
+import { useQuery, useMutation, useSuspenseQuery } from '@tanstack/react-query';
 import { spriteQueries, spriteMutations } from '@/lib/queries/sprites';
 import ms from 'ms';
 
@@ -39,23 +35,35 @@ export function useSetPrefferedVariant() {
   return useMutation(spriteMutations.setPreferredVariant());
 }
 
-type PreferredVariantKey = ReturnType<
-  typeof spriteQueries.preferredVariant
->['queryKey'];
-type PreferredVariantOptions = Omit<
-  UseQueryOptions<string, Error, string, PreferredVariantKey>,
-  'queryKey' | 'queryFn'
->;
-
 export function usePreferredVariantQuery(
   headId?: number | null,
   bodyId?: number | null,
-  options?: PreferredVariantOptions
+  opts?: { enabled?: boolean }
 ) {
   const base = spriteQueries.preferredVariant(headId, bodyId);
-  return useQuery({ ...base, ...(options ?? {}) });
+  return useQuery({
+    queryKey: base.queryKey,
+    queryFn: base.queryFn,
+    gcTime: base.gcTime,
+    staleTime: base.staleTime,
+    enabled: opts?.enabled ?? (base.enabled as boolean | undefined),
+  });
 }
 
 export function useCyclePreferredVariant() {
   return useMutation(spriteMutations.cyclePreferredVariant());
+}
+
+export function usePreferredVariantSuspenseQuery(
+  headId?: number | null,
+  bodyId?: number | null,
+  opts?: { enabled?: boolean }
+) {
+  const base = spriteQueries.preferredVariant(headId, bodyId);
+  return useSuspenseQuery({
+    queryKey: base.queryKey,
+    queryFn: base.queryFn,
+    gcTime: base.gcTime,
+    staleTime: base.staleTime,
+  });
 }
