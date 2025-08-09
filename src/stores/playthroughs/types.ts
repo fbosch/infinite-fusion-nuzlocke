@@ -7,13 +7,21 @@ export const GameModeSchema = z.enum(['classic', 'remix', 'randomized']);
 
 export type GameMode = z.infer<typeof GameModeSchema>;
 
-export const EncounterDataSchema = z.object({
-  head: PokemonOptionSchema.nullable(),
-  body: PokemonOptionSchema.nullable(),
-  isFusion: z.boolean(),
-  artworkVariant: z.string().optional(),
-  updatedAt: z.number(),
-});
+export const EncounterDataSchema = z
+  .object({
+    head: PokemonOptionSchema.nullable(),
+    body: PokemonOptionSchema.nullable(),
+    isFusion: z.boolean(),
+    updatedAt: z.number(),
+    // Keep artworkVariant for backward compatibility during migration
+    artworkVariant: z.string().optional(),
+  })
+  .transform(data => {
+    // Migration logic: remove artworkVariant field if it exists
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { artworkVariant, ...cleanData } = data;
+    return cleanData;
+  });
 
 export type EncounterData = z.infer<typeof EncounterDataSchema>;
 

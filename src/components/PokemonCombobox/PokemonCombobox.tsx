@@ -418,8 +418,10 @@ export const PokemonCombobox = React.memo(
         onDragEnd={handleDragEnd}
         data-uid={dragPreview?.uid || value?.uid}
       >
-        {}
-        <div className='absolute inset-0 bg-blue-500/20 border-2 border-blue-500/60 rounded-lg pointer-events-none z-10 opacity-0 transition-opacity duration-200 ease-in-out location-highlight-overlay max-w-screen' />
+        <div
+          className='absolute inset-0 bg-blue-500/20 border-2 border-blue-500/60 rounded-lg pointer-events-none z-10 opacity-0 transition-opacity duration-200 ease-in-out location-highlight-overlay max-w-screen'
+          data-combobox-id={comboboxId}
+        />
         <Combobox
           value={value || null}
           onChange={handleChange}

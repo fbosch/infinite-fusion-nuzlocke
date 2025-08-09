@@ -1,9 +1,17 @@
+'use client';
+
+import React from 'react';
+import { Loader2 } from 'lucide-react';
+import { match, P } from 'ts-pattern';
 import {
-  isEgg,
   PokemonStatus,
   type PokemonOptionType,
+  isEggId,
 } from '@/loaders/pokemon';
-import { match, P } from 'ts-pattern';
+
+function isEgg(pokemon: PokemonOptionType): boolean {
+  return isEggId(pokemon.id);
+}
 
 export const QUESTION_MARK =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgBAMAAADmrbOzAAAAD1BMVEUAAAAAAAD////Ozs6tra07B8SZAAAAAXRSTlMAQObYZgAAAcVJREFUeNrt3F1u4jAUgNGwgzFlA6RsYMgKBnn/axq1QG5TQ9q+xLZ6zhsREt/DjRPlhwEAAAAAAAAAAAAAAKhml27+DG0QtCYVhh8RtJ2oaahJ0DdqGmoStG6XwiFP7/K/FL5YtQVtFFTW5Mu4cMrfaBK0dVBR87RpeEjQtkExQPvxqePKGAmqFjTOXqebc2wT1E7QfYCiJo6phxxNxyd7vqBtg8oBSoXVMRJUJSgGaJ6e6fw2TPMk3cdIUP2gxWnQKd9rYgl4+IVhJqhS0GJE9mMoNgqqHLRb7NUfB2j6m9LL9HGMYl2IPV9QpaD9uPzhiCtDx6OgZoJOeT0oXwTVD4pfuu7nq0HpZfp8fBVUJyiW5vh4yrcVPJaDWLgFtRaU9tcjaCzNgloPuopzVkF9BM0nrIIaDMqXp0EpxMFVUIWg1VPYqCy2xMJ9GN61E3Q7p/5dQa9TWjWdBTUTtLwcs7xOXa7dgqoGlRc9Y1Gel+/qV2EFrd1aKIOauNchqOUbeIJ6vU0uqKOHUQR1+MiXoH4frBTUzePLgjp8SUBQf6/iCOrxhTdBHb5WKqjHl7cF9fgXCYIAAAAAAAAAAAAAAIDH/gPtjijCtkSRDwAAAABJRU5ErkJggg==';
@@ -210,4 +218,52 @@ export function getStatusState(
       overlayContent: null,
       canAnimate: true,
     }));
+}
+
+export interface DisplayPokemon {
+  head: PokemonOptionType | null;
+  body: PokemonOptionType | null;
+  isFusion: boolean;
+}
+
+/**
+ * Determines which Pokemon to display based on active/inactive states.
+ * If one Pokemon is inactive (dead or stored) and the other is active, shows only the active one.
+ */
+export function getDisplayPokemon(
+  head: PokemonOptionType | null,
+  body: PokemonOptionType | null,
+  isFusion: boolean
+): DisplayPokemon {
+  // Early return for non-fusion or incomplete data
+  if (!isFusion || !head || !body) {
+    return { head, body, isFusion };
+  }
+
+  // Check if Pokemon are inactive (dead or stored)
+  const headInactive =
+    head.status === PokemonStatus.DECEASED ||
+    head.status === PokemonStatus.STORED;
+  const bodyInactive =
+    body.status === PokemonStatus.DECEASED ||
+    body.status === PokemonStatus.STORED;
+
+  // If one is inactive and the other is active, show only the active one
+  if (headInactive && !bodyInactive) {
+    return { head: null, body, isFusion: false };
+  }
+  if (bodyInactive && !headInactive) {
+    return { head, body: null, isFusion: false };
+  }
+
+  // If both are inactive or both are active, keep fusion display
+  return { head, body, isFusion };
+}
+
+export function LoadingSpinner() {
+  return (
+    <div className='absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg'>
+      <Loader2 className='size-8 animate-spin text-gray-400' />
+    </div>
+  );
 }

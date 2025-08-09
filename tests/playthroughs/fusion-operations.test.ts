@@ -514,11 +514,11 @@ describe('Playthroughs Store - Fusion Operations', () => {
       expect(encounters!['route-1'].body?.status).toBe('captured');
     });
 
-    it('should reset artwork variant when flipping changes fusion composition', async () => {
+    it('should handle flipping without affecting global variants (variants are now global)', async () => {
       const alakazam = createMockPokemon('Alakazam', 65);
       alakazam.nickname = 'Spoon';
 
-      // Create fusion with artwork variant
+      // Create fusion
       await playthroughActions.updateEncounter(
         'route-1',
         alakazam,
@@ -526,11 +526,12 @@ describe('Playthroughs Store - Fusion Operations', () => {
         true
       );
 
-      // Manually set an artwork variant to test reset behavior
+      // Set global preferred variant (variants are no longer stored per encounter)
       playthroughActions.setArtworkVariant('route-1', 'custom-variant');
 
       let encounters = playthroughActions.getEncounters();
-      expect(encounters!['route-1'].artworkVariant).toBe('custom-variant');
+      // Encounters no longer store artworkVariant - variants are managed globally
+      expect('artworkVariant' in encounters!['route-1']).toBe(false);
 
       // Flip to body (which changes composition from head-only to body-only)
       await playthroughActions.updateEncounter('route-1', null, 'head', false);
@@ -543,8 +544,8 @@ describe('Playthroughs Store - Fusion Operations', () => {
 
       encounters = playthroughActions.getEncounters();
 
-      // Artwork variant should be reset when composition changes
-      expect(encounters!['route-1'].artworkVariant).toBeUndefined();
+      // Encounters still don't store artworkVariant after flipping
+      expect('artworkVariant' in encounters!['route-1']).toBe(false);
     });
   });
 });

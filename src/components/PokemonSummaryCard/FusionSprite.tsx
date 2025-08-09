@@ -2,11 +2,11 @@
 
 import React, { useCallback, useRef } from 'react';
 import Image from 'next/image';
-import clsx from 'clsx';
+
 import { CursorTooltip } from '@/components/CursorTooltip';
 import { twMerge } from 'tailwind-merge';
-import { Palette, SquareArrowUpRight, MousePointer } from 'lucide-react';
-import { useEncounter } from '@/stores/playthroughs';
+import { Palette, MousePointer } from 'lucide-react';
+
 import { useAnimatedSprite } from './useAnimatedSprite';
 import {
   getSpriteUrl,
@@ -19,38 +19,41 @@ import { isEggId } from '../../loaders';
 import { useSpriteCredits } from '@/hooks/useSprite';
 import { formatArtistCredits } from '../../utils/formatCredits';
 import { getSpriteId } from '../../lib/sprites';
+import { type PokemonOptionType } from '@/loaders/pokemon';
 
 interface FusionSpriteProps {
-  locationId: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  headPokemon: PokemonOptionType | null;
+  bodyPokemon: PokemonOptionType | null;
+  isFusion?: boolean;
+  artworkVariant?: string;
   className?: string;
   shouldLoad?: boolean;
+  showStatusOverlay?: boolean;
+  showTooltip?: boolean;
 }
 
-const SPRITE_SIZES = { sm: 32, md: 48, lg: 64, xl: 96 } as const;
-
 export function FusionSprite({
-  locationId,
-  size = 'md',
+  headPokemon,
+  bodyPokemon,
+  isFusion: isFusionProp,
+  artworkVariant,
   shouldLoad,
+  showStatusOverlay = true,
+  showTooltip = true,
+  className,
 }: FusionSpriteProps) {
-  const encounterData = useEncounter(locationId);
   const hasHovered = useRef(false);
-  const spriteId = getSpriteId(
-    encounterData?.head?.id,
-    encounterData?.body?.id
-  );
-  const { head, body, isFusion, artworkVariant } = encounterData || {
-    head: null,
-    body: null,
-    isFusion: false,
-    artworkVariant: undefined,
-  };
+
+  const head = headPokemon;
+  const body = bodyPokemon;
+  const isFusion = isFusionProp ?? Boolean(head && body);
+
+  const spriteId = getSpriteId(head?.id, body?.id);
   const hasEgg = isEggId(head?.id) || isEggId(body?.id);
 
   const { data: credits, isLoading: isLoadingCredits } = useSpriteCredits(
-    encounterData?.head?.id,
-    encounterData?.body?.id,
+    head?.id,
+    body?.id,
     shouldLoad && hasHovered.current === true && !hasEgg
   );
 
@@ -91,18 +94,13 @@ export function FusionSprite({
 
   const spriteUrl = getSpriteUrl(head, body, isFusion, artworkVariant);
   const altText = getAltText(head, body, isFusion);
-  const spriteSize = SPRITE_SIZES[size];
   const baseImageClasses =
     'object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none transform-gpu';
 
-  const link = hasEgg
-    ? '#'
-    : `https://infinitefusiondex.com/details/${head?.id && body?.id ? `${head.id}.${body.id}` : head?.id || body?.id}`;
-
   const imageProps = {
     src: spriteUrl,
-    width: spriteSize,
-    height: spriteSize,
+    width: 64,
+    height: 64,
     loading: shouldLoad ? ('eager' as const) : ('lazy' as const),
     unoptimized: true,
     decoding: shouldLoad ? ('auto' as const) : ('async' as const),
@@ -112,11 +110,20 @@ export function FusionSprite({
     onError: handleImageError,
   };
 
-  const content = (
-    <>
-      <div className='relative w-full flex justify-center'>
+  return (
+    <div className='flex flex-col items-center relative'>
+      <div
+        className={twMerge('relative w-full flex justify-center', className)}
+        onMouseEnter={() => {
+          if (!hasHovered.current) {
+            hasHovered.current = true;
+          }
+          handleMouseEnter();
+        }}
+        onMouseLeave={handleMouseLeave}
+      >
         <CursorTooltip
-          disabled={!credit}
+          disabled={!credit || !showTooltip}
           delay={500}
           content={
             credit ? (
@@ -153,10 +160,6 @@ export function FusionSprite({
           }
         >
           <div
-            onMouseEnter={() => {
-              if (hasHovered.current) return;
-              hasHovered.current = true;
-            }}
             className={twMerge(
               'relative z-10 -translate-y-6',
               statusState.wrapperClasses
@@ -177,70 +180,15 @@ export function FusionSprite({
               className={twMerge(
                 baseImageClasses,
                 statusState.imageClasses,
-                'group-focus-visible:ring-1 ring-blue-400 rounded-md'
+                'rounded-md'
               )}
               {...imageProps}
               alt={altText}
             />
           </div>
         </CursorTooltip>
-        {statusState.overlayContent}
+        {showStatusOverlay && statusState.overlayContent}
       </div>
-      {!hasEgg && (
-        <CursorTooltip
-          delay={1000}
-          content={
-            <div className='flex flex-col gap-1'>
-              <span className='text-sm'>Open Pokédex entry in new tab</span>
-              <span className='text-xs text-gray-400'>{link}</span>
-            </div>
-          }
-        >
-          <div
-            className={clsx(
-              'absolute -top-4 -right-2 text-blue-400 dark:text-blue-300 z-10 bg-gray-200 dark:bg-gray-800 rounded-sm opacity-0',
-              'group-focus-visible:opacity-100 group-hover:opacity-100 transition-opacity duration-200',
-              'group-focus-visible:ring-1 group-focus-visible:ring-blue-400'
-            )}
-          >
-            <SquareArrowUpRight className='size-4' />
-          </div>
-        </CursorTooltip>
-      )}
-    </>
-  );
-
-  const renderLinkConditionally = (children: React.ReactNode) => {
-    if (hasEgg) {
-      return (
-        <div
-          className='group focus:outline-none'
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          draggable={false}
-        >
-          {children}
-        </div>
-      );
-    }
-    return (
-      <a
-        href={link}
-        target='_blank'
-        rel='noopener noreferrer'
-        className='group focus:outline-none'
-        draggable={false}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        {children}
-      </a>
-    );
-  };
-
-  return (
-    <div className='flex flex-col items-center relative'>
-      {renderLinkConditionally(content)}
     </div>
   );
 }

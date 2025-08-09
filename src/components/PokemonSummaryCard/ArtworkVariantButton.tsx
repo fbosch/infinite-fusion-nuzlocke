@@ -3,11 +3,11 @@
 import React, { useMemo } from 'react';
 import { Loader2, RefreshCwOff, RefreshCcw, RefreshCw } from 'lucide-react';
 import clsx from 'clsx';
-import { playthroughActions, useEncounter } from '@/stores/playthroughs';
+import { useEncounter } from '@/stores/playthroughs';
 import { useShiftKey } from '@/hooks/useKeyPressed';
 import { twMerge } from 'tailwind-merge';
 import { CursorTooltip } from '../CursorTooltip';
-import { useSpriteVariants } from '@/hooks/useSprite';
+import { useSpriteVariants, useCyclePreferredVariant } from '@/hooks/useSprite';
 
 interface ArtworkVariantButtonProps {
   locationId: string;
@@ -25,6 +25,7 @@ export function ArtworkVariantButton({
   // Get encounter data directly - only this button will rerender when this encounter changes
   const encounter = useEncounter(locationId);
   const isShiftPressed = useShiftKey();
+  const cyclePreferredVariant = useCyclePreferredVariant();
 
   // Use React Query hook for sprite variants
   const { data: variants, isLoading } = useSpriteVariants(
@@ -40,11 +41,22 @@ export function ArtworkVariantButton({
     if (disabled || !hasVariants) return;
 
     try {
-      await playthroughActions.cycleArtworkVariant(locationId, isShiftPressed);
+      await cyclePreferredVariant.mutateAsync({
+        headId: encounter?.head?.id,
+        bodyId: encounter?.body?.id,
+        reverse: isShiftPressed,
+      });
     } catch (error) {
       console.error('Failed to cycle artwork variant:', error);
     }
-  }, [disabled, hasVariants, locationId, isShiftPressed]);
+  }, [
+    disabled,
+    hasVariants,
+    isShiftPressed,
+    cyclePreferredVariant,
+    encounter?.head?.id,
+    encounter?.body?.id,
+  ]);
 
   const buttonIcon = useMemo(() => {
     if (isLoading) {
