@@ -83,7 +83,13 @@ export default function SummaryCard({
               background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
             }}
           />
-          <FusionSprite locationId={locationId} shouldLoad={shouldLoad} />
+          <FusionSprite
+            headPokemon={encounterData?.head ?? null}
+            bodyPokemon={encounterData?.body ?? null}
+            isFusion={encounterData?.isFusion}
+            artworkVariant={encounterData?.artworkVariant}
+            shouldLoad={shouldLoad}
+          />
         </Fragment>
         {eitherPokemonIsEgg ? null : (
           <ArtworkVariantButton

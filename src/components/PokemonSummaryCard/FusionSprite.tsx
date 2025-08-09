@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import { CursorTooltip } from '@/components/CursorTooltip';
 import { twMerge } from 'tailwind-merge';
 import { Palette, SquareArrowUpRight, MousePointer } from 'lucide-react';
-import { useEncounter } from '@/stores/playthroughs';
+
 import { useAnimatedSprite } from './useAnimatedSprite';
 import {
   getSpriteUrl,
@@ -22,41 +22,31 @@ import { getSpriteId } from '../../lib/sprites';
 import { type PokemonOptionType } from '@/loaders/pokemon';
 
 interface FusionSpriteProps {
-  locationId: string;
+  headPokemon: PokemonOptionType | null;
+  bodyPokemon: PokemonOptionType | null;
+  isFusion?: boolean;
+  artworkVariant?: string;
   className?: string;
   shouldLoad?: boolean;
   showStatusOverlay?: boolean;
   showTooltip?: boolean;
-  headPokemon?: PokemonOptionType | null; // Override head Pokemon instead of using locationId lookup
-  bodyPokemon?: PokemonOptionType | null; // Override body Pokemon instead of using locationId lookup
 }
 
 export function FusionSprite({
-  locationId,
+  headPokemon,
+  bodyPokemon,
+  isFusion: isFusionProp,
+  artworkVariant,
   shouldLoad,
   showStatusOverlay = true,
   showTooltip = true,
   className,
-  headPokemon,
-  bodyPokemon,
 }: FusionSpriteProps) {
-  const encounterData = useEncounter(locationId);
   const hasHovered = useRef(false);
 
-  // Use override Pokemon if provided, otherwise fall back to encounter data
-  const hasOverrides = headPokemon !== undefined || bodyPokemon !== undefined;
-  const head = hasOverrides
-    ? (headPokemon ?? null)
-    : (encounterData?.head ?? null);
-  const body = hasOverrides
-    ? (bodyPokemon ?? null)
-    : (encounterData?.body ?? null);
-  const isFusion = hasOverrides
-    ? Boolean(head && body)
-    : (encounterData?.isFusion ?? Boolean(head && body));
-  const artworkVariant = hasOverrides
-    ? undefined
-    : encounterData?.artworkVariant;
+  const head = headPokemon;
+  const body = bodyPokemon;
+  const isFusion = isFusionProp ?? Boolean(head && body);
 
   const spriteId = getSpriteId(head?.id, body?.id);
   const hasEgg = isEggId(head?.id) || isEggId(body?.id);

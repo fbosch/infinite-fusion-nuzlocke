@@ -87,13 +87,11 @@ function PCEntryItem({
         <div className='flex-shrink-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-md'>
           {hasAny && (
             <FusionSprite
-              locationId={entry.locationId}
+              headPokemon={entry.head ?? null}
+              bodyPokemon={entry.body ?? null}
               shouldLoad
-              className=''
               showStatusOverlay={false}
               showTooltip={false}
-              headPokemon={entry.head}
-              bodyPokemon={entry.body}
             />
           )}
         </div>
