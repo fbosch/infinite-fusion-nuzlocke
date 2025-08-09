@@ -13,7 +13,7 @@ import {
   TabPanels,
 } from '@headlessui/react';
 import clsx from 'clsx';
-import { Skull, X, Computer } from 'lucide-react';
+import { Skull, X, Computer, Boxes } from 'lucide-react';
 import { useEncounters, useCustomLocations } from '@/stores/playthroughs';
 import { PokemonStatus, type PokemonOptionType } from '@/loaders/pokemon';
 import {
@@ -224,8 +224,8 @@ export default function PokemonPCSheet({
                     )
                   }
                 >
-                  <Computer className='h-4 w-4' />
-                  <span className='font-medium'>Box</span>
+                  <Boxes className='h-4 w-4' />
+                  <span className='font-medium'>Boxes</span>
                   <span className='ml-1 text-[10px] px-1 rounded bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100'>
                     {stored.length}
                   </span>
