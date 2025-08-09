@@ -25,6 +25,7 @@ interface FusionSpriteProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   shouldLoad?: boolean;
+  showStatusOverlay?: boolean;
 }
 
 const SPRITE_SIZES = { sm: 32, md: 48, lg: 64, xl: 96 } as const;
@@ -33,6 +34,7 @@ export function FusionSprite({
   locationId,
   size = 'md',
   shouldLoad,
+  showStatusOverlay = true,
 }: FusionSpriteProps) {
   const encounterData = useEncounter(locationId);
   const hasHovered = useRef(false);
@@ -177,14 +179,14 @@ export function FusionSprite({
               className={twMerge(
                 baseImageClasses,
                 statusState.imageClasses,
-                'group-focus-visible:ring-1 ring-blue-400 rounded-md'
+                'group-focus-visible/fusion:ring-1 group-focus-visible/fusion:ring-blue-400 rounded-md'
               )}
               {...imageProps}
               alt={altText}
             />
           </div>
         </CursorTooltip>
-        {statusState.overlayContent}
+        {showStatusOverlay && statusState.overlayContent}
       </div>
       {!hasEgg && (
         <CursorTooltip
@@ -199,8 +201,8 @@ export function FusionSprite({
           <div
             className={clsx(
               'absolute -top-4 -right-2 text-blue-400 dark:text-blue-300 z-10 bg-gray-200 dark:bg-gray-800 rounded-sm opacity-0',
-              'group-focus-visible:opacity-100 group-hover:opacity-100 transition-opacity duration-200',
-              'group-focus-visible:ring-1 group-focus-visible:ring-blue-400'
+              'group-focus-visible/fusion:opacity-100 group-hover/fusion:opacity-100 transition-opacity duration-200',
+              'group-focus-visible/fusion:ring-1 group-focus-visible/fusion:ring-blue-400'
             )}
           >
             <SquareArrowUpRight className='size-4' />
@@ -214,7 +216,7 @@ export function FusionSprite({
     if (hasEgg) {
       return (
         <div
-          className='group focus:outline-none'
+          className='group/fusion focus:outline-none'
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           draggable={false}
@@ -228,7 +230,7 @@ export function FusionSprite({
         href={link}
         target='_blank'
         rel='noopener noreferrer'
-        className='group focus:outline-none'
+        className='group/fusion focus:outline-none'
         draggable={false}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
