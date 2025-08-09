@@ -9,6 +9,7 @@ import {
   getPreferredVariant,
   setPreferredVariant,
 } from '@/lib/preferredVariants';
+import { getDisplayPokemon } from '@/components/PokemonSummaryCard/utils';
 import { queryClient } from '@/lib/queryClient';
 import { spriteKeys } from '@/lib/queries/sprites';
 import { EncounterDataSchema, Playthrough } from './types';
@@ -143,6 +144,13 @@ export const updateEncounter = async (
     return; // Early return since createEncounterData already handles preferred variants
   }
 
+  // Capture the current display state before making changes
+  const currentDisplayState = getDisplayPokemon(
+    encounter.head,
+    encounter.body,
+    encounter.isFusion ?? false
+  );
+
   // Handle both setting and clearing pokemon
   if (pokemon) {
     const pokemonWithLocationAndUID = {
@@ -258,6 +266,50 @@ export const updateEncounter = async (
 
     encounter.updatedAt = getCurrentTimestamp();
   }
+
+  // Check if the display state changed and validate artwork variant accordingly
+  const newDisplayState = getDisplayPokemon(
+    encounter.head,
+    encounter.body,
+    encounter.isFusion ?? false
+  );
+
+  // If display state changed, validate artwork variant for the new display state
+  const displayStateChanged =
+    currentDisplayState.isFusion !== newDisplayState.isFusion ||
+    currentDisplayState.head?.id !== newDisplayState.head?.id ||
+    currentDisplayState.body?.id !== newDisplayState.body?.id;
+
+  if (displayStateChanged) {
+    try {
+      // When display state changes, always apply preferred variant for the new display state
+      let newPreferredVariant: string | undefined;
+
+      if (
+        newDisplayState.isFusion &&
+        newDisplayState.head &&
+        newDisplayState.body
+      ) {
+        // For fusion display
+        newPreferredVariant = await getPreferredVariantHelper(
+          newDisplayState.head.id,
+          newDisplayState.body.id
+        );
+      } else if (newDisplayState.head || newDisplayState.body) {
+        // For single Pokemon display
+        const pokemon = newDisplayState.head || newDisplayState.body!;
+        newPreferredVariant = await getPreferredVariantHelper(pokemon.id);
+      }
+
+      // Apply the preferred variant (or undefined if none exists)
+      encounter.artworkVariant = newPreferredVariant;
+    } catch (error) {
+      console.warn(
+        'Failed to apply preferred variant for display state change:',
+        error
+      );
+    }
+  }
 };
 
 // Reset encounter for a location
@@ -343,6 +395,13 @@ export const flipEncounterFusion = async (locationId: string) => {
   const encounter = activePlaythrough.encounters[locationId];
   if (!encounter || !encounter.isFusion) return;
 
+  // Get display state before flipping
+  const currentDisplayState = getDisplayPokemon(
+    encounter.head,
+    encounter.body,
+    encounter.isFusion ?? false
+  );
+
   // Swap head and body atomically
   const originalHead = encounter.head;
   const originalBody = encounter.body;
@@ -351,8 +410,41 @@ export const flipEncounterFusion = async (locationId: string) => {
   encounter.body = originalHead;
   encounter.updatedAt = getCurrentTimestamp();
 
-  // Apply preferred variant for the new composition
-  await applyPreferredVariant(encounter, true);
+  // Get display state after flipping
+  const newDisplayState = getDisplayPokemon(
+    encounter.head,
+    encounter.body,
+    encounter.isFusion ?? false
+  );
+
+  // If the displayed Pokemon are the same (e.g., one is dead), keep current variant
+  const displayStateUnchanged =
+    currentDisplayState.isFusion === newDisplayState.isFusion &&
+    currentDisplayState.head?.id === newDisplayState.head?.id &&
+    currentDisplayState.body?.id === newDisplayState.body?.id;
+
+  if (displayStateUnchanged) {
+    // Display state unchanged, keep current artwork variant
+    return;
+  }
+
+  // Display state changed, apply preferred variant for the new display state
+  let preferredVariant: string | undefined;
+  if (
+    newDisplayState.isFusion &&
+    newDisplayState.head &&
+    newDisplayState.body
+  ) {
+    preferredVariant = await getPreferredVariantHelper(
+      newDisplayState.head.id,
+      newDisplayState.body.id
+    );
+  } else if (newDisplayState.head || newDisplayState.body) {
+    const pokemon = newDisplayState.head || newDisplayState.body!;
+    preferredVariant = await getPreferredVariantHelper(pokemon.id);
+  }
+
+  encounter.artworkVariant = preferredVariant;
 };
 
 // Move encounter atomically from source to destination (for drag and drop)

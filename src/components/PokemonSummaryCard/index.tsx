@@ -12,6 +12,7 @@ import { useEncounter } from '@/stores/playthroughs';
 import { useSpriteCredits } from '@/hooks/useSprite';
 import { CursorTooltip } from '@/components/CursorTooltip';
 import { SquareArrowUpRight } from 'lucide-react';
+import { getDisplayPokemon } from './utils';
 
 interface SummaryCardProps {
   locationId: string;
@@ -72,32 +73,11 @@ export default function SummaryCard({
   }
 
   // Determine which Pokemon to display based on active/inactive states
-  const headInactive =
-    encounterData?.head?.status === PokemonStatus.DECEASED ||
-    encounterData?.head?.status === PokemonStatus.STORED;
-  const bodyInactive =
-    encounterData?.body?.status === PokemonStatus.DECEASED ||
-    encounterData?.body?.status === PokemonStatus.STORED;
-
-  // For fusion Pokemon, if one is inactive and the other is active, show only the active one
-  let displayHead = encounterData?.head;
-  let displayBody = encounterData?.body;
-  let displayIsFusion = encounterData?.isFusion;
-
-  if (encounterData?.isFusion && encounterData?.head && encounterData?.body) {
-    if (headInactive && !bodyInactive) {
-      // Head is inactive, body is active - show only body as single Pokemon
-      displayHead = null;
-      displayBody = encounterData.body;
-      displayIsFusion = false;
-    } else if (bodyInactive && !headInactive) {
-      // Body is inactive, head is active - show only head as single Pokemon
-      displayHead = encounterData.head;
-      displayBody = null;
-      displayIsFusion = false;
-    }
-    // If both are inactive or both are active, keep fusion display
-  }
+  const displayPokemon = getDisplayPokemon(
+    encounterData?.head ?? null,
+    encounterData?.body ?? null,
+    encounterData?.isFusion ?? false
+  );
 
   const name = getNicknameText(
     encounterData?.head,
@@ -115,8 +95,8 @@ export default function SummaryCard({
       ? headDead && bodyDead
       : headDead || bodyDead;
 
-  const head = displayHead;
-  const body = displayBody;
+  const head = displayPokemon.head;
+  const body = displayPokemon.body;
   const link = eitherPokemonIsEgg
     ? '#'
     : `https://infinitefusiondex.com/details/${head?.id && body?.id ? `${head.id}.${body.id}` : head?.id || body?.id}`;
@@ -160,7 +140,7 @@ export default function SummaryCard({
             <FusionSprite
               headPokemon={head}
               bodyPokemon={body}
-              isFusion={displayIsFusion}
+              isFusion={displayPokemon.isFusion}
               artworkVariant={encounterData?.artworkVariant}
               shouldLoad={shouldLoad}
             />

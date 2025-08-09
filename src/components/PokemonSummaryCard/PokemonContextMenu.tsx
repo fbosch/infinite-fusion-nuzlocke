@@ -15,6 +15,7 @@ import BodyIcon from '@/assets/images/body.svg';
 import { useSpriteVariants } from '@/hooks/useSprite';
 import { isEggId, type PokemonOptionType } from '@/loaders/pokemon';
 import { playthroughActions } from '@/stores/playthroughs';
+import { getDisplayPokemon } from './utils';
 import dynamic from 'next/dynamic';
 
 const LocationSelector = dynamic(
@@ -38,6 +39,7 @@ interface PokemonContextMenuProps {
     head?: PokemonOptionType | null;
     body?: PokemonOptionType | null;
     artworkVariant?: string;
+    isFusion?: boolean;
   } | null;
   shouldLoad?: boolean;
 }
@@ -48,13 +50,20 @@ export function PokemonContextMenu({
   encounterData,
   shouldLoad,
 }: PokemonContextMenuProps) {
+  // Determine which Pokemon to display based on active/inactive states
+  const displayPokemon = getDisplayPokemon(
+    encounterData?.head ?? null,
+    encounterData?.body ?? null,
+    encounterData?.isFusion ?? false
+  );
+
   const eitherPokemonIsEgg =
     isEggId(encounterData?.head?.id) || isEggId(encounterData?.body?.id);
 
-  // Check for art variants
+  // Check for art variants using display Pokemon
   const { data: variants, isLoading: isLoadingVariants } = useSpriteVariants(
-    encounterData?.head?.id,
-    encounterData?.body?.id,
+    displayPokemon.head?.id,
+    displayPokemon.body?.id,
     shouldLoad && !eitherPokemonIsEgg
   );
   const hasArtVariants = variants && variants.length > 1;
@@ -163,10 +172,11 @@ export function PokemonContextMenu({
   );
 
   const contextItems = useMemo<ContextMenuItem[]>(() => {
+    // Use display Pokemon for links instead of raw encounter data
     const id =
-      encounterData?.head?.id && encounterData?.body?.id
-        ? `${encounterData.head.id}.${encounterData.body.id}`
-        : encounterData?.head?.id || encounterData?.body?.id;
+      displayPokemon.head?.id && displayPokemon.body?.id
+        ? `${displayPokemon.head.id}.${displayPokemon.body.id}`
+        : displayPokemon.head?.id || displayPokemon.body?.id;
     const infinitefusiondexLink = `https://infinitefusiondex.com/details/${id}`;
     const fusiondexLink = `https://fusiondex.org/sprite/pif/${id}${encounterData?.artworkVariant ?? ''}/`;
 
@@ -323,6 +333,7 @@ export function PokemonContextMenu({
     return items;
   }, [
     encounterData,
+    displayPokemon,
     eitherPokemonIsEgg,
     hasArtVariants,
     isLoadingVariants,
@@ -354,8 +365,8 @@ export function PokemonContextMenu({
         isOpen={isVariantModalOpen}
         onClose={() => setIsVariantModalOpen(false)}
         locationId={locationId}
-        headId={encounterData?.head?.id}
-        bodyId={encounterData?.body?.id}
+        headId={displayPokemon.head?.id}
+        bodyId={displayPokemon.body?.id}
         currentVariant={encounterData?.artworkVariant}
       />
 
