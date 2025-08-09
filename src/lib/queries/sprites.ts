@@ -9,6 +9,7 @@ import {
   getPreferredVariant,
 } from '@/lib/preferredVariants';
 import { queryClient } from '@/lib/client';
+import { queryPersister } from '@/lib/persistence';
 import ms from 'ms';
 
 // Query key factories for consistent key generation
@@ -44,10 +45,12 @@ export const spriteQueries = {
   preferredVariant: (headId?: number | null, bodyId?: number | null) =>
     queryOptions({
       queryKey: spriteKeys.preferredVariant(headId, bodyId),
-      queryFn: () => getPreferredVariant(headId, bodyId),
+      queryFn: () => getPreferredVariant(headId, bodyId) ?? '',
       enabled: !!(headId || bodyId),
-      staleTime: 0, // Always fetch fresh data to check for cache updates
-      gcTime: ms('5m'), // Keep in memory for 5 minutes
+      staleTime: Infinity, // Never stale
+      gcTime: Infinity, // Never garbage collect
+      // Persist ONLY this query (explicit per-query persistence)
+      persister: queryPersister.persisterFn,
     }),
 };
 
@@ -66,12 +69,12 @@ export const spriteMutations = {
       }) => {
         return await setPreferredVariant(headId, bodyId, variant);
       },
-      onSuccess: (_, { headId, bodyId }) => {
-        // Invalidate the preferred variant query for this specific Pokemon/fusion
-        // This will trigger re-renders of components using the preferred variant query
-        queryClient.invalidateQueries({
-          queryKey: spriteKeys.preferredVariant(headId, bodyId),
-        });
+      onSuccess: (result, { headId, bodyId, variant }) => {
+        // Seed cache immediately for instant UI and persistence
+        queryClient.setQueryData(
+          spriteKeys.preferredVariant(headId, bodyId),
+          variant ?? ''
+        );
       },
     }),
 
@@ -114,11 +117,12 @@ export const spriteMutations = {
         await setPreferredVariant(headId, bodyId, newVariant);
         return newVariant;
       },
-      onSuccess: (_newVariant, { headId, bodyId }) => {
-        // Invalidate the preferred variant query to update any consumers
-        queryClient.invalidateQueries({
-          queryKey: spriteKeys.preferredVariant(headId, bodyId),
-        });
+      onSuccess: (newVariant, { headId, bodyId }) => {
+        // Seed cache with the new value for instant UI and persistence
+        queryClient.setQueryData(
+          spriteKeys.preferredVariant(headId, bodyId),
+          (newVariant ?? '') as string
+        );
       },
     }),
 };

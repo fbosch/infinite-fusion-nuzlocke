@@ -16,7 +16,7 @@ import {
   getStatusState,
 } from './utils';
 import { isEggId } from '../../loaders';
-import { useSpriteCredits } from '@/hooks/useSprite';
+import { usePreferredVariantQuery, useSpriteCredits } from '@/hooks/useSprite';
 import { formatArtistCredits } from '../../utils/formatCredits';
 import { getSpriteId } from '../../lib/sprites';
 import { type PokemonOptionType } from '@/loaders/pokemon';
@@ -57,10 +57,22 @@ export function FusionSprite({
     shouldLoad && hasHovered.current === true && !hasEgg
   );
 
+  // Preferred variant via suspense query (unless eggs)
+  const { data: preferredVariant } = usePreferredVariantQuery(
+    head?.id,
+    body?.id,
+    {
+      suspense: true,
+      enabled: !!(head || body) && !!shouldLoad && !hasEgg,
+    }
+  );
+  const effectiveVariant =
+    artworkVariant ?? (preferredVariant as string | undefined);
+
   const credit =
     hasEgg || isLoadingCredits
       ? undefined
-      : formatArtistCredits(credits?.[spriteId + (artworkVariant ?? '')]);
+      : formatArtistCredits(credits?.[spriteId + (effectiveVariant ?? '')]);
 
   const handleImageError = useCallback(
     async (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -72,7 +84,7 @@ export function FusionSprite({
         failingUrl,
         head,
         body,
-        artworkVariant
+        effectiveVariant
       );
       if (newUrl) {
         target.src = newUrl;
@@ -81,7 +93,7 @@ export function FusionSprite({
         target.style.visibility = 'visible';
       });
     },
-    [head, body, artworkVariant]
+    [head, body, effectiveVariant]
   );
 
   const statusState = getStatusState(head, body);
@@ -92,7 +104,7 @@ export function FusionSprite({
 
   if (!head && !body) return null;
 
-  const spriteUrl = getSpriteUrl(head, body, isFusion, artworkVariant);
+  const spriteUrl = getSpriteUrl(head, body, isFusion, effectiveVariant);
   const altText = getAltText(head, body, isFusion);
   const baseImageClasses =
     'object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none transform-gpu';

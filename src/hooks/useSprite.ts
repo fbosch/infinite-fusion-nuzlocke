@@ -1,4 +1,8 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
+import {
+  useQuery,
+  useMutation,
+  type UseQueryOptions,
+} from '@tanstack/react-query';
 import { spriteQueries, spriteMutations } from '@/lib/queries/sprites';
 import ms from 'ms';
 
@@ -35,11 +39,21 @@ export function useSetPrefferedVariant() {
   return useMutation(spriteMutations.setPreferredVariant());
 }
 
+type PreferredVariantKey = ReturnType<
+  typeof spriteQueries.preferredVariant
+>['queryKey'];
+type PreferredVariantOptions = Omit<
+  UseQueryOptions<string, Error, string, PreferredVariantKey>,
+  'queryKey' | 'queryFn'
+>;
+
 export function usePreferredVariantQuery(
   headId?: number | null,
-  bodyId?: number | null
+  bodyId?: number | null,
+  options?: PreferredVariantOptions
 ) {
-  return useQuery(spriteQueries.preferredVariant(headId, bodyId));
+  const base = spriteQueries.preferredVariant(headId, bodyId);
+  return useQuery({ ...base, ...(options ?? {}) });
 }
 
 export function useCyclePreferredVariant() {
