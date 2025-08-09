@@ -22,18 +22,14 @@ import { getSpriteId } from '../../lib/sprites';
 
 interface FusionSpriteProps {
   locationId: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   shouldLoad?: boolean;
   showStatusOverlay?: boolean;
   showTooltip?: boolean;
 }
 
-const SPRITE_SIZES = { sm: 32, md: 48, lg: 64, xl: 96 } as const;
-
 export function FusionSprite({
   locationId,
-  size = 'md',
   shouldLoad,
   showStatusOverlay = true,
   showTooltip = true,
@@ -96,7 +92,6 @@ export function FusionSprite({
 
   const spriteUrl = getSpriteUrl(head, body, isFusion, artworkVariant);
   const altText = getAltText(head, body, isFusion);
-  const spriteSize = SPRITE_SIZES[size];
   const baseImageClasses =
     'object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none transform-gpu';
 
@@ -106,8 +101,8 @@ export function FusionSprite({
 
   const imageProps = {
     src: spriteUrl,
-    width: spriteSize,
-    height: spriteSize,
+    width: 64,
+    height: 64,
     loading: shouldLoad ? ('eager' as const) : ('lazy' as const),
     unoptimized: true,
     decoding: shouldLoad ? ('auto' as const) : ('async' as const),

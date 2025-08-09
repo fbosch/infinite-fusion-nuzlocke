@@ -76,31 +76,30 @@ function PCEntryItem({
   return (
     <li
       key={entry.locationId}
-      role='gridcell'
+      role='listitem'
       className={clsx(
-        'relative aspect-square rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/60 hover:ring-1 p-3',
+        'relative rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:ring-2 transition-all duration-200 cursor-pointer',
         hoverRingClass,
         className
       )}
     >
-      <div className='w-full h-full flex flex-col items-center justify-center'>
-        <div className='flex-1 flex items-center justify-center'>
+      <div className='flex items-center gap-3 p-3'>
+        <div className='flex-shrink-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-md'>
           {hasAny && (
             <FusionSprite
               locationId={entry.locationId}
-              size='lg'
               shouldLoad
-              className=''
+              className='top-3'
               showStatusOverlay={false}
               showTooltip={false}
             />
           )}
         </div>
-        <div className='w-full text-center mt-1'>
-          <div className='text-[10px] text-gray-900 dark:text-gray-100 truncate'>
+        <div className='flex-1 min-w-0'>
+          <div className='text-sm font-medium text-gray-900 dark:text-gray-100 truncate'>
             {label || fallbackLabel}
           </div>
-          <div className='text-[9px] text-gray-500 dark:text-gray-400 truncate'>
+          <div className='text-xs text-gray-500 dark:text-gray-400 truncate'>
             {idToName.get(entry.locationId) || 'Unknown Location'}
           </div>
         </div>
@@ -267,9 +266,9 @@ export default function PokemonPCSheet({
                     </div>
                   ) : (
                     <ul
-                      role='grid'
-                      aria-label='Stored Pokémon grid'
-                      className='w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 content-start py-2'
+                      role='list'
+                      aria-label='Stored Pokémon list'
+                      className='w-full grid grid-cols-1 sm:grid-cols-2 gap-2 py-2'
                     >
                       {stored.map(entry => (
                         <PCEntryItem
@@ -279,7 +278,7 @@ export default function PokemonPCSheet({
                           mode='stored'
                           hoverRingClass='hover:ring-blue-400/60'
                           fallbackLabel='Stored Pokémon'
-                          className='size-35'
+                          className=''
                         />
                       ))}
                     </ul>
@@ -302,9 +301,9 @@ export default function PokemonPCSheet({
                     </div>
                   ) : (
                     <ul
-                      role='grid'
-                      aria-label='Fainted Pokémon grid'
-                      className='w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 content-start py-2'
+                      role='list'
+                      aria-label='Fainted Pokémon list'
+                      className='w-full grid grid-cols-1 sm:grid-cols-2 gap-2 py-2'
                     >
                       {deceased.map(entry => (
                         <PCEntryItem
@@ -314,7 +313,7 @@ export default function PokemonPCSheet({
                           mode='graveyard'
                           hoverRingClass='hover:ring-red-400/60'
                           fallbackLabel='Fainted Pokémon'
-                          className='size-35'
+                          className=''
                         />
                       ))}
                     </ul>
