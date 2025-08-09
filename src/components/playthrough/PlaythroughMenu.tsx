@@ -7,8 +7,8 @@ import dynamic from 'next/dynamic';
 import { Skull } from 'lucide-react';
 import clsx from 'clsx';
 
-const GraveyardModal = dynamic(
-  () => import('@/components/graveyard/GraveyardModal'),
+const GraveyardSheet = dynamic(
+  () => import('@/components/graveyard/GraveyardSheet'),
   { ssr: false }
 );
 
@@ -38,7 +38,7 @@ export default function PlaythroughMenu() {
           <span className='hidden sm:inline'>Graveyard</span>
         </button>
       </div>
-      <GraveyardModal
+      <GraveyardSheet
         isOpen={graveyardOpen}
         onClose={() => setGraveyardOpen(false)}
       />

@@ -26,6 +26,7 @@ interface FusionSpriteProps {
   className?: string;
   shouldLoad?: boolean;
   showStatusOverlay?: boolean;
+  showTooltip?: boolean;
 }
 
 const SPRITE_SIZES = { sm: 32, md: 48, lg: 64, xl: 96 } as const;
@@ -35,6 +36,8 @@ export function FusionSprite({
   size = 'md',
   shouldLoad,
   showStatusOverlay = true,
+  showTooltip = true,
+  className,
 }: FusionSpriteProps) {
   const encounterData = useEncounter(locationId);
   const hasHovered = useRef(false);
@@ -116,9 +119,11 @@ export function FusionSprite({
 
   const content = (
     <>
-      <div className='relative w-full flex justify-center'>
+      <div
+        className={twMerge('relative w-full flex justify-center', className)}
+      >
         <CursorTooltip
-          disabled={!credit}
+          disabled={!credit || !showTooltip}
           delay={500}
           content={
             credit ? (

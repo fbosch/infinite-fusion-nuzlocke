@@ -11,10 +11,14 @@ import clsx from 'clsx';
 import { Skull, X } from 'lucide-react';
 import { useEncounters } from '@/stores/playthroughs';
 import { PokemonStatus, type PokemonOptionType } from '@/loaders/pokemon';
-import { getLocationById } from '@/loaders/locations';
+import {
+  getLocationById,
+  getLocationsSortedWithCustom,
+} from '@/loaders/locations';
+import { useCustomLocations } from '@/stores/playthroughs';
 import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
 
-interface GraveyardModalProps {
+interface GraveyardSheetProps {
   isOpen: boolean;
   onClose: () => void;
 }
@@ -31,11 +35,21 @@ function getPokemonLabel(p: PokemonOptionType | null | undefined): string {
   return p.nickname || p.name;
 }
 
-export default function GraveyardModal({
+export default function GraveyardSheet({
   isOpen,
   onClose,
-}: GraveyardModalProps) {
+}: GraveyardSheetProps) {
   const encounters = useEncounters();
+  const customLocations = useCustomLocations();
+  const mergedLocations = useMemo(
+    () => getLocationsSortedWithCustom(customLocations),
+    [customLocations]
+  );
+  const idToName = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const loc of mergedLocations) map.set(loc.id, loc.name);
+    return map;
+  }, [mergedLocations]);
 
   const deceased: DeceasedEntry[] = useMemo(() => {
     return Object.entries(encounters || {})
@@ -46,11 +60,14 @@ export default function GraveyardModal({
       })
       .map(([locationId, data]) => ({
         locationId,
-        locationName: getLocationById(locationId)?.name || 'Unknown Location',
+        locationName:
+          idToName.get(locationId) ||
+          getLocationById(locationId)?.name ||
+          'Unknown Location',
         head: data?.head ?? null,
         body: data?.body ?? null,
       }));
-  }, [encounters]);
+  }, [encounters, idToName]);
 
   const hasAny = deceased.length > 0;
 
@@ -58,19 +75,26 @@ export default function GraveyardModal({
     <Dialog open={isOpen} onClose={onClose} className='relative z-50 group'>
       <DialogBackdrop
         transition
-        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100'
+        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 duration-100 ease-out'
         aria-hidden='true'
       />
-      <div className='fixed inset-0 flex w-screen items-center justify-center p-4'>
+
+      <div className='fixed inset-y-0 right-0 flex w-screen items-stretch justify-end p-0'>
         <DialogPanel
           transition
+          id='graveyard-sheet'
           aria-labelledby='graveyard-title'
           className={clsx(
-            'w-full max-w-4xl max-h-[80vh] space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col',
-            'transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98'
+            'h-full w-full max-w-lg bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-xl',
+            'transform-gpu will-change-transform will-change-opacity',
+            'transition duration-100 ease-out',
+            // Quick fade + slide-in from the side (no scale)
+            'data-closed:opacity-0',
+            'data-closed:translate-x-full data-leave:translate-x-full',
+            'flex flex-col'
           )}
         >
-          <div className='flex items-center justify-between'>
+          <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700'>
             <div className='flex items-center gap-2'>
               <Skull
                 className='h-5 w-5 text-gray-900 dark:text-gray-100'
@@ -78,7 +102,7 @@ export default function GraveyardModal({
               />
               <DialogTitle
                 id='graveyard-title'
-                className='text-xl font-semibold text-gray-900 dark:text-white'
+                className='text-base font-semibold text-gray-900 dark:text-white'
               >
                 Graveyard{hasAny ? ` (${deceased.length})` : ''}
               </DialogTitle>
@@ -98,7 +122,7 @@ export default function GraveyardModal({
 
           {!hasAny ? (
             <div
-              className='flex flex-col items-center justify-center flex-1 text-gray-600 dark:text-gray-300'
+              className='flex flex-col items-center justify-center flex-1 text-gray-600 dark:text-gray-300 px-4'
               role='status'
               aria-live='polite'
             >
@@ -108,10 +132,10 @@ export default function GraveyardModal({
               </p>
             </div>
           ) : (
-            <div className='overflow-auto -m-2 p-2'>
+            <div className='flex-1 overflow-auto p-3'>
               <ul
                 role='list'
-                className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'
+                className='grid grid-cols-2 sm:grid-cols-3 gap-2 content-start'
               >
                 {deceased.map(entry => {
                   const headDead =
@@ -127,21 +151,21 @@ export default function GraveyardModal({
                   return (
                     <li
                       key={entry.locationId}
-                      className='rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/60 p-3 flex items-center gap-3'
+                      className='relative pt-4.5 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 p-2 flex flex-col items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
                     >
-                      <div className='shrink-0 group'>
-                        <FusionSprite
-                          locationId={entry.locationId}
-                          size='lg'
-                          shouldLoad
-                          showStatusOverlay={false}
-                        />
-                      </div>
-                      <div className='min-w-0'>
-                        <div className='text-gray-900 dark:text-gray-100 font-medium truncate'>
+                      <FusionSprite
+                        locationId={entry.locationId}
+                        size='lg'
+                        shouldLoad
+                        className='pt-2'
+                        showStatusOverlay={false}
+                        showTooltip={false}
+                      />
+                      <div className='w-full min-w-0 text-center'>
+                        <div className='text-gray-900 dark:text-gray-100 text-xs font-medium truncate'>
                           {label || 'Fainted Pokémon'}
                         </div>
-                        <div className='text-xs text-gray-600 dark:text-gray-400 truncate'>
+                        <div className='text-[10px] text-gray-600 dark:text-gray-400 truncate'>
                           {entry.locationName}
                         </div>
                       </div>
