@@ -7,6 +7,10 @@ import {
   DialogPanel,
   DialogTitle,
   Tab,
+  TabGroup,
+  TabList,
+  TabPanel,
+  TabPanels,
 } from '@headlessui/react';
 import clsx from 'clsx';
 import { Skull, X, Computer } from 'lucide-react';
@@ -35,6 +39,74 @@ type Entry = {
 function getPokemonLabel(p: PokemonOptionType | null | undefined): string {
   if (!p) return '';
   return p.nickname || p.name;
+}
+
+interface PCEntryItemProps {
+  entry: Entry;
+  idToName: Map<string, string>;
+  mode: 'stored' | 'graveyard';
+  hoverRingClass: string; // e.g., 'hover:ring-blue-400/60'
+  fallbackLabel: string; // e.g., 'Stored Pokémon'
+  className?: string; // extra classes like size-35 for specific lists
+}
+
+function PCEntryItem({
+  entry,
+  idToName,
+  mode,
+  hoverRingClass,
+  fallbackLabel,
+  className,
+}: PCEntryItemProps) {
+  const isStoredMode = mode === 'stored';
+  const headActive = isStoredMode
+    ? entry.head?.status === PokemonStatus.STORED
+    : entry.head?.status === PokemonStatus.DECEASED;
+  const bodyActive = isStoredMode
+    ? entry.body?.status === PokemonStatus.STORED
+    : entry.body?.status === PokemonStatus.DECEASED;
+  const hasAny = Boolean(headActive || bodyActive);
+  const label = [
+    headActive ? getPokemonLabel(entry.head) : '',
+    bodyActive ? getPokemonLabel(entry.body) : '',
+  ]
+    .filter(Boolean)
+    .join(' / ');
+
+  return (
+    <li
+      key={entry.locationId}
+      role='gridcell'
+      className={clsx(
+        'relative aspect-square rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/60 hover:ring-1 p-3',
+        hoverRingClass,
+        className
+      )}
+    >
+      <div className='w-full h-full flex flex-col items-center justify-center'>
+        <div className='flex-1 flex items-center justify-center'>
+          {hasAny && (
+            <FusionSprite
+              locationId={entry.locationId}
+              size='lg'
+              shouldLoad
+              className=''
+              showStatusOverlay={false}
+              showTooltip={false}
+            />
+          )}
+        </div>
+        <div className='w-full text-center mt-1'>
+          <div className='text-[10px] text-gray-900 dark:text-gray-100 truncate'>
+            {label || fallbackLabel}
+          </div>
+          <div className='text-[9px] text-gray-500 dark:text-gray-400 truncate'>
+            {idToName.get(entry.locationId) || 'Unknown Location'}
+          </div>
+        </div>
+      </div>
+    </li>
+  );
 }
 
 export default function PokemonPCSheet({
@@ -138,50 +210,50 @@ export default function PokemonPCSheet({
 
           {/* Content area: fills remaining height to allow true vertical centering */}
           <div className='flex-1 flex flex-col px-4 pt-2 pb-3 min-h-0'>
-            <Tab.Group
+            <TabGroup
               selectedIndex={selectedIndex}
               onChange={index => onChangeTab(index === 0 ? 'box' : 'graveyard')}
             >
-              <Tab.List className='inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-800 p-1'>
+              <TabList className='flex items-center gap-2 mb-4'>
                 <Tab
                   className={({ selected }) =>
                     clsx(
-                      'px-3 py-1.5 text-sm inline-flex items-center gap-1.5 cursor-pointer transition-colors focus:outline-none rounded',
+                      'px-3 py-1.5 text-sm inline-flex items-center gap-2 rounded-md border transition-colors focus:outline-none',
                       selected
-                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow'
-                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 shadow'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700'
                     )
                   }
                 >
                   <Computer className='h-4 w-4' />
-                  Box
-                  <span className='ml-1 text-[10px] px-1 rounded bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-100'>
+                  <span className='font-medium'>Box</span>
+                  <span className='ml-1 text-[10px] px-1 rounded bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100'>
                     {stored.length}
                   </span>
                 </Tab>
                 <Tab
                   className={({ selected }) =>
                     clsx(
-                      'px-3 py-1.5 text-sm inline-flex items-center gap-1.5 cursor-pointer transition-colors focus:outline-none rounded',
+                      'px-3 py-1.5 text-sm inline-flex items-center gap-2 rounded-md border transition-colors focus:outline-none',
                       selected
-                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow'
-                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 shadow'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700'
                     )
                   }
                 >
                   <Skull className='h-4 w-4' />
-                  Graveyard
-                  <span className='ml-1 text-[10px] px-1 rounded bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-100'>
+                  <span className='font-medium'>Graveyard</span>
+                  <span className='ml-1 text-[10px] px-1 rounded bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100'>
                     {deceased.length}
                   </span>
                 </Tab>
-              </Tab.List>
+              </TabList>
 
-              <Tab.Panels className='flex-1 min-h-0 flex flex-col'>
-                <Tab.Panel className='flex-1 min-h-0'>
+              <TabPanels className='flex-1 min-h-0 flex flex-col'>
+                <TabPanel className='flex-1 min-h-0 flex'>
                   {stored.length === 0 ? (
                     <div
-                      className='w-full h-full grid place-items-center text-gray-600 dark:text-gray-300 px-4'
+                      className='w-full flex-1 flex flex-col items-center justify-center text-gray-600 dark:text-gray-300 px-4 min-h-[60vh]'
                       role='status'
                       aria-live='polite'
                     >
@@ -195,48 +267,28 @@ export default function PokemonPCSheet({
                     </div>
                   ) : (
                     <ul
-                      role='list'
-                      className='w-full grid grid-cols-2 sm:grid-cols-3 gap-2 content-start'
+                      role='grid'
+                      aria-label='Stored Pokémon grid'
+                      className='w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 content-start py-2'
                     >
-                      {stored.map(entry => {
-                        const headActive =
-                          entry.head?.status === PokemonStatus.STORED;
-                        const bodyActive =
-                          entry.body?.status === PokemonStatus.STORED;
-                        const label = [
-                          headActive ? getPokemonLabel(entry.head) : '',
-                          bodyActive ? getPokemonLabel(entry.body) : '',
-                        ]
-                          .filter(Boolean)
-                          .join(' / ');
-                        return (
-                          <li
-                            key={entry.locationId}
-                            className='relative pt-4.5 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 p-2 flex flex-col items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
-                          >
-                            <FusionSprite
-                              locationId={entry.locationId}
-                              size='lg'
-                              shouldLoad
-                              className='pt-2'
-                              showStatusOverlay={false}
-                              showTooltip={false}
-                            />
-                            <div className='w-full min-w-0 text-center'>
-                              <div className='text-gray-900 dark:text-gray-100 text-xs font-medium truncate'>
-                                {label || 'Stored Pokémon'}
-                              </div>
-                            </div>
-                          </li>
-                        );
-                      })}
+                      {stored.map(entry => (
+                        <PCEntryItem
+                          key={entry.locationId}
+                          entry={entry}
+                          idToName={idToName}
+                          mode='stored'
+                          hoverRingClass='hover:ring-blue-400/60'
+                          fallbackLabel='Stored Pokémon'
+                          className='size-35'
+                        />
+                      ))}
                     </ul>
                   )}
-                </Tab.Panel>
-                <Tab.Panel className='flex-1 min-h-0'>
+                </TabPanel>
+                <TabPanel className='flex-1 min-h-0 flex'>
                   {deceased.length === 0 ? (
                     <div
-                      className='w-full h-full grid place-items-center text-gray-600 dark:text-gray-300 px-4'
+                      className='w-full flex-1 flex flex-col items-center justify-center text-gray-600 dark:text-gray-300 px-4 min-h-[60vh]'
                       role='status'
                       aria-live='polite'
                     >
@@ -250,46 +302,26 @@ export default function PokemonPCSheet({
                     </div>
                   ) : (
                     <ul
-                      role='list'
-                      className='w-full grid grid-cols-2 sm:grid-cols-3 gap-2 content-start'
+                      role='grid'
+                      aria-label='Fainted Pokémon grid'
+                      className='w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 content-start py-2'
                     >
-                      {deceased.map(entry => {
-                        const headActive =
-                          entry.head?.status === PokemonStatus.DECEASED;
-                        const bodyActive =
-                          entry.body?.status === PokemonStatus.DECEASED;
-                        const label = [
-                          headActive ? getPokemonLabel(entry.head) : '',
-                          bodyActive ? getPokemonLabel(entry.body) : '',
-                        ]
-                          .filter(Boolean)
-                          .join(' / ');
-                        return (
-                          <li
-                            key={entry.locationId}
-                            className='relative pt-4.5 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 p-2 flex flex-col items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
-                          >
-                            <FusionSprite
-                              locationId={entry.locationId}
-                              size='lg'
-                              shouldLoad
-                              className='pt-2'
-                              showStatusOverlay={false}
-                              showTooltip={false}
-                            />
-                            <div className='w-full min-w-0 text-center'>
-                              <div className='text-gray-900 dark:text-gray-100 text-xs font-medium truncate'>
-                                {label || 'Fainted Pokémon'}
-                              </div>
-                            </div>
-                          </li>
-                        );
-                      })}
+                      {deceased.map(entry => (
+                        <PCEntryItem
+                          key={entry.locationId}
+                          entry={entry}
+                          idToName={idToName}
+                          mode='graveyard'
+                          hoverRingClass='hover:ring-red-400/60'
+                          fallbackLabel='Fainted Pokémon'
+                          className='size-35'
+                        />
+                      ))}
                     </ul>
                   )}
-                </Tab.Panel>
-              </Tab.Panels>
-            </Tab.Group>
+                </TabPanel>
+              </TabPanels>
+            </TabGroup>
           </div>
         </DialogPanel>
       </div>
