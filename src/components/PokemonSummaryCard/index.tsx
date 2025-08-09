@@ -32,7 +32,23 @@ function getNicknameText(
     return pokemon.nickname || pokemon.name;
   }
 
-  // Handle complete fusion case
+  // For fusions, check if either Pokemon is dead/stored and the other is active
+  const headInactive =
+    head.status === PokemonStatus.DECEASED ||
+    head.status === PokemonStatus.STORED;
+  const bodyInactive =
+    body.status === PokemonStatus.DECEASED ||
+    body.status === PokemonStatus.STORED;
+
+  // If one is inactive and the other is active, show only the active one
+  if (headInactive && !bodyInactive) {
+    return body.nickname || body.name;
+  }
+  if (bodyInactive && !headInactive) {
+    return head.nickname || head.name;
+  }
+
+  // Handle complete fusion case (both alive or both dead)
   return head.nickname || body.nickname || `${head.name}/${body.name}`;
 }
 
@@ -55,17 +71,52 @@ export default function SummaryCard({
     return null;
   }
 
+  // Determine which Pokemon to display based on active/inactive states
+  const headInactive =
+    encounterData?.head?.status === PokemonStatus.DECEASED ||
+    encounterData?.head?.status === PokemonStatus.STORED;
+  const bodyInactive =
+    encounterData?.body?.status === PokemonStatus.DECEASED ||
+    encounterData?.body?.status === PokemonStatus.STORED;
+
+  // For fusion Pokemon, if one is inactive and the other is active, show only the active one
+  let displayHead = encounterData?.head;
+  let displayBody = encounterData?.body;
+  let displayIsFusion = encounterData?.isFusion;
+
+  if (encounterData?.isFusion && encounterData?.head && encounterData?.body) {
+    if (headInactive && !bodyInactive) {
+      // Head is inactive, body is active - show only body as single Pokemon
+      displayHead = null;
+      displayBody = encounterData.body;
+      displayIsFusion = false;
+    } else if (bodyInactive && !headInactive) {
+      // Body is inactive, head is active - show only head as single Pokemon
+      displayHead = encounterData.head;
+      displayBody = null;
+      displayIsFusion = false;
+    }
+    // If both are inactive or both are active, keep fusion display
+  }
+
   const name = getNicknameText(
     encounterData?.head,
     encounterData?.body,
     encounterData?.isFusion
   );
-  const isDeceased =
-    encounterData?.head?.status === PokemonStatus.DECEASED ||
-    encounterData?.body?.status === PokemonStatus.DECEASED;
 
-  const head = encounterData?.head;
-  const body = encounterData?.body;
+  // Only consider deceased if both Pokemon are dead (for fusion) or the single Pokemon is dead
+  // Note: stored Pokemon are not considered deceased, only actually dead Pokemon
+  const headDead = encounterData?.head?.status === PokemonStatus.DECEASED;
+  const bodyDead = encounterData?.body?.status === PokemonStatus.DECEASED;
+
+  const isDeceased =
+    encounterData?.isFusion && encounterData?.head && encounterData?.body
+      ? headDead && bodyDead
+      : headDead || bodyDead;
+
+  const head = displayHead;
+  const body = displayBody;
   const link = eitherPokemonIsEgg
     ? '#'
     : `https://infinitefusiondex.com/details/${head?.id && body?.id ? `${head.id}.${body.id}` : head?.id || body?.id}`;
@@ -107,9 +158,9 @@ export default function SummaryCard({
           />
           <SpriteWrapper {...spriteWrapperProps}>
             <FusionSprite
-              headPokemon={encounterData?.head ?? null}
-              bodyPokemon={encounterData?.body ?? null}
-              isFusion={encounterData?.isFusion}
+              headPokemon={head}
+              bodyPokemon={body}
+              isFusion={displayIsFusion}
               artworkVariant={encounterData?.artworkVariant}
               shouldLoad={shouldLoad}
             />
