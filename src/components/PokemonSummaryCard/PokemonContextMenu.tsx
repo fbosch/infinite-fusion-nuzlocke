@@ -13,6 +13,7 @@ import EscapeIcon from '@/assets/images/escape-cloud.svg';
 import HeadIcon from '@/assets/images/head.svg';
 import BodyIcon from '@/assets/images/body.svg';
 import { useSpriteVariants } from '@/hooks/useSprite';
+import { usePreferredVariant } from '@/hooks/usePreferredVariant';
 import { isEggId, type PokemonOptionType } from '@/loaders/pokemon';
 import { playthroughActions } from '@/stores/playthroughs';
 import { getDisplayPokemon } from './utils';
@@ -67,6 +68,14 @@ export function PokemonContextMenu({
     shouldLoad && !eitherPokemonIsEgg
   );
   const hasArtVariants = variants && variants.length > 1;
+
+  // Get preferred variant from cache, with encounter variant as fallback
+  const artworkVariant = usePreferredVariant(
+    encounterData?.head ?? null,
+    encounterData?.body ?? null,
+    encounterData?.isFusion ?? false,
+    encounterData?.artworkVariant
+  );
 
   const [hasContextMenuBeenOpened, setHasContextMenuBeenOpened] =
     useState(false);
@@ -367,7 +376,7 @@ export function PokemonContextMenu({
         locationId={locationId}
         headId={displayPokemon.head?.id}
         bodyId={displayPokemon.body?.id}
-        currentVariant={encounterData?.artworkVariant}
+        currentVariant={artworkVariant}
       />
 
       {/* Location Selector for Moving Head */}

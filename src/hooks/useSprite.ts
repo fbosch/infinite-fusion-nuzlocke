@@ -34,3 +34,10 @@ export function useSpriteCredits(
 export function useSetPrefferedVariant() {
   return useMutation(spriteMutations.setPreferredVariant());
 }
+
+export function usePreferredVariantQuery(
+  headId?: number | null,
+  bodyId?: number | null
+) {
+  return useQuery(spriteQueries.preferredVariant(headId, bodyId));
+}

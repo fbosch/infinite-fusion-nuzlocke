@@ -4,7 +4,11 @@ import {
   getArtworkVariants,
   getSpriteCredits,
 } from '@/lib/sprites';
-import { setPreferredVariant } from '@/lib/preferredVariants';
+import {
+  setPreferredVariant,
+  getPreferredVariant,
+} from '@/lib/preferredVariants';
+import { queryClient } from '@/lib/client';
 import ms from 'ms';
 
 // Query key factories for consistent key generation
@@ -13,6 +17,8 @@ export const spriteKeys = {
     ['sprite', 'variants', getSpriteId(headId, bodyId)] as const,
   credits: (headId?: number | null, bodyId?: number | null) =>
     ['sprite', 'credits', getSpriteId(headId, bodyId)] as const,
+  preferredVariant: (headId?: number | null, bodyId?: number | null) =>
+    ['sprite', 'preferredVariant', getSpriteId(headId, bodyId)] as const,
 };
 
 // Sprite query options
@@ -34,6 +40,15 @@ export const spriteQueries = {
       staleTime: ms('3d'),
       gcTime: ms('48h'),
     }),
+
+  preferredVariant: (headId?: number | null, bodyId?: number | null) =>
+    queryOptions({
+      queryKey: spriteKeys.preferredVariant(headId, bodyId),
+      queryFn: () => getPreferredVariant(headId, bodyId),
+      enabled: !!(headId || bodyId),
+      staleTime: 0, // Always fetch fresh data to check for cache updates
+      gcTime: ms('5m'), // Keep in memory for 5 minutes
+    }),
 };
 
 // Sprite mutation options
@@ -50,6 +65,13 @@ export const spriteMutations = {
         variant?: string;
       }) => {
         return await setPreferredVariant(headId, bodyId, variant);
+      },
+      onSuccess: (_, { headId, bodyId }) => {
+        // Invalidate the preferred variant query for this specific Pokemon/fusion
+        // This will trigger re-renders of components using the preferred variant query
+        queryClient.invalidateQueries({
+          queryKey: spriteKeys.preferredVariant(headId, bodyId),
+        });
       },
     }),
 };

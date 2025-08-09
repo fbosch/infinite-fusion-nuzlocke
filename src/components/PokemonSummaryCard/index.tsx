@@ -10,6 +10,7 @@ import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
 import { useEncounter } from '@/stores/playthroughs';
 import { useSpriteCredits } from '@/hooks/useSprite';
+import { usePreferredVariant } from '@/hooks/usePreferredVariant';
 import { CursorTooltip } from '@/components/CursorTooltip';
 import { SquareArrowUpRight } from 'lucide-react';
 import { getDisplayPokemon } from './utils';
@@ -66,6 +67,14 @@ export default function SummaryCard({
     encounterData?.head?.id,
     encounterData?.body?.id,
     shouldLoad && !eitherPokemonIsEgg
+  );
+
+  // Get preferred variant from cache, with encounter variant as fallback
+  const artworkVariant = usePreferredVariant(
+    encounterData?.head ?? null,
+    encounterData?.body ?? null,
+    encounterData?.isFusion ?? false,
+    encounterData?.artworkVariant
   );
 
   if (!encounterData?.head && !encounterData?.body) {
@@ -141,7 +150,7 @@ export default function SummaryCard({
               headPokemon={head}
               bodyPokemon={body}
               isFusion={displayPokemon.isFusion}
-              artworkVariant={encounterData?.artworkVariant}
+              artworkVariant={artworkVariant}
               shouldLoad={shouldLoad}
             />
             {!eitherPokemonIsEgg && (

@@ -28,17 +28,25 @@ export const applyPreferredVariant = async (
 
     let preferredVariant: string | undefined;
 
-    if (encounter.isFusion && encounter.head && encounter.body) {
-      // For fusion encounters with both parts
+    // Use display state logic to determine which Pokemon to get variant for
+    const displayState = getDisplayPokemon(
+      encounter.head,
+      encounter.body,
+      encounter.isFusion ?? false
+    );
+
+    if (displayState.isFusion && displayState.head && displayState.body) {
+      // For fusion display
       preferredVariant = await getPreferredVariantHelper(
-        encounter.head.id,
-        encounter.body.id
+        displayState.head.id,
+        displayState.body.id
       );
-    } else {
-      preferredVariant = await getPreferredVariantHelper(
-        encounter.head?.id || encounter.body?.id
-      );
+    } else if (displayState.head || displayState.body) {
+      // For single Pokemon display
+      const pokemon = displayState.head || displayState.body!;
+      preferredVariant = await getPreferredVariantHelper(pokemon.id);
     }
+
     // Only update if we got a variant - don't clear existing variant to undefined
     if (preferredVariant !== undefined) {
       encounter.artworkVariant = preferredVariant;
