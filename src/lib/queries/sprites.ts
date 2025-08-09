@@ -74,4 +74,51 @@ export const spriteMutations = {
         });
       },
     }),
+
+  cyclePreferredVariant: () =>
+    mutationOptions({
+      mutationFn: async ({
+        headId,
+        bodyId,
+        reverse = false,
+      }: {
+        headId?: number | null;
+        bodyId?: number | null;
+        reverse?: boolean;
+      }) => {
+        // Try to get variants from cache first
+        const variantsKey = spriteKeys.variants(headId, bodyId);
+        let availableVariants = queryClient.getQueryData<string[]>(variantsKey);
+
+        // If not cached, fetch from service
+        if (!availableVariants) {
+          availableVariants = await getArtworkVariants(headId, bodyId);
+        }
+
+        // If no variants or only default, do nothing
+        if (!availableVariants || availableVariants.length <= 1) {
+          return null;
+        }
+
+        // Determine current and next variant
+        const currentVariant = getPreferredVariant(headId, bodyId) || '';
+        const currentIndex = availableVariants.indexOf(currentVariant);
+        const nextIndex = reverse
+          ? (currentIndex - 1 + availableVariants.length) %
+            availableVariants.length
+          : (currentIndex + 1) % availableVariants.length;
+
+        const newVariant = availableVariants[nextIndex] || undefined;
+
+        // Update global preferred variant
+        await setPreferredVariant(headId, bodyId, newVariant);
+        return newVariant;
+      },
+      onSuccess: (_newVariant, { headId, bodyId }) => {
+        // Invalidate the preferred variant query to update any consumers
+        queryClient.invalidateQueries({
+          queryKey: spriteKeys.preferredVariant(headId, bodyId),
+        });
+      },
+    }),
 };

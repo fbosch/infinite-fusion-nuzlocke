@@ -15,6 +15,7 @@ import {
   useSpriteVariants,
   useSetPrefferedVariant,
   useSpriteCredits,
+  usePreferredVariantQuery,
 } from '@/hooks/useSprite';
 import {
   generateSpriteUrl,
@@ -29,7 +30,6 @@ interface ArtworkVariantModalProps {
   locationId: string;
   headId?: number | null;
   bodyId?: number | null;
-  currentVariant?: string;
 }
 
 export function ArtworkVariantModal({
@@ -38,14 +38,19 @@ export function ArtworkVariantModal({
   locationId,
   headId,
   bodyId,
-  currentVariant,
 }: ArtworkVariantModalProps) {
   const spriteId = headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId;
   const [localVariant, setLocalVariant] = useState<string | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Use local state for immediate updates, fallback to prop
-  const displayVariant = localVariant ?? currentVariant;
+  // Get global preferred variant
+  const { data: globalPreferredVariant } = usePreferredVariantQuery(
+    headId,
+    bodyId
+  );
+
+  // Use local state for immediate updates, fallback to global preferred variant
+  const displayVariant = localVariant ?? globalPreferredVariant;
 
   // Mutation hook for setting preferred variants
   const setPreferredVariantMutation = useSetPrefferedVariant();

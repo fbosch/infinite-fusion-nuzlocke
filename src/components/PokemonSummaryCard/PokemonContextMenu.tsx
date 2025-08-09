@@ -69,12 +69,11 @@ export function PokemonContextMenu({
   );
   const hasArtVariants = variants && variants.length > 1;
 
-  // Get preferred variant from cache, with encounter variant as fallback
+  // Get preferred variant from global cache
   const artworkVariant = usePreferredVariant(
     encounterData?.head ?? null,
     encounterData?.body ?? null,
-    encounterData?.isFusion ?? false,
-    encounterData?.artworkVariant
+    encounterData?.isFusion ?? false
   );
 
   const [hasContextMenuBeenOpened, setHasContextMenuBeenOpened] =
@@ -376,7 +375,6 @@ export function PokemonContextMenu({
         locationId={locationId}
         headId={displayPokemon.head?.id}
         bodyId={displayPokemon.body?.id}
-        currentVariant={artworkVariant}
       />
 
       {/* Location Selector for Moving Head */}

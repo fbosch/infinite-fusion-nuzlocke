@@ -41,3 +41,7 @@ export function usePreferredVariantQuery(
 ) {
   return useQuery(spriteQueries.preferredVariant(headId, bodyId));
 }
+
+export function useCyclePreferredVariant() {
+  return useMutation(spriteMutations.cyclePreferredVariant());
+}

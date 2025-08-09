@@ -69,12 +69,11 @@ export default function SummaryCard({
     shouldLoad && !eitherPokemonIsEgg
   );
 
-  // Get preferred variant from cache, with encounter variant as fallback
+  // Get preferred variant from global cache
   const artworkVariant = usePreferredVariant(
     encounterData?.head ?? null,
     encounterData?.body ?? null,
-    encounterData?.isFusion ?? false,
-    encounterData?.artworkVariant
+    encounterData?.isFusion ?? false
   );
 
   if (!encounterData?.head && !encounterData?.body) {

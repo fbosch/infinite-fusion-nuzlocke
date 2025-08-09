@@ -65,13 +65,8 @@ function PCEntryItem({
   const currentEncounter = encounters?.[entry.locationId];
   const isFusion = currentEncounter?.isFusion || false;
 
-  // Get preferred variant from cache, with encounter variant as fallback
-  const artworkVariant = usePreferredVariant(
-    entry.head,
-    entry.body,
-    isFusion,
-    currentEncounter?.artworkVariant
-  );
+  // Get preferred variant from global cache
+  const artworkVariant = usePreferredVariant(entry.head, entry.body, isFusion);
 
   const isStoredMode = mode === 'stored';
   const headActive = isStoredMode
