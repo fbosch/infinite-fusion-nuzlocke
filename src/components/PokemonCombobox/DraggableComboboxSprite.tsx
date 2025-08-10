@@ -270,7 +270,7 @@ export function DraggableComboboxSprite({
                       <div className='flex items-center gap-1.5 text-xs'>
                         <Home className='size-3 text-gray-500 dark:text-gray-400' />
                         <span className='text-gray-600 dark:text-gray-300'>
-                          Originally encountered at:{' '}
+                          Encountered at:{' '}
                         </span>
                         <span className='font-medium text-gray-700 dark:text-gray-200'>
                           {getLocationByIdFromMerged(
