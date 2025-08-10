@@ -36,7 +36,6 @@ export {
 
 // Export encounter actions
 export {
-  applyPreferredVariant,
   createEncounterData,
   getEncounters,
   updateEncounter,
@@ -46,8 +45,6 @@ export {
   moveEncounterAtomic,
   createFusion,
   setArtworkVariant,
-  setPreferredVariantHelper,
-  getPreferredVariantHelper,
   prefetchAdjacentVariants,
   cycleArtworkVariant,
   preloadArtworkVariants,
@@ -115,10 +112,6 @@ export const playthroughActions = {
 
   // Custom location actions
   ...customLocationActions,
-
-  // Add backward compatibility aliases for preferred variant methods
-  setPreferredVariant: encounterActions.setPreferredVariantHelper,
-  getPreferredVariant: encounterActions.getPreferredVariantHelper,
 
   // Add back getAvailablePlaythroughIds that was in the original store
   getAvailablePlaythroughIds: async (): Promise<string[]> => {

@@ -14,7 +14,6 @@ export interface EncounterData {
   head: PokemonOptionType | null;
   body: PokemonOptionType | null;
   isFusion: boolean;
-  artworkVariant?: string; // Alternative artwork variant for fusions (e.g., 'a', 'b', 'c')
 }
 
 export enum EncounterSource {

@@ -13,6 +13,8 @@ export interface SpriteCreditsError {
 
 /**
  * Generate sprite ID from head and body IDs
+ * For single Pokemon, returns just the ID
+ * For fusions, returns head.body format (maintaining order for sprite URLs)
  */
 export function getSpriteId(
   headId?: number | null,

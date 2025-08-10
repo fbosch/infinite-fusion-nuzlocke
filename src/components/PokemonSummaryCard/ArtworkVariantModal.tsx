@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useRef, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import {
   Dialog,
   DialogPanel,
@@ -10,11 +10,10 @@ import {
 import { RadioGroup, Radio, Field } from '@headlessui/react';
 import { X, Check, ArrowUpRight } from 'lucide-react';
 import clsx from 'clsx';
-import { playthroughActions } from '@/stores/playthroughs';
 import {
   useSpriteVariants,
-  useSetPrefferedVariant,
   useSpriteCredits,
+  usePreferredVariantState,
 } from '@/hooks/useSprite';
 import {
   generateSpriteUrl,
@@ -26,29 +25,26 @@ import ContextMenu from '../ContextMenu';
 interface ArtworkVariantModalProps {
   isOpen: boolean;
   onClose: () => void;
-  locationId: string;
   headId?: number | null;
   bodyId?: number | null;
-  currentVariant?: string;
 }
 
 export function ArtworkVariantModal({
   isOpen,
   onClose,
-  locationId,
   headId,
   bodyId,
-  currentVariant,
 }: ArtworkVariantModalProps) {
   const spriteId = headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId;
-  const [localVariant, setLocalVariant] = useState<string | null>(null);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Use local state for immediate updates, fallback to prop
-  const displayVariant = localVariant ?? currentVariant;
+  // Get global preferred variant
+  const { variant: globalPreferredVariant, updateVariant } =
+    usePreferredVariantState(headId ?? null, bodyId ?? null);
 
-  // Mutation hook for setting preferred variants
-  const setPreferredVariantMutation = useSetPrefferedVariant();
+  // Use local state for immediate updates, fallback to global preferred variant
+  const [localVariant, setLocalVariant] = React.useState<string>(
+    globalPreferredVariant || ''
+  );
 
   const { data: variants, isLoading: variantsLoading } = useSpriteVariants(
     headId,
@@ -69,85 +65,39 @@ export function ArtworkVariantModal({
     return variants;
   }, [variants]);
 
-  // Reset local state when modal opens/closes or currentVariant changes
+  // Reset local state when modal opens/closes or global variant changes
   useEffect(() => {
     if (!isOpen) {
-      setLocalVariant(null);
+      setLocalVariant('');
+    } else {
+      setLocalVariant(globalPreferredVariant || '');
     }
-  }, [isOpen]);
+  }, [isOpen, globalPreferredVariant]);
 
-  // Debounced save function
-  const debouncedSave = React.useCallback(
+  const handleSelectVariant = React.useCallback(
     async (variant: string) => {
+      // Immediately update the local state for instant UI feedback
+      setLocalVariant(variant);
       try {
-        // Set the variant for this specific encounter
-        playthroughActions.setArtworkVariant(locationId, variant);
-
-        // Also set it as the preferred variant for future encounters
-        await setPreferredVariantMutation.mutateAsync({
-          headId,
-          bodyId,
-          variant,
-        });
+        await updateVariant(variant);
       } catch (error) {
         console.error('Failed to set artwork variant:', error);
       }
     },
-    [locationId, headId, bodyId, setPreferredVariantMutation]
-  );
-
-  const handleSelectVariant = React.useCallback(
-    (variant: string) => {
-      // Immediately update the local state for instant UI feedback
-      setLocalVariant(variant);
-
-      // Clear any existing timeout
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-
-      // Set a new timeout to save after 500ms of no changes
-      saveTimeoutRef.current = setTimeout(() => {
-        debouncedSave(variant);
-      }, 500);
-    },
-    [debouncedSave]
+    [updateVariant]
   );
 
   const handleClearVariant = React.useCallback(async () => {
-    // Immediately update the local state
-    setLocalVariant('');
-
-    // Clear any existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
     try {
-      // Clear the variant for this specific encounter
-      playthroughActions.setArtworkVariant(locationId, undefined);
-
-      // Also clear the preferred variant
-      await setPreferredVariantMutation.mutateAsync({
-        headId,
-        bodyId,
-        variant: undefined,
-      });
-
+      // Clear the preferred variant using the new hook
+      await updateVariant('');
       onClose();
     } catch (error) {
       console.error('Failed to clear artwork variant:', error);
     }
-  }, [locationId, headId, bodyId, onClose, setPreferredVariantMutation]);
+  }, [updateVariant, onClose]);
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, []);
+  // No cleanup needed
 
   return (
     <Dialog open={isOpen} onClose={onClose} className='relative z-50 group'>
@@ -199,7 +149,7 @@ export function ArtworkVariantModal({
           ) : (
             <>
               <RadioGroup
-                value={displayVariant || ''}
+                value={localVariant || ''}
                 onChange={handleSelectVariant}
                 data-scroll-container
                 className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-y-auto overflow-x-hidden flex-1 min-h-0 scrollbar-thin p-3 relative'

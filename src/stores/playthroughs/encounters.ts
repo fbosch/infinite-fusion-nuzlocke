@@ -9,46 +9,13 @@ import {
   getPreferredVariant,
   setPreferredVariant,
 } from '@/lib/preferredVariants';
+import { getDisplayPokemon } from '@/components/PokemonSummaryCard/utils';
 import { queryClient } from '@/lib/queryClient';
 import { spriteKeys } from '@/lib/queries/sprites';
 import { EncounterDataSchema, Playthrough } from './types';
 import { getActivePlaythrough, getCurrentTimestamp } from './store';
 
-// Helper function to consistently apply and cache preferred variants
-export const applyPreferredVariant = async (
-  encounter: z.infer<typeof EncounterDataSchema>,
-  force: boolean = false
-): Promise<void> => {
-  try {
-    // Only apply if we don't already have a variant or if forced
-    if (!force && encounter.artworkVariant !== undefined) {
-      return;
-    }
-
-    let preferredVariant: string | undefined;
-
-    if (encounter.isFusion && encounter.head && encounter.body) {
-      // For fusion encounters with both parts
-      preferredVariant = await getPreferredVariantHelper(
-        encounter.head.id,
-        encounter.body.id
-      );
-    } else {
-      preferredVariant = await getPreferredVariantHelper(
-        encounter.head?.id || encounter.body?.id
-      );
-    }
-    // Only update if we got a variant - don't clear existing variant to undefined
-    if (preferredVariant !== undefined) {
-      encounter.artworkVariant = preferredVariant;
-    }
-  } catch (error) {
-    console.warn('Failed to apply preferred variant:', error);
-    // Don't clear on error - keep existing variant
-  }
-};
-
-// Create encounter data with preferred variant prefilled
+// Create encounter data (variants are now managed globally)
 export const createEncounterData = async (
   pokemon: z.infer<typeof PokemonOptionSchema> | null,
   field: 'head' | 'body' = 'head',
@@ -63,31 +30,7 @@ export const createEncounterData = async (
       }
     : null;
 
-  // Pre-fetch preferred variant based on the encounter configuration
-  let preferredVariant: string | undefined;
-  if (pokemonWithLocationAndUID) {
-    if (shouldCreateFusion) {
-      if (field === 'head') {
-        // Fusion with only head
-        preferredVariant = await getPreferredVariantHelper(
-          pokemonWithLocationAndUID.id
-        );
-      } else {
-        // Fusion with only body
-        preferredVariant = await getPreferredVariantHelper(
-          null,
-          pokemonWithLocationAndUID.id
-        );
-      }
-    } else {
-      // Regular encounter (non-fusion)
-      preferredVariant = await getPreferredVariantHelper(
-        pokemonWithLocationAndUID.id
-      );
-    }
-  }
-
-  // Create encounter data with pre-fetched variant
+  // Create encounter data without artwork variant (now managed globally)
   const encounterData: z.infer<typeof EncounterDataSchema> = {
     head:
       shouldCreateFusion && field === 'head'
@@ -98,7 +41,6 @@ export const createEncounterData = async (
     body:
       shouldCreateFusion && field === 'body' ? pokemonWithLocationAndUID : null,
     isFusion: shouldCreateFusion,
-    artworkVariant: preferredVariant, // Set immediately - no async delay!
     updatedAt: getCurrentTimestamp(),
   };
 
@@ -131,7 +73,7 @@ export const updateEncounter = async (
   // Get or create encounter
   let encounter = activePlaythrough.encounters[locationId];
   if (!encounter) {
-    // Pre-create encounter data with preferred variant
+    // Create encounter data (variants are now managed globally)
     const encounterData = await createEncounterData(
       pokemon,
       field,
@@ -140,7 +82,7 @@ export const updateEncounter = async (
     );
     encounter = encounterData;
     activePlaythrough.encounters[locationId] = encounter;
-    return; // Early return since createEncounterData already handles preferred variants
+    return;
   }
 
   // Handle both setting and clearing pokemon
@@ -151,49 +93,12 @@ export const updateEncounter = async (
       uid: pokemon.uid || generatePokemonUID(),
     };
 
-    // Pre-fetch preferred variant for the new encounter state to avoid flickering
-    let preferredVariant: string | undefined;
-
     // Determine if this should be a fusion encounter
     const willBeFusion = shouldCreateFusion || encounter.isFusion;
 
     if (willBeFusion) {
-      // For fusion encounters
-      const newHead =
-        field === 'head' ? pokemonWithLocationAndUID : encounter.head;
-      const newBody =
-        field === 'body' ? pokemonWithLocationAndUID : encounter.body;
-
-      if (newHead && newBody) {
-        preferredVariant = await getPreferredVariantHelper(
-          newHead.id,
-          newBody.id
-        );
-      } else if (newHead) {
-        preferredVariant = await getPreferredVariantHelper(newHead.id);
-      } else if (newBody) {
-        preferredVariant = await getPreferredVariantHelper(newBody.id);
-      }
-    } else {
-      // For regular encounters
-      preferredVariant = await getPreferredVariantHelper(
-        pokemonWithLocationAndUID.id
-      );
-    }
-
-    // Now update the encounter with pre-fetched variant
-    if (willBeFusion) {
       encounter[field] = pokemonWithLocationAndUID;
       encounter.isFusion = true; // Preserve or set fusion state
-
-      // For fusion encounters, only set preferred variant if we have both head and body
-      // This prevents setting variants for single-position states (head-only or body-only)
-      if (encounter.head && encounter.body) {
-        encounter.artworkVariant = preferredVariant;
-      } else {
-        // For single-position states, reset to undefined
-        encounter.artworkVariant = undefined;
-      }
 
       // Default behavior: If setting status on one part of a fusion and the other part
       // doesn't have a status, set both to the same status
@@ -217,45 +122,13 @@ export const updateEncounter = async (
       encounter.head = pokemonWithLocationAndUID;
       encounter.body = null;
       encounter.isFusion = false;
-      encounter.artworkVariant = preferredVariant;
     }
 
     encounter.updatedAt = getCurrentTimestamp();
   } else {
     // Handle clearing pokemon
-    const remainingPokemon = field === 'head' ? encounter.body : encounter.head;
-
-    // Clear the field first
+    // Clear the field
     encounter[field] = null;
-
-    // Reset artwork variant when composition changes significantly
-    // This ensures that when flipping from head-only to body-only (or vice versa),
-    // the artwork variant is reset to undefined
-    encounter.artworkVariant = undefined;
-
-    // Only set a new preferred variant if there's a remaining pokemon
-    // AND we're not changing from head-only to body-only (or vice versa)
-    if (remainingPokemon) {
-      // Check if this is a composition change (head-only to body-only or vice versa)
-      const wasHeadOnly = field === 'body' && !encounter.head; // If clearing body, was it head-only?
-      const wasBodyOnly = field === 'head' && !encounter.body; // If clearing head, was it body-only?
-
-      // If we're changing composition, clear the preferred variant cache for this pokemon
-      if (wasHeadOnly || wasBodyOnly) {
-        // Clear the cache for both head-only and body-only positions of this pokemon
-        await setPreferredVariantHelper(remainingPokemon.id, null, undefined);
-        await setPreferredVariantHelper(null, remainingPokemon.id, undefined);
-      } else {
-        // Only set preferred variant if we're not changing composition
-        const preferredVariant = await getPreferredVariantHelper(
-          remainingPokemon.id
-        );
-        if (preferredVariant !== undefined) {
-          encounter.artworkVariant = preferredVariant;
-        }
-      }
-    }
-
     encounter.updatedAt = getCurrentTimestamp();
   }
 };
@@ -303,11 +176,9 @@ export const toggleEncounterFusion = async (locationId: string) => {
         head: existingEncounter.body,
         body: null,
         isFusion: false,
-        artworkVariant: existingEncounter.artworkVariant, // Preserve existing variant
         updatedAt: getCurrentTimestamp(),
       };
       activePlaythrough.encounters[locationId] = newEncounter;
-      await applyPreferredVariant(newEncounter, true);
     } else {
       // If both slots have data or only head has data, preserve as-is
       const newEncounter = {
@@ -316,7 +187,6 @@ export const toggleEncounterFusion = async (locationId: string) => {
         updatedAt: getCurrentTimestamp(),
       };
       activePlaythrough.encounters[locationId] = newEncounter;
-      await applyPreferredVariant(newEncounter, true);
     }
   } else {
     // When fusing (going from non-fusion to fusion) or other cases
@@ -326,7 +196,6 @@ export const toggleEncounterFusion = async (locationId: string) => {
       updatedAt: getCurrentTimestamp(),
     };
     activePlaythrough.encounters[locationId] = newEncounter;
-    await applyPreferredVariant(newEncounter, true);
   }
 };
 
@@ -343,6 +212,8 @@ export const flipEncounterFusion = async (locationId: string) => {
   const encounter = activePlaythrough.encounters[locationId];
   if (!encounter || !encounter.isFusion) return;
 
+  // Display state management is now handled globally
+
   // Swap head and body atomically
   const originalHead = encounter.head;
   const originalBody = encounter.body;
@@ -351,8 +222,7 @@ export const flipEncounterFusion = async (locationId: string) => {
   encounter.body = originalHead;
   encounter.updatedAt = getCurrentTimestamp();
 
-  // Apply preferred variant for the new composition
-  await applyPreferredVariant(encounter, true);
+  // No need to handle variants - they're managed globally
 };
 
 // Move encounter atomically from source to destination (for drag and drop)
@@ -387,49 +257,13 @@ export const moveEncounterAtomic = async (
   const willBeFusion =
     targetField === 'body' || existingTargetEncounter?.isFusion === true;
 
-  // Pre-fetch preferred variant based on final encounter state
-  let preferredVariant: string | undefined;
+  // Variants are now managed globally, no need to pre-fetch
 
   if (isIntraEncounterMove && existingTargetEncounter) {
-    // Moving within same encounter - preserve existing variant since composition doesn't change
-    preferredVariant = existingTargetEncounter.artworkVariant;
+    // Moving within same encounter - no need to fetch variants since they're global
+    // Variants are managed globally now
   } else {
-    // Moving between different encounters - look up preferred variant
-    if (willBeFusion) {
-      if (targetField === 'head') {
-        // For fusion with pokemon in head slot
-        const existingBody = existingTargetEncounter?.body;
-        if (existingBody) {
-          preferredVariant = await getPreferredVariantHelper(
-            pokemonWithLocationAndUID.id,
-            existingBody.id
-          );
-        } else {
-          preferredVariant = await getPreferredVariantHelper(
-            pokemonWithLocationAndUID.id
-          );
-        }
-      } else {
-        // For fusion with pokemon in body slot
-        const existingHead = existingTargetEncounter?.head;
-        if (existingHead) {
-          preferredVariant = await getPreferredVariantHelper(
-            existingHead.id,
-            pokemonWithLocationAndUID.id
-          );
-        } else {
-          preferredVariant = await getPreferredVariantHelper(
-            null,
-            pokemonWithLocationAndUID.id
-          );
-        }
-      }
-    } else {
-      // For non-fusion (head field), the pokemon will be in head slot
-      preferredVariant = await getPreferredVariantHelper(
-        pokemonWithLocationAndUID.id
-      );
-    }
+    // Moving between different encounters - variants managed globally
   }
 
   // Clear source first to avoid duplicates
@@ -446,7 +280,7 @@ export const moveEncounterAtomic = async (
         ? pokemonWithLocationAndUID
         : existingTargetEncounter?.body || null,
     isFusion: willBeFusion,
-    artworkVariant: preferredVariant, // Set immediately - no flicker!
+
     updatedAt: getCurrentTimestamp(),
   };
 
@@ -488,60 +322,44 @@ export const createFusion = async (
   };
 
   activePlaythrough.encounters[locationId] = encounter;
-  await applyPreferredVariant(encounter, true);
 };
 
-// Set artwork variant for an encounter
-export const setArtworkVariant = (locationId: string, variant?: string) => {
+// Set artwork variant globally (no longer stored in encounters)
+export const setArtworkVariant = async (
+  locationId: string,
+  variant?: string
+) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return;
 
-  // Ensure encounters object exists
-  if (!activePlaythrough.encounters) {
-    activePlaythrough.encounters = {};
-  }
-
-  const encounter = activePlaythrough.encounters[locationId];
+  const encounter = activePlaythrough.encounters?.[locationId];
   if (!encounter) return;
 
-  // Update encounter timestamp for artwork variant changes
-  encounter.artworkVariant = variant;
-  encounter.updatedAt = getCurrentTimestamp();
-
-  // Always update the preferred variant cache when manually setting variants
-  setPreferredVariant(encounter.head?.id, encounter.body?.id, variant).catch(
-    (error: unknown) => {
-      console.warn('Failed to set preferred variant in cache:', error);
-    }
+  // Determine which Pokemon this variant applies to based on display state
+  const displayPokemon = getDisplayPokemon(
+    encounter.head,
+    encounter.body,
+    encounter.isFusion ?? false
   );
-};
 
-// Set preferred variant for a Pokémon or fusion (updates cache only, doesn't affect current encounters)
-export const setPreferredVariantHelper = async (
-  headId?: number | null,
-  bodyId?: number | null,
-  variant?: string
-): Promise<void> => {
-  if (variant !== undefined) {
-    try {
-      await setPreferredVariant(headId, bodyId, variant);
-    } catch (error) {
-      console.warn('Failed to set preferred variant in cache:', error);
-    }
-  }
-};
-
-// Get preferred variant for a Pokémon or fusion
-export const getPreferredVariantHelper = async (
-  headId?: number | null,
-  bodyId?: number | null
-): Promise<string | undefined> => {
+  // Update the global preferred variant cache
   try {
-    return getPreferredVariant(headId, bodyId);
-  } catch (error) {
-    console.warn('Failed to get preferred variant from cache:', error);
-    return undefined;
+    if (displayPokemon.isFusion && displayPokemon.head && displayPokemon.body) {
+      await setPreferredVariant(
+        displayPokemon.head.id,
+        displayPokemon.body.id,
+        variant ?? ''
+      );
+    } else if (displayPokemon.head || displayPokemon.body) {
+      const pokemon = displayPokemon.head || displayPokemon.body!;
+      await setPreferredVariant(pokemon.id, null, variant ?? '');
+    }
+  } catch (error: unknown) {
+    console.warn('Failed to set preferred variant in cache:', error);
   }
+
+  // Update encounter timestamp to trigger reactivity
+  encounter.updatedAt = getCurrentTimestamp();
 };
 
 // Prefetch adjacent artwork variants for better UX
@@ -631,34 +449,46 @@ export const cycleArtworkVariant = async (
     // Early return if no variants or only default
     if (!availableVariants || availableVariants.length <= 1) return;
 
-    // Calculate next variant index
-    const currentVariant = encounter.artworkVariant || '';
+    // Determine which Pokemon this variant applies to based on display state
+    const displayPokemon = getDisplayPokemon(
+      encounter.head,
+      encounter.body,
+      encounter.isFusion ?? false
+    );
+
+    const headId = displayPokemon.head?.id;
+    const bodyId = displayPokemon.body?.id;
+
+    // Get current variant from global preferred variants
+    const currentVariant =
+      getPreferredVariant(headId ?? null, bodyId ?? null) || '';
     const currentIndex = availableVariants.indexOf(currentVariant);
     const nextIndex = reverse
       ? (currentIndex - 1 + availableVariants.length) % availableVariants.length
       : (currentIndex + 1) % availableVariants.length;
 
-    // Update encounter with new variant and timestamp
-    const newVariant = availableVariants[nextIndex] || undefined;
-    encounter.artworkVariant = newVariant;
-    encounter.updatedAt = getCurrentTimestamp();
+    // Update global preferred variant
+    const newVariant = availableVariants[nextIndex] || '';
 
-    // Set the preferred variant in the cache for future use
-    if (newVariant !== undefined) {
-      setPreferredVariant(
-        encounter.head?.id,
-        encounter.body?.id,
+    if (displayPokemon.isFusion && displayPokemon.head && displayPokemon.body) {
+      await setPreferredVariant(
+        displayPokemon.head.id,
+        displayPokemon.body.id,
         newVariant
-      ).catch((error: unknown) => {
-        console.warn('Failed to set preferred variant in cache:', error);
-      });
+      );
+    } else if (displayPokemon.head || displayPokemon.body) {
+      const pokemon = displayPokemon.head || displayPokemon.body!;
+      await setPreferredVariant(pokemon.id, null, newVariant);
     }
+
+    // Update encounter timestamp to trigger reactivity
+    encounter.updatedAt = getCurrentTimestamp();
 
     // Prefetch adjacent variants for smoother cycling
     if (availableVariants.length > 2) {
       prefetchAdjacentVariants(
-        encounter.head?.id,
-        encounter.body?.id,
+        headId ?? undefined,
+        bodyId ?? undefined,
         newVariant,
         availableVariants
       ).catch(error => {
@@ -667,7 +497,6 @@ export const cycleArtworkVariant = async (
     }
   } catch (error) {
     console.error('Failed to cycle artwork variant:', error);
-    encounter.artworkVariant = undefined;
     encounter.updatedAt = getCurrentTimestamp();
   }
 };
@@ -777,20 +606,9 @@ export const clearEncounterFromLocation = async (
     // Clear only the specified field
     encounter[field] = null;
 
-    // When clearing part of a fusion, look up preferred variant for remaining pokemon
+    // When clearing part of a fusion, variants are managed globally
     if (encounter.isFusion) {
-      const remainingPokemon =
-        field === 'head' ? encounter.body : encounter.head;
-      if (remainingPokemon) {
-        // Get preferred variant for the remaining pokemon
-        const preferredVariant = await getPreferredVariantHelper(
-          remainingPokemon.id
-        );
-        encounter.artworkVariant = preferredVariant;
-      } else {
-        // No remaining pokemon, can clear variant
-        encounter.artworkVariant = undefined;
-      }
+      // Variants are managed globally now, no need to handle them per encounter
     }
 
     // Only remove the entire encounter if it's not a fusion and we're clearing the head
@@ -845,8 +663,7 @@ export const moveEncounter = async (
 
   activePlaythrough.encounters[toLocationId] = newEncounter;
 
-  // Apply the preferred variant from global cache
-  await applyPreferredVariant(newEncounter, true);
+  // Variants are now managed globally, no need to apply them here
 };
 
 // Swap encounters between two locations (replaces switchCombobox event)
@@ -898,10 +715,7 @@ export const swapEncounters = async (
   }
 
   // Apply preferred variants only if needed, without clearing first
-  await Promise.all([
-    applyPreferredVariant(encounter1, true),
-    applyPreferredVariant(encounter2, true),
-  ]);
+  // Variants are now managed globally, no need to apply them here
 
   // Update both encounter timestamps since they were swapped
   const timestamp = getCurrentTimestamp();

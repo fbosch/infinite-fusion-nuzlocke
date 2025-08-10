@@ -196,11 +196,11 @@ describe('Playthroughs Store - Utility Functions', () => {
       expect(encounters!['route-2']?.head?.name).toBe('Charmander'); // Should be preserved
     });
 
-    it('should update artwork variant when clearing part of fusion', async () => {
+    it('should handle clearing part of fusion (variants are now global)', async () => {
       const pikachu = createMockPokemon('Pikachu', 25);
       const charmander = createMockPokemon('Charmander', 4);
 
-      // Create a fusion encounter with artwork variant
+      // Create a fusion encounter
       await playthroughActions.updateEncounter(
         'route-1',
         pikachu,
@@ -213,21 +213,19 @@ describe('Playthroughs Store - Utility Functions', () => {
         'body',
         false
       );
-      playthroughActions.setArtworkVariant('route-1', 'custom-variant');
 
-      // Verify variant was set
-      let encounters = playthroughActions.getEncounters();
-      expect(encounters!['route-1']?.artworkVariant).toBe('custom-variant');
+      // Set global preferred variant (variants are no longer stored per encounter)
+      playthroughActions.setArtworkVariant('route-1', 'custom-variant');
 
       // Clear only the head encounter (body should remain)
       await playthroughActions.clearEncounterFromLocation('route-1', 'head');
 
-      // Body should remain and artwork variant should be updated based on remaining pokemon
-      encounters = playthroughActions.getEncounters();
+      // Body should remain, encounter no longer has artworkVariant field
+      const encounters = playthroughActions.getEncounters();
       expect(encounters!['route-1']?.head).toBeNull();
       expect(encounters!['route-1']?.body?.name).toBe('Charmander');
-      // Artwork variant should be updated when composition changes (may be undefined based on sprite service mock)
-      expect(encounters!['route-1']?.artworkVariant).toBeUndefined(); // Based on our mock returning undefined
+      // Encounters no longer store artworkVariant - variants are managed globally
+      expect('artworkVariant' in encounters!['route-1']!).toBe(false);
     });
 
     it('should handle clearing from fusion encounter with no remaining pokemon', async () => {

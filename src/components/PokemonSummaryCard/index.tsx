@@ -10,6 +10,9 @@ import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
 import { useEncounter } from '@/stores/playthroughs';
 import { useSpriteCredits } from '@/hooks/useSprite';
+import { CursorTooltip } from '@/components/CursorTooltip';
+import { SquareArrowUpRight } from 'lucide-react';
+import { getDisplayPokemon } from './utils';
 
 interface SummaryCardProps {
   locationId: string;
@@ -30,7 +33,23 @@ function getNicknameText(
     return pokemon.nickname || pokemon.name;
   }
 
-  // Handle complete fusion case
+  // For fusions, check if either Pokemon is dead/stored and the other is active
+  const headInactive =
+    head.status === PokemonStatus.DECEASED ||
+    head.status === PokemonStatus.STORED;
+  const bodyInactive =
+    body.status === PokemonStatus.DECEASED ||
+    body.status === PokemonStatus.STORED;
+
+  // If one is inactive and the other is active, show only the active one
+  if (headInactive && !bodyInactive) {
+    return body.nickname || body.name;
+  }
+  if (bodyInactive && !headInactive) {
+    return head.nickname || head.name;
+  }
+
+  // Handle complete fusion case (both alive or both dead)
   return head.nickname || body.nickname || `${head.name}/${body.name}`;
 }
 
@@ -53,14 +72,48 @@ export default function SummaryCard({
     return null;
   }
 
+  // Determine which Pokemon to display based on active/inactive states
+  const displayPokemon = getDisplayPokemon(
+    encounterData?.head ?? null,
+    encounterData?.body ?? null,
+    encounterData?.isFusion ?? false
+  );
+
   const name = getNicknameText(
     encounterData?.head,
     encounterData?.body,
     encounterData?.isFusion
   );
+
+  // Only consider deceased if both Pokemon are dead (for fusion) or the single Pokemon is dead
+  // Note: stored Pokemon are not considered deceased, only actually dead Pokemon
+  const headDead = encounterData?.head?.status === PokemonStatus.DECEASED;
+  const bodyDead = encounterData?.body?.status === PokemonStatus.DECEASED;
+
   const isDeceased =
-    encounterData?.head?.status === PokemonStatus.DECEASED ||
-    encounterData?.body?.status === PokemonStatus.DECEASED;
+    encounterData?.isFusion && encounterData?.head && encounterData?.body
+      ? headDead && bodyDead
+      : headDead || bodyDead;
+
+  const head = displayPokemon.head;
+  const body = displayPokemon.body;
+  const link = eitherPokemonIsEgg
+    ? '#'
+    : `https://infinitefusiondex.com/details/${head?.id && body?.id ? `${head.id}.${body.id}` : head?.id || body?.id}`;
+
+  const SpriteWrapper = eitherPokemonIsEgg ? 'div' : 'a';
+  const spriteWrapperProps = eitherPokemonIsEgg
+    ? {
+        className: 'group/fusion focus:outline-none',
+        draggable: false,
+      }
+    : {
+        href: link,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        className: 'group/fusion focus:outline-none relative',
+        draggable: false,
+      };
 
   return (
     <PokemonContextMenu
@@ -83,11 +136,37 @@ export default function SummaryCard({
               background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
             }}
           />
-          <FusionSprite
-            locationId={locationId}
-            size='lg'
-            shouldLoad={shouldLoad}
-          />
+          <SpriteWrapper {...spriteWrapperProps}>
+            <FusionSprite
+              headPokemon={head}
+              bodyPokemon={body}
+              isFusion={displayPokemon.isFusion}
+              shouldLoad={shouldLoad}
+            />
+            {!eitherPokemonIsEgg && (
+              <CursorTooltip
+                delay={1000}
+                content={
+                  <div className='flex flex-col gap-1'>
+                    <span className='text-sm'>
+                      Open Pokédex entry in new tab
+                    </span>
+                    <span className='text-xs text-gray-400'>{link}</span>
+                  </div>
+                }
+              >
+                <div
+                  className={clsx(
+                    'absolute -top-4 -right-2 text-blue-400 dark:text-blue-300 z-10 bg-gray-200 dark:bg-gray-800 rounded-sm opacity-0',
+                    'group-focus-visible/fusion:opacity-100 group-hover/fusion:opacity-100 transition-opacity duration-200',
+                    'group-focus-visible/fusion:ring-1 group-focus-visible/fusion:ring-blue-400'
+                  )}
+                >
+                  <SquareArrowUpRight className='size-4' />
+                </div>
+              </CursorTooltip>
+            )}
+          </SpriteWrapper>
         </Fragment>
         {eitherPokemonIsEgg ? null : (
           <ArtworkVariantButton

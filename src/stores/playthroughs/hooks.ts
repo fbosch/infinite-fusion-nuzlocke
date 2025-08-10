@@ -9,7 +9,6 @@ import {
   getMergedLocations,
   getAvailableAfterLocations,
 } from './customLocations';
-import { setPreferredVariantHelper } from './encounters';
 
 // Reusable hooks for components
 export const usePlaythroughsSnapshot = () => {
@@ -154,7 +153,10 @@ export const usePreferredVariant = (
 ) => {
   const setPreferredVariant = React.useCallback(
     async (variant?: string) => {
-      await setPreferredVariantHelper(headId, bodyId, variant);
+      const { setPreferredVariant: setGlobalVariant } = await import(
+        '@/lib/preferredVariants'
+      );
+      setGlobalVariant(headId ?? null, bodyId ?? null, variant ?? '');
     },
     [headId, bodyId]
   );

@@ -3,11 +3,12 @@
 import React, { useMemo } from 'react';
 import { Loader2, RefreshCwOff, RefreshCcw, RefreshCw } from 'lucide-react';
 import clsx from 'clsx';
-import { playthroughActions, useEncounter } from '@/stores/playthroughs';
+import { useEncounter } from '@/stores/playthroughs';
 import { useShiftKey } from '@/hooks/useKeyPressed';
 import { twMerge } from 'tailwind-merge';
 import { CursorTooltip } from '../CursorTooltip';
-import { useSpriteVariants } from '@/hooks/useSprite';
+import { useSpriteVariants, usePreferredVariantState } from '@/hooks/useSprite';
+import { getDisplayPokemon } from './utils';
 
 interface ArtworkVariantButtonProps {
   locationId: string;
@@ -25,6 +26,10 @@ export function ArtworkVariantButton({
   // Get encounter data directly - only this button will rerender when this encounter changes
   const encounter = useEncounter(locationId);
   const isShiftPressed = useShiftKey();
+  const { variant: currentVariant, updateVariant } = usePreferredVariantState(
+    encounter?.head?.id ?? null,
+    encounter?.body?.id ?? null
+  );
 
   // Use React Query hook for sprite variants
   const { data: variants, isLoading } = useSpriteVariants(
@@ -37,14 +42,43 @@ export function ArtworkVariantButton({
   const hasVariants = variants && variants.length > 1;
 
   const handleCycleVariant = React.useCallback(async () => {
-    if (disabled || !hasVariants) return;
+    if (disabled || !hasVariants || !variants) return;
 
     try {
-      await playthroughActions.cycleArtworkVariant(locationId, isShiftPressed);
+      // Determine which Pokemon this variant applies to based on display state
+      const displayPokemon = getDisplayPokemon(
+        encounter?.head ?? null,
+        encounter?.body ?? null,
+        encounter?.isFusion ?? false
+      );
+
+      const _headId = displayPokemon.head?.id;
+      const _bodyId = displayPokemon.body?.id;
+
+      // Get current variant and find next one
+      const currentIndex = variants.indexOf(currentVariant);
+      const nextIndex = isShiftPressed
+        ? (currentIndex - 1 + variants.length) % variants.length
+        : (currentIndex + 1) % variants.length;
+
+      const newVariant = variants[nextIndex] || '';
+
+      // Update the variant
+      await updateVariant(newVariant);
     } catch (error) {
       console.error('Failed to cycle artwork variant:', error);
     }
-  }, [disabled, hasVariants, locationId, isShiftPressed]);
+  }, [
+    disabled,
+    hasVariants,
+    variants,
+    currentVariant,
+    isShiftPressed,
+    encounter?.head,
+    encounter?.body,
+    encounter?.isFusion,
+    updateVariant,
+  ]);
 
   const buttonIcon = useMemo(() => {
     if (isLoading) {
