@@ -21,6 +21,7 @@ import {
   getLocationsSortedWithCustom,
 } from '@/loaders/locations';
 import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
+import { PokemonContextMenu } from '@/components/PokemonSummaryCard/PokemonContextMenu';
 import { getNicknameText } from '@/components/PokemonSummaryCard/utils';
 import PokeballIcon from '@/assets/images/pokeball.svg';
 import HeadIcon from '@/assets/images/head.svg';
@@ -178,10 +179,9 @@ function PCEntryItem({
 interface TeamEntryItemProps {
   entry: Entry;
   idToName: Map<string, string>;
-  onClose: () => void;
 }
 
-function TeamEntryItem({ entry, idToName, onClose }: TeamEntryItemProps) {
+function TeamEntryItem({ entry, idToName }: TeamEntryItemProps) {
   const encounters = useEncounters();
   const currentEncounter = encounters?.[entry.locationId];
   const headActive =
@@ -196,121 +196,74 @@ function TeamEntryItem({ entry, idToName, onClose }: TeamEntryItemProps) {
   const isFusion =
     (currentEncounter?.isFusion && headActive && bodyActive) || false;
 
-  const handleClick = () => {
-    // Close the sheet
-    onClose();
-
-    // Scroll to the Pokemon location after a short delay to ensure the sheet is closed
-    setTimeout(() => {
-      const element = document.querySelector(
-        `[data-location-id="${entry.locationId}"]`
-      );
-      if (element) {
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
-
-        // Determine which combobox(es) to highlight based on the active Pokemon and fusion state
-        const comboboxIds: string[] = [];
-        if (isFusion) {
-          // Fusion encounter - use head/body comboboxes
-          if (headActive && bodyActive) {
-            // Both head and body are active - highlight both comboboxes
-            comboboxIds.push(
-              `${entry.locationId}-head`,
-              `${entry.locationId}-body`
-            );
-          } else if (headActive) {
-            comboboxIds.push(`${entry.locationId}-head`);
-          } else if (bodyActive) {
-            comboboxIds.push(`${entry.locationId}-body`);
-          }
-        } else {
-          // Single encounter - always use single combobox
-          comboboxIds.push(`${entry.locationId}-single`);
-        }
-
-        // Highlight all relevant comboboxes
-        comboboxIds.forEach(comboboxId => {
-          const overlay = document.querySelector(
-            `.location-highlight-overlay[data-combobox-id="${comboboxId}"]`
-          );
-          if (overlay) {
-            // Show the highlight overlay
-            overlay.classList.add('opacity-100');
-            overlay.classList.remove('opacity-0');
-
-            // Remove highlight after 2 seconds
-            setTimeout(() => {
-              overlay.classList.add('opacity-0');
-              overlay.classList.remove('opacity-100');
-            }, 2000);
-          }
-        });
-      }
-    }, 100);
-  };
-
   if (!hasAny) return null;
 
   return (
-    <li
-      key={entry.locationId}
-      role='listitem'
-      className={clsx(
-        'relative rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:ring-2 transition-all duration-200 cursor-pointer',
-        'hover:ring-green-400/60'
-      )}
-      onClick={handleClick}
+    <PokemonContextMenu
+      locationId={entry.locationId}
+      encounterData={{
+        head: entry.head,
+        body: entry.body,
+        isFusion: currentEncounter?.isFusion || false,
+      }}
+      shouldLoad={true}
     >
-      <div className='p-4'>
-        <div className='flex items-start gap-4'>
-          <div className='flex-shrink-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-lg p-2'>
-            <FusionSprite
-              headPokemon={entry.head ?? null}
-              bodyPokemon={entry.body ?? null}
-              shouldLoad
-              className='top-1.5'
-              showStatusOverlay={false}
-              showTooltip={false}
-            />
-          </div>
-          <div className='flex-1 min-w-0 space-y-2'>
-            <div className='flex items-center gap-2'>
-              <h3 className='text-base font-semibold text-gray-900 dark:text-gray-100'>
-                {getNicknameText(entry.head, entry.body, isFusion)}
-              </h3>
+      <li
+        key={entry.locationId}
+        role='listitem'
+        className={clsx(
+          'relative rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:ring-2 transition-all duration-200 cursor-pointer',
+          'hover:ring-green-400/60'
+        )}
+      >
+        <div className='p-4'>
+          <div className='flex items-start gap-4'>
+            <div className='flex-shrink-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-lg p-2'>
+              <FusionSprite
+                headPokemon={entry.head ?? null}
+                bodyPokemon={entry.body ?? null}
+                shouldLoad
+                className='top-1.5'
+                showStatusOverlay={false}
+                showTooltip={false}
+              />
             </div>
-
-            {isFusion && (
-              <div className='flex align-center gap-x-3'>
-                {headActive && (
-                  <div className='flex items-center gap-1 text-sm'>
-                    <HeadIcon className='w-4 h-4' />
-                    <span className='text-gray-700 dark:text-gray-300'>
-                      {entry.head?.name || 'Unknown'}
-                    </span>
-                  </div>
-                )}
-                {bodyActive && (
-                  <div className='flex items-center gap-1 text-sm'>
-                    <BodyIcon className='w-4 h-4' />
-                    <span className='text-gray-700 dark:text-gray-300'>
-                      {entry.body?.name || 'Unknown'}
-                    </span>
-                  </div>
-                )}
+            <div className='flex-1 min-w-0 space-y-2'>
+              <div className='flex items-center gap-2'>
+                <h3 className='text-base font-semibold text-gray-900 dark:text-gray-100'>
+                  {getNicknameText(entry.head, entry.body, isFusion)}
+                </h3>
               </div>
-            )}
 
-            <div className='text-xs text-gray-500 dark:text-gray-400'>
-              {idToName.get(entry.locationId) || 'Unknown Location'}
+              {isFusion && (
+                <div className='flex align-center gap-x-3'>
+                  {headActive && (
+                    <div className='flex items-center gap-1 text-sm'>
+                      <HeadIcon className='w-4 h-4' />
+                      <span className='text-gray-700 dark:text-gray-300'>
+                        {entry.head?.name || 'Unknown'}
+                      </span>
+                    </div>
+                  )}
+                  {bodyActive && (
+                    <div className='flex items-center gap-1 text-sm'>
+                      <BodyIcon className='w-4 h-4' />
+                      <span className='text-gray-700 dark:text-gray-300'>
+                        {entry.body?.name || 'Unknown'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className='text-xs text-gray-500 dark:text-gray-400'>
+                {idToName.get(entry.locationId) || 'Unknown Location'}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </li>
+      </li>
+    </PokemonContextMenu>
   );
 }
 
@@ -564,7 +517,6 @@ export default function PokemonPCSheet({
                           key={entry.locationId}
                           entry={entry}
                           idToName={idToName}
-                          onClose={onClose}
                         />
                       ))}
                     </ul>
