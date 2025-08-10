@@ -13,7 +13,7 @@ import {
   TabPanels,
 } from '@headlessui/react';
 import clsx from 'clsx';
-import { Skull, X, Boxes, Box } from 'lucide-react';
+import { Skull, X, Boxes, Box, Users } from 'lucide-react';
 import { useEncounters, useCustomLocations } from '@/stores/playthroughs';
 import { PokemonStatus, type PokemonOptionType } from '@/loaders/pokemon';
 import {
@@ -21,19 +21,23 @@ import {
   getLocationsSortedWithCustom,
 } from '@/loaders/locations';
 import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
+import { getNicknameText } from '@/components/PokemonSummaryCard/utils';
+import PokeballIcon from '@/assets/images/pokeball.svg';
+import HeadIcon from '@/assets/images/head.svg';
+import BodyIcon from '@/assets/images/body.svg';
 
 export interface PokemonPCSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  activeTab: 'box' | 'graveyard';
-  onChangeTab: (tab: 'box' | 'graveyard') => void;
+  activeTab: 'team' | 'box' | 'graveyard';
+  onChangeTab: (tab: 'team' | 'box' | 'graveyard') => void;
 }
 
 type Entry = {
   locationId: string;
   locationName: string;
-  head: PokemonOptionType | null | undefined;
-  body: PokemonOptionType | null | undefined;
+  head: PokemonOptionType | null;
+  body: PokemonOptionType | null;
 };
 
 function getPokemonLabel(p: PokemonOptionType | null | undefined): string {
@@ -171,6 +175,145 @@ function PCEntryItem({
   );
 }
 
+interface TeamEntryItemProps {
+  entry: Entry;
+  idToName: Map<string, string>;
+  onClose: () => void;
+}
+
+function TeamEntryItem({ entry, idToName, onClose }: TeamEntryItemProps) {
+  const encounters = useEncounters();
+  const currentEncounter = encounters?.[entry.locationId];
+  const headActive =
+    entry.head?.status === PokemonStatus.CAPTURED ||
+    entry.head?.status === PokemonStatus.RECEIVED ||
+    entry.head?.status === PokemonStatus.TRADED;
+  const bodyActive =
+    entry.body?.status === PokemonStatus.CAPTURED ||
+    entry.body?.status === PokemonStatus.RECEIVED ||
+    entry.body?.status === PokemonStatus.TRADED;
+  const hasAny = Boolean(headActive || bodyActive);
+  const isFusion =
+    (currentEncounter?.isFusion && headActive && bodyActive) || false;
+
+  const handleClick = () => {
+    // Close the sheet
+    onClose();
+
+    // Scroll to the Pokemon location after a short delay to ensure the sheet is closed
+    setTimeout(() => {
+      const element = document.querySelector(
+        `[data-location-id="${entry.locationId}"]`
+      );
+      if (element) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+
+        // Determine which combobox(es) to highlight based on the active Pokemon and fusion state
+        const comboboxIds: string[] = [];
+        if (isFusion) {
+          // Fusion encounter - use head/body comboboxes
+          if (headActive && bodyActive) {
+            // Both head and body are active - highlight both comboboxes
+            comboboxIds.push(
+              `${entry.locationId}-head`,
+              `${entry.locationId}-body`
+            );
+          } else if (headActive) {
+            comboboxIds.push(`${entry.locationId}-head`);
+          } else if (bodyActive) {
+            comboboxIds.push(`${entry.locationId}-body`);
+          }
+        } else {
+          // Single encounter - always use single combobox
+          comboboxIds.push(`${entry.locationId}-single`);
+        }
+
+        // Highlight all relevant comboboxes
+        comboboxIds.forEach(comboboxId => {
+          const overlay = document.querySelector(
+            `.location-highlight-overlay[data-combobox-id="${comboboxId}"]`
+          );
+          if (overlay) {
+            // Show the highlight overlay
+            overlay.classList.add('opacity-100');
+            overlay.classList.remove('opacity-0');
+
+            // Remove highlight after 2 seconds
+            setTimeout(() => {
+              overlay.classList.add('opacity-0');
+              overlay.classList.remove('opacity-100');
+            }, 2000);
+          }
+        });
+      }
+    }, 100);
+  };
+
+  if (!hasAny) return null;
+
+  return (
+    <li
+      key={entry.locationId}
+      role='listitem'
+      className={clsx(
+        'relative rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:ring-2 transition-all duration-200 cursor-pointer',
+        'hover:ring-green-400/60'
+      )}
+      onClick={handleClick}
+    >
+      <div className='p-4'>
+        <div className='flex items-start gap-4'>
+          <div className='flex-shrink-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-lg p-2'>
+            <FusionSprite
+              headPokemon={entry.head ?? null}
+              bodyPokemon={entry.body ?? null}
+              shouldLoad
+              className='top-1.5'
+              showStatusOverlay={false}
+              showTooltip={false}
+            />
+          </div>
+          <div className='flex-1 min-w-0 space-y-2'>
+            <div className='flex items-center gap-2'>
+              <h3 className='text-base font-semibold text-gray-900 dark:text-gray-100'>
+                {getNicknameText(entry.head, entry.body, isFusion)}
+              </h3>
+            </div>
+
+            {isFusion && (
+              <div className='flex align-center gap-x-3'>
+                {headActive && (
+                  <div className='flex items-center gap-1 text-sm'>
+                    <HeadIcon className='w-4 h-4' />
+                    <span className='text-gray-700 dark:text-gray-300'>
+                      {entry.head?.name || 'Unknown'}
+                    </span>
+                  </div>
+                )}
+                {bodyActive && (
+                  <div className='flex items-center gap-1 text-sm'>
+                    <BodyIcon className='w-4 h-4' />
+                    <span className='text-gray-700 dark:text-gray-300'>
+                      {entry.body?.name || 'Unknown'}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className='text-xs text-gray-500 dark:text-gray-400'>
+              {idToName.get(entry.locationId) || 'Unknown Location'}
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+  );
+}
+
 export default function PokemonPCSheet({
   isOpen,
   onClose,
@@ -189,6 +332,35 @@ export default function PokemonPCSheet({
     return map;
   }, [mergedLocations]);
 
+  const team: Entry[] = useMemo(() => {
+    const entries: Entry[] = [];
+
+    Object.entries(encounters || {}).forEach(([locationId, data]) => {
+      const headActive =
+        data?.head?.status === PokemonStatus.CAPTURED ||
+        data?.head?.status === PokemonStatus.RECEIVED ||
+        data?.head?.status === PokemonStatus.TRADED;
+      const bodyActive =
+        data?.body?.status === PokemonStatus.CAPTURED ||
+        data?.body?.status === PokemonStatus.RECEIVED ||
+        data?.body?.status === PokemonStatus.TRADED;
+
+      if (headActive || bodyActive) {
+        entries.push({
+          locationId,
+          locationName:
+            idToName.get(locationId) ||
+            getLocationById(locationId)?.name ||
+            'Unknown Location',
+          head: headActive ? data?.head || null : null,
+          body: bodyActive ? data?.body || null : null,
+        });
+      }
+    });
+
+    return entries;
+  }, [encounters, idToName]);
+
   const deceased: Entry[] = useMemo(() => {
     const entries: Entry[] = [];
 
@@ -203,8 +375,8 @@ export default function PokemonPCSheet({
             idToName.get(locationId) ||
             getLocationById(locationId)?.name ||
             'Unknown Location',
-          head: headDead ? (data?.head ?? null) : null,
-          body: bodyDead ? (data?.body ?? null) : null,
+          head: headDead ? data?.head || null : null,
+          body: bodyDead ? data?.body || null : null,
         });
       }
     });
@@ -226,8 +398,8 @@ export default function PokemonPCSheet({
             idToName.get(locationId) ||
             getLocationById(locationId)?.name ||
             'Unknown Location',
-          head: headStored ? (data?.head ?? null) : null,
-          body: bodyStored ? (data?.body ?? null) : null,
+          head: headStored ? data?.head || null : null,
+          body: bodyStored ? data?.body || null : null,
         });
       }
     });
@@ -235,7 +407,33 @@ export default function PokemonPCSheet({
     return entries;
   }, [encounters, idToName]);
 
-  const selectedIndex = activeTab === 'box' ? 0 : 1;
+  const getSelectedIndex = (tab: 'team' | 'box' | 'graveyard') => {
+    switch (tab) {
+      case 'team':
+        return 0;
+      case 'box':
+        return 1;
+      case 'graveyard':
+        return 2;
+      default:
+        return 0;
+    }
+  };
+
+  const getTabFromIndex = (index: number): 'team' | 'box' | 'graveyard' => {
+    switch (index) {
+      case 0:
+        return 'team';
+      case 1:
+        return 'box';
+      case 2:
+        return 'graveyard';
+      default:
+        return 'team';
+    }
+  };
+
+  const selectedIndex = getSelectedIndex(activeTab);
 
   return (
     <Dialog open={isOpen} onClose={onClose} className='relative z-50 group'>
@@ -284,7 +482,7 @@ export default function PokemonPCSheet({
           <div className='flex-1 flex flex-col px-4 pt-2 pb-3 min-h-0'>
             <TabGroup
               selectedIndex={selectedIndex}
-              onChange={index => onChangeTab(index === 0 ? 'box' : 'graveyard')}
+              onChange={index => onChangeTab(getTabFromIndex(index))}
             >
               <TabList className='flex items-center gap-2 mb-4'>
                 <Tab
@@ -297,7 +495,23 @@ export default function PokemonPCSheet({
                     )
                   }
                 >
-                  <Boxes className='h-4 w-4' />
+                  <PokeballIcon className='h-4 w-4' />
+                  <span className='font-medium'>Team</span>
+                  <span className='ml-1 text-[10px] px-1 rounded bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100'>
+                    {team.length}
+                  </span>
+                </Tab>
+                <Tab
+                  className={({ selected }) =>
+                    clsx(
+                      'px-3 py-1.5 text-sm inline-flex items-center gap-2 rounded-md border transition-colors focus:outline-none cursor-pointer',
+                      selected
+                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 shadow'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    )
+                  }
+                >
+                  <Box className='h-4 w-4' />
                   <span className='font-medium'>Boxed</span>
                   <span className='ml-1 text-[10px] px-1 rounded bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100'>
                     {stored.length}
@@ -323,13 +537,47 @@ export default function PokemonPCSheet({
 
               <TabPanels className='flex-1 min-h-0 flex flex-col'>
                 <TabPanel className='flex-1 min-h-0 flex'>
+                  {team.length === 0 ? (
+                    <div
+                      className='w-full flex-1 flex flex-col items-center justify-center text-gray-600 dark:text-gray-300 px-4 min-h-[60vh]'
+                      role='status'
+                      aria-live='polite'
+                    >
+                      <Users
+                        className='h-10 w-10 opacity-50 mb-3'
+                        aria-hidden='true'
+                      />
+                      <p className='text-center'>No active team members.</p>
+                      <p className='text-center text-sm mt-1'>
+                        Catch Pokémon or receive them as gifts to build your
+                        team.
+                      </p>
+                    </div>
+                  ) : (
+                    <ul
+                      role='list'
+                      aria-label='Active team members list'
+                      className='w-full space-y-3 py-2'
+                    >
+                      {team.map(entry => (
+                        <TeamEntryItem
+                          key={entry.locationId}
+                          entry={entry}
+                          idToName={idToName}
+                          onClose={onClose}
+                        />
+                      ))}
+                    </ul>
+                  )}
+                </TabPanel>
+                <TabPanel className='flex-1 min-h-0 flex'>
                   {stored.length === 0 ? (
                     <div
                       className='w-full flex-1 flex flex-col items-center justify-center text-gray-600 dark:text-gray-300 px-4 min-h-[60vh]'
                       role='status'
                       aria-live='polite'
                     >
-                      <Box
+                      <Boxes
                         className='h-10 w-10 opacity-50 mb-3'
                         aria-hidden='true'
                       />

@@ -13,7 +13,9 @@ const PokemonPCSheet = dynamic(() => import('@/components/pc/PokemonPCSheet'), {
 
 export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'box' | 'graveyard'>('box');
+  const [activeTab, setActiveTab] = useState<'team' | 'box' | 'graveyard'>(
+    'team'
+  );
   return (
     <div>
       <a
