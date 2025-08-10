@@ -56,14 +56,8 @@ export function useCyclePreferredVariant() {
 
 export function usePreferredVariantSuspenseQuery(
   headId?: number | null,
-  bodyId?: number | null,
-  opts?: { enabled?: boolean }
+  bodyId?: number | null
 ) {
   const base = spriteQueries.preferredVariant(headId, bodyId);
-  return useSuspenseQuery({
-    queryKey: base.queryKey,
-    queryFn: base.queryFn,
-    gcTime: base.gcTime,
-    staleTime: base.staleTime,
-  });
+  return useSuspenseQuery(base);
 }

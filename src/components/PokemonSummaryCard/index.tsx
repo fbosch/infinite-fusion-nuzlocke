@@ -149,7 +149,6 @@ export default function SummaryCard({
               headPokemon={head}
               bodyPokemon={body}
               isFusion={displayPokemon.isFusion}
-              artworkVariant={artworkVariant}
               shouldLoad={shouldLoad}
             />
             {!eitherPokemonIsEgg && (

@@ -1,52 +1,46 @@
-import { get, set, createStore } from 'idb-keyval';
 import { getSpriteId } from './sprites';
-import { debounce } from 'es-toolkit';
 
-// Create a custom store for preferred variants
-const preferredVariantsStore = createStore('preferred-variants', 'cache');
+// Storage key for localStorage
+const STORAGE_KEY = 'preferred-variants';
 
 // Simple in-memory storage for preferred variants (for fast access)
 const preferredVariants = new Map<string, string>();
 
 /**
- * Load preferred variants from IndexedDB into memory
+ * Load preferred variants from localStorage into memory
  */
-async function loadPreferredVariants(): Promise<void> {
+function loadPreferredVariants(): void {
   try {
-    const entries = await get('preferred-variants', preferredVariantsStore);
-    if (entries && Array.isArray(entries)) {
-      preferredVariants.clear();
-      entries.forEach(([key, value]) => {
-        preferredVariants.set(key, value);
-      });
+    if (typeof window === 'undefined') return;
+
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const entries = JSON.parse(stored);
+      if (Array.isArray(entries)) {
+        preferredVariants.clear();
+        entries.forEach(([key, value]) => {
+          preferredVariants.set(key, value);
+        });
+      }
     }
   } catch (error) {
-    console.warn('Failed to load preferred variants from IndexedDB:', error);
+    console.warn('Failed to load preferred variants from localStorage:', error);
   }
 }
 
 /**
- * Save preferred variants from memory to IndexedDB
+ * Save preferred variants from memory to localStorage
  */
-async function savePreferredVariants(): Promise<void> {
+function savePreferredVariants(): void {
   try {
+    if (typeof window === 'undefined') return;
+
     const entries = Array.from(preferredVariants.entries());
-    await set('preferred-variants', entries, preferredVariantsStore);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   } catch (error) {
-    console.warn('Failed to save preferred variants to IndexedDB:', error);
+    console.warn('Failed to save preferred variants to localStorage:', error);
   }
 }
-
-/**
- * Debounced save function to avoid spamming IndexedDB with rapid writes
- * Wraps the promise to handle errors gracefully
- */
-const debouncedSave = debounce(() => {
-  savePreferredVariants().catch((error: unknown) => {
-    console.warn('Failed to persist preferred variants to IndexedDB:', error);
-    // TODO: Could implement retry logic or show user notification here
-  });
-}, 200);
 
 // Load preferred variants on module initialization
 if (typeof window !== 'undefined') {
@@ -61,51 +55,50 @@ export function getPreferredVariant(
   bodyId?: number | null
 ): string | undefined {
   if (!headId && !bodyId) return undefined;
+  if (headId === -1 || bodyId === -1) return undefined; // Egg
   const spriteId = getSpriteId(headId, bodyId);
   return preferredVariants.get(spriteId);
 }
 
 /**
  * Set the preferred variant for a Pokémon or fusion
- * Uses optimistic updates - updates in-memory cache immediately,
- * then saves to IndexedDB in the background
+ * Updates in-memory cache and localStorage immediately
  */
-export async function setPreferredVariant(
+export function setPreferredVariant(
   headId?: number | null,
   bodyId?: number | null,
   preferredVariant?: string
-): Promise<void> {
+): void {
   if (!headId && !bodyId) return;
 
   const spriteId = getSpriteId(headId, bodyId);
 
-  // Optimistic update: immediately update in-memory cache
+  // Update in-memory cache
   if (preferredVariant) {
     preferredVariants.set(spriteId, preferredVariant);
   } else {
     preferredVariants.delete(spriteId);
   }
 
-  // Save to IndexedDB in background with debouncing (don't await to avoid blocking UI)
-  debouncedSave();
+  // Save to localStorage immediately
+  savePreferredVariants();
 }
 
 /**
  * Clear all preferred variants
- * Uses optimistic updates - clears in-memory cache immediately,
- * then saves to IndexedDB in the background
+ * Clears in-memory cache and localStorage immediately
  */
-export async function clearPreferredVariants(): Promise<void> {
-  // Optimistic update: immediately clear in-memory cache
+export function clearPreferredVariants(): void {
+  // Clear in-memory cache
   preferredVariants.clear();
 
-  // Save to IndexedDB in background with debouncing (don't await to avoid blocking UI)
-  debouncedSave();
+  // Save to localStorage immediately
+  savePreferredVariants();
 }
 
 /**
- * Load preferred variants from IndexedDB (useful for forcing a reload)
+ * Load preferred variants from localStorage (useful for forcing a reload)
  */
-export async function reloadPreferredVariants(): Promise<void> {
-  await loadPreferredVariants();
+export function reloadPreferredVariants(): void {
+  loadPreferredVariants();
 }

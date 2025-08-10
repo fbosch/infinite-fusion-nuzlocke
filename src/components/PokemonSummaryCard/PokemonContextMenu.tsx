@@ -344,8 +344,6 @@ export function PokemonContextMenu({
     handleMarkAsCaptured,
     handleMarkAsMissed,
     handleMarkAsReceived,
-    handleMoveHead,
-    handleMoveBody,
   ]);
 
   return (
@@ -366,7 +364,6 @@ export function PokemonContextMenu({
       <ArtworkVariantModal
         isOpen={isVariantModalOpen}
         onClose={() => setIsVariantModalOpen(false)}
-        locationId={locationId}
         headId={displayPokemon.head?.id}
         bodyId={displayPokemon.body?.id}
       />

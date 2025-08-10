@@ -16,7 +16,10 @@ import {
   getStatusState,
 } from './utils';
 import { isEggId } from '../../loaders';
-import { usePreferredVariantSuspenseQuery, useSpriteCredits } from '@/hooks/useSprite';
+import {
+  usePreferredVariantSuspenseQuery,
+  useSpriteCredits,
+} from '@/hooks/useSprite';
 import { formatArtistCredits } from '../../utils/formatCredits';
 import { getSpriteId } from '../../lib/sprites';
 import { type PokemonOptionType } from '@/loaders/pokemon';
@@ -25,7 +28,6 @@ interface FusionSpriteProps {
   headPokemon: PokemonOptionType | null;
   bodyPokemon: PokemonOptionType | null;
   isFusion?: boolean;
-  artworkVariant?: string;
   className?: string;
   shouldLoad?: boolean;
   showStatusOverlay?: boolean;
@@ -36,7 +38,6 @@ export function FusionSprite({
   headPokemon,
   bodyPokemon,
   isFusion: isFusionProp,
-  artworkVariant,
   shouldLoad,
   showStatusOverlay = true,
   showTooltip = true,
@@ -60,18 +61,13 @@ export function FusionSprite({
   // Preferred variant via suspense query (unless eggs)
   const { data: preferredVariant } = usePreferredVariantSuspenseQuery(
     head?.id,
-    body?.id,
-    {
-      enabled: !!(head || body) && !!shouldLoad && !hasEgg,
-    }
+    body?.id
   );
-  const effectiveVariant =
-    artworkVariant ?? (preferredVariant as string | undefined);
 
   const credit =
     hasEgg || isLoadingCredits
       ? undefined
-      : formatArtistCredits(credits?.[spriteId + (effectiveVariant ?? '')]);
+      : formatArtistCredits(credits?.[spriteId + (preferredVariant ?? '')]);
 
   const handleImageError = useCallback(
     async (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -83,7 +79,7 @@ export function FusionSprite({
         failingUrl,
         head,
         body,
-        effectiveVariant
+        preferredVariant
       );
       if (newUrl) {
         target.src = newUrl;
@@ -92,7 +88,7 @@ export function FusionSprite({
         target.style.visibility = 'visible';
       });
     },
-    [head, body, effectiveVariant]
+    [head, body, preferredVariant]
   );
 
   const statusState = getStatusState(head, body);
@@ -103,7 +99,7 @@ export function FusionSprite({
 
   if (!head && !body) return null;
 
-  const spriteUrl = getSpriteUrl(head, body, isFusion, effectiveVariant);
+  const spriteUrl = getSpriteUrl(head, body, isFusion, preferredVariant);
   const altText = getAltText(head, body, isFusion);
   const baseImageClasses =
     'object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none transform-gpu';

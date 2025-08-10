@@ -21,7 +21,6 @@ import {
   getLocationsSortedWithCustom,
 } from '@/loaders/locations';
 import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
-import { usePreferredVariant } from '@/hooks/usePreferredVariant';
 
 export interface PokemonPCSheetProps {
   isOpen: boolean;
@@ -64,9 +63,6 @@ function PCEntryItem({
   const encounters = useEncounters();
   const currentEncounter = encounters?.[entry.locationId];
   const isFusion = currentEncounter?.isFusion || false;
-
-  // Get preferred variant from global cache
-  const artworkVariant = usePreferredVariant(entry.head, entry.body, isFusion);
 
   const isStoredMode = mode === 'stored';
   const headActive = isStoredMode
@@ -156,7 +152,6 @@ function PCEntryItem({
             <FusionSprite
               headPokemon={entry.head ?? null}
               bodyPokemon={entry.body ?? null}
-              artworkVariant={artworkVariant}
               shouldLoad
               showStatusOverlay={false}
               showTooltip={false}
