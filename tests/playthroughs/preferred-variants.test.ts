@@ -142,11 +142,7 @@ describe('Playthroughs Store - Preferred Variants (Global System)', () => {
         playthroughActions.setArtworkVariant('route-1', undefined);
       });
 
-      expect(mockedSetPreferredVariant).toHaveBeenCalledWith(
-        25,
-        null,
-        undefined
-      );
+      expect(mockedSetPreferredVariant).toHaveBeenCalledWith(25, null, '');
     });
   });
 
