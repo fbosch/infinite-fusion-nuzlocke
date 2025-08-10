@@ -1,5 +1,10 @@
-import { useQuery, useMutation, useSuspenseQuery } from '@tanstack/react-query';
-import { spriteQueries, spriteMutations } from '@/lib/queries/sprites';
+import { useQuery } from '@tanstack/react-query';
+import { spriteQueries } from '@/lib/queries/sprites';
+import { useState, useCallback } from 'react';
+import {
+  getPreferredVariant,
+  setPreferredVariant,
+} from '@/lib/preferredVariants';
 import ms from 'ms';
 
 /**
@@ -18,6 +23,9 @@ export function useSpriteVariants(
   });
 }
 
+/**
+ * Hook to get sprite credits for a Pokémon or fusion
+ */
 export function useSpriteCredits(
   headId?: number | null,
   bodyId?: number | null,
@@ -25,38 +33,75 @@ export function useSpriteCredits(
 ) {
   return useQuery({
     ...spriteQueries.credits(headId, bodyId),
-    staleTime: ms('24h'), // Cache credits for 24 hours
+    staleTime: ms('3d'),
     gcTime: ms('48h'),
     enabled: !!(headId || bodyId) && enabled,
   });
 }
 
-export function useSetPrefferedVariant() {
-  return useMutation(spriteMutations.setPreferredVariant());
-}
-
-export function usePreferredVariantQuery(
-  headId?: number | null,
-  bodyId?: number | null,
-  opts?: { enabled?: boolean }
-) {
-  const base = spriteQueries.preferredVariant(headId, bodyId);
-  return useQuery({
-    ...base,
-    staleTime: Infinity,
-    gcTime: Infinity,
-    enabled: opts?.enabled ?? (base.enabled as boolean | undefined),
-  });
-}
-
-export function useCyclePreferredVariant() {
-  return useMutation(spriteMutations.cyclePreferredVariant());
-}
-
-export function usePreferredVariantSuspenseQuery(
+/**
+ * Simple hook for preferred variants - no React Query, just direct state
+ */
+export function usePreferredVariantState(
   headId?: number | null,
   bodyId?: number | null
 ) {
-  const base = spriteQueries.preferredVariant(headId, bodyId);
-  return useSuspenseQuery(base);
+  // Compute initial value directly during render
+  const initialVariant =
+    headId || bodyId ? (getPreferredVariant(headId, bodyId) ?? '') : '';
+  const [variant, setVariant] = useState<string>(initialVariant);
+
+  // Update function that immediately updates both state and localStorage
+  const updateVariant = useCallback(
+    async (newVariant: string) => {
+      if (headId || bodyId) {
+        // Update localStorage and in-memory Map
+        setPreferredVariant(headId, bodyId, newVariant);
+        // Update local state immediately
+        setVariant(newVariant);
+      }
+    },
+    [headId, bodyId]
+  );
+
+  return {
+    variant,
+    updateVariant,
+    isLoading: false, // No loading state needed
+  };
+}
+
+export function useSetPrefferedVariant() {
+  // This hook is no longer needed since we're using direct state management
+  throw new Error(
+    'useSetPrefferedVariant is deprecated. Use usePreferredVariantState instead.'
+  );
+}
+
+export function usePreferredVariantQuery(
+  _headId?: number | null,
+  _bodyId?: number | null,
+  _opts?: { enabled?: boolean }
+) {
+  // This hook is no longer needed since we're using direct state management
+  throw new Error(
+    'usePreferredVariantQuery is deprecated. Use usePreferredVariantState instead.'
+  );
+}
+
+export function useCyclePreferredVariant() {
+  // This hook is no longer needed since we're using direct state management
+  throw new Error(
+    'useCyclePreferredVariant is deprecated. Use usePreferredVariantState instead.'
+  );
+}
+
+export function usePreferredVariantSuspenseQuery(
+  _headId?: number | null,
+  _bodyId?: number | null
+) {
+  // This hook is no longer needed since we're using direct state management
+  throw new Error(
+    'usePreferredVariantSuspenseQuery is deprecated. Use usePreferredVariantState instead.'
+  );
 }

@@ -12,9 +12,8 @@ import { X, Check, ArrowUpRight } from 'lucide-react';
 import clsx from 'clsx';
 import {
   useSpriteVariants,
-  useSetPrefferedVariant,
   useSpriteCredits,
-  usePreferredVariantQuery,
+  usePreferredVariantState,
 } from '@/hooks/useSprite';
 import {
   generateSpriteUrl,
@@ -40,16 +39,14 @@ export function ArtworkVariantModal({
   const [localVariant, setLocalVariant] = useState<string | null>(null);
 
   // Get global preferred variant
-  const { data: globalPreferredVariant } = usePreferredVariantQuery(
-    headId,
-    bodyId
-  );
+  const { variant: globalPreferredVariant, updateVariant } =
+    usePreferredVariantState(headId, bodyId);
 
   // Use local state for immediate updates, fallback to global preferred variant
   const displayVariant = localVariant ?? globalPreferredVariant;
 
   // Mutation hook for setting preferred variants
-  const setPreferredVariantMutation = useSetPrefferedVariant();
+  // const setPreferredVariantMutation = useSetPrefferedVariant(); // This line is removed
 
   const { data: variants, isLoading: variantsLoading } = useSpriteVariants(
     headId,
@@ -82,35 +79,23 @@ export function ArtworkVariantModal({
       // Immediately update the local state for instant UI feedback
       setLocalVariant(variant);
       try {
-        await setPreferredVariantMutation.mutateAsync({
-          headId,
-          bodyId,
-          variant,
-        });
+        await updateVariant(variant);
       } catch (error) {
         console.error('Failed to set artwork variant:', error);
       }
     },
-    [headId, bodyId, setPreferredVariantMutation]
+    [updateVariant]
   );
 
   const handleClearVariant = React.useCallback(async () => {
-    // Immediately update the local state
-    setLocalVariant('');
-
     try {
-      // Clear the preferred variant (reactive via query invalidation)
-      await setPreferredVariantMutation.mutateAsync({
-        headId,
-        bodyId,
-        variant: undefined,
-      });
-
+      // Clear the preferred variant using the new hook
+      await updateVariant('');
       onClose();
     } catch (error) {
       console.error('Failed to clear artwork variant:', error);
     }
-  }, [headId, bodyId, onClose, setPreferredVariantMutation]);
+  }, [updateVariant, onClose]);
 
   // No cleanup needed
 

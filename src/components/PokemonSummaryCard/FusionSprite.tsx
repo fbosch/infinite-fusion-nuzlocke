@@ -20,7 +20,7 @@ import { useSpriteCredits } from '@/hooks/useSprite';
 import { formatArtistCredits } from '../../utils/formatCredits';
 import { getSpriteId } from '../../lib/sprites';
 import { type PokemonOptionType } from '@/loaders/pokemon';
-import { usePreferredVariant } from '../../hooks/usePreferredVariant';
+import { usePreferredVariantState } from '@/hooks/useSprite';
 
 interface FusionSpriteProps {
   headPokemon: PokemonOptionType | null;
@@ -56,7 +56,10 @@ export function FusionSprite({
     shouldLoad && hasHovered.current === true && !hasEgg
   );
 
-  const { data: preferredVariant } = usePreferredVariant(head, body, isFusion);
+  const { variant: preferredVariant } = usePreferredVariantState(
+    head?.id,
+    body?.id
+  );
 
   const credit =
     hasEgg || isLoadingCredits
