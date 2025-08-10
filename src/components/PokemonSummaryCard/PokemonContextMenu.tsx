@@ -12,7 +12,7 @@ import PokeballIcon from '@/assets/images/pokeball.svg';
 import EscapeIcon from '@/assets/images/escape-cloud.svg';
 import HeadIcon from '@/assets/images/head.svg';
 import BodyIcon from '@/assets/images/body.svg';
-import { useSpriteVariants } from '@/hooks/useSprite';
+import { useSpriteVariants, usePreferredVariantState } from '@/hooks/useSprite';
 import { isEggId, type PokemonOptionType } from '@/loaders/pokemon';
 import { playthroughActions } from '@/stores/playthroughs';
 import { getDisplayPokemon } from './utils';
@@ -38,7 +38,6 @@ interface PokemonContextMenuProps {
   encounterData: {
     head?: PokemonOptionType | null;
     body?: PokemonOptionType | null;
-    artworkVariant?: string;
     isFusion?: boolean;
   } | null;
   shouldLoad?: boolean;
@@ -68,7 +67,11 @@ export function PokemonContextMenu({
   );
   const hasArtVariants = variants && variants.length > 1;
 
-  // Preferred variant now resolved inside FusionSprite via suspense query
+  // Get current preferred variant for the display Pokemon
+  const { variant: preferredVariant } = usePreferredVariantState(
+    displayPokemon.head?.id ?? null,
+    displayPokemon.body?.id ?? null
+  );
 
   const [hasContextMenuBeenOpened, setHasContextMenuBeenOpened] =
     useState(false);
@@ -180,7 +183,7 @@ export function PokemonContextMenu({
         ? `${displayPokemon.head.id}.${displayPokemon.body.id}`
         : displayPokemon.head?.id || displayPokemon.body?.id;
     const infinitefusiondexLink = `https://infinitefusiondex.com/details/${id}`;
-    const fusiondexLink = `https://fusiondex.org/sprite/pif/${id}${encounterData?.artworkVariant ?? ''}/`;
+    const fusiondexLink = `https://fusiondex.org/sprite/pif/${id}${preferredVariant ? `${preferredVariant}` : ''}/`;
 
     // Get current status (both Pokemon should have the same status in a fusion)
     const currentStatus =
