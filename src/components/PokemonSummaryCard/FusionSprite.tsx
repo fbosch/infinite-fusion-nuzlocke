@@ -16,13 +16,11 @@ import {
   getStatusState,
 } from './utils';
 import { isEggId } from '../../loaders';
-import {
-  usePreferredVariantSuspenseQuery,
-  useSpriteCredits,
-} from '@/hooks/useSprite';
+import { useSpriteCredits } from '@/hooks/useSprite';
 import { formatArtistCredits } from '../../utils/formatCredits';
 import { getSpriteId } from '../../lib/sprites';
 import { type PokemonOptionType } from '@/loaders/pokemon';
+import { usePreferredVariant } from '../../hooks/usePreferredVariant';
 
 interface FusionSpriteProps {
   headPokemon: PokemonOptionType | null;
@@ -58,11 +56,7 @@ export function FusionSprite({
     shouldLoad && hasHovered.current === true && !hasEgg
   );
 
-  // Preferred variant via suspense query (unless eggs)
-  const { data: preferredVariant } = usePreferredVariantSuspenseQuery(
-    head?.id,
-    body?.id
-  );
+  const { data: preferredVariant } = usePreferredVariant(head, body, isFusion);
 
   const credit =
     hasEgg || isLoadingCredits

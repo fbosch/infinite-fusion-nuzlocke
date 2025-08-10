@@ -46,8 +46,10 @@ export const spriteQueries = {
       queryKey: spriteKeys.preferredVariant(headId, bodyId),
       queryFn: () => getPreferredVariant(headId, bodyId) ?? '',
       enabled: !!(headId || bodyId),
-      staleTime: Infinity, // Never stale
-      gcTime: Infinity, // Never garbage collect
+      staleTime: 0, // Always fetch fresh data
+      gcTime: Infinity, // Keep in cache indefinitely
+      refetchOnMount: true, // Always refetch when component mounts
+      refetchOnWindowFocus: false, // Don't refetch on window focus
     }),
 };
 
@@ -67,11 +69,10 @@ export const spriteMutations = {
         return await setPreferredVariant(headId, bodyId, variant);
       },
       onSuccess: (result, { headId, bodyId, variant }) => {
-        // Seed cache immediately for instant UI and persistence
-        queryClient.setQueryData(
-          spriteKeys.preferredVariant(headId, bodyId),
-          variant ?? ''
-        );
+        // Invalidate the cache to trigger a re-fetch and UI update
+        queryClient.invalidateQueries({
+          queryKey: spriteKeys.preferredVariant(headId, bodyId),
+        });
       },
     }),
 
@@ -115,11 +116,10 @@ export const spriteMutations = {
         return newVariant;
       },
       onSuccess: (newVariant, { headId, bodyId }) => {
-        // Seed cache with the new value for instant UI and persistence
-        queryClient.setQueryData(
-          spriteKeys.preferredVariant(headId, bodyId),
-          (newVariant ?? '') as string
-        );
+        // Invalidate the cache to trigger a re-fetch and UI update
+        queryClient.invalidateQueries({
+          queryKey: spriteKeys.preferredVariant(headId, bodyId),
+        });
       },
     }),
 };

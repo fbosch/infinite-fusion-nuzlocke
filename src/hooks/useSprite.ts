@@ -42,10 +42,9 @@ export function usePreferredVariantQuery(
 ) {
   const base = spriteQueries.preferredVariant(headId, bodyId);
   return useQuery({
-    queryKey: base.queryKey,
-    queryFn: base.queryFn,
-    gcTime: base.gcTime,
-    staleTime: base.staleTime,
+    ...base,
+    staleTime: Infinity,
+    gcTime: Infinity,
     enabled: opts?.enabled ?? (base.enabled as boolean | undefined),
   });
 }
