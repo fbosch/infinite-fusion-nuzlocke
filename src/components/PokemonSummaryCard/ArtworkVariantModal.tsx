@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import {
   Dialog,
   DialogPanel,
@@ -36,17 +36,15 @@ export function ArtworkVariantModal({
   bodyId,
 }: ArtworkVariantModalProps) {
   const spriteId = headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId;
-  const [localVariant, setLocalVariant] = useState<string | null>(null);
 
   // Get global preferred variant
   const { variant: globalPreferredVariant, updateVariant } =
-    usePreferredVariantState(headId, bodyId);
+    usePreferredVariantState(headId ?? null, bodyId ?? null);
 
   // Use local state for immediate updates, fallback to global preferred variant
-  const displayVariant = localVariant ?? globalPreferredVariant;
-
-  // Mutation hook for setting preferred variants
-  // const setPreferredVariantMutation = useSetPrefferedVariant(); // This line is removed
+  const [localVariant, setLocalVariant] = React.useState<string>(
+    globalPreferredVariant || ''
+  );
 
   const { data: variants, isLoading: variantsLoading } = useSpriteVariants(
     headId,
@@ -67,12 +65,14 @@ export function ArtworkVariantModal({
     return variants;
   }, [variants]);
 
-  // Reset local state when modal opens/closes or currentVariant changes
+  // Reset local state when modal opens/closes or global variant changes
   useEffect(() => {
     if (!isOpen) {
-      setLocalVariant(null);
+      setLocalVariant('');
+    } else {
+      setLocalVariant(globalPreferredVariant || '');
     }
-  }, [isOpen]);
+  }, [isOpen, globalPreferredVariant]);
 
   const handleSelectVariant = React.useCallback(
     async (variant: string) => {
@@ -149,7 +149,7 @@ export function ArtworkVariantModal({
           ) : (
             <>
               <RadioGroup
-                value={displayVariant || ''}
+                value={localVariant || ''}
                 onChange={handleSelectVariant}
                 data-scroll-container
                 className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-y-auto overflow-x-hidden flex-1 min-h-0 scrollbar-thin p-3 relative'

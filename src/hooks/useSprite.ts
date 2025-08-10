@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { spriteQueries } from '@/lib/queries/sprites';
-import { useState, useCallback } from 'react';
+import { useSnapshot } from 'valtio';
 import {
   getPreferredVariant,
   setPreferredVariant,
+  preferredVariants,
 } from '@/lib/preferredVariants';
 import ms from 'ms';
 
@@ -40,29 +41,22 @@ export function useSpriteCredits(
 }
 
 /**
- * Simple hook for preferred variants - no React Query, just direct state
+ * Simple hook for preferred variants - uses Valtio for reactivity
  */
 export function usePreferredVariantState(
-  headId?: number | null,
-  bodyId?: number | null
+  headId: number | null,
+  bodyId: number | null
 ) {
-  // Compute initial value directly during render
-  const initialVariant =
-    headId || bodyId ? (getPreferredVariant(headId, bodyId) ?? '') : '';
-  const [variant, setVariant] = useState<string>(initialVariant);
+  // Use useSnapshot to make the component reactive to changes in the Valtio store
+  useSnapshot(preferredVariants);
 
-  // Update function that immediately updates both state and localStorage
-  const updateVariant = useCallback(
-    async (newVariant: string) => {
-      if (headId || bodyId) {
-        // Update localStorage and in-memory Map
-        setPreferredVariant(headId, bodyId, newVariant);
-        // Update local state immediately
-        setVariant(newVariant);
-      }
-    },
-    [headId, bodyId]
-  );
+  // Get the current value from the Valtio store
+  const variant = getPreferredVariant(headId, bodyId) ?? '';
+
+  // Update function that immediately updates the Valtio store
+  const updateVariant = async (newVariant: string) => {
+    setPreferredVariant(headId, bodyId, newVariant);
+  };
 
   return {
     variant,
@@ -71,36 +65,33 @@ export function usePreferredVariantState(
   };
 }
 
+// Deprecated hooks - these are no longer used
 export function useSetPrefferedVariant() {
-  // This hook is no longer needed since we're using direct state management
   throw new Error(
     'useSetPrefferedVariant is deprecated. Use usePreferredVariantState instead.'
   );
 }
 
-export function usePreferredVariantQuery(
-  _headId?: number | null,
-  _bodyId?: number | null,
-  _opts?: { enabled?: boolean }
-) {
-  // This hook is no longer needed since we're using direct state management
-  throw new Error(
-    'usePreferredVariantQuery is deprecated. Use usePreferredVariantState instead.'
-  );
-}
-
 export function useCyclePreferredVariant() {
-  // This hook is no longer needed since we're using direct state management
   throw new Error(
     'useCyclePreferredVariant is deprecated. Use usePreferredVariantState instead.'
   );
 }
 
-export function usePreferredVariantSuspenseQuery(
-  _headId?: number | null,
-  _bodyId?: number | null
+export function usePreferredVariantQuery(
+  _headId: number | null,
+  _bodyId: number | null
 ) {
-  // This hook is no longer needed since we're using direct state management
+  throw new Error(
+    'usePreferredVariantQuery is deprecated. Use usePreferredVariantState instead.'
+  );
+}
+
+export function usePreferredVariantSuspenseQuery(
+  _headId: number | null,
+  _bodyId: number | null,
+  _opts?: Record<string, unknown>
+) {
   throw new Error(
     'usePreferredVariantSuspenseQuery is deprecated. Use usePreferredVariantState instead.'
   );

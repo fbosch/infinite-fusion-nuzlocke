@@ -38,7 +38,7 @@ export const spriteQueries = {
   preferredVariant: (headId?: number | null, bodyId?: number | null) =>
     queryOptions({
       queryKey: spriteKeys.preferredVariant(headId, bodyId),
-      queryFn: () => getPreferredVariant(headId, bodyId) ?? '',
+      queryFn: () => getPreferredVariant(headId ?? null, bodyId ?? null) ?? '',
       enabled: !!(headId || bodyId),
       staleTime: 1, // Very short stale time (1ms)
       gcTime: Infinity, // Keep in cache indefinitely

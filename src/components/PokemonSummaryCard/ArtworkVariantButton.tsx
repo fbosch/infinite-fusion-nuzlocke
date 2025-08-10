@@ -27,8 +27,8 @@ export function ArtworkVariantButton({
   const encounter = useEncounter(locationId);
   const isShiftPressed = useShiftKey();
   const { variant: currentVariant, updateVariant } = usePreferredVariantState(
-    encounter?.head?.id,
-    encounter?.body?.id
+    encounter?.head?.id ?? null,
+    encounter?.body?.id ?? null
   );
 
   // Use React Query hook for sprite variants

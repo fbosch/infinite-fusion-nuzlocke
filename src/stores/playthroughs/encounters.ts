@@ -348,11 +348,11 @@ export const setArtworkVariant = async (
       await setPreferredVariant(
         displayPokemon.head.id,
         displayPokemon.body.id,
-        variant
+        variant ?? ''
       );
     } else if (displayPokemon.head || displayPokemon.body) {
       const pokemon = displayPokemon.head || displayPokemon.body!;
-      await setPreferredVariant(pokemon.id, null, variant);
+      await setPreferredVariant(pokemon.id, null, variant ?? '');
     }
   } catch (error: unknown) {
     console.warn('Failed to set preferred variant in cache:', error);
@@ -460,14 +460,15 @@ export const cycleArtworkVariant = async (
     const bodyId = displayPokemon.body?.id;
 
     // Get current variant from global preferred variants
-    const currentVariant = getPreferredVariant(headId, bodyId) || '';
+    const currentVariant =
+      getPreferredVariant(headId ?? null, bodyId ?? null) || '';
     const currentIndex = availableVariants.indexOf(currentVariant);
     const nextIndex = reverse
       ? (currentIndex - 1 + availableVariants.length) % availableVariants.length
       : (currentIndex + 1) % availableVariants.length;
 
     // Update global preferred variant
-    const newVariant = availableVariants[nextIndex] || undefined;
+    const newVariant = availableVariants[nextIndex] || '';
 
     if (displayPokemon.isFusion && displayPokemon.head && displayPokemon.body) {
       await setPreferredVariant(
@@ -486,8 +487,8 @@ export const cycleArtworkVariant = async (
     // Prefetch adjacent variants for smoother cycling
     if (availableVariants.length > 2) {
       prefetchAdjacentVariants(
-        headId,
-        bodyId,
+        headId ?? undefined,
+        bodyId ?? undefined,
         newVariant,
         availableVariants
       ).catch(error => {

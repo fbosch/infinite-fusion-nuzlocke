@@ -57,8 +57,8 @@ export function FusionSprite({
   );
 
   const { variant: preferredVariant } = usePreferredVariantState(
-    head?.id,
-    body?.id
+    head?.id ?? null,
+    body?.id ?? null
   );
 
   const credit =

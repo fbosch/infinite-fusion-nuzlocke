@@ -156,7 +156,7 @@ export const usePreferredVariant = (
       const { setPreferredVariant: setGlobalVariant } = await import(
         '@/lib/preferredVariants'
       );
-      await setGlobalVariant(headId, bodyId, variant);
+      setGlobalVariant(headId ?? null, bodyId ?? null, variant ?? '');
     },
     [headId, bodyId]
   );

@@ -1,74 +1,68 @@
+import { proxyMap } from 'valtio/utils';
 import { getSpriteId } from './sprites';
 
-const STORAGE_KEY = 'preferred-variants';
-const preferredVariants = new Map<string, string>();
+// Use Valtio's proxyMap for reactivity
+export const preferredVariants = proxyMap<string, string>();
 
-// Load on module initialization
+// Initialize from localStorage on module load
 if (typeof window !== 'undefined') {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem('preferredVariants');
     if (stored) {
       const entries = JSON.parse(stored);
-      if (Array.isArray(entries)) {
-        entries.forEach(([key, value]) => preferredVariants.set(key, value));
+      for (const [key, value] of entries) {
+        preferredVariants.set(key, value);
       }
     }
   } catch (error) {
-    console.warn('Failed to load preferred variants:', error);
+    console.error(
+      'Failed to load preferred variants from localStorage:',
+      error
+    );
   }
 }
 
-function saveToStorage(): void {
+// Save to localStorage whenever the Map changes
+const saveToStorage = () => {
   try {
-    if (typeof window === 'undefined') return;
     const entries = Array.from(preferredVariants.entries());
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    localStorage.setItem('preferredVariants', JSON.stringify(entries));
   } catch (error) {
-    console.warn('Failed to save preferred variants:', error);
+    console.error('Failed to save preferred variants to localStorage:', error);
   }
-}
+};
 
+// Subscribe to changes and save to localStorage
+import { subscribe } from 'valtio';
+subscribe(preferredVariants, saveToStorage);
+
+/**
+ * Get the preferred variant for a Pokémon or fusion
+ */
 export function getPreferredVariant(
-  headId?: number | null,
-  bodyId?: number | null
-): string | undefined {
-  if (!headId && !bodyId) return undefined;
-  if (headId === -1 || bodyId === -1) return undefined; // Egg
-  const spriteId = getSpriteId(headId, bodyId);
-  return preferredVariants.get(spriteId);
+  headId: number | null,
+  bodyId: number | null
+): string | null {
+  if (!headId && !bodyId) return null;
+
+  const key = getSpriteId(headId, bodyId);
+  return preferredVariants.get(key) ?? null;
 }
 
+/**
+ * Set the preferred variant for a Pokémon or fusion
+ */
 export function setPreferredVariant(
-  headId?: number | null,
-  bodyId?: number | null,
-  preferredVariant?: string
+  headId: number | null,
+  bodyId: number | null,
+  variant: string
 ): void {
   if (!headId && !bodyId) return;
 
-  const spriteId = getSpriteId(headId, bodyId);
-
-  if (preferredVariant) {
-    preferredVariants.set(spriteId, preferredVariant);
+  const key = getSpriteId(headId, bodyId);
+  if (variant) {
+    preferredVariants.set(key, variant);
   } else {
-    preferredVariants.delete(spriteId);
-  }
-
-  saveToStorage();
-}
-
-export function reloadPreferredVariants(): void {
-  try {
-    if (typeof window === 'undefined') return;
-
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const entries = JSON.parse(stored);
-      if (Array.isArray(entries)) {
-        preferredVariants.clear();
-        entries.forEach(([key, value]) => preferredVariants.set(key, value));
-      }
-    }
-  } catch (error) {
-    console.warn('Failed to reload preferred variants:', error);
+    preferredVariants.delete(key);
   }
 }
