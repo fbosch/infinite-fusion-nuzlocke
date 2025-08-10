@@ -53,7 +53,6 @@ interface PCEntryItemProps {
   hoverRingClass: string; // e.g., 'hover:ring-blue-400/60'
   fallbackLabel: string; // e.g., 'Stored Pokémon'
   className?: string; // extra classes like size-35 for specific lists
-  onClose: () => void;
 }
 
 function PCEntryItem({
@@ -63,7 +62,6 @@ function PCEntryItem({
   hoverRingClass,
   fallbackLabel,
   className,
-  onClose,
 }: PCEntryItemProps) {
   const encounters = useEncounters();
   const currentEncounter = encounters?.[entry.locationId];
@@ -84,104 +82,58 @@ function PCEntryItem({
     .filter(Boolean)
     .join(' / ');
 
-  const handleClick = () => {
-    // Close the sheet
-    onClose();
-
-    // Scroll to the Pokemon location after a short delay to ensure the sheet is closed
-    setTimeout(() => {
-      const element = document.querySelector(
-        `[data-location-id="${entry.locationId}"]`
-      );
-      if (element) {
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
-
-        // Determine which combobox(es) to highlight based on the active Pokemon and fusion state
-        const comboboxIds: string[] = [];
-        if (isFusion) {
-          // Fusion encounter - use head/body comboboxes
-          if (headActive && bodyActive) {
-            // Both head and body are active - highlight both comboboxes
-            comboboxIds.push(
-              `${entry.locationId}-head`,
-              `${entry.locationId}-body`
-            );
-          } else if (headActive) {
-            comboboxIds.push(`${entry.locationId}-head`);
-          } else if (bodyActive) {
-            comboboxIds.push(`${entry.locationId}-body`);
-          }
-        } else {
-          // Single encounter - always use single combobox
-          comboboxIds.push(`${entry.locationId}-single`);
-        }
-
-        // Highlight all relevant comboboxes
-        comboboxIds.forEach(comboboxId => {
-          const overlay = document.querySelector(
-            `.location-highlight-overlay[data-combobox-id="${comboboxId}"]`
-          );
-          if (overlay) {
-            // Show the highlight overlay
-            overlay.classList.add('opacity-100');
-            overlay.classList.remove('opacity-0');
-
-            // Remove highlight after 2 seconds
-            setTimeout(() => {
-              overlay.classList.add('opacity-0');
-              overlay.classList.remove('opacity-100');
-            }, 2000);
-          }
-        });
-      }
-    }, 100);
-  };
-
   return (
-    <li
-      key={entry.locationId}
-      role='listitem'
-      className={clsx(
-        'relative rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:ring-2 transition-all duration-200 cursor-pointer',
-        hoverRingClass,
-        className
-      )}
-      onClick={handleClick}
+    <PokemonContextMenu
+      locationId={entry.locationId}
+      encounterData={{
+        head: entry.head,
+        body: entry.body,
+        isFusion: currentEncounter?.isFusion || false,
+      }}
+      shouldLoad={true}
     >
-      <div className='flex items-center gap-3 p-3'>
-        <div className='flex-shrink-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-md'>
-          {hasAny && (
-            <FusionSprite
-              headPokemon={entry.head ?? null}
-              bodyPokemon={entry.body ?? null}
-              shouldLoad
-              showStatusOverlay={false}
-              showTooltip={false}
-            />
-          )}
-        </div>
-        <div className='flex-1 min-w-0'>
-          <div className='text-sm font-medium text-gray-900 dark:text-gray-100 truncate'>
-            {label || fallbackLabel}
+      <li
+        key={entry.locationId}
+        role='listitem'
+        className={clsx(
+          'relative rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:ring-2 transition-all duration-200 cursor-pointer',
+          hoverRingClass,
+          className
+        )}
+      >
+        <div className='flex items-center gap-3 p-3'>
+          <div className='flex-shrink-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-md'>
+            {hasAny && (
+              <FusionSprite
+                headPokemon={entry.head ?? null}
+                bodyPokemon={entry.body ?? null}
+                shouldLoad
+                showStatusOverlay={false}
+                showTooltip={false}
+              />
+            )}
           </div>
-          <div className='text-xs text-gray-500 dark:text-gray-400 truncate'>
-            {idToName.get(entry.locationId) || 'Unknown Location'}
+          <div className='flex-1 min-w-0'>
+            <div className='text-sm font-medium text-gray-900 dark:text-gray-100 truncate'>
+              {label || fallbackLabel}
+            </div>
+            <div className='text-xs text-gray-500 dark:text-gray-400 truncate'>
+              {idToName.get(entry.locationId) || 'Unknown Location'}
+            </div>
           </div>
         </div>
-      </div>
-    </li>
+      </li>
+    </PokemonContextMenu>
   );
 }
 
 interface TeamEntryItemProps {
   entry: Entry;
   idToName: Map<string, string>;
+  isOverLimit: boolean;
 }
 
-function TeamEntryItem({ entry, idToName }: TeamEntryItemProps) {
+function TeamEntryItem({ entry, idToName, isOverLimit }: TeamEntryItemProps) {
   const encounters = useEncounters();
   const currentEncounter = encounters?.[entry.locationId];
   const headActive =
@@ -212,8 +164,13 @@ function TeamEntryItem({ entry, idToName }: TeamEntryItemProps) {
         key={entry.locationId}
         role='listitem'
         className={clsx(
-          'relative rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:ring-2 transition-all duration-200 cursor-pointer',
-          'hover:ring-green-400/60'
+          'relative rounded-lg border transition-all duration-200 cursor-pointer',
+          {
+            'border-red-500 bg-red-50 dark:bg-red-900/20 hover:ring-2 hover:ring-red-400/60':
+              isOverLimit,
+            'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:ring-2 hover:ring-green-400/60':
+              !isOverLimit,
+          }
         )}
       >
         <div className='p-4'>
@@ -512,13 +469,35 @@ export default function PokemonPCSheet({
                       aria-label='Active team members list'
                       className='w-full space-y-3 py-2'
                     >
-                      {team.map(entry => (
-                        <TeamEntryItem
-                          key={entry.locationId}
-                          entry={entry}
-                          idToName={idToName}
-                        />
-                      ))}
+                      {(() => {
+                        let pokemonCount = 0;
+                        return team.map(entry => {
+                          // For fusions, count as 1 Pokémon; for non-fusions, count head and body separately
+                          const currentEncounter =
+                            encounters?.[entry.locationId];
+                          const isFusion =
+                            currentEncounter?.isFusion &&
+                            entry.head &&
+                            entry.body;
+
+                          const entryPokemonCount = isFusion
+                            ? 1
+                            : (entry.head ? 1 : 0) + (entry.body ? 1 : 0);
+
+                          // Check if this entry or any previous entries exceed 6
+                          pokemonCount += entryPokemonCount;
+                          const isOverLimit = pokemonCount > 6;
+
+                          return (
+                            <TeamEntryItem
+                              key={entry.locationId}
+                              entry={entry}
+                              idToName={idToName}
+                              isOverLimit={isOverLimit}
+                            />
+                          );
+                        });
+                      })()}
                     </ul>
                   )}
                 </TabPanel>
@@ -552,7 +531,6 @@ export default function PokemonPCSheet({
                           hoverRingClass='hover:ring-blue-400/60'
                           fallbackLabel='Stored Pokémon'
                           className=''
-                          onClose={onClose}
                         />
                       ))}
                     </ul>
@@ -588,7 +566,6 @@ export default function PokemonPCSheet({
                           hoverRingClass='hover:ring-red-400/60'
                           fallbackLabel='Fainted Pokémon'
                           className=''
-                          onClose={onClose}
                         />
                       ))}
                     </ul>

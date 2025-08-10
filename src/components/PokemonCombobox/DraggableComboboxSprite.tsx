@@ -9,10 +9,11 @@ import { PokemonSprite } from '../PokemonSprite';
 import { CursorTooltip } from '../CursorTooltip';
 import spritesheetMetadata from '@/assets/pokemon-spritesheet-metadata.json';
 import ContextMenu, { type ContextMenuItem } from '../ContextMenu';
-import { getLocations, getLocationById } from '@/loaders/locations';
+import { getLocations, getLocationByIdFromMerged } from '@/loaders/locations';
 import {
   playthroughActions,
   getActivePlaythrough,
+  useCustomLocations,
 } from '@/stores/playthroughs';
 import dynamic from 'next/dynamic';
 
@@ -43,6 +44,7 @@ export function DraggableComboboxSprite({
 }: DraggableComboboxSpriteProps) {
   const pokemon = dragPreview || value;
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const customLocations = useCustomLocations();
 
   // Extract field from comboboxId
   const field = comboboxId?.includes('-body') ? 'body' : 'head';
@@ -159,7 +161,10 @@ export function DraggableComboboxSprite({
       value.originalLocation &&
       value.originalLocation !== locationId
     ) {
-      const originalLocation = getLocationById(value.originalLocation);
+      const originalLocation = getLocationByIdFromMerged(
+        value.originalLocation,
+        customLocations
+      );
       if (originalLocation) {
         const isDisabled = wouldCreateEggFusionAtOriginal;
         options.push({
@@ -258,6 +263,24 @@ export function DraggableComboboxSprite({
             placement='bottom-start'
             content={
               <div>
+                {/* Show original encounter location if different from current location */}
+                {pokemon?.originalLocation &&
+                  pokemon.originalLocation !== locationId && (
+                    <div className='mb-2 pb-2 border-b border-gray-200 dark:border-gray-700'>
+                      <div className='flex items-center gap-1.5 text-xs'>
+                        <Home className='size-3 text-gray-500 dark:text-gray-400' />
+                        <span className='text-gray-600 dark:text-gray-300'>
+                          Originally encountered at:{' '}
+                        </span>
+                        <span className='font-medium text-gray-700 dark:text-gray-200'>
+                          {getLocationByIdFromMerged(
+                            pokemon.originalLocation,
+                            customLocations
+                          )?.name || pokemon.originalLocation}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 <div className='flex items-center text-xs gap-2'>
                   <div className='flex items-center gap-1'>
                     <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
