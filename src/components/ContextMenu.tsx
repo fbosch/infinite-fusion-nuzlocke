@@ -8,8 +8,6 @@ import {
   useDismiss,
   useListNavigation,
   FloatingFocusManager,
-  shift,
-  offset,
 } from '@floating-ui/react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -30,12 +28,17 @@ import { match } from 'ts-pattern';
 // Custom hook for context menu state management
 function useContextMenuState() {
   const [, startTransition] = useTransition();
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  const openMenu = useCallback((_position: { x: number; y: number }) => {
+  const openMenu = useCallback((position: { x: number; y: number }) => {
     startTransition(() => {
+      setMenuPosition(position);
       setIsOpen(true);
       setIsVisible(true);
     });
@@ -54,6 +57,7 @@ function useContextMenuState() {
   }, []);
 
   return {
+    menuPosition,
     isOpen,
     isVisible,
     activeIndex,
@@ -99,6 +103,7 @@ export function ContextMenu({
   onOpenChange,
 }: ContextMenuProps) {
   const {
+    menuPosition,
     isOpen,
     isVisible,
     activeIndex,
@@ -111,43 +116,18 @@ export function ContextMenu({
   const triggerRef = useRef<HTMLElement>(null);
   const listRef = useRef<Array<HTMLElement | null>>([]);
   const menuElementRef = useRef<HTMLDivElement>(null);
-  const virtualReferenceRef = useRef<{ getBoundingClientRect: () => DOMRect }>(
-    null
-  );
 
   useEffect(() => {
     onOpenChange?.(isOpen);
   }, [isOpen, onOpenChange]);
 
-  // Floating UI setup for keyboard navigation and positioning
-  const { refs, context, floatingStyles } = useFloating({
+  // Floating UI setup for keyboard navigation
+  const { refs, context } = useFloating({
     open: isOpen,
     onOpenChange: open => {
       if (!open) closeMenu();
     },
-    middleware: [
-      offset(8), // Add some offset from the cursor
-      shift({
-        padding: 8, // Ensure menu stays within viewport with padding
-        mainAxis: true, // Shift on main axis (vertical)
-        crossAxis: true, // Shift on cross axis (horizontal)
-      }),
-    ],
-    placement: 'bottom-start', // Default placement, will be adjusted by shift
-    whileElementsMounted: (reference, floating, update) => {
-      // Update position when elements are mounted
-      update();
-      // Return cleanup function
-      return () => {};
-    },
   });
-
-  // Update the reference when the virtual reference changes
-  useEffect(() => {
-    if (isOpen && virtualReferenceRef.current) {
-      refs.setReference(virtualReferenceRef.current);
-    }
-  }, [isOpen, refs]);
 
   const dismiss = useDismiss(context);
   const role = useRole(context, { role: 'menu' });
@@ -239,13 +219,9 @@ export function ContextMenu({
     event.preventDefault();
     event.stopPropagation();
 
-    // Create a virtual reference at the cursor position
-    const rect = new DOMRect(event.clientX, event.clientY, 0, 0);
-
-    virtualReferenceRef.current = {
-      getBoundingClientRect: () => rect,
-    };
-    openMenu({ x: event.clientX, y: event.clientY });
+    // Calculate position relative to the viewport
+    const position = { x: event.clientX, y: event.clientY };
+    openMenu(position);
 
     // Add enter animation class after a frame
     requestAnimationFrame(() => {
@@ -263,6 +239,7 @@ export function ContextMenu({
         cloneElement(children, {
           ref: (node: HTMLElement | null) => {
             triggerRef.current = node;
+            refs.setReference(node);
           },
           onContextMenu: handleContextMenu,
         } as React.HTMLAttributes<HTMLElement>)}
@@ -277,7 +254,9 @@ export function ContextMenu({
                 menuElementRef.current = node;
               }}
               style={{
-                ...floatingStyles,
+                position: 'fixed',
+                left: menuPosition.x,
+                top: menuPosition.y,
                 transformOrigin: 'top left',
               }}
               className={clsx(
