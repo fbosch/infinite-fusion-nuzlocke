@@ -9,7 +9,6 @@ import {
   getPreferredVariant,
 } from '@/lib/preferredVariants';
 import { queryClient } from '@/lib/client';
-import { queryPersister } from '@/lib/persistence';
 import ms from 'ms';
 
 // Query key factories for consistent key generation
@@ -49,8 +48,6 @@ export const spriteQueries = {
       enabled: !!(headId || bodyId),
       staleTime: Infinity, // Never stale
       gcTime: Infinity, // Never garbage collect
-      // Persist ONLY this query (explicit per-query persistence)
-      persister: queryPersister.persisterFn,
     }),
 };
 
