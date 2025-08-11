@@ -1,5 +1,4 @@
-import fs from 'fs/promises';
-import path from 'path';
+// Load license data without relying on filesystem access at runtime
 
 type LicensePackage = {
   name: string;
@@ -17,10 +16,14 @@ async function loadLicenses(): Promise<{
   packages: LicensePackage[];
 } | null> {
   try {
-    const filePath = path.join(process.cwd(), 'public', 'licenses.json');
-    const content = await fs.readFile(filePath, 'utf8');
-    return JSON.parse(content);
+    // Prefer build-time import so it works in Serverless/Edge runtimes
+    const mod = await import('../../../public/licenses.json');
+    return (mod as { default: unknown }).default as {
+      generatedAt: string;
+      packages: LicensePackage[];
+    };
   } catch {
+    // Fallback: if import fails (e.g., file missing), show friendly message
     return null;
   }
 }
