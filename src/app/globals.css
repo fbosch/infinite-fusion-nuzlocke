@@ -10,8 +10,8 @@
 }
 
 /* Ensure DotGothic16 is available for font-mono */
-.font-mono {
-  font-family: var(--font-mono), 'Courier New', monospace !important;
+.font-ds {
+  font-family: var(--font-ds), 'Courier New', monospace !important;
   -webkit-font-smoothing: none !important;
   -moz-osx-font-smoothing: none !important;
   font-smooth: never !important;
@@ -200,22 +200,4 @@ body {
 .tooltip-exit {
   animation: tooltipExit 0.05s ease-out forwards;
   will-change: opacity, transform;
-}
-
-/* Global button press animation */
-button {
-  @apply cursor-pointer transition-transform duration-150 ease-out enabled:active:scale-[.97];
-}
-
-[role='button'] {
-  @apply cursor-pointer transition-transform duration-150 ease-out;
-}
-
-[role='button']:not([aria-disabled='true']):active {
-  @apply scale-[.97];
-}
-
-button:disabled,
-[aria-disabled='true'] {
-  @apply cursor-not-allowed;
 }

@@ -6,6 +6,7 @@ import { Computer } from 'lucide-react';
 import { useState } from 'react';
 import clsx from 'clsx';
 import { CursorTooltip } from '@/components/CursorTooltip';
+import Link from 'next/link';
 
 const PokemonPCSheet = dynamic(() => import('@/components/pc/PokemonPCSheet'), {
   ssr: false,
@@ -28,7 +29,7 @@ export default function Header() {
       <div className='mx-auto max-w-[1500px] px-4 md:px-6 2xl:px-0'>
         <header className='mb-2 py-2 sm:mb-4 sm:pt-5 '>
           <div className='flex items-center justify-between gap-4'>
-            <div className='flex items-center gap-3 justify-start'>
+            <Link href='/' className='flex items-center gap-3 justify-start'>
               <Logo className='w-18 sm:w-14' />
               <div className='sr-only md:not-sr-only self-start'>
                 <h1 className='text-xs font-medium tracking-[0.01em] sm:text-[0.85rem]'>
@@ -40,7 +41,7 @@ export default function Header() {
                   </div>
                 </h1>
               </div>
-            </div>
+            </Link>
             <div className='flex items-center gap-2'>
               <CursorTooltip content='Open Pokémon PC' delay={500}>
                 <button

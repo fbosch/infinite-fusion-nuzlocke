@@ -1,6 +1,7 @@
 'use client';
 
 import CookieSettingsButton from '@/components/analytics/CookieSettingsButton';
+import CreditsModal from '@/components/CreditsModal';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { Sun, Moon, Monitor } from 'lucide-react';
@@ -68,6 +69,7 @@ export default function Footer() {
   });
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [isCreditsOpen, setIsCreditsOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -176,6 +178,27 @@ export default function Footer() {
               Game Freak Inc., or Creatures Inc.
             </p>
           </div>
+          <div className='mt-2 md:text-center'>
+            <button
+              onClick={() => setIsCreditsOpen(true)}
+              className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm cursor-pointer'
+              aria-haspopup='dialog'
+              aria-controls='credits-modal'
+            >
+              Credits
+            </button>
+            <span className='mx-2 text-gray-400'>·</span>
+            <a
+              href='/licenses'
+              className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm'
+            >
+              Open source licenses
+            </a>
+          </div>
+          <CreditsModal
+            isOpen={isCreditsOpen}
+            onClose={() => setIsCreditsOpen(false)}
+          />
         </div>
       </div>
     </footer>

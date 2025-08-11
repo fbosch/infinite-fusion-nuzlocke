@@ -23,7 +23,7 @@ const font = Font({
 
 const dsFont = localFont({
   src: '../../public/pokemon-ds-font.woff2',
-  variable: '--font-mono',
+  variable: '--font-ds',
   display: 'block',
 });
 
