@@ -201,3 +201,21 @@ body {
   animation: tooltipExit 0.05s ease-out forwards;
   will-change: opacity, transform;
 }
+
+/* Global button press animation */
+button {
+  @apply cursor-pointer transition-transform duration-150 ease-out enabled:active:scale-[.97];
+}
+
+[role='button'] {
+  @apply cursor-pointer transition-transform duration-150 ease-out;
+}
+
+[role='button']:not([aria-disabled='true']):active {
+  @apply scale-[.97];
+}
+
+button:disabled,
+[aria-disabled='true'] {
+  @apply cursor-not-allowed;
+}
