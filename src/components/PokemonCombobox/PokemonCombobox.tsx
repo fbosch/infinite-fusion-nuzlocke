@@ -485,6 +485,7 @@ export const PokemonCombobox = React.memo(
                     value={value}
                     onChange={onChange}
                     shouldLoad={shouldLoad}
+                    locationId={locationId}
                   />
                 )}
                 {open ? (
