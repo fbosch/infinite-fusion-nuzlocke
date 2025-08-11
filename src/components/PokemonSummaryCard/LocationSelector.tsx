@@ -270,7 +270,6 @@ function LocationItem({
       className={clsx(
         'w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-50 dark:focus:bg-gray-700 border-b border-gray-200 dark:border-gray-600 last:border-b-0',
         {
-          'cursor-pointer': !wouldCreateEggFusion,
           'cursor-not-allowed opacity-50': wouldCreateEggFusion,
         }
       )}
@@ -372,7 +371,7 @@ function TargetFieldSelector({
           type='button'
           onClick={() => onTargetFieldChange('head')}
           className={clsx(
-            'flex-1 px-3 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer',
+            'flex-1 px-3 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500',
             'justify-center flex items-center gap-x-1',
             selectedTargetField === 'head'
               ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
@@ -386,7 +385,7 @@ function TargetFieldSelector({
           type='button'
           onClick={() => onTargetFieldChange('body')}
           className={clsx(
-            'flex-1 px-3 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer',
+            'flex-1 px-3 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500',
             'justify-center flex items-center gap-x-1',
             selectedTargetField === 'body'
               ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
@@ -644,7 +643,7 @@ function LocationSelector({
             <button
               type='button'
               onClick={handleClose}
-              className='px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer'
+              className='px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
             >
               Cancel
             </button>

@@ -40,7 +40,7 @@ export default function RemoveLocationButton({
           type='button'
           onClick={handleButtonClick}
           className={clsx(
-            'size-8 flex items-center justify-center rounded-md transition-colors cursor-pointer',
+            'size-8 flex items-center justify-center rounded-md transition-colors',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2',
             'text-gray-400 hover:text-red-600 hover:bg-red-50',
             'dark:text-gray-500 dark:hover:text-red-400 dark:hover:bg-red-900/20'

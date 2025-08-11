@@ -125,7 +125,7 @@ export function ArtworkVariantModal({
               className={clsx(
                 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2',
-                'p-1 rounded-md transition-colors cursor-pointer'
+                'p-1 rounded-md transition-colors'
               )}
               aria-label='Close modal'
             >
@@ -246,7 +246,7 @@ export function ArtworkVariantModal({
                   onClick={onClose}
                   className={clsx(
                     'px-4 py-2 text-sm rounded-md transition-colors',
-                    'bg-gray-100 hover:bg-gray-200 text-gray-900 cursor-pointer',
+                    'bg-gray-100 hover:bg-gray-200 text-gray-900',
                     'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
                     'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2'
                   )}
@@ -257,7 +257,7 @@ export function ArtworkVariantModal({
                   onClick={handleClearVariant}
                   className={clsx(
                     'px-4 py-2 text-sm rounded-md transition-colors',
-                    'bg-gray-100 hover:bg-gray-200 text-gray-900 cursor-pointer',
+                    'bg-gray-100 hover:bg-gray-200 text-gray-900',
                     'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
                     'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
                   )}

@@ -183,13 +183,13 @@ export function CookieSettings({ isOpen, onClose }: CookieSettingsProps) {
             <div className='flex space-x-3'>
               <button
                 onClick={() => savePreferences(DEFAULT_PREFERENCES)}
-                className='flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white  py-3 px-4 rounded-md transition-colors cursor-pointer'
+                className='flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white  py-3 px-4 rounded-md transition-colors'
               >
                 Reject All
               </button>
               <button
                 onClick={() => savePreferences(localPreferences)}
-                className='flex-1 bg-blue-600 hover:bg-blue-700 text-white  py-3 px-4 rounded-md transition-colors cursor-pointer'
+                className='flex-1 bg-blue-600 hover:bg-blue-700 text-white  py-3 px-4 rounded-md transition-colors'
               >
                 Save Preferences
               </button>

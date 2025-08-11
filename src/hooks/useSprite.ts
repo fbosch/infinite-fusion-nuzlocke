@@ -77,22 +77,3 @@ export function useCyclePreferredVariant() {
     'useCyclePreferredVariant is deprecated. Use usePreferredVariantState instead.'
   );
 }
-
-export function usePreferredVariantQuery(
-  _headId: number | null,
-  _bodyId: number | null
-) {
-  throw new Error(
-    'usePreferredVariantQuery is deprecated. Use usePreferredVariantState instead.'
-  );
-}
-
-export function usePreferredVariantSuspenseQuery(
-  _headId: number | null,
-  _bodyId: number | null,
-  _opts?: Record<string, unknown>
-) {
-  throw new Error(
-    'usePreferredVariantSuspenseQuery is deprecated. Use usePreferredVariantState instead.'
-  );
-}

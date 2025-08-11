@@ -65,8 +65,6 @@ function PCEntryItem({
 }: PCEntryItemProps) {
   const encounters = useEncounters();
   const currentEncounter = encounters?.[entry.locationId];
-  const isFusion = currentEncounter?.isFusion || false;
-
   const isStoredMode = mode === 'stored';
   const headActive = isStoredMode
     ? entry.head?.status === PokemonStatus.STORED
@@ -379,7 +377,7 @@ export default function PokemonPCSheet({
                 className={clsx(
                   'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2',
-                  'p-1 rounded-md transition-colors cursor-pointer'
+                  'p-1 rounded-md transition-colors'
                 )}
                 aria-label='Close drawer'
               >
@@ -398,7 +396,7 @@ export default function PokemonPCSheet({
                 <Tab
                   className={({ selected }) =>
                     clsx(
-                      'px-3 py-1.5 text-sm inline-flex items-center gap-2 rounded-md border transition-colors focus:outline-none cursor-pointer',
+                      'px-3 py-1.5 text-sm inline-flex items-center gap-2 rounded-md border transition-colors focus:outline-none',
                       selected
                         ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 shadow'
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -414,7 +412,7 @@ export default function PokemonPCSheet({
                 <Tab
                   className={({ selected }) =>
                     clsx(
-                      'px-3 py-1.5 text-sm inline-flex items-center gap-2 rounded-md border transition-colors focus:outline-none cursor-pointer',
+                      'px-3 py-1.5 text-sm inline-flex items-center gap-2 rounded-md border transition-colors focus:outline-none',
                       selected
                         ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 shadow'
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -430,7 +428,7 @@ export default function PokemonPCSheet({
                 <Tab
                   className={({ selected }) =>
                     clsx(
-                      'px-3 py-1.5 text-sm inline-flex items-center gap-2 rounded-md border transition-colors focus:outline-none cursor-pointer',
+                      'px-3 py-1.5 text-sm inline-flex items-center gap-2 rounded-md border transition-colors focus:outline-none',
                       selected
                         ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 shadow'
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700'
