@@ -4,7 +4,11 @@ import {
   generatePokemonUID,
   PokemonStatus,
 } from '@/loaders/pokemon';
-import { generateSpriteUrl, getArtworkVariants } from '@/lib/sprites';
+import {
+  generateSpriteUrl,
+  getArtworkVariants,
+  getSpriteId,
+} from '@/lib/sprites';
 import {
   getPreferredVariant,
   setPreferredVariant,
@@ -15,6 +19,22 @@ import { spriteKeys } from '@/lib/queries/sprites';
 import { EncounterDataSchema, Playthrough } from './types';
 import { getActivePlaythrough, getCurrentTimestamp } from './store';
 import { emitEvolutionEvent } from '@/lib/events';
+
+function getFusionSpriteIdFromEncounter(enc?: {
+  head: z.infer<typeof PokemonOptionSchema> | null;
+  body: z.infer<typeof PokemonOptionSchema> | null;
+  isFusion?: boolean;
+}) {
+  if (!enc || !enc.isFusion || !enc.head || !enc.body) return null;
+  const headId = enc.head?.id ?? null;
+  const bodyId = enc.body?.id ?? null;
+  if (!headId || !bodyId) return null;
+  try {
+    return getSpriteId(headId, bodyId);
+  } catch {
+    return null;
+  }
+}
 
 // Create encounter data (variants are now managed globally)
 export const createEncounterData = async (
@@ -242,13 +262,19 @@ export const flipEncounterFusion = async (locationId: string) => {
   const originalHead = encounter.head;
   const originalBody = encounter.body;
 
+  // Only animate when both parts exist and the fusion actually changes
+  const prevSpriteId = getFusionSpriteIdFromEncounter(encounter);
+
   encounter.head = originalBody;
   encounter.body = originalHead;
   encounter.updatedAt = getCurrentTimestamp();
 
   // No need to handle variants - they're managed globally
-  // Trigger animation when flipping a fusion
-  emitEvolutionEvent(locationId);
+
+  const nextSpriteId = getFusionSpriteIdFromEncounter(encounter);
+  if (prevSpriteId && nextSpriteId && prevSpriteId !== nextSpriteId) {
+    emitEvolutionEvent(locationId);
+  }
 };
 
 // Move encounter atomically from source to destination (for drag and drop)
