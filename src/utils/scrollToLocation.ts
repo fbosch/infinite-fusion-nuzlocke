@@ -1,5 +1,8 @@
 import type { EncounterData } from '@/stores/playthroughs';
 
+// Keep teardown timers per overlay element across calls to avoid flicker
+const overlayHideTimers = new WeakMap<HTMLElement, number>();
+
 /**
  * Find the most recently filled out location based on encounter updatedAt timestamps
  */
@@ -112,9 +115,6 @@ export function flashPokemonOverlaysByUids(
 ): void {
   if (!uids || uids.length === 0) return;
 
-  // Keep teardown timers per element to avoid blink when re-applied
-  const hideTimers = new WeakMap<HTMLElement, number>();
-
   const apply = () => {
     uids.forEach(uid => {
       if (!uid) return;
@@ -132,12 +132,12 @@ export function flashPokemonOverlaysByUids(
         overlay.style.transition || 'opacity 180ms ease-in-out';
       overlay.style.opacity = '1';
 
-      const prev = hideTimers.get(overlay);
+      const prev = overlayHideTimers.get(overlay);
       if (prev) window.clearTimeout(prev);
       const timeout = window.setTimeout(() => {
         overlay.style.removeProperty('opacity');
       }, durationMs);
-      hideTimers.set(overlay, timeout);
+      overlayHideTimers.set(overlay, timeout);
     });
   };
 
