@@ -26,6 +26,7 @@ import { getNicknameText } from '@/components/PokemonSummaryCard/utils';
 import PokeballIcon from '@/assets/images/pokeball.svg';
 import HeadIcon from '@/assets/images/head.svg';
 import BodyIcon from '@/assets/images/body.svg';
+import { scrollToLocationById } from '@/utils/scrollToLocation';
 
 export interface PokemonPCSheetProps {
   isOpen: boolean;
@@ -53,6 +54,7 @@ interface PCEntryItemProps {
   hoverRingClass: string; // e.g., 'hover:ring-blue-400/60'
   fallbackLabel: string; // e.g., 'Stored Pokémon'
   className?: string; // extra classes like size-35 for specific lists
+  onClose?: () => void;
 }
 
 function PCEntryItem({
@@ -62,6 +64,7 @@ function PCEntryItem({
   hoverRingClass,
   fallbackLabel,
   className,
+  onClose,
 }: PCEntryItemProps) {
   const encounters = useEncounters();
   const currentEncounter = encounters?.[entry.locationId];
@@ -79,6 +82,20 @@ function PCEntryItem({
   ]
     .filter(Boolean)
     .join(' / ');
+
+  const handleClick = () => {
+    const highlightUids: string[] = [];
+    if (entry.head?.uid) highlightUids.push(entry.head.uid);
+    if (entry.body?.uid) highlightUids.push(entry.body.uid);
+
+    scrollToLocationById(entry.locationId, {
+      behavior: 'smooth',
+      highlightUids,
+      durationMs: 1200,
+    });
+
+    onClose?.();
+  };
 
   return (
     <PokemonContextMenu
@@ -98,6 +115,15 @@ function PCEntryItem({
           hoverRingClass,
           className
         )}
+        onClick={handleClick}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
+        tabIndex={0}
+        aria-label={`Scroll to ${idToName.get(entry.locationId) || 'location'} in table`}
       >
         <div className='flex items-center gap-3 p-3'>
           <div className='flex-shrink-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-md'>
@@ -129,9 +155,15 @@ interface TeamEntryItemProps {
   entry: Entry;
   idToName: Map<string, string>;
   isOverLimit: boolean;
+  onClose?: () => void;
 }
 
-function TeamEntryItem({ entry, idToName, isOverLimit }: TeamEntryItemProps) {
+function TeamEntryItem({
+  entry,
+  idToName,
+  isOverLimit,
+  onClose,
+}: TeamEntryItemProps) {
   const encounters = useEncounters();
   const currentEncounter = encounters?.[entry.locationId];
   const headActive =
@@ -147,6 +179,20 @@ function TeamEntryItem({ entry, idToName, isOverLimit }: TeamEntryItemProps) {
     (currentEncounter?.isFusion && headActive && bodyActive) || false;
 
   if (!hasAny) return null;
+
+  const handleClick = () => {
+    const highlightUids: string[] = [];
+    if (entry.head?.uid) highlightUids.push(entry.head.uid);
+    if (entry.body?.uid) highlightUids.push(entry.body.uid);
+
+    scrollToLocationById(entry.locationId, {
+      behavior: 'smooth',
+      highlightUids,
+      durationMs: 1200,
+    });
+
+    onClose?.();
+  };
 
   return (
     <PokemonContextMenu
@@ -170,6 +216,15 @@ function TeamEntryItem({ entry, idToName, isOverLimit }: TeamEntryItemProps) {
               !isOverLimit,
           }
         )}
+        onClick={handleClick}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
+        tabIndex={0}
+        aria-label={`Scroll to ${idToName.get(entry.locationId) || 'location'} in table`}
       >
         <div className='p-4'>
           <div className='flex items-start gap-4'>
@@ -492,6 +547,7 @@ export default function PokemonPCSheet({
                               entry={entry}
                               idToName={idToName}
                               isOverLimit={isOverLimit}
+                              onClose={onClose}
                             />
                           );
                         });
@@ -529,6 +585,7 @@ export default function PokemonPCSheet({
                           hoverRingClass='hover:ring-blue-400/60'
                           fallbackLabel='Stored Pokémon'
                           className=''
+                          onClose={onClose}
                         />
                       ))}
                     </ul>
@@ -564,6 +621,7 @@ export default function PokemonPCSheet({
                           hoverRingClass='hover:ring-red-400/60'
                           fallbackLabel='Fainted Pokémon'
                           className=''
+                          onClose={onClose}
                         />
                       ))}
                     </ul>
