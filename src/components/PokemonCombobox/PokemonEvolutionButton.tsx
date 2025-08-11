@@ -219,7 +219,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
         }
       }
     },
-    [availableEvolutions, availablePreEvolution, value, onChange]
+    [availableEvolutions, availablePreEvolution, value, onChange, locationId]
   );
 
   // Handle evolution button click for single evolution or devolution
