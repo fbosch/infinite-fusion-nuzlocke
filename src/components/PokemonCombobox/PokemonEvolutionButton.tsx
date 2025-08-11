@@ -18,11 +18,13 @@ import {
 import { useShiftKey } from '@/hooks/useKeyPressed';
 import { CursorTooltip } from '../CursorTooltip';
 import { PokemonSprite } from '../PokemonSprite';
+import { emitEvolutionEvent } from '@/lib/events';
 
 interface PokemonEvolutionButtonProps {
   value: PokemonOptionType | null | undefined;
   onChange: (value: PokemonOptionType | null) => void;
   shouldLoad?: boolean;
+  locationId?: string;
 }
 
 interface EvolutionDropdownProps {
@@ -148,6 +150,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   value,
   onChange,
   shouldLoad = true,
+  locationId,
 }) => {
   const isShiftPressed = useShiftKey();
   const { evolutions, preEvolution, isLoading } = usePokemonEvolutionData(
@@ -191,6 +194,10 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
           ...evolutionPokemon,
         };
         onChange(evolvedPokemon);
+        if (!isDevolution) {
+          const id = locationId ?? value?.originalLocation ?? null;
+          if (id) emitEvolutionEvent(id);
+        }
       } else if (isDevolution && availablePreEvolution) {
         // Devolution - go to pre-evolution
         const devolvedPokemon: PokemonOptionType = {
@@ -206,6 +213,10 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
           ...evolution,
         };
         onChange(evolvedPokemon);
+        if (!isDevolution) {
+          const id = locationId ?? value?.originalLocation ?? null;
+          if (id) emitEvolutionEvent(id);
+        }
       }
     },
     [availableEvolutions, availablePreEvolution, value, onChange]

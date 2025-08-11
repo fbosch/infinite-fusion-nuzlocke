@@ -104,6 +104,13 @@ body {
   image-rendering: pixelated;
 }
 
+/* Ensure absolutely positioned canvas overlays match container size */
+.absolute > canvas.w-full.h-full {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .image-render-crisp-edges {
   image-rendering: crisp-edges;
 }

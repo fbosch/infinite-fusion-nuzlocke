@@ -1,11 +1,11 @@
-import { FusionSprite } from './FusionSprite';
+import { FusionSprite, type FusionSpriteHandle } from './FusionSprite';
 import { PokemonContextMenu } from './PokemonContextMenu';
 import {
   isEggId,
   PokemonStatus,
   type PokemonOptionType,
 } from '@/loaders/pokemon';
-import { Fragment } from 'react';
+import { Fragment, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
 import { useEncounter } from '@/stores/playthroughs';
@@ -13,6 +13,7 @@ import { useSpriteCredits } from '@/hooks/useSprite';
 import { CursorTooltip } from '@/components/CursorTooltip';
 import { SquareArrowUpRight } from 'lucide-react';
 import { getDisplayPokemon } from './utils';
+import { addEvolutionListener } from '@/lib/events';
 
 interface SummaryCardProps {
   locationId: string;
@@ -57,6 +58,7 @@ export default function SummaryCard({
   locationId,
   shouldLoad,
 }: SummaryCardProps) {
+  const spriteRef = useRef<FusionSpriteHandle | null>(null);
   const encounterData = useEncounter(locationId);
   const eitherPokemonIsEgg =
     isEggId(encounterData?.head?.id) || isEggId(encounterData?.body?.id);
@@ -67,6 +69,15 @@ export default function SummaryCard({
     encounterData?.body?.id,
     shouldLoad && !eitherPokemonIsEgg
   );
+
+  // Play evolution animation when this location evolves
+  useEffect(() => {
+    return addEvolutionListener(({ locationId: evolvedLocation }) => {
+      if (evolvedLocation === locationId) {
+        spriteRef.current?.playEvolution();
+      }
+    });
+  }, [locationId]);
 
   if (!encounterData?.head && !encounterData?.body) {
     return null;
@@ -138,6 +149,7 @@ export default function SummaryCard({
           />
           <SpriteWrapper {...spriteWrapperProps}>
             <FusionSprite
+              ref={spriteRef}
               headPokemon={head}
               bodyPokemon={body}
               isFusion={displayPokemon.isFusion}
