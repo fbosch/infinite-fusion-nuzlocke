@@ -89,7 +89,7 @@ export default function ConfirmationDialog({
               onClick={onClose}
               className={clsx(
                 'px-4 py-2 text-sm  rounded-md transition-colors',
-                'bg-gray-100 hover:bg-gray-200 text-gray-900 cursor-pointer',
+                'bg-gray-100 hover:bg-gray-200 text-gray-900',
                 'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2'
               )}
@@ -99,7 +99,7 @@ export default function ConfirmationDialog({
             <Button
               onClick={handleConfirm}
               className={clsx(
-                'px-4 py-2 text-sm  rounded-md transition-colors cursor-pointer',
+                'px-4 py-2 text-sm  rounded-md transition-colors',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                 styles.confirmButton
               )}

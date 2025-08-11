@@ -131,7 +131,7 @@ export default function PlaythroughSelector({
             'flex items-center justify-between gap-2 px-3 py-2 sm:py-2.5 text-sm ',
             'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600',
             'border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500',
-            'rounded-md transition-colors cursor-pointer',
+            'rounded-md transition-colors',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
             'text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
             'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -182,7 +182,7 @@ export default function PlaythroughSelector({
                             handlePlaythroughSelect(playthrough.id)
                           }
                           className={clsx(
-                            'group flex w-full items-center justify-between px-3 py-3 text-sm cursor-pointer',
+                            'group flex w-full items-center justify-between px-3 py-3 text-sm',
                             'focus:outline-none text-left transition-color',
                             'touch-manipulation',
                             // Combined: Selected AND focused (most prominent)
@@ -250,7 +250,7 @@ export default function PlaythroughSelector({
                                   'p-1.5 rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity',
                                   'hover:bg-red-100 dark:hover:bg-red-900/20',
                                   'text-gray-400 hover:text-red-600 dark:hover:text-red-400',
-                                  'cursor-pointer touch-manipulation'
+                                  'touch-manipulation'
                                 )}
                                 title='Delete playthrough'
                                 role='button'
@@ -302,7 +302,7 @@ export default function PlaythroughSelector({
                   onClick={handleCreatePlaythrough}
                   disabled={Boolean(!newPlaythroughName.trim())}
                   className={clsx(
-                    'px-3 py-1.5 sm:px-2 sm:py-2 text-xs font-medium text-white rounded cursor-pointer',
+                    'px-3 py-1.5 sm:px-2 sm:py-2 text-xs font-medium text-white rounded',
                     'bg-blue-600 hover:bg-blue-700 transition-colors',
                     'focus:outline-none focus:ring-1 focus:ring-blue-500',
                     'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600',
@@ -321,7 +321,7 @@ export default function PlaythroughSelector({
                   setShowCreateInput(true);
                 }}
                 className={clsx(
-                  'group flex w-full items-center gap-2 px-3 py-3 text-sm cursor-pointer rounded-b-md',
+                  'group flex w-full items-center gap-2 px-3 py-3 text-sm rounded-b-md',
                   'hover:bg-gray-100 dark:hover:bg-gray-700',
                   'focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700',
                   'text-gray-700 dark:text-gray-300 transition-colors',

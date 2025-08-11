@@ -543,7 +543,7 @@ export function EncounterCell({
                 <button
                   type='button'
                   onClick={handleFlip}
-                  className='group size-6 flex items-center justify-center p-1 rounded-md border border-gray-300 dark:border-gray-600 transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-500 hover:border-blue-600 bg-white dark:bg-gray-800'
+                  className='group size-6 flex items-center justify-center p-1 rounded-md border border-gray-300 dark:border-gray-600 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-500 hover:border-blue-600 bg-white dark:bg-gray-800'
                   aria-label='Flip head and body'
                 >
                   <ArrowLeftRight className='size-4 text-gray-600 dark:text-gray-300 group-hover:text-white' />

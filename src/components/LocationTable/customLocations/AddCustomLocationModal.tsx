@@ -163,7 +163,7 @@ export default function AddCustomLocationModal({
                 type='submit'
                 disabled={allLocations.length === 0}
                 className={clsx(
-                  'flex-1 px-4 py-2 text-sm  rounded-md transition-colors cursor-pointer',
+                  'flex-1 px-4 py-2 text-sm  rounded-md transition-colors',
                   'bg-blue-600 hover:bg-blue-700 text-white',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
                   'flex items-center justify-center space-x-2',
@@ -181,7 +181,7 @@ export default function AddCustomLocationModal({
                 type='button'
                 onClick={onClose}
                 className={clsx(
-                  'flex-1 px-4 py-2 text-sm  rounded-md transition-colors cursor-pointer',
+                  'flex-1 px-4 py-2 text-sm  rounded-md transition-colors',
                   'bg-gray-100 hover:bg-gray-200 text-gray-900',
                   'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2'
