@@ -156,10 +156,25 @@ export function runAfterScrollSettles(
   maxWaitMs: number = 1200
 ): void {
   let timeoutId: number | null = null;
+  let intervalId: number | null = null;
   let totalWait = 0;
+  let hasCompleted = false;
 
   const done = () => {
+    if (hasCompleted) return;
+    hasCompleted = true;
+
+    // Cleanup listeners and timers
     container.removeEventListener('scroll', onScroll, listenerOptions);
+    if (timeoutId) {
+      window.clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+    if (intervalId) {
+      window.clearInterval(intervalId);
+      intervalId = null;
+    }
+
     callback();
   };
 
@@ -174,10 +189,13 @@ export function runAfterScrollSettles(
   container.addEventListener('scroll', onScroll, listenerOptions);
 
   // Fallback in case no scroll events fire or smooth-scroll is instantaneous
-  const interval = window.setInterval(() => {
+  intervalId = window.setInterval(() => {
     totalWait += settleDelayMs;
     if (totalWait >= maxWaitMs) {
-      window.clearInterval(interval);
+      if (intervalId) {
+        window.clearInterval(intervalId);
+        intervalId = null;
+      }
       done();
     }
   }, settleDelayMs);
