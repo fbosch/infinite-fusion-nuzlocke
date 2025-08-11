@@ -106,7 +106,6 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
     const {
       imageRef,
       shadowRef,
-      overlayRef,
       raysSvgRef,
       handleMouseEnter,
       handleMouseLeave,
@@ -118,8 +117,7 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
     useImperativeHandle(
       ref,
       () => ({
-        playEvolution: (durationMs?: number) =>
-          playEvolutionAnimation(durationMs),
+        playEvolution: playEvolutionAnimation,
       }),
       [playEvolutionAnimation]
     );
