@@ -14,6 +14,7 @@ import { queryClient } from '@/lib/queryClient';
 import { spriteKeys } from '@/lib/queries/sprites';
 import { EncounterDataSchema, Playthrough } from './types';
 import { getActivePlaythrough, getCurrentTimestamp } from './store';
+import { emitEvolutionEvent } from '@/lib/events';
 
 // Create encounter data (variants are now managed globally)
 export const createEncounterData = async (
@@ -82,6 +83,10 @@ export const updateEncounter = async (
     );
     encounter = encounterData;
     activePlaythrough.encounters[locationId] = encounter;
+    // Trigger animation if we created a fusion and set a Pokemon in this field
+    if (encounterData.isFusion && encounterData.head && encounterData.body) {
+      emitEvolutionEvent(locationId);
+    }
     return;
   }
 
@@ -96,6 +101,9 @@ export const updateEncounter = async (
     // Determine if this should be a fusion encounter
     const willBeFusion = shouldCreateFusion || encounter.isFusion;
 
+    // Track previous value for the field being updated
+    // Track previous value for the field being updated
+    const previousFieldId = encounter[field]?.id ?? null;
     if (willBeFusion) {
       encounter[field] = pokemonWithLocationAndUID;
       encounter.isFusion = true; // Preserve or set fusion state
@@ -125,6 +133,18 @@ export const updateEncounter = async (
     }
 
     encounter.updatedAt = getCurrentTimestamp();
+
+    // Emit when head or body changes while fusion is active
+    const newFieldId = encounter[field]?.id ?? null;
+    const fieldChanged = previousFieldId !== newFieldId;
+    if (
+      encounter.isFusion &&
+      encounter.head &&
+      encounter.body &&
+      fieldChanged
+    ) {
+      emitEvolutionEvent(locationId);
+    }
   } else {
     // Handle clearing pokemon
     // Clear the field
@@ -166,7 +186,8 @@ export const toggleEncounterFusion = async (locationId: string) => {
     updatedAt: getCurrentTimestamp(),
   };
 
-  const newIsFusion = !existingEncounter.isFusion;
+  const previousIsFusion = !!existingEncounter.isFusion;
+  const newIsFusion = !previousIsFusion;
 
   // When unfusing (going from fusion to non-fusion)
   if (existingEncounter.isFusion && !newIsFusion) {
@@ -197,6 +218,9 @@ export const toggleEncounterFusion = async (locationId: string) => {
     };
     activePlaythrough.encounters[locationId] = newEncounter;
   }
+
+  // Emit animation trigger when we transition into fusion mode
+  // Do not emit here; animation should be tied to head/body changes while fusion is active
 };
 
 // Flip head and body in a fusion encounter atomically
@@ -223,6 +247,8 @@ export const flipEncounterFusion = async (locationId: string) => {
   encounter.updatedAt = getCurrentTimestamp();
 
   // No need to handle variants - they're managed globally
+  // Trigger animation when flipping a fusion
+  emitEvolutionEvent(locationId);
 };
 
 // Move encounter atomically from source to destination (for drag and drop)
@@ -285,6 +311,10 @@ export const moveEncounterAtomic = async (
   };
 
   activePlaythrough.encounters[targetLocationId] = newEncounter;
+  // Emit when creating/updating a fusion via drag/drop and the changed field is set
+  if (newEncounter.isFusion && newEncounter.head && newEncounter.body) {
+    emitEvolutionEvent(targetLocationId);
+  }
 };
 
 // Create fusion from drag and drop
@@ -322,6 +352,8 @@ export const createFusion = async (
   };
 
   activePlaythrough.encounters[locationId] = encounter;
+  // Emit animation on creating a fusion from DnD
+  if (encounter.head && encounter.body) emitEvolutionEvent(locationId);
 };
 
 // Set artwork variant globally (no longer stored in encounters)
@@ -721,6 +753,14 @@ export const swapEncounters = async (
   const timestamp = getCurrentTimestamp();
   encounter1.updatedAt = timestamp;
   encounter2.updatedAt = timestamp;
+
+  // If the swap results in a fusion encounter having both parts, emit animation
+  const enc1NowFusion =
+    encounter1.isFusion && encounter1.head && encounter1.body;
+  const enc2NowFusion =
+    encounter2.isFusion && encounter2.head && encounter2.body;
+  if (enc1NowFusion) emitEvolutionEvent(locationId1);
+  if (enc2NowFusion) emitEvolutionEvent(locationId2);
 };
 
 // Get location ID from combobox ID (helper for drag operations)
