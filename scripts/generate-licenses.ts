@@ -26,6 +26,8 @@ type LicensePackage = {
   homepage?: string;
   author?: string;
   description?: string;
+  licenseText?: string;
+  noticeText?: string;
 };
 
 async function generateLicenses(): Promise<void> {
@@ -84,9 +86,61 @@ async function generateLicenses(): Promise<void> {
       return v && p.version === v;
     });
 
+    // Attempt to read LICENSE and NOTICE files for each direct dependency
+    async function readTextIfExists(filePath: string): Promise<string | undefined> {
+      try {
+        const content = await fs.readFile(filePath, 'utf8');
+        // Normalize newlines
+        return content.replace(/\r\n/g, '\n');
+      } catch {
+        return undefined;
+      }
+    }
+
+    async function collectLicenseInfo(pkg: LicensePackage): Promise<LicensePackage> {
+      const pkgDir = path.join(process.cwd(), 'node_modules', ...pkg.name.split('/'));
+      // Common candidate filenames (case-insensitive)
+      const licenseCandidates = [
+        'LICENSE',
+        'LICENSE.txt',
+        'LICENSE.md',
+        'LICENCE',
+        'COPYING',
+        'COPYING.txt',
+        'COPYING.md',
+      ];
+      const noticeCandidates = ['NOTICE', 'NOTICE.txt', 'NOTICE.md'];
+
+      // Find first matching file by case-insensitive compare
+      async function findCandidate(candidates: string[]): Promise<string | undefined> {
+        try {
+          const entries = await fs.readdir(pkgDir);
+          const lower = entries.reduce<Record<string, string>>((acc, name) => {
+            acc[name.toLowerCase()] = name;
+            return acc;
+          }, {});
+          for (const cand of candidates) {
+            const match = lower[cand.toLowerCase()];
+            if (match) return path.join(pkgDir, match);
+          }
+          return undefined;
+        } catch {
+          return undefined;
+        }
+      }
+
+      const licensePath = await findCandidate(licenseCandidates);
+      const noticePath = await findCandidate(noticeCandidates);
+      const licenseText = licensePath ? await readTextIfExists(licensePath) : undefined;
+      const noticeText = noticePath ? await readTextIfExists(noticePath) : undefined;
+      return { ...pkg, licenseText, noticeText };
+    }
+
+    const withTexts = await Promise.all(directOnly.map(collectLicenseInfo));
+
     // Deduplicate by package name (keep first occurrence)
     const dedupedMap = new Map<string, LicensePackage>();
-    for (const p of directOnly) {
+    for (const p of withTexts) {
       if (!dedupedMap.has(p.name)) dedupedMap.set(p.name, p);
     }
     const deduped = Array.from(dedupedMap.values());
@@ -103,6 +157,18 @@ async function generateLicenses(): Promise<void> {
     await fs.mkdir(outDir, { recursive: true });
     const outPath = path.join(outDir, 'licenses.json');
     await fs.writeFile(outPath, JSON.stringify(output, null, 2));
+
+    // Also generate a combined THIRD-PARTY-NOTICES.txt for distribution
+    const noticesHeader = `Third-Party Notices\n\nThis file lists open source packages included in this application along with their licenses.\nGenerated: ${output.generatedAt}\n\n`;
+    const sections = deduped.map(pkg => {
+      const header = `${pkg.name}@${pkg.version} — ${pkg.license}` + (pkg.homepage ? `\nHomepage: ${pkg.homepage}` : '');
+      const licenseBlock = pkg.licenseText ? `\n\n----- LICENSE TEXT -----\n${pkg.licenseText.trim()}\n` : '';
+      const noticeBlock = pkg.noticeText ? `\n----- NOTICE -----\n${pkg.noticeText.trim()}\n` : '';
+      return `${header}${licenseBlock}${noticeBlock}\n`;
+    });
+    const noticesContent = noticesHeader + sections.join('\n----------------------------------------\n\n');
+    const noticesPath = path.join(outDir, 'THIRD-PARTY-NOTICES.txt');
+    await fs.writeFile(noticesPath, noticesContent, 'utf8');
 
     console.log(`Wrote ${deduped.length} entries to ${outPath}`);
   } catch (error) {

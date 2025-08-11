@@ -8,6 +8,8 @@ type LicensePackage = {
   homepage?: string;
   author?: string;
   description?: string;
+  licenseText?: string;
+  noticeText?: string;
 };
 
 async function loadLicenses(): Promise<{
@@ -45,14 +47,24 @@ export default async function LicensesPage() {
           <p className='mt-2 text-sm text-gray-600 dark:text-gray-400'>
             Generated at {new Date(data.generatedAt).toLocaleString()}.
           </p>
+          <p className='mt-1 text-sm text-gray-600 dark:text-gray-400'>
+            Combined notices:{' '}
+            <a
+              href='/THIRD-PARTY-NOTICES.txt'
+              className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline'
+            >
+              THIRD-PARTY-NOTICES.txt
+            </a>
+          </p>
           <div className='mt-6 overflow-x-auto'>
-            <table className='min-w-full text-sm'>
+            <table className='min-w-full text-sm align-top'>
               <thead>
                 <tr className='text-left border-b border-gray-200 dark:border-gray-700'>
-                  <th className='py-2 pr-4'>Package</th>
-                  <th className='py-2 pr-4'>Version</th>
-                  <th className='py-2 pr-4'>License</th>
-                  <th className='py-2 pr-4'>Homepage</th>
+                  <th className='py-2 pr-4 align-top'>Package</th>
+                  <th className='py-2 pr-4 align-top'>Version</th>
+                  <th className='py-2 pr-4 align-top'>License</th>
+                  <th className='py-2 pr-4 align-top'>Homepage</th>
+                  <th className='py-2 pr-4 align-top'>Texts</th>
                 </tr>
               </thead>
               <tbody>
@@ -61,16 +73,16 @@ export default async function LicensesPage() {
                     key={`${pkg.name}@${pkg.version}`}
                     className='border-b border-gray-100 dark:border-gray-800'
                   >
-                    <td className='py-2 pr-4 text-gray-900 dark:text-gray-100'>
+                    <td className='py-2 pr-4 text-gray-900 dark:text-gray-100 align-top'>
                       {pkg.name}
                     </td>
-                    <td className='py-2 pr-4 text-gray-700 dark:text-gray-300'>
+                    <td className='py-2 pr-4 text-gray-700 dark:text-gray-300 align-top'>
                       {pkg.version}
                     </td>
-                    <td className='py-2 pr-4 text-gray-700 dark:text-gray-300'>
+                    <td className='py-2 pr-4 text-gray-700 dark:text-gray-300 align-top'>
                       {pkg.license}
                     </td>
-                    <td className='py-2 pr-4'>
+                    <td className='py-2 pr-4 align-top'>
                       {pkg.homepage ? (
                         <a
                           href={pkg.homepage}
@@ -80,6 +92,39 @@ export default async function LicensesPage() {
                         >
                           {pkg.homepage}
                         </a>
+                      ) : (
+                        <span className='text-gray-500 dark:text-gray-400'>
+                          —
+                        </span>
+                      )}
+                    </td>
+                    <td className='py-2 pr-4 align-top'>
+                      {pkg.licenseText || pkg.noticeText ? (
+                        <details>
+                          <summary className='cursor-pointer text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300'>
+                            View
+                          </summary>
+                          {pkg.licenseText && (
+                            <div className='mt-2'>
+                              <div className='text-xs font-semibold text-gray-900 dark:text-gray-200'>
+                                License
+                              </div>
+                              <pre className='mt-1 whitespace-pre-wrap text-[11px] leading-snug text-gray-700 dark:text-gray-300 max-h-64 overflow-y-auto scrollbar-thin border border-gray-200 dark:border-gray-700 rounded p-2 bg-white dark:bg-gray-900/40'>
+                                {pkg.licenseText}
+                              </pre>
+                            </div>
+                          )}
+                          {pkg.noticeText && (
+                            <div className='mt-3'>
+                              <div className='text-xs font-semibold text-gray-900 dark:text-gray-200'>
+                                Notice
+                              </div>
+                              <pre className='mt-1 whitespace-pre-wrap text-[11px] leading-snug text-gray-700 dark:text-gray-300 max-h-64 overflow-y-auto scrollbar-thin border border-gray-200 dark:border-gray-700 rounded p-2 bg-white dark:bg-gray-900/40'>
+                                {pkg.noticeText}
+                              </pre>
+                            </div>
+                          )}
+                        </details>
                       ) : (
                         <span className='text-gray-500 dark:text-gray-400'>
                           —
