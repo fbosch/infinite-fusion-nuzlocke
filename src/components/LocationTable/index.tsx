@@ -30,7 +30,12 @@ import clsx from 'clsx';
 import { CursorTooltip } from '../CursorTooltip';
 import dynamic from 'next/dynamic';
 import { useBreakpointSmallerThan } from '../../hooks/useBreakpoint';
-import { scrollToMostRecentLocation } from '@/utils/scrollToLocation';
+import {
+  scrollToMostRecentLocation,
+  scrollToLocationById,
+  flashPokemonOverlaysByUids,
+} from '@/utils/scrollToLocation';
+import { onScrollToLocation, onFlashUids } from '@/lib/events';
 
 const columnHelper = createColumnHelper<CombinedLocation>();
 
@@ -91,6 +96,22 @@ export default function LocationTable() {
       tableRef.current,
       'smooth'
     );
+  }, []);
+
+  // Subscribe to global scroll/flash events
+  useEffect(() => {
+    const offScroll = onScrollToLocation(({ locationId }) => {
+      // Use utility that also handles lazy content re-application
+      scrollToLocationById(locationId, { behavior: 'smooth' });
+    });
+    const offFlash = onFlashUids(({ uids, durationMs }) => {
+      // Reuse overlay highlighter for comboboxes
+      flashPokemonOverlaysByUids(uids, durationMs);
+    });
+    return () => {
+      offScroll();
+      offFlash();
+    };
   }, []);
 
   const columns = useMemo(
