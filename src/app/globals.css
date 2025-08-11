@@ -208,7 +208,11 @@ button {
 }
 
 [role='button'] {
-  @apply cursor-pointer transition-transform duration-150 ease-out active:scale-[.98];
+  @apply cursor-pointer transition-transform duration-150 ease-out;
+}
+
+[role='button']:not([aria-disabled='true']):active {
+  @apply scale-[.98];
 }
 
 button:disabled,
