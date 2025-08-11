@@ -1,28 +1,24 @@
-export const EVOLUTION_EVENT = 'pokemon:evolved';
+import mitt from 'mitt';
 
-export type EvolutionEventDetail = {
-  locationId: string;
+export const EVOLUTION_EVENT = 'pokemon:evolved' as const;
+
+type AppEvents = {
+  [EVOLUTION_EVENT]: { locationId: string };
 };
 
+const emitter = mitt<AppEvents>();
+
+export type EvolutionEventDetail = { locationId: string };
+
 export function emitEvolutionEvent(locationId: string): void {
-  if (typeof window === 'undefined' || !locationId) return;
-  const event = new CustomEvent<EvolutionEventDetail>(EVOLUTION_EVENT, {
-    detail: { locationId },
-  });
-  window.dispatchEvent(event);
+  if (!locationId) return;
+  emitter.emit(EVOLUTION_EVENT, { locationId });
 }
 
 export function addEvolutionListener(
   handler: (detail: EvolutionEventDetail) => void
 ): () => void {
-  if (typeof window === 'undefined') return () => {};
-
-  const listener = (e: Event) => {
-    const custom = e as CustomEvent<EvolutionEventDetail>;
-    if (custom?.detail) handler(custom.detail);
-  };
-
-  window.addEventListener(EVOLUTION_EVENT, listener as EventListener);
-  return () =>
-    window.removeEventListener(EVOLUTION_EVENT, listener as EventListener);
+  const fn = (payload: EvolutionEventDetail) => handler(payload);
+  emitter.on(EVOLUTION_EVENT, fn);
+  return () => emitter.off(EVOLUTION_EVENT, fn);
 }
