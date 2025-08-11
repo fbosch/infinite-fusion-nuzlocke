@@ -204,7 +204,7 @@ body {
 
 /* Global button press animation */
 button {
-  @apply cursor-pointer transition-transform duration-150 ease-out enabled:active:scale-[.98];
+  @apply cursor-pointer transition-transform duration-150 ease-out enabled:active:scale-[.97];
 }
 
 [role='button'] {
@@ -212,7 +212,7 @@ button {
 }
 
 [role='button']:not([aria-disabled='true']):active {
-  @apply scale-[.98];
+  @apply scale-[.97];
 }
 
 button:disabled,
