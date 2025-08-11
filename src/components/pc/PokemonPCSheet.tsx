@@ -65,8 +65,6 @@ function PCEntryItem({
 }: PCEntryItemProps) {
   const encounters = useEncounters();
   const currentEncounter = encounters?.[entry.locationId];
-  const isFusion = currentEncounter?.isFusion || false;
-
   const isStoredMode = mode === 'stored';
   const headActive = isStoredMode
     ? entry.head?.status === PokemonStatus.STORED
