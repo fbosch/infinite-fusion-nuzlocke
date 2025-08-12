@@ -60,6 +60,30 @@ export function isPokemonStored(pokemon: PokemonOptionType | null | undefined) {
   return isStoredStatus(pokemon?.status);
 }
 
+// Fusion status categories to simplify gating logic
+export type FusionStatusCategory = 'none' | 'active' | 'inactive' | 'missed';
+
+export function getFusionStatusCategory(
+  status: PokemonStatusType | null | undefined
+): FusionStatusCategory {
+  if (!status) return 'none';
+  if (isActiveStatus(status)) return 'active';
+  if (isInactiveStatus(status)) return 'inactive';
+  if (isMissedStatus(status)) return 'missed';
+  return 'none';
+}
+
+// Fusion gating predicate
+export function canFuse(
+  head: PokemonOptionType | null | undefined,
+  body: PokemonOptionType | null | undefined
+): boolean {
+  if (!head || !body) return false;
+  const headCategory = getFusionStatusCategory(head.status ?? null);
+  const bodyCategory = getFusionStatusCategory(body.status ?? null);
+  return headCategory === bodyCategory;
+}
+
 export function isFusionFullyActive(
   head: PokemonOptionType | null | undefined,
   body: PokemonOptionType | null | undefined

@@ -3,7 +3,11 @@
 import React from 'react';
 import { Loader2 } from 'lucide-react';
 import { type PokemonOptionType, isEggId } from '@/loaders/pokemon';
-import { isInactiveStatus } from '@/utils/pokemonPredicates';
+import {
+  isPokemonActive,
+  isPokemonInactive,
+  canFuse,
+} from '@/utils/pokemonPredicates';
 import { getFusionOverlayStatus } from '@/utils/fusionStatus';
 
 function isEgg(pokemon: PokemonOptionType): boolean {
@@ -235,25 +239,34 @@ export function getDisplayPokemon(
   body: PokemonOptionType | null,
   isFusion: boolean
 ): DisplayPokemon {
-  // Early return for non-fusion or incomplete data
+  // If either slot missing, or fusion not requested, return as-is
   if (!isFusion || !head || !body) {
     return { head, body, isFusion };
   }
 
-  // Check if Pokemon are inactive (dead or stored)
-  const headInactive = isInactiveStatus(head.status);
-  const bodyInactive = isInactiveStatus(body.status);
+  // Enforce fusion gating: both must have statuses and be both active or both inactive
+  const canShowFusion = canFuse(head, body);
+  if (!canShowFusion) {
+    const headIsActive = isPokemonActive(head);
+    const bodyIsActive = isPokemonActive(body);
+    const headIsInactive = isPokemonInactive(head);
+    const bodyIsInactive = isPokemonInactive(body);
 
-  // If one is inactive and the other is active, show only the active one
-  if (headInactive && !bodyInactive) {
-    return { head: null, body, isFusion: false };
-  }
-  if (bodyInactive && !headInactive) {
+    // Prefer showing a single with a known status; prioritize active over inactive
+    if (headIsActive && !bodyIsActive)
+      return { head, body: null, isFusion: false };
+    if (bodyIsActive && !headIsActive)
+      return { head: null, body, isFusion: false };
+    if (headIsInactive && !bodyIsInactive)
+      return { head, body: null, isFusion: false };
+    if (bodyIsInactive && !headIsInactive)
+      return { head: null, body, isFusion: false };
+
+    // If statuses are missing or ambiguous, default to showing head only when present
     return { head, body: null, isFusion: false };
   }
 
-  // If both are inactive or both are active, keep fusion display
-  return { head, body, isFusion };
+  return { head, body, isFusion: true };
 }
 
 export function LoadingSpinner() {
