@@ -21,6 +21,7 @@ import { PokemonSprite } from '../PokemonSprite';
 import BodyIcon from '@/assets/images/body.svg';
 import HeadIcon from '@/assets/images/head.svg';
 import { clsx } from 'clsx';
+import { canFuse } from '@/utils/pokemonPredicates';
 
 interface LocationSelectorProps {
   isOpen: boolean;
@@ -51,7 +52,9 @@ interface ActionPreviewProps {
   existingPokemon: PokemonOptionType | null;
   otherFieldPokemon: PokemonOptionType | null;
   remainingPokemon: PokemonOptionType | null;
+  movingPokemon: PokemonOptionType | null;
   targetLocationId: string;
+  sourceLocationId: string;
 }
 
 interface MovingPokemonInfoProps {
@@ -92,7 +95,9 @@ function ActionPreview({
   existingPokemon,
   otherFieldPokemon,
   remainingPokemon,
+  movingPokemon,
   targetLocationId,
+  sourceLocationId,
 }: ActionPreviewProps) {
   // Get the target location's fusion status
   const targetEncounter = useMemo(() => {
@@ -101,14 +106,23 @@ function ActionPreview({
   }, [targetLocationId]);
 
   const isTargetFusion = targetEncounter?.isFusion ?? false;
+  const sourceEncounter = useMemo(() => {
+    const activePlaythrough = getActivePlaythrough();
+    return activePlaythrough?.encounters?.[sourceLocationId];
+  }, [sourceLocationId]);
 
   if (!existingPokemon && !otherFieldPokemon) return null;
 
   if (existingPokemon) {
     // This is a swap operation
     const willCreateFusionAtTarget =
-      Boolean(otherFieldPokemon) && isTargetFusion;
-    const willCreateFusionAtSource = Boolean(remainingPokemon);
+      Boolean(otherFieldPokemon && movingPokemon) &&
+      isTargetFusion &&
+      canFuse(movingPokemon, otherFieldPokemon!);
+    const willCreateFusionAtSource =
+      Boolean(remainingPokemon) &&
+      Boolean(sourceEncounter?.isFusion) &&
+      canFuse(existingPokemon, remainingPokemon!);
 
     return (
       <div className='space-y-3 mt-2'>
@@ -153,7 +167,12 @@ function ActionPreview({
   }
 
   // Simple fusion case (no existing Pokemon in target slot)
-  if (otherFieldPokemon && isTargetFusion) {
+  if (
+    otherFieldPokemon &&
+    isTargetFusion &&
+    movingPokemon &&
+    canFuse(movingPokemon, otherFieldPokemon)
+  ) {
     return (
       <div className='flex items-center space-x-4 mt-2'>
         <div className='size-5 flex justify-center items-center flex-shrink-0'>
@@ -295,7 +314,9 @@ function LocationItem({
               existingPokemon={existingPokemon}
               otherFieldPokemon={otherFieldPokemon}
               remainingPokemon={remainingPokemon}
+              movingPokemon={movingPokemon}
               targetLocationId={location.id}
+              sourceLocationId={currentLocationId}
             />
           )}
         </div>

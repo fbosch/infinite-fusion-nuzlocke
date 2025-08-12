@@ -20,6 +20,7 @@ import {
   isPokemonActive,
   isPokemonDeceased,
   isPokemonStored,
+  canFuse,
 } from '@/utils/pokemonPredicates';
 import {
   getLocationById,
@@ -136,6 +137,9 @@ function PCEntryItem({
               <FusionSprite
                 headPokemon={entry.head ?? null}
                 bodyPokemon={entry.body ?? null}
+                isFusion={Boolean(
+                  currentEncounter?.isFusion && canFuse(entry.head, entry.body)
+                )}
                 shouldLoad
                 showStatusOverlay={false}
                 showTooltip={false}
@@ -174,8 +178,9 @@ function TeamEntryItem({
   const headActive = isPokemonActive(entry.head);
   const bodyActive = isPokemonActive(entry.body);
   const hasAny = Boolean(headActive || bodyActive);
-  const isFusion =
-    (currentEncounter?.isFusion && headActive && bodyActive) || false;
+  const isFusion = Boolean(
+    currentEncounter?.isFusion && canFuse(entry.head, entry.body)
+  );
 
   if (!hasAny) return null;
 
