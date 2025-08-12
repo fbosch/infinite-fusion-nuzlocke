@@ -55,6 +55,8 @@ interface ActionPreviewProps {
   movingPokemon: PokemonOptionType | null;
   targetLocationId: string;
   sourceLocationId: string;
+  selectedTargetField: 'head' | 'body';
+  sourceMoveTargetField: 'head' | 'body';
 }
 
 interface MovingPokemonInfoProps {
@@ -98,6 +100,8 @@ function ActionPreview({
   movingPokemon,
   targetLocationId,
   sourceLocationId,
+  selectedTargetField,
+  sourceMoveTargetField,
 }: ActionPreviewProps) {
   // Get the target location's fusion status
   const targetEncounter = useMemo(() => {
@@ -105,7 +109,7 @@ function ActionPreview({
     return activePlaythrough?.encounters?.[targetLocationId];
   }, [targetLocationId]);
 
-  const isTargetFusion = targetEncounter?.isFusion ?? false;
+  const isTargetFusion = targetEncounter?.isFusion ?? false; // informational only
   const sourceEncounter = useMemo(() => {
     const activePlaythrough = getActivePlaythrough();
     return activePlaythrough?.encounters?.[sourceLocationId];
@@ -115,14 +119,25 @@ function ActionPreview({
 
   if (existingPokemon) {
     // This is a swap operation
-    const willCreateFusionAtTarget =
-      Boolean(otherFieldPokemon && movingPokemon) &&
-      isTargetFusion &&
-      canFuse(movingPokemon, otherFieldPokemon!);
-    const willCreateFusionAtSource =
-      Boolean(remainingPokemon) &&
-      Boolean(sourceEncounter?.isFusion) &&
-      canFuse(existingPokemon, remainingPokemon!);
+    const targetHeadAfter =
+      selectedTargetField === 'head' ? movingPokemon : otherFieldPokemon;
+    const targetBodyAfter =
+      selectedTargetField === 'body' ? movingPokemon : otherFieldPokemon;
+    const willCreateFusionAtTarget = Boolean(
+      targetHeadAfter &&
+        targetBodyAfter &&
+        canFuse(targetHeadAfter, targetBodyAfter)
+    );
+
+    const sourceHeadAfter =
+      sourceMoveTargetField === 'head' ? existingPokemon : remainingPokemon;
+    const sourceBodyAfter =
+      sourceMoveTargetField === 'body' ? existingPokemon : remainingPokemon;
+    const willCreateFusionAtSource = Boolean(
+      sourceHeadAfter &&
+        sourceBodyAfter &&
+        canFuse(sourceHeadAfter, sourceBodyAfter)
+    );
 
     return (
       <div className='space-y-3 mt-2'>
@@ -166,13 +181,18 @@ function ActionPreview({
     );
   }
 
-  // Simple fusion case (no existing Pokemon in target slot)
-  if (
-    otherFieldPokemon &&
-    isTargetFusion &&
-    movingPokemon &&
-    canFuse(movingPokemon, otherFieldPokemon)
-  ) {
+  // Simple fusion case (no existing Pokemon in target slot): simulate post-move target
+  if (movingPokemon && otherFieldPokemon) {
+    const targetHeadAfter =
+      selectedTargetField === 'head' ? movingPokemon : otherFieldPokemon;
+    const targetBodyAfter =
+      selectedTargetField === 'body' ? movingPokemon : otherFieldPokemon;
+    const willCreateFusionAtTarget = Boolean(
+      targetHeadAfter &&
+        targetBodyAfter &&
+        canFuse(targetHeadAfter, targetBodyAfter)
+    );
+    if (!willCreateFusionAtTarget) return null;
     return (
       <div className='flex items-center space-x-4 mt-2'>
         <div className='size-5 flex justify-center items-center flex-shrink-0'>
@@ -317,6 +337,8 @@ function LocationItem({
               movingPokemon={movingPokemon}
               targetLocationId={location.id}
               sourceLocationId={currentLocationId}
+              selectedTargetField={selectedTargetField}
+              sourceMoveTargetField={moveTargetField}
             />
           )}
         </div>
