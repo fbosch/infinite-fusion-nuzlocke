@@ -21,6 +21,7 @@ import {
   isValidElement,
   useEffect,
   useRef,
+  useMemo,
 } from 'react';
 import { useWindowVisibility } from '@/hooks/useWindowVisibility';
 import { twMerge } from 'tailwind-merge';
@@ -81,7 +82,12 @@ export function CursorTooltip(props: CursorTooltipProps) {
   const isWindowVisible = useWindowVisibility();
   const dragSnapshot = useSnapshot(dragStore);
 
-  const { refs, floatingStyles, context } = useFloating({
+  const {
+    refs,
+    floatingStyles,
+    context,
+    placement: resolvedPlacement,
+  } = useFloating({
     placement,
     open: isOpen,
     onOpenChange: open => {
@@ -188,6 +194,36 @@ export function CursorTooltip(props: CursorTooltipProps) {
     role,
   ]);
 
+  const originClass = useMemo(() => {
+    const p = resolvedPlacement || placement;
+    const [side, align] = p.split('-') as [
+      'top' | 'bottom' | 'left' | 'right' | (string & {}),
+      'start' | 'end' | (string & {}),
+    ];
+
+    if (side === 'top') {
+      if (align === 'start') return 'origin-bottom-left';
+      if (align === 'end') return 'origin-bottom-right';
+      return 'origin-bottom';
+    }
+    if (side === 'bottom') {
+      if (align === 'start') return 'origin-top-left';
+      if (align === 'end') return 'origin-top-right';
+      return 'origin-top';
+    }
+    if (side === 'left') {
+      if (align === 'start') return 'origin-top-right';
+      if (align === 'end') return 'origin-bottom-right';
+      return 'origin-right';
+    }
+    if (side === 'right') {
+      if (align === 'start') return 'origin-top-left';
+      if (align === 'end') return 'origin-bottom-left';
+      return 'origin-left';
+    }
+    return 'origin-center';
+  }, [resolvedPlacement, placement]);
+
   if (!content) return children;
 
   return (
@@ -216,7 +252,8 @@ export function CursorTooltip(props: CursorTooltipProps) {
                   'pointer-events-none transform-gpu bg-white',
                   'dark:bg-gray-700/80 background-blur dark:text-white text-gray-700',
                   'border dark:border-gray-600 border-gray-200',
-                  'origin-top-left backdrop-blur-xl',
+                  originClass,
+                  'backdrop-blur-xl',
                   'transition duration-150 ease-out',
                   {
                     'opacity-0 scale-95 tooltip-exit':

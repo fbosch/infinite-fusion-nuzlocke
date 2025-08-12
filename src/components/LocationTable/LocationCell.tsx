@@ -80,22 +80,26 @@ export default function LocationCell({
             Original Encounter
           </div>
 
-          {locationPokemon.map((pokemon, index) => (
-            <div key={index} className='mb-3 flex items-center gap-2.5'>
-              <div className='flex-shrink-0 size-5 justify-center items-center flex'>
-                <PokemonSprite pokemonId={pokemon.id} />
-              </div>
-              <div className='flex-1 min-w-0'>
-                <span className='font-medium dark:text-white text-gray-900'>
-                  {pokemon.nickname ? `${pokemon.nickname} • ` : ''}
-                  <span className='dark:text-gray-300 text-gray-700 '>
-                    {pokemon.name}
+          <div className='flex flex-row divide-x divide-gray-200 dark:divide-gray-600'>
+            {locationPokemon.map((pokemon, index) => (
+              <div
+                key={index}
+                className='flex items-center first:pr-5 not-first:pl-2'
+              >
+                <div className='flex-shrink-0 h-12 w-15 justify-center items-center flex'>
+                  <PokemonSprite pokemonId={pokemon.id} />
+                </div>
+                <div className='flex-1 min-w-0'>
+                  <span className='font-medium dark:text-white text-gray-900'>
+                    {pokemon.nickname ? `${pokemon.nickname} • ` : ''}
+                    <span className='dark:text-gray-300 text-gray-700 '>
+                      {pokemon.name}
+                    </span>
                   </span>
-                </span>
+                </div>
               </div>
-            </div>
-          ))}
-
+            ))}
+          </div>
           <hr className='my-2 dark:border-gray-600 border-gray-200' />
           <div className='text-xs dark:text-gray-400 text-gray-400'>
             {isCustomLocation(location)
