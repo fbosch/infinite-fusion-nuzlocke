@@ -63,17 +63,33 @@ export function CursorTooltip(props: CursorTooltipProps) {
     onMouseLeave,
   } = props;
   const [isOpen, setIsOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const [animationState, setAnimationState] = useState<
-    'entering' | 'entered' | 'exiting'
-  >('entering');
+    'entering' | 'entered' | 'exiting' | null
+  >(null);
   const isWindowVisible = useWindowVisibility();
   const dragSnapshot = useSnapshot(dragStore);
 
   const { refs, floatingStyles, context } = useFloating({
     placement,
     open: isOpen,
-    onOpenChange: setIsOpen,
+    onOpenChange: open => {
+      if (open) {
+        setIsOpen(true);
+        setAnimationState('entering');
+        window.setTimeout(() => {
+          window.requestAnimationFrame(() => {
+            if (refs.floating.current) {
+              setAnimationState('entered');
+            }
+          });
+        }, delay || 16);
+      } else {
+        setAnimationState('exiting');
+        window.setTimeout(() => {
+          setIsOpen(false);
+        }, 100);
+      }
+    },
     middleware: [
       offset({
         mainAxis: props.offset?.mainAxis ?? getMainAxisOffset(placement),
@@ -101,32 +117,6 @@ export function CursorTooltip(props: CursorTooltipProps) {
       }
     }
   }, [isWindowVisible, isOpen, dragSnapshot.isDragging]);
-
-  // Handle animation states and mounting/unmounting
-  useEffect(() => {
-    if (isOpen) {
-      // Mount the tooltip and start entering animation
-      setIsMounted(true);
-      setAnimationState('entering');
-      // Force immediate position update when tooltip opens
-      const timer = setTimeout(() => {
-        setAnimationState('entered');
-        // Force a position update after the tooltip is rendered
-        if (refs.floating.current) {
-          refs.floating.current.getBoundingClientRect();
-        }
-      }, delay || 16);
-      return () => clearTimeout(timer);
-    } else if (isMounted) {
-      // Start exit animation
-      setAnimationState('exiting');
-      // Unmount after animation completes
-      const timer = setTimeout(() => {
-        setIsMounted(false);
-      }, 100); // Allow time for exit animation
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, isMounted, refs.floating, delay]);
 
   const clientPointFloating = useClientPoint(context, {
     axis: 'both',
@@ -162,7 +152,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
           }),
         })}
 
-      {isMounted && (
+      {isOpen && (
         <FloatingPortal>
           <div
             className='z-110'
