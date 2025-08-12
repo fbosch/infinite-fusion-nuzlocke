@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeFusionTypes, getFusionTyping } from '@/lib/fusionTyping';
+import { computeFusionTypes, getFusionTyping } from '@/lib/typings';
 import type { Pokemon } from '@/loaders/pokemon';
 
 function makePokemon(
