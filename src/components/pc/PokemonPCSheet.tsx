@@ -15,7 +15,12 @@ import {
 import clsx from 'clsx';
 import { Skull, X, Boxes, Box, Users } from 'lucide-react';
 import { useEncounters, useCustomLocations } from '@/stores/playthroughs';
-import { PokemonStatus, type PokemonOptionType } from '@/loaders/pokemon';
+import { type PokemonOptionType } from '@/loaders/pokemon';
+import {
+  isPokemonActive,
+  isPokemonDeceased,
+  isPokemonStored,
+} from '@/utils/pokemonPredicates';
 import {
   getLocationById,
   getLocationsSortedWithCustom,
@@ -70,11 +75,11 @@ function PCEntryItem({
   const currentEncounter = encounters?.[entry.locationId];
   const isStoredMode = mode === 'stored';
   const headActive = isStoredMode
-    ? entry.head?.status === PokemonStatus.STORED
-    : entry.head?.status === PokemonStatus.DECEASED;
+    ? isPokemonStored(entry.head)
+    : isPokemonDeceased(entry.head);
   const bodyActive = isStoredMode
-    ? entry.body?.status === PokemonStatus.STORED
-    : entry.body?.status === PokemonStatus.DECEASED;
+    ? isPokemonStored(entry.body)
+    : isPokemonDeceased(entry.body);
   const hasAny = Boolean(headActive || bodyActive);
   const label = [
     headActive ? getPokemonLabel(entry.head) : '',
@@ -166,14 +171,8 @@ function TeamEntryItem({
 }: TeamEntryItemProps) {
   const encounters = useEncounters();
   const currentEncounter = encounters?.[entry.locationId];
-  const headActive =
-    entry.head?.status === PokemonStatus.CAPTURED ||
-    entry.head?.status === PokemonStatus.RECEIVED ||
-    entry.head?.status === PokemonStatus.TRADED;
-  const bodyActive =
-    entry.body?.status === PokemonStatus.CAPTURED ||
-    entry.body?.status === PokemonStatus.RECEIVED ||
-    entry.body?.status === PokemonStatus.TRADED;
+  const headActive = isPokemonActive(entry.head);
+  const bodyActive = isPokemonActive(entry.body);
   const hasAny = Boolean(headActive || bodyActive);
   const isFusion =
     (currentEncounter?.isFusion && headActive && bodyActive) || false;
@@ -299,14 +298,8 @@ export default function PokemonPCSheet({
     const entries: Entry[] = [];
 
     Object.entries(encounters || {}).forEach(([locationId, data]) => {
-      const headActive =
-        data?.head?.status === PokemonStatus.CAPTURED ||
-        data?.head?.status === PokemonStatus.RECEIVED ||
-        data?.head?.status === PokemonStatus.TRADED;
-      const bodyActive =
-        data?.body?.status === PokemonStatus.CAPTURED ||
-        data?.body?.status === PokemonStatus.RECEIVED ||
-        data?.body?.status === PokemonStatus.TRADED;
+      const headActive = isPokemonActive(data?.head);
+      const bodyActive = isPokemonActive(data?.body);
 
       if (headActive || bodyActive) {
         entries.push({
@@ -328,8 +321,8 @@ export default function PokemonPCSheet({
     const entries: Entry[] = [];
 
     Object.entries(encounters || {}).forEach(([locationId, data]) => {
-      const headDead = data?.head?.status === PokemonStatus.DECEASED;
-      const bodyDead = data?.body?.status === PokemonStatus.DECEASED;
+      const headDead = isPokemonDeceased(data?.head);
+      const bodyDead = isPokemonDeceased(data?.body);
 
       if (headDead || bodyDead) {
         entries.push({
@@ -351,8 +344,8 @@ export default function PokemonPCSheet({
     const entries: Entry[] = [];
 
     Object.entries(encounters || {}).forEach(([locationId, data]) => {
-      const headStored = data?.head?.status === PokemonStatus.STORED;
-      const bodyStored = data?.body?.status === PokemonStatus.STORED;
+      const headStored = isPokemonStored(data?.head);
+      const bodyStored = isPokemonStored(data?.body);
 
       if (headStored || bodyStored) {
         entries.push({

@@ -1,10 +1,6 @@
 import { FusionSprite, type FusionSpriteHandle } from './FusionSprite';
 import { PokemonContextMenu } from './PokemonContextMenu';
-import {
-  isEggId,
-  PokemonStatus,
-  type PokemonOptionType,
-} from '@/loaders/pokemon';
+import { isEggId } from '@/loaders/pokemon';
 import { Fragment, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import { ArtworkVariantButton } from './ArtworkVariantButton';
@@ -12,46 +8,13 @@ import { useEncounter } from '@/stores/playthroughs';
 import { useSpriteCredits } from '@/hooks/useSprite';
 import { CursorTooltip } from '@/components/CursorTooltip';
 import { SquareArrowUpRight } from 'lucide-react';
-import { getDisplayPokemon } from './utils';
+import { getDisplayPokemon, getNicknameText } from './utils';
 import { addEvolutionListener } from '@/lib/events';
+import { isPokemonDeceased } from '@/utils/pokemonPredicates';
 
 interface SummaryCardProps {
   locationId: string;
   shouldLoad?: boolean;
-}
-
-function getNicknameText(
-  head: PokemonOptionType | null,
-  body: PokemonOptionType | null,
-  isFusion: boolean
-): string | undefined {
-  // Early return for empty state
-  if (!head && !body) return '';
-
-  // Handle single Pokemon case (non-fusion or partial fusion)
-  if (!isFusion || !head || !body) {
-    const pokemon = head || body!;
-    return pokemon.nickname || pokemon.name;
-  }
-
-  // For fusions, check if either Pokemon is dead/stored and the other is active
-  const headInactive =
-    head.status === PokemonStatus.DECEASED ||
-    head.status === PokemonStatus.STORED;
-  const bodyInactive =
-    body.status === PokemonStatus.DECEASED ||
-    body.status === PokemonStatus.STORED;
-
-  // If one is inactive and the other is active, show only the active one
-  if (headInactive && !bodyInactive) {
-    return body.nickname || body.name;
-  }
-  if (bodyInactive && !headInactive) {
-    return head.nickname || head.name;
-  }
-
-  // Handle complete fusion case (both alive or both dead)
-  return head.nickname || body.nickname || `${head.name}/${body.name}`;
 }
 
 export default function SummaryCard({
@@ -91,15 +54,15 @@ export default function SummaryCard({
   );
 
   const name = getNicknameText(
-    encounterData?.head,
-    encounterData?.body,
-    encounterData?.isFusion
+    displayPokemon.head,
+    displayPokemon.body,
+    displayPokemon.isFusion
   );
 
   // Only consider deceased if both Pokemon are dead (for fusion) or the single Pokemon is dead
   // Note: stored Pokemon are not considered deceased, only actually dead Pokemon
-  const headDead = encounterData?.head?.status === PokemonStatus.DECEASED;
-  const bodyDead = encounterData?.body?.status === PokemonStatus.DECEASED;
+  const headDead = isPokemonDeceased(encounterData?.head);
+  const bodyDead = isPokemonDeceased(encounterData?.body);
 
   const isDeceased =
     encounterData?.isFusion && encounterData?.head && encounterData?.body
