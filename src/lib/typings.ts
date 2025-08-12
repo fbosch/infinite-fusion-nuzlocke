@@ -1,6 +1,11 @@
 import type { Pokemon } from '@/loaders/pokemon';
+import {
+  getPokemonById,
+  getPokemonByName,
+  getPokemonByNationalDexId,
+} from '@/loaders/pokemon';
 
-const ALL_TYPES = [
+export const ALL_TYPES = [
   'grass',
   'fire',
   'water',
@@ -21,7 +26,7 @@ const ALL_TYPES = [
   'flying',
 ] as const;
 
-type TypeName = (typeof ALL_TYPES)[number];
+export type TypeName = (typeof ALL_TYPES)[number];
 
 function isTypeName(value: string | undefined): value is TypeName {
   if (!value) return false;
@@ -67,11 +72,14 @@ function hasTypes(pokemon: Pokemon, a: TypeName, b: TypeName): boolean {
 }
 
 function getDominantType(pokemon: Pokemon): TypeName | undefined {
+  // Dominant type rule for latest ruleset: only Normal/Flying always passes Flying
   if (hasTypes(pokemon, 'normal', 'flying')) return 'flying';
   return undefined;
 }
 
-function getEffectiveTypeOrder(pokemon: Pokemon): EffectiveTypes {
+// INTERNAL: Effective order with swaps/dominant rules.
+// Use ONLY for fusion calculation. Do not use for single-Pokémon displays.
+export function getEffectiveTypeOrder(pokemon: Pokemon): EffectiveTypes {
   const id = pokemon.nationalDexId;
   const types = pokemon.types.map(t => t.name.toLowerCase());
 
@@ -132,4 +140,45 @@ export function getFusionTyping(
 ): { primary: TypeName; secondary: TypeName } {
   const [primary, secondary] = computeFusionTypes(head, body);
   return { primary, secondary };
+}
+
+/**
+ * Returns the base types for a single Pokémon as stored in data (no swaps,
+ * no dominant rule). Use this for singular Pokémon display.
+ */
+export function getTypesForPokemon(pokemon: Pokemon): {
+  primary: TypeName;
+  secondary?: TypeName;
+} {
+  const types = pokemon.types.map(t => t.name.toLowerCase());
+  const primary = ensureTypeName(types[0]);
+  const secondary = isTypeName(types[1]) ? (types[1] as TypeName) : undefined;
+  return { primary, secondary };
+}
+
+export type TypeQuery =
+  | { name: string | undefined }
+  | { id: number | undefined }
+  | { nationalDexId: number | undefined };
+
+/**
+ * Helper to resolve a Pokemon by name, Infinite Fusion ID, or National Dex ID
+ * and return its effective types.
+ */
+export async function getPokemonTypes(
+  query: TypeQuery
+): Promise<{ primary: TypeName; secondary?: TypeName } | null> {
+  let pokemon: Pokemon | null = null;
+
+  if ('name' in query && query.name) {
+    pokemon = await getPokemonByName(query.name);
+  } else if ('id' in query && query.id) {
+    pokemon = await getPokemonById(query.id);
+  } else if ('nationalDexId' in query && query.nationalDexId) {
+    pokemon = await getPokemonByNationalDexId(query.nationalDexId);
+  }
+
+  if (!pokemon) return null;
+  // Return base types for a single Pokémon (no swaps/dominant)
+  return getTypesForPokemon(pokemon);
 }

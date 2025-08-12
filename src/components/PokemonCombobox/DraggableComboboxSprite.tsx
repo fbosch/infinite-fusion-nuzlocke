@@ -15,7 +15,9 @@ import {
   getActivePlaythrough,
   useCustomLocations,
 } from '@/stores/playthroughs';
+import TypePills from '../TypePills';
 import dynamic from 'next/dynamic';
+import usePokemonTypes from '../../hooks/usePokemonTypes';
 
 const LocationSelector = dynamic(
   () =>
@@ -45,6 +47,8 @@ export function DraggableComboboxSprite({
   const pokemon = dragPreview || value;
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const customLocations = useCustomLocations();
+
+  const { primary, secondary } = usePokemonTypes({ id: pokemon?.id });
 
   // Extract field from comboboxId
   const field = comboboxId?.includes('-body') ? 'body' : 'head';
@@ -194,6 +198,7 @@ export function DraggableComboboxSprite({
   }, [
     value,
     locationId,
+    customLocations,
     availableLocations.length,
     handleMoveToOriginalLocation,
     wouldCreateEggFusionAtOriginal,
@@ -263,6 +268,14 @@ export function DraggableComboboxSprite({
             placement='bottom-start'
             content={
               <div>
+                <div className='flex items-center py-0.5 text-xs mb-1.5'>
+                  <TypePills
+                    className='flex'
+                    primary={primary}
+                    secondary={secondary}
+                  />
+                </div>
+                <div className='w-full h-px bg-gray-200 dark:bg-gray-700 my-1.5 mb-2' />
                 {/* Show original encounter location if different from current location */}
                 {pokemon?.originalLocation &&
                   pokemon.originalLocation !== locationId && (
