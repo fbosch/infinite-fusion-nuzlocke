@@ -15,7 +15,13 @@ import {
   offset,
 } from '@floating-ui/react';
 import { clsx } from 'clsx';
-import { useState, cloneElement, isValidElement, useEffect } from 'react';
+import {
+  useState,
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useRef,
+} from 'react';
 import { useWindowVisibility } from '@/hooks/useWindowVisibility';
 import { twMerge } from 'tailwind-merge';
 import { useSnapshot } from 'valtio';
@@ -66,6 +72,12 @@ export function CursorTooltip(props: CursorTooltipProps) {
   const [animationState, setAnimationState] = useState<
     'entering' | 'entered' | 'exiting' | null
   >(null);
+  const animationBatchRef = useRef(0);
+  const animationStateRef = useRef<typeof animationState>(animationState);
+  // keep a live ref of animationState for async callbacks
+  if (animationStateRef.current !== animationState) {
+    animationStateRef.current = animationState;
+  }
   const isWindowVisible = useWindowVisibility();
   const dragSnapshot = useSnapshot(dragStore);
 
@@ -76,19 +88,54 @@ export function CursorTooltip(props: CursorTooltipProps) {
       if (open) {
         setIsOpen(true);
         setAnimationState('entering');
-        window.setTimeout(() => {
-          window.requestAnimationFrame(() => {
-            if (refs.floating.current) {
-              setAnimationState('entered');
-            }
-          });
-        }, delay || 16);
       } else {
         setAnimationState('exiting');
-        window.setTimeout(() => {
-          setIsOpen(false);
-        }, 100);
       }
+
+      const currentBatchId = ++animationBatchRef.current;
+      // Wait for the element to mount/update, then observe running animations/transitions
+      window.requestAnimationFrame(() => {
+        const node = refs.floating.current as HTMLElement | null;
+        if (!node) return;
+        const allAnimations = node.getAnimations({ subtree: true });
+
+        // Consider only finite animations/transitions (ignore infinite/unknown)
+        const finiteAnimations = allAnimations.filter(a => {
+          const effect = (a as Animation & { effect?: KeyframeEffect | null })
+            .effect;
+          if (!effect || typeof effect.getTiming !== 'function') return false;
+          const t = effect.getTiming() as KeyframeEffectOptions & {
+            duration?: number | string;
+            iterations?: number;
+          };
+          const duration: number =
+            typeof t.duration === 'number' ? (t.duration as number) : 0;
+          const iterations: number =
+            typeof t.iterations === 'number' ? (t.iterations as number) : 1;
+          return Number.isFinite(duration) && Number.isFinite(iterations);
+        });
+
+        if (!finiteAnimations.length) {
+          // No finite animations; finalize immediately
+          const state = animationStateRef.current;
+          if (state === 'entering') {
+            setAnimationState('entered');
+          } else if (state === 'exiting') {
+            setIsOpen(false);
+          }
+          return;
+        }
+
+        Promise.allSettled(finiteAnimations.map(a => a.finished)).then(() => {
+          if (animationBatchRef.current !== currentBatchId) return; // stale
+          const state = animationStateRef.current;
+          if (state === 'entering') {
+            setAnimationState('entered');
+          } else if (state === 'exiting') {
+            setIsOpen(false);
+          }
+        });
+      });
     },
     middleware: [
       offset({
@@ -123,8 +170,10 @@ export function CursorTooltip(props: CursorTooltipProps) {
   });
 
   const hover = useHover(context, {
-    delay: { open: 0, close: 0 },
+    delay: { open: delay, close: 50 },
     enabled: !disabled,
+    move: true,
+    restMs: 16,
   });
 
   const focus = useFocus(context);
@@ -132,11 +181,11 @@ export function CursorTooltip(props: CursorTooltipProps) {
   const role = useRole(context);
 
   const { getReferenceProps, getFloatingProps } = useInteractions([
+    clientPointFloating, // ensure pointer tracking is active alongside hover
     hover,
     focus,
     dismiss,
     role,
-    clientPointFloating,
   ]);
 
   if (!content) return children;
@@ -155,7 +204,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
       {isOpen && (
         <FloatingPortal>
           <div
-            className='z-110'
+            className='z-110 pointer-events-none'
             ref={refs.setFloating}
             style={floatingStyles}
             {...getFloatingProps()}
@@ -168,10 +217,13 @@ export function CursorTooltip(props: CursorTooltipProps) {
                   'dark:bg-gray-700/80 background-blur dark:text-white text-gray-700',
                   'border dark:border-gray-600 border-gray-200',
                   'origin-top-left backdrop-blur-xl',
+                  'transition duration-150 ease-out',
                   {
+                    'opacity-0 scale-95 tooltip-exit':
+                      animationState === 'exiting',
                     'opacity-0 scale-95': animationState === 'entering',
-                    'tooltip-enter': animationState === 'entered',
-                    'tooltip-exit': animationState === 'exiting',
+                    'opacity-100 scale-100 tooltip-enter':
+                      animationState === 'entered',
                   }
                 ),
                 className
