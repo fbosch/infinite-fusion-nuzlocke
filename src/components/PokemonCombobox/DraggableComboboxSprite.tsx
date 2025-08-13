@@ -15,7 +15,10 @@ import {
   getActivePlaythrough,
   useCustomLocations,
 } from '@/stores/playthroughs';
+import TypePills from '../TypePills';
 import dynamic from 'next/dynamic';
+import usePokemonTypes from '../../hooks/usePokemonTypes';
+import { ArrowUpRight } from 'lucide-react';
 
 const LocationSelector = dynamic(
   () =>
@@ -45,6 +48,8 @@ export function DraggableComboboxSprite({
   const pokemon = dragPreview || value;
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const customLocations = useCustomLocations();
+
+  const { primary, secondary } = usePokemonTypes({ id: pokemon?.id });
 
   // Extract field from comboboxId
   const field = comboboxId?.includes('-body') ? 'body' : 'head';
@@ -189,11 +194,38 @@ export function DraggableComboboxSprite({
         onClick: () => setIsMoveModalOpen(true),
       });
     }
+    const infinitefusiondexLink = `https://infinitefusiondex.com/details/${value?.id}`;
+    const fusiondexLink = `https://fusiondex.org/sprite/pif/${value?.id}/`;
 
+    options.push(
+      {
+        id: 'separator',
+        separator: true,
+      },
+      {
+        id: 'infinitefusiondex',
+        label: 'Open InfiniteDex entry',
+        href: infinitefusiondexLink,
+        target: '_blank',
+        favicon: 'https://infinitefusiondex.com/images/favicon.ico',
+        icon: ArrowUpRight,
+        iconClassName: 'dark:text-blue-300 text-blue-400',
+      },
+      {
+        id: 'fusiondex',
+        label: 'Open FusionDex entry',
+        href: fusiondexLink,
+        target: '_blank',
+        favicon: 'https://www.fusiondex.org/favicon.ico',
+        icon: ArrowUpRight,
+        iconClassName: 'dark:text-blue-300 text-blue-400',
+      }
+    );
     return options;
   }, [
     value,
     locationId,
+    customLocations,
     availableLocations.length,
     handleMoveToOriginalLocation,
     wouldCreateEggFusionAtOriginal,
@@ -239,20 +271,7 @@ export function DraggableComboboxSprite({
   return (
     <>
       <ContextMenu items={menuOptions}>
-        <div
-          className={clsx(
-            'absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md',
-            'size-12.5 flex items-center justify-center active:cursor-grabbing',
-            'group-focus-within/input:border-blue-500',
-            {
-              'cursor-grab': !disabled,
-              'cursor-not-allowed opacity-50': disabled,
-              'pointer-events-none': dragPreview || disabled,
-            }
-          )}
-          draggable={!disabled}
-          onDragStart={handleDragStart}
-        >
+        <div>
           <CursorTooltip
             disabled={!!dragPreview || disabled}
             delay={500}
@@ -263,6 +282,14 @@ export function DraggableComboboxSprite({
             placement='bottom-start'
             content={
               <div>
+                <div className='flex py-0.5 text-xs mb-1.5'>
+                  <TypePills
+                    className='flex'
+                    primary={primary}
+                    secondary={secondary}
+                  />
+                </div>
+                <div className='w-full h-px bg-gray-200 dark:bg-gray-700 my-1.5 mb-2' />
                 {/* Show original encounter location if different from current location */}
                 {pokemon?.originalLocation &&
                   pokemon.originalLocation !== locationId && (
@@ -304,13 +331,28 @@ export function DraggableComboboxSprite({
               </div>
             }
           >
-            <PokemonSprite
-              pokemonId={pokemon.id}
+            <div
               className={clsx(
-                dragPreview && 'opacity-60 pointer-events-none' // Make preview sprite opaque
+                'absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md',
+                'size-12.5 flex items-center justify-center active:cursor-grabbing',
+                'group-focus-within/input:border-blue-500',
+                {
+                  'cursor-grab': !disabled,
+                  'cursor-not-allowed opacity-50': disabled,
+                  'pointer-events-none': dragPreview || disabled,
+                }
               )}
-              draggable={false}
-            />
+              draggable={!disabled}
+              onDragStart={handleDragStart}
+            >
+              <PokemonSprite
+                pokemonId={pokemon.id}
+                className={clsx(
+                  dragPreview && 'opacity-60 pointer-events-none' // Make preview sprite opaque
+                )}
+                draggable={false}
+              />
+            </div>
           </CursorTooltip>
         </div>
       </ContextMenu>

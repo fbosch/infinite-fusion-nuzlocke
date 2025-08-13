@@ -51,6 +51,14 @@ function MyComponent({ data }: Props) {
 }
 ```
 
+## React 19+ Essentials
+
+- **useEvent (stable)**: Use for event handlers that read latest props/state without re-subscribing. Avoid as a render-time computed value; use only for callbacks.
+- **Actions and useActionState**: Model async UI actions (e.g., form submits) with built-in pending/error handling. Prefer over managing pending state manually.
+- **useOptimistic**: Optimistic UI updates for async actions. Reconcile on settle.
+- **useTransition / useDeferredValue**: Defer low-priority updates and expensive recalculations to keep UI responsive.
+- **Server Components (framework-dependent)**: Prefer fetching and heavy computation on the server; keep client effects for external sync only.
+
 ## Hook Dependencies
 
 ### useEffect Dependencies
@@ -58,41 +66,66 @@ function MyComponent({ data }: Props) {
 - **Include all dependencies**: Every value from component scope used inside useEffect should be in the dependency array
 - **Use exhaustive-deps ESLint rule**: Enable this rule to catch missing dependencies
 - **Avoid infinite loops**: Be careful with object/array dependencies that change on every render
+- **Prefer useEvent for handlers**: If an effect only exists to keep a callback up-to-date, replace with `useEvent` and remove the effect
+- **Use refs for imperative instances**: Store mutable external instances in `useRef` to avoid re-creating them due to dependency changes
 
 ### useMemo and useCallback Dependencies
 
 - **Include all referenced values**: Any value from component scope used in the callback should be in dependencies
 - **Don't over-optimize**: Only use these hooks when performance is actually an issue
 - **Consider useCallback for event handlers**: Especially when passing to child components
+- **Prefer useEvent for frequently changing reads**: For callbacks that need current state without re-creating the function, `useEvent` is often better than `useCallback`
 
 ## Custom Hook Rules
 
 ### Naming Convention
 
-- **Start with 'use'**: All custom hooks must start with 'use' (e.g., `usePokemonData`)
+- **Start with 'use'**: All custom hooks must start with 'use'
 - **Descriptive names**: Hook names should clearly indicate their purpose
 
 ### Custom Hook Structure
 
 ```typescript
 // ✅ Good custom hook pattern
-function usePokemonData(pokemonId: number) {
-  const [data, setData] = useState<Pokemon | null>(null);
+function useResource(resourceId: number) {
+  const [data, setData] = useState<unknown | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!pokemonId) return;
+    if (!resourceId) return;
 
     setLoading(true);
-    fetchPokemon(pokemonId)
+    fetchResource(resourceId)
       .then(setData)
       .catch(setError)
       .finally(() => setLoading(false));
-  }, [pokemonId]);
+  }, [resourceId]);
 
   return { data, loading, error };
 }
+```
+
+### Actions and Optimistic Updates
+
+```typescript
+// useActionState: model an async action with built-in pending/error state
+function MyForm() {
+  const [state, submitAction, isPending] = useActionState(async (prev, form) => {
+    const result = await submitForm(new FormData(form));
+    return result;
+  }, null);
+
+  return (
+    <form action={submitAction}>
+      <button disabled={isPending}>Submit</button>
+    </form>
+  );
+}
+
+// useOptimistic: show optimistic UI while an action is in flight
+const [items, setItems] = useState<string[]>([]);
+const [optimisticItems, addOptimisticItem] = useOptimistic(items, (current, newItem: string) => [newItem, ...current]);
 ```
 
 ## Common Hook Mistakes
@@ -103,18 +136,20 @@ function usePokemonData(pokemonId: number) {
 - **Hooks in loops**: Never call hooks inside for loops or while loops
 - **Hooks in nested functions**: Never call hooks inside regular functions
 - **Early returns before hooks**: Never return from component before all hooks are called
+ - **Callbacks derived in effects**: Don’t use effects to recreate callbacks—use `useEvent` instead
 
 ### Performance Considerations
 
 - **Don't overuse useMemo/useCallback**: Only use when there's a measurable performance benefit
 - **Use React.memo for expensive components**: Wrap components that re-render unnecessarily
 - **Consider useReducer for complex state**: When state logic becomes complex
+ - **Use transitions and deferred values**: Keep input responsive while deferring heavy work
 
 ## Testing Hooks
 
 ### Testing Custom Hooks
 
-- **Use @testing-library/react-hooks**: For testing custom hooks in isolation
+- **Use @testing-library/react's renderHook**: Prefer `renderHook` from `@testing-library/react` (the hooks package is deprecated)
 - **Test all hook states**: Loading, success, error, and edge cases
 - **Mock external dependencies**: Mock API calls and external services
 
@@ -138,6 +173,7 @@ function usePokemonData(pokemonId: number) {
 2. **Verify hook order**: Make sure hooks are called in the same order every time
 3. **Check conditional logic**: Ensure no hooks are called conditionally
 4. **Review dependencies**: Check useEffect, useMemo, and useCallback dependencies
+5. **Stale closures**: If a handler reads stale state, switch it to `useEvent`
 
 ## Best Practices
 
@@ -167,6 +203,8 @@ function usePokemonData(pokemonId: number) {
 - **Use useMemo for expensive calculations**: Instead of useEffect for computed values
 - **Use useCallback for stable references**: Instead of useEffect for callback stability
 - **Use useReducer for complex state**: Instead of multiple useEffect calls for related state
+ - **Prefer useEvent over effect-based callback wiring**: Keep callbacks stable without dependency churn
+ - **Prefer Actions for async UI flows**: Replace ad-hoc pending/error state managed in effects with Actions APIs
 
 ### When to Use useEffect
 
@@ -183,3 +221,4 @@ function usePokemonData(pokemonId: number) {
 - **User interactions**: Use event handlers instead
 - **Simple state updates**: Use direct state setters
 - **Callback stability**: Use useCallback instead
+ - **Keeping handlers fresh**: Use `useEvent` instead

@@ -29,14 +29,17 @@ export default function Header() {
       <div className='mx-auto max-w-[1500px] px-4 md:px-6 2xl:px-0'>
         <header className='mb-2 py-2 sm:mb-4 sm:pt-5 '>
           <div className='flex items-center justify-between gap-4'>
-            <Link href='/' className='flex items-center gap-3 justify-start'>
+            <Link
+              href='/'
+              className='flex items-center gap-3 justify-start drop-shadow-xs/5'
+            >
               <Logo className='w-18 sm:w-14' />
               <div className='sr-only md:not-sr-only self-start'>
                 <h1 className='text-xs font-medium tracking-[0.01em] sm:text-[0.85rem]'>
-                  <span className='bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200'>
+                  <span className='bg-gradient-to-r from-cyan-600 via-indigo-700 to-rose-400 bg-clip-text tracking-wide  text-transparent dark:from-cyan-300 dark:via-violet-300 dark:to-rose-200 whitespace-nowrap'>
                     Pokémon Infinite Fusion
                   </span>
-                  <div className='text-base font-medium text-gray-800 sm:text-xl dark:text-white'>
+                  <div className='text-base font-medium  text-gray-800 sm:text-xl dark:text-white whitespace-nowrap'>
                     Nuzlocke Tracker
                   </div>
                 </h1>
@@ -49,7 +52,7 @@ export default function Header() {
                   className={clsx(
                     'p-2 rounded-md border border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
                     'hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400',
-                    'cursor-pointer'
+                    'cursor-pointer items-center'
                   )}
                   aria-label='Open Pokémon PC'
                   onClick={() => setDrawerOpen(true)}

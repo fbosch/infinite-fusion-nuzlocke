@@ -2,12 +2,13 @@
 
 import React from 'react';
 import { Loader2 } from 'lucide-react';
-import { match, P } from 'ts-pattern';
+import { type PokemonOptionType, isEggId } from '@/loaders/pokemon';
 import {
-  PokemonStatus,
-  type PokemonOptionType,
-  isEggId,
-} from '@/loaders/pokemon';
+  isPokemonActive,
+  isPokemonInactive,
+  canFuse,
+} from '@/utils/pokemonPredicates';
+import { getFusionOverlayStatus } from '@/utils/fusionStatus';
 
 function isEgg(pokemon: PokemonOptionType): boolean {
   return isEggId(pokemon.id);
@@ -165,40 +166,41 @@ export function getStatusState(
   head: PokemonOptionType | null,
   body: PokemonOptionType | null
 ): StatusState {
-  return match([head?.status, body?.status])
-    .with([PokemonStatus.MISSED, P._], [P._, PokemonStatus.MISSED], () => ({
-      type: 'missed' as const,
-      wrapperClasses: 'opacity-50',
-      imageClasses: '',
-      overlayContent: (
-        <div
-          className='absolute -right-1.5 bottom-0 z-20 pl-1.5 rounded-sm flex items-center justify-center pointer-events-none font-ds'
-          title='Missed!'
-        >
-          <span className='dark:pixel-shadow text-gray-500 text-xs dark:text-gray-200'>
-            ď
-          </span>
-        </div>
-      ),
-      canAnimate: false,
-    }))
-    .with([PokemonStatus.DECEASED, P._], [P._, PokemonStatus.DECEASED], () => ({
-      type: 'deceased' as const,
-      wrapperClasses: 'opacity-50',
-      imageClasses: 'saturate-30',
-      overlayContent: (
-        <div className='absolute pixel-shadow -right-2 bottom-0 z-10 bg-red-500 flex items-center justify-center pointer-events-none dark:bg-red-900 h-fit w-fit px-1 rounded-xs'>
-          <span className='pixel-shadow text-xs text-white font-ds'>FNT</span>
-        </div>
-      ),
-      canAnimate: false,
-    }))
-    .with(
-      [PokemonStatus.STORED, P._],
-      [P._, PokemonStatus.STORED],
-      [PokemonStatus.STORED, PokemonStatus.STORED],
-      () => ({
-        type: 'stored' as const,
+  const overlayStatus = getFusionOverlayStatus(head, body);
+
+  switch (overlayStatus) {
+    case 'missed':
+      return {
+        type: 'missed',
+        wrapperClasses: 'opacity-50',
+        imageClasses: '',
+        overlayContent: (
+          <div
+            className='absolute -right-1.5 bottom-0 z-20 pl-1.5 rounded-sm flex items-center justify-center pointer-events-none font-ds'
+            title='Missed!'
+          >
+            <span className='dark:pixel-shadow text-gray-500 text-xs dark:text-gray-200'>
+              ď
+            </span>
+          </div>
+        ),
+        canAnimate: false,
+      };
+    case 'deceased':
+      return {
+        type: 'deceased',
+        wrapperClasses: 'opacity-50',
+        imageClasses: 'saturate-30',
+        overlayContent: (
+          <div className='absolute pixel-shadow -right-2 bottom-0 z-10 bg-red-500 flex items-center justify-center pointer-events-none dark:bg-red-900 h-fit w-fit px-1 rounded-xs'>
+            <span className='pixel-shadow text-xs text-white font-ds'>FNT</span>
+          </div>
+        ),
+        canAnimate: false,
+      };
+    case 'stored':
+      return {
+        type: 'stored',
         wrapperClasses: '',
         imageClasses: '',
         overlayContent: (
@@ -209,15 +211,19 @@ export function getStatusState(
           </div>
         ),
         canAnimate: true,
-      })
-    )
-    .otherwise(() => ({
-      type: 'normal' as const,
-      wrapperClasses: '',
-      imageClasses: '',
-      overlayContent: null,
-      canAnimate: true,
-    }));
+      };
+    case 'normal':
+    default:
+      // Only allow animation when both head and body have the same status (can fuse)
+      const canAnimate = canFuse(head, body);
+      return {
+        type: 'normal',
+        wrapperClasses: '',
+        imageClasses: '',
+        overlayContent: null,
+        canAnimate,
+      };
+  }
 }
 
 export interface DisplayPokemon {
@@ -235,29 +241,34 @@ export function getDisplayPokemon(
   body: PokemonOptionType | null,
   isFusion: boolean
 ): DisplayPokemon {
-  // Early return for non-fusion or incomplete data
+  // If either slot missing, or fusion not requested, return as-is
   if (!isFusion || !head || !body) {
     return { head, body, isFusion };
   }
 
-  // Check if Pokemon are inactive (dead or stored)
-  const headInactive =
-    head.status === PokemonStatus.DECEASED ||
-    head.status === PokemonStatus.STORED;
-  const bodyInactive =
-    body.status === PokemonStatus.DECEASED ||
-    body.status === PokemonStatus.STORED;
+  // Enforce fusion gating: both must have statuses and be both active or both inactive
+  const canShowFusion = canFuse(head, body);
+  if (!canShowFusion) {
+    const headIsActive = isPokemonActive(head);
+    const bodyIsActive = isPokemonActive(body);
+    const headIsInactive = isPokemonInactive(head);
+    const bodyIsInactive = isPokemonInactive(body);
 
-  // If one is inactive and the other is active, show only the active one
-  if (headInactive && !bodyInactive) {
-    return { head: null, body, isFusion: false };
-  }
-  if (bodyInactive && !headInactive) {
+    // Prefer showing a single with a known status; prioritize active over inactive
+    if (headIsActive && !bodyIsActive)
+      return { head, body: null, isFusion: false };
+    if (bodyIsActive && !headIsActive)
+      return { head: null, body, isFusion: false };
+    if (headIsInactive && !bodyIsInactive)
+      return { head, body: null, isFusion: false };
+    if (bodyIsInactive && !headIsInactive)
+      return { head: null, body, isFusion: false };
+
+    // If statuses are missing or ambiguous, default to showing head only when present
     return { head, body: null, isFusion: false };
   }
 
-  // If both are inactive or both are active, keep fusion display
-  return { head, body, isFusion };
+  return { head, body, isFusion: true };
 }
 
 export function LoadingSpinner() {

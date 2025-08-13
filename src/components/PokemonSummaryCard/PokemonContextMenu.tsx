@@ -17,6 +17,7 @@ import { isEggId, type PokemonOptionType } from '@/loaders/pokemon';
 import { playthroughActions } from '@/stores/playthroughs';
 import { getDisplayPokemon } from './utils';
 import dynamic from 'next/dynamic';
+import { getSpriteId } from '../../lib/sprites';
 
 const LocationSelector = dynamic(
   () => import('./LocationSelector').then(mod => mod.LocationSelector),
@@ -178,10 +179,7 @@ export function PokemonContextMenu({
 
   const contextItems = useMemo<ContextMenuItem[]>(() => {
     // Use display Pokemon for links instead of raw encounter data
-    const id =
-      displayPokemon.head?.id && displayPokemon.body?.id
-        ? `${displayPokemon.head.id}.${displayPokemon.body.id}`
-        : displayPokemon.head?.id || displayPokemon.body?.id;
+    const id = getSpriteId(displayPokemon.head?.id, displayPokemon.body?.id);
     const infinitefusiondexLink = `https://infinitefusiondex.com/details/${id}`;
     const fusiondexLink = `https://fusiondex.org/sprite/pif/${id}${preferredVariant ? `${preferredVariant}` : ''}/`;
 
@@ -231,7 +229,8 @@ export function PokemonContextMenu({
       if (
         currentStatus === 'captured' ||
         currentStatus === 'received' ||
-        currentStatus === 'traded'
+        currentStatus === 'traded' ||
+        currentStatus === 'deceased'
       ) {
         items.push({
           id: 'move-to-box',
@@ -337,6 +336,7 @@ export function PokemonContextMenu({
 
     return items;
   }, [
+    preferredVariant,
     encounterData,
     displayPokemon,
     eitherPokemonIsEgg,
@@ -371,29 +371,31 @@ export function PokemonContextMenu({
         bodyId={displayPokemon.body?.id}
       />
 
-      {/* Location Selector for Moving Head */}
-      <LocationSelector
-        isOpen={isMoveHeadModalOpen}
-        onClose={() => setIsMoveHeadModalOpen(false)}
-        currentLocationId={locationId}
-        onSelectLocation={handleMoveHead}
-        encounterData={
-          encounterData?.head ? { head: encounterData.head } : null
-        }
-        moveTargetField='head'
-      />
+      {encounterData?.head && (
+        <LocationSelector
+          isOpen={isMoveHeadModalOpen}
+          onClose={() => setIsMoveHeadModalOpen(false)}
+          currentLocationId={locationId}
+          onSelectLocation={handleMoveHead}
+          encounterData={
+            encounterData?.head ? { head: encounterData.head } : null
+          }
+          moveTargetField='head'
+        />
+      )}
 
-      {/* Location Selector for Moving Body */}
-      <LocationSelector
-        isOpen={isMoveBodyModalOpen}
-        onClose={() => setIsMoveBodyModalOpen(false)}
-        currentLocationId={locationId}
-        onSelectLocation={handleMoveBody}
-        encounterData={
-          encounterData?.body ? { body: encounterData.body } : null
-        }
-        moveTargetField='body'
-      />
+      {encounterData?.body && (
+        <LocationSelector
+          isOpen={isMoveBodyModalOpen}
+          onClose={() => setIsMoveBodyModalOpen(false)}
+          currentLocationId={locationId}
+          onSelectLocation={handleMoveBody}
+          encounterData={
+            encounterData?.body ? { body: encounterData.body } : null
+          }
+          moveTargetField='body'
+        />
+      )}
     </>
   );
 }

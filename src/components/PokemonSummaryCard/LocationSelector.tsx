@@ -21,6 +21,9 @@ import { PokemonSprite } from '../PokemonSprite';
 import BodyIcon from '@/assets/images/body.svg';
 import HeadIcon from '@/assets/images/head.svg';
 import { clsx } from 'clsx';
+import { canFuse } from '@/utils/pokemonPredicates';
+import { TypePills } from '@/components/TypePills';
+import { useFusionTypes } from '@/hooks/useFusionTypes';
 
 interface LocationSelectorProps {
   isOpen: boolean;
@@ -51,7 +54,11 @@ interface ActionPreviewProps {
   existingPokemon: PokemonOptionType | null;
   otherFieldPokemon: PokemonOptionType | null;
   remainingPokemon: PokemonOptionType | null;
+  movingPokemon: PokemonOptionType | null;
   targetLocationId: string;
+  sourceLocationId: string;
+  selectedTargetField: 'head' | 'body';
+  sourceMoveTargetField: 'head' | 'body';
 }
 
 interface MovingPokemonInfoProps {
@@ -92,23 +99,58 @@ function ActionPreview({
   existingPokemon,
   otherFieldPokemon,
   remainingPokemon,
-  targetLocationId,
+  movingPokemon,
+  targetLocationId: _targetLocationId, // eslint-disable-line @typescript-eslint/no-unused-vars
+  sourceLocationId: _sourceLocationId, // eslint-disable-line @typescript-eslint/no-unused-vars
+  selectedTargetField,
+  sourceMoveTargetField,
 }: ActionPreviewProps) {
-  // Get the target location's fusion status
-  const targetEncounter = useMemo(() => {
-    const activePlaythrough = getActivePlaythrough();
-    return activePlaythrough?.encounters?.[targetLocationId];
-  }, [targetLocationId]);
+  // Compute target and source post-move states for typing previews
+  const { targetHeadAfter, targetBodyAfter } = useMemo(() => {
+    const headAfter =
+      selectedTargetField === 'head' ? movingPokemon : otherFieldPokemon;
+    const bodyAfter =
+      selectedTargetField === 'body' ? movingPokemon : otherFieldPokemon;
+    return { targetHeadAfter: headAfter, targetBodyAfter: bodyAfter };
+  }, [selectedTargetField, movingPokemon, otherFieldPokemon]);
 
-  const isTargetFusion = targetEncounter?.isFusion ?? false;
+  const { sourceHeadAfter, sourceBodyAfter } = useMemo(() => {
+    const headAfter =
+      sourceMoveTargetField === 'head' ? existingPokemon : remainingPokemon;
+    const bodyAfter =
+      sourceMoveTargetField === 'body' ? existingPokemon : remainingPokemon;
+    return { sourceHeadAfter: headAfter, sourceBodyAfter: bodyAfter };
+  }, [existingPokemon, remainingPokemon, sourceMoveTargetField]);
+
+  // Resolve typings with fusion hook (falls back to single when one side is missing)
+  const existingTypes = useFusionTypes(
+    existingPokemon ? { id: existingPokemon.id } : undefined,
+    undefined
+  );
+  const targetFusionTypes = useFusionTypes(
+    targetHeadAfter ? { id: targetHeadAfter.id } : undefined,
+    targetBodyAfter ? { id: targetBodyAfter.id } : undefined
+  );
+  const sourceFusionTypes = useFusionTypes(
+    sourceHeadAfter ? { id: sourceHeadAfter.id } : undefined,
+    sourceBodyAfter ? { id: sourceBodyAfter.id } : undefined
+  );
 
   if (!existingPokemon && !otherFieldPokemon) return null;
 
   if (existingPokemon) {
     // This is a swap operation
-    const willCreateFusionAtTarget =
-      Boolean(otherFieldPokemon) && isTargetFusion;
-    const willCreateFusionAtSource = Boolean(remainingPokemon);
+    const willCreateFusionAtTarget = Boolean(
+      targetHeadAfter &&
+        targetBodyAfter &&
+        canFuse(targetHeadAfter, targetBodyAfter)
+    );
+
+    const willCreateFusionAtSource = Boolean(
+      sourceHeadAfter &&
+        sourceBodyAfter &&
+        canFuse(sourceHeadAfter, sourceBodyAfter)
+    );
 
     return (
       <div className='space-y-3 mt-2'>
@@ -120,6 +162,16 @@ function ActionPreview({
             <ArrowUpDown className='w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0' />
             <span>Will swap with {existingPokemon.name}</span>
           </p>
+          {existingTypes.primary && (
+            <div className='ml-auto'>
+              <TypePills
+                primary={existingTypes.primary}
+                secondary={existingTypes.secondary}
+                size='xs'
+                showTooltip
+              />
+            </div>
+          )}
         </div>
 
         {willCreateFusionAtTarget && (
@@ -131,6 +183,16 @@ function ActionPreview({
               <Dna className='w-4 h-4 text-purple-500 flex-shrink-0' />
               <span>Will fuse with {otherFieldPokemon!.name} here</span>
             </p>
+            {targetFusionTypes.primary && (
+              <div className='ml-auto'>
+                <TypePills
+                  primary={targetFusionTypes.primary}
+                  secondary={targetFusionTypes.secondary}
+                  size='xs'
+                  showTooltip
+                />
+              </div>
+            )}
           </div>
         )}
 
@@ -146,14 +208,30 @@ function ActionPreview({
                 at source
               </span>
             </p>
+            {sourceFusionTypes.primary && (
+              <div className='ml-auto'>
+                <TypePills
+                  primary={sourceFusionTypes.primary}
+                  secondary={sourceFusionTypes.secondary}
+                  size='xs'
+                  showTooltip
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
     );
   }
 
-  // Simple fusion case (no existing Pokemon in target slot)
-  if (otherFieldPokemon && isTargetFusion) {
+  // Simple fusion case (no existing Pokemon in target slot): simulate post-move target
+  if (movingPokemon && otherFieldPokemon) {
+    const willCreateFusionAtTarget = Boolean(
+      targetHeadAfter &&
+        targetBodyAfter &&
+        canFuse(targetHeadAfter, targetBodyAfter)
+    );
+    if (!willCreateFusionAtTarget) return null;
     return (
       <div className='flex items-center space-x-4 mt-2'>
         <div className='size-5 flex justify-center items-center flex-shrink-0'>
@@ -163,6 +241,16 @@ function ActionPreview({
           <Dna className='w-4 h-4 text-purple-500 flex-shrink-0' />
           <span>Will fuse with {otherFieldPokemon.name}</span>
         </p>
+        {targetFusionTypes.primary && (
+          <div className='ml-auto'>
+            <TypePills
+              primary={targetFusionTypes.primary}
+              secondary={targetFusionTypes.secondary}
+              size='xs'
+              showTooltip
+            />
+          </div>
+        )}
       </div>
     );
   }
@@ -268,7 +356,7 @@ function LocationItem({
       onClick={handleSelect}
       disabled={wouldCreateEggFusion}
       className={clsx(
-        'w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-50 dark:focus:bg-gray-700 border-b border-gray-200 dark:border-gray-600 last:border-b-0',
+        'w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 border-b border-gray-200 dark:border-gray-600 last:border-b-0',
         {
           'cursor-not-allowed opacity-50': wouldCreateEggFusion,
         }
@@ -295,7 +383,11 @@ function LocationItem({
               existingPokemon={existingPokemon}
               otherFieldPokemon={otherFieldPokemon}
               remainingPokemon={remainingPokemon}
+              movingPokemon={movingPokemon}
               targetLocationId={location.id}
+              sourceLocationId={currentLocationId}
+              selectedTargetField={selectedTargetField}
+              sourceMoveTargetField={moveTargetField}
             />
           )}
         </div>
@@ -312,6 +404,15 @@ function MovingPokemonInfo({
   moveTargetField,
   isFusion,
 }: MovingPokemonInfoProps) {
+  const fusionTypes = useFusionTypes(
+    isMovingEntireFusion
+      ? { id: encounterData?.head?.id }
+      : movingPokemon
+        ? { id: movingPokemon.id }
+        : undefined,
+    isMovingEntireFusion ? { id: encounterData?.body?.id } : undefined
+  );
+
   return (
     <div className='p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'>
       <div className='flex items-center space-x-3'>
@@ -348,6 +449,15 @@ function MovingPokemonInfo({
             </>
           )}
         </p>
+        <div className='ml-auto'>
+          {fusionTypes.primary && (
+            <TypePills
+              primary={fusionTypes.primary}
+              secondary={fusionTypes.secondary}
+              size='md'
+            />
+          )}
+        </div>
       </div>
     </div>
   );

@@ -147,9 +147,9 @@ const GameModeToggle = React.memo(function GameModeToggle() {
 
       <CursorTooltip
         placement={'bottom-end'}
-        className='origin-top-right'
         disabled={isMobile}
         delay={500}
+        offset={{ mainAxis: 10, crossAxis: 10 }}
         content={
           <div className='max-w-sm text-xs font-normal leading-5 space-y-2 divide-y divide-gray-200 dark:divide-gray-600 gap-y-4'>
             <div>
@@ -189,7 +189,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
           className={clsx(
             'flex items-center justify-center w-5 h-5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
-            'transition-colors duration-150 cursor-help'
+            'transition-colors duration-150 cursor-help md:block hidden'
           )}
           aria-label='Show game mode descriptions'
         >
