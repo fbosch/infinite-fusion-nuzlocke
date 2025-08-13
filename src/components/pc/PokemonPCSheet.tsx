@@ -201,11 +201,11 @@ export default function PokemonPCSheet({
               selectedIndex={selectedIndex}
               onChange={index => onChangeTab(getTabFromIndex(index))}
             >
-              <TabList className='mb-4 flex items-center gap-2'>
+              <TabList className='mb-4 flex w-full items-center gap-2 flex-1'>
                 <Tab
                   className={({ selected }) =>
                     clsx(
-                      'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none',
+                      'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none flex-1',
                       selected
                         ? 'border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100'
                         : 'border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
@@ -213,7 +213,7 @@ export default function PokemonPCSheet({
                   }
                 >
                   <PokeballIcon className='h-4 w-4' />
-                  <span className='font-medium'>Team</span>
+                  <span className='font-medium flex-1'>Team</span>
                   <span className='ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100'>
                     {team.length}
                   </span>
@@ -221,7 +221,7 @@ export default function PokemonPCSheet({
                 <Tab
                   className={({ selected }) =>
                     clsx(
-                      'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none',
+                      'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none flex-1',
                       selected
                         ? 'border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100'
                         : 'border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
@@ -229,7 +229,7 @@ export default function PokemonPCSheet({
                   }
                 >
                   <Box className='h-4 w-4' />
-                  <span className='font-medium'>Boxed</span>
+                  <span className='font-medium flex-1'>Boxed</span>
                   <span className='ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100'>
                     {stored.length}
                   </span>
@@ -237,7 +237,7 @@ export default function PokemonPCSheet({
                 <Tab
                   className={({ selected }) =>
                     clsx(
-                      'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none',
+                      'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none flex-1',
                       selected
                         ? 'border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100'
                         : 'border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
@@ -245,7 +245,7 @@ export default function PokemonPCSheet({
                   }
                 >
                   <Skull className='h-4 w-4' />
-                  <span className='font-medium'>Graveyard</span>
+                  <span className='font-medium flex-1'>Graveyard</span>
                   <span className='ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100'>
                     {deceased.length}
                   </span>
