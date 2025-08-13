@@ -325,7 +325,7 @@ function TeamEntryItem({
               <TypePills
                 primary={fusionTypes.primary}
                 secondary={fusionTypes.secondary}
-                showTooltip={!isOverLimit}
+                showTooltip
               />
             </div>
           )}
@@ -374,23 +374,7 @@ function TeamEntryItem({
       }}
       shouldLoad={true}
     >
-      <div>
-        {isOverLimit ? (
-          <CursorTooltip
-            content={
-              <div className='max-w-[240px]'>
-                This team exceeds the 6 Pokémon limit. Move some to storage to
-                resolve.
-              </div>
-            }
-            placement='top-end'
-          >
-            {card}
-          </CursorTooltip>
-        ) : (
-          card
-        )}
-      </div>
+      {card}
     </PokemonContextMenu>
   );
 }
@@ -636,7 +620,8 @@ export default function PokemonPCSheet({
                     >
                       {(() => {
                         let pokemonCount = 0;
-                        return team.map(entry => {
+                        let insertedLimitNotice = false;
+                        return team.flatMap(entry => {
                           // For fusions, count as 1 Pokémon; for non-fusions, count head and body separately
                           const currentEncounter =
                             encounters?.[entry.locationId];
@@ -653,7 +638,23 @@ export default function PokemonPCSheet({
                           pokemonCount += entryPokemonCount;
                           const isOverLimit = pokemonCount > 6;
 
-                          return (
+                          const nodes: React.ReactNode[] = [];
+                          if (isOverLimit && !insertedLimitNotice) {
+                            insertedLimitNotice = true;
+                            nodes.push(
+                              <li key='team-limit-divider' className='py-1'>
+                                <div className='flex items-center gap-2 mb-1'>
+                                  <div className='h-px flex-1 bg-gray-200 dark:bg-gray-700' />
+                                  <span className='text-xs font-medium text-red-600 dark:text-red-400'>
+                                    Team limit exceeded
+                                  </span>
+                                  <div className='h-px flex-1 bg-gray-200 dark:bg-gray-700' />
+                                </div>
+                              </li>
+                            );
+                          }
+
+                          nodes.push(
                             <TeamEntryItem
                               key={entry.locationId}
                               entry={entry}
@@ -662,6 +663,8 @@ export default function PokemonPCSheet({
                               onClose={onClose}
                             />
                           );
+
+                          return nodes;
                         });
                       })()}
                     </ul>
