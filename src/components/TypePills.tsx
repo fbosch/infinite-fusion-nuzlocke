@@ -2,6 +2,7 @@ import React from 'react';
 import clsx from 'clsx';
 import type { TypeName } from '@/lib/typings';
 import { twMerge } from 'tailwind-merge';
+import { CursorTooltip } from './CursorTooltip';
 
 const typeColors: Record<TypeName, string> = {
   normal: 'bg-gradient-to-b from-[#8A8A4A] to-[#A6A66A]',
@@ -24,11 +25,19 @@ const typeColors: Record<TypeName, string> = {
   fairy: 'bg-gradient-to-b from-[#B25579] to-[#EE99AC]',
 };
 
-type PillSize = 'xs' | 'sm' | 'md';
+export type PillSize = 'xs' | 'sm' | 'md';
 
-function TypeBadge({ type, size = 'md' }: { type: TypeName; size?: PillSize }) {
-  if (size === 'xs') {
-    return (
+export function TypeBadge({
+  type,
+  size = 'md',
+  showTooltip = true,
+}: {
+  type: TypeName;
+  size?: PillSize;
+  showTooltip?: boolean;
+}) {
+  const core =
+    size === 'xs' ? (
       <span
         className={clsx(
           'inline-block h-3 w-3 rounded-full border border-white/20 shadow-sm/20',
@@ -36,30 +45,87 @@ function TypeBadge({ type, size = 'md' }: { type: TypeName; size?: PillSize }) {
         )}
         role='status'
         aria-label={`${type} type`}
-        title={`${type.charAt(0).toUpperCase()}${type.slice(1)} type`}
+        title={
+          showTooltip
+            ? `${type.charAt(0).toUpperCase()}${type.slice(1)} type`
+            : undefined
+        }
       />
-    );
-  }
-  return (
-    <span
-      className={clsx(
-        'inline-flex items-center rounded-xs uppercase cursor-default select-none border border-white/10 drop-shadow-sm/20',
-        size === 'sm' ? 'px-1.5 py-0' : 'px-2 py-0.5',
-        typeColors[type]
-      )}
-      role='status'
-      aria-label={`${type} type`}
-      title={`${type.charAt(0).toUpperCase()}${type.slice(1)} type`}
-    >
+    ) : (
       <span
         className={clsx(
-          'text-white font-semibold text-shadow-sm/20',
-          size === 'sm' ? 'text-[10px]' : 'text-xs'
+          'inline-flex items-center rounded-xs uppercase cursor-default select-none border border-white/10 drop-shadow-sm/20',
+          size === 'sm' ? 'px-1.5 py-0' : 'px-2 py-0.5',
+          typeColors[type]
         )}
+        role='status'
+        aria-label={`${type} type`}
+        title={
+          showTooltip
+            ? `${type.charAt(0).toUpperCase()}${type.slice(1)} type`
+            : undefined
+        }
       >
-        {type}
+        <span
+          className={clsx(
+            'text-white font-semibold text-shadow-sm/20',
+            size === 'sm' ? 'text-[10px]' : 'text-xs'
+          )}
+        >
+          {type}
+        </span>
       </span>
-    </span>
+    );
+
+  if (!showTooltip) return core;
+
+  // Shared tooltip for single badge
+  return (
+    <CursorTooltip
+      content={
+        <div className={twMerge('flex gap-1.5')}>
+          <TypeBadge type={type} size='sm' showTooltip={false} />
+        </div>
+      }
+      placement='top-end'
+    >
+      {core}
+    </CursorTooltip>
+  );
+}
+
+export function TypeTooltip({
+  primary,
+  secondary,
+  children,
+  placement = 'top-end',
+}: {
+  primary?: TypeName;
+  secondary?: TypeName;
+  children: React.ReactElement;
+  placement?: Parameters<typeof CursorTooltip>[0]['placement'];
+}) {
+  if (!primary && !secondary) return children;
+
+  return (
+    <CursorTooltip
+      content={
+        <div
+          className={twMerge(clsx('flex gap-1.5'))}
+          aria-label='pokemon types tooltip'
+        >
+          {primary && (
+            <TypeBadge type={primary} size='sm' showTooltip={false} />
+          )}
+          {secondary && (
+            <TypeBadge type={secondary} size='sm' showTooltip={false} />
+          )}
+        </div>
+      }
+      placement={placement}
+    >
+      {children}
+    </CursorTooltip>
   );
 }
 
@@ -68,13 +134,15 @@ export function TypePills({
   secondary,
   className,
   size = 'md',
+  showTooltip = false,
 }: {
   primary?: TypeName;
   secondary?: TypeName;
   className?: string;
   size?: PillSize;
+  showTooltip?: boolean;
 }) {
-  return (
+  const pills = (
     <div
       className={twMerge(
         clsx('flex', size === 'xs' ? 'gap-1' : 'gap-1.5'),
@@ -82,10 +150,22 @@ export function TypePills({
       )}
       aria-label='pokemon types'
     >
-      {primary && <TypeBadge type={primary} size={size} />}
-      {secondary && <TypeBadge type={secondary} size={size} />}
+      {primary && <TypeBadge type={primary} size={size} showTooltip={false} />}
+      {secondary && (
+        <TypeBadge type={secondary} size={size} showTooltip={false} />
+      )}
     </div>
   );
+
+  if (showTooltip) {
+    return (
+      <TypeTooltip primary={primary} secondary={secondary}>
+        {pills}
+      </TypeTooltip>
+    );
+  }
+
+  return pills;
 }
 
 export default TypePills;

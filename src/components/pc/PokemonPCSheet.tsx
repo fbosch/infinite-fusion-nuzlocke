@@ -140,10 +140,11 @@ function PCEntryItem({
         aria-label={`Scroll to ${idToName.get(entry.locationId) || 'location'} in table`}
       >
         {fusionTypes.primary && (
-          <div className='pointer-events-none absolute right-2 top-2'>
+          <div className='absolute right-2 top-2'>
             <TypePills
               primary={fusionTypes.primary}
               secondary={fusionTypes.secondary}
+              showTooltip
               size='xs'
             />
           </div>
@@ -302,6 +303,7 @@ function TeamEntryItem({
                 <TypePills
                   primary={fusionTypes.primary}
                   secondary={fusionTypes.secondary}
+                  showTooltip
                 />
               </div>
             )}

@@ -229,7 +229,8 @@ export function PokemonContextMenu({
       if (
         currentStatus === 'captured' ||
         currentStatus === 'received' ||
-        currentStatus === 'traded'
+        currentStatus === 'traded' ||
+        currentStatus === 'deceased'
       ) {
         items.push({
           id: 'move-to-box',
