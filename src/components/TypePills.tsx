@@ -217,7 +217,7 @@ export function TypeBadge({
     size === 'xs' ? (
       <span
         className={clsx(
-          'inline-block h-3 w-3 rounded-full border border-white/20 shadow-sm/20',
+          'inline-block h-3 w-3 rounded-full border border-white/20',
           typeColors[type]
         )}
         role='status'
@@ -231,7 +231,7 @@ export function TypeBadge({
     ) : (
       <span
         className={clsx(
-          'inline-flex items-center rounded-xs uppercase cursor-default select-none border border-white/10 drop-shadow-sm/20',
+          'inline-flex items-center rounded-xs uppercase cursor-default select-none border border-white/10 ',
           size === 'sm' ? 'px-1.5 py-0' : 'px-2 py-0.5',
           typeColors[type]
         )}
