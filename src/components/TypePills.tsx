@@ -35,7 +35,7 @@ function TypeBadge({ type }: { type: TypeName }) {
       aria-label={`${type} type`}
       title={`${type.charAt(0).toUpperCase()}${type.slice(1)} type`}
     >
-      <span className='text-white font-ds pixel-shadow-black text-xs font-semibold '>
+      <span className='text-white text-xs font-semibold text-shadow-sm/20'>
         {type}
       </span>
     </span>

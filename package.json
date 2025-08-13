@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "licenses:generate": "jiti scripts/generate-licenses.ts",
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack --port 4000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

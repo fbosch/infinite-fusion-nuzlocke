@@ -27,6 +27,8 @@ import { getSpriteId } from '../../lib/sprites';
 import { type PokemonOptionType } from '@/loaders/pokemon';
 import { usePreferredVariantState } from '@/hooks/useSprite';
 import Rays from '@/assets/images/rays.svg';
+import { TypePills } from '../TypePills';
+import { useFusionTypes } from '@/hooks/useFusionTypes';
 
 export interface FusionSpriteHandle {
   playEvolution: (durationMs?: number) => void;
@@ -73,6 +75,11 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
     const { variant: preferredVariant } = usePreferredVariantState(
       head?.id ?? null,
       body?.id ?? null
+    );
+
+    const { primary, secondary } = useFusionTypes(
+      { id: head?.id },
+      { id: body?.id }
     );
 
     const credit =
@@ -160,6 +167,9 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
             content={
               credit ? (
                 <div>
+                  <div className='flex items-center gap-1'>
+                    <TypePills primary={primary} secondary={secondary} />
+                  </div>
                   <div className='flex flex-col gap-1'>
                     <div className='text-xs font-normal tracking-tight flex gap-1 items-center'>
                       <Palette className='size-3' />
