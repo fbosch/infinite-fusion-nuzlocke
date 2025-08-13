@@ -215,7 +215,7 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
                 aria-hidden='true'
                 className='absolute size-35 left-1/2 top-2/3 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 bg-radial from-10% to-30% from-white/40 to-transparent'
               >
-                <Rays className='w-full h-full opacity-100 dark:opacity-50d dark:text-white text-cyan-300' />
+                <Rays className='w-full h-full dark:text-white/50 text-sky-300' />
               </div>
               <Image
                 ref={shadowRef}
