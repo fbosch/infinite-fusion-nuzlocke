@@ -167,6 +167,8 @@ function ActionPreview({
               <TypePills
                 primary={existingTypes.primary}
                 secondary={existingTypes.secondary}
+                size='xs'
+                showTooltip
               />
             </div>
           )}
@@ -186,6 +188,8 @@ function ActionPreview({
                 <TypePills
                   primary={targetFusionTypes.primary}
                   secondary={targetFusionTypes.secondary}
+                  size='xs'
+                  showTooltip
                 />
               </div>
             )}
@@ -209,6 +213,8 @@ function ActionPreview({
                 <TypePills
                   primary={sourceFusionTypes.primary}
                   secondary={sourceFusionTypes.secondary}
+                  size='xs'
+                  showTooltip
                 />
               </div>
             )}
@@ -240,6 +246,7 @@ function ActionPreview({
             <TypePills
               primary={targetFusionTypes.primary}
               secondary={targetFusionTypes.secondary}
+              size='sm'
             />
           </div>
         )}
@@ -446,6 +453,7 @@ function MovingPokemonInfo({
             <TypePills
               primary={fusionTypes.primary}
               secondary={fusionTypes.secondary}
+              size='md'
             />
           )}
         </div>

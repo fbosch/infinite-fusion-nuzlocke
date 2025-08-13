@@ -104,8 +104,8 @@ function TypeEffectivenessSummary({
   const factorLabel = (v: number): string => {
     if (v === 4) return '4x';
     if (v === 2) return '2x';
-    if (v === 0.5) return '1/2x';
-    if (v === 0.25) return '1/4x';
+    if (v === 0.5) return '½x';
+    if (v === 0.25) return '¼x';
     if (v === 0) return '0x';
     return '';
   };
@@ -125,6 +125,7 @@ function TypeEffectivenessSummary({
   return (
     <div className='w-full max-w-full' aria-label='type effectiveness'>
       <div className='flex items-center justify-between gap-2'>
+        <span className='text-[11px] opacity-70'>Defenses</span>
         <div
           className='inline-flex items-center gap-1.5'
           role='group'
@@ -137,7 +138,6 @@ function TypeEffectivenessSummary({
             <TypeBadge type={secondary} size='sm' showTooltip={false} />
           )}
         </div>
-        <span className='text-[11px] opacity-70'>Defenses</span>
       </div>
       <div className='w-full h-px bg-gray-200 dark:bg-gray-600/60 my-2' />
       {/* Grid of all attacking types with multipliers */}
