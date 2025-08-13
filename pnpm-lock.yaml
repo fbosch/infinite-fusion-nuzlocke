@@ -71,6 +71,9 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      poke-types:
+        specifier: ^1.0.22
+        version: 1.0.22
       react:
         specifier: 19.1.0
         version: 19.1.0
@@ -4217,6 +4220,10 @@ packages:
     resolution: {integrity: sha512-jlOKfIQBTNJwQn2JKK5xLmwrsi/NwVTmHRvbrknCjdWxfX1/c/+yP4Jmp9jRZWedft/vnhh+rGbvl/kUmesurg==}
     engines: {node: '>=18'}
     hasBin: true
+
+  poke-types@1.0.22:
+    resolution: {integrity: sha512-PH9YfLUnN131UuQHQvSaOEhol/TFH3cdEHZwigjxFYsmqH/pNuDHSRBLBD2ywEwTrIisyaYUw139IPmy9K9yRw==}
+    engines: {node: '>=8.9 || >=10.0.0'}
 
   pokedex-promise-v2@4.2.1:
     resolution: {integrity: sha512-GYjamsfoma0kGKM64P8w/t+fgODcEy99WuERk8npvBIj9voS6UN8/Y58viaekDEvCGSt36zvo9LRuFNaRF4hWw==}
@@ -9409,6 +9416,8 @@ snapshots:
       bin-build: 3.0.0
       bin-wrapper: 4.1.0
       execa: 8.0.1
+
+  poke-types@1.0.22: {}
 
   pokedex-promise-v2@4.2.1:
     dependencies:
