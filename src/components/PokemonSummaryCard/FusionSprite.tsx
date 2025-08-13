@@ -78,8 +78,8 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
     );
 
     const { primary, secondary } = useFusionTypes(
-      { id: head?.id },
-      { id: body?.id }
+      head?.id ? { id: head?.id } : undefined,
+      body?.id ? { id: body?.id } : undefined
     );
 
     const credit =
@@ -166,35 +166,38 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
             delay={500}
             content={
               credit ? (
-                <div>
-                  <div className='flex items-center gap-1'>
+                <div className='min-w-44 max-w-[22rem]'>
+                  <div className='flex py-0.5'>
                     <TypePills primary={primary} secondary={secondary} />
                   </div>
-                  <div className='flex flex-col gap-1'>
-                    <div className='text-xs font-normal tracking-tight flex gap-1 items-center'>
+                  <div className='my-2 flex'>
+                    <div className='inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400'>
                       <Palette className='size-3' />
-                      <span>{credit}</span>
+                      <span className='opacity-80'>by</span>
+                      <span className='truncate max-w-[14rem]' title={credit}>
+                        {credit}
+                      </span>
                     </div>
-                    <div className='w-full h-px bg-gray-200 dark:bg-gray-700 my-1' />
-                    <div className='flex items-center text-xs gap-2'>
-                      <div className='flex items-center gap-1'>
-                        <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
-                          <MousePointer className='size-2.5' />
-                          <span className='font-medium text-xs'>L</span>
-                        </div>
-                        <span className='text-gray-600 dark:text-gray-300 text-xs'>
-                          Pokédex
-                        </span>
+                  </div>
+                  <div className='w-full h-px bg-gray-200 dark:bg-gray-700 my-1' />
+                  <div className='flex items-center text-xs gap-2'>
+                    <div className='flex items-center gap-1'>
+                      <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
+                        <MousePointer className='size-2.5' />
+                        <span className='font-medium text-xs'>L</span>
                       </div>
-                      <div className='flex items-center gap-1'>
-                        <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
-                          <MousePointer className='size-2.5' />
-                          <span className='font-medium text-xs'>R</span>
-                        </div>
-                        <span className='text-gray-600 dark:text-gray-300 text-xs'>
-                          Options
-                        </span>
+                      <span className='text-gray-600 dark:text-gray-300 text-xs'>
+                        Pokédex
+                      </span>
+                    </div>
+                    <div className='flex items-center gap-1'>
+                      <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
+                        <MousePointer className='size-2.5' />
+                        <span className='font-medium text-xs'>R</span>
                       </div>
+                      <span className='text-gray-600 dark:text-gray-300 text-xs'>
+                        Options
+                      </span>
                     </div>
                   </div>
                 </div>
