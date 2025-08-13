@@ -5,6 +5,7 @@ import { CursorTooltip } from '@/components/CursorTooltip';
 import { PokemonContextMenu } from '@/components/PokemonSummaryCard/PokemonContextMenu';
 import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
 import { TypePills } from '@/components/TypePills';
+import { getNicknameText } from '@/components/PokemonSummaryCard/utils';
 import HeadIcon from '@/assets/images/head.svg';
 import BodyIcon from '@/assets/images/body.svg';
 import { Box, Skull } from 'lucide-react';
@@ -18,20 +19,6 @@ interface TeamEntryItemProps {
   idToName: Map<string, string>;
   isOverLimit: boolean;
   onClose?: () => void;
-}
-
-function getNicknameText(
-  head?: { name?: string; nickname?: string } | null,
-  body?: { name?: string; nickname?: string } | null,
-  isFusion?: boolean
-) {
-  if (isFusion && head && body)
-    return `${head.nickname || head.name} / ${body.nickname || body.name}`;
-  return (head?.nickname ||
-    head?.name ||
-    body?.nickname ||
-    body?.name ||
-    'Unknown') as string;
 }
 
 export default function TeamEntryItem({
@@ -160,7 +147,7 @@ export default function TeamEntryItem({
           <CursorTooltip content='Move to Graveyard' placement='top-end'>
             <button
               type='button'
-              className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-400 transition-colors hover:border-gray-200/70 hover:bg-gray-100/50 hover:text-gray-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/40 dark:hover;border-gray-600/60 cursor-pointer'
+              className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-400 transition-colors hover:border-gray-200/70 hover:bg-gray-100/50 hover:text-gray-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/40 dark:hover:border-gray-600/60 cursor-pointer'
               aria-label='Move to Graveyard'
               onClick={async e => {
                 e.stopPropagation();

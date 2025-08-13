@@ -156,7 +156,7 @@ export default function PokemonPCSheet({
     <Dialog open={isOpen} onClose={onClose} className='group relative z-50'>
       <DialogBackdrop
         transition
-        className='fixed inset-0 bg-black/30 backdrop-blur-[2px] duration-100 ease-out data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/50'
+        className='fixed inset-0 bg-black/30 backdrop-blur-[2px] duration-100 ease-out data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/30'
         aria-hidden='true'
       />
 

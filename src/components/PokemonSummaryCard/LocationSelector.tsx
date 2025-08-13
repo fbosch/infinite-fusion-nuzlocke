@@ -246,7 +246,8 @@ function ActionPreview({
             <TypePills
               primary={targetFusionTypes.primary}
               secondary={targetFusionTypes.secondary}
-              size='sm'
+              size='xs'
+              showTooltip
             />
           </div>
         )}
