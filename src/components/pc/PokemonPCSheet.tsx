@@ -33,6 +33,8 @@ import PokeballIcon from '@/assets/images/pokeball.svg';
 import HeadIcon from '@/assets/images/head.svg';
 import BodyIcon from '@/assets/images/body.svg';
 import { scrollToLocationById } from '@/utils/scrollToLocation';
+import { TypePills } from '@/components/TypePills';
+import { useFusionTypes } from '@/hooks/useFusionTypes';
 
 export interface PokemonPCSheetProps {
   isOpen: boolean;
@@ -89,6 +91,12 @@ function PCEntryItem({
     .filter(Boolean)
     .join(' / ');
 
+  // Typings for entry (single or fusion)
+  const fusionTypes = useFusionTypes(
+    entry.head ? { id: entry.head.id } : undefined,
+    entry.body ? { id: entry.body.id } : undefined
+  );
+
   const handleClick = () => {
     const highlightUids: string[] = [];
     if (entry.head?.uid) highlightUids.push(entry.head.uid);
@@ -131,6 +139,15 @@ function PCEntryItem({
         tabIndex={0}
         aria-label={`Scroll to ${idToName.get(entry.locationId) || 'location'} in table`}
       >
+        {fusionTypes.primary && (
+          <div className='pointer-events-none absolute right-2 top-2'>
+            <TypePills
+              primary={fusionTypes.primary}
+              secondary={fusionTypes.secondary}
+              size='xs'
+            />
+          </div>
+        )}
         <div className='flex items-center gap-3 p-3'>
           <div className='flex flex-shrink-0 items-center justify-center rounded-md bg-gray-50 dark:bg-gray-700'>
             {hasAny && (
@@ -180,6 +197,12 @@ function TeamEntryItem({
   const hasAny = Boolean(headActive || bodyActive);
   const isFusion = Boolean(
     currentEncounter?.isFusion && canFuse(entry.head, entry.body)
+  );
+
+  // Typings for entry (single or fusion) – must run before early returns
+  const fusionTypes = useFusionTypes(
+    entry.head ? { id: entry.head.id } : undefined,
+    entry.body ? { id: entry.body.id } : undefined
   );
 
   if (!hasAny) return null;
@@ -274,6 +297,14 @@ function TeamEntryItem({
                 {idToName.get(entry.locationId) || 'Unknown Location'}
               </div>
             </div>
+            {fusionTypes.primary && (
+              <div className='ml-auto'>
+                <TypePills
+                  primary={fusionTypes.primary}
+                  secondary={fusionTypes.secondary}
+                />
+              </div>
+            )}
           </div>
         </div>
       </li>

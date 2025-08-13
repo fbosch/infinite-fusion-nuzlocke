@@ -41,8 +41,9 @@ export function useFusionTypes(
     const head = findPokemon(headQuery as TypeQuery);
     const body = findPokemon(bodyQuery as TypeQuery);
     if (!head || !body) return { isLoading };
-
     const { primary, secondary } = getFusionTyping(head, body);
+    if (primary === secondary)
+      return { primary, secondary: undefined, isLoading: false };
     return { primary, secondary, isLoading: false };
   }, [allPokemon, isLoading, headQuery, bodyQuery, headSingle, bodySingle]);
 

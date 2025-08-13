@@ -24,18 +24,39 @@ const typeColors: Record<TypeName, string> = {
   fairy: 'bg-gradient-to-b from-[#B25579] to-[#EE99AC]',
 };
 
-function TypeBadge({ type }: { type: TypeName }) {
+type PillSize = 'xs' | 'sm' | 'md';
+
+function TypeBadge({ type, size = 'md' }: { type: TypeName; size?: PillSize }) {
+  if (size === 'xs') {
+    return (
+      <span
+        className={clsx(
+          'inline-block h-3 w-3 rounded-full border border-white/20 shadow-sm/20',
+          typeColors[type]
+        )}
+        role='status'
+        aria-label={`${type} type`}
+        title={`${type.charAt(0).toUpperCase()}${type.slice(1)} type`}
+      />
+    );
+  }
   return (
     <span
       className={clsx(
-        'inline-flex items-center rounded-xs px-2 py-0.5 uppercase cursor-default select-none border border-white/10 drop-shadow-sm/20',
+        'inline-flex items-center rounded-xs uppercase cursor-default select-none border border-white/10 drop-shadow-sm/20',
+        size === 'sm' ? 'px-1.5 py-0' : 'px-2 py-0.5',
         typeColors[type]
       )}
       role='status'
       aria-label={`${type} type`}
       title={`${type.charAt(0).toUpperCase()}${type.slice(1)} type`}
     >
-      <span className='text-white text-xs font-semibold text-shadow-sm/20'>
+      <span
+        className={clsx(
+          'text-white font-semibold text-shadow-sm/20',
+          size === 'sm' ? 'text-[10px]' : 'text-xs'
+        )}
+      >
         {type}
       </span>
     </span>
@@ -46,18 +67,23 @@ export function TypePills({
   primary,
   secondary,
   className,
+  size = 'md',
 }: {
   primary?: TypeName;
   secondary?: TypeName;
   className?: string;
+  size?: PillSize;
 }) {
   return (
     <div
-      className={twMerge('flex gap-1.5', className)}
+      className={twMerge(
+        clsx('flex', size === 'xs' ? 'gap-1' : 'gap-1.5'),
+        className
+      )}
       aria-label='pokemon types'
     >
-      {primary && <TypeBadge type={primary} />}
-      {secondary && <TypeBadge type={secondary} />}
+      {primary && <TypeBadge type={primary} size={size} />}
+      {secondary && <TypeBadge type={secondary} size={size} />}
     </div>
   );
 }
