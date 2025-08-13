@@ -130,7 +130,7 @@ function PCEntryItem({
         key={entry.locationId}
         role='listitem'
         className={clsx(
-          'relative cursor-pointer rounded-lg border border-gray-200 bg-white transition-all duration-200 hover:ring-1 dark:border-gray-700 dark:bg-gray-800',
+          'group/pc-entry relative cursor-pointer rounded-lg border border-gray-200 bg-white transition-all duration-200 hover:ring-1 dark:border-gray-700 dark:bg-gray-800',
           hoverRingClass,
           className
         )}
@@ -179,11 +179,11 @@ function PCEntryItem({
           </div>
         </div>
         {mode === 'stored' && (
-          <div className='absolute bottom-2 right-2'>
+          <div className='absolute bottom-2 right-2 transition-opacity md:opacity-0 md:group-hover/pc-entry:opacity-100 md:pointer-events-none md:group-hover/pc-entry:pointer-events-auto'>
             <CursorTooltip content='Move to Team' placement='top-end'>
               <button
                 type='button'
-                className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-500 transition-colors hover:border-gray-200 hover:bg-gray-100/70 hover:text-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-300 dark:hover:text-gray-100 dark:hover:bg-gray-700/50 dark:hover:border-gray-600 cursor-pointer'
+                className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-400 transition-colors hover:border-gray-200/70 hover:bg-gray-100/50 hover:text-gray-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/40 dark:hover:border-gray-600/60 cursor-pointer'
                 aria-label='Move to Team'
                 onClick={async e => {
                   e.stopPropagation();
@@ -251,7 +251,7 @@ function TeamEntryItem({
       key={entry.locationId}
       role='listitem'
       className={clsx(
-        'relative cursor-pointer rounded-lg border transition-all duration-200',
+        'group/pc-entry relative cursor-pointer rounded-lg border transition-all duration-200',
         {
           'border-red-500 bg-red-50 dark:bg-red-900/20 hover:ring-1 hover:ring-red-400/30':
             isOverLimit,
@@ -331,12 +331,12 @@ function TeamEntryItem({
           )}
         </div>
       </div>
-      <div className='absolute bottom-2 right-2 flex gap-1.5'>
+      <div className='absolute bottom-2 right-2 flex gap-1.5 transition-opacity md:opacity-0 md:group-hover/pc-entry:opacity-100 md:pointer-events-none md:group-hover/pc-entry:pointer-events-auto'>
         <CursorTooltip content='Move to Box' placement='top-end'>
           <button
             type='button'
-            className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-500 transition-colors hover:border-gray-200 hover:bg-gray-100/70 hover:text-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-300 dark:hover:text-gray-100 dark:hover:bg-gray-700/50 dark:hover:border-gray-600 cursor-pointer'
-            aria-label='Mark as Stored'
+            className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-400 transition-colors hover:border-gray-200/70 hover:bg-gray-100/50 hover:text-gray-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/40 dark:hover:border-gray-600/60 cursor-pointer'
+            aria-label='Move to Box'
             onClick={async e => {
               e.stopPropagation();
               await playthroughActions.moveEncounterToBox(entry.locationId);
@@ -348,8 +348,8 @@ function TeamEntryItem({
         <CursorTooltip content='Move to Graveyard' placement='top-end'>
           <button
             type='button'
-            className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-500 transition-colors hover:border-gray-200 hover:bg-gray-100/70 hover:text-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-300 dark:hover:text-gray-100 dark:hover:bg-gray-700/50 dark:hover:border-gray-600 cursor-pointer'
-            aria-label='Mark as Deceased'
+            className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-400 transition-colors hover:border-gray-200/70 hover:bg-gray-100/50 hover:text-gray-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/40 dark:hover:border-gray-600/60 cursor-pointer'
+            aria-label='Move to Graveyard'
             onClick={async e => {
               e.stopPropagation();
               await playthroughActions.markEncounterAsDeceased(
