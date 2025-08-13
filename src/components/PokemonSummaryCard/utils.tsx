@@ -214,12 +214,14 @@ export function getStatusState(
       };
     case 'normal':
     default:
+      // Only allow animation when both head and body have the same status (can fuse)
+      const canAnimate = canFuse(head, body);
       return {
         type: 'normal',
         wrapperClasses: '',
         imageClasses: '',
         overlayContent: null,
-        canAnimate: true,
+        canAnimate,
       };
   }
 }

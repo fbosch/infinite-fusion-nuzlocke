@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { CursorTooltip } from '@/components/CursorTooltip';
 import { PokemonContextMenu } from '@/components/PokemonSummaryCard/PokemonContextMenu';
 import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
+import { getNicknameText } from '@/components/PokemonSummaryCard/utils';
 import { TypePills } from '@/components/TypePills';
 import PokeballIcon from '@/assets/images/pokeball.svg';
 import { useEncounters, playthroughActions } from '@/stores/playthroughs';
@@ -26,13 +27,6 @@ interface PCEntryItemProps {
   onClose?: () => void;
 }
 
-function getPokemonLabel(
-  p: { name?: string; nickname?: string } | null | undefined
-): string {
-  if (!p) return '';
-  return p.nickname || p.name || '';
-}
-
 export default function PCEntryItem(props: PCEntryItemProps) {
   const {
     entry,
@@ -53,12 +47,10 @@ export default function PCEntryItem(props: PCEntryItemProps) {
     ? isPokemonStored(entry.body)
     : isPokemonDeceased(entry.body);
   const hasAny = Boolean(headActive || bodyActive);
-  const label = [
-    headActive ? getPokemonLabel(entry.head) : '',
-    bodyActive ? getPokemonLabel(entry.body) : '',
-  ]
-    .filter(Boolean)
-    .join(' / ');
+  const isFusion = Boolean(
+    currentEncounter?.isFusion && canFuse(entry.head, entry.body)
+  );
+  const label = getNicknameText(entry.head, entry.body, isFusion);
 
   const fusionTypes = useFusionTypes(
     entry.head ? { id: entry.head.id } : undefined,

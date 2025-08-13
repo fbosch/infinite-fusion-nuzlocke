@@ -89,7 +89,7 @@ export default function TeamEntryItem({
                 showTooltip={false}
               />
             </div>
-            <div className='min-w-0 flex-1 space-y-2'>
+            <div className='min-w-0 flex-1 space-y-2.5'>
               <div className='flex items-center gap-2'>
                 <h3 className='text-base font-semibold text-gray-900 dark:text-gray-100'>
                   {getNicknameText(entry.head, entry.body, isFusion)}
@@ -98,19 +98,15 @@ export default function TeamEntryItem({
               {isFusion && (
                 <div className='align-center flex gap-x-3'>
                   {headActive && (
-                    <div className='flex items-center gap-1 text-sm'>
+                    <div className='flex items-center gap-1 text-sm text-gray-700 dark:text-gray-400'>
                       <HeadIcon className='h-4 w-4' />
-                      <span className='text-gray-700 dark:text-gray-300'>
-                        {entry.head?.name || 'Unknown'}
-                      </span>
+                      <span>{entry.head?.name || 'Unknown'}</span>
                     </div>
                   )}
                   {bodyActive && (
-                    <div className='flex items-center gap-1 text-sm'>
+                    <div className='flex items-center gap-1 text-sm text-gray-700 dark:text-gray-400'>
                       <BodyIcon className='h-4 w-4' />
-                      <span className='text-gray-700 dark:text-gray-300'>
-                        {entry.body?.name || 'Unknown'}
-                      </span>
+                      <span>{entry.body?.name || 'Unknown'}</span>
                     </div>
                   )}
                 </div>
@@ -125,6 +121,7 @@ export default function TeamEntryItem({
                   primary={fusionTypes.primary}
                   secondary={fusionTypes.secondary}
                   showTooltip
+                  size='sm'
                 />
               </div>
             )}
