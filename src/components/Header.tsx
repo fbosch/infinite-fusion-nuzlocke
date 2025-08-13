@@ -49,7 +49,7 @@ export default function Header() {
                   className={clsx(
                     'p-2 rounded-md border border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
                     'hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400',
-                    'cursor-pointer'
+                    'cursor-pointer items-center'
                   )}
                   aria-label='Open Pokémon PC'
                   onClick={() => setDrawerOpen(true)}
