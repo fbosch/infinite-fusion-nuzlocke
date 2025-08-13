@@ -14,7 +14,11 @@ import {
 } from '@headlessui/react';
 import clsx from 'clsx';
 import { Skull, X, Boxes, Box, Users } from 'lucide-react';
-import { useEncounters, useCustomLocations } from '@/stores/playthroughs';
+import {
+  useEncounters,
+  useCustomLocations,
+  playthroughActions,
+} from '@/stores/playthroughs';
 import { type PokemonOptionType } from '@/loaders/pokemon';
 import {
   isPokemonActive,
@@ -27,6 +31,7 @@ import {
   getLocationsSortedWithCustom,
 } from '@/loaders/locations';
 import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
+import { CursorTooltip } from '@/components/CursorTooltip';
 import { PokemonContextMenu } from '@/components/PokemonSummaryCard/PokemonContextMenu';
 import { getNicknameText } from '@/components/PokemonSummaryCard/utils';
 import PokeballIcon from '@/assets/images/pokeball.svg';
@@ -125,7 +130,7 @@ function PCEntryItem({
         key={entry.locationId}
         role='listitem'
         className={clsx(
-          'relative cursor-pointer rounded-lg border border-gray-200 bg-white transition-all duration-200 hover:ring-2 dark:border-gray-700 dark:bg-gray-800',
+          'relative cursor-pointer rounded-lg border border-gray-200 bg-white transition-all duration-200 hover:ring-1 dark:border-gray-700 dark:bg-gray-800',
           hoverRingClass,
           className
         )}
@@ -173,6 +178,25 @@ function PCEntryItem({
             </div>
           </div>
         </div>
+        {mode === 'stored' && (
+          <div className='absolute bottom-2 right-2'>
+            <CursorTooltip content='Move to Team' placement='top-end'>
+              <button
+                type='button'
+                className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-500 transition-colors hover:border-gray-200 hover:bg-gray-100/70 hover:text-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-300 dark:hover:text-gray-100 dark:hover:bg-gray-700/50 dark:hover:border-gray-600 cursor-pointer'
+                aria-label='Move to Team'
+                onClick={async e => {
+                  e.stopPropagation();
+                  await playthroughActions.markEncounterAsCaptured(
+                    entry.locationId
+                  );
+                }}
+              >
+                <PokeballIcon className='h-4 w-4' />
+              </button>
+            </CursorTooltip>
+          </div>
+        )}
       </li>
     </PokemonContextMenu>
   );
@@ -222,6 +246,124 @@ function TeamEntryItem({
     onClose?.();
   };
 
+  const card = (
+    <li
+      key={entry.locationId}
+      role='listitem'
+      className={clsx(
+        'relative cursor-pointer rounded-lg border transition-all duration-200',
+        {
+          'border-red-500 bg-red-50 dark:bg-red-900/20 hover:ring-1 hover:ring-red-400/30':
+            isOverLimit,
+          'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:ring-1 hover:ring-blue-400/30':
+            !isOverLimit,
+        }
+      )}
+      onClick={handleClick}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
+      tabIndex={0}
+      aria-label={`Scroll to ${idToName.get(entry.locationId) || 'location'} in table`}
+    >
+      <div className='p-4'>
+        <div className='flex items-start gap-4'>
+          <div
+            className={clsx(
+              'flex flex-shrink-0 items-center justify-center rounded-lg bg-gray-50 p-2 dark:bg-gray-700',
+              {
+                'bg-red-50 dark:bg-red-900/20': isOverLimit,
+              }
+            )}
+          >
+            <FusionSprite
+              headPokemon={entry.head ?? null}
+              bodyPokemon={entry.body ?? null}
+              shouldLoad
+              className='top-1.5'
+              showStatusOverlay={false}
+              showTooltip={false}
+            />
+          </div>
+          <div className='min-w-0 flex-1 space-y-2'>
+            <div className='flex items-center gap-2'>
+              <h3 className='text-base font-semibold text-gray-900 dark:text-gray-100'>
+                {getNicknameText(entry.head, entry.body, isFusion)}
+              </h3>
+            </div>
+
+            {isFusion && (
+              <div className='align-center flex gap-x-3'>
+                {headActive && (
+                  <div className='flex items-center gap-1 text-sm'>
+                    <HeadIcon className='h-4 w-4' />
+                    <span className='text-gray-700 dark:text-gray-300'>
+                      {entry.head?.name || 'Unknown'}
+                    </span>
+                  </div>
+                )}
+                {bodyActive && (
+                  <div className='flex items-center gap-1 text-sm'>
+                    <BodyIcon className='h-4 w-4' />
+                    <span className='text-gray-700 dark:text-gray-300'>
+                      {entry.body?.name || 'Unknown'}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className='text-xs text-gray-500 dark:text-gray-400'>
+              {idToName.get(entry.locationId) || 'Unknown Location'}
+            </div>
+          </div>
+          {fusionTypes.primary && (
+            <div className='ml-auto'>
+              <TypePills
+                primary={fusionTypes.primary}
+                secondary={fusionTypes.secondary}
+                showTooltip={!isOverLimit}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+      <div className='absolute bottom-2 right-2 flex gap-1.5'>
+        <CursorTooltip content='Move to Box' placement='top-end'>
+          <button
+            type='button'
+            className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-500 transition-colors hover:border-gray-200 hover:bg-gray-100/70 hover:text-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-300 dark:hover:text-gray-100 dark:hover:bg-gray-700/50 dark:hover:border-gray-600 cursor-pointer'
+            aria-label='Mark as Stored'
+            onClick={async e => {
+              e.stopPropagation();
+              await playthroughActions.moveEncounterToBox(entry.locationId);
+            }}
+          >
+            <Box className='h-4 w-4' />
+          </button>
+        </CursorTooltip>
+        <CursorTooltip content='Move to Graveyard' placement='top-end'>
+          <button
+            type='button'
+            className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-500 transition-colors hover:border-gray-200 hover:bg-gray-100/70 hover:text-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-300 dark:hover:text-gray-100 dark:hover:bg-gray-700/50 dark:hover:border-gray-600 cursor-pointer'
+            aria-label='Mark as Deceased'
+            onClick={async e => {
+              e.stopPropagation();
+              await playthroughActions.markEncounterAsDeceased(
+                entry.locationId
+              );
+            }}
+          >
+            <Skull className='h-4 w-4' />
+          </button>
+        </CursorTooltip>
+      </div>
+    </li>
+  );
+
   return (
     <PokemonContextMenu
       locationId={entry.locationId}
@@ -232,84 +374,23 @@ function TeamEntryItem({
       }}
       shouldLoad={true}
     >
-      <li
-        key={entry.locationId}
-        role='listitem'
-        className={clsx(
-          'relative cursor-pointer rounded-lg border transition-all duration-200',
-          {
-            'border-red-500 bg-red-50 dark:bg-red-900/20 hover:ring-2 hover:ring-red-400/60':
-              isOverLimit,
-            'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:ring-2 hover:ring-green-400/60':
-              !isOverLimit,
-          }
+      <div>
+        {isOverLimit ? (
+          <CursorTooltip
+            content={
+              <div className='max-w-[240px]'>
+                This team exceeds the 6 Pokémon limit. Move some to storage to
+                resolve.
+              </div>
+            }
+            placement='top-end'
+          >
+            {card}
+          </CursorTooltip>
+        ) : (
+          card
         )}
-        onClick={handleClick}
-        onKeyDown={e => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleClick();
-          }
-        }}
-        tabIndex={0}
-        aria-label={`Scroll to ${idToName.get(entry.locationId) || 'location'} in table`}
-      >
-        <div className='p-4'>
-          <div className='flex items-start gap-4'>
-            <div className='flex flex-shrink-0 items-center justify-center rounded-lg bg-gray-50 p-2 dark:bg-gray-700'>
-              <FusionSprite
-                headPokemon={entry.head ?? null}
-                bodyPokemon={entry.body ?? null}
-                shouldLoad
-                className='top-1.5'
-                showStatusOverlay={false}
-                showTooltip={false}
-              />
-            </div>
-            <div className='min-w-0 flex-1 space-y-2'>
-              <div className='flex items-center gap-2'>
-                <h3 className='text-base font-semibold text-gray-900 dark:text-gray-100'>
-                  {getNicknameText(entry.head, entry.body, isFusion)}
-                </h3>
-              </div>
-
-              {isFusion && (
-                <div className='align-center flex gap-x-3'>
-                  {headActive && (
-                    <div className='flex items-center gap-1 text-sm'>
-                      <HeadIcon className='h-4 w-4' />
-                      <span className='text-gray-700 dark:text-gray-300'>
-                        {entry.head?.name || 'Unknown'}
-                      </span>
-                    </div>
-                  )}
-                  {bodyActive && (
-                    <div className='flex items-center gap-1 text-sm'>
-                      <BodyIcon className='h-4 w-4' />
-                      <span className='text-gray-700 dark:text-gray-300'>
-                        {entry.body?.name || 'Unknown'}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className='text-xs text-gray-500 dark:text-gray-400'>
-                {idToName.get(entry.locationId) || 'Unknown Location'}
-              </div>
-            </div>
-            {fusionTypes.primary && (
-              <div className='ml-auto'>
-                <TypePills
-                  primary={fusionTypes.primary}
-                  secondary={fusionTypes.secondary}
-                  showTooltip
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      </li>
+      </div>
     </PokemonContextMenu>
   );
 }
@@ -613,7 +694,7 @@ export default function PokemonPCSheet({
                           entry={entry}
                           idToName={idToName}
                           mode='stored'
-                          hoverRingClass='hover:ring-blue-400/60'
+                          hoverRingClass='hover:ring-blue-400/30'
                           fallbackLabel='Stored Pokémon'
                           className=''
                           onClose={onClose}
@@ -649,7 +730,7 @@ export default function PokemonPCSheet({
                           entry={entry}
                           idToName={idToName}
                           mode='graveyard'
-                          hoverRingClass='hover:ring-red-400/60'
+                          hoverRingClass='hover:ring-red-400/30'
                           fallbackLabel='Fainted Pokémon'
                           className=''
                           onClose={onClose}
