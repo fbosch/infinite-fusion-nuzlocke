@@ -213,9 +213,9 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
               <div
                 ref={raysSvgRef as unknown as React.RefObject<HTMLDivElement>}
                 aria-hidden='true'
-                className='absolute size-35 left-1/2 top-2/3 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0'
+                className='absolute size-35 left-1/2 top-2/3 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 bg-radial from-10% to-30% from-white/40 to-transparent'
               >
-                <Rays className='w-full h-full opacity-50' />
+                <Rays className='w-full h-full opacity-100 dark:opacity-50d dark:text-white text-cyan-300' />
               </div>
               <Image
                 ref={shadowRef}
