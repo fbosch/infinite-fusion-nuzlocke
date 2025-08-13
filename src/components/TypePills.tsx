@@ -171,7 +171,7 @@ function TypeEffectivenessSummary({
                     <div
                       key={`head-${key}-${t}`}
                       className={clsx(
-                        'size-6 rounded-xs flex items-center justify-center text-[10px] font-semibold uppercase text-white border border-white/10  text-shadow-sm/20',
+                        'size-6 rounded-xs flex items-center justify-center text-[10px] font-semibold uppercase text-white border border-white/10 text-shadow-sm/20',
                         typeColors[t]
                       )}
                       role='columnheader'
