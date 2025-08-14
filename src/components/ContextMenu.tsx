@@ -83,6 +83,7 @@ export interface ContextMenuItem {
   shortcut?: string;
   separator?: boolean;
   tooltip?: React.ReactNode;
+  children?: ContextMenuItem[];
 }
 
 export interface ContextMenuProps {
@@ -116,6 +117,8 @@ export function ContextMenu({
   const triggerRef = useRef<HTMLElement>(null);
   const listRef = useRef<Array<HTMLElement | null>>([]);
   const menuElementRef = useRef<HTMLDivElement>(null);
+  const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
+  const [submenuPosition, setSubmenuPosition] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     onOpenChange?.(isOpen);
@@ -212,6 +215,25 @@ export function ContextMenu({
       }, 50); // Match CSS animation duration
     }
   };
+
+  const openSubmenuForIndex = useCallback(
+    (validIndex: number) => {
+      if (!menuElementRef.current) return;
+      const parentEl = listRef.current[validIndex];
+      if (!parentEl) return;
+      const itemRect = parentEl.getBoundingClientRect();
+      const x = itemRect.right - 2; // Anchor to the item's right edge
+      const y = itemRect.top; // Align vertically with the item
+      setSubmenuPosition({ x, y });
+      setOpenSubmenuIndex(validIndex);
+    },
+    []
+  );
+
+  const closeSubmenu = useCallback(() => {
+    setOpenSubmenuIndex(null);
+    setSubmenuPosition(null);
+  }, []);
 
   const handleContextMenu = (event: React.MouseEvent) => {
     if (disabled) return;
@@ -332,6 +354,7 @@ export function ContextMenu({
                   item.disabled && '!opacity-75 !cursor-not-allowed'
                 );
 
+                const hasChildren = Array.isArray(item.children) && item.children.length > 0;
                 const content = (
                   <div className='flex items-center gap-x-2 w-full'>
                     {item.icon && !item.href && (
@@ -377,6 +400,9 @@ export function ContextMenu({
                           )}
                           aria-hidden='true'
                         />
+                      )}
+                      {hasChildren && (
+                        <span className='text-xs opacity-60'>›</span>
                       )}
                     </div>
                   </div>
@@ -439,10 +465,14 @@ export function ContextMenu({
                       onClick: e => {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (!item.disabled) {
+                        if (!item.disabled && !hasChildren) {
                           item.onClick?.(e);
                           handleClose();
                         }
+                      },
+                      onMouseEnter: () => {
+                        if (hasChildren) openSubmenuForIndex(validIndex);
+                        else closeSubmenu();
                       },
                     })}
                   >
@@ -459,12 +489,104 @@ export function ContextMenu({
                       placement='right'
                       delay={500}
                     >
-                      {buttonElement}
+                      <div className='relative'>
+                        {buttonElement}
+                        {hasChildren &&
+                          openSubmenuIndex === validIndex &&
+                          submenuPosition && (
+                            <div
+                              style={{
+                                position: 'fixed',
+                                left: submenuPosition.x,
+                                top: submenuPosition.y,
+                              }}
+                              className={clsx(
+                                'min-w-[12rem] z-[101] rounded-md border border-gray-200 dark:border-gray-800',
+                                'bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25',
+                                'p-1 backdrop-blur-xl origin-top-left'
+                              )}
+                              role='menu'
+                              onMouseLeave={closeSubmenu}
+                            >
+                              {item.children?.map(child => (
+                                <button
+                                  key={child.id}
+                                  className={commonClasses}
+                                  disabled={child.disabled}
+                                  role='menuitem'
+                                  tabIndex={-1}
+                                  onClick={e => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (!child.disabled) {
+                                      child.onClick?.(e);
+                                      handleClose();
+                                    }
+                                  }}
+                                >
+                                  <div className='flex items-center gap-x-2 w-full'>
+                                    {child.icon && (
+                                      <child.icon className='h-4 w-4 flex-shrink-0' aria-hidden='true' />
+                                    )}
+                                    <span className='truncate'>{child.label}</span>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                      </div>
                     </CursorTooltip>
                   );
                 }
 
-                return buttonElement;
+                return (
+                  <div className='relative'>
+                    {buttonElement}
+                    {hasChildren &&
+                      openSubmenuIndex === validIndex &&
+                      submenuPosition && (
+                        <div
+                          style={{
+                            position: 'fixed',
+                            left: submenuPosition.x,
+                            top: submenuPosition.y,
+                          }}
+                          className={clsx(
+                            'min-w-[12rem] z-[101] rounded-md border border-gray-200 dark:border-gray-800',
+                            'bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25',
+                            'p-1 backdrop-blur-xl origin-top-left'
+                          )}
+                          role='menu'
+                          onMouseLeave={closeSubmenu}
+                        >
+                          {item.children?.map(child => (
+                            <button
+                              key={child.id}
+                              className={commonClasses}
+                              disabled={child.disabled}
+                              role='menuitem'
+                              tabIndex={-1}
+                              onClick={e => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (!child.disabled) {
+                                  child.onClick?.(e);
+                                  handleClose();
+                                }
+                              }}
+                            >
+                              <div className='flex items-center gap-x-2 w-full'>
+                                {child.icon && (
+                                  <child.icon className='h-4 w-4 flex-shrink-0' aria-hidden='true' />
+                                )}
+                                <span className='truncate'>{child.label}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                  </div>
+                );
               })}
             </div>
           </FloatingFocusManager>
@@ -480,6 +602,13 @@ export function ContextMenu({
             if (e.key === 'Escape') {
               handleClose();
             }
+          }}
+          onMouseMove={e => {
+            // Close submenu if moving far away from the menu
+            const withinMenu = menuElementRef.current?.contains(
+              e.target as Node
+            );
+            if (!withinMenu) closeSubmenu();
           }}
         />
       )}

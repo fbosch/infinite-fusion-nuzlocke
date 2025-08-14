@@ -181,9 +181,8 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
 
   const hasEvolutions = availableEvolutions.length > 0;
   const hasPreEvolution = !!availablePreEvolution;
-  const isDevolutionMode =
-    (isShiftPressed && hasPreEvolution) || (!hasEvolutions && hasPreEvolution);
-
+  const isDevolutionMode = isShiftPressed && hasPreEvolution;
+  
   // Handle evolution/devolution selection
   const handleEvolution = useCallback(
     (evolutionPokemon?: PokemonOptionType, isDevolution = false) => {
@@ -230,7 +229,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   // Don't render if no Pokemon is selected or no evolutions/devolutions available
   if (
     !value ||
-    (availableEvolutions.length === 0 && !availablePreEvolution) ||
+    (!hasEvolutions && !isDevolutionMode) ||
     isLoading
   ) {
     return null;
