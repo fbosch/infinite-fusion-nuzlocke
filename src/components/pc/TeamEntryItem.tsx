@@ -29,7 +29,6 @@ export default function TeamEntryItem({
 }: TeamEntryItemProps) {
   const encounters = useEncounters();
   const currentEncounter = encounters?.[entry.locationId];
-  console.log(currentEncounter);
   const headActive = isPokemonActive(entry.head);
   const bodyActive = isPokemonActive(entry.body);
   const hasAny = Boolean(headActive || bodyActive);
