@@ -54,7 +54,7 @@ export default function PCEntryItem(props: PCEntryItemProps) {
 
   const fusionTypes = useFusionTypes(
     entry.head ? { id: entry.head.id } : undefined,
-    entry.body ? { id: entry.body.id } : undefined
+    isFusion && entry.body ? { id: entry.body.id } : undefined
   );
 
   const handleClick = () => {

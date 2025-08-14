@@ -79,7 +79,7 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
 
     const { primary, secondary } = useFusionTypes(
       head?.id ? { id: head?.id } : undefined,
-      body?.id ? { id: body?.id } : undefined
+      isFusion && body?.id ? { id: body?.id } : undefined
     );
 
     const credit =

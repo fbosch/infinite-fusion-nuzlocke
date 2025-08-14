@@ -129,11 +129,15 @@ function ActionPreview({
   );
   const targetFusionTypes = useFusionTypes(
     targetHeadAfter ? { id: targetHeadAfter.id } : undefined,
-    targetBodyAfter ? { id: targetBodyAfter.id } : undefined
+    willCreateFusionAtTarget && targetBodyAfter
+      ? { id: targetBodyAfter.id }
+      : undefined
   );
   const sourceFusionTypes = useFusionTypes(
     sourceHeadAfter ? { id: sourceHeadAfter.id } : undefined,
-    sourceBodyAfter ? { id: sourceBodyAfter.id } : undefined
+    willCreateFusionAtSource && sourceBodyAfter
+      ? { id: sourceBodyAfter.id }
+      : undefined
   );
 
   if (!existingPokemon && !otherFieldPokemon) return null;
