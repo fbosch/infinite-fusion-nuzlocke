@@ -114,6 +114,12 @@ export function computeFusionTypes(
 
   const headType: TypeName = headDominant ?? headOrder.primary;
 
+  // If both have the same dominant type, avoid redundancy
+  if (bodyDominant && bodyDominant === headType) {
+    // Body has same dominant type as head, use body's primary type instead
+    return [headType, bodyOrder.primary];
+  }
+
   // If a dominant rule applies to the body, it takes precedence and always passes that type
   if (bodyDominant) {
     return [headType, bodyDominant];

@@ -125,4 +125,14 @@ describe('fusionTyping (latest rules)', () => {
       secondary: 'electric',
     });
   });
+
+  it('same type combination: Normal/Flying + Normal/Flying -> Flying/Normal', () => {
+    const pidgeot1 = makePokemon(18, 'Pidgeot', ['normal', 'flying']);
+    const pidgeot2 = makePokemon(18, 'Pidgeot', ['normal', 'flying']);
+    // Head contributes Flying (dominant), body contributes Normal (non-redundant)
+    expect(computeFusionTypes(pidgeot1, pidgeot2)).toEqual([
+      'flying',
+      'normal',
+    ]);
+  });
 });
