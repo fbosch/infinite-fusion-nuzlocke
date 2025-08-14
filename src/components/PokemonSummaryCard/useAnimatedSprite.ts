@@ -91,7 +91,7 @@ export function useAnimatedSprite({ canAnimate }: UseAnimatedSpriteOptions) {
   };
 
   const playEvolutionAnimation = () => {
-    if (!canAnimate) return;
+    // Evolution animations should always play regardless of canAnimate state
     // Cancel any existing animations
     imageRef.current?.getAnimations().forEach(a => a.cancel());
     shadowRef.current?.getAnimations().forEach(a => a.cancel());
