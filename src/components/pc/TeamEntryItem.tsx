@@ -83,6 +83,7 @@ export default function TeamEntryItem({
               <FusionSprite
                 headPokemon={entry.head ?? null}
                 bodyPokemon={entry.body ?? null}
+                isFusion={isFusion}
                 shouldLoad
                 className='top-1.5'
                 showStatusOverlay={false}

@@ -115,9 +115,7 @@ export default function PCEntryItem(props: PCEntryItemProps) {
               <FusionSprite
                 headPokemon={entry.head ?? null}
                 bodyPokemon={entry.body ?? null}
-                isFusion={Boolean(
-                  currentEncounter?.isFusion && canFuse(entry.head, entry.body)
-                )}
+                isFusion={isFusion}
                 shouldLoad
                 showStatusOverlay={false}
                 showTooltip={false}
