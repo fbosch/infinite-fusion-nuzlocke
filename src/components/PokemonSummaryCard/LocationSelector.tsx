@@ -174,14 +174,14 @@ function ActionPreview({
           )}
         </div>
 
-        {targetFusionTypes.primary && (
+        {targetFusionTypes.primary && otherFieldPokemon && (
           <div className='flex items-center space-x-4'>
             <div className='size-5 flex justify-center items-center flex-shrink-0'>
-              <PokemonSprite pokemonId={otherFieldPokemon!.id} />
+              <PokemonSprite pokemonId={otherFieldPokemon.id} />
             </div>
             <p className='text-xs text-purple-600 dark:text-purple-400 font-medium flex gap-x-1'>
               <Dna className='w-4 h-4 text-purple-500 flex-shrink-0' />
-              <span>Will fuse with {otherFieldPokemon!.name} here</span>
+              <span>Will fuse with {otherFieldPokemon.name} here</span>
             </p>
             {targetFusionTypes.primary && (
               <div className='ml-auto'>
@@ -196,16 +196,16 @@ function ActionPreview({
           </div>
         )}
 
-        {sourceFusionTypes.primary && (
+        {sourceFusionTypes.primary && remainingPokemon && (
           <div className='flex items-center space-x-4'>
             <div className='size-5 flex justify-center items-center flex-shrink-0'>
-              <PokemonSprite pokemonId={remainingPokemon!.id} />
+              <PokemonSprite pokemonId={remainingPokemon.id} />
             </div>
             <p className='text-xs text-green-600 dark:text-green-400 font-medium flex gap-x-1'>
               <Dna className='w-4 h-4 text-green-500 flex-shrink-0' />
               <span>
-                {existingPokemon.name} will fuse with {remainingPokemon!.name}{' '}
-                at source
+                {existingPokemon.name} will fuse with {remainingPokemon.name} at
+                source
               </span>
             </p>
             {sourceFusionTypes.primary && (

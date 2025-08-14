@@ -14,11 +14,12 @@ import { Palette, MousePointer } from 'lucide-react';
 
 import { useAnimatedSprite } from './useAnimatedSprite';
 import {
-  getSpriteUrl,
   getAltText,
+  getSpriteUrl,
   TRANSPARENT_PIXEL,
   getNextFallbackUrl,
   getStatusState,
+  getDisplayPokemon,
 } from './utils';
 import { isEggId } from '../../loaders';
 import { useSpriteCredits } from '@/hooks/useSprite';
@@ -63,6 +64,9 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
     const body = bodyPokemon;
     const isFusion = isFusionProp ?? Boolean(head && body);
 
+    // Determine which Pokémon to actually display based on status compatibility
+    const displayPokemon = getDisplayPokemon(head, body, isFusion);
+
     const spriteId = getSpriteId(head?.id, body?.id);
     const hasEgg = isEggId(head?.id) || isEggId(body?.id);
 
@@ -77,9 +81,13 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
       body?.id ?? null
     );
 
+    // refactor later
+    const headId = displayPokemon.head?.id || displayPokemon.body?.id;
+    const bodyId = displayPokemon.body?.id;
+
     const { primary, secondary } = useFusionTypes(
-      head?.id ? { id: head?.id } : undefined,
-      isFusion && body?.id ? { id: body?.id } : undefined
+      headId ? { id: headId } : undefined,
+      bodyId ? { id: bodyId } : undefined
     );
 
     const credit =
