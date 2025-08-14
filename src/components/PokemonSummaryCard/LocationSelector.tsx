@@ -127,15 +127,23 @@ function ActionPreview({
     existingPokemon ? { id: existingPokemon.id } : undefined,
     undefined
   );
+
+  // Compute fusion types conditionally but always at the top level
   const targetFusionTypes = useFusionTypes(
     targetHeadAfter ? { id: targetHeadAfter.id } : undefined,
-    willCreateFusionAtTarget && targetBodyAfter
+    // Only compute fusion types if both Pokémon exist and can fuse
+    targetHeadAfter &&
+      targetBodyAfter &&
+      canFuse(targetHeadAfter, targetBodyAfter)
       ? { id: targetBodyAfter.id }
       : undefined
   );
   const sourceFusionTypes = useFusionTypes(
     sourceHeadAfter ? { id: sourceHeadAfter.id } : undefined,
-    willCreateFusionAtSource && sourceBodyAfter
+    // Only compute fusion types if both Pokémon exist and can fuse
+    sourceHeadAfter &&
+      sourceBodyAfter &&
+      canFuse(sourceHeadAfter, sourceBodyAfter)
       ? { id: sourceBodyAfter.id }
       : undefined
   );
@@ -143,19 +151,7 @@ function ActionPreview({
   if (!existingPokemon && !otherFieldPokemon) return null;
 
   if (existingPokemon) {
-    // This is a swap operation
-    const willCreateFusionAtTarget = Boolean(
-      targetHeadAfter &&
-        targetBodyAfter &&
-        canFuse(targetHeadAfter, targetBodyAfter)
-    );
-
-    const willCreateFusionAtSource = Boolean(
-      sourceHeadAfter &&
-        sourceBodyAfter &&
-        canFuse(sourceHeadAfter, sourceBodyAfter)
-    );
-
+    // This is a swap operation - types are already computed above
     return (
       <div className='space-y-3 mt-2'>
         <div className='flex items-center space-x-4'>
@@ -178,7 +174,7 @@ function ActionPreview({
           )}
         </div>
 
-        {willCreateFusionAtTarget && (
+        {targetFusionTypes.primary && (
           <div className='flex items-center space-x-4'>
             <div className='size-5 flex justify-center items-center flex-shrink-0'>
               <PokemonSprite pokemonId={otherFieldPokemon!.id} />
@@ -200,7 +196,7 @@ function ActionPreview({
           </div>
         )}
 
-        {willCreateFusionAtSource && (
+        {sourceFusionTypes.primary && (
           <div className='flex items-center space-x-4'>
             <div className='size-5 flex justify-center items-center flex-shrink-0'>
               <PokemonSprite pokemonId={remainingPokemon!.id} />
@@ -230,12 +226,8 @@ function ActionPreview({
 
   // Simple fusion case (no existing Pokemon in target slot): simulate post-move target
   if (movingPokemon && otherFieldPokemon) {
-    const willCreateFusionAtTarget = Boolean(
-      targetHeadAfter &&
-        targetBodyAfter &&
-        canFuse(targetHeadAfter, targetBodyAfter)
-    );
-    if (!willCreateFusionAtTarget) return null;
+    // Only show if fusion types were computed (meaning fusion is possible)
+    if (!targetFusionTypes.primary) return null;
     return (
       <div className='flex items-center space-x-4 mt-2'>
         <div className='size-5 flex justify-center items-center flex-shrink-0'>
