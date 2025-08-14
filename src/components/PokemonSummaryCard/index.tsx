@@ -115,7 +115,7 @@ export default function SummaryCard({
               ref={spriteRef}
               headPokemon={head}
               bodyPokemon={body}
-              isFusion={displayPokemon.isFusion}
+              isFusion={encounterData?.isFusion}
               shouldLoad={shouldLoad}
             />
             {!eitherPokemonIsEgg && (
