@@ -156,7 +156,7 @@ export default function PokemonPCSheet({
     <Dialog open={isOpen} onClose={onClose} className='group relative z-50'>
       <DialogBackdrop
         transition
-        className='fixed inset-0 bg-black/30 backdrop-blur-[2px] duration-100 ease-out data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/30'
+        className='fixed inset-0 bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ease-out data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/30'
         aria-hidden='true'
       />
 
@@ -167,8 +167,8 @@ export default function PokemonPCSheet({
           aria-labelledby='pokemon-pc-title'
           className={clsx(
             'h-full w-full max-w-lg border-l border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800',
-            'will-change-opacity transform-gpu will-change-transform',
-            'transition duration-100 ease-out',
+            'transform-gpu will-change-transform',
+            'transition-all duration-200 ease-out',
             'data-closed:translate-x-full data-closed:opacity-0 data-leave:translate-x-full',
             'flex flex-col'
           )}
@@ -186,7 +186,7 @@ export default function PokemonPCSheet({
                 className={clsx(
                   'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2',
-                  'rounded-md p-1 transition-colors'
+                  'rounded-md p-1 transition-colors cursor-pointer'
                 )}
                 aria-label='Close drawer'
               >
