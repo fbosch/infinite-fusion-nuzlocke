@@ -81,8 +81,9 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
       body?.id ?? null
     );
 
-    const headId = isFusion ? displayPokemon.head?.id : displayPokemon.body?.id;
-    const bodyId = isFusion ? displayPokemon.body?.id : displayPokemon.head?.id;
+    // refactor later
+    const headId = displayPokemon.head?.id || displayPokemon.body?.id;
+    const bodyId = displayPokemon.body?.id;
 
     const { primary, secondary } = useFusionTypes(
       headId ? { id: headId } : undefined,
