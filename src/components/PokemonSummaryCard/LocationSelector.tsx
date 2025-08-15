@@ -660,7 +660,7 @@ function LocationSelector({
             />
           </div>
 
-          <div className='h-[50vh] min-h-96 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg scrollbar-thin'>
+          <div className='h-[46vh] min-h-96 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg scrollbar-thin'>
             {filteredLocations.length === 0 ? (
               <div className='p-4 text-center text-gray-500 dark:text-gray-400'>
                 {searchQuery.trim()
