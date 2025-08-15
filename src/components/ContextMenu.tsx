@@ -70,7 +70,7 @@ function useContextMenuState() {
 
 export interface ContextMenuItem {
   id: string;
-  label?: string;
+  label?: React.ReactNode;
   icon?: LucideIcon;
   iconClassName?: string;
   favicon?: string;
@@ -84,6 +84,7 @@ export interface ContextMenuItem {
   separator?: boolean;
   tooltip?: React.ReactNode;
   children?: ContextMenuItem[];
+  // Remove customContent since we're using ReactNode for label now
 }
 
 export interface ContextMenuProps {

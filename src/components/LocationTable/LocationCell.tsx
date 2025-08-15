@@ -88,7 +88,7 @@ export default function LocationCell({
                 </div>
                 <div className='flex-1 min-w-0'>
                   <span className='font-medium dark:text-white text-gray-900'>
-                    {pokemon.nickname ? pokemon.nickname : pokemon.name}
+                    {pokemon.nickname ?? pokemon.name}
                   </span>
                 </div>
               </div>

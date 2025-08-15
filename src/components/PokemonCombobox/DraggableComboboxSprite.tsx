@@ -215,7 +215,14 @@ export function DraggableComboboxSprite({
     if (value && locationId && preEvolution) {
       options.push({
         id: 'devolve',
-        label: `Devolve to ${preEvolution.name}`,
+        label: (
+          <div className='flex items-center gap-x-2 w-full'>
+            <div className='flex items-center justify-center size-6 flex-shrink-0'>
+              <PokemonSprite pokemonId={preEvolution.id} generation='gen7' />
+            </div>
+            <span className='truncate'>Devolve to {preEvolution.name}</span>
+          </div>
+        ),
         icon: Undo2,
         onClick: async () => {
           if (!value || !locationId || !preEvolution) return;
@@ -241,7 +248,14 @@ export function DraggableComboboxSprite({
         const evo = evolutions[0]!;
         options.push({
           id: `evolve-${evo.id}`,
-          label: `Evolve to ${evo.name}`,
+          label: (
+            <div className='flex items-center gap-x-2 w-full'>
+              <div className='flex items-center justify-center size-6 flex-shrink-0'>
+                <PokemonSprite pokemonId={evo.id} generation='gen7' />
+              </div>
+              <span className='truncate'>Evolve to {evo.name}</span>
+            </div>
+          ),
           icon: Atom,
           onClick: async () => {
             if (!value || !locationId) return;
@@ -268,8 +282,14 @@ export function DraggableComboboxSprite({
           icon: Atom,
           children: evolutions.map(evo => ({
             id: `evolve-${evo.id}`,
-            label: evo.name,
-            icon: Atom,
+            label: (
+              <div className='flex items-center gap-x-2 w-full'>
+                <div className='flex items-center justify-center size-6 flex-shrink-0'>
+                  <PokemonSprite pokemonId={evo.id} generation='gen7' />
+                </div>
+                <span className='truncate'>{evo.name}</span>
+              </div>
+            ),
             onClick: async () => {
               if (!value || !locationId) return;
               const evolved: PokemonOptionType = {
@@ -451,6 +471,7 @@ export function DraggableComboboxSprite({
                   dragPreview && 'opacity-60 pointer-events-none' // Make preview sprite opaque
                 )}
                 draggable={false}
+                generation='gen8'
               />
             </div>
           </CursorTooltip>
