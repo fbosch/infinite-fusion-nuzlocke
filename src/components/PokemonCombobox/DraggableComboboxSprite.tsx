@@ -2,12 +2,16 @@
 
 import React, { useMemo, useState, useCallback } from 'react';
 import clsx from 'clsx';
-import { Hand, MousePointer, ArrowDownToDot, Home } from 'lucide-react';
-import { type PokemonOptionType, isEggId } from '@/loaders/pokemon';
+import { Hand, MousePointer, ArrowDownToDot, Home, Atom } from 'lucide-react';
+import {
+  type PokemonOptionType,
+  isEggId,
+  usePokemonEvolutionData,
+} from '@/loaders/pokemon';
 import { dragActions } from '@/stores/dragStore';
 import { PokemonSprite } from '../PokemonSprite';
 import { CursorTooltip } from '../CursorTooltip';
-import spritesheetMetadata from '@/assets/pokemon-spritesheet-metadata.json';
+import spritesheetMetadata from '@/assets/pokemon-gen8-spritesheet-metadata.json';
 import ContextMenu, { type ContextMenuItem } from '../ContextMenu';
 import { getLocations, getLocationByIdFromMerged } from '@/loaders/locations';
 import {
@@ -18,7 +22,8 @@ import {
 import TypePills from '../TypePills';
 import dynamic from 'next/dynamic';
 import usePokemonTypes from '../../hooks/usePokemonTypes';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Undo2 } from 'lucide-react';
+import { emitEvolutionEvent } from '@/lib/events';
 
 const LocationSelector = dynamic(
   () =>
@@ -50,6 +55,10 @@ export function DraggableComboboxSprite({
   const customLocations = useCustomLocations();
 
   const { primary, secondary } = usePokemonTypes({ id: pokemon?.id });
+  const { evolutions, preEvolution } = usePokemonEvolutionData(
+    pokemon?.id,
+    true
+  );
 
   // Extract field from comboboxId
   const field = comboboxId?.includes('-body') ? 'body' : 'head';
@@ -194,6 +203,114 @@ export function DraggableComboboxSprite({
         onClick: () => setIsMoveModalOpen(true),
       });
     }
+
+    if (value && locationId && (preEvolution || evolutions?.length)) {
+      options.push({
+        id: 'evolve-separator',
+        separator: true,
+      });
+    }
+
+    // Add devolve option if pre-evolution exists
+    if (value && locationId && preEvolution) {
+      options.push({
+        id: 'devolve',
+        label: (
+          <div className='flex items-center gap-x-2 w-full'>
+            <div className='flex items-center justify-center size-6 flex-shrink-0'>
+              <PokemonSprite pokemonId={preEvolution.id} generation='gen7' />
+            </div>
+            <span className='truncate'>Devolve to {preEvolution.name}</span>
+          </div>
+        ),
+        icon: Undo2,
+        onClick: async () => {
+          if (!value || !locationId || !preEvolution) return;
+          const devolved: PokemonOptionType = {
+            ...value,
+            id: preEvolution.id,
+            name: preEvolution.name,
+            nationalDexId: preEvolution.nationalDexId,
+          };
+          await playthroughActions.updateEncounter(
+            locationId,
+            devolved,
+            field,
+            false
+          );
+        },
+      });
+    }
+
+    // Add evolve option(s)
+    if (value && locationId && evolutions && evolutions.length > 0) {
+      if (evolutions.length === 1) {
+        const evo = evolutions[0]!;
+        options.push({
+          id: `evolve-${evo.id}`,
+          label: (
+            <div className='flex items-center gap-x-2 w-full'>
+              <div className='flex items-center justify-center size-6 flex-shrink-0'>
+                <PokemonSprite pokemonId={evo.id} generation='gen7' />
+              </div>
+              <span className='truncate'>Evolve to {evo.name}</span>
+            </div>
+          ),
+          icon: Atom,
+          onClick: async () => {
+            if (!value || !locationId) return;
+            const evolved: PokemonOptionType = {
+              ...value,
+              id: evo.id,
+              name: evo.name,
+              nationalDexId: evo.nationalDexId,
+            };
+            await playthroughActions.updateEncounter(
+              locationId,
+              evolved,
+              field,
+              false
+            );
+            const id = locationId ?? value?.originalLocation ?? null;
+            if (id) emitEvolutionEvent(id);
+          },
+        });
+      } else {
+        options.push({
+          id: 'evolve',
+          label: 'Evolve to…',
+          icon: Atom,
+          children: evolutions.map(evo => ({
+            id: `evolve-${evo.id}`,
+            label: (
+              <div className='flex items-center gap-x-2 w-full'>
+                <div className='flex items-center justify-center size-6 flex-shrink-0'>
+                  <PokemonSprite pokemonId={evo.id} generation='gen7' />
+                </div>
+                <span className='truncate'>{evo.name}</span>
+              </div>
+            ),
+            onClick: async () => {
+              if (!value || !locationId) return;
+              const evolved: PokemonOptionType = {
+                ...value,
+                id: evo.id,
+                name: evo.name,
+                nationalDexId: evo.nationalDexId,
+              };
+              await playthroughActions.updateEncounter(
+                locationId,
+                evolved,
+                field,
+                false
+              );
+              const id = locationId ?? value?.originalLocation ?? null;
+              if (id) emitEvolutionEvent(id);
+            },
+          })),
+        });
+      }
+    }
     const infinitefusiondexLink = `https://infinitefusiondex.com/details/${value?.id}`;
     const fusiondexLink = `https://fusiondex.org/sprite/pif/${value?.id}/`;
 
@@ -229,6 +346,9 @@ export function DraggableComboboxSprite({
     availableLocations.length,
     handleMoveToOriginalLocation,
     wouldCreateEggFusionAtOriginal,
+    preEvolution,
+    evolutions,
+    field,
   ]);
 
   if (!pokemon) return null;
@@ -351,6 +471,7 @@ export function DraggableComboboxSprite({
                   dragPreview && 'opacity-60 pointer-events-none' // Make preview sprite opaque
                 )}
                 draggable={false}
+                generation='gen8'
               />
             </div>
           </CursorTooltip>

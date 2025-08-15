@@ -159,6 +159,7 @@ export function stripPokemonFormSuffix(name: string): string {
 /**
  * Normalizes Pokemon names for PokéSprite repository URLs
  * PokéSprite uses lowercase names with hyphens for forms
+ * Note: Some forms don't exist in PokeSprite, so we fall back to base forms
  */
 export function normalizePokemonNameForSprite(name: string): string {
   if (!name || typeof name !== 'string') {
@@ -177,17 +178,26 @@ export function normalizePokemonNameForSprite(name: string): string {
     .replace(/é/g, 'e')    // Remove accents
     
     // Handle specific form names for PokéSprite compatibility
-    .replace(/\s+baile\s+style/g, '-baile')
+    // Oricorio forms - only some forms exist in PokeSprite
+    .replace(/\s+baile\s+style/g, '')  // Fall back to base oricorio
     .replace(/\s+pom-pom\s+style/g, '-pom-pom')
     .replace(/\s+pau\s+style/g, '-pau')
     .replace(/\s+sensu\s+style/g, '-sensu')
-    .replace(/\s+midday\s+form/g, '-midday')
+    
+    // Lycanroc forms - only some forms exist in PokeSprite
+    .replace(/\s+midday\s+form/g, '')  // Fall back to base lycanroc
     .replace(/\s+midnight\s+form/g, '-midnight')
     .replace(/\s+dusk\s+form/g, '-dusk')
-    .replace(/\s+aria\s+form/g, '-aria')
+    
+    // Meloetta forms - only some forms exist in PokeSprite
+    .replace(/\s+aria\s+form/g, '')  // Fall back to base meloetta
     .replace(/\s+pirouette\s+form/g, '-pirouette')
-    .replace(/\s+meteor\s+form/g, '-meteor')
-    .replace(/\s+core\s+form/g, '-core')
+    
+    // Minior forms - only base form exists in PokeSprite
+    .replace(/\s+meteor\s+form/g, '')  // Fall back to base minior
+    .replace(/\s+core\s+form/g, '')    // Fall back to base minior
+    
+    // Other forms
     .replace(/\s+ordinary\s+form/g, '')
     .replace(/\s+resolute\s+form/g, '-resolute')
     .replace(/\s+plant\s+cloak/g, '-plant')

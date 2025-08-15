@@ -70,7 +70,7 @@ function useContextMenuState() {
 
 export interface ContextMenuItem {
   id: string;
-  label?: string;
+  label?: React.ReactNode;
   icon?: LucideIcon;
   iconClassName?: string;
   favicon?: string;
@@ -83,6 +83,8 @@ export interface ContextMenuItem {
   shortcut?: string;
   separator?: boolean;
   tooltip?: React.ReactNode;
+  children?: ContextMenuItem[];
+  // Remove customContent since we're using ReactNode for label now
 }
 
 export interface ContextMenuProps {
@@ -116,6 +118,8 @@ export function ContextMenu({
   const triggerRef = useRef<HTMLElement>(null);
   const listRef = useRef<Array<HTMLElement | null>>([]);
   const menuElementRef = useRef<HTMLDivElement>(null);
+  const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
+  const submenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     onOpenChange?.(isOpen);
@@ -212,6 +216,20 @@ export function ContextMenu({
       }, 50); // Match CSS animation duration
     }
   };
+
+  const openSubmenuForIndex = useCallback((validIndex: number) => {
+    if (!menuElementRef.current) return;
+    const parentEl = listRef.current[validIndex];
+    if (!parentEl) return;
+
+    // For absolute positioning, we just need to track which submenu is open
+    // The positioning is handled by CSS (left: 100%, top: 0)
+    setOpenSubmenuIndex(validIndex);
+  }, []);
+
+  const closeSubmenu = useCallback(() => {
+    setOpenSubmenuIndex(null);
+  }, []);
 
   const handleContextMenu = (event: React.MouseEvent) => {
     if (disabled) return;
@@ -332,6 +350,8 @@ export function ContextMenu({
                   item.disabled && '!opacity-75 !cursor-not-allowed'
                 );
 
+                const hasChildren =
+                  Array.isArray(item.children) && item.children.length > 0;
                 const content = (
                   <div className='flex items-center gap-x-2 w-full'>
                     {item.icon && !item.href && (
@@ -377,6 +397,9 @@ export function ContextMenu({
                           )}
                           aria-hidden='true'
                         />
+                      )}
+                      {hasChildren && (
+                        <span className='text-xs opacity-60'>›</span>
                       )}
                     </div>
                   </div>
@@ -439,10 +462,14 @@ export function ContextMenu({
                       onClick: e => {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (!item.disabled) {
+                        if (!item.disabled && !hasChildren) {
                           item.onClick?.(e);
                           handleClose();
                         }
+                      },
+                      onMouseEnter: () => {
+                        if (hasChildren) openSubmenuForIndex(validIndex);
+                        else closeSubmenu();
                       },
                     })}
                   >
@@ -459,12 +486,142 @@ export function ContextMenu({
                       placement='right'
                       delay={500}
                     >
-                      {buttonElement}
+                      <div className='relative'>
+                        {buttonElement}
+                        {hasChildren && openSubmenuIndex === validIndex && (
+                          <div
+                            ref={submenuRef}
+                            style={{
+                              position: 'absolute',
+                              left: '100%',
+                              top: 0,
+                              marginLeft: '4px',
+                              minWidth: '12rem',
+                            }}
+                            className={clsx(
+                              'z-[9999] rounded-md border border-gray-200 dark:border-gray-800',
+                              'bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25',
+                              'p-1 backdrop-blur-xl origin-top-left',
+                              'overflow-hidden'
+                            )}
+                            role='menu'
+                            onMouseLeave={closeSubmenu}
+                            onMouseEnter={() => {
+                              // Keep submenu open when hovering over it
+                              if (openSubmenuIndex !== validIndex) {
+                                setOpenSubmenuIndex(validIndex);
+                              }
+                            }}
+                          >
+                            {item.children?.map(child => (
+                              <button
+                                key={child.id}
+                                className={clsx(
+                                  'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
+                                  'text-sm transition-colors duration-75 enabled:cursor-pointer',
+                                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+                                  'text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white',
+                                  child.disabled &&
+                                    '!opacity-75 !cursor-not-allowed'
+                                )}
+                                disabled={child.disabled}
+                                role='menuitem'
+                                tabIndex={-1}
+                                onClick={e => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  if (!child.disabled) {
+                                    child.onClick?.(e);
+                                    handleClose();
+                                  }
+                                }}
+                              >
+                                <div className='flex items-center gap-x-2 w-full'>
+                                  {child.icon && (
+                                    <child.icon
+                                      className='h-4 w-4 flex-shrink-0'
+                                      aria-hidden='true'
+                                    />
+                                  )}
+                                  <span className='truncate'>
+                                    {child.label}
+                                  </span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </CursorTooltip>
                   );
                 }
 
-                return buttonElement;
+                return (
+                  <div key={item.id} className='relative'>
+                    {buttonElement}
+                    {hasChildren && openSubmenuIndex === validIndex && (
+                      <div
+                        ref={submenuRef}
+                        style={{
+                          position: 'absolute',
+                          left: '100%',
+                          top: 0,
+                          marginLeft: '4px',
+                          minWidth: '12rem',
+                        }}
+                        className={clsx(
+                          'z-[9999] rounded-md border border-gray-200 dark:border-gray-800',
+                          'bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25',
+                          'p-1 backdrop-blur-xl origin-top-left',
+                          'overflow-hidden'
+                        )}
+                        role='menu'
+                        onMouseLeave={closeSubmenu}
+                        onMouseEnter={() => {
+                          // Keep submenu open when hovering over it
+                          if (openSubmenuIndex !== validIndex) {
+                            setOpenSubmenuIndex(validIndex);
+                          }
+                        }}
+                      >
+                        {item.children?.map(child => (
+                          <button
+                            key={child.id}
+                            className={clsx(
+                              'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
+                              'text-sm transition-colors duration-75 enabled:cursor-pointer',
+                              'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+                              'text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white',
+                              child.disabled &&
+                                '!opacity-75 !cursor-not-allowed'
+                            )}
+                            disabled={child.disabled}
+                            role='menuitem'
+                            tabIndex={-1}
+                            onClick={e => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (!child.disabled) {
+                                child.onClick?.(e);
+                                handleClose();
+                              }
+                            }}
+                          >
+                            <div className='flex items-center gap-x-2 w-full'>
+                              {child.icon && (
+                                <child.icon
+                                  className='h-4 w-4 flex-shrink-0'
+                                  aria-hidden='true'
+                                />
+                              )}
+                              <span className='truncate'>{child.label}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
               })}
             </div>
           </FloatingFocusManager>
@@ -480,6 +637,16 @@ export function ContextMenu({
             if (e.key === 'Escape') {
               handleClose();
             }
+          }}
+          onMouseMove={e => {
+            // Close submenu if moving far away from the menu
+            const withinMenu = menuElementRef.current?.contains(
+              e.target as Node
+            );
+            const withinSubmenu = document
+              .querySelector('[role="menu"][style*="z-[9999]"]')
+              ?.contains(e.target as Node);
+            if (!withinMenu && !withinSubmenu) closeSubmenu();
           }}
         />
       )}

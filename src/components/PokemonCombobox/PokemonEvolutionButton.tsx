@@ -132,7 +132,10 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
                     )}
                   >
                     <div className='flex items-center justify-center size-8'>
-                      <PokemonSprite pokemonId={evolution.id} />
+                      <PokemonSprite
+                        pokemonId={evolution.id}
+                        generation='gen7'
+                      />
                     </div>
                     <span className=''>{evolution.name}</span>
                   </button>
@@ -181,8 +184,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
 
   const hasEvolutions = availableEvolutions.length > 0;
   const hasPreEvolution = !!availablePreEvolution;
-  const isDevolutionMode =
-    (isShiftPressed && hasPreEvolution) || (!hasEvolutions && hasPreEvolution);
+  const isDevolutionMode = isShiftPressed && hasPreEvolution;
 
   // Handle evolution/devolution selection
   const handleEvolution = useCallback(
@@ -228,11 +230,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   }, [handleEvolution, isDevolutionMode]);
 
   // Don't render if no Pokemon is selected or no evolutions/devolutions available
-  if (
-    !value ||
-    (availableEvolutions.length === 0 && !availablePreEvolution) ||
-    isLoading
-  ) {
+  if (!value || (!hasEvolutions && !isDevolutionMode) || isLoading) {
     return null;
   }
 
@@ -250,6 +248,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
                       ? availablePreEvolution!.id
                       : availableEvolutions[0]!.id
                   }
+                  generation='gen7'
                 />
               </div>
               <div className='flex flex-col gap-0.5'>

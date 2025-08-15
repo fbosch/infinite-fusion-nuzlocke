@@ -156,7 +156,7 @@ function ActionPreview({
       <div className='space-y-3 mt-2'>
         <div className='flex items-center space-x-4'>
           <div className='size-5 flex justify-center items-center flex-shrink-0'>
-            <PokemonSprite pokemonId={existingPokemon.id} />
+            <PokemonSprite pokemonId={existingPokemon.id} generation='gen7' />
           </div>
           <p className='text-xs text-amber-600 dark:text-amber-400 font-medium flex gap-x-1'>
             <ArrowUpDown className='w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0' />
@@ -177,7 +177,10 @@ function ActionPreview({
         {targetFusionTypes.primary && otherFieldPokemon && (
           <div className='flex items-center space-x-4'>
             <div className='size-5 flex justify-center items-center flex-shrink-0'>
-              <PokemonSprite pokemonId={otherFieldPokemon.id} />
+              <PokemonSprite
+                pokemonId={otherFieldPokemon.id}
+                generation='gen7'
+              />
             </div>
             <p className='text-xs text-purple-600 dark:text-purple-400 font-medium flex gap-x-1'>
               <Dna className='w-4 h-4 text-purple-500 flex-shrink-0' />
@@ -199,7 +202,10 @@ function ActionPreview({
         {sourceFusionTypes.primary && remainingPokemon && (
           <div className='flex items-center space-x-4'>
             <div className='size-5 flex justify-center items-center flex-shrink-0'>
-              <PokemonSprite pokemonId={remainingPokemon.id} />
+              <PokemonSprite
+                pokemonId={remainingPokemon.id}
+                generation='gen7'
+              />
             </div>
             <p className='text-xs text-green-600 dark:text-green-400 font-medium flex gap-x-1'>
               <Dna className='w-4 h-4 text-green-500 flex-shrink-0' />
@@ -231,7 +237,7 @@ function ActionPreview({
     return (
       <div className='flex items-center space-x-4 mt-2'>
         <div className='size-5 flex justify-center items-center flex-shrink-0'>
-          <PokemonSprite pokemonId={otherFieldPokemon.id} />
+          <PokemonSprite pokemonId={otherFieldPokemon.id} generation='gen7' />
         </div>
         <p className='text-xs text-purple-600 dark:text-purple-400 font-medium flex gap-x-1'>
           <Dna className='w-4 h-4 text-purple-500 flex-shrink-0' />
@@ -416,18 +422,24 @@ function MovingPokemonInfo({
           <div className='flex items-center space-x-1'>
             {encounterData?.head && (
               <div className='w-6 h-6 flex justify-center items-center flex-shrink-0'>
-                <PokemonSprite pokemonId={encounterData.head.id} />
+                <PokemonSprite
+                  pokemonId={encounterData.head.id}
+                  generation='gen7'
+                />
               </div>
             )}
             {encounterData?.body && (
               <div className='w-6 h-6 flex justify-center items-center flex-shrink-0'>
-                <PokemonSprite pokemonId={encounterData.body.id} />
+                <PokemonSprite
+                  pokemonId={encounterData.body.id}
+                  generation='gen7'
+                />
               </div>
             )}
           </div>
         ) : (
           <div className='w-6 h-6 flex justify-center items-center flex-shrink-0'>
-            <PokemonSprite pokemonId={movingPokemon.id} />
+            <PokemonSprite pokemonId={movingPokemon.id} generation='gen7' />
           </div>
         )}
         <p className='text-sm font-medium text-gray-900 dark:text-white'>

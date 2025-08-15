@@ -11,7 +11,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const BASE_ENTRIES_PATH = path.join(__dirname, '..', 'data', 'shared', 'base-entries.json');
-const SPRITES_DIR = path.join(__dirname, 'sprites', 'pokemon-icons');
+const SPRITES_BASE_DIR = path.join(__dirname, 'sprites');
+const GEN7_SPRITES_DIR = path.join(SPRITES_BASE_DIR, 'pokemon-gen7');
+const GEN8_SPRITES_DIR = path.join(SPRITES_BASE_DIR, 'pokemon-gen8');
 const SPRITESHEET_OUTPUT_DIR = path.join(__dirname, '..', 'public', 'images');
 const METADATA_OUTPUT_DIR = path.join(__dirname, '..', 'src', 'assets');
 
@@ -32,6 +34,7 @@ export type SpriteInfo = {
   name: string;
   filename: string;
   exists: boolean;
+  generation: 'gen7' | 'gen8';
   // Original sprite dimensions
   originalWidth: number;
   originalHeight: number;
@@ -47,6 +50,7 @@ export type SpriteInfo = {
 export type SpritesheetMetadata = {
   algorithm: 'compact-bin-packing';
   version: '2.0';
+  generation: 'gen7' | 'gen8';
   totalSprites: number;
   includedSprites: number;
   sheetWidth: number;
@@ -54,6 +58,28 @@ export type SpritesheetMetadata = {
   spaceEfficiency: number;
   sprites: SpriteInfo[];
 };
+
+export type GenerationConfig = {
+  name: 'gen7' | 'gen8';
+  spritesDir: string;
+  outputFilename: string;
+  metadataFilename: string;
+};
+
+const GENERATIONS: GenerationConfig[] = [
+  {
+    name: 'gen7',
+    spritesDir: GEN7_SPRITES_DIR,
+    outputFilename: 'pokemon-gen7-spritesheet.png',
+    metadataFilename: 'pokemon-gen7-spritesheet-metadata.json'
+  },
+  {
+    name: 'gen8',
+    spritesDir: GEN8_SPRITES_DIR,
+    outputFilename: 'pokemon-gen8-spritesheet.png',
+    metadataFilename: 'pokemon-gen8-spritesheet-metadata.json'
+  }
+];
 
 /**
  * Rectangle for bin packing algorithm
@@ -137,18 +163,18 @@ async function analyzeSpriteContent(spritePath: string): Promise<SpriteBounds | 
       .ensureAlpha()
       .raw()
       .toBuffer({ resolveWithObject: true });
-    
+
     let minX = info.width;
     let maxX = -1;
     let minY = info.height;
     let maxY = -1;
-    
+
     // Find bounds of non-transparent pixels
     for (let y = 0; y < info.height; y++) {
       for (let x = 0; x < info.width; x++) {
         const pixelIndex = (y * info.width + x) * info.channels;
         const alpha = data[pixelIndex + 3];
-        
+
         if (alpha > 0) {
           minX = Math.min(minX, x);
           maxX = Math.max(maxX, x);
@@ -157,11 +183,11 @@ async function analyzeSpriteContent(spritePath: string): Promise<SpriteBounds | 
         }
       }
     }
-    
+
     if (maxX === -1) {
       return null; // Completely transparent
     }
-    
+
     return {
       x: minX,
       y: minY,
@@ -176,12 +202,12 @@ async function analyzeSpriteContent(spritePath: string): Promise<SpriteBounds | 
 /**
  * Find the sprite file for a Pokemon, with fallback logic
  */
-async function findSpriteFile(pokemonName: string): Promise<string | null> {
+async function findSpriteFile(pokemonName: string, spritesDir: string): Promise<string | null> {
   // Try the full form name first
   const normalizedName = normalizePokemonNameForSprite(pokemonName);
   const primaryFilename = `${normalizedName}.png`;
-  const primaryPath = path.join(SPRITES_DIR, primaryFilename);
-  
+  const primaryPath = path.join(spritesDir, primaryFilename);
+
   if (await fileExists(primaryPath)) {
     return primaryFilename;
   }
@@ -191,8 +217,8 @@ async function findSpriteFile(pokemonName: string): Promise<string | null> {
   if (baseName && baseName !== pokemonName) {
     const baseNormalizedName = normalizePokemonNameForSprite(baseName);
     const baseFilename = `${baseNormalizedName}.png`;
-    const basePath = path.join(SPRITES_DIR, baseFilename);
-    
+    const basePath = path.join(spritesDir, baseFilename);
+
     if (await fileExists(basePath)) {
       return baseFilename;
     }
@@ -202,11 +228,11 @@ async function findSpriteFile(pokemonName: string): Promise<string | null> {
 }
 
 /**
- * Load Pokemon data and analyze sprite content
+ * Load Pokemon data and analyze sprite content for a specific generation
  */
-async function loadSpriteData(): Promise<SpriteInfo[]> {
-  ConsoleFormatter.printSection('Loading and Analyzing Pokemon Sprites');
-  
+async function loadSpriteData(generation: GenerationConfig): Promise<SpriteInfo[]> {
+  ConsoleFormatter.printSection(`Loading and Analyzing ${generation.name.toUpperCase()} Pokemon Sprites`);
+
   // Load Pokemon entries
   const entriesData = await ConsoleFormatter.withSpinner(
     'Loading Pokemon entries...',
@@ -221,7 +247,7 @@ async function loadSpriteData(): Promise<SpriteInfo[]> {
   // Process each sprite
   ConsoleFormatter.working('Analyzing sprite content bounds...');
   const progressBar = ConsoleFormatter.createProgressBar(entriesData.length);
-  
+
   const spriteInfos: SpriteInfo[] = [];
   let foundCount = 0;
   let missingCount = 0;
@@ -229,29 +255,30 @@ async function loadSpriteData(): Promise<SpriteInfo[]> {
 
   for (let i = 0; i < entriesData.length; i++) {
     const entry = entriesData[i];
-    const filename = await findSpriteFile(entry.name);
-    
+    const filename = await findSpriteFile(entry.name, generation.spritesDir);
+
     if (filename) {
-      const spritePath = path.join(SPRITES_DIR, filename);
-      
+      const spritePath = path.join(generation.spritesDir, filename);
+
       // Get original dimensions
       const metadata = await sharp(spritePath).metadata();
       const originalWidth = metadata.width!;
       const originalHeight = metadata.height!;
-      
+
       // Analyze content bounds
       const contentBounds = await analyzeSpriteContent(spritePath);
-      
+
       if (contentBounds) {
         const efficiency = (contentBounds.width * contentBounds.height) / (originalWidth * originalHeight);
         totalEfficiency += efficiency;
         foundCount++;
-        
+
         spriteInfos.push({
           id: entry.id,
           name: entry.name,
           filename,
           exists: true,
+          generation: generation.name,
           originalWidth,
           originalHeight,
           contentBounds,
@@ -268,6 +295,7 @@ async function loadSpriteData(): Promise<SpriteInfo[]> {
           name: entry.name,
           filename,
           exists: false,
+          generation: generation.name,
           originalWidth,
           originalHeight,
           contentBounds: null,
@@ -284,6 +312,7 @@ async function loadSpriteData(): Promise<SpriteInfo[]> {
         name: entry.name,
         filename: '',
         exists: false,
+        generation: generation.name,
         originalWidth: 0,
         originalHeight: 0,
         contentBounds: null,
@@ -294,17 +323,17 @@ async function loadSpriteData(): Promise<SpriteInfo[]> {
       });
     }
 
-    progressBar.update(i + 1, { 
-      status: `Found: ${foundCount}, Missing: ${missingCount}` 
+    progressBar.update(i + 1, {
+      status: `Found: ${foundCount}, Missing: ${missingCount}`
     });
   }
 
   progressBar.stop();
-  
+
   const avgEfficiency = foundCount > 0 ? (totalEfficiency / foundCount * 100) : 0;
   ConsoleFormatter.success(`Found ${foundCount} sprites, ${missingCount} missing`);
   ConsoleFormatter.info(`Average content efficiency: ${avgEfficiency.toFixed(1)}%`);
-  
+
   return spriteInfos;
 }
 
@@ -313,9 +342,9 @@ async function loadSpriteData(): Promise<SpriteInfo[]> {
  */
 function packSprites(sprites: SpriteInfo[]): { width: number; height: number; efficiency: number } {
   ConsoleFormatter.printSection('Packing Sprites with Bin Packing Algorithm');
-  
+
   const validSprites = sprites.filter(s => s.exists && s.contentBounds);
-  
+
   if (validSprites.length === 0) {
     throw new Error('No valid sprites to pack');
   }
@@ -329,7 +358,7 @@ function packSprites(sprites: SpriteInfo[]): { width: number; height: number; ef
   // Estimate initial canvas size
   const totalArea = validSprites.reduce((sum, s) => sum + (s.width * s.height), 0);
   const avgAspectRatio = validSprites.reduce((sum, s) => sum + (s.width / s.height), 0) / validSprites.length;
-  
+
   let canvasWidth = Math.ceil(Math.sqrt(totalArea * avgAspectRatio)) + 100; // Add padding
   let canvasHeight = Math.ceil(totalArea / canvasWidth) + 100;
 
@@ -362,11 +391,11 @@ function packSprites(sprites: SpriteInfo[]): { width: number; height: number; ef
 
     if (allFit) {
       packed = true;
-      
+
       // Trim canvas to actual used area
       const maxX = Math.max(...validSprites.map(s => s.x + s.width));
       const maxY = Math.max(...validSprites.map(s => s.y + s.height));
-      
+
       canvasWidth = maxX;
       canvasHeight = maxY;
     } else {
@@ -391,13 +420,13 @@ function packSprites(sprites: SpriteInfo[]): { width: number; height: number; ef
 }
 
 /**
- * Generate the spritesheet image and metadata
+ * Generate the spritesheet image and metadata for a specific generation
  */
-async function generateSpritesheet(spriteInfos: SpriteInfo[]): Promise<SpritesheetMetadata> {
-  ConsoleFormatter.printSection('Generating Compact Spritesheet');
+async function generateSpritesheet(spriteInfos: SpriteInfo[], generation: GenerationConfig): Promise<SpritesheetMetadata> {
+  ConsoleFormatter.printSection(`Generating ${generation.name.toUpperCase()} Compact Spritesheet`);
 
   const validSprites = spriteInfos.filter(s => s.exists && s.contentBounds);
-  
+
   if (validSprites.length === 0) {
     throw new Error('No sprites found to generate spritesheet');
   }
@@ -425,8 +454,8 @@ async function generateSpritesheet(spriteInfos: SpriteInfo[]): Promise<Spriteshe
     const sprite = validSprites[i];
     if (!sprite.contentBounds) continue;
 
-    const spritePath = path.join(SPRITES_DIR, sprite.filename);
-    
+    const spritePath = path.join(generation.spritesDir, sprite.filename);
+
     // Extract only the content area from the original sprite
     const croppedSprite = await sharp(spritePath)
       .extract({
@@ -451,8 +480,8 @@ async function generateSpritesheet(spriteInfos: SpriteInfo[]): Promise<Spriteshe
 
   // Generate the spritesheet
   ConsoleFormatter.working('Compositing compact spritesheet...');
-  
-  const spritesheetPath = path.join(SPRITESHEET_OUTPUT_DIR, 'pokemon-spritesheet.png');
+
+  const spritesheetPath = path.join(SPRITESHEET_OUTPUT_DIR, generation.outputFilename);
   await baseImage
     .composite(compositeOps)
     .png({ compressionLevel: 9 })
@@ -464,6 +493,7 @@ async function generateSpritesheet(spriteInfos: SpriteInfo[]): Promise<Spriteshe
   const metadata: SpritesheetMetadata = {
     algorithm: 'compact-bin-packing',
     version: '2.0',
+    generation: generation.name,
     totalSprites: spriteInfos.length,
     includedSprites: validSprites.length,
     sheetWidth,
@@ -473,23 +503,23 @@ async function generateSpritesheet(spriteInfos: SpriteInfo[]): Promise<Spriteshe
   };
 
   // Save metadata
-  const metadataPath = path.join(METADATA_OUTPUT_DIR, 'pokemon-spritesheet-metadata.json');
+  const metadataPath = path.join(METADATA_OUTPUT_DIR, generation.metadataFilename);
   await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
-  
+
   ConsoleFormatter.success(`Metadata saved to: ${metadataPath}`);
 
   return metadata;
 }
 
 /**
- * Main spritesheet generation function
+ * Generate spritesheet for a single generation
  */
-async function generatePokemonSpritesheet(): Promise<void> {
+async function generateGenerationSpritesheet(generation: GenerationConfig): Promise<SpritesheetMetadata> {
   ConsoleFormatter.printHeader(
-    'Compact Pokemon Spritesheet Generator',
-    'Creating space-efficient spritesheet using bin packing algorithm'
+    `${generation.name.toUpperCase()} Compact Pokemon Spritesheet Generator`,
+    `Creating space-efficient spritesheet using bin packing algorithm for ${generation.name}`
   );
-  
+
   const startTime = Date.now();
 
   try {
@@ -497,16 +527,21 @@ async function generatePokemonSpritesheet(): Promise<void> {
     await fs.mkdir(SPRITESHEET_OUTPUT_DIR, { recursive: true });
     await fs.mkdir(METADATA_OUTPUT_DIR, { recursive: true });
 
+    // Check if sprites directory exists
+    if (!await fileExists(generation.spritesDir)) {
+      throw new Error(`Sprites directory not found: ${generation.spritesDir}. Please run the scraper first.`);
+    }
+
     // Load sprite data
-    const spriteInfos = await loadSpriteData();
-    
+    const spriteInfos = await loadSpriteData(generation);
+
     if (spriteInfos.length === 0) {
       ConsoleFormatter.warn('No Pokemon data found');
-      return;
+      throw new Error('No Pokemon data found');
     }
 
     // Generate spritesheet
-    const metadata = await generateSpritesheet(spriteInfos);
+    const metadata = await generateSpritesheet(spriteInfos, generation);
 
     // Calculate comparison with old grid method
     const validSprites = spriteInfos.filter(s => s.exists && s.contentBounds);
@@ -520,10 +555,11 @@ async function generatePokemonSpritesheet(): Promise<void> {
 
     // Calculate stats
     const duration = Date.now() - startTime;
-    const outputFile = await fs.stat(path.join(SPRITESHEET_OUTPUT_DIR, 'pokemon-spritesheet.png'));
+    const outputFile = await fs.stat(path.join(SPRITESHEET_OUTPUT_DIR, generation.outputFilename));
 
     // Success summary
-    ConsoleFormatter.printSummary('Compact Spritesheet Generation Complete!', [
+    ConsoleFormatter.printSummary(`${generation.name.toUpperCase()} Compact Spritesheet Generation Complete!`, [
+      { label: 'Generation', value: generation.name.toUpperCase(), color: 'cyan' },
       { label: 'Total Pokemon', value: spriteInfos.length, color: 'blue' },
       { label: 'Sprites included', value: metadata.includedSprites, color: 'green' },
       { label: 'Missing sprites', value: metadata.totalSprites - metadata.includedSprites, color: 'yellow' },
@@ -536,13 +572,61 @@ async function generatePokemonSpritesheet(): Promise<void> {
       { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
     ]);
 
+    return metadata;
+
   } catch (error) {
     ConsoleFormatter.error(
-      `Error generating spritesheet: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Error generating ${generation.name} spritesheet: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+    throw error;
+  }
+}
+
+/**
+ * Main spritesheet generation function
+ */
+async function generatePokemonSpritesheets(): Promise<void> {
+  ConsoleFormatter.printHeader(
+    'Multi-Generation Pokemon Spritesheet Generator',
+    'Creating space-efficient spritesheets for both Gen 7 and Gen 8 using bin packing algorithm'
+  );
+
+  const startTime = Date.now();
+  let successCount = 0;
+  let errorCount = 0;
+
+  try {
+    // Generate spritesheets for each generation
+    for (const generation of GENERATIONS) {
+      try {
+        await generateGenerationSpritesheet(generation);
+        successCount++;
+      } catch (error) {
+        errorCount++;
+        ConsoleFormatter.error(`Failed to generate ${generation.name} spritesheet: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
+
+    // Final summary
+    const duration = Date.now() - startTime;
+    ConsoleFormatter.printSummary('Multi-Generation Spritesheet Generation Complete!', [
+      { label: 'Generations processed', value: GENERATIONS.length, color: 'blue' },
+      { label: 'Successful generations', value: successCount, color: 'green' },
+      { label: 'Failed generations', value: errorCount, color: 'red' },
+      { label: 'Total duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
+    ]);
+
+    if (errorCount > 0) {
+      process.exit(1);
+    }
+
+  } catch (error) {
+    ConsoleFormatter.error(
+      `Error in multi-generation spritesheet generation: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
     process.exit(1);
   }
 }
 
 // Run the generator
-generatePokemonSpritesheet();
+generatePokemonSpritesheets();
