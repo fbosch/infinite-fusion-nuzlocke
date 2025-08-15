@@ -204,9 +204,15 @@ export function DraggableComboboxSprite({
       });
     }
 
+    if (value && locationId && (preEvolution || evolutions?.length)) {
+      options.push({
+        id: 'evolve-separator',
+        separator: true,
+      });
+    }
+
     // Add devolve option if pre-evolution exists
     if (value && locationId && preEvolution) {
-      
       options.push({
         id: 'devolve',
         label: `Devolve to ${preEvolution.name}`,
@@ -258,7 +264,7 @@ export function DraggableComboboxSprite({
       } else {
         options.push({
           id: 'evolve',
-          label: 'Evolve…',
+          label: 'Evolve to…',
           icon: Atom,
           children: evolutions.map(evo => ({
             id: `evolve-${evo.id}`,

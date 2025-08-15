@@ -118,7 +118,7 @@ export function ContextMenu({
   const listRef = useRef<Array<HTMLElement | null>>([]);
   const menuElementRef = useRef<HTMLDivElement>(null);
   const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
-  const [submenuPosition, setSubmenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const submenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     onOpenChange?.(isOpen);
@@ -216,23 +216,18 @@ export function ContextMenu({
     }
   };
 
-  const openSubmenuForIndex = useCallback(
-    (validIndex: number) => {
-      if (!menuElementRef.current) return;
-      const parentEl = listRef.current[validIndex];
-      if (!parentEl) return;
-      const itemRect = parentEl.getBoundingClientRect();
-      const x = itemRect.right - 2; // Anchor to the item's right edge
-      const y = itemRect.top; // Align vertically with the item
-      setSubmenuPosition({ x, y });
-      setOpenSubmenuIndex(validIndex);
-    },
-    []
-  );
+  const openSubmenuForIndex = useCallback((validIndex: number) => {
+    if (!menuElementRef.current) return;
+    const parentEl = listRef.current[validIndex];
+    if (!parentEl) return;
+
+    // For absolute positioning, we just need to track which submenu is open
+    // The positioning is handled by CSS (left: 100%, top: 0)
+    setOpenSubmenuIndex(validIndex);
+  }, []);
 
   const closeSubmenu = useCallback(() => {
     setOpenSubmenuIndex(null);
-    setSubmenuPosition(null);
   }, []);
 
   const handleContextMenu = (event: React.MouseEvent) => {
@@ -354,7 +349,8 @@ export function ContextMenu({
                   item.disabled && '!opacity-75 !cursor-not-allowed'
                 );
 
-                const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+                const hasChildren =
+                  Array.isArray(item.children) && item.children.length > 0;
                 const content = (
                   <div className='flex items-center gap-x-2 w-full'>
                     {item.icon && !item.href && (
@@ -491,100 +487,138 @@ export function ContextMenu({
                     >
                       <div className='relative'>
                         {buttonElement}
-                        {hasChildren &&
-                          openSubmenuIndex === validIndex &&
-                          submenuPosition && (
-                            <div
-                              style={{
-                                position: 'fixed',
-                                left: submenuPosition.x,
-                                top: submenuPosition.y,
-                              }}
-                              className={clsx(
-                                'min-w-[12rem] z-[101] rounded-md border border-gray-200 dark:border-gray-800',
-                                'bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25',
-                                'p-1 backdrop-blur-xl origin-top-left'
-                              )}
-                              role='menu'
-                              onMouseLeave={closeSubmenu}
-                            >
-                              {item.children?.map(child => (
-                                <button
-                                  key={child.id}
-                                  className={commonClasses}
-                                  disabled={child.disabled}
-                                  role='menuitem'
-                                  tabIndex={-1}
-                                  onClick={e => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    if (!child.disabled) {
-                                      child.onClick?.(e);
-                                      handleClose();
-                                    }
-                                  }}
-                                >
-                                  <div className='flex items-center gap-x-2 w-full'>
-                                    {child.icon && (
-                                      <child.icon className='h-4 w-4 flex-shrink-0' aria-hidden='true' />
-                                    )}
-                                    <span className='truncate'>{child.label}</span>
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          )}
+                        {hasChildren && openSubmenuIndex === validIndex && (
+                          <div
+                            ref={submenuRef}
+                            style={{
+                              position: 'absolute',
+                              left: '100%',
+                              top: 0,
+                              marginLeft: '4px',
+                              minWidth: '12rem',
+                            }}
+                            className={clsx(
+                              'z-[9999] rounded-md border border-gray-200 dark:border-gray-800',
+                              'bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25',
+                              'p-1 backdrop-blur-xl origin-top-left',
+                              'overflow-hidden'
+                            )}
+                            role='menu'
+                            onMouseLeave={closeSubmenu}
+                            onMouseEnter={() => {
+                              // Keep submenu open when hovering over it
+                              if (openSubmenuIndex !== validIndex) {
+                                setOpenSubmenuIndex(validIndex);
+                              }
+                            }}
+                          >
+                            {item.children?.map(child => (
+                              <button
+                                key={child.id}
+                                className={clsx(
+                                  'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
+                                  'text-sm transition-colors duration-75 enabled:cursor-pointer',
+                                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+                                  'text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white',
+                                  child.disabled &&
+                                    '!opacity-75 !cursor-not-allowed'
+                                )}
+                                disabled={child.disabled}
+                                role='menuitem'
+                                tabIndex={-1}
+                                onClick={e => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  if (!child.disabled) {
+                                    child.onClick?.(e);
+                                    handleClose();
+                                  }
+                                }}
+                              >
+                                <div className='flex items-center gap-x-2 w-full'>
+                                  {child.icon && (
+                                    <child.icon
+                                      className='h-4 w-4 flex-shrink-0'
+                                      aria-hidden='true'
+                                    />
+                                  )}
+                                  <span className='truncate'>
+                                    {child.label}
+                                  </span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </CursorTooltip>
                   );
                 }
 
                 return (
-                  <div className='relative'>
+                  <div key={item.id} className='relative'>
                     {buttonElement}
-                    {hasChildren &&
-                      openSubmenuIndex === validIndex &&
-                      submenuPosition && (
-                        <div
-                          style={{
-                            position: 'fixed',
-                            left: submenuPosition.x,
-                            top: submenuPosition.y,
-                          }}
-                          className={clsx(
-                            'min-w-[12rem] z-[101] rounded-md border border-gray-200 dark:border-gray-800',
-                            'bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25',
-                            'p-1 backdrop-blur-xl origin-top-left'
-                          )}
-                          role='menu'
-                          onMouseLeave={closeSubmenu}
-                        >
-                          {item.children?.map(child => (
-                            <button
-                              key={child.id}
-                              className={commonClasses}
-                              disabled={child.disabled}
-                              role='menuitem'
-                              tabIndex={-1}
-                              onClick={e => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                if (!child.disabled) {
-                                  child.onClick?.(e);
-                                  handleClose();
-                                }
-                              }}
-                            >
-                              <div className='flex items-center gap-x-2 w-full'>
-                                {child.icon && (
-                                  <child.icon className='h-4 w-4 flex-shrink-0' aria-hidden='true' />
-                                )}
-                                <span className='truncate'>{child.label}</span>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                    {hasChildren && openSubmenuIndex === validIndex && (
+                      <div
+                        ref={submenuRef}
+                        style={{
+                          position: 'absolute',
+                          left: '100%',
+                          top: 0,
+                          marginLeft: '4px',
+                          minWidth: '12rem',
+                        }}
+                        className={clsx(
+                          'z-[9999] rounded-md border border-gray-200 dark:border-gray-800',
+                          'bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25',
+                          'p-1 backdrop-blur-xl origin-top-left',
+                          'overflow-hidden'
+                        )}
+                        role='menu'
+                        onMouseLeave={closeSubmenu}
+                        onMouseEnter={() => {
+                          // Keep submenu open when hovering over it
+                          if (openSubmenuIndex !== validIndex) {
+                            setOpenSubmenuIndex(validIndex);
+                          }
+                        }}
+                      >
+                        {item.children?.map(child => (
+                          <button
+                            key={child.id}
+                            className={clsx(
+                              'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
+                              'text-sm transition-colors duration-75 enabled:cursor-pointer',
+                              'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+                              'text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white',
+                              child.disabled &&
+                                '!opacity-75 !cursor-not-allowed'
+                            )}
+                            disabled={child.disabled}
+                            role='menuitem'
+                            tabIndex={-1}
+                            onClick={e => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (!child.disabled) {
+                                child.onClick?.(e);
+                                handleClose();
+                              }
+                            }}
+                          >
+                            <div className='flex items-center gap-x-2 w-full'>
+                              {child.icon && (
+                                <child.icon
+                                  className='h-4 w-4 flex-shrink-0'
+                                  aria-hidden='true'
+                                />
+                              )}
+                              <span className='truncate'>{child.label}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -608,7 +642,10 @@ export function ContextMenu({
             const withinMenu = menuElementRef.current?.contains(
               e.target as Node
             );
-            if (!withinMenu) closeSubmenu();
+            const withinSubmenu = document
+              .querySelector('[role="menu"][style*="z-[9999]"]')
+              ?.contains(e.target as Node);
+            if (!withinMenu && !withinSubmenu) closeSubmenu();
           }}
         />
       )}
