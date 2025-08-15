@@ -36,10 +36,15 @@ export default function TeamEntryItem({
     currentEncounter?.isFusion && canFuse(entry.head, entry.body)
   );
 
-  const fusionTypes = useFusionTypes(
-    entry.head ? { id: entry.head.id } : undefined,
-    isFusion && entry.body ? { id: entry.body.id } : undefined
+  const { primary, secondary } = useFusionTypes(
+    isFusion
+      ? { id: entry.head?.id || entry?.body?.id }
+      : entry?.head?.id
+        ? { id: entry.head?.id }
+        : undefined,
+    entry.body?.id ? { id: entry.body?.id } : undefined
   );
+
   if (!hasAny) return null;
 
   const handleClick = () => {
@@ -116,11 +121,11 @@ export default function TeamEntryItem({
                 {idToName.get(entry.locationId) || 'Unknown Location'}
               </div>
             </div>
-            {fusionTypes.primary && (
+            {primary && (
               <div className='ml-auto'>
                 <TypePills
-                  primary={fusionTypes.primary}
-                  secondary={fusionTypes.secondary}
+                  primary={primary}
+                  secondary={secondary}
                   showTooltip
                   size='sm'
                 />
