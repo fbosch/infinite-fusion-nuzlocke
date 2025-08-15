@@ -12,6 +12,7 @@ import { Box, Skull } from 'lucide-react';
 import { useEncounters, playthroughActions } from '@/stores/playthroughs';
 import { canFuse, isPokemonActive } from '@/utils/pokemonPredicates';
 import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
+import { scrollToLocationById } from '@/utils/scrollToLocation';
 import type { PCEntry } from './types';
 
 interface TeamEntryItemProps {
@@ -45,6 +46,16 @@ export default function TeamEntryItem({
   if (!hasAny) return null;
 
   const handleClick = () => {
+    const highlightUids: string[] = [];
+    if (entry.head?.uid) highlightUids.push(entry.head.uid);
+    if (entry.body?.uid) highlightUids.push(entry.body.uid);
+
+    scrollToLocationById(entry.locationId, {
+      behavior: 'smooth',
+      highlightUids,
+      durationMs: 1200,
+    });
+
     onClose?.();
   };
 
@@ -71,6 +82,12 @@ export default function TeamEntryItem({
           }
         )}
         onClick={handleClick}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
         tabIndex={0}
         aria-label={`Scroll to ${idToName.get(entry.locationId) || 'location'} in table`}
       >
