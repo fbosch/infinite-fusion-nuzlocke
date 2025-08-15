@@ -11,7 +11,8 @@ import BodyIcon from '@/assets/images/body.svg';
 import { Box, Skull } from 'lucide-react';
 import { useEncounters, playthroughActions } from '@/stores/playthroughs';
 import { canFuse, isPokemonActive } from '@/utils/pokemonPredicates';
-import { useFusionTypes } from '@/hooks/useFusionTypes';
+import { useFusionTypesFromQuery } from '@/hooks/useFusionTypes';
+import { createFusionTypeQuery } from '@/utils/fusionUtils';
 import type { PCEntry } from './types';
 
 interface TeamEntryItemProps {
@@ -36,14 +37,8 @@ export default function TeamEntryItem({
     currentEncounter?.isFusion && canFuse(entry.head, entry.body)
   );
 
-  const { primary, secondary } = useFusionTypes(
-    isFusion
-      ? { id: entry.head?.id || entry?.body?.id }
-      : entry?.head?.id
-        ? { id: entry.head?.id }
-        : undefined,
-    entry.body?.id ? { id: entry.body?.id } : undefined
-  );
+  const fusionQuery = createFusionTypeQuery(entry.head, entry.body, isFusion);
+  const { primary, secondary } = useFusionTypesFromQuery(fusionQuery);
 
   if (!hasAny) return null;
 

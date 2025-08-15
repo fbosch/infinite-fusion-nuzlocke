@@ -3,6 +3,7 @@ import { useAllPokemon } from '@/loaders/pokemon';
 import type { TypeName } from '@/lib/typings';
 import { getFusionTyping, TypeQuery } from '@/lib/typings';
 import { usePokemonTypes } from './usePokemonTypes';
+import type { FusionTypeQuery } from '@/utils/fusionUtils';
 
 export interface UseFusionTypesResult {
   primary?: TypeName;
@@ -48,6 +49,16 @@ export function useFusionTypes(
   }, [allPokemon, isLoading, headQuery, bodyQuery, headSingle, bodySingle]);
 
   return result;
+}
+
+/**
+ * Enhanced version of useFusionTypes that accepts a FusionTypeQuery object.
+ * This provides a cleaner API for components that need to handle fusion logic.
+ */
+export function useFusionTypesFromQuery(
+  query: FusionTypeQuery
+): UseFusionTypesResult {
+  return useFusionTypes(query.head || undefined, query.body || undefined);
 }
 
 export default useFusionTypes;

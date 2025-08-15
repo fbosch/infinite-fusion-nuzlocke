@@ -28,7 +28,8 @@ import { type PokemonOptionType } from '@/loaders/pokemon';
 import { usePreferredVariantState } from '@/hooks/useSprite';
 import Rays from '@/assets/images/rays.svg';
 import { TypePills } from '../TypePills';
-import { useFusionTypes } from '@/hooks/useFusionTypes';
+import { useFusionTypesFromQuery } from '@/hooks/useFusionTypes';
+import { createFusionTypeQuery } from '@/utils/fusionUtils';
 
 export interface FusionSpriteHandle {
   playEvolution: (durationMs?: number) => void;
@@ -76,10 +77,8 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
       body?.id ?? null
     );
 
-    const { primary, secondary } = useFusionTypes(
-      head?.id ? { id: head?.id } : undefined,
-      body?.id && isFusion ? { id: body?.id } : undefined
-    );
+    const fusionQuery = createFusionTypeQuery(head, body, isFusion);
+    const { primary, secondary } = useFusionTypesFromQuery(fusionQuery);
 
     const credit =
       hasEgg || isLoadingCredits

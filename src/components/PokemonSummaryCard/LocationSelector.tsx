@@ -23,7 +23,8 @@ import HeadIcon from '@/assets/images/head.svg';
 import { clsx } from 'clsx';
 import { canFuse } from '@/utils/pokemonPredicates';
 import { TypePills } from '@/components/TypePills';
-import { useFusionTypes } from '@/hooks/useFusionTypes';
+import { useFusionTypesFromQuery } from '@/hooks/useFusionTypes';
+import { createFusionTypeQuery } from '@/utils/fusionUtils';
 
 interface LocationSelectorProps {
   isOpen: boolean;
@@ -123,30 +124,32 @@ function ActionPreview({
   }, [existingPokemon, remainingPokemon, sourceMoveTargetField]);
 
   // Resolve typings with fusion hook (falls back to single when one side is missing)
-  const existingTypes = useFusionTypes(
-    existingPokemon ? { id: existingPokemon.id } : undefined,
-    undefined
+  const existingTypes = useFusionTypesFromQuery(
+    createFusionTypeQuery(existingPokemon, null, false)
   );
 
   // Compute fusion types conditionally but always at the top level
-  const targetFusionTypes = useFusionTypes(
-    targetHeadAfter ? { id: targetHeadAfter.id } : undefined,
-    // Only compute fusion types if both Pokémon exist and can fuse
-    targetHeadAfter &&
-      targetBodyAfter &&
-      canFuse(targetHeadAfter, targetBodyAfter)
-      ? { id: targetBodyAfter.id }
-      : undefined
+  const targetFusionQuery = createFusionTypeQuery(
+    targetHeadAfter,
+    targetBodyAfter,
+    Boolean(
+      targetHeadAfter &&
+        targetBodyAfter &&
+        canFuse(targetHeadAfter, targetBodyAfter)
+    )
   );
-  const sourceFusionTypes = useFusionTypes(
-    sourceHeadAfter ? { id: sourceHeadAfter.id } : undefined,
-    // Only compute fusion types if both Pokémon exist and can fuse
-    sourceHeadAfter &&
-      sourceBodyAfter &&
-      canFuse(sourceHeadAfter, sourceBodyAfter)
-      ? { id: sourceBodyAfter.id }
-      : undefined
+  const sourceFusionQuery = createFusionTypeQuery(
+    sourceHeadAfter,
+    sourceBodyAfter,
+    Boolean(
+      sourceHeadAfter &&
+        sourceBodyAfter &&
+        canFuse(sourceHeadAfter, sourceBodyAfter)
+    )
   );
+
+  const targetFusionTypes = useFusionTypesFromQuery(targetFusionQuery);
+  const sourceFusionTypes = useFusionTypesFromQuery(sourceFusionQuery);
 
   if (!existingPokemon && !otherFieldPokemon) return null;
 
@@ -406,14 +409,12 @@ function MovingPokemonInfo({
   moveTargetField,
   isFusion,
 }: MovingPokemonInfoProps) {
-  const fusionTypes = useFusionTypes(
+  const fusionQuery = createFusionTypeQuery(
+    isMovingEntireFusion ? encounterData?.head : movingPokemon,
+    isMovingEntireFusion ? encounterData?.body : null,
     isMovingEntireFusion
-      ? { id: encounterData?.head?.id }
-      : movingPokemon
-        ? { id: movingPokemon.id }
-        : undefined,
-    isMovingEntireFusion ? { id: encounterData?.body?.id } : undefined
   );
+  const fusionTypes = useFusionTypesFromQuery(fusionQuery);
 
   return (
     <div className='p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'>
