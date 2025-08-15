@@ -130,7 +130,7 @@ async function downloadImage(icon: PokemonIcon, config: GenerationConfig, retrie
 
               if (baseResponse.ok) {
                 const baseBuffer = await baseResponse.arrayBuffer();
-                await fs.writeFile(baseFilePath, Buffer.from(buffer));
+                await fs.writeFile(baseFilePath, Buffer.from(baseBuffer));
                 return true;
               }
             } catch {
