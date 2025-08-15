@@ -82,19 +82,13 @@ export default function LocationCell({
 
           <div className='flex flex-row divide-x divide-gray-200 dark:divide-gray-600'>
             {locationPokemon.map((pokemon, index) => (
-              <div
-                key={index}
-                className='flex items-center first:pr-5 not-first:pl-2'
-              >
-                <div className='flex-shrink-0 h-12 w-15 justify-center items-center flex'>
-                  <PokemonSprite pokemonId={pokemon.id} />
+              <div key={index} className='flex items-center first:pl-0 px-2'>
+                <div className='flex-shrink-0 size-9 justify-center items-center flex'>
+                  <PokemonSprite pokemonId={pokemon.id} generation='gen7' />
                 </div>
                 <div className='flex-1 min-w-0'>
                   <span className='font-medium dark:text-white text-gray-900'>
-                    {pokemon.nickname ? `${pokemon.nickname} • ` : ''}
-                    <span className='dark:text-gray-300 text-gray-700 '>
-                      {pokemon.name}
-                    </span>
+                    {pokemon.nickname ? pokemon.nickname : pokemon.name}
                   </span>
                 </div>
               </div>

@@ -11,7 +11,7 @@ import {
 import { dragActions } from '@/stores/dragStore';
 import { PokemonSprite } from '../PokemonSprite';
 import { CursorTooltip } from '../CursorTooltip';
-import spritesheetMetadata from '@/assets/pokemon-spritesheet-metadata.json';
+import spritesheetMetadata from '@/assets/pokemon-gen8-spritesheet-metadata.json';
 import ContextMenu, { type ContextMenuItem } from '../ContextMenu';
 import { getLocations, getLocationByIdFromMerged } from '@/loaders/locations';
 import {
