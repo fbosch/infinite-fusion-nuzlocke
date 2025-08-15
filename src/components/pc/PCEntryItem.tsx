@@ -13,8 +13,7 @@ import {
   isPokemonStored,
   canFuse,
 } from '@/utils/pokemonPredicates';
-import { useFusionTypesFromQuery } from '@/hooks/useFusionTypes';
-import { createFusionTypeQuery } from '@/utils/fusionUtils';
+import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
 import { scrollToLocationById } from '@/utils/scrollToLocation';
 import type { PCEntry } from './types';
 
@@ -53,8 +52,11 @@ export default function PCEntryItem(props: PCEntryItemProps) {
   );
   const label = getNicknameText(entry.head, entry.body, isFusion);
 
-  const fusionQuery = createFusionTypeQuery(entry.head, entry.body, isFusion);
-  const fusionTypes = useFusionTypesFromQuery(fusionQuery);
+  const fusionTypes = useFusionTypesFromPokemon(
+    entry.head,
+    entry.body,
+    isFusion
+  );
 
   const handleClick = () => {
     const highlightUids: string[] = [];

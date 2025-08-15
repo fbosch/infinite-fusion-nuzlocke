@@ -23,8 +23,7 @@ import HeadIcon from '@/assets/images/head.svg';
 import { clsx } from 'clsx';
 import { canFuse } from '@/utils/pokemonPredicates';
 import { TypePills } from '@/components/TypePills';
-import { useFusionTypesFromQuery } from '@/hooks/useFusionTypes';
-import { createFusionTypeQuery } from '@/utils/fusionUtils';
+import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
 
 interface LocationSelectorProps {
   isOpen: boolean;
@@ -124,12 +123,10 @@ function ActionPreview({
   }, [existingPokemon, remainingPokemon, sourceMoveTargetField]);
 
   // Resolve typings with fusion hook (falls back to single when one side is missing)
-  const existingTypes = useFusionTypesFromQuery(
-    createFusionTypeQuery(existingPokemon, null, false)
-  );
+  const existingTypes = useFusionTypesFromPokemon(existingPokemon, null, false);
 
   // Compute fusion types conditionally but always at the top level
-  const targetFusionQuery = createFusionTypeQuery(
+  const targetFusionTypes = useFusionTypesFromPokemon(
     targetHeadAfter,
     targetBodyAfter,
     Boolean(
@@ -138,7 +135,7 @@ function ActionPreview({
         canFuse(targetHeadAfter, targetBodyAfter)
     )
   );
-  const sourceFusionQuery = createFusionTypeQuery(
+  const sourceFusionTypes = useFusionTypesFromPokemon(
     sourceHeadAfter,
     sourceBodyAfter,
     Boolean(
@@ -147,9 +144,6 @@ function ActionPreview({
         canFuse(sourceHeadAfter, sourceBodyAfter)
     )
   );
-
-  const targetFusionTypes = useFusionTypesFromQuery(targetFusionQuery);
-  const sourceFusionTypes = useFusionTypesFromQuery(sourceFusionQuery);
 
   if (!existingPokemon && !otherFieldPokemon) return null;
 
@@ -409,12 +403,11 @@ function MovingPokemonInfo({
   moveTargetField,
   isFusion,
 }: MovingPokemonInfoProps) {
-  const fusionQuery = createFusionTypeQuery(
+  const fusionTypes = useFusionTypesFromPokemon(
     isMovingEntireFusion ? encounterData?.head : movingPokemon,
     isMovingEntireFusion ? encounterData?.body : null,
     isMovingEntireFusion
   );
-  const fusionTypes = useFusionTypesFromQuery(fusionQuery);
 
   return (
     <div className='p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'>

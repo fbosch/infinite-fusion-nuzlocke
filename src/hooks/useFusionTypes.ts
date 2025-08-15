@@ -3,7 +3,8 @@ import { useAllPokemon } from '@/loaders/pokemon';
 import type { TypeName } from '@/lib/typings';
 import { getFusionTyping, TypeQuery } from '@/lib/typings';
 import { usePokemonTypes } from './usePokemonTypes';
-import type { FusionTypeQuery } from '@/utils/fusionUtils';
+import type { PokemonOptionType } from '@/loaders/pokemon';
+import { canFuse } from '@/utils/pokemonPredicates';
 
 export interface UseFusionTypesResult {
   primary?: TypeName;
@@ -52,13 +53,22 @@ export function useFusionTypes(
 }
 
 /**
- * Enhanced version of useFusionTypes that accepts a FusionTypeQuery object.
- * This provides a cleaner API for components that need to handle fusion logic.
+ * Simplified hook that directly handles fusion logic from Pokémon objects.
+ * This eliminates the need for separate utility functions.
  */
-export function useFusionTypesFromQuery(
-  query: FusionTypeQuery
+export function useFusionTypesFromPokemon(
+  head: PokemonOptionType | null,
+  body: PokemonOptionType | null,
+  isFusion: boolean
 ): UseFusionTypesResult {
-  return useFusionTypes(query.head || undefined, query.body || undefined);
+  const headQuery = head?.id ? { id: head.id } : undefined;
+  const bodyQuery =
+    isFusion && body?.id && canFuse(head, body) ? { id: body.id } : undefined;
+
+  // If it's not a fusion or can't fuse, prioritize head over body
+  const finalHeadQuery = headQuery || (body?.id ? { id: body.id } : undefined);
+
+  return useFusionTypes(finalHeadQuery, bodyQuery);
 }
 
 export default useFusionTypes;
