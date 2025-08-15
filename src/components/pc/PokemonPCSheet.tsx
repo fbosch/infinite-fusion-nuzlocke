@@ -274,7 +274,7 @@ export default function PokemonPCSheet({
                     <ul
                       role='list'
                       aria-label='Active team members list'
-                      className='w-full space-y-3 py-2'
+                      className='w-full space-y-3 py-2 max-h-[calc(100dvh-6.5rem)] overflow-y-auto'
                     >
                       {(() => {
                         let pokemonCount = 0;
@@ -347,7 +347,7 @@ export default function PokemonPCSheet({
                     <ul
                       role='list'
                       aria-label='Stored Pokémon list'
-                      className='grid w-full grid-cols-1 gap-2 py-2 sm:grid-cols-2'
+                      className='grid w-full grid-cols-1 gap-2 py-2 sm:grid-cols-2 h-[calc(100dvh-6.5rem)] overflow-y-auto'
                     >
                       {stored.map(entry => (
                         <PCEntryItem
@@ -383,7 +383,7 @@ export default function PokemonPCSheet({
                     <ul
                       role='list'
                       aria-label='Fainted Pokémon list'
-                      className='grid w-full grid-cols-1 gap-2 py-2 sm:grid-cols-2'
+                      className='grid w-full grid-cols-1 gap-2 py-2 sm:grid-cols-2 max-h-[calc(100dvh-6.5rem)] g overflow-y-auto'
                     >
                       {deceased.map(entry => (
                         <PCEntryItem

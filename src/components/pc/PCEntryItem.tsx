@@ -13,7 +13,7 @@ import {
   isPokemonStored,
   canFuse,
 } from '@/utils/pokemonPredicates';
-import { useFusionTypes } from '@/hooks/useFusionTypes';
+import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
 import { scrollToLocationById } from '@/utils/scrollToLocation';
 import type { PCEntry } from './types';
 
@@ -52,9 +52,10 @@ export default function PCEntryItem(props: PCEntryItemProps) {
   );
   const label = getNicknameText(entry.head, entry.body, isFusion);
 
-  const fusionTypes = useFusionTypes(
-    entry.head ? { id: entry.head.id } : undefined,
-    isFusion && entry.body ? { id: entry.body.id } : undefined
+  const fusionTypes = useFusionTypesFromPokemon(
+    entry.head,
+    entry.body,
+    isFusion
   );
 
   const handleClick = () => {

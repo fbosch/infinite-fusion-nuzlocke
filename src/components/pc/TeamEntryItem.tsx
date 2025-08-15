@@ -11,7 +11,8 @@ import BodyIcon from '@/assets/images/body.svg';
 import { Box, Skull } from 'lucide-react';
 import { useEncounters, playthroughActions } from '@/stores/playthroughs';
 import { canFuse, isPokemonActive } from '@/utils/pokemonPredicates';
-import { useFusionTypes } from '@/hooks/useFusionTypes';
+import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
+import { scrollToLocationById } from '@/utils/scrollToLocation';
 import type { PCEntry } from './types';
 
 interface TeamEntryItemProps {
@@ -36,13 +37,25 @@ export default function TeamEntryItem({
     currentEncounter?.isFusion && canFuse(entry.head, entry.body)
   );
 
-  const fusionTypes = useFusionTypes(
-    entry.head ? { id: entry.head.id } : undefined,
-    isFusion && entry.body ? { id: entry.body.id } : undefined
+  const { primary, secondary } = useFusionTypesFromPokemon(
+    entry.head,
+    entry.body,
+    isFusion
   );
+
   if (!hasAny) return null;
 
   const handleClick = () => {
+    const highlightUids: string[] = [];
+    if (entry.head?.uid) highlightUids.push(entry.head.uid);
+    if (entry.body?.uid) highlightUids.push(entry.body.uid);
+
+    scrollToLocationById(entry.locationId, {
+      behavior: 'smooth',
+      highlightUids,
+      durationMs: 1200,
+    });
+
     onClose?.();
   };
 
@@ -69,6 +82,12 @@ export default function TeamEntryItem({
           }
         )}
         onClick={handleClick}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
         tabIndex={0}
         aria-label={`Scroll to ${idToName.get(entry.locationId) || 'location'} in table`}
       >
@@ -116,11 +135,11 @@ export default function TeamEntryItem({
                 {idToName.get(entry.locationId) || 'Unknown Location'}
               </div>
             </div>
-            {fusionTypes.primary && (
+            {primary && (
               <div className='ml-auto'>
                 <TypePills
-                  primary={fusionTypes.primary}
-                  secondary={fusionTypes.secondary}
+                  primary={primary}
+                  secondary={secondary}
                   showTooltip
                   size='sm'
                 />
