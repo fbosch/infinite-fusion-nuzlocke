@@ -23,7 +23,10 @@ import HeadIcon from '@/assets/images/head.svg';
 import { clsx } from 'clsx';
 import { canFuse } from '@/utils/pokemonPredicates';
 import { TypePills } from '@/components/TypePills';
-import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
+import {
+  useFusionTypesFromPokemon,
+  type UseFusionTypesResult,
+} from '@/hooks/useFusionTypes';
 
 interface LocationSelectorProps {
   isOpen: boolean;
@@ -61,23 +64,6 @@ interface ActionPreviewProps {
   sourceMoveTargetField: 'head' | 'body';
 }
 
-interface MovingPokemonInfoProps {
-  movingPokemon: PokemonOptionType;
-  isMovingEntireFusion: boolean;
-  encounterData: {
-    head?: PokemonOptionType | null;
-    body?: PokemonOptionType | null;
-  } | null;
-  moveTargetField: 'head' | 'body';
-  isFusion: boolean;
-}
-
-interface TargetFieldSelectorProps {
-  selectedTargetField: 'head' | 'body';
-  onTargetFieldChange: (field: 'head' | 'body') => void;
-  isMovingEntireFusion: boolean;
-}
-
 export { LocationSelector };
 
 // Helper function to get Pokemon in a specific slot
@@ -92,6 +78,43 @@ function getSlotPokemon(
       ? targetEncounter.head
       : targetEncounter.body
     : null;
+}
+
+// Reusable component for action preview items
+function ActionPreviewItem({
+  pokemon,
+  icon: Icon,
+  iconColor,
+  text,
+  types,
+}: {
+  pokemon: PokemonOptionType;
+  icon: React.ComponentType<{ className?: string }>;
+  iconColor: string;
+  text: string;
+  types: UseFusionTypesResult;
+}) {
+  return (
+    <div className='flex items-center space-x-4'>
+      <div className='size-4 flex justify-center items-center flex-shrink-0'>
+        <PokemonSprite pokemonId={pokemon.id} generation='gen7' />
+      </div>
+      <p className={`text-xs font-medium flex gap-x-1 ${iconColor}`}>
+        <Icon className={`w-3 h-3 ${iconColor} flex-shrink-0`} />
+        <span>{text}</span>
+      </p>
+      {types.primary && (
+        <div className='ml-auto'>
+          <TypePills
+            primary={types.primary}
+            secondary={types.secondary}
+            size='xs'
+            showTooltip
+          />
+        </div>
+      )}
+    </div>
+  );
 }
 
 // Component for rendering action preview (swap/fusion indicators)
@@ -150,78 +173,33 @@ function ActionPreview({
   if (existingPokemon) {
     // This is a swap operation - types are already computed above
     return (
-      <div className='space-y-3 mt-2'>
-        <div className='flex items-center space-x-4'>
-          <div className='size-5 flex justify-center items-center flex-shrink-0'>
-            <PokemonSprite pokemonId={existingPokemon.id} generation='gen7' />
-          </div>
-          <p className='text-xs text-amber-600 dark:text-amber-400 font-medium flex gap-x-1'>
-            <ArrowUpDown className='w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0' />
-            <span>Will swap with {existingPokemon.name}</span>
-          </p>
-          {existingTypes.primary && (
-            <div className='ml-auto'>
-              <TypePills
-                primary={existingTypes.primary}
-                secondary={existingTypes.secondary}
-                size='xs'
-                showTooltip
-              />
-            </div>
-          )}
-        </div>
+      <div className='space-y-2.5 mt-2'>
+        <ActionPreviewItem
+          pokemon={existingPokemon}
+          icon={ArrowUpDown}
+          iconColor='text-amber-600 dark:text-amber-400'
+          text={`Will swap with ${existingPokemon.name}`}
+          types={existingTypes}
+        />
 
         {targetFusionTypes.primary && otherFieldPokemon && (
-          <div className='flex items-center space-x-4'>
-            <div className='size-5 flex justify-center items-center flex-shrink-0'>
-              <PokemonSprite
-                pokemonId={otherFieldPokemon.id}
-                generation='gen7'
-              />
-            </div>
-            <p className='text-xs text-purple-600 dark:text-purple-400 font-medium flex gap-x-1'>
-              <Dna className='w-4 h-4 text-purple-500 flex-shrink-0' />
-              <span>Will fuse with {otherFieldPokemon.name} here</span>
-            </p>
-            {targetFusionTypes.primary && (
-              <div className='ml-auto'>
-                <TypePills
-                  primary={targetFusionTypes.primary}
-                  secondary={targetFusionTypes.secondary}
-                  size='xs'
-                  showTooltip
-                />
-              </div>
-            )}
-          </div>
+          <ActionPreviewItem
+            pokemon={otherFieldPokemon}
+            icon={Dna}
+            iconColor='text-purple-600 dark:text-purple-400'
+            text={`Will fuse with ${otherFieldPokemon.name} here`}
+            types={targetFusionTypes}
+          />
         )}
 
         {sourceFusionTypes.primary && remainingPokemon && (
-          <div className='flex items-center space-x-4'>
-            <div className='size-5 flex justify-center items-center flex-shrink-0'>
-              <PokemonSprite
-                pokemonId={remainingPokemon.id}
-                generation='gen7'
-              />
-            </div>
-            <p className='text-xs text-green-600 dark:text-green-400 font-medium flex gap-x-1'>
-              <Dna className='w-4 h-4 text-green-500 flex-shrink-0' />
-              <span>
-                {existingPokemon.name} will fuse with {remainingPokemon.name} at
-                source
-              </span>
-            </p>
-            {sourceFusionTypes.primary && (
-              <div className='ml-auto'>
-                <TypePills
-                  primary={sourceFusionTypes.primary}
-                  secondary={sourceFusionTypes.secondary}
-                  size='xs'
-                  showTooltip
-                />
-              </div>
-            )}
-          </div>
+          <ActionPreviewItem
+            pokemon={remainingPokemon}
+            icon={Dna}
+            iconColor='text-green-600 dark:text-green-400'
+            text={`${existingPokemon.name} will fuse with ${remainingPokemon.name} at source`}
+            types={sourceFusionTypes}
+          />
         )}
       </div>
     );
@@ -232,25 +210,13 @@ function ActionPreview({
     // Only show if fusion types were computed (meaning fusion is possible)
     if (!targetFusionTypes.primary) return null;
     return (
-      <div className='flex items-center space-x-4 mt-2'>
-        <div className='size-5 flex justify-center items-center flex-shrink-0'>
-          <PokemonSprite pokemonId={otherFieldPokemon.id} generation='gen7' />
-        </div>
-        <p className='text-xs text-purple-600 dark:text-purple-400 font-medium flex gap-x-1'>
-          <Dna className='w-4 h-4 text-purple-500 flex-shrink-0' />
-          <span>Will fuse with {otherFieldPokemon.name}</span>
-        </p>
-        {targetFusionTypes.primary && (
-          <div className='ml-auto'>
-            <TypePills
-              primary={targetFusionTypes.primary}
-              secondary={targetFusionTypes.secondary}
-              size='xs'
-              showTooltip
-            />
-          </div>
-        )}
-      </div>
+      <ActionPreviewItem
+        pokemon={otherFieldPokemon}
+        icon={Dna}
+        iconColor='text-purple-600 dark:text-purple-400'
+        text={`Will fuse with ${otherFieldPokemon.name}`}
+        types={targetFusionTypes}
+      />
     );
   }
 
@@ -350,106 +316,78 @@ function LocationItem({
   }, [movingPokemon, location.id, selectedTargetField]);
 
   return (
-    <button
-      type='button'
-      onClick={handleSelect}
-      disabled={wouldCreateEggFusion}
+    <div
+      role='listitem'
       className={clsx(
-        'w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 border-b border-gray-200 dark:border-gray-600 last:border-b-0',
-        {
-          'cursor-not-allowed opacity-50': wouldCreateEggFusion,
-        }
+        'group hover:bg-gray-50 dark:hover:bg-gray-700 focus-within:bg-gray-50 dark:focus-within:bg-gray-700',
+        'last:border-b-0 border-b border-gray-200 dark:border-gray-600',
+        'last:rounded-b-lg'
       )}
     >
-      <div className='flex items-start space-x-3'>
-        <MapPin className='h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0' />
-        <div className='flex-1 min-w-0'>
-          <p className='text-sm font-medium text-gray-900 dark:text-white truncate'>
-            {location.name}
-          </p>
-          <p className='text-xs text-gray-500 dark:text-gray-400 truncate'>
-            {'isCustom' in location && location.isCustom
-              ? 'Custom location'
-              : `${location.region} • ${location.description}`}
-          </p>
-          {wouldCreateEggFusion && (
-            <p className='text-xs text-red-500 dark:text-red-400 mt-1'>
-              Cannot fuse with egg
+      <button
+        type='button'
+        onClick={handleSelect}
+        disabled={wouldCreateEggFusion}
+        className={clsx('w-full text-left p-3 focus:outline-none', {
+          'cursor-not-allowed opacity-50': wouldCreateEggFusion,
+        })}
+      >
+        <div className='flex items-start space-x-3'>
+          <MapPin className='h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0' />
+          <div className='flex-1 min-w-0'>
+            <p className='text-sm font-medium text-gray-900 dark:text-white truncate'>
+              {location.name}
             </p>
-          )}
-          {!wouldCreateEggFusion && (
-            <ActionPreview
-              existingPokemon={existingPokemon}
-              otherFieldPokemon={otherFieldPokemon}
-              remainingPokemon={remainingPokemon}
-              movingPokemon={movingPokemon}
-              targetLocationId={location.id}
-              sourceLocationId={currentLocationId}
-              selectedTargetField={selectedTargetField}
-              sourceMoveTargetField={moveTargetField}
-            />
-          )}
+            <p className='text-xs text-gray-500 dark:text-gray-400 truncate'>
+              {'isCustom' in location && location.isCustom
+                ? 'Custom location'
+                : `${location.region} • ${location.description}`}
+            </p>
+            {wouldCreateEggFusion && (
+              <p className='text-xs text-red-500 dark:text-red-400 mt-1'>
+                Cannot fuse with egg
+              </p>
+            )}
+            {!wouldCreateEggFusion && (
+              <ActionPreview
+                existingPokemon={existingPokemon}
+                otherFieldPokemon={otherFieldPokemon}
+                remainingPokemon={remainingPokemon}
+                movingPokemon={movingPokemon}
+                targetLocationId={location.id}
+                sourceLocationId={currentLocationId}
+                selectedTargetField={selectedTargetField}
+                sourceMoveTargetField={moveTargetField}
+              />
+            )}
+          </div>
         </div>
-      </div>
-    </button>
+      </button>
+    </div>
   );
 }
 
 // Component for displaying information about the Pokemon being moved
 function MovingPokemonInfo({
   movingPokemon,
-  isMovingEntireFusion,
-  encounterData,
   moveTargetField,
   isFusion,
-}: MovingPokemonInfoProps) {
-  const fusionTypes = useFusionTypesFromPokemon(
-    isMovingEntireFusion ? encounterData?.head : movingPokemon,
-    isMovingEntireFusion ? encounterData?.body : null,
-    isMovingEntireFusion
-  );
+}: {
+  movingPokemon: PokemonOptionType;
+  moveTargetField: 'head' | 'body';
+  isFusion: boolean;
+}) {
+  const fusionTypes = useFusionTypesFromPokemon(movingPokemon, null, false);
 
   return (
     <div className='p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'>
       <div className='flex items-center space-x-3'>
-        {isMovingEntireFusion ? (
-          <div className='flex items-center space-x-1'>
-            {encounterData?.head && (
-              <div className='w-6 h-6 flex justify-center items-center flex-shrink-0'>
-                <PokemonSprite
-                  pokemonId={encounterData.head.id}
-                  generation='gen7'
-                />
-              </div>
-            )}
-            {encounterData?.body && (
-              <div className='w-6 h-6 flex justify-center items-center flex-shrink-0'>
-                <PokemonSprite
-                  pokemonId={encounterData.body.id}
-                  generation='gen7'
-                />
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className='w-6 h-6 flex justify-center items-center flex-shrink-0'>
-            <PokemonSprite pokemonId={movingPokemon.id} generation='gen7' />
-          </div>
-        )}
+        <div className='w-6 h-6 flex justify-center items-center flex-shrink-0'>
+          <PokemonSprite pokemonId={movingPokemon.id} generation='gen7' />
+        </div>
         <p className='text-sm font-medium text-gray-900 dark:text-white'>
-          {isMovingEntireFusion ? (
-            <>
-              Moving entire fusion: {encounterData?.head?.name}/
-              {encounterData?.body?.name}
-            </>
-          ) : (
-            <>
-              Moving: {movingPokemon.name}
-              {isFusion && (
-                <> ({moveTargetField === 'head' ? 'Head' : 'Body'})</>
-              )}
-            </>
-          )}
+          Moving: {movingPokemon.name}
+          {isFusion && <> ({moveTargetField === 'head' ? 'Head' : 'Body'})</>}
         </p>
         <div className='ml-auto'>
           {fusionTypes.primary && (
@@ -469,10 +407,10 @@ function MovingPokemonInfo({
 function TargetFieldSelector({
   selectedTargetField,
   onTargetFieldChange,
-  isMovingEntireFusion,
-}: TargetFieldSelectorProps) {
-  if (isMovingEntireFusion) return null;
-
+}: {
+  selectedTargetField: 'head' | 'body';
+  onTargetFieldChange: (field: 'head' | 'body') => void;
+}) {
   return (
     <div>
       <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
@@ -609,8 +547,6 @@ function useLocationSelector({
     isMovingPokemonEgg,
   ]);
 
-  const isMovingEntireFusion = isFusion && moveTargetField === 'head';
-
   const resetState = useCallback(() => {
     setSearchQuery('');
   }, []);
@@ -622,7 +558,6 @@ function useLocationSelector({
     setSelectedTargetField,
     filteredLocations,
     movingPokemon,
-    isMovingEntireFusion,
     isFusion,
     resetState,
   };
@@ -644,7 +579,6 @@ function LocationSelector({
     setSelectedTargetField,
     filteredLocations,
     movingPokemon,
-    isMovingEntireFusion,
     isFusion,
     resetState,
   } = useLocationSelector({
@@ -703,8 +637,6 @@ function LocationSelector({
           {movingPokemon && (
             <MovingPokemonInfo
               movingPokemon={movingPokemon}
-              isMovingEntireFusion={isMovingEntireFusion}
-              encounterData={encounterData}
               moveTargetField={moveTargetField}
               isFusion={isFusion}
             />
@@ -713,7 +645,6 @@ function LocationSelector({
           <TargetFieldSelector
             selectedTargetField={selectedTargetField}
             onTargetFieldChange={setSelectedTargetField}
-            isMovingEntireFusion={isMovingEntireFusion}
           />
 
           <div className='relative'>
