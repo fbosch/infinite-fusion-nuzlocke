@@ -2,6 +2,8 @@
 
 A Next.js application for tracking Nuzlocke runs in Pokémon Infinite Fusion, featuring fusion mechanics, encounter tracking, and comprehensive run management.
 
+![Test Coverage](https://img.shields.io/badge/coverage-36%25-red)
+
 ## Getting Started
 
 First, install dependencies:
@@ -36,6 +38,33 @@ pnpm lint          # Run ESLint
 pnpm lint:fix      # Run ESLint with auto-fix
 ```
 
+## Testing
+
+This project uses Vitest for testing with comprehensive coverage reporting:
+
+```bash
+# Run tests with coverage
+pnpm test:coverage
+
+# Run tests with coverage and generate badge
+pnpm coverage:full
+
+# Run tests with UI
+pnpm test:ui
+
+# Run tests once
+pnpm test:run
+
+# Watch mode with coverage
+pnpm test:coverage:watch
+```
+
+### Coverage Reports
+
+- **HTML Report**: Generated in `coverage/html/` directory
+- **Coverage Badge**: Automatically generated and updated
+- **GitHub Integration**: Coverage reports on PRs and commits
+
 ## Available Scripts
 
 - `pnpm dev` - Start development server with Turbopack
@@ -44,5 +73,7 @@ pnpm lint:fix      # Run ESLint with auto-fix
 - `pnpm test` - Run tests with Vitest
 - `pnpm test:ui` - Run tests with UI
 - `pnpm test:run` - Run tests once
+- `pnpm test:coverage` - Run tests with coverage
+- `pnpm coverage:full` - Run tests and generate coverage badge
 - `pnpm validate` - Check code formatting and linting
 - `pnpm validate:fix` - Fix code formatting and auto-fix linting issues

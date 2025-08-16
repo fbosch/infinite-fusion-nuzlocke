@@ -1,10 +1,12 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vitest/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { coverageConfig } from './coverage.config';
 
 export default defineConfig({
   test: {
     globals: true,
+    coverage: coverageConfig,
     projects: [
       {
         plugins: [tsconfigPaths()],
