@@ -1,12 +1,36 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vitest/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import { coverageConfig } from './coverage.config';
 
 export default defineConfig({
   test: {
     globals: true,
-    coverage: coverageConfig,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'lcov', 'cobertura'],
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/.next/**',
+        '**/coverage/**',
+        '**/*.config.*',
+        '**/*.d.ts',
+        'scripts/**',
+        '**/*.test.{js,ts,jsx,tsx}',
+        '**/*.spec.{js,ts,jsx,tsx}',
+        '**/vitest.config.*',
+        '**/coverage.config.*',
+      ],
+      thresholds: {
+        global: {
+          branches: 80,
+          functions: 80,
+          lines: 80,
+          statements: 80,
+        },
+      },
+      all: true,
+    },
     projects: [
       {
         plugins: [tsconfigPaths()],
