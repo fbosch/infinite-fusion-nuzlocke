@@ -2,7 +2,7 @@
 
 A Next.js application for tracking Nuzlocke runs in Pokémon Infinite Fusion, featuring fusion mechanics, encounter tracking, and comprehensive run management.
 
-![Test Coverage](https://img.shields.io/badge/coverage-36%25-red)
+![Test Coverage](https://img.shields.io/badge/coverage-38%25-red)
 
 ## Getting Started
 
