@@ -60,6 +60,8 @@ export function PokemonSprite({
         objectPosition: `-${spriteData.x}px -${spriteData.y}px`,
         minWidth: spriteData.width,
         minHeight: spriteData.height,
+        height: spriteData.height,
+        width: spriteData.width,
         imageRendering: 'pixelated',
       }}
       {...rest}
