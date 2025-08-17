@@ -53,7 +53,11 @@ export default defineConfig({
         plugins: [tsconfigPaths()],
         test: {
           name: 'react-hooks',
-          include: ['**/playthroughs.test.ts', '**/playthroughs/**/*.test.ts'],
+          include: [
+            '**/playthroughs.test.ts',
+            '**/playthroughs/**/*.test.ts',
+            '**/scrollToLocation.test.ts',
+          ],
           environment: 'jsdom',
         },
       },
@@ -66,6 +70,7 @@ export default defineConfig({
             '**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
             '**/playthroughs.test.ts',
             '**/playthroughs/**/*.test.ts',
+            '**/scrollToLocation.test.ts',
             'node_modules',
             'dist',
             '.next',

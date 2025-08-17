@@ -15,13 +15,16 @@ import {
   isFusionPartiallyActive,
   isFusionInactive,
   isFusionDeceased,
-} from './pokemonPredicates';
-import { PokemonStatus } from '@/loaders/pokemon';
-import type { PokemonOptionType } from '@/loaders/pokemon';
+} from '../pokemonPredicates';
+import {
+  PokemonStatus,
+  type PokemonStatusType,
+  type PokemonOptionType,
+} from '@/loaders/pokemon';
 
 // Helper function to create test Pokemon data
 function createTestPokemon(
-  status?: PokemonStatus,
+  status?: PokemonStatusType,
   id: number = 1,
   name: string = 'TestPokemon'
 ): PokemonOptionType {

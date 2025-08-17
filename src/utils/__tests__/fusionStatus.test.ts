@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { getFusionOverlayStatus, getFusionActivity } from './fusionStatus';
+import { getFusionOverlayStatus, getFusionActivity } from '../fusionStatus';
 import { PokemonStatus } from '@/loaders/pokemon';
-import type { PokemonOptionType } from '@/loaders/pokemon';
+import type { PokemonOptionType, PokemonStatusType } from '@/loaders/pokemon';
 
 // Helper function to create test Pokemon data
 function createTestPokemon(
-  status?: PokemonStatus,
+  status?: PokemonStatusType,
   id: number = 1,
   name: string = 'TestPokemon'
 ): PokemonOptionType {
