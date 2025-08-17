@@ -5,6 +5,32 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 export default defineConfig({
   test: {
     globals: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'lcov', 'cobertura'],
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/.next/**',
+        '**/coverage/**',
+        '**/*.config.*',
+        '**/*.d.ts',
+        'scripts/**',
+        '**/*.test.{js,ts,jsx,tsx}',
+        '**/*.spec.{js,ts,jsx,tsx}',
+        '**/vitest.config.*',
+        '**/coverage.config.*',
+      ],
+      thresholds: {
+        global: {
+          branches: 80,
+          functions: 80,
+          lines: 80,
+          statements: 80,
+        },
+      },
+      all: true,
+    },
     projects: [
       {
         plugins: [tsconfigPaths()],
@@ -27,7 +53,11 @@ export default defineConfig({
         plugins: [tsconfigPaths()],
         test: {
           name: 'react-hooks',
-          include: ['**/playthroughs.test.ts', '**/playthroughs/**/*.test.ts'],
+          include: [
+            '**/playthroughs.test.ts',
+            '**/playthroughs/**/*.test.ts',
+            '**/scrollToLocation.test.ts',
+          ],
           environment: 'jsdom',
         },
       },
@@ -40,6 +70,7 @@ export default defineConfig({
             '**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
             '**/playthroughs.test.ts',
             '**/playthroughs/**/*.test.ts',
+            '**/scrollToLocation.test.ts',
             'node_modules',
             'dist',
             '.next',
