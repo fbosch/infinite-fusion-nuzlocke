@@ -267,9 +267,8 @@ export default function PlaythroughSelector({
             <div
               className={clsx(
                 'border-t border-gray-200/50 dark:border-gray-600/50',
-
-                'hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100/50 dark:hover:from-green-900/20 dark:hover:to-green-800/20',
-                'focus-within:outline-none focus-within:bg-gradient-to-r focus-within:from-green-50 focus-within:to-green-100/50 dark:focus-within:from-green-900/20 dark:focus-within:to-green-800/20'
+                'hover:bg-green-50 dark:hover:bg-green-900/20',
+                'focus-within:outline-none focus-within:bg-green-50 focus-within:dark:bg-green-900/20'
               )}
             >
               <MenuItem>
