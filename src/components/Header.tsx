@@ -46,20 +46,35 @@ export default function Header() {
               </div>
             </Link>
             <div className='flex items-center gap-2'>
-              <CursorTooltip content='Open Pokémon PC' delay={500}>
+              <CursorTooltip
+                content={
+                  <div className='flex flex-col gap-1 min-w-32'>
+                    <div className='font-medium text-sm'>Pokémon PC</div>
+                    <div className='text-xs text-gray-600 dark:text-gray-300'>
+                      Manage your team, box, and graveyard
+                    </div>
+                  </div>
+                }
+                delay={300}
+              >
                 <button
                   type='button'
                   className={clsx(
-                    'p-2 rounded-md border border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
-                    'hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400',
-                    'cursor-pointer items-center'
+                    'group relative px-2.5 py-1.5 rounded-md border border-transparent',
+                    'bg-transparent text-gray-600 dark:text-gray-300',
+                    'hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-800 dark:hover:text-gray-100',
+                    'focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-400 focus-visible:ring-offset-1',
+                    'transition-all duration-150 cursor-pointer flex items-center gap-2',
+                    'hover:scale-105'
                   )}
                   aria-label='Open Pokémon PC'
                   onClick={() => setDrawerOpen(true)}
                 >
-                  <Computer className='h-5 w-5' />
+                  <Computer className='h-4 w-4' />
+                  <span className='text-sm font-medium'>PC</span>
                 </button>
               </CursorTooltip>
+
               <div
                 role='separator'
                 aria-orientation='vertical'
