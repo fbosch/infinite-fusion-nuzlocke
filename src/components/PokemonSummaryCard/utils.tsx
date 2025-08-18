@@ -222,10 +222,13 @@ export function getStatusState(
 
       // If we have both Pokemon (fusion case), both must be active
       // If we only have one Pokemon (single case), that one must be active
+      // Also ensure the Pokemon have status values (not undefined/null)
+      const hasValidStatus = head?.status || body?.status;
       const canAnimate =
-        head && body
+        hasValidStatus &&
+        (head && body
           ? headIsActive && bodyIsActive
-          : headIsActive || bodyIsActive;
+          : headIsActive || bodyIsActive);
 
       return {
         type: 'normal',

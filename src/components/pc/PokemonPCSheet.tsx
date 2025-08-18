@@ -166,9 +166,11 @@ export default function PokemonPCSheet({
           id='pokemon-pc-sheet'
           aria-labelledby='pokemon-pc-title'
           className={clsx(
-            'h-full w-full max-w-lg border-l border-gray-200 bg-white shadow-dropdown dark:border-gray-700 dark:bg-gray-800',
-            'transform transition-all duration-200 ease-out',
-            isOpen ? 'translate-x-0' : 'translate-x-full'
+            'h-full w-full max-w-lg border-l border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800',
+            'transform-gpu will-change-transform',
+            'transition-all duration-200 ease-out',
+            'data-closed:translate-x-full data-closed:opacity-0 data-leave:translate-x-full',
+            'flex flex-col'
           )}
         >
           <div className='px-4 py-2.5'>
