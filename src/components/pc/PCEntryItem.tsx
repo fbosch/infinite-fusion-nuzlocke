@@ -86,7 +86,7 @@ export default function PCEntryItem(props: PCEntryItemProps) {
         key={entry.locationId}
         role='listitem'
         className={clsx(
-          'group/pc-entry relative cursor-pointer rounded-lg border border-gray-200 bg-white transition-all duration-200 hover:ring-1 dark:border-gray-700 dark:bg-gray-800',
+          'group/pc-entry h-fit relative cursor-pointer rounded-lg border border-gray-200 bg-white transition-all duration-200 hover:ring-1 dark:border-gray-700 dark:bg-gray-800',
           hoverRingClass,
           className
         )}

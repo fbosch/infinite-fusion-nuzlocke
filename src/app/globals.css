@@ -250,6 +250,19 @@ button {
   @apply cursor-pointer transition-transform duration-150 ease-out enabled:active:scale-[.97];
 }
 
+/* Exclude buttons inside playthrough selector from global scale effect */
+[data-headlessui-state] button,
+[role='menu'] button,
+[role='menuitem'] button {
+  @apply transform-none;
+}
+
+[data-headlessui-state] button:active,
+[role='menu'] button:active,
+[role='menuitem'] button:active {
+  @apply scale-100;
+}
+
 [role='button'] {
   @apply cursor-pointer transition-transform duration-150 ease-out;
 }

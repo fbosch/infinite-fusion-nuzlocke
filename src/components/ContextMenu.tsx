@@ -251,7 +251,7 @@ export function ContextMenu({
   };
 
   return (
-    <div>
+    <>
       {/* Custom trigger element */}
       {isValidElement(children) &&
         cloneElement(children, {
@@ -650,7 +650,7 @@ export function ContextMenu({
           }}
         />
       )}
-    </div>
+    </>
   );
 }
 
