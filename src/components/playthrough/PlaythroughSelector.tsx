@@ -28,13 +28,13 @@ const getGameModeInfo = (gameMode: GameMode) => {
       return {
         label: 'Remix',
         className:
-          'bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700',
+          'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
       };
     case 'randomized':
       return {
         label: 'Random',
         className:
-          'bg-gradient-to-r from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-700',
+          'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
       };
     default:
       return null;
@@ -173,7 +173,7 @@ export default function PlaythroughSelector({
                 Your Playthroughs
               </div>
               {allPlaythroughs
-                .toSorted((a, b) => b.updatedAt - a.updatedAt)
+                .toSorted((a, b) => b.createdAt - a.createdAt)
                 .map(playthrough => {
                   const gameModeInfo = getGameModeInfo(
                     playthrough.gameMode as GameMode
@@ -234,7 +234,7 @@ export default function PlaythroughSelector({
                                   <Calendar className='w-3 h-3' />
                                   <span>
                                     {new Date(
-                                      playthrough.updatedAt
+                                      playthrough.createdAt
                                     ).toLocaleDateString()}
                                   </span>
                                 </div>
@@ -242,10 +242,25 @@ export default function PlaythroughSelector({
                             </div>
                           </div>
                           {allPlaythroughs.length > 1 && (
-                            <button
+                            <div
                               onClick={e =>
                                 handleDeleteClick(playthrough as Playthrough, e)
                               }
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  // Create a synthetic event for the delete handler
+                                  const syntheticEvent = {
+                                    preventDefault: () => {},
+                                    stopPropagation: () => {},
+                                  } as React.MouseEvent;
+                                  handleDeleteClick(
+                                    playthrough,
+                                    syntheticEvent
+                                  );
+                                }
+                              }}
                               className={clsx(
                                 'p-2 rounded-lg opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-all duration-200',
                                 'hover:bg-red-100 dark:hover:bg-red-900/20',
@@ -254,9 +269,11 @@ export default function PlaythroughSelector({
                               )}
                               title='Delete playthrough'
                               aria-label={`Delete ${playthrough.name}`}
+                              role='button'
+                              tabIndex={0}
                             >
                               <Trash2 className='w-4 h-4' />
-                            </button>
+                            </div>
                           )}
                         </button>
                       )}

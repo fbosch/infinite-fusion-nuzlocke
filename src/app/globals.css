@@ -251,15 +251,15 @@ button {
 }
 
 /* Exclude buttons inside playthrough selector from global scale effect */
-[data-headlessui-state] button,
-[role='menu'] button,
-[role='menuitem'] button {
+[data-headlessui-state] > button,
+[role='menu'] > button,
+[role='menuitem'] > button {
   @apply transform-none;
 }
 
-[data-headlessui-state] button:active,
-[role='menu'] button:active,
-[role='menuitem'] button:active {
+[data-headlessui-state] > button:active,
+[role='menu'] > button:active,
+[role='menuitem'] > button:active {
   @apply scale-100;
 }
 
