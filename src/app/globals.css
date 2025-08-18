@@ -9,221 +9,219 @@
   --font-family-mono: var(--font-dotgothic16), 'Courier New', monospace;
 }
 
-/* Enhanced Shadow System based on Josh Comeau's layered approach */
 .shadow-elevation-1 {
   /* Subtle elevation - barely off the surface */
   box-shadow:
-    0 1px 2px 0 hsl(0deg 0% 0% / 0.05),
-    0 1px 3px 1px hsl(0deg 0% 0% / 0.1);
+    0 1px 2px 0 hsl(0deg 0% 0% / 0.03),
+    0 1px 3px 1px hsl(0deg 0% 0% / 0.05);
 }
 
 .shadow-elevation-2 {
   /* Low elevation - slight lift */
   box-shadow:
-    0 1px 2px 0 hsl(0deg 0% 0% / 0.06),
-    0 1px 3px 1px hsl(0deg 0% 0% / 0.1),
-    0 2px 4px 2px hsl(0deg 0% 0% / 0.06);
+    0 1px 2px 0 hsl(0deg 0% 0% / 0.035),
+    0 1px 3px 1px hsl(0deg 0% 0% / 0.05),
+    0 2px 4px 2px hsl(0deg 0% 0% / 0.035);
 }
 
 .shadow-elevation-3 {
   /* Medium elevation - noticeable lift */
   box-shadow:
-    0 1px 3px 0 hsl(0deg 0% 0% / 0.1),
-    0 1px 2px 0 hsl(0deg 0% 0% / 0.06),
-    0 2px 4px 1px hsl(0deg 0% 0% / 0.08),
-    0 4px 8px 2px hsl(0deg 0% 0% / 0.06);
+    0 1px 3px 0 hsl(0deg 0% 0% / 0.05),
+    0 1px 2px 0 hsl(0deg 0% 0% / 0.035),
+    0 2px 4px 1px hsl(0deg 0% 0% / 0.04),
+    0 4px 8px 2px hsl(0deg 0% 0% / 0.035);
 }
 
 .shadow-elevation-4 {
   /* High elevation - significant lift */
   box-shadow:
-    0 2px 4px 0 hsl(0deg 0% 0% / 0.06),
-    0 4px 8px 1px hsl(0deg 0% 0% / 0.08),
-    0 8px 16px 2px hsl(0deg 0% 0% / 0.06),
-    0 16px 32px 4px hsl(0deg 0% 0% / 0.04);
+    0 2px 4px 0 hsl(0deg 0% 0% / 0.035),
+    0 4px 8px 1px hsl(0deg 0% 0% / 0.04),
+    0 8px 16px 2px hsl(0deg 0% 0% / 0.035),
+    0 16px 32px 4px hsl(0deg 0% 0% / 0.03);
 }
 
 .shadow-elevation-5 {
   /* Very high elevation - floating above */
   box-shadow:
-    0 4px 6px 0 hsl(0deg 0% 0% / 0.07),
-    0 8px 16px 1px hsl(0deg 0% 0% / 0.06),
-    0 16px 32px 2px hsl(0deg 0% 0% / 0.04),
-    0 32px 64px 4px hsl(0deg 0% 0% / 0.03);
+    0 4px 6px 0 hsl(0deg 0% 0% / 0.04),
+    0 8px 16px 1px hsl(0deg 0% 0% / 0.035),
+    0 16px 32px 2px hsl(0deg 0% 0% / 0.03),
+    0 32px 64px 4px hsl(0deg 0% 0% / 0.025);
 }
 
-/* Dark mode shadows - more pronounced for better contrast */
 .dark .shadow-elevation-1 {
   box-shadow:
-    0 1px 2px 0 hsl(0deg 0% 0% / 0.2),
-    0 1px 3px 1px hsl(0deg 0% 0% / 0.3);
+    0 1px 2px 0 hsl(0deg 0% 0% / 0.02),
+    0 1px 3px 1px hsl(0deg 0% 0% / 0.0325);
 }
 
 .dark .shadow-elevation-2 {
   box-shadow:
-    0 1px 2px 0 hsl(0deg 0% 0% / 0.25),
-    0 1px 3px 1px hsl(0deg 0% 0% / 0.35),
-    0 2px 4px 2px hsl(0deg 0% 0% / 0.25);
+    0 1px 2px 0 hsl(0deg 0% 0% / 0.025),
+    0 1px 3px 1px hsl(0deg 0% 0% / 0.0375),
+    0 2px 4px 2px hsl(0deg 0% 0% / 0.025);
 }
 
 .dark .shadow-elevation-3 {
   box-shadow:
-    0 1px 3px 0 hsl(0deg 0% 0% / 0.3),
-    0 1px 2px 0 hsl(0deg 0% 0% / 0.25),
-    0 2px 4px 1px hsl(0deg 0% 0% / 0.3),
-    0 4px 8px 2px hsl(0deg 0% 0% / 0.25);
+    0 1px 3px 0 hsl(0deg 0% 0% / 0.0325),
+    0 1px 2px 0 hsl(0deg 0% 0% / 0.025),
+    0 2px 4px 1px hsl(0deg 0% 0% / 0.03),
+    0 4px 8px 2px hsl(0deg 0% 0% / 0.025);
 }
 
 .dark .shadow-elevation-4 {
   box-shadow:
-    0 2px 4px 0 hsl(0deg 0% 0% / 0.25),
-    0 4px 8px 1px hsl(0deg 0% 0% / 0.3),
-    0 8px 16px 2px hsl(0deg 0% 0% / 0.25),
-    0 16px 32px 4px hsl(0deg 0% 0% / 0.2);
+    0 2px 4px 0 hsl(0deg 0% 0% / 0.03),
+    0 4px 8px 1px hsl(0deg 0% 0% / 0.035),
+    0 8px 16px 2px hsl(0deg 0% 0% / 0.025),
+    0 16px 32px 4px hsl(0deg 0% 0% / 0.02);
 }
 
 .dark .shadow-elevation-5 {
   box-shadow:
-    0 4px 6px 0 hsl(0deg 0% 0% / 0.3),
-    0 8px 16px 1px hsl(0deg 0% 0% / 0.25),
-    0 16px 32px 2px hsl(0deg 0% 0% / 0.2),
-    0 32px 64px 4px hsl(0deg 0% 0% / 0.15);
+    0 4px 6px 0 hsl(0deg 0% 0% / 0.035),
+    0 8px 16px 1px hsl(0deg 0% 0% / 0.0275),
+    0 16px 32px 2px hsl(0deg 0% 0% / 0.02),
+    0 32px 64px 4px hsl(0deg 0% 0% / 0.015);
 }
 
 /* Interactive shadows - for hover and focus states */
 .shadow-elevation-1-hover {
   box-shadow:
-    0 2px 4px 0 hsl(0deg 0% 0% / 0.08),
-    0 2px 6px 2px hsl(0deg 0% 0% / 0.12);
+    0 2px 4px 0 hsl(0deg 0% 0% / 0.02),
+    0 2px 6px 2px hsl(0deg 0% 0% / 0.03);
 }
 
 .shadow-elevation-2-hover {
   box-shadow:
-    0 2px 4px 0 hsl(0deg 0% 0% / 0.1),
-    0 2px 6px 2px hsl(0deg 0% 0% / 0.15),
-    0 4px 8px 4px hsl(0deg 0% 0% / 0.1);
+    0 2px 4px 0 hsl(0deg 0% 0% / 0.025),
+    0 2px 6px 2px hsl(0deg 0% 0% / 0.0375),
+    0 4px 8px 4px hsl(0deg 0% 0% / 0.025);
 }
 
 .shadow-elevation-3-hover {
   box-shadow:
-    0 2px 6px 0 hsl(0deg 0% 0% / 0.12),
-    0 2px 4px 0 hsl(0deg 0% 0% / 0.08),
-    0 4px 8px 2px hsl(0deg 0% 0% / 0.1),
-    0 8px 16px 4px hsl(0deg 0% 0% / 0.08);
+    0 2px 6px 0 hsl(0deg 0% 0% / 0.03),
+    0 2px 4px 0 hsl(0deg 0% 0% / 0.02),
+    0 4px 8px 2px hsl(0deg 0% 0% / 0.025),
+    0 8px 16px 4px hsl(0deg 0% 0% / 0.02);
 }
 
 .shadow-elevation-4-hover {
   box-shadow:
-    0 4px 8px 0 hsl(0deg 0% 0% / 0.08),
-    0 8px 16px 2px hsl(0deg 0% 0% / 0.1),
-    0 16px 32px 4px hsl(0deg 0% 0% / 0.08),
-    0 32px 64px 8px hsl(0deg 0% 0% / 0.06);
+    0 4px 8px 0 hsl(0deg 0% 0% / 0.02),
+    0 8px 16px 2px hsl(0deg 0% 0% / 0.025),
+    0 16px 32px 4px hsl(0deg 0% 0% / 0.02),
+    0 32px 64px 8px hsl(0deg 0% 0% / 0.015);
 }
 
 .shadow-elevation-5-hover {
   box-shadow:
-    0 6px 12px 0 hsl(0deg 0% 0% / 0.1),
-    0 12px 24px 2px hsl(0deg 0% 0% / 0.08),
-    0 24px 48px 4px hsl(0deg 0% 0% / 0.06),
-    0 48px 96px 8px hsl(0deg 0% 0% / 0.04);
+    0 6px 12px 0 hsl(0deg 0% 0% / 0.025),
+    0 12px 24px 2px hsl(0deg 0% 0% / 0.02),
+    0 24px 48px 4px hsl(0deg 0% 0% / 0.015),
+    0 48px 96px 8px hsl(0deg 0% 0% / 0.01);
 }
 
 /* Dark mode hover shadows */
 .dark .shadow-elevation-1-hover {
   box-shadow:
-    0 2px 4px 0 hsl(0deg 0% 0% / 0.35),
-    0 2px 6px 2px hsl(0deg 0% 0% / 0.45);
+    0 2px 4px 0 hsl(0deg 0% 0% / 0.09),
+    0 2px 6px 2px hsl(0deg 0% 0% / 0.115);
 }
 
 .dark .shadow-elevation-2-hover {
   box-shadow:
-    0 2px 4px 0 hsl(0deg 0% 0% / 0.4),
-    0 2px 6px 2px hsl(0deg 0% 0% / 0.5),
-    0 4px 8px 4px hsl(0deg 0% 0% / 0.4);
+    0 2px 4px 0 hsl(0deg 0% 0% / 0.1),
+    0 2px 6px 2px hsl(0deg 0% 0% / 0.125),
+    0 4px 8px 4px hsl(0deg 0% 0% / 0.1);
 }
 
 .dark .shadow-elevation-3-hover {
   box-shadow:
-    0 2px 6px 0 hsl(0deg 0% 0% / 0.45),
-    0 2px 4px 0 hsl(0deg 0% 0% / 0.4),
-    0 4px 8px 2px hsl(0deg 0% 0% / 0.45),
-    0 8px 16px 4px hsl(0deg 0% 0% / 0.4);
+    0 2px 6px 0 hsl(0deg 0% 0% / 0.115),
+    0 2px 4px 0 hsl(0deg 0% 0% / 0.1),
+    0 4px 8px 2px hsl(0deg 0% 0% / 0.115),
+    0 8px 16px 4px hsl(0deg 0% 0% / 0.1);
 }
 
 .dark .shadow-elevation-4-hover {
   box-shadow:
-    0 4px 8px 0 hsl(0deg 0% 0% / 0.4),
-    0 8px 16px 2px hsl(0deg 0% 0% / 0.45),
-    0 16px 32px 4px hsl(0deg 0% 0% / 0.4),
-    0 32px 64px 8px hsl(0deg 0% 0% / 0.35);
+    0 4px 8px 0 hsl(0deg 0% 0% / 0.1),
+    0 8px 16px 2px hsl(0deg 0% 0% / 0.115),
+    0 16px 32px 4px hsl(0deg 0% 0% / 0.1),
+    0 32px 64px 8px hsl(0deg 0% 0% / 0.09);
 }
 
 .dark .shadow-elevation-5-hover {
   box-shadow:
-    0 6px 12px 0 hsl(0deg 0% 0% / 0.45),
-    0 12px 24px 2px hsl(0deg 0% 0% / 0.4),
-    0 24px 48px 4px hsl(0deg 0% 0% / 0.35),
-    0 48px 96px 8px hsl(0deg 0% 0% / 0.3);
+    0 6px 12px 0 hsl(0deg 0% 0% / 0.115),
+    0 12px 24px 2px hsl(0deg 0% 0% / 0.1),
+    0 24px 48px 4px hsl(0deg 0% 0% / 0.09),
+    0 48px 96px 8px hsl(0deg 0% 0% / 0.075);
 }
 
 /* Specialized shadows for specific use cases - using Josh's exact approach */
 .shadow-card {
   box-shadow:
-    0 1px 3px 0 hsl(0deg 0% 0% / 0.1),
-    0 1px 2px 0 hsl(0deg 0% 0% / 0.06);
+    0 1px 3px 0 hsl(0deg 0% 0% / 0.06),
+    0 1px 2px 0 hsl(0deg 0% 0% / 0.04);
 }
 
 .shadow-card-hover {
   box-shadow:
-    0 4px 6px 0 hsl(0deg 0% 0% / 0.07),
-    0 8px 16px 1px hsl(0deg 0% 0% / 0.06),
-    0 16px 32px 2px hsl(0deg 0% 0% / 0.04);
+    0 4px 6px 0 hsl(0deg 0% 0% / 0.05),
+    0 8px 16px 1px hsl(0deg 0% 0% / 0.04),
+    0 16px 32px 2px hsl(0deg 0% 0% / 0.03);
 }
 
 .shadow-dropdown {
   box-shadow:
-    0 4px 6px 0 hsl(0deg 0% 0% / 0.07),
-    0 8px 16px 1px hsl(0deg 0% 0% / 0.06),
-    0 16px 32px 2px hsl(0deg 0% 0% / 0.04),
-    0 32px 64px 4px hsl(0deg 0% 0% / 0.03);
+    0 4px 6px 0 hsl(0deg 0% 0% / 0.05),
+    0 8px 16px 1px hsl(0deg 0% 0% / 0.04),
+    0 16px 32px 2px hsl(0deg 0% 0% / 0.03),
+    0 32px 64px 4px hsl(0deg 0% 0% / 0.025);
 }
 
 .shadow-modal {
   box-shadow:
-    0 8px 16px 0 hsl(0deg 0% 0% / 0.08),
-    0 16px 32px 2px hsl(0deg 0% 0% / 0.06),
-    0 32px 64px 4px hsl(0deg 0% 0% / 0.04),
-    0 64px 128px 8px hsl(0deg 0% 0% / 0.02);
+    0 8px 16px 0 hsl(0deg 0% 0% / 0.02),
+    0 16px 32px 2px hsl(0deg 0% 0% / 0.015),
+    0 32px 64px 4px hsl(0deg 0% 0% / 0.01),
+    0 64px 128px 8px hsl(0deg 0% 0% / 0.005);
 }
 
 /* Dark mode specialized shadows */
 .dark .shadow-card {
   box-shadow:
-    0 1px 3px 0 hsl(0deg 0% 0% / 0.3),
-    0 1px 2px 0 hsl(0deg 0% 0% / 0.25);
+    0 1px 3px 0 hsl(0deg 0% 0% / 0.075),
+    0 1px 2px 0 hsl(0deg 0% 0% / 0.065);
 }
 
 .dark .shadow-card-hover {
   box-shadow:
-    0 4px 6px 0 hsl(0deg 0% 0% / 0.35),
-    0 8px 16px 1px hsl(0deg 0% 0% / 0.3),
-    0 16px 32px 2px hsl(0deg 0% 0% / 0.25);
+    0 4px 6px 0 hsl(0deg 0% 0% / 0.09),
+    0 8px 16px 1px hsl(0deg 0% 0% / 0.075),
+    0 16px 32px 2px hsl(0deg 0% 0% / 0.065);
 }
 
 .dark .shadow-dropdown {
   box-shadow:
-    0 4px 6px 0 hsl(0deg 0% 0% / 0.35),
-    0 8px 16px 1px hsl(0deg 0% 0% / 0.3),
-    0 16px 32px 2px hsl(0deg 0% 0% / 0.25),
-    0 32px 64px 4px hsl(0deg 0% 0% / 0.2);
+    0 4px 6px 0 hsl(0deg 0% 0% / 0.09),
+    0 8px 16px 1px hsl(0deg 0% 0% / 0.075),
+    0 16px 32px 2px hsl(0deg 0% 0% / 0.065),
+    0 32px 64px 4px hsl(0deg 0% 0% / 0.05);
 }
 
 .dark .shadow-modal {
   box-shadow:
-    0 8px 16px 0 hsl(0deg 0% 0% / 0.4),
-    0 16px 32px 2px hsl(0deg 0% 0% / 0.35),
-    0 32px 64px 4px hsl(0deg 0% 0% / 0.3),
-    0 64px 128px 8px hsl(0deg 0% 0% / 0.25);
+    0 8px 16px 0 hsl(0deg 0% 0% / 0.1),
+    0 16px 32px 2px hsl(0deg 0% 0% / 0.09),
+    0 32px 64px 4px hsl(0deg 0% 0% / 0.075),
+    0 64px 128px 8px hsl(0deg 0% 0% / 0.065);
 }
 
 /* Ensure DotGothic16 is available for font-mono */
