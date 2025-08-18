@@ -136,7 +136,7 @@ export default function CreatePlaythroughModal({
                   <span>Game Mode</span>
                   <CursorTooltip
                     content='You can change the game mode at any time.'
-                    placement='bottom'
+                    placement='bottom-start'
                   >
                     <div className='w-4 h-4 text-gray-400 dark:text-gray-500 cursor-help'>
                       <HelpCircle className='w-4 h-4' />

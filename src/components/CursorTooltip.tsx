@@ -249,7 +249,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
               className={twMerge(
                 clsx(
                   'rounded-md px-3 py-2 text-sm shadow-xl/5 w-max max-w-sm dark:pixel-shadow-black-25',
-                  'pointer-events-none transform-gpu bg-white',
+                  'pointer-events-none transform-gpu bg-white/75',
                   'dark:bg-gray-700/80 background-blur dark:text-white text-gray-700',
                   'border dark:border-gray-600 border-gray-200',
                   originClass,

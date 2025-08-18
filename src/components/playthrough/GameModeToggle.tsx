@@ -149,7 +149,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
         placement={'bottom-end'}
         disabled={isMobile}
         delay={500}
-        offset={{ mainAxis: 10, crossAxis: 10 }}
+        offset={{ mainAxis: 10, crossAxis: -5 }}
         content={
           <div className='max-w-sm text-xs font-normal leading-5 space-y-2 divide-y divide-gray-200 dark:divide-gray-600 gap-y-4'>
             <div>
@@ -184,8 +184,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
           </div>
         }
       >
-        <button
-          type='button'
+        <div
           className={clsx(
             'flex items-center justify-center w-5 h-5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
@@ -194,7 +193,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
           aria-label='Show game mode descriptions'
         >
           <HelpCircle className='w-4 h-4' />
-        </button>
+        </div>
       </CursorTooltip>
     </div>
   );
