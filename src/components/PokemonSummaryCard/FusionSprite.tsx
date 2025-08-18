@@ -110,6 +110,7 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
     );
 
     const statusState = getStatusState(head, body);
+    console.log('Status state:', statusState);
     const {
       imageRef,
       shadowRef,

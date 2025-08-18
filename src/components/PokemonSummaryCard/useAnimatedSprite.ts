@@ -12,8 +12,10 @@ export function useAnimatedSprite({ canAnimate }: UseAnimatedSpriteOptions) {
   const hoverRef = useRef<boolean>(false);
 
   const handleMouseEnter = () => {
+    console.log('handleMouseEnter called, canAnimate:', canAnimate);
     hoverRef.current = true;
     if (imageRef.current && canAnimate) {
+      console.log('Starting hover animation');
       // Cancel any running animations so the new one will replay
       imageRef.current.getAnimations().forEach(anim => anim.cancel());
       if (shadowRef.current) {

@@ -214,8 +214,19 @@ export function getStatusState(
       };
     case 'normal':
     default:
-      // Only allow animation when both head and body have the same status (can fuse)
-      const canAnimate = canFuse(head, body);
+      // Allow animation for active Pokemon (CAPTURED, RECEIVED, TRADED)
+      // For single Pokemon: animate if the Pokemon is active
+      // For fusion Pokemon: animate if both are active
+      const headIsActive = isPokemonActive(head);
+      const bodyIsActive = isPokemonActive(body);
+
+      // If we have both Pokemon (fusion case), both must be active
+      // If we only have one Pokemon (single case), that one must be active
+      const canAnimate =
+        head && body
+          ? headIsActive && bodyIsActive
+          : headIsActive || bodyIsActive;
+
       return {
         type: 'normal',
         wrapperClasses: '',
