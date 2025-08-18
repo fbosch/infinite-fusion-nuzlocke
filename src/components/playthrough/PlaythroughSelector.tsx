@@ -123,7 +123,7 @@ export default function PlaythroughSelector({
                   'cursor-pointer',
                   'h-[40px] sm:h-[44px]',
                   'font-medium',
-                  'shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] dark:shadow-sm dark:hover:shadow-md',
+                  'shadow-card hover:shadow-card-hover',
                   'backdrop-blur-sm'
                 )}
                 disabled={isLoading}
@@ -148,7 +148,7 @@ export default function PlaythroughSelector({
                 className={clsx(
                   'z-[50] rounded-xl',
                   'bg-white/95 dark:bg-gray-800/95 backdrop-blur-md',
-                  'shadow-xl ring-1 ring-gray-200/50 dark:ring-gray-600/50',
+                  'shadow-dropdown',
                   'border border-gray-200/50 dark:border-gray-600/50',
                   'min-w-[320px] sm:min-w-[360px] max-w-[420px]',
                   'origin-top-right'

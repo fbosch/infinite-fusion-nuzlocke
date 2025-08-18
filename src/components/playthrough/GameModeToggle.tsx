@@ -60,7 +60,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
         className={clsx(
           'relative flex items-center bg-white dark:bg-gray-800 rounded-xl p-0.5 sm:p-1',
           'border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500',
-          'font-medium shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] dark:shadow-sm dark:hover:shadow-md backdrop-blur-sm',
+          'font-medium shadow-elevation-1 hover:shadow-elevation-2 backdrop-blur-sm',
           'h-[40px] sm:h-[44px] w-[180px] sm:w-auto',
           'transition-all duration-200 ease-out',
           !activePlaythrough && 'opacity-50'
@@ -74,7 +74,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
         {activePlaythrough && (
           <div
             className={clsx(
-              'absolute top-1 bottom-1 left-0.5 sm:left-1 w-14 sm:w-16 md:w-20 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm transition-transform duration-200 ease-out',
+              'absolute top-1 bottom-1 left-0.5 sm:left-1 w-14 sm:w-16 md:w-20 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-elevation-1 transition-transform duration-200 ease-out',
               'border border-gray-200 dark:border-gray-500',
               getBackgroundPosition(optimisticMode)
             )}

@@ -1,10 +1,4 @@
-import {
-  Dialog,
-  DialogPanel,
-  DialogTitle,
-  Button,
-  DialogBackdrop,
-} from '@headlessui/react';
+import { Dialog, DialogTitle, Button, DialogBackdrop } from '@headlessui/react';
 import { AlertTriangle } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -63,11 +57,13 @@ export default function ConfirmationDialog({
       />
 
       <div className='fixed inset-0 flex w-screen items-center justify-center p-4'>
-        <DialogPanel
-          transition
+        <div
           className={clsx(
-            'max-w-md space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6',
-            'transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98'
+            'max-w-md space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-modal border border-gray-200 dark:border-gray-700 p-6',
+            'transform transition-all duration-200 ease-out',
+            isOpen
+              ? 'opacity-100 scale-100 translate-y-0'
+              : 'opacity-0 scale-95 translate-y-4'
           )}
         >
           <div className='flex items-start space-x-3'>
@@ -107,7 +103,7 @@ export default function ConfirmationDialog({
               {confirmText}
             </Button>
           </div>
-        </DialogPanel>
+        </div>
       </div>
     </Dialog>
   );
