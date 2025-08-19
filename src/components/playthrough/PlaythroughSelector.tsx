@@ -399,10 +399,16 @@ export default function PlaythroughSelector({
                               <div className='flex items-center gap-1 opacity-0 group-hover/menu-item:opacity-100 group-focus-within/menu-item:opacity-100 transition-all duration-200'>
                                 <button
                                   onClick={e =>
-                                    handleExportClick(playthrough, e)
+                                    handleExportClick(
+                                      playthrough as Playthrough,
+                                      e
+                                    )
                                   }
                                   onKeyDown={e =>
-                                    handleExportKeyDown(playthrough, e)
+                                    handleExportKeyDown(
+                                      playthrough as Playthrough,
+                                      e
+                                    )
                                   }
                                   className={clsx(
                                     'p-2 rounded-lg transition-all duration-200',
