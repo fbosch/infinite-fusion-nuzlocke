@@ -1,0 +1,206 @@
+---
+title: Testing DOM Features in Vitest Browser Mode
+---
+
+# Testing DOM Features in Vitest Browser Mode
+
+## Core Principle
+
+**NEVER mock DOM features** when using Vitest browser mode. Vitest provides a real browser environment, so mocking DOM APIs defeats the purpose and creates brittle tests.
+
+## What NOT to Mock
+
+### ❌ Never Mock These DOM APIs
+
+```typescript
+// ❌ BAD: Mocking DOM features
+const mockCreateObjectURL = vi.fn();
+const mockRevokeObjectURL = vi.fn();
+Object.defineProperty(global, 'URL', {
+  value: {
+    createObjectURL: mockCreateObjectURL,
+    revokeObjectURL: mockRevokeObjectURL,
+  },
+});
+
+// ❌ BAD: Mocking document methods
+const mockAppendChild = vi.fn();
+const mockRemoveChild = vi.fn();
+Object.defineProperty(document, 'body', {
+  value: {
+    appendChild: mockAppendChild,
+    removeChild: mockRemoveChild,
+  },
+});
+
+// ❌ BAD: Mocking document.createElement
+const mockCreateElement = vi.fn(() => mockFileInput);
+Object.defineProperty(document, 'createElement', {
+  value: mockCreateElement,
+});
+```
+
+### ❌ Never Mock These Browser APIs
+
+- `URL.createObjectURL`
+- `URL.revokeObjectURL`
+- `document.createElement`
+- `document.body.appendChild`
+- `document.body.removeChild`
+- `File` constructor
+- `Blob` constructor
+- `FileReader`
+- `FormData`
+
+## What TO Mock Instead
+
+### ✅ Mock Application Logic
+
+```typescript
+// ✅ GOOD: Mock store actions
+vi.mock('@/stores/playthroughs', () => ({
+  playthroughActions: {
+    importPlaythrough: vi.fn(),
+  },
+}));
+
+// ✅ GOOD: Mock external services
+vi.mock('@/services/api', () => ({
+  fetchData: vi.fn(),
+}));
+
+// ✅ GOOD: Mock React hooks
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: mockUser, login: vi.fn() }),
+}));
+```
+
+### ✅ Use Real DOM APIs in Tests
+
+```typescript
+// ✅ GOOD: Use real File constructor
+const mockFile = new File(['{}'], 'test.json', { type: 'application/json' });
+
+// ✅ GOOD: Use real Blob constructor
+const blob = new Blob(['test data'], { type: 'text/plain' });
+
+// ✅ GOOD: Use real URL APIs
+const url = URL.createObjectURL(blob);
+URL.revokeObjectURL(url);
+```
+
+## Test Configuration
+
+### Vitest Browser Mode Setup
+
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    environment: 'jsdom', // or 'happy-dom' for better DOM support
+    setupFiles: ['./tests/setup.ts'],
+  },
+});
+```
+
+### Test Setup File
+
+```typescript
+// tests/setup.ts
+import { vi } from 'vitest';
+
+// Mock only what's necessary for tests to run
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+// Don't mock DOM APIs - let them work naturally
+```
+
+## Examples of Good vs Bad Tests
+
+### ❌ Bad Test (Mocking DOM)
+
+```typescript
+// ❌ BAD: Over-mocking DOM features
+it('should export file', () => {
+  const mockCreateObjectURL = vi.fn();
+  const mockAppendChild = vi.fn();
+
+  Object.defineProperty(global, 'URL', {
+    value: { createObjectURL: mockCreateObjectURL },
+  });
+
+  // Test logic...
+});
+```
+
+### ✅ Good Test (Using Real DOM)
+
+```typescript
+// ✅ GOOD: Let DOM APIs work naturally
+it('should export file', async () => {
+  const { result } = renderHook(() => usePlaythroughImportExport());
+
+  // Use real File and Blob APIs
+  const mockFile = new File(['{}'], 'test.json', { type: 'application/json' });
+
+  await act(async () => {
+    result.current.handleExportClick(mockPlaythrough, {} as React.MouseEvent);
+  });
+
+  // Assert on behavior, not implementation details
+  expect(result.current.exportSuccess).toBe(true);
+});
+```
+
+## When DOM Mocking Might Be Acceptable
+
+### Limited Exceptions
+
+- **Server-side rendering tests** where DOM doesn't exist
+- **Unit tests of pure functions** that don't need DOM
+- **Testing error boundaries** where you need to simulate DOM failures
+
+### Exception Pattern
+
+```typescript
+// Only when absolutely necessary
+if (typeof window === 'undefined') {
+  // Server-side test - minimal DOM mocking allowed
+  global.File = vi.fn() as any;
+} else {
+  // Browser test - use real DOM APIs
+}
+```
+
+## Code Review Checklist
+
+- [ ] No DOM API mocking in browser mode tests
+- [ ] Real File/Blob constructors used
+- [ ] Real URL APIs used
+- [ ] Real document methods used
+- [ ] Only application logic is mocked
+- [ ] Tests focus on behavior, not implementation
+
+## Benefits of Not Mocking DOM
+
+1. **More realistic tests** - Tests run in actual browser environment
+2. **Better coverage** - Real DOM behavior is tested
+3. **Easier maintenance** - No brittle mocks to maintain
+4. **Faster development** - Less setup code needed
+5. **Real bug detection** - DOM-related issues are caught
+
+## Common Mistakes to Avoid
+
+1. **Mocking File constructor** - Use `new File()` instead
+2. **Mocking Blob constructor** - Use `new Blob()` instead
+3. **Mocking URL methods** - Let them work naturally
+4. **Mocking document methods** - Use real DOM manipulation
+5. **Over-mocking browser APIs** - Only mock what's absolutely necessary
+
+Remember: **Vitest browser mode gives you a real browser environment. Use it!**

@@ -1,0 +1,250 @@
+---
+description: Browser test naming conventions for components and DOM-dependent tests
+globs: ['tests/**/*.ts', 'tests/**/*.tsx']
+alwaysApply: false
+---
+
+# Browser Test Naming Conventions
+
+## Core Principle
+
+**Use browser tests for components and DOM-dependent code**. Components and anything that relies on DOM APIs should run in a real browser environment, not jsdom or node.
+
+## When to Use Browser Tests
+
+### ✅ Always Use Browser Tests For
+
+- **React Components**: All component rendering and interaction tests
+- **DOM Manipulation**: Tests that create, modify, or query DOM elements
+- **Browser APIs**: Tests using `File`, `Blob`, `URL`, `FormData`, etc.
+- **Event Handling**: Tests that simulate user interactions
+- **CSS and Styling**: Tests that depend on computed styles or layout
+- **Accessibility Testing**: Tests using screen readers or focus management
+
+### File Naming Pattern
+
+```bash
+# ✅ GOOD: Browser test naming
+ComponentName.browser.test.tsx
+feature.browser.test.ts
+integration.browser.test.ts
+
+# ❌ BAD: Regular test naming for components
+ComponentName.test.tsx  # Will run in node environment
+ComponentName.spec.tsx  # Will run in node environment
+```
+
+## Examples of What Needs Browser Tests
+
+### React Component Tests
+
+```typescript
+// ✅ GOOD: tests/components/ImportErrorContent.browser.test.tsx
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { ImportErrorContent } from '@/components/playthrough/ImportErrorContent';
+
+describe('ImportErrorContent', () => {
+  it('should display validation errors with proper formatting', () => {
+    const errorMessage = `Validation failed:
+
+• Invalid option: expected one of "classic"|"remix"|"randomized" at playthrough.gameMode`;
+
+    render(<ImportErrorContent errorMessage={errorMessage} />);
+
+    expect(screen.getByText('The imported file has some issues:')).toBeInTheDocument();
+  });
+});
+```
+
+### DOM API Tests
+
+```typescript
+// ✅ GOOD: tests/utils/file-handling.browser.test.ts
+import { describe, it, expect } from 'vitest';
+
+describe('File Handling', () => {
+  it('should create and download file correctly', () => {
+    const blob = new Blob(['test data'], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    expect(url).toMatch(/^blob:/);
+
+    URL.revokeObjectURL(url);
+  });
+});
+```
+
+### Event Handling Tests
+
+```typescript
+// ✅ GOOD: tests/hooks/useFileUpload.browser.test.ts
+import { describe, it, expect } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+import { useFileUpload } from '@/hooks/useFileUpload';
+
+describe('useFileUpload', () => {
+  it('should handle file selection', async () => {
+    const { result } = renderHook(() => useFileUpload());
+
+    const file = new File(['{}'], 'test.json', { type: 'application/json' });
+
+    await act(async () => {
+      result.current.handleFileSelect(file);
+    });
+
+    expect(result.current.selectedFile).toBe(file);
+  });
+});
+```
+
+## What Should NOT Use Browser Tests
+
+### ✅ Use Regular Tests (node/jsdom) For
+
+- **Pure Functions**: Logic that doesn't touch the DOM
+- **Data Processing**: Validation, transformation, calculation functions
+- **Store Logic**: State management without UI
+- **API Utilities**: HTTP client functions (when properly mocked)
+
+### Examples of Regular Tests
+
+```typescript
+// ✅ GOOD: tests/utils/validation.test.ts (runs in node)
+import { describe, it, expect } from 'vitest';
+import { validatePlaythrough } from '@/utils/validation';
+
+describe('validatePlaythrough', () => {
+  it('should validate correct playthrough data', () => {
+    const validData = { id: '1', name: 'Test', gameMode: 'classic' };
+    expect(validatePlaythrough(validData)).toBe(true);
+  });
+});
+```
+
+## Test Environment Configuration
+
+Our Vitest configuration supports three environments:
+
+### Browser Environment
+
+- **Pattern**: `**/*.browser.{test,spec}.{js,ts,tsx}`
+- **Environment**: Real Chromium browser via Playwright
+- **Use for**: Components, DOM APIs, browser features
+
+### React Hooks Environment
+
+- **Pattern**: `**/playthroughs/**/*.test.ts`, `**/components/**/*.test.ts`
+- **Environment**: jsdom
+- **Use for**: React hooks that don't need full browser
+
+### Node Environment
+
+- **Pattern**: All other test files
+- **Environment**: Node.js
+- **Use for**: Pure functions, utilities, server logic
+
+## Migration Checklist
+
+When moving tests to browser environment:
+
+- [ ] Rename file to use `.browser.test.tsx` pattern
+- [ ] Ensure test imports React components properly
+- [ ] Use real DOM APIs instead of mocks
+- [ ] Test actual user interactions
+- [ ] Verify accessibility features work
+- [ ] Check that styling and layout work correctly
+
+## Common Mistakes to Avoid
+
+### ❌ Bad: Component test in node environment
+
+```typescript
+// ❌ BAD: ComponentName.test.tsx (runs in node)
+// This will fail because React and DOM aren't available
+describe('MyComponent', () => {
+  it('should render', () => {
+    render(<MyComponent />); // ReferenceError: React is not defined
+  });
+});
+```
+
+### ✅ Good: Component test in browser environment
+
+```typescript
+// ✅ GOOD: ComponentName.browser.test.tsx (runs in browser)
+describe('MyComponent', () => {
+  it('should render', () => {
+    render(<MyComponent />); // Works perfectly!
+  });
+});
+```
+
+## Performance Considerations
+
+### Browser Test Performance
+
+- **Slower startup**: Browser tests take longer to initialize
+- **Real rendering**: Actual DOM rendering and layout calculation
+- **Network isolation**: Tests run in isolated browser context
+- **Parallel execution**: Multiple browser instances can run in parallel
+
+### When to Optimize
+
+- Use browser tests for integration and component testing
+- Use node tests for unit testing pure functions
+- Use jsdom for React hooks that don't need full browser features
+- Consider test grouping to minimize browser startup overhead
+
+## Code Review Checklist
+
+- [ ] Component tests use `.browser.test.tsx` naming
+- [ ] DOM API tests use `.browser.test.ts` naming
+- [ ] Pure function tests use regular `.test.ts` naming
+- [ ] No DOM mocking in browser tests
+- [ ] Tests focus on user behavior, not implementation
+- [ ] Accessibility testing included where appropriate
+
+## Benefits of Browser Tests
+
+1. **Real Environment**: Tests run in actual browser with real DOM
+2. **Better Coverage**: Catches browser-specific issues
+3. **User-Focused**: Tests real user interactions and workflows
+4. **Accessibility**: Can test with actual assistive technologies
+5. **Performance**: Catches real performance issues
+6. **Cross-Browser**: Can test multiple browser engines
+
+## Examples by Test Type
+
+### Component Rendering
+
+```bash
+Button.browser.test.tsx
+Modal.browser.test.tsx
+Form.browser.test.tsx
+```
+
+### User Interactions
+
+```bash
+file-upload.browser.test.ts
+drag-and-drop.browser.test.ts
+keyboard-navigation.browser.test.ts
+```
+
+### Browser APIs
+
+```bash
+local-storage.browser.test.ts
+file-system.browser.test.ts
+clipboard.browser.test.ts
+```
+
+### Integration Tests
+
+```bash
+playthrough-workflow.browser.test.ts
+import-export-flow.browser.test.ts
+```
+
+Remember: **If it touches the DOM or browser APIs, use browser tests!**

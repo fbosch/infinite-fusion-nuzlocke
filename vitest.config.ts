@@ -1,16 +1,44 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vitest/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   test: {
     globals: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'lcov', 'cobertura'],
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/.next/**',
+        '**/coverage/**',
+        '**/*.config.*',
+        '**/*.d.ts',
+        'scripts/**',
+        '**/*.test.{js,ts,jsx,tsx}',
+        '**/*.spec.{js,ts,jsx,tsx}',
+        '**/vitest.config.*',
+        '**/coverage.config.*',
+      ],
+      thresholds: {
+        global: {
+          branches: 80,
+          functions: 80,
+          lines: 80,
+          statements: 80,
+        },
+      },
+      all: true,
+    },
     projects: [
       {
-        plugins: [tsconfigPaths()],
+        plugins: [tsconfigPaths(), react()],
         test: {
           name: 'browser',
           include: ['**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+          setupFiles: ['./tests/setup.browser.ts'],
           browser: {
             enabled: true,
             provider: 'playwright',
@@ -27,7 +55,13 @@ export default defineConfig({
         plugins: [tsconfigPaths()],
         test: {
           name: 'react-hooks',
-          include: ['**/playthroughs.test.ts', '**/playthroughs/**/*.test.ts'],
+          include: [
+            '**/playthroughs.test.ts',
+            '**/playthroughs/**/*.test.ts',
+            '**/components/**/*.test.tsx',
+            '**/components/**/*.test.ts',
+          ],
+          exclude: ['**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
           environment: 'jsdom',
         },
       },

@@ -197,7 +197,7 @@ const GameModeToggle = React.memo(function GameModeToggle() {
           )}
           aria-label='Show game mode descriptions'
         >
-          <HelpCircle className='w-4 h-4' />
+          <HelpCircle className='size-5' />
         </div>
       </CursorTooltip>
     </div>
