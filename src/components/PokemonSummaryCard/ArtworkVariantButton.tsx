@@ -52,9 +52,6 @@ export function ArtworkVariantButton({
         encounter?.isFusion ?? false
       );
 
-      const _headId = displayPokemon.head?.id;
-      const _bodyId = displayPokemon.body?.id;
-
       // Get current variant and find next one
       const currentIndex = variants.indexOf(currentVariant);
       const nextIndex = isShiftPressed

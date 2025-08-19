@@ -273,7 +273,7 @@ const isRemixModeEnabled = (): boolean => {
 
 const getGameMode = (): GameMode => {
   const activePlaythrough = getActivePlaythrough();
-  return activePlaythrough?.gameMode || 'classic';
+  return (activePlaythrough?.gameMode as GameMode) || 'classic';
 };
 
 const importPlaythrough = async (importData: unknown): Promise<string> => {
@@ -282,7 +282,7 @@ const importPlaythrough = async (importData: unknown): Promise<string> => {
     const { ImportedPlaythroughSchema } = await import('./types');
     const validatedData = ImportedPlaythroughSchema.parse(importData);
 
-    // Extract the playthrough data
+    // Extract the playthrough data - the transform ensures proper typing
     const importedPlaythrough = validatedData.playthrough;
 
     // Check for ID conflicts and generate new ID if needed
@@ -298,7 +298,7 @@ const importPlaythrough = async (importData: unknown): Promise<string> => {
     const newPlaythrough: Playthrough = {
       id: finalId,
       name: importedPlaythrough.name,
-      gameMode: importedPlaythrough.gameMode,
+      gameMode: importedPlaythrough.gameMode as GameMode, // Type assertion since transform ensures it's GameMode
       createdAt: importedPlaythrough.createdAt,
       updatedAt: Date.now(), // Update to current time
       customLocations: importedPlaythrough.customLocations || [],
@@ -320,7 +320,7 @@ const importPlaythrough = async (importData: unknown): Promise<string> => {
       try {
         const prettyError = z.prettifyError(error as z.ZodError);
         throw new Error(`Validation failed:\n\n${prettyError}`);
-      } catch (_prettifyError) {
+      } catch {
         const zodError = error as z.ZodError;
         if (zodError.issues && zodError.issues.length > 0) {
           const errorDetails = zodError.issues

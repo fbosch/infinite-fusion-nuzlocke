@@ -115,7 +115,7 @@ export function usePlaythroughImportExport() {
           let data;
           try {
             data = JSON.parse(text);
-          } catch (_jsonError) {
+          } catch {
             setImportErrorMessage('Invalid JSON syntax');
             setShowImportError(true);
             input.remove();

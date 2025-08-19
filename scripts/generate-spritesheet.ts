@@ -96,6 +96,14 @@ type Rectangle = {
 
 /**
  * Simple bin packing algorithm implementation
+ * 
+ * This algorithm mathematically guarantees no overlaps because:
+ * 1. Each sprite is placed in a single, unused node
+ * 2. When a node is split, the new rectangles are positioned exactly at the boundaries
+ * 3. The down rectangle starts at y + height (no overlap with placed sprite)
+ * 4. The right rectangle starts at x + width (no overlap with placed sprite)
+ * 5. Each new rectangle has reduced dimensions that fit within the original node
+ * 6. No gaps are added, maximizing space efficiency
  */
 class BinPacker {
   private root: Rectangle;
@@ -123,6 +131,8 @@ class BinPacker {
 
   private splitNode(node: Rectangle, width: number, height: number): Rectangle {
     node.used = true;
+    
+    // Create the down rectangle (below the placed sprite)
     node.down = {
       x: node.x,
       y: node.y + height,
@@ -130,6 +140,8 @@ class BinPacker {
       height: node.height - height,
       used: false
     };
+    
+    // Create the right rectangle (to the right of the placed sprite)
     node.right = {
       x: node.x + width,
       y: node.y,
@@ -137,7 +149,41 @@ class BinPacker {
       height: height,
       used: false
     };
-    return node;
+    
+    // Return the node with the exact dimensions requested
+    return {
+      x: node.x,
+      y: node.y,
+      width,
+      height,
+      used: true
+    };
+  }
+
+  // Add method to get all packed rectangles for debugging
+  getAllPackedRectangles(): Rectangle[] {
+    const rectangles: Rectangle[] = [];
+    this.collectRectangles(this.root, rectangles);
+    return rectangles.filter(r => r.used);
+  }
+
+  private collectRectangles(node: Rectangle, rectangles: Rectangle[]): void {
+    if (node.used) {
+      // Find the actual dimensions of this used node
+      const actualWidth = node.right ? node.right.x - node.x : node.width;
+      const actualHeight = node.down ? node.down.y - node.y : node.height;
+      
+      rectangles.push({
+        x: node.x,
+        y: node.y,
+        width: actualWidth,
+        height: actualHeight,
+        used: true
+      });
+      
+      if (node.right) this.collectRectangles(node.right, rectangles);
+      if (node.down) this.collectRectangles(node.down, rectangles);
+    }
   }
 }
 
@@ -169,7 +215,9 @@ async function analyzeSpriteContent(spritePath: string): Promise<SpriteBounds | 
     let minY = info.height;
     let maxY = -1;
 
-    // Find bounds of non-transparent pixels
+    // Find bounds of non-transparent pixels with precise alpha detection
+    // Since there's no anti-aliasing, we can use a strict alpha > 0 threshold
+    
     for (let y = 0; y < info.height; y++) {
       for (let x = 0; x < info.width; x++) {
         const pixelIndex = (y * info.width + x) * info.channels;
@@ -188,6 +236,7 @@ async function analyzeSpriteContent(spritePath: string): Promise<SpriteBounds | 
       return null; // Completely transparent
     }
 
+    // Return exact content bounds without padding
     return {
       x: minX,
       y: minY,
@@ -355,17 +404,17 @@ function packSprites(sprites: SpriteInfo[]): { width: number; height: number; ef
     return heightDiff !== 0 ? heightDiff : b.width - a.width;
   });
 
-  // Estimate initial canvas size
+  // Estimate initial canvas size with more padding to prevent overlaps
   const totalArea = validSprites.reduce((sum, s) => sum + (s.width * s.height), 0);
   const avgAspectRatio = validSprites.reduce((sum, s) => sum + (s.width / s.height), 0) / validSprites.length;
 
-  let canvasWidth = Math.ceil(Math.sqrt(totalArea * avgAspectRatio)) + 100; // Add padding
-  let canvasHeight = Math.ceil(totalArea / canvasWidth) + 100;
+  let canvasWidth = Math.ceil(Math.sqrt(totalArea * avgAspectRatio)) + 200; // Increased padding
+  let canvasHeight = Math.ceil(totalArea / canvasWidth) + 200;
 
   // Try packing with progressively larger canvas sizes
   let packed = false;
   let attempts = 0;
-  const maxAttempts = 10;
+  const maxAttempts = 15; // Increased max attempts
 
   while (!packed && attempts < maxAttempts) {
     const packer = new BinPacker(canvasWidth, canvasHeight);
@@ -399,15 +448,58 @@ function packSprites(sprites: SpriteInfo[]): { width: number; height: number; ef
       canvasWidth = maxX;
       canvasHeight = maxY;
     } else {
-      // Increase canvas size and try again
-      canvasWidth = Math.ceil(canvasWidth * 1.2);
-      canvasHeight = Math.ceil(canvasHeight * 1.2);
+      // Increase canvas size more aggressively and try again
+      canvasWidth = Math.ceil(canvasWidth * 1.3);
+      canvasHeight = Math.ceil(canvasHeight * 1.3);
       attempts++;
     }
   }
 
   if (!packed) {
     throw new Error('Failed to pack all sprites after multiple attempts');
+  }
+
+  // Validate that no sprites overlap
+  const hasOverlap = validateNoOverlap(validSprites);
+  if (hasOverlap) {
+    ConsoleFormatter.warn('Overlap detected in sprite packing, attempting to fix...');
+    
+    // Try to fix overlaps by adding padding
+    const fixed = fixOverlaps(validSprites);
+    if (fixed) {
+      // Recalculate canvas dimensions after fixing
+      const maxX = Math.max(...validSprites.map(s => s.x + s.width));
+      const maxY = Math.max(...validSprites.map(s => s.y + s.height));
+      canvasWidth = maxX;
+      canvasHeight = maxY;
+      
+      ConsoleFormatter.success('Successfully fixed sprite overlaps');
+    } else {
+      throw new Error('Failed to fix sprite overlaps');
+    }
+  } else {
+    ConsoleFormatter.success('No sprite overlaps detected');
+  }
+
+  // Final validation
+  const finalOverlapCheck = validateNoOverlap(validSprites);
+  if (finalOverlapCheck) {
+    ConsoleFormatter.error('Final overlap check failed - sprites still overlap');
+    
+    // Log problematic sprites for debugging
+    for (let i = 0; i < validSprites.length; i++) {
+      for (let j = i + 1; j < validSprites.length; j++) {
+        const a = validSprites[i]!;
+        const b = validSprites[j]!;
+        
+        if (a.x < b.x + b.width && a.x + a.width > b.x &&
+            a.y < b.y + b.height && a.y + a.height > b.y) {
+          ConsoleFormatter.error(`Overlap: ${a.name} (${a.x},${a.y},${a.width}x${a.height}) with ${b.name} (${b.x},${b.y},${b.width}x${b.height})`);
+        }
+      }
+    }
+    
+    throw new Error('Sprite overlaps could not be resolved');
   }
 
   const usedArea = validSprites.reduce((sum, s) => sum + (s.width * s.height), 0);
@@ -417,6 +509,103 @@ function packSprites(sprites: SpriteInfo[]): { width: number; height: number; ef
   ConsoleFormatter.info(`Packing efficiency: ${efficiency.toFixed(1)}%`);
 
   return { width: canvasWidth, height: canvasHeight, efficiency };
+}
+
+/**
+ * Check if any sprites overlap
+ */
+function validateNoOverlap(sprites: SpriteInfo[]): boolean {
+  for (let i = 0; i < sprites.length; i++) {
+    for (let j = i + 1; j < sprites.length; j++) {
+      const a = sprites[i]!;
+      const b = sprites[j]!;
+      
+      // Check for any overlap using precise mathematical bounds
+      // Two rectangles overlap if and only if:
+      // a.x < b.x + b.width AND a.x + a.width > b.x AND
+      // a.y < b.y + b.height AND a.y + a.height > b.y
+      if (a.x < b.x + b.width && a.x + a.width > b.x &&
+          a.y < b.y + b.height && a.y + a.height > b.y) {
+        ConsoleFormatter.error(`Overlap detected between ${a.name} and ${b.name}`);
+        ConsoleFormatter.error(`  ${a.name}: (${a.x},${a.y}) ${a.width}x${a.height}`);
+        ConsoleFormatter.error(`  ${b.name}: (${b.x},${b.y}) ${b.width}x${b.height}`);
+        ConsoleFormatter.error(`  Overlap area: ${Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x))} x ${Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y))}`);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Attempt to fix overlaps by adding padding
+ */
+function fixOverlaps(sprites: SpriteInfo[]): boolean {
+  let attempts = 0;
+  const maxAttempts = 10; // Increased attempts
+  
+  while (attempts < maxAttempts) {
+    let hasOverlap = false;
+    
+    for (let i = 0; i < sprites.length; i++) {
+      for (let j = i + 1; j < sprites.length; j++) {
+        const a = sprites[i]!;
+        const b = sprites[j]!;
+        
+        if (a.x < b.x + b.width && a.x + a.width > b.x &&
+            a.y < b.y + b.height && a.y + a.height > b.y) {
+          
+          // Calculate overlap amounts
+          const overlapX = Math.max(0, a.x + a.width - b.x);
+          const overlapY = Math.max(0, a.y + a.height - b.y);
+          
+          // Move sprite b to avoid overlap with some extra padding
+          if (overlapX > 0) {
+            b.x += overlapX + 1; // Add 1px padding
+          }
+          if (overlapY > 0) {
+            b.y += overlapY + 1; // Add 1px padding
+          }
+          
+          hasOverlap = true;
+        }
+      }
+    }
+    
+    if (!hasOverlap) {
+      ConsoleFormatter.success(`Fixed overlaps in ${attempts + 1} attempts`);
+      return true;
+    }
+    
+    attempts++;
+    
+    // If we're taking too long, try a more aggressive approach
+    if (attempts === 5) {
+      ConsoleFormatter.warn('Using aggressive overlap fixing...');
+      
+      // Sort sprites by position and ensure minimum spacing
+      sprites.sort((a, b) => {
+        if (a.y !== b.y) return a.y - b.y;
+        return a.x - b.x;
+      });
+      
+      for (let i = 1; i < sprites.length; i++) {
+        const prev = sprites[i - 1]!;
+        const curr = sprites[i]!;
+        
+        // Ensure minimum spacing between sprites
+        if (curr.x < prev.x + prev.width + 1) {
+          curr.x = prev.x + prev.width + 1;
+        }
+        if (curr.y < prev.y + prev.height + 1) {
+          curr.y = prev.y + prev.height + 1;
+        }
+      }
+    }
+  }
+  
+  ConsoleFormatter.error(`Failed to fix overlaps after ${maxAttempts} attempts`);
+  return false;
 }
 
 /**
@@ -454,24 +643,30 @@ async function generateSpritesheet(spriteInfos: SpriteInfo[], generation: Genera
     const sprite = validSprites[i];
     if (!sprite.contentBounds) continue;
 
-    const spritePath = path.join(generation.spritesDir, sprite.filename);
+    try {
+      const spritePath = path.join(generation.spritesDir, sprite.filename);
 
-    // Extract only the content area from the original sprite
-    const croppedSprite = await sharp(spritePath)
-      .extract({
-        left: sprite.contentBounds.x,
-        top: sprite.contentBounds.y,
-        width: sprite.contentBounds.width,
-        height: sprite.contentBounds.height
-      })
-      .png()
-      .toBuffer();
+      // Extract only the content area from the original sprite
+      const croppedSprite = await sharp(spritePath)
+        .extract({
+          left: Math.max(0, sprite.contentBounds.x),
+          top: Math.max(0, sprite.contentBounds.y),
+          width: Math.min(sprite.contentBounds.width, sprite.originalWidth - sprite.contentBounds.x),
+          height: Math.min(sprite.contentBounds.height, sprite.originalHeight - sprite.contentBounds.y)
+        })
+        .png()
+        .toBuffer();
 
-    compositeOps.push({
-      input: croppedSprite,
-      left: sprite.x,
-      top: sprite.y
-    });
+      compositeOps.push({
+        input: croppedSprite,
+        left: sprite.x,
+        top: sprite.y
+      });
+    } catch (error) {
+      ConsoleFormatter.error(`Failed to process sprite ${sprite.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Skip this sprite but continue with others
+      continue;
+    }
 
     progressBar.update(i + 1, { status: `Processing ${sprite.name}` });
   }

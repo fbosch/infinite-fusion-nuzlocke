@@ -176,13 +176,11 @@ describe('Pokemon Default Status Logic', () => {
 
   describe('Edge cases', () => {
     it('should handle null Pokemon gracefully', () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = applyDefaultStatus(null as any, EncounterSource.GIFT);
       expect(result).toBeNull();
     });
 
     it('should handle undefined Pokemon gracefully', () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = applyDefaultStatus(undefined as any, EncounterSource.GIFT);
       expect(result).toBeUndefined();
     });
