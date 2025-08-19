@@ -206,7 +206,9 @@ export default function PlaythroughSelector({
                         Your Playthroughs
                       </span>
                       <button
-                        onClick={handleImportClick}
+                        onClick={() => {
+                          handleImportClick();
+                        }}
                         className={clsx(
                           'px-2 py-1 text-xs font-medium rounded-md flex items-center gap-1.5',
                           'bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400',
