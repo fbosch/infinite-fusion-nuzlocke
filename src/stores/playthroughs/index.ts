@@ -4,6 +4,8 @@ export type {
   EncounterData,
   Playthrough,
   PlaythroughsState,
+  ExportedPlaythrough,
+  ExportablePlaythrough,
 } from './types';
 
 export {

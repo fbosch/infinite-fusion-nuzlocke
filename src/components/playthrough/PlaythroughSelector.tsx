@@ -20,6 +20,7 @@ import {
   useGameMode,
   type Playthrough,
   type GameMode,
+  type ExportedPlaythrough,
 } from '@/stores/playthroughs';
 import ConfirmationDialog from '@/components/ConfirmationDialog';
 import CreatePlaythroughModal from './CreatePlaythroughModal';
@@ -48,6 +49,49 @@ const getGameModeInfo = (gameMode: GameMode) => {
       };
     default:
       return null;
+  }
+};
+
+// Helper function to export playthrough data as JSON
+const exportPlaythrough = (playthrough: Playthrough) => {
+  try {
+    // Create a clean export object with only the necessary data
+    const exportData: ExportedPlaythrough = {
+      version: '1.0.0',
+      exportedAt: new Date().toISOString(),
+      playthrough: {
+        id: playthrough.id,
+        name: playthrough.name,
+        gameMode: playthrough.gameMode as GameMode,
+        createdAt: playthrough.createdAt,
+        updatedAt: playthrough.updatedAt,
+        customLocations: playthrough.customLocations,
+        encounters: playthrough.encounters,
+      },
+    };
+
+    // Convert to JSON string with pretty formatting
+    const jsonString = JSON.stringify(exportData, null, 2);
+
+    // Create blob and download
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    // Create download link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${playthrough.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_playthrough.json`;
+
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Clean up URL
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Failed to export playthrough:', error);
+    // You could add a toast notification here for user feedback
   }
 };
 
@@ -110,6 +154,28 @@ export default function PlaythroughSelector({
     setShowDeleteConfirm(false);
     setPlaythroughToDelete(null);
   }, []);
+
+  // Handle export playthrough
+  const handleExportClick = useCallback(
+    (playthrough: Playthrough, e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      exportPlaythrough(playthrough);
+    },
+    []
+  );
+
+  // Handle export playthrough with keyboard
+  const handleExportKeyDown = useCallback(
+    (playthrough: Playthrough, e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        exportPlaythrough(playthrough);
+      }
+    },
+    []
+  );
 
   // Handle arrow key navigation using refs
   const handleKeyDown = useCallback(
@@ -332,24 +398,12 @@ export default function PlaythroughSelector({
                               </div>
                               <div className='flex items-center gap-1 opacity-0 group-hover/menu-item:opacity-100 group-focus-within/menu-item:opacity-100 transition-all duration-200'>
                                 <button
-                                  onClick={() => {
-                                    // TODO: Implement export functionality
-                                    console.log(
-                                      'Export playthrough clicked:',
-                                      playthrough.name
-                                    );
-                                  }}
-                                  onKeyDown={e => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      // TODO: Implement export functionality
-                                      console.log(
-                                        'Export playthrough clicked:',
-                                        playthrough.name
-                                      );
-                                    }
-                                  }}
+                                  onClick={e =>
+                                    handleExportClick(playthrough, e)
+                                  }
+                                  onKeyDown={e =>
+                                    handleExportKeyDown(playthrough, e)
+                                  }
                                   className={clsx(
                                     'p-2 rounded-lg transition-all duration-200',
                                     'border border-transparent',
