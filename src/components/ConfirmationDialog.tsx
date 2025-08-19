@@ -8,9 +8,11 @@ interface ConfirmationDialogProps {
   onConfirm: () => void;
   title: string;
   message: string;
+  children?: React.ReactNode;
   confirmText?: string;
   cancelText?: string;
   variant?: 'danger' | 'warning' | 'info';
+  showCancel?: boolean;
 }
 
 export default function ConfirmationDialog({
@@ -19,6 +21,7 @@ export default function ConfirmationDialog({
   onConfirm,
   title,
   message,
+  children,
   confirmText = 'Confirm',
   cancelText = 'Cancel',
   variant = 'danger',
@@ -59,7 +62,8 @@ export default function ConfirmationDialog({
       <div className='fixed inset-0 flex w-screen items-center justify-center p-4'>
         <div
           className={clsx(
-            'max-w-md space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-modal border border-gray-200 dark:border-gray-700 p-6',
+            children ? 'max-w-2xl' : 'max-w-md',
+            'space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-modal border border-gray-200 dark:border-gray-700 p-6',
             'transform transition-all duration-200 ease-out',
             isOpen
               ? 'opacity-100 scale-100 translate-y-0'
@@ -75,7 +79,7 @@ export default function ConfirmationDialog({
                 {title}
               </DialogTitle>
               <p className='mt-2 text-sm text-gray-600 dark:text-gray-300 break-words max-w-inherit'>
-                {message}
+                {children || message}
               </p>
             </div>
           </div>

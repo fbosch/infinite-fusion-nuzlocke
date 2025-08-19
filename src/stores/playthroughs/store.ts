@@ -9,6 +9,7 @@ import {
   loadAllPlaythroughs,
   saveToIndexedDB,
 } from './persistence';
+import { z } from 'zod';
 
 // Default state
 const defaultState: PlaythroughsState = {
@@ -313,6 +314,28 @@ const importPlaythrough = async (importData: unknown): Promise<string> => {
     return finalId;
   } catch (error) {
     console.error('Failed to import playthrough:', error);
+
+    // Handle Zod validation errors specifically
+    if (error && typeof error === 'object' && 'issues' in error) {
+      try {
+        const prettyError = z.prettifyError(error as z.ZodError);
+        throw new Error(`Validation failed:\n\n${prettyError}`);
+      } catch (_prettifyError) {
+        const zodError = error as z.ZodError;
+        if (zodError.issues && zodError.issues.length > 0) {
+          const errorDetails = zodError.issues
+            .map((issue: z.ZodIssue) => {
+              const path =
+                issue.path.length > 0 ? ` at ${issue.path.join('.')}` : '';
+              return `• ${issue.message}${path}`;
+            })
+            .join('\n');
+          throw new Error(`Validation failed:\n\n${errorDetails}`);
+        }
+        throw new Error('Data validation failed');
+      }
+    }
+
     throw new Error('Invalid playthrough data format');
   }
 };

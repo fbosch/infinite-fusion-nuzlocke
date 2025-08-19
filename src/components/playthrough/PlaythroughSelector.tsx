@@ -1,15 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import {
-  ChevronDown,
-  Album,
-  Plus,
-  Trash2,
-  Calendar,
-  Upload,
-  Download,
-} from 'lucide-react';
+import { ChevronDown, Album, Plus, Trash2, Calendar } from 'lucide-react';
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
 import clsx from 'clsx';
 import {
@@ -20,11 +12,13 @@ import {
   useGameMode,
   type Playthrough,
   type GameMode,
-  type ExportedPlaythrough,
 } from '@/stores/playthroughs';
 import ConfirmationDialog from '@/components/ConfirmationDialog';
 import CreatePlaythroughModal from './CreatePlaythroughModal';
 import { CursorTooltip } from '@/components/CursorTooltip';
+import { Upload, Download } from 'lucide-react';
+import { usePlaythroughImportExport } from '@/hooks/usePlaythroughImportExport';
+import { ImportErrorContent } from './ImportErrorContent';
 
 interface PlaythroughSelectorProps {
   className?: string;
@@ -52,49 +46,6 @@ const getGameModeInfo = (gameMode: GameMode) => {
   }
 };
 
-// Helper function to export playthrough data as JSON
-const exportPlaythrough = (playthrough: Playthrough) => {
-  try {
-    // Create a clean export object with only the necessary data
-    const exportData: ExportedPlaythrough = {
-      version: '1.0.0',
-      exportedAt: new Date().toISOString(),
-      playthrough: {
-        id: playthrough.id,
-        name: playthrough.name,
-        gameMode: playthrough.gameMode as GameMode,
-        createdAt: playthrough.createdAt,
-        updatedAt: playthrough.updatedAt,
-        customLocations: playthrough.customLocations,
-        encounters: playthrough.encounters,
-      },
-    };
-
-    // Convert to JSON string with pretty formatting
-    const jsonString = JSON.stringify(exportData, null, 2);
-
-    // Create blob and download
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    // Create download link
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${playthrough.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_playthrough.json`;
-
-    // Trigger download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Clean up URL
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error('Failed to export playthrough:', error);
-    // You could add a toast notification here for user feedback
-  }
-};
-
 export default function PlaythroughSelector({
   className,
 }: PlaythroughSelectorProps) {
@@ -105,6 +56,16 @@ export default function PlaythroughSelector({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [playthroughToDelete, setPlaythroughToDelete] =
     useState<Playthrough | null>(null);
+
+  const {
+    showImportError,
+    setShowImportError,
+    importErrorMessage,
+    handleExportClick,
+    handleExportKeyDown,
+    handleImportClick,
+  } = usePlaythroughImportExport();
+
   const allPlaythroughs = useAllPlaythroughs();
   const playthroughRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -153,63 +114,6 @@ export default function PlaythroughSelector({
   const handleCancelDelete = useCallback(() => {
     setShowDeleteConfirm(false);
     setPlaythroughToDelete(null);
-  }, []);
-
-  // Handle export playthrough
-  const handleExportClick = useCallback(
-    (playthrough: Playthrough, e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      exportPlaythrough(playthrough);
-    },
-    []
-  );
-
-  // Handle export playthrough with keyboard
-  const handleExportKeyDown = useCallback(
-    (playthrough: Playthrough, e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        e.stopPropagation();
-        exportPlaythrough(playthrough);
-      }
-    },
-    []
-  );
-
-  // Handle import playthrough
-  const handleImportClick = useCallback(async () => {
-    try {
-      // Create a file input element
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-      input.onchange = async e => {
-        const file = (e.target as HTMLInputElement).files?.[0];
-        if (!file) return;
-
-        try {
-          const text = await file.text();
-          const data = JSON.parse(text);
-
-          // Import the playthrough
-          const newId = await playthroughActions.importPlaythrough(data);
-          console.log('Successfully imported playthrough:', newId);
-
-          // Clean up
-          input.remove();
-        } catch (error) {
-          console.error('Failed to import playthrough:', error);
-          alert('Failed to import playthrough. Please check the file format.');
-          input.remove();
-        }
-      };
-
-      input.click();
-    } catch (error) {
-      console.error('Import failed:', error);
-      alert('Import failed. Please try again.');
-    }
   }, []);
 
   // Handle arrow key navigation using refs
@@ -586,6 +490,20 @@ export default function PlaythroughSelector({
         cancelText='Cancel'
         variant='danger'
       />
+
+      {/* Import error modal */}
+      <ConfirmationDialog
+        isOpen={showImportError}
+        onClose={() => setShowImportError(false)}
+        onConfirm={() => setShowImportError(false)}
+        title='Import Error'
+        message=''
+        confirmText='OK'
+        cancelText='Cancel'
+        variant='danger'
+      >
+        <ImportErrorContent errorMessage={importErrorMessage} />
+      </ConfirmationDialog>
     </>
   );
 }
