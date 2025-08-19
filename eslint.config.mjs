@@ -56,6 +56,15 @@ const eslintConfig = [
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },
+  // Override for scripts directory to disable TypeScript project service for JS files
+  {
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+      },
+    },
+  },
 ];
 
 export default eslintConfig;

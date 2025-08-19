@@ -60,7 +60,7 @@ export default function SummaryCard({
   );
 
   // Only consider deceased if both Pokemon are dead (for fusion) or the single Pokemon is dead
-  // Note: stored Pokemon are not considered deceased, only actually dead Pokemon
+  // Note: boxed Pokemon are not considered deceased, only actually dead Pokemon
   const headDead = isPokemonDeceased(encounterData?.head);
   const bodyDead = isPokemonDeceased(encounterData?.body);
 

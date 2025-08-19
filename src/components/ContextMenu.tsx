@@ -251,7 +251,7 @@ export function ContextMenu({
   };
 
   return (
-    <div>
+    <>
       {/* Custom trigger element */}
       {isValidElement(children) &&
         cloneElement(children, {
@@ -279,7 +279,7 @@ export function ContextMenu({
               }}
               className={clsx(
                 'min-w-[12rem] z-100 rounded-md border border-gray-200 dark:border-gray-800',
-                'bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25',
+                'bg-white dark:bg-gray-900/80 shadow-elevation-3',
                 'p-1 backdrop-blur-xl tooltip-enter',
                 'origin-top-left backdrop-blur-xl',
                 'focus:outline-none',
@@ -311,7 +311,7 @@ export function ContextMenu({
                 const baseClasses = clsx(
                   'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
                   'text-sm transition-colors duration-75 enabled:cursor-pointer',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
                 );
 
                 const variantClasses = match<[string | undefined, boolean]>([
@@ -519,7 +519,7 @@ export function ContextMenu({
                                 className={clsx(
                                   'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
                                   'text-sm transition-colors duration-75 enabled:cursor-pointer',
-                                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+                                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
                                   'text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white',
                                   child.disabled &&
                                     '!opacity-75 !cursor-not-allowed'
@@ -590,7 +590,7 @@ export function ContextMenu({
                             className={clsx(
                               'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
                               'text-sm transition-colors duration-75 enabled:cursor-pointer',
-                              'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+                              'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
                               'text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white',
                               child.disabled &&
                                 '!opacity-75 !cursor-not-allowed'
@@ -650,7 +650,7 @@ export function ContextMenu({
           }}
         />
       )}
-    </div>
+    </>
   );
 }
 

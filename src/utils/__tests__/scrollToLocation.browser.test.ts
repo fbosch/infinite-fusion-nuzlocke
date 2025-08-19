@@ -612,7 +612,7 @@ describe('scrollToLocationById', () => {
     container.style.height = '200px';
     container.style.overflow = 'auto';
 
-    const initialScrollTop = container.scrollTop;
+    const _initialScrollTop = window.scrollY;
     const result = scrollToLocationById('route-1');
 
     expect(result).toBe(true);
@@ -632,7 +632,7 @@ describe('scrollToLocationById', () => {
     }
     container.scrollTop = 0;
 
-    const initialScrollTop = container.scrollTop;
+    const _initialScrollTop = window.scrollY;
     const result = scrollToLocationById('route-1');
 
     expect(result).toBe(true);

@@ -229,7 +229,7 @@ export default function PokemonPCSheet({
                   }
                 >
                   <Box className='h-4 w-4' />
-                  <span className='font-medium flex-1'>Boxed</span>
+                  <span className='font-medium flex-1'>Box</span>
                   <span className='ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100'>
                     {stored.length}
                   </span>
@@ -339,15 +339,13 @@ export default function PokemonPCSheet({
                         className='mb-3 h-10 w-10 opacity-50'
                         aria-hidden='true'
                       />
-                      <p className='text-center'>
-                        No stored Pokémon in your box.
-                      </p>
+                      <p className='text-center'>No Pokémon in your box.</p>
                     </div>
                   ) : (
                     <ul
                       role='list'
-                      aria-label='Stored Pokémon list'
-                      className='grid w-full grid-cols-1 gap-2 py-2 sm:grid-cols-2 h-[calc(100dvh-6.5rem)] overflow-y-auto'
+                      aria-label='Boxed Pokémon list'
+                      className='grid content-start w-full grid-cols-1 gap-2 py-2 sm:grid-cols-2 h-[calc(100dvh-6.5rem)] overflow-y-auto'
                     >
                       {stored.map(entry => (
                         <PCEntryItem
@@ -356,7 +354,7 @@ export default function PokemonPCSheet({
                           idToName={idToName}
                           mode='stored'
                           hoverRingClass='hover:ring-blue-400/30'
-                          fallbackLabel='Stored Pokémon'
+                          fallbackLabel='Boxed Pokémon'
                           className=''
                           onClose={onClose}
                         />
@@ -383,7 +381,7 @@ export default function PokemonPCSheet({
                     <ul
                       role='list'
                       aria-label='Fainted Pokémon list'
-                      className='grid w-full grid-cols-1 gap-2 py-2 sm:grid-cols-2 max-h-[calc(100dvh-6.5rem)] g overflow-y-auto'
+                      className='grid w-full content-start grid-cols-1 gap-2 py-2 sm:grid-cols-2 h-[calc(100dvh-6.5rem)] g overflow-y-auto'
                     >
                       {deceased.map(entry => (
                         <PCEntryItem

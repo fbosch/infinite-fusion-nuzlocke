@@ -250,7 +250,7 @@ export function DraggableComboboxSprite({
           id: `evolve-${evo.id}`,
           label: (
             <div className='flex items-center gap-x-2 w-full'>
-              <div className='flex items-center justify-center size-6 flex-shrink-0'>
+              <div className='flex items-center justify-center size-8 flex-shrink-0'>
                 <PokemonSprite pokemonId={evo.id} generation='gen7' />
               </div>
               <span className='truncate'>Evolve to {evo.name}</span>
@@ -284,7 +284,7 @@ export function DraggableComboboxSprite({
             id: `evolve-${evo.id}`,
             label: (
               <div className='flex items-center gap-x-2 w-full'>
-                <div className='flex items-center justify-center size-6 flex-shrink-0'>
+                <div className='flex items-center justify-center size-8 flex-shrink-0'>
                   <PokemonSprite pokemonId={evo.id} generation='gen7' />
                 </div>
                 <span className='truncate'>{evo.name}</span>

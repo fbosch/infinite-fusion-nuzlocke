@@ -41,7 +41,7 @@ const mockRouteEncounter2 = {
   ],
 } as any;
 
-const mockApiResponse = {
+const _mockApiResponse = {
   data: [mockRouteEncounter, mockRouteEncounter2],
   count: 2,
   gameMode: 'classic' as const,

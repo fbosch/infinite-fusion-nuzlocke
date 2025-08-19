@@ -4,6 +4,8 @@ export type {
   EncounterData,
   Playthrough,
   PlaythroughsState,
+  ExportedPlaythrough,
+  ImportedPlaythrough,
 } from './types';
 
 export {
@@ -11,6 +13,8 @@ export {
   EncounterDataSchema,
   PlaythroughSchema,
   PlaythroughsSchema,
+  ExportedPlaythroughSchema,
+  ImportedPlaythroughSchema,
 } from './types';
 
 // Export store and core actions

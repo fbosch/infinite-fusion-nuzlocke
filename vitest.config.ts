@@ -1,6 +1,7 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vitest/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   test: {
@@ -33,10 +34,11 @@ export default defineConfig({
     },
     projects: [
       {
-        plugins: [tsconfigPaths()],
+        plugins: [tsconfigPaths(), react()],
         test: {
           name: 'browser',
           include: ['**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+          setupFiles: ['./tests/setup.browser.ts'],
           browser: {
             enabled: true,
             provider: 'playwright',
@@ -53,11 +55,7 @@ export default defineConfig({
         plugins: [tsconfigPaths()],
         test: {
           name: 'react-hooks',
-          include: [
-            '**/playthroughs.test.ts',
-            '**/playthroughs/**/*.test.ts',
-            '**/scrollToLocation.test.ts',
-          ],
+          include: ['**/playthroughs.test.ts', '**/playthroughs/**/*.test.ts'],
           environment: 'jsdom',
         },
       },

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
-import { ChevronDown, Album, Plus, Trash2 } from 'lucide-react';
-import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { ChevronDown, Album, Plus, Trash2, Calendar } from 'lucide-react';
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
 import clsx from 'clsx';
 import {
   playthroughActions,
@@ -14,6 +14,11 @@ import {
   type GameMode,
 } from '@/stores/playthroughs';
 import ConfirmationDialog from '@/components/ConfirmationDialog';
+import CreatePlaythroughModal from './CreatePlaythroughModal';
+import { CursorTooltip } from '@/components/CursorTooltip';
+import { Upload, Download } from 'lucide-react';
+import { usePlaythroughImportExport } from '@/hooks/usePlaythroughImportExport';
+import { ImportErrorContent } from './ImportErrorContent';
 
 interface PlaythroughSelectorProps {
   className?: string;
@@ -28,13 +33,13 @@ const getGameModeInfo = (gameMode: GameMode) => {
       return {
         label: 'Remix',
         className:
-          'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300',
+          'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
       };
     case 'randomized':
       return {
         label: 'Random',
         className:
-          'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300',
+          'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
       };
     default:
       return null;
@@ -48,11 +53,29 @@ export default function PlaythroughSelector({
   const currentGameMode = useGameMode();
   const isLoading = useIsLoading();
   const [showCreateInput, setShowCreateInput] = useState(false);
-  const [newPlaythroughName, setNewPlaythroughName] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [playthroughToDelete, setPlaythroughToDelete] =
     useState<Playthrough | null>(null);
+
+  const {
+    showImportError,
+    setShowImportError,
+    importErrorMessage,
+    handleExportClick,
+    handleExportKeyDown,
+    handleImportClick,
+  } = usePlaythroughImportExport();
+
   const allPlaythroughs = useAllPlaythroughs();
+  const playthroughRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Initialize refs array when playthroughs change
+  useEffect(() => {
+    playthroughRefs.current = playthroughRefs.current.slice(
+      0,
+      allPlaythroughs.length
+    );
+  }, [allPlaythroughs.length]);
 
   // Switch to a different playthrough
   const handlePlaythroughSelect = useCallback(async (playthroughId: string) => {
@@ -63,42 +86,10 @@ export default function PlaythroughSelector({
     }
   }, []);
 
-  // Create a new playthrough
-  const handleCreatePlaythrough = useCallback(async () => {
-    const name = newPlaythroughName.trim();
-    if (!name) return;
-
-    try {
-      // Use the current game mode for new playthroughs
-      const newId = playthroughActions.createPlaythrough(name, currentGameMode);
-      await playthroughActions.setActivePlaythrough(newId);
-      setNewPlaythroughName('');
-      setShowCreateInput(false);
-    } catch (error) {
-      console.error('Failed to create playthrough:', error);
-    }
-  }, [newPlaythroughName, currentGameMode]);
-
-  // Handle enter key in create input
-  const handleCreateInputKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleCreatePlaythrough();
-      } else if (e.key === 'Escape') {
-        setShowCreateInput(false);
-        setNewPlaythroughName('');
-      }
-    },
-    [handleCreatePlaythrough]
-  );
-
   // Handle delete playthrough click
   const handleDeleteClick = useCallback(
-    (playthrough: Playthrough, e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setPlaythroughToDelete(playthrough);
+    (playthrough: { id: string; name: string }) => {
+      setPlaythroughToDelete(playthrough as Playthrough);
       setShowDeleteConfirm(true);
     },
     []
@@ -123,224 +114,362 @@ export default function PlaythroughSelector({
     setPlaythroughToDelete(null);
   }, []);
 
+  // Handle arrow key navigation using refs
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent, currentIndex: number) => {
+      e.preventDefault();
+
+      // Get the sorted playthroughs (newest first)
+      const sortedPlaythroughs = allPlaythroughs.toSorted(
+        (a, b) => b.createdAt - a.createdAt
+      );
+
+      switch (e.key) {
+        case 'ArrowDown':
+          const nextIndex =
+            currentIndex < sortedPlaythroughs.length - 1 ? currentIndex + 1 : 0;
+          playthroughRefs.current[nextIndex]?.focus();
+          break;
+        case 'ArrowUp':
+          const prevIndex =
+            currentIndex > 0 ? currentIndex - 1 : sortedPlaythroughs.length - 1;
+          playthroughRefs.current[prevIndex]?.focus();
+          break;
+        case 'Home':
+          playthroughRefs.current[0]?.focus();
+          break;
+        case 'End':
+          playthroughRefs.current[sortedPlaythroughs.length - 1]?.focus();
+          break;
+      }
+    },
+    [allPlaythroughs]
+  );
+
   return (
     <>
-      <Menu as='div' className={clsx('relative', className)}>
-        <MenuButton
-          className={clsx(
-            'flex items-center justify-between gap-2 px-3 py-2 sm:py-2.5 text-sm ',
-            'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600',
-            'border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500',
-            'rounded-md transition-colors',
-            'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1',
-            'text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
-            'disabled:opacity-50 disabled:cursor-not-allowed',
-            'w-[180px] sm:min-w-[140px] sm:w-auto',
-            'touch-manipulation',
-            'overflow-hidden'
-          )}
-          disabled={isLoading}
-        >
-          <div className='flex items-center gap-2 min-w-0 flex-1 overflow-hidden'>
-            <Album className='w-4 h-4 flex-shrink-0' />
-            <span className='truncate min-w-0 font-medium'>
-              {activePlaythrough?.name || '...'}
-            </span>
-          </div>
-          <ChevronDown className='w-4 h-4 flex-shrink-0' />
-        </MenuButton>
-        <MenuItems
-          className={clsx(
-            'absolute z-80 mt-2 rounded-md',
-            'bg-white dark:bg-gray-800 shadow-lg ring-1 ring-gray-200 dark:ring-gray-600 ring-opacity-5',
-            'border border-gray-200 dark:border-gray-600',
-            'focus:outline-none',
-            'min-w-[240px] sm:min-w-[260px] max-w-[320px]',
-            // Mobile positioning - center on small screens, right-aligned on larger screens
-            'left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0',
-            'origin-top-center sm:origin-top-right'
-          )}
-        >
-          {/* Current playthroughs section */}
-          {allPlaythroughs.length > 0 && (
+      <div className={clsx('relative group', className)}>
+        {/* Playthrough Selector Dropdown */}
+        <Popover className='relative'>
+          {({ open }) => (
             <>
-              <div className='px-3 py-2 sm:py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600'>
-                Playthroughs
-              </div>
-              {allPlaythroughs
-                .toSorted((a, b) => b.updatedAt - a.updatedAt)
-                .map(playthrough => {
-                  const gameModeInfo = getGameModeInfo(
-                    playthrough.gameMode as GameMode
-                  );
+              <PopoverButton
+                className={clsx(
+                  'flex items-center justify-between gap-3 px-4 py-2.5 text-sm',
+                  'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700',
+                  'border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500',
+                  'rounded-xl transition-all duration-200 ease-out',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+                  'focus-visible:border-blue-500 dark:focus-visible:border-blue-400',
+                  'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100',
+                  'disabled:opacity-50 disabled:cursor-not-allowed',
+                  'w-[200px] sm:min-w-[220px] sm:w-auto',
+                  'cursor-pointer',
+                  'h-[40px] sm:h-[44px]',
+                  'font-medium',
+                  'shadow-card hover:shadow-card-hover',
+                  'backdrop-blur-sm'
+                )}
+                disabled={isLoading}
+              >
+                <div className='flex items-center gap-3 min-w-0 flex-1 overflow-hidden'>
+                  <div className='flex items-center justify-center size-6 rounded-lg bg-gradient-to-br '>
+                    <Album className='size-4' />
+                  </div>
+                  <span className='truncate min-w-0'>
+                    {activePlaythrough?.name || 'Select Playthrough'}
+                  </span>
+                </div>
+                <ChevronDown
+                  className={clsx(
+                    'w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform duration-200',
+                    open && 'rotate-180'
+                  )}
+                />
+              </PopoverButton>
+              <PopoverPanel
+                anchor={{ to: 'bottom end', gap: '12px' }}
+                className={clsx(
+                  'z-[50] rounded-xl',
+                  'bg-white/95 dark:bg-gray-800/95 backdrop-blur-md',
+                  'shadow-dropdown',
+                  'border border-gray-200/50 dark:border-gray-600/50',
+                  'min-w-[320px] sm:min-w-[360px] max-w-[420px]',
+                  'origin-top-right'
+                )}
+              >
+                {/* Current playthroughs section */}
+                {allPlaythroughs.length > 0 && (
+                  <>
+                    <div className='px-4 py-3 flex items-center justify-between border-b border-gray-200/50 dark:border-gray-600/50 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/30 dark:to-gray-600/30 rounded-t-xl'>
+                      <span className='text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider'>
+                        Your Playthroughs
+                      </span>
+                      <button
+                        onClick={handleImportClick}
+                        className={clsx(
+                          'px-2 py-1 text-xs font-medium rounded-md flex items-center gap-1.5',
+                          'bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400',
+                          'border border-gray-300 dark:border-gray-600',
+                          'hover:bg-blue-100 hover:text-blue-700 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-300 dark:hover:border-blue-600',
+                          'focus:bg-blue-100 focus:text-blue-700 focus:border-blue-300 dark:focus:bg-blue-900/30 dark:focus:text-blue-300 dark:focus:border-blue-600',
+                          'transition-colors duration-200',
+                          'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset',
+                          'cursor-pointer'
+                        )}
+                        title='Import playthrough from file'
+                        aria-label='Import playthrough'
+                      >
+                        <Upload className='w-3 h-3' />
+                        Import
+                      </button>
+                    </div>
+                    {allPlaythroughs
+                      .toSorted((a, b) => b.createdAt - a.createdAt)
+                      .map(playthrough => {
+                        const gameModeInfo = getGameModeInfo(
+                          playthrough.gameMode as GameMode
+                        );
+                        const isActive =
+                          activePlaythrough?.id === playthrough.id;
 
-                  return (
-                    <MenuItem key={playthrough.id}>
-                      {({ focus }) => (
-                        <button
-                          onClick={() =>
-                            handlePlaythroughSelect(playthrough.id)
-                          }
-                          className={clsx(
-                            'group flex w-full items-center justify-between px-3 py-3 text-sm',
-                            'focus:outline-none text-left transition-color',
-                            'touch-manipulation',
-                            // Combined: Selected AND focused (most prominent)
-                            focus &&
-                              activePlaythrough?.id === playthrough.id &&
-                              'bg-blue-100 dark:bg-blue-900/35 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300/50 dark:ring-blue-600/50',
-                            // Selected but not focused
-                            !focus &&
-                              activePlaythrough?.id === playthrough.id &&
-                              'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
-                            // Focused but not selected
-                            focus &&
-                              activePlaythrough?.id !== playthrough.id &&
-                              'bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100',
-                            // Default/hover state
-                            !focus &&
-                              activePlaythrough?.id !== playthrough.id &&
-                              'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100'
-                          )}
-                        >
-                          <div className='flex items-center gap-2 flex-1 min-w-0'>
+                        return (
+                          <div
+                            key={playthrough.id}
+                            className={clsx(
+                              'relative',
+                              'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100/50 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 text-gray-900 dark:text-gray-100',
+                              isActive &&
+                                'bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/20 text-blue-700 dark:text-blue-300'
+                            )}
+                          >
                             <div
+                              ref={el => {
+                                // Use the index in the sorted array (newest first)
+                                const sortedPlaythroughs =
+                                  allPlaythroughs.toSorted(
+                                    (a, b) => b.createdAt - a.createdAt
+                                  );
+                                const index = sortedPlaythroughs.findIndex(
+                                  p => p.id === playthrough.id
+                                );
+                                if (index >= 0) {
+                                  playthroughRefs.current[index] = el;
+                                }
+                              }}
+                              onClick={() =>
+                                handlePlaythroughSelect(playthrough.id)
+                              }
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  handlePlaythroughSelect(playthrough.id);
+                                } else if (
+                                  e.key === 'ArrowDown' ||
+                                  e.key === 'ArrowUp' ||
+                                  e.key === 'Home' ||
+                                  e.key === 'End'
+                                ) {
+                                  // Use the index in the sorted array (newest first)
+                                  const sortedPlaythroughs =
+                                    allPlaythroughs.toSorted(
+                                      (a, b) => b.createdAt - a.createdAt
+                                    );
+                                  const index = sortedPlaythroughs.findIndex(
+                                    p => p.id === playthrough.id
+                                  );
+                                  handleKeyDown(e, index);
+                                }
+                              }}
+                              tabIndex={0}
+                              role='button'
+                              aria-label={`Select playthrough: ${playthrough.name}`}
+                              data-playthrough-index={allPlaythroughs
+                                .toSorted((a, b) => b.createdAt - a.createdAt)
+                                .findIndex(p => p.id === playthrough.id)}
                               className={clsx(
-                                'w-2 h-2 rounded-full flex-shrink-0',
-                                activePlaythrough?.id === playthrough.id
-                                  ? 'bg-blue-500'
-                                  : 'bg-gray-400'
+                                'group/menu-item flex w-full items-center justify-between px-4 py-3.5 text-sm',
+                                'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset text-left transition-all duration-200 ease-out',
+                                'cursor-pointer'
                               )}
-                            />
-                            <div className='flex flex-col gap-1 flex-1 min-w-0 mr-1'>
-                              <div className='flex items-center gap-2'>
-                                <span className='truncate  flex-1'>
-                                  {playthrough.name}
-                                </span>
-                                {gameModeInfo && (
-                                  <span
-                                    className={clsx(
-                                      'text-xs px-1.5 py-0.5 rounded flex-shrink-0 ',
-                                      gameModeInfo.className
+                            >
+                              <div className='flex items-center gap-3 flex-1 min-w-0'>
+                                <div
+                                  className={clsx(
+                                    'w-2.5 h-2.5 rounded-full flex-shrink-0',
+                                    isActive
+                                      ? 'bg-blue-500 shadow-sm'
+                                      : 'bg-gray-400 dark:bg-gray-500'
+                                  )}
+                                />
+                                <div className='flex flex-col gap-1.5 flex-1 min-w-0'>
+                                  <div className='flex items-center gap-2'>
+                                    <span className='truncate font-semibold'>
+                                      {playthrough.name}
+                                    </span>
+                                    {gameModeInfo && (
+                                      <span
+                                        className={clsx(
+                                          'text-xs px-2 py-1 rounded-full font-medium',
+                                          gameModeInfo.className
+                                        )}
+                                      >
+                                        {gameModeInfo.label}
+                                      </span>
                                     )}
+                                  </div>
+                                  <div className='flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400'>
+                                    <div className='flex items-center gap-1'>
+                                      <Calendar className='w-3 h-3' />
+                                      <span>
+                                        {new Date(
+                                          playthrough.createdAt
+                                        ).toLocaleDateString()}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className='flex items-center gap-1 opacity-0 group-hover/menu-item:opacity-100 group-focus-within/menu-item:opacity-100 transition-all duration-200'>
+                                <button
+                                  onClick={e =>
+                                    handleExportClick(
+                                      playthrough as Playthrough,
+                                      e
+                                    )
+                                  }
+                                  onKeyDown={e =>
+                                    handleExportKeyDown(
+                                      playthrough as Playthrough,
+                                      e
+                                    )
+                                  }
+                                  className={clsx(
+                                    'p-2 rounded-lg transition-all duration-200',
+                                    'border border-transparent',
+                                    'hover:bg-blue-100 hover:border-blue-300 dark:hover:bg-blue-900/20 dark:hover:border-blue-600',
+                                    'focus:bg-blue-100 focus:border-blue-300 dark:focus:bg-blue-900/20 dark:focus:border-blue-600',
+                                    'text-gray-400 hover:text-blue-600 dark:hover:text-blue-400',
+                                    'focus:text-blue-600 dark:focus:text-blue-400',
+                                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset',
+                                    'cursor-pointer'
+                                  )}
+                                  aria-label={`Export ${playthrough.name}`}
+                                  tabIndex={0}
+                                >
+                                  <div className='relative z-[1000]'>
+                                    <CursorTooltip
+                                      delay={200}
+                                      content='Export playthrough'
+                                      placement='bottom-start'
+                                    >
+                                      <Download className='w-4 h-4' />
+                                    </CursorTooltip>
+                                  </div>
+                                </button>
+                                {allPlaythroughs.length > 1 && (
+                                  <button
+                                    onClick={e => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleDeleteClick(playthrough);
+                                    }}
+                                    onKeyDown={e => {
+                                      if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleDeleteClick(playthrough);
+                                      }
+                                    }}
+                                    className={clsx(
+                                      'p-2 rounded-lg transition-all duration-200',
+                                      'border border-transparent',
+                                      'hover:bg-red-100 hover:border-red-300 dark:hover:bg-red-900/20 dark:hover:border-red-600',
+                                      'focus:bg-red-100 focus:border-red-300 dark:focus:bg-red-900/20 dark:focus:border-red-600',
+                                      'text-gray-400 hover:text-red-600 dark:hover:text-red-400',
+                                      'focus:text-red-600 dark:focus:text-red-400',
+                                      'focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-inset',
+                                      'cursor-pointer'
+                                    )}
+                                    aria-label={`Delete ${playthrough.name}`}
+                                    tabIndex={0}
                                   >
-                                    {gameModeInfo.label}
-                                  </span>
+                                    <div className='relative z-[1000]'>
+                                      <CursorTooltip
+                                        delay={200}
+                                        content='Delete playthrough'
+                                        placement='bottom-start'
+                                      >
+                                        <Trash2 className='w-4 h-4' />
+                                      </CursorTooltip>
+                                    </div>
+                                  </button>
                                 )}
                               </div>
                             </div>
                           </div>
-                          <div className='flex items-center gap-2 flex-shrink-0'>
-                            <div className='text-xs text-gray-500 dark:text-gray-400 hidden sm:block'>
-                              {new Date(
-                                playthrough.updatedAt
-                              ).toLocaleDateString()}
-                            </div>
-                            {allPlaythroughs.length > 1 && (
-                              <span
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  e.preventDefault();
-                                  handleDeleteClick(
-                                    playthrough as Playthrough,
-                                    e
-                                  );
-                                }}
-                                className={clsx(
-                                  'p-1.5 rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity',
-                                  'hover:bg-red-100 dark:hover:bg-red-900/20',
-                                  'text-gray-400 hover:text-red-600 dark:hover:text-red-400',
-                                  'touch-manipulation'
-                                )}
-                                title='Delete playthrough'
-                                role='button'
-                                aria-label={`Delete ${playthrough.name}`}
-                              >
-                                <Trash2 className='w-3 h-3' />
-                              </span>
-                            )}
-                          </div>
-                        </button>
-                      )}
-                    </MenuItem>
-                  );
-                })}
-              <div className='border-t border-gray-200 dark:border-gray-600 ' />
-            </>
-          )}
+                        );
+                      })}
+                  </>
+                )}
 
-          {/* Create new playthrough section */}
-          {showCreateInput ? (
-            <div className='px-1.5 py-1.5'>
-              <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5'>
-                <input
-                  type='text'
-                  value={newPlaythroughName}
-                  onChange={e => {
-                    e.stopPropagation();
-                    setNewPlaythroughName(e.target.value);
-                  }}
-                  onKeyDown={e => {
-                    // Prevent Menu from intercepting keyboard events
-                    e.stopPropagation();
-                    handleCreateInputKeyDown(e);
-                  }}
-                  placeholder='Enter playthrough name'
+                {isLoading && (
+                  <div className='px-4 py-4 text-sm text-gray-500 dark:text-gray-400 text-center'>
+                    <div className='flex items-center justify-center gap-2'>
+                      <div className='w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin' />
+                      Loading playthroughs...
+                    </div>
+                  </div>
+                )}
+
+                {/* Create new playthrough section - Now inside the dropdown as well */}
+                <div
                   className={clsx(
-                    'flex-1 px-2 py-1.5 text-sm',
-                    'border border-gray-300 dark:border-gray-600 rounded',
-                    'bg-white dark:bg-gray-700 text-gray-900 dark:text-white',
-                    'placeholder-gray-500 dark:placeholder-gray-400',
-                    'focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500'
-                  )}
-                  autoFocus
-                  maxLength={50}
-                  spellCheck={false}
-                  autoComplete='off'
-                />
-                <button
-                  onClick={handleCreatePlaythrough}
-                  disabled={Boolean(!newPlaythroughName.trim())}
-                  className={clsx(
-                    'px-3 py-1.5 sm:px-2 sm:py-2 text-xs font-medium text-white rounded',
-                    'bg-blue-600 hover:bg-blue-700 transition-colors',
-                    'focus:outline-none focus:ring-1 focus:ring-blue-500',
-                    'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600',
-                    'touch-manipulation'
+                    'border-t border-gray-200/50 dark:border-gray-600/50',
+                    'hover:bg-green-50 dark:hover:bg-green-900/20',
+                    'focus-within:outline-none focus-within:bg-green-50 focus-within:dark:bg-green-900/20'
                   )}
                 >
-                  Create
-                </button>
-              </div>
-            </div>
-          ) : (
-            <MenuItem>
-              <button
-                onClick={e => {
-                  e.preventDefault();
-                  setShowCreateInput(true);
-                }}
-                className={clsx(
-                  'group flex w-full items-center gap-2 px-3 py-3 text-sm rounded-b-md',
-                  'hover:bg-gray-100 dark:hover:bg-gray-700',
-                  'focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700',
-                  'text-gray-700 dark:text-gray-300 transition-colors',
-                  'touch-manipulation'
-                )}
-              >
-                <Plus className='w-4 h-4' />
-                <span className='font-medium'>Create New Playthrough</span>
-              </button>
-            </MenuItem>
+                  <div className='relative'>
+                    <button
+                      onClick={e => {
+                        e.preventDefault();
+                        setShowCreateInput(true);
+                      }}
+                      className={clsx(
+                        'group flex w-full items-center gap-3 px-4 py-3.5 text-sm',
+                        'text-gray-700 dark:text-gray-300 transition-all duration-200',
+                        'cursor-pointer',
+                        'rounded-b-xl',
+                        'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset',
+                        'focus-visible:bg-green-50 dark:focus-visible:bg-green-900/20'
+                      )}
+                    >
+                      <div className='flex items-center justify-center w-6 h-6 rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30'>
+                        <Plus className='w-4 h-4 text-green-600 dark:text-green-400' />
+                      </div>
+                      <span className='font-semibold'>
+                        Create New Playthrough
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </PopoverPanel>
+            </>
           )}
+        </Popover>
+      </div>
 
-          {isLoading && (
-            <div className='px-3 py-2 text-sm text-gray-500 dark:text-gray-400 text-center'>
-              Loading...
-            </div>
-          )}
-        </MenuItems>
-      </Menu>
+      {/* Create Playthrough Modal */}
+      <CreatePlaythroughModal
+        isOpen={showCreateInput}
+        onClose={() => setShowCreateInput(false)}
+        onCreate={async (name: string, gameMode: GameMode) => {
+          const newId = playthroughActions.createPlaythrough(name, gameMode);
+          await playthroughActions.setActivePlaythrough(newId);
+        }}
+        currentGameMode={currentGameMode}
+      />
 
       {/* Delete confirmation dialog */}
       <ConfirmationDialog
@@ -353,6 +482,20 @@ export default function PlaythroughSelector({
         cancelText='Cancel'
         variant='danger'
       />
+
+      {/* Import error modal */}
+      <ConfirmationDialog
+        isOpen={showImportError}
+        onClose={() => setShowImportError(false)}
+        onConfirm={() => setShowImportError(false)}
+        title='Import Error'
+        message=''
+        confirmText='OK'
+        cancelText='Cancel'
+        variant='danger'
+      >
+        <ImportErrorContent errorMessage={importErrorMessage} />
+      </ConfirmationDialog>
     </>
   );
 }

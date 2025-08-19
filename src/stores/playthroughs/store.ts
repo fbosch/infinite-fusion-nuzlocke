@@ -9,6 +9,8 @@ import {
   loadAllPlaythroughs,
   saveToIndexedDB,
 } from './persistence';
+import { z } from 'zod';
+import { generatePrefixedId } from '@/utils/id';
 
 // Default state
 const defaultState: PlaythroughsState = {
@@ -24,7 +26,7 @@ let cachedActiveId: string | undefined = undefined;
 
 // Helper functions
 const generatePlaythroughId = (): string => {
-  return `playthrough_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return generatePrefixedId('playthrough');
 };
 
 const getCurrentTimestamp = (): number => {
@@ -275,6 +277,70 @@ const getGameMode = (): GameMode => {
   return (activePlaythrough?.gameMode as GameMode) || 'classic';
 };
 
+const importPlaythrough = async (importData: unknown): Promise<string> => {
+  try {
+    // Validate the imported data against the schema
+    const { ImportedPlaythroughSchema } = await import('./types');
+    const validatedData = ImportedPlaythroughSchema.parse(importData);
+
+    // Extract the playthrough data - the transform ensures proper typing
+    const importedPlaythrough = validatedData.playthrough;
+
+    // Check for ID conflicts and generate new ID if needed
+    const existingIds = new Set(playthroughsStore.playthroughs.map(p => p.id));
+    let finalId = importedPlaythrough.id;
+
+    if (existingIds.has(finalId)) {
+      // Generate a new unique ID with timestamp and crypto-secure random suffix
+      finalId = generatePrefixedId('playthrough');
+    }
+
+    // Create the new playthrough with migrated data
+    const newPlaythrough: Playthrough = {
+      id: finalId,
+      name: importedPlaythrough.name,
+      gameMode: importedPlaythrough.gameMode as GameMode, // Type assertion since transform ensures it's GameMode
+      createdAt: importedPlaythrough.createdAt,
+      updatedAt: Date.now(), // Update to current time
+      customLocations: importedPlaythrough.customLocations || [],
+      encounters: importedPlaythrough.encounters || {},
+    };
+
+    // Add to store
+    playthroughsStore.playthroughs.push(newPlaythrough);
+
+    // Set as active playthrough
+    playthroughsStore.activePlaythroughId = finalId;
+
+    return finalId;
+  } catch (error) {
+    console.error('Failed to import playthrough:', error);
+
+    // Handle Zod validation errors specifically
+    if (error && typeof error === 'object' && 'issues' in error) {
+      try {
+        const prettyError = z.prettifyError(error as z.ZodError);
+        throw new Error(`Validation failed:\n\n${prettyError}`);
+      } catch {
+        const zodError = error as z.ZodError;
+        if (zodError.issues && zodError.issues.length > 0) {
+          const errorDetails = zodError.issues
+            .map((issue: z.ZodIssue) => {
+              const path =
+                issue.path.length > 0 ? ` at ${issue.path.join('.')}` : '';
+              return `• ${issue.message}${path}`;
+            })
+            .join('\n');
+          throw new Error(`Validation failed:\n\n${errorDetails}`);
+        }
+        throw new Error('Data validation failed');
+      }
+    }
+
+    throw new Error('Invalid playthrough data format');
+  }
+};
+
 const isRandomizedModeEnabled = (): boolean => {
   const activePlaythrough = getActivePlaythrough();
   return activePlaythrough?.gameMode === 'randomized';
@@ -316,5 +382,6 @@ export {
   isRandomizedModeEnabled,
   resetAllPlaythroughs,
   forceSave,
+  importPlaythrough,
   getCurrentTimestamp,
 };

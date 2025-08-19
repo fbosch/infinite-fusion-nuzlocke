@@ -234,7 +234,7 @@ export function PokemonContextMenu({
       ) {
         items.push({
           id: 'move-to-box',
-          label: 'Mark as Stored',
+          label: 'Move to Box',
           icon: Computer,
 
           onClick: handleMoveToBox,
