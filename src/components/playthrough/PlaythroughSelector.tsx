@@ -202,7 +202,7 @@ export default function PlaythroughSelector({
                                 'bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/20 text-blue-700 dark:text-blue-300'
                             )}
                           >
-                            <button
+                            <div
                               onClick={() =>
                                 handlePlaythroughSelect(playthrough.id)
                               }
@@ -337,7 +337,7 @@ export default function PlaythroughSelector({
                                   </button>
                                 )}
                               </div>
-                            </button>
+                            </div>
                           </div>
                         );
                       })}
