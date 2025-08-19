@@ -38,8 +38,13 @@ describe('Custom Location Functionality', () => {
       const id1 = generateCustomLocationId();
       const id2 = generateCustomLocationId();
 
-      expect(id1).toMatch(/^custom_\d+_[a-z0-9]+$/);
-      expect(id2).toMatch(/^custom_\d+_[a-z0-9]+$/);
+      // New format: custom_<timestamp>_<uuid>
+      expect(id1).toMatch(
+        /^custom_\d+_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+      );
+      expect(id2).toMatch(
+        /^custom_\d+_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+      );
       expect(id1).not.toBe(id2);
     });
   });
