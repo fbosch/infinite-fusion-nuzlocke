@@ -70,18 +70,19 @@ export type PlaythroughsState = z.infer<typeof PlaythroughsSchema> & {
 export const ExportedPlaythroughSchema = z.object({
   version: z.string(),
   exportedAt: z.string(),
-  playthrough: z.object({
-    id: z.string(),
-    name: z.string(),
-    gameMode: z.string(),
-    createdAt: z.number(),
-    updatedAt: z.number(),
-    customLocations: z.array(CustomLocationSchema).optional(),
-    encounters: z.record(z.string(), EncounterDataSchema).optional(),
-  }),
+  playthrough: PlaythroughSchema,
 });
 
 export type ExportedPlaythrough = z.infer<typeof ExportedPlaythroughSchema>;
+
+// Schema for importing playthrough data with migration support
+export const ImportedPlaythroughSchema = z.object({
+  version: z.string().optional(),
+  exportedAt: z.string().optional(),
+  playthrough: PlaythroughSchema,
+});
+
+export type ImportedPlaythrough = z.infer<typeof ImportedPlaythroughSchema>;
 
 // Helper type for creating export data from a Playthrough
 export type ExportablePlaythrough = {

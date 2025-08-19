@@ -272,7 +272,49 @@ const isRemixModeEnabled = (): boolean => {
 
 const getGameMode = (): GameMode => {
   const activePlaythrough = getActivePlaythrough();
-  return (activePlaythrough?.gameMode as GameMode) || 'classic';
+  return activePlaythrough?.gameMode || 'classic';
+};
+
+const importPlaythrough = async (importData: unknown): Promise<string> => {
+  try {
+    // Validate the imported data against the schema
+    const { ImportedPlaythroughSchema } = await import('./types');
+    const validatedData = ImportedPlaythroughSchema.parse(importData);
+
+    // Extract the playthrough data
+    const importedPlaythrough = validatedData.playthrough;
+
+    // Check for ID conflicts and generate new ID if needed
+    const existingIds = new Set(playthroughsStore.playthroughs.map(p => p.id));
+    let finalId = importedPlaythrough.id;
+
+    if (existingIds.has(finalId)) {
+      // Generate a new unique ID with timestamp and random suffix
+      finalId = `playthrough_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    // Create the new playthrough with migrated data
+    const newPlaythrough: Playthrough = {
+      id: finalId,
+      name: importedPlaythrough.name,
+      gameMode: importedPlaythrough.gameMode,
+      createdAt: importedPlaythrough.createdAt,
+      updatedAt: Date.now(), // Update to current time
+      customLocations: importedPlaythrough.customLocations || [],
+      encounters: importedPlaythrough.encounters || {},
+    };
+
+    // Add to store
+    playthroughsStore.playthroughs.push(newPlaythrough);
+
+    // Set as active playthrough
+    playthroughsStore.activePlaythroughId = finalId;
+
+    return finalId;
+  } catch (error) {
+    console.error('Failed to import playthrough:', error);
+    throw new Error('Invalid playthrough data format');
+  }
 };
 
 const isRandomizedModeEnabled = (): boolean => {
@@ -316,5 +358,6 @@ export {
   isRandomizedModeEnabled,
   resetAllPlaythroughs,
   forceSave,
+  importPlaythrough,
   getCurrentTimestamp,
 };

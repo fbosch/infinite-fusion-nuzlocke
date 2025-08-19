@@ -177,6 +177,41 @@ export default function PlaythroughSelector({
     []
   );
 
+  // Handle import playthrough
+  const handleImportClick = useCallback(async () => {
+    try {
+      // Create a file input element
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = async e => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (!file) return;
+
+        try {
+          const text = await file.text();
+          const data = JSON.parse(text);
+
+          // Import the playthrough
+          const newId = await playthroughActions.importPlaythrough(data);
+          console.log('Successfully imported playthrough:', newId);
+
+          // Clean up
+          input.remove();
+        } catch (error) {
+          console.error('Failed to import playthrough:', error);
+          alert('Failed to import playthrough. Please check the file format.');
+          input.remove();
+        }
+      };
+
+      input.click();
+    } catch (error) {
+      console.error('Import failed:', error);
+      alert('Import failed. Please try again.');
+    }
+  }, []);
+
   // Handle arrow key navigation using refs
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent, currentIndex: number) => {
@@ -269,10 +304,7 @@ export default function PlaythroughSelector({
                         Your Playthroughs
                       </span>
                       <button
-                        onClick={() => {
-                          // TODO: Implement import functionality
-                          console.log('Import playthrough clicked');
-                        }}
+                        onClick={handleImportClick}
                         className={clsx(
                           'px-2 py-1 text-xs font-medium rounded-md flex items-center gap-1.5',
                           'bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400',
