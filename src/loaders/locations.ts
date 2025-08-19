@@ -6,6 +6,7 @@ import { getStarterPokemonByGameMode } from '@/loaders/starters';
 import { isStarterLocation } from '@/constants/special-locations';
 import { GameMode } from '../stores/playthroughs';
 import { EncounterSource, type PokemonEncounter } from './encounters';
+import { generatePrefixedId } from '@/utils/id';
 
 // Location schema
 export const LocationSchema = z.object({
@@ -286,7 +287,7 @@ export async function hasLocationEncounters(
 
 // Generate a unique ID for custom locations
 export function generateCustomLocationId(): string {
-  return `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return generatePrefixedId('custom');
 }
 
 // Get the index where a custom location should be inserted after a given location

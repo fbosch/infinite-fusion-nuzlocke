@@ -10,6 +10,7 @@ import {
   saveToIndexedDB,
 } from './persistence';
 import { z } from 'zod';
+import { generatePrefixedId } from '@/utils/id';
 
 // Default state
 const defaultState: PlaythroughsState = {
@@ -25,7 +26,7 @@ let cachedActiveId: string | undefined = undefined;
 
 // Helper functions
 const generatePlaythroughId = (): string => {
-  return `playthrough_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return generatePrefixedId('playthrough');
 };
 
 const getCurrentTimestamp = (): number => {
@@ -290,8 +291,8 @@ const importPlaythrough = async (importData: unknown): Promise<string> => {
     let finalId = importedPlaythrough.id;
 
     if (existingIds.has(finalId)) {
-      // Generate a new unique ID with timestamp and random suffix
-      finalId = `playthrough_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // Generate a new unique ID with timestamp and crypto-secure random suffix
+      finalId = generatePrefixedId('playthrough');
     }
 
     // Create the new playthrough with migrated data

@@ -88,9 +88,7 @@ export default function PlaythroughSelector({
 
   // Handle delete playthrough click
   const handleDeleteClick = useCallback(
-    (playthrough: { id: string; name: string }, e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+    (playthrough: { id: string; name: string }) => {
       setPlaythroughToDelete(playthrough as Playthrough);
       setShowDeleteConfirm(true);
     },
@@ -371,22 +369,16 @@ export default function PlaythroughSelector({
                                 </button>
                                 {allPlaythroughs.length > 1 && (
                                   <button
-                                    onClick={e =>
-                                      handleDeleteClick(playthrough, e)
-                                    }
+                                    onClick={e => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleDeleteClick(playthrough);
+                                    }}
                                     onKeyDown={e => {
                                       if (e.key === 'Enter' || e.key === ' ') {
                                         e.preventDefault();
                                         e.stopPropagation();
-                                        // Create a synthetic event for the delete handler
-                                        const syntheticEvent = {
-                                          preventDefault: () => {},
-                                          stopPropagation: () => {},
-                                        } as React.MouseEvent;
-                                        handleDeleteClick(
-                                          playthrough,
-                                          syntheticEvent
-                                        );
+                                        handleDeleteClick(playthrough);
                                       }
                                     }}
                                     className={clsx(
