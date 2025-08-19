@@ -1,5 +1,6 @@
 ---
-title: Testing DOM Features in Vitest Browser Mode
+globs: *.test.*
+alwaysApply: false
 ---
 
 # Testing DOM Features in Vitest Browser Mode
