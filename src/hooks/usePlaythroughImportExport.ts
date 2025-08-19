@@ -3,8 +3,8 @@ import {
   playthroughActions,
   type Playthrough,
   type ExportedPlaythrough,
+  type GameMode,
 } from '@/stores/playthroughs';
-import { GameMode } from '@/types';
 
 // Helper function to export playthrough data as JSON
 const exportPlaythrough = (playthrough: Playthrough) => {
