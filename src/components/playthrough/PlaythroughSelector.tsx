@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   ChevronDown,
   Album,
@@ -62,6 +62,15 @@ export default function PlaythroughSelector({
   const [playthroughToDelete, setPlaythroughToDelete] =
     useState<Playthrough | null>(null);
   const allPlaythroughs = useAllPlaythroughs();
+  const playthroughRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Initialize refs array when playthroughs change
+  useEffect(() => {
+    playthroughRefs.current = playthroughRefs.current.slice(
+      0,
+      allPlaythroughs.length
+    );
+  }, [allPlaythroughs.length]);
 
   // Switch to a different playthrough
   const handlePlaythroughSelect = useCallback(async (playthroughId: string) => {
@@ -101,6 +110,38 @@ export default function PlaythroughSelector({
     setShowDeleteConfirm(false);
     setPlaythroughToDelete(null);
   }, []);
+
+  // Handle arrow key navigation using refs
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent, currentIndex: number) => {
+      e.preventDefault();
+
+      // Get the sorted playthroughs (newest first)
+      const sortedPlaythroughs = allPlaythroughs.toSorted(
+        (a, b) => b.createdAt - a.createdAt
+      );
+
+      switch (e.key) {
+        case 'ArrowDown':
+          const nextIndex =
+            currentIndex < sortedPlaythroughs.length - 1 ? currentIndex + 1 : 0;
+          playthroughRefs.current[nextIndex]?.focus();
+          break;
+        case 'ArrowUp':
+          const prevIndex =
+            currentIndex > 0 ? currentIndex - 1 : sortedPlaythroughs.length - 1;
+          playthroughRefs.current[prevIndex]?.focus();
+          break;
+        case 'Home':
+          playthroughRefs.current[0]?.focus();
+          break;
+        case 'End':
+          playthroughRefs.current[sortedPlaythroughs.length - 1]?.focus();
+          break;
+      }
+    },
+    [allPlaythroughs]
+  );
 
   return (
     <>
@@ -203,9 +244,49 @@ export default function PlaythroughSelector({
                             )}
                           >
                             <div
+                              ref={el => {
+                                // Use the index in the sorted array (newest first)
+                                const sortedPlaythroughs =
+                                  allPlaythroughs.toSorted(
+                                    (a, b) => b.createdAt - a.createdAt
+                                  );
+                                const index = sortedPlaythroughs.findIndex(
+                                  p => p.id === playthrough.id
+                                );
+                                if (index >= 0) {
+                                  playthroughRefs.current[index] = el;
+                                }
+                              }}
                               onClick={() =>
                                 handlePlaythroughSelect(playthrough.id)
                               }
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  handlePlaythroughSelect(playthrough.id);
+                                } else if (
+                                  e.key === 'ArrowDown' ||
+                                  e.key === 'ArrowUp' ||
+                                  e.key === 'Home' ||
+                                  e.key === 'End'
+                                ) {
+                                  // Use the index in the sorted array (newest first)
+                                  const sortedPlaythroughs =
+                                    allPlaythroughs.toSorted(
+                                      (a, b) => b.createdAt - a.createdAt
+                                    );
+                                  const index = sortedPlaythroughs.findIndex(
+                                    p => p.id === playthrough.id
+                                  );
+                                  handleKeyDown(e, index);
+                                }
+                              }}
+                              tabIndex={0}
+                              role='button'
+                              aria-label={`Select playthrough: ${playthrough.name}`}
+                              data-playthrough-index={allPlaythroughs
+                                .toSorted((a, b) => b.createdAt - a.createdAt)
+                                .findIndex(p => p.id === playthrough.id)}
                               className={clsx(
                                 'group/menu-item flex w-full items-center justify-between px-4 py-3.5 text-sm',
                                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset text-left transition-all duration-200 ease-out',
