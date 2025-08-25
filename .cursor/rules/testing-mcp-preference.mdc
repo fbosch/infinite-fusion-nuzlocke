@@ -1,0 +1,117 @@
+---
+description: Always use MCP vitest server for running tests instead of terminal commands
+globs: []
+alwaysApply: true
+---
+
+# Testing with MCP Server
+
+Always use the MCP vitest server for running tests instead of raw terminal commands.
+
+## Required Setup
+
+Before running any tests, always set the project root:
+
+```typescript
+mcp_vitest_set_project_root({ path: "/absolute/path/to/project" })
+```
+
+## Running Tests
+
+Use MCP tools instead of terminal commands:
+
+### ✅ Preferred: MCP Commands
+
+```typescript
+// Run specific test file
+mcp_vitest_run_tests({
+  target: "src/components/Button.test.ts",
+  format: "detailed",
+  showLogs: true
+})
+
+// Run tests in directory
+mcp_vitest_run_tests({
+  target: "src/components/__tests__",
+  format: "summary"
+})
+
+// Coverage analysis
+mcp_vitest_analyze_coverage({
+  target: "src/components",
+  format: "detailed"
+})
+```
+
+### ❌ Avoid: Raw Terminal Commands
+
+```bash
+# Don't use these directly
+pnpm test:run -- src/components/Button.test.ts
+vitest run src/components
+```
+
+## Benefits of MCP Approach
+
+- **Structured Output**: JSON format for better AI analysis
+- **Better Error Reporting**: Clear, actionable error messages
+- **Built-in Safety**: Prevents accidental full project runs
+- **Consistent Format**: Always gets proper test results
+- **Debug Support**: Built-in console log capture
+
+## When to Use Terminal Fallback
+
+Only use terminal commands when:
+- MCP server is unavailable or fails
+- Need interactive test watching (`pnpm test`)
+- Running commands not supported by MCP
+
+## Test Development Workflow
+
+1. **Set Project Root**: Always call `mcp_vitest_set_project_root` first
+2. **Run Tests**: Use `mcp_vitest_run_tests` with appropriate target
+3. **Debug Failures**: Use `showLogs: true` for failing tests
+4. **Check Coverage**: Use `mcp_vitest_analyze_coverage` for gaps
+5. **Iterate**: Use MCP for faster feedback loops
+
+## Examples
+
+### Testing New Features
+```typescript
+// Set up
+await mcp_vitest_set_project_root({ path: "/absolute/project/path" });
+
+// Run new test file
+await mcp_vitest_run_tests({
+  target: "src/components/NewFeature.test.tsx",
+  format: "detailed",
+  showLogs: true
+});
+```
+
+### Debugging Test Failures
+```typescript
+// Focus on failing tests with logs
+await mcp_vitest_run_tests({
+  target: "src/components/Button.test.tsx", 
+  format: "detailed",
+  showLogs: true
+});
+```
+
+### Coverage Analysis
+```typescript
+// Check test coverage for component
+await mcp_vitest_analyze_coverage({
+  target: "src/components/Button.tsx",
+  format: "detailed"
+});
+```
+
+## Remember
+
+- Always use MCP tools for test execution
+- Set project root before running tests
+- Use detailed format for debugging
+- Enable logs when tests fail
+- Fall back to terminal only when MCP fails

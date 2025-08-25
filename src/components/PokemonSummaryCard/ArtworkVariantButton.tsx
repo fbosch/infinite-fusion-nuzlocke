@@ -26,15 +26,33 @@ export function ArtworkVariantButton({
   // Get encounter data directly - only this button will rerender when this encounter changes
   const encounter = useEncounter(locationId);
   const isShiftPressed = useShiftKey();
-  const { variant: currentVariant, updateVariant } = usePreferredVariantState(
-    encounter?.head?.id ?? null,
-    encounter?.body?.id ?? null
+
+  // Determine which Pokemon to display based on active/inactive states
+  const displayPokemon = getDisplayPokemon(
+    encounter?.head ?? null,
+    encounter?.body ?? null,
+    encounter?.isFusion ?? false
   );
 
-  // Use React Query hook for sprite variants
+  // Determine which Pokemon IDs to use for variants and preferred state
+  // When fusion is off, use the single Pokemon ID; when fusion is on, use both
+  const headId = displayPokemon.isFusion
+    ? (displayPokemon.head?.id ?? null)
+    : (displayPokemon.head?.id ?? displayPokemon.body?.id ?? null);
+  const bodyId = displayPokemon.isFusion
+    ? (displayPokemon.body?.id ?? null)
+    : null;
+
+  // Use the determined Pokemon IDs for preferred variant state
+  const { variant: currentVariant, updateVariant } = usePreferredVariantState(
+    headId,
+    bodyId
+  );
+
+  // Use React Query hook for sprite variants with determined Pokemon IDs
   const { data: variants, isLoading } = useSpriteVariants(
-    encounter?.head?.id,
-    encounter?.body?.id,
+    headId,
+    bodyId,
     shouldLoad
   );
 
@@ -45,13 +63,6 @@ export function ArtworkVariantButton({
     if (disabled || !hasVariants || !variants) return;
 
     try {
-      // Determine which Pokemon this variant applies to based on display state
-      const displayPokemon = getDisplayPokemon(
-        encounter?.head ?? null,
-        encounter?.body ?? null,
-        encounter?.isFusion ?? false
-      );
-
       // Get current variant and find next one
       const currentIndex = variants.indexOf(currentVariant);
       const nextIndex = isShiftPressed
@@ -71,9 +82,6 @@ export function ArtworkVariantButton({
     variants,
     currentVariant,
     isShiftPressed,
-    encounter?.head,
-    encounter?.body,
-    encounter?.isFusion,
     updateVariant,
   ]);
 

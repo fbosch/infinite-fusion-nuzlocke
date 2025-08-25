@@ -26,10 +26,25 @@ export default function SummaryCard({
   const eitherPokemonIsEgg =
     isEggId(encounterData?.head?.id) || isEggId(encounterData?.body?.id);
 
+  // Determine which Pokemon to display based on active/inactive states
+  const displayPokemon = getDisplayPokemon(
+    encounterData?.head ?? null,
+    encounterData?.body ?? null,
+    encounterData?.isFusion ?? false
+  );
+
+  // Determine which Pokemon IDs to use for credits based on display state
+  const creditsHeadId = displayPokemon.isFusion
+    ? (displayPokemon.head?.id ?? null)
+    : (displayPokemon.head?.id ?? displayPokemon.body?.id ?? null);
+  const creditsBodyId = displayPokemon.isFusion
+    ? (displayPokemon.body?.id ?? null)
+    : null;
+
   // Preload credits for the artwork variants when they exist
   useSpriteCredits(
-    encounterData?.head?.id,
-    encounterData?.body?.id,
+    creditsHeadId,
+    creditsBodyId,
     shouldLoad && !eitherPokemonIsEgg
   );
 
@@ -45,13 +60,6 @@ export default function SummaryCard({
   if (!encounterData?.head && !encounterData?.body) {
     return null;
   }
-
-  // Determine which Pokemon to display based on active/inactive states
-  const displayPokemon = getDisplayPokemon(
-    encounterData?.head ?? null,
-    encounterData?.body ?? null,
-    encounterData?.isFusion ?? false
-  );
 
   const name = getNicknameText(
     displayPokemon.head,
@@ -71,9 +79,19 @@ export default function SummaryCard({
 
   const head = displayPokemon.head;
   const body = displayPokemon.body;
+
+  // Determine which Pokemon IDs to use for the link based on display state
+  // When fusion is off, use the single Pokemon ID; when fusion is on, use both
+  const linkHeadId = displayPokemon.isFusion
+    ? (displayPokemon.head?.id ?? null)
+    : (displayPokemon.head?.id ?? displayPokemon.body?.id ?? null);
+  const linkBodyId = displayPokemon.isFusion
+    ? (displayPokemon.body?.id ?? null)
+    : null;
+
   const link = eitherPokemonIsEgg
     ? '#'
-    : `https://infinitefusiondex.com/details/${head?.id && body?.id ? `${head.id}.${body.id}` : head?.id || body?.id}`;
+    : `https://infinitefusiondex.com/details/${linkHeadId && linkBodyId ? `${linkHeadId}.${linkBodyId}` : linkHeadId || linkBodyId}`;
 
   const SpriteWrapper = eitherPokemonIsEgg ? 'div' : 'a';
   const spriteWrapperProps = eitherPokemonIsEgg

@@ -384,6 +384,7 @@ export function PokemonContextMenu({
         onClose={() => setIsVariantModalOpen(false)}
         headId={displayPokemon.head?.id}
         bodyId={displayPokemon.body?.id}
+        isFusion={encounterData?.isFusion}
       />
 
       {encounterData?.head && (

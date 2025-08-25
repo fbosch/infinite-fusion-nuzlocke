@@ -71,9 +71,16 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
       shouldLoad && hasHovered.current === true && !hasEgg
     );
 
+    // Determine which Pokemon IDs to use for preferred variant based on fusion state
+    // When fusion is off, use the single Pokemon ID; when fusion is on, use both
+    const variantHeadId = isFusion
+      ? (head?.id ?? null)
+      : (head?.id ?? body?.id ?? null);
+    const variantBodyId = isFusion ? (body?.id ?? null) : null;
+
     const { variant: preferredVariant } = usePreferredVariantState(
-      head?.id ?? null,
-      body?.id ?? null
+      variantHeadId,
+      variantBodyId
     );
 
     const { primary, secondary } = useFusionTypesFromPokemon(
