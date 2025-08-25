@@ -19,7 +19,7 @@ export default function MenuItems() {
 
   return (
     <>
-      <div className='flex items-start gap-1'>
+      <div className='flex items-start gap-3'>
         <CursorTooltip
           content={
             <div className='flex flex-col gap-1 min-w-32'>

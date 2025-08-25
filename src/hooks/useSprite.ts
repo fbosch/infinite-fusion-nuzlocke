@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { spriteQueries } from '@/lib/queries/sprites';
-import { useSnapshot } from 'valtio';
+import { useValtioSync } from './useValtioSync';
 import {
   getPreferredVariant,
   setPreferredVariant,
@@ -42,16 +42,18 @@ export function useSpriteCredits(
 
 /**
  * Simple hook for preferred variants - uses Valtio for reactivity
+ * Compatible with React Compiler by using useValtioSync utility
  */
 export function usePreferredVariantState(
   headId: number | null,
   bodyId: number | null
 ) {
-  // Use useSnapshot to make the component reactive to changes in the Valtio store
-  useSnapshot(preferredVariants);
-
-  // Get the current value from the Valtio store
-  const variant = getPreferredVariant(headId, bodyId) ?? '';
+  // Use useValtioSync for React Compiler compatibility
+  const variant = useValtioSync(
+    preferredVariants,
+    () => getPreferredVariant(headId, bodyId) ?? '',
+    ''
+  );
 
   // Update function that immediately updates the Valtio store
   const updateVariant = async (newVariant: string) => {
@@ -61,7 +63,7 @@ export function usePreferredVariantState(
   return {
     variant,
     updateVariant,
-    isLoading: false, // No loading state needed
+    isLoading: false,
   };
 }
 

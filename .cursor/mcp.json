@@ -8,6 +8,10 @@
       "type": "http",
       "url": "https://server.smithery.ai/@NaveenBandarage/poke-mcp/mcp",
       "headers": {}
+    },
+    "gitmcp": {
+      "type": "http",
+      "url": "https://gitmcp.io/fbosch/infinite-fusion-nuzlocke"
     }
   }
 }
