@@ -19,7 +19,7 @@ export default function MenuItems() {
 
   return (
     <>
-      <div className='flex items-start gap-3'>
+      <div className='flex items-center gap-1 mr-3'>
         <CursorTooltip
           content={
             <div className='flex flex-col gap-1 min-w-32'>
@@ -34,12 +34,12 @@ export default function MenuItems() {
           <button
             type='button'
             className={clsx(
-              'group relative p-1.5 rounded-md border border-transparent',
-              'bg-transparent text-gray-400 dark:text-gray-500',
-              'hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-600 dark:hover:text-gray-300',
-              'focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-300 focus-visible:ring-offset-1',
+              'inline-flex items-center justify-center w-9 h-9 rounded-md',
+              'bg-transparent text-gray-500 dark:text-gray-400',
+              'hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
               'transition-all duration-150 cursor-pointer',
-              'hover:scale-105'
+              'border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             )}
             aria-label='Open Pokémon PC'
             onClick={() => setDrawerOpen(true)}
@@ -62,12 +62,12 @@ export default function MenuItems() {
           <button
             type='button'
             className={clsx(
-              'group relative p-1.5 rounded-md border border-transparent',
-              'bg-transparent text-gray-400 dark:text-gray-500',
-              'hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-600 dark:hover:text-gray-300',
-              'focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-300 focus-visible:ring-offset-1',
+              'inline-flex items-center justify-center w-9 h-9 rounded-md',
+              'bg-transparent text-gray-500 dark:text-gray-400',
+              'hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
               'transition-all duration-150 cursor-pointer',
-              'hover:scale-105'
+              'border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             )}
             aria-label='Open Settings'
             onClick={() => setSettingsOpen(true)}

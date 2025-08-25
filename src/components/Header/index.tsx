@@ -33,7 +33,7 @@ export default function Header() {
                 </h1>
               </div>
             </Link>
-            <div className='flex items-start gap-2'>
+            <div className='flex items-start'>
               <MenuItems />
               <PlaythroughMenu />
             </div>
