@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "vitest": {
+      "command": "npx",
+      "args": ["-y", "@djankies/vitest-mcp"]
+    },
+    "Pokémcp": {
+      "type": "http",
+      "url": "https://server.smithery.ai/@NaveenBandarage/poke-mcp/mcp",
+      "headers": {}
+    }
+  }
+}
