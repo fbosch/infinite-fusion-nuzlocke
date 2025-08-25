@@ -58,9 +58,9 @@ const GameModeToggle = React.memo(function GameModeToggle() {
     <div className='flex items-center gap-2'>
       <fieldset
         className={clsx(
-          'relative flex items-center bg-white dark:bg-gray-800 rounded-xl p-0.5 sm:p-1',
-          'border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500',
-          'font-medium shadow-elevation-1 hover:shadow-elevation-2 backdrop-blur-sm',
+          'relative flex items-center bg-white dark:bg-gray-800 rounded-t-xl p-0.5 sm:p-1',
+          'border-b-0 border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500',
+          'font-medium backdrop-blur-sm',
           'h-[40px] sm:h-[44px] w-[180px] sm:w-auto',
           'transition-all duration-200 ease-out',
           !activePlaythrough && 'opacity-50'

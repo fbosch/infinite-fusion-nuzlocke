@@ -148,7 +148,7 @@ export default function PlaythroughSelector({
 
   return (
     <>
-      <div className={clsx('relative group', className)}>
+      <div className={clsx('relative group l', className)}>
         {/* Playthrough Selector Dropdown */}
         <Popover className='relative'>
           {({ open }) => (
@@ -158,16 +158,15 @@ export default function PlaythroughSelector({
                   'flex items-center justify-between gap-3 px-4 py-2.5 text-sm',
                   'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700',
                   'border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500',
-                  'rounded-xl transition-all duration-200 ease-out',
+                  'rounded-b-xl transition-all duration-200 ease-out',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
                   'focus-visible:border-blue-500 dark:focus-visible:border-blue-400',
                   'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100',
                   'disabled:opacity-50 disabled:cursor-not-allowed',
-                  'w-[200px] sm:min-w-[220px] sm:w-auto',
+                  'w-full md:w-[calc(100%-1.75rem)]',
                   'cursor-pointer',
                   'h-[40px] sm:h-[44px]',
                   'font-medium',
-                  'shadow-card hover:shadow-card-hover',
                   'backdrop-blur-sm'
                 )}
                 disabled={isLoading}
