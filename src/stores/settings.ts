@@ -48,7 +48,7 @@ const loadSettings = (): Settings => {
   if (typeof window === 'undefined') return dynamicDefaults;
 
   try {
-    const stored = localStorage.getItem('nuzlocke-settings');
+    const stored = localStorage.getItem('settings');
     if (stored) {
       const parsed = JSON.parse(stored);
       // Validate and parse with Zod, merging with dynamic defaults for missing fields
@@ -85,7 +85,7 @@ if (typeof window !== 'undefined') {
       // Validate settings before saving
       const result = SettingsSchema.safeParse(settingsStore);
       if (result.success) {
-        localStorage.setItem('nuzlocke-settings', JSON.stringify(result.data));
+        localStorage.setItem('settings', JSON.stringify(result.data));
       } else {
         console.error('Invalid settings data, not saving:', result.error);
       }
@@ -129,7 +129,7 @@ export const settingsActions = {
   // Function to re-evaluate defaults when playthrough changes
   // This should be called when switching playthroughs if the setting hasn't been explicitly set
   refreshDefaults: () => {
-    const stored = localStorage.getItem('nuzlocke-settings');
+    const stored = localStorage.getItem('settings');
     if (!stored) {
       // No settings stored yet, apply dynamic defaults
       updateSettings(getDefaultSettings());

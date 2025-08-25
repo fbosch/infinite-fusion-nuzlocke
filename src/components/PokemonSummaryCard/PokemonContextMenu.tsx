@@ -15,6 +15,8 @@ import BodyIcon from '@/assets/images/body.svg';
 import { useSpriteVariants, usePreferredVariantState } from '@/hooks/useSprite';
 import { isEggId, type PokemonOptionType } from '@/loaders/pokemon';
 import { playthroughActions } from '@/stores/playthroughs';
+import { settingsStore } from '@/stores/settings';
+import { useSnapshot } from 'valtio';
 import { getDisplayPokemon } from './utils';
 import dynamic from 'next/dynamic';
 import { getSpriteId } from '../../lib/sprites';
@@ -50,6 +52,8 @@ export function PokemonContextMenu({
   encounterData,
   shouldLoad,
 }: PokemonContextMenuProps) {
+  const settings = useSnapshot(settingsStore);
+
   // Determine which Pokemon to display based on active/inactive states
   const displayPokemon = getDisplayPokemon(
     encounterData?.head ?? null,
@@ -274,16 +278,17 @@ export function PokemonContextMenu({
         });
       }
 
-      // Add move actions if there are Pokemon
-      if (hasPokemon && !eitherPokemonIsEgg) {
-        items.push({
-          id: 'separator-move',
-          separator: true,
-        });
+      // Add move actions if there are Pokemon and setting is enabled
+      if (
+        hasPokemon &&
+        !eitherPokemonIsEgg &&
+        settings.moveEncountersBetweenLocations
+      ) {
+        const moveActions = [];
 
         // Show "Move Head" if head Pokemon exists
         if (encounterData?.head) {
-          items.push({
+          moveActions.push({
             id: 'move-head',
             label: 'Move Head',
             icon: HeadIcon,
@@ -295,7 +300,7 @@ export function PokemonContextMenu({
 
         // Show "Move Body" if body Pokemon exists
         if (encounterData?.body) {
-          items.push({
+          moveActions.push({
             id: 'move-body',
             label: 'Move Body',
             icon: BodyIcon,
@@ -303,6 +308,15 @@ export function PokemonContextMenu({
               setIsMoveBodyModalOpen(true);
             },
           });
+        }
+
+        // Only add separator and move actions if there are actually move actions to show
+        if (moveActions.length > 0) {
+          items.push({
+            id: 'separator-move',
+            separator: true,
+          });
+          items.push(...moveActions);
         }
       }
     }
@@ -342,6 +356,7 @@ export function PokemonContextMenu({
     eitherPokemonIsEgg,
     hasArtVariants,
     isLoadingVariants,
+    settings.moveEncountersBetweenLocations,
     handleMarkAsDeceased,
     handleMoveToBox,
     handleMarkAsCaptured,

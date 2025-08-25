@@ -19,6 +19,8 @@ import {
   getActivePlaythrough,
   useCustomLocations,
 } from '@/stores/playthroughs';
+import { settingsStore } from '@/stores/settings';
+import { useSnapshot } from 'valtio';
 import TypePills from '../TypePills';
 import dynamic from 'next/dynamic';
 import usePokemonTypes from '../../hooks/usePokemonTypes';
@@ -53,6 +55,7 @@ export function DraggableComboboxSprite({
   const pokemon = dragPreview || value;
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const customLocations = useCustomLocations();
+  const settings = useSnapshot(settingsStore);
 
   const { primary, secondary } = usePokemonTypes({ id: pokemon?.id });
   const { evolutions, preEvolution } = usePokemonEvolutionData(
@@ -173,7 +176,8 @@ export function DraggableComboboxSprite({
       value &&
       locationId &&
       value.originalLocation &&
-      value.originalLocation !== locationId
+      value.originalLocation !== locationId &&
+      settings.moveEncountersBetweenLocations
     ) {
       const originalLocation = getLocationByIdFromMerged(
         value.originalLocation,
@@ -195,7 +199,12 @@ export function DraggableComboboxSprite({
     }
 
     // Add move option if we have a Pokemon and location with available destinations
-    if (value && locationId && availableLocations.length > 0) {
+    if (
+      value &&
+      locationId &&
+      availableLocations.length > 0 &&
+      settings.moveEncountersBetweenLocations
+    ) {
       options.push({
         id: 'move',
         label: 'Move to Location',
@@ -204,7 +213,12 @@ export function DraggableComboboxSprite({
       });
     }
 
-    if (value && locationId && (preEvolution || evolutions?.length)) {
+    if (
+      value &&
+      locationId &&
+      (preEvolution || evolutions?.length) &&
+      settings.moveEncountersBetweenLocations
+    ) {
       options.push({
         id: 'evolve-separator',
         separator: true,
@@ -344,6 +358,7 @@ export function DraggableComboboxSprite({
     locationId,
     customLocations,
     availableLocations.length,
+    settings.moveEncountersBetweenLocations,
     handleMoveToOriginalLocation,
     wouldCreateEggFusionAtOriginal,
     preEvolution,

@@ -153,7 +153,7 @@ describe('Settings Store', () => {
         version: '1.0.0',
       };
 
-      localStorage.setItem('nuzlocke-settings', JSON.stringify(storedSettings));
+      localStorage.setItem('settings', JSON.stringify(storedSettings));
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
@@ -186,7 +186,7 @@ describe('Settings Store', () => {
         version: '1.0.0',
       };
 
-      localStorage.setItem('nuzlocke-settings', JSON.stringify(storedSettings));
+      localStorage.setItem('settings', JSON.stringify(storedSettings));
       mockGetActivePlaythrough.mockReturnValue({
         id: 'old-playthrough',
         name: 'Old Run',
@@ -208,7 +208,7 @@ describe('Settings Store', () => {
         version: '1.0.0',
       };
 
-      localStorage.setItem('nuzlocke-settings', JSON.stringify(storedSettings));
+      localStorage.setItem('settings', JSON.stringify(storedSettings));
       mockGetActivePlaythrough.mockReturnValue({
         id: 'old-playthrough',
         name: 'Old Run',
@@ -225,7 +225,7 @@ describe('Settings Store', () => {
     });
 
     it('handles corrupted localStorage data gracefully', async () => {
-      localStorage.setItem('nuzlocke-settings', 'invalid-json');
+      localStorage.setItem('settings', 'invalid-json');
 
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -249,10 +249,7 @@ describe('Settings Store', () => {
         version: 123,
       };
 
-      localStorage.setItem(
-        'nuzlocke-settings',
-        JSON.stringify(invalidSettings)
-      );
+      localStorage.setItem('settings', JSON.stringify(invalidSettings));
 
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -353,7 +350,7 @@ describe('Settings Store', () => {
     it('refreshes defaults only when setting was undefined', () => {
       // Mock stored settings without moveEncountersBetweenLocations
       const storedSettings = { version: '1.0.0' };
-      localStorage.setItem('nuzlocke-settings', JSON.stringify(storedSettings));
+      localStorage.setItem('settings', JSON.stringify(storedSettings));
 
       mockGetActivePlaythrough.mockReturnValue({
         id: 'old-playthrough',
@@ -374,7 +371,7 @@ describe('Settings Store', () => {
         moveEncountersBetweenLocations: false,
         version: '1.0.0',
       };
-      localStorage.setItem('nuzlocke-settings', JSON.stringify(storedSettings));
+      localStorage.setItem('settings', JSON.stringify(storedSettings));
 
       mockGetActivePlaythrough.mockReturnValue({
         id: 'old-playthrough',
@@ -399,7 +396,7 @@ describe('Settings Store', () => {
       await new Promise(resolve => setTimeout(resolve, 10));
 
       // Should have saved to localStorage with updated settings
-      const stored = localStorage.getItem('nuzlocke-settings');
+      const stored = localStorage.getItem('settings');
       expect(stored).not.toBeNull();
       expect(stored!).toContain('"moveEncountersBetweenLocations":true');
     });
