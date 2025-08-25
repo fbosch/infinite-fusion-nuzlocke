@@ -223,7 +223,13 @@ export function useComboboxDragAndDrop({
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       e.stopPropagation();
-      e.dataTransfer.dropEffect = 'copy';
+
+      // If move operations are disabled, show appropriate drop effect
+      if (!settings.moveEncountersBetweenLocations) {
+        e.dataTransfer.dropEffect = 'copy';
+      } else {
+        e.dataTransfer.dropEffect = 'copy';
+      }
 
       // Cancel pending drag leave timeout
       if (dragLeaveAnimationRef.current !== null) {

@@ -369,7 +369,7 @@ export function DraggableComboboxSprite({
   if (!pokemon) return null;
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    if (disabled) {
+    if (disabled || !settings.moveEncountersBetweenLocations) {
       e.preventDefault();
       return;
     }
@@ -444,15 +444,17 @@ export function DraggableComboboxSprite({
                     </div>
                   )}
                 <div className='flex items-center text-xs gap-2'>
-                  <div className='flex items-center gap-1'>
-                    <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
-                      <Hand className='size-2.5' />
-                      <span className='font-medium text-xs'>L</span>
+                  {settings.moveEncountersBetweenLocations && (
+                    <div className='flex items-center gap-1'>
+                      <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
+                        <Hand className='size-2.5' />
+                        <span className='font-medium text-xs'>L</span>
+                      </div>
+                      <span className='text-gray-600 dark:text-gray-300 text-xs'>
+                        Grab
+                      </span>
                     </div>
-                    <span className='text-gray-600 dark:text-gray-300 text-xs'>
-                      Grab
-                    </span>
-                  </div>
+                  )}
                   <div className='flex items-center gap-1'>
                     <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
                       <MousePointer className='size-2.5' />
@@ -469,15 +471,16 @@ export function DraggableComboboxSprite({
             <div
               className={clsx(
                 'absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md',
-                'size-12.5 flex items-center justify-center active:cursor-grabbing',
+                'size-12.5 flex items-center justify-center',
                 'group-focus-within/input:border-blue-500',
                 {
-                  'cursor-grab': !disabled,
+                  'cursor-grab active:cursor-grabbing':
+                    !disabled && settings.moveEncountersBetweenLocations,
                   'cursor-not-allowed opacity-50': disabled,
                   'pointer-events-none': dragPreview || disabled,
                 }
               )}
-              draggable={!disabled}
+              draggable={!disabled && settings.moveEncountersBetweenLocations}
               onDragStart={handleDragStart}
             >
               <PokemonSprite
