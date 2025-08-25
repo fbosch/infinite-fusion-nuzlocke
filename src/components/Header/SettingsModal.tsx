@@ -5,6 +5,7 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react';
+import { Switch, Field, Label, Description } from '@headlessui/react';
 import { X, Monitor, Sun, Moon, Move } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
@@ -29,30 +30,6 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   if (!mounted) {
     return null;
   }
-
-  const ToggleSwitch = ({
-    enabled,
-    onChange,
-  }: {
-    enabled: boolean;
-    onChange: () => void;
-  }) => (
-    <button
-      type='button'
-      onClick={onChange}
-      className={clsx(
-        'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-        enabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
-      )}
-    >
-      <span
-        className={clsx(
-          'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-          enabled ? 'translate-x-6' : 'translate-x-1'
-        )}
-      />
-    </button>
-  );
 
   return (
     <Dialog open={isOpen} onClose={onClose} className='relative z-50 group'>
@@ -126,25 +103,28 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               </div>
             </div>
 
-            <div className='flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700'>
+            <Field className='flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700'>
               <div className='flex items-center gap-3'>
                 <div className='flex-shrink-0 p-2 rounded-md bg-gray-100 dark:bg-gray-800'>
                   <Move className='h-4 w-4 text-gray-600 dark:text-gray-300' />
                 </div>
                 <div>
-                  <h3 className='text-sm font-medium text-gray-900 dark:text-white'>
+                  <Label className='text-sm font-medium text-gray-900 dark:text-white'>
                     Move Encounters
-                  </h3>
-                  <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                  </Label>
+                  <Description className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
                     Allow moving encounters between locations
-                  </p>
+                  </Description>
                 </div>
               </div>
-              <ToggleSwitch
-                enabled={settings.moveEncountersBetweenLocations}
+              <Switch
+                checked={settings.moveEncountersBetweenLocations}
                 onChange={settingsActions.toggleMoveEncountersBetweenLocations}
-              />
-            </div>
+                className='group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition data-checked:bg-blue-600'
+              >
+                <span className='size-4 translate-x-1 rounded-full bg-white transition group-data-checked:translate-x-6' />
+              </Switch>
+            </Field>
           </div>
 
           <div className='flex justify-end pt-4'>
