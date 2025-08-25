@@ -109,10 +109,10 @@ export default function PlaythroughSelector({
   }, [playthroughToDelete]);
 
   // Cancel delete
-  const handleCancelDelete = useCallback(() => {
+  const handleCancelDelete = () => {
     setShowDeleteConfirm(false);
     setPlaythroughToDelete(null);
-  }, []);
+  };
 
   // Handle arrow key navigation using refs
   const handleKeyDown = useCallback(

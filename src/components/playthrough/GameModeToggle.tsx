@@ -12,7 +12,7 @@ import {
 import { CursorTooltip } from '@/components/CursorTooltip';
 import { useBreakpointSmallerThan } from '@/hooks/useBreakpoint';
 
-const GameModeToggle = React.memo(function GameModeToggle() {
+const GameModeToggle = function GameModeToggle() {
   const activePlaythrough = useActivePlaythrough();
   const actualGameMode = useGameMode();
   const [isPending, startTransition] = useTransition();
@@ -202,6 +202,6 @@ const GameModeToggle = React.memo(function GameModeToggle() {
       </CursorTooltip>
     </div>
   );
-});
+};
 
 export default GameModeToggle;
