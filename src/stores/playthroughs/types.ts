@@ -37,6 +37,7 @@ export const PlaythroughSchema = z
     remixMode: z.boolean().optional(),
     createdAt: z.number(),
     updatedAt: z.number(),
+    version: z.string().default('1.0.0'),
   })
   .transform(data => {
     // Migration logic: if remixMode exists but gameMode is default, migrate
@@ -45,7 +46,12 @@ export const PlaythroughSchema = z
         ...data,
         gameMode: data.remixMode ? 'remix' : 'classic',
         remixMode: undefined, // Remove the old field
+        version: '1.0.0',
       };
+    }
+
+    if (data.version === undefined) {
+      data.version = '1.0.0';
     }
 
     // Remove remixMode if it exists (clean up)
@@ -91,6 +97,7 @@ export type ExportablePlaythrough = {
   readonly gameMode: GameMode;
   readonly createdAt: number;
   readonly updatedAt: number;
+  readonly version: string;
   readonly customLocations?: readonly {
     readonly id: string;
     readonly name: string;

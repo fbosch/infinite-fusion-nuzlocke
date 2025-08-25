@@ -4,6 +4,7 @@ import { useState } from 'react';
 import clsx from 'clsx';
 import { CursorTooltip } from '@/components/CursorTooltip';
 import dynamic from 'next/dynamic';
+import SettingsModal from './SettingsModal';
 
 const PokemonPCSheet = dynamic(() => import('@/components/pc/PokemonPCSheet'), {
   ssr: false,
@@ -14,6 +15,7 @@ export default function MenuItems() {
   const [activeTab, setActiveTab] = useState<'team' | 'box' | 'graveyard'>(
     'team'
   );
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <>
@@ -68,10 +70,7 @@ export default function MenuItems() {
               'hover:scale-105'
             )}
             aria-label='Open Settings'
-            onClick={() => {
-              // TODO: Implement settings functionality
-              console.log('Settings clicked');
-            }}
+            onClick={() => setSettingsOpen(true)}
           >
             <Settings className='h-4 w-4' />
           </button>
@@ -92,6 +91,11 @@ export default function MenuItems() {
         onClose={() => setDrawerOpen(false)}
         activeTab={activeTab}
         onChangeTab={setActiveTab}
+      />
+
+      <SettingsModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
       />
     </>
   );
