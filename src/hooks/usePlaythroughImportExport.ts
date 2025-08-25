@@ -19,6 +19,7 @@ const exportPlaythrough = (playthrough: Playthrough) => {
         gameMode: playthrough.gameMode as GameMode,
         createdAt: playthrough.createdAt,
         updatedAt: playthrough.updatedAt,
+        version: playthrough.version || '1.0.0',
         customLocations: playthrough.customLocations,
         encounters: playthrough.encounters,
       },

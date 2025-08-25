@@ -53,6 +53,7 @@ const createDefaultPlaythrough = (): Playthrough => ({
   name: 'Nuzlocke',
   encounters: {},
   gameMode: 'classic',
+  version: '1.0.0',
   createdAt: getCurrentTimestamp(),
   updatedAt: getCurrentTimestamp(),
 });
@@ -128,6 +129,7 @@ const createPlaythrough = (
     name,
     encounters: {},
     gameMode,
+    version: '1.0.0',
     createdAt: getCurrentTimestamp(),
     updatedAt: getCurrentTimestamp(),
   };
@@ -300,6 +302,7 @@ const importPlaythrough = async (importData: unknown): Promise<string> => {
       id: finalId,
       name: importedPlaythrough.name,
       gameMode: importedPlaythrough.gameMode as GameMode, // Type assertion since transform ensures it's GameMode
+      version: importedPlaythrough.version || '1.0.0',
       createdAt: importedPlaythrough.createdAt,
       updatedAt: Date.now(), // Update to current time
       customLocations: importedPlaythrough.customLocations || [],
