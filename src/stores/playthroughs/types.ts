@@ -7,6 +7,21 @@ export const GameModeSchema = z.enum(['classic', 'remix', 'randomized']);
 
 export type GameMode = z.infer<typeof GameModeSchema>;
 
+// Team member schema - represents a single team member
+export const TeamMemberSchema = z.object({
+  headEncounterId: z.string(), // Reference to head encounter slot
+  bodyEncounterId: z.string(), // Reference to body encounter slot
+});
+
+export type TeamMember = z.infer<typeof TeamMemberSchema>;
+
+// Team schema - represents the complete team
+export const TeamSchema = z.object({
+  members: z.array(TeamMemberSchema.nullable()).length(6), // Fixed size 6, null for empty slots
+});
+
+export type Team = z.infer<typeof TeamSchema>;
+
 export const EncounterDataSchema = z
   .object({
     head: PokemonOptionSchema.nullable(),
@@ -26,39 +41,19 @@ export const EncounterDataSchema = z
 export type EncounterData = z.infer<typeof EncounterDataSchema>;
 
 // Zod schema for a single playthrough
-export const PlaythroughSchema = z
-  .object({
-    id: z.string(),
-    name: z.string(),
-    customLocations: z.array(CustomLocationSchema).optional(),
-    encounters: z.record(z.string(), EncounterDataSchema).optional(),
-    gameMode: GameModeSchema.default('classic'),
-    // Keep remixMode for backward compatibility during migration
-    remixMode: z.boolean().optional(),
-    createdAt: z.number(),
-    updatedAt: z.number(),
-    version: z.string().default('1.0.0'),
-  })
-  .transform(data => {
-    // Migration logic: if remixMode exists but gameMode is default, migrate
-    if (data.remixMode !== undefined && data.gameMode === 'classic') {
-      return {
-        ...data,
-        gameMode: data.remixMode ? 'remix' : 'classic',
-        remixMode: undefined, // Remove the old field
-        version: '1.0.0',
-      };
-    }
-
-    if (data.version === undefined) {
-      data.version = '1.0.0';
-    }
-
-    // Remove remixMode if it exists (clean up)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { remixMode, ...cleanData } = data;
-    return cleanData;
-  });
+export const PlaythroughSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  customLocations: z.array(CustomLocationSchema).optional(),
+  encounters: z.record(z.string(), EncounterDataSchema).optional(),
+  team: TeamSchema.default({ members: Array.from({ length: 6 }, () => null) }), // Fixed size 6 with null values
+  gameMode: GameModeSchema.default('classic'),
+  // Keep remixMode for backward compatibility during migration
+  remixMode: z.boolean().optional(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+  version: z.string().default('1.0.0'),
+});
 
 // Zod schema for the playthroughs store
 export const PlaythroughsSchema = z.object({
@@ -104,4 +99,5 @@ export type ExportablePlaythrough = {
     readonly insertAfterLocationId: string;
   }[];
   readonly encounters?: Record<string, EncounterData>;
+  readonly team: Team; // NEW: Include team in exports
 };

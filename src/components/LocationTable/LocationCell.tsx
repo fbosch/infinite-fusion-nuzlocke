@@ -9,6 +9,7 @@ import { isCustomLocation } from '@/loaders';
 import { PokemonSprite } from '@/components/PokemonSprite';
 import type { CombinedLocation } from '@/loaders/locations';
 import type { PokemonOptionSchema } from '@/loaders/pokemon';
+import type { EncounterData } from '@/stores/playthroughs/types';
 import { z } from 'zod';
 import { CursorTooltip } from '../CursorTooltip';
 import { isStarterLocation } from '../../constants/special-locations';
@@ -35,7 +36,7 @@ export default function LocationCell({
     const pokemon: Pokemon[] = [];
 
     // Go through all encounters and find pokemon from this location
-    for (const encounter of Object.values(encounters)) {
+    for (const encounter of Object.values(encounters) as EncounterData[]) {
       if (encounter.head?.originalLocation === location.id) {
         pokemon.push(encounter.head);
       }
@@ -52,7 +53,10 @@ export default function LocationCell({
     if (!encounters) return false;
 
     // Check all encounters to see if any Pokémon are not in their original location
-    for (const [currentLocationId, encounter] of Object.entries(encounters)) {
+    for (const [currentLocationId, encounter] of Object.entries(encounters) as [
+      string,
+      EncounterData,
+    ][]) {
       // Check head Pokémon
       if (
         encounter.head?.originalLocation &&

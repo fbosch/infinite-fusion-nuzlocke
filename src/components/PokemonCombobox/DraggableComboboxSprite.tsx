@@ -26,6 +26,7 @@ import dynamic from 'next/dynamic';
 import usePokemonTypes from '../../hooks/usePokemonTypes';
 import { ArrowUpRight, Undo2 } from 'lucide-react';
 import { emitEvolutionEvent } from '@/lib/events';
+import type { EncounterData } from '@/stores/playthroughs/types';
 
 const LocationSelector = dynamic(
   () =>
@@ -80,8 +81,10 @@ export function DraggableComboboxSprite({
 
     // Check if there's a Pokemon in the opposite slot at the original location
     const activePlaythrough = getActivePlaythrough();
-    const originalEncounter =
-      activePlaythrough?.encounters?.[value.originalLocation];
+    const encounters = activePlaythrough?.encounters as
+      | Record<string, EncounterData>
+      | undefined;
+    const originalEncounter = encounters?.[value.originalLocation];
     if (!originalEncounter) return false;
 
     // If the original location encounter is not a fusion (isFusion = false),
@@ -134,7 +137,9 @@ export function DraggableComboboxSprite({
 
     // Check if there's already a Pokemon in the target slot
     const activePlaythrough = getActivePlaythrough();
-    const targetEncounter = activePlaythrough?.encounters?.[targetLocationId];
+    const targetEncounter = (
+      activePlaythrough?.encounters as Record<string, EncounterData> | undefined
+    )?.[targetLocationId];
     const existingPokemon = targetEncounter
       ? targetField === 'head'
         ? targetEncounter.head
