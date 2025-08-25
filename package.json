@@ -75,6 +75,7 @@
     "@eslint/eslintrc": "^3",
     "@next/bundle-analyzer": "^15.4.4",
     "@next/eslint-plugin-next": "^15.4.2",
+    "@smithery/cli": "^1.2.20",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.6.3",
