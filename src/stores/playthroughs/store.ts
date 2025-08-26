@@ -371,6 +371,128 @@ const forceSave = async () => {
   await saveToIndexedDB(playthroughsStore);
 };
 
+// Team management actions
+const addToTeam = (locationId: string, position: number): boolean => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough) return false;
+
+  // Validate position
+  if (position < 0 || position >= 6) return false;
+
+  // Check if position is already occupied
+  if (activePlaythrough.team.members[position] !== null) return false;
+
+  // Validate that encounter exists at the location
+  const encounter = activePlaythrough.encounters?.[locationId];
+  if (!encounter || !encounter.head || !encounter.body) {
+    return false;
+  }
+
+  // Check if this encounter is already used in other team slots
+  const isAlreadyInTeam = activePlaythrough.team.members.some(
+    member => member && member.headEncounterId === locationId
+  );
+
+  if (isAlreadyInTeam) return false;
+
+  // Add to team - reference the location as the encounter ID
+  activePlaythrough.team.members[position] = {
+    headEncounterId: locationId,
+    bodyEncounterId: locationId,
+  };
+
+  activePlaythrough.updatedAt = getCurrentTimestamp();
+  return true;
+};
+
+const removeFromTeam = (position: number): boolean => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough) return false;
+
+  // Validate position
+  if (position < 0 || position >= 6) return false;
+
+  // Check if position is occupied
+  if (activePlaythrough.team.members[position] === null) return false;
+
+  // Remove from team
+  activePlaythrough.team.members[position] = null;
+
+  activePlaythrough.updatedAt = getCurrentTimestamp();
+  return true;
+};
+
+const reorderTeam = (fromPosition: number, toPosition: number): boolean => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough) return false;
+
+  // Validate positions
+  if (
+    fromPosition < 0 ||
+    fromPosition >= 6 ||
+    toPosition < 0 ||
+    toPosition >= 6
+  ) {
+    return false;
+  }
+
+  // Check if source position is occupied
+  if (activePlaythrough.team.members[fromPosition] === null) return false;
+
+  // If moving to the same position, no change needed
+  if (fromPosition === toPosition) return true;
+
+  // Get the team member to move
+  const teamMember = activePlaythrough.team.members[fromPosition];
+
+  // Remove from source position
+  activePlaythrough.team.members[fromPosition] = null;
+
+  // Add to target position (overwrite if occupied)
+  activePlaythrough.team.members[toPosition] = teamMember;
+
+  activePlaythrough.updatedAt = getCurrentTimestamp();
+  return true;
+};
+
+// Helper function to get team member details
+const getTeamMemberDetails = (position: number) => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough || position < 0 || position >= 6) return null;
+
+  const teamMember = activePlaythrough.team.members[position];
+  if (!teamMember) return null;
+
+  // Since both headEncounterId and bodyEncounterId point to the same location
+  const encounter = activePlaythrough.encounters?.[teamMember.headEncounterId];
+  if (!encounter) return null;
+
+  return {
+    position,
+    encounter,
+    teamMember,
+  };
+};
+
+// Helper function to check if team is full
+const isTeamFull = (): boolean => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough) return true;
+
+  return activePlaythrough.team.members.every(member => member !== null);
+};
+
+// Helper function to get available team positions
+const getAvailableTeamPositions = (): number[] => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough) return [];
+
+  return activePlaythrough.team.members
+    .map((member, index) => ({ member, index }))
+    .filter(({ member }) => member === null)
+    .map(({ index }) => index);
+};
+
 export {
   playthroughsStore,
   getActivePlaythrough,
@@ -391,4 +513,10 @@ export {
   forceSave,
   importPlaythrough,
   getCurrentTimestamp,
+  addToTeam,
+  removeFromTeam,
+  reorderTeam,
+  getTeamMemberDetails,
+  isTeamFull,
+  getAvailableTeamPositions,
 };

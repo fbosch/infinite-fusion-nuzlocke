@@ -2,6 +2,7 @@
 import Logo from '@/components/Logo';
 import PlaythroughMenu from '@/components/playthrough/PlaythroughMenu';
 import MenuItems from './MenuItems';
+import TeamSlots from '@/components/team/TeamSlots';
 import Link from 'next/link';
 
 export default function Header() {
@@ -33,6 +34,12 @@ export default function Header() {
                 </h1>
               </div>
             </Link>
+
+            {/* Team Slots */}
+            <div className='flex-1 flex justify-center'>
+              <TeamSlots />
+            </div>
+
             <div className='flex items-start'>
               <MenuItems />
               <PlaythroughMenu />
