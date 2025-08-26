@@ -1,9 +1,7 @@
 ---
 description: Guidelines for writing clean conditional logic with early returns and avoiding deep nesting
-globs: []
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Conditional Logic and Early Returns
 
 Rules for writing clean, readable conditional logic by avoiding nested if-else statements and preferring early returns.

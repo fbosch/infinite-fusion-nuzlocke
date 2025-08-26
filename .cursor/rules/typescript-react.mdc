@@ -1,7 +1,7 @@
 ---
 description: TypeScript and React/Next.js development guidelines including type safety, naming conventions, and performance considerations
-globs: []
-alwaysApply: true
+globs: src/components/**/*.tsx
+alwaysApply: false
 ---
 
 # TypeScript and React Guidelines

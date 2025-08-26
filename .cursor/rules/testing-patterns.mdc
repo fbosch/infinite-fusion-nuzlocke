@@ -1,6 +1,6 @@
 ---
 description: Testing patterns and best practices for Valtio stores, browser mode tests, and version-based logic
-globs: ['**/*.test.ts', '**/*.spec.ts', '**/*.browser.test.ts']
+globs: **/*.test.ts,**/*.browser.test.ts
 alwaysApply: false
 ---
 

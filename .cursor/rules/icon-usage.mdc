@@ -1,6 +1,6 @@
 ---
 description: Icon usage guidelines requiring Lucide React icons with consistent styling and accessibility considerations
-globs: ['src/components/**/*.{ts,tsx}']
+globs: src/components/**/*.tsx,src/components/**/*.ts
 alwaysApply: false
 ---
 

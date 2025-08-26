@@ -1,9 +1,7 @@
 ---
 description: Guidelines for when and how to write code comments, emphasizing self-documenting code over comments
-globs: []
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Code Comments Guidelines
 
 Guidelines for writing meaningful comments while prioritizing self-documenting code through clear naming and structure. This rule is project-agnostic.

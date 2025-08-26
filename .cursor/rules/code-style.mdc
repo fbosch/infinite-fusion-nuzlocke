@@ -1,9 +1,7 @@
 ---
-description: Code style guidelines including naming conventions, code structure, documentation practices, and CSS class management
-globs: ['**/*.{js,jsx,ts,tsx}']
-alwaysApply: true
+globs: **/*.tsx,**/*.ts,**/*.js
+alwaysApply: false
 ---
-
 ## Code Style Guidelines
 
 ### General Principles

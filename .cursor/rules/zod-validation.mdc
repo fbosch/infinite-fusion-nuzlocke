@@ -1,9 +1,7 @@
 ---
 description: Zod v4 validation rules including schema definition, error handling, performance optimization, and testing patterns
-globs: []
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Zod Validation Rules
 
 Rules for using Zod v4 for data validation and type safety in the Infinite Fusion Nuzlocke tracker.
