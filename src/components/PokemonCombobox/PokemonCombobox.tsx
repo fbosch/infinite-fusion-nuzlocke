@@ -41,6 +41,7 @@ import { usePokemonSearch } from '@/loaders/pokemon';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { PokemonOption, PokemonOptions } from './PokemonOptions';
 import { DraggableComboboxSprite } from './DraggableComboboxSprite';
+import type { CustomLocation } from '@/loaders/locations';
 
 interface PokemonComboboxProps {
   locationId?: string;
@@ -103,7 +104,7 @@ export const PokemonCombobox = ({
 
   const isCustomLocation = useMemo(() => {
     return playthrough?.customLocations?.some(
-      location => location.id === locationId
+      (location: CustomLocation) => location.id === locationId
     );
   }, [playthrough, locationId]);
 

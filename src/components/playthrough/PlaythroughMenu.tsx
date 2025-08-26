@@ -6,7 +6,7 @@ import PlaythroughSelector from './PlaythroughSelector';
 
 export default function PlaythroughMenu() {
   return (
-    <div className='flex flex-col w-full'>
+    <div className='flex flex-col'>
       <GameModeToggle />
       <PlaythroughSelector />
     </div>

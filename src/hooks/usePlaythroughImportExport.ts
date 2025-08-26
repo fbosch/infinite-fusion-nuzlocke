@@ -22,6 +22,7 @@ const exportPlaythrough = (playthrough: Playthrough) => {
         version: playthrough.version || '1.0.0',
         customLocations: playthrough.customLocations,
         encounters: playthrough.encounters,
+        team: playthrough.team,
       },
     };
 

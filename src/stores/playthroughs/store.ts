@@ -52,6 +52,7 @@ const createDefaultPlaythrough = (): Playthrough => ({
   id: generatePlaythroughId(),
   name: 'Nuzlocke',
   encounters: {},
+  team: { members: Array.from({ length: 6 }, () => null) }, // Fixed size 6 with null values
   gameMode: 'classic',
   version: '1.0.0',
   createdAt: getCurrentTimestamp(),
@@ -71,8 +72,7 @@ if (typeof window !== 'undefined') {
   }
 
   // Load data from IndexedDB asynchronously
-  loadFromIndexedDB(createDefaultPlaythrough).then(loadedState => {
-    Object.assign(playthroughsStore, loadedState);
+  loadFromIndexedDB(playthroughsStore).then(() => {
     // Ensure loading state is set to false
     playthroughsStore.isLoading = false;
   });
@@ -128,6 +128,7 @@ const createPlaythrough = (
     id: generatePlaythroughId(),
     name,
     encounters: {},
+    team: { members: Array.from({ length: 6 }, () => null) },
     gameMode,
     version: '1.0.0',
     createdAt: getCurrentTimestamp(),
@@ -307,6 +308,9 @@ const importPlaythrough = async (importData: unknown): Promise<string> => {
       updatedAt: Date.now(), // Update to current time
       customLocations: importedPlaythrough.customLocations || [],
       encounters: importedPlaythrough.encounters || {},
+      team: importedPlaythrough.team || {
+        members: [null, null, null, null, null, null],
+      }, // Fixed size 6 with null values
     };
 
     // Add to store

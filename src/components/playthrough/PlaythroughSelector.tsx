@@ -162,12 +162,8 @@ export default function PlaythroughSelector({
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
                   'focus-visible:border-blue-500 dark:focus-visible:border-blue-400',
                   'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100',
-                  'disabled:opacity-50 disabled:cursor-not-allowed',
-                  'w-full md:w-[calc(100%-1.75rem)]',
-                  'cursor-pointer',
-                  'h-[40px] sm:h-[44px]',
-                  'font-medium',
-                  'backdrop-blur-sm'
+                  'disabled:opacity-50 disabled:cursor-not-allowed w-full cursor-pointer font-medium backdrop-blur-sm',
+                  'h-[40px] sm:h-[44px]'
                 )}
                 disabled={isLoading}
               >
