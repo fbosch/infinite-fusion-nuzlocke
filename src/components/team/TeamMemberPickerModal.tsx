@@ -1,0 +1,424 @@
+'use client';
+
+import React, { useState, useMemo } from 'react';
+import {
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+  DialogBackdrop,
+} from '@headlessui/react';
+import { X, Search } from 'lucide-react';
+import clsx from 'clsx';
+import { useActivePlaythrough } from '@/stores/playthroughs';
+import { useEncounters } from '@/stores/playthroughs/hooks';
+import { PokemonSprite } from '@/components/PokemonSprite';
+import { type PokemonOptionType } from '@/loaders/pokemon';
+import BodyIcon from '@/assets/images/body.svg';
+import HeadIcon from '@/assets/images/head.svg';
+
+interface TeamMemberPickerModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSelect: (
+    headPokemon: PokemonOptionType,
+    bodyPokemon: PokemonOptionType,
+    headLocationId: string,
+    bodyLocationId: string
+  ) => void;
+  position: number;
+}
+
+export default function TeamMemberPickerModal({
+  isOpen,
+  onClose,
+  onSelect,
+  position,
+}: TeamMemberPickerModalProps) {
+  const activePlaythrough = useActivePlaythrough();
+  const encounters = useEncounters();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedHead, setSelectedHead] = useState<{
+    pokemon: PokemonOptionType;
+    locationId: string;
+  } | null>(null);
+  const [selectedBody, setSelectedBody] = useState<{
+    pokemon: PokemonOptionType;
+    locationId: string;
+  } | null>(null);
+  const [activeSlot, setActiveSlot] = useState<'head' | 'body' | null>('head');
+
+  // Get all available Pokémon from encounters
+  const availablePokemon = useMemo(() => {
+    if (!encounters) return [];
+
+    const pokemon: Array<{
+      pokemon: PokemonOptionType;
+      locationId: string;
+    }> = [];
+
+    Object.entries(encounters).forEach(([locationId, encounter]) => {
+      if (encounter.head) {
+        pokemon.push({
+          pokemon: encounter.head,
+          locationId,
+        });
+      }
+      if (encounter.body) {
+        pokemon.push({
+          pokemon: encounter.body,
+          locationId,
+        });
+      }
+    });
+
+    if (searchQuery.trim()) {
+      return pokemon.filter(
+        p =>
+          p.pokemon.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.pokemon.nickname?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    return pokemon;
+  }, [encounters, searchQuery]);
+
+  const handleSlotSelect = (slot: 'head' | 'body') => {
+    setActiveSlot(slot);
+  };
+
+  const handlePokemonSelect = (
+    pokemon: PokemonOptionType,
+    locationId: string
+  ) => {
+    if (activeSlot === 'head') {
+      setSelectedHead({ pokemon, locationId });
+      setActiveSlot(null);
+    } else if (activeSlot === 'body') {
+      setSelectedBody({ pokemon, locationId });
+      setActiveSlot(null);
+    }
+  };
+
+  const handleUpdateTeamMember = () => {
+    if (selectedHead && selectedBody) {
+      // Fusion case
+      onSelect(
+        selectedHead.pokemon,
+        selectedBody.pokemon,
+        selectedHead.locationId,
+        selectedBody.locationId
+      );
+      onClose();
+    } else if (selectedHead && !selectedBody) {
+      // Non-fusion case - just head Pokémon
+      onSelect(
+        selectedHead.pokemon,
+        selectedHead.pokemon,
+        selectedHead.locationId,
+        selectedHead.locationId
+      );
+      onClose();
+    } else if (selectedBody && !selectedHead) {
+      // Non-fusion case - just body Pokémon
+      onSelect(
+        selectedBody.pokemon,
+        selectedBody.pokemon,
+        selectedBody.locationId,
+        selectedBody.locationId
+      );
+      onClose();
+    }
+  };
+
+  const handleClose = () => {
+    setSearchQuery('');
+    setSelectedHead(null);
+    setSelectedBody(null);
+    setActiveSlot('head');
+    onClose();
+  };
+
+  const canUpdateTeam = selectedHead || selectedBody;
+
+  if (!activePlaythrough) return null;
+
+  return (
+    <Dialog open={isOpen} onClose={handleClose} className='relative z-50 group'>
+      <DialogBackdrop
+        transition
+        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100'
+        aria-hidden='true'
+      />
+
+      <div className='fixed inset-0 flex w-screen items-center justify-center p-4'>
+        <DialogPanel
+          transition
+          className={clsx(
+            'max-w-4xl w-full max-h-[80vh] space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col',
+            'transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98'
+          )}
+        >
+          <div className='flex items-center justify-between'>
+            <DialogTitle className='text-xl font-semibold text-gray-900 dark:text-white'>
+              Select Pokémon for Team Slot {position + 1}
+            </DialogTitle>
+            <button
+              onClick={handleClose}
+              className={clsx(
+                'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2',
+                'p-1 rounded-md transition-colors cursor-pointer'
+              )}
+              aria-label='Close modal'
+            >
+              <X className='h-5 w-5' />
+            </button>
+          </div>
+
+          {/* Selection Display */}
+          <div className='grid grid-cols-2 gap-4'>
+            {/* Head Selection */}
+            <button
+              onClick={() => handleSlotSelect('head')}
+              className={clsx(
+                'border-2 rounded-lg p-3 transition-colors text-left h-32',
+                activeSlot === 'head'
+                  ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-500'
+                  : selectedHead
+                    ? 'border-blue-300 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-600 hover:border-blue-400 dark:hover:border-blue-500'
+                    : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500'
+              )}
+            >
+              <div className='text-center mb-2'>
+                <div className='flex items-center justify-center space-x-2 mb-1'>
+                  <HeadIcon className='h-5 w-5 text-blue-600 dark:text-blue-400' />
+                  <h3
+                    className={clsx(
+                      'font-medium text-sm',
+                      selectedHead
+                        ? 'text-blue-700 dark:text-blue-300'
+                        : 'text-gray-500 dark:text-gray-400'
+                    )}
+                  >
+                    Head Pokémon
+                  </h3>
+                </div>
+              </div>
+              {selectedHead ? (
+                <div className='flex items-center justify-center space-x-3'>
+                  <PokemonSprite
+                    pokemonId={selectedHead.pokemon.id}
+                    className='h-12 w-12'
+                  />
+                  <div className='text-center'>
+                    <div className='font-medium text-blue-900 dark:text-blue-100 text-sm'>
+                      {selectedHead.pokemon.nickname ||
+                        selectedHead.pokemon.name}
+                    </div>
+                    {selectedHead.pokemon.nickname && (
+                      <div className='text-xs text-blue-700 dark:text-blue-300'>
+                        ({selectedHead.pokemon.name})
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      setSelectedHead(null);
+                    }}
+                    className='text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 p-1'
+                  >
+                    <X className='h-4 w-4' />
+                  </button>
+                </div>
+              ) : (
+                <div className='text-center text-gray-400 dark:text-gray-500 py-4'>
+                  {activeSlot === 'head'
+                    ? 'Click a Pokémon below to assign'
+                    : 'Click to select head'}
+                </div>
+              )}
+            </button>
+
+            {/* Body Selection */}
+            <button
+              onClick={() => handleSlotSelect('body')}
+              className={clsx(
+                'border-2 rounded-lg p-3 transition-colors text-left h-32',
+                activeSlot === 'body'
+                  ? 'border-green-400 bg-green-50 dark:bg-green-900/20 dark:border-green-500'
+                  : selectedBody
+                    ? 'border-green-300 bg-green-50 dark:bg-green-900/20 dark:border-green-600 hover:border-green-400 dark:hover:border-green-500'
+                    : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500'
+              )}
+            >
+              <div className='text-center mb-2'>
+                <div className='flex items-center justify-center space-x-2 mb-1'>
+                  <BodyIcon className='h-5 w-5 text-green-600 dark:text-green-400' />
+                  <h3
+                    className={clsx(
+                      'font-medium text-sm',
+                      selectedBody
+                        ? 'text-green-700 dark:text-green-300'
+                        : 'text-gray-500 dark:text-gray-400'
+                    )}
+                  >
+                    Body Pokémon
+                  </h3>
+                </div>
+              </div>
+              {selectedBody ? (
+                <div className='flex items-center justify-center space-x-3'>
+                  <PokemonSprite
+                    pokemonId={selectedBody.pokemon.id}
+                    className='h-12 w-12'
+                  />
+                  <div className='text-center'>
+                    <div className='font-medium text-green-900 dark:text-green-100 text-sm'>
+                      {selectedBody.pokemon.nickname ||
+                        selectedBody.pokemon.name}
+                    </div>
+                    {selectedBody.pokemon.nickname && (
+                      <div className='text-xs text-green-700 dark:text-green-300'>
+                        ({selectedBody.pokemon.name})
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      setSelectedBody(null);
+                    }}
+                    className='text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200 p-1'
+                  >
+                    <X className='h-4 w-4' />
+                  </button>
+                </div>
+              ) : (
+                <div className='text-center text-gray-400 dark:text-gray-500 py-4'>
+                  {activeSlot === 'body'
+                    ? 'Click a Pokémon below to assign'
+                    : 'Click to select body'}
+                </div>
+              )}
+            </button>
+          </div>
+
+          {/* Active Slot Indicator */}
+          {activeSlot && (
+            <div
+              className={clsx(
+                'text-center py-2 rounded-lg font-medium',
+                activeSlot === 'head'
+                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                  : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+              )}
+            >
+              Click a Pokémon below to assign as{' '}
+              {activeSlot === 'head' ? 'head' : 'body'}
+            </div>
+          )}
+
+          {/* Search */}
+          <div className='relative'>
+            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400' />
+            <input
+              type='text'
+              placeholder='Search Pokémon...'
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className='w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            />
+          </div>
+
+          {/* Pokémon Grid */}
+          <div className='flex-1 max-h-64 overflow-y-auto'>
+            {availablePokemon.length > 0 ? (
+              <div className='grid grid-cols-6 gap-2'>
+                {availablePokemon.map(({ pokemon, locationId }) => {
+                  const isSelectedHead =
+                    selectedHead?.pokemon.id === pokemon.id &&
+                    selectedHead?.locationId === locationId;
+                  const isSelectedBody =
+                    selectedBody?.pokemon.id === pokemon.id &&
+                    selectedBody?.locationId === locationId;
+                  const isSelected = isSelectedHead || isSelectedBody;
+                  const isActiveSlot = activeSlot && !isSelected;
+
+                  return (
+                    <button
+                      key={`${pokemon.uid || pokemon.id}-${locationId}`}
+                      onClick={() => handlePokemonSelect(pokemon, locationId)}
+                      disabled={!activeSlot || isSelected}
+                      className={clsx(
+                        'flex flex-col items-center justify-center p-2 rounded-lg border transition-colors h-20 relative',
+                        isSelectedHead
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 cursor-default'
+                          : isSelectedBody
+                            ? 'border-green-500 bg-green-50 dark:bg-green-900/20 cursor-default'
+                            : isActiveSlot
+                              ? 'border-gray-300 bg-gray-100 dark:bg-gray-700 dark:border-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer'
+                              : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-60'
+                      )}
+                    >
+                      <PokemonSprite
+                        pokemonId={pokemon.id}
+                        className='h-12 w-12 flex-shrink-0 mb-1'
+                      />
+                      <div className='text-center min-w-0'>
+                        <div className='font-medium text-gray-900 dark:text-white text-xs truncate'>
+                          {pokemon.nickname || pokemon.name}
+                        </div>
+                        {pokemon.nickname && (
+                          <div className='text-xs text-gray-500 dark:text-gray-400 truncate'>
+                            ({pokemon.name})
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Selection Status - Only show for selected Pokémon */}
+                      <div className='absolute top-1 right-1'>
+                        {isSelectedHead && (
+                          <div className='px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded-full flex items-center space-x-1'>
+                            <HeadIcon className='h-3 w-3' />
+                          </div>
+                        )}
+                        {isSelectedBody && (
+                          <div className='px-2 py-1 bg-green-600 text-white text-xs font-medium rounded-full flex items-center space-x-1'>
+                            <BodyIcon className='h-3 w-3' />
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className='text-center py-8 text-gray-500 dark:text-gray-400'>
+                {searchQuery.trim()
+                  ? 'No Pokémon found matching your search.'
+                  : 'No Pokémon available.'}
+              </div>
+            )}
+          </div>
+
+          {/* Update Team Member Button */}
+          <div className='flex justify-center'>
+            <button
+              onClick={handleUpdateTeamMember}
+              disabled={!canUpdateTeam}
+              className={clsx(
+                'px-6 py-2 rounded-lg font-medium transition-colors',
+                canUpdateTeam
+                  ? 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600 dark:text-gray-400'
+              )}
+            >
+              Update Team Member
+            </button>
+          </div>
+        </DialogPanel>
+      </div>
+    </Dialog>
+  );
+}
