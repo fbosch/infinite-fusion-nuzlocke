@@ -91,12 +91,45 @@ export default function TeamMemberPickerModal({
     pokemon: PokemonOptionType,
     locationId: string
   ) => {
+    // Check if this Pokémon is already selected in either slot
+    const isSelectedHead =
+      selectedHead?.pokemon.id === pokemon.id &&
+      selectedHead?.locationId === locationId;
+    const isSelectedBody =
+      selectedBody?.pokemon.id === pokemon.id &&
+      selectedBody?.locationId === locationId;
+
+    if (isSelectedHead) {
+      // Unselect head Pokémon and toggle head selection mode
+      setSelectedHead(null);
+      setActiveSlot(activeSlot === 'head' ? null : 'head');
+      return;
+    }
+
+    if (isSelectedBody) {
+      // Unselect body Pokémon and toggle body selection mode
+      setSelectedBody(null);
+      setActiveSlot(activeSlot === 'body' ? null : 'body');
+      return;
+    }
+
+    // Normal selection logic
     if (activeSlot === 'head') {
       setSelectedHead({ pokemon, locationId });
-      setActiveSlot(null);
+      // If no body Pokémon is selected, automatically switch to body selection mode
+      if (!selectedBody) {
+        setActiveSlot('body');
+      } else {
+        setActiveSlot(null);
+      }
     } else if (activeSlot === 'body') {
       setSelectedBody({ pokemon, locationId });
-      setActiveSlot(null);
+      // If no head Pokémon is selected, automatically switch to head selection mode
+      if (!selectedHead) {
+        setActiveSlot('head');
+      } else {
+        setActiveSlot(null);
+      }
     }
   };
 
@@ -334,13 +367,13 @@ export default function TeamMemberPickerModal({
                           onClick={() =>
                             handlePokemonSelect(pokemon, locationId)
                           }
-                          disabled={!activeSlot || isSelected}
+                          disabled={!activeSlot && !isSelected}
                           className={clsx(
                             'flex flex-col items-center justify-center p-2 rounded-lg border transition-colors h-20 relative',
                             isSelectedHead
-                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 cursor-default'
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30'
                               : isSelectedBody
-                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20 cursor-default'
+                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20 cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30'
                                 : isActiveSlot
                                   ? 'border-gray-300 bg-gray-100 dark:bg-gray-700 dark:border-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer'
                                   : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-60'
