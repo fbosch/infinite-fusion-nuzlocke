@@ -279,7 +279,7 @@ export default function TeamMemberPickerModal({
                             e.stopPropagation();
                             setSelectedHead(null);
                           }}
-                          className='absolute top-2 right-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 p-1 bg-white dark:bg-gray-700 rounded-full shadow-sm'
+                          className='absolute top-2 right-2 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 p-1 bg-white dark:bg-gray-700 rounded-full shadow-sm'
                         >
                           <X className='h-4 w-4' />
                         </button>
@@ -341,7 +341,7 @@ export default function TeamMemberPickerModal({
                             e.stopPropagation();
                             setSelectedBody(null);
                           }}
-                          className='absolute top-2 right-2 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200 p-1 bg-white dark:bg-gray-700 rounded-full shadow-sm'
+                          className='absolute top-2 right-2 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 p-1 bg-white dark:bg-gray-700 rounded-full shadow-sm'
                         >
                           <X className='h-4 w-4' />
                         </button>
