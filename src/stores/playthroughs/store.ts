@@ -463,13 +463,52 @@ const getTeamMemberDetails = (position: number) => {
   const teamMember = activePlaythrough.team.members[position];
   if (!teamMember) return null;
 
-  // Since both headEncounterId and bodyEncounterId point to the same location
-  const encounter = activePlaythrough.encounters?.[teamMember.headEncounterId];
-  if (!encounter) return null;
+  // Find Pokémon by UID across all encounters
+  let headPokemon: any = null;
+  let bodyPokemon: any = null;
+
+  // Debug logging
+  console.log('Looking for team member:', teamMember);
+  console.log('Available encounters:', Object.keys(activePlaythrough.encounters || {}));
+
+  // Flatten all Pokémon from all encounters into a single collection
+  const allPokemon = Object.values(activePlaythrough.encounters || {}).flatMap(encounter => {
+    const pokemon = [];
+    if (encounter.head) pokemon.push(encounter.head);
+    if (encounter.body) pokemon.push(encounter.body);
+    return pokemon;
+  });
+
+  console.log('All available Pokémon:', allPokemon.map(p => ({ name: p.name, uid: p.uid })));
+
+  // Find Pokémon by UID from the flattened collection
+  headPokemon = allPokemon.find(pokemon => pokemon.uid === teamMember.headPokemonUid) || null;
+  bodyPokemon = allPokemon.find(pokemon => pokemon.uid === teamMember.bodyPokemonUid) || null;
+
+  if (headPokemon) console.log('Found head Pokémon:', headPokemon);
+  if (bodyPokemon) console.log('Found body Pokémon:', bodyPokemon);
+
+  if (!headPokemon && !bodyPokemon) {
+    console.log('No Pokémon found for team member:', teamMember);
+    return null;
+  }
+
+  // Create a combined encounter object for display
+  const combinedEncounter = {
+    head: headPokemon,
+    body: bodyPokemon,
+    isFusion: Boolean(headPokemon && bodyPokemon),
+    updatedAt: Math.max(
+      headPokemon?.updatedAt || 0,
+      bodyPokemon?.updatedAt || 0
+    ),
+  };
+
+  console.log('Returning combined encounter:', combinedEncounter);
 
   return {
     position,
-    encounter,
+    encounter: combinedEncounter,
     teamMember,
   };
 };

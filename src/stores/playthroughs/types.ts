@@ -9,8 +9,8 @@ export type GameMode = z.infer<typeof GameModeSchema>;
 
 // Team member schema - represents a single team member
 export const TeamMemberSchema = z.object({
-  headEncounterId: z.string(), // Reference to head encounter slot
-  bodyEncounterId: z.string(), // Reference to body encounter slot
+  headPokemonUid: z.string(), // Reference to head Pokémon by UID
+  bodyPokemonUid: z.string(), // Reference to body Pokémon by UID
 });
 
 export type TeamMember = z.infer<typeof TeamMemberSchema>;

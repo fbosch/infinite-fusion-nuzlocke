@@ -97,6 +97,44 @@ export function cleanupRemixMode(data: MigrationData): MigrationData {
 }
 
 /**
+ * Migrate team member schema from encounter IDs to Pokémon UIDs
+ */
+export function migrateTeamMemberSchema(data: MigrationData): MigrationData {
+  if (data.team && typeof data.team === 'object' && 'members' in data.team) {
+    const team = data.team as Record<string, unknown>;
+    const members = team.members;
+    
+    if (Array.isArray(members)) {
+      const migratedMembers = members.map((member: unknown) => {
+        if (member && typeof member === 'object') {
+          // Check if this is the old format with encounter IDs
+          if ('headEncounterId' in member || 'bodyEncounterId' in member) {
+            // Convert to new format - for now, we'll set empty UIDs
+            // since we can't reliably reconstruct the old UIDs
+            return {
+              headPokemonUid: '',
+              bodyPokemonUid: '',
+            };
+          }
+          // Already in new format
+          return member;
+        }
+        return member;
+      });
+
+      return {
+        ...data,
+        team: {
+          ...data.team,
+          members: migratedMembers,
+        },
+      };
+    }
+  }
+  return data;
+}
+
+/**
  * Apply all migrations to a playthrough in sequence
  */
 export function migratePlaythrough(data: MigrationData): MigrationData {
@@ -106,6 +144,7 @@ export function migratePlaythrough(data: MigrationData): MigrationData {
   migratedData = migrateRemixMode(migratedData);
   migratedData = migrateVersion(migratedData);
   migratedData = migrateTeamField(migratedData);
+  migratedData = migrateTeamMemberSchema(migratedData);
   migratedData = cleanupRemixMode(migratedData);
 
   return migratedData;

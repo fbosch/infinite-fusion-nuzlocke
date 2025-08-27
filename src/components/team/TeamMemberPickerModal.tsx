@@ -21,11 +21,17 @@ interface TeamMemberPickerModalProps {
   onClose: () => void;
   onSelect: (
     headPokemon: PokemonOptionType,
-    bodyPokemon: PokemonOptionType,
-    headLocationId: string,
-    bodyLocationId: string
+    bodyPokemon: PokemonOptionType
   ) => void;
   position: number;
+  existingTeamMember?: {
+    position: number;
+    isEmpty: boolean;
+    location?: string;
+    headPokemon?: PokemonOptionType | null;
+    bodyPokemon?: PokemonOptionType | null;
+    isFusion?: boolean;
+  } | null;
 }
 
 export default function TeamMemberPickerModal({
@@ -33,6 +39,7 @@ export default function TeamMemberPickerModal({
   onClose,
   onSelect,
   position,
+  existingTeamMember,
 }: TeamMemberPickerModalProps) {
   const activePlaythrough = useActivePlaythrough();
   const encounters = useEncounters();
@@ -54,6 +61,45 @@ export default function TeamMemberPickerModal({
     }
   }, [selectedHead, selectedBody, activeSlot]);
 
+  // Pre-populate selections when editing existing team member
+  useEffect(() => {
+    if (existingTeamMember && !existingTeamMember.isEmpty && encounters) {
+      // Find the encounter locations for the existing team member
+      const headLocationId = Object.keys(encounters).find(locationId => {
+        const encounter = encounters[locationId];
+        return encounter.head?.id === existingTeamMember.headPokemon?.id;
+      });
+      
+      const bodyLocationId = Object.keys(encounters).find(locationId => {
+        const encounter = encounters[locationId];
+        return encounter.body?.id === existingTeamMember.bodyPokemon?.id;
+      });
+
+      if (headLocationId && existingTeamMember.headPokemon) {
+        setSelectedHead({
+          pokemon: existingTeamMember.headPokemon,
+          locationId: headLocationId,
+        });
+      }
+
+      if (bodyLocationId && existingTeamMember.bodyPokemon) {
+        setSelectedBody({
+          pokemon: existingTeamMember.bodyPokemon,
+          locationId: bodyLocationId,
+        });
+      }
+
+      // Set active slot to head if we have both, or to the empty slot
+      if (existingTeamMember.headPokemon && existingTeamMember.bodyPokemon) {
+        setActiveSlot(null);
+      } else if (existingTeamMember.headPokemon) {
+        setActiveSlot('body');
+      } else if (existingTeamMember.bodyPokemon) {
+        setActiveSlot('head');
+      }
+    }
+  }, [existingTeamMember, encounters]);
+
   // Get all available Pokémon from encounters
   const availablePokemon = useMemo(() => {
     if (!encounters) return [];
@@ -67,14 +113,24 @@ export default function TeamMemberPickerModal({
           encounter.head.status !== PokemonStatus.MISSED &&
           encounter.head.status !== PokemonStatus.DECEASED
         ) {
-          validPokemon.push({ pokemon: encounter.head, locationId });
+          // Ensure the Pokémon has a UID
+          const pokemonWithUid = {
+            ...encounter.head,
+            uid: encounter.head.uid || `${encounter.head.id}_${locationId}_${Date.now()}`,
+          };
+          validPokemon.push({ pokemon: pokemonWithUid, locationId });
         }
         if (
           encounter.body?.status &&
           encounter.body.status !== PokemonStatus.MISSED &&
           encounter.body.status !== PokemonStatus.DECEASED
         ) {
-          validPokemon.push({ pokemon: encounter.body, locationId });
+          // Ensure the Pokémon has a UID
+          const pokemonWithUid = {
+            ...encounter.body,
+            uid: encounter.body.uid || `${encounter.body.id}_${locationId}_${Date.now()}`,
+          };
+          validPokemon.push({ pokemon: pokemonWithUid, locationId });
         }
 
         return validPokemon;
@@ -132,16 +188,13 @@ export default function TeamMemberPickerModal({
   const handleUpdateTeamMember = () => {
     const headPokemon = selectedHead?.pokemon;
     const bodyPokemon = selectedBody?.pokemon;
-    const headLocationId = selectedHead?.locationId;
-    const bodyLocationId = selectedBody?.locationId;
 
     if (!headPokemon && !bodyPokemon) return;
 
+    // Pass the selected Pokémon to the parent component
     onSelect(
       headPokemon || bodyPokemon!,
-      bodyPokemon || headPokemon!,
-      headLocationId || bodyLocationId!,
-      bodyLocationId || headLocationId!
+      bodyPokemon || headPokemon!
     );
     onClose();
   };
