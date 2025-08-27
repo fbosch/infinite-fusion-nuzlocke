@@ -58,13 +58,26 @@ export default function TeamMemberPickerModal({
     }> = [];
 
     Object.entries(encounters).forEach(([locationId, encounter]) => {
-      if (encounter.head) {
+      // Only include Pokémon with selectable statuses
+      if (
+        encounter.head &&
+        encounter.head.status &&
+        ['captured', 'stored', 'traded', 'received'].includes(
+          encounter.head.status
+        )
+      ) {
         pokemon.push({
           pokemon: encounter.head,
           locationId,
         });
       }
-      if (encounter.body) {
+      if (
+        encounter.body &&
+        encounter.body.status &&
+        ['captured', 'stored', 'traded', 'received'].includes(
+          encounter.body.status
+        )
+      ) {
         pokemon.push({
           pokemon: encounter.body,
           locationId,
@@ -348,7 +361,7 @@ export default function TeamMemberPickerModal({
                 />
               </div>
 
-              <div className='flex-1 max-h-64 overflow-y-auto'>
+              <div className='flex-1 max-h-64 overflow-y-auto scrollbar-thin pr-1'>
                 {availablePokemon.length > 0 ? (
                   <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-2'>
                     {availablePokemon.map(({ pokemon, locationId }) => {
@@ -379,10 +392,12 @@ export default function TeamMemberPickerModal({
                                   : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-60'
                           )}
                         >
-                          <PokemonSprite
-                            pokemonId={pokemon.id}
-                            className='h-12 w-12 flex-shrink-0 mb-1'
-                          />
+                          <div className='h-12 w-12 flex items-center justify-center mb-1'>
+                            <PokemonSprite
+                              pokemonId={pokemon.id}
+                              className='h-12 w-12'
+                            />
+                          </div>
                           <div className='text-center min-w-0'>
                             <div className='font-medium text-gray-900 dark:text-white text-xs truncate'>
                               {pokemon.nickname || pokemon.name}
