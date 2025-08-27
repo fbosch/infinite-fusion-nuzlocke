@@ -188,8 +188,8 @@ export default function TeamMemberPickerModal({
                       : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500'
                   )}
                 >
-                  <div className='text-center mb-2'>
-                    <div className='flex items-center justify-center space-x-2 mb-1'>
+                  <div className='absolute top-2 left-2'>
+                    <div className='flex items-center space-x-2'>
                       <HeadIcon className='h-5 w-5 text-blue-600 dark:text-blue-400' />
                       <h3
                         className={clsx(
@@ -204,7 +204,7 @@ export default function TeamMemberPickerModal({
                     </div>
                   </div>
                   {selectedHead ? (
-                    <div className='flex items-center justify-center space-x-3'>
+                    <div className='absolute inset-0 flex items-center justify-center space-x-3 pt-6'>
                       <PokemonSprite
                         pokemonId={selectedHead.pokemon.id}
                         className='h-12 w-12'
@@ -233,7 +233,7 @@ export default function TeamMemberPickerModal({
                       )}
                     </div>
                   ) : (
-                    <div className='text-center text-gray-400 dark:text-gray-500 py-4'>
+                    <div className='absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-500 pt-6'>
                       {activeSlot === 'head'
                         ? 'Click a Pokémon below to assign'
                         : 'Click to select head'}
@@ -250,15 +250,15 @@ export default function TeamMemberPickerModal({
                       : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500'
                   )}
                 >
-                  <div className='text-center mb-2'>
-                    <div className='flex items-center justify-center space-x-2 mb-1'>
+                  <div className='absolute top-2 left-2'>
+                    <div className='flex items-center space-x-2'>
                       <BodyIcon className='h-5 w-5 text-green-600 dark:text-green-400' />
                       <h3
                         className={clsx(
                           'font-medium text-sm',
                           selectedBody
                             ? 'text-green-700 dark:text-green-300'
-                            : 'text-gray-500 dark:text-green-300'
+                            : 'text-gray-500 dark:text-gray-400'
                         )}
                       >
                         Body Pokémon
@@ -266,7 +266,7 @@ export default function TeamMemberPickerModal({
                     </div>
                   </div>
                   {selectedBody ? (
-                    <div className='flex items-center justify-center space-x-3'>
+                    <div className='absolute inset-0 flex items-center justify-center space-x-3 pt-6'>
                       <PokemonSprite
                         pokemonId={selectedBody.pokemon.id}
                         className='h-12 w-12'
@@ -295,7 +295,7 @@ export default function TeamMemberPickerModal({
                       )}
                     </div>
                   ) : (
-                    <div className='text-center text-gray-400 dark:text-gray-500 py-4'>
+                    <div className='absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-500 pt-6'>
                       {activeSlot === 'body'
                         ? 'Click a Pokémon below to assign'
                         : 'Click to select body'}
