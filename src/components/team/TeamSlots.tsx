@@ -58,8 +58,8 @@ export default function TeamSlots() {
               'flex flex-col items-center justify-center relative',
               'size-16 sm:size-18 md:size-22 rounded-full border transition-all duration-200',
               slot.isEmpty
-                ? ' border-gray-200 dark:border-gray-700 bg-transparent'
-                : 'border-solid border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 hover:border-blue-400 dark:hover:border-blue-500'
+                ? 'border-gray-200 dark:border-gray-700 bg-transparent hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer'
+                : 'border-gray-200 dark:border-gray-700 bg-transparent hover:border-gray-300 dark:hover:border-gray-600'
             )}
           >
             {slot.isEmpty ? (
@@ -80,15 +80,13 @@ export default function TeamSlots() {
                     background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
                   }}
                 />
-
-                <div className='relative z-10'>
+                <div className='relative z-10 top-2'>
                   <FusionSprite
                     headPokemon={slot.headPokemon || null}
                     bodyPokemon={slot.bodyPokemon || null}
                     isFusion={slot.isFusion}
                     shouldLoad={true}
                     showStatusOverlay={true}
-                    className='scale-75'
                   />
                 </div>
               </div>
