@@ -11,11 +11,10 @@ import { X, Search } from 'lucide-react';
 import clsx from 'clsx';
 import { useActivePlaythrough } from '@/stores/playthroughs';
 import { useEncounters } from '@/stores/playthroughs/hooks';
-import { PokemonSprite } from '@/components/PokemonSprite';
-import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
-import { type PokemonOptionType } from '@/loaders/pokemon';
-import BodyIcon from '@/assets/images/body.svg';
-import HeadIcon from '@/assets/images/head.svg';
+import { type PokemonOptionType, PokemonStatus } from '@/loaders/pokemon';
+import { PokemonSlotSelector } from './PokemonSlotSelector';
+import { PokemonGridItem } from './PokemonGridItem';
+import { PokemonPreview } from './PokemonPreview';
 
 interface TeamMemberPickerModalProps {
   isOpen: boolean;
@@ -59,48 +58,37 @@ export default function TeamMemberPickerModal({
   const availablePokemon = useMemo(() => {
     if (!encounters) return [];
 
-    const pokemon: Array<{
-      pokemon: PokemonOptionType;
-      locationId: string;
-    }> = [];
+    const pokemon = Object.entries(encounters).flatMap(
+      ([locationId, encounter]) => {
+        const validPokemon = [];
 
-    Object.entries(encounters).forEach(([locationId, encounter]) => {
-      // Only include Pokémon with selectable statuses
-      if (
-        encounter.head &&
-        encounter.head.status &&
-        ['captured', 'stored', 'traded', 'received'].includes(
-          encounter.head.status
-        )
-      ) {
-        pokemon.push({
-          pokemon: encounter.head,
-          locationId,
-        });
+        if (
+          encounter.head?.status &&
+          encounter.head.status !== PokemonStatus.MISSED &&
+          encounter.head.status !== PokemonStatus.DECEASED
+        ) {
+          validPokemon.push({ pokemon: encounter.head, locationId });
+        }
+        if (
+          encounter.body?.status &&
+          encounter.body.status !== PokemonStatus.MISSED &&
+          encounter.body.status !== PokemonStatus.DECEASED
+        ) {
+          validPokemon.push({ pokemon: encounter.body, locationId });
+        }
+
+        return validPokemon;
       }
-      if (
-        encounter.body &&
-        encounter.body.status &&
-        ['captured', 'stored', 'traded', 'received'].includes(
-          encounter.body.status
-        )
-      ) {
-        pokemon.push({
-          pokemon: encounter.body,
-          locationId,
-        });
-      }
-    });
+    );
 
-    if (searchQuery.trim()) {
-      return pokemon.filter(
-        p =>
-          p.pokemon.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.pokemon.nickname?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
+    if (!searchQuery.trim()) return pokemon;
 
-    return pokemon;
+    const query = searchQuery.toLowerCase();
+    return pokemon.filter(
+      p =>
+        p.pokemon.name.toLowerCase().includes(query) ||
+        p.pokemon.nickname?.toLowerCase().includes(query)
+    );
   }, [encounters, searchQuery]);
 
   const handleSlotSelect = (slot: 'head' | 'body') => {
@@ -111,7 +99,6 @@ export default function TeamMemberPickerModal({
     pokemon: PokemonOptionType,
     locationId: string
   ) => {
-    // Check if this Pokémon is already selected in either slot
     const isSelectedHead =
       selectedHead?.pokemon.id === pokemon.id &&
       selectedHead?.locationId === locationId;
@@ -119,69 +106,44 @@ export default function TeamMemberPickerModal({
       selectedBody?.pokemon.id === pokemon.id &&
       selectedBody?.locationId === locationId;
 
+    // Handle unselecting
     if (isSelectedHead) {
-      // Unselect head Pokémon and toggle head selection mode
       setSelectedHead(null);
       setActiveSlot(activeSlot === 'head' ? null : 'head');
       return;
     }
-
     if (isSelectedBody) {
-      // Unselect body Pokémon and toggle body selection mode
       setSelectedBody(null);
       setActiveSlot(activeSlot === 'body' ? null : 'body');
       return;
     }
 
-    // Normal selection logic
-    if (activeSlot === 'head') {
+    // Handle selecting
+    const slot = activeSlot;
+    if (slot === 'head') {
       setSelectedHead({ pokemon, locationId });
-      // If no body Pokémon is selected, automatically switch to body selection mode
-      if (!selectedBody) {
-        setActiveSlot('body');
-      } else {
-        setActiveSlot(null);
-      }
-    } else if (activeSlot === 'body') {
+      setActiveSlot(selectedBody ? null : 'body');
+    } else if (slot === 'body') {
       setSelectedBody({ pokemon, locationId });
-      // If no head Pokémon is selected, automatically switch to head selection mode
-      if (!selectedHead) {
-        setActiveSlot('head');
-      } else {
-        setActiveSlot(null);
-      }
+      setActiveSlot(selectedHead ? null : 'head');
     }
   };
 
   const handleUpdateTeamMember = () => {
-    if (selectedHead && selectedBody) {
-      // Fusion case
-      onSelect(
-        selectedHead.pokemon,
-        selectedBody.pokemon,
-        selectedHead.locationId,
-        selectedBody.locationId
-      );
-      onClose();
-    } else if (selectedHead && !selectedBody) {
-      // Non-fusion case - just head Pokémon
-      onSelect(
-        selectedHead.pokemon,
-        selectedHead.pokemon,
-        selectedHead.locationId,
-        selectedHead.locationId
-      );
-      onClose();
-    } else if (selectedBody && !selectedHead) {
-      // Non-fusion case - just body Pokémon
-      onSelect(
-        selectedBody.pokemon,
-        selectedBody.pokemon,
-        selectedBody.locationId,
-        selectedBody.locationId
-      );
-      onClose();
-    }
+    const headPokemon = selectedHead?.pokemon;
+    const bodyPokemon = selectedBody?.pokemon;
+    const headLocationId = selectedHead?.locationId;
+    const bodyLocationId = selectedBody?.locationId;
+
+    if (!headPokemon && !bodyPokemon) return;
+
+    onSelect(
+      headPokemon || bodyPokemon!,
+      bodyPokemon || headPokemon!,
+      headLocationId || bodyLocationId!,
+      bodyLocationId || headLocationId!
+    );
+    onClose();
   };
 
   const handleClose = () => {
@@ -232,129 +194,21 @@ export default function TeamMemberPickerModal({
           <div className='flex flex-col lg:flex-row gap-4 lg:gap-6 flex-1 min-h-0'>
             <div className='flex-1 flex flex-col space-y-4'>
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                <div
-                  onClick={() => handleSlotSelect('head')}
-                  className={clsx(
-                    'border-2 rounded-lg p-2 transition-colors text-left h-24 relative cursor-pointer',
-                    activeSlot === 'head'
-                      ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-500'
-                      : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500'
-                  )}
-                >
-                  <div className='absolute top-2 left-2'>
-                    <div className='flex items-center space-x-2'>
-                      <HeadIcon className='h-5 w-5 text-blue-600 dark:text-blue-400' />
-                      <h3
-                        className={clsx(
-                          'font-medium text-sm',
-                          selectedHead
-                            ? 'text-blue-700 dark:text-blue-300'
-                            : 'text-gray-500 dark:text-gray-400'
-                        )}
-                      >
-                        Head Pokémon
-                      </h3>
-                    </div>
-                  </div>
-                  {selectedHead ? (
-                    <div className='absolute inset-0 flex items-center justify-center space-x-3 pt-6'>
-                      <PokemonSprite
-                        pokemonId={selectedHead.pokemon.id}
-                        className='h-12 w-12'
-                      />
-                      <div className='text-center'>
-                        <div className='font-medium text-blue-900 dark:text-blue-100 text-sm'>
-                          {selectedHead.pokemon.nickname ||
-                            selectedHead.pokemon.name}
-                        </div>
-                        {selectedHead.pokemon.nickname && (
-                          <div className='text-xs text-blue-700 dark:text-blue-300'>
-                            ({selectedHead.pokemon.name})
-                          </div>
-                        )}
-                      </div>
-                      {selectedHead && (
-                        <button
-                          onClick={e => {
-                            e.stopPropagation();
-                            setSelectedHead(null);
-                          }}
-                          className='absolute top-2 right-2 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 p-1 bg-white dark:bg-gray-700 rounded-full shadow-sm'
-                        >
-                          <X className='h-4 w-4' />
-                        </button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className='absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-500 pt-6'>
-                      {activeSlot === 'head'
-                        ? 'Click a Pokémon below to assign'
-                        : 'Click to select head'}
-                    </div>
-                  )}
-                </div>
+                <PokemonSlotSelector
+                  slot='head'
+                  selectedPokemon={selectedHead}
+                  isActive={activeSlot === 'head'}
+                  onSlotSelect={handleSlotSelect}
+                  onRemovePokemon={() => setSelectedHead(null)}
+                />
 
-                <div
-                  onClick={() => handleSlotSelect('body')}
-                  className={clsx(
-                    'border-2 rounded-lg p-2 transition-colors text-left h-24 relative cursor-pointer',
-                    activeSlot === 'body'
-                      ? 'border-green-400 bg-green-50 dark:bg-green-900/20 dark:border-green-500'
-                      : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500'
-                  )}
-                >
-                  <div className='absolute top-2 left-2'>
-                    <div className='flex items-center space-x-2'>
-                      <BodyIcon className='h-5 w-5 text-green-600 dark:text-green-400' />
-                      <h3
-                        className={clsx(
-                          'font-medium text-sm',
-                          selectedBody
-                            ? 'text-green-700 dark:text-green-300'
-                            : 'text-gray-500 dark:text-gray-400'
-                        )}
-                      >
-                        Body Pokémon
-                      </h3>
-                    </div>
-                  </div>
-                  {selectedBody ? (
-                    <div className='absolute inset-0 flex items-center justify-center space-x-3 pt-6'>
-                      <PokemonSprite
-                        pokemonId={selectedBody.pokemon.id}
-                        className='h-12 w-12'
-                      />
-                      <div className='text-center'>
-                        <div className='font-medium text-green-900 dark:text-green-100 text-sm'>
-                          {selectedBody.pokemon.nickname ||
-                            selectedBody.pokemon.name}
-                        </div>
-                        {selectedBody.pokemon.nickname && (
-                          <div className='text-xs text-green-700 dark:text-green-300'>
-                            ({selectedBody.pokemon.name})
-                          </div>
-                        )}
-                      </div>
-                      {selectedBody && (
-                        <button
-                          onClick={e => {
-                            e.stopPropagation();
-                            setSelectedBody(null);
-                          }}
-                          className='absolute top-2 right-2 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 p-1 bg-white dark:bg-gray-700 rounded-full shadow-sm'
-                        >
-                          <X className='h-4 w-4' />
-                        </button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className='absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-500 pt-6'>
-                      {activeSlot === 'body'
-                        ? 'Click a Pokémon below to assign'
-                        : 'Click to select body'}
-                    </div>
-                  )}
-                </div>
+                <PokemonSlotSelector
+                  slot='body'
+                  selectedPokemon={selectedBody}
+                  isActive={activeSlot === 'body'}
+                  onSlotSelect={handleSlotSelect}
+                  onRemovePokemon={() => setSelectedBody(null)}
+                />
               </div>
 
               <div className='relative'>
@@ -379,56 +233,18 @@ export default function TeamMemberPickerModal({
                         selectedBody?.pokemon.id === pokemon.id &&
                         selectedBody?.locationId === locationId;
                       const isSelected = isSelectedHead || isSelectedBody;
-                      const isActiveSlot = activeSlot && !isSelected;
+                      const isActiveSlot = Boolean(activeSlot && !isSelected);
 
                       return (
-                        <button
+                        <PokemonGridItem
                           key={`${pokemon.uid || pokemon.id}-${locationId}`}
-                          onClick={() =>
-                            handlePokemonSelect(pokemon, locationId)
-                          }
-                          disabled={!activeSlot && !isSelected}
-                          className={clsx(
-                            'flex flex-col items-center justify-center p-2 rounded-lg border transition-colors h-20 relative',
-                            isSelectedHead
-                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30'
-                              : isSelectedBody
-                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20 cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30'
-                                : isActiveSlot
-                                  ? 'border-gray-300 bg-gray-100 dark:bg-gray-700 dark:border-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer'
-                                  : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-60'
-                          )}
-                        >
-                          <div className='h-12 w-12 flex items-center justify-center mb-1'>
-                            <PokemonSprite
-                              pokemonId={pokemon.id}
-                              className='h-12 w-12'
-                            />
-                          </div>
-                          <div className='text-center min-w-0'>
-                            <div className='font-medium text-gray-900 dark:text-white text-xs truncate'>
-                              {pokemon.nickname || pokemon.name}
-                            </div>
-                            {pokemon.nickname && (
-                              <div className='text-xs text-gray-500 dark:text-gray-400 truncate'>
-                                ({pokemon.name})
-                              </div>
-                            )}
-                          </div>
-
-                          <div className='absolute top-1 right-1'>
-                            {isSelectedHead && (
-                              <div className='px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded-full flex items-center space-x-1'>
-                                <HeadIcon className='h-3 w-3' />
-                              </div>
-                            )}
-                            {isSelectedBody && (
-                              <div className='px-2 py-1 bg-green-600 text-white text-xs font-medium rounded-full flex items-center space-x-1'>
-                                <BodyIcon className='h-3 w-3' />
-                              </div>
-                            )}
-                          </div>
-                        </button>
+                          pokemon={pokemon}
+                          locationId={locationId}
+                          isSelectedHead={isSelectedHead}
+                          isSelectedBody={isSelectedBody}
+                          isActiveSlot={isActiveSlot}
+                          onSelect={handlePokemonSelect}
+                        />
                       );
                     })}
                   </div>
@@ -445,23 +261,10 @@ export default function TeamMemberPickerModal({
             <div className='hidden lg:block w-px bg-gray-200 dark:bg-gray-600'></div>
 
             <div className='w-full lg:w-64 flex flex-col space-y-4'>
-              <div className='h-28 w-28 flex items-center justify-center relative mx-auto'>
-                <div
-                  className='size-28 absolute -translate-y-2 rounded-lg opacity-30 border border-gray-200 dark:border-gray-400 text-gray-300 dark:text-gray-400'
-                  style={{
-                    background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
-                  }}
-                />
-                <div className='flex items-center justify-center'>
-                  <FusionSprite
-                    headPokemon={selectedHead?.pokemon || null}
-                    bodyPokemon={selectedBody?.pokemon || null}
-                    isFusion={Boolean(selectedHead && selectedBody)}
-                    shouldLoad={true}
-                    className='h-16 w-16'
-                  />
-                </div>
-              </div>
+              <PokemonPreview
+                headPokemon={selectedHead?.pokemon || null}
+                bodyPokemon={selectedBody?.pokemon || null}
+              />
 
               <button
                 onClick={handleUpdateTeamMember}
