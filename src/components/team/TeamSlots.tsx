@@ -50,7 +50,6 @@ export default function TeamSlots() {
 
   return (
     <div className='hidden lg:flex flex-col items-center'>
-      {/* Team Slots */}
       <div className='flex gap-1 sm:gap-2 md:gap-3'>
         {teamSlots.map(slot => (
           <div
@@ -64,22 +63,17 @@ export default function TeamSlots() {
             )}
           >
             {slot.isEmpty ? (
-              // Empty slot
               <div className='flex flex-col items-center justify-center text-center relative w-full h-full'>
-                {/* Background pattern similar to PokemonSummaryCard */}
                 <div
                   className='w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-white dark:mix-blend-soft-light'
                   style={{
                     background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
                   }}
                 />
-
                 <div className='flex flex-col items-center justify-center text-center relative z-10'></div>
               </div>
             ) : (
-              // Team member slot
               <div className='flex flex-col items-center justify-center relative w-full h-full'>
-                {/* Background pattern similar to PokemonSummaryCard */}
                 <div
                   className='w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-white dark:mix-blend-soft-light'
                   style={{
@@ -87,7 +81,6 @@ export default function TeamSlots() {
                   }}
                 />
 
-                {/* Pokemon sprite */}
                 <div className='relative z-10'>
                   <FusionSprite
                     headPokemon={slot.headPokemon || null}
