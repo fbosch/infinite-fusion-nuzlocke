@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Dialog,
   DialogPanel,
@@ -47,6 +47,13 @@ export default function TeamMemberPickerModal({
     locationId: string;
   } | null>(null);
   const [activeSlot, setActiveSlot] = useState<'head' | 'body' | null>('head');
+
+  // Auto-switch to head selection mode when both slots are empty
+  useEffect(() => {
+    if (!selectedHead && !selectedBody && !activeSlot) {
+      setActiveSlot('head');
+    }
+  }, [selectedHead, selectedBody, activeSlot]);
 
   // Get all available Pokémon from encounters
   const availablePokemon = useMemo(() => {
