@@ -1,7 +1,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useActivePlaythrough } from '@/stores/playthroughs/hooks';
+import {
+  useActivePlaythrough,
+  useEncounters,
+} from '@/stores/playthroughs/hooks';
 import {
   getTeamMemberDetails,
   getActivePlaythrough,
@@ -15,6 +18,7 @@ import { type PokemonOptionType } from '@/loaders/pokemon';
 
 export default function TeamSlots() {
   const activePlaythrough = useActivePlaythrough();
+  const encounters = useEncounters();
   const [pickerModalOpen, setPickerModalOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
 
@@ -53,7 +57,7 @@ export default function TeamSlots() {
         isFusion: details.encounter.isFusion,
       };
     });
-  }, [activePlaythrough]);
+  }, [activePlaythrough, encounters]);
 
   const handleSlotClick = (
     position: number,

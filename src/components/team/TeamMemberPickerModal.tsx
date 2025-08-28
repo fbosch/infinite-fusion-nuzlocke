@@ -64,29 +64,83 @@ export default function TeamMemberPickerModal({
   // Pre-populate selections when editing existing team member
   useEffect(() => {
     if (existingTeamMember && !existingTeamMember.isEmpty && encounters) {
-      // Find the encounter locations for the existing team member
-      const headLocationId = Object.keys(encounters).find(locationId => {
-        const encounter = encounters[locationId];
-        return encounter.head?.id === existingTeamMember.headPokemon?.id;
+      console.log('Pre-populating modal with:', existingTeamMember);
+
+      // Use the availablePokemon array which is already computed from encounters
+      const availablePokemon = Object.entries(encounters).flatMap(
+        ([locationId, encounter]) => {
+          const validPokemon = [];
+
+          if (
+            encounter.head?.status &&
+            encounter.head.status !== PokemonStatus.MISSED &&
+            encounter.head.status !== PokemonStatus.DECEASED
+          ) {
+            const pokemonWithUid = {
+              ...encounter.head,
+              uid:
+                encounter.head.uid ||
+                `${encounter.head.id}_${locationId}_${Date.now()}`,
+            };
+            validPokemon.push({ pokemon: pokemonWithUid, locationId });
+          }
+          if (
+            encounter.body?.status &&
+            encounter.body.status !== PokemonStatus.MISSED &&
+            encounter.body.status !== PokemonStatus.DECEASED
+          ) {
+            const pokemonWithUid = {
+              ...encounter.body,
+              uid:
+                encounter.body.uid ||
+                `${encounter.body.id}_${locationId}_${Date.now()}`,
+            };
+            validPokemon.push({ pokemon: pokemonWithUid, locationId });
+          }
+
+          return validPokemon;
+        }
+      );
+
+      console.log(
+        'Available Pokémon:',
+        availablePokemon.map(p => ({
+          name: p.pokemon.name,
+          uid: p.pokemon.uid,
+        }))
+      );
+
+      // Find Pokémon by UID from the available list
+      const headMatch = availablePokemon.find(
+        p => p.pokemon.uid === existingTeamMember.headPokemon?.uid
+      );
+      const bodyMatch = availablePokemon.find(
+        p => p.pokemon.uid === existingTeamMember.bodyPokemon?.uid
+      );
+
+      console.log('Found matches:', {
+        headMatch: headMatch
+          ? { name: headMatch.pokemon.name, uid: headMatch.pokemon.uid }
+          : null,
+        bodyMatch: bodyMatch
+          ? { name: bodyMatch.pokemon.name, uid: bodyMatch.pokemon.uid }
+          : null,
       });
 
-      const bodyLocationId = Object.keys(encounters).find(locationId => {
-        const encounter = encounters[locationId];
-        return encounter.body?.id === existingTeamMember.bodyPokemon?.id;
-      });
-
-      if (headLocationId && existingTeamMember.headPokemon) {
+      if (headMatch) {
         setSelectedHead({
-          pokemon: existingTeamMember.headPokemon,
-          locationId: headLocationId,
+          pokemon: headMatch.pokemon,
+          locationId: headMatch.locationId,
         });
+        console.log('Set head Pokémon:', headMatch.pokemon.name);
       }
 
-      if (bodyLocationId && existingTeamMember.bodyPokemon) {
+      if (bodyMatch) {
         setSelectedBody({
-          pokemon: existingTeamMember.bodyPokemon,
-          locationId: bodyLocationId,
+          pokemon: bodyMatch.pokemon,
+          locationId: bodyMatch.locationId,
         });
+        console.log('Set body Pokémon:', bodyMatch.pokemon.name);
       }
 
       // Set active slot to head if we have both, or to the empty slot
