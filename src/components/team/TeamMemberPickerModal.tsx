@@ -198,7 +198,8 @@ export default function TeamMemberPickerModal({
     }
 
     // Pass the selected Pokémon to the parent component
-    onSelect(headPokemon || bodyPokemon!, bodyPokemon || headPokemon!);
+    // Only pass the Pokémon that are actually selected, don't duplicate them
+    onSelect(headPokemon || null, bodyPokemon || null);
     onClose();
   };
 
