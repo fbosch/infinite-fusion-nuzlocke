@@ -21,6 +21,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
   const locationId = row.original.id;
   const { ref, inView } = useInView();
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
+  const previousFusionId = useRef<string | null>(null);
 
   const aboveTheFold = row.index < 8;
   const shouldLoad = inView || aboveTheFold;
@@ -57,27 +58,41 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
         }
       }
     });
-  }, [
-    locationId,
-    encounterData.isFusion,
-    encounterData.head,
-    encounterData.body,
-  ]);
+  }, [locationId]); // Only depend on locationId since the listener is static
 
-  // Play evolution animation when Pokémon statuses change and they become compatible for fusion
+  // Initialize the previous fusion ID on first render to prevent animation on page load
   useEffect(() => {
     if (encounterData.isFusion && encounterData.head && encounterData.body) {
       const canActuallyFuse = canFuse(encounterData.head, encounterData.body);
       if (canActuallyFuse) {
-        // Trigger evolution animation when Pokémon become compatible
-        spriteRef.current?.playEvolution();
+        const currentFusionId = `${encounterData.head.id}.${encounterData.body.id}`;
+        if (previousFusionId.current === null) {
+          // First time rendering - just set the ID without playing animation
+          previousFusionId.current = currentFusionId;
+        }
       }
     }
-  }, [
-    encounterData.isFusion,
-    encounterData.head?.status,
-    encounterData.body?.status,
-  ]);
+  }, [encounterData.isFusion, encounterData.head?.id, encounterData.body?.id]);
+
+  // Play evolution animation only when the effective fusion ID changes
+  useEffect(() => {
+    if (encounterData.isFusion && encounterData.head && encounterData.body) {
+      const canActuallyFuse = canFuse(encounterData.head, encounterData.body);
+      if (canActuallyFuse) {
+        // Calculate the effective fusion ID based on current state
+        const currentFusionId = `${encounterData.head.id}.${encounterData.body.id}`;
+
+        // Only play animation if this is a new fusion combination (and not the first render)
+        if (
+          previousFusionId.current !== null &&
+          currentFusionId !== previousFusionId.current
+        ) {
+          previousFusionId.current = currentFusionId;
+          spriteRef.current?.playEvolution();
+        }
+      }
+    }
+  }, [encounterData.isFusion, encounterData.head?.id, encounterData.body?.id]);
 
   return (
     <tr
