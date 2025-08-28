@@ -20,8 +20,8 @@ interface TeamMemberPickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (
-    headPokemon: PokemonOptionType,
-    bodyPokemon: PokemonOptionType
+    headPokemon: PokemonOptionType | null,
+    bodyPokemon: PokemonOptionType | null
   ) => void;
   position: number;
   existingTeamMember?: {
@@ -69,7 +69,7 @@ export default function TeamMemberPickerModal({
         const encounter = encounters[locationId];
         return encounter.head?.id === existingTeamMember.headPokemon?.id;
       });
-      
+
       const bodyLocationId = Object.keys(encounters).find(locationId => {
         const encounter = encounters[locationId];
         return encounter.body?.id === existingTeamMember.bodyPokemon?.id;
@@ -116,7 +116,9 @@ export default function TeamMemberPickerModal({
           // Ensure the Pokémon has a UID
           const pokemonWithUid = {
             ...encounter.head,
-            uid: encounter.head.uid || `${encounter.head.id}_${locationId}_${Date.now()}`,
+            uid:
+              encounter.head.uid ||
+              `${encounter.head.id}_${locationId}_${Date.now()}`,
           };
           validPokemon.push({ pokemon: pokemonWithUid, locationId });
         }
@@ -128,7 +130,9 @@ export default function TeamMemberPickerModal({
           // Ensure the Pokémon has a UID
           const pokemonWithUid = {
             ...encounter.body,
-            uid: encounter.body.uid || `${encounter.body.id}_${locationId}_${Date.now()}`,
+            uid:
+              encounter.body.uid ||
+              `${encounter.body.id}_${locationId}_${Date.now()}`,
           };
           validPokemon.push({ pokemon: pokemonWithUid, locationId });
         }
@@ -155,12 +159,8 @@ export default function TeamMemberPickerModal({
     pokemon: PokemonOptionType,
     locationId: string
   ) => {
-    const isSelectedHead =
-      selectedHead?.pokemon.id === pokemon.id &&
-      selectedHead?.locationId === locationId;
-    const isSelectedBody =
-      selectedBody?.pokemon.id === pokemon.id &&
-      selectedBody?.locationId === locationId;
+    const isSelectedHead = selectedHead?.pokemon?.uid === pokemon.uid;
+    const isSelectedBody = selectedBody?.pokemon?.uid === pokemon.uid;
 
     // Handle unselecting
     if (isSelectedHead) {
@@ -189,13 +189,22 @@ export default function TeamMemberPickerModal({
     const headPokemon = selectedHead?.pokemon;
     const bodyPokemon = selectedBody?.pokemon;
 
-    if (!headPokemon && !bodyPokemon) return;
+    // If both are empty, this functions the same as clearing
+    if (!headPokemon && !bodyPokemon) {
+      // Pass null for both to indicate clearing the team member
+      onSelect(null, null);
+      onClose();
+      return;
+    }
 
     // Pass the selected Pokémon to the parent component
-    onSelect(
-      headPokemon || bodyPokemon!,
-      bodyPokemon || headPokemon!
-    );
+    onSelect(headPokemon || bodyPokemon!, bodyPokemon || headPokemon!);
+    onClose();
+  };
+
+  const handleClearTeamMember = () => {
+    // Clear the team member by passing null for both
+    onSelect(null, null);
     onClose();
   };
 
@@ -207,7 +216,9 @@ export default function TeamMemberPickerModal({
     onClose();
   };
 
-  const canUpdateTeam = selectedHead || selectedBody;
+  // Allow update when there are selections OR when both are empty (clearing)
+  const canUpdateTeam =
+    selectedHead || selectedBody || (!selectedHead && !selectedBody);
 
   if (!activePlaythrough) return null;
 
@@ -280,11 +291,9 @@ export default function TeamMemberPickerModal({
                   <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-2'>
                     {availablePokemon.map(({ pokemon, locationId }) => {
                       const isSelectedHead =
-                        selectedHead?.pokemon.id === pokemon.id &&
-                        selectedHead?.locationId === locationId;
+                        selectedHead?.pokemon?.uid === pokemon.uid;
                       const isSelectedBody =
-                        selectedBody?.pokemon.id === pokemon.id &&
-                        selectedBody?.locationId === locationId;
+                        selectedBody?.pokemon?.uid === pokemon.uid;
                       const isSelected = isSelectedHead || isSelectedBody;
                       const isActiveSlot = Boolean(activeSlot && !isSelected);
 
@@ -323,13 +332,26 @@ export default function TeamMemberPickerModal({
                 onClick={handleUpdateTeamMember}
                 disabled={!canUpdateTeam}
                 className={clsx(
-                  'w-full px-6 py-3 rounded-lg font-medium transition-colors',
+                  'w-full px-4 py-2.5 rounded-md font-medium transition-colors duration-200 border',
                   canUpdateTeam
-                    ? 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600 dark:text-gray-400'
+                    ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 hover:text-blue-800 hover:border-blue-300 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800 dark:hover:bg-blue-900/50 dark:hover:text-blue-200 dark:hover:border-blue-700'
+                    : 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-500'
                 )}
               >
                 Update Team Member
+              </button>
+
+              <button
+                onClick={handleClearTeamMember}
+                disabled={!selectedHead && !selectedBody}
+                className={clsx(
+                  'w-full px-4 py-2.5 rounded-md font-medium transition-colors duration-200 border',
+                  selectedHead || selectedBody
+                    ? 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-700 dark:hover:bg-red-950/50 dark:hover:text-red-300 dark:hover:border-red-800'
+                    : 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-500'
+                )}
+              >
+                Clear Team Member
               </button>
             </div>
           </div>

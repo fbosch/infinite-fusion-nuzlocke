@@ -2,7 +2,10 @@
 
 import { useMemo, useState } from 'react';
 import { useActivePlaythrough } from '@/stores/playthroughs/hooks';
-import { getTeamMemberDetails, getActivePlaythrough } from '@/stores/playthroughs/store';
+import {
+  getTeamMemberDetails,
+  getActivePlaythrough,
+} from '@/stores/playthroughs/store';
 import { getLocationById } from '@/loaders/locations';
 import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
 import { clsx } from 'clsx';
@@ -35,7 +38,9 @@ export default function TeamSlots() {
       }
 
       // Get location from the head Pokémon's original location
-      const location = getLocationById(details.encounter.head?.originalLocation || '');
+      const location = getLocationById(
+        details.encounter.head?.originalLocation || ''
+      );
       const headPokemon = details.encounter.head;
       const bodyPokemon = details.encounter.body;
 
@@ -50,32 +55,40 @@ export default function TeamSlots() {
     });
   }, [activePlaythrough]);
 
-  const handleSlotClick = (position: number, existingSlot: {
-    position: number;
-    isEmpty: boolean;
-    location?: string;
-    headPokemon?: PokemonOptionType | null;
-    bodyPokemon?: PokemonOptionType | null;
-    isFusion?: boolean;
-  } | null) => {
+  const handleSlotClick = (
+    position: number,
+    existingSlot: {
+      position: number;
+      isEmpty: boolean;
+      location?: string;
+      headPokemon?: PokemonOptionType | null;
+      bodyPokemon?: PokemonOptionType | null;
+      isFusion?: boolean;
+    } | null
+  ) => {
     setSelectedPosition(position);
     setPickerModalOpen(true);
   };
 
   const handlePokemonSelect = (
-    headPokemon: PokemonOptionType,
-    bodyPokemon: PokemonOptionType
+    headPokemon: PokemonOptionType | null,
+    bodyPokemon: PokemonOptionType | null
   ) => {
     if (selectedPosition === null) return;
 
     const activePlaythrough = getActivePlaythrough();
     if (!activePlaythrough) return;
 
-    // Add the team member by referencing the Pokémon UIDs
-    activePlaythrough.team.members[selectedPosition] = {
-      headPokemonUid: headPokemon.uid || '',
-      bodyPokemonUid: bodyPokemon.uid || '',
-    };
+    // If both are null, clear the team member
+    if (!headPokemon && !bodyPokemon) {
+      activePlaythrough.team.members[selectedPosition] = null;
+    } else {
+      // Add the team member by referencing the Pokémon UIDs
+      activePlaythrough.team.members[selectedPosition] = {
+        headPokemonUid: headPokemon?.uid || '',
+        bodyPokemonUid: bodyPokemon?.uid || '',
+      };
+    }
 
     // Update the playthrough timestamp
     activePlaythrough.updatedAt = Date.now();
@@ -107,7 +120,9 @@ export default function TeamSlots() {
                   ? 'border-gray-200 dark:border-gray-700 bg-transparent hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer'
                   : 'border-gray-200 dark:border-gray-700 bg-transparent hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer'
               )}
-              onClick={() => handleSlotClick(slot.position, slot.isEmpty ? null : slot)}
+              onClick={() =>
+                handleSlotClick(slot.position, slot.isEmpty ? null : slot)
+              }
             >
               {slot.isEmpty ? (
                 <div className='flex flex-col items-center justify-center text-center relative w-full h-full'>
@@ -154,7 +169,9 @@ export default function TeamSlots() {
         onClose={handleCloseModal}
         onSelect={handlePokemonSelect}
         position={selectedPosition || 0}
-        existingTeamMember={selectedPosition !== null ? teamSlots[selectedPosition] : null}
+        existingTeamMember={
+          selectedPosition !== null ? teamSlots[selectedPosition] : null
+        }
       />
     </>
   );
