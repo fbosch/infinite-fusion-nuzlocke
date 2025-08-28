@@ -14,7 +14,7 @@ import { useEncounters } from '@/stores/playthroughs/hooks';
 import { type PokemonOptionType, PokemonStatus } from '@/loaders/pokemon';
 import { PokemonSlotSelector } from './PokemonSlotSelector';
 import { PokemonGridItem } from './PokemonGridItem';
-import { PokemonPreview } from './PokemonPreview';
+import PokemonSummaryCard from '@/components/PokemonSummaryCard';
 
 interface TeamMemberPickerModalProps {
   isOpen: boolean;
@@ -323,9 +323,13 @@ export default function TeamMemberPickerModal({
             <div className='hidden lg:block w-px bg-gray-200 dark:bg-gray-600'></div>
 
             <div className='w-full lg:w-64 flex flex-col space-y-4'>
-              <PokemonPreview
+              <PokemonSummaryCard
                 headPokemon={selectedHead?.pokemon || null}
                 bodyPokemon={selectedBody?.pokemon || null}
+                isFusion={Boolean(
+                  selectedHead?.pokemon && selectedBody?.pokemon
+                )}
+                shouldLoad={true}
               />
 
               <button
