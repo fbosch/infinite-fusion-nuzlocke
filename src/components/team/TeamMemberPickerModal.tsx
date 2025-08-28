@@ -576,6 +576,7 @@ export default function TeamMemberPickerModal({
                   )}
                   shouldLoad={true}
                   nickname={previewNickname || undefined}
+                  showStatusActions={false}
                 />
               </div>
 

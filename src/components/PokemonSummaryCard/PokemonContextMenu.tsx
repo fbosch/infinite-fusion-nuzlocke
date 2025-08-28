@@ -44,6 +44,7 @@ interface PokemonContextMenuProps {
     isFusion?: boolean;
   } | null;
   shouldLoad?: boolean;
+  showStatusActions?: boolean; // Whether to show status-changing actions in context menu
 }
 
 export function PokemonContextMenu({
@@ -51,6 +52,7 @@ export function PokemonContextMenu({
   locationId,
   encounterData,
   shouldLoad,
+  showStatusActions = true,
 }: PokemonContextMenuProps) {
   const settings = useSnapshot(settingsStore);
 
@@ -211,8 +213,8 @@ export function PokemonContextMenu({
       },
     ];
 
-    // Only show status options if there are Pokemon and they're not eggs
-    if (hasPokemon && !eitherPokemonIsEgg) {
+    // Only show status options if there are Pokemon, they're not eggs, and status actions are enabled
+    if (hasPokemon && !eitherPokemonIsEgg && showStatusActions) {
       items.push({
         id: 'separator-1',
         separator: true,

@@ -20,12 +20,20 @@ interface SummaryCardProps {
   isFusion?: boolean;
   shouldLoad?: boolean;
   nickname?: string; // Optional nickname to override the Pokémon's existing nickname
+  showStatusActions?: boolean; // Whether to show status-changing actions in context menu
   ref?: React.Ref<FusionSpriteHandle>;
 }
 
 const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
   (
-    { headPokemon, bodyPokemon, isFusion = false, shouldLoad = true, nickname },
+    {
+      headPokemon,
+      bodyPokemon,
+      isFusion = false,
+      shouldLoad = true,
+      nickname,
+      showStatusActions = true,
+    },
     ref
   ) => {
     SummaryCard.displayName = 'SummaryCard';
@@ -143,6 +151,7 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
           isFusion: effectiveIsFusion,
         }}
         shouldLoad={shouldLoad}
+        showStatusActions={showStatusActions}
       >
         <div className='flex flex-col items-center justify-center relative'>
           <Fragment>
