@@ -246,6 +246,14 @@ export default function TeamMemberPickerModal({
       }
     );
 
+    console.log('Available Pokémon count:', pokemon.length);
+    console.log(
+      'First few available Pokémon:',
+      pokemon
+        .slice(0, 3)
+        .map(p => ({ name: p.pokemon.name, uid: p.pokemon.uid }))
+    );
+
     if (!searchQuery.trim()) return pokemon;
 
     const query = searchQuery.toLowerCase();
@@ -263,6 +271,7 @@ export default function TeamMemberPickerModal({
   ]);
 
   const handleSlotSelect = (slot: 'head' | 'body') => {
+    console.log('Slot selected:', slot);
     setActiveSlot(slot);
   };
 
@@ -270,6 +279,14 @@ export default function TeamMemberPickerModal({
     pokemon: PokemonOptionType,
     locationId: string
   ) => {
+    console.log('Pokemon selected:', {
+      pokemon: pokemon.name,
+      uid: pokemon.uid,
+      activeSlot,
+      selectedHead: selectedHead?.pokemon?.name,
+      selectedBody: selectedBody?.pokemon?.name,
+    });
+
     const isSelectedHead = selectedHead?.pokemon?.uid === pokemon.uid;
     const isSelectedBody = selectedBody?.pokemon?.uid === pokemon.uid;
 
@@ -501,6 +518,17 @@ export default function TeamMemberPickerModal({
                         selectedBody?.pokemon?.uid === pokemon.uid;
                       const isSelected = isSelectedHead || isSelectedBody;
                       const isActiveSlot = Boolean(activeSlot && !isSelected);
+
+                      // Debug logging for the first few Pokémon
+                      if (pokemon.name === availablePokemon[0]?.pokemon.name) {
+                        console.log('First Pokémon debug:', {
+                          pokemon: pokemon.name,
+                          activeSlot,
+                          isSelected,
+                          isActiveSlot,
+                          canSelect: isActiveSlot || isSelected,
+                        });
+                      }
 
                       return (
                         <PokemonGridItem

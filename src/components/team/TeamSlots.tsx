@@ -1,16 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import {
   useActivePlaythrough,
   useEncounters,
 } from '@/stores/playthroughs/hooks';
-import {
-  getTeamMemberDetails,
-  getActivePlaythrough,
-} from '@/stores/playthroughs/store';
+import { getActivePlaythrough } from '@/stores/playthroughs/store';
 import { getLocationById } from '@/loaders/locations';
-import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
+import {
+  FusionSprite,
+  type FusionSpriteHandle,
+} from '@/components/PokemonSummaryCard/FusionSprite';
 import { clsx } from 'clsx';
 import { Plus } from 'lucide-react';
 import TeamMemberPickerModal from './TeamMemberPickerModal';
@@ -21,6 +21,10 @@ export default function TeamSlots() {
   const encounters = useEncounters();
   const [pickerModalOpen, setPickerModalOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
+
+  // Refs for team member sprites to play evolution animations
+  const teamSpriteRefs = useRef<(FusionSpriteHandle | null)[]>([]);
+  const previousFusionIds = useRef<(string | null)[]>([]);
 
   const teamSlots = useMemo(() => {
     if (!activePlaythrough?.team) return [];
@@ -33,20 +37,33 @@ export default function TeamSlots() {
         };
       }
 
-      const details = getTeamMemberDetails(index);
-      if (!details) {
+      // Get encounter data directly from encounters to ensure reactivity
+      const headPokemon = member.headPokemonUid
+        ? Object.values(encounters || {}).find(
+            enc => enc.head?.uid === member.headPokemonUid
+          )?.head || null
+        : null;
+      const bodyPokemon = member.bodyPokemonUid
+        ? Object.values(encounters || {}).find(
+            enc => enc.body?.uid === member.bodyPokemonUid
+          )?.body || null
+        : null;
+
+      // A slot is empty only if both UIDs are empty strings
+      if (!member.headPokemonUid && !member.bodyPokemonUid) {
         return {
           position: index,
           isEmpty: true,
         };
       }
 
-      // Get location from the head Pokémon's original location
+      // Get location from the head Pokémon's original location, fallback to body if head doesn't exist
       const location = getLocationById(
-        details.encounter.head?.originalLocation || ''
+        headPokemon?.originalLocation || bodyPokemon?.originalLocation || ''
       );
-      const headPokemon = details.encounter.head;
-      const bodyPokemon = details.encounter.body;
+
+      // Determine fusion state: true if both Pokémon exist and can form a fusion
+      const isFusion = Boolean(headPokemon && bodyPokemon);
 
       return {
         position: index,
@@ -54,10 +71,47 @@ export default function TeamSlots() {
         location: location?.name || 'Unknown Location',
         headPokemon,
         bodyPokemon,
-        isFusion: details.encounter.isFusion,
+        isFusion,
       };
     });
-  }, [activePlaythrough, encounters]);
+  }, [activePlaythrough?.team?.members, encounters]);
+
+  // Track fusion ID changes and play evolution animations for team members
+  useEffect(() => {
+    // Initialize refs arrays if needed
+    if (teamSpriteRefs.current.length !== 6) {
+      teamSpriteRefs.current = new Array(6).fill(null);
+    }
+    if (previousFusionIds.current.length !== 6) {
+      previousFusionIds.current = new Array(6).fill(null);
+    }
+
+    teamSlots.forEach((slot, index) => {
+      if (
+        !slot.isEmpty &&
+        slot.isFusion &&
+        slot.headPokemon &&
+        slot.bodyPokemon
+      ) {
+        const currentFusionId = `${slot.headPokemon.id}.${slot.bodyPokemon.id}`;
+
+        // Initialize previous fusion ID if not set
+        if (previousFusionIds.current[index] === null) {
+          previousFusionIds.current[index] = currentFusionId;
+          return;
+        }
+
+        // Play animation if fusion ID changed
+        if (previousFusionIds.current[index] !== currentFusionId) {
+          previousFusionIds.current[index] = currentFusionId;
+          teamSpriteRefs.current[index]?.playEvolution();
+        }
+      } else if (slot.isEmpty) {
+        // Reset previous fusion ID for empty slots
+        previousFusionIds.current[index] = null;
+      }
+    });
+  }, [teamSlots]);
 
   const handleSlotClick = (
     position: number,
@@ -154,6 +208,9 @@ export default function TeamSlots() {
 
                   <div className='relative z-10'>
                     <FusionSprite
+                      ref={ref => {
+                        teamSpriteRefs.current[slot.position] = ref;
+                      }}
                       headPokemon={slot.headPokemon || null}
                       bodyPokemon={slot.bodyPokemon || null}
                       isFusion={slot.isFusion}

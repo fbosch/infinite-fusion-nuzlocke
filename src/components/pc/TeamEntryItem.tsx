@@ -1,9 +1,13 @@
 'use client';
 
+import { useRef, useEffect } from 'react';
 import clsx from 'clsx';
 import { CursorTooltip } from '@/components/CursorTooltip';
 import { PokemonContextMenu } from '@/components/PokemonSummaryCard/PokemonContextMenu';
-import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
+import {
+  FusionSprite,
+  type FusionSpriteHandle,
+} from '@/components/PokemonSummaryCard/FusionSprite';
 import { TypePills } from '@/components/TypePills';
 import { getNicknameText } from '@/components/PokemonSummaryCard/utils';
 import HeadIcon from '@/assets/images/head.svg';
@@ -36,6 +40,32 @@ export default function TeamEntryItem({
   const isFusion = Boolean(
     currentEncounter?.isFusion && canFuse(entry.head, entry.body)
   );
+
+  // Ref for the sprite to play evolution animations
+  const spriteRef = useRef<FusionSpriteHandle | null>(null);
+  const previousFusionId = useRef<string | null>(null);
+
+  // Track fusion ID changes and play evolution animations
+  useEffect(() => {
+    if (isFusion && entry.head && entry.body) {
+      const currentFusionId = `${entry.head.id}.${entry.body.id}`;
+
+      // Initialize previous fusion ID if not set
+      if (previousFusionId.current === null) {
+        previousFusionId.current = currentFusionId;
+        return;
+      }
+
+      // Play animation if fusion ID changed
+      if (previousFusionId.current !== currentFusionId) {
+        previousFusionId.current = currentFusionId;
+        spriteRef.current?.playEvolution();
+      }
+    } else {
+      // Reset previous fusion ID for non-fusion entries
+      previousFusionId.current = null;
+    }
+  }, [isFusion, entry.head?.id, entry.body?.id]);
 
   const { primary, secondary } = useFusionTypesFromPokemon(
     entry.head,
@@ -100,6 +130,7 @@ export default function TeamEntryItem({
               )}
             >
               <FusionSprite
+                ref={spriteRef}
                 headPokemon={entry.head ?? null}
                 bodyPokemon={entry.body ?? null}
                 isFusion={isFusion}
