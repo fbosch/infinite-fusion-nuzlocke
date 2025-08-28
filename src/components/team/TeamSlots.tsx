@@ -169,6 +169,7 @@ export default function TeamSlots() {
       </div>
 
       <TeamMemberPickerModal
+        key={`team-member-picker-${selectedPosition}`}
         isOpen={pickerModalOpen}
         onClose={handleCloseModal}
         onSelect={handlePokemonSelect}

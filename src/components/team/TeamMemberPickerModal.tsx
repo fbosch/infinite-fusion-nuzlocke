@@ -189,9 +189,35 @@ export default function TeamMemberPickerModal({
     }
   }, [existingTeamMember, encounters]);
 
-  // Get all available Pokémon from encounters
+  // Get all available Pokémon from encounters, filtering out those already in use by other team members
   const availablePokemon = useMemo(() => {
-    if (!encounters) return [];
+    if (!encounters || !activePlaythrough?.team) return [];
+
+    // Get all Pokémon UIDs that are currently in use by other team members
+    const usedPokemonUids = new Set<string>();
+    activePlaythrough.team.members.forEach((member, index) => {
+      // Skip the current position being edited
+      if (index === position) return;
+
+      if (member) {
+        // Add both head and body Pokémon UIDs to the used set
+        if (member.headPokemonUid) usedPokemonUids.add(member.headPokemonUid);
+        if (member.bodyPokemonUid) usedPokemonUids.add(member.bodyPokemonUid);
+      }
+    });
+
+    // If we're editing an existing team member, allow the current Pokémon to be selected again
+    if (existingTeamMember && !existingTeamMember.isEmpty) {
+      if (existingTeamMember.headPokemon?.uid) {
+        usedPokemonUids.delete(existingTeamMember.headPokemon.uid);
+      }
+      if (existingTeamMember.bodyPokemon?.uid) {
+        usedPokemonUids.delete(existingTeamMember.bodyPokemon.uid);
+      }
+    }
+
+    console.log('Used Pokémon UIDs:', Array.from(usedPokemonUids));
+    console.log('Current position being edited:', position);
 
     const pokemon = Object.entries(encounters).flatMap(
       ([locationId, encounter]) => {
@@ -201,7 +227,8 @@ export default function TeamMemberPickerModal({
           encounter.head?.status &&
           encounter.head.status !== PokemonStatus.MISSED &&
           encounter.head.status !== PokemonStatus.DECEASED &&
-          encounter.head.uid // Only include Pokémon that already have UIDs
+          encounter.head.uid && // Only include Pokémon that already have UIDs
+          !usedPokemonUids.has(encounter.head.uid) // Filter out already used Pokémon
         ) {
           validPokemon.push({ pokemon: encounter.head, locationId });
         }
@@ -209,7 +236,8 @@ export default function TeamMemberPickerModal({
           encounter.body?.status &&
           encounter.body.status !== PokemonStatus.MISSED &&
           encounter.body.status !== PokemonStatus.DECEASED &&
-          encounter.body.uid // Only include Pokémon that already have UIDs
+          encounter.body.uid && // Only include Pokémon that already have UIDs
+          !usedPokemonUids.has(encounter.body.uid) // Filter out already used Pokémon
         ) {
           validPokemon.push({ pokemon: encounter.body, locationId });
         }
@@ -226,7 +254,13 @@ export default function TeamMemberPickerModal({
         p.pokemon.name.toLowerCase().includes(query) ||
         p.pokemon.nickname?.toLowerCase().includes(query)
     );
-  }, [encounters, searchQuery]);
+  }, [
+    encounters,
+    searchQuery,
+    activePlaythrough?.team,
+    position,
+    existingTeamMember,
+  ]);
 
   const handleSlotSelect = (slot: 'head' | 'body') => {
     setActiveSlot(slot);
