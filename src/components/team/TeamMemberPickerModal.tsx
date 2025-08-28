@@ -56,15 +56,21 @@ export default function TeamMemberPickerModal({
     locationId: string;
   } | null>(null);
   const [activeSlot, setActiveSlot] = useState<'head' | 'body' | null>('head');
+  const [hasManuallySelectedSlot, setHasManuallySelectedSlot] = useState(false);
   const [nickname, setNickname] = useState('');
   const [previewNickname, setPreviewNickname] = useState('');
 
-  // Auto-switch to head selection mode when both slots are empty
+  // Auto-switch to head selection mode when both slots are empty, but only if no manual selection was made
   useEffect(() => {
-    if (!selectedHead && !selectedBody && !activeSlot) {
+    if (
+      !selectedHead &&
+      !selectedBody &&
+      !activeSlot &&
+      !hasManuallySelectedSlot
+    ) {
       setActiveSlot('head');
     }
-  }, [selectedHead, selectedBody, activeSlot]);
+  }, [selectedHead, selectedBody, hasManuallySelectedSlot]); // Respect manual slot selection
 
   // Pre-populate selections when editing existing team member
   useEffect(() => {
@@ -186,6 +192,9 @@ export default function TeamMemberPickerModal({
       } else if (existingTeamMember.bodyPokemon) {
         setActiveSlot('head');
       }
+
+      // Reset manual selection flag when editing existing team member
+      setHasManuallySelectedSlot(false);
     }
   }, [existingTeamMember, encounters]);
 
@@ -273,6 +282,7 @@ export default function TeamMemberPickerModal({
   const handleSlotSelect = (slot: 'head' | 'body') => {
     console.log('Slot selected:', slot);
     setActiveSlot(slot);
+    setHasManuallySelectedSlot(true);
   };
 
   const handlePokemonSelect = (
@@ -422,6 +432,7 @@ export default function TeamMemberPickerModal({
     setSelectedHead(null);
     setSelectedBody(null);
     setActiveSlot('head');
+    setHasManuallySelectedSlot(false);
     setNickname('');
     setPreviewNickname('');
     onClose();
