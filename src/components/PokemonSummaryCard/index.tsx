@@ -19,11 +19,15 @@ interface SummaryCardProps {
   bodyPokemon?: PokemonOptionType | null;
   isFusion?: boolean;
   shouldLoad?: boolean;
+  nickname?: string; // Optional nickname to override the Pokémon's existing nickname
   ref?: React.Ref<FusionSpriteHandle>;
 }
 
 const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
-  ({ headPokemon, bodyPokemon, isFusion = false, shouldLoad = true }, ref) => {
+  (
+    { headPokemon, bodyPokemon, isFusion = false, shouldLoad = true, nickname },
+    ref
+  ) => {
     SummaryCard.displayName = 'SummaryCard';
     const spriteRef = useRef<FusionSpriteHandle | null>(null);
 
@@ -77,11 +81,18 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
       return null;
     }
 
-    const name = getNicknameText(
-      displayPokemon.head,
-      displayPokemon.body,
-      displayPokemon.isFusion
-    );
+    // Use the nickname prop if provided, otherwise use the Pokémon's existing nickname
+    const name =
+      nickname !== undefined
+        ? nickname ||
+          displayPokemon.head?.name ||
+          displayPokemon.body?.name ||
+          ''
+        : getNicknameText(
+            displayPokemon.head,
+            displayPokemon.body,
+            displayPokemon.isFusion
+          );
 
     // Only consider deceased if both Pokemon are dead (for fusion) or the single Pokemon is dead
     // Note: boxed Pokemon are not considered deceased, only actually dead Pokemon

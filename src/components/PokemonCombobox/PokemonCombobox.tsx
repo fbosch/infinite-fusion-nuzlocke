@@ -582,7 +582,7 @@ export const PokemonCombobox = ({
       </Combobox>
       <div className='flex'>
         <PokemonNicknameInput
-          key={value?.uid + 'nickname'}
+          key={`${value?.uid}-${value?.nickname || 'no-nickname'}`}
           value={value}
           onChange={onChange}
           placeholder={nicknamePlaceholder}
