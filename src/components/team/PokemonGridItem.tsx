@@ -85,7 +85,11 @@ export function PokemonGridItem({
       )}
     >
       <div className='h-12 w-12 flex items-center justify-center mb-1'>
-        <PokemonSprite pokemonId={pokemon.id} className='h-12 w-12' />
+        <PokemonSprite
+          pokemonId={pokemon.id}
+          generation='gen7'
+          className='h-12 w-12'
+        />
       </div>
 
       <div className='text-center min-w-0'>

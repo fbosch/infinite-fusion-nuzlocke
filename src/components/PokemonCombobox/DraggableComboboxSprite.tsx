@@ -494,7 +494,7 @@ export function DraggableComboboxSprite({
                   dragPreview && 'opacity-60 pointer-events-none' // Make preview sprite opaque
                 )}
                 draggable={false}
-                generation='gen8'
+                generation='gen7'
               />
             </div>
           </CursorTooltip>

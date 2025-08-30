@@ -84,7 +84,7 @@ export function PokemonSlotSelector({
             pokemonId={selectedPokemon.pokemon.id}
             className='h-12 w-12'
           />
-          <div className='text-center'>
+          <div>
             <div className={clsx('font-medium text-sm', getPokemonNameColor())}>
               {selectedPokemon.pokemon.nickname || selectedPokemon.pokemon.name}
             </div>

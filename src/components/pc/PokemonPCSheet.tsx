@@ -20,6 +20,7 @@ import {
   isPokemonDeceased,
   isPokemonStored,
 } from '@/utils/pokemonPredicates';
+import { scrollToLocationById } from '@/utils/scrollToLocation';
 import {
   getLocationById,
   getLocationsSortedWithCustom,
@@ -27,6 +28,7 @@ import {
 import PokeballIcon from '@/assets/images/pokeball.svg';
 import PCEntryItem from './PCEntryItem';
 import TeamEntryItem from './TeamEntryItem';
+import { GraveyardGridItem } from './GraveyardGridItem';
 
 export interface PokemonPCSheetProps {
   isOpen: boolean;
@@ -378,24 +380,32 @@ export default function PokemonPCSheet({
                       </p>
                     </div>
                   ) : (
-                    <ul
-                      role='list'
-                      aria-label='Fainted Pokémon list'
-                      className='grid w-full content-start grid-cols-1 gap-2 py-2 sm:grid-cols-2 h-[calc(100dvh-6.5rem)] g overflow-y-auto'
-                    >
-                      {deceased.map(entry => (
-                        <PCEntryItem
-                          key={entry.locationId}
-                          entry={entry}
-                          idToName={idToName}
-                          mode='graveyard'
-                          hoverRingClass='hover:ring-red-400/30'
-                          fallbackLabel='Fainted Pokémon'
-                          className=''
-                          onClose={onClose}
-                        />
-                      ))}
-                    </ul>
+                    <div className='w-full py-2 h-[calc(100dvh-6.5rem)] overflow-y-auto'>
+                      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3'>
+                        {deceased.map(entry => (
+                          <GraveyardGridItem
+                            key={entry.locationId}
+                            entry={entry}
+                            onLocationClick={locationId => {
+                              // Scroll to location in the encounter table
+                              const highlightUids: string[] = [];
+                              if (entry.head?.uid)
+                                highlightUids.push(entry.head.uid);
+                              if (entry.body?.uid)
+                                highlightUids.push(entry.body.uid);
+
+                              scrollToLocationById(locationId, {
+                                behavior: 'smooth',
+                                highlightUids,
+                                durationMs: 1200,
+                              });
+
+                              onClose();
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </TabPanel>
               </TabPanels>
