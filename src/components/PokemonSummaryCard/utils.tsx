@@ -198,20 +198,6 @@ export function getStatusState(
         ),
         canAnimate: false,
       };
-    case 'stored':
-      return {
-        type: 'stored',
-        wrapperClasses: '',
-        imageClasses: '',
-        overlayContent: (
-          <div className='absolute -right-1.5 bottom-0 z-10 flex items-center justify-center pointer-events-none font-ds'>
-            <span className='dark:pixel-shadow text-xs text-gray-500 dark:text-white'>
-              Ą
-            </span>
-          </div>
-        ),
-        canAnimate: true,
-      };
     case 'normal':
     default:
       // Allow animation for active Pokemon (CAPTURED, RECEIVED, TRADED)
