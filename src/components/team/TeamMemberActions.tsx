@@ -28,20 +28,20 @@ export function TeamMemberActions({
             : 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-500'
         )}
       >
-        Update Team Member
+        Update
       </button>
 
       <button
         onClick={onClear}
         disabled={!hasSelection}
         className={clsx(
-          'w-full px-4 py-3 rounded-lg font-medium transition-all duration-200 border shadow-sm',
+          'w-full px-4 py-3 rounded-lg font-medium transition-all duration-200',
           hasSelection
-            ? 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200 hover:shadow-md dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-700 dark:hover:bg-red-950/50 dark:hover:text-red-300 dark:hover:border-red-800'
-            : 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-500'
+            ? 'bg-white text-gray-500 hover:bg-red-50 hover:text-red-700 dark:bg-gray-800/50 dark:text-gray-400 dark:hover:bg-red-950/50 dark:hover:text-red-300'
+            : 'bg-gray-50 text-gray-400 cursor-not-allowed dark:bg-gray-800/50 dark:text-gray-500'
         )}
       >
-        Clear Team Member
+        Clear
       </button>
     </div>
   );

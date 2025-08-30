@@ -28,10 +28,10 @@ export function PokemonSlotSelector({
   const getSlotStyles = () => {
     if (isActive) {
       return isHead
-        ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-500'
-        : 'border-green-400 bg-green-50 dark:bg-green-900/20 dark:border-green-500';
+        ? 'border-blue-400 bg-blue-50/30 dark:bg-blue-900/20 dark:border-blue-500'
+        : 'border-green-400 bg-green-50/30 dark:bg-green-900/20 dark:border-green-500';
     }
-    return 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500';
+    return 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500';
   };
 
   const getIconColor = () => {

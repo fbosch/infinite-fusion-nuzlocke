@@ -52,9 +52,9 @@ export function PokemonGridItem({
       return 'border-green-500 bg-green-50 dark:bg-green-900/20 cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30';
     }
     if (isActiveSlot) {
-      return 'border-gray-300 bg-gray-100 dark:bg-gray-700 dark:border-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer';
+      return 'border-gray-200 bg-white dark:bg-gray-700 dark:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer';
     }
-    return 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-60';
+    return 'border-gray-100 dark:border-gray-600 bg-white dark:bg-gray-800 cursor-not-allowed opacity-60';
   };
 
   const getStatusBadge = () => {

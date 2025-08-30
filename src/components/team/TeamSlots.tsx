@@ -219,8 +219,8 @@ export default function TeamSlots() {
                 'flex flex-col items-center justify-center relative',
                 'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
                 slot.isEmpty
-                  ? 'border-gray-200 dark:border-gray-700 bg-transparent hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer'
-                  : 'border-gray-200 dark:border-gray-700 bg-transparent hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer'
+                  ? 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer'
+                  : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer'
               )}
               onClick={() =>
                 handleSlotClick(slot.position, slot.isEmpty ? null : slot)
@@ -239,9 +239,9 @@ export default function TeamSlots() {
               {slot.isEmpty ? (
                 <div className='flex flex-col items-center justify-center text-center relative w-full h-full'>
                   <div
-                    className='w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-white dark:mix-blend-soft-light'
+                    className='w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-500'
                     style={{
-                      background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
+                      background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
                     }}
                   />
                   <div className='flex flex-col items-center justify-center text-center relative z-10'>
@@ -254,9 +254,9 @@ export default function TeamSlots() {
               ) : (
                 <div className='flex flex-col items-center justify-center relative w-full h-full'>
                   <div
-                    className='w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-white dark:mix-blend-soft-light'
+                    className='w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-500'
                     style={{
-                      background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
+                      background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
                     }}
                   />
 

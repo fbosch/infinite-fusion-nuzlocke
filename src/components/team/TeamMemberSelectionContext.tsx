@@ -390,13 +390,15 @@ export function TeamMemberSelectionProvider({
           type: 'SET_SELECTED_HEAD',
           payload: { pokemon, locationId },
         });
-        dispatch({ type: 'SET_ACTIVE_SLOT', payload: 'body' });
+        // Keep the same slot active so user can continue selecting in the same slot if needed
+        dispatch({ type: 'SET_ACTIVE_SLOT', payload: 'head' });
       } else if (slot === 'body') {
         dispatch({
           type: 'SET_SELECTED_BODY',
           payload: { pokemon, locationId },
         });
-        dispatch({ type: 'SET_ACTIVE_SLOT', payload: 'head' });
+        // Keep the same slot active so user can continue selecting in the same slot if needed
+        dispatch({ type: 'SET_ACTIVE_SLOT', payload: 'body' });
       }
 
       // Set nickname from the selected Pokémon

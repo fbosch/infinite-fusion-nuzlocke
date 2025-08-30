@@ -299,13 +299,15 @@ export function ContextMenu({
                 left: menuPosition.x,
                 top: menuPosition.y,
                 transformOrigin: 'top left',
+                zIndex: 9999,
               }}
               className={clsx(
-                'min-w-[12rem] z-100 rounded-md border border-gray-200 dark:border-gray-800',
+                'min-w-[12rem] rounded-md border border-gray-200 dark:border-gray-800',
                 'bg-white dark:bg-gray-900/80 shadow-elevation-3',
                 'p-1 backdrop-blur-xl tooltip-enter',
                 'origin-top-left backdrop-blur-xl',
                 'focus:outline-none',
+                'pointer-events-auto',
                 className
               )}
               role='menu'
