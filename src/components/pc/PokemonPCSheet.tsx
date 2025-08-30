@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback, useRef } from 'react';
 import {
   Dialog,
   DialogBackdrop,
@@ -56,10 +56,24 @@ export default function PokemonPCSheet({
   // State for team member picker modal
   const [pickerModalOpen, setPickerModalOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
+
+  // Use refs to prevent unnecessary re-renders from store changes
+  const encountersRef = useRef(encounters);
+  const customLocationsRef = useRef(customLocations);
+  const activePlaythroughRef = useRef(activePlaythrough);
+
+  // Update refs when stores change, but don't trigger re-renders
+  if (encounters !== encountersRef.current) encountersRef.current = encounters;
+  if (customLocations !== customLocationsRef.current)
+    customLocationsRef.current = customLocations;
+  if (activePlaythrough !== activePlaythroughRef.current)
+    activePlaythroughRef.current = activePlaythrough;
+
   const mergedLocations = useMemo(
-    () => getLocationsSortedWithCustom(customLocations),
-    [customLocations]
+    () => getLocationsSortedWithCustom(customLocationsRef.current),
+    [customLocationsRef.current]
   );
+
   const idToName = useMemo(() => {
     const map = new Map<string, string>();
     for (const loc of mergedLocations) map.set(loc.id, loc.name);
@@ -67,56 +81,62 @@ export default function PokemonPCSheet({
   }, [mergedLocations]);
 
   // Handlers for team member picker modal
-  const handleTeamMemberClick = (
-    position: number,
-    _existingTeamMember: {
-      position: number;
-      isEmpty: boolean;
-      headPokemon: PokemonOptionType | null;
-      bodyPokemon: PokemonOptionType | null;
-      isFusion: boolean;
-    }
-  ) => {
-    setSelectedPosition(position);
-    setPickerModalOpen(true);
-  };
+  const handleTeamMemberClick = useCallback(
+    (
+      position: number,
+      _existingTeamMember: {
+        position: number;
+        isEmpty: boolean;
+        headPokemon: PokemonOptionType | null;
+        bodyPokemon: PokemonOptionType | null;
+        isFusion: boolean;
+      }
+    ) => {
+      setSelectedPosition(position);
+      setPickerModalOpen(true);
+    },
+    []
+  );
 
-  const handleClosePickerModal = () => {
+  const handleClosePickerModal = useCallback(() => {
     setPickerModalOpen(false);
     setSelectedPosition(null);
-  };
+  }, []);
 
-  const handlePokemonSelect = async (
-    headPokemon: PokemonOptionType | null,
-    bodyPokemon: PokemonOptionType | null
-  ) => {
-    if (selectedPosition === null) return;
+  const handlePokemonSelect = useCallback(
+    async (
+      headPokemon: PokemonOptionType | null,
+      bodyPokemon: PokemonOptionType | null
+    ) => {
+      if (selectedPosition === null) return;
 
-    // Create team member references
-    const headRef = headPokemon ? { uid: headPokemon.uid! } : null;
-    const bodyRef = bodyPokemon ? { uid: bodyPokemon.uid! } : null;
+      // Create team member references
+      const headRef = headPokemon ? { uid: headPokemon.uid! } : null;
+      const bodyRef = bodyPokemon ? { uid: bodyPokemon.uid! } : null;
 
-    const success = await playthroughActions.updateTeamMember(
-      selectedPosition,
-      headRef,
-      bodyRef
-    );
-
-    if (!success) {
-      console.error(
-        'Failed to update team member at position:',
-        selectedPosition
+      const success = await playthroughActions.updateTeamMember(
+        selectedPosition,
+        headRef,
+        bodyRef
       );
-      return;
-    }
 
-    handleClosePickerModal();
-  };
+      if (!success) {
+        console.error(
+          'Failed to update team member at position:',
+          selectedPosition
+        );
+        return;
+      }
+
+      handleClosePickerModal();
+    },
+    [selectedPosition, handleClosePickerModal]
+  );
 
   const team: Entry[] = useMemo(() => {
-    if (!activePlaythrough?.team) return [];
+    if (!activePlaythroughRef.current?.team) return [];
 
-    return activePlaythrough.team.members.map((member, index) => {
+    return activePlaythroughRef.current.team.members.map((member, index) => {
       console.log(`Building team slot ${index}:`, member);
 
       if (!member) {
@@ -131,10 +151,10 @@ export default function PokemonPCSheet({
       }
 
       const headPokemon = member.headPokemonUid
-        ? findPokemonByUid(encounters, member.headPokemonUid)
+        ? findPokemonByUid(encountersRef.current, member.headPokemonUid)
         : null;
       const bodyPokemon = member.bodyPokemonUid
-        ? findPokemonByUid(encounters, member.bodyPokemonUid)
+        ? findPokemonByUid(encountersRef.current, member.bodyPokemonUid)
         : null;
 
       // A slot is empty only if both UIDs are empty strings
@@ -165,55 +185,67 @@ export default function PokemonPCSheet({
         isFusion,
       };
     });
-  }, [activePlaythrough?.team, encounters]);
+  }, [activePlaythroughRef.current?.team, encountersRef.current]);
 
   const deceased: Entry[] = useMemo(() => {
     const entries: Entry[] = [];
 
-    Object.entries(encounters || {}).forEach(([locationId, data]) => {
-      const headDead = isPokemonDeceased(data?.head);
-      const bodyDead = isPokemonDeceased(data?.body);
+    Object.entries(encountersRef.current || {}).forEach(
+      ([locationId, data]) => {
+        const headDead = isPokemonDeceased(data?.head);
+        const bodyDead = isPokemonDeceased(data?.body);
 
-      if (headDead || bodyDead) {
-        entries.push({
-          locationId,
-          locationName:
-            idToName.get(locationId) ||
-            getLocationById(locationId)?.name ||
-            'Unknown Location',
-          head: headDead ? data?.head || null : null,
-          body: bodyDead ? data?.body || null : null,
-        });
+        if (headDead || bodyDead) {
+          entries.push({
+            locationId,
+            locationName:
+              idToName.get(locationId) ||
+              getLocationById(locationId)?.name ||
+              'Unknown Location',
+            head: headDead ? data?.head || null : null,
+            body: bodyDead ? data?.body || null : null,
+          });
+        }
       }
-    });
+    );
 
     return entries;
-  }, [encounters, idToName, activePlaythrough?.updatedAt]);
+  }, [
+    encountersRef.current,
+    idToName,
+    activePlaythroughRef.current?.updatedAt,
+  ]);
 
   const stored: Entry[] = useMemo(() => {
     const entries: Entry[] = [];
 
-    Object.entries(encounters || {}).forEach(([locationId, data]) => {
-      const headStored = isPokemonStored(data?.head);
-      const bodyStored = isPokemonStored(data?.body);
+    Object.entries(encountersRef.current || {}).forEach(
+      ([locationId, data]) => {
+        const headStored = isPokemonStored(data?.head);
+        const bodyStored = isPokemonStored(data?.body);
 
-      if (headStored || bodyStored) {
-        entries.push({
-          locationId,
-          locationName:
-            idToName.get(locationId) ||
-            getLocationById(locationId)?.name ||
-            'Unknown Location',
-          head: headStored ? data?.head || null : null,
-          body: bodyStored ? data?.body || null : null,
-        });
+        if (headStored || bodyStored) {
+          entries.push({
+            locationId,
+            locationName:
+              idToName.get(locationId) ||
+              getLocationById(locationId)?.name ||
+              'Unknown Location',
+            head: headStored ? data?.head || null : null,
+            body: bodyStored ? data?.body || null : null,
+          });
+        }
       }
-    });
+    );
 
     return entries;
-  }, [encounters, idToName, activePlaythrough?.updatedAt]);
+  }, [
+    encountersRef.current,
+    idToName,
+    activePlaythroughRef.current?.updatedAt,
+  ]);
 
-  const getSelectedIndex = (tab: 'team' | 'box' | 'graveyard') => {
+  const getSelectedIndex = useCallback((tab: 'team' | 'box' | 'graveyard') => {
     switch (tab) {
       case 'team':
         return 0;
@@ -224,25 +256,41 @@ export default function PokemonPCSheet({
       default:
         return 0;
     }
-  };
+  }, []);
 
-  const getTabFromIndex = (index: number): 'team' | 'box' | 'graveyard' => {
-    switch (index) {
-      case 0:
-        return 'team';
-      case 1:
-        return 'box';
-      case 2:
-        return 'graveyard';
-      default:
-        return 'team';
-    }
-  };
+  const getTabFromIndex = useCallback(
+    (index: number): 'team' | 'box' | 'graveyard' => {
+      switch (index) {
+        case 0:
+          return 'team';
+        case 1:
+          return 'box';
+        case 2:
+          return 'graveyard';
+        default:
+          return 'team';
+      }
+    },
+    []
+  );
 
   const selectedIndex = getSelectedIndex(activeTab);
 
+  // Memoize the onClose handler to prevent unnecessary re-renders
+  const handleClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  // Memoize the onChangeTab handler
+  const handleChangeTab = useCallback(
+    (index: number) => {
+      onChangeTab(getTabFromIndex(index));
+    },
+    [onChangeTab, getTabFromIndex]
+  );
+
   return (
-    <Dialog open={isOpen} onClose={onClose} className='group relative z-50'>
+    <Dialog open={isOpen} onClose={handleClose} className='group relative z-50'>
       <DialogBackdrop
         transition
         className='fixed inset-0 bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ease-out data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/30'
@@ -271,7 +319,7 @@ export default function PokemonPCSheet({
                 Pokémon PC
               </DialogTitle>
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className={clsx(
                   'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2',
@@ -286,10 +334,7 @@ export default function PokemonPCSheet({
 
           {/* Content area: fills remaining height to allow true vertical centering */}
           <div className='flex min-h-0 flex-1 flex-col px-4 pt-2 pb-3'>
-            <TabGroup
-              selectedIndex={selectedIndex}
-              onChange={index => onChangeTab(getTabFromIndex(index))}
-            >
+            <TabGroup selectedIndex={selectedIndex} onChange={handleChangeTab}>
               <TabList className='mb-4 flex w-full items-center gap-2 flex-1'>
                 <Tab
                   className={({ selected }) =>
@@ -353,7 +398,7 @@ export default function PokemonPCSheet({
                         key={entry.locationId}
                         entry={entry}
                         idToName={idToName}
-                        onClose={onClose}
+                        onClose={handleClose}
                         onTeamMemberClick={handleTeamMemberClick}
                       />
                     ))}
@@ -387,7 +432,7 @@ export default function PokemonPCSheet({
                           hoverRingClass='hover:ring-blue-400/30'
                           fallbackLabel='Boxed Pokémon'
                           className=''
-                          onClose={onClose}
+                          onClose={handleClose}
                         />
                       ))}
                     </ul>
@@ -429,7 +474,7 @@ export default function PokemonPCSheet({
                                 durationMs: 1200,
                               });
 
-                              onClose();
+                              handleClose();
                             }}
                           />
                         ))}

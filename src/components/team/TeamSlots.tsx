@@ -19,6 +19,7 @@ import { playthroughActions } from '@/stores/playthroughs';
 import { findPokemonByUid } from '@/utils/encounter-utils';
 import { TypePills } from '@/components/TypePills';
 import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
+import { TeamMemberContextMenu } from '@/components/PokemonSummaryCard/TeamMemberContextMenu';
 
 // Component to display type indicators and nickname
 function TypeIndicators({
@@ -159,7 +160,7 @@ export default function TeamSlots() {
 
   const handleSlotClick = (
     position: number,
-    _existingSlot: {
+    existingSlot: {
       position: number;
       isEmpty: boolean;
       location?: string;
@@ -177,8 +178,6 @@ export default function TeamSlots() {
     bodyPokemon: PokemonOptionType | null
   ) => {
     if (selectedPosition === null) return;
-
-
 
     // Create team member references
     const headRef = headPokemon ? { uid: headPokemon.uid! } : null;
@@ -215,68 +214,76 @@ export default function TeamSlots() {
       <div className='hidden lg:flex flex-col items-center'>
         <div className='flex gap-3 sm:gap-4 md:gap-5'>
           {teamSlots.map(slot => (
-            <div
+            <TeamMemberContextMenu
               key={slot.position}
-              className={clsx(
-                'flex flex-col items-center justify-center relative',
-                'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
-                slot.isEmpty
-                  ? 'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
-                  : 'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
-              )}
-              onClick={() =>
-                handleSlotClick(slot.position, slot.isEmpty ? null : slot)
-              }
+              teamMember={slot}
+              shouldLoad={!slot.isEmpty}
+              onClose={() => {
+                // Context menu closed, no specific action needed
+              }}
             >
-              {!slot.isEmpty &&
-                slot.headPokemon !== undefined &&
-                slot.bodyPokemon !== undefined &&
-                slot.isFusion !== undefined && (
-                  <TypeIndicators
-                    headPokemon={slot.headPokemon}
-                    bodyPokemon={slot.bodyPokemon}
-                    isFusion={slot.isFusion}
-                  />
+              <div
+                className={clsx(
+                  'flex flex-col items-center justify-center relative',
+                  'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
+                  slot.isEmpty
+                    ? 'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
+                    : 'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
                 )}
-              {slot.isEmpty ? (
-                <div className='flex flex-col items-center justify-center text-center relative w-full h-full'>
-                  <div
-                    className='w-full h-full absolute rounded-full opacity-30 border border-gray-100 dark:border-gray-800/20 text-gray-300 dark:text-gray-600'
-                    style={{
-                      background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
-                    }}
-                  />
-                  <div className='flex flex-col items-center justify-center text-center relative z-10'>
-                    <Plus className='h-6 w-6 text-gray-400 dark:text-gray-600' />
-                    <span className='text-xs text-gray-500 dark:text-gray-500 mt-1'>
-                      Add
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className='flex flex-col items-center justify-center relative w-full h-full'>
-                  <div
-                    className='w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600'
-                    style={{
-                      background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
-                    }}
-                  />
-
-                  <div className='relative z-10'>
-                    <FusionSprite
-                      ref={ref => {
-                        teamSpriteRefs.current[slot.position] = ref;
-                      }}
-                      headPokemon={slot.headPokemon || null}
-                      bodyPokemon={slot.bodyPokemon || null}
+                onClick={() =>
+                  handleSlotClick(slot.position, slot.isEmpty ? null : slot)
+                }
+              >
+                {!slot.isEmpty &&
+                  slot.headPokemon !== undefined &&
+                  slot.bodyPokemon !== undefined &&
+                  slot.isFusion !== undefined && (
+                    <TypeIndicators
+                      headPokemon={slot.headPokemon}
+                      bodyPokemon={slot.bodyPokemon}
                       isFusion={slot.isFusion}
-                      shouldLoad={true}
-                      showStatusOverlay={true}
                     />
+                  )}
+                {slot.isEmpty ? (
+                  <div className='flex flex-col items-center justify-center text-center relative w-full h-full'>
+                    <div
+                      className='w-full h-full absolute rounded-full opacity-30 border border-gray-100 dark:border-gray-800/20 text-gray-300 dark:text-gray-600'
+                      style={{
+                        background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
+                      }}
+                    />
+                    <div className='flex flex-col items-center justify-center text-center relative z-10'>
+                      <Plus className='h-6 w-6 text-gray-400 dark:text-gray-600' />
+                      <span className='text-xs text-gray-500 dark:text-gray-500 mt-1'>
+                        Add
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                ) : (
+                  <div className='flex flex-col items-center justify-center relative w-full h-full'>
+                    <div
+                      className='w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600'
+                      style={{
+                        background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
+                      }}
+                    />
+
+                    <div className='relative z-10'>
+                      <FusionSprite
+                        ref={ref => {
+                          teamSpriteRefs.current[slot.position] = ref;
+                        }}
+                        headPokemon={slot.headPokemon || null}
+                        bodyPokemon={slot.bodyPokemon || null}
+                        isFusion={slot.isFusion}
+                        shouldLoad={true}
+                        showStatusOverlay={true}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </TeamMemberContextMenu>
           ))}
         </div>
       </div>

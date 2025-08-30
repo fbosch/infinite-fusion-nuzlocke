@@ -1,6 +1,6 @@
 'use client';
 import { Computer, Settings } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { CursorTooltip } from '@/components/CursorTooltip';
 import dynamic from 'next/dynamic';
@@ -16,6 +16,21 @@ export default function MenuItems() {
     'team'
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Debug effect to track drawerOpen changes
+  useEffect(() => {
+    console.log('MenuItems useEffect - drawerOpen changed to:', drawerOpen);
+  }, [drawerOpen]);
+
+  const handleOpenDrawer = () => {
+    console.log('MenuItems handleOpenDrawer called');
+    setDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    console.log('MenuItems handleCloseDrawer called');
+    setDrawerOpen(false);
+  };
 
   return (
     <>
@@ -69,7 +84,7 @@ export default function MenuItems() {
               'border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             )}
             aria-label='Open Pokémon PC'
-            onClick={() => setDrawerOpen(true)}
+            onClick={handleOpenDrawer}
           >
             <Computer className='h-4 w-4' />
           </button>
@@ -78,7 +93,7 @@ export default function MenuItems() {
 
       <PokemonPCSheet
         isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
+        onClose={handleCloseDrawer}
         activeTab={activeTab}
         onChangeTab={setActiveTab}
       />
