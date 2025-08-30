@@ -1,10 +1,14 @@
 'use client';
 
 import React from 'react';
+import { ArrowLeftRight } from 'lucide-react';
 import { PokemonSlotSelector } from './PokemonSlotSelector';
 import { PokemonGridItem } from './PokemonGridItem';
 import { TeamMemberSearchBar } from './TeamMemberSearchBar';
 import { useTeamMemberSelection } from './TeamMemberSelectionContext';
+import { CursorTooltip } from '@/components/CursorTooltip';
+import { DNA_REVERSER_ICON } from '@/constants/items';
+import Image from 'next/image';
 
 export function TeamMemberSelectionPanel() {
   const { state, actions } = useTeamMemberSelection();
@@ -22,6 +26,19 @@ export function TeamMemberSelectionPanel() {
     handlePokemonSelect,
   } = actions;
 
+  // Handler to flip fusion (swap head and body)
+  const handleFlipFusion = React.useCallback(() => {
+    if (!selectedHead || !selectedBody) return;
+
+    // Simply swap the selections - the actual team member update happens later
+    const tempHead = selectedHead;
+    const tempBody = selectedBody;
+
+    // Swap the selections directly
+    actions.setSelectedHead(tempBody);
+    actions.setSelectedBody(tempHead);
+  }, [selectedHead, selectedBody, actions]);
+
   // Filter Pokémon based on search query locally (no need to update state)
   const filteredPokemon = React.useMemo(() => {
     if (!searchQuery.trim()) return availablePokemon;
@@ -35,7 +52,8 @@ export function TeamMemberSelectionPanel() {
   }, [availablePokemon, searchQuery]);
   return (
     <div className='flex-1 flex flex-col space-y-5'>
-      <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+      <div className='grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-4 items-center'>
+        {/* Head Slot */}
         <PokemonSlotSelector
           slot='head'
           selectedPokemon={selectedHead}
@@ -44,6 +62,41 @@ export function TeamMemberSelectionPanel() {
           onRemovePokemon={handleRemoveHeadPokemon}
         />
 
+        {/* Inverse Fusion Button - only show when both slots are filled */}
+        {selectedHead && selectedBody ? (
+          <div className='flex items-center justify-center'>
+            <CursorTooltip
+              placement='bottom'
+              className='origin-top'
+              content={
+                <div className='flex items-center gap-2'>
+                  <Image
+                    src={DNA_REVERSER_ICON}
+                    alt='DNA Reverser'
+                    width={24}
+                    height={24}
+                    className='object-contain object-center image-rendering-pixelated'
+                  />
+                  <span className='text-sm'>Invert Fusion</span>
+                </div>
+              }
+              delay={300}
+            >
+              <button
+                type='button'
+                onClick={handleFlipFusion}
+                className='group size-6 flex items-center justify-center p-1 rounded-md border border-gray-300 dark:border-gray-600 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-500 hover:border-blue-600 bg-white dark:bg-gray-800'
+                aria-label='Flip head and body'
+              >
+                <ArrowLeftRight className='size-4 text-gray-600 dark:text-gray-300 group-hover:text-white' />
+              </button>
+            </CursorTooltip>
+          </div>
+        ) : (
+          <div className='size-6'></div> // Placeholder to maintain grid structure
+        )}
+
+        {/* Body Slot */}
         <PokemonSlotSelector
           slot='body'
           selectedPokemon={selectedBody}

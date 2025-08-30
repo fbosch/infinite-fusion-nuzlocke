@@ -8,6 +8,7 @@ import {
   Computer,
   Atom,
   Undo2,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { useSpriteVariants, usePreferredVariantState } from '@/hooks/useSprite';
 import {
@@ -177,6 +178,18 @@ export function TeamMemberContextMenu({
     await playthroughActions.updatePokemonByUID(bodyPokemon.uid, devolved);
   }, [bodyPokemon, bodyPreEvolution]);
 
+  // Handler to flip fusion (swap head and body)
+  const handleFlipFusion = useCallback(async () => {
+    if (!isFusion || !headPokemon?.uid || !bodyPokemon?.uid) return;
+
+    // Swap head and body by updating the team member
+    await playthroughActions.updateTeamMember(
+      position,
+      { uid: bodyPokemon.uid },
+      { uid: headPokemon.uid }
+    );
+  }, [isFusion, headPokemon?.uid, bodyPokemon?.uid, position]);
+
   const contextItems = useMemo<ContextMenuItem[]>(() => {
     // Use team member Pokémon for links
     const id = getSpriteId(headPokemon?.id, bodyPokemon?.id);
@@ -213,6 +226,17 @@ export function TeamMemberContextMenu({
     // Check if this is a fusion (both head and body exist and are different)
     const isFusion =
       headPokemon && bodyPokemon && headPokemon.id !== bodyPokemon.id;
+
+    // Add inverse fusion option if this is a fusion
+    if (isFusion) {
+      items.push({
+        id: 'inverse-fusion',
+        label: 'Inverse Fusion',
+        icon: ArrowLeftRight,
+        onClick: handleFlipFusion,
+        tooltip: 'Swap head and body Pokémon positions',
+      });
+    }
 
     // Add evolution options if available
     if (headPokemon && (headEvolutions?.length || headPreEvolution)) {
