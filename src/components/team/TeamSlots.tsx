@@ -219,8 +219,8 @@ export default function TeamSlots() {
                 'flex flex-col items-center justify-center relative',
                 'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
                 slot.isEmpty
-                  ? 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer'
-                  : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer'
+                  ? 'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
+                  : 'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
               )}
               onClick={() =>
                 handleSlotClick(slot.position, slot.isEmpty ? null : slot)
@@ -239,14 +239,14 @@ export default function TeamSlots() {
               {slot.isEmpty ? (
                 <div className='flex flex-col items-center justify-center text-center relative w-full h-full'>
                   <div
-                    className='w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-500'
+                    className='w-full h-full absolute rounded-full opacity-30 border border-gray-100 dark:border-gray-800/20 text-gray-300 dark:text-gray-600'
                     style={{
                       background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
                     }}
                   />
                   <div className='flex flex-col items-center justify-center text-center relative z-10'>
-                    <Plus className='h-6 w-6 text-gray-400 dark:text-gray-500' />
-                    <span className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                    <Plus className='h-6 w-6 text-gray-400 dark:text-gray-600' />
+                    <span className='text-xs text-gray-500 dark:text-gray-500 mt-1'>
                       Add
                     </span>
                   </div>
@@ -254,7 +254,7 @@ export default function TeamSlots() {
               ) : (
                 <div className='flex flex-col items-center justify-center relative w-full h-full'>
                   <div
-                    className='w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-500'
+                    className='w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600'
                     style={{
                       background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
                     }}
