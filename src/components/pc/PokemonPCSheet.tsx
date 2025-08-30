@@ -52,7 +52,7 @@ export default function PokemonPCSheet({
   const activePlaythrough = useActivePlaythrough();
   const encounters = useEncounters();
   const customLocations = useCustomLocations();
-  
+
   // State for team member picker modal
   const [pickerModalOpen, setPickerModalOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
@@ -67,13 +67,16 @@ export default function PokemonPCSheet({
   }, [mergedLocations]);
 
   // Handlers for team member picker modal
-  const handleTeamMemberClick = (position: number, _existingTeamMember: {
-    position: number;
-    isEmpty: boolean;
-    headPokemon: PokemonOptionType | null;
-    bodyPokemon: PokemonOptionType | null;
-    isFusion: boolean;
-  }) => {
+  const handleTeamMemberClick = (
+    position: number,
+    _existingTeamMember: {
+      position: number;
+      isEmpty: boolean;
+      headPokemon: PokemonOptionType | null;
+      bodyPokemon: PokemonOptionType | null;
+      isFusion: boolean;
+    }
+  ) => {
     setSelectedPosition(position);
     setPickerModalOpen(true);
   };
@@ -114,7 +117,10 @@ export default function PokemonPCSheet({
     if (!activePlaythrough?.team) return [];
 
     return activePlaythrough.team.members.map((member, index) => {
+      console.log(`Building team slot ${index}:`, member);
+
       if (!member) {
+        console.log(`Slot ${index} is null member`);
         return {
           locationId: `team-slot-${index}`,
           locationName: `Team Slot ${index + 1}`,
@@ -337,43 +343,22 @@ export default function PokemonPCSheet({
 
               <TabPanels className='flex min-h-0 flex-1 flex-col'>
                 <TabPanel className='flex min-h-0 flex-1'>
-                  {team.filter(entry => entry.head || entry.body).length ===
-                  0 ? (
-                    <div
-                      className='flex min-h-[60vh] w-full flex-1 flex-col items-center justify-center px-4 text-gray-600 dark:text-gray-300'
-                      role='status'
-                      aria-live='polite'
-                    >
-                      <Users
-                        className='mb-3 h-10 w-10 opacity-50'
-                        aria-hidden='true'
+                  <ul
+                    role='list'
+                    aria-label='Team members list'
+                    className='w-full space-y-3 py-2 max-h-[calc(100dvh-6.5rem)] overflow-y-auto'
+                  >
+                    {team.map(entry => (
+                      <TeamEntryItem
+                        key={entry.locationId}
+                        entry={entry}
+                        idToName={idToName}
+                        isOverLimit={false}
+                        onClose={onClose}
+                        onTeamMemberClick={handleTeamMemberClick}
                       />
-                      <p className='text-center'>No active team members.</p>
-                      <p className='mt-1 text-center text-sm'>
-                        Catch Pokémon or receive them as gifts to build your
-                        team.
-                      </p>
-                    </div>
-                  ) : (
-                    <ul
-                      role='list'
-                      aria-label='Active team members list'
-                      className='w-full space-y-3 py-2 max-h-[calc(100dvh-6.5rem)] overflow-y-auto'
-                    >
-                                              {team
-                          .filter(entry => entry.head || entry.body)
-                          .map(entry => (
-                            <TeamEntryItem
-                              key={entry.locationId}
-                              entry={entry}
-                              idToName={idToName}
-                              isOverLimit={false}
-                              onClose={onClose}
-                              onTeamMemberClick={handleTeamMemberClick}
-                            />
-                          ))}
-                    </ul>
-                  )}
+                    ))}
+                  </ul>
                 </TabPanel>
                 <TabPanel className='flex min-h-0 flex-1'>
                   {stored.length === 0 ? (
@@ -458,7 +443,7 @@ export default function PokemonPCSheet({
           </div>
         </DialogPanel>
       </div>
-      
+
       {/* Team Member Picker Modal */}
       <TeamMemberPickerModal
         key={`team-member-picker-${selectedPosition}`}
@@ -467,13 +452,15 @@ export default function PokemonPCSheet({
         onSelect={handlePokemonSelect}
         position={selectedPosition || 0}
         existingTeamMember={
-          selectedPosition !== null ? {
-            position: selectedPosition,
-            isEmpty: false,
-            headPokemon: team[selectedPosition]?.head || null,
-            bodyPokemon: team[selectedPosition]?.body || null,
-            isFusion: team[selectedPosition]?.isFusion || false,
-          } : null
+          selectedPosition !== null
+            ? {
+                position: selectedPosition,
+                isEmpty: false,
+                headPokemon: team[selectedPosition]?.head || null,
+                bodyPokemon: team[selectedPosition]?.body || null,
+                isFusion: team[selectedPosition]?.isFusion || false,
+              }
+            : null
         }
       />
     </Dialog>
