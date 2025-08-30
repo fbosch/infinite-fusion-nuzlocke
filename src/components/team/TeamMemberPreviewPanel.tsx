@@ -3,39 +3,24 @@
 import React from 'react';
 import PokemonSummaryCard from '@/components/PokemonSummaryCard';
 import { TeamMemberActions } from './TeamMemberActions';
-import { type PokemonOptionType } from '@/loaders/pokemon';
+import { useTeamMemberSelection } from './TeamMemberSelectionContext';
 
-interface TeamMemberPreviewPanelProps {
-  selectedHead: {
-    pokemon: PokemonOptionType;
-    locationId: string;
-  } | null;
-  selectedBody: {
-    pokemon: PokemonOptionType;
-    locationId: string;
-  } | null;
-  nickname: string;
-  previewNickname: string;
-  canUpdateTeam: boolean;
-  hasSelection: boolean;
-  onNicknameChange: (nickname: string) => void;
-  onNicknameBlur: () => void;
-  onUpdate: () => void;
-  onClear: () => void;
-}
-
-export function TeamMemberPreviewPanel({
-  selectedHead,
-  selectedBody,
-  nickname,
-  previewNickname,
-  canUpdateTeam,
-  hasSelection,
-  onNicknameChange,
-  onNicknameBlur,
-  onUpdate,
-  onClear,
-}: TeamMemberPreviewPanelProps) {
+export function TeamMemberPreviewPanel() {
+  const { state, actions } = useTeamMemberSelection();
+  const {
+    selectedHead,
+    selectedBody,
+    nickname,
+    previewNickname,
+    canUpdateTeam,
+    hasSelection,
+  } = state;
+  const {
+    setNickname,
+    setPreviewNickname,
+    handleUpdateTeamMember,
+    handleClearTeamMember,
+  } = actions;
   const selectedPokemonName =
     selectedHead?.pokemon?.name || selectedBody?.pokemon?.name;
 
@@ -67,8 +52,8 @@ export function TeamMemberPreviewPanel({
               type='text'
               placeholder='Enter nickname...'
               value={nickname}
-              onChange={e => onNicknameChange(e.target.value)}
-              onBlur={onNicknameBlur}
+              onChange={e => setNickname(e.target.value)}
+              onBlur={() => setPreviewNickname(nickname)}
               className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200'
               maxLength={12}
             />
@@ -78,8 +63,8 @@ export function TeamMemberPreviewPanel({
         <TeamMemberActions
           canUpdateTeam={canUpdateTeam}
           hasSelection={hasSelection}
-          onUpdate={onUpdate}
-          onClear={onClear}
+          onUpdate={handleUpdateTeamMember}
+          onClear={handleClearTeamMember}
         />
       </div>
     </div>

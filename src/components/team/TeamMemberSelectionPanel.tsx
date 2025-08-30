@@ -4,42 +4,23 @@ import React from 'react';
 import { PokemonSlotSelector } from './PokemonSlotSelector';
 import { PokemonGridItem } from './PokemonGridItem';
 import { TeamMemberSearchBar } from './TeamMemberSearchBar';
-import { type PokemonOptionType } from '@/loaders/pokemon';
+import { useTeamMemberSelection } from './TeamMemberSelectionContext';
 
-interface TeamMemberSelectionPanelProps {
-  selectedHead: {
-    pokemon: PokemonOptionType;
-    locationId: string;
-  } | null;
-  selectedBody: {
-    pokemon: PokemonOptionType;
-    locationId: string;
-  } | null;
-  activeSlot: 'head' | 'body' | null;
-  searchQuery: string;
-  availablePokemon: Array<{
-    pokemon: PokemonOptionType;
-    locationId: string;
-  }>;
-  onSlotSelect: (slot: 'head' | 'body') => void;
-  onRemoveHeadPokemon: () => void;
-  onRemoveBodyPokemon: () => void;
-  onSearchChange: (query: string) => void;
-  onPokemonSelect: (pokemon: PokemonOptionType, locationId: string) => void;
-}
-
-export function TeamMemberSelectionPanel({
-  selectedHead,
-  selectedBody,
-  activeSlot,
-  searchQuery,
-  availablePokemon,
-  onSlotSelect,
-  onRemoveHeadPokemon,
-  onRemoveBodyPokemon,
-  onSearchChange,
-  onPokemonSelect,
-}: TeamMemberSelectionPanelProps) {
+export function TeamMemberSelectionPanel() {
+  const { state, actions } = useTeamMemberSelection();
+  const {
+    selectedHead,
+    selectedBody,
+    activeSlot,
+    searchQuery,
+    availablePokemon,
+  } = state;
+  const {
+    handleSlotSelect,
+    handleRemoveHeadPokemon,
+    handleRemoveBodyPokemon,
+    handlePokemonSelect,
+  } = actions;
   return (
     <div className='flex-1 flex flex-col space-y-5'>
       <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
@@ -47,22 +28,22 @@ export function TeamMemberSelectionPanel({
           slot='head'
           selectedPokemon={selectedHead}
           isActive={activeSlot === 'head'}
-          onSlotSelect={onSlotSelect}
-          onRemovePokemon={onRemoveHeadPokemon}
+          onSlotSelect={handleSlotSelect}
+          onRemovePokemon={handleRemoveHeadPokemon}
         />
 
         <PokemonSlotSelector
           slot='body'
           selectedPokemon={selectedBody}
           isActive={activeSlot === 'body'}
-          onSlotSelect={onSlotSelect}
-          onRemovePokemon={onRemoveBodyPokemon}
+          onSlotSelect={handleSlotSelect}
+          onRemovePokemon={handleRemoveBodyPokemon}
         />
       </div>
 
       <TeamMemberSearchBar
         searchQuery={searchQuery}
-        onSearchChange={onSearchChange}
+        onSearchChange={actions.setSearchQuery}
       />
 
       <div className='h-72 overflow-y-auto scrollbar-thin pr-1'>
@@ -85,7 +66,7 @@ export function TeamMemberSelectionPanel({
                   isSelectedHead={isSelectedHead}
                   isSelectedBody={isSelectedBody}
                   isActiveSlot={isActiveSlot}
-                  onSelect={onPokemonSelect}
+                  onSelect={handlePokemonSelect}
                 />
               );
             })
