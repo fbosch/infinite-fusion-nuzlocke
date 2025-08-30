@@ -1016,3 +1016,38 @@ export const markEncounterAsReceived = async (
 ): Promise<void> => {
   await updateEncounterStatus(locationId, PokemonStatus.RECEIVED);
 };
+
+/**
+ * Move a team member to the box by updating their status to stored and removing from team
+ */
+export const moveTeamMemberToBox = async (position: number): Promise<void> => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough?.team) return;
+
+  // Validate position
+  if (position < 0 || position >= 6) return;
+
+  // Get the team member at the specified position
+  const teamMember = activePlaythrough.team.members[position];
+  if (!teamMember) return;
+
+  // Update head Pokémon status to stored if it exists
+  if (teamMember.headPokemonUid) {
+    await updatePokemonByUID(teamMember.headPokemonUid, {
+      status: PokemonStatus.STORED,
+    });
+  }
+
+  // Update body Pokémon status to stored if it exists
+  if (teamMember.bodyPokemonUid) {
+    await updatePokemonByUID(teamMember.bodyPokemonUid, {
+      status: PokemonStatus.STORED,
+    });
+  }
+
+  // Remove the team member from the team
+  activePlaythrough.team.members[position] = null;
+
+  // Update the playthrough timestamp to trigger reactivity
+  activePlaythrough.updatedAt = getCurrentTimestamp();
+};

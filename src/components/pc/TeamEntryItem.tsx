@@ -259,7 +259,17 @@ export default function TeamEntryItem({
                 aria-label='Move to Box'
                 onClick={async e => {
                   e.stopPropagation();
-                  await playthroughActions.moveEncounterToBox(entry.locationId);
+                  if (isTeamData && entry.position !== undefined) {
+                    // For team members, move to box by updating status and removing from team
+                    await playthroughActions.moveTeamMemberToBox(
+                      entry.position
+                    );
+                  } else {
+                    // For encounters, use the existing encounter logic
+                    await playthroughActions.moveEncounterToBox(
+                      entry.locationId
+                    );
+                  }
                 }}
               >
                 <Box className='h-4 w-4' />

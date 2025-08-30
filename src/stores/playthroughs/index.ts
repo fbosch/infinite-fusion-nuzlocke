@@ -64,6 +64,7 @@ export {
   markEncounterAsCaptured,
   markEncounterAsMissed,
   markEncounterAsReceived,
+  moveTeamMemberToBox,
 } from './encounters';
 
 // Export custom location actions
