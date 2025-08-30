@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { PokemonSprite } from '@/components/PokemonSprite';
-import { type PokemonOptionType } from '@/loaders/pokemon';
+import { type PokemonOptionType, type Pokemon, getPokemonById } from '@/loaders/pokemon';
 import HeadIcon from '@/assets/images/head.svg';
 import BodyIcon from '@/assets/images/body.svg';
+import { TypePills } from '@/components/TypePills';
 
 interface PokemonGridItemProps {
   pokemon: PokemonOptionType;
@@ -22,7 +23,22 @@ export function PokemonGridItem({
   isActiveSlot,
   onSelect,
 }: PokemonGridItemProps) {
+  const [pokemonData, setPokemonData] = useState<Pokemon | null>(null);
   const isSelected = isSelectedHead || isSelectedBody;
+
+  // Fetch full Pokemon data to get types
+  useEffect(() => {
+    const fetchPokemonData = async () => {
+      try {
+        const data = await getPokemonById(pokemon.id);
+        setPokemonData(data);
+      } catch (error) {
+        console.error('Failed to fetch Pokemon data:', error);
+      }
+    };
+
+    fetchPokemonData();
+  }, [pokemon.id]);
 
   const getButtonStyles = () => {
     if (isSelectedHead) {
@@ -79,6 +95,19 @@ export function PokemonGridItem({
         )}
       </div>
 
+      {/* Type indicators in top left corner */}
+      {pokemonData && (
+        <div className='absolute top-1 left-1'>
+          <TypePills
+            primary={pokemonData.types[0]?.name as any}
+            secondary={pokemonData.types[1]?.name as any}
+            size='xxs'
+            showTooltip={false}
+          />
+        </div>
+      )}
+
+      {/* Status badge in top right corner */}
       <div className='absolute top-1 right-1'>{getStatusBadge()}</div>
     </button>
   );

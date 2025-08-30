@@ -16,6 +16,7 @@ import {
   findPokemonWithLocation,
   getAllPokemonWithLocations,
 } from '@/utils/encounter-utils';
+import { playthroughActions } from '@/stores/playthroughs';
 
 // Action types
 type TeamMemberSelectionAction =
@@ -296,7 +297,7 @@ export function TeamMemberSelectionProvider({
   }, [existingTeamMember, encounters, hasManuallySelectedSlot]);
 
   // Get all available Pokémon from encounters, filtering out those already in use by other team members
-  const availablePokemon = useMemo(() => {
+  const allAvailablePokemon = useMemo(() => {
     if (!encounters || !activePlaythrough?.team) return [];
 
     // Get all Pokémon UIDs that are currently in use by other team members
@@ -324,7 +325,7 @@ export function TeamMemberSelectionProvider({
 
     // Get all Pokémon and filter by status and availability
     const allPokemon = getAllPokemonWithLocations(encounters);
-    const pokemon = allPokemon.filter(
+    return allPokemon.filter(
       ({ pokemon }) =>
         pokemon.status &&
         pokemon.status !== PokemonStatus.MISSED &&
@@ -332,27 +333,17 @@ export function TeamMemberSelectionProvider({
         pokemon.uid &&
         !usedPokemonUids.has(pokemon.uid)
     );
-
-    if (!searchQuery.trim()) return pokemon;
-
-    const query = searchQuery.toLowerCase();
-    return pokemon.filter(
-      p =>
-        p.pokemon.name.toLowerCase().includes(query) ||
-        p.pokemon.nickname?.toLowerCase().includes(query)
-    );
   }, [
     encounters,
-    searchQuery,
     activePlaythrough?.team,
     position,
     existingTeamMember,
   ]);
 
-  // Update availablePokemon in state when it changes
+  // Update availablePokemon in state when the base list changes (not when search changes)
   useEffect(() => {
-    dispatch({ type: 'SET_AVAILABLE_POKEMON', payload: availablePokemon });
-  }, [availablePokemon, dispatch]);
+    dispatch({ type: 'SET_AVAILABLE_POKEMON', payload: allAvailablePokemon });
+  }, [allAvailablePokemon, dispatch]);
 
   // Computed values
   const canUpdateTeam: boolean =
@@ -401,7 +392,7 @@ export function TeamMemberSelectionProvider({
       dispatch({ type: 'SET_ACTIVE_SLOT', payload: 'body' });
     } else if (slot === 'body') {
       dispatch({ type: 'SET_SELECTED_BODY', payload: { pokemon, locationId } });
-      dispatch({ type: 'SET_ACTIVE_SLOT', payload: 'body' });
+      dispatch({ type: 'SET_ACTIVE_SLOT', payload: 'head' });
     }
 
     // Set nickname from the selected Pokémon
@@ -432,9 +423,23 @@ export function TeamMemberSelectionProvider({
     dispatch({ type: 'RESET_STATE' });
   };
 
-  const handleUpdateTeamMember = () => {
+  const handleUpdateTeamMember = async () => {
     const headPokemon = selectedHead?.pokemon;
     const bodyPokemon = selectedBody?.pokemon;
+
+    // Update the encounter nickname if a head Pokémon is selected and nickname has changed
+    if (headPokemon && selectedHead?.locationId && nickname && nickname !== headPokemon.nickname) {
+      const updatedPokemon = {
+        ...headPokemon,
+        nickname: nickname || undefined,
+      };
+      await playthroughActions.updateEncounter(
+        selectedHead.locationId,
+        updatedPokemon,
+        'head',
+        false
+      );
+    }
 
     // If both are empty, this functions the same as clearing
     if (!headPokemon && !bodyPokemon) {
@@ -489,7 +494,7 @@ export function TeamMemberSelectionProvider({
       searchQuery,
       nickname,
       previewNickname,
-      availablePokemon,
+      availablePokemon: allAvailablePokemon,
       canUpdateTeam,
       hasSelection,
     }),
@@ -501,7 +506,7 @@ export function TeamMemberSelectionProvider({
       searchQuery,
       nickname,
       previewNickname,
-      availablePokemon,
+      allAvailablePokemon,
       canUpdateTeam,
       hasSelection,
     ]

@@ -21,6 +21,18 @@ export function TeamMemberSelectionPanel() {
     handleRemoveBodyPokemon,
     handlePokemonSelect,
   } = actions;
+
+  // Filter Pokémon based on search query locally (no need to update state)
+  const filteredPokemon = React.useMemo(() => {
+    if (!searchQuery.trim()) return availablePokemon;
+
+    const query = searchQuery.toLowerCase();
+    return availablePokemon.filter(
+      ({ pokemon }) =>
+        pokemon.name.toLowerCase().includes(query) ||
+        pokemon.nickname?.toLowerCase().includes(query)
+    );
+  }, [availablePokemon, searchQuery]);
   return (
     <div className='flex-1 flex flex-col space-y-5'>
       <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
@@ -48,11 +60,11 @@ export function TeamMemberSelectionPanel() {
 
       <div className='h-72 overflow-y-auto scrollbar-thin pr-1'>
         <div
-          className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 h-full'
+          className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 h-full'
           style={{ gridTemplateRows: 'repeat(4, 1fr)' }}
         >
-          {availablePokemon.length > 0 ? (
-            availablePokemon.map(({ pokemon, locationId }) => {
+          {filteredPokemon.length > 0 ? (
+            filteredPokemon.map(({ pokemon, locationId }) => {
               const isSelectedHead = selectedHead?.pokemon?.uid === pokemon.uid;
               const isSelectedBody = selectedBody?.pokemon?.uid === pokemon.uid;
               const isSelected = isSelectedHead || isSelectedBody;

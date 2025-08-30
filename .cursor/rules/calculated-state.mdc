@@ -1,0 +1,128 @@
+# Calculated State Principle
+
+**Don't store calculated/derived values in state when they can be computed during render.**
+
+## Core Principle
+
+State should contain the minimal data needed to reconstruct the UI, not the computed results. Derived values should be calculated during render using `useMemo` or similar hooks.
+
+## Anti-Patterns to Avoid
+
+### ❌ Storing Search/Filter Results in State
+```typescript
+// Bad: Storing filtered results in state
+const [filteredPokemon, setFilteredPokemon] = useState([]);
+
+useEffect(() => {
+  const filtered = allPokemon.filter(p => p.name.includes(searchQuery));
+  setFilteredPokemon(filtered);
+}, [searchQuery, allPokemon]);
+```
+
+### ❌ Storing Sorted Lists in State
+```typescript
+// Bad: Storing sorted results in state
+const [sortedUsers, setSortedUsers] = useState([]);
+
+useEffect(() => {
+  const sorted = users.sort((a, b) => a.name.localeCompare(b.name));
+  setSortedUsers(sorted);
+}, [users, sortBy]);
+```
+
+### ❌ Storing Formatted Values in State
+```typescript
+// Bad: Storing formatted display values in state
+const [formattedPrice, setFormattedPrice] = useState('');
+
+useEffect(() => {
+  setFormattedPrice(new Intl.NumberFormat('en-US', { 
+    style: 'currency', 
+    currency: 'USD' 
+  }).format(price));
+}, [price]);
+```
+
+## ✅ Best Practices
+
+### Use Local Computation with useMemo
+```typescript
+// Good: Compute derived values during render
+const filteredPokemon = useMemo(() => {
+  if (!searchQuery.trim()) return allPokemon;
+  
+  const query = searchQuery.toLowerCase();
+  return allPokemon.filter(pokemon => 
+    pokemon.name.toLowerCase().includes(query) ||
+    pokemon.nickname?.toLowerCase().includes(query)
+  );
+}, [allPokemon, searchQuery]);
+```
+
+### Store Only Base Data in State
+```typescript
+// Good: State contains only source of truth
+const [allPokemon, setAllPokemon] = useState([]);
+const [searchQuery, setSearchQuery] = useState('');
+
+// Derived value computed locally
+const filteredPokemon = useMemo(() => {
+  return allPokemon.filter(/* filtering logic */);
+}, [allPokemon, searchQuery]);
+```
+
+### Handle Complex Calculations Locally
+```typescript
+// Good: Complex derived state computed locally
+const teamStats = useMemo(() => {
+  return {
+    totalHP: team.reduce((sum, pokemon) => sum + pokemon.hp, 0),
+    averageLevel: team.reduce((sum, pokemon) => sum + pokemon.level, 0) / team.length,
+    typeCoverage: calculateTypeCoverage(team),
+  };
+}, [team]);
+```
+
+## When to Apply This Rule
+
+- **Search/filtering results** → Compute locally with useMemo
+- **Sorted lists** → Sort during render, not in state
+- **Calculated totals** → Compute from base data
+- **Formatted display values** → Format during render
+- **Combined/merged data** → Combine during render
+- **Derived statistics** → Calculate from source data
+- **UI state combinations** → Compute from individual state pieces
+
+## Benefits
+
+1. **No unnecessary state updates** when derived values change
+2. **Better performance** - computations happen locally without triggering re-renders
+3. **Cleaner state** - state only contains the source of truth
+4. **More predictable** - state changes only when underlying data changes
+5. **Follows React patterns** - derived values computed during render
+6. **Easier debugging** - state is simpler and more focused
+
+## Example from Our Codebase
+
+In [TeamMemberSelectionContext.tsx](mdc:src/components/team/TeamMemberSelectionContext.tsx), we store only the base available Pokémon list in state and handle search filtering locally in [TeamMemberSelectionPanel.tsx](mdc:src/components/team/TeamMemberSelectionPanel.tsx):
+
+```typescript
+// Context: Store base data only
+const allAvailablePokemon = useMemo(() => {
+  // ... expensive filtering logic for base data only
+}, [encounters, activePlaythrough?.team, position, existingTeamMember]);
+
+// Component: Handle search filtering locally
+const filteredPokemon = useMemo(() => {
+  if (!searchQuery.trim()) return availablePokemon;
+  return availablePokemon.filter(/* search logic */);
+}, [availablePokemon, searchQuery]);
+```
+
+## Remember
+
+**State should contain the minimal data needed to reconstruct the UI, not the computed results.**
+description:
+globs:
+alwaysApply: true
+---

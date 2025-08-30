@@ -40,7 +40,7 @@ const typeColors: Record<TypeName, string> = {
     'bg-gradient-to-b from-[#D27599] to-[#F8B9CC] dark:from-[#B25579] dark:to-[#EE99AC]',
 };
 
-export type PillSize = 'xs' | 'sm' | 'md';
+export type PillSize = 'xxs' | 'xs' | 'sm' | 'md';
 
 type FactorKey = '4' | '2' | '0.5' | '0.25' | '0';
 
@@ -227,7 +227,21 @@ export function TypeBadge({
   showTooltip?: boolean;
 }) {
   const core =
-    size === 'xs' ? (
+    size === 'xxs' ? (
+      <span
+        className={clsx(
+          'inline-block h-2 w-2 rounded-full border border-white/20',
+          typeColors[type]
+        )}
+        role='status'
+        aria-label={`${type} type`}
+        title={
+          showTooltip
+            ? `${type.charAt(0).toUpperCase()}${type.slice(1)} type`
+            : undefined
+        }
+      />
+    ) : size === 'xs' ? (
       <span
         className={clsx(
           'inline-block h-3 w-3 rounded-full border border-white/20',
@@ -331,7 +345,7 @@ export function TypePills({
   const pills = (
     <div
       className={twMerge(
-        clsx('flex', size === 'xs' ? 'gap-1' : 'gap-1.5'),
+        clsx('flex', size === 'xxs' ? 'gap-0.5' : size === 'xs' ? 'gap-1' : 'gap-1.5'),
         className
       )}
       aria-label='pokemon types'

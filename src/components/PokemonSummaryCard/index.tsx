@@ -292,6 +292,8 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
               </span>
             </div>
           )}
+          
+
         </div>
       </PokemonContextMenu>
     );
