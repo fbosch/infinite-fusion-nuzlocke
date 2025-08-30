@@ -12,9 +12,7 @@ import clsx from 'clsx';
 import { useActivePlaythrough } from '@/stores/playthroughs';
 import { useEncounters } from '@/stores/playthroughs/hooks';
 import { type PokemonOptionType, PokemonStatus } from '@/loaders/pokemon';
-import { PokemonSlotSelector } from './PokemonSlotSelector';
-import { PokemonGridItem } from './PokemonGridItem';
-import { TeamMemberSearchBar } from './TeamMemberSearchBar';
+import { TeamMemberSelectionPanel } from './TeamMemberSelectionPanel';
 import { TeamMemberPreviewPanel } from './TeamMemberPreviewPanel';
 import {
   findPokemonWithLocation,
@@ -360,66 +358,18 @@ export default function TeamMemberPickerModal({
           </div>
 
           <div className='flex flex-col lg:flex-row gap-6 flex-1 min-h-0'>
-            <div className='flex-1 flex flex-col space-y-5'>
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                <PokemonSlotSelector
-                  slot='head'
-                  selectedPokemon={selectedHead}
-                  isActive={activeSlot === 'head'}
-                  onSlotSelect={handleSlotSelect}
-                  onRemovePokemon={() => setSelectedHead(null)}
-                />
-
-                <PokemonSlotSelector
-                  slot='body'
-                  selectedPokemon={selectedBody}
-                  isActive={activeSlot === 'body'}
-                  onSlotSelect={handleSlotSelect}
-                  onRemovePokemon={() => setSelectedBody(null)}
-                />
-              </div>
-
-              <TeamMemberSearchBar
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-              />
-
-              <div className='h-72 overflow-y-auto scrollbar-thin pr-1'>
-                <div
-                  className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 h-full'
-                  style={{ gridTemplateRows: 'repeat(4, 1fr)' }}
-                >
-                  {availablePokemon.length > 0 ? (
-                    availablePokemon.map(({ pokemon, locationId }) => {
-                      const isSelectedHead =
-                        selectedHead?.pokemon?.uid === pokemon.uid;
-                      const isSelectedBody =
-                        selectedBody?.pokemon?.uid === pokemon.uid;
-                      const isSelected = isSelectedHead || isSelectedBody;
-                      const isActiveSlot = Boolean(activeSlot && !isSelected);
-
-                      return (
-                        <PokemonGridItem
-                          key={`${pokemon.uid}-${locationId}`}
-                          pokemon={pokemon}
-                          locationId={locationId}
-                          isSelectedHead={isSelectedHead}
-                          isSelectedBody={isSelectedBody}
-                          isActiveSlot={isActiveSlot}
-                          onSelect={handlePokemonSelect}
-                        />
-                      );
-                    })
-                  ) : (
-                    <div className='text-center py-8 text-gray-500 dark:text-gray-400 col-span-full row-span-full flex items-center justify-center'>
-                      {searchQuery.trim()
-                        ? 'No Pokémon found matching your search.'
-                        : 'No Pokémon available.'}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <TeamMemberSelectionPanel
+              selectedHead={selectedHead}
+              selectedBody={selectedBody}
+              activeSlot={activeSlot}
+              searchQuery={searchQuery}
+              availablePokemon={availablePokemon}
+              onSlotSelect={handleSlotSelect}
+              onRemoveHeadPokemon={() => setSelectedHead(null)}
+              onRemoveBodyPokemon={() => setSelectedBody(null)}
+              onSearchChange={setSearchQuery}
+              onPokemonSelect={handlePokemonSelect}
+            />
 
             <div className='hidden lg:block w-px bg-gray-200 dark:bg-gray-600'></div>
 
