@@ -25,6 +25,7 @@ interface TeamEntryItemProps {
   idToName: Map<string, string>;
   isOverLimit: boolean;
   onClose?: () => void;
+  onTeamMemberClick?: (position: number, existingTeamMember: any) => void;
 }
 
 export default function TeamEntryItem({
@@ -32,6 +33,7 @@ export default function TeamEntryItem({
   idToName,
   isOverLimit,
   onClose,
+  onTeamMemberClick,
 }: TeamEntryItemProps) {
   const encounters = useEncounters();
 
@@ -83,10 +85,16 @@ export default function TeamEntryItem({
   if (!hasAny) return null;
 
   const handleClick = () => {
-    if (isTeamData) {
-      // For team data, just close the modal or handle team slot click
-      console.log('Team slot clicked:', entry.position);
-      onClose?.();
+    if (isTeamData && entry.position !== undefined) {
+      // For team data, open the team member picker modal
+      const existingTeamMember = {
+        position: entry.position,
+        isEmpty: false,
+        headPokemon: entry.head,
+        bodyPokemon: entry.body,
+        isFusion: entry.isFusion,
+      };
+      onTeamMemberClick?.(entry.position, existingTeamMember);
       return;
     }
 

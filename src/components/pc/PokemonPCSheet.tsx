@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Dialog,
   DialogBackdrop,
@@ -26,10 +26,13 @@ import {
   getLocationsSortedWithCustom,
 } from '@/loaders/locations';
 import { findPokemonByUid } from '@/utils/encounter-utils';
-import PokeballIcon from '@/assets/images/pokeball.svg';
+import { playthroughActions } from '@/stores/playthroughs';
+
 import PCEntryItem from './PCEntryItem';
+import type { PokemonOptionType } from '@/loaders/pokemon';
 import TeamEntryItem from './TeamEntryItem';
 import { GraveyardGridItem } from './GraveyardGridItem';
+import TeamMemberPickerModal from '../team/TeamMemberPickerModal';
 
 export interface PokemonPCSheetProps {
   isOpen: boolean;
@@ -49,6 +52,10 @@ export default function PokemonPCSheet({
   const activePlaythrough = useActivePlaythrough();
   const encounters = useEncounters();
   const customLocations = useCustomLocations();
+  
+  // State for team member picker modal
+  const [pickerModalOpen, setPickerModalOpen] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
   const mergedLocations = useMemo(
     () => getLocationsSortedWithCustom(customLocations),
     [customLocations]
@@ -58,6 +65,50 @@ export default function PokemonPCSheet({
     for (const loc of mergedLocations) map.set(loc.id, loc.name);
     return map;
   }, [mergedLocations]);
+
+  // Handlers for team member picker modal
+  const handleTeamMemberClick = (position: number, _existingTeamMember: {
+    position: number;
+    isEmpty: boolean;
+    headPokemon: PokemonOptionType | null;
+    bodyPokemon: PokemonOptionType | null;
+    isFusion: boolean;
+  }) => {
+    setSelectedPosition(position);
+    setPickerModalOpen(true);
+  };
+
+  const handleClosePickerModal = () => {
+    setPickerModalOpen(false);
+    setSelectedPosition(null);
+  };
+
+  const handlePokemonSelect = (
+    headPokemon: PokemonOptionType | null,
+    bodyPokemon: PokemonOptionType | null
+  ) => {
+    if (selectedPosition === null) return;
+
+    // Create team member references
+    const headRef = headPokemon ? { uid: headPokemon.uid! } : null;
+    const bodyRef = bodyPokemon ? { uid: bodyPokemon.uid! } : null;
+
+    const success = playthroughActions.updateTeamMember(
+      selectedPosition,
+      headRef,
+      bodyRef
+    );
+
+    if (!success) {
+      console.error(
+        'Failed to update team member at position:',
+        selectedPosition
+      );
+      return;
+    }
+
+    handleClosePickerModal();
+  };
 
   const team: Entry[] = useMemo(() => {
     if (!activePlaythrough?.team) return [];
@@ -244,7 +295,7 @@ export default function PokemonPCSheet({
                     )
                   }
                 >
-                  <PokeballIcon className='h-4 w-4' />
+                  <Users className='h-4 w-4' />
                   <span className='font-medium flex-1'>Team</span>
                   <span className='ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100'>
                     {team.filter(entry => entry.head || entry.body).length}/6
@@ -309,17 +360,18 @@ export default function PokemonPCSheet({
                       aria-label='Active team members list'
                       className='w-full space-y-3 py-2 max-h-[calc(100dvh-6.5rem)] overflow-y-auto'
                     >
-                      {team
-                        .filter(entry => entry.head || entry.body)
-                        .map(entry => (
-                          <TeamEntryItem
-                            key={entry.locationId}
-                            entry={entry}
-                            idToName={idToName}
-                            isOverLimit={false}
-                            onClose={onClose}
-                          />
-                        ))}
+                                              {team
+                          .filter(entry => entry.head || entry.body)
+                          .map(entry => (
+                            <TeamEntryItem
+                              key={entry.locationId}
+                              entry={entry}
+                              idToName={idToName}
+                              isOverLimit={false}
+                              onClose={onClose}
+                              onTeamMemberClick={handleTeamMemberClick}
+                            />
+                          ))}
                     </ul>
                   )}
                 </TabPanel>
@@ -406,6 +458,24 @@ export default function PokemonPCSheet({
           </div>
         </DialogPanel>
       </div>
+      
+      {/* Team Member Picker Modal */}
+      <TeamMemberPickerModal
+        key={`team-member-picker-${selectedPosition}`}
+        isOpen={pickerModalOpen}
+        onClose={handleClosePickerModal}
+        onSelect={handlePokemonSelect}
+        position={selectedPosition || 0}
+        existingTeamMember={
+          selectedPosition !== null ? {
+            position: selectedPosition,
+            isEmpty: false,
+            headPokemon: team[selectedPosition]?.head || null,
+            bodyPokemon: team[selectedPosition]?.body || null,
+            isFusion: team[selectedPosition]?.isFusion || false,
+          } : null
+        }
+      />
     </Dialog>
   );
 }
