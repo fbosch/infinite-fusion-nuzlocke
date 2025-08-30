@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
   playthroughsStore,
-  addToTeam,
+  updateTeamMember,
   removeFromTeam,
   reorderTeam,
   getTeamMemberDetails,
@@ -19,7 +19,7 @@ describe('Team Management Functions', () => {
     playthroughsStore.isSaving = false;
   });
 
-  describe('addToTeam', () => {
+  describe('updateTeamMember', () => {
     it('should add a Pokémon to an empty team position', () => {
       const playthroughId = createPlaythrough('Test Run');
       playthroughsStore.activePlaythroughId = playthroughId;
@@ -55,12 +55,16 @@ describe('Team Management Functions', () => {
         };
       }
 
-      const result = addToTeam('route1', 0);
+      const result = updateTeamMember(
+        0,
+        { uid: 'pikachu_route1_123' },
+        { uid: 'charmander_route1_456' }
+      );
 
       expect(result).toBe(true);
       expect(activePlaythrough?.team.members[0]).toEqual({
-        headEncounterId: 'route1',
-        bodyEncounterId: 'route1',
+        headPokemonUid: 'pikachu_route1_123',
+        bodyPokemonUid: 'charmander_route1_456',
       });
     });
 
@@ -100,19 +104,31 @@ describe('Team Management Functions', () => {
       }
 
       // Add first Pokémon
-      addToTeam('route1', 0);
+      updateTeamMember(
+        0,
+        { uid: 'pikachu_route1_123' },
+        { uid: 'charmander_route1_456' }
+      );
 
       // Try to add another to the same position
-      const result = addToTeam('route1', 0);
+      const result = updateTeamMember(
+        0,
+        { uid: 'pikachu_route1_123' },
+        { uid: 'charmander_route1_456' }
+      );
 
-      expect(result).toBe(false);
+      expect(result).toBe(true);
     });
 
     it('should fail when adding to invalid position', () => {
       const playthroughId = createPlaythrough('Test Run');
       playthroughsStore.activePlaythroughId = playthroughId;
 
-      const result = addToTeam('route1', 10);
+      const result = updateTeamMember(
+        10,
+        { uid: 'pikachu_route1_123' },
+        { uid: 'charmander_route1_456' }
+      );
 
       expect(result).toBe(false);
     });

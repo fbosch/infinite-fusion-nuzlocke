@@ -41,19 +41,40 @@ export const EncounterDataSchema = z
 export type EncounterData = z.infer<typeof EncounterDataSchema>;
 
 // Zod schema for a single playthrough
-export const PlaythroughSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  customLocations: z.array(CustomLocationSchema).optional(),
-  encounters: z.record(z.string(), EncounterDataSchema).optional(),
-  team: TeamSchema.default({ members: Array.from({ length: 6 }, () => null) }), // Fixed size 6 with null values
-  gameMode: GameModeSchema.default('classic'),
-  // Keep remixMode for backward compatibility during migration
-  remixMode: z.boolean().optional(),
-  createdAt: z.number(),
-  updatedAt: z.number(),
-  version: z.string().default('1.0.0'),
-});
+export const PlaythroughSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    customLocations: z.array(CustomLocationSchema).optional(),
+    encounters: z.record(z.string(), EncounterDataSchema).optional(),
+    team: TeamSchema.default({
+      members: Array.from({ length: 6 }, () => null),
+    }), // Fixed size 6 with null values
+    gameMode: GameModeSchema.default('classic'),
+    // Keep remixMode for backward compatibility during migration
+    remixMode: z.boolean().optional(),
+    createdAt: z.number(),
+    updatedAt: z.number(),
+    version: z.string().default('1.0.0'),
+  })
+  .transform(data => {
+    // Migration logic: if remixMode is provided and gameMode is default, use it to set gameMode
+    if (data.remixMode !== undefined && data.gameMode === 'classic') {
+      const migratedData = {
+        ...data,
+        gameMode: data.remixMode ? 'remix' : ('classic' as const),
+      };
+      // Remove remixMode field after migration
+      const { remixMode, ...cleanData } = migratedData;
+      return cleanData;
+    }
+    // Remove remixMode field even if no migration was needed
+    if (data.remixMode !== undefined) {
+      const { remixMode, ...cleanData } = data;
+      return cleanData;
+    }
+    return data;
+  });
 
 // Zod schema for the playthroughs store
 export const PlaythroughsSchema = z.object({
