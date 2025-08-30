@@ -42,20 +42,6 @@ export default function TeamMemberPickerModal({
 }: TeamMemberPickerModalProps) {
   const activePlaythrough = useActivePlaythrough();
 
-  const handleUpdateTeamMember = async () => {
-    // This will be handled by the context
-    onClose();
-  };
-
-  const handleClearTeamMember = () => {
-    // This will be handled by the context
-    onClose();
-  };
-
-  const handleClose = () => {
-    onClose();
-  };
-
   if (!activePlaythrough) return null;
 
   return (
@@ -63,12 +49,9 @@ export default function TeamMemberPickerModal({
       position={position}
       existingTeamMember={existingTeamMember}
       onSelect={onSelect}
+      onClose={onClose}
     >
-      <Dialog
-        open={isOpen}
-        onClose={handleClose}
-        className='relative z-50 group'
-      >
+      <Dialog open={isOpen} onClose={onClose} className='relative z-50 group'>
         <DialogBackdrop
           transition
           className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100'
@@ -88,10 +71,10 @@ export default function TeamMemberPickerModal({
                 Select Pokémon for Team Slot {position + 1}
               </DialogTitle>
               <button
-                onClick={handleClose}
+                onClick={onClose}
                 className={clsx(
                   'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                   'p-1 rounded-md transition-colors cursor-pointer'
                 )}
                 aria-label='Close modal'
