@@ -28,9 +28,7 @@ export function TeamMemberSelectionPanel() {
 
   // Handler to flip fusion (swap head and body)
   const handleFlipFusion = React.useCallback(() => {
-    if (!selectedHead || !selectedBody) return;
-
-    // Simply swap the selections - the actual team member update happens later
+    // Always swap the selections, regardless of whether they're filled or empty
     const tempHead = selectedHead;
     const tempBody = selectedBody;
 
@@ -62,39 +60,35 @@ export function TeamMemberSelectionPanel() {
           onRemovePokemon={handleRemoveHeadPokemon}
         />
 
-        {/* Inverse Fusion Button - only show when both slots are filled */}
-        {selectedHead && selectedBody ? (
-          <div className='flex items-center justify-center'>
-            <CursorTooltip
-              placement='bottom'
-              className='origin-top'
-              content={
-                <div className='flex items-center gap-2'>
-                  <Image
-                    src={DNA_REVERSER_ICON}
-                    alt='DNA Reverser'
-                    width={24}
-                    height={24}
-                    className='object-contain object-center image-rendering-pixelated'
-                  />
-                  <span className='text-sm'>Invert Fusion</span>
-                </div>
-              }
-              delay={300}
+        {/* Inverse Fusion Button - always visible */}
+        <div className='flex items-center justify-center'>
+          <CursorTooltip
+            placement='bottom'
+            className='origin-top'
+            content={
+              <div className='flex items-center gap-2'>
+                <Image
+                  src={DNA_REVERSER_ICON}
+                  alt='DNA Reverser'
+                  width={24}
+                  height={24}
+                  className='object-contain object-center image-rendering-pixelated'
+                />
+                <span className='text-sm'>Invert Fusion</span>
+              </div>
+            }
+            delay={300}
+          >
+            <button
+              type='button'
+              onClick={handleFlipFusion}
+              className='group size-6 flex items-center justify-center p-1 rounded-md border border-gray-300 dark:border-gray-600 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-500 hover:border-blue-600 bg-white dark:bg-gray-800'
+              aria-label='Flip head and body'
             >
-              <button
-                type='button'
-                onClick={handleFlipFusion}
-                className='group size-6 flex items-center justify-center p-1 rounded-md border border-gray-300 dark:border-gray-600 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-500 hover:border-blue-600 bg-white dark:bg-gray-800'
-                aria-label='Flip head and body'
-              >
-                <ArrowLeftRight className='size-4 text-gray-600 dark:text-gray-300 group-hover:text-white' />
-              </button>
-            </CursorTooltip>
-          </div>
-        ) : (
-          <div className='size-6'></div> // Placeholder to maintain grid structure
-        )}
+              <ArrowLeftRight className='size-4 text-gray-600 dark:text-gray-300 group-hover:text-white' />
+            </button>
+          </CursorTooltip>
+        </div>
 
         {/* Body Slot */}
         <PokemonSlotSelector
