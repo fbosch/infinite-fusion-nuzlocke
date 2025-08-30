@@ -152,6 +152,7 @@ function teamMemberSelectionReducer(
           ...updatedState,
           selectedHead: { pokemon: headPokemon, locationId: headLocationId },
         };
+        // Always prioritize head Pokémon's nickname
         if (headPokemon.nickname) {
           updatedState = {
             ...updatedState,
@@ -166,7 +167,8 @@ function teamMemberSelectionReducer(
           ...updatedState,
           selectedBody: { pokemon: bodyPokemon, locationId: bodyLocationId },
         };
-        if (bodyPokemon.nickname) {
+        // Only set body Pokémon's nickname if head Pokémon doesn't have one
+        if (bodyPokemon.nickname && !headPokemon?.nickname) {
           updatedState = {
             ...updatedState,
             nickname: bodyPokemon.nickname,
@@ -431,23 +433,36 @@ export function TeamMemberSelectionProvider({
     const headPokemon = selectedHead?.pokemon;
     const bodyPokemon = selectedBody?.pokemon;
 
-    // Update the encounter nickname if a head Pokémon is selected and nickname has changed
-    if (
-      headPokemon &&
-      selectedHead?.locationId &&
-      nickname &&
-      nickname !== headPokemon.nickname
-    ) {
-      const updatedPokemon = {
-        ...headPokemon,
-        nickname: nickname || undefined,
-      };
-      await playthroughActions.updateEncounter(
-        selectedHead.locationId,
-        updatedPokemon,
-        'head',
-        false
-      );
+    // Update the nickname for the Pokémon that needs it
+    if (nickname) {
+      console.log('Updating nickname:', {
+        nickname,
+        headPokemon: headPokemon?.nickname,
+        bodyPokemon: bodyPokemon?.nickname,
+        headLocationId: selectedHead?.locationId,
+        bodyLocationId: selectedBody?.locationId,
+      });
+
+      // Update the head Pokémon's nickname (regardless of where it is in the encounter table)
+      if (headPokemon && headPokemon.uid && nickname !== headPokemon.nickname) {
+        console.log('Updating head Pokémon nickname');
+        await playthroughActions.updatePokemonByUID(headPokemon.uid, {
+          nickname: nickname || undefined,
+        });
+      }
+
+      // If only body Pokémon is selected (no head), update body instead
+      if (
+        !headPokemon &&
+        bodyPokemon &&
+        bodyPokemon.uid &&
+        nickname !== bodyPokemon.nickname
+      ) {
+        console.log('Updating body Pokémon nickname');
+        await playthroughActions.updatePokemonByUID(bodyPokemon.uid, {
+          nickname: nickname || undefined,
+        });
+      }
     }
 
     // If both are empty, this functions the same as clearing

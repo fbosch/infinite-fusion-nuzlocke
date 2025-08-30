@@ -43,6 +43,8 @@ export {
   createEncounterData,
   getEncounters,
   updateEncounter,
+  updatePokemonByUID,
+  updatePokemonInEncounter,
   resetEncounter,
   toggleEncounterFusion,
   flipEncounterFusion,

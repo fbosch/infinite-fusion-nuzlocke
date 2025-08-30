@@ -53,14 +53,8 @@ export const createEncounterData = async (
 
   // Create encounter data without artwork variant (now managed globally)
   const encounterData: z.infer<typeof EncounterDataSchema> = {
-    head:
-      shouldCreateFusion && field === 'head'
-        ? pokemonWithLocationAndUID
-        : !shouldCreateFusion
-          ? pokemonWithLocationAndUID
-          : null,
-    body:
-      shouldCreateFusion && field === 'body' ? pokemonWithLocationAndUID : null,
+    head: field === 'head' ? pokemonWithLocationAndUID : null,
+    body: field === 'body' ? pokemonWithLocationAndUID : null,
     isFusion: shouldCreateFusion,
     updatedAt: getCurrentTimestamp(),
   };
@@ -72,6 +66,85 @@ export const createEncounterData = async (
 export const getEncounters = (): Playthrough['encounters'] => {
   const activePlaythrough = getActivePlaythrough();
   return activePlaythrough?.encounters || {};
+};
+
+// Update a Pokémon's properties by UID across all encounters
+export const updatePokemonByUID = async (
+  pokemonUID: string,
+  updates: Partial<z.infer<typeof PokemonOptionSchema>>
+) => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough?.encounters) {
+    return;
+  }
+
+  // Find and update the Pokémon in all encounters
+  for (const [locationId, encounter] of Object.entries(
+    activePlaythrough.encounters
+  )) {
+    if (encounter.head?.uid === pokemonUID) {
+      encounter.head = { ...encounter.head, ...updates };
+      encounter.updatedAt = getCurrentTimestamp();
+    }
+    if (encounter.body?.uid === pokemonUID) {
+      encounter.body = { ...encounter.body, ...updates };
+      encounter.updatedAt = getCurrentTimestamp();
+    }
+  }
+
+  // Invalidate queries to refresh UI
+  queryClient.invalidateQueries({ queryKey: spriteKeys.all });
+};
+
+// Update a Pokémon's properties in a specific encounter by UID and field
+export const updatePokemonInEncounter = async (
+  locationId: string,
+  pokemonUID: string,
+  field: 'head' | 'body',
+  updates: Partial<z.infer<typeof PokemonOptionSchema>>
+) => {
+  console.log('updatePokemonInEncounter called with:', {
+    locationId,
+    pokemonUID,
+    field,
+    updates,
+  });
+
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough?.encounters?.[locationId]) {
+    console.log(
+      'No active playthrough or encounter not found for locationId:',
+      locationId
+    );
+    return;
+  }
+
+  const encounter = activePlaythrough.encounters[locationId];
+  console.log('Found encounter:', encounter);
+
+  const pokemon = encounter[field];
+  console.log('Pokemon in field', field, ':', pokemon);
+
+  if (pokemon?.uid === pokemonUID) {
+    console.log('Updating pokemon from:', pokemon, 'to:', {
+      ...pokemon,
+      ...updates,
+    });
+    encounter[field] = { ...pokemon, ...updates };
+    encounter.updatedAt = getCurrentTimestamp();
+
+    console.log('Updated encounter:', encounter);
+
+    // Invalidate queries to refresh UI
+    queryClient.invalidateQueries({ queryKey: spriteKeys.all });
+  } else {
+    console.log(
+      'Pokemon UID mismatch. Expected:',
+      pokemonUID,
+      'Found:',
+      pokemon?.uid
+    );
+  }
 };
 
 // Update encounter for a location
