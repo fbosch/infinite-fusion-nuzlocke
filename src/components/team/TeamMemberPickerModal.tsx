@@ -9,10 +9,7 @@ import {
 } from '@headlessui/react';
 import { X, Search } from 'lucide-react';
 import clsx from 'clsx';
-import {
-  useActivePlaythrough,
-  playthroughActions,
-} from '@/stores/playthroughs';
+import { useActivePlaythrough } from '@/stores/playthroughs';
 import { useEncounters } from '@/stores/playthroughs/hooks';
 import { type PokemonOptionType, PokemonStatus } from '@/loaders/pokemon';
 import { PokemonSlotSelector } from './PokemonSlotSelector';
@@ -77,111 +74,71 @@ export default function TeamMemberPickerModal({
     if (existingTeamMember && !existingTeamMember.isEmpty && encounters) {
       console.log('Pre-populating modal with:', existingTeamMember);
 
-      // Use the availablePokemon array which is already computed from encounters
-      const availablePokemon = Object.entries(encounters).flatMap(
-        ([locationId, encounter]) => {
-          const validPokemon = [];
+      // Find the existing Pokémon directly from encounters by UID
+      let headPokemon: PokemonOptionType | null = null;
+      let bodyPokemon: PokemonOptionType | null = null;
+      let headLocationId: string | null = null;
+      let bodyLocationId: string | null = null;
 
-          if (
-            encounter.head?.status &&
-            encounter.head.status !== PokemonStatus.MISSED &&
-            encounter.head.status !== PokemonStatus.DECEASED
-          ) {
-            const pokemonWithUid = {
-              ...encounter.head,
-              uid:
-                encounter.head.uid ||
-                `${encounter.head.id}_${locationId}_${Date.now()}`,
-            };
-            validPokemon.push({ pokemon: pokemonWithUid, locationId });
-          }
-          if (
-            encounter.body?.status &&
-            encounter.body.status !== PokemonStatus.MISSED &&
-            encounter.body.status !== PokemonStatus.DECEASED
-          ) {
-            const pokemonWithUid = {
-              ...encounter.body,
-              uid:
-                encounter.body.uid ||
-                `${encounter.body.id}_${locationId}_${Date.now()}`,
-            };
-            validPokemon.push({ pokemon: pokemonWithUid, locationId });
-          }
-
-          return validPokemon;
+      // Search through all encounters to find the existing Pokémon
+      for (const [locationId, encounter] of Object.entries(encounters)) {
+        if (encounter.head?.uid === existingTeamMember.headPokemon?.uid) {
+          headPokemon = encounter.head;
+          headLocationId = locationId;
         }
-      );
+        if (encounter.body?.uid === existingTeamMember.bodyPokemon?.uid) {
+          bodyPokemon = encounter.body;
+          bodyLocationId = locationId;
+        }
+      }
 
-      console.log(
-        'Available Pokémon:',
-        availablePokemon.map(p => ({
-          name: p.pokemon.name,
-          uid: p.pokemon.uid,
-        }))
-      );
-
-      // Find Pokémon by UID from the available list
-      const headMatch = availablePokemon.find(
-        p => p.pokemon.uid === existingTeamMember.headPokemon?.uid
-      );
-      const bodyMatch = availablePokemon.find(
-        p => p.pokemon.uid === existingTeamMember.bodyPokemon?.uid
-      );
-
-      console.log('Found matches:', {
-        headMatch: headMatch
-          ? { name: headMatch.pokemon.name, uid: headMatch.pokemon.uid }
+      console.log('Found existing Pokémon:', {
+        headPokemon: headPokemon
+          ? { name: headPokemon.name, uid: headPokemon.uid }
           : null,
-        bodyMatch: bodyMatch
-          ? { name: bodyMatch.pokemon.name, uid: bodyMatch.pokemon.uid }
+        bodyPokemon: bodyPokemon
+          ? { name: bodyPokemon.name, uid: bodyPokemon.uid }
           : null,
+        headLocationId,
+        bodyLocationId,
       });
 
-      if (headMatch) {
+      if (headPokemon && headLocationId) {
         setSelectedHead({
-          pokemon: headMatch.pokemon,
-          locationId: headMatch.locationId,
+          pokemon: headPokemon,
+          locationId: headLocationId,
         });
-        console.log('Set head Pokémon:', headMatch.pokemon.name);
+        console.log('Set head Pokémon:', headPokemon.name);
 
-        // Set the nickname from the current encounter data (which may have been updated)
-        const currentEncounter = encounters[headMatch.locationId];
-        if (currentEncounter?.head?.nickname) {
-          setNickname(currentEncounter.head.nickname);
-          setPreviewNickname(currentEncounter.head.nickname);
-        } else if (!bodyMatch) {
+        // Set the nickname from the current encounter data
+        if (headPokemon.nickname) {
+          setNickname(headPokemon.nickname);
+          setPreviewNickname(headPokemon.nickname);
+        } else if (!bodyPokemon) {
           // Only clear nickname if there's no body Pokémon
           setNickname('');
           setPreviewNickname('');
         }
-        console.log(
-          'Set nickname from encounter:',
-          currentEncounter?.head?.nickname
-        );
+        console.log('Set nickname from head Pokémon:', headPokemon.nickname);
       }
 
-      if (bodyMatch) {
+      if (bodyPokemon && bodyLocationId) {
         setSelectedBody({
-          pokemon: bodyMatch.pokemon,
-          locationId: bodyMatch.locationId,
+          pokemon: bodyPokemon,
+          locationId: bodyLocationId,
         });
-        console.log('Set body Pokémon:', bodyMatch.pokemon.name);
+        console.log('Set body Pokémon:', bodyPokemon.name);
 
-        // Set the nickname from the current encounter data for body Pokémon
-        const currentEncounter = encounters[bodyMatch.locationId];
-        if (currentEncounter?.body?.nickname) {
-          setNickname(currentEncounter.body.nickname);
-          setPreviewNickname(currentEncounter.body.nickname);
-        } else if (!headMatch) {
+        // Set the nickname from the body Pokémon
+        if (bodyPokemon.nickname) {
+          setNickname(bodyPokemon.nickname);
+          setPreviewNickname(bodyPokemon.nickname);
+        } else if (!headPokemon) {
           // Only clear nickname if there's no head Pokémon
           setNickname('');
           setPreviewNickname('');
         }
-        console.log(
-          'Set nickname from encounter:',
-          currentEncounter?.body?.nickname
-        );
+        console.log('Set nickname from body Pokémon:', bodyPokemon.nickname);
       }
 
       // Set active slot to head if we have both, or to the empty slot
@@ -303,7 +260,8 @@ export default function TeamMemberPickerModal({
     // Handle unselecting
     if (isSelectedHead) {
       setSelectedHead(null);
-      setActiveSlot(activeSlot === 'head' ? null : 'head');
+      // If we're removing the head Pokémon, set active slot to head so user can select a new one
+      setActiveSlot('head');
       // Clear nickname when head Pokémon is removed
       setNickname('');
       setPreviewNickname('');
@@ -311,7 +269,8 @@ export default function TeamMemberPickerModal({
     }
     if (isSelectedBody) {
       setSelectedBody(null);
-      setActiveSlot(activeSlot === 'body' ? null : 'body');
+      // If we're removing the body Pokémon, set active slot to body so user can select a new one
+      setActiveSlot('body');
       // Clear nickname when body Pokémon is removed
       setNickname('');
       setPreviewNickname('');
@@ -322,22 +281,24 @@ export default function TeamMemberPickerModal({
     const slot = activeSlot;
     if (slot === 'head') {
       setSelectedHead({ pokemon, locationId });
-      setActiveSlot(selectedBody ? null : 'body');
-      // Set nickname from the encounter data (which may have been updated)
-      if (encounters && encounters[locationId]?.head?.nickname) {
-        setNickname(encounters[locationId].head.nickname);
-        setPreviewNickname(encounters[locationId].head.nickname);
+      // After selecting head, set active slot to body so user can select body next
+      setActiveSlot('body');
+      // Set nickname from the selected Pokémon itself, regardless of encounter position
+      if (pokemon.nickname) {
+        setNickname(pokemon.nickname);
+        setPreviewNickname(pokemon.nickname);
       } else {
         setNickname('');
         setPreviewNickname('');
       }
     } else if (slot === 'body') {
       setSelectedBody({ pokemon, locationId });
-      setActiveSlot(selectedHead ? null : 'head');
-      // Set nickname from the encounter data for body Pokémon
-      if (encounters && encounters[locationId]?.body?.nickname) {
-        setNickname(encounters[locationId].body.nickname);
-        setPreviewNickname(encounters[locationId].body.nickname);
+      // After selecting body, set active slot to null since both slots are filled
+      setActiveSlot(null);
+      // Set nickname from the selected Pokémon itself, regardless of encounter position
+      if (pokemon.nickname) {
+        setNickname(pokemon.nickname);
+        setPreviewNickname(pokemon.nickname);
       } else {
         setNickname('');
         setPreviewNickname('');
@@ -357,63 +318,9 @@ export default function TeamMemberPickerModal({
       return;
     }
 
-    // Apply nickname to the selected Pokémon using the proper store update method
-    if (nickname.trim() && encounters) {
-      // Determine which Pokémon to update with the nickname
-      let pokemonToUpdate: PokemonOptionType | null = null;
-      let locationId: string | null = null;
-      let targetField: 'head' | 'body' | null = null;
-
-      if (headPokemon && selectedHead?.locationId) {
-        pokemonToUpdate = headPokemon;
-        locationId = selectedHead.locationId;
-        // For head Pokémon, we know it's in the head field of the encounter
-        targetField = 'head';
-      } else if (bodyPokemon && selectedBody?.locationId) {
-        pokemonToUpdate = bodyPokemon;
-        locationId = selectedBody.locationId;
-        // For body Pokémon, we know it's in the body field of the encounter
-        targetField = 'body';
-      }
-
-      if (pokemonToUpdate && locationId && targetField) {
-        try {
-          // Create updated Pokémon object with new nickname
-          const updatedPokemon = {
-            ...pokemonToUpdate,
-            nickname: nickname.trim() || undefined,
-          };
-
-          // Use the proper store action to update the encounter
-          // When updating just the nickname, preserve the existing fusion state
-          const currentEncounter = encounters[locationId];
-          const shouldPreserveFusion = currentEncounter?.isFusion || false;
-
-          console.log('Updating encounter:', {
-            locationId,
-            targetField,
-            pokemonName: pokemonToUpdate.name,
-            newNickname: updatedPokemon.nickname,
-            currentFusionState: currentEncounter?.isFusion,
-            preserveFusion: shouldPreserveFusion,
-          });
-
-          await playthroughActions.updateEncounter(
-            locationId,
-            updatedPokemon,
-            targetField,
-            shouldPreserveFusion
-          );
-
-          console.log(
-            `Updated nickname for ${pokemonToUpdate.name} in ${targetField} field to:`,
-            updatedPokemon.nickname
-          );
-        } catch (error) {
-          console.error('Failed to update nickname:', error);
-        }
-      }
-    }
+    // Note: We do NOT update the original encounter data when selecting Pokémon for team members.
+    // The nickname and other modifications should only apply to the team member, not the source encounter.
+    // This preserves the integrity of the original encounter data.
 
     // Pass the selected Pokémon to the parent component
     // Only pass the Pokémon that are actually selected, don't duplicate them

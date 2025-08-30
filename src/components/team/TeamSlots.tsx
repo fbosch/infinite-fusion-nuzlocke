@@ -5,7 +5,7 @@ import {
   useActivePlaythrough,
   useEncounters,
 } from '@/stores/playthroughs/hooks';
-import { getActivePlaythrough } from '@/stores/playthroughs/store';
+
 import { getLocationById } from '@/loaders/locations';
 import {
   FusionSprite,
@@ -15,6 +15,7 @@ import { clsx } from 'clsx';
 import { Plus } from 'lucide-react';
 import TeamMemberPickerModal from './TeamMemberPickerModal';
 import { type PokemonOptionType } from '@/loaders/pokemon';
+import { playthroughActions } from '@/stores/playthroughs';
 
 export default function TeamSlots() {
   const activePlaythrough = useActivePlaythrough();
@@ -134,22 +135,39 @@ export default function TeamSlots() {
   ) => {
     if (selectedPosition === null) return;
 
-    const activePlaythrough = getActivePlaythrough();
-    if (!activePlaythrough) return;
+    console.log('TeamSlots: Updating team member:', {
+      position: selectedPosition,
+      headPokemon: headPokemon
+        ? { name: headPokemon.name, uid: headPokemon.uid }
+        : null,
+      bodyPokemon: bodyPokemon
+        ? { name: bodyPokemon.name, uid: bodyPokemon.uid }
+        : null,
+    });
 
-    // If both are null, clear the team member
-    if (!headPokemon && !bodyPokemon) {
-      activePlaythrough.team.members[selectedPosition] = null;
-    } else {
-      // Add the team member by referencing the Pokémon UIDs
-      activePlaythrough.team.members[selectedPosition] = {
-        headPokemonUid: headPokemon?.uid || '',
-        bodyPokemonUid: bodyPokemon?.uid || '',
-      };
+    // Use the proper store action instead of direct mutation
+    // Extract UID information for the store action
+    const headPokemonRef = headPokemon?.uid ? { uid: headPokemon.uid } : null;
+    const bodyPokemonRef = bodyPokemon?.uid ? { uid: bodyPokemon.uid } : null;
+
+    const success = playthroughActions.updateTeamMember(
+      selectedPosition,
+      headPokemonRef,
+      bodyPokemonRef
+    );
+
+    if (!success) {
+      console.error(
+        'Failed to update team member at position:',
+        selectedPosition
+      );
+      return;
     }
 
-    // Update the playthrough timestamp
-    activePlaythrough.updatedAt = Date.now();
+    console.log(
+      'TeamSlots: Successfully updated team member at position:',
+      selectedPosition
+    );
 
     // Close the modal
     handleCloseModal();

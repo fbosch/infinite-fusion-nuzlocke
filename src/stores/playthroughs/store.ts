@@ -1,6 +1,7 @@
 import { proxy, subscribe } from 'valtio';
 import { devtools } from 'valtio/utils';
 import { PlaythroughsState, Playthrough, GameMode } from './types';
+import { type PokemonOptionType } from '@/loaders/pokemon';
 import {
   loadFromIndexedDB,
   createDebouncedSaveAll,
@@ -371,40 +372,6 @@ const forceSave = async () => {
   await saveToIndexedDB(playthroughsStore);
 };
 
-// Team management actions
-const addToTeam = (locationId: string, position: number): boolean => {
-  const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough) return false;
-
-  // Validate position
-  if (position < 0 || position >= 6) return false;
-
-  // Check if position is already occupied
-  if (activePlaythrough.team.members[position] !== null) return false;
-
-  // Validate that encounter exists at the location
-  const encounter = activePlaythrough.encounters?.[locationId];
-  if (!encounter || !encounter.head || !encounter.body) {
-    return false;
-  }
-
-  // Check if this encounter is already used in other team slots
-  const isAlreadyInTeam = activePlaythrough.team.members.some(
-    member => member && member.headEncounterId === locationId
-  );
-
-  if (isAlreadyInTeam) return false;
-
-  // Add to team - reference the location as the encounter ID
-  activePlaythrough.team.members[position] = {
-    headEncounterId: locationId,
-    bodyEncounterId: locationId,
-  };
-
-  activePlaythrough.updatedAt = getCurrentTimestamp();
-  return true;
-};
-
 const removeFromTeam = (position: number): boolean => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return false;
@@ -455,6 +422,36 @@ const reorderTeam = (fromPosition: number, toPosition: number): boolean => {
   return true;
 };
 
+// Update team member at a specific position
+const updateTeamMember = (
+  position: number,
+  headPokemon: { uid: string } | null,
+  bodyPokemon: { uid: string } | null
+): boolean => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough) return false;
+
+  // Validate position
+  if (position < 0 || position >= 6) return false;
+
+  // Update the team member
+  if (!headPokemon && !bodyPokemon) {
+    // Clear the team member
+    activePlaythrough.team.members[position] = null;
+  } else {
+    // Set the team member with the provided UIDs
+    activePlaythrough.team.members[position] = {
+      headPokemonUid: headPokemon?.uid || '',
+      bodyPokemonUid: bodyPokemon?.uid || '',
+    };
+  }
+
+  // Update the playthrough timestamp to trigger reactivity
+  activePlaythrough.updatedAt = getCurrentTimestamp();
+
+  return true;
+};
+
 // Helper function to get team member details
 const getTeamMemberDetails = (position: number) => {
   const activePlaythrough = getActivePlaythrough();
@@ -464,26 +461,38 @@ const getTeamMemberDetails = (position: number) => {
   if (!teamMember) return null;
 
   // Find Pokémon by UID across all encounters
-  let headPokemon: any = null;
-  let bodyPokemon: any = null;
+  let headPokemon: PokemonOptionType | null = null;
+  let bodyPokemon: PokemonOptionType | null = null;
 
   // Debug logging
   console.log('Looking for team member:', teamMember);
-  console.log('Available encounters:', Object.keys(activePlaythrough.encounters || {}));
+  console.log(
+    'Available encounters:',
+    Object.keys(activePlaythrough.encounters || {})
+  );
 
   // Flatten all Pokémon from all encounters into a single collection
-  const allPokemon = Object.values(activePlaythrough.encounters || {}).flatMap(encounter => {
-    const pokemon = [];
-    if (encounter.head) pokemon.push(encounter.head);
-    if (encounter.body) pokemon.push(encounter.body);
-    return pokemon;
-  });
+  const allPokemon = Object.values(activePlaythrough.encounters || {}).flatMap(
+    encounter => {
+      const pokemon = [];
+      if (encounter.head) pokemon.push(encounter.head);
+      if (encounter.body) pokemon.push(encounter.body);
+      return pokemon;
+    }
+  );
 
-  console.log('All available Pokémon:', allPokemon.map(p => ({ name: p.name, uid: p.uid })));
+  console.log(
+    'All available Pokémon:',
+    allPokemon.map(p => ({ name: p.name, uid: p.uid }))
+  );
 
   // Find Pokémon by UID from the flattened collection
-  headPokemon = allPokemon.find(pokemon => pokemon.uid === teamMember.headPokemonUid) || null;
-  bodyPokemon = allPokemon.find(pokemon => pokemon.uid === teamMember.bodyPokemonUid) || null;
+  headPokemon =
+    allPokemon.find(pokemon => pokemon.uid === teamMember.headPokemonUid) ||
+    null;
+  bodyPokemon =
+    allPokemon.find(pokemon => pokemon.uid === teamMember.bodyPokemonUid) ||
+    null;
 
   if (headPokemon) console.log('Found head Pokémon:', headPokemon);
   if (bodyPokemon) console.log('Found body Pokémon:', bodyPokemon);
@@ -498,10 +507,7 @@ const getTeamMemberDetails = (position: number) => {
     head: headPokemon,
     body: bodyPokemon,
     isFusion: Boolean(headPokemon && bodyPokemon),
-    updatedAt: Math.max(
-      headPokemon?.updatedAt || 0,
-      bodyPokemon?.updatedAt || 0
-    ),
+    updatedAt: getCurrentTimestamp(), // Use current timestamp since Pokémon don't have updatedAt
   };
 
   console.log('Returning combined encounter:', combinedEncounter);
@@ -552,9 +558,9 @@ export {
   forceSave,
   importPlaythrough,
   getCurrentTimestamp,
-  addToTeam,
   removeFromTeam,
   reorderTeam,
+  updateTeamMember,
   getTeamMemberDetails,
   isTeamFull,
   getAvailableTeamPositions,

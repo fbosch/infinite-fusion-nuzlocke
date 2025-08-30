@@ -1,0 +1,98 @@
+---
+alwaysApply: true
+description: Comprehensive guide to available MCP tools and when to utilize them for optimal development workflow
+---
+
+# MCP Tools Quick Reference
+
+**Priority Order**: Vitest MCP → GitMCP → Context7 → Browser Tools
+
+## 1. Vitest MCP - Primary Testing Tool
+
+**Use for**: All testing operations (files, directories, coverage, debugging)
+**Fallback**: `pnpm test:run` when MCP fails
+
+```typescript
+// Setup
+mcp_vitest_set_project_root({ path: '/absolute/project/path' });
+
+// Run tests
+mcp_vitest_run_tests({
+  target: 'src/components/Button.test.ts',
+  format: 'detailed',
+  showLogs: true,
+});
+
+// Coverage
+mcp_vitest_analyze_coverage({ target: 'src/components', format: 'detailed' });
+```
+
+## 2. GitMCP - Project Documentation
+
+**Use for**: Repository docs, code search, external links
+**Tools**: `fetch_infinite_docs()`, `search_infinite_docs(query)`, `search_infinite_code(query)`
+
+```typescript
+mcp_gitmcp_fetch_infinite_docs();
+mcp_gitmcp_search_infinite_docs({ query: 'specific feature' });
+mcp_gitmcp_search_infinite_code({ query: 'function name' });
+```
+
+## 3. Context7 - Library Documentation
+
+**Use for**: External library research, API docs, code examples
+
+```typescript
+// Resolve library
+mcp_context7_resolve - library - id({ libraryName: 'library-name' });
+
+// Get docs
+mcp_context7_get -
+  library -
+  docs({
+    context7CompatibleLibraryID: '/org/project',
+    topic: 'topic',
+    tokens: 5000,
+  });
+```
+
+## 4. Browser Tools - Web Testing
+
+**Use for**: Browser automation, debugging, audits (accessibility, performance, SEO)
+
+## Quick Decision Matrix
+
+| Task             | Primary Tool  | Fallback        |
+| ---------------- | ------------- | --------------- |
+| **Testing**      | Vitest MCP    | `pnpm test:run` |
+| **Project Docs** | GitMCP        | Manual search   |
+| **Library Docs** | Context7      | Web search      |
+| **Web Testing**  | Browser Tools | Manual testing  |
+
+## Key Workflows
+
+1. **Testing**: `mcp_vitest_set_project_root()` → `mcp_vitest_run_tests()`
+2. **Documentation**: `mcp_gitmcp_fetch_infinite_docs()` → `mcp_gitmcp_search_infinite_docs()`
+3. **Libraries**: `mcp_context7_resolve-library-id()` → `mcp_context7_get-library-docs()`
+
+## Best Practices
+
+- **Always set project root first** for Vitest MCP
+- **Fetch docs before searching** for better context
+- **Use `showLogs: true`** when debugging test failures
+- **Have terminal fallbacks ready** for MCP failures
+
+## Configuration
+
+MCP tools configured in [`.cursor/mcp.json`](mdc:.cursor/mcp.json)
+
+## Troubleshooting
+
+| Issue                  | Solution                                  |
+| ---------------------- | ----------------------------------------- |
+| **Vitest MCP fails**   | Check `@djankies/vitest-mcp` installation |
+| **GitMCP errors**      | Verify repository access in config        |
+| **Context7 issues**    | Ensure correct library names              |
+| **Browser tools fail** | Check browser automation setup            |
+
+**Fallback**: Always have terminal commands ready (`pnpm test:run`, manual search)

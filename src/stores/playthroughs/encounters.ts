@@ -119,9 +119,9 @@ export const updateEncounter = async (
     };
 
     // Determine if this should be a fusion encounter
-    const willBeFusion = shouldCreateFusion || encounter.isFusion;
+    const willBeFusion =
+      shouldCreateFusion || encounter.isFusion || field === 'body';
 
-    // Track previous value for the field being updated
     // Track previous value for the field being updated
     const previousFieldId = encounter[field]?.id ?? null;
     if (willBeFusion) {
@@ -146,7 +146,7 @@ export const updateEncounter = async (
         }
       }
     } else {
-      // For regular encounters
+      // For regular encounters (only when setting head and not creating fusion)
       encounter.head = pokemonWithLocationAndUID;
       encounter.body = null;
       encounter.isFusion = false;
