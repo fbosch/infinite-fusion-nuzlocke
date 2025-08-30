@@ -14,17 +14,18 @@ import {
 } from '@headlessui/react';
 import clsx from 'clsx';
 import { Skull, X, Boxes, Box, Users } from 'lucide-react';
-import { useEncounters, useCustomLocations } from '@/stores/playthroughs';
 import {
-  isPokemonActive,
-  isPokemonDeceased,
-  isPokemonStored,
-} from '@/utils/pokemonPredicates';
+  useEncounters,
+  useCustomLocations,
+  useActivePlaythrough,
+} from '@/stores/playthroughs';
+import { isPokemonDeceased, isPokemonStored } from '@/utils/pokemonPredicates';
 import { scrollToLocationById } from '@/utils/scrollToLocation';
 import {
   getLocationById,
   getLocationsSortedWithCustom,
 } from '@/loaders/locations';
+import { findPokemonByUid } from '@/utils/encounter-utils';
 import PokeballIcon from '@/assets/images/pokeball.svg';
 import PCEntryItem from './PCEntryItem';
 import TeamEntryItem from './TeamEntryItem';
@@ -45,6 +46,7 @@ export default function PokemonPCSheet({
   activeTab,
   onChangeTab,
 }: PokemonPCSheetProps) {
+  const activePlaythrough = useActivePlaythrough();
   const encounters = useEncounters();
   const customLocations = useCustomLocations();
   const mergedLocations = useMemo(
@@ -58,27 +60,55 @@ export default function PokemonPCSheet({
   }, [mergedLocations]);
 
   const team: Entry[] = useMemo(() => {
-    const entries: Entry[] = [];
+    if (!activePlaythrough?.team) return [];
 
-    Object.entries(encounters || {}).forEach(([locationId, data]) => {
-      const headActive = isPokemonActive(data?.head);
-      const bodyActive = isPokemonActive(data?.body);
-
-      if (headActive || bodyActive) {
-        entries.push({
-          locationId,
-          locationName:
-            idToName.get(locationId) ||
-            getLocationById(locationId)?.name ||
-            'Unknown Location',
-          head: headActive ? data?.head || null : null,
-          body: bodyActive ? data?.body || null : null,
-        });
+    return activePlaythrough.team.members.map((member, index) => {
+      if (!member) {
+        return {
+          locationId: `team-slot-${index}`,
+          locationName: `Team Slot ${index + 1}`,
+          head: null,
+          body: null,
+          position: index,
+        };
       }
-    });
 
-    return entries;
-  }, [encounters, idToName]);
+      const headPokemon = member.headPokemonUid
+        ? findPokemonByUid(encounters, member.headPokemonUid)
+        : null;
+      const bodyPokemon = member.bodyPokemonUid
+        ? findPokemonByUid(encounters, member.bodyPokemonUid)
+        : null;
+
+      // A slot is empty only if both UIDs are empty strings
+      if (!member.headPokemonUid && !member.bodyPokemonUid) {
+        return {
+          locationId: `team-slot-${index}`,
+          locationName: `Team Slot ${index + 1}`,
+          head: null,
+          body: null,
+          position: index,
+        };
+      }
+
+      // Get location from the head Pokémon's original location, fallback to body if head doesn't exist
+      const location = getLocationById(
+        headPokemon?.originalLocation || bodyPokemon?.originalLocation || ''
+      );
+
+      // Determine fusion state: true if both Pokémon exist and can form a fusion
+      const isFusion = Boolean(headPokemon && bodyPokemon);
+
+      return {
+        locationId: `team-slot-${index}`,
+        locationName: location?.name || 'Unknown Location',
+        head: headPokemon,
+        body: bodyPokemon,
+        position: index,
+        isFusion,
+      };
+    });
+  }, [activePlaythrough?.team, encounters]);
 
   const deceased: Entry[] = useMemo(() => {
     const entries: Entry[] = [];
@@ -217,7 +247,7 @@ export default function PokemonPCSheet({
                   <PokeballIcon className='h-4 w-4' />
                   <span className='font-medium flex-1'>Team</span>
                   <span className='ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100'>
-                    {team.length}
+                    {team.filter(entry => entry.head || entry.body).length}/6
                   </span>
                 </Tab>
                 <Tab
@@ -256,7 +286,8 @@ export default function PokemonPCSheet({
 
               <TabPanels className='flex min-h-0 flex-1 flex-col'>
                 <TabPanel className='flex min-h-0 flex-1'>
-                  {team.length === 0 ? (
+                  {team.filter(entry => entry.head || entry.body).length ===
+                  0 ? (
                     <div
                       className='flex min-h-[60vh] w-full flex-1 flex-col items-center justify-center px-4 text-gray-600 dark:text-gray-300'
                       role='status'
@@ -278,55 +309,17 @@ export default function PokemonPCSheet({
                       aria-label='Active team members list'
                       className='w-full space-y-3 py-2 max-h-[calc(100dvh-6.5rem)] overflow-y-auto'
                     >
-                      {(() => {
-                        let pokemonCount = 0;
-                        let insertedLimitNotice = false;
-                        return team.flatMap(entry => {
-                          // For fusions, count as 1 Pokémon; for non-fusions, count head and body separately
-                          const currentEncounter =
-                            encounters?.[entry.locationId];
-                          const isFusion =
-                            currentEncounter?.isFusion &&
-                            entry.head &&
-                            entry.body;
-
-                          const entryPokemonCount = isFusion
-                            ? 1
-                            : (entry.head ? 1 : 0) + (entry.body ? 1 : 0);
-
-                          // Check if this entry or any previous entries exceed 6
-                          pokemonCount += entryPokemonCount;
-                          const isOverLimit = pokemonCount > 6;
-
-                          const nodes: React.ReactNode[] = [];
-                          if (isOverLimit && !insertedLimitNotice) {
-                            insertedLimitNotice = true;
-                            nodes.push(
-                              <li key='team-limit-divider' className='py-1'>
-                                <div className='flex items-center gap-2 mb-1'>
-                                  <div className='h-px flex-1 bg-gray-200 dark:bg-gray-700' />
-                                  <span className='text-xs font-medium text-red-600 dark:text-red-400'>
-                                    Team limit exceeded
-                                  </span>
-                                  <div className='h-px flex-1 bg-gray-200 dark:bg-gray-700' />
-                                </div>
-                              </li>
-                            );
-                          }
-
-                          nodes.push(
-                            <TeamEntryItem
-                              key={entry.locationId}
-                              entry={entry}
-                              idToName={idToName}
-                              isOverLimit={isOverLimit}
-                              onClose={onClose}
-                            />
-                          );
-
-                          return nodes;
-                        });
-                      })()}
+                      {team
+                        .filter(entry => entry.head || entry.body)
+                        .map(entry => (
+                          <TeamEntryItem
+                            key={entry.locationId}
+                            entry={entry}
+                            idToName={idToName}
+                            isOverLimit={false}
+                            onClose={onClose}
+                          />
+                        ))}
                     </ul>
                   )}
                 </TabPanel>

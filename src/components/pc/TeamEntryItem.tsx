@@ -17,6 +17,7 @@ import { useEncounters, playthroughActions } from '@/stores/playthroughs';
 import { canFuse, isPokemonActive } from '@/utils/pokemonPredicates';
 import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
 import { scrollToLocationById } from '@/utils/scrollToLocation';
+import { getLocationById } from '@/loaders/locations';
 import type { PCEntry } from './types';
 
 interface TeamEntryItemProps {
@@ -33,13 +34,19 @@ export default function TeamEntryItem({
   onClose,
 }: TeamEntryItemProps) {
   const encounters = useEncounters();
-  const currentEncounter = encounters?.[entry.locationId];
-  const headActive = isPokemonActive(entry.head);
-  const bodyActive = isPokemonActive(entry.body);
+
+  // Check if this is team data (has position field) or encounter data
+  const isTeamData = 'position' in entry && typeof entry.position === 'number';
+
+  const currentEncounter = isTeamData ? null : encounters?.[entry.locationId];
+  const headActive = isTeamData ? true : isPokemonActive(entry.head);
+  const bodyActive = isTeamData ? true : isPokemonActive(entry.body);
   const hasAny = Boolean(headActive || bodyActive);
-  const isFusion = Boolean(
-    currentEncounter?.isFusion && canFuse(entry.head, entry.body)
-  );
+
+  // Use entry.isFusion if available (for team data), otherwise infer from encounter
+  const isFusion = isTeamData
+    ? entry.isFusion || false
+    : Boolean(currentEncounter?.isFusion && canFuse(entry.head, entry.body));
 
   // Ref for the sprite to play evolution animations
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
@@ -76,6 +83,14 @@ export default function TeamEntryItem({
   if (!hasAny) return null;
 
   const handleClick = () => {
+    if (isTeamData) {
+      // For team data, just close the modal or handle team slot click
+      console.log('Team slot clicked:', entry.position);
+      onClose?.();
+      return;
+    }
+
+    // For encounter data, scroll to location
     const highlightUids: string[] = [];
     if (entry.head?.uid) highlightUids.push(entry.head.uid);
     if (entry.body?.uid) highlightUids.push(entry.body.uid);
@@ -91,11 +106,11 @@ export default function TeamEntryItem({
 
   return (
     <PokemonContextMenu
-      locationId={entry.locationId}
+      locationId={isTeamData ? `team-slot-${entry.position}` : entry.locationId}
       encounterData={{
         head: entry.head,
         body: entry.body,
-        isFusion: currentEncounter?.isFusion || false,
+        isFusion: isFusion,
       }}
       shouldLoad={true}
     >
@@ -119,7 +134,11 @@ export default function TeamEntryItem({
           }
         }}
         tabIndex={0}
-        aria-label={`Scroll to ${idToName.get(entry.locationId) || 'location'} in table`}
+        aria-label={
+          isTeamData && entry.position !== undefined
+            ? `Team slot ${entry.position + 1}`
+            : `Scroll to ${idToName.get(entry.locationId) || 'location'} in table`
+        }
       >
         <div className='p-4'>
           <div className='flex items-start gap-4'>
@@ -145,25 +164,37 @@ export default function TeamEntryItem({
                   {getNicknameText(entry.head, entry.body, isFusion)}
                 </h3>
               </div>
-              {isFusion && (
-                <div className='align-center flex gap-x-3'>
-                  {headActive && (
-                    <div className='flex items-center gap-1 text-sm text-gray-700 dark:text-gray-400'>
-                      <HeadIcon className='h-4 w-4' />
-                      <span>{entry.head?.name || 'Unknown'}</span>
-                    </div>
-                  )}
-                  {bodyActive && (
-                    <div className='flex items-center gap-1 text-sm text-gray-700 dark:text-gray-400'>
-                      <BodyIcon className='h-4 w-4' />
-                      <span>{entry.body?.name || 'Unknown'}</span>
-                    </div>
-                  )}
+              {/* Head Pokémon info */}
+              {entry.head && (
+                <div className='flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 min-w-0'>
+                  <HeadIcon className='h-4 w-4 flex-shrink-0' />
+                  <span className='truncate'>
+                    {entry.head.name || 'Unknown'}
+                  </span>
+                  <span className='text-xs text-gray-400 dark:text-gray-500 ml-2 truncate flex-shrink-0'>
+                    {entry.head.originalLocation
+                      ? getLocationById(entry.head.originalLocation)?.name ||
+                        'Unknown Location'
+                      : 'Unknown Location'}
+                  </span>
                 </div>
               )}
-              <div className='text-xs text-gray-500 dark:text-gray-400'>
-                {idToName.get(entry.locationId) || 'Unknown Location'}
-              </div>
+
+              {/* Body Pokémon info */}
+              {entry.body && (
+                <div className='flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 min-w-0'>
+                  <BodyIcon className='h-4 w-4 flex-shrink-0' />
+                  <span className='truncate'>
+                    {entry.body.name || 'Unknown'}
+                  </span>
+                  <span className='text-xs text-gray-400 dark:text-gray-500 ml-2 truncate flex-shrink-0'>
+                    {entry.body.originalLocation
+                      ? getLocationById(entry.body.originalLocation)?.name ||
+                        'Unknown Location'
+                      : 'Unknown Location'}
+                  </span>
+                </div>
+              )}
             </div>
             {primary && (
               <div className='ml-auto'>

@@ -1,13 +1,11 @@
 'use client';
 
 import clsx from 'clsx';
-import { CursorTooltip } from '@/components/CursorTooltip';
 import { PokemonContextMenu } from '@/components/PokemonSummaryCard/PokemonContextMenu';
 import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
 import { getNicknameText } from '@/components/PokemonSummaryCard/utils';
 import { TypePills } from '@/components/TypePills';
-import PokeballIcon from '@/assets/images/pokeball.svg';
-import { useEncounters, playthroughActions } from '@/stores/playthroughs';
+import { useEncounters } from '@/stores/playthroughs';
 import {
   isPokemonDeceased,
   isPokemonStored,
@@ -131,25 +129,6 @@ export default function PCEntryItem(props: PCEntryItemProps) {
             </div>
           </div>
         </div>
-        {mode === 'stored' && (
-          <div className='absolute bottom-2 right-2 transition-opacity md:opacity-0 md:group-hover/pc-entry:opacity-100 md:pointer-events-none md:group-hover/pc-entry:pointer-events-auto'>
-            <CursorTooltip content='Move to Team' placement='top-end'>
-              <button
-                type='button'
-                className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-400 transition-colors hover:border-gray-200/70 hover:bg-gray-100/50 hover:text-gray-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/40 dark:hover:border-gray-600/60 cursor-pointer'
-                aria-label='Move to Team'
-                onClick={async e => {
-                  e.stopPropagation();
-                  await playthroughActions.markEncounterAsCaptured(
-                    entry.locationId
-                  );
-                }}
-              >
-                <PokeballIcon className='h-4 w-4' />
-              </button>
-            </CursorTooltip>
-          </div>
-        )}
       </li>
     </PokemonContextMenu>
   );
