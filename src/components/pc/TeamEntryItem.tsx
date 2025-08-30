@@ -20,6 +20,7 @@ import { scrollToLocationById } from '@/utils/scrollToLocation';
 import { getLocationById } from '@/loaders/locations';
 import type { PCEntry } from './types';
 import type { PokemonOptionType } from '@/loaders/pokemon';
+import { PokemonStatus } from '@/loaders/pokemon';
 
 interface TeamEntryItemProps {
   entry: PCEntry;
@@ -270,9 +271,36 @@ export default function TeamEntryItem({
               aria-label='Move to Graveyard'
               onClick={async e => {
                 e.stopPropagation();
-                await playthroughActions.markEncounterAsDeceased(
-                  entry.locationId
-                );
+                if (isTeamData && entry.position !== undefined) {
+                  // For team members, mark as deceased and clear the slot
+                  if (entry.head?.uid) {
+                    await playthroughActions.updatePokemonByUID(
+                      entry.head.uid,
+                      {
+                        status: PokemonStatus.DECEASED,
+                      }
+                    );
+                  }
+                  if (entry.body?.uid) {
+                    await playthroughActions.updatePokemonByUID(
+                      entry.body.uid,
+                      {
+                        status: PokemonStatus.DECEASED,
+                      }
+                    );
+                  }
+                  // Clear the team member slot
+                  await playthroughActions.updateTeamMember(
+                    entry.position,
+                    null,
+                    null
+                  );
+                } else {
+                  // For encounters, use the existing encounter logic
+                  await playthroughActions.markEncounterAsDeceased(
+                    entry.locationId
+                  );
+                }
               }}
             >
               <Skull className='h-4 w-4' />

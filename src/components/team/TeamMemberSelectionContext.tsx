@@ -467,17 +467,8 @@ export function TeamMemberSelectionProvider({
 
     // Update the nickname for the Pokémon that needs it
     if (nickname) {
-      console.log('Updating nickname:', {
-        nickname,
-        headPokemon: headPokemon?.nickname,
-        bodyPokemon: bodyPokemon?.nickname,
-        headLocationId: selectedHead?.locationId,
-        bodyLocationId: selectedBody?.locationId,
-      });
-
       // Always update the head Pokémon's nickname if there is one
       if (headPokemon && headPokemon.uid && nickname !== headPokemon.nickname) {
-        console.log('Updating head Pokémon nickname');
         await playthroughActions.updatePokemonByUID(headPokemon.uid, {
           nickname: nickname || undefined,
         });
@@ -490,7 +481,6 @@ export function TeamMemberSelectionProvider({
         bodyPokemon.uid &&
         nickname !== bodyPokemon.nickname
       ) {
-        console.log('Updating body Pokémon nickname (no head Pokémon)');
         await playthroughActions.updatePokemonByUID(bodyPokemon.uid, {
           nickname: nickname || undefined,
         });

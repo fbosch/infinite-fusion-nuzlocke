@@ -1,6 +1,6 @@
 'use client';
 import { Computer, Settings } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import clsx from 'clsx';
 import { CursorTooltip } from '@/components/CursorTooltip';
 import dynamic from 'next/dynamic';
@@ -17,18 +17,11 @@ export default function MenuItems() {
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  // Debug effect to track drawerOpen changes
-  useEffect(() => {
-    console.log('MenuItems useEffect - drawerOpen changed to:', drawerOpen);
-  }, [drawerOpen]);
-
   const handleOpenDrawer = () => {
-    console.log('MenuItems handleOpenDrawer called');
     setDrawerOpen(true);
   };
 
   const handleCloseDrawer = () => {
-    console.log('MenuItems handleCloseDrawer called');
     setDrawerOpen(false);
   };
 

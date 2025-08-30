@@ -137,10 +137,7 @@ export default function PokemonPCSheet({
     if (!activePlaythroughRef.current?.team) return [];
 
     return activePlaythroughRef.current.team.members.map((member, index) => {
-      console.log(`Building team slot ${index}:`, member);
-
       if (!member) {
-        console.log(`Slot ${index} is null member`);
         return {
           locationId: `team-slot-${index}`,
           locationName: `Team Slot ${index + 1}`,
