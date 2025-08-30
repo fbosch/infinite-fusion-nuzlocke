@@ -17,6 +17,53 @@ import TeamMemberPickerModal from './TeamMemberPickerModal';
 import { type PokemonOptionType } from '@/loaders/pokemon';
 import { playthroughActions } from '@/stores/playthroughs';
 import { findPokemonByUid } from '@/utils/encounter-utils';
+import { TypePills } from '@/components/TypePills';
+import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
+
+// Component to display type indicators and nickname
+function TypeIndicators({
+  headPokemon,
+  bodyPokemon,
+  isFusion,
+}: {
+  headPokemon: PokemonOptionType | null;
+  bodyPokemon: PokemonOptionType | null;
+  isFusion: boolean;
+}) {
+  const { primary, secondary } = useFusionTypesFromPokemon(
+    headPokemon,
+    bodyPokemon,
+    isFusion
+  );
+
+  // Get nickname from head Pokémon (or body if no head)
+  const nickname = headPokemon?.nickname || bodyPokemon?.nickname;
+
+  return (
+    <>
+      {/* Type indicators above the slot */}
+      {(primary || secondary) && (
+        <div className='absolute -top-4 left-1/2 transform -translate-x-1/2 z-20'>
+          <TypePills
+            primary={primary}
+            secondary={secondary}
+            size='xxs'
+            showTooltip={true}
+          />
+        </div>
+      )}
+
+      {/* Nickname below the slot */}
+      {nickname && (
+        <div className='absolute -bottom-6 left-1/2 transform -translate-x-1/2 z-20'>
+          <span className='text-sm font-ds text-gray-700 dark:text-gray-200 pixel-shadow'>
+            {nickname}
+          </span>
+        </div>
+      )}
+    </>
+  );
+}
 
 export default function TeamSlots() {
   const activePlaythrough = useActivePlaythrough();
@@ -164,13 +211,13 @@ export default function TeamSlots() {
   return (
     <>
       <div className='hidden lg:flex flex-col items-center'>
-        <div className='flex gap-1 sm:gap-2 md:gap-3'>
+        <div className='flex gap-3 sm:gap-4 md:gap-5'>
           {teamSlots.map(slot => (
             <div
               key={slot.position}
               className={clsx(
                 'flex flex-col items-center justify-center relative',
-                'size-16 sm:size-18 md:size-22 rounded-full border transition-all duration-200',
+                'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
                 slot.isEmpty
                   ? 'border-gray-200 dark:border-gray-700 bg-transparent hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer'
                   : 'border-gray-200 dark:border-gray-700 bg-transparent hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer'
@@ -179,6 +226,16 @@ export default function TeamSlots() {
                 handleSlotClick(slot.position, slot.isEmpty ? null : slot)
               }
             >
+              {!slot.isEmpty &&
+                slot.headPokemon !== undefined &&
+                slot.bodyPokemon !== undefined &&
+                slot.isFusion !== undefined && (
+                  <TypeIndicators
+                    headPokemon={slot.headPokemon}
+                    bodyPokemon={slot.bodyPokemon}
+                    isFusion={slot.isFusion}
+                  />
+                )}
               {slot.isEmpty ? (
                 <div className='flex flex-col items-center justify-center text-center relative w-full h-full'>
                   <div

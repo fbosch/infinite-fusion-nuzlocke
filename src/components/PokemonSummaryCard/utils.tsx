@@ -199,6 +199,7 @@ export function getStatusState(
         canAnimate: false,
       };
     case 'normal':
+    case 'stored':
     default:
       // Allow animation for active Pokemon (CAPTURED, RECEIVED, TRADED)
       // For single Pokemon: animate if the Pokemon is active
