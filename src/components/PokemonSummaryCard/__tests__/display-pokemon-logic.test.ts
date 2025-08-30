@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getDisplayPokemon } from '../utils';
+import { getDisplayPokemon, getNicknameText } from '../utils';
 import { type PokemonOptionType } from '@/loaders/pokemon';
 import { canFuse } from '@/utils/pokemonPredicates';
 
@@ -296,6 +296,51 @@ describe('Display Pokemon Logic - Artwork Variant Bug Prevention', () => {
       expect(displayPokemon.isFusion).toBe(false);
       // The function should show some Pokemon (either head or body)
       expect(displayPokemon.head || displayPokemon.body).toBeTruthy();
+    });
+  });
+
+  describe('Nickname Logic', () => {
+    it('should prioritize head Pokémon nickname for fusions', () => {
+      const headWithNickname = { ...mockPikachu, nickname: 'Sparky' };
+      const bodyWithNickname = { ...mockBulbasaur, nickname: 'Bulby' };
+
+      // When both have nicknames, head should take priority
+      const result = getNicknameText(headWithNickname, bodyWithNickname, true);
+      expect(result).toBe('Sparky');
+    });
+
+    it('should fall back to body nickname when head has no nickname', () => {
+      const headWithoutNickname = { ...mockPikachu }; // No nickname
+      const bodyWithNickname = { ...mockBulbasaur, nickname: 'Bulby' };
+
+      // When head has no nickname, should use body nickname
+      const result = getNicknameText(headWithoutNickname, bodyWithNickname, true);
+      expect(result).toBe('Bulby');
+    });
+
+    it('should use fusion name format when neither has nickname', () => {
+      const headWithoutNickname = { ...mockPikachu }; // No nickname
+      const bodyWithoutNickname = { ...mockBulbasaur }; // No nickname
+
+      // When neither has nickname, should use fusion name format
+      const result = getNicknameText(headWithoutNickname, bodyWithoutNickname, true);
+      expect(result).toBe('Pikachu/Bulbasaur');
+    });
+
+    it('should handle single Pokémon correctly', () => {
+      const singlePokemonWithNickname = { ...mockPikachu, nickname: 'Sparky' };
+
+      // Single Pokémon should show nickname if available
+      const result = getNicknameText(singlePokemonWithNickname, null, false);
+      expect(result).toBe('Sparky');
+    });
+
+    it('should fall back to name when no nickname is available', () => {
+      const singlePokemonWithoutNickname = { ...mockPikachu }; // No nickname
+
+      // Single Pokémon should show name when no nickname
+      const result = getNicknameText(singlePokemonWithoutNickname, null, false);
+      expect(result).toBe('Pikachu');
     });
   });
 });

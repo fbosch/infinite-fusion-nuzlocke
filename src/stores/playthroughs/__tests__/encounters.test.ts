@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { playthroughsStore, createPlaythrough } from '../store';
-import { moveTeamMemberToBox } from '../encounters';
+import { moveTeamMemberToBox, restorePokemonToTeam } from '../encounters';
 import { PokemonStatus } from '@/loaders/pokemon';
 
 describe('Encounter Actions', () => {
@@ -273,6 +273,165 @@ describe('Encounter Actions', () => {
 
       // Verify timestamp is updated
       expect(activePlaythrough.updatedAt).toBeGreaterThan(originalTimestamp);
+    });
+  });
+
+  describe('restorePokemonToTeam', () => {
+    it('should restore stored Pokémon to original receival status', async () => {
+      const playthroughId = createPlaythrough('Test Run');
+      playthroughsStore.activePlaythroughId = playthroughId;
+
+      const activePlaythrough = playthroughsStore.playthroughs.find(
+        p => p.id === playthroughId
+      );
+      if (!activePlaythrough) throw new Error('Playthrough not found');
+
+      // Set up encounters with stored Pokémon that has originalReceivalStatus
+      activePlaythrough.encounters = {
+        route1: {
+          head: {
+            id: 25,
+            name: 'Pikachu',
+            nationalDexId: 25,
+            status: PokemonStatus.STORED,
+            originalReceivalStatus: PokemonStatus.CAPTURED,
+            uid: 'pikachu_route1_123',
+            originalLocation: 'route1',
+          },
+          body: null,
+          isFusion: false,
+          updatedAt: Date.now(),
+        },
+      };
+
+      // Restore Pokémon to team
+      await restorePokemonToTeam('pikachu_route1_123');
+
+      // Verify status is restored to original receival status
+      const pikachu = activePlaythrough.encounters.route1.head;
+      expect(pikachu?.status).toBe(PokemonStatus.CAPTURED);
+    });
+
+    it('should default to captured status if no original receival status exists', async () => {
+      const playthroughId = createPlaythrough('Test Run');
+      playthroughsStore.activePlaythroughId = playthroughId;
+
+      const activePlaythrough = playthroughsStore.playthroughs.find(
+        p => p.id === playthroughId
+      );
+      if (!activePlaythrough) throw new Error('Playthrough not found');
+
+      // Set up encounters with stored Pokémon without originalReceivalStatus
+      activePlaythrough.encounters = {
+        route1: {
+          head: {
+            id: 25,
+            name: 'Pikachu',
+            nationalDexId: 25,
+            status: PokemonStatus.STORED,
+            // No originalReceivalStatus
+            uid: 'pikachu_route1_123',
+            originalLocation: 'route1',
+          },
+          body: null,
+          isFusion: false,
+          updatedAt: Date.now(),
+        },
+      };
+
+      // Restore Pokémon to team
+      await restorePokemonToTeam('pikachu_route1_123');
+
+      // Verify status defaults to captured
+      const pikachu = activePlaythrough.encounters.route1.head;
+      expect(pikachu?.status).toBe(PokemonStatus.CAPTURED);
+    });
+
+    it('should not change status if Pokémon is not stored', async () => {
+      const playthroughId = createPlaythrough('Test Run');
+      playthroughsStore.activePlaythroughId = playthroughId;
+
+      const activePlaythrough = playthroughsStore.playthroughs.find(
+        p => p.id === playthroughId
+      );
+      if (!activePlaythrough) throw new Error('Playthrough not found');
+
+      // Set up encounters with captured Pokémon
+      activePlaythrough.encounters = {
+        route1: {
+          head: {
+            id: 25,
+            name: 'Pikachu',
+            nationalDexId: 25,
+            status: PokemonStatus.CAPTURED,
+            uid: 'pikachu_route1_123',
+            originalLocation: 'route1',
+          },
+          body: null,
+          isFusion: false,
+          updatedAt: Date.now(),
+        },
+      };
+
+      const originalStatus = activePlaythrough.encounters.route1.head?.status;
+
+      // Try to restore Pokémon that is not stored
+      await restorePokemonToTeam('pikachu_route1_123');
+
+      // Verify status is unchanged
+      const pikachu = activePlaythrough.encounters.route1.head;
+      expect(pikachu?.status).toBe(originalStatus);
+    });
+
+    it('should handle Pokémon not found gracefully', async () => {
+      const playthroughId = createPlaythrough('Test Run');
+      playthroughsStore.activePlaythroughId = playthroughId;
+
+      // Try to restore non-existent Pokémon
+      await restorePokemonToTeam('non-existent-uid');
+
+      // Should not throw error
+      expect(true).toBe(true);
+    });
+
+    it('should actually update the Pokémon status in the store', async () => {
+      const playthroughId = createPlaythrough('Test Run');
+      playthroughsStore.activePlaythroughId = playthroughId;
+
+      const activePlaythrough = playthroughsStore.playthroughs.find(
+        p => p.id === playthroughId
+      );
+      if (!activePlaythrough) throw new Error('Playthrough not found');
+
+      // Set up encounters with stored Pokémon
+      activePlaythrough.encounters = {
+        route1: {
+          head: {
+            id: 25,
+            name: 'Pikachu',
+            nationalDexId: 25,
+            status: PokemonStatus.STORED,
+            originalReceivalStatus: PokemonStatus.CAPTURED,
+            uid: 'pikachu_route1_123',
+            originalLocation: 'route1',
+          },
+          body: null,
+          isFusion: false,
+          updatedAt: Date.now(),
+        },
+      };
+
+      // Verify initial status
+      expect(activePlaythrough.encounters.route1.head?.status).toBe(PokemonStatus.STORED);
+
+      // Restore Pokémon to team
+      await restorePokemonToTeam('pikachu_route1_123');
+
+      // Verify status is actually updated in the store
+      expect(activePlaythrough.encounters.route1.head?.status).toBe(PokemonStatus.CAPTURED);
+      
+      // Verify the playthrough timestamp was updated
+      expect(activePlaythrough.updatedAt).toBeGreaterThan(0);
     });
   });
 });

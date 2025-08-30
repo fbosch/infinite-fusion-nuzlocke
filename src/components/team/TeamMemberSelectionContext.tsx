@@ -403,16 +403,36 @@ export function TeamMemberSelectionProvider({
         dispatch({ type: 'SET_ACTIVE_SLOT', payload: 'body' });
       }
 
-      // Set nickname from the selected Pokémon
-      if (pokemon.nickname) {
-        dispatch({ type: 'SET_NICKNAME', payload: pokemon.nickname });
-        dispatch({ type: 'SET_PREVIEW_NICKNAME', payload: pokemon.nickname });
-      } else {
-        dispatch({ type: 'SET_NICKNAME', payload: '' });
-        dispatch({ type: 'SET_PREVIEW_NICKNAME', payload: '' });
+      // Set nickname based on selection priority
+      // For fusions, always prioritize head Pokémon nickname
+      // For single Pokémon, use the selected Pokémon's nickname
+      if (slot === 'head') {
+        // When selecting head Pokémon, use its nickname
+        if (pokemon.nickname) {
+          dispatch({ type: 'SET_NICKNAME', payload: pokemon.nickname });
+          dispatch({ type: 'SET_PREVIEW_NICKNAME', payload: pokemon.nickname });
+        } else {
+          dispatch({ type: 'SET_NICKNAME', payload: '' });
+          dispatch({ type: 'SET_PREVIEW_NICKNAME', payload: '' });
+        }
+      } else if (slot === 'body') {
+        // When selecting body Pokémon, check if we have a head Pokémon
+        if (selectedHead?.pokemon?.nickname) {
+          // If head Pokémon has a nickname, use that (fusion priority)
+          dispatch({ type: 'SET_NICKNAME', payload: selectedHead.pokemon.nickname });
+          dispatch({ type: 'SET_PREVIEW_NICKNAME', payload: selectedHead.pokemon.nickname });
+        } else if (pokemon.nickname) {
+          // If no head nickname, use body Pokémon's nickname
+          dispatch({ type: 'SET_NICKNAME', payload: pokemon.nickname });
+          dispatch({ type: 'SET_PREVIEW_NICKNAME', payload: pokemon.nickname });
+        } else {
+          // No nickname available
+          dispatch({ type: 'SET_NICKNAME', payload: '' });
+          dispatch({ type: 'SET_PREVIEW_NICKNAME', payload: '' });
+        }
       }
     },
-    [dispatch, selectedHead, selectedBody, activeSlot]
+    [dispatch, selectedHead, selectedBody, activeSlot, selectedHead?.pokemon?.nickname]
   );
 
   const handleRemoveHeadPokemon = useCallback(() => {
@@ -449,7 +469,7 @@ export function TeamMemberSelectionProvider({
         bodyLocationId: selectedBody?.locationId,
       });
 
-      // Update the head Pokémon's nickname (regardless of where it is in the encounter table)
+      // Always update the head Pokémon's nickname if there is one
       if (headPokemon && headPokemon.uid && nickname !== headPokemon.nickname) {
         console.log('Updating head Pokémon nickname');
         await playthroughActions.updatePokemonByUID(headPokemon.uid, {
@@ -457,14 +477,14 @@ export function TeamMemberSelectionProvider({
         });
       }
 
-      // If only body Pokémon is selected (no head), update body instead
+      // Only update body Pokémon nickname if there's no head Pokémon
       if (
         !headPokemon &&
         bodyPokemon &&
         bodyPokemon.uid &&
         nickname !== bodyPokemon.nickname
       ) {
-        console.log('Updating body Pokémon nickname');
+        console.log('Updating body Pokémon nickname (no head Pokémon)');
         await playthroughActions.updatePokemonByUID(bodyPokemon.uid, {
           nickname: nickname || undefined,
         });

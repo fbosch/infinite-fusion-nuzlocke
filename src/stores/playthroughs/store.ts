@@ -12,6 +12,7 @@ import {
 } from './persistence';
 import { z } from 'zod';
 import { generatePrefixedId } from '@/utils/id';
+import { restorePokemonToTeam } from './encounters';
 
 // Default state
 const defaultState: PlaythroughsState = {
@@ -423,11 +424,11 @@ const reorderTeam = (fromPosition: number, toPosition: number): boolean => {
 };
 
 // Update team member at a specific position
-const updateTeamMember = (
+const updateTeamMember = async (
   position: number,
   headPokemon: { uid: string } | null,
   bodyPokemon: { uid: string } | null
-): boolean => {
+): Promise<boolean> => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return false;
 
@@ -446,6 +447,14 @@ const updateTeamMember = (
       bodyPokemonUid: body?.uid || '',
     };
   };
+
+  // Restore Pokémon status if they were stored before adding to team
+  if (headPokemon?.uid) {
+    await restorePokemonToTeam(headPokemon.uid);
+  }
+  if (bodyPokemon?.uid) {
+    await restorePokemonToTeam(bodyPokemon.uid);
+  }
 
   // Update the team member
   activePlaythrough.team.members[position] = createTeamMember(

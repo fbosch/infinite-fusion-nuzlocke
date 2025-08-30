@@ -86,17 +86,19 @@ export default function PokemonPCSheet({
     setSelectedPosition(null);
   };
 
-  const handlePokemonSelect = (
+  const handlePokemonSelect = async (
     headPokemon: PokemonOptionType | null,
     bodyPokemon: PokemonOptionType | null
   ) => {
     if (selectedPosition === null) return;
 
+
+
     // Create team member references
     const headRef = headPokemon ? { uid: headPokemon.uid! } : null;
     const bodyRef = bodyPokemon ? { uid: bodyPokemon.uid! } : null;
 
-    const success = playthroughActions.updateTeamMember(
+    const success = await playthroughActions.updateTeamMember(
       selectedPosition,
       headRef,
       bodyRef
@@ -165,7 +167,7 @@ export default function PokemonPCSheet({
         isFusion,
       };
     });
-  }, [activePlaythrough?.team, encounters]);
+  }, [activePlaythrough?.team, encounters, activePlaythrough?.updatedAt]);
 
   const deceased: Entry[] = useMemo(() => {
     const entries: Entry[] = [];
@@ -188,7 +190,7 @@ export default function PokemonPCSheet({
     });
 
     return entries;
-  }, [encounters, idToName]);
+  }, [encounters, idToName, activePlaythrough?.updatedAt]);
 
   const stored: Entry[] = useMemo(() => {
     const entries: Entry[] = [];
@@ -211,7 +213,7 @@ export default function PokemonPCSheet({
     });
 
     return entries;
-  }, [encounters, idToName]);
+  }, [encounters, idToName, activePlaythrough?.updatedAt]);
 
   const getSelectedIndex = (tab: 'team' | 'box' | 'graveyard') => {
     switch (tab) {

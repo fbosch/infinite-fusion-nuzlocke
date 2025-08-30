@@ -172,17 +172,19 @@ export default function TeamSlots() {
     setPickerModalOpen(true);
   };
 
-  const handlePokemonSelect = (
+  const handlePokemonSelect = async (
     headPokemon: PokemonOptionType | null,
     bodyPokemon: PokemonOptionType | null
   ) => {
     if (selectedPosition === null) return;
 
+
+
     // Create team member references
     const headRef = headPokemon ? { uid: headPokemon.uid! } : null;
     const bodyRef = bodyPokemon ? { uid: bodyPokemon.uid! } : null;
 
-    const success = playthroughActions.updateTeamMember(
+    const success = await playthroughActions.updateTeamMember(
       selectedPosition,
       headRef,
       bodyRef

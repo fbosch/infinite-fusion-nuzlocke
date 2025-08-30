@@ -45,8 +45,17 @@ export function getAllPokemonWithLocations(
 
   return Object.entries(encounters).flatMap(([locationId, encounter]) => {
     const pokemon = [];
+    
+    // Always include head Pokémon
     if (encounter.head) pokemon.push({ pokemon: encounter.head, locationId });
-    if (encounter.body) pokemon.push({ pokemon: encounter.body, locationId });
+    
+    // Only include body Pokémon if this is actually a fusion (isFusion = true)
+    // If isFusion = false, the body Pokémon doesn't exist as a valid option
+    // and is only stored for UX reasons if the user retoggled the fusion
+    if (encounter.body && encounter.isFusion) {
+      pokemon.push({ pokemon: encounter.body, locationId });
+    }
+    
     return pokemon;
   });
 }

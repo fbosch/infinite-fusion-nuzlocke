@@ -40,7 +40,13 @@ export function getNicknameText(
     return pokemon.nickname || pokemon.name;
   }
 
-  return head.nickname || body.nickname || `${head.name}/${body.name}`;
+  // For fusions, always prioritize head Pokémon nickname if it exists
+  if (head.nickname) {
+    return head.nickname;
+  }
+  
+  // If no head nickname, fall back to body nickname or the fusion name format
+  return body.nickname || `${head.name}/${body.name}`;
 }
 
 export function getSpriteUrl(

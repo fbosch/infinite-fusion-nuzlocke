@@ -20,7 +20,7 @@ describe('Team Management Functions', () => {
   });
 
   describe('updateTeamMember', () => {
-    it('should add a Pokémon to an empty team position', () => {
+    it('should add a Pokémon to an empty team position', async () => {
       const playthroughId = createPlaythrough('Test Run');
       playthroughsStore.activePlaythroughId = playthroughId;
 
@@ -55,7 +55,7 @@ describe('Team Management Functions', () => {
         };
       }
 
-      const result = updateTeamMember(
+      const result = await updateTeamMember(
         0,
         { uid: 'pikachu_route1_123' },
         { uid: 'charmander_route1_456' }
@@ -68,7 +68,7 @@ describe('Team Management Functions', () => {
       });
     });
 
-    it('should fail when adding to an occupied position', () => {
+    it('should fail when adding to an occupied position', async () => {
       const playthroughId = createPlaythrough('Test Run');
       playthroughsStore.activePlaythroughId = playthroughId;
 
@@ -85,6 +85,7 @@ describe('Team Management Functions', () => {
               nickname: 'Sparky',
               level: 5,
               isActive: true,
+              isStored: false,
               isStored: false,
               isDeceased: false,
             },
@@ -104,14 +105,14 @@ describe('Team Management Functions', () => {
       }
 
       // Add first Pokémon
-      updateTeamMember(
+      await updateTeamMember(
         0,
         { uid: 'pikachu_route1_123' },
         { uid: 'charmander_route1_456' }
       );
 
       // Try to add another to the same position
-      const result = updateTeamMember(
+      const result = await updateTeamMember(
         0,
         { uid: 'pikachu_route1_123' },
         { uid: 'charmander_route1_456' }
@@ -120,11 +121,11 @@ describe('Team Management Functions', () => {
       expect(result).toBe(true);
     });
 
-    it('should fail when adding to invalid position', () => {
+    it('should fail when adding to invalid position', async () => {
       const playthroughId = createPlaythrough('Test Run');
       playthroughsStore.activePlaythroughId = playthroughId;
 
-      const result = updateTeamMember(
+      const result = await updateTeamMember(
         10,
         { uid: 'pikachu_route1_123' },
         { uid: 'charmander_route1_456' }

@@ -65,6 +65,7 @@ export {
   markEncounterAsMissed,
   markEncounterAsReceived,
   moveTeamMemberToBox,
+  restorePokemonToTeam,
 } from './encounters';
 
 // Export custom location actions
