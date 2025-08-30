@@ -353,7 +353,6 @@ export default function PokemonPCSheet({
                         key={entry.locationId}
                         entry={entry}
                         idToName={idToName}
-                        isOverLimit={false}
                         onClose={onClose}
                         onTeamMemberClick={handleTeamMemberClick}
                       />

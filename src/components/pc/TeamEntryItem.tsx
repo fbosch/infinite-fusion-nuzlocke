@@ -24,7 +24,6 @@ import type { PokemonOptionType } from '@/loaders/pokemon';
 interface TeamEntryItemProps {
   entry: PCEntry;
   idToName: Map<string, string>;
-  isOverLimit: boolean;
   onClose?: () => void;
   onTeamMemberClick?: (
     position: number,
@@ -41,7 +40,6 @@ interface TeamEntryItemProps {
 export default function TeamEntryItem({
   entry,
   idToName,
-  isOverLimit,
   onClose,
   onTeamMemberClick,
 }: TeamEntryItemProps) {
@@ -143,10 +141,8 @@ export default function TeamEntryItem({
         className={clsx(
           'group/pc-entry relative cursor-pointer rounded-lg transition-all duration-200',
           {
-            'border border-red-500 bg-red-50 dark:bg-red-900/20 hover:ring-1 hover:ring-red-400/30':
-              isOverLimit,
             'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:ring-1 hover:ring-blue-400/30':
-              !isOverLimit && !isEmpty,
+              !isEmpty,
             'bg-gray-50 dark:bg-gray-900 shadow-inner hover:bg-gray-100 dark:hover:bg-gray-900':
               isEmpty,
           }
@@ -172,8 +168,7 @@ export default function TeamEntryItem({
                 'flex flex-shrink-0 items-center justify-center rounded-lg',
                 isEmpty
                   ? 'bg-gray-50 dark:bg-gray-800 p-2'
-                  : 'bg-gray-50 dark:bg-gray-700 p-2',
-                { 'bg-red-50 dark:bg-red-900/20': isOverLimit }
+                  : 'bg-gray-50 dark:bg-gray-700 p-2'
               )}
             >
               {isEmpty ? (

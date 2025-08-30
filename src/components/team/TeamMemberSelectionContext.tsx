@@ -390,8 +390,10 @@ export function TeamMemberSelectionProvider({
           type: 'SET_SELECTED_HEAD',
           payload: { pokemon, locationId },
         });
-        // Keep the same slot active so user can continue selecting in the same slot if needed
-        dispatch({ type: 'SET_ACTIVE_SLOT', payload: 'head' });
+        // Automatically move to body slot only if it's empty
+        if (!selectedBody) {
+          dispatch({ type: 'SET_ACTIVE_SLOT', payload: 'body' });
+        }
       } else if (slot === 'body') {
         dispatch({
           type: 'SET_SELECTED_BODY',
@@ -415,6 +417,7 @@ export function TeamMemberSelectionProvider({
 
   const handleRemoveHeadPokemon = useCallback(() => {
     dispatch({ type: 'SET_SELECTED_HEAD', payload: null });
+    // When removing head Pokémon, automatically switch to head slot for new selection
     dispatch({ type: 'SET_ACTIVE_SLOT', payload: 'head' });
     dispatch({ type: 'SET_NICKNAME', payload: '' });
     dispatch({ type: 'SET_PREVIEW_NICKNAME', payload: '' });
@@ -422,6 +425,7 @@ export function TeamMemberSelectionProvider({
 
   const handleRemoveBodyPokemon = useCallback(() => {
     dispatch({ type: 'SET_SELECTED_BODY', payload: null });
+    // When removing body Pokémon, automatically switch to body slot for new selection
     dispatch({ type: 'SET_ACTIVE_SLOT', payload: 'body' });
     dispatch({ type: 'SET_NICKNAME', payload: '' });
     dispatch({ type: 'SET_PREVIEW_NICKNAME', payload: '' });
