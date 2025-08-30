@@ -143,7 +143,16 @@ export function migrateOriginalReceivalStatus(
   if (data.encounters && typeof data.encounters === 'object') {
     const encounters = data.encounters as Record<
       string,
-      Record<string, unknown>
+      {
+        head?: {
+          originalReceivalStatus?: string;
+          status?: string;
+        } | null;
+        body?: {
+          originalReceivalStatus?: string;
+          status?: string;
+        } | null;
+      }
     >;
 
     for (const locationId in encounters) {

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   PokemonOptionSchema,
+  PokemonOptionType,
   generatePokemonUID,
   PokemonStatus,
 } from '@/loaders/pokemon';
@@ -16,7 +17,7 @@ import {
 import { getDisplayPokemon } from '@/components/PokemonSummaryCard/utils';
 import { queryClient } from '@/lib/queryClient';
 import { spriteKeys } from '@/lib/queries/sprites';
-import { EncounterDataSchema, Playthrough } from './types';
+import { EncounterDataSchema, EncounterData, Playthrough } from './types';
 import { getActivePlaythrough, getCurrentTimestamp } from './store';
 import { emitEvolutionEvent } from '@/lib/events';
 
