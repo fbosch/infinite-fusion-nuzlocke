@@ -13,7 +13,11 @@ import EscapeIcon from '@/assets/images/escape-cloud.svg';
 import HeadIcon from '@/assets/images/head.svg';
 import BodyIcon from '@/assets/images/body.svg';
 import { useSpriteVariants, usePreferredVariantState } from '@/hooks/useSprite';
-import { isEggId, type PokemonOptionType } from '@/loaders/pokemon';
+import {
+  isEggId,
+  type PokemonOptionType,
+  PokemonStatus,
+} from '@/loaders/pokemon';
 import { playthroughActions } from '@/stores/playthroughs';
 import { settingsStore } from '@/stores/settings';
 import { useSnapshot } from 'valtio';
@@ -221,7 +225,10 @@ export function PokemonContextMenu({
       });
 
       // Show "Mark as Deceased" unless already deceased or missed
-      if (currentStatus !== 'deceased' && currentStatus !== 'missed') {
+      if (
+        currentStatus !== PokemonStatus.DECEASED &&
+        currentStatus !== PokemonStatus.MISSED
+      ) {
         items.push({
           id: 'mark-deceased',
           label: 'Mark as Deceased',
@@ -233,10 +240,10 @@ export function PokemonContextMenu({
 
       // Show "Move to Box" only if captured, received, or traded
       if (
-        currentStatus === 'captured' ||
-        currentStatus === 'received' ||
-        currentStatus === 'traded' ||
-        currentStatus === 'deceased'
+        currentStatus === PokemonStatus.CAPTURED ||
+        currentStatus === PokemonStatus.RECEIVED ||
+        currentStatus === PokemonStatus.TRADED ||
+        currentStatus === PokemonStatus.DECEASED
       ) {
         items.push({
           id: 'move-to-box',
@@ -248,7 +255,10 @@ export function PokemonContextMenu({
       }
 
       // Show "Mark as Captured" unless already captured or received
-      if (currentStatus !== 'captured' && currentStatus !== 'received') {
+      if (
+        currentStatus !== PokemonStatus.CAPTURED &&
+        currentStatus !== PokemonStatus.RECEIVED
+      ) {
         items.push({
           id: 'mark-captured',
           label: 'Mark as Captured',
@@ -270,7 +280,10 @@ export function PokemonContextMenu({
       }
 
       // Show "Mark as Received" unless already received or captured
-      if (currentStatus !== 'received' && currentStatus !== 'captured') {
+      if (
+        currentStatus !== PokemonStatus.RECEIVED &&
+        currentStatus !== PokemonStatus.CAPTURED
+      ) {
         items.push({
           id: 'mark-received',
           label: 'Mark as Received',

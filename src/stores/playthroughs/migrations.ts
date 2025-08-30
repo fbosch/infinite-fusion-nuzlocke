@@ -1,4 +1,5 @@
 import type { GameMode } from './types';
+import { PokemonStatus } from '@/loaders/pokemon';
 
 /**
  * Migration data type for playthrough migrations
@@ -163,15 +164,15 @@ export function migrateOriginalReceivalStatus(
           if (!encounter.head.originalReceivalStatus) {
             // Set originalReceivalStatus based on current status
             if (
-              encounter.head.status === 'stored' ||
-              encounter.head.status === 'deceased'
+              encounter.head.status === PokemonStatus.STORED ||
+              encounter.head.status === PokemonStatus.DECEASED
             ) {
               // Most common case: stored/deceased Pokémon were probably captured
-              encounter.head.originalReceivalStatus = 'captured';
+              encounter.head.originalReceivalStatus = PokemonStatus.CAPTURED;
             } else if (
-              encounter.head.status === 'captured' ||
-              encounter.head.status === 'received' ||
-              encounter.head.status === 'traded'
+              encounter.head.status === PokemonStatus.CAPTURED ||
+              encounter.head.status === PokemonStatus.RECEIVED ||
+              encounter.head.status === PokemonStatus.TRADED
             ) {
               // Active statuses: set as original
               encounter.head.originalReceivalStatus = encounter.head.status;
@@ -185,15 +186,15 @@ export function migrateOriginalReceivalStatus(
           if (!encounter.body.originalReceivalStatus) {
             // Set originalReceivalStatus based on current status
             if (
-              encounter.body.status === 'stored' ||
-              encounter.body.status === 'deceased'
+              encounter.body.status === PokemonStatus.STORED ||
+              encounter.body.status === PokemonStatus.DECEASED
             ) {
               // Most common case: stored/deceased Pokémon were probably captured
-              encounter.body.originalReceivalStatus = 'captured';
+              encounter.body.originalReceivalStatus = PokemonStatus.CAPTURED;
             } else if (
-              encounter.body.status === 'captured' ||
-              encounter.body.status === 'received' ||
-              encounter.body.status === 'traded'
+              encounter.body.status === PokemonStatus.CAPTURED ||
+              encounter.body.status === PokemonStatus.RECEIVED ||
+              encounter.body.status === PokemonStatus.TRADED
             ) {
               // Active statuses: set as original
               encounter.body.originalReceivalStatus = encounter.body.status;
