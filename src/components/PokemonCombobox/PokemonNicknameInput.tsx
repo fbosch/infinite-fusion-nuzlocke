@@ -54,7 +54,7 @@ export const PokemonNicknameInput = ({
     if (value.nickname !== localNickname && !isUserTyping) {
       setLocalNickname(value.nickname || '');
     }
-  }, [value?.nickname, currentPokemonId, localNickname, isUserTyping]);
+  }, [value, value?.nickname, currentPokemonId, localNickname, isUserTyping]);
 
   // Helper function to commit changes to parent
   const commitChanges = useCallback(() => {

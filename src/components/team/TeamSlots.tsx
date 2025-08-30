@@ -71,7 +71,7 @@ export default function TeamSlots() {
         isFusion,
       };
     });
-  }, [activePlaythrough?.team?.members, encounters]);
+  }, [activePlaythrough?.team, encounters]);
 
   // Track fusion ID changes and play evolution animations for team members
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function TeamSlots() {
 
   const handleSlotClick = (
     position: number,
-    existingSlot: {
+    _existingSlot: {
       position: number;
       isEmpty: boolean;
       location?: string;

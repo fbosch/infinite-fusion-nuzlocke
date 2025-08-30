@@ -4,7 +4,6 @@ import type { TypeName } from '@/lib/typings';
 import { getFusionTyping, TypeQuery } from '@/lib/typings';
 import { usePokemonTypes } from './usePokemonTypes';
 import type { PokemonOptionType } from '@/loaders/pokemon';
-import { canFuse } from '@/utils/pokemonPredicates';
 
 export interface UseFusionTypesResult {
   primary?: TypeName;

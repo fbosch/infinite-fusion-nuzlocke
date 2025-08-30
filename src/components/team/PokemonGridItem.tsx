@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { PokemonSprite } from '@/components/PokemonSprite';
-import { type PokemonOptionType, type Pokemon, getPokemonById } from '@/loaders/pokemon';
+import {
+  type PokemonOptionType,
+  type Pokemon,
+  getPokemonById,
+} from '@/loaders/pokemon';
 import HeadIcon from '@/assets/images/head.svg';
 import BodyIcon from '@/assets/images/body.svg';
 import { TypePills } from '@/components/TypePills';
@@ -99,8 +103,48 @@ export function PokemonGridItem({
       {pokemonData && (
         <div className='absolute top-1 left-1'>
           <TypePills
-            primary={pokemonData.types[0]?.name as any}
-            secondary={pokemonData.types[1]?.name as any}
+            primary={
+              pokemonData.types[0]?.name?.toLowerCase() as
+                | 'grass'
+                | 'poison'
+                | 'fire'
+                | 'flying'
+                | 'water'
+                | 'bug'
+                | 'normal'
+                | 'electric'
+                | 'ground'
+                | 'fairy'
+                | 'fighting'
+                | 'psychic'
+                | 'rock'
+                | 'steel'
+                | 'ice'
+                | 'ghost'
+                | 'dragon'
+                | 'dark'
+            }
+            secondary={
+              pokemonData.types[1]?.name?.toLowerCase() as
+                | 'grass'
+                | 'poison'
+                | 'fire'
+                | 'flying'
+                | 'water'
+                | 'bug'
+                | 'normal'
+                | 'electric'
+                | 'ground'
+                | 'fairy'
+                | 'fighting'
+                | 'psychic'
+                | 'rock'
+                | 'steel'
+                | 'ice'
+                | 'ghost'
+                | 'dragon'
+                | 'dark'
+            }
             size='xxs'
             showTooltip={false}
           />

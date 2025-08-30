@@ -119,7 +119,6 @@ export default function PCEntryItem(props: PCEntryItemProps) {
                 isFusion={isFusion}
                 shouldLoad
                 showStatusOverlay={false}
-                showTooltip={false}
               />
             )}
           </div>

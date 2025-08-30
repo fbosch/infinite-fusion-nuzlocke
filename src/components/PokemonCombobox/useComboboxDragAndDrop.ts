@@ -280,6 +280,7 @@ export function useComboboxDragAndDrop({
       dragSnapshot.currentDragData,
       setDragPreviewDebounced,
       updatePreviewForDragData,
+      settings.moveEncountersBetweenLocations,
     ]
   );
 

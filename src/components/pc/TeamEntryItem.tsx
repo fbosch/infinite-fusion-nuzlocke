@@ -65,7 +65,7 @@ export default function TeamEntryItem({
       // Reset previous fusion ID for non-fusion entries
       previousFusionId.current = null;
     }
-  }, [isFusion, entry.head?.id, entry.body?.id]);
+  }, [isFusion, entry.head, entry.body]);
 
   const { primary, secondary } = useFusionTypesFromPokemon(
     entry.head,
@@ -137,7 +137,6 @@ export default function TeamEntryItem({
                 shouldLoad
                 className='top-1.5'
                 showStatusOverlay={false}
-                showTooltip={false}
               />
             </div>
             <div className='min-w-0 flex-1 space-y-2.5'>

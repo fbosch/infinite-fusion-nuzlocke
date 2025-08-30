@@ -65,12 +65,12 @@ export const PlaythroughSchema = z
         gameMode: data.remixMode ? 'remix' : ('classic' as const),
       };
       // Remove remixMode field after migration
-      const { remixMode, ...cleanData } = migratedData;
+      const { remixMode: _remixMode, ...cleanData } = migratedData;
       return cleanData;
     }
-    // Remove remixMode field even if no migration was needed
+    // Remove remixMode field even if no migration was needed (e.g., gameMode was already non-classic)
     if (data.remixMode !== undefined) {
-      const { remixMode, ...cleanData } = data;
+      const { remixMode: _remixMode, ...cleanData } = data;
       return cleanData;
     }
     return data;

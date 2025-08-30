@@ -22,7 +22,6 @@ export function PokemonSlotSelector({
   onRemovePokemon,
 }: PokemonSlotSelectorProps) {
   const isHead = slot === 'head';
-  const slotColor = isHead ? 'blue' : 'green';
   const Icon = isHead ? HeadIcon : BodyIcon;
   const slotLabel = isHead ? 'Head Pokémon' : 'Body Pokémon';
 

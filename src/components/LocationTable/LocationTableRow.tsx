@@ -58,7 +58,12 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
         }
       }
     });
-  }, [locationId]); // Only depend on locationId since the listener is static
+  }, [
+    locationId,
+    encounterData.isFusion,
+    encounterData.head,
+    encounterData.body,
+  ]);
 
   // Initialize the previous fusion ID on first render to prevent animation on page load
   useEffect(() => {
@@ -72,7 +77,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
         }
       }
     }
-  }, [encounterData.isFusion, encounterData.head?.id, encounterData.body?.id]);
+  }, [encounterData.isFusion, encounterData.head, encounterData.body]);
 
   // Play evolution animation only when the effective fusion ID changes
   useEffect(() => {
@@ -92,7 +97,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
         }
       }
     }
-  }, [encounterData.isFusion, encounterData.head?.id, encounterData.body?.id]);
+  }, [encounterData.isFusion, encounterData.head, encounterData.body]);
 
   return (
     <tr

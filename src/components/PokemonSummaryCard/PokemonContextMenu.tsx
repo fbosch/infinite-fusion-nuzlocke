@@ -359,6 +359,7 @@ export function PokemonContextMenu({
     hasArtVariants,
     isLoadingVariants,
     settings.moveEncountersBetweenLocations,
+    showStatusActions,
     handleMarkAsDeceased,
     handleMoveToBox,
     handleMarkAsCaptured,

@@ -32,8 +32,6 @@ export function TeamMemberPreviewPanel() {
     handleUpdateTeamMember,
     handleClearTeamMember,
   } = actions;
-  const selectedPokemonName =
-    selectedHead?.pokemon?.name || selectedBody?.pokemon?.name;
 
   return (
     <div className='w-full lg:w-72 flex flex-col justify-between'>
