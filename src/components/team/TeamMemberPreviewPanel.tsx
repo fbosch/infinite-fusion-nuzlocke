@@ -12,14 +12,14 @@ export function TeamMemberPreviewPanel() {
   const { state, actions } = useTeamMemberSelection();
   const {
     selectedHead,
-  
+
     selectedBody,
     nickname,
     previewNickname,
     canUpdateTeam,
     hasSelection,
   } = state;
-  
+
   // Get fusion types using the existing hook
   const { primary, secondary } = useFusionTypesFromPokemon(
     selectedHead?.pokemon || null,
@@ -50,7 +50,7 @@ export function TeamMemberPreviewPanel() {
               />
             </div>
           )}
-          
+
           <PokemonSummaryCard
             headPokemon={selectedHead?.pokemon || null}
             bodyPokemon={selectedBody?.pokemon || null}
@@ -58,6 +58,7 @@ export function TeamMemberPreviewPanel() {
             shouldLoad={true}
             nickname={previewNickname || undefined}
             showStatusActions={false}
+            isTeamMember={true}
           />
         </div>
       </div>

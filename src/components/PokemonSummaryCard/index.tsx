@@ -21,6 +21,7 @@ interface SummaryCardProps {
   shouldLoad?: boolean;
   nickname?: string; // Optional nickname to override the Pokémon's existing nickname
   showStatusActions?: boolean; // Whether to show status-changing actions in context menu
+  isTeamMember?: boolean; // Whether this is for team member selection (bypasses encounter logic)
   ref?: React.Ref<FusionSpriteHandle>;
 }
 
@@ -33,6 +34,7 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
       shouldLoad = true,
       nickname,
       showStatusActions = true,
+      isTeamMember = false,
     },
     ref
   ) => {
@@ -46,12 +48,19 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
     const eitherPokemonIsEgg =
       isEggId(effectiveHeadPokemon?.id) || isEggId(effectiveBodyPokemon?.id);
 
-    // Determine which Pokemon to display based on active/inactive states
-    const displayPokemon = getDisplayPokemon(
-      effectiveHeadPokemon || null,
-      effectiveBodyPokemon || null,
-      effectiveIsFusion
-    );
+    // For team member selection, bypass encounter logic and always show fusion when requested
+    // For encounters, use the full display logic with canFuse restrictions
+    const displayPokemon = isTeamMember
+      ? {
+          head: effectiveHeadPokemon || null,
+          body: effectiveBodyPokemon || null,
+          isFusion: effectiveIsFusion,
+        }
+      : getDisplayPokemon(
+          effectiveHeadPokemon || null,
+          effectiveBodyPokemon || null,
+          effectiveIsFusion
+        );
 
     // Preload credits for the artwork variants when they exist
     useSpriteCredits(
@@ -292,8 +301,6 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
               </span>
             </div>
           )}
-          
-
         </div>
       </PokemonContextMenu>
     );

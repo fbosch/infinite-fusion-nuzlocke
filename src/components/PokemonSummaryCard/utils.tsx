@@ -261,8 +261,28 @@ export function getDisplayPokemon(
     return { head, body, isFusion };
   }
 
-  // For team member selection, we trust that the available Pokémon list has already been filtered
-  // No need to check canFuse here as it's for encounter logic, not team member logic
+  // Enforce fusion gating: both must have statuses and be both active or both inactive
+  const canShowFusion = canFuse(head, body);
+  if (!canShowFusion) {
+    const headIsActive = isPokemonActive(head);
+    const bodyIsActive = isPokemonActive(body);
+    const headIsInactive = isPokemonInactive(head);
+    const bodyIsInactive = isPokemonInactive(body);
+
+    // Prefer showing a single with a known status; prioritize active over inactive
+    if (headIsActive && !bodyIsActive)
+      return { head, body: null, isFusion: false };
+    if (bodyIsActive && !headIsActive)
+      return { head: null, body, isFusion: false };
+    if (headIsInactive && !bodyIsInactive)
+      return { head, body: null, isFusion: false };
+    if (bodyIsInactive && headIsActive)
+      return { head, body: null, isFusion: false };
+
+    // If statuses are missing or ambiguous, default to showing head only when present
+    return { head, body: null, isFusion: false };
+  }
+
   return { head, body, isFusion: true };
 }
 
