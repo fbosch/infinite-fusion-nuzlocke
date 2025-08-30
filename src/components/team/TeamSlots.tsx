@@ -39,15 +39,21 @@ export default function TeamSlots() {
       }
 
       // Get encounter data directly from encounters to ensure reactivity
+      // Search ALL Pokémon (both head and body) from all encounters by UID
+      const allPokemon = Object.values(encounters || {}).flatMap(enc => {
+        const pokemon = [];
+        if (enc.head) pokemon.push(enc.head);
+        if (enc.body) pokemon.push(enc.body);
+        return pokemon;
+      });
+
       const headPokemon = member.headPokemonUid
-        ? Object.values(encounters || {}).find(
-            enc => enc.head?.uid === member.headPokemonUid
-          )?.head || null
+        ? allPokemon.find(pokemon => pokemon.uid === member.headPokemonUid) ||
+          null
         : null;
       const bodyPokemon = member.bodyPokemonUid
-        ? Object.values(encounters || {}).find(
-            enc => enc.body?.uid === member.bodyPokemonUid
-          )?.body || null
+        ? allPokemon.find(pokemon => pokemon.uid === member.bodyPokemonUid) ||
+          null
         : null;
 
       // A slot is empty only if both UIDs are empty strings
@@ -135,20 +141,26 @@ export default function TeamSlots() {
   ) => {
     if (selectedPosition === null) return;
 
-    console.log('TeamSlots: Updating team member:', {
-      position: selectedPosition,
-      headPokemon: headPokemon
-        ? { name: headPokemon.name, uid: headPokemon.uid }
-        : null,
-      bodyPokemon: bodyPokemon
-        ? { name: bodyPokemon.name, uid: bodyPokemon.uid }
-        : null,
-    });
-
     // Use the proper store action instead of direct mutation
     // Extract UID information for the store action
-    const headPokemonRef = headPokemon?.uid ? { uid: headPokemon.uid } : null;
-    const bodyPokemonRef = bodyPokemon?.uid ? { uid: bodyPokemon.uid } : null;
+    // For single Pokémon selections, we need to handle this properly
+    let headPokemonRef: { uid: string } | null = null;
+    let bodyPokemonRef: { uid: string } | null = null;
+
+    if (headPokemon && bodyPokemon) {
+      // Both Pokémon selected - this is a fusion
+      headPokemonRef = { uid: headPokemon.uid! };
+      bodyPokemonRef = { uid: bodyPokemon.uid! };
+    } else if (headPokemon) {
+      // Only head Pokémon selected - this is a single Pokémon
+      headPokemonRef = { uid: headPokemon.uid! };
+      bodyPokemonRef = null;
+    } else if (bodyPokemon) {
+      // Only body Pokémon selected - this is a single Pokémon
+      // Store it as the body Pokémon, not the head
+      headPokemonRef = null;
+      bodyPokemonRef = { uid: bodyPokemon.uid! };
+    }
 
     const success = playthroughActions.updateTeamMember(
       selectedPosition,
@@ -163,11 +175,6 @@ export default function TeamSlots() {
       );
       return;
     }
-
-    console.log(
-      'TeamSlots: Successfully updated team member at position:',
-      selectedPosition
-    );
 
     // Close the modal
     handleCloseModal();

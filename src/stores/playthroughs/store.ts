@@ -438,11 +438,24 @@ const updateTeamMember = (
   if (!headPokemon && !bodyPokemon) {
     // Clear the team member
     activePlaythrough.team.members[position] = null;
-  } else {
-    // Set the team member with the provided UIDs
+  } else if (headPokemon && bodyPokemon) {
+    // Both Pokémon provided - this is a fusion
     activePlaythrough.team.members[position] = {
-      headPokemonUid: headPokemon?.uid || '',
-      bodyPokemonUid: bodyPokemon?.uid || '',
+      headPokemonUid: headPokemon.uid,
+      bodyPokemonUid: bodyPokemon.uid,
+    };
+  } else if (headPokemon) {
+    // Only head Pokémon provided - this is a single Pokémon (non-fused)
+    activePlaythrough.team.members[position] = {
+      headPokemonUid: headPokemon.uid,
+      bodyPokemonUid: '', // Empty string for body indicates single Pokémon
+    };
+  } else if (bodyPokemon) {
+    // Only body Pokémon provided - this is a single Pokémon (non-fused)
+    // Store it as the body Pokémon, not the head
+    activePlaythrough.team.members[position] = {
+      headPokemonUid: '', // Empty string for head indicates no head Pokémon
+      bodyPokemonUid: bodyPokemon.uid,
     };
   }
 
@@ -464,13 +477,6 @@ const getTeamMemberDetails = (position: number) => {
   let headPokemon: PokemonOptionType | null = null;
   let bodyPokemon: PokemonOptionType | null = null;
 
-  // Debug logging
-  console.log('Looking for team member:', teamMember);
-  console.log(
-    'Available encounters:',
-    Object.keys(activePlaythrough.encounters || {})
-  );
-
   // Flatten all Pokémon from all encounters into a single collection
   const allPokemon = Object.values(activePlaythrough.encounters || {}).flatMap(
     encounter => {
@@ -481,36 +487,29 @@ const getTeamMemberDetails = (position: number) => {
     }
   );
 
-  console.log(
-    'All available Pokémon:',
-    allPokemon.map(p => ({ name: p.name, uid: p.uid }))
-  );
-
   // Find Pokémon by UID from the flattened collection
   headPokemon =
     allPokemon.find(pokemon => pokemon.uid === teamMember.headPokemonUid) ||
     null;
   bodyPokemon =
-    allPokemon.find(pokemon => pokemon.uid === teamMember.bodyPokemonUid) ||
-    null;
-
-  if (headPokemon) console.log('Found head Pokémon:', headPokemon);
-  if (bodyPokemon) console.log('Found body Pokémon:', bodyPokemon);
+    teamMember.bodyPokemonUid && teamMember.bodyPokemonUid !== ''
+      ? allPokemon.find(pokemon => pokemon.uid === teamMember.bodyPokemonUid) ||
+        null
+      : null;
 
   if (!headPokemon && !bodyPokemon) {
-    console.log('No Pokémon found for team member:', teamMember);
     return null;
   }
 
   // Create a combined encounter object for display
+  // A team member is a fusion only if both head and body Pokémon exist
+  const isFusion = Boolean(headPokemon && bodyPokemon);
   const combinedEncounter = {
     head: headPokemon,
     body: bodyPokemon,
-    isFusion: Boolean(headPokemon && bodyPokemon),
+    isFusion,
     updatedAt: getCurrentTimestamp(), // Use current timestamp since Pokémon don't have updatedAt
   };
-
-  console.log('Returning combined encounter:', combinedEncounter);
 
   return {
     position,

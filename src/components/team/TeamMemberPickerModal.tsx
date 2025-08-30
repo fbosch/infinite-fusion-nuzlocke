@@ -72,44 +72,48 @@ export default function TeamMemberPickerModal({
   // Pre-populate selections when editing existing team member
   useEffect(() => {
     if (existingTeamMember && !existingTeamMember.isEmpty && encounters) {
-      console.log('Pre-populating modal with:', existingTeamMember);
-
       // Find the existing Pokémon directly from encounters by UID
       let headPokemon: PokemonOptionType | null = null;
       let bodyPokemon: PokemonOptionType | null = null;
       let headLocationId: string | null = null;
       let bodyLocationId: string | null = null;
 
-      // Search through all encounters to find the existing Pokémon
-      for (const [locationId, encounter] of Object.entries(encounters)) {
-        if (encounter.head?.uid === existingTeamMember.headPokemon?.uid) {
-          headPokemon = encounter.head;
-          headLocationId = locationId;
+      // Search through ALL Pokémon from ALL encounters by UID, regardless of slot position
+      const allPokemon = Object.entries(encounters).flatMap(
+        ([locationId, enc]) => {
+          const pokemon = [];
+          if (enc.head) pokemon.push({ ...enc.head, locationId });
+          if (enc.body) pokemon.push({ ...enc.body, locationId });
+          return pokemon;
         }
-        if (encounter.body?.uid === existingTeamMember.bodyPokemon?.uid) {
-          bodyPokemon = encounter.body;
-          bodyLocationId = locationId;
+      );
+
+      // Find Pokémon by UID from the flattened collection
+      if (existingTeamMember.headPokemon?.uid) {
+        const foundHead = allPokemon.find(
+          pokemon => pokemon.uid === existingTeamMember.headPokemon?.uid
+        );
+        if (foundHead) {
+          headPokemon = foundHead;
+          headLocationId = foundHead.locationId;
         }
       }
 
-      console.log('Found existing Pokémon:', {
-        headPokemon: headPokemon
-          ? { name: headPokemon.name, uid: headPokemon.uid }
-          : null,
-        bodyPokemon: bodyPokemon
-          ? { name: bodyPokemon.name, uid: bodyPokemon.uid }
-          : null,
-        headLocationId,
-        bodyLocationId,
-      });
+      if (existingTeamMember.bodyPokemon?.uid) {
+        const foundBody = allPokemon.find(
+          pokemon => pokemon.uid === existingTeamMember.bodyPokemon?.uid
+        );
+        if (foundBody) {
+          bodyPokemon = foundBody;
+          bodyLocationId = foundBody.locationId;
+        }
+      }
 
       if (headPokemon && headLocationId) {
         setSelectedHead({
           pokemon: headPokemon,
           locationId: headLocationId,
         });
-        console.log('Set head Pokémon:', headPokemon.name);
-
         // Set the nickname from the current encounter data
         if (headPokemon.nickname) {
           setNickname(headPokemon.nickname);
@@ -119,7 +123,6 @@ export default function TeamMemberPickerModal({
           setNickname('');
           setPreviewNickname('');
         }
-        console.log('Set nickname from head Pokémon:', headPokemon.nickname);
       }
 
       if (bodyPokemon && bodyLocationId) {
@@ -127,7 +130,6 @@ export default function TeamMemberPickerModal({
           pokemon: bodyPokemon,
           locationId: bodyLocationId,
         });
-        console.log('Set body Pokémon:', bodyPokemon.name);
 
         // Set the nickname from the body Pokémon
         if (bodyPokemon.nickname) {
@@ -138,20 +140,18 @@ export default function TeamMemberPickerModal({
           setNickname('');
           setPreviewNickname('');
         }
-        console.log('Set nickname from body Pokémon:', bodyPokemon.nickname);
       }
 
-      // Set active slot to head if we have both, or to the empty slot
-      if (existingTeamMember.headPokemon && existingTeamMember.bodyPokemon) {
-        setActiveSlot(null);
-      } else if (existingTeamMember.headPokemon) {
-        setActiveSlot('body');
-      } else if (existingTeamMember.bodyPokemon) {
-        setActiveSlot('head');
+      // Only set active slot if user hasn't manually selected one
+      if (!hasManuallySelectedSlot) {
+        if (existingTeamMember.headPokemon && existingTeamMember.bodyPokemon) {
+          setActiveSlot(null);
+        } else if (existingTeamMember.headPokemon) {
+          setActiveSlot('body');
+        } else if (existingTeamMember.bodyPokemon) {
+          setActiveSlot('body'); // If only body Pokémon exists, set active slot to body
+        }
       }
-
-      // Reset manual selection flag when editing existing team member
-      setHasManuallySelectedSlot(false);
     }
   }, [existingTeamMember, encounters]);
 
@@ -182,9 +182,6 @@ export default function TeamMemberPickerModal({
       }
     }
 
-    console.log('Used Pokémon UIDs:', Array.from(usedPokemonUids));
-    console.log('Current position being edited:', position);
-
     const pokemon = Object.entries(encounters).flatMap(
       ([locationId, encounter]) => {
         const validPokemon = [];
@@ -212,14 +209,6 @@ export default function TeamMemberPickerModal({
       }
     );
 
-    console.log('Available Pokémon count:', pokemon.length);
-    console.log(
-      'First few available Pokémon:',
-      pokemon
-        .slice(0, 3)
-        .map(p => ({ name: p.pokemon.name, uid: p.pokemon.uid }))
-    );
-
     if (!searchQuery.trim()) return pokemon;
 
     const query = searchQuery.toLowerCase();
@@ -237,7 +226,6 @@ export default function TeamMemberPickerModal({
   ]);
 
   const handleSlotSelect = (slot: 'head' | 'body') => {
-    console.log('Slot selected:', slot);
     setActiveSlot(slot);
     setHasManuallySelectedSlot(true);
   };
@@ -246,14 +234,6 @@ export default function TeamMemberPickerModal({
     pokemon: PokemonOptionType,
     locationId: string
   ) => {
-    console.log('Pokemon selected:', {
-      pokemon: pokemon.name,
-      uid: pokemon.uid,
-      activeSlot,
-      selectedHead: selectedHead?.pokemon?.name,
-      selectedBody: selectedBody?.pokemon?.name,
-    });
-
     const isSelectedHead = selectedHead?.pokemon?.uid === pokemon.uid;
     const isSelectedBody = selectedBody?.pokemon?.uid === pokemon.uid;
 
@@ -279,9 +259,11 @@ export default function TeamMemberPickerModal({
 
     // Handle selecting
     const slot = activeSlot;
+
     if (slot === 'head') {
       setSelectedHead({ pokemon, locationId });
       // After selecting head, set active slot to body so user can select body next
+      // But don't force them to select body - they can update with just head if they want
       setActiveSlot('body');
       // Set nickname from the selected Pokémon itself, regardless of encounter position
       if (pokemon.nickname) {
@@ -293,8 +275,9 @@ export default function TeamMemberPickerModal({
       }
     } else if (slot === 'body') {
       setSelectedBody({ pokemon, locationId });
-      // After selecting body, set active slot to null since both slots are filled
-      setActiveSlot(null);
+      // After selecting body, keep active slot as body so user can select another body Pokémon if they want
+      // Don't set to null - allow single Pokémon selections
+      setActiveSlot('body');
       // Set nickname from the selected Pokémon itself, regardless of encounter position
       if (pokemon.nickname) {
         setNickname(pokemon.nickname);
@@ -318,13 +301,32 @@ export default function TeamMemberPickerModal({
       return;
     }
 
-    // Note: We do NOT update the original encounter data when selecting Pokémon for team members.
-    // The nickname and other modifications should only apply to the team member, not the source encounter.
-    // This preserves the integrity of the original encounter data.
+    // For single Pokémon selections (non-fused), we need to handle this properly
+    // If only one Pokémon is selected, we should still allow the update
+    // The parent component will handle whether it's a fusion or single Pokémon
+    if (headPokemon && !bodyPokemon) {
+      // Single Pokémon selected as head - this is valid for non-fused Pokémon
+      onSelect(headPokemon, null);
+      onClose();
+      return;
+    }
 
-    // Pass the selected Pokémon to the parent component
-    // Only pass the Pokémon that are actually selected, don't duplicate them
-    onSelect(headPokemon || null, bodyPokemon || null);
+    if (!headPokemon && bodyPokemon) {
+      // Single Pokémon selected as body - this is valid for non-fused Pokémon
+      onSelect(null, bodyPokemon);
+      onClose();
+      return;
+    }
+
+    // Both Pokémon selected - this is a fusion
+    if (headPokemon && bodyPokemon) {
+      onSelect(headPokemon, bodyPokemon);
+      onClose();
+      return;
+    }
+
+    // Fallback - shouldn't reach here but just in case
+    onSelect(null, null);
     onClose();
   };
 
@@ -357,6 +359,7 @@ export default function TeamMemberPickerModal({
   };
 
   // Allow update when there are selections OR when both are empty (clearing)
+  // For single Pokémon selections, we should also allow updates
   const canUpdateTeam =
     selectedHead || selectedBody || (!selectedHead && !selectedBody);
 
@@ -437,17 +440,6 @@ export default function TeamMemberPickerModal({
                       const isSelected = isSelectedHead || isSelectedBody;
                       const isActiveSlot = Boolean(activeSlot && !isSelected);
 
-                      // Debug logging for the first few Pokémon
-                      if (pokemon.name === availablePokemon[0]?.pokemon.name) {
-                        console.log('First Pokémon debug:', {
-                          pokemon: pokemon.name,
-                          activeSlot,
-                          isSelected,
-                          isActiveSlot,
-                          canSelect: isActiveSlot || isSelected,
-                        });
-                      }
-
                       return (
                         <PokemonGridItem
                           key={`${pokemon.uid}-${locationId}`}
@@ -507,10 +499,6 @@ export default function TeamMemberPickerModal({
                       value={nickname}
                       onChange={e => setNickname(e.target.value)}
                       onBlur={() => {
-                        console.log('Nickname input onBlur:', {
-                          current: nickname,
-                          setting: nickname,
-                        });
                         setPreviewNickname(nickname);
                       }}
                       className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200'
