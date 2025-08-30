@@ -419,8 +419,14 @@ export function TeamMemberSelectionProvider({
         // When selecting body Pokémon, check if we have a head Pokémon
         if (selectedHead?.pokemon?.nickname) {
           // If head Pokémon has a nickname, use that (fusion priority)
-          dispatch({ type: 'SET_NICKNAME', payload: selectedHead.pokemon.nickname });
-          dispatch({ type: 'SET_PREVIEW_NICKNAME', payload: selectedHead.pokemon.nickname });
+          dispatch({
+            type: 'SET_NICKNAME',
+            payload: selectedHead.pokemon.nickname,
+          });
+          dispatch({
+            type: 'SET_PREVIEW_NICKNAME',
+            payload: selectedHead.pokemon.nickname,
+          });
         } else if (pokemon.nickname) {
           // If no head nickname, use body Pokémon's nickname
           dispatch({ type: 'SET_NICKNAME', payload: pokemon.nickname });
@@ -432,7 +438,7 @@ export function TeamMemberSelectionProvider({
         }
       }
     },
-    [dispatch, selectedHead, selectedBody, activeSlot, selectedHead?.pokemon?.nickname]
+    [dispatch, selectedHead, selectedBody, activeSlot]
   );
 
   const handleRemoveHeadPokemon = useCallback(() => {

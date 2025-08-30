@@ -92,8 +92,6 @@ export default function PokemonPCSheet({
   ) => {
     if (selectedPosition === null) return;
 
-
-
     // Create team member references
     const headRef = headPokemon ? { uid: headPokemon.uid! } : null;
     const bodyRef = bodyPokemon ? { uid: bodyPokemon.uid! } : null;
@@ -167,7 +165,7 @@ export default function PokemonPCSheet({
         isFusion,
       };
     });
-  }, [activePlaythrough?.team, encounters, activePlaythrough?.updatedAt]);
+  }, [activePlaythrough?.team, encounters]);
 
   const deceased: Entry[] = useMemo(() => {
     const entries: Entry[] = [];

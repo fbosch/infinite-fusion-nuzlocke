@@ -79,7 +79,7 @@ export const updatePokemonByUID = async (
   }
 
   // Find and update the Pokémon in all encounters
-  for (const [locationId, encounter] of Object.entries(
+  for (const [_locationId, encounter] of Object.entries(
     activePlaythrough.encounters
   )) {
     if (encounter.head?.uid === pokemonUID) {
@@ -1020,9 +1020,12 @@ export const markEncounterAsReceived = async (
 /**
  * Helper function to find a Pokémon by UID across all encounters
  */
-function findPokemonByUID(encounters: Record<string, any> | undefined, uid: string): any | null {
+function findPokemonByUID(
+  encounters: Record<string, EncounterData> | undefined,
+  uid: string
+): PokemonOptionType | null {
   if (!encounters) return null;
-  
+
   for (const locationId in encounters) {
     const encounter = encounters[locationId];
     if (encounter?.head?.uid === uid) {
@@ -1051,38 +1054,52 @@ export const moveTeamMemberToBox = async (position: number): Promise<void> => {
 
   // Update head Pokémon status to stored if it exists
   if (teamMember.headPokemonUid) {
-    const headPokemon = findPokemonByUID(activePlaythrough.encounters, teamMember.headPokemonUid);
-    
+    const headPokemon = findPokemonByUID(
+      activePlaythrough.encounters,
+      teamMember.headPokemonUid
+    );
+
     if (headPokemon) {
-      const updates: any = { status: PokemonStatus.STORED };
-      
+      const updates: Partial<z.infer<typeof PokemonOptionSchema>> = {
+        status: PokemonStatus.STORED,
+      };
+
       // Set originalReceivalStatus if not already set and current status is active
-      if (!headPokemon.originalReceivalStatus && 
-          (headPokemon.status === PokemonStatus.CAPTURED || 
-           headPokemon.status === PokemonStatus.RECEIVED || 
-           headPokemon.status === PokemonStatus.TRADED)) {
+      if (
+        !headPokemon.originalReceivalStatus &&
+        (headPokemon.status === PokemonStatus.CAPTURED ||
+          headPokemon.status === PokemonStatus.RECEIVED ||
+          headPokemon.status === PokemonStatus.TRADED)
+      ) {
         updates.originalReceivalStatus = headPokemon.status;
       }
-      
+
       await updatePokemonByUID(teamMember.headPokemonUid, updates);
     }
   }
 
   // Update body Pokémon status to stored if it exists
   if (teamMember.bodyPokemonUid) {
-    const bodyPokemon = findPokemonByUID(activePlaythrough.encounters, teamMember.bodyPokemonUid);
-    
+    const bodyPokemon = findPokemonByUID(
+      activePlaythrough.encounters,
+      teamMember.bodyPokemonUid
+    );
+
     if (bodyPokemon) {
-      const updates: any = { status: PokemonStatus.STORED };
-      
+      const updates: Partial<z.infer<typeof PokemonOptionSchema>> = {
+        status: PokemonStatus.STORED,
+      };
+
       // Set originalReceivalStatus if not already set and current status is active
-      if (!bodyPokemon.originalReceivalStatus && 
-          (bodyPokemon.status === PokemonStatus.CAPTURED || 
-           bodyPokemon.status === PokemonStatus.RECEIVED || 
-           bodyPokemon.status === PokemonStatus.TRADED)) {
+      if (
+        !bodyPokemon.originalReceivalStatus &&
+        (bodyPokemon.status === PokemonStatus.CAPTURED ||
+          bodyPokemon.status === PokemonStatus.RECEIVED ||
+          bodyPokemon.status === PokemonStatus.TRADED)
+      ) {
         updates.originalReceivalStatus = bodyPokemon.status;
       }
-      
+
       await updatePokemonByUID(teamMember.bodyPokemonUid, updates);
     }
   }
@@ -1097,7 +1114,9 @@ export const moveTeamMemberToBox = async (position: number): Promise<void> => {
 /**
  * Restore a Pokémon's status to its original receival status when adding to team
  */
-export const restorePokemonToTeam = async (pokemonUID: string): Promise<void> => {
+export const restorePokemonToTeam = async (
+  pokemonUID: string
+): Promise<void> => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough?.encounters) return;
 
@@ -1106,8 +1125,9 @@ export const restorePokemonToTeam = async (pokemonUID: string): Promise<void> =>
 
   // If Pokémon is stored, restore to original receival status
   if (pokemon.status === PokemonStatus.STORED) {
-    const statusToRestore = pokemon.originalReceivalStatus || PokemonStatus.CAPTURED;
-    
+    const statusToRestore =
+      pokemon.originalReceivalStatus || PokemonStatus.CAPTURED;
+
     await updatePokemonByUID(pokemonUID, {
       status: statusToRestore,
     });
