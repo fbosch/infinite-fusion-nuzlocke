@@ -4,7 +4,7 @@ alwaysApply: true
 
 # MCP Tools Quick Reference
 
-**Priority Order**: Vitest MCP → GitMCP → Context7 → Browser Tools → Sequential Thinking
+**Priority Order**: Vitest MCP → GitMCP → Context7 → Browser Tools → Sequential Thinking → ESLint MCP
 
 ## 1. Vitest MCP - Primary Testing Tool
 
@@ -50,6 +50,27 @@ alwaysApply: true
 - Making design decisions with trade-offs
 - Breaking down complex requirements
 
+## 6. ESLint MCP - Code Quality Verification
+
+**Use for**: Code linting, style enforcement, error detection after coding tasks
+**When to use**: After completing code changes, before committing, to ensure code quality and consistency
+**Tool**: `mcp_eslint_lint-files()`
+
+**Key Features**:
+
+- **Automated linting**: Check multiple files for code quality issues
+- **Style enforcement**: Ensure consistent coding standards across the project
+- **Error detection**: Catch potential bugs and code smells early
+- **Batch processing**: Lint multiple files simultaneously
+
+**Best Use Cases**:
+
+- After completing coding tasks
+- Before committing code changes
+- During code review processes
+- To maintain consistent code style
+- To catch potential issues early
+
 ## Quick Decision Matrix
 
 | Task                 | Primary Tool        | Fallback        |
@@ -59,6 +80,7 @@ alwaysApply: true
 | **Library Docs**     | Context7            | Web search      |
 | **Web Testing**      | Browser Tools       | Manual testing  |
 | **Complex Problems** | Sequential Thinking | Manual analysis |
+| **Code Quality**     | ESLint MCP          | `pnpm lint`     |
 
 ## Key Workflows
 
@@ -66,6 +88,7 @@ alwaysApply: true
 2. **Documentation**: `mcp_gitmcp_fetch_infinite_docs()` → `mcp_gitmcp_search_infinite_docs()`
 3. **Libraries**: `mcp_context7_resolve-library-id()` → `mcp_context7_get-library-docs()`
 4. **Problem Solving**: `mcp_sequential-thinking_sequentialthinking()` → Iterative analysis → Solution
+5. **Code Quality**: Complete coding task → `mcp_eslint_lint-files()` → Fix issues → Commit
 
 ## Best Practices
 
@@ -75,6 +98,8 @@ alwaysApply: true
 - **Have terminal fallbacks ready** for MCP failures
 - **Use sequential thinking early** for complex problems to avoid going down wrong paths
 - **Start with conservative thought estimates** and adjust as needed
+- **Run ESLint after coding tasks** to ensure code quality before committing
+- **Fix linting issues immediately** to maintain clean codebase
 
 ## Configuration
 
@@ -89,12 +114,15 @@ MCP tools configured in [`.cursor/mcp.json`](mdc:.cursor/mcp.json)
 | **Context7 issues**           | Ensure correct library names                            |
 | **Browser tools fail**        | Check browser automation setup                          |
 | **Sequential thinking loops** | Set `nextThoughtNeeded: false` when solution is reached |
+| **ESLint MCP fails**          | Check `@modelcontextprotocol/eslint` installation       |
+
+**Fallback**: Always have terminal commands ready (`pnpm test:run`, `pnpm lint`, manual search)
 
 **Fallback**: Always have terminal commands ready (`pnpm test:run`, manual search)
 
 # MCP Tools Quick Reference
 
-**Priority Order**: Vitest MCP → GitMCP → Context7 → Browser Tools → Sequential Thinking
+**Priority Order**: Vitest MCP → GitMCP → Context7 → Browser Tools → Sequential Thinking → ESLint MCP
 
 ## 1. Vitest MCP - Primary Testing Tool
 
@@ -140,6 +168,27 @@ MCP tools configured in [`.cursor/mcp.json`](mdc:.cursor/mcp.json)
 - Making design decisions with trade-offs
 - Breaking down complex requirements
 
+## 6. ESLint MCP - Code Quality Verification
+
+**Use for**: Code linting, style enforcement, error detection after coding tasks
+**When to use**: After completing code changes, before committing, to ensure code quality and consistency
+**Tool**: `mcp_eslint_lint-files()`
+
+**Key Features**:
+
+- **Automated linting**: Check multiple files for code quality issues
+- **Style enforcement**: Ensure consistent coding standards across the project
+- **Error detection**: Catch potential bugs and code smells early
+- **Batch processing**: Lint multiple files simultaneously
+
+**Best Use Cases**:
+
+- After completing coding tasks
+- Before committing code changes
+- During code review processes
+- To maintain consistent code style
+- To catch potential issues early
+
 ## Quick Decision Matrix
 
 | Task                 | Primary Tool        | Fallback        |
@@ -149,6 +198,7 @@ MCP tools configured in [`.cursor/mcp.json`](mdc:.cursor/mcp.json)
 | **Library Docs**     | Context7            | Web search      |
 | **Web Testing**      | Browser Tools       | Manual testing  |
 | **Complex Problems** | Sequential Thinking | Manual analysis |
+| **Code Quality**     | ESLint MCP          | `pnpm lint`     |
 
 ## Key Workflows
 
@@ -156,6 +206,7 @@ MCP tools configured in [`.cursor/mcp.json`](mdc:.cursor/mcp.json)
 2. **Documentation**: `mcp_gitmcp_fetch_infinite_docs()` → `mcp_gitmcp_search_infinite_docs()`
 3. **Libraries**: `mcp_context7_resolve-library-id()` → `mcp_context7_get-library-docs()`
 4. **Problem Solving**: `mcp_sequential-thinking_sequentialthinking()` → Iterative analysis → Solution
+5. **Code Quality**: Complete coding task → `mcp_eslint_lint-files()` → Fix issues → Commit
 
 ## Best Practices
 
@@ -165,6 +216,8 @@ MCP tools configured in [`.cursor/mcp.json`](mdc:.cursor/mcp.json)
 - **Have terminal fallbacks ready** for MCP failures
 - **Use sequential thinking early** for complex problems to avoid going down wrong paths
 - **Start with conservative thought estimates** and adjust as needed
+- **Run ESLint after coding tasks** to ensure code quality before committing
+- **Fix linting issues immediately** to maintain clean codebase
 
 ## Configuration
 
@@ -179,5 +232,8 @@ MCP tools configured in [`.cursor/mcp.json`](mdc:.cursor/mcp.json)
 | **Context7 issues**           | Ensure correct library names                            |
 | **Browser tools fail**        | Check browser automation setup                          |
 | **Sequential thinking loops** | Set `nextThoughtNeeded: false` when solution is reached |
+| **ESLint MCP fails**          | Check `@modelcontextprotocol/eslint` installation       |
+
+**Fallback**: Always have terminal commands ready (`pnpm test:run`, `pnpm lint`, manual search)
 
 **Fallback**: Always have terminal commands ready (`pnpm test:run`, manual search)
