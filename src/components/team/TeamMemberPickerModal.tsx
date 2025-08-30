@@ -15,6 +15,10 @@ import { type PokemonOptionType, PokemonStatus } from '@/loaders/pokemon';
 import { PokemonSlotSelector } from './PokemonSlotSelector';
 import { PokemonGridItem } from './PokemonGridItem';
 import PokemonSummaryCard from '@/components/PokemonSummaryCard';
+import {
+  findPokemonWithLocation,
+  getAllPokemonWithLocations,
+} from '@/utils/encounter-utils';
 
 interface TeamMemberPickerModalProps {
   isOpen: boolean;
@@ -67,7 +71,7 @@ export default function TeamMemberPickerModal({
     ) {
       setActiveSlot('head');
     }
-  }, [selectedHead, selectedBody, hasManuallySelectedSlot]); // Respect manual slot selection
+  }, [selectedHead, selectedBody, hasManuallySelectedSlot, activeSlot]); // Respect manual slot selection
 
   // Pre-populate selections when editing existing team member
   useEffect(() => {
@@ -78,34 +82,26 @@ export default function TeamMemberPickerModal({
       let headLocationId: string | null = null;
       let bodyLocationId: string | null = null;
 
-      // Search through ALL Pokémon from ALL encounters by UID, regardless of slot position
-      const allPokemon = Object.entries(encounters).flatMap(
-        ([locationId, enc]) => {
-          const pokemon = [];
-          if (enc.head) pokemon.push({ ...enc.head, locationId });
-          if (enc.body) pokemon.push({ ...enc.body, locationId });
-          return pokemon;
-        }
-      );
-
-      // Find Pokémon by UID from the flattened collection
+      // Find existing Pokémon using utility function
       if (existingTeamMember.headPokemon?.uid) {
-        const foundHead = allPokemon.find(
-          pokemon => pokemon.uid === existingTeamMember.headPokemon?.uid
+        const found = findPokemonWithLocation(
+          encounters,
+          existingTeamMember.headPokemon.uid
         );
-        if (foundHead) {
-          headPokemon = foundHead;
-          headLocationId = foundHead.locationId;
+        if (found) {
+          headPokemon = found.pokemon;
+          headLocationId = found.locationId;
         }
       }
 
       if (existingTeamMember.bodyPokemon?.uid) {
-        const foundBody = allPokemon.find(
-          pokemon => pokemon.uid === existingTeamMember.bodyPokemon?.uid
+        const found = findPokemonWithLocation(
+          encounters,
+          existingTeamMember.bodyPokemon.uid
         );
-        if (foundBody) {
-          bodyPokemon = foundBody;
-          bodyLocationId = foundBody.locationId;
+        if (found) {
+          bodyPokemon = found.pokemon;
+          bodyLocationId = found.locationId;
         }
       }
 
@@ -114,12 +110,11 @@ export default function TeamMemberPickerModal({
           pokemon: headPokemon,
           locationId: headLocationId,
         });
-        // Set the nickname from the current encounter data
+        // Set nickname from head Pokémon or clear if no body Pokémon
         if (headPokemon.nickname) {
           setNickname(headPokemon.nickname);
           setPreviewNickname(headPokemon.nickname);
         } else if (!bodyPokemon) {
-          // Only clear nickname if there's no body Pokémon
           setNickname('');
           setPreviewNickname('');
         }
@@ -142,18 +137,21 @@ export default function TeamMemberPickerModal({
         }
       }
 
-      // Only set active slot if user hasn't manually selected one
+      // Set active slot based on existing Pokémon (only if no manual selection)
       if (!hasManuallySelectedSlot) {
-        if (existingTeamMember.headPokemon && existingTeamMember.bodyPokemon) {
+        const hasHead = !!existingTeamMember.headPokemon;
+        const hasBody = !!existingTeamMember.bodyPokemon;
+
+        if (hasHead && hasBody) {
           setActiveSlot(null);
-        } else if (existingTeamMember.headPokemon) {
+        } else if (hasHead) {
           setActiveSlot('body');
-        } else if (existingTeamMember.bodyPokemon) {
-          setActiveSlot('body'); // If only body Pokémon exists, set active slot to body
+        } else if (hasBody) {
+          setActiveSlot('body');
         }
       }
     }
-  }, [existingTeamMember, encounters]);
+  }, [existingTeamMember, encounters, hasManuallySelectedSlot]);
 
   // Get all available Pokémon from encounters, filtering out those already in use by other team members
   const availablePokemon = useMemo(() => {
@@ -182,31 +180,15 @@ export default function TeamMemberPickerModal({
       }
     }
 
-    const pokemon = Object.entries(encounters).flatMap(
-      ([locationId, encounter]) => {
-        const validPokemon = [];
-
-        if (
-          encounter.head?.status &&
-          encounter.head.status !== PokemonStatus.MISSED &&
-          encounter.head.status !== PokemonStatus.DECEASED &&
-          encounter.head.uid && // Only include Pokémon that already have UIDs
-          !usedPokemonUids.has(encounter.head.uid) // Filter out already used Pokémon
-        ) {
-          validPokemon.push({ pokemon: encounter.head, locationId });
-        }
-        if (
-          encounter.body?.status &&
-          encounter.body.status !== PokemonStatus.MISSED &&
-          encounter.body.status !== PokemonStatus.DECEASED &&
-          encounter.body.uid && // Only include Pokémon that already have UIDs
-          !usedPokemonUids.has(encounter.body.uid) // Filter out already used Pokémon
-        ) {
-          validPokemon.push({ pokemon: encounter.body, locationId });
-        }
-
-        return validPokemon;
-      }
+    // Get all Pokémon and filter by status and availability
+    const allPokemon = getAllPokemonWithLocations(encounters);
+    const pokemon = allPokemon.filter(
+      ({ pokemon }) =>
+        pokemon.status &&
+        pokemon.status !== PokemonStatus.MISSED &&
+        pokemon.status !== PokemonStatus.DECEASED &&
+        pokemon.uid &&
+        !usedPokemonUids.has(pokemon.uid)
     );
 
     if (!searchQuery.trim()) return pokemon;
@@ -262,30 +244,19 @@ export default function TeamMemberPickerModal({
 
     if (slot === 'head') {
       setSelectedHead({ pokemon, locationId });
-      // After selecting head, set active slot to body so user can select body next
-      // But don't force them to select body - they can update with just head if they want
       setActiveSlot('body');
-      // Set nickname from the selected Pokémon itself, regardless of encounter position
-      if (pokemon.nickname) {
-        setNickname(pokemon.nickname);
-        setPreviewNickname(pokemon.nickname);
-      } else {
-        setNickname('');
-        setPreviewNickname('');
-      }
     } else if (slot === 'body') {
       setSelectedBody({ pokemon, locationId });
-      // After selecting body, keep active slot as body so user can select another body Pokémon if they want
-      // Don't set to null - allow single Pokémon selections
       setActiveSlot('body');
-      // Set nickname from the selected Pokémon itself, regardless of encounter position
-      if (pokemon.nickname) {
-        setNickname(pokemon.nickname);
-        setPreviewNickname(pokemon.nickname);
-      } else {
-        setNickname('');
-        setPreviewNickname('');
-      }
+    }
+
+    // Set nickname from the selected Pokémon
+    if (pokemon.nickname) {
+      setNickname(pokemon.nickname);
+      setPreviewNickname(pokemon.nickname);
+    } else {
+      setNickname('');
+      setPreviewNickname('');
     }
   };
 
@@ -347,19 +318,6 @@ export default function TeamMemberPickerModal({
     onClose();
   };
 
-  // Helper function to determine which Pokémon's nickname to display
-  const getDisplayNickname = () => {
-    if (selectedHead?.pokemon?.nickname) {
-      return selectedHead.pokemon.nickname;
-    }
-    if (selectedBody?.pokemon?.nickname) {
-      return selectedBody.pokemon.nickname;
-    }
-    return '';
-  };
-
-  // Allow update when there are selections OR when both are empty (clearing)
-  // For single Pokémon selections, we should also allow updates
   const canUpdateTeam =
     selectedHead || selectedBody || (!selectedHead && !selectedBody);
 

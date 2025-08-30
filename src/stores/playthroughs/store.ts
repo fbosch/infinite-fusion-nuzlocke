@@ -434,30 +434,24 @@ const updateTeamMember = (
   // Validate position
   if (position < 0 || position >= 6) return false;
 
+  // Helper function to create team member object
+  const createTeamMember = (
+    head: { uid: string } | null,
+    body: { uid: string } | null
+  ) => {
+    if (!head && !body) return null;
+
+    return {
+      headPokemonUid: head?.uid || '',
+      bodyPokemonUid: body?.uid || '',
+    };
+  };
+
   // Update the team member
-  if (!headPokemon && !bodyPokemon) {
-    // Clear the team member
-    activePlaythrough.team.members[position] = null;
-  } else if (headPokemon && bodyPokemon) {
-    // Both Pokémon provided - this is a fusion
-    activePlaythrough.team.members[position] = {
-      headPokemonUid: headPokemon.uid,
-      bodyPokemonUid: bodyPokemon.uid,
-    };
-  } else if (headPokemon) {
-    // Only head Pokémon provided - this is a single Pokémon (non-fused)
-    activePlaythrough.team.members[position] = {
-      headPokemonUid: headPokemon.uid,
-      bodyPokemonUid: '', // Empty string for body indicates single Pokémon
-    };
-  } else if (bodyPokemon) {
-    // Only body Pokémon provided - this is a single Pokémon (non-fused)
-    // Store it as the body Pokémon, not the head
-    activePlaythrough.team.members[position] = {
-      headPokemonUid: '', // Empty string for head indicates no head Pokémon
-      bodyPokemonUid: bodyPokemon.uid,
-    };
-  }
+  activePlaythrough.team.members[position] = createTeamMember(
+    headPokemon,
+    bodyPokemon
+  );
 
   // Update the playthrough timestamp to trigger reactivity
   activePlaythrough.updatedAt = getCurrentTimestamp();

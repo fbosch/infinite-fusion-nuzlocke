@@ -16,6 +16,7 @@ import { Plus } from 'lucide-react';
 import TeamMemberPickerModal from './TeamMemberPickerModal';
 import { type PokemonOptionType } from '@/loaders/pokemon';
 import { playthroughActions } from '@/stores/playthroughs';
+import { findPokemonByUid } from '@/utils/encounter-utils';
 
 export default function TeamSlots() {
   const activePlaythrough = useActivePlaythrough();
@@ -38,22 +39,11 @@ export default function TeamSlots() {
         };
       }
 
-      // Get encounter data directly from encounters to ensure reactivity
-      // Search ALL Pokémon (both head and body) from all encounters by UID
-      const allPokemon = Object.values(encounters || {}).flatMap(enc => {
-        const pokemon = [];
-        if (enc.head) pokemon.push(enc.head);
-        if (enc.body) pokemon.push(enc.body);
-        return pokemon;
-      });
-
       const headPokemon = member.headPokemonUid
-        ? allPokemon.find(pokemon => pokemon.uid === member.headPokemonUid) ||
-          null
+        ? findPokemonByUid(encounters, member.headPokemonUid)
         : null;
       const bodyPokemon = member.bodyPokemonUid
-        ? allPokemon.find(pokemon => pokemon.uid === member.bodyPokemonUid) ||
-          null
+        ? findPokemonByUid(encounters, member.bodyPokemonUid)
         : null;
 
       // A slot is empty only if both UIDs are empty strings
@@ -141,31 +131,14 @@ export default function TeamSlots() {
   ) => {
     if (selectedPosition === null) return;
 
-    // Use the proper store action instead of direct mutation
-    // Extract UID information for the store action
-    // For single Pokémon selections, we need to handle this properly
-    let headPokemonRef: { uid: string } | null = null;
-    let bodyPokemonRef: { uid: string } | null = null;
-
-    if (headPokemon && bodyPokemon) {
-      // Both Pokémon selected - this is a fusion
-      headPokemonRef = { uid: headPokemon.uid! };
-      bodyPokemonRef = { uid: bodyPokemon.uid! };
-    } else if (headPokemon) {
-      // Only head Pokémon selected - this is a single Pokémon
-      headPokemonRef = { uid: headPokemon.uid! };
-      bodyPokemonRef = null;
-    } else if (bodyPokemon) {
-      // Only body Pokémon selected - this is a single Pokémon
-      // Store it as the body Pokémon, not the head
-      headPokemonRef = null;
-      bodyPokemonRef = { uid: bodyPokemon.uid! };
-    }
+    // Create team member references
+    const headRef = headPokemon ? { uid: headPokemon.uid! } : null;
+    const bodyRef = bodyPokemon ? { uid: bodyPokemon.uid! } : null;
 
     const success = playthroughActions.updateTeamMember(
       selectedPosition,
-      headPokemonRef,
-      bodyPokemonRef
+      headRef,
+      bodyRef
     );
 
     if (!success) {
@@ -176,7 +149,6 @@ export default function TeamSlots() {
       return;
     }
 
-    // Close the modal
     handleCloseModal();
   };
 
