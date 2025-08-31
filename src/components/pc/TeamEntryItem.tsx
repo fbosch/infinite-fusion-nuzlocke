@@ -21,6 +21,7 @@ import { getLocationById } from '@/loaders/locations';
 import type { PCEntry } from './types';
 import type { PokemonOptionType } from '@/loaders/pokemon';
 import { PokemonStatus } from '@/loaders/pokemon';
+import { ArtworkVariantButton } from '@/components/PokemonSummaryCard/ArtworkVariantButton';
 
 interface TeamEntryItemProps {
   entry: PCEntry;
@@ -158,7 +159,7 @@ export default function TeamEntryItem({
         <div className='flex items-start gap-4'>
           <div
             className={clsx(
-              'flex flex-shrink-0 items-center justify-center rounded-lg',
+              'flex flex-shrink-0 items-center justify-center rounded-lg relative group/sprite-container',
               isEmpty
                 ? 'bg-gray-50 dark:bg-gray-800 p-2'
                 : 'bg-gray-50 dark:bg-gray-700 p-2'
@@ -172,15 +173,24 @@ export default function TeamEntryItem({
                 </span>
               </div>
             ) : (
-              <FusionSprite
-                ref={spriteRef}
-                headPokemon={entry.head ?? null}
-                bodyPokemon={entry.body ?? null}
-                isFusion={isFusion}
-                shouldLoad
-                className='top-1.5'
-                showStatusOverlay={false}
-              />
+              <>
+                <FusionSprite
+                  ref={spriteRef}
+                  headPokemon={entry.head ?? null}
+                  bodyPokemon={entry.body ?? null}
+                  isFusion={isFusion}
+                  shouldLoad
+                  className='top-1.5'
+                  showStatusOverlay={false}
+                />
+                <ArtworkVariantButton
+                  headId={entry.head?.id}
+                  bodyId={entry.body?.id}
+                  isFusion={isFusion}
+                  shouldLoad={!isEmpty}
+                  className='absolute bottom-1 left-1 z-10 opacity-0 group-hover/sprite-container:opacity-50 focus:opacity-100 transition-opacity duration-200'
+                />
+              </>
             )}
           </div>
           <div className='min-w-0 flex-1 space-y-2.5'>

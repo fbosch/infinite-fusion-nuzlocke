@@ -20,6 +20,7 @@ import { findPokemonByUid } from '@/utils/encounter-utils';
 import { TypePills } from '@/components/TypePills';
 import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
 import { TeamMemberContextMenu } from '@/components/PokemonSummaryCard/TeamMemberContextMenu';
+import { ArtworkVariantButton } from '@/components/PokemonSummaryCard/ArtworkVariantButton';
 
 // Component to display type indicators and nickname
 function TypeIndicators({
@@ -224,7 +225,7 @@ export default function TeamSlots() {
             >
               <div
                 className={clsx(
-                  'flex flex-col items-center justify-center relative',
+                  'flex flex-col items-center justify-center relative group/team-slot',
                   'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
                   slot.isEmpty
                     ? 'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
@@ -280,6 +281,14 @@ export default function TeamSlots() {
                         showStatusOverlay={true}
                       />
                     </div>
+
+                    <ArtworkVariantButton
+                      headId={slot.headPokemon?.id}
+                      bodyId={slot.bodyPokemon?.id}
+                      isFusion={slot.isFusion}
+                      shouldLoad={true}
+                      className='absolute bottom-0 right-1/2 -translate-x-6 z-20 opacity-0 group-hover/team-slot:opacity-50 focus:opacity-100 transition-opacity duration-200'
+                    />
                   </div>
                 )}
               </div>
