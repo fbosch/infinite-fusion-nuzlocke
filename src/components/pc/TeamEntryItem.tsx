@@ -21,6 +21,7 @@ import { getLocationById } from '@/loaders/locations';
 import type { PCEntry } from './types';
 import type { PokemonOptionType } from '@/loaders/pokemon';
 import { PokemonStatus } from '@/loaders/pokemon';
+import { ArtworkVariantButton } from '@/components/PokemonSummaryCard/ArtworkVariantButton';
 
 interface TeamEntryItemProps {
   entry: PCEntry;
@@ -306,6 +307,13 @@ export default function TeamEntryItem({
               <Skull className='h-4 w-4' />
             </button>
           </CursorTooltip>
+          <ArtworkVariantButton
+            headId={entry.head?.id}
+            bodyId={entry.body?.id}
+            isFusion={isFusion}
+            shouldLoad={!isEmpty}
+            className='size-7'
+          />
         </div>
       )}
     </li>

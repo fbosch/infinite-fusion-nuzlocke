@@ -290,7 +290,9 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
             <ArtworkVariantButton
               key={`${effectiveHeadPokemon?.id}-${effectiveBodyPokemon?.id}`}
               className='absolute bottom-0 right-1/2 -translate-x-6 z-10'
-              locationId='preview'
+              headId={effectiveHeadPokemon?.id}
+              bodyId={effectiveBodyPokemon?.id}
+              isFusion={effectiveIsFusion}
               shouldLoad={shouldLoad}
             />
           )}
