@@ -133,31 +133,45 @@ export default function TeamSlots() {
       previousFusionIds.current = new Array(6).fill(null);
     }
 
-    teamSlots.forEach((slot, index) => {
-      if (
-        !slot.isEmpty &&
-        slot.isFusion &&
-        slot.headPokemon &&
-        slot.bodyPokemon
-      ) {
-        const currentFusionId = `${slot.headPokemon.id}.${slot.bodyPokemon.id}`;
+    // Use requestAnimationFrame to ensure proper timing
+    const animationFrame = requestAnimationFrame(() => {
+      teamSlots.forEach((slot, index) => {
+        if (
+          !slot.isEmpty &&
+          slot.isFusion &&
+          slot.headPokemon &&
+          slot.bodyPokemon
+        ) {
+          const currentFusionId = `${slot.headPokemon.id}.${slot.bodyPokemon.id}`;
 
-        // Initialize previous fusion ID if not set
-        if (previousFusionIds.current[index] === null) {
-          previousFusionIds.current[index] = currentFusionId;
-          return;
-        }
+          // Initialize previous fusion ID if not set
+          if (previousFusionIds.current[index] === null) {
+            previousFusionIds.current[index] = currentFusionId;
+            return;
+          }
 
-        // Play animation if fusion ID changed
-        if (previousFusionIds.current[index] !== currentFusionId) {
-          previousFusionIds.current[index] = currentFusionId;
-          teamSpriteRefs.current[index]?.playEvolution();
+          // Play animation if fusion ID changed and ref exists
+          if (previousFusionIds.current[index] !== currentFusionId) {
+            previousFusionIds.current[index] = currentFusionId;
+
+            // Add small delay to ensure ref is properly set
+            setTimeout(() => {
+              if (teamSpriteRefs.current[index]) {
+                teamSpriteRefs.current[index]?.playEvolution();
+              }
+            }, 50);
+          }
+        } else if (slot.isEmpty) {
+          // Reset previous fusion ID for empty slots
+          previousFusionIds.current[index] = null;
         }
-      } else if (slot.isEmpty) {
-        // Reset previous fusion ID for empty slots
-        previousFusionIds.current[index] = null;
-      }
+      });
     });
+
+    // Cleanup animation frame on unmount
+    return () => {
+      cancelAnimationFrame(animationFrame);
+    };
   }, [teamSlots]);
 
   // Show skeleton while loading
