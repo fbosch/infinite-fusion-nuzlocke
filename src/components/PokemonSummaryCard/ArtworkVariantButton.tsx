@@ -105,6 +105,11 @@ export function ArtworkVariantButton({
     return 'Cycle artwork variants (hold Shift to reverse)';
   }, [hasVariants, isLoading]);
 
+  // Don't render the button if there are no variants (unless still loading)
+  if (!isLoading && !hasVariants) {
+    return null;
+  }
+
   const isButtonDisabled = disabled || !hasVariants || isLoading;
 
   return (
