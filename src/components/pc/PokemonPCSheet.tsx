@@ -487,7 +487,6 @@ export default function PokemonPCSheet({
 
       {/* Team Member Picker Modal */}
       <TeamMemberPickerModal
-        key={`team-member-picker-${selectedPosition}`}
         isOpen={pickerModalOpen}
         onClose={handleClosePickerModal}
         onSelect={handlePokemonSelect}

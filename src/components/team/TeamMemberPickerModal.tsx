@@ -42,8 +42,6 @@ export default function TeamMemberPickerModal({
 }: TeamMemberPickerModalProps) {
   const activePlaythrough = useActivePlaythrough();
 
-  if (!activePlaythrough) return null;
-
   return (
     <TeamMemberSelectionProvider
       position={position}
@@ -51,7 +49,11 @@ export default function TeamMemberPickerModal({
       onSelect={onSelect}
       onClose={onClose}
     >
-      <Dialog open={isOpen} onClose={onClose} className='relative z-50 group'>
+      <Dialog
+        open={isOpen && !!activePlaythrough}
+        onClose={onClose}
+        className='relative z-50 group'
+      >
         <DialogBackdrop
           transition
           className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100'
@@ -61,13 +63,18 @@ export default function TeamMemberPickerModal({
         <div className='fixed inset-0 flex w-screen items-center justify-center p-2 sm:p-4'>
           <DialogPanel
             transition
+            id='team-member-picker-modal'
+            aria-labelledby='team-member-picker-title'
             className={clsx(
-              'w-full max-w-6xl max-h-[90vh] sm:max-h-[80vh] space-y-6 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8 flex flex-col',
+              'max-w-6xl w-full max-h-[95vh] sm:max-h-[80vh] space-y-3 sm:space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-3 sm:p-6 flex flex-col',
               'transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98'
             )}
           >
             <div className='flex items-center justify-between'>
-              <DialogTitle className='text-2xl font-semibold text-gray-900 dark:text-white'>
+              <DialogTitle
+                id='team-member-picker-title'
+                className='text-lg sm:text-2xl font-semibold text-gray-900 dark:text-white'
+              >
                 Select Pokémon for Team Slot {position + 1}
               </DialogTitle>
               <button
@@ -83,7 +90,7 @@ export default function TeamMemberPickerModal({
               </button>
             </div>
 
-            <div className='flex flex-col lg:flex-row gap-6 flex-1 min-h-0'>
+            <div className='flex flex-col lg:flex-row gap-3 sm:gap-6 flex-1 min-h-0'>
               <TeamMemberSelectionPanel />
               <div className='hidden lg:block w-px bg-gray-200 dark:bg-gray-600'></div>
               <TeamMemberPreviewPanel />

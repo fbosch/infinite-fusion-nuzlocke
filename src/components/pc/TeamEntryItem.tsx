@@ -137,10 +137,18 @@ export default function TeamEntryItem({
         {
           'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:ring-1 hover:ring-blue-400/30':
             !isEmpty,
-          'bg-gray-50 dark:bg-gray-900 shadow-inner hover:bg-gray-100 dark:hover:bg-gray-900':
+          'bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-900':
             isEmpty,
         }
       )}
+      style={
+        isEmpty
+          ? {
+              boxShadow:
+                'inset 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.15)',
+            }
+          : undefined
+      }
       onClick={handleClick}
       onKeyDown={e => {
         if (e.key === 'Enter' || e.key === ' ') {
