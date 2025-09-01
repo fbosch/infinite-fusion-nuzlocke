@@ -223,7 +223,10 @@ export default function TeamEntryItem({
                     <span className='truncate'>
                       {entry.head.name || 'Unknown'}
                     </span>
-                    <span className='text-xs text-gray-400 dark:text-gray-500 ml-2 truncate flex-shrink-0'>
+                    <span className='text-xs text-gray-400 dark:text-gray-500 '>
+                      •
+                    </span>
+                    <span className='text-xs text-gray-400 dark:text-gray-500 ml-0.5 truncate flex-shrink-0'>
                       {entry.head.originalLocation
                         ? getLocationById(entry.head.originalLocation)?.name ||
                           'Unknown Location'
@@ -241,7 +244,10 @@ export default function TeamEntryItem({
                     <span className='truncate'>
                       {entry.body.name || 'Unknown'}
                     </span>
-                    <span className='text-xs text-gray-400 dark:text-gray-500 ml-2 truncate flex-shrink-0'>
+                    <span className='text-xs text-gray-400 dark:text-gray-500 '>
+                      •
+                    </span>
+                    <span className='text-xs text-gray-400 dark:text-gray-500 ml-0.5 truncate flex-shrink-0'>
                       {entry.body.originalLocation
                         ? getLocationById(entry.body.originalLocation)?.name ||
                           'Unknown Location'
