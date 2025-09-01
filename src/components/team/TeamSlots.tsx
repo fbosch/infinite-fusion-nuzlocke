@@ -21,6 +21,7 @@ import { TypePills } from '@/components/TypePills';
 import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
 import { TeamMemberContextMenu } from '@/components/PokemonSummaryCard/TeamMemberContextMenu';
 import { ArtworkVariantButton } from '@/components/PokemonSummaryCard/ArtworkVariantButton';
+import TeamSlotsSkeleton from './TeamSlotsSkeleton';
 
 // Component to display type indicators and nickname
 function TypeIndicators({
@@ -159,6 +160,11 @@ export default function TeamSlots() {
     });
   }, [teamSlots]);
 
+  // Show skeleton while loading
+  if (!activePlaythrough || !encounters) {
+    return <TeamSlotsSkeleton />;
+  }
+
   const handleSlotClick = (
     position: number,
     existingSlot: {
@@ -205,10 +211,6 @@ export default function TeamSlots() {
     setPickerModalOpen(false);
     setSelectedPosition(null);
   };
-
-  if (!activePlaythrough) {
-    return null;
-  }
 
   return (
     <>
