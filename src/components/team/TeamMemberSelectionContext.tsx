@@ -244,6 +244,72 @@ export function TeamMemberSelectionProvider({
     }
   }, [selectedHead, selectedBody, hasManuallySelectedSlot, activeSlot]);
 
+  // Update nickname whenever the fusion order changes (head/body swap)
+  useEffect(() => {
+    // Update nickname when fusion order changes
+    if (selectedHead?.pokemon && selectedBody?.pokemon) {
+      // For fusions, always prioritize head Pokémon's nickname
+      if (selectedHead.pokemon.nickname) {
+        dispatch({
+          type: 'SET_NICKNAME',
+          payload: selectedHead.pokemon.nickname,
+        });
+        dispatch({
+          type: 'SET_PREVIEW_NICKNAME',
+          payload: selectedHead.pokemon.nickname,
+        });
+      } else if (selectedBody.pokemon.nickname) {
+        // Fallback to body Pokémon's nickname if head doesn't have one
+        dispatch({
+          type: 'SET_NICKNAME',
+          payload: selectedBody.pokemon.nickname,
+        });
+        dispatch({
+          type: 'SET_PREVIEW_NICKNAME',
+          payload: selectedBody.pokemon.nickname,
+        });
+      } else {
+        // No nickname available
+        dispatch({ type: 'SET_NICKNAME', payload: '' });
+        dispatch({ type: 'SET_PREVIEW_NICKNAME', payload: '' });
+      }
+    } else if (selectedHead?.pokemon) {
+      // Single head Pokémon
+      if (selectedHead.pokemon.nickname) {
+        dispatch({
+          type: 'SET_NICKNAME',
+          payload: selectedHead.pokemon.nickname,
+        });
+        dispatch({
+          type: 'SET_PREVIEW_NICKNAME',
+          payload: selectedHead.pokemon.nickname,
+        });
+      } else {
+        dispatch({ type: 'SET_NICKNAME', payload: '' });
+        dispatch({ type: 'SET_PREVIEW_NICKNAME', payload: '' });
+      }
+    } else if (selectedBody?.pokemon) {
+      // Single body Pokémon
+      if (selectedBody.pokemon.nickname) {
+        dispatch({
+          type: 'SET_NICKNAME',
+          payload: selectedBody.pokemon.nickname,
+        });
+        dispatch({
+          type: 'SET_PREVIEW_NICKNAME',
+          payload: selectedBody.pokemon.nickname,
+        });
+      } else {
+        dispatch({ type: 'SET_NICKNAME', payload: '' });
+        dispatch({ type: 'SET_PREVIEW_NICKNAME', payload: '' });
+      }
+    } else {
+      // No Pokémon selected
+      dispatch({ type: 'SET_NICKNAME', payload: '' });
+      dispatch({ type: 'SET_PREVIEW_NICKNAME', payload: '' });
+    }
+  }, [selectedHead, selectedBody, dispatch]);
+
   // Pre-populate selections when editing existing team member
   useEffect(() => {
     if (existingTeamMember && !existingTeamMember.isEmpty && encounters) {
