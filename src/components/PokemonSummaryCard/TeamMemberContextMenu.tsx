@@ -230,8 +230,8 @@ export function TeamMemberContextMenu({
     // Add inverse fusion option if this is a fusion
     if (isFusion) {
       items.push({
-        id: 'inverse-fusion',
-        label: 'Inverse Fusion',
+        id: 'invert-fusion',
+        label: 'Invert Fusion',
         icon: ArrowLeftRight,
         onClick: handleFlipFusion,
         tooltip: 'Swap head and body Pokémon positions',
@@ -399,7 +399,7 @@ export function TeamMemberContextMenu({
     ) {
       items.push({
         id: 'mark-deceased',
-        label: 'Mark as Deceased',
+        label: 'Move to Graveyard',
         icon: Skull,
         onClick: handleMarkAsDeceased,
       });
