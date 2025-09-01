@@ -181,6 +181,11 @@ export const updateEncounter = async (
     if (encounterData.isFusion && encounterData.head && encounterData.body) {
       emitEvolutionEvent(locationId);
     }
+
+    // Auto-assign Pokémon to team slots if it has a relevant status
+    if (pokemon && pokemon.status) {
+      await autoAssignCapturedPokemonToTeam(locationId);
+    }
     return;
   }
 
@@ -238,6 +243,11 @@ export const updateEncounter = async (
       fieldChanged
     ) {
       emitEvolutionEvent(locationId);
+    }
+
+    // Auto-assign Pokémon to team slots if it has a relevant status
+    if (pokemonWithLocationAndUID.status) {
+      await autoAssignCapturedPokemonToTeam(locationId);
     }
   } else {
     // Handle clearing pokemon
@@ -993,11 +1003,111 @@ export const moveEncounterToBox = async (locationId: string): Promise<void> => {
 
 /**
  * Mark both Pokemon in an encounter as captured
+ *
+ * Auto-assigns captured Pokémon to available team slots for new playthroughs
  */
 export const markEncounterAsCaptured = async (
   locationId: string
 ): Promise<void> => {
   await updateEncounterStatus(locationId, PokemonStatus.CAPTURED);
+
+  // Auto-assign captured Pokémon to team slots if available
+  await autoAssignCapturedPokemonToTeam(locationId);
+};
+
+/**
+ * Auto-assign captured/received Pokémon to available team slots
+ */
+const autoAssignCapturedPokemonToTeam = async (
+  locationId: string
+): Promise<void> => {
+  console.log(`Auto-assignment triggered for location: ${locationId}`);
+
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough?.team || !activePlaythrough.encounters) {
+    console.log('No active playthrough or team, skipping auto-assignment');
+    return;
+  }
+
+  const encounter = activePlaythrough.encounters[locationId];
+  if (!encounter) {
+    console.log('No encounter found, skipping auto-assignment');
+    return;
+  }
+
+  // Find available team positions
+  const availablePositions = activePlaythrough.team.members
+    .map((member, index) => ({ member, index }))
+    .filter(({ member }) => member === null)
+    .map(({ index }) => index);
+
+  console.log(`Available team positions: ${availablePositions.join(', ')}`);
+  console.log(`Team members:`, activePlaythrough.team.members);
+
+  if (availablePositions.length === 0) {
+    // No available team slots
+    console.log('No available team slots, skipping auto-assignment');
+    return;
+  }
+
+  // Get the first available position
+  const nextAvailablePosition = availablePositions[0];
+
+  // Determine which Pokémon to assign
+  let headPokemon: { uid: string } | null = null;
+  let bodyPokemon: { uid: string } | null = null;
+
+  // Check for Pokémon that should be auto-assigned to team
+  const shouldAutoAssign = (status: string | undefined) =>
+    status === PokemonStatus.CAPTURED ||
+    status === PokemonStatus.RECEIVED ||
+    status === PokemonStatus.TRADED;
+
+  if (
+    encounter.head &&
+    encounter.head.status &&
+    shouldAutoAssign(encounter.head.status)
+  ) {
+    headPokemon = { uid: encounter.head.uid! };
+  }
+
+  if (
+    encounter.body &&
+    encounter.body.status &&
+    shouldAutoAssign(encounter.body.status)
+  ) {
+    bodyPokemon = { uid: encounter.body.uid! };
+  }
+
+  // Only proceed if we have at least one captured Pokémon
+  if (!headPokemon && !bodyPokemon) {
+    console.log('No Pokémon eligible for auto-assignment');
+    return;
+  }
+
+  console.log(
+    `Auto-assigning: head=${headPokemon?.uid || 'none'}, body=${bodyPokemon?.uid || 'none'}`
+  );
+
+  // Import the updateTeamMember function dynamically to avoid circular dependencies
+  const { updateTeamMember } = await import('./store');
+
+  // Assign to the next available team slot
+  const success = await updateTeamMember(
+    nextAvailablePosition,
+    headPokemon,
+    bodyPokemon
+  );
+
+  if (success) {
+    console.log(
+      `Successfully auto-assigned Pokémon from ${locationId} to team slot ${nextAvailablePosition + 1}`
+    );
+  } else {
+    console.error(
+      `Failed to auto-assign Pokémon from ${locationId} to team slot ${nextAvailablePosition + 1}`
+    );
+  }
 };
 
 /**
@@ -1011,11 +1121,16 @@ export const markEncounterAsMissed = async (
 
 /**
  * Mark both Pokemon in an encounter as received
+ *
+ * Auto-assigns received Pokémon to available team slots for new playthroughs
  */
 export const markEncounterAsReceived = async (
   locationId: string
 ): Promise<void> => {
   await updateEncounterStatus(locationId, PokemonStatus.RECEIVED);
+
+  // Auto-assign received Pokémon to team slots if available
+  await autoAssignCapturedPokemonToTeam(locationId);
 };
 
 /**
