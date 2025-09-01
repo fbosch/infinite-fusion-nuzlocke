@@ -11,8 +11,7 @@ export function isActiveStatus(
   return (
     status === PokemonStatus.CAPTURED ||
     status === PokemonStatus.RECEIVED ||
-    status === PokemonStatus.TRADED ||
-    status === PokemonStatus.STORED
+    status === PokemonStatus.TRADED
   );
 }
 

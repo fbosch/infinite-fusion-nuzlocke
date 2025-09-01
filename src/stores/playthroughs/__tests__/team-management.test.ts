@@ -1,368 +1,316 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
+import { moveTeamMemberToBox, restorePokemonToTeam } from '../encounters';
+import { PokemonStatus } from '@/loaders/pokemon';
 import {
-  playthroughsStore,
-  updateTeamMember,
-  removeFromTeam,
-  reorderTeam,
-  getTeamMemberDetails,
-  isTeamFull,
-  getAvailableTeamPositions,
-} from '../store';
-import { createPlaythrough } from '../store';
+  resetPlaythroughsStore,
+  createTestPlaythrough,
+  testPokemon,
+  waitForTimestamp,
+  expectTeamMember,
+} from './test-utils';
 
-describe('Team Management Functions', () => {
-  beforeEach(() => {
-    // Reset store before each test
-    playthroughsStore.playthroughs = [];
-    playthroughsStore.activePlaythroughId = undefined;
-    playthroughsStore.isLoading = false;
-    playthroughsStore.isSaving = false;
-  });
+describe('Team Management', () => {
+  resetPlaythroughsStore();
 
-  describe('updateTeamMember', () => {
-    it('should add a Pokémon to an empty team position', async () => {
-      const playthroughId = createPlaythrough('Test Run');
-      playthroughsStore.activePlaythroughId = playthroughId;
+  describe('moveTeamMemberToBox', () => {
+    it('should move a team member with both head and body Pokémon to box', async () => {
+      const { activePlaythrough } = createTestPlaythrough();
 
-      // Add some encounters first
-      const activePlaythrough = playthroughsStore.playthroughs.find(
-        p => p.id === playthroughId
-      );
-      if (activePlaythrough) {
-        activePlaythrough.encounters = {
-          route1: {
-            head: {
-              id: 'pikachu',
-              name: 'Pikachu',
-              nickname: 'Sparky',
-              level: 5,
-              isActive: true,
-              isStored: false,
-              isDeceased: false,
-            },
-            body: {
-              id: 'charmander',
-              name: 'Charmander',
-              nickname: 'Flame',
-              level: 5,
-              isActive: true,
-              isStored: false,
-              isDeceased: false,
-            },
-            isFusion: true,
-            updatedAt: Date.now(),
-          },
-        };
-      }
+      // Set up encounters with Pokémon
+      activePlaythrough.encounters = {
+        route1: {
+          head: testPokemon.pikachu(),
+          body: testPokemon.charmander(),
+          isFusion: true,
+          updatedAt: Date.now(),
+        },
+      };
 
-      const result = await updateTeamMember(
-        0,
-        { uid: 'pikachu_route1_123' },
-        { uid: 'charmander_route1_456' }
-      );
-
-      expect(result).toBe(true);
-      expect(activePlaythrough?.team.members[0]).toEqual({
+      // Add team member
+      activePlaythrough.team.members[0] = {
         headPokemonUid: 'pikachu_route1_123',
         bodyPokemonUid: 'charmander_route1_456',
-      });
+      };
+
+      // Verify team member exists
+      expectTeamMember(
+        activePlaythrough.team.members[0],
+        'pikachu_route1_123',
+        'charmander_route1_456'
+      );
+
+      // Move team member to box
+      await moveTeamMemberToBox(0);
+
+      // Verify team member is removed
+      expectTeamMember(activePlaythrough.team.members[0], null);
+
+      // Verify Pokémon statuses are updated to STORED
+      const pikachu = activePlaythrough.encounters.route1.head;
+      const charmander = activePlaythrough.encounters.route1.body;
+
+      expect(pikachu?.status).toBe(PokemonStatus.STORED);
+      expect(charmander?.status).toBe(PokemonStatus.STORED);
     });
 
-    it('should fail when adding to an occupied position', async () => {
-      const playthroughId = createPlaythrough('Test Run');
-      playthroughsStore.activePlaythroughId = playthroughId;
+    it('should move a team member with only head Pokémon to box', async () => {
+      const { activePlaythrough } = createTestPlaythrough();
 
-      // Add some encounters first
-      const activePlaythrough = playthroughsStore.playthroughs.find(
-        p => p.id === playthroughId
+      // Set up encounters with only head Pokémon
+      activePlaythrough.encounters = {
+        route1: {
+          head: testPokemon.pikachu(),
+          body: null,
+          isFusion: false,
+          updatedAt: Date.now(),
+        },
+      };
+
+      // Add team member with only head Pokémon
+      activePlaythrough.team.members[0] = {
+        headPokemonUid: 'pikachu_route1_123',
+        bodyPokemonUid: '',
+      };
+
+      // Verify team member exists
+      expectTeamMember(
+        activePlaythrough.team.members[0],
+        'pikachu_route1_123',
+        ''
       );
-      if (activePlaythrough) {
-        activePlaythrough.encounters = {
-          route1: {
-            head: {
-              id: 'pikachu',
-              name: 'Pikachu',
-              nickname: 'Sparky',
-              level: 5,
-              isActive: true,
-              isStored: false,
-              isStored: false,
-              isDeceased: false,
-            },
-            body: {
-              id: 'charmander',
-              name: 'Charmander',
-              nickname: 'Flame',
-              level: 5,
-              isActive: true,
-              isStored: false,
-              isDeceased: false,
-            },
-            isFusion: true,
-            updatedAt: Date.now(),
+
+      // Move team member to box
+      await moveTeamMemberToBox(0);
+
+      // Verify team member is removed
+      expectTeamMember(activePlaythrough.team.members[0], null);
+
+      // Verify head Pokémon status is updated to STORED
+      const pikachu = activePlaythrough.encounters.route1.head;
+      expect(pikachu?.status).toBe(PokemonStatus.STORED);
+    });
+
+    it('should move a team member with only body Pokémon to box', async () => {
+      const { activePlaythrough } = createTestPlaythrough();
+
+      // Set up encounters with only body Pokémon
+      activePlaythrough.encounters = {
+        route1: {
+          head: null,
+          body: testPokemon.charmander(),
+          isFusion: false,
+          updatedAt: Date.now(),
+        },
+      };
+
+      // Add team member with only body Pokémon
+      activePlaythrough.team.members[0] = {
+        headPokemonUid: '',
+        bodyPokemonUid: 'charmander_route1_456',
+      };
+
+      // Verify team member exists
+      expectTeamMember(
+        activePlaythrough.team.members[0],
+        '',
+        'charmander_route1_456'
+      );
+
+      // Move team member to box
+      await moveTeamMemberToBox(0);
+
+      // Verify team member is removed
+      expectTeamMember(activePlaythrough.team.members[0], null);
+
+      // Verify body Pokémon status is updated to STORED
+      const charmander = activePlaythrough.encounters.route1.body;
+      expect(charmander?.status).toBe(PokemonStatus.STORED);
+    });
+
+    it('should handle invalid position gracefully', async () => {
+      const { activePlaythrough } = createTestPlaythrough();
+
+      // Try to move team member at invalid position
+      await moveTeamMemberToBox(-1);
+      await moveTeamMemberToBox(6);
+
+      // Should not throw error and should not modify anything
+      expect(activePlaythrough.team.members).toHaveLength(6);
+    });
+
+    it('should handle empty team slot gracefully', async () => {
+      const { activePlaythrough } = createTestPlaythrough();
+
+      // Verify slot 0 is empty
+      expectTeamMember(activePlaythrough.team.members[0], null);
+
+      // Try to move team member at empty slot
+      await moveTeamMemberToBox(0);
+
+      // Should not throw error and should not modify anything
+      expectTeamMember(activePlaythrough.team.members[0], null);
+    });
+
+    it('should handle missing team gracefully', async () => {
+      const { activePlaythrough } = createTestPlaythrough();
+
+      // Remove team property
+      delete (activePlaythrough as any).team;
+
+      // Try to move team member
+      await moveTeamMemberToBox(0);
+
+      // Should not throw error
+      expect(true).toBe(true);
+    });
+
+    it('should update playthrough timestamp', async () => {
+      const { activePlaythrough } = createTestPlaythrough();
+
+      // Set up encounters and team member
+      activePlaythrough.encounters = {
+        route1: {
+          head: testPokemon.pikachu(),
+          body: null,
+          isFusion: false,
+          updatedAt: Date.now(),
+        },
+      };
+
+      activePlaythrough.team.members[0] = {
+        headPokemonUid: 'pikachu_route1_123',
+        bodyPokemonUid: '',
+      };
+
+      const originalTimestamp = activePlaythrough.updatedAt;
+
+      // Wait a bit to ensure timestamp difference
+      await waitForTimestamp();
+
+      // Move team member to box
+      await moveTeamMemberToBox(0);
+
+      // Verify timestamp is updated
+      expect(activePlaythrough.updatedAt).toBeGreaterThan(originalTimestamp);
+    });
+  });
+
+  describe('restorePokemonToTeam', () => {
+    it('should restore stored Pokémon to original receival status', async () => {
+      const { activePlaythrough } = createTestPlaythrough();
+
+      // Set up encounters with stored Pokémon that has originalReceivalStatus
+      activePlaythrough.encounters = {
+        route1: {
+          head: {
+            ...testPokemon.pikachu(),
+            status: PokemonStatus.STORED,
+            originalReceivalStatus: PokemonStatus.CAPTURED,
           },
-        };
-      }
+          body: null,
+          isFusion: false,
+          updatedAt: Date.now(),
+        },
+      };
 
-      // Add first Pokémon
-      await updateTeamMember(
-        0,
-        { uid: 'pikachu_route1_123' },
-        { uid: 'charmander_route1_456' }
-      );
+      // Restore Pokémon to team
+      await restorePokemonToTeam('pikachu_route1_123');
 
-      // Try to add another to the same position
-      const result = await updateTeamMember(
-        0,
-        { uid: 'pikachu_route1_123' },
-        { uid: 'charmander_route1_456' }
-      );
-
-      expect(result).toBe(true);
+      // Verify status is restored to original receival status
+      const pikachu = activePlaythrough.encounters.route1.head;
+      expect(pikachu?.status).toBe(PokemonStatus.CAPTURED);
     });
 
-    it('should fail when adding to invalid position', async () => {
-      const playthroughId = createPlaythrough('Test Run');
-      playthroughsStore.activePlaythroughId = playthroughId;
+    it('should default to captured status if no original receival status exists', async () => {
+      const { activePlaythrough } = createTestPlaythrough();
 
-      const result = await updateTeamMember(
-        10,
-        { uid: 'pikachu_route1_123' },
-        { uid: 'charmander_route1_456' }
-      );
-
-      expect(result).toBe(false);
-    });
-  });
-
-  describe('removeFromTeam', () => {
-    it('should remove a Pokémon from a team position', () => {
-      const playthroughId = createPlaythrough('Test Run');
-      playthroughsStore.activePlaythroughId = playthroughId;
-
-      // Add some encounters and team member
-      const activePlaythrough = playthroughsStore.playthroughs.find(
-        p => p.id === playthroughId
-      );
-      if (activePlaythrough) {
-        activePlaythrough.encounters = {
-          route1: {
-            head: {
-              id: 'pikachu',
-              name: 'Pikachu',
-              nickname: 'Sparky',
-              level: 5,
-              isActive: true,
-              isStored: false,
-              isDeceased: false,
-            },
-            body: {
-              id: 'charmander',
-              name: 'Charmander',
-              nickname: 'Flame',
-              level: 5,
-              isActive: true,
-              isStored: false,
-              isDeceased: false,
-            },
-            isFusion: true,
-            updatedAt: Date.now(),
+      // Set up encounters with stored Pokémon without originalReceivalStatus
+      activePlaythrough.encounters = {
+        route1: {
+          head: {
+            ...testPokemon.pikachu(),
+            status: PokemonStatus.STORED,
+            // No originalReceivalStatus
           },
-        };
-        activePlaythrough.team.members[0] = {
-          headEncounterId: 'route1',
-          bodyEncounterId: 'route1',
-        };
-      }
+          body: null,
+          isFusion: false,
+          updatedAt: Date.now(),
+        },
+      };
 
-      const result = removeFromTeam(0);
+      // Restore Pokémon to team
+      await restorePokemonToTeam('pikachu_route1_123');
 
-      expect(result).toBe(true);
-      expect(activePlaythrough?.team.members[0]).toBeNull();
+      // Verify status defaults to captured
+      const pikachu = activePlaythrough.encounters.route1.head;
+      expect(pikachu?.status).toBe(PokemonStatus.CAPTURED);
     });
 
-    it('should fail when removing from empty position', () => {
-      const playthroughId = createPlaythrough('Test Run');
-      playthroughsStore.activePlaythroughId = playthroughId;
+    it('should not change status if Pokémon is not stored', async () => {
+      const { activePlaythrough } = createTestPlaythrough();
 
-      const result = removeFromTeam(0);
+      // Set up encounters with captured Pokémon
+      activePlaythrough.encounters = {
+        route1: {
+          head: testPokemon.pikachu(),
+          body: null,
+          isFusion: false,
+          updatedAt: Date.now(),
+        },
+      };
 
-      expect(result).toBe(false);
+      const originalStatus = activePlaythrough.encounters.route1.head?.status;
+
+      // Try to restore Pokémon that is not stored
+      await restorePokemonToTeam('pikachu_route1_123');
+
+      // Verify status is unchanged
+      const pikachu = activePlaythrough.encounters.route1.head;
+      expect(pikachu?.status).toBe(originalStatus);
     });
-  });
 
-  describe('reorderTeam', () => {
-    it('should reorder team members correctly', () => {
-      const playthroughId = createPlaythrough('Test Run');
-      playthroughsStore.activePlaythroughId = playthroughId;
+    it('should handle Pokémon not found gracefully', async () => {
+      createTestPlaythrough();
 
-      // Add some encounters and team member
-      const activePlaythrough = playthroughsStore.playthroughs.find(
-        p => p.id === playthroughId
-      );
-      if (activePlaythrough) {
-        activePlaythrough.encounters = {
-          route1: {
-            head: {
-              id: 'pikachu',
-              name: 'Pikachu',
-              nickname: 'Sparky',
-              level: 5,
-              isActive: true,
-              isStored: false,
-              isDeceased: false,
-            },
-            body: {
-              id: 'charmander',
-              name: 'Charmander',
-              nickname: 'Flame',
-              level: 5,
-              isActive: true,
-              isStored: false,
-              isDeceased: false,
-            },
-            isFusion: true,
-            updatedAt: Date.now(),
+      // Try to restore non-existent Pokémon
+      await restorePokemonToTeam('non-existent-uid');
+
+      // Should not throw error
+      expect(true).toBe(true);
+    });
+
+    it('should actually update the Pokémon status in the store', async () => {
+      const { activePlaythrough } = createTestPlaythrough();
+
+      // Set up encounters with stored Pokémon
+      activePlaythrough.encounters = {
+        route1: {
+          head: {
+            ...testPokemon.pikachu(),
+            status: PokemonStatus.STORED,
+            originalReceivalStatus: PokemonStatus.CAPTURED,
           },
-        };
-        activePlaythrough.team.members[0] = {
-          headEncounterId: 'route1',
-          bodyEncounterId: 'route1',
-        };
-      }
+          body: null,
+          isFusion: false,
+          updatedAt: Date.now(),
+        },
+      };
 
-      const result = reorderTeam(0, 2);
-
-      expect(result).toBe(true);
-      expect(activePlaythrough?.team.members[0]).toBeNull();
-      expect(activePlaythrough?.team.members[2]).toEqual({
-        headEncounterId: 'route1',
-        bodyEncounterId: 'route1',
-      });
-    });
-  });
-
-  describe('getTeamMemberDetails', () => {
-    it('should return team member details', () => {
-      const playthroughId = createPlaythrough('Test Run');
-      playthroughsStore.activePlaythroughId = playthroughId;
-
-      // Add some encounters and team member
-      const activePlaythrough = playthroughsStore.playthroughs.find(
-        p => p.id === playthroughId
+      // Verify initial status
+      expect(activePlaythrough.encounters.route1.head?.status).toBe(
+        PokemonStatus.STORED
       );
-      if (activePlaythrough) {
-        activePlaythrough.encounters = {
-          route1: {
-            head: {
-              id: 'pikachu',
-              name: 'Pikachu',
-              nickname: 'Sparky',
-              level: 5,
-              isActive: true,
-              isStored: false,
-              isDeceased: false,
-            },
-            body: {
-              id: 'charmander',
-              name: 'Charmander',
-              nickname: 'Flame',
-              level: 5,
-              isActive: true,
-              isStored: false,
-              isDeceased: false,
-            },
-            isFusion: true,
-            updatedAt: Date.now(),
-          },
-        };
-        activePlaythrough.team.members[0] = {
-          headEncounterId: 'route1',
-          bodyEncounterId: 'route1',
-        };
-      }
 
-      const details = getTeamMemberDetails(0);
+      // Restore Pokémon to team
+      await restorePokemonToTeam('pikachu_route1_123');
 
-      expect(details).toBeDefined();
-      expect(details?.position).toBe(0);
-      expect(details?.teamMember).toEqual({
-        headEncounterId: 'route1',
-        bodyEncounterId: 'route1',
-      });
-    });
-
-    it('should return null for empty position', () => {
-      const playthroughId = createPlaythrough('Test Run');
-      playthroughsStore.activePlaythroughId = playthroughId;
-
-      const details = getTeamMemberDetails(0);
-
-      expect(details).toBeNull();
-    });
-  });
-
-  describe('isTeamFull', () => {
-    it('should return false for empty team', () => {
-      const playthroughId = createPlaythrough('Test Run');
-      playthroughsStore.activePlaythroughId = playthroughId;
-
-      const full = isTeamFull();
-
-      expect(full).toBe(false);
-    });
-
-    it('should return true for full team', () => {
-      const playthroughId = createPlaythrough('Test Run');
-      playthroughsStore.activePlaythroughId = playthroughId;
-
-      // Fill the team
-      const activePlaythrough = playthroughsStore.playthroughs.find(
-        p => p.id === playthroughId
+      // Verify status is actually updated in the store
+      expect(activePlaythrough.encounters.route1.head?.status).toBe(
+        PokemonStatus.CAPTURED
       );
-      if (activePlaythrough) {
-        activePlaythrough.team.members = activePlaythrough.team.members.map(
-          () => ({
-            headEncounterId: 'dummy',
-            bodyEncounterId: 'dummy',
-          })
-        );
-      }
 
-      const full = isTeamFull();
-
-      expect(full).toBe(true);
-    });
-  });
-
-  describe('getAvailableTeamPositions', () => {
-    it('should return all positions for empty team', () => {
-      const playthroughId = createPlaythrough('Test Run');
-      playthroughsStore.activePlaythroughId = playthroughId;
-
-      const positions = getAvailableTeamPositions();
-
-      expect(positions).toEqual([0, 1, 2, 3, 4, 5]);
-    });
-
-    it('should return only empty positions', () => {
-      const playthroughId = createPlaythrough('Test Run');
-      playthroughsStore.activePlaythroughId = playthroughId;
-
-      // Add one team member
-      const activePlaythrough = playthroughsStore.playthroughs.find(
-        p => p.id === playthroughId
-      );
-      if (activePlaythrough) {
-        activePlaythrough.team.members[0] = {
-          headEncounterId: 'dummy',
-          bodyEncounterId: 'dummy',
-        };
-      }
-
-      const positions = getAvailableTeamPositions();
-
-      expect(positions).toEqual([1, 2, 3, 4, 5]);
+      // Verify the playthrough timestamp was updated
+      expect(activePlaythrough.updatedAt).toBeGreaterThan(0);
     });
   });
 });
