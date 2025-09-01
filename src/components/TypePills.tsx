@@ -345,7 +345,10 @@ export function TypePills({
   const pills = (
     <div
       className={twMerge(
-        clsx('flex', size === 'xxs' ? 'gap-0.5' : size === 'xs' ? 'gap-1' : 'gap-1.5'),
+        clsx(
+          'flex',
+          size === 'xxs' ? 'gap-0.5' : size === 'xs' ? 'gap-1' : 'gap-1.5'
+        ),
         className
       )}
       aria-label='pokemon types'

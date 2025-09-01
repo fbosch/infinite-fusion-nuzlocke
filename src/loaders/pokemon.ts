@@ -80,11 +80,13 @@ export const PokemonOptionSchema = z.object({
   nickname: z.string().optional(),
   originalLocation: z.string().optional(),
   status: PokemonStatusSchema.optional(),
-  originalReceivalStatus: z.enum([
-    PokemonStatus.CAPTURED,
-    PokemonStatus.RECEIVED,
-    PokemonStatus.TRADED,
-  ]).optional(), // Track original status when Pokémon was first received (captured, traded, or received)
+  originalReceivalStatus: z
+    .enum([
+      PokemonStatus.CAPTURED,
+      PokemonStatus.RECEIVED,
+      PokemonStatus.TRADED,
+    ])
+    .optional(), // Track original status when Pokémon was first received (captured, traded, or received)
   uid: z.string().optional(), // Unique identifier for React reconciliation
 });
 

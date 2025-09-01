@@ -314,7 +314,11 @@ describe('Display Pokemon Logic - Artwork Variant Bug Prevention', () => {
       const bodyWithNickname = { ...mockBulbasaur, nickname: 'Bulby' };
 
       // When head has no nickname, should use body nickname
-      const result = getNicknameText(headWithoutNickname, bodyWithNickname, true);
+      const result = getNicknameText(
+        headWithoutNickname,
+        bodyWithNickname,
+        true
+      );
       expect(result).toBe('Bulby');
     });
 
@@ -323,7 +327,11 @@ describe('Display Pokemon Logic - Artwork Variant Bug Prevention', () => {
       const bodyWithoutNickname = { ...mockBulbasaur }; // No nickname
 
       // When neither has nickname, should use fusion name format
-      const result = getNicknameText(headWithoutNickname, bodyWithoutNickname, true);
+      const result = getNicknameText(
+        headWithoutNickname,
+        bodyWithoutNickname,
+        true
+      );
       expect(result).toBe('Pikachu/Bulbasaur');
     });
 

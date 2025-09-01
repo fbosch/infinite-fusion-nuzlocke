@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { getAllPokemonWithLocations, findPokemonByUid, findPokemonWithLocation } from '../encounter-utils';
+import {
+  getAllPokemonWithLocations,
+  findPokemonByUid,
+  findPokemonWithLocation,
+} from '../encounter-utils';
 import type { PokemonOptionType } from '@/loaders/pokemon';
 import type { EncounterData } from '@/stores/playthroughs/types';
 
@@ -101,7 +105,9 @@ describe('encounter-utils', () => {
         locationId: 'route1',
       });
       // Body Pokémon should not be included
-      expect(result.some(item => item.pokemon.uid === mockCharmander.uid)).toBe(false);
+      expect(result.some(item => item.pokemon.uid === mockCharmander.uid)).toBe(
+        false
+      );
     });
 
     it('should handle multiple encounters correctly', () => {
