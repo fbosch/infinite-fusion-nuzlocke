@@ -43,33 +43,33 @@ export default function TeamMemberPickerModal({
   const activePlaythrough = useActivePlaythrough();
 
   return (
-    <TeamMemberSelectionProvider
-      key={`team-member-selection-${position}-${isOpen}`}
-      position={position}
-      existingTeamMember={existingTeamMember}
-      onSelect={onSelect}
+    <Dialog
+      open={isOpen && !!activePlaythrough}
       onClose={onClose}
+      className='relative z-50 group'
     >
-      <Dialog
-        open={isOpen && !!activePlaythrough}
-        onClose={onClose}
-        className='relative z-50 group'
-      >
-        <DialogBackdrop
-          transition
-          className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100'
-          aria-hidden='true'
-        />
+      <DialogBackdrop
+        transition
+        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100'
+        aria-hidden='true'
+      />
 
-        <div className='fixed inset-0 flex w-screen items-center justify-center p-2 sm:p-4'>
-          <DialogPanel
-            transition
-            id='team-member-picker-modal'
-            aria-labelledby='team-member-picker-title'
-            className={clsx(
-              'max-w-6xl w-full max-h-[95vh] sm:max-h-[80vh] space-y-3 sm:space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-3 sm:p-6 flex flex-col',
-              'transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98'
-            )}
+      <div className='fixed inset-0 flex w-screen items-center justify-center p-2 sm:p-4'>
+        <DialogPanel
+          transition
+          id='team-member-picker-modal'
+          aria-labelledby='team-member-picker-title'
+          className={clsx(
+            'max-w-6xl w-full max-h-[95vh] sm:max-h-[80vh] space-y-3 sm:space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-3 sm:p-6 flex flex-col',
+            'transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98'
+          )}
+        >
+          <TeamMemberSelectionProvider
+            key={`team-member-selection-${position}`}
+            position={position}
+            existingTeamMember={existingTeamMember}
+            onSelect={onSelect}
+            onClose={onClose}
           >
             <div className='flex items-center justify-between'>
               <DialogTitle
@@ -96,9 +96,9 @@ export default function TeamMemberPickerModal({
               <div className='hidden lg:block w-px bg-gray-200 dark:bg-gray-600'></div>
               <TeamMemberPreviewPanel />
             </div>
-          </DialogPanel>
-        </div>
-      </Dialog>
-    </TeamMemberSelectionProvider>
+          </TeamMemberSelectionProvider>
+        </DialogPanel>
+      </div>
+    </Dialog>
   );
 }
