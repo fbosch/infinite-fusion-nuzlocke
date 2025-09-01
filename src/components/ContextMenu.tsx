@@ -102,6 +102,7 @@ export interface ContextMenuItem {
   href?: string;
   target?: string;
   disabled?: boolean;
+  visualOnly?: boolean;
   variant?: 'default' | 'danger' | 'warning';
   shortcut?: string;
   separator?: boolean;
@@ -328,7 +329,7 @@ export function ContextMenu({
 
                   const filteredItems = filterEdgeSeparators(items);
                   const validItems = filteredItems.filter(
-                    i => !i.separator && !i.disabled
+                    i => !i.separator && !i.disabled && !i.visualOnly
                   );
                   const validIndex = validItems.findIndex(
                     validItem => validItem.id === item.id
@@ -373,7 +374,9 @@ export function ContextMenu({
 
                   const commonClasses = clsx(
                     baseClasses,
-                    variantClasses,
+                    item.visualOnly
+                      ? 'text-gray-500 dark:text-gray-400 cursor-default'
+                      : variantClasses,
                     item.disabled && '!opacity-75 !cursor-not-allowed'
                   );
 
@@ -474,8 +477,17 @@ export function ContextMenu({
                     return linkElement;
                   }
 
-                  // Render as button
-                  const buttonElement = (
+                  // Render as button or visual-only element
+                  const buttonElement = item.visualOnly ? (
+                    <div
+                      key={item.id}
+                      className={commonClasses}
+                      role='presentation'
+                      tabIndex={-1}
+                    >
+                      {content}
+                    </div>
+                  ) : (
                     <button
                       key={item.id}
                       ref={node => {

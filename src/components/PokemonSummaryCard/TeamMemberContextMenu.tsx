@@ -325,17 +325,14 @@ export function TeamMemberContextMenu({
         items.push({
           id: 'head-section-header',
           label: (
-            <div
-              className='flex items-center gap-1.5 px-1 py-0.5'
-              style={{ cursor: 'default', pointerEvents: 'none' }}
-            >
+            <div className='flex items-center gap-1.5 px-1 py-0.5'>
               <HeadIcon className='h-3.5 w-3.5 text-gray-500 dark:text-gray-400' />
               <span className='text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
                 Head
               </span>
             </div>
           ),
-          disabled: true,
+          visualOnly: true,
         });
       }
 
@@ -432,17 +429,14 @@ export function TeamMemberContextMenu({
       items.push({
         id: 'body-section-header',
         label: (
-          <div
-            className='flex items-center gap-1.5 px-1 py-0.5'
-            style={{ cursor: 'default', pointerEvents: 'none' }}
-          >
+          <div className='flex items-center gap-1.5 px-1 py-0.5'>
             <BodyIcon className='h-3.5 w-3.5 text-gray-500 dark:text-gray-400' />
             <span className='text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
               Body
             </span>
           </div>
         ),
-        disabled: true,
+        visualOnly: true,
       });
       // Add devolve option for body Pokémon
       if (bodyPreEvolution) {
