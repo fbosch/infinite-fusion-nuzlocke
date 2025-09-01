@@ -200,7 +200,7 @@ export default function TeamEntryItem({
               </>
             )}
           </div>
-          <div className='min-w-0 flex-1 space-y-2.5'>
+          <div className='min-w-0 flex-1 space-y-1.5'>
             <div className='flex items-center gap-2'>
               <h3 className='text-base font-semibold text-gray-900 dark:text-gray-100'>
                 {isEmpty
@@ -217,7 +217,9 @@ export default function TeamEntryItem({
                 {/* Head Pokémon info */}
                 {entry.head && (
                   <div className='flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 min-w-0'>
-                    <HeadIcon className='h-4 w-4 flex-shrink-0' />
+                    {entry.body && (
+                      <HeadIcon className='h-4 w-4 flex-shrink-0' />
+                    )}
                     <span className='truncate'>
                       {entry.head.name || 'Unknown'}
                     </span>
@@ -233,7 +235,9 @@ export default function TeamEntryItem({
                 {/* Body Pokémon info */}
                 {entry.body && (
                   <div className='flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 min-w-0'>
-                    <BodyIcon className='h-4 w-4 flex-shrink-0' />
+                    {entry.head && (
+                      <BodyIcon className='h-4 w-4 flex-shrink-0' />
+                    )}
                     <span className='truncate'>
                       {entry.body.name || 'Unknown'}
                     </span>
