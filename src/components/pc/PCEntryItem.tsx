@@ -109,15 +109,23 @@ export default function PCEntryItem(props: PCEntryItemProps) {
           </div>
         )}
         <div className='flex items-center gap-3 p-3'>
-          <div className='flex flex-shrink-0 items-center justify-center rounded-md bg-gray-50 dark:bg-gray-700'>
+          <div className='flex flex-shrink-0 items-center justify-center rounded-md relative'>
             {hasAny && (
-              <FusionSprite
-                headPokemon={entry.head ?? null}
-                bodyPokemon={entry.body ?? null}
-                isFusion={isFusion}
-                shouldLoad
-                showStatusOverlay={false}
-              />
+              <>
+                <div
+                  className='w-full h-full absolute rounded-md opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600'
+                  style={{
+                    background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
+                  }}
+                />
+                <FusionSprite
+                  headPokemon={entry.head ?? null}
+                  bodyPokemon={entry.body ?? null}
+                  isFusion={isFusion}
+                  shouldLoad
+                  showStatusOverlay={false}
+                />
+              </>
             )}
           </div>
           <div className='min-w-0 flex-1'>

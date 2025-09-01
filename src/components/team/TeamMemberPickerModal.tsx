@@ -44,6 +44,7 @@ export default function TeamMemberPickerModal({
 
   return (
     <TeamMemberSelectionProvider
+      key={`team-member-selection-${position}-${isOpen}`}
       position={position}
       existingTeamMember={existingTeamMember}
       onSelect={onSelect}

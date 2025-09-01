@@ -165,14 +165,7 @@ export default function TeamEntryItem({
     >
       <div className='p-4'>
         <div className='flex items-start gap-4'>
-          <div
-            className={clsx(
-              'flex flex-shrink-0 items-center justify-center rounded-lg relative group/sprite-container',
-              isEmpty
-                ? 'bg-gray-50 dark:bg-gray-800 p-2'
-                : 'bg-gray-50 dark:bg-gray-700 p-2'
-            )}
-          >
+          <div className='flex flex-shrink-0 items-center justify-center rounded-lg relative group/sprite-container p-2'>
             {isEmpty ? (
               <div className='size-16 flex flex-col items-center justify-center text-center text-gray-400 dark:text-gray-500'>
                 <Plus className='h-8 w-8 mb-1 text-gray-400 dark:text-gray-500' />
@@ -182,6 +175,12 @@ export default function TeamEntryItem({
               </div>
             ) : (
               <>
+                <div
+                  className='w-full h-full absolute rounded-lg opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600'
+                  style={{
+                    background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
+                  }}
+                />
                 <FusionSprite
                   ref={spriteRef}
                   headPokemon={entry.head ?? null}
