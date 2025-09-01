@@ -24,6 +24,8 @@ import { PokemonSprite } from '../PokemonSprite';
 import dynamic from 'next/dynamic';
 import { emitEvolutionEvent } from '@/lib/events';
 import { scrollToLocationById } from '@/utils/scrollToLocation';
+import HeadIcon from '@/assets/images/head.svg';
+import BodyIcon from '@/assets/images/body.svg';
 
 const ArtworkVariantModal = dynamic(
   () => import('./ArtworkVariantModal').then(mod => mod.ArtworkVariantModal),
@@ -268,12 +270,74 @@ export function TeamMemberContextMenu({
       });
     }
 
-    // Add evolution options if available
-    if (headPokemon && (headEvolutions?.length || headPreEvolution)) {
+    // Add status actions (moved before head/body sections)
+    const canMarkAsDeceased =
+      currentStatus !== PokemonStatus.DECEASED &&
+      currentStatus !== PokemonStatus.MISSED;
+    const canMoveToBox =
+      currentStatus === PokemonStatus.CAPTURED ||
+      currentStatus === PokemonStatus.RECEIVED ||
+      currentStatus === PokemonStatus.TRADED ||
+      currentStatus === PokemonStatus.DECEASED;
+    const hasStatusActions = canMarkAsDeceased || canMoveToBox;
+
+    if (hasStatusActions) {
       items.push({
-        id: 'evolution-separator',
+        id: 'status-separator',
         separator: true,
       });
+
+      // Show "Mark as Deceased" unless already deceased or missed
+      if (canMarkAsDeceased) {
+        items.push({
+          id: 'mark-deceased',
+          label: 'Move to Graveyard',
+          icon: Skull,
+          onClick: handleMarkAsDeceased,
+        });
+      }
+
+      // Show "Move to Box" only if captured, received, traded, or deceased
+      if (canMoveToBox) {
+        items.push({
+          id: 'move-to-box',
+          label: 'Move to Box',
+          icon: Computer,
+          onClick: handleMoveToBox,
+        });
+      }
+    }
+
+    // Add head section if head Pokémon exists and has evolution options or encounter
+    if (
+      headPokemon &&
+      (headEvolutions?.length ||
+        headPreEvolution ||
+        headPokemon.originalLocation)
+    ) {
+      items.push({
+        id: 'head-section-separator',
+        separator: true,
+      });
+
+      // Add head section header
+      if (isFusion) {
+        items.push({
+          id: 'head-section-header',
+          label: (
+            <div
+              className='flex items-center gap-1.5 px-1 py-0.5'
+              style={{ cursor: 'default', pointerEvents: 'none' }}
+            >
+              <HeadIcon className='h-3.5 w-3.5 text-gray-500 dark:text-gray-400' />
+              <span className='text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+                Head
+              </span>
+            </div>
+          ),
+          disabled: true,
+        });
+      }
 
       // Add devolve option for head Pokémon
       if (headPreEvolution) {
@@ -288,7 +352,7 @@ export function TeamMemberContextMenu({
                 />
               </div>
               <span className='truncate'>
-                Devolve {isFusion ? 'Head' : ''} to {headPreEvolution.name}
+                Devolve to {headPreEvolution.name}
               </span>
             </div>
           ),
@@ -308,9 +372,7 @@ export function TeamMemberContextMenu({
                 <div className='flex items-center justify-center size-6 flex-shrink-0'>
                   <PokemonSprite pokemonId={evo.id} generation='gen7' />
                 </div>
-                <span className='truncate'>
-                  Evolve {isFusion ? 'Head' : ''} to {evo.name}
-                </span>
+                <span className='truncate'>Evolve to {evo.name}</span>
               </div>
             ),
             icon: Atom,
@@ -320,7 +382,7 @@ export function TeamMemberContextMenu({
         } else {
           items.push({
             id: 'evolve-head',
-            label: `Evolve ${isFusion ? 'Head' : ''} to…`,
+            label: 'Evolve to…',
             icon: Atom,
             children: headEvolutions.map(evo => ({
               id: `evolve-head-${evo.id}`,
@@ -343,7 +405,7 @@ export function TeamMemberContextMenu({
       if (headPokemon?.originalLocation) {
         items.push({
           id: 'go-to-head-encounter',
-          label: `Go to ${isFusion ? 'Head' : ''} Encounter`,
+          label: 'Go to Encounter',
           icon: MapPin,
           onClick: handleGoToHeadEncounter,
           tooltip:
@@ -352,16 +414,35 @@ export function TeamMemberContextMenu({
       }
     }
 
-    // Add evolution options for body Pokémon if it exists and is different from head
+    // Add body section if body Pokémon exists and is different from head
     if (
       bodyPokemon &&
       bodyPokemon.id !== headPokemon?.id &&
-      (bodyEvolutions?.length || bodyPreEvolution)
+      (bodyEvolutions?.length ||
+        bodyPreEvolution ||
+        bodyPokemon.originalLocation)
     ) {
-      // Add separator between head and body evolution sections
+      // Add separator between head and body sections
       items.push({
-        id: 'head-body-evolution-separator',
+        id: 'body-section-separator',
         separator: true,
+      });
+
+      // Add body section header
+      items.push({
+        id: 'body-section-header',
+        label: (
+          <div
+            className='flex items-center gap-1.5 px-1 py-0.5'
+            style={{ cursor: 'default', pointerEvents: 'none' }}
+          >
+            <BodyIcon className='h-3.5 w-3.5 text-gray-500 dark:text-gray-400' />
+            <span className='text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+              Body
+            </span>
+          </div>
+        ),
+        disabled: true,
       });
       // Add devolve option for body Pokémon
       if (bodyPreEvolution) {
@@ -376,7 +457,7 @@ export function TeamMemberContextMenu({
                 />
               </div>
               <span className='truncate'>
-                Devolve {isFusion ? 'Body' : ''} to {bodyPreEvolution.name}
+                Devolve to {bodyPreEvolution.name}
               </span>
             </div>
           ),
@@ -396,9 +477,7 @@ export function TeamMemberContextMenu({
                 <div className='flex items-center justify-center size-6 flex-shrink-0'>
                   <PokemonSprite pokemonId={evo.id} generation='gen7' />
                 </div>
-                <span className='truncate'>
-                  Evolve {isFusion ? 'Body' : ''} to {evo.name}
-                </span>
+                <span className='truncate'>Evolve to {evo.name}</span>
               </div>
             ),
             icon: Atom,
@@ -408,7 +487,7 @@ export function TeamMemberContextMenu({
         } else {
           items.push({
             id: 'evolve-body',
-            label: `Evolve ${isFusion ? 'Body' : ''} to…`,
+            label: 'Evolve to…',
             icon: Atom,
             children: bodyEvolutions.map(evo => ({
               id: `evolve-body-${evo.id}`,
@@ -431,7 +510,7 @@ export function TeamMemberContextMenu({
       if (bodyPokemon?.originalLocation) {
         items.push({
           id: 'go-to-body-encounter',
-          label: `Go to ${isFusion ? 'Body' : ''} Encounter`,
+          label: 'Go to Encounter',
           icon: MapPin,
           onClick: handleGoToBodyEncounter,
           tooltip:
@@ -440,42 +519,9 @@ export function TeamMemberContextMenu({
       }
     }
 
-    // Add status actions
+    // Add external links separator
     items.push({
-      id: 'separator-1',
-      separator: true,
-    });
-
-    // Show "Mark as Deceased" unless already deceased or missed
-    if (
-      currentStatus !== PokemonStatus.DECEASED &&
-      currentStatus !== PokemonStatus.MISSED
-    ) {
-      items.push({
-        id: 'mark-deceased',
-        label: 'Move to Graveyard',
-        icon: Skull,
-        onClick: handleMarkAsDeceased,
-      });
-    }
-
-    // Show "Move to Box" only if captured, received, traded, or deceased
-    if (
-      currentStatus === PokemonStatus.CAPTURED ||
-      currentStatus === PokemonStatus.RECEIVED ||
-      currentStatus === PokemonStatus.TRADED ||
-      currentStatus === PokemonStatus.DECEASED
-    ) {
-      items.push({
-        id: 'move-to-box',
-        label: 'Move to Box',
-        icon: Computer,
-        onClick: handleMoveToBox,
-      });
-    }
-
-    items.push({
-      id: 'separator-2',
+      id: 'external-links-separator',
       separator: true,
     });
 
