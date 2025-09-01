@@ -333,13 +333,6 @@ export default function TeamEntryItem({
               <Skull className='h-4 w-4' />
             </button>
           </CursorTooltip>
-          <ArtworkVariantButton
-            headId={entry.head?.id}
-            bodyId={entry.body?.id}
-            isFusion={isFusion}
-            shouldLoad={!isEmpty}
-            className='size-7'
-          />
         </div>
       )}
     </li>

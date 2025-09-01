@@ -9,6 +9,7 @@ import {
   Atom,
   Undo2,
   ArrowLeftRight,
+  MapPin,
 } from 'lucide-react';
 import { useSpriteVariants, usePreferredVariantState } from '@/hooks/useSprite';
 import {
@@ -22,6 +23,7 @@ import { getSpriteId } from '@/lib/sprites';
 import { PokemonSprite } from '../PokemonSprite';
 import dynamic from 'next/dynamic';
 import { emitEvolutionEvent } from '@/lib/events';
+import { scrollToLocationById } from '@/utils/scrollToLocation';
 
 const ArtworkVariantModal = dynamic(
   () => import('./ArtworkVariantModal').then(mod => mod.ArtworkVariantModal),
@@ -190,6 +192,34 @@ export function TeamMemberContextMenu({
     );
   }, [isFusion, headPokemon?.uid, bodyPokemon?.uid, position]);
 
+  // Handler to navigate to head encounter
+  const handleGoToHeadEncounter = useCallback(() => {
+    if (!headPokemon?.originalLocation || !headPokemon.uid) return;
+
+    scrollToLocationById(headPokemon.originalLocation, {
+      behavior: 'smooth',
+      highlightUids: [headPokemon.uid],
+      durationMs: 1200,
+    });
+
+    // Close any parent modal/sheet
+    onClose?.();
+  }, [headPokemon?.originalLocation, headPokemon?.uid, onClose]);
+
+  // Handler to navigate to body encounter
+  const handleGoToBodyEncounter = useCallback(() => {
+    if (!bodyPokemon?.originalLocation || !bodyPokemon.uid) return;
+
+    scrollToLocationById(bodyPokemon.originalLocation, {
+      behavior: 'smooth',
+      highlightUids: [bodyPokemon.uid],
+      durationMs: 1200,
+    });
+
+    // Close any parent modal/sheet
+    onClose?.();
+  }, [bodyPokemon?.originalLocation, bodyPokemon?.uid, onClose]);
+
   const contextItems = useMemo<ContextMenuItem[]>(() => {
     // Use team member Pokémon for links
     const id = getSpriteId(headPokemon?.id, bodyPokemon?.id);
@@ -308,6 +338,18 @@ export function TeamMemberContextMenu({
           });
         }
       }
+
+      // Add "Go to head encounter" option
+      if (headPokemon?.originalLocation) {
+        items.push({
+          id: 'go-to-head-encounter',
+          label: `Go to ${isFusion ? 'Head' : ''} Encounter`,
+          icon: MapPin,
+          onClick: handleGoToHeadEncounter,
+          tooltip:
+            'Navigate to the location where this Pokémon was encountered',
+        });
+      }
     }
 
     // Add evolution options for body Pokémon if it exists and is different from head
@@ -383,6 +425,18 @@ export function TeamMemberContextMenu({
             })),
           });
         }
+      }
+
+      // Add "Go to body encounter" option
+      if (bodyPokemon?.originalLocation) {
+        items.push({
+          id: 'go-to-body-encounter',
+          label: `Go to ${isFusion ? 'Body' : ''} Encounter`,
+          icon: MapPin,
+          onClick: handleGoToBodyEncounter,
+          tooltip:
+            'Navigate to the location where this Pokémon was encountered',
+        });
       }
     }
 
@@ -464,6 +518,9 @@ export function TeamMemberContextMenu({
     handleEvolveBody,
     handleDevolveHead,
     handleDevolveBody,
+    handleFlipFusion,
+    handleGoToHeadEncounter,
+    handleGoToBodyEncounter,
   ]);
 
   return (
