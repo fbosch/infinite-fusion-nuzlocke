@@ -52,28 +52,31 @@ const LegendaryRouteEncountersArraySchema = z.array(
   LegendaryRouteEncounterSchema
 );
 
-// Type for egg location data
-interface EggLocation {
-  routeName: string;
-  source: 'gift' | 'nest';
-  description: string;
-  pokemonName?: string;
-  pokemonId?: number;
-}
+// Schema for egg location data
+const EggLocationSchema = z.object({
+  routeName: z.string(),
+  source: z.enum(['gift', 'nest']),
+  description: z.string(),
+  pokemonName: z.string().optional(),
+  pokemonId: z.number().optional(),
+});
 
-interface EggLocationsData {
-  totalLocations: number;
-  sources: {
-    gifts: number;
-    nests: number;
-  };
-  pokemonIdentified: {
-    total: number;
-    fromGifts: number;
-    fromNests: number;
-  };
-  locations: EggLocation[];
-}
+const EggLocationsSchema = z.object({
+  totalLocations: z.number(),
+  sources: z.object({
+    gifts: z.number(),
+    nests: z.number(),
+  }),
+  pokemonIdentified: z.object({
+    total: z.number(),
+    fromGifts: z.number(),
+    fromNests: z.number(),
+  }),
+  locations: z.array(EggLocationSchema),
+});
+
+// Types for egg location data (inferred from schemas)
+// Use z.infer<typeof EggLocationSchema> and z.infer<typeof EggLocationsSchema> where needed
 
 // Function to map encounter types to encounter sources
 function mapEncounterTypeToSource(
@@ -214,7 +217,7 @@ export function processGameModeData(gameMode: 'classic' | 'remix') {
   const gifts = OldRouteEncountersArraySchema.parse(data.gifts);
   const quests = OldRouteEncountersArraySchema.parse(data.quests);
   const staticsData = OldRouteEncountersArraySchema.parse(data.statics);
-  const eggLocationsData = eggLocations as EggLocationsData;
+  const eggLocationsData = EggLocationsSchema.parse(eggLocations);
   const legendaryData =
     LegendaryRouteEncountersArraySchema.parse(legendaryEncounters);
 
