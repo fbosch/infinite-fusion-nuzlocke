@@ -78,7 +78,10 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
       displayPokemon.head?.id,
       displayPokemon.body?.id
     );
-    const variantSpriteId = tooltipSpriteId + (preferredVariant ?? '');
+    const variantSpriteId =
+      tooltipSpriteId != null
+        ? tooltipSpriteId + (preferredVariant ?? '')
+        : undefined;
     const { data: tooltipCredits } = useSpriteCredits(
       displayPokemon.head?.id,
       displayPokemon.body?.id,
@@ -89,9 +92,15 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
       displayPokemon.body,
       effectiveIsFusion
     );
-    const credit = eitherPokemonIsEgg
-      ? undefined
-      : formatArtistCredits(tooltipCredits?.[variantSpriteId]);
+    const credit =
+      eitherPokemonIsEgg || variantSpriteId == null
+        ? undefined
+        : (() => {
+            const credits = tooltipCredits?.[variantSpriteId];
+            return credits && Object.keys(credits).length > 0
+              ? formatArtistCredits(credits)
+              : undefined;
+          })();
 
     // If no Pokémon are provided and no encounter data exists, don't render
     if (!effectiveHeadPokemon && !effectiveBodyPokemon) {

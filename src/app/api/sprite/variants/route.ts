@@ -127,7 +127,22 @@ export async function GET(request: NextRequest) {
       processingCache.delete(cacheKey);
     });
 
-    return processingPromise;
+    // Wrap promise to handle rejections with proper error response and CORS headers
+    return processingPromise.catch(error => {
+      console.error('Error processing sprite variants:', error);
+
+      const errorResponse = NextResponse.json(
+        { error: 'Failed to process sprite variants' },
+        { status: 500 }
+      );
+
+      // Set CORS headers on error response
+      errorResponse.headers.set('Access-Control-Allow-Origin', '*');
+      errorResponse.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+      errorResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+
+      return errorResponse;
+    });
   } catch (error) {
     console.error('Error in sprite variants API:', error);
 
