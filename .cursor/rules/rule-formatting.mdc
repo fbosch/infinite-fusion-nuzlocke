@@ -2,12 +2,12 @@
 description: Example rule description
 globs: .cursor/rules/*.mdc
 alwaysApply: true
---
+---
+
 ````
 
 ### Correct Placement
 ```markdown
--
 
 # Rule Title
 Rule content goes here...

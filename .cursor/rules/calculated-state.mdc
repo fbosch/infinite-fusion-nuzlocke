@@ -1,3 +1,9 @@
+---
+description: "Don't store calculated/derived values in state when they can be computed during render"
+globs: ['**/*.{ts,tsx,js,jsx}']
+alwaysApply: true
+---
+
 # Calculated State Principle
 
 **Don't store calculated/derived values in state when they can be computed during render.**
@@ -9,6 +15,7 @@ State should contain the minimal data needed to reconstruct the UI, not the comp
 ## Anti-Patterns to Avoid
 
 ### ❌ Storing Search/Filter Results in State
+
 ```typescript
 // Bad: Storing filtered results in state
 const [filteredPokemon, setFilteredPokemon] = useState([]);
@@ -20,6 +27,7 @@ useEffect(() => {
 ```
 
 ### ❌ Storing Sorted Lists in State
+
 ```typescript
 // Bad: Storing sorted results in state
 const [sortedUsers, setSortedUsers] = useState([]);
@@ -31,35 +39,41 @@ useEffect(() => {
 ```
 
 ### ❌ Storing Formatted Values in State
+
 ```typescript
 // Bad: Storing formatted display values in state
 const [formattedPrice, setFormattedPrice] = useState('');
 
 useEffect(() => {
-  setFormattedPrice(new Intl.NumberFormat('en-US', { 
-    style: 'currency', 
-    currency: 'USD' 
-  }).format(price));
+  setFormattedPrice(
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(price)
+  );
 }, [price]);
 ```
 
 ## ✅ Best Practices
 
 ### Use Local Computation with useMemo
+
 ```typescript
 // Good: Compute derived values during render
 const filteredPokemon = useMemo(() => {
   if (!searchQuery.trim()) return allPokemon;
-  
+
   const query = searchQuery.toLowerCase();
-  return allPokemon.filter(pokemon => 
-    pokemon.name.toLowerCase().includes(query) ||
-    pokemon.nickname?.toLowerCase().includes(query)
+  return allPokemon.filter(
+    pokemon =>
+      pokemon.name.toLowerCase().includes(query) ||
+      pokemon.nickname?.toLowerCase().includes(query)
   );
 }, [allPokemon, searchQuery]);
 ```
 
 ### Store Only Base Data in State
+
 ```typescript
 // Good: State contains only source of truth
 const [allPokemon, setAllPokemon] = useState([]);
@@ -72,12 +86,14 @@ const filteredPokemon = useMemo(() => {
 ```
 
 ### Handle Complex Calculations Locally
+
 ```typescript
 // Good: Complex derived state computed locally
 const teamStats = useMemo(() => {
   return {
     totalHP: team.reduce((sum, pokemon) => sum + pokemon.hp, 0),
-    averageLevel: team.reduce((sum, pokemon) => sum + pokemon.level, 0) / team.length,
+    averageLevel:
+      team.reduce((sum, pokemon) => sum + pokemon.level, 0) / team.length,
     typeCoverage: calculateTypeCoverage(team),
   };
 }, [team]);
@@ -122,7 +138,3 @@ const filteredPokemon = useMemo(() => {
 ## Remember
 
 **State should contain the minimal data needed to reconstruct the UI, not the computed results.**
-description:
-globs:
-alwaysApply: true
----

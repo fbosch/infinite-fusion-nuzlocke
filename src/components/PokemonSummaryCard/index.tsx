@@ -166,7 +166,7 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
           <Fragment>
             <div
               className={clsx(
-                'size-22 absolute -translate-y-2 rounded-lg opacity-30 border border-gray-200 dark:border-gray-40 ',
+                'size-22 absolute -translate-y-2 rounded-lg opacity-30 border border-gray-200 dark:border-gray-400 ',
                 {
                   'text-rose-200 dark:text-red-700 dark:mix-blend-color-dodge opacity-90 dark:border-red-800':
                     isDeceased,

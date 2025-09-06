@@ -1,7 +1,6 @@
 import { beforeEach, expect } from 'vitest';
 import { playthroughsStore, createPlaythrough } from '../store';
-import { PokemonStatus } from '@/loaders/pokemon';
-import type { PokemonOptionType } from '@/stores/playthroughs/types';
+import { PokemonStatus, type PokemonOptionType } from '@/loaders/pokemon';
 
 /**
  * Reset the playthroughs store before each test

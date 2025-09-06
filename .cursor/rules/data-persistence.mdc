@@ -1,6 +1,6 @@
 ---
 description: Data persistence and state management rules including run storage, auto-save, export/import, and data validation
-globs: src/lib/**/*.ts,src/stores/**/*.ts
+globs: src/lib/**/*.ts,src/lib/**/*.tsx,src/stores/**/*.ts,src/stores/**/*.tsx
 alwaysApply: false
 ---
 

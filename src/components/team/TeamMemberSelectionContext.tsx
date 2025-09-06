@@ -141,7 +141,7 @@ function teamMemberSelectionReducer(
       return { ...initialState, activeSlot: 'head' };
     case 'SET_AVAILABLE_POKEMON':
       return { ...state, availablePokemon: action.payload };
-    case 'INITIALIZE_FROM_EXISTING':
+    case 'INITIALIZE_FROM_EXISTING': {
       const { headPokemon, bodyPokemon, headLocationId, bodyLocationId } =
         action.payload;
 
@@ -178,6 +178,7 @@ function teamMemberSelectionReducer(
       }
 
       return updatedState;
+    }
     default:
       return state;
   }
@@ -532,25 +533,23 @@ export function TeamMemberSelectionProvider({
     const bodyPokemon = selectedBody?.pokemon;
 
     // Update the nickname for the Pokémon that needs it
-    if (nickname) {
-      // Always update the head Pokémon's nickname if there is one
-      if (headPokemon && headPokemon.uid && nickname !== headPokemon.nickname) {
-        await playthroughActions.updatePokemonByUID(headPokemon.uid, {
-          nickname: nickname || undefined,
-        });
-      }
+    // Always update the head Pokémon's nickname if there is one
+    if (headPokemon && headPokemon.uid && nickname !== headPokemon.nickname) {
+      await playthroughActions.updatePokemonByUID(headPokemon.uid, {
+        nickname: nickname === '' ? undefined : nickname,
+      });
+    }
 
-      // Only update body Pokémon nickname if there's no head Pokémon
-      if (
-        !headPokemon &&
-        bodyPokemon &&
-        bodyPokemon.uid &&
-        nickname !== bodyPokemon.nickname
-      ) {
-        await playthroughActions.updatePokemonByUID(bodyPokemon.uid, {
-          nickname: nickname || undefined,
-        });
-      }
+    // Only update body Pokémon nickname if there's no head Pokémon
+    if (
+      !headPokemon &&
+      bodyPokemon &&
+      bodyPokemon.uid &&
+      nickname !== bodyPokemon.nickname
+    ) {
+      await playthroughActions.updatePokemonByUID(bodyPokemon.uid, {
+        nickname: nickname === '' ? undefined : nickname,
+      });
     }
 
     // If both are empty, this functions the same as clearing

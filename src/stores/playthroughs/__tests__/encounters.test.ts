@@ -211,9 +211,9 @@ describe('Basic Encounter Operations', () => {
     it('should handle non-existent encounter gracefully', async () => {
       createTestPlaythrough();
 
-      expect(
-        async () => await clearEncounterFromLocation('nonexistent')
-      ).not.toThrow();
+      await expect(
+        clearEncounterFromLocation('nonexistent')
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -409,14 +409,14 @@ describe('Basic Encounter Operations', () => {
 
       const pikachu = testPokemon.pikachu();
 
-      expect(
-        async () => await updateEncounter('route1', pikachu, 'head', false)
-      ).not.toThrow();
+      await expect(
+        updateEncounter('route1', pikachu, 'head', false)
+      ).resolves.not.toThrow();
       expect(() => resetEncounter('route1')).not.toThrow();
-      expect(
-        async () => await clearEncounterFromLocation('route1')
-      ).not.toThrow();
-      expect(async () => await markEncounterAsCaptured('route1')).not.toThrow();
+      await expect(
+        clearEncounterFromLocation('route1')
+      ).resolves.toBeUndefined();
+      await expect(markEncounterAsCaptured('route1')).resolves.toBeUndefined();
     });
 
     it('should handle invalid encounter operations gracefully', async () => {
@@ -425,9 +425,11 @@ describe('Basic Encounter Operations', () => {
       // Try operations on non-existent encounters
       await expect(
         markEncounterAsCaptured('nonexistent')
-      ).resolves.not.toThrow();
-      await expect(toggleEncounterFusion('nonexistent')).resolves.not.toThrow();
-      await expect(flipEncounterFusion('nonexistent')).resolves.not.toThrow();
+      ).resolves.toBeUndefined();
+      await expect(
+        toggleEncounterFusion('nonexistent')
+      ).resolves.toBeUndefined();
+      await expect(flipEncounterFusion('nonexistent')).resolves.toBeUndefined();
 
       // Verify no encounters were created (or only empty encounter from toggle)
       const encounterKeys = Object.keys(activePlaythrough.encounters || {});
