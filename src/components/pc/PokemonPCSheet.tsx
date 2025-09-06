@@ -70,8 +70,8 @@ export default function PokemonPCSheet({
     activePlaythroughRef.current = activePlaythrough;
 
   const mergedLocations = useMemo(
-    () => getLocationsSortedWithCustom(customLocationsRef.current),
-    [customLocationsRef.current]
+    () => getLocationsSortedWithCustom(customLocations),
+    [customLocations]
   );
 
   const idToName = useMemo(() => {
@@ -84,6 +84,7 @@ export default function PokemonPCSheet({
   const handleTeamMemberClick = useCallback(
     (
       position: number,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       _existingTeamMember: {
         position: number;
         isEmpty: boolean;
@@ -134,9 +135,9 @@ export default function PokemonPCSheet({
   );
 
   const team: Entry[] = useMemo(() => {
-    if (!activePlaythroughRef.current?.team) return [];
+    if (!activePlaythrough?.team) return [];
 
-    return activePlaythroughRef.current.team.members.map((member, index) => {
+    return activePlaythrough.team.members.map((member, index) => {
       if (!member) {
         return {
           locationId: `team-slot-${index}`,
@@ -148,10 +149,10 @@ export default function PokemonPCSheet({
       }
 
       const headPokemon = member.headPokemonUid
-        ? findPokemonByUid(encountersRef.current, member.headPokemonUid)
+        ? findPokemonByUid(encounters, member.headPokemonUid)
         : null;
       const bodyPokemon = member.bodyPokemonUid
-        ? findPokemonByUid(encountersRef.current, member.bodyPokemonUid)
+        ? findPokemonByUid(encounters, member.bodyPokemonUid)
         : null;
 
       // A slot is empty only if both UIDs are empty strings
@@ -182,65 +183,53 @@ export default function PokemonPCSheet({
         isFusion,
       };
     });
-  }, [activePlaythroughRef.current?.team, encountersRef.current]);
+  }, [activePlaythrough?.team, encounters]);
 
   const deceased: Entry[] = useMemo(() => {
     const entries: Entry[] = [];
 
-    Object.entries(encountersRef.current || {}).forEach(
-      ([locationId, data]) => {
-        const headDead = isPokemonDeceased(data?.head);
-        const bodyDead = isPokemonDeceased(data?.body);
+    Object.entries(encounters || {}).forEach(([locationId, data]) => {
+      const headDead = isPokemonDeceased(data?.head);
+      const bodyDead = isPokemonDeceased(data?.body);
 
-        if (headDead || bodyDead) {
-          entries.push({
-            locationId,
-            locationName:
-              idToName.get(locationId) ||
-              getLocationById(locationId)?.name ||
-              'Unknown Location',
-            head: headDead ? data?.head || null : null,
-            body: bodyDead ? data?.body || null : null,
-          });
-        }
+      if (headDead || bodyDead) {
+        entries.push({
+          locationId,
+          locationName:
+            idToName.get(locationId) ||
+            getLocationById(locationId)?.name ||
+            'Unknown Location',
+          head: headDead ? data?.head || null : null,
+          body: bodyDead ? data?.body || null : null,
+        });
       }
-    );
+    });
 
     return entries;
-  }, [
-    encountersRef.current,
-    idToName,
-    activePlaythroughRef.current?.updatedAt,
-  ]);
+  }, [encounters, idToName]);
 
   const stored: Entry[] = useMemo(() => {
     const entries: Entry[] = [];
 
-    Object.entries(encountersRef.current || {}).forEach(
-      ([locationId, data]) => {
-        const headStored = isPokemonStored(data?.head);
-        const bodyStored = isPokemonStored(data?.body);
+    Object.entries(encounters || {}).forEach(([locationId, data]) => {
+      const headStored = isPokemonStored(data?.head);
+      const bodyStored = isPokemonStored(data?.body);
 
-        if (headStored || bodyStored) {
-          entries.push({
-            locationId,
-            locationName:
-              idToName.get(locationId) ||
-              getLocationById(locationId)?.name ||
-              'Unknown Location',
-            head: headStored ? data?.head || null : null,
-            body: bodyStored ? data?.body || null : null,
-          });
-        }
+      if (headStored || bodyStored) {
+        entries.push({
+          locationId,
+          locationName:
+            idToName.get(locationId) ||
+            getLocationById(locationId)?.name ||
+            'Unknown Location',
+          head: headStored ? data?.head || null : null,
+          body: bodyStored ? data?.body || null : null,
+        });
       }
-    );
+    });
 
     return entries;
-  }, [
-    encountersRef.current,
-    idToName,
-    activePlaythroughRef.current?.updatedAt,
-  ]);
+  }, [encounters, idToName]);
 
   const getSelectedIndex = useCallback((tab: 'team' | 'box' | 'graveyard') => {
     switch (tab) {
