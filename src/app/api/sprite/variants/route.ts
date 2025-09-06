@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SpriteVariantsResponse } from '@/types/sprites';
 
-export const runtime = 'edge';
+export const revalidate = 86400;
+
+// Static import of pre-generated sprite variants data
 
 /**
  * Generate variant suffix for index (0='', 1='a', 2='b', etc.)
