@@ -192,15 +192,27 @@ export default function PokemonPCSheet({
       const headDead = isPokemonDeceased(data?.head);
       const bodyDead = isPokemonDeceased(data?.body);
 
-      if (headDead || bodyDead) {
+      const locationName =
+        idToName.get(locationId) ||
+        getLocationById(locationId)?.name ||
+        'Unknown Location';
+
+      // Create separate entries for each deceased Pokémon
+      if (headDead && data?.head) {
         entries.push({
-          locationId,
-          locationName:
-            idToName.get(locationId) ||
-            getLocationById(locationId)?.name ||
-            'Unknown Location',
-          head: headDead ? data?.head || null : null,
-          body: bodyDead ? data?.body || null : null,
+          locationId: `${locationId}-head`,
+          locationName,
+          head: data.head,
+          body: null,
+        });
+      }
+
+      if (bodyDead && data?.body) {
+        entries.push({
+          locationId: `${locationId}-body`,
+          locationName,
+          head: null,
+          body: data.body,
         });
       }
     });
@@ -449,10 +461,10 @@ export default function PokemonPCSheet({
                             onLocationClick={locationId => {
                               // Scroll to location in the encounter table
                               const highlightUids: string[] = [];
-                              if (entry.head?.uid)
-                                highlightUids.push(entry.head.uid);
-                              if (entry.body?.uid)
-                                highlightUids.push(entry.body.uid);
+                              const pokemon = entry.head || entry.body;
+                              if (pokemon?.uid) {
+                                highlightUids.push(pokemon.uid);
+                              }
 
                               scrollToLocationById(locationId, {
                                 behavior: 'smooth',

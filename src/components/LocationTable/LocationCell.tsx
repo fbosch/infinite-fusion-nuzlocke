@@ -154,6 +154,7 @@ export default function LocationCell({
     <div className='text-gray-900 dark:text-white flex gap-x-2 items-center'>
       <CursorTooltip
         content={getTooltipContent}
+        delay={300}
         onMouseEnter={() =>
           shouldShowOriginalEncounter && setIsTooltipHovered(true)
         }

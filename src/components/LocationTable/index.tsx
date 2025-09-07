@@ -128,7 +128,10 @@ export default function LocationTable() {
           <div className='flex items-center w-full'>
             <span>Location</span>
             <div className='flex items-center gap-1 ml-2'>
-              <CursorTooltip content={'Scroll to most recent encounter'}>
+              <CursorTooltip
+                content={'Scroll to most recent encounter'}
+                delay={300}
+              >
                 <button
                   onKeyDown={e => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -155,7 +158,7 @@ export default function LocationTable() {
                   <LocateIcon className='size-2.5' />
                 </button>
               </CursorTooltip>
-              <CursorTooltip content={'Add a custom location'}>
+              <CursorTooltip content={'Add a custom location'} delay={300}>
                 <button
                   onKeyDown={e => {
                     if (e.key === 'Enter' || e.key === ' ') {

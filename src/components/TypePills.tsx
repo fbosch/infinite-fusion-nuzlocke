@@ -288,6 +288,7 @@ export function TypeBadge({
     <CursorTooltip
       content={<TypeEffectivenessSummary primary={type} />}
       placement='bottom-end'
+      delay={300}
       className='max-w-none'
     >
       {core}
@@ -320,6 +321,7 @@ export function TypeTooltip({
         />
       }
       placement={placement}
+      delay={300}
       className='max-w-none'
     >
       {children}

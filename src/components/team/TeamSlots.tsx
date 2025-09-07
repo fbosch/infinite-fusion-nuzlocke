@@ -12,7 +12,8 @@ import {
   type FusionSpriteHandle,
 } from '@/components/PokemonSummaryCard/FusionSprite';
 import { clsx } from 'clsx';
-import { Plus } from 'lucide-react';
+import PokeballIcon from '@/assets/images/pokeball.svg';
+import { CursorTooltip } from '@/components/CursorTooltip';
 import TeamMemberPickerModal from './TeamMemberPickerModal';
 import { type PokemonOptionType } from '@/loaders/pokemon';
 import { playthroughActions } from '@/stores/playthroughs';
@@ -22,6 +23,10 @@ import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
 import { TeamMemberContextMenu } from '@/components/PokemonSummaryCard/TeamMemberContextMenu';
 import { ArtworkVariantButton } from '@/components/PokemonSummaryCard/ArtworkVariantButton';
 import TeamSlotsSkeleton from './TeamSlotsSkeleton';
+import { useSpriteCredits } from '@/hooks/useSprite';
+import { Palette, MousePointer } from 'lucide-react';
+import { getSpriteId } from '@/lib/sprites';
+import { formatArtistCredits } from '@/utils/formatCredits';
 
 // Component to display type indicators and nickname
 function TypeIndicators({
@@ -65,6 +70,95 @@ function TypeIndicators({
         </div>
       )}
     </>
+  );
+}
+
+// Component to create tooltip content for team members
+function TeamMemberTooltipContent({
+  headPokemon,
+  bodyPokemon,
+  isFusion,
+}: {
+  headPokemon: PokemonOptionType | null;
+  bodyPokemon: PokemonOptionType | null;
+  isFusion: boolean;
+}) {
+  const { primary, secondary } = useFusionTypesFromPokemon(
+    headPokemon,
+    bodyPokemon,
+    isFusion
+  );
+
+  // Get sprite credits
+  const tooltipSpriteId = getSpriteId(headPokemon?.id, bodyPokemon?.id);
+  const { data: tooltipCredits } = useSpriteCredits(
+    headPokemon?.id,
+    bodyPokemon?.id,
+    true
+  );
+
+  const credit =
+    tooltipSpriteId == null
+      ? undefined
+      : (() => {
+          const credits = tooltipCredits?.[tooltipSpriteId];
+          return credits && Object.keys(credits).length > 0
+            ? formatArtistCredits(credits)
+            : undefined;
+        })();
+
+  return (
+    <div className='min-w-44 max-w-[22rem]' role='tooltip'>
+      <div className='flex py-0.5'>
+        <TypePills primary={primary} secondary={secondary} />
+      </div>
+      {credit && (
+        <>
+          <div className='my-2 flex'>
+            <div className='inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400'>
+              <Palette
+                className='h-3 w-3'
+                aria-hidden='true'
+                focusable={false}
+              />
+              <span className='opacity-80'>by</span>
+              <span className='truncate max-w-[14rem]' title={credit}>
+                {credit}
+              </span>
+            </div>
+          </div>
+          <div className='w-full h-px bg-gray-200 dark:bg-gray-700 my-1' />
+        </>
+      )}
+      <div className='flex items-center text-xs gap-2'>
+        <div className='flex items-center gap-1'>
+          <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
+            <MousePointer
+              className='h-3 w-3'
+              aria-hidden='true'
+              focusable={false}
+            />
+            <span className='font-medium text-xs'>L</span>
+          </div>
+          <span className='text-gray-600 dark:text-gray-300 text-xs'>
+            Change
+          </span>
+        </div>
+        <div className='flex items-center gap-1'>
+          <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
+            <MousePointer
+              className='h-3 w-3'
+              aria-hidden='true'
+              focusable={false}
+            />
+            <span className='font-medium text-xs'>R</span>
+          </div>
+          <span className='text-gray-600 dark:text-gray-300 text-xs'>
+            Options
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -179,17 +273,7 @@ export default function TeamSlots() {
     return <TeamSlotsSkeleton />;
   }
 
-  const handleSlotClick = (
-    position: number,
-    existingSlot: {
-      position: number;
-      isEmpty: boolean;
-      location?: string;
-      headPokemon?: PokemonOptionType | null;
-      bodyPokemon?: PokemonOptionType | null;
-      isFusion?: boolean;
-    } | null
-  ) => {
+  const handleSlotClick = (position: number) => {
     setSelectedPosition(position);
     setPickerModalOpen(true);
   };
@@ -230,38 +314,23 @@ export default function TeamSlots() {
     <>
       <div className='hidden lg:flex flex-col items-center'>
         <div className='flex gap-3 sm:gap-4 md:gap-5'>
-          {teamSlots.map(slot => (
-            <TeamMemberContextMenu
-              key={slot.position}
-              teamMember={slot}
-              shouldLoad={!slot.isEmpty}
-              onClose={() => {
-                // Context menu closed, no specific action needed
-              }}
-            >
-              <div
-                className={clsx(
-                  'flex flex-col items-center justify-center relative group/team-slot',
-                  'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
-                  slot.isEmpty
-                    ? 'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
-                    : 'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
-                )}
-                onClick={() =>
-                  handleSlotClick(slot.position, slot.isEmpty ? null : slot)
-                }
+          {teamSlots.map(slot =>
+            slot.isEmpty ? (
+              <CursorTooltip
+                key={slot.position}
+                content='Click to add a Pokémon'
+                placement='bottom-start'
+                delay={300}
+                offset={{ mainAxis: 16 }}
               >
-                {!slot.isEmpty &&
-                  slot.headPokemon !== undefined &&
-                  slot.bodyPokemon !== undefined &&
-                  slot.isFusion !== undefined && (
-                    <TypeIndicators
-                      headPokemon={slot.headPokemon}
-                      bodyPokemon={slot.bodyPokemon}
-                      isFusion={slot.isFusion}
-                    />
+                <div
+                  className={clsx(
+                    'flex flex-col items-center justify-center relative group/team-slot',
+                    'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
+                    'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
                   )}
-                {slot.isEmpty ? (
+                  onClick={() => handleSlotClick(slot.position)}
+                >
                   <div className='flex flex-col items-center justify-center text-center relative w-full h-full'>
                     <div
                       className='w-full h-full absolute rounded-full opacity-30 border border-gray-100 dark:border-gray-800/20 text-gray-300 dark:text-gray-600'
@@ -269,14 +338,55 @@ export default function TeamSlots() {
                         background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
                       }}
                     />
-                    <div className='flex flex-col items-center justify-center text-center relative z-10'>
-                      <Plus className='h-6 w-6 text-gray-400 dark:text-gray-600' />
-                      <span className='text-xs text-gray-500 dark:text-gray-500 mt-1'>
-                        Add
-                      </span>
+                    <div className='flex items-center justify-center relative z-10'>
+                      <PokeballIcon
+                        className='h-8 w-8 text-gray-400 dark:text-gray-500 opacity-60'
+                        aria-hidden='true'
+                        focusable={false}
+                      />
                     </div>
                   </div>
-                ) : (
+                </div>
+              </CursorTooltip>
+            ) : (
+              <TeamMemberContextMenu
+                key={slot.position}
+                teamMember={slot}
+                shouldLoad={!slot.isEmpty}
+                onClose={() => {
+                  // Context menu closed, no specific action needed
+                }}
+              >
+                <div
+                  role='button'
+                  tabIndex={0}
+                  className={clsx(
+                    'flex flex-col items-center justify-center relative group/team-slot',
+                    'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
+                    'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
+                  )}
+                  onClick={() => handleSlotClick(slot.position)}
+                  onKeyDown={e => {
+                    if (
+                      e.target === e.currentTarget &&
+                      (e.key === 'Enter' || e.key === ' ')
+                    ) {
+                      e.preventDefault();
+                      handleSlotClick(slot.position);
+                    }
+                  }}
+                >
+                  {slot.headPokemon !== undefined &&
+                    slot.bodyPokemon !== undefined &&
+                    slot.isFusion !== undefined && (
+                      <TypeIndicators
+                        headPokemon={slot.headPokemon}
+                        bodyPokemon={slot.bodyPokemon}
+                        isFusion={slot.isFusion}
+                      />
+                    )}
+
                   <div className='flex flex-col items-center justify-center relative w-full h-full'>
                     <div
                       className='w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600'
@@ -286,16 +396,29 @@ export default function TeamSlots() {
                     />
 
                     <div className='relative z-10'>
-                      <FusionSprite
-                        ref={ref => {
-                          teamSpriteRefs.current[slot.position] = ref;
-                        }}
-                        headPokemon={slot.headPokemon || null}
-                        bodyPokemon={slot.bodyPokemon || null}
-                        isFusion={slot.isFusion}
-                        shouldLoad={true}
-                        showStatusOverlay={true}
-                      />
+                      <CursorTooltip
+                        delay={500}
+                        content={
+                          <TeamMemberTooltipContent
+                            headPokemon={slot.headPokemon || null}
+                            bodyPokemon={slot.bodyPokemon || null}
+                            isFusion={slot.isFusion || false}
+                          />
+                        }
+                      >
+                        <div>
+                          <FusionSprite
+                            ref={ref => {
+                              teamSpriteRefs.current[slot.position] = ref;
+                            }}
+                            headPokemon={slot.headPokemon || null}
+                            bodyPokemon={slot.bodyPokemon || null}
+                            isFusion={slot.isFusion}
+                            shouldLoad={true}
+                            showStatusOverlay={true}
+                          />
+                        </div>
+                      </CursorTooltip>
                     </div>
 
                     <ArtworkVariantButton
@@ -306,10 +429,10 @@ export default function TeamSlots() {
                       className='absolute bottom-0 right-1/2 -translate-x-6 z-20 opacity-0 group-hover/team-slot:opacity-50 focus:opacity-100 transition-opacity duration-200'
                     />
                   </div>
-                )}
-              </div>
-            </TeamMemberContextMenu>
-          ))}
+                </div>
+              </TeamMemberContextMenu>
+            )
+          )}
         </div>
       </div>
 
