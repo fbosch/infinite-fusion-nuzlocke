@@ -13,6 +13,7 @@ import { getNicknameText } from '@/components/PokemonSummaryCard/utils';
 import HeadIcon from '@/assets/images/head.svg';
 import BodyIcon from '@/assets/images/body.svg';
 import { Box, Skull, Plus } from 'lucide-react';
+import PokeballIcon from '@/assets/images/pokeball.svg';
 import { useEncounters, playthroughActions } from '@/stores/playthroughs';
 import { canFuse, isPokemonActive } from '@/utils/pokemonPredicates';
 import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
@@ -145,7 +146,7 @@ export default function TeamEntryItem({
         isEmpty
           ? {
               boxShadow:
-                'inset 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.15)',
+                'inset 0 1px 3px rgba(0, 0, 0, 0.05), inset 0 1px 2px rgba(0, 0, 0, 0.08)',
             }
           : undefined
       }
@@ -164,14 +165,11 @@ export default function TeamEntryItem({
       }
     >
       <div className='p-4'>
-        <div className='flex items-start gap-4'>
+        <div className='flex items-center gap-4'>
           <div className='flex flex-shrink-0 items-center justify-center rounded-lg relative group/sprite-container p-2'>
             {isEmpty ? (
-              <div className='size-16 flex flex-col items-center justify-center text-center text-gray-400 dark:text-gray-500'>
-                <Plus className='h-8 w-8 mb-1 text-gray-400 dark:text-gray-500' />
-                <span className='text-xs text-gray-400 dark:text-gray-400'>
-                  Add
-                </span>
+              <div className='size-16 flex items-center justify-center'>
+                <PokeballIcon className='h-12 w-12 text-gray-400 dark:text-gray-500 opacity-60' />
               </div>
             ) : (
               <>
@@ -200,20 +198,37 @@ export default function TeamEntryItem({
               </>
             )}
           </div>
-          <div className='min-w-0 flex-1 space-y-1.5'>
-            <div className='flex items-center gap-2'>
-              <h3 className='text-base font-semibold text-gray-900 dark:text-gray-100'>
-                {isEmpty
-                  ? ''
-                  : getNicknameText(entry.head, entry.body, isFusion)}
-              </h3>
-            </div>
+          <div className='min-w-0 flex-1'>
             {isEmpty ? (
-              <div className='text-sm text-gray-400 dark:text-gray-300 font-medium'>
-                Click to add a Pokémon to this slot
+              <div className='flex items-center h-full'>
+                <button
+                  type='button'
+                  className='inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 rounded-md transition-colors focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1'
+                  onClick={e => {
+                    e.stopPropagation();
+                    if (isTeamData && entry.position !== undefined) {
+                      const existingTeamMember = {
+                        position: entry.position,
+                        isEmpty: true,
+                        headPokemon: null,
+                        bodyPokemon: null,
+                        isFusion: false,
+                      };
+                      onTeamMemberClick?.(entry.position, existingTeamMember);
+                    }
+                  }}
+                >
+                  <Plus className='h-3 w-3' />
+                  Add
+                </button>
               </div>
             ) : (
-              <>
+              <div className='space-y-1.5'>
+                <div className='flex items-center gap-2'>
+                  <h3 className='text-base font-semibold text-gray-900 dark:text-gray-100'>
+                    {getNicknameText(entry.head, entry.body, isFusion)}
+                  </h3>
+                </div>
                 {/* Head Pokémon info */}
                 {entry.head && (
                   <div className='flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 min-w-0'>
@@ -255,7 +270,7 @@ export default function TeamEntryItem({
                     </span>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
           {primary && (
