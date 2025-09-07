@@ -23,6 +23,10 @@ import type { PCEntry } from './types';
 import type { PokemonOptionType } from '@/loaders/pokemon';
 import { PokemonStatus } from '@/loaders/pokemon';
 import { ArtworkVariantButton } from '@/components/PokemonSummaryCard/ArtworkVariantButton';
+import { useSpriteCredits } from '@/hooks/useSprite';
+import { Palette, MousePointer } from 'lucide-react';
+import { getSpriteId } from '@/lib/sprites';
+import { formatArtistCredits } from '@/utils/formatCredits';
 
 interface TeamEntryItemProps {
   entry: PCEntry;
@@ -38,6 +42,83 @@ interface TeamEntryItemProps {
       isFusion: boolean;
     }
   ) => void;
+}
+
+// Component to create tooltip content for team members
+function TeamMemberTooltipContent({
+  headPokemon,
+  bodyPokemon,
+  isFusion,
+}: {
+  headPokemon: PokemonOptionType | null;
+  bodyPokemon: PokemonOptionType | null;
+  isFusion: boolean;
+}) {
+  const { primary, secondary } = useFusionTypesFromPokemon(
+    headPokemon,
+    bodyPokemon,
+    isFusion
+  );
+
+  // Get sprite credits
+  const tooltipSpriteId = getSpriteId(headPokemon?.id, bodyPokemon?.id);
+  const { data: tooltipCredits } = useSpriteCredits(
+    headPokemon?.id,
+    bodyPokemon?.id,
+    true
+  );
+
+  const credit =
+    tooltipSpriteId == null
+      ? undefined
+      : (() => {
+          const credits = tooltipCredits?.[tooltipSpriteId];
+          return credits && Object.keys(credits).length > 0
+            ? formatArtistCredits(credits)
+            : undefined;
+        })();
+
+  return (
+    <div className='min-w-44 max-w-[22rem]'>
+      <div className='flex py-0.5'>
+        <TypePills primary={primary} secondary={secondary} />
+      </div>
+      {credit && (
+        <>
+          <div className='my-2 flex'>
+            <div className='inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400'>
+              <Palette className='size-3' />
+              <span className='opacity-80'>by</span>
+              <span className='truncate max-w-[14rem]' title={credit}>
+                {credit}
+              </span>
+            </div>
+          </div>
+          <div className='w-full h-px bg-gray-200 dark:bg-gray-700 my-1' />
+        </>
+      )}
+      <div className='flex items-center text-xs gap-2'>
+        <div className='flex items-center gap-1'>
+          <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
+            <MousePointer className='size-2.5' />
+            <span className='font-medium text-xs'>L</span>
+          </div>
+          <span className='text-gray-600 dark:text-gray-300 text-xs'>
+            Change
+          </span>
+        </div>
+        <div className='flex items-center gap-1'>
+          <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
+            <MousePointer className='size-2.5' />
+            <span className='font-medium text-xs'>R</span>
+          </div>
+          <span className='text-gray-600 dark:text-gray-300 text-xs'>
+            Options
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function TeamEntryItem({
@@ -179,15 +260,28 @@ export default function TeamEntryItem({
                     background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
                   }}
                 />
-                <FusionSprite
-                  ref={spriteRef}
-                  headPokemon={entry.head ?? null}
-                  bodyPokemon={entry.body ?? null}
-                  isFusion={isFusion}
-                  shouldLoad
-                  className='top-1.5'
-                  showStatusOverlay={false}
-                />
+                <CursorTooltip
+                  delay={500}
+                  content={
+                    <TeamMemberTooltipContent
+                      headPokemon={entry.head}
+                      bodyPokemon={entry.body}
+                      isFusion={isFusion}
+                    />
+                  }
+                >
+                  <div>
+                    <FusionSprite
+                      ref={spriteRef}
+                      headPokemon={entry.head ?? null}
+                      bodyPokemon={entry.body ?? null}
+                      isFusion={isFusion}
+                      shouldLoad
+                      className='top-1.5'
+                      showStatusOverlay={false}
+                    />
+                  </div>
+                </CursorTooltip>
                 <ArtworkVariantButton
                   headId={entry.head?.id}
                   bodyId={entry.body?.id}
