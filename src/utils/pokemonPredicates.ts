@@ -37,7 +37,7 @@ export function isMissedStatus(
 export function isInactiveStatus(
   status: PokemonStatusType | null | undefined
 ): boolean {
-  return isDeceasedStatus(status) || isStoredStatus(status);
+  return isDeceasedStatus(status);
 }
 
 // Object-level predicates (pokemon-level)
