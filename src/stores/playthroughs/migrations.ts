@@ -210,12 +210,61 @@ export function migrateOriginalReceivalStatus(
 }
 
 /**
+ * Ensure required fields exist with proper types
+ */
+export function migrateRequiredFields(data: MigrationData): MigrationData {
+  const now = Date.now();
+
+  // Handle completely malformed data
+  if (!data || typeof data !== 'object') {
+    return {
+      id: `playthrough_${now}_${Math.random().toString(36).substr(2, 9)}`,
+      name: 'Nuzlocke',
+      createdAt: now,
+      updatedAt: now,
+      gameMode: 'classic',
+      version: '1.0.0',
+      team: { members: Array.from({ length: 6 }, () => null) },
+    };
+  }
+
+  // Helper function to safely convert to number
+  const toNumber = (value: unknown, fallback: number): number => {
+    if (typeof value === 'number' && !isNaN(value) && isFinite(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const parsed = parseInt(value, 10);
+      if (!isNaN(parsed) && isFinite(parsed)) {
+        return parsed;
+      }
+    }
+    return fallback;
+  };
+
+  return {
+    ...data,
+    id:
+      typeof data.id === 'string' && data.id.length > 0
+        ? data.id
+        : `playthrough_${now}_${Math.random().toString(36).substr(2, 9)}`,
+    name:
+      typeof data.name === 'string' && data.name.length > 0
+        ? data.name
+        : 'Nuzlocke',
+    createdAt: toNumber(data.createdAt, now),
+    updatedAt: toNumber(data.updatedAt, now),
+  };
+}
+
+/**
  * Apply all migrations to a playthrough in sequence
  */
 export function migratePlaythrough(data: MigrationData): MigrationData {
   let migratedData = data;
 
   // Apply migrations in order
+  migratedData = migrateRequiredFields(migratedData);
   migratedData = migrateRemixMode(migratedData);
   migratedData = migrateVersion(migratedData);
   migratedData = migrateTeamField(migratedData);
