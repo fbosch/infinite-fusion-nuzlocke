@@ -13,6 +13,7 @@ import {
   autoUpdate,
   Placement,
   offset,
+  useDelayGroup,
 } from '@floating-ui/react';
 import { clsx } from 'clsx';
 import {
@@ -27,6 +28,7 @@ import { useWindowVisibility } from '@/hooks/useWindowVisibility';
 import { twMerge } from 'tailwind-merge';
 import { useSnapshot } from 'valtio';
 import { dragStore } from '../stores/dragStore';
+import { useGlobalTooltip } from '@/contexts/GlobalTooltipContext';
 
 // Helper functions to calculate offsets based on placement
 function getMainAxisOffset(placement: Placement): number {
@@ -81,6 +83,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
   }
   const isWindowVisible = useWindowVisibility();
   const dragSnapshot = useSnapshot(dragStore);
+  const { isAnyTooltipVisible, registerTooltip } = useGlobalTooltip();
 
   const {
     refs,
@@ -162,6 +165,11 @@ export function CursorTooltip(props: CursorTooltipProps) {
     },
   });
 
+  // Register tooltip with global state when it opens/closes
+  useEffect(() => {
+    registerTooltip(isOpen);
+  }, [isOpen, registerTooltip]);
+
   // Handle window visibility changes - close tooltip if window becomes hidden
   useEffect(() => {
     if (isOpen) {
@@ -175,8 +183,17 @@ export function CursorTooltip(props: CursorTooltipProps) {
     axis: 'both',
   });
 
+  // Use delay group context if available, otherwise use the provided delay
+  const { delay: delayGroupDelay } = useDelayGroup(context);
+  const groupDelay = delayGroupDelay || { open: delay, close: 50 };
+
+  // If any tooltip is visible globally, skip the open delay
+  const effectiveDelay = isAnyTooltipVisible
+    ? { open: 0, close: typeof groupDelay === 'number' ? 50 : groupDelay.close }
+    : groupDelay;
+
   const hover = useHover(context, {
-    delay: { open: delay, close: 50 },
+    delay: effectiveDelay,
     enabled: !disabled,
     move: true,
     restMs: 16,

@@ -36,6 +36,7 @@ export default function ResetEncounterButton({
       <CursorTooltip
         placement={'bottom-end'}
         className='origin-top-right'
+        delay={300}
         content={'Reset the encounter for this location'}
       >
         <button

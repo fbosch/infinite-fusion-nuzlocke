@@ -287,7 +287,7 @@ export default function TeamEntryItem({
       </div>
       {!isEmpty && (
         <div className='absolute bottom-2 right-2 flex gap-1.5 transition-opacity md:opacity-0 md:group-hover/pc-entry:opacity-100 md:pointer-events-none md:group-hover/pc-entry:pointer-events-auto'>
-          <CursorTooltip content='Move to Box' placement='top-end'>
+          <CursorTooltip content='Move to Box' placement='top-end' delay={300}>
             <button
               type='button'
               className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-400 transition-colors hover:border-gray-200/70 hover:bg-gray-100/50 hover:text-gray-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/40 dark:hover:border-gray-600/60 cursor-pointer'
@@ -306,7 +306,11 @@ export default function TeamEntryItem({
               <Box className='h-4 w-4' />
             </button>
           </CursorTooltip>
-          <CursorTooltip content='Move to Graveyard' placement='top-end'>
+          <CursorTooltip
+            content='Move to Graveyard'
+            delay={300}
+            placement='top-end'
+          >
             <button
               type='button'
               className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-400 transition-colors hover:border-gray-200/70 hover:bg-gray-100/50 hover:text-gray-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/40 dark:hover:border-gray-600/60 cursor-pointer'

@@ -180,17 +180,7 @@ export default function TeamSlots() {
     return <TeamSlotsSkeleton />;
   }
 
-  const handleSlotClick = (
-    position: number,
-    existingSlot: {
-      position: number;
-      isEmpty: boolean;
-      location?: string;
-      headPokemon?: PokemonOptionType | null;
-      bodyPokemon?: PokemonOptionType | null;
-      isFusion?: boolean;
-    } | null
-  ) => {
+  const handleSlotClick = (position: number) => {
     setSelectedPosition(position);
     setPickerModalOpen(true);
   };
@@ -237,7 +227,7 @@ export default function TeamSlots() {
                 key={slot.position}
                 content='Click to add a Pokémon'
                 placement='bottom-start'
-                delay={500}
+                delay={300}
                 offset={{ mainAxis: 16 }}
               >
                 <div
@@ -246,9 +236,7 @@ export default function TeamSlots() {
                     'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
                     'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
                   )}
-                  onClick={() =>
-                    handleSlotClick(slot.position, slot.isEmpty ? null : slot)
-                  }
+                  onClick={() => handleSlotClick(slot.position)}
                 >
                   <div className='flex flex-col items-center justify-center text-center relative w-full h-full'>
                     <div
@@ -278,9 +266,7 @@ export default function TeamSlots() {
                     'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
                     'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
                   )}
-                  onClick={() =>
-                    handleSlotClick(slot.position, slot.isEmpty ? null : slot)
-                  }
+                  onClick={() => handleSlotClick(slot.position)}
                 >
                   {slot.headPokemon !== undefined &&
                     slot.bodyPokemon !== undefined &&

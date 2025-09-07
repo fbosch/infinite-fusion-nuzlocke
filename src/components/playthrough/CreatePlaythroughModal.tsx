@@ -135,6 +135,7 @@ export default function CreatePlaythroughModal({
                 <div className='flex items-center gap-2'>
                   <span>Game Mode</span>
                   <CursorTooltip
+                    delay={300}
                     content={
                       <div className='max-w-sm text-sm font-normal leading-5 space-y-2 divide-y divide-gray-200 dark:divide-gray-600 gap-y-4'>
                         <div>
