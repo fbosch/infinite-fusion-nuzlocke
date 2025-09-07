@@ -25,6 +25,7 @@
 *.pem
 __screenshots__
 .playwright-mcp
+*.backup*
 
 # debug
 npm-debug.log*

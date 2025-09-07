@@ -13,6 +13,8 @@ import { buildPokemonNameMap, type PokemonNameMap } from './pokemon-name-utils';
 export interface DexEntry {
   id: number;
   name: string;
+  headNamePart?: string;
+  bodyNamePart?: string;
 }
 
 // Cache for loaded data to avoid repeated file reads
