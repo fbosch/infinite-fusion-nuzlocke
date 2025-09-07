@@ -13,6 +13,7 @@ import {
 } from '@/components/PokemonSummaryCard/FusionSprite';
 import { clsx } from 'clsx';
 import PokeballIcon from '@/assets/images/pokeball.svg';
+import { CursorTooltip } from '@/components/CursorTooltip';
 import TeamMemberPickerModal from './TeamMemberPickerModal';
 import { type PokemonOptionType } from '@/loaders/pokemon';
 import { playthroughActions } from '@/stores/playthroughs';
@@ -232,29 +233,36 @@ export default function TeamSlots() {
         <div className='flex gap-3 sm:gap-4 md:gap-5'>
           {teamSlots.map(slot =>
             slot.isEmpty ? (
-              <div
+              <CursorTooltip
                 key={slot.position}
-                className={clsx(
-                  'flex flex-col items-center justify-center relative group/team-slot',
-                  'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
-                  'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
-                )}
-                onClick={() =>
-                  handleSlotClick(slot.position, slot.isEmpty ? null : slot)
-                }
+                content='Click to add a Pokémon'
+                placement='bottom-start'
+                delay={500}
+                offset={{ mainAxis: 16 }}
               >
-                <div className='flex flex-col items-center justify-center text-center relative w-full h-full'>
-                  <div
-                    className='w-full h-full absolute rounded-full opacity-30 border border-gray-100 dark:border-gray-800/20 text-gray-300 dark:text-gray-600'
-                    style={{
-                      background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
-                    }}
-                  />
-                  <div className='flex items-center justify-center relative z-10'>
-                    <PokeballIcon className='h-8 w-8 text-gray-400 dark:text-gray-500 opacity-60' />
+                <div
+                  className={clsx(
+                    'flex flex-col items-center justify-center relative group/team-slot',
+                    'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
+                    'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
+                  )}
+                  onClick={() =>
+                    handleSlotClick(slot.position, slot.isEmpty ? null : slot)
+                  }
+                >
+                  <div className='flex flex-col items-center justify-center text-center relative w-full h-full'>
+                    <div
+                      className='w-full h-full absolute rounded-full opacity-30 border border-gray-100 dark:border-gray-800/20 text-gray-300 dark:text-gray-600'
+                      style={{
+                        background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
+                      }}
+                    />
+                    <div className='flex items-center justify-center relative z-10'>
+                      <PokeballIcon className='h-8 w-8 text-gray-400 dark:text-gray-500 opacity-60' />
+                    </div>
                   </div>
                 </div>
-              </div>
+              </CursorTooltip>
             ) : (
               <TeamMemberContextMenu
                 key={slot.position}
