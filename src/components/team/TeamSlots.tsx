@@ -108,7 +108,7 @@ function TeamMemberTooltipContent({
         })();
 
   return (
-    <div className='min-w-44 max-w-[22rem]'>
+    <div className='min-w-44 max-w-[22rem]' role='tooltip'>
       <div className='flex py-0.5'>
         <TypePills primary={primary} secondary={secondary} />
       </div>
@@ -116,7 +116,11 @@ function TeamMemberTooltipContent({
         <>
           <div className='my-2 flex'>
             <div className='inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400'>
-              <Palette className='size-3' />
+              <Palette
+                className='h-3 w-3'
+                aria-hidden='true'
+                focusable={false}
+              />
               <span className='opacity-80'>by</span>
               <span className='truncate max-w-[14rem]' title={credit}>
                 {credit}
@@ -129,7 +133,11 @@ function TeamMemberTooltipContent({
       <div className='flex items-center text-xs gap-2'>
         <div className='flex items-center gap-1'>
           <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
-            <MousePointer className='size-2.5' />
+            <MousePointer
+              className='h-3 w-3'
+              aria-hidden='true'
+              focusable={false}
+            />
             <span className='font-medium text-xs'>L</span>
           </div>
           <span className='text-gray-600 dark:text-gray-300 text-xs'>
@@ -138,7 +146,11 @@ function TeamMemberTooltipContent({
         </div>
         <div className='flex items-center gap-1'>
           <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
-            <MousePointer className='size-2.5' />
+            <MousePointer
+              className='h-3 w-3'
+              aria-hidden='true'
+              focusable={false}
+            />
             <span className='font-medium text-xs'>R</span>
           </div>
           <span className='text-gray-600 dark:text-gray-300 text-xs'>
@@ -327,7 +339,11 @@ export default function TeamSlots() {
                       }}
                     />
                     <div className='flex items-center justify-center relative z-10'>
-                      <PokeballIcon className='h-8 w-8 text-gray-400 dark:text-gray-500 opacity-60' />
+                      <PokeballIcon
+                        className='h-8 w-8 text-gray-400 dark:text-gray-500 opacity-60'
+                        aria-hidden='true'
+                        focusable={false}
+                      />
                     </div>
                   </div>
                 </div>
@@ -342,12 +358,24 @@ export default function TeamSlots() {
                 }}
               >
                 <div
+                  role='button'
+                  tabIndex={0}
                   className={clsx(
                     'flex flex-col items-center justify-center relative group/team-slot',
                     'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
-                    'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
+                    'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
                   )}
                   onClick={() => handleSlotClick(slot.position)}
+                  onKeyDown={e => {
+                    if (
+                      e.target === e.currentTarget &&
+                      (e.key === 'Enter' || e.key === ' ')
+                    ) {
+                      e.preventDefault();
+                      handleSlotClick(slot.position);
+                    }
+                  }}
                 >
                   {slot.headPokemon !== undefined &&
                     slot.bodyPokemon !== undefined &&

@@ -86,8 +86,11 @@ function TeamMemberTooltipContent({
       {credit && (
         <>
           <div className='my-2 flex'>
-            <div className='inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400'>
-              <Palette className='size-3' />
+            <div
+              className='inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400'
+              role='tooltip'
+            >
+              <Palette className='h-3 w-3' aria-hidden='true' />
               <span className='opacity-80'>by</span>
               <span className='truncate max-w-[14rem]' title={credit}>
                 {credit}
@@ -100,7 +103,7 @@ function TeamMemberTooltipContent({
       <div className='flex items-center text-xs gap-2'>
         <div className='flex items-center gap-1'>
           <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
-            <MousePointer className='size-2.5' />
+            <MousePointer className='h-3 w-3' aria-hidden='true' />
             <span className='font-medium text-xs'>L</span>
           </div>
           <span className='text-gray-600 dark:text-gray-300 text-xs'>
@@ -109,7 +112,7 @@ function TeamMemberTooltipContent({
         </div>
         <div className='flex items-center gap-1'>
           <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
-            <MousePointer className='size-2.5' />
+            <MousePointer className='h-3 w-3' aria-hidden='true' />
             <span className='font-medium text-xs'>R</span>
           </div>
           <span className='text-gray-600 dark:text-gray-300 text-xs'>

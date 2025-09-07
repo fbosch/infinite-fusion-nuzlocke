@@ -32,7 +32,9 @@ export function GraveyardGridItem({
 
   return (
     <button
+      type='button'
       onClick={handleClick}
+      aria-label={`View graveyard entry for ${pokemon.nickname || pokemon.name} from ${entry.locationName}`}
       className={clsx(
         'flex flex-col items-center justify-center p-2 rounded-lg border transition-colors h-20',
         'border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer',

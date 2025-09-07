@@ -167,7 +167,15 @@ export function CursorTooltip(props: CursorTooltipProps) {
 
   // Register tooltip with global state when it opens/closes
   useEffect(() => {
-    registerTooltip(isOpen);
+    if (isOpen) {
+      registerTooltip(true);
+    }
+
+    return () => {
+      if (isOpen) {
+        registerTooltip(false);
+      }
+    };
   }, [isOpen, registerTooltip]);
 
   // Handle window visibility changes - close tooltip if window becomes hidden
@@ -183,9 +191,13 @@ export function CursorTooltip(props: CursorTooltipProps) {
     axis: 'both',
   });
 
+  // Normalize delay to object format
+  const normalizedDelay =
+    typeof delay === 'number' ? { open: delay, close: 50 } : delay;
+
   // Use delay group context if available, otherwise use the provided delay
   const { delay: delayGroupDelay } = useDelayGroup(context);
-  const groupDelay = delayGroupDelay || { open: delay, close: 50 };
+  const groupDelay = delayGroupDelay ?? normalizedDelay;
 
   // If any tooltip is visible globally, skip the open delay
   const effectiveDelay = isAnyTooltipVisible
