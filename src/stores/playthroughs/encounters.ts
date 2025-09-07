@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   PokemonOptionSchema,
+  PokemonOptionType,
   generatePokemonUID,
   PokemonStatus,
 } from '@/loaders/pokemon';
@@ -16,7 +17,7 @@ import {
 import { getDisplayPokemon } from '@/components/PokemonSummaryCard/utils';
 import { queryClient } from '@/lib/queryClient';
 import { spriteKeys } from '@/lib/queries/sprites';
-import { EncounterDataSchema, Playthrough } from './types';
+import { EncounterDataSchema, EncounterData, Playthrough } from './types';
 import { getActivePlaythrough, getCurrentTimestamp } from './store';
 import { emitEvolutionEvent } from '@/lib/events';
 
@@ -53,14 +54,8 @@ export const createEncounterData = async (
 
   // Create encounter data without artwork variant (now managed globally)
   const encounterData: z.infer<typeof EncounterDataSchema> = {
-    head:
-      shouldCreateFusion && field === 'head'
-        ? pokemonWithLocationAndUID
-        : !shouldCreateFusion
-          ? pokemonWithLocationAndUID
-          : null,
-    body:
-      shouldCreateFusion && field === 'body' ? pokemonWithLocationAndUID : null,
+    head: field === 'head' ? pokemonWithLocationAndUID : null,
+    body: field === 'body' ? pokemonWithLocationAndUID : null,
     isFusion: shouldCreateFusion,
     updatedAt: getCurrentTimestamp(),
   };
@@ -72,6 +67,83 @@ export const createEncounterData = async (
 export const getEncounters = (): Playthrough['encounters'] => {
   const activePlaythrough = getActivePlaythrough();
   return activePlaythrough?.encounters || {};
+};
+
+// Update a Pokémon's properties by UID across all encounters
+export const updatePokemonByUID = async (
+  pokemonUID: string,
+  updates: Partial<z.infer<typeof PokemonOptionSchema>>
+) => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough?.encounters) {
+    return;
+  }
+
+  // Find and update the Pokémon in all encounters
+  for (const encounter of Object.values(activePlaythrough.encounters)) {
+    if (encounter.head?.uid === pokemonUID) {
+      encounter.head = { ...encounter.head, ...updates };
+      encounter.updatedAt = getCurrentTimestamp();
+    }
+    if (encounter.body?.uid === pokemonUID) {
+      encounter.body = { ...encounter.body, ...updates };
+      encounter.updatedAt = getCurrentTimestamp();
+    }
+  }
+
+  // Update the playthrough timestamp to trigger reactivity
+  activePlaythrough.updatedAt = getCurrentTimestamp();
+};
+
+// Update a Pokémon's properties in a specific encounter by UID and field
+export const updatePokemonInEncounter = async (
+  locationId: string,
+  pokemonUID: string,
+  field: 'head' | 'body',
+  updates: Partial<z.infer<typeof PokemonOptionSchema>>
+) => {
+  console.log('updatePokemonInEncounter called with:', {
+    locationId,
+    pokemonUID,
+    field,
+    updates,
+  });
+
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough?.encounters?.[locationId]) {
+    console.log(
+      'No active playthrough or encounter not found for locationId:',
+      locationId
+    );
+    return;
+  }
+
+  const encounter = activePlaythrough.encounters[locationId];
+  console.log('Found encounter:', encounter);
+
+  const pokemon = encounter[field];
+  console.log('Pokemon in field', field, ':', pokemon);
+
+  if (pokemon?.uid === pokemonUID) {
+    console.log('Updating pokemon from:', pokemon, 'to:', {
+      ...pokemon,
+      ...updates,
+    });
+    encounter[field] = { ...pokemon, ...updates };
+    encounter.updatedAt = getCurrentTimestamp();
+
+    console.log('Updated encounter:', encounter);
+
+    // Update the playthrough timestamp to trigger reactivity
+    activePlaythrough.updatedAt = getCurrentTimestamp();
+  } else {
+    console.log(
+      'Pokemon UID mismatch. Expected:',
+      pokemonUID,
+      'Found:',
+      pokemon?.uid
+    );
+  }
 };
 
 // Update encounter for a location
@@ -107,6 +179,11 @@ export const updateEncounter = async (
     if (encounterData.isFusion && encounterData.head && encounterData.body) {
       emitEvolutionEvent(locationId);
     }
+
+    // Auto-assign Pokémon to team slots if it has a relevant status
+    if (pokemon && pokemon.status) {
+      await autoAssignCapturedPokemonToTeam(locationId);
+    }
     return;
   }
 
@@ -119,9 +196,9 @@ export const updateEncounter = async (
     };
 
     // Determine if this should be a fusion encounter
-    const willBeFusion = shouldCreateFusion || encounter.isFusion;
+    const willBeFusion =
+      shouldCreateFusion || encounter.isFusion || field === 'body';
 
-    // Track previous value for the field being updated
     // Track previous value for the field being updated
     const previousFieldId = encounter[field]?.id ?? null;
     if (willBeFusion) {
@@ -146,7 +223,7 @@ export const updateEncounter = async (
         }
       }
     } else {
-      // For regular encounters
+      // For regular encounters (only when setting head and not creating fusion)
       encounter.head = pokemonWithLocationAndUID;
       encounter.body = null;
       encounter.isFusion = false;
@@ -165,11 +242,25 @@ export const updateEncounter = async (
     ) {
       emitEvolutionEvent(locationId);
     }
+
+    // Auto-assign Pokémon to team slots if it has a relevant status
+    if (pokemonWithLocationAndUID.status) {
+      await autoAssignCapturedPokemonToTeam(locationId);
+    }
   } else {
     // Handle clearing pokemon
+    // Collect UIDs of Pokémon being removed for team cleanup
+    const removedUIDs: string[] = [];
+    if (encounter[field]?.uid) {
+      removedUIDs.push(encounter[field]!.uid);
+    }
+
     // Clear the field
     encounter[field] = null;
     encounter.updatedAt = getCurrentTimestamp();
+
+    // Remove team members that contained the cleared Pokémon
+    removeTeamMembersWithPokemon(removedUIDs);
   }
 };
 
@@ -183,8 +274,24 @@ export const resetEncounter = (locationId: string) => {
     activePlaythrough.encounters = {};
   }
 
+  // Collect UIDs of Pokémon being removed for team cleanup
+  const encounter = activePlaythrough.encounters[locationId];
+  const removedUIDs: string[] = [];
+
+  if (encounter) {
+    if (encounter.head?.uid) {
+      removedUIDs.push(encounter.head.uid);
+    }
+    if (encounter.body?.uid) {
+      removedUIDs.push(encounter.body.uid);
+    }
+  }
+
   delete activePlaythrough.encounters[locationId];
   // Note: No need to update timestamp since encounter is deleted
+
+  // Remove team members that contained the cleared Pokémon
+  removeTeamMembersWithPokemon(removedUIDs);
 };
 
 // Toggle fusion mode for an encounter
@@ -656,12 +763,26 @@ export const clearEncounterFromLocation = async (
   const encounter = activePlaythrough.encounters[locationId];
   if (!encounter) return;
 
+  // Collect UIDs of Pokémon being removed for team cleanup
+  const removedUIDs: string[] = [];
+
   if (!field) {
     // If no field specified, clear the entire encounter
+    if (encounter.head?.uid) {
+      removedUIDs.push(encounter.head.uid);
+    }
+    if (encounter.body?.uid) {
+      removedUIDs.push(encounter.body.uid);
+    }
+
     delete activePlaythrough.encounters![locationId];
     // No encounter timestamp to update since it's deleted
   } else {
     // Clear only the specified field
+    if (encounter[field]?.uid) {
+      removedUIDs.push(encounter[field]!.uid);
+    }
+
     encounter[field] = null;
 
     // When clearing part of a fusion, variants are managed globally
@@ -684,6 +805,9 @@ export const clearEncounterFromLocation = async (
       encounter.updatedAt = getCurrentTimestamp();
     }
   }
+
+  // Remove team members that contained the cleared Pokémon
+  removeTeamMembersWithPokemon(removedUIDs);
 };
 
 // Move encounter from one location to another (replaces some clearCombobox usage)
@@ -919,11 +1043,140 @@ export const moveEncounterToBox = async (locationId: string): Promise<void> => {
 
 /**
  * Mark both Pokemon in an encounter as captured
+ *
+ * Auto-assigns captured Pokémon to available team slots for new playthroughs
  */
 export const markEncounterAsCaptured = async (
   locationId: string
 ): Promise<void> => {
   await updateEncounterStatus(locationId, PokemonStatus.CAPTURED);
+
+  // Auto-assign captured Pokémon to team slots if available
+  await autoAssignCapturedPokemonToTeam(locationId);
+};
+
+/**
+ * Auto-assign captured/received Pokémon to available team slots
+ */
+const autoAssignCapturedPokemonToTeam = async (
+  locationId: string
+): Promise<void> => {
+  console.log(`Auto-assignment triggered for location: ${locationId}`);
+
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough?.team || !activePlaythrough.encounters) {
+    console.log('No active playthrough or team, skipping auto-assignment');
+    return;
+  }
+
+  const encounter = activePlaythrough.encounters[locationId];
+  if (!encounter) {
+    console.log('No encounter found, skipping auto-assignment');
+    return;
+  }
+
+  // Find available team positions
+  const availablePositions = activePlaythrough.team.members
+    .map((member, index) => ({ member, index }))
+    .filter(({ member }) => member === null)
+    .map(({ index }) => index);
+
+  console.log(`Available team positions: ${availablePositions.join(', ')}`);
+  console.log(`Team members:`, activePlaythrough.team.members);
+
+  if (availablePositions.length === 0) {
+    // No available team slots
+    console.log('No available team slots, skipping auto-assignment');
+    return;
+  }
+
+  // Get the first available position
+  const nextAvailablePosition = availablePositions[0];
+
+  // Determine which Pokémon to assign
+  let headPokemon: { uid: string } | null = null;
+  let bodyPokemon: { uid: string } | null = null;
+
+  // Check for Pokémon that should be auto-assigned to team
+  const shouldAutoAssign = (status: string | undefined) =>
+    status === PokemonStatus.CAPTURED ||
+    status === PokemonStatus.RECEIVED ||
+    status === PokemonStatus.TRADED;
+
+  if (
+    encounter.head &&
+    encounter.head.status &&
+    shouldAutoAssign(encounter.head.status)
+  ) {
+    headPokemon = { uid: encounter.head.uid! };
+  }
+
+  if (
+    encounter.body &&
+    encounter.body.status &&
+    shouldAutoAssign(encounter.body.status)
+  ) {
+    bodyPokemon = { uid: encounter.body.uid! };
+  }
+
+  // Only proceed if we have at least one captured Pokémon
+  if (!headPokemon && !bodyPokemon) {
+    console.log('No Pokémon eligible for auto-assignment');
+    return;
+  }
+
+  console.log(
+    `Auto-assigning: head=${headPokemon?.uid || 'none'}, body=${bodyPokemon?.uid || 'none'}`
+  );
+
+  // Import the updateTeamMember function dynamically to avoid circular dependencies
+  const { updateTeamMember } = await import('./store');
+
+  // Check if either Pokemon is already on the team and needs to be updated for fusion
+  let targetPosition = nextAvailablePosition;
+  let existingSlot = -1;
+
+  if (headPokemon || bodyPokemon) {
+    for (let i = 0; i < activePlaythrough.team.members.length; i++) {
+      const member = activePlaythrough.team.members[i];
+      if (member) {
+        // Check if this team member has either the head or body Pokemon
+        if (
+          (headPokemon && member.headPokemonUid === headPokemon.uid) ||
+          (bodyPokemon && member.bodyPokemonUid === bodyPokemon.uid) ||
+          (headPokemon && member.bodyPokemonUid === headPokemon.uid) ||
+          (bodyPokemon && member.headPokemonUid === bodyPokemon.uid)
+        ) {
+          existingSlot = i;
+          targetPosition = i;
+          break;
+        }
+      }
+    }
+  }
+
+  console.log(
+    existingSlot >= 0
+      ? `Updating existing team slot ${existingSlot + 1} for fusion`
+      : `Assigning to new team slot ${targetPosition + 1}`
+  );
+
+  // Assign to the target team slot (either existing or new)
+  const success = await updateTeamMember(
+    targetPosition,
+    headPokemon,
+    bodyPokemon
+  );
+
+  if (success) {
+    console.log(
+      `Successfully auto-assigned Pokémon from ${locationId} to team slot ${targetPosition + 1}`
+    );
+  } else {
+    console.error(
+      `Failed to auto-assign Pokémon from ${locationId} to team slot ${targetPosition + 1}`
+    );
+  }
 };
 
 /**
@@ -937,9 +1190,171 @@ export const markEncounterAsMissed = async (
 
 /**
  * Mark both Pokemon in an encounter as received
+ *
+ * Auto-assigns received Pokémon to available team slots for new playthroughs
  */
 export const markEncounterAsReceived = async (
   locationId: string
 ): Promise<void> => {
   await updateEncounterStatus(locationId, PokemonStatus.RECEIVED);
+
+  // Auto-assign received Pokémon to team slots if available
+  await autoAssignCapturedPokemonToTeam(locationId);
+};
+
+/**
+ * Helper function to find a Pokémon by UID across all encounters
+ */
+function findPokemonByUID(
+  encounters: Record<string, EncounterData> | undefined,
+  uid: string
+): PokemonOptionType | null {
+  if (!encounters) return null;
+
+  for (const locationId in encounters) {
+    const encounter = encounters[locationId];
+    if (encounter?.head?.uid === uid) {
+      return encounter.head;
+    }
+    if (encounter?.body?.uid === uid) {
+      return encounter.body;
+    }
+  }
+  return null;
+}
+
+/**
+ * Remove team members that contain any of the specified Pokémon UIDs
+ */
+const removeTeamMembersWithPokemon = (pokemonUIDs: string[]): void => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough?.team || pokemonUIDs.length === 0) return;
+
+  let hasChanges = false;
+
+  // Check each team member
+  for (let i = 0; i < activePlaythrough.team.members.length; i++) {
+    const member = activePlaythrough.team.members[i];
+    if (!member) continue;
+
+    // Check if this team member contains any of the removed Pokémon
+    const hasRemovedPokemon =
+      (member.headPokemonUid && pokemonUIDs.includes(member.headPokemonUid)) ||
+      (member.bodyPokemonUid && pokemonUIDs.includes(member.bodyPokemonUid));
+
+    if (hasRemovedPokemon) {
+      console.log(
+        `Removing team member at position ${i + 1} due to cleared Pokémon:`,
+        {
+          headPokemonUid: member.headPokemonUid,
+          bodyPokemonUid: member.bodyPokemonUid,
+          removedUIDs: pokemonUIDs,
+        }
+      );
+
+      activePlaythrough.team.members[i] = null;
+      hasChanges = true;
+    }
+  }
+
+  // Update playthrough timestamp if any changes were made
+  if (hasChanges) {
+    activePlaythrough.updatedAt = getCurrentTimestamp();
+  }
+};
+
+/**
+ * Move a team member to the box by updating their status to stored and removing from team
+ */
+export const moveTeamMemberToBox = async (position: number): Promise<void> => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough?.team) return;
+
+  // Validate position
+  if (position < 0 || position >= 6) return;
+
+  // Get the team member at the specified position
+  const teamMember = activePlaythrough.team.members[position];
+  if (!teamMember) return;
+
+  // Update head Pokémon status to stored if it exists
+  if (teamMember.headPokemonUid) {
+    const headPokemon = findPokemonByUID(
+      activePlaythrough.encounters,
+      teamMember.headPokemonUid
+    );
+
+    if (headPokemon) {
+      const updates: Partial<z.infer<typeof PokemonOptionSchema>> = {
+        status: PokemonStatus.STORED,
+      };
+
+      // Set originalReceivalStatus if not already set and current status is active
+      if (
+        !headPokemon.originalReceivalStatus &&
+        (headPokemon.status === PokemonStatus.CAPTURED ||
+          headPokemon.status === PokemonStatus.RECEIVED ||
+          headPokemon.status === PokemonStatus.TRADED)
+      ) {
+        updates.originalReceivalStatus = headPokemon.status;
+      }
+
+      await updatePokemonByUID(teamMember.headPokemonUid, updates);
+    }
+  }
+
+  // Update body Pokémon status to stored if it exists
+  if (teamMember.bodyPokemonUid) {
+    const bodyPokemon = findPokemonByUID(
+      activePlaythrough.encounters,
+      teamMember.bodyPokemonUid
+    );
+
+    if (bodyPokemon) {
+      const updates: Partial<z.infer<typeof PokemonOptionSchema>> = {
+        status: PokemonStatus.STORED,
+      };
+
+      // Set originalReceivalStatus if not already set and current status is active
+      if (
+        !bodyPokemon.originalReceivalStatus &&
+        (bodyPokemon.status === PokemonStatus.CAPTURED ||
+          bodyPokemon.status === PokemonStatus.RECEIVED ||
+          bodyPokemon.status === PokemonStatus.TRADED)
+      ) {
+        updates.originalReceivalStatus = bodyPokemon.status;
+      }
+
+      await updatePokemonByUID(teamMember.bodyPokemonUid, updates);
+    }
+  }
+
+  // Remove the team member from the team
+  activePlaythrough.team.members[position] = null;
+
+  // Update the playthrough timestamp to trigger reactivity
+  activePlaythrough.updatedAt = getCurrentTimestamp();
+};
+
+/**
+ * Restore a Pokémon's status to its original receival status when adding to team
+ */
+export const restorePokemonToTeam = async (
+  pokemonUID: string
+): Promise<void> => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough?.encounters) return;
+
+  const pokemon = findPokemonByUID(activePlaythrough.encounters, pokemonUID);
+  if (!pokemon) return;
+
+  // If Pokémon is stored, restore to original receival status
+  if (pokemon.status === PokemonStatus.STORED) {
+    const statusToRestore =
+      pokemon.originalReceivalStatus || PokemonStatus.CAPTURED;
+
+    await updatePokemonByUID(pokemonUID, {
+      status: statusToRestore,
+    });
+  }
 };

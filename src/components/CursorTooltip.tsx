@@ -240,7 +240,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
       {isOpen && (
         <FloatingPortal>
           <div
-            className='z-110 pointer-events-none'
+            className='z-[9999] pointer-events-none'
             ref={refs.setFloating}
             style={floatingStyles}
             {...getFloatingProps()}

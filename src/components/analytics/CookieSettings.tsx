@@ -7,6 +7,7 @@ import {
   DialogTitle,
   DialogBackdrop,
 } from '@headlessui/react';
+import { Switch, Field, Label, Description } from '@headlessui/react';
 import { Cookie, X } from 'lucide-react';
 import clsx from 'clsx';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
@@ -119,64 +120,49 @@ export function CookieSettings({ isOpen, onClose }: CookieSettingsProps) {
                   </p>
                 </div>
 
-                <div className='border border-gray-200 dark:border-gray-600 rounded-lg p-4'>
+                <Field className='border border-gray-200 dark:border-gray-600 rounded-lg p-4'>
                   <div className='flex items-center justify-between mb-2'>
-                    <h4 className=' text-gray-900 dark:text-white'>
+                    <Label className=' text-gray-900 dark:text-white'>
                       Analytics Cookies
-                    </h4>
-                    <label className='relative inline-flex items-center cursor-pointer'>
-                      <input
-                        type='checkbox'
-                        checked={localPreferences.analytics}
-                        onChange={e =>
-                          handlePreferenceChange('analytics', e.target.checked)
-                        }
-                        className='sr-only peer'
-                        aria-describedby='analytics-description'
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                    </label>
+                    </Label>
+                    <Switch
+                      checked={localPreferences.analytics}
+                      onChange={checked =>
+                        handlePreferenceChange('analytics', checked)
+                      }
+                      className='group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition data-checked:bg-blue-600'
+                    >
+                      <span className='size-4 translate-x-1 rounded-full bg-white transition group-data-checked:translate-x-6' />
+                    </Switch>
                   </div>
-                  <p
-                    id='analytics-description'
-                    className='text-sm text-gray-600 dark:text-gray-300'
-                  >
+                  <Description className='text-sm text-gray-600 dark:text-gray-300'>
                     These cookies help us understand how visitors interact with
                     our website by collecting and reporting information
                     anonymously.
-                  </p>
-                </div>
+                  </Description>
+                </Field>
 
-                <div className='border border-gray-200 dark:border-gray-600 rounded-lg p-4'>
+                <Field className='border border-gray-200 dark:border-gray-600 rounded-lg p-4'>
                   <div className='flex items-center justify-between mb-2'>
-                    <h4 className=' text-gray-900 dark:text-white'>
+                    <Label className=' text-gray-900 dark:text-white'>
                       Performance Cookies
-                    </h4>
-                    <label className='relative inline-flex items-center cursor-pointer'>
-                      <input
-                        type='checkbox'
-                        checked={localPreferences.speedInsights}
-                        onChange={e =>
-                          handlePreferenceChange(
-                            'speedInsights',
-                            e.target.checked
-                          )
-                        }
-                        className='sr-only peer'
-                        aria-describedby='performance-description'
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                    </label>
+                    </Label>
+                    <Switch
+                      checked={localPreferences.speedInsights}
+                      onChange={checked =>
+                        handlePreferenceChange('speedInsights', checked)
+                      }
+                      className='group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition data-checked:bg-blue-600'
+                    >
+                      <span className='size-4 translate-x-1 rounded-full bg-white transition group-data-checked:translate-x-6' />
+                    </Switch>
                   </div>
-                  <p
-                    id='performance-description'
-                    className='text-sm text-gray-600 dark:text-gray-300'
-                  >
+                  <Description className='text-sm text-gray-600 dark:text-gray-300'>
                     These cookies allow us to monitor and improve the
                     performance of our website by collecting information about
                     how the site is used.
-                  </p>
-                </div>
+                  </Description>
+                </Field>
               </div>
             </div>
 

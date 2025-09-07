@@ -63,7 +63,7 @@ function PokemonOptionContent({
   return (
     <div className={'gap-4 group w-full flex items-center'}>
       <div className='size-10 flex justify-center items-center'>
-        <PokemonSprite pokemonId={pokemon.id} />
+        <PokemonSprite pokemonId={pokemon.id} generation='gen7' />
       </div>
       <span
         className={clsx(

@@ -135,7 +135,46 @@ export default function CreatePlaythroughModal({
                 <div className='flex items-center gap-2'>
                   <span>Game Mode</span>
                   <CursorTooltip
-                    content='You can change the game mode at any time.'
+                    content={
+                      <div className='max-w-sm text-sm font-normal leading-5 space-y-2 divide-y divide-gray-200 dark:divide-gray-600 gap-y-4'>
+                        <div>
+                          <strong className='text-gray-900 dark:text-gray-100'>
+                            Classic
+                          </strong>
+                          <p className='my-2'>
+                            Uses the standard encounter tables and route data.
+                            The tracker will show traditional Pokémon encounters
+                            for each route and location.
+                          </p>
+                        </div>
+                        <div>
+                          <strong className='text-purple-700 dark:text-purple-300'>
+                            Remix
+                          </strong>
+                          <p className='my-2'>
+                            Uses modified encounter tables with different
+                            Pokémon availability per route. The tracker will
+                            show updated encounters that include more diverse
+                            Pokémon in early game areas.
+                          </p>
+                        </div>
+                        <div>
+                          <strong className='text-orange-700 dark:text-orange-300'>
+                            Random
+                          </strong>
+                          <p className='my-2'>
+                            Uses randomized encounters where any Pokémon can
+                            appear in any location.
+                          </p>
+                        </div>
+                        <div className='pt-2'>
+                          <p className='text-gray-600 dark:text-gray-400 italic'>
+                            You can change the game mode at any time during your
+                            playthrough.
+                          </p>
+                        </div>
+                      </div>
+                    }
                     placement='bottom-start'
                   >
                     <div className='w-4 h-4 text-gray-400 dark:text-gray-500 cursor-help'>

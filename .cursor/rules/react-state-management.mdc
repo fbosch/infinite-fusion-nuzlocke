@@ -1,9 +1,7 @@
 ---
-description: React state management best practices focusing on minimizing useState/useEffect usage and preferring alternatives
-globs: []
-alwaysApply: true
+globs: src/components/**/*.tsx,src/hooks/**/*.ts
+alwaysApply: false
 ---
-
 # React State Management Guidelines
 
 Rules for efficient state management and avoiding unnecessary effects in React components.

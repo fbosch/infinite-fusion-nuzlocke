@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SpriteVariantsResponse } from '@/types/sprites';
 
-export const runtime = 'edge';
+export const revalidate = 86400;
+
+// Request deduplication cache for CDN optimization
+const processingCache = new Map<string, Promise<NextResponse>>();
 
 /**
  * Generate variant suffix for index (0='', 1='a', 2='b', etc.)
@@ -86,6 +89,12 @@ export async function GET(request: NextRequest) {
     // Ignore cache busting version parameter (v)
     const maxVariants = 50;
 
+    // Check if we're already processing this request (CDN deduplication)
+    const cacheKey = `sprite-variants-${id}`;
+    if (processingCache.has(cacheKey)) {
+      return processingCache.get(cacheKey)!;
+    }
+
     // Validate input
     if (!id) {
       const errorResponse = NextResponse.json(
@@ -109,41 +118,31 @@ export async function GET(request: NextRequest) {
       return errorResponse;
     }
 
-    const variants: string[] = [];
+    // Create processing promise and cache it
+    const processingPromise = processSpriteVariants(id, maxVariants);
+    processingCache.set(cacheKey, processingPromise);
 
-    // Check variants sequentially to maintain order and break early
-    for (let i = 0; i < maxVariants; i++) {
-      const variant = getVariantSuffix(i);
-      const url = generateSpriteUrl(id, variant);
+    // Clean up cache after completion
+    processingPromise.finally(() => {
+      processingCache.delete(cacheKey);
+    });
 
-      if (await checkSpriteExists(url)) {
-        variants.push(variant);
-      } else {
-        // No more variants available, break early
-        break;
-      }
-    }
+    // Wrap promise to handle rejections with proper error response and CORS headers
+    return processingPromise.catch(error => {
+      console.error('Error processing sprite variants:', error);
 
-    const responseData: SpriteVariantsResponse = {
-      variants,
-      cacheKey: id,
-      timestamp: Date.now(),
-    };
+      const errorResponse = NextResponse.json(
+        { error: 'Failed to process sprite variants' },
+        { status: 500 }
+      );
 
-    const response = NextResponse.json(responseData);
+      // Set CORS headers on error response
+      errorResponse.headers.set('Access-Control-Allow-Origin', '*');
+      errorResponse.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+      errorResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type');
 
-    // Set CORS headers to allow requests from any origin
-    response.headers.set('Access-Control-Allow-Origin', '*');
-    response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
-
-    // Set appropriate cache headers based on environment
-    response.headers.set(
-      'Cache-Control',
-      'public, max-age=86400, stale-while-revalidate=3600' // 24 hours in production
-    );
-
-    return response;
+      return errorResponse;
+    });
   } catch (error) {
     console.error('Error in sprite variants API:', error);
 
@@ -159,4 +158,52 @@ export async function GET(request: NextRequest) {
 
     return errorResponse;
   }
+}
+
+/**
+ * Process sprite variants with CDN optimization
+ */
+async function processSpriteVariants(
+  id: string,
+  maxVariants: number
+): Promise<NextResponse> {
+  const variants: string[] = [];
+
+  // Check variants sequentially to maintain order and break early
+  for (let i = 0; i < maxVariants; i++) {
+    const variant = getVariantSuffix(i);
+    const url = generateSpriteUrl(id, variant);
+
+    if (await checkSpriteExists(url)) {
+      variants.push(variant);
+    } else {
+      // No more variants available, break early
+      break;
+    }
+  }
+
+  const responseData: SpriteVariantsResponse = {
+    variants,
+    cacheKey: id,
+    timestamp: Date.now(),
+  };
+
+  const response = NextResponse.json(responseData);
+
+  // Set CORS headers to allow requests from any origin
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  // CDN-optimized cache headers
+  response.headers.set(
+    'Cache-Control',
+    'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600' // CDN edge caching
+  );
+
+  // Additional CDN optimization headers
+  response.headers.set('Vary', 'Accept-Encoding'); // Enable compression
+  response.headers.set('X-Cache-Status', 'HIT'); // For debugging
+
+  return response;
 }

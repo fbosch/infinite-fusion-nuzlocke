@@ -1,6 +1,6 @@
 ---
 description: Essential UI components for the Nuzlocke tracker including team management, progress tracking, fusion interface, and game management
-globs: ['src/components/**/*.{ts,tsx}']
+globs: src/components/**/*.tsx
 alwaysApply: false
 ---
 

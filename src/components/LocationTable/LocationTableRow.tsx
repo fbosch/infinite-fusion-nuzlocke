@@ -8,6 +8,10 @@ import { useInView } from 'react-intersection-observer';
 import { useEncounter } from '@/stores/playthroughs';
 import { EncounterCell } from './EncounterCell';
 import PokemonSummaryCard from '../PokemonSummaryCard';
+import { useRef, useEffect } from 'react';
+import { addEvolutionListener } from '@/lib/events';
+import type { FusionSpriteHandle } from '../PokemonSummaryCard/FusionSprite';
+import { canFuse } from '@/utils/pokemonPredicates';
 
 interface LocationTableRowProps {
   row: Row<CombinedLocation>;
@@ -16,6 +20,8 @@ interface LocationTableRowProps {
 export default function LocationTableRow({ row }: LocationTableRowProps) {
   const locationId = row.original.id;
   const { ref, inView } = useInView();
+  const spriteRef = useRef<FusionSpriteHandle | null>(null);
+  const previousFusionId = useRef<string | null>(null);
 
   const aboveTheFold = row.index < 8;
   const shouldLoad = inView || aboveTheFold;
@@ -27,6 +33,71 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
     isFusion: false,
     updatedAt: Date.now(),
   };
+
+  // Play evolution animation when this location evolves, but only if the Pokémon can form an effective fusion
+  useEffect(() => {
+    return addEvolutionListener(({ locationId: evolvedLocation }) => {
+      if (evolvedLocation === locationId) {
+        // Only play evolution animation if the Pokémon can actually fuse
+        // This matches the same logic used to determine if the sprite should show
+        if (
+          encounterData.isFusion &&
+          encounterData.head &&
+          encounterData.body
+        ) {
+          const canActuallyFuse = canFuse(
+            encounterData.head,
+            encounterData.body
+          );
+          if (canActuallyFuse) {
+            spriteRef.current?.playEvolution();
+          }
+        } else if (encounterData.head || encounterData.body) {
+          // For single Pokémon, always play evolution animation
+          spriteRef.current?.playEvolution();
+        }
+      }
+    });
+  }, [
+    locationId,
+    encounterData.isFusion,
+    encounterData.head,
+    encounterData.body,
+  ]);
+
+  // Initialize the previous fusion ID on first render to prevent animation on page load
+  useEffect(() => {
+    if (encounterData.isFusion && encounterData.head && encounterData.body) {
+      const canActuallyFuse = canFuse(encounterData.head, encounterData.body);
+      if (canActuallyFuse) {
+        const currentFusionId = `${encounterData.head.id}.${encounterData.body.id}`;
+        if (previousFusionId.current === null) {
+          // First time rendering - just set the ID without playing animation
+          previousFusionId.current = currentFusionId;
+        }
+      }
+    }
+  }, [encounterData.isFusion, encounterData.head, encounterData.body]);
+
+  // Play evolution animation only when the effective fusion ID changes
+  useEffect(() => {
+    if (encounterData.isFusion && encounterData.head && encounterData.body) {
+      const canActuallyFuse = canFuse(encounterData.head, encounterData.body);
+      if (canActuallyFuse) {
+        // Calculate the effective fusion ID based on current state
+        const currentFusionId = `${encounterData.head.id}.${encounterData.body.id}`;
+
+        // Only play animation if this is a new fusion combination (and not the first render)
+        if (
+          previousFusionId.current !== null &&
+          currentFusionId !== previousFusionId.current
+        ) {
+          previousFusionId.current = currentFusionId;
+          spriteRef.current?.playEvolution();
+        }
+      }
+    }
+  }, [encounterData.isFusion, encounterData.head, encounterData.body]);
 
   return (
     <tr
@@ -45,7 +116,10 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
               role='cell'
             >
               <PokemonSummaryCard
-                locationId={locationId}
+                ref={spriteRef}
+                headPokemon={encounterData.head}
+                bodyPokemon={encounterData.body}
+                isFusion={encounterData.isFusion}
                 shouldLoad={shouldLoad}
               />
             </td>

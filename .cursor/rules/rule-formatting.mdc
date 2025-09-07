@@ -1,6 +1,6 @@
 ---
-description: Cursor rules formatting guidelines including metadata structure, frontmatter placement, and common mistakes to avoid
-globs: []
+description: Example rule description
+globs: .cursor/rules/*.mdc
 alwaysApply: true
 ---
 
@@ -8,11 +8,6 @@ alwaysApply: true
 
 ### Correct Placement
 ```markdown
----
-description: Example rule description
-globs: []
-alwaysApply: true
----
 
 # Rule Title
 Rule content goes here...

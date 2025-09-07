@@ -1,0 +1,107 @@
+# Testing Guide
+
+**Priority**: Vitest MCP → Terminal Fallback → Browser Mode for DOM Tests
+
+## Quick Start
+
+```typescript
+// 1. Set project root
+mcp_vitest_set_project_root({ path: '/absolute/project/path' });
+
+// 2. Run tests with MCP
+mcp_vitest_run_tests({ target: 'src/components/Button.test.ts', format: 'detailed', showLogs: true });
+
+// 3. Coverage analysis
+mcp_vitest_analyze_coverage({ target: 'src/components', format: 'detailed' });
+```
+
+## Tool Selection
+
+| Task | Primary Tool | Fallback |
+|------|--------------|----------|
+| **Unit Tests** | Vitest MCP | `pnpm test:run` |
+| **Browser Tests** | Vitest MCP + Browser Mode | `pnpm test:browser` |
+| **Coverage** | MCP Coverage | `pnpm test:coverage` |
+
+## Test File Organization
+
+- **Unit Tests**: `*.test.ts` alongside source files
+- **Browser Tests**: `*.browser.test.ts` for DOM/browser features
+- **Store Tests**: Use browser mode for localStorage interactions
+
+## Key Testing Patterns
+
+### Valtio Store Testing
+```typescript
+// Clear state before each test
+beforeEach(() => {
+  clearLocalStorage();
+  Object.assign(store, { /* reset state */ });
+});
+
+// Handle async subscriptions
+it('saves to localStorage', async () => {
+  store.someValue = 'new';
+  await new Promise(resolve => setTimeout(resolve, 10)); // Wait for subscription
+  expect(localStorage.getItem('key')).toBe('new');
+});
+```
+
+### Browser Mode for DOM Tests
+```typescript
+// Always use browser mode for store tests with localStorage
+// Use real APIs instead of mocking DOM features
+// Handle async subscriptions with timing controls
+```
+
+### Version-Based Logic Testing
+```typescript
+// Test backward compatibility
+it('enables feature for old playthroughs', async () => {
+  mockGetActivePlaythrough.mockReturnValue({ id: 'old', /* no version */ });
+  const { store } = await import('../store?t=' + Date.now());
+  expect(store.feature).toBe(true);
+});
+```
+
+## MCP Usage Guidelines
+
+### Always Start with MCP
+- Set project root first
+- Use `showLogs: true` for debugging
+- Use `format: 'detailed'` for complex failures
+- Fall back to terminal only if MCP fails
+
+### Target Examples
+```typescript
+// Specific file
+mcp_vitest_run_tests({ target: 'src/components/Button.test.ts' });
+
+// Directory
+mcp_vitest_run_tests({ target: 'src/stores/__tests__' });
+
+// Multiple files
+mcp_vitest_run_tests({ target: 'src/components' });
+```
+
+## Fallback Strategy
+
+```bash
+# Only when MCP fails
+pnpm test:run -- path/to/test/file
+pnpm test:run -- --run path/to/directory
+pnpm test:coverage
+```
+
+## Best Practices
+
+- **Test both success and error cases**
+- **Mock external APIs, not DOM features**
+- **Use descriptive test names**
+- **Group related tests in describe blocks**
+- **Keep tests focused and isolated**
+- **Handle async operations properly**
+---
+alwaysApply: true
+description: Comprehensive testing strategy, MCP priority, and patterns for unit tests, browser tests, and Valtio stores
+---

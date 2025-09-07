@@ -3,7 +3,7 @@
     "routeName": "Safari Zone (Area 1)",
     "encounters": [
       {
-        "pokemonId": 32,
+        "pokemonId": 29,
         "encounterType": "grass"
       },
       {
@@ -159,7 +159,7 @@
         "encounterType": "grass"
       },
       {
-        "pokemonId": 32,
+        "pokemonId": 29,
         "encounterType": "grass"
       },
       {
@@ -625,7 +625,7 @@
     "routeName": "Safari Zone (Area 3)",
     "encounters": [
       {
-        "pokemonId": 32,
+        "pokemonId": 29,
         "encounterType": "grass"
       },
       {
@@ -1383,12 +1383,12 @@
         "encounterType": "fishing"
       },
       {
-        "pokemonId": 471,
-        "encounterType": "grass"
-      },
-      {
         "pokemonId": 74,
         "encounterType": "rock_smash"
+      },
+      {
+        "pokemonId": 471,
+        "encounterType": "grass"
       },
       {
         "pokemonId": 22,

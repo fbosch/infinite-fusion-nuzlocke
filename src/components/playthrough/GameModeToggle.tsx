@@ -2,21 +2,17 @@
 
 import React, { useOptimistic, useTransition } from 'react';
 import clsx from 'clsx';
-import { HelpCircle } from 'lucide-react';
 import {
   playthroughActions,
   useActivePlaythrough,
   useGameMode,
   type GameMode,
 } from '@/stores/playthroughs';
-import { CursorTooltip } from '@/components/CursorTooltip';
-import { useBreakpointSmallerThan } from '@/hooks/useBreakpoint';
 
-const GameModeToggle = React.memo(function GameModeToggle() {
+const GameModeToggle = function GameModeToggle() {
   const activePlaythrough = useActivePlaythrough();
   const actualGameMode = useGameMode();
   const [isPending, startTransition] = useTransition();
-  const isMobile = useBreakpointSmallerThan('md');
 
   // React 19's useOptimistic hook for instant UI updates
   const [optimisticMode, setOptimisticMode] = useOptimistic(
@@ -55,12 +51,12 @@ const GameModeToggle = React.memo(function GameModeToggle() {
   };
 
   return (
-    <div className='flex items-center gap-2'>
+    <div className='flex items-center'>
       <fieldset
         className={clsx(
-          'relative flex items-center bg-white dark:bg-gray-800 rounded-xl p-0.5 sm:p-1',
-          'border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500',
-          'font-medium shadow-elevation-1 hover:shadow-elevation-2 backdrop-blur-sm',
+          'relative flex items-center bg-white dark:bg-gray-800 rounded-t-xl p-0.5 sm:p-1',
+          'border-b-0 border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500',
+          'font-medium backdrop-blur-sm',
           'h-[40px] sm:h-[44px] w-[180px] sm:w-auto',
           'transition-all duration-200 ease-out',
           !activePlaythrough && 'opacity-50'
@@ -149,59 +145,8 @@ const GameModeToggle = React.memo(function GameModeToggle() {
             `Game mode: ${optimisticMode}${isPending ? ' (updating...)' : ''}`}
         </div>
       </fieldset>
-
-      <CursorTooltip
-        placement={'bottom-end'}
-        disabled={isMobile}
-        delay={500}
-        offset={{ mainAxis: 10, crossAxis: -5 }}
-        content={
-          <div className='max-w-sm text-xs font-normal leading-5 space-y-2 divide-y divide-gray-200 dark:divide-gray-600 gap-y-4'>
-            <div>
-              <strong className='text-gray-900 dark:text-gray-100'>
-                Classic
-              </strong>
-              <p className='my-2'>
-                Uses the standard encounter tables and route data. The tracker
-                will show traditional Pokémon encounters for each route and
-                location.
-              </p>
-            </div>
-            <div>
-              <strong className='text-purple-700 dark:text-purple-300'>
-                Remix
-              </strong>
-              <p className='my-2'>
-                Uses modified encounter tables with different Pokémon
-                availability per route. The tracker will show updated encounters
-                that include more diverse Pokémon in early game areas.
-              </p>
-            </div>
-            <div>
-              <strong className='text-orange-700 dark:text-orange-300'>
-                Random
-              </strong>
-              <p className='my-2'>
-                Uses randomized encounters where any Pokémon can appear in any
-                location.
-              </p>
-            </div>
-          </div>
-        }
-      >
-        <div
-          className={clsx(
-            'flex items-center justify-center w-5 h-5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300',
-            'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
-            'transition-colors duration-200 cursor-help md:block hidden'
-          )}
-          aria-label='Show game mode descriptions'
-        >
-          <HelpCircle className='size-5' />
-        </div>
-      </CursorTooltip>
     </div>
   );
-});
+};
 
 export default GameModeToggle;

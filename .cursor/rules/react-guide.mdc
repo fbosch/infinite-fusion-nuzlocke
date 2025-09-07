@@ -1,0 +1,201 @@
+# React Development Guide
+
+**Framework**: Next.js 15 + TypeScript + Tailwind CSS
+
+## Core Principles
+
+### Component Design
+- **Single responsibility**: Each component has one clear purpose
+- **Composition over inheritance**: Build complex UIs from simple components
+- **Props interface**: Define clear, typed props with minimal optional fields
+- **Keep components small**: Under 200 lines, preferably under 100
+
+### TypeScript Integration
+```typescript
+// ✅ Good: Clear, typed interfaces
+interface ButtonProps {
+  variant: 'primary' | 'secondary' | 'danger';
+  size: 'sm' | 'md' | 'lg';
+  children: React.ReactNode;
+  onClick: () => void;
+}
+
+// ❌ Bad: Vague, optional-heavy props
+interface ButtonProps {
+  variant?: string;
+  size?: string;
+  children?: any;
+  onClick?: () => void;
+  [key: string]: any; // Avoid index signatures
+}
+```
+
+## Hook Rules
+
+### Core Hook Principles
+- **Always call hooks in the same order** on every render
+- **Never call hooks conditionally** (inside if/loops/nested functions)
+- **Call hooks at the top level** of components or custom hooks
+- **Early returns must come after all hooks**
+
+```typescript
+// ✅ Good: All hooks before early return
+function MyComponent({ data }: Props) {
+  const [state, setState] = useState(null);
+  const memoizedValue = useMemo(() => computeValue(data), [data]);
+  
+  if (!data) return null; // Early return after hooks
+  
+  return <div>{memoizedValue}</div>;
+}
+
+// ❌ Bad: Early return before hooks
+function MyComponent({ data }: Props) {
+  if (!data) return null; // This breaks hook order!
+  
+  const [state, setState] = useState(null);
+  const memoizedValue = useMemo(() => computeValue(data), [data]);
+  
+  return <div>{memoizedValue}</div>;
+}
+```
+
+### Hook Dependencies
+```typescript
+// ✅ Good: Include all dependencies
+useEffect(() => {
+  fetchData(userId, filters);
+}, [userId, filters]); // All values from component scope
+
+// ❌ Bad: Missing dependencies
+useEffect(() => {
+  fetchData(userId, filters);
+}, [userId]); // Missing filters dependency
+```
+
+### Custom Hooks
+```typescript
+// ✅ Good: Descriptive names starting with 'use'
+function usePokemonData(pokemonId: number) {
+  const [data, setData] = useState<Pokemon | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    if (!pokemonId) return;
+    
+    setLoading(true);
+    fetchPokemon(pokemonId)
+      .then(setData)
+      .finally(() => setLoading(false));
+  }, [pokemonId]);
+  
+  return { data, loading };
+}
+```
+
+## State Management
+
+### Local State
+- Use `useState` for simple component state
+- Use `useReducer` for complex state logic
+- Prefer `useCallback` for event handlers passed to children
+
+### Global State (Valtio)
+```typescript
+// ✅ Good: Clear store structure
+interface SettingsStore {
+  theme: 'light' | 'dark';
+  notifications: boolean;
+  updateTheme: (theme: 'light' | 'dark') => void;
+}
+
+// ✅ Good: Actions as methods
+const settingsStore = proxy<SettingsStore>({
+  theme: 'light',
+  notifications: true,
+  updateTheme: (theme) => {
+    settingsStore.theme = theme;
+  }
+});
+```
+
+## Performance Optimization
+
+### Memoization
+```typescript
+// ✅ Good: Memoize expensive calculations
+const expensiveValue = useMemo(() => {
+  return computeExpensiveValue(data);
+}, [data]);
+
+// ✅ Good: Stable callbacks for children
+const handleClick = useCallback(() => {
+  performAction(id);
+}, [id]);
+```
+
+### React.memo
+```typescript
+// ✅ Good: Memoize expensive components
+const ExpensiveComponent = React.memo(({ data }: Props) => {
+  return <div>{/* expensive rendering */}</div>;
+});
+```
+
+## Best Practices
+
+### Event Handling
+```typescript
+// ✅ Good: Proper event types
+const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  // handle submission
+};
+
+// ✅ Good: Destructure needed values
+const handleChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
+  setValue(value);
+};
+```
+
+### Conditional Rendering
+```typescript
+// ✅ Good: Early returns for complex conditions
+function ConditionalComponent({ user }: Props) {
+  if (!user) return <LoadingSpinner />;
+  if (!user.permissions.canEdit) return <AccessDenied />;
+  
+  return <EditForm user={user} />;
+}
+
+// ❌ Bad: Complex inline conditionals
+function ConditionalComponent({ user }: Props) {
+  return (
+    <div>
+      {user ? (
+        user.permissions.canEdit ? (
+          <EditForm user={user} />
+        ) : (
+          <AccessDenied />
+        )
+      ) : (
+        <LoadingSpinner />
+      )}
+    </div>
+  );
+}
+```
+
+## Quick Rules
+
+- **Component size**: Under 200 lines
+- **Hook order**: Always same order, never conditional
+- **Props**: Clear interfaces, minimal optional fields
+- **State**: Local first, global when needed
+- **Performance**: Memoize expensive operations
+- **TypeScript**: Strict types, avoid `any`
+- **Conditionals**: Early returns over complex nesting
+---
+alwaysApply: true
+description: Comprehensive React development guidelines including hooks, TypeScript patterns, and best practices
+---
