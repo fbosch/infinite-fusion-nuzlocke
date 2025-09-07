@@ -353,8 +353,8 @@ export default function TeamEntryItem({
     </li>
   );
 
-  // Start with just TeamMemberContextMenu to isolate the issue
-  if (isTeamData) {
+  // Only wrap filled team slots with context menu
+  if (isTeamData && !isEmpty) {
     return (
       <TeamMemberContextMenu
         teamMember={{
