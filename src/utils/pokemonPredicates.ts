@@ -11,7 +11,6 @@ export function isActiveStatus(
   return (
     status === PokemonStatus.CAPTURED ||
     status === PokemonStatus.RECEIVED ||
-    status === PokemonStatus.STORED ||
     status === PokemonStatus.TRADED
   );
 }
@@ -37,7 +36,7 @@ export function isMissedStatus(
 export function isInactiveStatus(
   status: PokemonStatusType | null | undefined
 ): boolean {
-  return isDeceasedStatus(status);
+  return isDeceasedStatus(status) || isStoredStatus(status);
 }
 
 // Object-level predicates (pokemon-level)
