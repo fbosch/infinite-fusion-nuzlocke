@@ -27,34 +27,24 @@ export const PokemonNicknameInput = ({
 }: PokemonNicknameInputProps) => {
   // Local state for immediate UI feedback
   const [localNickname, setLocalNickname] = useState(value?.nickname || '');
-  const [isUserTyping, setIsUserTyping] = useState(false);
 
   // Keep track of the Pokemon ID to detect when a different Pokemon is selected
   const currentPokemonId = value?.id;
   const lastSyncedPokemonId = useRef(currentPokemonId);
 
-  // Simple effect to sync when Pokemon changes or external nickname updates
+  // Sync local state when Pokemon changes (different ID) or when component first mounts
   useEffect(() => {
     if (!value) {
       setLocalNickname('');
       lastSyncedPokemonId.current = undefined;
-      setIsUserTyping(false);
       return;
     }
-
-    // If this is a different Pokemon, always sync
+    // Only sync if this is a different Pokemon than the last one we synced
     if (currentPokemonId !== lastSyncedPokemonId.current) {
       setLocalNickname(value.nickname || '');
       lastSyncedPokemonId.current = currentPokemonId;
-      setIsUserTyping(false);
-      return;
     }
-
-    // If it's the same Pokemon but nickname changed externally and user isn't typing, sync
-    if (value.nickname !== localNickname && !isUserTyping) {
-      setLocalNickname(value.nickname || '');
-    }
-  }, [value, value?.nickname, currentPokemonId, localNickname, isUserTyping]);
+  }, [value, currentPokemonId, lastSyncedPokemonId]);
 
   // Helper function to commit changes to parent
   const commitChanges = useCallback(() => {
@@ -72,7 +62,6 @@ export const PokemonNicknameInput = ({
   // Handle nickname input change (local state only for immediate feedback)
   const handleNicknameChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setIsUserTyping(true);
       setLocalNickname(event.target.value);
     },
     []
@@ -82,12 +71,10 @@ export const PokemonNicknameInput = ({
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === 'Enter') {
-        setIsUserTyping(false);
         commitChanges();
         event.currentTarget.blur();
       } else if (event.key === 'Escape') {
         // Revert to original value
-        setIsUserTyping(false);
         setLocalNickname(value?.nickname || '');
         event.currentTarget.blur();
       }
@@ -97,7 +84,6 @@ export const PokemonNicknameInput = ({
 
   // Handle blur - commit changes immediately
   const handleBlur = useCallback(() => {
-    setIsUserTyping(false);
     commitChanges();
   }, [commitChanges]);
 

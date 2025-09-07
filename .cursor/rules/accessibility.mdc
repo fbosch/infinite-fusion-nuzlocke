@@ -1,7 +1,9 @@
 ---
 description: Comprehensive accessibility requirements for WCAG 2.1 AA compliance including semantic HTML, ARIA attributes, keyboard navigation, and screen reader support
-alwaysApply: false
+globs: []
+alwaysApply: true
 ---
+
 # Accessibility Guidelines
 
 Comprehensive accessibility requirements for the Infinite Fusion Nuzlocke tracker to ensure WCAG 2.1 AA compliance.

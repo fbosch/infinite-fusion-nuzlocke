@@ -1,0 +1,232 @@
+---
+description: Zod v4 validation rules including schema definition, error handling, performance optimization, and testing patterns
+globs: []
+alwaysApply: true
+---
+
+# Zod Validation Rules
+
+Rules for using Zod v4 for data validation and type safety in the Infinite Fusion Nuzlocke tracker.
+
+## Core Zod Principles
+
+### Schema Definition
+
+- **Use Zod v4**: Always use the latest Zod v4 features and APIs
+- **Type Inference**: Use `z.infer<typeof Schema>` for TypeScript types
+- **Strict Validation**: Define schemas with appropriate constraints (min, max, regex, etc.)
+- **Error Messages**: Use the new error customization API: `{ error: "message" }`
+
+### Schema Organization
+
+- **Centralized Schemas**: Define schemas in `src/types/` directory
+- **Reusable Schemas**: Create base schemas and extend them as needed
+- **Enum Validation**: Use `z.enum()` for fixed value sets with proper error messages
+- **Partial Schemas**: Use `.partial()` for form validation and optional fields
+
+## Best Practices
+
+### Error Handling
+
+- **Safe Parsing**: Use `.safeParse()` for non-throwing validation
+- **Error Logging**: Log validation errors with context
+- **User Feedback**: Provide clear, actionable error messages
+- **Graceful Degradation**: Handle validation failures gracefully
+
+### Performance
+
+- **Leverage v4 Performance**: Take advantage of 14x faster string parsing
+- **Efficient Arrays**: Use Zod v4's 7x faster array parsing
+- **TypeScript Performance**: Benefit from 100x reduction in tsc instantiations
+- **Bundle Size**: Consider using Zod Mini for minimal bundles when appropriate
+
+### Schema Patterns
+
+#### Basic Schema
+
+```typescript
+export const MySchema = z.object({
+  name: z.string().min(1, { error: 'Name is required' }),
+  age: z.number().int().positive({ error: 'Age must be positive' }),
+  email: z.string().email({ error: 'Invalid email format' }),
+});
+```
+
+#### Extended Schema
+
+```typescript
+export const EnhancedSchema = MySchema.extend({
+  region: z.enum(['Kanto', 'Johto'], { error: 'Invalid region' }),
+});
+```
+
+#### Partial Schema for Forms
+
+```typescript
+export const FormSchema = MySchema.partial({
+  age: true, // Make age optional
+});
+```
+
+## Validation Functions
+
+### Standard Validation
+
+- **Use `.parse()`**: For strict validation that throws on error
+- **Use `.safeParse()`**: For validation that returns success/error result
+- **Error Context**: Always provide meaningful error messages
+
+### Utility Functions
+
+- **Centralized Validation**: Create utility functions in `src/utils/`
+- **Consistent Error Handling**: Use try-catch with proper error logging
+- **Type Safety**: Ensure all validation functions return properly typed data
+
+## Testing with Zod
+
+### Schema Testing
+
+- **Valid Data**: Test with valid data to ensure acceptance
+- **Invalid Data**: Test with invalid data to ensure rejection
+- **Edge Cases**: Test boundary conditions and edge cases
+- **Error Messages**: Verify error messages are clear and helpful
+
+### Integration Testing
+
+- **Data Loading**: Test validation of loaded JSON data
+- **Form Validation**: Test partial schema validation
+- **Error Recovery**: Test error handling and recovery
+
+## Migration from Zod v3
+
+### Breaking Changes
+
+- **Error API**: Replace `message` with `error` parameter
+- **Error Maps**: Use function-based error customization
+- **Performance**: Leverage improved performance features
+
+### New Features
+
+- **`.overwrite()`**: Use for transforms that don't change inferred type
+- **Multiple Literals**: Use `z.literal([val1, val2, val3])`
+- **Improved Unions**: Take advantage of enhanced discriminated unions
+
+## File Organization
+
+### Schema Files
+
+- **Location**: `src/loaders/locations.ts`
+- **Pokemon**: `src/loaders/pokemon.ts`
+- **Run Data**: `src/loaders/run.ts`
+- **Forms**: `src/loaders/forms.ts`
+
+### Utility Files
+
+- **Validation**: `src/utils/validation.ts`
+- **Data Loading**: `src/utils/data.ts`
+- **Error Handling**: `src/utils/errors.ts`
+
+### Data Files (Raw JSON)
+
+- **Locations**: `@data/locations.json`
+- **Pokemon**: `@data/pokemon-data.json`
+- **Encounters**: `@data/route-encounters-*.json`
+
+### Loader Files (Data Processing)
+
+- **Locations**: `@loaders/locations.ts`
+- **Pokemon**: `@loaders/pokemon.ts`
+- **Encounters**: `@loaders/encounters.ts`
+
+## Import Patterns
+
+### Data Imports
+
+```typescript
+// Use the @data alias for clean imports (data folder is at root level)
+import locationsData from '@data/locations.json';
+import pokemonData from '@data/pokemon-data.json';
+import encountersData from '@data/route-encounters-classic.json';
+```
+
+### Loader Imports
+
+```typescript
+// Use the @loaders alias for data processing functions
+import { getLocations, Location } from '@/loaders';
+import { getPokemon, Pokemon } from '@/loaders';
+```
+
+### Schema Imports
+
+```typescript
+// Import schemas from loaders directory
+import { LocationSchema, Location } from '@/loaders/locations';
+import { PokemonSchema, Pokemon } from '@/loaders/pokemon';
+```
+
+## Code Examples
+
+### Location Validation
+
+```typescript
+export const LocationSchema = z.object({
+  name: z.string().min(1, { error: 'Location name is required' }),
+  routeId: z.number().nullable(),
+  order: z.number().int().positive({ error: 'Order must be positive' }),
+  region: z.string().min(1, { error: 'Region is required' }),
+  description: z.string().min(1, { error: 'Description is required' }),
+});
+```
+
+### Safe Validation Function
+
+```typescript
+export function safeParseLocation(data: unknown): Location | null {
+  const result = LocationSchema.safeParse(data);
+  return result.success ? result.data : null;
+}
+```
+
+### Form Validation
+
+```typescript
+export const LocationFormSchema = LocationSchema.partial({
+  routeId: true,
+  order: true,
+});
+```
+
+## Error Handling Patterns
+
+### Try-Catch Pattern
+
+```typescript
+try {
+  const validated = Schema.parse(data);
+  return validated;
+} catch (error) {
+  if (error instanceof Error) {
+    console.error('Validation failed:', error.message);
+  }
+  throw new Error('Invalid data format');
+}
+```
+
+### Safe Parse Pattern
+
+```typescript
+const result = Schema.safeParse(data);
+if (!result.success) {
+  console.error('Validation errors:', result.error.issues);
+  return null;
+}
+return result.data;
+```
+
+## Testing Requirements
+
+- **Unit Tests**: Test all schema definitions
+- **Integration Tests**: Test data loading and validation
+- **Error Tests**: Test error handling and messages
+- **Performance Tests**: Ensure validation performance meets requirements

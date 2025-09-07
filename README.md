@@ -1,51 +1,79 @@
 # <img src="https://github.com/fbosch/infinite-fusion-nuzlocke/blob/master/src/app/favicon-32x32.png?raw=true" height="27px" width="26px" /> Infinite Fusion Nuzlocke Tracker
 
-Track your Pokémon Infinite Fusion Nuzlocke runs with encounter tracking, team management, and fusion mechanics.
+A Next.js application for tracking Nuzlocke runs in Pokémon Infinite Fusion, featuring fusion mechanics, encounter tracking, and comprehensive run management.
 
-[![Test Coverage](https://img.shields.io/badge/coverage-40%25-orange)](https://github.com/fbosch/infinite-fusion-nuzlocke)
-[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+![Test Coverage](https://img.shields.io/badge/coverage-38%25-red)
 
-## Features
+## Getting Started
 
-- **Encounter Tracking** - Track encounters across all game locations
-- **Team Management** - Build and manage your team with visual previews
-- **Multiple Playthroughs** - Manage multiple Nuzlocke runs
-- **Fusion Support** - Track DNA Splicers and fusion combinations
-- **PWA** - Install as a native app with offline support
-
-## Quick Start
+First, install dependencies:
 
 ```bash
-# Install dependencies
 pnpm install
+```
 
-# Start development server
+Then run the development server:
+
+```bash
 pnpm dev
 ```
 
-Open [http://localhost:4000](http://localhost:4000) to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Tech Stack
+## Code Quality
 
-- Next.js 15
-- TypeScript
-- Tailwind CSS
-- Vitest
-- pnpm
+This project uses Prettier and ESLint for code formatting and linting. To ensure code quality:
+
+```bash
+# Check formatting and linting
+pnpm validate
+
+# Fix formatting and auto-fix linting issues
+pnpm validate:fix
+
+# Individual commands
+pnpm format:check  # Check Prettier formatting
+pnpm format        # Format with Prettier
+pnpm lint          # Run ESLint
+pnpm lint:fix      # Run ESLint with auto-fix
+```
+
+## Testing
+
+This project uses Vitest for testing with comprehensive coverage reporting:
+
+```bash
+# Run tests with coverage
+pnpm test:coverage
+
+# Run tests with coverage and generate badge
+pnpm coverage:full
+
+# Run tests with UI
+pnpm test:ui
+
+# Run tests once
+pnpm test:run
+
+# Watch mode with coverage
+pnpm test:coverage:watch
+```
+
+### Coverage Reports
+
+- **HTML Report**: Generated in `coverage/html/` directory
+- **Coverage Badge**: Automatically generated and updated
+- **GitHub Integration**: Coverage reports on PRs and commits
 
 ## Available Scripts
 
-```bash
-pnpm dev          # Start development server
-pnpm build        # Build for production
-pnpm test         # Run tests
-pnpm test:ui      # Run tests with UI
-pnpm test:coverage # Run tests with coverage
-pnpm lint         # Run ESLint
-pnpm format       # Format with Prettier
-```
-
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details.
+- `pnpm dev` - Start development server with Turbopack
+- `pnpm build` - Build for production
+- `pnpm start` - Start production server
+- `pnpm test` - Run tests with Vitest
+- `pnpm test:ui` - Run tests with UI
+- `pnpm test:run` - Run tests once
+- `pnpm test:coverage` - Run tests with coverage
+- `pnpm coverage:full` - Run tests and generate coverage badge
+- `pnpm validate` - Check code formatting and linting
+- `pnpm validate:fix` - Fix code formatting and auto-fix linting issues

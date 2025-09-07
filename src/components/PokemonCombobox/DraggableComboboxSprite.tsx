@@ -19,14 +19,11 @@ import {
   getActivePlaythrough,
   useCustomLocations,
 } from '@/stores/playthroughs';
-import { settingsStore } from '@/stores/settings';
-import { useSnapshot } from 'valtio';
 import TypePills from '../TypePills';
 import dynamic from 'next/dynamic';
 import usePokemonTypes from '../../hooks/usePokemonTypes';
 import { ArrowUpRight, Undo2 } from 'lucide-react';
 import { emitEvolutionEvent } from '@/lib/events';
-import type { EncounterData } from '@/stores/playthroughs/types';
 
 const LocationSelector = dynamic(
   () =>
@@ -56,7 +53,6 @@ export function DraggableComboboxSprite({
   const pokemon = dragPreview || value;
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const customLocations = useCustomLocations();
-  const settings = useSnapshot(settingsStore);
 
   const { primary, secondary } = usePokemonTypes({ id: pokemon?.id });
   const { evolutions, preEvolution } = usePokemonEvolutionData(
@@ -81,10 +77,8 @@ export function DraggableComboboxSprite({
 
     // Check if there's a Pokemon in the opposite slot at the original location
     const activePlaythrough = getActivePlaythrough();
-    const encounters = activePlaythrough?.encounters as
-      | Record<string, EncounterData>
-      | undefined;
-    const originalEncounter = encounters?.[value.originalLocation];
+    const originalEncounter =
+      activePlaythrough?.encounters?.[value.originalLocation];
     if (!originalEncounter) return false;
 
     // If the original location encounter is not a fusion (isFusion = false),
@@ -137,9 +131,7 @@ export function DraggableComboboxSprite({
 
     // Check if there's already a Pokemon in the target slot
     const activePlaythrough = getActivePlaythrough();
-    const targetEncounter = (
-      activePlaythrough?.encounters as Record<string, EncounterData> | undefined
-    )?.[targetLocationId];
+    const targetEncounter = activePlaythrough?.encounters?.[targetLocationId];
     const existingPokemon = targetEncounter
       ? targetField === 'head'
         ? targetEncounter.head
@@ -181,8 +173,7 @@ export function DraggableComboboxSprite({
       value &&
       locationId &&
       value.originalLocation &&
-      value.originalLocation !== locationId &&
-      settings.moveEncountersBetweenLocations
+      value.originalLocation !== locationId
     ) {
       const originalLocation = getLocationByIdFromMerged(
         value.originalLocation,
@@ -204,12 +195,7 @@ export function DraggableComboboxSprite({
     }
 
     // Add move option if we have a Pokemon and location with available destinations
-    if (
-      value &&
-      locationId &&
-      availableLocations.length > 0 &&
-      settings.moveEncountersBetweenLocations
-    ) {
+    if (value && locationId && availableLocations.length > 0) {
       options.push({
         id: 'move',
         label: 'Move to Location',
@@ -218,12 +204,7 @@ export function DraggableComboboxSprite({
       });
     }
 
-    if (
-      value &&
-      locationId &&
-      (preEvolution || evolutions?.length) &&
-      settings.moveEncountersBetweenLocations
-    ) {
+    if (value && locationId && (preEvolution || evolutions?.length)) {
       options.push({
         id: 'evolve-separator',
         separator: true,
@@ -269,7 +250,7 @@ export function DraggableComboboxSprite({
           id: `evolve-${evo.id}`,
           label: (
             <div className='flex items-center gap-x-2 w-full'>
-              <div className='flex items-center justify-center size-6 flex-shrink-0'>
+              <div className='flex items-center justify-center size-8 flex-shrink-0'>
                 <PokemonSprite pokemonId={evo.id} generation='gen7' />
               </div>
               <span className='truncate'>Evolve to {evo.name}</span>
@@ -303,7 +284,7 @@ export function DraggableComboboxSprite({
             id: `evolve-${evo.id}`,
             label: (
               <div className='flex items-center gap-x-2 w-full'>
-                <div className='flex items-center justify-center size-6 flex-shrink-0'>
+                <div className='flex items-center justify-center size-8 flex-shrink-0'>
                   <PokemonSprite pokemonId={evo.id} generation='gen7' />
                 </div>
                 <span className='truncate'>{evo.name}</span>
@@ -363,7 +344,6 @@ export function DraggableComboboxSprite({
     locationId,
     customLocations,
     availableLocations.length,
-    settings.moveEncountersBetweenLocations,
     handleMoveToOriginalLocation,
     wouldCreateEggFusionAtOriginal,
     preEvolution,
@@ -374,7 +354,7 @@ export function DraggableComboboxSprite({
   if (!pokemon) return null;
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    if (disabled || !settings.moveEncountersBetweenLocations) {
+    if (disabled) {
       e.preventDefault();
       return;
     }
@@ -449,17 +429,15 @@ export function DraggableComboboxSprite({
                     </div>
                   )}
                 <div className='flex items-center text-xs gap-2'>
-                  {settings.moveEncountersBetweenLocations && (
-                    <div className='flex items-center gap-1'>
-                      <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
-                        <Hand className='size-2.5' />
-                        <span className='font-medium text-xs'>L</span>
-                      </div>
-                      <span className='text-gray-600 dark:text-gray-300 text-xs'>
-                        Grab
-                      </span>
+                  <div className='flex items-center gap-1'>
+                    <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
+                      <Hand className='size-2.5' />
+                      <span className='font-medium text-xs'>L</span>
                     </div>
-                  )}
+                    <span className='text-gray-600 dark:text-gray-300 text-xs'>
+                      Grab
+                    </span>
+                  </div>
                   <div className='flex items-center gap-1'>
                     <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
                       <MousePointer className='size-2.5' />
@@ -476,16 +454,15 @@ export function DraggableComboboxSprite({
             <div
               className={clsx(
                 'absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md',
-                'size-12.5 flex items-center justify-center',
+                'size-12.5 flex items-center justify-center active:cursor-grabbing',
                 'group-focus-within/input:border-blue-500',
                 {
-                  'cursor-grab active:cursor-grabbing':
-                    !disabled && settings.moveEncountersBetweenLocations,
+                  'cursor-grab': !disabled,
                   'cursor-not-allowed opacity-50': disabled,
                   'pointer-events-none': dragPreview || disabled,
                 }
               )}
-              draggable={!disabled && settings.moveEncountersBetweenLocations}
+              draggable={!disabled}
               onDragStart={handleDragStart}
             >
               <PokemonSprite
@@ -494,6 +471,7 @@ export function DraggableComboboxSprite({
                   dragPreview && 'opacity-60 pointer-events-none' // Make preview sprite opaque
                 )}
                 draggable={false}
+                generation='gen8'
               />
             </div>
           </CursorTooltip>

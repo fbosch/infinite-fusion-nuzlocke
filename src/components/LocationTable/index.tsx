@@ -15,6 +15,11 @@ import React, {
   useCallback,
 } from 'react';
 import { getLocationsSortedWithCustom } from '@/loaders';
+import type { CombinedLocation } from '@/loaders/locations';
+import LocationTableHeader from './LocationTableHeader';
+import LocationTableRow from './LocationTableRow';
+import LocationTableSkeleton from './LocationTableSkeleton';
+import LocationCell from './LocationCell';
 import {
   useIsLoading,
   useCustomLocations,
@@ -31,12 +36,6 @@ import {
   flashPokemonOverlaysByUids,
 } from '@/utils/scrollToLocation';
 import { onScrollToLocation, onFlashUids } from '@/lib/events';
-import type { CombinedLocation } from '@/loaders/locations';
-import type { EncounterData } from '@/stores/playthroughs/types';
-import LocationTableHeader from './LocationTableHeader';
-import LocationTableRow from './LocationTableRow';
-import LocationTableSkeleton from './LocationTableSkeleton';
-import LocationCell from './LocationCell';
 
 const columnHelper = createColumnHelper<CombinedLocation>();
 
@@ -81,10 +80,7 @@ export default function LocationTable() {
 
     window.requestAnimationFrame(() => {
       scrollToMostRecentLocation(
-        (playthroughActions.getEncounters() || {}) as Record<
-          string,
-          EncounterData
-        >,
+        playthroughActions.getEncounters() || {},
         tableContainerRef.current,
         tableRef.current,
         'smooth'
@@ -95,10 +91,7 @@ export default function LocationTable() {
   // Manual scroll handler
   const handleScrollToRecent = useCallback(() => {
     scrollToMostRecentLocation(
-      (playthroughActions.getEncounters() || {}) as Record<
-        string,
-        EncounterData
-      >,
+      playthroughActions.getEncounters() || {},
       tableContainerRef.current,
       tableRef.current,
       'smooth'

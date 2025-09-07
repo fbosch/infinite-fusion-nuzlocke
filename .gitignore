@@ -24,7 +24,6 @@
 .DS_Store
 *.pem
 __screenshots__
-.playwright-mcp
 
 # debug
 npm-debug.log*

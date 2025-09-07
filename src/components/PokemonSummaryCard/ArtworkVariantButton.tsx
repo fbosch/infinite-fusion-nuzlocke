@@ -3,84 +3,79 @@
 import React, { useMemo } from 'react';
 import { Loader2, RefreshCwOff, RefreshCcw, RefreshCw } from 'lucide-react';
 import clsx from 'clsx';
+import { useEncounter } from '@/stores/playthroughs';
+import { useShiftKey } from '@/hooks/useKeyPressed';
 import { twMerge } from 'tailwind-merge';
 import { CursorTooltip } from '../CursorTooltip';
 import { useSpriteVariants, usePreferredVariantState } from '@/hooks/useSprite';
-import { useShiftKey } from '@/hooks/useKeyPressed';
+import { getDisplayPokemon } from './utils';
 
 interface ArtworkVariantButtonProps {
-  headId?: number;
-  bodyId?: number;
-  isFusion?: boolean;
+  locationId: string;
   disabled?: boolean;
   className?: string;
   shouldLoad?: boolean;
 }
 
 export function ArtworkVariantButton({
-  headId,
-  bodyId,
-  isFusion = false,
+  locationId,
   disabled = false,
   className,
   shouldLoad = true,
 }: ArtworkVariantButtonProps) {
+  // Get encounter data directly - only this button will rerender when this encounter changes
+  const encounter = useEncounter(locationId);
   const isShiftPressed = useShiftKey();
-
-  // Determine which Pokemon IDs to use for variants and preferred state
-  // When fusion is off, use the single Pokemon ID; when fusion is on, use both
-  const effectiveHeadId = isFusion
-    ? (headId ?? null)
-    : (headId ?? bodyId ?? null);
-  const effectiveBodyId = isFusion ? (bodyId ?? null) : null;
-
-  // Use the determined Pokemon IDs for preferred variant state
   const { variant: currentVariant, updateVariant } = usePreferredVariantState(
-    effectiveHeadId,
-    effectiveBodyId
+    encounter?.head?.id ?? null,
+    encounter?.body?.id ?? null
   );
 
-  // Use React Query hook for sprite variants with determined Pokemon IDs
+  // Use React Query hook for sprite variants
   const { data: variants, isLoading } = useSpriteVariants(
-    effectiveHeadId,
-    effectiveBodyId,
+    encounter?.head?.id,
+    encounter?.body?.id,
     shouldLoad
   );
 
   // Determine if variants are available
   const hasVariants = variants && variants.length > 1;
 
-  const handleCycleVariant = React.useCallback(
-    async (event: React.MouseEvent) => {
-      // Prevent event bubbling to avoid triggering parent click handlers
-      event.stopPropagation();
+  const handleCycleVariant = React.useCallback(async () => {
+    if (disabled || !hasVariants || !variants) return;
 
-      if (disabled || !hasVariants || !variants) return;
+    try {
+      // Determine which Pokemon this variant applies to based on display state
+      const displayPokemon = getDisplayPokemon(
+        encounter?.head ?? null,
+        encounter?.body ?? null,
+        encounter?.isFusion ?? false
+      );
 
-      try {
-        // Get current variant and find next one
-        const currentIndex = variants.indexOf(currentVariant);
-        const nextIndex = isShiftPressed
-          ? (currentIndex - 1 + variants.length) % variants.length
-          : (currentIndex + 1) % variants.length;
+      // Get current variant and find next one
+      const currentIndex = variants.indexOf(currentVariant);
+      const nextIndex = isShiftPressed
+        ? (currentIndex - 1 + variants.length) % variants.length
+        : (currentIndex + 1) % variants.length;
 
-        const newVariant = variants[nextIndex] || '';
+      const newVariant = variants[nextIndex] || '';
 
-        // Update the variant
-        await updateVariant(newVariant);
-      } catch (error) {
-        console.error('Failed to cycle artwork variant:', error);
-      }
-    },
-    [
-      disabled,
-      hasVariants,
-      variants,
-      currentVariant,
-      isShiftPressed,
-      updateVariant,
-    ]
-  );
+      // Update the variant
+      await updateVariant(newVariant);
+    } catch (error) {
+      console.error('Failed to cycle artwork variant:', error);
+    }
+  }, [
+    disabled,
+    hasVariants,
+    variants,
+    currentVariant,
+    isShiftPressed,
+    encounter?.head,
+    encounter?.body,
+    encounter?.isFusion,
+    updateVariant,
+  ]);
 
   const buttonIcon = useMemo(() => {
     if (isLoading) {
@@ -105,8 +100,8 @@ export function ArtworkVariantButton({
     return 'Cycle artwork variants (hold Shift to reverse)';
   }, [hasVariants, isLoading]);
 
-  // Don't render the button if there are no variants (unless still loading)
-  if (!isLoading && !hasVariants) {
+  // Don't show button if no encounter exists
+  if (!encounter) {
     return null;
   }
 

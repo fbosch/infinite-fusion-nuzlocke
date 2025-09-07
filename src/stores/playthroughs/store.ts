@@ -1,7 +1,6 @@
 import { proxy, subscribe } from 'valtio';
 import { devtools } from 'valtio/utils';
 import { PlaythroughsState, Playthrough, GameMode } from './types';
-import { type PokemonOptionType } from '@/loaders/pokemon';
 import {
   loadFromIndexedDB,
   createDebouncedSaveAll,
@@ -12,7 +11,6 @@ import {
 } from './persistence';
 import { z } from 'zod';
 import { generatePrefixedId } from '@/utils/id';
-import { restorePokemonToTeam } from './encounters';
 
 // Default state
 const defaultState: PlaythroughsState = {
@@ -54,9 +52,7 @@ const createDefaultPlaythrough = (): Playthrough => ({
   id: generatePlaythroughId(),
   name: 'Nuzlocke',
   encounters: {},
-  team: { members: Array.from({ length: 6 }, () => null) }, // Fixed size 6 with null values
   gameMode: 'classic',
-  version: '1.0.0',
   createdAt: getCurrentTimestamp(),
   updatedAt: getCurrentTimestamp(),
 });
@@ -74,7 +70,8 @@ if (typeof window !== 'undefined') {
   }
 
   // Load data from IndexedDB asynchronously
-  loadFromIndexedDB(playthroughsStore).then(() => {
+  loadFromIndexedDB(createDefaultPlaythrough).then(loadedState => {
+    Object.assign(playthroughsStore, loadedState);
     // Ensure loading state is set to false
     playthroughsStore.isLoading = false;
   });
@@ -130,9 +127,7 @@ const createPlaythrough = (
     id: generatePlaythroughId(),
     name,
     encounters: {},
-    team: { members: Array.from({ length: 6 }, () => null) },
     gameMode,
-    version: '1.0.0',
     createdAt: getCurrentTimestamp(),
     updatedAt: getCurrentTimestamp(),
   };
@@ -305,14 +300,10 @@ const importPlaythrough = async (importData: unknown): Promise<string> => {
       id: finalId,
       name: importedPlaythrough.name,
       gameMode: importedPlaythrough.gameMode as GameMode, // Type assertion since transform ensures it's GameMode
-      version: importedPlaythrough.version || '1.0.0',
       createdAt: importedPlaythrough.createdAt,
       updatedAt: Date.now(), // Update to current time
       customLocations: importedPlaythrough.customLocations || [],
       encounters: importedPlaythrough.encounters || {},
-      team: importedPlaythrough.team || {
-        members: [null, null, null, null, null, null],
-      }, // Fixed size 6 with null values
     };
 
     // Add to store
@@ -373,173 +364,6 @@ const forceSave = async () => {
   await saveToIndexedDB(playthroughsStore);
 };
 
-const removeFromTeam = (position: number): boolean => {
-  const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough) return false;
-
-  // Validate position
-  if (position < 0 || position >= 6) return false;
-
-  // Check if position is occupied
-  if (activePlaythrough.team.members[position] === null) return false;
-
-  // Remove from team
-  activePlaythrough.team.members[position] = null;
-
-  activePlaythrough.updatedAt = getCurrentTimestamp();
-  return true;
-};
-
-const reorderTeam = (fromPosition: number, toPosition: number): boolean => {
-  const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough) return false;
-
-  // Validate positions
-  if (
-    fromPosition < 0 ||
-    fromPosition >= 6 ||
-    toPosition < 0 ||
-    toPosition >= 6
-  ) {
-    return false;
-  }
-
-  // Check if source position is occupied
-  if (activePlaythrough.team.members[fromPosition] === null) return false;
-
-  // If moving to the same position, no change needed
-  if (fromPosition === toPosition) return true;
-
-  // Get the team member to move
-  const teamMember = activePlaythrough.team.members[fromPosition];
-
-  // Remove from source position
-  activePlaythrough.team.members[fromPosition] = null;
-
-  // Add to target position (overwrite if occupied)
-  activePlaythrough.team.members[toPosition] = teamMember;
-
-  activePlaythrough.updatedAt = getCurrentTimestamp();
-  return true;
-};
-
-// Update team member at a specific position
-const updateTeamMember = async (
-  position: number,
-  headPokemon: { uid: string } | null,
-  bodyPokemon: { uid: string } | null
-): Promise<boolean> => {
-  const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough) return false;
-
-  // Validate position
-  if (position < 0 || position >= 6) return false;
-
-  // Helper function to create team member object
-  const createTeamMember = (
-    head: { uid: string } | null,
-    body: { uid: string } | null
-  ) => {
-    if (!head && !body) return null;
-
-    return {
-      headPokemonUid: head?.uid || '',
-      bodyPokemonUid: body?.uid || '',
-    };
-  };
-
-  // Restore Pokémon status if they were stored before adding to team
-  if (headPokemon?.uid) {
-    await restorePokemonToTeam(headPokemon.uid);
-  }
-  if (bodyPokemon?.uid) {
-    await restorePokemonToTeam(bodyPokemon.uid);
-  }
-
-  // Update the team member
-  activePlaythrough.team.members[position] = createTeamMember(
-    headPokemon,
-    bodyPokemon
-  );
-
-  // Update the playthrough timestamp to trigger reactivity
-  activePlaythrough.updatedAt = getCurrentTimestamp();
-
-  return true;
-};
-
-// Helper function to get team member details
-const getTeamMemberDetails = (position: number) => {
-  const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough || position < 0 || position >= 6) return null;
-
-  const teamMember = activePlaythrough.team.members[position];
-  if (!teamMember) return null;
-
-  // Find Pokémon by UID across all encounters
-  let headPokemon: PokemonOptionType | null = null;
-  let bodyPokemon: PokemonOptionType | null = null;
-
-  // Flatten all Pokémon from all encounters into a single collection
-  const allPokemon = Object.values(activePlaythrough.encounters || {}).flatMap(
-    encounter => {
-      const pokemon = [];
-      if (encounter.head) pokemon.push(encounter.head);
-      if (encounter.body) pokemon.push(encounter.body);
-      return pokemon;
-    }
-  );
-
-  // Find Pokémon by UID from the flattened collection
-  headPokemon =
-    allPokemon.find(pokemon => pokemon.uid === teamMember.headPokemonUid) ||
-    null;
-  bodyPokemon =
-    teamMember.bodyPokemonUid && teamMember.bodyPokemonUid !== ''
-      ? allPokemon.find(pokemon => pokemon.uid === teamMember.bodyPokemonUid) ||
-        null
-      : null;
-
-  if (!headPokemon && !bodyPokemon) {
-    return null;
-  }
-
-  // Create a combined encounter object for display
-  // A team member is a fusion only if both head and body Pokémon exist
-  const isFusion = Boolean(headPokemon && bodyPokemon);
-  const combinedEncounter = {
-    head: headPokemon,
-    body: bodyPokemon,
-    isFusion,
-    updatedAt: getCurrentTimestamp(), // Use current timestamp since Pokémon don't have updatedAt
-  };
-
-  return {
-    position,
-    encounter: combinedEncounter,
-    teamMember,
-  };
-};
-
-// Helper function to check if team is full
-const isTeamFull = (): boolean => {
-  const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough) return true;
-
-  return activePlaythrough.team.members.every(member => member !== null);
-};
-
-// Helper function to get available team positions
-const getAvailableTeamPositions = (): number[] => {
-  const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough) return [];
-
-  return activePlaythrough.team.members
-    .map((member, index) => ({ member, index }))
-    .filter(({ member }) => member === null)
-    .map(({ index }) => index);
-};
-
 export {
   playthroughsStore,
   getActivePlaythrough,
@@ -560,10 +384,4 @@ export {
   forceSave,
   importPlaythrough,
   getCurrentTimestamp,
-  removeFromTeam,
-  reorderTeam,
-  updateTeamMember,
-  getTeamMemberDetails,
-  isTeamFull,
-  getAvailableTeamPositions,
 };

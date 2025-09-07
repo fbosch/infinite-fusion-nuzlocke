@@ -1,0 +1,146 @@
+---
+alwaysApply: false
+---
+
+# Response Actions Menu
+
+## Goal
+Every non-trivial response ends with a compact menu of the **most relevant next actions** (3–5 items), tailored to the current context (files, errors, diffs, stack, repo scripts).
+
+## When to Show Actions
+- ✅ Bugfixes, refactors, new features, test work, CLI/tooling, config changes  
+- ❌ Pure ideation, casual Q&A, legal/policy, or when no concrete action exists
+
+## Quality Bar
+- Actions must be **directly doable** in Cursor: patch, terminal command, or "open/inspect" with precise file/line
+- Prefer high-leverage edits over general descriptions
+- Never invent paths/commands — if unknown, use `[Investigate]` with exact search/file target
+
+## Output Contract
+Append to the end of your message:
+
+```text
+Actions
+1. [Patch] <summary of change>
+   <minimal diff (≤ 80 lines)>
+
+2. [Command] <what it does in 6–10 words>
+$ <terminal command>
+
+3. [Open] <file:line and what to inspect>
+: <brief instruction>
+
+4. [Test] <what to verify>
+$ <test command>
+
+5. [Doc/Rule] <add or update rule or README>
+  - 1–2 bullets describing the addition
+```
+
+## Examples
+
+### Bugfix Response
+```text
+Actions (top 3–5)
+1. [Patch] Fix validation error in form submission
+   <minimal diff showing the fix>
+
+2. [Test] Verify the fix resolves the issue
+$ pnpm test:run -- --run src/components/Form.test.tsx
+
+3. [Open] Check related validation logic
+: src/utils/validation.ts:45 - Review validation function
+```
+
+### Feature Addition Response
+```text
+Actions 
+1. [Patch] Add new feature component
+   <minimal diff for the new component>
+
+2. [Test] Create tests for the new feature
+$ pnpm test:run -- --run src/components/NewFeature.test.tsx
+
+3. [Doc/Rule] Update component documentation
+  - Add usage examples to README
+  - Document new props and behavior
+```
+
+## Implementation Notes
+
+- Always provide 3-5 actionable items
+- Use precise file paths and line numbers
+- Include terminal commands when applicable
+- Focus on high-leverage actions that move the project forward
+- Avoid generic advice - be specific and actionable
+# Response Actions Menu
+
+## Goal
+Every non-trivial response ends with a compact menu of the **most relevant next actions** (3–5 items), tailored to the current context (files, errors, diffs, stack, repo scripts).
+
+## When to Show Actions
+- ✅ Bugfixes, refactors, new features, test work, CLI/tooling, config changes  
+- ❌ Pure ideation, casual Q&A, legal/policy, or when no concrete action exists
+
+## Quality Bar
+- Actions must be **directly doable** in Cursor: patch, terminal command, or "open/inspect" with precise file/line
+- Prefer high-leverage edits over general descriptions
+- Never invent paths/commands — if unknown, use `[Investigate]` with exact search/file target
+
+## Output Contract
+Append to the end of your message:
+
+```text
+Actions
+1. [Patch] <summary of change>
+   <minimal diff (≤ 80 lines)>
+
+2. [Command] <what it does in 6–10 words>
+$ <terminal command>
+
+3. [Open] <file:line and what to inspect>
+: <brief instruction>
+
+4. [Test] <what to verify>
+$ <test command>
+
+5. [Doc/Rule] <add or update rule or README>
+  - 1–2 bullets describing the addition
+```
+
+## Examples
+
+### Bugfix Response
+```text
+Actions
+1. [Patch] Fix validation error in form submission
+   <minimal diff showing the fix>
+
+2. [Test] Verify the fix resolves the issue
+$ pnpm test:run -- --run src/components/Form.test.tsx
+
+3. [Open] Check related validation logic
+: src/utils/validation.ts:45 - Review validation function
+```
+
+### Feature Addition Response
+```text
+Actions (top 3–5)
+1. [Patch] Add new feature component
+   <minimal diff for the new component>
+
+2. [Test] Create tests for the new feature
+$ pnpm test:run -- --run src/components/NewFeature.test.tsx
+
+3. [Doc/Rule] Update component documentation
+  - Add usage examples to README
+  - Document new props and behavior
+```
+
+## Implementation Notes
+
+- Always provide 3-5 actionable items
+- Use precise file paths and line numbers
+- Include terminal commands when applicable
+- Focus on high-leverage actions that move the project forward
+- Avoid generic advice - be specific and actionable

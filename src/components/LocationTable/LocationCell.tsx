@@ -3,13 +3,10 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { Info, CheckCircle } from 'lucide-react';
 import { useEncounters } from '@/stores/playthroughs';
-import { useSnapshot } from 'valtio';
-import { settingsStore } from '@/stores/settings';
 import { isCustomLocation } from '@/loaders';
 import { PokemonSprite } from '@/components/PokemonSprite';
 import type { CombinedLocation } from '@/loaders/locations';
 import type { PokemonOptionSchema } from '@/loaders/pokemon';
-import type { EncounterData } from '@/stores/playthroughs/types';
 import { z } from 'zod';
 import { CursorTooltip } from '../CursorTooltip';
 import { isStarterLocation } from '../../constants/special-locations';
@@ -26,7 +23,6 @@ export default function LocationCell({
   locationName,
 }: LocationCellProps) {
   const encounters = useEncounters();
-  const settings = useSnapshot(settingsStore);
   const [isTooltipHovered, setIsTooltipHovered] = useState(false);
 
   // Find all pokemon that originated from this location
@@ -36,7 +32,7 @@ export default function LocationCell({
     const pokemon: Pokemon[] = [];
 
     // Go through all encounters and find pokemon from this location
-    for (const encounter of Object.values(encounters) as EncounterData[]) {
+    for (const encounter of Object.values(encounters)) {
       if (encounter.head?.originalLocation === location.id) {
         pokemon.push(encounter.head);
       }
@@ -48,48 +44,13 @@ export default function LocationCell({
     return pokemon;
   }, [encounters, location.id]);
 
-  // Check if any Pokémon have been moved from their original locations
-  const hasMovedPokemon = useMemo(() => {
-    if (!encounters) return false;
-
-    // Check all encounters to see if any Pokémon are not in their original location
-    for (const [currentLocationId, encounter] of Object.entries(encounters) as [
-      string,
-      EncounterData,
-    ][]) {
-      // Check head Pokémon
-      if (
-        encounter.head?.originalLocation &&
-        encounter.head.originalLocation !== currentLocationId
-      ) {
-        return true;
-      }
-      // Check body Pokémon
-      if (
-        encounter.body?.originalLocation &&
-        encounter.body.originalLocation !== currentLocationId
-      ) {
-        return true;
-      }
-    }
-
-    return false;
-  }, [encounters]);
-
-  // Determine if we should show detailed original encounter information
-  const shouldShowOriginalEncounter =
-    settings.moveEncountersBetweenLocations || hasMovedPokemon;
-
   const encounterUids = locationPokemon
     .map(p => p.uid)
     .filter(Boolean) as string[];
   const hasEncounter = locationPokemon.length > 0;
 
-  // Handle hover effect on encounter Pokémon elements - only when moving is relevant
+  // Handle hover effect on encounter Pokémon elements
   useEffect(() => {
-    // Only apply hover effects if we should show original encounter information
-    if (!shouldShowOriginalEncounter) return;
-
     encounterUids.forEach(uid => {
       const element = document.querySelector(
         `[data-uid="${uid}"]`
@@ -109,11 +70,10 @@ export default function LocationCell({
         }
       }
     });
-  }, [isTooltipHovered, encounterUids, shouldShowOriginalEncounter]);
+  }, [isTooltipHovered, encounterUids]);
 
   const getTooltipContent = useMemo(() => {
-    // Only show detailed original encounter information if setting is enabled or Pokémon have been moved
-    if (locationPokemon.length > 0 && shouldShowOriginalEncounter) {
+    if (locationPokemon.length > 0) {
       return (
         <div className='max-w-xs'>
           <div className='text-xs dark:text-gray-400 uppercase tracking-wide mb-2.5 font-medium'>
@@ -128,7 +88,7 @@ export default function LocationCell({
                 </div>
                 <div className='flex-1 min-w-0'>
                   <span className='font-medium dark:text-white text-gray-900'>
-                    {pokemon.nickname || pokemon.name}
+                    {pokemon.nickname ?? pokemon.name}
                   </span>
                 </div>
               </div>
@@ -144,22 +104,17 @@ export default function LocationCell({
       );
     }
 
-    // Always show basic location description as fallback
     return isCustomLocation(location)
       ? `Custom Location`
       : location.description;
-  }, [locationPokemon, location, shouldShowOriginalEncounter]);
+  }, [locationPokemon, location]);
 
   return (
     <div className='text-gray-900 dark:text-white flex gap-x-2 items-center'>
       <CursorTooltip
         content={getTooltipContent}
-        onMouseEnter={() =>
-          shouldShowOriginalEncounter && setIsTooltipHovered(true)
-        }
-        onMouseLeave={() =>
-          shouldShowOriginalEncounter && setIsTooltipHovered(false)
-        }
+        onMouseEnter={() => setIsTooltipHovered(true)}
+        onMouseLeave={() => setIsTooltipHovered(false)}
       >
         {hasEncounter ? (
           <CheckCircle className='size-4 text-green-600 cursor-help' />

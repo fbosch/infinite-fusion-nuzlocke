@@ -7,6 +7,4 @@ export type PCEntry = {
   locationName: string;
   head: PokemonOptionType | null;
   body: PokemonOptionType | null;
-  position?: number;
-  isFusion?: boolean;
 };

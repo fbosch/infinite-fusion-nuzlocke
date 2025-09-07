@@ -1,6 +1,6 @@
 ---
 description: Scraping script development guidelines including data fetching, error handling, progress tracking, and file organization patterns
-globs: scripts/**/*.ts,scripts/**/*.js
+globs: ['scripts/**/*.{ts,js}']
 alwaysApply: false
 ---
 

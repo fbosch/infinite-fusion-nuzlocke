@@ -21,15 +21,12 @@ import {
 } from '@/lib/sprites';
 import Image from 'next/image';
 import ContextMenu from '../ContextMenu';
-import { getDisplayPokemon } from './utils';
-import { type PokemonOptionType } from '@/loaders/pokemon';
 
 interface ArtworkVariantModalProps {
   isOpen: boolean;
   onClose: () => void;
   headId?: number | null;
   bodyId?: number | null;
-  isFusion?: boolean;
 }
 
 export function ArtworkVariantModal({
@@ -37,33 +34,12 @@ export function ArtworkVariantModal({
   onClose,
   headId,
   bodyId,
-  isFusion = false,
 }: ArtworkVariantModalProps) {
-  // Determine which Pokemon to display based on fusion state
-  const displayPokemon = getDisplayPokemon(
-    headId ? ({ id: headId } as PokemonOptionType) : null,
-    bodyId ? ({ id: bodyId } as PokemonOptionType) : null,
-    isFusion
-  );
+  const spriteId = headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId;
 
-  // Determine which Pokemon IDs to use for variants and preferred state
-  // When fusion is off, use the single Pokemon ID; when fusion is on, use both
-  const effectiveHeadId = displayPokemon.isFusion
-    ? (displayPokemon.head?.id ?? null)
-    : (displayPokemon.head?.id ?? displayPokemon.body?.id ?? null);
-  const effectiveBodyId = displayPokemon.isFusion
-    ? (displayPokemon.body?.id ?? null)
-    : null;
-
-  // Use the effective Pokemon IDs for the sprite ID
-  const spriteId =
-    effectiveHeadId && effectiveBodyId
-      ? `${effectiveHeadId}.${effectiveBodyId}`
-      : effectiveHeadId || effectiveBodyId;
-
-  // Get global preferred variant using effective Pokemon IDs
+  // Get global preferred variant
   const { variant: globalPreferredVariant, updateVariant } =
-    usePreferredVariantState(effectiveHeadId, effectiveBodyId);
+    usePreferredVariantState(headId ?? null, bodyId ?? null);
 
   // Use local state for immediate updates, fallback to global preferred variant
   const [localVariant, setLocalVariant] = React.useState<string>(
@@ -71,14 +47,14 @@ export function ArtworkVariantModal({
   );
 
   const { data: variants, isLoading: variantsLoading } = useSpriteVariants(
-    effectiveHeadId,
-    effectiveBodyId,
+    headId,
+    bodyId,
     isOpen
   );
 
   const { data: credits, isLoading: creditsLoading } = useSpriteCredits(
-    effectiveHeadId,
-    effectiveBodyId,
+    headId,
+    bodyId,
     isOpen
   );
 
@@ -180,11 +156,7 @@ export function ArtworkVariantModal({
                 aria-label='Artwork variant options'
               >
                 {availableVariants.map(variant => {
-                  const spriteUrl = generateSpriteUrl(
-                    effectiveHeadId,
-                    effectiveBodyId,
-                    variant
-                  );
+                  const spriteUrl = generateSpriteUrl(headId, bodyId, variant);
                   return (
                     <Field key={variant} className='contents'>
                       <Radio
@@ -255,8 +227,8 @@ export function ArtworkVariantModal({
                                 <div className='pointer-events-none'>
                                   {getFormattedCreditsFromResponse(
                                     credits,
-                                    effectiveHeadId,
-                                    effectiveBodyId,
+                                    headId,
+                                    bodyId,
                                     variant
                                   )}
                                 </div>

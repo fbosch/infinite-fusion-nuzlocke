@@ -1,4 +1,4 @@
-import { get, set, del, createStore, keys } from 'idb-keyval';
+import { get, set, del, createStore } from 'idb-keyval';
 import { debounce } from 'es-toolkit';
 import { z, ZodError } from 'zod';
 import type {
@@ -6,80 +6,12 @@ import type {
   Playthrough,
 } from '@/stores/playthroughs/types';
 import { PlaythroughSchema } from '@/stores/playthroughs/types';
-import { migratePlaythrough } from './migrations';
 
 // Create a custom store for playthroughs data
 export const playthroughsStore_idb = createStore('playthroughs', 'data');
 
 // Storage keys
 export const ACTIVE_PLAYTHROUGH_KEY = 'activePlaythroughId';
-
-// Local createDefaultPlaythrough function
-const createDefaultPlaythrough = (): Playthrough => ({
-  id: `playthrough_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-  name: 'Nuzlocke',
-  encounters: {},
-  team: { members: Array.from({ length: 6 }, () => null) },
-  gameMode: 'classic',
-  version: '1.0.0',
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
-});
-
-// LocalStorage helpers for active playthrough ID
-export const getActivePlaythroughId = (): string | null => {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(ACTIVE_PLAYTHROUGH_KEY);
-};
-
-export const setActivePlaythroughId = (id: string): void => {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(ACTIVE_PLAYTHROUGH_KEY, id);
-};
-
-export const removeActivePlaythroughId = (): void => {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem(ACTIVE_PLAYTHROUGH_KEY);
-};
-
-// Migration function to move activePlaythroughId from IndexedDB to LocalStorage
-export const migrateActivePlaythroughId = async (): Promise<string | null> => {
-  if (typeof window === 'undefined') return null;
-
-  // Check if we already have the value in LocalStorage
-  const localStorageValue = getActivePlaythroughId();
-  if (localStorageValue) {
-    return localStorageValue;
-  }
-
-  try {
-    // Try to get the value from IndexedDB
-    const indexedDBValue = await get(
-      ACTIVE_PLAYTHROUGH_KEY,
-      playthroughsStore_idb
-    );
-
-    if (indexedDBValue && typeof indexedDBValue === 'string') {
-      // Migrate to LocalStorage
-      setActivePlaythroughId(indexedDBValue);
-
-      // Clean up the old IndexedDB entry
-      await del(ACTIVE_PLAYTHROUGH_KEY, playthroughsStore_idb);
-
-      console.log(
-        'Migrated activePlaythroughId from IndexedDB to LocalStorage'
-      );
-      return indexedDBValue;
-    }
-  } catch (error) {
-    console.warn(
-      'Failed to migrate activePlaythroughId from IndexedDB:',
-      error
-    );
-  }
-
-  return null;
-};
 
 // More efficient serialization: Use structuredClone when available, fallback to JSON
 export const serializeForStorage = (obj: unknown): unknown => {
@@ -101,8 +33,7 @@ export const loadPlaythroughById = async (
   try {
     const playthroughData = await get(playthroughId, playthroughsStore_idb);
     if (playthroughData) {
-      const migratedPlaythrough = await migratePlaythrough(playthroughData);
-      return PlaythroughSchema.parse(migratedPlaythrough);
+      return PlaythroughSchema.parse(playthroughData);
     }
     return null;
   } catch (error) {
@@ -115,23 +46,14 @@ export const loadAllPlaythroughs = async (): Promise<Playthrough[]> => {
   if (typeof window === 'undefined') return [];
 
   try {
-    // Get all keys from IndexedDB and filter out non-playthrough keys
-    const allKeys = await keys(playthroughsStore_idb);
-    const playthroughIds = allKeys.filter(
-      (key): key is string =>
-        typeof key === 'string' && key !== ACTIVE_PLAYTHROUGH_KEY
-    );
+    const availablePlaythroughIds = ((await get(
+      'playthrough_ids',
+      playthroughsStore_idb
+    )) || []) as string[];
 
     // Load all playthroughs in parallel
-    const playthroughPromises = playthroughIds.map(async id => {
-      const playthroughData = await get(id, playthroughsStore_idb);
-      if (playthroughData) {
-        const migratedPlaythrough = await migratePlaythrough(playthroughData);
-        return PlaythroughSchema.parse(migratedPlaythrough);
-      }
-      return null;
-    });
-
+    const playthroughPromises =
+      availablePlaythroughIds.map(loadPlaythroughById);
     const results = await Promise.all(playthroughPromises);
 
     return results.filter(
@@ -157,8 +79,20 @@ export const deletePlaythroughFromIndexedDB = async (
   if (typeof window === 'undefined') return;
 
   try {
-    // Simply delete the playthrough - no need to maintain ID list
-    await del(playthroughId, playthroughsStore_idb);
+    // Get current playthrough IDs and prepare delete operations
+    const playthroughIds = ((await get(
+      'playthrough_ids',
+      playthroughsStore_idb
+    )) || []) as string[];
+    const updatedIds = playthroughIds.filter(
+      (id: string) => id !== playthroughId
+    );
+
+    // Run delete and update operations in parallel
+    await Promise.all([
+      del(playthroughId, playthroughsStore_idb),
+      set('playthrough_ids', updatedIds, playthroughsStore_idb),
+    ]);
   } catch (error) {
     console.error(
       `Failed to delete playthrough ${playthroughId} from IndexedDB:`,
@@ -174,11 +108,15 @@ export const saveToIndexedDB = async (
   if (typeof window === 'undefined') return;
 
   try {
-    // Save active playthrough ID to LocalStorage for faster access
+    // Save active playthrough ID
     if (state.activePlaythroughId) {
-      setActivePlaythroughId(state.activePlaythroughId);
+      await set(
+        ACTIVE_PLAYTHROUGH_KEY,
+        state.activePlaythroughId,
+        playthroughsStore_idb
+      );
     } else {
-      removeActivePlaythroughId();
+      await del(ACTIVE_PLAYTHROUGH_KEY, playthroughsStore_idb);
     }
   } catch (error) {
     console.error('Failed to save playthroughs to IndexedDB:', error);
@@ -200,11 +138,19 @@ export const createDebouncedSaveAll = (
         const activePlaythrough = getActivePlaythrough();
         const saveOperations: Promise<void>[] = [];
 
-        // Save active playthrough ID to LocalStorage for faster access
+        // Save active playthrough ID
         if (state.activePlaythroughId) {
-          setActivePlaythroughId(state.activePlaythroughId);
+          saveOperations.push(
+            set(
+              ACTIVE_PLAYTHROUGH_KEY,
+              state.activePlaythroughId,
+              playthroughsStore_idb
+            )
+          );
         } else {
-          removeActivePlaythroughId();
+          saveOperations.push(
+            del(ACTIVE_PLAYTHROUGH_KEY, playthroughsStore_idb)
+          );
         }
 
         // Save the active playthrough data if it exists
@@ -215,6 +161,23 @@ export const createDebouncedSaveAll = (
           saveOperations.push(
             set(activePlaythrough.id, plainPlaythrough, playthroughsStore_idb)
           );
+
+          // Check if we need to update playthrough IDs list
+          const updatePlaythroughIds = async () => {
+            const playthroughIds = ((await get(
+              'playthrough_ids',
+              playthroughsStore_idb
+            )) || []) as string[];
+            if (!playthroughIds.includes(activePlaythrough.id)) {
+              playthroughIds.push(activePlaythrough.id);
+              await set(
+                'playthrough_ids',
+                playthroughIds,
+                playthroughsStore_idb
+              );
+            }
+          };
+          saveOperations.push(updatePlaythroughIds());
         }
 
         // Execute all save operations in parallel
@@ -230,55 +193,83 @@ export const createDebouncedSaveAll = (
   );
 };
 
-// Load all data from IndexedDB
 export const loadFromIndexedDB = async (
-  playthroughsStore: PlaythroughsState
-): Promise<void> => {
-  if (typeof window === 'undefined') return;
+  createDefaultPlaythrough: () => Playthrough
+): Promise<PlaythroughsState> => {
+  const defaultState: PlaythroughsState = {
+    playthroughs: [],
+    activePlaythroughId: undefined,
+    isLoading: true,
+    isSaving: false,
+  };
+
+  if (typeof window === 'undefined') return defaultState;
 
   try {
-    playthroughsStore.isLoading = true;
+    // Load active playthrough ID and available playthrough IDs in parallel
+    const [activePlaythroughId, availablePlaythroughIds] = await Promise.all([
+      get(ACTIVE_PLAYTHROUGH_KEY, playthroughsStore_idb),
+      get('playthrough_ids', playthroughsStore_idb).then(
+        ids => (ids || []) as string[]
+      ),
+    ]);
 
-    // Load all playthroughs
-    const allPlaythroughs = await loadAllPlaythroughs();
-    playthroughsStore.playthroughs = allPlaythroughs;
+    let activePlaythrough: Playthrough | null = null;
 
-    // Migrate and load active playthrough ID from LocalStorage (with fallback to IndexedDB)
-    const activePlaythroughId = await migrateActivePlaythroughId();
-
+    // Only load the active playthrough data if we have an active ID
     if (
       activePlaythroughId &&
-      allPlaythroughs.find(p => p.id === activePlaythroughId)
+      availablePlaythroughIds.includes(activePlaythroughId)
     ) {
-      playthroughsStore.activePlaythroughId = activePlaythroughId;
-    } else if (allPlaythroughs.length > 0) {
-      // If no valid active playthrough, use the first available one
-      const firstPlaythroughId = allPlaythroughs[0].id;
-      playthroughsStore.activePlaythroughId = firstPlaythroughId;
-      setActivePlaythroughId(firstPlaythroughId);
-    } else {
-      // No playthroughs exist, create a default one
-      const defaultPlaythrough = createDefaultPlaythrough();
-      playthroughsStore.playthroughs.push(defaultPlaythrough);
-      playthroughsStore.activePlaythroughId = defaultPlaythrough.id;
-      setActivePlaythroughId(defaultPlaythrough.id);
-
-      // Save the default playthrough
-      await set(
-        defaultPlaythrough.id,
-        serializeForStorage(defaultPlaythrough),
-        playthroughsStore_idb
-      );
+      try {
+        const playthroughData = await get(
+          activePlaythroughId,
+          playthroughsStore_idb
+        );
+        if (playthroughData) {
+          activePlaythrough = PlaythroughSchema.parse(playthroughData);
+        }
+      } catch (error) {
+        console.error(
+          `Failed to load active playthrough ${activePlaythroughId}:`,
+          error instanceof ZodError
+            ? z.prettifyError(error)
+            : error instanceof Error
+              ? error.message
+              : String(error)
+        );
+      }
     }
-  } catch (error) {
-    console.error('Failed to load from IndexedDB:', error);
 
-    // Fallback: create a default playthrough if loading fails
-    const defaultPlaythrough = createDefaultPlaythrough();
-    playthroughsStore.playthroughs.push(defaultPlaythrough);
-    playthroughsStore.activePlaythroughId = defaultPlaythrough.id;
-    setActivePlaythroughId(defaultPlaythrough.id);
-  } finally {
-    playthroughsStore.isLoading = false;
+    // If no active playthrough exists or failed to load, create a default one
+    if (!activePlaythrough) {
+      activePlaythrough = createDefaultPlaythrough();
+
+      // Save the new default playthrough immediately - all operations in parallel
+      await Promise.all([
+        set(
+          activePlaythrough.id,
+          serializeForStorage(activePlaythrough),
+          playthroughsStore_idb
+        ),
+        set('playthrough_ids', [activePlaythrough.id], playthroughsStore_idb),
+        set(
+          ACTIVE_PLAYTHROUGH_KEY,
+          activePlaythrough.id,
+          playthroughsStore_idb
+        ),
+      ]);
+    }
+
+    // Return state with only the active playthrough loaded
+    return {
+      playthroughs: [activePlaythrough],
+      activePlaythroughId: activePlaythrough.id,
+      isLoading: false,
+      isSaving: false,
+    };
+  } catch (error) {
+    console.error('Failed to load playthroughs from IndexedDB:', error);
+    return defaultState;
   }
 };

@@ -98,7 +98,6 @@ export default function ConfirmationDialog({
             </Button>
             <Button
               onClick={handleConfirm}
-              autoFocus
               className={clsx(
                 'px-4 py-2 text-sm  rounded-md transition-colors',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',

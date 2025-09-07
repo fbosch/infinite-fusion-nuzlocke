@@ -4,6 +4,7 @@ import type { TypeName } from '@/lib/typings';
 import { getFusionTyping, TypeQuery } from '@/lib/typings';
 import { usePokemonTypes } from './usePokemonTypes';
 import type { PokemonOptionType } from '@/loaders/pokemon';
+import { canFuse } from '@/utils/pokemonPredicates';
 
 export interface UseFusionTypesResult {
   primary?: TypeName;
@@ -61,9 +62,10 @@ export function useFusionTypesFromPokemon(
   isFusion: boolean
 ): UseFusionTypesResult {
   const headQuery = head?.id ? { id: head.id } : undefined;
-  const bodyQuery = isFusion && body?.id ? { id: body.id } : undefined;
+  const bodyQuery =
+    isFusion && body?.id && canFuse(head, body) ? { id: body.id } : undefined;
 
-  // If it's not a fusion, prioritize head over body
+  // If it's not a fusion or can't fuse, prioritize head over body
   const finalHeadQuery = headQuery || (body?.id ? { id: body.id } : undefined);
 
   return useFusionTypes(finalHeadQuery, bodyQuery);

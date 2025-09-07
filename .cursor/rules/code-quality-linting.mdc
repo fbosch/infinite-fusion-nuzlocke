@@ -1,7 +1,7 @@
 ---
 description: Code quality and linting standards including Prettier formatting, ESLint rules, and validation commands
-globs: ['**/*.{ts,tsx,js,jsx,json,md,css}']
-alwaysApply: false
+globs: []
+alwaysApply: true
 ---
 
 # Code Quality and Linting Rules

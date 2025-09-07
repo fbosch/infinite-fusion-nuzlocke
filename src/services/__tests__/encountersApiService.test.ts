@@ -41,6 +41,12 @@ const mockRouteEncounter2 = {
   ],
 } as any;
 
+const _mockApiResponse = {
+  data: [mockRouteEncounter, mockRouteEncounter2],
+  count: 2,
+  gameMode: 'classic' as const,
+};
+
 describe('EncountersApiService', () => {
   beforeEach(() => {
     vi.clearAllMocks();

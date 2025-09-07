@@ -1,11 +1,13 @@
 'use client';
 
 import clsx from 'clsx';
+import { CursorTooltip } from '@/components/CursorTooltip';
 import { PokemonContextMenu } from '@/components/PokemonSummaryCard/PokemonContextMenu';
 import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
 import { getNicknameText } from '@/components/PokemonSummaryCard/utils';
 import { TypePills } from '@/components/TypePills';
-import { useEncounters } from '@/stores/playthroughs';
+import PokeballIcon from '@/assets/images/pokeball.svg';
+import { useEncounters, playthroughActions } from '@/stores/playthroughs';
 import {
   isPokemonDeceased,
   isPokemonStored,
@@ -109,23 +111,16 @@ export default function PCEntryItem(props: PCEntryItemProps) {
           </div>
         )}
         <div className='flex items-center gap-3 p-3'>
-          <div className='flex flex-shrink-0 items-center justify-center rounded-md relative'>
+          <div className='flex flex-shrink-0 items-center justify-center rounded-md bg-gray-50 dark:bg-gray-700'>
             {hasAny && (
-              <>
-                <div
-                  className='w-full h-full absolute rounded-md opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600'
-                  style={{
-                    background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
-                  }}
-                />
-                <FusionSprite
-                  headPokemon={entry.head ?? null}
-                  bodyPokemon={entry.body ?? null}
-                  isFusion={isFusion}
-                  shouldLoad
-                  showStatusOverlay={false}
-                />
-              </>
+              <FusionSprite
+                headPokemon={entry.head ?? null}
+                bodyPokemon={entry.body ?? null}
+                isFusion={isFusion}
+                shouldLoad
+                showStatusOverlay={false}
+                showTooltip={false}
+              />
             )}
           </div>
           <div className='min-w-0 flex-1'>
@@ -137,6 +132,25 @@ export default function PCEntryItem(props: PCEntryItemProps) {
             </div>
           </div>
         </div>
+        {mode === 'stored' && (
+          <div className='absolute bottom-2 right-2 transition-opacity md:opacity-0 md:group-hover/pc-entry:opacity-100 md:pointer-events-none md:group-hover/pc-entry:pointer-events-auto'>
+            <CursorTooltip content='Move to Team' placement='top-end'>
+              <button
+                type='button'
+                className='inline-flex size-7 items-center justify-center rounded-md border border-transparent bg-transparent text-gray-400 transition-colors hover:border-gray-200/70 hover:bg-gray-100/50 hover:text-gray-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-500 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/40 dark:hover:border-gray-600/60 cursor-pointer'
+                aria-label='Move to Team'
+                onClick={async e => {
+                  e.stopPropagation();
+                  await playthroughActions.markEncounterAsCaptured(
+                    entry.locationId
+                  );
+                }}
+              >
+                <PokeballIcon className='h-4 w-4' />
+              </button>
+            </CursorTooltip>
+          </div>
+        )}
       </li>
     </PokemonContextMenu>
   );

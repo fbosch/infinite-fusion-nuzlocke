@@ -40,13 +40,7 @@ export function getNicknameText(
     return pokemon.nickname || pokemon.name;
   }
 
-  // For fusions, always prioritize head Pokémon nickname if it exists
-  if (head.nickname) {
-    return head.nickname;
-  }
-
-  // If no head nickname, fall back to body nickname or the fusion name format
-  return body.nickname || `${head.name}/${body.name}`;
+  return head.nickname || body.nickname || `${head.name}/${body.name}`;
 }
 
 export function getSpriteUrl(
@@ -204,8 +198,21 @@ export function getStatusState(
         ),
         canAnimate: false,
       };
-    case 'normal':
     case 'stored':
+      return {
+        type: 'stored',
+        wrapperClasses: '',
+        imageClasses: '',
+        overlayContent: (
+          <div className='absolute -right-1.5 bottom-0 z-10 flex items-center justify-center pointer-events-none font-ds'>
+            <span className='dark:pixel-shadow text-xs text-gray-500 dark:text-white'>
+              Ą
+            </span>
+          </div>
+        ),
+        canAnimate: true,
+      };
+    case 'normal':
     default:
       // Allow animation for active Pokemon (CAPTURED, RECEIVED, TRADED)
       // For single Pokemon: animate if the Pokemon is active
@@ -269,8 +276,8 @@ export function getDisplayPokemon(
       return { head: null, body, isFusion: false };
     if (headIsInactive && !bodyIsInactive)
       return { head, body: null, isFusion: false };
-    if (bodyIsInactive && headIsActive)
-      return { head, body: null, isFusion: false };
+    if (bodyIsInactive && !headIsInactive)
+      return { head: null, body, isFusion: false };
 
     // If statuses are missing or ambiguous, default to showing head only when present
     return { head, body: null, isFusion: false };

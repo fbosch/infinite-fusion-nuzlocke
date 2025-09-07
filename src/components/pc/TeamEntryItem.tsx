@@ -1,94 +1,41 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
 import clsx from 'clsx';
 import { CursorTooltip } from '@/components/CursorTooltip';
-import { TeamMemberContextMenu } from '@/components/PokemonSummaryCard/TeamMemberContextMenu';
-import {
-  FusionSprite,
-  type FusionSpriteHandle,
-} from '@/components/PokemonSummaryCard/FusionSprite';
+import { PokemonContextMenu } from '@/components/PokemonSummaryCard/PokemonContextMenu';
+import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
 import { TypePills } from '@/components/TypePills';
 import { getNicknameText } from '@/components/PokemonSummaryCard/utils';
 import HeadIcon from '@/assets/images/head.svg';
 import BodyIcon from '@/assets/images/body.svg';
-import { Box, Skull, Plus } from 'lucide-react';
+import { Box, Skull } from 'lucide-react';
 import { useEncounters, playthroughActions } from '@/stores/playthroughs';
 import { canFuse, isPokemonActive } from '@/utils/pokemonPredicates';
 import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
 import { scrollToLocationById } from '@/utils/scrollToLocation';
-import { getLocationById } from '@/loaders/locations';
 import type { PCEntry } from './types';
-import type { PokemonOptionType } from '@/loaders/pokemon';
-import { PokemonStatus } from '@/loaders/pokemon';
-import { ArtworkVariantButton } from '@/components/PokemonSummaryCard/ArtworkVariantButton';
 
 interface TeamEntryItemProps {
   entry: PCEntry;
   idToName: Map<string, string>;
+  isOverLimit: boolean;
   onClose?: () => void;
-  onTeamMemberClick?: (
-    position: number,
-    existingTeamMember: {
-      position: number;
-      isEmpty: boolean;
-      headPokemon: PokemonOptionType | null;
-      bodyPokemon: PokemonOptionType | null;
-      isFusion: boolean;
-    }
-  ) => void;
 }
 
 export default function TeamEntryItem({
   entry,
   idToName,
+  isOverLimit,
   onClose,
-  onTeamMemberClick,
 }: TeamEntryItemProps) {
   const encounters = useEncounters();
-
-  // Check if this is team data (has position field) or encounter data
-  const isTeamData = 'position' in entry && typeof entry.position === 'number';
-
-  const currentEncounter = isTeamData ? null : encounters?.[entry.locationId];
-  const headActive = isTeamData
-    ? Boolean(entry.head)
-    : isPokemonActive(entry.head);
-  const bodyActive = isTeamData
-    ? Boolean(entry.body)
-    : isPokemonActive(entry.body);
+  const currentEncounter = encounters?.[entry.locationId];
+  const headActive = isPokemonActive(entry.head);
+  const bodyActive = isPokemonActive(entry.body);
   const hasAny = Boolean(headActive || bodyActive);
-
-  // Use entry.isFusion if available (for team data), otherwise infer from encounter
-  const isFusion = isTeamData
-    ? entry.isFusion || false
-    : Boolean(currentEncounter?.isFusion && canFuse(entry.head, entry.body));
-
-  // Ref for the sprite to play evolution animations
-  const spriteRef = useRef<FusionSpriteHandle | null>(null);
-  const previousFusionId = useRef<string | null>(null);
-
-  // Track fusion ID changes and play evolution animations
-  useEffect(() => {
-    if (isFusion && entry.head && entry.body) {
-      const currentFusionId = `${entry.head.id}.${entry.body.id}`;
-
-      // Initialize previous fusion ID if not set
-      if (previousFusionId.current === null) {
-        previousFusionId.current = currentFusionId;
-        return;
-      }
-
-      // Play animation if fusion ID changed
-      if (previousFusionId.current !== currentFusionId) {
-        previousFusionId.current = currentFusionId;
-        spriteRef.current?.playEvolution();
-      }
-    } else {
-      // Reset previous fusion ID for non-fusion entries
-      previousFusionId.current = null;
-    }
-  }, [isFusion, entry.head, entry.body]);
+  const isFusion = Boolean(
+    currentEncounter?.isFusion && canFuse(entry.head, entry.body)
+  );
 
   const { primary, secondary } = useFusionTypesFromPokemon(
     entry.head,
@@ -96,24 +43,9 @@ export default function TeamEntryItem({
     isFusion
   );
 
-  // For empty slots, we still want to show them so users can add Pokémon
-  const isEmpty = !hasAny;
+  if (!hasAny) return null;
 
   const handleClick = () => {
-    if (isTeamData && entry.position !== undefined) {
-      // For team data, open the team member picker modal
-      const existingTeamMember = {
-        position: entry.position,
-        isEmpty: isEmpty,
-        headPokemon: entry.head,
-        bodyPokemon: entry.body,
-        isFusion: entry.isFusion || false,
-      };
-      onTeamMemberClick?.(entry.position, existingTeamMember);
-      return;
-    }
-
-    // For encounter data, scroll to location
     const highlightUids: string[] = [];
     if (entry.head?.uid) highlightUids.push(entry.head.uid);
     if (entry.body?.uid) highlightUids.push(entry.body.uid);
@@ -127,150 +59,94 @@ export default function TeamEntryItem({
     onClose?.();
   };
 
-  // Create the main content that will be wrapped by context menus
-  const mainContent = (
-    <li
-      key={entry.locationId}
-      role='listitem'
-      className={clsx(
-        'group/pc-entry relative cursor-pointer rounded-lg transition-all duration-200',
-        {
-          'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:ring-1 hover:ring-blue-400/30':
-            !isEmpty,
-          'bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-900':
-            isEmpty,
-        }
-      )}
-      style={
-        isEmpty
-          ? {
-              boxShadow:
-                'inset 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.15)',
-            }
-          : undefined
-      }
-      onClick={handleClick}
-      onKeyDown={e => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handleClick();
-        }
+  return (
+    <PokemonContextMenu
+      locationId={entry.locationId}
+      encounterData={{
+        head: entry.head,
+        body: entry.body,
+        isFusion: currentEncounter?.isFusion || false,
       }}
-      tabIndex={0}
-      aria-label={
-        isTeamData && entry.position !== undefined
-          ? `Team slot ${entry.position + 1}`
-          : `Scroll to ${idToName.get(entry.locationId) || 'location'} in table`
-      }
+      shouldLoad={true}
     >
-      <div className='p-4'>
-        <div className='flex items-start gap-4'>
-          <div className='flex flex-shrink-0 items-center justify-center rounded-lg relative group/sprite-container p-2'>
-            {isEmpty ? (
-              <div className='size-16 flex flex-col items-center justify-center text-center text-gray-400 dark:text-gray-500'>
-                <Plus className='h-8 w-8 mb-1 text-gray-400 dark:text-gray-500' />
-                <span className='text-xs text-gray-400 dark:text-gray-400'>
-                  Add
-                </span>
-              </div>
-            ) : (
-              <>
-                <div
-                  className='w-full h-full absolute rounded-lg opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600'
-                  style={{
-                    background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
-                  }}
-                />
-                <FusionSprite
-                  ref={spriteRef}
-                  headPokemon={entry.head ?? null}
-                  bodyPokemon={entry.body ?? null}
-                  isFusion={isFusion}
-                  shouldLoad
-                  className='top-1.5'
-                  showStatusOverlay={false}
-                />
-                <ArtworkVariantButton
-                  headId={entry.head?.id}
-                  bodyId={entry.body?.id}
-                  isFusion={isFusion}
-                  shouldLoad={!isEmpty}
-                  className='absolute bottom-1 left-1 z-10 opacity-0 group-hover/sprite-container:opacity-50 focus:opacity-100 transition-opacity duration-200'
-                />
-              </>
-            )}
-          </div>
-          <div className='min-w-0 flex-1 space-y-1.5'>
-            <div className='flex items-center gap-2'>
-              <h3 className='text-base font-semibold text-gray-900 dark:text-gray-100'>
-                {isEmpty
-                  ? ''
-                  : getNicknameText(entry.head, entry.body, isFusion)}
-              </h3>
-            </div>
-            {isEmpty ? (
-              <div className='text-sm text-gray-400 dark:text-gray-300 font-medium'>
-                Click to add a Pokémon to this slot
-              </div>
-            ) : (
-              <>
-                {/* Head Pokémon info */}
-                {entry.head && (
-                  <div className='flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 min-w-0'>
-                    {entry.body && (
-                      <HeadIcon className='h-4 w-4 flex-shrink-0' />
-                    )}
-                    <span className='truncate'>
-                      {entry.head.name || 'Unknown'}
-                    </span>
-                    <span className='text-xs text-gray-400 dark:text-gray-500 '>
-                      •
-                    </span>
-                    <span className='text-xs text-gray-400 dark:text-gray-500 ml-0.5 truncate flex-shrink-0'>
-                      {entry.head.originalLocation
-                        ? getLocationById(entry.head.originalLocation)?.name ||
-                          'Unknown Location'
-                        : 'Unknown Location'}
-                    </span>
-                  </div>
-                )}
-
-                {/* Body Pokémon info */}
-                {entry.body && (
-                  <div className='flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 min-w-0'>
-                    {entry.head && (
-                      <BodyIcon className='h-4 w-4 flex-shrink-0' />
-                    )}
-                    <span className='truncate'>
-                      {entry.body.name || 'Unknown'}
-                    </span>
-                    <span className='text-xs text-gray-400 dark:text-gray-500 '>
-                      •
-                    </span>
-                    <span className='text-xs text-gray-400 dark:text-gray-500 ml-0.5 truncate flex-shrink-0'>
-                      {entry.body.originalLocation
-                        ? getLocationById(entry.body.originalLocation)?.name ||
-                          'Unknown Location'
-                        : 'Unknown Location'}
-                    </span>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-          {primary && (
-            <div className='ml-auto'>
-              <TypePills
-                primary={primary}
-                secondary={secondary}
-                showTooltip
-                size='sm'
+      <li
+        key={entry.locationId}
+        role='listitem'
+        className={clsx(
+          'group/pc-entry relative cursor-pointer rounded-lg border transition-all duration-200',
+          {
+            'border-red-500 bg-red-50 dark:bg-red-900/20 hover:ring-1 hover:ring-red-400/30':
+              isOverLimit,
+            'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:ring-1 hover:ring-blue-400/30':
+              !isOverLimit,
+          }
+        )}
+        onClick={handleClick}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
+        tabIndex={0}
+        aria-label={`Scroll to ${idToName.get(entry.locationId) || 'location'} in table`}
+      >
+        <div className='p-4'>
+          <div className='flex items-start gap-4'>
+            <div
+              className={clsx(
+                'flex flex-shrink-0 items-center justify-center rounded-lg bg-gray-50 p-2 dark:bg-gray-700',
+                { 'bg-red-50 dark:bg-red-900/20': isOverLimit }
+              )}
+            >
+              <FusionSprite
+                headPokemon={entry.head ?? null}
+                bodyPokemon={entry.body ?? null}
+                isFusion={isFusion}
+                shouldLoad
+                className='top-1.5'
+                showStatusOverlay={false}
+                showTooltip={false}
               />
             </div>
-          )}
+            <div className='min-w-0 flex-1 space-y-2.5'>
+              <div className='flex items-center gap-2'>
+                <h3 className='text-base font-semibold text-gray-900 dark:text-gray-100'>
+                  {getNicknameText(entry.head, entry.body, isFusion)}
+                </h3>
+              </div>
+              {isFusion && (
+                <div className='align-center flex gap-x-3'>
+                  {headActive && (
+                    <div className='flex items-center gap-1 text-sm text-gray-700 dark:text-gray-400'>
+                      <HeadIcon className='h-4 w-4' />
+                      <span>{entry.head?.name || 'Unknown'}</span>
+                    </div>
+                  )}
+                  {bodyActive && (
+                    <div className='flex items-center gap-1 text-sm text-gray-700 dark:text-gray-400'>
+                      <BodyIcon className='h-4 w-4' />
+                      <span>{entry.body?.name || 'Unknown'}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className='text-xs text-gray-500 dark:text-gray-400'>
+                {idToName.get(entry.locationId) || 'Unknown Location'}
+              </div>
+            </div>
+            {primary && (
+              <div className='ml-auto'>
+                <TypePills
+                  primary={primary}
+                  secondary={secondary}
+                  showTooltip
+                  size='sm'
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-      {!isEmpty && (
         <div className='absolute bottom-2 right-2 flex gap-1.5 transition-opacity md:opacity-0 md:group-hover/pc-entry:opacity-100 md:pointer-events-none md:group-hover/pc-entry:pointer-events-auto'>
           <CursorTooltip content='Move to Box' placement='top-end'>
             <button
@@ -279,13 +155,7 @@ export default function TeamEntryItem({
               aria-label='Move to Box'
               onClick={async e => {
                 e.stopPropagation();
-                if (isTeamData && entry.position !== undefined) {
-                  // For team members, move to box by updating status and removing from team
-                  await playthroughActions.moveTeamMemberToBox(entry.position);
-                } else {
-                  // For encounters, use the existing encounter logic
-                  await playthroughActions.moveEncounterToBox(entry.locationId);
-                }
+                await playthroughActions.moveEncounterToBox(entry.locationId);
               }}
             >
               <Box className='h-4 w-4' />
@@ -298,65 +168,16 @@ export default function TeamEntryItem({
               aria-label='Move to Graveyard'
               onClick={async e => {
                 e.stopPropagation();
-                if (isTeamData && entry.position !== undefined) {
-                  // For team members, mark as deceased and clear the slot
-                  if (entry.head?.uid) {
-                    await playthroughActions.updatePokemonByUID(
-                      entry.head.uid,
-                      {
-                        status: PokemonStatus.DECEASED,
-                      }
-                    );
-                  }
-                  if (entry.body?.uid) {
-                    await playthroughActions.updatePokemonByUID(
-                      entry.body.uid,
-                      {
-                        status: PokemonStatus.DECEASED,
-                      }
-                    );
-                  }
-                  // Clear the team member slot
-                  await playthroughActions.updateTeamMember(
-                    entry.position,
-                    null,
-                    null
-                  );
-                } else {
-                  // For encounters, use the existing encounter logic
-                  await playthroughActions.markEncounterAsDeceased(
-                    entry.locationId
-                  );
-                }
+                await playthroughActions.markEncounterAsDeceased(
+                  entry.locationId
+                );
               }}
             >
               <Skull className='h-4 w-4' />
             </button>
           </CursorTooltip>
         </div>
-      )}
-    </li>
+      </li>
+    </PokemonContextMenu>
   );
-
-  // Start with just TeamMemberContextMenu to isolate the issue
-  if (isTeamData) {
-    return (
-      <TeamMemberContextMenu
-        teamMember={{
-          position: entry.position || 0,
-          isEmpty: isEmpty,
-          headPokemon: entry.head,
-          bodyPokemon: entry.body,
-          isFusion: isFusion,
-        }}
-        shouldLoad={!isEmpty}
-        onClose={onClose}
-      >
-        {mainContent}
-      </TeamMemberContextMenu>
-    );
-  }
-
-  // For encounter data, just return main content for now
-  return mainContent;
 }

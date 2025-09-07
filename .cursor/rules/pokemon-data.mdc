@@ -1,6 +1,6 @@
 ---
 description: Pokémon data management rules including API integration, data handling, and game-specific requirements for Infinite Fusion
-globs: src/loaders/**/*.tsx,src/utils/**/*.ts
+globs: ['src/loaders/**/*.{ts,tsx}', 'src/utils/**/*.{ts,tsx}']
 alwaysApply: false
 ---
 

@@ -13,14 +13,8 @@ import EscapeIcon from '@/assets/images/escape-cloud.svg';
 import HeadIcon from '@/assets/images/head.svg';
 import BodyIcon from '@/assets/images/body.svg';
 import { useSpriteVariants, usePreferredVariantState } from '@/hooks/useSprite';
-import {
-  isEggId,
-  type PokemonOptionType,
-  PokemonStatus,
-} from '@/loaders/pokemon';
+import { isEggId, type PokemonOptionType } from '@/loaders/pokemon';
 import { playthroughActions } from '@/stores/playthroughs';
-import { settingsStore } from '@/stores/settings';
-import { useSnapshot } from 'valtio';
 import { getDisplayPokemon } from './utils';
 import dynamic from 'next/dynamic';
 import { getSpriteId } from '../../lib/sprites';
@@ -48,7 +42,6 @@ interface PokemonContextMenuProps {
     isFusion?: boolean;
   } | null;
   shouldLoad?: boolean;
-  showStatusActions?: boolean; // Whether to show status-changing actions in context menu
 }
 
 export function PokemonContextMenu({
@@ -56,10 +49,7 @@ export function PokemonContextMenu({
   locationId,
   encounterData,
   shouldLoad,
-  showStatusActions = true,
 }: PokemonContextMenuProps) {
-  const settings = useSnapshot(settingsStore);
-
   // Determine which Pokemon to display based on active/inactive states
   const displayPokemon = getDisplayPokemon(
     encounterData?.head ?? null,
@@ -217,18 +207,15 @@ export function PokemonContextMenu({
       },
     ];
 
-    // Only show status options if there are Pokemon, they're not eggs, and status actions are enabled
-    if (hasPokemon && !eitherPokemonIsEgg && showStatusActions) {
+    // Only show status options if there are Pokemon and they're not eggs
+    if (hasPokemon && !eitherPokemonIsEgg) {
       items.push({
         id: 'separator-1',
         separator: true,
       });
 
       // Show "Mark as Deceased" unless already deceased or missed
-      if (
-        currentStatus !== PokemonStatus.DECEASED &&
-        currentStatus !== PokemonStatus.MISSED
-      ) {
+      if (currentStatus !== 'deceased' && currentStatus !== 'missed') {
         items.push({
           id: 'mark-deceased',
           label: 'Mark as Deceased',
@@ -240,10 +227,10 @@ export function PokemonContextMenu({
 
       // Show "Move to Box" only if captured, received, or traded
       if (
-        currentStatus === PokemonStatus.CAPTURED ||
-        currentStatus === PokemonStatus.RECEIVED ||
-        currentStatus === PokemonStatus.TRADED ||
-        currentStatus === PokemonStatus.DECEASED
+        currentStatus === 'captured' ||
+        currentStatus === 'received' ||
+        currentStatus === 'traded' ||
+        currentStatus === 'deceased'
       ) {
         items.push({
           id: 'move-to-box',
@@ -255,10 +242,7 @@ export function PokemonContextMenu({
       }
 
       // Show "Mark as Captured" unless already captured or received
-      if (
-        currentStatus !== PokemonStatus.CAPTURED &&
-        currentStatus !== PokemonStatus.RECEIVED
-      ) {
+      if (currentStatus !== 'captured' && currentStatus !== 'received') {
         items.push({
           id: 'mark-captured',
           label: 'Mark as Captured',
@@ -280,10 +264,7 @@ export function PokemonContextMenu({
       }
 
       // Show "Mark as Received" unless already received or captured
-      if (
-        currentStatus !== PokemonStatus.RECEIVED &&
-        currentStatus !== PokemonStatus.CAPTURED
-      ) {
+      if (currentStatus !== 'received' && currentStatus !== 'captured') {
         items.push({
           id: 'mark-received',
           label: 'Mark as Received',
@@ -293,17 +274,16 @@ export function PokemonContextMenu({
         });
       }
 
-      // Add move actions if there are Pokemon and setting is enabled
-      if (
-        hasPokemon &&
-        !eitherPokemonIsEgg &&
-        settings.moveEncountersBetweenLocations
-      ) {
-        const moveActions = [];
+      // Add move actions if there are Pokemon
+      if (hasPokemon && !eitherPokemonIsEgg) {
+        items.push({
+          id: 'separator-move',
+          separator: true,
+        });
 
         // Show "Move Head" if head Pokemon exists
         if (encounterData?.head) {
-          moveActions.push({
+          items.push({
             id: 'move-head',
             label: 'Move Head',
             icon: HeadIcon,
@@ -315,7 +295,7 @@ export function PokemonContextMenu({
 
         // Show "Move Body" if body Pokemon exists
         if (encounterData?.body) {
-          moveActions.push({
+          items.push({
             id: 'move-body',
             label: 'Move Body',
             icon: BodyIcon,
@@ -323,15 +303,6 @@ export function PokemonContextMenu({
               setIsMoveBodyModalOpen(true);
             },
           });
-        }
-
-        // Only add separator and move actions if there are actually move actions to show
-        if (moveActions.length > 0) {
-          items.push({
-            id: 'separator-move',
-            separator: true,
-          });
-          items.push(...moveActions);
         }
       }
     }
@@ -371,8 +342,6 @@ export function PokemonContextMenu({
     eitherPokemonIsEgg,
     hasArtVariants,
     isLoadingVariants,
-    settings.moveEncountersBetweenLocations,
-    showStatusActions,
     handleMarkAsDeceased,
     handleMoveToBox,
     handleMarkAsCaptured,
@@ -400,7 +369,6 @@ export function PokemonContextMenu({
         onClose={() => setIsVariantModalOpen(false)}
         headId={displayPokemon.head?.id}
         bodyId={displayPokemon.body?.id}
-        isFusion={encounterData?.isFusion}
       />
 
       {encounterData?.head && (

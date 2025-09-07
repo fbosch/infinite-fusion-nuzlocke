@@ -1,7 +1,6 @@
 import { useCallback, useRef, useEffect, useState, useMemo } from 'react';
 import { useSnapshot } from 'valtio';
 import { dragStore, dragActions } from '@/stores/dragStore';
-import { settingsStore } from '@/stores/settings';
 import { playthroughActions } from '@/stores/playthroughs';
 import { getPokemon, getPokemonNameMap } from '@/loaders';
 import type { PokemonOptionType } from '@/loaders/pokemon';
@@ -24,7 +23,6 @@ export function useComboboxDragAndDrop({
   onChange,
 }: UseComboboxDragAndDropProps) {
   const dragSnapshot = useSnapshot(dragStore);
-  const settings = useSnapshot(settingsStore);
   const [dragPreview, setDragPreview] = useState<PokemonOptionType | null>(
     null
   );
@@ -158,23 +156,8 @@ export function useComboboxDragAndDrop({
       const pokemonName = e.dataTransfer.getData('text/plain');
       if (!pokemonName) return;
 
-      // Check if move operations are allowed
-      if (
-        dragState.isFromDifferentCombobox &&
-        !settings.moveEncountersBetweenLocations
-      ) {
-        // If trying to move between different locations but setting is disabled, just set the Pokemon
-        let pokemon = dragSnapshot.currentDragValue;
-        if (!pokemon) {
-          pokemon = await findPokemonByName(pokemonName);
-          if (!pokemon) return;
-        }
-        onChange(pokemon);
-        return;
-      }
-
       // Handle swap operation if conditions are met
-      if (dragState.canSwitch && settings.moveEncountersBetweenLocations) {
+      if (dragState.canSwitch) {
         performSwapOperation();
         return;
       }
@@ -187,10 +170,7 @@ export function useComboboxDragAndDrop({
       }
 
       // Perform move or set operation
-      if (
-        dragState.isFromDifferentCombobox &&
-        settings.moveEncountersBetweenLocations
-      ) {
+      if (dragState.isFromDifferentCombobox) {
         performMoveOperation(pokemon);
       } else {
         onChange(pokemon);
@@ -200,7 +180,6 @@ export function useComboboxDragAndDrop({
       dragState.canSwitch,
       dragState.isFromDifferentCombobox,
       dragSnapshot.currentDragValue,
-      settings.moveEncountersBetweenLocations,
       performSwapOperation,
       performMoveOperation,
       findPokemonByName,
@@ -223,13 +202,7 @@ export function useComboboxDragAndDrop({
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       e.stopPropagation();
-
-      // If move operations are disabled, show appropriate drop effect
-      if (!settings.moveEncountersBetweenLocations) {
-        e.dataTransfer.dropEffect = 'copy';
-      } else {
-        e.dataTransfer.dropEffect = 'copy';
-      }
+      e.dataTransfer.dropEffect = 'copy';
 
       // Cancel pending drag leave timeout
       if (dragLeaveAnimationRef.current !== null) {
@@ -280,7 +253,6 @@ export function useComboboxDragAndDrop({
       dragSnapshot.currentDragData,
       setDragPreviewDebounced,
       updatePreviewForDragData,
-      settings.moveEncountersBetweenLocations,
     ]
   );
 

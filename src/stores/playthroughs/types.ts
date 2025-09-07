@@ -7,21 +7,6 @@ export const GameModeSchema = z.enum(['classic', 'remix', 'randomized']);
 
 export type GameMode = z.infer<typeof GameModeSchema>;
 
-// Team member schema - represents a single team member
-export const TeamMemberSchema = z.object({
-  headPokemonUid: z.string(), // Reference to head Pokémon by UID
-  bodyPokemonUid: z.string(), // Reference to body Pokémon by UID
-});
-
-export type TeamMember = z.infer<typeof TeamMemberSchema>;
-
-// Team schema - represents the complete team
-export const TeamSchema = z.object({
-  members: z.array(TeamMemberSchema.nullable()).length(6), // Fixed size 6, null for empty slots
-});
-
-export type Team = z.infer<typeof TeamSchema>;
-
 export const EncounterDataSchema = z
   .object({
     head: PokemonOptionSchema.nullable(),
@@ -47,33 +32,26 @@ export const PlaythroughSchema = z
     name: z.string(),
     customLocations: z.array(CustomLocationSchema).optional(),
     encounters: z.record(z.string(), EncounterDataSchema).optional(),
-    team: TeamSchema.default({
-      members: Array.from({ length: 6 }, () => null),
-    }), // Fixed size 6 with null values
     gameMode: GameModeSchema.default('classic'),
     // Keep remixMode for backward compatibility during migration
     remixMode: z.boolean().optional(),
     createdAt: z.number(),
     updatedAt: z.number(),
-    version: z.string().default('1.0.0'),
   })
   .transform(data => {
-    // Migration logic: if remixMode is provided and gameMode is default, use it to set gameMode
+    // Migration logic: if remixMode exists but gameMode is default, migrate
     if (data.remixMode !== undefined && data.gameMode === 'classic') {
-      const migratedData = {
+      return {
         ...data,
-        gameMode: data.remixMode ? 'remix' : ('classic' as const),
+        gameMode: data.remixMode ? 'remix' : 'classic',
+        remixMode: undefined, // Remove the old field
       };
-      // Remove remixMode field after migration
-      const { remixMode: _remixMode, ...cleanData } = migratedData;
-      return cleanData;
     }
-    // Remove remixMode field even if no migration was needed (e.g., gameMode was already non-classic)
-    if (data.remixMode !== undefined) {
-      const { remixMode: _remixMode, ...cleanData } = data;
-      return cleanData;
-    }
-    return data;
+
+    // Remove remixMode if it exists (clean up)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { remixMode, ...cleanData } = data;
+    return cleanData;
   });
 
 // Zod schema for the playthroughs store
@@ -113,12 +91,10 @@ export type ExportablePlaythrough = {
   readonly gameMode: GameMode;
   readonly createdAt: number;
   readonly updatedAt: number;
-  readonly version: string;
   readonly customLocations?: readonly {
     readonly id: string;
     readonly name: string;
     readonly insertAfterLocationId: string;
   }[];
   readonly encounters?: Record<string, EncounterData>;
-  readonly team: Team; // NEW: Include team in exports
 };

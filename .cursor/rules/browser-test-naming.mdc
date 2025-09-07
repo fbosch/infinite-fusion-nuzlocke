@@ -1,6 +1,6 @@
 ---
 description: Browser test naming conventions for components and DOM-dependent tests
-globs: tests/**/*.ts,tests/**/*.tsx
+globs: ['tests/**/*.ts', 'tests/**/*.tsx']
 alwaysApply: false
 ---
 

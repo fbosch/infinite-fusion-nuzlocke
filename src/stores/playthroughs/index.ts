@@ -43,8 +43,6 @@ export {
   createEncounterData,
   getEncounters,
   updateEncounter,
-  updatePokemonByUID,
-  updatePokemonInEncounter,
   resetEncounter,
   toggleEncounterFusion,
   flipEncounterFusion,
@@ -64,8 +62,6 @@ export {
   markEncounterAsCaptured,
   markEncounterAsMissed,
   markEncounterAsReceived,
-  moveTeamMemberToBox,
-  restorePokemonToTeam,
 } from './encounters';
 
 // Export custom location actions
