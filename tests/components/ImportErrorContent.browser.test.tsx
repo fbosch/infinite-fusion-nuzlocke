@@ -1,8 +1,12 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, afterEach } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
 import { ImportErrorContent } from '@/components/playthrough/ImportErrorContent';
 
 describe('ImportErrorContent', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   describe('Zod validation errors', () => {
     it('should display validation errors with proper formatting', () => {
       const errorMessage = `Validation failed:

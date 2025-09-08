@@ -227,33 +227,72 @@ describe('Data Loading Utilities', () => {
   });
 
   describe('loadDexEntries', () => {
-    const mockDexEntries: DexEntry[] = [
-      { id: 1, name: 'Bulbasaur' },
-      { id: 25, name: 'Pikachu' },
+    const mockPokemonDataForDexEntries = [
+      {
+        id: 1,
+        nationalDexId: 1,
+        name: 'Bulbasaur',
+        types: [{ name: 'grass' }],
+        species: {
+          is_legendary: false,
+          is_mythical: false,
+          generation: 'generation-i',
+          evolution_chain: {
+            url: 'https://pokeapi.co/api/v2/evolution-chain/1/',
+          },
+        },
+        headNamePart: 'Bulba',
+        bodyNamePart: 'saur',
+      },
+      {
+        id: 25,
+        nationalDexId: 25,
+        name: 'Pikachu',
+        types: [{ name: 'electric' }],
+        species: {
+          is_legendary: false,
+          is_mythical: false,
+          generation: 'generation-i',
+          evolution_chain: {
+            url: 'https://pokeapi.co/api/v2/evolution-chain/10/',
+          },
+        },
+        headNamePart: 'Pika',
+        bodyNamePart: 'chu',
+      },
+    ];
+
+    const expectedDexEntries: DexEntry[] = [
+      { id: 1, name: 'Bulbasaur', headNamePart: 'Bulba', bodyNamePart: 'saur' },
+      { id: 25, name: 'Pikachu', headNamePart: 'Pika', bodyNamePart: 'chu' },
     ];
 
     it('should load dex entries successfully', async () => {
-      mockFs.readFile.mockResolvedValue(JSON.stringify(mockDexEntries));
+      mockFs.readFile.mockResolvedValue(
+        JSON.stringify(mockPokemonDataForDexEntries)
+      );
 
       const result = await loadDexEntries();
 
-      expect(result).toEqual(mockDexEntries);
+      expect(result).toEqual(expectedDexEntries);
       expect(mockFs.readFile).toHaveBeenCalledWith(
-        '/mock/project/data/shared/base-entries.json',
+        '/mock/project/data/shared/pokemon-data.json',
         'utf8'
       );
     });
 
     it('should cache dex entries on subsequent calls', async () => {
-      mockFs.readFile.mockResolvedValue(JSON.stringify(mockDexEntries));
+      mockFs.readFile.mockResolvedValue(
+        JSON.stringify(mockPokemonDataForDexEntries)
+      );
 
       // First call
       const result1 = await loadDexEntries();
       // Second call
       const result2 = await loadDexEntries();
 
-      expect(result1).toEqual(mockDexEntries);
-      expect(result2).toEqual(mockDexEntries);
+      expect(result1).toEqual(expectedDexEntries);
+      expect(result2).toEqual(expectedDexEntries);
       expect(mockFs.readFile).toHaveBeenCalledTimes(1);
     });
 
@@ -261,19 +300,41 @@ describe('Data Loading Utilities', () => {
       mockFs.readFile.mockResolvedValue(JSON.stringify({ invalid: 'data' }));
 
       await expect(loadDexEntries()).rejects.toThrow(
-        'Dex entries file does not contain an array'
+        'Error loading dex entries from Pokemon data'
       );
     });
 
     it('should validate individual dex entries', async () => {
-      const invalidDexEntries = [
-        { id: 1, name: 'Valid' },
-        { id: null, name: 'Invalid' },
+      const invalidPokemonData = [
+        {
+          id: 1,
+          nationalDexId: 1,
+          name: 'Valid',
+          types: [],
+          species: {
+            is_legendary: false,
+            is_mythical: false,
+            generation: 'generation-i',
+            evolution_chain: null,
+          },
+        },
+        {
+          id: null, // Missing id
+          nationalDexId: 2,
+          name: 'Invalid',
+          types: [],
+          species: {
+            is_legendary: false,
+            is_mythical: false,
+            generation: 'generation-i',
+            evolution_chain: null,
+          },
+        },
       ];
-      mockFs.readFile.mockResolvedValue(JSON.stringify(invalidDexEntries));
+      mockFs.readFile.mockResolvedValue(JSON.stringify(invalidPokemonData));
 
       await expect(loadDexEntries()).rejects.toThrow(
-        'Invalid dex entry: missing id or name'
+        'Error loading dex entries from Pokemon data'
       );
     });
   });
@@ -287,18 +348,14 @@ describe('Data Loading Utilities', () => {
 
       expect(result).toEqual({
         pokemonData: true,
-        dexEntries: true,
         classicEncounters: true,
         remixEncounters: true,
         locations: true,
       });
 
-      expect(mockFs.access).toHaveBeenCalledTimes(5);
+      expect(mockFs.access).toHaveBeenCalledTimes(4);
       expect(mockFs.access).toHaveBeenCalledWith(
         '/mock/project/data/shared/pokemon-data.json'
-      );
-      expect(mockFs.access).toHaveBeenCalledWith(
-        '/mock/project/data/shared/base-entries.json'
       );
       expect(mockFs.access).toHaveBeenCalledWith(
         '/mock/project/data/classic/encounters.json'
@@ -328,7 +385,6 @@ describe('Data Loading Utilities', () => {
 
       expect(result).toEqual({
         pokemonData: false,
-        dexEntries: true,
         classicEncounters: true,
         remixEncounters: true,
         locations: false,
@@ -410,7 +466,7 @@ describe('Data Loading Utilities', () => {
         'Error loading Pokemon data: ENOENT: no such file or directory'
       );
       await expect(loadDexEntries()).rejects.toThrow(
-        'Error loading dex entries: ENOENT: no such file or directory'
+        'Error loading dex entries from Pokemon data'
       );
     });
 

@@ -5,2262 +5,3392 @@
   },
   {
     "id": 1,
-    "name": "Bulbasaur"
+    "name": "Bulbasaur",
+    "headNamePart": "Bulba",
+    "bodyNamePart": "saur"
   },
   {
     "id": 2,
-    "name": "Ivysaur"
+    "name": "Ivysaur",
+    "headNamePart": "Ivy",
+    "bodyNamePart": "saur"
   },
   {
     "id": 3,
-    "name": "Venusaur"
+    "name": "Venusaur",
+    "headNamePart": "Venu",
+    "bodyNamePart": "saur"
   },
   {
     "id": 4,
-    "name": "Charmander"
+    "name": "Charmander",
+    "headNamePart": "Char",
+    "bodyNamePart": "mander"
   },
   {
     "id": 5,
-    "name": "Charmeleon"
+    "name": "Charmeleon",
+    "headNamePart": "Char",
+    "bodyNamePart": "meleon"
   },
   {
     "id": 6,
-    "name": "Charizard"
+    "name": "Charizard",
+    "headNamePart": "Char",
+    "bodyNamePart": "izard"
   },
   {
     "id": 7,
-    "name": "Squirtle"
+    "name": "Squirtle",
+    "headNamePart": "Squirt",
+    "bodyNamePart": "tle"
   },
   {
     "id": 8,
-    "name": "Wartortle"
+    "name": "Wartortle",
+    "headNamePart": "War",
+    "bodyNamePart": "tortle"
   },
   {
     "id": 9,
-    "name": "Blastoise"
+    "name": "Blastoise",
+    "headNamePart": "Blast",
+    "bodyNamePart": "toise"
   },
   {
     "id": 10,
-    "name": "Caterpie"
+    "name": "Caterpie",
+    "headNamePart": "Cater",
+    "bodyNamePart": "pie"
   },
   {
     "id": 11,
-    "name": "Metapod"
+    "name": "Metapod",
+    "headNamePart": "Meta",
+    "bodyNamePart": "pod"
   },
   {
     "id": 12,
-    "name": "Butterfree"
+    "name": "Butterfree",
+    "headNamePart": "Butter",
+    "bodyNamePart": "free"
   },
   {
     "id": 13,
-    "name": "Weedle"
+    "name": "Weedle",
+    "headNamePart": "Wee",
+    "bodyNamePart": "dle"
   },
   {
     "id": 14,
-    "name": "Kakuna"
+    "name": "Kakuna",
+    "headNamePart": "Kak",
+    "bodyNamePart": "una"
   },
   {
     "id": 15,
-    "name": "Beedrill"
+    "name": "Beedrill",
+    "headNamePart": "Bee",
+    "bodyNamePart": "drill"
   },
   {
     "id": 16,
-    "name": "Pidgey"
+    "name": "Pidgey",
+    "headNamePart": "Pid",
+    "bodyNamePart": "gey"
   },
   {
     "id": 17,
-    "name": "Pidgeotto"
+    "name": "Pidgeotto",
+    "headNamePart": "Pidge",
+    "bodyNamePart": "tto"
   },
   {
     "id": 18,
-    "name": "Pidgeot"
+    "name": "Pidgeot",
+    "headNamePart": "Pid",
+    "bodyNamePart": "geot"
   },
   {
     "id": 19,
-    "name": "Rattata"
+    "name": "Rattata",
+    "headNamePart": "Rat",
+    "bodyNamePart": "tata"
   },
   {
     "id": 20,
-    "name": "Raticate"
+    "name": "Raticate",
+    "headNamePart": "Rat",
+    "bodyNamePart": "icate"
   },
   {
     "id": 21,
-    "name": "Spearow"
+    "name": "Spearow",
+    "headNamePart": "Spear",
+    "bodyNamePart": "row"
   },
   {
     "id": 22,
-    "name": "Fearow"
+    "name": "Fearow",
+    "headNamePart": "Fear",
+    "bodyNamePart": "row"
   },
   {
     "id": 23,
-    "name": "Ekans"
+    "name": "Ekans",
+    "headNamePart": "Ek",
+    "bodyNamePart": "ans"
   },
   {
     "id": 24,
-    "name": "Arbok"
+    "name": "Arbok",
+    "headNamePart": "Ar",
+    "bodyNamePart": "bok"
   },
   {
     "id": 25,
-    "name": "Pikachu"
+    "name": "Pikachu",
+    "headNamePart": "Pika",
+    "bodyNamePart": "chu"
   },
   {
     "id": 26,
-    "name": "Raichu"
+    "name": "Raichu",
+    "headNamePart": "Rai",
+    "bodyNamePart": "chu"
   },
   {
     "id": 27,
-    "name": "Sandshrew"
+    "name": "Sandshrew",
+    "headNamePart": "Sand",
+    "bodyNamePart": "shrew"
   },
   {
     "id": 28,
-    "name": "Sandslash"
+    "name": "Sandslash",
+    "headNamePart": "Sand",
+    "bodyNamePart": "slash"
   },
   {
     "id": 29,
-    "name": "Nidoran♀"
+    "name": "Nidoran♀",
+    "headNamePart": "Nido",
+    "bodyNamePart": "ran"
   },
   {
     "id": 30,
-    "name": "Nidorina"
+    "name": "Nidorina",
+    "headNamePart": "Nido",
+    "bodyNamePart": "rina"
   },
   {
     "id": 31,
-    "name": "Nidoqueen"
+    "name": "Nidoqueen",
+    "headNamePart": "Nido",
+    "bodyNamePart": "queen"
   },
   {
     "id": 32,
-    "name": "Nidoran♂"
+    "name": "Nidoran♂",
+    "headNamePart": "Nido",
+    "bodyNamePart": "ran"
   },
   {
     "id": 33,
-    "name": "Nidorino"
+    "name": "Nidorino",
+    "headNamePart": "Nido",
+    "bodyNamePart": "rino"
   },
   {
     "id": 34,
-    "name": "Nidoking"
+    "name": "Nidoking",
+    "headNamePart": "Nido",
+    "bodyNamePart": "king"
   },
   {
     "id": 35,
-    "name": "Clefairy"
+    "name": "Clefairy",
+    "headNamePart": "Clef",
+    "bodyNamePart": "fairy"
   },
   {
     "id": 36,
-    "name": "Clefable"
+    "name": "Clefable",
+    "headNamePart": "Clef",
+    "bodyNamePart": "fable"
   },
   {
     "id": 37,
-    "name": "Vulpix"
+    "name": "Vulpix",
+    "headNamePart": "Vul",
+    "bodyNamePart": "pix"
   },
   {
     "id": 38,
-    "name": "Ninetales"
+    "name": "Ninetales",
+    "headNamePart": "Nine",
+    "bodyNamePart": "tales"
   },
   {
     "id": 39,
-    "name": "Jigglypuff"
+    "name": "Jigglypuff",
+    "headNamePart": "Jiggly",
+    "bodyNamePart": "puff"
   },
   {
     "id": 40,
-    "name": "Wigglytuff"
+    "name": "Wigglytuff",
+    "headNamePart": "Wiggly",
+    "bodyNamePart": "tuff"
   },
   {
     "id": 41,
-    "name": "Zubat"
+    "name": "Zubat",
+    "headNamePart": "Zu",
+    "bodyNamePart": "bat"
   },
   {
     "id": 42,
-    "name": "Golbat"
+    "name": "Golbat",
+    "headNamePart": "Gol",
+    "bodyNamePart": "bat"
   },
   {
     "id": 43,
-    "name": "Oddish"
+    "name": "Oddish",
+    "headNamePart": "Odd",
+    "bodyNamePart": "ish"
   },
   {
     "id": 44,
-    "name": "Gloom"
+    "name": "Gloom",
+    "headNamePart": "Gloo",
+    "bodyNamePart": "om"
   },
   {
     "id": 45,
-    "name": "Vileplume"
+    "name": "Vileplume",
+    "headNamePart": "Vile",
+    "bodyNamePart": "plume"
   },
   {
     "id": 46,
-    "name": "Paras"
+    "name": "Paras",
+    "headNamePart": "Pa",
+    "bodyNamePart": "ras"
   },
   {
     "id": 47,
-    "name": "Parasect"
+    "name": "Parasect",
+    "headNamePart": "Para",
+    "bodyNamePart": "sect"
   },
   {
     "id": 48,
-    "name": "Venonat"
+    "name": "Venonat",
+    "headNamePart": "Veno",
+    "bodyNamePart": "nat"
   },
   {
     "id": 49,
-    "name": "Venomoth"
+    "name": "Venomoth",
+    "headNamePart": "Veno",
+    "bodyNamePart": "moth"
   },
   {
     "id": 50,
-    "name": "Diglett"
+    "name": "Diglett",
+    "headNamePart": "Dig",
+    "bodyNamePart": "lett"
   },
   {
     "id": 51,
-    "name": "Dugtrio"
+    "name": "Dugtrio",
+    "headNamePart": "Dug",
+    "bodyNamePart": "trio"
   },
   {
     "id": 52,
-    "name": "Meowth"
+    "name": "Meowth",
+    "headNamePart": "Meow",
+    "bodyNamePart": "th"
   },
   {
     "id": 53,
-    "name": "Persian"
+    "name": "Persian",
+    "headNamePart": "Per",
+    "bodyNamePart": "sian"
   },
   {
     "id": 54,
-    "name": "Psyduck"
+    "name": "Psyduck",
+    "headNamePart": "Psy",
+    "bodyNamePart": "duck"
   },
   {
     "id": 55,
-    "name": "Golduck"
+    "name": "Golduck",
+    "headNamePart": "Gol",
+    "bodyNamePart": "duck"
   },
   {
     "id": 56,
-    "name": "Mankey"
+    "name": "Mankey",
+    "headNamePart": "Man",
+    "bodyNamePart": "key"
   },
   {
     "id": 57,
-    "name": "Primeape"
+    "name": "Primeape",
+    "headNamePart": "Prime",
+    "bodyNamePart": "ape"
   },
   {
     "id": 58,
-    "name": "Growlithe"
+    "name": "Growlithe",
+    "headNamePart": "Growl",
+    "bodyNamePart": "lithe"
   },
   {
     "id": 59,
-    "name": "Arcanine"
+    "name": "Arcanine",
+    "headNamePart": "Arca",
+    "bodyNamePart": "nine"
   },
   {
     "id": 60,
-    "name": "Poliwag"
+    "name": "Poliwag",
+    "headNamePart": "Poli",
+    "bodyNamePart": "wag"
   },
   {
     "id": 61,
-    "name": "Poliwhirl"
+    "name": "Poliwhirl",
+    "headNamePart": "Poli",
+    "bodyNamePart": "whirl"
   },
   {
     "id": 62,
-    "name": "Poliwrath"
+    "name": "Poliwrath",
+    "headNamePart": "Poli",
+    "bodyNamePart": "wrath"
   },
   {
     "id": 63,
-    "name": "Abra"
+    "name": "Abra",
+    "headNamePart": "Ab",
+    "bodyNamePart": "ra"
   },
   {
     "id": 64,
-    "name": "Kadabra"
+    "name": "Kadabra",
+    "headNamePart": "Kada",
+    "bodyNamePart": "bra"
   },
   {
     "id": 65,
-    "name": "Alakazam"
+    "name": "Alakazam",
+    "headNamePart": "Ala",
+    "bodyNamePart": "kazam"
   },
   {
     "id": 66,
-    "name": "Machop"
+    "name": "Machop",
+    "headNamePart": "Ma",
+    "bodyNamePart": "chop"
   },
   {
     "id": 67,
-    "name": "Machoke"
+    "name": "Machoke",
+    "headNamePart": "Ma",
+    "bodyNamePart": "choke"
   },
   {
     "id": 68,
-    "name": "Machamp"
+    "name": "Machamp",
+    "headNamePart": "Ma",
+    "bodyNamePart": "champ"
   },
   {
     "id": 69,
-    "name": "Bellsprout"
+    "name": "Bellsprout",
+    "headNamePart": "Bell",
+    "bodyNamePart": "sprout"
   },
   {
     "id": 70,
-    "name": "Weepinbell"
+    "name": "Weepinbell",
+    "headNamePart": "Weepin",
+    "bodyNamePart": "bell"
   },
   {
     "id": 71,
-    "name": "Victreebel"
+    "name": "Victreebel",
+    "headNamePart": "Victree",
+    "bodyNamePart": "bell"
   },
   {
     "id": 72,
-    "name": "Tentacool"
+    "name": "Tentacool",
+    "headNamePart": "Tenta",
+    "bodyNamePart": "cool"
   },
   {
     "id": 73,
-    "name": "Tentacruel"
+    "name": "Tentacruel",
+    "headNamePart": "Tenta",
+    "bodyNamePart": "cruel"
   },
   {
     "id": 74,
-    "name": "Geodude"
+    "name": "Geodude",
+    "headNamePart": "Geo",
+    "bodyNamePart": "dude"
   },
   {
     "id": 75,
-    "name": "Graveler"
+    "name": "Graveler",
+    "headNamePart": "Grave",
+    "bodyNamePart": "ler"
   },
   {
     "id": 76,
-    "name": "Golem"
+    "name": "Golem",
+    "headNamePart": "Go",
+    "bodyNamePart": "lem"
   },
   {
     "id": 77,
-    "name": "Ponyta"
+    "name": "Ponyta",
+    "headNamePart": "Pony",
+    "bodyNamePart": "ta"
   },
   {
     "id": 78,
-    "name": "Rapidash"
+    "name": "Rapidash",
+    "headNamePart": "Rapi",
+    "bodyNamePart": "dash"
   },
   {
     "id": 79,
-    "name": "Slowpoke"
+    "name": "Slowpoke",
+    "headNamePart": "Slow",
+    "bodyNamePart": "poke"
   },
   {
     "id": 80,
-    "name": "Slowbro"
+    "name": "Slowbro",
+    "headNamePart": "Slow",
+    "bodyNamePart": "bro"
   },
   {
     "id": 81,
-    "name": "Magnemite"
+    "name": "Magnemite",
+    "headNamePart": "Magne",
+    "bodyNamePart": "mite"
   },
   {
     "id": 82,
-    "name": "Magneton"
+    "name": "Magneton",
+    "headNamePart": "Magne",
+    "bodyNamePart": "ton"
   },
   {
     "id": 83,
-    "name": "Farfetch'd"
+    "name": "Farfetch'd",
+    "headNamePart": "Far",
+    "bodyNamePart": "fetchd"
   },
   {
     "id": 84,
-    "name": "Doduo"
+    "name": "Doduo",
+    "headNamePart": "Do",
+    "bodyNamePart": "duo"
   },
   {
     "id": 85,
-    "name": "Dodrio"
+    "name": "Dodrio",
+    "headNamePart": "Do",
+    "bodyNamePart": "drio"
   },
   {
     "id": 86,
-    "name": "Seel"
+    "name": "Seel",
+    "headNamePart": "See",
+    "bodyNamePart": "eel"
   },
   {
     "id": 87,
-    "name": "Dewgong"
+    "name": "Dewgong",
+    "headNamePart": "Dew",
+    "bodyNamePart": "gong"
   },
   {
     "id": 88,
-    "name": "Grimer"
+    "name": "Grimer",
+    "headNamePart": "Gri",
+    "bodyNamePart": "mer"
   },
   {
     "id": 89,
-    "name": "Muk"
+    "name": "Muk",
+    "headNamePart": "Mu",
+    "bodyNamePart": "uk"
   },
   {
     "id": 90,
-    "name": "Shellder"
+    "name": "Shellder",
+    "headNamePart": "Shell",
+    "bodyNamePart": "der"
   },
   {
     "id": 91,
-    "name": "Cloyster"
+    "name": "Cloyster",
+    "headNamePart": "Cloy",
+    "bodyNamePart": "ster"
   },
   {
     "id": 92,
-    "name": "Gastly"
+    "name": "Gastly",
+    "headNamePart": "Gas",
+    "bodyNamePart": "tly"
   },
   {
     "id": 93,
-    "name": "Haunter"
+    "name": "Haunter",
+    "headNamePart": "Haun",
+    "bodyNamePart": "ter"
   },
   {
     "id": 94,
-    "name": "Gengar"
+    "name": "Gengar",
+    "headNamePart": "Gen",
+    "bodyNamePart": "gar"
   },
   {
     "id": 95,
-    "name": "Onix"
+    "name": "Onix",
+    "headNamePart": "On",
+    "bodyNamePart": "nix"
   },
   {
     "id": 96,
-    "name": "Drowzee"
+    "name": "Drowzee",
+    "headNamePart": "Drow",
+    "bodyNamePart": "zee"
   },
   {
     "id": 97,
-    "name": "Hypno"
+    "name": "Hypno",
+    "headNamePart": "Hy",
+    "bodyNamePart": "no"
   },
   {
     "id": 98,
-    "name": "Krabby"
+    "name": "Krabby",
+    "headNamePart": "Krab",
+    "bodyNamePart": "by"
   },
   {
     "id": 99,
-    "name": "Kingler"
+    "name": "Kingler",
+    "headNamePart": "King",
+    "bodyNamePart": "ler"
   },
   {
     "id": 100,
-    "name": "Voltorb"
+    "name": "Voltorb",
+    "headNamePart": "Volt",
+    "bodyNamePart": "rb"
   },
   {
     "id": 101,
-    "name": "Electrode"
+    "name": "Electrode",
+    "headNamePart": "Electr",
+    "bodyNamePart": "de"
   },
   {
     "id": 102,
-    "name": "Exeggcute"
+    "name": "Exeggcute",
+    "headNamePart": "Exegg",
+    "bodyNamePart": "cute"
   },
   {
     "id": 103,
-    "name": "Exeggutor"
+    "name": "Exeggutor",
+    "headNamePart": "Exeggu",
+    "bodyNamePart": "tor"
   },
   {
     "id": 104,
-    "name": "Cubone"
+    "name": "Cubone",
+    "headNamePart": "Cu",
+    "bodyNamePart": "bone"
   },
   {
     "id": 105,
-    "name": "Marowak"
+    "name": "Marowak",
+    "headNamePart": "Maro",
+    "bodyNamePart": "wak"
   },
   {
     "id": 106,
-    "name": "Hitmonlee"
+    "name": "Hitmonlee",
+    "headNamePart": "Hitmon",
+    "bodyNamePart": "lee"
   },
   {
     "id": 107,
-    "name": "Hitmonchan"
+    "name": "Hitmonchan",
+    "headNamePart": "Hitmon",
+    "bodyNamePart": "chan"
   },
   {
     "id": 108,
-    "name": "Lickitung"
+    "name": "Lickitung",
+    "headNamePart": "Licki",
+    "bodyNamePart": "tung"
   },
   {
     "id": 109,
-    "name": "Koffing"
+    "name": "Koffing",
+    "headNamePart": "Koff",
+    "bodyNamePart": "fing"
   },
   {
     "id": 110,
-    "name": "Weezing"
+    "name": "Weezing",
+    "headNamePart": "Wee",
+    "bodyNamePart": "zing"
   },
   {
     "id": 111,
-    "name": "Rhyhorn"
+    "name": "Rhyhorn",
+    "headNamePart": "Rhy",
+    "bodyNamePart": "horn"
   },
   {
     "id": 112,
-    "name": "Rhydon"
+    "name": "Rhydon",
+    "headNamePart": "Rhy",
+    "bodyNamePart": "don"
   },
   {
     "id": 113,
-    "name": "Chansey"
+    "name": "Chansey",
+    "headNamePart": "Chan",
+    "bodyNamePart": "sey"
   },
   {
     "id": 114,
-    "name": "Tangela"
+    "name": "Tangela",
+    "headNamePart": "Tan",
+    "bodyNamePart": "gela"
   },
   {
     "id": 115,
-    "name": "Kangaskhan"
+    "name": "Kangaskhan",
+    "headNamePart": "Kangas",
+    "bodyNamePart": "khan"
   },
   {
     "id": 116,
-    "name": "Horsea"
+    "name": "Horsea",
+    "headNamePart": "Hor",
+    "bodyNamePart": "sea"
   },
   {
     "id": 117,
-    "name": "Seadra"
+    "name": "Seadra",
+    "headNamePart": "Sea",
+    "bodyNamePart": "dra"
   },
   {
     "id": 118,
-    "name": "Goldeen"
+    "name": "Goldeen",
+    "headNamePart": "Gol",
+    "bodyNamePart": "deen"
   },
   {
     "id": 119,
-    "name": "Seaking"
+    "name": "Seaking",
+    "headNamePart": "Sea",
+    "bodyNamePart": "king"
   },
   {
     "id": 120,
-    "name": "Staryu"
+    "name": "Staryu",
+    "headNamePart": "Star",
+    "bodyNamePart": "yu"
   },
   {
     "id": 121,
-    "name": "Starmie"
+    "name": "Starmie",
+    "headNamePart": "Star",
+    "bodyNamePart": "mie"
   },
   {
     "id": 122,
-    "name": "Mr. Mime"
+    "name": "Mr. Mime",
+    "headNamePart": "Mr. ",
+    "bodyNamePart": "mime"
   },
   {
     "id": 123,
-    "name": "Scyther"
+    "name": "Scyther",
+    "headNamePart": "Scy",
+    "bodyNamePart": "ther"
   },
   {
     "id": 124,
-    "name": "Jynx"
+    "name": "Jynx",
+    "headNamePart": "Jyn",
+    "bodyNamePart": "nx"
   },
   {
     "id": 125,
-    "name": "Electabuzz"
+    "name": "Electabuzz",
+    "headNamePart": "Electa",
+    "bodyNamePart": "buzz"
   },
   {
     "id": 126,
-    "name": "Magmar"
+    "name": "Magmar",
+    "headNamePart": "Mag",
+    "bodyNamePart": "mar"
   },
   {
     "id": 127,
-    "name": "Pinsir"
+    "name": "Pinsir",
+    "headNamePart": "Pin",
+    "bodyNamePart": "sir"
   },
   {
     "id": 128,
-    "name": "Tauros"
+    "name": "Tauros",
+    "headNamePart": "Tau",
+    "bodyNamePart": "ros"
   },
   {
     "id": 129,
-    "name": "Magikarp"
+    "name": "Magikarp",
+    "headNamePart": "Magi",
+    "bodyNamePart": "karp"
   },
   {
     "id": 130,
-    "name": "Gyarados"
+    "name": "Gyarados",
+    "headNamePart": "Gyara",
+    "bodyNamePart": "dos"
   },
   {
     "id": 131,
-    "name": "Lapras"
+    "name": "Lapras",
+    "headNamePart": "La",
+    "bodyNamePart": "ras"
   },
   {
     "id": 132,
-    "name": "Ditto"
+    "name": "Ditto",
+    "headNamePart": "Dit",
+    "bodyNamePart": "to"
   },
   {
     "id": 133,
-    "name": "Eevee"
+    "name": "Eevee",
+    "headNamePart": "Ee",
+    "bodyNamePart": "vee"
   },
   {
     "id": 134,
-    "name": "Vaporeon"
+    "name": "Vaporeon",
+    "headNamePart": "Vapor",
+    "bodyNamePart": "eon"
   },
   {
     "id": 135,
-    "name": "Jolteon"
+    "name": "Jolteon",
+    "headNamePart": "Jolt",
+    "bodyNamePart": "eon"
   },
   {
     "id": 136,
-    "name": "Flareon"
+    "name": "Flareon",
+    "headNamePart": "Fla",
+    "bodyNamePart": "reon"
   },
   {
     "id": 137,
-    "name": "Porygon"
+    "name": "Porygon",
+    "headNamePart": "Pory",
+    "bodyNamePart": "gon"
   },
   {
     "id": 138,
-    "name": "Omanyte"
+    "name": "Omanyte",
+    "headNamePart": "Oma",
+    "bodyNamePart": "nyte"
   },
   {
     "id": 139,
-    "name": "Omastar"
+    "name": "Omastar",
+    "headNamePart": "Oma",
+    "bodyNamePart": "star"
   },
   {
     "id": 140,
-    "name": "Kabuto"
+    "name": "Kabuto",
+    "headNamePart": "Kabu",
+    "bodyNamePart": "to"
   },
   {
     "id": 141,
-    "name": "Kabutops"
+    "name": "Kabutops",
+    "headNamePart": "Kabu",
+    "bodyNamePart": "tops"
   },
   {
     "id": 142,
-    "name": "Aerodactyl"
+    "name": "Aerodactyl",
+    "headNamePart": "Aero",
+    "bodyNamePart": "dactyl"
   },
   {
     "id": 143,
-    "name": "Snorlax"
+    "name": "Snorlax",
+    "headNamePart": "Snor",
+    "bodyNamePart": "lax"
   },
   {
     "id": 144,
-    "name": "Articuno"
+    "name": "Articuno",
+    "headNamePart": "Arti",
+    "bodyNamePart": "cuno"
   },
   {
     "id": 145,
-    "name": "Zapdos"
+    "name": "Zapdos",
+    "headNamePart": "Za",
+    "bodyNamePart": "dos"
   },
   {
     "id": 146,
-    "name": "Moltres"
+    "name": "Moltres",
+    "headNamePart": "Mol",
+    "bodyNamePart": "tres"
   },
   {
     "id": 147,
-    "name": "Dratini"
+    "name": "Dratini",
+    "headNamePart": "Dra",
+    "bodyNamePart": "tini"
   },
   {
     "id": 148,
-    "name": "Dragonair"
+    "name": "Dragonair",
+    "headNamePart": "Drago",
+    "bodyNamePart": "nair"
   },
   {
     "id": 149,
-    "name": "Dragonite"
+    "name": "Dragonite",
+    "headNamePart": "Drago",
+    "bodyNamePart": "nite"
   },
   {
     "id": 150,
-    "name": "Mewtwo"
+    "name": "Mewtwo",
+    "headNamePart": "Mew",
+    "bodyNamePart": "two"
   },
   {
     "id": 151,
-    "name": "Mew"
+    "name": "Mew",
+    "headNamePart": "Mew",
+    "bodyNamePart": "ew"
   },
   {
     "id": 152,
-    "name": "Chikorita"
+    "name": "Chikorita",
+    "headNamePart": "Chiko",
+    "bodyNamePart": "rita"
   },
   {
     "id": 153,
-    "name": "Bayleef"
+    "name": "Bayleef",
+    "headNamePart": "Bay",
+    "bodyNamePart": "leef"
   },
   {
     "id": 154,
-    "name": "Meganium"
+    "name": "Meganium",
+    "headNamePart": "Mega",
+    "bodyNamePart": "nium"
   },
   {
     "id": 155,
-    "name": "Cyndaquil"
+    "name": "Cyndaquil",
+    "headNamePart": "Cynda",
+    "bodyNamePart": "quil"
   },
   {
     "id": 156,
-    "name": "Quilava"
+    "name": "Quilava",
+    "headNamePart": "Qui",
+    "bodyNamePart": "lava"
   },
   {
     "id": 157,
-    "name": "Typhlosion"
+    "name": "Typhlosion",
+    "headNamePart": "Typh",
+    "bodyNamePart": "losion"
   },
   {
     "id": 158,
-    "name": "Totodile"
+    "name": "Totodile",
+    "headNamePart": "Toto",
+    "bodyNamePart": "dile"
   },
   {
     "id": 159,
-    "name": "Croconaw"
+    "name": "Croconaw",
+    "headNamePart": "Croco",
+    "bodyNamePart": "naw"
   },
   {
     "id": 160,
-    "name": "Feraligatr"
+    "name": "Feraligatr",
+    "headNamePart": "Fera",
+    "bodyNamePart": "ligatr"
   },
   {
     "id": 161,
-    "name": "Sentret"
+    "name": "Sentret",
+    "headNamePart": "Sen",
+    "bodyNamePart": "tret"
   },
   {
     "id": 162,
-    "name": "Furret"
+    "name": "Furret",
+    "headNamePart": "Fur",
+    "bodyNamePart": "ret"
   },
   {
     "id": 163,
-    "name": "Hoothoot"
+    "name": "Hoothoot",
+    "headNamePart": "Hoot",
+    "bodyNamePart": "hoot"
   },
   {
     "id": 164,
-    "name": "Noctowl"
+    "name": "Noctowl",
+    "headNamePart": "Noct",
+    "bodyNamePart": "wl"
   },
   {
     "id": 165,
-    "name": "Ledyba"
+    "name": "Ledyba",
+    "headNamePart": "Ledy",
+    "bodyNamePart": "ba"
   },
   {
     "id": 166,
-    "name": "Ledian"
+    "name": "Ledian",
+    "headNamePart": "Led",
+    "bodyNamePart": "ian"
   },
   {
     "id": 167,
-    "name": "Spinarak"
+    "name": "Spinarak",
+    "headNamePart": "Spina",
+    "bodyNamePart": "rak"
   },
   {
     "id": 168,
-    "name": "Ariados"
+    "name": "Ariados",
+    "headNamePart": "Aria",
+    "bodyNamePart": "dos"
   },
   {
     "id": 169,
-    "name": "Crobat"
+    "name": "Crobat",
+    "headNamePart": "Cro",
+    "bodyNamePart": "bat"
   },
   {
     "id": 170,
-    "name": "Chinchou"
+    "name": "Chinchou",
+    "headNamePart": "Chin",
+    "bodyNamePart": "chou"
   },
   {
     "id": 171,
-    "name": "Lanturn"
+    "name": "Lanturn",
+    "headNamePart": "Lan",
+    "bodyNamePart": "turn"
   },
   {
     "id": 172,
-    "name": "Pichu"
+    "name": "Pichu",
+    "headNamePart": "Pi",
+    "bodyNamePart": "chu"
   },
   {
     "id": 173,
-    "name": "Cleffa"
+    "name": "Cleffa",
+    "headNamePart": "Clef",
+    "bodyNamePart": "fa"
   },
   {
     "id": 174,
-    "name": "Igglybuff"
+    "name": "Igglybuff",
+    "headNamePart": "Iggly",
+    "bodyNamePart": "buff"
   },
   {
     "id": 175,
-    "name": "Togepi"
+    "name": "Togepi",
+    "headNamePart": "Toge",
+    "bodyNamePart": "pi"
   },
   {
     "id": 176,
-    "name": "Togetic"
+    "name": "Togetic",
+    "headNamePart": "Toge",
+    "bodyNamePart": "tic"
   },
   {
     "id": 177,
-    "name": "Natu"
+    "name": "Natu",
+    "headNamePart": "Na",
+    "bodyNamePart": "tu"
   },
   {
     "id": 178,
-    "name": "Xatu"
+    "name": "Xatu",
+    "headNamePart": "Xa",
+    "bodyNamePart": "tu"
   },
   {
     "id": 179,
-    "name": "Mareep"
+    "name": "Mareep",
+    "headNamePart": "Ma",
+    "bodyNamePart": "reep"
   },
   {
     "id": 180,
-    "name": "Flaaffy"
+    "name": "Flaaffy",
+    "headNamePart": "Flaa",
+    "bodyNamePart": "ffy"
   },
   {
     "id": 181,
-    "name": "Ampharos"
+    "name": "Ampharos",
+    "headNamePart": "Ampha",
+    "bodyNamePart": "ros"
   },
   {
     "id": 182,
-    "name": "Bellossom"
+    "name": "Bellossom",
+    "headNamePart": "Bell",
+    "bodyNamePart": "ssom"
   },
   {
     "id": 183,
-    "name": "Marill"
+    "name": "Marill",
+    "headNamePart": "Ma",
+    "bodyNamePart": "rill"
   },
   {
     "id": 184,
-    "name": "Azumarill"
+    "name": "Azumarill",
+    "headNamePart": "Azuma",
+    "bodyNamePart": "rill"
   },
   {
     "id": 185,
-    "name": "Sudowoodo"
+    "name": "Sudowoodo",
+    "headNamePart": "Sudo",
+    "bodyNamePart": "woodo"
   },
   {
     "id": 186,
-    "name": "Politoed"
+    "name": "Politoed",
+    "headNamePart": "Poli",
+    "bodyNamePart": "toed"
   },
   {
     "id": 187,
-    "name": "Hoppip"
+    "name": "Hoppip",
+    "headNamePart": "Ho",
+    "bodyNamePart": "pip"
   },
   {
     "id": 188,
-    "name": "Skiploom"
+    "name": "Skiploom",
+    "headNamePart": "Ski",
+    "bodyNamePart": "loom"
   },
   {
     "id": 189,
-    "name": "Jumpluff"
+    "name": "Jumpluff",
+    "headNamePart": "Jum",
+    "bodyNamePart": "luff"
   },
   {
     "id": 190,
-    "name": "Aipom"
+    "name": "Aipom",
+    "headNamePart": "Ai",
+    "bodyNamePart": "pom"
   },
   {
     "id": 191,
-    "name": "Sunkern"
+    "name": "Sunkern",
+    "headNamePart": "Sun",
+    "bodyNamePart": "kern"
   },
   {
     "id": 192,
-    "name": "Sunflora"
+    "name": "Sunflora",
+    "headNamePart": "Sun",
+    "bodyNamePart": "flora"
   },
   {
     "id": 193,
-    "name": "Yanma"
+    "name": "Yanma",
+    "headNamePart": "Yan",
+    "bodyNamePart": "ma"
   },
   {
     "id": 194,
-    "name": "Wooper"
+    "name": "Wooper",
+    "headNamePart": "Woo",
+    "bodyNamePart": "per"
   },
   {
     "id": 195,
-    "name": "Quagsire"
+    "name": "Quagsire",
+    "headNamePart": "Quag",
+    "bodyNamePart": "sire"
   },
   {
     "id": 196,
-    "name": "Espeon"
+    "name": "Espeon",
+    "headNamePart": "Es",
+    "bodyNamePart": "eon"
   },
   {
     "id": 197,
-    "name": "Umbreon"
+    "name": "Umbreon",
+    "headNamePart": "Umb",
+    "bodyNamePart": "reon"
   },
   {
     "id": 198,
-    "name": "Murkrow"
+    "name": "Murkrow",
+    "headNamePart": "Mur",
+    "bodyNamePart": "krow"
   },
   {
     "id": 199,
-    "name": "Slowking"
+    "name": "Slowking",
+    "headNamePart": "Slow",
+    "bodyNamePart": "king"
   },
   {
     "id": 200,
-    "name": "Misdreavus"
+    "name": "Misdreavus",
+    "headNamePart": "Mis",
+    "bodyNamePart": "dreavus"
   },
   {
     "id": 201,
-    "name": "Unown"
+    "name": "Unown",
+    "headNamePart": "Un",
+    "bodyNamePart": "wn"
   },
   {
     "id": 202,
-    "name": "Wobbuffet"
+    "name": "Wobbuffet",
+    "headNamePart": "Wob",
+    "bodyNamePart": "buffet"
   },
   {
     "id": 203,
-    "name": "Girafarig"
+    "name": "Girafarig",
+    "headNamePart": "Gira",
+    "bodyNamePart": "farig"
   },
   {
     "id": 204,
-    "name": "Pineco"
+    "name": "Pineco",
+    "headNamePart": "Pine",
+    "bodyNamePart": "co"
   },
   {
     "id": 205,
-    "name": "Forretress"
+    "name": "Forretress",
+    "headNamePart": "Forre",
+    "bodyNamePart": "tress"
   },
   {
     "id": 206,
-    "name": "Dunsparce"
+    "name": "Dunsparce",
+    "headNamePart": "Dun",
+    "bodyNamePart": "sparce"
   },
   {
     "id": 207,
-    "name": "Gligar"
+    "name": "Gligar",
+    "headNamePart": "Gli",
+    "bodyNamePart": "gar"
   },
   {
     "id": 208,
-    "name": "Steelix"
+    "name": "Steelix",
+    "headNamePart": "Stee",
+    "bodyNamePart": "lix"
   },
   {
     "id": 209,
-    "name": "Snubbull"
+    "name": "Snubbull",
+    "headNamePart": "Snub",
+    "bodyNamePart": "bull"
   },
   {
     "id": 210,
-    "name": "Granbull"
+    "name": "Granbull",
+    "headNamePart": "Gran",
+    "bodyNamePart": "bull"
   },
   {
     "id": 211,
-    "name": "Qwilfish"
+    "name": "Qwilfish",
+    "headNamePart": "Qwil",
+    "bodyNamePart": "fish"
   },
   {
     "id": 212,
-    "name": "Scizor"
+    "name": "Scizor",
+    "headNamePart": "Sci",
+    "bodyNamePart": "zor"
   },
   {
     "id": 213,
-    "name": "Shuckle"
+    "name": "Shuckle",
+    "headNamePart": "Shu",
+    "bodyNamePart": "ckle"
   },
   {
     "id": 214,
-    "name": "Heracross"
+    "name": "Heracross",
+    "headNamePart": "Hera",
+    "bodyNamePart": "cross"
   },
   {
     "id": 215,
-    "name": "Sneasel"
+    "name": "Sneasel",
+    "headNamePart": "Snea",
+    "bodyNamePart": "sel"
   },
   {
     "id": 216,
-    "name": "Teddiursa"
+    "name": "Teddiursa",
+    "headNamePart": "Teddi",
+    "bodyNamePart": "ursa"
   },
   {
     "id": 217,
-    "name": "Ursaring"
+    "name": "Ursaring",
+    "headNamePart": "Ursa",
+    "bodyNamePart": "ring"
   },
   {
     "id": 218,
-    "name": "Slugma"
+    "name": "Slugma",
+    "headNamePart": "Slug",
+    "bodyNamePart": "gma"
   },
   {
     "id": 219,
-    "name": "Magcargo"
+    "name": "Magcargo",
+    "headNamePart": "Mag",
+    "bodyNamePart": "cargo"
   },
   {
     "id": 220,
-    "name": "Swinub"
+    "name": "Swinub",
+    "headNamePart": "Swi",
+    "bodyNamePart": "nub"
   },
   {
     "id": 221,
-    "name": "Piloswine"
+    "name": "Piloswine",
+    "headNamePart": "Pilo",
+    "bodyNamePart": "swine"
   },
   {
     "id": 222,
-    "name": "Corsola"
+    "name": "Corsola",
+    "headNamePart": "Cor",
+    "bodyNamePart": "sola"
   },
   {
     "id": 223,
-    "name": "Remoraid"
+    "name": "Remoraid",
+    "headNamePart": "Remo",
+    "bodyNamePart": "raid"
   },
   {
     "id": 224,
-    "name": "Octillery"
+    "name": "Octillery",
+    "headNamePart": "Octi",
+    "bodyNamePart": "llery"
   },
   {
     "id": 225,
-    "name": "Delibird"
+    "name": "Delibird",
+    "headNamePart": "Deli",
+    "bodyNamePart": "bird"
   },
   {
     "id": 226,
-    "name": "Mantine"
+    "name": "Mantine",
+    "headNamePart": "Man",
+    "bodyNamePart": "tine"
   },
   {
     "id": 227,
-    "name": "Skarmory"
+    "name": "Skarmory",
+    "headNamePart": "Skar",
+    "bodyNamePart": "mory"
   },
   {
     "id": 228,
-    "name": "Houndour"
+    "name": "Houndour",
+    "headNamePart": "Houn",
+    "bodyNamePart": "dour"
   },
   {
     "id": 229,
-    "name": "Houndoom"
+    "name": "Houndoom",
+    "headNamePart": "Houn",
+    "bodyNamePart": "doom"
   },
   {
     "id": 230,
-    "name": "Kingdra"
+    "name": "Kingdra",
+    "headNamePart": "King",
+    "bodyNamePart": "dra"
   },
   {
     "id": 231,
-    "name": "Phanpy"
+    "name": "Phanpy",
+    "headNamePart": "Phan",
+    "bodyNamePart": "py"
   },
   {
     "id": 232,
-    "name": "Donphan"
+    "name": "Donphan",
+    "headNamePart": "Don",
+    "bodyNamePart": "phan"
   },
   {
     "id": 233,
-    "name": "Porygon2"
+    "name": "Porygon2",
+    "headNamePart": "Pory",
+    "bodyNamePart": "gon2"
   },
   {
     "id": 234,
-    "name": "Stantler"
+    "name": "Stantler",
+    "headNamePart": "Stan",
+    "bodyNamePart": "tler"
   },
   {
     "id": 235,
-    "name": "Smeargle"
+    "name": "Smeargle",
+    "headNamePart": "Smear",
+    "bodyNamePart": "gle"
   },
   {
     "id": 236,
-    "name": "Tyrogue"
+    "name": "Tyrogue",
+    "headNamePart": "Ty",
+    "bodyNamePart": "rogue"
   },
   {
     "id": 237,
-    "name": "Hitmontop"
+    "name": "Hitmontop",
+    "headNamePart": "Hitmon",
+    "bodyNamePart": "top"
   },
   {
     "id": 238,
-    "name": "Smoochum"
+    "name": "Smoochum",
+    "headNamePart": "Smoo",
+    "bodyNamePart": "chum"
   },
   {
     "id": 239,
-    "name": "Elekid"
+    "name": "Elekid",
+    "headNamePart": "Ele",
+    "bodyNamePart": "kid"
   },
   {
     "id": 240,
-    "name": "Magby"
+    "name": "Magby",
+    "headNamePart": "Mag",
+    "bodyNamePart": "by"
   },
   {
     "id": 241,
-    "name": "Miltank"
+    "name": "Miltank",
+    "headNamePart": "Mil",
+    "bodyNamePart": "tank"
   },
   {
     "id": 242,
-    "name": "Blissey"
+    "name": "Blissey",
+    "headNamePart": "Blis",
+    "bodyNamePart": "sey"
   },
   {
     "id": 243,
-    "name": "Raikou"
+    "name": "Raikou",
+    "headNamePart": "Rai",
+    "bodyNamePart": "kou"
   },
   {
     "id": 244,
-    "name": "Entei"
+    "name": "Entei",
+    "headNamePart": "En",
+    "bodyNamePart": "tei"
   },
   {
     "id": 245,
-    "name": "Suicune"
+    "name": "Suicune",
+    "headNamePart": "Sui",
+    "bodyNamePart": "cune"
   },
   {
     "id": 246,
-    "name": "Larvitar"
+    "name": "Larvitar",
+    "headNamePart": "Larvi",
+    "bodyNamePart": "tar"
   },
   {
     "id": 247,
-    "name": "Pupitar"
+    "name": "Pupitar",
+    "headNamePart": "Pupi",
+    "bodyNamePart": "tar"
   },
   {
     "id": 248,
-    "name": "Tyranitar"
+    "name": "Tyranitar",
+    "headNamePart": "Tyran",
+    "bodyNamePart": "itar"
   },
   {
     "id": 249,
-    "name": "Lugia"
+    "name": "Lugia",
+    "headNamePart": "Lu",
+    "bodyNamePart": "gia"
   },
   {
     "id": 250,
-    "name": "Ho-oh"
+    "name": "Ho-oh",
+    "headNamePart": "Ho-",
+    "bodyNamePart": "h"
   },
   {
     "id": 251,
-    "name": "Celebi"
+    "name": "Celebi",
+    "headNamePart": "Cele",
+    "bodyNamePart": "bi"
   },
   {
     "id": 252,
-    "name": "Azurill"
+    "name": "Azurill",
+    "headNamePart": "Azu",
+    "bodyNamePart": "rill"
   },
   {
     "id": 253,
-    "name": "Wynaut"
+    "name": "Wynaut",
+    "headNamePart": "Wy",
+    "bodyNamePart": "naut"
   },
   {
     "id": 254,
-    "name": "Ambipom"
+    "name": "Ambipom",
+    "headNamePart": "Ambi",
+    "bodyNamePart": "pom"
   },
   {
     "id": 255,
-    "name": "Mismagius"
+    "name": "Mismagius",
+    "headNamePart": "Mis",
+    "bodyNamePart": "magius"
   },
   {
     "id": 256,
-    "name": "Honchkrow"
+    "name": "Honchkrow",
+    "headNamePart": "Honch",
+    "bodyNamePart": "krow"
   },
   {
     "id": 257,
-    "name": "Bonsly"
+    "name": "Bonsly",
+    "headNamePart": "Bon",
+    "bodyNamePart": "sly"
   },
   {
     "id": 258,
-    "name": "Mime Jr."
+    "name": "Mime Jr.",
+    "headNamePart": "Mime",
+    "bodyNamePart": " Jr."
   },
   {
     "id": 259,
-    "name": "Happiny"
+    "name": "Happiny",
+    "headNamePart": "Happi",
+    "bodyNamePart": "piny"
   },
   {
     "id": 260,
-    "name": "Munchlax"
+    "name": "Munchlax",
+    "headNamePart": "Munch",
+    "bodyNamePart": "lax"
   },
   {
     "id": 261,
-    "name": "Mantyke"
+    "name": "Mantyke",
+    "headNamePart": "Man",
+    "bodyNamePart": "tyke"
   },
   {
     "id": 262,
-    "name": "Weavile"
+    "name": "Weavile",
+    "headNamePart": "Weav",
+    "bodyNamePart": "vile"
   },
   {
     "id": 263,
-    "name": "Magnezone"
+    "name": "Magnezone",
+    "headNamePart": "Magne",
+    "bodyNamePart": "zone"
   },
   {
     "id": 264,
-    "name": "Lickilicky"
+    "name": "Lickilicky",
+    "headNamePart": "Licki",
+    "bodyNamePart": "licky"
   },
   {
     "id": 265,
-    "name": "Rhyperior"
+    "name": "Rhyperior",
+    "headNamePart": "Rhy",
+    "bodyNamePart": "perior"
   },
   {
     "id": 266,
-    "name": "Tangrowth"
+    "name": "Tangrowth",
+    "headNamePart": "Tan",
+    "bodyNamePart": "growth"
   },
   {
     "id": 267,
-    "name": "Electivire"
+    "name": "Electivire",
+    "headNamePart": "Electi",
+    "bodyNamePart": "vire"
   },
   {
     "id": 268,
-    "name": "Magmortar"
+    "name": "Magmortar",
+    "headNamePart": "Magmor",
+    "bodyNamePart": "mortar"
   },
   {
     "id": 269,
-    "name": "Togekiss"
+    "name": "Togekiss",
+    "headNamePart": "Toge",
+    "bodyNamePart": "kiss"
   },
   {
     "id": 270,
-    "name": "Yanmega"
+    "name": "Yanmega",
+    "headNamePart": "Yan",
+    "bodyNamePart": "mega"
   },
   {
     "id": 271,
-    "name": "Leafeon"
+    "name": "Leafeon",
+    "headNamePart": "Leaf",
+    "bodyNamePart": "feon"
   },
   {
     "id": 272,
-    "name": "Glaceon"
+    "name": "Glaceon",
+    "headNamePart": "Glace",
+    "bodyNamePart": "ceon"
   },
   {
     "id": 273,
-    "name": "Gliscor"
+    "name": "Gliscor",
+    "headNamePart": "Glis",
+    "bodyNamePart": "cor"
   },
   {
     "id": 274,
-    "name": "Mamoswine"
+    "name": "Mamoswine",
+    "headNamePart": "Mamo",
+    "bodyNamePart": "swine"
   },
   {
     "id": 275,
-    "name": "Porygon-Z"
+    "name": "Porygon-Z",
+    "headNamePart": "Pory",
+    "bodyNamePart": "gon-Z"
   },
   {
     "id": 276,
-    "name": "Treecko"
+    "name": "Treecko",
+    "headNamePart": "Tree",
+    "bodyNamePart": "cko"
   },
   {
     "id": 277,
-    "name": "Grovyle"
+    "name": "Grovyle",
+    "headNamePart": "Gro",
+    "bodyNamePart": "vyle"
   },
   {
     "id": 278,
-    "name": "Sceptile"
+    "name": "Sceptile",
+    "headNamePart": "Sce",
+    "bodyNamePart": "tile"
   },
   {
     "id": 279,
-    "name": "Torchic"
+    "name": "Torchic",
+    "headNamePart": "Torch",
+    "bodyNamePart": "chic"
   },
   {
     "id": 280,
-    "name": "Combusken"
+    "name": "Combusken",
+    "headNamePart": "Com",
+    "bodyNamePart": "busken"
   },
   {
     "id": 281,
-    "name": "Blaziken"
+    "name": "Blaziken",
+    "headNamePart": "Bla",
+    "bodyNamePart": "ziken"
   },
   {
     "id": 282,
-    "name": "Mudkip"
+    "name": "Mudkip",
+    "headNamePart": "Mud",
+    "bodyNamePart": "kip"
   },
   {
     "id": 283,
-    "name": "Marshtomp"
+    "name": "Marshtomp",
+    "headNamePart": "Marsh",
+    "bodyNamePart": "tomp"
   },
   {
     "id": 284,
-    "name": "Swampert"
+    "name": "Swampert",
+    "headNamePart": "Swam",
+    "bodyNamePart": "pert"
   },
   {
     "id": 285,
-    "name": "Ralts"
+    "name": "Ralts",
+    "headNamePart": "Ral",
+    "bodyNamePart": "ts"
   },
   {
     "id": 286,
-    "name": "Kirlia"
+    "name": "Kirlia",
+    "headNamePart": "Kir",
+    "bodyNamePart": "lia"
   },
   {
     "id": 287,
-    "name": "Gardevoir"
+    "name": "Gardevoir",
+    "headNamePart": "Garde",
+    "bodyNamePart": "voir"
   },
   {
     "id": 288,
-    "name": "Gallade"
+    "name": "Gallade",
+    "headNamePart": "Gall",
+    "bodyNamePart": "lade"
   },
   {
     "id": 289,
-    "name": "Shedinja"
+    "name": "Shedinja",
+    "headNamePart": "Shed",
+    "bodyNamePart": "inja"
   },
   {
     "id": 290,
-    "name": "Kecleon"
+    "name": "Kecleon",
+    "headNamePart": "Kec",
+    "bodyNamePart": "eon"
   },
   {
     "id": 291,
-    "name": "Beldum"
+    "name": "Beldum",
+    "headNamePart": "Bel",
+    "bodyNamePart": "dum"
   },
   {
     "id": 292,
-    "name": "Metang"
+    "name": "Metang",
+    "headNamePart": "Met",
+    "bodyNamePart": "tang"
   },
   {
     "id": 293,
-    "name": "Metagross"
+    "name": "Metagross",
+    "headNamePart": "Meta",
+    "bodyNamePart": "gross"
   },
   {
     "id": 294,
-    "name": "Bidoof"
+    "name": "Bidoof",
+    "headNamePart": "Bi",
+    "bodyNamePart": "doof"
   },
   {
     "id": 295,
-    "name": "Spiritomb"
+    "name": "Spiritomb",
+    "headNamePart": "Spiri",
+    "bodyNamePart": "tomb"
   },
   {
     "id": 296,
-    "name": "Lucario"
+    "name": "Lucario",
+    "headNamePart": "Luca",
+    "bodyNamePart": "cario"
   },
   {
     "id": 297,
-    "name": "Gible"
+    "name": "Gible",
+    "headNamePart": "Gib",
+    "bodyNamePart": "ble"
   },
   {
     "id": 298,
-    "name": "Gabite"
+    "name": "Gabite",
+    "headNamePart": "Gab",
+    "bodyNamePart": "bite"
   },
   {
     "id": 299,
-    "name": "Garchomp"
+    "name": "Garchomp",
+    "headNamePart": "Gar",
+    "bodyNamePart": "chomp"
   },
   {
     "id": 300,
-    "name": "Mawile"
+    "name": "Mawile",
+    "headNamePart": "Maw",
+    "bodyNamePart": "wile"
   },
   {
     "id": 301,
-    "name": "Lileep"
+    "name": "Lileep",
+    "headNamePart": "Lil",
+    "bodyNamePart": "leep"
   },
   {
     "id": 302,
-    "name": "Cradily"
+    "name": "Cradily",
+    "headNamePart": "Crad",
+    "bodyNamePart": "dily"
   },
   {
     "id": 303,
-    "name": "Anorith"
+    "name": "Anorith",
+    "headNamePart": "Ano",
+    "bodyNamePart": "rith"
   },
   {
     "id": 304,
-    "name": "Armaldo"
+    "name": "Armaldo",
+    "headNamePart": "Arm",
+    "bodyNamePart": "aldo"
   },
   {
     "id": 305,
-    "name": "Cranidos"
+    "name": "Cranidos",
+    "headNamePart": "Cran",
+    "bodyNamePart": "idos"
   },
   {
     "id": 306,
-    "name": "Rampardos"
+    "name": "Rampardos",
+    "headNamePart": "Ram",
+    "bodyNamePart": "pardos"
   },
   {
     "id": 307,
-    "name": "Shieldon"
+    "name": "Shieldon",
+    "headNamePart": "Shiel",
+    "bodyNamePart": "don"
   },
   {
     "id": 308,
-    "name": "Bastiodon"
+    "name": "Bastiodon",
+    "headNamePart": "Bastio",
+    "bodyNamePart": "don"
   },
   {
     "id": 309,
-    "name": "Slaking"
+    "name": "Slaking",
+    "headNamePart": "Sla",
+    "bodyNamePart": "king"
   },
   {
     "id": 310,
-    "name": "Absol"
+    "name": "Absol",
+    "headNamePart": "Ab",
+    "bodyNamePart": "sol"
   },
   {
     "id": 311,
-    "name": "Duskull"
+    "name": "Duskull",
+    "headNamePart": "Dus",
+    "bodyNamePart": "skull"
   },
   {
     "id": 312,
-    "name": "Dusclops"
+    "name": "Dusclops",
+    "headNamePart": "Dusc",
+    "bodyNamePart": "clops"
   },
   {
     "id": 313,
-    "name": "Dusknoir"
+    "name": "Dusknoir",
+    "headNamePart": "Dusk",
+    "bodyNamePart": "noir"
   },
   {
     "id": 314,
-    "name": "Wailord"
+    "name": "Wailord",
+    "headNamePart": "Wail",
+    "bodyNamePart": "lord"
   },
   {
     "id": 315,
-    "name": "Arceus"
+    "name": "Arceus",
+    "headNamePart": "Arc",
+    "bodyNamePart": "ceus"
   },
   {
     "id": 316,
-    "name": "Turtwig"
+    "name": "Turtwig",
+    "headNamePart": "Tur",
+    "bodyNamePart": "wig"
   },
   {
     "id": 317,
-    "name": "Grotle"
+    "name": "Grotle",
+    "headNamePart": "Gro",
+    "bodyNamePart": "tle"
   },
   {
     "id": 318,
-    "name": "Torterra"
+    "name": "Torterra",
+    "headNamePart": "Tor",
+    "bodyNamePart": "terra"
   },
   {
     "id": 319,
-    "name": "Chimchar"
+    "name": "Chimchar",
+    "headNamePart": "Chim",
+    "bodyNamePart": "char"
   },
   {
     "id": 320,
-    "name": "Monferno"
+    "name": "Monferno",
+    "headNamePart": "Mon",
+    "bodyNamePart": "ferno"
   },
   {
     "id": 321,
-    "name": "Infernape"
+    "name": "Infernape",
+    "headNamePart": "Infer",
+    "bodyNamePart": "nape"
   },
   {
     "id": 322,
-    "name": "Piplup"
+    "name": "Piplup",
+    "headNamePart": "Pi",
+    "bodyNamePart": "lup"
   },
   {
     "id": 323,
-    "name": "Prinplup"
+    "name": "Prinplup",
+    "headNamePart": "Prin",
+    "bodyNamePart": "plup"
   },
   {
     "id": 324,
-    "name": "Empoleon"
+    "name": "Empoleon",
+    "headNamePart": "Empo",
+    "bodyNamePart": "leon"
   },
   {
     "id": 325,
-    "name": "Nosepass"
+    "name": "Nosepass",
+    "headNamePart": "Nose",
+    "bodyNamePart": "pass"
   },
   {
     "id": 326,
-    "name": "Probopass"
+    "name": "Probopass",
+    "headNamePart": "Probo",
+    "bodyNamePart": "pass"
   },
   {
     "id": 327,
-    "name": "Honedge"
+    "name": "Honedge",
+    "headNamePart": "Hon",
+    "bodyNamePart": "edge"
   },
   {
     "id": 328,
-    "name": "Doublade"
+    "name": "Doublade",
+    "headNamePart": "Doub",
+    "bodyNamePart": "blade"
   },
   {
     "id": 329,
-    "name": "Aegislash"
+    "name": "Aegislash",
+    "headNamePart": "Aegi",
+    "bodyNamePart": "slash"
   },
   {
     "id": 330,
-    "name": "Pawniard"
+    "name": "Pawniard",
+    "headNamePart": "Pawn",
+    "bodyNamePart": "iard"
   },
   {
     "id": 331,
-    "name": "Bisharp"
+    "name": "Bisharp",
+    "headNamePart": "Bi",
+    "bodyNamePart": "sharp"
   },
   {
     "id": 332,
-    "name": "Luxray"
+    "name": "Luxray",
+    "headNamePart": "Lux",
+    "bodyNamePart": "ray"
   },
   {
     "id": 333,
-    "name": "Aggron"
+    "name": "Aggron",
+    "headNamePart": "Agg",
+    "bodyNamePart": "gron"
   },
   {
     "id": 334,
-    "name": "Flygon"
+    "name": "Flygon",
+    "headNamePart": "Fly",
+    "bodyNamePart": "gon"
   },
   {
     "id": 335,
-    "name": "Milotic"
+    "name": "Milotic",
+    "headNamePart": "Milo",
+    "bodyNamePart": "tic"
   },
   {
     "id": 336,
-    "name": "Salamence"
+    "name": "Salamence",
+    "headNamePart": "Sala",
+    "bodyNamePart": "mence"
   },
   {
     "id": 337,
-    "name": "Klinklang"
+    "name": "Klinklang",
+    "headNamePart": "Klink",
+    "bodyNamePart": "klang"
   },
   {
     "id": 338,
-    "name": "Zoroark"
+    "name": "Zoroark",
+    "headNamePart": "Zoro",
+    "bodyNamePart": "ark"
   },
   {
     "id": 339,
-    "name": "Sylveon"
+    "name": "Sylveon",
+    "headNamePart": "Syl",
+    "bodyNamePart": "veon"
   },
   {
     "id": 340,
-    "name": "Kyogre"
+    "name": "Kyogre",
+    "headNamePart": "Kyo",
+    "bodyNamePart": "gre"
   },
   {
     "id": 341,
-    "name": "Groudon"
+    "name": "Groudon",
+    "headNamePart": "Grou",
+    "bodyNamePart": "don"
   },
   {
     "id": 342,
-    "name": "Rayquaza"
+    "name": "Rayquaza",
+    "headNamePart": "Ray",
+    "bodyNamePart": "quaza"
   },
   {
     "id": 343,
-    "name": "Dialga"
+    "name": "Dialga",
+    "headNamePart": "Dial",
+    "bodyNamePart": "alga"
   },
   {
     "id": 344,
-    "name": "Palkia"
+    "name": "Palkia",
+    "headNamePart": "Palk",
+    "bodyNamePart": "kia"
   },
   {
     "id": 345,
-    "name": "Giratina"
+    "name": "Giratina",
+    "headNamePart": "Gira",
+    "bodyNamePart": "tina"
   },
   {
     "id": 346,
-    "name": "Regigigas"
+    "name": "Regigigas",
+    "headNamePart": "Regi",
+    "bodyNamePart": "gigas"
   },
   {
     "id": 347,
-    "name": "Darkrai"
+    "name": "Darkrai",
+    "headNamePart": "Dark",
+    "bodyNamePart": "rai"
   },
   {
     "id": 348,
-    "name": "Genesect"
+    "name": "Genesect",
+    "headNamePart": "Gene",
+    "bodyNamePart": "esect"
   },
   {
     "id": 349,
-    "name": "Reshiram"
+    "name": "Reshiram",
+    "headNamePart": "Reshi",
+    "bodyNamePart": "ram"
   },
   {
     "id": 350,
-    "name": "Zekrom"
+    "name": "Zekrom",
+    "headNamePart": "Zek",
+    "bodyNamePart": "rom"
   },
   {
     "id": 351,
-    "name": "Kyurem"
+    "name": "Kyurem",
+    "headNamePart": "Kyu",
+    "bodyNamePart": "rem"
   },
   {
     "id": 352,
-    "name": "Roserade"
+    "name": "Roserade",
+    "headNamePart": "Rose",
+    "bodyNamePart": "rade"
   },
   {
     "id": 353,
-    "name": "Drifblim"
+    "name": "Drifblim",
+    "headNamePart": "Drifb",
+    "bodyNamePart": "blim"
   },
   {
     "id": 354,
-    "name": "Lopunny"
+    "name": "Lopunny",
+    "headNamePart": "Lo",
+    "bodyNamePart": "punny"
   },
   {
     "id": 355,
-    "name": "Breloom"
+    "name": "Breloom",
+    "headNamePart": "Bre",
+    "bodyNamePart": "loom"
   },
   {
     "id": 356,
-    "name": "Ninjask"
+    "name": "Ninjask",
+    "headNamePart": "Nin",
+    "bodyNamePart": "jask"
   },
   {
     "id": 357,
-    "name": "Banette"
+    "name": "Banette",
+    "headNamePart": "Ban",
+    "bodyNamePart": "nette"
   },
   {
     "id": 358,
-    "name": "Rotom"
+    "name": "Rotom",
+    "headNamePart": "Ro",
+    "bodyNamePart": "tom"
   },
   {
     "id": 359,
-    "name": "Reuniclus"
+    "name": "Reuniclus",
+    "headNamePart": "Reuni",
+    "bodyNamePart": "niclus"
   },
   {
     "id": 360,
-    "name": "Whimsicott"
+    "name": "Whimsicott",
+    "headNamePart": "Whimsi",
+    "bodyNamePart": "cott"
   },
   {
     "id": 361,
-    "name": "Krookodile"
+    "name": "Krookodile",
+    "headNamePart": "Krooko",
+    "bodyNamePart": "dile"
   },
   {
     "id": 362,
-    "name": "Cofagrigus"
+    "name": "Cofagrigus",
+    "headNamePart": "Cofa",
+    "bodyNamePart": "grigus"
   },
   {
     "id": 363,
-    "name": "Galvantula"
+    "name": "Galvantula",
+    "headNamePart": "Galvan",
+    "bodyNamePart": "tula"
   },
   {
     "id": 364,
-    "name": "Ferrothorn"
+    "name": "Ferrothorn",
+    "headNamePart": "Ferro",
+    "bodyNamePart": "thorn"
   },
   {
     "id": 365,
-    "name": "Litwick"
+    "name": "Litwick",
+    "headNamePart": "Lit",
+    "bodyNamePart": "wick"
   },
   {
     "id": 366,
-    "name": "Lampent"
+    "name": "Lampent",
+    "headNamePart": "Lam",
+    "bodyNamePart": "pent"
   },
   {
     "id": 367,
-    "name": "Chandelure"
+    "name": "Chandelure",
+    "headNamePart": "Chandel",
+    "bodyNamePart": "lure"
   },
   {
     "id": 368,
-    "name": "Haxorus"
+    "name": "Haxorus",
+    "headNamePart": "Hax",
+    "bodyNamePart": "xorus"
   },
   {
     "id": 369,
-    "name": "Golurk"
+    "name": "Golurk",
+    "headNamePart": "Golu",
+    "bodyNamePart": "lurk"
   },
   {
     "id": 370,
-    "name": "Pyukumuku"
+    "name": "Pyukumuku",
+    "headNamePart": "Pyuku",
+    "bodyNamePart": "muku"
   },
   {
     "id": 371,
-    "name": "Klefki"
+    "name": "Klefki",
+    "headNamePart": "Klef",
+    "bodyNamePart": "ki"
   },
   {
     "id": 372,
-    "name": "Talonflame"
+    "name": "Talonflame",
+    "headNamePart": "Talon",
+    "bodyNamePart": "flame"
   },
   {
     "id": 373,
-    "name": "Mimikyu"
+    "name": "Mimikyu",
+    "headNamePart": "Mimi",
+    "bodyNamePart": "kyu"
   },
   {
     "id": 374,
-    "name": "Volcarona"
+    "name": "Volcarona",
+    "headNamePart": "Volca",
+    "bodyNamePart": "rona"
   },
   {
     "id": 375,
-    "name": "Deino"
+    "name": "Deino",
+    "headNamePart": "Dei",
+    "bodyNamePart": "no"
   },
   {
     "id": 376,
-    "name": "Zweilous"
+    "name": "Zweilous",
+    "headNamePart": "Zwei",
+    "bodyNamePart": "lous"
   },
   {
     "id": 377,
-    "name": "Hydreigon"
+    "name": "Hydreigon",
+    "headNamePart": "Hy",
+    "bodyNamePart": "dreigon"
   },
   {
     "id": 378,
-    "name": "Latias"
+    "name": "Latias",
+    "headNamePart": "La",
+    "bodyNamePart": "tias"
   },
   {
     "id": 379,
-    "name": "Latios"
+    "name": "Latios",
+    "headNamePart": "La",
+    "bodyNamePart": "tios"
   },
   {
     "id": 380,
-    "name": "Deoxys"
+    "name": "Deoxys",
+    "headNamePart": "Deo",
+    "bodyNamePart": "xys"
   },
   {
     "id": 381,
-    "name": "Jirachi"
+    "name": "Jirachi",
+    "headNamePart": "Ji",
+    "bodyNamePart": "rachi"
   },
   {
     "id": 382,
-    "name": "Nincada"
+    "name": "Nincada",
+    "headNamePart": "Nin",
+    "bodyNamePart": "cada"
   },
   {
     "id": 383,
-    "name": "Bibarel"
+    "name": "Bibarel",
+    "headNamePart": "Bi",
+    "bodyNamePart": "barel"
   },
   {
     "id": 384,
-    "name": "Riolu"
+    "name": "Riolu",
+    "headNamePart": "Rio",
+    "bodyNamePart": "lu"
   },
   {
     "id": 385,
-    "name": "Slakoth"
+    "name": "Slakoth",
+    "headNamePart": "Sla",
+    "bodyNamePart": "koth"
   },
   {
     "id": 386,
-    "name": "Vigoroth"
+    "name": "Vigoroth",
+    "headNamePart": "Vigo",
+    "bodyNamePart": "roth"
   },
   {
     "id": 387,
-    "name": "Wailmer"
+    "name": "Wailmer",
+    "headNamePart": "Wail",
+    "bodyNamePart": "mer"
   },
   {
     "id": 388,
-    "name": "Shinx"
+    "name": "Shinx",
+    "headNamePart": "Shi",
+    "bodyNamePart": "nx"
   },
   {
     "id": 389,
-    "name": "Luxio"
+    "name": "Luxio",
+    "headNamePart": "Lu",
+    "bodyNamePart": "xio"
   },
   {
     "id": 390,
-    "name": "Aron"
+    "name": "Aron",
+    "headNamePart": "Ar",
+    "bodyNamePart": "n"
   },
   {
     "id": 391,
-    "name": "Lairon"
+    "name": "Lairon",
+    "headNamePart": "Lair",
+    "bodyNamePart": "ron"
   },
   {
     "id": 392,
-    "name": "Trapinch"
+    "name": "Trapinch",
+    "headNamePart": "Tra",
+    "bodyNamePart": "inch"
   },
   {
     "id": 393,
-    "name": "Vibrava"
+    "name": "Vibrava",
+    "headNamePart": "Vibra",
+    "bodyNamePart": "va"
   },
   {
     "id": 394,
-    "name": "Feebas"
+    "name": "Feebas",
+    "headNamePart": "Fee",
+    "bodyNamePart": "bas"
   },
   {
     "id": 395,
-    "name": "Bagon"
+    "name": "Bagon",
+    "headNamePart": "Ba",
+    "bodyNamePart": "agon"
   },
   {
     "id": 396,
-    "name": "Shelgon"
+    "name": "Shelgon",
+    "headNamePart": "Shel",
+    "bodyNamePart": "elgon"
   },
   {
     "id": 397,
-    "name": "Klink"
+    "name": "Klink",
+    "headNamePart": "Kli",
+    "bodyNamePart": "ink"
   },
   {
     "id": 398,
-    "name": "Klang"
+    "name": "Klang",
+    "headNamePart": "Kla",
+    "bodyNamePart": "ang"
   },
   {
     "id": 399,
-    "name": "Zorua"
+    "name": "Zorua",
+    "headNamePart": "Zo",
+    "bodyNamePart": "rua"
   },
   {
     "id": 400,
-    "name": "Budew"
+    "name": "Budew",
+    "headNamePart": "Bu",
+    "bodyNamePart": "dew"
   },
   {
     "id": 401,
-    "name": "Roselia"
+    "name": "Roselia",
+    "headNamePart": "Rose",
+    "bodyNamePart": "elia"
   },
   {
     "id": 402,
-    "name": "Drifloon"
+    "name": "Drifloon",
+    "headNamePart": "Drifl",
+    "bodyNamePart": "loon"
   },
   {
     "id": 403,
-    "name": "Buneary"
+    "name": "Buneary",
+    "headNamePart": "Bun",
+    "bodyNamePart": "eary"
   },
   {
     "id": 404,
-    "name": "Shroomish"
+    "name": "Shroomish",
+    "headNamePart": "Shroom",
+    "bodyNamePart": "ish"
   },
   {
     "id": 405,
-    "name": "Shuppet"
+    "name": "Shuppet",
+    "headNamePart": "Shu",
+    "bodyNamePart": "pet"
   },
   {
     "id": 406,
-    "name": "Solosis"
+    "name": "Solosis",
+    "headNamePart": "Solo",
+    "bodyNamePart": "sis"
   },
   {
     "id": 407,
-    "name": "Duosion"
+    "name": "Duosion",
+    "headNamePart": "Duo",
+    "bodyNamePart": "sion"
   },
   {
     "id": 408,
-    "name": "Cottonee"
+    "name": "Cottonee",
+    "headNamePart": "Cotton",
+    "bodyNamePart": "nee"
   },
   {
     "id": 409,
-    "name": "Sandile"
+    "name": "Sandile",
+    "headNamePart": "Sandi",
+    "bodyNamePart": "ile"
   },
   {
     "id": 410,
-    "name": "Krokorok"
+    "name": "Krokorok",
+    "headNamePart": "Kroko",
+    "bodyNamePart": "rok"
   },
   {
     "id": 411,
-    "name": "Yamask"
+    "name": "Yamask",
+    "headNamePart": "Ya",
+    "bodyNamePart": "mask"
   },
   {
     "id": 412,
-    "name": "Joltik"
+    "name": "Joltik",
+    "headNamePart": "Jol",
+    "bodyNamePart": "tik"
   },
   {
     "id": 413,
-    "name": "Ferroseed"
+    "name": "Ferroseed",
+    "headNamePart": "Ferro",
+    "bodyNamePart": "seed"
   },
   {
     "id": 414,
-    "name": "Axew"
+    "name": "Axew",
+    "headNamePart": "Axe",
+    "bodyNamePart": "xew"
   },
   {
     "id": 415,
-    "name": "Fraxure"
+    "name": "Fraxure",
+    "headNamePart": "Frax",
+    "bodyNamePart": "xure"
   },
   {
     "id": 416,
-    "name": "Golett"
+    "name": "Golett",
+    "headNamePart": "Gole",
+    "bodyNamePart": "lett"
   },
   {
     "id": 417,
-    "name": "Fletchling"
+    "name": "Fletchling",
+    "headNamePart": "Fletch",
+    "bodyNamePart": "ling"
   },
   {
     "id": 418,
-    "name": "Fletchinder"
+    "name": "Fletchinder",
+    "headNamePart": "Fletch",
+    "bodyNamePart": "inder"
   },
   {
     "id": 419,
-    "name": "Larvesta"
+    "name": "Larvesta",
+    "headNamePart": "Larv",
+    "bodyNamePart": "esta"
   },
   {
     "id": 420,
-    "name": "Stunfisk"
+    "name": "Stunfisk",
+    "headNamePart": "Stun",
+    "bodyNamePart": "fisk"
   },
   {
     "id": 421,
-    "name": "Sableye"
+    "name": "Sableye",
+    "headNamePart": "Sabl",
+    "bodyNamePart": "eye"
   },
   {
     "id": 422,
-    "name": "Venipede"
+    "name": "Venipede",
+    "headNamePart": "Veni",
+    "bodyNamePart": "pede"
   },
   {
     "id": 423,
-    "name": "Whirlipede"
+    "name": "Whirlipede",
+    "headNamePart": "Whirli",
+    "bodyNamePart": "pede"
   },
   {
     "id": 424,
-    "name": "Scolipede"
+    "name": "Scolipede",
+    "headNamePart": "Scoli",
+    "bodyNamePart": "pede"
   },
   {
     "id": 425,
-    "name": "Tyrunt"
+    "name": "Tyrunt",
+    "headNamePart": "Ty",
+    "bodyNamePart": "runt"
   },
   {
     "id": 426,
-    "name": "Tyrantrum"
+    "name": "Tyrantrum",
+    "headNamePart": "Tyran",
+    "bodyNamePart": "trum"
   },
   {
     "id": 427,
-    "name": "Snorunt"
+    "name": "Snorunt",
+    "headNamePart": "Sno",
+    "bodyNamePart": "runt"
   },
   {
     "id": 428,
-    "name": "Glalie"
+    "name": "Glalie",
+    "headNamePart": "Gla",
+    "bodyNamePart": "lie"
   },
   {
     "id": 429,
-    "name": "Froslass"
+    "name": "Froslass",
+    "headNamePart": "Fros",
+    "bodyNamePart": "lass"
   },
   {
     "id": 430,
-    "name": "Oricorio Baile Style"
+    "name": "Oricorio Baile Style",
+    "headNamePart": "Ori",
+    "bodyNamePart": "corio"
   },
   {
     "id": 431,
-    "name": "Oricorio Pom-Pom Style"
+    "name": "Oricorio Pom-Pom Style",
+    "headNamePart": "Ori",
+    "bodyNamePart": "corio"
   },
   {
     "id": 432,
-    "name": "Oricorio Pa'u Style"
+    "name": "Oricorio Pa'u Style",
+    "headNamePart": "Ori",
+    "bodyNamePart": "corio"
   },
   {
     "id": 433,
-    "name": "Oricorio Sensu Style"
+    "name": "Oricorio Sensu Style",
+    "headNamePart": "Ori",
+    "bodyNamePart": "corio"
   },
   {
     "id": 434,
-    "name": "Trubbish"
+    "name": "Trubbish",
+    "headNamePart": "Trub",
+    "bodyNamePart": "bish"
   },
   {
     "id": 435,
-    "name": "Garbodor"
+    "name": "Garbodor",
+    "headNamePart": "Garb",
+    "bodyNamePart": "dor"
   },
   {
     "id": 436,
-    "name": "Carvanha"
+    "name": "Carvanha",
+    "headNamePart": "Car",
+    "bodyNamePart": "vanha"
   },
   {
     "id": 437,
-    "name": "Sharpedo"
+    "name": "Sharpedo",
+    "headNamePart": "Shar",
+    "bodyNamePart": "edo"
   },
   {
     "id": 438,
-    "name": "Phantump"
+    "name": "Phantump",
+    "headNamePart": "Phant",
+    "bodyNamePart": "tump"
   },
   {
     "id": 439,
-    "name": "Trevenant"
+    "name": "Trevenant",
+    "headNamePart": "Tre",
+    "bodyNamePart": "venant"
   },
   {
     "id": 440,
-    "name": "Noibat"
+    "name": "Noibat",
+    "headNamePart": "Noi",
+    "bodyNamePart": "bat"
   },
   {
     "id": 441,
-    "name": "Noivern"
+    "name": "Noivern",
+    "headNamePart": "Noi",
+    "bodyNamePart": "vern"
   },
   {
     "id": 442,
-    "name": "Swablu"
+    "name": "Swablu",
+    "headNamePart": "Swab",
+    "bodyNamePart": "lu"
   },
   {
     "id": 443,
-    "name": "Altaria"
+    "name": "Altaria",
+    "headNamePart": "Alta",
+    "bodyNamePart": "ria"
   },
   {
     "id": 444,
-    "name": "Goomy"
+    "name": "Goomy",
+    "headNamePart": "Goo",
+    "bodyNamePart": "my"
   },
   {
     "id": 445,
-    "name": "Sliggoo"
+    "name": "Sliggoo",
+    "headNamePart": "Sli",
+    "bodyNamePart": "goo"
   },
   {
     "id": 446,
-    "name": "Goodra"
+    "name": "Goodra",
+    "headNamePart": "Goo",
+    "bodyNamePart": "dra"
   },
   {
     "id": 447,
-    "name": "Regirock"
+    "name": "Regirock",
+    "headNamePart": "Regi",
+    "bodyNamePart": "rock"
   },
   {
     "id": 448,
-    "name": "Regice"
+    "name": "Regice",
+    "headNamePart": "Regi",
+    "bodyNamePart": "ice"
   },
   {
     "id": 449,
-    "name": "Registeel"
+    "name": "Registeel",
+    "headNamePart": "Regi",
+    "bodyNamePart": "steel"
   },
   {
     "id": 450,
-    "name": "Necrozma"
+    "name": "Necrozma",
+    "headNamePart": "Necro",
+    "bodyNamePart": "zma"
   },
   {
     "id": 451,
-    "name": "Stufful"
+    "name": "Stufful",
+    "headNamePart": "Stuff",
+    "bodyNamePart": "ful"
   },
   {
     "id": 452,
-    "name": "Bewear"
+    "name": "Bewear",
+    "headNamePart": "Be",
+    "bodyNamePart": "wear"
   },
   {
     "id": 453,
-    "name": "Dhelmise"
+    "name": "Dhelmise",
+    "headNamePart": "Dhel",
+    "bodyNamePart": "mise"
   },
   {
     "id": 454,
-    "name": "Mareanie"
+    "name": "Mareanie",
+    "headNamePart": "Mar",
+    "bodyNamePart": "eanie"
   },
   {
     "id": 455,
-    "name": "Toxapex"
+    "name": "Toxapex",
+    "headNamePart": "Tox",
+    "bodyNamePart": "apex"
   },
   {
     "id": 456,
-    "name": "Hawlucha"
+    "name": "Hawlucha",
+    "headNamePart": "Hawl",
+    "bodyNamePart": "lucha"
   },
   {
     "id": 457,
-    "name": "Cacnea"
+    "name": "Cacnea",
+    "headNamePart": "Cac",
+    "bodyNamePart": "nea"
   },
   {
     "id": 458,
-    "name": "Cacturne"
+    "name": "Cacturne",
+    "headNamePart": "Cact",
+    "bodyNamePart": "turne"
   },
   {
     "id": 459,
-    "name": "Sandygast"
+    "name": "Sandygast",
+    "headNamePart": "Sandy",
+    "bodyNamePart": "gast"
   },
   {
     "id": 460,
-    "name": "Palossand"
+    "name": "Palossand",
+    "headNamePart": "Palo",
+    "bodyNamePart": "sand"
   },
   {
     "id": 461,
-    "name": "Amaura"
+    "name": "Amaura",
+    "headNamePart": "Ama",
+    "bodyNamePart": "aura"
   },
   {
     "id": 462,
-    "name": "Aurorus"
+    "name": "Aurorus",
+    "headNamePart": "Auro",
+    "bodyNamePart": "rorus"
   },
   {
     "id": 463,
-    "name": "Rockruff"
+    "name": "Rockruff",
+    "headNamePart": "Rock",
+    "bodyNamePart": "ruff"
   },
   {
     "id": 464,
-    "name": "Lycanroc Midday Form"
+    "name": "Lycanroc Midday Form",
+    "headNamePart": "Lycan",
+    "bodyNamePart": "roc"
   },
   {
     "id": 465,
-    "name": "Lycanroc Midnight Form"
+    "name": "Lycanroc Midnight Form",
+    "headNamePart": "Lycan",
+    "bodyNamePart": "roc"
   },
   {
     "id": 466,
-    "name": "Meloetta Aria Form"
+    "name": "Meloetta Aria Form",
+    "headNamePart": "Melo",
+    "bodyNamePart": "etta"
   },
   {
     "id": 467,
-    "name": "Meloetta Pirouette Form"
+    "name": "Meloetta Pirouette Form",
+    "headNamePart": "Melo",
+    "bodyNamePart": "etta"
   },
   {
     "id": 468,
-    "name": "Cresselia"
+    "name": "Cresselia",
+    "headNamePart": "Cress",
+    "bodyNamePart": "selia"
   },
   {
     "id": 469,
-    "name": "Bruxish"
+    "name": "Bruxish",
+    "headNamePart": "Brux",
+    "bodyNamePart": "ish"
   },
   {
     "id": 470,
-    "name": "Necrozma Ultra"
+    "name": "Necrozma Ultra",
+    "headNamePart": "Necro",
+    "bodyNamePart": "zma"
   },
   {
     "id": 471,
-    "name": "Jangmo-o"
+    "name": "Jangmo-o",
+    "headNamePart": "Jang",
+    "bodyNamePart": "mo-o"
   },
   {
     "id": 472,
-    "name": "Hakamo-o"
+    "name": "Hakamo-o",
+    "headNamePart": "Haka",
+    "bodyNamePart": "mo-o"
   },
   {
     "id": 473,
-    "name": "Kommo-o"
+    "name": "Kommo-o",
+    "headNamePart": "Kom",
+    "bodyNamePart": "mo-o"
   },
   {
     "id": 474,
-    "name": "Wimpod"
+    "name": "Wimpod",
+    "headNamePart": "Wim",
+    "bodyNamePart": "pod"
   },
   {
     "id": 475,
-    "name": "Golisopod"
+    "name": "Golisopod",
+    "headNamePart": "Goli",
+    "bodyNamePart": "sopod"
   },
   {
     "id": 476,
-    "name": "Fomantis"
+    "name": "Fomantis",
+    "headNamePart": "Fo",
+    "bodyNamePart": "mantis"
   },
   {
     "id": 477,
-    "name": "Lurantis"
+    "name": "Lurantis",
+    "headNamePart": "Lu",
+    "bodyNamePart": "rantis"
   },
   {
     "id": 478,
-    "name": "Carbink"
+    "name": "Carbink",
+    "headNamePart": "Car",
+    "bodyNamePart": "bink"
   },
   {
     "id": 479,
-    "name": "Chespin"
+    "name": "Chespin",
+    "headNamePart": "Ches",
+    "bodyNamePart": "pin"
   },
   {
     "id": 480,
-    "name": "Quilladin"
+    "name": "Quilladin",
+    "headNamePart": "Quil",
+    "bodyNamePart": "ladin"
   },
   {
     "id": 481,
-    "name": "Chesnaught"
+    "name": "Chesnaught",
+    "headNamePart": "Ches",
+    "bodyNamePart": "naught"
   },
   {
     "id": 482,
-    "name": "Fennekin"
+    "name": "Fennekin",
+    "headNamePart": "Fenne",
+    "bodyNamePart": "kin"
   },
   {
     "id": 483,
-    "name": "Braixen"
+    "name": "Braixen",
+    "headNamePart": "Brai",
+    "bodyNamePart": "xen"
   },
   {
     "id": 484,
-    "name": "Delphox"
+    "name": "Delphox",
+    "headNamePart": "Del",
+    "bodyNamePart": "phox"
   },
   {
     "id": 485,
-    "name": "Froakie"
+    "name": "Froakie",
+    "headNamePart": "Froa",
+    "bodyNamePart": "kie"
   },
   {
     "id": 486,
-    "name": "Frogadier"
+    "name": "Frogadier",
+    "headNamePart": "Frog",
+    "bodyNamePart": "adier"
   },
   {
     "id": 487,
-    "name": "Greninja"
+    "name": "Greninja",
+    "headNamePart": "Gre",
+    "bodyNamePart": "ninja"
   },
   {
     "id": 488,
-    "name": "Torkoal"
+    "name": "Torkoal",
+    "headNamePart": "Tor",
+    "bodyNamePart": "koal"
   },
   {
     "id": 489,
-    "name": "Pumpkaboo"
+    "name": "Pumpkaboo",
+    "headNamePart": "Pum",
+    "bodyNamePart": "kaboo"
   },
   {
     "id": 490,
-    "name": "Gourgeist"
+    "name": "Gourgeist",
+    "headNamePart": "Gour",
+    "bodyNamePart": "geist"
   },
   {
     "id": 491,
-    "name": "Swirlix"
+    "name": "Swirlix",
+    "headNamePart": "Swir",
+    "bodyNamePart": "lix"
   },
   {
     "id": 492,
-    "name": "Slurpuff"
+    "name": "Slurpuff",
+    "headNamePart": "Slur",
+    "bodyNamePart": "puff"
   },
   {
     "id": 493,
-    "name": "Scraggy"
+    "name": "Scraggy",
+    "headNamePart": "Scra",
+    "bodyNamePart": "ggy"
   },
   {
     "id": 494,
-    "name": "Scrafty"
+    "name": "Scrafty",
+    "headNamePart": "Scraf",
+    "bodyNamePart": "ty"
   },
   {
     "id": 495,
-    "name": "Lotad"
+    "name": "Lotad",
+    "headNamePart": "Lo",
+    "bodyNamePart": "tad"
   },
   {
     "id": 496,
-    "name": "Lombre"
+    "name": "Lombre",
+    "headNamePart": "Lom",
+    "bodyNamePart": "bre"
   },
   {
     "id": 497,
-    "name": "Ludicolo"
+    "name": "Ludicolo",
+    "headNamePart": "Ludi",
+    "bodyNamePart": "colo"
   },
   {
     "id": 498,
-    "name": "Minior Meteor Form"
+    "name": "Minior Meteor Form",
+    "headNamePart": "Mini",
+    "bodyNamePart": "r"
   },
   {
     "id": 499,
-    "name": "Minior Core Form"
+    "name": "Minior Core Form",
+    "headNamePart": "Mini",
+    "bodyNamePart": "r"
   },
   {
     "id": 500,
-    "name": "Diancie"
+    "name": "Diancie",
+    "headNamePart": "Dian",
+    "bodyNamePart": "cie"
   },
   {
     "id": 501,
-    "name": "Luvdisc"
+    "name": "Luvdisc",
+    "headNamePart": "Luv",
+    "bodyNamePart": "disc"
   },
   {
     "id": 502,
-    "name": "Poochyena"
+    "name": "Poochyena",
+    "headNamePart": "Pooch",
+    "bodyNamePart": "yena"
   },
   {
     "id": 503,
-    "name": "Mightyena"
+    "name": "Mightyena",
+    "headNamePart": "Might",
+    "bodyNamePart": "tyena"
   },
   {
     "id": 504,
-    "name": "Zigzagoon"
+    "name": "Zigzagoon",
+    "headNamePart": "Zig",
+    "bodyNamePart": "zagoon"
   },
   {
     "id": 505,
-    "name": "Linoone"
+    "name": "Linoone",
+    "headNamePart": "Lin",
+    "bodyNamePart": "noone"
   },
   {
     "id": 506,
-    "name": "Wurmple"
+    "name": "Wurmple",
+    "headNamePart": "Wurm",
+    "bodyNamePart": "ple"
   },
   {
     "id": 507,
-    "name": "Silcoon"
+    "name": "Silcoon",
+    "headNamePart": "Sil",
+    "bodyNamePart": "coon"
   },
   {
     "id": 508,
-    "name": "Beautifly"
+    "name": "Beautifly",
+    "headNamePart": "Beauti",
+    "bodyNamePart": "fly"
   },
   {
     "id": 509,
-    "name": "Cascoon"
+    "name": "Cascoon",
+    "headNamePart": "Cas",
+    "bodyNamePart": "scoon"
   },
   {
     "id": 510,
-    "name": "Dustox"
+    "name": "Dustox",
+    "headNamePart": "Dust",
+    "bodyNamePart": "tox"
   },
   {
     "id": 511,
-    "name": "Seedot"
+    "name": "Seedot",
+    "headNamePart": "Seed",
+    "bodyNamePart": "dot"
   },
   {
     "id": 512,
-    "name": "Nuzleaf"
+    "name": "Nuzleaf",
+    "headNamePart": "Nuz",
+    "bodyNamePart": "leaf"
   },
   {
     "id": 513,
-    "name": "Shiftry"
+    "name": "Shiftry",
+    "headNamePart": "Shift",
+    "bodyNamePart": "try"
   },
   {
     "id": 514,
-    "name": "Taillow"
+    "name": "Taillow",
+    "headNamePart": "Tail",
+    "bodyNamePart": "low"
   },
   {
     "id": 515,
-    "name": "Swellow"
+    "name": "Swellow",
+    "headNamePart": "Swell",
+    "bodyNamePart": "wellow"
   },
   {
     "id": 516,
-    "name": "Wingull"
+    "name": "Wingull",
+    "headNamePart": "Wing",
+    "bodyNamePart": "gull"
   },
   {
     "id": 517,
-    "name": "Pelipper"
+    "name": "Pelipper",
+    "headNamePart": "Peli",
+    "bodyNamePart": "liper"
   },
   {
     "id": 518,
-    "name": "Surskit"
+    "name": "Surskit",
+    "headNamePart": "Sur",
+    "bodyNamePart": "skit"
   },
   {
     "id": 519,
-    "name": "Masquerain"
+    "name": "Masquerain",
+    "headNamePart": "Masque",
+    "bodyNamePart": "rain"
   },
   {
     "id": 520,
-    "name": "Whismur"
+    "name": "Whismur",
+    "headNamePart": "Whism",
+    "bodyNamePart": "mur"
   },
   {
     "id": 521,
-    "name": "Loudred"
+    "name": "Loudred",
+    "headNamePart": "Loud",
+    "bodyNamePart": "dred"
   },
   {
     "id": 522,
-    "name": "Exploud"
+    "name": "Exploud",
+    "headNamePart": "Ex",
+    "bodyNamePart": "loud"
   },
   {
     "id": 523,
-    "name": "Makuhita"
+    "name": "Makuhita",
+    "headNamePart": "Maku",
+    "bodyNamePart": "hita"
   },
   {
     "id": 524,
-    "name": "Hariyama"
+    "name": "Hariyama",
+    "headNamePart": "Hari",
+    "bodyNamePart": "yama"
   },
   {
     "id": 525,
-    "name": "Skitty"
+    "name": "Skitty",
+    "headNamePart": "Skit",
+    "bodyNamePart": "itty"
   },
   {
     "id": 526,
-    "name": "Delcatty"
+    "name": "Delcatty",
+    "headNamePart": "Del",
+    "bodyNamePart": "catty"
   },
   {
     "id": 527,
-    "name": "Meditite"
+    "name": "Meditite",
+    "headNamePart": "Med",
+    "bodyNamePart": "tite"
   },
   {
     "id": 528,
-    "name": "Medicham"
+    "name": "Medicham",
+    "headNamePart": "Medi",
+    "bodyNamePart": "cham"
   },
   {
     "id": 529,
-    "name": "Electrike"
+    "name": "Electrike",
+    "headNamePart": "Elect",
+    "bodyNamePart": "trike"
   },
   {
     "id": 530,
-    "name": "Manectric"
+    "name": "Manectric",
+    "headNamePart": "Mane",
+    "bodyNamePart": "tric"
   },
   {
     "id": 531,
-    "name": "Plusle"
+    "name": "Plusle",
+    "headNamePart": "Plus",
+    "bodyNamePart": "le"
   },
   {
     "id": 532,
-    "name": "Minun"
+    "name": "Minun",
+    "headNamePart": "Min",
+    "bodyNamePart": "un"
   },
   {
     "id": 533,
-    "name": "Volbeat"
+    "name": "Volbeat",
+    "headNamePart": "Vol",
+    "bodyNamePart": "beat"
   },
   {
     "id": 534,
-    "name": "Illumise"
+    "name": "Illumise",
+    "headNamePart": "Illu",
+    "bodyNamePart": "mise"
   },
   {
     "id": 535,
-    "name": "Gulpin"
+    "name": "Gulpin",
+    "headNamePart": "Gul",
+    "bodyNamePart": "in"
   },
   {
     "id": 536,
-    "name": "Swalot"
+    "name": "Swalot",
+    "headNamePart": "Swal",
+    "bodyNamePart": "t"
   },
   {
     "id": 537,
-    "name": "Numel"
+    "name": "Numel",
+    "headNamePart": "Nu",
+    "bodyNamePart": "mel"
   },
   {
     "id": 538,
-    "name": "Camerupt"
+    "name": "Camerupt",
+    "headNamePart": "Came",
+    "bodyNamePart": "rupt"
   },
   {
     "id": 539,
-    "name": "Spoink"
+    "name": "Spoink",
+    "headNamePart": "Spo",
+    "bodyNamePart": "ink"
   },
   {
     "id": 540,
-    "name": "Grumpig"
+    "name": "Grumpig",
+    "headNamePart": "Grum",
+    "bodyNamePart": "pig"
   },
   {
     "id": 541,
-    "name": "Spinda"
+    "name": "Spinda",
+    "headNamePart": "Spin",
+    "bodyNamePart": "da"
   },
   {
     "id": 542,
-    "name": "Zangoose"
+    "name": "Zangoose",
+    "headNamePart": "Zan",
+    "bodyNamePart": "goose"
   },
   {
     "id": 543,
-    "name": "Seviper"
+    "name": "Seviper",
+    "headNamePart": "Se",
+    "bodyNamePart": "viper"
   },
   {
     "id": 544,
-    "name": "Lunatone"
+    "name": "Lunatone",
+    "headNamePart": "Luna",
+    "bodyNamePart": "atone"
   },
   {
     "id": 545,
-    "name": "Solrock"
+    "name": "Solrock",
+    "headNamePart": "Sol",
+    "bodyNamePart": "lrock"
   },
   {
     "id": 546,
-    "name": "Barboach"
+    "name": "Barboach",
+    "headNamePart": "Bar",
+    "bodyNamePart": "boach"
   },
   {
     "id": 547,
-    "name": "Whiscash"
+    "name": "Whiscash",
+    "headNamePart": "Whis",
+    "bodyNamePart": "cash"
   },
   {
     "id": 548,
-    "name": "Corphish"
+    "name": "Corphish",
+    "headNamePart": "Cor",
+    "bodyNamePart": "phish"
   },
   {
     "id": 549,
-    "name": "Crawdaunt"
+    "name": "Crawdaunt",
+    "headNamePart": "Craw",
+    "bodyNamePart": "daunt"
   },
   {
     "id": 550,
-    "name": "Baltoy"
+    "name": "Baltoy",
+    "headNamePart": "Bal",
+    "bodyNamePart": "toy"
   },
   {
     "id": 551,
-    "name": "Claydol"
+    "name": "Claydol",
+    "headNamePart": "Clay",
+    "bodyNamePart": "dol"
   },
   {
     "id": 552,
-    "name": "Castform"
+    "name": "Castform",
+    "headNamePart": "Cast",
+    "bodyNamePart": "form"
   },
   {
     "id": 553,
-    "name": "Castform Sunny"
+    "name": "Castform Sunny",
+    "headNamePart": "Cast",
+    "bodyNamePart": "form"
   },
   {
     "id": 554,
-    "name": "Castform Rainy"
+    "name": "Castform Rainy",
+    "headNamePart": "Cast",
+    "bodyNamePart": "form"
   },
   {
     "id": 555,
-    "name": "Castform Snowy"
+    "name": "Castform Snowy",
+    "headNamePart": "Cast",
+    "bodyNamePart": "form"
   },
   {
     "id": 556,
-    "name": "Tropius"
+    "name": "Tropius",
+    "headNamePart": "Tro",
+    "bodyNamePart": "pius"
   },
   {
     "id": 557,
-    "name": "Chingling"
+    "name": "Chingling",
+    "headNamePart": "Ching",
+    "bodyNamePart": "ling"
   },
   {
     "id": 558,
-    "name": "Chimecho"
+    "name": "Chimecho",
+    "headNamePart": "Chime",
+    "bodyNamePart": "echo"
   },
   {
     "id": 559,
-    "name": "Spheal"
+    "name": "Spheal",
+    "headNamePart": "Sphe",
+    "bodyNamePart": "eal"
   },
   {
     "id": 560,
-    "name": "Sealeo"
+    "name": "Sealeo",
+    "headNamePart": "Sea",
+    "bodyNamePart": "leo"
   },
   {
     "id": 561,
-    "name": "Walrein"
+    "name": "Walrein",
+    "headNamePart": "Wal",
+    "bodyNamePart": "rein"
   },
   {
     "id": 562,
-    "name": "Clamperl"
+    "name": "Clamperl",
+    "headNamePart": "Clam",
+    "bodyNamePart": "perl"
   },
   {
     "id": 563,
-    "name": "Huntail"
+    "name": "Huntail",
+    "headNamePart": "Hun",
+    "bodyNamePart": "tail"
   },
   {
     "id": 564,
-    "name": "Gorebyss"
+    "name": "Gorebyss",
+    "headNamePart": "Gore",
+    "bodyNamePart": "byss"
   },
   {
     "id": 565,
-    "name": "Relicanth"
+    "name": "Relicanth",
+    "headNamePart": "Reli",
+    "bodyNamePart": "canth"
   }
 ]

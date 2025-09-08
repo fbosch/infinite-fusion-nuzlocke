@@ -3,7 +3,7 @@
 import clsx from 'clsx';
 import { PokemonContextMenu } from '@/components/PokemonSummaryCard/PokemonContextMenu';
 import { FusionSprite } from '@/components/PokemonSummaryCard/FusionSprite';
-import { getNicknameText } from '@/components/PokemonSummaryCard/utils';
+import { useFusionNickname } from '@/hooks/useFusionNickname';
 import { TypePills } from '@/components/TypePills';
 import { useEncounters } from '@/stores/playthroughs';
 import {
@@ -48,7 +48,7 @@ export default function PCEntryItem(props: PCEntryItemProps) {
   const isFusion = Boolean(
     currentEncounter?.isFusion && canFuse(entry.head, entry.body)
   );
-  const label = getNicknameText(entry.head, entry.body, isFusion);
+  const label = useFusionNickname(entry.head, entry.body, isFusion);
 
   const fusionTypes = useFusionTypesFromPokemon(
     entry.head,

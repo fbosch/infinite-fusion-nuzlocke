@@ -9,7 +9,7 @@ import {
   type FusionSpriteHandle,
 } from '@/components/PokemonSummaryCard/FusionSprite';
 import { TypePills } from '@/components/TypePills';
-import { getNicknameText } from '@/components/PokemonSummaryCard/utils';
+import { useFusionNickname } from '@/hooks/useFusionNickname';
 import HeadIcon from '@/assets/images/head.svg';
 import BodyIcon from '@/assets/images/body.svg';
 import { Box, Skull, Plus } from 'lucide-react';
@@ -148,6 +148,9 @@ export default function TeamEntryItem({
   const isFusion = isTeamData
     ? entry.isFusion || false
     : Boolean(currentEncounter?.isFusion && canFuse(entry.head, entry.body));
+
+  // Get fusion nickname - always call the hook to maintain hook order
+  const fusionNickname = useFusionNickname(entry.head, entry.body, isFusion);
 
   // Ref for the sprite to play evolution animations
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
@@ -323,7 +326,9 @@ export default function TeamEntryItem({
               <div className='space-y-1.5'>
                 <div className='flex items-center gap-2'>
                   <h3 className='text-base font-semibold text-gray-900 dark:text-gray-100'>
-                    {getNicknameText(entry.head, entry.body, isFusion)}
+                    {isFusion
+                      ? fusionNickname
+                      : entry.head?.nickname || entry.head?.name || 'Unknown'}
                   </h3>
                 </div>
                 {/* Head Pokémon info */}

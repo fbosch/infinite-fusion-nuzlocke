@@ -7,7 +7,8 @@ import { ArtworkVariantButton } from './ArtworkVariantButton';
 import { useSpriteCredits, usePreferredVariantState } from '@/hooks/useSprite';
 import { CursorTooltip } from '@/components/CursorTooltip';
 import { SquareArrowUpRight, Palette, MousePointer } from 'lucide-react';
-import { getDisplayPokemon, getNicknameText } from './utils';
+import { getDisplayPokemon } from './utils';
+import { useFusionNickname } from '@/hooks/useFusionNickname';
 import { isPokemonDeceased } from '@/utils/pokemonPredicates';
 import { TypePills } from '../TypePills';
 import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
@@ -102,23 +103,26 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
               : undefined;
           })();
 
+    // Use the fusion nickname hook for proper name display (must be before any early returns)
+    const fusionNickname = useFusionNickname(
+      displayPokemon.head,
+      displayPokemon.body,
+      displayPokemon.isFusion
+    );
+
     // If no Pokémon are provided and no encounter data exists, don't render
     if (!effectiveHeadPokemon && !effectiveBodyPokemon) {
       return null;
     }
 
-    // Use the nickname prop if provided, otherwise use the Pokémon's existing nickname
+    // Use the nickname prop if provided, otherwise use the fusion nickname
     const name =
       nickname !== undefined
         ? nickname ||
           displayPokemon.head?.name ||
           displayPokemon.body?.name ||
           ''
-        : getNicknameText(
-            displayPokemon.head,
-            displayPokemon.body,
-            displayPokemon.isFusion
-          );
+        : fusionNickname;
 
     // Only consider deceased if both Pokemon are dead (for fusion) or the single Pokemon is dead
     // Note: boxed Pokemon are not considered deceased, only actually dead Pokemon

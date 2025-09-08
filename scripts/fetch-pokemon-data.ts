@@ -148,6 +148,9 @@ export interface ProcessedPokemonData {
   types: PokemonType[];
   species: PokemonSpeciesData;
   evolution?: EvolutionData;
+  // Fusion name parts (added by scrape-fusion-names.ts)
+  headNamePart?: string;
+  bodyNamePart?: string;
 }
 
 async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
@@ -158,6 +161,8 @@ async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
     ConsoleFormatter.info('Loading Pokemon entries...');
 
     // Read the pokemon entries with custom IDs and names
+    // Note: This script now uses the old base-entries.json for initial data fetching
+    // The fusion name parts will be added later by scrape-fusion-names.ts
     const pokemonEntriesPath = path.join(process.cwd(), 'data/shared/base-entries.json');
     const pokemonEntriesData = await fs.readFile(pokemonEntriesPath, 'utf8');
     const pokemonEntries: DexEntry[] = JSON.parse(pokemonEntriesData);
