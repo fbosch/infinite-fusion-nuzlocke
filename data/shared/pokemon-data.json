@@ -258,7 +258,7 @@
         "name": "squirtle"
       }
     },
-    "headNamePart": "War",
+    "headNamePart": "Wart",
     "bodyNamePart": "tortle"
   },
   {
@@ -556,7 +556,7 @@
       }
     },
     "headNamePart": "Pidge",
-    "bodyNamePart": "tto"
+    "bodyNamePart": "otto"
   },
   {
     "id": 18,
@@ -645,7 +645,7 @@
       }
     },
     "headNamePart": "Rat",
-    "bodyNamePart": "icate"
+    "bodyNamePart": "ticate"
   },
   {
     "id": 21,
@@ -1196,7 +1196,7 @@
         "name": "vulpix"
       }
     },
-    "headNamePart": "Nine",
+    "headNamePart": "Ninet",
     "bodyNamePart": "tales"
   },
   {
@@ -1265,7 +1265,7 @@
         "condition": "Happiness: 160"
       }
     },
-    "headNamePart": "Wiggly",
+    "headNamePart": "Wigglyt",
     "bodyNamePart": "tuff"
   },
   {
@@ -1412,7 +1412,7 @@
       }
     },
     "headNamePart": "Gloo",
-    "bodyNamePart": "om"
+    "bodyNamePart": "oom"
   },
   {
     "id": 45,
@@ -1626,7 +1626,7 @@
         "name": "diglett"
       }
     },
-    "headNamePart": "Dug",
+    "headNamePart": "Dugt",
     "bodyNamePart": "trio"
   },
   {
@@ -1662,7 +1662,7 @@
         }
       ]
     },
-    "headNamePart": "Meow",
+    "headNamePart": "Meowt",
     "bodyNamePart": "th"
   },
   {
@@ -2447,7 +2447,7 @@
         }
       ]
     },
-    "headNamePart": "Pony",
+    "headNamePart": "Ponyt",
     "bodyNamePart": "ta"
   },
   {
@@ -2612,7 +2612,7 @@
         "name": "magnemite"
       }
     },
-    "headNamePart": "Magne",
+    "headNamePart": "Magnet",
     "bodyNamePart": "ton"
   },
   {
@@ -2917,7 +2917,7 @@
         }
       ]
     },
-    "headNamePart": "Gas",
+    "headNamePart": "Gast",
     "bodyNamePart": "tly"
   },
   {
@@ -2953,7 +2953,7 @@
         "name": "gastly"
       }
     },
-    "headNamePart": "Haun",
+    "headNamePart": "Haunt",
     "bodyNamePart": "ter"
   },
   {
@@ -3074,7 +3074,7 @@
         "name": "drowzee"
       }
     },
-    "headNamePart": "Hy",
+    "headNamePart": "Hyp",
     "bodyNamePart": "no"
   },
   {
@@ -3162,7 +3162,7 @@
       ]
     },
     "headNamePart": "Volt",
-    "bodyNamePart": "rb"
+    "bodyNamePart": "torb"
   },
   {
     "id": 101,
@@ -3189,7 +3189,7 @@
       }
     },
     "headNamePart": "Electr",
-    "bodyNamePart": "de"
+    "bodyNamePart": "ode"
   },
   {
     "id": 102,
@@ -3251,7 +3251,7 @@
         "name": "exeggcute"
       }
     },
-    "headNamePart": "Exeggu",
+    "headNamePart": "Exeggut",
     "bodyNamePart": "tor"
   },
   {
@@ -3391,7 +3391,7 @@
         }
       ]
     },
-    "headNamePart": "Licki",
+    "headNamePart": "Lickit",
     "bodyNamePart": "tung"
   },
   {
@@ -3858,7 +3858,7 @@
         }
       ]
     },
-    "headNamePart": "Scy",
+    "headNamePart": "Scyt",
     "bodyNamePart": "ther"
   },
   {
@@ -4086,7 +4086,7 @@
     "evolution": {
       "evolves_to": []
     },
-    "headNamePart": "La",
+    "headNamePart": "Lap",
     "bodyNamePart": "ras"
   },
   {
@@ -4236,7 +4236,7 @@
       }
     },
     "headNamePart": "Jolt",
-    "bodyNamePart": "eon"
+    "bodyNamePart": "teon"
   },
   {
     "id": 136,
@@ -4387,7 +4387,7 @@
         }
       ]
     },
-    "headNamePart": "Kabu",
+    "headNamePart": "Kabut",
     "bodyNamePart": "to"
   },
   {
@@ -4417,7 +4417,7 @@
         "name": "kabuto"
       }
     },
-    "headNamePart": "Kabu",
+    "headNamePart": "Kabut",
     "bodyNamePart": "tops"
   },
   {
@@ -4522,7 +4522,7 @@
     "evolution": {
       "evolves_to": []
     },
-    "headNamePart": "Za",
+    "headNamePart": "Zap",
     "bodyNamePart": "dos"
   },
   {
@@ -4548,7 +4548,7 @@
     "evolution": {
       "evolves_to": []
     },
-    "headNamePart": "Mol",
+    "headNamePart": "Molt",
     "bodyNamePart": "tres"
   },
   {
@@ -4578,7 +4578,7 @@
         }
       ]
     },
-    "headNamePart": "Dra",
+    "headNamePart": "Drat",
     "bodyNamePart": "tini"
   },
   {
@@ -4667,7 +4667,7 @@
     "evolution": {
       "evolves_to": []
     },
-    "headNamePart": "Mew",
+    "headNamePart": "Mewt",
     "bodyNamePart": "two"
   },
   {
@@ -4906,8 +4906,8 @@
         }
       ]
     },
-    "headNamePart": "Toto",
-    "bodyNamePart": "dile"
+    "headNamePart": "t",
+    "bodyNamePart": "todile"
   },
   {
     "id": 159,
@@ -4999,7 +4999,7 @@
         }
       ]
     },
-    "headNamePart": "Sen",
+    "headNamePart": "Sent",
     "bodyNamePart": "tret"
   },
   {
@@ -5060,7 +5060,7 @@
       ]
     },
     "headNamePart": "Hoot",
-    "bodyNamePart": "hoot"
+    "bodyNamePart": "thoot"
   },
   {
     "id": 164,
@@ -5090,7 +5090,7 @@
       }
     },
     "headNamePart": "Noct",
-    "bodyNamePart": "wl"
+    "bodyNamePart": "towl"
   },
   {
     "id": 165,
@@ -5310,7 +5310,7 @@
         "name": "chinchou"
       }
     },
-    "headNamePart": "Lan",
+    "headNamePart": "Lant",
     "bodyNamePart": "turn"
   },
   {
@@ -5433,7 +5433,7 @@
         }
       ]
     },
-    "headNamePart": "Toge",
+    "headNamePart": "t",
     "bodyNamePart": "pi"
   },
   {
@@ -5470,7 +5470,7 @@
         "name": "togepi"
       }
     },
-    "headNamePart": "Toge",
+    "headNamePart": "t",
     "bodyNamePart": "tic"
   },
   {
@@ -5503,7 +5503,7 @@
         }
       ]
     },
-    "headNamePart": "Na",
+    "headNamePart": "Nat",
     "bodyNamePart": "tu"
   },
   {
@@ -5533,7 +5533,7 @@
         "name": "natu"
       }
     },
-    "headNamePart": "Xa",
+    "headNamePart": "Xat",
     "bodyNamePart": "tu"
   },
   {
@@ -5656,7 +5656,7 @@
       }
     },
     "headNamePart": "Bell",
-    "bodyNamePart": "ssom"
+    "bodyNamePart": "ossom"
   },
   {
     "id": 183,
@@ -5780,7 +5780,7 @@
         "trigger": "level-up"
       }
     },
-    "headNamePart": "Poli",
+    "headNamePart": "Polit",
     "bodyNamePart": "toed"
   },
   {
@@ -5813,7 +5813,7 @@
         }
       ]
     },
-    "headNamePart": "Ho",
+    "headNamePart": "Hop",
     "bodyNamePart": "pip"
   },
   {
@@ -5850,7 +5850,7 @@
         "name": "hoppip"
       }
     },
-    "headNamePart": "Ski",
+    "headNamePart": "Skip",
     "bodyNamePart": "loom"
   },
   {
@@ -5882,7 +5882,7 @@
         "trigger": "level-up"
       }
     },
-    "headNamePart": "Jum",
+    "headNamePart": "Jump",
     "bodyNamePart": "luff"
   },
   {
@@ -6096,7 +6096,7 @@
         "name": "eevee"
       }
     },
-    "headNamePart": "Es",
+    "headNamePart": "Esp",
     "bodyNamePart": "eon"
   },
   {
@@ -6240,7 +6240,7 @@
       "evolves_to": []
     },
     "headNamePart": "Un",
-    "bodyNamePart": "wn"
+    "bodyNamePart": "own"
   },
   {
     "id": 202,
@@ -6358,7 +6358,7 @@
         "name": "pineco"
       }
     },
-    "headNamePart": "Forre",
+    "headNamePart": "Forret",
     "bodyNamePart": "tress"
   },
   {
@@ -7000,7 +7000,7 @@
         "name": "mantyke"
       }
     },
-    "headNamePart": "Man",
+    "headNamePart": "Mant",
     "bodyNamePart": "tine"
   },
   {
@@ -7240,7 +7240,7 @@
         }
       ]
     },
-    "headNamePart": "Stan",
+    "headNamePart": "Stant",
     "bodyNamePart": "tler"
   },
   {
@@ -7332,7 +7332,7 @@
         "name": "tyrogue"
       }
     },
-    "headNamePart": "Hitmon",
+    "headNamePart": "Hitmont",
     "bodyNamePart": "top"
   },
   {
@@ -7448,7 +7448,7 @@
     "evolution": {
       "evolves_to": []
     },
-    "headNamePart": "Mil",
+    "headNamePart": "Milt",
     "bodyNamePart": "tank"
   },
   {
@@ -7523,7 +7523,7 @@
     "evolution": {
       "evolves_to": []
     },
-    "headNamePart": "En",
+    "headNamePart": "Ent",
     "bodyNamePart": "tei"
   },
   {
@@ -7579,7 +7579,7 @@
         }
       ]
     },
-    "headNamePart": "Larvi",
+    "headNamePart": "Larvit",
     "bodyNamePart": "tar"
   },
   {
@@ -7616,7 +7616,7 @@
         "name": "larvitar"
       }
     },
-    "headNamePart": "Pupi",
+    "headNamePart": "Pupit",
     "bodyNamePart": "tar"
   },
   {
@@ -7701,7 +7701,7 @@
       "evolves_to": []
     },
     "headNamePart": "Ho-",
-    "bodyNamePart": "h"
+    "bodyNamePart": "oh"
   },
   {
     "id": 251,
@@ -8026,7 +8026,7 @@
         }
       ]
     },
-    "headNamePart": "Man",
+    "headNamePart": "Mant",
     "bodyNamePart": "tyke"
   },
   {
@@ -8232,7 +8232,7 @@
         "trigger": "level-up"
       }
     },
-    "headNamePart": "Magmor",
+    "headNamePart": "Magmort",
     "bodyNamePart": "mortar"
   },
   {
@@ -8264,7 +8264,7 @@
         "condition": "Happiness: 160"
       }
     },
-    "headNamePart": "Toge",
+    "headNamePart": "t",
     "bodyNamePart": "kiss"
   },
   {
@@ -8531,7 +8531,7 @@
         "trigger": "level-up"
       }
     },
-    "headNamePart": "Sce",
+    "headNamePart": "Scept",
     "bodyNamePart": "tile"
   },
   {
@@ -8561,7 +8561,7 @@
         }
       ]
     },
-    "headNamePart": "Torch",
+    "headNamePart": "t",
     "bodyNamePart": "chic"
   },
   {
@@ -8697,7 +8697,7 @@
         "name": "mudkip"
       }
     },
-    "headNamePart": "Marsh",
+    "headNamePart": "Marsht",
     "bodyNamePart": "tomp"
   },
   {
@@ -8729,7 +8729,7 @@
         "trigger": "level-up"
       }
     },
-    "headNamePart": "Swam",
+    "headNamePart": "Swamp",
     "bodyNamePart": "pert"
   },
   {
@@ -8762,7 +8762,7 @@
         }
       ]
     },
-    "headNamePart": "Ral",
+    "headNamePart": "Ralt",
     "bodyNamePart": "ts"
   },
   {
@@ -9080,7 +9080,7 @@
     "evolution": {
       "evolves_to": []
     },
-    "headNamePart": "Spiri",
+    "headNamePart": "Spirit",
     "bodyNamePart": "tomb"
   },
   {
@@ -9708,8 +9708,8 @@
         }
       ]
     },
-    "headNamePart": "Tur",
-    "bodyNamePart": "wig"
+    "headNamePart": "Turt",
+    "bodyNamePart": "twig"
   },
   {
     "id": 317,
@@ -9742,7 +9742,7 @@
         "name": "turtwig"
       }
     },
-    "headNamePart": "Gro",
+    "headNamePart": "Grot",
     "bodyNamePart": "tle"
   },
   {
@@ -9774,7 +9774,7 @@
         "trigger": "level-up"
       }
     },
-    "headNamePart": "Tor",
+    "headNamePart": "t",
     "bodyNamePart": "terra"
   },
   {
@@ -9903,7 +9903,7 @@
         }
       ]
     },
-    "headNamePart": "Pi",
+    "headNamePart": "Pip",
     "bodyNamePart": "lup"
   },
   {
@@ -10320,7 +10320,7 @@
         "name": "feebas"
       }
     },
-    "headNamePart": "Milo",
+    "headNamePart": "Milot",
     "bodyNamePart": "tic"
   },
   {
@@ -10459,7 +10459,7 @@
       "evolves_to": []
     },
     "headNamePart": "Kyo",
-    "bodyNamePart": "gre"
+    "bodyNamePart": "ogre"
   },
   {
     "id": 341,
@@ -10585,7 +10585,7 @@
     "evolution": {
       "evolves_to": []
     },
-    "headNamePart": "Gira",
+    "headNamePart": "Girat",
     "bodyNamePart": "tina"
   },
   {
@@ -10824,7 +10824,7 @@
         "name": "buneary"
       }
     },
-    "headNamePart": "Lo",
+    "headNamePart": "Lop",
     "bodyNamePart": "punny"
   },
   {
@@ -10937,7 +10937,7 @@
     "evolution": {
       "evolves_to": []
     },
-    "headNamePart": "Ro",
+    "headNamePart": "Rot",
     "bodyNamePart": "tom"
   },
   {
@@ -11085,7 +11085,7 @@
         "name": "joltik"
       }
     },
-    "headNamePart": "Galvan",
+    "headNamePart": "Galvant",
     "bodyNamePart": "tula"
   },
   {
@@ -11115,7 +11115,7 @@
         "name": "ferroseed"
       }
     },
-    "headNamePart": "Ferro",
+    "headNamePart": "Ferrot",
     "bodyNamePart": "thorn"
   },
   {
@@ -11149,7 +11149,7 @@
       ]
     },
     "headNamePart": "Lit",
-    "bodyNamePart": "wick"
+    "bodyNamePart": "twick"
   },
   {
     "id": 366,
@@ -11185,7 +11185,7 @@
         "name": "litwick"
       }
     },
-    "headNamePart": "Lam",
+    "headNamePart": "Lamp",
     "bodyNamePart": "pent"
   },
   {
@@ -11541,7 +11541,7 @@
     "evolution": {
       "evolves_to": []
     },
-    "headNamePart": "La",
+    "headNamePart": "Lat",
     "bodyNamePart": "tias"
   },
   {
@@ -11567,7 +11567,7 @@
     "evolution": {
       "evolves_to": []
     },
-    "headNamePart": "La",
+    "headNamePart": "Lat",
     "bodyNamePart": "tios"
   },
   {
@@ -11715,7 +11715,7 @@
       ]
     },
     "headNamePart": "Rio",
-    "bodyNamePart": "lu"
+    "bodyNamePart": "olu"
   },
   {
     "id": 385,
@@ -11906,7 +11906,7 @@
       ]
     },
     "headNamePart": "Ar",
-    "bodyNamePart": "n"
+    "bodyNamePart": "on"
   },
   {
     "id": 391,
@@ -11972,7 +11972,7 @@
         }
       ]
     },
-    "headNamePart": "Tra",
+    "headNamePart": "Trap",
     "bodyNamePart": "inch"
   },
   {
@@ -12389,7 +12389,7 @@
         }
       ]
     },
-    "headNamePart": "Shu",
+    "headNamePart": "Shup",
     "bodyNamePart": "pet"
   },
   {
@@ -12486,8 +12486,8 @@
         }
       ]
     },
-    "headNamePart": "Cotton",
-    "bodyNamePart": "nee"
+    "headNamePart": "Cott",
+    "bodyNamePart": "tonee"
   },
   {
     "id": 409,
@@ -12624,7 +12624,7 @@
         }
       ]
     },
-    "headNamePart": "Jol",
+    "headNamePart": "Jolt",
     "bodyNamePart": "tik"
   },
   {
@@ -12754,8 +12754,8 @@
         }
       ]
     },
-    "headNamePart": "Gole",
-    "bodyNamePart": "lett"
+    "headNamePart": "Golet",
+    "bodyNamePart": "olett"
   },
   {
     "id": 417,
@@ -13075,7 +13075,7 @@
         "name": "tyrunt"
       }
     },
-    "headNamePart": "Tyran",
+    "headNamePart": "Tyrant",
     "bodyNamePart": "trum"
   },
   {
@@ -13330,7 +13330,7 @@
       }
     },
     "headNamePart": "Garb",
-    "bodyNamePart": "dor"
+    "bodyNamePart": "odor"
   },
   {
     "id": 436,
@@ -13392,7 +13392,7 @@
         "name": "carvanha"
       }
     },
-    "headNamePart": "Shar",
+    "headNamePart": "Sharp",
     "bodyNamePart": "edo"
   },
   {
@@ -13917,7 +13917,7 @@
         "name": "mareanie"
       }
     },
-    "headNamePart": "Tox",
+    "headNamePart": "t",
     "bodyNamePart": "apex"
   },
   {
@@ -14896,7 +14896,7 @@
     "evolution": {
       "evolves_to": []
     },
-    "headNamePart": "Tor",
+    "headNamePart": "",
     "bodyNamePart": "koal"
   },
   {
@@ -14928,7 +14928,7 @@
         }
       ]
     },
-    "headNamePart": "Pum",
+    "headNamePart": "Pump",
     "bodyNamePart": "kaboo"
   },
   {
@@ -15077,7 +15077,7 @@
         "name": "scraggy"
       }
     },
-    "headNamePart": "Scraf",
+    "headNamePart": "Scraft",
     "bodyNamePart": "ty"
   },
   {
@@ -15110,7 +15110,7 @@
         }
       ]
     },
-    "headNamePart": "Lo",
+    "headNamePart": "Lot",
     "bodyNamePart": "tad"
   },
   {
@@ -15206,7 +15206,7 @@
       "evolves_to": []
     },
     "headNamePart": "Mini",
-    "bodyNamePart": "r"
+    "bodyNamePart": "or"
   },
   {
     "id": 499,
@@ -15232,7 +15232,7 @@
       "evolves_to": []
     },
     "headNamePart": "Mini",
-    "bodyNamePart": "r"
+    "bodyNamePart": "or"
   },
   {
     "id": 500,
@@ -15951,7 +15951,7 @@
         "trigger": "level-up"
       }
     },
-    "headNamePart": "Ex",
+    "headNamePart": "Exp",
     "bodyNamePart": "loud"
   },
   {
@@ -16307,7 +16307,7 @@
         }
       ]
     },
-    "headNamePart": "Gul",
+    "headNamePart": "Gulp",
     "bodyNamePart": "in"
   },
   {
@@ -16335,7 +16335,7 @@
       }
     },
     "headNamePart": "Swal",
-    "bodyNamePart": "t"
+    "bodyNamePart": "ot"
   },
   {
     "id": 537,
@@ -16549,7 +16549,7 @@
     "evolution": {
       "evolves_to": []
     },
-    "headNamePart": "Luna",
+    "headNamePart": "Lunat",
     "bodyNamePart": "atone"
   },
   {
@@ -16668,7 +16668,7 @@
         }
       ]
     },
-    "headNamePart": "Cor",
+    "headNamePart": "Corp",
     "bodyNamePart": "phish"
   },
   {
@@ -16731,7 +16731,7 @@
         }
       ]
     },
-    "headNamePart": "Bal",
+    "headNamePart": "Balt",
     "bodyNamePart": "toy"
   },
   {
@@ -16785,7 +16785,7 @@
       "evolves_to": []
     },
     "headNamePart": "Cast",
-    "bodyNamePart": "form"
+    "bodyNamePart": "tform"
   },
   {
     "id": 553,
@@ -17072,7 +17072,7 @@
         }
       ]
     },
-    "headNamePart": "Clam",
+    "headNamePart": "Clamp",
     "bodyNamePart": "perl"
   },
   {
@@ -17099,7 +17099,7 @@
         "name": "clamperl"
       }
     },
-    "headNamePart": "Hun",
+    "headNamePart": "Hunt",
     "bodyNamePart": "tail"
   },
   {

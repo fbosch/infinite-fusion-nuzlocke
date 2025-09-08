@@ -3,8 +3,11 @@
 import * as cheerio from 'cheerio';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 import { ConsoleFormatter } from './utils/console-utils';
 import type { DexEntry } from './utils/data-loading-utils';
+import { generateFusionName } from '../src/utils/fusionNaming';
 
 interface ValidationResult {
   headPokemon: DexEntry;
@@ -45,7 +48,7 @@ async function loadPokemonData(): Promise<DexEntry[]> {
       
       console.log(`✅ Loaded ${dexEntries.length} Pokemon entries from pokemon-data.json`);
       return dexEntries;
-    } catch (pokemonDataError) {
+    } catch {
       console.log('⚠️  pokemon-data.json not found or invalid, trying base-entries.json...');
       
       // Fallback to base-entries.json
@@ -63,14 +66,12 @@ async function loadPokemonData(): Promise<DexEntry[]> {
 }
 
 /**
- * Generates expected fusion name from our calculated parts
+ * Generates our fusion name from calculated parts
+ * NOTE: This is what our current logic produces, not necessarily what FusionDex.org has
  */
-function generateExpectedFusionName(headPokemon: DexEntry, bodyPokemon: DexEntry): string {
-  if (!headPokemon.headNamePart || !bodyPokemon.bodyNamePart) {
-    return `${headPokemon.name}/${bodyPokemon.name}`;
-  }
-  
-  return `${headPokemon.headNamePart}${bodyPokemon.bodyNamePart}`;
+function generateOurFusionName(headPokemon: DexEntry, bodyPokemon: DexEntry): string {
+  // Use the same fusion name generation logic as the UI
+  return generateFusionName(headPokemon, bodyPokemon);
 }
 
 /**
@@ -93,7 +94,7 @@ async function getActualFusionName(headId: number, bodyId: number): Promise<stri
     const fusionName = pageTitle.split(' #')[0].trim();
     
     return fusionName || null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -135,10 +136,60 @@ function selectRandomCombinations(baseEntries: DexEntry[], count: number = 10): 
 }
 
 /**
+ * Selects specific Pokemon combinations based on fusion IDs
+ */
+function selectSpecificCombinations(baseEntries: DexEntry[], fusionIds: string[]): Array<{ head: DexEntry; body: DexEntry }> {
+  const combinations: Array<{ head: DexEntry; body: DexEntry }> = [];
+  
+  for (const fusionId of fusionIds) {
+    // Parse fusion ID format: "headId.bodyId" (e.g., "151.250" for Mew + Ho-oh)
+    const parts = fusionId.split('.');
+    if (parts.length !== 2) {
+      console.log(`⚠️  Invalid fusion ID format: ${fusionId}. Expected format: headId.bodyId (e.g., 151.250)`);
+      continue;
+    }
+    
+    const headId = parseInt(parts[0], 10);
+    const bodyId = parseInt(parts[1], 10);
+    
+    if (isNaN(headId) || isNaN(bodyId)) {
+      console.log(`⚠️  Invalid fusion ID format: ${fusionId}. IDs must be numbers.`);
+      continue;
+    }
+    
+    const headPokemon = baseEntries.find(entry => entry.id === headId);
+    const bodyPokemon = baseEntries.find(entry => entry.id === bodyId);
+    
+    if (!headPokemon) {
+      console.log(`⚠️  Pokemon with ID ${headId} not found.`);
+      continue;
+    }
+    
+    if (!bodyPokemon) {
+      console.log(`⚠️  Pokemon with ID ${bodyId} not found.`);
+      continue;
+    }
+    
+    combinations.push({
+      head: headPokemon,
+      body: bodyPokemon
+    });
+    
+    console.log(`✅ Added combination: ${headPokemon.name} (${headId}) + ${bodyPokemon.name} (${bodyId})`);
+  }
+  
+  if (combinations.length === 0) {
+    throw new Error('No valid combinations found from provided fusion IDs');
+  }
+  
+  return combinations;
+}
+
+/**
  * Validates a single fusion combination
  */
 async function validateCombination(headPokemon: DexEntry, bodyPokemon: DexEntry): Promise<ValidationResult> {
-  const expectedFusionName = generateExpectedFusionName(headPokemon, bodyPokemon);
+  const ourFusionName = generateOurFusionName(headPokemon, bodyPokemon);
   
   try {
     const actualFusionName = await getActualFusionName(headPokemon.id, bodyPokemon.id);
@@ -147,32 +198,72 @@ async function validateCombination(headPokemon: DexEntry, bodyPokemon: DexEntry)
       return {
         headPokemon,
         bodyPokemon,
-        expectedFusionName,
-        actualFusionName: 'Failed to fetch',
+        expectedFusionName: 'Failed to fetch',
+        actualFusionName: ourFusionName,
         matches: false,
         error: 'Failed to fetch from FusionDex.org'
       };
     }
     
-    const matches = expectedFusionName.toLowerCase() === actualFusionName.toLowerCase();
+    const matches = ourFusionName.toLowerCase() === actualFusionName.toLowerCase();
     
     return {
       headPokemon,
       bodyPokemon,
-      expectedFusionName,
-      actualFusionName,
+      expectedFusionName: actualFusionName, // FusionDex.org is the source of truth
+      actualFusionName: ourFusionName,      // Our logic result
       matches
     };
   } catch (error) {
     return {
       headPokemon,
       bodyPokemon,
-      expectedFusionName,
-      actualFusionName: 'Error',
+      expectedFusionName: 'Error occurred',
+      actualFusionName: ourFusionName,
       matches: false,
       error: error instanceof Error ? error.message : 'Unknown error'
     };
   }
+}
+
+/**
+ * Parses command line arguments using yargs
+ */
+function parseCommandLineArgs() {
+  return yargs(hideBin(process.argv))
+    .option('fusion-ids', {
+      alias: 'f',
+      type: 'string',
+      description: 'Comma-separated fusion IDs to test (e.g., "151.250,150.151")',
+      coerce: (value: string) => value ? value.split(',').map(id => id.trim()) : null
+    })
+    .option('count', {
+      alias: 'c',
+      type: 'number',
+      default: 10,
+      description: 'Number of random combinations to test',
+      coerce: (value: number) => {
+        if (value <= 0) {
+          throw new Error('Count must be a positive number');
+        }
+        return value;
+      }
+    })
+    .option('until-first-failure', {
+      alias: 'u',
+      type: 'boolean',
+      default: false,
+      description: 'Stop at the first failure (useful for debugging)'
+    })
+    .help('help')
+    .alias('help', 'h')
+    .example('pnpm validate:fusion-names', 'Test 10 random combinations')
+    .example('pnpm validate:fusion-names --count 20', 'Test 20 random combinations')
+    .example('pnpm validate:fusion-names --count=50', 'Test 50 random combinations')
+    .example('pnpm validate:fusion-names --until-first-failure', 'Test until first failure')
+    .example('pnpm validate:fusion-names --fusion-ids "151.250"', 'Test Mew + Ho-oh')
+    .example('pnpm validate:fusion-names --fusion-ids "151.250,150.151"', 'Test specific combinations')
+    .parseSync();
 }
 
 /**
@@ -182,15 +273,32 @@ async function validateFusionNames(): Promise<void> {
   ConsoleFormatter.printHeader('Fusion Name Validation', 'Validating fusion name parts against FusionDex.org');
   
   try {
+    // Parse command line arguments
+    const args = parseCommandLineArgs();
+    const { fusionIds, count, untilFirstFailure } = args;
+    
+    
     // Load Pokemon data
     console.log('\n🔍 Starting Fusion Name Validation...\n');
     const baseEntries = await loadPokemonData();
     
-    // Select random combinations
-    ConsoleFormatter.printSection('Selecting random combinations');
-    const combinations = selectRandomCombinations(baseEntries, 10);
+    // Select combinations based on arguments
+    let combinations: Array<{ head: DexEntry; body: DexEntry }>;
     
-    ConsoleFormatter.info(`Selected ${combinations.length} random combinations for validation`);
+    if (fusionIds) {
+      ConsoleFormatter.printSection('Selecting specific combinations');
+      combinations = selectSpecificCombinations(baseEntries, fusionIds);
+      ConsoleFormatter.info(`Selected ${combinations.length} specific combinations for validation`);
+    } else {
+      ConsoleFormatter.printSection('Selecting random combinations');
+      // Use a large count when until-first-failure is enabled to keep going until failure
+      const effectiveCount = untilFirstFailure ? 1000 : count;
+      combinations = selectRandomCombinations(baseEntries, effectiveCount);
+      ConsoleFormatter.info(`Selected ${combinations.length} random combinations for validation`);
+      if (untilFirstFailure) {
+        ConsoleFormatter.info('🛑 Will stop at first failure');
+      }
+    }
     
     // Validate each combination
     ConsoleFormatter.printSection('Validating combinations');
@@ -207,6 +315,12 @@ async function validateFusionNames(): Promise<void> {
       
       const status = result.matches ? '✅' : '❌';
       console.log(`${status} Expected: "${result.expectedFusionName}" | Actual: "${result.actualFusionName}"`);
+      
+      // Stop at first failure if requested
+      if (untilFirstFailure && !result.matches) {
+        console.log(`\n🛑 Stopping at first failure as requested.`);
+        break;
+      }
       
       // Rate limiting
       await delay(1000);

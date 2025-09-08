@@ -4,36 +4,7 @@ import * as cheerio from 'cheerio';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { ConsoleFormatter } from './utils/console-utils';
-
-interface PokemonData {
-  id: number;
-  nationalDexId: number;
-  name: string;
-  types: Array<{ name: string }>;
-  species: {
-    is_legendary: boolean;
-    is_mythical: boolean;
-    generation: string;
-    evolution_chain: { url: string };
-  };
-  evolution?: {
-    evolves_to: Array<{
-      id: number;
-      name: string;
-      min_level?: number;
-      trigger: string;
-    }>;
-    evolves_from?: {
-      id: number;
-      name: string;
-      min_level?: number;
-      trigger?: string;
-    };
-  };
-  // Fusion name parts
-  headNamePart?: string;
-  bodyNamePart?: string;
-}
+import type { Pokemon } from '../src/loaders/pokemon';
 
 
 /**
@@ -46,11 +17,11 @@ function delay(ms: number): Promise<void> {
 /**
  * Loads Pokemon data from the main JSON file
  */
-async function loadPokemonData(): Promise<PokemonData[]> {
+async function loadPokemonData(): Promise<Pokemon[]> {
   try {
     const pokemonDataPath = path.join(process.cwd(), 'data', 'shared', 'pokemon-data.json');
     const pokemonDataContent = await fs.readFile(pokemonDataPath, 'utf8');
-    const pokemonData: PokemonData[] = JSON.parse(pokemonDataContent);
+    const pokemonData: Pokemon[] = JSON.parse(pokemonDataContent);
     
     ConsoleFormatter.success(`Loaded ${pokemonData.length} Pokemon entries`);
     return pokemonData;
@@ -69,9 +40,64 @@ function getFusionDexUrl(headId: number, bodyId: number): string {
 
 
 /**
- * Extracts fusion name from a specific fusion page
+ * Extracts fusion name from a specific fusion page (optimized to only read title)
  */
 async function scrapeSpecificFusion(headId: number, bodyId: number): Promise<string | null> {
+  const url = getFusionDexUrl(headId, bodyId);
+  
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Infinite-Fusion-Scraper/1.0',
+        'Range': 'bytes=0-8192' // Only fetch first 8KB to get the title
+      }
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        ConsoleFormatter.warn(`❌ 404 Not Found: ${url}`);
+        return null;
+      }
+      // If Range header is not supported, fall back to full fetch
+      if (response.status === 416) {
+        return await scrapeSpecificFusionFull(headId, bodyId);
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Read only the first chunk of HTML
+    const htmlChunk = await response.text();
+    
+    // Extract title using regex (faster than cheerio for this simple case)
+    const titleMatch = htmlChunk.match(/<title[^>]*>([^<]+)<\/title>/i);
+    if (!titleMatch) {
+      ConsoleFormatter.warn(`❌ No title found in HTML chunk for ${url}`);
+      return null;
+    }
+    
+    const pageTitle = titleMatch[1].trim();
+    
+    // Extract the fusion name by removing the ID part and site name
+    // "Bulbamander #1.4 - FusionDex.org" -> "Bulbamander"
+    const fusionName = pageTitle.split(' #')[0].trim();
+    
+    if (fusionName && fusionName.length >= 3 && fusionName.length <= 20) {
+      return fusionName;
+    }
+    
+    ConsoleFormatter.warn(`❌ Invalid fusion name length: "${fusionName}" (${fusionName.length} chars) from ${url}`);
+    return null;
+    
+  } catch (_error) {
+    ConsoleFormatter.warn(`Error scraping fusion ${headId}.${bodyId}: ${_error instanceof Error ? _error.message : 'Unknown error'}`);
+    return null;
+  }
+}
+
+/**
+ * Fallback method to fetch the full page if Range header is not supported
+ */
+async function scrapeSpecificFusionFull(headId: number, bodyId: number): Promise<string | null> {
   const url = getFusionDexUrl(headId, bodyId);
   
   try {
@@ -91,12 +117,7 @@ async function scrapeSpecificFusion(headId: number, bodyId: number): Promise<str
     const html = await response.text();
     const $ = cheerio.load(html);
     
-    // Look for the fusion name in the page title - based on the website structure
-    // The fusion name appears in the title like "Bulbamander #1.4 - FusionDex.org"
     const pageTitle = $('title').text().trim();
-    
-    // Extract the fusion name by removing the ID part and site name
-    // "Bulbamander #1.4 - FusionDex.org" -> "Bulbamander"
     const fusionName = pageTitle.split(' #')[0].trim();
     
     if (fusionName && fusionName.length >= 3 && fusionName.length <= 20) {
@@ -105,58 +126,117 @@ async function scrapeSpecificFusion(headId: number, bodyId: number): Promise<str
     
     return null;
     
-  } catch (error) {
-    ConsoleFormatter.warn(`Error scraping fusion ${headId}.${bodyId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  } catch {
     return null;
   }
 }
 
 /**
- * Determines head and body name parts by scraping both directions with Tropius
+ * Ultra-simplified Ditto method for determining Pokemon name parts
+ * Ditto (ID 132) has consistent parts: "Dit" (head) and "to" (body)
+ * 
+ * This method uses Ditto as a reference because:
+ * - "Dit" and "to" are very unique parts that won't overlap with many other Pokemon names
+ * - Simple structure with clear boundaries
+ * - No complex merging logic needed
+ */
+
+
+/**
+ * Merges two strings, removing overlapping characters at the boundary
+ * Example: mergeOverlappingStrings("Sphe", "eal") = "Spheal"
+ */
+function mergeOverlappingStrings(str1: string, str2: string): string {
+  // Find the longest suffix of str1 that matches a prefix of str2
+  for (let i = Math.min(str1.length, str2.length); i > 0; i--) {
+    if (str1.slice(-i) === str2.slice(0, i)) {
+      return str1 + str2.slice(i);
+    }
+  }
+  return str1 + str2; // No overlap found
+}
+
+/**
+ * Extracts head part from Pokemon + Ditto fusion (simple approach)
+ */
+function extractHeadPart(pokemonName: string, fusionName: string): string {
+  const fusionLower = fusionName.toLowerCase();
+  const toIndex = fusionLower.indexOf('to');
+  
+  if (toIndex === -1) {
+    return pokemonName; // fallback
+  }
+  
+  // Simply extract everything before "to"
+  return fusionName.slice(0, toIndex);
+}
+
+/**
+ * Extracts body part from Ditto + Pokemon fusion (simple approach)
+ */
+function extractBodyPart(pokemonName: string, fusionName: string): string {
+  const fusionLower = fusionName.toLowerCase();
+  const ditIndex = fusionLower.indexOf('dit');
+  
+  if (ditIndex !== 0) {
+    return pokemonName; // fallback
+  }
+  
+  // Simply extract everything after "Dit"
+  return fusionName.slice(3);
+}
+
+/**
+ * Determines the head and body name parts for a Pokemon using the bidirectional "Ditto method"
+ * 
+ * Method:
+ * 1. Scrape Pokemon + Ditto to get head part candidates
+ * 2. Scrape Ditto + Pokemon to get body part candidates  
+ * 3. Find the combination that perfectly reconstructs the original name
+ * 4. Use fallback logic if no perfect match is found
  */
 async function determineNameParts(pokemonId: number, pokemonName: string): Promise<{ headNamePart: string, bodyNamePart: string }> {
   try {
-    // Use Tropius (556) as a reference Pokemon because it has a distinctive ending "pius"
-    const tropiusId = 556;
+    const dittoId = 132;
     
-    let headNamePart = pokemonName; // fallback
-    let bodyNamePart = pokemonName; // fallback
+    // Step 1: Get Pokemon + Ditto fusion (should end with "to")
+    const headFusionName = await scrapeSpecificFusion(pokemonId, dittoId);
     
-    // Scrape Pokemon + Tropius to get head part
-    const headFusionName = await scrapeSpecificFusion(pokemonId, tropiusId);
-    if (headFusionName) {
-      const fusionName = headFusionName.toLowerCase();
-      
-      // The fusion name should end with "pius", so the head part is what comes before it
-      if (fusionName.endsWith('pius')) {
-        headNamePart = headFusionName.substring(0, headFusionName.length - 4); // Remove "pius"
-      }
+    // Step 2: Get Ditto + Pokemon fusion (should start with "Dit")
+    const bodyFusionName = await scrapeSpecificFusion(dittoId, pokemonId);
+    
+    // Step 3: Extract raw parts (overlap handling will be done during fusion name generation)
+    let headPart = pokemonName; // fallback
+    let bodyPart = pokemonName; // fallback
+    
+    if (headFusionName && headFusionName.toLowerCase().endsWith('to')) {
+      headPart = extractHeadPart(pokemonName, headFusionName);
+    } else {
+      ConsoleFormatter.warn(`❌ ${pokemonName}: Head fusion doesn't end with "to": "${headFusionName}"`);
     }
     
-    // Scrape Tropius + Pokemon to get body part
-    const bodyFusionName = await scrapeSpecificFusion(tropiusId, pokemonId);
-    if (bodyFusionName) {
-      const fusionName = bodyFusionName.toLowerCase();
-      
-      // The fusion name should start with "tro", so the body part is what comes after it
-      if (fusionName.startsWith('tro')) {
-        bodyNamePart = bodyFusionName.substring(3); // Remove "Tro"
-      }
+    if (bodyFusionName && bodyFusionName.toLowerCase().startsWith('dit')) {
+      bodyPart = extractBodyPart(pokemonName, bodyFusionName);
+    } else {
+      ConsoleFormatter.warn(`❌ ${pokemonName}: Body fusion doesn't start with "Dit": "${bodyFusionName}"`);
     }
     
-    return { headNamePart, bodyNamePart };
+    // Step 4: Return the extracted parts (validation will be done by the validation script)
+    
+    return { headNamePart: headPart, bodyNamePart: bodyPart };
     
   } catch (error) {
-    ConsoleFormatter.error(`Error determining name parts for ${pokemonName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    ConsoleFormatter.error(`Error with ${pokemonName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return { headNamePart: pokemonName, bodyNamePart: pokemonName };
   }
 }
 
 
+
 /**
  * Processes a single Pokemon entry
  */
-async function processPokemonEntry(entry: PokemonData): Promise<PokemonData> {
+async function processPokemonEntry(entry: Pokemon): Promise<Pokemon> {
   try {
     // Skip special entries (like Egg entry which shouldn't exist in pokemon-data.json anyway)
     if (entry.id <= 0) {
@@ -182,7 +262,7 @@ async function processPokemonEntry(entry: PokemonData): Promise<PokemonData> {
 /**
  * Updates Pokemon data with fusion name data using parallel processing
  */
-async function updatePokemonDataWithFusionNames(pokemonData: PokemonData[]): Promise<PokemonData[]> {
+async function updatePokemonDataWithFusionNames(pokemonData: Pokemon[]): Promise<Pokemon[]> {
   const progressBar = ConsoleFormatter.createProgressBar(pokemonData.length);
   
   // Process all Pokemon entries in parallel batches
@@ -190,7 +270,7 @@ async function updatePokemonDataWithFusionNames(pokemonData: PokemonData[]): Pro
   
   const BATCH_SIZE = 10; // Process 10 Pokemon at a time
   const CONCURRENT_BATCHES = 3; // Run 3 batches concurrently
-  const updatedEntries: PokemonData[] = [];
+  const updatedEntries: Pokemon[] = [];
   
   let successCount = 0;
   let errorCount = 0;
@@ -200,7 +280,7 @@ async function updatePokemonDataWithFusionNames(pokemonData: PokemonData[]): Pro
   
   // Process in batches
   for (let i = 0; i < pokemonData.length; i += BATCH_SIZE * CONCURRENT_BATCHES) {
-    const batchPromises: Promise<PokemonData[]>[] = [];
+    const batchPromises: Promise<Pokemon[]>[] = [];
     
     // Create concurrent batches
     for (let j = 0; j < CONCURRENT_BATCHES && i + j * BATCH_SIZE < pokemonData.length; j++) {
@@ -261,7 +341,7 @@ async function updatePokemonDataWithFusionNames(pokemonData: PokemonData[]): Pro
     
     // Small delay between batch rounds to be respectful to the server
     if (i + BATCH_SIZE * CONCURRENT_BATCHES < pokemonData.length) {
-      await delay(1000);
+      await delay(300);
     }
   }
   
@@ -288,7 +368,7 @@ async function updatePokemonDataWithFusionNames(pokemonData: PokemonData[]): Pro
 /**
  * Saves updated Pokemon data to file
  */
-async function savePokemonData(pokemonData: PokemonData[]): Promise<void> {
+async function savePokemonData(pokemonData: Pokemon[]): Promise<void> {
   try {
     const outputPath = path.join(process.cwd(), 'data', 'shared', 'pokemon-data.json');
     
@@ -307,6 +387,34 @@ async function savePokemonData(pokemonData: PokemonData[]): Promise<void> {
   }
 }
 
+/**
+ * Saves partial Pokemon data update (single Pokemon)
+ */
+async function savePokemonDataPartial(updatedEntry: Pokemon, allPokemonData: Pokemon[]): Promise<void> {
+  try {
+    const outputPath = path.join(process.cwd(), 'data', 'shared', 'pokemon-data.json');
+    
+    // Create backup of original file
+    const backupPath = `${outputPath}.backup.${Date.now()}`;
+    await fs.copyFile(outputPath, backupPath);
+    ConsoleFormatter.info(`Created backup: ${backupPath}`);
+    
+    // Update the specific entry in the full dataset
+    const updatedPokemonData = allPokemonData.map(entry => 
+      entry.id === updatedEntry.id ? updatedEntry : entry
+    );
+    
+    // Write updated entries
+    await fs.writeFile(outputPath, JSON.stringify(updatedPokemonData, null, 2));
+    ConsoleFormatter.success(`Updated Pokemon data saved to: ${outputPath}`);
+    ConsoleFormatter.info(`Updated entry: ${updatedEntry.name} (ID: ${updatedEntry.id})`);
+    
+  } catch (error) {
+    ConsoleFormatter.error(`Error saving Pokemon data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw error;
+  }
+}
+
 async function main() {
   const startTime = Date.now();
 
@@ -316,17 +424,48 @@ async function main() {
       'Scraping fusion names from FusionDex.org to enrich Pokemon data'
     );
 
+    // Parse command line arguments
+    const args = process.argv.slice(2);
+    const targetPokemon = args.find(arg => arg.startsWith('--pokemon='))?.split('=')[1];
+    
+    if (targetPokemon) {
+      ConsoleFormatter.info(`Target Pokemon: ${targetPokemon}`);
+    }
+
     // Load Pokemon data
     ConsoleFormatter.printSection('Loading Pokemon data');
     const pokemonData = await loadPokemonData();
 
+    // Filter to target Pokemon if specified
+    let pokemonToProcess = pokemonData;
+    if (targetPokemon) {
+      const targetEntry = pokemonData.find(p => 
+        p.name.toLowerCase() === targetPokemon.toLowerCase() || 
+        p.id.toString() === targetPokemon
+      );
+      
+      if (!targetEntry) {
+        ConsoleFormatter.error(`Pokemon not found: ${targetPokemon}`);
+        process.exit(1);
+      }
+      
+      pokemonToProcess = [targetEntry];
+      ConsoleFormatter.info(`Processing only: ${targetEntry.name} (ID: ${targetEntry.id})`);
+    }
+
     // Update entries with fusion name data
     ConsoleFormatter.printSection('Scraping fusion names and updating Pokemon data');
-    const updatedEntries = await updatePokemonDataWithFusionNames(pokemonData);
+    const updatedEntries = await updatePokemonDataWithFusionNames(pokemonToProcess);
 
     // Save updated entries
     ConsoleFormatter.printSection('Saving updated Pokemon data');
-    await savePokemonData(updatedEntries);
+    if (targetPokemon) {
+      // For single Pokemon updates, merge with existing data
+      await savePokemonDataPartial(updatedEntries[0], pokemonData);
+    } else {
+      // For full updates, save all entries
+      await savePokemonData(updatedEntries);
+    }
 
     // Calculate statistics
     const entriesWithHeadParts = updatedEntries.filter(entry => 
@@ -339,12 +478,22 @@ async function main() {
     const duration = Date.now() - startTime;
 
     // Success summary
-    ConsoleFormatter.printSummary('Fusion Names Scraping Complete!', [
-      { label: 'Total Pokemon processed', value: updatedEntries.length, color: 'yellow' },
-      { label: 'Entries with head name parts', value: entriesWithHeadParts.length, color: 'green' },
-      { label: 'Entries with body name parts', value: entriesWithBodyParts.length, color: 'green' },
-      { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
-    ]);
+    if (targetPokemon) {
+      const updatedEntry = updatedEntries[0];
+      ConsoleFormatter.printSummary('Single Pokemon Update Complete!', [
+        { label: 'Pokemon processed', value: updatedEntry.name, color: 'green' },
+        { label: 'Head name part', value: updatedEntry.headNamePart || 'None', color: updatedEntry.headNamePart ? 'green' : 'red' },
+        { label: 'Body name part', value: updatedEntry.bodyNamePart || 'None', color: updatedEntry.bodyNamePart ? 'green' : 'red' },
+        { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
+      ]);
+    } else {
+      ConsoleFormatter.printSummary('Fusion Names Scraping Complete!', [
+        { label: 'Total Pokemon processed', value: updatedEntries.length, color: 'yellow' },
+        { label: 'Entries with head name parts', value: entriesWithHeadParts.length, color: 'green' },
+        { label: 'Entries with body name parts', value: entriesWithBodyParts.length, color: 'green' },
+        { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
+      ]);
+    }
 
   } catch (error) {
     ConsoleFormatter.error(`Fatal error: ${error instanceof Error ? error.message : 'Unknown error'}`);

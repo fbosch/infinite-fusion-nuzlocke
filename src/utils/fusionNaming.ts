@@ -8,6 +8,31 @@
 import type { DexEntry } from '../../scripts/utils/data-loading-utils';
 
 /**
+ * Merges two strings, removing overlapping characters at the boundary
+ * Only merges if there's exactly a 1-character overlap
+ * Example: mergeOverlappingStrings("Sphe", "eal") = "Spheal" (1-char overlap: "e")
+ * Example: mergeOverlappingStrings("Rapi", "pius") = "Rapipius" (2-char overlap: "pi" - no merge)
+ */
+function mergeOverlappingStrings(str1: string, str2: string): string {
+  // Only merge if there's exactly a 1-character overlap
+  // If overlap is more than 1 character, don't merge (just concatenate)
+
+  // Check for 1-character overlap first
+  if (str1.length > 0 && str2.length > 0) {
+    const lastChar = str1.slice(-1);
+    const firstChar = str2.slice(0, 1);
+
+    if (lastChar === firstChar) {
+      // Found 1-character overlap - merge by removing the overlapping character from str2
+      return str1 + str2.slice(1);
+    }
+  }
+
+  // No 1-character overlap found - simple concatenation
+  return str1 + str2;
+}
+
+/**
  * Generates a fusion name from head and body Pokémon
  */
 export function generateFusionName(
@@ -19,8 +44,11 @@ export function generateFusionName(
     return `${headPokemon.name}/${bodyPokemon.name}`;
   }
 
-  // Combine head part with body part
-  return `${headPokemon.headNamePart}${bodyPokemon.bodyNamePart}`;
+  // Combine head part with body part using overlap-aware merging
+  return mergeOverlappingStrings(
+    headPokemon.headNamePart,
+    bodyPokemon.bodyNamePart
+  );
 }
 
 /**

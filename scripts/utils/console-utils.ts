@@ -99,7 +99,7 @@ export class ConsoleFormatter {
    * Print info message
    */
   static info(message: string) {
-    console.debug(colors.yellow(`📖 ${message}`));
+    console.debug(colors.yellow(`${message}`));
   }
 
   /**
