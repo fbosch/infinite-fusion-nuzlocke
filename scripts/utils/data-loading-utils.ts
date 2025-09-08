@@ -17,6 +17,18 @@ export interface DexEntry {
   bodyNamePart?: string;
 }
 
+/**
+ * Converts ProcessedPokemonData to DexEntry format for backwards compatibility
+ */
+export function pokemonDataToDexEntry(pokemon: ProcessedPokemonData): DexEntry {
+  return {
+    id: pokemon.id,
+    name: pokemon.name,
+    headNamePart: pokemon.headNamePart,
+    bodyNamePart: pokemon.bodyNamePart
+  };
+}
+
 // Cache for loaded data to avoid repeated file reads
 let pokemonDataCache: ProcessedPokemonData[] | null = null;
 let pokemonNameMapCache: PokemonNameMap | null = null;
@@ -70,7 +82,8 @@ export async function loadPokemonNameMap(forceReload: boolean = false): Promise<
 }
 
 /**
- * Loads dex entries from the JSON file with caching
+ * Loads dex entries derived from Pokemon data with caching
+ * This replaces the old base-entries.json approach
  */
 export async function loadDexEntries(forceReload: boolean = false): Promise<DexEntry[]> {
   if (dexEntriesCache && !forceReload) {
@@ -78,13 +91,13 @@ export async function loadDexEntries(forceReload: boolean = false): Promise<DexE
   }
 
   try {
-    const dataPath = path.join(process.cwd(), 'data', 'shared', 'base-entries.json');
-    const data = await fs.readFile(dataPath, 'utf8');
-    const entries: DexEntry[] = JSON.parse(data);
+    // Load Pokemon data and convert to DexEntry format
+    const pokemonData = await loadPokemonData(forceReload);
+    const entries: DexEntry[] = pokemonData.map(pokemonDataToDexEntry);
 
     // Validate data structure
     if (!Array.isArray(entries)) {
-      throw new Error('Dex entries file does not contain an array');
+      throw new Error('Pokemon data could not be converted to dex entries');
     }
 
     for (const entry of entries) {
@@ -97,7 +110,7 @@ export async function loadDexEntries(forceReload: boolean = false): Promise<DexE
     return entries;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`Error loading dex entries: ${message}`);
+    throw new Error(`Error loading dex entries from Pokemon data: ${message}`);
   }
 }
 
@@ -106,7 +119,6 @@ export async function loadDexEntries(forceReload: boolean = false): Promise<DexE
  */
 export async function checkDataFiles(): Promise<{
   pokemonData: boolean;
-  dexEntries: boolean;
   classicEncounters: boolean;
   remixEncounters: boolean;
   locations: boolean;
@@ -124,7 +136,6 @@ export async function checkDataFiles(): Promise<{
 
   return {
     pokemonData: await checkFile('shared/pokemon-data.json'),
-    dexEntries: await checkFile('shared/base-entries.json'),
     classicEncounters: await checkFile('classic/encounters.json'),
     remixEncounters: await checkFile('remix/encounters.json'),
     locations: await checkFile('shared/locations.json'),

@@ -137,6 +137,9 @@ export const PokemonSchema = z.object({
   types: z.array(PokemonTypeSchema),
   species: PokemonSpeciesSchema,
   evolution: EvolutionDataSchema.optional(),
+  // Fusion name parts (added by scrape-fusion-names.ts)
+  headNamePart: z.string().optional(),
+  bodyNamePart: z.string().optional(),
 });
 
 export type Pokemon = z.infer<typeof PokemonSchema>;

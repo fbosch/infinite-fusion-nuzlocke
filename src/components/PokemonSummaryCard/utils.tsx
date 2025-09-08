@@ -21,34 +21,6 @@ export const QUESTION_MARK =
 export const TRANSPARENT_PIXEL =
   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
-export function getNicknameText(
-  head: PokemonOptionType | null,
-  body: PokemonOptionType | null,
-  isFusion: boolean
-): string | undefined {
-  if (!isFusion) {
-    // Single Pokémon - show nickname if available, otherwise show name
-    const pokemon = head || body;
-    if (!pokemon) return '';
-    return pokemon.nickname || pokemon.name;
-  }
-
-  // Fusion case
-  if (!head || !body) {
-    const pokemon = head || body;
-    if (!pokemon) return '';
-    return pokemon.nickname || pokemon.name;
-  }
-
-  // For fusions, always prioritize head Pokémon nickname if it exists
-  if (head.nickname) {
-    return head.nickname;
-  }
-
-  // If no head nickname, fall back to body nickname or the fusion name format
-  return body.nickname || `${head.name}/${body.name}`;
-}
-
 export function getSpriteUrl(
   head: PokemonOptionType | null,
   body: PokemonOptionType | null,

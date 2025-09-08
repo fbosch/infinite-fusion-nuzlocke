@@ -5,9 +5,32 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { ConsoleFormatter } from './utils/console-utils';
 
-interface BasePokemonEntry {
+interface PokemonData {
   id: number;
+  nationalDexId: number;
   name: string;
+  types: Array<{ name: string }>;
+  species: {
+    is_legendary: boolean;
+    is_mythical: boolean;
+    generation: string;
+    evolution_chain: { url: string };
+  };
+  evolution?: {
+    evolves_to: Array<{
+      id: number;
+      name: string;
+      min_level?: number;
+      trigger: string;
+    }>;
+    evolves_from?: {
+      id: number;
+      name: string;
+      min_level?: number;
+      trigger?: string;
+    };
+  };
+  // Fusion name parts
   headNamePart?: string;
   bodyNamePart?: string;
 }
@@ -21,18 +44,18 @@ function delay(ms: number): Promise<void> {
 }
 
 /**
- * Loads base Pokemon entries from the JSON file
+ * Loads Pokemon data from the main JSON file
  */
-async function loadBaseEntries(): Promise<BasePokemonEntry[]> {
+async function loadPokemonData(): Promise<PokemonData[]> {
   try {
-    const baseEntriesPath = path.join(process.cwd(), 'data', 'shared', 'base-entries.json');
-    const baseEntriesContent = await fs.readFile(baseEntriesPath, 'utf8');
-    const baseEntries: BasePokemonEntry[] = JSON.parse(baseEntriesContent);
+    const pokemonDataPath = path.join(process.cwd(), 'data', 'shared', 'pokemon-data.json');
+    const pokemonDataContent = await fs.readFile(pokemonDataPath, 'utf8');
+    const pokemonData: PokemonData[] = JSON.parse(pokemonDataContent);
     
-    ConsoleFormatter.success(`Loaded ${baseEntries.length} base Pokemon entries`);
-    return baseEntries;
+    ConsoleFormatter.success(`Loaded ${pokemonData.length} Pokemon entries`);
+    return pokemonData;
   } catch (error) {
-    ConsoleFormatter.error(`Error loading base entries: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    ConsoleFormatter.error(`Error loading Pokemon data: ${error instanceof Error ? error.message : 'Unknown error'}`);
     throw error;
   }
 }
@@ -133,10 +156,10 @@ async function determineNameParts(pokemonId: number, pokemonName: string): Promi
 /**
  * Processes a single Pokemon entry
  */
-async function processPokemonEntry(entry: BasePokemonEntry): Promise<BasePokemonEntry> {
+async function processPokemonEntry(entry: PokemonData): Promise<PokemonData> {
   try {
-    // Skip Egg entry
-    if (entry.id === -1) {
+    // Skip special entries (like Egg entry which shouldn't exist in pokemon-data.json anyway)
+    if (entry.id <= 0) {
       return entry;
     }
     
@@ -157,17 +180,17 @@ async function processPokemonEntry(entry: BasePokemonEntry): Promise<BasePokemon
 }
 
 /**
- * Updates base entries with fusion name data using parallel processing
+ * Updates Pokemon data with fusion name data using parallel processing
  */
-async function updateBaseEntriesWithFusionNames(baseEntries: BasePokemonEntry[]): Promise<BasePokemonEntry[]> {
-  const progressBar = ConsoleFormatter.createProgressBar(baseEntries.length);
+async function updatePokemonDataWithFusionNames(pokemonData: PokemonData[]): Promise<PokemonData[]> {
+  const progressBar = ConsoleFormatter.createProgressBar(pokemonData.length);
   
   // Process all Pokemon entries in parallel batches
   ConsoleFormatter.printSection('Processing all Pokemon entries in parallel');
   
   const BATCH_SIZE = 10; // Process 10 Pokemon at a time
   const CONCURRENT_BATCHES = 3; // Run 3 batches concurrently
-  const updatedEntries: BasePokemonEntry[] = [];
+  const updatedEntries: PokemonData[] = [];
   
   let successCount = 0;
   let errorCount = 0;
@@ -176,14 +199,14 @@ async function updateBaseEntriesWithFusionNames(baseEntries: BasePokemonEntry[])
   const errorDetails: Array<{ name: string; id: number; error: string }> = [];
   
   // Process in batches
-  for (let i = 0; i < baseEntries.length; i += BATCH_SIZE * CONCURRENT_BATCHES) {
-    const batchPromises: Promise<BasePokemonEntry[]>[] = [];
+  for (let i = 0; i < pokemonData.length; i += BATCH_SIZE * CONCURRENT_BATCHES) {
+    const batchPromises: Promise<PokemonData[]>[] = [];
     
     // Create concurrent batches
-    for (let j = 0; j < CONCURRENT_BATCHES && i + j * BATCH_SIZE < baseEntries.length; j++) {
+    for (let j = 0; j < CONCURRENT_BATCHES && i + j * BATCH_SIZE < pokemonData.length; j++) {
       const batchStart = i + j * BATCH_SIZE;
-      const batchEnd = Math.min(batchStart + BATCH_SIZE, baseEntries.length);
-      const batch = baseEntries.slice(batchStart, batchEnd);
+      const batchEnd = Math.min(batchStart + BATCH_SIZE, pokemonData.length);
+      const batch = pokemonData.slice(batchStart, batchEnd);
       
       const batchPromise = Promise.all(
         batch.map(async (entry) => {
@@ -191,7 +214,7 @@ async function updateBaseEntriesWithFusionNames(baseEntries: BasePokemonEntry[])
           processedCount++;
           
           // Count results
-          if (entry.id === -1) {
+          if (entry.id <= 0) {
             skippedCount++;
           } else {
             // Check for specific issues - only count as errors if parts are missing, not if they equal the full name
@@ -237,7 +260,7 @@ async function updateBaseEntriesWithFusionNames(baseEntries: BasePokemonEntry[])
     }
     
     // Small delay between batch rounds to be respectful to the server
-    if (i + BATCH_SIZE * CONCURRENT_BATCHES < baseEntries.length) {
+    if (i + BATCH_SIZE * CONCURRENT_BATCHES < pokemonData.length) {
       await delay(1000);
     }
   }
@@ -246,7 +269,7 @@ async function updateBaseEntriesWithFusionNames(baseEntries: BasePokemonEntry[])
   
   // Log final statistics
   ConsoleFormatter.printSection('Scraping Statistics');
-  ConsoleFormatter.info(`Total Pokemon processed: ${baseEntries.length}`);
+  ConsoleFormatter.info(`Total Pokemon processed: ${pokemonData.length}`);
   ConsoleFormatter.success(`Successfully processed: ${successCount}`);
   ConsoleFormatter.warn(`Errors encountered: ${errorCount}`);
   ConsoleFormatter.info(`Skipped entries: ${skippedCount}`);
@@ -263,11 +286,11 @@ async function updateBaseEntriesWithFusionNames(baseEntries: BasePokemonEntry[])
 }
 
 /**
- * Saves updated base entries to file
+ * Saves updated Pokemon data to file
  */
-async function saveBaseEntries(baseEntries: BasePokemonEntry[]): Promise<void> {
+async function savePokemonData(pokemonData: PokemonData[]): Promise<void> {
   try {
-    const outputPath = path.join(process.cwd(), 'data', 'shared', 'base-entries.json');
+    const outputPath = path.join(process.cwd(), 'data', 'shared', 'pokemon-data.json');
     
     // Create backup of original file
     const backupPath = `${outputPath}.backup.${Date.now()}`;
@@ -275,11 +298,11 @@ async function saveBaseEntries(baseEntries: BasePokemonEntry[]): Promise<void> {
     ConsoleFormatter.info(`Created backup: ${backupPath}`);
     
     // Write updated entries
-    await fs.writeFile(outputPath, JSON.stringify(baseEntries, null, 2));
-    ConsoleFormatter.success(`Updated base entries saved to: ${outputPath}`);
+    await fs.writeFile(outputPath, JSON.stringify(pokemonData, null, 2));
+    ConsoleFormatter.success(`Updated Pokemon data saved to: ${outputPath}`);
     
   } catch (error) {
-    ConsoleFormatter.error(`Error saving base entries: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    ConsoleFormatter.error(`Error saving Pokemon data: ${error instanceof Error ? error.message : 'Unknown error'}`);
     throw error;
   }
 }
@@ -290,27 +313,27 @@ async function main() {
   try {
     ConsoleFormatter.printHeader(
       'Pokemon Fusion Names Scraper',
-      'Scraping fusion names from FusionDex.org to enrich base entries'
+      'Scraping fusion names from FusionDex.org to enrich Pokemon data'
     );
 
-    // Load base entries
-    ConsoleFormatter.printSection('Loading base Pokemon entries');
-    const baseEntries = await loadBaseEntries();
+    // Load Pokemon data
+    ConsoleFormatter.printSection('Loading Pokemon data');
+    const pokemonData = await loadPokemonData();
 
     // Update entries with fusion name data
-    ConsoleFormatter.printSection('Scraping fusion names and updating entries');
-    const updatedEntries = await updateBaseEntriesWithFusionNames(baseEntries);
+    ConsoleFormatter.printSection('Scraping fusion names and updating Pokemon data');
+    const updatedEntries = await updatePokemonDataWithFusionNames(pokemonData);
 
     // Save updated entries
-    ConsoleFormatter.printSection('Saving updated base entries');
-    await saveBaseEntries(updatedEntries);
+    ConsoleFormatter.printSection('Saving updated Pokemon data');
+    await savePokemonData(updatedEntries);
 
     // Calculate statistics
     const entriesWithHeadParts = updatedEntries.filter(entry => 
-      entry.id !== -1 && entry.headNamePart
+      entry.id > 0 && entry.headNamePart
     );
     const entriesWithBodyParts = updatedEntries.filter(entry => 
-      entry.id !== -1 && entry.bodyNamePart
+      entry.id > 0 && entry.bodyNamePart
     );
 
     const duration = Date.now() - startTime;

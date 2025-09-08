@@ -7,6 +7,7 @@ import { useTeamMemberSelection } from './TeamMemberSelectionContext';
 
 import { TypePills } from '@/components/TypePills';
 import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
+import { useFusionNickname } from '@/hooks/useFusionNickname';
 
 export function TeamMemberPreviewPanel() {
   const { state, actions } = useTeamMemberSelection();
@@ -22,6 +23,13 @@ export function TeamMemberPreviewPanel() {
 
   // Get fusion types using the existing hook
   const { primary, secondary } = useFusionTypesFromPokemon(
+    selectedHead?.pokemon || null,
+    selectedBody?.pokemon || null,
+    Boolean(selectedHead?.pokemon && selectedBody?.pokemon)
+  );
+
+  // Get the fusion nickname for placeholder
+  const fusionNickname = useFusionNickname(
     selectedHead?.pokemon || null,
     selectedBody?.pokemon || null,
     Boolean(selectedHead?.pokemon && selectedBody?.pokemon)
@@ -76,7 +84,7 @@ export function TeamMemberPreviewPanel() {
             <input
               id='nickname'
               type='text'
-              placeholder='Enter nickname...'
+              placeholder={fusionNickname || 'Enter nickname...'}
               value={nickname}
               onChange={e => setNickname(e.target.value)}
               onBlur={() => setPreviewNickname(nickname)}

@@ -1,7 +1,25 @@
 import { describe, it, expect } from 'vitest';
-import { getDisplayPokemon, getNicknameText } from '../utils';
+import { getDisplayPokemon } from '../utils';
+import { getFusionDisplayNameFromOptionsSync } from '@/utils/fusionNaming';
 import { type PokemonOptionType } from '@/loaders/pokemon';
 import { canFuse } from '@/utils/pokemonPredicates';
+
+// Mock function for testing nickname logic
+function getNicknameText(
+  head: PokemonOptionType | null,
+  body: PokemonOptionType | null,
+  isFusion: boolean
+): string {
+  // Mock getPokemonById function that returns undefined (no base entries)
+  const mockGetPokemonById = () => undefined;
+
+  return getFusionDisplayNameFromOptionsSync(
+    head,
+    body,
+    isFusion,
+    mockGetPokemonById
+  );
+}
 
 describe('Display Pokemon Logic - Artwork Variant Bug Prevention', () => {
   const mockPikachu: PokemonOptionType = {

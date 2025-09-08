@@ -28,7 +28,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Bulba",
+    "bodyNamePart": "saur"
   },
   {
     "id": 2,
@@ -63,7 +65,9 @@
         "id": 1,
         "name": "bulbasaur"
       }
-    }
+    },
+    "headNamePart": "Ivy",
+    "bodyNamePart": "saur"
   },
   {
     "id": 3,
@@ -93,7 +97,9 @@
         "min_level": 16,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Venu",
+    "bodyNamePart": "saur"
   },
   {
     "id": 4,
@@ -121,7 +127,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Char",
+    "bodyNamePart": "mander"
   },
   {
     "id": 5,
@@ -153,7 +161,9 @@
         "id": 4,
         "name": "charmander"
       }
-    }
+    },
+    "headNamePart": "Char",
+    "bodyNamePart": "meleon"
   },
   {
     "id": 6,
@@ -183,7 +193,9 @@
         "min_level": 16,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Char",
+    "bodyNamePart": "izard"
   },
   {
     "id": 7,
@@ -211,7 +223,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Squirt",
+    "bodyNamePart": "tle"
   },
   {
     "id": 8,
@@ -243,7 +257,9 @@
         "id": 7,
         "name": "squirtle"
       }
-    }
+    },
+    "headNamePart": "War",
+    "bodyNamePart": "tortle"
   },
   {
     "id": 9,
@@ -270,7 +286,9 @@
         "min_level": 16,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Blast",
+    "bodyNamePart": "toise"
   },
   {
     "id": 10,
@@ -298,7 +316,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Cater",
+    "bodyNamePart": "pie"
   },
   {
     "id": 11,
@@ -330,7 +350,9 @@
         "id": 10,
         "name": "caterpie"
       }
-    }
+    },
+    "headNamePart": "Meta",
+    "bodyNamePart": "pod"
   },
   {
     "id": 12,
@@ -360,7 +382,9 @@
         "min_level": 7,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Butter",
+    "bodyNamePart": "free"
   },
   {
     "id": 13,
@@ -391,7 +415,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Wee",
+    "bodyNamePart": "dle"
   },
   {
     "id": 14,
@@ -426,7 +452,9 @@
         "id": 13,
         "name": "weedle"
       }
-    }
+    },
+    "headNamePart": "Kak",
+    "bodyNamePart": "una"
   },
   {
     "id": 15,
@@ -456,7 +484,9 @@
         "min_level": 7,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Bee",
+    "bodyNamePart": "drill"
   },
   {
     "id": 16,
@@ -487,7 +517,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Pid",
+    "bodyNamePart": "gey"
   },
   {
     "id": 17,
@@ -522,7 +554,9 @@
         "id": 16,
         "name": "pidgey"
       }
-    }
+    },
+    "headNamePart": "Pidge",
+    "bodyNamePart": "tto"
   },
   {
     "id": 18,
@@ -552,7 +586,9 @@
         "min_level": 18,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Pid",
+    "bodyNamePart": "geot"
   },
   {
     "id": 19,
@@ -580,7 +616,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Rat",
+    "bodyNamePart": "tata"
   },
   {
     "id": 20,
@@ -605,7 +643,9 @@
         "id": 19,
         "name": "rattata"
       }
-    }
+    },
+    "headNamePart": "Rat",
+    "bodyNamePart": "icate"
   },
   {
     "id": 21,
@@ -636,7 +676,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Spear",
+    "bodyNamePart": "row"
   },
   {
     "id": 22,
@@ -664,7 +706,9 @@
         "id": 21,
         "name": "spearow"
       }
-    }
+    },
+    "headNamePart": "Fear",
+    "bodyNamePart": "row"
   },
   {
     "id": 23,
@@ -692,7 +736,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ek",
+    "bodyNamePart": "ans"
   },
   {
     "id": 24,
@@ -717,7 +763,9 @@
         "id": 23,
         "name": "ekans"
       }
-    }
+    },
+    "headNamePart": "Ar",
+    "bodyNamePart": "bok"
   },
   {
     "id": 25,
@@ -749,7 +797,9 @@
         "id": 172,
         "name": "pichu"
       }
-    }
+    },
+    "headNamePart": "Pika",
+    "bodyNamePart": "chu"
   },
   {
     "id": 26,
@@ -776,7 +826,9 @@
         "trigger": "level-up",
         "condition": "Happiness: 220"
       }
-    }
+    },
+    "headNamePart": "Rai",
+    "bodyNamePart": "chu"
   },
   {
     "id": 27,
@@ -804,7 +856,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Sand",
+    "bodyNamePart": "shrew"
   },
   {
     "id": 28,
@@ -829,7 +883,9 @@
         "id": 27,
         "name": "sandshrew"
       }
-    }
+    },
+    "headNamePart": "Sand",
+    "bodyNamePart": "slash"
   },
   {
     "id": 29,
@@ -857,7 +913,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Nido",
+    "bodyNamePart": "ran"
   },
   {
     "id": 30,
@@ -889,7 +947,9 @@
         "id": 29,
         "name": "nidoran-f"
       }
-    }
+    },
+    "headNamePart": "Nido",
+    "bodyNamePart": "rina"
   },
   {
     "id": 31,
@@ -919,7 +979,9 @@
         "min_level": 16,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Nido",
+    "bodyNamePart": "queen"
   },
   {
     "id": 32,
@@ -947,7 +1009,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Nido",
+    "bodyNamePart": "ran"
   },
   {
     "id": 33,
@@ -979,7 +1043,9 @@
         "id": 32,
         "name": "nidoran-m"
       }
-    }
+    },
+    "headNamePart": "Nido",
+    "bodyNamePart": "rino"
   },
   {
     "id": 34,
@@ -1009,7 +1075,9 @@
         "min_level": 16,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Nido",
+    "bodyNamePart": "king"
   },
   {
     "id": 35,
@@ -1041,7 +1109,9 @@
         "id": 173,
         "name": "cleffa"
       }
-    }
+    },
+    "headNamePart": "Clef",
+    "bodyNamePart": "fairy"
   },
   {
     "id": 36,
@@ -1068,7 +1138,9 @@
         "trigger": "level-up",
         "condition": "Happiness: 160"
       }
-    }
+    },
+    "headNamePart": "Clef",
+    "bodyNamePart": "fable"
   },
   {
     "id": 37,
@@ -1096,7 +1168,9 @@
           "trigger": "use-item"
         }
       ]
-    }
+    },
+    "headNamePart": "Vul",
+    "bodyNamePart": "pix"
   },
   {
     "id": 38,
@@ -1121,7 +1195,9 @@
         "id": 37,
         "name": "vulpix"
       }
-    }
+    },
+    "headNamePart": "Nine",
+    "bodyNamePart": "tales"
   },
   {
     "id": 39,
@@ -1156,7 +1232,9 @@
         "id": 174,
         "name": "igglybuff"
       }
-    }
+    },
+    "headNamePart": "Jiggly",
+    "bodyNamePart": "puff"
   },
   {
     "id": 40,
@@ -1186,7 +1264,9 @@
         "trigger": "level-up",
         "condition": "Happiness: 160"
       }
-    }
+    },
+    "headNamePart": "Wiggly",
+    "bodyNamePart": "tuff"
   },
   {
     "id": 41,
@@ -1217,7 +1297,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Zu",
+    "bodyNamePart": "bat"
   },
   {
     "id": 42,
@@ -1252,7 +1334,9 @@
         "id": 41,
         "name": "zubat"
       }
-    }
+    },
+    "headNamePart": "Gol",
+    "bodyNamePart": "bat"
   },
   {
     "id": 43,
@@ -1283,7 +1367,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Odd",
+    "bodyNamePart": "ish"
   },
   {
     "id": 44,
@@ -1324,7 +1410,9 @@
         "id": 43,
         "name": "oddish"
       }
-    }
+    },
+    "headNamePart": "Gloo",
+    "bodyNamePart": "om"
   },
   {
     "id": 45,
@@ -1354,7 +1442,9 @@
         "min_level": 21,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Vile",
+    "bodyNamePart": "plume"
   },
   {
     "id": 46,
@@ -1385,7 +1475,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Pa",
+    "bodyNamePart": "ras"
   },
   {
     "id": 47,
@@ -1413,7 +1505,9 @@
         "id": 46,
         "name": "paras"
       }
-    }
+    },
+    "headNamePart": "Para",
+    "bodyNamePart": "sect"
   },
   {
     "id": 48,
@@ -1444,7 +1538,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Veno",
+    "bodyNamePart": "nat"
   },
   {
     "id": 49,
@@ -1472,7 +1568,9 @@
         "id": 48,
         "name": "venonat"
       }
-    }
+    },
+    "headNamePart": "Veno",
+    "bodyNamePart": "moth"
   },
   {
     "id": 50,
@@ -1500,7 +1598,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Dig",
+    "bodyNamePart": "lett"
   },
   {
     "id": 51,
@@ -1525,7 +1625,9 @@
         "id": 50,
         "name": "diglett"
       }
-    }
+    },
+    "headNamePart": "Dug",
+    "bodyNamePart": "trio"
   },
   {
     "id": 52,
@@ -1559,7 +1661,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Meow",
+    "bodyNamePart": "th"
   },
   {
     "id": 53,
@@ -1584,7 +1688,9 @@
         "id": 52,
         "name": "meowth"
       }
-    }
+    },
+    "headNamePart": "Per",
+    "bodyNamePart": "sian"
   },
   {
     "id": 54,
@@ -1612,7 +1718,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Psy",
+    "bodyNamePart": "duck"
   },
   {
     "id": 55,
@@ -1637,7 +1745,9 @@
         "id": 54,
         "name": "psyduck"
       }
-    }
+    },
+    "headNamePart": "Gol",
+    "bodyNamePart": "duck"
   },
   {
     "id": 56,
@@ -1665,7 +1775,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Man",
+    "bodyNamePart": "key"
   },
   {
     "id": 57,
@@ -1696,7 +1808,9 @@
         "id": 56,
         "name": "mankey"
       }
-    }
+    },
+    "headNamePart": "Prime",
+    "bodyNamePart": "ape"
   },
   {
     "id": 58,
@@ -1724,7 +1838,9 @@
           "trigger": "use-item"
         }
       ]
-    }
+    },
+    "headNamePart": "Growl",
+    "bodyNamePart": "lithe"
   },
   {
     "id": 59,
@@ -1749,7 +1865,9 @@
         "id": 58,
         "name": "growlithe"
       }
-    }
+    },
+    "headNamePart": "Arca",
+    "bodyNamePart": "nine"
   },
   {
     "id": 60,
@@ -1777,7 +1895,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Poli",
+    "bodyNamePart": "wag"
   },
   {
     "id": 61,
@@ -1814,7 +1934,9 @@
         "id": 60,
         "name": "poliwag"
       }
-    }
+    },
+    "headNamePart": "Poli",
+    "bodyNamePart": "whirl"
   },
   {
     "id": 62,
@@ -1844,7 +1966,9 @@
         "min_level": 25,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Poli",
+    "bodyNamePart": "wrath"
   },
   {
     "id": 63,
@@ -1872,7 +1996,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ab",
+    "bodyNamePart": "ra"
   },
   {
     "id": 64,
@@ -1903,7 +2029,9 @@
         "id": 63,
         "name": "abra"
       }
-    }
+    },
+    "headNamePart": "Kada",
+    "bodyNamePart": "bra"
   },
   {
     "id": 65,
@@ -1930,7 +2058,9 @@
         "min_level": 16,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Ala",
+    "bodyNamePart": "kazam"
   },
   {
     "id": 66,
@@ -1958,7 +2088,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ma",
+    "bodyNamePart": "chop"
   },
   {
     "id": 67,
@@ -1989,7 +2121,9 @@
         "id": 66,
         "name": "machop"
       }
-    }
+    },
+    "headNamePart": "Ma",
+    "bodyNamePart": "choke"
   },
   {
     "id": 68,
@@ -2016,7 +2150,9 @@
         "min_level": 28,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Ma",
+    "bodyNamePart": "champ"
   },
   {
     "id": 69,
@@ -2047,7 +2183,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Bell",
+    "bodyNamePart": "sprout"
   },
   {
     "id": 70,
@@ -2082,7 +2220,9 @@
         "id": 69,
         "name": "bellsprout"
       }
-    }
+    },
+    "headNamePart": "Weepin",
+    "bodyNamePart": "bell"
   },
   {
     "id": 71,
@@ -2112,7 +2252,9 @@
         "min_level": 21,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Victree",
+    "bodyNamePart": "bell"
   },
   {
     "id": 72,
@@ -2143,7 +2285,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Tenta",
+    "bodyNamePart": "cool"
   },
   {
     "id": 73,
@@ -2171,7 +2315,9 @@
         "id": 72,
         "name": "tentacool"
       }
-    }
+    },
+    "headNamePart": "Tenta",
+    "bodyNamePart": "cruel"
   },
   {
     "id": 74,
@@ -2202,7 +2348,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Geo",
+    "bodyNamePart": "dude"
   },
   {
     "id": 75,
@@ -2236,7 +2384,9 @@
         "id": 74,
         "name": "geodude"
       }
-    }
+    },
+    "headNamePart": "Grave",
+    "bodyNamePart": "ler"
   },
   {
     "id": 76,
@@ -2266,7 +2416,9 @@
         "min_level": 25,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Go",
+    "bodyNamePart": "lem"
   },
   {
     "id": 77,
@@ -2294,7 +2446,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Pony",
+    "bodyNamePart": "ta"
   },
   {
     "id": 78,
@@ -2319,7 +2473,9 @@
         "id": 77,
         "name": "ponyta"
       }
-    }
+    },
+    "headNamePart": "Rapi",
+    "bodyNamePart": "dash"
   },
   {
     "id": 79,
@@ -2355,7 +2511,9 @@
           "trigger": "trade"
         }
       ]
-    }
+    },
+    "headNamePart": "Slow",
+    "bodyNamePart": "poke"
   },
   {
     "id": 80,
@@ -2383,7 +2541,9 @@
         "id": 79,
         "name": "slowpoke"
       }
-    }
+    },
+    "headNamePart": "Slow",
+    "bodyNamePart": "bro"
   },
   {
     "id": 81,
@@ -2414,7 +2574,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Magne",
+    "bodyNamePart": "mite"
   },
   {
     "id": 82,
@@ -2449,7 +2611,9 @@
         "id": 81,
         "name": "magnemite"
       }
-    }
+    },
+    "headNamePart": "Magne",
+    "bodyNamePart": "ton"
   },
   {
     "id": 83,
@@ -2479,7 +2643,9 @@
           "trigger": "three-critical-hits"
         }
       ]
-    }
+    },
+    "headNamePart": "Far",
+    "bodyNamePart": "fetchd"
   },
   {
     "id": 84,
@@ -2510,7 +2676,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Do",
+    "bodyNamePart": "duo"
   },
   {
     "id": 85,
@@ -2538,7 +2706,9 @@
         "id": 84,
         "name": "doduo"
       }
-    }
+    },
+    "headNamePart": "Do",
+    "bodyNamePart": "drio"
   },
   {
     "id": 86,
@@ -2566,7 +2736,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "See",
+    "bodyNamePart": "eel"
   },
   {
     "id": 87,
@@ -2594,7 +2766,9 @@
         "id": 86,
         "name": "seel"
       }
-    }
+    },
+    "headNamePart": "Dew",
+    "bodyNamePart": "gong"
   },
   {
     "id": 88,
@@ -2622,7 +2796,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Gri",
+    "bodyNamePart": "mer"
   },
   {
     "id": 89,
@@ -2647,7 +2823,9 @@
         "id": 88,
         "name": "grimer"
       }
-    }
+    },
+    "headNamePart": "Mu",
+    "bodyNamePart": "uk"
   },
   {
     "id": 90,
@@ -2675,7 +2853,9 @@
           "trigger": "use-item"
         }
       ]
-    }
+    },
+    "headNamePart": "Shell",
+    "bodyNamePart": "der"
   },
   {
     "id": 91,
@@ -2703,7 +2883,9 @@
         "id": 90,
         "name": "shellder"
       }
-    }
+    },
+    "headNamePart": "Cloy",
+    "bodyNamePart": "ster"
   },
   {
     "id": 92,
@@ -2734,7 +2916,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Gas",
+    "bodyNamePart": "tly"
   },
   {
     "id": 93,
@@ -2768,7 +2952,9 @@
         "id": 92,
         "name": "gastly"
       }
-    }
+    },
+    "headNamePart": "Haun",
+    "bodyNamePart": "ter"
   },
   {
     "id": 94,
@@ -2798,7 +2984,9 @@
         "min_level": 25,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Gen",
+    "bodyNamePart": "gar"
   },
   {
     "id": 95,
@@ -2828,7 +3016,9 @@
           "trigger": "trade"
         }
       ]
-    }
+    },
+    "headNamePart": "On",
+    "bodyNamePart": "nix"
   },
   {
     "id": 96,
@@ -2856,7 +3046,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Drow",
+    "bodyNamePart": "zee"
   },
   {
     "id": 97,
@@ -2881,7 +3073,9 @@
         "id": 96,
         "name": "drowzee"
       }
-    }
+    },
+    "headNamePart": "Hy",
+    "bodyNamePart": "no"
   },
   {
     "id": 98,
@@ -2909,7 +3103,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Krab",
+    "bodyNamePart": "by"
   },
   {
     "id": 99,
@@ -2934,7 +3130,9 @@
         "id": 98,
         "name": "krabby"
       }
-    }
+    },
+    "headNamePart": "King",
+    "bodyNamePart": "ler"
   },
   {
     "id": 100,
@@ -2962,7 +3160,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Volt",
+    "bodyNamePart": "rb"
   },
   {
     "id": 101,
@@ -2987,7 +3187,9 @@
         "id": 100,
         "name": "voltorb"
       }
-    }
+    },
+    "headNamePart": "Electr",
+    "bodyNamePart": "de"
   },
   {
     "id": 102,
@@ -3018,7 +3220,9 @@
           "trigger": "use-item"
         }
       ]
-    }
+    },
+    "headNamePart": "Exegg",
+    "bodyNamePart": "cute"
   },
   {
     "id": 103,
@@ -3046,7 +3250,9 @@
         "id": 102,
         "name": "exeggcute"
       }
-    }
+    },
+    "headNamePart": "Exeggu",
+    "bodyNamePart": "tor"
   },
   {
     "id": 104,
@@ -3074,7 +3280,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Cu",
+    "bodyNamePart": "bone"
   },
   {
     "id": 105,
@@ -3099,7 +3307,9 @@
         "id": 104,
         "name": "cubone"
       }
-    }
+    },
+    "headNamePart": "Maro",
+    "bodyNamePart": "wak"
   },
   {
     "id": 106,
@@ -3124,7 +3334,9 @@
         "id": 236,
         "name": "tyrogue"
       }
-    }
+    },
+    "headNamePart": "Hitmon",
+    "bodyNamePart": "lee"
   },
   {
     "id": 107,
@@ -3149,7 +3361,9 @@
         "id": 236,
         "name": "tyrogue"
       }
-    }
+    },
+    "headNamePart": "Hitmon",
+    "bodyNamePart": "chan"
   },
   {
     "id": 108,
@@ -3176,7 +3390,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Licki",
+    "bodyNamePart": "tung"
   },
   {
     "id": 109,
@@ -3204,7 +3420,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Koff",
+    "bodyNamePart": "fing"
   },
   {
     "id": 110,
@@ -3229,7 +3447,9 @@
         "id": 109,
         "name": "koffing"
       }
-    }
+    },
+    "headNamePart": "Wee",
+    "bodyNamePart": "zing"
   },
   {
     "id": 111,
@@ -3260,7 +3480,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Rhy",
+    "bodyNamePart": "horn"
   },
   {
     "id": 112,
@@ -3294,7 +3516,9 @@
         "id": 111,
         "name": "rhyhorn"
       }
-    }
+    },
+    "headNamePart": "Rhy",
+    "bodyNamePart": "don"
   },
   {
     "id": 113,
@@ -3326,7 +3550,9 @@
         "id": 440,
         "name": "happiny"
       }
-    }
+    },
+    "headNamePart": "Chan",
+    "bodyNamePart": "sey"
   },
   {
     "id": 114,
@@ -3353,7 +3579,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Tan",
+    "bodyNamePart": "gela"
   },
   {
     "id": 115,
@@ -3374,7 +3602,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Kangas",
+    "bodyNamePart": "khan"
   },
   {
     "id": 116,
@@ -3402,7 +3632,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Hor",
+    "bodyNamePart": "sea"
   },
   {
     "id": 117,
@@ -3433,7 +3665,9 @@
         "id": 116,
         "name": "horsea"
       }
-    }
+    },
+    "headNamePart": "Sea",
+    "bodyNamePart": "dra"
   },
   {
     "id": 118,
@@ -3461,7 +3695,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Gol",
+    "bodyNamePart": "deen"
   },
   {
     "id": 119,
@@ -3486,7 +3722,9 @@
         "id": 118,
         "name": "goldeen"
       }
-    }
+    },
+    "headNamePart": "Sea",
+    "bodyNamePart": "king"
   },
   {
     "id": 120,
@@ -3514,7 +3752,9 @@
           "trigger": "use-item"
         }
       ]
-    }
+    },
+    "headNamePart": "Star",
+    "bodyNamePart": "yu"
   },
   {
     "id": 121,
@@ -3542,7 +3782,9 @@
         "id": 120,
         "name": "staryu"
       }
-    }
+    },
+    "headNamePart": "Star",
+    "bodyNamePart": "mie"
   },
   {
     "id": 122,
@@ -3577,7 +3819,9 @@
         "id": 439,
         "name": "mime-jr"
       }
-    }
+    },
+    "headNamePart": "Mr. ",
+    "bodyNamePart": "mime"
   },
   {
     "id": 123,
@@ -3613,7 +3857,9 @@
           "trigger": "use-item"
         }
       ]
-    }
+    },
+    "headNamePart": "Scy",
+    "bodyNamePart": "ther"
   },
   {
     "id": 124,
@@ -3641,7 +3887,9 @@
         "id": 238,
         "name": "smoochum"
       }
-    }
+    },
+    "headNamePart": "Jyn",
+    "bodyNamePart": "nx"
   },
   {
     "id": 125,
@@ -3672,7 +3920,9 @@
         "id": 239,
         "name": "elekid"
       }
-    }
+    },
+    "headNamePart": "Electa",
+    "bodyNamePart": "buzz"
   },
   {
     "id": 126,
@@ -3703,7 +3953,9 @@
         "id": 240,
         "name": "magby"
       }
-    }
+    },
+    "headNamePart": "Mag",
+    "bodyNamePart": "mar"
   },
   {
     "id": 127,
@@ -3724,7 +3976,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Pin",
+    "bodyNamePart": "sir"
   },
   {
     "id": 128,
@@ -3745,7 +3999,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Tau",
+    "bodyNamePart": "ros"
   },
   {
     "id": 129,
@@ -3773,7 +4029,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Magi",
+    "bodyNamePart": "karp"
   },
   {
     "id": 130,
@@ -3801,7 +4059,9 @@
         "id": 129,
         "name": "magikarp"
       }
-    }
+    },
+    "headNamePart": "Gyara",
+    "bodyNamePart": "dos"
   },
   {
     "id": 131,
@@ -3825,7 +4085,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "La",
+    "bodyNamePart": "ras"
   },
   {
     "id": 132,
@@ -3846,7 +4108,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Dit",
+    "bodyNamePart": "to"
   },
   {
     "id": 133,
@@ -3916,7 +4180,9 @@
           "condition": "Knows fairy move"
         }
       ]
-    }
+    },
+    "headNamePart": "Ee",
+    "bodyNamePart": "vee"
   },
   {
     "id": 134,
@@ -3941,7 +4207,9 @@
         "id": 133,
         "name": "eevee"
       }
-    }
+    },
+    "headNamePart": "Vapor",
+    "bodyNamePart": "eon"
   },
   {
     "id": 135,
@@ -3966,7 +4234,9 @@
         "id": 133,
         "name": "eevee"
       }
-    }
+    },
+    "headNamePart": "Jolt",
+    "bodyNamePart": "eon"
   },
   {
     "id": 136,
@@ -3991,7 +4261,9 @@
         "id": 133,
         "name": "eevee"
       }
-    }
+    },
+    "headNamePart": "Fla",
+    "bodyNamePart": "reon"
   },
   {
     "id": 137,
@@ -4018,7 +4290,9 @@
           "trigger": "trade"
         }
       ]
-    }
+    },
+    "headNamePart": "Pory",
+    "bodyNamePart": "gon"
   },
   {
     "id": 138,
@@ -4049,7 +4323,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Oma",
+    "bodyNamePart": "nyte"
   },
   {
     "id": 139,
@@ -4077,7 +4353,9 @@
         "id": 138,
         "name": "omanyte"
       }
-    }
+    },
+    "headNamePart": "Oma",
+    "bodyNamePart": "star"
   },
   {
     "id": 140,
@@ -4108,7 +4386,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Kabu",
+    "bodyNamePart": "to"
   },
   {
     "id": 141,
@@ -4136,7 +4416,9 @@
         "id": 140,
         "name": "kabuto"
       }
-    }
+    },
+    "headNamePart": "Kabu",
+    "bodyNamePart": "tops"
   },
   {
     "id": 142,
@@ -4160,7 +4442,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Aero",
+    "bodyNamePart": "dactyl"
   },
   {
     "id": 143,
@@ -4185,7 +4469,9 @@
         "id": 446,
         "name": "munchlax"
       }
-    }
+    },
+    "headNamePart": "Snor",
+    "bodyNamePart": "lax"
   },
   {
     "id": 144,
@@ -4209,7 +4495,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Arti",
+    "bodyNamePart": "cuno"
   },
   {
     "id": 145,
@@ -4233,7 +4521,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Za",
+    "bodyNamePart": "dos"
   },
   {
     "id": 146,
@@ -4257,7 +4547,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Mol",
+    "bodyNamePart": "tres"
   },
   {
     "id": 147,
@@ -4285,7 +4577,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Dra",
+    "bodyNamePart": "tini"
   },
   {
     "id": 148,
@@ -4317,7 +4611,9 @@
         "id": 147,
         "name": "dratini"
       }
-    }
+    },
+    "headNamePart": "Drago",
+    "bodyNamePart": "nair"
   },
   {
     "id": 149,
@@ -4347,7 +4643,9 @@
         "min_level": 30,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Drago",
+    "bodyNamePart": "nite"
   },
   {
     "id": 150,
@@ -4368,7 +4666,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Mew",
+    "bodyNamePart": "two"
   },
   {
     "id": 151,
@@ -4389,7 +4689,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Mew",
+    "bodyNamePart": "ew"
   },
   {
     "id": 152,
@@ -4417,7 +4719,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Chiko",
+    "bodyNamePart": "rita"
   },
   {
     "id": 153,
@@ -4449,7 +4753,9 @@
         "id": 152,
         "name": "chikorita"
       }
-    }
+    },
+    "headNamePart": "Bay",
+    "bodyNamePart": "leef"
   },
   {
     "id": 154,
@@ -4476,7 +4782,9 @@
         "min_level": 16,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Mega",
+    "bodyNamePart": "nium"
   },
   {
     "id": 155,
@@ -4504,7 +4812,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Cynda",
+    "bodyNamePart": "quil"
   },
   {
     "id": 156,
@@ -4536,7 +4846,9 @@
         "id": 155,
         "name": "cyndaquil"
       }
-    }
+    },
+    "headNamePart": "Qui",
+    "bodyNamePart": "lava"
   },
   {
     "id": 157,
@@ -4563,7 +4875,9 @@
         "min_level": 14,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Typh",
+    "bodyNamePart": "losion"
   },
   {
     "id": 158,
@@ -4591,7 +4905,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Toto",
+    "bodyNamePart": "dile"
   },
   {
     "id": 159,
@@ -4623,7 +4939,9 @@
         "id": 158,
         "name": "totodile"
       }
-    }
+    },
+    "headNamePart": "Croco",
+    "bodyNamePart": "naw"
   },
   {
     "id": 160,
@@ -4650,7 +4968,9 @@
         "min_level": 18,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Fera",
+    "bodyNamePart": "ligatr"
   },
   {
     "id": 161,
@@ -4678,7 +4998,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Sen",
+    "bodyNamePart": "tret"
   },
   {
     "id": 162,
@@ -4703,7 +5025,9 @@
         "id": 161,
         "name": "sentret"
       }
-    }
+    },
+    "headNamePart": "Fur",
+    "bodyNamePart": "ret"
   },
   {
     "id": 163,
@@ -4734,7 +5058,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Hoot",
+    "bodyNamePart": "hoot"
   },
   {
     "id": 164,
@@ -4762,7 +5088,9 @@
         "id": 163,
         "name": "hoothoot"
       }
-    }
+    },
+    "headNamePart": "Noct",
+    "bodyNamePart": "wl"
   },
   {
     "id": 165,
@@ -4793,7 +5121,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ledy",
+    "bodyNamePart": "ba"
   },
   {
     "id": 166,
@@ -4821,7 +5151,9 @@
         "id": 165,
         "name": "ledyba"
       }
-    }
+    },
+    "headNamePart": "Led",
+    "bodyNamePart": "ian"
   },
   {
     "id": 167,
@@ -4852,7 +5184,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Spina",
+    "bodyNamePart": "rak"
   },
   {
     "id": 168,
@@ -4880,7 +5214,9 @@
         "id": 167,
         "name": "spinarak"
       }
-    }
+    },
+    "headNamePart": "Aria",
+    "bodyNamePart": "dos"
   },
   {
     "id": 169,
@@ -4910,7 +5246,9 @@
         "min_level": 22,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Cro",
+    "bodyNamePart": "bat"
   },
   {
     "id": 170,
@@ -4941,7 +5279,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Chin",
+    "bodyNamePart": "chou"
   },
   {
     "id": 171,
@@ -4969,7 +5309,9 @@
         "id": 170,
         "name": "chinchou"
       }
-    }
+    },
+    "headNamePart": "Lan",
+    "bodyNamePart": "turn"
   },
   {
     "id": 172,
@@ -4997,7 +5339,9 @@
           "condition": "Happiness: 220"
         }
       ]
-    }
+    },
+    "headNamePart": "Pi",
+    "bodyNamePart": "chu"
   },
   {
     "id": 173,
@@ -5025,7 +5369,9 @@
           "condition": "Happiness: 160"
         }
       ]
-    }
+    },
+    "headNamePart": "Clef",
+    "bodyNamePart": "fa"
   },
   {
     "id": 174,
@@ -5056,7 +5402,9 @@
           "condition": "Happiness: 160"
         }
       ]
-    }
+    },
+    "headNamePart": "Iggly",
+    "bodyNamePart": "buff"
   },
   {
     "id": 175,
@@ -5084,7 +5432,9 @@
           "condition": "Happiness: 160"
         }
       ]
-    }
+    },
+    "headNamePart": "Toge",
+    "bodyNamePart": "pi"
   },
   {
     "id": 176,
@@ -5119,7 +5469,9 @@
         "id": 175,
         "name": "togepi"
       }
-    }
+    },
+    "headNamePart": "Toge",
+    "bodyNamePart": "tic"
   },
   {
     "id": 177,
@@ -5150,7 +5502,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Na",
+    "bodyNamePart": "tu"
   },
   {
     "id": 178,
@@ -5178,7 +5532,9 @@
         "id": 177,
         "name": "natu"
       }
-    }
+    },
+    "headNamePart": "Xa",
+    "bodyNamePart": "tu"
   },
   {
     "id": 179,
@@ -5206,7 +5562,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ma",
+    "bodyNamePart": "reep"
   },
   {
     "id": 180,
@@ -5238,7 +5596,9 @@
         "id": 179,
         "name": "mareep"
       }
-    }
+    },
+    "headNamePart": "Flaa",
+    "bodyNamePart": "ffy"
   },
   {
     "id": 181,
@@ -5265,7 +5625,9 @@
         "min_level": 15,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Ampha",
+    "bodyNamePart": "ros"
   },
   {
     "id": 182,
@@ -5292,7 +5654,9 @@
         "min_level": 21,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Bell",
+    "bodyNamePart": "ssom"
   },
   {
     "id": 183,
@@ -5327,7 +5691,9 @@
         "id": 298,
         "name": "azurill"
       }
-    }
+    },
+    "headNamePart": "Ma",
+    "bodyNamePart": "rill"
   },
   {
     "id": 184,
@@ -5357,7 +5723,9 @@
         "trigger": "level-up",
         "condition": "Happiness: 160"
       }
-    }
+    },
+    "headNamePart": "Azuma",
+    "bodyNamePart": "rill"
   },
   {
     "id": 185,
@@ -5382,7 +5750,9 @@
         "id": 438,
         "name": "bonsly"
       }
-    }
+    },
+    "headNamePart": "Sudo",
+    "bodyNamePart": "woodo"
   },
   {
     "id": 186,
@@ -5409,7 +5779,9 @@
         "min_level": 25,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Poli",
+    "bodyNamePart": "toed"
   },
   {
     "id": 187,
@@ -5440,7 +5812,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ho",
+    "bodyNamePart": "pip"
   },
   {
     "id": 188,
@@ -5475,7 +5849,9 @@
         "id": 187,
         "name": "hoppip"
       }
-    }
+    },
+    "headNamePart": "Ski",
+    "bodyNamePart": "loom"
   },
   {
     "id": 189,
@@ -5505,7 +5881,9 @@
         "min_level": 18,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Jum",
+    "bodyNamePart": "luff"
   },
   {
     "id": 190,
@@ -5532,7 +5910,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ai",
+    "bodyNamePart": "pom"
   },
   {
     "id": 191,
@@ -5560,7 +5940,9 @@
           "trigger": "use-item"
         }
       ]
-    }
+    },
+    "headNamePart": "Sun",
+    "bodyNamePart": "kern"
   },
   {
     "id": 192,
@@ -5585,7 +5967,9 @@
         "id": 191,
         "name": "sunkern"
       }
-    }
+    },
+    "headNamePart": "Sun",
+    "bodyNamePart": "flora"
   },
   {
     "id": 193,
@@ -5615,7 +5999,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Yan",
+    "bodyNamePart": "ma"
   },
   {
     "id": 194,
@@ -5652,7 +6038,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Woo",
+    "bodyNamePart": "per"
   },
   {
     "id": 195,
@@ -5680,7 +6068,9 @@
         "id": 194,
         "name": "wooper"
       }
-    }
+    },
+    "headNamePart": "Quag",
+    "bodyNamePart": "sire"
   },
   {
     "id": 196,
@@ -5705,7 +6095,9 @@
         "id": 133,
         "name": "eevee"
       }
-    }
+    },
+    "headNamePart": "Es",
+    "bodyNamePart": "eon"
   },
   {
     "id": 197,
@@ -5730,7 +6122,9 @@
         "id": 133,
         "name": "eevee"
       }
-    }
+    },
+    "headNamePart": "Umb",
+    "bodyNamePart": "reon"
   },
   {
     "id": 198,
@@ -5761,7 +6155,9 @@
           "trigger": "use-item"
         }
       ]
-    }
+    },
+    "headNamePart": "Mur",
+    "bodyNamePart": "krow"
   },
   {
     "id": 199,
@@ -5789,7 +6185,9 @@
         "id": 79,
         "name": "slowpoke"
       }
-    }
+    },
+    "headNamePart": "Slow",
+    "bodyNamePart": "king"
   },
   {
     "id": 200,
@@ -5817,7 +6215,9 @@
           "trigger": "use-item"
         }
       ]
-    }
+    },
+    "headNamePart": "Mis",
+    "bodyNamePart": "dreavus"
   },
   {
     "id": 201,
@@ -5838,7 +6238,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Un",
+    "bodyNamePart": "wn"
   },
   {
     "id": 202,
@@ -5863,7 +6265,9 @@
         "id": 360,
         "name": "wynaut"
       }
-    }
+    },
+    "headNamePart": "Wob",
+    "bodyNamePart": "buffet"
   },
   {
     "id": 203,
@@ -5893,7 +6297,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Gira",
+    "bodyNamePart": "farig"
   },
   {
     "id": 204,
@@ -5921,7 +6327,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Pine",
+    "bodyNamePart": "co"
   },
   {
     "id": 205,
@@ -5949,7 +6357,9 @@
         "id": 204,
         "name": "pineco"
       }
-    }
+    },
+    "headNamePart": "Forre",
+    "bodyNamePart": "tress"
   },
   {
     "id": 206,
@@ -5976,7 +6386,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Dun",
+    "bodyNamePart": "sparce"
   },
   {
     "id": 207,
@@ -6007,7 +6419,9 @@
           "condition": "Time: night"
         }
       ]
-    }
+    },
+    "headNamePart": "Gli",
+    "bodyNamePart": "gar"
   },
   {
     "id": 208,
@@ -6035,7 +6449,9 @@
         "id": 95,
         "name": "onix"
       }
-    }
+    },
+    "headNamePart": "Stee",
+    "bodyNamePart": "lix"
   },
   {
     "id": 209,
@@ -6063,7 +6479,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Snub",
+    "bodyNamePart": "bull"
   },
   {
     "id": 210,
@@ -6088,7 +6506,9 @@
         "id": 209,
         "name": "snubbull"
       }
-    }
+    },
+    "headNamePart": "Gran",
+    "bodyNamePart": "bull"
   },
   {
     "id": 211,
@@ -6118,7 +6538,9 @@
           "trigger": "strong-style-move"
         }
       ]
-    }
+    },
+    "headNamePart": "Qwil",
+    "bodyNamePart": "fish"
   },
   {
     "id": 212,
@@ -6146,7 +6568,9 @@
         "id": 123,
         "name": "scyther"
       }
-    }
+    },
+    "headNamePart": "Sci",
+    "bodyNamePart": "zor"
   },
   {
     "id": 213,
@@ -6170,7 +6594,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Shu",
+    "bodyNamePart": "ckle"
   },
   {
     "id": 214,
@@ -6194,7 +6620,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Hera",
+    "bodyNamePart": "cross"
   },
   {
     "id": 215,
@@ -6231,7 +6659,9 @@
           "condition": "Time: day"
         }
       ]
-    }
+    },
+    "headNamePart": "Snea",
+    "bodyNamePart": "sel"
   },
   {
     "id": 216,
@@ -6259,7 +6689,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Teddi",
+    "bodyNamePart": "ursa"
   },
   {
     "id": 217,
@@ -6292,7 +6724,9 @@
         "id": 216,
         "name": "teddiursa"
       }
-    }
+    },
+    "headNamePart": "Ursa",
+    "bodyNamePart": "ring"
   },
   {
     "id": 218,
@@ -6320,7 +6754,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Slug",
+    "bodyNamePart": "gma"
   },
   {
     "id": 219,
@@ -6348,7 +6784,9 @@
         "id": 218,
         "name": "slugma"
       }
-    }
+    },
+    "headNamePart": "Mag",
+    "bodyNamePart": "cargo"
   },
   {
     "id": 220,
@@ -6379,7 +6817,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Swi",
+    "bodyNamePart": "nub"
   },
   {
     "id": 221,
@@ -6413,7 +6853,9 @@
         "id": 220,
         "name": "swinub"
       }
-    }
+    },
+    "headNamePart": "Pilo",
+    "bodyNamePart": "swine"
   },
   {
     "id": 222,
@@ -6444,7 +6886,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Cor",
+    "bodyNamePart": "sola"
   },
   {
     "id": 223,
@@ -6472,7 +6916,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Remo",
+    "bodyNamePart": "raid"
   },
   {
     "id": 224,
@@ -6497,7 +6943,9 @@
         "id": 223,
         "name": "remoraid"
       }
-    }
+    },
+    "headNamePart": "Octi",
+    "bodyNamePart": "llery"
   },
   {
     "id": 225,
@@ -6521,7 +6969,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Deli",
+    "bodyNamePart": "bird"
   },
   {
     "id": 226,
@@ -6549,7 +6999,9 @@
         "id": 458,
         "name": "mantyke"
       }
-    }
+    },
+    "headNamePart": "Man",
+    "bodyNamePart": "tine"
   },
   {
     "id": 227,
@@ -6573,7 +7025,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Skar",
+    "bodyNamePart": "mory"
   },
   {
     "id": 228,
@@ -6604,7 +7058,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Houn",
+    "bodyNamePart": "dour"
   },
   {
     "id": 229,
@@ -6632,7 +7088,9 @@
         "id": 228,
         "name": "houndour"
       }
-    }
+    },
+    "headNamePart": "Houn",
+    "bodyNamePart": "doom"
   },
   {
     "id": 230,
@@ -6662,7 +7120,9 @@
         "min_level": 32,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "King",
+    "bodyNamePart": "dra"
   },
   {
     "id": 231,
@@ -6690,7 +7150,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Phan",
+    "bodyNamePart": "py"
   },
   {
     "id": 232,
@@ -6715,7 +7177,9 @@
         "id": 231,
         "name": "phanpy"
       }
-    }
+    },
+    "headNamePart": "Don",
+    "bodyNamePart": "phan"
   },
   {
     "id": 233,
@@ -6746,7 +7210,9 @@
         "id": 137,
         "name": "porygon"
       }
-    }
+    },
+    "headNamePart": "Pory",
+    "bodyNamePart": "gon2"
   },
   {
     "id": 234,
@@ -6773,7 +7239,9 @@
           "trigger": "agile-style-move"
         }
       ]
-    }
+    },
+    "headNamePart": "Stan",
+    "bodyNamePart": "tler"
   },
   {
     "id": 235,
@@ -6794,7 +7262,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Smear",
+    "bodyNamePart": "gle"
   },
   {
     "id": 236,
@@ -6834,7 +7304,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ty",
+    "bodyNamePart": "rogue"
   },
   {
     "id": 237,
@@ -6859,7 +7331,9 @@
         "id": 236,
         "name": "tyrogue"
       }
-    }
+    },
+    "headNamePart": "Hitmon",
+    "bodyNamePart": "top"
   },
   {
     "id": 238,
@@ -6890,7 +7364,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Smoo",
+    "bodyNamePart": "chum"
   },
   {
     "id": 239,
@@ -6918,7 +7394,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ele",
+    "bodyNamePart": "kid"
   },
   {
     "id": 240,
@@ -6946,7 +7424,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Mag",
+    "bodyNamePart": "by"
   },
   {
     "id": 241,
@@ -6967,7 +7447,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Mil",
+    "bodyNamePart": "tank"
   },
   {
     "id": 242,
@@ -6994,7 +7476,9 @@
         "trigger": "level-up",
         "condition": "Time: day"
       }
-    }
+    },
+    "headNamePart": "Blis",
+    "bodyNamePart": "sey"
   },
   {
     "id": 243,
@@ -7015,7 +7499,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Rai",
+    "bodyNamePart": "kou"
   },
   {
     "id": 244,
@@ -7036,7 +7522,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "En",
+    "bodyNamePart": "tei"
   },
   {
     "id": 245,
@@ -7057,7 +7545,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Sui",
+    "bodyNamePart": "cune"
   },
   {
     "id": 246,
@@ -7088,7 +7578,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Larvi",
+    "bodyNamePart": "tar"
   },
   {
     "id": 247,
@@ -7123,7 +7615,9 @@
         "id": 246,
         "name": "larvitar"
       }
-    }
+    },
+    "headNamePart": "Pupi",
+    "bodyNamePart": "tar"
   },
   {
     "id": 248,
@@ -7153,7 +7647,9 @@
         "min_level": 30,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Tyran",
+    "bodyNamePart": "itar"
   },
   {
     "id": 249,
@@ -7177,7 +7673,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Lu",
+    "bodyNamePart": "gia"
   },
   {
     "id": 250,
@@ -7201,7 +7699,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Ho-",
+    "bodyNamePart": "h"
   },
   {
     "id": 251,
@@ -7225,7 +7725,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Cele",
+    "bodyNamePart": "bi"
   },
   {
     "id": 252,
@@ -7256,7 +7758,9 @@
           "condition": "Happiness: 160"
         }
       ]
-    }
+    },
+    "headNamePart": "Azu",
+    "bodyNamePart": "rill"
   },
   {
     "id": 253,
@@ -7284,7 +7788,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Wy",
+    "bodyNamePart": "naut"
   },
   {
     "id": 254,
@@ -7309,7 +7815,9 @@
         "id": 190,
         "name": "aipom"
       }
-    }
+    },
+    "headNamePart": "Ambi",
+    "bodyNamePart": "pom"
   },
   {
     "id": 255,
@@ -7334,7 +7842,9 @@
         "id": 200,
         "name": "misdreavus"
       }
-    }
+    },
+    "headNamePart": "Mis",
+    "bodyNamePart": "magius"
   },
   {
     "id": 256,
@@ -7362,7 +7872,9 @@
         "id": 198,
         "name": "murkrow"
       }
-    }
+    },
+    "headNamePart": "Honch",
+    "bodyNamePart": "krow"
   },
   {
     "id": 257,
@@ -7389,7 +7901,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Bon",
+    "bodyNamePart": "sly"
   },
   {
     "id": 258,
@@ -7419,7 +7933,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Mime",
+    "bodyNamePart": " Jr."
   },
   {
     "id": 259,
@@ -7447,7 +7963,9 @@
           "condition": "Time: day"
         }
       ]
-    }
+    },
+    "headNamePart": "Happi",
+    "bodyNamePart": "piny"
   },
   {
     "id": 260,
@@ -7475,7 +7993,9 @@
           "condition": "Happiness: 160"
         }
       ]
-    }
+    },
+    "headNamePart": "Munch",
+    "bodyNamePart": "lax"
   },
   {
     "id": 261,
@@ -7505,7 +8025,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Man",
+    "bodyNamePart": "tyke"
   },
   {
     "id": 262,
@@ -7533,7 +8055,9 @@
         "id": 215,
         "name": "sneasel"
       }
-    }
+    },
+    "headNamePart": "Weav",
+    "bodyNamePart": "vile"
   },
   {
     "id": 263,
@@ -7563,7 +8087,9 @@
         "min_level": 30,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Magne",
+    "bodyNamePart": "zone"
   },
   {
     "id": 264,
@@ -7588,7 +8114,9 @@
         "id": 108,
         "name": "lickitung"
       }
-    }
+    },
+    "headNamePart": "Licki",
+    "bodyNamePart": "licky"
   },
   {
     "id": 265,
@@ -7618,7 +8146,9 @@
         "min_level": 42,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Rhy",
+    "bodyNamePart": "perior"
   },
   {
     "id": 266,
@@ -7643,7 +8173,9 @@
         "id": 114,
         "name": "tangela"
       }
-    }
+    },
+    "headNamePart": "Tan",
+    "bodyNamePart": "growth"
   },
   {
     "id": 267,
@@ -7670,7 +8202,9 @@
         "min_level": 30,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Electi",
+    "bodyNamePart": "vire"
   },
   {
     "id": 268,
@@ -7697,7 +8231,9 @@
         "min_level": 30,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Magmor",
+    "bodyNamePart": "mortar"
   },
   {
     "id": 269,
@@ -7727,7 +8263,9 @@
         "trigger": "level-up",
         "condition": "Happiness: 160"
       }
-    }
+    },
+    "headNamePart": "Toge",
+    "bodyNamePart": "kiss"
   },
   {
     "id": 270,
@@ -7755,7 +8293,9 @@
         "id": 193,
         "name": "yanma"
       }
-    }
+    },
+    "headNamePart": "Yan",
+    "bodyNamePart": "mega"
   },
   {
     "id": 271,
@@ -7780,7 +8320,9 @@
         "id": 133,
         "name": "eevee"
       }
-    }
+    },
+    "headNamePart": "Leaf",
+    "bodyNamePart": "feon"
   },
   {
     "id": 272,
@@ -7805,7 +8347,9 @@
         "id": 133,
         "name": "eevee"
       }
-    }
+    },
+    "headNamePart": "Glace",
+    "bodyNamePart": "ceon"
   },
   {
     "id": 273,
@@ -7833,7 +8377,9 @@
         "id": 207,
         "name": "gligar"
       }
-    }
+    },
+    "headNamePart": "Glis",
+    "bodyNamePart": "cor"
   },
   {
     "id": 274,
@@ -7863,7 +8409,9 @@
         "min_level": 33,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Mamo",
+    "bodyNamePart": "swine"
   },
   {
     "id": 275,
@@ -7889,7 +8437,9 @@
         "name": "porygon2",
         "trigger": "trade"
       }
-    }
+    },
+    "headNamePart": "Pory",
+    "bodyNamePart": "gon-Z"
   },
   {
     "id": 276,
@@ -7917,7 +8467,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Tree",
+    "bodyNamePart": "cko"
   },
   {
     "id": 277,
@@ -7949,7 +8501,9 @@
         "id": 252,
         "name": "treecko"
       }
-    }
+    },
+    "headNamePart": "Gro",
+    "bodyNamePart": "vyle"
   },
   {
     "id": 278,
@@ -7976,7 +8530,9 @@
         "min_level": 16,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Sce",
+    "bodyNamePart": "tile"
   },
   {
     "id": 279,
@@ -8004,7 +8560,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Torch",
+    "bodyNamePart": "chic"
   },
   {
     "id": 280,
@@ -8039,7 +8597,9 @@
         "id": 255,
         "name": "torchic"
       }
-    }
+    },
+    "headNamePart": "Com",
+    "bodyNamePart": "busken"
   },
   {
     "id": 281,
@@ -8069,7 +8629,9 @@
         "min_level": 16,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Bla",
+    "bodyNamePart": "ziken"
   },
   {
     "id": 282,
@@ -8097,7 +8659,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Mud",
+    "bodyNamePart": "kip"
   },
   {
     "id": 283,
@@ -8132,7 +8696,9 @@
         "id": 258,
         "name": "mudkip"
       }
-    }
+    },
+    "headNamePart": "Marsh",
+    "bodyNamePart": "tomp"
   },
   {
     "id": 284,
@@ -8162,7 +8728,9 @@
         "min_level": 16,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Swam",
+    "bodyNamePart": "pert"
   },
   {
     "id": 285,
@@ -8193,7 +8761,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ral",
+    "bodyNamePart": "ts"
   },
   {
     "id": 286,
@@ -8234,7 +8804,9 @@
         "id": 280,
         "name": "ralts"
       }
-    }
+    },
+    "headNamePart": "Kir",
+    "bodyNamePart": "lia"
   },
   {
     "id": 287,
@@ -8264,7 +8836,9 @@
         "min_level": 20,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Garde",
+    "bodyNamePart": "voir"
   },
   {
     "id": 288,
@@ -8294,7 +8868,9 @@
         "min_level": 20,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Gall",
+    "bodyNamePart": "lade"
   },
   {
     "id": 289,
@@ -8322,7 +8898,9 @@
         "id": 290,
         "name": "nincada"
       }
-    }
+    },
+    "headNamePart": "Shed",
+    "bodyNamePart": "inja"
   },
   {
     "id": 290,
@@ -8343,7 +8921,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Kec",
+    "bodyNamePart": "eon"
   },
   {
     "id": 291,
@@ -8374,7 +8954,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Bel",
+    "bodyNamePart": "dum"
   },
   {
     "id": 292,
@@ -8409,7 +8991,9 @@
         "id": 374,
         "name": "beldum"
       }
-    }
+    },
+    "headNamePart": "Met",
+    "bodyNamePart": "tang"
   },
   {
     "id": 293,
@@ -8439,7 +9023,9 @@
         "min_level": 20,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Meta",
+    "bodyNamePart": "gross"
   },
   {
     "id": 294,
@@ -8467,7 +9053,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Bi",
+    "bodyNamePart": "doof"
   },
   {
     "id": 295,
@@ -8491,7 +9079,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Spiri",
+    "bodyNamePart": "tomb"
   },
   {
     "id": 296,
@@ -8519,7 +9109,9 @@
         "id": 447,
         "name": "riolu"
       }
-    }
+    },
+    "headNamePart": "Luca",
+    "bodyNamePart": "cario"
   },
   {
     "id": 297,
@@ -8550,7 +9142,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Gib",
+    "bodyNamePart": "ble"
   },
   {
     "id": 298,
@@ -8585,7 +9179,9 @@
         "id": 443,
         "name": "gible"
       }
-    }
+    },
+    "headNamePart": "Gab",
+    "bodyNamePart": "bite"
   },
   {
     "id": 299,
@@ -8615,7 +9211,9 @@
         "min_level": 24,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Gar",
+    "bodyNamePart": "chomp"
   },
   {
     "id": 300,
@@ -8639,7 +9237,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Maw",
+    "bodyNamePart": "wile"
   },
   {
     "id": 301,
@@ -8670,7 +9270,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Lil",
+    "bodyNamePart": "leep"
   },
   {
     "id": 302,
@@ -8698,7 +9300,9 @@
         "id": 345,
         "name": "lileep"
       }
-    }
+    },
+    "headNamePart": "Crad",
+    "bodyNamePart": "dily"
   },
   {
     "id": 303,
@@ -8729,7 +9333,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ano",
+    "bodyNamePart": "rith"
   },
   {
     "id": 304,
@@ -8757,7 +9363,9 @@
         "id": 347,
         "name": "anorith"
       }
-    }
+    },
+    "headNamePart": "Arm",
+    "bodyNamePart": "aldo"
   },
   {
     "id": 305,
@@ -8785,7 +9393,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Cran",
+    "bodyNamePart": "idos"
   },
   {
     "id": 306,
@@ -8810,7 +9420,9 @@
         "id": 408,
         "name": "cranidos"
       }
-    }
+    },
+    "headNamePart": "Ram",
+    "bodyNamePart": "pardos"
   },
   {
     "id": 307,
@@ -8841,7 +9453,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Shiel",
+    "bodyNamePart": "don"
   },
   {
     "id": 308,
@@ -8869,7 +9483,9 @@
         "id": 410,
         "name": "shieldon"
       }
-    }
+    },
+    "headNamePart": "Bastio",
+    "bodyNamePart": "don"
   },
   {
     "id": 309,
@@ -8896,7 +9512,9 @@
         "min_level": 18,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Sla",
+    "bodyNamePart": "king"
   },
   {
     "id": 310,
@@ -8917,7 +9535,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Ab",
+    "bodyNamePart": "sol"
   },
   {
     "id": 311,
@@ -8945,7 +9565,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Dus",
+    "bodyNamePart": "skull"
   },
   {
     "id": 312,
@@ -8976,7 +9598,9 @@
         "id": 355,
         "name": "duskull"
       }
-    }
+    },
+    "headNamePart": "Dusc",
+    "bodyNamePart": "clops"
   },
   {
     "id": 313,
@@ -9003,7 +9627,9 @@
         "min_level": 37,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Dusk",
+    "bodyNamePart": "noir"
   },
   {
     "id": 314,
@@ -9028,7 +9654,9 @@
         "id": 320,
         "name": "wailmer"
       }
-    }
+    },
+    "headNamePart": "Wail",
+    "bodyNamePart": "lord"
   },
   {
     "id": 315,
@@ -9049,7 +9677,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Arc",
+    "bodyNamePart": "ceus"
   },
   {
     "id": 316,
@@ -9077,7 +9707,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Tur",
+    "bodyNamePart": "wig"
   },
   {
     "id": 317,
@@ -9109,7 +9741,9 @@
         "id": 387,
         "name": "turtwig"
       }
-    }
+    },
+    "headNamePart": "Gro",
+    "bodyNamePart": "tle"
   },
   {
     "id": 318,
@@ -9139,7 +9773,9 @@
         "min_level": 18,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Tor",
+    "bodyNamePart": "terra"
   },
   {
     "id": 319,
@@ -9167,7 +9803,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Chim",
+    "bodyNamePart": "char"
   },
   {
     "id": 320,
@@ -9202,7 +9840,9 @@
         "id": 390,
         "name": "chimchar"
       }
-    }
+    },
+    "headNamePart": "Mon",
+    "bodyNamePart": "ferno"
   },
   {
     "id": 321,
@@ -9232,7 +9872,9 @@
         "min_level": 14,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Infer",
+    "bodyNamePart": "nape"
   },
   {
     "id": 322,
@@ -9260,7 +9902,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Pi",
+    "bodyNamePart": "lup"
   },
   {
     "id": 323,
@@ -9292,7 +9936,9 @@
         "id": 393,
         "name": "piplup"
       }
-    }
+    },
+    "headNamePart": "Prin",
+    "bodyNamePart": "plup"
   },
   {
     "id": 324,
@@ -9322,7 +9968,9 @@
         "min_level": 16,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Empo",
+    "bodyNamePart": "leon"
   },
   {
     "id": 325,
@@ -9350,7 +9998,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Nose",
+    "bodyNamePart": "pass"
   },
   {
     "id": 326,
@@ -9378,7 +10028,9 @@
         "id": 299,
         "name": "nosepass"
       }
-    }
+    },
+    "headNamePart": "Probo",
+    "bodyNamePart": "pass"
   },
   {
     "id": 327,
@@ -9409,7 +10061,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Hon",
+    "bodyNamePart": "edge"
   },
   {
     "id": 328,
@@ -9444,7 +10098,9 @@
         "id": 679,
         "name": "honedge"
       }
-    }
+    },
+    "headNamePart": "Doub",
+    "bodyNamePart": "blade"
   },
   {
     "id": 329,
@@ -9474,7 +10130,9 @@
         "min_level": 35,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Aegi",
+    "bodyNamePart": "slash"
   },
   {
     "id": 330,
@@ -9505,7 +10163,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Pawn",
+    "bodyNamePart": "iard"
   },
   {
     "id": 331,
@@ -9539,7 +10199,9 @@
         "id": 624,
         "name": "pawniard"
       }
-    }
+    },
+    "headNamePart": "Bi",
+    "bodyNamePart": "sharp"
   },
   {
     "id": 332,
@@ -9566,7 +10228,9 @@
         "min_level": 15,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Lux",
+    "bodyNamePart": "ray"
   },
   {
     "id": 333,
@@ -9596,7 +10260,9 @@
         "min_level": 32,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Agg",
+    "bodyNamePart": "gron"
   },
   {
     "id": 334,
@@ -9626,7 +10292,9 @@
         "min_level": 35,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Fly",
+    "bodyNamePart": "gon"
   },
   {
     "id": 335,
@@ -9651,7 +10319,9 @@
         "id": 349,
         "name": "feebas"
       }
-    }
+    },
+    "headNamePart": "Milo",
+    "bodyNamePart": "tic"
   },
   {
     "id": 336,
@@ -9681,7 +10351,9 @@
         "min_level": 30,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Sala",
+    "bodyNamePart": "mence"
   },
   {
     "id": 337,
@@ -9708,7 +10380,9 @@
         "min_level": 38,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Klink",
+    "bodyNamePart": "klang"
   },
   {
     "id": 338,
@@ -9733,7 +10407,9 @@
         "id": 570,
         "name": "zorua"
       }
-    }
+    },
+    "headNamePart": "Zoro",
+    "bodyNamePart": "ark"
   },
   {
     "id": 339,
@@ -9758,7 +10434,9 @@
         "id": 133,
         "name": "eevee"
       }
-    }
+    },
+    "headNamePart": "Syl",
+    "bodyNamePart": "veon"
   },
   {
     "id": 340,
@@ -9779,7 +10457,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Kyo",
+    "bodyNamePart": "gre"
   },
   {
     "id": 341,
@@ -9800,7 +10480,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Grou",
+    "bodyNamePart": "don"
   },
   {
     "id": 342,
@@ -9824,7 +10506,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Ray",
+    "bodyNamePart": "quaza"
   },
   {
     "id": 343,
@@ -9848,7 +10532,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Dial",
+    "bodyNamePart": "alga"
   },
   {
     "id": 344,
@@ -9872,7 +10558,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Palk",
+    "bodyNamePart": "kia"
   },
   {
     "id": 345,
@@ -9896,7 +10584,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Gira",
+    "bodyNamePart": "tina"
   },
   {
     "id": 346,
@@ -9917,7 +10607,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Regi",
+    "bodyNamePart": "gigas"
   },
   {
     "id": 347,
@@ -9938,7 +10630,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Dark",
+    "bodyNamePart": "rai"
   },
   {
     "id": 348,
@@ -9962,7 +10656,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Gene",
+    "bodyNamePart": "esect"
   },
   {
     "id": 349,
@@ -9986,7 +10682,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Reshi",
+    "bodyNamePart": "ram"
   },
   {
     "id": 350,
@@ -10010,7 +10708,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Zek",
+    "bodyNamePart": "rom"
   },
   {
     "id": 351,
@@ -10034,7 +10734,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Kyu",
+    "bodyNamePart": "rem"
   },
   {
     "id": 352,
@@ -10064,7 +10766,9 @@
         "trigger": "level-up",
         "condition": "Time: day"
       }
-    }
+    },
+    "headNamePart": "Rose",
+    "bodyNamePart": "rade"
   },
   {
     "id": 353,
@@ -10092,7 +10796,9 @@
         "id": 425,
         "name": "drifloon"
       }
-    }
+    },
+    "headNamePart": "Drifb",
+    "bodyNamePart": "blim"
   },
   {
     "id": 354,
@@ -10117,7 +10823,9 @@
         "id": 427,
         "name": "buneary"
       }
-    }
+    },
+    "headNamePart": "Lo",
+    "bodyNamePart": "punny"
   },
   {
     "id": 355,
@@ -10145,7 +10853,9 @@
         "id": 285,
         "name": "shroomish"
       }
-    }
+    },
+    "headNamePart": "Bre",
+    "bodyNamePart": "loom"
   },
   {
     "id": 356,
@@ -10173,7 +10883,9 @@
         "id": 290,
         "name": "nincada"
       }
-    }
+    },
+    "headNamePart": "Nin",
+    "bodyNamePart": "jask"
   },
   {
     "id": 357,
@@ -10198,7 +10910,9 @@
         "id": 353,
         "name": "shuppet"
       }
-    }
+    },
+    "headNamePart": "Ban",
+    "bodyNamePart": "nette"
   },
   {
     "id": 358,
@@ -10222,7 +10936,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Ro",
+    "bodyNamePart": "tom"
   },
   {
     "id": 359,
@@ -10249,7 +10965,9 @@
         "min_level": 32,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Reuni",
+    "bodyNamePart": "niclus"
   },
   {
     "id": 360,
@@ -10277,7 +10995,9 @@
         "id": 546,
         "name": "cottonee"
       }
-    }
+    },
+    "headNamePart": "Whimsi",
+    "bodyNamePart": "cott"
   },
   {
     "id": 361,
@@ -10307,7 +11027,9 @@
         "min_level": 29,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Krooko",
+    "bodyNamePart": "dile"
   },
   {
     "id": 362,
@@ -10332,7 +11054,9 @@
         "id": 562,
         "name": "yamask"
       }
-    }
+    },
+    "headNamePart": "Cofa",
+    "bodyNamePart": "grigus"
   },
   {
     "id": 363,
@@ -10360,7 +11084,9 @@
         "id": 595,
         "name": "joltik"
       }
-    }
+    },
+    "headNamePart": "Galvan",
+    "bodyNamePart": "tula"
   },
   {
     "id": 364,
@@ -10388,7 +11114,9 @@
         "id": 597,
         "name": "ferroseed"
       }
-    }
+    },
+    "headNamePart": "Ferro",
+    "bodyNamePart": "thorn"
   },
   {
     "id": 365,
@@ -10419,7 +11147,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Lit",
+    "bodyNamePart": "wick"
   },
   {
     "id": 366,
@@ -10454,7 +11184,9 @@
         "id": 607,
         "name": "litwick"
       }
-    }
+    },
+    "headNamePart": "Lam",
+    "bodyNamePart": "pent"
   },
   {
     "id": 367,
@@ -10484,7 +11216,9 @@
         "min_level": 41,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Chandel",
+    "bodyNamePart": "lure"
   },
   {
     "id": 368,
@@ -10511,7 +11245,9 @@
         "min_level": 38,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Hax",
+    "bodyNamePart": "xorus"
   },
   {
     "id": 369,
@@ -10539,7 +11275,9 @@
         "id": 622,
         "name": "golett"
       }
-    }
+    },
+    "headNamePart": "Golu",
+    "bodyNamePart": "lurk"
   },
   {
     "id": 370,
@@ -10560,7 +11298,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Pyuku",
+    "bodyNamePart": "muku"
   },
   {
     "id": 371,
@@ -10584,7 +11324,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Klef",
+    "bodyNamePart": "ki"
   },
   {
     "id": 372,
@@ -10614,7 +11356,9 @@
         "min_level": 17,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Talon",
+    "bodyNamePart": "flame"
   },
   {
     "id": 373,
@@ -10638,7 +11382,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Mimi",
+    "bodyNamePart": "kyu"
   },
   {
     "id": 374,
@@ -10666,7 +11412,9 @@
         "id": 636,
         "name": "larvesta"
       }
-    }
+    },
+    "headNamePart": "Volca",
+    "bodyNamePart": "rona"
   },
   {
     "id": 375,
@@ -10697,7 +11445,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Dei",
+    "bodyNamePart": "no"
   },
   {
     "id": 376,
@@ -10732,7 +11482,9 @@
         "id": 633,
         "name": "deino"
       }
-    }
+    },
+    "headNamePart": "Zwei",
+    "bodyNamePart": "lous"
   },
   {
     "id": 377,
@@ -10762,7 +11514,9 @@
         "min_level": 50,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Hy",
+    "bodyNamePart": "dreigon"
   },
   {
     "id": 378,
@@ -10786,7 +11540,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "La",
+    "bodyNamePart": "tias"
   },
   {
     "id": 379,
@@ -10810,7 +11566,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "La",
+    "bodyNamePart": "tios"
   },
   {
     "id": 380,
@@ -10831,7 +11589,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Deo",
+    "bodyNamePart": "xys"
   },
   {
     "id": 381,
@@ -10855,7 +11615,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Ji",
+    "bodyNamePart": "rachi"
   },
   {
     "id": 382,
@@ -10891,7 +11653,9 @@
           "trigger": "shed"
         }
       ]
-    }
+    },
+    "headNamePart": "Nin",
+    "bodyNamePart": "cada"
   },
   {
     "id": 383,
@@ -10919,7 +11683,9 @@
         "id": 399,
         "name": "bidoof"
       }
-    }
+    },
+    "headNamePart": "Bi",
+    "bodyNamePart": "barel"
   },
   {
     "id": 384,
@@ -10947,7 +11713,9 @@
           "condition": "Time: day"
         }
       ]
-    }
+    },
+    "headNamePart": "Rio",
+    "bodyNamePart": "lu"
   },
   {
     "id": 385,
@@ -10975,7 +11743,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Sla",
+    "bodyNamePart": "koth"
   },
   {
     "id": 386,
@@ -11007,7 +11777,9 @@
         "id": 287,
         "name": "slakoth"
       }
-    }
+    },
+    "headNamePart": "Vigo",
+    "bodyNamePart": "roth"
   },
   {
     "id": 387,
@@ -11035,7 +11807,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Wail",
+    "bodyNamePart": "mer"
   },
   {
     "id": 388,
@@ -11063,7 +11837,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Shi",
+    "bodyNamePart": "nx"
   },
   {
     "id": 389,
@@ -11095,7 +11871,9 @@
         "id": 403,
         "name": "shinx"
       }
-    }
+    },
+    "headNamePart": "Lu",
+    "bodyNamePart": "xio"
   },
   {
     "id": 390,
@@ -11126,7 +11904,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ar",
+    "bodyNamePart": "n"
   },
   {
     "id": 391,
@@ -11161,7 +11941,9 @@
         "id": 304,
         "name": "aron"
       }
-    }
+    },
+    "headNamePart": "Lair",
+    "bodyNamePart": "ron"
   },
   {
     "id": 392,
@@ -11189,7 +11971,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Tra",
+    "bodyNamePart": "inch"
   },
   {
     "id": 393,
@@ -11224,7 +12008,9 @@
         "id": 328,
         "name": "trapinch"
       }
-    }
+    },
+    "headNamePart": "Vibra",
+    "bodyNamePart": "va"
   },
   {
     "id": 394,
@@ -11251,7 +12037,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Fee",
+    "bodyNamePart": "bas"
   },
   {
     "id": 395,
@@ -11279,7 +12067,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ba",
+    "bodyNamePart": "agon"
   },
   {
     "id": 396,
@@ -11311,7 +12101,9 @@
         "id": 371,
         "name": "bagon"
       }
-    }
+    },
+    "headNamePart": "Shel",
+    "bodyNamePart": "elgon"
   },
   {
     "id": 397,
@@ -11339,7 +12131,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Kli",
+    "bodyNamePart": "ink"
   },
   {
     "id": 398,
@@ -11371,7 +12165,9 @@
         "id": 599,
         "name": "klink"
       }
-    }
+    },
+    "headNamePart": "Kla",
+    "bodyNamePart": "ang"
   },
   {
     "id": 399,
@@ -11399,7 +12195,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Zo",
+    "bodyNamePart": "rua"
   },
   {
     "id": 400,
@@ -11430,7 +12228,9 @@
           "condition": "Time: day"
         }
       ]
-    }
+    },
+    "headNamePart": "Bu",
+    "bodyNamePart": "dew"
   },
   {
     "id": 401,
@@ -11465,7 +12265,9 @@
         "id": 406,
         "name": "budew"
       }
-    }
+    },
+    "headNamePart": "Rose",
+    "bodyNamePart": "elia"
   },
   {
     "id": 402,
@@ -11496,7 +12298,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Drifl",
+    "bodyNamePart": "loon"
   },
   {
     "id": 403,
@@ -11524,7 +12328,9 @@
           "condition": "Happiness: 160"
         }
       ]
-    }
+    },
+    "headNamePart": "Bun",
+    "bodyNamePart": "eary"
   },
   {
     "id": 404,
@@ -11552,7 +12358,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Shroom",
+    "bodyNamePart": "ish"
   },
   {
     "id": 405,
@@ -11580,7 +12388,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Shu",
+    "bodyNamePart": "pet"
   },
   {
     "id": 406,
@@ -11608,7 +12418,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Solo",
+    "bodyNamePart": "sis"
   },
   {
     "id": 407,
@@ -11640,7 +12452,9 @@
         "id": 577,
         "name": "solosis"
       }
-    }
+    },
+    "headNamePart": "Duo",
+    "bodyNamePart": "sion"
   },
   {
     "id": 408,
@@ -11671,7 +12485,9 @@
           "trigger": "use-item"
         }
       ]
-    }
+    },
+    "headNamePart": "Cotton",
+    "bodyNamePart": "nee"
   },
   {
     "id": 409,
@@ -11702,7 +12518,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Sandi",
+    "bodyNamePart": "ile"
   },
   {
     "id": 410,
@@ -11737,7 +12555,9 @@
         "id": 551,
         "name": "sandile"
       }
-    }
+    },
+    "headNamePart": "Kroko",
+    "bodyNamePart": "rok"
   },
   {
     "id": 411,
@@ -11770,7 +12590,9 @@
           "trigger": "take-damage"
         }
       ]
-    }
+    },
+    "headNamePart": "Ya",
+    "bodyNamePart": "mask"
   },
   {
     "id": 412,
@@ -11801,7 +12623,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Jol",
+    "bodyNamePart": "tik"
   },
   {
     "id": 413,
@@ -11832,7 +12656,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ferro",
+    "bodyNamePart": "seed"
   },
   {
     "id": 414,
@@ -11860,7 +12686,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Axe",
+    "bodyNamePart": "xew"
   },
   {
     "id": 415,
@@ -11892,7 +12720,9 @@
         "id": 610,
         "name": "axew"
       }
-    }
+    },
+    "headNamePart": "Frax",
+    "bodyNamePart": "xure"
   },
   {
     "id": 416,
@@ -11923,7 +12753,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Gole",
+    "bodyNamePart": "lett"
   },
   {
     "id": 417,
@@ -11954,7 +12786,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Fletch",
+    "bodyNamePart": "ling"
   },
   {
     "id": 418,
@@ -11989,7 +12823,9 @@
         "id": 661,
         "name": "fletchling"
       }
-    }
+    },
+    "headNamePart": "Fletch",
+    "bodyNamePart": "inder"
   },
   {
     "id": 419,
@@ -12020,7 +12856,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Larv",
+    "bodyNamePart": "esta"
   },
   {
     "id": 420,
@@ -12044,7 +12882,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Stun",
+    "bodyNamePart": "fisk"
   },
   {
     "id": 421,
@@ -12068,7 +12908,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Sabl",
+    "bodyNamePart": "eye"
   },
   {
     "id": 422,
@@ -12099,7 +12941,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Veni",
+    "bodyNamePart": "pede"
   },
   {
     "id": 423,
@@ -12134,7 +12978,9 @@
         "id": 543,
         "name": "venipede"
       }
-    }
+    },
+    "headNamePart": "Whirli",
+    "bodyNamePart": "pede"
   },
   {
     "id": 424,
@@ -12164,7 +13010,9 @@
         "min_level": 22,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Scoli",
+    "bodyNamePart": "pede"
   },
   {
     "id": 425,
@@ -12196,7 +13044,9 @@
           "condition": "Time: day"
         }
       ]
-    }
+    },
+    "headNamePart": "Ty",
+    "bodyNamePart": "runt"
   },
   {
     "id": 426,
@@ -12224,7 +13074,9 @@
         "id": 696,
         "name": "tyrunt"
       }
-    }
+    },
+    "headNamePart": "Tyran",
+    "bodyNamePart": "trum"
   },
   {
     "id": 427,
@@ -12258,7 +13110,9 @@
           "trigger": "use-item"
         }
       ]
-    }
+    },
+    "headNamePart": "Sno",
+    "bodyNamePart": "runt"
   },
   {
     "id": 428,
@@ -12283,7 +13137,9 @@
         "id": 361,
         "name": "snorunt"
       }
-    }
+    },
+    "headNamePart": "Gla",
+    "bodyNamePart": "lie"
   },
   {
     "id": 429,
@@ -12311,7 +13167,9 @@
         "id": 361,
         "name": "snorunt"
       }
-    }
+    },
+    "headNamePart": "Fros",
+    "bodyNamePart": "lass"
   },
   {
     "id": 430,
@@ -12335,7 +13193,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Ori",
+    "bodyNamePart": "corio"
   },
   {
     "id": 431,
@@ -12359,7 +13219,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Ori",
+    "bodyNamePart": "corio"
   },
   {
     "id": 432,
@@ -12383,7 +13245,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Ori",
+    "bodyNamePart": "corio"
   },
   {
     "id": 433,
@@ -12407,7 +13271,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Ori",
+    "bodyNamePart": "corio"
   },
   {
     "id": 434,
@@ -12435,7 +13301,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Trub",
+    "bodyNamePart": "bish"
   },
   {
     "id": 435,
@@ -12460,7 +13328,9 @@
         "id": 568,
         "name": "trubbish"
       }
-    }
+    },
+    "headNamePart": "Garb",
+    "bodyNamePart": "dor"
   },
   {
     "id": 436,
@@ -12491,7 +13361,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Car",
+    "bodyNamePart": "vanha"
   },
   {
     "id": 437,
@@ -12519,7 +13391,9 @@
         "id": 318,
         "name": "carvanha"
       }
-    }
+    },
+    "headNamePart": "Shar",
+    "bodyNamePart": "edo"
   },
   {
     "id": 438,
@@ -12549,7 +13423,9 @@
           "trigger": "trade"
         }
       ]
-    }
+    },
+    "headNamePart": "Phant",
+    "bodyNamePart": "tump"
   },
   {
     "id": 439,
@@ -12577,7 +13453,9 @@
         "id": 708,
         "name": "phantump"
       }
-    }
+    },
+    "headNamePart": "Tre",
+    "bodyNamePart": "venant"
   },
   {
     "id": 440,
@@ -12608,7 +13486,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Noi",
+    "bodyNamePart": "bat"
   },
   {
     "id": 441,
@@ -12636,7 +13516,9 @@
         "id": 714,
         "name": "noibat"
       }
-    }
+    },
+    "headNamePart": "Noi",
+    "bodyNamePart": "vern"
   },
   {
     "id": 442,
@@ -12667,7 +13549,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Swab",
+    "bodyNamePart": "lu"
   },
   {
     "id": 443,
@@ -12695,7 +13579,9 @@
         "id": 333,
         "name": "swablu"
       }
-    }
+    },
+    "headNamePart": "Alta",
+    "bodyNamePart": "ria"
   },
   {
     "id": 444,
@@ -12723,7 +13609,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Goo",
+    "bodyNamePart": "my"
   },
   {
     "id": 445,
@@ -12755,7 +13643,9 @@
         "id": 704,
         "name": "goomy"
       }
-    }
+    },
+    "headNamePart": "Sli",
+    "bodyNamePart": "goo"
   },
   {
     "id": 446,
@@ -12782,7 +13672,9 @@
         "min_level": 40,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Goo",
+    "bodyNamePart": "dra"
   },
   {
     "id": 447,
@@ -12803,7 +13695,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Regi",
+    "bodyNamePart": "rock"
   },
   {
     "id": 448,
@@ -12824,7 +13718,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Regi",
+    "bodyNamePart": "ice"
   },
   {
     "id": 449,
@@ -12845,7 +13741,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Regi",
+    "bodyNamePart": "steel"
   },
   {
     "id": 450,
@@ -12866,7 +13764,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Necro",
+    "bodyNamePart": "zma"
   },
   {
     "id": 451,
@@ -12897,7 +13797,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Stuff",
+    "bodyNamePart": "ful"
   },
   {
     "id": 452,
@@ -12925,7 +13827,9 @@
         "id": 759,
         "name": "stufful"
       }
-    }
+    },
+    "headNamePart": "Be",
+    "bodyNamePart": "wear"
   },
   {
     "id": 453,
@@ -12949,7 +13853,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Dhel",
+    "bodyNamePart": "mise"
   },
   {
     "id": 454,
@@ -12980,7 +13886,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Mar",
+    "bodyNamePart": "eanie"
   },
   {
     "id": 455,
@@ -13008,7 +13916,9 @@
         "id": 747,
         "name": "mareanie"
       }
-    }
+    },
+    "headNamePart": "Tox",
+    "bodyNamePart": "apex"
   },
   {
     "id": 456,
@@ -13032,7 +13942,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Hawl",
+    "bodyNamePart": "lucha"
   },
   {
     "id": 457,
@@ -13060,7 +13972,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Cac",
+    "bodyNamePart": "nea"
   },
   {
     "id": 458,
@@ -13088,7 +14002,9 @@
         "id": 331,
         "name": "cacnea"
       }
-    }
+    },
+    "headNamePart": "Cact",
+    "bodyNamePart": "turne"
   },
   {
     "id": 459,
@@ -13119,7 +14035,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Sandy",
+    "bodyNamePart": "gast"
   },
   {
     "id": 460,
@@ -13147,7 +14065,9 @@
         "id": 769,
         "name": "sandygast"
       }
-    }
+    },
+    "headNamePart": "Palo",
+    "bodyNamePart": "sand"
   },
   {
     "id": 461,
@@ -13179,7 +14099,9 @@
           "condition": "Time: night"
         }
       ]
-    }
+    },
+    "headNamePart": "Ama",
+    "bodyNamePart": "aura"
   },
   {
     "id": 462,
@@ -13207,7 +14129,9 @@
         "id": 698,
         "name": "amaura"
       }
-    }
+    },
+    "headNamePart": "Auro",
+    "bodyNamePart": "rorus"
   },
   {
     "id": 463,
@@ -13236,7 +14160,9 @@
           "condition": "Time: day"
         }
       ]
-    }
+    },
+    "headNamePart": "Rock",
+    "bodyNamePart": "ruff"
   },
   {
     "id": 464,
@@ -13261,7 +14187,9 @@
         "id": 744,
         "name": "rockruff"
       }
-    }
+    },
+    "headNamePart": "Lycan",
+    "bodyNamePart": "roc"
   },
   {
     "id": 465,
@@ -13286,7 +14214,9 @@
         "id": 744,
         "name": "rockruff"
       }
-    }
+    },
+    "headNamePart": "Lycan",
+    "bodyNamePart": "roc"
   },
   {
     "id": 466,
@@ -13310,7 +14240,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Melo",
+    "bodyNamePart": "etta"
   },
   {
     "id": 467,
@@ -13334,7 +14266,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Melo",
+    "bodyNamePart": "etta"
   },
   {
     "id": 468,
@@ -13355,7 +14289,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Cress",
+    "bodyNamePart": "selia"
   },
   {
     "id": 469,
@@ -13379,7 +14315,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Brux",
+    "bodyNamePart": "ish"
   },
   {
     "id": 470,
@@ -13400,7 +14338,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Necro",
+    "bodyNamePart": "zma"
   },
   {
     "id": 471,
@@ -13428,7 +14368,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Jang",
+    "bodyNamePart": "mo-o"
   },
   {
     "id": 472,
@@ -13463,7 +14405,9 @@
         "id": 782,
         "name": "jangmo-o"
       }
-    }
+    },
+    "headNamePart": "Haka",
+    "bodyNamePart": "mo-o"
   },
   {
     "id": 473,
@@ -13493,7 +14437,9 @@
         "min_level": 35,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Kom",
+    "bodyNamePart": "mo-o"
   },
   {
     "id": 474,
@@ -13524,7 +14470,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Wim",
+    "bodyNamePart": "pod"
   },
   {
     "id": 475,
@@ -13552,7 +14500,9 @@
         "id": 767,
         "name": "wimpod"
       }
-    }
+    },
+    "headNamePart": "Goli",
+    "bodyNamePart": "sopod"
   },
   {
     "id": 476,
@@ -13581,7 +14531,9 @@
           "condition": "Time: day"
         }
       ]
-    }
+    },
+    "headNamePart": "Fo",
+    "bodyNamePart": "mantis"
   },
   {
     "id": 477,
@@ -13606,7 +14558,9 @@
         "id": 753,
         "name": "fomantis"
       }
-    }
+    },
+    "headNamePart": "Lu",
+    "bodyNamePart": "rantis"
   },
   {
     "id": 478,
@@ -13630,7 +14584,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Car",
+    "bodyNamePart": "bink"
   },
   {
     "id": 479,
@@ -13658,7 +14614,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Ches",
+    "bodyNamePart": "pin"
   },
   {
     "id": 480,
@@ -13690,7 +14648,9 @@
         "id": 650,
         "name": "chespin"
       }
-    }
+    },
+    "headNamePart": "Quil",
+    "bodyNamePart": "ladin"
   },
   {
     "id": 481,
@@ -13720,7 +14680,9 @@
         "min_level": 16,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Ches",
+    "bodyNamePart": "naught"
   },
   {
     "id": 482,
@@ -13748,7 +14710,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Fenne",
+    "bodyNamePart": "kin"
   },
   {
     "id": 483,
@@ -13780,7 +14744,9 @@
         "id": 653,
         "name": "fennekin"
       }
-    }
+    },
+    "headNamePart": "Brai",
+    "bodyNamePart": "xen"
   },
   {
     "id": 484,
@@ -13810,7 +14776,9 @@
         "min_level": 16,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Del",
+    "bodyNamePart": "phox"
   },
   {
     "id": 485,
@@ -13838,7 +14806,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Froa",
+    "bodyNamePart": "kie"
   },
   {
     "id": 486,
@@ -13870,7 +14840,9 @@
         "id": 656,
         "name": "froakie"
       }
-    }
+    },
+    "headNamePart": "Frog",
+    "bodyNamePart": "adier"
   },
   {
     "id": 487,
@@ -13900,7 +14872,9 @@
         "min_level": 16,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Gre",
+    "bodyNamePart": "ninja"
   },
   {
     "id": 488,
@@ -13921,7 +14895,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Tor",
+    "bodyNamePart": "koal"
   },
   {
     "id": 489,
@@ -13951,7 +14927,9 @@
           "trigger": "trade"
         }
       ]
-    }
+    },
+    "headNamePart": "Pum",
+    "bodyNamePart": "kaboo"
   },
   {
     "id": 490,
@@ -13979,7 +14957,9 @@
         "id": 710,
         "name": "pumpkaboo"
       }
-    }
+    },
+    "headNamePart": "Gour",
+    "bodyNamePart": "geist"
   },
   {
     "id": 491,
@@ -14006,7 +14986,9 @@
           "trigger": "trade"
         }
       ]
-    }
+    },
+    "headNamePart": "Swir",
+    "bodyNamePart": "lix"
   },
   {
     "id": 492,
@@ -14031,7 +15013,9 @@
         "id": 684,
         "name": "swirlix"
       }
-    }
+    },
+    "headNamePart": "Slur",
+    "bodyNamePart": "puff"
   },
   {
     "id": 493,
@@ -14062,7 +15046,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Scra",
+    "bodyNamePart": "ggy"
   },
   {
     "id": 494,
@@ -14090,7 +15076,9 @@
         "id": 559,
         "name": "scraggy"
       }
-    }
+    },
+    "headNamePart": "Scraf",
+    "bodyNamePart": "ty"
   },
   {
     "id": 495,
@@ -14121,7 +15109,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Lo",
+    "bodyNamePart": "tad"
   },
   {
     "id": 496,
@@ -14156,7 +15146,9 @@
         "id": 270,
         "name": "lotad"
       }
-    }
+    },
+    "headNamePart": "Lom",
+    "bodyNamePart": "bre"
   },
   {
     "id": 497,
@@ -14186,7 +15178,9 @@
         "min_level": 14,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Ludi",
+    "bodyNamePart": "colo"
   },
   {
     "id": 498,
@@ -14210,7 +15204,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Mini",
+    "bodyNamePart": "r"
   },
   {
     "id": 499,
@@ -14234,7 +15230,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Mini",
+    "bodyNamePart": "r"
   },
   {
     "id": 500,
@@ -14258,7 +15256,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Dian",
+    "bodyNamePart": "cie"
   },
   {
     "id": 501,
@@ -14279,7 +15279,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Luv",
+    "bodyNamePart": "disc"
   },
   {
     "id": 502,
@@ -14307,7 +15309,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Pooch",
+    "bodyNamePart": "yena"
   },
   {
     "id": 503,
@@ -14332,7 +15336,9 @@
         "id": 261,
         "name": "poochyena"
       }
-    }
+    },
+    "headNamePart": "Might",
+    "bodyNamePart": "tyena"
   },
   {
     "id": 504,
@@ -14360,7 +15366,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Zig",
+    "bodyNamePart": "zagoon"
   },
   {
     "id": 505,
@@ -14393,7 +15401,9 @@
         "id": 263,
         "name": "zigzagoon"
       }
-    }
+    },
+    "headNamePart": "Lin",
+    "bodyNamePart": "noone"
   },
   {
     "id": 506,
@@ -14427,7 +15437,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Wurm",
+    "bodyNamePart": "ple"
   },
   {
     "id": 507,
@@ -14459,7 +15471,9 @@
         "id": 265,
         "name": "wurmple"
       }
-    }
+    },
+    "headNamePart": "Sil",
+    "bodyNamePart": "coon"
   },
   {
     "id": 508,
@@ -14489,7 +15503,9 @@
         "min_level": 7,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Beauti",
+    "bodyNamePart": "fly"
   },
   {
     "id": 509,
@@ -14521,7 +15537,9 @@
         "id": 265,
         "name": "wurmple"
       }
-    }
+    },
+    "headNamePart": "Cas",
+    "bodyNamePart": "scoon"
   },
   {
     "id": 510,
@@ -14551,7 +15569,9 @@
         "min_level": 7,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Dust",
+    "bodyNamePart": "tox"
   },
   {
     "id": 511,
@@ -14579,7 +15599,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Seed",
+    "bodyNamePart": "dot"
   },
   {
     "id": 512,
@@ -14614,7 +15636,9 @@
         "id": 273,
         "name": "seedot"
       }
-    }
+    },
+    "headNamePart": "Nuz",
+    "bodyNamePart": "leaf"
   },
   {
     "id": 513,
@@ -14644,7 +15668,9 @@
         "min_level": 14,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Shift",
+    "bodyNamePart": "try"
   },
   {
     "id": 514,
@@ -14675,7 +15701,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Tail",
+    "bodyNamePart": "low"
   },
   {
     "id": 515,
@@ -14703,7 +15731,9 @@
         "id": 276,
         "name": "taillow"
       }
-    }
+    },
+    "headNamePart": "Swell",
+    "bodyNamePart": "wellow"
   },
   {
     "id": 516,
@@ -14734,7 +15764,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Wing",
+    "bodyNamePart": "gull"
   },
   {
     "id": 517,
@@ -14762,7 +15794,9 @@
         "id": 278,
         "name": "wingull"
       }
-    }
+    },
+    "headNamePart": "Peli",
+    "bodyNamePart": "liper"
   },
   {
     "id": 518,
@@ -14793,7 +15827,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Sur",
+    "bodyNamePart": "skit"
   },
   {
     "id": 519,
@@ -14821,7 +15857,9 @@
         "id": 283,
         "name": "surskit"
       }
-    }
+    },
+    "headNamePart": "Masque",
+    "bodyNamePart": "rain"
   },
   {
     "id": 520,
@@ -14849,7 +15887,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Whism",
+    "bodyNamePart": "mur"
   },
   {
     "id": 521,
@@ -14881,7 +15921,9 @@
         "id": 293,
         "name": "whismur"
       }
-    }
+    },
+    "headNamePart": "Loud",
+    "bodyNamePart": "dred"
   },
   {
     "id": 522,
@@ -14908,7 +15950,9 @@
         "min_level": 20,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Ex",
+    "bodyNamePart": "loud"
   },
   {
     "id": 523,
@@ -14936,7 +15980,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Maku",
+    "bodyNamePart": "hita"
   },
   {
     "id": 524,
@@ -14961,7 +16007,9 @@
         "id": 296,
         "name": "makuhita"
       }
-    }
+    },
+    "headNamePart": "Hari",
+    "bodyNamePart": "yama"
   },
   {
     "id": 525,
@@ -14989,7 +16037,9 @@
           "trigger": "use-item"
         }
       ]
-    }
+    },
+    "headNamePart": "Skit",
+    "bodyNamePart": "itty"
   },
   {
     "id": 526,
@@ -15014,7 +16064,9 @@
         "id": 300,
         "name": "skitty"
       }
-    }
+    },
+    "headNamePart": "Del",
+    "bodyNamePart": "catty"
   },
   {
     "id": 527,
@@ -15045,7 +16097,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Med",
+    "bodyNamePart": "tite"
   },
   {
     "id": 528,
@@ -15073,7 +16127,9 @@
         "id": 307,
         "name": "meditite"
       }
-    }
+    },
+    "headNamePart": "Medi",
+    "bodyNamePart": "cham"
   },
   {
     "id": 529,
@@ -15101,7 +16157,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Elect",
+    "bodyNamePart": "trike"
   },
   {
     "id": 530,
@@ -15126,7 +16184,9 @@
         "id": 309,
         "name": "electrike"
       }
-    }
+    },
+    "headNamePart": "Mane",
+    "bodyNamePart": "tric"
   },
   {
     "id": 531,
@@ -15147,7 +16207,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Plus",
+    "bodyNamePart": "le"
   },
   {
     "id": 532,
@@ -15168,7 +16230,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Min",
+    "bodyNamePart": "un"
   },
   {
     "id": 533,
@@ -15189,7 +16253,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Vol",
+    "bodyNamePart": "beat"
   },
   {
     "id": 534,
@@ -15210,7 +16276,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Illu",
+    "bodyNamePart": "mise"
   },
   {
     "id": 535,
@@ -15238,7 +16306,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Gul",
+    "bodyNamePart": "in"
   },
   {
     "id": 536,
@@ -15263,7 +16333,9 @@
         "id": 316,
         "name": "gulpin"
       }
-    }
+    },
+    "headNamePart": "Swal",
+    "bodyNamePart": "t"
   },
   {
     "id": 537,
@@ -15294,7 +16366,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Nu",
+    "bodyNamePart": "mel"
   },
   {
     "id": 538,
@@ -15322,7 +16396,9 @@
         "id": 322,
         "name": "numel"
       }
-    }
+    },
+    "headNamePart": "Came",
+    "bodyNamePart": "rupt"
   },
   {
     "id": 539,
@@ -15350,7 +16426,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Spo",
+    "bodyNamePart": "ink"
   },
   {
     "id": 540,
@@ -15375,7 +16453,9 @@
         "id": 325,
         "name": "spoink"
       }
-    }
+    },
+    "headNamePart": "Grum",
+    "bodyNamePart": "pig"
   },
   {
     "id": 541,
@@ -15396,7 +16476,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Spin",
+    "bodyNamePart": "da"
   },
   {
     "id": 542,
@@ -15417,7 +16499,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Zan",
+    "bodyNamePart": "goose"
   },
   {
     "id": 543,
@@ -15438,7 +16522,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Se",
+    "bodyNamePart": "viper"
   },
   {
     "id": 544,
@@ -15462,7 +16548,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Luna",
+    "bodyNamePart": "atone"
   },
   {
     "id": 545,
@@ -15486,7 +16574,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Sol",
+    "bodyNamePart": "lrock"
   },
   {
     "id": 546,
@@ -15517,7 +16607,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Bar",
+    "bodyNamePart": "boach"
   },
   {
     "id": 547,
@@ -15545,7 +16637,9 @@
         "id": 339,
         "name": "barboach"
       }
-    }
+    },
+    "headNamePart": "Whis",
+    "bodyNamePart": "cash"
   },
   {
     "id": 548,
@@ -15573,7 +16667,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Cor",
+    "bodyNamePart": "phish"
   },
   {
     "id": 549,
@@ -15601,7 +16697,9 @@
         "id": 341,
         "name": "corphish"
       }
-    }
+    },
+    "headNamePart": "Craw",
+    "bodyNamePart": "daunt"
   },
   {
     "id": 550,
@@ -15632,7 +16730,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Bal",
+    "bodyNamePart": "toy"
   },
   {
     "id": 551,
@@ -15660,7 +16760,9 @@
         "id": 343,
         "name": "baltoy"
       }
-    }
+    },
+    "headNamePart": "Clay",
+    "bodyNamePart": "dol"
   },
   {
     "id": 552,
@@ -15681,7 +16783,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Cast",
+    "bodyNamePart": "form"
   },
   {
     "id": 553,
@@ -15702,7 +16806,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Cast",
+    "bodyNamePart": "form"
   },
   {
     "id": 554,
@@ -15723,7 +16829,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Cast",
+    "bodyNamePart": "form"
   },
   {
     "id": 555,
@@ -15744,7 +16852,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Cast",
+    "bodyNamePart": "form"
   },
   {
     "id": 556,
@@ -15768,7 +16878,9 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Tro",
+    "bodyNamePart": "pius"
   },
   {
     "id": 557,
@@ -15796,7 +16908,9 @@
           "condition": "Time: night"
         }
       ]
-    }
+    },
+    "headNamePart": "Ching",
+    "bodyNamePart": "ling"
   },
   {
     "id": 558,
@@ -15821,7 +16935,9 @@
         "id": 433,
         "name": "chingling"
       }
-    }
+    },
+    "headNamePart": "Chime",
+    "bodyNamePart": "echo"
   },
   {
     "id": 559,
@@ -15852,7 +16968,9 @@
           "trigger": "level-up"
         }
       ]
-    }
+    },
+    "headNamePart": "Sphe",
+    "bodyNamePart": "eal"
   },
   {
     "id": 560,
@@ -15887,7 +17005,9 @@
         "id": 363,
         "name": "spheal"
       }
-    }
+    },
+    "headNamePart": "Sea",
+    "bodyNamePart": "leo"
   },
   {
     "id": 561,
@@ -15917,7 +17037,9 @@
         "min_level": 32,
         "trigger": "level-up"
       }
-    }
+    },
+    "headNamePart": "Wal",
+    "bodyNamePart": "rein"
   },
   {
     "id": 562,
@@ -15949,7 +17071,9 @@
           "trigger": "trade"
         }
       ]
-    }
+    },
+    "headNamePart": "Clam",
+    "bodyNamePart": "perl"
   },
   {
     "id": 563,
@@ -15974,7 +17098,9 @@
         "id": 366,
         "name": "clamperl"
       }
-    }
+    },
+    "headNamePart": "Hun",
+    "bodyNamePart": "tail"
   },
   {
     "id": 564,
@@ -15999,7 +17125,9 @@
         "id": 366,
         "name": "clamperl"
       }
-    }
+    },
+    "headNamePart": "Gore",
+    "bodyNamePart": "byss"
   },
   {
     "id": 565,
@@ -16023,6 +17151,8 @@
     },
     "evolution": {
       "evolves_to": []
-    }
+    },
+    "headNamePart": "Reli",
+    "bodyNamePart": "canth"
   }
 ]

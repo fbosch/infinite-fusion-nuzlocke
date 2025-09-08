@@ -32,6 +32,8 @@
     "scrape:safari": "jiti scripts/scrape-safari-encounters.ts",
     "scrape:eggs": "jiti scripts/scrape-egg-locations.ts",
     "scrape:special": "jiti scripts/scrape-special-encounters.ts",
+    "scrape:fusion-names": "jiti scripts/scrape-fusion-names.ts",
+    "validate:fusion-names": "jiti scripts/validate-fusion-names.ts",
     "data:refresh": "pnpm run scrape && pnpm run test:run",
     "spritesheet": "jiti scripts/generate-spritesheet.ts",
     "mcp:test": "npx -y @modelcontextprotocol/inspector npx @upstash/context7-mcp",

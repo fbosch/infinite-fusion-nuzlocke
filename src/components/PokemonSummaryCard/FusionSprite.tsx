@@ -12,7 +12,6 @@ import { twMerge } from 'tailwind-merge';
 
 import { useAnimatedSprite } from './useAnimatedSprite';
 import {
-  getAltText,
   getSpriteUrl,
   TRANSPARENT_PIXEL,
   getNextFallbackUrl,
@@ -110,7 +109,12 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
     if (!head && !body) return null;
 
     const spriteUrl = getSpriteUrl(head, body, isFusion, preferredVariant);
-    const altText = getAltText(head, body, isFusion);
+
+    // Simple alt text logic
+    const altText =
+      isFusion && head && body
+        ? `${head.name}/${body.name} fusion`
+        : head?.name || body?.name || 'Pokemon';
     const baseImageClasses =
       'object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none transform-gpu';
 

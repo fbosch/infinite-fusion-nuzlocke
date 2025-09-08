@@ -2,7 +2,7 @@
  * Fusion Naming Utilities
  *
  * Utilities for generating and working with Pokémon fusion names
- * based on the head and body name parts from base entries.
+ * based on the head and body name parts from Pokemon data.
  */
 
 import type { DexEntry } from '../../scripts/utils/data-loading-utils';
@@ -66,4 +66,70 @@ export function getFusionDisplayName(
   }
 
   return `${headPokemon.name}/${bodyPokemon.name}`;
+}
+
+/**
+ * Gets the display name for a fusion from PokemonOptionType objects
+ * This is the UI-friendly version that works with the component system
+ */
+export function getFusionDisplayNameFromOptions(
+  headPokemon: { id: number; name: string } | null,
+  bodyPokemon: { id: number; name: string } | null,
+  getPokemonById: (id: number) => DexEntry | undefined,
+  useFusionNames: boolean = true
+): string {
+  if (!headPokemon || !bodyPokemon) {
+    return headPokemon?.name || bodyPokemon?.name || '';
+  }
+
+  const headDexEntry = getPokemonById(headPokemon.id);
+  const bodyDexEntry = getPokemonById(bodyPokemon.id);
+
+  if (!headDexEntry || !bodyDexEntry) {
+    return `${headPokemon.name}/${bodyPokemon.name}`;
+  }
+
+  return getFusionDisplayName(headDexEntry, bodyDexEntry, useFusionNames);
+}
+
+/**
+ * Gets the display name for a fusion from PokemonOptionType objects (non-hook version)
+ * This is for use in contexts where hooks cannot be used
+ */
+export function getFusionDisplayNameFromOptionsSync(
+  headPokemon: { id: number; name: string; nickname?: string } | null,
+  bodyPokemon: { id: number; name: string; nickname?: string } | null,
+  isFusion: boolean,
+  getPokemonById: (id: number) => DexEntry | undefined
+): string {
+  if (!isFusion) {
+    // Single Pokémon - show nickname if available, otherwise show name
+    const pokemon = headPokemon || bodyPokemon;
+    if (!pokemon) return '';
+    return pokemon.nickname || pokemon.name;
+  }
+
+  // Fusion case
+  if (!headPokemon || !bodyPokemon) {
+    const pokemon = headPokemon || bodyPokemon;
+    if (!pokemon) return '';
+    return pokemon.nickname || pokemon.name;
+  }
+
+  // For fusions, always prioritize head Pokémon nickname if it exists
+  if (headPokemon.nickname) {
+    return headPokemon.nickname;
+  }
+
+  // If no head nickname, fall back to body nickname
+  if (bodyPokemon.nickname) {
+    return bodyPokemon.nickname;
+  }
+
+  // If neither has a nickname, generate the fusion name
+  return getFusionDisplayNameFromOptions(
+    headPokemon,
+    bodyPokemon,
+    getPokemonById
+  );
 }

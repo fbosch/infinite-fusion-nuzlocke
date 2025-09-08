@@ -23,18 +23,41 @@ function delay(ms: number): Promise<void> {
 }
 
 /**
- * Loads base Pokemon entries from the JSON file
+ * Loads Pokemon data and converts to DexEntry format
  */
-async function loadBaseEntries(): Promise<DexEntry[]> {
+async function loadPokemonData(): Promise<DexEntry[]> {
   try {
-    const baseEntriesPath = path.join(process.cwd(), 'data', 'shared', 'base-entries.json');
-    const baseEntriesContent = await fs.readFile(baseEntriesPath, 'utf8');
-    const baseEntries: DexEntry[] = JSON.parse(baseEntriesContent);
+    console.log('🔄 Loading Pokemon data...');
     
-    ConsoleFormatter.success(`Loaded ${baseEntries.length} base Pokemon entries`);
-    return baseEntries;
+    // Try to load from pokemon-data.json first (enriched data)
+    try {
+      const pokemonDataPath = path.join(process.cwd(), 'data', 'shared', 'pokemon-data.json');
+      const pokemonDataContent = await fs.readFile(pokemonDataPath, 'utf8');
+      const pokemonData = JSON.parse(pokemonDataContent);
+      
+      // Convert to DexEntry format
+      const dexEntries: DexEntry[] = pokemonData.map((pokemon: any) => ({
+        id: pokemon.id,
+        name: pokemon.name,
+        headNamePart: pokemon.headNamePart,
+        bodyNamePart: pokemon.bodyNamePart,
+      }));
+      
+      console.log(`✅ Loaded ${dexEntries.length} Pokemon entries from pokemon-data.json`);
+      return dexEntries;
+    } catch (pokemonDataError) {
+      console.log('⚠️  pokemon-data.json not found or invalid, trying base-entries.json...');
+      
+      // Fallback to base-entries.json
+      const baseEntriesPath = path.join(process.cwd(), 'data', 'shared', 'base-entries.json');
+      const baseEntriesContent = await fs.readFile(baseEntriesPath, 'utf8');
+      const baseEntries: DexEntry[] = JSON.parse(baseEntriesContent);
+      
+      console.log(`✅ Loaded ${baseEntries.length} Pokemon entries from base-entries.json`);
+      return baseEntries;
+    }
   } catch (error) {
-    ConsoleFormatter.error(`Error loading base entries: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error(`❌ Error loading Pokemon data: ${error instanceof Error ? error.message : 'Unknown error'}`);
     throw error;
   }
 }
@@ -88,7 +111,13 @@ function selectRandomCombinations(baseEntries: DexEntry[], count: number = 10): 
     entry.bodyNamePart !== entry.name
   );
   
-  ConsoleFormatter.info(`Found ${validEntries.length} valid entries with fusion name parts`);
+  console.log(`🎯 Found ${validEntries.length} valid entries with fusion name parts`);
+  
+  if (validEntries.length === 0) {
+    console.log('❌ No Pokemon found with fusion name parts!');
+    console.log('💡 You may need to run: pnpm scrape:fusion-names');
+    throw new Error('No valid Pokemon with fusion name parts found');
+  }
   
   const combinations: Array<{ head: DexEntry; body: DexEntry }> = [];
   
@@ -153,9 +182,9 @@ async function validateFusionNames(): Promise<void> {
   ConsoleFormatter.printHeader('Fusion Name Validation', 'Validating fusion name parts against FusionDex.org');
   
   try {
-    // Load base entries
-    ConsoleFormatter.printSection('Loading Pokemon data');
-    const baseEntries = await loadBaseEntries();
+    // Load Pokemon data
+    console.log('\n🔍 Starting Fusion Name Validation...\n');
+    const baseEntries = await loadPokemonData();
     
     // Select random combinations
     ConsoleFormatter.printSection('Selecting random combinations');
@@ -171,10 +200,13 @@ async function validateFusionNames(): Promise<void> {
     for (let i = 0; i < combinations.length; i++) {
       const { head, body } = combinations[i];
       
-      ConsoleFormatter.info(`Validating ${head.name} + ${body.name}...`);
+      console.log(`🔄 [${i + 1}/${combinations.length}] Validating ${head.name} + ${body.name}...`);
       
       const result = await validateCombination(head, body);
       results.push(result);
+      
+      const status = result.matches ? '✅' : '❌';
+      console.log(`${status} Expected: "${result.expectedFusionName}" | Actual: "${result.actualFusionName}"`);
       
       // Rate limiting
       await delay(1000);
@@ -238,7 +270,10 @@ async function validateFusionNames(): Promise<void> {
   }
 }
 
-// Run the validation
-if (require.main === module) {
-  validateFusionNames();
-}
+// Run the validation immediately
+console.log('🚀 Starting Fusion Name Validation Script...');
+
+validateFusionNames().catch(error => {
+  console.error('❌ Validation script failed:', error);
+  process.exit(1);
+});
