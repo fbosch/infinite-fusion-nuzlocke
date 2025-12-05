@@ -6,14 +6,6 @@ Track your Pokémon Infinite Fusion Nuzlocke runs with encounter tracking, team 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 
-## Features
-
-- **Encounter Tracking** - Track encounters across all game locations
-- **Team Management** - Build and manage your team with visual previews
-- **Multiple Playthroughs** - Manage multiple Nuzlocke runs
-- **Fusion Support** - Track DNA Splicers and fusion combinations
-- **PWA** - Install as a native app with offline support
-
 ## Quick Start
 
 ```bash
