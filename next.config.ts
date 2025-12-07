@@ -3,9 +3,7 @@ import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const nextConfig: NextConfig = {
   // Enable React Compiler for automatic performance optimizations
-  experimental: {
-    reactCompiler: true,
-  },
+  reactCompiler: true,
 
   // Enable Turbopack for faster development builds
   turbopack: {
