@@ -17,6 +17,13 @@ interface LocationTableRowProps {
   row: Row<CombinedLocation>;
 }
 
+const EMPTY_ENCOUNTER = {
+  head: null,
+  body: null,
+  isFusion: false,
+  updatedAt: 0,
+};
+
 export default function LocationTableRow({ row }: LocationTableRowProps) {
   const locationId = row.original.id;
   const { ref, inView } = useInView();
@@ -27,12 +34,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
   const shouldLoad = inView || aboveTheFold;
 
   // Get encounter data directly - only this row will rerender when this encounter changes
-  const encounterData = useEncounter(locationId) || {
-    head: null,
-    body: null,
-    isFusion: false,
-    updatedAt: Date.now(),
-  };
+  const encounterData = useEncounter(locationId) || EMPTY_ENCOUNTER;
 
   // Play evolution animation when this location evolves, but only if the Pokémon can form an effective fusion
   useEffect(() => {
