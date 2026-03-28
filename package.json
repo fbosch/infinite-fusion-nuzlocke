@@ -86,7 +86,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/cli-progress": "^3.11.6",
     "@types/ms": "^2.1.0",
-    "@types/node": "^20",
+    "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
