@@ -8,7 +8,7 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { HelpCircle, X } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import type { GameMode } from "@/stores/playthroughs";
 
@@ -28,7 +28,16 @@ export default function CreatePlaythroughModal({
   const [newPlaythroughName, setNewPlaythroughName] = useState("");
   const [selectedGameModeOverride, setSelectedGameModeOverride] =
     useState<GameMode | null>(null);
+  const playthroughNameInputRef = useRef<HTMLInputElement>(null);
   const selectedGameMode = selectedGameModeOverride ?? currentGameMode;
+
+  useEffect(() => {
+    if (isOpen === false) {
+      return;
+    }
+
+    playthroughNameInputRef.current?.focus();
+  }, [isOpen]);
 
   const handleClose = useCallback(() => {
     setNewPlaythroughName("");
@@ -92,6 +101,7 @@ export default function CreatePlaythroughModal({
                 Playthrough Name
               </label>
               <input
+                ref={playthroughNameInputRef}
                 id="playthrough-name"
                 type="text"
                 value={newPlaythroughName}
@@ -111,19 +121,15 @@ export default function CreatePlaythroughModal({
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500",
                   "transition-all duration-200",
                 )}
-                autoFocus
                 maxLength={50}
                 spellCheck={false}
                 autoComplete="off"
               />
             </div>
 
-            <div>
-              <label
-                htmlFor="game-mode"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                <div className="flex items-center gap-2">
+            <fieldset>
+              <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <span className="flex items-center gap-2">
                   <span>Game Mode</span>
                   <CursorTooltip
                     delay={300}
@@ -169,12 +175,12 @@ export default function CreatePlaythroughModal({
                     }
                     placement="bottom-start"
                   >
-                    <div className="w-4 h-4 text-gray-400 dark:text-gray-500 cursor-help">
+                    <span className="w-4 h-4 text-gray-400 dark:text-gray-500 cursor-help inline-flex">
                       <HelpCircle className="w-4 h-4" />
-                    </div>
+                    </span>
                   </CursorTooltip>
-                </div>
-              </label>
+                </span>
+              </legend>
               <div className="grid grid-cols-3 gap-2">
                 {(["classic", "remix", "randomized"] as const).map((mode) => (
                   <button
@@ -199,11 +205,12 @@ export default function CreatePlaythroughModal({
                   </button>
                 ))}
               </div>
-            </div>
+            </fieldset>
           </div>
 
           <div className="flex items-center gap-3 pt-4">
             <button
+              type="button"
               onClick={handleClose}
               className={clsx(
                 "flex-1 px-4 py-2.5 text-sm font-medium",
@@ -216,6 +223,7 @@ export default function CreatePlaythroughModal({
               Cancel
             </button>
             <button
+              type="button"
               onClick={handleCreatePlaythrough}
               disabled={!newPlaythroughName.trim()}
               className={clsx(

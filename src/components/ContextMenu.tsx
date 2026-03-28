@@ -309,13 +309,12 @@ export function ContextMenu({
               {...getFloatingProps()}
             >
               {filterEdgeSeparators(items).map(
-                (item: ContextMenuItem, index: number) => {
+                (item: ContextMenuItem, _index: number) => {
                   if (item.separator) {
                     return (
-                      <div
+                      <hr
                         key={item.id}
                         className="my-1 h-px bg-gray-200 dark:bg-gray-700/70"
-                        role="separator"
                       />
                     );
                   }
@@ -548,6 +547,7 @@ export function ContextMenu({
                               {item.children?.map((child) => (
                                 <button
                                   key={child.id}
+                                  type="button"
                                   className={clsx(
                                     "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
                                     "text-sm transition-colors duration-75 enabled:cursor-pointer",
@@ -619,6 +619,7 @@ export function ContextMenu({
                           {item.children?.map((child) => (
                             <button
                               key={child.id}
+                              type="button"
                               className={clsx(
                                 "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
                                 "text-sm transition-colors duration-75 enabled:cursor-pointer",
@@ -663,8 +664,10 @@ export function ContextMenu({
 
       {/* Handle outside clicks and escape key */}
       {isVisible && (
-        <div
+        <button
+          type="button"
           className="fixed inset-0 z-40"
+          aria-label="Close context menu"
           onClick={handleClose}
           onKeyDown={(e) => {
             if (e.key === "Escape") {
