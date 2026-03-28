@@ -484,21 +484,25 @@ const updateTeamMember = async (
 };
 
 // Helper function to get team member details
-const getTeamMemberDetails = (position: number) => {
+const getTeamMemberDetails = (
+  position: number,
+  pokemonByUid?: ReadonlyMap<string, PokemonOptionType>
+) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough || position < 0 || position >= 6) return null;
 
   const teamMember = activePlaythrough.team.members[position];
   if (!teamMember) return null;
 
-  const pokemonByUid = buildPokemonUidIndex(activePlaythrough.encounters);
+  const uidIndex =
+    pokemonByUid ?? buildPokemonUidIndex(activePlaythrough.encounters);
 
   const headPokemon: PokemonOptionType | null =
-    pokemonByUid.get(teamMember.headPokemonUid) ?? null;
+    uidIndex.get(teamMember.headPokemonUid) ?? null;
 
   const bodyPokemon: PokemonOptionType | null =
     teamMember.bodyPokemonUid && teamMember.bodyPokemonUid !== ''
-      ? (pokemonByUid.get(teamMember.bodyPokemonUid) ?? null)
+      ? (uidIndex.get(teamMember.bodyPokemonUid) ?? null)
       : null;
 
   if (!headPokemon && !bodyPokemon) {

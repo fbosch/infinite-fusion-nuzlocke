@@ -221,6 +221,29 @@ describe('encounter-utils', () => {
 
       expect(result).toEqual(mockCharmander);
     });
+
+    it('should fall back to encounter scan when uid is missing from provided index', () => {
+      const encounters: Record<string, EncounterData> = {
+        route1: {
+          head: mockPikachu,
+          body: mockCharmander,
+          isFusion: true,
+          updatedAt: Date.now(),
+        },
+      };
+
+      const incompleteIndex = new Map<string, PokemonOptionType>([
+        ['pikachu_route1_123', mockPikachu],
+      ]);
+
+      const result = findPokemonByUid(
+        encounters,
+        'charmander_route1_456',
+        incompleteIndex
+      );
+
+      expect(result).toEqual(mockCharmander);
+    });
   });
 
   describe('buildPokemonUidIndex', () => {

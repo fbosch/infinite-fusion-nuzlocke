@@ -32,7 +32,10 @@ export function findPokemonByUid(
   pokemonByUid?: ReadonlyMap<string, PokemonOptionType>
 ): PokemonOptionType | null {
   if (pokemonByUid) {
-    return pokemonByUid.get(uid) ?? null;
+    const indexedPokemon = pokemonByUid.get(uid);
+    if (indexedPokemon) {
+      return indexedPokemon;
+    }
   }
 
   if (!encounters) return null;
