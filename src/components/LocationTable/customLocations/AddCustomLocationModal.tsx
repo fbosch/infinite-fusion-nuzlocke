@@ -8,7 +8,7 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { Loader2, Plus, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { getLocationsSortedWithCustom } from "@/loaders";
 import { playthroughActions, useCustomLocations } from "@/stores/playthroughs";
 
@@ -24,19 +24,12 @@ export default function AddCustomLocationModal({
   const [locationName, setLocationName] = useState("");
   const [selectedAfterLocationId, setSelectedAfterLocationId] = useState("");
   const customLocations = useCustomLocations();
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-    } else {
-      setTimeout(() => {
-        setLocationName("");
-      }, 100);
-    }
-  }, [isOpen]);
+  const handleClose = useCallback(() => {
+    setLocationName("");
+    setSelectedAfterLocationId("");
+    onClose();
+  }, [onClose]);
 
   // Only process locations when modal is open to improve performance
   const allLocations = useMemo(() => {
@@ -57,15 +50,12 @@ export default function AddCustomLocationModal({
     );
 
     if (newLocationId !== null) {
-      // Reset form and close modal
-      setLocationName("");
-      setSelectedAfterLocationId("");
-      onClose();
+      handleClose();
     }
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-70 group">
+    <Dialog open={isOpen} onClose={handleClose} className="relative z-70 group">
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"
@@ -85,7 +75,7 @@ export default function AddCustomLocationModal({
               Add Custom Location
             </DialogTitle>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
@@ -107,7 +97,6 @@ export default function AddCustomLocationModal({
               </label>
               <input
                 type="text"
-                ref={inputRef}
                 id="locationName"
                 value={locationName}
                 onChange={(e) => setLocationName(e.target.value)}
@@ -179,7 +168,7 @@ export default function AddCustomLocationModal({
               </button>
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleClose}
                 className={clsx(
                   "flex-1 px-4 py-2 text-sm  rounded-md transition-colors",
                   "bg-gray-100 hover:bg-gray-200 text-gray-900",
