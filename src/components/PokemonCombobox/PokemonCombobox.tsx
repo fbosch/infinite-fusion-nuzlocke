@@ -155,8 +155,13 @@ export const PokemonCombobox = ({
   const finalOptions = useMemo(() => {
     // Early return for empty query
     if (deferredQuery === "") {
-      // In randomized mode or custom location, show all Pokemon
-      if (gameMode === "randomized" || isCustomLocation) {
+      const shouldShowAllPokemon =
+        gameMode === "randomized" ||
+        isCustomLocation ||
+        routeEncounterData.length === 0;
+
+      // In randomized mode, custom locations, or locations without route data, show all Pokemon
+      if (shouldShowAllPokemon) {
         // If still loading, return empty array to avoid showing incomplete data
         if (isAllPokemonLoading) {
           return [];

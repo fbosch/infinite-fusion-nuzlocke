@@ -99,6 +99,14 @@ describe("Locations", () => {
       // Since we removed order property, they should be in the same order as the original array
       expect(sortedLocations).toEqual(locations);
     });
+
+    it("should include Route 25 and Gate in default locations", () => {
+      const locations = getLocations();
+      const locationNames = locations.map((location) => location.name);
+
+      expect(locationNames).toContain("Route 25");
+      expect(locationNames).toContain("Gate");
+    });
   });
 
   describe("getLocationsByRegion", () => {
