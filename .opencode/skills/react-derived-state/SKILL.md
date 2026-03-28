@@ -7,6 +7,11 @@ description: Prevent React derived-state regressions and effect-sync loops. Use 
 
 Use this skill to avoid stale UI and state sync loops caused by storing computed values in state.
 
+## Scope
+
+- Apply when editing `useState`/`useEffect` logic for filtering, sorting, formatting, aggregation, or selector output.
+- Skip when the value must be persisted outside render as canonical state.
+
 ## Failure modes this prevents
 
 - `useEffect` + `setState` mirrors filtered/sorted/formatted values from other state.
@@ -27,6 +32,8 @@ Use this skill to avoid stale UI and state sync loops caused by storing computed
 3. Replace derived `useState`/`useEffect` with `useMemo` in render scope.
 4. Keep state/actions for user intent only (query, selected id, sort mode), not computed collections.
 5. Re-check dependencies to ensure memoized derivation tracks all canonical inputs.
+
+## Fallbacks
 
 If a derivation is too expensive for render:
 

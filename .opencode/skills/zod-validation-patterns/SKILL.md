@@ -7,6 +7,11 @@ description: Apply repository Zod boundary-validation conventions with consisten
 
 Use this skill to keep invalid data from entering stores and to make failures diagnosable.
 
+## Scope
+
+- Apply at untrusted-data boundaries: API inputs, external fetch payloads, localStorage, import/export payloads, and migration transforms.
+- Skip for internal trusted objects unless explicitly asserting invariants.
+
 ## Failure modes this prevents
 
 - Accepting unvalidated API/localStorage/import payloads into state.
@@ -34,6 +39,8 @@ Use this skill to keep invalid data from entering stores and to make failures di
 3. On failure, return/throw a contextual error that preserves `issues` path data.
 4. On success, propagate only parsed `data`.
 5. Add or update tests for valid, invalid, and legacy-format payloads.
+
+## Fallbacks
 
 If validation fails for a backward-compatible format:
 

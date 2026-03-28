@@ -7,6 +7,11 @@ description: Enforce high-risk accessibility invariants for interactive React UI
 
 Use this skill for concrete implementation checks, not generic WCAG prose.
 
+## Scope
+
+- Apply for interactive controls, custom click wrappers, icon-only actions, sortable tables, dialogs, and dynamic status updates.
+- Skip static content edits with no interaction or stateful announcements.
+
 ## Failure modes this prevents
 
 - Clickable non-button elements without keyboard parity.
@@ -33,6 +38,8 @@ Use this skill for concrete implementation checks, not generic WCAG prose.
 4. For sortable table headers, include `aria-sort` and keyboard trigger parity.
 5. For dialogs, include `role="dialog"`, `aria-modal`, and label association.
 6. For dynamic status/loading/error text, use appropriate live-region semantics.
+
+## Fallbacks
 
 If a custom wrapper can be replaced by semantic HTML, replace it; do not keep wrapper + ARIA unless required.
 
