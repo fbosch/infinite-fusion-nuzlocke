@@ -1,5 +1,5 @@
 import { emitEvolutionEvent } from "@/lib/events";
-import { getCurrentTimestamp } from "../store";
+import { getCurrentTimestamp } from "../playthroughState";
 import {
   createPokemonWithLocationAndUID,
   ensureActivePlaythroughWithEncounters,

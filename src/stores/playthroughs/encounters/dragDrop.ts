@@ -1,7 +1,7 @@
 import type { z } from "zod";
 import { emitEvolutionEvent } from "@/lib/events";
 import type { PokemonOptionSchema } from "@/loaders/pokemon";
-import { getCurrentTimestamp } from "../store";
+import { getCurrentTimestamp } from "../playthroughState";
 import type { EncounterDataSchema } from "../types";
 import {
   createPokemonWithLocationAndUID,

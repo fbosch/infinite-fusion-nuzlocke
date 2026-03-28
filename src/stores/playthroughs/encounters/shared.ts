@@ -4,7 +4,7 @@ import {
   generatePokemonUID,
   type PokemonOptionSchema,
 } from "@/loaders/pokemon";
-import { getActivePlaythrough } from "../store";
+import { getActivePlaythrough } from "../playthroughState";
 import type { Playthrough } from "../types";
 
 export type PokemonOption = z.infer<typeof PokemonOptionSchema>;
