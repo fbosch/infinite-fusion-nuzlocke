@@ -46,6 +46,11 @@ If replacing derived state changes behavior:
 - Compare old/new outputs for the same canonical inputs.
 - Fix hidden input omissions (common: missing route filters, active-team exclusions, or mode toggles).
 
+If memoization is unnecessary:
+
+- For cheap and linear transforms, derive directly during render without `useMemo`.
+- Add `useMemo` only when cost or referential stability requirements are proven.
+
 ## Rewrite pattern
 
 ```tsx

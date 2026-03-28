@@ -49,6 +49,29 @@ If keyboard behavior is uncertain, implement the minimum deterministic contract:
 - Focus indicator is visible in default keyboard navigation.
 - Escape closes dismissible dialogs and returns focus to trigger when possible.
 
+```tsx
+// Bad: mouse-only interaction on non-semantic wrapper
+<div onClick={onOpen}>Open details</div>
+
+// Good: semantic control
+<button type="button" onClick={onOpen}>Open details</button>
+
+// Good fallback when wrapper is unavoidable
+<div
+  role="button"
+  tabIndex={0}
+  onClick={onOpen}
+  onKeyDown={e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onOpen();
+    }
+  }}
+>
+  Open details
+</div>
+```
+
 ## Quick review checks
 
 - Search for `onClick` on non-semantic elements and verify keyboard parity.

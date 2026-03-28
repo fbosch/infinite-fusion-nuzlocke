@@ -73,11 +73,18 @@ return { ok: true, data: result.data };
 Use one boundary error shape consistently:
 
 ```ts
+type ValidationSuccess<T> = {
+  ok: true;
+  data: T;
+};
+
 type ValidationFailure = {
   ok: false;
   message: string;
   issues: { path: (string | number)[]; message: string }[];
 };
+
+type ValidationResult<T> = ValidationSuccess<T> | ValidationFailure;
 ```
 
 ## Fast review checks
