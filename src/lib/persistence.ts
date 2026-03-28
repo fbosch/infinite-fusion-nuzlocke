@@ -3,6 +3,7 @@ import {
   type PersistedQuery,
 } from "@tanstack/query-persist-client-core";
 import { createStore, del, get, set } from "idb-keyval";
+import { z } from "zod";
 
 // Cache busting mechanism using build ID
 export const getCacheBuster = () => {
@@ -22,12 +23,42 @@ const idbStorage = {
   removeItem: (key: string) => del(key, queryStore),
 };
 
+const PersistedQuerySchema = z.custom<PersistedQuery>((value) => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as {
+    buster?: unknown;
+    queryHash?: unknown;
+    queryKey?: unknown;
+    state?: unknown;
+  };
+
+  return (
+    typeof candidate.buster === "string" &&
+    typeof candidate.queryHash === "string" &&
+    Array.isArray(candidate.queryKey) &&
+    typeof candidate.state === "object" &&
+    candidate.state !== null
+  );
+});
+
+const deserializePersistedQuery = (data: unknown): PersistedQuery => {
+  try {
+    const parsed = typeof data === "string" ? JSON.parse(data) : data;
+    return PersistedQuerySchema.parse(parsed);
+  } catch {
+    throw new Error("Invalid persisted query payload");
+  }
+};
+
 export const queryPersister = experimental_createQueryPersister({
   storage: idbStorage,
   prefix: `query:`,
   buster: getCacheBuster().toString(),
-  deserialize: (data) => data as unknown as PersistedQuery,
-  serialize: (data) => data as unknown as string,
+  deserialize: deserializePersistedQuery,
+  serialize: JSON.stringify,
   maxAge:
     process.env.NODE_ENV === "development"
       ? 1000 * 60 * 5 // 5 minutes in dev

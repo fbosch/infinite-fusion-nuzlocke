@@ -8,16 +8,20 @@ export function useAnimatedSprite({ canAnimate }: UseAnimatedSpriteOptions) {
   const imageRef = useRef<HTMLImageElement>(null);
   const shadowRef = useRef<HTMLImageElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
-  const raysSvgRef = useRef<HTMLElement | SVGElement>(null);
+  const raysSvgRef = useRef<HTMLDivElement>(null);
   const hoverRef = useRef<boolean>(false);
 
   const handleMouseEnter = () => {
     hoverRef.current = true;
     if (imageRef.current && canAnimate) {
       // Cancel any running animations so the new one will replay
-      imageRef.current.getAnimations().forEach((anim) => anim.cancel());
+      imageRef.current.getAnimations().forEach((anim) => {
+        anim.cancel();
+      });
       if (shadowRef.current) {
-        shadowRef.current.getAnimations().forEach((anim) => anim.cancel());
+        shadowRef.current.getAnimations().forEach((anim) => {
+          anim.cancel();
+        });
       }
 
       const animateSprite = () => {
@@ -93,9 +97,18 @@ export function useAnimatedSprite({ canAnimate }: UseAnimatedSpriteOptions) {
   const playEvolutionAnimation = () => {
     // Evolution animations should always play regardless of canAnimate state
     // Cancel any existing animations
-    imageRef.current?.getAnimations().forEach((a) => a.cancel());
-    shadowRef.current?.getAnimations().forEach((a) => a.cancel());
-    overlayRef.current?.getAnimations().forEach((a) => a.cancel());
+    imageRef.current?.getAnimations().forEach((a) => {
+      a.cancel();
+    });
+    shadowRef.current?.getAnimations().forEach((a) => {
+      a.cancel();
+    });
+    overlayRef.current?.getAnimations().forEach((a) => {
+      a.cancel();
+    });
+    raysSvgRef.current?.getAnimations().forEach((a) => {
+      a.cancel();
+    });
 
     // Sprite pulsing + brightness flashes without overriding base scale/transform
     imageRef.current?.animate(
@@ -124,15 +137,15 @@ export function useAnimatedSprite({ canAnimate }: UseAnimatedSpriteOptions) {
       [
         {
           transform: "skewX(-5deg) skewY(-30deg) scale(1)",
-          opacity: 0.12 as unknown as string,
+          opacity: 0.12,
         },
         {
           transform: "skewX(-5deg) skewY(-30deg) scale(1.06)",
-          opacity: 0.18 as unknown as string,
+          opacity: 0.18,
         },
         {
           transform: "skewX(-5deg) skewY(-30deg) scale(1)",
-          opacity: 0.12 as unknown as string,
+          opacity: 0.12,
         },
       ],
       {
