@@ -24,10 +24,6 @@ const defaultState: PlaythroughsState = {
   isSaving: false,
 };
 
-// Simple cache for active playthrough to avoid repeated find() calls
-let cachedActivePlaythrough: Playthrough | null = null;
-let cachedActiveId: string | undefined;
-
 // Helper functions
 const generatePlaythroughId = (): string => {
   return generatePrefixedId("playthrough");
@@ -35,20 +31,6 @@ const generatePlaythroughId = (): string => {
 
 const getCurrentTimestamp = (): number => {
   return Date.now();
-};
-
-// More efficient cache invalidation - only clear when necessary
-const invalidateActivePlaythroughCache = () => {
-  cachedActivePlaythrough = null;
-  cachedActiveId = undefined;
-};
-
-// Check if cache is still valid
-const isCacheValid = (): boolean => {
-  return (
-    cachedActiveId === playthroughsStore.activePlaythroughId &&
-    cachedActivePlaythrough !== null
-  );
 };
 
 // Create the playthroughs store with proper SSR handling
@@ -90,12 +72,6 @@ if (typeof window !== "undefined") {
 
   // Subscribe to store changes and debounce saves
   subscribe(playthroughsStore, () => {
-    // Only invalidate cache if the active playthrough ID changed or
-    // if we don't have a cached active playthrough
-    const currentActiveId = playthroughsStore.activePlaythroughId;
-    if (cachedActiveId !== currentActiveId) {
-      invalidateActivePlaythroughCache();
-    }
     debouncedSaveAll(playthroughsStore);
   });
 } else {
@@ -107,23 +83,11 @@ if (typeof window !== "undefined") {
 const getActivePlaythrough = (): Playthrough | null => {
   if (!playthroughsStore.activePlaythroughId) return null;
 
-  // Use simple cache to avoid repeated find() operations
-  if (isCacheValid()) {
-    return cachedActivePlaythrough;
-  }
-
-  // Find and cache the active playthrough
-  const found =
+  return (
     playthroughsStore.playthroughs.find(
       (p: Playthrough) => p.id === playthroughsStore.activePlaythroughId,
-    ) || null;
-
-  if (found) {
-    cachedActivePlaythrough = found;
-    cachedActiveId = playthroughsStore.activePlaythroughId;
-  }
-
-  return found;
+    ) ?? null
+  );
 };
 
 const createPlaythrough = (
@@ -168,8 +132,6 @@ const setActivePlaythrough = async (playthroughId: string) => {
 
   if (playthrough) {
     playthroughsStore.activePlaythroughId = playthroughId;
-    // Force cache invalidation immediately when switching playthroughs
-    invalidateActivePlaythroughCache();
   }
 };
 
