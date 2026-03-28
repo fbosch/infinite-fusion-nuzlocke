@@ -3,17 +3,13 @@
 import clsx from "clsx";
 import { Moon, Palette, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useMounted } from "@/hooks/useMounted";
 
 export default function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted || !resolvedTheme) {
+  if (mounted === false || !resolvedTheme) {
     return (
       <button
         className="p-2 rounded-md bg-gray-100 border border-gray-200 text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 opacity-50"

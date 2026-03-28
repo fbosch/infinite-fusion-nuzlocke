@@ -11,6 +11,7 @@ import clsx from "clsx";
 import { LocateIcon, PlusIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMounted } from "@/hooks/useMounted";
 import { onFlashUids, onScrollToLocation } from "@/lib/events";
 import { getLocationsSortedWithCustom } from "@/loaders";
 import type { CombinedLocation } from "@/loaders/locations";
@@ -50,17 +51,13 @@ export default function LocationTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isCustomLocationModalOpen, setIsCustomLocationModalOpen] =
     useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const isLoading = useIsLoading();
   const customLocations = useCustomLocations();
   const smallScreen = useBreakpointSmallerThan("2xl");
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const data = useMemo(() => {
     try {
@@ -73,7 +70,7 @@ export default function LocationTable() {
 
   // Auto-scroll to recent encounter on page load
   useEffect(() => {
-    if (!mounted || isLoading || data.length === 0) return;
+    if (mounted === false || isLoading || data.length === 0) return;
 
     window.requestAnimationFrame(() => {
       scrollToMostRecentLocation(
@@ -238,7 +235,7 @@ export default function LocationTable() {
   });
 
   // Show skeleton loading state while component is mounting or store is initializing from IndexedDB
-  if (!mounted || isLoading) {
+  if (mounted === false || isLoading) {
     return <LocationTableSkeleton />;
   }
 

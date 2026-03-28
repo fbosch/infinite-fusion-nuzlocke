@@ -12,8 +12,8 @@ import {
 import clsx from "clsx";
 import { Monitor, Moon, Move, Sun, X } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 import { useSnapshot } from "valtio";
+import { useMounted } from "@/hooks/useMounted";
 import { settingsActions, settingsStore } from "@/stores/settings";
 
 interface SettingsModalProps {
@@ -23,14 +23,10 @@ interface SettingsModalProps {
 
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const settings = useSnapshot(settingsStore);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
+  if (mounted === false) {
     return null;
   }
 

@@ -3,6 +3,7 @@ export * from "./useBreakpoint";
 export * from "./useFusionTypes";
 export * from "./useKeyPressed";
 export * from "./useLocalStorage";
+export * from "./useMounted";
 export * from "./usePlaythroughImportExport";
 export * from "./usePokemonTypes";
 export * from "./useSprite";
