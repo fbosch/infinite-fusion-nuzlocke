@@ -85,6 +85,8 @@ export const PokemonCombobox = ({
   routeEncounterData = [],
   isCustomLocation = false,
 }: PokemonComboboxProps) => {
+  "use no memo";
+
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
   const gameMode = useGameMode();

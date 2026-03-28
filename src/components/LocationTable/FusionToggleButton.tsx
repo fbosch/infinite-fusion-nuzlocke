@@ -54,53 +54,42 @@ export function FusionToggleButton({
       // Prevent dropping if the button is disabled (Egg in non-fusion mode)
       if (!isFusion && selectedPokemon && isEgg(selectedPokemon)) return;
 
-      // Find the Pokémon by name
-      const findPokemonByName = async () => {
-        try {
-          // Find Pokemon by name (case insensitive)
-          const foundPokemon = allPokemon.find(
-            (p) =>
-              nameMap?.get(p.id)?.toLowerCase() === pokemonName.toLowerCase(),
-          );
+      const foundPokemon = allPokemon.find(
+        (p) => nameMap?.get(p.id)?.toLowerCase() === pokemonName.toLowerCase(),
+      );
 
-          if (foundPokemon) {
-            const pokemonOption: PokemonOptionType = {
-              id: foundPokemon.id,
-              name: pokemonName,
-              nationalDexId: foundPokemon.nationalDexId,
-              // Preserve the original location from the dragged Pokemon, don't overwrite!
-              originalLocation:
-                dragSnapshot.currentDragValue?.originalLocation || locationId,
-              ...(dragSnapshot.currentDragValue && {
-                nickname: dragSnapshot.currentDragValue.nickname,
-                status: dragSnapshot.currentDragValue.status,
-                uid: dragSnapshot.currentDragValue.uid,
-              }),
-            };
+      if (!foundPokemon) return;
 
-            await playthroughActions.createFusion(
-              locationId,
-              selectedPokemon,
-              pokemonOption,
-            );
-
-            if (dragSnapshot.currentDragSource) {
-              const { locationId: sourceLocationId, field: sourceField } =
-                playthroughActions.getLocationFromComboboxId(
-                  dragSnapshot.currentDragSource,
-                );
-              await playthroughActions.clearEncounterFromLocation(
-                sourceLocationId,
-                sourceField,
-              );
-            }
-          }
-        } catch (err) {
-          console.error("Error finding Pokemon by name:", err);
-        }
+      const pokemonOption: PokemonOptionType = {
+        id: foundPokemon.id,
+        name: pokemonName,
+        nationalDexId: foundPokemon.nationalDexId,
+        originalLocation:
+          dragSnapshot.currentDragValue?.originalLocation || locationId,
+        ...(dragSnapshot.currentDragValue && {
+          nickname: dragSnapshot.currentDragValue.nickname,
+          status: dragSnapshot.currentDragValue.status,
+          uid: dragSnapshot.currentDragValue.uid,
+        }),
       };
 
-      findPokemonByName();
+      await playthroughActions
+        .createFusion(locationId, selectedPokemon, pokemonOption)
+        .then(async () => {
+          if (!dragSnapshot.currentDragSource) return;
+
+          const { locationId: sourceLocationId, field: sourceField } =
+            playthroughActions.getLocationFromComboboxId(
+              dragSnapshot.currentDragSource,
+            );
+          await playthroughActions.clearEncounterFromLocation(
+            sourceLocationId,
+            sourceField,
+          );
+        })
+        .catch((err) => {
+          console.error("Error finding Pokemon by name:", err);
+        });
     },
     [
       isFusion,
