@@ -357,7 +357,11 @@ export function ContextMenu({
 
             event.preventDefault();
             event.stopPropagation();
-            openFromKeyboardTrigger(event.currentTarget);
+            const keyboardAnchor =
+              event.target instanceof HTMLElement
+                ? event.target
+                : event.currentTarget;
+            openFromKeyboardTrigger(keyboardAnchor);
           },
         } as React.HTMLAttributes<HTMLElement>)}
 
