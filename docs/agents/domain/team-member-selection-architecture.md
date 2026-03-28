@@ -2,7 +2,7 @@
 
 ## Critical invariants
 
-- UI selection slots are presentation constructs and are not data-location guarantees.
+- UI selection slots (used for choosing Pokemon) are presentation constructs and not storage-field guarantees.
 - Pokemon updates by identity must not assume storage field (`head`/`body`) from UI slot.
 - Encounter structure changes and Pokemon field updates are separate operations.
 

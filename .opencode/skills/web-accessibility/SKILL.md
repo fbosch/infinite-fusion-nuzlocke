@@ -82,7 +82,7 @@ If keyboard behavior is uncertain, implement the minimum deterministic contract:
 
 1. Interactive semantics (`button`/`a`/wrapper parity)
 2. Keyboard parity (`tabIndex`, Enter/Space handlers, focus visibility)
-3. Naming (`aria-label`, labelledby/describedby correctness)
+3. Naming (`aria-label`, `aria-labelledby`/`aria-describedby` correctness)
 4. Stateful semantics (`aria-sort`, expanded/pressed/selected states)
 5. Dynamic announcements (loading/error/success live-region behavior)
 

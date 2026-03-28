@@ -36,7 +36,7 @@ Use this skill to keep invalid data from entering stores and to make failures di
 
 1. Define or reuse schema at the boundary where untrusted data enters.
 2. Use `safeParse` for normal control flow.
-3. On failure, return/throw a contextual error that preserves `issues` path data.
+3. On failure, return the boundary error envelope while preserving `issues` path data.
 4. On success, propagate only parsed `data`.
 5. Add or update tests for valid, invalid, and legacy-format payloads.
 
@@ -44,7 +44,7 @@ Use this skill to keep invalid data from entering stores and to make failures di
 
 If validation fails for a backward-compatible format:
 
-- Attempt explicit legacy schema parse.
+- Attempt explicit legacy schema `safeParse`.
 - Transform to current canonical shape.
 - Re-validate transformed output with current schema before use.
 
