@@ -3,6 +3,7 @@ import { devtools } from "valtio/utils";
 import { z } from "zod";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { generatePrefixedId } from "@/utils/id";
+import { createDefaultPlaythrough } from "./defaultPlaythrough";
 import { restorePokemonToTeam } from "./encounters";
 import {
   createDebouncedSaveAll,
@@ -48,18 +49,6 @@ const isCacheValid = (): boolean => {
     cachedActivePlaythrough !== null
   );
 };
-
-// Default playthrough creation
-const createDefaultPlaythrough = (): Playthrough => ({
-  id: generatePlaythroughId(),
-  name: "Nuzlocke",
-  encounters: {},
-  team: { members: Array.from({ length: 6 }, () => null) }, // Fixed size 6 with null values
-  gameMode: "classic",
-  version: "1.0.0",
-  createdAt: getCurrentTimestamp(),
-  updatedAt: getCurrentTimestamp(),
-});
 
 // Create the playthroughs store with proper SSR handling
 let playthroughsStore: PlaythroughsState;
