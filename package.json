@@ -8,10 +8,10 @@
     "dev": "next dev --turbopack --port 4000",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "lint": "biome lint . --vcs-use-ignore-file=true --files-ignore-unknown=true",
+    "lint:fix": "biome lint --write . --vcs-use-ignore-file=true --files-ignore-unknown=true",
+    "format": "biome format --write . --vcs-use-ignore-file=true --files-ignore-unknown=true",
+    "format:check": "biome format . --vcs-use-ignore-file=true --files-ignore-unknown=true",
     "validate": "pnpm format:check && pnpm lint",
     "validate:fix": "pnpm format && pnpm lint:fix",
     "type-check": "tsc --noEmit",
@@ -74,10 +74,9 @@
     "zod": "^4.0.5"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.9",
     "@djankies/vitest-mcp": "^0.5.1",
-    "@eslint/eslintrc": "^3",
-    "@next/bundle-analyzer": "^15.4.4",
-    "@next/eslint-plugin-next": "^15.4.2",
+    "@next/bundle-analyzer": "^16.2.1",
     "@smithery/cli": "^1.2.20",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4",
@@ -99,13 +98,6 @@
     "babel-plugin-react-compiler": "19.1.0-rc.2",
     "cheerio": "^1.0.0",
     "cli-progress": "^3.12.0",
-    "eslint": "^9",
-    "eslint-config-next": "15.4.1",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.3",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-tailwindcss": "4.0.0-beta.0",
-    "eslint-plugin-unused-imports": "^4.1.4",
     "happy-dom": "^18.0.1",
     "husky": "^9.1.7",
     "jiti": "^2.4.2",
@@ -116,7 +108,6 @@
     "playwright": "^1.54.1",
     "pngquant-bin": "^9.0.0",
     "pokedex-promise-v2": "^4.2.1",
-    "prettier": "^3.6.2",
     "sharp": "^0.34.3",
     "sharp-cli": "^5.2.0",
     "tailwindcss": "^4",
@@ -127,12 +118,8 @@
   },
   "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39",
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,css}": [
-      "prettier --write"
+    "*": [
+      "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
     ]
   }
 }
