@@ -27,6 +27,7 @@
     "test:coverage:watch": "vitest --coverage",
     "test:coverage:html": "vitest run --coverage --reporter=html",
     "coverage:badge": "node scripts/generate-coverage-badge.js",
+    "react-doctor:badge": "node scripts/generate-react-doctor-badge.js",
     "coverage:full": "pnpm test:coverage && pnpm coverage:badge",
     "analyze": "ANALYZE=true pnpm build",
     "scrape": "npm-run-all --sequential scrape:*",
