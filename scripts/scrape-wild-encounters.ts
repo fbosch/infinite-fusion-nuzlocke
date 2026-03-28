@@ -21,6 +21,7 @@ const WILD_ENCOUNTERS_REMIX_URL =
   "https://infinitefusion.fandom.com/wiki/Wild_Encounters/Remix";
 
 const ROUTE_ARTICLE_BATCH_SIZE = 6;
+const ROUTE_ARTICLE_BACKFILL_OVERRIDES = ["Route 2", "Route 10"] as const;
 
 const WILD_ENCOUNTER_TYPES: readonly EncounterType[] = [
   "grass",
@@ -128,7 +129,7 @@ function isValidRouteName(text: string): boolean {
   return true;
 }
 
-interface PokemonEncounter {
+export interface PokemonEncounter {
   pokemonId: number; // Custom Infinite Fusion ID
   encounterType: EncounterType;
 }
@@ -138,7 +139,7 @@ interface RouteEncounters {
   encounters: PokemonEncounter[];
 }
 
-function getLocationWikiUrl(locationName: string): string {
+export function getLocationWikiUrl(locationName: string): string {
   const slug = encodeURIComponent(locationName.trim().replace(/\s+/g, "_"));
   return `https://infinitefusion.fandom.com/wiki/${slug}`;
 }
@@ -190,26 +191,25 @@ function parseEncounterTable(
   return encounters;
 }
 
-async function scrapeEncountersFromLocationArticle(
+export async function scrapeEncountersFromLocationArticle(
   locationName: string,
   pokemonNameMap: PokemonNameMap,
 ): Promise<PokemonEncounter[]> {
   const html = await fetchWikiPageHtml(getLocationWikiUrl(locationName));
   const $ = cheerio.load(html);
-  const firstEncounterTable = $(
-    ".mw-parser-output table.IFTable.encounterTable",
-  ).first();
+  const encounterTables = $(".mw-parser-output table.IFTable.encounterTable");
 
-  if (firstEncounterTable.length === 0) {
+  if (encounterTables.length === 0) {
     return [];
   }
 
-  const encounters = parseEncounterTable(
-    $,
-    firstEncounterTable,
-    pokemonNameMap,
-    null,
-  );
+  const encounters: PokemonEncounter[] = [];
+
+  encounterTables.each((_index, table) => {
+    encounters.push(
+      ...parseEncounterTable($, $(table), pokemonNameMap, "grass"),
+    );
+  });
 
   const uniqueByKey = new Map<string, PokemonEncounter>();
   for (const encounter of encounters) {
@@ -238,6 +238,7 @@ async function backfillMissingRouteArticles(
     name: string;
   }>;
 
+  const locationNames = locationsData.map((location) => location.name);
   const scrapedRouteNames = new Set(routes.map((route) => route.routeName));
   const missingRouteNames = locationsData
     .map((location) => location.name)
@@ -247,18 +248,33 @@ async function backfillMissingRouteArticles(
         scrapedRouteNames.has(locationName) === false,
     );
 
-  if (missingRouteNames.length === 0) {
+  const forcedBackfillRouteNames = ROUTE_ARTICLE_BACKFILL_OVERRIDES.filter(
+    (routeName) => locationNames.includes(routeName),
+  );
+
+  const routeNamesForArticleBackfill = Array.from(
+    new Set([...missingRouteNames, ...forcedBackfillRouteNames]),
+  );
+
+  if (routeNamesForArticleBackfill.length === 0) {
     return routes;
   }
 
   ConsoleFormatter.info(
-    `Backfilling missing route articles: ${missingRouteNames.join(", ")}`,
+    `Backfilling route articles: ${routeNamesForArticleBackfill.join(", ")}`,
   );
 
   const recoveredRoutes: RouteEncounters[] = [];
 
-  for (let i = 0; i < missingRouteNames.length; i += ROUTE_ARTICLE_BATCH_SIZE) {
-    const batch = missingRouteNames.slice(i, i + ROUTE_ARTICLE_BATCH_SIZE);
+  for (
+    let i = 0;
+    i < routeNamesForArticleBackfill.length;
+    i += ROUTE_ARTICLE_BATCH_SIZE
+  ) {
+    const batch = routeNamesForArticleBackfill.slice(
+      i,
+      i + ROUTE_ARTICLE_BATCH_SIZE,
+    );
     const batchResults = await Promise.all(
       batch.map(async (routeName) => {
         try {

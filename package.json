@@ -32,6 +32,7 @@
     "scrape": "npm-run-all --sequential scrape:*",
     "scrape:pokedex": "jiti scripts/scrape-pokedex.ts && jiti scripts/fetch-pokemon-data.ts",
     "scrape:encounters": "jiti scripts/scrape-wild-encounters.ts",
+    "validate:route-articles": "jiti scripts/validate-route-article-coverage.ts",
     "scrape:legendary": "jiti scripts/scrape-legendary-encounters.ts",
     "scrape:safari": "jiti scripts/scrape-safari-encounters.ts",
     "scrape:eggs": "jiti scripts/scrape-egg-locations.ts",
