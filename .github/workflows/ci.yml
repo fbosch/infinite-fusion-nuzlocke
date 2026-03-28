@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master, main]
+    branches: [master]
   pull_request:
-    branches: [master, main]
+    branches: [master]
   schedule:
     # Run daily at 2 AM UTC to refresh data
     - cron: '0 2 * * *'
@@ -93,10 +93,32 @@ jobs:
       - name: Run full validation
         run: pnpm run validate
 
+  release-gate:
+    name: Release Gate
+    runs-on: ubuntu-latest
+    needs: [test, code-quality]
+    if: always()
+
+    steps:
+      - name: Enforce required checks
+        run: |
+          if [[ "${{ needs.test.result }}" != "success" ]]; then
+            echo "Test Suite must pass before release gating"
+            exit 1
+          fi
+
+          if [[ "${{ needs.code-quality.result }}" != "success" ]]; then
+            echo "Code Quality must pass before release gating"
+            exit 1
+          fi
+
+          echo "Required release checks passed"
+
   data-refresh:
     name: Data Download & Validation
     runs-on: ubuntu-latest
     needs: [test, code-quality]
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout code
