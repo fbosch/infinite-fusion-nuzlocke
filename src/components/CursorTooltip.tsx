@@ -77,10 +77,9 @@ export function CursorTooltip(props: CursorTooltipProps) {
   >(null);
   const animationBatchRef = useRef(0);
   const animationStateRef = useRef<typeof animationState>(animationState);
-  // keep a live ref of animationState for async callbacks
-  if (animationStateRef.current !== animationState) {
+  useEffect(() => {
     animationStateRef.current = animationState;
-  }
+  }, [animationState]);
   const isWindowVisible = useWindowVisibility();
   const dragSnapshot = useSnapshot(dragStore);
   const { isAnyTooltipVisible, registerTooltip } = useGlobalTooltip();
