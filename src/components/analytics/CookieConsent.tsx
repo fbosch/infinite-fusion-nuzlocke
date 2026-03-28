@@ -2,8 +2,9 @@
 
 import { Description, Field, Label, Switch } from "@headlessui/react";
 import { Cookie, Settings, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useMounted } from "@/hooks/useMounted";
 
 export interface ConsentPreferences {
   analytics: boolean;
@@ -158,16 +159,12 @@ function CookieSettings({
 
 export function CookieConsent() {
   const [showSettings, setShowSettings] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const [hasConsent, setHasConsent] = useLocalStorage("cookie-consent", false);
   const [preferences, setPreferences] = useLocalStorage<ConsentPreferences>(
     "cookie-preferences",
     DEFAULT_PREFERENCES,
   );
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const savePreferences = (newPreferences: ConsentPreferences) => {
     setPreferences(newPreferences);
@@ -201,7 +198,7 @@ export function CookieConsent() {
   };
 
   // Don't show banner if user has already given consent or component hasn't mounted yet
-  if (!mounted || hasConsent) return null;
+  if (mounted === false || hasConsent) return null;
 
   return (
     <>

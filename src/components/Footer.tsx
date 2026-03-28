@@ -3,21 +3,18 @@
 import clsx from "clsx";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import GitHubButton from "react-github-btn";
 import { useInView } from "react-intersection-observer";
 import CookieSettingsButton from "@/components/analytics/CookieSettingsButton";
 import CreditsModal from "@/components/CreditsModal";
+import { useMounted } from "@/hooks/useMounted";
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
+  if (mounted === false) {
     return (
       <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-sm p-0.5">
         <div className="w-7 h-7 rounded bg-gray-200 dark:bg-gray-700" />
@@ -68,16 +65,13 @@ export default function Footer() {
     triggerOnce: true,
   });
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const [isCreditsOpen, setIsCreditsOpen] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Determine the color scheme based on the current theme
   const getColorScheme = () => {
-    if (!mounted) return "no-preference: light; light: light; dark: dark;";
+    if (mounted === false)
+      return "no-preference: light; light: light; dark: dark;";
 
     switch (resolvedTheme) {
       case "light":

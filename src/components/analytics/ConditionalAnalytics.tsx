@@ -1,8 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useMounted } from "@/hooks/useMounted";
 
 const SpeedInsights = dynamic(
   () => import("@vercel/speed-insights/next").then((mod) => mod.SpeedInsights),
@@ -31,15 +31,11 @@ const DEFAULT_PREFERENCES: ConsentPreferences = {
 };
 
 export function ConditionalAnalytics() {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const [preferences] = useLocalStorage<ConsentPreferences>(
     "cookie-preferences",
     DEFAULT_PREFERENCES,
   );
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Only render Analytics if component has mounted and user has given consent
   // Disable analytics in development and preview environments
@@ -47,7 +43,7 @@ export function ConditionalAnalytics() {
     process.env.NODE_ENV === "production" &&
     process.env.NEXT_PUBLIC_VERCEL_ENV === "production";
 
-  if (!mounted || !preferences.analytics || !isProduction) {
+  if (mounted === false || !preferences.analytics || !isProduction) {
     return null;
   }
 
@@ -55,15 +51,11 @@ export function ConditionalAnalytics() {
 }
 
 export function ConditionalSpeedInsights() {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const [preferences] = useLocalStorage<ConsentPreferences>(
     "cookie-preferences",
     DEFAULT_PREFERENCES,
   );
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Only render SpeedInsights if component has mounted and user has given consent
   // Disable speed insights in development and preview environments
@@ -71,7 +63,7 @@ export function ConditionalSpeedInsights() {
     process.env.NODE_ENV === "production" &&
     process.env.NEXT_PUBLIC_VERCEL_ENV === "production";
 
-  if (!mounted || !preferences.speedInsights || !isProduction) {
+  if (mounted === false || !preferences.speedInsights || !isProduction) {
     return null;
   }
 
