@@ -6,6 +6,12 @@ Pokemon Infinite Fusion Nuzlocke tracker with strict run-state invariants.
 
 - Use `pnpm` for all package operations.
 
+## Runtime stack
+
+- Framework/runtime: Next.js 16 + React 19.
+- State management: Valtio for app run-state, TanStack Query for server/cache state.
+- Validation and schemas: Zod for runtime data boundaries.
+
 ## Operational constraints
 
 - Keep repo-wide policy guidance minimal; put directory rules in local `AGENTS.md` files.
@@ -22,9 +28,9 @@ Pokemon Infinite Fusion Nuzlocke tracker with strict run-state invariants.
 
 ## Local AGENTS
 
-- `src/components/AGENTS.md`
-- `src/stores/AGENTS.md`
-- `scripts/AGENTS.md`
+- `src/components/AGENTS.md` - UI and interaction rules.
+- `src/stores/AGENTS.md` - playthrough state and persistence invariants.
+- `scripts/AGENTS.md` - data scraping and generation script constraints.
 
 ## References
 
