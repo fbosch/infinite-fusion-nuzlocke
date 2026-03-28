@@ -551,7 +551,6 @@ async function main() {
   }
 }
 
-// Check if this script is being run directly
-if (process.argv[1] && process.argv[1].endsWith("scrape-gifts-and-trades.ts")) {
-  main();
+if (import.meta.url === `file://${process.argv[1]}`) {
+  void main();
 }

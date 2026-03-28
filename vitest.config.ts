@@ -2,6 +2,7 @@
 
 import { fileURLToPath, URL } from "node:url";
 import react from "@vitejs/plugin-react";
+import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
 
 const isBrowserTestsEnabled = process.env.VITEST_BROWSER === "true";
@@ -16,6 +17,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html", "lcov", "cobertura"],
+      include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "**/node_modules/**",
         "**/dist/**",
@@ -54,7 +56,7 @@ export default defineConfig({
                 setupFiles: ["./tests/setup.browser.ts"],
                 browser: {
                   enabled: true,
-                  provider: "playwright" as never,
+                  provider: playwright(),
                   headless: true,
                   instances: [
                     {
