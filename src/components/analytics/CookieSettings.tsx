@@ -12,7 +12,7 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { Cookie, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 export interface ConsentPreferences {
@@ -30,24 +30,42 @@ interface CookieSettingsProps {
   onClose: () => void;
 }
 
+interface CookieSettingsDialogProps {
+  initialPreferences: ConsentPreferences;
+  onSave: (value: ConsentPreferences) => void;
+  onClose: () => void;
+}
+
 export function CookieSettings({ isOpen, onClose }: CookieSettingsProps) {
   const [preferences, setStoredPreferences] =
     useLocalStorage<ConsentPreferences>(
       "cookie-preferences",
       DEFAULT_PREFERENCES,
     );
-  const [localPreferences, setLocalPreferences] =
-    useState<ConsentPreferences>(preferences);
 
-  // Sync local state with stored preferences when dialog opens
-  useEffect(() => {
-    if (isOpen) {
-      setLocalPreferences(preferences);
-    }
-  }, [isOpen, preferences]);
+  if (isOpen === false) {
+    return null;
+  }
+
+  return (
+    <CookieSettingsDialog
+      initialPreferences={preferences}
+      onSave={setStoredPreferences}
+      onClose={onClose}
+    />
+  );
+}
+
+function CookieSettingsDialog({
+  initialPreferences,
+  onSave,
+  onClose,
+}: CookieSettingsDialogProps) {
+  const [localPreferences, setLocalPreferences] =
+    useState<ConsentPreferences>(initialPreferences);
 
   const savePreferences = (newPreferences: ConsentPreferences) => {
-    setStoredPreferences(newPreferences);
+    onSave(newPreferences);
     onClose();
   };
 
@@ -62,7 +80,7 @@ export function CookieSettings({ isOpen, onClose }: CookieSettingsProps) {
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50 group">
+    <Dialog open onClose={onClose} className="relative z-50 group">
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"

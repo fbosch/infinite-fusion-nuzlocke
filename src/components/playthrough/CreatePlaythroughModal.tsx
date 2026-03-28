@@ -8,7 +8,7 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { HelpCircle, X } from "lucide-react";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import type { GameMode } from "@/stores/playthroughs";
 
@@ -26,8 +26,15 @@ export default function CreatePlaythroughModal({
   currentGameMode,
 }: CreatePlaythroughModalProps) {
   const [newPlaythroughName, setNewPlaythroughName] = useState("");
-  const [selectedGameMode, setSelectedGameMode] =
-    useState<GameMode>(currentGameMode);
+  const [selectedGameModeOverride, setSelectedGameModeOverride] =
+    useState<GameMode | null>(null);
+  const selectedGameMode = selectedGameModeOverride ?? currentGameMode;
+
+  const handleClose = useCallback(() => {
+    setNewPlaythroughName("");
+    setSelectedGameModeOverride(null);
+    onClose();
+  }, [onClose]);
 
   // Create a new playthrough
   const handleCreatePlaythrough = useCallback(async () => {
@@ -36,30 +43,14 @@ export default function CreatePlaythroughModal({
 
     try {
       await onCreate(name, selectedGameMode);
-      setNewPlaythroughName("");
-      setSelectedGameMode(currentGameMode);
-      onClose();
+      handleClose();
     } catch (error) {
       console.error("Failed to create playthrough:", error);
     }
-  }, [
-    newPlaythroughName,
-    selectedGameMode,
-    currentGameMode,
-    onCreate,
-    onClose,
-  ]);
-
-  // Reset state when modal opens
-  React.useEffect(() => {
-    if (isOpen) {
-      setSelectedGameMode(currentGameMode);
-      setNewPlaythroughName("");
-    }
-  }, [isOpen, currentGameMode]);
+  }, [newPlaythroughName, selectedGameMode, onCreate, handleClose]);
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50 group">
+    <Dialog open={isOpen} onClose={handleClose} className="relative z-50 group">
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"
@@ -80,7 +71,7 @@ export default function CreatePlaythroughModal({
             </DialogTitle>
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
@@ -189,7 +180,7 @@ export default function CreatePlaythroughModal({
                   <button
                     key={mode}
                     type="button"
-                    onClick={() => setSelectedGameMode(mode)}
+                    onClick={() => setSelectedGameModeOverride(mode)}
                     className={clsx(
                       "px-3 py-2.5 text-sm font-medium rounded-lg border transition-all duration-200",
                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
@@ -213,11 +204,7 @@ export default function CreatePlaythroughModal({
 
           <div className="flex items-center gap-3 pt-4">
             <button
-              onClick={() => {
-                setNewPlaythroughName("");
-                setSelectedGameMode(currentGameMode);
-                onClose();
-              }}
+              onClick={handleClose}
               className={clsx(
                 "flex-1 px-4 py-2.5 text-sm font-medium",
                 "border border-gray-300 dark:border-gray-600 rounded-lg",
