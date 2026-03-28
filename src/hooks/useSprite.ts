@@ -66,16 +66,3 @@ export function usePreferredVariantState(
     isLoading: false,
   };
 }
-
-// Deprecated hooks - these are no longer used
-export function useSetPrefferedVariant() {
-  throw new Error(
-    "useSetPrefferedVariant is deprecated. Use usePreferredVariantState instead.",
-  );
-}
-
-export function useCyclePreferredVariant() {
-  throw new Error(
-    "useCyclePreferredVariant is deprecated. Use usePreferredVariantState instead.",
-  );
-}
