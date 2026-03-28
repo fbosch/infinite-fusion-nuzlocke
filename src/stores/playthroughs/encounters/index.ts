@@ -28,6 +28,7 @@ export {
 export {
   moveTeamMemberToBox,
   restorePokemonToTeam,
+  updateTeamMember,
   updatePokemonByUID,
 } from "./team";
 export {

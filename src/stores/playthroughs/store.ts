@@ -5,7 +5,11 @@ import type { PokemonOptionType } from "@/loaders/pokemon";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 import { generatePrefixedId } from "@/utils/id";
 import { createDefaultPlaythrough } from "./defaultPlaythrough";
-import { restorePokemonToTeam } from "./encounters";
+import {
+  getActivePlaythrough,
+  getCurrentTimestamp,
+  setPlaythroughsStore,
+} from "./playthroughState";
 import {
   createDebouncedSaveAll,
   deletePlaythroughFromIndexedDB,
@@ -27,10 +31,6 @@ const defaultState: PlaythroughsState = {
 // Helper functions
 const generatePlaythroughId = (): string => {
   return generatePrefixedId("playthrough");
-};
-
-const getCurrentTimestamp = (): number => {
-  return Date.now();
 };
 
 // Create the playthroughs store with proper SSR handling
@@ -79,16 +79,7 @@ if (typeof window !== "undefined") {
   playthroughsStore = proxy<PlaythroughsState>(defaultState);
 }
 
-// Core actions
-const getActivePlaythrough = (): Playthrough | null => {
-  if (!playthroughsStore.activePlaythroughId) return null;
-
-  return (
-    playthroughsStore.playthroughs.find(
-      (p: Playthrough) => p.id === playthroughsStore.activePlaythroughId,
-    ) ?? null
-  );
-};
+setPlaythroughsStore(playthroughsStore);
 
 const createPlaythrough = (
   name: string,
@@ -391,51 +382,6 @@ const reorderTeam = (fromPosition: number, toPosition: number): boolean => {
   return true;
 };
 
-// Update team member at a specific position
-const updateTeamMember = async (
-  position: number,
-  headPokemon: { uid: string } | null,
-  bodyPokemon: { uid: string } | null,
-): Promise<boolean> => {
-  const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough) return false;
-
-  // Validate position
-  if (position < 0 || position >= 6) return false;
-
-  // Helper function to create team member object
-  const createTeamMember = (
-    head: { uid: string } | null,
-    body: { uid: string } | null,
-  ) => {
-    if (!head && !body) return null;
-
-    return {
-      headPokemonUid: head?.uid || "",
-      bodyPokemonUid: body?.uid || "",
-    };
-  };
-
-  // Restore Pokémon status if they were stored before adding to team
-  if (headPokemon?.uid) {
-    await restorePokemonToTeam(headPokemon.uid);
-  }
-  if (bodyPokemon?.uid) {
-    await restorePokemonToTeam(bodyPokemon.uid);
-  }
-
-  // Update the team member
-  activePlaythrough.team.members[position] = createTeamMember(
-    headPokemon,
-    bodyPokemon,
-  );
-
-  // Update the playthrough timestamp to trigger reactivity
-  activePlaythrough.updatedAt = getCurrentTimestamp();
-
-  return true;
-};
-
 // Helper function to get team member details
 const getTeamMemberDetails = (
   position: number,
@@ -523,5 +469,4 @@ export {
   setRemixMode,
   toggleRemixMode,
   updatePlaythroughName,
-  updateTeamMember,
 };
