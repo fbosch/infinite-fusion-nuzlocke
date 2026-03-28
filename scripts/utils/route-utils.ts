@@ -8,7 +8,7 @@
 // Simple patterns for route validation
 export const ROUTE_PATTERNS = {
   // Basic route pattern: "Route" followed by a number
-  ROUTE_NUMBER: /^Route\s+\d+(?:\s*-\s*.+)?$/i,
+  ROUTE_NUMBER: /^Route\s+\d+(?:\s*-\s*.+|\s+Gate)?$/i,
 
   // Safari Zone pattern: "Safari Zone" followed by optional area
   SAFARI_ZONE: /^Safari Zone(?:\s+\(Area\s+\d+\))?$/i,
@@ -18,6 +18,10 @@ export const ROUTE_PATTERNS = {
 
   // ID cleanup pattern
   ROUTE_ID_CLEAN: /\s*\(ID\s+-?\d+(?:\.\d+)?\)\s*$/i,
+
+  // Route variant cleanup patterns
+  ROUTE_VARIANT_BILLS_HOUSE_CLEAN: /^(Route\s+\d+)\s*-\s*Bill'?s\s+House$/i,
+  ROUTE_VARIANT_GATE_CLEAN: /^(Route\s+\d+)\s+Gate$/i,
 
   // Legacy pattern for test compatibility
   ROUTE_MATCH: /^Route\s+\d+$/i,
@@ -96,7 +100,6 @@ const LOCATION_SUFFIXES = [
   "Depths",
   "Hidden",
   "Dark Room",
-  "Gate",
 ] as const;
 
 // Common location prefixes
@@ -262,7 +265,25 @@ export function cleanRouteName(routeName: string): string {
     return "";
   }
 
-  return routeName.replace(ROUTE_PATTERNS.ROUTE_ID_CLEAN, "").trim();
+  const cleanedName = routeName
+    .replace(ROUTE_PATTERNS.ROUTE_ID_CLEAN, "")
+    .trim();
+
+  const routeBillsHouseVariant = cleanedName.match(
+    ROUTE_PATTERNS.ROUTE_VARIANT_BILLS_HOUSE_CLEAN,
+  );
+  if (routeBillsHouseVariant?.[1]) {
+    return routeBillsHouseVariant[1];
+  }
+
+  const routeGateVariant = cleanedName.match(
+    ROUTE_PATTERNS.ROUTE_VARIANT_GATE_CLEAN,
+  );
+  if (routeGateVariant?.[1]) {
+    return routeGateVariant[1];
+  }
+
+  return cleanedName;
 }
 
 /**

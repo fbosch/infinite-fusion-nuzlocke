@@ -198,15 +198,6 @@ function findParentLocation(
   routeName: string,
   existingLocations: string[],
 ): string | null {
-  const normalizedRouteName = routeName.trim();
-
-  if (
-    existingLocations.includes("Gate") &&
-    /(?:\s|^)Gate(?:\s|$)/i.test(normalizedRouteName)
-  ) {
-    return "Gate";
-  }
-
   // Define valid sub-location suffixes that indicate a real sub-location
   const validSubLocationSuffixes = [
     "B1F",

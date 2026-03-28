@@ -100,12 +100,12 @@ describe("Locations", () => {
       expect(sortedLocations).toEqual(locations);
     });
 
-    it("should include Route 25 and Gate in default locations", () => {
+    it("should include Route 25 in default locations", () => {
       const locations = getLocations();
       const locationNames = locations.map((location) => location.name);
 
       expect(locationNames).toContain("Route 25");
-      expect(locationNames).toContain("Gate");
+      expect(locationNames).not.toContain("Gate");
     });
   });
 
