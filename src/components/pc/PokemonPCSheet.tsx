@@ -13,7 +13,7 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { Box, Boxes, Skull, Users, X } from "lucide-react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   getLocationById,
   getLocationsSortedWithCustom,
@@ -58,18 +58,6 @@ export default function PokemonPCSheet({
   // State for team member picker modal
   const [pickerModalOpen, setPickerModalOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
-
-  // Use refs to prevent unnecessary re-renders from store changes
-  const encountersRef = useRef(encounters);
-  const customLocationsRef = useRef(customLocations);
-  const activePlaythroughRef = useRef(activePlaythrough);
-
-  // Update refs when stores change, but don't trigger re-renders
-  if (encounters !== encountersRef.current) encountersRef.current = encounters;
-  if (customLocations !== customLocationsRef.current)
-    customLocationsRef.current = customLocations;
-  if (activePlaythrough !== activePlaythroughRef.current)
-    activePlaythroughRef.current = activePlaythrough;
 
   const mergedLocations = useMemo(
     () => getLocationsSortedWithCustom(customLocations),

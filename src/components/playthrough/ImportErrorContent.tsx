@@ -7,10 +7,10 @@ export function ImportErrorContent({ errorMessage }: ImportErrorContentProps) {
   if (errorMessage.includes("Validation failed:")) {
     // Parse the error message to extract validation errors
     const lines = errorMessage.split("\n");
-    const validationErrors: string[] = [];
+    const validationErrors: Array<{ message: string; lineNumber: number }> = [];
     let currentSection: "validation" | null = null;
 
-    for (const line of lines) {
+    for (const [lineNumber, line] of lines.entries()) {
       if (line.includes("Validation failed:")) {
         currentSection = "validation";
         continue;
@@ -24,7 +24,7 @@ export function ImportErrorContent({ errorMessage }: ImportErrorContentProps) {
         line.trim() &&
         !line.includes("Expected format:")
       ) {
-        validationErrors.push(line.trim());
+        validationErrors.push({ message: line.trim(), lineNumber });
       }
     }
 
@@ -52,13 +52,13 @@ export function ImportErrorContent({ errorMessage }: ImportErrorContentProps) {
           </h3>
           {validationErrors.length > 0 && (
             <div className="space-y-3">
-              {validationErrors.map((error, index) => (
+              {validationErrors.map((error) => (
                 <div
-                  key={index}
+                  key={error.lineNumber}
                   className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800"
                 >
                   <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
-                    {formatErrorMessage(error)}
+                    {formatErrorMessage(error.message)}
                   </p>
                 </div>
               ))}

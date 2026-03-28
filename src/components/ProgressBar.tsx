@@ -14,32 +14,21 @@ export default function ProgressBar({ className }: ProgressBarProps) {
   const customLocations = useCustomLocations();
 
   const { completedCount, totalCount, percentage } = useMemo(() => {
-    try {
-      // Get all locations (including custom ones)
-      const allLocations = getLocationsSortedWithCustom(customLocations);
-      const total = allLocations.length;
+    const allLocations = getLocationsSortedWithCustom(customLocations);
+    const total = allLocations.length;
 
-      // Count locations that have encounters (either head or body Pokemon)
-      const completed = allLocations.filter((location) => {
-        const encounter = encounters?.[location.id];
-        return encounter && (encounter.head || encounter.body);
-      }).length;
+    const completed = allLocations.filter((location) => {
+      const encounter = encounters?.[location.id];
+      return encounter && (encounter.head || encounter.body);
+    }).length;
 
-      const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-      return {
-        completedCount: completed,
-        totalCount: total,
-        percentage: percent,
-      };
-    } catch (error) {
-      console.error("Failed to calculate progress:", error);
-      return {
-        completedCount: 0,
-        totalCount: 0,
-        percentage: 0,
-      };
-    }
+    return {
+      completedCount: completed,
+      totalCount: total,
+      percentage: percent,
+    };
   }, [encounters, customLocations]);
 
   return (

@@ -222,7 +222,7 @@ export default function TeamSlots() {
         isFusion,
       };
     });
-  }, [activePlaythrough?.team, encounters, pokemonByUid]);
+  }, [activePlaythrough, encounters, pokemonByUid]);
 
   // Track fusion ID changes and play evolution animations for team members
   useEffect(() => {

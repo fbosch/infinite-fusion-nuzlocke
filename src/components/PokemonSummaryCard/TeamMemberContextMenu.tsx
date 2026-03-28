@@ -95,7 +95,7 @@ export function TeamMemberContextMenu({
 
     // Clear the team member slot after marking as deceased
     await playthroughActions.updateTeamMember(position, null, null);
-  }, [headPokemon?.uid, bodyPokemon?.uid, position]);
+  }, [headPokemon, bodyPokemon, position]);
 
   // Handler to move team member to box
   const handleMoveToBox = useCallback(async () => {
@@ -192,7 +192,7 @@ export function TeamMemberContextMenu({
       { uid: bodyPokemon.uid },
       { uid: headPokemon.uid },
     );
-  }, [isFusion, headPokemon?.uid, bodyPokemon?.uid, position]);
+  }, [isFusion, headPokemon, bodyPokemon, position]);
 
   // Handler to navigate to head encounter
   const handleGoToHeadEncounter = useCallback(() => {
@@ -206,7 +206,7 @@ export function TeamMemberContextMenu({
 
     // Close any parent modal/sheet
     onClose?.();
-  }, [headPokemon?.originalLocation, headPokemon?.uid, onClose]);
+  }, [headPokemon, onClose]);
 
   // Handler to navigate to body encounter
   const handleGoToBodyEncounter = useCallback(() => {
@@ -220,7 +220,7 @@ export function TeamMemberContextMenu({
 
     // Close any parent modal/sheet
     onClose?.();
-  }, [bodyPokemon?.originalLocation, bodyPokemon?.uid, onClose]);
+  }, [bodyPokemon, onClose]);
 
   const contextItems = useMemo<ContextMenuItem[]>(() => {
     // Use team member Pokémon for links

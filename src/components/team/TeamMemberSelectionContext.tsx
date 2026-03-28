@@ -235,6 +235,7 @@ export function TeamMemberSelectionProvider({
     nickname,
     previewNickname,
   } = state;
+  const teamMembers = activePlaythrough?.team?.members;
 
   // Auto-switch to head selection mode when both slots are empty, but only if no manual selection was made
   useEffect(() => {
@@ -370,11 +371,11 @@ export function TeamMemberSelectionProvider({
 
   // Get all available Pokémon from encounters, filtering out those already in use by other team members
   const allAvailablePokemon = useMemo(() => {
-    if (!encounters || !activePlaythrough?.team) return [];
+    if (!encounters || !teamMembers) return [];
 
     // Get all Pokémon UIDs that are currently in use by other team members
     const usedPokemonUids = new Set<string>();
-    activePlaythrough.team.members.forEach((member, index) => {
+    teamMembers.forEach((member, index) => {
       // Skip the current position being edited
       if (index === position) return;
 
@@ -405,7 +406,7 @@ export function TeamMemberSelectionProvider({
         pokemon.uid &&
         !usedPokemonUids.has(pokemon.uid),
     );
-  }, [encounters, activePlaythrough?.team, position, existingTeamMember]);
+  }, [encounters, teamMembers, position, existingTeamMember]);
 
   // Update availablePokemon in state when the base list changes (not when search changes)
   useEffect(() => {

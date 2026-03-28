@@ -461,9 +461,13 @@ function useLocationSelector({
   encounterData: LocationSelectorProps["encounterData"];
 }) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTargetField, setSelectedTargetField] = useState<
-    "head" | "body"
-  >(moveTargetField);
+  const [selectedTargetFieldOverride, setSelectedTargetFieldOverride] =
+    useState<"head" | "body" | null>(null);
+  const selectedTargetField = selectedTargetFieldOverride ?? moveTargetField;
+
+  const setSelectedTargetField = useCallback((field: "head" | "body") => {
+    setSelectedTargetFieldOverride(field);
+  }, []);
 
   // Get custom locations and create merged locations
   const customLocations = useCustomLocations();
@@ -549,6 +553,7 @@ function useLocationSelector({
 
   const resetState = useCallback(() => {
     setSearchQuery("");
+    setSelectedTargetFieldOverride(null);
   }, []);
 
   return {
