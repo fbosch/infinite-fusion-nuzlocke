@@ -28,6 +28,13 @@ interface EncounterCellProps {
   shouldLoad?: boolean;
 }
 
+const EMPTY_ENCOUNTER = {
+  head: null,
+  body: null,
+  isFusion: false,
+  updatedAt: 0,
+};
+
 interface PendingClear {
   field: "head" | "body";
   pokemon: PokemonOptionType;
@@ -113,12 +120,7 @@ export function EncounterCell({
   shouldLoad = true,
 }: EncounterCellProps) {
   // Get encounter data directly - only this cell will rerender when this encounter changes
-  const encounterData = useEncounter(locationId) || {
-    head: null,
-    body: null,
-    isFusion: false,
-    updatedAt: Date.now(),
-  };
+  const encounterData = useEncounter(locationId) || EMPTY_ENCOUNTER;
 
   // useSnapshot already returns plain objects, so we can use them directly
   const headPokemon = encounterData.head;
