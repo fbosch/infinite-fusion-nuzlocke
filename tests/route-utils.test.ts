@@ -21,6 +21,7 @@ describe("Route Processing Utilities", () => {
       expect(isRoutePattern("Route 1")).toBe(true);
       expect(isRoutePattern("Route 25")).toBe(true);
       expect(isRoutePattern("Route 123")).toBe(true);
+      expect(isRoutePattern("Route 25 - Bill's House")).toBe(true);
     });
 
     it("should match special locations", () => {
@@ -28,6 +29,7 @@ describe("Route Processing Utilities", () => {
       expect(isRoutePattern("Secret Garden")).toBe(true);
       expect(isRoutePattern("Hidden Forest")).toBe(true);
       expect(isRoutePattern("Viridian River")).toBe(true);
+      expect(isRoutePattern("Route 11 Gate")).toBe(true);
     });
 
     it("should be case insensitive", () => {

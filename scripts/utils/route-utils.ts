@@ -8,7 +8,7 @@
 // Simple patterns for route validation
 export const ROUTE_PATTERNS = {
   // Basic route pattern: "Route" followed by a number
-  ROUTE_NUMBER: /^Route\s+\d+$/i,
+  ROUTE_NUMBER: /^Route\s+\d+(?:\s*-\s*.+)?$/i,
 
   // Safari Zone pattern: "Safari Zone" followed by optional area
   SAFARI_ZONE: /^Safari Zone(?:\s+\(Area\s+\d+\))?$/i,
@@ -96,6 +96,7 @@ const LOCATION_SUFFIXES = [
   "Depths",
   "Hidden",
   "Dark Room",
+  "Gate",
 ] as const;
 
 // Common location prefixes
