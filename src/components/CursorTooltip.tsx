@@ -84,6 +84,9 @@ export function CursorTooltip(props: CursorTooltipProps) {
   const isWindowVisible = useWindowVisibility();
   const dragSnapshot = useSnapshot(dragStore);
   const { isAnyTooltipVisible, registerTooltip } = useGlobalTooltip();
+  const shouldDisableTooltip =
+    disabled || !isWindowVisible || dragSnapshot.isDragging;
+  const isTooltipVisible = isOpen && shouldDisableTooltip === false;
 
   const {
     refs,
@@ -92,8 +95,14 @@ export function CursorTooltip(props: CursorTooltipProps) {
     placement: resolvedPlacement,
   } = useFloating({
     placement,
-    open: isOpen,
+    open: isTooltipVisible,
     onOpenChange: (open) => {
+      if (shouldDisableTooltip) {
+        setIsOpen(false);
+        setAnimationState(null);
+        return;
+      }
+
       if (open) {
         setIsOpen(true);
         setAnimationState("entering");
@@ -167,25 +176,16 @@ export function CursorTooltip(props: CursorTooltipProps) {
 
   // Register tooltip with global state when it opens/closes
   useEffect(() => {
-    if (isOpen) {
+    if (isTooltipVisible) {
       registerTooltip(true);
     }
 
     return () => {
-      if (isOpen) {
+      if (isTooltipVisible) {
         registerTooltip(false);
       }
     };
-  }, [isOpen, registerTooltip]);
-
-  // Handle window visibility changes - close tooltip if window becomes hidden
-  useEffect(() => {
-    if (isOpen) {
-      if (!isWindowVisible || dragSnapshot.isDragging) {
-        setIsOpen(false);
-      }
-    }
-  }, [isWindowVisible, isOpen, dragSnapshot.isDragging]);
+  }, [isTooltipVisible, registerTooltip]);
 
   const clientPointFloating = useClientPoint(context, {
     axis: "both",
@@ -206,7 +206,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
 
   const hover = useHover(context, {
     delay: effectiveDelay,
-    enabled: !disabled,
+    enabled: shouldDisableTooltip === false,
     move: true,
     restMs: 16,
   });
@@ -266,7 +266,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
           }),
         })}
 
-      {isOpen && (
+      {isTooltipVisible && (
         <FloatingPortal>
           <div
             className="z-[9999] pointer-events-none"
