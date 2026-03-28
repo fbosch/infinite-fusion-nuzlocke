@@ -13,6 +13,7 @@ import {
 import { z } from 'zod';
 import { generatePrefixedId } from '@/utils/id';
 import { restorePokemonToTeam } from './encounters';
+import { buildPokemonUidIndex } from '@/utils/encounter-utils';
 
 // Default state
 const defaultState: PlaythroughsState = {
@@ -490,28 +491,14 @@ const getTeamMemberDetails = (position: number) => {
   const teamMember = activePlaythrough.team.members[position];
   if (!teamMember) return null;
 
-  // Find Pokémon by UID across all encounters
-  let headPokemon: PokemonOptionType | null = null;
-  let bodyPokemon: PokemonOptionType | null = null;
+  const pokemonByUid = buildPokemonUidIndex(activePlaythrough.encounters);
 
-  // Flatten all Pokémon from all encounters into a single collection
-  const allPokemon = Object.values(activePlaythrough.encounters || {}).flatMap(
-    encounter => {
-      const pokemon = [];
-      if (encounter.head) pokemon.push(encounter.head);
-      if (encounter.body) pokemon.push(encounter.body);
-      return pokemon;
-    }
-  );
+  const headPokemon: PokemonOptionType | null =
+    pokemonByUid.get(teamMember.headPokemonUid) ?? null;
 
-  // Find Pokémon by UID from the flattened collection
-  headPokemon =
-    allPokemon.find(pokemon => pokemon.uid === teamMember.headPokemonUid) ||
-    null;
-  bodyPokemon =
+  const bodyPokemon: PokemonOptionType | null =
     teamMember.bodyPokemonUid && teamMember.bodyPokemonUid !== ''
-      ? allPokemon.find(pokemon => pokemon.uid === teamMember.bodyPokemonUid) ||
-        null
+      ? (pokemonByUid.get(teamMember.bodyPokemonUid) ?? null)
       : null;
 
   if (!headPokemon && !bodyPokemon) {

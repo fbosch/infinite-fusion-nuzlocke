@@ -1,13 +1,40 @@
 import type { PokemonOptionType } from '@/loaders/pokemon';
 import type { EncounterData } from '@/stores/playthroughs/types';
 
+export type PokemonUidIndex = Map<string, PokemonOptionType>;
+
+export function buildPokemonUidIndex(
+  encounters: Record<string, EncounterData> | null | undefined
+): PokemonUidIndex {
+  const pokemonByUid: PokemonUidIndex = new Map();
+
+  if (!encounters) return pokemonByUid;
+
+  for (const encounter of Object.values(encounters)) {
+    if (encounter.head?.uid) {
+      pokemonByUid.set(encounter.head.uid, encounter.head);
+    }
+
+    if (encounter.body?.uid) {
+      pokemonByUid.set(encounter.body.uid, encounter.body);
+    }
+  }
+
+  return pokemonByUid;
+}
+
 /**
  * Find a Pokémon by UID from all encounters (both head and body slots)
  */
 export function findPokemonByUid(
   encounters: Record<string, EncounterData> | null | undefined,
-  uid: string
+  uid: string,
+  pokemonByUid?: ReadonlyMap<string, PokemonOptionType>
 ): PokemonOptionType | null {
+  if (pokemonByUid) {
+    return pokemonByUid.get(uid) ?? null;
+  }
+
   if (!encounters) return null;
 
   for (const encounter of Object.values(encounters)) {

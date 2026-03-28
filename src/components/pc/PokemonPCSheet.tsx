@@ -25,7 +25,10 @@ import {
   getLocationById,
   getLocationsSortedWithCustom,
 } from '@/loaders/locations';
-import { findPokemonByUid } from '@/utils/encounter-utils';
+import {
+  buildPokemonUidIndex,
+  findPokemonByUid,
+} from '@/utils/encounter-utils';
 import { playthroughActions } from '@/stores/playthroughs';
 
 import PCEntryItem from './PCEntryItem';
@@ -79,6 +82,11 @@ export default function PokemonPCSheet({
     for (const loc of mergedLocations) map.set(loc.id, loc.name);
     return map;
   }, [mergedLocations]);
+
+  const pokemonByUid = useMemo(
+    () => buildPokemonUidIndex(encounters),
+    [encounters]
+  );
 
   // Handlers for team member picker modal
   const handleTeamMemberClick = useCallback(
@@ -149,10 +157,10 @@ export default function PokemonPCSheet({
       }
 
       const headPokemon = member.headPokemonUid
-        ? findPokemonByUid(encounters, member.headPokemonUid)
+        ? findPokemonByUid(encounters, member.headPokemonUid, pokemonByUid)
         : null;
       const bodyPokemon = member.bodyPokemonUid
-        ? findPokemonByUid(encounters, member.bodyPokemonUid)
+        ? findPokemonByUid(encounters, member.bodyPokemonUid, pokemonByUid)
         : null;
 
       // A slot is empty only if both UIDs are empty strings
@@ -183,7 +191,7 @@ export default function PokemonPCSheet({
         isFusion,
       };
     });
-  }, [activePlaythrough?.team, encounters]);
+  }, [activePlaythrough?.team, encounters, pokemonByUid]);
 
   const deceased: Entry[] = useMemo(() => {
     const entries: Entry[] = [];

@@ -17,7 +17,10 @@ import { CursorTooltip } from '@/components/CursorTooltip';
 import TeamMemberPickerModal from './TeamMemberPickerModal';
 import { type PokemonOptionType } from '@/loaders/pokemon';
 import { playthroughActions } from '@/stores/playthroughs';
-import { findPokemonByUid } from '@/utils/encounter-utils';
+import {
+  buildPokemonUidIndex,
+  findPokemonByUid,
+} from '@/utils/encounter-utils';
 import { TypePills } from '@/components/TypePills';
 import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
 import { TeamMemberContextMenu } from '@/components/PokemonSummaryCard/TeamMemberContextMenu';
@@ -172,6 +175,11 @@ export default function TeamSlots() {
   const teamSpriteRefs = useRef<(FusionSpriteHandle | null)[]>([]);
   const previousFusionIds = useRef<(string | null)[]>([]);
 
+  const pokemonByUid = useMemo(
+    () => buildPokemonUidIndex(encounters),
+    [encounters]
+  );
+
   const teamSlots = useMemo(() => {
     if (!activePlaythrough?.team) return [];
 
@@ -184,10 +192,10 @@ export default function TeamSlots() {
       }
 
       const headPokemon = member.headPokemonUid
-        ? findPokemonByUid(encounters, member.headPokemonUid)
+        ? findPokemonByUid(encounters, member.headPokemonUid, pokemonByUid)
         : null;
       const bodyPokemon = member.bodyPokemonUid
-        ? findPokemonByUid(encounters, member.bodyPokemonUid)
+        ? findPokemonByUid(encounters, member.bodyPokemonUid, pokemonByUid)
         : null;
 
       // A slot is empty only if both UIDs are empty strings
@@ -215,7 +223,7 @@ export default function TeamSlots() {
         isFusion,
       };
     });
-  }, [activePlaythrough?.team, encounters]);
+  }, [activePlaythrough?.team, encounters, pokemonByUid]);
 
   // Track fusion ID changes and play evolution animations for team members
   useEffect(() => {

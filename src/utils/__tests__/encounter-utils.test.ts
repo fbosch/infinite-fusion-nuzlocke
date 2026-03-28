@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  buildPokemonUidIndex,
   getAllPokemonWithLocations,
   findPokemonByUid,
   findPokemonWithLocation,
@@ -198,6 +199,58 @@ describe('encounter-utils', () => {
 
       const result = findPokemonByUid(encounters, 'non-existent-uid');
       expect(result).toBeNull();
+    });
+
+    it('should use uid index when provided', () => {
+      const encounters: Record<string, EncounterData> = {
+        route1: {
+          head: mockPikachu,
+          body: mockCharmander,
+          isFusion: true,
+          updatedAt: Date.now(),
+        },
+      };
+
+      const pokemonByUid = buildPokemonUidIndex(encounters);
+
+      const result = findPokemonByUid(
+        encounters,
+        'charmander_route1_456',
+        pokemonByUid
+      );
+
+      expect(result).toEqual(mockCharmander);
+    });
+  });
+
+  describe('buildPokemonUidIndex', () => {
+    it('should index head and body pokemon by uid', () => {
+      const encounters: Record<string, EncounterData> = {
+        route1: {
+          head: mockPikachu,
+          body: mockCharmander,
+          isFusion: true,
+          updatedAt: Date.now(),
+        },
+        route2: {
+          head: mockBulbasaur,
+          body: null,
+          isFusion: false,
+          updatedAt: Date.now(),
+        },
+      };
+
+      const index = buildPokemonUidIndex(encounters);
+
+      expect(index.get('pikachu_route1_123')).toEqual(mockPikachu);
+      expect(index.get('charmander_route1_456')).toEqual(mockCharmander);
+      expect(index.get('bulbasaur_route2_789')).toEqual(mockBulbasaur);
+      expect(index.size).toBe(3);
+    });
+
+    it('should return empty index for null encounters', () => {
+      const index = buildPokemonUidIndex(null);
+      expect(index.size).toBe(0);
     });
   });
 
