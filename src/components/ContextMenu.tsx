@@ -140,7 +140,6 @@ export function ContextMenu({
     hideMenu,
   } = useContextMenuState();
 
-  const triggerRef = useRef<HTMLElement>(null);
   const listRef = useRef<Array<HTMLElement | null>>([]);
   const menuElementRef = useRef<HTMLDivElement>(null);
   const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
@@ -243,12 +242,6 @@ export function ContextMenu({
   };
 
   const openSubmenuForIndex = useCallback((validIndex: number) => {
-    if (!menuElementRef.current) return;
-    const parentEl = listRef.current[validIndex];
-    if (!parentEl) return;
-
-    // For absolute positioning, we just need to track which submenu is open
-    // The positioning is handled by CSS (left: 100%, top: 0)
     setOpenSubmenuIndex(validIndex);
   }, []);
 
@@ -281,14 +274,13 @@ export function ContextMenu({
       {isValidElement(children) &&
         cloneElement(children, {
           ref: (node: HTMLElement | null) => {
-            triggerRef.current = node;
             refs.setReference(node);
           },
           onContextMenu: handleContextMenu,
         } as React.HTMLAttributes<HTMLElement>)}
 
       {/* Render popover in portal when visible */}
-      {isVisible && triggerRef.current && (
+      {isVisible && (
         <FloatingPortal id={portalRootId}>
           <FloatingFocusManager context={context} modal={false}>
             <div
