@@ -2,6 +2,7 @@ import { proxy, subscribe } from "valtio";
 import { devtools } from "valtio/utils";
 import { z } from "zod";
 import type { PokemonOptionType } from "@/loaders/pokemon";
+import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 import { generatePrefixedId } from "@/utils/id";
 import { restorePokemonToTeam } from "./encounters";
 import {
@@ -485,36 +486,25 @@ const updateTeamMember = async (
 };
 
 // Helper function to get team member details
-const getTeamMemberDetails = (position: number) => {
+const getTeamMemberDetails = (
+  position: number,
+  pokemonByUid?: ReadonlyMap<string, PokemonOptionType>,
+) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough || position < 0 || position >= 6) return null;
 
   const teamMember = activePlaythrough.team.members[position];
   if (!teamMember) return null;
 
-  // Find Pokémon by UID across all encounters
-  let headPokemon: PokemonOptionType | null = null;
-  let bodyPokemon: PokemonOptionType | null = null;
+  const uidIndex =
+    pokemonByUid ?? buildPokemonUidIndex(activePlaythrough.encounters);
 
-  // Flatten all Pokémon from all encounters into a single collection
-  const allPokemon = Object.values(activePlaythrough.encounters || {}).flatMap(
-    (encounter) => {
-      const pokemon = [];
-      if (encounter.head) pokemon.push(encounter.head);
-      if (encounter.body) pokemon.push(encounter.body);
-      return pokemon;
-    },
-  );
+  const headPokemon: PokemonOptionType | null =
+    uidIndex.get(teamMember.headPokemonUid) ?? null;
 
-  // Find Pokémon by UID from the flattened collection
-  headPokemon =
-    allPokemon.find((pokemon) => pokemon.uid === teamMember.headPokemonUid) ||
-    null;
-  bodyPokemon =
+  const bodyPokemon: PokemonOptionType | null =
     teamMember.bodyPokemonUid && teamMember.bodyPokemonUid !== ""
-      ? allPokemon.find(
-          (pokemon) => pokemon.uid === teamMember.bodyPokemonUid,
-        ) || null
+      ? (uidIndex.get(teamMember.bodyPokemonUid) ?? null)
       : null;
 
   if (!headPokemon && !bodyPokemon) {
