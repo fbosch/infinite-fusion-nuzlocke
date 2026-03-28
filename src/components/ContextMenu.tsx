@@ -26,6 +26,13 @@ import { twMerge } from "tailwind-merge";
 import { match } from "ts-pattern";
 import { CursorTooltip } from "./CursorTooltip";
 
+export function isContextMenuKeyboardShortcut(event: {
+  key: string;
+  shiftKey: boolean;
+}) {
+  return event.key === "ContextMenu" || (event.shiftKey && event.key === "F10");
+}
+
 // Filter out separators at the beginning and end of the items array
 function filterEdgeSeparators(items: ContextMenuItem[]): ContextMenuItem[] {
   if (items.length === 0) return items;
@@ -268,6 +275,23 @@ export function ContextMenu({
     });
   };
 
+  const openFromKeyboardTrigger = (triggerElement: HTMLElement) => {
+    if (disabled) return;
+
+    const rect = triggerElement.getBoundingClientRect();
+    openMenu({
+      x: Math.round(rect.left),
+      y: Math.round(rect.bottom),
+    });
+
+    requestAnimationFrame(() => {
+      if (menuElementRef.current) {
+        menuElementRef.current.classList.remove("tooltip-exit");
+        menuElementRef.current.classList.add("tooltip-enter");
+      }
+    });
+  };
+
   return (
     <>
       {/* Custom trigger element */}
@@ -275,8 +299,51 @@ export function ContextMenu({
         cloneElement(children, {
           ref: (node: HTMLElement | null) => {
             refs.setReference(node);
+
+            const childRef = (
+              children as React.ReactElement<{
+                ref?: React.Ref<HTMLElement>;
+              }>
+            ).props.ref;
+
+            if (typeof childRef === "function") {
+              childRef(node);
+            } else if (childRef && "current" in childRef) {
+              childRef.current = node;
+            }
           },
-          onContextMenu: handleContextMenu,
+          onContextMenu: (event: React.MouseEvent<HTMLElement>) => {
+            const childOnContextMenu = (
+              children as React.ReactElement<{
+                onContextMenu?: React.MouseEventHandler<HTMLElement>;
+              }>
+            ).props.onContextMenu;
+
+            childOnContextMenu?.(event);
+            if (event.defaultPrevented === false) {
+              handleContextMenu(event);
+            }
+          },
+          onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
+            const childOnKeyDown = (
+              children as React.ReactElement<{
+                onKeyDown?: React.KeyboardEventHandler<HTMLElement>;
+              }>
+            ).props.onKeyDown;
+
+            childOnKeyDown?.(event);
+            if (event.defaultPrevented === true) {
+              return;
+            }
+
+            if (isContextMenuKeyboardShortcut(event) === false) {
+              return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            openFromKeyboardTrigger(event.currentTarget);
+          },
         } as React.HTMLAttributes<HTMLElement>)}
 
       {/* Render popover in portal when visible */}
