@@ -88,6 +88,13 @@ export function CursorTooltip(props: CursorTooltipProps) {
     disabled || !isWindowVisible || dragSnapshot.isDragging;
   const isTooltipVisible = isOpen && shouldDisableTooltip === false;
 
+  useEffect(() => {
+    if (shouldDisableTooltip && isOpen) {
+      setIsOpen(false);
+      setAnimationState(null);
+    }
+  }, [shouldDisableTooltip, isOpen]);
+
   const {
     refs,
     floatingStyles,

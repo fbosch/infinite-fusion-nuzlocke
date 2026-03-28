@@ -100,25 +100,15 @@ export function ArtworkVariantModal({
     async (variant: string) => {
       // Immediately update the local state for instant UI feedback
       setLocalVariant(variant);
-      try {
-        await updateVariant(variant);
-      } catch (error) {
-        setLocalVariant(globalPreferredVariant || "");
-        console.error("Failed to set artwork variant:", error);
-      }
+      await updateVariant(variant);
     },
-    [updateVariant, globalPreferredVariant],
+    [updateVariant],
   );
 
   const handleClearVariant = React.useCallback(async () => {
-    try {
-      // Clear the preferred variant using the new hook
-      setLocalVariant("");
-      await updateVariant("");
-      handleClose();
-    } catch (error) {
-      console.error("Failed to clear artwork variant:", error);
-    }
+    setLocalVariant("");
+    await updateVariant("");
+    handleClose();
   }, [updateVariant, handleClose]);
 
   // No cleanup needed

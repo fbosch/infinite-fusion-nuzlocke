@@ -80,7 +80,7 @@ function CookieSettingsDialog({
   };
 
   return (
-    <Dialog open onClose={onClose} className="relative z-50 group">
+    <Dialog open={true} onClose={onClose} className="relative z-50 group">
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"
