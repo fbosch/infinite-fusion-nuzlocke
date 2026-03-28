@@ -1,15 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import {
-  ArrowDownToDot,
-  ArrowUpRight,
-  Atom,
-  Hand,
-  Home,
-  MousePointer,
-  Undo2,
-} from "lucide-react";
+import { ArrowDownToDot, ArrowUpRight, Atom, Home, Undo2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import type React from "react";
 import { useCallback, useMemo, useState } from "react";
@@ -33,8 +25,8 @@ import { settingsStore } from "@/stores/settings";
 import usePokemonTypes from "../../hooks/usePokemonTypes";
 import ContextMenu, { type ContextMenuItem } from "../ContextMenu";
 import { CursorTooltip } from "../CursorTooltip";
+import { DraggableSpriteTooltipContent } from "./DraggableSpriteTooltipContent";
 import { PokemonSprite } from "../PokemonSprite";
-import TypePills from "../TypePills";
 
 const LocationSelector = dynamic(
   () =>
@@ -379,6 +371,16 @@ export function DraggableComboboxSprite({
     field,
   ]);
 
+  const originalLocationName = useMemo(() => {
+    if (!pokemon?.originalLocation || pokemon.originalLocation === locationId) {
+      return null;
+    }
+    return (
+      getLocationByIdFromMerged(pokemon.originalLocation, customLocations)
+        ?.name || pokemon.originalLocation
+    );
+  }, [pokemon?.originalLocation, locationId, customLocations]);
+
   if (!pokemon) return null;
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
@@ -429,56 +431,12 @@ export function DraggableComboboxSprite({
             }}
             placement="bottom-start"
             content={
-              <div>
-                <div className="flex py-0.5 text-xs mb-1.5">
-                  <TypePills
-                    className="flex"
-                    primary={primary}
-                    secondary={secondary}
-                  />
-                </div>
-                <div className="w-full h-px bg-gray-200 dark:bg-gray-700 my-1.5 mb-2" />
-                {/* Show original encounter location if different from current location */}
-                {pokemon?.originalLocation &&
-                  pokemon.originalLocation !== locationId && (
-                    <div className="mb-2 pb-2 border-b border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center gap-1.5 text-xs">
-                        <Home className="size-3 text-gray-500 dark:text-gray-400" />
-                        <span className="text-gray-600 dark:text-gray-300">
-                          Encountered at:{" "}
-                        </span>
-                        <span className="font-medium text-gray-700 dark:text-gray-200">
-                          {getLocationByIdFromMerged(
-                            pokemon.originalLocation,
-                            customLocations,
-                          )?.name || pokemon.originalLocation}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                <div className="flex items-center text-xs gap-2">
-                  {settings.moveEncountersBetweenLocations && (
-                    <div className="flex items-center gap-1">
-                      <div className="flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200">
-                        <Hand className="size-2.5" />
-                        <span className="font-medium text-xs">L</span>
-                      </div>
-                      <span className="text-gray-600 dark:text-gray-300 text-xs">
-                        Grab
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1">
-                    <div className="flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200">
-                      <MousePointer className="size-2.5" />
-                      <span className="font-medium text-xs">R</span>
-                    </div>
-                    <span className="text-gray-600 dark:text-gray-300 text-xs">
-                      Options
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <DraggableSpriteTooltipContent
+                primary={primary}
+                secondary={secondary}
+                originalLocationName={originalLocationName}
+                showGrabHint={settings.moveEncountersBetweenLocations}
+              />
             }
           >
             <div
