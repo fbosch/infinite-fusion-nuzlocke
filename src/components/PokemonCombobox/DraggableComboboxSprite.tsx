@@ -381,7 +381,7 @@ export function DraggableComboboxSprite({
 
   if (!pokemon) return null;
 
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragStart = (e: React.DragEvent<HTMLButtonElement>) => {
     if (disabled || !settings.moveEncountersBetweenLocations) {
       e.preventDefault();
       return;
@@ -481,7 +481,8 @@ export function DraggableComboboxSprite({
               </div>
             }
           >
-            <div
+            <button
+              type="button"
               className={clsx(
                 "absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md",
                 "size-12.5 flex items-center justify-center",
@@ -493,6 +494,7 @@ export function DraggableComboboxSprite({
                   "pointer-events-none": dragPreview || disabled,
                 },
               )}
+              aria-label={`Manage ${pokemon.name}. Press Shift+F10 for options.`}
               draggable={!disabled && settings.moveEncountersBetweenLocations}
               onDragStart={handleDragStart}
             >
@@ -503,7 +505,7 @@ export function DraggableComboboxSprite({
                 )}
                 draggable={false}
               />
-            </div>
+            </button>
           </CursorTooltip>
         </div>
       </ContextMenu>

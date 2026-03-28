@@ -61,16 +61,11 @@ export function PokemonSlotSelector({
   };
 
   return (
-    <div
+    <button
+      type="button"
       onClick={() => onSlotSelect(slot)}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          onSlotSelect(slot);
-        }
-      }}
-      role="button"
-      tabIndex={0}
+      aria-pressed={isActive}
+      aria-label={`Select ${slotLabel}`}
       className={clsx(
         "border-2 rounded-lg p-2 transition-colors text-left h-24 relative cursor-pointer",
         getSlotStyles(),
@@ -102,10 +97,12 @@ export function PokemonSlotSelector({
             )}
           </div>
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onRemovePokemon();
             }}
+            aria-label={`Remove ${slotLabel}`}
             className="absolute top-2 right-2 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 p-1 bg-white dark:bg-gray-700 rounded-full shadow-sm"
           >
             <X className="h-4 w-4" />
@@ -118,6 +115,6 @@ export function PokemonSlotSelector({
             : `Click to select ${slot}`}
         </div>
       )}
-    </div>
+    </button>
   );
 }

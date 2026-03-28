@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isContextMenuKeyboardShortcut } from "../ContextMenu";
 
 // We need to import the function directly since it's not exported
 // For testing purposes, we'll redefine it here
@@ -122,5 +123,34 @@ describe("filterEdgeSeparators", () => {
     const items = [{ id: "sep1", separator: true }];
     const result = filterEdgeSeparators(items);
     expect(result).toHaveLength(0);
+  });
+});
+
+describe("isContextMenuKeyboardShortcut", () => {
+  it("returns true for ContextMenu key", () => {
+    expect(
+      isContextMenuKeyboardShortcut({
+        key: "ContextMenu",
+        shiftKey: false,
+      }),
+    ).toBe(true);
+  });
+
+  it("returns true for Shift+F10", () => {
+    expect(
+      isContextMenuKeyboardShortcut({
+        key: "F10",
+        shiftKey: true,
+      }),
+    ).toBe(true);
+  });
+
+  it("returns false for unrelated keys", () => {
+    expect(
+      isContextMenuKeyboardShortcut({
+        key: "Enter",
+        shiftKey: false,
+      }),
+    ).toBe(false);
   });
 });
