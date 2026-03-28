@@ -24,4 +24,3 @@
 - `docs/agents/domain/fusion-mechanics.md`
 - `docs/agents/domain/ui-components.md`
 - `docs/agents/domain/team-member-selection-architecture.md`
-- `.opencode/commands/domain-context.md`

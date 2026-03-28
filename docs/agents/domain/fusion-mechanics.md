@@ -25,4 +25,3 @@
 - `docs/agents/domain/nuzlocke-core-rules.md`
 - `docs/agents/domain/pokemon-data.md`
 - `docs/agents/domain/ui-components.md`
-- `.opencode/commands/domain-context.md`

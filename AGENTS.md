@@ -9,15 +9,14 @@ Pokemon Infinite Fusion Nuzlocke tracker with strict run-state invariants.
 ## Operational constraints
 
 - Keep repo-wide policy guidance minimal; put directory rules in local `AGENTS.md` files.
-- For testing and validation workflows, use action commands instead of embedding long checklists.
-- Load domain mechanics from `docs/agents/domain/` when work touches game-rule behavior.
+- For targeted testing workflows, use action commands instead of embedding long checklists.
+- When work touches game-rule behavior or run-state logic, read relevant domain docs listed in `docs/agents/domain/README.md` or local `AGENTS.md` references.
 - Keep new guidance failure-mode-driven: prefer local `AGENTS.md` for path scope, commands for explicit workflows, and narrow skills for repeated non-obvious implementation errors.
+- Validation workflow for changed work: run `pnpm type-check`, then `pnpm test:run`, then `pnpm validate` when scope is broad/cross-cutting.
 
 ## Action commands
 
 - `/test-target <path>`
-- `/domain-context <topic>`
-- `/validate-changed`
 
 ## Local AGENTS
 
@@ -27,4 +26,4 @@ Pokemon Infinite Fusion Nuzlocke tracker with strict run-state invariants.
 
 ## References
 
-- `docs/agents/domain/`
+- `docs/agents/domain/README.md`

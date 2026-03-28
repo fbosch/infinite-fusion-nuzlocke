@@ -23,4 +23,3 @@
 - `src/components/team/TeamMemberSelectionContext.tsx`
 - `src/stores/playthroughs/encounters.ts`
 - `docs/agents/domain/ui-components.md`
-- `.opencode/commands/domain-context.md`
