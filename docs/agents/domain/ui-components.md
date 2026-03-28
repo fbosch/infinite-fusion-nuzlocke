@@ -18,9 +18,3 @@
 - Allowing UI-only optimistic updates that diverge from validated store state.
 - Building separate calculations per panel that drift from shared game logic.
 - Coupling selector layout assumptions to storage layout assumptions.
-
-## Cross-references
-
-- `docs/agents/domain/nuzlocke-core-rules.md`
-- `docs/agents/domain/fusion-mechanics.md`
-- `docs/agents/domain/team-member-selection-architecture.md`

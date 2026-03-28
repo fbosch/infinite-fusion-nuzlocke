@@ -18,8 +18,7 @@
 - Mutating encounter field layout when the intended action is Pokemon attribute edit.
 - Building feature logic that treats visual slot order as canonical storage order.
 
-## Cross-references
+## Key files
 
 - `src/components/team/TeamMemberSelectionContext.tsx`
 - `src/stores/playthroughs/encounters.ts`
-- `docs/agents/domain/ui-components.md`

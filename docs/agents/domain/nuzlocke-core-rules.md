@@ -18,9 +18,3 @@
 - Treating area visits and area catches as unrelated states.
 - Letting imports bypass nickname or death validations.
 - Marking fainted Pokemon in UI only while underlying state remains usable.
-
-## Cross-references
-
-- `docs/agents/domain/fusion-mechanics.md`
-- `docs/agents/domain/ui-components.md`
-- `docs/agents/domain/team-member-selection-architecture.md`

@@ -19,9 +19,3 @@
 - Updating display names/sprites without updating canonical fusion identity fields.
 - Treating unfuse as delete instead of a reversible state transition.
 - Applying generic team updates that ignore fusion-specific constraints.
-
-## Cross-references
-
-- `docs/agents/domain/nuzlocke-core-rules.md`
-- `docs/agents/domain/pokemon-data.md`
-- `docs/agents/domain/ui-components.md`

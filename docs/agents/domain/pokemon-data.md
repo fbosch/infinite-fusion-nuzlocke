@@ -22,6 +22,4 @@
 
 ## Cross-references
 
-- `docs/agents/domain/fusion-mechanics.md`
-- `docs/agents/domain/ui-components.md`
 - `scripts/AGENTS.md`
