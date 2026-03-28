@@ -8146,5 +8146,14 @@
         "encounterType": "grass"
       }
     ]
+  },
+  {
+    "routeName": "Route 25",
+    "encounters": [
+      {
+        "pokemonId": 495,
+        "encounterType": "grass"
+      }
+    ]
   }
 ]
