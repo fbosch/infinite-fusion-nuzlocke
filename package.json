@@ -14,7 +14,7 @@
     "format:check": "biome format . --vcs-use-ignore-file=true --files-ignore-unknown=true",
     "validate": "pnpm format:check && pnpm lint",
     "validate:fix": "pnpm format && pnpm lint:fix",
-    "type-check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "NODE_NO_WARNINGS=1 vitest run --silent=passed-only",
