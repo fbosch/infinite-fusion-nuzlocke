@@ -82,6 +82,10 @@ pnpm validate
 
 Contributions are welcome through issues and pull requests. Keep changes focused, include relevant tests, and run the validation workflow before opening a PR.
 
+### Valtio Subscription Guidance
+
+For contributor guidance on choosing `useSnapshot` vs `useValtioSync` under React Compiler, see `docs/VALTIO_REACT_COMPILER_GUIDANCE.md`.
+
 ## License
 
 MIT License. See [`LICENSE`](LICENSE).
