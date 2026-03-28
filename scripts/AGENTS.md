@@ -16,4 +16,3 @@ Local rules for data scraping and generation scripts.
 ## Domain references
 
 - `docs/agents/domain/pokemon-data.md`
-- `docs/agents/domain/fusion-mechanics.md`
