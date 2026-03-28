@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest';
-import { PokemonStatus, type PokemonOptionType } from '@/loaders/pokemon';
-import { EncounterSource } from '@/loaders/encounters';
+import { describe, expect, it } from "vitest";
+import { EncounterSource } from "@/loaders/encounters";
+import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
 
 // Helper function to simulate the default status logic from PokemonCombobox
 function applyDefaultStatus(
   pokemon: PokemonOptionType,
-  source: EncounterSource | null
+  source: EncounterSource | null,
 ): PokemonOptionType {
   if (!pokemon) return pokemon;
 
@@ -29,12 +29,12 @@ function applyDefaultStatus(
   return pokemon;
 }
 
-describe('Pokemon Default Status Logic', () => {
-  describe('Default status application', () => {
+describe("Pokemon Default Status Logic", () => {
+  describe("Default status application", () => {
     it('should set default status to "received" for gift Pokemon', () => {
       const giftPokemon: PokemonOptionType = {
         id: 102,
-        name: 'Exeggcute',
+        name: "Exeggcute",
         nationalDexId: 102,
       };
 
@@ -42,7 +42,7 @@ describe('Pokemon Default Status Logic', () => {
 
       expect(result).toEqual({
         id: 102,
-        name: 'Exeggcute',
+        name: "Exeggcute",
         nationalDexId: 102,
         status: PokemonStatus.RECEIVED,
       });
@@ -51,7 +51,7 @@ describe('Pokemon Default Status Logic', () => {
     it('should set default status to "traded" for trade Pokemon', () => {
       const tradePokemon: PokemonOptionType = {
         id: 79,
-        name: 'Slowpoke',
+        name: "Slowpoke",
         nationalDexId: 79,
       };
 
@@ -59,16 +59,16 @@ describe('Pokemon Default Status Logic', () => {
 
       expect(result).toEqual({
         id: 79,
-        name: 'Slowpoke',
+        name: "Slowpoke",
         nationalDexId: 79,
         status: PokemonStatus.TRADED,
       });
     });
 
-    it('should not change status for wild Pokemon without existing status', () => {
+    it("should not change status for wild Pokemon without existing status", () => {
       const wildPokemon: PokemonOptionType = {
         id: 1,
-        name: 'Bulbasaur',
+        name: "Bulbasaur",
         nationalDexId: 1,
       };
 
@@ -76,15 +76,15 @@ describe('Pokemon Default Status Logic', () => {
 
       expect(result).toEqual({
         id: 1,
-        name: 'Bulbasaur',
+        name: "Bulbasaur",
         nationalDexId: 1,
       });
     });
 
-    it('should preserve existing status for wild Pokemon', () => {
+    it("should preserve existing status for wild Pokemon", () => {
       const wildPokemon: PokemonOptionType = {
         id: 1,
-        name: 'Bulbasaur',
+        name: "Bulbasaur",
         nationalDexId: 1,
         status: PokemonStatus.CAPTURED,
       };
@@ -93,58 +93,58 @@ describe('Pokemon Default Status Logic', () => {
 
       expect(result).toEqual({
         id: 1,
-        name: 'Bulbasaur',
+        name: "Bulbasaur",
         nationalDexId: 1,
         status: PokemonStatus.CAPTURED,
       });
     });
 
-    it('should override existing status for gift Pokemon', () => {
+    it("should override existing status for gift Pokemon", () => {
       const giftPokemonWithStatus: PokemonOptionType = {
         id: 102,
-        name: 'Exeggcute',
+        name: "Exeggcute",
         nationalDexId: 102,
         status: PokemonStatus.CAPTURED,
       };
 
       const result = applyDefaultStatus(
         giftPokemonWithStatus,
-        EncounterSource.GIFT
+        EncounterSource.GIFT,
       );
 
       expect(result).toEqual({
         id: 102,
-        name: 'Exeggcute',
+        name: "Exeggcute",
         nationalDexId: 102,
         status: PokemonStatus.RECEIVED,
       });
     });
 
-    it('should override existing status for trade Pokemon', () => {
+    it("should override existing status for trade Pokemon", () => {
       const tradePokemonWithStatus: PokemonOptionType = {
         id: 79,
-        name: 'Slowpoke',
+        name: "Slowpoke",
         nationalDexId: 79,
         status: PokemonStatus.MISSED,
       };
 
       const result = applyDefaultStatus(
         tradePokemonWithStatus,
-        EncounterSource.TRADE
+        EncounterSource.TRADE,
       );
 
       expect(result).toEqual({
         id: 79,
-        name: 'Slowpoke',
+        name: "Slowpoke",
         nationalDexId: 79,
         status: PokemonStatus.TRADED,
       });
     });
 
-    it('should handle Pokemon without source data gracefully', () => {
+    it("should handle Pokemon without source data gracefully", () => {
       const unknownPokemon: PokemonOptionType = {
         id: 999,
-        name: 'Unknown',
+        name: "Unknown",
         nationalDexId: 999,
         status: PokemonStatus.CAPTURED,
       };
@@ -153,16 +153,16 @@ describe('Pokemon Default Status Logic', () => {
 
       expect(result).toEqual({
         id: 999,
-        name: 'Unknown',
+        name: "Unknown",
         nationalDexId: 999,
         status: PokemonStatus.CAPTURED,
       });
     });
 
-    it('should not change Pokemon if same status would be applied', () => {
+    it("should not change Pokemon if same status would be applied", () => {
       const giftPokemon: PokemonOptionType = {
         id: 102,
-        name: 'Exeggcute',
+        name: "Exeggcute",
         nationalDexId: 102,
         status: PokemonStatus.RECEIVED,
       };
@@ -174,40 +174,40 @@ describe('Pokemon Default Status Logic', () => {
     });
   });
 
-  describe('Edge cases', () => {
-    it('should handle null Pokemon gracefully', () => {
+  describe("Edge cases", () => {
+    it("should handle null Pokemon gracefully", () => {
       const result = applyDefaultStatus(null as any, EncounterSource.GIFT);
       expect(result).toBeNull();
     });
 
-    it('should handle undefined Pokemon gracefully', () => {
+    it("should handle undefined Pokemon gracefully", () => {
       const result = applyDefaultStatus(undefined as any, EncounterSource.GIFT);
       expect(result).toBeUndefined();
     });
 
-    it('should preserve all Pokemon properties when applying status', () => {
+    it("should preserve all Pokemon properties when applying status", () => {
       const pokemonWithAllProps: PokemonOptionType = {
         id: 102,
-        name: 'Exeggcute',
+        name: "Exeggcute",
         nationalDexId: 102,
-        nickname: 'Eggy',
-        originalLocation: 'test-location',
-        uid: 'unique-id-123',
+        nickname: "Eggy",
+        originalLocation: "test-location",
+        uid: "unique-id-123",
         status: PokemonStatus.CAPTURED,
       };
 
       const result = applyDefaultStatus(
         pokemonWithAllProps,
-        EncounterSource.GIFT
+        EncounterSource.GIFT,
       );
 
       expect(result).toEqual({
         id: 102,
-        name: 'Exeggcute',
+        name: "Exeggcute",
         nationalDexId: 102,
-        nickname: 'Eggy',
-        originalLocation: 'test-location',
-        uid: 'unique-id-123',
+        nickname: "Eggy",
+        originalLocation: "test-location",
+        uid: "unique-id-123",
         status: PokemonStatus.RECEIVED,
       });
     });

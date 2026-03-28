@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
+import { readFileSync } from "node:fs";
+import fs from "node:fs/promises";
+import path from "node:path";
 import * as cheerio from "cheerio";
-import { readFileSync } from "fs";
-import fs from "fs/promises";
-import path from "path";
 import type { EncounterType } from "./types/encounters";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
@@ -152,7 +152,7 @@ function consolidateSubLocations(routes: RouteEncounters[]): RouteEncounters[] {
     }
 
     // Add all encounters to the base location (will deduplicate later)
-    locationGroups.get(baseLocation)!.push(...route.encounters);
+    locationGroups.get(baseLocation)?.push(...route.encounters);
   }
 
   // Convert back to RouteEncounters format with deduplication
@@ -360,7 +360,7 @@ async function scrapeWildEncounters(
               // Found the encounter table for this route - process it
               $(nextElement)
                 .find("tr")
-                .each((rowIndex: number, row: any) => {
+                .each((_rowIndex: number, row: any) => {
                   const $row = $(row);
 
                   // Check if this row contains a header that spans multiple columns (encounter type header)
@@ -375,7 +375,7 @@ async function scrapeWildEncounters(
                   }
 
                   // Process Pokemon in this row using the current encounter type
-                  $row.find("td").each((cellIndex: number, cell: any) => {
+                  $row.find("td").each((_cellIndex: number, cell: any) => {
                     const cellText = $(cell).text().trim();
 
                     // Skip headers and non-Pokemon content

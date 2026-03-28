@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
+import fs from "node:fs/promises";
+import path from "node:path";
 import * as cheerio from "cheerio";
-import fs from "fs/promises";
-import path from "path";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
 
@@ -34,15 +34,15 @@ async function scrapeDexEntries(): Promise<{ id: number; name: string }[]> {
 
     // Look for table rows with dex numbers
     // The structure appears to be: first column contains the dex number
-    $("table tr").each((index: number, element: any) => {
+    $("table tr").each((_index: number, element: any) => {
       const firstCell = $(element).find("td").first();
       const dexText = firstCell.text().trim();
       const thirdCell = $(element).find("td").eq(2);
       const nameText = thirdCell.text().trim();
 
       // Check if this looks like a dex number (should be a number)
-      const dexNumber = parseInt(dexText);
-      if (!isNaN(dexNumber) && dexNumber > 0) {
+      const dexNumber = parseInt(dexText, 10);
+      if (!Number.isNaN(dexNumber) && dexNumber > 0) {
         dexEntries.push({
           id: dexNumber,
           name: nameText,

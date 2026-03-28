@@ -5,7 +5,7 @@ export const breakpoints = {
   md: 768,
   lg: 1024,
   xl: 1280,
-  '2xl': 1536,
+  "2xl": 1536,
 } as const;
 
 export type Breakpoint = keyof typeof breakpoints;
@@ -16,12 +16,12 @@ export type Breakpoint = keyof typeof breakpoints;
  * @returns Current breakpoint
  */
 export function getBreakpoint(width: number): Breakpoint {
-  if (width >= breakpoints['2xl']) return '2xl';
-  if (width >= breakpoints.xl) return 'xl';
-  if (width >= breakpoints.lg) return 'lg';
-  if (width >= breakpoints.md) return 'md';
-  if (width >= breakpoints.sm) return 'sm';
-  return 'sm';
+  if (width >= breakpoints["2xl"]) return "2xl";
+  if (width >= breakpoints.xl) return "xl";
+  if (width >= breakpoints.lg) return "lg";
+  if (width >= breakpoints.md) return "md";
+  if (width >= breakpoints.sm) return "sm";
+  return "sm";
 }
 
 /**
@@ -40,7 +40,7 @@ export function createBreakpointQuery(breakpoint: Breakpoint): string {
  * @returns Media query string
  */
 export function createBreakpointSmallerThanQuery(
-  breakpoint: Breakpoint
+  breakpoint: Breakpoint,
 ): string {
   const width = breakpoints[breakpoint];
   return `(max-width: ${width - 1}px)`;
@@ -54,7 +54,7 @@ export function createBreakpointSmallerThanQuery(
  */
 export function createBreakpointBetweenQuery(
   min: Breakpoint,
-  max: Breakpoint
+  max: Breakpoint,
 ): string {
   const minWidth = breakpoints[min];
   const maxWidth = breakpoints[max];

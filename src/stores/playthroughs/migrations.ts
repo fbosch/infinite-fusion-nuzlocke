@@ -1,5 +1,5 @@
-import type { GameMode } from './types';
-import { PokemonStatus } from '@/loaders/pokemon';
+import { PokemonStatus } from "@/loaders/pokemon";
+import type { GameMode } from "./types";
 
 /**
  * Migration data type for playthrough migrations
@@ -22,12 +22,12 @@ export interface MigrationData {
  * Migrate remixMode to gameMode field
  */
 export function migrateRemixMode(data: MigrationData): MigrationData {
-  if (data.remixMode !== undefined && data.gameMode === 'classic') {
+  if (data.remixMode !== undefined && data.gameMode === "classic") {
     return {
       ...data,
-      gameMode: data.remixMode ? 'remix' : 'classic',
+      gameMode: data.remixMode ? "remix" : "classic",
       remixMode: undefined, // Remove the old field
-      version: '1.0.0',
+      version: "1.0.0",
     };
   }
   return data;
@@ -42,7 +42,7 @@ export function migrateTeamField(data: MigrationData): MigrationData {
   if (!team) {
     // No team field exists, create default
     team = { members: Array.from({ length: 6 }, () => null) };
-  } else if (team && typeof team === 'object' && 'members' in team) {
+  } else if (team && typeof team === "object" && "members" in team) {
     // Team exists, ensure it has the right structure
     const members = (team as Record<string, unknown>).members;
     if (Array.isArray(members)) {
@@ -54,7 +54,7 @@ export function migrateTeamField(data: MigrationData): MigrationData {
         }
       });
       team = { members: fixedMembers };
-    } else if (typeof members === 'object' && members !== null) {
+    } else if (typeof members === "object" && members !== null) {
       // Members is a record/object, convert to array format
       const fixedMembers = new Array(6).fill(null);
       Object.entries(members as Record<string, unknown>).forEach(
@@ -63,7 +63,7 @@ export function migrateTeamField(data: MigrationData): MigrationData {
           if (index >= 0 && index < 6 && member !== null) {
             fixedMembers[index] = member;
           }
-        }
+        },
       );
       team = { members: fixedMembers };
     } else {
@@ -83,7 +83,7 @@ export function migrateTeamField(data: MigrationData): MigrationData {
  */
 export function migrateVersion(data: MigrationData): MigrationData {
   if (data.version === undefined) {
-    return { ...data, version: '1.0.0' };
+    return { ...data, version: "1.0.0" };
   }
   return data;
 }
@@ -101,20 +101,20 @@ export function cleanupRemixMode(data: MigrationData): MigrationData {
  * Migrate team member schema from encounter IDs to Pokémon UIDs
  */
 export function migrateTeamMemberSchema(data: MigrationData): MigrationData {
-  if (data.team && typeof data.team === 'object' && 'members' in data.team) {
+  if (data.team && typeof data.team === "object" && "members" in data.team) {
     const team = data.team as Record<string, unknown>;
     const members = team.members;
 
     if (Array.isArray(members)) {
       const migratedMembers = members.map((member: unknown) => {
-        if (member && typeof member === 'object') {
+        if (member && typeof member === "object") {
           // Check if this is the old format with encounter IDs
-          if ('headEncounterId' in member || 'bodyEncounterId' in member) {
+          if ("headEncounterId" in member || "bodyEncounterId" in member) {
             // Convert to new format - for now, we'll set empty UIDs
             // since we can't reliably reconstruct the old UIDs
             return {
-              headPokemonUid: '',
-              bodyPokemonUid: '',
+              headPokemonUid: "",
+              bodyPokemonUid: "",
             };
           }
           // Already in new format
@@ -139,9 +139,9 @@ export function migrateTeamMemberSchema(data: MigrationData): MigrationData {
  * Migrate Pokémon to include originalReceivalStatus field
  */
 export function migrateOriginalReceivalStatus(
-  data: MigrationData
+  data: MigrationData,
 ): MigrationData {
-  if (data.encounters && typeof data.encounters === 'object') {
+  if (data.encounters && typeof data.encounters === "object") {
     const encounters = data.encounters as Record<
       string,
       {
@@ -158,9 +158,9 @@ export function migrateOriginalReceivalStatus(
 
     for (const locationId in encounters) {
       const encounter = encounters[locationId];
-      if (encounter && typeof encounter === 'object') {
+      if (encounter && typeof encounter === "object") {
         // Migrate head Pokémon
-        if (encounter.head && typeof encounter.head === 'object') {
+        if (encounter.head && typeof encounter.head === "object") {
           if (!encounter.head.originalReceivalStatus) {
             // Set originalReceivalStatus based on current status
             if (
@@ -182,7 +182,7 @@ export function migrateOriginalReceivalStatus(
         }
 
         // Migrate body Pokémon
-        if (encounter.body && typeof encounter.body === 'object') {
+        if (encounter.body && typeof encounter.body === "object") {
           if (!encounter.body.originalReceivalStatus) {
             // Set originalReceivalStatus based on current status
             if (
@@ -216,26 +216,30 @@ export function migrateRequiredFields(data: MigrationData): MigrationData {
   const now = Date.now();
 
   // Handle completely malformed data
-  if (!data || typeof data !== 'object') {
+  if (!data || typeof data !== "object") {
     return {
       id: `playthrough_${now}_${Math.random().toString(36).substr(2, 9)}`,
-      name: 'Nuzlocke',
+      name: "Nuzlocke",
       createdAt: now,
       updatedAt: now,
-      gameMode: 'classic',
-      version: '1.0.0',
+      gameMode: "classic",
+      version: "1.0.0",
       team: { members: Array.from({ length: 6 }, () => null) },
     };
   }
 
   // Helper function to safely convert to number
   const toNumber = (value: unknown, fallback: number): number => {
-    if (typeof value === 'number' && !isNaN(value) && isFinite(value)) {
+    if (
+      typeof value === "number" &&
+      !Number.isNaN(value) &&
+      Number.isFinite(value)
+    ) {
       return value;
     }
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       const parsed = parseInt(value, 10);
-      if (!isNaN(parsed) && isFinite(parsed)) {
+      if (!Number.isNaN(parsed) && Number.isFinite(parsed)) {
         return parsed;
       }
     }
@@ -245,13 +249,13 @@ export function migrateRequiredFields(data: MigrationData): MigrationData {
   return {
     ...data,
     id:
-      typeof data.id === 'string' && data.id.length > 0
+      typeof data.id === "string" && data.id.length > 0
         ? data.id
         : `playthrough_${now}_${Math.random().toString(36).substr(2, 9)}`,
     name:
-      typeof data.name === 'string' && data.name.length > 0
+      typeof data.name === "string" && data.name.length > 0
         ? data.name
-        : 'Nuzlocke',
+        : "Nuzlocke",
     createdAt: toNumber(data.createdAt, now),
     updatedAt: toNumber(data.updatedAt, now),
   };

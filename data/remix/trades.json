@@ -1,87 +1,54 @@
 [
   {
     "routeName": "Celadon City",
-    "pokemonIds": [
-      77
-    ]
+    "pokemonIds": [77]
   },
   {
     "routeName": "Cerulean City",
-    "pokemonIds": [
-      193
-    ]
+    "pokemonIds": [193]
   },
   {
     "routeName": "Cinnabar Island",
-    "pokemonIds": [
-      101,
-      113,
-      227
-    ]
+    "pokemonIds": [101, 113, 227]
   },
   {
     "routeName": "Crimson City",
-    "pokemonIds": [
-      246
-    ]
+    "pokemonIds": [246]
   },
   {
     "routeName": "Goldenrod City",
-    "pokemonIds": [
-      215
-    ]
+    "pokemonIds": [215]
   },
   {
     "routeName": "Pewter City",
-    "pokemonIds": [
-      236
-    ]
+    "pokemonIds": [236]
   },
   {
     "routeName": "Route 11",
-    "pokemonIds": [
-      179
-    ]
+    "pokemonIds": [179]
   },
   {
     "routeName": "Route 2",
-    "pokemonIds": [
-      122
-    ]
+    "pokemonIds": [122]
   },
   {
     "routeName": "Route 5",
-    "pokemonIds": [
-      60
-    ]
+    "pokemonIds": [60]
   },
   {
     "routeName": "S.S. Anne",
-    "pokemonIds": [
-      58,
-      86
-    ]
+    "pokemonIds": [58, 86]
   },
   {
     "routeName": "Safari Zone A3",
-    "pokemonIds": [
-      214
-    ]
+    "pokemonIds": [214]
   },
   {
     "routeName": "Vermillion City",
-    "pokemonIds": [
-      79,
-      83,
-      84,
-      100,
-      102
-    ]
+    "pokemonIds": [79, 83, 84, 100, 102]
   },
   {
     "routeName": "Viridian City",
-    "pokemonIds": [
-      69
-    ]
+    "pokemonIds": [69]
   }
 ]

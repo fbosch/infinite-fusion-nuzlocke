@@ -1,10 +1,10 @@
-import { z } from 'zod';
-import { useCallback, useMemo } from 'react';
-import { getStarterPokemonByGameMode } from './starters';
-import type { PokemonOptionType, Pokemon } from './pokemon';
-import { useAllPokemon, usePokemonNameMap } from './pokemon';
-import { encountersData } from '@/lib/queryClient';
-import { useLocationEncountersById } from './locations';
+import { useCallback, useMemo } from "react";
+import { z } from "zod";
+import { encountersData } from "@/lib/queryClient";
+import { useLocationEncountersById } from "./locations";
+import type { Pokemon, PokemonOptionType } from "./pokemon";
+import { useAllPokemon, usePokemonNameMap } from "./pokemon";
+import { getStarterPokemonByGameMode } from "./starters";
 
 /**
  * Type for encounter data with fusion status
@@ -17,20 +17,20 @@ export interface EncounterData {
 }
 
 export enum EncounterSource {
-  WILD = 'wild', // Generic wild (for backward compatibility)
-  GRASS = 'grass', // Wild grass encounters
-  SURF = 'surf', // Surfing encounters
-  FISHING = 'fishing', // Fishing encounters
-  CAVE = 'cave', // Cave encounters
-  ROCK_SMASH = 'rock_smash', // Rock Smash encounters
-  POKERADAR = 'pokeradar', // Pokéradar encounters
-  GIFT = 'gift',
-  TRADE = 'trade',
-  QUEST = 'quest',
-  NEST = 'nest',
-  EGG = 'egg',
-  STATIC = 'static',
-  LEGENDARY = 'legendary', // Legendary Pokémon encounters
+  WILD = "wild", // Generic wild (for backward compatibility)
+  GRASS = "grass", // Wild grass encounters
+  SURF = "surf", // Surfing encounters
+  FISHING = "fishing", // Fishing encounters
+  CAVE = "cave", // Cave encounters
+  ROCK_SMASH = "rock_smash", // Rock Smash encounters
+  POKERADAR = "pokeradar", // Pokéradar encounters
+  GIFT = "gift",
+  TRADE = "trade",
+  QUEST = "quest",
+  NEST = "nest",
+  EGG = "egg",
+  STATIC = "static",
+  LEGENDARY = "legendary", // Legendary Pokémon encounters
 }
 
 // Zod schema for individual Pokemon encounters
@@ -38,8 +38,8 @@ export const PokemonEncounterSchema = z.object({
   id: z
     .number()
     .int()
-    .refine(val => val > 0 || val === -1, {
-      error: 'Pokemon ID must be positive or -1 for egg locations',
+    .refine((val) => val > 0 || val === -1, {
+      error: "Pokemon ID must be positive or -1 for egg locations",
     }),
   source: z.enum(
     [
@@ -60,8 +60,8 @@ export const PokemonEncounterSchema = z.object({
     ],
     {
       error:
-        'Source must be wild, grass, surf, fishing, cave, rock_smash, pokeradar, gift, trade, quest, static, nest, egg, or legendary',
-    }
+        "Source must be wild, grass, surf, fishing, cave, rock_smash, pokeradar, gift, trade, quest, static, nest, egg, or legendary",
+    },
   ),
 });
 
@@ -69,7 +69,7 @@ export type PokemonEncounter = z.infer<typeof PokemonEncounterSchema>;
 
 // Zod schema for route encounter data
 export const RouteEncounterSchema = z.object({
-  routeName: z.string().min(1, { error: 'Route name is required' }),
+  routeName: z.string().min(1, { error: "Route name is required" }),
   pokemon: z.array(PokemonEncounterSchema),
 });
 
@@ -80,37 +80,37 @@ export const RouteEncountersArraySchema = z.array(RouteEncounterSchema);
 // Data loaders for encounters using TanStack Query
 export async function getClassicEncounters(): Promise<RouteEncounter[]> {
   try {
-    return await encountersData.getAllEncounters('classic');
+    return await encountersData.getAllEncounters("classic");
   } catch (error) {
-    console.error('Failed to fetch classic encounters:', error);
-    throw new Error('Failed to load classic encounters data');
+    console.error("Failed to fetch classic encounters:", error);
+    throw new Error("Failed to load classic encounters data");
   }
 }
 
 export async function getRemixEncounters(): Promise<RouteEncounter[]> {
   try {
-    return await encountersData.getAllEncounters('remix');
+    return await encountersData.getAllEncounters("remix");
   } catch (error) {
-    console.error('Failed to fetch remix encounters:', error);
-    throw new Error('Failed to load remix encounters data');
+    console.error("Failed to fetch remix encounters:", error);
+    throw new Error("Failed to load remix encounters data");
   }
 }
 
 // Get encounters by route name
 export async function getEncountersByRouteName(
   routeName: string | null | undefined,
-  gameMode: 'classic' | 'remix' = 'classic'
+  gameMode: "classic" | "remix" = "classic",
 ): Promise<RouteEncounter | null> {
   if (!routeName) {
     return null;
   }
 
   // Special case for starter location
-  if (routeName === 'Starter') {
+  if (routeName === "Starter") {
     const starterIds = await getStarterPokemonByGameMode(gameMode);
     return {
-      routeName: 'Starter',
-      pokemon: starterIds.map(id => ({ id, source: EncounterSource.GIFT })),
+      routeName: "Starter",
+      pokemon: starterIds.map((id) => ({ id, source: EncounterSource.GIFT })),
     };
   }
 
@@ -118,7 +118,7 @@ export async function getEncountersByRouteName(
     // Get all encounters for the game mode and find the specific route
     const encounters = await encountersData.getAllEncounters(gameMode);
     return (
-      encounters.find(encounter => encounter.routeName === routeName) || null
+      encounters.find((encounter) => encounter.routeName === routeName) || null
     );
   } catch (error) {
     console.error(`Failed to fetch encounter for route '${routeName}':`, error);
@@ -128,21 +128,21 @@ export async function getEncountersByRouteName(
 
 // Get all encounters for a specific game mode
 export async function getEncounters(
-  gameMode: 'classic' | 'remix' = 'classic'
+  gameMode: "classic" | "remix" = "classic",
 ): Promise<RouteEncounter[]> {
-  return gameMode === 'classic'
+  return gameMode === "classic"
     ? await getClassicEncounters()
     : await getRemixEncounters();
 }
 
 // Create a map of routeName to encounter for quick lookup
 export async function getEncountersMap(
-  gameMode: 'classic' | 'remix' = 'classic'
+  gameMode: "classic" | "remix" = "classic",
 ): Promise<Map<string, RouteEncounter>> {
   const encounters = await getEncounters(gameMode);
   const encounterMap = new Map<string, RouteEncounter>();
 
-  encounters.forEach(encounter => {
+  encounters.forEach((encounter) => {
     encounterMap.set(encounter.routeName, encounter);
   });
 
@@ -159,18 +159,18 @@ export function clearEncountersCache(): void {
 interface UseEncounterDataOptions {
   locationId?: string;
   enabled?: boolean;
-  gameMode?: 'classic' | 'remix';
+  gameMode?: "classic" | "remix";
 }
 
 export function useEncountersForLocation({
   locationId,
   enabled = false,
-  gameMode = 'classic',
+  gameMode = "classic",
 }: UseEncounterDataOptions) {
   // Use the hook variant to fetch encounters
   const { pokemonEncounters, isLoading, error } = useLocationEncountersById(
     enabled ? locationId : undefined,
-    gameMode
+    gameMode,
   );
 
   // Use existing hooks for Pokemon data and name map
@@ -215,11 +215,11 @@ export function useEncountersForLocation({
   const isRoutePokemon = useCallback(
     (pokemonId: number): boolean => {
       const routePokemonIds = new Set(
-        routeEncounterData.map(pokemon => pokemon.id)
+        routeEncounterData.map((pokemon) => pokemon.id),
       );
       return routePokemonIds.has(pokemonId);
     },
-    [routeEncounterData]
+    [routeEncounterData],
   );
 
   return {

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
+import fs from "node:fs/promises";
+import path from "node:path";
 import * as cheerio from "cheerio";
-import fs from "fs/promises";
-import path from "path";
 import type { EncounterType } from "./types/encounters";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
@@ -121,11 +121,11 @@ async function scrapeSafariAreaPage(
     let currentEncounterType: EncounterType = "grass";
 
     // Find all encounter tables on the page
-    $("table.IFTable.encounterTable").each((tableIndex, table) => {
+    $("table.IFTable.encounterTable").each((_tableIndex, table) => {
       const $table = $(table);
 
       // Look for encounter type headers in the table
-      $table.find("tr").each((rowIndex, row) => {
+      $table.find("tr").each((_rowIndex, row) => {
         const $row = $(row);
 
         // Check if this row contains a header that spans multiple columns (encounter type header)
@@ -140,7 +140,7 @@ async function scrapeSafariAreaPage(
         }
 
         // Process Pokemon in this row using the current encounter type
-        $row.find("td").each((cellIndex, cell) => {
+        $row.find("td").each((_cellIndex, cell) => {
           const cellText = $(cell).text().trim();
 
           // Skip headers and non-Pokemon content

@@ -1,13 +1,13 @@
-import { proxyMap } from 'valtio/utils';
-import { getSpriteId } from './sprites';
+import { proxyMap } from "valtio/utils";
+import { getSpriteId } from "./sprites";
 
 // Use Valtio's proxyMap for reactivity
 export const preferredVariants = proxyMap<string, string>();
 
 // Initialize from localStorage on module load
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   try {
-    const stored = localStorage.getItem('preferredVariants');
+    const stored = localStorage.getItem("preferredVariants");
     if (stored) {
       const entries = JSON.parse(stored);
       for (const [key, value] of entries) {
@@ -16,8 +16,8 @@ if (typeof window !== 'undefined') {
     }
   } catch (error) {
     console.error(
-      'Failed to load preferred variants from localStorage:',
-      error
+      "Failed to load preferred variants from localStorage:",
+      error,
     );
   }
 }
@@ -26,14 +26,15 @@ if (typeof window !== 'undefined') {
 const saveToStorage = () => {
   try {
     const entries = Array.from(preferredVariants.entries());
-    localStorage.setItem('preferredVariants', JSON.stringify(entries));
+    localStorage.setItem("preferredVariants", JSON.stringify(entries));
   } catch (error) {
-    console.error('Failed to save preferred variants to localStorage:', error);
+    console.error("Failed to save preferred variants to localStorage:", error);
   }
 };
 
 // Subscribe to changes and save to localStorage
-import { subscribe } from 'valtio';
+import { subscribe } from "valtio";
+
 subscribe(preferredVariants, saveToStorage);
 
 /**
@@ -41,7 +42,7 @@ subscribe(preferredVariants, saveToStorage);
  */
 export function getPreferredVariant(
   headId: number | null,
-  bodyId: number | null
+  bodyId: number | null,
 ): string | null {
   if (!headId && !bodyId) return null;
 
@@ -55,7 +56,7 @@ export function getPreferredVariant(
 export function setPreferredVariant(
   headId: number | null,
   bodyId: number | null,
-  variant: string
+  variant: string,
 ): void {
   if (!headId && !bodyId) return;
 

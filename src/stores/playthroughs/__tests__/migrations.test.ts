@@ -20,7 +20,7 @@ type TeamWithMembers = {
 function getTeamMembers(result: MigrationData): LegacyTeamMember[] {
   const team = result.team as TeamWithMembers | undefined;
   expect(team).toBeDefined();
-  return team!.members;
+  return team?.members;
 }
 
 describe("Migration Functions", () => {

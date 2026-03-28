@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import * as cheerio from "cheerio";
-import * as fs from "fs/promises";
-import * as path from "path";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
 
@@ -152,11 +152,11 @@ async function scrapeGiftsAndTradesForEggs(
     // Find tables that might contain egg information
     const tables = $("table");
 
-    tables.each((tableIndex: number, table: any) => {
+    tables.each((_tableIndex: number, table: any) => {
       const $table = $(table);
       const rows = $table.find("tr");
 
-      rows.each((rowIndex: number, row: any) => {
+      rows.each((_rowIndex: number, row: any) => {
         const $row = $(row);
         const cells = $row.find("td");
 
@@ -306,7 +306,7 @@ async function scrapePokemonNestsForEggs(
     const links = $('a[href*="/wiki/"]');
     const locationSet = new Set<string>();
 
-    links.each((index: number, link: any) => {
+    links.each((_index: number, link: any) => {
       const $link = $(link);
       const href = $link.attr("href") || "";
 
@@ -557,6 +557,6 @@ async function main() {
 }
 
 // Check if this script is being run directly
-if (process.argv[1] && process.argv[1].endsWith("scrape-egg-locations.ts")) {
+if (process.argv[1]?.endsWith("scrape-egg-locations.ts")) {
   main();
 }

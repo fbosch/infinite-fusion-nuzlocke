@@ -1,5 +1,5 @@
-import fs from "fs/promises";
-import path from "path";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { SPECIAL_LOCATIONS } from "@/constants/special-locations";
 
@@ -1165,7 +1165,7 @@ describe("Data Integrity Tests", () => {
     });
 
     it("should have valid location objects", () => {
-      eggLocations.locations.forEach((location, index) => {
+      eggLocations.locations.forEach((location, _index) => {
         expect(location).toHaveProperty("routeName");
         expect(location).toHaveProperty("source");
         expect(location).toHaveProperty("description");

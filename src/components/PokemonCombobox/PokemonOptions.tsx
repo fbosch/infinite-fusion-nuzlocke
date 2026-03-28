@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Check, Search, Loader2 } from 'lucide-react';
-import { ComboboxOption } from '@headlessui/react';
-import clsx from 'clsx';
+import { ComboboxOption } from "@headlessui/react";
+import clsx from "clsx";
+import { Check, Loader2, Search } from "lucide-react";
+import type React from "react";
+import type { EncounterSource } from "@/loaders/encounters";
 import {
-  type PokemonOptionType,
   getEncounterDisplayName,
   isEgg,
-} from '@/loaders/pokemon';
-import { SourceTag } from './SourceTag';
-import { EncounterSource } from '@/loaders/encounters';
-import { PokemonSprite } from '../PokemonSprite';
+  type PokemonOptionType,
+} from "@/loaders/pokemon";
+import { PokemonSprite } from "../PokemonSprite";
+import { SourceTag } from "./SourceTag";
 
 interface PokemonOptionsProps {
   finalOptions: PokemonOptionType[];
@@ -20,7 +20,7 @@ interface PokemonOptionsProps {
   isRoutePokemon: (pokemonId: number) => boolean;
   getPokemonSource: (pokemonId: number) => EncounterSource[];
   comboboxId: string;
-  gameMode: 'classic' | 'remix' | 'randomized';
+  gameMode: "classic" | "remix" | "randomized";
   isLoading?: boolean;
 }
 
@@ -31,7 +31,7 @@ interface PokemonOptionProps {
   isRoutePokemon: (pokemonId: number) => boolean;
   getPokemonSource: (pokemonId: number) => EncounterSource[];
   comboboxId: string;
-  gameMode: 'classic' | 'remix' | 'randomized';
+  gameMode: "classic" | "remix" | "randomized";
   style?: React.CSSProperties;
   disabled?: boolean;
   className?: string;
@@ -44,7 +44,7 @@ interface PokemonOptionContentProps {
   isRoutePokemon: (pokemonId: number) => boolean;
   getPokemonSource: (pokemonId: number) => EncounterSource[];
   comboboxId: string;
-  gameMode: 'classic' | 'remix' | 'randomized';
+  gameMode: "classic" | "remix" | "randomized";
   isActive?: boolean;
   isSelected?: boolean;
 }
@@ -61,22 +61,22 @@ function PokemonOptionContent({
   const displayName = getEncounterDisplayName(pokemon);
 
   return (
-    <div className={'gap-4 group w-full flex items-center'}>
-      <div className='size-10 flex justify-center items-center'>
-        <PokemonSprite pokemonId={pokemon.id} generation='gen7' />
+    <div className={"gap-4 group w-full flex items-center"}>
+      <div className="size-10 flex justify-center items-center">
+        <PokemonSprite pokemonId={pokemon.id} generation="gen7" />
       </div>
       <span
         className={clsx(
-          'block truncate flex-1',
-          'group-data-selected:',
-          'not:group-data-selected:font-normal',
-          isSelected && ''
+          "block truncate flex-1",
+          "group-data-selected:",
+          "not:group-data-selected:font-normal",
+          isSelected && "",
         )}
       >
         {displayName}
       </span>
-      <div className='flex items-center gap-2 group'>
-        {gameMode !== 'randomized' && isRoutePokemon(pokemon.id) && (
+      <div className="flex items-center gap-2 group">
+        {gameMode !== "randomized" && isRoutePokemon(pokemon.id) && (
           <SourceTag
             sources={getPokemonSource(pokemon.id)}
             locationId={locationId}
@@ -84,21 +84,21 @@ function PokemonOptionContent({
         )}
         <span
           className={clsx(
-            'text-xs dark:text-gray-400 w-8 text-right inline-block',
+            "text-xs dark:text-gray-400 w-8 text-right inline-block",
             isActive &&
-              'group-hover:text-white group-data-selected:group-hover:text-white'
+              "group-hover:text-white group-data-selected:group-hover:text-white",
           )}
         >
-          {isEgg(pokemon) ? '???' : pokemon.id.toString().padStart(3, '0')}
+          {isEgg(pokemon) ? "???" : pokemon.id.toString().padStart(3, "0")}
         </span>
-        <div className='w-5 h-5 flex items-center justify-center'>
+        <div className="w-5 h-5 flex items-center justify-center">
           <Check
             className={clsx(
-              'size-5 text-blue-400 dark:text-white',
-              isActive && 'group-hover:text-white',
-              isSelected ? 'visible' : 'invisible group-data-selected:visible'
+              "size-5 text-blue-400 dark:text-white",
+              isActive && "group-hover:text-white",
+              isSelected ? "visible" : "invisible group-data-selected:visible",
             )}
-            aria-hidden='true'
+            aria-hidden="true"
           />
         </div>
       </div>
@@ -119,10 +119,10 @@ export function PokemonOption({
   className,
 }: PokemonOptionProps) {
   const baseClassName = clsx(
-    'relative cursor-pointer select-none p-2 my-1 content-visibility-auto',
-    'rounded-md w-full flex items-center',
-    'h-14 group',
-    className
+    "relative cursor-pointer select-none p-2 my-1 content-visibility-auto",
+    "rounded-md w-full flex items-center",
+    "h-14 group",
+    className,
   );
 
   return (
@@ -134,11 +134,11 @@ export function PokemonOption({
           baseClassName,
           {
             // Disable active state when user is scrolling to prevent auto-scroll
-            'bg-blue-600 text-white ': active,
-            'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700':
+            "bg-blue-600 text-white ": active,
+            "text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700":
               !active,
           },
-          className
+          className,
         )
       }
       style={style}
@@ -173,10 +173,10 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className='relative cursor-default select-none p-2 text-center'>
-        <div className='text-gray-500 dark:text-gray-400'>
-          <p className='text-sm flex items-center gap-2 justify-center py-2'>
-            <Loader2 className='w-4 h-4 animate-spin' />
+      <div className="relative cursor-default select-none p-2 text-center">
+        <div className="text-gray-500 dark:text-gray-400">
+          <p className="text-sm flex items-center gap-2 justify-center py-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
             <span>Loading Pokémon...</span>
           </p>
         </div>
@@ -186,18 +186,18 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
 
   if (finalOptions.length === 0) {
     return (
-      <div className='relative cursor-default select-none p-2 text-center'>
-        <div className='text-gray-500 dark:text-gray-400'>
+      <div className="relative cursor-default select-none p-2 text-center">
+        <div className="text-gray-500 dark:text-gray-400">
           {deferredQuery ? (
             <>
-              <p className='text-sm'>
+              <p className="text-sm">
                 No Pokémon found for &quot;{deferredQuery}&quot;
               </p>
-              <p className='text-xs mt-1'>Try a different search term</p>
+              <p className="text-xs mt-1">Try a different search term</p>
             </>
           ) : (
-            <p className='text-sm flex items-center gap-2 justify-center py-2'>
-              <Search className='w-4 h-4' />
+            <p className="text-sm flex items-center gap-2 justify-center py-2">
+              <Search className="w-4 h-4" />
               <span>Search for Pokémon</span>
             </p>
           )}
@@ -221,4 +221,4 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
   ));
 };
 
-PokemonOptions.displayName = 'PokemonOptions';
+PokemonOptions.displayName = "PokemonOptions";

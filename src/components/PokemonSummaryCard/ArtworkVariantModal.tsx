@@ -1,28 +1,30 @@
-'use client';
+"use client";
 
-import React, { useMemo, useEffect } from 'react';
 import {
   Dialog,
+  DialogBackdrop,
   DialogPanel,
   DialogTitle,
-  DialogBackdrop,
-} from '@headlessui/react';
-import { RadioGroup, Radio, Field } from '@headlessui/react';
-import { X, Check, ArrowUpRight } from 'lucide-react';
-import clsx from 'clsx';
+  Field,
+  Radio,
+  RadioGroup,
+} from "@headlessui/react";
+import clsx from "clsx";
+import { ArrowUpRight, Check, X } from "lucide-react";
+import Image from "next/image";
+import React, { useEffect, useMemo } from "react";
 import {
-  useSpriteVariants,
-  useSpriteCredits,
   usePreferredVariantState,
-} from '@/hooks/useSprite';
+  useSpriteCredits,
+  useSpriteVariants,
+} from "@/hooks/useSprite";
 import {
   generateSpriteUrl,
   getFormattedCreditsFromResponse,
-} from '@/lib/sprites';
-import Image from 'next/image';
-import ContextMenu from '../ContextMenu';
-import { getDisplayPokemon } from './utils';
-import { type PokemonOptionType } from '@/loaders/pokemon';
+} from "@/lib/sprites";
+import type { PokemonOptionType } from "@/loaders/pokemon";
+import ContextMenu from "../ContextMenu";
+import { getDisplayPokemon } from "./utils";
 
 interface ArtworkVariantModalProps {
   isOpen: boolean;
@@ -43,7 +45,7 @@ export function ArtworkVariantModal({
   const displayPokemon = getDisplayPokemon(
     headId ? ({ id: headId } as PokemonOptionType) : null,
     bodyId ? ({ id: bodyId } as PokemonOptionType) : null,
-    isFusion
+    isFusion,
   );
 
   // Determine which Pokemon IDs to use for variants and preferred state
@@ -67,19 +69,19 @@ export function ArtworkVariantModal({
 
   // Use local state for immediate updates, fallback to global preferred variant
   const [localVariant, setLocalVariant] = React.useState<string>(
-    globalPreferredVariant || ''
+    globalPreferredVariant || "",
   );
 
   const { data: variants, isLoading: variantsLoading } = useSpriteVariants(
     effectiveHeadId,
     effectiveBodyId,
-    isOpen
+    isOpen,
   );
 
   const { data: credits, isLoading: creditsLoading } = useSpriteCredits(
     effectiveHeadId,
     effectiveBodyId,
-    isOpen
+    isOpen,
   );
 
   const isLoading = creditsLoading || variantsLoading;
@@ -92,9 +94,9 @@ export function ArtworkVariantModal({
   // Reset local state when modal opens/closes or global variant changes
   useEffect(() => {
     if (!isOpen) {
-      setLocalVariant('');
+      setLocalVariant("");
     } else {
-      setLocalVariant(globalPreferredVariant || '');
+      setLocalVariant(globalPreferredVariant || "");
     }
   }, [isOpen, globalPreferredVariant]);
 
@@ -105,159 +107,159 @@ export function ArtworkVariantModal({
       try {
         await updateVariant(variant);
       } catch (error) {
-        console.error('Failed to set artwork variant:', error);
+        console.error("Failed to set artwork variant:", error);
       }
     },
-    [updateVariant]
+    [updateVariant],
   );
 
   const handleClearVariant = React.useCallback(async () => {
     try {
       // Clear the preferred variant using the new hook
-      await updateVariant('');
+      await updateVariant("");
       onClose();
     } catch (error) {
-      console.error('Failed to clear artwork variant:', error);
+      console.error("Failed to clear artwork variant:", error);
     }
   }, [updateVariant, onClose]);
 
   // No cleanup needed
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className='relative z-50 group'>
+    <Dialog open={isOpen} onClose={onClose} className="relative z-50 group">
       <DialogBackdrop
         transition
-        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 '
-        aria-hidden='true'
+        className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 "
+        aria-hidden="true"
       />
 
-      <div className='fixed inset-0 flex w-screen items-center justify-center p-4'>
+      <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
         <DialogPanel
           transition
-          id='artwork-variant-modal'
+          id="artwork-variant-modal"
           className={clsx(
-            'max-w-5xl w-full max-h-[80vh] space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col',
-            'transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98'
+            "max-w-5xl w-full max-h-[80vh] space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col",
+            "transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98",
           )}
         >
-          <div className='flex items-center justify-between'>
-            <DialogTitle className='text-xl font-semibold text-gray-900 dark:text-white'>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
               Select Artwork Variant
             </DialogTitle>
             <button
               onClick={onClose}
               className={clsx(
-                'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
-                'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2',
-                'p-1 rounded-md transition-colors'
+                "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
+                "p-1 rounded-md transition-colors",
               )}
-              aria-label='Close modal'
+              aria-label="Close modal"
             >
-              <X className='h-5 w-5' />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
           {isLoading ? (
-            <div className='flex items-center justify-center py-8 flex-1'>
-              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
-              <span className='ml-3 text-gray-600 dark:text-gray-300'>
+            <div className="flex items-center justify-center py-8 flex-1">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-gray-600 dark:text-gray-300">
                 Loading variants...
               </span>
             </div>
           ) : availableVariants.length === 0 ? (
-            <div className='text-center py-8 flex-1'>
-              <p className='text-gray-600 dark:text-gray-300'>
+            <div className="text-center py-8 flex-1">
+              <p className="text-gray-600 dark:text-gray-300">
                 No artwork variants available for this Pokémon.
               </p>
             </div>
           ) : (
             <>
               <RadioGroup
-                value={localVariant || ''}
+                value={localVariant || ""}
                 onChange={handleSelectVariant}
                 data-scroll-container
-                className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-y-auto overflow-x-hidden flex-1 min-h-0 scrollbar-thin p-3 relative'
-                aria-label='Artwork variant options'
+                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-y-auto overflow-x-hidden flex-1 min-h-0 scrollbar-thin p-3 relative"
+                aria-label="Artwork variant options"
               >
-                {availableVariants.map(variant => {
+                {availableVariants.map((variant) => {
                   const spriteUrl = generateSpriteUrl(
                     effectiveHeadId,
                     effectiveBodyId,
-                    variant
+                    variant,
                   );
                   return (
-                    <Field key={variant} className='contents'>
+                    <Field key={variant} className="contents">
                       <Radio
                         value={variant}
                         id={`artwork-variant-${variant}`}
                         className={({ checked }) =>
                           clsx(
-                            'relative group p-2 rounded-lg border-2 transition-color duration-200 cursor-pointer flex flex-col',
-                            'hover:border-blue-500 hover:shadow-md',
-                            'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+                            "relative group p-2 rounded-lg border-2 transition-color duration-200 cursor-pointer flex flex-col",
+                            "hover:border-blue-500 hover:shadow-md",
+                            "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                             {
-                              'border-blue-500 bg-blue-50 dark:bg-blue-900/20':
+                              "border-blue-500 bg-blue-50 dark:bg-blue-900/20":
                                 checked,
-                              'border-gray-200 dark:border-gray-600': !checked,
-                            }
+                              "border-gray-200 dark:border-gray-600": !checked,
+                            },
                           )
                         }
                       >
                         {({ checked }) => (
-                          <figure className='flex flex-col items-center space-y-2 relative user-select-none group/figure'>
-                            <div className=''>
+                          <figure className="flex flex-col items-center space-y-2 relative user-select-none group/figure">
+                            <div className="">
                               <Image
                                 src={spriteUrl}
-                                alt={`Artwork variant ${variant || 'default'}`}
-                                className='w-24 h-24 object-fill image-render-pixelated'
+                                alt={`Artwork variant ${variant || "default"}`}
+                                className="w-24 h-24 object-fill image-render-pixelated"
                                 width={100}
                                 height={100}
-                                loading='lazy'
-                                decoding='async'
+                                loading="lazy"
+                                decoding="async"
                                 unoptimized
                               />
                               {checked && (
-                                <div className='absolute top-0.5 right-0.5 bg-blue-500 text-white rounded-full p-1.5 shadow-lg'>
-                                  <Check className='h-3 w-3' />
+                                <div className="absolute top-0.5 right-0.5 bg-blue-500 text-white rounded-full p-1.5 shadow-lg">
+                                  <Check className="h-3 w-3" />
                                 </div>
                               )}
                               <ContextMenu
                                 items={[
                                   {
-                                    label: 'View on FusionDex',
-                                    id: 'artist',
+                                    label: "View on FusionDex",
+                                    id: "artist",
                                     href: `https://www.fusiondex.org/sprite/pif/${spriteId}${variant}`,
-                                    target: '_blank',
+                                    target: "_blank",
                                     icon: ArrowUpRight,
                                     iconClassName:
-                                      'dark:text-blue-300 text-blue-400',
+                                      "dark:text-blue-300 text-blue-400",
                                     favicon:
-                                      'https://www.fusiondex.org/favicon.ico',
+                                      "https://www.fusiondex.org/favicon.ico",
                                     onClick: (
-                                      event: React.MouseEvent<HTMLAnchorElement>
+                                      event: React.MouseEvent<HTMLAnchorElement>,
                                     ) => {
                                       event.stopPropagation();
                                     },
                                   },
                                 ]}
                               >
-                                <div className='absolute inset-0 bg-transparent' />
+                                <div className="absolute inset-0 bg-transparent" />
                               </ContextMenu>
                             </div>
-                            <figcaption className='w-full text-center px-1'>
-                              <div className='text-xs font-normal text-gray-500 dark:text-gray-400 cursor-pointer block leading-tight break-words select-none'>
+                            <figcaption className="w-full text-center px-1">
+                              <div className="text-xs font-normal text-gray-500 dark:text-gray-400 cursor-pointer block leading-tight break-words select-none">
                                 <div
-                                  className='text-lg transition-colors uppercase absolute -top-1 left-0.5 text-gray-500/40 dark:text-gray-400/30 group-hover/figure:text-blue-500/80 dark:group-hover/figure:text-gray-400/30 pointer-events-none'
-                                  aria-hidden='true'
+                                  className="text-lg transition-colors uppercase absolute -top-1 left-0.5 text-gray-500/40 dark:text-gray-400/30 group-hover/figure:text-blue-500/80 dark:group-hover/figure:text-gray-400/30 pointer-events-none"
+                                  aria-hidden="true"
                                 >
                                   {variant}
                                 </div>
-                                <div className='pointer-events-none'>
+                                <div className="pointer-events-none">
                                   {getFormattedCreditsFromResponse(
                                     credits,
                                     effectiveHeadId,
                                     effectiveBodyId,
-                                    variant
+                                    variant,
                                   )}
                                 </div>
                               </div>
@@ -269,14 +271,14 @@ export function ArtworkVariantModal({
                   );
                 })}
               </RadioGroup>
-              <div className='flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700'>
+              <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button
                   onClick={onClose}
                   className={clsx(
-                    'px-4 py-2 text-sm rounded-md transition-colors',
-                    'bg-gray-100 hover:bg-gray-200 text-gray-900',
-                    'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
-                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2'
+                    "px-4 py-2 text-sm rounded-md transition-colors",
+                    "bg-gray-100 hover:bg-gray-200 text-gray-900",
+                    "dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
                   )}
                 >
                   Cancel
@@ -284,10 +286,10 @@ export function ArtworkVariantModal({
                 <button
                   onClick={handleClearVariant}
                   className={clsx(
-                    'px-4 py-2 text-sm rounded-md transition-colors',
-                    'bg-gray-100 hover:bg-gray-200 text-gray-900',
-                    'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
-                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
+                    "px-4 py-2 text-sm rounded-md transition-colors",
+                    "bg-gray-100 hover:bg-gray-200 text-gray-900",
+                    "dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                   )}
                 >
                   Use Default

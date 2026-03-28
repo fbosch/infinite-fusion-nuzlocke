@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
+import fs from "node:fs/promises";
+import path from "node:path";
 import * as cheerio from "cheerio";
-import fs from "fs/promises";
-import path from "path";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
 import {
@@ -45,7 +45,7 @@ async function scrapeLegendaryEncounters(): Promise<LegendaryRoute[]> {
 
     ConsoleFormatter.info(`Found ${headings.length} h3 headings`);
 
-    headings.each((index: number, heading: any) => {
+    headings.each((_index: number, heading: any) => {
       const $heading = $(heading);
       const headlineSpan = $heading.find("span.mw-headline");
 
@@ -75,7 +75,7 @@ async function scrapeLegendaryEncounters(): Promise<LegendaryRoute[]> {
 
         // Also look for entries that start with the name (for forms)
         for (const [pokemonName, id] of pokemonNameMap.nameToId.entries()) {
-          if (pokemonName.startsWith(name + " ") && pokemonName !== name) {
+          if (pokemonName.startsWith(`${name} `) && pokemonName !== name) {
             pokemonIds.push(id);
           }
         }
@@ -127,7 +127,7 @@ async function scrapeLegendaryEncounters(): Promise<LegendaryRoute[]> {
               }
               // Add all forms of this pokemon
               for (const id of pokemonIds) {
-                routeMap.get(routeName)!.push(id);
+                routeMap.get(routeName)?.push(id);
               }
               ConsoleFormatter.success(
                 `Added ${pokemonIds.length} forms of ${name} to route: ${routeName}`,

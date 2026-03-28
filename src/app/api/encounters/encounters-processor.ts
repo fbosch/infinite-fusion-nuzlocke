@@ -1,27 +1,24 @@
-import { z } from 'zod';
+// Static imports - load data once at module level
+import classicEncounters from "@data/classic/encounters.json";
+import classicGifts from "@data/classic/gifts.json";
+import classicQuests from "@data/classic/quests.json";
+import classicSafari from "@data/classic/safari-encounters.json";
+import classicStatics from "@data/classic/statics.json";
+import classicTrades from "@data/classic/trades.json";
+import remixEncounters from "@data/remix/encounters.json";
+import remixGifts from "@data/remix/gifts.json";
+import remixQuests from "@data/remix/quests.json";
+import remixSafari from "@data/remix/safari-encounters.json";
+import remixStatics from "@data/remix/statics.json";
+import remixTrades from "@data/remix/trades.json";
+import eggLocations from "@data/shared/egg-locations.json";
+import legendaryEncounters from "@data/shared/legendary-encounters.json";
+import { z } from "zod";
 import {
   EncounterSource,
   RouteEncountersArraySchema,
-} from '@/loaders/encounters';
-import { EncounterTypeSchema, type EncounterType } from '@/types/encounters';
-
-// Static imports - load data once at module level
-import classicEncounters from '@data/classic/encounters.json';
-import classicSafari from '@data/classic/safari-encounters.json';
-import classicTrades from '@data/classic/trades.json';
-import classicGifts from '@data/classic/gifts.json';
-import classicQuests from '@data/classic/quests.json';
-import classicStatics from '@data/classic/statics.json';
-
-import remixEncounters from '@data/remix/encounters.json';
-import remixSafari from '@data/remix/safari-encounters.json';
-import remixTrades from '@data/remix/trades.json';
-import remixGifts from '@data/remix/gifts.json';
-import remixQuests from '@data/remix/quests.json';
-import remixStatics from '@data/remix/statics.json';
-
-import eggLocations from '@data/shared/egg-locations.json';
-import legendaryEncounters from '@data/shared/legendary-encounters.json';
+} from "@/loaders/encounters";
+import { type EncounterType, EncounterTypeSchema } from "@/types/encounters";
 
 // Schema for the new enhanced data format with encounter types
 const NewPokemonEncounterSchema = z.object({
@@ -30,7 +27,7 @@ const NewPokemonEncounterSchema = z.object({
 });
 
 const NewRouteEncounterSchema = z.object({
-  routeName: z.string().min(1, { error: 'Route name is required' }),
+  routeName: z.string().min(1, { error: "Route name is required" }),
   encounters: z.array(NewPokemonEncounterSchema),
 });
 
@@ -38,24 +35,24 @@ const NewRouteEncountersArraySchema = z.array(NewRouteEncounterSchema);
 
 // Temporary schema for the old data format during migration
 const OldRouteEncounterSchema = z.object({
-  routeName: z.string().min(1, { error: 'Route name is required' }),
+  routeName: z.string().min(1, { error: "Route name is required" }),
   pokemonIds: z.array(z.number().int()),
 });
 const OldRouteEncountersArraySchema = z.array(OldRouteEncounterSchema);
 
 // Schema for legendary encounters data format
 const LegendaryRouteEncounterSchema = z.object({
-  routeName: z.string().min(1, { error: 'Route name is required' }),
+  routeName: z.string().min(1, { error: "Route name is required" }),
   encounters: z.array(z.number().int()),
 });
 const LegendaryRouteEncountersArraySchema = z.array(
-  LegendaryRouteEncounterSchema
+  LegendaryRouteEncounterSchema,
 );
 
 // Schema for egg location data
 const EggLocationSchema = z.object({
   routeName: z.string(),
-  source: z.enum(['gift', 'nest']),
+  source: z.enum(["gift", "nest"]),
   description: z.string(),
   pokemonName: z.string().optional(),
   pokemonId: z.number().optional(),
@@ -80,22 +77,22 @@ const EggLocationsSchema = z.object({
 
 // Function to map encounter types to encounter sources
 function mapEncounterTypeToSource(
-  encounterType: EncounterType
+  encounterType: EncounterType,
 ): EncounterSource {
   switch (encounterType) {
-    case 'grass':
+    case "grass":
       return EncounterSource.GRASS;
-    case 'surf':
+    case "surf":
       return EncounterSource.SURF;
-    case 'fishing':
+    case "fishing":
       return EncounterSource.FISHING;
-    case 'cave':
+    case "cave":
       return EncounterSource.CAVE;
-    case 'rock_smash':
+    case "rock_smash":
       return EncounterSource.ROCK_SMASH;
-    case 'special':
+    case "special":
       return EncounterSource.STATIC;
-    case 'pokeradar':
+    case "pokeradar":
       return EncounterSource.POKERADAR;
     default:
       return EncounterSource.WILD;
@@ -110,7 +107,7 @@ function consolidateSafariZoneAreas(
       pokemonId: number;
       encounterType: EncounterType;
     }>;
-  }>
+  }>,
 ): Array<{
   routeName: string;
   encounters: Array<{
@@ -128,7 +125,7 @@ function consolidateSafariZoneAreas(
     encounterType: EncounterType;
   }> = [];
 
-  safariEncounters.forEach(area => {
+  safariEncounters.forEach((area) => {
     allSafariEncounters.push(...area.encounters);
   });
 
@@ -136,15 +133,15 @@ function consolidateSafariZoneAreas(
   const uniqueEncounters = allSafariEncounters.filter(
     (encounter, index, array) =>
       array.findIndex(
-        e =>
+        (e) =>
           e.pokemonId === encounter.pokemonId &&
-          e.encounterType === encounter.encounterType
-      ) === index
+          e.encounterType === encounter.encounterType,
+      ) === index,
   );
 
   return [
     {
-      routeName: 'Safari Zone',
+      routeName: "Safari Zone",
       encounters: uniqueEncounters,
     },
   ];
@@ -157,7 +154,7 @@ const processedDataCache = new Map<
 >();
 
 // Pre-process data once when module loads
-export function processGameModeData(gameMode: 'classic' | 'remix') {
+export function processGameModeData(gameMode: "classic" | "remix") {
   const cacheKey = `processed-${gameMode}`;
 
   if (processedDataCache.has(cacheKey)) {
@@ -166,7 +163,7 @@ export function processGameModeData(gameMode: 'classic' | 'remix') {
 
   // Get the correct data for the game mode
   const data =
-    gameMode === 'remix'
+    gameMode === "remix"
       ? {
           encounters: remixEncounters,
           safari: remixSafari,
@@ -199,13 +196,13 @@ export function processGameModeData(gameMode: 'classic' | 'remix') {
   }>;
 
   const newWildFormat = NewRouteEncountersArraySchema.safeParse(
-    data.encounters
+    data.encounters,
   );
   if (newWildFormat.success) {
     encounters = [...newWildFormat.data, ...consolidatedSafari];
   } else {
     const oldWildFormat = OldRouteEncountersArraySchema.parse(data.encounters);
-    const oldFormatEncounters = oldWildFormat.map(route => ({
+    const oldFormatEncounters = oldWildFormat.map((route) => ({
       routeName: route.routeName,
       pokemonIds: route.pokemonIds,
     }));
@@ -224,37 +221,37 @@ export function processGameModeData(gameMode: 'classic' | 'remix') {
   // Create maps of route names for egg locations by source type
   const eggGiftRoutes = new Map(
     eggLocationsData.locations
-      .filter(location => location.source === 'gift')
-      .map(location => [location.routeName, location])
+      .filter((location) => location.source === "gift")
+      .map((location) => [location.routeName, location]),
   );
   const eggNestRoutes = new Map(
     eggLocationsData.locations
-      .filter(location => location.source === 'nest')
-      .map(location => [location.routeName, location])
+      .filter((location) => location.source === "nest")
+      .map((location) => [location.routeName, location]),
   );
 
   // Merge the data by route name
   const allRouteNames = new Set([
-    ...encounters.map(e => e.routeName),
-    ...trades.map(t => t.routeName),
-    ...gifts.map(g => g.routeName),
-    ...quests.map(q => q.routeName),
-    ...staticsData.map(s => s.routeName),
-    ...legendaryData.map(l => l.routeName),
+    ...encounters.map((e) => e.routeName),
+    ...trades.map((t) => t.routeName),
+    ...gifts.map((g) => g.routeName),
+    ...quests.map((q) => q.routeName),
+    ...staticsData.map((s) => s.routeName),
+    ...legendaryData.map((l) => l.routeName),
     ...eggGiftRoutes.keys(),
     ...eggNestRoutes.keys(),
   ]);
 
   // Create maps for quick lookup
-  const encountersMap = new Map(encounters.map(e => [e.routeName, e]));
-  const tradesMap = new Map(trades.map(t => [t.routeName, t]));
-  const giftsMap = new Map(gifts.map(g => [g.routeName, g]));
-  const questsMap = new Map(quests.map(q => [q.routeName, q]));
-  const staticsMap = new Map(staticsData.map(s => [s.routeName, s]));
-  const legendaryMap = new Map(legendaryData.map(l => [l.routeName, l]));
+  const encountersMap = new Map(encounters.map((e) => [e.routeName, e]));
+  const tradesMap = new Map(trades.map((t) => [t.routeName, t]));
+  const giftsMap = new Map(gifts.map((g) => [g.routeName, g]));
+  const questsMap = new Map(quests.map((q) => [q.routeName, q]));
+  const staticsMap = new Map(staticsData.map((s) => [s.routeName, s]));
+  const legendaryMap = new Map(legendaryData.map((l) => [l.routeName, l]));
 
   // Merge encounters for each route
-  const mergedEncounters = Array.from(allRouteNames).map(routeName => {
+  const mergedEncounters = Array.from(allRouteNames).map((routeName) => {
     const routeData = encountersMap.get(routeName);
     const tradePokemon = tradesMap.get(routeName)?.pokemonIds || [];
     const giftPokemon = giftsMap.get(routeName)?.pokemonIds || [];
@@ -269,17 +266,17 @@ export function processGameModeData(gameMode: 'classic' | 'remix') {
     if (routeData) {
       if (routeData.encounters) {
         wildPokemonObjects.push(
-          ...routeData.encounters.map(encounter => ({
+          ...routeData.encounters.map((encounter) => ({
             id: encounter.pokemonId,
             source: mapEncounterTypeToSource(encounter.encounterType),
-          }))
+          })),
         );
       } else if (routeData.pokemonIds) {
         wildPokemonObjects.push(
-          ...routeData.pokemonIds.map(id => ({
+          ...routeData.pokemonIds.map((id) => ({
             id,
             source: EncounterSource.WILD as const,
-          }))
+          })),
         );
       }
     }
@@ -287,16 +284,19 @@ export function processGameModeData(gameMode: 'classic' | 'remix') {
     // Create Pokemon objects with source information
     const pokemon: Array<{ id: number; source: EncounterSource }> = [
       ...wildPokemonObjects,
-      ...tradePokemon.map(id => ({
+      ...tradePokemon.map((id) => ({
         id,
         source: EncounterSource.TRADE as const,
       })),
-      ...giftPokemon.map(id => ({ id, source: EncounterSource.GIFT as const })),
-      ...questPokemon.map(id => ({
+      ...giftPokemon.map((id) => ({
+        id,
+        source: EncounterSource.GIFT as const,
+      })),
+      ...questPokemon.map((id) => ({
         id,
         source: EncounterSource.QUEST as const,
       })),
-      ...staticPokemon.map(id => ({
+      ...staticPokemon.map((id) => ({
         id,
         source: EncounterSource.STATIC as const,
       })),
@@ -332,8 +332,8 @@ export function processGameModeData(gameMode: 'classic' | 'remix') {
     const uniquePokemon = pokemon.filter(
       (pokemon, index, array) =>
         array.findIndex(
-          p => p.id === pokemon.id && p.source === pokemon.source
-        ) === index
+          (p) => p.id === pokemon.id && p.source === pokemon.source,
+        ) === index,
     );
 
     return { routeName, pokemon: uniquePokemon };

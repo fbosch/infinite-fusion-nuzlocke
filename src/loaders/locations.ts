@@ -1,45 +1,45 @@
-import { z } from 'zod';
-import locationsData from '@data/shared/locations.json';
-import { encountersData, encountersQueries } from '@/lib/queryClient';
-import { useQuery } from '@tanstack/react-query';
-import { getStarterPokemonByGameMode } from '@/loaders/starters';
-import { isStarterLocation } from '@/constants/special-locations';
-import { GameMode } from '../stores/playthroughs';
-import { EncounterSource, type PokemonEncounter } from './encounters';
-import { generatePrefixedId } from '@/utils/id';
+import locationsData from "@data/shared/locations.json";
+import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
+import { isStarterLocation } from "@/constants/special-locations";
+import { encountersData, encountersQueries } from "@/lib/queryClient";
+import { getStarterPokemonByGameMode } from "@/loaders/starters";
+import { generatePrefixedId } from "@/utils/id";
+import type { GameMode } from "../stores/playthroughs";
+import { EncounterSource, type PokemonEncounter } from "./encounters";
 
 // Location schema
 export const LocationSchema = z.object({
-  id: z.string().min(1, { error: 'Location ID is required' }),
-  name: z.string().min(1, { error: 'Location name is required' }),
-  region: z.string().min(1, { error: 'Region is required' }),
-  description: z.string().min(1, { error: 'Description is required' }),
+  id: z.string().min(1, { error: "Location ID is required" }),
+  name: z.string().min(1, { error: "Location name is required" }),
+  region: z.string().min(1, { error: "Region is required" }),
+  description: z.string().min(1, { error: "Description is required" }),
 });
 
 export type Location = z.infer<typeof LocationSchema>;
 
 // Legacy custom location schema for migration
 const LegacyCustomLocationSchema = z.object({
-  id: z.string().min(1, { error: 'Location ID is required' }),
-  name: z.string().min(1, { error: 'Location name is required' }),
-  order: z.number().positive({ error: 'Order must be a positive number' }),
+  id: z.string().min(1, { error: "Location ID is required" }),
+  name: z.string().min(1, { error: "Location name is required" }),
+  order: z.number().positive({ error: "Order must be a positive number" }),
 });
 
 // Modern custom location schema
 const ModernCustomLocationSchema = z.object({
-  id: z.string().min(1, { error: 'Location ID is required' }),
-  name: z.string().min(1, { error: 'Location name is required' }),
+  id: z.string().min(1, { error: "Location ID is required" }),
+  name: z.string().min(1, { error: "Location name is required" }),
   insertAfterLocationId: z
     .string()
-    .min(1, { error: 'Insert after location ID is required' }),
+    .min(1, { error: "Insert after location ID is required" }),
 });
 
 // Custom location schema with migration support
 export const CustomLocationSchema = z
   .union([LegacyCustomLocationSchema, ModernCustomLocationSchema])
-  .transform(data => {
+  .transform((data) => {
     // If it's a legacy location with order, migrate it
-    if ('order' in data) {
+    if ("order" in data) {
       return migrateCustomLocationFromOrder(data);
     }
     // Otherwise, it's already in the modern format
@@ -48,7 +48,7 @@ export const CustomLocationSchema = z
 
 // Migration function to convert order-based custom locations
 function migrateCustomLocationFromOrder(
-  legacyLocation: z.infer<typeof LegacyCustomLocationSchema>
+  legacyLocation: z.infer<typeof LegacyCustomLocationSchema>,
 ): z.infer<typeof ModernCustomLocationSchema> {
   const defaultLocations = getLocations();
 
@@ -58,14 +58,14 @@ function migrateCustomLocationFromOrder(
   // Ensure we have a valid index
   const safeIndex = Math.max(
     0,
-    Math.min(beforeLocationIndex, defaultLocations.length - 1)
+    Math.min(beforeLocationIndex, defaultLocations.length - 1),
   );
   const insertAfterLocationId =
     defaultLocations[safeIndex]?.id || defaultLocations[0]?.id;
 
   if (!insertAfterLocationId) {
     throw new Error(
-      'Cannot migrate custom location: no valid location to insert after'
+      "Cannot migrate custom location: no valid location to insert after",
     );
   }
 
@@ -89,8 +89,8 @@ export const LocationsArraySchema = z.array(LocationSchema);
 function loadLocations(): Location[] {
   const result = z.array(LocationSchema).safeParse(locationsData);
   if (!result.success) {
-    console.error('Invalid locations data:', result.error.issues);
-    throw new Error('Invalid locations data');
+    console.error("Invalid locations data:", result.error.issues);
+    throw new Error("Invalid locations data");
   }
   return result.data;
 }
@@ -112,14 +112,14 @@ export function clearLocationsCache(): void {
 
 // Get locations by region
 export function getLocationsByRegion(region: string): Location[] {
-  return getLocations().filter(location => location.region === region);
+  return getLocations().filter((location) => location.region === region);
 }
 
 // Get locations by specific region (case-insensitive)
 export function getLocationsBySpecificRegion(region: string): Location[] {
   const normalizedRegion = region.toLowerCase();
   return getLocations().filter(
-    location => location.region.toLowerCase() === normalizedRegion
+    (location) => location.region.toLowerCase() === normalizedRegion,
   );
 }
 
@@ -131,10 +131,10 @@ export function getLocationsSortedByOrder(): Location[] {
 // Get encounters for a location by its name
 export async function getLocationEncountersByName(
   locationName: string,
-  gameMode: 'classic' | 'remix' = 'classic'
+  gameMode: "classic" | "remix" = "classic",
 ): Promise<PokemonEncounter[]> {
   // Find the location by name to get its ID
-  const location = getLocations().find(loc => loc.name === locationName);
+  const location = getLocations().find((loc) => loc.name === locationName);
   if (!location) {
     return [];
   }
@@ -142,22 +142,22 @@ export async function getLocationEncountersByName(
   // Special case for starter location
   if (isStarterLocation(location.id)) {
     const starterIds = await getStarterPokemonByGameMode(gameMode);
-    return starterIds.map(id => ({ id, source: EncounterSource.GIFT }));
+    return starterIds.map((id) => ({ id, source: EncounterSource.GIFT }));
   }
 
   // Get all encounters for the game mode and find the specific route
   const encounters = await encountersData.getAllEncounters(gameMode);
-  const encounter = encounters.find(e => e.routeName === locationName);
+  const encounter = encounters.find((e) => e.routeName === locationName);
   return encounter?.pokemon || [];
 }
 
 // Get encounters for a location by its ID
 export async function getLocationEncountersById(
   locationId: string,
-  gameMode: 'classic' | 'remix' = 'classic'
+  gameMode: "classic" | "remix" = "classic",
 ): Promise<PokemonEncounter[]> {
   // Find the location by ID
-  const location = getLocations().find(loc => loc.id === locationId);
+  const location = getLocations().find((loc) => loc.id === locationId);
   if (!location) {
     return [];
   }
@@ -165,31 +165,31 @@ export async function getLocationEncountersById(
   // Special case for starter location
   if (isStarterLocation(locationId)) {
     const starterIds = await getStarterPokemonByGameMode(gameMode);
-    return starterIds.map(id => ({ id, source: EncounterSource.GIFT }));
+    return starterIds.map((id) => ({ id, source: EncounterSource.GIFT }));
   }
 
   // Use TanStack Query to get encounters
   const encounters = await encountersData.getAllEncounters(gameMode);
-  const encounter = encounters.find(e => e.routeName === location.name);
+  const encounter = encounters.find((e) => e.routeName === location.name);
   return encounter?.pokemon || [];
 }
 
 // Hook variant for getting encounters by location ID
 export function useLocationEncountersById(
   locationId: string | undefined,
-  gameMode: GameMode
+  gameMode: GameMode,
 ) {
   // Find the location by ID
-  const location = getLocations().find(loc => loc.id === locationId);
+  const location = getLocations().find((loc) => loc.id === locationId);
   const isStarter = !!locationId && isStarterLocation(locationId);
-  const isRandomized = gameMode == 'randomized';
+  const isRandomized = gameMode === "randomized";
 
   const {
     data: encounters = [],
     isLoading,
     error,
   } = useQuery({
-    ...encountersQueries.all(gameMode as 'remix' | 'classic'),
+    ...encountersQueries.all(gameMode as "remix" | "classic"),
     enabled: !isStarter && !isRandomized,
   });
 
@@ -199,14 +199,14 @@ export function useLocationEncountersById(
     isLoading: starterLoading,
     error: starterError,
   } = useQuery({
-    queryKey: ['starter-pokemon', gameMode],
-    queryFn: () => getStarterPokemonByGameMode(gameMode as 'remix' | 'classic'),
+    queryKey: ["starter-pokemon", gameMode],
+    queryFn: () => getStarterPokemonByGameMode(gameMode as "remix" | "classic"),
     enabled: isStarter && !isRandomized,
     staleTime: Infinity,
     gcTime: Infinity,
   });
 
-  if (gameMode === 'randomized') {
+  if (gameMode === "randomized") {
     return {
       pokemonEncounters: [],
       isLoading: false,
@@ -216,7 +216,7 @@ export function useLocationEncountersById(
 
   if (isStarter) {
     return {
-      pokemonEncounters: starterPokemon.map(id => ({
+      pokemonEncounters: starterPokemon.map((id) => ({
         id,
         source: EncounterSource.GIFT,
       })),
@@ -226,8 +226,8 @@ export function useLocationEncountersById(
   }
 
   const encounter = (
-    encounters && 'data' in encounters ? encounters.data : encounters
-  )?.find(e => e.routeName === location?.name);
+    encounters && "data" in encounters ? encounters.data : encounters
+  )?.find((e) => e.routeName === location?.name);
 
   return {
     pokemonEncounters: encounter?.pokemon || [],
@@ -238,7 +238,7 @@ export function useLocationEncountersById(
 
 // Get all locations with their available encounters
 export async function getLocationsWithEncounters(
-  gameMode: 'classic' | 'remix' = 'classic'
+  gameMode: "classic" | "remix" = "classic",
 ): Promise<Array<Location & { encounters: PokemonEncounter[] }>> {
   const locations = getLocations();
   const locationsWithEncounters: Array<
@@ -261,7 +261,7 @@ export async function getLocationsWithEncounters(
 // Check if a location has encounters
 export async function hasLocationEncounters(
   location: Location,
-  gameMode: 'classic' | 'remix' = 'classic'
+  gameMode: "classic" | "remix" = "classic",
 ): Promise<boolean> {
   const encounters = await getLocationEncountersById(location.id, gameMode);
   return encounters.length > 0;
@@ -287,13 +287,13 @@ export async function hasLocationEncounters(
 
 // Generate a unique ID for custom locations
 export function generateCustomLocationId(): string {
-  return generatePrefixedId('custom');
+  return generatePrefixedId("custom");
 }
 
 // Get the index where a custom location should be inserted after a given location
 export function getCustomLocationInsertIndex(
   afterLocationId: string,
-  customLocations: CustomLocation[] = []
+  customLocations: CustomLocation[] = [],
 ): number {
   // To avoid circular dependency with mergeLocationsWithCustom,
   // we'll just validate that the afterLocationId exists somewhere
@@ -301,12 +301,12 @@ export function getCustomLocationInsertIndex(
 
   // Check if it's a default location
   const defaultLocationExists = defaultLocations.some(
-    loc => loc.id === afterLocationId
+    (loc) => loc.id === afterLocationId,
   );
 
   // Check if it's a custom location
   const customLocationExists = customLocations.some(
-    loc => loc.id === afterLocationId
+    (loc) => loc.id === afterLocationId,
   );
 
   if (!defaultLocationExists && !customLocationExists) {
@@ -321,7 +321,7 @@ export function getCustomLocationInsertIndex(
 // Merge default locations with custom locations, inserting at specified positions
 export function mergeLocationsWithCustom(
   defaultLocations: Location[] = getLocations(),
-  customLocations: CustomLocation[] = []
+  customLocations: CustomLocation[] = [],
 ): CombinedLocation[] {
   // Early return if no custom locations
   if (customLocations.length === 0) {
@@ -344,7 +344,7 @@ export function mergeLocationsWithCustom(
     // Try to place each unplaced custom location
     for (const custom of unplacedCustoms) {
       const afterIndex = result.findIndex(
-        loc => loc.id === custom.insertAfterLocationId
+        (loc) => loc.id === custom.insertAfterLocationId,
       );
 
       if (afterIndex !== -1) {
@@ -352,8 +352,8 @@ export function mergeLocationsWithCustom(
         const customLocation: CombinedLocation = {
           id: custom.id,
           name: custom.name,
-          region: 'Custom',
-          description: 'Custom location',
+          region: "Custom",
+          description: "Custom location",
           isCustom: true as const,
         };
         result.splice(afterIndex + 1, 0, customLocation);
@@ -363,14 +363,16 @@ export function mergeLocationsWithCustom(
 
     // Remove placed locations from unplaced list
     unplacedCustoms = unplacedCustoms.filter(
-      custom => !placedInThisPass.includes(custom)
+      (custom) => !placedInThisPass.includes(custom),
     );
 
     // If no progress was made, we have circular dependencies or missing references
     if (placedInThisPass.length === 0 && unplacedCustoms.length > 0) {
       console.warn(
-        'Custom location dependency error: Could not place custom locations due to circular dependencies or missing references:',
-        unplacedCustoms.map(c => `${c.name} (after ${c.insertAfterLocationId})`)
+        "Custom location dependency error: Could not place custom locations due to circular dependencies or missing references:",
+        unplacedCustoms.map(
+          (c) => `${c.name} (after ${c.insertAfterLocationId})`,
+        ),
       );
       break;
     }
@@ -383,39 +385,39 @@ export function mergeLocationsWithCustom(
 
 // Get merged locations sorted by order for a specific playthrough
 export function getLocationsSortedWithCustom(
-  customLocations: CustomLocation[] = []
+  customLocations: CustomLocation[] = [],
 ): CombinedLocation[] {
   return mergeLocationsWithCustom(getLocations(), customLocations);
 }
 
 // Alias function for compatibility with AddCustomLocationModal
 export function getCombinedLocationsSortedByOrder(
-  customLocations: CustomLocation[] = []
+  customLocations: CustomLocation[] = [],
 ): CombinedLocation[] {
   return getLocationsSortedWithCustom(customLocations);
 }
 
 // Helper to check if a location is custom
 export function isCustomLocation(
-  location?: CombinedLocation | null
+  location?: CombinedLocation | null,
 ): location is CustomLocation & {
   region: string;
   description: string;
   isCustom: true;
 } {
-  return !!location && 'isCustom' in location && location.isCustom === true;
+  return !!location && "isCustom" in location && location.isCustom === true;
 }
 
 // Get location by ID from merged locations (including custom)
 export function getLocationByIdFromMerged(
   locationId: string,
-  customLocations: CustomLocation[] = []
+  customLocations: CustomLocation[] = [],
 ): CombinedLocation | null {
   const mergedLocations = mergeLocationsWithCustom(
     getLocations(),
-    customLocations
+    customLocations,
   );
-  return mergedLocations.find(loc => loc.id === locationId) || null;
+  return mergedLocations.find((loc) => loc.id === locationId) || null;
 }
 
 // Create a new custom location
@@ -423,7 +425,7 @@ export function createCustomLocation(
   name: string,
   afterLocationId: string,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _customLocations: CustomLocation[] = []
+  _customLocations: CustomLocation[] = [],
 ): CustomLocation {
   return {
     id: generateCustomLocationId(),
@@ -435,7 +437,7 @@ export function createCustomLocation(
 // Validate that a custom location can be placed after the specified location
 export function validateCustomLocationPlacement(
   afterLocationId: string,
-  customLocations: CustomLocation[] = []
+  customLocations: CustomLocation[] = [],
 ): boolean {
   try {
     getCustomLocationInsertIndex(afterLocationId, customLocations);
@@ -448,11 +450,11 @@ export function validateCustomLocationPlacement(
 // Update custom location dependencies when a custom location is removed
 export function updateCustomLocationDependencies(
   removedLocationId: string,
-  customLocations: CustomLocation[]
+  customLocations: CustomLocation[],
 ): CustomLocation[] {
   // Find the location that the removed location was inserted after
   const removedLocation = customLocations.find(
-    loc => loc.id === removedLocationId
+    (loc) => loc.id === removedLocationId,
   );
   if (!removedLocation) {
     // Location doesn't exist, return unchanged
@@ -463,8 +465,8 @@ export function updateCustomLocationDependencies(
 
   // Update all locations that depended on the removed location
   return customLocations
-    .filter(loc => loc.id !== removedLocationId) // Remove the target location
-    .map(loc => {
+    .filter((loc) => loc.id !== removedLocationId) // Remove the target location
+    .map((loc) => {
       if (loc.insertAfterLocationId === removedLocationId) {
         // This location depended on the removed one, update it to depend on the parent
         return {
@@ -479,7 +481,7 @@ export function updateCustomLocationDependencies(
 // Get all custom locations that depend on a given location (directly or indirectly)
 export function getCustomLocationDependents(
   locationId: string,
-  customLocations: CustomLocation[]
+  customLocations: CustomLocation[],
 ): CustomLocation[] {
   const dependents: CustomLocation[] = [];
   const visited = new Set<string>();
@@ -489,7 +491,7 @@ export function getCustomLocationDependents(
     visited.add(targetId);
 
     const directDependents = customLocations.filter(
-      loc => loc.insertAfterLocationId === targetId && !visited.has(loc.id)
+      (loc) => loc.insertAfterLocationId === targetId && !visited.has(loc.id),
     );
 
     for (const dependent of directDependents) {
@@ -506,7 +508,7 @@ export function getCustomLocationDependents(
 // Check if removing a custom location would orphan other locations
 export function wouldOrphanLocations(
   locationId: string,
-  customLocations: CustomLocation[]
+  customLocations: CustomLocation[],
 ): { wouldOrphan: boolean; dependents: CustomLocation[] } {
   const dependents = getCustomLocationDependents(locationId, customLocations);
   return {
@@ -517,12 +519,12 @@ export function wouldOrphanLocations(
 
 // Get all locations that can be used as "after" locations for custom placement
 export function getAvailableAfterLocations(
-  customLocations: CustomLocation[] = []
+  customLocations: CustomLocation[] = [],
 ): CombinedLocation[] {
   // Return all locations except the last one (since you can't place after the last)
   const mergedLocations = mergeLocationsWithCustom(
     getLocations(),
-    customLocations
+    customLocations,
   );
   return mergedLocations.slice(0, -1); // Remove the last location
 }
@@ -530,7 +532,7 @@ export function getAvailableAfterLocations(
 // Get merged locations with encounters for a specific game mode
 export async function getMergedLocationsWithEncounters(
   customLocations: CustomLocation[] = [],
-  gameMode: 'classic' | 'remix' = 'classic'
+  gameMode: "classic" | "remix" = "classic",
 ): Promise<Array<CombinedLocation & { encounters: PokemonEncounter[] }>> {
   const mergedLocations = getLocationsSortedWithCustom(customLocations);
   const locationsWithEncounters = [];
@@ -554,5 +556,5 @@ export async function getMergedLocationsWithEncounters(
 
 export function getLocationById(id?: string) {
   const locations = getLocations();
-  return locations.find(loc => loc.id === id) || null;
+  return locations.find((loc) => loc.id === id) || null;
 }

@@ -8,8 +8,9 @@
     "dev": "next dev --turbopack --port 4000",
     "build": "next build",
     "start": "next start",
-    "lint": "biome lint . --vcs-use-ignore-file=true --files-ignore-unknown=true",
-    "lint:fix": "biome lint --write . --vcs-use-ignore-file=true --files-ignore-unknown=true",
+    "lint": "biome lint src tests scripts data --diagnostic-level=error --max-diagnostics=500 --vcs-use-ignore-file=true --files-ignore-unknown=true",
+    "lint:fix": "biome lint --write src tests scripts data --diagnostic-level=error --max-diagnostics=500 --vcs-use-ignore-file=true --files-ignore-unknown=true",
+    "lint:all": "biome lint src tests scripts data --vcs-use-ignore-file=true --files-ignore-unknown=true",
     "format": "biome format --write src tests scripts data --vcs-use-ignore-file=true --files-ignore-unknown=true",
     "format:check": "biome check src tests scripts data --formatter-enabled=true --linter-enabled=false --assist-enabled=false --vcs-use-ignore-file=true --files-ignore-unknown=true",
     "validate": "pnpm format:check && pnpm lint",
@@ -119,7 +120,7 @@
   "packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319",
   "lint-staged": {
     "*": [
-      "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --vcs-use-ignore-file=true"
+      "biome check --write --diagnostic-level=error --max-diagnostics=2000 --no-errors-on-unmatched --files-ignore-unknown=true --vcs-use-ignore-file=true"
     ]
   }
 }

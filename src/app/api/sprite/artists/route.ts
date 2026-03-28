@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from "next/server";
 
 // Cache for 2 weeks (artists update monthly, so 2 weeks is safe)
 const CACHE_DURATION = 60 * 60 * 24 * 14; // 14 days in seconds
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id');
+  const id = searchParams.get("id");
 
   if (!id) {
     return NextResponse.json(
-      { error: 'ID parameter is required' },
-      { status: 400 }
+      { error: "ID parameter is required" },
+      { status: 400 },
     );
   }
 
@@ -26,21 +26,21 @@ export async function GET(request: NextRequest) {
     if (!artistLinks) return [];
 
     return artistLinks
-      .map(link => link.match(/<a[^>]*>([^<]+)<\/a>/)?.[1] || '')
-      .filter(name => name.trim());
+      .map((link) => link.match(/<a[^>]*>([^<]+)<\/a>/)?.[1] || "")
+      .filter((name) => name.trim());
   };
 
   try {
     // Fetch only the first part of the page (where gallery content is)
     const response = await fetch(url, {
       headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         Accept:
-          'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate',
-        Range: 'bytes=0-1048576', // First 1MB to handle Pokémon with up to 50 variants
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate",
+        Range: "bytes=0-1048576", // First 1MB to handle Pokémon with up to 50 variants
       },
       next: {
         revalidate: CACHE_DURATION,
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       return NextResponse.json(
         { error: `Failed to fetch page: ${response.status}` },
-        { status: response.status }
+        { status: response.status },
       );
     }
 
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     // Extract base sprite credit
     const baseDexEntryMatch = html.match(
-      /<article class="dex-entry sprite-variant-main">[\s\S]*?<figcaption>[\s\S]*?<\/figcaption>/
+      /<article class="dex-entry sprite-variant-main">[\s\S]*?<figcaption>[\s\S]*?<\/figcaption>/,
     );
     if (baseDexEntryMatch) {
       const baseArtists = extractArtists(baseDexEntryMatch[0]);
@@ -71,13 +71,13 @@ export async function GET(request: NextRequest) {
 
     // Extract all gallery sprite variants
     const spriteArticles = html.match(
-      /<article class="sprite-preview[^"]*">[\s\S]*?<\/article>/g
+      /<article class="sprite-preview[^"]*">[\s\S]*?<\/article>/g,
     );
     if (spriteArticles) {
       for (const article of spriteArticles) {
-        const spriteIdMatch = article.match(/href="\/sprite\/pif\/([^"\/]+)/);
+        const spriteIdMatch = article.match(/href="\/sprite\/pif\/([^"/]+)/);
         const figcaptionMatch = article.match(
-          /<figcaption>[\s\S]*?<\/figcaption>/
+          /<figcaption>[\s\S]*?<\/figcaption>/,
         );
 
         if (spriteIdMatch && figcaptionMatch) {
@@ -93,24 +93,24 @@ export async function GET(request: NextRequest) {
 
     if (Object.keys(artistCredits).length === 0) {
       return NextResponse.json(
-        { error: 'No artist credits found on page' },
-        { status: 404 }
+        { error: "No artist credits found on page" },
+        { status: 404 },
       );
     }
 
     // Return with cache headers
     return NextResponse.json(artistCredits, {
       headers: {
-        'Cache-Control': `public, max-age=${CACHE_DURATION}, s-maxage=${CACHE_DURATION}`,
-        'CDN-Cache-Control': `public, max-age=${CACHE_DURATION}`,
-        'Vercel-CDN-Cache-Control': `public, max-age=${CACHE_DURATION}`,
+        "Cache-Control": `public, max-age=${CACHE_DURATION}, s-maxage=${CACHE_DURATION}`,
+        "CDN-Cache-Control": `public, max-age=${CACHE_DURATION}`,
+        "Vercel-CDN-Cache-Control": `public, max-age=${CACHE_DURATION}`,
       },
     });
   } catch (error) {
-    console.error('Error scraping artist credit:', error);
+    console.error("Error scraping artist credit:", error);
     return NextResponse.json(
-      { error: 'Failed to scrape artist credit' },
-      { status: 500 }
+      { error: "Failed to scrape artist credit" },
+      { status: 500 },
     );
   }
 }

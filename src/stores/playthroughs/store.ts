@@ -1,18 +1,18 @@
-import { proxy, subscribe } from 'valtio';
-import { devtools } from 'valtio/utils';
-import { PlaythroughsState, Playthrough, GameMode } from './types';
-import { type PokemonOptionType } from '@/loaders/pokemon';
+import { proxy, subscribe } from "valtio";
+import { devtools } from "valtio/utils";
+import { z } from "zod";
+import type { PokemonOptionType } from "@/loaders/pokemon";
+import { generatePrefixedId } from "@/utils/id";
+import { restorePokemonToTeam } from "./encounters";
 import {
-  loadFromIndexedDB,
   createDebouncedSaveAll,
-  loadPlaythroughById,
   deletePlaythroughFromIndexedDB,
   loadAllPlaythroughs,
+  loadFromIndexedDB,
+  loadPlaythroughById,
   saveToIndexedDB,
-} from './persistence';
-import { z } from 'zod';
-import { generatePrefixedId } from '@/utils/id';
-import { restorePokemonToTeam } from './encounters';
+} from "./persistence";
+import type { GameMode, Playthrough, PlaythroughsState } from "./types";
 
 // Default state
 const defaultState: PlaythroughsState = {
@@ -24,11 +24,11 @@ const defaultState: PlaythroughsState = {
 
 // Simple cache for active playthrough to avoid repeated find() calls
 let cachedActivePlaythrough: Playthrough | null = null;
-let cachedActiveId: string | undefined = undefined;
+let cachedActiveId: string | undefined;
 
 // Helper functions
 const generatePlaythroughId = (): string => {
-  return generatePrefixedId('playthrough');
+  return generatePrefixedId("playthrough");
 };
 
 const getCurrentTimestamp = (): number => {
@@ -52,11 +52,11 @@ const isCacheValid = (): boolean => {
 // Default playthrough creation
 const createDefaultPlaythrough = (): Playthrough => ({
   id: generatePlaythroughId(),
-  name: 'Nuzlocke',
+  name: "Nuzlocke",
   encounters: {},
   team: { members: Array.from({ length: 6 }, () => null) }, // Fixed size 6 with null values
-  gameMode: 'classic',
-  version: '1.0.0',
+  gameMode: "classic",
+  version: "1.0.0",
   createdAt: getCurrentTimestamp(),
   updatedAt: getCurrentTimestamp(),
 });
@@ -64,13 +64,13 @@ const createDefaultPlaythrough = (): Playthrough => ({
 // Create the playthroughs store with proper SSR handling
 let playthroughsStore: PlaythroughsState;
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   // Client-side: Initialize with default state first, then load from IndexedDB
   playthroughsStore = proxy<PlaythroughsState>(defaultState);
 
   // Add devtools integration for debugging
-  if (process.env.NODE_ENV === 'development') {
-    devtools(playthroughsStore, { name: 'Playthroughs Store' });
+  if (process.env.NODE_ENV === "development") {
+    devtools(playthroughsStore, { name: "Playthroughs Store" });
   }
 
   // Load data from IndexedDB asynchronously
@@ -81,7 +81,7 @@ if (typeof window !== 'undefined') {
 
   // Create debounced save function with store dependencies
   const debouncedSaveAll = createDebouncedSaveAll(playthroughsStore, () =>
-    getActivePlaythrough()
+    getActivePlaythrough(),
   );
 
   // Subscribe to store changes and debounce saves
@@ -111,7 +111,7 @@ const getActivePlaythrough = (): Playthrough | null => {
   // Find and cache the active playthrough
   const found =
     playthroughsStore.playthroughs.find(
-      (p: Playthrough) => p.id === playthroughsStore.activePlaythroughId
+      (p: Playthrough) => p.id === playthroughsStore.activePlaythroughId,
     ) || null;
 
   if (found) {
@@ -124,7 +124,7 @@ const getActivePlaythrough = (): Playthrough | null => {
 
 const createPlaythrough = (
   name: string,
-  gameMode: GameMode = 'classic'
+  gameMode: GameMode = "classic",
 ): string => {
   const newPlaythrough: Playthrough = {
     id: generatePlaythroughId(),
@@ -132,7 +132,7 @@ const createPlaythrough = (
     encounters: {},
     team: { members: Array.from({ length: 6 }, () => null) },
     gameMode,
-    version: '1.0.0',
+    version: "1.0.0",
     createdAt: getCurrentTimestamp(),
     updatedAt: getCurrentTimestamp(),
   };
@@ -150,7 +150,7 @@ const createPlaythrough = (
 const setActivePlaythrough = async (playthroughId: string) => {
   // Check if the playthrough is already loaded
   let playthrough = playthroughsStore.playthroughs.find(
-    (p: Playthrough) => p.id === playthroughId
+    (p: Playthrough) => p.id === playthroughId,
   );
 
   // If not loaded, try to load it
@@ -172,9 +172,9 @@ const setActivePlaythrough = async (playthroughId: string) => {
 const cycleGameMode = () => {
   const activePlaythrough = getActivePlaythrough();
   if (activePlaythrough) {
-    const modes = ['classic', 'remix', 'randomized'] as const;
+    const modes = ["classic", "remix", "randomized"] as const;
     const currentIndex = modes.indexOf(
-      activePlaythrough.gameMode as (typeof modes)[number]
+      activePlaythrough.gameMode as (typeof modes)[number],
     );
     const nextIndex = (currentIndex + 1) % modes.length;
     const nextMode = modes[nextIndex];
@@ -188,8 +188,8 @@ const toggleRemixMode = () => {
   const activePlaythrough = getActivePlaythrough();
   if (activePlaythrough) {
     // Convert current mode to boolean logic for backward compatibility
-    const isRemix = activePlaythrough.gameMode === 'remix';
-    activePlaythrough.gameMode = isRemix ? 'classic' : 'remix';
+    const isRemix = activePlaythrough.gameMode === "remix";
+    activePlaythrough.gameMode = isRemix ? "classic" : "remix";
     // Don't update timestamp immediately for UI toggles - let the debounced save handle it
   }
 };
@@ -205,14 +205,14 @@ const setGameMode = (gameMode: GameMode) => {
 const setRemixMode = (enabled: boolean) => {
   const activePlaythrough = getActivePlaythrough();
   if (activePlaythrough) {
-    activePlaythrough.gameMode = enabled ? 'remix' : 'classic';
+    activePlaythrough.gameMode = enabled ? "remix" : "classic";
     activePlaythrough.updatedAt = getCurrentTimestamp();
   }
 };
 
 const updatePlaythroughName = (playthroughId: string, name: string) => {
   const playthrough = playthroughsStore.playthroughs.find(
-    (p: Playthrough) => p.id === playthroughId
+    (p: Playthrough) => p.id === playthroughId,
   );
 
   if (playthrough) {
@@ -223,7 +223,7 @@ const updatePlaythroughName = (playthroughId: string, name: string) => {
 
 const deletePlaythrough = async (playthroughId: string) => {
   const index = playthroughsStore.playthroughs.findIndex(
-    (p: Playthrough) => p.id === playthroughId
+    (p: Playthrough) => p.id === playthroughId,
   );
 
   if (index !== -1) {
@@ -248,7 +248,7 @@ const getAllPlaythroughs = async (): Promise<Playthrough[]> => {
 
   // Merge with existing playthroughs instead of replacing the entire array
   // This preserves Valtio's reactivity
-  const existingIds = new Set(playthroughsStore.playthroughs.map(p => p.id));
+  const existingIds = new Set(playthroughsStore.playthroughs.map((p) => p.id));
 
   // Add new playthroughs that aren't already loaded
   for (const playthrough of allPlaythroughs) {
@@ -258,7 +258,7 @@ const getAllPlaythroughs = async (): Promise<Playthrough[]> => {
   }
 
   // Remove playthroughs that no longer exist
-  const loadedIds = new Set(allPlaythroughs.map(p => p.id));
+  const loadedIds = new Set(allPlaythroughs.map((p) => p.id));
   for (let i = playthroughsStore.playthroughs.length - 1; i >= 0; i--) {
     if (!loadedIds.has(playthroughsStore.playthroughs[i].id)) {
       playthroughsStore.playthroughs.splice(i, 1);
@@ -274,30 +274,32 @@ const getCurrentlyLoadedPlaythroughs = (): Playthrough[] => {
 
 const isRemixModeEnabled = (): boolean => {
   const activePlaythrough = getActivePlaythrough();
-  return activePlaythrough?.gameMode === 'remix';
+  return activePlaythrough?.gameMode === "remix";
 };
 
 const getGameMode = (): GameMode => {
   const activePlaythrough = getActivePlaythrough();
-  return (activePlaythrough?.gameMode as GameMode) || 'classic';
+  return (activePlaythrough?.gameMode as GameMode) || "classic";
 };
 
 const importPlaythrough = async (importData: unknown): Promise<string> => {
   try {
     // Validate the imported data against the schema
-    const { ImportedPlaythroughSchema } = await import('./types');
+    const { ImportedPlaythroughSchema } = await import("./types");
     const validatedData = ImportedPlaythroughSchema.parse(importData);
 
     // Extract the playthrough data - the transform ensures proper typing
     const importedPlaythrough = validatedData.playthrough;
 
     // Check for ID conflicts and generate new ID if needed
-    const existingIds = new Set(playthroughsStore.playthroughs.map(p => p.id));
+    const existingIds = new Set(
+      playthroughsStore.playthroughs.map((p) => p.id),
+    );
     let finalId = importedPlaythrough.id;
 
     if (existingIds.has(finalId)) {
       // Generate a new unique ID with timestamp and crypto-secure random suffix
-      finalId = generatePrefixedId('playthrough');
+      finalId = generatePrefixedId("playthrough");
     }
 
     // Create the new playthrough with migrated data
@@ -305,7 +307,7 @@ const importPlaythrough = async (importData: unknown): Promise<string> => {
       id: finalId,
       name: importedPlaythrough.name,
       gameMode: importedPlaythrough.gameMode as GameMode, // Type assertion since transform ensures it's GameMode
-      version: importedPlaythrough.version || '1.0.0',
+      version: importedPlaythrough.version || "1.0.0",
       createdAt: importedPlaythrough.createdAt,
       updatedAt: Date.now(), // Update to current time
       customLocations: importedPlaythrough.customLocations || [],
@@ -323,10 +325,10 @@ const importPlaythrough = async (importData: unknown): Promise<string> => {
 
     return finalId;
   } catch (error) {
-    console.error('Failed to import playthrough:', error);
+    console.error("Failed to import playthrough:", error);
 
     // Handle Zod validation errors specifically
-    if (error && typeof error === 'object' && 'issues' in error) {
+    if (error && typeof error === "object" && "issues" in error) {
       try {
         const prettyError = z.prettifyError(error as z.ZodError);
         throw new Error(`Validation failed:\n\n${prettyError}`);
@@ -336,29 +338,29 @@ const importPlaythrough = async (importData: unknown): Promise<string> => {
           const errorDetails = zodError.issues
             .map((issue: z.ZodIssue) => {
               const path =
-                issue.path.length > 0 ? ` at ${issue.path.join('.')}` : '';
+                issue.path.length > 0 ? ` at ${issue.path.join(".")}` : "";
               return `• ${issue.message}${path}`;
             })
-            .join('\n');
+            .join("\n");
           throw new Error(`Validation failed:\n\n${errorDetails}`);
         }
-        throw new Error('Data validation failed');
+        throw new Error("Data validation failed");
       }
     }
 
-    throw new Error('Invalid playthrough data format');
+    throw new Error("Invalid playthrough data format");
   }
 };
 
 const isRandomizedModeEnabled = (): boolean => {
   const activePlaythrough = getActivePlaythrough();
-  return activePlaythrough?.gameMode === 'randomized';
+  return activePlaythrough?.gameMode === "randomized";
 };
 
 const resetAllPlaythroughs = async () => {
   // Delete all existing playthroughs from IndexedDB in parallel
-  const deletePromises = playthroughsStore.playthroughs.map(playthrough =>
-    deletePlaythroughFromIndexedDB(playthrough.id)
+  const deletePromises = playthroughsStore.playthroughs.map((playthrough) =>
+    deletePlaythroughFromIndexedDB(playthrough.id),
   );
   await Promise.all(deletePromises);
 
@@ -369,7 +371,7 @@ const resetAllPlaythroughs = async () => {
 };
 
 const forceSave = async () => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   await saveToIndexedDB(playthroughsStore);
 };
 
@@ -427,7 +429,7 @@ const reorderTeam = (fromPosition: number, toPosition: number): boolean => {
 const updateTeamMember = async (
   position: number,
   headPokemon: { uid: string } | null,
-  bodyPokemon: { uid: string } | null
+  bodyPokemon: { uid: string } | null,
 ): Promise<boolean> => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return false;
@@ -438,13 +440,13 @@ const updateTeamMember = async (
   // Helper function to create team member object
   const createTeamMember = (
     head: { uid: string } | null,
-    body: { uid: string } | null
+    body: { uid: string } | null,
   ) => {
     if (!head && !body) return null;
 
     return {
-      headPokemonUid: head?.uid || '',
-      bodyPokemonUid: body?.uid || '',
+      headPokemonUid: head?.uid || "",
+      bodyPokemonUid: body?.uid || "",
     };
   };
 
@@ -459,7 +461,7 @@ const updateTeamMember = async (
   // Update the team member
   activePlaythrough.team.members[position] = createTeamMember(
     headPokemon,
-    bodyPokemon
+    bodyPokemon,
   );
 
   // Update the playthrough timestamp to trigger reactivity
@@ -482,22 +484,23 @@ const getTeamMemberDetails = (position: number) => {
 
   // Flatten all Pokémon from all encounters into a single collection
   const allPokemon = Object.values(activePlaythrough.encounters || {}).flatMap(
-    encounter => {
+    (encounter) => {
       const pokemon = [];
       if (encounter.head) pokemon.push(encounter.head);
       if (encounter.body) pokemon.push(encounter.body);
       return pokemon;
-    }
+    },
   );
 
   // Find Pokémon by UID from the flattened collection
   headPokemon =
-    allPokemon.find(pokemon => pokemon.uid === teamMember.headPokemonUid) ||
+    allPokemon.find((pokemon) => pokemon.uid === teamMember.headPokemonUid) ||
     null;
   bodyPokemon =
-    teamMember.bodyPokemonUid && teamMember.bodyPokemonUid !== ''
-      ? allPokemon.find(pokemon => pokemon.uid === teamMember.bodyPokemonUid) ||
-        null
+    teamMember.bodyPokemonUid && teamMember.bodyPokemonUid !== ""
+      ? allPokemon.find(
+          (pokemon) => pokemon.uid === teamMember.bodyPokemonUid,
+        ) || null
       : null;
 
   if (!headPokemon && !bodyPokemon) {
@@ -526,7 +529,7 @@ const isTeamFull = (): boolean => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return true;
 
-  return activePlaythrough.team.members.every(member => member !== null);
+  return activePlaythrough.team.members.every((member) => member !== null);
 };
 
 // Helper function to get available team positions
@@ -541,29 +544,29 @@ const getAvailableTeamPositions = (): number[] => {
 };
 
 export {
-  playthroughsStore,
-  getActivePlaythrough,
   createPlaythrough,
-  setActivePlaythrough,
   cycleGameMode,
-  toggleRemixMode,
-  setGameMode,
-  setRemixMode,
-  updatePlaythroughName,
   deletePlaythrough,
-  getAllPlaythroughs,
-  getCurrentlyLoadedPlaythroughs,
-  isRemixModeEnabled,
-  getGameMode,
-  isRandomizedModeEnabled,
-  resetAllPlaythroughs,
   forceSave,
-  importPlaythrough,
+  getActivePlaythrough,
+  getAllPlaythroughs,
+  getAvailableTeamPositions,
+  getCurrentlyLoadedPlaythroughs,
   getCurrentTimestamp,
+  getGameMode,
+  getTeamMemberDetails,
+  importPlaythrough,
+  isRandomizedModeEnabled,
+  isRemixModeEnabled,
+  isTeamFull,
+  playthroughsStore,
   removeFromTeam,
   reorderTeam,
+  resetAllPlaythroughs,
+  setActivePlaythrough,
+  setGameMode,
+  setRemixMode,
+  toggleRemixMode,
+  updatePlaythroughName,
   updateTeamMember,
-  getTeamMemberDetails,
-  isTeamFull,
-  getAvailableTeamPositions,
 };

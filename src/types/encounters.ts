@@ -1,15 +1,15 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Shared encounter type definition for consistency across the codebase.
  * This type defines all valid encounter types that can be used in the application.
  */
 export const EncounterTypeSchema = z.enum(
-  ['grass', 'surf', 'fishing', 'special', 'cave', 'rock_smash', 'pokeradar'],
+  ["grass", "surf", "fishing", "special", "cave", "rock_smash", "pokeradar"],
   {
     error:
-      'Invalid encounter type. Must be one of: grass, surf, fishing, special, cave, rock_smash, pokeradar',
-  }
+      "Invalid encounter type. Must be one of: grass, surf, fishing, special, cave, rock_smash, pokeradar",
+  },
 );
 
 export type EncounterType = z.infer<typeof EncounterTypeSchema>;
@@ -18,13 +18,13 @@ export type EncounterType = z.infer<typeof EncounterTypeSchema>;
  * Array of all valid encounter types for validation and iteration
  */
 export const ENCOUNTER_TYPES: EncounterType[] = [
-  'grass',
-  'surf',
-  'fishing',
-  'special',
-  'cave',
-  'rock_smash',
-  'pokeradar',
+  "grass",
+  "surf",
+  "fishing",
+  "special",
+  "cave",
+  "rock_smash",
+  "pokeradar",
 ];
 
 /**

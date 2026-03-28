@@ -1,6 +1,6 @@
-declare module 'poke-types' {
+declare module "poke-types" {
   export function getTypeWeaknesses(
     type: string,
-    secondType?: string
+    secondType?: string,
   ): Record<string, number>;
 }

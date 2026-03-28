@@ -10,16 +10,16 @@
 export function formatArtistCredits(artists?: string[] | null): string {
   // Handle empty or invalid input
   if (!artists || artists.length === 0) {
-    return 'Unknown artist';
+    return "Unknown artist";
   }
 
   // Filter out empty strings and trim whitespace
   const cleanedArtists = artists
-    .map(artist => artist.trim())
-    .filter(artist => artist.length > 0);
+    .map((artist) => artist.trim())
+    .filter((artist) => artist.length > 0);
 
   if (cleanedArtists.length === 0) {
-    return 'Unknown artist';
+    return "Unknown artist";
   }
 
   // Single artist
@@ -36,5 +36,5 @@ export function formatArtistCredits(artists?: string[] | null): string {
   const allButLast = cleanedArtists.slice(0, -1);
   const lastArtist = cleanedArtists[cleanedArtists.length - 1];
 
-  return `${allButLast.join(', ')} and ${lastArtist}`;
+  return `${allButLast.join(", ")} and ${lastArtist}`;
 }

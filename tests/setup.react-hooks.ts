@@ -1,13 +1,13 @@
 function hasUsableLocalStorage() {
-  if (typeof globalThis.localStorage === 'undefined') {
+  if (typeof globalThis.localStorage === "undefined") {
     return false;
   }
 
   return (
-    typeof globalThis.localStorage.getItem === 'function' &&
-    typeof globalThis.localStorage.setItem === 'function' &&
-    typeof globalThis.localStorage.removeItem === 'function' &&
-    typeof globalThis.localStorage.clear === 'function'
+    typeof globalThis.localStorage.getItem === "function" &&
+    typeof globalThis.localStorage.setItem === "function" &&
+    typeof globalThis.localStorage.removeItem === "function" &&
+    typeof globalThis.localStorage.clear === "function"
   );
 }
 
@@ -39,14 +39,14 @@ function createLocalStorageMock(): Storage {
 if (hasUsableLocalStorage() === false) {
   const localStorageMock = createLocalStorageMock();
 
-  Object.defineProperty(globalThis, 'localStorage', {
+  Object.defineProperty(globalThis, "localStorage", {
     value: localStorageMock,
     writable: true,
     configurable: true,
   });
 
-  if (typeof window !== 'undefined') {
-    Object.defineProperty(window, 'localStorage', {
+  if (typeof window !== "undefined") {
+    Object.defineProperty(window, "localStorage", {
       value: localStorageMock,
       writable: true,
       configurable: true,

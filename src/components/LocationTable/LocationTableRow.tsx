@@ -1,17 +1,17 @@
-import { Row, flexRender } from '@tanstack/react-table';
-import type { CombinedLocation } from '@/loaders/locations';
-import { isCustomLocation } from '@/loaders/locations';
-import ResetEncounterButton from './ResetEncounterButton';
-import RemoveLocationButton from './customLocations/RemoveLocationButton';
-import { match } from 'ts-pattern';
-import { useInView } from 'react-intersection-observer';
-import { useEncounter } from '@/stores/playthroughs';
-import { EncounterCell } from './EncounterCell';
-import PokemonSummaryCard from '../PokemonSummaryCard';
-import { useRef, useEffect } from 'react';
-import { addEvolutionListener } from '@/lib/events';
-import type { FusionSpriteHandle } from '../PokemonSummaryCard/FusionSprite';
-import { canFuse } from '@/utils/pokemonPredicates';
+import { flexRender, type Row } from "@tanstack/react-table";
+import { useEffect, useRef } from "react";
+import { useInView } from "react-intersection-observer";
+import { match } from "ts-pattern";
+import { addEvolutionListener } from "@/lib/events";
+import type { CombinedLocation } from "@/loaders/locations";
+import { isCustomLocation } from "@/loaders/locations";
+import { useEncounter } from "@/stores/playthroughs";
+import { canFuse } from "@/utils/pokemonPredicates";
+import PokemonSummaryCard from "../PokemonSummaryCard";
+import type { FusionSpriteHandle } from "../PokemonSummaryCard/FusionSprite";
+import RemoveLocationButton from "./customLocations/RemoveLocationButton";
+import { EncounterCell } from "./EncounterCell";
+import ResetEncounterButton from "./ResetEncounterButton";
 
 interface LocationTableRowProps {
   row: Row<CombinedLocation>;
@@ -47,7 +47,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
         ) {
           const canActuallyFuse = canFuse(
             encounterData.head,
-            encounterData.body
+            encounterData.body,
           );
           if (canActuallyFuse) {
             spriteRef.current?.playEvolution();
@@ -102,18 +102,16 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
   return (
     <tr
       key={row.id}
-      role='row'
-      className='hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors content-visibility-auto group/row contain-intrinsic-height-[150px]'
+      className="hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors content-visibility-auto group/row contain-intrinsic-height-[150px]"
       ref={ref}
       data-location-id={locationId}
     >
-      {row.getVisibleCells().map(cell =>
+      {row.getVisibleCells().map((cell) =>
         match(cell.column.id)
-          .with('sprite', () => (
+          .with("sprite", () => (
             <td
               key={cell.id}
-              className='p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group'
-              role='cell'
+              className="p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group"
             >
               <PokemonSummaryCard
                 ref={spriteRef}
@@ -124,22 +122,21 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
               />
             </td>
           ))
-          .with('encounter', () => (
+          .with("encounter", () => (
             <EncounterCell
               key={cell.id}
               locationId={locationId}
               shouldLoad={shouldLoad}
             />
           ))
-          .with('actions', () => {
+          .with("actions", () => {
             const hasEncounter = !!(encounterData.head || encounterData.body);
             return (
               <td
                 key={cell.id}
-                className='p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top'
-                role='cell'
+                className="p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top"
               >
-                <div className='flex flex-col items-center justify-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 group-focus-within/row:opacity-100'>
+                <div className="flex flex-col items-center justify-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 group-focus-within/row:opacity-100">
                   {hasEncounter && (
                     <ResetEncounterButton
                       locationId={locationId}
@@ -160,12 +157,11 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
           .otherwise(() => (
             <td
               key={cell.id}
-              className='px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'
-              role='cell'
+              className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
             >
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </td>
-          ))
+          )),
       )}
     </tr>
   );

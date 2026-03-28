@@ -1,19 +1,19 @@
-import { describe, it, expect } from 'vitest';
-import { moveTeamMemberToBox, restorePokemonToTeam } from '../encounters';
-import { PokemonStatus } from '@/loaders/pokemon';
+import { describe, expect, it } from "vitest";
+import { PokemonStatus } from "@/loaders/pokemon";
+import { moveTeamMemberToBox, restorePokemonToTeam } from "../encounters";
 import {
-  resetPlaythroughsStore,
   createTestPlaythrough,
+  expectTeamMember,
+  resetPlaythroughsStore,
   testPokemon,
   waitForTimestamp,
-  expectTeamMember,
-} from './test-utils';
+} from "./test-utils";
 
-describe('Team Management', () => {
+describe("Team Management", () => {
   resetPlaythroughsStore();
 
-  describe('moveTeamMemberToBox', () => {
-    it('should move a team member with both head and body Pokémon to box', async () => {
+  describe("moveTeamMemberToBox", () => {
+    it("should move a team member with both head and body Pokémon to box", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up encounters with Pokémon
@@ -28,15 +28,15 @@ describe('Team Management', () => {
 
       // Add team member
       activePlaythrough.team.members[0] = {
-        headPokemonUid: 'pikachu_route1_123',
-        bodyPokemonUid: 'charmander_route1_456',
+        headPokemonUid: "pikachu_route1_123",
+        bodyPokemonUid: "charmander_route1_456",
       };
 
       // Verify team member exists
       expectTeamMember(
         activePlaythrough.team.members[0],
-        'pikachu_route1_123',
-        'charmander_route1_456'
+        "pikachu_route1_123",
+        "charmander_route1_456",
       );
 
       // Move team member to box
@@ -53,7 +53,7 @@ describe('Team Management', () => {
       expect(charmander?.status).toBe(PokemonStatus.STORED);
     });
 
-    it('should move a team member with only head Pokémon to box', async () => {
+    it("should move a team member with only head Pokémon to box", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up encounters with only head Pokémon
@@ -68,15 +68,15 @@ describe('Team Management', () => {
 
       // Add team member with only head Pokémon
       activePlaythrough.team.members[0] = {
-        headPokemonUid: 'pikachu_route1_123',
-        bodyPokemonUid: '',
+        headPokemonUid: "pikachu_route1_123",
+        bodyPokemonUid: "",
       };
 
       // Verify team member exists
       expectTeamMember(
         activePlaythrough.team.members[0],
-        'pikachu_route1_123',
-        ''
+        "pikachu_route1_123",
+        "",
       );
 
       // Move team member to box
@@ -90,7 +90,7 @@ describe('Team Management', () => {
       expect(pikachu?.status).toBe(PokemonStatus.STORED);
     });
 
-    it('should move a team member with only body Pokémon to box', async () => {
+    it("should move a team member with only body Pokémon to box", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up encounters with only body Pokémon
@@ -105,15 +105,15 @@ describe('Team Management', () => {
 
       // Add team member with only body Pokémon
       activePlaythrough.team.members[0] = {
-        headPokemonUid: '',
-        bodyPokemonUid: 'charmander_route1_456',
+        headPokemonUid: "",
+        bodyPokemonUid: "charmander_route1_456",
       };
 
       // Verify team member exists
       expectTeamMember(
         activePlaythrough.team.members[0],
-        '',
-        'charmander_route1_456'
+        "",
+        "charmander_route1_456",
       );
 
       // Move team member to box
@@ -127,7 +127,7 @@ describe('Team Management', () => {
       expect(charmander?.status).toBe(PokemonStatus.STORED);
     });
 
-    it('should handle invalid position gracefully', async () => {
+    it("should handle invalid position gracefully", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Try to move team member at invalid position
@@ -138,7 +138,7 @@ describe('Team Management', () => {
       expect(activePlaythrough.team.members).toHaveLength(6);
     });
 
-    it('should handle empty team slot gracefully', async () => {
+    it("should handle empty team slot gracefully", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Verify slot 0 is empty
@@ -151,7 +151,7 @@ describe('Team Management', () => {
       expectTeamMember(activePlaythrough.team.members[0], null);
     });
 
-    it('should handle missing team gracefully', async () => {
+    it("should handle missing team gracefully", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Remove team property
@@ -164,7 +164,7 @@ describe('Team Management', () => {
       expect(true).toBe(true);
     });
 
-    it('should update playthrough timestamp', async () => {
+    it("should update playthrough timestamp", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up encounters and team member
@@ -178,8 +178,8 @@ describe('Team Management', () => {
       };
 
       activePlaythrough.team.members[0] = {
-        headPokemonUid: 'pikachu_route1_123',
-        bodyPokemonUid: '',
+        headPokemonUid: "pikachu_route1_123",
+        bodyPokemonUid: "",
       };
 
       const originalTimestamp = activePlaythrough.updatedAt;
@@ -195,8 +195,8 @@ describe('Team Management', () => {
     });
   });
 
-  describe('restorePokemonToTeam', () => {
-    it('should restore stored Pokémon to original receival status', async () => {
+  describe("restorePokemonToTeam", () => {
+    it("should restore stored Pokémon to original receival status", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up encounters with stored Pokémon that has originalReceivalStatus
@@ -214,14 +214,14 @@ describe('Team Management', () => {
       };
 
       // Restore Pokémon to team
-      await restorePokemonToTeam('pikachu_route1_123');
+      await restorePokemonToTeam("pikachu_route1_123");
 
       // Verify status is restored to original receival status
       const pikachu = activePlaythrough.encounters.route1.head;
       expect(pikachu?.status).toBe(PokemonStatus.CAPTURED);
     });
 
-    it('should default to captured status if no original receival status exists', async () => {
+    it("should default to captured status if no original receival status exists", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up encounters with stored Pokémon without originalReceivalStatus
@@ -239,14 +239,14 @@ describe('Team Management', () => {
       };
 
       // Restore Pokémon to team
-      await restorePokemonToTeam('pikachu_route1_123');
+      await restorePokemonToTeam("pikachu_route1_123");
 
       // Verify status defaults to captured
       const pikachu = activePlaythrough.encounters.route1.head;
       expect(pikachu?.status).toBe(PokemonStatus.CAPTURED);
     });
 
-    it('should not change status if Pokémon is not stored', async () => {
+    it("should not change status if Pokémon is not stored", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up encounters with captured Pokémon
@@ -262,24 +262,24 @@ describe('Team Management', () => {
       const originalStatus = activePlaythrough.encounters.route1.head?.status;
 
       // Try to restore Pokémon that is not stored
-      await restorePokemonToTeam('pikachu_route1_123');
+      await restorePokemonToTeam("pikachu_route1_123");
 
       // Verify status is unchanged
       const pikachu = activePlaythrough.encounters.route1.head;
       expect(pikachu?.status).toBe(originalStatus);
     });
 
-    it('should handle Pokémon not found gracefully', async () => {
+    it("should handle Pokémon not found gracefully", async () => {
       createTestPlaythrough();
 
       // Try to restore non-existent Pokémon
-      await restorePokemonToTeam('non-existent-uid');
+      await restorePokemonToTeam("non-existent-uid");
 
       // Should not throw error
       expect(true).toBe(true);
     });
 
-    it('should actually update the Pokémon status in the store', async () => {
+    it("should actually update the Pokémon status in the store", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up encounters with stored Pokémon
@@ -298,15 +298,15 @@ describe('Team Management', () => {
 
       // Verify initial status
       expect(activePlaythrough.encounters.route1.head?.status).toBe(
-        PokemonStatus.STORED
+        PokemonStatus.STORED,
       );
 
       // Restore Pokémon to team
-      await restorePokemonToTeam('pikachu_route1_123');
+      await restorePokemonToTeam("pikachu_route1_123");
 
       // Verify status is actually updated in the store
       expect(activePlaythrough.encounters.route1.head?.status).toBe(
-        PokemonStatus.CAPTURED
+        PokemonStatus.CAPTURED,
       );
 
       // Verify the playthrough timestamp was updated

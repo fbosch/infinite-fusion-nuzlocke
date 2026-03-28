@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { SpriteVariantsResponse } from '@/types/sprites';
+import { type NextRequest, NextResponse } from "next/server";
+import type { SpriteVariantsResponse } from "@/types/sprites";
 
 export const revalidate = 86400;
 
@@ -10,9 +10,9 @@ const processingCache = new Map<string, Promise<NextResponse>>();
  * Generate variant suffix for index (0='', 1='a', 2='b', etc.)
  */
 function getVariantSuffix(index: number): string {
-  if (index === 0) return '';
+  if (index === 0) return "";
 
-  let result = '';
+  let result = "";
   index = index - 1; // Convert to 0-based
 
   do {
@@ -26,7 +26,7 @@ function getVariantSuffix(index: number): string {
 /**
  * Generate sprite URL for a fusion or single Pokémon
  */
-function generateSpriteUrl(id: string, variant = ''): string {
+function generateSpriteUrl(id: string, variant = ""): string {
   return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${id}${variant}.png`;
 }
 
@@ -37,9 +37,9 @@ export async function OPTIONS() {
   const response = new NextResponse(null, { status: 200 });
 
   // Set CORS headers
-  response.headers.set('Access-Control-Allow-Origin', '*');
-  response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+  response.headers.set("Access-Control-Allow-Origin", "*");
+  response.headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+  response.headers.set("Access-Control-Allow-Headers", "Content-Type");
 
   return response;
 }
@@ -53,7 +53,7 @@ async function checkSpriteExists(url: string): Promise<boolean> {
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
     const response = await fetch(url, {
-      method: 'HEAD',
+      method: "HEAD",
       signal: controller.signal,
     });
 
@@ -66,17 +66,17 @@ async function checkSpriteExists(url: string): Promise<boolean> {
       const timeoutId = setTimeout(() => controller.abort(), 3000);
 
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         signal: controller.signal,
         headers: {
-          Range: 'bytes=0-1023', // Only fetch first 1KB to minimize data transfer
+          Range: "bytes=0-1023", // Only fetch first 1KB to minimize data transfer
         },
       });
 
       clearTimeout(timeoutId);
       return response.ok;
     } catch (getError) {
-      console.warn('Failed to check sprite exists:', error, getError);
+      console.warn("Failed to check sprite exists:", error, getError);
       return false;
     }
   }
@@ -85,7 +85,7 @@ async function checkSpriteExists(url: string): Promise<boolean> {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    const id = searchParams.get("id");
     // Ignore cache busting version parameter (v)
     const maxVariants = 50;
 
@@ -98,10 +98,10 @@ export async function GET(request: NextRequest) {
     // Validate input
     if (!id) {
       const errorResponse = NextResponse.json(
-        { error: 'id parameter is required' },
-        { status: 400 }
+        { error: "id parameter is required" },
+        { status: 400 },
       );
-      errorResponse.headers.set('Access-Control-Allow-Origin', '*');
+      errorResponse.headers.set("Access-Control-Allow-Origin", "*");
       return errorResponse;
     }
 
@@ -112,9 +112,9 @@ export async function GET(request: NextRequest) {
           error:
             'Invalid id format. Expected format: "headId" or "headId.bodyId"',
         },
-        { status: 400 }
+        { status: 400 },
       );
-      errorResponse.headers.set('Access-Control-Allow-Origin', '*');
+      errorResponse.headers.set("Access-Control-Allow-Origin", "*");
       return errorResponse;
     }
 
@@ -128,33 +128,33 @@ export async function GET(request: NextRequest) {
     });
 
     // Wrap promise to handle rejections with proper error response and CORS headers
-    return processingPromise.catch(error => {
-      console.error('Error processing sprite variants:', error);
+    return processingPromise.catch((error) => {
+      console.error("Error processing sprite variants:", error);
 
       const errorResponse = NextResponse.json(
-        { error: 'Failed to process sprite variants' },
-        { status: 500 }
+        { error: "Failed to process sprite variants" },
+        { status: 500 },
       );
 
       // Set CORS headers on error response
-      errorResponse.headers.set('Access-Control-Allow-Origin', '*');
-      errorResponse.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-      errorResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+      errorResponse.headers.set("Access-Control-Allow-Origin", "*");
+      errorResponse.headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+      errorResponse.headers.set("Access-Control-Allow-Headers", "Content-Type");
 
       return errorResponse;
     });
   } catch (error) {
-    console.error('Error in sprite variants API:', error);
+    console.error("Error in sprite variants API:", error);
 
     const errorResponse = NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: "Internal server error" },
+      { status: 500 },
     );
 
     // Set CORS headers on error response too
-    errorResponse.headers.set('Access-Control-Allow-Origin', '*');
-    errorResponse.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    errorResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+    errorResponse.headers.set("Access-Control-Allow-Origin", "*");
+    errorResponse.headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+    errorResponse.headers.set("Access-Control-Allow-Headers", "Content-Type");
 
     return errorResponse;
   }
@@ -165,7 +165,7 @@ export async function GET(request: NextRequest) {
  */
 async function processSpriteVariants(
   id: string,
-  maxVariants: number
+  maxVariants: number,
 ): Promise<NextResponse> {
   const variants: string[] = [];
 
@@ -191,19 +191,19 @@ async function processSpriteVariants(
   const response = NextResponse.json(responseData);
 
   // Set CORS headers to allow requests from any origin
-  response.headers.set('Access-Control-Allow-Origin', '*');
-  response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+  response.headers.set("Access-Control-Allow-Origin", "*");
+  response.headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+  response.headers.set("Access-Control-Allow-Headers", "Content-Type");
 
   // CDN-optimized cache headers
   response.headers.set(
-    'Cache-Control',
-    'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600' // CDN edge caching
+    "Cache-Control",
+    "public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600", // CDN edge caching
   );
 
   // Additional CDN optimization headers
-  response.headers.set('Vary', 'Accept-Encoding'); // Enable compression
-  response.headers.set('X-Cache-Status', 'HIT'); // For debugging
+  response.headers.set("Vary", "Accept-Encoding"); // Enable compression
+  response.headers.set("X-Cache-Status", "HIT"); // For debugging
 
   return response;
 }

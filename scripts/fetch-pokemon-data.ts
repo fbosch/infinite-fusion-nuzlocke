@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
-import Pokedex from 'pokedex-promise-v2';
-import fs from 'fs/promises';
-import path from 'path';
-import type { DexEntry } from './scrape-pokedex';
-import { ConsoleFormatter } from './utils/console-utils';
-import * as cliProgress from 'cli-progress';
+import fs from "node:fs/promises";
+import path from "node:path";
+import type * as cliProgress from "cli-progress";
+import Pokedex from "pokedex-promise-v2";
+import type { DexEntry } from "./scrape-pokedex";
+import { ConsoleFormatter } from "./utils/console-utils";
 
 // Optimized configuration for pokedex-promise-v2
 const P = new Pokedex({
   cacheLimit: 24 * 60 * 60 * 1000, // 24 hours cache
-  timeout: 30 * 1000 // 30 second timeout
+  timeout: 30 * 1000, // 30 second timeout
 });
 
 // Cache for evolution chains to avoid duplicate API calls
@@ -26,18 +26,23 @@ async function fetchEvolutionChain(chainId: number): Promise<any> {
     evolutionChainCache.set(chainId, chainData);
     return chainData;
   } catch (error) {
-    ConsoleFormatter.warn(`Failed to fetch evolution chain ${chainId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    ConsoleFormatter.warn(
+      `Failed to fetch evolution chain ${chainId}: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
     return null;
   }
 }
 
-function extractEvolutionData(chainData: any, pokemonName: string): EvolutionData | undefined {
-  if (!chainData || !chainData.chain) {
+function extractEvolutionData(
+  chainData: any,
+  pokemonName: string,
+): EvolutionData | undefined {
+  if (!chainData?.chain) {
     return undefined;
   }
 
   const evolutionData: EvolutionData = {
-    evolves_to: []
+    evolves_to: [],
   };
 
   // Helper function to find Pokemon in evolution chain
@@ -57,8 +62,8 @@ function extractEvolutionData(chainData: any, pokemonName: string): EvolutionDat
   // Helper function to get evolution details
   function getEvolutionDetails(evolution: any): EvolutionDetail {
     const details: EvolutionDetail = {
-      id: parseInt(evolution.species.url.split('/').slice(-2)[0]),
-      name: evolution.species.name
+      id: parseInt(evolution.species.url.split("/").slice(-2)[0], 10),
+      name: evolution.species.name,
     };
 
     if (evolution.evolution_details && evolution.evolution_details.length > 0) {
@@ -70,11 +75,15 @@ function extractEvolutionData(chainData: any, pokemonName: string): EvolutionDat
       if (detail.trigger) details.trigger = detail.trigger.name;
 
       // Handle special conditions
-      if (detail.min_happiness) details.condition = `Happiness: ${detail.min_happiness}`;
-      if (detail.min_affection) details.condition = `Affection: ${detail.min_affection}`;
+      if (detail.min_happiness)
+        details.condition = `Happiness: ${detail.min_happiness}`;
+      if (detail.min_affection)
+        details.condition = `Affection: ${detail.min_affection}`;
       if (detail.time_of_day) details.condition = `Time: ${detail.time_of_day}`;
-      if (detail.known_move_type) details.condition = `Knows ${detail.known_move_type.name} move`;
-      if (detail.held_item_type) details.condition = `Holding ${detail.held_item_type.name}`;
+      if (detail.known_move_type)
+        details.condition = `Knows ${detail.known_move_type.name} move`;
+      if (detail.held_item_type)
+        details.condition = `Holding ${detail.held_item_type.name}`;
     }
 
     return details;
@@ -92,7 +101,11 @@ function extractEvolutionData(chainData: any, pokemonName: string): EvolutionDat
   }
 
   // Find what this Pokemon evolves from
-  function findPreEvolution(chain: any, targetName: string, parent: any = null): any {
+  function findPreEvolution(
+    chain: any,
+    targetName: string,
+    parent: any = null,
+  ): any {
     if (chain.species.name === targetName) {
       return parent;
     }
@@ -151,18 +164,26 @@ export interface ProcessedPokemonData {
 }
 
 async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
-  ConsoleFormatter.printHeader('Fetching Pokemon Data', 'Fetching Pokemon data from PokéAPI');
+  ConsoleFormatter.printHeader(
+    "Fetching Pokemon Data",
+    "Fetching Pokemon data from PokéAPI",
+  );
   const startTime = Date.now();
 
   try {
-    ConsoleFormatter.info('Loading Pokemon entries...');
+    ConsoleFormatter.info("Loading Pokemon entries...");
 
     // Read the pokemon entries with custom IDs and names
-    const pokemonEntriesPath = path.join(process.cwd(), 'data/shared/base-entries.json');
-    const pokemonEntriesData = await fs.readFile(pokemonEntriesPath, 'utf8');
+    const pokemonEntriesPath = path.join(
+      process.cwd(),
+      "data/shared/base-entries.json",
+    );
+    const pokemonEntriesData = await fs.readFile(pokemonEntriesPath, "utf8");
     const pokemonEntries: DexEntry[] = JSON.parse(pokemonEntriesData);
 
-    ConsoleFormatter.success(`Found ${pokemonEntries.length} Pokemon entries to fetch data for`);
+    ConsoleFormatter.success(
+      `Found ${pokemonEntries.length} Pokemon entries to fetch data for`,
+    );
 
     const pokemonData: ProcessedPokemonData[] = [];
 
@@ -177,20 +198,37 @@ async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
       batches.push(pokemonEntries.slice(i, i + batchSize));
     }
 
-    ConsoleFormatter.working(`Processing ${batches.length} batches (${batchSize} Pokemon each, ${maxConcurrentBatches} concurrent batches)`);
+    ConsoleFormatter.working(
+      `Processing ${batches.length} batches (${batchSize} Pokemon each, ${maxConcurrentBatches} concurrent batches)`,
+    );
 
     // Create main progress bar
-    const mainProgressBar = ConsoleFormatter.createProgressBar(pokemonEntries.length);
+    const mainProgressBar = ConsoleFormatter.createProgressBar(
+      pokemonEntries.length,
+    );
 
     let totalProcessed = 0;
 
     // Process batches with controlled concurrency
-    for (let batchIndex = 0; batchIndex < batches.length; batchIndex += maxConcurrentBatches) {
-      const currentBatches = batches.slice(batchIndex, batchIndex + maxConcurrentBatches);
+    for (
+      let batchIndex = 0;
+      batchIndex < batches.length;
+      batchIndex += maxConcurrentBatches
+    ) {
+      const currentBatches = batches.slice(
+        batchIndex,
+        batchIndex + maxConcurrentBatches,
+      );
 
       // Process multiple batches concurrently
       const batchPromises = currentBatches.map((batch, localIndex) =>
-        processBatch(batch, batchIndex + localIndex + 1, batches.length, mainProgressBar, totalProcessed)
+        processBatch(
+          batch,
+          batchIndex + localIndex + 1,
+          batches.length,
+          mainProgressBar,
+          totalProcessed,
+        ),
       );
 
       const batchResults = await Promise.all(batchPromises);
@@ -201,27 +239,38 @@ async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
         totalProcessed += batchResult.length;
       }
 
-      mainProgressBar.update(totalProcessed, { status: `Processed ${totalProcessed}/${pokemonEntries.length} Pokemon` });
+      mainProgressBar.update(totalProcessed, {
+        status: `Processed ${totalProcessed}/${pokemonEntries.length} Pokemon`,
+      });
 
       // Delay only between batch groups, not individual batches
       if (batchIndex + maxConcurrentBatches < batches.length) {
-        mainProgressBar.update(totalProcessed, { status: 'Pausing between batch groups...' });
-        await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
+        mainProgressBar.update(totalProcessed, {
+          status: "Pausing between batch groups...",
+        });
+        await new Promise((resolve) =>
+          setTimeout(resolve, delayBetweenBatches),
+        );
       }
     }
 
-    mainProgressBar.update(totalProcessed, { status: 'Complete!' });
+    mainProgressBar.update(totalProcessed, { status: "Complete!" });
     mainProgressBar.stop();
 
-    ConsoleFormatter.success(`Successfully fetched data for ${pokemonData.length} Pokemon`);
+    ConsoleFormatter.success(
+      `Successfully fetched data for ${pokemonData.length} Pokemon`,
+    );
 
     // Sort by custom ID to maintain Infinite Fusion order
     pokemonData.sort((a, b) => a.id - b.id);
 
     // Write to JSON file
-    ConsoleFormatter.info('Saving data to file...');
-    const outputPath = path.join(process.cwd(), 'data/shared/pokemon-data.json');
-    
+    ConsoleFormatter.info("Saving data to file...");
+    const outputPath = path.join(
+      process.cwd(),
+      "data/shared/pokemon-data.json",
+    );
+
     // Ensure the shared directory exists
     const sharedDir = path.dirname(outputPath);
     await fs.mkdir(sharedDir, { recursive: true });
@@ -232,17 +281,26 @@ async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
     const duration = Date.now() - startTime;
 
     // Success summary
-    ConsoleFormatter.printSummary('Pokemon Data Fetch Complete!', [
-      { label: 'Pokemon data saved to', value: outputPath, color: 'cyan' },
-      { label: 'Total Pokemon', value: pokemonData.length, color: 'green' },
-      { label: 'File size', value: ConsoleFormatter.formatFileSize(fileStats.size), color: 'cyan' },
-      { label: 'Duration', value: ConsoleFormatter.formatDuration(duration), color: 'yellow' }
+    ConsoleFormatter.printSummary("Pokemon Data Fetch Complete!", [
+      { label: "Pokemon data saved to", value: outputPath, color: "cyan" },
+      { label: "Total Pokemon", value: pokemonData.length, color: "green" },
+      {
+        label: "File size",
+        value: ConsoleFormatter.formatFileSize(fileStats.size),
+        color: "cyan",
+      },
+      {
+        label: "Duration",
+        value: ConsoleFormatter.formatDuration(duration),
+        color: "yellow",
+      },
     ]);
 
     return pokemonData;
-
   } catch (error) {
-    ConsoleFormatter.error(`Error fetching Pokemon data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    ConsoleFormatter.error(
+      `Error fetching Pokemon data: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
     process.exit(1);
   }
 }
@@ -252,40 +310,40 @@ async function processBatch(
   batchNumber: number,
   totalBatches: number,
   mainProgressBar: cliProgress.SingleBar,
-  currentTotal: number
+  currentTotal: number,
 ): Promise<ProcessedPokemonData[]> {
-
   // Prepare normalized names for batch API call
-  const batchEntries = batch.map(entry => {
-    const normalizedName = entry.name.toLowerCase()
-      .replace(/♀/g, '-f')
-      .replace(/♂/g, '-m')
-      .replace(/\./g, '')
-      .replace(/'/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/é/g, 'e')
-      .replace(/^aegislash.*$/i, 'aegislash-shield')
-      .replace(/^oricorio.*$/i, 'oricorio-baile')
-      .replace(/^deoxys.*$/i, 'deoxys-normal')
-      .replace(/^gourgeist.*$/i, 'gourgeist-average')
-      .replace(/^pumpkaboo.*$/i, 'pumpkaboo-average')
-      .replace(/^castform.*$/i, 'castform')
-      .replace(/^mimikyu.*$/i, 'mimikyu-disguised')
-      .replace(/^giratina.*$/i, 'giratina-altered')
-      .replace(/^minior.*$/i, 'minior-red-meteor')
-      .replace(/^meloetta.*$/i, 'meloetta-aria')
-      .replace(/^lycanroc.*$/i, 'lycanroc-midday')
-      .replace(/^necrozma.*$/i, 'necrozma')
+  const batchEntries = batch.map((entry) => {
+    const normalizedName = entry.name
+      .toLowerCase()
+      .replace(/♀/g, "-f")
+      .replace(/♂/g, "-m")
+      .replace(/\./g, "")
+      .replace(/'/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/é/g, "e")
+      .replace(/^aegislash.*$/i, "aegislash-shield")
+      .replace(/^oricorio.*$/i, "oricorio-baile")
+      .replace(/^deoxys.*$/i, "deoxys-normal")
+      .replace(/^gourgeist.*$/i, "gourgeist-average")
+      .replace(/^pumpkaboo.*$/i, "pumpkaboo-average")
+      .replace(/^castform.*$/i, "castform")
+      .replace(/^mimikyu.*$/i, "mimikyu-disguised")
+      .replace(/^giratina.*$/i, "giratina-altered")
+      .replace(/^minior.*$/i, "minior-red-meteor")
+      .replace(/^meloetta.*$/i, "meloetta-aria")
+      .replace(/^lycanroc.*$/i, "lycanroc-midday")
+      .replace(/^necrozma.*$/i, "necrozma");
 
     return { entry, normalizedName };
   });
 
-  const normalizedNames = batchEntries.map(item => item.normalizedName);
+  const normalizedNames = batchEntries.map((item) => item.normalizedName);
 
   try {
     // Update main progress bar with current batch info
     mainProgressBar.update(currentTotal, {
-      status: `Batch ${batchNumber}/${totalBatches}: ${batch[0].name} - ${batch[batch.length - 1].name}`
+      status: `Batch ${batchNumber}/${totalBatches}: ${batch[0].name} - ${batch[batch.length - 1].name}`,
     });
 
     // First get Pokemon data, then use those results to get species data
@@ -302,13 +360,18 @@ async function processBatch(
       const species = speciesResults[index];
 
       if (!pokemon || !species) {
-        throw new Error(`Missing data for "${item.entry.name}" (API name: ${item.normalizedName}) (ID ${item.entry.id})`);
+        throw new Error(
+          `Missing data for "${item.entry.name}" (API name: ${item.normalizedName}) (ID ${item.entry.id})`,
+        );
       }
 
       // Fetch evolution data if available
       let evolutionData: EvolutionData | undefined;
       if (species.evolution_chain?.url) {
-        const chainId = parseInt(species.evolution_chain.url.split('/').slice(-2)[0]);
+        const chainId = parseInt(
+          species.evolution_chain.url.split("/").slice(-2)[0],
+          10,
+        );
         const chainData = await fetchEvolutionChain(chainId);
         if (chainData) {
           evolutionData = extractEvolutionData(chainData, pokemon.species.name);
@@ -320,24 +383,23 @@ async function processBatch(
         nationalDexId: pokemon.id,
         name: item.entry.name, // Keep original name from Infinite Fusion
         types: pokemon.types.map((type: any) => ({
-          name: type.type.name
+          name: type.type.name,
         })),
         species: {
           is_legendary: species.is_legendary,
           is_mythical: species.is_mythical,
           generation: species.generation?.name || null,
-          evolution_chain: species.evolution_chain
+          evolution_chain: species.evolution_chain,
         },
-        evolution: evolutionData
+        evolution: evolutionData,
       });
     }
 
     return results;
-
-  } catch (error) {
+  } catch (_error) {
     // Update progress bar to show fallback mode
     mainProgressBar.update(currentTotal, {
-      status: `Batch ${batchNumber}/${totalBatches}: Fallback mode (individual calls)`
+      status: `Batch ${batchNumber}/${totalBatches}: Fallback mode (individual calls)`,
     });
 
     // Fallback to individual calls with controlled concurrency
@@ -345,70 +407,90 @@ async function processBatch(
     const concurrencyLimit = 10;
 
     // Create a mini progress bar for the fallback batch
-    const batchProgressBar = ConsoleFormatter.createMiniProgressBar(batchEntries.length, 'Starting individual calls...');
+    const batchProgressBar = ConsoleFormatter.createMiniProgressBar(
+      batchEntries.length,
+      "Starting individual calls...",
+    );
 
     for (let i = 0; i < batchEntries.length; i += concurrencyLimit) {
       const chunk = batchEntries.slice(i, i + concurrencyLimit);
 
-      const chunkPromises = chunk.map(async (item, chunkIndex): Promise<ProcessedPokemonData | null> => {
-        try {
-          const pokemon = await P.getPokemonByName(item.normalizedName);
-          const species = await P.getPokemonSpeciesByName(pokemon.id);
+      const chunkPromises = chunk.map(
+        async (item, chunkIndex): Promise<ProcessedPokemonData | null> => {
+          try {
+            const pokemon = await P.getPokemonByName(item.normalizedName);
+            const species = await P.getPokemonSpeciesByName(pokemon.id);
 
-          batchProgressBar.update(i + chunkIndex + 1, { status: `Fetched ${item.entry.name}` });
+            batchProgressBar.update(i + chunkIndex + 1, {
+              status: `Fetched ${item.entry.name}`,
+            });
 
-          // Fetch evolution data if available
-          let evolutionData: EvolutionData | undefined;
-          if (species.evolution_chain?.url) {
-            const chainId = parseInt(species.evolution_chain.url.split('/').slice(-2)[0]);
-            const chainData = await fetchEvolutionChain(chainId);
-            if (chainData) {
-              evolutionData = extractEvolutionData(chainData, pokemon.species.name);
+            // Fetch evolution data if available
+            let evolutionData: EvolutionData | undefined;
+            if (species.evolution_chain?.url) {
+              const chainId = parseInt(
+                species.evolution_chain.url.split("/").slice(-2)[0],
+                10,
+              );
+              const chainData = await fetchEvolutionChain(chainId);
+              if (chainData) {
+                evolutionData = extractEvolutionData(
+                  chainData,
+                  pokemon.species.name,
+                );
+              }
             }
-          }
 
-          return {
-            id: item.entry.id,
-            nationalDexId: pokemon.id,
-            name: item.entry.name,
-            types: pokemon.types.map((type: any) => ({
-              name: type.type.name
-            })),
-            species: {
-              is_legendary: species.is_legendary,
-              is_mythical: species.is_mythical,
-              generation: species.generation?.name || null,
-              evolution_chain: species.evolution_chain
-            },
-            evolution: evolutionData
-          };
-        } catch (error) {
-          batchProgressBar.update(i + chunkIndex + 1, { status: `Failed: ${item.entry.name}` });
-          return null;
-        }
-      });
+            return {
+              id: item.entry.id,
+              nationalDexId: pokemon.id,
+              name: item.entry.name,
+              types: pokemon.types.map((type: any) => ({
+                name: type.type.name,
+              })),
+              species: {
+                is_legendary: species.is_legendary,
+                is_mythical: species.is_mythical,
+                generation: species.generation?.name || null,
+                evolution_chain: species.evolution_chain,
+              },
+              evolution: evolutionData,
+            };
+          } catch (_error) {
+            batchProgressBar.update(i + chunkIndex + 1, {
+              status: `Failed: ${item.entry.name}`,
+            });
+            return null;
+          }
+        },
+      );
 
       const chunkResults = await Promise.all(chunkPromises);
       individualResults.push(...chunkResults);
 
       // Update batch progress
-      batchProgressBar.update(Math.min(i + concurrencyLimit, batchEntries.length), {
-        status: `Processing chunk ${Math.floor(i / concurrencyLimit) + 1}...`
-      });
+      batchProgressBar.update(
+        Math.min(i + concurrencyLimit, batchEntries.length),
+        {
+          status: `Processing chunk ${Math.floor(i / concurrencyLimit) + 1}...`,
+        },
+      );
 
       // Small delay between chunks in fallback mode
       if (i + concurrencyLimit < batchEntries.length) {
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
       }
     }
 
-    batchProgressBar.update(batchEntries.length, { status: 'Complete!' });
+    batchProgressBar.update(batchEntries.length, { status: "Complete!" });
     batchProgressBar.stop();
 
-    const validResults = individualResults.filter((result): result is ProcessedPokemonData => result !== null);
+    const validResults = individualResults.filter(
+      (result): result is ProcessedPokemonData => result !== null,
+    );
     return validResults;
   }
 }
 
 // Run the fetcher
-fetchPokemonData(); 
+fetchPokemonData();

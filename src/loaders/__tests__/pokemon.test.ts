@@ -179,7 +179,7 @@ describe("Pokemon Loader with Evolution Data", () => {
     expect(bulbasaurOption?.nationalDexId).toBeDefined();
 
     // Test getting evolution IDs separately
-    const evolutionIds = await getPokemonEvolutionIds(bulbasaurOption!.id);
+    const evolutionIds = await getPokemonEvolutionIds(bulbasaurOption?.id);
     expect(evolutionIds).toEqual([2]); // Ivysaur's ID
 
     // Test a Pokemon without evolutions (Venusaur is final evolution)
@@ -188,7 +188,7 @@ describe("Pokemon Loader with Evolution Data", () => {
     expect(venusaurOption).toBeDefined();
 
     const venusaurEvolutionIds = await getPokemonEvolutionIds(
-      venusaurOption!.id,
+      venusaurOption?.id,
     );
     expect(venusaurEvolutionIds).toEqual([]); // No evolutions
   });
@@ -199,7 +199,7 @@ describe("Pokemon Loader with Evolution Data", () => {
     const ivysaurOption = ivysaurResults.find((p) => p.name === "Ivysaur");
     expect(ivysaurOption).toBeDefined();
 
-    const preEvolutionId = await getPokemonPreEvolutionId(ivysaurOption!.id);
+    const preEvolutionId = await getPokemonPreEvolutionId(ivysaurOption?.id);
     expect(preEvolutionId).toBe(1); // Bulbasaur's ID
 
     // Test with Venusaur - should devolve to Ivysaur
@@ -208,7 +208,7 @@ describe("Pokemon Loader with Evolution Data", () => {
     expect(venusaurOption).toBeDefined();
 
     const venusaurPreEvolutionId = await getPokemonPreEvolutionId(
-      venusaurOption!.id,
+      venusaurOption?.id,
     );
     expect(venusaurPreEvolutionId).toBe(2); // Ivysaur's ID
 
@@ -220,7 +220,7 @@ describe("Pokemon Loader with Evolution Data", () => {
     expect(bulbasaurOption).toBeDefined();
 
     const bulbasaurPreEvolutionId = await getPokemonPreEvolutionId(
-      bulbasaurOption!.id,
+      bulbasaurOption?.id,
     );
     expect(bulbasaurPreEvolutionId).toBe(null); // No pre-evolution
   });
@@ -233,7 +233,7 @@ describe("Pokemon Loader with Evolution Data", () => {
     expect(eeveeOption).toBeDefined();
 
     // Test getting evolution IDs separately
-    const evolutionIds = await getPokemonEvolutionIds(eeveeOption!.id);
+    const evolutionIds = await getPokemonEvolutionIds(eeveeOption?.id);
     expect(evolutionIds.length).toBeGreaterThan(1); // Multiple evolutions
 
     // Check that it includes some known Eevee evolutions
@@ -250,7 +250,7 @@ describe("Pokemon Loader with Evolution Data", () => {
 
     expect(pikachuOption).toBeDefined();
     // Pikachu should have evolution data (evolves to Raichu)
-    const evolutionIds = await getPokemonEvolutionIds(pikachuOption!.id);
+    const evolutionIds = await getPokemonEvolutionIds(pikachuOption?.id);
     expect(evolutionIds).toEqual([26]); // Raichu's ID
   });
 });

@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Plus } from 'lucide-react';
-import AddCustomLocationModal from './AddCustomLocationModal';
-import CustomLocationsList from './CustomLocationsList';
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import AddCustomLocationModal from "./AddCustomLocationModal";
+import CustomLocationsList from "./CustomLocationsList";
 
 interface CustomLocationsManagerProps {
   className?: string;
 }
 
 export default function CustomLocationsManager({
-  className = '',
+  className = "",
 }: CustomLocationsManagerProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -18,15 +18,15 @@ export default function CustomLocationsManager({
     <div
       className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 ${className}`}
     >
-      <div className='flex items-center justify-between mb-4'>
-        <h2 className='text-lg  text-gray-900 dark:text-white'>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg  text-gray-900 dark:text-white">
           Custom Locations
         </h2>
         <button
           onClick={() => setIsModalOpen(true)}
-          className='inline-flex items-center space-x-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
+          className="inline-flex items-center space-x-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
-          <Plus className='h-4 w-4' />
+          <Plus className="h-4 w-4" />
           <span>Add Location</span>
         </button>
       </div>

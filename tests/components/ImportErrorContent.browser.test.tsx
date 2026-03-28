@@ -1,10 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { ImportErrorContent } from '@/components/playthrough/ImportErrorContent';
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { ImportErrorContent } from "@/components/playthrough/ImportErrorContent";
 
-describe('ImportErrorContent', () => {
-  describe('Zod validation errors', () => {
-    it('should display validation errors with proper formatting', () => {
+describe("ImportErrorContent", () => {
+  describe("Zod validation errors", () => {
+    it("should display validation errors with proper formatting", () => {
       const errorMessage = `Validation failed:
 
 • Invalid option: expected one of "classic"|"remix"|"randomized" at playthrough.gameMode
@@ -13,19 +13,19 @@ describe('ImportErrorContent', () => {
       render(<ImportErrorContent errorMessage={errorMessage} />);
 
       expect(
-        screen.getByText('The imported file has some issues:')
+        screen.getByText("The imported file has some issues:"),
       ).toBeInTheDocument();
       expect(
         screen.getByText(
-          'Invalid value: must be one of: classic, remix, randomized in the gameMode field'
-        )
+          "Invalid value: must be one of: classic, remix, randomized in the gameMode field",
+        ),
       ).toBeInTheDocument();
       expect(
-        screen.getByText('This field is required in the name field')
+        screen.getByText("This field is required in the name field"),
       ).toBeInTheDocument();
     });
 
-    it('should handle complex validation error paths', () => {
+    it("should handle complex validation error paths", () => {
       const errorMessage = `Validation failed:
 
 • Invalid type: expected string, received number at playthrough.customLocations.0.name`;
@@ -34,12 +34,12 @@ describe('ImportErrorContent', () => {
 
       expect(
         screen.getByText(
-          'Invalid value: expected string, received number in the name field'
-        )
+          "Invalid value: expected string, received number in the name field",
+        ),
       ).toBeInTheDocument();
     });
 
-    it('should handle single validation error', () => {
+    it("should handle single validation error", () => {
       const errorMessage = `Validation failed:
 
 • Required at playthrough.id`;
@@ -47,55 +47,55 @@ describe('ImportErrorContent', () => {
       render(<ImportErrorContent errorMessage={errorMessage} />);
 
       expect(
-        screen.getByText('The imported file has some issues:')
+        screen.getByText("The imported file has some issues:"),
       ).toBeInTheDocument();
       expect(
-        screen.getByText('This field is required in the id field')
+        screen.getByText("This field is required in the id field"),
       ).toBeInTheDocument();
     });
   });
 
-  describe('General import errors', () => {
-    it('should display file type errors', () => {
-      const errorMessage = 'File must have a .json extension';
+  describe("General import errors", () => {
+    it("should display file type errors", () => {
+      const errorMessage = "File must have a .json extension";
 
       render(<ImportErrorContent errorMessage={errorMessage} />);
 
       expect(
-        screen.getByText('File must have a .json extension')
+        screen.getByText("File must have a .json extension"),
       ).toBeInTheDocument();
       expect(
-        screen.queryByText('The imported file has some issues:')
+        screen.queryByText("The imported file has some issues:"),
       ).not.toBeInTheDocument();
     });
 
-    it('should display JSON syntax errors', () => {
-      const errorMessage = 'Invalid JSON syntax';
+    it("should display JSON syntax errors", () => {
+      const errorMessage = "Invalid JSON syntax";
 
       render(<ImportErrorContent errorMessage={errorMessage} />);
 
-      expect(screen.getByText('Invalid JSON syntax')).toBeInTheDocument();
+      expect(screen.getByText("Invalid JSON syntax")).toBeInTheDocument();
       expect(
-        screen.queryByText('The imported file has some issues:')
+        screen.queryByText("The imported file has some issues:"),
       ).not.toBeInTheDocument();
     });
 
-    it('should display generic import errors', () => {
-      const errorMessage = 'Import failed. Please try again.';
+    it("should display generic import errors", () => {
+      const errorMessage = "Import failed. Please try again.";
 
       render(<ImportErrorContent errorMessage={errorMessage} />);
 
       expect(
-        screen.getByText('Import failed. Please try again.')
+        screen.getByText("Import failed. Please try again."),
       ).toBeInTheDocument();
       expect(
-        screen.queryByText('The imported file has some issues:')
+        screen.queryByText("The imported file has some issues:"),
       ).not.toBeInTheDocument();
     });
   });
 
-  describe('Error message formatting', () => {
-    it('should remove bullet points from validation errors', () => {
+  describe("Error message formatting", () => {
+    it("should remove bullet points from validation errors", () => {
       const errorMessage = `Validation failed:
 
 • Invalid option: expected one of "classic"|"remix"|"randomized" at playthrough.gameMode`;
@@ -104,13 +104,13 @@ describe('ImportErrorContent', () => {
 
       expect(
         screen.getByText(
-          'Invalid value: must be one of: classic, remix, randomized in the gameMode field'
-        )
+          "Invalid value: must be one of: classic, remix, randomized in the gameMode field",
+        ),
       ).toBeInTheDocument();
-      expect(screen.queryByText('• Invalid option:')).not.toBeInTheDocument();
+      expect(screen.queryByText("• Invalid option:")).not.toBeInTheDocument();
     });
 
-    it('should format field references clearly', () => {
+    it("should format field references clearly", () => {
       const errorMessage = `Validation failed:
 
 • Required at playthrough.encounters.route1.head`;
@@ -118,11 +118,11 @@ describe('ImportErrorContent', () => {
       render(<ImportErrorContent errorMessage={errorMessage} />);
 
       expect(
-        screen.getByText('This field is required in the head field')
+        screen.getByText("This field is required in the head field"),
       ).toBeInTheDocument();
     });
 
-    it('should handle enum errors clearly', () => {
+    it("should handle enum errors clearly", () => {
       const errorMessage = `Validation failed:
 
 • Invalid option: expected one of "classic"|"remix"|"randomized" at playthrough.gameMode`;
@@ -131,41 +131,41 @@ describe('ImportErrorContent', () => {
 
       expect(
         screen.getByText(
-          'Invalid value: must be one of: classic, remix, randomized in the gameMode field'
-        )
+          "Invalid value: must be one of: classic, remix, randomized in the gameMode field",
+        ),
       ).toBeInTheDocument();
     });
   });
 
-  describe('Edge cases', () => {
-    it('should handle empty error message', () => {
-      render(<ImportErrorContent errorMessage='' />);
+  describe("Edge cases", () => {
+    it("should handle empty error message", () => {
+      render(<ImportErrorContent errorMessage="" />);
 
       expect(
-        screen.queryByText('The imported file has some issues:')
+        screen.queryByText("The imported file has some issues:"),
       ).not.toBeInTheDocument();
     });
 
-    it('should handle error message without validation section', () => {
-      const errorMessage = 'Some random error message';
+    it("should handle error message without validation section", () => {
+      const errorMessage = "Some random error message";
 
       render(<ImportErrorContent errorMessage={errorMessage} />);
 
-      expect(screen.getByText('Some random error message')).toBeInTheDocument();
+      expect(screen.getByText("Some random error message")).toBeInTheDocument();
       expect(
-        screen.queryByText('The imported file has some issues:')
+        screen.queryByText("The imported file has some issues:"),
       ).not.toBeInTheDocument();
     });
 
     it('should handle error message with only "Validation failed:" header', () => {
-      const errorMessage = 'Validation failed:';
+      const errorMessage = "Validation failed:";
 
       render(<ImportErrorContent errorMessage={errorMessage} />);
 
       expect(
-        screen.getByText('The imported file has some issues:')
+        screen.getByText("The imported file has some issues:"),
       ).toBeInTheDocument();
-      expect(screen.queryByText('•')).not.toBeInTheDocument();
+      expect(screen.queryByText("•")).not.toBeInTheDocument();
     });
   });
 });

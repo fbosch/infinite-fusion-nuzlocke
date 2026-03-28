@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useSyncExternalStore } from 'react';
+import { useCallback, useMemo, useRef, useSyncExternalStore } from "react";
 
 const callbacks = new Set<(key: string) => void>();
 
@@ -23,7 +23,7 @@ function triggerCallbacks(key: string): void {
  */
 export function useLocalStorage<T>(
   key: string,
-  initialValue: T
+  initialValue: T,
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
   const stringifiedInitialValue = JSON.stringify(initialValue);
 
@@ -32,7 +32,7 @@ export function useLocalStorage<T>(
       // Check if the key exists in fallback storage
       fallbackStorage.has(key)
         ? fallbackStorage.get(key) // use cached value
-        : typeof window !== 'undefined' && globalThis.localStorage
+        : typeof window !== "undefined" && globalThis.localStorage
           ? globalThis.localStorage.getItem(key) // otherwise get from localStorage
           : null;
 
@@ -44,13 +44,13 @@ export function useLocalStorage<T>(
   const initialStorageValue = useRef<T>(
     initialStorageSnapshot
       ? (JSON.parse(initialStorageSnapshot.current as string) as T)
-      : initialValue
+      : initialValue,
   );
 
   const subscribe = useCallback(
     (onStoreChange: () => void) => {
       // Return early no-op if not in browser environment
-      if (typeof window === 'undefined') {
+      if (typeof window === "undefined") {
         return () => {};
       }
 
@@ -65,13 +65,13 @@ export function useLocalStorage<T>(
         }
       };
       callbacks.add(onChange);
-      window.addEventListener('storage', onStorageChange);
+      window.addEventListener("storage", onStorageChange);
       return () => {
         callbacks.delete(onChange);
-        window.removeEventListener('storage', onStorageChange);
+        window.removeEventListener("storage", onStorageChange);
       };
     },
-    [key]
+    [key],
   );
 
   const getServerSnapshot = (): string | null => {
@@ -84,13 +84,13 @@ export function useLocalStorage<T>(
   const setState = useCallback<React.Dispatch<React.SetStateAction<T>>>(
     (newValue: React.SetStateAction<T>) => {
       const value =
-        typeof newValue === 'function'
+        typeof newValue === "function"
           ? (newValue as (prevState: T) => T)(initialStorageValue.current)
           : newValue;
 
       try {
         initialStorageValue.current = value;
-        if (typeof window !== 'undefined' && globalThis.localStorage) {
+        if (typeof window !== "undefined" && globalThis.localStorage) {
           localStorage.setItem(key, JSON.stringify(value));
           fallbackStorage.delete(key);
         } else {
@@ -104,15 +104,15 @@ export function useLocalStorage<T>(
 
       triggerCallbacks(key);
     },
-    [key]
+    [key],
   );
 
   return useMemo(
     () => [
-      (JSON.parse(value ? value : stringifiedInitialValue) ?? '{}') as T,
+      (JSON.parse(value ? value : stringifiedInitialValue) ?? "{}") as T,
       setState,
     ],
-    [value, setState, stringifiedInitialValue]
+    [value, setState, stringifiedInitialValue],
   );
 }
 

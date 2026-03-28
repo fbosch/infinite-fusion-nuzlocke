@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import * as cheerio from "cheerio";
-import * as fs from "fs/promises";
-import * as path from "path";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
 import {
@@ -152,7 +152,7 @@ function groupPokemonByLocation<
     if (!locationMap.has(item.location)) {
       locationMap.set(item.location, []);
     }
-    locationMap.get(item.location)!.push(item.pokemonId);
+    locationMap.get(item.location)?.push(item.pokemonId);
   }
 
   // Convert to array and sort by location name
@@ -205,7 +205,7 @@ async function scrapePokedexForSpecialEncounters(
       const rows = $table.find("tr");
       console.log(`Processing table ${tableIndex} with ${rows.length} rows`);
 
-      rows.each((rowIndex: number, row: any) => {
+      rows.each((_rowIndex: number, row: any) => {
         const $row = $(row);
         const cells = $row.find("td");
 

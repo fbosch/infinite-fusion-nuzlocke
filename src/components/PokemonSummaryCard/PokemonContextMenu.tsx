@@ -1,42 +1,42 @@
-import { ContextMenu, type ContextMenuItem } from '@/components/ContextMenu';
-import { Fragment, useState, useMemo, useCallback } from 'react';
 import {
   ArrowUpRight,
+  Computer,
+  Gift,
   Loader2,
   Replace,
   Skull,
-  Computer,
-  Gift,
-} from 'lucide-react';
-import PokeballIcon from '@/assets/images/pokeball.svg';
-import EscapeIcon from '@/assets/images/escape-cloud.svg';
-import HeadIcon from '@/assets/images/head.svg';
-import BodyIcon from '@/assets/images/body.svg';
-import { useSpriteVariants, usePreferredVariantState } from '@/hooks/useSprite';
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import { useCallback, useMemo, useState } from "react";
+import { useSnapshot } from "valtio";
+import BodyIcon from "@/assets/images/body.svg";
+import EscapeIcon from "@/assets/images/escape-cloud.svg";
+import HeadIcon from "@/assets/images/head.svg";
+import PokeballIcon from "@/assets/images/pokeball.svg";
+import { ContextMenu, type ContextMenuItem } from "@/components/ContextMenu";
+import { usePreferredVariantState, useSpriteVariants } from "@/hooks/useSprite";
 import {
   isEggId,
   type PokemonOptionType,
   PokemonStatus,
-} from '@/loaders/pokemon';
-import { playthroughActions } from '@/stores/playthroughs';
-import { settingsStore } from '@/stores/settings';
-import { useSnapshot } from 'valtio';
-import { getDisplayPokemon } from './utils';
-import dynamic from 'next/dynamic';
-import { getSpriteId } from '../../lib/sprites';
+} from "@/loaders/pokemon";
+import { playthroughActions } from "@/stores/playthroughs";
+import { settingsStore } from "@/stores/settings";
+import { getSpriteId } from "../../lib/sprites";
+import { getDisplayPokemon } from "./utils";
 
 const LocationSelector = dynamic(
-  () => import('./LocationSelector').then(mod => mod.LocationSelector),
+  () => import("./LocationSelector").then((mod) => mod.LocationSelector),
   {
     ssr: false,
-  }
+  },
 );
 
 const ArtworkVariantModal = dynamic(
-  () => import('./ArtworkVariantModal').then(mod => mod.ArtworkVariantModal),
+  () => import("./ArtworkVariantModal").then((mod) => mod.ArtworkVariantModal),
   {
     ssr: false,
-  }
+  },
 );
 
 interface PokemonContextMenuProps {
@@ -64,7 +64,7 @@ export function PokemonContextMenu({
   const displayPokemon = getDisplayPokemon(
     encounterData?.head ?? null,
     encounterData?.body ?? null,
-    encounterData?.isFusion ?? false
+    encounterData?.isFusion ?? false,
   );
 
   const eitherPokemonIsEgg =
@@ -74,14 +74,14 @@ export function PokemonContextMenu({
   const { data: variants, isLoading: isLoadingVariants } = useSpriteVariants(
     displayPokemon.head?.id,
     displayPokemon.body?.id,
-    shouldLoad && !eitherPokemonIsEgg
+    shouldLoad && !eitherPokemonIsEgg,
   );
   const hasArtVariants = variants && variants.length > 1;
 
   // Get current preferred variant for the display Pokemon
   const { variant: preferredVariant } = usePreferredVariantState(
     displayPokemon.head?.id ?? null,
-    displayPokemon.body?.id ?? null
+    displayPokemon.body?.id ?? null,
   );
 
   const [hasContextMenuBeenOpened, setHasContextMenuBeenOpened] =
@@ -117,14 +117,14 @@ export function PokemonContextMenu({
 
   // Handler for moving head Pokemon
   const handleMoveHead = useCallback(
-    async (targetLocationId: string, targetField: 'head' | 'body') => {
+    async (targetLocationId: string, targetField: "head" | "body") => {
       if (!encounterData?.head) return;
 
       // Check if there's already a Pokemon in the target slot
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       const targetEncounter = activePlaythrough?.encounters?.[targetLocationId];
       const existingPokemon = targetEncounter
-        ? targetField === 'head'
+        ? targetField === "head"
           ? targetEncounter.head
           : targetEncounter.body
         : null;
@@ -134,33 +134,33 @@ export function PokemonContextMenu({
         await playthroughActions.swapEncounters(
           locationId,
           targetLocationId,
-          'head',
-          targetField
+          "head",
+          targetField,
         );
       } else {
         // If the target slot is empty, use atomic move to preserve other Pokemon at source
         await playthroughActions.moveEncounterAtomic(
           locationId,
-          'head',
+          "head",
           targetLocationId,
           targetField,
-          encounterData.head
+          encounterData.head,
         );
       }
     },
-    [encounterData?.head, locationId]
+    [encounterData?.head, locationId],
   );
 
   // Handler for moving body Pokemon
   const handleMoveBody = useCallback(
-    async (targetLocationId: string, targetField: 'head' | 'body') => {
+    async (targetLocationId: string, targetField: "head" | "body") => {
       if (!encounterData?.body) return;
 
       // Check if there's already a Pokemon in the target slot
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       const targetEncounter = activePlaythrough?.encounters?.[targetLocationId];
       const existingPokemon = targetEncounter
-        ? targetField === 'head'
+        ? targetField === "head"
           ? targetEncounter.head
           : targetEncounter.body
         : null;
@@ -170,28 +170,28 @@ export function PokemonContextMenu({
         await playthroughActions.swapEncounters(
           locationId,
           targetLocationId,
-          'body',
-          targetField
+          "body",
+          targetField,
         );
       } else {
         // If the target slot is empty, use atomic move to preserve other Pokemon at source
         await playthroughActions.moveEncounterAtomic(
           locationId,
-          'body',
+          "body",
           targetLocationId,
           targetField,
-          encounterData.body
+          encounterData.body,
         );
       }
     },
-    [encounterData?.body, locationId]
+    [encounterData?.body, locationId],
   );
 
   const contextItems = useMemo<ContextMenuItem[]>(() => {
     // Use display Pokemon for links instead of raw encounter data
     const id = getSpriteId(displayPokemon.head?.id, displayPokemon.body?.id);
     const infinitefusiondexLink = `https://infinitefusiondex.com/details/${id}`;
-    const fusiondexLink = `https://fusiondex.org/sprite/pif/${id}${preferredVariant ? `${preferredVariant}` : ''}/`;
+    const fusiondexLink = `https://fusiondex.org/sprite/pif/${id}${preferredVariant ? `${preferredVariant}` : ""}/`;
 
     // Get current status (both Pokemon should have the same status in a fusion)
     const currentStatus =
@@ -200,17 +200,17 @@ export function PokemonContextMenu({
 
     const items: ContextMenuItem[] = [
       {
-        id: 'change-variant',
-        label: 'Change Preferred Artwork',
+        id: "change-variant",
+        label: "Change Preferred Artwork",
         disabled: eitherPokemonIsEgg || !hasArtVariants,
         icon: isLoadingVariants ? Loader2 : Replace,
         tooltip:
           eitherPokemonIsEgg || !hasArtVariants
             ? isLoadingVariants
-              ? 'Loading artwork variants...'
-              : 'No artwork variants available'
+              ? "Loading artwork variants..."
+              : "No artwork variants available"
             : undefined,
-        iconClassName: isLoadingVariants ? 'animate-spin' : '',
+        iconClassName: isLoadingVariants ? "animate-spin" : "",
         onClick: () => {
           setIsVariantModalOpen(true);
         },
@@ -220,7 +220,7 @@ export function PokemonContextMenu({
     // Only show status options if there are Pokemon, they're not eggs, and status actions are enabled
     if (hasPokemon && !eitherPokemonIsEgg && showStatusActions) {
       items.push({
-        id: 'separator-1',
+        id: "separator-1",
         separator: true,
       });
 
@@ -230,8 +230,8 @@ export function PokemonContextMenu({
         currentStatus !== PokemonStatus.MISSED
       ) {
         items.push({
-          id: 'mark-deceased',
-          label: 'Mark as Deceased',
+          id: "mark-deceased",
+          label: "Mark as Deceased",
           icon: Skull,
 
           onClick: handleMarkAsDeceased,
@@ -246,8 +246,8 @@ export function PokemonContextMenu({
         currentStatus === PokemonStatus.DECEASED
       ) {
         items.push({
-          id: 'move-to-box',
-          label: 'Move to Box',
+          id: "move-to-box",
+          label: "Move to Box",
           icon: Computer,
 
           onClick: handleMoveToBox,
@@ -260,8 +260,8 @@ export function PokemonContextMenu({
         currentStatus !== PokemonStatus.RECEIVED
       ) {
         items.push({
-          id: 'mark-captured',
-          label: 'Mark as Captured',
+          id: "mark-captured",
+          label: "Mark as Captured",
           icon: PokeballIcon,
 
           onClick: handleMarkAsCaptured,
@@ -271,8 +271,8 @@ export function PokemonContextMenu({
       // Show "Mark as Missed" only when no status is set on either Pokemon
       if (!currentStatus) {
         items.push({
-          id: 'mark-missed',
-          label: 'Mark as Missed',
+          id: "mark-missed",
+          label: "Mark as Missed",
           icon: EscapeIcon,
 
           onClick: handleMarkAsMissed,
@@ -285,8 +285,8 @@ export function PokemonContextMenu({
         currentStatus !== PokemonStatus.CAPTURED
       ) {
         items.push({
-          id: 'mark-received',
-          label: 'Mark as Received',
+          id: "mark-received",
+          label: "Mark as Received",
           icon: Gift,
 
           onClick: handleMarkAsReceived,
@@ -304,8 +304,8 @@ export function PokemonContextMenu({
         // Show "Move Head" if head Pokemon exists
         if (encounterData?.head) {
           moveActions.push({
-            id: 'move-head',
-            label: 'Move Head',
+            id: "move-head",
+            label: "Move Head",
             icon: HeadIcon,
             onClick: () => {
               setIsMoveHeadModalOpen(true);
@@ -316,8 +316,8 @@ export function PokemonContextMenu({
         // Show "Move Body" if body Pokemon exists
         if (encounterData?.body) {
           moveActions.push({
-            id: 'move-body',
-            label: 'Move Body',
+            id: "move-body",
+            label: "Move Body",
             icon: BodyIcon,
             onClick: () => {
               setIsMoveBodyModalOpen(true);
@@ -328,7 +328,7 @@ export function PokemonContextMenu({
         // Only add separator and move actions if there are actually move actions to show
         if (moveActions.length > 0) {
           items.push({
-            id: 'separator-move',
+            id: "separator-move",
             separator: true,
           });
           items.push(...moveActions);
@@ -337,30 +337,30 @@ export function PokemonContextMenu({
     }
 
     items.push({
-      id: 'separator-2',
+      id: "separator-2",
       separator: true,
     });
 
     // Add external links
     items.push(
       {
-        id: 'infinitefusiondex',
-        label: 'Open InfiniteDex entry',
+        id: "infinitefusiondex",
+        label: "Open InfiniteDex entry",
         href: infinitefusiondexLink,
-        target: '_blank',
-        favicon: 'https://infinitefusiondex.com/images/favicon.ico',
+        target: "_blank",
+        favicon: "https://infinitefusiondex.com/images/favicon.ico",
         icon: ArrowUpRight,
-        iconClassName: 'dark:text-blue-300 text-blue-400',
+        iconClassName: "dark:text-blue-300 text-blue-400",
       },
       {
-        id: 'fusiondex',
-        label: 'Open FusionDex entry',
+        id: "fusiondex",
+        label: "Open FusionDex entry",
         href: fusiondexLink,
-        target: '_blank',
-        favicon: 'https://www.fusiondex.org/favicon.ico',
+        target: "_blank",
+        favicon: "https://www.fusiondex.org/favicon.ico",
         icon: ArrowUpRight,
-        iconClassName: 'dark:text-blue-300 text-blue-400',
-      }
+        iconClassName: "dark:text-blue-300 text-blue-400",
+      },
     );
 
     return items;
@@ -385,7 +385,7 @@ export function PokemonContextMenu({
       <ContextMenu
         disabled={eitherPokemonIsEgg}
         items={contextItems}
-        portalRootId='location-table'
+        portalRootId="location-table"
         onOpenChange={
           hasContextMenuBeenOpened
             ? undefined
@@ -412,7 +412,7 @@ export function PokemonContextMenu({
           encounterData={
             encounterData?.head ? { head: encounterData.head } : null
           }
-          moveTargetField='head'
+          moveTargetField="head"
         />
       )}
 
@@ -425,7 +425,7 @@ export function PokemonContextMenu({
           encounterData={
             encounterData?.body ? { body: encounterData.body } : null
           }
-          moveTargetField='body'
+          moveTargetField="body"
         />
       )}
     </>

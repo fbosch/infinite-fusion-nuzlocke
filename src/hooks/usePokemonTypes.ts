@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import { useAllPokemon } from '@/loaders/pokemon';
-import type { TypeName } from '@/lib/typings';
-import { getTypesForPokemon, TypeQuery } from '@/lib/typings';
+import { useMemo } from "react";
+import type { TypeName } from "@/lib/typings";
+import { getTypesForPokemon, type TypeQuery } from "@/lib/typings";
+import { useAllPokemon } from "@/loaders/pokemon";
 
 export interface UsePokemonTypesResult {
   primary?: TypeName;
@@ -10,7 +10,7 @@ export interface UsePokemonTypesResult {
 }
 
 export function usePokemonTypes(
-  query: TypeQuery | undefined
+  query: TypeQuery | undefined,
 ): UsePokemonTypesResult {
   const { data: allPokemon = [], isLoading } = useAllPokemon();
 
@@ -19,18 +19,18 @@ export function usePokemonTypes(
     if (!allPokemon || allPokemon.length === 0) return { isLoading: true };
 
     const resolveBy = (q: TypeQuery) => {
-      if ('name' in q) {
+      if ("name" in q) {
         const p = allPokemon.find(
-          x => x.name.toLowerCase() === q.name?.toLowerCase()
+          (x) => x.name.toLowerCase() === q.name?.toLowerCase(),
         );
         return p ? getTypesForPokemon(p) : undefined;
       }
-      if ('id' in q) {
-        const p = allPokemon.find(x => x.id === q.id);
+      if ("id" in q) {
+        const p = allPokemon.find((x) => x.id === q.id);
         return p ? getTypesForPokemon(p) : undefined;
       }
-      if ('nationalDexId' in q) {
-        const p = allPokemon.find(x => x.nationalDexId === q.nationalDexId);
+      if ("nationalDexId" in q) {
+        const p = allPokemon.find((x) => x.nationalDexId === q.nationalDexId);
         return p ? getTypesForPokemon(p) : undefined;
       }
       return undefined;

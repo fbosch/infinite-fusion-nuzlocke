@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import React, { useCallback } from 'react';
-import { Dna, DnaOff } from 'lucide-react';
-import clsx from 'clsx';
-import { useSnapshot } from 'valtio';
-import { dragStore, dragActions } from '@/stores/dragStore';
-import { playthroughActions } from '@/stores/playthroughs';
-import type { PokemonOptionType } from '@/loaders/pokemon';
-import { CursorTooltip } from '../CursorTooltip';
-import { DNA_SPLICER_ICON } from '@/constants/items';
-import Image from 'next/image';
-import { useAllPokemon, usePokemonNameMap, isEgg } from '@/loaders/pokemon';
+import clsx from "clsx";
+import { Dna, DnaOff } from "lucide-react";
+import Image from "next/image";
+import type React from "react";
+import { useCallback } from "react";
+import { useSnapshot } from "valtio";
+import { DNA_SPLICER_ICON } from "@/constants/items";
+import type { PokemonOptionType } from "@/loaders/pokemon";
+import { isEgg, useAllPokemon, usePokemonNameMap } from "@/loaders/pokemon";
+import { dragActions, dragStore } from "@/stores/dragStore";
+import { playthroughActions } from "@/stores/playthroughs";
+import { CursorTooltip } from "../CursorTooltip";
 
 interface FusionToggleButtonProps {
   locationId: string;
@@ -35,7 +36,7 @@ export function FusionToggleButton({
       e.preventDefault();
       e.stopPropagation();
 
-      const pokemonName = e.dataTransfer.getData('text/plain');
+      const pokemonName = e.dataTransfer.getData("text/plain");
       if (!pokemonName) return;
 
       // Check if this drop is from a different combobox
@@ -58,7 +59,8 @@ export function FusionToggleButton({
         try {
           // Find Pokemon by name (case insensitive)
           const foundPokemon = allPokemon.find(
-            p => nameMap?.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
+            (p) =>
+              nameMap?.get(p.id)?.toLowerCase() === pokemonName.toLowerCase(),
           );
 
           if (foundPokemon) {
@@ -79,22 +81,22 @@ export function FusionToggleButton({
             await playthroughActions.createFusion(
               locationId,
               selectedPokemon,
-              pokemonOption
+              pokemonOption,
             );
 
             if (dragSnapshot.currentDragSource) {
               const { locationId: sourceLocationId, field: sourceField } =
                 playthroughActions.getLocationFromComboboxId(
-                  dragSnapshot.currentDragSource
+                  dragSnapshot.currentDragSource,
                 );
               await playthroughActions.clearEncounterFromLocation(
                 sourceLocationId,
-                sourceField
+                sourceField,
               );
             }
           }
         } catch (err) {
-          console.error('Error finding Pokemon by name:', err);
+          console.error("Error finding Pokemon by name:", err);
         }
       };
 
@@ -108,7 +110,7 @@ export function FusionToggleButton({
       locationId,
       allPokemon,
       nameMap,
-    ]
+    ],
   );
 
   // Handle drag over
@@ -119,13 +121,13 @@ export function FusionToggleButton({
 
       // Only allow drop if this row is not already a fusion and has an existing encounter
       if (isFusion || !selectedPokemon) {
-        e.dataTransfer.dropEffect = 'none';
+        e.dataTransfer.dropEffect = "none";
         return;
       }
 
       // Prevent drop if the button is disabled (Egg in non-fusion mode)
       if (!isFusion && selectedPokemon && isEgg(selectedPokemon)) {
-        e.dataTransfer.dropEffect = 'none';
+        e.dataTransfer.dropEffect = "none";
         return;
       }
 
@@ -137,12 +139,12 @@ export function FusionToggleButton({
         dragSnapshot.currentDragSource !== `${locationId}-body`;
 
       if (isFromDifferentCombobox) {
-        e.dataTransfer.dropEffect = 'copy';
+        e.dataTransfer.dropEffect = "copy";
       } else {
-        e.dataTransfer.dropEffect = 'none';
+        e.dataTransfer.dropEffect = "none";
       }
     },
-    [isFusion, selectedPokemon, dragSnapshot.currentDragSource, locationId]
+    [isFusion, selectedPokemon, dragSnapshot.currentDragSource, locationId],
   );
 
   // Handle drag end
@@ -162,55 +164,55 @@ export function FusionToggleButton({
 
   // Disable fusion toggle if not in fusion mode and the selected pokemon is an Egg
   const isDisabled = Boolean(
-    !isFusion && selectedPokemon && isEgg(selectedPokemon)
+    !isFusion && selectedPokemon && isEgg(selectedPokemon),
   );
 
   return (
     <button
-      type='button'
+      type="button"
       onClick={onToggleFusion}
       onDrop={handleFusionDrop}
       onDragOver={handleFusionDragOver}
       onDragEnd={handleFusionDragEnd}
       disabled={isDisabled}
       className={clsx(
-        'group',
-        'size-10 flex items-center justify-center self-center',
-        'p-2 rounded-md border transition-all duration-200',
-        'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+        "group",
+        "size-10 flex items-center justify-center self-center",
+        "p-2 rounded-md border transition-all duration-200",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
         {
           // Fusion mode (enabled)
-          'cursor-pointer bg-white border-gray-300 text-gray-700 hover:bg-red-500 hover:border-red-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300':
+          "cursor-pointer bg-white border-gray-300 text-gray-700 hover:bg-red-500 hover:border-red-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300":
             isFusion,
           // Non-fusion mode (enabled)
-          'cursor-pointer bg-white border-gray-300 text-gray-700 hover:bg-green-700 hover:border-green-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-green-700':
+          "cursor-pointer bg-white border-gray-300 text-gray-700 hover:bg-green-700 hover:border-green-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-green-700":
             !isFusion && !isDisabled,
           // Disabled state
-          'cursor-not-allowed bg-gray-100 border-gray-200 text-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-500':
+          "cursor-not-allowed bg-gray-100 border-gray-200 text-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-500":
             isDisabled,
           // Drop allowed indicator
-          'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20':
+          "ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20":
             isDropAllowed && !isDisabled,
-        }
+        },
       )}
       aria-label={
         isDisabled
-          ? 'Cannot fuse Eggs'
-          : `Toggle fusion for ${selectedPokemon?.name || 'Pokemon'}`
+          ? "Cannot fuse Eggs"
+          : `Toggle fusion for ${selectedPokemon?.name || "Pokemon"}`
       }
     >
       <CursorTooltip
         content={
-          <div className='flex items-center gap-2'>
+          <div className="flex items-center gap-2">
             <Image
               src={DNA_SPLICER_ICON}
-              alt='DNA Splicer'
+              alt="DNA Splicer"
               width={24}
               height={24}
-              className='object-contain object-center image-rendering-pixelated'
+              className="object-contain object-center image-rendering-pixelated"
             />
-            <span className='text-sm'>
-              {isDisabled ? 'Cannot fuse Eggs' : isFusion ? 'Unfuse' : 'Fuse'}
+            <span className="text-sm">
+              {isDisabled ? "Cannot fuse Eggs" : isFusion ? "Unfuse" : "Fuse"}
             </span>
           </div>
         }
@@ -219,19 +221,19 @@ export function FusionToggleButton({
         {isFusion ? (
           <DnaOff
             className={clsx(
-              'size-6',
+              "size-6",
               isDisabled
-                ? 'text-gray-400 dark:text-gray-500'
-                : 'group-hover:text-white'
+                ? "text-gray-400 dark:text-gray-500"
+                : "group-hover:text-white",
             )}
           />
         ) : (
           <Dna
             className={clsx(
-              'size-6',
+              "size-6",
               isDisabled
-                ? 'text-gray-400 dark:text-gray-500'
-                : 'group-hover:text-white'
+                ? "text-gray-400 dark:text-gray-500"
+                : "group-hover:text-white",
             )}
           />
         )}

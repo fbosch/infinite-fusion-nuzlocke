@@ -1,12 +1,12 @@
 import {
-  PokemonStatus,
   type PokemonOptionType,
+  PokemonStatus,
   type PokemonStatusType,
-} from '@/loaders/pokemon';
+} from "@/loaders/pokemon";
 
 // Status predicates (status-level)
 export function isActiveStatus(
-  status: PokemonStatusType | null | undefined
+  status: PokemonStatusType | null | undefined,
 ): boolean {
   return (
     status === PokemonStatus.CAPTURED ||
@@ -16,25 +16,25 @@ export function isActiveStatus(
 }
 
 export function isDeceasedStatus(
-  status: PokemonStatusType | null | undefined
+  status: PokemonStatusType | null | undefined,
 ): boolean {
   return status === PokemonStatus.DECEASED;
 }
 
 export function isStoredStatus(
-  status: PokemonStatusType | null | undefined
+  status: PokemonStatusType | null | undefined,
 ): boolean {
   return status === PokemonStatus.STORED;
 }
 
 export function isMissedStatus(
-  status: PokemonStatusType | null | undefined
+  status: PokemonStatusType | null | undefined,
 ): boolean {
   return status === PokemonStatus.MISSED;
 }
 
 export function isInactiveStatus(
-  status: PokemonStatusType | null | undefined
+  status: PokemonStatusType | null | undefined,
 ): boolean {
   return isDeceasedStatus(status) || isStoredStatus(status);
 }
@@ -45,13 +45,13 @@ export function isPokemonActive(pokemon: PokemonOptionType | null | undefined) {
 }
 
 export function isPokemonInactive(
-  pokemon: PokemonOptionType | null | undefined
+  pokemon: PokemonOptionType | null | undefined,
 ) {
   return isInactiveStatus(pokemon?.status);
 }
 
 export function isPokemonDeceased(
-  pokemon: PokemonOptionType | null | undefined
+  pokemon: PokemonOptionType | null | undefined,
 ) {
   return isDeceasedStatus(pokemon?.status);
 }
@@ -61,22 +61,22 @@ export function isPokemonStored(pokemon: PokemonOptionType | null | undefined) {
 }
 
 // Fusion status categories to simplify gating logic
-export type FusionStatusCategory = 'none' | 'active' | 'inactive' | 'missed';
+export type FusionStatusCategory = "none" | "active" | "inactive" | "missed";
 
 export function getFusionStatusCategory(
-  status: PokemonStatusType | null | undefined
+  status: PokemonStatusType | null | undefined,
 ): FusionStatusCategory {
-  if (!status) return 'none';
-  if (isActiveStatus(status)) return 'active';
-  if (isInactiveStatus(status)) return 'inactive';
-  if (isMissedStatus(status)) return 'missed';
-  return 'none';
+  if (!status) return "none";
+  if (isActiveStatus(status)) return "active";
+  if (isInactiveStatus(status)) return "inactive";
+  if (isMissedStatus(status)) return "missed";
+  return "none";
 }
 
 // Fusion gating predicate
 export function canFuse(
   head: PokemonOptionType | null | undefined,
-  body: PokemonOptionType | null | undefined
+  body: PokemonOptionType | null | undefined,
 ): boolean {
   if (!head || !body) return false;
   const headCategory = getFusionStatusCategory(head.status ?? null);
@@ -86,7 +86,7 @@ export function canFuse(
 
 export function isFusionFullyActive(
   head: PokemonOptionType | null | undefined,
-  body: PokemonOptionType | null | undefined
+  body: PokemonOptionType | null | undefined,
 ): boolean {
   const headActive = isPokemonActive(head);
   const bodyActive = isPokemonActive(body);
@@ -95,7 +95,7 @@ export function isFusionFullyActive(
 
 export function isFusionPartiallyActive(
   head: PokemonOptionType | null | undefined,
-  body: PokemonOptionType | null | undefined
+  body: PokemonOptionType | null | undefined,
 ): boolean {
   const headActive = isPokemonActive(head);
   const bodyActive = isPokemonActive(body);
@@ -104,7 +104,7 @@ export function isFusionPartiallyActive(
 
 export function isFusionInactive(
   head: PokemonOptionType | null | undefined,
-  body: PokemonOptionType | null | undefined
+  body: PokemonOptionType | null | undefined,
 ): boolean {
   return !isPokemonActive(head) && !isPokemonActive(body);
 }
@@ -112,7 +112,7 @@ export function isFusionInactive(
 export function isFusionDeceased(
   head: PokemonOptionType | null | undefined,
   body: PokemonOptionType | null | undefined,
-  isFusion?: boolean
+  isFusion?: boolean,
 ): boolean {
   if (isFusion && head && body) {
     return isPokemonDeceased(head) && isPokemonDeceased(body);

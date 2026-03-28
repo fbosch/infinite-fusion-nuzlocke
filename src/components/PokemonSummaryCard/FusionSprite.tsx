@@ -1,27 +1,22 @@
-'use client';
+"use client";
 
-import React, {
-  useCallback,
-  useImperativeHandle,
-  useRef,
-  forwardRef,
-} from 'react';
-import Image from 'next/image';
+import Image from "next/image";
+import type React from "react";
+import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
 
-import { twMerge } from 'tailwind-merge';
+import { twMerge } from "tailwind-merge";
+import Rays from "@/assets/images/rays.svg";
+import { usePreferredVariantState } from "@/hooks/useSprite";
 
-import { useAnimatedSprite } from './useAnimatedSprite';
+import type { PokemonOptionType } from "@/loaders/pokemon";
+import { useAnimatedSprite } from "./useAnimatedSprite";
 import {
   getAltText,
-  getSpriteUrl,
-  TRANSPARENT_PIXEL,
   getNextFallbackUrl,
+  getSpriteUrl,
   getStatusState,
-} from './utils';
-
-import { type PokemonOptionType } from '@/loaders/pokemon';
-import { usePreferredVariantState } from '@/hooks/useSprite';
-import Rays from '@/assets/images/rays.svg';
+  TRANSPARENT_PIXEL,
+} from "./utils";
 
 export interface FusionSpriteHandle {
   playEvolution: (durationMs?: number) => void;
@@ -46,7 +41,7 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
       showStatusOverlay = true,
       className,
     }: FusionSpriteProps,
-    ref
+    ref,
   ) {
     const hasHovered = useRef(false);
 
@@ -62,29 +57,29 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
 
     const { variant: preferredVariant } = usePreferredVariantState(
       variantHeadId,
-      variantBodyId
+      variantBodyId,
     );
 
     const handleImageError = useCallback(
       async (e: React.SyntheticEvent<HTMLImageElement>) => {
         const target = e.target as HTMLImageElement;
-        target.style.visibility = 'hidden';
+        target.style.visibility = "hidden";
         const failingUrl = target.src;
         target.src = TRANSPARENT_PIXEL;
         const newUrl = await getNextFallbackUrl(
           failingUrl,
           head,
           body,
-          preferredVariant
+          preferredVariant,
         );
         if (newUrl) {
           target.src = newUrl;
         }
         window.requestAnimationFrame(() => {
-          target.style.visibility = 'visible';
+          target.style.visibility = "visible";
         });
       },
-      [head, body, preferredVariant]
+      [head, body, preferredVariant],
     );
 
     const statusState = getStatusState(head, body);
@@ -104,7 +99,7 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
       () => ({
         playEvolution: playEvolutionAnimation,
       }),
-      [playEvolutionAnimation]
+      [playEvolutionAnimation],
     );
 
     if (!head && !body) return null;
@@ -112,25 +107,25 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
     const spriteUrl = getSpriteUrl(head, body, isFusion, preferredVariant);
     const altText = getAltText(head, body, isFusion);
     const baseImageClasses =
-      'object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none transform-gpu';
+      "object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none transform-gpu";
 
     const imageProps = {
       src: spriteUrl,
       width: 64,
       height: 64,
-      loading: shouldLoad ? ('eager' as const) : ('lazy' as const),
+      loading: shouldLoad ? ("eager" as const) : ("lazy" as const),
       unoptimized: true,
-      decoding: shouldLoad ? ('auto' as const) : ('async' as const),
+      decoding: shouldLoad ? ("auto" as const) : ("async" as const),
       draggable: false,
-      placeholder: 'blur' as const,
+      placeholder: "blur" as const,
       blurDataURL: TRANSPARENT_PIXEL,
       onError: handleImageError,
     };
 
     return (
-      <div className='flex flex-col items-center relative'>
+      <div className="flex flex-col items-center relative">
         <div
-          className={twMerge('relative w-full flex justify-center', className)}
+          className={twMerge("relative w-full flex justify-center", className)}
           onMouseEnter={() => {
             if (!hasHovered.current) {
               hasHovered.current = true;
@@ -141,23 +136,23 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
         >
           <div
             className={twMerge(
-              'relative z-10 -translate-y-6',
-              statusState.wrapperClasses
+              "relative z-10 -translate-y-6",
+              statusState.wrapperClasses,
             )}
           >
             <div
               ref={raysSvgRef as unknown as React.RefObject<HTMLDivElement>}
-              aria-hidden='true'
-              className='absolute size-35 left-1/2 top-2/3 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 bg-radial from-5% to-35% from-white/50 to-transparent'
+              aria-hidden="true"
+              className="absolute size-35 left-1/2 top-2/3 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 bg-radial from-5% to-35% from-white/50 to-transparent"
             >
-              <Rays className='w-full h-full dark:text-white/50 text-sky-300' />
+              <Rays className="w-full h-full dark:text-white/50 text-sky-300" />
             </div>
             <Image
               ref={shadowRef}
               aria-hidden={true}
               className={twMerge(
                 baseImageClasses,
-                'absolute translate-x-[45%] translate-y-[35%] skew-x-[-5deg] skew-y-[-30deg] scale-100 rotate-[24deg] brightness-0 opacity-10 dark:opacity-15'
+                "absolute translate-x-[45%] translate-y-[35%] skew-x-[-5deg] skew-y-[-30deg] scale-100 rotate-[24deg] brightness-0 opacity-10 dark:opacity-15",
               )}
               {...imageProps}
               alt={altText}
@@ -167,7 +162,7 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
               className={twMerge(
                 baseImageClasses,
                 statusState.imageClasses,
-                'rounded-md'
+                "rounded-md",
               )}
               {...imageProps}
               alt={altText}
@@ -177,5 +172,5 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
         </div>
       </div>
     );
-  }
+  },
 );

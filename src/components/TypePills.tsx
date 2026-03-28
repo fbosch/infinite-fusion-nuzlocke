@@ -1,59 +1,60 @@
-import React, { useMemo } from 'react';
-import clsx from 'clsx';
-import type { TypeName } from '@/lib/typings';
-import { ALL_TYPES } from '@/lib/typings';
-import { twMerge } from 'tailwind-merge';
-import { CursorTooltip } from './CursorTooltip';
-import { getTypeWeaknesses } from 'poke-types';
+import clsx from "clsx";
+import { getTypeWeaknesses } from "poke-types";
+import type React from "react";
+import { useMemo } from "react";
+import { twMerge } from "tailwind-merge";
+import type { TypeName } from "@/lib/typings";
+import { ALL_TYPES } from "@/lib/typings";
+import { CursorTooltip } from "./CursorTooltip";
 
 const typeColors: Record<TypeName, string> = {
   normal:
-    'bg-gradient-to-b from-[#8A8A4A] to-[#A6A66A] dark:from-[#8A8A4A] dark:to-[#A6A66A]',
-  fire: 'bg-gradient-to-b from-[#E86B3C] to-[#F29050] dark:from-[#D85A1C] dark:to-[#F08030]',
+    "bg-gradient-to-b from-[#8A8A4A] to-[#A6A66A] dark:from-[#8A8A4A] dark:to-[#A6A66A]",
+  fire: "bg-gradient-to-b from-[#E86B3C] to-[#F29050] dark:from-[#D85A1C] dark:to-[#F08030]",
   water:
-    'bg-gradient-to-b from-[#5E7AD5] to-[#88A0F0] dark:from-[#3E5AB5] dark:to-[#6890F0]',
+    "bg-gradient-to-b from-[#5E7AD5] to-[#88A0F0] dark:from-[#3E5AB5] dark:to-[#6890F0]",
   electric:
-    'bg-gradient-to-b from-[#EBB220] to-[#FFEF90] dark:from-[#E8A800] dark:to-[#FFEC70]',
+    "bg-gradient-to-b from-[#EBB220] to-[#FFEF90] dark:from-[#E8A800] dark:to-[#FFEC70]",
   grass:
-    'bg-gradient-to-b from-[#6CAA48] to-[#98D870] dark:from-[#4C9A28] dark:to-[#78C850]',
-  ice: 'bg-gradient-to-b from-[#65C5C2] to-[#B8E8E8] dark:from-[#45B5B2] dark:to-[#98D8D8]',
+    "bg-gradient-to-b from-[#6CAA48] to-[#98D870] dark:from-[#4C9A28] dark:to-[#78C850]",
+  ice: "bg-gradient-to-b from-[#65C5C2] to-[#B8E8E8] dark:from-[#45B5B2] dark:to-[#98D8D8]",
   fighting:
-    'bg-gradient-to-b from-[#B34240] to-[#D05048] dark:from-[#932220] dark:to-[#C03028]',
+    "bg-gradient-to-b from-[#B34240] to-[#D05048] dark:from-[#932220] dark:to-[#C03028]",
   poison:
-    'bg-gradient-to-b from-[#A04EA0] to-[#C060C0] dark:from-[#802E80] dark:to-[#A040A0]',
+    "bg-gradient-to-b from-[#A04EA0] to-[#C060C0] dark:from-[#802E80] dark:to-[#A040A0]",
   ground:
-    'bg-gradient-to-b from-[#D2A75E] to-[#F0D088] dark:from-[#C2973E] dark:to-[#E0C068]',
+    "bg-gradient-to-b from-[#D2A75E] to-[#F0D088] dark:from-[#C2973E] dark:to-[#E0C068]",
   flying:
-    'bg-gradient-to-b from-[#A27BE5] to-[#C8B0F0] dark:from-[#825BC5] dark:to-[#A890F0]',
+    "bg-gradient-to-b from-[#A27BE5] to-[#C8B0F0] dark:from-[#825BC5] dark:to-[#A890F0]",
   psychic:
-    'bg-gradient-to-b from-[#E44E75] to-[#F878A8] dark:from-[#D42E55] dark:to-[#F85888]',
-  bug: 'bg-gradient-to-b from-[#A4B235] to-[#C8D840] dark:from-[#849215] dark:to-[#A8B820]',
-  rock: 'bg-gradient-to-b from-[#B0A145] to-[#D8C058] dark:from-[#908125] dark:to-[#B8A038]',
+    "bg-gradient-to-b from-[#E44E75] to-[#F878A8] dark:from-[#D42E55] dark:to-[#F85888]",
+  bug: "bg-gradient-to-b from-[#A4B235] to-[#C8D840] dark:from-[#849215] dark:to-[#A8B820]",
+  rock: "bg-gradient-to-b from-[#B0A145] to-[#D8C058] dark:from-[#908125] dark:to-[#B8A038]",
   ghost:
-    'bg-gradient-to-b from-[#6C5B81] to-[#9078B8] dark:from-[#4C3B61] dark:to-[#705898]',
+    "bg-gradient-to-b from-[#6C5B81] to-[#9078B8] dark:from-[#4C3B61] dark:to-[#705898]",
   dragon:
-    'bg-gradient-to-b from-[#6448E5] to-[#9058F8] dark:from-[#4428C5] dark:to-[#7038F8]',
-  dark: 'bg-gradient-to-b from-[#6A5950] to-[#907868] dark:from-[#4A3930] dark:to-[#705848]',
+    "bg-gradient-to-b from-[#6448E5] to-[#9058F8] dark:from-[#4428C5] dark:to-[#7038F8]",
+  dark: "bg-gradient-to-b from-[#6A5950] to-[#907868] dark:from-[#4A3930] dark:to-[#705848]",
   steel:
-    'bg-gradient-to-b from-[#B0B0CB] to-[#D8D8F0] dark:from-[#9090AB] dark:to-[#B8B8D0]',
+    "bg-gradient-to-b from-[#B0B0CB] to-[#D8D8F0] dark:from-[#9090AB] dark:to-[#B8B8D0]",
   fairy:
-    'bg-gradient-to-b from-[#D27599] to-[#F8B9CC] dark:from-[#B25579] dark:to-[#EE99AC]',
+    "bg-gradient-to-b from-[#D27599] to-[#F8B9CC] dark:from-[#B25579] dark:to-[#EE99AC]",
 };
 
-export type PillSize = 'xxs' | 'xs' | 'sm' | 'md';
+export type PillSize = "xxs" | "xs" | "sm" | "md";
 
-type FactorKey = '4' | '2' | '0.5' | '0.25' | '0';
+type FactorKey = "4" | "2" | "0.5" | "0.25" | "0";
 
 function getDefensiveEffectGroups(
   primary?: TypeName,
-  secondary?: TypeName
+  secondary?: TypeName,
 ): Record<FactorKey, TypeName[]> {
   const empty: Record<FactorKey, TypeName[]> = {
-    '4': [],
-    '2': [],
-    '0.5': [],
-    '0.25': [],
-    '0': [],
+    "4": [],
+    "2": [],
+    "0.5": [],
+    "0.25": [],
+    "0": [],
   };
   if (!primary && !secondary) return empty;
   const mainType = (primary ?? secondary) as string;
@@ -62,24 +63,24 @@ function getDefensiveEffectGroups(
   const isTypeName = (t: string): t is TypeName =>
     (ALL_TYPES as readonly string[]).includes(t);
   const groups: Record<FactorKey, TypeName[]> = {
-    '4': [],
-    '2': [],
-    '0.5': [],
-    '0.25': [],
-    '0': [],
+    "4": [],
+    "2": [],
+    "0.5": [],
+    "0.25": [],
+    "0": [],
   };
   Object.entries(map).forEach(([type, multValue]) => {
     if (!isTypeName(type)) return;
     const mult = Number(multValue);
-    if (mult === 4) groups['4'].push(type);
-    else if (mult === 2) groups['2'].push(type);
-    else if (mult === 0.5) groups['0.5'].push(type);
-    else if (mult === 0.25) groups['0.25'].push(type);
-    else if (mult === 0) groups['0'].push(type);
+    if (mult === 4) groups["4"].push(type);
+    else if (mult === 2) groups["2"].push(type);
+    else if (mult === 0.5) groups["0.5"].push(type);
+    else if (mult === 0.25) groups["0.25"].push(type);
+    else if (mult === 0) groups["0"].push(type);
   });
   const byOrder = (a: TypeName, b: TypeName) =>
     ALL_TYPES.indexOf(a) - ALL_TYPES.indexOf(b);
-  (Object.keys(groups) as FactorKey[]).forEach(k => {
+  (Object.keys(groups) as FactorKey[]).forEach((k) => {
     groups[k] = groups[k].sort(byOrder);
   });
   return groups;
@@ -98,7 +99,7 @@ function TypeEffectivenessSummary({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _groups = useMemo(
     () => getDefensiveEffectGroups(primary, secondary),
-    [primary, secondary]
+    [primary, secondary],
   );
 
   const mainType = (primary ?? secondary) as string | undefined;
@@ -107,7 +108,7 @@ function TypeEffectivenessSummary({
     if (!mainType) return {} as Record<TypeName, number>;
     const map = getTypeWeaknesses(mainType, secondType);
     const result: Record<TypeName, number> = {} as Record<TypeName, number>;
-    (ALL_TYPES as readonly TypeName[]).forEach(t => {
+    (ALL_TYPES as readonly TypeName[]).forEach((t) => {
       const v = Number(map[t]);
       result[t] = Number.isFinite(v) ? (v as number) : 1;
     });
@@ -115,50 +116,50 @@ function TypeEffectivenessSummary({
   }, [mainType, secondType]);
 
   const factorLabel = (v: number): string => {
-    if (v === 4) return '4x';
-    if (v === 2) return '2x';
-    if (v === 0.5) return '½x';
-    if (v === 0.25) return '¼x';
-    if (v === 0) return '0x';
-    return '';
+    if (v === 4) return "4x";
+    if (v === 2) return "2x";
+    if (v === 0.5) return "½x";
+    if (v === 0.25) return "¼x";
+    if (v === 0) return "0x";
+    return "";
   };
 
   const factorClass = (v: number): string => {
     // Reversed colors: weaknesses (2x/4x) are green, resistances are red
-    if (v === 4) return 'bg-emerald-700 text-white';
-    if (v === 2) return 'bg-emerald-600 text-white';
-    if (v === 0.5) return 'bg-red-600 text-white';
-    if (v === 0.25) return 'bg-red-700 text-white';
-    if (v === 0) return 'bg-red-800 text-white';
-    return 'border border-gray-200 dark:border-gray-600 text-transparent';
+    if (v === 4) return "bg-emerald-700 text-white";
+    if (v === 2) return "bg-emerald-600 text-white";
+    if (v === 0.5) return "bg-red-600 text-white";
+    if (v === 0.25) return "bg-red-700 text-white";
+    if (v === 0) return "bg-red-800 text-white";
+    return "border border-gray-200 dark:border-gray-600 text-transparent";
   };
 
   if (!primary && !secondary) return null;
 
   return (
-    <div className='w-full max-w-full' aria-label='type effectiveness'>
-      <div className='flex items-center justify-between gap-2'>
-        <span className='text-[11px] opacity-70'>Defenses</span>
+    <div className="w-full max-w-full" aria-label="type effectiveness">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[11px] opacity-70">Defenses</span>
         <div
-          className='inline-flex items-center gap-1.5'
-          role='group'
-          aria-label='types'
+          className="inline-flex items-center gap-1.5"
+          role="group"
+          aria-label="types"
         >
           {primary && (
-            <TypeBadge type={primary} size='sm' showTooltip={false} />
+            <TypeBadge type={primary} size="sm" showTooltip={false} />
           )}
           {secondary && (
-            <TypeBadge type={secondary} size='sm' showTooltip={false} />
+            <TypeBadge type={secondary} size="sm" showTooltip={false} />
           )}
         </div>
       </div>
-      <div className='w-full h-px bg-gray-200 dark:bg-gray-600/60 my-2' />
+      <div className="w-full h-px bg-gray-200 dark:bg-gray-600/60 my-2" />
       {/* Grid of all attacking types with multipliers */}
       {mainType && (
-        <div className='space-y-2'>
+        <div className="space-y-2">
           {(() => {
             const allVisible = (ALL_TYPES as readonly TypeName[]).filter(
-              t => !(hideNeutral && multiplierByType[t] === 1)
+              (t) => !(hideNeutral && multiplierByType[t] === 1),
             );
             const splitIndex = Math.ceil(allVisible.length / 2);
             const top = allVisible.slice(0, splitIndex);
@@ -166,15 +167,15 @@ function TypeEffectivenessSummary({
 
             const renderBlock = (types: readonly TypeName[], key: string) => (
               <div key={key}>
-                <div className='flex flex-wrap gap-1.5 sm:gap-2'>
-                  {types.map(t => (
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  {types.map((t) => (
                     <div
                       key={`head-${key}-${t}`}
                       className={clsx(
-                        'size-6 rounded-xs flex items-center justify-center text-[10px] font-semibold uppercase text-white border border-white/10 text-shadow-sm/20',
-                        typeColors[t]
+                        "size-6 rounded-xs flex items-center justify-center text-[10px] font-semibold uppercase text-white border border-white/10 text-shadow-sm/20",
+                        typeColors[t],
                       )}
-                      role='columnheader'
+                      role="columnheader"
                       aria-label={`${t} attack type`}
                       title={`${t} attack`}
                     >
@@ -182,19 +183,19 @@ function TypeEffectivenessSummary({
                     </div>
                   ))}
                 </div>
-                <div className='mt-1 flex flex-wrap gap-1.5 sm:gap-2'>
-                  {types.map(t => {
+                <div className="mt-1 flex flex-wrap gap-1.5 sm:gap-2">
+                  {types.map((t) => {
                     const v = multiplierByType[t];
                     const label = factorLabel(v);
                     return (
                       <div
                         key={`val-${key}-${t}`}
                         className={clsx(
-                          'size-6 rounded-xs flex items-center justify-center text-[11px] font-semibold',
-                          factorClass(v)
+                          "size-6 rounded-xs flex items-center justify-center text-[11px] font-semibold",
+                          factorClass(v),
                         )}
-                        role='cell'
-                        aria-label={`${t} effectiveness ${label || '1x'}`}
+                        role="cell"
+                        aria-label={`${t} effectiveness ${label || "1x"}`}
                       >
                         {label}
                       </div>
@@ -205,9 +206,9 @@ function TypeEffectivenessSummary({
             );
 
             return (
-              <div className='flex flex-col gap-y-4'>
-                {renderBlock(top, 'top')}
-                {bottom.length > 0 && renderBlock(bottom, 'bottom')}
+              <div className="flex flex-col gap-y-4">
+                {renderBlock(top, "top")}
+                {bottom.length > 0 && renderBlock(bottom, "bottom")}
               </div>
             );
           })()}
@@ -219,7 +220,7 @@ function TypeEffectivenessSummary({
 
 export function TypeBadge({
   type,
-  size = 'md',
+  size = "md",
   showTooltip = true,
 }: {
   type: TypeName;
@@ -227,13 +228,13 @@ export function TypeBadge({
   showTooltip?: boolean;
 }) {
   const core =
-    size === 'xxs' ? (
+    size === "xxs" ? (
       <span
         className={clsx(
-          'inline-block h-2 w-2 rounded-full border border-white/20',
-          typeColors[type]
+          "inline-block h-2 w-2 rounded-full border border-white/20",
+          typeColors[type],
         )}
-        role='status'
+        role="status"
         aria-label={`${type} type`}
         title={
           showTooltip
@@ -241,13 +242,13 @@ export function TypeBadge({
             : undefined
         }
       />
-    ) : size === 'xs' ? (
+    ) : size === "xs" ? (
       <span
         className={clsx(
-          'inline-block h-3 w-3 rounded-full border border-white/20',
-          typeColors[type]
+          "inline-block h-3 w-3 rounded-full border border-white/20",
+          typeColors[type],
         )}
-        role='status'
+        role="status"
         aria-label={`${type} type`}
         title={
           showTooltip
@@ -258,11 +259,11 @@ export function TypeBadge({
     ) : (
       <span
         className={clsx(
-          'inline-flex items-center rounded-xs uppercase cursor-default select-none border border-white/10 ',
-          size === 'sm' ? 'px-1.5 py-0' : 'px-2 py-0.5',
-          typeColors[type]
+          "inline-flex items-center rounded-xs uppercase cursor-default select-none border border-white/10 ",
+          size === "sm" ? "px-1.5 py-0" : "px-2 py-0.5",
+          typeColors[type],
         )}
-        role='status'
+        role="status"
         aria-label={`${type} type`}
         title={
           showTooltip
@@ -272,8 +273,8 @@ export function TypeBadge({
       >
         <span
           className={clsx(
-            'text-white font-semibold text-shadow-sm/20',
-            size === 'sm' ? 'text-[10px]' : 'text-xs'
+            "text-white font-semibold text-shadow-sm/20",
+            size === "sm" ? "text-[10px]" : "text-xs",
           )}
         >
           {type}
@@ -287,9 +288,9 @@ export function TypeBadge({
   return (
     <CursorTooltip
       content={<TypeEffectivenessSummary primary={type} />}
-      placement='bottom-end'
+      placement="bottom-end"
       delay={300}
-      className='max-w-none'
+      className="max-w-none"
     >
       {core}
     </CursorTooltip>
@@ -300,13 +301,13 @@ export function TypeTooltip({
   primary,
   secondary,
   children,
-  placement = 'bottom-end',
+  placement = "bottom-end",
   hideNeutral,
 }: {
   primary?: TypeName;
   secondary?: TypeName;
   children: React.ReactElement;
-  placement?: Parameters<typeof CursorTooltip>[0]['placement'];
+  placement?: Parameters<typeof CursorTooltip>[0]["placement"];
   hideNeutral?: boolean;
 }) {
   if (!primary && !secondary) return children;
@@ -322,7 +323,7 @@ export function TypeTooltip({
       }
       placement={placement}
       delay={300}
-      className='max-w-none'
+      className="max-w-none"
     >
       {children}
     </CursorTooltip>
@@ -333,7 +334,7 @@ export function TypePills({
   primary,
   secondary,
   className,
-  size = 'md',
+  size = "md",
   showTooltip = false,
   hideNeutral = false,
 }: {
@@ -348,12 +349,12 @@ export function TypePills({
     <div
       className={twMerge(
         clsx(
-          'flex',
-          size === 'xxs' ? 'gap-0.5' : size === 'xs' ? 'gap-1' : 'gap-1.5'
+          "flex",
+          size === "xxs" ? "gap-0.5" : size === "xs" ? "gap-1" : "gap-1.5",
         ),
-        className
+        className,
       )}
-      aria-label='pokemon types'
+      aria-label="pokemon types"
     >
       {primary && <TypeBadge type={primary} size={size} showTooltip={false} />}
       {secondary && (

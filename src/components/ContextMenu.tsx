@@ -1,29 +1,30 @@
-'use client';
+"use client";
 
 import {
+  FloatingFocusManager,
   FloatingPortal,
+  useDismiss,
   useFloating,
   useInteractions,
-  useRole,
-  useDismiss,
   useListNavigation,
-  FloatingFocusManager,
-} from '@floating-ui/react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-import React, {
-  useState,
-  useRef,
+  useRole,
+} from "@floating-ui/react";
+import { clsx } from "clsx";
+import type { LucideIcon } from "lucide-react";
+import Image from "next/image";
+import type React from "react";
+import {
   cloneElement,
   isValidElement,
   useCallback,
-  useTransition,
   useEffect,
-} from 'react';
-import { type LucideIcon } from 'lucide-react';
-import Image from 'next/image';
-import { CursorTooltip } from './CursorTooltip';
-import { match } from 'ts-pattern';
+  useRef,
+  useState,
+  useTransition,
+} from "react";
+import { twMerge } from "tailwind-merge";
+import { match } from "ts-pattern";
+import { CursorTooltip } from "./CursorTooltip";
 
 // Filter out separators at the beginning and end of the items array
 function filterEdgeSeparators(items: ContextMenuItem[]): ContextMenuItem[] {
@@ -103,7 +104,7 @@ export interface ContextMenuItem {
   target?: string;
   disabled?: boolean;
   visualOnly?: boolean;
-  variant?: 'default' | 'danger' | 'warning';
+  variant?: "default" | "danger" | "warning";
   shortcut?: string;
   separator?: boolean;
   tooltip?: React.ReactNode;
@@ -125,7 +126,7 @@ export function ContextMenu({
   items,
   className,
   disabled = false,
-  portalRootId = 'context-menu-root',
+  portalRootId = "context-menu-root",
   onOpenChange,
 }: ContextMenuProps) {
   const {
@@ -152,13 +153,13 @@ export function ContextMenu({
   // Floating UI setup for keyboard navigation
   const { refs, context } = useFloating({
     open: isOpen,
-    onOpenChange: open => {
+    onOpenChange: (open) => {
       if (!open) closeMenu();
     },
   });
 
   const dismiss = useDismiss(context);
-  const role = useRole(context, { role: 'menu' });
+  const role = useRole(context, { role: "menu" });
   const listNavigation = useListNavigation(context, {
     listRef,
     activeIndex,
@@ -176,7 +177,7 @@ export function ContextMenu({
   // Close menu when window becomes hidden, loses focus, or scrolls
   useEffect(() => {
     const handleVisibilityChange = () => {
-      const isVisible = document.visibilityState === 'visible';
+      const isVisible = document.visibilityState === "visible";
       const isFocused = document.hasFocus();
       const shouldClose = !isVisible || !isFocused;
 
@@ -185,8 +186,8 @@ export function ContextMenu({
 
         // Start exit animation
         if (menuElementRef.current) {
-          menuElementRef.current.classList.remove('tooltip-enter');
-          menuElementRef.current.classList.add('tooltip-exit');
+          menuElementRef.current.classList.remove("tooltip-enter");
+          menuElementRef.current.classList.add("tooltip-exit");
 
           setTimeout(() => {
             hideMenu();
@@ -201,8 +202,8 @@ export function ContextMenu({
 
         // Start exit animation
         if (menuElementRef.current) {
-          menuElementRef.current.classList.remove('tooltip-enter');
-          menuElementRef.current.classList.add('tooltip-exit');
+          menuElementRef.current.classList.remove("tooltip-enter");
+          menuElementRef.current.classList.add("tooltip-exit");
 
           setTimeout(() => {
             hideMenu();
@@ -212,17 +213,17 @@ export function ContextMenu({
     };
 
     // Add event listeners
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleVisibilityChange);
-    window.addEventListener('blur', handleVisibilityChange);
-    window.addEventListener('scroll', handleScroll, true); // Use capture phase to catch all scroll events
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleVisibilityChange);
+    window.addEventListener("blur", handleVisibilityChange);
+    window.addEventListener("scroll", handleScroll, true); // Use capture phase to catch all scroll events
 
     // Cleanup
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleVisibilityChange);
-      window.removeEventListener('blur', handleVisibilityChange);
-      window.removeEventListener('scroll', handleScroll, true);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleVisibilityChange);
+      window.removeEventListener("blur", handleVisibilityChange);
+      window.removeEventListener("scroll", handleScroll, true);
     };
   }, [isOpen, closeMenu, hideMenu]);
 
@@ -231,8 +232,8 @@ export function ContextMenu({
 
     // Start exit animation
     if (menuElementRef.current) {
-      menuElementRef.current.classList.remove('tooltip-enter');
-      menuElementRef.current.classList.add('tooltip-exit');
+      menuElementRef.current.classList.remove("tooltip-enter");
+      menuElementRef.current.classList.add("tooltip-exit");
 
       // Hide menu after animation completes
       setTimeout(() => {
@@ -268,8 +269,8 @@ export function ContextMenu({
     // Add enter animation class after a frame
     requestAnimationFrame(() => {
       if (menuElementRef.current) {
-        menuElementRef.current.classList.remove('tooltip-exit');
-        menuElementRef.current.classList.add('tooltip-enter');
+        menuElementRef.current.classList.remove("tooltip-exit");
+        menuElementRef.current.classList.add("tooltip-enter");
       }
     });
   };
@@ -291,28 +292,28 @@ export function ContextMenu({
         <FloatingPortal id={portalRootId}>
           <FloatingFocusManager context={context} modal={false}>
             <div
-              ref={node => {
+              ref={(node) => {
                 refs.setFloating(node);
                 menuElementRef.current = node;
               }}
               style={{
-                position: 'fixed',
+                position: "fixed",
                 left: menuPosition.x,
                 top: menuPosition.y,
-                transformOrigin: 'top left',
+                transformOrigin: "top left",
                 zIndex: 9999,
               }}
               className={clsx(
-                'min-w-[12rem] rounded-md border border-gray-200 dark:border-gray-800',
-                'bg-white dark:bg-gray-900/80 shadow-elevation-3',
-                'p-1 backdrop-blur-xl tooltip-enter',
-                'origin-top-left backdrop-blur-xl',
-                'focus:outline-none',
-                'pointer-events-auto',
-                className
+                "min-w-[12rem] rounded-md border border-gray-200 dark:border-gray-800",
+                "bg-white dark:bg-gray-900/80 shadow-elevation-3",
+                "p-1 backdrop-blur-xl tooltip-enter",
+                "origin-top-left backdrop-blur-xl",
+                "focus:outline-none",
+                "pointer-events-auto",
+                className,
               )}
-              role='menu'
-              aria-orientation='vertical'
+              role="menu"
+              aria-orientation="vertical"
               {...getFloatingProps()}
             >
               {filterEdgeSeparators(items).map(
@@ -321,25 +322,25 @@ export function ContextMenu({
                     return (
                       <div
                         key={`separator-${index}`}
-                        className='my-1 h-px bg-gray-200 dark:bg-gray-700/70'
-                        role='separator'
+                        className="my-1 h-px bg-gray-200 dark:bg-gray-700/70"
+                        role="separator"
                       />
                     );
                   }
 
                   const filteredItems = filterEdgeSeparators(items);
                   const validItems = filteredItems.filter(
-                    i => !i.separator && !i.disabled && !i.visualOnly
+                    (i) => !i.separator && !i.disabled && !i.visualOnly,
                   );
                   const validIndex = validItems.findIndex(
-                    validItem => validItem.id === item.id
+                    (validItem) => validItem.id === item.id,
                   );
                   const isActive = activeIndex === validIndex;
 
                   const baseClasses = clsx(
-                    'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
-                    'text-sm transition-colors duration-75 enabled:cursor-pointer',
-                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
+                    "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
+                    "text-sm transition-colors duration-75 enabled:cursor-pointer",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                   );
 
                   const variantClasses = match<[string | undefined, boolean]>([
@@ -347,89 +348,89 @@ export function ContextMenu({
                     isActive,
                   ])
                     .with(
-                      ['danger', true],
+                      ["danger", true],
                       () =>
-                        'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                        "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300",
                     )
                     .with(
-                      ['danger', false],
+                      ["danger", false],
                       () =>
-                        'text-red-600 dark:text-red-400 enabled:hover:bg-red-50 enabled:dark:hover:bg-red-900/20 enabled:hover:text-red-700 enabled:dark:hover:text-red-300'
+                        "text-red-600 dark:text-red-400 enabled:hover:bg-red-50 enabled:dark:hover:bg-red-900/20 enabled:hover:text-red-700 enabled:dark:hover:text-red-300",
                     )
                     .with(
-                      ['warning', true],
+                      ["warning", true],
                       () =>
-                        'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
+                        "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300",
                     )
                     .with(
-                      ['warning', false],
+                      ["warning", false],
                       () =>
-                        'text-yellow-600 dark:text-yellow-400 enabled:hover:bg-yellow-50 enabled:dark:hover:bg-yellow-900/20 enabled:hover:text-yellow-700 enabled:dark:hover:text-yellow-300'
+                        "text-yellow-600 dark:text-yellow-400 enabled:hover:bg-yellow-50 enabled:dark:hover:bg-yellow-900/20 enabled:hover:text-yellow-700 enabled:dark:hover:text-yellow-300",
                     )
                     .otherwise(([, active]) =>
                       active
-                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                        : 'text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white'
+                        ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                        : "text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white",
                     );
 
                   const commonClasses = clsx(
                     baseClasses,
                     item.visualOnly
-                      ? 'text-gray-500 dark:text-gray-400 cursor-default'
+                      ? "text-gray-500 dark:text-gray-400 cursor-default"
                       : variantClasses,
-                    item.disabled && '!opacity-75 !cursor-not-allowed'
+                    item.disabled && "!opacity-75 !cursor-not-allowed",
                   );
 
                   const hasChildren =
                     Array.isArray(item.children) && item.children.length > 0;
                   const content = (
-                    <div className='flex items-center gap-x-2 w-full'>
+                    <div className="flex items-center gap-x-2 w-full">
                       {item.icon && !item.href && (
                         <item.icon
                           className={twMerge(
-                            'h-4 w-4 flex-shrink-0',
-                            item.iconClassName
+                            "h-4 w-4 flex-shrink-0",
+                            item.iconClassName,
                           )}
-                          aria-hidden='true'
+                          aria-hidden="true"
                         />
                       )}
-                      <div className='flex items-center gap-x-2 min-w-0'>
+                      <div className="flex items-center gap-x-2 min-w-0">
                         {item.favicon && item.href && (
                           <Image
                             src={item.favicon}
-                            alt=''
-                            loading='lazy'
-                            decoding='async'
-                            className='h-4 w-4 flex-shrink-0 rounded-sm'
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            className="h-4 w-4 flex-shrink-0 rounded-sm"
                             width={16}
                             height={16}
                             unoptimized
-                            aria-hidden='true'
-                            onError={e => {
-                              e.currentTarget.style.display = 'none';
+                            aria-hidden="true"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
                             }}
                           />
                         )}
-                        <span className='truncate'>{item.label}</span>
+                        <span className="truncate">{item.label}</span>
                       </div>
                       {/* Right: shortcut and icon, always aligned to end */}
-                      <div className='flex items-center gap-x-2 ml-auto'>
+                      <div className="flex items-center gap-x-2 ml-auto">
                         {item.shortcut && (
-                          <span className='text-xs opacity-60'>
+                          <span className="text-xs opacity-60">
                             {item.shortcut}
                           </span>
                         )}
                         {item.icon && item.href && (
                           <item.icon
                             className={twMerge(
-                              'h-4 w-4 flex-shrink-0',
-                              item.iconClassName
+                              "h-4 w-4 flex-shrink-0",
+                              item.iconClassName,
                             )}
-                            aria-hidden='true'
+                            aria-hidden="true"
                           />
                         )}
                         {hasChildren && (
-                          <span className='text-xs opacity-60'>›</span>
+                          <span className="text-xs opacity-60">›</span>
                         )}
                       </div>
                     </div>
@@ -440,19 +441,19 @@ export function ContextMenu({
                     const linkElement = (
                       <a
                         key={item.id}
-                        ref={node => {
+                        ref={(node) => {
                           listRef.current[validIndex] = node;
                         }}
                         target={item.target}
                         href={item.href}
                         className={commonClasses}
-                        onClick={e => {
+                        onClick={(e) => {
                           if (!item.disabled) {
                             item.onClick?.(e);
                             handleClose();
                           }
                         }}
-                        role='menuitem'
+                        role="menuitem"
                         tabIndex={isActive ? 0 : -1}
                         {...getItemProps()}
                       >
@@ -466,7 +467,7 @@ export function ContextMenu({
                         <CursorTooltip
                           key={item.id}
                           content={item.tooltip}
-                          placement='right'
+                          placement="right"
                           delay={500}
                         >
                           {linkElement}
@@ -482,7 +483,7 @@ export function ContextMenu({
                     <div
                       key={item.id}
                       className={commonClasses}
-                      role='presentation'
+                      role="presentation"
                       tabIndex={-1}
                     >
                       {content}
@@ -490,15 +491,15 @@ export function ContextMenu({
                   ) : (
                     <button
                       key={item.id}
-                      ref={node => {
+                      ref={(node) => {
                         listRef.current[validIndex] = node;
                       }}
                       className={commonClasses}
                       disabled={item.disabled}
-                      role='menuitem'
+                      role="menuitem"
                       tabIndex={isActive ? 0 : -1}
                       {...getItemProps({
-                        onClick: e => {
+                        onClick: (e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           if (!item.disabled && !hasChildren) {
@@ -522,28 +523,28 @@ export function ContextMenu({
                       <CursorTooltip
                         key={item.id}
                         content={item.tooltip}
-                        placement='right'
+                        placement="right"
                         delay={500}
                       >
-                        <div className='relative'>
+                        <div className="relative">
                           {buttonElement}
                           {hasChildren && openSubmenuIndex === validIndex && (
                             <div
                               ref={submenuRef}
                               style={{
-                                position: 'absolute',
-                                left: '100%',
+                                position: "absolute",
+                                left: "100%",
                                 top: 0,
-                                marginLeft: '4px',
-                                minWidth: '12rem',
+                                marginLeft: "4px",
+                                minWidth: "12rem",
                               }}
                               className={clsx(
-                                'z-[9999] rounded-md border border-gray-200 dark:border-gray-800',
-                                'bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25',
-                                'p-1 backdrop-blur-xl origin-top-left',
-                                'overflow-hidden'
+                                "z-[9999] rounded-md border border-gray-200 dark:border-gray-800",
+                                "bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25",
+                                "p-1 backdrop-blur-xl origin-top-left",
+                                "overflow-hidden",
                               )}
-                              role='menu'
+                              role="menu"
                               onMouseLeave={closeSubmenu}
                               onMouseEnter={() => {
                                 // Keep submenu open when hovering over it
@@ -552,21 +553,21 @@ export function ContextMenu({
                                 }
                               }}
                             >
-                              {item.children?.map(child => (
+                              {item.children?.map((child) => (
                                 <button
                                   key={child.id}
                                   className={clsx(
-                                    'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
-                                    'text-sm transition-colors duration-75 enabled:cursor-pointer',
-                                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
-                                    'text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white',
+                                    "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
+                                    "text-sm transition-colors duration-75 enabled:cursor-pointer",
+                                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+                                    "text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white",
                                     child.disabled &&
-                                      '!opacity-75 !cursor-not-allowed'
+                                      "!opacity-75 !cursor-not-allowed",
                                   )}
                                   disabled={child.disabled}
-                                  role='menuitem'
+                                  role="menuitem"
                                   tabIndex={-1}
-                                  onClick={e => {
+                                  onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
                                     if (!child.disabled) {
@@ -575,14 +576,14 @@ export function ContextMenu({
                                     }
                                   }}
                                 >
-                                  <div className='flex items-center gap-x-2 w-full'>
+                                  <div className="flex items-center gap-x-2 w-full">
                                     {child.icon && (
                                       <child.icon
-                                        className='h-4 w-4 flex-shrink-0'
-                                        aria-hidden='true'
+                                        className="h-4 w-4 flex-shrink-0"
+                                        aria-hidden="true"
                                       />
                                     )}
-                                    <span className='truncate'>
+                                    <span className="truncate">
                                       {child.label}
                                     </span>
                                   </div>
@@ -596,25 +597,25 @@ export function ContextMenu({
                   }
 
                   return (
-                    <div key={item.id} className='relative'>
+                    <div key={item.id} className="relative">
                       {buttonElement}
                       {hasChildren && openSubmenuIndex === validIndex && (
                         <div
                           ref={submenuRef}
                           style={{
-                            position: 'absolute',
-                            left: '100%',
+                            position: "absolute",
+                            left: "100%",
                             top: 0,
-                            marginLeft: '4px',
-                            minWidth: '12rem',
+                            marginLeft: "4px",
+                            minWidth: "12rem",
                           }}
                           className={clsx(
-                            'z-[9999] rounded-md border border-gray-200 dark:border-gray-800',
-                            'bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25',
-                            'p-1 backdrop-blur-xl origin-top-left',
-                            'overflow-hidden'
+                            "z-[9999] rounded-md border border-gray-200 dark:border-gray-800",
+                            "bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25",
+                            "p-1 backdrop-blur-xl origin-top-left",
+                            "overflow-hidden",
                           )}
-                          role='menu'
+                          role="menu"
                           onMouseLeave={closeSubmenu}
                           onMouseEnter={() => {
                             // Keep submenu open when hovering over it
@@ -623,21 +624,21 @@ export function ContextMenu({
                             }
                           }}
                         >
-                          {item.children?.map(child => (
+                          {item.children?.map((child) => (
                             <button
                               key={child.id}
                               className={clsx(
-                                'group flex w-full items-center justify-between rounded-sm px-2 py-1.5',
-                                'text-sm transition-colors duration-75 enabled:cursor-pointer',
-                                'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
-                                'text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white',
+                                "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
+                                "text-sm transition-colors duration-75 enabled:cursor-pointer",
+                                "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+                                "text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white",
                                 child.disabled &&
-                                  '!opacity-75 !cursor-not-allowed'
+                                  "!opacity-75 !cursor-not-allowed",
                               )}
                               disabled={child.disabled}
-                              role='menuitem'
+                              role="menuitem"
                               tabIndex={-1}
-                              onClick={e => {
+                              onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 if (!child.disabled) {
@@ -646,14 +647,14 @@ export function ContextMenu({
                                 }
                               }}
                             >
-                              <div className='flex items-center gap-x-2 w-full'>
+                              <div className="flex items-center gap-x-2 w-full">
                                 {child.icon && (
                                   <child.icon
-                                    className='h-4 w-4 flex-shrink-0'
-                                    aria-hidden='true'
+                                    className="h-4 w-4 flex-shrink-0"
+                                    aria-hidden="true"
                                   />
                                 )}
-                                <span className='truncate'>{child.label}</span>
+                                <span className="truncate">{child.label}</span>
                               </div>
                             </button>
                           ))}
@@ -661,7 +662,7 @@ export function ContextMenu({
                       )}
                     </div>
                   );
-                }
+                },
               )}
             </div>
           </FloatingFocusManager>
@@ -671,17 +672,17 @@ export function ContextMenu({
       {/* Handle outside clicks and escape key */}
       {isVisible && (
         <div
-          className='fixed inset-0 z-40'
+          className="fixed inset-0 z-40"
           onClick={handleClose}
-          onKeyDown={e => {
-            if (e.key === 'Escape') {
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
               handleClose();
             }
           }}
-          onMouseMove={e => {
+          onMouseMove={(e) => {
             // Close submenu if moving far away from the menu
             const withinMenu = menuElementRef.current?.contains(
-              e.target as Node
+              e.target as Node,
             );
             const withinSubmenu = document
               .querySelector('[role="menu"][style*="z-[9999]"]')

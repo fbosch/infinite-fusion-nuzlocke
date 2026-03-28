@@ -1,15 +1,15 @@
-import { z } from 'zod';
-import { v4 as uuidv4 } from 'uuid';
 import {
-  useQuery,
   keepPreviousData,
-  QueryOptions,
-} from '@tanstack/react-query';
-import { useDebounce } from 'use-debounce';
-import { pokemonQueries, pokemonData } from '@/lib/queryClient';
-import { useMemo } from 'react';
-import { SearchCore } from '@/lib/searchCore';
-import searchService from '@/services/searchService';
+  type QueryOptions,
+  useQuery,
+} from "@tanstack/react-query";
+import { useMemo } from "react";
+import { useDebounce } from "use-debounce";
+import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
+import { pokemonData, pokemonQueries } from "@/lib/queryClient";
+import { SearchCore } from "@/lib/searchCore";
+import searchService from "@/services/searchService";
 
 // Utility function to generate unique identifiers
 export function generatePokemonUID(): string {
@@ -24,11 +24,11 @@ export function isEgg(pokemon?: PokemonOptionType): boolean {
 // Utility function to create an Egg encounter
 export function createEggEncounter(
   locationId?: string,
-  nickname?: string
+  nickname?: string,
 ): PokemonOptionType {
   return {
     id: -1,
-    name: 'Egg',
+    name: "Egg",
     nationalDexId: -1,
     nickname,
     originalLocation: locationId,
@@ -39,19 +39,19 @@ export function createEggEncounter(
 // Utility function to get encounter display name
 export function getEncounterDisplayName(encounter: PokemonOptionType): string {
   if (isEgg(encounter)) {
-    return encounter.nickname || 'Egg';
+    return encounter.nickname || "Egg";
   }
   return encounter.nickname || encounter.name;
 }
 
 // Status enum for Pokemon tracking
 export const PokemonStatus = {
-  CAPTURED: 'captured',
-  RECEIVED: 'received',
-  TRADED: 'traded',
-  MISSED: 'missed',
-  STORED: 'stored',
-  DECEASED: 'deceased',
+  CAPTURED: "captured",
+  RECEIVED: "received",
+  TRADED: "traded",
+  MISSED: "missed",
+  STORED: "stored",
+  DECEASED: "deceased",
 } as const;
 
 export type PokemonStatusType =
@@ -67,16 +67,16 @@ export const PokemonStatusSchema = z.enum(
     PokemonStatus.STORED,
     PokemonStatus.DECEASED,
   ],
-  { error: 'Invalid Pokemon status' }
+  { error: "Invalid Pokemon status" },
 );
 
 // Zod schema for Pokemon option (search results)
 export const PokemonOptionSchema = z.object({
-  id: z.number().int({ error: 'Pokemon ID must be an integer' }),
-  name: z.string().min(1, { error: 'Pokemon name is required' }),
+  id: z.number().int({ error: "Pokemon ID must be an integer" }),
+  name: z.string().min(1, { error: "Pokemon name is required" }),
   nationalDexId: z
     .number()
-    .int({ error: 'National Dex ID must be an integer' }),
+    .int({ error: "National Dex ID must be an integer" }),
   nickname: z.string().optional(),
   originalLocation: z.string().optional(),
   status: PokemonStatusSchema.optional(),
@@ -95,7 +95,7 @@ export type PokemonOptionType = z.infer<typeof PokemonOptionSchema>;
 
 // Zod schema for Pokemon type
 export const PokemonTypeSchema = z.object({
-  name: z.string().min(1, { error: 'Type name is required' }),
+  name: z.string().min(1, { error: "Type name is required" }),
 });
 
 // Zod schema for Pokemon species
@@ -105,15 +105,15 @@ export const PokemonSpeciesSchema = z.object({
   generation: z.string().nullable(),
   evolution_chain: z
     .object({
-      url: z.string().url({ error: 'Invalid evolution chain URL' }),
+      url: z.string().url({ error: "Invalid evolution chain URL" }),
     })
     .nullable(),
 });
 
 // Zod schema for evolution detail
 export const EvolutionDetailSchema = z.object({
-  id: z.number().int().positive({ error: 'Evolution ID must be positive' }),
-  name: z.string().min(1, { error: 'Evolution name is required' }),
+  id: z.number().int().positive({ error: "Evolution ID must be positive" }),
+  name: z.string().min(1, { error: "Evolution name is required" }),
   min_level: z.number().int().positive().optional(),
   trigger: z.string().optional(),
   item: z.string().optional(),
@@ -129,11 +129,11 @@ export const EvolutionDataSchema = z.object({
 
 // Zod schema for Pokemon data
 export const PokemonSchema = z.object({
-  id: z.number().int({ error: 'Pokemon ID must be an integer' }),
+  id: z.number().int({ error: "Pokemon ID must be an integer" }),
   nationalDexId: z
     .number()
-    .int({ error: 'National Dex ID must be an integer' }),
-  name: z.string().min(1, { error: 'Pokemon name is required' }),
+    .int({ error: "National Dex ID must be an integer" }),
+  name: z.string().min(1, { error: "Pokemon name is required" }),
   types: z.array(PokemonTypeSchema),
   species: PokemonSpeciesSchema,
   evolution: EvolutionDataSchema.optional(),
@@ -149,40 +149,40 @@ export const PokemonArraySchema = z.array(PokemonSchema);
 
 // Evolution helper functions using centralized query client
 export async function getPokemonEvolutionIds(
-  pokemonId: number
+  pokemonId: number,
 ): Promise<number[]> {
   try {
     const allPokemon = await pokemonData.getAllPokemon();
-    const pokemon = allPokemon.find(p => p.id === pokemonId);
+    const pokemon = allPokemon.find((p) => p.id === pokemonId);
     if (!pokemon?.evolution?.evolves_to) {
       return [];
     }
-    return pokemon.evolution.evolves_to.map(e => e.id);
+    return pokemon.evolution.evolves_to.map((e) => e.id);
   } catch (error) {
-    console.error('Error fetching evolution IDs:', error);
+    console.error("Error fetching evolution IDs:", error);
     return [];
   }
 }
 
 export async function getPokemonPreEvolutionId(
-  pokemonId: number
+  pokemonId: number,
 ): Promise<number | null> {
   try {
     const allPokemon = await pokemonData.getAllPokemon();
-    const pokemon = allPokemon.find(p => p.id === pokemonId);
+    const pokemon = allPokemon.find((p) => p.id === pokemonId);
     if (!pokemon?.evolution?.evolves_from) {
       return null;
     }
     return pokemon.evolution.evolves_from.id;
   } catch (error) {
-    console.error('Error fetching pre-evolution ID:', error);
+    console.error("Error fetching pre-evolution ID:", error);
     return null;
   }
 }
 
 export async function isPokemonEvolution(
   currentPokemon: PokemonOptionType,
-  newPokemon: PokemonOptionType
+  newPokemon: PokemonOptionType,
 ): Promise<boolean> {
   if (currentPokemon.id === newPokemon.id) {
     return false;
@@ -192,14 +192,14 @@ export async function isPokemonEvolution(
     const evolutionIds = await getPokemonEvolutionIds(currentPokemon.id);
     return evolutionIds.includes(newPokemon.id);
   } catch (error) {
-    console.error('Error checking evolution relationship:', error);
+    console.error("Error checking evolution relationship:", error);
     return false;
   }
 }
 
 export async function isPokemonPreEvolution(
   currentPokemon: PokemonOptionType,
-  newPokemon: PokemonOptionType
+  newPokemon: PokemonOptionType,
 ): Promise<boolean> {
   if (currentPokemon.id === newPokemon.id) {
     return false;
@@ -209,28 +209,28 @@ export async function isPokemonPreEvolution(
     const preEvolutionId = await getPokemonPreEvolutionId(currentPokemon.id);
     return preEvolutionId === newPokemon.id;
   } catch (error) {
-    console.error('Error checking pre-evolution relationship:', error);
+    console.error("Error checking pre-evolution relationship:", error);
     return false;
   }
 }
 
 // Search function using local SearchCore (kept separate from API approach)
 export async function searchPokemon(
-  query: string
+  query: string,
 ): Promise<PokemonOptionType[]> {
   try {
     const searchCore = new SearchCore();
     await searchCore.initialize();
     const searchResults = searchCore.search(query);
 
-    return searchResults.map(result => ({
+    return searchResults.map((result) => ({
       id: result.id,
       name: result.name,
       nationalDexId: result.nationalDexId,
       uid: generatePokemonUID(),
     }));
   } catch (error) {
-    console.error('Failed to search Pokemon:', error);
+    console.error("Failed to search Pokemon:", error);
     return [];
   }
 }
@@ -240,10 +240,11 @@ export async function getPokemonByName(name: string): Promise<Pokemon | null> {
   try {
     const allPokemon = await pokemonData.getAllPokemon();
     return (
-      allPokemon.find(p => p.name.toLowerCase() === name.toLowerCase()) || null
+      allPokemon.find((p) => p.name.toLowerCase() === name.toLowerCase()) ||
+      null
     );
   } catch (error) {
-    console.error('Error fetching Pokemon by name:', error);
+    console.error("Error fetching Pokemon by name:", error);
     return null;
   }
 }
@@ -253,8 +254,8 @@ export async function getPokemon(): Promise<Pokemon[]> {
   try {
     return await pokemonData.getAllPokemon();
   } catch (error) {
-    console.error('Failed to fetch Pokemon data:', error);
-    throw new Error('Failed to load Pokemon data');
+    console.error("Failed to fetch Pokemon data:", error);
+    throw new Error("Failed to load Pokemon data");
   }
 }
 
@@ -282,9 +283,9 @@ export async function getPokemonByType(type: string): Promise<Pokemon[]> {
 export async function getPokemonNameMap(): Promise<Map<number, string>> {
   try {
     const allPokemon = await pokemonData.getAllPokemon();
-    return new Map(allPokemon.map(p => [p.id, p.name]));
+    return new Map(allPokemon.map((p) => [p.id, p.name]));
   } catch (error) {
-    console.error('Failed to fetch Pokemon name map:', error);
+    console.error("Failed to fetch Pokemon name map:", error);
     return new Map();
   }
 }
@@ -292,9 +293,9 @@ export async function getPokemonNameMap(): Promise<Map<number, string>> {
 export async function getPokemonNamesByIds(ids: number[]): Promise<string[]> {
   try {
     const pokemon = await pokemonData.getPokemonByIds(ids);
-    return pokemon.map(p => p.name);
+    return pokemon.map((p) => p.name);
   } catch (error) {
-    console.error('Failed to fetch Pokemon names by IDs:', error);
+    console.error("Failed to fetch Pokemon names by IDs:", error);
     return [];
   }
 }
@@ -304,53 +305,53 @@ export async function getAllPokemonTypes(): Promise<string[]> {
     const pokemon = await pokemonData.getAllPokemon();
     const typeSet = new Set<string>();
 
-    pokemon.forEach(p => {
-      p.types.forEach(type => {
+    pokemon.forEach((p) => {
+      p.types.forEach((type) => {
         typeSet.add(type.name);
       });
     });
 
     return Array.from(typeSet).sort();
   } catch (error) {
-    console.error('Failed to fetch Pokemon types:', error);
+    console.error("Failed to fetch Pokemon types:", error);
     return [];
   }
 }
 
 export async function getNationalDexIdFromInfiniteFusionId(
-  infiniteFusionId: number
+  infiniteFusionId: number,
 ): Promise<number | null> {
   try {
     const allPokemon = await pokemonData.getAllPokemon();
-    const pokemon = allPokemon.find(p => p.id === infiniteFusionId);
+    const pokemon = allPokemon.find((p) => p.id === infiniteFusionId);
     return pokemon?.nationalDexId || null;
   } catch (error) {
-    console.error('Error fetching National Dex ID:', error);
+    console.error("Error fetching National Dex ID:", error);
     return null;
   }
 }
 
 export async function getInfiniteFusionIdFromNationalDexId(
-  nationalDexId: number
+  nationalDexId: number,
 ): Promise<number | null> {
   try {
     const allPokemon = await pokemonData.getAllPokemon();
-    const found = allPokemon.find(p => p.nationalDexId === nationalDexId);
+    const found = allPokemon.find((p) => p.nationalDexId === nationalDexId);
     return found?.id || null;
   } catch (error) {
-    console.error('Error fetching Infinite Fusion ID:', error);
+    console.error("Error fetching Infinite Fusion ID:", error);
     return null;
   }
 }
 
 export async function getPokemonByNationalDexId(
-  nationalDexId: number
+  nationalDexId: number,
 ): Promise<Pokemon | null> {
   try {
     const allPokemon = await pokemonData.getAllPokemon();
-    return allPokemon.find(p => p.nationalDexId === nationalDexId) || null;
+    return allPokemon.find((p) => p.nationalDexId === nationalDexId) || null;
   } catch (error) {
-    console.error('Error fetching Pokemon by National Dex ID:', error);
+    console.error("Error fetching Pokemon by National Dex ID:", error);
     return null;
   }
 }
@@ -362,13 +363,13 @@ export async function getNationalDexToInfiniteFusionMap(): Promise<
     const pokemon = await pokemonData.getAllPokemon();
     const map = new Map<number, number>();
 
-    pokemon.forEach(p => {
+    pokemon.forEach((p) => {
       map.set(p.nationalDexId, p.id);
     });
 
     return map;
   } catch (error) {
-    console.error('Error creating National Dex to Infinite Fusion map:', error);
+    console.error("Error creating National Dex to Infinite Fusion map:", error);
     return new Map();
   }
 }
@@ -380,13 +381,13 @@ export async function getInfiniteFusionToNationalDexMap(): Promise<
     const pokemon = await pokemonData.getAllPokemon();
     const map = new Map<number, number>();
 
-    pokemon.forEach(p => {
+    pokemon.forEach((p) => {
       map.set(p.id, p.nationalDexId);
     });
 
     return map;
   } catch (error) {
-    console.error('Error creating Infinite Fusion to National Dex map:', error);
+    console.error("Error creating Infinite Fusion to National Dex map:", error);
     return new Map();
   }
 }
@@ -409,7 +410,7 @@ export function usePokemonNameMap() {
   const { data: allPokemon = [] } = useAllPokemon();
 
   const nameMap = useMemo(() => {
-    return new Map(allPokemon.map(p => [p.id, p.name]));
+    return new Map(allPokemon.map((p) => [p.id, p.name]));
   }, [allPokemon]);
 
   return nameMap;
@@ -417,7 +418,7 @@ export function usePokemonNameMap() {
 
 export function usePokemonEvolutionData(
   pokemonId: number | undefined,
-  enabled: boolean = true
+  enabled: boolean = true,
 ) {
   const { data: allPokemon, isLoading } = useQuery({
     ...pokemonQueries.all(),
@@ -428,7 +429,7 @@ export function usePokemonEvolutionData(
     if (!pokemonId || !allPokemon || !enabled)
       return { evolutions: [], preEvolution: null, isLoading };
 
-    const currentPokemon = allPokemon.find(p => p.id === pokemonId);
+    const currentPokemon = allPokemon.find((p) => p.id === pokemonId);
     if (!currentPokemon)
       return {
         evolutions: [],
@@ -437,13 +438,13 @@ export function usePokemonEvolutionData(
       };
 
     const evolutionIds =
-      currentPokemon.evolution?.evolves_to.map(e => e.id) || [];
+      currentPokemon.evolution?.evolves_to.map((e) => e.id) || [];
     const preEvolutionId = currentPokemon.evolution?.evolves_from?.id || null;
-    const evolutions = allPokemon.filter(p =>
-      evolutionIds.includes(p.nationalDexId)
+    const evolutions = allPokemon.filter((p) =>
+      evolutionIds.includes(p.nationalDexId),
     );
     const preEvolution = preEvolutionId
-      ? allPokemon.find(p => p.nationalDexId === preEvolutionId) || null
+      ? allPokemon.find((p) => p.nationalDexId === preEvolutionId) || null
       : null;
     return {
       evolutions,
@@ -458,7 +459,7 @@ interface UsePokemonSearchOptions {
   query: string;
   queryOptions?: Omit<
     QueryOptions<PokemonOptionType[], Error>,
-    'queryKey' | 'queryFn'
+    "queryKey" | "queryFn"
   >;
 }
 
@@ -476,37 +477,37 @@ export function usePokemonSearch({
   });
 
   return useQuery<PokemonOptionType[], Error>({
-    queryKey: ['pokemon', 'search', debouncedQuery],
+    queryKey: ["pokemon", "search", debouncedQuery],
     queryFn: async () => {
-      if (debouncedQuery === '') return [];
+      if (debouncedQuery === "") return [];
 
       try {
         const searchResults = await searchService.search(debouncedQuery);
-        return searchResults.map(result => ({
+        return searchResults.map((result) => ({
           id: result.id,
           name: result.name,
           nationalDexId: result.nationalDexId,
         }));
       } catch (err) {
         console.warn(
-          'searchService failed, using client-side filtering fallback',
-          err
+          "searchService failed, using client-side filtering fallback",
+          err,
         );
         return allPokemon
-          .filter(pokemon =>
-            pokemon.name.toLowerCase().includes(debouncedQuery.toLowerCase())
+          .filter((pokemon) =>
+            pokemon.name.toLowerCase().includes(debouncedQuery.toLowerCase()),
           )
-          .map(p => ({
+          .map((p) => ({
             id: p.id,
             name: p.name,
             nationalDexId: p.nationalDexId,
           }));
       }
     },
-    select: data => {
-      return data?.filter(p => p.id !== 0) ?? [];
+    select: (data) => {
+      return data?.filter((p) => p.id !== 0) ?? [];
     },
-    enabled: allPokemon.length > 0 && debouncedQuery !== '',
+    enabled: allPokemon.length > 0 && debouncedQuery !== "",
     placeholderData: keepPreviousData,
     staleTime: 0, // Don't cache - always fetch fresh data
     gcTime: 0, // Don't keep in garbage collection

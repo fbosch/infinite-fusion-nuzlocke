@@ -1,55 +1,55 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { SPECIAL_LOCATIONS } from "@/constants/special-locations";
 import {
+  getLocationEncountersById,
+  getLocationEncountersByName,
   getLocations,
   getLocationsByRegion,
   getLocationsBySpecificRegion,
   getLocationsSortedByOrder,
-  getLocationEncountersByName,
-  getLocationEncountersById,
   getLocationsWithEncounters,
   hasLocationEncounters,
-} from '../locations';
-import { getStarterPokemonByGameMode } from '../starters';
-import { SPECIAL_LOCATIONS } from '@/constants/special-locations';
+} from "../locations";
+import { getStarterPokemonByGameMode } from "../starters";
 
 // Mock the starters module
-vi.mock('../starters', () => ({
+vi.mock("../starters", () => ({
   getStarterPokemonByGameMode: vi.fn(),
 }));
 
 // Mock the query client encounters data
-vi.mock('@/lib/queryClient', () => {
+vi.mock("@/lib/queryClient", () => {
   const mockEncountersData = [
     {
-      routeName: 'Route 1',
+      routeName: "Route 1",
       pokemon: [
-        { id: 1, source: 'wild' },
-        { id: 2, source: 'wild' },
-        { id: 3, source: 'gift' },
+        { id: 1, source: "wild" },
+        { id: 2, source: "wild" },
+        { id: 3, source: "gift" },
       ],
     },
     {
-      routeName: 'Route 2',
+      routeName: "Route 2",
       pokemon: [
-        { id: 4, source: 'wild' },
-        { id: 5, source: 'trade' },
-        { id: 6, source: 'wild' },
+        { id: 4, source: "wild" },
+        { id: 5, source: "trade" },
+        { id: 6, source: "wild" },
       ],
     },
     {
-      routeName: 'Viridian Forest',
+      routeName: "Viridian Forest",
       pokemon: [
-        { id: 7, source: 'wild' },
-        { id: 8, source: 'wild' },
-        { id: 9, source: 'wild' },
+        { id: 7, source: "wild" },
+        { id: 8, source: "wild" },
+        { id: 9, source: "wild" },
       ],
     },
     {
-      routeName: 'Pewter City',
+      routeName: "Pewter City",
       pokemon: [
-        { id: 10, source: 'gift' },
-        { id: 11, source: 'trade' },
-        { id: 12, source: 'wild' },
+        { id: 10, source: "gift" },
+        { id: 11, source: "trade" },
+        { id: 12, source: "wild" },
       ],
     },
   ];
@@ -63,36 +63,36 @@ vi.mock('@/lib/queryClient', () => {
     },
     encountersQueries: {
       all: vi.fn(() => ({
-        queryKey: ['encounters', 'classic'],
+        queryKey: ["encounters", "classic"],
         queryFn: vi.fn().mockResolvedValue(mockEncountersData),
       })),
     },
   };
 });
 
-describe('Locations', () => {
+describe("Locations", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('getLocations', () => {
-    it('should return an array of locations', () => {
+  describe("getLocations", () => {
+    it("should return an array of locations", () => {
       const locations = getLocations();
       expect(Array.isArray(locations)).toBe(true);
       expect(locations.length).toBeGreaterThan(0);
     });
 
-    it('should return locations with required properties', () => {
+    it("should return locations with required properties", () => {
       const locations = getLocations();
       const location = locations[0];
 
-      expect(location).toHaveProperty('id');
-      expect(location).toHaveProperty('name');
-      expect(location).toHaveProperty('region');
-      expect(location).toHaveProperty('description');
+      expect(location).toHaveProperty("id");
+      expect(location).toHaveProperty("name");
+      expect(location).toHaveProperty("region");
+      expect(location).toHaveProperty("description");
     });
 
-    it('should return locations in natural order', () => {
+    it("should return locations in natural order", () => {
       const locations = getLocations();
       const sortedLocations = getLocationsSortedByOrder();
 
@@ -101,178 +101,178 @@ describe('Locations', () => {
     });
   });
 
-  describe('getLocationsByRegion', () => {
-    it('should return locations for a specific region', () => {
-      const kantoLocations = getLocationsByRegion('Kanto');
+  describe("getLocationsByRegion", () => {
+    it("should return locations for a specific region", () => {
+      const kantoLocations = getLocationsByRegion("Kanto");
       expect(kantoLocations.length).toBeGreaterThan(0);
-      kantoLocations.forEach(location => {
-        expect(location.region).toBe('Kanto');
+      kantoLocations.forEach((location) => {
+        expect(location.region).toBe("Kanto");
       });
     });
 
-    it('should return empty array for non-existent region', () => {
-      const nonExistentLocations = getLocationsByRegion('NonExistent');
+    it("should return empty array for non-existent region", () => {
+      const nonExistentLocations = getLocationsByRegion("NonExistent");
       expect(nonExistentLocations).toEqual([]);
     });
   });
 
-  describe('getLocationsBySpecificRegion', () => {
-    it('should return locations for a specific region (case-insensitive)', () => {
-      const kantoLocations = getLocationsBySpecificRegion('kanto');
+  describe("getLocationsBySpecificRegion", () => {
+    it("should return locations for a specific region (case-insensitive)", () => {
+      const kantoLocations = getLocationsBySpecificRegion("kanto");
       expect(kantoLocations.length).toBeGreaterThan(0);
-      kantoLocations.forEach(location => {
-        expect(location.region.toLowerCase()).toBe('kanto');
+      kantoLocations.forEach((location) => {
+        expect(location.region.toLowerCase()).toBe("kanto");
       });
     });
 
-    it('should return empty array for non-existent region', () => {
-      const nonExistentLocations = getLocationsBySpecificRegion('nonexistent');
+    it("should return empty array for non-existent region", () => {
+      const nonExistentLocations = getLocationsBySpecificRegion("nonexistent");
       expect(nonExistentLocations).toEqual([]);
     });
   });
 
-  describe('Starter Pokémon Encounter Handling', () => {
-    describe('getLocationEncountersByName', () => {
-      it('should return starter Pokémon for starter location', async () => {
+  describe("Starter Pokémon Encounter Handling", () => {
+    describe("getLocationEncountersByName", () => {
+      it("should return starter Pokémon for starter location", async () => {
         const mockStarterPokemon = [1, 4, 7];
         const expectedEncounters = [
-          { id: 1, source: 'gift' },
-          { id: 4, source: 'gift' },
-          { id: 7, source: 'gift' },
+          { id: 1, source: "gift" },
+          { id: 4, source: "gift" },
+          { id: 7, source: "gift" },
         ];
         vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(
-          mockStarterPokemon
+          mockStarterPokemon,
         );
 
         const encounters = await getLocationEncountersByName(
-          'Starter',
-          'classic'
+          "Starter",
+          "classic",
         );
         expect(encounters).toEqual(expectedEncounters);
       });
 
-      it('should return empty array for non-existent location', async () => {
+      it("should return empty array for non-existent location", async () => {
         const encounters = await getLocationEncountersByName(
-          'NonExistentLocation',
-          'classic'
+          "NonExistentLocation",
+          "classic",
         );
         expect(encounters).toEqual([]);
       });
     });
 
-    describe('getLocationEncountersById', () => {
-      it('should return starter Pokémon for starter location ID', async () => {
+    describe("getLocationEncountersById", () => {
+      it("should return starter Pokémon for starter location ID", async () => {
         const mockStarterPokemon = [1, 4, 7];
         const expectedEncounters = [
-          { id: 1, source: 'gift' },
-          { id: 4, source: 'gift' },
-          { id: 7, source: 'gift' },
+          { id: 1, source: "gift" },
+          { id: 4, source: "gift" },
+          { id: 7, source: "gift" },
         ];
         vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(
-          mockStarterPokemon
+          mockStarterPokemon,
         );
 
         const encounters = await getLocationEncountersById(
           SPECIAL_LOCATIONS.STARTER_LOCATION,
-          'classic'
+          "classic",
         );
         expect(encounters).toEqual(expectedEncounters);
       });
 
-      it('should return empty array for non-existent location ID', async () => {
+      it("should return empty array for non-existent location ID", async () => {
         const encounters = await getLocationEncountersById(
-          'non-existent-id',
-          'classic'
+          "non-existent-id",
+          "classic",
         );
         expect(encounters).toEqual([]);
       });
     });
 
-    describe('getLocationsWithEncounters', () => {
-      it('should return locations with encounters', async () => {
+    describe("getLocationsWithEncounters", () => {
+      it("should return locations with encounters", async () => {
         const mockStarterPokemon = [1, 4, 7];
         const expectedEncounters = [
-          { id: 1, source: 'gift' },
-          { id: 4, source: 'gift' },
-          { id: 7, source: 'gift' },
+          { id: 1, source: "gift" },
+          { id: 4, source: "gift" },
+          { id: 7, source: "gift" },
         ];
         vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(
-          mockStarterPokemon
+          mockStarterPokemon,
         );
 
         const locationsWithEncounters =
-          await getLocationsWithEncounters('classic');
+          await getLocationsWithEncounters("classic");
         expect(locationsWithEncounters).toBeInstanceOf(Array);
         expect(locationsWithEncounters.length).toBeGreaterThan(0);
 
         // Check that starter location has encounters
         const starterLocationWithEncounters = locationsWithEncounters.find(
-          loc => loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION
+          (loc) => loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION,
         );
         expect(starterLocationWithEncounters).toBeDefined();
         expect(starterLocationWithEncounters?.encounters).toEqual(
-          expectedEncounters
+          expectedEncounters,
         );
       });
     });
 
-    describe('hasLocationEncounters', () => {
-      it('should return true for starter location', async () => {
+    describe("hasLocationEncounters", () => {
+      it("should return true for starter location", async () => {
         const mockStarterPokemon = [1, 4, 7];
         vi.mocked(getStarterPokemonByGameMode).mockResolvedValue(
-          mockStarterPokemon
+          mockStarterPokemon,
         );
 
         const locations = getLocations();
         const starterLocation = locations.find(
-          loc => loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION
+          (loc) => loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION,
         );
         expect(starterLocation).not.toBeNull();
 
         if (starterLocation) {
           const hasEncounters = await hasLocationEncounters(
             starterLocation,
-            'classic'
+            "classic",
           );
           expect(hasEncounters).toBe(true);
         }
       });
 
-      it('should return false for non-starter locations', async () => {
+      it("should return false for non-starter locations", async () => {
         // Create a mock location that we know doesn't have encounters
         const mockLocation = {
-          id: 'mock-location-id',
-          name: 'Mock City',
-          region: 'Kanto',
-          description: 'A mock location for testing',
+          id: "mock-location-id",
+          name: "Mock City",
+          region: "Kanto",
+          description: "A mock location for testing",
         };
 
         const hasEncounters = await hasLocationEncounters(
           mockLocation,
-          'classic'
+          "classic",
         );
         expect(hasEncounters).toBe(false);
       });
     });
 
-    describe('Starter Location Identification', () => {
-      it('should identify starter location by GUID', () => {
+    describe("Starter Location Identification", () => {
+      it("should identify starter location by GUID", () => {
         const locations = getLocations();
         const starterLocation = locations.find(
-          loc => loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION
+          (loc) => loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION,
         );
         expect(starterLocation).not.toBeNull();
-        expect(starterLocation?.name).toBe('Starter');
+        expect(starterLocation?.name).toBe("Starter");
       });
 
-      it('should identify non-starter locations correctly', () => {
+      it("should identify non-starter locations correctly", () => {
         const locations = getLocations();
         const nonStarterLocation = locations.find(
-          loc => loc.id !== SPECIAL_LOCATIONS.STARTER_LOCATION
+          (loc) => loc.id !== SPECIAL_LOCATIONS.STARTER_LOCATION,
         );
         expect(nonStarterLocation).toBeDefined();
         expect(nonStarterLocation?.id).not.toBe(
-          SPECIAL_LOCATIONS.STARTER_LOCATION
+          SPECIAL_LOCATIONS.STARTER_LOCATION,
         );
       });
     });
