@@ -20,23 +20,25 @@ import {
   useRef,
   useState,
 } from "react";
-import {
+import type {
   EncounterSource,
-  useEncountersForLocation,
+  RouteEncounterPokemon,
 } from "@/loaders/encounters";
-import type { CustomLocation } from "@/loaders/locations";
 import {
   isEgg,
   isPokemonEvolution,
   isPokemonPreEvolution,
   type PokemonOptionType,
   PokemonStatus,
-  type PokemonStatusType,
   useAllPokemon,
   usePokemonSearch,
 } from "@/loaders/pokemon";
-import { useActivePlaythrough, useGameMode } from "@/stores/playthroughs";
+import { useGameMode } from "@/stores/playthroughs";
 import { DraggableComboboxSprite } from "./DraggableComboboxSprite";
+import {
+  applyEncounterDefaultStatus,
+  getPokemonSources,
+} from "./encounterSelection";
 import { PokemonEvolutionButton } from "./PokemonEvolutionButton";
 import { PokemonNicknameInput } from "./PokemonNicknameInput";
 import { PokemonOption, PokemonOptions } from "./PokemonOptions";
@@ -62,6 +64,8 @@ interface PokemonComboboxProps {
   ref?: React.RefObject<HTMLInputElement | null>;
   isFusion?: boolean;
   shouldLoad?: boolean;
+  routeEncounterData?: RouteEncounterPokemon[];
+  isCustomLocation?: boolean;
 }
 
 // Pokemon Combobox Component
@@ -78,11 +82,12 @@ export const PokemonCombobox = ({
   ref,
   isFusion = false,
   shouldLoad = true,
+  routeEncounterData = [],
+  isCustomLocation = false,
 }: PokemonComboboxProps) => {
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
   const gameMode = useGameMode();
-  const playthrough = useActivePlaythrough();
 
   // Ref to maintain focus on input
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -102,18 +107,15 @@ export const PokemonCombobox = ({
     onChange,
   });
 
-  const isCustomLocation = useMemo(() => {
-    return playthrough?.customLocations?.some(
-      (location: CustomLocation) => location.id === locationId,
-    );
-  }, [playthrough, locationId]);
+  const routePokemonIds = useMemo(
+    () => new Set(routeEncounterData.map((pokemon) => pokemon.id)),
+    [routeEncounterData],
+  );
 
-  // Use the encounter data hook (now handles custom locations automatically)
-  const { routeEncounterData, isRoutePokemon } = useEncountersForLocation({
-    locationId,
-    enabled: !isCustomLocation && gameMode !== "randomized",
-    gameMode: gameMode === "randomized" ? "classic" : gameMode,
-  });
+  const isRoutePokemon = useCallback(
+    (pokemonId: number): boolean => routePokemonIds.has(pokemonId),
+    [routePokemonIds],
+  );
   // Use the search hook
   const { data: results = [], isLoading: isSearchLoading } = usePokemonSearch({
     query: deferredQuery,
@@ -144,8 +146,7 @@ export const PokemonCombobox = ({
   // Function to get Pokemon source information
   const getPokemonSource = useCallback(
     (pokemonId: number): EncounterSource[] => {
-      const pokemonData = routeEncounterData.find((p) => p.id === pokemonId);
-      return pokemonData?.sources || [];
+      return getPokemonSources(routeEncounterData, pokemonId);
     },
     [routeEncounterData],
   );
@@ -283,20 +284,7 @@ export const PokemonCombobox = ({
   const applyDefaultStatus = useCallback(
     (pokemon: PokemonOptionType): PokemonOptionType => {
       const sources = getPokemonSource(pokemon.id);
-      let defaultStatus: PokemonStatusType | undefined = pokemon.status;
-
-      if (sources.includes(EncounterSource.GIFT)) {
-        defaultStatus = PokemonStatus.RECEIVED;
-      } else if (sources.includes(EncounterSource.TRADE)) {
-        defaultStatus = PokemonStatus.TRADED;
-      }
-
-      if (!defaultStatus || defaultStatus === pokemon.status) return pokemon;
-
-      return {
-        ...pokemon,
-        status: defaultStatus,
-      };
+      return applyEncounterDefaultStatus(pokemon, sources);
     },
     [getPokemonSource],
   );

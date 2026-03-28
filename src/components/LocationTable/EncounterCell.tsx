@@ -510,6 +510,8 @@ export function EncounterCell({
                 <PokemonCombobox
                   key={`${locationId}-head`}
                   locationId={locationId}
+                  routeEncounterData={routeEncounterData}
+                  isCustomLocation={isCustomLocation}
                   value={headPokemon}
                   onChange={handleHeadChange}
                   placeholder="Select Pokémon"
@@ -554,6 +556,8 @@ export function EncounterCell({
                 <PokemonCombobox
                   key={`${locationId}-body`}
                   locationId={locationId}
+                  routeEncounterData={routeEncounterData}
+                  isCustomLocation={isCustomLocation}
                   value={bodyPokemon}
                   onChange={handleBodyChange}
                   placeholder="Select Pokémon"
@@ -571,6 +575,8 @@ export function EncounterCell({
             <PokemonCombobox
               key={`${locationId}-single`}
               locationId={locationId}
+              routeEncounterData={routeEncounterData}
+              isCustomLocation={isCustomLocation}
               value={selectedPokemon}
               onChange={handleSingleChange}
               placeholder="Select Pokémon"
