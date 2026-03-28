@@ -370,11 +370,14 @@ export const PokemonCombobox = ({
 
   const isShowingLoading = useMemo(() => {
     // Show loading when:
-    // 1. No query and all Pokemon are loading (for randomized/custom locations)
+    // 1. No query and all Pokemon are loading (for randomized/custom/empty-route locations)
     // 2. There's a query and search is loading, or all Pokemon are loading
     if (deferredQuery === "") {
       return (
-        (gameMode === "randomized" || isCustomLocation) && isAllPokemonLoading
+        (gameMode === "randomized" ||
+          isCustomLocation ||
+          routeEncounterData.length === 0) &&
+        isAllPokemonLoading
       );
     }
     return isSearchLoading || isAllPokemonLoading;
@@ -384,6 +387,7 @@ export const PokemonCombobox = ({
     isCustomLocation,
     isAllPokemonLoading,
     isSearchLoading,
+    routeEncounterData.length,
   ]);
 
   const shouldVirtualize = finalOptions.length > 30;

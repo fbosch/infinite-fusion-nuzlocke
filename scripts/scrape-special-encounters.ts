@@ -166,10 +166,16 @@ export function extractStaticEncounterLocations(
     .map((part) => part.trim())
     .filter((part) => part.length > 0);
 
-  const hasTrashCanStatic = parts.some(
-    (part) =>
-      /trash\s*cans?/i.test(part) && part.toLowerCase().includes("(static)"),
-  );
+  const isTrashCanLocation = (location: string): boolean =>
+    /^trash\s*cans?$/i.test(location.trim());
+
+  const hasTrashCanStatic = parts.some((part) => {
+    const cleanedLocation = cleanLocationName(extractBaseLocation(part));
+    return (
+      isTrashCanLocation(cleanedLocation) &&
+      part.toLowerCase().includes("(static)")
+    );
+  });
 
   const expandedParts: { location: string; isStatic: boolean }[] = [];
   let previousLocation: string | null = null;
@@ -194,7 +200,7 @@ export function extractStaticEncounterLocations(
       new Set(
         expandedParts
           .map((part) => part.location)
-          .filter((location) => location !== "Trash Cans"),
+          .filter((location) => isTrashCanLocation(location) === false),
       ),
     );
 

@@ -23,4 +23,12 @@ describe("extractStaticEncounterLocations", () => {
 
     expect(locations).toEqual(["Route 16"]);
   });
+
+  it("drops trash-can placeholder for singular and lowercase variants", () => {
+    const locations = extractStaticEncounterLocations(
+      "trash can (static), Route 11, Route 12",
+    );
+
+    expect(locations).toEqual(["Route 11", "Route 12"]);
+  });
 });
