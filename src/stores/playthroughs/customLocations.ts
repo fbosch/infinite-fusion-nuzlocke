@@ -2,6 +2,8 @@ import type { z } from "zod";
 import {
   type CustomLocationSchema,
   createCustomLocation,
+  getAvailableAfterLocations as getAvailableAfterLocationsFromLoader,
+  getLocationsSortedWithCustom,
 } from "@/loaders/locations";
 import { getActivePlaythrough, getCurrentTimestamp } from "./store";
 
@@ -125,31 +127,17 @@ export const validateCustomLocationPlacement = async (
 };
 
 // Get all available locations for placing custom locations after
-export const getAvailableAfterLocations = async () => {
+export const getAvailableAfterLocations = () => {
   const activePlaythrough = getActivePlaythrough();
 
-  try {
-    const { getAvailableAfterLocations } = await import("@/loaders/locations");
-    return getAvailableAfterLocations(activePlaythrough?.customLocations || []);
-  } catch (error) {
-    console.error("Failed to get available after locations:", error);
-    return [];
-  }
+  return getAvailableAfterLocationsFromLoader(
+    activePlaythrough?.customLocations || [],
+  );
 };
 
 // Get merged locations (default + custom) for the active playthrough
-export const getMergedLocations = async () => {
+export const getMergedLocations = () => {
   const activePlaythrough = getActivePlaythrough();
 
-  try {
-    const { getLocationsSortedWithCustom } = await import(
-      "@/loaders/locations"
-    );
-    return getLocationsSortedWithCustom(
-      activePlaythrough?.customLocations || [],
-    );
-  } catch (error) {
-    console.error("Failed to get merged locations:", error);
-    return [];
-  }
+  return getLocationsSortedWithCustom(activePlaythrough?.customLocations || []);
 };

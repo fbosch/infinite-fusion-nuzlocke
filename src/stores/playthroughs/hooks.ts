@@ -8,6 +8,7 @@ import {
 } from "./customLocations";
 import { getAllPlaythroughs, playthroughsStore } from "./store";
 import type { EncounterData, GameMode, Playthrough } from "./types";
+import { GameModeSchema } from "./types";
 
 // Reusable hooks for components
 export const usePlaythroughsSnapshot = () => {
@@ -61,12 +62,9 @@ export const useGameMode = (): GameMode => {
   const activePlaythrough = snapshot.playthroughs.find(
     (p) => p.id === snapshot.activePlaythroughId,
   );
-  const gameMode = activePlaythrough?.gameMode;
-  return gameMode === "classic" ||
-    gameMode === "remix" ||
-    gameMode === "randomized"
-    ? gameMode
-    : "classic";
+
+  const result = GameModeSchema.safeParse(activePlaythrough?.gameMode);
+  return result.success ? result.data : "classic";
 };
 
 export const useIsRandomizedMode = (): boolean => {

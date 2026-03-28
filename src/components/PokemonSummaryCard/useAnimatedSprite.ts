@@ -106,6 +106,9 @@ export function useAnimatedSprite({ canAnimate }: UseAnimatedSpriteOptions) {
     overlayRef.current?.getAnimations().forEach((a) => {
       a.cancel();
     });
+    raysSvgRef.current?.getAnimations().forEach((a) => {
+      a.cancel();
+    });
 
     // Sprite pulsing + brightness flashes without overriding base scale/transform
     imageRef.current?.animate(
