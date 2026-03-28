@@ -30,7 +30,7 @@ function getBadgeColor(score) {
 function readReactDoctorScore() {
   const result = spawnSync(
     "pnpm",
-    ["dlx", "react-doctor", "--score", "--offline", "--yes"],
+    ["dlx", "react-doctor", "--score", "--yes"],
     {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
