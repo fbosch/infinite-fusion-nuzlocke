@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { isContextMenuKeyboardShortcut } from "../ContextMenu";
 
-// We need to import the function directly since it's not exported
-// For testing purposes, we'll redefine it here
+// Local test helper that trims leading and trailing separator items
+// from a list of context menu entries.
 function filterEdgeSeparators(
   items: Array<{ separator?: boolean; id: string }>,
 ) {

@@ -61,16 +61,20 @@ export function PokemonSlotSelector({
   };
 
   return (
-    <button
-      type="button"
-      onClick={() => onSlotSelect(slot)}
-      aria-pressed={isActive}
-      aria-label={`Select ${slotLabel}`}
+    <div
       className={clsx(
         "border-2 rounded-lg p-2 transition-colors text-left h-24 relative cursor-pointer",
         getSlotStyles(),
       )}
     >
+      <button
+        type="button"
+        onClick={() => onSlotSelect(slot)}
+        aria-pressed={isActive}
+        aria-label={`Select ${slotLabel}`}
+        className="absolute inset-0 rounded-lg"
+      />
+
       <div className="absolute top-2 left-2">
         <div className="flex items-center space-x-2">
           <Icon className={`h-5 w-5 ${getIconColor()}`} />
@@ -98,12 +102,9 @@ export function PokemonSlotSelector({
           </div>
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemovePokemon();
-            }}
+            onClick={onRemovePokemon}
             aria-label={`Remove ${slotLabel}`}
-            className="absolute top-2 right-2 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 p-1 bg-white dark:bg-gray-700 rounded-full shadow-sm"
+            className="absolute top-2 right-2 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 p-1 bg-white dark:bg-gray-700 rounded-full shadow-sm z-10"
           >
             <X className="h-4 w-4" />
           </button>
@@ -115,6 +116,6 @@ export function PokemonSlotSelector({
             : `Click to select ${slot}`}
         </div>
       )}
-    </button>
+    </div>
   );
 }
