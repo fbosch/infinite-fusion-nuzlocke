@@ -38,7 +38,6 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
     },
     ref,
   ) => {
-    SummaryCard.displayName = "SummaryCard";
     const spriteRef = useRef<FusionSpriteHandle | null>(null);
 
     const effectiveHeadPokemon = headPokemon;
@@ -312,5 +311,7 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
     );
   },
 );
+
+SummaryCard.displayName = "SummaryCard";
 
 export default SummaryCard;
