@@ -32,7 +32,7 @@ export const setArtworkVariant = async (
 
   try {
     if (displayPokemon.isFusion && displayPokemon.head && displayPokemon.body) {
-      await setPreferredVariant(
+      setPreferredVariant(
         displayPokemon.head.id,
         displayPokemon.body.id,
         variant ?? "",
@@ -40,7 +40,7 @@ export const setArtworkVariant = async (
     } else if (displayPokemon.head || displayPokemon.body) {
       const pokemon = displayPokemon.head || displayPokemon.body;
       if (pokemon) {
-        await setPreferredVariant(pokemon.id, null, variant ?? "");
+        setPreferredVariant(pokemon.id, null, variant ?? "");
       }
     }
   } catch (error: unknown) {
@@ -152,7 +152,7 @@ export const cycleArtworkVariant = async (
     const newVariant = availableVariants[nextIndex] || "";
 
     if (displayPokemon.isFusion && displayPokemon.head && displayPokemon.body) {
-      await setPreferredVariant(
+      setPreferredVariant(
         displayPokemon.head.id,
         displayPokemon.body.id,
         newVariant,
@@ -160,7 +160,7 @@ export const cycleArtworkVariant = async (
     } else if (displayPokemon.head || displayPokemon.body) {
       const pokemon = displayPokemon.head || displayPokemon.body;
       if (pokemon) {
-        await setPreferredVariant(pokemon.id, null, newVariant);
+        setPreferredVariant(pokemon.id, null, newVariant);
       }
     }
 

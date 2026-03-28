@@ -1,30 +1,30 @@
 import type { z } from "zod";
 import { type PokemonOptionSchema, PokemonStatus } from "@/loaders/pokemon";
-import { getActivePlaythrough, getCurrentTimestamp } from "../store";
 import type { EncounterData } from "../types";
+import { ensureActivePlaythroughWithEncounters } from "./shared";
 
 // Update a Pokemon's properties by UID across all encounters
 export const updatePokemonByUID = async (
   pokemonUID: string,
   updates: Partial<z.infer<typeof PokemonOptionSchema>>,
 ) => {
-  const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough?.encounters) {
+  const activePlaythrough = ensureActivePlaythroughWithEncounters();
+  if (!activePlaythrough) {
     return;
   }
 
   for (const encounter of Object.values(activePlaythrough.encounters)) {
     if (encounter.head?.uid === pokemonUID) {
       encounter.head = { ...encounter.head, ...updates };
-      encounter.updatedAt = getCurrentTimestamp();
+      encounter.updatedAt = Date.now();
     }
     if (encounter.body?.uid === pokemonUID) {
       encounter.body = { ...encounter.body, ...updates };
-      encounter.updatedAt = getCurrentTimestamp();
+      encounter.updatedAt = Date.now();
     }
   }
 
-  activePlaythrough.updatedAt = getCurrentTimestamp();
+  activePlaythrough.updatedAt = Date.now();
 };
 
 const shouldAutoAssign = (status: string | undefined) =>
@@ -35,8 +35,8 @@ const shouldAutoAssign = (status: string | undefined) =>
 export const autoAssignCapturedPokemonToTeam = async (
   locationId: string,
 ): Promise<void> => {
-  const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough?.team || !activePlaythrough.encounters) {
+  const activePlaythrough = ensureActivePlaythroughWithEncounters();
+  if (!activePlaythrough?.team) {
     return;
   }
 
@@ -140,7 +140,7 @@ const findPokemonByUID = (
 };
 
 export const removeTeamMembersWithPokemon = (pokemonUIDs: string[]) => {
-  const activePlaythrough = getActivePlaythrough();
+  const activePlaythrough = ensureActivePlaythroughWithEncounters();
   if (!activePlaythrough?.team || pokemonUIDs.length === 0) {
     return;
   }
@@ -164,12 +164,12 @@ export const removeTeamMembersWithPokemon = (pokemonUIDs: string[]) => {
   }
 
   if (hasChanges) {
-    activePlaythrough.updatedAt = getCurrentTimestamp();
+    activePlaythrough.updatedAt = Date.now();
   }
 };
 
 export const moveTeamMemberToBox = async (position: number): Promise<void> => {
-  const activePlaythrough = getActivePlaythrough();
+  const activePlaythrough = ensureActivePlaythroughWithEncounters();
   if (!activePlaythrough?.team) {
     return;
   }
@@ -232,14 +232,14 @@ export const moveTeamMemberToBox = async (position: number): Promise<void> => {
   }
 
   activePlaythrough.team.members[position] = null;
-  activePlaythrough.updatedAt = getCurrentTimestamp();
+  activePlaythrough.updatedAt = Date.now();
 };
 
 export const restorePokemonToTeam = async (
   pokemonUID: string,
 ): Promise<void> => {
-  const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough?.encounters) {
+  const activePlaythrough = ensureActivePlaythroughWithEncounters();
+  if (!activePlaythrough) {
     return;
   }
 
