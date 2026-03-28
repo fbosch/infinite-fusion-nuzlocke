@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { ReactNode } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
-import clsx from 'clsx';
+import clsx from "clsx";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+import React, { type ReactNode } from "react";
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -27,7 +27,7 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error) {
-    console.error('Error caught by boundary:', error);
+    console.error("Error caught by boundary:", error);
   }
 
   render() {
@@ -35,21 +35,21 @@ export class ErrorBoundary extends React.Component<
       return (
         <div
           className={clsx(
-            'p-8 flex justify-center flex-col text-center',
-            this.props.className
+            "p-8 flex justify-center flex-col text-center",
+            this.props.className,
           )}
         >
           <div>
-            <AlertTriangle className='h-12 w-12 text-destructive mx-auto mb-4' />
-            <h2 className='text-lg  mb-2'>Something went wrong</h2>
-            <p className='text-muted-foreground mb-4'>
+            <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <h2 className="text-lg  mb-2">Something went wrong</h2>
+            <p className="text-muted-foreground mb-4">
               An error occurred while loading this content.
             </p>
             <button
               onClick={() => this.setState({ hasError: false })}
-              className='inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90'
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
             >
-              <RefreshCw className='h-4 w-4' />
+              <RefreshCw className="h-4 w-4" />
               Try again
             </button>
           </div>

@@ -1,76 +1,70 @@
-import { describe, it, expect } from 'vitest';
-import { isEgg } from '@/loaders/pokemon';
+import { describe, expect, it } from "vitest";
+import {
+  isEgg,
+  type PokemonOptionType,
+  PokemonStatus,
+} from "@/loaders/pokemon";
 
-// Mock the Pokemon data types
-interface PokemonOptionType {
-  id: number;
-  name: string;
-  nationalDexId: number;
-  nickname?: string;
-  status?: string;
-  uid?: string;
-}
-
-describe('Egg Hatching Logic', () => {
-  it('should identify eggs correctly', () => {
+describe("Egg Hatching Logic", () => {
+  it("should identify eggs correctly", () => {
     const eggPokemon: PokemonOptionType = {
       id: -1,
-      name: 'Egg',
+      name: "Egg",
       nationalDexId: -1,
-      nickname: 'MyEgg',
-      status: 'captured',
-      uid: 'egg--1',
+      nickname: "MyEgg",
+      status: PokemonStatus.CAPTURED,
+      uid: "egg--1",
     };
 
     const regularPokemon: PokemonOptionType = {
       id: 1,
-      name: 'Bulbasaur',
+      name: "Bulbasaur",
       nationalDexId: 1,
-      nickname: 'Bulby',
-      status: 'captured',
-      uid: 'bulbasaur-1',
+      nickname: "Bulby",
+      status: PokemonStatus.CAPTURED,
+      uid: "bulbasaur-1",
     };
 
     expect(isEgg(eggPokemon)).toBe(true);
     expect(isEgg(regularPokemon)).toBe(false);
   });
 
-  it('should detect egg hatching scenario', () => {
+  it("should detect egg hatching scenario", () => {
     const eggPokemon: PokemonOptionType = {
       id: -1,
-      name: 'Egg',
+      name: "Egg",
       nationalDexId: -1,
-      nickname: 'MyEgg',
-      status: 'captured',
-      uid: 'egg--1',
+      nickname: "MyEgg",
+      status: PokemonStatus.CAPTURED,
+      uid: "egg--1",
     };
 
     const newPokemon: PokemonOptionType = {
       id: 1,
-      name: 'Bulbasaur',
+      name: "Bulbasaur",
       nationalDexId: 1,
-      uid: 'bulbasaur-1',
+      uid: "bulbasaur-1",
     };
 
     const isEggHatching = isEgg(eggPokemon) && !isEgg(newPokemon);
     expect(isEggHatching).toBe(true);
   });
 
-  it('should preserve nickname and status when hatching egg', () => {
+  it("should preserve nickname and status when hatching egg", () => {
     const eggPokemon: PokemonOptionType = {
       id: -1,
-      name: 'Egg',
+      name: "Egg",
       nationalDexId: -1,
-      nickname: 'MyEgg',
-      status: 'captured',
-      uid: 'egg--1',
+      nickname: "MyEgg",
+      status: PokemonStatus.CAPTURED,
+      uid: "egg--1",
     };
 
     const newPokemon: PokemonOptionType = {
       id: 1,
-      name: 'Bulbasaur',
+      name: "Bulbasaur",
       nationalDexId: 1,
-      uid: 'bulbasaur-1',
+      uid: "bulbasaur-1",
     };
 
     // Simulate the egg hatching logic
@@ -87,29 +81,29 @@ describe('Egg Hatching Logic', () => {
 
     expect(finalValue).toEqual({
       id: 1,
-      name: 'Bulbasaur',
+      name: "Bulbasaur",
       nationalDexId: 1,
-      nickname: 'MyEgg',
-      status: 'captured',
-      uid: 'bulbasaur-1',
+      nickname: "MyEgg",
+      status: PokemonStatus.CAPTURED,
+      uid: "bulbasaur-1",
     });
   });
 
-  it('should not preserve nickname and status when replacing regular Pokémon', () => {
+  it("should not preserve nickname and status when replacing regular Pokémon", () => {
     const currentPokemon: PokemonOptionType = {
       id: 1,
-      name: 'Bulbasaur',
+      name: "Bulbasaur",
       nationalDexId: 1,
-      nickname: 'Bulby',
-      status: 'captured',
-      uid: 'bulbasaur-1',
+      nickname: "Bulby",
+      status: PokemonStatus.CAPTURED,
+      uid: "bulbasaur-1",
     };
 
     const newPokemon: PokemonOptionType = {
       id: 2,
-      name: 'Ivysaur',
+      name: "Ivysaur",
       nationalDexId: 2,
-      uid: 'ivysaur-2',
+      uid: "ivysaur-2",
     };
 
     // Simulate the regular replacement logic
@@ -128,21 +122,21 @@ describe('Egg Hatching Logic', () => {
     expect(finalValue).toEqual(newPokemon);
   });
 
-  it('should handle egg hatching with undefined nickname and status', () => {
+  it("should handle egg hatching with undefined nickname and status", () => {
     const eggPokemon: PokemonOptionType = {
       id: -1,
-      name: 'Egg',
+      name: "Egg",
       nationalDexId: -1,
-      uid: 'egg--1',
+      uid: "egg--1",
     };
 
     const newPokemon: PokemonOptionType = {
       id: 1,
-      name: 'Bulbasaur',
+      name: "Bulbasaur",
       nationalDexId: 1,
-      nickname: 'Bulby',
-      status: 'captured',
-      uid: 'bulbasaur-1',
+      nickname: "Bulby",
+      status: "captured",
+      uid: "bulbasaur-1",
     };
 
     // Simulate the egg hatching logic
@@ -160,11 +154,11 @@ describe('Egg Hatching Logic', () => {
     // Should keep the new Pokémon's nickname and status since egg has none
     expect(finalValue).toEqual({
       id: 1,
-      name: 'Bulbasaur',
+      name: "Bulbasaur",
       nationalDexId: 1,
-      nickname: 'Bulby',
-      status: 'captured',
-      uid: 'bulbasaur-1',
+      nickname: "Bulby",
+      status: "captured",
+      uid: "bulbasaur-1",
     });
   });
 });

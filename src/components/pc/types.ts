@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import type { PokemonOptionType } from '@/loaders/pokemon';
+import type { PokemonOptionType } from "@/loaders/pokemon";
 
 export type PCEntry = {
   locationId: string;

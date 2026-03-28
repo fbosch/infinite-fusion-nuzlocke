@@ -1,29 +1,29 @@
-import type { Pokemon } from '@/loaders/pokemon';
+import type { Pokemon } from "@/loaders/pokemon";
 import {
   getPokemonById,
   getPokemonByName,
   getPokemonByNationalDexId,
-} from '@/loaders/pokemon';
+} from "@/loaders/pokemon";
 
 export const ALL_TYPES = [
-  'grass',
-  'fire',
-  'water',
-  'electric',
-  'ice',
-  'fighting',
-  'poison',
-  'ground',
-  'psychic',
-  'bug',
-  'rock',
-  'ghost',
-  'dragon',
-  'dark',
-  'steel',
-  'fairy',
-  'normal',
-  'flying',
+  "grass",
+  "fire",
+  "water",
+  "electric",
+  "ice",
+  "fighting",
+  "poison",
+  "ground",
+  "psychic",
+  "bug",
+  "rock",
+  "ghost",
+  "dragon",
+  "dark",
+  "steel",
+  "fairy",
+  "normal",
+  "flying",
 ] as const;
 
 export type TypeName = (typeof ALL_TYPES)[number];
@@ -49,31 +49,31 @@ interface EffectiveTypes {
 // type ordering used in fusion typing.
 const latestSwappedTypeMap: Record<number, [TypeName, TypeName]> = {
   // Steel/Electric line
-  81: ['steel', 'electric'], // Magnemite
-  82: ['steel', 'electric'], // Magneton
-  462: ['steel', 'electric'], // Magnezone (v6.1+)
+  81: ["steel", "electric"], // Magnemite
+  82: ["steel", "electric"], // Magneton
+  462: ["steel", "electric"], // Magnezone (v6.1+)
   // Spiritomb
-  442: ['dark', 'ghost'],
+  442: ["dark", "ghost"],
   // Ferroseed line (v6.3+)
-  597: ['steel', 'grass'], // Ferroseed
-  598: ['steel', 'grass'], // Ferrothorn
+  597: ["steel", "grass"], // Ferroseed
+  598: ["steel", "grass"], // Ferrothorn
   // Phantump line (v6.3+)
-  708: ['grass', 'ghost'], // Phantump
-  709: ['grass', 'ghost'], // Trevenant
+  708: ["grass", "ghost"], // Phantump
+  709: ["grass", "ghost"], // Trevenant
   // Sandygast line (v6.x)
-  769: ['ground', 'ghost'], // Sandygast
-  770: ['ground', 'ghost'], // Palossand
+  769: ["ground", "ghost"], // Sandygast
+  770: ["ground", "ghost"], // Palossand
 };
 
 // Dominant type rule for latest ruleset: only Normal/Flying always passes Flying
 function hasTypes(pokemon: Pokemon, a: TypeName, b: TypeName): boolean {
-  const names = pokemon.types.map(t => t.name.toLowerCase());
+  const names = pokemon.types.map((t) => t.name.toLowerCase());
   return names.includes(a) && names.includes(b);
 }
 
 function getDominantType(pokemon: Pokemon): TypeName | undefined {
   // Dominant type rule for latest ruleset: only Normal/Flying always passes Flying
-  if (hasTypes(pokemon, 'normal', 'flying')) return 'flying';
+  if (hasTypes(pokemon, "normal", "flying")) return "flying";
   return undefined;
 }
 
@@ -81,7 +81,7 @@ function getDominantType(pokemon: Pokemon): TypeName | undefined {
 // Use ONLY for fusion calculation. Do not use for single-Pokémon displays.
 export function getEffectiveTypeOrder(pokemon: Pokemon): EffectiveTypes {
   const id = pokemon.nationalDexId;
-  const types = pokemon.types.map(t => t.name.toLowerCase());
+  const types = pokemon.types.map((t) => t.name.toLowerCase());
 
   if (id in latestSwappedTypeMap) {
     const [p, s] = latestSwappedTypeMap[id]!;
@@ -103,7 +103,7 @@ export function getEffectiveTypeOrder(pokemon: Pokemon): EffectiveTypes {
  */
 export function computeFusionTypes(
   head: Pokemon,
-  body: Pokemon
+  body: Pokemon,
 ): [TypeName, TypeName] {
   const headOrder = getEffectiveTypeOrder(head);
   const bodyOrder = getEffectiveTypeOrder(body);
@@ -142,7 +142,7 @@ export function computeFusionTypes(
  */
 export function getFusionTyping(
   head: Pokemon,
-  body: Pokemon
+  body: Pokemon,
 ): { primary: TypeName; secondary: TypeName } {
   const [primary, secondary] = computeFusionTypes(head, body);
   return { primary, secondary };
@@ -156,7 +156,7 @@ export function getTypesForPokemon(pokemon: Pokemon): {
   primary: TypeName;
   secondary?: TypeName;
 } {
-  const types = pokemon.types.map(t => t.name.toLowerCase());
+  const types = pokemon.types.map((t) => t.name.toLowerCase());
   const primary = ensureTypeName(types[0]);
   const secondary = isTypeName(types[1]) ? (types[1] as TypeName) : undefined;
   return { primary, secondary };
@@ -172,15 +172,15 @@ export type TypeQuery =
  * and return its effective types.
  */
 export async function getPokemonTypes(
-  query: TypeQuery
+  query: TypeQuery,
 ): Promise<{ primary: TypeName; secondary?: TypeName } | null> {
   let pokemon: Pokemon | null = null;
 
-  if ('name' in query && query.name) {
+  if ("name" in query && query.name) {
     pokemon = await getPokemonByName(query.name);
-  } else if ('id' in query && query.id) {
+  } else if ("id" in query && query.id) {
     pokemon = await getPokemonById(query.id);
-  } else if ('nationalDexId' in query && query.nationalDexId) {
+  } else if ("nationalDexId" in query && query.nationalDexId) {
     pokemon = await getPokemonByNationalDexId(query.nationalDexId);
   }
 

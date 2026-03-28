@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { settingsStore, settingsActions, SettingsSchema } from '../settings';
-import { getActivePlaythrough } from '../playthroughs';
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getActivePlaythrough } from "../playthroughs";
+import { SettingsSchema, settingsActions, settingsStore } from "../settings";
 
 // Mock the playthroughs store
-vi.mock('../playthroughs', () => ({
+vi.mock("../playthroughs", () => ({
   getActivePlaythrough: vi.fn(),
 }));
 
@@ -14,7 +14,7 @@ const clearLocalStorage = () => {
   localStorage.clear();
 };
 
-describe('Settings Store', () => {
+describe("Settings Store", () => {
   beforeEach(() => {
     // Clear all mocks and localStorage
     vi.clearAllMocks();
@@ -27,11 +27,11 @@ describe('Settings Store', () => {
     clearLocalStorage();
   });
 
-  describe('SettingsSchema', () => {
-    it('validates valid settings object', () => {
+  describe("SettingsSchema", () => {
+    it("validates valid settings object", () => {
       const validSettings = {
         moveEncountersBetweenLocations: true,
-        version: '1.0.0',
+        version: "1.0.0",
       };
 
       const result = SettingsSchema.safeParse(validSettings);
@@ -41,7 +41,7 @@ describe('Settings Store', () => {
       }
     });
 
-    it('applies defaults for missing fields', () => {
+    it("applies defaults for missing fields", () => {
       const partialSettings = {};
 
       const result = SettingsSchema.safeParse(partialSettings);
@@ -49,14 +49,14 @@ describe('Settings Store', () => {
       if (result.success) {
         expect(result.data).toEqual({
           moveEncountersBetweenLocations: false,
-          version: '1.0.0',
+          version: "1.0.0",
         });
       }
     });
 
-    it('rejects invalid types', () => {
+    it("rejects invalid types", () => {
       const invalidSettings = {
-        moveEncountersBetweenLocations: 'invalid',
+        moveEncountersBetweenLocations: "invalid",
         version: 123,
       };
 
@@ -65,12 +65,12 @@ describe('Settings Store', () => {
     });
   });
 
-  describe('Version-based Default Logic', () => {
-    it('re-evaluates defaults after playthrough load completes', async () => {
+  describe("Version-based Default Logic", () => {
+    it("re-evaluates defaults after playthrough load completes", async () => {
       const oldPlaythrough = {
-        id: 'old-playthrough',
-        name: 'Old Run',
-        gameMode: 'classic',
+        id: "old-playthrough",
+        name: "Old Run",
+        gameMode: "classic",
         encounters: {},
         team: [],
         pc: [],
@@ -84,7 +84,7 @@ describe('Settings Store', () => {
         .mockReturnValue(oldPlaythrough);
 
       const { settingsStore: freshStore, settingsActions: freshActions } =
-        await import('../settings?t=' + Date.now());
+        await import("../settings?t=" + Date.now());
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
 
@@ -93,12 +93,12 @@ describe('Settings Store', () => {
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
     });
 
-    it('enables move encounters for old playthroughs (no version)', async () => {
+    it("enables move encounters for old playthroughs (no version)", async () => {
       // Mock old playthrough without version field
       mockGetActivePlaythrough.mockReturnValue({
-        id: 'old-playthrough',
-        name: 'Old Run',
-        gameMode: 'classic',
+        id: "old-playthrough",
+        name: "Old Run",
+        gameMode: "classic",
         encounters: {},
         team: [],
         pc: [],
@@ -110,202 +110,202 @@ describe('Settings Store', () => {
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        '../settings?t=' + Date.now()
+        `../settings?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
     });
 
-    it('disables move encounters for new playthroughs (with version)', async () => {
+    it("disables move encounters for new playthroughs (with version)", async () => {
       // Mock new playthrough with version field
       mockGetActivePlaythrough.mockReturnValue({
-        id: 'new-playthrough',
-        name: 'New Run',
-        gameMode: 'classic',
+        id: "new-playthrough",
+        name: "New Run",
+        gameMode: "classic",
         encounters: {},
         team: [],
         pc: [],
         customLocations: [],
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        version: '1.0.0', // Has version - this indicates new playthrough
+        version: "1.0.0", // Has version - this indicates new playthrough
       } as any);
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        '../settings?t=' + Date.now()
+        `../settings?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
     });
 
-    it('disables move encounters when no active playthrough (new user)', async () => {
+    it("disables move encounters when no active playthrough (new user)", async () => {
       mockGetActivePlaythrough.mockReturnValue(null);
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        '../settings?t=' + Date.now()
+        `../settings?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
     });
 
-    it('handles errors gracefully and defaults to disabled', async () => {
+    it("handles errors gracefully and defaults to disabled", async () => {
       mockGetActivePlaythrough.mockImplementation(() => {
-        throw new Error('Playthrough access failed');
+        throw new Error("Playthrough access failed");
       });
 
       // Spy on console.warn to verify error logging
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        '../settings?t=' + Date.now()
+        `../settings?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Error checking playthrough version for settings default:',
-        expect.any(Error)
+        "Error checking playthrough version for settings default:",
+        expect.any(Error),
       );
 
       consoleSpy.mockRestore();
     });
   });
 
-  describe('localStorage Integration', () => {
-    it('loads settings from localStorage when available', async () => {
+  describe("localStorage Integration", () => {
+    it("loads settings from localStorage when available", async () => {
       const storedSettings = {
         moveEncountersBetweenLocations: true,
-        version: '1.0.0',
+        version: "1.0.0",
       };
 
-      localStorage.setItem('settings', JSON.stringify(storedSettings));
+      localStorage.setItem("settings", JSON.stringify(storedSettings));
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        '../settings?t=' + Date.now()
+        `../settings?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
-      expect(freshStore.version).toBe('1.0.0');
+      expect(freshStore.version).toBe("1.0.0");
     });
 
-    it('uses dynamic defaults when localStorage is empty', async () => {
+    it("uses dynamic defaults when localStorage is empty", async () => {
       // localStorage is already cleared in beforeEach
       mockGetActivePlaythrough.mockReturnValue({
-        id: 'old-playthrough',
-        name: 'Old Run',
+        id: "old-playthrough",
+        name: "Old Run",
         // No version field
       } as any);
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        '../settings?t=' + Date.now()
+        `../settings?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
     });
 
-    it('applies dynamic default only when setting is undefined in localStorage', async () => {
+    it("applies dynamic default only when setting is undefined in localStorage", async () => {
       // Stored settings without moveEncountersBetweenLocations field
       const storedSettings = {
-        version: '1.0.0',
+        version: "1.0.0",
       };
 
-      localStorage.setItem('settings', JSON.stringify(storedSettings));
+      localStorage.setItem("settings", JSON.stringify(storedSettings));
       mockGetActivePlaythrough.mockReturnValue({
-        id: 'old-playthrough',
-        name: 'Old Run',
+        id: "old-playthrough",
+        name: "Old Run",
         // No version field - should enable move encounters
       } as any);
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        '../settings?t=' + Date.now()
+        `../settings?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
     });
 
-    it('preserves explicit user setting from localStorage', async () => {
+    it("preserves explicit user setting from localStorage", async () => {
       // User explicitly disabled move encounters in old playthrough
       const storedSettings = {
         moveEncountersBetweenLocations: false,
-        version: '1.0.0',
+        version: "1.0.0",
       };
 
-      localStorage.setItem('settings', JSON.stringify(storedSettings));
+      localStorage.setItem("settings", JSON.stringify(storedSettings));
       mockGetActivePlaythrough.mockReturnValue({
-        id: 'old-playthrough',
-        name: 'Old Run',
+        id: "old-playthrough",
+        name: "Old Run",
         // No version field - would normally enable, but user explicitly disabled
       } as any);
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        '../settings?t=' + Date.now()
+        `../settings?t=${Date.now()}`
       );
 
       // Should preserve user's explicit choice
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
     });
 
-    it('handles corrupted localStorage data gracefully', async () => {
-      localStorage.setItem('settings', 'invalid-json');
+    it("handles corrupted localStorage data gracefully", async () => {
+      localStorage.setItem("settings", "invalid-json");
 
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        '../settings?t=' + Date.now()
+        `../settings?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to load settings from localStorage:',
-        expect.any(Error)
+        "Failed to load settings from localStorage:",
+        expect.any(Error),
       );
 
       consoleSpy.mockRestore();
     });
 
-    it('handles invalid settings data with Zod validation', async () => {
+    it("handles invalid settings data with Zod validation", async () => {
       const invalidSettings = {
-        moveEncountersBetweenLocations: 'invalid-type',
+        moveEncountersBetweenLocations: "invalid-type",
         version: 123,
       };
 
-      localStorage.setItem('settings', JSON.stringify(invalidSettings));
+      localStorage.setItem("settings", JSON.stringify(invalidSettings));
 
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        '../settings?t=' + Date.now()
+        `../settings?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Invalid settings data, using defaults:',
-        expect.any(Object)
+        "Invalid settings data, using defaults:",
+        expect.any(Object),
       );
 
       consoleSpy.mockRestore();
     });
   });
 
-  describe('Settings Actions', () => {
+  describe("Settings Actions", () => {
     beforeEach(() => {
       // Reset settingsStore to default state and clear localStorage
       clearLocalStorage();
       Object.assign(settingsStore, {
         moveEncountersBetweenLocations: false,
-        version: '1.0.0',
+        version: "1.0.0",
       });
     });
 
-    it('toggles moveEncountersBetweenLocations', () => {
+    it("toggles moveEncountersBetweenLocations", () => {
       expect(settingsStore.moveEncountersBetweenLocations).toBe(false);
 
       settingsActions.toggleMoveEncountersBetweenLocations();
@@ -315,14 +315,14 @@ describe('Settings Store', () => {
       expect(settingsStore.moveEncountersBetweenLocations).toBe(false);
     });
 
-    it('resets to dynamic defaults', () => {
+    it("resets to dynamic defaults", () => {
       // Set to non-default value
       settingsStore.moveEncountersBetweenLocations = true;
 
       // Mock old playthrough (should default to enabled)
       mockGetActivePlaythrough.mockReturnValue({
-        id: 'old-playthrough',
-        name: 'Old Run',
+        id: "old-playthrough",
+        name: "Old Run",
         // No version field
       } as any);
 
@@ -331,32 +331,32 @@ describe('Settings Store', () => {
 
       // Mock new playthrough (should default to disabled)
       mockGetActivePlaythrough.mockReturnValue({
-        id: 'new-playthrough',
-        name: 'New Run',
-        version: '1.0.0',
+        id: "new-playthrough",
+        name: "New Run",
+        version: "1.0.0",
       } as any);
 
       settingsActions.resetToDefaults();
       expect(settingsStore.moveEncountersBetweenLocations).toBe(false);
     });
 
-    it('updates multiple settings at once', () => {
+    it("updates multiple settings at once", () => {
       settingsActions.updateMultiple({
         moveEncountersBetweenLocations: true,
-        version: '2.0.0',
+        version: "2.0.0",
       });
 
       expect(settingsStore.moveEncountersBetweenLocations).toBe(true);
-      expect(settingsStore.version).toBe('2.0.0');
+      expect(settingsStore.version).toBe("2.0.0");
     });
 
-    it('refreshes defaults when no settings are stored', async () => {
+    it("refreshes defaults when no settings are stored", async () => {
       // Clear localStorage to ensure clean state
       clearLocalStorage();
 
       mockGetActivePlaythrough.mockReturnValue({
-        id: 'old-playthrough',
-        name: 'Old Run',
+        id: "old-playthrough",
+        name: "Old Run",
         // No version field
       } as any);
 
@@ -364,7 +364,7 @@ describe('Settings Store', () => {
       settingsStore.moveEncountersBetweenLocations = false;
 
       // Wait a bit for any pending localStorage saves from the state change
-      await new Promise(resolve => setTimeout(resolve, 20));
+      await new Promise((resolve) => setTimeout(resolve, 20));
 
       // Clear localStorage again after the state change
       clearLocalStorage();
@@ -374,14 +374,14 @@ describe('Settings Store', () => {
       expect(settingsStore.moveEncountersBetweenLocations).toBe(true);
     });
 
-    it('refreshes defaults only when setting was undefined', () => {
+    it("refreshes defaults only when setting was undefined", () => {
       // Mock stored settings without moveEncountersBetweenLocations
-      const storedSettings = { version: '1.0.0' };
-      localStorage.setItem('settings', JSON.stringify(storedSettings));
+      const storedSettings = { version: "1.0.0" };
+      localStorage.setItem("settings", JSON.stringify(storedSettings));
 
       mockGetActivePlaythrough.mockReturnValue({
-        id: 'old-playthrough',
-        name: 'Old Run',
+        id: "old-playthrough",
+        name: "Old Run",
         // No version field
       } as any);
 
@@ -392,17 +392,17 @@ describe('Settings Store', () => {
       expect(settingsStore.moveEncountersBetweenLocations).toBe(true);
     });
 
-    it('does not refresh when setting was explicitly set', () => {
+    it("does not refresh when setting was explicitly set", () => {
       // Mock stored settings with explicit moveEncountersBetweenLocations
       const storedSettings = {
         moveEncountersBetweenLocations: false,
-        version: '1.0.0',
+        version: "1.0.0",
       };
-      localStorage.setItem('settings', JSON.stringify(storedSettings));
+      localStorage.setItem("settings", JSON.stringify(storedSettings));
 
       mockGetActivePlaythrough.mockReturnValue({
-        id: 'old-playthrough',
-        name: 'Old Run',
+        id: "old-playthrough",
+        name: "Old Run",
         // No version field - would normally enable
       } as any);
 
@@ -415,29 +415,29 @@ describe('Settings Store', () => {
     });
   });
 
-  describe('Persistence', () => {
-    it('saves settings to localStorage when updated', async () => {
+  describe("Persistence", () => {
+    it("saves settings to localStorage when updated", async () => {
       settingsActions.toggleMoveEncountersBetweenLocations();
 
       // Wait a bit for the subscription to fire
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Should have saved to localStorage with updated settings
-      const stored = localStorage.getItem('settings');
+      const stored = localStorage.getItem("settings");
       expect(stored).not.toBeNull();
       expect(stored!).toContain('"moveEncountersBetweenLocations":true');
     });
 
-    it('validates settings before saving', async () => {
+    it("validates settings before saving", async () => {
       const consoleSpy = vi
-        .spyOn(console, 'error')
+        .spyOn(console, "error")
         .mockImplementation(() => {});
 
       // Try to use updateSettings with invalid data
       try {
         // This should trigger validation error in updateSettings
         (settingsActions as any).updateMultiple({
-          moveEncountersBetweenLocations: 'invalid',
+          moveEncountersBetweenLocations: "invalid",
         });
       } catch {
         // Expected to catch validation error
@@ -445,8 +445,8 @@ describe('Settings Store', () => {
 
       // Should have logged validation error
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Invalid settings update:',
-        expect.any(Object)
+        "Invalid settings update:",
+        expect.any(Object),
       );
 
       consoleSpy.mockRestore();

@@ -1,7 +1,7 @@
 /**
  * Utility functions for API cache headers with build ID integration
  */
-import { getCacheBuster } from '@/lib/persistence';
+import { getCacheBuster } from "@/lib/persistence";
 
 /**
  * Create cache headers with ETag based on build ID
@@ -11,7 +11,7 @@ export function createCacheHeaders(
     maxAge?: number;
     staleWhileRevalidate?: number;
     includeETag?: boolean;
-  } = {}
+  } = {},
 ) {
   const {
     maxAge = 3600, // 1 hour default
@@ -20,11 +20,11 @@ export function createCacheHeaders(
   } = options;
 
   const headers: Record<string, string> = {
-    'Cache-Control': `public, max-age=${maxAge}, stale-while-revalidate=${staleWhileRevalidate}`,
+    "Cache-Control": `public, max-age=${maxAge}, stale-while-revalidate=${staleWhileRevalidate}`,
   };
 
   if (includeETag) {
-    headers['ETag'] = `"${getCacheBuster()}"`;
+    headers.ETag = `"${getCacheBuster()}"`;
   }
 
   return headers;
@@ -35,7 +35,7 @@ export function createCacheHeaders(
  */
 export function createDevCacheHeaders(maxAge: number = 30) {
   return {
-    'Cache-Control': `public, max-age=${maxAge}`,
+    "Cache-Control": `public, max-age=${maxAge}`,
     ETag: `"${getCacheBuster()}"`,
   };
 }
@@ -45,8 +45,8 @@ export function createDevCacheHeaders(maxAge: number = 30) {
  */
 export function createNoCacheHeaders() {
   return {
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    Pragma: 'no-cache',
-    Expires: '0',
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    Pragma: "no-cache",
+    Expires: "0",
   };
 }

@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
-import Image from 'next/image';
-import spritesheetMetadata from '@/assets/pokemon-gen8-spritesheet-metadata.json';
-import gen7SpritesheetMetadata from '@/assets/pokemon-gen7-spritesheet-metadata.json';
-import { twMerge } from 'tailwind-merge';
-import { getCacheBuster } from '../lib/persistence';
+import Image from "next/image";
+import type React from "react";
+import { useMemo } from "react";
+import { twMerge } from "tailwind-merge";
+import gen7SpritesheetMetadata from "@/assets/pokemon-gen7-spritesheet-metadata.json";
+import spritesheetMetadata from "@/assets/pokemon-gen8-spritesheet-metadata.json";
+import { getCacheBuster } from "../lib/persistence";
 
 const version = getCacheBuster();
 
@@ -14,26 +15,26 @@ interface PokemonSpriteProps extends React.HTMLAttributes<HTMLImageElement> {
    * - 'gen8': Standard size sprites (default)
    * - 'gen7': More compact sprites for space efficiency
    */
-  generation?: 'gen7' | 'gen8';
+  generation?: "gen7" | "gen8";
   className?: string;
   draggable?: boolean;
 }
 
 export function PokemonSprite({
   pokemonId,
-  generation = 'gen8',
-  className = '',
+  generation = "gen8",
+  className = "",
   ...rest
 }: PokemonSpriteProps) {
   const metadata = useMemo(() => {
-    return generation === 'gen7'
+    return generation === "gen7"
       ? gen7SpritesheetMetadata
       : spritesheetMetadata;
   }, [generation]);
 
   const spriteData = useMemo(
-    () => metadata.sprites.find(sprite => sprite.id === pokemonId),
-    [pokemonId, metadata]
+    () => metadata.sprites.find((sprite) => sprite.id === pokemonId),
+    [pokemonId, metadata],
   );
 
   if (!spriteData?.exists) {
@@ -41,7 +42,7 @@ export function PokemonSprite({
   }
 
   const spritesheetSrc =
-    generation === 'gen7'
+    generation === "gen7"
       ? `/images/pokemon-gen7-spritesheet.png?v=${version}`
       : `/images/pokemon-gen8-spritesheet.png?v=${version}`;
 
@@ -51,10 +52,10 @@ export function PokemonSprite({
       alt={`${spriteData.name} sprite (${generation})`}
       width={spriteData.width}
       height={spriteData.height}
-      className={twMerge('object-none ', className)}
+      className={twMerge("object-none ", className)}
       unoptimized
-      decoding='async'
-      loading='eager'
+      decoding="async"
+      loading="eager"
       priority={true}
       style={{
         objectPosition: `-${spriteData.x}px -${spriteData.y}px`,
@@ -62,7 +63,7 @@ export function PokemonSprite({
         minHeight: spriteData.height,
         height: spriteData.height,
         width: spriteData.width,
-        imageRendering: 'pixelated',
+        imageRendering: "pixelated",
       }}
       {...rest}
     />

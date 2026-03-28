@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
-import { useAllPokemon } from '@/loaders/pokemon';
-import type { TypeName } from '@/lib/typings';
-import { getFusionTyping, TypeQuery } from '@/lib/typings';
-import { usePokemonTypes } from './usePokemonTypes';
-import type { PokemonOptionType } from '@/loaders/pokemon';
+import { useMemo } from "react";
+import type { TypeName } from "@/lib/typings";
+import { getFusionTyping, type TypeQuery } from "@/lib/typings";
+import type { PokemonOptionType } from "@/loaders/pokemon";
+import { useAllPokemon } from "@/loaders/pokemon";
+import { usePokemonTypes } from "./usePokemonTypes";
 
 export interface UseFusionTypesResult {
   primary?: TypeName;
@@ -13,7 +13,7 @@ export interface UseFusionTypesResult {
 
 export function useFusionTypes(
   headQuery: TypeQuery | undefined,
-  bodyQuery: TypeQuery | undefined
+  bodyQuery: TypeQuery | undefined,
 ): UseFusionTypesResult {
   const { data: allPokemon = [], isLoading } = useAllPokemon();
 
@@ -29,12 +29,12 @@ export function useFusionTypes(
     if (!allPokemon || allPokemon.length === 0) return { isLoading: true };
 
     const findPokemon = (q: TypeQuery) => {
-      if ('id' in q && q.id) return allPokemon.find(p => p.id === q.id);
-      if ('nationalDexId' in q && q.nationalDexId)
-        return allPokemon.find(p => p.nationalDexId === q.nationalDexId);
-      if ('name' in q && q.name)
+      if ("id" in q && q.id) return allPokemon.find((p) => p.id === q.id);
+      if ("nationalDexId" in q && q.nationalDexId)
+        return allPokemon.find((p) => p.nationalDexId === q.nationalDexId);
+      if ("name" in q && q.name)
         return allPokemon.find(
-          p => p.name.toLowerCase() === q.name!.toLowerCase()
+          (p) => p.name.toLowerCase() === q.name?.toLowerCase(),
         );
       return undefined;
     };
@@ -58,7 +58,7 @@ export function useFusionTypes(
 export function useFusionTypesFromPokemon(
   head: PokemonOptionType | null,
   body: PokemonOptionType | null,
-  isFusion: boolean
+  isFusion: boolean,
 ): UseFusionTypesResult {
   const headQuery = head?.id ? { id: head.id } : undefined;
   const bodyQuery = isFusion && body?.id ? { id: body.id } : undefined;

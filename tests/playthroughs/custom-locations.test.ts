@@ -1,20 +1,20 @@
 // Import mocks first (must be at top level for Vitest hoisting)
-import './mocks';
+import "./mocks";
 
 // Import shared setup and utilities
 import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  vi,
   afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
   playthroughActions,
   playthroughsStore,
   setupPlaythroughTest,
-} from './setup';
+  vi,
+} from "./setup";
 
-describe('Playthroughs Store - Custom Locations', () => {
+describe("Playthroughs Store - Custom Locations", () => {
   beforeEach(() => {
     setupPlaythroughTest();
     // Clear mock calls
@@ -25,12 +25,12 @@ describe('Playthroughs Store - Custom Locations', () => {
     vi.clearAllMocks();
   });
 
-  describe('addCustomLocation', () => {
-    it('should add a custom location to the active playthrough', async () => {
+  describe("addCustomLocation", () => {
+    it("should add a custom location to the active playthrough", async () => {
       // Use real location ID from locations.json (Route 1)
       const customLocationId = await playthroughActions.addCustomLocation(
-        'Custom Route',
-        '288d719e-5aab-4097-b98d-f1ffbd780a9b'
+        "Custom Route",
+        "288d719e-5aab-4097-b98d-f1ffbd780a9b",
       );
 
       expect(customLocationId).toBeTruthy();
@@ -41,13 +41,13 @@ describe('Playthroughs Store - Custom Locations', () => {
         expect(activePlaythrough?.customLocations).toHaveLength(1);
         expect(activePlaythrough?.customLocations?.[0]).toMatchObject({
           id: customLocationId,
-          name: 'Custom Route',
+          name: "Custom Route",
           insertAfterLocationId: expect.any(String),
         });
       }
     });
 
-    it('should initialize customLocations array if it does not exist', async () => {
+    it("should initialize customLocations array if it does not exist", async () => {
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       // Ensure customLocations is undefined initially
       if (activePlaythrough) {
@@ -56,37 +56,37 @@ describe('Playthroughs Store - Custom Locations', () => {
 
       // Use real location ID from locations.json (Route 1)
       const customLocationId = await playthroughActions.addCustomLocation(
-        'Custom Route',
-        '288d719e-5aab-4097-b98d-f1ffbd780a9b'
+        "Custom Route",
+        "288d719e-5aab-4097-b98d-f1ffbd780a9b",
       );
 
       expect(customLocationId).toBeTruthy();
       expect(activePlaythrough?.customLocations).toHaveLength(1);
     });
 
-    it('should return null if no active playthrough', async () => {
+    it("should return null if no active playthrough", async () => {
       playthroughsStore.activePlaythroughId = undefined;
 
       // Use real location ID from locations.json (Route 1)
       const result = await playthroughActions.addCustomLocation(
-        'Custom Route',
-        '288d719e-5aab-4097-b98d-f1ffbd780a9b'
+        "Custom Route",
+        "288d719e-5aab-4097-b98d-f1ffbd780a9b",
       );
 
       expect(result).toBeNull();
     });
 
-    it('should update playthrough timestamp when adding custom location', async () => {
+    it("should update playthrough timestamp when adding custom location", async () => {
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       const originalTimestamp = activePlaythrough?.updatedAt || 0;
 
       // Wait longer to ensure timestamp difference
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       // Use real location ID from locations.json (Route 1)
       await playthroughActions.addCustomLocation(
-        'Custom Route',
-        '288d719e-5aab-4097-b98d-f1ffbd780a9b'
+        "Custom Route",
+        "288d719e-5aab-4097-b98d-f1ffbd780a9b",
       );
 
       const updatedPlaythrough = playthroughActions.getActivePlaythrough();
@@ -98,18 +98,18 @@ describe('Playthroughs Store - Custom Locations', () => {
         expect(updatedPlaythrough?.customLocations).toHaveLength(1);
       } else {
         expect(updatedPlaythrough?.updatedAt).toBeGreaterThan(
-          originalTimestamp
+          originalTimestamp,
         );
       }
     });
   });
 
-  describe('removeCustomLocation', () => {
-    it('should remove a custom location from the active playthrough', async () => {
+  describe("removeCustomLocation", () => {
+    it("should remove a custom location from the active playthrough", async () => {
       // Add a custom location first using real location ID (Route 1)
       const customLocationId = await playthroughActions.addCustomLocation(
-        'Custom Route',
-        '288d719e-5aab-4097-b98d-f1ffbd780a9b'
+        "Custom Route",
+        "288d719e-5aab-4097-b98d-f1ffbd780a9b",
       );
       expect(customLocationId).toBeTruthy();
 
@@ -124,11 +124,11 @@ describe('Playthroughs Store - Custom Locations', () => {
       }
     });
 
-    it('should remove associated encounters when removing custom location', async () => {
+    it("should remove associated encounters when removing custom location", async () => {
       // Add a custom location first using real location ID (Route 1)
       const customLocationId = await playthroughActions.addCustomLocation(
-        'Custom Route',
-        '288d719e-5aab-4097-b98d-f1ffbd780a9b'
+        "Custom Route",
+        "288d719e-5aab-4097-b98d-f1ffbd780a9b",
       );
       expect(customLocationId).toBeTruthy();
 
@@ -142,9 +142,9 @@ describe('Playthroughs Store - Custom Locations', () => {
           activePlaythrough.encounters[customLocationId] = {
             head: {
               id: 1,
-              name: 'Bulbasaur',
+              name: "Bulbasaur",
               nationalDexId: 1,
-              uid: 'test-uid',
+              uid: "test-uid",
             },
             body: null,
             isFusion: false,
@@ -158,53 +158,53 @@ describe('Playthroughs Store - Custom Locations', () => {
 
         expect(result).toBe(true);
         expect(
-          activePlaythrough?.encounters?.[customLocationId]
+          activePlaythrough?.encounters?.[customLocationId],
         ).toBeUndefined();
       }
     });
 
-    it('should return false if custom location does not exist', async () => {
+    it("should return false if custom location does not exist", async () => {
       const result =
-        await playthroughActions.removeCustomLocation('non-existent-id');
+        await playthroughActions.removeCustomLocation("non-existent-id");
       expect(result).toBe(false);
     });
 
-    it('should return false if no active playthrough', async () => {
+    it("should return false if no active playthrough", async () => {
       playthroughsStore.activePlaythroughId = undefined;
 
-      const result = await playthroughActions.removeCustomLocation('custom-id');
+      const result = await playthroughActions.removeCustomLocation("custom-id");
       expect(result).toBe(false);
     });
 
-    it('should return false if customLocations array does not exist', async () => {
+    it("should return false if customLocations array does not exist", async () => {
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       if (activePlaythrough) {
         delete activePlaythrough.customLocations;
       }
 
-      const result = await playthroughActions.removeCustomLocation('custom-id');
+      const result = await playthroughActions.removeCustomLocation("custom-id");
       expect(result).toBe(false);
     });
 
-    it('should update dependent locations when removing a custom location', async () => {
+    it("should update dependent locations when removing a custom location", async () => {
       // Create a chain: Route 1 → Custom A → Custom B → Custom C
       const customIdA = await playthroughActions.addCustomLocation(
-        'Custom Route A',
-        '288d719e-5aab-4097-b98d-f1ffbd780a9b' // Route 1 ID
+        "Custom Route A",
+        "288d719e-5aab-4097-b98d-f1ffbd780a9b", // Route 1 ID
       );
       expect(customIdA).toBeTruthy();
 
       if (customIdA) {
         const customIdB = await playthroughActions.addCustomLocation(
-          'Custom Route B',
-          customIdA
+          "Custom Route B",
+          customIdA,
         );
         expect(customIdB).toBeTruthy();
 
         if (customIdB) {
           const customIdC = await playthroughActions.addCustomLocation(
-            'Custom Route C',
-            customIdB
+            "Custom Route C",
+            customIdB,
           );
           expect(customIdC).toBeTruthy();
 
@@ -222,11 +222,11 @@ describe('Playthroughs Store - Custom Locations', () => {
             customLocations = playthroughActions.getCustomLocations();
             expect(customLocations).toHaveLength(2);
 
-            const customB = customLocations.find(loc => loc.id === customIdB);
-            const customC = customLocations.find(loc => loc.id === customIdC);
+            const customB = customLocations.find((loc) => loc.id === customIdB);
+            const customC = customLocations.find((loc) => loc.id === customIdC);
 
             expect(customB?.insertAfterLocationId).toBe(
-              '288d719e-5aab-4097-b98d-f1ffbd780a9b'
+              "288d719e-5aab-4097-b98d-f1ffbd780a9b",
             ); // Route 1
             expect(customC?.insertAfterLocationId).toBe(customIdB); // Still points to Custom B
           }
@@ -235,12 +235,12 @@ describe('Playthroughs Store - Custom Locations', () => {
     });
   });
 
-  describe('updateCustomLocationName', () => {
-    it('should update the name of a custom location', async () => {
+  describe("updateCustomLocationName", () => {
+    it("should update the name of a custom location", async () => {
       // Add a custom location first using real location ID (Route 1)
       const customLocationId = await playthroughActions.addCustomLocation(
-        'Original Name',
-        '288d719e-5aab-4097-b98d-f1ffbd780a9b'
+        "Original Name",
+        "288d719e-5aab-4097-b98d-f1ffbd780a9b",
       );
       expect(customLocationId).toBeTruthy();
 
@@ -248,23 +248,23 @@ describe('Playthroughs Store - Custom Locations', () => {
         // Update the name
         const result = playthroughActions.updateCustomLocationName(
           customLocationId,
-          'Updated Name'
+          "Updated Name",
         );
 
         expect(result).toBe(true);
         const activePlaythrough = playthroughActions.getActivePlaythrough();
         const customLocation = activePlaythrough?.customLocations?.find(
-          loc => loc.id === customLocationId
+          (loc) => loc.id === customLocationId,
         );
-        expect(customLocation?.name).toBe('Updated Name');
+        expect(customLocation?.name).toBe("Updated Name");
       }
     });
 
-    it('should trim whitespace from the new name', async () => {
+    it("should trim whitespace from the new name", async () => {
       // Add a custom location first using real location ID (Route 1)
       const customLocationId = await playthroughActions.addCustomLocation(
-        'Original Name',
-        '288d719e-5aab-4097-b98d-f1ffbd780a9b'
+        "Original Name",
+        "288d719e-5aab-4097-b98d-f1ffbd780a9b",
       );
       expect(customLocationId).toBeTruthy();
 
@@ -272,66 +272,66 @@ describe('Playthroughs Store - Custom Locations', () => {
         // Update the name with whitespace
         const result = playthroughActions.updateCustomLocationName(
           customLocationId,
-          '  Spaced Name  '
+          "  Spaced Name  ",
         );
 
         expect(result).toBe(true);
         const activePlaythrough = playthroughActions.getActivePlaythrough();
         const customLocation = activePlaythrough?.customLocations?.find(
-          loc => loc.id === customLocationId
+          (loc) => loc.id === customLocationId,
         );
-        expect(customLocation?.name).toBe('Spaced Name');
+        expect(customLocation?.name).toBe("Spaced Name");
       }
     });
 
-    it('should return false if custom location does not exist', () => {
+    it("should return false if custom location does not exist", () => {
       const result = playthroughActions.updateCustomLocationName(
-        'non-existent-id',
-        'New Name'
+        "non-existent-id",
+        "New Name",
       );
       expect(result).toBe(false);
     });
 
-    it('should return false if no active playthrough', () => {
+    it("should return false if no active playthrough", () => {
       playthroughsStore.activePlaythroughId = undefined;
 
       const result = playthroughActions.updateCustomLocationName(
-        'custom-id',
-        'New Name'
+        "custom-id",
+        "New Name",
       );
       expect(result).toBe(false);
     });
   });
 
-  describe('getCustomLocations', () => {
-    it('should return custom locations for the active playthrough', async () => {
+  describe("getCustomLocations", () => {
+    it("should return custom locations for the active playthrough", async () => {
       // Initially should be empty
       expect(playthroughActions.getCustomLocations()).toEqual([]);
 
       // Add custom locations using real location IDs
       await playthroughActions.addCustomLocation(
-        'Custom Route 1',
-        '288d719e-5aab-4097-b98d-f1ffbd780a9b'
+        "Custom Route 1",
+        "288d719e-5aab-4097-b98d-f1ffbd780a9b",
       ); // Route 1
       await playthroughActions.addCustomLocation(
-        'Custom Route 2',
-        'a1e59912-1eb5-4b2a-b3b3-e5ae27f66e68'
+        "Custom Route 2",
+        "a1e59912-1eb5-4b2a-b3b3-e5ae27f66e68",
       ); // Route 22
 
       const customLocations = playthroughActions.getCustomLocations();
       expect(customLocations).toHaveLength(2);
-      expect(customLocations[0].name).toBe('Custom Route 1');
-      expect(customLocations[1].name).toBe('Custom Route 2');
+      expect(customLocations[0].name).toBe("Custom Route 1");
+      expect(customLocations[1].name).toBe("Custom Route 2");
     });
 
-    it('should return empty array if no active playthrough', () => {
+    it("should return empty array if no active playthrough", () => {
       playthroughsStore.activePlaythroughId = undefined;
 
       const result = playthroughActions.getCustomLocations();
       expect(result).toEqual([]);
     });
 
-    it('should return empty array if customLocations does not exist', () => {
+    it("should return empty array if customLocations does not exist", () => {
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       if (activePlaythrough) {
         delete activePlaythrough.customLocations;
@@ -342,16 +342,16 @@ describe('Playthroughs Store - Custom Locations', () => {
     });
   });
 
-  describe('Integration tests', () => {
-    it('should handle complete custom location lifecycle', async () => {
+  describe("Integration tests", () => {
+    it("should handle complete custom location lifecycle", async () => {
       // 1. Add multiple custom locations using real location IDs
       const customId1 = await playthroughActions.addCustomLocation(
-        'Custom Route 1',
-        '288d719e-5aab-4097-b98d-f1ffbd780a9b'
+        "Custom Route 1",
+        "288d719e-5aab-4097-b98d-f1ffbd780a9b",
       ); // Route 1
       const customId2 = await playthroughActions.addCustomLocation(
-        'Custom Route 2',
-        'a1e59912-1eb5-4b2a-b3b3-e5ae27f66e68'
+        "Custom Route 2",
+        "a1e59912-1eb5-4b2a-b3b3-e5ae27f66e68",
       ); // Route 22
 
       expect(customId1).toBeTruthy();
@@ -365,16 +365,16 @@ describe('Playthroughs Store - Custom Locations', () => {
         // 3. Update a custom location name
         const updateResult = playthroughActions.updateCustomLocationName(
           customId1,
-          'Updated Route 1'
+          "Updated Route 1",
         );
         expect(updateResult).toBe(true);
 
         // 4. Verify the update
         customLocations = playthroughActions.getCustomLocations();
         const updatedLocation = customLocations.find(
-          loc => loc.id === customId1
+          (loc) => loc.id === customId1,
         );
-        expect(updatedLocation?.name).toBe('Updated Route 1');
+        expect(updatedLocation?.name).toBe("Updated Route 1");
 
         // 5. Remove one custom location
         const removeResult =
@@ -388,19 +388,19 @@ describe('Playthroughs Store - Custom Locations', () => {
       }
     });
 
-    it('should maintain data integrity across operations', async () => {
+    it("should maintain data integrity across operations", async () => {
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       expect(activePlaythrough).toBeTruthy();
 
       const originalTimestamp = activePlaythrough?.updatedAt || 0;
 
       // Wait a bit to ensure timestamp difference
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise((resolve) => setTimeout(resolve, 5));
 
       // Add custom location using real location ID (Route 1)
       const customId = await playthroughActions.addCustomLocation(
-        'Test Route',
-        '288d719e-5aab-4097-b98d-f1ffbd780a9b'
+        "Test Route",
+        "288d719e-5aab-4097-b98d-f1ffbd780a9b",
       );
       expect(customId).toBeTruthy();
 
@@ -413,14 +413,14 @@ describe('Playthroughs Store - Custom Locations', () => {
         expect(customLocations).toHaveLength(1);
         expect(customLocations[0]).toMatchObject({
           id: expect.stringMatching(/^custom_/),
-          name: 'Test Route',
+          name: "Test Route",
           insertAfterLocationId: expect.any(String),
         });
 
         // Verify the playthrough structure is intact
         expect(activePlaythrough?.id).toBeTruthy();
-        expect(activePlaythrough?.name).toBe('Test Run');
-        expect(activePlaythrough?.gameMode).toBe('classic');
+        expect(activePlaythrough?.name).toBe("Test Run");
+        expect(activePlaythrough?.gameMode).toBe("classic");
       }
     });
   });

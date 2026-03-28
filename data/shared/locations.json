@@ -6,7 +6,7 @@
     "description": "Choose your starter Pokémon in Professor Oak's Lab in Pallet Town"
   },
   {
-    "id":"288d719e-5aab-4097-b98d-f1ffbd780a9b",
+    "id": "288d719e-5aab-4097-b98d-f1ffbd780a9b",
     "name": "Route 1",
     "region": "Kanto",
     "description": "The road to Viridian City"
@@ -18,7 +18,7 @@
     "description": "Viridian City is the first town after exiting Route 1."
   },
   {
-    "id":"a1e59912-1eb5-4b2a-b3b3-e5ae27f66e68",
+    "id": "a1e59912-1eb5-4b2a-b3b3-e5ae27f66e68",
     "name": "Route 22",
     "region": "Kanto",
     "description": "West of Viridian City - Rival battle to unlock Secret Garden"
@@ -72,7 +72,7 @@
     "description": "After Mt. Moon, path to Cerulean City"
   },
   {
-    "id":"5e4ab76e-a25a-4804-865a-1d6ba341ffe4",
+    "id": "5e4ab76e-a25a-4804-865a-1d6ba341ffe4",
     "name": "Cerulean City",
     "region": "Kanto",
     "description": "This city contains Cerulean City's Gym, with Misty as its leader."
@@ -102,7 +102,6 @@
     "description": "North of Vermillion City"
   },
   {
-
     "id": "9611b486-0ef9-4f5c-a703-b102a2647c20",
     "name": "Vermillion City",
     "region": "Kanto",
@@ -217,7 +216,7 @@
     "description": "Cycling Road exit"
   },
   {
-    "id":"05ab7274-b33c-42da-a07d-bf6ae3cbf9a8",
+    "id": "05ab7274-b33c-42da-a07d-bf6ae3cbf9a8",
     "name": "Safari Zone",
     "region": "Kanto",
     "description": "Safari Zone is a large area in Fuchsia City, with many wild Pokémon to catch."
@@ -289,7 +288,7 @@
     "description": "Mt. Ember is a mountain in the Kanto region. It is home to the legendary Pokémon, Moltres."
   },
   {
-    "id":  "c6944add-2615-4550-a539-90e7e3364cd6",
+    "id": "c6944add-2615-4550-a539-90e7e3364cd6",
     "name": "Power Plant",
     "region": "Kanto",
     "description": "The Power Plant is a large building in the Kanto region. It is home to the legendary Pokémon, Zapdos."
@@ -319,7 +318,7 @@
     "description": "Tohjo Falls is connected to Route 27 at several locations. Players pass here to go towards the Pokemon league, and Waterfall is required to access the Western portion."
   },
   {
-    "id":"d5b68a17-d9e9-4fe4-a0ab-3a5b46f902d0",
+    "id": "d5b68a17-d9e9-4fe4-a0ab-3a5b46f902d0",
     "name": "Victory Road",
     "region": "Kanto",
     "description": "The final route before the Pokemon League"
@@ -450,13 +449,13 @@
     "region": "Johto",
     "description": "Blackthorn City can be accessed by the Dark Cave from the South and by the Ice Mountains from the North."
   },
-    {
+  {
     "id": "6c07da4c-4966-4fda-b773-9fe6ba1746e9",
     "name": "Ice Mountains",
     "region": "Johto",
     "description": "Ice Mountains is a chain of mountains that can be accessed by the West from Route 44 and by the East from Blackthorn City."
   },
-    {
+  {
     "id": "93826d53-6bd9-4135-b193-a0475597179e",
     "name": "Ice Cavern",
     "region": "Johto",

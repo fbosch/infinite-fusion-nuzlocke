@@ -1,4 +1,4 @@
-import type { EncounterData } from '@/stores/playthroughs';
+import type { EncounterData } from "@/stores/playthroughs";
 
 // Keep teardown timers per overlay element across calls to avoid flicker
 const overlayHideTimers = new WeakMap<HTMLElement, number>();
@@ -7,7 +7,7 @@ const overlayHideTimers = new WeakMap<HTMLElement, number>();
  * Find the most recently filled out location based on encounter updatedAt timestamps
  */
 export function findMostRecentlyFilledLocation(
-  encounters: Record<string, EncounterData>
+  encounters: Record<string, EncounterData>,
 ): string | null {
   if (!encounters || Object.keys(encounters).length === 0) {
     return null;
@@ -35,7 +35,7 @@ export function findMostRecentlyFilledLocation(
 export function scrollToTableRow(
   tableContainerElement: HTMLElement,
   targetRowElement: HTMLElement,
-  behavior: ScrollBehavior = 'smooth'
+  behavior: ScrollBehavior = "smooth",
 ): void {
   if (!tableContainerElement || !targetRowElement) {
     return;
@@ -57,10 +57,10 @@ export function scrollToTableRow(
  */
 export function findTableRowByLocationId(
   tableElement: HTMLElement,
-  locationId: string
+  locationId: string,
 ): HTMLElement | null {
   return tableElement.querySelector(
-    `tbody tr[data-location-id="${locationId}"]`
+    `tbody tr[data-location-id="${locationId}"]`,
   ) as HTMLElement | null;
 }
 
@@ -71,7 +71,7 @@ export function scrollToMostRecentLocation(
   encounters: Record<string, EncounterData>,
   tableContainerElement: HTMLElement | null,
   tableElement: HTMLElement | null,
-  behavior: ScrollBehavior = 'smooth'
+  behavior: ScrollBehavior = "smooth",
 ): boolean {
   if (!tableContainerElement || !tableElement) return false;
 
@@ -90,14 +90,14 @@ export function scrollToMostRecentLocation(
  */
 export function flashTableRow(
   rowElement: HTMLElement,
-  durationMs: number = 1200
+  durationMs: number = 1200,
 ): void {
   if (!rowElement) return;
   const highlightClasses = [
-    'ring-2',
-    'ring-green-500/60',
-    'bg-green-50',
-    'dark:bg-green-900/20',
+    "ring-2",
+    "ring-green-500/60",
+    "bg-green-50",
+    "dark:bg-green-900/20",
   ];
 
   rowElement.classList.add(...highlightClasses);
@@ -111,31 +111,31 @@ export function flashTableRow(
  */
 export function flashPokemonOverlaysByUids(
   uids: string[],
-  durationMs: number = 1200
+  durationMs: number = 1200,
 ): void {
   if (!uids || uids.length === 0) return;
 
   const apply = () => {
-    uids.forEach(uid => {
+    uids.forEach((uid) => {
       if (!uid) return;
       const root = document.querySelector(
-        `[data-uid="${CSS.escape(uid)}"]`
+        `[data-uid="${CSS.escape(uid)}"]`,
       ) as HTMLElement | null;
       if (!root) return;
       const overlay = root.querySelector(
-        '.location-highlight-overlay'
+        ".location-highlight-overlay",
       ) as HTMLElement | null;
       if (!overlay) return;
 
       // Inline style overrides Tailwind opacity classes; do not toggle classes
       overlay.style.transition =
-        overlay.style.transition || 'opacity 180ms ease-in-out';
-      overlay.style.opacity = '1';
+        overlay.style.transition || "opacity 180ms ease-in-out";
+      overlay.style.opacity = "1";
 
       const prev = overlayHideTimers.get(overlay);
       if (prev) window.clearTimeout(prev);
       const timeout = window.setTimeout(() => {
-        overlay.style.removeProperty('opacity');
+        overlay.style.removeProperty("opacity");
       }, durationMs);
       overlayHideTimers.set(overlay, timeout);
     });
@@ -153,7 +153,7 @@ export function runAfterScrollSettles(
   container: HTMLElement,
   callback: () => void,
   settleDelayMs: number = 150,
-  maxWaitMs: number = 1200
+  maxWaitMs: number = 1200,
 ): void {
   let timeoutId: number | null = null;
   let intervalId: number | null = null;
@@ -165,7 +165,7 @@ export function runAfterScrollSettles(
     hasCompleted = true;
 
     // Cleanup listeners and timers
-    container.removeEventListener('scroll', onScroll, listenerOptions);
+    container.removeEventListener("scroll", onScroll, listenerOptions);
     if (timeoutId) {
       window.clearTimeout(timeoutId);
       timeoutId = null;
@@ -186,7 +186,7 @@ export function runAfterScrollSettles(
   const listenerOptions: AddEventListenerOptions & EventListenerOptions = {
     passive: true,
   };
-  container.addEventListener('scroll', onScroll, listenerOptions);
+  container.addEventListener("scroll", onScroll, listenerOptions);
 
   // Fallback in case no scroll events fire or smooth-scroll is instantaneous
   intervalId = window.setInterval(() => {
@@ -210,14 +210,14 @@ export function scrollToLocationById(
     behavior?: ScrollBehavior;
     highlightUids?: string[];
     durationMs?: number;
-  }
+  },
 ): boolean {
   if (!locationId) return false;
 
-  const behavior = options?.behavior ?? 'smooth';
+  const behavior = options?.behavior ?? "smooth";
 
   const tableElement = document.querySelector(
-    'table[aria-label="Locations table"]'
+    'table[aria-label="Locations table"]',
   ) as HTMLElement | null;
   if (!tableElement) return false;
 
@@ -256,7 +256,7 @@ export function scrollToLocationById(
         tableContainerElement,
         () => flashPokemonOverlaysByUids(uids, durationMs),
         120,
-        1200
+        1200,
       );
     }
   }

@@ -2262,5 +2262,33 @@
   {
     "id": 565,
     "name": "Relicanth"
+  },
+  {
+    "id": 566,
+    "name": "Woobat"
+  },
+  {
+    "id": 567,
+    "name": "Swoobat"
+  },
+  {
+    "id": 568,
+    "name": "Tynamo"
+  },
+  {
+    "id": 569,
+    "name": "Eelektrik"
+  },
+  {
+    "id": 570,
+    "name": "Eelektross"
+  },
+  {
+    "id": 571,
+    "name": "Skrelp"
+  },
+  {
+    "id": 572,
+    "name": "Dragalge"
   }
 ]

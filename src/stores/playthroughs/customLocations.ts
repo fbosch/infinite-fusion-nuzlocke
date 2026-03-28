@@ -1,14 +1,14 @@
-import { z } from 'zod';
+import type { z } from "zod";
 import {
-  CustomLocationSchema,
+  type CustomLocationSchema,
   createCustomLocation,
-} from '@/loaders/locations';
-import { getActivePlaythrough, getCurrentTimestamp } from './store';
+} from "@/loaders/locations";
+import { getActivePlaythrough, getCurrentTimestamp } from "./store";
 
 // Add a custom location to the active playthrough
 export const addCustomLocation = async (
   name: string,
-  afterLocationId: string
+  afterLocationId: string,
 ): Promise<string | null> => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return null;
@@ -22,7 +22,7 @@ export const addCustomLocation = async (
     const newCustomLocation = createCustomLocation(
       name,
       afterLocationId,
-      activePlaythrough.customLocations
+      activePlaythrough.customLocations,
     );
 
     // Create a new array instead of mutating the existing one to ensure reactivity
@@ -34,39 +34,36 @@ export const addCustomLocation = async (
 
     return newCustomLocation.id;
   } catch (error) {
-    console.error('Failed to add custom location:', error);
+    console.error("Failed to add custom location:", error);
     return null;
   }
 };
 
 // Remove a custom location from the active playthrough
 export const removeCustomLocation = async (
-  customLocationId: string
+  customLocationId: string,
 ): Promise<boolean> => {
   const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough || !activePlaythrough.customLocations) return false;
+  if (!activePlaythrough?.customLocations) return false;
 
   const index = activePlaythrough.customLocations.findIndex(
-    loc => loc.id === customLocationId
+    (loc) => loc.id === customLocationId,
   );
 
   if (index !== -1) {
     // Import the dependency update function
     const { updateCustomLocationDependencies } = await import(
-      '@/loaders/locations'
+      "@/loaders/locations"
     );
 
     // Update dependencies and remove the location in one operation
     activePlaythrough.customLocations = updateCustomLocationDependencies(
       customLocationId,
-      activePlaythrough.customLocations
+      activePlaythrough.customLocations,
     );
 
     // Also remove any encounters associated with this custom location
-    if (
-      activePlaythrough.encounters &&
-      activePlaythrough.encounters[customLocationId]
-    ) {
+    if (activePlaythrough.encounters?.[customLocationId]) {
       delete activePlaythrough.encounters[customLocationId];
     }
 
@@ -80,13 +77,13 @@ export const removeCustomLocation = async (
 // Update a custom location's name
 export const updateCustomLocationName = (
   customLocationId: string,
-  newName: string
+  newName: string,
 ): boolean => {
   const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough || !activePlaythrough.customLocations) return false;
+  if (!activePlaythrough?.customLocations) return false;
 
   const customLocation = activePlaythrough.customLocations.find(
-    loc => loc.id === customLocationId
+    (loc) => loc.id === customLocationId,
   );
 
   if (customLocation) {
@@ -108,21 +105,21 @@ export const getCustomLocations = (): z.infer<
 
 // Validate if a custom location can be placed after a specific location
 export const validateCustomLocationPlacement = async (
-  afterLocationId: string
+  afterLocationId: string,
 ): Promise<boolean> => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return false;
 
   try {
     const { validateCustomLocationPlacement } = await import(
-      '@/loaders/locations'
+      "@/loaders/locations"
     );
     return validateCustomLocationPlacement(
       afterLocationId,
-      activePlaythrough.customLocations || []
+      activePlaythrough.customLocations || [],
     );
   } catch (error) {
-    console.error('Failed to validate custom location placement:', error);
+    console.error("Failed to validate custom location placement:", error);
     return false;
   }
 };
@@ -132,10 +129,10 @@ export const getAvailableAfterLocations = async () => {
   const activePlaythrough = getActivePlaythrough();
 
   try {
-    const { getAvailableAfterLocations } = await import('@/loaders/locations');
+    const { getAvailableAfterLocations } = await import("@/loaders/locations");
     return getAvailableAfterLocations(activePlaythrough?.customLocations || []);
   } catch (error) {
-    console.error('Failed to get available after locations:', error);
+    console.error("Failed to get available after locations:", error);
     return [];
   }
 };
@@ -146,13 +143,13 @@ export const getMergedLocations = async () => {
 
   try {
     const { getLocationsSortedWithCustom } = await import(
-      '@/loaders/locations'
+      "@/loaders/locations"
     );
     return getLocationsSortedWithCustom(
-      activePlaythrough?.customLocations || []
+      activePlaythrough?.customLocations || [],
     );
   } catch (error) {
-    console.error('Failed to get merged locations:', error);
+    console.error("Failed to get merged locations:", error);
     return [];
   }
 };

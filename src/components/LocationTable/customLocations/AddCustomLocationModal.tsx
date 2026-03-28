@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Dialog,
+  DialogBackdrop,
   DialogPanel,
   DialogTitle,
-  DialogBackdrop,
-} from '@headlessui/react';
-import { X, Plus, Loader2 } from 'lucide-react';
-import clsx from 'clsx';
-import { playthroughActions, useCustomLocations } from '@/stores/playthroughs';
-import { getLocationsSortedWithCustom } from '@/loaders';
+} from "@headlessui/react";
+import clsx from "clsx";
+import { Loader2, Plus, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { getLocationsSortedWithCustom } from "@/loaders";
+import { playthroughActions, useCustomLocations } from "@/stores/playthroughs";
 
 interface AddCustomLocationModalProps {
   isOpen: boolean;
@@ -21,8 +21,8 @@ export default function AddCustomLocationModal({
   isOpen,
   onClose,
 }: AddCustomLocationModalProps) {
-  const [locationName, setLocationName] = useState('');
-  const [selectedAfterLocationId, setSelectedAfterLocationId] = useState('');
+  const [locationName, setLocationName] = useState("");
+  const [selectedAfterLocationId, setSelectedAfterLocationId] = useState("");
   const customLocations = useCustomLocations();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -33,7 +33,7 @@ export default function AddCustomLocationModal({
       }, 100);
     } else {
       setTimeout(() => {
-        setLocationName('');
+        setLocationName("");
       }, 100);
     }
   }, [isOpen]);
@@ -53,138 +53,138 @@ export default function AddCustomLocationModal({
 
     const newLocationId = await playthroughActions.addCustomLocation(
       locationName.trim(),
-      selectedAfterLocationId
+      selectedAfterLocationId,
     );
 
     if (newLocationId !== null) {
       // Reset form and close modal
-      setLocationName('');
-      setSelectedAfterLocationId('');
+      setLocationName("");
+      setSelectedAfterLocationId("");
       onClose();
     }
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className='relative z-70 group'>
+    <Dialog open={isOpen} onClose={onClose} className="relative z-70 group">
       <DialogBackdrop
         transition
-        className='fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100'
-        aria-hidden='true'
+        className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"
+        aria-hidden="true"
       />
 
-      <div className='fixed inset-0 flex w-screen items-center justify-center p-4'>
+      <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
         <DialogPanel
           transition
           className={clsx(
-            'max-w-md w-full space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6',
-            'transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98'
+            "max-w-md w-full space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6",
+            "transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98",
           )}
         >
-          <div className='flex items-center justify-between'>
-            <DialogTitle className='text-xl  text-gray-900 dark:text-white'>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl  text-gray-900 dark:text-white">
               Add Custom Location
             </DialogTitle>
             <button
               onClick={onClose}
               className={clsx(
-                'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
-                'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2',
-                'p-1 rounded-md transition-colors cursor-pointer'
+                "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
+                "p-1 rounded-md transition-colors cursor-pointer",
               )}
-              aria-label='Close modal'
+              aria-label="Close modal"
             >
-              <X className='h-5 w-5' />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className='space-y-4 pt-2'>
+          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
             <div>
               <label
-                htmlFor='locationName'
-                className='block text-sm  text-gray-700 dark:text-gray-300 mb-1'
+                htmlFor="locationName"
+                className="block text-sm  text-gray-700 dark:text-gray-300 mb-1"
               >
                 Location Name
               </label>
               <input
-                type='text'
+                type="text"
                 ref={inputRef}
-                id='locationName'
+                id="locationName"
                 value={locationName}
-                onChange={e => setLocationName(e.target.value)}
+                onChange={(e) => setLocationName(e.target.value)}
                 required
                 className={clsx(
-                  'w-full px-3 py-2 border rounded-md transition-colors',
-                  'border-gray-300 dark:border-gray-600',
-                  'bg-white dark:bg-gray-700',
-                  'text-gray-900 dark:text-white',
-                  'placeholder-gray-500 dark:placeholder-gray-400',
-                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                  'dark:focus:ring-blue-400 dark:focus:border-blue-400'
+                  "w-full px-3 py-2 border rounded-md transition-colors",
+                  "border-gray-300 dark:border-gray-600",
+                  "bg-white dark:bg-gray-700",
+                  "text-gray-900 dark:text-white",
+                  "placeholder-gray-500 dark:placeholder-gray-400",
+                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                  "dark:focus:ring-blue-400 dark:focus:border-blue-400",
                 )}
-                placeholder='e.g., Hidden Grotto, Secret Cave'
+                placeholder="e.g., Hidden Grotto, Secret Cave"
               />
             </div>
 
             <div>
               <label
-                htmlFor='afterLocation'
-                className='block text-sm  text-gray-700 dark:text-gray-300 mb-1'
+                htmlFor="afterLocation"
+                className="block text-sm  text-gray-700 dark:text-gray-300 mb-1"
               >
                 Place After
               </label>
               <select
-                id='afterLocation'
+                id="afterLocation"
                 value={selectedAfterLocationId}
-                onChange={e => setSelectedAfterLocationId(e.target.value)}
+                onChange={(e) => setSelectedAfterLocationId(e.target.value)}
                 required
                 disabled={allLocations.length === 0}
                 className={clsx(
-                  'w-full px-3 py-2 border rounded-md transition-colors cursor-pointer',
-                  'border-gray-300 dark:border-gray-600',
-                  'bg-white dark:bg-gray-700',
-                  'text-gray-900 dark:text-white',
-                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                  'dark:focus:ring-blue-400 dark:focus:border-blue-400',
-                  'disabled:opacity-50 disabled:cursor-not-allowed'
+                  "w-full px-3 py-2 border rounded-md transition-colors cursor-pointer",
+                  "border-gray-300 dark:border-gray-600",
+                  "bg-white dark:bg-gray-700",
+                  "text-gray-900 dark:text-white",
+                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                  "dark:focus:ring-blue-400 dark:focus:border-blue-400",
+                  "disabled:opacity-50 disabled:cursor-not-allowed",
                 )}
               >
-                <option value=''>Select location to place after...</option>
-                {allLocations.map(location => (
+                <option value="">Select location to place after...</option>
+                {allLocations.map((location) => (
                   <option key={location.id} value={location.id}>
                     {location.name} (
-                    {'region' in location ? location.region : 'Custom'})
+                    {"region" in location ? location.region : "Custom"})
                   </option>
                 ))}
               </select>
             </div>
 
-            <div className='flex pt-4 flex-row-reverse gap-x-3'>
+            <div className="flex pt-4 flex-row-reverse gap-x-3">
               <button
-                type='submit'
+                type="submit"
                 disabled={allLocations.length === 0}
                 className={clsx(
-                  'flex-1 px-4 py-2 text-sm  rounded-md transition-colors',
-                  'bg-blue-600 hover:bg-blue-700 text-white',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
-                  'flex items-center justify-center space-x-2',
-                  'disabled:opacity-50 disabled:cursor-not-allowed'
+                  "flex-1 px-4 py-2 text-sm  rounded-md transition-colors",
+                  "bg-blue-600 hover:bg-blue-700 text-white",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+                  "flex items-center justify-center space-x-2",
+                  "disabled:opacity-50 disabled:cursor-not-allowed",
                 )}
               >
                 {allLocations.length === 0 ? (
-                  <Loader2 className='h-4 w-4 animate-spin' />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Plus className='h-4 w-4' />
+                  <Plus className="h-4 w-4" />
                 )}
                 <span>Add Location</span>
               </button>
               <button
-                type='button'
+                type="button"
                 onClick={onClose}
                 className={clsx(
-                  'flex-1 px-4 py-2 text-sm  rounded-md transition-colors',
-                  'bg-gray-100 hover:bg-gray-200 text-gray-900',
-                  'dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2'
+                  "flex-1 px-4 py-2 text-sm  rounded-md transition-colors",
+                  "bg-gray-100 hover:bg-gray-200 text-gray-900",
+                  "dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
                 )}
               >
                 Cancel

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ServiceWorkerManager } from '@/utils/serviceWorker';
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ServiceWorkerManager } from "@/utils/serviceWorker";
 
 // Mock the service worker API
 const mockServiceWorker = {
@@ -31,16 +31,16 @@ const mockConsole = {
   warn: vi.fn(),
 };
 
-describe('ServiceWorkerManager', () => {
+describe("ServiceWorkerManager", () => {
   beforeEach(() => {
     // Setup global mocks using vi.stubGlobal
-    vi.stubGlobal('navigator', {
+    vi.stubGlobal("navigator", {
       serviceWorker: mockServiceWorker,
     });
 
-    vi.stubGlobal('caches', mockCaches);
-    vi.stubGlobal('fetch', mockFetch);
-    vi.stubGlobal('console', mockConsole);
+    vi.stubGlobal("caches", mockCaches);
+    vi.stubGlobal("fetch", mockFetch);
+    vi.stubGlobal("console", mockConsole);
 
     // Reset all mocks
     vi.clearAllMocks();
@@ -50,8 +50,8 @@ describe('ServiceWorkerManager', () => {
     vi.restoreAllMocks();
   });
 
-  describe('API Cache Status', () => {
-    it('should return API cache status when service worker is active', async () => {
+  describe("API Cache Status", () => {
+    it("should return API cache status when service worker is active", async () => {
       // Mock service worker controller
       const mockController = {
         postMessage: vi.fn(),
@@ -68,8 +68,10 @@ describe('ServiceWorkerManager', () => {
         port2: mockPort,
       };
       vi.stubGlobal(
-        'MessageChannel',
-        vi.fn().mockImplementation(() => mockMessageChannel)
+        "MessageChannel",
+        vi.fn(function MockMessageChannel() {
+          return mockMessageChannel;
+        }),
       );
 
       const manager = ServiceWorkerManager.getInstance();
@@ -78,7 +80,7 @@ describe('ServiceWorkerManager', () => {
       setTimeout(() => {
         mockPort.onmessage({
           data: {
-            type: 'API_CACHE_STATUS',
+            type: "API_CACHE_STATUS",
             status: {
               total: 10,
               cached: 8,
@@ -96,12 +98,12 @@ describe('ServiceWorkerManager', () => {
         percentage: 80,
       });
       expect(mockController.postMessage).toHaveBeenCalledWith(
-        { type: 'GET_API_CACHE_STATUS' },
-        [mockPort]
+        { type: "GET_API_CACHE_STATUS" },
+        [mockPort],
       );
     });
 
-    it('should return error when service worker is not active', async () => {
+    it("should return error when service worker is not active", async () => {
       mockServiceWorker.controller = null;
 
       const manager = ServiceWorkerManager.getInstance();
@@ -110,13 +112,13 @@ describe('ServiceWorkerManager', () => {
       expect(status).toEqual({
         total: 0,
         endpoints: [],
-        error: 'Service worker not active',
+        error: "Service worker not active",
       });
     });
   });
 
-  describe('API Cache Clearing', () => {
-    it('should clear API cache when service worker is active', async () => {
+  describe("API Cache Clearing", () => {
+    it("should clear API cache when service worker is active", async () => {
       const mockController = {
         postMessage: vi.fn(),
       } as unknown as ServiceWorker;
@@ -131,8 +133,10 @@ describe('ServiceWorkerManager', () => {
         port2: mockPort,
       };
       vi.stubGlobal(
-        'MessageChannel',
-        vi.fn().mockImplementation(() => mockMessageChannel)
+        "MessageChannel",
+        vi.fn(function MockMessageChannel() {
+          return mockMessageChannel;
+        }),
       );
 
       const manager = ServiceWorkerManager.getInstance();
@@ -141,7 +145,7 @@ describe('ServiceWorkerManager', () => {
       setTimeout(() => {
         mockPort.onmessage({
           data: {
-            type: 'API_CACHE_CLEARED',
+            type: "API_CACHE_CLEARED",
           },
         });
       }, 0);
@@ -149,12 +153,12 @@ describe('ServiceWorkerManager', () => {
       await manager.clearApiCache();
 
       expect(mockController.postMessage).toHaveBeenCalledWith(
-        { type: 'CLEAR_API_CACHE' },
-        [mockPort]
+        { type: "CLEAR_API_CACHE" },
+        [mockPort],
       );
     });
 
-    it('should handle clearing when service worker is not active', async () => {
+    it("should handle clearing when service worker is not active", async () => {
       mockServiceWorker.controller = null;
 
       const manager = ServiceWorkerManager.getInstance();

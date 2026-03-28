@@ -1,235 +1,235 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from "vitest";
 import {
-  isRoutePattern,
   cleanRouteName,
   extractRouteId,
+  isRoutePattern,
   processRouteName,
   ROUTE_PATTERNS,
-} from '../scripts/utils/route-utils';
+} from "../scripts/utils/route-utils";
 
-describe('Route Processing Utilities', () => {
-  describe('ROUTE_PATTERNS', () => {
-    it('should have the expected regex patterns', () => {
+describe("Route Processing Utilities", () => {
+  describe("ROUTE_PATTERNS", () => {
+    it("should have the expected regex patterns", () => {
       expect(ROUTE_PATTERNS.ROUTE_MATCH).toBeInstanceOf(RegExp);
       expect(ROUTE_PATTERNS.ROUTE_ID_EXTRACT).toBeInstanceOf(RegExp);
       expect(ROUTE_PATTERNS.ROUTE_ID_CLEAN).toBeInstanceOf(RegExp);
     });
   });
 
-  describe('isRoutePattern', () => {
-    it('should match numbered routes', () => {
-      expect(isRoutePattern('Route 1')).toBe(true);
-      expect(isRoutePattern('Route 25')).toBe(true);
-      expect(isRoutePattern('Route 123')).toBe(true);
+  describe("isRoutePattern", () => {
+    it("should match numbered routes", () => {
+      expect(isRoutePattern("Route 1")).toBe(true);
+      expect(isRoutePattern("Route 25")).toBe(true);
+      expect(isRoutePattern("Route 123")).toBe(true);
     });
 
-    it('should match special locations', () => {
-      expect(isRoutePattern('Viridian Forest')).toBe(true);
-      expect(isRoutePattern('Secret Garden')).toBe(true);
-      expect(isRoutePattern('Hidden Forest')).toBe(true);
-      expect(isRoutePattern('Viridian River')).toBe(true);
+    it("should match special locations", () => {
+      expect(isRoutePattern("Viridian Forest")).toBe(true);
+      expect(isRoutePattern("Secret Garden")).toBe(true);
+      expect(isRoutePattern("Hidden Forest")).toBe(true);
+      expect(isRoutePattern("Viridian River")).toBe(true);
     });
 
-    it('should be case insensitive', () => {
-      expect(isRoutePattern('route 1')).toBe(true);
-      expect(isRoutePattern('ROUTE 1')).toBe(true);
-      expect(isRoutePattern('viridian forest')).toBe(true);
+    it("should be case insensitive", () => {
+      expect(isRoutePattern("route 1")).toBe(true);
+      expect(isRoutePattern("ROUTE 1")).toBe(true);
+      expect(isRoutePattern("viridian forest")).toBe(true);
     });
 
-    it('should handle routes with ID information', () => {
-      expect(isRoutePattern('Route 1 (ID 78)')).toBe(true);
-      expect(isRoutePattern('Viridian Forest (ID 12)')).toBe(true);
+    it("should handle routes with ID information", () => {
+      expect(isRoutePattern("Route 1 (ID 78)")).toBe(true);
+      expect(isRoutePattern("Viridian Forest (ID 12)")).toBe(true);
     });
 
-    it('should reject non-route patterns', () => {
-      expect(isRoutePattern('Gym Leader')).toBe(false);
-      expect(isRoutePattern('Random Text')).toBe(false);
-      expect(isRoutePattern('Route')).toBe(false); // Route without number
-      expect(isRoutePattern('Magnezone')).toBe(false); // Pokemon names should not match
-      expect(isRoutePattern('Pikachu')).toBe(false);
-      expect(isRoutePattern('Charizard')).toBe(false);
+    it("should reject non-route patterns", () => {
+      expect(isRoutePattern("Gym Leader")).toBe(false);
+      expect(isRoutePattern("Random Text")).toBe(false);
+      expect(isRoutePattern("Route")).toBe(false); // Route without number
+      expect(isRoutePattern("Magnezone")).toBe(false); // Pokemon names should not match
+      expect(isRoutePattern("Pikachu")).toBe(false);
+      expect(isRoutePattern("Charizard")).toBe(false);
     });
 
-    it('should handle invalid input', () => {
-      expect(isRoutePattern('')).toBe(false);
+    it("should handle invalid input", () => {
+      expect(isRoutePattern("")).toBe(false);
       expect(isRoutePattern(null as any)).toBe(false);
       expect(isRoutePattern(undefined as any)).toBe(false);
     });
 
-    it('should handle whitespace', () => {
-      expect(isRoutePattern('  Route 1  ')).toBe(true);
-      expect(isRoutePattern('\tViridian Forest\n')).toBe(true);
+    it("should handle whitespace", () => {
+      expect(isRoutePattern("  Route 1  ")).toBe(true);
+      expect(isRoutePattern("\tViridian Forest\n")).toBe(true);
     });
 
-    describe('Mt. Moon Pattern Matching (Regression Tests)', () => {
-      it('should match all Mt. Moon variants that were previously failing', () => {
+    describe("Mt. Moon Pattern Matching (Regression Tests)", () => {
+      it("should match all Mt. Moon variants that were previously failing", () => {
         // These specific patterns were failing before the alpha character ratio fix
-        expect(isRoutePattern('Mt. Moon (ID 102)')).toBe(true);
-        expect(isRoutePattern('Mt. Moon B1F (ID 103)')).toBe(true);
-        expect(isRoutePattern('Mt. Moon B2F (ID 105)')).toBe(true);
-        expect(isRoutePattern('Mt. Moon (ID 767)')).toBe(true);
-        expect(isRoutePattern('Mt. Moon (ID 104)')).toBe(true);
-        expect(isRoutePattern('Mt. Moon Summit (ID 827)')).toBe(true);
+        expect(isRoutePattern("Mt. Moon (ID 102)")).toBe(true);
+        expect(isRoutePattern("Mt. Moon B1F (ID 103)")).toBe(true);
+        expect(isRoutePattern("Mt. Moon B2F (ID 105)")).toBe(true);
+        expect(isRoutePattern("Mt. Moon (ID 767)")).toBe(true);
+        expect(isRoutePattern("Mt. Moon (ID 104)")).toBe(true);
+        expect(isRoutePattern("Mt. Moon Summit (ID 827)")).toBe(true);
       });
 
-      it('should match Mt. Moon without ID numbers', () => {
-        expect(isRoutePattern('Mt. Moon')).toBe(true);
-        expect(isRoutePattern('Mt. Moon B1F')).toBe(true);
-        expect(isRoutePattern('Mt. Moon B2F')).toBe(true);
-        expect(isRoutePattern('Mt. Moon Dark Room')).toBe(true);
-        expect(isRoutePattern('Mt. Moon Summit')).toBe(true);
+      it("should match Mt. Moon without ID numbers", () => {
+        expect(isRoutePattern("Mt. Moon")).toBe(true);
+        expect(isRoutePattern("Mt. Moon B1F")).toBe(true);
+        expect(isRoutePattern("Mt. Moon B2F")).toBe(true);
+        expect(isRoutePattern("Mt. Moon Dark Room")).toBe(true);
+        expect(isRoutePattern("Mt. Moon Summit")).toBe(true);
       });
 
-      it('should match other mountain locations', () => {
-        expect(isRoutePattern('Mt. Silver')).toBe(true);
-        expect(isRoutePattern('Mt. Silver (ID 123)')).toBe(true);
-        expect(isRoutePattern('Mt. Coronet')).toBe(true);
-        expect(isRoutePattern('Mt. Battle')).toBe(true);
+      it("should match other mountain locations", () => {
+        expect(isRoutePattern("Mt. Silver")).toBe(true);
+        expect(isRoutePattern("Mt. Silver (ID 123)")).toBe(true);
+        expect(isRoutePattern("Mt. Coronet")).toBe(true);
+        expect(isRoutePattern("Mt. Battle")).toBe(true);
       });
 
-      it('should match cave and tunnel locations', () => {
-        expect(isRoutePattern('Rock Tunnel')).toBe(true);
-        expect(isRoutePattern('Rock Tunnel (ID 456)')).toBe(true);
-        expect(isRoutePattern('Cerulean Cave')).toBe(true);
-        expect(isRoutePattern('Victory Road')).toBe(true);
+      it("should match cave and tunnel locations", () => {
+        expect(isRoutePattern("Rock Tunnel")).toBe(true);
+        expect(isRoutePattern("Rock Tunnel (ID 456)")).toBe(true);
+        expect(isRoutePattern("Cerulean Cave")).toBe(true);
+        expect(isRoutePattern("Victory Road")).toBe(true);
       });
     });
   });
 
-  describe('cleanRouteName', () => {
-    it('should remove ID information', () => {
-      expect(cleanRouteName('Route 1 (ID 78)')).toBe('Route 1');
-      expect(cleanRouteName('Viridian Forest (ID 12)')).toBe('Viridian Forest');
+  describe("cleanRouteName", () => {
+    it("should remove ID information", () => {
+      expect(cleanRouteName("Route 1 (ID 78)")).toBe("Route 1");
+      expect(cleanRouteName("Viridian Forest (ID 12)")).toBe("Viridian Forest");
     });
 
-    it('should handle routes without ID', () => {
-      expect(cleanRouteName('Route 1')).toBe('Route 1');
-      expect(cleanRouteName('Viridian Forest')).toBe('Viridian Forest');
+    it("should handle routes without ID", () => {
+      expect(cleanRouteName("Route 1")).toBe("Route 1");
+      expect(cleanRouteName("Viridian Forest")).toBe("Viridian Forest");
     });
 
-    it('should handle multiple ID patterns', () => {
-      expect(cleanRouteName('Route 1 (ID 78) (ID 99)')).toBe('Route 1 (ID 78)');
+    it("should handle multiple ID patterns", () => {
+      expect(cleanRouteName("Route 1 (ID 78) (ID 99)")).toBe("Route 1 (ID 78)");
     });
 
-    it('should trim whitespace', () => {
-      expect(cleanRouteName('  Route 1 (ID 78)  ')).toBe('Route 1');
-      expect(cleanRouteName('Route 1   (ID 78)')).toBe('Route 1');
+    it("should trim whitespace", () => {
+      expect(cleanRouteName("  Route 1 (ID 78)  ")).toBe("Route 1");
+      expect(cleanRouteName("Route 1   (ID 78)")).toBe("Route 1");
     });
 
-    it('should properly clean Mt. Moon variants', () => {
+    it("should properly clean Mt. Moon variants", () => {
       // Test all the Mt. Moon patterns that were causing issues
-      expect(cleanRouteName('Mt. Moon (ID 102)')).toBe('Mt. Moon');
-      expect(cleanRouteName('Mt. Moon B1F (ID 103)')).toBe('Mt. Moon B1F');
-      expect(cleanRouteName('Mt. Moon B2F (ID 105)')).toBe('Mt. Moon B2F');
-      expect(cleanRouteName('Mt. Moon (ID 767)')).toBe('Mt. Moon');
-      expect(cleanRouteName('Mt. Moon (ID 104)')).toBe('Mt. Moon');
-      expect(cleanRouteName('Mt. Moon Summit (ID 827)')).toBe(
-        'Mt. Moon Summit'
+      expect(cleanRouteName("Mt. Moon (ID 102)")).toBe("Mt. Moon");
+      expect(cleanRouteName("Mt. Moon B1F (ID 103)")).toBe("Mt. Moon B1F");
+      expect(cleanRouteName("Mt. Moon B2F (ID 105)")).toBe("Mt. Moon B2F");
+      expect(cleanRouteName("Mt. Moon (ID 767)")).toBe("Mt. Moon");
+      expect(cleanRouteName("Mt. Moon (ID 104)")).toBe("Mt. Moon");
+      expect(cleanRouteName("Mt. Moon Summit (ID 827)")).toBe(
+        "Mt. Moon Summit",
       );
-      expect(cleanRouteName('Mt. Moon Dark Room (ID 999)')).toBe(
-        'Mt. Moon Dark Room'
+      expect(cleanRouteName("Mt. Moon Dark Room (ID 999)")).toBe(
+        "Mt. Moon Dark Room",
       );
     });
 
-    it('should handle invalid input', () => {
-      expect(cleanRouteName('')).toBe('');
-      expect(cleanRouteName(null as any)).toBe('');
-      expect(cleanRouteName(undefined as any)).toBe('');
+    it("should handle invalid input", () => {
+      expect(cleanRouteName("")).toBe("");
+      expect(cleanRouteName(null as any)).toBe("");
+      expect(cleanRouteName(undefined as any)).toBe("");
     });
 
-    it('should handle malformed ID patterns', () => {
-      expect(cleanRouteName('Route 1 (ID)')).toBe('Route 1 (ID)');
-      expect(cleanRouteName('Route 1 (ID abc)')).toBe('Route 1 (ID abc)');
-      expect(cleanRouteName('Route 1 (NoID 123)')).toBe('Route 1 (NoID 123)');
+    it("should handle malformed ID patterns", () => {
+      expect(cleanRouteName("Route 1 (ID)")).toBe("Route 1 (ID)");
+      expect(cleanRouteName("Route 1 (ID abc)")).toBe("Route 1 (ID abc)");
+      expect(cleanRouteName("Route 1 (NoID 123)")).toBe("Route 1 (NoID 123)");
     });
   });
 
-  describe('extractRouteId', () => {
-    it('should extract valid route IDs', () => {
-      expect(extractRouteId('Route 1 (ID 78)')).toBe(78);
-      expect(extractRouteId('Viridian Forest (ID 12)')).toBe(12);
-      expect(extractRouteId('Secret Garden (ID 999)')).toBe(999);
+  describe("extractRouteId", () => {
+    it("should extract valid route IDs", () => {
+      expect(extractRouteId("Route 1 (ID 78)")).toBe(78);
+      expect(extractRouteId("Viridian Forest (ID 12)")).toBe(12);
+      expect(extractRouteId("Secret Garden (ID 999)")).toBe(999);
     });
 
-    it('should handle routes without ID', () => {
-      expect(extractRouteId('Route 1')).toBeUndefined();
-      expect(extractRouteId('Viridian Forest')).toBeUndefined();
+    it("should handle routes without ID", () => {
+      expect(extractRouteId("Route 1")).toBeUndefined();
+      expect(extractRouteId("Viridian Forest")).toBeUndefined();
     });
 
-    it('should handle malformed ID patterns', () => {
-      expect(extractRouteId('Route 1 (ID)')).toBeUndefined();
-      expect(extractRouteId('Route 1 (ID abc)')).toBeUndefined();
-      expect(extractRouteId('Route 1 (NoID 123)')).toBeUndefined();
+    it("should handle malformed ID patterns", () => {
+      expect(extractRouteId("Route 1 (ID)")).toBeUndefined();
+      expect(extractRouteId("Route 1 (ID abc)")).toBeUndefined();
+      expect(extractRouteId("Route 1 (NoID 123)")).toBeUndefined();
     });
 
-    it('should extract first ID if multiple exist', () => {
-      expect(extractRouteId('Route 1 (ID 78) (ID 99)')).toBe(78);
+    it("should extract first ID if multiple exist", () => {
+      expect(extractRouteId("Route 1 (ID 78) (ID 99)")).toBe(78);
     });
 
-    it('should handle different spacing', () => {
-      expect(extractRouteId('Route 1 (ID  78)')).toBe(78);
-      expect(extractRouteId('Route 1 (ID\t78)')).toBe(78);
-      expect(extractRouteId('Route 1 ( ID 78 )')).toBeUndefined(); // Extra spaces break pattern
+    it("should handle different spacing", () => {
+      expect(extractRouteId("Route 1 (ID  78)")).toBe(78);
+      expect(extractRouteId("Route 1 (ID\t78)")).toBe(78);
+      expect(extractRouteId("Route 1 ( ID 78 )")).toBeUndefined(); // Extra spaces break pattern
     });
 
-    it('should handle invalid input', () => {
-      expect(extractRouteId('')).toBeUndefined();
+    it("should handle invalid input", () => {
+      expect(extractRouteId("")).toBeUndefined();
       expect(extractRouteId(null as any)).toBeUndefined();
       expect(extractRouteId(undefined as any)).toBeUndefined();
     });
 
-    it('should handle edge cases', () => {
-      expect(extractRouteId('Route 1 (ID 0)')).toBe(0);
-      expect(extractRouteId('Route 1 (ID -1)')).toBe(-1);
-      expect(extractRouteId('Route 1 (ID 12.5)')).toBe(12); // parseInt behavior
+    it("should handle edge cases", () => {
+      expect(extractRouteId("Route 1 (ID 0)")).toBe(0);
+      expect(extractRouteId("Route 1 (ID -1)")).toBe(-1);
+      expect(extractRouteId("Route 1 (ID 12.5)")).toBe(12); // parseInt behavior
     });
   });
 
-  describe('processRouteName', () => {
-    it('should process route with ID', () => {
-      const result = processRouteName('Route 1 (ID 78)');
+  describe("processRouteName", () => {
+    it("should process route with ID", () => {
+      const result = processRouteName("Route 1 (ID 78)");
       expect(result).toEqual({
-        cleanName: 'Route 1',
+        cleanName: "Route 1",
         routeId: 78,
       });
     });
 
-    it('should process route without ID', () => {
-      const result = processRouteName('Route 1');
+    it("should process route without ID", () => {
+      const result = processRouteName("Route 1");
       expect(result).toEqual({
-        cleanName: 'Route 1',
+        cleanName: "Route 1",
       });
     });
 
-    it('should handle special locations', () => {
-      const result = processRouteName('Viridian Forest (ID 12)');
+    it("should handle special locations", () => {
+      const result = processRouteName("Viridian Forest (ID 12)");
       expect(result).toEqual({
-        cleanName: 'Viridian Forest',
+        cleanName: "Viridian Forest",
         routeId: 12,
       });
     });
 
-    it('should handle empty input', () => {
-      const result = processRouteName('');
+    it("should handle empty input", () => {
+      const result = processRouteName("");
       expect(result).toEqual({
-        cleanName: '',
+        cleanName: "",
       });
     });
 
-    it('should not include routeId property when undefined', () => {
-      const result = processRouteName('Route 1');
-      expect(result).not.toHaveProperty('routeId');
+    it("should not include routeId property when undefined", () => {
+      const result = processRouteName("Route 1");
+      expect(result).not.toHaveProperty("routeId");
     });
 
-    it('should include routeId property when defined', () => {
-      const result = processRouteName('Route 1 (ID 78)');
-      expect(result).toHaveProperty('routeId');
+    it("should include routeId property when defined", () => {
+      const result = processRouteName("Route 1 (ID 78)");
+      expect(result).toHaveProperty("routeId");
       expect(result.routeId).toBe(78);
     });
 
-    it('should handle complex route names', () => {
-      const result = processRouteName('Route 22 - Victory Road (ID 156)');
-      expect(result.cleanName).toBe('Route 22 - Victory Road');
+    it("should handle complex route names", () => {
+      const result = processRouteName("Route 22 - Victory Road (ID 156)");
+      expect(result.cleanName).toBe("Route 22 - Victory Road");
       expect(result.routeId).toBe(156);
     });
   });

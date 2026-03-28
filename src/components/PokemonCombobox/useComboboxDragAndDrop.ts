@@ -1,10 +1,10 @@
-import { useCallback, useRef, useEffect, useState, useMemo } from 'react';
-import { useSnapshot } from 'valtio';
-import { dragStore, dragActions } from '@/stores/dragStore';
-import { settingsStore } from '@/stores/settings';
-import { playthroughActions } from '@/stores/playthroughs';
-import { getPokemon, getPokemonNameMap } from '@/loaders';
-import type { PokemonOptionType } from '@/loaders/pokemon';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSnapshot } from "valtio";
+import { getPokemon, getPokemonNameMap } from "@/loaders";
+import type { PokemonOptionType } from "@/loaders/pokemon";
+import { dragActions, dragStore } from "@/stores/dragStore";
+import { playthroughActions } from "@/stores/playthroughs";
+import { settingsStore } from "@/stores/settings";
 
 interface UseComboboxDragAndDropProps {
   comboboxId?: string;
@@ -26,7 +26,7 @@ export function useComboboxDragAndDrop({
   const dragSnapshot = useSnapshot(dragStore);
   const settings = useSnapshot(settingsStore);
   const [dragPreview, setDragPreview] = useState<PokemonOptionType | null>(
-    null
+    null,
   );
 
   // Ref to track pending timeout for drag leave operations
@@ -45,7 +45,7 @@ export function useComboboxDragAndDrop({
         const nameMap = await getPokemonNameMap();
 
         const foundPokemon = allPokemon.find(
-          p => nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase()
+          (p) => nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase(),
         );
 
         if (!foundPokemon) return null;
@@ -61,11 +61,11 @@ export function useComboboxDragAndDrop({
           }),
         };
       } catch (err) {
-        console.error('Error finding Pokemon by name:', err);
+        console.error("Error finding Pokemon by name:", err);
         return null;
       }
     },
-    [locationId, dragSnapshot.currentDragValue]
+    [locationId, dragSnapshot.currentDragValue],
   );
 
   // Helper function to perform move operations
@@ -84,10 +84,10 @@ export function useComboboxDragAndDrop({
         sourceLocation.field,
         targetLocation.locationId,
         targetLocation.field,
-        pokemon
+        pokemon,
       );
     },
-    [dragSnapshot.currentDragSource, comboboxId, onChange, getLocationInfo]
+    [dragSnapshot.currentDragSource, comboboxId, onChange, getLocationInfo],
   );
 
   // Helper function to perform swap operations
@@ -101,7 +101,7 @@ export function useComboboxDragAndDrop({
       sourceLocation.locationId,
       targetLocation.locationId,
       sourceLocation.field,
-      targetLocation.field
+      targetLocation.field,
     );
   }, [dragSnapshot.currentDragSource, comboboxId, getLocationInfo]);
 
@@ -139,7 +139,7 @@ export function useComboboxDragAndDrop({
         dragPreviewTimeout = null;
       }, DRAG_PREVIEW_DEBOUNCE);
     },
-    []
+    [],
   );
 
   // Handle drop events on the input
@@ -155,7 +155,7 @@ export function useComboboxDragAndDrop({
       }
       setDragPreview(null);
 
-      const pokemonName = e.dataTransfer.getData('text/plain');
+      const pokemonName = e.dataTransfer.getData("text/plain");
       if (!pokemonName) return;
 
       // Check if move operations are allowed
@@ -205,7 +205,7 @@ export function useComboboxDragAndDrop({
       performMoveOperation,
       findPokemonByName,
       onChange,
-    ]
+    ],
   );
 
   // Helper function to update preview for drag data
@@ -216,7 +216,7 @@ export function useComboboxDragAndDrop({
         setDragPreview(pokemon);
       }
     },
-    [findPokemonByName, dragSnapshot.currentDragData]
+    [findPokemonByName, dragSnapshot.currentDragData],
   );
 
   const handleDragOver = useCallback(
@@ -226,9 +226,9 @@ export function useComboboxDragAndDrop({
 
       // If move operations are disabled, show appropriate drop effect
       if (!settings.moveEncountersBetweenLocations) {
-        e.dataTransfer.dropEffect = 'copy';
+        e.dataTransfer.dropEffect = "copy";
       } else {
-        e.dataTransfer.dropEffect = 'copy';
+        e.dataTransfer.dropEffect = "copy";
       }
 
       // Cancel pending drag leave timeout
@@ -281,7 +281,7 @@ export function useComboboxDragAndDrop({
       setDragPreviewDebounced,
       updatePreviewForDragData,
       settings.moveEncountersBetweenLocations,
-    ]
+    ],
   );
 
   const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {

@@ -13,57 +13,57 @@ export class ServiceWorkerManager {
   }
 
   async register(): Promise<ServiceWorkerRegistration | null> {
-    console.debug('ServiceWorkerManager: Starting registration process...');
+    console.debug("ServiceWorkerManager: Starting registration process...");
 
-    if (!('serviceWorker' in navigator)) {
+    if (!("serviceWorker" in navigator)) {
       console.debug(
-        'ServiceWorkerManager: Service Worker not supported in this browser'
+        "ServiceWorkerManager: Service Worker not supported in this browser",
       );
       return null;
     }
 
     console.debug(
-      'ServiceWorkerManager: Service Worker supported, attempting to register /sw.js'
+      "ServiceWorkerManager: Service Worker supported, attempting to register /sw.js",
     );
 
     try {
-      this.swRegistration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/',
+      this.swRegistration = await navigator.serviceWorker.register("/sw.js", {
+        scope: "/",
       });
 
       console.debug(
-        'ServiceWorkerManager: Registration successful:',
-        this.swRegistration
+        "ServiceWorkerManager: Registration successful:",
+        this.swRegistration,
       );
 
-      console.debug('ServiceWorkerManager: Current service worker state:', {
+      console.debug("ServiceWorkerManager: Current service worker state:", {
         installing: this.swRegistration.installing?.state,
         waiting: this.swRegistration.waiting?.state,
         active: this.swRegistration.active?.state,
       });
 
       // Handle updates
-      this.swRegistration.addEventListener('updatefound', () => {
+      this.swRegistration.addEventListener("updatefound", () => {
         console.debug(
-          'ServiceWorkerManager: Update found, new worker installing'
+          "ServiceWorkerManager: Update found, new worker installing",
         );
-        const newWorker = this.swRegistration!.installing;
+        const newWorker = this.swRegistration?.installing;
         if (newWorker) {
           console.debug(
-            'ServiceWorkerManager: New worker state:',
-            newWorker.state
+            "ServiceWorkerManager: New worker state:",
+            newWorker.state,
           );
-          newWorker.addEventListener('statechange', () => {
+          newWorker.addEventListener("statechange", () => {
             console.debug(
-              'ServiceWorkerManager: New worker state changed to:',
-              newWorker.state
+              "ServiceWorkerManager: New worker state changed to:",
+              newWorker.state,
             );
             if (
-              newWorker.state === 'installed' &&
+              newWorker.state === "installed" &&
               navigator.serviceWorker.controller
             ) {
               console.debug(
-                'ServiceWorkerManager: New service worker available and ready'
+                "ServiceWorkerManager: New service worker available and ready",
               );
             }
           });
@@ -73,22 +73,22 @@ export class ServiceWorkerManager {
       // Log current controller state
       if (navigator.serviceWorker.controller) {
         console.debug(
-          'ServiceWorkerManager: Active service worker controller found'
+          "ServiceWorkerManager: Active service worker controller found",
         );
       } else {
         console.debug(
-          'ServiceWorkerManager: No active service worker controller - waiting for control'
+          "ServiceWorkerManager: No active service worker controller - waiting for control",
         );
       }
 
       // Listen for when the service worker takes control
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
         console.debug(
-          'ServiceWorkerManager: Service worker now controlling the page!'
+          "ServiceWorkerManager: Service worker now controlling the page!",
         );
         if (navigator.serviceWorker.controller) {
           console.debug(
-            'ServiceWorkerManager: Controller is now active, fetch events will be intercepted'
+            "ServiceWorkerManager: Controller is now active, fetch events will be intercepted",
           );
         }
       });
@@ -96,14 +96,14 @@ export class ServiceWorkerManager {
       // Force activation if the service worker is waiting
       if (this.swRegistration.waiting) {
         console.debug(
-          'ServiceWorkerManager: Service worker is waiting, sending skipWaiting message'
+          "ServiceWorkerManager: Service worker is waiting, sending skipWaiting message",
         );
-        this.swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        this.swRegistration.waiting.postMessage({ type: "SKIP_WAITING" });
       }
 
       return this.swRegistration;
     } catch (error) {
-      console.error('ServiceWorkerManager: Registration failed:', error);
+      console.error("ServiceWorkerManager: Registration failed:", error);
       return null;
     }
   }
@@ -113,10 +113,10 @@ export class ServiceWorkerManager {
       try {
         await this.swRegistration.unregister();
         this.swRegistration = null;
-        console.debug('Service Worker unregistered');
+        console.debug("Service Worker unregistered");
         return true;
       } catch (error) {
-        console.error('Service Worker unregistration failed:', error);
+        console.error("Service Worker unregistration failed:", error);
         return false;
       }
     }
@@ -124,15 +124,15 @@ export class ServiceWorkerManager {
   }
 
   async clearCache(): Promise<void> {
-    if ('caches' in window) {
+    if ("caches" in window) {
       try {
         const cacheNames = await caches.keys();
         await Promise.all(
-          cacheNames.map(cacheName => caches.delete(cacheName))
+          cacheNames.map((cacheName) => caches.delete(cacheName)),
         );
-        console.debug('All caches cleared');
+        console.debug("All caches cleared");
       } catch (error) {
-        console.error('Failed to clear caches:', error);
+        console.error("Failed to clear caches:", error);
       }
     }
   }
@@ -142,22 +142,22 @@ export class ServiceWorkerManager {
   }
 
   async getCacheSize(): Promise<string> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!navigator.serviceWorker.controller) {
-        resolve('Service worker not active');
+        resolve("Service worker not active");
         return;
       }
 
       const messageChannel = new MessageChannel();
-      messageChannel.port1.onmessage = event => {
-        if (event.data.type === 'CACHE_SIZE') {
+      messageChannel.port1.onmessage = (event) => {
+        if (event.data.type === "CACHE_SIZE") {
           resolve(event.data.size);
         }
       };
 
       navigator.serviceWorker.controller.postMessage(
-        { type: 'GET_CACHE_SIZE' },
-        [messageChannel.port2]
+        { type: "GET_CACHE_SIZE" },
+        [messageChannel.port2],
       );
     });
   }
@@ -168,27 +168,27 @@ export class ServiceWorkerManager {
     percentage: number;
     error?: string;
   }> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!navigator.serviceWorker.controller) {
         resolve({
           total: 0,
           cached: 0,
           percentage: 0,
-          error: 'Service worker not active',
+          error: "Service worker not active",
         });
         return;
       }
 
       const messageChannel = new MessageChannel();
-      messageChannel.port1.onmessage = event => {
-        if (event.data.type === 'POKEMON_CACHE_STATUS') {
+      messageChannel.port1.onmessage = (event) => {
+        if (event.data.type === "POKEMON_CACHE_STATUS") {
           resolve(event.data.status);
         }
       };
 
       navigator.serviceWorker.controller.postMessage(
-        { type: 'GET_POKEMON_CACHE_STATUS' },
-        [messageChannel.port2]
+        { type: "GET_POKEMON_CACHE_STATUS" },
+        [messageChannel.port2],
       );
     });
   }
@@ -198,26 +198,26 @@ export class ServiceWorkerManager {
     endpoints: string[];
     error?: string;
   }> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!navigator.serviceWorker.controller) {
         resolve({
           total: 0,
           endpoints: [],
-          error: 'Service worker not active',
+          error: "Service worker not active",
         });
         return;
       }
 
       const messageChannel = new MessageChannel();
-      messageChannel.port1.onmessage = event => {
-        if (event.data.type === 'API_CACHE_STATUS') {
+      messageChannel.port1.onmessage = (event) => {
+        if (event.data.type === "API_CACHE_STATUS") {
           resolve(event.data.status);
         }
       };
 
       navigator.serviceWorker.controller.postMessage(
-        { type: 'GET_API_CACHE_STATUS' },
-        [messageChannel.port2]
+        { type: "GET_API_CACHE_STATUS" },
+        [messageChannel.port2],
       );
     });
   }
@@ -226,46 +226,46 @@ export class ServiceWorkerManager {
     cached: boolean;
     error?: string;
   }> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!navigator.serviceWorker.controller) {
         resolve({
           cached: false,
-          error: 'Service worker not active',
+          error: "Service worker not active",
         });
         return;
       }
 
       const messageChannel = new MessageChannel();
-      messageChannel.port1.onmessage = event => {
-        if (event.data.type === 'API_ENDPOINT_CACHE_STATUS') {
+      messageChannel.port1.onmessage = (event) => {
+        if (event.data.type === "API_ENDPOINT_CACHE_STATUS") {
           resolve(event.data.status);
         }
       };
 
       navigator.serviceWorker.controller.postMessage(
-        { type: 'CHECK_API_ENDPOINT_CACHE', endpoint },
-        [messageChannel.port2]
+        { type: "CHECK_API_ENDPOINT_CACHE", endpoint },
+        [messageChannel.port2],
       );
     });
   }
 
   async clearApiCache(): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!navigator.serviceWorker.controller) {
         resolve();
         return;
       }
 
       const messageChannel = new MessageChannel();
-      messageChannel.port1.onmessage = event => {
-        if (event.data.type === 'API_CACHE_CLEARED') {
+      messageChannel.port1.onmessage = (event) => {
+        if (event.data.type === "API_CACHE_CLEARED") {
           resolve();
         }
       };
 
       navigator.serviceWorker.controller.postMessage(
-        { type: 'CLEAR_API_CACHE' },
-        [messageChannel.port2]
+        { type: "CLEAR_API_CACHE" },
+        [messageChannel.port2],
       );
     });
   }

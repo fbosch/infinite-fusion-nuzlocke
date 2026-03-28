@@ -1,14 +1,15 @@
-'use client';
+"use client";
 
-import React, {
-  useState,
-  useEffect,
-  useCallback,
+import clsx from "clsx";
+import type React from "react";
+import {
   startTransition,
+  useCallback,
+  useEffect,
   useRef,
-} from 'react';
-import clsx from 'clsx';
-import { type PokemonOptionType } from '@/loaders/pokemon';
+  useState,
+} from "react";
+import type { PokemonOptionType } from "@/loaders/pokemon";
 
 interface PokemonNicknameInputProps {
   value: PokemonOptionType | null | undefined;
@@ -21,12 +22,12 @@ interface PokemonNicknameInputProps {
 export const PokemonNicknameInput = ({
   value,
   onChange,
-  placeholder = 'Enter nickname',
+  placeholder = "Enter nickname",
   disabled = false,
   dragPreview,
 }: PokemonNicknameInputProps) => {
   // Local state for immediate UI feedback
-  const [localNickname, setLocalNickname] = useState(value?.nickname || '');
+  const [localNickname, setLocalNickname] = useState(value?.nickname || "");
   const [isUserTyping, setIsUserTyping] = useState(false);
 
   // Keep track of the Pokemon ID to detect when a different Pokemon is selected
@@ -36,7 +37,7 @@ export const PokemonNicknameInput = ({
   // Simple effect to sync when Pokemon changes or external nickname updates
   useEffect(() => {
     if (!value) {
-      setLocalNickname('');
+      setLocalNickname("");
       lastSyncedPokemonId.current = undefined;
       setIsUserTyping(false);
       return;
@@ -44,7 +45,7 @@ export const PokemonNicknameInput = ({
 
     // If this is a different Pokemon, always sync
     if (currentPokemonId !== lastSyncedPokemonId.current) {
-      setLocalNickname(value.nickname || '');
+      setLocalNickname(value.nickname || "");
       lastSyncedPokemonId.current = currentPokemonId;
       setIsUserTyping(false);
       return;
@@ -52,7 +53,7 @@ export const PokemonNicknameInput = ({
 
     // If it's the same Pokemon but nickname changed externally and user isn't typing, sync
     if (value.nickname !== localNickname && !isUserTyping) {
-      setLocalNickname(value.nickname || '');
+      setLocalNickname(value.nickname || "");
     }
   }, [value, value?.nickname, currentPokemonId, localNickname, isUserTyping]);
 
@@ -75,24 +76,24 @@ export const PokemonNicknameInput = ({
       setIsUserTyping(true);
       setLocalNickname(event.target.value);
     },
-    []
+    [],
   );
 
   // Handle Enter key - commit changes immediately and blur
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') {
+      if (event.key === "Enter") {
         setIsUserTyping(false);
         commitChanges();
         event.currentTarget.blur();
-      } else if (event.key === 'Escape') {
+      } else if (event.key === "Escape") {
         // Revert to original value
         setIsUserTyping(false);
-        setLocalNickname(value?.nickname || '');
+        setLocalNickname(value?.nickname || "");
         event.currentTarget.blur();
       }
     },
-    [commitChanges, value]
+    [commitChanges, value],
   );
 
   // Handle blur - commit changes immediately
@@ -101,27 +102,27 @@ export const PokemonNicknameInput = ({
     commitChanges();
   }, [commitChanges]);
 
-  const displayValue = dragPreview ? dragPreview.nickname || '' : localNickname;
+  const displayValue = dragPreview ? dragPreview.nickname || "" : localNickname;
 
   return (
     <input
-      type='text'
+      type="text"
       value={displayValue}
       onChange={handleNicknameChange}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
       placeholder={placeholder}
       className={clsx(
-        'rounded-bl-md border-t-0 border-r-0 rounded-t-none relative',
-        'flex-1 px-3 py-3.5 text-sm border bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:cursor-not-allowed',
-        'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
-        'placeholder-gray-500 dark:placeholder-gray-400',
-        dragPreview && 'opacity-60 '
+        "rounded-bl-md border-t-0 border-r-0 rounded-t-none relative",
+        "flex-1 px-3 py-3.5 text-sm border bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:cursor-not-allowed",
+        "border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400",
+        "placeholder-gray-500 dark:placeholder-gray-400",
+        dragPreview && "opacity-60 ",
       )}
       maxLength={12}
       disabled={!value || disabled}
       spellCheck={false}
-      autoComplete='off'
+      autoComplete="off"
     />
   );
 };

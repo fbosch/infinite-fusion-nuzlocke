@@ -1,22 +1,22 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from "vitest";
+import type { PokemonOptionType } from "@/loaders/pokemon";
 import {
-  isEgg,
   createEggEncounter,
   getEncounterDisplayName,
-} from '@/loaders/pokemon';
-import type { PokemonOptionType } from '@/loaders/pokemon';
+  isEgg,
+} from "@/loaders/pokemon";
 
-describe('Egg Pokemon functionality', () => {
-  it('should identify Egg Pokemon correctly', () => {
+describe("Egg Pokemon functionality", () => {
+  it("should identify Egg Pokemon correctly", () => {
     const eggPokemon: PokemonOptionType = {
       id: -1,
-      name: 'Egg',
+      name: "Egg",
       nationalDexId: -1,
     };
 
     const regularPokemon: PokemonOptionType = {
       id: 1,
-      name: 'Bulbasaur',
+      name: "Bulbasaur",
       nationalDexId: 1,
     };
 
@@ -24,56 +24,56 @@ describe('Egg Pokemon functionality', () => {
     expect(isEgg(regularPokemon)).toBe(false);
   });
 
-  it('should create Egg encounter correctly', () => {
-    const eggEncounter = createEggEncounter('route-1', 'My Egg');
+  it("should create Egg encounter correctly", () => {
+    const eggEncounter = createEggEncounter("route-1", "My Egg");
 
     expect(eggEncounter.id).toBe(-1);
-    expect(eggEncounter.name).toBe('Egg');
+    expect(eggEncounter.name).toBe("Egg");
     expect(eggEncounter.nationalDexId).toBe(-1);
-    expect(eggEncounter.nickname).toBe('My Egg');
-    expect(eggEncounter.originalLocation).toBe('route-1');
+    expect(eggEncounter.nickname).toBe("My Egg");
+    expect(eggEncounter.originalLocation).toBe("route-1");
     expect(eggEncounter.uid).toBeDefined();
   });
 
-  it('should get correct display name for Egg encounters', () => {
+  it("should get correct display name for Egg encounters", () => {
     const eggWithNickname: PokemonOptionType = {
       id: -1,
-      name: 'Egg',
+      name: "Egg",
       nationalDexId: -1,
-      nickname: 'My Egg',
+      nickname: "My Egg",
     };
 
     const eggWithoutNickname: PokemonOptionType = {
       id: -1,
-      name: 'Egg',
+      name: "Egg",
       nationalDexId: -1,
     };
 
     const regularPokemon: PokemonOptionType = {
       id: 1,
-      name: 'Bulbasaur',
+      name: "Bulbasaur",
       nationalDexId: 1,
-      nickname: 'Bulby',
+      nickname: "Bulby",
     };
 
-    expect(getEncounterDisplayName(eggWithNickname)).toBe('My Egg');
-    expect(getEncounterDisplayName(eggWithoutNickname)).toBe('Egg');
-    expect(getEncounterDisplayName(regularPokemon)).toBe('Bulby');
+    expect(getEncounterDisplayName(eggWithNickname)).toBe("My Egg");
+    expect(getEncounterDisplayName(eggWithoutNickname)).toBe("Egg");
+    expect(getEncounterDisplayName(regularPokemon)).toBe("Bulby");
   });
 
-  it('should detect egg hatching correctly', () => {
+  it("should detect egg hatching correctly", () => {
     const eggPokemon: PokemonOptionType = {
       id: -1,
-      name: 'Egg',
+      name: "Egg",
       nationalDexId: -1,
-      nickname: 'My Egg',
+      nickname: "My Egg",
     };
 
     const hatchedPokemon: PokemonOptionType = {
       id: 1,
-      name: 'Bulbasaur',
+      name: "Bulbasaur",
       nationalDexId: 1,
-      nickname: 'Bulby',
+      nickname: "Bulby",
     };
 
     // Egg hatching: replacing egg with regular pokemon
@@ -85,9 +85,9 @@ describe('Egg Pokemon functionality', () => {
     // Egg to egg: should not be considered hatching
     const anotherEgg: PokemonOptionType = {
       id: -1,
-      name: 'Egg',
+      name: "Egg",
       nationalDexId: -1,
-      nickname: 'Another Egg',
+      nickname: "Another Egg",
     };
     expect(isEgg(eggPokemon) && !isEgg(anotherEgg)).toBe(false);
   });

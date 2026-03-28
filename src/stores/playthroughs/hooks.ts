@@ -1,14 +1,13 @@
-import React, { useMemo } from 'react';
-import { useSnapshot } from 'valtio';
-import { z } from 'zod';
-import { CustomLocationSchema } from '@/loaders/locations';
-import { GameMode, Playthrough, EncounterData } from './types';
-import { playthroughsStore } from './store';
-import { getAllPlaythroughs } from './store';
+import React, { useMemo } from "react";
+import { useSnapshot } from "valtio";
+import type { z } from "zod";
+import type { CustomLocationSchema } from "@/loaders/locations";
 import {
-  getMergedLocations,
   getAvailableAfterLocations,
-} from './customLocations';
+  getMergedLocations,
+} from "./customLocations";
+import { getAllPlaythroughs, playthroughsStore } from "./store";
+import type { EncounterData, GameMode, Playthrough } from "./types";
 
 // Reusable hooks for components
 export const usePlaythroughsSnapshot = () => {
@@ -22,8 +21,8 @@ export const useAllPlaythroughs = () => {
   // and we're not currently loading
   React.useEffect(() => {
     if (!snapshot.isLoading && snapshot.playthroughs.length <= 1) {
-      getAllPlaythroughs().catch(error => {
-        console.error('Failed to load all playthroughs:', error);
+      getAllPlaythroughs().catch((error) => {
+        console.error("Failed to load all playthroughs:", error);
       });
     }
   }, [snapshot.isLoading, snapshot.playthroughs.length]);
@@ -40,7 +39,7 @@ export const useActivePlaythrough = (): Playthrough | null => {
     if (!snapshot.activePlaythroughId) return null;
 
     const activePlaythroughData = snapshot.playthroughs.find(
-      p => p.id === snapshot.activePlaythroughId
+      (p) => p.id === snapshot.activePlaythroughId,
     );
 
     return (activePlaythroughData as Playthrough) || null;
@@ -50,33 +49,33 @@ export const useActivePlaythrough = (): Playthrough | null => {
 export const useIsRemixMode = (): boolean => {
   const snapshot = useSnapshot(playthroughsStore);
   const activePlaythrough = snapshot.playthroughs.find(
-    p => p.id === snapshot.activePlaythroughId
+    (p) => p.id === snapshot.activePlaythroughId,
   );
-  return activePlaythrough?.gameMode === 'remix';
+  return activePlaythrough?.gameMode === "remix";
 };
 
 export const useGameMode = (): GameMode => {
   const snapshot = useSnapshot(playthroughsStore);
   const activePlaythrough = snapshot.playthroughs.find(
-    p => p.id === snapshot.activePlaythroughId
+    (p) => p.id === snapshot.activePlaythroughId,
   );
-  return (activePlaythrough?.gameMode as GameMode) || 'classic';
+  return (activePlaythrough?.gameMode as GameMode) || "classic";
 };
 
 export const useIsRandomizedMode = (): boolean => {
   const snapshot = useSnapshot(playthroughsStore);
   const activePlaythrough = snapshot.playthroughs.find(
-    p => p.id === snapshot.activePlaythroughId
+    (p) => p.id === snapshot.activePlaythroughId,
   );
-  return activePlaythrough?.gameMode === 'randomized';
+  return activePlaythrough?.gameMode === "randomized";
 };
 
 export const usePlaythroughById = (
-  playthroughId: string | undefined
+  playthroughId: string | undefined,
 ): Playthrough | null => {
   const snapshot = useSnapshot(playthroughsStore);
   const playthroughData = snapshot.playthroughs.find(
-    p => p.id === playthroughId
+    (p) => p.id === playthroughId,
   );
 
   return useMemo(() => {
@@ -91,10 +90,10 @@ export const useIsLoading = (): boolean => {
   return snapshot.isLoading;
 };
 
-export const useEncounters = (): Playthrough['encounters'] => {
+export const useEncounters = (): Playthrough["encounters"] => {
   const snapshot = useSnapshot(playthroughsStore);
   const activePlaythrough = snapshot.playthroughs.find(
-    p => p.id === snapshot.activePlaythroughId
+    (p) => p.id === snapshot.activePlaythroughId,
   );
 
   // Valtio snapshots are already reactive, no need for additional memoization
@@ -105,7 +104,7 @@ export const useEncounters = (): Playthrough['encounters'] => {
 export const useEncounter = (locationId: string): EncounterData | null => {
   const snapshot = useSnapshot(playthroughsStore);
   const activePlaythrough = snapshot.playthroughs.find(
-    p => p.id === snapshot.activePlaythroughId
+    (p) => p.id === snapshot.activePlaythroughId,
   );
 
   // Valtio snapshots are already reactive to deep changes
@@ -129,36 +128,34 @@ export const useCustomLocations = (): z.infer<
 };
 
 export const useMergedLocations = () => {
-  const activePlaythrough = useActivePlaythrough();
+  useActivePlaythrough();
 
   return useMemo(() => {
     return getMergedLocations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePlaythrough?.customLocations]);
+  }, []);
 };
 
 export const useAvailableAfterLocations = () => {
-  const activePlaythrough = useActivePlaythrough();
+  useActivePlaythrough();
 
   return useMemo(() => {
     return getAvailableAfterLocations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePlaythrough?.customLocations]);
+  }, []);
 };
 
 // Hook for preferred variants - simplified version
 export const usePreferredVariant = (
   headId?: number | null,
-  bodyId?: number | null
+  bodyId?: number | null,
 ) => {
   const setPreferredVariant = React.useCallback(
     async (variant?: string) => {
       const { setPreferredVariant: setGlobalVariant } = await import(
-        '@/lib/preferredVariants'
+        "@/lib/preferredVariants"
       );
-      setGlobalVariant(headId ?? null, bodyId ?? null, variant ?? '');
+      setGlobalVariant(headId ?? null, bodyId ?? null, variant ?? "");
     },
-    [headId, bodyId]
+    [headId, bodyId],
   );
 
   return {

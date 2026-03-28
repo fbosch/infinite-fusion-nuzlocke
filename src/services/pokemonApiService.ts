@@ -1,6 +1,6 @@
-import { PokemonSchema } from '@/loaders/pokemon';
-import { getCacheBuster } from '@/lib/persistence';
-import { z } from 'zod';
+import { z } from "zod";
+import { getCacheBuster } from "@/lib/persistence";
+import { PokemonSchema } from "@/loaders/pokemon";
 
 export type Pokemon = z.infer<typeof PokemonSchema>;
 
@@ -23,47 +23,47 @@ class PokemonApiService {
   constructor() {
     // Use absolute URL in test environment, relative in browser
     this.baseUrl =
-      typeof window === 'undefined'
-        ? 'http://localhost:3000/api/pokemon'
-        : '/api/pokemon';
+      typeof window === "undefined"
+        ? "http://localhost:3000/api/pokemon"
+        : "/api/pokemon";
   }
 
   private async makeRequest(
-    params: PokemonApiParams = {}
+    params: PokemonApiParams = {},
   ): Promise<PokemonApiResponse> {
     const searchParams = new URLSearchParams();
 
     if (params.ids && params.ids.length > 0) {
-      searchParams.append('ids', params.ids.join(','));
+      searchParams.append("ids", params.ids.join(","));
     }
 
     if (params.search) {
-      searchParams.append('search', params.search);
+      searchParams.append("search", params.search);
     }
 
     if (params.type) {
-      searchParams.append('type', params.type);
+      searchParams.append("type", params.type);
     }
 
     if (params.limit) {
-      searchParams.append('limit', params.limit.toString());
+      searchParams.append("limit", params.limit.toString());
     }
 
     // Add cache busting version parameter
-    searchParams.append('v', getCacheBuster().toString());
+    searchParams.append("v", getCacheBuster().toString());
 
     const url = `${this.baseUrl}?${searchParams.toString()}`;
 
     const response = await fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
     if (!response.ok) {
       throw new Error(
-        `Pokemon API error: ${response.status} ${response.statusText}`
+        `Pokemon API error: ${response.status} ${response.statusText}`,
       );
     }
 
@@ -79,8 +79,8 @@ class PokemonApiService {
       .safeParse(data);
 
     if (!validatedData.success) {
-      console.error('Invalid API response:', validatedData.error.issues);
-      throw new Error('Invalid API response format');
+      console.error("Invalid API response:", validatedData.error.issues);
+      throw new Error("Invalid API response format");
     }
 
     return validatedData.data;

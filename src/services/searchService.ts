@@ -1,14 +1,14 @@
-import { SearchCore } from '@/lib/searchCore';
-import { pokemonData } from '@/lib/data';
-import * as Comlink from 'comlink';
-import type { Pokemon } from '@/loaders/pokemon';
+import * as Comlink from "comlink";
+import { pokemonData } from "@/lib/data";
+import { SearchCore } from "@/lib/searchCore";
+import type { Pokemon } from "@/loaders/pokemon";
 
 let mainThreadInstance: SearchCore | null = null;
 let mainThreadInitPromise: Promise<SearchCore> | null = null;
 let instance: Comlink.Remote<SearchCore> | SearchCore | null = null;
 
 const getMainThreadInstance = async () => {
-  if (mainThreadInstance && mainThreadInstance.isReady()) {
+  if (mainThreadInstance?.isReady()) {
     return mainThreadInstance;
   }
 
@@ -24,7 +24,7 @@ const getMainThreadInstance = async () => {
       mainThreadInstance = newInstance;
       return newInstance;
     } catch (error) {
-      console.error('Failed to initialize main thread SearchCore:', error);
+      console.error("Failed to initialize main thread SearchCore:", error);
       throw error;
     } finally {
       mainThreadInitPromise = null;
@@ -45,7 +45,7 @@ const getInstance = async (mainThread = false) => {
 
   try {
     const worker = new Worker(
-      new URL('@/workers/search.worker', import.meta.url)
+      new URL("@/workers/search.worker", import.meta.url),
     );
     const wrappedInstance = Comlink.wrap(worker) as {
       initialize: (pokemonData: Pokemon[]) => Promise<void>;
@@ -59,8 +59,8 @@ const getInstance = async (mainThread = false) => {
       await wrappedInstance.initialize(allPokemon);
     } catch (error) {
       console.warn(
-        'Worker initialization failed, falling back to main thread:',
-        error
+        "Worker initialization failed, falling back to main thread:",
+        error,
       );
       return await getMainThreadInstance();
     }
@@ -68,8 +68,8 @@ const getInstance = async (mainThread = false) => {
     instance = wrappedInstance as unknown as SearchCore;
   } catch (error) {
     console.error(
-      'Failed to initialize search worker, falling back to main thread:',
-      error
+      "Failed to initialize search worker, falling back to main thread:",
+      error,
     );
     instance = await getMainThreadInstance();
   }
@@ -83,7 +83,7 @@ const service = {
       const instance = await getInstance();
       return instance.search(query);
     } catch (error) {
-      console.error('Search service failed:', error);
+      console.error("Search service failed:", error);
       return [];
     }
   },

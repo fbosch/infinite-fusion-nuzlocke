@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
 import {
   createContext,
+  type ReactNode,
+  useCallback,
   useContext,
   useState,
-  useCallback,
-  ReactNode,
-} from 'react';
+} from "react";
 
 interface GlobalTooltipContextType {
   isAnyTooltipVisible: boolean;
@@ -14,7 +14,7 @@ interface GlobalTooltipContextType {
 }
 
 const GlobalTooltipContext = createContext<GlobalTooltipContextType | null>(
-  null
+  null,
 );
 
 interface GlobalTooltipProviderProps {
@@ -27,7 +27,7 @@ export function GlobalTooltipProvider({
   const [visibleTooltipCount, setVisibleTooltipCount] = useState(0);
 
   const registerTooltip = useCallback((isVisible: boolean) => {
-    setVisibleTooltipCount(prev => {
+    setVisibleTooltipCount((prev) => {
       if (isVisible) {
         return prev + 1;
       } else {
