@@ -57,20 +57,16 @@ export function ArtworkVariantButton({
 
       if (disabled || !hasVariants || !variants) return;
 
-      try {
-        // Get current variant and find next one
-        const currentIndex = variants.indexOf(currentVariant);
-        const nextIndex = isShiftPressed
-          ? (currentIndex - 1 + variants.length) % variants.length
-          : (currentIndex + 1) % variants.length;
+      const currentIndex = variants.indexOf(currentVariant);
+      const nextIndex = isShiftPressed
+        ? (currentIndex - 1 + variants.length) % variants.length
+        : (currentIndex + 1) % variants.length;
 
-        const newVariant = variants[nextIndex] || "";
+      const newVariant = variants[nextIndex] || "";
 
-        // Update the variant
-        await updateVariant(newVariant);
-      } catch (error) {
+      await updateVariant(newVariant).catch((error) => {
         console.error("Failed to cycle artwork variant:", error);
-      }
+      });
     },
     [
       disabled,

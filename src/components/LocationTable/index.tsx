@@ -48,6 +48,8 @@ const AddCustomLocationModal = dynamic(
 );
 
 export default function LocationTable() {
+  "use no memo";
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isCustomLocationModalOpen, setIsCustomLocationModalOpen] =
     useState(false);
