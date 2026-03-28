@@ -1,5 +1,5 @@
-import Fuse, { type IFuseOptions } from 'fuse.js';
-import type { Pokemon } from '@/loaders/pokemon';
+import Fuse, { type IFuseOptions } from "fuse.js";
+import type { Pokemon } from "@/loaders/pokemon";
 
 export interface PokemonData {
   id: number;
@@ -23,7 +23,7 @@ export class SearchCore {
     // Search in both name and ID fields
     keys: [
       {
-        name: 'name',
+        name: "name",
       },
     ],
     threshold: 0.3,
@@ -49,7 +49,7 @@ export class SearchCore {
       try {
         if (!rawPokemonData || rawPokemonData.length === 0) {
           throw new Error(
-            'Pokemon data must be provided to SearchCore.initialize()'
+            "Pokemon data must be provided to SearchCore.initialize()",
           );
         }
 
@@ -61,7 +61,7 @@ export class SearchCore {
 
         this.fuse = new Fuse(this.pokemonData, this.fuseOptions);
       } catch (error) {
-        console.error('Failed to initialize SearchCore:', error);
+        console.error("Failed to initialize SearchCore:", error);
         throw error;
       } finally {
         this.initializationPromise = null;
@@ -85,14 +85,14 @@ export class SearchCore {
     if (/^\d+$/.test(trimmedQuery)) {
       const queryNum = parseInt(trimmedQuery, 10);
       return this.pokemonData
-        .filter(p => p.id === queryNum || p.nationalDexId === queryNum)
-        .map(p => ({ ...p, score: 0 }));
+        .filter((p) => p.id === queryNum || p.nationalDexId === queryNum)
+        .map((p) => ({ ...p, score: 0 }));
     }
 
     // Fuzzy search for names - let Fuse.js handle the ranking
     const results = this.fuse.search(trimmedQuery);
 
-    return results.map(result => ({
+    return results.map((result) => ({
       ...result.item,
       score: result.score || 0,
     }));

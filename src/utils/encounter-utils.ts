@@ -1,10 +1,10 @@
-import type { PokemonOptionType } from '@/loaders/pokemon';
-import type { EncounterData } from '@/stores/playthroughs/types';
+import type { PokemonOptionType } from "@/loaders/pokemon";
+import type { EncounterData } from "@/stores/playthroughs/types";
 
 export type PokemonUidIndex = Map<string, PokemonOptionType>;
 
 export function buildPokemonUidIndex(
-  encounters: Record<string, EncounterData> | null | undefined
+  encounters: Record<string, EncounterData> | null | undefined,
 ): PokemonUidIndex {
   const pokemonByUid: PokemonUidIndex = new Map();
 
@@ -29,7 +29,7 @@ export function buildPokemonUidIndex(
 export function findPokemonByUid(
   encounters: Record<string, EncounterData> | null | undefined,
   uid: string,
-  pokemonByUid?: ReadonlyMap<string, PokemonOptionType>
+  pokemonByUid?: ReadonlyMap<string, PokemonOptionType>,
 ): PokemonOptionType | null {
   if (pokemonByUid) {
     const indexedPokemon = pokemonByUid.get(uid);
@@ -52,7 +52,7 @@ export function findPokemonByUid(
  */
 export function findPokemonWithLocation(
   encounters: Record<string, EncounterData> | null | undefined,
-  uid: string
+  uid: string,
 ): { pokemon: PokemonOptionType; locationId: string } | null {
   if (!encounters) return null;
 
@@ -69,7 +69,7 @@ export function findPokemonWithLocation(
  * Get all available Pokémon from encounters with location info
  */
 export function getAllPokemonWithLocations(
-  encounters: Record<string, EncounterData> | null | undefined
+  encounters: Record<string, EncounterData> | null | undefined,
 ): Array<{ pokemon: PokemonOptionType; locationId: string }> {
   if (!encounters) return [];
 

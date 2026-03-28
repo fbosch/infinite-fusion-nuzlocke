@@ -1,6 +1,6 @@
-import { beforeEach, expect } from 'vitest';
-import { playthroughsStore, createPlaythrough } from '../store';
-import { PokemonStatus, type PokemonOptionType } from '@/loaders/pokemon';
+import { beforeEach, expect } from "vitest";
+import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
+import { createPlaythrough, playthroughsStore } from "../store";
 
 /**
  * Reset the playthroughs store before each test
@@ -17,16 +17,16 @@ export const resetPlaythroughsStore = () => {
 /**
  * Create a test playthrough and return the playthrough ID and instance
  */
-export const createTestPlaythrough = (name: string = 'Test Run') => {
+export const createTestPlaythrough = (name: string = "Test Run") => {
   const playthroughId = createPlaythrough(name);
   playthroughsStore.activePlaythroughId = playthroughId;
 
   const activePlaythrough = playthroughsStore.playthroughs.find(
-    p => p.id === playthroughId
+    (p) => p.id === playthroughId,
   );
 
   if (!activePlaythrough) {
-    throw new Error('Playthrough not found');
+    throw new Error("Playthrough not found");
   }
 
   return { playthroughId, activePlaythrough };
@@ -36,15 +36,15 @@ export const createTestPlaythrough = (name: string = 'Test Run') => {
  * Create a test Pokémon with default values
  */
 export const createTestPokemon = (
-  overrides: Partial<PokemonOptionType> = {}
+  overrides: Partial<PokemonOptionType> = {},
 ): PokemonOptionType => {
   const defaults = {
     id: 25,
-    name: 'Pikachu',
+    name: "Pikachu",
     nationalDexId: 25,
     status: PokemonStatus.CAPTURED,
     uid: `pokemon_${Date.now()}_${Math.random()}`,
-    originalLocation: 'route1',
+    originalLocation: "route1",
   };
 
   return { ...defaults, ...overrides } as PokemonOptionType;
@@ -54,52 +54,52 @@ export const createTestPokemon = (
  * Common test Pokémon definitions
  */
 export const testPokemon = {
-  pikachu: (uid: string = 'pikachu_route1_123'): PokemonOptionType => ({
+  pikachu: (uid: string = "pikachu_route1_123"): PokemonOptionType => ({
     id: 25,
-    name: 'Pikachu',
+    name: "Pikachu",
     nationalDexId: 25,
-    nickname: 'Sparky',
+    nickname: "Sparky",
     status: PokemonStatus.CAPTURED,
     uid,
-    originalLocation: 'route1',
+    originalLocation: "route1",
   }),
 
-  charmander: (uid: string = 'charmander_route1_456'): PokemonOptionType => ({
+  charmander: (uid: string = "charmander_route1_456"): PokemonOptionType => ({
     id: 4,
-    name: 'Charmander',
+    name: "Charmander",
     nationalDexId: 4,
-    nickname: 'Flame',
+    nickname: "Flame",
     status: PokemonStatus.CAPTURED,
     uid,
-    originalLocation: 'route1',
+    originalLocation: "route1",
   }),
 
-  squirtle: (uid: string = 'squirtle_route2_789'): PokemonOptionType => ({
+  squirtle: (uid: string = "squirtle_route2_789"): PokemonOptionType => ({
     id: 7,
-    name: 'Squirtle',
+    name: "Squirtle",
     nationalDexId: 7,
-    nickname: 'Bubbles',
+    nickname: "Bubbles",
     status: PokemonStatus.CAPTURED,
     uid,
-    originalLocation: 'route2',
+    originalLocation: "route2",
   }),
 
-  abra: (uid: string = 'abra_trade_101'): PokemonOptionType => ({
+  abra: (uid: string = "abra_trade_101"): PokemonOptionType => ({
     id: 63,
-    name: 'Abra',
+    name: "Abra",
     nationalDexId: 63,
     status: PokemonStatus.TRADED,
     uid,
-    originalLocation: 'trade',
+    originalLocation: "trade",
   }),
 
-  bulbasaur: (uid: string = 'bulbasaur_starter_001'): PokemonOptionType => ({
+  bulbasaur: (uid: string = "bulbasaur_starter_001"): PokemonOptionType => ({
     id: 1,
-    name: 'Bulbasaur',
+    name: "Bulbasaur",
     nationalDexId: 1,
     status: PokemonStatus.RECEIVED,
     uid,
-    originalLocation: 'starter',
+    originalLocation: "starter",
   }),
 };
 
@@ -107,7 +107,7 @@ export const testPokemon = {
  * Helper to add a delay for timestamp testing
  */
 export const waitForTimestamp = (ms: number = 10) => {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
 /**
@@ -116,7 +116,7 @@ export const waitForTimestamp = (ms: number = 10) => {
 export const expectTeamMember = (
   teamMember: unknown,
   expectedHeadUid: string | null,
-  expectedBodyUid: string | null = null
+  expectedBodyUid: string | null = null,
 ) => {
   if (expectedHeadUid === null) {
     expect(teamMember).toBeNull();
@@ -129,7 +129,7 @@ export const expectTeamMember = (
     bodyPokemonUid?: string;
   };
   expect(member.headPokemonUid).toBe(expectedHeadUid);
-  expect(member.bodyPokemonUid).toBe(expectedBodyUid || '');
+  expect(member.bodyPokemonUid).toBe(expectedBodyUid || "");
 };
 
 /**
@@ -139,7 +139,7 @@ export const expectEncounter = (
   encounter: unknown,
   expectedHeadUid: string | null,
   expectedBodyUid: string | null = null,
-  isFusion: boolean = false
+  isFusion: boolean = false,
 ) => {
   if (expectedHeadUid === null && expectedBodyUid === null) {
     expect(encounter).toBeUndefined();

@@ -1,63 +1,63 @@
-'use client';
+"use client";
 
-import React, {
-  useState,
-  useMemo,
-  useDeferredValue,
-  startTransition,
-  useCallback,
-  useRef,
-} from 'react';
-import { Combobox, ComboboxInput, ComboboxOptions } from '@headlessui/react';
 import {
-  useFloating,
   autoUpdate,
+  FloatingPortal,
   flip,
   size,
-  FloatingPortal,
-} from '@floating-ui/react';
-import clsx from 'clsx';
-import { Loader2, Search } from 'lucide-react';
+  useFloating,
+} from "@floating-ui/react";
+import { Combobox, ComboboxInput, ComboboxOptions } from "@headlessui/react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import clsx from "clsx";
+import { Loader2, Search } from "lucide-react";
+import type React from "react";
 import {
-  PokemonStatus,
-  type PokemonOptionType,
-  type PokemonStatusType,
-  useAllPokemon,
-  isPokemonEvolution,
-  isPokemonPreEvolution,
-  isEgg,
-} from '@/loaders/pokemon';
-
-import { useActivePlaythrough, useGameMode } from '@/stores/playthroughs';
-import { PokemonEvolutionButton } from './PokemonEvolutionButton';
-import { PokemonNicknameInput } from './PokemonNicknameInput';
-import { PokemonStatusInput } from './PokemonStatusInput';
-import { useComboboxDragAndDrop } from './useComboboxDragAndDrop';
+  startTransition,
+  useCallback,
+  useDeferredValue,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   EncounterSource,
   useEncountersForLocation,
-} from '@/loaders/encounters';
-import { usePokemonSearch } from '@/loaders/pokemon';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { PokemonOption, PokemonOptions } from './PokemonOptions';
-import { DraggableComboboxSprite } from './DraggableComboboxSprite';
-import type { CustomLocation } from '@/loaders/locations';
+} from "@/loaders/encounters";
+import type { CustomLocation } from "@/loaders/locations";
+import {
+  isEgg,
+  isPokemonEvolution,
+  isPokemonPreEvolution,
+  type PokemonOptionType,
+  PokemonStatus,
+  type PokemonStatusType,
+  useAllPokemon,
+  usePokemonSearch,
+} from "@/loaders/pokemon";
+import { useActivePlaythrough, useGameMode } from "@/stores/playthroughs";
+import { DraggableComboboxSprite } from "./DraggableComboboxSprite";
+import { PokemonEvolutionButton } from "./PokemonEvolutionButton";
+import { PokemonNicknameInput } from "./PokemonNicknameInput";
+import { PokemonOption, PokemonOptions } from "./PokemonOptions";
+import { PokemonStatusInput } from "./PokemonStatusInput";
+import { useComboboxDragAndDrop } from "./useComboboxDragAndDrop";
 
 interface PokemonComboboxProps {
   locationId?: string;
   value: PokemonOptionType | null | undefined;
   onChange: (value: PokemonOptionType | null) => void;
   onBeforeClear?: (
-    currentValue: PokemonOptionType
+    currentValue: PokemonOptionType,
   ) => Promise<boolean> | boolean;
   onBeforeOverwrite?: (
     currentValue: PokemonOptionType,
-    newValue: PokemonOptionType
+    newValue: PokemonOptionType,
   ) => Promise<boolean> | boolean;
   placeholder?: string;
   nicknamePlaceholder?: string;
   disabled?: boolean;
-  gameMode?: 'classic' | 'remix';
+  gameMode?: "classic" | "remix";
   comboboxId?: string;
   ref?: React.RefObject<HTMLInputElement | null>;
   isFusion?: boolean;
@@ -71,15 +71,15 @@ export const PokemonCombobox = ({
   onChange,
   onBeforeClear,
   onBeforeOverwrite,
-  placeholder = 'Select Pokemon',
-  nicknamePlaceholder = 'Enter nickname',
+  placeholder = "Select Pokemon",
+  nicknamePlaceholder = "Enter nickname",
   disabled = false,
   comboboxId,
   ref,
   isFusion = false,
   shouldLoad = true,
 }: PokemonComboboxProps) => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
   const gameMode = useGameMode();
   const playthrough = useActivePlaythrough();
@@ -104,15 +104,15 @@ export const PokemonCombobox = ({
 
   const isCustomLocation = useMemo(() => {
     return playthrough?.customLocations?.some(
-      (location: CustomLocation) => location.id === locationId
+      (location: CustomLocation) => location.id === locationId,
     );
   }, [playthrough, locationId]);
 
   // Use the encounter data hook (now handles custom locations automatically)
   const { routeEncounterData, isRoutePokemon } = useEncountersForLocation({
     locationId,
-    enabled: !isCustomLocation && gameMode !== 'randomized',
-    gameMode: gameMode === 'randomized' ? 'classic' : gameMode,
+    enabled: !isCustomLocation && gameMode !== "randomized",
+    gameMode: gameMode === "randomized" ? "classic" : gameMode,
   });
   // Use the search hook
   const { data: results = [], isLoading: isSearchLoading } = usePokemonSearch({
@@ -125,7 +125,7 @@ export const PokemonCombobox = ({
 
   // Floating UI setup
   const { refs, floatingStyles, update, placement } = useFloating({
-    placement: 'bottom-start',
+    placement: "bottom-start",
     middleware: [
       flip({ padding: 8 }),
       size({
@@ -144,31 +144,33 @@ export const PokemonCombobox = ({
   // Function to get Pokemon source information
   const getPokemonSource = useCallback(
     (pokemonId: number): EncounterSource[] => {
-      const pokemonData = routeEncounterData.find(p => p.id === pokemonId);
+      const pokemonData = routeEncounterData.find((p) => p.id === pokemonId);
       return pokemonData?.sources || [];
     },
-    [routeEncounterData]
+    [routeEncounterData],
   );
 
   // Combine route matches with smart search results
   const finalOptions = useMemo(() => {
     // Early return for empty query
-    if (deferredQuery === '') {
+    if (deferredQuery === "") {
       // In randomized mode or custom location, show all Pokemon
-      if (gameMode === 'randomized' || isCustomLocation) {
+      if (gameMode === "randomized" || isCustomLocation) {
         // If still loading, return empty array to avoid showing incomplete data
         if (isAllPokemonLoading) {
           return [];
         }
         return allPokemon
-          .map(p => ({
+          .map((p) => ({
             id: p.id,
             name: p.name,
             nationalDexId: p.nationalDexId,
           }))
-          .filter(pokemon => !isFusion || !isEgg(pokemon));
+          .filter((pokemon) => !isFusion || !isEgg(pokemon));
       }
-      return routeEncounterData.filter(pokemon => !isFusion || !isEgg(pokemon));
+      return routeEncounterData.filter(
+        (pokemon) => !isFusion || !isEgg(pokemon),
+      );
     }
 
     // Early return if no search results and no route data
@@ -185,22 +187,22 @@ export const PokemonCombobox = ({
       // For numeric queries, check both ID and National Dex ID
       const queryNum = parseInt(deferredQuery, 10);
       routeMatches = routeEncounterData.filter(
-        pokemon =>
+        (pokemon) =>
           (pokemon.id === queryNum || pokemon.nationalDexId === queryNum) &&
-          (!isFusion || !isEgg(pokemon))
+          (!isFusion || !isEgg(pokemon)),
       );
     } else {
       // For text queries, use name matching
       routeMatches = routeEncounterData.filter(
-        pokemon =>
+        (pokemon) =>
           pokemon.name.toLowerCase().includes(deferredQuery.toLowerCase()) &&
-          (!isFusion || !isEgg(pokemon))
+          (!isFusion || !isEgg(pokemon)),
       );
     }
 
     // Filter search results to exclude eggs when in fusion mode
     const filteredResults = results.filter(
-      pokemon => !isFusion || !isEgg(pokemon)
+      (pokemon) => !isFusion || !isEgg(pokemon),
     );
 
     // Combine results: route matches first, then smart search results
@@ -210,7 +212,7 @@ export const PokemonCombobox = ({
     // In classic/remix modes, prioritize route Pokemon
     return allResults
       .sort((a, b) => {
-        if (gameMode === 'randomized') {
+        if (gameMode === "randomized") {
           // In randomized mode, maintain search relevance order
           return 0;
         } else {
@@ -223,7 +225,7 @@ export const PokemonCombobox = ({
       })
       .filter(
         (pokemon, index, self) =>
-          index === self.findIndex(t => t.id === pokemon.id)
+          index === self.findIndex((t) => t.id === pokemon.id),
       );
   }, [
     routeEncounterData,
@@ -241,7 +243,7 @@ export const PokemonCombobox = ({
   const shouldAllowOverwrite = useCallback(
     async (
       currentValue: PokemonOptionType,
-      newValue: PokemonOptionType
+      newValue: PokemonOptionType,
     ): Promise<boolean> => {
       try {
         const [isEvolution, isPreEvolution] = await Promise.all([
@@ -253,18 +255,18 @@ export const PokemonCombobox = ({
         // Allow overwrite for natural progressions without confirmation
         return isEvolution || isPreEvolution || isEggHatching;
       } catch (error) {
-        console.error('Error checking evolution relationship:', error);
+        console.error("Error checking evolution relationship:", error);
         return false; // Err on the side of caution - require confirmation
       }
     },
-    []
+    [],
   );
 
   // Helper function to apply egg hatching data preservation
   const applyEggHatchingPreservation = useCallback(
     (
       oldValue: PokemonOptionType,
-      newValue: PokemonOptionType
+      newValue: PokemonOptionType,
     ): PokemonOptionType => {
       if (!isEgg(oldValue) || isEgg(newValue)) return newValue;
 
@@ -274,7 +276,7 @@ export const PokemonCombobox = ({
         status: oldValue.status || newValue.status,
       };
     },
-    []
+    [],
   );
 
   // Helper function to apply default status based on Pokemon source
@@ -296,7 +298,7 @@ export const PokemonCombobox = ({
         status: defaultStatus,
       };
     },
-    [getPokemonSource]
+    [getPokemonSource],
   );
 
   const handleChange = useCallback(
@@ -304,7 +306,7 @@ export const PokemonCombobox = ({
       // Early return for clearing value
       if (!newValue) {
         onChange(null);
-        setQuery('');
+        setQuery("");
         return;
       }
 
@@ -312,7 +314,7 @@ export const PokemonCombobox = ({
       if (!value || !onBeforeOverwrite) {
         const finalValue = applyDefaultStatus(newValue);
         onChange(finalValue);
-        setQuery('');
+        setQuery("");
         return;
       }
 
@@ -328,7 +330,7 @@ export const PokemonCombobox = ({
       finalValue = applyDefaultStatus(finalValue);
 
       onChange(finalValue);
-      setQuery('');
+      setQuery("");
     },
     [
       onChange,
@@ -337,7 +339,7 @@ export const PokemonCombobox = ({
       shouldAllowOverwrite,
       applyEggHatchingPreservation,
       applyDefaultStatus,
-    ]
+    ],
   );
 
   // Memoize input change handler
@@ -348,7 +350,7 @@ export const PokemonCombobox = ({
       // Always update the query immediately for responsive UI
       startTransition(() => setQuery(inputValue));
 
-      if (inputValue !== '') {
+      if (inputValue !== "") {
         return;
       }
 
@@ -370,16 +372,16 @@ export const PokemonCombobox = ({
         inputRef.current?.focus();
       }, 0);
     },
-    [onChange, value, onBeforeClear]
+    [onChange, value, onBeforeClear],
   );
 
   const isShowingLoading = useMemo(() => {
     // Show loading when:
     // 1. No query and all Pokemon are loading (for randomized/custom locations)
     // 2. There's a query and search is loading, or all Pokemon are loading
-    if (deferredQuery === '') {
+    if (deferredQuery === "") {
       return (
-        (gameMode === 'randomized' || isCustomLocation) && isAllPokemonLoading
+        (gameMode === "randomized" || isCustomLocation) && isAllPokemonLoading
       );
     }
     return isSearchLoading || isAllPokemonLoading;
@@ -407,7 +409,7 @@ export const PokemonCombobox = ({
   return (
     <div
       id={value?.uid}
-      className='relative'
+      className="relative"
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -415,7 +417,7 @@ export const PokemonCombobox = ({
       data-uid={dragPreview?.uid || value?.uid}
     >
       <div
-        className='absolute inset-0 bg-blue-500/20 border-2 border-blue-500/60 rounded-lg pointer-events-none z-10 opacity-0 transition-opacity duration-200 ease-in-out location-highlight-overlay max-w-screen'
+        className="absolute inset-0 bg-blue-500/20 border-2 border-blue-500/60 rounded-lg pointer-events-none z-10 opacity-0 transition-opacity duration-200 ease-in-out location-highlight-overlay max-w-screen"
         data-combobox-id={comboboxId}
       />
       <Combobox
@@ -423,49 +425,49 @@ export const PokemonCombobox = ({
         onChange={handleChange}
         disabled={disabled}
         immediate
-        onClose={() => setQuery('')}
+        onClose={() => setQuery("")}
       >
         {({ open }) => (
           <div key={comboboxId}>
-            <div className='relative'>
+            <div className="relative">
               <ComboboxInput
-                ref={comboRef => {
+                ref={(comboRef) => {
                   if (comboRef) {
                     inputRef.current = comboRef;
                     refs.setReference(comboRef);
                     update();
-                    if (ref && 'current' in ref) {
+                    if (ref && "current" in ref) {
                       ref.current = comboRef;
                     }
                   }
                 }}
                 className={clsx(
-                  'rounded-t-md rounded-b-none border group/input',
-                  'w-full px-3 py-3.5 text-sm  bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed',
-                  'border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400',
-                  'focus:cursor-text hover:cursor-pointer',
-                  (value || dragPreview) && 'pl-16', // Add padding for sprite when value is selected or previewing
+                  "rounded-t-md rounded-b-none border group/input",
+                  "w-full px-3 py-3.5 text-sm  bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed",
+                  "border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400",
+                  "focus:cursor-text hover:cursor-pointer",
+                  (value || dragPreview) && "pl-16", // Add padding for sprite when value is selected or previewing
                   dragPreview &&
-                    'border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60', // Highlight when showing preview with opacity,
+                    "border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60", // Highlight when showing preview with opacity,
                   {
-                    'rounded-t-md rounded-b-none ':
-                      open && placement.startsWith('bottom'),
-                    'rounded-b-md rounded-t-none ':
-                      open && placement.startsWith('top'),
-                    'rounded-md':
-                      !placement.startsWith('bottom') &&
-                      !placement.startsWith('top'),
-                  }
+                    "rounded-t-md rounded-b-none ":
+                      open && placement.startsWith("bottom"),
+                    "rounded-b-md rounded-t-none ":
+                      open && placement.startsWith("top"),
+                    "rounded-md":
+                      !placement.startsWith("bottom") &&
+                      !placement.startsWith("top"),
+                  },
                 )}
                 placeholder={placeholder}
                 displayValue={(
-                  pokemon: PokemonOptionType | null | undefined
+                  pokemon: PokemonOptionType | null | undefined,
                 ) => {
                   const displayPokemon = dragPreview || pokemon;
-                  return displayPokemon?.name || '';
+                  return displayPokemon?.name || "";
                 }}
                 spellCheck={false}
-                autoComplete='off'
+                autoComplete="off"
                 onChange={handleInputChange}
               />
               <DraggableComboboxSprite
@@ -486,15 +488,15 @@ export const PokemonCombobox = ({
               )}
               {open ? (
                 <Search
-                  className='absolute right-4 top-1/2 -translate-y-1/2 size-4 text-gray-400 dark:text-gray-600 pointer-events-none'
+                  className="absolute right-4 top-1/2 -translate-y-1/2 size-4 text-gray-400 dark:text-gray-600 pointer-events-none"
                   aria-hidden={true}
                 />
               ) : null}
             </div>
             {open && (
-              <FloatingPortal id='location-table'>
+              <FloatingPortal id="location-table">
                 <div
-                  ref={ref => {
+                  ref={(ref) => {
                     if (ref) {
                       optionsRef.current = ref;
                       refs.setFloating(ref);
@@ -504,40 +506,40 @@ export const PokemonCombobox = ({
                     ...floatingStyles,
                     height: shouldVirtualize
                       ? `${virtualizer.getTotalSize()}px`
-                      : 'auto',
+                      : "auto",
                   }}
                   className={clsx(
-                    'max-h-[500px] h-full overflow-y-auto z-40 relative',
-                    'px-1 text-base shadow-lg focus:outline-none sm:text-sm',
-                    'bg-white dark:bg-gray-800 gap-x-2',
-                    'border border-gray-300 dark:border-gray-600 scrollbar-thin',
+                    "max-h-[500px] h-full overflow-y-auto z-40 relative",
+                    "px-1 text-base shadow-lg focus:outline-none sm:text-sm",
+                    "bg-white dark:bg-gray-800 gap-x-2",
+                    "border border-gray-300 dark:border-gray-600 scrollbar-thin",
                     {
-                      'rounded-b-md rounded-t-none border-t-0':
-                        placement.startsWith('bottom'),
-                      'rounded-t-md rounded-b-none border-b-0':
-                        placement.startsWith('top'),
-                      'rounded-md':
-                        !placement.startsWith('bottom') &&
-                        !placement.startsWith('top'),
-                    }
+                      "rounded-b-md rounded-t-none border-t-0":
+                        placement.startsWith("bottom"),
+                      "rounded-t-md rounded-b-none border-b-0":
+                        placement.startsWith("top"),
+                      "rounded-md":
+                        !placement.startsWith("bottom") &&
+                        !placement.startsWith("top"),
+                    },
                   )}
                 >
                   <ComboboxOptions
-                    className={clsx('h-full', {
-                      'pointer-events-none': virtualizer.isScrolling,
+                    className={clsx("h-full", {
+                      "pointer-events-none": virtualizer.isScrolling,
                     })}
                   >
                     {isShowingLoading ? (
-                      <div className='relative cursor-default select-none py-2 px-4 text-center'>
-                        <div className='text-gray-500 dark:text-gray-400'>
-                          <p className='text-sm flex items-center gap-2 justify-center py-2'>
-                            <Loader2 className='w-4 h-4 animate-spin' />
+                      <div className="relative cursor-default select-none py-2 px-4 text-center">
+                        <div className="text-gray-500 dark:text-gray-400">
+                          <p className="text-sm flex items-center gap-2 justify-center py-2">
+                            <Loader2 className="w-4 h-4 animate-spin" />
                             <span>Loading Pokémon...</span>
                           </p>
                         </div>
                       </div>
                     ) : shouldVirtualize ? (
-                      virtualizer.getVirtualItems().map(virtualItem => (
+                      virtualizer.getVirtualItems().map((virtualItem) => (
                         <PokemonOption
                           locationId={locationId}
                           key={virtualItem.key}
@@ -546,25 +548,25 @@ export const PokemonCombobox = ({
                           disabled={virtualizer.isScrolling}
                           isRoutePokemon={isRoutePokemon}
                           getPokemonSource={getPokemonSource}
-                          comboboxId={comboboxId || ''}
+                          comboboxId={comboboxId || ""}
                           gameMode={gameMode}
                           style={{
-                            position: 'absolute',
-                            top: '0',
-                            left: '0.25rem',
-                            width: 'calc(100% - 8px)',
+                            position: "absolute",
+                            top: "0",
+                            left: "0.25rem",
+                            width: "calc(100% - 8px)",
                             height: `${virtualItem.size}px`,
                             transform: `translateY(${virtualItem.start}px)`,
                             pointerEvents: virtualizer.isScrolling
-                              ? 'none'
-                              : 'auto',
+                              ? "none"
+                              : "auto",
                           }}
                         />
                       ))
                     ) : (
                       <PokemonOptions
                         locationId={locationId}
-                        comboboxId={comboboxId || ''}
+                        comboboxId={comboboxId || ""}
                         finalOptions={finalOptions}
                         deferredQuery={deferredQuery}
                         isRoutePokemon={isRoutePokemon}
@@ -580,9 +582,9 @@ export const PokemonCombobox = ({
           </div>
         )}
       </Combobox>
-      <div className='flex'>
+      <div className="flex">
         <PokemonNicknameInput
-          key={`${value?.uid}-${value?.nickname || 'no-nickname'}`}
+          key={`${value?.uid}-${value?.nickname || "no-nickname"}`}
           value={value}
           onChange={onChange}
           placeholder={nicknamePlaceholder}
@@ -591,7 +593,7 @@ export const PokemonCombobox = ({
         />
         <PokemonStatusInput
           value={value}
-          key={value?.uid + 'status'}
+          key={`${value?.uid}status`}
           onChange={onChange}
           disabled={disabled}
           dragPreview={dragPreview}

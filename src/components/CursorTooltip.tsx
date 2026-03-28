@@ -1,47 +1,47 @@
-'use client';
+"use client";
 
 import {
-  useFloating,
-  useClientPoint,
-  useInteractions,
-  useHover,
-  useFocus,
-  useDismiss,
-  useRole,
-  FloatingPortal,
-  shift,
   autoUpdate,
-  Placement,
+  FloatingPortal,
   offset,
+  type Placement,
+  shift,
+  useClientPoint,
   useDelayGroup,
-} from '@floating-ui/react';
-import { clsx } from 'clsx';
+  useDismiss,
+  useFloating,
+  useFocus,
+  useHover,
+  useInteractions,
+  useRole,
+} from "@floating-ui/react";
+import { clsx } from "clsx";
 import {
-  useState,
   cloneElement,
   isValidElement,
   useEffect,
-  useRef,
   useMemo,
-} from 'react';
-import { useWindowVisibility } from '@/hooks/useWindowVisibility';
-import { twMerge } from 'tailwind-merge';
-import { useSnapshot } from 'valtio';
-import { dragStore } from '../stores/dragStore';
-import { useGlobalTooltip } from '@/contexts/GlobalTooltipContext';
+  useRef,
+  useState,
+} from "react";
+import { twMerge } from "tailwind-merge";
+import { useSnapshot } from "valtio";
+import { useGlobalTooltip } from "@/contexts/GlobalTooltipContext";
+import { useWindowVisibility } from "@/hooks/useWindowVisibility";
+import { dragStore } from "../stores/dragStore";
 
 // Helper functions to calculate offsets based on placement
 function getMainAxisOffset(placement: Placement): number {
-  if (placement.startsWith('top')) return -16;
-  if (placement.startsWith('bottom')) return 8;
-  if (placement.startsWith('left')) return 0;
-  if (placement.startsWith('right')) return 16;
+  if (placement.startsWith("top")) return -16;
+  if (placement.startsWith("bottom")) return 8;
+  if (placement.startsWith("left")) return 0;
+  if (placement.startsWith("right")) return 16;
   return 8; // Default fallback
 }
 
 function getCrossAxisOffset(placement: Placement): number {
-  if (placement.includes('start')) return 16;
-  if (placement.includes('end')) return -16;
+  if (placement.includes("start")) return 16;
+  if (placement.includes("end")) return -16;
   return 0; // Default for center alignments
 }
 
@@ -67,13 +67,13 @@ export function CursorTooltip(props: CursorTooltipProps) {
     className,
     delay = 0,
     disabled = false,
-    placement = 'bottom-start',
+    placement = "bottom-start",
     onMouseEnter,
     onMouseLeave,
   } = props;
   const [isOpen, setIsOpen] = useState(false);
   const [animationState, setAnimationState] = useState<
-    'entering' | 'entered' | 'exiting' | null
+    "entering" | "entered" | "exiting" | null
   >(null);
   const animationBatchRef = useRef(0);
   const animationStateRef = useRef<typeof animationState>(animationState);
@@ -93,12 +93,12 @@ export function CursorTooltip(props: CursorTooltipProps) {
   } = useFloating({
     placement,
     open: isOpen,
-    onOpenChange: open => {
+    onOpenChange: (open) => {
       if (open) {
         setIsOpen(true);
-        setAnimationState('entering');
+        setAnimationState("entering");
       } else {
-        setAnimationState('exiting');
+        setAnimationState("exiting");
       }
 
       const currentBatchId = ++animationBatchRef.current;
@@ -109,38 +109,38 @@ export function CursorTooltip(props: CursorTooltipProps) {
         const allAnimations = node.getAnimations({ subtree: true });
 
         // Consider only finite animations/transitions (ignore infinite/unknown)
-        const finiteAnimations = allAnimations.filter(a => {
+        const finiteAnimations = allAnimations.filter((a) => {
           const effect = (a as Animation & { effect?: KeyframeEffect | null })
             .effect;
-          if (!effect || typeof effect.getTiming !== 'function') return false;
+          if (!effect || typeof effect.getTiming !== "function") return false;
           const t = effect.getTiming() as KeyframeEffectOptions & {
             duration?: number | string;
             iterations?: number;
           };
           const duration: number =
-            typeof t.duration === 'number' ? (t.duration as number) : 0;
+            typeof t.duration === "number" ? (t.duration as number) : 0;
           const iterations: number =
-            typeof t.iterations === 'number' ? (t.iterations as number) : 1;
+            typeof t.iterations === "number" ? (t.iterations as number) : 1;
           return Number.isFinite(duration) && Number.isFinite(iterations);
         });
 
         if (!finiteAnimations.length) {
           // No finite animations; finalize immediately
           const state = animationStateRef.current;
-          if (state === 'entering') {
-            setAnimationState('entered');
-          } else if (state === 'exiting') {
+          if (state === "entering") {
+            setAnimationState("entered");
+          } else if (state === "exiting") {
             setIsOpen(false);
           }
           return;
         }
 
-        Promise.allSettled(finiteAnimations.map(a => a.finished)).then(() => {
+        Promise.allSettled(finiteAnimations.map((a) => a.finished)).then(() => {
           if (animationBatchRef.current !== currentBatchId) return; // stale
           const state = animationStateRef.current;
-          if (state === 'entering') {
-            setAnimationState('entered');
-          } else if (state === 'exiting') {
+          if (state === "entering") {
+            setAnimationState("entered");
+          } else if (state === "exiting") {
             setIsOpen(false);
           }
         });
@@ -188,12 +188,12 @@ export function CursorTooltip(props: CursorTooltipProps) {
   }, [isWindowVisible, isOpen, dragSnapshot.isDragging]);
 
   const clientPointFloating = useClientPoint(context, {
-    axis: 'both',
+    axis: "both",
   });
 
   // Normalize delay to object format
   const normalizedDelay =
-    typeof delay === 'number' ? { open: delay, close: 50 } : delay;
+    typeof delay === "number" ? { open: delay, close: 50 } : delay;
 
   // Use delay group context if available, otherwise use the provided delay
   const { delay: delayGroupDelay } = useDelayGroup(context);
@@ -201,7 +201,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
 
   // If any tooltip is visible globally, skip the open delay
   const effectiveDelay = isAnyTooltipVisible
-    ? { open: 0, close: typeof groupDelay === 'number' ? 50 : groupDelay.close }
+    ? { open: 0, close: typeof groupDelay === "number" ? 50 : groupDelay.close }
     : groupDelay;
 
   const hover = useHover(context, {
@@ -225,32 +225,32 @@ export function CursorTooltip(props: CursorTooltipProps) {
 
   const originClass = useMemo(() => {
     const p = resolvedPlacement || placement;
-    const [side, align] = p.split('-') as [
-      'top' | 'bottom' | 'left' | 'right' | (string & {}),
-      'start' | 'end' | (string & {}),
+    const [side, align] = p.split("-") as [
+      "top" | "bottom" | "left" | "right" | (string & {}),
+      "start" | "end" | (string & {}),
     ];
 
-    if (side === 'top') {
-      if (align === 'start') return 'origin-bottom-left';
-      if (align === 'end') return 'origin-bottom-right';
-      return 'origin-bottom';
+    if (side === "top") {
+      if (align === "start") return "origin-bottom-left";
+      if (align === "end") return "origin-bottom-right";
+      return "origin-bottom";
     }
-    if (side === 'bottom') {
-      if (align === 'start') return 'origin-top-left';
-      if (align === 'end') return 'origin-top-right';
-      return 'origin-top';
+    if (side === "bottom") {
+      if (align === "start") return "origin-top-left";
+      if (align === "end") return "origin-top-right";
+      return "origin-top";
     }
-    if (side === 'left') {
-      if (align === 'start') return 'origin-top-right';
-      if (align === 'end') return 'origin-bottom-right';
-      return 'origin-right';
+    if (side === "left") {
+      if (align === "start") return "origin-top-right";
+      if (align === "end") return "origin-bottom-right";
+      return "origin-right";
     }
-    if (side === 'right') {
-      if (align === 'start') return 'origin-top-left';
-      if (align === 'end') return 'origin-bottom-left';
-      return 'origin-left';
+    if (side === "right") {
+      if (align === "start") return "origin-top-left";
+      if (align === "end") return "origin-bottom-left";
+      return "origin-left";
     }
-    return 'origin-center';
+    return "origin-center";
   }, [resolvedPlacement, placement]);
 
   if (!content) return children;
@@ -269,7 +269,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
       {isOpen && (
         <FloatingPortal>
           <div
-            className='z-[9999] pointer-events-none'
+            className="z-[9999] pointer-events-none"
             ref={refs.setFloating}
             style={floatingStyles}
             {...getFloatingProps()}
@@ -277,25 +277,25 @@ export function CursorTooltip(props: CursorTooltipProps) {
             <div
               className={twMerge(
                 clsx(
-                  'rounded-md px-3 py-2 text-sm shadow-elevation-4 w-max max-w-sm dark:pixel-shadow-black-25',
-                  'pointer-events-none transform-gpu bg-white/75',
-                  'dark:bg-gray-700/80 background-blur dark:text-white text-gray-700',
-                  'border dark:border-gray-600 border-gray-200',
+                  "rounded-md px-3 py-2 text-sm shadow-elevation-4 w-max max-w-sm dark:pixel-shadow-black-25",
+                  "pointer-events-none transform-gpu bg-white/75",
+                  "dark:bg-gray-700/80 background-blur dark:text-white text-gray-700",
+                  "border dark:border-gray-600 border-gray-200",
                   originClass,
-                  'backdrop-blur-xl',
-                  'transition duration-150 ease-out',
+                  "backdrop-blur-xl",
+                  "transition duration-150 ease-out",
                   {
-                    'opacity-0 scale-95 tooltip-exit':
-                      animationState === 'exiting',
-                    'opacity-0 scale-95': animationState === 'entering',
-                    'opacity-100 scale-100 tooltip-enter':
-                      animationState === 'entered',
-                  }
+                    "opacity-0 scale-95 tooltip-exit":
+                      animationState === "exiting",
+                    "opacity-0 scale-95": animationState === "entering",
+                    "opacity-100 scale-100 tooltip-enter":
+                      animationState === "entered",
+                  },
                 ),
-                className
+                className,
               )}
               style={{
-                position: 'relative',
+                position: "relative",
                 zIndex: 1000,
               }}
             >

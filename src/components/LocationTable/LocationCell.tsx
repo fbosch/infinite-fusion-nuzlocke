@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import React, { useMemo, useEffect, useState } from 'react';
-import { Info, CheckCircle } from 'lucide-react';
-import { useEncounters } from '@/stores/playthroughs';
-import { useSnapshot } from 'valtio';
-import { settingsStore } from '@/stores/settings';
-import { isCustomLocation } from '@/loaders';
-import { PokemonSprite } from '@/components/PokemonSprite';
-import type { CombinedLocation } from '@/loaders/locations';
-import type { PokemonOptionSchema } from '@/loaders/pokemon';
-import type { EncounterData } from '@/stores/playthroughs/types';
-import { z } from 'zod';
-import { CursorTooltip } from '../CursorTooltip';
-import { isStarterLocation } from '../../constants/special-locations';
+import { CheckCircle, Info } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useSnapshot } from "valtio";
+import type { z } from "zod";
+import { PokemonSprite } from "@/components/PokemonSprite";
+import { isCustomLocation } from "@/loaders";
+import type { CombinedLocation } from "@/loaders/locations";
+import type { PokemonOptionSchema } from "@/loaders/pokemon";
+import { useEncounters } from "@/stores/playthroughs";
+import type { EncounterData } from "@/stores/playthroughs/types";
+import { settingsStore } from "@/stores/settings";
+import { isStarterLocation } from "../../constants/special-locations";
+import { CursorTooltip } from "../CursorTooltip";
 
 interface LocationCellProps {
   location: CombinedLocation;
@@ -81,7 +81,7 @@ export default function LocationCell({
     settings.moveEncountersBetweenLocations || hasMovedPokemon;
 
   const encounterUids = locationPokemon
-    .map(p => p.uid)
+    .map((p) => p.uid)
     .filter(Boolean) as string[];
   const hasEncounter = locationPokemon.length > 0;
 
@@ -90,21 +90,21 @@ export default function LocationCell({
     // Only apply hover effects if we should show original encounter information
     if (!shouldShowOriginalEncounter) return;
 
-    encounterUids.forEach(uid => {
+    encounterUids.forEach((uid) => {
       const element = document.querySelector(
-        `[data-uid="${uid}"]`
+        `[data-uid="${uid}"]`,
       ) as HTMLElement;
       if (element) {
         const overlay = element.querySelector(
-          '.location-highlight-overlay'
+          ".location-highlight-overlay",
         ) as HTMLElement;
         if (overlay) {
           if (isTooltipHovered) {
-            overlay.classList.add('opacity-100');
-            overlay.classList.remove('opacity-0');
+            overlay.classList.add("opacity-100");
+            overlay.classList.remove("opacity-0");
           } else {
-            overlay.classList.add('opacity-0');
-            overlay.classList.remove('opacity-100');
+            overlay.classList.add("opacity-0");
+            overlay.classList.remove("opacity-100");
           }
         }
       }
@@ -115,27 +115,27 @@ export default function LocationCell({
     // Only show detailed original encounter information if setting is enabled or Pokémon have been moved
     if (locationPokemon.length > 0 && shouldShowOriginalEncounter) {
       return (
-        <div className='max-w-xs'>
-          <div className='text-xs dark:text-gray-400 uppercase tracking-wide mb-2.5 font-medium'>
+        <div className="max-w-xs">
+          <div className="text-xs dark:text-gray-400 uppercase tracking-wide mb-2.5 font-medium">
             Original Encounter
           </div>
 
-          <div className='flex flex-row divide-x divide-gray-200 dark:divide-gray-600'>
+          <div className="flex flex-row divide-x divide-gray-200 dark:divide-gray-600">
             {locationPokemon.map((pokemon, index) => (
-              <div key={index} className='flex items-center first:pl-0 px-2'>
-                <div className='flex-shrink-0 size-9 justify-center items-center flex'>
-                  <PokemonSprite pokemonId={pokemon.id} generation='gen7' />
+              <div key={index} className="flex items-center first:pl-0 px-2">
+                <div className="flex-shrink-0 size-9 justify-center items-center flex">
+                  <PokemonSprite pokemonId={pokemon.id} generation="gen7" />
                 </div>
-                <div className='flex-1 min-w-0'>
-                  <span className='font-medium dark:text-white text-gray-900'>
+                <div className="flex-1 min-w-0">
+                  <span className="font-medium dark:text-white text-gray-900">
                     {pokemon.nickname || pokemon.name}
                   </span>
                 </div>
               </div>
             ))}
           </div>
-          <hr className='my-2 dark:border-gray-600 border-gray-200' />
-          <div className='text-xs dark:text-gray-400 text-gray-400'>
+          <hr className="my-2 dark:border-gray-600 border-gray-200" />
+          <div className="text-xs dark:text-gray-400 text-gray-400">
             {isCustomLocation(location)
               ? `Custom Location`
               : location.description}
@@ -151,7 +151,7 @@ export default function LocationCell({
   }, [locationPokemon, location, shouldShowOriginalEncounter]);
 
   return (
-    <div className='text-gray-900 dark:text-white flex gap-x-2 items-center'>
+    <div className="text-gray-900 dark:text-white flex gap-x-2 items-center">
       <CursorTooltip
         content={getTooltipContent}
         delay={300}
@@ -163,12 +163,12 @@ export default function LocationCell({
         }
       >
         {hasEncounter ? (
-          <CheckCircle className='size-4 text-green-600 cursor-help' />
+          <CheckCircle className="size-4 text-green-600 cursor-help" />
         ) : (
-          <Info className='size-4 text-gray-400 dark:text-gray-600 cursor-help' />
+          <Info className="size-4 text-gray-400 dark:text-gray-600 cursor-help" />
         )}
       </CursorTooltip>
-      <h2 className='text-sm truncate rounded-md focus-within:ring-2 focus-within:ring-blue-400 focus-within:ring-offset-0.5 break-words block'>
+      <h2 className="text-sm truncate rounded-md focus-within:ring-2 focus-within:ring-blue-400 focus-within:ring-offset-0.5 break-words block">
         {isCustomLocation(location) ? (
           locationName
         ) : (
@@ -176,11 +176,11 @@ export default function LocationCell({
             href={
               isStarterLocation(location.id)
                 ? `https://infinitefusion.fandom.com/wiki/Pallet_Town`
-                : `https://infinitefusion.fandom.com/wiki/${locationName.replaceAll(' ', '_')}`
+                : `https://infinitefusion.fandom.com/wiki/${locationName.replaceAll(" ", "_")}`
             }
-            target='_blank'
-            rel='noopener noreferrer'
-            className='hover:underline focus:outline-none px-0.5'
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline focus:outline-none px-0.5"
           >
             {locationName}
           </a>

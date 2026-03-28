@@ -1,35 +1,34 @@
-'use client';
+"use client";
 
-import { useMemo, useState, useRef, useEffect } from 'react';
-import {
-  useActivePlaythrough,
-  useEncounters,
-} from '@/stores/playthroughs/hooks';
-
-import { getLocationById } from '@/loaders/locations';
+import { clsx } from "clsx";
+import { MousePointer, Palette } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import PokeballIcon from "@/assets/images/pokeball.svg";
+import { CursorTooltip } from "@/components/CursorTooltip";
+import { ArtworkVariantButton } from "@/components/PokemonSummaryCard/ArtworkVariantButton";
 import {
   FusionSprite,
   type FusionSpriteHandle,
-} from '@/components/PokemonSummaryCard/FusionSprite';
-import { clsx } from 'clsx';
-import PokeballIcon from '@/assets/images/pokeball.svg';
-import { CursorTooltip } from '@/components/CursorTooltip';
-import TeamMemberPickerModal from './TeamMemberPickerModal';
-import { type PokemonOptionType } from '@/loaders/pokemon';
-import { playthroughActions } from '@/stores/playthroughs';
+} from "@/components/PokemonSummaryCard/FusionSprite";
+import { TeamMemberContextMenu } from "@/components/PokemonSummaryCard/TeamMemberContextMenu";
+import { TypePills } from "@/components/TypePills";
+import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
+import { useSpriteCredits } from "@/hooks/useSprite";
+import { getSpriteId } from "@/lib/sprites";
+import { getLocationById } from "@/loaders/locations";
+import type { PokemonOptionType } from "@/loaders/pokemon";
+import { playthroughActions } from "@/stores/playthroughs";
+import {
+  useActivePlaythrough,
+  useEncounters,
+} from "@/stores/playthroughs/hooks";
 import {
   buildPokemonUidIndex,
   findPokemonByUid,
-} from '@/utils/encounter-utils';
-import { TypePills } from '@/components/TypePills';
-import { useFusionTypesFromPokemon } from '@/hooks/useFusionTypes';
-import { TeamMemberContextMenu } from '@/components/PokemonSummaryCard/TeamMemberContextMenu';
-import { ArtworkVariantButton } from '@/components/PokemonSummaryCard/ArtworkVariantButton';
-import TeamSlotsSkeleton from './TeamSlotsSkeleton';
-import { useSpriteCredits } from '@/hooks/useSprite';
-import { Palette, MousePointer } from 'lucide-react';
-import { getSpriteId } from '@/lib/sprites';
-import { formatArtistCredits } from '@/utils/formatCredits';
+} from "@/utils/encounter-utils";
+import { formatArtistCredits } from "@/utils/formatCredits";
+import TeamMemberPickerModal from "./TeamMemberPickerModal";
+import TeamSlotsSkeleton from "./TeamSlotsSkeleton";
 
 // Component to display type indicators and nickname
 function TypeIndicators({
@@ -44,7 +43,7 @@ function TypeIndicators({
   const { primary, secondary } = useFusionTypesFromPokemon(
     headPokemon,
     bodyPokemon,
-    isFusion
+    isFusion,
   );
 
   // Get nickname from head Pokémon (or body if no head)
@@ -54,11 +53,11 @@ function TypeIndicators({
     <>
       {/* Type indicators above the slot */}
       {(primary || secondary) && (
-        <div className='absolute -top-4 left-1/2 transform -translate-x-1/2 z-20'>
+        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
           <TypePills
             primary={primary}
             secondary={secondary}
-            size='xxs'
+            size="xxs"
             showTooltip={true}
           />
         </div>
@@ -66,8 +65,8 @@ function TypeIndicators({
 
       {/* Nickname below the slot */}
       {nickname && (
-        <div className='absolute -bottom-6 left-1/2 transform -translate-x-1/2 z-20'>
-          <span className='text-sm font-ds text-gray-700 dark:text-gray-200 pixel-shadow'>
+        <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 z-20">
+          <span className="text-sm font-ds text-gray-700 dark:text-gray-200 pixel-shadow">
             {nickname}
           </span>
         </div>
@@ -89,7 +88,7 @@ function TeamMemberTooltipContent({
   const { primary, secondary } = useFusionTypesFromPokemon(
     headPokemon,
     bodyPokemon,
-    isFusion
+    isFusion,
   );
 
   // Get sprite credits
@@ -97,7 +96,7 @@ function TeamMemberTooltipContent({
   const { data: tooltipCredits } = useSpriteCredits(
     headPokemon?.id,
     bodyPokemon?.id,
-    true
+    true,
   );
 
   const credit =
@@ -111,52 +110,52 @@ function TeamMemberTooltipContent({
         })();
 
   return (
-    <div className='min-w-44 max-w-[22rem]' role='tooltip'>
-      <div className='flex py-0.5'>
+    <div className="min-w-44 max-w-[22rem]" role="tooltip">
+      <div className="flex py-0.5">
         <TypePills primary={primary} secondary={secondary} />
       </div>
       {credit && (
         <>
-          <div className='my-2 flex'>
-            <div className='inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400'>
+          <div className="my-2 flex">
+            <div className="inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400">
               <Palette
-                className='h-3 w-3'
-                aria-hidden='true'
+                className="h-3 w-3"
+                aria-hidden="true"
                 focusable={false}
               />
-              <span className='opacity-80'>by</span>
-              <span className='truncate max-w-[14rem]' title={credit}>
+              <span className="opacity-80">by</span>
+              <span className="truncate max-w-[14rem]" title={credit}>
                 {credit}
               </span>
             </div>
           </div>
-          <div className='w-full h-px bg-gray-200 dark:bg-gray-700 my-1' />
+          <div className="w-full h-px bg-gray-200 dark:bg-gray-700 my-1" />
         </>
       )}
-      <div className='flex items-center text-xs gap-2'>
-        <div className='flex items-center gap-1'>
-          <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
+      <div className="flex items-center text-xs gap-2">
+        <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200">
             <MousePointer
-              className='h-3 w-3'
-              aria-hidden='true'
+              className="h-3 w-3"
+              aria-hidden="true"
               focusable={false}
             />
-            <span className='font-medium text-xs'>L</span>
+            <span className="font-medium text-xs">L</span>
           </div>
-          <span className='text-gray-600 dark:text-gray-300 text-xs'>
+          <span className="text-gray-600 dark:text-gray-300 text-xs">
             Change
           </span>
         </div>
-        <div className='flex items-center gap-1'>
-          <div className='flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200'>
+        <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200">
             <MousePointer
-              className='h-3 w-3'
-              aria-hidden='true'
+              className="h-3 w-3"
+              aria-hidden="true"
               focusable={false}
             />
-            <span className='font-medium text-xs'>R</span>
+            <span className="font-medium text-xs">R</span>
           </div>
-          <span className='text-gray-600 dark:text-gray-300 text-xs'>
+          <span className="text-gray-600 dark:text-gray-300 text-xs">
             Options
           </span>
         </div>
@@ -177,7 +176,7 @@ export default function TeamSlots() {
 
   const pokemonByUid = useMemo(
     () => buildPokemonUidIndex(encounters),
-    [encounters]
+    [encounters],
   );
 
   const teamSlots = useMemo(() => {
@@ -208,7 +207,7 @@ export default function TeamSlots() {
 
       // Get location from the head Pokémon's original location, fallback to body if head doesn't exist
       const location = getLocationById(
-        headPokemon?.originalLocation || bodyPokemon?.originalLocation || ''
+        headPokemon?.originalLocation || bodyPokemon?.originalLocation || "",
       );
 
       // Determine fusion state: true if both Pokémon exist and can form a fusion
@@ -217,7 +216,7 @@ export default function TeamSlots() {
       return {
         position: index,
         isEmpty: false,
-        location: location?.name || 'Unknown Location',
+        location: location?.name || "Unknown Location",
         headPokemon,
         bodyPokemon,
         isFusion,
@@ -288,7 +287,7 @@ export default function TeamSlots() {
 
   const handlePokemonSelect = async (
     headPokemon: PokemonOptionType | null,
-    bodyPokemon: PokemonOptionType | null
+    bodyPokemon: PokemonOptionType | null,
   ) => {
     if (selectedPosition === null) return;
 
@@ -299,13 +298,13 @@ export default function TeamSlots() {
     const success = await playthroughActions.updateTeamMember(
       selectedPosition,
       headRef,
-      bodyRef
+      bodyRef,
     );
 
     if (!success) {
       console.error(
-        'Failed to update team member at position:',
-        selectedPosition
+        "Failed to update team member at position:",
+        selectedPosition,
       );
       return;
     }
@@ -320,36 +319,44 @@ export default function TeamSlots() {
 
   return (
     <>
-      <div className='hidden lg:flex flex-col items-center'>
-        <div className='flex gap-3 sm:gap-4 md:gap-5'>
-          {teamSlots.map(slot =>
+      <div className="hidden lg:flex flex-col items-center">
+        <div className="flex gap-3 sm:gap-4 md:gap-5">
+          {teamSlots.map((slot) =>
             slot.isEmpty ? (
               <CursorTooltip
                 key={slot.position}
-                content='Click to add a Pokémon'
-                placement='bottom-start'
+                content="Click to add a Pokémon"
+                placement="bottom-start"
                 delay={300}
                 offset={{ mainAxis: 16 }}
               >
                 <div
                   className={clsx(
-                    'flex flex-col items-center justify-center relative group/team-slot',
-                    'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
-                    'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer'
+                    "flex flex-col items-center justify-center relative group/team-slot",
+                    "size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200",
+                    "border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer",
                   )}
                   onClick={() => handleSlotClick(slot.position)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      handleSlotClick(slot.position);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                 >
-                  <div className='flex flex-col items-center justify-center text-center relative w-full h-full'>
+                  <div className="flex flex-col items-center justify-center text-center relative w-full h-full">
                     <div
-                      className='w-full h-full absolute rounded-full opacity-30 border border-gray-100 dark:border-gray-800/20 text-gray-300 dark:text-gray-600'
+                      className="w-full h-full absolute rounded-full opacity-30 border border-gray-100 dark:border-gray-800/20 text-gray-300 dark:text-gray-600"
                       style={{
                         background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
                       }}
                     />
-                    <div className='flex items-center justify-center relative z-10'>
+                    <div className="flex items-center justify-center relative z-10">
                       <PokeballIcon
-                        className='h-8 w-8 text-gray-400 dark:text-gray-500 opacity-60'
-                        aria-hidden='true'
+                        className="h-8 w-8 text-gray-400 dark:text-gray-500 opacity-60"
+                        aria-hidden="true"
                         focusable={false}
                       />
                     </div>
@@ -366,19 +373,19 @@ export default function TeamSlots() {
                 }}
               >
                 <div
-                  role='button'
+                  role="button"
                   tabIndex={0}
                   className={clsx(
-                    'flex flex-col items-center justify-center relative group/team-slot',
-                    'size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200',
-                    'border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
+                    "flex flex-col items-center justify-center relative group/team-slot",
+                    "size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200",
+                    "border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                   )}
                   onClick={() => handleSlotClick(slot.position)}
-                  onKeyDown={e => {
+                  onKeyDown={(e) => {
                     if (
                       e.target === e.currentTarget &&
-                      (e.key === 'Enter' || e.key === ' ')
+                      (e.key === "Enter" || e.key === " ")
                     ) {
                       e.preventDefault();
                       handleSlotClick(slot.position);
@@ -395,15 +402,15 @@ export default function TeamSlots() {
                       />
                     )}
 
-                  <div className='flex flex-col items-center justify-center relative w-full h-full'>
+                  <div className="flex flex-col items-center justify-center relative w-full h-full">
                     <div
-                      className='w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600'
+                      className="w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600"
                       style={{
                         background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
                       }}
                     />
 
-                    <div className='relative z-10'>
+                    <div className="relative z-10">
                       <CursorTooltip
                         delay={500}
                         content={
@@ -416,7 +423,7 @@ export default function TeamSlots() {
                       >
                         <div>
                           <FusionSprite
-                            ref={ref => {
+                            ref={(ref) => {
                               teamSpriteRefs.current[slot.position] = ref;
                             }}
                             headPokemon={slot.headPokemon || null}
@@ -434,12 +441,12 @@ export default function TeamSlots() {
                       bodyId={slot.bodyPokemon?.id}
                       isFusion={slot.isFusion}
                       shouldLoad={true}
-                      className='absolute bottom-0 right-1/2 -translate-x-6 z-20 opacity-0 group-hover/team-slot:opacity-50 focus:opacity-100 transition-opacity duration-200'
+                      className="absolute bottom-0 right-1/2 -translate-x-6 z-20 opacity-0 group-hover/team-slot:opacity-50 focus:opacity-100 transition-opacity duration-200"
                     />
                   </div>
                 </div>
               </TeamMemberContextMenu>
-            )
+            ),
           )}
         </div>
       </div>

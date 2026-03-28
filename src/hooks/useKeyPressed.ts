@@ -1,4 +1,4 @@
-import { useSyncExternalStore, useMemo } from 'react';
+import { useMemo, useSyncExternalStore } from "react";
 
 // Global state for all keys
 const keyStates = new Map<string, boolean>();
@@ -30,13 +30,13 @@ function createSubscribe(key: string) {
     }
 
     // Add listener for this key
-    keyListeners.get(key)!.add(listener);
+    keyListeners.get(key)?.add(listener);
 
     // Add global event listeners if this is the first subscription across all keys
     if (!globalListenersAttached) {
-      document.addEventListener('keydown', handleKeyDown);
-      document.addEventListener('keyup', handleKeyUp);
-      window.addEventListener('blur', handleWindowBlur);
+      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("keyup", handleKeyUp);
+      window.addEventListener("blur", handleWindowBlur);
       globalListenersAttached = true;
     }
 
@@ -55,9 +55,9 @@ function createSubscribe(key: string) {
 
       // Remove global event listeners if no subscriptions remain
       if (getTotalSubscriptions() === 0 && globalListenersAttached) {
-        document.removeEventListener('keydown', handleKeyDown);
-        document.removeEventListener('keyup', handleKeyUp);
-        window.removeEventListener('blur', handleWindowBlur);
+        document.removeEventListener("keydown", handleKeyDown);
+        document.removeEventListener("keyup", handleKeyUp);
+        window.removeEventListener("blur", handleWindowBlur);
         globalListenersAttached = false;
 
         // Clear all state when no subscribers
@@ -115,7 +115,7 @@ function handleWindowBlur() {
 function notifyListeners(key: string) {
   const listeners = keyListeners.get(key);
   if (listeners) {
-    listeners.forEach(listener => listener());
+    listeners.forEach((listener) => listener());
   }
 }
 
@@ -143,7 +143,7 @@ export function useKeyPressed(key: string): boolean {
  * @returns {boolean} True if shift key is currently pressed, false otherwise
  */
 export function useShiftKey(): boolean {
-  return useKeyPressed('Shift');
+  return useKeyPressed("Shift");
 }
 
 /**
@@ -152,7 +152,7 @@ export function useShiftKey(): boolean {
  * @returns {boolean} True if control key is currently pressed, false otherwise
  */
 export function useControlKey(): boolean {
-  return useKeyPressed('Control');
+  return useKeyPressed("Control");
 }
 
 /**
@@ -161,7 +161,7 @@ export function useControlKey(): boolean {
  * @returns {boolean} True if alt key is currently pressed, false otherwise
  */
 export function useAltKey(): boolean {
-  return useKeyPressed('Alt');
+  return useKeyPressed("Alt");
 }
 
 /**
@@ -170,5 +170,5 @@ export function useAltKey(): boolean {
  * @returns {boolean} True if meta key is currently pressed, false otherwise
  */
 export function useMetaKey(): boolean {
-  return useKeyPressed('Meta');
+  return useKeyPressed("Meta");
 }

@@ -1,16 +1,15 @@
 // Re-export everything from the new modular structure
 // This file is kept for backward compatibility with existing imports
 
+// Re-export data utilities
+export { encountersData, pokemonData, spriteData } from "./data";
 // Re-export queries and client
 export {
-  pokemonQueries,
-  pokemonKeys,
-  encountersQueries,
   encountersKeys,
-  spriteQueries,
-  spriteKeys,
+  encountersQueries,
+  pokemonKeys,
+  pokemonQueries,
   queryClient,
-} from './queries';
-
-// Re-export data utilities
-export { pokemonData, encountersData, spriteData } from './data';
+  spriteKeys,
+  spriteQueries,
+} from "./queries";

@@ -1,11 +1,11 @@
-import { proxy, subscribe } from 'valtio';
-import { z } from 'zod';
-import { getActivePlaythrough } from '@/stores/playthroughs';
+import { proxy, subscribe } from "valtio";
+import { z } from "zod";
+import { getActivePlaythrough } from "@/stores/playthroughs";
 
 // Zod schema for settings validation
 export const SettingsSchema = z.object({
   moveEncountersBetweenLocations: z.boolean().default(false),
-  version: z.string().default('1.0.0'),
+  version: z.string().default("1.0.0"),
 });
 
 export type Settings = z.infer<typeof SettingsSchema>;
@@ -13,7 +13,7 @@ export type Settings = z.infer<typeof SettingsSchema>;
 // Function to determine if move encounters should be enabled by default
 // Based on whether the current playthrough has a version (old vs new playthroughs)
 const shouldEnableMoveEncountersByDefault = (): boolean => {
-  if (typeof window === 'undefined') return false; // SSR safety
+  if (typeof window === "undefined") return false; // SSR safety
 
   try {
     const activePlaythrough = getActivePlaythrough();
@@ -29,8 +29,8 @@ const shouldEnableMoveEncountersByDefault = (): boolean => {
     return false;
   } catch (error) {
     console.warn(
-      'Error checking playthrough version for settings default:',
-      error
+      "Error checking playthrough version for settings default:",
+      error,
     );
     return false; // Safe default
   }
@@ -38,17 +38,17 @@ const shouldEnableMoveEncountersByDefault = (): boolean => {
 
 const getDefaultSettings = (): Settings => ({
   moveEncountersBetweenLocations: shouldEnableMoveEncountersByDefault(),
-  version: '1.0.0',
+  version: "1.0.0",
 });
 
 // Load settings from localStorage on initialization with Zod validation
 const loadSettings = (): Settings => {
   const dynamicDefaults = getDefaultSettings();
 
-  if (typeof window === 'undefined') return dynamicDefaults;
+  if (typeof window === "undefined") return dynamicDefaults;
 
   try {
-    const stored = localStorage.getItem('settings');
+    const stored = localStorage.getItem("settings");
     if (stored) {
       const parsed = JSON.parse(stored);
       // Validate and parse with Zod, merging with dynamic defaults for missing fields
@@ -65,12 +65,12 @@ const loadSettings = (): Settings => {
         }
         return result.data;
       } else {
-        console.warn('Invalid settings data, using defaults:', result.error);
+        console.warn("Invalid settings data, using defaults:", result.error);
         return dynamicDefaults;
       }
     }
   } catch (error) {
-    console.warn('Failed to load settings from localStorage:', error);
+    console.warn("Failed to load settings from localStorage:", error);
   }
 
   return dynamicDefaults;
@@ -79,18 +79,18 @@ const loadSettings = (): Settings => {
 export const settingsStore = proxy<Settings>(loadSettings());
 
 // Subscribe to changes and save to localStorage with validation
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   subscribe(settingsStore, () => {
     try {
       // Validate settings before saving
       const result = SettingsSchema.safeParse(settingsStore);
       if (result.success) {
-        localStorage.setItem('settings', JSON.stringify(result.data));
+        localStorage.setItem("settings", JSON.stringify(result.data));
       } else {
-        console.error('Invalid settings data, not saving:', result.error);
+        console.error("Invalid settings data, not saving:", result.error);
       }
     } catch (error) {
-      console.warn('Failed to save settings to localStorage:', error);
+      console.warn("Failed to save settings to localStorage:", error);
     }
   });
 }
@@ -103,7 +103,7 @@ const updateSettings = (updates: Partial<Settings>) => {
   if (result.success) {
     Object.assign(settingsStore, result.data);
   } else {
-    console.error('Invalid settings update:', result.error);
+    console.error("Invalid settings update:", result.error);
   }
 };
 
@@ -129,7 +129,7 @@ export const settingsActions = {
   // Function to re-evaluate defaults when playthrough changes
   // This should be called when switching playthroughs if the setting hasn't been explicitly set
   refreshDefaults: () => {
-    const stored = localStorage.getItem('settings');
+    const stored = localStorage.getItem("settings");
     if (!stored) {
       // No settings stored yet, apply dynamic defaults
       updateSettings(getDefaultSettings());
@@ -147,7 +147,7 @@ export const settingsActions = {
         });
       }
     } catch (error) {
-      console.warn('Failed to refresh settings defaults:', error);
+      console.warn("Failed to refresh settings defaults:", error);
     }
   },
 };

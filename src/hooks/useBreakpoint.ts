@@ -1,9 +1,9 @@
-import { useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from "react";
 import {
+  type Breakpoint,
   breakpoints,
   getBreakpoint,
-  type Breakpoint,
-} from '@/utils/breakpoints';
+} from "@/utils/breakpoints";
 
 // Create a simple store that uses matchMedia for breakpoint detection
 const createBreakpointStore = () => {
@@ -14,30 +14,30 @@ const createBreakpointStore = () => {
     listeners.push(listener);
 
     // Set up matchMedia listeners if not already done
-    if (mediaQueries.length === 0 && typeof window !== 'undefined') {
+    if (mediaQueries.length === 0 && typeof window !== "undefined") {
       // Create media queries for each breakpoint
-      Object.values(breakpoints).forEach(width => {
+      Object.values(breakpoints).forEach((width) => {
         const query = window.matchMedia(`(min-width: ${width}px)`);
-        query.addEventListener('change', notify);
+        query.addEventListener("change", notify);
         mediaQueries.push(query);
       });
     }
 
     return () => {
-      listeners = listeners.filter(l => l !== listener);
+      listeners = listeners.filter((l) => l !== listener);
     };
   };
 
   const getSnapshot = () => {
-    if (typeof window === 'undefined') {
-      return 'sm' as Breakpoint; // Default for SSR
+    if (typeof window === "undefined") {
+      return "sm" as Breakpoint; // Default for SSR
     }
 
     return getBreakpoint(window.innerWidth);
   };
 
   const notify = () => {
-    listeners.forEach(listener => listener());
+    listeners.forEach((listener) => listener());
   };
 
   return { subscribe, getSnapshot };
@@ -54,7 +54,7 @@ export function useBreakpoint(): Breakpoint {
   return useSyncExternalStore(
     breakpointStore.subscribe,
     breakpointStore.getSnapshot,
-    breakpointStore.getSnapshot
+    breakpointStore.getSnapshot,
   );
 }
 
@@ -92,7 +92,7 @@ export function useBreakpointSmallerThan(breakpoint: Breakpoint): boolean {
  */
 export function useBreakpointBetween(
   min: Breakpoint,
-  max: Breakpoint
+  max: Breakpoint,
 ): boolean {
   const currentBreakpoint = useBreakpoint();
   const currentIndex = Object.keys(breakpoints).indexOf(currentBreakpoint);
@@ -102,6 +102,6 @@ export function useBreakpointBetween(
   return currentIndex >= minIndex && currentIndex <= maxIndex;
 }
 
+export type { Breakpoint };
 // Export breakpoint values for reference
 export { breakpoints };
-export type { Breakpoint };

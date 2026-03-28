@@ -1,24 +1,24 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import fs from 'fs/promises';
-import path from 'path';
+import fs from "node:fs/promises";
+import path from "node:path";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  loadPokemonData,
-  loadPokemonNameMap,
-  loadDexEntries,
   checkDataFiles,
   clearDataCache,
-  getCacheStatus,
   type DexEntry,
-} from '../scripts/utils/data-loading-utils';
+  getCacheStatus,
+  loadDexEntries,
+  loadPokemonData,
+  loadPokemonNameMap,
+} from "../scripts/utils/data-loading-utils";
 
 // Mock fs and path modules
-vi.mock('fs/promises');
-vi.mock('path');
+vi.mock("fs/promises");
+vi.mock("path");
 
 const mockFs = vi.mocked(fs);
 const mockPath = vi.mocked(path);
 
-describe('Data Loading Utilities', () => {
+describe("Data Loading Utilities", () => {
   beforeEach(() => {
     // Reset all mocks
     vi.clearAllMocks();
@@ -27,10 +27,10 @@ describe('Data Loading Utilities', () => {
     clearDataCache();
 
     // Mock path.join to return predictable paths
-    mockPath.join.mockImplementation((...segments) => segments.join('/'));
+    mockPath.join.mockImplementation((...segments) => segments.join("/"));
 
     // Mock process.cwd()
-    vi.stubGlobal('process', { cwd: () => '/mock/project' });
+    vi.stubGlobal("process", { cwd: () => "/mock/project" });
   });
 
   afterEach(() => {
@@ -39,28 +39,28 @@ describe('Data Loading Utilities', () => {
     vi.unstubAllGlobals();
   });
 
-  describe('loadPokemonData', () => {
+  describe("loadPokemonData", () => {
     const mockPokemonData = [
       {
         id: 1,
         nationalDexId: 1,
-        name: 'Bulbasaur',
-        types: [{ name: 'grass' }],
+        name: "Bulbasaur",
+        types: [{ name: "grass" }],
         species: {
           is_legendary: false,
           is_mythical: false,
-          generation: 'generation-i',
+          generation: "generation-i",
           evolution_chain: {
-            url: 'https://pokeapi.co/api/v2/evolution-chain/1/',
+            url: "https://pokeapi.co/api/v2/evolution-chain/1/",
           },
         },
         evolution: {
           evolves_to: [
             {
               id: 2,
-              name: 'ivysaur',
+              name: "ivysaur",
               min_level: 16,
-              trigger: 'level-up',
+              trigger: "level-up",
             },
           ],
         },
@@ -68,48 +68,48 @@ describe('Data Loading Utilities', () => {
       {
         id: 25,
         nationalDexId: 25,
-        name: 'Pikachu',
-        types: [{ name: 'electric' }],
+        name: "Pikachu",
+        types: [{ name: "electric" }],
         species: {
           is_legendary: false,
           is_mythical: false,
-          generation: 'generation-i',
+          generation: "generation-i",
           evolution_chain: {
-            url: 'https://pokeapi.co/api/v2/evolution-chain/10/',
+            url: "https://pokeapi.co/api/v2/evolution-chain/10/",
           },
         },
         evolution: {
           evolves_to: [
             {
               id: 26,
-              name: 'raichu',
-              item: 'thunder-stone',
-              trigger: 'use-item',
+              name: "raichu",
+              item: "thunder-stone",
+              trigger: "use-item",
             },
           ],
           evolves_from: {
             id: 172,
-            name: 'pichu',
+            name: "pichu",
             min_level: 10,
-            trigger: 'level-up',
+            trigger: "level-up",
           },
         },
       },
     ];
 
-    it('should load Pokemon data successfully', async () => {
+    it("should load Pokemon data successfully", async () => {
       mockFs.readFile.mockResolvedValue(JSON.stringify(mockPokemonData));
 
       const result = await loadPokemonData();
 
       expect(result).toEqual(mockPokemonData);
       expect(mockFs.readFile).toHaveBeenCalledWith(
-        '/mock/project/data/shared/pokemon-data.json',
-        'utf8'
+        "/mock/project/data/shared/pokemon-data.json",
+        "utf8",
       );
     });
 
-    it('should cache Pokemon data on subsequent calls', async () => {
+    it("should cache Pokemon data on subsequent calls", async () => {
       mockFs.readFile.mockResolvedValue(JSON.stringify(mockPokemonData));
 
       // First call
@@ -122,7 +122,7 @@ describe('Data Loading Utilities', () => {
       expect(mockFs.readFile).toHaveBeenCalledTimes(1); // Only called once due to caching
     });
 
-    it('should reload data when forceReload is true', async () => {
+    it("should reload data when forceReload is true", async () => {
       mockFs.readFile.mockResolvedValue(JSON.stringify(mockPokemonData));
 
       // First call
@@ -133,50 +133,50 @@ describe('Data Loading Utilities', () => {
       expect(mockFs.readFile).toHaveBeenCalledTimes(2);
     });
 
-    it('should validate Pokemon data structure', async () => {
+    it("should validate Pokemon data structure", async () => {
       // Mock invalid data - not an array
-      mockFs.readFile.mockResolvedValue(JSON.stringify({ invalid: 'data' }));
+      mockFs.readFile.mockResolvedValue(JSON.stringify({ invalid: "data" }));
 
       await expect(loadPokemonData()).rejects.toThrow(
-        'Pokemon data file does not contain an array'
+        "Pokemon data file does not contain an array",
       );
     });
 
-    it('should validate individual Pokemon entries', async () => {
+    it("should validate individual Pokemon entries", async () => {
       const invalidPokemonData = [
-        { id: 1, name: 'Valid' },
-        { id: null, name: 'Invalid' }, // Missing id
+        { id: 1, name: "Valid" },
+        { id: null, name: "Invalid" }, // Missing id
       ];
       mockFs.readFile.mockResolvedValue(JSON.stringify(invalidPokemonData));
 
       await expect(loadPokemonData()).rejects.toThrow(
-        'Invalid Pokemon data entry: missing id or name'
+        "Invalid Pokemon data entry: missing id or name",
       );
     });
 
-    it('should handle file read errors', async () => {
-      mockFs.readFile.mockRejectedValue(new Error('File not found'));
+    it("should handle file read errors", async () => {
+      mockFs.readFile.mockRejectedValue(new Error("File not found"));
 
       await expect(loadPokemonData()).rejects.toThrow(
-        'Error loading Pokemon data: File not found'
+        "Error loading Pokemon data: File not found",
       );
     });
 
-    it('should handle JSON parse errors', async () => {
-      mockFs.readFile.mockResolvedValue('invalid json');
+    it("should handle JSON parse errors", async () => {
+      mockFs.readFile.mockResolvedValue("invalid json");
 
       await expect(loadPokemonData()).rejects.toThrow(
-        'Error loading Pokemon data:'
+        "Error loading Pokemon data:",
       );
     });
   });
 
-  describe('loadPokemonNameMap', () => {
+  describe("loadPokemonNameMap", () => {
     const mockPokemonData = [
       {
         id: 1,
         nationalDexId: 1,
-        name: 'Bulbasaur',
+        name: "Bulbasaur",
         types: [],
         species: {},
         evolution: {},
@@ -184,25 +184,25 @@ describe('Data Loading Utilities', () => {
       {
         id: 25,
         nationalDexId: 25,
-        name: 'Pikachu',
+        name: "Pikachu",
         types: [],
         species: {},
         evolution: {},
       },
     ];
 
-    it('should load and build Pokemon name map', async () => {
+    it("should load and build Pokemon name map", async () => {
       mockFs.readFile.mockResolvedValue(JSON.stringify(mockPokemonData));
 
       const nameMap = await loadPokemonNameMap();
 
-      expect(nameMap.nameToId.get('Bulbasaur')).toBe(1);
-      expect(nameMap.nameToId.get('Pikachu')).toBe(25);
-      expect(nameMap.idToName.get(1)).toBe('Bulbasaur');
-      expect(nameMap.idToName.get(25)).toBe('Pikachu');
+      expect(nameMap.nameToId.get("Bulbasaur")).toBe(1);
+      expect(nameMap.nameToId.get("Pikachu")).toBe(25);
+      expect(nameMap.idToName.get(1)).toBe("Bulbasaur");
+      expect(nameMap.idToName.get(25)).toBe("Pikachu");
     });
 
-    it('should cache name map on subsequent calls', async () => {
+    it("should cache name map on subsequent calls", async () => {
       mockFs.readFile.mockResolvedValue(JSON.stringify(mockPokemonData));
 
       // First call
@@ -214,7 +214,7 @@ describe('Data Loading Utilities', () => {
       expect(mockFs.readFile).toHaveBeenCalledTimes(1);
     });
 
-    it('should reload when forceReload is true', async () => {
+    it("should reload when forceReload is true", async () => {
       mockFs.readFile.mockResolvedValue(JSON.stringify(mockPokemonData));
 
       // First call
@@ -226,25 +226,25 @@ describe('Data Loading Utilities', () => {
     });
   });
 
-  describe('loadDexEntries', () => {
+  describe("loadDexEntries", () => {
     const mockDexEntries: DexEntry[] = [
-      { id: 1, name: 'Bulbasaur' },
-      { id: 25, name: 'Pikachu' },
+      { id: 1, name: "Bulbasaur" },
+      { id: 25, name: "Pikachu" },
     ];
 
-    it('should load dex entries successfully', async () => {
+    it("should load dex entries successfully", async () => {
       mockFs.readFile.mockResolvedValue(JSON.stringify(mockDexEntries));
 
       const result = await loadDexEntries();
 
       expect(result).toEqual(mockDexEntries);
       expect(mockFs.readFile).toHaveBeenCalledWith(
-        '/mock/project/data/shared/base-entries.json',
-        'utf8'
+        "/mock/project/data/shared/base-entries.json",
+        "utf8",
       );
     });
 
-    it('should cache dex entries on subsequent calls', async () => {
+    it("should cache dex entries on subsequent calls", async () => {
       mockFs.readFile.mockResolvedValue(JSON.stringify(mockDexEntries));
 
       // First call
@@ -257,29 +257,29 @@ describe('Data Loading Utilities', () => {
       expect(mockFs.readFile).toHaveBeenCalledTimes(1);
     });
 
-    it('should validate dex entries structure', async () => {
-      mockFs.readFile.mockResolvedValue(JSON.stringify({ invalid: 'data' }));
+    it("should validate dex entries structure", async () => {
+      mockFs.readFile.mockResolvedValue(JSON.stringify({ invalid: "data" }));
 
       await expect(loadDexEntries()).rejects.toThrow(
-        'Dex entries file does not contain an array'
+        "Dex entries file does not contain an array",
       );
     });
 
-    it('should validate individual dex entries', async () => {
+    it("should validate individual dex entries", async () => {
       const invalidDexEntries = [
-        { id: 1, name: 'Valid' },
-        { id: null, name: 'Invalid' },
+        { id: 1, name: "Valid" },
+        { id: null, name: "Invalid" },
       ];
       mockFs.readFile.mockResolvedValue(JSON.stringify(invalidDexEntries));
 
       await expect(loadDexEntries()).rejects.toThrow(
-        'Invalid dex entry: missing id or name'
+        "Invalid dex entry: missing id or name",
       );
     });
   });
 
-  describe('checkDataFiles', () => {
-    it('should check all required data files', async () => {
+  describe("checkDataFiles", () => {
+    it("should check all required data files", async () => {
       // Mock all files as existing
       mockFs.access.mockResolvedValue(undefined);
 
@@ -295,31 +295,31 @@ describe('Data Loading Utilities', () => {
 
       expect(mockFs.access).toHaveBeenCalledTimes(5);
       expect(mockFs.access).toHaveBeenCalledWith(
-        '/mock/project/data/shared/pokemon-data.json'
+        "/mock/project/data/shared/pokemon-data.json",
       );
       expect(mockFs.access).toHaveBeenCalledWith(
-        '/mock/project/data/shared/base-entries.json'
+        "/mock/project/data/shared/base-entries.json",
       );
       expect(mockFs.access).toHaveBeenCalledWith(
-        '/mock/project/data/classic/encounters.json'
+        "/mock/project/data/classic/encounters.json",
       );
       expect(mockFs.access).toHaveBeenCalledWith(
-        '/mock/project/data/remix/encounters.json'
+        "/mock/project/data/remix/encounters.json",
       );
       expect(mockFs.access).toHaveBeenCalledWith(
-        '/mock/project/data/shared/locations.json'
+        "/mock/project/data/shared/locations.json",
       );
     });
 
-    it('should handle missing files', async () => {
+    it("should handle missing files", async () => {
       // Mock some files as missing
-      mockFs.access.mockImplementation(async filePath => {
+      mockFs.access.mockImplementation(async (filePath) => {
         const pathStr = String(filePath);
         if (
-          pathStr.includes('pokemon-data.json') ||
-          pathStr.includes('locations.json')
+          pathStr.includes("pokemon-data.json") ||
+          pathStr.includes("locations.json")
         ) {
-          throw new Error('File not found');
+          throw new Error("File not found");
         }
         return undefined;
       });
@@ -336,9 +336,9 @@ describe('Data Loading Utilities', () => {
     });
   });
 
-  describe('clearDataCache', () => {
-    it('should clear all cached data', async () => {
-      const mockData = [{ id: 1, name: 'Test' }];
+  describe("clearDataCache", () => {
+    it("should clear all cached data", async () => {
+      const mockData = [{ id: 1, name: "Test" }];
       mockFs.readFile.mockResolvedValue(JSON.stringify(mockData));
 
       // Load some data to populate cache
@@ -361,8 +361,8 @@ describe('Data Loading Utilities', () => {
     });
   });
 
-  describe('getCacheStatus', () => {
-    it('should return correct cache status', async () => {
+  describe("getCacheStatus", () => {
+    it("should return correct cache status", async () => {
       // Initial state
       let status = getCacheStatus();
       expect(status).toEqual({
@@ -373,7 +373,7 @@ describe('Data Loading Utilities', () => {
 
       // Load Pokemon data
       mockFs.readFile.mockResolvedValue(
-        JSON.stringify([{ id: 1, name: 'Test' }])
+        JSON.stringify([{ id: 1, name: "Test" }]),
       );
       await loadPokemonData();
 
@@ -400,25 +400,25 @@ describe('Data Loading Utilities', () => {
     });
   });
 
-  describe('error handling', () => {
-    it('should provide meaningful error messages', async () => {
+  describe("error handling", () => {
+    it("should provide meaningful error messages", async () => {
       mockFs.readFile.mockRejectedValue(
-        new Error('ENOENT: no such file or directory')
+        new Error("ENOENT: no such file or directory"),
       );
 
       await expect(loadPokemonData()).rejects.toThrow(
-        'Error loading Pokemon data: ENOENT: no such file or directory'
+        "Error loading Pokemon data: ENOENT: no such file or directory",
       );
       await expect(loadDexEntries()).rejects.toThrow(
-        'Error loading dex entries: ENOENT: no such file or directory'
+        "Error loading dex entries: ENOENT: no such file or directory",
       );
     });
 
-    it('should handle non-Error objects', async () => {
-      mockFs.readFile.mockRejectedValue('String error');
+    it("should handle non-Error objects", async () => {
+      mockFs.readFile.mockRejectedValue("String error");
 
       await expect(loadPokemonData()).rejects.toThrow(
-        'Error loading Pokemon data: Unknown error'
+        "Error loading Pokemon data: Unknown error",
       );
     });
   });

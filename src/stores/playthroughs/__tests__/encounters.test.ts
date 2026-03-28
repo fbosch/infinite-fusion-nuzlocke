@@ -1,135 +1,133 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from "vitest";
+import { PokemonStatus } from "@/loaders/pokemon";
 import {
-  updateEncounter,
-  resetEncounter,
   clearEncounterFromLocation,
-  markEncounterAsCaptured,
-  markEncounterAsReceived,
-  markEncounterAsMissed,
-  markEncounterAsDeceased,
-  moveEncounterToBox,
-  toggleEncounterFusion,
   flipEncounterFusion,
-} from '../encounters';
-import { PokemonStatus } from '@/loaders/pokemon';
+  markEncounterAsCaptured,
+  markEncounterAsDeceased,
+  markEncounterAsMissed,
+  markEncounterAsReceived,
+  moveEncounterToBox,
+  resetEncounter,
+  toggleEncounterFusion,
+  updateEncounter,
+} from "../encounters";
 import {
-  resetPlaythroughsStore,
   createTestPlaythrough,
+  expectEncounter,
+  resetPlaythroughsStore,
   testPokemon,
   waitForTimestamp,
-  expectEncounter,
-} from './test-utils';
+} from "./test-utils";
 
-describe('Basic Encounter Operations', () => {
+describe("Basic Encounter Operations", () => {
   resetPlaythroughsStore();
 
-  describe('updateEncounter', () => {
-    it('should create a new encounter with head Pokémon', async () => {
+  describe("updateEncounter", () => {
+    it("should create a new encounter with head Pokémon", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       const pikachu = testPokemon.pikachu();
-      await updateEncounter('route1', pikachu, 'head', false);
+      await updateEncounter("route1", pikachu, "head", false);
 
       expectEncounter(
         activePlaythrough.encounters?.route1,
-        'pikachu_route1_123',
+        "pikachu_route1_123",
         null,
-        false
+        false,
       );
     });
 
-    it('should create a fusion encounter with both head and body', async () => {
+    it("should create a fusion encounter with both head and body", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       const pikachu = testPokemon.pikachu();
       const charmander = testPokemon.charmander();
 
-      await updateEncounter('route1', pikachu, 'head', false);
-      await updateEncounter('route1', charmander, 'body', true);
+      await updateEncounter("route1", pikachu, "head", false);
+      await updateEncounter("route1", charmander, "body", true);
 
       expectEncounter(
         activePlaythrough.encounters?.route1,
-        'pikachu_route1_123',
-        'charmander_route1_456',
-        true
+        "pikachu_route1_123",
+        "charmander_route1_456",
+        true,
       );
     });
 
-    it('should update existing encounter field', async () => {
+    it("should update existing encounter field", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Create initial encounter
       const pikachu = testPokemon.pikachu();
-      await updateEncounter('route1', pikachu, 'head', false);
+      await updateEncounter("route1", pikachu, "head", false);
 
       // Update with different Pokémon
       const charmander = testPokemon.charmander();
-      await updateEncounter('route1', charmander, 'head', false);
+      await updateEncounter("route1", charmander, "head", false);
 
       expectEncounter(
         activePlaythrough.encounters?.route1,
-        'charmander_route1_456',
+        "charmander_route1_456",
         null,
-        false
+        false,
       );
     });
 
-    it('should clear encounter field when passed null', async () => {
+    it("should clear encounter field when passed null", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Create encounter
       const pikachu = testPokemon.pikachu();
-      await updateEncounter('route1', pikachu, 'head', false);
+      await updateEncounter("route1", pikachu, "head", false);
 
       // Clear it
-      await updateEncounter('route1', null, 'head', false);
+      await updateEncounter("route1", null, "head", false);
 
       expect(activePlaythrough.encounters?.route1?.head).toBeNull();
     });
 
-    it('should generate UID if not provided', async () => {
+    it("should generate UID if not provided", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       const pokemon = {
         id: 25,
-        name: 'Pikachu',
+        name: "Pikachu",
         nationalDexId: 25,
-        originalLocation: 'route1',
+        originalLocation: "route1",
       };
 
-      await updateEncounter('route1', pokemon, 'head', false);
+      await updateEncounter("route1", pokemon, "head", false);
 
-      expect(activePlaythrough.encounters?.route1?.head?.uid).toBeDefined();
-      expect(typeof activePlaythrough.encounters?.route1?.head?.uid).toBe(
-        'string'
-      );
-      expect(
-        activePlaythrough.encounters?.route1?.head?.uid.length
-      ).toBeGreaterThan(0);
+      const generatedUid = activePlaythrough.encounters?.route1?.head?.uid;
+
+      expect(generatedUid).toBeDefined();
+      expect(typeof generatedUid).toBe("string");
+      expect((generatedUid ?? "").length).toBeGreaterThan(0);
     });
 
-    it('should set originalLocation if not provided', async () => {
+    it("should set originalLocation if not provided", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       const pokemon = {
         id: 25,
-        name: 'Pikachu',
+        name: "Pikachu",
         nationalDexId: 25,
-        uid: 'pikachu_route1_123',
+        uid: "pikachu_route1_123",
       };
 
-      await updateEncounter('route1', pokemon, 'head', false);
+      await updateEncounter("route1", pokemon, "head", false);
 
       expect(activePlaythrough.encounters?.route1?.head?.originalLocation).toBe(
-        'route1'
+        "route1",
       );
     });
 
-    it('should update encounter timestamp', async () => {
+    it("should update encounter timestamp", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       const pikachu = testPokemon.pikachu();
-      await updateEncounter('route1', pikachu, 'head', false);
+      await updateEncounter("route1", pikachu, "head", false);
 
       const timestamp = activePlaythrough.encounters?.route1?.updatedAt;
       expect(timestamp).toBeGreaterThan(0);
@@ -137,15 +135,15 @@ describe('Basic Encounter Operations', () => {
       // Wait and update again
       await waitForTimestamp();
       const charmander = testPokemon.charmander();
-      await updateEncounter('route1', charmander, 'body', true);
+      await updateEncounter("route1", charmander, "body", true);
 
       const newTimestamp = activePlaythrough.encounters?.route1?.updatedAt;
       expect(newTimestamp).toBeGreaterThan(timestamp!);
     });
   });
 
-  describe('resetEncounter', () => {
-    it('should delete entire encounter', () => {
+  describe("resetEncounter", () => {
+    it("should delete entire encounter", () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up encounter
@@ -158,20 +156,20 @@ describe('Basic Encounter Operations', () => {
         },
       };
 
-      resetEncounter('route1');
+      resetEncounter("route1");
 
       expect(activePlaythrough.encounters?.route1).toBeUndefined();
     });
 
-    it('should handle non-existent encounter gracefully', () => {
+    it("should handle non-existent encounter gracefully", () => {
       createTestPlaythrough();
 
-      expect(() => resetEncounter('nonexistent')).not.toThrow();
+      expect(() => resetEncounter("nonexistent")).not.toThrow();
     });
   });
 
-  describe('clearEncounterFromLocation', () => {
-    it('should clear specific field when field is specified', async () => {
+  describe("clearEncounterFromLocation", () => {
+    it("should clear specific field when field is specified", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up fusion encounter
@@ -184,13 +182,13 @@ describe('Basic Encounter Operations', () => {
         },
       };
 
-      await clearEncounterFromLocation('route1', 'head');
+      await clearEncounterFromLocation("route1", "head");
 
       expect(activePlaythrough.encounters?.route1?.head).toBeNull();
       expect(activePlaythrough.encounters?.route1?.body).toBeDefined();
     });
 
-    it('should clear entire encounter when no field specified', async () => {
+    it("should clear entire encounter when no field specified", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up encounter
@@ -203,142 +201,142 @@ describe('Basic Encounter Operations', () => {
         },
       };
 
-      await clearEncounterFromLocation('route1');
+      await clearEncounterFromLocation("route1");
 
       expect(activePlaythrough.encounters?.route1).toBeUndefined();
     });
 
-    it('should handle non-existent encounter gracefully', async () => {
+    it("should handle non-existent encounter gracefully", async () => {
       createTestPlaythrough();
 
       await expect(
-        clearEncounterFromLocation('nonexistent')
+        clearEncounterFromLocation("nonexistent"),
       ).resolves.toBeUndefined();
     });
   });
 
-  describe('Status Update Functions', () => {
-    it('should mark encounter as captured', async () => {
+  describe("Status Update Functions", () => {
+    it("should mark encounter as captured", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up encounter without status
       const pikachu = {
         id: 25,
-        name: 'Pikachu',
+        name: "Pikachu",
         nationalDexId: 25,
-        uid: 'pikachu_route1_123',
-        originalLocation: 'route1',
+        uid: "pikachu_route1_123",
+        originalLocation: "route1",
       };
-      await updateEncounter('route1', pikachu, 'head', false);
+      await updateEncounter("route1", pikachu, "head", false);
 
-      await markEncounterAsCaptured('route1');
+      await markEncounterAsCaptured("route1");
 
       expect(activePlaythrough.encounters?.route1?.head?.status).toBe(
-        PokemonStatus.CAPTURED
+        PokemonStatus.CAPTURED,
       );
     });
 
-    it('should mark encounter as received', async () => {
+    it("should mark encounter as received", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       const pikachu = {
         id: 25,
-        name: 'Pikachu',
+        name: "Pikachu",
         nationalDexId: 25,
-        uid: 'pikachu_route1_123',
-        originalLocation: 'route1',
+        uid: "pikachu_route1_123",
+        originalLocation: "route1",
       };
-      await updateEncounter('route1', pikachu, 'head', false);
+      await updateEncounter("route1", pikachu, "head", false);
 
-      await markEncounterAsReceived('route1');
+      await markEncounterAsReceived("route1");
 
       expect(activePlaythrough.encounters?.route1?.head?.status).toBe(
-        PokemonStatus.RECEIVED
+        PokemonStatus.RECEIVED,
       );
     });
 
-    it('should mark encounter as missed', async () => {
+    it("should mark encounter as missed", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       const pikachu = {
         id: 25,
-        name: 'Pikachu',
+        name: "Pikachu",
         nationalDexId: 25,
-        uid: 'pikachu_route1_123',
-        originalLocation: 'route1',
+        uid: "pikachu_route1_123",
+        originalLocation: "route1",
       };
-      await updateEncounter('route1', pikachu, 'head', false);
+      await updateEncounter("route1", pikachu, "head", false);
 
-      await markEncounterAsMissed('route1');
+      await markEncounterAsMissed("route1");
 
       expect(activePlaythrough.encounters?.route1?.head?.status).toBe(
-        PokemonStatus.MISSED
+        PokemonStatus.MISSED,
       );
     });
 
-    it('should mark encounter as deceased', async () => {
+    it("should mark encounter as deceased", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       const pikachu = testPokemon.pikachu();
-      await updateEncounter('route1', pikachu, 'head', false);
+      await updateEncounter("route1", pikachu, "head", false);
 
-      await markEncounterAsDeceased('route1');
+      await markEncounterAsDeceased("route1");
 
       expect(activePlaythrough.encounters?.route1?.head?.status).toBe(
-        PokemonStatus.DECEASED
+        PokemonStatus.DECEASED,
       );
     });
 
-    it('should move encounter to box (stored)', async () => {
+    it("should move encounter to box (stored)", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       const pikachu = testPokemon.pikachu();
-      await updateEncounter('route1', pikachu, 'head', false);
+      await updateEncounter("route1", pikachu, "head", false);
 
-      await moveEncounterToBox('route1');
+      await moveEncounterToBox("route1");
 
       expect(activePlaythrough.encounters?.route1?.head?.status).toBe(
-        PokemonStatus.STORED
+        PokemonStatus.STORED,
       );
     });
 
-    it('should update both head and body in fusion encounter', async () => {
+    it("should update both head and body in fusion encounter", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up fusion encounter
       const pikachu = testPokemon.pikachu();
       const charmander = testPokemon.charmander();
 
-      await updateEncounter('route1', pikachu, 'head', false);
-      await updateEncounter('route1', charmander, 'body', true);
+      await updateEncounter("route1", pikachu, "head", false);
+      await updateEncounter("route1", charmander, "body", true);
 
-      await markEncounterAsDeceased('route1');
+      await markEncounterAsDeceased("route1");
 
       expect(activePlaythrough.encounters?.route1?.head?.status).toBe(
-        PokemonStatus.DECEASED
+        PokemonStatus.DECEASED,
       );
       expect(activePlaythrough.encounters?.route1?.body?.status).toBe(
-        PokemonStatus.DECEASED
+        PokemonStatus.DECEASED,
       );
     });
   });
 
-  describe('Fusion Operations', () => {
-    it('should toggle fusion mode on non-fusion encounter', async () => {
+  describe("Fusion Operations", () => {
+    it("should toggle fusion mode on non-fusion encounter", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up regular encounter
       const pikachu = testPokemon.pikachu();
-      await updateEncounter('route1', pikachu, 'head', false);
+      await updateEncounter("route1", pikachu, "head", false);
 
       expect(activePlaythrough.encounters?.route1?.isFusion).toBe(false);
 
-      await toggleEncounterFusion('route1');
+      await toggleEncounterFusion("route1");
 
       expect(activePlaythrough.encounters?.route1?.isFusion).toBe(true);
     });
 
-    it('should toggle fusion mode off fusion encounter', async () => {
+    it("should toggle fusion mode off fusion encounter", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up fusion encounter
@@ -351,12 +349,12 @@ describe('Basic Encounter Operations', () => {
         },
       };
 
-      await toggleEncounterFusion('route1');
+      await toggleEncounterFusion("route1");
 
       expect(activePlaythrough.encounters?.route1?.isFusion).toBe(false);
     });
 
-    it('should flip fusion head and body', async () => {
+    it("should flip fusion head and body", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up fusion encounter
@@ -369,17 +367,17 @@ describe('Basic Encounter Operations', () => {
         },
       };
 
-      await flipEncounterFusion('route1');
+      await flipEncounterFusion("route1");
 
       expect(activePlaythrough.encounters?.route1?.head?.uid).toBe(
-        'charmander_route1_456'
+        "charmander_route1_456",
       );
       expect(activePlaythrough.encounters?.route1?.body?.uid).toBe(
-        'pikachu_route1_123'
+        "pikachu_route1_123",
       );
     });
 
-    it('should handle flip on non-fusion encounter gracefully', async () => {
+    it("should handle flip on non-fusion encounter gracefully", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Set up regular encounter
@@ -392,44 +390,44 @@ describe('Basic Encounter Operations', () => {
         },
       };
 
-      expect(async () => await flipEncounterFusion('route1')).not.toThrow();
+      expect(async () => await flipEncounterFusion("route1")).not.toThrow();
 
       // Should remain unchanged
       expect(activePlaythrough.encounters?.route1?.head?.uid).toBe(
-        'pikachu_route1_123'
+        "pikachu_route1_123",
       );
       expect(activePlaythrough.encounters?.route1?.body).toBeNull();
     });
   });
 
-  describe('Error Handling', () => {
-    it('should handle missing active playthrough gracefully', async () => {
+  describe("Error Handling", () => {
+    it("should handle missing active playthrough gracefully", async () => {
       resetPlaythroughsStore();
       // Don't create a playthrough
 
       const pikachu = testPokemon.pikachu();
 
       await expect(
-        updateEncounter('route1', pikachu, 'head', false)
+        updateEncounter("route1", pikachu, "head", false),
       ).resolves.not.toThrow();
-      expect(() => resetEncounter('route1')).not.toThrow();
+      expect(() => resetEncounter("route1")).not.toThrow();
       await expect(
-        clearEncounterFromLocation('route1')
+        clearEncounterFromLocation("route1"),
       ).resolves.toBeUndefined();
-      await expect(markEncounterAsCaptured('route1')).resolves.toBeUndefined();
+      await expect(markEncounterAsCaptured("route1")).resolves.toBeUndefined();
     });
 
-    it('should handle invalid encounter operations gracefully', async () => {
+    it("should handle invalid encounter operations gracefully", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Try operations on non-existent encounters
       await expect(
-        markEncounterAsCaptured('nonexistent')
+        markEncounterAsCaptured("nonexistent"),
       ).resolves.toBeUndefined();
       await expect(
-        toggleEncounterFusion('nonexistent')
+        toggleEncounterFusion("nonexistent"),
       ).resolves.toBeUndefined();
-      await expect(flipEncounterFusion('nonexistent')).resolves.toBeUndefined();
+      await expect(flipEncounterFusion("nonexistent")).resolves.toBeUndefined();
 
       // Verify no encounters were created (or only empty encounter from toggle)
       const encounterKeys = Object.keys(activePlaythrough.encounters || {});

@@ -1689,7 +1689,7 @@
         {
           "id": 979,
           "name": "annihilape",
-          "trigger": "other"
+          "trigger": "use-move"
         }
       ],
       "evolves_from": {
@@ -9532,7 +9532,7 @@
         {
           "id": 983,
           "name": "kingambit",
-          "trigger": "other"
+          "trigger": "three-defeated-bisharp"
         }
       ],
       "evolves_from": {
@@ -16023,6 +16023,211 @@
     },
     "evolution": {
       "evolves_to": []
+    }
+  },
+  {
+    "id": 566,
+    "nationalDexId": 527,
+    "name": "Woobat",
+    "types": [
+      {
+        "name": "psychic"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v",
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/269/"
+      }
+    },
+    "evolution": {
+      "evolves_to": [
+        {
+          "id": 528,
+          "name": "swoobat",
+          "trigger": "level-up",
+          "condition": "Happiness: 160"
+        }
+      ]
+    }
+  },
+  {
+    "id": 567,
+    "nationalDexId": 528,
+    "name": "Swoobat",
+    "types": [
+      {
+        "name": "psychic"
+      },
+      {
+        "name": "flying"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v",
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/269/"
+      }
+    },
+    "evolution": {
+      "evolves_to": [],
+      "evolves_from": {
+        "id": 527,
+        "name": "woobat"
+      }
+    }
+  },
+  {
+    "id": 568,
+    "nationalDexId": 602,
+    "name": "Tynamo",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v",
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/306/"
+      }
+    },
+    "evolution": {
+      "evolves_to": [
+        {
+          "id": 603,
+          "name": "eelektrik",
+          "min_level": 39,
+          "trigger": "level-up"
+        }
+      ]
+    }
+  },
+  {
+    "id": 569,
+    "nationalDexId": 603,
+    "name": "Eelektrik",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v",
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/306/"
+      }
+    },
+    "evolution": {
+      "evolves_to": [
+        {
+          "id": 604,
+          "name": "eelektross",
+          "item": "thunder-stone",
+          "trigger": "use-item"
+        }
+      ],
+      "evolves_from": {
+        "id": 602,
+        "name": "tynamo"
+      }
+    }
+  },
+  {
+    "id": 570,
+    "nationalDexId": 604,
+    "name": "Eelektross",
+    "types": [
+      {
+        "name": "electric"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-v",
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/306/"
+      }
+    },
+    "evolution": {
+      "evolves_to": [],
+      "evolves_from": {
+        "id": 603,
+        "name": "eelektrik",
+        "min_level": 39,
+        "trigger": "level-up"
+      }
+    }
+  },
+  {
+    "id": 571,
+    "nationalDexId": 690,
+    "name": "Skrelp",
+    "types": [
+      {
+        "name": "poison"
+      },
+      {
+        "name": "water"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi",
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/354/"
+      }
+    },
+    "evolution": {
+      "evolves_to": [
+        {
+          "id": 691,
+          "name": "dragalge",
+          "min_level": 48,
+          "trigger": "level-up"
+        }
+      ]
+    }
+  },
+  {
+    "id": 572,
+    "nationalDexId": 691,
+    "name": "Dragalge",
+    "types": [
+      {
+        "name": "poison"
+      },
+      {
+        "name": "dragon"
+      }
+    ],
+    "species": {
+      "is_legendary": false,
+      "is_mythical": false,
+      "generation": "generation-vi",
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/354/"
+      }
+    },
+    "evolution": {
+      "evolves_to": [],
+      "evolves_from": {
+        "id": 690,
+        "name": "skrelp"
+      }
     }
   }
 ]

@@ -1,21 +1,21 @@
-import { keepPreviousData, queryOptions } from '@tanstack/react-query';
-import pokemonApiService from '@/services/pokemonApiService';
-import ms from 'ms';
+import { keepPreviousData, queryOptions } from "@tanstack/react-query";
+import ms from "ms";
+import pokemonApiService from "@/services/pokemonApiService";
 
 // Pokemon query options
 export const pokemonQueries = {
   all: () =>
     queryOptions({
-      queryKey: ['pokemon', 'all'],
+      queryKey: ["pokemon", "all"],
       queryFn: () => pokemonApiService.getAllPokemon(),
-      staleTime: ms('7d'),
-      gcTime: ms('30m'),
+      staleTime: ms("7d"),
+      gcTime: ms("30m"),
       placeholderData: keepPreviousData,
     }),
 
   byId: (id: number) =>
     queryOptions({
-      queryKey: ['pokemon', 'byId', id],
+      queryKey: ["pokemon", "byId", id],
       queryFn: async () => {
         // Always use API for individual lookups to avoid circular dependency
         return pokemonApiService.getPokemonById(id);
@@ -27,7 +27,7 @@ export const pokemonQueries = {
 
   byIds: (ids: number[]) =>
     queryOptions({
-      queryKey: ['pokemon', 'byIds', ids],
+      queryKey: ["pokemon", "byIds", ids],
       queryFn: async () => {
         // Always use API for multiple lookups to avoid circular dependency
         return pokemonApiService.getPokemonByIds(ids);
@@ -39,18 +39,18 @@ export const pokemonQueries = {
 
   byType: (type: string) =>
     queryOptions({
-      queryKey: ['pokemon', 'byType', type],
+      queryKey: ["pokemon", "byType", type],
       queryFn: () => pokemonApiService.getPokemonByType(type),
       enabled: !!type,
-      staleTime: ms('5m'),
-      gcTime: ms('10m'),
+      staleTime: ms("5m"),
+      gcTime: ms("10m"),
     }),
 };
 
 // Query key factories for consistent key generation
 export const pokemonKeys = {
-  all: ['pokemon', 'all'] as const,
-  byId: (id: number) => ['pokemon', 'byId', id] as const,
-  byIds: (ids: number[]) => ['pokemon', 'byIds', ids] as const,
-  byType: (type: string) => ['pokemon', 'byType', type] as const,
+  all: ["pokemon", "all"] as const,
+  byId: (id: number) => ["pokemon", "byId", id] as const,
+  byIds: (ids: number[]) => ["pokemon", "byIds", ids] as const,
+  byType: (type: string) => ["pokemon", "byType", type] as const,
 };

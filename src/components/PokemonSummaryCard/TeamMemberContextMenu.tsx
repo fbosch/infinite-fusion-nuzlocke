@@ -1,37 +1,37 @@
-import { ContextMenu, type ContextMenuItem } from '@/components/ContextMenu';
-import { Fragment, useState, useMemo, useCallback } from 'react';
 import {
+  ArrowLeftRight,
   ArrowUpRight,
+  Atom,
+  Computer,
   Loader2,
+  MapPin,
   Replace,
   Skull,
-  Computer,
-  Atom,
   Undo2,
-  ArrowLeftRight,
-  MapPin,
-} from 'lucide-react';
-import { useSpriteVariants, usePreferredVariantState } from '@/hooks/useSprite';
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import { useCallback, useMemo, useState } from "react";
+import BodyIcon from "@/assets/images/body.svg";
+import HeadIcon from "@/assets/images/head.svg";
+import { ContextMenu, type ContextMenuItem } from "@/components/ContextMenu";
+import { usePreferredVariantState, useSpriteVariants } from "@/hooks/useSprite";
+import { emitEvolutionEvent } from "@/lib/events";
+import { getSpriteId } from "@/lib/sprites";
 import {
   isEggId,
   type PokemonOptionType,
-  usePokemonEvolutionData,
   PokemonStatus,
-} from '@/loaders/pokemon';
-import { playthroughActions } from '@/stores/playthroughs';
-import { getSpriteId } from '@/lib/sprites';
-import { PokemonSprite } from '../PokemonSprite';
-import dynamic from 'next/dynamic';
-import { emitEvolutionEvent } from '@/lib/events';
-import { scrollToLocationById } from '@/utils/scrollToLocation';
-import HeadIcon from '@/assets/images/head.svg';
-import BodyIcon from '@/assets/images/body.svg';
+  usePokemonEvolutionData,
+} from "@/loaders/pokemon";
+import { playthroughActions } from "@/stores/playthroughs";
+import { scrollToLocationById } from "@/utils/scrollToLocation";
+import { PokemonSprite } from "../PokemonSprite";
 
 const ArtworkVariantModal = dynamic(
-  () => import('./ArtworkVariantModal').then(mod => mod.ArtworkVariantModal),
+  () => import("./ArtworkVariantModal").then((mod) => mod.ArtworkVariantModal),
   {
     ssr: false,
-  }
+  },
 );
 
 interface TeamMemberContextMenuProps {
@@ -59,14 +59,14 @@ export function TeamMemberContextMenu({
   const { data: variants, isLoading: isLoadingVariants } = useSpriteVariants(
     headPokemon?.id,
     bodyPokemon?.id,
-    shouldLoad && !isEggId(headPokemon?.id) && !isEggId(bodyPokemon?.id)
+    shouldLoad && !isEggId(headPokemon?.id) && !isEggId(bodyPokemon?.id),
   );
   const hasArtVariants = variants && variants.length > 1;
 
   // Get current preferred variant for the team member
   const { variant: preferredVariant } = usePreferredVariantState(
     headPokemon?.id ?? null,
-    bodyPokemon?.id ?? null
+    bodyPokemon?.id ?? null,
   );
 
   // Get evolution data for both Pokémon
@@ -107,7 +107,7 @@ export function TeamMemberContextMenu({
     async (
       evolutionId: number,
       evolutionName: string,
-      evolutionNationalDexId: number
+      evolutionNationalDexId: number,
     ) => {
       if (!headPokemon?.uid) return;
 
@@ -125,7 +125,7 @@ export function TeamMemberContextMenu({
         emitEvolutionEvent(headPokemon.originalLocation);
       }
     },
-    [headPokemon]
+    [headPokemon],
   );
 
   // Handler to evolve body Pokémon
@@ -133,7 +133,7 @@ export function TeamMemberContextMenu({
     async (
       evolutionId: number,
       evolutionName: string,
-      evolutionNationalDexId: number
+      evolutionNationalDexId: number,
     ) => {
       if (!bodyPokemon?.uid) return;
 
@@ -151,7 +151,7 @@ export function TeamMemberContextMenu({
         emitEvolutionEvent(bodyPokemon.originalLocation);
       }
     },
-    [bodyPokemon]
+    [bodyPokemon],
   );
 
   // Handler to devolve head Pokémon
@@ -190,7 +190,7 @@ export function TeamMemberContextMenu({
     await playthroughActions.updateTeamMember(
       position,
       { uid: bodyPokemon.uid },
-      { uid: headPokemon.uid }
+      { uid: headPokemon.uid },
     );
   }, [isFusion, headPokemon?.uid, bodyPokemon?.uid, position]);
 
@@ -199,7 +199,7 @@ export function TeamMemberContextMenu({
     if (!headPokemon?.originalLocation || !headPokemon.uid) return;
 
     scrollToLocationById(headPokemon.originalLocation, {
-      behavior: 'smooth',
+      behavior: "smooth",
       highlightUids: [headPokemon.uid],
       durationMs: 1200,
     });
@@ -213,7 +213,7 @@ export function TeamMemberContextMenu({
     if (!bodyPokemon?.originalLocation || !bodyPokemon.uid) return;
 
     scrollToLocationById(bodyPokemon.originalLocation, {
-      behavior: 'smooth',
+      behavior: "smooth",
       highlightUids: [bodyPokemon.uid],
       durationMs: 1200,
     });
@@ -226,15 +226,15 @@ export function TeamMemberContextMenu({
     // Use team member Pokémon for links
     const id = getSpriteId(headPokemon?.id, bodyPokemon?.id);
     const infinitefusiondexLink = `https://infinitefusiondex.com/details/${id}`;
-    const fusiondexLink = `https://fusiondex.org/sprite/pif/${id}${preferredVariant ? `${preferredVariant}` : ''}/`;
+    const fusiondexLink = `https://fusiondex.org/sprite/pif/${id}${preferredVariant ? `${preferredVariant}` : ""}/`;
 
     // Get current status (check both Pokémon, they should have the same status)
     const currentStatus = headPokemon?.status || bodyPokemon?.status;
 
     const items: ContextMenuItem[] = [
       {
-        id: 'change-variant',
-        label: 'Change Preferred Artwork',
+        id: "change-variant",
+        label: "Change Preferred Artwork",
         disabled:
           !hasArtVariants ||
           isEggId(headPokemon?.id) ||
@@ -245,10 +245,10 @@ export function TeamMemberContextMenu({
           isEggId(headPokemon?.id) ||
           isEggId(bodyPokemon?.id)
             ? isLoadingVariants
-              ? 'Loading artwork variants...'
-              : 'No artwork variants available'
+              ? "Loading artwork variants..."
+              : "No artwork variants available"
             : undefined,
-        iconClassName: isLoadingVariants ? 'animate-spin' : '',
+        iconClassName: isLoadingVariants ? "animate-spin" : "",
         onClick: () => {
           setIsVariantModalOpen(true);
         },
@@ -262,11 +262,11 @@ export function TeamMemberContextMenu({
     // Add inverse fusion option if this is a fusion
     if (isFusion) {
       items.push({
-        id: 'invert-fusion',
-        label: 'Invert Fusion',
+        id: "invert-fusion",
+        label: "Invert Fusion",
         icon: ArrowLeftRight,
         onClick: handleFlipFusion,
-        tooltip: 'Swap head and body Pokémon positions',
+        tooltip: "Swap head and body Pokémon positions",
       });
     }
 
@@ -283,15 +283,15 @@ export function TeamMemberContextMenu({
 
     if (hasStatusActions) {
       items.push({
-        id: 'status-separator',
+        id: "status-separator",
         separator: true,
       });
 
       // Show "Mark as Deceased" unless already deceased or missed
       if (canMarkAsDeceased) {
         items.push({
-          id: 'mark-deceased',
-          label: 'Move to Graveyard',
+          id: "mark-deceased",
+          label: "Move to Graveyard",
           icon: Skull,
           onClick: handleMarkAsDeceased,
         });
@@ -300,8 +300,8 @@ export function TeamMemberContextMenu({
       // Show "Move to Box" only if captured, received, traded, or deceased
       if (canMoveToBox) {
         items.push({
-          id: 'move-to-box',
-          label: 'Move to Box',
+          id: "move-to-box",
+          label: "Move to Box",
           icon: Computer,
           onClick: handleMoveToBox,
         });
@@ -316,18 +316,18 @@ export function TeamMemberContextMenu({
         headPokemon.originalLocation)
     ) {
       items.push({
-        id: 'head-section-separator',
+        id: "head-section-separator",
         separator: true,
       });
 
       // Add head section header
       if (isFusion) {
         items.push({
-          id: 'head-section-header',
+          id: "head-section-header",
           label: (
-            <div className='flex items-center gap-1.5 px-1 py-0.5'>
-              <HeadIcon className='h-3.5 w-3.5 text-gray-500 dark:text-gray-400' />
-              <span className='text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+            <div className="flex items-center gap-1.5 px-1 py-0.5">
+              <HeadIcon className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                 Head
               </span>
             </div>
@@ -339,16 +339,16 @@ export function TeamMemberContextMenu({
       // Add devolve option for head Pokémon
       if (headPreEvolution) {
         items.push({
-          id: 'devolve-head',
+          id: "devolve-head",
           label: (
-            <div className='flex items-center gap-x-2 w-full'>
-              <div className='flex items-center justify-center size-6 flex-shrink-0'>
+            <div className="flex items-center gap-x-2 w-full">
+              <div className="flex items-center justify-center size-6 flex-shrink-0">
                 <PokemonSprite
                   pokemonId={headPreEvolution.id}
-                  generation='gen7'
+                  generation="gen7"
                 />
               </div>
-              <span className='truncate'>
+              <span className="truncate">
                 Devolve to {headPreEvolution.name}
               </span>
             </div>
@@ -365,11 +365,11 @@ export function TeamMemberContextMenu({
           items.push({
             id: `evolve-head-${evo.id}`,
             label: (
-              <div className='flex items-center gap-x-2 w-full'>
-                <div className='flex items-center justify-center size-6 flex-shrink-0'>
-                  <PokemonSprite pokemonId={evo.id} generation='gen7' />
+              <div className="flex items-center gap-x-2 w-full">
+                <div className="flex items-center justify-center size-6 flex-shrink-0">
+                  <PokemonSprite pokemonId={evo.id} generation="gen7" />
                 </div>
-                <span className='truncate'>Evolve to {evo.name}</span>
+                <span className="truncate">Evolve to {evo.name}</span>
               </div>
             ),
             icon: Atom,
@@ -378,17 +378,17 @@ export function TeamMemberContextMenu({
           });
         } else {
           items.push({
-            id: 'evolve-head',
-            label: 'Evolve to…',
+            id: "evolve-head",
+            label: "Evolve to…",
             icon: Atom,
-            children: headEvolutions.map(evo => ({
+            children: headEvolutions.map((evo) => ({
               id: `evolve-head-${evo.id}`,
               label: (
-                <div className='flex items-center gap-x-2 w-full'>
-                  <div className='flex items-center justify-center size-6 flex-shrink-0'>
-                    <PokemonSprite pokemonId={evo.id} generation='gen7' />
+                <div className="flex items-center gap-x-2 w-full">
+                  <div className="flex items-center justify-center size-6 flex-shrink-0">
+                    <PokemonSprite pokemonId={evo.id} generation="gen7" />
                   </div>
-                  <span className='truncate'>{evo.name}</span>
+                  <span className="truncate">{evo.name}</span>
                 </div>
               ),
               onClick: () =>
@@ -401,12 +401,12 @@ export function TeamMemberContextMenu({
       // Add "Go to head encounter" option
       if (headPokemon?.originalLocation) {
         items.push({
-          id: 'go-to-head-encounter',
-          label: 'Go to Encounter',
+          id: "go-to-head-encounter",
+          label: "Go to Encounter",
           icon: MapPin,
           onClick: handleGoToHeadEncounter,
           tooltip:
-            'Navigate to the location where this Pokémon was encountered',
+            "Navigate to the location where this Pokémon was encountered",
         });
       }
     }
@@ -421,17 +421,17 @@ export function TeamMemberContextMenu({
     ) {
       // Add separator between head and body sections
       items.push({
-        id: 'body-section-separator',
+        id: "body-section-separator",
         separator: true,
       });
 
       // Add body section header
       items.push({
-        id: 'body-section-header',
+        id: "body-section-header",
         label: (
-          <div className='flex items-center gap-1.5 px-1 py-0.5'>
-            <BodyIcon className='h-3.5 w-3.5 text-gray-500 dark:text-gray-400' />
-            <span className='text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+          <div className="flex items-center gap-1.5 px-1 py-0.5">
+            <BodyIcon className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               Body
             </span>
           </div>
@@ -441,16 +441,16 @@ export function TeamMemberContextMenu({
       // Add devolve option for body Pokémon
       if (bodyPreEvolution) {
         items.push({
-          id: 'devolve-body',
+          id: "devolve-body",
           label: (
-            <div className='flex items-center gap-x-2 w-full'>
-              <div className='flex items-center justify-center size-6 flex-shrink-0'>
+            <div className="flex items-center gap-x-2 w-full">
+              <div className="flex items-center justify-center size-6 flex-shrink-0">
                 <PokemonSprite
                   pokemonId={bodyPreEvolution.id}
-                  generation='gen7'
+                  generation="gen7"
                 />
               </div>
-              <span className='truncate'>
+              <span className="truncate">
                 Devolve to {bodyPreEvolution.name}
               </span>
             </div>
@@ -467,11 +467,11 @@ export function TeamMemberContextMenu({
           items.push({
             id: `evolve-body-${evo.id}`,
             label: (
-              <div className='flex items-center gap-x-2 w-full'>
-                <div className='flex items-center justify-center size-6 flex-shrink-0'>
-                  <PokemonSprite pokemonId={evo.id} generation='gen7' />
+              <div className="flex items-center gap-x-2 w-full">
+                <div className="flex items-center justify-center size-6 flex-shrink-0">
+                  <PokemonSprite pokemonId={evo.id} generation="gen7" />
                 </div>
-                <span className='truncate'>Evolve to {evo.name}</span>
+                <span className="truncate">Evolve to {evo.name}</span>
               </div>
             ),
             icon: Atom,
@@ -480,17 +480,17 @@ export function TeamMemberContextMenu({
           });
         } else {
           items.push({
-            id: 'evolve-body',
-            label: 'Evolve to…',
+            id: "evolve-body",
+            label: "Evolve to…",
             icon: Atom,
-            children: bodyEvolutions.map(evo => ({
+            children: bodyEvolutions.map((evo) => ({
               id: `evolve-body-${evo.id}`,
               label: (
-                <div className='flex items-center gap-x-2 w-full'>
-                  <div className='flex items-center justify-center size-6 flex-shrink-0'>
-                    <PokemonSprite pokemonId={evo.id} generation='gen7' />
+                <div className="flex items-center gap-x-2 w-full">
+                  <div className="flex items-center justify-center size-6 flex-shrink-0">
+                    <PokemonSprite pokemonId={evo.id} generation="gen7" />
                   </div>
-                  <span className='truncate'>{evo.name}</span>
+                  <span className="truncate">{evo.name}</span>
                 </div>
               ),
               onClick: () =>
@@ -503,42 +503,42 @@ export function TeamMemberContextMenu({
       // Add "Go to body encounter" option
       if (bodyPokemon?.originalLocation) {
         items.push({
-          id: 'go-to-body-encounter',
-          label: 'Go to Encounter',
+          id: "go-to-body-encounter",
+          label: "Go to Encounter",
           icon: MapPin,
           onClick: handleGoToBodyEncounter,
           tooltip:
-            'Navigate to the location where this Pokémon was encountered',
+            "Navigate to the location where this Pokémon was encountered",
         });
       }
     }
 
     // Add external links separator
     items.push({
-      id: 'external-links-separator',
+      id: "external-links-separator",
       separator: true,
     });
 
     // Add external links
     items.push(
       {
-        id: 'infinitefusiondex',
-        label: 'Open InfiniteDex entry',
+        id: "infinitefusiondex",
+        label: "Open InfiniteDex entry",
         href: infinitefusiondexLink,
-        target: '_blank',
-        favicon: 'https://infinitefusiondex.com/images/favicon.ico',
+        target: "_blank",
+        favicon: "https://infinitefusiondex.com/images/favicon.ico",
         icon: ArrowUpRight,
-        iconClassName: 'dark:text-blue-300 text-blue-400',
+        iconClassName: "dark:text-blue-300 text-blue-400",
       },
       {
-        id: 'fusiondex',
-        label: 'Open FusionDex entry',
+        id: "fusiondex",
+        label: "Open FusionDex entry",
         href: fusiondexLink,
-        target: '_blank',
-        favicon: 'https://www.fusiondex.org/favicon.ico',
+        target: "_blank",
+        favicon: "https://www.fusiondex.org/favicon.ico",
         icon: ArrowUpRight,
-        iconClassName: 'dark:text-blue-300 text-blue-400',
-      }
+        iconClassName: "dark:text-blue-300 text-blue-400",
+      },
     );
 
     return items;
@@ -568,7 +568,7 @@ export function TeamMemberContextMenu({
       <ContextMenu
         disabled={isEggId(headPokemon?.id) || isEggId(bodyPokemon?.id)}
         items={contextItems}
-        portalRootId='team-slots'
+        portalRootId="team-slots"
       >
         {children}
       </ContextMenu>

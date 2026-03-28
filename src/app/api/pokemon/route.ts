@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import pokemonData from '@data/shared/pokemon-data.json';
-import { PokemonSchema } from '@/loaders/pokemon';
-import { z } from 'zod';
+import pokemonData from "@data/shared/pokemon-data.json";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { PokemonSchema } from "@/loaders/pokemon";
 
 // Query parameter schema for filtering
 const QuerySchema = z.object({
@@ -10,7 +10,7 @@ const QuerySchema = z.object({
   type: z.string().optional(), // Filter by type
   limit: z
     .string()
-    .transform(val => parseInt(val, 10))
+    .transform((val) => parseInt(val, 10))
     .optional(), // Limit results
   v: z.string().optional(), // Cache busting version (ignored)
 });
@@ -19,8 +19,8 @@ const QuerySchema = z.object({
 const EGG_POKEMON = {
   id: -1,
   nationalDexId: -1,
-  name: 'Egg',
-  types: [{ name: 'Normal' }],
+  name: "Egg",
+  types: [{ name: "Normal" }],
   species: {
     is_legendary: false,
     is_mythical: false,
@@ -43,10 +43,10 @@ export async function GET(request: NextRequest) {
     if (!validatedQuery.success) {
       return NextResponse.json(
         {
-          error: 'Invalid query parameters',
+          error: "Invalid query parameters",
           details: validatedQuery.error.issues,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -59,24 +59,24 @@ export async function GET(request: NextRequest) {
 
     // Filter by IDs if provided
     if (ids) {
-      const idList = ids.split(',').map(id => parseInt(id, 10));
-      filteredData = filteredData.filter(pokemon =>
-        idList.includes(pokemon.id)
+      const idList = ids.split(",").map((id) => parseInt(id, 10));
+      filteredData = filteredData.filter((pokemon) =>
+        idList.includes(pokemon.id),
       );
     }
 
     // Filter by search term if provided
     if (search) {
       const searchLower = search.toLowerCase();
-      filteredData = filteredData.filter(pokemon =>
-        pokemon.name.toLowerCase().includes(searchLower)
+      filteredData = filteredData.filter((pokemon) =>
+        pokemon.name.toLowerCase().includes(searchLower),
       );
     }
 
     // Filter by type if provided
     if (type) {
-      filteredData = filteredData.filter(pokemon =>
-        pokemon.types.some(t => t.name.toLowerCase() === type.toLowerCase())
+      filteredData = filteredData.filter((pokemon) =>
+        pokemon.types.some((t) => t.name.toLowerCase() === type.toLowerCase()),
       );
     }
 
@@ -88,14 +88,14 @@ export async function GET(request: NextRequest) {
     // Validate the filtered data
     const validatedData = z.array(PokemonSchema).safeParse(filteredData);
     if (!validatedData.success) {
-      console.error('Data validation failed:', validatedData.error.issues);
+      console.error("Data validation failed:", validatedData.error.issues);
       return NextResponse.json(
-        { error: 'Data validation failed' },
-        { status: 500 }
+        { error: "Data validation failed" },
+        { status: 500 },
       );
     }
 
-    const isDevelopment = process.env.NODE_ENV === 'development';
+    const isDevelopment = process.env.NODE_ENV === "development";
 
     return NextResponse.json(
       {
@@ -105,20 +105,20 @@ export async function GET(request: NextRequest) {
       },
       {
         headers: {
-          'Cache-Control': isDevelopment
-            ? 'public, max-age=60' // 1 minute in dev
-            : 'public, max-age=86400', // 24 hours in production
-          'X-Content-Type-Options': 'nosniff',
-          'X-Frame-Options': 'DENY',
-          'X-XSS-Protection': '1; mode=block',
+          "Cache-Control": isDevelopment
+            ? "public, max-age=60" // 1 minute in dev
+            : "public, max-age=86400", // 24 hours in production
+          "X-Content-Type-Options": "nosniff",
+          "X-Frame-Options": "DENY",
+          "X-XSS-Protection": "1; mode=block",
         },
-      }
+      },
     );
   } catch (error) {
-    console.error('Error in Pokemon API route:', error);
+    console.error("Error in Pokemon API route:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: "Internal server error" },
+      { status: 500 },
     );
   }
 }
@@ -128,9 +128,9 @@ export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': 'same-origin',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      "Access-Control-Allow-Origin": "same-origin",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
     },
   });
 }

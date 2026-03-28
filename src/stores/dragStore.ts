@@ -1,5 +1,5 @@
-import { proxy } from 'valtio';
-import type { PokemonOptionType } from '@/loaders/pokemon';
+import { proxy } from "valtio";
+import type { PokemonOptionType } from "@/loaders/pokemon";
 
 export interface DragState {
   currentDragData: string | null;
@@ -23,7 +23,7 @@ export const dragActions = {
   startDrag: (
     data: string,
     source: string,
-    value: PokemonOptionType | null | undefined
+    value: PokemonOptionType | null | undefined,
   ) => {
     // Initialize global handlers on first use
     initializeGlobalHandlers();
@@ -68,7 +68,7 @@ export const dragActions = {
 
 // Initialize global drag end handlers (called automatically on first drag)
 function initializeGlobalHandlers() {
-  if (typeof window === 'undefined' || globalHandlersCleanup) return;
+  if (typeof window === "undefined" || globalHandlersCleanup) return;
 
   const abortController = new AbortController();
   const { signal } = abortController;
@@ -78,18 +78,18 @@ function initializeGlobalHandlers() {
   };
 
   // Clean up drag state on global drag events
-  document.addEventListener('dragend', handleDragEnd, { signal });
-  document.addEventListener('drop', handleDragEnd, { signal });
+  document.addEventListener("dragend", handleDragEnd, { signal });
+  document.addEventListener("drop", handleDragEnd, { signal });
 
   // Clean up if page becomes hidden (e.g., tab switch during drag)
   document.addEventListener(
-    'visibilitychange',
+    "visibilitychange",
     () => {
       if (document.hidden && dragStore.isDragging) {
         dragActions.clearDrag();
       }
     },
-    { signal }
+    { signal },
   );
 
   // Store cleanup function

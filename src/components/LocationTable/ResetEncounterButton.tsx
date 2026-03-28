@@ -1,9 +1,9 @@
-import clsx from 'clsx';
-import { useState, useCallback, Fragment } from 'react';
-import ConfirmationDialog from '../ConfirmationDialog';
-import { playthroughActions } from '@/stores/playthroughs';
-import { Eraser } from 'lucide-react';
-import { CursorTooltip } from '../CursorTooltip';
+import clsx from "clsx";
+import { Eraser } from "lucide-react";
+import { Fragment, useCallback, useState } from "react";
+import { playthroughActions } from "@/stores/playthroughs";
+import ConfirmationDialog from "../ConfirmationDialog";
+import { CursorTooltip } from "../CursorTooltip";
 
 interface ResetEncounterButtonProps {
   locationId: string;
@@ -34,25 +34,25 @@ export default function ResetEncounterButton({
   return (
     <Fragment>
       <CursorTooltip
-        placement={'bottom-end'}
-        className='origin-top-right'
+        placement={"bottom-end"}
+        className="origin-top-right"
         delay={300}
-        content={'Reset the encounter for this location'}
+        content={"Reset the encounter for this location"}
       >
         <button
-          type='button'
+          type="button"
           onClick={handleButtonClick}
           disabled={!hasEncounter}
           className={clsx(
-            'size-8 flex items-center justify-center rounded-md transition-colors cursor-pointer',
-            'focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2',
-            'disabled:opacity-30 disabled:cursor-not-allowed',
-            'text-gray-400 enabled:hover:text-orange-600 enabled:hover:bg-orange-50',
-            'dark:text-gray-500 dark:enabled:hover:text-orange-400 dark:enabled:hover:bg-orange-900/20'
+            "size-8 flex items-center justify-center rounded-md transition-colors cursor-pointer",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2",
+            "disabled:opacity-30 disabled:cursor-not-allowed",
+            "text-gray-400 enabled:hover:text-orange-600 enabled:hover:bg-orange-50",
+            "dark:text-gray-500 dark:enabled:hover:text-orange-400 dark:enabled:hover:bg-orange-900/20",
           )}
           aria-label={`Reset encounter for ${locationName}`}
         >
-          <Eraser className='size-4' />
+          <Eraser className="size-4" />
         </button>
       </CursorTooltip>
 
@@ -60,11 +60,11 @@ export default function ResetEncounterButton({
         isOpen={isDialogOpen}
         onClose={handleCancel}
         onConfirm={handleConfirm}
-        title='Reset Encounter'
+        title="Reset Encounter"
         message={`Are you sure you want to reset the encounter for ${locationName}?`}
-        confirmText='Reset'
-        cancelText='Cancel'
-        variant='warning'
+        confirmText="Reset"
+        cancelText="Cancel"
+        variant="warning"
       />
     </Fragment>
   );

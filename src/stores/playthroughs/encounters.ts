@@ -1,32 +1,32 @@
-import { z } from 'zod';
+import type { z } from "zod";
+import { getDisplayPokemon } from "@/components/PokemonSummaryCard/utils";
+import { emitEvolutionEvent } from "@/lib/events";
 import {
-  PokemonOptionSchema,
-  PokemonOptionType,
-  generatePokemonUID,
-  PokemonStatus,
-} from '@/loaders/pokemon';
+  getPreferredVariant,
+  setPreferredVariant,
+} from "@/lib/preferredVariants";
+import { spriteKeys } from "@/lib/queries/sprites";
+import { queryClient } from "@/lib/queryClient";
 import {
   generateSpriteUrl,
   getArtworkVariants,
   getSpriteId,
-} from '@/lib/sprites';
+} from "@/lib/sprites";
 import {
-  getPreferredVariant,
-  setPreferredVariant,
-} from '@/lib/preferredVariants';
-import { getDisplayPokemon } from '@/components/PokemonSummaryCard/utils';
-import { queryClient } from '@/lib/queryClient';
-import { spriteKeys } from '@/lib/queries/sprites';
-import { EncounterDataSchema, EncounterData, Playthrough } from './types';
-import { getActivePlaythrough, getCurrentTimestamp } from './store';
-import { emitEvolutionEvent } from '@/lib/events';
+  generatePokemonUID,
+  type PokemonOptionSchema,
+  type PokemonOptionType,
+  PokemonStatus,
+} from "@/loaders/pokemon";
+import { getActivePlaythrough, getCurrentTimestamp } from "./store";
+import type { EncounterData, EncounterDataSchema, Playthrough } from "./types";
 
 function getFusionSpriteIdFromEncounter(enc?: {
   head: z.infer<typeof PokemonOptionSchema> | null;
   body: z.infer<typeof PokemonOptionSchema> | null;
   isFusion?: boolean;
 }) {
-  if (!enc || !enc.isFusion || !enc.head || !enc.body) return null;
+  if (!enc?.isFusion || !enc.head || !enc.body) return null;
   const headId = enc.head?.id ?? null;
   const bodyId = enc.body?.id ?? null;
   if (!headId || !bodyId) return null;
@@ -40,22 +40,22 @@ function getFusionSpriteIdFromEncounter(enc?: {
 // Create encounter data (variants are now managed globally)
 export const createEncounterData = async (
   pokemon: z.infer<typeof PokemonOptionSchema> | null,
-  field: 'head' | 'body' = 'head',
+  field: "head" | "body" = "head",
   shouldCreateFusion: boolean = false,
-  locationId?: string
+  locationId?: string,
 ): Promise<z.infer<typeof EncounterDataSchema>> => {
   const pokemonWithLocationAndUID = pokemon
     ? {
         ...pokemon,
-        originalLocation: pokemon.originalLocation ?? locationId ?? '',
+        originalLocation: pokemon.originalLocation ?? locationId ?? "",
         uid: pokemon.uid || generatePokemonUID(),
       }
     : null;
 
   // Create encounter data without artwork variant (now managed globally)
   const encounterData: z.infer<typeof EncounterDataSchema> = {
-    head: field === 'head' ? pokemonWithLocationAndUID : null,
-    body: field === 'body' ? pokemonWithLocationAndUID : null,
+    head: field === "head" ? pokemonWithLocationAndUID : null,
+    body: field === "body" ? pokemonWithLocationAndUID : null,
     isFusion: shouldCreateFusion,
     updatedAt: getCurrentTimestamp(),
   };
@@ -64,7 +64,7 @@ export const createEncounterData = async (
 };
 
 // Get encounters for active playthrough
-export const getEncounters = (): Playthrough['encounters'] => {
+export const getEncounters = (): Playthrough["encounters"] => {
   const activePlaythrough = getActivePlaythrough();
   return activePlaythrough?.encounters || {};
 };
@@ -72,7 +72,7 @@ export const getEncounters = (): Playthrough['encounters'] => {
 // Update a Pokémon's properties by UID across all encounters
 export const updatePokemonByUID = async (
   pokemonUID: string,
-  updates: Partial<z.infer<typeof PokemonOptionSchema>>
+  updates: Partial<z.infer<typeof PokemonOptionSchema>>,
 ) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough?.encounters) {
@@ -99,8 +99,8 @@ export const updatePokemonByUID = async (
 export const updatePokemonInEncounter = async (
   locationId: string,
   pokemonUID: string,
-  field: 'head' | 'body',
-  updates: Partial<z.infer<typeof PokemonOptionSchema>>
+  field: "head" | "body",
+  updates: Partial<z.infer<typeof PokemonOptionSchema>>,
 ) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough?.encounters?.[locationId]) {
@@ -124,8 +124,8 @@ export const updatePokemonInEncounter = async (
 export const updateEncounter = async (
   locationId: string,
   pokemon: z.infer<typeof PokemonOptionSchema> | null,
-  field: 'head' | 'body' = 'head',
-  shouldCreateFusion: boolean = false
+  field: "head" | "body" = "head",
+  shouldCreateFusion: boolean = false,
 ) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) {
@@ -145,7 +145,7 @@ export const updateEncounter = async (
       pokemon,
       field,
       shouldCreateFusion,
-      locationId
+      locationId,
     );
     encounter = encounterData;
     activePlaythrough.encounters[locationId] = encounter;
@@ -155,7 +155,7 @@ export const updateEncounter = async (
     }
 
     // Auto-assign Pokémon to team slots if it has a relevant status
-    if (pokemon && pokemon.status) {
+    if (pokemon?.status) {
       await autoAssignCapturedPokemonToTeam(locationId);
     }
     return;
@@ -171,7 +171,7 @@ export const updateEncounter = async (
 
     // Determine if this should be a fusion encounter
     const willBeFusion =
-      shouldCreateFusion || encounter.isFusion || field === 'body';
+      shouldCreateFusion || encounter.isFusion || field === "body";
 
     // Track previous value for the field being updated
     const previousFieldId = encounter[field]?.id ?? null;
@@ -186,7 +186,7 @@ export const updateEncounter = async (
         encounter.head &&
         encounter.body
       ) {
-        const otherField = field === 'head' ? 'body' : 'head';
+        const otherField = field === "head" ? "body" : "head";
         const otherPokemon = encounter[otherField];
 
         if (otherPokemon && !otherPokemon.status) {
@@ -226,7 +226,7 @@ export const updateEncounter = async (
     // Collect UIDs of Pokémon being removed for team cleanup
     const removedUIDs: string[] = [];
     if (encounter[field]?.uid) {
-      removedUIDs.push(encounter[field]!.uid);
+      removedUIDs.push(encounter[field]?.uid);
     }
 
     // Clear the field
@@ -335,7 +335,7 @@ export const flipEncounterFusion = async (locationId: string) => {
   }
 
   const encounter = activePlaythrough.encounters[locationId];
-  if (!encounter || !encounter.isFusion) return;
+  if (!encounter?.isFusion) return;
 
   // Display state management is now handled globally
 
@@ -361,10 +361,10 @@ export const flipEncounterFusion = async (locationId: string) => {
 // Move encounter atomically from source to destination (for drag and drop)
 export const moveEncounterAtomic = async (
   sourceLocationId: string,
-  sourceField: 'head' | 'body',
+  sourceField: "head" | "body",
   targetLocationId: string,
-  targetField: 'head' | 'body',
-  pokemon: z.infer<typeof PokemonOptionSchema>
+  targetField: "head" | "body",
+  pokemon: z.infer<typeof PokemonOptionSchema>,
 ) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return;
@@ -388,7 +388,7 @@ export const moveEncounterAtomic = async (
   const existingTargetEncounter =
     activePlaythrough.encounters[targetLocationId];
   const willBeFusion =
-    targetField === 'body' || existingTargetEncounter?.isFusion === true;
+    targetField === "body" || existingTargetEncounter?.isFusion === true;
 
   // Variants are now managed globally, no need to pre-fetch
 
@@ -405,11 +405,11 @@ export const moveEncounterAtomic = async (
   // Create the target encounter with the pre-fetched variant, preserving existing pokemon
   const newEncounter: z.infer<typeof EncounterDataSchema> = {
     head:
-      targetField === 'head'
+      targetField === "head"
         ? pokemonWithLocationAndUID
         : existingTargetEncounter?.head || null,
     body:
-      targetField === 'body'
+      targetField === "body"
         ? pokemonWithLocationAndUID
         : existingTargetEncounter?.body || null,
     isFusion: willBeFusion,
@@ -428,7 +428,7 @@ export const moveEncounterAtomic = async (
 export const createFusion = async (
   locationId: string,
   head: z.infer<typeof PokemonOptionSchema>,
-  body: z.infer<typeof PokemonOptionSchema>
+  body: z.infer<typeof PokemonOptionSchema>,
 ) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return;
@@ -466,7 +466,7 @@ export const createFusion = async (
 // Set artwork variant globally (no longer stored in encounters)
 export const setArtworkVariant = async (
   locationId: string,
-  variant?: string
+  variant?: string,
 ) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return;
@@ -478,7 +478,7 @@ export const setArtworkVariant = async (
   const displayPokemon = getDisplayPokemon(
     encounter.head,
     encounter.body,
-    encounter.isFusion ?? false
+    encounter.isFusion ?? false,
   );
 
   // Update the global preferred variant cache
@@ -487,14 +487,14 @@ export const setArtworkVariant = async (
       await setPreferredVariant(
         displayPokemon.head.id,
         displayPokemon.body.id,
-        variant ?? ''
+        variant ?? "",
       );
     } else if (displayPokemon.head || displayPokemon.body) {
       const pokemon = displayPokemon.head || displayPokemon.body!;
-      await setPreferredVariant(pokemon.id, null, variant ?? '');
+      await setPreferredVariant(pokemon.id, null, variant ?? "");
     }
   } catch (error: unknown) {
-    console.warn('Failed to set preferred variant in cache:', error);
+    console.warn("Failed to set preferred variant in cache:", error);
   }
 
   // Update encounter timestamp to trigger reactivity
@@ -506,7 +506,7 @@ export const prefetchAdjacentVariants = async (
   headId?: number,
   bodyId?: number,
   currentVariant?: string,
-  availableVariants?: string[]
+  availableVariants?: string[],
 ) => {
   try {
     // Get available variants if not provided
@@ -517,7 +517,7 @@ export const prefetchAdjacentVariants = async (
     if (!variants || variants.length <= 1) return;
 
     // Find current variant index
-    const currentIndex = variants.indexOf(currentVariant || '');
+    const currentIndex = variants.indexOf(currentVariant || "");
 
     // Calculate adjacent indices (next and previous)
     const nextIndex = (currentIndex + 1) % variants.length;
@@ -525,16 +525,16 @@ export const prefetchAdjacentVariants = async (
 
     // Get the adjacent variants
     const adjacentVariants = [variants[nextIndex], variants[prevIndex]].filter(
-      variant => variant && variant !== currentVariant
+      (variant) => variant && variant !== currentVariant,
     );
 
     // Prefetch the adjacent variant images
-    const prefetchPromises = adjacentVariants.map(variant => () => {
+    const prefetchPromises = adjacentVariants.map((variant) => () => {
       try {
         const imageUrl = generateSpriteUrl(headId, bodyId, variant);
         // Create new Image object to trigger prefetch
         const img = new Image();
-        img.setAttribute('decoding', 'async');
+        img.setAttribute("decoding", "async");
         img.src = imageUrl;
         // Optionally handle load/error events
         img.onload = () => {
@@ -549,19 +549,19 @@ export const prefetchAdjacentVariants = async (
     });
 
     window.requestAnimationFrame(() => {
-      prefetchPromises.forEach(p => p());
+      prefetchPromises.forEach((p) => p());
     });
 
     // Execute prefetch operations in parallel (no need for await since we're just triggering prefetch)
   } catch (error) {
-    console.warn('Failed to prefetch adjacent variants:', error);
+    console.warn("Failed to prefetch adjacent variants:", error);
   }
 };
 
 // Cycle through artwork variants for encounters (with validation)
 export const cycleArtworkVariant = async (
   locationId: string,
-  reverse: boolean = false
+  reverse: boolean = false,
 ) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough?.encounters) return;
@@ -573,7 +573,7 @@ export const cycleArtworkVariant = async (
     // First try to get cached variants from React Query
     const queryKey = spriteKeys.variants(
       encounter.head?.id,
-      encounter.body?.id
+      encounter.body?.id,
     );
     let availableVariants = queryClient.getQueryData<string[]>(queryKey);
 
@@ -581,7 +581,7 @@ export const cycleArtworkVariant = async (
     if (!availableVariants) {
       availableVariants = await getArtworkVariants(
         encounter.head?.id,
-        encounter.body?.id
+        encounter.body?.id,
       );
     }
 
@@ -592,7 +592,7 @@ export const cycleArtworkVariant = async (
     const displayPokemon = getDisplayPokemon(
       encounter.head,
       encounter.body,
-      encounter.isFusion ?? false
+      encounter.isFusion ?? false,
     );
 
     const headId = displayPokemon.head?.id;
@@ -600,20 +600,20 @@ export const cycleArtworkVariant = async (
 
     // Get current variant from global preferred variants
     const currentVariant =
-      getPreferredVariant(headId ?? null, bodyId ?? null) || '';
+      getPreferredVariant(headId ?? null, bodyId ?? null) || "";
     const currentIndex = availableVariants.indexOf(currentVariant);
     const nextIndex = reverse
       ? (currentIndex - 1 + availableVariants.length) % availableVariants.length
       : (currentIndex + 1) % availableVariants.length;
 
     // Update global preferred variant
-    const newVariant = availableVariants[nextIndex] || '';
+    const newVariant = availableVariants[nextIndex] || "";
 
     if (displayPokemon.isFusion && displayPokemon.head && displayPokemon.body) {
       await setPreferredVariant(
         displayPokemon.head.id,
         displayPokemon.body.id,
-        newVariant
+        newVariant,
       );
     } else if (displayPokemon.head || displayPokemon.body) {
       const pokemon = displayPokemon.head || displayPokemon.body!;
@@ -629,13 +629,13 @@ export const cycleArtworkVariant = async (
         headId ?? undefined,
         bodyId ?? undefined,
         newVariant,
-        availableVariants
-      ).catch(error => {
-        console.warn('Failed to prefetch adjacent variants:', error);
+        availableVariants,
+      ).catch((error) => {
+        console.warn("Failed to prefetch adjacent variants:", error);
       });
     }
   } catch (error) {
-    console.error('Failed to cycle artwork variant:', error);
+    console.error("Failed to cycle artwork variant:", error);
     encounter.updatedAt = getCurrentTimestamp();
   }
 };
@@ -652,7 +652,7 @@ export const preloadArtworkVariants = async () => {
 
   // Get all encounters that need variant preloading
   const encountersToPreload = Object.entries(
-    activePlaythrough.encounters
+    activePlaythrough.encounters,
   ).filter(([, encounter]) => {
     // Include fusion encounters with both head and body
     if (encounter.isFusion && encounter.head && encounter.body) {
@@ -666,12 +666,12 @@ export const preloadArtworkVariants = async () => {
   });
 
   if (encountersToPreload.length === 0) {
-    console.debug('No encounters found to preload variants for');
+    console.debug("No encounters found to preload variants for");
     return;
   }
 
   console.debug(
-    `Preloading artwork variants for ${encountersToPreload.length} encounters...`
+    `Preloading artwork variants for ${encountersToPreload.length} encounters...`,
   );
 
   try {
@@ -686,20 +686,20 @@ export const preloadArtworkVariants = async () => {
           return getArtworkVariants(encounter.head.id, encounter.body.id).catch(
             (error: unknown) => {
               console.warn(
-                `Failed to preload fusion variants ${encounter.head!.id}.${encounter.body!.id}:`,
-                error
+                `Failed to preload fusion variants ${encounter.head?.id}.${encounter.body?.id}:`,
+                error,
               );
-            }
+            },
           );
         } else if (encounter.head) {
           // Single Pokémon encounter
           return getArtworkVariants(encounter.head.id).catch(
             (error: unknown) => {
               console.warn(
-                `Failed to preload Pokémon variants ${encounter.head!.id}:`,
-                error
+                `Failed to preload Pokémon variants ${encounter.head?.id}:`,
+                error,
               );
-            }
+            },
           );
         }
         return Promise.resolve();
@@ -709,13 +709,13 @@ export const preloadArtworkVariants = async () => {
 
       // Add a small delay between batches to be respectful to the server
       if (i + batchSize < encountersToPreload.length) {
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
       }
     }
 
-    console.debug('Artwork variant preloading completed');
+    console.debug("Artwork variant preloading completed");
   } catch (error) {
-    console.error('Failed to preload artwork variants:', error);
+    console.error("Failed to preload artwork variants:", error);
   }
 };
 
@@ -724,7 +724,7 @@ export const preloadArtworkVariants = async () => {
 // Clear encounter from a specific location (replaces clearCombobox event)
 export const clearEncounterFromLocation = async (
   locationId: string,
-  field?: 'head' | 'body'
+  field?: "head" | "body",
 ) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return;
@@ -749,12 +749,12 @@ export const clearEncounterFromLocation = async (
       removedUIDs.push(encounter.body.uid);
     }
 
-    delete activePlaythrough.encounters![locationId];
+    delete activePlaythrough.encounters?.[locationId];
     // No encounter timestamp to update since it's deleted
   } else {
     // Clear only the specified field
     if (encounter[field]?.uid) {
-      removedUIDs.push(encounter[field]!.uid);
+      removedUIDs.push(encounter[field]?.uid);
     }
 
     encounter[field] = null;
@@ -767,8 +767,8 @@ export const clearEncounterFromLocation = async (
     // Only remove the entire encounter if it's not a fusion and we're clearing the head
     // OR if it's a regular encounter (not a fusion) and both are null
     if (!encounter.isFusion) {
-      if (field === 'head' || (!encounter.head && !encounter.body)) {
-        delete activePlaythrough.encounters![locationId];
+      if (field === "head" || (!encounter.head && !encounter.body)) {
+        delete activePlaythrough.encounters?.[locationId];
         // No encounter timestamp to update since it's deleted
       } else {
         // Update encounter timestamp for partial clearing
@@ -789,7 +789,7 @@ export const moveEncounter = async (
   fromLocationId: string,
   toLocationId: string,
   pokemon: z.infer<typeof PokemonOptionSchema>,
-  toField: 'head' | 'body' = 'head'
+  toField: "head" | "body" = "head",
 ) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return;
@@ -811,9 +811,9 @@ export const moveEncounter = async (
 
   // Create new encounter
   const newEncounter: z.infer<typeof EncounterDataSchema> = {
-    head: toField === 'head' ? pokemonWithLocationAndUID : null,
-    body: toField === 'body' ? pokemonWithLocationAndUID : null,
-    isFusion: toField === 'body', // If we're setting body field, it's a fusion
+    head: toField === "head" ? pokemonWithLocationAndUID : null,
+    body: toField === "body" ? pokemonWithLocationAndUID : null,
+    isFusion: toField === "body", // If we're setting body field, it's a fusion
     updatedAt: getCurrentTimestamp(),
   };
 
@@ -826,8 +826,8 @@ export const moveEncounter = async (
 export const swapEncounters = async (
   locationId1: string,
   locationId2: string,
-  field1: 'head' | 'body' = 'head',
-  field2: 'head' | 'body' = 'head'
+  field1: "head" | "body" = "head",
+  field2: "head" | "body" = "head",
 ) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return;
@@ -842,8 +842,8 @@ export const swapEncounters = async (
 
   if (!encounter1 || !encounter2) return;
 
-  const pokemon1 = field1 === 'head' ? encounter1.head : encounter1.body;
-  const pokemon2 = field2 === 'head' ? encounter2.head : encounter2.body;
+  const pokemon1 = field1 === "head" ? encounter1.head : encounter1.body;
+  const pokemon2 = field2 === "head" ? encounter2.head : encounter2.body;
 
   if (!pokemon1 || !pokemon2) return;
 
@@ -858,13 +858,13 @@ export const swapEncounters = async (
   };
 
   // Directly swap the Pokemon
-  if (field1 === 'head') {
+  if (field1 === "head") {
     encounter1.head = pokemon2WithLocation;
   } else {
     encounter1.body = pokemon2WithLocation;
   }
 
-  if (field2 === 'head') {
+  if (field2 === "head") {
     encounter2.head = pokemon1WithLocation;
   } else {
     encounter2.body = pokemon1WithLocation;
@@ -889,26 +889,26 @@ export const swapEncounters = async (
 
 // Get location ID from combobox ID (helper for drag operations)
 export const getLocationFromComboboxId = (
-  comboboxId: string
-): { locationId: string; field: 'head' | 'body' } => {
-  if (comboboxId.endsWith('-head')) {
-    return { locationId: comboboxId.replace('-head', ''), field: 'head' };
+  comboboxId: string,
+): { locationId: string; field: "head" | "body" } => {
+  if (comboboxId.endsWith("-head")) {
+    return { locationId: comboboxId.replace("-head", ""), field: "head" };
   }
-  if (comboboxId.endsWith('-body')) {
-    return { locationId: comboboxId.replace('-body', ''), field: 'body' };
+  if (comboboxId.endsWith("-body")) {
+    return { locationId: comboboxId.replace("-body", ""), field: "body" };
   }
-  if (comboboxId.endsWith('-single')) {
-    return { locationId: comboboxId.replace('-single', ''), field: 'head' };
+  if (comboboxId.endsWith("-single")) {
+    return { locationId: comboboxId.replace("-single", ""), field: "head" };
   }
   // Fallback - assume it's just the location ID
-  return { locationId: comboboxId, field: 'head' };
+  return { locationId: comboboxId, field: "head" };
 };
 
 // Move Pokemon to its original location with smart slot selection
 export const moveToOriginalLocation = async (
   sourceLocationId: string,
-  sourceField: 'head' | 'body',
-  pokemon: z.infer<typeof PokemonOptionSchema>
+  sourceField: "head" | "body",
+  pokemon: z.infer<typeof PokemonOptionSchema>,
 ) => {
   if (!pokemon.originalLocation) return;
 
@@ -937,8 +937,8 @@ export const moveToOriginalLocation = async (
       sourceLocationId,
       sourceField,
       originalLocationId,
-      'head',
-      pokemon
+      "head",
+      pokemon,
     );
   } else if (!existingBodyPokemon) {
     // Head is occupied but body is empty, move to body slot
@@ -946,8 +946,8 @@ export const moveToOriginalLocation = async (
       sourceLocationId,
       sourceField,
       originalLocationId,
-      'body',
-      pokemon
+      "body",
+      pokemon,
     );
   } else {
     // Both slots are occupied, swap with the head slot (default behavior)
@@ -955,7 +955,7 @@ export const moveToOriginalLocation = async (
       sourceLocationId,
       originalLocationId,
       sourceField,
-      'head'
+      "head",
     );
   }
 };
@@ -967,7 +967,7 @@ export const moveToOriginalLocation = async (
  */
 const updateEncounterStatus = async (
   locationId: string,
-  status: (typeof PokemonStatus)[keyof typeof PokemonStatus]
+  status: (typeof PokemonStatus)[keyof typeof PokemonStatus],
 ): Promise<void> => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return;
@@ -986,7 +986,7 @@ const updateEncounterStatus = async (
       ...encounter.head,
       status,
     };
-    await updateEncounter(locationId, updatedHead, 'head', false);
+    await updateEncounter(locationId, updatedHead, "head", false);
   }
 
   // Update body Pokemon status if it exists
@@ -995,7 +995,7 @@ const updateEncounterStatus = async (
       ...encounter.body,
       status,
     };
-    await updateEncounter(locationId, updatedBody, 'body', false);
+    await updateEncounter(locationId, updatedBody, "body", false);
   }
 };
 
@@ -1003,7 +1003,7 @@ const updateEncounterStatus = async (
  * Mark both Pokemon in an encounter as deceased
  */
 export const markEncounterAsDeceased = async (
-  locationId: string
+  locationId: string,
 ): Promise<void> => {
   await updateEncounterStatus(locationId, PokemonStatus.DECEASED);
 };
@@ -1021,7 +1021,7 @@ export const moveEncounterToBox = async (locationId: string): Promise<void> => {
  * Auto-assigns captured Pokémon to available team slots for new playthroughs
  */
 export const markEncounterAsCaptured = async (
-  locationId: string
+  locationId: string,
 ): Promise<void> => {
   await updateEncounterStatus(locationId, PokemonStatus.CAPTURED);
 
@@ -1033,7 +1033,7 @@ export const markEncounterAsCaptured = async (
  * Auto-assign captured/received Pokémon to available team slots
  */
 const autoAssignCapturedPokemonToTeam = async (
-  locationId: string
+  locationId: string,
 ): Promise<void> => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough?.team || !activePlaythrough.encounters) {
@@ -1069,19 +1069,11 @@ const autoAssignCapturedPokemonToTeam = async (
     status === PokemonStatus.RECEIVED ||
     status === PokemonStatus.TRADED;
 
-  if (
-    encounter.head &&
-    encounter.head.status &&
-    shouldAutoAssign(encounter.head.status)
-  ) {
+  if (encounter.head?.status && shouldAutoAssign(encounter.head.status)) {
     headPokemon = { uid: encounter.head.uid! };
   }
 
-  if (
-    encounter.body &&
-    encounter.body.status &&
-    shouldAutoAssign(encounter.body.status)
-  ) {
+  if (encounter.body?.status && shouldAutoAssign(encounter.body.status)) {
     bodyPokemon = { uid: encounter.body.uid! };
   }
 
@@ -1089,9 +1081,8 @@ const autoAssignCapturedPokemonToTeam = async (
   if (!headPokemon && !bodyPokemon) {
     return;
   }
-
   // Import the updateTeamMember function dynamically to avoid circular dependencies
-  const { updateTeamMember } = await import('./store');
+  const { updateTeamMember } = await import("./store");
 
   // Check if either Pokemon is already on the team and needs to be updated for fusion
   let targetPosition = nextAvailablePosition;
@@ -1120,12 +1111,12 @@ const autoAssignCapturedPokemonToTeam = async (
   const success = await updateTeamMember(
     targetPosition,
     headPokemon,
-    bodyPokemon
+    bodyPokemon,
   );
 
   if (success === false) {
     console.error(
-      `Failed to auto-assign Pokémon from ${locationId} to team slot ${targetPosition + 1}`
+      `Failed to auto-assign Pokémon from ${locationId} to team slot ${targetPosition + 1}`,
     );
   }
 };
@@ -1134,7 +1125,7 @@ const autoAssignCapturedPokemonToTeam = async (
  * Mark both Pokemon in an encounter as missed
  */
 export const markEncounterAsMissed = async (
-  locationId: string
+  locationId: string,
 ): Promise<void> => {
   await updateEncounterStatus(locationId, PokemonStatus.MISSED);
 };
@@ -1145,7 +1136,7 @@ export const markEncounterAsMissed = async (
  * Auto-assigns received Pokémon to available team slots for new playthroughs
  */
 export const markEncounterAsReceived = async (
-  locationId: string
+  locationId: string,
 ): Promise<void> => {
   await updateEncounterStatus(locationId, PokemonStatus.RECEIVED);
 
@@ -1158,7 +1149,7 @@ export const markEncounterAsReceived = async (
  */
 function findPokemonByUID(
   encounters: Record<string, EncounterData> | undefined,
-  uid: string
+  uid: string,
 ): PokemonOptionType | null {
   if (!encounters) return null;
 
@@ -1223,7 +1214,7 @@ export const moveTeamMemberToBox = async (position: number): Promise<void> => {
   if (teamMember.headPokemonUid) {
     const headPokemon = findPokemonByUID(
       activePlaythrough.encounters,
-      teamMember.headPokemonUid
+      teamMember.headPokemonUid,
     );
 
     if (headPokemon) {
@@ -1249,7 +1240,7 @@ export const moveTeamMemberToBox = async (position: number): Promise<void> => {
   if (teamMember.bodyPokemonUid) {
     const bodyPokemon = findPokemonByUID(
       activePlaythrough.encounters,
-      teamMember.bodyPokemonUid
+      teamMember.bodyPokemonUid,
     );
 
     if (bodyPokemon) {
@@ -1282,7 +1273,7 @@ export const moveTeamMemberToBox = async (position: number): Promise<void> => {
  * Restore a Pokémon's status to its original receival status when adding to team
  */
 export const restorePokemonToTeam = async (
-  pokemonUID: string
+  pokemonUID: string,
 ): Promise<void> => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough?.encounters) return;

@@ -1,6 +1,9 @@
-import { SpriteVariantsResponse, SpriteVariantsError } from '@/types/sprites';
-import { formatArtistCredits } from '@/utils/formatCredits';
-import { getCacheBuster } from '@/lib/persistence';
+import { getCacheBuster } from "@/lib/persistence";
+import type {
+  SpriteVariantsError,
+  SpriteVariantsResponse,
+} from "@/types/sprites";
+import { formatArtistCredits } from "@/utils/formatCredits";
 
 // Types for sprite credits API
 export interface SpriteCreditsResponse {
@@ -18,11 +21,11 @@ export interface SpriteCreditsError {
  */
 export function getSpriteId(
   headId?: number | null,
-  bodyId?: number | null
+  bodyId?: number | null,
 ): string {
   return headId && bodyId
     ? `${headId}.${bodyId}`
-    : (headId || bodyId || '').toString();
+    : (headId || bodyId || "").toString();
 }
 
 /**
@@ -31,9 +34,9 @@ export function getSpriteId(
 export function generateSpriteUrl(
   headId?: number | null,
   bodyId?: number | null,
-  variant = ''
+  variant = "",
 ): string {
-  const id = headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
+  const id = headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || "";
   return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${id}${variant}.png`;
 }
 
@@ -41,9 +44,9 @@ export function generateSpriteUrl(
  * Generate variant suffix for index (0='', 1='a', 2='b', etc.)
  */
 export function getVariantSuffix(index: number): string {
-  if (index === 0) return '';
+  if (index === 0) return "";
 
-  let result = '';
+  let result = "";
   index = index - 1; // Convert to 0-based
 
   do {
@@ -60,10 +63,10 @@ export function getVariantSuffix(index: number): string {
  */
 export async function checkSpriteExists(url: string): Promise<boolean> {
   // Try Image approach first in main thread (more reliable for images)
-  if (typeof window !== 'undefined' && typeof Image !== 'undefined') {
-    return new Promise<boolean>(resolve => {
+  if (typeof window !== "undefined" && typeof Image !== "undefined") {
+    return new Promise<boolean>((resolve) => {
       const img = new Image();
-      img.decoding = 'async';
+      img.decoding = "async";
 
       const timeoutId = setTimeout(() => {
         img.onload = null;
@@ -91,7 +94,7 @@ export async function checkSpriteExists(url: string): Promise<boolean> {
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
     const response = await fetch(url, {
-      method: 'HEAD',
+      method: "HEAD",
       signal: controller.signal,
     });
 
@@ -104,14 +107,14 @@ export async function checkSpriteExists(url: string): Promise<boolean> {
       const timeoutId = setTimeout(() => controller.abort(), 3000);
 
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
       return response.ok;
     } catch (getError) {
-      console.warn('Failed to check sprite exists:', error, getError);
+      console.warn("Failed to check sprite exists:", error, getError);
       return false;
     }
   }
@@ -122,19 +125,19 @@ export async function checkSpriteExists(url: string): Promise<boolean> {
  */
 export async function getArtworkVariants(
   headId?: number | null,
-  bodyId?: number | null
+  bodyId?: number | null,
 ): Promise<string[]> {
-  if (!headId && !bodyId) return [''];
+  if (!headId && !bodyId) return [""];
 
   try {
     // Use edge function to get variants (avoids CORS issues)
     const id =
-      headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
+      headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || "";
     const params = new URLSearchParams();
-    params.set('id', id.toString());
+    params.set("id", id.toString());
 
     // Add cache busting version parameter
-    params.set('v', getCacheBuster().toString());
+    params.set("v", getCacheBuster().toString());
 
     const response = await fetch(`/api/sprite/variants?${params.toString()}`);
 
@@ -146,17 +149,17 @@ export async function getArtworkVariants(
       await response.json();
 
     // Check if response is an error
-    if ('error' in data) {
+    if ("error" in data) {
       throw new Error(data.error);
     }
 
     return data.variants || [];
   } catch (error) {
-    console.warn('Failed to get artwork variants from API:', error);
+    console.warn("Failed to get artwork variants from API:", error);
 
     // Return empty array to avoid CORS issues with direct CDN access
     // The API should handle all sprite checking server-side
-    return [''];
+    return [""];
   }
 }
 
@@ -165,20 +168,20 @@ export async function getArtworkVariants(
  */
 export async function getSpriteCredits(
   headId?: number | null,
-  bodyId?: number | null
+  bodyId?: number | null,
 ): Promise<SpriteCreditsResponse | null> {
   if (!headId && !bodyId) return null;
 
   try {
     // Generate the sprite ID (same format as other methods)
     const id =
-      headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
+      headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || "";
 
     // Add cache busting version parameter
     const buildId = getCacheBuster().toString();
 
     const response = await fetch(
-      `/api/sprite/artists?id=${encodeURIComponent(id)}&v=${encodeURIComponent(buildId)}`
+      `/api/sprite/artists?id=${encodeURIComponent(id)}&v=${encodeURIComponent(buildId)}`,
     );
 
     if (!response.ok) {
@@ -189,15 +192,15 @@ export async function getSpriteCredits(
       await response.json();
 
     // Check if response is an error
-    if ('error' in data) {
+    if ("error" in data) {
       throw new Error(
-        typeof data.error === 'string' ? data.error : 'Unknown error'
+        typeof data.error === "string" ? data.error : "Unknown error",
       );
     }
 
     return data;
   } catch (error) {
-    console.warn('Failed to get sprite credits from API:', error);
+    console.warn("Failed to get sprite credits from API:", error);
     return null;
   }
 }
@@ -208,14 +211,14 @@ export async function getSpriteCredits(
 export async function getVariantSpriteCredits(
   headId?: number | null,
   bodyId?: number | null,
-  variant = ''
+  variant = "",
 ): Promise<string[] | null> {
   const allCredits = await getSpriteCredits(headId, bodyId);
   if (!allCredits) return null;
 
   // Generate the variant key
   const baseId =
-    headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
+    headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || "";
   const variantKey = variant ? `${baseId}${variant}` : baseId;
 
   return allCredits[variantKey] || null;
@@ -228,7 +231,7 @@ export async function getVariantSpriteCredits(
 export async function getFormattedVariantSpriteCredits(
   headId?: number | null,
   bodyId?: number | null,
-  variant = ''
+  variant = "",
 ): Promise<string> {
   const credits = await getVariantSpriteCredits(headId, bodyId, variant);
   return formatArtistCredits(credits);
@@ -242,13 +245,13 @@ export function getFormattedCreditsFromResponse(
   credits: SpriteCreditsResponse | null | undefined,
   headId?: number | null,
   bodyId?: number | null,
-  variant = ''
+  variant = "",
 ): string {
   if (!credits) return formatArtistCredits(null);
 
   // Generate the variant key
   const baseId =
-    headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || '';
+    headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || "";
   const variantKey = variant ? `${baseId}${variant}` : baseId;
 
   return formatArtistCredits(credits[variantKey]);

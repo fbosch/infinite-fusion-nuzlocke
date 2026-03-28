@@ -1,25 +1,25 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from "@testing-library/react";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
+  useAltKey,
+  useControlKey,
   useKeyPressed,
   useShiftKey,
-  useControlKey,
-  useAltKey,
-} from '../useKeyPressed';
+} from "../useKeyPressed";
 
 // Helper functions to simulate real keyboard events
 function dispatchKeyDown(key: string) {
-  const event = new KeyboardEvent('keydown', { key });
+  const event = new KeyboardEvent("keydown", { key });
   document.dispatchEvent(event);
 }
 
 function dispatchKeyUp(key: string) {
-  const event = new KeyboardEvent('keyup', { key });
+  const event = new KeyboardEvent("keyup", { key });
   document.dispatchEvent(event);
 }
 
 function dispatchWindowBlur() {
-  const event = new Event('blur');
+  const event = new Event("blur");
   window.dispatchEvent(event);
 }
 
@@ -30,12 +30,12 @@ beforeEach(() => {
   });
 });
 
-describe('useKeyPressed', () => {
-  it('should return false initially for any key', () => {
-    const { result: shiftResult } = renderHook(() => useKeyPressed('Shift'));
-    const { result: ctrlResult } = renderHook(() => useKeyPressed('Control'));
-    const { result: enterResult } = renderHook(() => useKeyPressed('Enter'));
-    const { result: aResult } = renderHook(() => useKeyPressed('a'));
+describe("useKeyPressed", () => {
+  it("should return false initially for any key", () => {
+    const { result: shiftResult } = renderHook(() => useKeyPressed("Shift"));
+    const { result: ctrlResult } = renderHook(() => useKeyPressed("Control"));
+    const { result: enterResult } = renderHook(() => useKeyPressed("Enter"));
+    const { result: aResult } = renderHook(() => useKeyPressed("a"));
 
     expect(shiftResult.current).toBe(false);
     expect(ctrlResult.current).toBe(false);
@@ -43,9 +43,9 @@ describe('useKeyPressed', () => {
     expect(aResult.current).toBe(false);
   });
 
-  it('should update state when keys are pressed and released', () => {
-    const { result: shiftResult } = renderHook(() => useKeyPressed('Shift'));
-    const { result: ctrlResult } = renderHook(() => useKeyPressed('Control'));
+  it("should update state when keys are pressed and released", () => {
+    const { result: shiftResult } = renderHook(() => useKeyPressed("Shift"));
+    const { result: ctrlResult } = renderHook(() => useKeyPressed("Control"));
 
     // Initially both false
     expect(shiftResult.current).toBe(false);
@@ -53,7 +53,7 @@ describe('useKeyPressed', () => {
 
     // Press Shift
     act(() => {
-      dispatchKeyDown('Shift');
+      dispatchKeyDown("Shift");
     });
 
     expect(shiftResult.current).toBe(true);
@@ -61,7 +61,7 @@ describe('useKeyPressed', () => {
 
     // Press Control
     act(() => {
-      dispatchKeyDown('Control');
+      dispatchKeyDown("Control");
     });
 
     expect(shiftResult.current).toBe(true);
@@ -69,7 +69,7 @@ describe('useKeyPressed', () => {
 
     // Release Shift
     act(() => {
-      dispatchKeyUp('Shift');
+      dispatchKeyUp("Shift");
     });
 
     expect(shiftResult.current).toBe(false);
@@ -77,42 +77,42 @@ describe('useKeyPressed', () => {
 
     // Clean up
     act(() => {
-      dispatchKeyUp('Control');
+      dispatchKeyUp("Control");
     });
 
     expect(ctrlResult.current).toBe(false);
   });
 
-  it('should handle multiple subscriptions to the same key', () => {
-    const { result: shift1 } = renderHook(() => useKeyPressed('Shift'));
-    const { result: shift2 } = renderHook(() => useKeyPressed('Shift'));
+  it("should handle multiple subscriptions to the same key", () => {
+    const { result: shift1 } = renderHook(() => useKeyPressed("Shift"));
+    const { result: shift2 } = renderHook(() => useKeyPressed("Shift"));
 
     expect(shift1.current).toBe(false);
     expect(shift2.current).toBe(false);
 
     act(() => {
-      dispatchKeyDown('Shift');
+      dispatchKeyDown("Shift");
     });
 
     expect(shift1.current).toBe(true);
     expect(shift2.current).toBe(true);
 
     act(() => {
-      dispatchKeyUp('Shift');
+      dispatchKeyUp("Shift");
     });
 
     expect(shift1.current).toBe(false);
     expect(shift2.current).toBe(false);
   });
 
-  it('should reset all keys on window blur', () => {
-    const { result: shiftResult } = renderHook(() => useKeyPressed('Shift'));
-    const { result: ctrlResult } = renderHook(() => useKeyPressed('Control'));
+  it("should reset all keys on window blur", () => {
+    const { result: shiftResult } = renderHook(() => useKeyPressed("Shift"));
+    const { result: ctrlResult } = renderHook(() => useKeyPressed("Control"));
 
     // Press both keys
     act(() => {
-      dispatchKeyDown('Shift');
-      dispatchKeyDown('Control');
+      dispatchKeyDown("Shift");
+      dispatchKeyDown("Control");
     });
 
     expect(shiftResult.current).toBe(true);
@@ -127,14 +127,14 @@ describe('useKeyPressed', () => {
     expect(ctrlResult.current).toBe(false);
   });
 
-  it('should handle letter keys and special keys', () => {
-    const { result: aResult } = renderHook(() => useKeyPressed('a'));
-    const { result: enterResult } = renderHook(() => useKeyPressed('Enter'));
-    const { result: spaceResult } = renderHook(() => useKeyPressed(' '));
+  it("should handle letter keys and special keys", () => {
+    const { result: aResult } = renderHook(() => useKeyPressed("a"));
+    const { result: enterResult } = renderHook(() => useKeyPressed("Enter"));
+    const { result: spaceResult } = renderHook(() => useKeyPressed(" "));
 
     // Test letter key
     act(() => {
-      dispatchKeyDown('a');
+      dispatchKeyDown("a");
     });
 
     expect(aResult.current).toBe(true);
@@ -143,7 +143,7 @@ describe('useKeyPressed', () => {
 
     // Test Enter key
     act(() => {
-      dispatchKeyDown('Enter');
+      dispatchKeyDown("Enter");
     });
 
     expect(aResult.current).toBe(true);
@@ -152,7 +152,7 @@ describe('useKeyPressed', () => {
 
     // Test space key
     act(() => {
-      dispatchKeyDown(' ');
+      dispatchKeyDown(" ");
     });
 
     expect(aResult.current).toBe(true);
@@ -161,114 +161,114 @@ describe('useKeyPressed', () => {
 
     // Clean up
     act(() => {
-      dispatchKeyUp('a');
-      dispatchKeyUp('Enter');
-      dispatchKeyUp(' ');
+      dispatchKeyUp("a");
+      dispatchKeyUp("Enter");
+      dispatchKeyUp(" ");
     });
   });
 
-  it('should handle rapid key presses correctly', () => {
-    const { result } = renderHook(() => useKeyPressed('a'));
+  it("should handle rapid key presses correctly", () => {
+    const { result } = renderHook(() => useKeyPressed("a"));
 
     expect(result.current).toBe(false);
 
     // Rapid key down/up cycles
     act(() => {
-      dispatchKeyDown('a');
+      dispatchKeyDown("a");
     });
     expect(result.current).toBe(true);
 
     act(() => {
-      dispatchKeyUp('a');
+      dispatchKeyUp("a");
     });
     expect(result.current).toBe(false);
 
     act(() => {
-      dispatchKeyDown('a');
+      dispatchKeyDown("a");
     });
     expect(result.current).toBe(true);
 
     act(() => {
-      dispatchKeyUp('a');
+      dispatchKeyUp("a");
     });
     expect(result.current).toBe(false);
   });
 
-  it('should ignore repeated keydown events for the same key', () => {
-    const { result } = renderHook(() => useKeyPressed('Shift'));
+  it("should ignore repeated keydown events for the same key", () => {
+    const { result } = renderHook(() => useKeyPressed("Shift"));
 
     expect(result.current).toBe(false);
 
     // First keydown
     act(() => {
-      dispatchKeyDown('Shift');
+      dispatchKeyDown("Shift");
     });
     expect(result.current).toBe(true);
 
     // Repeated keydown (should not change state)
     act(() => {
-      dispatchKeyDown('Shift');
+      dispatchKeyDown("Shift");
     });
     expect(result.current).toBe(true);
 
     // Keyup
     act(() => {
-      dispatchKeyUp('Shift');
+      dispatchKeyUp("Shift");
     });
     expect(result.current).toBe(false);
   });
 });
 
-describe('Convenience hooks', () => {
-  it('useShiftKey should work correctly', () => {
+describe("Convenience hooks", () => {
+  it("useShiftKey should work correctly", () => {
     const { result } = renderHook(() => useShiftKey());
 
     expect(result.current).toBe(false);
 
     act(() => {
-      dispatchKeyDown('Shift');
+      dispatchKeyDown("Shift");
     });
 
     expect(result.current).toBe(true);
 
     act(() => {
-      dispatchKeyUp('Shift');
+      dispatchKeyUp("Shift");
     });
 
     expect(result.current).toBe(false);
   });
 
-  it('useControlKey should work correctly', () => {
+  it("useControlKey should work correctly", () => {
     const { result } = renderHook(() => useControlKey());
 
     expect(result.current).toBe(false);
 
     act(() => {
-      dispatchKeyDown('Control');
+      dispatchKeyDown("Control");
     });
 
     expect(result.current).toBe(true);
 
     act(() => {
-      dispatchKeyUp('Control');
+      dispatchKeyUp("Control");
     });
 
     expect(result.current).toBe(false);
   });
 
-  it('useAltKey should work correctly', () => {
+  it("useAltKey should work correctly", () => {
     const { result } = renderHook(() => useAltKey());
 
     expect(result.current).toBe(false);
 
     act(() => {
-      dispatchKeyDown('Alt');
+      dispatchKeyDown("Alt");
     });
 
     expect(result.current).toBe(true);
 
     act(() => {
-      dispatchKeyUp('Alt');
+      dispatchKeyUp("Alt");
     });
 
     expect(result.current).toBe(false);

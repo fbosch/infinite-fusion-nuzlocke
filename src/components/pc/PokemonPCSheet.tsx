@@ -1,6 +1,5 @@
-'use client';
+"use client";
 
-import React, { useMemo, useState, useCallback, useRef } from 'react';
 import {
   Dialog,
   DialogBackdrop,
@@ -11,40 +10,40 @@ import {
   TabList,
   TabPanel,
   TabPanels,
-} from '@headlessui/react';
-import clsx from 'clsx';
-import { Skull, X, Boxes, Box, Users } from 'lucide-react';
-import {
-  useEncounters,
-  useCustomLocations,
-  useActivePlaythrough,
-} from '@/stores/playthroughs';
-import { isPokemonDeceased, isPokemonStored } from '@/utils/pokemonPredicates';
-import { scrollToLocationById } from '@/utils/scrollToLocation';
+} from "@headlessui/react";
+import clsx from "clsx";
+import { Box, Boxes, Skull, Users, X } from "lucide-react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   getLocationById,
   getLocationsSortedWithCustom,
-} from '@/loaders/locations';
+} from "@/loaders/locations";
+import type { PokemonOptionType } from "@/loaders/pokemon";
+import {
+  playthroughActions,
+  useActivePlaythrough,
+  useCustomLocations,
+  useEncounters,
+} from "@/stores/playthroughs";
 import {
   buildPokemonUidIndex,
   findPokemonByUid,
-} from '@/utils/encounter-utils';
-import { playthroughActions } from '@/stores/playthroughs';
-
-import PCEntryItem from './PCEntryItem';
-import type { PokemonOptionType } from '@/loaders/pokemon';
-import TeamEntryItem from './TeamEntryItem';
-import { GraveyardGridItem } from './GraveyardGridItem';
-import TeamMemberPickerModal from '../team/TeamMemberPickerModal';
+} from "@/utils/encounter-utils";
+import { isPokemonDeceased, isPokemonStored } from "@/utils/pokemonPredicates";
+import { scrollToLocationById } from "@/utils/scrollToLocation";
+import TeamMemberPickerModal from "../team/TeamMemberPickerModal";
+import { GraveyardGridItem } from "./GraveyardGridItem";
+import PCEntryItem from "./PCEntryItem";
+import TeamEntryItem from "./TeamEntryItem";
 
 export interface PokemonPCSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  activeTab: 'team' | 'box' | 'graveyard';
-  onChangeTab: (tab: 'team' | 'box' | 'graveyard') => void;
+  activeTab: "team" | "box" | "graveyard";
+  onChangeTab: (tab: "team" | "box" | "graveyard") => void;
 }
 
-import type { PCEntry as Entry } from './types';
+import type { PCEntry as Entry } from "./types";
 
 export default function PokemonPCSheet({
   isOpen,
@@ -74,7 +73,7 @@ export default function PokemonPCSheet({
 
   const mergedLocations = useMemo(
     () => getLocationsSortedWithCustom(customLocations),
-    [customLocations]
+    [customLocations],
   );
 
   const idToName = useMemo(() => {
@@ -85,7 +84,7 @@ export default function PokemonPCSheet({
 
   const pokemonByUid = useMemo(
     () => buildPokemonUidIndex(encounters),
-    [encounters]
+    [encounters],
   );
 
   // Handlers for team member picker modal
@@ -99,12 +98,12 @@ export default function PokemonPCSheet({
         headPokemon: PokemonOptionType | null;
         bodyPokemon: PokemonOptionType | null;
         isFusion: boolean;
-      }
+      },
     ) => {
       setSelectedPosition(position);
       setPickerModalOpen(true);
     },
-    []
+    [],
   );
 
   const handleClosePickerModal = useCallback(() => {
@@ -115,7 +114,7 @@ export default function PokemonPCSheet({
   const handlePokemonSelect = useCallback(
     async (
       headPokemon: PokemonOptionType | null,
-      bodyPokemon: PokemonOptionType | null
+      bodyPokemon: PokemonOptionType | null,
     ) => {
       if (selectedPosition === null) return;
 
@@ -126,20 +125,20 @@ export default function PokemonPCSheet({
       const success = await playthroughActions.updateTeamMember(
         selectedPosition,
         headRef,
-        bodyRef
+        bodyRef,
       );
 
       if (!success) {
         console.error(
-          'Failed to update team member at position:',
-          selectedPosition
+          "Failed to update team member at position:",
+          selectedPosition,
         );
         return;
       }
 
       handleClosePickerModal();
     },
-    [selectedPosition, handleClosePickerModal]
+    [selectedPosition, handleClosePickerModal],
   );
 
   const team: Entry[] = useMemo(() => {
@@ -176,7 +175,7 @@ export default function PokemonPCSheet({
 
       // Get location from the head Pokémon's original location, fallback to body if head doesn't exist
       const location = getLocationById(
-        headPokemon?.originalLocation || bodyPokemon?.originalLocation || ''
+        headPokemon?.originalLocation || bodyPokemon?.originalLocation || "",
       );
 
       // Determine fusion state: true if both Pokémon exist and can form a fusion
@@ -184,7 +183,7 @@ export default function PokemonPCSheet({
 
       return {
         locationId: `team-slot-${index}`,
-        locationName: location?.name || 'Unknown Location',
+        locationName: location?.name || "Unknown Location",
         head: headPokemon,
         body: bodyPokemon,
         position: index,
@@ -203,7 +202,7 @@ export default function PokemonPCSheet({
       const locationName =
         idToName.get(locationId) ||
         getLocationById(locationId)?.name ||
-        'Unknown Location';
+        "Unknown Location";
 
       // Create separate entries for each deceased Pokémon
       if (headDead && data?.head) {
@@ -241,7 +240,7 @@ export default function PokemonPCSheet({
           locationName:
             idToName.get(locationId) ||
             getLocationById(locationId)?.name ||
-            'Unknown Location',
+            "Unknown Location",
           head: headStored ? data?.head || null : null,
           body: bodyStored ? data?.body || null : null,
         });
@@ -251,13 +250,13 @@ export default function PokemonPCSheet({
     return entries;
   }, [encounters, idToName]);
 
-  const getSelectedIndex = useCallback((tab: 'team' | 'box' | 'graveyard') => {
+  const getSelectedIndex = useCallback((tab: "team" | "box" | "graveyard") => {
     switch (tab) {
-      case 'team':
+      case "team":
         return 0;
-      case 'box':
+      case "box":
         return 1;
-      case 'graveyard':
+      case "graveyard":
         return 2;
       default:
         return 0;
@@ -265,19 +264,19 @@ export default function PokemonPCSheet({
   }, []);
 
   const getTabFromIndex = useCallback(
-    (index: number): 'team' | 'box' | 'graveyard' => {
+    (index: number): "team" | "box" | "graveyard" => {
       switch (index) {
         case 0:
-          return 'team';
+          return "team";
         case 1:
-          return 'box';
+          return "box";
         case 2:
-          return 'graveyard';
+          return "graveyard";
         default:
-          return 'team';
+          return "team";
       }
     },
-    []
+    [],
   );
 
   const selectedIndex = getSelectedIndex(activeTab);
@@ -292,114 +291,113 @@ export default function PokemonPCSheet({
     (index: number) => {
       onChangeTab(getTabFromIndex(index));
     },
-    [onChangeTab, getTabFromIndex]
+    [onChangeTab, getTabFromIndex],
   );
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} className='group relative z-50'>
+    <Dialog open={isOpen} onClose={handleClose} className="group relative z-50">
       <DialogBackdrop
         transition
-        className='fixed inset-0 bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ease-out data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/30'
-        aria-hidden='true'
+        className="fixed inset-0 bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ease-out data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/30"
+        aria-hidden="true"
       />
 
-      <div className='fixed inset-y-0 right-0 flex w-screen items-stretch justify-end p-0'>
+      <div className="fixed inset-y-0 right-0 flex w-screen items-stretch justify-end p-0">
         <DialogPanel
           transition
-          id='pokemon-pc-sheet'
-          aria-labelledby='pokemon-pc-title'
+          id="pokemon-pc-sheet"
+          aria-labelledby="pokemon-pc-title"
           className={clsx(
-            'h-full w-full max-w-lg border-l border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800',
-            'transform-gpu will-change-transform',
-            'transition-all duration-200 ease-out',
-            'data-closed:translate-x-full data-closed:opacity-0 data-leave:translate-x-full',
-            'flex flex-col'
+            "h-full w-full max-w-lg border-l border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800",
+            "transform-gpu will-change-transform",
+            "transition-all duration-200 ease-out",
+            "data-closed:translate-x-full data-closed:opacity-0 data-leave:translate-x-full",
+            "flex flex-col",
           )}
         >
-          <div className='px-4 py-2.5'>
-            <div className='flex items-center justify-between'>
+          <div className="px-4 py-2.5">
+            <div className="flex items-center justify-between">
               <DialogTitle
-                id='pokemon-pc-title'
-                className='text-sm font-semibold text-gray-900 dark:text-white'
+                id="pokemon-pc-title"
+                className="text-sm font-semibold text-gray-900 dark:text-white"
               >
                 Pokémon PC
               </DialogTitle>
               <button
                 onClick={handleClose}
                 className={clsx(
-                  'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2',
-                  'rounded-md p-1 transition-colors cursor-pointer'
+                  "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
+                  "rounded-md p-1 transition-colors cursor-pointer",
                 )}
-                aria-label='Close drawer'
+                aria-label="Close drawer"
               >
-                <X className='h-5 w-5' />
+                <X className="h-5 w-5" />
               </button>
             </div>
           </div>
 
           {/* Content area: fills remaining height to allow true vertical centering */}
-          <div className='flex min-h-0 flex-1 flex-col px-4 pt-2 pb-3'>
+          <div className="flex min-h-0 flex-1 flex-col px-4 pt-2 pb-3">
             <TabGroup selectedIndex={selectedIndex} onChange={handleChangeTab}>
-              <TabList className='mb-4 flex w-full items-center gap-2 flex-1'>
+              <TabList className="mb-4 flex w-full items-center gap-2 flex-1">
                 <Tab
                   className={({ selected }) =>
                     clsx(
-                      'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none flex-1',
+                      "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none flex-1",
                       selected
-                        ? 'border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100'
-                        : 'border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                        ? "border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                        : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
                     )
                   }
                 >
-                  <Users className='h-4 w-4' />
-                  <span className='font-medium flex-1'>Team</span>
-                  <span className='ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100'>
-                    {team.filter(entry => entry.head || entry.body).length}/6
+                  <Users className="h-4 w-4" />
+                  <span className="font-medium flex-1">Team</span>
+                  <span className="ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100">
+                    {team.filter((entry) => entry.head || entry.body).length}/6
                   </span>
                 </Tab>
                 <Tab
                   className={({ selected }) =>
                     clsx(
-                      'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none flex-1',
+                      "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none flex-1",
                       selected
-                        ? 'border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100'
-                        : 'border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                        ? "border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                        : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
                     )
                   }
                 >
-                  <Box className='h-4 w-4' />
-                  <span className='font-medium flex-1'>Box</span>
-                  <span className='ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100'>
+                  <Box className="h-4 w-4" />
+                  <span className="font-medium flex-1">Box</span>
+                  <span className="ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100">
                     {stored.length}
                   </span>
                 </Tab>
                 <Tab
                   className={({ selected }) =>
                     clsx(
-                      'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none flex-1',
+                      "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none flex-1",
                       selected
-                        ? 'border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100'
-                        : 'border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                        ? "border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                        : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
                     )
                   }
                 >
-                  <Skull className='h-4 w-4' />
-                  <span className='font-medium flex-1'>Graveyard</span>
-                  <span className='ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100'>
+                  <Skull className="h-4 w-4" />
+                  <span className="font-medium flex-1">Graveyard</span>
+                  <span className="ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100">
                     {deceased.length}
                   </span>
                 </Tab>
               </TabList>
 
-              <TabPanels className='flex min-h-0 flex-1 flex-col'>
-                <TabPanel className='flex min-h-0 flex-1'>
+              <TabPanels className="flex min-h-0 flex-1 flex-col">
+                <TabPanel className="flex min-h-0 flex-1">
                   <ul
-                    role='list'
-                    aria-label='Team members list'
-                    className='w-full space-y-3 py-2 max-h-[calc(100dvh-6.5rem)] overflow-y-auto'
+                    aria-label="Team members list"
+                    className="w-full space-y-3 py-2 max-h-[calc(100dvh-6.5rem)] overflow-y-auto"
                   >
-                    {team.map(entry => (
+                    {team.map((entry) => (
                       <TeamEntryItem
                         key={entry.locationId}
                         entry={entry}
@@ -410,63 +408,62 @@ export default function PokemonPCSheet({
                     ))}
                   </ul>
                 </TabPanel>
-                <TabPanel className='flex min-h-0 flex-1'>
+                <TabPanel className="flex min-h-0 flex-1">
                   {stored.length === 0 ? (
                     <div
-                      className='flex min-h-[60vh] w-full flex-1 flex-col items-center justify-center px-4 text-gray-600 dark:text-gray-300'
-                      role='status'
-                      aria-live='polite'
+                      className="flex min-h-[60vh] w-full flex-1 flex-col items-center justify-center px-4 text-gray-600 dark:text-gray-300"
+                      role="status"
+                      aria-live="polite"
                     >
                       <Boxes
-                        className='mb-3 h-10 w-10 opacity-50'
-                        aria-hidden='true'
+                        className="mb-3 h-10 w-10 opacity-50"
+                        aria-hidden="true"
                       />
-                      <p className='text-center'>No Pokémon in your box.</p>
+                      <p className="text-center">No Pokémon in your box.</p>
                     </div>
                   ) : (
                     <ul
-                      role='list'
-                      aria-label='Boxed Pokémon list'
-                      className='grid content-start w-full grid-cols-1 gap-2 py-2 sm:grid-cols-2 h-[calc(100dvh-6.5rem)] overflow-y-auto'
+                      aria-label="Boxed Pokémon list"
+                      className="grid content-start w-full grid-cols-1 gap-2 py-2 sm:grid-cols-2 h-[calc(100dvh-6.5rem)] overflow-y-auto"
                     >
-                      {stored.map(entry => (
+                      {stored.map((entry) => (
                         <PCEntryItem
                           key={entry.locationId}
                           entry={entry}
                           idToName={idToName}
-                          mode='stored'
-                          hoverRingClass='hover:ring-blue-400/30'
-                          fallbackLabel='Boxed Pokémon'
-                          className=''
+                          mode="stored"
+                          hoverRingClass="hover:ring-blue-400/30"
+                          fallbackLabel="Boxed Pokémon"
+                          className=""
                           onClose={handleClose}
                         />
                       ))}
                     </ul>
                   )}
                 </TabPanel>
-                <TabPanel className='flex min-h-0 flex-1'>
+                <TabPanel className="flex min-h-0 flex-1">
                   {deceased.length === 0 ? (
                     <div
-                      className='flex min-h-[60vh] w-full flex-1 flex-col items-center justify-center px-4 text-gray-600 dark:text-gray-300'
-                      role='status'
-                      aria-live='polite'
+                      className="flex min-h-[60vh] w-full flex-1 flex-col items-center justify-center px-4 text-gray-600 dark:text-gray-300"
+                      role="status"
+                      aria-live="polite"
                     >
                       <Skull
-                        className='mb-3 h-10 w-10 opacity-50'
-                        aria-hidden='true'
+                        className="mb-3 h-10 w-10 opacity-50"
+                        aria-hidden="true"
                       />
-                      <p className='text-center'>
+                      <p className="text-center">
                         No fallen Pokémon. Keep it that way!
                       </p>
                     </div>
                   ) : (
-                    <div className='w-full py-2 h-[calc(100dvh-6.5rem)] overflow-y-auto'>
-                      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3'>
-                        {deceased.map(entry => (
+                    <div className="w-full py-2 h-[calc(100dvh-6.5rem)] overflow-y-auto">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                        {deceased.map((entry) => (
                           <GraveyardGridItem
                             key={entry.locationId}
                             entry={entry}
-                            onLocationClick={locationId => {
+                            onLocationClick={(locationId) => {
                               // Scroll to location in the encounter table
                               const highlightUids: string[] = [];
                               const pokemon = entry.head || entry.body;
@@ -475,7 +472,7 @@ export default function PokemonPCSheet({
                               }
 
                               scrollToLocationById(locationId, {
-                                behavior: 'smooth',
+                                behavior: "smooth",
                                 highlightUids,
                                 durationMs: 1200,
                               });

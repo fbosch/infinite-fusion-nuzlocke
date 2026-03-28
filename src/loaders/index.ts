@@ -1,8 +1,9 @@
 // Export locations data functions and types
-export * from './locations';
+
 // Export encounters data functions and types
-export * from './encounters';
+export * from "./encounters";
+export * from "./locations";
 // Export Pokemon data functions and types
-export * from './pokemon';
+export * from "./pokemon";
 // Export starter Pokemon data functions and types
-export * from './starters';
+export * from "./starters";

@@ -1,5 +1,5 @@
-import { useSyncExternalStore } from 'react';
-import { subscribe } from 'valtio';
+import { useSyncExternalStore } from "react";
+import { subscribe } from "valtio";
 
 /**
  * Utility hooks for Valtio synchronization that's compatible with React Compiler
@@ -40,17 +40,17 @@ import { subscribe } from 'valtio';
 export function useValtioSync<T, S extends object>(
   store: S,
   selector: (store: S) => T,
-  serverSnapshot?: T
+  serverSnapshot?: T,
 ): T {
   return useSyncExternalStore(
     // Subscribe function
-    callback => {
+    (callback) => {
       return subscribe(store, callback);
     },
     // Get snapshot function
     () => selector(store),
     // Server snapshot function
-    () => serverSnapshot ?? selector(store)
+    () => serverSnapshot ?? selector(store),
   );
 }
 
@@ -65,7 +65,7 @@ export function useValtioSync<T, S extends object>(
 export function useValtioMapSync<T, S extends object>(
   store: S,
   selector: (store: S) => T,
-  serverSnapshot?: T
+  serverSnapshot?: T,
 ): T {
   return useValtioSync(store, selector, serverSnapshot);
 }
