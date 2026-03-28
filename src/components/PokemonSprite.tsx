@@ -1,6 +1,5 @@
 import Image from "next/image";
 import type React from "react";
-import { useMemo } from "react";
 import { twMerge } from "tailwind-merge";
 import gen7SpritesheetMetadata from "@/assets/pokemon-gen7-spritesheet-metadata.json";
 import spritesheetMetadata from "@/assets/pokemon-gen8-spritesheet-metadata.json";
@@ -26,16 +25,10 @@ export function PokemonSprite({
   className = "",
   ...rest
 }: PokemonSpriteProps) {
-  const metadata = useMemo(() => {
-    return generation === "gen7"
-      ? gen7SpritesheetMetadata
-      : spritesheetMetadata;
-  }, [generation]);
+  const metadata =
+    generation === "gen7" ? gen7SpritesheetMetadata : spritesheetMetadata;
 
-  const spriteData = useMemo(
-    () => metadata.sprites.find((sprite) => sprite.id === pokemonId),
-    [pokemonId, metadata],
-  );
+  const spriteData = metadata.sprites.find((sprite) => sprite.id === pokemonId);
 
   if (!spriteData?.exists) {
     return null;

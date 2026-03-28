@@ -19,7 +19,9 @@ const {
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: { alt: string }) => <img alt={props.alt} />,
+  default: (props: { alt: string }) => (
+    <span role="img" aria-label={props.alt} data-testid="next-image-mock" />
+  ),
 }));
 
 vi.mock("@/components/CursorTooltip", () => ({

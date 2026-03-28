@@ -8,6 +8,7 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { X } from "lucide-react";
+import Link from "next/link";
 
 interface CreditsModalProps {
   isOpen: boolean;
@@ -159,14 +160,13 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 This project is licensed under the MIT License.
               </p>
-              <a
+              <Link
                 href="/licenses"
-                target="_blank"
-                rel="noopener noreferrer"
+                onClick={onClose}
                 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
               >
                 View Open Source Licenses
-              </a>
+              </Link>
             </section>
           </div>
 

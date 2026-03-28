@@ -1,6 +1,7 @@
 import { Button, Dialog, DialogBackdrop, DialogTitle } from "@headlessui/react";
 import clsx from "clsx";
 import { AlertTriangle } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 interface ConfirmationDialogProps {
   isOpen: boolean;
@@ -26,6 +27,16 @@ export default function ConfirmationDialog({
   cancelText = "Cancel",
   variant = "danger",
 }: ConfirmationDialogProps) {
+  const confirmButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isOpen === false) {
+      return;
+    }
+
+    confirmButtonRef.current?.focus();
+  }, [isOpen]);
+
   const handleConfirm = () => {
     onConfirm();
     onClose();
@@ -97,8 +108,8 @@ export default function ConfirmationDialog({
               {cancelText}
             </Button>
             <Button
+              ref={confirmButtonRef}
               onClick={handleConfirm}
-              autoFocus
               className={clsx(
                 "px-4 py-2 text-sm  rounded-md transition-colors",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",

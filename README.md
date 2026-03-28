@@ -84,6 +84,10 @@ Contributions are welcome through issues and pull requests. Keep changes focused
 
 SEO routing and canonical conventions are documented in `docs/SEO_CANONICAL_STRATEGY.md`.
 
+### Valtio Subscription Guidance
+
+For contributor guidance on choosing `useSnapshot` vs `useValtioSync` under React Compiler, see `docs/VALTIO_REACT_COMPILER_GUIDANCE.md`.
+
 ## License
 
 MIT License. See [`LICENSE`](LICENSE).

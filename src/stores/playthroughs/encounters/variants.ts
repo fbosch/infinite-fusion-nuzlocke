@@ -6,7 +6,7 @@ import {
 import { spriteKeys } from "@/lib/queries/sprites";
 import { queryClient } from "@/lib/queryClient";
 import { generateSpriteUrl, getArtworkVariants } from "@/lib/sprites";
-import { getCurrentTimestamp } from "../store";
+import { getCurrentTimestamp } from "../playthroughState";
 import { ensureActivePlaythroughWithEncounters } from "./shared";
 
 // Set artwork variant globally (no longer stored in encounters)

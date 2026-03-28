@@ -32,6 +32,51 @@ const shouldAutoAssign = (status: string | undefined) =>
   status === PokemonStatus.RECEIVED ||
   status === PokemonStatus.TRADED;
 
+const createTeamMember = (
+  head: { uid: string } | null,
+  body: { uid: string } | null,
+) => {
+  if (!head && !body) {
+    return null;
+  }
+
+  return {
+    headPokemonUid: head?.uid || "",
+    bodyPokemonUid: body?.uid || "",
+  };
+};
+
+export const updateTeamMember = async (
+  position: number,
+  headPokemon: { uid: string } | null,
+  bodyPokemon: { uid: string } | null,
+): Promise<boolean> => {
+  const activePlaythrough = ensureActivePlaythroughWithEncounters();
+  if (!activePlaythrough) {
+    return false;
+  }
+
+  if (position < 0 || position >= 6) {
+    return false;
+  }
+
+  if (headPokemon?.uid) {
+    await restorePokemonToTeam(headPokemon.uid);
+  }
+
+  if (bodyPokemon?.uid) {
+    await restorePokemonToTeam(bodyPokemon.uid);
+  }
+
+  activePlaythrough.team.members[position] = createTeamMember(
+    headPokemon,
+    bodyPokemon,
+  );
+  activePlaythrough.updatedAt = Date.now();
+
+  return true;
+};
+
 export const autoAssignCapturedPokemonToTeam = async (
   locationId: string,
 ): Promise<void> => {
@@ -80,9 +125,6 @@ export const autoAssignCapturedPokemonToTeam = async (
   if (!headPokemon && !bodyPokemon) {
     return;
   }
-
-  // Dynamic import intentionally retained to avoid encounter/store circular dependencies.
-  const { updateTeamMember } = await import("../store");
 
   let targetPosition = nextAvailablePosition;
 
