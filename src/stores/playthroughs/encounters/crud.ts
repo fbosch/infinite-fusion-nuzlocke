@@ -108,6 +108,7 @@ export const updateEncounter = async (
     const willBeFusion =
       shouldCreateFusion || encounter.isFusion || field === "body";
 
+    const previousFieldUid = encounter[field]?.uid ?? null;
     const previousFieldId = encounter[field]?.id ?? null;
     if (willBeFusion) {
       encounter[field] = pokemonWithLocationAndUID;
@@ -145,6 +146,14 @@ export const updateEncounter = async (
       fieldChanged
     ) {
       emitEvolutionEvent(locationId);
+    }
+
+    if (
+      previousFieldUid &&
+      encounter[field]?.uid &&
+      previousFieldUid !== encounter[field]?.uid
+    ) {
+      removeTeamMembersWithPokemon([previousFieldUid]);
     }
 
     if (pokemonWithLocationAndUID.status) {
