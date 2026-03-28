@@ -148,7 +148,7 @@ export function PokemonContextMenu({
         );
       }
     },
-    [encounterData?.head, locationId],
+    [encounterData, locationId],
   );
 
   // Handler for moving body Pokemon
@@ -184,7 +184,7 @@ export function PokemonContextMenu({
         );
       }
     },
-    [encounterData?.body, locationId],
+    [encounterData, locationId],
   );
 
   const contextItems = useMemo<ContextMenuItem[]>(() => {
