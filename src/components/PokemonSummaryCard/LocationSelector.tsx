@@ -316,8 +316,7 @@ function LocationItem({
   }, [movingPokemon, location.id, selectedTargetField]);
 
   return (
-    <div
-      role="listitem"
+    <li
       className={clsx(
         "group hover:bg-gray-50 dark:hover:bg-gray-700 focus-within:bg-gray-50 dark:focus-within:bg-gray-700",
         "last:border-b-0 border-b border-gray-200 dark:border-gray-600",
@@ -363,7 +362,7 @@ function LocationItem({
           </div>
         </div>
       </button>
-    </div>
+    </li>
   );
 }
 
@@ -412,10 +411,10 @@ function TargetFieldSelector({
   onTargetFieldChange: (field: "head" | "body") => void;
 }) {
   return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+    <fieldset>
+      <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
         Move to slot:
-      </label>
+      </legend>
       <div className="flex space-x-2">
         <button
           type="button"
@@ -446,7 +445,7 @@ function TargetFieldSelector({
           <span className="mr-2.5">Body Slot</span>
         </button>
       </div>
-    </div>
+    </fieldset>
   );
 }
 
@@ -627,6 +626,7 @@ function LocationSelector({
               Move Pokemon to Location
             </DialogTitle>
             <button
+              type="button"
               onClick={handleClose}
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
@@ -665,13 +665,13 @@ function LocationSelector({
             />
           </div>
 
-          <div className="h-[46vh] min-h-96 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg scrollbar-thin">
+          <ul className="h-[46vh] min-h-96 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg scrollbar-thin">
             {filteredLocations.length === 0 ? (
-              <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+              <li className="p-4 text-center text-gray-500 dark:text-gray-400 list-none">
                 {searchQuery.trim()
                   ? "No locations found matching your search for locations or Pokemon names."
                   : "No available locations."}
-              </div>
+              </li>
             ) : (
               filteredLocations.map((location) => (
                 <LocationItem
@@ -685,7 +685,7 @@ function LocationSelector({
                 />
               ))
             )}
-          </div>
+          </ul>
 
           <div className="flex justify-end">
             <button
