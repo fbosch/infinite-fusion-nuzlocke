@@ -3,6 +3,8 @@ import { defineConfig } from 'vitest/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import react from '@vitejs/plugin-react';
 
+const isBrowserTestsEnabled = process.env.VITEST_BROWSER === 'true';
+
 export default defineConfig({
   test: {
     globals: true,
@@ -33,30 +35,38 @@ export default defineConfig({
       all: true,
     },
     projects: [
-      {
-        plugins: [tsconfigPaths(), react()],
-        test: {
-          name: 'browser',
-          include: ['**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-          setupFiles: ['./tests/setup.browser.ts'],
-          browser: {
-            enabled: true,
-            provider: 'playwright',
-            headless: true,
-            instances: [
-              {
-                browser: 'chromium',
+      ...(isBrowserTestsEnabled
+        ? [
+            {
+              plugins: [tsconfigPaths(), react()],
+              test: {
+                name: 'browser',
+                include: [
+                  '**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
+                ],
+                setupFiles: ['./tests/setup.browser.ts'],
+                browser: {
+                  enabled: true,
+                  provider: 'playwright',
+                  headless: true,
+                  instances: [
+                    {
+                      browser: 'chromium',
+                    },
+                  ],
+                },
               },
-            ],
-          },
-        },
-      },
+            },
+          ]
+        : []),
       {
         plugins: [tsconfigPaths()],
         test: {
           name: 'react-hooks',
           include: ['**/playthroughs.test.ts', '**/playthroughs/**/*.test.ts'],
+          setupFiles: ['./tests/setup.react-hooks.ts'],
           environment: 'jsdom',
+          pool: 'threads',
         },
       },
       {

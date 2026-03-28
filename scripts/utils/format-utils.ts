@@ -71,7 +71,7 @@ export function formatNumber(num: number): string {
     return '0';
   }
 
-  return num.toLocaleString();
+  return num.toLocaleString('en-US');
 }
 
 /**
@@ -120,10 +120,11 @@ export function padString(str: string, width: number, align: 'left' | 'right' | 
   switch (align) {
     case 'right':
       return ' '.repeat(padding) + str;
-    case 'center':
+    case 'center': {
       const leftPad = Math.floor(padding / 2);
       const rightPad = padding - leftPad;
       return ' '.repeat(leftPad) + str + ' '.repeat(rightPad);
+    }
     case 'left':
     default:
       return str + ' '.repeat(padding);
