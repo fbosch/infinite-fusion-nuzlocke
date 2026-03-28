@@ -84,6 +84,12 @@
     "description": "Nugget Bridge north of Cerulean City"
   },
   {
+    "id": "bbe21b75-c7ca-42d4-b68d-11859385082a",
+    "name": "Route 25",
+    "region": "Kanto",
+    "description": "Route east of Cerulean City that leads to Cerulean Cape"
+  },
+  {
     "id": "b74b3c29-5c7e-486c-a8a2-788987b024dc",
     "name": "Cerulean Cape",
     "region": "Kanto",

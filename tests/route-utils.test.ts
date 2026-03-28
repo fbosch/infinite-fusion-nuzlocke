@@ -21,6 +21,7 @@ describe("Route Processing Utilities", () => {
       expect(isRoutePattern("Route 1")).toBe(true);
       expect(isRoutePattern("Route 25")).toBe(true);
       expect(isRoutePattern("Route 123")).toBe(true);
+      expect(isRoutePattern("Route 25 - Bill's House")).toBe(true);
     });
 
     it("should match special locations", () => {
@@ -28,6 +29,7 @@ describe("Route Processing Utilities", () => {
       expect(isRoutePattern("Secret Garden")).toBe(true);
       expect(isRoutePattern("Hidden Forest")).toBe(true);
       expect(isRoutePattern("Viridian River")).toBe(true);
+      expect(isRoutePattern("Route 11 Gate")).toBe(true);
     });
 
     it("should be case insensitive", () => {
@@ -39,6 +41,8 @@ describe("Route Processing Utilities", () => {
     it("should handle routes with ID information", () => {
       expect(isRoutePattern("Route 1 (ID 78)")).toBe(true);
       expect(isRoutePattern("Viridian Forest (ID 12)")).toBe(true);
+      expect(isRoutePattern("Route 11 Gate (ID 201)")).toBe(true);
+      expect(isRoutePattern("Route 25 - Bill's House (ID 202)")).toBe(true);
     });
 
     it("should reject non-route patterns", () => {
@@ -105,6 +109,15 @@ describe("Route Processing Utilities", () => {
     it("should handle routes without ID", () => {
       expect(cleanRouteName("Route 1")).toBe("Route 1");
       expect(cleanRouteName("Viridian Forest")).toBe("Viridian Forest");
+    });
+
+    it("should normalize route variants to canonical route names", () => {
+      expect(cleanRouteName("Route 11 Gate")).toBe("Route 11");
+      expect(cleanRouteName("Route 25 - Bill's House")).toBe("Route 25");
+      expect(cleanRouteName("Route 11 Gate (ID 201)")).toBe("Route 11");
+      expect(cleanRouteName("Route 25 - Bill's House (ID 202)")).toBe(
+        "Route 25",
+      );
     });
 
     it("should handle multiple ID patterns", () => {

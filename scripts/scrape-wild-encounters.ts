@@ -10,6 +10,7 @@ import { loadPokemonNameMap } from "./utils/data-loading-utils";
 import {
   findPokemonId,
   isPotentialPokemonName,
+  type PokemonNameMap,
 } from "./utils/pokemon-name-utils";
 import { isRoutePattern, processRouteName } from "./utils/route-utils";
 import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
@@ -19,10 +20,22 @@ const WILD_ENCOUNTERS_CLASSIC_URL =
 const WILD_ENCOUNTERS_REMIX_URL =
   "https://infinitefusion.fandom.com/wiki/Wild_Encounters/Remix";
 
+const ROUTE_ARTICLE_BATCH_SIZE = 6;
+const ROUTE_ARTICLE_BACKFILL_OVERRIDES = ["Route 2", "Route 10"] as const;
+
+const WILD_ENCOUNTER_TYPES: readonly EncounterType[] = [
+  "grass",
+  "cave",
+  "rock_smash",
+  "surf",
+  "fishing",
+  "pokeradar",
+];
+
 /**
  * Detects encounter type from text content like "Surf", "Old Rod", etc.
  */
-function detectEncounterType(text: string): EncounterType | null {
+export function detectEncounterType(text: string): EncounterType | null {
   if (!text || typeof text !== "string") return null;
 
   const normalizedText = text.toLowerCase().trim();
@@ -59,7 +72,7 @@ function detectEncounterType(text: string): EncounterType | null {
     },
     {
       type: "grass",
-      patterns: ["grass", "walking", "wild grass", "overworld"],
+      patterns: ["grass", "walking", "wild grass", "overworld", "lilypads"],
     },
     {
       type: "special",
@@ -83,6 +96,10 @@ function detectEncounterType(text: string): EncounterType | null {
   }
 
   return null;
+}
+
+function isWildEncounterType(encounterType: EncounterType): boolean {
+  return WILD_ENCOUNTER_TYPES.includes(encounterType);
 }
 
 /**
@@ -112,7 +129,7 @@ function isValidRouteName(text: string): boolean {
   return true;
 }
 
-interface PokemonEncounter {
+export interface PokemonEncounter {
   pokemonId: number; // Custom Infinite Fusion ID
   encounterType: EncounterType;
 }
@@ -120,6 +137,183 @@ interface PokemonEncounter {
 interface RouteEncounters {
   routeName: string;
   encounters: PokemonEncounter[];
+}
+
+export function getLocationWikiUrl(locationName: string): string {
+  const slug = encodeURIComponent(locationName.trim().replace(/\s+/g, "_"));
+  return `https://infinitefusion.fandom.com/wiki/${slug}`;
+}
+
+function parseEncounterTable(
+  $: cheerio.CheerioAPI,
+  table: cheerio.Cheerio<any>,
+  pokemonNameMap: PokemonNameMap,
+  defaultEncounterType: EncounterType | null,
+): PokemonEncounter[] {
+  const encounters: PokemonEncounter[] = [];
+  let currentEncounterType: EncounterType | null = defaultEncounterType;
+
+  table.find("tr").each((_rowIndex, row) => {
+    const $row = $(row);
+    const headerCell = $row.find("th[colspan]").first();
+
+    if (headerCell.length > 0) {
+      const detectedType = detectEncounterType(headerCell.text().trim());
+      currentEncounterType =
+        detectedType && isWildEncounterType(detectedType) ? detectedType : null;
+      return;
+    }
+
+    if (currentEncounterType === null) {
+      return;
+    }
+
+    const activeEncounterType = currentEncounterType;
+
+    $row.find("td").each((_cellIndex, cell) => {
+      const cellText = $(cell).text().trim();
+      if (isPotentialPokemonName(cellText) === false) {
+        return;
+      }
+
+      const pokemonId = findPokemonId(cellText, pokemonNameMap);
+      if (pokemonId === null) {
+        return;
+      }
+
+      encounters.push({
+        pokemonId,
+        encounterType: activeEncounterType,
+      });
+    });
+  });
+
+  return encounters;
+}
+
+export async function scrapeEncountersFromLocationArticle(
+  locationName: string,
+  pokemonNameMap: PokemonNameMap,
+): Promise<PokemonEncounter[]> {
+  const html = await fetchWikiPageHtml(getLocationWikiUrl(locationName));
+  const $ = cheerio.load(html);
+  const encounterTables = $(".mw-parser-output table.IFTable.encounterTable");
+
+  if (encounterTables.length === 0) {
+    return [];
+  }
+
+  const encounters: PokemonEncounter[] = [];
+
+  encounterTables.each((_index, table) => {
+    encounters.push(
+      ...parseEncounterTable($, $(table), pokemonNameMap, "grass"),
+    );
+  });
+
+  const uniqueByKey = new Map<string, PokemonEncounter>();
+  for (const encounter of encounters) {
+    uniqueByKey.set(
+      `${encounter.pokemonId}:${encounter.encounterType}`,
+      encounter,
+    );
+  }
+
+  return Array.from(uniqueByKey.values());
+}
+
+async function backfillMissingRouteArticles(
+  routes: RouteEncounters[],
+  pokemonNameMap: PokemonNameMap,
+): Promise<RouteEncounters[]> {
+  const locationsPath = path.join(
+    process.cwd(),
+    "data",
+    "shared",
+    "locations.json",
+  );
+  const locationsData = JSON.parse(
+    readFileSync(locationsPath, "utf-8"),
+  ) as Array<{
+    name: string;
+  }>;
+
+  const locationNames = locationsData.map((location) => location.name);
+  const scrapedRouteNames = new Set(routes.map((route) => route.routeName));
+  const missingRouteNames = locationsData
+    .map((location) => location.name)
+    .filter(
+      (locationName) =>
+        /^Route \d+$/i.test(locationName) &&
+        scrapedRouteNames.has(locationName) === false,
+    );
+
+  const forcedBackfillRouteNames = ROUTE_ARTICLE_BACKFILL_OVERRIDES.filter(
+    (routeName) => locationNames.includes(routeName),
+  );
+
+  const routeNamesForArticleBackfill = Array.from(
+    new Set([...missingRouteNames, ...forcedBackfillRouteNames]),
+  );
+
+  if (routeNamesForArticleBackfill.length === 0) {
+    return routes;
+  }
+
+  ConsoleFormatter.info(
+    `Backfilling route articles: ${routeNamesForArticleBackfill.join(", ")}`,
+  );
+
+  const recoveredRoutes: RouteEncounters[] = [];
+
+  for (
+    let i = 0;
+    i < routeNamesForArticleBackfill.length;
+    i += ROUTE_ARTICLE_BATCH_SIZE
+  ) {
+    const batch = routeNamesForArticleBackfill.slice(
+      i,
+      i + ROUTE_ARTICLE_BATCH_SIZE,
+    );
+    const batchResults = await Promise.all(
+      batch.map(async (routeName) => {
+        try {
+          const encounters = await scrapeEncountersFromLocationArticle(
+            routeName,
+            pokemonNameMap,
+          );
+
+          if (encounters.length === 0) {
+            ConsoleFormatter.warn(
+              `No wild encounter table found on article: ${routeName}`,
+            );
+            return null;
+          }
+
+          return { routeName, encounters } satisfies RouteEncounters;
+        } catch (error) {
+          ConsoleFormatter.warn(
+            `Failed to scrape article for ${routeName}: ${error instanceof Error ? error.message : "unknown error"}`,
+          );
+          return null;
+        }
+      }),
+    );
+
+    for (const result of batchResults) {
+      if (result) {
+        recoveredRoutes.push(result);
+      }
+    }
+  }
+
+  if (recoveredRoutes.length > 0) {
+    ConsoleFormatter.success(
+      `Recovered ${recoveredRoutes.length} missing routes from individual route articles`,
+    );
+  }
+
+  return [...routes, ...recoveredRoutes];
 }
 
 /**
@@ -350,7 +544,6 @@ async function scrapeWildEncounters(
 
           // Find Pokemon data in the immediately following table
           const encounters: PokemonEncounter[] = [];
-          let currentEncounterType: EncounterType = "grass"; // Default to grass
 
           // Look for the next table with classes 'IFTable encounterTable'
           let nextElement = $element.next();
@@ -358,40 +551,9 @@ async function scrapeWildEncounters(
           while (nextElement.length > 0 && tablesChecked < 10) {
             if (nextElement.is("table.IFTable.encounterTable")) {
               // Found the encounter table for this route - process it
-              $(nextElement)
-                .find("tr")
-                .each((_rowIndex: number, row: any) => {
-                  const $row = $(row);
-
-                  // Check if this row contains a header that spans multiple columns (encounter type header)
-                  const headerCell = $row.find("th[colspan]").first();
-                  if (headerCell.length > 0) {
-                    const headerText = headerCell.text().trim();
-                    const detectedType = detectEncounterType(headerText);
-                    if (detectedType) {
-                      currentEncounterType = detectedType;
-                      return; // Skip processing this row for Pokemon
-                    }
-                  }
-
-                  // Process Pokemon in this row using the current encounter type
-                  $row.find("td").each((_cellIndex: number, cell: any) => {
-                    const cellText = $(cell).text().trim();
-
-                    // Skip headers and non-Pokemon content
-                    if (isPotentialPokemonName(cellText)) {
-                      // Try to find Pokemon by name (returns custom ID)
-                      const pokemonId = findPokemonId(cellText, pokemonNameMap);
-
-                      if (pokemonId) {
-                        encounters.push({
-                          pokemonId,
-                          encounterType: currentEncounterType,
-                        });
-                      }
-                    }
-                  });
-                });
+              encounters.push(
+                ...parseEncounterTable($, nextElement, pokemonNameMap, "grass"),
+              );
 
               break; // Found and processed one table, stop looking
             }
@@ -425,10 +587,17 @@ async function scrapeWildEncounters(
     progressBar.stop();
     ConsoleFormatter.success(`${modeType} scraping complete!`);
 
+    const routesWithArticleBackfill = await backfillMissingRouteArticles(
+      routes,
+      pokemonNameMap,
+    );
+
     // Consolidate sub-locations under parent locations for Nuzlocke rules
-    const consolidatedRoutes = consolidateSubLocations(routes);
+    const consolidatedRoutes = consolidateSubLocations(
+      routesWithArticleBackfill,
+    );
     ConsoleFormatter.info(
-      `Consolidated ${routes.length} locations into ${consolidatedRoutes.length} unique locations`,
+      `Consolidated ${routesWithArticleBackfill.length} locations into ${consolidatedRoutes.length} unique locations`,
     );
 
     return consolidatedRoutes;

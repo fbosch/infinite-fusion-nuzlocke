@@ -155,8 +155,13 @@ export const PokemonCombobox = ({
   const finalOptions = useMemo(() => {
     // Early return for empty query
     if (deferredQuery === "") {
-      // In randomized mode or custom location, show all Pokemon
-      if (gameMode === "randomized" || isCustomLocation) {
+      const shouldShowAllPokemon =
+        gameMode === "randomized" ||
+        isCustomLocation ||
+        routeEncounterData.length === 0;
+
+      // In randomized mode, custom locations, or locations without route data, show all Pokemon
+      if (shouldShowAllPokemon) {
         // If still loading, return empty array to avoid showing incomplete data
         if (isAllPokemonLoading) {
           return [];
@@ -365,11 +370,14 @@ export const PokemonCombobox = ({
 
   const isShowingLoading = useMemo(() => {
     // Show loading when:
-    // 1. No query and all Pokemon are loading (for randomized/custom locations)
+    // 1. No query and all Pokemon are loading (for randomized/custom/empty-route locations)
     // 2. There's a query and search is loading, or all Pokemon are loading
     if (deferredQuery === "") {
       return (
-        (gameMode === "randomized" || isCustomLocation) && isAllPokemonLoading
+        (gameMode === "randomized" ||
+          isCustomLocation ||
+          routeEncounterData.length === 0) &&
+        isAllPokemonLoading
       );
     }
     return isSearchLoading || isAllPokemonLoading;
@@ -379,6 +387,7 @@ export const PokemonCombobox = ({
     isCustomLocation,
     isAllPokemonLoading,
     isSearchLoading,
+    routeEncounterData.length,
   ]);
 
   const shouldVirtualize = finalOptions.length > 30;
