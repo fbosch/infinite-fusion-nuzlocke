@@ -3,7 +3,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import LocationTable from "@/components/LocationTable";
 
 export const metadata: Metadata = {
-  title: "Pokemon Infinite Fusion Nuzlocke Tracker",
+  title: "Home",
   description:
     "Track encounters, fusions, and team state in Pokemon Infinite Fusion Nuzlocke runs.",
 };

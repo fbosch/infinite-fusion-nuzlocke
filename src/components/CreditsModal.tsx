@@ -162,6 +162,7 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
               </p>
               <Link
                 href="/licenses"
+                onClick={onClose}
                 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
               >
                 View Open Source Licenses

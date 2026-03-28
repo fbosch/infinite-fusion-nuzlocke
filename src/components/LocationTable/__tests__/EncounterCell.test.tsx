@@ -20,7 +20,7 @@ const {
 
 vi.mock("next/image", () => ({
   default: (props: { alt: string }) => (
-    <span aria-label={props.alt} data-testid="next-image-mock" />
+    <span role="img" aria-label={props.alt} data-testid="next-image-mock" />
   ),
 }));
 
