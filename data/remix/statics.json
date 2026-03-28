@@ -8,8 +8,32 @@
     "pokemonIds": [338]
   },
   {
+    "routeName": "Blackthorn City",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Celadon City",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Celadon Sewers",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Cerulean Cape",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Cerulean Cave",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Cerulean City",
+    "pokemonIds": [434]
+  },
+  {
     "routeName": "Cinnabar Island",
-    "pokemonIds": [310]
+    "pokemonIds": [310, 434]
   },
   {
     "routeName": "Creepy House",
@@ -17,7 +41,11 @@
   },
   {
     "routeName": "Crimson City",
-    "pokemonIds": [300, 421]
+    "pokemonIds": [300, 421, 434]
+  },
+  {
+    "routeName": "Dark Cave",
+    "pokemonIds": [434]
   },
   {
     "routeName": "Deep Sea",
@@ -37,7 +65,7 @@
   },
   {
     "routeName": "Ilex Forest",
-    "pokemonIds": [289]
+    "pokemonIds": [289, 434]
   },
   {
     "routeName": "Mt. Moon Summit",
@@ -58,8 +86,16 @@
     "pokemonIds": [295]
   },
   {
+    "routeName": "Offshore Road",
+    "pokemonIds": [434]
+  },
+  {
     "routeName": "Old Shipwreck",
     "pokemonIds": [453]
+  },
+  {
+    "routeName": "Pallet Town",
+    "pokemonIds": [434]
   },
   {
     "routeName": "Pokemon Mansion",
@@ -67,7 +103,7 @@
   },
   {
     "routeName": "Power Plant",
-    "pokemonIds": [125]
+    "pokemonIds": [125, 434]
   },
   {
     "routeName": "Roaming Sevii Islands",
@@ -82,28 +118,120 @@
     "pokemonIds": [337]
   },
   {
+    "routeName": "Route 10",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 12",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 13",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 17",
+    "pokemonIds": [434]
+  },
+  {
     "routeName": "Route 18",
-    "pokemonIds": [489]
+    "pokemonIds": [434, 489]
+  },
+  {
+    "routeName": "Route 19",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 20",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 21",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 22",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 23",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 24",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 26",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 27",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 30",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 31",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 32",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 34",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Route 35",
+    "pokemonIds": [434]
   },
   {
     "routeName": "Route 36",
     "pokemonIds": [185]
   },
   {
+    "routeName": "Route 4",
+    "pokemonIds": [434]
+  },
+  {
     "routeName": "Route 46",
     "pokemonIds": [309]
+  },
+  {
+    "routeName": "Route 5",
+    "pokemonIds": [434]
   },
   {
     "routeName": "Ruby Chamber",
     "pokemonIds": [218, 219]
   },
   {
+    "routeName": "Ruins of Alph",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Safari Zone A1",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Safari Zone A2",
+    "pokemonIds": [434]
+  },
+  {
     "routeName": "Safari Zone A3",
-    "pokemonIds": [424]
+    "pokemonIds": [424, 434]
+  },
+  {
+    "routeName": "Safari Zone A4",
+    "pokemonIds": [434]
   },
   {
     "routeName": "Safari Zone A5",
-    "pokemonIds": [50, 392, 409]
+    "pokemonIds": [50, 392, 409, 434]
   },
   {
     "routeName": "Safari Zone Temple",
@@ -115,7 +243,15 @@
   },
   {
     "routeName": "Seafoam Islands",
-    "pokemonIds": [124]
+    "pokemonIds": [124, 434]
+  },
+  {
+    "routeName": "Slowpoke Well",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Tohjo Falls",
+    "pokemonIds": [434]
   },
   {
     "routeName": "Trash Cans",
@@ -123,7 +259,19 @@
   },
   {
     "routeName": "Treasure Beach",
-    "pokemonIds": [370]
+    "pokemonIds": [370, 434]
+  },
+  {
+    "routeName": "Union Cave",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Vermillion City",
+    "pokemonIds": [434]
+  },
+  {
+    "routeName": "Violet City",
+    "pokemonIds": [434]
   },
   {
     "routeName": "Viridian Forest",
@@ -131,6 +279,6 @@
   },
   {
     "routeName": "Viridian River",
-    "pokemonIds": [479, 482, 485]
+    "pokemonIds": [434, 479, 482, 485]
   }
 ]

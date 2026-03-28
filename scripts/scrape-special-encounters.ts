@@ -140,6 +140,80 @@ function extractSpecialEncounterLocation(locationText: string): string | null {
   return null;
 }
 
+function expandLocationShorthand(
+  location: string,
+  previousLocation: string | null,
+): string {
+  if (/^\d+$/.test(location) && previousLocation?.startsWith("Route ")) {
+    return `Route ${location}`;
+  }
+
+  if (
+    /^[A-Z]\d+$/i.test(location) &&
+    previousLocation?.startsWith("Safari Zone ")
+  ) {
+    return `Safari Zone ${location.toUpperCase()}`;
+  }
+
+  return location;
+}
+
+export function extractStaticEncounterLocations(
+  locationText: string,
+): string[] {
+  const parts = locationText
+    .split(",")
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+
+  const hasTrashCanStatic = parts.some(
+    (part) =>
+      /trash\s*cans?/i.test(part) && part.toLowerCase().includes("(static)"),
+  );
+
+  const expandedParts: { location: string; isStatic: boolean }[] = [];
+  let previousLocation: string | null = null;
+
+  for (const part of parts) {
+    const isStatic = part.toLowerCase().includes("(static)");
+    const cleanedLocation = cleanLocationName(extractBaseLocation(part));
+    const expandedLocation = expandLocationShorthand(
+      cleanedLocation,
+      previousLocation,
+    );
+    previousLocation = expandedLocation;
+
+    expandedParts.push({
+      location: expandedLocation,
+      isStatic,
+    });
+  }
+
+  if (hasTrashCanStatic) {
+    const expandedTrashCanLocations = Array.from(
+      new Set(
+        expandedParts
+          .map((part) => part.location)
+          .filter((location) => location !== "Trash Cans"),
+      ),
+    );
+
+    if (expandedTrashCanLocations.length > 0) {
+      return expandedTrashCanLocations;
+    }
+
+    return ["Trash Cans"];
+  }
+
+  return Array.from(
+    new Set(
+      expandedParts
+        .filter((part) => part.isStatic)
+        .map((part) => part.location),
+    ),
+  );
+}
+
 /**
  * Groups Pokémon by location to create the merged structure
  */
@@ -269,16 +343,17 @@ async function scrapePokedexForSpecialEncounters(
           return;
         }
 
-        // Extract the specific location that has the (gift), (trade), (quest), or (static) marker
-        const specificLocation = extractSpecialEncounterLocation(locationCell);
-        if (!specificLocation) {
-          ConsoleFormatter.warn(
-            `Could not extract specific location for ${pokemonCell}`,
-          );
-          return;
-        }
-
         if (isGift) {
+          // Extract the specific location that has the (gift), (trade), or (quest) marker
+          const specificLocation =
+            extractSpecialEncounterLocation(locationCell);
+          if (!specificLocation) {
+            ConsoleFormatter.warn(
+              `Could not extract specific location for ${pokemonCell}`,
+            );
+            return;
+          }
+
           // Create unique key to avoid duplicates
           const uniqueKey = `${pokemonCell}-${specificLocation}`;
           if (giftsSeen.has(uniqueKey)) {
@@ -291,6 +366,15 @@ async function scrapePokedexForSpecialEncounters(
             location: specificLocation,
           });
         } else if (isTrade) {
+          const specificLocation =
+            extractSpecialEncounterLocation(locationCell);
+          if (!specificLocation) {
+            ConsoleFormatter.warn(
+              `Could not extract specific location for ${pokemonCell}`,
+            );
+            return;
+          }
+
           // Create unique key to avoid duplicates
           const uniqueKey = `${pokemonCell}-${specificLocation}`;
           if (tradesSeen.has(uniqueKey)) {
@@ -303,6 +387,15 @@ async function scrapePokedexForSpecialEncounters(
             location: specificLocation,
           });
         } else if (isQuest) {
+          const specificLocation =
+            extractSpecialEncounterLocation(locationCell);
+          if (!specificLocation) {
+            ConsoleFormatter.warn(
+              `Could not extract specific location for ${pokemonCell}`,
+            );
+            return;
+          }
+
           // Create unique key to avoid duplicates
           const uniqueKey = `${pokemonCell}-${specificLocation}`;
           if (questsSeen.has(uniqueKey)) {
@@ -315,17 +408,26 @@ async function scrapePokedexForSpecialEncounters(
             location: specificLocation,
           });
         } else if (isStatic) {
-          // Create unique key to avoid duplicates
-          const uniqueKey = `${pokemonCell}-${specificLocation}`;
-          if (staticsSeen.has(uniqueKey)) {
+          const staticLocations = extractStaticEncounterLocations(locationCell);
+          if (staticLocations.length === 0) {
+            ConsoleFormatter.warn(
+              `Could not extract static locations for ${pokemonCell}`,
+            );
             return;
           }
-          staticsSeen.add(uniqueKey);
 
-          statics.push({
-            pokemonId,
-            location: specificLocation,
-          });
+          for (const staticLocation of staticLocations) {
+            const uniqueKey = `${pokemonCell}-${staticLocation}`;
+            if (staticsSeen.has(uniqueKey)) {
+              continue;
+            }
+            staticsSeen.add(uniqueKey);
+
+            statics.push({
+              pokemonId,
+              location: staticLocation,
+            });
+          }
         }
       });
     });
