@@ -174,6 +174,7 @@ export const updateEncounter = async (
       shouldCreateFusion || encounter.isFusion || field === "body";
 
     // Track previous value for the field being updated
+    const previousFieldUid = encounter[field]?.uid ?? null;
     const previousFieldId = encounter[field]?.id ?? null;
     if (willBeFusion) {
       encounter[field] = pokemonWithLocationAndUID;
@@ -215,6 +216,15 @@ export const updateEncounter = async (
       fieldChanged
     ) {
       emitEvolutionEvent(locationId);
+    }
+
+    // Keep team references in sync when replacing a Pokémon in-place.
+    if (
+      previousFieldUid &&
+      encounter[field]?.uid &&
+      previousFieldUid !== encounter[field]?.uid
+    ) {
+      removeTeamMembersWithPokemon([previousFieldUid]);
     }
 
     // Auto-assign Pokémon to team slots if it has a relevant status

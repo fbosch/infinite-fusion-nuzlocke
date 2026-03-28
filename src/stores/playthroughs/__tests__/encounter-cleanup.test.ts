@@ -153,6 +153,49 @@ describe("Team Member Cleanup on Encounter Clearing", () => {
     expect(activePlaythrough.updatedAt).toBeGreaterThan(originalTimestamp);
   });
 
+  it("should remove stale team member when replacing an encounter Pokémon", async () => {
+    const { activePlaythrough } = createTestPlaythrough();
+
+    const pikachu = testPokemon.pikachu();
+    const charmander = testPokemon.charmander();
+
+    await updateEncounter("route1", pikachu, "head", false);
+
+    expectTeamMember(activePlaythrough.team.members[0], "pikachu_route1_123");
+
+    await updateEncounter("route1", charmander, "head", false);
+
+    expectTeamMember(
+      activePlaythrough.team.members[0],
+      "charmander_route1_456",
+    );
+  });
+
+  it("should keep unaffected team members when replacing another encounter", async () => {
+    const { activePlaythrough } = createTestPlaythrough();
+
+    const pikachu = testPokemon.pikachu();
+    const charmander = testPokemon.charmander("charmander_route2_456");
+    const squirtle = testPokemon.squirtle("squirtle_route1_789");
+
+    await updateEncounter("route1", pikachu, "head", false);
+    await updateEncounter("route2", charmander, "head", false);
+
+    expectTeamMember(activePlaythrough.team.members[0], "pikachu_route1_123");
+    expectTeamMember(
+      activePlaythrough.team.members[1],
+      "charmander_route2_456",
+    );
+
+    await updateEncounter("route1", squirtle, "head", false);
+
+    expectTeamMember(activePlaythrough.team.members[0], "squirtle_route1_789");
+    expectTeamMember(
+      activePlaythrough.team.members[1],
+      "charmander_route2_456",
+    );
+  });
+
   it("should remove team member when clearing entire encounter", async () => {
     const { activePlaythrough } = createTestPlaythrough();
 
