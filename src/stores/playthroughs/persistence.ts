@@ -6,6 +6,7 @@ import type {
   PlaythroughsState,
 } from "@/stores/playthroughs/types";
 import { PlaythroughSchema } from "@/stores/playthroughs/types";
+import { createDefaultPlaythrough } from "./defaultPlaythrough";
 import { migratePlaythrough } from "./migrations";
 
 // Create a custom store for playthroughs data
@@ -13,18 +14,6 @@ export const playthroughsStore_idb = createStore("playthroughs", "data");
 
 // Storage keys
 export const ACTIVE_PLAYTHROUGH_KEY = "activePlaythroughId";
-
-// Local createDefaultPlaythrough function
-const createDefaultPlaythrough = (): Playthrough => ({
-  id: `playthrough_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-  name: "Nuzlocke",
-  encounters: {},
-  team: { members: Array.from({ length: 6 }, () => null) },
-  gameMode: "classic",
-  version: "1.0.0",
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
-});
 
 // LocalStorage helpers for active playthrough ID
 export const getActivePlaythroughId = (): string | null => {
