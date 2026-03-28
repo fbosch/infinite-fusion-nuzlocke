@@ -162,6 +162,10 @@ interface UseEncounterDataOptions {
   gameMode?: "classic" | "remix";
 }
 
+export type RouteEncounterPokemon = PokemonOptionType & {
+  sources: EncounterSource[];
+};
+
 export function useEncountersForLocation({
   locationId,
   enabled = false,
@@ -178,9 +182,7 @@ export function useEncountersForLocation({
   const nameMap = usePokemonNameMap();
 
   // Process encounter data using useMemo, merging duplicates with multiple sources
-  const routeEncounterData = useMemo((): (PokemonOptionType & {
-    sources: EncounterSource[];
-  })[] => {
+  const routeEncounterData = useMemo((): RouteEncounterPokemon[] => {
     if (!enabled || !pokemonEncounters.length || !allPokemon.length) {
       return [];
     }
@@ -211,15 +213,17 @@ export function useEncountersForLocation({
     });
   }, [pokemonEncounters, allPokemon, nameMap, enabled, locationId]);
 
+  const routePokemonIds = useMemo(
+    () => new Set(routeEncounterData.map((pokemon) => pokemon.id)),
+    [routeEncounterData],
+  );
+
   // Predicate function to check if a Pokemon is in the current route
   const isRoutePokemon = useCallback(
     (pokemonId: number): boolean => {
-      const routePokemonIds = new Set(
-        routeEncounterData.map((pokemon) => pokemon.id),
-      );
       return routePokemonIds.has(pokemonId);
     },
-    [routeEncounterData],
+    [routePokemonIds],
   );
 
   return {
