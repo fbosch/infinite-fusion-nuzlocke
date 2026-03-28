@@ -68,16 +68,30 @@ if (typeof window !== "undefined") {
   // Client-side: Initialize with default state first, then load from IndexedDB
   playthroughsStore = proxy<PlaythroughsState>(defaultState);
 
+  const refreshSettingsDefaultsAfterPlaythroughLoad = async () => {
+    try {
+      const { settingsActions } = await import("@/stores/settings");
+      settingsActions.refreshDefaults();
+    } catch (error) {
+      console.warn(
+        "Failed to refresh settings defaults after playthrough load:",
+        error,
+      );
+    }
+  };
+
   // Add devtools integration for debugging
   if (process.env.NODE_ENV === "development") {
     devtools(playthroughsStore, { name: "Playthroughs Store" });
   }
 
   // Load data from IndexedDB asynchronously
-  loadFromIndexedDB(playthroughsStore).then(() => {
-    // Ensure loading state is set to false
-    playthroughsStore.isLoading = false;
-  });
+  loadFromIndexedDB(playthroughsStore)
+    .then(refreshSettingsDefaultsAfterPlaythroughLoad)
+    .finally(() => {
+      // Keep this explicit for callers that rely on the store-level flag.
+      playthroughsStore.isLoading = false;
+    });
 
   // Create debounced save function with store dependencies
   const debouncedSaveAll = createDebouncedSaveAll(playthroughsStore, () =>

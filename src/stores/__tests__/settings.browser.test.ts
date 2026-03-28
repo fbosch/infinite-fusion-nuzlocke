@@ -66,6 +66,33 @@ describe("Settings Store", () => {
   });
 
   describe("Version-based Default Logic", () => {
+    it("re-evaluates defaults after playthrough load completes", async () => {
+      const oldPlaythrough = {
+        id: "old-playthrough",
+        name: "Old Run",
+        gameMode: "classic",
+        encounters: {},
+        team: [],
+        pc: [],
+        customLocations: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      } as any;
+
+      mockGetActivePlaythrough
+        .mockReturnValueOnce(null)
+        .mockReturnValue(oldPlaythrough);
+
+      const { settingsStore: freshStore, settingsActions: freshActions } =
+        await import("../settings?t=" + Date.now());
+
+      expect(freshStore.moveEncountersBetweenLocations).toBe(false);
+
+      freshActions.refreshDefaults();
+
+      expect(freshStore.moveEncountersBetweenLocations).toBe(true);
+    });
+
     it("enables move encounters for old playthroughs (no version)", async () => {
       // Mock old playthrough without version field
       mockGetActivePlaythrough.mockReturnValue({

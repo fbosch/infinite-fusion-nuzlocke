@@ -102,47 +102,21 @@ export const updatePokemonInEncounter = async (
   field: "head" | "body",
   updates: Partial<z.infer<typeof PokemonOptionSchema>>,
 ) => {
-  console.log("updatePokemonInEncounter called with:", {
-    locationId,
-    pokemonUID,
-    field,
-    updates,
-  });
-
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough?.encounters?.[locationId]) {
-    console.log(
-      "No active playthrough or encounter not found for locationId:",
-      locationId,
-    );
     return;
   }
 
   const encounter = activePlaythrough.encounters[locationId];
-  console.log("Found encounter:", encounter);
 
   const pokemon = encounter[field];
-  console.log("Pokemon in field", field, ":", pokemon);
 
   if (pokemon?.uid === pokemonUID) {
-    console.log("Updating pokemon from:", pokemon, "to:", {
-      ...pokemon,
-      ...updates,
-    });
     encounter[field] = { ...pokemon, ...updates };
     encounter.updatedAt = getCurrentTimestamp();
 
-    console.log("Updated encounter:", encounter);
-
     // Update the playthrough timestamp to trigger reactivity
     activePlaythrough.updatedAt = getCurrentTimestamp();
-  } else {
-    console.log(
-      "Pokemon UID mismatch. Expected:",
-      pokemonUID,
-      "Found:",
-      pokemon?.uid,
-    );
   }
 };
 
@@ -1061,17 +1035,13 @@ export const markEncounterAsCaptured = async (
 const autoAssignCapturedPokemonToTeam = async (
   locationId: string,
 ): Promise<void> => {
-  console.log(`Auto-assignment triggered for location: ${locationId}`);
-
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough?.team || !activePlaythrough.encounters) {
-    console.log("No active playthrough or team, skipping auto-assignment");
     return;
   }
 
   const encounter = activePlaythrough.encounters[locationId];
   if (!encounter) {
-    console.log("No encounter found, skipping auto-assignment");
     return;
   }
 
@@ -1081,12 +1051,8 @@ const autoAssignCapturedPokemonToTeam = async (
     .filter(({ member }) => member === null)
     .map(({ index }) => index);
 
-  console.log(`Available team positions: ${availablePositions.join(", ")}`);
-  console.log(`Team members:`, activePlaythrough.team.members);
-
   if (availablePositions.length === 0) {
     // No available team slots
-    console.log("No available team slots, skipping auto-assignment");
     return;
   }
 
@@ -1113,14 +1079,8 @@ const autoAssignCapturedPokemonToTeam = async (
 
   // Only proceed if we have at least one captured Pokémon
   if (!headPokemon && !bodyPokemon) {
-    console.log("No Pokémon eligible for auto-assignment");
     return;
   }
-
-  console.log(
-    `Auto-assigning: head=${headPokemon?.uid || "none"}, body=${bodyPokemon?.uid || "none"}`,
-  );
-
   // Import the updateTeamMember function dynamically to avoid circular dependencies
   const { updateTeamMember } = await import("./store");
 
@@ -1147,12 +1107,6 @@ const autoAssignCapturedPokemonToTeam = async (
     }
   }
 
-  console.log(
-    existingSlot >= 0
-      ? `Updating existing team slot ${existingSlot + 1} for fusion`
-      : `Assigning to new team slot ${targetPosition + 1}`,
-  );
-
   // Assign to the target team slot (either existing or new)
   const success = await updateTeamMember(
     targetPosition,
@@ -1160,11 +1114,7 @@ const autoAssignCapturedPokemonToTeam = async (
     bodyPokemon,
   );
 
-  if (success) {
-    console.log(
-      `Successfully auto-assigned Pokémon from ${locationId} to team slot ${targetPosition + 1}`,
-    );
-  } else {
+  if (success === false) {
     console.error(
       `Failed to auto-assign Pokémon from ${locationId} to team slot ${targetPosition + 1}`,
     );
@@ -1235,15 +1185,6 @@ const removeTeamMembersWithPokemon = (pokemonUIDs: string[]): void => {
       (member.bodyPokemonUid && pokemonUIDs.includes(member.bodyPokemonUid));
 
     if (hasRemovedPokemon) {
-      console.log(
-        `Removing team member at position ${i + 1} due to cleared Pokémon:`,
-        {
-          headPokemonUid: member.headPokemonUid,
-          bodyPokemonUid: member.bodyPokemonUid,
-          removedUIDs: pokemonUIDs,
-        },
-      );
-
       activePlaythrough.team.members[i] = null;
       hasChanges = true;
     }
