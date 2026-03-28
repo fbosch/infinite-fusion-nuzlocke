@@ -42,7 +42,9 @@ export const useActivePlaythrough = (): Playthrough | null => {
       (p) => p.id === snapshot.activePlaythroughId,
     );
 
-    return (activePlaythroughData as Playthrough) || null;
+    return activePlaythroughData
+      ? (activePlaythroughData as Playthrough)
+      : null;
   }, [snapshot.activePlaythroughId, snapshot.playthroughs]);
 };
 
@@ -59,7 +61,12 @@ export const useGameMode = (): GameMode => {
   const activePlaythrough = snapshot.playthroughs.find(
     (p) => p.id === snapshot.activePlaythroughId,
   );
-  return (activePlaythrough?.gameMode as GameMode) || "classic";
+  const gameMode = activePlaythrough?.gameMode;
+  return gameMode === "classic" ||
+    gameMode === "remix" ||
+    gameMode === "randomized"
+    ? gameMode
+    : "classic";
 };
 
 export const useIsRandomizedMode = (): boolean => {
@@ -80,7 +87,6 @@ export const usePlaythroughById = (
 
   return useMemo(() => {
     if (!playthroughId || !playthroughData) return null;
-    // Valtio snapshots are already immutable, no need to clone
     return playthroughData as Playthrough;
   }, [playthroughId, playthroughData]);
 };
@@ -130,17 +136,13 @@ export const useCustomLocations = (): z.infer<
 export const useMergedLocations = () => {
   useActivePlaythrough();
 
-  return useMemo(() => {
-    return getMergedLocations();
-  }, []);
+  return getMergedLocations();
 };
 
 export const useAvailableAfterLocations = () => {
   useActivePlaythrough();
 
-  return useMemo(() => {
-    return getAvailableAfterLocations();
-  }, []);
+  return getAvailableAfterLocations();
 };
 
 // Hook for preferred variants - simplified version

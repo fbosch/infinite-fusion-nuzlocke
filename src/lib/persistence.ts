@@ -22,12 +22,41 @@ const idbStorage = {
   removeItem: (key: string) => del(key, queryStore),
 };
 
+const isPersistedQuery = (value: unknown): value is PersistedQuery => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as {
+    buster?: unknown;
+    clientState?: unknown;
+    timestamp?: unknown;
+  };
+
+  return (
+    typeof candidate.timestamp === "number" &&
+    typeof candidate.buster === "string" &&
+    typeof candidate.clientState === "object" &&
+    candidate.clientState !== null
+  );
+};
+
+const deserializePersistedQuery = (data: unknown): PersistedQuery => {
+  const parsed = typeof data === "string" ? JSON.parse(data) : data;
+
+  if (isPersistedQuery(parsed)) {
+    return parsed;
+  }
+
+  throw new Error("Invalid persisted query payload");
+};
+
 export const queryPersister = experimental_createQueryPersister({
   storage: idbStorage,
   prefix: `query:`,
   buster: getCacheBuster().toString(),
-  deserialize: (data) => data as unknown as PersistedQuery,
-  serialize: (data) => data as unknown as string,
+  deserialize: deserializePersistedQuery,
+  serialize: JSON.stringify,
   maxAge:
     process.env.NODE_ENV === "development"
       ? 1000 * 60 * 5 // 5 minutes in dev

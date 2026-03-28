@@ -141,7 +141,7 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
             )}
           >
             <div
-              ref={raysSvgRef as unknown as React.RefObject<HTMLDivElement>}
+              ref={raysSvgRef}
               aria-hidden="true"
               className="absolute size-35 left-1/2 top-2/3 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 bg-radial from-5% to-35% from-white/50 to-transparent"
             >
