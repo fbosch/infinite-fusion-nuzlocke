@@ -12,7 +12,7 @@ import {
 import clsx from "clsx";
 import { ArrowUpRight, Check, X } from "lucide-react";
 import Image from "next/image";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
   usePreferredVariantState,
   useSpriteCredits,
@@ -68,9 +68,7 @@ export function ArtworkVariantModal({
     usePreferredVariantState(effectiveHeadId, effectiveBodyId);
 
   // Use local state for immediate updates, fallback to global preferred variant
-  const [localVariant, setLocalVariant] = React.useState<string>(
-    globalPreferredVariant || "",
-  );
+  const [localVariant, setLocalVariant] = React.useState<string | null>(null);
 
   const { data: variants, isLoading: variantsLoading } = useSpriteVariants(
     effectiveHeadId,
@@ -91,42 +89,32 @@ export function ArtworkVariantModal({
     return variants;
   }, [variants]);
 
-  // Reset local state when modal opens/closes or global variant changes
-  useEffect(() => {
-    if (!isOpen) {
-      setLocalVariant("");
-    } else {
-      setLocalVariant(globalPreferredVariant || "");
-    }
-  }, [isOpen, globalPreferredVariant]);
+  const selectedVariant = localVariant ?? globalPreferredVariant ?? "";
+
+  const handleClose = React.useCallback(() => {
+    setLocalVariant(null);
+    onClose();
+  }, [onClose]);
 
   const handleSelectVariant = React.useCallback(
     async (variant: string) => {
       // Immediately update the local state for instant UI feedback
       setLocalVariant(variant);
-      try {
-        await updateVariant(variant);
-      } catch (error) {
-        console.error("Failed to set artwork variant:", error);
-      }
+      await updateVariant(variant);
     },
     [updateVariant],
   );
 
   const handleClearVariant = React.useCallback(async () => {
-    try {
-      // Clear the preferred variant using the new hook
-      await updateVariant("");
-      onClose();
-    } catch (error) {
-      console.error("Failed to clear artwork variant:", error);
-    }
-  }, [updateVariant, onClose]);
+    setLocalVariant("");
+    await updateVariant("");
+    handleClose();
+  }, [updateVariant, handleClose]);
 
   // No cleanup needed
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50 group">
+    <Dialog open={isOpen} onClose={handleClose} className="relative z-50 group">
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 "
@@ -147,7 +135,7 @@ export function ArtworkVariantModal({
               Select Artwork Variant
             </DialogTitle>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
@@ -175,7 +163,7 @@ export function ArtworkVariantModal({
           ) : (
             <>
               <RadioGroup
-                value={localVariant || ""}
+                value={selectedVariant}
                 onChange={handleSelectVariant}
                 data-scroll-container
                 className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-y-auto overflow-x-hidden flex-1 min-h-0 scrollbar-thin p-3 relative"
@@ -273,7 +261,7 @@ export function ArtworkVariantModal({
               </RadioGroup>
               <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button
-                  onClick={onClose}
+                  onClick={handleClose}
                   className={clsx(
                     "px-4 py-2 text-sm rounded-md transition-colors",
                     "bg-gray-100 hover:bg-gray-200 text-gray-900",

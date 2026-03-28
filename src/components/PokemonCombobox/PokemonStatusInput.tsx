@@ -9,7 +9,7 @@ import {
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import clsx from "clsx";
 import { ArrowUpDown, ChevronDown, Computer, Gift, Skull } from "lucide-react";
-import { startTransition, useEffect, useState } from "react";
+import { startTransition } from "react";
 import { match } from "ts-pattern";
 import EscapeIcon from "@/assets/images/escape-cloud.svg";
 import PokeballIcon from "@/assets/images/pokeball.svg";
@@ -55,8 +55,7 @@ export const PokemonStatusInput = ({
   disabled = false,
   dragPreview,
 }: PokemonStatusInputProps) => {
-  // Local status state for smooth selection
-  const [localStatus, setLocalStatus] = useState(value?.status || null);
+  const selectedStatus = dragPreview?.status ?? value?.status ?? null;
 
   // Floating UI setup
   const { refs, floatingStyles, placement } = useFloating({
@@ -65,18 +64,8 @@ export const PokemonStatusInput = ({
     whileElementsMounted: autoUpdate,
   });
 
-  // Sync local status when value changes
-  useEffect(() => {
-    if (value?.status !== localStatus) {
-      setLocalStatus(value?.status || null);
-    }
-  }, [value?.status, localStatus]);
-
   // Handle status selection
   const handleStatusSelect = (newStatus: PokemonStatusType) => {
-    // Update local state immediately for responsive UI
-    setLocalStatus(newStatus);
-
     if (value) {
       // Use startTransition to defer the state update
       startTransition(() => {
@@ -114,11 +103,8 @@ export const PokemonStatusInput = ({
             disabled={!value || disabled}
           >
             <div className="flex items-center gap-2">
-              {(dragPreview?.status || localStatus) &&
-                getStatusIcon(
-                  (dragPreview?.status || localStatus) as PokemonStatusType,
-                )}
-              <span>{dragPreview?.status || localStatus || "Status"}</span>
+              {selectedStatus && getStatusIcon(selectedStatus)}
+              <span>{selectedStatus || "Status"}</span>
             </div>
             <ChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
           </MenuButton>
@@ -152,8 +138,7 @@ export const PokemonStatusInput = ({
                               "bg-gray-100 dark:bg-gray-700 focus-visible:ring-1 focus-visible:ring-blue-500 ring-inset":
                                 focus,
                               "bg-gray-200 dark:bg-gray-600":
-                                (dragPreview?.status || localStatus) ===
-                                  statusValue && !focus,
+                                selectedStatus === statusValue && !focus,
                             },
                           )}
                         >
