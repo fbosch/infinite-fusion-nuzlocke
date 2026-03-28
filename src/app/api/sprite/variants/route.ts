@@ -203,7 +203,6 @@ async function processSpriteVariants(
 
   // Additional CDN optimization headers
   response.headers.set("Vary", "Accept-Encoding"); // Enable compression
-  response.headers.set("X-Cache-Status", "HIT"); // For debugging
 
   return response;
 }

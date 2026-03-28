@@ -125,9 +125,17 @@ async function scrapeLegendaryEncounters(): Promise<LegendaryRoute[]> {
               if (!routeMap.has(routeName)) {
                 routeMap.set(routeName, []);
               }
+
+              const routeEncounters = routeMap.get(routeName);
+              if (routeEncounters === undefined) {
+                throw new Error(
+                  `Failed to initialize route encounters for ${routeName}`,
+                );
+              }
+
               // Add all forms of this pokemon
               for (const id of pokemonIds) {
-                routeMap.get(routeName)?.push(id);
+                routeEncounters.push(id);
               }
               ConsoleFormatter.success(
                 `Added ${pokemonIds.length} forms of ${name} to route: ${routeName}`,

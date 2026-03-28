@@ -1,5 +1,6 @@
 const WIKI_ORIGIN = "https://infinitefusion.fandom.com";
 const WIKI_API_URL = `${WIKI_ORIGIN}/api.php`;
+const WIKI_API_TIMEOUT_MS = 10_000;
 const SCRAPER_USER_AGENT =
   "InfiniteFusionNuzlockeScraper/1.0 (+https://github.com/fbb/infinite-fusion-nuzlocke)";
 
@@ -26,9 +27,14 @@ function getPageTitleFromUrl(pageUrl: string): string {
     throw new Error(`Unsupported wiki path: ${parsed.pathname}`);
   }
 
-  const rawTitle = decodeURIComponent(
-    parsed.pathname.slice(wikiPathPrefix.length),
-  );
+  let rawTitle: string;
+  try {
+    rawTitle = decodeURIComponent(parsed.pathname.slice(wikiPathPrefix.length));
+  } catch (error) {
+    throw new Error(
+      `Invalid wiki page URL encoding for ${pageUrl}: ${error instanceof Error ? error.message : "unknown decode error"}`,
+    );
+  }
   const normalizedTitle = rawTitle
     .replace(/\/+$/, "")
     .replace(/_/g, " ")
@@ -51,12 +57,29 @@ export async function fetchWikiPageHtml(pageUrl: string): Promise<string> {
     page: pageTitle,
   });
 
-  const response = await fetch(`${WIKI_API_URL}?${params.toString()}`, {
-    headers: {
-      Accept: "application/json",
-      "User-Agent": SCRAPER_USER_AGENT,
-    },
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), WIKI_API_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(`${WIKI_API_URL}?${params.toString()}`, {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": SCRAPER_USER_AGENT,
+      },
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error(
+        `Wiki API request timed out after ${WIKI_API_TIMEOUT_MS}ms for page: ${pageTitle}`,
+      );
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (response.ok === false) {
     throw new Error(
