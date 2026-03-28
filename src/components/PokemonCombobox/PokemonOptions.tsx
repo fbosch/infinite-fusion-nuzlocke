@@ -26,9 +26,11 @@ interface PokemonOptionsProps {
 
 interface PokemonOptionProps {
   pokemon: PokemonOptionType;
+  index?: number;
   locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
   getPokemonSource: (pokemonId: number) => EncounterSource[];
+  comboboxId?: string;
   gameMode: "classic" | "remix" | "randomized";
   style?: React.CSSProperties;
   disabled?: boolean;
