@@ -27,6 +27,44 @@ const dsFont = localFont({
   display: "block",
 });
 
+const STRUCTURED_DATA = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Infinite Fusion Nuzlocke Tracker",
+  description:
+    "Track your Pokémon Infinite Fusion Nuzlocke runs with location-based encounters, multiple playthroughs, and Classic/Remix game modes.",
+  url: "https://fusion.nuzlocke.io",
+  applicationCategory: "Game",
+  operatingSystem: "Web Browser",
+  author: {
+    "@type": "Person",
+    name: "Frederik Bosch",
+  },
+  creator: {
+    "@type": "Person",
+    name: "Frederik Bosch",
+  },
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+  softwareVersion: "1.0.0",
+  screenshot: "https://fusion.nuzlocke.io/android-chrome-512x512.png",
+  featureList: [
+    "Location-based encounter tracking",
+    "Multiple playthrough management",
+    "Classic and Remix game modes",
+    "Custom location support",
+    "Interactive location table",
+    "Encounter history tracking",
+    "Auto-scroll to recent encounters",
+    "Responsive design for mobile and desktop",
+  ],
+};
+
+const STRUCTURED_DATA_JSON = JSON.stringify(STRUCTURED_DATA);
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://fusion.nuzlocke.io"),
   title: {
@@ -122,47 +160,7 @@ export default function RootLayout({
           content="Infinite Fusion Nuzlocke Tracker"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebApplication",
-              name: "Infinite Fusion Nuzlocke Tracker",
-              description:
-                "Track your Pokémon Infinite Fusion Nuzlocke runs with location-based encounters, multiple playthroughs, and Classic/Remix game modes.",
-              url: "https://fusion.nuzlocke.io",
-              applicationCategory: "Game",
-              operatingSystem: "Web Browser",
-              author: {
-                "@type": "Person",
-                name: "Frederik Bosch",
-              },
-              creator: {
-                "@type": "Person",
-                name: "Frederik Bosch",
-              },
-              offers: {
-                "@type": "Offer",
-                price: "0",
-                priceCurrency: "USD",
-              },
-              softwareVersion: "1.0.0",
-              screenshot:
-                "https://fusion.nuzlocke.io/android-chrome-512x512.png",
-              featureList: [
-                "Location-based encounter tracking",
-                "Multiple playthrough management",
-                "Classic and Remix game modes",
-                "Custom location support",
-                "Interactive location table",
-                "Encounter history tracking",
-                "Auto-scroll to recent encounters",
-                "Responsive design for mobile and desktop",
-              ],
-            }),
-          }}
-        />
+        <script type="application/ld+json">{STRUCTURED_DATA_JSON}</script>
       </head>
       <body className="antialiased font-sans">
         <Providers>
