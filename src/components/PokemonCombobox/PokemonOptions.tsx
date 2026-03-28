@@ -26,11 +26,9 @@ interface PokemonOptionsProps {
 
 interface PokemonOptionProps {
   pokemon: PokemonOptionType;
-  index: number;
   locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
   getPokemonSource: (pokemonId: number) => EncounterSource[];
-  comboboxId: string;
   gameMode: "classic" | "remix" | "randomized";
   style?: React.CSSProperties;
   disabled?: boolean;
@@ -39,11 +37,9 @@ interface PokemonOptionProps {
 
 interface PokemonOptionContentProps {
   pokemon: PokemonOptionType;
-  index: number;
   locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
   getPokemonSource: (pokemonId: number) => EncounterSource[];
-  comboboxId: string;
   gameMode: "classic" | "remix" | "randomized";
   isActive?: boolean;
   isSelected?: boolean;
@@ -108,10 +104,8 @@ function PokemonOptionContent({
 
 export function PokemonOption({
   pokemon,
-  index,
   isRoutePokemon,
   getPokemonSource,
-  comboboxId,
   gameMode,
   style,
   disabled,
@@ -127,7 +121,6 @@ export function PokemonOption({
 
   return (
     <ComboboxOption
-      key={`${pokemon.id}-${pokemon.name}-${index}`}
       value={pokemon}
       className={({ active }) =>
         clsx(
@@ -148,10 +141,8 @@ export function PokemonOption({
         <PokemonOptionContent
           locationId={locationId}
           pokemon={pokemon}
-          index={index}
           isRoutePokemon={isRoutePokemon}
           getPokemonSource={getPokemonSource}
-          comboboxId={comboboxId}
           gameMode={gameMode}
           isActive={active}
           isSelected={selected}
@@ -167,7 +158,6 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
   isRoutePokemon,
   getPokemonSource,
   locationId,
-  comboboxId,
   gameMode,
   isLoading = false,
 }) => {
@@ -207,15 +197,15 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
   }
 
   // Use the PokemonOption component
-  return finalOptions.map((pokemon, index) => (
+  return finalOptions.map((pokemon) => (
     <PokemonOption
-      key={`${pokemon.id}-${pokemon.name}-${index}`}
+      key={
+        pokemon.uid ?? `${pokemon.id}-${pokemon.nationalDexId}-${pokemon.name}`
+      }
       pokemon={pokemon}
-      index={index}
       locationId={locationId}
       isRoutePokemon={isRoutePokemon}
       getPokemonSource={getPokemonSource}
-      comboboxId={comboboxId}
       gameMode={gameMode}
     />
   ));

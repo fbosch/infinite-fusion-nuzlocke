@@ -313,7 +313,7 @@ export function ContextMenu({
                   if (item.separator) {
                     return (
                       <div
-                        key={`separator-${index}`}
+                        key={item.id}
                         className="my-1 h-px bg-gray-200 dark:bg-gray-700/70"
                         role="separator"
                       />

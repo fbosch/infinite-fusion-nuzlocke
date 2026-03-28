@@ -21,6 +21,14 @@ interface LocationCellProps {
 
 type Pokemon = z.infer<typeof PokemonOptionSchema>;
 
+function getLocationPokemonKey(pokemon: Pokemon): string {
+  if (pokemon.uid) {
+    return pokemon.uid;
+  }
+
+  return `${pokemon.id}-${pokemon.name}-${pokemon.originalLocation ?? "unknown"}`;
+}
+
 export default function LocationCell({
   location,
   locationName,
@@ -121,8 +129,11 @@ export default function LocationCell({
           </div>
 
           <div className="flex flex-row divide-x divide-gray-200 dark:divide-gray-600">
-            {locationPokemon.map((pokemon, index) => (
-              <div key={index} className="flex items-center first:pl-0 px-2">
+            {locationPokemon.map((pokemon) => (
+              <div
+                key={getLocationPokemonKey(pokemon)}
+                className="flex items-center first:pl-0 px-2"
+              >
                 <div className="flex-shrink-0 size-9 justify-center items-center flex">
                   <PokemonSprite pokemonId={pokemon.id} generation="gen7" />
                 </div>
