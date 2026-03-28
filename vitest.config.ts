@@ -1,28 +1,33 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vitest/config';
-import tsconfigPaths from 'vite-tsconfig-paths';
-import react from '@vitejs/plugin-react';
 
-const isBrowserTestsEnabled = process.env.VITEST_BROWSER === 'true';
+import { fileURLToPath, URL } from "node:url";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vitest/config";
+
+const isBrowserTestsEnabled = process.env.VITEST_BROWSER === "true";
+const alias = {
+  "@": fileURLToPath(new URL("./src", import.meta.url)),
+  "@data": fileURLToPath(new URL("./data", import.meta.url)),
+};
 
 export default defineConfig({
   test: {
     globals: true,
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html', 'lcov', 'cobertura'],
+      provider: "v8",
+      reporter: ["text", "json", "html", "lcov", "cobertura"],
       exclude: [
-        '**/node_modules/**',
-        '**/dist/**',
-        '**/.next/**',
-        '**/coverage/**',
-        '**/*.config.*',
-        '**/*.d.ts',
-        'scripts/**',
-        '**/*.test.{js,ts,jsx,tsx}',
-        '**/*.spec.{js,ts,jsx,tsx}',
-        '**/vitest.config.*',
-        '**/coverage.config.*',
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/.next/**",
+        "**/coverage/**",
+        "**/*.config.*",
+        "**/*.d.ts",
+        "scripts/**",
+        "**/*.test.{js,ts,jsx,tsx}",
+        "**/*.spec.{js,ts,jsx,tsx}",
+        "**/vitest.config.*",
+        "**/coverage.config.*",
       ],
       thresholds: {
         global: {
@@ -32,26 +37,28 @@ export default defineConfig({
           statements: 80,
         },
       },
-      all: true,
     },
     projects: [
       ...(isBrowserTestsEnabled
         ? [
             {
-              plugins: [tsconfigPaths(), react()],
+              resolve: {
+                alias,
+              },
+              plugins: react(),
               test: {
-                name: 'browser',
+                name: "browser",
                 include: [
-                  '**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
+                  "**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
                 ],
-                setupFiles: ['./tests/setup.browser.ts'],
+                setupFiles: ["./tests/setup.browser.ts"],
                 browser: {
                   enabled: true,
-                  provider: 'playwright',
+                  provider: "playwright" as never,
                   headless: true,
                   instances: [
                     {
-                      browser: 'chromium',
+                      browser: "chromium" as const,
                     },
                   ],
                 },
@@ -60,30 +67,34 @@ export default defineConfig({
           ]
         : []),
       {
-        plugins: [tsconfigPaths()],
+        resolve: {
+          alias,
+        },
         test: {
-          name: 'react-hooks',
-          include: ['**/playthroughs.test.ts', '**/playthroughs/**/*.test.ts'],
-          setupFiles: ['./tests/setup.react-hooks.ts'],
-          environment: 'jsdom',
-          pool: 'threads',
+          name: "react-hooks",
+          include: ["**/playthroughs.test.ts", "**/playthroughs/**/*.test.ts"],
+          setupFiles: ["./tests/setup.react-hooks.ts"],
+          environment: "jsdom",
+          pool: "threads",
         },
       },
       {
-        plugins: [tsconfigPaths()],
+        resolve: {
+          alias,
+        },
         test: {
-          name: 'node',
-          include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+          name: "node",
+          include: ["**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
           exclude: [
-            '**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
-            '**/playthroughs.test.ts',
-            '**/playthroughs/**/*.test.ts',
-            '**/scrollToLocation.test.ts',
-            'node_modules',
-            'dist',
-            '.next',
+            "**/*.browser.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/playthroughs.test.ts",
+            "**/playthroughs/**/*.test.ts",
+            "**/scrollToLocation.test.ts",
+            "node_modules",
+            "dist",
+            ".next",
           ],
-          environment: 'node',
+          environment: "node",
         },
       },
     ],
