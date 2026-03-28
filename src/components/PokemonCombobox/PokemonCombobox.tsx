@@ -68,6 +68,9 @@ interface PokemonComboboxProps {
   isCustomLocation?: boolean;
 }
 
+const DEFAULT_ROUTE_ENCOUNTER_DATA: RouteEncounterPokemon[] = [];
+const EMPTY_POKEMON_OPTIONS: PokemonOptionType[] = [];
+
 // Pokemon Combobox Component
 export const PokemonCombobox = ({
   locationId,
@@ -82,7 +85,7 @@ export const PokemonCombobox = ({
   ref,
   isFusion = false,
   shouldLoad = true,
-  routeEncounterData = [],
+  routeEncounterData = DEFAULT_ROUTE_ENCOUNTER_DATA,
   isCustomLocation = false,
 }: PokemonComboboxProps) => {
   "use no memo";
@@ -119,13 +122,15 @@ export const PokemonCombobox = ({
     [routePokemonIds],
   );
   // Use the search hook
-  const { data: results = [], isLoading: isSearchLoading } = usePokemonSearch({
+  const { data: resultsData, isLoading: isSearchLoading } = usePokemonSearch({
     query: deferredQuery,
   });
+  const results = resultsData ?? EMPTY_POKEMON_OPTIONS;
 
   // Get all Pokemon for randomized mode
-  const { data: allPokemon = [], isLoading: isAllPokemonLoading } =
+  const { data: allPokemonData, isLoading: isAllPokemonLoading } =
     useAllPokemon();
+  const allPokemon = allPokemonData ?? EMPTY_POKEMON_OPTIONS;
 
   // Floating UI setup
   const { refs, floatingStyles, update, placement } = useFloating({
