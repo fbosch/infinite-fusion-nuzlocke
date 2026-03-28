@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import LocationTable from "@/components/LocationTable";
+
+export const metadata: Metadata = {
+  title: "Pokemon Infinite Fusion Nuzlocke Tracker",
+  description:
+    "Track encounters, fusions, and team state in Pokemon Infinite Fusion Nuzlocke runs.",
+};
 
 export default function Home() {
   return (

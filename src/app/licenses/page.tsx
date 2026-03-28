@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 // Load license data without relying on filesystem access at runtime
 
 type LicensePackage = {
@@ -52,12 +54,12 @@ export default async function LicensesPage() {
           </p>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             Combined notices:{" "}
-            <a
+            <Link
               href="/THIRD-PARTY-NOTICES.txt"
               className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
             >
               THIRD-PARTY-NOTICES.txt
-            </a>
+            </Link>
           </p>
           <div className="mt-6 overflow-x-auto">
             <table className="min-w-full text-sm align-top">
