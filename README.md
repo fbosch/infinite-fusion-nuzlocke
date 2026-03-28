@@ -82,6 +82,8 @@ pnpm validate
 
 Contributions are welcome through issues and pull requests. Keep changes focused, include relevant tests, and run the validation workflow before opening a PR.
 
+SEO routing and canonical conventions are documented in `docs/SEO_CANONICAL_STRATEGY.md`.
+
 ## License
 
 MIT License. See [`LICENSE`](LICENSE).

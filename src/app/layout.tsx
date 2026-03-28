@@ -90,9 +90,6 @@ export const metadata: Metadata = {
   verification: {
     google: "your-google-verification-code", // Add your Google Search Console verification code
   },
-  alternates: {
-    canonical: "https://fusion.nuzlocke.io",
-  },
 };
 
 export default function RootLayout({
