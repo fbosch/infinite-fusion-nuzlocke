@@ -15,8 +15,8 @@ Primary rule: if guidance is auto-discoverable from code, config, or standard to
 | Source rule                  | Keep as skill? | Keep in AGENTS.md? | Decision                                                                                                      |
 | ---------------------------- | -------------- | ------------------ | ------------------------------------------------------------------------------------------------------------- |
 | `calculated-state.mdc`       | yes            | no                 | Skill: reusable derived-state implementation pattern.                                                         |
-| `react-guide.mdc`            | yes (trimmed)  | no                 | Skill: reusable React component patterns; remove obvious framework basics.                                    |
-| `react-state-management.mdc` | yes (trimmed)  | no                 | Skill: reusable state decisions; dedupe overlap with `calculated-state`.                                      |
+| `react-guide.mdc`            | no             | no                 | Ditch: broad React guidance is covered by model baseline and pre-existing `vercel-react-best-practices`.      |
+| `react-state-management.mdc` | no             | no                 | Ditch: broad state guidance overlaps with existing skills; keep only narrow derived-state anti-pattern rules. |
 | `validation-guide.mdc`       | yes            | no                 | Skill: reusable Zod validation patterns and error-shape handling.                                             |
 | `accessibility.mdc`          | yes (focused)  | partial            | Skill for implementation patterns; keep only project-specific accessibility landmines in AGENTS if any exist. |
 | `icon-usage.mdc`             | no             | yes (local)        | Local `src/components/AGENTS.md`: repo-specific `lucide-react` constraint and sizing conventions.             |
@@ -36,8 +36,6 @@ Primary rule: if guidance is auto-discoverable from code, config, or standard to
 
 - Skills:
   - `.opencode/skills/react-derived-state/`
-  - `.opencode/skills/react-component-patterns/`
-  - `.opencode/skills/react-state-management/`
   - `.opencode/skills/zod-validation-patterns/`
   - `.opencode/skills/web-accessibility/` (focused)
 - AGENTS guidance:
