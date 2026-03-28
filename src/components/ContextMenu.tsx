@@ -263,6 +263,17 @@ export function ContextMenu({
     setOpenSubmenuIndex(null);
   }, []);
 
+  const focusFirstMenuItem = useCallback(() => {
+    const firstMenuItem = listRef.current.find(
+      (element): element is HTMLElement => element !== null,
+    );
+
+    if (!firstMenuItem) return;
+
+    setActiveIndex(0);
+    firstMenuItem.focus();
+  }, [setActiveIndex]);
+
   const handleContextMenu = (event: React.MouseEvent) => {
     if (disabled) return;
 
@@ -279,6 +290,8 @@ export function ContextMenu({
         menuElementRef.current.classList.remove("tooltip-exit");
         menuElementRef.current.classList.add("tooltip-enter");
       }
+
+      focusFirstMenuItem();
     });
   };
 
@@ -296,6 +309,8 @@ export function ContextMenu({
         menuElementRef.current.classList.remove("tooltip-exit");
         menuElementRef.current.classList.add("tooltip-enter");
       }
+
+      focusFirstMenuItem();
     });
   };
 
