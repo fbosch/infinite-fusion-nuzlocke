@@ -1,20 +1,6 @@
 import type { MetadataRoute } from "next";
+import { buildSitemapEntries } from "./seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://fusion.nuzlocke.io";
-
-  return [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/licenses`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.3,
-    },
-  ];
+  return buildSitemapEntries();
 }

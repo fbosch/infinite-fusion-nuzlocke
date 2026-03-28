@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 // Load license data without relying on filesystem access at runtime
@@ -30,8 +31,11 @@ async function loadLicenses(): Promise<{
   }
 }
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Open Source Licenses",
+  alternates: {
+    canonical: "/licenses",
+  },
 };
 
 export default async function LicensesPage() {
