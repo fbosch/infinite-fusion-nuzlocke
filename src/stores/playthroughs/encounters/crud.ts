@@ -85,7 +85,10 @@ export const updateEncounter = async (
     encounter = encounterData;
     activePlaythrough.encounters[locationId] = encounter;
 
-    if (encounterData.isFusion && encounterData.head && encounterData.body) {
+    if (
+      encounterData.isFusion &&
+      (encounterData.head !== null || encounterData.body !== null)
+    ) {
       emitEvolutionEvent(locationId);
     }
 

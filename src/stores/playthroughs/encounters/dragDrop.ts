@@ -13,6 +13,7 @@ import { removeTeamMembersWithPokemon } from "./team";
 export const clearEncounterFromLocation = async (
   locationId: string,
   field?: "head" | "body",
+  options?: { preserveTeamMembership?: boolean },
 ) => {
   const activePlaythrough = ensureActivePlaythroughWithEncounters();
   if (!activePlaythrough) {
@@ -53,7 +54,9 @@ export const clearEncounterFromLocation = async (
     }
   }
 
-  removeTeamMembersWithPokemon(removedUIDs);
+  if (options?.preserveTeamMembership !== true) {
+    removeTeamMembersWithPokemon(removedUIDs);
+  }
 };
 
 // Move encounter atomically from source to destination (for drag and drop)
@@ -79,7 +82,9 @@ export const moveEncounterAtomic = async (
   const willBeFusion =
     targetField === "body" || existingTargetEncounter?.isFusion === true;
 
-  await clearEncounterFromLocation(sourceLocationId, sourceField);
+  await clearEncounterFromLocation(sourceLocationId, sourceField, {
+    preserveTeamMembership: true,
+  });
 
   const newEncounter: z.infer<typeof EncounterDataSchema> = {
     head:
@@ -107,8 +112,52 @@ export const moveEncounter = async (
   pokemon: z.infer<typeof PokemonOptionSchema>,
   toField: "head" | "body" = "head",
 ) => {
+  if (fromLocationId === toLocationId) {
+    return;
+  }
+
   const activePlaythrough = ensureActivePlaythroughWithEncounters();
   if (!activePlaythrough) {
+    return;
+  }
+
+  const sourceEncounter = activePlaythrough.encounters[fromLocationId];
+  if (!sourceEncounter) {
+    return;
+  }
+
+  const sourceField: "head" | "body" =
+    sourceEncounter.head?.uid === pokemon.uid
+      ? "head"
+      : sourceEncounter.body?.uid === pokemon.uid
+        ? "body"
+        : sourceEncounter[toField]
+          ? toField
+          : sourceEncounter.head
+            ? "head"
+            : "body";
+
+  const targetEncounter = activePlaythrough.encounters[toLocationId];
+  if (targetEncounter?.[toField]) {
+    await swapEncounters(fromLocationId, toLocationId, sourceField, toField);
+    return;
+  }
+
+  if (
+    sourceEncounter.isFusion &&
+    sourceEncounter.head &&
+    sourceEncounter.body
+  ) {
+    const movedEncounter: z.infer<typeof EncounterDataSchema> = {
+      head: createPokemonWithLocationAndUID(sourceEncounter.head, toLocationId),
+      body: createPokemonWithLocationAndUID(sourceEncounter.body, toLocationId),
+      isFusion: true,
+      updatedAt: getCurrentTimestamp(),
+    };
+
+    delete activePlaythrough.encounters[fromLocationId];
+    activePlaythrough.encounters[toLocationId] = movedEncounter;
+    emitEvolutionEvent(toLocationId);
     return;
   }
 
@@ -119,14 +168,14 @@ export const moveEncounter = async (
     toLocationId,
   );
 
-  const newEncounter: z.infer<typeof EncounterDataSchema> = {
+  const movedEncounter: z.infer<typeof EncounterDataSchema> = {
     head: toField === "head" ? pokemonWithLocationAndUID : null,
     body: toField === "body" ? pokemonWithLocationAndUID : null,
     isFusion: toField === "body",
     updatedAt: getCurrentTimestamp(),
   };
 
-  activePlaythrough.encounters[toLocationId] = newEncounter;
+  activePlaythrough.encounters[toLocationId] = movedEncounter;
 };
 
 // Swap encounters between two locations
@@ -155,11 +204,11 @@ export const swapEncounters = async (
 
   const pokemon1WithLocation = {
     ...pokemon1,
-    originalLocation: pokemon1.originalLocation ?? locationId2,
+    originalLocation: pokemon1.originalLocation ?? locationId1,
   };
   const pokemon2WithLocation = {
     ...pokemon2,
-    originalLocation: pokemon2.originalLocation ?? locationId1,
+    originalLocation: pokemon2.originalLocation ?? locationId2,
   };
 
   if (field1 === "head") {
@@ -196,16 +245,22 @@ export const getLocationFromComboboxId = (
   comboboxId: string,
 ): { locationId: string; field: "head" | "body" } => {
   if (comboboxId.endsWith("-head")) {
-    return { locationId: comboboxId.replace("-head", ""), field: "head" };
+    return {
+      locationId: comboboxId.slice(0, -"-head".length),
+      field: "head",
+    };
   }
 
   if (comboboxId.endsWith("-body")) {
-    return { locationId: comboboxId.replace("-body", ""), field: "body" };
+    return {
+      locationId: comboboxId.slice(0, -"-body".length),
+      field: "body",
+    };
   }
 
   if (comboboxId.endsWith("-single")) {
     return {
-      locationId: comboboxId.replace("-single", ""),
+      locationId: comboboxId.slice(0, -"-single".length),
       field: "head",
     };
   }
