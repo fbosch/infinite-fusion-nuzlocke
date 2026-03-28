@@ -77,7 +77,7 @@
     "@biomejs/biome": "^2.4.9",
     "@djankies/vitest-mcp": "^0.5.1",
     "@next/bundle-analyzer": "^16.2.1",
-    "@smithery/cli": "^1.2.20",
+    "@smithery/cli": "^4.7.4",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4.2.2",
     "@testing-library/jest-dom": "^6.9.1",
