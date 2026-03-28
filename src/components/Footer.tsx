@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { Monitor, Moon, Sun } from "lucide-react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import GitHubButton from "react-github-btn";
@@ -180,12 +181,12 @@ export default function Footer() {
               Credits
             </button>
             <span className="mx-2 text-gray-400">·</span>
-            <a
+            <Link
               href="/licenses"
               className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm"
             >
               Open source licenses
-            </a>
+            </Link>
           </div>
           <CreditsModal
             isOpen={isCreditsOpen}

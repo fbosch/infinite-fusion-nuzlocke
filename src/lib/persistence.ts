@@ -5,14 +5,24 @@ import {
 import { createStore, del, get, set } from "idb-keyval";
 import { z } from "zod";
 
+const readEnvVar = (key: "NODE_ENV" | "NEXT_PUBLIC_BUILD_ID") => {
+  if (typeof process === "undefined") {
+    return undefined;
+  }
+
+  return process.env[key];
+};
+
+const isDevelopment = readEnvVar("NODE_ENV") === "development";
+
 // Cache busting mechanism using build ID
 export const getCacheBuster = () => {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevelopment) {
     return Math.floor(Date.now() / (1 * 60 * 1000)); // Updates every minute
   }
 
   // Use Vercel commit SHA (exposed as NEXT_PUBLIC_BUILD_ID) or fallback
-  return process.env.NEXT_PUBLIC_BUILD_ID || "v1";
+  return readEnvVar("NEXT_PUBLIC_BUILD_ID") || "v1";
 };
 
 const queryStore = createStore("query-client", "queries");
@@ -59,8 +69,7 @@ export const queryPersister = experimental_createQueryPersister({
   buster: getCacheBuster().toString(),
   deserialize: deserializePersistedQuery,
   serialize: JSON.stringify,
-  maxAge:
-    process.env.NODE_ENV === "development"
-      ? 1000 * 60 * 5 // 5 minutes in dev
-      : 1000 * 60 * 60 * 24 * 7, // 1 week in production
+  maxAge: isDevelopment
+    ? 1000 * 60 * 5 // 5 minutes in dev
+    : 1000 * 60 * 60 * 24 * 7, // 1 week in production
 });
