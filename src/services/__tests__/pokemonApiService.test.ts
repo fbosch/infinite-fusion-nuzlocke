@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Pokemon } from "../pokemonApiService";
+import type {
+  Pokemon,
+  PokemonApiParams,
+  PokemonApiResponse,
+} from "../pokemonApiService";
 import pokemonApiService from "../pokemonApiService";
 
 // Mock fetch globally
@@ -48,6 +52,10 @@ const mockApiResponse = {
   total: 151,
 };
 
+const pokemonApiServicePrivate = pokemonApiService as unknown as {
+  makeRequest: (params?: PokemonApiParams) => Promise<PokemonApiResponse>;
+};
+
 describe("PokemonApiService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -84,7 +92,7 @@ describe("PokemonApiService", () => {
         limit: 10,
       };
 
-      await pokemonApiService.makeRequest(params);
+      await pokemonApiServicePrivate.makeRequest(params);
 
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/api/pokemon?ids=1%2C2&search=bulba&type=grass&limit=10&v=12345",
@@ -103,7 +111,7 @@ describe("PokemonApiService", () => {
         json: async () => mockApiResponse,
       });
 
-      await pokemonApiService.makeRequest();
+      await pokemonApiServicePrivate.makeRequest();
 
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/api/pokemon?v=12345",
@@ -123,7 +131,7 @@ describe("PokemonApiService", () => {
       });
 
       const params = { search: "bulba" };
-      await pokemonApiService.makeRequest(params);
+      await pokemonApiServicePrivate.makeRequest(params);
 
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/api/pokemon?search=bulba&v=12345",
@@ -143,7 +151,7 @@ describe("PokemonApiService", () => {
         statusText: "Not Found",
       });
 
-      await expect(pokemonApiService.makeRequest()).rejects.toThrow(
+      await expect(pokemonApiServicePrivate.makeRequest()).rejects.toThrow(
         "Pokemon API error: 404 Not Found",
       );
     });
@@ -160,7 +168,7 @@ describe("PokemonApiService", () => {
         json: async () => invalidResponse,
       });
 
-      await expect(pokemonApiService.makeRequest()).rejects.toThrow(
+      await expect(pokemonApiServicePrivate.makeRequest()).rejects.toThrow(
         "Invalid API response format",
       );
     });
@@ -168,7 +176,7 @@ describe("PokemonApiService", () => {
     it("should handle fetch errors gracefully", async () => {
       mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-      await expect(pokemonApiService.makeRequest()).rejects.toThrow(
+      await expect(pokemonApiServicePrivate.makeRequest()).rejects.toThrow(
         "Network error",
       );
     });

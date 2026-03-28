@@ -1,4 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type {
+  EncountersApiParams,
+  EncountersApiResponse,
+} from "../encountersApiService";
 import encountersApiService from "../encountersApiService";
 
 // Mock fetch globally
@@ -19,6 +23,10 @@ vi.mock("@/loaders/encounters", () => ({
 
 // Import the mocked module to access the mock function
 import { RouteEncountersArraySchema } from "@/loaders/encounters";
+
+const encountersApiServicePrivate = encountersApiService as unknown as {
+  makeRequest: (params: EncountersApiParams) => Promise<EncountersApiResponse>;
+};
 
 // Mock data - using any to avoid type issues in tests
 const mockRouteEncounter = {
@@ -78,7 +86,7 @@ describe("EncountersApiService", () => {
         json: async () => [mockRouteEncounter, mockRouteEncounter2],
       });
 
-      await encountersApiService.makeRequest({ gameMode: "classic" });
+      await encountersApiServicePrivate.makeRequest({ gameMode: "classic" });
 
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/api/encounters?gameMode=classic&v=12345",
@@ -99,7 +107,7 @@ describe("EncountersApiService", () => {
       });
 
       await expect(
-        encountersApiService.makeRequest({ gameMode: "classic" }),
+        encountersApiServicePrivate.makeRequest({ gameMode: "classic" }),
       ).rejects.toThrow("Invalid API response format");
     });
 
@@ -107,7 +115,7 @@ describe("EncountersApiService", () => {
       mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
       await expect(
-        encountersApiService.makeRequest({ gameMode: "classic" }),
+        encountersApiServicePrivate.makeRequest({ gameMode: "classic" }),
       ).rejects.toThrow("Network error");
     });
   });

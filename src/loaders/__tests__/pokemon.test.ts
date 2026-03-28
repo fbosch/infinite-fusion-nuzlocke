@@ -159,6 +159,19 @@ vi.mock("@/lib/searchCore", () => {
 });
 
 describe("Pokemon Loader with Evolution Data", () => {
+  function getRequiredPokemonId(name: string): Promise<number> {
+    return searchPokemon(name).then((results) => {
+      const option = results.find((pokemon) => pokemon.name === name);
+      expect(option).toBeDefined();
+
+      if (option === undefined) {
+        throw new Error(`Expected to find Pokemon option for ${name}`);
+      }
+
+      return option.id;
+    });
+  }
+
   it("should get evolution IDs for specific Pokemon", async () => {
     const pokemon = await getPokemon();
 
@@ -178,50 +191,34 @@ describe("Pokemon Loader with Evolution Data", () => {
     expect(bulbasaurOption?.name).toBeDefined();
     expect(bulbasaurOption?.nationalDexId).toBeDefined();
 
+    if (bulbasaurOption === undefined) {
+      throw new Error("Expected Bulbasaur option to be defined");
+    }
+
     // Test getting evolution IDs separately
-    const evolutionIds = await getPokemonEvolutionIds(bulbasaurOption?.id);
+    const evolutionIds = await getPokemonEvolutionIds(bulbasaurOption.id);
     expect(evolutionIds).toEqual([2]); // Ivysaur's ID
 
     // Test a Pokemon without evolutions (Venusaur is final evolution)
-    const venusaurResults = await searchPokemon("Venusaur");
-    const venusaurOption = venusaurResults.find((p) => p.name === "Venusaur");
-    expect(venusaurOption).toBeDefined();
-
-    const venusaurEvolutionIds = await getPokemonEvolutionIds(
-      venusaurOption?.id,
-    );
+    const venusaurId = await getRequiredPokemonId("Venusaur");
+    const venusaurEvolutionIds = await getPokemonEvolutionIds(venusaurId);
     expect(venusaurEvolutionIds).toEqual([]); // No evolutions
   });
 
   it("should get pre-evolution ID for specific Pokemon", async () => {
     // Test with Ivysaur - should devolve to Bulbasaur
-    const ivysaurResults = await searchPokemon("Ivysaur");
-    const ivysaurOption = ivysaurResults.find((p) => p.name === "Ivysaur");
-    expect(ivysaurOption).toBeDefined();
-
-    const preEvolutionId = await getPokemonPreEvolutionId(ivysaurOption?.id);
+    const ivysaurId = await getRequiredPokemonId("Ivysaur");
+    const preEvolutionId = await getPokemonPreEvolutionId(ivysaurId);
     expect(preEvolutionId).toBe(1); // Bulbasaur's ID
 
     // Test with Venusaur - should devolve to Ivysaur
-    const venusaurResults = await searchPokemon("Venusaur");
-    const venusaurOption = venusaurResults.find((p) => p.name === "Venusaur");
-    expect(venusaurOption).toBeDefined();
-
-    const venusaurPreEvolutionId = await getPokemonPreEvolutionId(
-      venusaurOption?.id,
-    );
+    const venusaurId = await getRequiredPokemonId("Venusaur");
+    const venusaurPreEvolutionId = await getPokemonPreEvolutionId(venusaurId);
     expect(venusaurPreEvolutionId).toBe(2); // Ivysaur's ID
 
     // Test with Bulbasaur - should have no pre-evolution (base Pokemon)
-    const bulbasaurResults = await searchPokemon("Bulbasaur");
-    const bulbasaurOption = bulbasaurResults.find(
-      (p) => p.name === "Bulbasaur",
-    );
-    expect(bulbasaurOption).toBeDefined();
-
-    const bulbasaurPreEvolutionId = await getPokemonPreEvolutionId(
-      bulbasaurOption?.id,
-    );
+    const bulbasaurId = await getRequiredPokemonId("Bulbasaur");
+    const bulbasaurPreEvolutionId = await getPokemonPreEvolutionId(bulbasaurId);
     expect(bulbasaurPreEvolutionId).toBe(null); // No pre-evolution
   });
 
@@ -233,7 +230,11 @@ describe("Pokemon Loader with Evolution Data", () => {
     expect(eeveeOption).toBeDefined();
 
     // Test getting evolution IDs separately
-    const evolutionIds = await getPokemonEvolutionIds(eeveeOption?.id);
+    if (eeveeOption === undefined) {
+      throw new Error("Expected Eevee option to be defined");
+    }
+
+    const evolutionIds = await getPokemonEvolutionIds(eeveeOption.id);
     expect(evolutionIds.length).toBeGreaterThan(1); // Multiple evolutions
 
     // Check that it includes some known Eevee evolutions
@@ -245,12 +246,9 @@ describe("Pokemon Loader with Evolution Data", () => {
 
   it("should handle Pokemon with no evolution data", async () => {
     // Some Pokemon might not have evolution data
-    const searchResults = await searchPokemon("Pikachu");
-    const pikachuOption = searchResults.find((p) => p.name === "Pikachu");
-
-    expect(pikachuOption).toBeDefined();
+    const pikachuId = await getRequiredPokemonId("Pikachu");
     // Pikachu should have evolution data (evolves to Raichu)
-    const evolutionIds = await getPokemonEvolutionIds(pikachuOption?.id);
+    const evolutionIds = await getPokemonEvolutionIds(pikachuId);
     expect(evolutionIds).toEqual([26]); // Raichu's ID
   });
 });
