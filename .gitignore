@@ -50,3 +50,4 @@ next-env.d.ts
 /scripts/sprites/
 
 *.log
+.env*.local
