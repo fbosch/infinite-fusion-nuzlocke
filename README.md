@@ -84,6 +84,8 @@ pnpm validate
 
 Releases are automated with Release Please via `.github/workflows/release-please.yml`. Pushes to `master` update or create a release PR with computed version bump and notes; merging that PR creates a git tag and GitHub release. Ensure repository Actions settings allow GitHub Actions to create pull requests. Production auto-deploys from `master` remain disabled in `vercel.json` (`git.deploymentEnabled.master=false`), and production deployment runs from the `deploy-production` job in `.github/workflows/release-please.yml` when a release is created.
 
+Version boundary guidance (app release SemVer vs persisted schema compatibility markers) is documented in `docs/VERSION_BOUNDARIES.md`.
+
 ## Contributing
 
 Contributions are welcome through issues and pull requests. Keep changes focused, include relevant tests, and run the validation workflow before opening a PR.
