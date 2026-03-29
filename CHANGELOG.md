@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.2.0...v0.2.1) (2026-03-29)
+
+
+### Bug Fixes
+
+* **inf-89:** pin third-party actions and tighten permissions ([6218511](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/6218511c8378604dc414a21a38e698c86260b57d))
+* **inf-89:** pin third-party actions and tighten workflow permissions ([1d3317e](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/1d3317e0be022b7080de5e86012b6dc14052e05a))
+
 ## [0.2.0](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.1.0...v0.2.0) (2026-03-29)
 
 
