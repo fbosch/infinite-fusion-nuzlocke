@@ -80,7 +80,7 @@ pnpm validate
 
 ## Release Workflow
 
-Releases are automated with Release Please via `.github/workflows/release-please.yml`. Pushes to `master` update or create a release PR with computed version bump and notes; merging that PR creates a git tag and GitHub release.
+Releases are automated with Release Please via `.github/workflows/release-please.yml`. Pushes to `master` update or create a release PR with computed version bump and notes; merging that PR creates a git tag and GitHub release. Ensure repository Actions settings allow GitHub Actions to create pull requests. Production auto-deploys from `master` are disabled in `vercel.json` (`git.deploymentEnabled.master=false`), so production deploys must be promoted or triggered manually in Vercel.
 
 ## Contributing
 

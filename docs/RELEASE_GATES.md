@@ -21,3 +21,10 @@ Configure branch protection for `master` to require these checks:
 
 - `Test Coverage` and `PR Coverage Report` follow the same `master` branch strategy.
 - Coverage jobs are informational and should not replace required release gates unless explicitly promoted.
+
+## Production deploy gate
+
+- Git-triggered Vercel deployments from `master` are disabled via `vercel.json`:
+  - `git.deploymentEnabled.master = false`
+- This prevents automatic production deploys on every merge to `master`.
+- Production releases must be deployed manually from Vercel (promote/trigger) after release validation.
