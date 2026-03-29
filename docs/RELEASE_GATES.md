@@ -2,6 +2,8 @@
 
 This repository uses `master` as the default branch for CI and release automation.
 
+For SemVer ownership, release trigger details, and cadence expectations, see `docs/RELEASE_POLICY.md`.
+
 ## Branch trigger strategy
 
 - CI workflows that gate releases run on `push` and `pull_request` events targeting `master`.
