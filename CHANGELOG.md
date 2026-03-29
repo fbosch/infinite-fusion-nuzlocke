@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.2](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.2.1...v0.2.2) (2026-03-29)
+
+
+### Bug Fixes
+
+* **footer:** show dynamic year and app version ([9f86af8](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/9f86af801efb3b6bf3905384f4ef629408cdd9c3))
+* **inf-91:** use dynamic year and app version in footer ([5b0f342](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/5b0f342222359201882c32c28e3b8d46c0dac238))
+
 ## [0.2.1](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.2.0...v0.2.1) (2026-03-29)
 
 
