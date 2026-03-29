@@ -78,6 +78,10 @@ pnpm test:run
 pnpm validate
 ```
 
+## Release Workflow
+
+Releases are automated with Release Please via `.github/workflows/release-please.yml`. Pushes to `master` update or create a release PR with computed version bump and notes; merging that PR creates a git tag and GitHub release.
+
 ## Contributing
 
 Contributions are welcome through issues and pull requests. Keep changes focused, include relevant tests, and run the validation workflow before opening a PR.

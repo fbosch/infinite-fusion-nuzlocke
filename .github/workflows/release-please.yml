@@ -1,0 +1,32 @@
+name: Release Please
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  release-please:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@v4.4.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      - name: Release output
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          echo "Release created"
+          echo "Tag: ${{ steps.release.outputs.tag_name }}"
+          echo "URL: ${{ steps.release.outputs.html_url }}"
