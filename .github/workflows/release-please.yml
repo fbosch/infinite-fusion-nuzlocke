@@ -14,6 +14,9 @@ jobs:
   release-please:
     name: Prepare Release
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
 
     steps:
       - name: Run release-please
@@ -30,3 +33,46 @@ jobs:
           echo "Release created"
           echo "Tag: ${{ steps.release.outputs.tag_name }}"
           echo "URL: ${{ steps.release.outputs.html_url }}"
+
+  deploy-production:
+    name: Deploy to Vercel Production
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate Vercel secrets
+        run: |
+          for required_var in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [ -z "${!required_var}" ]; then
+              echo "::error::Missing required secret: ${required_var}"
+              exit 1
+            fi
+          done
+
+      - name: Pull Vercel production settings
+        run: npx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Build production artifacts
+        run: npx vercel@latest build --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy prebuilt artifacts to production
+        run: npx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
