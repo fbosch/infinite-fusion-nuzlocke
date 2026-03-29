@@ -86,6 +86,7 @@ Releases are automated with Release Please via `.github/workflows/release-please
 
 Release trigger, SemVer bump expectations, approvals, and cadence are documented in `docs/RELEASE_POLICY.md`.
 
+Version boundary guidance (app release SemVer vs persisted schema compatibility markers) is documented in `docs/VERSION_BOUNDARIES.md`.
 ## Contributing
 
 Contributions are welcome through issues and pull requests. Keep changes focused, include relevant tests, and run the validation workflow before opening a PR.
