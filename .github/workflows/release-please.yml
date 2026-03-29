@@ -39,7 +39,7 @@ jobs:
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created == 'true' }}
     runs-on: ubuntu-latest
-    environment: production
+    environment: Production
     concurrency:
       group: production-deploy
       cancel-in-progress: false
