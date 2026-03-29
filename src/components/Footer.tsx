@@ -61,6 +61,8 @@ function ThemeToggle() {
 }
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? "unknown";
   const { ref, inView } = useInView({
     threshold: 0.5,
     triggerOnce: true,
@@ -165,11 +167,15 @@ export default function Footer() {
             <p>
               Pokémon and Pokémon character names are trademarks of Nintendo.
             </p>
-            <p>Pokémon character designs are © 1995–2025 The Pokémon Company</p>
+            <p>
+              Pokémon character designs are © 1995–{currentYear} The Pokémon
+              Company
+            </p>
             <p>
               This website is not affiliated with The Pokémon Company, Nintendo,
               Game Freak Inc., or Creatures Inc.
             </p>
+            <p>Version {appVersion}</p>
           </div>
           <div className="mt-2 md:text-center">
             <button
