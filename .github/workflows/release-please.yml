@@ -14,6 +14,7 @@ jobs:
   release-please:
     name: Prepare Release
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
@@ -36,14 +37,18 @@ jobs:
 
   deploy-production:
     name: Deploy to Vercel Production
+    permissions:
+      contents: read
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment: Production
     concurrency:
       group: production-deploy
       cancel-in-progress: false
     env:
+      VERCEL_CLI_VERSION: '44.7.3'
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -71,11 +76,40 @@ jobs:
             fi
           done
 
+      - name: Install Vercel CLI
+        run: npm install --global "vercel@$VERCEL_CLI_VERSION"
+
       - name: Pull Vercel production settings
-        run: npx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Build production artifacts
-        run: npx vercel@latest build --prod --token="$VERCEL_TOKEN"
+        run: vercel build --prod --token="$VERCEL_TOKEN"
 
       - name: Deploy prebuilt artifacts to production
-        run: npx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+        id: deploy
+        run: |
+          deployment_url="$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")"
+          echo "deployment_url=$deployment_url" >> "$GITHUB_OUTPUT"
+
+      - name: Verify deployment health
+        run: |
+          deployment_url="${{ steps.deploy.outputs.deployment_url }}"
+          if [[ "$deployment_url" != http* ]]; then
+            deployment_url="https://$deployment_url"
+          fi
+
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --location \
+            --retry 6 \
+            --retry-delay 5 \
+            --retry-all-errors \
+            "$deployment_url"
+
+      - name: Publish deployment summary
+        run: |
+          echo "### Production Deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Tag: \`${{ needs.release-please.outputs.tag_name }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- URL: \`${{ steps.deploy.outputs.deployment_url }}\`" >> "$GITHUB_STEP_SUMMARY"
