@@ -28,7 +28,7 @@ Every event includes these shared properties unless noted otherwise.
 | Property | Type | Description |
 | --- | --- | --- |
 | `playthrough_id` | `string` | Stable playthrough identifier |
-| `game_mode` | `"classic" | "remix" | "randomized"` | Active mode at emit time |
+| `game_mode` | `"classic" \| "remix" \| "randomized"` | Active mode at emit time |
 | `encounter_count_bucket` | `EncounterCountBucket` | Bucketed encounter count at emit time |
 | `deceased_count_bucket` | `CountBucket` | Bucketed deceased count at emit time |
 | `boxed_count_bucket` | `CountBucket` | Bucketed stored/boxed count at emit time |
@@ -47,8 +47,8 @@ Every event includes these shared properties unless noted otherwise.
 
 | Property | Type | Notes |
 | --- | --- | --- |
-| `checkpoint` | `1 | 5 | 10 | 20 | 40 | 80` | Threshold crossed by this mutation |
-| `checkpoint_label` | `"cp_1" | "cp_5" | "cp_10" | "cp_20" | "cp_40" | "cp_80"` | Stable string form for dashboard filters |
+| `checkpoint` | `1 \| 5 \| 10 \| 20 \| 40 \| 80` | Threshold crossed by this mutation |
+| `checkpoint_label` | `"cp_1" \| "cp_5" \| "cp_10" \| "cp_20" \| "cp_40" \| "cp_80"` | Stable string form for dashboard filters |
 
 ### `playthrough_resumed`
 
@@ -61,7 +61,7 @@ Every event includes these shared properties unless noted otherwise.
 | Property | Type | Notes |
 | --- | --- | --- |
 | `location_id` | `string` | Encounter location identifier |
-| `creation_method` | `"create_fusion" | "update_encounter" | "drag_drop"` | Path used to create complete fusion |
+| `creation_method` | `"create_fusion" \| "update_encounter" \| "drag_drop"` | Path used to create complete fusion |
 
 ### `fusion_flipped`
 
@@ -75,7 +75,7 @@ Every event includes these shared properties unless noted otherwise.
 | --- | --- | --- |
 | `location_id` | `string` | Encounter location identifier |
 | `was_fused` | `boolean` | Encounter was fusion at the moment of death transition |
-| `team_size_after` | `0 | 1 | 2 | 3 | 4 | 5 | 6` | Team size after mutation |
+| `team_size_after` | `0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6` | Team size after mutation |
 | `viable_roster_bucket_after` | `ViableRosterBucket` | Viable roster bucket after mutation |
 
 ### `playthrough_exported`
