@@ -1,5 +1,6 @@
-import type { NextConfig } from 'next';
-import withBundleAnalyzer from '@next/bundle-analyzer';
+import withBundleAnalyzer from "@next/bundle-analyzer";
+import type { NextConfig } from "next";
+import packageJson from "./package.json" with { type: "json" };
 
 const nextConfig: NextConfig = {
   // Enable React Compiler for automatic performance optimizations
@@ -10,16 +11,16 @@ const nextConfig: NextConfig = {
     // Use default Turbopack configuration
     // Can add custom rules, resolveAlias, resolveExtensions here if needed
     rules: {
-      '*.svg': {
+      "*.svg": {
         loaders: [
           {
-            loader: '@svgr/webpack',
+            loader: "@svgr/webpack",
             options: {
               icon: true,
               svgoConfig: {
                 plugins: [
                   {
-                    name: 'preset-default',
+                    name: "preset-default",
                     params: {
                       overrides: {
                         removeViewBox: false,
@@ -31,7 +32,7 @@ const nextConfig: NextConfig = {
             },
           },
         ],
-        as: '*.js',
+        as: "*.js",
       },
     },
   },
@@ -43,13 +44,13 @@ const nextConfig: NextConfig = {
       test: /\.svg$/,
       use: [
         {
-          loader: '@svgr/webpack',
+          loader: "@svgr/webpack",
           options: {
             icon: true,
             svgoConfig: {
               plugins: [
                 {
-                  name: 'preset-default',
+                  name: "preset-default",
                   params: {
                     overrides: {
                       removeViewBox: false,
@@ -68,19 +69,19 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'raw.githubusercontent.com',
-        pathname: '/PokeAPI/sprites/**',
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+        pathname: "/PokeAPI/sprites/**",
       },
       {
-        protocol: 'https',
-        hostname: 'ifd-spaces.sfo2.cdn.digitaloceanspaces.com',
-        pathname: '/custom/**',
+        protocol: "https",
+        hostname: "ifd-spaces.sfo2.cdn.digitaloceanspaces.com",
+        pathname: "/custom/**",
       },
       {
-        protocol: 'https',
-        hostname: 'ifd-spaces.sfo2.cdn.digitaloceanspaces.com',
-        pathname: '/generated/**',
+        protocol: "https",
+        hostname: "ifd-spaces.sfo2.cdn.digitaloceanspaces.com",
+        pathname: "/generated/**",
       },
     ],
   },
@@ -91,47 +92,49 @@ const nextConfig: NextConfig = {
       process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ||
       process.env.NEXT_PUBLIC_BUILD_ID ||
       `build-${Date.now()}`,
+    NEXT_PUBLIC_APP_VERSION:
+      process.env.NEXT_PUBLIC_APP_VERSION || packageJson.version,
   },
 
   // Optimize static asset caching
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: "/:path*",
         headers: [
           {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
+            key: "X-DNS-Prefetch-Control",
+            value: "on",
           },
         ],
       },
       {
         // Cache static assets aggressively
-        source: '/images/:path*',
+        source: "/images/:path*",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },
       {
         // Cache fonts
-        source: '/fonts/:path*',
+        source: "/fonts/:path*",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },
       {
         // Cache service worker with shorter duration for updates
-        source: '/sw.js',
+        source: "/sw.js",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=0, must-revalidate',
+            key: "Cache-Control",
+            value: "public, max-age=0, must-revalidate",
           },
         ],
       },
@@ -139,6 +142,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })(
-  nextConfig
+export default withBundleAnalyzer({ enabled: process.env.ANALYZE === "true" })(
+  nextConfig,
 );
