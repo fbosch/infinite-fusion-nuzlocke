@@ -29,3 +29,5 @@ Configure branch protection for `master` to require these checks:
 - This prevents automatic production deploys on every merge to `master`.
 - Production deploys run from the `deploy-production` job in `.github/workflows/release-please.yml`.
 - The release deploy workflow requires repository secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
+
+Version ownership boundaries between app SemVer and persisted schema markers are documented in `docs/VERSION_BOUNDARIES.md`.
