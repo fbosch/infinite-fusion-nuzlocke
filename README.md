@@ -22,6 +22,8 @@ Live app: [fusion.nuzlocke.io](https://fusion.nuzlocke.io)
 ## Quick Start
 
 ```bash
+corepack enable
+corepack prepare pnpm@10 --activate
 pnpm install
 pnpm dev
 ```
@@ -30,8 +32,8 @@ Open [http://localhost:4000](http://localhost:4000).
 
 ## Requirements
 
-- Node.js compatible with Next.js 16
-- pnpm (project uses `pnpm@10`)
+- Node.js `20.x` (matches CI)
+- Corepack-enabled pnpm `10.x` (project uses `pnpm@10`)
 
 ## Common Scripts
 
