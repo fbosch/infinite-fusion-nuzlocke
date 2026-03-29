@@ -27,4 +27,5 @@ Configure branch protection for `master` to require these checks:
 - Git-triggered Vercel deployments from `master` are disabled via `vercel.json`:
   - `git.deploymentEnabled.master = false`
 - This prevents automatic production deploys on every merge to `master`.
-- Production releases must be deployed manually from Vercel (promote/trigger) after release validation.
+- Production deploys run from the `deploy-production` job in `.github/workflows/release-please.yml`.
+- The release deploy workflow requires repository secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
