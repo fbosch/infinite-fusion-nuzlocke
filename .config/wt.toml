@@ -1,8 +1,6 @@
 # Ensure each new worktree is ready to run
-pre-start = "pnpm install --frozen-lockfile --prefer-offline"
+pre-start = "pnpm install --frozen-lockfile --prefer-offline && ./.config/ensure-vercel-link.sh"
 
 [pre-merge]
 typecheck = "pnpm type-check"
 tests = "pnpm test:run"
-# Uncomment for broader, stricter merge checks:
-# validate = "pnpm validate"
