@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.3](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.2.2...v0.2.3) (2026-03-29)
+
+
+### Bug Fixes
+
+* **release:** ensure pnpm is available for Vercel production build ([c2e1d09](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/c2e1d0937e87720ae76ceb5d3a16fd3798eb4c7a))
+* **release:** install pnpm before vercel build ([6977731](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/697773162d65556a329ab9a3d3af6a852ee9d623))
+
 ## [0.2.2](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.2.1...v0.2.2) (2026-03-29)
 
 
