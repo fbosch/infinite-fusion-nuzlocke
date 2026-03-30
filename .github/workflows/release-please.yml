@@ -102,15 +102,26 @@ jobs:
             deployment_url="https://$deployment_url"
           fi
 
-          curl \
-            --fail \
+          http_status="$(curl \
             --silent \
             --show-error \
             --location \
             --retry 6 \
             --retry-delay 5 \
             --retry-all-errors \
-            "$deployment_url"
+            --write-out '%{http_code}' \
+            --output /dev/null \
+            "$deployment_url")"
+
+          if [[ "$http_status" == "401" || "$http_status" == "403" ]]; then
+            echo "Deployment is reachable but access-protected (HTTP $http_status)."
+            exit 0
+          fi
+
+          if [[ "$http_status" != "200" ]]; then
+            echo "::error::Deployment health check failed with HTTP $http_status"
+            exit 1
+          fi
 
       - name: Publish deployment summary
         run: |
