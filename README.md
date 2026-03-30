@@ -24,7 +24,6 @@ Source: [github.com/fbosch/infinite-fusion-nuzlocke](https://github.com/fbosch/i
 
 Requirements:
 
-- Node.js `24.x`
 - Node.js `22.x`
 - Corepack-enabled pnpm `10.x`
 
