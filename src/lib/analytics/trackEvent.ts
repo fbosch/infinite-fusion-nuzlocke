@@ -1,4 +1,5 @@
 import { track } from "@vercel/analytics";
+import { z } from "zod";
 
 type AnalyticsPrimitive = string | number | boolean;
 
@@ -86,6 +87,12 @@ export type AnalyticsEventMap = {
 
 const COOKIE_PREFERENCES_KEY = "cookie-preferences";
 
+const consentPreferencesSchema = z
+  .object({
+    analytics: z.boolean().optional(),
+  })
+  .passthrough();
+
 type AppEnvironment = {
   NODE_ENV?: string;
   NEXT_PUBLIC_VERCEL_ENV?: string;
@@ -94,21 +101,37 @@ type AppEnvironment = {
 export function isAnalyticsProductionEnvironment(
   environment: AppEnvironment = process.env,
 ): boolean {
-  if (environment.NODE_ENV !== "production") {
-    return false;
+  return (
+    environment.NODE_ENV === "production" &&
+    environment.NEXT_PUBLIC_VERCEL_ENV === "production"
+  );
+}
+
+function getBrowserStorage(): Pick<Storage, "getItem"> | null {
+  if (typeof globalThis === "undefined") {
+    return null;
   }
 
-  if (environment.NEXT_PUBLIC_VERCEL_ENV == null) {
-    return true;
+  try {
+    return globalThis.localStorage;
+  } catch {
+    return null;
   }
-
-  return environment.NEXT_PUBLIC_VERCEL_ENV === "production";
 }
 
 export function hasAnalyticsConsent(
-  storage: Storage = globalThis.localStorage,
+  storage: Pick<Storage, "getItem"> | null | undefined = getBrowserStorage(),
 ): boolean {
-  const value = storage.getItem(COOKIE_PREFERENCES_KEY);
+  if (storage == null) {
+    return false;
+  }
+
+  let value: string | null;
+  try {
+    value = storage.getItem(COOKIE_PREFERENCES_KEY);
+  } catch {
+    return false;
+  }
 
   if (value == null) {
     return false;
@@ -116,12 +139,9 @@ export function hasAnalyticsConsent(
 
   try {
     const parsed: unknown = JSON.parse(value);
+    const parsedConsent = consentPreferencesSchema.safeParse(parsed);
 
-    if (typeof parsed !== "object" || parsed == null) {
-      return false;
-    }
-
-    return Reflect.get(parsed, "analytics") === true;
+    return parsedConsent.success && parsedConsent.data.analytics === true;
   } catch {
     return false;
   }

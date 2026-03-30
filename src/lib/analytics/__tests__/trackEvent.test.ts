@@ -83,6 +83,12 @@ describe("analytics transport wrapper", () => {
         NEXT_PUBLIC_VERCEL_ENV: "preview",
       }),
     ).toBe(false);
+
+    expect(
+      isAnalyticsProductionEnvironment({
+        NODE_ENV: "production",
+      }),
+    ).toBe(false);
   });
 
   it("returns false without analytics consent", () => {
@@ -101,6 +107,20 @@ describe("analytics transport wrapper", () => {
     );
 
     expect(hasAnalyticsConsent()).toBe(true);
+  });
+
+  it("returns false when storage is unavailable", () => {
+    expect(hasAnalyticsConsent(null)).toBe(false);
+  });
+
+  it("returns false when storage reads throw", () => {
+    const storage = {
+      getItem: () => {
+        throw new Error("SecurityError");
+      },
+    };
+
+    expect(hasAnalyticsConsent(storage)).toBe(false);
   });
 
   it("is a no-op outside production gating", () => {
