@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.3.0](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.2.3...v0.3.0) (2026-03-30)
+
+
+### Features
+
+* **INF-106:** update home title from active playthrough ([1ba0b5a](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/1ba0b5a9526fa52fee36998f61cdfb115fa4ee25))
+* **inf-73:** instrument analytics events and add coverage ([4ad520e](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/4ad520eb30fcfe72cfca8b920f330f9c0fb9739a))
+* **inf-77:** add shared analytics selectors and bucket helpers ([adc17ba](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/adc17ba0fc98024907b4c68c332ca259d5c943a3))
+* **inf-77:** split analytics selectors and bucket helpers ([4a77d9f](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/4a77d9fa48bb3467ecb07a889d3f717618643765))
+* **inf-81:** add gated analytics transport wrapper ([f6e41a4](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/f6e41a4d2ea88bb61a5faf143ec506191d66a413))
+
+
+### Bug Fixes
+
+* **ci:** checkout before local setup action ([f10d93a](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/f10d93a8e6de63048a6d259166f962c4136a3686))
+* **ci:** harden data PR body git command execution ([446ecde](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/446ecde1875e2a4bfe18c06aa8203671a6c8eb2d))
+* **INF-106:** align client title updates with Next metadata patterns ([29a61fa](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/29a61fa378f54b46dc1f55da0f5d763b53053a7e))
+* **inf-73:** normalize analytics game mode mapping ([687dffd](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/687dffd63e168b188c3463be519109f56c66ef9f))
+* **inf-81:** harden consent reads and env gating ([177622e](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/177622e9560f2169ffe42e4a9831c2e8533d43d9))
+* **inf-92:** restore keyboard activation for location table actions ([2cfb5ad](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/2cfb5ad1b15b729d4eb2c9ee244776bd7d39bcf5))
+* **inf-92:** restore keyboard activation for location table actions ([3c1f5ac](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/3c1f5ac49d91806c7186beda121e380797f6bdb5))
+* **INF-94:** address review feedback on static route handling ([bf2bec3](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/bf2bec3aa6c2a9ac5162c865a705fdd30dfd45e0))
+* **INF-94:** restore special encounter parsing from wiki markers ([d305215](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/d30521530ffcf370e3580cc86b73d2434d56efa3))
+
 ## [0.2.3](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.2.2...v0.2.3) (2026-03-29)
 
 
