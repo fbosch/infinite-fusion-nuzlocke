@@ -1,9 +1,9 @@
+import { getCheckpointLabel } from "@/lib/analytics/buckets";
 import {
-  getCheckpointLabel,
   getEncounterCount,
   getNewlyReachedCheckpoints,
-  getSharedEventProperties,
 } from "@/lib/analytics/playthroughEventData";
+import { getSharedEventProperties } from "@/lib/analytics/selectors";
 import { trackEvent } from "@/lib/analytics/trackEvent";
 import { emitEvolutionEvent } from "@/lib/events";
 import { getCurrentTimestamp } from "../playthroughState";

@@ -1,7 +1,7 @@
 import { proxy, subscribe } from "valtio";
 import { devtools } from "valtio/utils";
 import { z } from "zod";
-import { getSharedEventProperties } from "@/lib/analytics/playthroughEventData";
+import { getSharedEventProperties } from "@/lib/analytics/selectors";
 import { trackEvent } from "@/lib/analytics/trackEvent";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";

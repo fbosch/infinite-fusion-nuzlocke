@@ -1,10 +1,10 @@
 import type { z } from "zod";
+import { getCheckpointLabel } from "@/lib/analytics/buckets";
 import {
-  getCheckpointLabel,
   getEncounterCount,
   getNewlyReachedCheckpoints,
-  getSharedEventProperties,
 } from "@/lib/analytics/playthroughEventData";
+import { getSharedEventProperties } from "@/lib/analytics/selectors";
 import { trackEvent } from "@/lib/analytics/trackEvent";
 import { emitEvolutionEvent } from "@/lib/events";
 import type { PokemonOptionSchema, PokemonOptionType } from "@/loaders/pokemon";
