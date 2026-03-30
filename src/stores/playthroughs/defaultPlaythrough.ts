@@ -1,7 +1,7 @@
 import { generatePrefixedId } from "@/utils/id";
 import type { Playthrough } from "./types";
 
-const DEFAULT_PLAYTHROUGH_NAME = "Nuzlocke";
+const DEFAULT_PLAYTHROUGH_NAME = "Playthrough";
 const DEFAULT_GAME_MODE = "classic" as const;
 const DEFAULT_PLAYTHROUGH_VERSION = "1.0.0";
 
