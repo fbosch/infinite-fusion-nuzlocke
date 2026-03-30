@@ -1,20 +1,20 @@
-# Node 24 Runtime Migration
+# Node 22 Runtime Baseline
 
-This project now standardizes on Node.js 24 for local development, CI, and release automation.
+This project now standardizes on Node.js 22 for local development, CI, and release automation.
 
-## Updated Runtime Pins
+## Runtime Pins
 
-- `package.json` engines -> `"node": "24.x"`
-- `.nvmrc` -> `24`
-- GitHub Actions workflows -> `actions/setup-node` uses `node-version: '24'`
+- `package.json` engines -> `"node": "22.x"`
+- `.nvmrc` -> `22`
+- GitHub Actions workflows -> `actions/setup-node` uses `node-version: '22'`
 
-## Migration Steps
+## Setup Steps
 
-1. Install Node 24 (recommended via `nvm`):
+1. Install Node 22 (recommended via `nvm`):
 
 ```bash
-nvm install 24
-nvm use 24
+nvm install 22
+nvm use 22
 ```
 
 2. Verify runtime and package manager:
@@ -33,14 +33,14 @@ pnpm test:run
 pnpm validate
 ```
 
-## Rollback Plan
+## Upgrade Plan
 
-If Node 24 introduces regressions in CI, Vercel builds, or local tooling:
+If a future Node upgrade is required for CI, Vercel builds, or tooling:
 
-1. Revert runtime pins to Node 22:
-   - `package.json` engines -> `"node": "22.x"`
-   - `.nvmrc` -> `22`
-   - all `actions/setup-node` entries -> `node-version: '22'`
+1. Update runtime pins together:
+   - `package.json` engines
+   - `.nvmrc`
+   - all `actions/setup-node` entries
 2. Re-run `pnpm install --frozen-lockfile` and validation checks.
 3. Open a follow-up issue with failing command output and environment details.
 
