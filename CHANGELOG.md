@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.4](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.3.3...v0.3.4) (2026-03-30)
+
+
+### Bug Fixes
+
+* **ci:** handle protected Vercel health checks ([58e98b8](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/58e98b8e0efdec426fa082bacdea358cf3392903))
+* **ci:** handle protected Vercel health checks ([d510d32](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/d510d3275af6d7ff104fcf9131f1f1fbc7362a7e))
+
 ## [0.3.3](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.3.2...v0.3.3) (2026-03-30)
 
 
