@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.2](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.3.1...v0.3.2) (2026-03-30)
+
+
+### Bug Fixes
+
+* **ci:** force bundled server trace for Vercel production deploy ([7ff1ce3](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/7ff1ce31d4dfb5d7246a02494d666cd186ebd105))
+* **ci:** force bundled server trace on production deploy ([9d589d8](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/9d589d88179a3c50187d588ef52c08d4429afa2e))
+
 ## [0.3.1](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.3.0...v0.3.1) (2026-03-30)
 
 
