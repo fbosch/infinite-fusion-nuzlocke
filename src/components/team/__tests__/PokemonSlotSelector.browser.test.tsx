@@ -6,6 +6,14 @@ vi.mock("@/components/PokemonSprite", () => ({
   PokemonSprite: () => null,
 }));
 
+vi.mock("@/assets/images/head.svg", () => ({
+  default: () => null,
+}));
+
+vi.mock("@/assets/images/body.svg", () => ({
+  default: () => null,
+}));
+
 import { PokemonSlotSelector } from "../PokemonSlotSelector";
 
 describe("PokemonSlotSelector keyboard interaction", () => {
