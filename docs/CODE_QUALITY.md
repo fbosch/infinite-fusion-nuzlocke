@@ -30,20 +30,32 @@ pnpm lint          # Check for code issues
 pnpm lint:fix      # Auto-fix linting issues where possible
 ```
 
-## Pre-commit Hooks
+## Git Hooks
 
-To ensure code quality before commits, you can set up pre-commit hooks:
+Hooks are managed by [Husky](https://typicode.github.io/husky/) and installed automatically via the `prepare` script when you run `pnpm install`.
 
-1. Install Husky (if not already installed):
+### Pre-commit
 
-   ```bash
-   pnpm add -D husky
-   pnpm husky install
-   ```
+Runs `lint-staged` on staged files — formatting and lint checks scoped to changed files only.
 
-2. The pre-commit hook will automatically run `pnpm validate` before each commit.
+### Pre-push
 
-3. If validation fails, the commit will be aborted with helpful error messages.
+Runs two gates in sequence before any push reaches the remote:
+
+1. **Type check** — `pnpm run typecheck` (`tsc --noEmit`)
+2. **Fast test suite** — `pnpm run test:run` (node + react-hooks projects, no browser/Playwright)
+
+Both must pass for the push to proceed. Browser tests are excluded from the hook because they require Playwright and are covered by CI.
+
+#### Bypassing the hook
+
+Use `--no-verify` only in exceptional cases (for example, pushing a WIP branch for remote backup with known failures):
+
+```bash
+git push --no-verify
+```
+
+Do not use `--no-verify` to bypass a failing gate on a branch targeting `master`.
 
 ## Configuration Files
 
