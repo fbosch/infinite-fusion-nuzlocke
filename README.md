@@ -24,7 +24,7 @@ Source: [github.com/fbosch/infinite-fusion-nuzlocke](https://github.com/fbosch/i
 
 Requirements:
 
-- Node.js `22.x`
+- Node.js `24.x`
 - Corepack-enabled pnpm `10.x`
 
 ```bash
@@ -35,6 +35,8 @@ pnpm dev
 ```
 
 Open [http://localhost:4000](http://localhost:4000).
+
+Migration notes and rollback steps: `docs/NODE_24_MIGRATION.md`
 
 ## Common Scripts
 
