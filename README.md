@@ -32,8 +32,10 @@ Open [http://localhost:4000](http://localhost:4000).
 
 ## Requirements
 
-- Node.js `22.x` (matches CI)
+- Node.js `24.x` (matches CI)
 - Corepack-enabled pnpm `10.x` (project uses `pnpm@10`)
+
+Migration notes and rollback steps: `docs/NODE_24_MIGRATION.md`
 
 ## Common Scripts
 

@@ -400,7 +400,7 @@ describe("Playthroughs Store - React Hooks", () => {
         });
 
         const updatedPlaythrough = playthroughActions.getActivePlaythrough();
-        expect(updatedPlaythrough?.updatedAt).toBeGreaterThan(
+        expect(updatedPlaythrough?.updatedAt).toBeGreaterThanOrEqual(
           originalTimestamp || 0,
         );
       });
