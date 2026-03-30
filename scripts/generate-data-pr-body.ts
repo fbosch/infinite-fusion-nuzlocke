@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -18,16 +18,18 @@ interface FilePokemonDelta {
   removed: number[];
 }
 
-function runGitCommand(command: string): string {
+function runGitCommand(args: string[]): string {
   try {
-    return execSync(command, {
+    return execFileSync("git", args, {
       cwd: process.cwd(),
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
     }).trim();
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown error";
-    throw new Error(`Failed to execute git command '${command}': ${message}`);
+    throw new Error(
+      `Failed to execute git command 'git ${args.join(" ")}': ${message}`,
+    );
   }
 }
 
@@ -215,7 +217,7 @@ async function main(): Promise<void> {
   const outputPathArg = cliArgs[0] ?? DEFAULT_OUTPUT_PATH;
   const outputPath = path.resolve(process.cwd(), outputPathArg);
 
-  const changedDataFiles = runGitCommand("git diff --name-only -- data/")
+  const changedDataFiles = runGitCommand(["diff", "--name-only", "--", "data/"])
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line.length > 0 && line.endsWith(".json"))
@@ -237,7 +239,7 @@ async function main(): Promise<void> {
     let previousIds = new Set<number>();
 
     try {
-      const previousContent = runGitCommand(`git show HEAD:${filePath}`);
+      const previousContent = runGitCommand(["show", `HEAD:${filePath}`]);
       const previousJson = readJsonWithContext<unknown>(
         previousContent,
         `HEAD:${filePath}`,
