@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { getSharedEventProperties } from "@/lib/analytics/playthroughEventData";
+import { getSharedEventProperties } from "@/lib/analytics/selectors";
 import { trackEvent } from "@/lib/analytics/trackEvent";
 import {
   type ExportedPlaythrough,
