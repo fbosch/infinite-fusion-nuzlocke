@@ -10,6 +10,8 @@ Track Pokemon Infinite Fusion Nuzlocke runs with encounter logging, team and box
 Live app: [fusion.nuzlocke.io](https://fusion.nuzlocke.io)  
 Source: [github.com/fbosch/infinite-fusion-nuzlocke](https://github.com/fbosch/infinite-fusion-nuzlocke)
 
+![Infinite Fusion Nuzlocke Tracker screenshot](docs/readme-tracker-screenshot.png)
+
 ## Features
 
 - Encounter tracking by location with quick actions and sorting
