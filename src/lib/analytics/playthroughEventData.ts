@@ -1,5 +1,5 @@
 import { PokemonStatus } from "@/loaders/pokemon";
-import type { Playthrough } from "@/stores/playthroughs";
+import type { Playthrough } from "@/stores/playthroughs/types";
 import type {
   Checkpoint,
   CheckpointLabel,
@@ -62,6 +62,20 @@ const getPokemonByUid = (
   }
 
   return index;
+};
+
+const toAnalyticsGameMode = (
+  gameMode: string,
+): SharedEventProperties["game_mode"] => {
+  if (gameMode === "remix") {
+    return "remix";
+  }
+
+  if (gameMode === "randomized") {
+    return "randomized";
+  }
+
+  return "classic";
 };
 
 export const getEncounterCount = (playthrough: Playthrough): number => {
@@ -282,7 +296,7 @@ export const getSharedEventProperties = (
 
   return {
     playthrough_id: playthrough.id,
-    game_mode: playthrough.gameMode,
+    game_mode: toAnalyticsGameMode(playthrough.gameMode),
     encounter_count_bucket: toEncounterCountBucket(encounterCount),
     deceased_count_bucket: toCountBucket(deceasedCount),
     boxed_count_bucket: toCountBucket(boxedCount),
