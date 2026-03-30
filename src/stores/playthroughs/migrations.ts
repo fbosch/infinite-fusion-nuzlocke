@@ -219,7 +219,7 @@ export function migrateRequiredFields(data: MigrationData): MigrationData {
   if (!data || typeof data !== "object") {
     return {
       id: `playthrough_${now}_${Math.random().toString(36).substr(2, 9)}`,
-      name: "Nuzlocke",
+      name: "Playthrough",
       createdAt: now,
       updatedAt: now,
       gameMode: "classic",
@@ -255,7 +255,7 @@ export function migrateRequiredFields(data: MigrationData): MigrationData {
     name:
       typeof data.name === "string" && data.name.length > 0
         ? data.name
-        : "Nuzlocke",
+        : "Playthrough",
     createdAt: toNumber(data.createdAt, now),
     updatedAt: toNumber(data.updatedAt, now),
   };

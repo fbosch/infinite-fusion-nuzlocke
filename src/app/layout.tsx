@@ -11,6 +11,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { ServiceWorkerInit } from "@/components/ServiceWorkerInit";
+import { APP_TITLE, APP_TITLE_TEMPLATE } from "@/lib/metadata";
 import { Providers } from "./providers";
 
 // Primary sans-serif font for body text
@@ -68,8 +69,8 @@ const STRUCTURED_DATA_JSON = JSON.stringify(STRUCTURED_DATA);
 export const metadata: Metadata = {
   metadataBase: new URL("https://fusion.nuzlocke.io"),
   title: {
-    default: "Infinite Fusion Nuzlocke Tracker",
-    template: "%s | Infinite Fusion Nuzlocke Tracker",
+    default: APP_TITLE,
+    template: APP_TITLE_TEMPLATE,
   },
   description:
     "Track your Pokémon Infinite Fusion Nuzlocke runs with location-based encounters, multiple playthroughs, and Classic/Remix game modes.",
