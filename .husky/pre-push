@@ -1,1 +1,2 @@
 pnpm run typecheck
+pnpm run test:run
