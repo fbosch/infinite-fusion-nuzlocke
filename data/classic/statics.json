@@ -1,11 +1,15 @@
 [
   {
-    "routeName": "16",
-    "pokemonIds": [143]
-  },
-  {
     "routeName": "Berry Forest",
     "pokemonIds": [338]
+  },
+  {
+    "routeName": "Celadon City",
+    "pokemonIds": [358]
+  },
+  {
+    "routeName": "Cerulean Team Rocket HQ",
+    "pokemonIds": [474]
   },
   {
     "routeName": "Cinnabar Island",
@@ -32,6 +36,10 @@
     "pokemonIds": [476]
   },
   {
+    "routeName": "Goldenrod City",
+    "pokemonIds": [358]
+  },
+  {
     "routeName": "Ice Cavern",
     "pokemonIds": [429]
   },
@@ -46,7 +54,8 @@
   {
     "routeName": "Mt. Mortar",
     "pokemonIds": [
-      20, 42, 67, 75, 80, 95, 105, 169, 184, 195, 202, 217, 292, 325, 332, 333
+      20, 42, 67, 75, 80, 95, 105, 169, 184, 195, 202, 217, 292, 300, 310, 325,
+      332, 333
     ]
   },
   {
@@ -80,6 +89,10 @@
   {
     "routeName": "Rocket Warehouse",
     "pokemonIds": [337]
+  },
+  {
+    "routeName": "Route 16",
+    "pokemonIds": [143]
   },
   {
     "routeName": "Route 18",

@@ -1087,6 +1087,46 @@ describe("Data Integrity Tests", () => {
       expect(totalTrades).toBeLessThan(50); // Reasonable upper limit
     });
 
+    it("should keep special encounter location coverage above guardrails", async () => {
+      const [
+        classicQuestsData,
+        remixQuestsData,
+        classicStaticsData,
+        remixStaticsData,
+      ] = await Promise.all([
+        fs.readFile(
+          path.join(process.cwd(), "data/classic/quests.json"),
+          "utf-8",
+        ),
+        fs.readFile(
+          path.join(process.cwd(), "data/remix/quests.json"),
+          "utf-8",
+        ),
+        fs.readFile(
+          path.join(process.cwd(), "data/classic/statics.json"),
+          "utf-8",
+        ),
+        fs.readFile(
+          path.join(process.cwd(), "data/remix/statics.json"),
+          "utf-8",
+        ),
+      ]);
+
+      const classicQuests = JSON.parse(classicQuestsData) as LocationGifts[];
+      const remixQuests = JSON.parse(remixQuestsData) as LocationGifts[];
+      const classicStatics = JSON.parse(classicStaticsData) as LocationGifts[];
+      const remixStatics = JSON.parse(remixStaticsData) as LocationGifts[];
+
+      expect(classicGifts.length).toBeGreaterThanOrEqual(20);
+      expect(remixGifts.length).toBeGreaterThanOrEqual(20);
+      expect(classicTrades.length).toBeGreaterThanOrEqual(10);
+      expect(remixTrades.length).toBeGreaterThanOrEqual(10);
+      expect(classicQuests.length).toBeGreaterThanOrEqual(8);
+      expect(remixQuests.length).toBeGreaterThanOrEqual(8);
+      expect(classicStatics.length).toBeGreaterThanOrEqual(28);
+      expect(remixStatics.length).toBeGreaterThanOrEqual(65);
+    });
+
     it("should have consistent location naming patterns", () => {
       const allLocations = [
         ...classicGifts.map((g) => g.routeName),
