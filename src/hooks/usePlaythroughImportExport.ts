@@ -1,4 +1,6 @@
 import { useCallback, useState } from "react";
+import { getSharedEventProperties } from "@/lib/analytics/playthroughEventData";
+import { trackEvent } from "@/lib/analytics/trackEvent";
 import {
   type ExportedPlaythrough,
   type GameMode,
@@ -45,6 +47,8 @@ const exportPlaythrough = (playthrough: Playthrough) => {
 
     // Clean up URL
     URL.revokeObjectURL(url);
+
+    trackEvent("playthrough_exported", getSharedEventProperties(playthrough));
   } catch (error) {
     console.error("Failed to export playthrough:", error);
   }

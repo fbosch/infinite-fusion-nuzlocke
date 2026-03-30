@@ -48,7 +48,7 @@ export type DormancyBucket =
 
 type GameMode = "classic" | "remix" | "randomized";
 
-type SharedEventProperties = {
+export type SharedEventProperties = {
   playthrough_id: string;
   game_mode: GameMode;
   encounter_count_bucket: EncounterCountBucket;
@@ -58,13 +58,22 @@ type SharedEventProperties = {
   viable_roster_bucket: ViableRosterBucket;
 };
 
+export type Checkpoint = 1 | 5 | 10 | 20 | 40 | 80;
+export type CheckpointLabel =
+  | "cp_1"
+  | "cp_5"
+  | "cp_10"
+  | "cp_20"
+  | "cp_40"
+  | "cp_80";
+
 export type AnalyticsEventMap = {
   playthrough_created: SharedEventProperties & {
     has_existing_playthroughs: boolean;
   };
   run_checkpoint_reached: SharedEventProperties & {
-    checkpoint: 1 | 5 | 10 | 20 | 40 | 80;
-    checkpoint_label: "cp_1" | "cp_5" | "cp_10" | "cp_20" | "cp_40" | "cp_80";
+    checkpoint: Checkpoint;
+    checkpoint_label: CheckpointLabel;
   };
   playthrough_resumed: SharedEventProperties & {
     days_since_last_active_bucket: DormancyBucket;

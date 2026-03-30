@@ -1,4 +1,6 @@
 import type { z } from "zod";
+import { getSharedEventProperties } from "@/lib/analytics/playthroughEventData";
+import { trackEvent } from "@/lib/analytics/trackEvent";
 import { emitEvolutionEvent } from "@/lib/events";
 import type { PokemonOptionSchema } from "@/loaders/pokemon";
 import { getCurrentTimestamp } from "../playthroughState";
@@ -79,6 +81,11 @@ export const moveEncounterAtomic = async (
 
   const existingTargetEncounter =
     activePlaythrough.encounters[targetLocationId];
+  const targetWasCompleteFusion = Boolean(
+    existingTargetEncounter?.isFusion &&
+      existingTargetEncounter.head &&
+      existingTargetEncounter.body,
+  );
   const willBeFusion =
     targetField === "body" || existingTargetEncounter?.isFusion === true;
 
@@ -102,6 +109,14 @@ export const moveEncounterAtomic = async (
   activePlaythrough.encounters[targetLocationId] = newEncounter;
   if (newEncounter.isFusion && newEncounter.head && newEncounter.body) {
     emitEvolutionEvent(targetLocationId);
+
+    if (!targetWasCompleteFusion) {
+      trackEvent("fusion_created", {
+        ...getSharedEventProperties(activePlaythrough),
+        location_id: targetLocationId,
+        creation_method: "drag_drop",
+      });
+    }
   }
 };
 
