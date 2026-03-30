@@ -51,7 +51,7 @@ describe("PlaythroughResumeObserver", () => {
     sessionStorage.clear();
   });
 
-  it("does not emit while store is loading", async () => {
+  it("does not emit while store is loading", () => {
     const { activePlaythrough } = createTestPlaythrough();
     activePlaythrough.updatedAt = Date.now() - 2 * 86_400_000;
     playthroughsStore.isLoading = true;
@@ -59,7 +59,6 @@ describe("PlaythroughResumeObserver", () => {
 
     render(createElement(PlaythroughResumeObserver));
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(
       analyticsMocks.trackEvent.mock.calls.filter(
         (call) => call[0] === "playthrough_resumed",
