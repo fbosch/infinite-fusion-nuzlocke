@@ -1,0 +1,44 @@
+name: Setup Node.js and pnpm
+description: >
+  Checkout, install Node.js, set up pnpm with cache, and install
+  frozen dependencies. Used by all CI jobs to avoid duplicating setup steps.
+
+inputs:
+  node-version:
+    description: Node.js version to install
+    default: '24'
+  fetch-depth:
+    description: Number of commits to fetch (0 = full history)
+    default: '1'
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Get pnpm store directory
+      shell: bash
+      run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+    - name: Setup pnpm cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile

@@ -1,9 +1,9 @@
+import { toViableRosterBucket } from "@/lib/analytics/buckets";
 import {
   getSharedEventProperties,
   getTeamSizeAfter,
   getViableRosterSize,
-  toViableRosterBucket,
-} from "@/lib/analytics/playthroughEventData";
+} from "@/lib/analytics/selectors";
 import { trackEvent } from "@/lib/analytics/trackEvent";
 import { PokemonStatus } from "@/loaders/pokemon";
 import { updateEncounter } from "./crud";

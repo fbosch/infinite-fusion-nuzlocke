@@ -10,6 +10,12 @@ permissions:
   pull-requests: write
   issues: write
 
+# Release workflows must never be cancelled mid-flight to avoid
+# leaving release PRs or tags in an inconsistent state.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release-please:
     name: Prepare Release
