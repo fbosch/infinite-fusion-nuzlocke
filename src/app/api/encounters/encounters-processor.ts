@@ -256,6 +256,9 @@ export function processGameModeData(gameMode: "classic" | "remix") {
     const tradePokemon = tradesMap.get(routeName)?.pokemonIds || [];
     const giftPokemon = giftsMap.get(routeName)?.pokemonIds || [];
     const questPokemon = questsMap.get(routeName)?.pokemonIds || [];
+    // Static encounters can come from special-only locations (for example cities,
+    // interior rooms, and one-off events) that intentionally have no wild
+    // encounter table entry in encounters.json.
     const staticPokemon = staticsMap.get(routeName)?.pokemonIds || [];
     const legendaryPokemon = legendaryMap.get(routeName)?.encounters || [];
 

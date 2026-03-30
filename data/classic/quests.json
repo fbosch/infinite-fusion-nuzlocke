@@ -32,10 +32,6 @@
     "pokemonIds": [235]
   },
   {
-    "routeName": "Team Rocket HQ",
-    "pokemonIds": [474]
-  },
-  {
     "routeName": "Viridian Forest",
     "pokemonIds": [15]
   }

@@ -65,6 +65,10 @@ describe("Data Integrity Tests", () => {
   let remixGifts: LocationGifts[];
   let classicTrades: LocationTrades[];
   let remixTrades: LocationTrades[];
+  let classicQuests: LocationGifts[];
+  let remixQuests: LocationGifts[];
+  let classicStatics: LocationGifts[];
+  let remixStatics: LocationGifts[];
   let eggLocations: EggLocationsData;
 
   // Function to consolidate Safari Zone areas into a single location for Nuzlocke rules
@@ -114,6 +118,10 @@ describe("Data Integrity Tests", () => {
       remixGiftsData,
       classicTradesData,
       remixTradesData,
+      classicQuestsData,
+      remixQuestsData,
+      classicStaticsData,
+      remixStaticsData,
       eggLocationsData,
     ] = await Promise.all([
       fs.readFile(path.join(dataDir, "shared/locations.json"), "utf-8"),
@@ -128,6 +136,10 @@ describe("Data Integrity Tests", () => {
       fs.readFile(path.join(dataDir, "remix/gifts.json"), "utf-8"),
       fs.readFile(path.join(dataDir, "classic/trades.json"), "utf-8"),
       fs.readFile(path.join(dataDir, "remix/trades.json"), "utf-8"),
+      fs.readFile(path.join(dataDir, "classic/quests.json"), "utf-8"),
+      fs.readFile(path.join(dataDir, "remix/quests.json"), "utf-8"),
+      fs.readFile(path.join(dataDir, "classic/statics.json"), "utf-8"),
+      fs.readFile(path.join(dataDir, "remix/statics.json"), "utf-8"),
       fs.readFile(path.join(dataDir, "shared/egg-locations.json"), "utf-8"),
     ]);
 
@@ -156,6 +168,10 @@ describe("Data Integrity Tests", () => {
     remixGifts = JSON.parse(remixGiftsData);
     classicTrades = JSON.parse(classicTradesData);
     remixTrades = JSON.parse(remixTradesData);
+    classicQuests = JSON.parse(classicQuestsData);
+    remixQuests = JSON.parse(remixQuestsData);
+    classicStatics = JSON.parse(classicStaticsData);
+    remixStatics = JSON.parse(remixStaticsData);
     eggLocations = JSON.parse(eggLocationsData);
   });
 
@@ -1085,6 +1101,20 @@ describe("Data Integrity Tests", () => {
       expect(totalTrades).toBeGreaterThan(0);
       expect(totalGifts).toBeLessThan(100); // Reasonable upper limit
       expect(totalTrades).toBeLessThan(50); // Reasonable upper limit
+    });
+
+    it("should keep special encounter location coverage above guardrails", () => {
+      // Guardrails are set below current observed counts to catch parser regressions
+      // while allowing normal wiki-driven data churn.
+
+      expect(classicGifts.length).toBeGreaterThanOrEqual(20);
+      expect(remixGifts.length).toBeGreaterThanOrEqual(20);
+      expect(classicTrades.length).toBeGreaterThanOrEqual(10);
+      expect(remixTrades.length).toBeGreaterThanOrEqual(10);
+      expect(classicQuests.length).toBeGreaterThanOrEqual(8);
+      expect(remixQuests.length).toBeGreaterThanOrEqual(8);
+      expect(classicStatics.length).toBeGreaterThanOrEqual(28);
+      expect(remixStatics.length).toBeGreaterThanOrEqual(65);
     });
 
     it("should have consistent location naming patterns", () => {

@@ -118,6 +118,22 @@ interface LocationStatics {
   pokemonIds: number[];
 }
 
+const SPECIAL_ENCOUNTER_MARKERS = ["(gift)", "(trade)", "(quest)", "(static)"];
+
+function findLocationCellText(cells: cheerio.Cheerio<any>): string {
+  for (let index = 0; index < cells.length; index++) {
+    const text = cells.eq(index).text().trim();
+    const normalized = text.toLowerCase();
+    if (
+      SPECIAL_ENCOUNTER_MARKERS.some((marker) => normalized.includes(marker))
+    ) {
+      return text;
+    }
+  }
+
+  return "";
+}
+
 /**
  * Extracts only the location that has the (gift), (trade), (quest), or (static) marker
  */
@@ -294,22 +310,10 @@ async function scrapePokedexForSpecialEncounters(
           return;
         }
 
-        // Extract data from cells - location index varies by table structure
+        // Extract data from cells
         const _dexCell = cells.eq(0).text().trim();
         const pokemonCell = cells.eq(2).text().trim(); // Pokémon name is at index 2
-
-        // Different table structures have location at different indices
-        // Tables 2 (Gen 2) and 3 (Other Generations): location at index 4
-        // Tables 0 and 1 (Gen 1): location at index 5
-        const locationIndex = tableIndex === 2 || tableIndex === 3 ? 4 : 5;
-        const locationCell = cells.eq(locationIndex).text().trim();
-        const _notesCell =
-          cells.length > locationIndex + 1
-            ? cells
-                .eq(locationIndex + 1)
-                .text()
-                .trim()
-            : "";
+        const locationCell = findLocationCellText(cells);
 
         // Skip if no Pokémon name found or if it's a header row
         if (
