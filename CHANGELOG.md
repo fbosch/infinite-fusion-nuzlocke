@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.3.0...v0.3.1) (2026-03-30)
+
+
+### Bug Fixes
+
+* **readme:** remove stale Node 24 requirement ([5d40faa](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/5d40faa0c7f6028149bcab4c6b5da30994669c1f))
+* **readme:** remove stale Node 24 requirement ([b8854e4](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/b8854e41ac6037ebd521e83e71a1f2ef23ebfdcb))
+
 ## [0.3.0](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.2.3...v0.3.0) (2026-03-30)
 
 
