@@ -1,15 +1,16 @@
 "use client";
 
+import { useEffect } from "react";
+import { getPlaythroughPageTitle } from "@/lib/metadata";
 import { useActivePlaythrough } from "@/stores/playthroughs/hooks";
-
-const HOME_TITLE = "Infinite Fusion Nuzlocke Tracker";
 
 export function ActivePlaythroughTitle() {
   const activePlaythrough = useActivePlaythrough();
-  const playthroughName = activePlaythrough?.name?.trim();
-  const pageTitle = playthroughName
-    ? `${playthroughName} | ${HOME_TITLE}`
-    : HOME_TITLE;
+  const pageTitle = getPlaythroughPageTitle(activePlaythrough?.name);
 
-  return <title>{pageTitle}</title>;
+  useEffect(() => {
+    document.title = pageTitle;
+  }, [pageTitle]);
+
+  return null;
 }
