@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.3](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.3.2...v0.3.3) (2026-03-30)
+
+
+### Bug Fixes
+
+* **ci:** deploy production without prebuilt artifacts ([e2d7676](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/e2d7676a5d71ba495bf8e67c69e1050877a4ce55))
+* **ci:** deploy to Vercel production without prebuilt step ([e262c74](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/e262c74e243662b215d6afdd5a8b7bf620cb13de))
+
 ## [0.3.2](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.3.1...v0.3.2) (2026-03-30)
 
 
