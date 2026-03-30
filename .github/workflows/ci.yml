@@ -14,6 +14,13 @@ on:
 permissions:
   contents: read
 
+# Cancel in-progress runs for the same ref on PR and push events.
+# Schedule and workflow_dispatch runs each get a unique group via run_id
+# so they are never cancelled mid-flight (data-refresh is long-running).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.run_id || 'default' }}
+  cancel-in-progress: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' }}
+
 jobs:
   test:
     name: Test Suite
