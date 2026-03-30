@@ -32,7 +32,7 @@ Open [http://localhost:4000](http://localhost:4000).
 
 ## Requirements
 
-- Node.js `20.x` (matches CI)
+- Node.js `22.x` (matches CI)
 - Corepack-enabled pnpm `10.x` (project uses `pnpm@10`)
 
 ## Common Scripts
