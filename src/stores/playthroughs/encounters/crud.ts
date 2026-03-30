@@ -1,4 +1,11 @@
 import type { z } from "zod";
+import {
+  getCheckpointLabel,
+  getEncounterCount,
+  getNewlyReachedCheckpoints,
+  getSharedEventProperties,
+} from "@/lib/analytics/playthroughEventData";
+import { trackEvent } from "@/lib/analytics/trackEvent";
 import { emitEvolutionEvent } from "@/lib/events";
 import type { PokemonOptionSchema, PokemonOptionType } from "@/loaders/pokemon";
 import { getActivePlaythrough, getCurrentTimestamp } from "../playthroughState";
@@ -74,6 +81,8 @@ export const updateEncounter = async (
     return;
   }
 
+  const previousEncounterCount = getEncounterCount(activePlaythrough);
+
   let encounter = activePlaythrough.encounters[locationId];
   if (!encounter) {
     const encounterData = await createEncounterData(
@@ -96,8 +105,27 @@ export const updateEncounter = async (
       await autoAssignCapturedPokemonToTeam(locationId);
     }
 
+    const nextEncounterCount = getEncounterCount(activePlaythrough);
+    const newlyReachedCheckpoints = getNewlyReachedCheckpoints(
+      activePlaythrough.id,
+      previousEncounterCount,
+      nextEncounterCount,
+    );
+
+    for (const checkpoint of newlyReachedCheckpoints) {
+      trackEvent("run_checkpoint_reached", {
+        ...getSharedEventProperties(activePlaythrough),
+        checkpoint,
+        checkpoint_label: getCheckpointLabel(checkpoint),
+      });
+    }
+
     return;
   }
+
+  const wasCompleteFusion = Boolean(
+    encounter.isFusion && encounter.head && encounter.body,
+  );
 
   if (pokemon) {
     const pokemonWithLocationAndUID = createPokemonWithLocationAndUID(
@@ -160,6 +188,32 @@ export const updateEncounter = async (
       await autoAssignCapturedPokemonToTeam(locationId);
     }
 
+    const isCompleteFusion = Boolean(
+      encounter.isFusion && encounter.head && encounter.body,
+    );
+    if (!wasCompleteFusion && isCompleteFusion) {
+      trackEvent("fusion_created", {
+        ...getSharedEventProperties(activePlaythrough),
+        location_id: locationId,
+        creation_method: "update_encounter",
+      });
+    }
+
+    const nextEncounterCount = getEncounterCount(activePlaythrough);
+    const newlyReachedCheckpoints = getNewlyReachedCheckpoints(
+      activePlaythrough.id,
+      previousEncounterCount,
+      nextEncounterCount,
+    );
+
+    for (const checkpoint of newlyReachedCheckpoints) {
+      trackEvent("run_checkpoint_reached", {
+        ...getSharedEventProperties(activePlaythrough),
+        checkpoint,
+        checkpoint_label: getCheckpointLabel(checkpoint),
+      });
+    }
+
     return;
   }
 
@@ -172,6 +226,21 @@ export const updateEncounter = async (
   encounter.updatedAt = getCurrentTimestamp();
 
   removeTeamMembersWithPokemon(removedUIDs);
+
+  const nextEncounterCount = getEncounterCount(activePlaythrough);
+  const newlyReachedCheckpoints = getNewlyReachedCheckpoints(
+    activePlaythrough.id,
+    previousEncounterCount,
+    nextEncounterCount,
+  );
+
+  for (const checkpoint of newlyReachedCheckpoints) {
+    trackEvent("run_checkpoint_reached", {
+      ...getSharedEventProperties(activePlaythrough),
+      checkpoint,
+      checkpoint_label: getCheckpointLabel(checkpoint),
+    });
+  }
 };
 
 // Reset encounter for a location

@@ -1,15 +1,12 @@
 import { proxy, subscribe } from "valtio";
 import { devtools } from "valtio/utils";
 import { z } from "zod";
+import { getSharedEventProperties } from "@/lib/analytics/playthroughEventData";
+import { trackEvent } from "@/lib/analytics/trackEvent";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 import { generatePrefixedId } from "@/utils/id";
 import { createDefaultPlaythrough } from "./defaultPlaythrough";
-import {
-  getActivePlaythrough,
-  getCurrentTimestamp,
-  setPlaythroughsStore,
-} from "./playthroughState";
 import {
   createDebouncedSaveAll,
   deletePlaythroughFromIndexedDB,
@@ -18,6 +15,11 @@ import {
   loadPlaythroughById,
   saveToIndexedDB,
 } from "./persistence";
+import {
+  getActivePlaythrough,
+  getCurrentTimestamp,
+  setPlaythroughsStore,
+} from "./playthroughState";
 import type { GameMode, Playthrough, PlaythroughsState } from "./types";
 
 // Default state
@@ -85,6 +87,8 @@ const createPlaythrough = (
   name: string,
   gameMode: GameMode = "classic",
 ): string => {
+  const hasExistingPlaythroughs = playthroughsStore.playthroughs.length > 0;
+
   const newPlaythrough: Playthrough = {
     id: generatePlaythroughId(),
     name,
@@ -102,6 +106,11 @@ const createPlaythrough = (
   if (playthroughsStore.playthroughs.length === 1) {
     playthroughsStore.activePlaythroughId = newPlaythrough.id;
   }
+
+  trackEvent("playthrough_created", {
+    ...getSharedEventProperties(newPlaythrough),
+    has_existing_playthroughs: hasExistingPlaythroughs,
+  });
 
   return newPlaythrough.id;
 };

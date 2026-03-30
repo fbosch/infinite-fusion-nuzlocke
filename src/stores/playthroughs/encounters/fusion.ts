@@ -1,3 +1,10 @@
+import {
+  getCheckpointLabel,
+  getEncounterCount,
+  getNewlyReachedCheckpoints,
+  getSharedEventProperties,
+} from "@/lib/analytics/playthroughEventData";
+import { trackEvent } from "@/lib/analytics/trackEvent";
 import { emitEvolutionEvent } from "@/lib/events";
 import { getCurrentTimestamp } from "../playthroughState";
 import {
@@ -75,6 +82,11 @@ export const flipEncounterFusion = async (locationId: string) => {
   if (prevSpriteId && nextSpriteId && prevSpriteId !== nextSpriteId) {
     emitEvolutionEvent(locationId);
   }
+
+  trackEvent("fusion_flipped", {
+    ...getSharedEventProperties(activePlaythrough),
+    location_id: locationId,
+  });
 };
 
 // Create fusion from drag and drop
@@ -88,6 +100,8 @@ export const createFusion = async (
     return;
   }
 
+  const previousEncounterCount = getEncounterCount(activePlaythrough);
+
   const encounter = {
     head: createPokemonWithLocationAndUID(head, locationId),
     body: createPokemonWithLocationAndUID(body, locationId),
@@ -98,5 +112,26 @@ export const createFusion = async (
   activePlaythrough.encounters[locationId] = encounter;
   if (encounter.head && encounter.body) {
     emitEvolutionEvent(locationId);
+
+    trackEvent("fusion_created", {
+      ...getSharedEventProperties(activePlaythrough),
+      location_id: locationId,
+      creation_method: "create_fusion",
+    });
+  }
+
+  const nextEncounterCount = getEncounterCount(activePlaythrough);
+  const newlyReachedCheckpoints = getNewlyReachedCheckpoints(
+    activePlaythrough.id,
+    previousEncounterCount,
+    nextEncounterCount,
+  );
+
+  for (const checkpoint of newlyReachedCheckpoints) {
+    trackEvent("run_checkpoint_reached", {
+      ...getSharedEventProperties(activePlaythrough),
+      checkpoint,
+      checkpoint_label: getCheckpointLabel(checkpoint),
+    });
   }
 };

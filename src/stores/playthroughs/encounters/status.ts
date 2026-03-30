@@ -1,3 +1,10 @@
+import {
+  getSharedEventProperties,
+  getTeamSizeAfter,
+  getViableRosterSize,
+  toViableRosterBucket,
+} from "@/lib/analytics/playthroughEventData";
+import { trackEvent } from "@/lib/analytics/trackEvent";
 import { PokemonStatus } from "@/loaders/pokemon";
 import { updateEncounter } from "./crud";
 import { ensureActivePlaythroughWithEncounters } from "./shared";
@@ -43,7 +50,57 @@ const updateEncounterStatus = async (
 export const markEncounterAsDeceased = async (
   locationId: string,
 ): Promise<void> => {
+  const activePlaythrough = ensureActivePlaythroughWithEncounters();
+  if (!activePlaythrough) {
+    return;
+  }
+
+  const encounterBefore = activePlaythrough.encounters[locationId];
+  if (!encounterBefore) {
+    return;
+  }
+
+  const hasPokemonBefore = Boolean(
+    encounterBefore.head || encounterBefore.body,
+  );
+  const alreadyDeceased =
+    hasPokemonBefore &&
+    [encounterBefore.head, encounterBefore.body]
+      .filter((pokemon) => pokemon != null)
+      .every((pokemon) => pokemon.status === PokemonStatus.DECEASED);
+
+  if (alreadyDeceased) {
+    return;
+  }
+
+  const wasFused = Boolean(
+    encounterBefore.isFusion && encounterBefore.head && encounterBefore.body,
+  );
+
   await updateEncounterStatus(locationId, PokemonStatus.DECEASED);
+
+  const encounterAfter = activePlaythrough.encounters[locationId];
+  if (!encounterAfter) {
+    return;
+  }
+
+  const nowDeceased = [encounterAfter.head, encounterAfter.body]
+    .filter((pokemon) => pokemon != null)
+    .every((pokemon) => pokemon.status === PokemonStatus.DECEASED);
+
+  if (!nowDeceased) {
+    return;
+  }
+
+  trackEvent("encounter_marked_deceased", {
+    ...getSharedEventProperties(activePlaythrough),
+    location_id: locationId,
+    was_fused: wasFused,
+    team_size_after: getTeamSizeAfter(activePlaythrough),
+    viable_roster_bucket_after: toViableRosterBucket(
+      getViableRosterSize(activePlaythrough),
+    ),
+  });
 };
 
 /**
