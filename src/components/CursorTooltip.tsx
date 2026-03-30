@@ -45,6 +45,10 @@ function getCrossAxisOffset(placement: Placement): number {
   return 0; // Default for center alignments
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 interface CursorTooltipProps {
   content: React.ReactNode;
   children: React.ReactElement;
@@ -259,6 +263,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
       {isValidElement(children) &&
         cloneElement(children, {
           ...getReferenceProps({
+            ...(isRecord(children.props) ? children.props : {}),
             ref: refs.setReference,
             onMouseEnter: onMouseEnter,
             onMouseLeave: onMouseLeave,

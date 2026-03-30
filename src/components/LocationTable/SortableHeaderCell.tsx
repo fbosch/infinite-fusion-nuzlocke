@@ -35,6 +35,10 @@ export default function SortableHeaderCell({
         sortingEnabled ? header.column.getToggleSortingHandler() : undefined
       }
       onKeyDown={(e) => {
+        if (sortingEnabled === false || e.target !== e.currentTarget) {
+          return;
+        }
+
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           header.column.getToggleSortingHandler()?.(e);
