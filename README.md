@@ -65,26 +65,9 @@ pnpm test:run
 pnpm validate
 ```
 
-## Release Workflow
-
-Releases are automated with Release Please.
-
-- Release policy and SemVer expectations: `docs/RELEASE_POLICY.md`
-- Version boundary guidance: `docs/VERSION_BOUNDARIES.md`
-- Release workflow: `.github/workflows/release-please.yml`
-
 ## Contributing
 
 Contributions are welcome via issues and pull requests.
-
-- Keep changes focused
-- Add or update relevant tests
-- Run `pnpm type-check`, `pnpm test:run`, and `pnpm validate` before opening a PR
-
-Additional docs:
-
-- SEO/canonical routing: `docs/SEO_CANONICAL_STRATEGY.md`
-- Valtio React Compiler guidance: `docs/VALTIO_REACT_COMPILER_GUIDANCE.md`
 
 ## License
 
