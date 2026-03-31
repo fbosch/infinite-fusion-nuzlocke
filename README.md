@@ -36,8 +36,6 @@ pnpm dev
 
 Open [http://localhost:4000](http://localhost:4000).
 
-Runtime notes and rollback steps: `docs/NODE_24_MIGRATION.md`
-
 ## Common Scripts
 
 ```bash
