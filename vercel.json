@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "if [ -z \"$VERCEL_GIT_PREVIOUS_SHA\" ]; then exit 1; fi; changed_files=$(git diff --name-only \"$VERCEL_GIT_PREVIOUS_SHA\" \"$VERCEL_GIT_COMMIT_SHA\"); if [ -z \"$changed_files\" ]; then exit 1; fi; if printf '%s\\n' \"$changed_files\" | grep -Eqv '\\.md$'; then exit 1; fi; exit 0",
+  "ignoreCommand": "if [ -z \"$VERCEL_GIT_PREVIOUS_SHA\" ] || [ -z \"$VERCEL_GIT_COMMIT_SHA\" ]; then exit 1; fi; changed_files=$(git diff --name-only \"$VERCEL_GIT_PREVIOUS_SHA\" \"$VERCEL_GIT_COMMIT_SHA\" 2>/dev/null) || exit 1; if [ -z \"$changed_files\" ]; then exit 1; fi; if printf '%s\\n' \"$changed_files\" | grep -Eqv '\\.md$'; then exit 1; fi; exit 0",
   "git": {
     "deploymentEnabled": {
       "master": false
