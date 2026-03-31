@@ -87,10 +87,25 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run tests
+      - name: Run tests with coverage for PR/push
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        env:
+          VITEST_BROWSER: 'true'
+        run: pnpm run test:coverage
+
+      - name: Run tests for schedule/manual runs
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           VITEST_BROWSER: 'true'
         run: pnpm run test:run
+
+      - name: Upload coverage artifacts
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ github.sha }}
+          path: coverage/
+          retention-days: 7
 
   type-check:
     name: Type Check
