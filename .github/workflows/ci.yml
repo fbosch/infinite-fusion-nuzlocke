@@ -22,9 +22,60 @@ concurrency:
   cancel-in-progress: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' }}
 
 jobs:
+  detect-docs-only:
+    name: Detect markdown-only changes
+    runs-on: ubuntu-latest
+    outputs:
+      docs_only: ${{ steps.changed-files.outputs.docs_only }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect markdown-only changes
+        id: changed-files
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "schedule" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base_sha="${{ github.event.pull_request.base.sha }}"
+            head_sha="${{ github.event.pull_request.head.sha }}"
+          else
+            base_sha="${{ github.event.before }}"
+            head_sha="${{ github.sha }}"
+          fi
+
+          if [[ -z "$base_sha" || "$base_sha" =~ ^0+$ ]]; then
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          changed_files="$(git diff --name-only "$base_sha" "$head_sha")"
+
+          if [[ -z "$changed_files" ]]; then
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          non_markdown_count="$(printf '%s\n' "$changed_files" | grep -Evc '\\.md$')"
+
+          if [[ "$non_markdown_count" == "0" ]]; then
+            echo "docs_only=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+          fi
+
   test:
     name: Test Suite
     runs-on: ubuntu-latest
+    needs: detect-docs-only
+    if: needs.detect-docs-only.outputs.docs_only != 'true'
 
     steps:
       - name: Checkout code
@@ -44,6 +95,8 @@ jobs:
   type-check:
     name: Type Check
     runs-on: ubuntu-latest
+    needs: detect-docs-only
+    if: needs.detect-docs-only.outputs.docs_only != 'true'
 
     steps:
       - name: Checkout code
@@ -58,6 +111,8 @@ jobs:
   code-quality:
     name: Code Quality
     runs-on: ubuntu-latest
+    needs: detect-docs-only
+    if: needs.detect-docs-only.outputs.docs_only != 'true'
 
     steps:
       - name: Checkout code
@@ -72,12 +127,17 @@ jobs:
   release-gate:
     name: Release Gate
     runs-on: ubuntu-latest
-    needs: [test, type-check, code-quality]
+    needs: [detect-docs-only, test, type-check, code-quality]
     if: always()
 
     steps:
       - name: Enforce required checks
         run: |
+          if [[ "${{ needs.detect-docs-only.outputs.docs_only }}" == "true" ]]; then
+            echo "Markdown-only change detected; skipping heavy CI gates"
+            exit 0
+          fi
+
           if [[ "${{ needs.test.result }}" != "success" ]]; then
             echo "Test Suite must pass before release gating"
             exit 1
@@ -98,7 +158,7 @@ jobs:
   data-refresh:
     name: Data Download & Validation
     runs-on: ubuntu-latest
-    needs: [test, type-check, code-quality]
+    needs: [detect-docs-only, test, type-check, code-quality]
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     permissions:
       contents: write
