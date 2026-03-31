@@ -67,7 +67,7 @@ jobs:
           # Keep this list narrow and repo-specific. Any path not matched here
           # will run full CI gates.
           lightweight_patterns='(^docs/|\.md$|^LICENSE$|^\.github/|^\.vscode/|^\.editorconfig$|^\.gitignore$|^\.prettier.*$|^biome\.jsonc$)'
-          non_runtime_count="$(printf '%s\n' "$changed_files" | grep -Evc "$lightweight_patterns")"
+          non_runtime_count="$(printf '%s\n' "$changed_files" | grep -Evc "$lightweight_patterns" || true)"
 
           if [[ "$non_runtime_count" == "0" ]]; then
             echo "lightweight_only=true" >> "$GITHUB_OUTPUT"
