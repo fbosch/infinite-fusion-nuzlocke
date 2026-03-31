@@ -1,10 +1,12 @@
 name: Test Coverage
 
 on:
-  push:
-    branches: [master]
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -12,61 +14,51 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  detect-docs-only:
-    name: Detect markdown-only changes
-    runs-on: ubuntu-latest
-    outputs:
-      docs_only: ${{ steps.changed-files.outputs.docs_only }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Detect markdown-only changes
-        id: changed-files
-        shell: bash
-        run: |
-          base_sha="${{ github.event.before }}"
-          head_sha="${{ github.sha }}"
-
-          if [[ -z "$base_sha" || "$base_sha" =~ ^0+$ ]]; then
-            echo "docs_only=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          changed_files="$(git diff --name-only "$base_sha" "$head_sha")"
-
-          if [[ -z "$changed_files" ]]; then
-            echo "docs_only=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          non_markdown_count="$(printf '%s\n' "$changed_files" | grep -Evc '\.md$')"
-
-          if [[ "$non_markdown_count" == "0" ]]; then
-            echo "docs_only=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "docs_only=false" >> "$GITHUB_OUTPUT"
-          fi
-
   test-coverage:
     runs-on: ubuntu-latest
-    needs: detect-docs-only
-    if: needs.detect-docs-only.outputs.docs_only != 'true'
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'master'
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Resolve CI artifact metadata
+        id: artifact
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runId = context.payload.workflow_run.id;
+            const expectedName = `coverage-${context.payload.workflow_run.head_sha}`;
 
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
+            const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId,
+              per_page: 100,
+            });
 
-      - name: Run tests with coverage
-        run: pnpm test:coverage
+            const coverageArtifact = artifacts.find((artifact) => artifact.name === expectedName);
+
+            if (coverageArtifact === undefined) {
+              core.setOutput('found', 'false');
+              core.setOutput('artifact_name', expectedName);
+              return;
+            }
+
+            core.setOutput('found', 'true');
+            core.setOutput('artifact_name', coverageArtifact.name);
+
+      - name: Skip when CI produced no coverage artifact
+        if: steps.artifact.outputs.found != 'true'
+        run: echo "No coverage artifact found for this CI run (likely docs-only change)."
+
+      - name: Download coverage artifact from CI run
+        if: steps.artifact.outputs.found == 'true'
+        uses: dawidd6/action-download-artifact@v9
+        with:
+          run_id: ${{ github.event.workflow_run.id }}
+          name: ${{ steps.artifact.outputs.artifact_name }}
+          path: .
 
       - name: Upload coverage reports to Codecov
+        if: steps.artifact.outputs.found == 'true'
         uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
         with:
           file: ./coverage/lcov.info
@@ -74,16 +66,3 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: false
           verbose: true
-
-      - name: Generate coverage badge
-        run: |
-          # Update coverage badge in README.md
-          pnpm coverage:badge
-
-      - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-reports
-          path: |
-            coverage/
-          retention-days: 30
