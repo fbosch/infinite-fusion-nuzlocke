@@ -1,6 +1,6 @@
 # <img src="https://github.com/fbosch/infinite-fusion-nuzlocke/blob/master/src/app/favicon-32x32.png?raw=true" height="27px" width="26px" /> Infinite Fusion Nuzlocke Tracker
 
-Track Pokemon Infinite Fusion Nuzlocke runs with encounter logging, team and box management, and fusion-aware workflows.
+Track Pokemon Infinite Fusion Nuzlocke runs with encounter logging, team and box management.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-149eca)](https://react.dev/)
@@ -9,6 +9,11 @@ Track Pokemon Infinite Fusion Nuzlocke runs with encounter logging, team and box
 
 Live app: [fusion.nuzlocke.io](https://fusion.nuzlocke.io)  
 Source: [github.com/fbosch/infinite-fusion-nuzlocke](https://github.com/fbosch/infinite-fusion-nuzlocke)
+
+> [!NOTE]
+> This project started as a way to explore agentic workflows, and I still use it as a playground for this.
+
+---
 
 ![Infinite Fusion Nuzlocke Tracker screenshot](docs/readme-tracker-screenshot.png)
 
