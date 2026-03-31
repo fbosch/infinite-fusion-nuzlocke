@@ -22,11 +22,11 @@ concurrency:
   cancel-in-progress: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' }}
 
 jobs:
-  detect-docs-only:
-    name: Detect markdown-only changes
+  detect-change-scope:
+    name: Detect non-runtime-only changes
     runs-on: ubuntu-latest
     outputs:
-      docs_only: ${{ steps.changed-files.outputs.docs_only }}
+      lightweight_only: ${{ steps.changed-files.outputs.lightweight_only }}
 
     steps:
       - name: Checkout code
@@ -34,12 +34,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Detect markdown-only changes
+      - name: Detect non-runtime-only changes
         id: changed-files
         shell: bash
         run: |
           if [[ "${{ github.event_name }}" == "schedule" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "lightweight_only=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -52,30 +52,34 @@ jobs:
           fi
 
           if [[ -z "$base_sha" || "$base_sha" =~ ^0+$ ]]; then
-            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "lightweight_only=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           changed_files="$(git diff --name-only "$base_sha" "$head_sha")"
 
           if [[ -z "$changed_files" ]]; then
-            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "lightweight_only=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          non_markdown_count="$(printf '%s\n' "$changed_files" | grep -Evc '\.md$')"
+          # Safe-to-skip patterns for heavyweight CI jobs.
+          # Keep this list narrow and repo-specific. Any path not matched here
+          # will run full CI gates.
+          lightweight_patterns='(^docs/|\.md$|^LICENSE$|^\.github/|^\.vscode/|^\.editorconfig$|^\.gitignore$|^\.prettier.*$|^biome\.jsonc$)'
+          non_runtime_count="$(printf '%s\n' "$changed_files" | grep -Evc "$lightweight_patterns")"
 
-          if [[ "$non_markdown_count" == "0" ]]; then
-            echo "docs_only=true" >> "$GITHUB_OUTPUT"
+          if [[ "$non_runtime_count" == "0" ]]; then
+            echo "lightweight_only=true" >> "$GITHUB_OUTPUT"
           else
-            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "lightweight_only=false" >> "$GITHUB_OUTPUT"
           fi
 
   test:
     name: Test Suite
     runs-on: ubuntu-latest
-    needs: detect-docs-only
-    if: needs.detect-docs-only.outputs.docs_only != 'true'
+    needs: detect-change-scope
+    if: needs.detect-change-scope.outputs.lightweight_only != 'true'
 
     steps:
       - name: Checkout code
@@ -110,8 +114,8 @@ jobs:
   type-check:
     name: Type Check
     runs-on: ubuntu-latest
-    needs: detect-docs-only
-    if: needs.detect-docs-only.outputs.docs_only != 'true'
+    needs: detect-change-scope
+    if: needs.detect-change-scope.outputs.lightweight_only != 'true'
 
     steps:
       - name: Checkout code
@@ -126,8 +130,8 @@ jobs:
   code-quality:
     name: Code Quality
     runs-on: ubuntu-latest
-    needs: detect-docs-only
-    if: needs.detect-docs-only.outputs.docs_only != 'true'
+    needs: detect-change-scope
+    if: needs.detect-change-scope.outputs.lightweight_only != 'true'
 
     steps:
       - name: Checkout code
@@ -142,14 +146,14 @@ jobs:
   release-gate:
     name: Release Gate
     runs-on: ubuntu-latest
-    needs: [detect-docs-only, test, type-check, code-quality]
+    needs: [detect-change-scope, test, type-check, code-quality]
     if: always()
 
     steps:
       - name: Enforce required checks
         run: |
-          if [[ "${{ needs.detect-docs-only.outputs.docs_only }}" == "true" ]]; then
-            echo "Markdown-only change detected; skipping heavy CI gates"
+          if [[ "${{ needs.detect-change-scope.outputs.lightweight_only }}" == "true" ]]; then
+            echo "Non-runtime-only change detected; skipping heavy CI gates"
             exit 0
           fi
 
@@ -173,7 +177,7 @@ jobs:
   data-refresh:
     name: Data Download & Validation
     runs-on: ubuntu-latest
-    needs: [detect-docs-only, test, type-check, code-quality]
+    needs: [detect-change-scope, test, type-check, code-quality]
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     permissions:
       contents: write

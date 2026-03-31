@@ -57,7 +57,7 @@ jobs:
 
       - name: Skip when CI produced no coverage artifact
         if: steps.artifact.outputs.found != 'true'
-        run: echo "No coverage artifact found for this CI run (likely docs-only change)."
+        run: echo "No coverage artifact found for this CI run (likely non-runtime-only change)."
 
       - name: Download coverage artifact from CI run
         if: steps.artifact.outputs.found == 'true'
