@@ -88,19 +88,12 @@ jobs:
       - name: Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-pnpm
 
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Run tests with coverage for PR/push
+      - name: Run non-browser tests with coverage for PR/push
         if: github.event_name == 'pull_request' || github.event_name == 'push'
-        env:
-          VITEST_BROWSER: 'true'
         run: pnpm run test:coverage
 
-      - name: Run tests for schedule/manual runs
+      - name: Run non-browser tests for schedule/manual runs
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        env:
-          VITEST_BROWSER: 'true'
         run: pnpm run test:run
 
       - name: Upload coverage artifacts
@@ -110,6 +103,42 @@ jobs:
           name: coverage-${{ github.sha }}
           path: coverage/
           retention-days: 7
+
+  browser-test:
+    name: Browser Test Suite
+    runs-on: ubuntu-latest
+    needs: [detect-change-scope, test]
+    if: needs.detect-change-scope.outputs.lightweight_only != 'true' && (github.event_name == 'pull_request' || github.event_name == 'push')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Get Playwright version
+        id: playwright-version
+        shell: bash
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Run browser-only test suite
+        run: pnpm run test:run:browser
 
   type-check:
     name: Type Check
@@ -146,7 +175,7 @@ jobs:
   release-gate:
     name: Release Gate
     runs-on: ubuntu-latest
-    needs: [detect-change-scope, test, type-check, code-quality]
+    needs: [detect-change-scope, test, browser-test, type-check, code-quality]
     if: always()
 
     steps:
@@ -159,6 +188,11 @@ jobs:
 
           if [[ "${{ needs.test.result }}" != "success" ]]; then
             echo "Test Suite must pass before release gating"
+            exit 1
+          fi
+
+          if [[ "${{ needs.browser-test.result }}" != "success" && "${{ needs.browser-test.result }}" != "skipped" ]]; then
+            echo "Browser Test Suite must pass before release gating"
             exit 1
           fi
 
