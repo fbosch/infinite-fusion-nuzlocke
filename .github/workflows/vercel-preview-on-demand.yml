@@ -1,0 +1,168 @@
+name: Vercel Preview On Demand
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to deploy
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy-preview:
+    name: Deploy Preview
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.pull_request.draft == false &&
+        github.event.pull_request.head.repo.full_name == github.repository &&
+        (
+          contains(github.event.pull_request.labels.*.name, 'preview') ||
+          startsWith(github.event.pull_request.head.ref, 'release-please--branches--master--components--')
+        )
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: preview-deploy-${{ github.event.pull_request.number || inputs.pr_number }}
+      cancel-in-progress: true
+    env:
+      VERCEL_CLI_VERSION: '50.37.3'
+      VERCEL_NEXT_BUNDLED_SERVER: '1'
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    steps:
+      - name: Resolve PR metadata
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (context.eventName === 'workflow_dispatch') {
+              const prNumber = Number(core.getInput('pr_number'));
+              if (Number.isNaN(prNumber) === true) {
+                core.setFailed('workflow_dispatch requires a numeric pr_number input.');
+                return;
+              }
+
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+              });
+
+              core.setOutput('number', String(pr.number));
+              core.setOutput('head_sha', pr.head.sha);
+              core.setOutput('head_ref', pr.head.ref);
+              core.setOutput('is_fork', String(pr.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`));
+              return;
+            }
+
+            const pr = context.payload.pull_request;
+            core.setOutput('number', String(pr.number));
+            core.setOutput('head_sha', pr.head.sha);
+            core.setOutput('head_ref', pr.head.ref);
+            core.setOutput('is_fork', String(pr.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`));
+
+      - name: Abort fork preview builds
+        if: ${{ steps.pr.outputs.is_fork == 'true' }}
+        run: |
+          echo "Fork PR previews are disabled to protect Vercel secrets."
+          exit 1
+
+      - name: Checkout PR head SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.head_sha }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate Vercel secrets
+        run: |
+          for required_var in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [ -z "${!required_var}" ]; then
+              echo "::error::Missing required secret: ${required_var}"
+              exit 1
+            fi
+          done
+
+      - name: Install Vercel CLI
+        run: npm install --global "vercel@$VERCEL_CLI_VERSION"
+
+      - name: Pull Vercel preview settings
+        run: vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+
+      - name: Build preview artifacts
+        run: vercel build --yes --token="$VERCEL_TOKEN"
+
+      - name: Deploy prebuilt preview artifacts
+        id: deploy
+        run: |
+          deployment_url="$(vercel deploy --prebuilt --yes --token="$VERCEL_TOKEN")"
+          if [[ "$deployment_url" != http* ]]; then
+            deployment_url="https://$deployment_url"
+          fi
+
+          echo "deployment_url=$deployment_url" >> "$GITHUB_OUTPUT"
+
+      - name: Publish deployment summary
+        run: |
+          echo "### On-Demand Preview Deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "- PR: #${{ steps.pr.outputs.number }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Branch: ${{ steps.pr.outputs.head_ref }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- URL: ${{ steps.deploy.outputs.deployment_url }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment preview URL on PR
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment_url }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        with:
+          script: |
+            const marker = '<!-- vercel-preview-on-demand -->';
+            const body = `${marker}\nVercel preview is ready: ${process.env.DEPLOYMENT_URL}`;
+            const issue_number = Number(process.env.PR_NUMBER);
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              per_page: 100,
+            });
+
+            const existing = comments.find((comment) =>
+              comment.user?.type === 'Bot' && comment.body?.includes(marker),
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+              return;
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              body,
+            });

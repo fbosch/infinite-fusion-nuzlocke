@@ -58,3 +58,18 @@ pnpm validate
 - No fixed calendar cadence is required.
 - Default cadence is batched, demand-driven releases: merge release PRs when enough validated value has accumulated (features/fixes/docs tied to release outcomes).
 - Urgent hotfixes can be released immediately by merging the release PR after required checks pass.
+
+## Preview Deployment Strategy
+
+To reduce Vercel build-minute usage without losing reviewer workflows:
+
+- Git-triggered Vercel deployments are disabled globally in `vercel.json`.
+- Preview deployments run through `.github/workflows/vercel-preview-on-demand.yml` using prebuilt artifacts (`vercel build` + `vercel deploy --prebuilt`).
+- Regular PRs only get previews when the PR has the `preview` label.
+- Release Please PRs (`release-please--branches--master--components--*`) get preview deployments automatically.
+
+Rationale:
+
+- Most build-minute usage came from automatic preview builds on every PR update.
+- On-demand previews keep costs lower while preserving preview URLs for important reviews.
+- Automatic previews for release PRs preserve release confidence where preview signal matters most.
