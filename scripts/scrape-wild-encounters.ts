@@ -30,6 +30,11 @@ const WILD_ENCOUNTER_TYPES: readonly EncounterType[] = [
 const WIKITEXT_ROUTE_HEADING_PATTERN = /^'''(.+?)'''$/;
 const ENCOUNTER_TEMPLATE_PATTERN =
   /^\{\{\s*(EncounterTable\/[A-Za-z]+(?:\/[A-Za-z]+)?)\s*(?:\|(.*))?\}\}$/;
+
+type EncounterTemplate = {
+  templateName: string;
+  args: string[];
+};
 const DEFAULT_ROCK_SMASH_POKEMON_ID = 74;
 
 /**
@@ -229,9 +234,7 @@ function splitTemplateArguments(rawArgs: string): string[] {
   return args;
 }
 
-function extractEncounterTemplate(
-  line: string,
-): { templateName: string; args: string[] } | null {
+function extractEncounterTemplate(line: string): EncounterTemplate | null {
   const templateMatch = line.match(ENCOUNTER_TEMPLATE_PATTERN);
   if (!templateMatch) {
     return null;
@@ -244,6 +247,59 @@ function extractEncounterTemplate(
     templateName,
     args: rawArgs.length > 0 ? splitTemplateArguments(rawArgs) : [],
   };
+}
+
+function applyEncounterTemplate(
+  template: EncounterTemplate,
+  currentEncounterType: EncounterType | null,
+  encounters: PokemonEncounter[],
+  pokemonNameMap: PokemonNameMap,
+  contextLabel: string,
+): EncounterType | null {
+  if (
+    template.templateName === "EncounterTable/Header" ||
+    template.templateName === "EncounterTable/Header/Time"
+  ) {
+    return "grass";
+  }
+
+  if (template.templateName === "EncounterTable/Section") {
+    const sectionLabel = cleanTemplateValue(template.args[0] ?? "");
+    const detectedType = detectEncounterType(sectionLabel);
+    return detectedType && isWildEncounterType(detectedType)
+      ? detectedType
+      : null;
+  }
+
+  if (template.templateName === "EncounterTable/RockSmash") {
+    addDefaultRockSmashEncounter(encounters, pokemonNameMap, contextLabel);
+    return "rock_smash";
+  }
+
+  if (
+    template.templateName === "EncounterTable/Footer" ||
+    template.templateName === "EncounterTable/Footer/Time"
+  ) {
+    return null;
+  }
+
+  if (
+    template.templateName === "EncounterTable/Data" &&
+    currentEncounterType !== null
+  ) {
+    const pokemonId = resolvePokemonIdFromTemplate(
+      template.args,
+      pokemonNameMap,
+      contextLabel,
+    );
+
+    encounters.push({
+      pokemonId,
+      encounterType: currentEncounterType,
+    });
+  }
+
+  return currentEncounterType;
 }
 
 function cleanTemplateValue(value: string): string {
@@ -317,51 +373,13 @@ export function parseEncounterTemplatesFromWikitext(
       continue;
     }
 
-    if (
-      template.templateName === "EncounterTable/Header" ||
-      template.templateName === "EncounterTable/Header/Time"
-    ) {
-      currentEncounterType = "grass";
-      continue;
-    }
-
-    if (template.templateName === "EncounterTable/Section") {
-      const sectionLabel = cleanTemplateValue(template.args[0] ?? "");
-      const detectedType = detectEncounterType(sectionLabel);
-      currentEncounterType =
-        detectedType && isWildEncounterType(detectedType) ? detectedType : null;
-      continue;
-    }
-
-    if (template.templateName === "EncounterTable/RockSmash") {
-      currentEncounterType = "rock_smash";
-      addDefaultRockSmashEncounter(encounters, pokemonNameMap, contextLabel);
-      continue;
-    }
-
-    if (
-      template.templateName === "EncounterTable/Footer" ||
-      template.templateName === "EncounterTable/Footer/Time"
-    ) {
-      currentEncounterType = null;
-      continue;
-    }
-
-    if (
-      template.templateName === "EncounterTable/Data" &&
-      currentEncounterType !== null
-    ) {
-      const pokemonId = resolvePokemonIdFromTemplate(
-        template.args,
-        pokemonNameMap,
-        contextLabel,
-      );
-
-      encounters.push({
-        pokemonId,
-        encounterType: currentEncounterType,
-      });
-    }
+    currentEncounterType = applyEncounterTemplate(
+      template,
+      currentEncounterType,
+      encounters,
+      pokemonNameMap,
+      contextLabel,
+    );
   }
 
   return deduplicateEncounters(encounters);
@@ -406,8 +424,6 @@ export function parseWildEncounterRoutesFromWikitext(
 
     const routeHeadingMatch = line.match(WIKITEXT_ROUTE_HEADING_PATTERN);
     if (routeHeadingMatch?.[1]) {
-      flushActiveRoute();
-
       const routeHeading = routeHeadingMatch[1].trim();
 
       if (
@@ -416,6 +432,8 @@ export function parseWildEncounterRoutesFromWikitext(
       ) {
         continue;
       }
+
+      flushActiveRoute();
 
       const { cleanName: cleanedRouteName, routeId } =
         processRouteName(routeHeading);
@@ -448,55 +466,13 @@ export function parseWildEncounterRoutesFromWikitext(
       continue;
     }
 
-    if (
-      template.templateName === "EncounterTable/Header" ||
-      template.templateName === "EncounterTable/Header/Time"
-    ) {
-      currentEncounterType = "grass";
-      continue;
-    }
-
-    if (template.templateName === "EncounterTable/Section") {
-      const sectionLabel = cleanTemplateValue(template.args[0] ?? "");
-      const detectedType = detectEncounterType(sectionLabel);
-      currentEncounterType =
-        detectedType && isWildEncounterType(detectedType) ? detectedType : null;
-      continue;
-    }
-
-    if (template.templateName === "EncounterTable/RockSmash") {
-      currentEncounterType = "rock_smash";
-      addDefaultRockSmashEncounter(
-        activeEncounters,
-        pokemonNameMap,
-        activeRouteContext,
-      );
-      continue;
-    }
-
-    if (
-      template.templateName === "EncounterTable/Footer" ||
-      template.templateName === "EncounterTable/Footer/Time"
-    ) {
-      currentEncounterType = null;
-      continue;
-    }
-
-    if (
-      template.templateName === "EncounterTable/Data" &&
-      currentEncounterType !== null
-    ) {
-      const pokemonId = resolvePokemonIdFromTemplate(
-        template.args,
-        pokemonNameMap,
-        activeRouteContext,
-      );
-
-      activeEncounters.push({
-        pokemonId,
-        encounterType: currentEncounterType,
-      });
-    }
+    currentEncounterType = applyEncounterTemplate(
+      template,
+      currentEncounterType,
+      activeEncounters,
+      pokemonNameMap,
+      activeRouteContext,
+    );
   }
 
   flushActiveRoute();

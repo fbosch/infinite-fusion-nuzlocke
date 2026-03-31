@@ -85,4 +85,26 @@ describe("Wild encounter wikitext parser", () => {
       ),
     ).toThrow(/Unable to resolve Pokemon/);
   });
+
+  it("does not flush an active route on non-route bold lines", () => {
+    const wikitext = [
+      "'''Route 2 (ID 20)'''",
+      "{{EncounterTable/Header}}",
+      "'''Table Notes'''",
+      "{{EncounterTable/Section|Grass}}",
+      "{{EncounterTable/Data|016|Pidgey|3|100%}}",
+      "{{EncounterTable/Footer}}",
+    ].join("\n");
+
+    const routes = parseWildEncounterRoutesFromWikitext(
+      wikitext,
+      pokemonNameMap,
+    );
+
+    expect(routes).toHaveLength(1);
+    expect(routes[0]?.routeName).toBe("Route 2");
+    expect(routes[0]?.encounters).toEqual([
+      { pokemonId: 16, encounterType: "grass" },
+    ]);
+  });
 });
