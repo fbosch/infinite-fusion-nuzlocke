@@ -33,7 +33,7 @@ jobs:
       group: preview-deploy-${{ github.event.pull_request.number || inputs.pr_number }}
       cancel-in-progress: true
     env:
-      VERCEL_CLI_VERSION: '44.7.3'
+      VERCEL_CLI_VERSION: '50.37.3'
       VERCEL_NEXT_BUNDLED_SERVER: '1'
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -109,12 +109,12 @@ jobs:
         run: vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
 
       - name: Build preview artifacts
-        run: vercel build --token="$VERCEL_TOKEN"
+        run: vercel build --yes --token="$VERCEL_TOKEN"
 
       - name: Deploy prebuilt preview artifacts
         id: deploy
         run: |
-          deployment_url="$(vercel deploy --prebuilt --token="$VERCEL_TOKEN")"
+          deployment_url="$(vercel deploy --prebuilt --yes --token="$VERCEL_TOKEN")"
           if [[ "$deployment_url" != http* ]]; then
             deployment_url="https://$deployment_url"
           fi
