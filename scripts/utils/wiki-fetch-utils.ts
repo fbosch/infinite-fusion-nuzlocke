@@ -7,6 +7,7 @@ const SCRAPER_USER_AGENT =
 type WikiParseResponse = {
   parse?: {
     text?: string;
+    wikitext?: string;
     title?: string;
   };
   error?: {
@@ -47,14 +48,18 @@ function getPageTitleFromUrl(pageUrl: string): string {
   return normalizedTitle;
 }
 
-export async function fetchWikiPageHtml(pageUrl: string): Promise<string> {
+async function fetchWikiPageParsedContent(
+  pageUrl: string,
+  prop: "text" | "wikitext",
+): Promise<string> {
   const pageTitle = getPageTitleFromUrl(pageUrl);
   const params = new URLSearchParams({
     action: "parse",
     format: "json",
     formatversion: "2",
-    prop: "text",
+    prop,
     page: pageTitle,
+    redirects: "1",
   });
 
   const controller = new AbortController();
@@ -97,12 +102,21 @@ export async function fetchWikiPageHtml(pageUrl: string): Promise<string> {
     );
   }
 
-  const html = payload.parse?.text;
-  if (typeof html !== "string" || html.length === 0) {
+  const parsedContent =
+    prop === "text" ? payload.parse?.text : payload.parse?.wikitext;
+  if (typeof parsedContent !== "string" || parsedContent.length === 0) {
     throw new Error(
-      `Wiki API returned empty parsed content for page: ${pageTitle}`,
+      `Wiki API returned empty ${prop} content for page: ${pageTitle}`,
     );
   }
 
-  return html;
+  return parsedContent;
+}
+
+export async function fetchWikiPageHtml(pageUrl: string): Promise<string> {
+  return fetchWikiPageParsedContent(pageUrl, "text");
+}
+
+export async function fetchWikiPageWikitext(pageUrl: string): Promise<string> {
+  return fetchWikiPageParsedContent(pageUrl, "wikitext");
 }

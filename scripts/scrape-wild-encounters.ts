@@ -3,17 +3,12 @@
 import { readFileSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import * as cheerio from "cheerio";
 import type { EncounterType } from "./types/encounters";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
-import {
-  findPokemonId,
-  isPotentialPokemonName,
-  type PokemonNameMap,
-} from "./utils/pokemon-name-utils";
+import { findPokemonId, type PokemonNameMap } from "./utils/pokemon-name-utils";
 import { isRoutePattern, processRouteName } from "./utils/route-utils";
-import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
+import { fetchWikiPageWikitext } from "./utils/wiki-fetch-utils";
 
 const WILD_ENCOUNTERS_CLASSIC_URL =
   "https://infinitefusion.fandom.com/wiki/Wild_Encounters";
@@ -31,6 +26,16 @@ const WILD_ENCOUNTER_TYPES: readonly EncounterType[] = [
   "fishing",
   "pokeradar",
 ];
+
+const WIKITEXT_ROUTE_HEADING_PATTERN = /^'''(.+?)'''$/;
+const ENCOUNTER_TEMPLATE_PATTERN =
+  /^\{\{\s*(EncounterTable\/[A-Za-z]+(?:\/[A-Za-z]+)?)\s*(?:\|(.*))?\}\}$/;
+
+type EncounterTemplate = {
+  templateName: string;
+  args: string[];
+};
+const DEFAULT_ROCK_SMASH_POKEMON_ID = 74;
 
 /**
  * Detects encounter type from text content like "Surf", "Old Rod", etc.
@@ -102,6 +107,21 @@ function isWildEncounterType(encounterType: EncounterType): boolean {
   return WILD_ENCOUNTER_TYPES.includes(encounterType);
 }
 
+function deduplicateEncounters(
+  encounters: PokemonEncounter[],
+): PokemonEncounter[] {
+  const uniqueByKey = new Map<string, PokemonEncounter>();
+
+  for (const encounter of encounters) {
+    uniqueByKey.set(
+      `${encounter.pokemonId}:${encounter.encounterType}`,
+      encounter,
+    );
+  }
+
+  return Array.from(uniqueByKey.values());
+}
+
 /**
  * Validates if a potential route name is actually a valid route and not CSS or other content
  */
@@ -144,82 +164,335 @@ export function getLocationWikiUrl(locationName: string): string {
   return `https://infinitefusion.fandom.com/wiki/${slug}`;
 }
 
-function parseEncounterTable(
-  $: cheerio.CheerioAPI,
-  table: cheerio.Cheerio<any>,
+function splitTemplateArguments(rawArgs: string): string[] {
+  const args: string[] = [];
+  let current = "";
+  let squareDepth = 0;
+  let curlyDepth = 0;
+  let angleDepth = 0;
+
+  for (let index = 0; index < rawArgs.length; index += 1) {
+    const currentPair = rawArgs.slice(index, index + 2);
+
+    if (currentPair === "[[") {
+      squareDepth += 1;
+      current += currentPair;
+      index += 1;
+      continue;
+    }
+
+    if (currentPair === "]]" && squareDepth > 0) {
+      squareDepth -= 1;
+      current += currentPair;
+      index += 1;
+      continue;
+    }
+
+    if (currentPair === "{{") {
+      curlyDepth += 1;
+      current += currentPair;
+      index += 1;
+      continue;
+    }
+
+    if (currentPair === "}}" && curlyDepth > 0) {
+      curlyDepth -= 1;
+      current += currentPair;
+      index += 1;
+      continue;
+    }
+
+    const currentChar = rawArgs[index];
+
+    if (currentChar === "<") {
+      angleDepth += 1;
+      current += currentChar;
+      continue;
+    }
+
+    if (currentChar === ">" && angleDepth > 0) {
+      angleDepth -= 1;
+      current += currentChar;
+      continue;
+    }
+
+    if (
+      currentChar === "|" &&
+      squareDepth === 0 &&
+      curlyDepth === 0 &&
+      angleDepth === 0
+    ) {
+      args.push(current.trim());
+      current = "";
+      continue;
+    }
+
+    current += currentChar;
+  }
+
+  args.push(current.trim());
+  return args;
+}
+
+function extractEncounterTemplate(line: string): EncounterTemplate | null {
+  const templateMatch = line.match(ENCOUNTER_TEMPLATE_PATTERN);
+  if (!templateMatch) {
+    return null;
+  }
+
+  const templateName = templateMatch[1];
+  const rawArgs = templateMatch[2] ?? "";
+
+  return {
+    templateName,
+    args: rawArgs.length > 0 ? splitTemplateArguments(rawArgs) : [],
+  };
+}
+
+function applyEncounterTemplate(
+  template: EncounterTemplate,
+  currentEncounterType: EncounterType | null,
+  encounters: PokemonEncounter[],
   pokemonNameMap: PokemonNameMap,
-  defaultEncounterType: EncounterType | null,
+  contextLabel: string,
+): EncounterType | null {
+  if (
+    template.templateName === "EncounterTable/Header" ||
+    template.templateName === "EncounterTable/Header/Time"
+  ) {
+    return "grass";
+  }
+
+  if (template.templateName === "EncounterTable/Section") {
+    const sectionLabel = cleanTemplateValue(template.args[0] ?? "");
+    const detectedType = detectEncounterType(sectionLabel);
+    return detectedType && isWildEncounterType(detectedType)
+      ? detectedType
+      : null;
+  }
+
+  if (template.templateName === "EncounterTable/RockSmash") {
+    addDefaultRockSmashEncounter(encounters, pokemonNameMap, contextLabel);
+    return "rock_smash";
+  }
+
+  if (
+    template.templateName === "EncounterTable/Footer" ||
+    template.templateName === "EncounterTable/Footer/Time"
+  ) {
+    return null;
+  }
+
+  if (
+    template.templateName === "EncounterTable/Data" &&
+    currentEncounterType !== null
+  ) {
+    const pokemonId = resolvePokemonIdFromTemplate(
+      template.args,
+      pokemonNameMap,
+      contextLabel,
+    );
+
+    encounters.push({
+      pokemonId,
+      encounterType: currentEncounterType,
+    });
+  }
+
+  return currentEncounterType;
+}
+
+function cleanTemplateValue(value: string): string {
+  return value
+    .replace(/<[^>]+>/g, "")
+    .replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, "$2")
+    .replace(/\[\[([^\]]+)\]\]/g, "$1")
+    .replace(/&nbsp;/g, " ")
+    .trim();
+}
+
+function addDefaultRockSmashEncounter(
+  encounters: PokemonEncounter[],
+  pokemonNameMap: PokemonNameMap,
+  contextLabel: string,
+): void {
+  if (pokemonNameMap.idToName.has(DEFAULT_ROCK_SMASH_POKEMON_ID) === false) {
+    throw new Error(
+      `Missing default Rock Smash Pokemon ID ${DEFAULT_ROCK_SMASH_POKEMON_ID} in ${contextLabel}`,
+    );
+  }
+
+  encounters.push({
+    pokemonId: DEFAULT_ROCK_SMASH_POKEMON_ID,
+    encounterType: "rock_smash",
+  });
+}
+
+function resolvePokemonIdFromTemplate(
+  templateArgs: string[],
+  pokemonNameMap: PokemonNameMap,
+  contextLabel: string,
+): number {
+  const rawTemplateId = cleanTemplateValue(templateArgs[0] ?? "");
+  const parsedTemplateId = Number.parseInt(rawTemplateId, 10);
+
+  if (
+    Number.isNaN(parsedTemplateId) === false &&
+    pokemonNameMap.idToName.has(parsedTemplateId)
+  ) {
+    return parsedTemplateId;
+  }
+
+  const pokemonName = cleanTemplateValue(templateArgs[1] ?? "");
+  const fallbackPokemonId = findPokemonId(pokemonName, pokemonNameMap);
+  if (fallbackPokemonId !== null) {
+    return fallbackPokemonId;
+  }
+
+  throw new Error(
+    `Unable to resolve Pokemon from template in ${contextLabel}: id="${rawTemplateId}" name="${pokemonName}"`,
+  );
+}
+
+export function parseEncounterTemplatesFromWikitext(
+  wikitext: string,
+  pokemonNameMap: PokemonNameMap,
+  contextLabel: string,
 ): PokemonEncounter[] {
   const encounters: PokemonEncounter[] = [];
-  let currentEncounterType: EncounterType | null = defaultEncounterType;
+  let currentEncounterType: EncounterType | null = null;
 
-  table.find("tr").each((_rowIndex, row) => {
-    const $row = $(row);
-    const headerCell = $row.find("th[colspan]").first();
+  for (const rawLine of wikitext.split(/\r?\n/u)) {
+    const line = rawLine.trim();
+    if (line.length === 0) {
+      continue;
+    }
 
-    if (headerCell.length > 0) {
-      const detectedType = detectEncounterType(headerCell.text().trim());
-      currentEncounterType =
-        detectedType && isWildEncounterType(detectedType) ? detectedType : null;
+    const template = extractEncounterTemplate(line);
+    if (template === null) {
+      continue;
+    }
+
+    currentEncounterType = applyEncounterTemplate(
+      template,
+      currentEncounterType,
+      encounters,
+      pokemonNameMap,
+      contextLabel,
+    );
+  }
+
+  return deduplicateEncounters(encounters);
+}
+
+export function parseWildEncounterRoutesFromWikitext(
+  wikitext: string,
+  pokemonNameMap: PokemonNameMap,
+): RouteEncounters[] {
+  const routes: RouteEncounters[] = [];
+  const routesSeen = new Set<string>();
+  let activeRouteName: string | null = null;
+  let activeRouteContext = "";
+  let activeEncounters: PokemonEncounter[] = [];
+  let currentEncounterType: EncounterType | null = null;
+
+  const flushActiveRoute = () => {
+    if (activeRouteName === null || activeEncounters.length === 0) {
+      activeRouteName = null;
+      activeRouteContext = "";
+      activeEncounters = [];
+      currentEncounterType = null;
       return;
     }
 
-    if (currentEncounterType === null) {
-      return;
-    }
-
-    const activeEncounterType = currentEncounterType;
-
-    $row.find("td").each((_cellIndex, cell) => {
-      const cellText = $(cell).text().trim();
-      if (isPotentialPokemonName(cellText) === false) {
-        return;
-      }
-
-      const pokemonId = findPokemonId(cellText, pokemonNameMap);
-      if (pokemonId === null) {
-        return;
-      }
-
-      encounters.push({
-        pokemonId,
-        encounterType: activeEncounterType,
-      });
+    routes.push({
+      routeName: activeRouteName,
+      encounters: deduplicateEncounters(activeEncounters),
     });
-  });
 
-  return encounters;
+    activeRouteName = null;
+    activeRouteContext = "";
+    activeEncounters = [];
+    currentEncounterType = null;
+  };
+
+  for (const rawLine of wikitext.split(/\r?\n/u)) {
+    const line = rawLine.trim();
+    if (line.length === 0) {
+      continue;
+    }
+
+    const routeHeadingMatch = line.match(WIKITEXT_ROUTE_HEADING_PATTERN);
+    if (routeHeadingMatch?.[1]) {
+      const routeHeading = routeHeadingMatch[1].trim();
+
+      if (
+        isRoutePattern(routeHeading) === false ||
+        isValidRouteName(routeHeading) === false
+      ) {
+        continue;
+      }
+
+      flushActiveRoute();
+
+      const { cleanName: cleanedRouteName, routeId } =
+        processRouteName(routeHeading);
+      if (isValidRouteName(cleanedRouteName) === false) {
+        continue;
+      }
+
+      const uniqueIdentifier = routeId
+        ? `${cleanedRouteName}#${routeId}`
+        : cleanedRouteName;
+
+      if (routesSeen.has(uniqueIdentifier)) {
+        continue;
+      }
+
+      routesSeen.add(uniqueIdentifier);
+      activeRouteName = cleanedRouteName;
+      activeRouteContext = `route ${cleanedRouteName}`;
+      activeEncounters = [];
+      currentEncounterType = "grass";
+      continue;
+    }
+
+    if (activeRouteName === null) {
+      continue;
+    }
+
+    const template = extractEncounterTemplate(line);
+    if (template === null) {
+      continue;
+    }
+
+    currentEncounterType = applyEncounterTemplate(
+      template,
+      currentEncounterType,
+      activeEncounters,
+      pokemonNameMap,
+      activeRouteContext,
+    );
+  }
+
+  flushActiveRoute();
+
+  return routes;
 }
 
 export async function scrapeEncountersFromLocationArticle(
   locationName: string,
   pokemonNameMap: PokemonNameMap,
 ): Promise<PokemonEncounter[]> {
-  const html = await fetchWikiPageHtml(getLocationWikiUrl(locationName));
-  const $ = cheerio.load(html);
-  const encounterTables = $(".mw-parser-output table.IFTable.encounterTable");
+  const wikitext = await fetchWikiPageWikitext(
+    getLocationWikiUrl(locationName),
+  );
 
-  if (encounterTables.length === 0) {
-    return [];
-  }
-
-  const encounters: PokemonEncounter[] = [];
-
-  encounterTables.each((_index, table) => {
-    encounters.push(
-      ...parseEncounterTable($, $(table), pokemonNameMap, "grass"),
-    );
-  });
-
-  const uniqueByKey = new Map<string, PokemonEncounter>();
-  for (const encounter of encounters) {
-    uniqueByKey.set(
-      `${encounter.pokemonId}:${encounter.encounterType}`,
-      encounter,
-    );
-  }
-
-  return Array.from(uniqueByKey.values());
+  return parseEncounterTemplatesFromWikitext(
+    wikitext,
+    pokemonNameMap,
+    `route article ${locationName}`,
+  );
 }
 
 async function backfillMissingRouteArticles(
@@ -479,112 +752,21 @@ async function scrapeWildEncounters(
   try {
     const modeType = isRemix ? "Remix" : "Classic";
 
-    // Fetch the webpage
-    const html = await ConsoleFormatter.withSpinner(
-      `Fetching ${modeType} Wild Encounters page...`,
-      () => fetchWikiPageHtml(url),
+    const wikitext = await ConsoleFormatter.withSpinner(
+      `Fetching ${modeType} Wild Encounters wikitext...`,
+      () => fetchWikiPageWikitext(url),
     );
 
-    const $ = cheerio.load(html);
-    const pokemonNameMap = await loadPokemonNameMap(); // Use cached data
-
-    // Focus on main content area
-    const mainContent = $(".mw-parser-output");
-    const routes: RouteEncounters[] = [];
-    const routesSeen = new Set<string>(); // Track cleaned route names
-
-    // Find route headings - back to original approach but with pre-compiled regex
-    const allElements = mainContent.find("*");
-
-    let routesProcessed = 0;
-    const progressBar = ConsoleFormatter.createMiniProgressBar(
-      allElements.length,
-      "Scanning for routes...",
+    const pokemonNameMap = await loadPokemonNameMap();
+    const routes = parseWildEncounterRoutesFromWikitext(
+      wikitext,
+      pokemonNameMap,
     );
 
-    allElements.each((index: number, element: any) => {
-      const $element = $(element);
-      const fullText = $element.text().trim();
+    if (routes.length === 0) {
+      throw new Error(`No route encounters parsed from ${modeType} wikitext`);
+    }
 
-      // Update progress periodically
-      if (index % 100 === 0) {
-        progressBar.update(index, {
-          status: `Scanning elements... (${routesProcessed} routes found)`,
-        });
-      }
-
-      // Look for route patterns
-      if (isRoutePattern(fullText) && isValidRouteName(fullText)) {
-        // Make sure this isn't deeply nested content (allow some basic formatting)
-        const children = $element.children();
-        if (children.length <= 2) {
-          const { cleanName: cleanedRouteName, routeId } =
-            processRouteName(fullText);
-
-          // Additional validation on the cleaned name
-          if (!isValidRouteName(cleanedRouteName)) {
-            return;
-          }
-
-          // Create unique identifier that includes both name and ID for duplicate detection
-          const uniqueIdentifier = routeId
-            ? `${cleanedRouteName}#${routeId}`
-            : cleanedRouteName;
-
-          // Skip if we've already processed this exact route (including ID)
-          if (routesSeen.has(uniqueIdentifier)) {
-            return;
-          }
-          routesSeen.add(uniqueIdentifier);
-
-          routesProcessed++;
-          progressBar.update(index, {
-            status: `Processing: ${cleanedRouteName}`,
-          });
-
-          // Find Pokemon data in the immediately following table
-          const encounters: PokemonEncounter[] = [];
-
-          // Look for the next table with classes 'IFTable encounterTable'
-          let nextElement = $element.next();
-          let tablesChecked = 0;
-          while (nextElement.length > 0 && tablesChecked < 10) {
-            if (nextElement.is("table.IFTable.encounterTable")) {
-              // Found the encounter table for this route - process it
-              encounters.push(
-                ...parseEncounterTable($, nextElement, pokemonNameMap, "grass"),
-              );
-
-              break; // Found and processed one table, stop looking
-            }
-
-            // Stop if we hit another route heading
-            if (
-              isRoutePattern(nextElement.text().trim()) &&
-              isValidRouteName(nextElement.text().trim())
-            ) {
-              break;
-            }
-
-            tablesChecked++;
-            nextElement = nextElement.next();
-          }
-
-          if (encounters.length > 0) {
-            const routeData: RouteEncounters = {
-              routeName: cleanedRouteName,
-              encounters: encounters,
-            };
-            routes.push(routeData);
-          } else {
-            console.debug("No encounters found for route:", cleanedRouteName);
-          }
-        }
-      }
-    });
-
-    progressBar.update(allElements.length, { status: "Scanning complete!" });
-    progressBar.stop();
     ConsoleFormatter.success(`${modeType} scraping complete!`);
 
     const routesWithArticleBackfill = await backfillMissingRouteArticles(

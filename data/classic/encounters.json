@@ -89,6 +89,46 @@
         "encounterType": "grass"
       },
       {
+        "pokemonId": 165,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 167,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 285,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 388,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 417,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 438,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 442,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 451,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 489,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 495,
+        "encounterType": "grass"
+      },
+      {
         "pokemonId": 417,
         "encounterType": "pokeradar"
       }
@@ -5324,6 +5364,22 @@
       {
         "pokemonId": 127,
         "encounterType": "grass"
+      },
+      {
+        "pokemonId": 430,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 431,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 432,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 433,
+        "encounterType": "grass"
       }
     ]
   },
@@ -5409,6 +5465,10 @@
       },
       {
         "pokemonId": 114,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 432,
         "encounterType": "grass"
       },
       {
@@ -5704,6 +5764,10 @@
         "encounterType": "grass"
       },
       {
+        "pokemonId": 431,
+        "encounterType": "grass"
+      },
+      {
         "pokemonId": 72,
         "encounterType": "surf"
       },
@@ -5827,6 +5891,10 @@
       },
       {
         "pokemonId": 79,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 430,
         "encounterType": "grass"
       },
       {
@@ -6014,6 +6082,10 @@
       },
       {
         "pokemonId": 310,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 433,
         "encounterType": "grass"
       },
       {
@@ -6217,6 +6289,10 @@
       },
       {
         "pokemonId": 258,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 432,
         "encounterType": "grass"
       },
       {
