@@ -38,7 +38,7 @@ jobs:
             exit 0
           fi
 
-          non_markdown_count="$(printf '%s\n' "$changed_files" | grep -Evc '\\.md$')"
+          non_markdown_count="$(printf '%s\n' "$changed_files" | grep -Evc '\.md$')"
 
           if [[ "$non_markdown_count" == "0" ]]; then
             echo "docs_only=true" >> "$GITHUB_OUTPUT"
