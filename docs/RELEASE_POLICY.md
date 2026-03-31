@@ -46,6 +46,18 @@ pnpm test:run
 pnpm validate
 ```
 
+## CI Path-Aware Skip Rules
+
+Heavy CI jobs (`Test Suite`, `Type Check`, `Code Quality`) are skipped only when every changed file matches the lightweight pattern set in `.github/workflows/ci.yml` (`detect-change-scope` job).
+
+Current lightweight patterns include:
+
+- docs and markdown-only updates (`docs/**`, `*.md`)
+- repository metadata (`LICENSE`, `.editorconfig`, `.gitignore`, `.prettier*`, `biome.jsonc`)
+- GitHub and editor config files (`.github/**`, `.vscode/**`)
+
+If any changed file falls outside that set, full CI gates run as usual. Keep this list conservative and update it in the workflow when adding new lightweight-only paths.
+
 ## Ownership and Approval
 
 - Release authority: repository maintainers, with final responsibility held by the repository owner.
