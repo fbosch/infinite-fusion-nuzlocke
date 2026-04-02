@@ -94,6 +94,8 @@ const nextConfig: NextConfig = {
       `build-${Date.now()}`,
     NEXT_PUBLIC_APP_VERSION:
       process.env.NEXT_PUBLIC_APP_VERSION || packageJson.version,
+    NEXT_PUBLIC_VERCEL_ENV:
+      process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.VERCEL_ENV || "",
   },
 
   // Optimize static asset caching
