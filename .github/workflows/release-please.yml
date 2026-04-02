@@ -54,7 +54,7 @@ jobs:
       group: production-deploy
       cancel-in-progress: false
     env:
-      VERCEL_CLI_VERSION: '44.7.3'
+      VERCEL_CLI_VERSION: '50.37.3'
       VERCEL_NEXT_BUNDLED_SERVER: '1'
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
