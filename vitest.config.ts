@@ -92,6 +92,7 @@ export default defineConfig({
             "**/playthroughs.test.ts",
             "**/playthroughs/**/*.test.ts",
             "**/scrollToLocation.test.ts",
+            "**/.opencode/**",
             "node_modules",
             "dist",
             ".next",
