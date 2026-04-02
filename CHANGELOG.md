@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.1](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.4.0...v0.4.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* **ci:** align production deploy with current Vercel CLI ([d4b562e](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/d4b562ecfda66fb62d817e3a6bef97ceb2265a57))
+* **test:** exclude opencode workspace from vitest discovery ([6a72b06](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/6a72b06a2ff57c10fd80b91c074dd9a4963fd21c))
+
 ## [0.4.0](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.3.4...v0.4.0) (2026-04-02)
 
 
