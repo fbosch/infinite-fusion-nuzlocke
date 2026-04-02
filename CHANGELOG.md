@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.4.0](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.3.4...v0.4.0) (2026-04-02)
+
+
+### Features
+
+* **inf-105:** migrate wild encounters scraping to wikitext templates ([37a2273](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/37a2273374530eaa8c938650768dd93825a45106))
+
+
+### Bug Fixes
+
+* **analytics:** expose Vercel env for custom event tracking ([77b1a4d](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/77b1a4d0a8e031d93cc847e63e8f61c61087142f))
+* **analytics:** expose vercel env to client tracking ([bdda11d](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/bdda11dc518b7d27ba334eb02de9b62ab34afd0c))
+* **inf-105:** address PR review parser edge cases ([0cb0d82](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/0cb0d826384947bcefb89e8d64fe1fa9d7cda206))
+* **inf-110:** update preview workflow for newer Vercel CLI ([a40e9e1](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/a40e9e100d0327d63a5105eb5846ad626354b2ae))
+* **inf-111:** tolerate zero-match grep in scope detection ([479ef36](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/479ef3619c5463b94100fb33071e2362318883d6))
+* **inf-114:** correct markdown-only regex matching ([5b7aeb9](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/5b7aeb9d8dd7a7b37ceefa8f60a1c4c7428eb5d9))
+* **inf-114:** harden vercel ignore command sha guards ([8caf509](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/8caf5096458607948f203a16c2f0dc465cf17123))
+* **inf-114:** remove unsupported vercel ignoreCommand ([5b10d6b](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/5b10d6bf2c6ce9ef43f3810a89eb6c4664caf41e))
+
 ## [0.3.4](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.3.3...v0.3.4) (2026-03-30)
 
 
