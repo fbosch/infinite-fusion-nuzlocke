@@ -1,0 +1,15 @@
+name: Install Vercel CLI
+description: Install a pinned Vercel CLI version
+
+inputs:
+  version:
+    description: Vercel CLI version to install
+    required: false
+    default: 50.37.3
+
+runs:
+  using: composite
+  steps:
+    - name: Install Vercel CLI
+      shell: bash
+      run: npm install --global "vercel@${{ inputs.version }}"

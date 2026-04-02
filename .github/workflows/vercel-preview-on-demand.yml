@@ -33,7 +33,6 @@ jobs:
       group: preview-deploy-${{ github.event.pull_request.number || inputs.pr_number }}
       cancel-in-progress: true
     env:
-      VERCEL_CLI_VERSION: '50.37.3'
       VERCEL_NEXT_BUNDLED_SERVER: '1'
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -103,7 +102,7 @@ jobs:
           done
 
       - name: Install Vercel CLI
-        run: npm install --global "vercel@$VERCEL_CLI_VERSION"
+        uses: ./.github/actions/install-vercel-cli
 
       - name: Pull Vercel preview settings
         run: vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
