@@ -65,6 +65,18 @@ describe("canTrackCustomEvents", () => {
           NODE_ENV: "production",
           NEXT_PUBLIC_VERCEL_ENV: "production",
         },
+        storage: {
+          getItem: () => null,
+        },
+      }),
+    ).toBe(false);
+
+    expect(
+      canTrackCustomEvents({
+        env: {
+          NODE_ENV: "production",
+          NEXT_PUBLIC_VERCEL_ENV: "production",
+        },
         storage: createStorage({ analytics: false }),
       }),
     ).toBe(false);
