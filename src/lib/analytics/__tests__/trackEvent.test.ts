@@ -248,6 +248,52 @@ describe("analytics transport wrapper", () => {
     debugSpy.mockRestore();
   });
 
+  it("counts invalid payloads before runtime gates", () => {
+    setEnvironment("development", "preview");
+
+    trackEvent(ANALYTICS_EVENTS.playthroughExported, {
+      playthrough_id: "pt-1",
+      game_mode: "classic",
+      encounter_count_bucket: "e_1",
+      deceased_count_bucket: "c_0",
+      boxed_count_bucket: "c_0",
+      fusion_count_bucket: "c_0",
+      viable_roster_bucket: "v_6_plus",
+      unexpected: "value",
+    } as never);
+
+    const counters = getAnalyticsDebugCounters();
+    expect(counters.blockReasons.invalid_payload).toBe(1);
+    expect(counters.blockReasons.non_production).toBe(0);
+    expect(analyticsMock.track).not.toHaveBeenCalled();
+  });
+
+  it("returns deep-cloned debug counters", () => {
+    localStorage.setItem(
+      "cookie-preferences",
+      JSON.stringify({ analytics: true }),
+    );
+    setEnvironment("production", "production");
+
+    trackEvent(ANALYTICS_EVENTS.playthroughExported, {
+      playthrough_id: "pt-1",
+      game_mode: "classic",
+      encounter_count_bucket: "e_1",
+      deceased_count_bucket: "c_0",
+      boxed_count_bucket: "c_0",
+      fusion_count_bucket: "c_0",
+      viable_roster_bucket: "v_6_plus",
+    });
+
+    const snapshot = getAnalyticsDebugCounters();
+    snapshot.byEvent.playthrough_exported.sent = 999;
+    snapshot.blockReasons.track_error = 999;
+
+    const freshSnapshot = getAnalyticsDebugCounters();
+    expect(freshSnapshot.byEvent.playthrough_exported.sent).toBe(1);
+    expect(freshSnapshot.blockReasons.track_error).toBe(0);
+  });
+
   it("swallows analytics transport errors", () => {
     localStorage.setItem(
       "cookie-preferences",

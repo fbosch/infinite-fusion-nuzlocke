@@ -290,12 +290,22 @@ export function resetAnalyticsDebugCounters(): void {
 }
 
 export function getAnalyticsDebugCounters(): AnalyticsDebugCounters {
+  const byEvent = Object.fromEntries(
+    Object.entries(analyticsDebugCounters.byEvent).map(
+      ([eventName, counts]) => [
+        eventName,
+        {
+          sent: counts.sent,
+          blocked: counts.blocked,
+        },
+      ],
+    ),
+  ) as Record<AnalyticsEventName, EventCounter>;
+
   return {
     sent: analyticsDebugCounters.sent,
     blocked: analyticsDebugCounters.blocked,
-    byEvent: {
-      ...analyticsDebugCounters.byEvent,
-    },
+    byEvent,
     blockReasons: {
       ...analyticsDebugCounters.blockReasons,
     },
@@ -432,6 +442,11 @@ export function trackEvent<EventName extends AnalyticsEventName>(
     return;
   }
 
+  if (!isValidEventPayload(eventName, properties)) {
+    recordBlocked(eventName, "invalid_payload");
+    return;
+  }
+
   if (isCustomEventKillSwitchEnabled()) {
     recordBlocked(eventName, "kill_switch");
     debugLog("Analytics event blocked by kill switch", { eventName });
@@ -445,11 +460,6 @@ export function trackEvent<EventName extends AnalyticsEventName>(
 
   if (!hasAnalyticsConsent()) {
     recordBlocked(eventName, "no_consent");
-    return;
-  }
-
-  if (!isValidEventPayload(eventName, properties)) {
-    recordBlocked(eventName, "invalid_payload");
     return;
   }
 
