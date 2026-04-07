@@ -37,6 +37,17 @@ pnpm validate
   - `fusion_created` emits on transition to complete fusion only.
   - `encounter_marked_deceased` emits on transition to deceased only.
 
+## Guardrails and operator controls
+
+- Payload guardrails in `trackEvent` enforce per-event allowlisted keys and primitive value shapes.
+- Invalid payloads are dropped safely (no throw) and counted in debug counters.
+- Kill switch for custom events:
+  - `NEXT_PUBLIC_DISABLE_CUSTOM_ANALYTICS=true` (or `1`, `yes`, `on`)
+  - behavior: blocks all custom events while leaving pageview analytics wiring unchanged
+- Debug counters/logging:
+  - `NEXT_PUBLIC_ANALYTICS_DEBUG=true` enables low-noise debug logs without payload values
+  - counters are available via `getAnalyticsDebugCounters()` and resettable via `resetAnalyticsDebugCounters()`
+
 ## Vercel verification checklist
 
 Run this after deploying the branch (preview first, then production).
