@@ -205,7 +205,14 @@ const hasAnalyticsConsent = (storage: MinimalStorage | null): boolean => {
     return false;
   }
 
-  const rawPreferences = storage.getItem(COOKIE_PREFERENCES_KEY);
+  let rawPreferences: string | null = null;
+
+  try {
+    rawPreferences = storage.getItem(COOKIE_PREFERENCES_KEY);
+  } catch {
+    return false;
+  }
+
   if (!rawPreferences) {
     return false;
   }
@@ -230,7 +237,11 @@ const getRuntimeStorage = (
     return null;
   }
 
-  return globalThis.localStorage ?? null;
+  try {
+    return globalThis.localStorage ?? null;
+  } catch {
+    return null;
+  }
 };
 
 export const canTrackCustomEvents = (

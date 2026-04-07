@@ -80,6 +80,20 @@ describe("canTrackCustomEvents", () => {
         },
       }),
     ).toBe(false);
+
+    expect(
+      canTrackCustomEvents({
+        env: {
+          NODE_ENV: "production",
+          NEXT_PUBLIC_VERCEL_ENV: "production",
+        },
+        storage: {
+          getItem: () => {
+            throw new Error("blocked");
+          },
+        },
+      }),
+    ).toBe(false);
   });
 
   it("returns false outside production", () => {
@@ -200,6 +214,41 @@ describe("trackCustomEvent", () => {
 });
 
 describe("analytics context helpers", () => {
+  it("defaults all buckets to zero when encounters are empty", () => {
+    const playthrough = createPlaythrough({
+      id: "pt-empty",
+      encounters: {},
+    });
+
+    expect(buildSharedAnalyticsContext(playthrough)).toEqual({
+      playthrough_id: "pt-empty",
+      game_mode: "classic",
+      encounter_count_bucket: "e_0",
+      deceased_count_bucket: "c_0",
+      boxed_count_bucket: "c_0",
+      fusion_count_bucket: "c_0",
+      viable_roster_bucket: "v_0",
+    });
+  });
+
+  it("excludes pokemon without status from viable roster", () => {
+    const playthrough = createPlaythrough({
+      id: "pt-statusless",
+      encounters: {
+        route_10: {
+          head: { id: 10, name: "Caterpie", nationalDexId: 10, uid: "h" },
+          body: null,
+          isFusion: false,
+          updatedAt: 1,
+        },
+      },
+    });
+
+    expect(buildSharedAnalyticsContext(playthrough).viable_roster_bucket).toBe(
+      "v_0",
+    );
+  });
+
   it("builds shared context using documented bucket rules", () => {
     const playthrough = createPlaythrough({
       id: "pt-2",
