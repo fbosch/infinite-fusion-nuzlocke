@@ -1,6 +1,8 @@
-# Analytics Rollout and Verification (AN-13)
+# Analytics Rollout and Verification (AN-5)
 
 This runbook defines how to validate analytics changes locally, verify event delivery after deploy, and record rollout outcomes.
+
+It is the execution checklist for AN-1 through AN-4 instrumentation and guardrail work.
 
 ## Scope
 
@@ -94,6 +96,30 @@ Expected semantics:
 - Open a new tab and confirm `playthrough_resumed` can emit once there.
 - Repeat non-crossing encounter edits and confirm no extra checkpoint events.
 
+## Manual QA matrix (required)
+
+Run this matrix before production rollout and attach evidence (notes + screenshots/log snippets) to the release ticket.
+
+| Scenario | Setup | Expected Result |
+| --- | --- | --- |
+| Lifecycle emits | Consent ON, production deployment | `playthrough_created`, `playthrough_resumed`, `playthrough_exported` emit on successful canonical paths only |
+| Progression emits | Consent ON, production deployment | `fusion_created`, `fusion_flipped`, `encounter_marked_deceased`, `run_checkpoint_reached` emit on transition-only paths |
+| Checkpoint dedupe | Consent ON, production deployment | Each checkpoint threshold emits at most once per playthrough |
+| Resume dedupe | Consent ON, same-tab and new-tab checks | Same tab does not double-emit; new tab may emit once |
+| Consent denied | Consent OFF in cookie preferences | No custom events are emitted |
+| Preview environment | Consent ON, preview deployment | No custom events emitted in preview (dispatch blocked in non-production) |
+| Guardrail drop behavior | Trigger invalid payload in test harness/spec test | Event is dropped safely, debug blocked counter increments, no throw |
+| Kill switch | `NEXT_PUBLIC_DISABLE_CUSTOM_ANALYTICS=true` | No custom events emitted while pageview wiring remains intact |
+
+## Release evidence checklist
+
+- Attach command output for:
+  - `pnpm exec vitest run src/lib/analytics/__tests__/trackEvent.test.ts src/lib/analytics/__tests__/playthroughEventData.test.ts src/stores/playthroughs/__tests__/analytics-events.test.ts src/stores/playthroughs/__tests__/playthrough-export-analytics.test.ts src/stores/playthroughs/__tests__/playthrough-resume-observer.test.ts`
+  - `pnpm type-check`
+- Include Vercel Analytics screenshots showing event names and sampled property keys.
+- Provide consent-OFF verification evidence confirming no custom events.
+- Record any anomalies and whether rollout was blocked.
+
 ## Known limitations
 
 - Local and preview environments may intentionally suppress analytics when environment/consent gating is not satisfied.
@@ -120,5 +146,33 @@ Use this section during each rollout and keep it in the merge commit.
   - [ ] canonical event names observed
   - [ ] shared properties present
   - [ ] dedupe behavior confirmed
+  - [ ] consent denied emits no custom events
+  - [ ] guardrail drop behavior verified
+  - [ ] kill switch behavior verified
+- Rollback readiness:
+  - [ ] rollback trigger evaluated
+  - [ ] rollback command/env toggle tested
 - Notes / anomalies:
 ```
+
+## Rollback playbook
+
+Use this when analytics causes production instability or incorrect telemetry.
+
+### Trigger conditions
+
+- Sustained invalid-payload drops beyond expected noise floor.
+- Reproducible double-emits on canonical no-op paths.
+- Verified consent gating regression (events emitted when consent is denied).
+
+### Immediate rollback action
+
+1. Set `NEXT_PUBLIC_DISABLE_CUSTOM_ANALYTICS=true` in Vercel environment variables.
+2. Redeploy the affected environment.
+3. Re-run a smoke path (create/resume/export + one progression transition) and verify no custom events appear.
+
+### Recovery and re-enable
+
+1. Fix root cause and validate locally with targeted analytics tests.
+2. Deploy to preview and re-run the manual QA matrix.
+3. Re-enable custom analytics by removing the kill switch variable, then redeploy.
