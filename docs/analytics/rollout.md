@@ -107,7 +107,7 @@ Run this matrix before production rollout and attach evidence (notes + screensho
 | Checkpoint dedupe | Consent ON, production deployment | Each checkpoint threshold emits at most once per playthrough |
 | Resume dedupe | Consent ON, same-tab and new-tab checks | Same tab does not double-emit; new tab may emit once |
 | Consent denied | Consent OFF in cookie preferences | No custom events are emitted |
-| Preview environment | Consent ON, preview deployment | Custom events remain gated per environment policy |
+| Preview environment | Consent ON, preview deployment | No custom events emitted in preview (dispatch blocked in non-production) |
 | Guardrail drop behavior | Trigger invalid payload in test harness/spec test | Event is dropped safely, debug blocked counter increments, no throw |
 | Kill switch | `NEXT_PUBLIC_DISABLE_CUSTOM_ANALYTICS=true` | No custom events emitted while pageview wiring remains intact |
 
@@ -116,8 +116,8 @@ Run this matrix before production rollout and attach evidence (notes + screensho
 - Attach command output for:
   - `pnpm exec vitest run src/lib/analytics/__tests__/trackEvent.test.ts src/lib/analytics/__tests__/playthroughEventData.test.ts src/stores/playthroughs/__tests__/analytics-events.test.ts src/stores/playthroughs/__tests__/playthrough-export-analytics.test.ts src/stores/playthroughs/__tests__/playthrough-resume-observer.test.ts`
   - `pnpm type-check`
-- Attach Vercel Analytics screenshots showing event names and sampled property keys.
-- Attach consent-OFF verification evidence showing no custom events.
+- Include Vercel Analytics screenshots showing event names and sampled property keys.
+- Provide consent-OFF verification evidence confirming no custom events.
 - Record any anomalies and whether rollout was blocked.
 
 ## Known limitations
