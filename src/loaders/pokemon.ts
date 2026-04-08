@@ -127,19 +127,27 @@ export const EvolutionDataSchema = z.object({
   evolves_from: EvolutionDetailSchema.optional(),
 });
 
-// Zod schema for Pokemon data
-export const PokemonSchema = z.object({
-  id: z.number().int({ error: "Pokemon ID must be an integer" }),
-  nationalDexId: z
-    .number()
-    .int({ error: "National Dex ID must be an integer" }),
-  name: z.string().min(1, { error: "Pokemon name is required" }),
-  types: z.array(PokemonTypeSchema),
-  species: PokemonSpeciesSchema,
-  evolution: EvolutionDataSchema.optional(),
+export const FusionNamePartsSchema = z.object({
+  headNamePart: z.string().optional(),
+  bodyNamePart: z.string().optional(),
 });
 
+// Zod schema for Pokemon data
+export const PokemonSchema = z
+  .object({
+    id: z.number().int({ error: "Pokemon ID must be an integer" }),
+    nationalDexId: z
+      .number()
+      .int({ error: "National Dex ID must be an integer" }),
+    name: z.string().min(1, { error: "Pokemon name is required" }),
+    types: z.array(PokemonTypeSchema),
+    species: PokemonSpeciesSchema,
+    evolution: EvolutionDataSchema.optional(),
+  })
+  .extend(FusionNamePartsSchema.shape);
+
 export type Pokemon = z.infer<typeof PokemonSchema>;
+export type FusionNameParts = z.infer<typeof FusionNamePartsSchema>;
 export type PokemonType = z.infer<typeof PokemonTypeSchema>;
 export type PokemonSpecies = z.infer<typeof PokemonSpeciesSchema>;
 export type EvolutionDetail = z.infer<typeof EvolutionDetailSchema>;

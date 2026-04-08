@@ -3,6 +3,7 @@ import {
   getPokemon,
   getPokemonEvolutionIds,
   getPokemonPreEvolutionId,
+  PokemonSchema,
   searchPokemon,
 } from "../pokemon";
 
@@ -250,5 +251,41 @@ describe("Pokemon Loader with Evolution Data", () => {
     // Pikachu should have evolution data (evolves to Raichu)
     const evolutionIds = await getPokemonEvolutionIds(pikachuId);
     expect(evolutionIds).toEqual([26]); // Raichu's ID
+  });
+
+  it("accepts optional fusion name parts on runtime Pokemon objects", () => {
+    const result = PokemonSchema.safeParse({
+      id: 500,
+      nationalDexId: 500,
+      name: "DemoMon",
+      types: [{ name: "normal" }],
+      species: {
+        is_legendary: false,
+        is_mythical: false,
+        generation: null,
+        evolution_chain: null,
+      },
+      headNamePart: "Demo",
+      bodyNamePart: "Mon",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("remains backward compatible when fusion name parts are absent", () => {
+    const result = PokemonSchema.safeParse({
+      id: 501,
+      nationalDexId: 501,
+      name: "LegacyMon",
+      types: [{ name: "normal" }],
+      species: {
+        is_legendary: false,
+        is_mythical: false,
+        generation: null,
+        evolution_chain: null,
+      },
+    });
+
+    expect(result.success).toBe(true);
   });
 });
