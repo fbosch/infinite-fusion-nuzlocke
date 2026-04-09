@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.5.0](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.4.1...v0.5.0) (2026-04-08)
+
+
+### Features
+
+* **inf-118:** add analytics guardrails and observability controls ([f8a0a6f](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/f8a0a6f4b24e1fc49db2b616da0b978bf9618b01))
+* **inf-118:** harden analytics payload guardrails ([f84644a](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/f84644a8202d0249075fc656388422308ef382e1))
+* **inf-70:** add typed analytics tracking foundation ([322162d](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/322162d61c5578ec9ba9744004b519eb391eae2c))
+* **inf-70:** add typed analytics tracking foundation ([aa42588](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/aa425883c5dbd570d4dad2da41f1d2c9e9c5d3d3))
+
+
+### Bug Fixes
+
+* **ci:** centralize Vercel CLI install for deploy workflows ([d7ca868](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/d7ca86874f69bda1c8cbd6439ea36baae2e4fd1a))
+* **inf-116:** remove duplicate analytics foundation ([440c22c](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/440c22c623f25ff9b7eb4035ae5f586e53676404))
+* **INF-116:** remove duplicate analytics foundation ([cff5f70](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/cff5f70924498f921405bc0ca13184f7ba4a257d))
+* **inf-118:** harden debug snapshot and validation order ([424ccc6](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/424ccc6c2606fa8d08ff80a4f0b93b2dd0673b15))
+* **inf-70:** harden analytics consent storage access ([4839315](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/4839315102725de9ec7b496fae581d2fc08de8c5))
+
 ## [0.4.1](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.4.0...v0.4.1) (2026-04-02)
 
 
