@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useMounted } from "@/hooks/useMounted";
+import { isAnalyticsProductionEnvironment } from "@/lib/analytics/trackEvent";
 
 const SpeedInsights = dynamic(
   () => import("@vercel/speed-insights/next").then((mod) => mod.SpeedInsights),
@@ -39,9 +40,7 @@ export function ConditionalAnalytics() {
 
   // Only render Analytics if component has mounted and user has given consent
   // Disable analytics in development and preview environments
-  const isProduction =
-    process.env.NODE_ENV === "production" &&
-    process.env.NEXT_PUBLIC_VERCEL_ENV === "production";
+  const isProduction = isAnalyticsProductionEnvironment();
 
   if (mounted === false || !preferences.analytics || !isProduction) {
     return null;
@@ -59,9 +58,7 @@ export function ConditionalSpeedInsights() {
 
   // Only render SpeedInsights if component has mounted and user has given consent
   // Disable speed insights in development and preview environments
-  const isProduction =
-    process.env.NODE_ENV === "production" &&
-    process.env.NEXT_PUBLIC_VERCEL_ENV === "production";
+  const isProduction = isAnalyticsProductionEnvironment();
 
   if (mounted === false || !preferences.speedInsights || !isProduction) {
     return null;

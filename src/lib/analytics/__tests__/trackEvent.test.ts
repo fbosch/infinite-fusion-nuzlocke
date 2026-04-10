@@ -65,7 +65,7 @@ describe("analytics transport wrapper", () => {
     });
   });
 
-  it("checks production and vercel production env", () => {
+  it("checks production environment with safe hostname fallback", () => {
     expect(
       isAnalyticsProductionEnvironment({
         NODE_ENV: "production",
@@ -91,6 +91,24 @@ describe("analytics transport wrapper", () => {
       isAnalyticsProductionEnvironment({
         NODE_ENV: "production",
       }),
+    ).toBe(false);
+
+    expect(
+      isAnalyticsProductionEnvironment(
+        {
+          NODE_ENV: "production",
+        },
+        "fusion.nuzlocke.io",
+      ),
+    ).toBe(true);
+
+    expect(
+      isAnalyticsProductionEnvironment(
+        {
+          NODE_ENV: "production",
+        },
+        "preview-deploy.vercel.app",
+      ),
     ).toBe(false);
   });
 
