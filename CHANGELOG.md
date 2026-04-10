@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.3](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.5.2...v0.5.3) (2026-04-10)
+
+
+### Bug Fixes
+
+* **analytics:** allow production hostname fallback when env is missing ([6a092fc](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/6a092fc01217c8d5d7a383f3d2bf1aaa5e5657a0))
+* **analytics:** fallback production gating to known hostnames ([29e0dd1](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/29e0dd12a046c4379045f724d28cdf086f5bdf17))
+
 ## [0.5.2](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.5.1...v0.5.2) (2026-04-10)
 
 
