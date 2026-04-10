@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.4](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.5.3...v0.5.4) (2026-04-10)
+
+
+### Bug Fixes
+
+* **analytics:** remove NODE_ENV dependency from prod gate ([e4c9424](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/e4c9424768581ea4dcf0f6975c5a8d7c8f42a6fb))
+* **analytics:** trust prod vercel env even if NODE_ENV differs ([3d36a2c](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/3d36a2c324bc1b0a432643a0c4720e274b3b6be3))
+
 ## [0.5.3](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.5.2...v0.5.3) (2026-04-10)
 
 
