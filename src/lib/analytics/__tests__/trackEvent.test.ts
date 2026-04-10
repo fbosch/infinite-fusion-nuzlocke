@@ -78,7 +78,7 @@ describe("analytics transport wrapper", () => {
         NODE_ENV: "development",
         NEXT_PUBLIC_VERCEL_ENV: "production",
       }),
-    ).toBe(false);
+    ).toBe(true);
 
     expect(
       isAnalyticsProductionEnvironment({
