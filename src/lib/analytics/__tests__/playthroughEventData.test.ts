@@ -166,12 +166,12 @@ describe("playthroughEventData", () => {
     expect(getNewlyReachedCheckpoints("playthrough-1", 0, 6, storage)).toEqual([
       1, 5,
     ]);
-    markCheckpointEventsTracked("playthrough-1", [1, 5], storage);
+    markCheckpointEventsTracked("playthrough-1", [1, 5], [1, 5], storage);
 
     expect(getNewlyReachedCheckpoints("playthrough-1", 4, 10, storage)).toEqual(
       [10],
     );
-    markCheckpointEventsTracked("playthrough-1", [10], storage);
+    markCheckpointEventsTracked("playthrough-1", [10], [10], storage);
 
     expect(getNewlyReachedCheckpoints("playthrough-1", 9, 10, storage)).toEqual(
       [],
@@ -185,6 +185,52 @@ describe("playthroughEventData", () => {
     markPlaythroughResumedTracked("playthrough-1", storage);
     expect(shouldTrackPlaythroughResumed("playthrough-1", storage)).toBe(false);
     expect(shouldTrackPlaythroughResumed("playthrough-2", storage)).toBe(true);
+  });
+
+  it("avoids duplicate emissions while checkpoints are pending", () => {
+    const storage = createStorage();
+
+    expect(getNewlyReachedCheckpoints("playthrough-1", 0, 6, storage)).toEqual([
+      1, 5,
+    ]);
+
+    expect(getNewlyReachedCheckpoints("playthrough-1", 0, 6, storage)).toEqual(
+      [],
+    );
+
+    markCheckpointEventsTracked("playthrough-1", [1, 5], [1], storage);
+
+    expect(getNewlyReachedCheckpoints("playthrough-1", 0, 6, storage)).toEqual([
+      5,
+    ]);
+  });
+
+  it("swallows storage read/write failures for analytics markers", () => {
+    const storage = {
+      getItem() {
+        throw new Error("SecurityError");
+      },
+      setItem() {
+        throw new Error("QuotaExceededError");
+      },
+    } as unknown as Storage;
+
+    expect(() => {
+      const checkpoints = getNewlyReachedCheckpoints(
+        "playthrough-1",
+        0,
+        1,
+        storage,
+      );
+      markCheckpointEventsTracked(
+        "playthrough-1",
+        checkpoints,
+        checkpoints,
+        storage,
+      );
+      shouldTrackPlaythroughResumed("playthrough-1", storage);
+      markPlaythroughResumedTracked("playthrough-1", storage);
+    }).not.toThrow();
   });
 
   it("computes days since active and team size", () => {

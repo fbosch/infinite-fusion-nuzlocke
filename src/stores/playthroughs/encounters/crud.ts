@@ -126,7 +126,11 @@ export const updateEncounter = async (
       }
     }
 
-    markCheckpointEventsTracked(activePlaythrough.id, trackedCheckpoints);
+    markCheckpointEventsTracked(
+      activePlaythrough.id,
+      newlyReachedCheckpoints,
+      trackedCheckpoints,
+    );
 
     return;
   }
@@ -227,7 +231,11 @@ export const updateEncounter = async (
       }
     }
 
-    markCheckpointEventsTracked(activePlaythrough.id, trackedCheckpoints);
+    markCheckpointEventsTracked(
+      activePlaythrough.id,
+      newlyReachedCheckpoints,
+      trackedCheckpoints,
+    );
 
     return;
   }
@@ -262,7 +270,11 @@ export const updateEncounter = async (
     }
   }
 
-  markCheckpointEventsTracked(activePlaythrough.id, trackedCheckpoints);
+  markCheckpointEventsTracked(
+    activePlaythrough.id,
+    newlyReachedCheckpoints,
+    trackedCheckpoints,
+  );
 };
 
 // Reset encounter for a location

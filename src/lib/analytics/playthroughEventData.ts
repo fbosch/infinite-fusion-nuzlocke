@@ -5,6 +5,7 @@ const CHECKPOINT_STORAGE_KEY_PREFIX = "analytics:checkpoints:";
 const RESUME_STORAGE_KEY_PREFIX = "analytics:playthrough-resumed:";
 
 type StorageValue = Storage | null | undefined;
+const pendingCheckpointEvents = new Map<string, Set<Checkpoint>>();
 
 const isUsableStorage = (value: StorageValue): value is Storage => {
   if (value == null) {
@@ -14,6 +15,22 @@ const isUsableStorage = (value: StorageValue): value is Storage => {
   return (
     typeof value.getItem === "function" && typeof value.setItem === "function"
   );
+};
+
+const safeGetItem = (storage: Storage, key: string): string | null => {
+  try {
+    return storage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const safeSetItem = (storage: Storage, key: string, value: string): void => {
+  try {
+    storage.setItem(key, value);
+  } catch {
+    // Keep analytics bookkeeping non-blocking when storage access fails.
+  }
 };
 
 export const getCheckpointStorageKey = (playthroughId: string): string => {
@@ -75,27 +92,56 @@ export const getNewlyReachedCheckpoints = (
   }
 
   const key = getCheckpointStorageKey(playthroughId);
-  const existing = parseStoredCheckpoints(storage.getItem(key));
-  return crossed.filter((checkpoint) => !existing.has(checkpoint));
+  const existing = parseStoredCheckpoints(safeGetItem(storage, key));
+  const pending = pendingCheckpointEvents.get(playthroughId) ?? new Set();
+  const unsent = crossed.filter(
+    (checkpoint) => !existing.has(checkpoint) && !pending.has(checkpoint),
+  );
+
+  if (unsent.length > 0) {
+    for (const checkpoint of unsent) {
+      pending.add(checkpoint);
+    }
+
+    pendingCheckpointEvents.set(playthroughId, pending);
+  }
+
+  return unsent;
 };
 
 export const markCheckpointEventsTracked = (
   playthroughId: string,
-  checkpoints: readonly Checkpoint[],
+  attemptedCheckpoints: readonly Checkpoint[],
+  trackedCheckpoints: readonly Checkpoint[],
   storage: StorageValue = globalThis.localStorage,
 ): void => {
-  if (!isUsableStorage(storage) || checkpoints.length === 0) {
+  if (attemptedCheckpoints.length === 0) {
     return;
   }
 
-  const key = getCheckpointStorageKey(playthroughId);
-  const existing = parseStoredCheckpoints(storage.getItem(key));
+  if (isUsableStorage(storage) && trackedCheckpoints.length > 0) {
+    const key = getCheckpointStorageKey(playthroughId);
+    const existing = parseStoredCheckpoints(safeGetItem(storage, key));
 
-  for (const checkpoint of checkpoints) {
-    existing.add(checkpoint);
+    for (const checkpoint of trackedCheckpoints) {
+      existing.add(checkpoint);
+    }
+
+    safeSetItem(storage, key, JSON.stringify(Array.from(existing.values())));
   }
 
-  storage.setItem(key, JSON.stringify(Array.from(existing.values())));
+  const pending = pendingCheckpointEvents.get(playthroughId);
+  if (!pending) {
+    return;
+  }
+
+  for (const checkpoint of attemptedCheckpoints) {
+    pending.delete(checkpoint);
+  }
+
+  if (pending.size === 0) {
+    pendingCheckpointEvents.delete(playthroughId);
+  }
 };
 
 export const shouldTrackPlaythroughResumed = (
@@ -107,7 +153,7 @@ export const shouldTrackPlaythroughResumed = (
   }
 
   const key = getResumeStorageKey(playthroughId);
-  return storage.getItem(key) !== "1";
+  return safeGetItem(storage, key) !== "1";
 };
 
 export const markPlaythroughResumedTracked = (
@@ -118,7 +164,7 @@ export const markPlaythroughResumedTracked = (
     return;
   }
 
-  storage.setItem(getResumeStorageKey(playthroughId), "1");
+  safeSetItem(storage, getResumeStorageKey(playthroughId), "1");
 };
 
 export const getDaysSinceLastActive = (

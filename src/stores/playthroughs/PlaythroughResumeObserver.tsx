@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   getDaysSinceLastActive,
   getSharedEventProperties,
@@ -11,10 +12,25 @@ import {
 import { trackEvent } from "@/lib/analytics/trackEvent";
 import { useActivePlaythrough, useIsLoading } from "./hooks";
 
+type ConsentPreferences = {
+  analytics: boolean;
+  speedInsights: boolean;
+};
+
+const DEFAULT_CONSENT_PREFERENCES: ConsentPreferences = {
+  analytics: false,
+  speedInsights: false,
+};
+
 export function PlaythroughResumeObserver() {
   const activePlaythrough = useActivePlaythrough();
   const isLoading = useIsLoading();
   const lastTrackedPlaythroughId = useRef<string | null>(null);
+  const [preferences] = useLocalStorage<ConsentPreferences>(
+    "cookie-preferences",
+    DEFAULT_CONSENT_PREFERENCES,
+  );
+  const hasAnalyticsConsent = preferences.analytics;
 
   useEffect(() => {
     if (isLoading || !activePlaythrough) {
@@ -41,7 +57,7 @@ export function PlaythroughResumeObserver() {
       markPlaythroughResumedTracked(activePlaythrough.id);
       lastTrackedPlaythroughId.current = activePlaythrough.id;
     }
-  }, [activePlaythrough, isLoading]);
+  }, [activePlaythrough, hasAnalyticsConsent, isLoading]);
 
   return null;
 }

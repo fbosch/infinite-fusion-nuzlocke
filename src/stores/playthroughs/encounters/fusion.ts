@@ -141,5 +141,9 @@ export const createFusion = async (
     }
   }
 
-  markCheckpointEventsTracked(activePlaythrough.id, trackedCheckpoints);
+  markCheckpointEventsTracked(
+    activePlaythrough.id,
+    newlyReachedCheckpoints,
+    trackedCheckpoints,
+  );
 };

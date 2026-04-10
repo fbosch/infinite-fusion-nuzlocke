@@ -125,4 +125,38 @@ describe("PlaythroughResumeObserver", () => {
       ).toHaveLength(2);
     });
   });
+
+  it("retries when consent changes after an initially blocked send", async () => {
+    const { activePlaythrough } = createTestPlaythrough();
+    activePlaythrough.updatedAt = Date.now() - 8 * 86_400_000;
+    playthroughsStore.isLoading = false;
+    analyticsMocks.trackEvent.mockClear();
+    analyticsMocks.trackEvent.mockReturnValueOnce(false).mockReturnValue(true);
+
+    render(createElement(PlaythroughResumeObserver));
+
+    await waitFor(() => {
+      expect(analyticsMocks.trackEvent).toHaveBeenCalledTimes(1);
+    });
+
+    localStorage.setItem(
+      "cookie-preferences",
+      JSON.stringify({ analytics: true, speedInsights: false }),
+    );
+    window.dispatchEvent(
+      new StorageEvent("storage", {
+        key: "cookie-preferences",
+        newValue: JSON.stringify({ analytics: true, speedInsights: false }),
+        storageArea: localStorage,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(
+        analyticsMocks.trackEvent.mock.calls.filter(
+          (call) => call[0] === "playthrough_resumed",
+        ),
+      ).toHaveLength(2);
+    });
+  });
 });
