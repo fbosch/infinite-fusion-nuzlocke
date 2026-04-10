@@ -393,10 +393,6 @@ export function isAnalyticsProductionEnvironment(
   environment: AppEnvironment = process.env,
   browserHostname?: string,
 ): boolean {
-  if (environment.NODE_ENV !== "production") {
-    return false;
-  }
-
   if (environment.NEXT_PUBLIC_VERCEL_ENV === "production") {
     return true;
   }
