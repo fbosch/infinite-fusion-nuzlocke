@@ -252,6 +252,11 @@ type AppEnvironment = {
   ANALYTICS_DEBUG?: string;
 };
 
+const ANALYTICS_PRODUCTION_HOSTNAMES = new Set([
+  "fusion.nuzlocke.io",
+  "www.fusion.nuzlocke.io",
+]);
+
 const createByEventCounter = (): Record<AnalyticsEventName, EventCounter> => {
   return {
     playthrough_created: { sent: 0, blocked: 0 },
@@ -386,11 +391,32 @@ function isValidEventPayload<EventName extends AnalyticsEventName>(
 
 export function isAnalyticsProductionEnvironment(
   environment: AppEnvironment = process.env,
+  browserHostname?: string,
 ): boolean {
-  return (
-    environment.NODE_ENV === "production" &&
-    environment.NEXT_PUBLIC_VERCEL_ENV === "production"
-  );
+  if (environment.NODE_ENV !== "production") {
+    return false;
+  }
+
+  if (environment.NEXT_PUBLIC_VERCEL_ENV === "production") {
+    return true;
+  }
+
+  if (
+    environment.NEXT_PUBLIC_VERCEL_ENV === "preview" ||
+    environment.NEXT_PUBLIC_VERCEL_ENV === "development"
+  ) {
+    return false;
+  }
+
+  const hostname =
+    browserHostname ??
+    (typeof window === "undefined" ? undefined : globalThis.location?.hostname);
+
+  if (hostname == null) {
+    return false;
+  }
+
+  return ANALYTICS_PRODUCTION_HOSTNAMES.has(hostname.toLowerCase());
 }
 
 function getBrowserStorage(): Pick<Storage, "getItem"> | null {
