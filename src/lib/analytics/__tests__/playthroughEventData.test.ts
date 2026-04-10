@@ -11,6 +11,8 @@ import {
   getCheckpointLabel,
   getDaysSinceLastActive,
   getNewlyReachedCheckpoints,
+  markCheckpointEventsTracked,
+  markPlaythroughResumedTracked,
   shouldTrackPlaythroughResumed,
 } from "../playthroughEventData";
 import {
@@ -164,10 +166,12 @@ describe("playthroughEventData", () => {
     expect(getNewlyReachedCheckpoints("playthrough-1", 0, 6, storage)).toEqual([
       1, 5,
     ]);
+    markCheckpointEventsTracked("playthrough-1", [1, 5], storage);
 
     expect(getNewlyReachedCheckpoints("playthrough-1", 4, 10, storage)).toEqual(
       [10],
     );
+    markCheckpointEventsTracked("playthrough-1", [10], storage);
 
     expect(getNewlyReachedCheckpoints("playthrough-1", 9, 10, storage)).toEqual(
       [],
@@ -178,6 +182,7 @@ describe("playthroughEventData", () => {
     const storage = createStorage();
 
     expect(shouldTrackPlaythroughResumed("playthrough-1", storage)).toBe(true);
+    markPlaythroughResumedTracked("playthrough-1", storage);
     expect(shouldTrackPlaythroughResumed("playthrough-1", storage)).toBe(false);
     expect(shouldTrackPlaythroughResumed("playthrough-2", storage)).toBe(true);
   });

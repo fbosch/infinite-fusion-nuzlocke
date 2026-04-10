@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import {
   getDaysSinceLastActive,
   getSharedEventProperties,
+  markPlaythroughResumedTracked,
   shouldTrackPlaythroughResumed,
   toDormancyBucket,
 } from "@/lib/analytics/playthroughEventData";
@@ -29,14 +30,17 @@ export function PlaythroughResumeObserver() {
       return;
     }
 
-    trackEvent("playthrough_resumed", {
+    const wasTracked = trackEvent("playthrough_resumed", {
       ...getSharedEventProperties(activePlaythrough),
       days_since_last_active_bucket: toDormancyBucket(
         getDaysSinceLastActive(activePlaythrough.updatedAt),
       ),
     });
 
-    lastTrackedPlaythroughId.current = activePlaythrough.id;
+    if (wasTracked) {
+      markPlaythroughResumedTracked(activePlaythrough.id);
+      lastTrackedPlaythroughId.current = activePlaythrough.id;
+    }
   }, [activePlaythrough, isLoading]);
 
   return null;
