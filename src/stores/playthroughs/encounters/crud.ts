@@ -3,6 +3,7 @@ import { getCheckpointLabel } from "@/lib/analytics/buckets";
 import {
   getEncounterCount,
   getNewlyReachedCheckpoints,
+  markCheckpointEventsTracked,
 } from "@/lib/analytics/playthroughEventData";
 import { getSharedEventProperties } from "@/lib/analytics/selectors";
 import { trackEvent } from "@/lib/analytics/trackEvent";
@@ -111,14 +112,25 @@ export const updateEncounter = async (
       previousEncounterCount,
       nextEncounterCount,
     );
+    const trackedCheckpoints: typeof newlyReachedCheckpoints = [];
 
     for (const checkpoint of newlyReachedCheckpoints) {
-      trackEvent("run_checkpoint_reached", {
+      const wasTracked = trackEvent("run_checkpoint_reached", {
         ...getSharedEventProperties(activePlaythrough),
         checkpoint,
         checkpoint_label: getCheckpointLabel(checkpoint),
       });
+
+      if (wasTracked) {
+        trackedCheckpoints.push(checkpoint);
+      }
     }
+
+    markCheckpointEventsTracked(
+      activePlaythrough.id,
+      newlyReachedCheckpoints,
+      trackedCheckpoints,
+    );
 
     return;
   }
@@ -205,14 +217,25 @@ export const updateEncounter = async (
       previousEncounterCount,
       nextEncounterCount,
     );
+    const trackedCheckpoints: typeof newlyReachedCheckpoints = [];
 
     for (const checkpoint of newlyReachedCheckpoints) {
-      trackEvent("run_checkpoint_reached", {
+      const wasTracked = trackEvent("run_checkpoint_reached", {
         ...getSharedEventProperties(activePlaythrough),
         checkpoint,
         checkpoint_label: getCheckpointLabel(checkpoint),
       });
+
+      if (wasTracked) {
+        trackedCheckpoints.push(checkpoint);
+      }
     }
+
+    markCheckpointEventsTracked(
+      activePlaythrough.id,
+      newlyReachedCheckpoints,
+      trackedCheckpoints,
+    );
 
     return;
   }
@@ -233,14 +256,25 @@ export const updateEncounter = async (
     previousEncounterCount,
     nextEncounterCount,
   );
+  const trackedCheckpoints: typeof newlyReachedCheckpoints = [];
 
   for (const checkpoint of newlyReachedCheckpoints) {
-    trackEvent("run_checkpoint_reached", {
+    const wasTracked = trackEvent("run_checkpoint_reached", {
       ...getSharedEventProperties(activePlaythrough),
       checkpoint,
       checkpoint_label: getCheckpointLabel(checkpoint),
     });
+
+    if (wasTracked) {
+      trackedCheckpoints.push(checkpoint);
+    }
   }
+
+  markCheckpointEventsTracked(
+    activePlaythrough.id,
+    newlyReachedCheckpoints,
+    trackedCheckpoints,
+  );
 };
 
 // Reset encounter for a location

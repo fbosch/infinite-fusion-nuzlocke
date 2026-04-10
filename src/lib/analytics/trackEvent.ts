@@ -436,38 +436,40 @@ export function hasAnalyticsConsent(
 export function trackEvent<EventName extends AnalyticsEventName>(
   eventName: EventName,
   properties: AnalyticsEventMap[EventName],
-): void {
+): boolean {
   if (typeof window === "undefined") {
     recordBlocked(eventName, "non_browser");
-    return;
+    return false;
   }
 
   if (!isValidEventPayload(eventName, properties)) {
     recordBlocked(eventName, "invalid_payload");
-    return;
+    return false;
   }
 
   if (isCustomEventKillSwitchEnabled()) {
     recordBlocked(eventName, "kill_switch");
     debugLog("Analytics event blocked by kill switch", { eventName });
-    return;
+    return false;
   }
 
   if (!isAnalyticsProductionEnvironment()) {
     recordBlocked(eventName, "non_production");
-    return;
+    return false;
   }
 
   if (!hasAnalyticsConsent()) {
     recordBlocked(eventName, "no_consent");
-    return;
+    return false;
   }
 
   try {
     track(eventName, properties satisfies AnalyticsProperties);
     recordSent(eventName);
+    return true;
   } catch {
     recordBlocked(eventName, "track_error");
     debugLog("Analytics event failed to send", { eventName });
+    return false;
   }
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Karla as Font } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import { AnalyticsDebugPanel } from "@/components/analytics/AnalyticsDebugPanel";
 import {
   ConditionalAnalytics,
   ConditionalSpeedInsights,
@@ -170,6 +171,7 @@ export default function RootLayout({
           </ErrorBoundary>
           <ConditionalAnalytics />
           <ConditionalSpeedInsights />
+          <AnalyticsDebugPanel />
           <ServiceWorkerInit />
           {/* Portal root for context menus */}
           <div id="context-menu-root" />

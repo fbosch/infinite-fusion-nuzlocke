@@ -43,6 +43,7 @@ describe("PlaythroughResumeObserver", () => {
 
   beforeEach(() => {
     analyticsMocks.trackEvent.mockReset();
+    analyticsMocks.trackEvent.mockReturnValue(true);
     Object.defineProperty(globalThis, "sessionStorage", {
       value: createStorageMock(),
       configurable: true,
@@ -55,7 +56,7 @@ describe("PlaythroughResumeObserver", () => {
     const { activePlaythrough } = createTestPlaythrough();
     activePlaythrough.updatedAt = Date.now() - 2 * 86_400_000;
     playthroughsStore.isLoading = true;
-    analyticsMocks.trackEvent.mockReset();
+    analyticsMocks.trackEvent.mockClear();
 
     render(createElement(PlaythroughResumeObserver));
 
@@ -70,7 +71,7 @@ describe("PlaythroughResumeObserver", () => {
     const { activePlaythrough } = createTestPlaythrough();
     activePlaythrough.updatedAt = Date.now() - 8 * 86_400_000;
     playthroughsStore.isLoading = false;
-    analyticsMocks.trackEvent.mockReset();
+    analyticsMocks.trackEvent.mockClear();
 
     const view = render(createElement(PlaythroughResumeObserver));
 
@@ -98,7 +99,7 @@ describe("PlaythroughResumeObserver", () => {
     const first = createTestPlaythrough("First");
     first.activePlaythrough.updatedAt = Date.now() - 86_400_000;
     playthroughsStore.isLoading = false;
-    analyticsMocks.trackEvent.mockReset();
+    analyticsMocks.trackEvent.mockClear();
 
     const view = render(createElement(PlaythroughResumeObserver));
 
@@ -115,6 +116,40 @@ describe("PlaythroughResumeObserver", () => {
     playthroughsStore.activePlaythroughId = second.playthroughId;
 
     view.rerender(createElement(PlaythroughResumeObserver));
+
+    await waitFor(() => {
+      expect(
+        analyticsMocks.trackEvent.mock.calls.filter(
+          (call) => call[0] === "playthrough_resumed",
+        ),
+      ).toHaveLength(2);
+    });
+  });
+
+  it("retries when consent changes after an initially blocked send", async () => {
+    const { activePlaythrough } = createTestPlaythrough();
+    activePlaythrough.updatedAt = Date.now() - 8 * 86_400_000;
+    playthroughsStore.isLoading = false;
+    analyticsMocks.trackEvent.mockClear();
+    analyticsMocks.trackEvent.mockReturnValueOnce(false).mockReturnValue(true);
+
+    render(createElement(PlaythroughResumeObserver));
+
+    await waitFor(() => {
+      expect(analyticsMocks.trackEvent).toHaveBeenCalledTimes(1);
+    });
+
+    localStorage.setItem(
+      "cookie-preferences",
+      JSON.stringify({ analytics: true, speedInsights: false }),
+    );
+    window.dispatchEvent(
+      new StorageEvent("storage", {
+        key: "cookie-preferences",
+        newValue: JSON.stringify({ analytics: true, speedInsights: false }),
+        storageArea: localStorage,
+      }),
+    );
 
     await waitFor(() => {
       expect(

@@ -32,6 +32,7 @@ describe("analytics event instrumentation", () => {
 
   beforeEach(() => {
     analyticsMocks.trackEvent.mockReset();
+    analyticsMocks.trackEvent.mockReturnValue(true);
     localStorage.clear();
     sessionStorage.clear();
   });
@@ -52,7 +53,7 @@ describe("analytics event instrumentation", () => {
 
   it("tracks run checkpoints once per threshold", async () => {
     createTestPlaythrough();
-    analyticsMocks.trackEvent.mockReset();
+    analyticsMocks.trackEvent.mockClear();
 
     await updateEncounter("route1", testPokemon.pikachu("p-1"), "head", false);
     await updateEncounter("route2", testPokemon.pikachu("p-2"), "head", false);
@@ -80,7 +81,7 @@ describe("analytics event instrumentation", () => {
 
   it("tracks fusion_created for update, create, and drag-drop transitions", async () => {
     createTestPlaythrough();
-    analyticsMocks.trackEvent.mockReset();
+    analyticsMocks.trackEvent.mockClear();
 
     await updateEncounter(
       "route1",
@@ -113,7 +114,7 @@ describe("analytics event instrumentation", () => {
       "head",
       false,
     );
-    analyticsMocks.trackEvent.mockReset();
+    analyticsMocks.trackEvent.mockClear();
 
     const sourcePokemon =
       playthroughsStore.playthroughs[0]?.encounters?.route3?.head;
@@ -137,7 +138,7 @@ describe("analytics event instrumentation", () => {
 
   it("tracks encounter_marked_deceased only on transition", async () => {
     createTestPlaythrough();
-    analyticsMocks.trackEvent.mockReset();
+    analyticsMocks.trackEvent.mockClear();
 
     await updateEncounter(
       "route1",
@@ -152,7 +153,7 @@ describe("analytics event instrumentation", () => {
       true,
     );
 
-    analyticsMocks.trackEvent.mockReset();
+    analyticsMocks.trackEvent.mockClear();
 
     await markEncounterAsDeceased("route1");
     await markEncounterAsDeceased("route1");
