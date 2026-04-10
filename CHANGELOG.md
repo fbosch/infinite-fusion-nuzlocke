@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.2](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.5.1...v0.5.2) (2026-04-10)
+
+
+### Bug Fixes
+
+* **ci:** set NEXT_PUBLIC_VERCEL_ENV for production deploy builds ([90f44e3](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/90f44e3f603f8a60e8421b0da8a05e3c87746532))
+* **ci:** set production Vercel env for client analytics ([39ad26b](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/39ad26b669aa27fbc2d63e1ef6064080ce9d447b))
+
 ## [0.5.1](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.5.0...v0.5.1) (2026-04-10)
 
 
