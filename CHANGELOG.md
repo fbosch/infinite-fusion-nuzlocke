@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.1](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.5.0...v0.5.1) (2026-04-10)
+
+
+### Bug Fixes
+
+* **analytics:** address PR feedback on dedupe and consent retry ([a9de284](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/a9de2842c8789cae24989f8cf5dc5a87cdf88c4c))
+* **analytics:** mark one-time events tracked only after successful send ([7b1d4d8](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/7b1d4d8004e403329757ce33646b5d73655e77c6))
+* **analytics:** persist dedupe markers only after successful sends ([d0bff1c](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/d0bff1c7ce6339cfd78c8e574de3dc56cbf04a0d))
+
 ## [0.5.0](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.4.1...v0.5.0) (2026-04-08)
 
 
