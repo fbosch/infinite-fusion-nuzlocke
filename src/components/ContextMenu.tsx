@@ -18,6 +18,7 @@ import {
   isValidElement,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   useTransition,
@@ -27,6 +28,27 @@ import { match } from "ts-pattern";
 import { CursorTooltip } from "./CursorTooltip";
 
 // Filter out separators at the beginning and end of the items array
+const VIEWPORT_EDGE_PADDING = 8;
+
+export function clampMenuPosition(
+  position: { x: number; y: number },
+  size: { width: number; height: number },
+) {
+  const maxX = Math.max(
+    VIEWPORT_EDGE_PADDING,
+    window.innerWidth - size.width - VIEWPORT_EDGE_PADDING,
+  );
+  const maxY = Math.max(
+    VIEWPORT_EDGE_PADDING,
+    window.innerHeight - size.height - VIEWPORT_EDGE_PADDING,
+  );
+
+  return {
+    x: Math.min(Math.max(position.x, VIEWPORT_EDGE_PADDING), maxX),
+    y: Math.min(Math.max(position.y, VIEWPORT_EDGE_PADDING), maxY),
+  };
+}
+
 function filterEdgeSeparators(items: ContextMenuItem[]): ContextMenuItem[] {
   if (items.length === 0) return items;
 
@@ -82,6 +104,7 @@ function useContextMenuState() {
 
   return {
     menuPosition,
+    setMenuPosition,
     isOpen,
     isVisible,
     activeIndex,
@@ -98,8 +121,7 @@ export interface ContextMenuItem {
   icon?: LucideIcon;
   iconClassName?: string;
   favicon?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onClick?: (event: React.MouseEvent<any>) => void;
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
   href?: string;
   target?: string;
   disabled?: boolean;
@@ -131,6 +153,7 @@ export function ContextMenu({
 }: ContextMenuProps) {
   const {
     menuPosition,
+    setMenuPosition,
     isOpen,
     isVisible,
     activeIndex,
@@ -144,6 +167,20 @@ export function ContextMenu({
   const menuElementRef = useRef<HTMLDivElement>(null);
   const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
   const submenuRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!isVisible || !menuElementRef.current) return;
+
+    const { width, height } = menuElementRef.current.getBoundingClientRect();
+    const nextPosition = clampMenuPosition(menuPosition, { width, height });
+
+    if (
+      nextPosition.x !== menuPosition.x ||
+      nextPosition.y !== menuPosition.y
+    ) {
+      setMenuPosition(nextPosition);
+    }
+  }, [isVisible, menuPosition, setMenuPosition]);
 
   useEffect(() => {
     onOpenChange?.(isOpen);
@@ -297,6 +334,7 @@ export function ContextMenu({
               }}
               className={clsx(
                 "min-w-[12rem] rounded-md border border-gray-200 dark:border-gray-800",
+                "max-h-[calc(100vh-1rem)] max-w-[calc(100vw-1rem)] overflow-y-auto",
                 "bg-white dark:bg-gray-900/80 shadow-elevation-3",
                 "p-1 backdrop-blur-xl tooltip-enter",
                 "origin-top-left backdrop-blur-xl",
