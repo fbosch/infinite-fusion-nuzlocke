@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import type { EncounterData } from "@/stores/playthroughs/types";
 import {
+  buildCapturedSpeciesIdSet,
   buildPokemonUidIndex,
   findPokemonByUid,
   findPokemonWithLocation,
@@ -274,6 +275,52 @@ describe("encounter-utils", () => {
     it("should return empty index for null encounters", () => {
       const index = buildPokemonUidIndex(null);
       expect(index.size).toBe(0);
+    });
+  });
+
+  describe("buildCapturedSpeciesIdSet", () => {
+    it("includes species captured directly or via original capture provenance", () => {
+      const encounters: Record<string, EncounterData> = {
+        route1: {
+          head: mockPikachu,
+          body: {
+            ...mockCharmander,
+            status: "deceased",
+            originalReceivalStatus: "captured",
+          },
+          isFusion: true,
+          updatedAt: Date.now(),
+        },
+      };
+
+      expect(buildCapturedSpeciesIdSet(encounters)).toEqual(new Set([25, 4]));
+    });
+
+    it("ignores non-captured provenance and hidden non-fusion body pokemon", () => {
+      const encounters: Record<string, EncounterData> = {
+        route1: {
+          head: {
+            ...mockPikachu,
+            status: "received",
+            originalReceivalStatus: "received",
+          },
+          body: mockCharmander,
+          isFusion: false,
+          updatedAt: Date.now(),
+        },
+        route2: {
+          head: {
+            ...mockBulbasaur,
+            status: "traded",
+            originalReceivalStatus: "traded",
+          },
+          body: null,
+          isFusion: false,
+          updatedAt: Date.now(),
+        },
+      };
+
+      expect(buildCapturedSpeciesIdSet(encounters)).toEqual(new Set());
     });
   });
 

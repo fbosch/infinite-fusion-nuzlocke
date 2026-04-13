@@ -33,7 +33,8 @@ import {
   useAllPokemon,
   usePokemonSearch,
 } from "@/loaders/pokemon";
-import { useGameMode } from "@/stores/playthroughs";
+import { useEncounters, useGameMode } from "@/stores/playthroughs";
+import { buildCapturedSpeciesIdSet } from "@/utils/encounter-utils";
 import { DraggableComboboxSprite } from "./DraggableComboboxSprite";
 import {
   applyEncounterDefaultStatus,
@@ -93,6 +94,7 @@ export const PokemonCombobox = ({
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
   const gameMode = useGameMode();
+  const encounters = useEncounters();
 
   // Ref to maintain focus on input
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -121,6 +123,17 @@ export const PokemonCombobox = ({
     (pokemonId: number): boolean => routePokemonIds.has(pokemonId),
     [routePokemonIds],
   );
+
+  const capturedSpeciesIds = useMemo(
+    () => buildCapturedSpeciesIdSet(encounters),
+    [encounters],
+  );
+
+  const isDuplicatePokemon = useCallback(
+    (pokemonId: number): boolean => capturedSpeciesIds.has(pokemonId),
+    [capturedSpeciesIds],
+  );
+
   // Use the search hook
   const { data: resultsData, isLoading: isSearchLoading } = usePokemonSearch({
     query: deferredQuery,
@@ -551,6 +564,7 @@ export const PokemonCombobox = ({
                           index={virtualItem.index}
                           disabled={virtualizer.isScrolling}
                           isRoutePokemon={isRoutePokemon}
+                          isDuplicatePokemon={isDuplicatePokemon}
                           getPokemonSource={getPokemonSource}
                           comboboxId={comboboxId || ""}
                           gameMode={gameMode}
@@ -574,6 +588,7 @@ export const PokemonCombobox = ({
                         finalOptions={finalOptions}
                         deferredQuery={deferredQuery}
                         isRoutePokemon={isRoutePokemon}
+                        isDuplicatePokemon={isDuplicatePokemon}
                         getPokemonSource={getPokemonSource}
                         gameMode={gameMode}
                         isLoading={isShowingLoading}

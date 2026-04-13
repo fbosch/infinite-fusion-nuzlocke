@@ -18,6 +18,7 @@ interface PokemonOptionsProps {
   deferredQuery: string;
   locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
+  isDuplicatePokemon: (pokemonId: number) => boolean;
   getPokemonSource: (pokemonId: number) => EncounterSource[];
   comboboxId: string;
   gameMode: "classic" | "remix" | "randomized";
@@ -29,6 +30,7 @@ interface PokemonOptionProps {
   index?: number;
   locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
+  isDuplicatePokemon: (pokemonId: number) => boolean;
   getPokemonSource: (pokemonId: number) => EncounterSource[];
   comboboxId?: string;
   gameMode: "classic" | "remix" | "randomized";
@@ -41,6 +43,7 @@ interface PokemonOptionContentProps {
   pokemon: PokemonOptionType;
   locationId: string | undefined;
   isRoutePokemon: (pokemonId: number) => boolean;
+  isDuplicatePokemon: (pokemonId: number) => boolean;
   getPokemonSource: (pokemonId: number) => EncounterSource[];
   gameMode: "classic" | "remix" | "randomized";
   isActive?: boolean;
@@ -50,6 +53,7 @@ interface PokemonOptionContentProps {
 function PokemonOptionContent({
   pokemon,
   isRoutePokemon,
+  isDuplicatePokemon,
   getPokemonSource,
   gameMode,
   locationId,
@@ -57,6 +61,7 @@ function PokemonOptionContent({
   isSelected = false,
 }: PokemonOptionContentProps) {
   const displayName = getEncounterDisplayName(pokemon);
+  const isDuplicate = isDuplicatePokemon(pokemon.id);
 
   return (
     <div className={"gap-4 group w-full flex items-center"}>
@@ -79,6 +84,19 @@ function PokemonOptionContent({
             sources={getPokemonSource(pokemon.id)}
             locationId={locationId}
           />
+        )}
+        {isDuplicate && (
+          <span
+            className={clsx(
+              "text-xs px-1.5 py-0.5 rounded-sm font-medium leading-none",
+              "text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/20",
+              "border border-amber-200/60 dark:border-amber-700/40",
+              isActive && "group-hover:text-white group-hover:border-white/60",
+            )}
+            title="Already captured"
+          >
+            Dup
+          </span>
         )}
         <span
           className={clsx(
@@ -107,6 +125,7 @@ function PokemonOptionContent({
 export function PokemonOption({
   pokemon,
   isRoutePokemon,
+  isDuplicatePokemon,
   getPokemonSource,
   gameMode,
   style,
@@ -144,6 +163,7 @@ export function PokemonOption({
           locationId={locationId}
           pokemon={pokemon}
           isRoutePokemon={isRoutePokemon}
+          isDuplicatePokemon={isDuplicatePokemon}
           getPokemonSource={getPokemonSource}
           gameMode={gameMode}
           isActive={active}
@@ -158,6 +178,7 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
   finalOptions,
   deferredQuery,
   isRoutePokemon,
+  isDuplicatePokemon,
   getPokemonSource,
   locationId,
   gameMode,
@@ -207,6 +228,7 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
       pokemon={pokemon}
       locationId={locationId}
       isRoutePokemon={isRoutePokemon}
+      isDuplicatePokemon={isDuplicatePokemon}
       getPokemonSource={getPokemonSource}
       gameMode={gameMode}
     />
