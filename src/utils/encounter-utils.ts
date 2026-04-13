@@ -1,4 +1,4 @@
-import type { PokemonOptionType } from "@/loaders/pokemon";
+import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
 import type { EncounterData } from "@/stores/playthroughs/types";
 
 export type PokemonUidIndex = Map<string, PokemonOptionType>;
@@ -88,4 +88,40 @@ export function getAllPokemonWithLocations(
 
     return pokemon;
   });
+}
+
+function wasOriginallyCaptured(
+  pokemon: PokemonOptionType | null | undefined,
+): pokemon is PokemonOptionType {
+  if (!pokemon) return false;
+
+  if (pokemon.originalReceivalStatus) {
+    return pokemon.originalReceivalStatus === PokemonStatus.CAPTURED;
+  }
+
+  return (
+    pokemon.status === PokemonStatus.CAPTURED ||
+    pokemon.status === PokemonStatus.STORED ||
+    pokemon.status === PokemonStatus.DECEASED
+  );
+}
+
+export function buildCapturedSpeciesIdSet(
+  encounters: Record<string, EncounterData> | null | undefined,
+): Set<number> {
+  const capturedSpeciesIds = new Set<number>();
+
+  if (!encounters) return capturedSpeciesIds;
+
+  for (const encounter of Object.values(encounters)) {
+    if (wasOriginallyCaptured(encounter.head)) {
+      capturedSpeciesIds.add(encounter.head.id);
+    }
+
+    if (encounter.isFusion && wasOriginallyCaptured(encounter.body)) {
+      capturedSpeciesIds.add(encounter.body.id);
+    }
+  }
+
+  return capturedSpeciesIds;
 }
