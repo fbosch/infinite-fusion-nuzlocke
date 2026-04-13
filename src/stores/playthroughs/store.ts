@@ -378,14 +378,18 @@ const reorderTeam = (fromPosition: number, toPosition: number): boolean => {
   // If moving to the same position, no change needed
   if (fromPosition === toPosition) return true;
 
-  // Get the team member to move
-  const teamMember = activePlaythrough.team.members[fromPosition];
+  const source = activePlaythrough.team.members[fromPosition];
+  const destination = activePlaythrough.team.members[toPosition];
 
-  // Remove from source position
-  activePlaythrough.team.members[fromPosition] = null;
-
-  // Add to target position (overwrite if occupied)
-  activePlaythrough.team.members[toPosition] = teamMember;
+  if (destination === null) {
+    // Move into empty slot
+    activePlaythrough.team.members[toPosition] = source;
+    activePlaythrough.team.members[fromPosition] = null;
+  } else {
+    // Swap when destination is occupied
+    activePlaythrough.team.members[fromPosition] = destination;
+    activePlaythrough.team.members[toPosition] = source;
+  }
 
   activePlaythrough.updatedAt = getCurrentTimestamp();
   return true;
