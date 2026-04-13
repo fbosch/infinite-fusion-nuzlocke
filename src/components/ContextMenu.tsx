@@ -121,7 +121,8 @@ export interface ContextMenuItem {
   icon?: LucideIcon;
   iconClassName?: string;
   favicon?: string;
-  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onClick?: (event: React.MouseEvent<any>) => void;
   href?: string;
   target?: string;
   disabled?: boolean;
