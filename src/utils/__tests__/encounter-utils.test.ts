@@ -296,6 +296,27 @@ describe("encounter-utils", () => {
       expect(buildCapturedSpeciesIdSet(encounters)).toEqual(new Set([25, 4]));
     });
 
+    it("keeps legacy stored or deceased species when provenance is missing", () => {
+      const encounters: Record<string, EncounterData> = {
+        route1: {
+          head: {
+            ...mockPikachu,
+            status: "stored",
+            originalReceivalStatus: undefined,
+          },
+          body: {
+            ...mockCharmander,
+            status: "deceased",
+            originalReceivalStatus: undefined,
+          },
+          isFusion: true,
+          updatedAt: Date.now(),
+        },
+      };
+
+      expect(buildCapturedSpeciesIdSet(encounters)).toEqual(new Set([25, 4]));
+    });
+
     it("ignores non-captured provenance and hidden non-fusion body pokemon", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {

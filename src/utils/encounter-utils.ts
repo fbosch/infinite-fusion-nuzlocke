@@ -95,9 +95,14 @@ function wasOriginallyCaptured(
 ): pokemon is PokemonOptionType {
   if (!pokemon) return false;
 
+  if (pokemon.originalReceivalStatus) {
+    return pokemon.originalReceivalStatus === PokemonStatus.CAPTURED;
+  }
+
   return (
-    (pokemon.originalReceivalStatus ?? pokemon.status) ===
-    PokemonStatus.CAPTURED
+    pokemon.status === PokemonStatus.CAPTURED ||
+    pokemon.status === PokemonStatus.STORED ||
+    pokemon.status === PokemonStatus.DECEASED
   );
 }
 
