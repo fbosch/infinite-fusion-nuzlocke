@@ -291,6 +291,12 @@ export default function TeamSlots() {
     [encounters],
   );
 
+  // Shared cancel helper — used by both global Escape listener and drag handle keydown
+  const cancelKbReorder = () => {
+    setKbReorderFrom(null);
+    setAnnouncement("Reorder cancelled.");
+  };
+
   const teamSlots = useMemo(() => {
     if (!activePlaythrough?.team) return [];
 
@@ -391,14 +397,11 @@ export default function TeamSlots() {
   useEffect(() => {
     if (kbReorderFrom === null) return;
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setKbReorderFrom(null);
-        setAnnouncement("Reorder cancelled.");
-      }
+      if (e.key === "Escape") cancelKbReorder();
     };
     window.addEventListener("keydown", handleGlobalKeyDown);
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [kbReorderFrom]);
+  }, [kbReorderFrom]); // cancelKbReorder only uses stable state setters
 
   // dnd-kit sensors (pointer only; keyboard reorder is handled via state)
   const sensors = useSensors(
@@ -490,8 +493,7 @@ export default function TeamSlots() {
       if (e.key === "Escape") {
         e.preventDefault();
         e.stopPropagation();
-        setKbReorderFrom(null);
-        setAnnouncement("Reorder cancelled.");
+        cancelKbReorder();
       } else if (e.key === " " || e.key === "Enter") {
         e.preventDefault();
         e.stopPropagation();
