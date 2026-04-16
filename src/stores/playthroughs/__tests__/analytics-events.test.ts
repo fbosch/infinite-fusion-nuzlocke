@@ -2,9 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PokemonStatus } from "@/loaders/pokemon";
 import {
   createFusion,
+  flipEncounterFusion,
+  flipTeamMemberFusion,
   markEncounterAsDeceased,
+  markTeamMemberAsDeceased,
   moveEncounterAtomic,
   updateEncounter,
+  updateTeamMember,
 } from "../encounters";
 import { createPlaythrough, playthroughsStore } from "../store";
 import {
@@ -163,6 +167,77 @@ describe("analytics event instrumentation", () => {
     expect(deceasedEvents[0]?.[1]).toMatchObject({
       location_id: "route1",
       was_fused: true,
+    });
+  });
+
+  it("uses canonical deceased emit semantics from team context flow", async () => {
+    createTestPlaythrough();
+
+    await updateEncounter(
+      "route1",
+      { ...testPokemon.pikachu("tm-1-head"), status: PokemonStatus.CAPTURED },
+      "head",
+      false,
+    );
+    await updateEncounter(
+      "route1",
+      {
+        ...testPokemon.charmander("tm-1-body"),
+        status: PokemonStatus.CAPTURED,
+      },
+      "body",
+      true,
+    );
+    await updateTeamMember(0, { uid: "tm-1-head" }, { uid: "tm-1-body" });
+
+    analyticsMocks.trackEvent.mockClear();
+
+    await markTeamMemberAsDeceased(0);
+
+    const deceasedEvents = getTrackedEvents("encounter_marked_deceased");
+    expect(deceasedEvents).toHaveLength(1);
+    expect(deceasedEvents[0]?.[1]).toMatchObject({
+      location_id: "route1",
+      was_fused: true,
+    });
+
+    expect(playthroughsStore.playthroughs[0]?.team.members[0]).toBeNull();
+  });
+
+  it("keeps fusion_flipped semantics equivalent across table and team flows", async () => {
+    createTestPlaythrough();
+
+    await updateEncounter(
+      "route1",
+      testPokemon.pikachu("flip-1-head"),
+      "head",
+      false,
+    );
+    await updateEncounter(
+      "route1",
+      testPokemon.charmander("flip-1-body"),
+      "body",
+      true,
+    );
+
+    analyticsMocks.trackEvent.mockClear();
+    await flipEncounterFusion("route1");
+
+    const tableFlowEvents = getTrackedEvents("fusion_flipped");
+    expect(tableFlowEvents).toHaveLength(1);
+    expect(tableFlowEvents[0]?.[1]).toMatchObject({ location_id: "route1" });
+
+    await updateTeamMember(0, { uid: "flip-1-body" }, { uid: "flip-1-head" });
+
+    analyticsMocks.trackEvent.mockClear();
+    await flipTeamMemberFusion(0);
+
+    const teamFlowEvents = getTrackedEvents("fusion_flipped");
+    expect(teamFlowEvents).toHaveLength(1);
+    expect(teamFlowEvents[0]?.[1]).toMatchObject({ location_id: "route1" });
+    expect(playthroughsStore.playthroughs[0]?.team.members[0]).toMatchObject({
+      headPokemonUid: "flip-1-head",
+      bodyPokemonUid: "flip-1-body",
     });
   });
 });

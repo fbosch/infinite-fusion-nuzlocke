@@ -79,23 +79,8 @@ export function TeamMemberContextMenu({
 
   // Handler to mark team member as deceased
   const handleMarkAsDeceased = useCallback(async () => {
-    if (!headPokemon?.uid && !bodyPokemon?.uid) return;
-
-    // Mark both Pokémon as deceased if they exist
-    if (headPokemon?.uid) {
-      await playthroughActions.updatePokemonByUID(headPokemon.uid, {
-        status: PokemonStatus.DECEASED,
-      });
-    }
-    if (bodyPokemon?.uid) {
-      await playthroughActions.updatePokemonByUID(bodyPokemon.uid, {
-        status: PokemonStatus.DECEASED,
-      });
-    }
-
-    // Clear the team member slot after marking as deceased
-    await playthroughActions.updateTeamMember(position, null, null);
-  }, [headPokemon, bodyPokemon, position]);
+    await playthroughActions.markTeamMemberAsDeceased(position);
+  }, [position]);
 
   // Handler to move team member to box
   const handleMoveToBox = useCallback(async () => {
@@ -184,15 +169,10 @@ export function TeamMemberContextMenu({
 
   // Handler to flip fusion (swap head and body)
   const handleFlipFusion = useCallback(async () => {
-    if (!isFusion || !headPokemon?.uid || !bodyPokemon?.uid) return;
+    if (!isFusion) return;
 
-    // Swap head and body by updating the team member
-    await playthroughActions.updateTeamMember(
-      position,
-      { uid: bodyPokemon.uid },
-      { uid: headPokemon.uid },
-    );
-  }, [isFusion, headPokemon, bodyPokemon, position]);
+    await playthroughActions.flipTeamMemberFusion(position);
+  }, [isFusion, position]);
 
   // Handler to navigate to head encounter
   const handleGoToHeadEncounter = useCallback(() => {
