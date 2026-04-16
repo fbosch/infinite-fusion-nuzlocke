@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.1](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.6.0...v0.6.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* **inf-115:** address review feedback for animation reset ([8ede43d](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/8ede43dbe08b4fc371cbddcf00c5c9e32e49dbad))
+* **INF-115:** prevent evolution animation when switching playthroughs ([c67396e](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/c67396e9c153f0f218c359d4b4f04ad3972f6cdc))
+* **inf-115:** reset evolution animation state on playthrough switch ([eeab1ac](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/eeab1ac457621792467354cf9454635729619ee5))
+* **inf-128:** address PR review on canonical emit paths ([275202b](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/275202b56c5f33a19d1fc0a7941247c617f6d05f))
+* **inf-128:** route team actions through canonical emit points ([ba785b9](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/ba785b9e3be714a577aab31d975f8cc555a3a097))
+
 ## [0.6.0](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.5.4...v0.6.0) (2026-04-13)
 
 
