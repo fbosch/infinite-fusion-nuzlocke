@@ -204,6 +204,39 @@ describe("analytics event instrumentation", () => {
     expect(playthroughsStore.playthroughs[0]?.team.members[0]).toBeNull();
   });
 
+  it("does not mark non-team partner as deceased for single-uid team slot", async () => {
+    createTestPlaythrough();
+
+    await updateEncounter(
+      "route1",
+      { ...testPokemon.pikachu("solo-head"), status: PokemonStatus.CAPTURED },
+      "head",
+      false,
+    );
+    await updateEncounter(
+      "route1",
+      {
+        ...testPokemon.charmander("solo-body"),
+        status: PokemonStatus.CAPTURED,
+      },
+      "body",
+      true,
+    );
+    await updateTeamMember(0, { uid: "solo-head" }, null);
+
+    analyticsMocks.trackEvent.mockClear();
+
+    await markTeamMemberAsDeceased(0);
+
+    const deceasedEvents = getTrackedEvents("encounter_marked_deceased");
+    expect(deceasedEvents).toHaveLength(0);
+
+    const encounter = playthroughsStore.playthroughs[0]?.encounters?.route1;
+    expect(encounter?.head?.status).toBe(PokemonStatus.DECEASED);
+    expect(encounter?.body?.status).toBe(PokemonStatus.CAPTURED);
+    expect(playthroughsStore.playthroughs[0]?.team.members[0]).toBeNull();
+  });
+
   it("keeps fusion_flipped semantics equivalent across table and team flows", async () => {
     createTestPlaythrough();
 

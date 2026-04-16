@@ -55,7 +55,11 @@ export const markTeamMemberAsDeceased = async (
     return;
   }
 
-  const locationId = findCanonicalLocationForUids(uids);
+  const hasFullFusionPair = uids.length === 2;
+  const locationId = hasFullFusionPair
+    ? findCanonicalLocationForUids(uids)
+    : null;
+
   if (locationId) {
     await markEncounterAsDeceased(locationId);
   } else {
