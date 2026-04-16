@@ -179,6 +179,10 @@ export default function TeamSlots() {
     [encounters],
   );
 
+  useEffect(() => {
+    previousFusionIds.current = new Array(6).fill(null);
+  }, [activePlaythrough?.id]);
+
   const teamSlots = useMemo(() => {
     if (!activePlaythrough?.team) return [];
 

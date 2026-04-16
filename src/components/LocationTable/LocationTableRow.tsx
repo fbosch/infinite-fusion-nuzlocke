@@ -6,6 +6,7 @@ import { addEvolutionListener } from "@/lib/events";
 import type { CombinedLocation } from "@/loaders/locations";
 import { isCustomLocation } from "@/loaders/locations";
 import { useEncounter } from "@/stores/playthroughs";
+import { useActivePlaythrough } from "@/stores/playthroughs/hooks";
 import { canFuse } from "@/utils/pokemonPredicates";
 import PokemonSummaryCard from "../PokemonSummaryCard";
 import type { FusionSpriteHandle } from "../PokemonSummaryCard/FusionSprite";
@@ -29,12 +30,17 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
   const { ref, inView } = useInView();
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
   const previousFusionId = useRef<string | null>(null);
+  const activePlaythrough = useActivePlaythrough();
 
   const aboveTheFold = row.index < 8;
   const shouldLoad = inView || aboveTheFold;
 
   // Get encounter data directly - only this row will rerender when this encounter changes
   const encounterData = useEncounter(locationId) || EMPTY_ENCOUNTER;
+
+  useEffect(() => {
+    previousFusionId.current = null;
+  }, [activePlaythrough?.id]);
 
   // Play evolution animation when this location evolves, but only if the Pokémon can form an effective fusion
   useEffect(() => {

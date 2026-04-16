@@ -13,18 +13,22 @@ import { PokemonStatus } from "@/loaders/pokemon";
 import TeamEntryItem from "../TeamEntryItem";
 import type { PCEntry } from "../types";
 
+let activePlaythroughId = "playthrough-1";
+
 const {
   moveTeamMemberToBoxMock,
   moveEncounterToBoxMock,
   markEncounterAsDeceasedMock,
   updatePokemonByUIDMock,
   updateTeamMemberMock,
+  playEvolutionMock,
 } = vi.hoisted(() => ({
   moveTeamMemberToBoxMock: vi.fn().mockResolvedValue(undefined),
   moveEncounterToBoxMock: vi.fn().mockResolvedValue(undefined),
   markEncounterAsDeceasedMock: vi.fn().mockResolvedValue(undefined),
   updatePokemonByUIDMock: vi.fn().mockResolvedValue(undefined),
   updateTeamMemberMock: vi.fn().mockResolvedValue(undefined),
+  playEvolutionMock: vi.fn(),
 }));
 
 vi.mock("@/assets/images/head.svg", () => ({
@@ -48,7 +52,25 @@ vi.mock("@/components/PokemonSummaryCard/ArtworkVariantButton", () => ({
 }));
 
 vi.mock("@/components/PokemonSummaryCard/FusionSprite", () => ({
-  FusionSprite: () => <div data-testid="fusion-sprite" />,
+  FusionSprite: (() => {
+    const React = require("react") as typeof import("react");
+    return React.forwardRef((props, ref) => {
+      React.useImperativeHandle(
+        ref,
+        () => ({
+          playEvolution: playEvolutionMock,
+        }),
+        [],
+      );
+
+      return <div data-testid="fusion-sprite" {...props} />;
+    });
+  })(),
+}));
+
+vi.mock("@/stores/playthroughs/hooks", () => ({
+  useActivePlaythrough: () =>
+    activePlaythroughId ? { id: activePlaythroughId } : null,
 }));
 
 vi.mock("@/components/PokemonSummaryCard/TeamMemberContextMenu", () => ({
@@ -140,11 +162,13 @@ describe("TeamEntryItem", () => {
   });
 
   beforeEach(() => {
+    activePlaythroughId = "playthrough-1";
     moveTeamMemberToBoxMock.mockClear();
     moveEncounterToBoxMock.mockClear();
     markEncounterAsDeceasedMock.mockClear();
     updatePokemonByUIDMock.mockClear();
     updateTeamMemberMock.mockClear();
+    playEvolutionMock.mockClear();
   });
 
   it("opens team assignment from empty team slot", () => {
@@ -225,5 +249,52 @@ describe("TeamEntryItem", () => {
       });
       expect(updateTeamMemberMock).toHaveBeenCalledWith(1, null, null);
     });
+  });
+
+  it("does not play evolution animation when active playthrough changes", () => {
+    const entryA: PCEntry = {
+      ...filledTeamEntry,
+    };
+    const entryB: PCEntry = {
+      ...filledTeamEntry,
+      head: {
+        ...filledTeamEntry.head!,
+        id: 1,
+        name: "Bulbasaur",
+        uid: "bulbasaur-uid",
+      },
+      body: {
+        ...filledTeamEntry.body!,
+        id: 2,
+        name: "Ivysaur",
+        uid: "ivysaur-uid",
+      },
+    };
+    const entryC: PCEntry = {
+      ...filledTeamEntry,
+      head: {
+        ...filledTeamEntry.head!,
+        id: 4,
+        name: "Charmander",
+        uid: "charmander-uid",
+      },
+      body: {
+        ...filledTeamEntry.body!,
+        id: 7,
+        name: "Squirtle",
+        uid: "squirtle-uid",
+      },
+    };
+
+    const { rerender } = render(
+      <TeamEntryItem entry={entryA} idToName={idToName} />,
+    );
+
+    rerender(<TeamEntryItem entry={entryB} idToName={idToName} />);
+    expect(playEvolutionMock).toHaveBeenCalledTimes(1);
+
+    activePlaythroughId = "playthrough-2";
+    rerender(<TeamEntryItem entry={entryC} idToName={idToName} />);
+    expect(playEvolutionMock).toHaveBeenCalledTimes(1);
   });
 });
