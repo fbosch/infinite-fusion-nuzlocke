@@ -22,6 +22,7 @@ import { getLocationById } from "@/loaders/locations";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { PokemonStatus } from "@/loaders/pokemon";
 import { playthroughActions, useEncounters } from "@/stores/playthroughs";
+import { useActivePlaythrough } from "@/stores/playthroughs/hooks";
 import { formatArtistCredits } from "@/utils/formatCredits";
 import { canFuse, isPokemonActive } from "@/utils/pokemonPredicates";
 import { scrollToLocationById } from "@/utils/scrollToLocation";
@@ -130,6 +131,7 @@ export default function TeamEntryItem({
   onTeamMemberClick,
 }: TeamEntryItemProps) {
   const encounters = useEncounters();
+  const activePlaythrough = useActivePlaythrough();
 
   // Check if this is team data (has position field) or encounter data
   const isTeamData = "position" in entry && typeof entry.position === "number";
@@ -151,6 +153,10 @@ export default function TeamEntryItem({
   // Ref for the sprite to play evolution animations
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
   const previousFusionId = useRef<string | null>(null);
+
+  useEffect(() => {
+    previousFusionId.current = null;
+  }, [activePlaythrough?.id]);
 
   // Track fusion ID changes and play evolution animations
   useEffect(() => {
