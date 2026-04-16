@@ -1,12 +1,67 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ANALYTICS_EVENTS,
+  type AnalyticsEventName,
   getAnalyticsDebugCounters,
   hasAnalyticsConsent,
   isAnalyticsProductionEnvironment,
   resetAnalyticsDebugCounters,
   trackEvent,
 } from "../trackEvent";
+
+type AnalyticsPrimitive = string | number | boolean;
+
+const BASE_SHARED_PROPERTIES = {
+  playthrough_id: "pt-1",
+  game_mode: "classic",
+  encounter_count_bucket: "e_1",
+  deceased_count_bucket: "c_0",
+  boxed_count_bucket: "c_0",
+  fusion_count_bucket: "c_0",
+  viable_roster_bucket: "v_6_plus",
+} as const;
+
+const VALID_EVENT_PAYLOADS: Record<
+  AnalyticsEventName,
+  Record<string, AnalyticsPrimitive>
+> = {
+  playthrough_created: {
+    ...BASE_SHARED_PROPERTIES,
+    has_existing_playthroughs: false,
+  },
+  run_checkpoint_reached: {
+    ...BASE_SHARED_PROPERTIES,
+    checkpoint: 5,
+    checkpoint_label: "cp_5",
+  },
+  playthrough_resumed: {
+    ...BASE_SHARED_PROPERTIES,
+    days_since_last_active_bucket: "d_1_2_days",
+  },
+  fusion_created: {
+    ...BASE_SHARED_PROPERTIES,
+    location_id: "route-1",
+    creation_method: "create_fusion",
+  },
+  fusion_flipped: {
+    ...BASE_SHARED_PROPERTIES,
+    location_id: "route-1",
+  },
+  encounter_marked_deceased: {
+    ...BASE_SHARED_PROPERTIES,
+    location_id: "route-1",
+    was_fused: true,
+    team_size_after: 5,
+    viable_roster_bucket_after: "v_4_5",
+  },
+  playthrough_exported: {
+    ...BASE_SHARED_PROPERTIES,
+  },
+};
+
+const eventPayloadEntries = Object.entries(VALID_EVENT_PAYLOADS) as Array<
+  [AnalyticsEventName, Record<string, AnalyticsPrimitive>]
+>;
 
 const analyticsMock = vi.hoisted(() => ({
   track: vi.fn(),
@@ -233,6 +288,42 @@ describe("analytics transport wrapper", () => {
       expect.objectContaining({ checkpoint: 5, checkpoint_label: "cp_5" }),
     );
     expect(getAnalyticsDebugCounters().sent).toBe(1);
+  });
+
+  it.each(
+    eventPayloadEntries,
+  )("accepts contract-valid payload for %s", (eventName, payload) => {
+    localStorage.setItem(
+      "cookie-preferences",
+      JSON.stringify({ analytics: true }),
+    );
+    setEnvironment("production", "production");
+
+    trackEvent(eventName, payload as never);
+
+    expect(analyticsMock.track).toHaveBeenCalledTimes(1);
+    expect(analyticsMock.track).toHaveBeenCalledWith(eventName, payload);
+    expect(getAnalyticsDebugCounters().sent).toBe(1);
+  });
+
+  it.each(
+    eventPayloadEntries,
+  )("rejects payload when shared contract field is missing for %s", (eventName, payload) => {
+    localStorage.setItem(
+      "cookie-preferences",
+      JSON.stringify({ analytics: true }),
+    );
+    setEnvironment("production", "production");
+
+    const invalidPayload = { ...payload };
+    delete invalidPayload.playthrough_id;
+
+    trackEvent(eventName, invalidPayload as never);
+
+    const counters = getAnalyticsDebugCounters();
+    expect(analyticsMock.track).not.toHaveBeenCalled();
+    expect(counters.blockReasons.invalid_payload).toBe(1);
+    expect(counters.byEvent[eventName].blocked).toBe(1);
   });
 
   it("blocks invalid payload shapes without logging payload values", () => {
