@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.5.4...v0.6.0) (2026-04-13)
+
+
+### Features
+
+* **combobox:** add INF-15 duplicate indicator ([65a7c0f](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/65a7c0f1226040aad51533442666927078d813c7))
+
+
+### Bug Fixes
+
+* **combobox:** preserve INF-15 capture fallback ([ab673cf](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/ab673cfea9275280d0bf285a532bb29e6094574a))
+* **context-menu:** clamp INF-14 viewport overflow ([ce5ae53](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/ce5ae53e6e952b0a5e59bbe18596a57c4013c946))
+* **context-menu:** restore INF-14 click typing ([a8f392e](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/a8f392e3a167dbd36262a49fa30eaa26ad7445e5))
+
 ## [0.5.4](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.5.3...v0.5.4) (2026-04-10)
 
 
