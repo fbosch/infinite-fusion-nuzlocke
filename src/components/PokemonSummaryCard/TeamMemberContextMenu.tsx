@@ -53,7 +53,11 @@ export function TeamMemberContextMenu({
   shouldLoad = true,
   onClose,
 }: TeamMemberContextMenuProps) {
-  const { headPokemon, bodyPokemon, isFusion, position } = teamMember;
+  const { headPokemon, bodyPokemon, position } = teamMember;
+  const hasFusionPair =
+    headPokemon != null &&
+    bodyPokemon != null &&
+    headPokemon.id !== bodyPokemon.id;
 
   // Check for art variants using the team member's Pokémon
   const { data: variants, isLoading: isLoadingVariants } = useSpriteVariants(
@@ -79,23 +83,8 @@ export function TeamMemberContextMenu({
 
   // Handler to mark team member as deceased
   const handleMarkAsDeceased = useCallback(async () => {
-    if (!headPokemon?.uid && !bodyPokemon?.uid) return;
-
-    // Mark both Pokémon as deceased if they exist
-    if (headPokemon?.uid) {
-      await playthroughActions.updatePokemonByUID(headPokemon.uid, {
-        status: PokemonStatus.DECEASED,
-      });
-    }
-    if (bodyPokemon?.uid) {
-      await playthroughActions.updatePokemonByUID(bodyPokemon.uid, {
-        status: PokemonStatus.DECEASED,
-      });
-    }
-
-    // Clear the team member slot after marking as deceased
-    await playthroughActions.updateTeamMember(position, null, null);
-  }, [headPokemon, bodyPokemon, position]);
+    await playthroughActions.markTeamMemberAsDeceased(position);
+  }, [position]);
 
   // Handler to move team member to box
   const handleMoveToBox = useCallback(async () => {
@@ -184,15 +173,10 @@ export function TeamMemberContextMenu({
 
   // Handler to flip fusion (swap head and body)
   const handleFlipFusion = useCallback(async () => {
-    if (!isFusion || !headPokemon?.uid || !bodyPokemon?.uid) return;
+    if (hasFusionPair === false) return;
 
-    // Swap head and body by updating the team member
-    await playthroughActions.updateTeamMember(
-      position,
-      { uid: bodyPokemon.uid },
-      { uid: headPokemon.uid },
-    );
-  }, [isFusion, headPokemon, bodyPokemon, position]);
+    await playthroughActions.flipTeamMemberFusion(position);
+  }, [hasFusionPair, position]);
 
   // Handler to navigate to head encounter
   const handleGoToHeadEncounter = useCallback(() => {
@@ -256,11 +240,11 @@ export function TeamMemberContextMenu({
     ];
 
     // Check if this is a fusion (both head and body exist and are different)
-    const isFusion =
+    const isFusionPair =
       headPokemon && bodyPokemon && headPokemon.id !== bodyPokemon.id;
 
     // Add inverse fusion option if this is a fusion
-    if (isFusion) {
+    if (isFusionPair) {
       items.push({
         id: "invert-fusion",
         label: "Invert Fusion",
@@ -321,7 +305,7 @@ export function TeamMemberContextMenu({
       });
 
       // Add head section header
-      if (isFusion) {
+      if (isFusionPair) {
         items.push({
           id: "head-section-header",
           label: (
@@ -578,7 +562,7 @@ export function TeamMemberContextMenu({
         onClose={() => setIsVariantModalOpen(false)}
         headId={headPokemon?.id}
         bodyId={bodyPokemon?.id}
-        isFusion={isFusion}
+        isFusion={hasFusionPair}
       />
     </>
   );

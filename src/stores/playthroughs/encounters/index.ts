@@ -28,9 +28,10 @@ export {
 export {
   moveTeamMemberToBox,
   restorePokemonToTeam,
-  updateTeamMember,
   updatePokemonByUID,
+  updateTeamMember,
 } from "./team";
+export { flipTeamMemberFusion, markTeamMemberAsDeceased } from "./teamActions";
 export {
   cycleArtworkVariant,
   prefetchAdjacentVariants,

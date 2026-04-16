@@ -20,7 +20,6 @@ import { useSpriteCredits } from "@/hooks/useSprite";
 import { getSpriteId } from "@/lib/sprites";
 import { getLocationById } from "@/loaders/locations";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { PokemonStatus } from "@/loaders/pokemon";
 import { playthroughActions, useEncounters } from "@/stores/playthroughs";
 import { useActivePlaythrough } from "@/stores/playthroughs/hooks";
 import { formatArtistCredits } from "@/utils/formatCredits";
@@ -418,28 +417,8 @@ export default function TeamEntryItem({
               onClick={async (e) => {
                 e.stopPropagation();
                 if (isTeamData && entry.position !== undefined) {
-                  // For team members, mark as deceased and clear the slot
-                  if (entry.head?.uid) {
-                    await playthroughActions.updatePokemonByUID(
-                      entry.head.uid,
-                      {
-                        status: PokemonStatus.DECEASED,
-                      },
-                    );
-                  }
-                  if (entry.body?.uid) {
-                    await playthroughActions.updatePokemonByUID(
-                      entry.body.uid,
-                      {
-                        status: PokemonStatus.DECEASED,
-                      },
-                    );
-                  }
-                  // Clear the team member slot
-                  await playthroughActions.updateTeamMember(
+                  await playthroughActions.markTeamMemberAsDeceased(
                     entry.position,
-                    null,
-                    null,
                   );
                 } else {
                   // For encounters, use the existing encounter logic

@@ -9,7 +9,6 @@ import {
 } from "@testing-library/react";
 import type React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PokemonStatus } from "@/loaders/pokemon";
 import TeamEntryItem from "../TeamEntryItem";
 import type { PCEntry } from "../types";
 
@@ -19,6 +18,7 @@ const {
   moveTeamMemberToBoxMock,
   moveEncounterToBoxMock,
   markEncounterAsDeceasedMock,
+  markTeamMemberAsDeceasedMock,
   updatePokemonByUIDMock,
   updateTeamMemberMock,
   playEvolutionMock,
@@ -26,6 +26,7 @@ const {
   moveTeamMemberToBoxMock: vi.fn().mockResolvedValue(undefined),
   moveEncounterToBoxMock: vi.fn().mockResolvedValue(undefined),
   markEncounterAsDeceasedMock: vi.fn().mockResolvedValue(undefined),
+  markTeamMemberAsDeceasedMock: vi.fn().mockResolvedValue(undefined),
   updatePokemonByUIDMock: vi.fn().mockResolvedValue(undefined),
   updateTeamMemberMock: vi.fn().mockResolvedValue(undefined),
   playEvolutionMock: vi.fn(),
@@ -114,6 +115,7 @@ vi.mock("@/stores/playthroughs", () => ({
     moveTeamMemberToBox: moveTeamMemberToBoxMock,
     moveEncounterToBox: moveEncounterToBoxMock,
     markEncounterAsDeceased: markEncounterAsDeceasedMock,
+    markTeamMemberAsDeceased: markTeamMemberAsDeceasedMock,
     updatePokemonByUID: updatePokemonByUIDMock,
     updateTeamMember: updateTeamMemberMock,
   },
@@ -166,6 +168,7 @@ describe("TeamEntryItem", () => {
     moveTeamMemberToBoxMock.mockClear();
     moveEncounterToBoxMock.mockClear();
     markEncounterAsDeceasedMock.mockClear();
+    markTeamMemberAsDeceasedMock.mockClear();
     updatePokemonByUIDMock.mockClear();
     updateTeamMemberMock.mockClear();
     playEvolutionMock.mockClear();
@@ -241,13 +244,7 @@ describe("TeamEntryItem", () => {
     fireEvent.click(screen.getByRole("button", { name: "Move to Graveyard" }));
 
     await waitFor(() => {
-      expect(updatePokemonByUIDMock).toHaveBeenNthCalledWith(1, "pikachu-uid", {
-        status: PokemonStatus.DECEASED,
-      });
-      expect(updatePokemonByUIDMock).toHaveBeenNthCalledWith(2, "eevee-uid", {
-        status: PokemonStatus.DECEASED,
-      });
-      expect(updateTeamMemberMock).toHaveBeenCalledWith(1, null, null);
+      expect(markTeamMemberAsDeceasedMock).toHaveBeenCalledWith(1);
     });
   });
 
