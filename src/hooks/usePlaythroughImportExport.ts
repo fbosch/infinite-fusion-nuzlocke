@@ -1,12 +1,155 @@
 import { useCallback, useState } from "react";
 import { getSharedEventProperties } from "@/lib/analytics/selectors";
-import { trackEvent } from "@/lib/analytics/trackEvent";
+import {
+  type FileExtensionGroup,
+  type ImportErrorCategory,
+  type ImportFailureStage,
+  type MimeGroup,
+  trackEvent,
+} from "@/lib/analytics/trackEvent";
 import {
   type ExportedPlaythrough,
   type GameMode,
   type Playthrough,
   playthroughActions,
 } from "@/stores/playthroughs";
+
+const IMPORT_SOURCE = "file_picker" as const;
+
+type ImportFileContext = {
+  hasFile: boolean;
+  fileExtensionGroup: FileExtensionGroup;
+  mimeGroup: MimeGroup;
+};
+
+const getFileExtensionGroup = (fileName?: string): FileExtensionGroup => {
+  if (!fileName) {
+    return "other";
+  }
+
+  return fileName.toLowerCase().endsWith(".json") ? "json" : "other";
+};
+
+const getMimeGroup = (mimeType?: string): MimeGroup => {
+  if (!mimeType) {
+    return "empty";
+  }
+
+  if (mimeType === "application/json") {
+    return "application_json";
+  }
+
+  if (mimeType === "text/plain") {
+    return "text_plain";
+  }
+
+  return "other";
+};
+
+const createFileContext = (file?: File): ImportFileContext => {
+  if (!file) {
+    return {
+      hasFile: false,
+      fileExtensionGroup: "other",
+      mimeGroup: "empty",
+    };
+  }
+
+  return {
+    hasFile: true,
+    fileExtensionGroup: getFileExtensionGroup(file.name),
+    mimeGroup: getMimeGroup(file.type),
+  };
+};
+
+const isStorageFailureMessage = (message: string) => {
+  const normalizedMessage = message.toLowerCase();
+
+  return (
+    normalizedMessage.includes("quota") ||
+    normalizedMessage.includes("storage") ||
+    normalizedMessage.includes("indexeddb")
+  );
+};
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (error instanceof Error && error.message.length > 0) {
+    return error.message;
+  }
+
+  return fallback;
+};
+
+const resolvePlaythroughForImportAnalytics = async (playthroughId?: string) => {
+  if (
+    playthroughId &&
+    typeof playthroughActions.getAllPlaythroughs === "function"
+  ) {
+    const importedPlaythroughs = await playthroughActions.getAllPlaythroughs();
+    const importedPlaythrough = importedPlaythroughs.find(
+      (playthrough) => playthrough.id === playthroughId,
+    );
+
+    if (importedPlaythrough) {
+      return importedPlaythrough;
+    }
+  }
+
+  if (typeof playthroughActions.getActivePlaythrough === "function") {
+    return playthroughActions.getActivePlaythrough();
+  }
+
+  return null;
+};
+
+const trackImportFailure = async ({
+  failureStage,
+  errorCategory,
+  fileContext,
+  playthroughId,
+}: {
+  failureStage: ImportFailureStage;
+  errorCategory: ImportErrorCategory;
+  fileContext: ImportFileContext;
+  playthroughId?: string;
+}) => {
+  const analyticsPlaythrough =
+    await resolvePlaythroughForImportAnalytics(playthroughId);
+  if (!analyticsPlaythrough) {
+    return;
+  }
+
+  trackEvent("playthrough_import_failed", {
+    ...getSharedEventProperties(analyticsPlaythrough),
+    import_source: IMPORT_SOURCE,
+    failure_stage: failureStage,
+    error_category: errorCategory,
+    has_file: fileContext.hasFile,
+    file_extension_group: fileContext.fileExtensionGroup,
+    mime_group: fileContext.mimeGroup,
+  });
+};
+
+const trackImportSuccess = async ({
+  playthroughId,
+  fileContext,
+}: {
+  playthroughId: string;
+  fileContext: ImportFileContext;
+}) => {
+  const analyticsPlaythrough =
+    await resolvePlaythroughForImportAnalytics(playthroughId);
+  if (!analyticsPlaythrough) {
+    return;
+  }
+
+  trackEvent("playthrough_imported", {
+    ...getSharedEventProperties(analyticsPlaythrough),
+    import_source: IMPORT_SOURCE,
+    file_extension_group: fileContext.fileExtensionGroup,
+    mime_group: fileContext.mimeGroup,
+  });
+};
 
 // Helper function to export playthrough data as JSON
 const exportPlaythrough = (playthrough: Playthrough) => {
@@ -86,9 +229,13 @@ export function usePlaythroughImportExport() {
       input.accept = ".json,application/json,text/plain";
 
       input.onchange = async (e) => {
+        let importFailureStage: ImportFailureStage = "unknown";
+        let importErrorCategory: ImportErrorCategory = "unexpected";
+
         try {
           const target = e.target as HTMLInputElement;
           const file = target.files?.[0];
+          const fileContext = createFileContext(file);
 
           if (!file) {
             input.remove();
@@ -97,6 +244,14 @@ export function usePlaythroughImportExport() {
 
           // Check file extension
           if (!file.name.toLowerCase().endsWith(".json")) {
+            importFailureStage = "file_selection";
+            importErrorCategory = "unsupported_file_type";
+            await trackImportFailure({
+              failureStage: importFailureStage,
+              errorCategory: importErrorCategory,
+              fileContext,
+            });
+
             setImportErrorMessage("File must have a .json extension");
             setShowImportError(true);
             input.remove();
@@ -109,19 +264,36 @@ export function usePlaythroughImportExport() {
             file.type !== "application/json" &&
             file.type !== "text/plain"
           ) {
+            importFailureStage = "file_selection";
+            importErrorCategory = "unsupported_file_type";
+            await trackImportFailure({
+              failureStage: importFailureStage,
+              errorCategory: importErrorCategory,
+              fileContext,
+            });
+
             setImportErrorMessage("File is not a valid JSON file");
             setShowImportError(true);
             input.remove();
             return;
           }
 
+          importFailureStage = "file_read";
           const text = await file.text();
 
           // Try to parse as JSON first to catch JSON syntax errors
+          importFailureStage = "json_parse";
           let data: unknown;
           try {
             data = JSON.parse(text);
           } catch {
+            importErrorCategory = "invalid_json";
+            await trackImportFailure({
+              failureStage: importFailureStage,
+              errorCategory: importErrorCategory,
+              fileContext,
+            });
+
             setImportErrorMessage("Invalid JSON syntax");
             setShowImportError(true);
             input.remove();
@@ -129,19 +301,46 @@ export function usePlaythroughImportExport() {
           }
 
           // Import the playthrough
+          importFailureStage = "store_import";
           const newId = await playthroughActions.importPlaythrough(data);
-          console.log("Successfully imported playthrough:", newId);
+          await trackImportSuccess({
+            playthroughId: newId,
+            fileContext,
+          });
 
           // Clean up
           input.remove();
         } catch (error) {
           console.error("Failed to import playthrough:", error);
 
+          const file = (e.target as HTMLInputElement).files?.[0];
+          const fileContext = createFileContext(file);
+
           let errorMessage = "Import failed";
 
           if (error instanceof Error) {
             errorMessage = error.message;
+
+            if (importFailureStage === "store_import") {
+              if (error.message.startsWith("Validation failed:")) {
+                importFailureStage = "schema_validation";
+                importErrorCategory = "invalid_schema";
+              } else if (isStorageFailureMessage(error.message)) {
+                importErrorCategory = "storage_failure";
+              }
+            } else if (
+              importFailureStage === "file_read" &&
+              isStorageFailureMessage(error.message)
+            ) {
+              importErrorCategory = "storage_failure";
+            }
           }
+
+          await trackImportFailure({
+            failureStage: importFailureStage,
+            errorCategory: importErrorCategory,
+            fileContext,
+          });
 
           setImportErrorMessage(errorMessage);
           setShowImportError(true);
@@ -152,7 +351,15 @@ export function usePlaythroughImportExport() {
       input.click();
     } catch (error) {
       console.error("Import failed:", error);
-      setImportErrorMessage("Import failed. Please try again.");
+      await trackImportFailure({
+        failureStage: "unknown",
+        errorCategory: "unexpected",
+        fileContext: createFileContext(),
+      });
+
+      setImportErrorMessage(
+        getErrorMessage(error, "Import failed. Please try again."),
+      );
       setShowImportError(true);
     }
   }, []);
