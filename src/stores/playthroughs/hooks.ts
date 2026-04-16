@@ -49,6 +49,11 @@ export const useActivePlaythrough = (): Playthrough | null => {
   }, [snapshot.activePlaythroughId, snapshot.playthroughs]);
 };
 
+export const useActivePlaythroughId = (): string | null => {
+  const snapshot = useSnapshot(playthroughsStore);
+  return snapshot.activePlaythroughId ?? null;
+};
+
 export const useIsRemixMode = (): boolean => {
   const snapshot = useSnapshot(playthroughsStore);
   const activePlaythrough = snapshot.playthroughs.find(
