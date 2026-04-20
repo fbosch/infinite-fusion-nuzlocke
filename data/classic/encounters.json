@@ -945,6 +945,34 @@
     "routeName": "Flooded Cave",
     "encounters": [
       {
+        "pokemonId": 72,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 90,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 98,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 119,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 129,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 211,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 223,
+        "encounterType": "grass"
+      },
+      {
         "pokemonId": 41,
         "encounterType": "cave"
       },
@@ -955,6 +983,14 @@
       {
         "pokemonId": 79,
         "encounterType": "cave"
+      },
+      {
+        "pokemonId": 90,
+        "encounterType": "rock_smash"
+      },
+      {
+        "pokemonId": 91,
+        "encounterType": "rock_smash"
       },
       {
         "pokemonId": 129,
@@ -1420,8 +1456,44 @@
         "encounterType": "grass"
       },
       {
+        "pokemonId": 72,
+        "encounterType": "grass"
+      },
+      {
         "pokemonId": 83,
         "encounterType": "grass"
+      },
+      {
+        "pokemonId": 90,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 98,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 119,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 129,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 211,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 223,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 90,
+        "encounterType": "rock_smash"
+      },
+      {
+        "pokemonId": 91,
+        "encounterType": "rock_smash"
       },
       {
         "pokemonId": 60,
@@ -1826,6 +1898,10 @@
         "encounterType": "grass"
       },
       {
+        "pokemonId": 137,
+        "encounterType": "cave"
+      },
+      {
         "pokemonId": 54,
         "encounterType": "surf"
       },
@@ -2215,11 +2291,39 @@
         "encounterType": "grass"
       },
       {
+        "pokemonId": 90,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 98,
+        "encounterType": "grass"
+      },
+      {
         "pokemonId": 114,
         "encounterType": "grass"
       },
       {
+        "pokemonId": 116,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 120,
+        "encounterType": "grass"
+      },
+      {
         "pokemonId": 122,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 211,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 222,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 224,
         "encounterType": "grass"
       },
       {
@@ -3931,6 +4035,10 @@
       },
       {
         "pokemonId": 200,
+        "encounterType": "cave"
+      },
+      {
+        "pokemonId": 208,
         "encounterType": "cave"
       },
       {
@@ -5715,6 +5823,22 @@
         "encounterType": "grass"
       },
       {
+        "pokemonId": 117,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 119,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 170,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 171,
+        "encounterType": "grass"
+      },
+      {
         "pokemonId": 175,
         "encounterType": "grass"
       },
@@ -5723,8 +5847,64 @@
         "encounterType": "grass"
       },
       {
+        "pokemonId": 222,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 224,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 226,
+        "encounterType": "grass"
+      },
+      {
         "pokemonId": 254,
         "encounterType": "grass"
+      },
+      {
+        "pokemonId": 454,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 455,
+        "encounterType": "grass"
+      },
+      {
+        "pokemonId": 72,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 73,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 222,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 90,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 116,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 129,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 170,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 171,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 501,
+        "encounterType": "fishing"
       }
     ]
   },
@@ -5776,12 +5956,40 @@
         "encounterType": "surf"
       },
       {
+        "pokemonId": 116,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 187,
+        "encounterType": "surf"
+      },
+      {
         "pokemonId": 211,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 222,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 226,
         "encounterType": "surf"
       },
       {
         "pokemonId": 436,
         "encounterType": "surf"
+      },
+      {
+        "pokemonId": 469,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 501,
+        "encounterType": "surf"
+      },
+      {
+        "pokemonId": 90,
+        "encounterType": "fishing"
       },
       {
         "pokemonId": 116,
@@ -5796,7 +6004,19 @@
         "encounterType": "fishing"
       },
       {
+        "pokemonId": 170,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 171,
+        "encounterType": "fishing"
+      },
+      {
         "pokemonId": 211,
+        "encounterType": "fishing"
+      },
+      {
+        "pokemonId": 501,
         "encounterType": "fishing"
       }
     ]
