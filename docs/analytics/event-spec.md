@@ -16,7 +16,7 @@ This document is the source of truth for analytics taxonomy, trigger points, pay
 | `landing_viewed` | Client runtime observer mounted from `src/app/layout.tsx` | Active playthrough is available after store load, once per playthrough per tab session | Store is still loading, no active playthrough, or same session already emitted |
 | `playthrough_selector_opened` | `PlaythroughSelector` header control | User opens the playthrough selector popover | Store is still loading or no active playthrough is available |
 | `create_playthrough_modal_opened` | Create action inside `PlaythroughSelector` | User opens the create playthrough modal | No active playthrough is available |
-| `first_encounter_saved` | Encounter mutation paths in `src/stores/playthroughs/encounters/crud.ts` | Encounter count changes from zero to at least one | Encounter count was already non-zero or mutation removes data |
+| `first_encounter_saved` | Encounter mutation paths in `src/stores/playthroughs/encounters/crud.ts` and `src/stores/playthroughs/encounters/fusion.ts` | Encounter count changes from zero to at least one | Encounter count was already non-zero or mutation removes data |
 | `playthrough_created` | `createPlaythrough` in `src/stores/playthroughs/store.ts` | A new playthrough is successfully appended to store state | Creation short-circuits or throws before append |
 | `run_checkpoint_reached` | Encounter mutation paths in `src/stores/playthroughs/encounters/*.ts` | Encounter count crosses any configured checkpoint threshold | Encounter count changes without crossing a new threshold |
 | `playthrough_resumed` | Client runtime observer mounted from `src/app/layout.tsx` | Active playthrough is available after store load and qualifies as a resume | Store is still loading, no active playthrough, or same session already emitted |
@@ -167,6 +167,6 @@ No additional properties beyond the shared schema.
 
 ## Implementation notes
 
-- Trigger detection belongs at action/mutation boundaries, not in presentational components.
+- Trigger detection belongs at action/mutation boundaries for mutation-backed events (for example `first_encounter_saved`), while pure UI-intent events such as `playthrough_selector_opened` and `create_playthrough_modal_opened` may emit from their presentational component.
 - Event payload builders should read canonical store state after mutation when the event requires after-state fields.
 - Any contract change in event names, property names, bucket labels, or thresholds must update this document first.

@@ -128,7 +128,7 @@ describe("PlaythroughSelector", () => {
   it("tracks when the playthrough selector opens", () => {
     render(<PlaythroughSelector />);
 
-    fireEvent.click(screen.getAllByText("Older Run")[0]!.closest("button")!);
+    fireEvent.click(screen.getByRole("button", { name: /^older run$/i }));
 
     expect(trackEventMock).toHaveBeenCalledWith(
       "playthrough_selector_opened",
