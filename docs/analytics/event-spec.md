@@ -13,6 +13,10 @@ This document is the source of truth for analytics taxonomy, trigger points, pay
 
 | Event | Trigger point | Emits when | Does not emit when |
 | --- | --- | --- | --- |
+| `landing_viewed` | Client runtime observer mounted from `src/app/layout.tsx` | Active playthrough is available after store load, once per playthrough per tab session | Store is still loading, no active playthrough, or same session already emitted |
+| `playthrough_selector_opened` | `PlaythroughSelector` header control | User opens the playthrough selector popover | Store is still loading or no active playthrough is available |
+| `create_playthrough_modal_opened` | Create action inside `PlaythroughSelector` | User opens the create playthrough modal | No active playthrough is available |
+| `first_encounter_saved` | Encounter mutation paths in `src/stores/playthroughs/encounters/crud.ts` | Encounter count changes from zero to at least one | Encounter count was already non-zero or mutation removes data |
 | `playthrough_created` | `createPlaythrough` in `src/stores/playthroughs/store.ts` | A new playthrough is successfully appended to store state | Creation short-circuits or throws before append |
 | `run_checkpoint_reached` | Encounter mutation paths in `src/stores/playthroughs/encounters/*.ts` | Encounter count crosses any configured checkpoint threshold | Encounter count changes without crossing a new threshold |
 | `playthrough_resumed` | Client runtime observer mounted from `src/app/layout.tsx` | Active playthrough is available after store load and qualifies as a resume | Store is still loading, no active playthrough, or same session already emitted |
@@ -36,6 +40,30 @@ Every event includes these shared properties unless noted otherwise.
 | `viable_roster_bucket` | `ViableRosterBucket` | Bucketed viable roster size at emit time |
 
 ## Event-specific properties
+
+### `landing_viewed`
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `entry_route` | `"home" \| "locations" \| "other"` | Low-cardinality route bucket at emit time |
+
+### `playthrough_selector_opened`
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `source_surface` | `"header"` | UI surface that opened the selector |
+
+### `create_playthrough_modal_opened`
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `source_surface` | `"header"` | UI surface that opened the modal |
+
+### `first_encounter_saved`
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `location_id` | `string` | Encounter location identifier |
 
 ### `playthrough_created`
 
@@ -125,6 +153,10 @@ No additional properties beyond the shared schema.
 
 | Event | Dedupe strategy |
 | --- | --- |
+| `landing_viewed` | Session dedupe per playthrough using session storage (once per tab session) |
+| `playthrough_selector_opened` | No storage dedupe required; emit each successful open intent |
+| `create_playthrough_modal_opened` | No storage dedupe required; emit each successful modal open intent |
+| `first_encounter_saved` | Transition dedupe only; emit when encounter count crosses from zero to one or more |
 | `playthrough_created` | No storage dedupe required; emit once per successful `createPlaythrough` call |
 | `run_checkpoint_reached` | Monotonic threshold dedupe per playthrough using persistent local storage keyed by playthrough id |
 | `playthrough_resumed` | Session dedupe per playthrough using session storage (once per tab session) |

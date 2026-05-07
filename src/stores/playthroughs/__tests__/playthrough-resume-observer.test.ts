@@ -95,6 +95,33 @@ describe("PlaythroughResumeObserver", () => {
     ).toHaveLength(1);
   });
 
+  it("emits landing view once for an active playthrough in a session", async () => {
+    const { activePlaythrough } = createTestPlaythrough();
+    playthroughsStore.isLoading = false;
+    analyticsMocks.trackEvent.mockClear();
+
+    const view = render(createElement(PlaythroughResumeObserver));
+
+    await waitFor(() => {
+      expect(analyticsMocks.trackEvent).toHaveBeenCalledWith(
+        "landing_viewed",
+        expect.objectContaining({
+          playthrough_id: activePlaythrough.id,
+          entry_route: "home",
+        }),
+      );
+    });
+
+    view.rerender(createElement(PlaythroughResumeObserver));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(
+      analyticsMocks.trackEvent.mock.calls.filter(
+        (call) => call[0] === "landing_viewed",
+      ),
+    ).toHaveLength(1);
+  });
+
   it("emits for a different playthrough in same session", async () => {
     const first = createTestPlaythrough("First");
     first.activePlaythrough.updatedAt = Date.now() - 86_400_000;
@@ -136,7 +163,11 @@ describe("PlaythroughResumeObserver", () => {
     render(createElement(PlaythroughResumeObserver));
 
     await waitFor(() => {
-      expect(analyticsMocks.trackEvent).toHaveBeenCalledTimes(1);
+      expect(
+        analyticsMocks.trackEvent.mock.calls.filter(
+          (call) => call[0] === "landing_viewed",
+        ),
+      ).toHaveLength(1);
     });
 
     localStorage.setItem(
@@ -154,9 +185,15 @@ describe("PlaythroughResumeObserver", () => {
     await waitFor(() => {
       expect(
         analyticsMocks.trackEvent.mock.calls.filter(
-          (call) => call[0] === "playthrough_resumed",
+          (call) => call[0] === "landing_viewed",
         ),
       ).toHaveLength(2);
     });
+
+    expect(
+      analyticsMocks.trackEvent.mock.calls.filter(
+        (call) => call[0] === "playthrough_resumed",
+      ),
+    ).toHaveLength(1);
   });
 });

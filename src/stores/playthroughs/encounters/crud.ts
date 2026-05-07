@@ -21,6 +21,22 @@ import {
   removeTeamMembersWithPokemon,
 } from "./team";
 
+const trackFirstEncounterSaved = (
+  activePlaythrough: Playthrough,
+  locationId: string,
+  previousEncounterCount: number,
+  nextEncounterCount: number,
+) => {
+  if (previousEncounterCount !== 0 || nextEncounterCount === 0) {
+    return;
+  }
+
+  trackEvent("first_encounter_saved", {
+    ...getSharedEventProperties(activePlaythrough),
+    location_id: locationId,
+  });
+};
+
 // Create encounter data (variants are managed globally)
 export const createEncounterData = async (
   pokemon: PokemonOption | null,
@@ -107,6 +123,12 @@ export const updateEncounter = async (
     }
 
     const nextEncounterCount = getEncounterCount(activePlaythrough);
+    trackFirstEncounterSaved(
+      activePlaythrough,
+      locationId,
+      previousEncounterCount,
+      nextEncounterCount,
+    );
     const newlyReachedCheckpoints = getNewlyReachedCheckpoints(
       activePlaythrough.id,
       previousEncounterCount,
@@ -212,6 +234,12 @@ export const updateEncounter = async (
     }
 
     const nextEncounterCount = getEncounterCount(activePlaythrough);
+    trackFirstEncounterSaved(
+      activePlaythrough,
+      locationId,
+      previousEncounterCount,
+      nextEncounterCount,
+    );
     const newlyReachedCheckpoints = getNewlyReachedCheckpoints(
       activePlaythrough.id,
       previousEncounterCount,

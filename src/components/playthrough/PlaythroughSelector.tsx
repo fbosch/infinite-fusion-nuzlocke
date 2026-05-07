@@ -16,6 +16,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import { usePlaythroughImportExport } from "@/hooks/usePlaythroughImportExport";
+import { getSharedEventProperties } from "@/lib/analytics/playthroughEventData";
+import { trackEvent } from "@/lib/analytics/trackEvent";
 import {
   type GameMode,
   type Playthrough,
@@ -122,6 +124,31 @@ export default function PlaythroughSelector({
     setPlaythroughToDelete(null);
   };
 
+  const trackSelectorOpened = useCallback(() => {
+    if (!activePlaythrough) {
+      return;
+    }
+
+    trackEvent("playthrough_selector_opened", {
+      ...getSharedEventProperties(activePlaythrough),
+      source_surface: "header",
+    });
+  }, [activePlaythrough]);
+
+  const handleCreateClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      if (activePlaythrough) {
+        trackEvent("create_playthrough_modal_opened", {
+          ...getSharedEventProperties(activePlaythrough),
+          source_surface: "header",
+        });
+      }
+      setShowCreateInput(true);
+    },
+    [activePlaythrough],
+  );
+
   // Handle arrow key navigation using refs
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent, currentIndex: number) => {
@@ -176,6 +203,11 @@ export default function PlaythroughSelector({
                   "h-[40px] sm:h-[44px]",
                 )}
                 disabled={isLoading}
+                onClick={() => {
+                  if (!open) {
+                    trackSelectorOpened();
+                  }
+                }}
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
                   <div className="flex items-center justify-center size-6 rounded-lg bg-gradient-to-br ">
@@ -437,10 +469,7 @@ export default function PlaythroughSelector({
                 >
                   <div className="relative">
                     <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setShowCreateInput(true);
-                      }}
+                      onClick={handleCreateClick}
                       className={clsx(
                         "group flex w-full items-center gap-3 px-4 py-3.5 text-sm",
                         "text-gray-700 dark:text-gray-300 transition-all duration-200",

@@ -25,6 +25,22 @@ const VALID_EVENT_PAYLOADS: Record<
   AnalyticsEventName,
   Record<string, AnalyticsPrimitive>
 > = {
+  landing_viewed: {
+    ...BASE_SHARED_PROPERTIES,
+    entry_route: "home",
+  },
+  playthrough_selector_opened: {
+    ...BASE_SHARED_PROPERTIES,
+    source_surface: "header",
+  },
+  create_playthrough_modal_opened: {
+    ...BASE_SHARED_PROPERTIES,
+    source_surface: "header",
+  },
+  first_encounter_saved: {
+    ...BASE_SHARED_PROPERTIES,
+    location_id: "route-1",
+  },
   playthrough_created: {
     ...BASE_SHARED_PROPERTIES,
     has_existing_playthroughs: false,

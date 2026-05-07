@@ -11,8 +11,9 @@ import type React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import PlaythroughSelector from "../PlaythroughSelector";
 
-const { setActivePlaythroughMock } = vi.hoisted(() => ({
+const { setActivePlaythroughMock, trackEventMock } = vi.hoisted(() => ({
   setActivePlaythroughMock: vi.fn().mockResolvedValue(undefined),
+  trackEventMock: vi.fn(),
 }));
 
 const playthroughs = [
@@ -43,7 +44,7 @@ type PopoverChildren =
 vi.mock("@headlessui/react", () => ({
   Popover: ({ children }: { children: PopoverChildren }) => {
     if (typeof children === "function") {
-      return <div>{children({ open: true })}</div>;
+      return <div>{children({ open: false })}</div>;
     }
 
     return <div>{children}</div>;
@@ -78,6 +79,22 @@ vi.mock("@/hooks/usePlaythroughImportExport", () => ({
   }),
 }));
 
+vi.mock("@/lib/analytics/playthroughEventData", () => ({
+  getSharedEventProperties: () => ({
+    playthrough_id: "older",
+    game_mode: "classic",
+    encounter_count_bucket: "e_0",
+    deceased_count_bucket: "c_0",
+    boxed_count_bucket: "c_0",
+    fusion_count_bucket: "c_0",
+    viable_roster_bucket: "v_0",
+  }),
+}));
+
+vi.mock("@/lib/analytics/trackEvent", () => ({
+  trackEvent: trackEventMock,
+}));
+
 vi.mock("../CreatePlaythroughModal", () => ({
   default: () => null,
 }));
@@ -105,6 +122,29 @@ describe("PlaythroughSelector", () => {
 
   beforeEach(() => {
     setActivePlaythroughMock.mockClear();
+    trackEventMock.mockClear();
+  });
+
+  it("tracks when the playthrough selector opens", () => {
+    render(<PlaythroughSelector />);
+
+    fireEvent.click(screen.getAllByText("Older Run")[0]!.closest("button")!);
+
+    expect(trackEventMock).toHaveBeenCalledWith(
+      "playthrough_selector_opened",
+      expect.objectContaining({ source_surface: "header" }),
+    );
+  });
+
+  it("tracks when the create playthrough modal opens", () => {
+    render(<PlaythroughSelector />);
+
+    fireEvent.click(screen.getByRole("button", { name: /create new/i }));
+
+    expect(trackEventMock).toHaveBeenCalledWith(
+      "create_playthrough_modal_opened",
+      expect.objectContaining({ source_surface: "header" }),
+    );
   });
 
   it("supports arrow/home/end keyboard navigation between playthrough rows", () => {
