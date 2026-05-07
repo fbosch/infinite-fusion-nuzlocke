@@ -29,6 +29,21 @@ const VALID_EVENT_PAYLOADS: Record<
     ...BASE_SHARED_PROPERTIES,
     has_existing_playthroughs: false,
   },
+  playthrough_imported: {
+    ...BASE_SHARED_PROPERTIES,
+    import_source: "file_picker",
+    file_extension_group: "json",
+    mime_group: "application_json",
+  },
+  playthrough_import_failed: {
+    ...BASE_SHARED_PROPERTIES,
+    import_source: "file_picker",
+    failure_stage: "json_parse",
+    error_category: "invalid_json",
+    has_file: true,
+    file_extension_group: "json",
+    mime_group: "application_json",
+  },
   run_checkpoint_reached: {
     ...BASE_SHARED_PROPERTIES,
     checkpoint: 5,
@@ -288,6 +303,66 @@ describe("analytics transport wrapper", () => {
       expect.objectContaining({ checkpoint: 5, checkpoint_label: "cp_5" }),
     );
     expect(getAnalyticsDebugCounters().sent).toBe(1);
+  });
+
+  it("tracks normalized import failure payloads", () => {
+    localStorage.setItem(
+      "cookie-preferences",
+      JSON.stringify({ analytics: true }),
+    );
+    setEnvironment("production", "production");
+
+    trackEvent(ANALYTICS_EVENTS.playthroughImportFailed, {
+      playthrough_id: "pt-1",
+      game_mode: "classic",
+      encounter_count_bucket: "e_1",
+      deceased_count_bucket: "c_0",
+      boxed_count_bucket: "c_0",
+      fusion_count_bucket: "c_0",
+      viable_roster_bucket: "v_6_plus",
+      import_source: "file_picker",
+      failure_stage: "json_parse",
+      error_category: "invalid_json",
+      has_file: true,
+      file_extension_group: "json",
+      mime_group: "application_json",
+    });
+
+    expect(analyticsMock.track).toHaveBeenCalledWith(
+      "playthrough_import_failed",
+      expect.objectContaining({
+        failure_stage: "json_parse",
+        error_category: "invalid_json",
+      }),
+    );
+  });
+
+  it("rejects import failure payloads with raw error text fields", () => {
+    localStorage.setItem(
+      "cookie-preferences",
+      JSON.stringify({ analytics: true }),
+    );
+    setEnvironment("production", "production");
+
+    trackEvent(ANALYTICS_EVENTS.playthroughImportFailed, {
+      playthrough_id: "pt-1",
+      game_mode: "classic",
+      encounter_count_bucket: "e_1",
+      deceased_count_bucket: "c_0",
+      boxed_count_bucket: "c_0",
+      fusion_count_bucket: "c_0",
+      viable_roster_bucket: "v_6_plus",
+      import_source: "file_picker",
+      failure_stage: "store_import",
+      error_category: "unexpected",
+      has_file: true,
+      file_extension_group: "json",
+      mime_group: "application_json",
+      raw_error_message: "schema exploded",
+    } as never);
+
+    expect(analyticsMock.track).not.toHaveBeenCalled();
+    expect(getAnalyticsDebugCounters().blockReasons.invalid_payload).toBe(1);
   });
 
   it.each(

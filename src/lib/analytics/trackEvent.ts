@@ -7,6 +7,8 @@ export type AnalyticsProperties = Record<string, AnalyticsPrimitive>;
 
 export const ANALYTICS_EVENTS = {
   playthroughCreated: "playthrough_created",
+  playthroughImported: "playthrough_imported",
+  playthroughImportFailed: "playthrough_import_failed",
   runCheckpointReached: "run_checkpoint_reached",
   playthroughResumed: "playthrough_resumed",
   fusionCreated: "fusion_created",
@@ -67,9 +69,40 @@ export type CheckpointLabel =
   | "cp_40"
   | "cp_80";
 
+export type ImportSource = "file_picker";
+export type FileExtensionGroup = "json" | "other";
+export type MimeGroup = "application_json" | "text_plain" | "empty" | "other";
+export type ImportFailureStage =
+  | "file_selection"
+  | "file_read"
+  | "json_parse"
+  | "schema_validation"
+  | "store_import"
+  | "unknown";
+export type ImportErrorCategory =
+  | "unsupported_file_type"
+  | "invalid_json"
+  | "invalid_schema"
+  | "duplicate_id"
+  | "storage_failure"
+  | "unexpected";
+
 export type AnalyticsEventMap = {
   playthrough_created: SharedEventProperties & {
     has_existing_playthroughs: boolean;
+  };
+  playthrough_imported: SharedEventProperties & {
+    import_source: ImportSource;
+    file_extension_group: FileExtensionGroup;
+    mime_group: MimeGroup;
+  };
+  playthrough_import_failed: SharedEventProperties & {
+    import_source: ImportSource;
+    failure_stage: ImportFailureStage;
+    error_category: ImportErrorCategory;
+    has_file: boolean;
+    file_extension_group: FileExtensionGroup;
+    mime_group: MimeGroup;
   };
   run_checkpoint_reached: SharedEventProperties & {
     checkpoint: Checkpoint;
@@ -163,6 +196,37 @@ const analyticsEventSchemaMap = {
   playthrough_created: sharedEventPropertiesSchema
     .extend({
       has_existing_playthroughs: z.boolean(),
+    })
+    .strict(),
+  playthrough_imported: sharedEventPropertiesSchema
+    .extend({
+      import_source: z.literal("file_picker"),
+      file_extension_group: z.enum(["json", "other"]),
+      mime_group: z.enum(["application_json", "text_plain", "empty", "other"]),
+    })
+    .strict(),
+  playthrough_import_failed: sharedEventPropertiesSchema
+    .extend({
+      import_source: z.literal("file_picker"),
+      failure_stage: z.enum([
+        "file_selection",
+        "file_read",
+        "json_parse",
+        "schema_validation",
+        "store_import",
+        "unknown",
+      ]),
+      error_category: z.enum([
+        "unsupported_file_type",
+        "invalid_json",
+        "invalid_schema",
+        "duplicate_id",
+        "storage_failure",
+        "unexpected",
+      ]),
+      has_file: z.boolean(),
+      file_extension_group: z.enum(["json", "other"]),
+      mime_group: z.enum(["application_json", "text_plain", "empty", "other"]),
     })
     .strict(),
   run_checkpoint_reached: sharedEventPropertiesSchema
@@ -260,6 +324,8 @@ const ANALYTICS_PRODUCTION_HOSTNAMES = new Set([
 const createByEventCounter = (): Record<AnalyticsEventName, EventCounter> => {
   return {
     playthrough_created: { sent: 0, blocked: 0 },
+    playthrough_imported: { sent: 0, blocked: 0 },
+    playthrough_import_failed: { sent: 0, blocked: 0 },
     run_checkpoint_reached: { sent: 0, blocked: 0 },
     playthrough_resumed: { sent: 0, blocked: 0 },
     fusion_created: { sent: 0, blocked: 0 },
