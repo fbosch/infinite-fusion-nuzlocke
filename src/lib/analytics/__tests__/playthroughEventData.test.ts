@@ -9,6 +9,7 @@ import {
 } from "../buckets";
 import {
   getCheckpointLabel,
+  getCheckpointStorageKey,
   getDaysSinceLastActive,
   getNewlyReachedCheckpoints,
   markCheckpointEventsTracked,
@@ -175,6 +176,21 @@ describe("playthroughEventData", () => {
 
     expect(getNewlyReachedCheckpoints("playthrough-1", 9, 10, storage)).toEqual(
       [],
+    );
+  });
+
+  it("respects checkpoint markers restored from storage", () => {
+    const storage = createStorage();
+    storage.setItem(
+      getCheckpointStorageKey("playthrough-1"),
+      JSON.stringify([1, 5]),
+    );
+
+    expect(getNewlyReachedCheckpoints("playthrough-1", 0, 6, storage)).toEqual(
+      [],
+    );
+    expect(getNewlyReachedCheckpoints("playthrough-1", 0, 10, storage)).toEqual(
+      [10],
     );
   });
 
