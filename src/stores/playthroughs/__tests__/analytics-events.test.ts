@@ -81,6 +81,12 @@ describe("analytics event instrumentation", () => {
       checkpoint: 5,
       checkpoint_label: "cp_5",
     });
+
+    const firstEncounterEvents = getTrackedEvents("first_encounter_saved");
+    expect(firstEncounterEvents).toHaveLength(1);
+    expect(firstEncounterEvents[0]?.[1]).toMatchObject({
+      location_id: "route1",
+    });
   });
 
   it("tracks fusion_created for update, create, and drag-drop transitions", async () => {
@@ -137,6 +143,23 @@ describe("analytics event instrumentation", () => {
     expect(fusionCreatedEvents[0]?.[1]).toMatchObject({
       creation_method: "drag_drop",
       location_id: "route4",
+    });
+  });
+
+  it("tracks first encounter when a fusion creates the first saved encounter", async () => {
+    createTestPlaythrough();
+    analyticsMocks.trackEvent.mockClear();
+
+    await createFusion(
+      "route1",
+      testPokemon.pikachu("first-fusion-head"),
+      testPokemon.charmander("first-fusion-body"),
+    );
+
+    const firstEncounterEvents = getTrackedEvents("first_encounter_saved");
+    expect(firstEncounterEvents).toHaveLength(1);
+    expect(firstEncounterEvents[0]?.[1]).toMatchObject({
+      location_id: "route1",
     });
   });
 

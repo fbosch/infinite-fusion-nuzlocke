@@ -6,6 +6,10 @@ type AnalyticsPrimitive = string | number | boolean;
 export type AnalyticsProperties = Record<string, AnalyticsPrimitive>;
 
 export const ANALYTICS_EVENTS = {
+  landingViewed: "landing_viewed",
+  playthroughSelectorOpened: "playthrough_selector_opened",
+  createPlaythroughModalOpened: "create_playthrough_modal_opened",
+  firstEncounterSaved: "first_encounter_saved",
   playthroughCreated: "playthrough_created",
   playthroughImported: "playthrough_imported",
   playthroughImportFailed: "playthrough_import_failed",
@@ -88,6 +92,18 @@ export type ImportErrorCategory =
   | "unexpected";
 
 export type AnalyticsEventMap = {
+  landing_viewed: SharedEventProperties & {
+    entry_route: "home" | "locations" | "other";
+  };
+  playthrough_selector_opened: SharedEventProperties & {
+    source_surface: "header";
+  };
+  create_playthrough_modal_opened: SharedEventProperties & {
+    source_surface: "header";
+  };
+  first_encounter_saved: SharedEventProperties & {
+    location_id: string;
+  };
   playthrough_created: SharedEventProperties & {
     has_existing_playthroughs: boolean;
   };
@@ -193,6 +209,26 @@ const sharedEventPropertiesSchema = z
   .strict();
 
 const analyticsEventSchemaMap = {
+  landing_viewed: sharedEventPropertiesSchema
+    .extend({
+      entry_route: z.enum(["home", "locations", "other"]),
+    })
+    .strict(),
+  playthrough_selector_opened: sharedEventPropertiesSchema
+    .extend({
+      source_surface: z.literal("header"),
+    })
+    .strict(),
+  create_playthrough_modal_opened: sharedEventPropertiesSchema
+    .extend({
+      source_surface: z.literal("header"),
+    })
+    .strict(),
+  first_encounter_saved: sharedEventPropertiesSchema
+    .extend({
+      location_id: z.string().min(1),
+    })
+    .strict(),
   playthrough_created: sharedEventPropertiesSchema
     .extend({
       has_existing_playthroughs: z.boolean(),
@@ -323,6 +359,10 @@ const ANALYTICS_PRODUCTION_HOSTNAMES = new Set([
 
 const createByEventCounter = (): Record<AnalyticsEventName, EventCounter> => {
   return {
+    landing_viewed: { sent: 0, blocked: 0 },
+    playthrough_selector_opened: { sent: 0, blocked: 0 },
+    create_playthrough_modal_opened: { sent: 0, blocked: 0 },
+    first_encounter_saved: { sent: 0, blocked: 0 },
     playthrough_created: { sent: 0, blocked: 0 },
     playthrough_imported: { sent: 0, blocked: 0 },
     playthrough_import_failed: { sent: 0, blocked: 0 },

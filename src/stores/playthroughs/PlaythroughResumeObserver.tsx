@@ -5,7 +5,9 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   getDaysSinceLastActive,
   getSharedEventProperties,
+  markLandingViewedTracked,
   markPlaythroughResumedTracked,
+  shouldTrackLandingViewed,
   shouldTrackPlaythroughResumed,
   toDormancyBucket,
 } from "@/lib/analytics/playthroughEventData";
@@ -25,12 +27,46 @@ const DEFAULT_CONSENT_PREFERENCES: ConsentPreferences = {
 export function PlaythroughResumeObserver() {
   const activePlaythrough = useActivePlaythrough();
   const isLoading = useIsLoading();
+  const lastTrackedLandingPlaythroughId = useRef<string | null>(null);
   const lastTrackedPlaythroughId = useRef<string | null>(null);
   const [preferences] = useLocalStorage<ConsentPreferences>(
     "cookie-preferences",
     DEFAULT_CONSENT_PREFERENCES,
   );
   const hasAnalyticsConsent = preferences.analytics;
+
+  useEffect(() => {
+    if (isLoading || !activePlaythrough) {
+      return;
+    }
+
+    if (lastTrackedLandingPlaythroughId.current === activePlaythrough.id) {
+      return;
+    }
+
+    if (!shouldTrackLandingViewed(activePlaythrough.id)) {
+      lastTrackedLandingPlaythroughId.current = activePlaythrough.id;
+      return;
+    }
+
+    const pathname = globalThis.location?.pathname;
+    const entryRoute =
+      pathname === "/"
+        ? "home"
+        : pathname === "/locations"
+          ? "locations"
+          : "other";
+
+    const wasTracked = trackEvent("landing_viewed", {
+      ...getSharedEventProperties(activePlaythrough),
+      entry_route: entryRoute,
+    });
+
+    if (wasTracked) {
+      markLandingViewedTracked(activePlaythrough.id);
+      lastTrackedLandingPlaythroughId.current = activePlaythrough.id;
+    }
+  }, [activePlaythrough, hasAnalyticsConsent, isLoading]);
 
   useEffect(() => {
     if (isLoading || !activePlaythrough) {

@@ -122,6 +122,13 @@ export const createFusion = async (
   }
 
   const nextEncounterCount = getEncounterCount(activePlaythrough);
+  if (previousEncounterCount === 0 && nextEncounterCount > 0) {
+    trackEvent("first_encounter_saved", {
+      ...getSharedEventProperties(activePlaythrough),
+      location_id: locationId,
+    });
+  }
+
   const newlyReachedCheckpoints = getNewlyReachedCheckpoints(
     activePlaythrough.id,
     previousEncounterCount,

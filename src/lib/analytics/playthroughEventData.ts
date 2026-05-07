@@ -2,6 +2,7 @@ import type { Checkpoint } from "./trackEvent";
 
 const CHECKPOINTS: readonly Checkpoint[] = [1, 5, 10, 20, 40, 80];
 const CHECKPOINT_STORAGE_KEY_PREFIX = "analytics:checkpoints:";
+const LANDING_STORAGE_KEY_PREFIX = "analytics:landing-viewed:";
 const RESUME_STORAGE_KEY_PREFIX = "analytics:playthrough-resumed:";
 
 type StorageValue = Storage | null | undefined;
@@ -39,6 +40,10 @@ export const getCheckpointStorageKey = (playthroughId: string): string => {
 
 export const getResumeStorageKey = (playthroughId: string): string => {
   return `${RESUME_STORAGE_KEY_PREFIX}${playthroughId}`;
+};
+
+export const getLandingStorageKey = (playthroughId: string): string => {
+  return `${LANDING_STORAGE_KEY_PREFIX}${playthroughId}`;
 };
 
 const parseStoredCheckpoints = (value: string | null): Set<Checkpoint> => {
@@ -156,6 +161,17 @@ export const shouldTrackPlaythroughResumed = (
   return safeGetItem(storage, key) !== "1";
 };
 
+export const shouldTrackLandingViewed = (
+  playthroughId: string,
+  storage: StorageValue = globalThis.sessionStorage,
+): boolean => {
+  if (!isUsableStorage(storage)) {
+    return true;
+  }
+
+  return safeGetItem(storage, getLandingStorageKey(playthroughId)) !== "1";
+};
+
 export const markPlaythroughResumedTracked = (
   playthroughId: string,
   storage: StorageValue = globalThis.sessionStorage,
@@ -165,6 +181,17 @@ export const markPlaythroughResumedTracked = (
   }
 
   safeSetItem(storage, getResumeStorageKey(playthroughId), "1");
+};
+
+export const markLandingViewedTracked = (
+  playthroughId: string,
+  storage: StorageValue = globalThis.sessionStorage,
+): void => {
+  if (!isUsableStorage(storage)) {
+    return;
+  }
+
+  safeSetItem(storage, getLandingStorageKey(playthroughId), "1");
 };
 
 export const getDaysSinceLastActive = (
