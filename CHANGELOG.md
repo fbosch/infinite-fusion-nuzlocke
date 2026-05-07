@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.7.0](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.6.0...v0.7.0) (2026-05-07)
+
+
+### Features
+
+* **analytics:** track early funnel events ([ee54fe5](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/ee54fe5055c3e5db149d5efe8dfd817c175c2997))
+* **inf-131:** track import success and failure events ([8d5d51f](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/8d5d51f198708b2503ab33190c8ec3b38fc3e88a))
+
+
+### Bug Fixes
+
+* **analytics:** address PR feedback ([b6960b7](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/b6960b70e7b5c4a8ceaf6f0e9ff874d4554650b7))
+* **inf-115:** address review feedback for animation reset ([8ede43d](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/8ede43dbe08b4fc371cbddcf00c5c9e32e49dbad))
+* **INF-115:** prevent evolution animation when switching playthroughs ([c67396e](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/c67396e9c153f0f218c359d4b4f04ad3972f6cdc))
+* **inf-115:** reset evolution animation state on playthrough switch ([eeab1ac](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/eeab1ac457621792467354cf9454635729619ee5))
+* **inf-128:** address PR review on canonical emit paths ([275202b](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/275202b56c5f33a19d1fc0a7941247c617f6d05f))
+* **inf-128:** route team actions through canonical emit points ([ba785b9](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/ba785b9e3be714a577aab31d975f8cc555a3a097))
+
 ## [0.6.0](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.5.4...v0.6.0) (2026-04-13)
 
 
