@@ -12,7 +12,7 @@ The system MUST emit dedicated analytics events for import success and import fa
 #### Scenario: Failed import emits canonical failure event
 - **WHEN** a playthrough import attempt fails at any supported stage
 - **THEN** the system emits `playthrough_import_failed`
-- **AND** payload includes required shared event properties where available
+- **AND** payload includes required shared event properties
 - **AND** payload includes normalized `failure_stage` and `error_category` fields
 
 ### Requirement: Import failure taxonomy uses bounded normalized fields
