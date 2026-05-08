@@ -20,6 +20,7 @@ import {
   cloneElement,
   isValidElement,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -56,6 +57,7 @@ interface CursorTooltipProps {
   delay?: number;
   disabled?: boolean;
   placement?: Placement;
+  tooltipId?: string;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   offset?: {
@@ -72,9 +74,11 @@ export function CursorTooltip(props: CursorTooltipProps) {
     delay = 0,
     disabled = false,
     placement = "bottom-start",
+    tooltipId,
     onMouseEnter,
     onMouseLeave,
   } = props;
+  const instanceId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [animationState, setAnimationState] = useState<
     "entering" | "entered" | "exiting" | null
@@ -107,6 +111,13 @@ export function CursorTooltip(props: CursorTooltipProps) {
       }
 
       if (open) {
+        if (tooltipId) {
+          window.dispatchEvent(
+            new CustomEvent("cursor-tooltip-open", {
+              detail: { tooltipId, instanceId },
+            }),
+          );
+        }
         setIsOpen(true);
         setAnimationState("entering");
       } else {
@@ -176,6 +187,27 @@ export function CursorTooltip(props: CursorTooltipProps) {
       return cleanup;
     },
   });
+
+  useEffect(() => {
+    if (!tooltipId) return;
+
+    const handleTooltipOpen = (event: Event) => {
+      const detail = (event as CustomEvent).detail as
+        | { tooltipId?: string; instanceId?: string }
+        | undefined;
+      if (detail?.tooltipId !== tooltipId || detail.instanceId === instanceId) {
+        return;
+      }
+
+      setIsOpen(false);
+      setAnimationState(null);
+    };
+
+    window.addEventListener("cursor-tooltip-open", handleTooltipOpen);
+    return () => {
+      window.removeEventListener("cursor-tooltip-open", handleTooltipOpen);
+    };
+  }, [instanceId, tooltipId]);
 
   // Register tooltip with global state when it opens/closes
   useEffect(() => {
