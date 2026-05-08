@@ -173,9 +173,6 @@ export default function TeamSlots() {
   // Refs for team member sprites to play evolution animations
   const teamSpriteRefs = useRef<(FusionSpriteHandle | null)[]>([]);
   const previousFusionIds = useRef<(string | null)[]>([]);
-  const pendingEvolutionTimeouts = useRef<
-    Array<ReturnType<typeof setTimeout> | null>
-  >([]);
 
   const pokemonByUid = useMemo(
     () => buildPokemonUidIndex(encounters),
@@ -184,12 +181,6 @@ export default function TeamSlots() {
 
   useEffect(() => {
     previousFusionIds.current = new Array(6).fill(null);
-    pendingEvolutionTimeouts.current.forEach((timeoutId, index) => {
-      if (timeoutId !== null) {
-        clearTimeout(timeoutId);
-      }
-      pendingEvolutionTimeouts.current[index] = null;
-    });
   }, [activePlaythrough?.id]);
 
   const teamSlots = useMemo(() => {
@@ -246,10 +237,6 @@ export default function TeamSlots() {
     if (previousFusionIds.current.length !== 6) {
       previousFusionIds.current = new Array(6).fill(null);
     }
-    if (pendingEvolutionTimeouts.current.length !== 6) {
-      pendingEvolutionTimeouts.current = new Array(6).fill(null);
-    }
-
     // Use requestAnimationFrame to ensure proper timing
     const animationFrame = requestAnimationFrame(() => {
       teamSlots.forEach((slot, index) => {
@@ -270,17 +257,7 @@ export default function TeamSlots() {
           // Play animation if fusion ID changed and ref exists
           if (previousFusionIds.current[index] !== currentFusionId) {
             previousFusionIds.current[index] = currentFusionId;
-
-            // Add small delay to ensure ref is properly set
-            if (pendingEvolutionTimeouts.current[index] !== null) {
-              clearTimeout(pendingEvolutionTimeouts.current[index]!);
-            }
-            pendingEvolutionTimeouts.current[index] = setTimeout(() => {
-              if (teamSpriteRefs.current[index]) {
-                teamSpriteRefs.current[index]?.playEvolution();
-              }
-              pendingEvolutionTimeouts.current[index] = null;
-            }, 50);
+            teamSpriteRefs.current[index]?.playEvolution();
           }
         } else if (slot.isEmpty) {
           // Reset previous fusion ID for empty slots
@@ -292,12 +269,6 @@ export default function TeamSlots() {
     // Cleanup animation frame on unmount
     return () => {
       cancelAnimationFrame(animationFrame);
-      pendingEvolutionTimeouts.current.forEach((timeoutId, index) => {
-        if (timeoutId !== null) {
-          clearTimeout(timeoutId);
-        }
-        pendingEvolutionTimeouts.current[index] = null;
-      });
     };
   }, [teamSlots]);
 
