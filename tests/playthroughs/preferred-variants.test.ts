@@ -20,6 +20,19 @@ import {
 const mockedGetPreferredVariant = vi.mocked(getPreferredVariant);
 const mockedSetPreferredVariant = vi.mocked(setPreferredVariant);
 
+const createImageConstructorMock = () =>
+  vi.fn(function MockImage(this: {
+    setAttribute: ReturnType<typeof vi.fn>;
+    src: string;
+    onload: ReturnType<typeof vi.fn>;
+    onerror: ReturnType<typeof vi.fn>;
+  }) {
+    this.setAttribute = vi.fn();
+    this.src = "";
+    this.onload = vi.fn();
+    this.onerror = vi.fn();
+  });
+
 // Import shared setup and utilities
 import {
   act,
@@ -225,6 +238,9 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
     });
 
     it("should handle errors gracefully", async () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
       const sprites = await import("../../src/lib/sprites");
       vi.mocked(sprites.getArtworkVariants).mockRejectedValue(
         new Error("Service error"),
@@ -233,6 +249,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       await act(async () => {
         await playthroughActions.cycleArtworkVariant("route-1", false);
       });
+      consoleErrorSpy.mockRestore();
 
       // Should still update encounter timestamp
       const encounter =
@@ -244,13 +261,8 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
   describe("prefetchAdjacentVariants", () => {
     it("should prefetch adjacent variants for better UX", async () => {
       // Mock Image constructor to track prefetch calls
-      const mockImage = vi.fn().mockImplementation(() => ({
-        setAttribute: vi.fn(),
-        src: "",
-        onload: vi.fn(),
-        onerror: vi.fn(),
-      }));
-      global.Image = mockImage;
+      const mockImage = createImageConstructorMock();
+      global.Image = mockImage as unknown as typeof Image;
 
       // Mock generateSpriteUrl to return valid URLs
       const sprites = await import("../../src/lib/sprites");
@@ -272,13 +284,11 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
     });
 
     it("should handle errors gracefully during prefetching", async () => {
-      const mockImage = vi.fn().mockImplementation(() => ({
-        setAttribute: vi.fn(),
-        src: "",
-        onload: vi.fn(),
-        onerror: vi.fn(),
-      }));
-      global.Image = mockImage;
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+      const mockImage = createImageConstructorMock();
+      global.Image = mockImage as unknown as typeof Image;
 
       // Mock generateSpriteUrl to throw error
       const sprites = await import("../../src/lib/sprites");
@@ -296,6 +306,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
 
       // Wait for async prefetch to complete
       await new Promise((resolve) => setTimeout(resolve, 100));
+      consoleWarnSpy.mockRestore();
 
       // Should not have called Image constructor because generateSpriteUrl throws
       expect(mockImage).not.toHaveBeenCalled();
@@ -316,6 +327,9 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
     });
 
     it("should preload variants for all encounters in the playthrough", async () => {
+      const consoleDebugSpy = vi
+        .spyOn(console, "debug")
+        .mockImplementation(() => {});
       const sprites = await import("../../src/lib/sprites");
       vi.mocked(sprites.getArtworkVariants).mockResolvedValue([
         "",
@@ -325,6 +339,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       await act(async () => {
         await playthroughActions.preloadArtworkVariants();
       });
+      consoleDebugSpy.mockRestore();
 
       // Should have called getArtworkVariants for both encounters
       expect(vi.mocked(sprites.getArtworkVariants)).toHaveBeenCalledWith(25); // Single Pokémon
@@ -332,6 +347,12 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
     });
 
     it("should handle errors gracefully for individual encounters", async () => {
+      const consoleDebugSpy = vi
+        .spyOn(console, "debug")
+        .mockImplementation(() => {});
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
       const sprites = await import("../../src/lib/sprites");
       vi.mocked(sprites.getArtworkVariants)
         .mockResolvedValueOnce(["", "variant-1"]) // Single Pokémon
@@ -340,12 +361,17 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       await act(async () => {
         await playthroughActions.preloadArtworkVariants();
       });
+      consoleDebugSpy.mockRestore();
+      consoleWarnSpy.mockRestore();
 
       // Should still have called for both encounters despite one failing
       expect(vi.mocked(sprites.getArtworkVariants)).toHaveBeenCalledTimes(2);
     });
 
     it("should handle playthroughs with no encounters", async () => {
+      const consoleDebugSpy = vi
+        .spyOn(console, "debug")
+        .mockImplementation(() => {});
       // Create a new playthrough with no encounters
       const playthroughId = playthroughActions.createPlaythrough("Empty Run");
       await playthroughActions.setActivePlaythrough(playthroughId);
@@ -353,6 +379,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       await act(async () => {
         await playthroughActions.preloadArtworkVariants();
       });
+      consoleDebugSpy.mockRestore();
 
       const sprites = await import("../../src/lib/sprites");
       expect(vi.mocked(sprites.getArtworkVariants)).not.toHaveBeenCalled();

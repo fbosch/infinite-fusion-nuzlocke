@@ -1,3 +1,23 @@
+import { beforeEach, vi } from "vitest";
+
+const indexedDbStore = new Map<string, unknown>();
+
+vi.mock("idb-keyval", () => ({
+  createStore: vi.fn(() => ({ name: "mock-store" })),
+  del: vi.fn(async (key: string) => {
+    indexedDbStore.delete(String(key));
+  }),
+  get: vi.fn(async (key: string) => indexedDbStore.get(String(key))),
+  keys: vi.fn(async () => Array.from(indexedDbStore.keys())),
+  set: vi.fn(async (key: string, value: unknown) => {
+    indexedDbStore.set(String(key), value);
+  }),
+}));
+
+beforeEach(() => {
+  indexedDbStore.clear();
+});
+
 function hasUsableLocalStorage() {
   if (typeof globalThis.localStorage === "undefined") {
     return false;

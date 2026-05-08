@@ -283,6 +283,9 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
   });
 
   it("tracks schema-validation failures with normalized taxonomy", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const { input, createElementSpy } = mockInputCreation();
     const validJsonFile = {
       name: "save.json",
@@ -315,6 +318,7 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
       },
     );
 
+    consoleErrorSpy.mockRestore();
     createElementSpy.mockRestore();
   });
 });

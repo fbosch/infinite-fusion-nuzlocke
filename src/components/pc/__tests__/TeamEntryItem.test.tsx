@@ -32,6 +32,14 @@ const {
   playEvolutionMock: vi.fn(),
 }));
 
+type FusionSpriteMockProps = React.HTMLAttributes<HTMLDivElement> & {
+  headPokemon?: unknown;
+  bodyPokemon?: unknown;
+  isFusion?: boolean;
+  shouldLoad?: boolean;
+  showStatusOverlay?: boolean;
+};
+
 vi.mock("@/assets/images/head.svg", () => ({
   default: () => <svg data-testid="head-icon" />,
 }));
@@ -55,17 +63,32 @@ vi.mock("@/components/PokemonSummaryCard/ArtworkVariantButton", () => ({
 vi.mock("@/components/PokemonSummaryCard/FusionSprite", () => ({
   FusionSprite: (() => {
     const React = require("react") as typeof import("react");
-    return React.forwardRef((props, ref) => {
-      React.useImperativeHandle(
+    return React.forwardRef<
+      { playEvolution: typeof playEvolutionMock },
+      FusionSpriteMockProps
+    >(
+      (
+        {
+          headPokemon: _headPokemon,
+          bodyPokemon: _bodyPokemon,
+          isFusion: _isFusion,
+          shouldLoad: _shouldLoad,
+          showStatusOverlay: _showStatusOverlay,
+          ...props
+        },
         ref,
-        () => ({
-          playEvolution: playEvolutionMock,
-        }),
-        [],
-      );
+      ) => {
+        React.useImperativeHandle(
+          ref,
+          () => ({
+            playEvolution: playEvolutionMock,
+          }),
+          [],
+        );
 
-      return <div data-testid="fusion-sprite" {...props} />;
-    });
+        return <div data-testid="fusion-sprite" {...props} />;
+      },
+    );
   })(),
 }));
 

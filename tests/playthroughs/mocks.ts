@@ -5,6 +5,7 @@ vi.mock("idb-keyval", () => ({
   get: vi.fn().mockResolvedValue(undefined),
   set: vi.fn().mockResolvedValue(undefined),
   del: vi.fn().mockResolvedValue(undefined),
+  keys: vi.fn().mockResolvedValue([]),
   createStore: vi.fn(() => ({
     // Mock store object that can be passed as second parameter
     name: "mock-store",

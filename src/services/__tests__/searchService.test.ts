@@ -82,6 +82,8 @@ describe("SearchService", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     vi.resetModules();
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
     ({ default: searchService } = await import("../searchService"));
   });
 
