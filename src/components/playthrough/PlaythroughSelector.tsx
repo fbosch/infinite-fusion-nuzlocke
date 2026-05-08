@@ -24,7 +24,6 @@ import {
   playthroughActions,
   useActivePlaythrough,
   useAllPlaythroughs,
-  useGameMode,
   useIsLoading,
 } from "@/stores/playthroughs";
 import CreatePlaythroughModal from "./CreatePlaythroughModal";
@@ -62,7 +61,6 @@ export default function PlaythroughSelector({
   standalone = false,
 }: PlaythroughSelectorProps) {
   const activePlaythrough = useActivePlaythrough();
-  const currentGameMode = useGameMode();
   const isLoading = useIsLoading();
   const [showCreateInput, setShowCreateInput] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -505,7 +503,6 @@ export default function PlaythroughSelector({
           const newId = playthroughActions.createPlaythrough(name, gameMode);
           await playthroughActions.setActivePlaythrough(newId);
         }}
-        currentGameMode={currentGameMode}
       />
 
       {/* Delete confirmation dialog */}

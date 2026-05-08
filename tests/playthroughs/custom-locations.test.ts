@@ -420,7 +420,7 @@ describe("Playthroughs Store - Custom Locations", () => {
         // Verify the playthrough structure is intact
         expect(activePlaythrough?.id).toBeTruthy();
         expect(activePlaythrough?.name).toBe("Test Run");
-        expect(activePlaythrough?.gameMode).toBe("classic");
+        expect(activePlaythrough?.gameMode).toBe("randomized");
       }
     });
   });

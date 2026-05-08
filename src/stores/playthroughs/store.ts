@@ -20,7 +20,12 @@ import {
   getCurrentTimestamp,
   setPlaythroughsStore,
 } from "./playthroughState";
-import type { GameMode, Playthrough, PlaythroughsState } from "./types";
+import {
+  DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
+  type GameMode,
+  type Playthrough,
+  type PlaythroughsState,
+} from "./types";
 
 // Default state
 const defaultState: PlaythroughsState = {
@@ -85,7 +90,7 @@ setPlaythroughsStore(playthroughsStore);
 
 const createPlaythrough = (
   name: string,
-  gameMode: GameMode = "classic",
+  gameMode: GameMode = DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
 ): string => {
   const hasExistingPlaythroughs = playthroughsStore.playthroughs.length > 0;
 

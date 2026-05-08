@@ -10,26 +10,28 @@ import clsx from "clsx";
 import { HelpCircle, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CursorTooltip } from "@/components/CursorTooltip";
-import type { GameMode } from "@/stores/playthroughs";
+import {
+  DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
+  type GameMode,
+} from "@/stores/playthroughs";
 
 interface CreatePlaythroughModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreate: (name: string, gameMode: GameMode) => Promise<void>;
-  currentGameMode: GameMode;
 }
 
 export default function CreatePlaythroughModal({
   isOpen,
   onClose,
   onCreate,
-  currentGameMode,
 }: CreatePlaythroughModalProps) {
   const [newPlaythroughName, setNewPlaythroughName] = useState("");
   const [selectedGameModeOverride, setSelectedGameModeOverride] =
     useState<GameMode | null>(null);
   const playthroughNameInputRef = useRef<HTMLInputElement>(null);
-  const selectedGameMode = selectedGameModeOverride ?? currentGameMode;
+  const selectedGameMode =
+    selectedGameModeOverride ?? DEFAULT_NEW_PLAYTHROUGH_GAME_MODE;
 
   useEffect(() => {
     if (isOpen === false) {
