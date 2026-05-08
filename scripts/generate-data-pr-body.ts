@@ -10,6 +10,12 @@ const POKEMON_ICON_BASE_URL =
 
 interface PokemonDataEntry {
   id: number;
+  nationalDexId: number;
+  name: string;
+}
+
+interface PokemonDisplayData {
+  nationalDexId: number;
   name: string;
 }
 
@@ -105,30 +111,32 @@ function titleCase(value: string): string {
 
 function describePokemon(
   pokemonId: number,
-  pokemonNameMap: Map<number, string>,
+  pokemonDataMap: Map<number, PokemonDisplayData>,
 ): string {
-  const pokemonName = pokemonNameMap.get(pokemonId) ?? "Unknown";
+  const pokemonName = pokemonDataMap.get(pokemonId)?.name ?? "Unknown";
   return `${pokemonName} (${formatPokemonId(pokemonId)})`;
 }
 
 function describePokemonWithSprite(
   pokemonId: number,
-  pokemonNameMap: Map<number, string>,
+  pokemonDataMap: Map<number, PokemonDisplayData>,
 ): string {
-  const pokemonName = pokemonNameMap.get(pokemonId) ?? "Unknown";
-  const spriteUrl = `${POKEMON_ICON_BASE_URL}/${pokemonId}.png`;
+  const pokemonData = pokemonDataMap.get(pokemonId);
+  const pokemonName = pokemonData?.name ?? "Unknown";
+  const iconId = pokemonData?.nationalDexId ?? pokemonId;
+  const spriteUrl = `${POKEMON_ICON_BASE_URL}/${iconId}.png`;
   const sprite = `<img src="${spriteUrl}" alt="${pokemonName}" />`;
-  return `${sprite} ${describePokemon(pokemonId, pokemonNameMap)}`;
+  return `${sprite} ${describePokemon(pokemonId, pokemonDataMap)}`;
 }
 
 function formatPokemonBulletList(
   pokemonIds: number[],
-  pokemonNameMap: Map<number, string>,
+  pokemonDataMap: Map<number, PokemonDisplayData>,
 ): string {
   const listItems = pokemonIds
     .map(
       (pokemonId) =>
-        `<li>${describePokemonWithSprite(pokemonId, pokemonNameMap)}</li>`,
+        `<li>${describePokemonWithSprite(pokemonId, pokemonDataMap)}</li>`,
     )
     .join("");
 
@@ -357,7 +365,7 @@ function groupLocationPokemonDeltas(
 function buildBody(
   fileStats: FileChangeStats[],
   locationDeltas: LocationPokemonDelta[],
-  pokemonNameMap: Map<number, string>,
+  pokemonDataMap: Map<number, PokemonDisplayData>,
 ): string {
   const totalAdditions = fileStats.reduce(
     (sum, stats) => sum + stats.additions,
@@ -412,7 +420,7 @@ function buildBody(
       )) {
         const pokemonList = formatPokemonBulletList(
           delta.pokemonIds,
-          pokemonNameMap,
+          pokemonDataMap,
         );
         lines.push(
           `| ${delta.status} | ${escapeMarkdownTableCell(delta.location)} | ${escapeMarkdownTableCell(delta.source)} | ${escapeMarkdownTableCell(pokemonList)} |`,
@@ -431,7 +439,9 @@ function buildBody(
   return `${lines.join("\n")}\n`;
 }
 
-async function createPokemonNameMap(): Promise<Map<number, string>> {
+async function createPokemonDataMap(): Promise<
+  Map<number, PokemonDisplayData>
+> {
   const pokemonDataPath = path.join(
     process.cwd(),
     "data",
@@ -445,18 +455,25 @@ async function createPokemonNameMap(): Promise<Map<number, string>> {
     pokemonDataPath,
   );
 
-  const pokemonNameMap = new Map<number, string>();
+  const pokemonDataMap = new Map<number, PokemonDisplayData>();
   for (const entry of pokemonData) {
-    if (typeof entry.id !== "number" || typeof entry.name !== "string") {
+    if (
+      typeof entry.id !== "number" ||
+      typeof entry.nationalDexId !== "number" ||
+      typeof entry.name !== "string"
+    ) {
       throw new Error(
         `Invalid Pokemon entry in ${pokemonDataPath}: ${JSON.stringify(entry)}`,
       );
     }
 
-    pokemonNameMap.set(entry.id, entry.name);
+    pokemonDataMap.set(entry.id, {
+      nationalDexId: entry.nationalDexId,
+      name: entry.name,
+    });
   }
 
-  return pokemonNameMap;
+  return pokemonDataMap;
 }
 
 async function main(): Promise<void> {
@@ -466,7 +483,7 @@ async function main(): Promise<void> {
 
   const fileStats = getFileChangeStats();
 
-  const pokemonNameMap = await createPokemonNameMap();
+  const pokemonDataMap = await createPokemonDataMap();
   const locationDeltas: LocationPokemonDelta[] = [];
 
   for (const { filePath } of fileStats) {
@@ -506,7 +523,7 @@ async function main(): Promise<void> {
     );
   }
 
-  const body = buildBody(fileStats, locationDeltas, pokemonNameMap);
+  const body = buildBody(fileStats, locationDeltas, pokemonDataMap);
 
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
   await fs.writeFile(outputPath, body, "utf8");
