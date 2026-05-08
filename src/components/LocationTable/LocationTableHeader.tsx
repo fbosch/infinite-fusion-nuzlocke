@@ -1,5 +1,6 @@
 import type { HeaderGroup } from "@tanstack/react-table";
 import type { CombinedLocation } from "@/loaders/locations";
+import ProgressBar from "@/components/ProgressBar";
 import SortableHeaderCell from "./SortableHeaderCell";
 
 interface LocationTableHeaderProps {
@@ -18,6 +19,11 @@ export default function LocationTableHeader({
           ))}
         </tr>
       ))}
+      <tr aria-hidden="true">
+        <th colSpan={headerGroups[0]?.headers.length ?? 1} className="p-0">
+          <ProgressBar />
+        </th>
+      </tr>
     </thead>
   );
 }
