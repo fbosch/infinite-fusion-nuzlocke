@@ -513,12 +513,12 @@ describe("Playthroughs Store - React Hooks", () => {
   });
 
   describe("Playthrough Creation with Game Modes", () => {
-    it("should create playthrough with classic mode by default", () => {
+    it("should create playthrough with randomized mode by default", () => {
       const playthroughId = playthroughActions.createPlaythrough("Default Run");
       const playthrough = playthroughsStore.playthroughs.find(
         (p) => p.id === playthroughId,
       );
-      expect(playthrough?.gameMode).toBe("classic");
+      expect(playthrough?.gameMode).toBe("randomized");
     });
 
     it("should create playthrough with specified classic mode", () => {

@@ -16,20 +16,18 @@ interface CreatePlaythroughModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreate: (name: string, gameMode: GameMode) => Promise<void>;
-  currentGameMode: GameMode;
 }
 
 export default function CreatePlaythroughModal({
   isOpen,
   onClose,
   onCreate,
-  currentGameMode,
 }: CreatePlaythroughModalProps) {
   const [newPlaythroughName, setNewPlaythroughName] = useState("");
   const [selectedGameModeOverride, setSelectedGameModeOverride] =
     useState<GameMode | null>(null);
   const playthroughNameInputRef = useRef<HTMLInputElement>(null);
-  const selectedGameMode = selectedGameModeOverride ?? currentGameMode;
+  const selectedGameMode = selectedGameModeOverride ?? "randomized";
 
   useEffect(() => {
     if (isOpen === false) {

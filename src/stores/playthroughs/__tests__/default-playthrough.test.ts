@@ -8,7 +8,7 @@ describe("createDefaultPlaythrough", () => {
 
     expect(playthrough.id.startsWith("playthrough_")).toBe(true);
     expect(playthrough.name).toBe("Playthrough");
-    expect(playthrough.gameMode).toBe("classic");
+    expect(playthrough.gameMode).toBe("randomized");
     expect(playthrough.version).toBe("1.0.0");
     expect(playthrough.team.members).toHaveLength(6);
     expect(playthrough.createdAt).toBe(playthrough.updatedAt);

@@ -47,4 +47,24 @@ describe("active playthrough lookup", () => {
     expect(playthroughsStore.activePlaythroughId).toBeUndefined();
     expect(getActivePlaythrough()).toBeNull();
   });
+
+  it("defaults new playthroughs to randomized mode", () => {
+    const id = createPlaythrough("Randomized Run");
+
+    const playthrough = playthroughsStore.playthroughs.find(
+      (run) => run.id === id,
+    );
+
+    expect(playthrough?.gameMode).toBe("randomized");
+  });
+
+  it("preserves an explicit game mode choice for new playthroughs", () => {
+    const id = createPlaythrough("Classic Run", "classic");
+
+    const playthrough = playthroughsStore.playthroughs.find(
+      (run) => run.id === id,
+    );
+
+    expect(playthrough?.gameMode).toBe("classic");
+  });
 });

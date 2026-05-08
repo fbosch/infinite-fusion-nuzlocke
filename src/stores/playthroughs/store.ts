@@ -85,7 +85,7 @@ setPlaythroughsStore(playthroughsStore);
 
 const createPlaythrough = (
   name: string,
-  gameMode: GameMode = "classic",
+  gameMode: GameMode = "randomized",
 ): string => {
   const hasExistingPlaythroughs = playthroughsStore.playthroughs.length > 0;
 
