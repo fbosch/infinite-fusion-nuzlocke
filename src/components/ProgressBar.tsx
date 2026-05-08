@@ -43,6 +43,13 @@ export default function ProgressBar({ className }: ProgressBarProps) {
         const statuses = [encounter.head?.status, encounter.body?.status];
         const hasMissed = statuses.includes(PokemonStatus.MISSED);
         const hasDeceased = statuses.includes(PokemonStatus.DECEASED);
+        const hasSuccessfulEncounter = statuses.some(
+          (status) =>
+            status === PokemonStatus.CAPTURED ||
+            status === PokemonStatus.RECEIVED ||
+            status === PokemonStatus.TRADED ||
+            status === PokemonStatus.STORED,
+        );
 
         if (hasMissed) {
           missed += 1;
@@ -54,7 +61,9 @@ export default function ProgressBar({ className }: ProgressBarProps) {
           continue;
         }
 
-        captured += 1;
+        if (hasSuccessfulEncounter) {
+          captured += 1;
+        }
       }
 
       return {
