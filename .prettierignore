@@ -8,6 +8,8 @@ dist/
 build/
 out/
 
+.opencode/**/*
+
 # Environment files
 .env
 .env.local
