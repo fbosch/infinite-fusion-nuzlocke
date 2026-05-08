@@ -44,9 +44,20 @@ interface RoutePokemonIdsEntry {
 
 interface RouteEncounterEntry {
   routeName: string;
-  encounters: Array<{
-    pokemonId: number;
-    encounterType: string;
+  encounters: Array<
+    | number
+    | {
+        pokemonId: number;
+        encounterType?: string;
+      }
+  >;
+}
+
+interface LocationPokemonDataRoot {
+  locations: Array<{
+    routeName: string;
+    source?: string;
+    pokemonId?: number;
   }>;
 }
 
@@ -182,28 +193,47 @@ function isRouteEncounterEntry(value: unknown): value is RouteEncounterEntry {
   return typeof entry.routeName === "string" && Array.isArray(entry.encounters);
 }
 
+function isLocationPokemonDataRoot(
+  value: unknown,
+): value is LocationPokemonDataRoot {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const entry = value as Record<string, unknown>;
+  return Array.isArray(entry.locations);
+}
+
 function flattenLocationPokemonEntries(
   filePath: string,
   data: unknown,
 ): LocationPokemonEntry[] {
-  if (!Array.isArray(data)) {
+  const locationData = isLocationPokemonDataRoot(data) ? data.locations : data;
+
+  if (!Array.isArray(locationData)) {
     return [];
   }
 
   const entries: LocationPokemonEntry[] = [];
   const defaultSource = getSourceFromFilePath(filePath);
 
-  for (const item of data) {
+  for (const item of locationData) {
     if (isRouteEncounterEntry(item)) {
       for (const encounter of item.encounters) {
-        if (
+        if (typeof encounter === "number" && Number.isInteger(encounter)) {
+          entries.push({
+            location: item.routeName,
+            source: defaultSource,
+            pokemonId: encounter,
+          });
+        } else if (
+          typeof encounter === "object" &&
           typeof encounter.pokemonId === "number" &&
-          Number.isInteger(encounter.pokemonId) &&
-          typeof encounter.encounterType === "string"
+          Number.isInteger(encounter.pokemonId)
         ) {
           entries.push({
             location: item.routeName,
-            source: encounter.encounterType,
+            source: encounter.encounterType ?? defaultSource,
             pokemonId: encounter.pokemonId,
           });
         }
@@ -220,6 +250,29 @@ function flattenLocationPokemonEntries(
             pokemonId,
           });
         }
+      }
+    }
+
+    if (
+      typeof item === "object" &&
+      item !== null &&
+      "routeName" in item &&
+      "pokemonId" in item
+    ) {
+      const location = item as Record<string, unknown>;
+      if (
+        typeof location.routeName === "string" &&
+        typeof location.pokemonId === "number" &&
+        Number.isInteger(location.pokemonId)
+      ) {
+        entries.push({
+          location: location.routeName,
+          source:
+            typeof location.source === "string"
+              ? location.source
+              : defaultSource,
+          pokemonId: location.pokemonId,
+        });
       }
     }
   }
