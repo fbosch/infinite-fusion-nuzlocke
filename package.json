@@ -8,6 +8,8 @@
     "dev": "next dev --turbopack --port 4000",
     "build": "next build",
     "start": "next start",
+    "design:detect": "pnpm dlx impeccable detect --fast .",
+    "design:detect:json": "pnpm dlx impeccable detect --fast --json .",
     "lint": "biome lint src tests scripts data --diagnostic-level=error --max-diagnostics=500 --vcs-use-ignore-file=true --files-ignore-unknown=true",
     "lint:fix": "biome lint --write src tests scripts data --diagnostic-level=error --max-diagnostics=500 --vcs-use-ignore-file=true --files-ignore-unknown=true",
     "lint:all": "biome lint src tests scripts data --vcs-use-ignore-file=true --files-ignore-unknown=true",
