@@ -5,21 +5,13 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
-  schedule:
-    # Run daily at 2 AM UTC to refresh data
-    - cron: '0 2 * * *'
-  workflow_dispatch:
-    # Allow manual triggering
 
 permissions:
   contents: read
 
-# Cancel in-progress runs for the same ref on PR and push events.
-# Schedule and workflow_dispatch runs each get a unique group via run_id
-# so they are never cancelled mid-flight (data-refresh is long-running).
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.run_id || 'default' }}
-  cancel-in-progress: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' }}
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   detect-change-scope:
@@ -38,11 +30,6 @@ jobs:
         id: changed-files
         shell: bash
         run: |
-          if [[ "${{ github.event_name }}" == "schedule" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "lightweight_only=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             base_sha="${{ github.event.pull_request.base.sha }}"
             head_sha="${{ github.event.pull_request.head.sha }}"
@@ -88,16 +75,10 @@ jobs:
       - name: Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-pnpm
 
-      - name: Run non-browser tests with coverage for PR/push
-        if: github.event_name == 'pull_request' || github.event_name == 'push'
+      - name: Run non-browser tests with coverage
         run: pnpm run test:coverage
 
-      - name: Run non-browser tests for schedule/manual runs
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        run: pnpm run test:run
-
       - name: Upload coverage artifacts
-        if: github.event_name == 'pull_request' || github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ github.sha }}
@@ -108,7 +89,7 @@ jobs:
     name: Browser Test Suite
     runs-on: ubuntu-latest
     needs: [detect-change-scope, test]
-    if: needs.detect-change-scope.outputs.lightweight_only != 'true' && (github.event_name == 'pull_request' || github.event_name == 'push')
+    if: needs.detect-change-scope.outputs.lightweight_only != 'true'
 
     steps:
       - name: Checkout code
@@ -207,71 +188,3 @@ jobs:
           fi
 
           echo "Required release checks passed"
-
-  data-refresh:
-    name: Data Download & Validation
-    runs-on: ubuntu-latest
-    needs: [detect-change-scope, test, type-check, code-quality]
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    permissions:
-      contents: write
-      pull-requests: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
-
-      - name: Download fresh Pokemon data
-        run: |
-          pnpm run scrape
-
-      - name: Run data integrity tests on fresh data
-        run: |
-          echo "🧪 Validating data integrity..."
-          pnpm vitest run tests/data-integrity.test.ts
-
-      - name: Display data summary
-        run: |
-          echo "📊 Data Summary:"
-          echo "Pokemon data files:"
-          find data -name "*.json" -type f | sort
-          echo ""
-          echo "File sizes:"
-          find data -name "*.json" -type f -exec du -h {} \;
-
-      - name: Upload data artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: pokemon-data
-          path: |
-            data/**/*.json
-          retention-days: 30
-
-      - name: Check for data changes
-        id: data-changes
-        run: |
-          if [[ -n $(git status --porcelain data/) ]]; then
-            echo "changes=true" >> $GITHUB_OUTPUT
-            echo "Data files have been updated"
-          else
-            echo "changes=false" >> $GITHUB_OUTPUT
-            echo "No changes to data files"
-          fi
-
-      - name: Generate data update PR body
-        if: steps.data-changes.outputs.changes == 'true' && github.event_name == 'schedule'
-        run: pnpm run data:pr-body -- "$RUNNER_TEMP/data-refresh-pr-body.md"
-
-      - name: Create Pull Request with updated data
-        if: steps.data-changes.outputs.changes == 'true' && github.event_name == 'schedule'
-        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 'chore: update Pokemon data files'
-          title: '🤖 Auto-update Pokemon data'
-          body-path: ${{ runner.temp }}/data-refresh-pr-body.md
-          branch: auto-update-data
-          delete-branch: true

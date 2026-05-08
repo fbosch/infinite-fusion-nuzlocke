@@ -1,0 +1,76 @@
+name: Data Refresh
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC to refresh data.
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  data-refresh:
+    name: Data Download & Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Download fresh Pokemon data
+        run: pnpm run scrape
+
+      - name: Run data integrity tests on fresh data
+        run: pnpm vitest run tests/data-integrity.test.ts
+
+      - name: Display data summary
+        run: |
+          echo "Data Summary:"
+          echo "Pokemon data files:"
+          find data -name "*.json" -type f | sort
+          echo ""
+          echo "File sizes:"
+          find data -name "*.json" -type f -exec du -h {} \;
+
+      - name: Upload data artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pokemon-data
+          path: |
+            data/**/*.json
+          retention-days: 30
+
+      - name: Check for data changes
+        id: data-changes
+        run: |
+          if [[ -n $(git status --porcelain data/) ]]; then
+            echo "changes=true" >> "$GITHUB_OUTPUT"
+            echo "Data files have been updated"
+          else
+            echo "changes=false" >> "$GITHUB_OUTPUT"
+            echo "No changes to data files"
+          fi
+
+      - name: Generate data update PR body
+        if: steps.data-changes.outputs.changes == 'true'
+        run: pnpm run data:pr-body -- "$RUNNER_TEMP/data-refresh-pr-body.md"
+
+      - name: Create Pull Request with updated data
+        if: steps.data-changes.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update Pokemon data files'
+          title: '🤖 Auto-update Pokemon data'
+          body-path: ${{ runner.temp }}/data-refresh-pr-body.md
+          branch: auto-update-data
+          delete-branch: true
