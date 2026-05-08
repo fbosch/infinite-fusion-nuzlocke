@@ -158,11 +158,15 @@ describe("playthrough persistence initialization regression cases", () => {
   });
 
   it("uses deterministic fallback when IndexedDB load fails", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const state = createState();
 
     idbMocks.keys.mockRejectedValue(new Error("indexeddb unavailable"));
 
     await loadFromIndexedDB(state);
+    consoleErrorSpy.mockRestore();
 
     expect(state.playthroughs).toHaveLength(1);
     expect(state.activePlaythroughId).toBeDefined();

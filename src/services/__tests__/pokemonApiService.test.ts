@@ -157,6 +157,8 @@ describe("PokemonApiService", () => {
     });
 
     it("should throw error on invalid response format", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+
       const invalidResponse = {
         data: "invalid data",
         count: "not a number",

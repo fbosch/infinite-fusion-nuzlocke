@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { usePlaythroughImportExport } from "@/hooks/usePlaythroughImportExport";
 import type { Playthrough } from "@/stores/playthroughs";
 import { playthroughActions } from "@/stores/playthroughs";
@@ -12,12 +12,21 @@ vi.mock("@/stores/playthroughs", () => ({
 }));
 
 describe("usePlaythroughImportExport", () => {
+  let anchorClickSpy: ReturnType<typeof vi.spyOn>;
+
   const emptyTeam = {
     members: [null, null, null, null, null, null],
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    anchorClickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    anchorClickSpy.mockRestore();
   });
 
   describe("Export functionality", () => {
