@@ -96,6 +96,12 @@
     "description": "contains Bill's Lighthouse. It is connected to Route 25 and Route 23"
   },
   {
+    "id": "53509ae6-3b87-4500-a013-9210d5fd60b3",
+    "name": "Bill's garden",
+    "region": "Kanto",
+    "description": "Removed garden area next to Bill's Lighthouse at Cerulean Cape"
+  },
+  {
     "id": "e635f3bb-be57-40ae-b4ec-1267466c0642",
     "name": "Route 5",
     "region": "Kanto",
@@ -178,6 +184,12 @@
     "name": "Route 12",
     "region": "Kanto",
     "description": "South of Lavender Town"
+  },
+  {
+    "id": "d1dcb3ba-2faf-4ebc-9d43-7f775c93cc08",
+    "name": "Flooded Cave",
+    "region": "Kanto",
+    "description": "Removed cave area tied to Route 12 encounters"
   },
   {
     "id": "4c3e2d97-b963-4077-9f3c-658e71917118",
@@ -280,6 +292,18 @@
     "name": "Pokémon Mansion",
     "region": "Kanto",
     "description": "Pokémon Mansion was burnt down due to a scientific experiment gone wrong."
+  },
+  {
+    "id": "d807f7eb-ef3f-40cb-aab1-19b47460cc9b",
+    "name": "Deep Sea",
+    "region": "Kanto",
+    "description": "Underwater route accessible from Brine Road"
+  },
+  {
+    "id": "ee6d0d86-2796-415e-9f3c-761de8bc6372",
+    "name": "Bond Bridge",
+    "region": "Kanto",
+    "description": "Route connecting Berry Forest to Kin Island"
   },
   {
     "id": "71a29508-94d1-4ba7-b9b3-1d81fda6a887",
@@ -448,6 +472,12 @@
     "name": "Cerulean Cave",
     "region": "Kanto",
     "description": "Cerulean Cave is located near Cerulean City, Surf and climb the waterfall to reach it."
+  },
+  {
+    "id": "6af32a9e-845d-440a-ab0e-08b8f82e4ac8",
+    "name": "Mt. Silver",
+    "region": "Kanto",
+    "description": "End-game mountain accessed from Mt. Silver Base"
   },
   {
     "id": "9f30abb2-b8b8-4000-930d-1db78054873d",
