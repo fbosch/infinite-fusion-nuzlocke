@@ -7,6 +7,8 @@ import path from "node:path";
 const DEFAULT_OUTPUT_PATH = ".github/data-refresh-pr-body.md";
 const POKEMON_ICON_BASE_URL =
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons";
+const INFINITE_FUSION_DEX_DETAILS_BASE_URL =
+  "https://infinitefusiondex.com/details";
 
 interface PokemonDataEntry {
   id: number;
@@ -114,7 +116,8 @@ function describePokemon(
   pokemonDataMap: Map<number, PokemonDisplayData>,
 ): string {
   const pokemonName = pokemonDataMap.get(pokemonId)?.name ?? "Unknown";
-  return `${pokemonName} (${formatPokemonId(pokemonId)})`;
+  const pokemonUrl = `${INFINITE_FUSION_DEX_DETAILS_BASE_URL}/${pokemonId}`;
+  return `<a href="${pokemonUrl}">${pokemonName} (${formatPokemonId(pokemonId)})</a>`;
 }
 
 function describePokemonWithSprite(
