@@ -16,57 +16,62 @@ interface ProgressBarProps {
 
 type ProgressSegment = "captured" | "deceased" | "missed" | "untouched";
 
+const progressTooltipClassName = "px-2 py-1 text-xs leading-none";
+
 export default function ProgressBar({ className }: ProgressBarProps) {
   const encounters = useEncounters();
   const customLocations = useCustomLocations();
-  const [hoveredSegment, setHoveredSegment] =
-    useState<ProgressSegment | null>(null);
+  const [hoveredSegment, setHoveredSegment] = useState<ProgressSegment | null>(
+    null,
+  );
 
-  const { capturedCount, deceasedCount, missedCount, totalCount } = useMemo(() => {
-    const allLocations = getLocationsSortedWithCustom(customLocations);
-    const total = allLocations.length;
+  const { capturedCount, deceasedCount, missedCount, totalCount } =
+    useMemo(() => {
+      const allLocations = getLocationsSortedWithCustom(customLocations);
+      const total = allLocations.length;
 
-    let captured = 0;
-    let deceased = 0;
-    let missed = 0;
+      let captured = 0;
+      let deceased = 0;
+      let missed = 0;
 
-    for (const location of allLocations) {
-      const encounter = encounters?.[location.id];
-      if (!encounter || (!encounter.head && !encounter.body)) {
-        continue;
+      for (const location of allLocations) {
+        const encounter = encounters?.[location.id];
+        if (!encounter || (!encounter.head && !encounter.body)) {
+          continue;
+        }
+
+        const statuses = [encounter.head?.status, encounter.body?.status];
+        const hasMissed = statuses.includes(PokemonStatus.MISSED);
+        const hasDeceased = statuses.includes(PokemonStatus.DECEASED);
+
+        if (hasMissed) {
+          missed += 1;
+          continue;
+        }
+
+        if (hasDeceased) {
+          deceased += 1;
+          continue;
+        }
+
+        captured += 1;
       }
 
-      const statuses = [encounter.head?.status, encounter.body?.status];
-      const hasMissed = statuses.includes(PokemonStatus.MISSED);
-      const hasDeceased = statuses.includes(PokemonStatus.DECEASED);
-
-      if (hasMissed) {
-        missed += 1;
-        continue;
-      }
-
-      if (hasDeceased) {
-        deceased += 1;
-        continue;
-      }
-
-      captured += 1;
-    }
-
-    return {
-      capturedCount: captured,
-      deceasedCount: deceased,
-      missedCount: missed,
-      totalCount: total,
-    };
-  }, [encounters, customLocations]);
+      return {
+        capturedCount: captured,
+        deceasedCount: deceased,
+        missedCount: missed,
+        totalCount: total,
+      };
+    }, [encounters, customLocations]);
 
   const completedCount = capturedCount + deceasedCount + missedCount;
   const untouchedCount = Math.max(totalCount - completedCount, 0);
   const capturedWidth = totalCount > 0 ? (capturedCount / totalCount) * 100 : 0;
   const deceasedWidth = totalCount > 0 ? (deceasedCount / totalCount) * 100 : 0;
   const missedWidth = totalCount > 0 ? (missedCount / totalCount) * 100 : 0;
-  const untouchedWidth = totalCount > 0 ? (untouchedCount / totalCount) * 100 : 0;
+  const untouchedWidth =
+    totalCount > 0 ? (untouchedCount / totalCount) * 100 : 0;
 
   const shouldDimOthers =
     hoveredSegment === "captured" ||
@@ -74,7 +79,8 @@ export default function ProgressBar({ className }: ProgressBarProps) {
     hoveredSegment === "missed";
 
   const getBg = (segment: ProgressSegment): string => {
-    const dimNeutral = "light-dark(var(--color-gray-100), var(--color-gray-800))";
+    const dimNeutral =
+      "light-dark(var(--color-gray-100), var(--color-gray-800))";
     const isHovered = hoveredSegment === segment;
     if (!shouldDimOthers || isHovered) {
       if (segment === "captured") return "var(--color-emerald-600)";
@@ -114,10 +120,15 @@ export default function ProgressBar({ className }: ProgressBarProps) {
             </span>
           }
           placement="bottom"
+          tooltipId="encounter-progress-bar"
+          className={progressTooltipClassName}
           onMouseEnter={() => setHoveredSegment("captured")}
           onMouseLeave={() => setHoveredSegment(null)}
         >
-          <div className="relative h-full" style={{ width: `${capturedWidth}%` }}>
+          <div
+            className="relative h-full"
+            style={{ width: `${capturedWidth}%` }}
+          >
             <div
               className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 origin-center transition-[background-color,transform] duration-150 ease-out"
               style={{
@@ -136,10 +147,15 @@ export default function ProgressBar({ className }: ProgressBarProps) {
             </span>
           }
           placement="bottom"
+          tooltipId="encounter-progress-bar"
+          className={progressTooltipClassName}
           onMouseEnter={() => setHoveredSegment("deceased")}
           onMouseLeave={() => setHoveredSegment(null)}
         >
-          <div className="relative h-full" style={{ width: `${deceasedWidth}%` }}>
+          <div
+            className="relative h-full"
+            style={{ width: `${deceasedWidth}%` }}
+          >
             <div
               className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 origin-center transition-[background-color,transform] duration-150 ease-out"
               style={{
@@ -158,6 +174,8 @@ export default function ProgressBar({ className }: ProgressBarProps) {
             </span>
           }
           placement="bottom"
+          tooltipId="encounter-progress-bar"
+          className={progressTooltipClassName}
           onMouseEnter={() => setHoveredSegment("missed")}
           onMouseLeave={() => setHoveredSegment(null)}
         >
@@ -180,10 +198,15 @@ export default function ProgressBar({ className }: ProgressBarProps) {
             </span>
           }
           placement="bottom"
+          tooltipId="encounter-progress-bar"
+          className={progressTooltipClassName}
           onMouseEnter={() => setHoveredSegment("untouched")}
           onMouseLeave={() => setHoveredSegment(null)}
         >
-          <div className="relative h-full" style={{ width: `${untouchedWidth}%` }}>
+          <div
+            className="relative h-full"
+            style={{ width: `${untouchedWidth}%` }}
+          >
             <div
               className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 origin-center transition-[background-color,transform] duration-150 ease-out"
               style={{
