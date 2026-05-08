@@ -353,7 +353,7 @@ export function ContextMenu({
                     return (
                       <hr
                         key={item.id}
-                        className="my-1 h-px bg-gray-200 dark:bg-gray-700/70"
+                        className="my-1 h-px border-0 bg-gray-300 dark:bg-gray-600"
                       />
                     );
                   }

@@ -328,11 +328,11 @@ export default function PokemonPCSheet({
           {/* Content area: fills remaining height to allow true vertical centering */}
           <div className="flex min-h-0 flex-1 flex-col px-4 pt-2 pb-3">
             <TabGroup selectedIndex={selectedIndex} onChange={handleChangeTab}>
-              <TabList className="mb-4 flex w-full items-center gap-2 flex-1">
+              <TabList className="mb-4 flex w-full flex-nowrap items-center gap-2 overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:none] sm:pb-0 [&::-webkit-scrollbar]:hidden">
                 <Tab
                   className={({ selected }) =>
                     clsx(
-                      "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none flex-1",
+                      "inline-flex min-w-[7.25rem] shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors focus:outline-none sm:flex-1",
                       selected
                         ? "border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                         : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
@@ -348,7 +348,7 @@ export default function PokemonPCSheet({
                 <Tab
                   className={({ selected }) =>
                     clsx(
-                      "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none flex-1",
+                      "inline-flex min-w-[7.25rem] shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors focus:outline-none sm:flex-1",
                       selected
                         ? "border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                         : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
@@ -364,7 +364,7 @@ export default function PokemonPCSheet({
                 <Tab
                   className={({ selected }) =>
                     clsx(
-                      "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors focus:outline-none flex-1",
+                      "inline-flex min-w-[7.25rem] shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors focus:outline-none sm:flex-1",
                       selected
                         ? "border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                         : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
