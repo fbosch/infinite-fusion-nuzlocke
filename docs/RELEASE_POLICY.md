@@ -53,7 +53,7 @@ Heavy CI jobs (`Test Suite`, `Type Check`, `Code Quality`) are skipped only when
 Current lightweight patterns include:
 
 - docs and markdown-only updates (`docs/**`, `*.md`)
-- repository metadata (`LICENSE`, `.editorconfig`, `.gitignore`, `.prettier*`, `biome.jsonc`)
+- repository metadata (`LICENSE`, `.editorconfig`, `.gitignore`, `biome.json`)
 - GitHub and editor config files (`.github/**`, `.vscode/**`)
 
 If any changed file falls outside that set, full CI gates run as usual. Keep this list conservative and update it in the workflow when adding new lightweight-only paths.
