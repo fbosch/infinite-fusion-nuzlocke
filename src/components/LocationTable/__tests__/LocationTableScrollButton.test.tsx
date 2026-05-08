@@ -25,6 +25,7 @@ vi.mock("@/stores/playthroughs", () => ({
     getEncounters: vi.fn(() => ({})),
   },
   useCustomLocations: vi.fn(() => []),
+  useEncounters: vi.fn(() => ({})),
   useIsLoading: vi.fn(() => false),
 }));
 

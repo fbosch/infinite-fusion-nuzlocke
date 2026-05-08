@@ -14,7 +14,7 @@ interface ProgressBarProps {
   className?: string;
 }
 
-type ProgressSegment = "captured" | "deceased" | "missed" | "untouched";
+type ProgressSegment = "captured" | "deceased" | "missed" | "unencountered";
 
 const progressTooltipClassName = "px-2 py-1 text-xs leading-none";
 
@@ -66,12 +66,12 @@ export default function ProgressBar({ className }: ProgressBarProps) {
     }, [encounters, customLocations]);
 
   const completedCount = capturedCount + deceasedCount + missedCount;
-  const untouchedCount = Math.max(totalCount - completedCount, 0);
+  const unencounteredCount = Math.max(totalCount - completedCount, 0);
   const capturedWidth = totalCount > 0 ? (capturedCount / totalCount) * 100 : 0;
   const deceasedWidth = totalCount > 0 ? (deceasedCount / totalCount) * 100 : 0;
   const missedWidth = totalCount > 0 ? (missedCount / totalCount) * 100 : 0;
-  const untouchedWidth =
-    totalCount > 0 ? (untouchedCount / totalCount) * 100 : 0;
+  const unencounteredWidth =
+    totalCount > 0 ? (unencounteredCount / totalCount) * 100 : 0;
 
   const shouldDimOthers =
     hoveredSegment === "captured" ||
@@ -108,7 +108,7 @@ export default function ProgressBar({ className }: ProgressBarProps) {
         className,
       )}
       role="img"
-      aria-label={`Encounter progress: ${capturedCount} captured, ${deceasedCount} deceased, ${missedCount} missed, ${untouchedCount} untouched`}
+      aria-label={`Encounter progress: ${capturedCount} captured, ${deceasedCount} deceased, ${missedCount} missed, ${unencounteredCount} unencountered`}
     >
       <div className="group/bar absolute left-0 right-0 top-1/2 flex h-10 -translate-y-1/2 overflow-visible">
         <CursorTooltip
@@ -193,24 +193,24 @@ export default function ProgressBar({ className }: ProgressBarProps) {
           content={
             <span className="inline-flex items-center gap-1.5 leading-none">
               <CircleIcon className="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400" />
-              <span>Untouched</span>
-              <span className="tabular-nums">{untouchedCount}</span>
+              <span>Unencountered</span>
+              <span className="tabular-nums">{unencounteredCount}</span>
             </span>
           }
           placement="bottom"
           tooltipId="encounter-progress-bar"
           className={progressTooltipClassName}
-          onMouseEnter={() => setHoveredSegment("untouched")}
+          onMouseEnter={() => setHoveredSegment("unencountered")}
           onMouseLeave={() => setHoveredSegment(null)}
         >
           <div
             className="relative h-full"
-            style={{ width: `${untouchedWidth}%` }}
+            style={{ width: `${unencounteredWidth}%` }}
           >
             <div
               className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 origin-center transition-[background-color,transform] duration-150 ease-out"
               style={{
-                backgroundColor: getBg("untouched"),
+                backgroundColor: getBg("unencountered"),
                 transform: `translateY(-50%) scaleY(${hoveredSegment ? 7 : 1})`,
               }}
             />
