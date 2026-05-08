@@ -97,7 +97,7 @@ function describePokemon(
   pokemonNameMap: Map<number, string>,
 ): string {
   const pokemonName = pokemonNameMap.get(pokemonId) ?? "Unknown";
-  return `${pokemonName} (#${formatPokemonId(pokemonId)})`;
+  return `${pokemonName} (${formatPokemonId(pokemonId)})`;
 }
 
 function createPokemonSpriteSlug(pokemonName: string): string {
@@ -120,8 +120,22 @@ function describePokemonWithSprite(
   const pokemonName = pokemonNameMap.get(pokemonId) ?? "Unknown";
   const spriteSlug = createPokemonSpriteSlug(pokemonName);
   const spriteUrl = `${POKESPRITE_BASE_URL}/${spriteSlug}.png`;
-  const sprite = `<img src="${spriteUrl}" alt="${pokemonName}" width="32" />`;
+  const sprite = `<img src="${spriteUrl}" alt="${pokemonName}" />`;
   return `${sprite} ${describePokemon(pokemonId, pokemonNameMap)}`;
+}
+
+function formatPokemonBulletList(
+  pokemonIds: number[],
+  pokemonNameMap: Map<number, string>,
+): string {
+  const listItems = pokemonIds
+    .map(
+      (pokemonId) =>
+        `<li>${describePokemonWithSprite(pokemonId, pokemonNameMap)}</li>`,
+    )
+    .join("");
+
+  return `<ul>${listItems}</ul>`;
 }
 
 function escapeMarkdownTableCell(value: string): string {
@@ -321,6 +335,9 @@ function buildBody(
     (delta) => delta.status === "Removed",
   ).length;
   const groupedLocationDeltas = groupLocationPokemonDeltas(locationDeltas);
+  const versions = Array.from(
+    new Set(groupedLocationDeltas.map((delta) => delta.version)),
+  ).sort((a, b) => a.localeCompare(b));
 
   const lines: string[] = [
     "This PR contains automatically updated Pokemon encounter data.",
@@ -343,20 +360,25 @@ function buildBody(
   if (groupedLocationDeltas.length === 0) {
     lines.push("No location-level Pokemon additions/removals detected.");
   } else {
-    lines.push(
-      "| Change | Version | Location | Source | Pokemon |",
-      "| --- | --- | --- | --- | --- |",
-    );
-
-    for (const delta of groupedLocationDeltas) {
-      const pokemonList = delta.pokemonIds
-        .map((pokemonId) =>
-          describePokemonWithSprite(pokemonId, pokemonNameMap),
-        )
-        .join(", ");
+    for (const version of versions) {
       lines.push(
-        `| ${delta.status} | ${escapeMarkdownTableCell(delta.version)} | ${escapeMarkdownTableCell(delta.location)} | ${escapeMarkdownTableCell(delta.source)} | ${escapeMarkdownTableCell(pokemonList)} |`,
+        "",
+        `### ${version}`,
+        "| Change | Location | Source | Pokemon |",
+        "| --- | --- | --- | --- |",
       );
+
+      for (const delta of groupedLocationDeltas.filter(
+        (entry) => entry.version === version,
+      )) {
+        const pokemonList = formatPokemonBulletList(
+          delta.pokemonIds,
+          pokemonNameMap,
+        );
+        lines.push(
+          `| ${delta.status} | ${escapeMarkdownTableCell(delta.location)} | ${escapeMarkdownTableCell(delta.source)} | ${escapeMarkdownTableCell(pokemonList)} |`,
+        );
+      }
     }
   }
 
