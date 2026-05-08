@@ -95,6 +95,7 @@ export type {
   PlaythroughsState,
 } from "./types";
 export {
+  DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
   EncounterDataSchema,
   ExportedPlaythroughSchema,
   GameModeSchema,

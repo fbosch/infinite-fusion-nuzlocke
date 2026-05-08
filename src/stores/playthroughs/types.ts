@@ -7,6 +7,8 @@ export const GameModeSchema = z.enum(["classic", "remix", "randomized"]);
 
 export type GameMode = z.infer<typeof GameModeSchema>;
 
+export const DEFAULT_NEW_PLAYTHROUGH_GAME_MODE: GameMode = "randomized";
+
 // Team member schema - represents a single team member
 export const TeamMemberSchema = z.object({
   headPokemonUid: z.string(), // Reference to head Pokémon by UID
