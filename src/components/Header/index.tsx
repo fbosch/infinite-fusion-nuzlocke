@@ -26,7 +26,7 @@ export default function Header() {
                 <Logo className="w-10 shrink-0 sm:w-12" />
                 <div className="min-w-0 self-start">
                   <h1 className="text-sm font-medium tracking-[0.01em]">
-                    <span className="bg-gradient-to-r from-sky-800 via-blue-700 to-pink-500 bg-clip-text tracking-wide text-transparent dark:from-cyan-200 dark:via-violet-300 dark:to-rose-200 whitespace-nowrap">
+                    <span className="whitespace-nowrap tracking-wide text-sky-800 dark:text-cyan-200">
                       Pokémon Infinite Fusion
                     </span>
                     <div className="text-base font-medium text-gray-800 sm:text-xl dark:text-white whitespace-nowrap">

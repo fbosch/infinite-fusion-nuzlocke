@@ -213,7 +213,7 @@ export default function PlaythroughSelector({
                 }}
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
-                  <div className="flex items-center justify-center size-6 rounded-lg bg-gradient-to-br ">
+                  <div className="flex size-6 items-center justify-center rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-700/60 dark:text-slate-300">
                     <Album className="size-4" />
                   </div>
                   <span className="truncate min-w-0">
