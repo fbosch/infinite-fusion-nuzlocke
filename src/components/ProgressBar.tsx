@@ -1,13 +1,10 @@
 "use client";
 
 import clsx from "clsx";
-import {
-  CheckCircleIcon,
-  CircleIcon,
-  SkullIcon,
-  XCircleIcon,
-} from "lucide-react";
+import { CircleIcon, SkullIcon } from "lucide-react";
 import { useMemo, useState } from "react";
+import EscapeIcon from "@/assets/images/escape-cloud.svg";
+import PokeballIcon from "@/assets/images/pokeball.svg";
 import { getLocationsSortedWithCustom } from "@/loaders";
 import { PokemonStatus } from "@/loaders/pokemon";
 import { useCustomLocations, useEncounters } from "@/stores/playthroughs";
@@ -126,7 +123,7 @@ export default function ProgressBar({ className }: ProgressBarProps) {
         <CursorTooltip
           content={
             <span className="inline-flex items-center gap-1.5 leading-none">
-              <CheckCircleIcon className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <PokeballIcon className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
               <span>Captured</span>
               <span className="tabular-nums">{capturedCount}</span>
             </span>
@@ -180,7 +177,7 @@ export default function ProgressBar({ className }: ProgressBarProps) {
         <CursorTooltip
           content={
             <span className="inline-flex items-center gap-1.5 leading-none">
-              <XCircleIcon className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+              <EscapeIcon className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
               <span>Missed</span>
               <span className="tabular-nums">{missedCount}</span>
             </span>
