@@ -40,6 +40,14 @@ const generatePlaythroughId = (): string => {
   return generatePrefixedId("playthrough");
 };
 
+const toGameMode = (gameMode: string): GameMode => {
+  if (gameMode === "remix" || gameMode === "randomized") {
+    return gameMode;
+  }
+
+  return "classic";
+};
+
 // Create the playthroughs store with proper SSR handling
 let playthroughsStore: PlaythroughsState;
 
@@ -140,6 +148,29 @@ const setActivePlaythrough = async (playthroughId: string) => {
   }
 };
 
+const changeActiveGameMode = (
+  nextGameMode: GameMode,
+  shouldUpdateTimestamp: boolean,
+) => {
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough || activePlaythrough.gameMode === nextGameMode) {
+    return;
+  }
+
+  const previousGameMode = toGameMode(activePlaythrough.gameMode);
+  activePlaythrough.gameMode = nextGameMode;
+
+  if (shouldUpdateTimestamp) {
+    activePlaythrough.updatedAt = getCurrentTimestamp();
+  }
+
+  trackEvent("game_mode_changed", {
+    ...getSharedEventProperties(activePlaythrough),
+    previous_game_mode: previousGameMode,
+    next_game_mode: nextGameMode,
+  });
+};
+
 const cycleGameMode = () => {
   const activePlaythrough = getActivePlaythrough();
   if (activePlaythrough) {
@@ -149,7 +180,7 @@ const cycleGameMode = () => {
     );
     const nextIndex = (currentIndex + 1) % modes.length;
     const nextMode = modes[nextIndex];
-    activePlaythrough.gameMode = nextMode;
+    changeActiveGameMode(nextMode, false);
     // Don't update timestamp immediately for UI toggles - let the debounced save handle it
     // This makes the UI more responsive for rapid toggles
   }
@@ -160,25 +191,17 @@ const toggleRemixMode = () => {
   if (activePlaythrough) {
     // Convert current mode to boolean logic for backward compatibility
     const isRemix = activePlaythrough.gameMode === "remix";
-    activePlaythrough.gameMode = isRemix ? "classic" : "remix";
+    changeActiveGameMode(isRemix ? "classic" : "remix", false);
     // Don't update timestamp immediately for UI toggles - let the debounced save handle it
   }
 };
 
 const setGameMode = (gameMode: GameMode) => {
-  const activePlaythrough = getActivePlaythrough();
-  if (activePlaythrough) {
-    activePlaythrough.gameMode = gameMode;
-    activePlaythrough.updatedAt = getCurrentTimestamp();
-  }
+  changeActiveGameMode(gameMode, true);
 };
 
 const setRemixMode = (enabled: boolean) => {
-  const activePlaythrough = getActivePlaythrough();
-  if (activePlaythrough) {
-    activePlaythrough.gameMode = enabled ? "remix" : "classic";
-    activePlaythrough.updatedAt = getCurrentTimestamp();
-  }
+  changeActiveGameMode(enabled ? "remix" : "classic", true);
 };
 
 const updatePlaythroughName = (playthroughId: string, name: string) => {
