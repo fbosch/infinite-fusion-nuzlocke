@@ -23,6 +23,7 @@ import {
 import {
   DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
   type GameMode,
+  GameModeSchema,
   type Playthrough,
   type PlaythroughsState,
 } from "./types";
@@ -38,14 +39,6 @@ const defaultState: PlaythroughsState = {
 // Helper functions
 const generatePlaythroughId = (): string => {
   return generatePrefixedId("playthrough");
-};
-
-const toGameMode = (gameMode: string): GameMode => {
-  if (gameMode === "remix" || gameMode === "randomized") {
-    return gameMode;
-  }
-
-  return "classic";
 };
 
 // Create the playthroughs store with proper SSR handling
@@ -157,7 +150,18 @@ const changeActiveGameMode = (
     return;
   }
 
-  const previousGameMode = toGameMode(activePlaythrough.gameMode);
+  const previousGameModeResult = GameModeSchema.safeParse(
+    activePlaythrough.gameMode,
+  );
+  if (!previousGameModeResult.success) {
+    return;
+  }
+
+  const previousGameMode = previousGameModeResult.data;
+  if (previousGameMode === nextGameMode) {
+    return;
+  }
+
   activePlaythrough.gameMode = nextGameMode;
 
   if (shouldUpdateTimestamp) {
