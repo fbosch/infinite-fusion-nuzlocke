@@ -140,6 +140,26 @@ describe("Wild encounter wikitext parser", () => {
     ).toThrow(/encounterType/);
   });
 
+  it("returns the normalized payload after validation", () => {
+    const payload = JSON.parse(
+      JSON.stringify([
+        {
+          routeName: " Route 1 ",
+          encounters: [{ pokemonId: 16, encounterType: "grass" }],
+        },
+      ]),
+    );
+
+    expect(
+      assertEncounterPayload(payload, pokemonNameMap, "unit test encounters"),
+    ).toEqual([
+      {
+        routeName: "Route 1",
+        encounters: [{ pokemonId: 16, encounterType: "grass" }],
+      },
+    ]);
+  });
+
   it("fails validation when scraped payloads contain unexpected keys", () => {
     const payload = JSON.parse(
       JSON.stringify([
@@ -178,5 +198,20 @@ describe("Wild encounter wikitext parser", () => {
         "unit test encounters",
       ),
     ).toThrow(/routeCount: baseline=1 next=2/);
+  });
+
+  it("preserves zero values in parity mismatch messages", () => {
+    expect(() =>
+      assertEncounterParity(
+        [
+          {
+            routeName: "Route 1",
+            encounters: [{ pokemonId: 16, encounterType: "grass" }],
+          },
+        ],
+        [],
+        "unit test encounters",
+      ),
+    ).toThrow(/routeCount: baseline=0 next=1/);
   });
 });
