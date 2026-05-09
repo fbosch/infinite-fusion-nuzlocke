@@ -2,7 +2,11 @@ import { proxy, subscribe } from "valtio";
 import { devtools } from "valtio/utils";
 import { z } from "zod";
 import { getSharedEventProperties } from "@/lib/analytics/selectors";
-import { trackEvent } from "@/lib/analytics/trackEvent";
+import {
+  type SourceSurface,
+  type TriggerMethod,
+  trackEvent,
+} from "@/lib/analytics/trackEvent";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 import { generatePrefixedId } from "@/utils/id";
@@ -40,6 +44,19 @@ const defaultState: PlaythroughsState = {
 const generatePlaythroughId = (): string => {
   return generatePrefixedId("playthrough");
 };
+
+type AnalyticsSourceContext = {
+  source_surface?: SourceSurface;
+  trigger_method?: TriggerMethod;
+};
+
+const getAnalyticsSourceContext = ({
+  source_surface = "store",
+  trigger_method = "programmatic",
+}: AnalyticsSourceContext = {}) => ({
+  source_surface,
+  trigger_method,
+});
 
 // Create the playthroughs store with proper SSR handling
 let playthroughsStore: PlaythroughsState;
@@ -121,7 +138,12 @@ const createPlaythrough = (
   return newPlaythrough.id;
 };
 
-const setActivePlaythrough = async (playthroughId: string) => {
+const setActivePlaythrough = async (
+  playthroughId: string,
+  sourceContext?: AnalyticsSourceContext,
+) => {
+  const previousPlaythroughId = playthroughsStore.activePlaythroughId;
+
   // Check if the playthrough is already loaded
   let playthrough = playthroughsStore.playthroughs.find(
     (p: Playthrough) => p.id === playthroughId,
@@ -138,12 +160,22 @@ const setActivePlaythrough = async (playthroughId: string) => {
 
   if (playthrough) {
     playthroughsStore.activePlaythroughId = playthroughId;
+
+    if (previousPlaythroughId && previousPlaythroughId !== playthroughId) {
+      trackEvent("playthrough_switched", {
+        ...getSharedEventProperties(playthrough),
+        previous_playthrough_id: previousPlaythroughId,
+        new_playthrough_id: playthroughId,
+        ...getAnalyticsSourceContext(sourceContext),
+      });
+    }
   }
 };
 
 const changeActiveGameMode = (
   nextGameMode: GameMode,
   shouldUpdateTimestamp: boolean,
+  sourceContext?: AnalyticsSourceContext,
 ) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough || activePlaythrough.gameMode === nextGameMode) {
@@ -171,41 +203,53 @@ const changeActiveGameMode = (
   trackEvent("game_mode_changed", {
     ...getSharedEventProperties(activePlaythrough),
     previous_game_mode: previousGameMode,
-    next_game_mode: nextGameMode,
+    new_game_mode: nextGameMode,
+    ...getAnalyticsSourceContext(sourceContext),
   });
 };
 
-const cycleGameMode = () => {
+const cycleGameMode = (sourceContext?: AnalyticsSourceContext) => {
   const activePlaythrough = getActivePlaythrough();
   if (activePlaythrough) {
     const modes = ["classic", "remix", "randomized"] as const;
-    const currentIndex = modes.indexOf(
-      activePlaythrough.gameMode as (typeof modes)[number],
+    const currentModeResult = GameModeSchema.safeParse(
+      activePlaythrough.gameMode,
     );
+    if (!currentModeResult.success) {
+      return;
+    }
+
+    const currentIndex = modes.indexOf(currentModeResult.data);
     const nextIndex = (currentIndex + 1) % modes.length;
     const nextMode = modes[nextIndex];
-    changeActiveGameMode(nextMode, false);
+    changeActiveGameMode(nextMode, false, sourceContext);
     // Don't update timestamp immediately for UI toggles - let the debounced save handle it
     // This makes the UI more responsive for rapid toggles
   }
 };
 
-const toggleRemixMode = () => {
+const toggleRemixMode = (sourceContext?: AnalyticsSourceContext) => {
   const activePlaythrough = getActivePlaythrough();
   if (activePlaythrough) {
     // Convert current mode to boolean logic for backward compatibility
     const isRemix = activePlaythrough.gameMode === "remix";
-    changeActiveGameMode(isRemix ? "classic" : "remix", false);
+    changeActiveGameMode(isRemix ? "classic" : "remix", false, sourceContext);
     // Don't update timestamp immediately for UI toggles - let the debounced save handle it
   }
 };
 
-const setGameMode = (gameMode: GameMode) => {
-  changeActiveGameMode(gameMode, true);
+const setGameMode = (
+  gameMode: GameMode,
+  sourceContext?: AnalyticsSourceContext,
+) => {
+  changeActiveGameMode(gameMode, true, sourceContext);
 };
 
-const setRemixMode = (enabled: boolean) => {
-  changeActiveGameMode(enabled ? "remix" : "classic", true);
+const setRemixMode = (
+  enabled: boolean,
+  sourceContext?: AnalyticsSourceContext,
+) => {
+  changeActiveGameMode(enabled ? "remix" : "classic", true, sourceContext);
 };
 
 const updatePlaythroughName = (playthroughId: string, name: string) => {

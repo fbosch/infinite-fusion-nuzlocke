@@ -45,6 +45,13 @@ const VALID_EVENT_PAYLOADS: Record<
     ...BASE_SHARED_PROPERTIES,
     has_existing_playthroughs: false,
   },
+  playthrough_switched: {
+    ...BASE_SHARED_PROPERTIES,
+    previous_playthrough_id: "pt-1",
+    new_playthrough_id: "pt-2",
+    source_surface: "playthrough_selector",
+    trigger_method: "click",
+  },
   playthrough_imported: {
     ...BASE_SHARED_PROPERTIES,
     import_source: "file_picker",
@@ -72,7 +79,9 @@ const VALID_EVENT_PAYLOADS: Record<
   game_mode_changed: {
     ...BASE_SHARED_PROPERTIES,
     previous_game_mode: "classic",
-    next_game_mode: "randomized",
+    new_game_mode: "randomized",
+    source_surface: "game_mode_toggle",
+    trigger_method: "click",
   },
   fusion_created: {
     ...BASE_SHARED_PROPERTIES,

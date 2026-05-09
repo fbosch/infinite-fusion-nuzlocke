@@ -1,12 +1,15 @@
-# Analytics Event Contract (v1)
+# Analytics Event Contract (v2)
 
 This document is the source of truth for analytics taxonomy, trigger points, payload properties, buckets, and dedupe rules.
 
 ## Contract rules
 
 - Event names are stable, snake_case, and versioned by this document.
+- Event-specific properties use snake_case names.
 - Properties are flat key-value pairs only (no nested objects, no arrays).
 - Property value types are limited to `string`, `number`, and `boolean`.
+- Lifecycle transition properties use paired `previous_*` and `new_*` names for the transitioned dimension.
+- Source attribution uses bounded `source_surface` and `trigger_method` values.
 - All count or time dimensions use the bucket labels in this document.
 
 ## Canonical events
@@ -18,6 +21,10 @@ This document is the source of truth for analytics taxonomy, trigger points, pay
 | `create_playthrough_modal_opened` | Create action inside `PlaythroughSelector` | User opens the create playthrough modal | No active playthrough is available |
 | `first_encounter_saved` | Encounter mutation paths in `src/stores/playthroughs/encounters/crud.ts` and `src/stores/playthroughs/encounters/fusion.ts` | Encounter count changes from zero to at least one | Encounter count was already non-zero or mutation removes data |
 | `playthrough_created` | `createPlaythrough` in `src/stores/playthroughs/store.ts` | A new playthrough is successfully appended to store state | Creation short-circuits or throws before append |
+| `playthrough_switched` | `setActivePlaythrough` in `src/stores/playthroughs/store.ts` | Active playthrough changes from one existing id to a different loaded/importable id | Requested playthrough cannot be found/loaded, no previous active playthrough exists, or requested id is already active |
+| `game_mode_changed` | Game mode mutation helpers in `src/stores/playthroughs/store.ts` | Active playthrough mode changes to a different mode | No active playthrough exists or requested mode matches current mode |
+| `playthrough_imported` | Import success path in `src/hooks/usePlaythroughImportExport.ts` | Import file parse, store import, and active playthrough lookup complete successfully | Import fails before active imported playthrough state is available |
+| `playthrough_import_failed` | Import failure paths in `src/hooks/usePlaythroughImportExport.ts` | Import attempt fails at file selection, file read, JSON parse, schema validation, store import, or unknown stage | Import completes successfully |
 | `run_checkpoint_reached` | Encounter mutation paths in `src/stores/playthroughs/encounters/*.ts` | Encounter count crosses any configured checkpoint threshold | Encounter count changes without crossing a new threshold |
 | `playthrough_resumed` | Client runtime observer mounted from `src/app/layout.tsx` | Active playthrough is available after store load and qualifies as a resume | Store is still loading, no active playthrough, or same session already emitted |
 | `fusion_created` | Fusion transition helper called from `fusion.ts`, `crud.ts`, and `dragDrop.ts` encounter paths | Encounter transitions from not-fully-fused to fully-fused (`head` and `body` both set with fusion active) | Encounter remains non-fusion, remains partial, or is already fully fused |
@@ -70,6 +77,43 @@ Every event includes these shared properties unless noted otherwise.
 | Property | Type | Notes |
 | --- | --- | --- |
 | `has_existing_playthroughs` | `boolean` | True when at least one playthrough existed before create |
+
+### `playthrough_switched`
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `previous_playthrough_id` | `string` | Active playthrough id before the switch |
+| `new_playthrough_id` | `string` | Active playthrough id after the switch |
+| `source_surface` | `SourceSurface` | Surface or domain owner that initiated the switch |
+| `trigger_method` | `TriggerMethod` | User or programmatic trigger bucket |
+
+### `game_mode_changed`
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `previous_game_mode` | `"classic" \| "remix" \| "randomized"` | Mode before the transition |
+| `new_game_mode` | `"classic" \| "remix" \| "randomized"` | Mode after the transition |
+| `source_surface` | `SourceSurface` | Surface or domain owner that initiated the change |
+| `trigger_method` | `TriggerMethod` | User or programmatic trigger bucket |
+
+### `playthrough_imported`
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `import_source` | `"file_picker"` | Import entrypoint bucket |
+| `file_extension_group` | `"json" \| "other"` | Low-cardinality file extension group |
+| `mime_group` | `"application_json" \| "text_plain" \| "empty" \| "other"` | Low-cardinality MIME group |
+
+### `playthrough_import_failed`
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `import_source` | `"file_picker"` | Import entrypoint bucket |
+| `failure_stage` | `ImportFailureStage` | Normalized stage where the attempt failed |
+| `error_category` | `ImportErrorCategory` | Normalized error taxonomy value; raw error text is prohibited |
+| `has_file` | `boolean` | True when a file object was available |
+| `file_extension_group` | `"json" \| "other"` | Low-cardinality file extension group |
+| `mime_group` | `"application_json" \| "text_plain" \| "empty" \| "other"` | Low-cardinality MIME group |
 
 ### `run_checkpoint_reached`
 
@@ -149,6 +193,39 @@ No additional properties beyond the shared schema.
 - `d_14_29_days`
 - `d_30_plus_days`
 
+### `ImportFailureStage`
+
+- `file_selection`
+- `file_read`
+- `json_parse`
+- `schema_validation`
+- `store_import`
+- `unknown`
+
+### `ImportErrorCategory`
+
+- `unsupported_file_type`
+- `invalid_json`
+- `invalid_schema`
+- `duplicate_id`
+- `storage_failure`
+- `unexpected`
+
+### `SourceSurface`
+
+- `header`
+- `playthrough_selector`
+- `create_playthrough_modal`
+- `game_mode_toggle`
+- `store`
+
+### `TriggerMethod`
+
+- `click`
+- `keyboard`
+- `submit`
+- `programmatic`
+
 ## Dedupe policy
 
 | Event | Dedupe strategy |
@@ -158,6 +235,10 @@ No additional properties beyond the shared schema.
 | `create_playthrough_modal_opened` | No storage dedupe required; emit each successful modal open intent |
 | `first_encounter_saved` | Transition dedupe only; emit when encounter count crosses from zero to one or more |
 | `playthrough_created` | No storage dedupe required; emit once per successful `createPlaythrough` call |
+| `playthrough_switched` | Transition dedupe only; emit once per successful active-id transition |
+| `game_mode_changed` | Transition dedupe only; emit once per successful mode transition |
+| `playthrough_imported` | No storage dedupe required; emit once per successful import completion |
+| `playthrough_import_failed` | No storage dedupe required; emit once per failed import attempt |
 | `run_checkpoint_reached` | Monotonic threshold dedupe per playthrough using persistent local storage keyed by playthrough id |
 | `playthrough_resumed` | Session dedupe per playthrough using session storage (once per tab session) |
 | `fusion_created` | Transition dedupe only; emit on state transition into complete fusion, never on steady state |

@@ -175,7 +175,10 @@ describe("PlaythroughSelector", () => {
     fireEvent.keyDown(middleRow, { key: "Enter" });
 
     await waitFor(() => {
-      expect(setActivePlaythroughMock).toHaveBeenCalledWith("middle");
+      expect(setActivePlaythroughMock).toHaveBeenCalledWith("middle", {
+        source_surface: "playthrough_selector",
+        trigger_method: "keyboard",
+      });
     });
   });
 
@@ -186,7 +189,10 @@ describe("PlaythroughSelector", () => {
     fireEvent.keyDown(olderRow, { key: " " });
 
     await waitFor(() => {
-      expect(setActivePlaythroughMock).toHaveBeenCalledWith("older");
+      expect(setActivePlaythroughMock).toHaveBeenCalledWith("older", {
+        source_surface: "playthrough_selector",
+        trigger_method: "keyboard",
+      });
     });
   });
 });

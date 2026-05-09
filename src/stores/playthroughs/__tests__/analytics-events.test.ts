@@ -14,6 +14,7 @@ import {
   createPlaythrough,
   cycleGameMode,
   playthroughsStore,
+  setActivePlaythrough,
   setGameMode,
   setRemixMode,
   toggleRemixMode,
@@ -78,18 +79,58 @@ describe("analytics event instrumentation", () => {
     expect(modeEvents[0]?.[1]).toMatchObject({
       game_mode: "remix",
       previous_game_mode: "classic",
-      next_game_mode: "remix",
+      new_game_mode: "remix",
+      source_surface: "store",
+      trigger_method: "programmatic",
     });
     expect(modeEvents[1]?.[1]).toMatchObject({
       game_mode: "classic",
       previous_game_mode: "remix",
-      next_game_mode: "classic",
+      new_game_mode: "classic",
+      source_surface: "store",
+      trigger_method: "programmatic",
     });
     expect(modeEvents[2]?.[1]).toMatchObject({
       game_mode: "remix",
       previous_game_mode: "classic",
-      next_game_mode: "remix",
+      new_game_mode: "remix",
+      source_surface: "store",
+      trigger_method: "programmatic",
     });
+  });
+
+  it("tracks active playthrough switching with canonical transition fields", async () => {
+    const firstId = createPlaythrough("First Run", "classic");
+    const secondId = createPlaythrough("Second Run", "remix");
+    playthroughsStore.activePlaythroughId = firstId;
+    analyticsMocks.trackEvent.mockClear();
+
+    await setActivePlaythrough(secondId, {
+      source_surface: "playthrough_selector",
+      trigger_method: "keyboard",
+    });
+
+    const switchedEvents = getTrackedEvents("playthrough_switched");
+    expect(switchedEvents).toHaveLength(1);
+    expect(switchedEvents[0]?.[1]).toMatchObject({
+      playthrough_id: secondId,
+      game_mode: "remix",
+      previous_playthrough_id: firstId,
+      new_playthrough_id: secondId,
+      source_surface: "playthrough_selector",
+      trigger_method: "keyboard",
+    });
+  });
+
+  it("does not track active playthrough switching no-ops", async () => {
+    const firstId = createPlaythrough("First Run");
+    playthroughsStore.activePlaythroughId = firstId;
+    analyticsMocks.trackEvent.mockClear();
+
+    await setActivePlaythrough(firstId);
+    await setActivePlaythrough("missing-playthrough");
+
+    expect(getTrackedEvents("playthrough_switched")).toHaveLength(0);
   });
 
   it("tracks run checkpoints once per threshold", async () => {

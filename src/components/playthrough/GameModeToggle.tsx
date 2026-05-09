@@ -21,7 +21,7 @@ const GameModeToggle = function GameModeToggle() {
   );
 
   const handleModeSelect = React.useCallback(
-    (targetMode: GameMode) => {
+    (targetMode: GameMode, triggerMethod: "click" | "keyboard") => {
       if (!activePlaythrough || isPending || optimisticMode === targetMode)
         return;
 
@@ -30,7 +30,10 @@ const GameModeToggle = function GameModeToggle() {
         setOptimisticMode(targetMode);
 
         // Actual state update
-        playthroughActions.setGameMode(targetMode);
+        playthroughActions.setGameMode(targetMode, {
+          source_surface: "game_mode_toggle",
+          trigger_method: triggerMethod,
+        });
       });
     },
     [activePlaythrough, optimisticMode, isPending, setOptimisticMode],
@@ -56,7 +59,12 @@ const GameModeToggle = function GameModeToggle() {
 
         <button
           type="button"
-          onClick={() => handleModeSelect("classic")}
+          onClick={(event) =>
+            handleModeSelect(
+              "classic",
+              event.detail === 0 ? "keyboard" : "click",
+            )
+          }
           disabled={!activePlaythrough}
           className={clsx(
             "relative z-10 h-10 min-w-0 rounded-lg border border-transparent px-2 py-2 text-center text-sm sm:h-[36px] sm:px-3",
@@ -76,7 +84,9 @@ const GameModeToggle = function GameModeToggle() {
 
         <button
           type="button"
-          onClick={() => handleModeSelect("remix")}
+          onClick={(event) =>
+            handleModeSelect("remix", event.detail === 0 ? "keyboard" : "click")
+          }
           disabled={!activePlaythrough}
           className={clsx(
             "relative z-10 h-10 min-w-0 rounded-lg border border-transparent px-2 py-2 text-center text-sm sm:h-[36px] sm:px-3",
@@ -96,7 +106,12 @@ const GameModeToggle = function GameModeToggle() {
 
         <button
           type="button"
-          onClick={() => handleModeSelect("randomized")}
+          onClick={(event) =>
+            handleModeSelect(
+              "randomized",
+              event.detail === 0 ? "keyboard" : "click",
+            )
+          }
           disabled={!activePlaythrough}
           className={clsx(
             "relative z-10 h-10 min-w-0 rounded-lg border border-transparent px-2 py-2 text-center text-sm sm:h-[36px] sm:px-3",

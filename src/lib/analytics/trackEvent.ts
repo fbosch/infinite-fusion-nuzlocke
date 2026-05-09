@@ -11,6 +11,7 @@ export const ANALYTICS_EVENTS = {
   createPlaythroughModalOpened: "create_playthrough_modal_opened",
   firstEncounterSaved: "first_encounter_saved",
   playthroughCreated: "playthrough_created",
+  playthroughSwitched: "playthrough_switched",
   playthroughImported: "playthrough_imported",
   playthroughImportFailed: "playthrough_import_failed",
   runCheckpointReached: "run_checkpoint_reached",
@@ -54,6 +55,13 @@ export type DormancyBucket =
   | "d_30_plus_days";
 
 type GameMode = "classic" | "remix" | "randomized";
+export type SourceSurface =
+  | "header"
+  | "playthrough_selector"
+  | "create_playthrough_modal"
+  | "game_mode_toggle"
+  | "store";
+export type TriggerMethod = "click" | "keyboard" | "submit" | "programmatic";
 
 export type SharedEventProperties = {
   playthrough_id: string;
@@ -108,6 +116,12 @@ export type AnalyticsEventMap = {
   playthrough_created: SharedEventProperties & {
     has_existing_playthroughs: boolean;
   };
+  playthrough_switched: SharedEventProperties & {
+    previous_playthrough_id: string;
+    new_playthrough_id: string;
+    source_surface: SourceSurface;
+    trigger_method: TriggerMethod;
+  };
   playthrough_imported: SharedEventProperties & {
     import_source: ImportSource;
     file_extension_group: FileExtensionGroup;
@@ -130,7 +144,9 @@ export type AnalyticsEventMap = {
   };
   game_mode_changed: SharedEventProperties & {
     previous_game_mode: GameMode;
-    next_game_mode: GameMode;
+    new_game_mode: GameMode;
+    source_surface: SourceSurface;
+    trigger_method: TriggerMethod;
   };
   fusion_created: SharedEventProperties & {
     location_id: string;
@@ -239,6 +255,20 @@ const analyticsEventSchemaMap = {
       has_existing_playthroughs: z.boolean(),
     })
     .strict(),
+  playthrough_switched: sharedEventPropertiesSchema
+    .extend({
+      previous_playthrough_id: z.string().min(1),
+      new_playthrough_id: z.string().min(1),
+      source_surface: z.enum([
+        "header",
+        "playthrough_selector",
+        "create_playthrough_modal",
+        "game_mode_toggle",
+        "store",
+      ]),
+      trigger_method: z.enum(["click", "keyboard", "submit", "programmatic"]),
+    })
+    .strict(),
   playthrough_imported: sharedEventPropertiesSchema
     .extend({
       import_source: z.literal("file_picker"),
@@ -305,7 +335,15 @@ const analyticsEventSchemaMap = {
   game_mode_changed: sharedEventPropertiesSchema
     .extend({
       previous_game_mode: z.enum(["classic", "remix", "randomized"]),
-      next_game_mode: z.enum(["classic", "remix", "randomized"]),
+      new_game_mode: z.enum(["classic", "remix", "randomized"]),
+      source_surface: z.enum([
+        "header",
+        "playthrough_selector",
+        "create_playthrough_modal",
+        "game_mode_toggle",
+        "store",
+      ]),
+      trigger_method: z.enum(["click", "keyboard", "submit", "programmatic"]),
     })
     .strict(),
   fusion_created: sharedEventPropertiesSchema
@@ -375,6 +413,7 @@ const createByEventCounter = (): Record<AnalyticsEventName, EventCounter> => {
     create_playthrough_modal_opened: { sent: 0, blocked: 0 },
     first_encounter_saved: { sent: 0, blocked: 0 },
     playthrough_created: { sent: 0, blocked: 0 },
+    playthrough_switched: { sent: 0, blocked: 0 },
     playthrough_imported: { sent: 0, blocked: 0 },
     playthrough_import_failed: { sent: 0, blocked: 0 },
     run_checkpoint_reached: { sent: 0, blocked: 0 },
