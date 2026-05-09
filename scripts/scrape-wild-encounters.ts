@@ -3,6 +3,7 @@
 import { readFileSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { z } from "zod";
 import type { EncounterType } from "./types/encounters";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
@@ -17,15 +18,16 @@ const WILD_ENCOUNTERS_REMIX_URL =
 
 const ROUTE_ARTICLE_BATCH_SIZE = 6;
 const ROUTE_ARTICLE_BACKFILL_OVERRIDES = ["Route 2", "Route 10"] as const;
+const ENCOUNTER_PARITY_REFRESH_ENV = "SCRAPE_ENCOUNTERS_REFRESH";
 
-const WILD_ENCOUNTER_TYPES: readonly EncounterType[] = [
+const WILD_ENCOUNTER_TYPES = [
   "grass",
   "cave",
   "rock_smash",
   "surf",
   "fishing",
   "pokeradar",
-];
+] as const satisfies readonly EncounterType[];
 
 const WIKITEXT_ROUTE_HEADING_PATTERN = /^'''(.+?)'''$/;
 const ENCOUNTER_TEMPLATE_PATTERN =
@@ -104,7 +106,7 @@ export function detectEncounterType(text: string): EncounterType | null {
 }
 
 function isWildEncounterType(encounterType: EncounterType): boolean {
-  return WILD_ENCOUNTER_TYPES.includes(encounterType);
+  return WILD_ENCOUNTER_TYPES.some((wildType) => wildType === encounterType);
 }
 
 function deduplicateEncounters(
@@ -157,6 +159,153 @@ export interface PokemonEncounter {
 interface RouteEncounters {
   routeName: string;
   encounters: PokemonEncounter[];
+}
+
+const EncounterTypeSchema = z.enum(WILD_ENCOUNTER_TYPES);
+
+const RouteEncountersSchema = z.array(
+  z.strictObject({
+    routeName: z.string().trim().min(1),
+    encounters: z
+      .array(
+        z.strictObject({
+          pokemonId: z.number().int().positive(),
+          encounterType: EncounterTypeSchema,
+        }),
+      )
+      .min(1),
+  }),
+);
+
+type EncounterParitySummary = {
+  routeCount: number;
+  encounterCount: number;
+  pokemonIds: string;
+  encounterTypes: string;
+};
+
+type ValidateEncounterOutputOptions = {
+  skipParity?: boolean;
+};
+
+function formatZodIssues(error: z.ZodError): string {
+  return error.issues
+    .map((issue) => {
+      const pathLabel = issue.path.length > 0 ? issue.path.join(".") : "root";
+      return `${pathLabel}: ${issue.message}`;
+    })
+    .join("; ");
+}
+
+function summarizeEncounterParity(
+  routes: RouteEncounters[],
+): EncounterParitySummary {
+  const encounters = routes.flatMap((route) => route.encounters);
+
+  return {
+    routeCount: routes.length,
+    encounterCount: encounters.length,
+    pokemonIds: Array.from(
+      new Set(encounters.map((encounter) => encounter.pokemonId)),
+    )
+      .sort((a, b) => a - b)
+      .join(","),
+    encounterTypes: Array.from(
+      new Set(encounters.map((encounter) => encounter.encounterType)),
+    )
+      .sort()
+      .join(","),
+  };
+}
+
+export function assertEncounterPayload(
+  routes: RouteEncounters[],
+  pokemonNameMap: PokemonNameMap,
+  label: string,
+): RouteEncounters[] {
+  const parseResult = RouteEncountersSchema.safeParse(routes);
+  if (parseResult.success === false) {
+    throw new Error(
+      `${label} failed encounter schema validation: ${formatZodIssues(parseResult.error)}`,
+    );
+  }
+
+  const parsedRoutes = parseResult.data;
+  const invalidIds = parsedRoutes.flatMap((route) =>
+    route.encounters
+      .filter(
+        (encounter) =>
+          pokemonNameMap.idToName.has(encounter.pokemonId) === false,
+      )
+      .map((encounter) => `${route.routeName}:${encounter.pokemonId}`),
+  );
+
+  if (invalidIds.length > 0) {
+    throw new Error(
+      `${label} failed Pokemon ID integrity validation: ${invalidIds.join(", ")}`,
+    );
+  }
+
+  return parsedRoutes;
+}
+
+function formatParityValue(value: string | number): string | number {
+  return value === "" ? "<empty>" : value;
+}
+
+export function assertEncounterParity(
+  nextRoutes: RouteEncounters[],
+  baselineRoutes: RouteEncounters[],
+  label: string,
+): void {
+  const nextSummary = summarizeEncounterParity(nextRoutes);
+  const baselineSummary = summarizeEncounterParity(baselineRoutes);
+  const mismatches = Object.entries(nextSummary).flatMap(([key, nextValue]) => {
+    const baselineValue = baselineSummary[key as keyof EncounterParitySummary];
+    return nextValue === baselineValue
+      ? []
+      : `${key}: baseline=${formatParityValue(baselineValue)} next=${formatParityValue(nextValue)}`;
+  });
+
+  if (mismatches.length > 0) {
+    throw new Error(
+      `${label} failed encounter parity validation: ${mismatches.join("; ")}`,
+    );
+  }
+}
+
+async function validateEncounterOutputBeforeWrite(
+  outputPath: string,
+  nextRoutes: RouteEncounters[],
+  pokemonNameMap: PokemonNameMap,
+  label: string,
+  options: ValidateEncounterOutputOptions = {},
+): Promise<void> {
+  assertEncounterPayload(nextRoutes, pokemonNameMap, label);
+
+  if (options.skipParity === true) {
+    ConsoleFormatter.warn(
+      `${label} baseline parity skipped because ${ENCOUNTER_PARITY_REFRESH_ENV}=1`,
+    );
+    return;
+  }
+
+  const baselineJson = await fs.readFile(outputPath, "utf-8");
+  const baselineRoutes = RouteEncountersSchema.safeParse(
+    JSON.parse(baselineJson),
+  );
+  if (baselineRoutes.success === false) {
+    throw new Error(
+      `${label} baseline failed encounter schema validation: ${formatZodIssues(baselineRoutes.error)}`,
+    );
+  }
+
+  assertEncounterPayload(
+    baselineRoutes.data,
+    pokemonNameMap,
+    `${label} baseline`,
+  );
+  assertEncounterParity(nextRoutes, baselineRoutes.data, label);
 }
 
 export function getLocationWikiUrl(locationName: string): string {
@@ -743,6 +892,7 @@ function findParentLocation(
 
 async function scrapeWildEncounters(
   url: string,
+  pokemonNameMap: PokemonNameMap,
   isRemix: boolean = false,
 ): Promise<RouteEncounters[]> {
   ConsoleFormatter.printHeader(
@@ -757,7 +907,6 @@ async function scrapeWildEncounters(
       () => fetchWikiPageWikitext(url),
     );
 
-    const pokemonNameMap = await loadPokemonNameMap();
     const routes = parseWildEncounterRoutesFromWikitext(
       wikitext,
       pokemonNameMap,
@@ -803,14 +952,23 @@ async function main() {
     await fs.mkdir(classicDir, { recursive: true });
     await fs.mkdir(remixDir, { recursive: true });
 
+    const pokemonNameMap = await loadPokemonNameMap();
     const [classicRoutes, remixRoutes] = await Promise.all([
       (async () => {
         ConsoleFormatter.info("Scraping Classic Mode encounters...");
-        return scrapeWildEncounters(WILD_ENCOUNTERS_CLASSIC_URL, false);
+        return scrapeWildEncounters(
+          WILD_ENCOUNTERS_CLASSIC_URL,
+          pokemonNameMap,
+          false,
+        );
       })(),
       (async () => {
         ConsoleFormatter.info("Scraping Remix Mode encounters...");
-        return scrapeWildEncounters(WILD_ENCOUNTERS_REMIX_URL, true);
+        return scrapeWildEncounters(
+          WILD_ENCOUNTERS_REMIX_URL,
+          pokemonNameMap,
+          true,
+        );
       })(),
     ]);
 
@@ -818,6 +976,24 @@ async function main() {
     ConsoleFormatter.info("Saving encounter data to files...");
     const classicPath = path.join(classicDir, "encounters.json");
     const remixPath = path.join(remixDir, "encounters.json");
+    const skipParity = process.env[ENCOUNTER_PARITY_REFRESH_ENV] === "1";
+
+    await Promise.all([
+      validateEncounterOutputBeforeWrite(
+        classicPath,
+        classicRoutes,
+        pokemonNameMap,
+        "Classic encounters",
+        { skipParity },
+      ),
+      validateEncounterOutputBeforeWrite(
+        remixPath,
+        remixRoutes,
+        pokemonNameMap,
+        "Remix encounters",
+        { skipParity },
+      ),
+    ]);
 
     await Promise.all([
       fs.writeFile(classicPath, JSON.stringify(classicRoutes, null, 2)),

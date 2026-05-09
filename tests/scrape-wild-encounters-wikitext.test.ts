@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  assertEncounterParity,
+  assertEncounterPayload,
   parseEncounterTemplatesFromWikitext,
   parseWildEncounterRoutesFromWikitext,
 } from "../scripts/scrape-wild-encounters";
@@ -106,5 +108,110 @@ describe("Wild encounter wikitext parser", () => {
     expect(routes[0]?.encounters).toEqual([
       { pokemonId: 16, encounterType: "grass" },
     ]);
+  });
+
+  it("fails validation when scraped payloads contain invalid Pokemon IDs", () => {
+    expect(() =>
+      assertEncounterPayload(
+        [
+          {
+            routeName: "Route 1",
+            encounters: [{ pokemonId: 9999, encounterType: "grass" }],
+          },
+        ],
+        pokemonNameMap,
+        "unit test encounters",
+      ),
+    ).toThrow(/Pokemon ID integrity/);
+  });
+
+  it("fails validation when wild encounter output contains special encounters", () => {
+    const payload = JSON.parse(
+      JSON.stringify([
+        {
+          routeName: "Route 1",
+          encounters: [{ pokemonId: 16, encounterType: "special" }],
+        },
+      ]),
+    );
+
+    expect(() =>
+      assertEncounterPayload(payload, pokemonNameMap, "unit test encounters"),
+    ).toThrow(/encounterType/);
+  });
+
+  it("returns the normalized payload after validation", () => {
+    const payload = JSON.parse(
+      JSON.stringify([
+        {
+          routeName: " Route 1 ",
+          encounters: [{ pokemonId: 16, encounterType: "grass" }],
+        },
+      ]),
+    );
+
+    expect(
+      assertEncounterPayload(payload, pokemonNameMap, "unit test encounters"),
+    ).toEqual([
+      {
+        routeName: "Route 1",
+        encounters: [{ pokemonId: 16, encounterType: "grass" }],
+      },
+    ]);
+  });
+
+  it("fails validation when scraped payloads contain unexpected keys", () => {
+    const payload = JSON.parse(
+      JSON.stringify([
+        {
+          routeName: "Route 1",
+          source: "wiki",
+          encounters: [{ pokemonId: 16, encounterType: "grass" }],
+        },
+      ]),
+    );
+
+    expect(() =>
+      assertEncounterPayload(payload, pokemonNameMap, "unit test encounters"),
+    ).toThrow(/Unrecognized key/);
+  });
+
+  it("fails parity when route and encounter aggregates diverge", () => {
+    expect(() =>
+      assertEncounterParity(
+        [
+          {
+            routeName: "Route 1",
+            encounters: [{ pokemonId: 16, encounterType: "grass" }],
+          },
+          {
+            routeName: "Route 2",
+            encounters: [{ pokemonId: 27, encounterType: "cave" }],
+          },
+        ],
+        [
+          {
+            routeName: "Route 1",
+            encounters: [{ pokemonId: 16, encounterType: "grass" }],
+          },
+        ],
+        "unit test encounters",
+      ),
+    ).toThrow(/routeCount: baseline=1 next=2/);
+  });
+
+  it("preserves zero values in parity mismatch messages", () => {
+    expect(() =>
+      assertEncounterParity(
+        [
+          {
+            routeName: "Route 1",
+            encounters: [{ pokemonId: 16, encounterType: "grass" }],
+          },
+        ],
+        [],
+        "unit test encounters",
+      ),
+    ).toThrow(/routeCount: baseline=0 next=1/);
   });
 });
