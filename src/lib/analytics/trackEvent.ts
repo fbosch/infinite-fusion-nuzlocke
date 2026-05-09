@@ -15,6 +15,7 @@ export const ANALYTICS_EVENTS = {
   playthroughImportFailed: "playthrough_import_failed",
   runCheckpointReached: "run_checkpoint_reached",
   playthroughResumed: "playthrough_resumed",
+  gameModeChanged: "game_mode_changed",
   fusionCreated: "fusion_created",
   fusionFlipped: "fusion_flipped",
   encounterMarkedDeceased: "encounter_marked_deceased",
@@ -126,6 +127,10 @@ export type AnalyticsEventMap = {
   };
   playthrough_resumed: SharedEventProperties & {
     days_since_last_active_bucket: DormancyBucket;
+  };
+  game_mode_changed: SharedEventProperties & {
+    previous_game_mode: GameMode;
+    next_game_mode: GameMode;
   };
   fusion_created: SharedEventProperties & {
     location_id: string;
@@ -297,6 +302,12 @@ const analyticsEventSchemaMap = {
       ]),
     })
     .strict(),
+  game_mode_changed: sharedEventPropertiesSchema
+    .extend({
+      previous_game_mode: z.enum(["classic", "remix", "randomized"]),
+      next_game_mode: z.enum(["classic", "remix", "randomized"]),
+    })
+    .strict(),
   fusion_created: sharedEventPropertiesSchema
     .extend({
       location_id: z.string().min(1),
@@ -368,6 +379,7 @@ const createByEventCounter = (): Record<AnalyticsEventName, EventCounter> => {
     playthrough_import_failed: { sent: 0, blocked: 0 },
     run_checkpoint_reached: { sent: 0, blocked: 0 },
     playthrough_resumed: { sent: 0, blocked: 0 },
+    game_mode_changed: { sent: 0, blocked: 0 },
     fusion_created: { sent: 0, blocked: 0 },
     fusion_flipped: { sent: 0, blocked: 0 },
     encounter_marked_deceased: { sent: 0, blocked: 0 },

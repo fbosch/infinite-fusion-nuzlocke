@@ -10,7 +10,14 @@ import {
   updateEncounter,
   updateTeamMember,
 } from "../encounters";
-import { createPlaythrough, playthroughsStore } from "../store";
+import {
+  createPlaythrough,
+  cycleGameMode,
+  playthroughsStore,
+  setGameMode,
+  setRemixMode,
+  toggleRemixMode,
+} from "../store";
 import {
   createTestPlaythrough,
   resetPlaythroughsStore,
@@ -52,6 +59,36 @@ describe("analytics event instrumentation", () => {
     });
     expect(createdEvents[1]?.[1]).toMatchObject({
       has_existing_playthroughs: true,
+    });
+  });
+
+  it("tracks game_mode_changed only on real transitions", () => {
+    const { activePlaythrough } = createTestPlaythrough();
+    activePlaythrough.gameMode = "classic";
+    analyticsMocks.trackEvent.mockClear();
+
+    setGameMode("classic");
+    setGameMode("remix");
+    setRemixMode(true);
+    toggleRemixMode();
+    cycleGameMode();
+
+    const modeEvents = getTrackedEvents("game_mode_changed");
+    expect(modeEvents).toHaveLength(3);
+    expect(modeEvents[0]?.[1]).toMatchObject({
+      game_mode: "remix",
+      previous_game_mode: "classic",
+      next_game_mode: "remix",
+    });
+    expect(modeEvents[1]?.[1]).toMatchObject({
+      game_mode: "classic",
+      previous_game_mode: "remix",
+      next_game_mode: "classic",
+    });
+    expect(modeEvents[2]?.[1]).toMatchObject({
+      game_mode: "remix",
+      previous_game_mode: "classic",
+      next_game_mode: "remix",
     });
   });
 

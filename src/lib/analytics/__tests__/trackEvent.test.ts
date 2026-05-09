@@ -69,6 +69,11 @@ const VALID_EVENT_PAYLOADS: Record<
     ...BASE_SHARED_PROPERTIES,
     days_since_last_active_bucket: "d_1_2_days",
   },
+  game_mode_changed: {
+    ...BASE_SHARED_PROPERTIES,
+    previous_game_mode: "classic",
+    next_game_mode: "randomized",
+  },
   fusion_created: {
     ...BASE_SHARED_PROPERTIES,
     location_id: "route-1",
