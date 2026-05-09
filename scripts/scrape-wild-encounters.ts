@@ -19,14 +19,14 @@ const WILD_ENCOUNTERS_REMIX_URL =
 const ROUTE_ARTICLE_BATCH_SIZE = 6;
 const ROUTE_ARTICLE_BACKFILL_OVERRIDES = ["Route 2", "Route 10"] as const;
 
-const WILD_ENCOUNTER_TYPES: readonly EncounterType[] = [
+const WILD_ENCOUNTER_TYPES = [
   "grass",
   "cave",
   "rock_smash",
   "surf",
   "fishing",
   "pokeradar",
-];
+] as const satisfies readonly EncounterType[];
 
 const WIKITEXT_ROUTE_HEADING_PATTERN = /^'''(.+?)'''$/;
 const ENCOUNTER_TEMPLATE_PATTERN =
@@ -105,7 +105,7 @@ export function detectEncounterType(text: string): EncounterType | null {
 }
 
 function isWildEncounterType(encounterType: EncounterType): boolean {
-  return WILD_ENCOUNTER_TYPES.includes(encounterType);
+  return WILD_ENCOUNTER_TYPES.some((wildType) => wildType === encounterType);
 }
 
 function deduplicateEncounters(
@@ -160,22 +160,14 @@ interface RouteEncounters {
   encounters: PokemonEncounter[];
 }
 
-const EncounterTypeSchema = z.enum([
-  "grass",
-  "surf",
-  "fishing",
-  "special",
-  "cave",
-  "rock_smash",
-  "pokeradar",
-]);
+const EncounterTypeSchema = z.enum(WILD_ENCOUNTER_TYPES);
 
 const RouteEncountersSchema = z.array(
-  z.object({
+  z.strictObject({
     routeName: z.string().trim().min(1),
     encounters: z
       .array(
-        z.object({
+        z.strictObject({
           pokemonId: z.number().int().positive(),
           encounterType: EncounterTypeSchema,
         }),

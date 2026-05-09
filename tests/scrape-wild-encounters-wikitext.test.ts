@@ -125,6 +125,37 @@ describe("Wild encounter wikitext parser", () => {
     ).toThrow(/Pokemon ID integrity/);
   });
 
+  it("fails validation when wild encounter output contains special encounters", () => {
+    const payload = JSON.parse(
+      JSON.stringify([
+        {
+          routeName: "Route 1",
+          encounters: [{ pokemonId: 16, encounterType: "special" }],
+        },
+      ]),
+    );
+
+    expect(() =>
+      assertEncounterPayload(payload, pokemonNameMap, "unit test encounters"),
+    ).toThrow(/encounterType/);
+  });
+
+  it("fails validation when scraped payloads contain unexpected keys", () => {
+    const payload = JSON.parse(
+      JSON.stringify([
+        {
+          routeName: "Route 1",
+          source: "wiki",
+          encounters: [{ pokemonId: 16, encounterType: "grass" }],
+        },
+      ]),
+    );
+
+    expect(() =>
+      assertEncounterPayload(payload, pokemonNameMap, "unit test encounters"),
+    ).toThrow(/Unrecognized key/);
+  });
+
   it("fails parity when route and encounter aggregates diverge", () => {
     expect(() =>
       assertEncounterParity(
