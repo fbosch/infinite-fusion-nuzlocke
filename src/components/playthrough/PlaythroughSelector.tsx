@@ -88,13 +88,19 @@ export default function PlaythroughSelector({
   }, [allPlaythroughs.length]);
 
   // Switch to a different playthrough
-  const handlePlaythroughSelect = useCallback(async (playthroughId: string) => {
-    try {
-      await playthroughActions.setActivePlaythrough(playthroughId);
-    } catch (error) {
-      console.error("Failed to switch playthrough:", error);
-    }
-  }, []);
+  const handlePlaythroughSelect = useCallback(
+    async (playthroughId: string, triggerMethod: "click" | "keyboard") => {
+      try {
+        await playthroughActions.setActivePlaythrough(playthroughId, {
+          source_surface: "playthrough_selector",
+          trigger_method: triggerMethod,
+        });
+      } catch (error) {
+        console.error("Failed to switch playthrough:", error);
+      }
+    },
+    [],
+  );
 
   // Handle delete playthrough click
   const handleDeleteClick = useCallback(
@@ -296,12 +302,15 @@ export default function PlaythroughSelector({
                                 }
                               }}
                               onClick={() =>
-                                handlePlaythroughSelect(playthrough.id)
+                                handlePlaythroughSelect(playthrough.id, "click")
                               }
                               onKeyDown={(e) => {
                                 if (e.key === "Enter" || e.key === " ") {
                                   e.preventDefault();
-                                  handlePlaythroughSelect(playthrough.id);
+                                  handlePlaythroughSelect(
+                                    playthrough.id,
+                                    "keyboard",
+                                  );
                                 } else if (
                                   e.key === "ArrowDown" ||
                                   e.key === "ArrowUp" ||
@@ -501,7 +510,10 @@ export default function PlaythroughSelector({
         onClose={() => setShowCreateInput(false)}
         onCreate={async (name: string, gameMode: GameMode) => {
           const newId = playthroughActions.createPlaythrough(name, gameMode);
-          await playthroughActions.setActivePlaythrough(newId);
+          await playthroughActions.setActivePlaythrough(newId, {
+            source_surface: "create_playthrough_modal",
+            trigger_method: "submit",
+          });
         }}
       />
 

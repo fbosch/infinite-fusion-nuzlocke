@@ -30,7 +30,10 @@ const GameModeToggle = function GameModeToggle() {
         setOptimisticMode(targetMode);
 
         // Actual state update
-        playthroughActions.setGameMode(targetMode);
+        playthroughActions.setGameMode(targetMode, {
+          source_surface: "game_mode_toggle",
+          trigger_method: "click",
+        });
       });
     },
     [activePlaythrough, optimisticMode, isPending, setOptimisticMode],
