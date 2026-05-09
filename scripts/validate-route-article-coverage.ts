@@ -8,6 +8,7 @@ import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
 
 const ROUTE_VALIDATION_BATCH_SIZE = 6;
+const ROUTES_WITHOUT_ARTICLE_WILD_ROWS = new Set(["Route 10"]);
 
 interface PokemonEncounter {
   pokemonId: number;
@@ -58,7 +59,10 @@ function buildValidationFailure(
 ): RouteValidationFailure | null {
   const reasons: string[] = [];
 
-  if (articleEncounters.length === 0) {
+  if (
+    articleEncounters.length === 0 &&
+    ROUTES_WITHOUT_ARTICLE_WILD_ROWS.has(routeName) === false
+  ) {
     reasons.push("article has no wild encounter rows");
   }
 

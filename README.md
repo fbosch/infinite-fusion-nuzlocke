@@ -60,6 +60,14 @@ pnpm data:refresh
 pnpm spritesheet
 ```
 
+Scraper maintenance checks:
+
+```bash
+pnpm test:run tests/scrape-wild-encounters-wikitext.test.ts
+pnpm scrape:encounters
+pnpm validate:route-articles
+```
+
 ## Validation Workflow
 
 For behavior or run-state changes, run checks in this order:
