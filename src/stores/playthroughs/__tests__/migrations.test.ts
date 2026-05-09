@@ -7,6 +7,7 @@ import {
   migrateTeamField,
   migrateVersion,
 } from "../migrations";
+import { PlaythroughSchema } from "../types";
 
 type LegacyTeamMember = {
   headEncounterId: string;
@@ -285,6 +286,85 @@ describe("Migration Functions", () => {
       expect(result.version).toBe("2.0.0");
       expect(result.team).toBeDefined();
       expect(result.remixMode).toBeUndefined(); // Should still be cleaned up
+    });
+
+    it("should migrate an old persisted shape through the full pipeline into a valid playthrough", () => {
+      const legacyData: MigrationData = {
+        id: "",
+        name: "",
+        remixMode: true,
+        gameMode: "classic",
+        createdAt: Number.NaN,
+        updatedAt: Number.POSITIVE_INFINITY,
+        encounters: {
+          route1: {
+            head: {
+              id: 25,
+              name: "Pikachu",
+              nationalDexId: 25,
+              status: "stored",
+              uid: "pikachu-route1",
+            },
+            body: {
+              id: 4,
+              name: "Charmander",
+              nationalDexId: 4,
+              status: "deceased",
+              uid: "charmander-route1",
+            },
+            isFusion: true,
+            updatedAt: 1_700_000_000,
+            artworkVariant: "legacy-sprite-key",
+          },
+        },
+        team: {
+          members: {
+            0: {
+              headEncounterId: "route1:head",
+              bodyEncounterId: "route1:body",
+            },
+          },
+        },
+      };
+
+      const migrated = migratePlaythrough(legacyData);
+      const parsed = PlaythroughSchema.parse(migrated);
+
+      expect(parsed.id).toMatch(/^playthrough_/);
+      expect(parsed.name).toBe("Playthrough");
+      expect(parsed.createdAt).toBeGreaterThan(0);
+      expect(parsed.updatedAt).toBeGreaterThan(0);
+      expect(parsed.gameMode).toBe("remix");
+      expect("remixMode" in parsed).toBe(false);
+      expect(parsed.version).toBe("1.0.0");
+      expect(parsed.team.members).toEqual([
+        { headPokemonUid: "", bodyPokemonUid: "" },
+        null,
+        null,
+        null,
+        null,
+        null,
+      ]);
+      expect(parsed.encounters?.route1).toEqual({
+        head: {
+          id: 25,
+          name: "Pikachu",
+          nationalDexId: 25,
+          status: "stored",
+          originalReceivalStatus: "captured",
+          uid: "pikachu-route1",
+        },
+        body: {
+          id: 4,
+          name: "Charmander",
+          nationalDexId: 4,
+          status: "deceased",
+          originalReceivalStatus: "captured",
+          uid: "charmander-route1",
+        },
+        isFusion: true,
+        updatedAt: 1_700_000_000,
+      });
     });
   });
 });
