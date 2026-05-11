@@ -1,7 +1,5 @@
 import type { z } from "zod";
 import { getEncounterCount } from "@/lib/analytics/playthroughEventData";
-import { getSharedEventProperties } from "@/lib/analytics/selectors";
-import { trackEvent } from "@/lib/analytics/trackEvent";
 import { emitEvolutionEvent } from "@/lib/events";
 import type { PokemonOptionSchema, PokemonOptionType } from "@/loaders/pokemon";
 import { getActivePlaythrough, getCurrentTimestamp } from "../playthroughState";
