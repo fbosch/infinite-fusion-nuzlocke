@@ -1,12 +1,5 @@
 import type { z } from "zod";
-import { getCheckpointLabel } from "@/lib/analytics/buckets";
-import {
-  getEncounterCount,
-  getNewlyReachedCheckpoints,
-  markCheckpointEventsTracked,
-} from "@/lib/analytics/playthroughEventData";
-import { getSharedEventProperties } from "@/lib/analytics/selectors";
-import { trackEvent } from "@/lib/analytics/trackEvent";
+import { getEncounterCount } from "@/lib/analytics/playthroughEventData";
 import { emitEvolutionEvent } from "@/lib/events";
 import type { PokemonOptionSchema, PokemonOptionType } from "@/loaders/pokemon";
 import { getActivePlaythrough, getCurrentTimestamp } from "../playthroughState";
@@ -20,22 +13,7 @@ import {
   autoAssignCapturedPokemonToTeam,
   removeTeamMembersWithPokemon,
 } from "./team";
-
-const trackFirstEncounterSaved = (
-  activePlaythrough: Playthrough,
-  locationId: string,
-  previousEncounterCount: number,
-  nextEncounterCount: number,
-) => {
-  if (previousEncounterCount !== 0 || nextEncounterCount === 0) {
-    return;
-  }
-
-  trackEvent("first_encounter_saved", {
-    ...getSharedEventProperties(activePlaythrough),
-    location_id: locationId,
-  });
-};
+import { trackEncounterProgress, trackFusionCreatedIfNew } from "./transition";
 
 // Create encounter data (variants are managed globally)
 export const createEncounterData = async (
@@ -122,36 +100,10 @@ export const updateEncounter = async (
       await autoAssignCapturedPokemonToTeam(locationId);
     }
 
-    const nextEncounterCount = getEncounterCount(activePlaythrough);
-    trackFirstEncounterSaved(
+    trackEncounterProgress(
       activePlaythrough,
       locationId,
       previousEncounterCount,
-      nextEncounterCount,
-    );
-    const newlyReachedCheckpoints = getNewlyReachedCheckpoints(
-      activePlaythrough.id,
-      previousEncounterCount,
-      nextEncounterCount,
-    );
-    const trackedCheckpoints: typeof newlyReachedCheckpoints = [];
-
-    for (const checkpoint of newlyReachedCheckpoints) {
-      const wasTracked = trackEvent("run_checkpoint_reached", {
-        ...getSharedEventProperties(activePlaythrough),
-        checkpoint,
-        checkpoint_label: getCheckpointLabel(checkpoint),
-      });
-
-      if (wasTracked) {
-        trackedCheckpoints.push(checkpoint);
-      }
-    }
-
-    markCheckpointEventsTracked(
-      activePlaythrough.id,
-      newlyReachedCheckpoints,
-      trackedCheckpoints,
     );
 
     return;
@@ -225,44 +177,18 @@ export const updateEncounter = async (
     const isCompleteFusion = Boolean(
       encounter.isFusion && encounter.head && encounter.body,
     );
-    if (!wasCompleteFusion && isCompleteFusion) {
-      trackEvent("fusion_created", {
-        ...getSharedEventProperties(activePlaythrough),
-        location_id: locationId,
-        creation_method: "update_encounter",
-      });
-    }
+    trackFusionCreatedIfNew(
+      activePlaythrough,
+      locationId,
+      wasCompleteFusion,
+      isCompleteFusion,
+      "update_encounter",
+    );
 
-    const nextEncounterCount = getEncounterCount(activePlaythrough);
-    trackFirstEncounterSaved(
+    trackEncounterProgress(
       activePlaythrough,
       locationId,
       previousEncounterCount,
-      nextEncounterCount,
-    );
-    const newlyReachedCheckpoints = getNewlyReachedCheckpoints(
-      activePlaythrough.id,
-      previousEncounterCount,
-      nextEncounterCount,
-    );
-    const trackedCheckpoints: typeof newlyReachedCheckpoints = [];
-
-    for (const checkpoint of newlyReachedCheckpoints) {
-      const wasTracked = trackEvent("run_checkpoint_reached", {
-        ...getSharedEventProperties(activePlaythrough),
-        checkpoint,
-        checkpoint_label: getCheckpointLabel(checkpoint),
-      });
-
-      if (wasTracked) {
-        trackedCheckpoints.push(checkpoint);
-      }
-    }
-
-    markCheckpointEventsTracked(
-      activePlaythrough.id,
-      newlyReachedCheckpoints,
-      trackedCheckpoints,
     );
 
     return;
@@ -278,31 +204,7 @@ export const updateEncounter = async (
 
   removeTeamMembersWithPokemon(removedUIDs);
 
-  const nextEncounterCount = getEncounterCount(activePlaythrough);
-  const newlyReachedCheckpoints = getNewlyReachedCheckpoints(
-    activePlaythrough.id,
-    previousEncounterCount,
-    nextEncounterCount,
-  );
-  const trackedCheckpoints: typeof newlyReachedCheckpoints = [];
-
-  for (const checkpoint of newlyReachedCheckpoints) {
-    const wasTracked = trackEvent("run_checkpoint_reached", {
-      ...getSharedEventProperties(activePlaythrough),
-      checkpoint,
-      checkpoint_label: getCheckpointLabel(checkpoint),
-    });
-
-    if (wasTracked) {
-      trackedCheckpoints.push(checkpoint);
-    }
-  }
-
-  markCheckpointEventsTracked(
-    activePlaythrough.id,
-    newlyReachedCheckpoints,
-    trackedCheckpoints,
-  );
+  trackEncounterProgress(activePlaythrough, locationId, previousEncounterCount);
 };
 
 // Reset encounter for a location
