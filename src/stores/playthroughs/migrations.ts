@@ -22,7 +22,10 @@ export interface MigrationData {
  * Migrate remixMode to gameMode field
  */
 export function migrateRemixMode(data: MigrationData): MigrationData {
-  if (data.remixMode !== undefined && data.gameMode === "classic") {
+  if (
+    data.remixMode !== undefined &&
+    (data.gameMode === undefined || data.gameMode === "classic")
+  ) {
     return {
       ...data,
       gameMode: data.remixMode ? "remix" : "classic",
@@ -309,10 +312,18 @@ export function migrateImportedPlaythroughData(data: unknown): unknown {
     return data;
   }
 
+  const { playthrough } = data as { playthrough: unknown };
+
+  if (
+    !playthrough ||
+    typeof playthrough !== "object" ||
+    Array.isArray(playthrough)
+  ) {
+    return data;
+  }
+
   return {
     ...data,
-    playthrough: migratePlaythrough(
-      (data as { playthrough: MigrationData }).playthrough,
-    ),
+    playthrough: migratePlaythrough(playthrough as MigrationData),
   };
 }

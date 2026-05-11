@@ -269,6 +269,19 @@ describe("Migration Functions", () => {
       expect(teamMembers.every((member) => member === null)).toBe(true);
     });
 
+    it("should preserve legacy remix mode when gameMode is absent", () => {
+      const result = migratePlaythrough({
+        id: "test",
+        name: "Test",
+        remixMode: true,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+
+      expect(result.gameMode).toBe("remix");
+      expect(result.remixMode).toBeUndefined();
+    });
+
     it("should handle data that needs no migration", () => {
       const data: MigrationData = {
         id: "test",
@@ -437,6 +450,18 @@ describe("Migration Functions", () => {
         isFusion: false,
         updatedAt: 1,
       });
+    });
+
+    it("leaves malformed import playthrough values for schema validation to reject", () => {
+      const malformedImport = {
+        exportedAt: "2026-05-11T00:00:00.000Z",
+        playthrough: null,
+      };
+
+      const migratedImport = migrateImportedPlaythroughData(malformedImport);
+
+      expect(migratedImport).toBe(malformedImport);
+      expect(() => ImportedPlaythroughSchema.parse(migratedImport)).toThrow();
     });
   });
 });
