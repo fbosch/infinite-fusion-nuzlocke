@@ -209,6 +209,30 @@ export function migrateOriginalReceivalStatus(
   return data;
 }
 
+export function cleanupEncounterArtworkVariant(
+  data: MigrationData,
+): MigrationData {
+  if (!data.encounters || typeof data.encounters !== "object") {
+    return data;
+  }
+
+  return {
+    ...data,
+    encounters: Object.fromEntries(
+      Object.entries(data.encounters).map(([locationId, encounter]) => {
+        if (!encounter || typeof encounter !== "object") {
+          return [locationId, encounter];
+        }
+
+        const { artworkVariant: _artworkVariant, ...cleanEncounter } =
+          encounter as Record<string, unknown>;
+
+        return [locationId, cleanEncounter];
+      }),
+    ),
+  };
+}
+
 /**
  * Ensure required fields exist with proper types
  */
@@ -274,7 +298,21 @@ export function migratePlaythrough(data: MigrationData): MigrationData {
   migratedData = migrateTeamField(migratedData);
   migratedData = migrateTeamMemberSchema(migratedData);
   migratedData = migrateOriginalReceivalStatus(migratedData);
+  migratedData = cleanupEncounterArtworkVariant(migratedData);
   migratedData = cleanupRemixMode(migratedData);
 
   return migratedData;
+}
+
+export function migrateImportedPlaythroughData(data: unknown): unknown {
+  if (!data || typeof data !== "object" || !("playthrough" in data)) {
+    return data;
+  }
+
+  return {
+    ...data,
+    playthrough: migratePlaythrough(
+      (data as { playthrough: MigrationData }).playthrough,
+    ),
+  };
 }

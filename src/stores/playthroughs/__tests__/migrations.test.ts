@@ -2,12 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   cleanupRemixMode,
   type MigrationData,
+  migrateImportedPlaythroughData,
   migratePlaythrough,
   migrateRemixMode,
   migrateTeamField,
   migrateVersion,
 } from "../migrations";
-import { PlaythroughSchema } from "../types";
+import { ImportedPlaythroughSchema, PlaythroughSchema } from "../types";
 
 type LegacyTeamMember = {
   headEncounterId: string;
@@ -364,6 +365,77 @@ describe("Migration Functions", () => {
         },
         isFusion: true,
         updatedAt: 1_700_000_000,
+      });
+    });
+  });
+
+  describe("schema validation boundary", () => {
+    it("validates current playthrough shape without performing legacy migration", () => {
+      const parsed = PlaythroughSchema.parse({
+        id: "current",
+        name: "Current Run",
+        gameMode: "classic",
+        version: "1.0.0",
+        team: { members: Array.from({ length: 6 }, () => null) },
+        encounters: {},
+        createdAt: 1,
+        updatedAt: 1,
+      });
+
+      expect(parsed).toEqual({
+        id: "current",
+        name: "Current Run",
+        gameMode: "classic",
+        version: "1.0.0",
+        team: { members: [null, null, null, null, null, null] },
+        encounters: {},
+        createdAt: 1,
+        updatedAt: 1,
+      });
+    });
+
+    it("normalizes legacy import payloads before current-shape validation", () => {
+      const migratedImport = migrateImportedPlaythroughData({
+        exportedAt: "2026-05-11T00:00:00.000Z",
+        playthrough: {
+          id: "legacy-import",
+          name: "Legacy Import",
+          remixMode: true,
+          gameMode: "classic",
+          team: {
+            members: {
+              0: {
+                headEncounterId: "route1:head",
+                bodyEncounterId: "route1:body",
+              },
+            },
+          },
+          encounters: {
+            route1: {
+              head: null,
+              body: null,
+              isFusion: false,
+              updatedAt: 1,
+              artworkVariant: "legacy-sprite-key",
+            },
+          },
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      });
+
+      const parsed = ImportedPlaythroughSchema.parse(migratedImport);
+
+      expect(parsed.playthrough.gameMode).toBe("remix");
+      expect(parsed.playthrough.team.members[0]).toEqual({
+        headPokemonUid: "",
+        bodyPokemonUid: "",
+      });
+      expect(parsed.playthrough.encounters?.route1).toEqual({
+        head: null,
+        body: null,
+        isFusion: false,
+        updatedAt: 1,
       });
     });
   });

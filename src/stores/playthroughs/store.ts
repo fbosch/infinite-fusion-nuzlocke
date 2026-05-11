@@ -11,6 +11,7 @@ import type { PokemonOptionType } from "@/loaders/pokemon";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 import { generatePrefixedId } from "@/utils/id";
 import { createDefaultPlaythrough } from "./defaultPlaythrough";
+import { migrateImportedPlaythroughData } from "./migrations";
 import {
   createDebouncedSaveAll,
   deletePlaythroughFromIndexedDB,
@@ -326,9 +327,16 @@ const getGameMode = (): GameMode => {
 
 const importPlaythrough = async (importData: unknown): Promise<string> => {
   try {
-    // Validate the imported data against the schema
     const { ImportedPlaythroughSchema } = await import("./types");
-    const validatedData = ImportedPlaythroughSchema.parse(importData);
+    const migratedImportData = migrateImportedPlaythroughData(importData);
+    const validationResult =
+      ImportedPlaythroughSchema.safeParse(migratedImportData);
+
+    if (!validationResult.success) {
+      throw validationResult.error;
+    }
+
+    const validatedData = validationResult.data;
 
     // Extract the playthrough data - the transform ensures proper typing
     const importedPlaythrough = validatedData.playthrough;
@@ -348,7 +356,7 @@ const importPlaythrough = async (importData: unknown): Promise<string> => {
     const newPlaythrough: Playthrough = {
       id: finalId,
       name: importedPlaythrough.name,
-      gameMode: importedPlaythrough.gameMode as GameMode, // Type assertion since transform ensures it's GameMode
+      gameMode: importedPlaythrough.gameMode,
       version: importedPlaythrough.version || "1.0.0",
       createdAt: importedPlaythrough.createdAt,
       updatedAt: Date.now(), // Update to current time
