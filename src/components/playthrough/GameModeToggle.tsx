@@ -39,6 +39,17 @@ const GameModeToggle = function GameModeToggle() {
     [activePlaythrough, optimisticMode, isPending, setOptimisticMode],
   );
 
+  const getBackgroundPosition = (mode: GameMode): string => {
+    switch (mode) {
+      case "classic":
+        return "translate-x-0";
+      case "remix":
+        return "translate-x-full";
+      case "randomized":
+        return "translate-x-[200%]";
+    }
+  };
+
   return (
     <div className="flex w-full items-center">
       <fieldset
@@ -57,6 +68,16 @@ const GameModeToggle = function GameModeToggle() {
       >
         <legend className="sr-only">Game Mode Selection</legend>
 
+        {activePlaythrough && (
+          <div
+            className={clsx(
+              "absolute inset-y-1 left-0.5 w-[calc((100%-0.25rem)/3)] rounded-lg border border-gray-200 bg-gray-50 shadow-elevation-1 transition-transform duration-200 ease-out dark:border-gray-500 dark:bg-gray-700 sm:left-1 sm:w-[calc((100%-0.5rem)/3)]",
+              getBackgroundPosition(optimisticMode),
+            )}
+            aria-hidden="true"
+          />
+        )}
+
         <button
           type="button"
           onClick={(event) =>
@@ -71,7 +92,7 @@ const GameModeToggle = function GameModeToggle() {
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
             "focus-visible:border-blue-500 dark:focus-visible:border-blue-400",
             optimisticMode === "classic"
-              ? "border-gray-200 bg-gray-50 text-gray-900 shadow-elevation-1 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-100"
+              ? "text-gray-900 dark:text-gray-100"
               : "text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300",
             activePlaythrough &&
               "cursor-pointer transition-colors duration-200",
@@ -93,7 +114,7 @@ const GameModeToggle = function GameModeToggle() {
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
             "focus-visible:border-blue-500 dark:focus-visible:border-blue-400",
             optimisticMode === "remix"
-              ? "border-purple-200 bg-purple-50 text-purple-700 shadow-elevation-1 dark:border-purple-700 dark:bg-purple-900/40 dark:text-purple-300"
+              ? "text-purple-700 dark:text-purple-300"
               : "text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300",
             activePlaythrough &&
               "cursor-pointer transition-colors duration-200",
@@ -118,7 +139,7 @@ const GameModeToggle = function GameModeToggle() {
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
             "focus-visible:border-blue-500 dark:focus-visible:border-blue-400",
             optimisticMode === "randomized"
-              ? "border-orange-200 bg-orange-50 text-orange-700 shadow-elevation-1 dark:border-orange-700 dark:bg-orange-900/40 dark:text-orange-300"
+              ? "text-orange-700 dark:text-orange-300"
               : "text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300",
             activePlaythrough &&
               "cursor-pointer transition-colors duration-200",
