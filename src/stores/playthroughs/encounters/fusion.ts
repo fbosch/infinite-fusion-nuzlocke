@@ -1,9 +1,4 @@
-import { getCheckpointLabel } from "@/lib/analytics/buckets";
-import {
-  getEncounterCount,
-  getNewlyReachedCheckpoints,
-  markCheckpointEventsTracked,
-} from "@/lib/analytics/playthroughEventData";
+import { getEncounterCount } from "@/lib/analytics/playthroughEventData";
 import { getSharedEventProperties } from "@/lib/analytics/selectors";
 import { trackEvent } from "@/lib/analytics/trackEvent";
 import { emitEvolutionEvent } from "@/lib/events";
@@ -14,6 +9,7 @@ import {
   getFusionSpriteIdFromEncounter,
   type PokemonOption,
 } from "./shared";
+import { trackEncounterProgress, trackFusionCreatedIfNew } from "./transition";
 
 // Toggle fusion mode for an encounter
 export const toggleEncounterFusion = async (locationId: string) => {
@@ -111,46 +107,17 @@ export const createFusion = async (
   };
 
   activePlaythrough.encounters[locationId] = encounter;
-  if (encounter.head && encounter.body) {
+  const isCompleteFusion = Boolean(encounter.head && encounter.body);
+  if (isCompleteFusion) {
     emitEvolutionEvent(locationId);
-
-    trackEvent("fusion_created", {
-      ...getSharedEventProperties(activePlaythrough),
-      location_id: locationId,
-      creation_method: "create_fusion",
-    });
   }
 
-  const nextEncounterCount = getEncounterCount(activePlaythrough);
-  if (previousEncounterCount === 0 && nextEncounterCount > 0) {
-    trackEvent("first_encounter_saved", {
-      ...getSharedEventProperties(activePlaythrough),
-      location_id: locationId,
-    });
-  }
-
-  const newlyReachedCheckpoints = getNewlyReachedCheckpoints(
-    activePlaythrough.id,
-    previousEncounterCount,
-    nextEncounterCount,
+  trackFusionCreatedIfNew(
+    activePlaythrough,
+    locationId,
+    false,
+    isCompleteFusion,
+    "create_fusion",
   );
-  const trackedCheckpoints: typeof newlyReachedCheckpoints = [];
-
-  for (const checkpoint of newlyReachedCheckpoints) {
-    const wasTracked = trackEvent("run_checkpoint_reached", {
-      ...getSharedEventProperties(activePlaythrough),
-      checkpoint,
-      checkpoint_label: getCheckpointLabel(checkpoint),
-    });
-
-    if (wasTracked) {
-      trackedCheckpoints.push(checkpoint);
-    }
-  }
-
-  markCheckpointEventsTracked(
-    activePlaythrough.id,
-    newlyReachedCheckpoints,
-    trackedCheckpoints,
-  );
+  trackEncounterProgress(activePlaythrough, locationId, previousEncounterCount);
 };

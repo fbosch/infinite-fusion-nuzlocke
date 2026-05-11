@@ -10,6 +10,7 @@ import {
   ensureActivePlaythroughWithEncounters,
 } from "./shared";
 import { removeTeamMembersWithPokemon } from "./team";
+import { trackFusionCreatedIfNew } from "./transition";
 
 // Clear encounter from a specific location (replaces clearCombobox event)
 export const clearEncounterFromLocation = async (
@@ -107,17 +108,20 @@ export const moveEncounterAtomic = async (
   };
 
   activePlaythrough.encounters[targetLocationId] = newEncounter;
-  if (newEncounter.isFusion && newEncounter.head && newEncounter.body) {
+  const isCompleteFusion = Boolean(
+    newEncounter.isFusion && newEncounter.head && newEncounter.body,
+  );
+  if (isCompleteFusion) {
     emitEvolutionEvent(targetLocationId);
-
-    if (!targetWasCompleteFusion) {
-      trackEvent("fusion_created", {
-        ...getSharedEventProperties(activePlaythrough),
-        location_id: targetLocationId,
-        creation_method: "drag_drop",
-      });
-    }
   }
+
+  trackFusionCreatedIfNew(
+    activePlaythrough,
+    targetLocationId,
+    targetWasCompleteFusion,
+    isCompleteFusion,
+    "drag_drop",
+  );
 };
 
 // Move encounter from one location to another
