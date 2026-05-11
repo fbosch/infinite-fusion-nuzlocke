@@ -44,20 +44,20 @@ const GameModeToggle = function GameModeToggle() {
       case "classic":
         return "translate-x-0";
       case "remix":
-        return "translate-x-14 sm:translate-x-16 md:translate-x-20";
+        return "translate-x-full";
       case "randomized":
-        return "translate-x-28 sm:translate-x-32 md:translate-x-40";
+        return "translate-x-[200%]";
     }
   };
 
   return (
-    <div className="flex items-center">
+    <div className="flex w-full items-center">
       <fieldset
         className={clsx(
-          "relative flex items-center bg-white dark:bg-gray-800 rounded-t-xl p-0.5 sm:p-1",
+          "relative grid w-full grid-cols-3 items-center rounded-t-xl bg-white p-0.5 dark:bg-gray-800 sm:p-1",
           "border-b-0 border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500",
           "font-medium backdrop-blur-sm",
-          "h-[40px] sm:h-[44px] w-[180px] sm:w-auto",
+          "h-12 sm:h-[44px]",
           "transition-all duration-200 ease-out",
           !activePlaythrough && "opacity-50",
         )}
@@ -71,8 +71,7 @@ const GameModeToggle = function GameModeToggle() {
         {activePlaythrough && (
           <div
             className={clsx(
-              "absolute top-1 bottom-1 left-0.5 sm:left-1 w-14 sm:w-16 md:w-20 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-elevation-1 transition-transform duration-200 ease-out",
-              "border border-gray-200 dark:border-gray-500",
+              "absolute inset-y-1 left-0.5 w-[calc((100%-0.25rem)/3)] rounded-lg border border-gray-200 bg-gray-50 shadow-elevation-1 transition-transform duration-200 ease-out dark:border-gray-500 dark:bg-gray-700 sm:left-1 sm:w-[calc((100%-0.5rem)/3)]",
               getBackgroundPosition(optimisticMode),
             )}
             aria-hidden="true"
@@ -89,7 +88,7 @@ const GameModeToggle = function GameModeToggle() {
           }
           disabled={!activePlaythrough}
           className={clsx(
-            "relative z-10 w-14 sm:w-16 md:w-20 h-[32px] sm:h-[36px] py-1.5 sm:py-2 text-xs sm:text-sm text-center",
+            "relative z-10 h-10 min-w-0 rounded-lg border border-transparent px-2 py-2 text-center text-sm sm:h-[36px] sm:px-3",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
             "focus-visible:border-blue-500 dark:focus-visible:border-blue-400",
             optimisticMode === "classic"
@@ -111,7 +110,7 @@ const GameModeToggle = function GameModeToggle() {
           }
           disabled={!activePlaythrough}
           className={clsx(
-            "relative z-10 w-14 sm:w-16 md:w-20 h-[32px] sm:h-[36px] py-1.5 sm:py-2 text-xs sm:text-sm text-center",
+            "relative z-10 h-10 min-w-0 rounded-lg border border-transparent px-2 py-2 text-center text-sm sm:h-[36px] sm:px-3",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
             "focus-visible:border-blue-500 dark:focus-visible:border-blue-400",
             optimisticMode === "remix"
@@ -136,7 +135,7 @@ const GameModeToggle = function GameModeToggle() {
           }
           disabled={!activePlaythrough}
           className={clsx(
-            "relative z-10 w-14 sm:w-16 md:w-20 h-[32px] sm:h-[36px] py-1.5 sm:py-2 text-xs sm:text-sm text-center",
+            "relative z-10 h-10 min-w-0 rounded-lg border border-transparent px-2 py-2 text-center text-sm sm:h-[36px] sm:px-3",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
             "focus-visible:border-blue-500 dark:focus-visible:border-blue-400",
             optimisticMode === "randomized"
