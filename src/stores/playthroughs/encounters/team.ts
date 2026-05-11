@@ -3,6 +3,11 @@ import { type PokemonOptionSchema, PokemonStatus } from "@/loaders/pokemon";
 import type { EncounterData } from "../types";
 import { ensureActivePlaythroughWithEncounters } from "./shared";
 
+const TEAM_SIZE = 6;
+
+const isValidTeamPosition = (position: number) =>
+  position >= 0 && position < TEAM_SIZE;
+
 // Update a Pokemon's properties by UID across all encounters
 export const updatePokemonByUID = async (
   pokemonUID: string,
@@ -56,7 +61,7 @@ export const updateTeamMember = async (
     return false;
   }
 
-  if (position < 0 || position >= 6) {
+  if (!isValidTeamPosition(position)) {
     return false;
   }
 
@@ -181,6 +186,49 @@ const findPokemonByUID = (
   return null;
 };
 
+export const getTeamMemberUids = (position: number): string[] => {
+  const activePlaythrough = ensureActivePlaythroughWithEncounters();
+  if (!activePlaythrough?.team) {
+    return [];
+  }
+
+  if (!isValidTeamPosition(position)) {
+    return [];
+  }
+
+  const member = activePlaythrough.team.members[position];
+  if (!member) {
+    return [];
+  }
+
+  return [member.headPokemonUid, member.bodyPokemonUid].filter(
+    (uid) => uid !== "",
+  );
+};
+
+export const findCanonicalLocationForUids = (uids: string[]) => {
+  const activePlaythrough = ensureActivePlaythroughWithEncounters();
+  if (!activePlaythrough || uids.length === 0) {
+    return null;
+  }
+
+  const matches = Object.entries(activePlaythrough.encounters).filter(
+    ([, encounter]) => {
+      const encounterUids = [encounter.head?.uid, encounter.body?.uid].filter(
+        (uid) => uid != null,
+      );
+
+      return uids.every((uid) => encounterUids.includes(uid));
+    },
+  );
+
+  if (matches.length !== 1) {
+    return null;
+  }
+
+  return matches[0][0];
+};
+
 export const removeTeamMembersWithPokemon = (pokemonUIDs: string[]) => {
   const activePlaythrough = ensureActivePlaythroughWithEncounters();
   if (!activePlaythrough?.team || pokemonUIDs.length === 0) {
@@ -216,7 +264,7 @@ export const moveTeamMemberToBox = async (position: number): Promise<void> => {
     return;
   }
 
-  if (position < 0 || position >= 6) {
+  if (!isValidTeamPosition(position)) {
     return;
   }
 
