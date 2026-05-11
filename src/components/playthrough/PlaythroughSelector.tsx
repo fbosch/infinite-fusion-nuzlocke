@@ -31,7 +31,6 @@ import { ImportErrorContent } from "./ImportErrorContent";
 
 interface PlaythroughSelectorProps {
   className?: string;
-  standalone?: boolean;
 }
 
 // Helper function to get game mode display info
@@ -58,7 +57,6 @@ const getGameModeInfo = (gameMode: GameMode) => {
 
 export default function PlaythroughSelector({
   className,
-  standalone = false,
 }: PlaythroughSelectorProps) {
   const activePlaythrough = useActivePlaythrough();
   const isLoading = useIsLoading();
@@ -191,23 +189,22 @@ export default function PlaythroughSelector({
 
   return (
     <>
-      <div className={clsx("relative w-full group", className)}>
+      <div className={clsx("relative group l", className)}>
         {/* Playthrough Selector Dropdown */}
-        <Popover className="relative w-full">
+        <Popover className="relative">
           {({ open }) => (
             <>
               <PopoverButton
                 className={clsx(
-                  "flex items-center justify-between gap-2 px-3 py-2.5 text-sm sm:gap-3 sm:px-4",
+                  "flex items-center justify-between gap-3 px-4 py-2.5 text-sm",
                   "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700",
                   "border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500",
-                  standalone ? "rounded-xl" : "rounded-b-xl",
-                  "transition-all duration-200 ease-out",
+                  "rounded-b-xl transition-all duration-200 ease-out",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                   "focus-visible:border-blue-500 dark:focus-visible:border-blue-400",
                   "text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100",
                   "disabled:opacity-50 disabled:cursor-not-allowed w-full cursor-pointer font-medium backdrop-blur-sm",
-                  "h-11",
+                  "h-[40px] sm:h-[44px]",
                 )}
                 disabled={isLoading}
                 onClick={() => {
@@ -238,7 +235,7 @@ export default function PlaythroughSelector({
                   "bg-white/95 dark:bg-gray-800/95 backdrop-blur-md",
                   "shadow-dropdown",
                   "border border-gray-200/50 dark:border-gray-600/50",
-                  "w-[var(--button-width,100%)] max-w-[calc(100vw-2rem)]",
+                  "min-w-[320px] sm:min-w-[360px] max-w-[420px]",
                   "origin-top-right",
                 )}
               >
