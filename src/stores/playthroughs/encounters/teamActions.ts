@@ -2,50 +2,12 @@ import { PokemonStatus } from "@/loaders/pokemon";
 import { flipEncounterFusion } from "./fusion";
 import { ensureActivePlaythroughWithEncounters } from "./shared";
 import { markEncounterAsDeceased } from "./status";
-import { updatePokemonByUID, updateTeamMember } from "./team";
-
-const getTeamMemberUids = (position: number) => {
-  const activePlaythrough = ensureActivePlaythroughWithEncounters();
-  if (!activePlaythrough?.team) {
-    return [] as string[];
-  }
-
-  if (position < 0 || position >= activePlaythrough.team.members.length) {
-    return [] as string[];
-  }
-
-  const member = activePlaythrough.team.members[position];
-  if (!member) {
-    return [] as string[];
-  }
-
-  return [member.headPokemonUid, member.bodyPokemonUid].filter(
-    (uid) => uid !== "",
-  );
-};
-
-const findCanonicalLocationForUids = (uids: string[]) => {
-  const activePlaythrough = ensureActivePlaythroughWithEncounters();
-  if (!activePlaythrough || uids.length === 0) {
-    return null;
-  }
-
-  const matches = Object.entries(activePlaythrough.encounters).filter(
-    ([, encounter]) => {
-      const encounterUids = [encounter.head?.uid, encounter.body?.uid].filter(
-        (uid) => uid != null,
-      );
-
-      return uids.every((uid) => encounterUids.includes(uid));
-    },
-  );
-
-  if (matches.length !== 1) {
-    return null;
-  }
-
-  return matches[0][0];
-};
+import {
+  findCanonicalLocationForUids,
+  getTeamMemberUids,
+  updatePokemonByUID,
+  updateTeamMember,
+} from "./team";
 
 export const markTeamMemberAsDeceased = async (
   position: number,
