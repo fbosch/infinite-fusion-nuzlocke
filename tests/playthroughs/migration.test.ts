@@ -1,6 +1,7 @@
 // Import mocks first (must be at top level for Vitest hoisting)
 import "./mocks";
 
+import { migratePlaythrough } from "../../src/stores/playthroughs/migrations";
 // Import shared setup and utilities
 import {
   createMockPokemon,
@@ -17,13 +18,13 @@ describe("Playthroughs Store - Migration Tests", () => {
         id: "test-migration-1",
         name: "Legacy Remix Run",
         remixMode: true,
-        gameMode: "classic", // Default value
+        gameMode: "classic" as const, // Default value
         encounters: {},
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
 
-      const result = PlaythroughSchema.parse(legacyData);
+      const result = PlaythroughSchema.parse(migratePlaythrough(legacyData));
 
       expect(result.gameMode).toBe("remix");
       expect(result.name).toBe("Legacy Remix Run");
@@ -37,13 +38,13 @@ describe("Playthroughs Store - Migration Tests", () => {
         id: "test-migration-2",
         name: "Legacy Classic Run",
         remixMode: false,
-        gameMode: "classic", // Default value
+        gameMode: "classic" as const, // Default value
         encounters: {},
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
 
-      const result = PlaythroughSchema.parse(legacyData);
+      const result = PlaythroughSchema.parse(migratePlaythrough(legacyData));
 
       expect(result.gameMode).toBe("classic");
       expect(result.name).toBe("Legacy Classic Run");
@@ -63,7 +64,7 @@ describe("Playthroughs Store - Migration Tests", () => {
         updatedAt: Date.now(),
       };
 
-      const result = PlaythroughSchema.parse(modernData);
+      const result = PlaythroughSchema.parse(migratePlaythrough(modernData));
 
       // Should preserve explicit gameMode and remove remixMode
       expect(result.gameMode).toBe("randomized");
@@ -75,7 +76,7 @@ describe("Playthroughs Store - Migration Tests", () => {
         id: "test-migration-6",
         name: "Legacy Run with Data",
         remixMode: true,
-        gameMode: "classic",
+        gameMode: "classic" as const,
         encounters: {
           "route-1": {
             head: createMockPokemon("Pikachu", 25),
@@ -95,7 +96,9 @@ describe("Playthroughs Store - Migration Tests", () => {
         updatedAt: 1234567891,
       };
 
-      const result = PlaythroughSchema.parse(legacyDataWithEncounters);
+      const result = PlaythroughSchema.parse(
+        migratePlaythrough(legacyDataWithEncounters),
+      );
 
       expect(result.gameMode).toBe("remix");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
