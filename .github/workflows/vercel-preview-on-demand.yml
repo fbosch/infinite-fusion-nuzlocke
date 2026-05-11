@@ -20,12 +20,10 @@ jobs:
     if: >
       github.event_name == 'workflow_dispatch' ||
       (
+        github.event_name == 'pull_request' &&
         github.event.pull_request.draft == false &&
         github.event.pull_request.head.repo.full_name == github.repository &&
-        (
-          contains(github.event.pull_request.labels.*.name, 'preview') ||
-          startsWith(github.event.pull_request.head.ref, 'release-please--branches--master--components--')
-        )
+        contains(github.event.pull_request.labels.*.name, 'preview')
       )
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -122,10 +120,12 @@ jobs:
 
       - name: Publish deployment summary
         run: |
-          echo "### On-Demand Preview Deployment" >> "$GITHUB_STEP_SUMMARY"
-          echo "- PR: #${{ steps.pr.outputs.number }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Branch: ${{ steps.pr.outputs.head_ref }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- URL: ${{ steps.deploy.outputs.deployment_url }}" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### On-Demand Preview Deployment"
+            echo "- PR: #${{ steps.pr.outputs.number }}"
+            echo "- Branch: ${{ steps.pr.outputs.head_ref }}"
+            echo "- URL: ${{ steps.deploy.outputs.deployment_url }}"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment preview URL on PR
         uses: actions/github-script@v7
