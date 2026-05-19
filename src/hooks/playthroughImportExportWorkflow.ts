@@ -84,22 +84,11 @@ export const getImportErrorMessage = (error: unknown, fallback: string) => {
 };
 
 const resolvePlaythroughForImportAnalytics = async (playthroughId?: string) => {
-  if (
-    playthroughId &&
-    typeof playthroughActions.getAllPlaythroughs === "function"
-  ) {
-    const importedPlaythroughs = await playthroughActions.getAllPlaythroughs();
-    const importedPlaythrough = importedPlaythroughs.find(
-      (playthrough) => playthrough.id === playthroughId,
-    );
-
-    if (importedPlaythrough) {
-      return importedPlaythrough;
-    }
-  }
-
   if (typeof playthroughActions.getActivePlaythrough === "function") {
-    return playthroughActions.getActivePlaythrough();
+    const activePlaythrough = playthroughActions.getActivePlaythrough();
+    if (!playthroughId || activePlaythrough?.id === playthroughId) {
+      return activePlaythrough;
+    }
   }
 
   return null;

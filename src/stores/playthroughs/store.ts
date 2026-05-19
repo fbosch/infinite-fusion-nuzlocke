@@ -325,9 +325,13 @@ const getGameMode = (): GameMode => {
 };
 
 const importPlaythrough = async (importData: unknown): Promise<string> => {
+  const persistedIds = (await loadAllPlaythroughs()).map((p) => p.id);
   const newPlaythrough = prepareImportedPlaythrough(
     importData,
-    playthroughsStore.playthroughs.map((p) => p.id),
+    new Set([
+      ...persistedIds,
+      ...playthroughsStore.playthroughs.map((p) => p.id),
+    ]),
   );
 
   playthroughsStore.playthroughs.push(newPlaythrough);

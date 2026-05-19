@@ -39,23 +39,31 @@ export const prepareImportedPlaythrough = (
     console.error("Failed to import playthrough:", error);
 
     if (error && typeof error === "object" && "issues" in error) {
+      const zodError = error as z.ZodError;
+      let prettyError: string | null = null;
+
       try {
-        const prettyError = z.prettifyError(error as z.ZodError);
-        throw new Error(`Validation failed:\n\n${prettyError}`);
+        prettyError = z.prettifyError(zodError);
       } catch {
-        const zodError = error as z.ZodError;
-        if (zodError.issues && zodError.issues.length > 0) {
-          const errorDetails = zodError.issues
-            .map((issue: z.ZodIssue) => {
-              const path =
-                issue.path.length > 0 ? ` at ${issue.path.join(".")}` : "";
-              return `• ${issue.message}${path}`;
-            })
-            .join("\n");
-          throw new Error(`Validation failed:\n\n${errorDetails}`);
-        }
-        throw new Error("Data validation failed");
+        // Fall back to manual issue formatting.
       }
+
+      if (prettyError) {
+        throw new Error(`Validation failed:\n\n${prettyError}`);
+      }
+
+      if (zodError.issues.length > 0) {
+        const errorDetails = zodError.issues
+          .map((issue: z.ZodIssue) => {
+            const path =
+              issue.path.length > 0 ? ` at ${issue.path.join(".")}` : "";
+            return `• ${issue.message}${path}`;
+          })
+          .join("\n");
+        throw new Error(`Validation failed:\n\n${errorDetails}`);
+      }
+
+      throw new Error("Data validation failed");
     }
 
     throw new Error("Invalid playthrough data format");

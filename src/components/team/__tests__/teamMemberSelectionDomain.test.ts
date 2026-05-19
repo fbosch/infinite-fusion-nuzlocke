@@ -26,6 +26,12 @@ describe("team member selection domain", () => {
     ).toBe("Flame");
   });
 
+  it("falls back to body nickname when head nickname is blank", () => {
+    expect(
+      getTeamSelectionNickname(pokemon("head", ""), pokemon("body", "Flame")),
+    ).toBe("Flame");
+  });
+
   it("returns empty nickname when no selected pokemon has one", () => {
     expect(getTeamSelectionNickname(pokemon("head"), pokemon("body"))).toBe("");
     expect(getTeamSelectionNickname(null, null)).toBe("");
