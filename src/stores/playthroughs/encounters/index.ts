@@ -11,6 +11,7 @@ export {
   moveEncounter,
   moveEncounterAtomic,
   moveToOriginalLocation,
+  relocateEncounterSlot,
   swapEncounters,
 } from "./dragDrop";
 export {

@@ -25,8 +25,8 @@ import { settingsStore } from "@/stores/settings";
 import usePokemonTypes from "../../hooks/usePokemonTypes";
 import ContextMenu, { type ContextMenuItem } from "../ContextMenu";
 import { CursorTooltip } from "../CursorTooltip";
-import { DraggableSpriteTooltipContent } from "./DraggableSpriteTooltipContent";
 import { PokemonSprite } from "../PokemonSprite";
+import { DraggableSpriteTooltipContent } from "./DraggableSpriteTooltipContent";
 
 const LocationSelector = dynamic(
   () =>
@@ -135,35 +135,12 @@ export function DraggableComboboxSprite({
   ) => {
     if (!value || !locationId) return;
 
-    // Check if there's already a Pokemon in the target slot
-    const activePlaythrough = getActivePlaythrough();
-    const targetEncounter = (
-      activePlaythrough?.encounters as Record<string, EncounterData> | undefined
-    )?.[targetLocationId];
-    const existingPokemon = targetEncounter
-      ? targetField === "head"
-        ? targetEncounter.head
-        : targetEncounter.body
-      : null;
-
-    if (existingPokemon) {
-      // If there's already a Pokemon in the target slot, swap them
-      await playthroughActions.swapEncounters(
-        locationId,
-        targetLocationId,
-        field,
-        targetField,
-      );
-    } else {
-      // If the target slot is empty, use atomic move to preserve other Pokemon at source
-      await playthroughActions.moveEncounterAtomic(
-        locationId,
-        field,
-        targetLocationId,
-        targetField,
-        value,
-      );
-    }
+    await playthroughActions.relocateEncounterSlot({
+      sourceLocationId: locationId,
+      sourceField: field,
+      targetLocationId,
+      targetField,
+    });
   };
 
   // Handle move to original location

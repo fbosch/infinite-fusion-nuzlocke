@@ -118,73 +118,27 @@ export function PokemonContextMenu({
   // Handler for moving head Pokemon
   const handleMoveHead = useCallback(
     async (targetLocationId: string, targetField: "head" | "body") => {
-      if (!encounterData?.head) return;
-
-      // Check if there's already a Pokemon in the target slot
-      const activePlaythrough = playthroughActions.getActivePlaythrough();
-      const targetEncounter = activePlaythrough?.encounters?.[targetLocationId];
-      const existingPokemon = targetEncounter
-        ? targetField === "head"
-          ? targetEncounter.head
-          : targetEncounter.body
-        : null;
-
-      if (existingPokemon) {
-        // If there's already a Pokemon in the target slot, swap them
-        await playthroughActions.swapEncounters(
-          locationId,
-          targetLocationId,
-          "head",
-          targetField,
-        );
-      } else {
-        // If the target slot is empty, use atomic move to preserve other Pokemon at source
-        await playthroughActions.moveEncounterAtomic(
-          locationId,
-          "head",
-          targetLocationId,
-          targetField,
-          encounterData.head,
-        );
-      }
+      await playthroughActions.relocateEncounterSlot({
+        sourceLocationId: locationId,
+        sourceField: "head",
+        targetLocationId,
+        targetField,
+      });
     },
-    [encounterData, locationId],
+    [locationId],
   );
 
   // Handler for moving body Pokemon
   const handleMoveBody = useCallback(
     async (targetLocationId: string, targetField: "head" | "body") => {
-      if (!encounterData?.body) return;
-
-      // Check if there's already a Pokemon in the target slot
-      const activePlaythrough = playthroughActions.getActivePlaythrough();
-      const targetEncounter = activePlaythrough?.encounters?.[targetLocationId];
-      const existingPokemon = targetEncounter
-        ? targetField === "head"
-          ? targetEncounter.head
-          : targetEncounter.body
-        : null;
-
-      if (existingPokemon) {
-        // If there's already a Pokemon in the target slot, swap them
-        await playthroughActions.swapEncounters(
-          locationId,
-          targetLocationId,
-          "body",
-          targetField,
-        );
-      } else {
-        // If the target slot is empty, use atomic move to preserve other Pokemon at source
-        await playthroughActions.moveEncounterAtomic(
-          locationId,
-          "body",
-          targetLocationId,
-          targetField,
-          encounterData.body,
-        );
-      }
+      await playthroughActions.relocateEncounterSlot({
+        sourceLocationId: locationId,
+        sourceField: "body",
+        targetLocationId,
+        targetField,
+      });
     },
-    [encounterData, locationId],
+    [locationId],
   );
 
   const contextItems = useMemo<ContextMenuItem[]>(() => {

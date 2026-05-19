@@ -32,6 +32,7 @@ export {
   moveToOriginalLocation,
   prefetchAdjacentVariants,
   preloadArtworkVariants,
+  relocateEncounterSlot,
   resetEncounter,
   restorePokemonToTeam,
   setArtworkVariant,

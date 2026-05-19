@@ -3,6 +3,7 @@ import {
   getLocationFromComboboxId,
   moveEncounter,
   moveEncounterAtomic,
+  relocateEncounterSlot,
   swapEncounters,
   updateEncounter,
 } from "../encounters";
@@ -27,6 +28,49 @@ describe("Encounter drag/drop operations", () => {
 
     expectTeamMember(activePlaythrough.team.members[0], "pikachu_route1_123");
     expect(activePlaythrough.encounters?.route1).toBeUndefined();
+    expect(activePlaythrough.encounters?.route2?.head?.uid).toBe(
+      "pikachu_route1_123",
+    );
+  });
+
+  it("relocates to an empty destination slot", async () => {
+    const { activePlaythrough } = createTestPlaythrough();
+    const pikachu = testPokemon.pikachu();
+
+    await updateEncounter("route1", pikachu, "head", false);
+
+    await relocateEncounterSlot({
+      sourceLocationId: "route1",
+      sourceField: "head",
+      targetLocationId: "route2",
+      targetField: "head",
+    });
+
+    expect(activePlaythrough.encounters?.route1).toBeUndefined();
+    expect(activePlaythrough.encounters?.route2?.head?.uid).toBe(
+      "pikachu_route1_123",
+    );
+    expectTeamMember(activePlaythrough.team.members[0], "pikachu_route1_123");
+  });
+
+  it("swaps when relocation destination slot is occupied", async () => {
+    const { activePlaythrough } = createTestPlaythrough();
+    const pikachu = testPokemon.pikachu();
+    const charmander = testPokemon.charmander("charmander_route2_456");
+
+    await updateEncounter("route1", pikachu, "head", false);
+    await updateEncounter("route2", charmander, "head", false);
+
+    await relocateEncounterSlot({
+      sourceLocationId: "route1",
+      sourceField: "head",
+      targetLocationId: "route2",
+      targetField: "head",
+    });
+
+    expect(activePlaythrough.encounters?.route1?.head?.uid).toBe(
+      "charmander_route2_456",
+    );
     expect(activePlaythrough.encounters?.route2?.head?.uid).toBe(
       "pikachu_route1_123",
     );

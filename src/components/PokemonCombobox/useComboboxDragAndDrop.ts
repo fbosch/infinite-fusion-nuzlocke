@@ -79,13 +79,12 @@ export function useComboboxDragAndDrop({
       const sourceLocation = getLocationInfo(dragSnapshot.currentDragSource);
       const targetLocation = getLocationInfo(comboboxId);
 
-      playthroughActions.moveEncounterAtomic(
-        sourceLocation.locationId,
-        sourceLocation.field,
-        targetLocation.locationId,
-        targetLocation.field,
-        pokemon,
-      );
+      playthroughActions.relocateEncounterSlot({
+        sourceLocationId: sourceLocation.locationId,
+        sourceField: sourceLocation.field,
+        targetLocationId: targetLocation.locationId,
+        targetField: targetLocation.field,
+      });
     },
     [dragSnapshot.currentDragSource, comboboxId, onChange, getLocationInfo],
   );
@@ -97,12 +96,12 @@ export function useComboboxDragAndDrop({
     const sourceLocation = getLocationInfo(dragSnapshot.currentDragSource);
     const targetLocation = getLocationInfo(comboboxId);
 
-    playthroughActions.swapEncounters(
-      sourceLocation.locationId,
-      targetLocation.locationId,
-      sourceLocation.field,
-      targetLocation.field,
-    );
+    playthroughActions.relocateEncounterSlot({
+      sourceLocationId: sourceLocation.locationId,
+      sourceField: sourceLocation.field,
+      targetLocationId: targetLocation.locationId,
+      targetField: targetLocation.field,
+    });
   }, [dragSnapshot.currentDragSource, comboboxId, getLocationInfo]);
 
   // Memoize drag state calculations

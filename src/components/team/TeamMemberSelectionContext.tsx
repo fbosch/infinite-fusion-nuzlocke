@@ -20,6 +20,7 @@ import {
   findPokemonWithLocation,
   getAllPokemonWithLocations,
 } from "@/utils/encounter-utils";
+import { getTeamSelectionNickname } from "./teamMemberSelectionDomain";
 
 // Action types
 type TeamMemberSelectionAction =
@@ -149,20 +150,16 @@ function teamMemberSelectionReducer(
         action.payload;
 
       let updatedState = { ...state };
+      const selectionNickname = getTeamSelectionNickname(
+        headPokemon,
+        bodyPokemon,
+      );
 
       if (headPokemon && headLocationId) {
         updatedState = {
           ...updatedState,
           selectedHead: { pokemon: headPokemon, locationId: headLocationId },
         };
-        // Always prioritize head Pokémon's nickname
-        if (headPokemon.nickname) {
-          updatedState = {
-            ...updatedState,
-            nickname: headPokemon.nickname,
-            previewNickname: headPokemon.nickname,
-          };
-        }
       }
 
       if (bodyPokemon && bodyLocationId) {
@@ -170,17 +167,13 @@ function teamMemberSelectionReducer(
           ...updatedState,
           selectedBody: { pokemon: bodyPokemon, locationId: bodyLocationId },
         };
-        // Only set body Pokémon's nickname if head Pokémon doesn't have one
-        if (bodyPokemon.nickname && !headPokemon?.nickname) {
-          updatedState = {
-            ...updatedState,
-            nickname: bodyPokemon.nickname,
-            previewNickname: bodyPokemon.nickname,
-          };
-        }
       }
 
-      return updatedState;
+      return {
+        ...updatedState,
+        nickname: selectionNickname,
+        previewNickname: selectionNickname,
+      };
     }
     default:
       return state;
@@ -251,68 +244,12 @@ export function TeamMemberSelectionProvider({
 
   // Update nickname whenever the fusion order changes (head/body swap)
   useEffect(() => {
-    // Update nickname when fusion order changes
-    if (selectedHead?.pokemon && selectedBody?.pokemon) {
-      // For fusions, always prioritize head Pokémon's nickname
-      if (selectedHead.pokemon.nickname) {
-        dispatch({
-          type: "SET_NICKNAME",
-          payload: selectedHead.pokemon.nickname,
-        });
-        dispatch({
-          type: "SET_PREVIEW_NICKNAME",
-          payload: selectedHead.pokemon.nickname,
-        });
-      } else if (selectedBody.pokemon.nickname) {
-        // Fallback to body Pokémon's nickname if head doesn't have one
-        dispatch({
-          type: "SET_NICKNAME",
-          payload: selectedBody.pokemon.nickname,
-        });
-        dispatch({
-          type: "SET_PREVIEW_NICKNAME",
-          payload: selectedBody.pokemon.nickname,
-        });
-      } else {
-        // No nickname available
-        dispatch({ type: "SET_NICKNAME", payload: "" });
-        dispatch({ type: "SET_PREVIEW_NICKNAME", payload: "" });
-      }
-    } else if (selectedHead?.pokemon) {
-      // Single head Pokémon
-      if (selectedHead.pokemon.nickname) {
-        dispatch({
-          type: "SET_NICKNAME",
-          payload: selectedHead.pokemon.nickname,
-        });
-        dispatch({
-          type: "SET_PREVIEW_NICKNAME",
-          payload: selectedHead.pokemon.nickname,
-        });
-      } else {
-        dispatch({ type: "SET_NICKNAME", payload: "" });
-        dispatch({ type: "SET_PREVIEW_NICKNAME", payload: "" });
-      }
-    } else if (selectedBody?.pokemon) {
-      // Single body Pokémon
-      if (selectedBody.pokemon.nickname) {
-        dispatch({
-          type: "SET_NICKNAME",
-          payload: selectedBody.pokemon.nickname,
-        });
-        dispatch({
-          type: "SET_PREVIEW_NICKNAME",
-          payload: selectedBody.pokemon.nickname,
-        });
-      } else {
-        dispatch({ type: "SET_NICKNAME", payload: "" });
-        dispatch({ type: "SET_PREVIEW_NICKNAME", payload: "" });
-      }
-    } else {
-      // No Pokémon selected
-      dispatch({ type: "SET_NICKNAME", payload: "" });
-      dispatch({ type: "SET_PREVIEW_NICKNAME", payload: "" });
-    }
+    const selectionNickname = getTeamSelectionNickname(
+      selectedHead?.pokemon,
+      selectedBody?.pokemon,
+    );
+    dispatch({ type: "SET_NICKNAME", payload: selectionNickname });
+    dispatch({ type: "SET_PREVIEW_NICKNAME", payload: selectionNickname });
   }, [selectedHead, selectedBody]);
 
   // Pre-populate selections when editing existing team member
@@ -471,39 +408,20 @@ export function TeamMemberSelectionProvider({
         dispatch({ type: "SET_ACTIVE_SLOT", payload: "body" });
       }
 
-      // Set nickname based on selection priority
-      // For fusions, always prioritize head Pokémon nickname
-      // For single Pokémon, use the selected Pokémon's nickname
       if (slot === "head") {
-        // When selecting head Pokémon, use its nickname
-        if (pokemon.nickname) {
-          dispatch({ type: "SET_NICKNAME", payload: pokemon.nickname });
-          dispatch({ type: "SET_PREVIEW_NICKNAME", payload: pokemon.nickname });
-        } else {
-          dispatch({ type: "SET_NICKNAME", payload: "" });
-          dispatch({ type: "SET_PREVIEW_NICKNAME", payload: "" });
-        }
+        const selectionNickname = getTeamSelectionNickname(
+          pokemon,
+          selectedBody?.pokemon,
+        );
+        dispatch({ type: "SET_NICKNAME", payload: selectionNickname });
+        dispatch({ type: "SET_PREVIEW_NICKNAME", payload: selectionNickname });
       } else if (slot === "body") {
-        // When selecting body Pokémon, check if we have a head Pokémon
-        if (selectedHead?.pokemon?.nickname) {
-          // If head Pokémon has a nickname, use that (fusion priority)
-          dispatch({
-            type: "SET_NICKNAME",
-            payload: selectedHead.pokemon.nickname,
-          });
-          dispatch({
-            type: "SET_PREVIEW_NICKNAME",
-            payload: selectedHead.pokemon.nickname,
-          });
-        } else if (pokemon.nickname) {
-          // If no head nickname, use body Pokémon's nickname
-          dispatch({ type: "SET_NICKNAME", payload: pokemon.nickname });
-          dispatch({ type: "SET_PREVIEW_NICKNAME", payload: pokemon.nickname });
-        } else {
-          // No nickname available
-          dispatch({ type: "SET_NICKNAME", payload: "" });
-          dispatch({ type: "SET_PREVIEW_NICKNAME", payload: "" });
-        }
+        const selectionNickname = getTeamSelectionNickname(
+          selectedHead?.pokemon,
+          pokemon,
+        );
+        dispatch({ type: "SET_NICKNAME", payload: selectionNickname });
+        dispatch({ type: "SET_PREVIEW_NICKNAME", payload: selectionNickname });
       }
     },
     [selectedHead, selectedBody, activeSlot],
