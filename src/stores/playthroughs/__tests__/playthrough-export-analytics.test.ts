@@ -187,10 +187,9 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
     playthroughActionMocks.importPlaythrough.mockResolvedValue(
       importedPlaythrough.id,
     );
-    playthroughActionMocks.getAllPlaythroughs.mockReturnValue([
-      basePlaythrough,
+    playthroughActionMocks.getActivePlaythrough.mockReturnValue(
       importedPlaythrough,
-    ]);
+    );
 
     const { result } = renderHook(() => usePlaythroughImportExport());
 
@@ -203,6 +202,7 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
     expect(playthroughActionMocks.importPlaythrough).toHaveBeenCalledWith({
       playthrough: {},
     });
+    expect(playthroughActionMocks.getAllPlaythroughs).not.toHaveBeenCalled();
     expect(analyticsMocks.trackEvent).toHaveBeenCalledWith(
       "playthrough_imported",
       {
