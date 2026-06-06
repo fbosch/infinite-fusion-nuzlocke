@@ -156,7 +156,12 @@ jobs:
         run: pnpm run validate
 
       - name: Run graph quality audit
-        run: pnpm run quality:graph
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            pnpm exec fallow audit --base "origin/${{ github.base_ref }}" --format compact
+          else
+            pnpm exec fallow audit --base "${{ github.event.before }}" --format compact
+          fi
 
   release-gate:
     name: Release Gate
