@@ -35,11 +35,13 @@ Requirements:
 ```bash
 corepack enable
 corepack prepare pnpm@10 --activate
-pnpm install
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
 Open [http://localhost:4000](http://localhost:4000).
+
+If you use devenv, `devenv shell` provides the pinned Node.js, pnpm, git, GitHub CLI, Worktrunk, and no-mistakes tooling, then runs dependency and git hook setup on entry.
 
 ## Common Scripts
 
@@ -55,6 +57,8 @@ pnpm validate
 pnpm test
 pnpm test:run
 pnpm test:coverage
+
+devenv test
 
 pnpm data:refresh
 pnpm spritesheet
