@@ -149,9 +149,14 @@ jobs:
 
       - name: Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-pnpm
+        with:
+          fetch-depth: '0'
 
       - name: Run full validation
         run: pnpm run validate
+
+      - name: Run graph quality audit
+        run: pnpm run quality:graph
 
   release-gate:
     name: Release Gate

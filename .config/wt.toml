@@ -7,6 +7,9 @@ typecheck = "pnpm type-check"
 [[pre-merge]]
 tests = "pnpm test:run"
 
+[[pre-merge]]
+fallow = "pnpm quality:graph"
+
 [aliases]
 # Publish the current Worktrunk branch through the no-mistakes gate.
 push-nomistakes = "git push no-mistakes HEAD:refs/heads/{{ branch }}"
