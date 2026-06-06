@@ -38,13 +38,8 @@ in
     '';
     status = ''
       cd "${config.env.DEVENV_ROOT}"
-      common_dir="$(${pkgs.git}/bin/git rev-parse --git-common-dir 2>/dev/null)"
-      case "$common_dir" in
-        */.no-mistakes/repos/*.git) exit 0 ;;
-      esac
       env -u GIT_DIR -u GIT_WORK_TREE ${no-mistakes}/bin/no-mistakes status >/dev/null 2>&1 && env -u GIT_DIR -u GIT_WORK_TREE ${pkgs.git}/bin/git remote get-url no-mistakes >/dev/null 2>&1
     '';
-    before = [ "devenv:enterShell" ];
   };
 
   tasks."pnpm:install" = {
