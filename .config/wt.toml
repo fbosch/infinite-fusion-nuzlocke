@@ -5,3 +5,7 @@ pre-merge = [
   "pnpm type-check",
   "pnpm test:run",
 ]
+
+[aliases]
+# Publish the current Worktrunk branch through the no-mistakes gate.
+push-nomistakes = "git push no-mistakes HEAD:refs/heads/{{ branch }}"

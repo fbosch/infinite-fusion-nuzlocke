@@ -27,6 +27,7 @@ in
   packages = [
     pkgs.git
     pkgs.gh
+    pkgs.worktrunk
     no-mistakes
   ];
 
@@ -40,6 +41,7 @@ in
     no-mistakes --version
     git --version
     gh --version
+    wt --version
     pnpm --version
   '';
 }
