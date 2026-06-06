@@ -37,8 +37,8 @@ in
     before = [ "devenv:enterShell" ];
   };
 
-  tasks."pnpm:install-dev" = {
-    exec = "pnpm install --dev --frozen-lockfile --prefer-offline";
+  tasks."pnpm:install" = {
+    exec = "pnpm install --frozen-lockfile --prefer-offline";
     status = ''
       [ -d node_modules/.pnpm ] && [ node_modules/.modules.yaml -nt package.json ] && [ node_modules/.modules.yaml -nt pnpm-lock.yaml ]
     '';
@@ -50,7 +50,7 @@ in
     status = ''
       [ "$(git config --get core.hooksPath 2>/dev/null)" = ".husky/_" ] && [ -f .husky/_/h ] && [ -x .husky/_/pre-commit ] && [ -x .husky/_/pre-push ]
     '';
-    after = [ "pnpm:install-dev" ];
+    after = [ "pnpm:install" ];
     before = [ "devenv:enterShell" ];
   };
 

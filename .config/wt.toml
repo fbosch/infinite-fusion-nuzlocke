@@ -1,10 +1,11 @@
 # Ensure each new worktree is ready to run
 pre-start = "pnpm install --frozen-lockfile --prefer-offline && sh ./.config/ensure-vercel-link.sh"
 
-pre-merge = [
-  "pnpm type-check",
-  "pnpm test:run",
-]
+[[pre-merge]]
+typecheck = "pnpm type-check"
+
+[[pre-merge]]
+tests = "pnpm test:run"
 
 [aliases]
 # Publish the current Worktrunk branch through the no-mistakes gate.
