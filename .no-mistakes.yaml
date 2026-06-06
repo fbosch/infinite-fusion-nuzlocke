@@ -2,7 +2,7 @@ agent: opencode
 
 commands:
   test: "pnpm install --frozen-lockfile --prefer-offline && pnpm type-check && pnpm test:run"
-  lint: "pnpm install --frozen-lockfile --prefer-offline && pnpm validate"
+  lint: "pnpm install --frozen-lockfile --prefer-offline && pnpm validate && pnpm quality:graph"
 
 auto_fix:
   review: 0
