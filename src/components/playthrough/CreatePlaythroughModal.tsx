@@ -13,7 +13,7 @@ import { CursorTooltip } from "@/components/CursorTooltip";
 import {
   DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
   type GameMode,
-} from "@/stores/playthroughs";
+} from "@/stores/playthroughs/types";
 
 interface CreatePlaythroughModalProps {
   isOpen: boolean;
