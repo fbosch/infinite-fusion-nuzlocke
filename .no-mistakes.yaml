@@ -1,0 +1,10 @@
+commands:
+  test: "pnpm type-check && pnpm test:run"
+  lint: "pnpm validate"
+
+auto_fix:
+  review: 0
+
+test:
+  evidence:
+    store_in_repo: false

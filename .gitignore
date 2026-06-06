@@ -12,6 +12,7 @@
 
 
 .agents/skills/**/*
+.devenv/
 
 # testing
 /coverage
