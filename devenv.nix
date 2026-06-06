@@ -37,6 +37,23 @@ in
     before = [ "devenv:enterShell" ];
   };
 
+  tasks."pnpm:install-dev" = {
+    exec = "pnpm install --dev --frozen-lockfile --prefer-offline";
+    status = ''
+      [ -d node_modules/.pnpm ] && [ node_modules/.modules.yaml -nt package.json ] && [ node_modules/.modules.yaml -nt pnpm-lock.yaml ]
+    '';
+    before = [ "devenv:enterShell" ];
+  };
+
+  tasks."git-hooks:init" = {
+    exec = "pnpm exec husky";
+    status = ''
+      [ "$(git config --get core.hooksPath 2>/dev/null)" = ".husky/_" ] && [ -f .husky/_/h ] && [ -x .husky/_/pre-commit ] && [ -x .husky/_/pre-push ]
+    '';
+    after = [ "pnpm:install-dev" ];
+    before = [ "devenv:enterShell" ];
+  };
+
   enterTest = ''
     no-mistakes --version
     git --version
