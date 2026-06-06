@@ -15,6 +15,7 @@ Pokemon Infinite Fusion Nuzlocke tracker with strict run-state invariants.
 ## Operational constraints
 
 - Keep repo-wide policy guidance minimal; put directory rules in local `AGENTS.md` files.
+- When pushing work intended for a PR, use `git push no-mistakes` instead of `git push origin`.
 - For targeted testing workflows, run the smallest relevant checks first before broader validation.
 - When work touches game-rule behavior or run-state logic, read relevant domain docs listed in `docs/agents/domain/README.md` and local `AGENTS.md` references.
 - Keep new guidance failure-mode-driven: prefer local `AGENTS.md` for path scope and narrow skills for repeated non-obvious implementation errors.
