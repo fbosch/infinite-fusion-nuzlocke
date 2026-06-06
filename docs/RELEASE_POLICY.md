@@ -44,6 +44,7 @@ Maintainers should also run local preflight checks for risky changes before rele
 pnpm type-check
 pnpm test:run
 pnpm validate
+pnpm quality:graph
 ```
 
 ## CI Path-Aware Skip Rules

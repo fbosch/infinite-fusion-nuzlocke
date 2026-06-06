@@ -19,6 +19,8 @@ Configure branch protection for `master` to require these checks:
 
 `CI / Release Gate` is an enforcement job that fails when upstream required jobs do not pass.
 
+`CI / Code Quality` runs formatting/lint validation and the Fallow graph-quality audit.
+
 ## Coverage workflows
 
 - `Test Coverage` and `PR Coverage Report` follow the same `master` branch strategy.

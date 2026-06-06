@@ -53,6 +53,7 @@ pnpm start
 pnpm type-check
 pnpm lint
 pnpm validate
+pnpm quality:graph
 
 pnpm test
 pnpm test:run
@@ -80,6 +81,7 @@ For behavior or run-state changes, run checks in this order:
 pnpm type-check
 pnpm test:run
 pnpm validate
+pnpm quality:graph
 ```
 
 ## Contributing
