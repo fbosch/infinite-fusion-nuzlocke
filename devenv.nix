@@ -30,6 +30,12 @@ in
     no-mistakes
   ];
 
+  tasks."no-mistakes:init" = {
+    exec = "no-mistakes init";
+    status = "git remote get-url no-mistakes >/dev/null 2>&1";
+    before = [ "devenv:enterShell" ];
+  };
+
   enterTest = ''
     no-mistakes --version
     git --version
