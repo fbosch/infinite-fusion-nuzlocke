@@ -6,6 +6,7 @@ Local rules for data scraping and generation scripts.
 
 - Keep script outputs deterministic for identical inputs.
 - Validate fetched or scraped payloads before writing generated data files.
+- Format generated `data/` files with the repository Biome config before validation or change detection.
 - Fail loudly on network, parse, or schema errors; do not silently produce partial trusted output.
 - Keep script changes scoped; avoid drive-by edits to app runtime code from script tasks.
 

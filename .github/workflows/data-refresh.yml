@@ -29,6 +29,9 @@ jobs:
       - name: Download fresh Pokemon data
         run: pnpm run scrape
 
+      - name: Format generated data
+        run: pnpm exec biome format --write data --vcs-use-ignore-file=true --files-ignore-unknown=true
+
       - name: Run data integrity tests on fresh data
         run: pnpm vitest run tests/data-integrity.test.ts
 
