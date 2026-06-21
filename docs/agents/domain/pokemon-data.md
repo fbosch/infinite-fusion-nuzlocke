@@ -13,12 +13,13 @@
 - Keep explicit error paths for network, parse, and schema failures.
 - Cache and retry behavior must not change canonical IDs or identity mapping.
 - Script outputs should be stable and diff-friendly for review.
+- Format generated `data/` files with the repository Biome config before reviewing or validating data diffs.
 
 ## Common mistakes
 
 - Mixing API-derived IDs with project-local identifiers without mapping.
 - Accepting malformed external payloads into typed internal structures.
-- Updating generated data files without re-running dependent validations.
+- Updating generated data files without formatting them and re-running dependent validations.
 
 ## Cross-references
 

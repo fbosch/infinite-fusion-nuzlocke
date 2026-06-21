@@ -69,6 +69,7 @@ Scraper maintenance checks:
 ```bash
 pnpm test:run tests/scrape-wild-encounters-wikitext.test.ts
 pnpm scrape:encounters
+pnpm exec biome format --write data --vcs-use-ignore-file=true --files-ignore-unknown=true
 pnpm validate:route-articles
 ```
 
