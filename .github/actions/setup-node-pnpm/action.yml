@@ -1,6 +1,6 @@
 name: Setup Node.js and pnpm
 description: >
-  Checkout, install Node.js, set up pnpm with cache, and install
+  Checkout, install Node.js, set up pnpm with setup-node caching, and install
   frozen dependencies. Used by all CI jobs to avoid duplicating setup steps.
 
 inputs:
