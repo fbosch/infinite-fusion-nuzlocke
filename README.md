@@ -41,7 +41,7 @@ pnpm dev
 
 Open [http://localhost:4000](http://localhost:4000).
 
-If you use devenv, `devenv shell` provides the pinned Node.js, pnpm, git, GitHub CLI, Worktrunk, and no-mistakes tooling, then runs dependency and git hook setup on entry. Run `devenv tasks run no-mistakes:init` once when setting up the gated push remote.
+If you use devenv, `devenv shell` provides the pinned Node.js, pnpm, git, GitHub CLI, and Worktrunk tooling, then runs dependency and git hook setup on entry.
 
 ## Common Scripts
 
