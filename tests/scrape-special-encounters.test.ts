@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { extractStaticEncounterLocations } from "../scripts/scrape-special-encounters";
+import {
+  extractStaticEncounterLocations,
+  getSpecialEncounterPokedexUrls,
+} from "../scripts/scrape-special-encounters";
 
 describe("extractStaticEncounterLocations", () => {
   it("expands Trash Cans static locations to all listed locations", () => {
@@ -30,5 +33,36 @@ describe("extractStaticEncounterLocations", () => {
     );
 
     expect(locations).toEqual(["Route 11", "Route 12"]);
+  });
+});
+
+describe("getSpecialEncounterPokedexUrls", () => {
+  it("selects Classic subpages from the Pokédex landing page", () => {
+    const html = [
+      '<a href="/wiki/Pok%C3%A9dex/Kanto/Classic" title="Pokédex/Kanto/Classic">Kanto Classic</a>',
+      '<a href="/wiki/Pok%C3%A9dex/Kanto/Remix" title="Pokédex/Kanto/Remix">Kanto Remix</a>',
+      '<a href="/wiki/Pok%C3%A9dex/Hoenn/Classic" title="Pokédex/Hoenn/Classic">Hoenn Classic</a>',
+    ].join("");
+
+    expect(
+      getSpecialEncounterPokedexUrls(
+        html,
+        "https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex",
+        "classic",
+      ),
+    ).toEqual([
+      "https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex/Kanto/Classic",
+      "https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex/Hoenn/Classic",
+    ]);
+  });
+
+  it("uses the source page when no matching subpage links exist", () => {
+    expect(
+      getSpecialEncounterPokedexUrls(
+        "<table><tr><td>1</td></tr></table>",
+        "https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex/Remix",
+        "remix",
+      ),
+    ).toEqual(["https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex/Remix"]);
   });
 });

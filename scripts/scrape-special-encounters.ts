@@ -3,11 +3,13 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import * as cheerio from "cheerio";
+import { extractPokedexSubpageTitles } from "./scrape-pokedex";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
 import {
   findPokemonId,
   isPotentialPokemonName,
+  type PokemonNameMap,
 } from "./utils/pokemon-name-utils";
 import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
 
@@ -15,6 +17,26 @@ const CLASSIC_POKEDEX_URL =
   "https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex";
 const REMIX_POKEDEX_URL =
   "https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex/Remix";
+
+function getPokedexPageUrl(title: string): string {
+  const pathSegments = title
+    .split("/")
+    .map((segment) => encodeURIComponent(segment));
+  return `https://infinitefusion.fandom.com/wiki/${pathSegments.join("/")}`;
+}
+
+export function getSpecialEncounterPokedexUrls(
+  html: string,
+  sourceUrl: string,
+  mode: "classic" | "remix",
+): string[] {
+  const modeSubpageSuffix = mode === "classic" ? "/Classic" : "/Remix";
+  const subpageUrls = extractPokedexSubpageTitles(html)
+    .filter((title) => title.endsWith(modeSubpageSuffix))
+    .map((title) => getPokedexPageUrl(title));
+
+  return subpageUrls.length > 0 ? subpageUrls : [sourceUrl];
+}
 
 /**
  * Handles special cases for Pokémon names that might not be found in the standard name map
@@ -118,6 +140,32 @@ interface LocationStatics {
   pokemonIds: number[];
 }
 
+type SpecialEncounterKind = "gift" | "trade" | "quest" | "static";
+
+interface SpecialEncounterItem {
+  pokemonId: number;
+  location: string;
+}
+
+interface SpecialEncounterCollection {
+  items: SpecialEncounterItem[];
+  seen: Set<string>;
+}
+
+interface SpecialEncounterAccumulator {
+  gift: SpecialEncounterCollection;
+  trade: SpecialEncounterCollection;
+  quest: SpecialEncounterCollection;
+  static: SpecialEncounterCollection;
+}
+
+interface SpecialEncounterResult {
+  gifts: LocationGifts[];
+  trades: LocationTrades[];
+  quests: LocationQuests[];
+  statics: LocationStatics[];
+}
+
 const SPECIAL_ENCOUNTER_MARKERS = ["(gift)", "(trade)", "(quest)", "(static)"];
 
 function findLocationCellText(cells: cheerio.Cheerio<any>): string {
@@ -132,6 +180,30 @@ function findLocationCellText(cells: cheerio.Cheerio<any>): string {
   }
 
   return "";
+}
+
+function getSpecialEncounterKind(
+  locationCell: string,
+): SpecialEncounterKind | null {
+  const normalizedLocation = locationCell.toLowerCase();
+
+  if (normalizedLocation.includes("(gift)")) {
+    return "gift";
+  }
+
+  if (normalizedLocation.includes("(trade)")) {
+    return "trade";
+  }
+
+  if (normalizedLocation.includes("(quest)")) {
+    return "quest";
+  }
+
+  if (normalizedLocation.includes("(static)")) {
+    return "static";
+  }
+
+  return null;
 }
 
 /**
@@ -260,204 +332,207 @@ function groupPokemonByLocation<
     .sort((a, b) => a.routeName.localeCompare(b.routeName)); // Sort locations alphabetically
 }
 
+function createSpecialEncounterAccumulator(): SpecialEncounterAccumulator {
+  return {
+    gift: { items: [], seen: new Set<string>() },
+    trade: { items: [], seen: new Set<string>() },
+    quest: { items: [], seen: new Set<string>() },
+    static: { items: [], seen: new Set<string>() },
+  };
+}
+
+function addSpecialEncounterItem(
+  collection: SpecialEncounterCollection,
+  pokemonCell: string,
+  pokemonId: number,
+  location: string,
+): void {
+  const uniqueKey = `${pokemonCell}-${location}`;
+  if (collection.seen.has(uniqueKey)) {
+    return;
+  }
+
+  collection.seen.add(uniqueKey);
+  collection.items.push({ pokemonId, location });
+}
+
+function addLocationEncounter(
+  collection: SpecialEncounterCollection,
+  pokemonCell: string,
+  pokemonId: number,
+  locationCell: string,
+): void {
+  const specificLocation = extractSpecialEncounterLocation(locationCell);
+  if (!specificLocation) {
+    ConsoleFormatter.warn(
+      `Could not extract specific location for ${pokemonCell}`,
+    );
+    return;
+  }
+
+  addSpecialEncounterItem(collection, pokemonCell, pokemonId, specificLocation);
+}
+
+function addStaticEncounters(
+  collection: SpecialEncounterCollection,
+  pokemonCell: string,
+  pokemonId: number,
+  locationCell: string,
+): void {
+  const staticLocations = extractStaticEncounterLocations(locationCell);
+  if (staticLocations.length === 0) {
+    ConsoleFormatter.warn(
+      `Could not extract static locations for ${pokemonCell}`,
+    );
+    return;
+  }
+
+  for (const staticLocation of staticLocations) {
+    addSpecialEncounterItem(collection, pokemonCell, pokemonId, staticLocation);
+  }
+}
+
+function addSpecialEncounterRow(
+  cells: cheerio.Cheerio<any>,
+  pokemonNameMap: PokemonNameMap,
+  accumulator: SpecialEncounterAccumulator,
+): void {
+  if (cells.length < 5) {
+    return;
+  }
+
+  const pokemonCell = cells.eq(2).text().trim();
+  if (
+    !pokemonCell ||
+    !isPotentialPokemonName(pokemonCell) ||
+    pokemonCell.toLowerCase().includes("pokemon")
+  ) {
+    return;
+  }
+
+  const locationCell = findLocationCellText(cells);
+  const encounterKind = getSpecialEncounterKind(locationCell);
+  if (encounterKind === null) {
+    return;
+  }
+
+  const pokemonId = findPokemonIdWithSpecialCases(pokemonCell, pokemonNameMap);
+  if (!pokemonId) {
+    ConsoleFormatter.warn(
+      `Could not find ID for ${encounterKind} Pokémon: ${pokemonCell}`,
+    );
+    return;
+  }
+
+  if (encounterKind === "static") {
+    addStaticEncounters(
+      accumulator.static,
+      pokemonCell,
+      pokemonId,
+      locationCell,
+    );
+    return;
+  }
+
+  addLocationEncounter(
+    accumulator[encounterKind],
+    pokemonCell,
+    pokemonId,
+    locationCell,
+  );
+}
+
+function addSpecialEncountersFromHtml(
+  html: string,
+  pokemonNameMap: PokemonNameMap,
+  accumulator: SpecialEncounterAccumulator,
+): void {
+  const $ = cheerio.load(html);
+
+  $("table tr").each((_rowIndex: number, row: any) => {
+    addSpecialEncounterRow($(row).find("td"), pokemonNameMap, accumulator);
+  });
+}
+
+async function fetchSpecialEncounterPokedexPages(
+  url: string,
+  mode: "classic" | "remix",
+): Promise<string[]> {
+  const sourceHtml = await ConsoleFormatter.withSpinner(
+    `Fetching ${mode} Pokédex page...`,
+    () => fetchWikiPageHtml(url),
+  );
+
+  const pokedexUrls = getSpecialEncounterPokedexUrls(sourceHtml, url, mode);
+  if (pokedexUrls.length === 1 && pokedexUrls[0] === url) {
+    return [sourceHtml];
+  }
+
+  ConsoleFormatter.working(
+    `Fetching ${pokedexUrls.length} ${mode} Pokédex subpages...`,
+  );
+
+  const pageHtml: string[] = [];
+  for (const pokedexUrl of pokedexUrls) {
+    pageHtml.push(await fetchWikiPageHtml(pokedexUrl));
+  }
+
+  return pageHtml;
+}
+
+function assertHasSpecialEncounters(
+  mode: "classic" | "remix",
+  result: SpecialEncounterResult,
+): void {
+  if (
+    result.gifts.length > 0 ||
+    result.trades.length > 0 ||
+    result.quests.length > 0 ||
+    result.statics.length > 0
+  ) {
+    return;
+  }
+
+  throw new Error(`No special encounters found in ${mode} Pokédex pages`);
+}
+
 async function scrapePokedexForSpecialEncounters(
   url: string,
   mode: "classic" | "remix",
-): Promise<{
-  gifts: LocationGifts[];
-  trades: LocationTrades[];
-  quests: LocationQuests[];
-  statics: LocationStatics[];
-}> {
+): Promise<SpecialEncounterResult> {
   ConsoleFormatter.printHeader(
     `Scraping ${mode.toUpperCase()} Special Encounters`,
     `Scraping gift, trade, quest, and static Pokémon data from the ${mode} Pokédex`,
   );
 
   try {
-    // Fetch the webpage
-    const html = await ConsoleFormatter.withSpinner(
-      `Fetching ${mode} Pokédex page...`,
-      () => fetchWikiPageHtml(url),
-    );
-
-    const $ = cheerio.load(html);
+    const pageHtml = await fetchSpecialEncounterPokedexPages(url, mode);
     const pokemonNameMap = await loadPokemonNameMap();
+    const accumulator = createSpecialEncounterAccumulator();
 
-    const gifts: { pokemonId: number; location: string }[] = [];
-    const trades: { pokemonId: number; location: string }[] = [];
-    const quests: { pokemonId: number; location: string }[] = [];
-    const statics: { pokemonId: number; location: string }[] = [];
-    const giftsSeen = new Set<string>();
-    const tradesSeen = new Set<string>();
-    const questsSeen = new Set<string>();
-    const staticsSeen = new Set<string>();
-
-    // Find the main Pokédex table
-    const tables = $("table");
-
-    tables.each((tableIndex: number, table: any) => {
-      const $table = $(table);
-      const rows = $table.find("tr");
-      console.log(`Processing table ${tableIndex} with ${rows.length} rows`);
-
-      rows.each((_rowIndex: number, row: any) => {
-        const $row = $(row);
-        const cells = $row.find("td");
-
-        // Skip header rows and rows with insufficient data
-        if (cells.length < 5) {
-          return;
-        }
-
-        // Extract data from cells
-        const _dexCell = cells.eq(0).text().trim();
-        const pokemonCell = cells.eq(2).text().trim(); // Pokémon name is at index 2
-        const locationCell = findLocationCellText(cells);
-
-        // Skip if no Pokémon name found or if it's a header row
-        if (
-          !pokemonCell ||
-          !isPotentialPokemonName(pokemonCell) ||
-          pokemonCell.toLowerCase().includes("pokemon")
-        ) {
-          return;
-        }
-
-        // Check if this is a gift, trade, quest, or static
-        const isGift = locationCell.toLowerCase().includes("(gift)");
-        const isTrade = locationCell.toLowerCase().includes("(trade)");
-        const isQuest = locationCell.toLowerCase().includes("(quest)");
-        const isStatic = locationCell.toLowerCase().includes("(static)");
-
-        if (!isGift && !isTrade && !isQuest && !isStatic) {
-          return;
-        }
-
-        // Find Pokémon ID
-        const pokemonId = findPokemonIdWithSpecialCases(
-          pokemonCell,
-          pokemonNameMap,
-        );
-        if (!pokemonId) {
-          const type = isGift
-            ? "gift"
-            : isTrade
-              ? "trade"
-              : isQuest
-                ? "quest"
-                : "static";
-          ConsoleFormatter.warn(
-            `Could not find ID for ${type} Pokémon: ${pokemonCell}`,
-          );
-          return;
-        }
-
-        if (isGift) {
-          // Extract the specific location that has the (gift), (trade), or (quest) marker
-          const specificLocation =
-            extractSpecialEncounterLocation(locationCell);
-          if (!specificLocation) {
-            ConsoleFormatter.warn(
-              `Could not extract specific location for ${pokemonCell}`,
-            );
-            return;
-          }
-
-          // Create unique key to avoid duplicates
-          const uniqueKey = `${pokemonCell}-${specificLocation}`;
-          if (giftsSeen.has(uniqueKey)) {
-            return;
-          }
-          giftsSeen.add(uniqueKey);
-
-          gifts.push({
-            pokemonId,
-            location: specificLocation,
-          });
-        } else if (isTrade) {
-          const specificLocation =
-            extractSpecialEncounterLocation(locationCell);
-          if (!specificLocation) {
-            ConsoleFormatter.warn(
-              `Could not extract specific location for ${pokemonCell}`,
-            );
-            return;
-          }
-
-          // Create unique key to avoid duplicates
-          const uniqueKey = `${pokemonCell}-${specificLocation}`;
-          if (tradesSeen.has(uniqueKey)) {
-            return;
-          }
-          tradesSeen.add(uniqueKey);
-
-          trades.push({
-            pokemonId,
-            location: specificLocation,
-          });
-        } else if (isQuest) {
-          const specificLocation =
-            extractSpecialEncounterLocation(locationCell);
-          if (!specificLocation) {
-            ConsoleFormatter.warn(
-              `Could not extract specific location for ${pokemonCell}`,
-            );
-            return;
-          }
-
-          // Create unique key to avoid duplicates
-          const uniqueKey = `${pokemonCell}-${specificLocation}`;
-          if (questsSeen.has(uniqueKey)) {
-            return;
-          }
-          questsSeen.add(uniqueKey);
-
-          quests.push({
-            pokemonId,
-            location: specificLocation,
-          });
-        } else if (isStatic) {
-          const staticLocations = extractStaticEncounterLocations(locationCell);
-          if (staticLocations.length === 0) {
-            ConsoleFormatter.warn(
-              `Could not extract static locations for ${pokemonCell}`,
-            );
-            return;
-          }
-
-          for (const staticLocation of staticLocations) {
-            const uniqueKey = `${pokemonCell}-${staticLocation}`;
-            if (staticsSeen.has(uniqueKey)) {
-              continue;
-            }
-            staticsSeen.add(uniqueKey);
-
-            statics.push({
-              pokemonId,
-              location: staticLocation,
-            });
-          }
-        }
-      });
-    });
+    for (const html of pageHtml) {
+      addSpecialEncountersFromHtml(html, pokemonNameMap, accumulator);
+    }
 
     // Group by location to match encounters.json structure
-    const groupedGifts = groupPokemonByLocation(gifts);
-    const groupedTrades = groupPokemonByLocation(trades);
-    const groupedQuests = groupPokemonByLocation(quests);
-    const groupedStatics = groupPokemonByLocation(statics);
-
-    ConsoleFormatter.success(
-      `Found ${gifts.length} gift Pokémon in ${groupedGifts.length} locations, ${trades.length} trades in ${groupedTrades.length} locations, ${quests.length} quest rewards in ${groupedQuests.length} locations, and ${statics.length} static encounters in ${groupedStatics.length} locations in ${mode} mode`,
-    );
-
-    return {
+    const groupedGifts = groupPokemonByLocation(accumulator.gift.items);
+    const groupedTrades = groupPokemonByLocation(accumulator.trade.items);
+    const groupedQuests = groupPokemonByLocation(accumulator.quest.items);
+    const groupedStatics = groupPokemonByLocation(accumulator.static.items);
+    const result = {
       gifts: groupedGifts,
       trades: groupedTrades,
       quests: groupedQuests,
       statics: groupedStatics,
     };
+
+    assertHasSpecialEncounters(mode, result);
+
+    ConsoleFormatter.success(
+      `Found ${accumulator.gift.items.length} gift Pokémon in ${groupedGifts.length} locations, ${accumulator.trade.items.length} trades in ${groupedTrades.length} locations, ${accumulator.quest.items.length} quest rewards in ${groupedQuests.length} locations, and ${accumulator.static.items.length} static encounters in ${groupedStatics.length} locations in ${mode} mode`,
+    );
+
+    return result;
   } catch (error) {
     ConsoleFormatter.error(
       `Error scraping ${mode} special encounters: ${error instanceof Error ? error.message : "Unknown error"}`,
