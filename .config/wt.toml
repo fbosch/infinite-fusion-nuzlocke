@@ -3,7 +3,3 @@ pre-start = "pnpm install --frozen-lockfile --prefer-offline && sh ./.config/ens
 
 [[pre-merge]]
 quality = "pnpm quality:pre-push"
-
-[aliases]
-# Publish the current Worktrunk branch through the no-mistakes gate.
-push-nomistakes = "git push no-mistakes HEAD:refs/heads/{{ branch }}"
