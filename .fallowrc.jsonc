@@ -19,6 +19,7 @@
   "audit": {
     "gate": "new-only"
   },
+  "ignorePatterns": [".opencode/skills/impeccable/**"],
   "duplicates": {
     "mode": "mild",
     "minTokens": 50,

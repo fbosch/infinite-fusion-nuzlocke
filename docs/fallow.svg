@@ -1,21 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="88" height="20" role="img" aria-label="fallow: F (38)">
-<title>fallow: F (38)</title>
-<linearGradient id="s-323b4d39" x2="0" y2="100%">
+<svg xmlns="http://www.w3.org/2000/svg" width="90" height="20" role="img" aria-label="fallow: D (44)">
+<title>fallow: D (44)</title>
+<linearGradient id="s-2ed19f40" x2="0" y2="100%">
 <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
 <stop offset="1" stop-opacity=".1"/>
 </linearGradient>
-<clipPath id="r-323b4d39">
-<rect width="88" height="20" rx="3" fill="#fff"/>
+<clipPath id="r-2ed19f40">
+<rect width="90" height="20" rx="3" fill="#fff"/>
 </clipPath>
-<g clip-path="url(#r-323b4d39)">
+<g clip-path="url(#r-2ed19f40)">
 <rect width="43" height="20" fill="#555"/>
-<rect x="43" width="45" height="20" fill="#e05d44"/>
-<rect width="88" height="20" fill="url(#s-323b4d39)"/>
+<rect x="43" width="47" height="20" fill="#fe7d37"/>
+<rect width="90" height="20" fill="url(#s-2ed19f40)"/>
 </g>
 <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="110">
 <text aria-hidden="true" x="220" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="330">fallow</text>
 <text x="220" y="140" transform="scale(.1)" fill="#fff" textLength="330">fallow</text>
-<text aria-hidden="true" x="640" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="350">F (38)</text>
-<text x="640" y="140" transform="scale(.1)" fill="#fff" textLength="350">F (38)</text>
+<text aria-hidden="true" x="650" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="370">D (44)</text>
+<text x="650" y="140" transform="scale(.1)" fill="#fff" textLength="370">D (44)</text>
 </g>
 </svg>
