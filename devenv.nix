@@ -20,7 +20,7 @@ in
 {
   languages.javascript = {
     enable = true;
-    package = pkgs.nodejs-slim_22;
+    package = pkgs.nodejs-slim_24;
     corepack.enable = true;
   };
 

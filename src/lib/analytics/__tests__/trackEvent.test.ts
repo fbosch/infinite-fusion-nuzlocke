@@ -395,41 +395,43 @@ describe("analytics transport wrapper", () => {
     expect(getAnalyticsDebugCounters().blockReasons.invalid_payload).toBe(1);
   });
 
-  it.each(
-    eventPayloadEntries,
-  )("accepts contract-valid payload for %s", (eventName, payload) => {
-    localStorage.setItem(
-      "cookie-preferences",
-      JSON.stringify({ analytics: true }),
-    );
-    setEnvironment("production", "production");
+  it.each(eventPayloadEntries)(
+    "accepts contract-valid payload for %s",
+    (eventName, payload) => {
+      localStorage.setItem(
+        "cookie-preferences",
+        JSON.stringify({ analytics: true }),
+      );
+      setEnvironment("production", "production");
 
-    trackEvent(eventName, payload as never);
+      trackEvent(eventName, payload as never);
 
-    expect(analyticsMock.track).toHaveBeenCalledTimes(1);
-    expect(analyticsMock.track).toHaveBeenCalledWith(eventName, payload);
-    expect(getAnalyticsDebugCounters().sent).toBe(1);
-  });
+      expect(analyticsMock.track).toHaveBeenCalledTimes(1);
+      expect(analyticsMock.track).toHaveBeenCalledWith(eventName, payload);
+      expect(getAnalyticsDebugCounters().sent).toBe(1);
+    },
+  );
 
-  it.each(
-    eventPayloadEntries,
-  )("rejects payload when shared contract field is missing for %s", (eventName, payload) => {
-    localStorage.setItem(
-      "cookie-preferences",
-      JSON.stringify({ analytics: true }),
-    );
-    setEnvironment("production", "production");
+  it.each(eventPayloadEntries)(
+    "rejects payload when shared contract field is missing for %s",
+    (eventName, payload) => {
+      localStorage.setItem(
+        "cookie-preferences",
+        JSON.stringify({ analytics: true }),
+      );
+      setEnvironment("production", "production");
 
-    const invalidPayload = { ...payload };
-    delete invalidPayload.playthrough_id;
+      const invalidPayload = { ...payload };
+      delete invalidPayload.playthrough_id;
 
-    trackEvent(eventName, invalidPayload as never);
+      trackEvent(eventName, invalidPayload as never);
 
-    const counters = getAnalyticsDebugCounters();
-    expect(analyticsMock.track).not.toHaveBeenCalled();
-    expect(counters.blockReasons.invalid_payload).toBe(1);
-    expect(counters.byEvent[eventName].blocked).toBe(1);
-  });
+      const counters = getAnalyticsDebugCounters();
+      expect(analyticsMock.track).not.toHaveBeenCalled();
+      expect(counters.blockReasons.invalid_payload).toBe(1);
+      expect(counters.byEvent[eventName].blocked).toBe(1);
+    },
+  );
 
   it("blocks invalid payload shapes without logging payload values", () => {
     localStorage.setItem(

@@ -6,7 +6,7 @@ description: >
 inputs:
   node-version:
     description: Node.js version to install
-    default: '22'
+    default: '24'
   fetch-depth:
     description: Number of commits to fetch (0 = full history)
     default: '1'
