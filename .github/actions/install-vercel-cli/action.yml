@@ -5,7 +5,7 @@ inputs:
   version:
     description: Vercel CLI version to install
     required: false
-    default: 50.37.3
+    default: 56.2.1
 
 runs:
   using: composite
