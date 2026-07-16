@@ -13,7 +13,7 @@
     "duplicate-exports": "warn",
     "circular-dependencies": "warn",
     "boundary-violation": "warn",
-    "coverage-gaps": "off",
+    "coverage-gaps": "warn",
     "stale-suppressions": "warn"
   },
   "audit": {

@@ -15,6 +15,7 @@
     "lint:all": "biome lint src tests scripts data --vcs-use-ignore-file=true --files-ignore-unknown=true",
     "quality:graph": "fallow audit --format compact",
     "quality:graph:json": "fallow audit --format json --quiet --explain",
+    "quality:pre-push": "pnpm type-check && pnpm test:run && pnpm quality:graph",
     "format": "biome format --write src tests scripts data --vcs-use-ignore-file=true --files-ignore-unknown=true",
     "format:check": "biome check src tests scripts data --formatter-enabled=true --linter-enabled=false --assist-enabled=false --vcs-use-ignore-file=true --files-ignore-unknown=true",
     "validate": "pnpm format:check && pnpm lint",
@@ -31,6 +32,8 @@
     "test:coverage:watch": "vitest --coverage",
     "test:coverage:html": "vitest run --coverage --reporter=html",
     "coverage:badge": "node scripts/generate-coverage-badge.js",
+    "fallow:badge": "node scripts/generate-fallow-badge.js",
+    "badges:staged": "node scripts/update-staged-badges.js",
     "react-doctor:badge": "node scripts/generate-react-doctor-badge.js",
     "coverage:full": "pnpm test:coverage && pnpm coverage:badge",
     "analyze": "ANALYZE=true pnpm build",
@@ -47,7 +50,7 @@
     "sprites:download": "jiti scripts/scrape-pokemon-icons.ts",
     "spritesheet": "pnpm run sprites:download && jiti scripts/generate-spritesheet.ts",
     "mcp:test": "npx -y @modelcontextprotocol/inspector npx @upstash/context7-mcp",
-    "prepare": "husky"
+    "prepare": "lefthook install"
   },
   "dependencies": {
     "@floating-ui/react": "^0.27.20",
@@ -109,9 +112,9 @@
     "cli-progress": "^3.12.0",
     "fallow": "^3.6.0",
     "happy-dom": "^20.10.6",
-    "husky": "^9.1.7",
     "jiti": "^2.7.0",
     "jsdom": "^29.1.1",
+    "lefthook": "^2.1.9",
     "lint-staged": "^17.0.8",
     "npm-run-all": "^4.1.5",
     "oxipng": "^1.0.1",

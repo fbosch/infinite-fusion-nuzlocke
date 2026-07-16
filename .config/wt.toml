@@ -2,13 +2,7 @@
 pre-start = "pnpm install --frozen-lockfile --prefer-offline && sh ./.config/ensure-vercel-link.sh"
 
 [[pre-merge]]
-typecheck = "pnpm type-check"
-
-[[pre-merge]]
-tests = "pnpm test:run"
-
-[[pre-merge]]
-fallow = "pnpm quality:graph"
+quality = "pnpm quality:pre-push"
 
 [aliases]
 # Publish the current Worktrunk branch through the no-mistakes gate.

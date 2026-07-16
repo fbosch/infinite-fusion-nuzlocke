@@ -51,9 +51,9 @@ in
   };
 
   tasks."git-hooks:init" = {
-    exec = "pnpm exec husky";
+    exec = "pnpm exec lefthook install";
     status = ''
-      [ "$(git config --get core.hooksPath 2>/dev/null)" = ".husky/_" ] && [ -f .husky/_/h ] && [ -x .husky/_/pre-commit ] && [ -x .husky/_/pre-push ]
+      [ -z "$(git config --get --local core.hooksPath 2>/dev/null)" ] && [ -x "$(git rev-parse --git-path hooks/pre-commit)" ] && [ -x "$(git rev-parse --git-path hooks/pre-push)" ]
     '';
     after = [ "pnpm:install" ];
     before = [ "devenv:enterShell" ];

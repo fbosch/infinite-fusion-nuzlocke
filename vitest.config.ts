@@ -16,7 +16,7 @@ export default defineConfig({
     globals: true,
     coverage: {
       provider: "v8",
-      reporter: ["text", "json", "html", "lcov", "cobertura"],
+      reporter: ["text", "json", "json-summary", "html", "lcov", "cobertura"],
       include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "**/node_modules/**",
