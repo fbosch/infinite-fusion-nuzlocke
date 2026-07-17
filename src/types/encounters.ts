@@ -1,5 +1,58 @@
 import { z } from "zod";
 
+export enum EncounterSource {
+  WILD = "wild",
+  GRASS = "grass",
+  SURF = "surf",
+  FISHING = "fishing",
+  CAVE = "cave",
+  ROCK_SMASH = "rock_smash",
+  POKERADAR = "pokeradar",
+  GIFT = "gift",
+  TRADE = "trade",
+  QUEST = "quest",
+  NEST = "nest",
+  EGG = "egg",
+  STATIC = "static",
+  LEGENDARY = "legendary",
+}
+
+export const PokemonEncounterSchema = z.object({
+  id: z
+    .number()
+    .int()
+    .refine((value) => value > 0 || value === -1, {
+      error: "Pokemon ID must be positive or -1 for egg locations",
+    }),
+  source: z.enum([
+    EncounterSource.WILD,
+    EncounterSource.GRASS,
+    EncounterSource.SURF,
+    EncounterSource.FISHING,
+    EncounterSource.CAVE,
+    EncounterSource.ROCK_SMASH,
+    EncounterSource.POKERADAR,
+    EncounterSource.GIFT,
+    EncounterSource.TRADE,
+    EncounterSource.QUEST,
+    EncounterSource.NEST,
+    EncounterSource.EGG,
+    EncounterSource.STATIC,
+    EncounterSource.LEGENDARY,
+  ]),
+});
+
+export type PokemonEncounter = z.infer<typeof PokemonEncounterSchema>;
+
+export const RouteEncounterSchema = z.object({
+  routeName: z.string().min(1, { error: "Route name is required" }),
+  pokemon: z.array(PokemonEncounterSchema),
+});
+
+export type RouteEncounter = z.infer<typeof RouteEncounterSchema>;
+
+export const RouteEncountersArraySchema = z.array(RouteEncounterSchema);
+
 /**
  * Shared encounter type definition for consistency across the codebase.
  * This type defines all valid encounter types that can be used in the application.

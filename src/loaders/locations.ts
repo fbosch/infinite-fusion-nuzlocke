@@ -4,9 +4,9 @@ import { z } from "zod";
 import { isStarterLocation } from "@/constants/special-locations";
 import { encountersData, encountersQueries } from "@/lib/queryClient";
 import { getStarterPokemonByGameMode } from "@/loaders/starters";
+import { EncounterSource, type PokemonEncounter } from "@/types/encounters";
 import { generatePrefixedId } from "@/utils/id";
 import type { GameMode } from "../stores/playthroughs";
-import { EncounterSource, type PokemonEncounter } from "./encounters";
 
 // Location schema
 export const LocationSchema = z.object({

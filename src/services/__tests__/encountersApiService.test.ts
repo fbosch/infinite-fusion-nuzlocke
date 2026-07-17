@@ -14,15 +14,15 @@ vi.mock("@/lib/persistence", () => ({
   getCacheBuster: () => 12345,
 }));
 
-// Mock the encounters loader
-vi.mock("@/loaders/encounters", () => ({
+// Mock the response schema at the service boundary.
+vi.mock("@/types/encounters", () => ({
   RouteEncountersArraySchema: {
     safeParse: vi.fn().mockReturnValue({ success: true, data: [] }),
   },
 }));
 
 // Import the mocked module to access the mock function
-import { RouteEncountersArraySchema } from "@/loaders/encounters";
+import { RouteEncountersArraySchema } from "@/types/encounters";
 
 const encountersApiServicePrivate = encountersApiService as unknown as {
   makeRequest: (params: EncountersApiParams) => Promise<EncountersApiResponse>;

@@ -1,8 +1,6 @@
-import {
-  EncounterSource,
-  type RouteEncounterPokemon,
-} from "@/loaders/encounters";
+import type { RouteEncounterPokemon } from "@/loaders/encounters";
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
+import { EncounterSource } from "@/types/encounters";
 
 export const getPokemonSources = (
   routeEncounterData: RouteEncounterPokemon[],

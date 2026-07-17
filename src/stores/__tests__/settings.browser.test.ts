@@ -1,11 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getActivePlaythrough } from "../playthroughs";
+import { getActivePlaythrough, playthroughsStore } from "../playthroughs/store";
 import { SettingsSchema, settingsActions, settingsStore } from "../settings";
 
 // Mock the playthroughs store
-vi.mock("../playthroughs", () => ({
-  getActivePlaythrough: vi.fn(),
-}));
+vi.mock("../playthroughs/store", async () => {
+  const { proxy } = await import("valtio");
+  return {
+    getActivePlaythrough: vi.fn(),
+    playthroughsStore: proxy({ isLoading: false }),
+  };
+});
 
 const mockGetActivePlaythrough = vi.mocked(getActivePlaythrough);
 
@@ -19,6 +23,7 @@ describe("Settings Store", () => {
     // Clear all mocks and localStorage
     vi.clearAllMocks();
     clearLocalStorage();
+    playthroughsStore.isLoading = false;
     mockGetActivePlaythrough.mockReturnValue(null);
   });
 
@@ -91,6 +96,37 @@ describe("Settings Store", () => {
       freshActions.refreshDefaults();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
+    });
+
+    it("re-evaluates defaults when the playthrough store finishes loading", async () => {
+      const oldPlaythrough = {
+        id: "old-playthrough",
+        name: "Old Run",
+        gameMode: "classic",
+        encounters: {},
+        team: [],
+        pc: [],
+        customLocations: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      } as any;
+
+      playthroughsStore.isLoading = true;
+      mockGetActivePlaythrough
+        .mockReturnValueOnce(null)
+        .mockReturnValue(oldPlaythrough);
+
+      const { settingsStore: freshStore } = await import(
+        `../settings?t=${Date.now()}`
+      );
+
+      expect(freshStore.moveEncountersBetweenLocations).toBe(false);
+
+      playthroughsStore.isLoading = false;
+
+      await vi.waitFor(() => {
+        expect(freshStore.moveEncountersBetweenLocations).toBe(true);
+      });
     });
 
     it("enables move encounters for old playthroughs (no version)", async () => {

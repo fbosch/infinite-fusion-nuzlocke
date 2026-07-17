@@ -1,6 +1,9 @@
 import { proxy, subscribe } from "valtio";
 import { z } from "zod";
-import { getActivePlaythrough } from "@/stores/playthroughs";
+import {
+  getActivePlaythrough,
+  playthroughsStore,
+} from "@/stores/playthroughs/store";
 
 // Zod schema for settings validation
 export const SettingsSchema = z.object({
@@ -151,3 +154,16 @@ export const settingsActions = {
     }
   },
 };
+
+if (typeof window !== "undefined") {
+  let wasLoading = playthroughsStore.isLoading;
+
+  subscribe(playthroughsStore, () => {
+    const hasFinishedLoading = wasLoading && !playthroughsStore.isLoading;
+    wasLoading = playthroughsStore.isLoading;
+
+    if (hasFinishedLoading) {
+      settingsActions.refreshDefaults();
+    }
+  });
+}

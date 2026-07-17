@@ -1,7 +1,7 @@
 import * as Comlink from "comlink";
 import { pokemonData } from "@/lib/data";
 import { SearchCore } from "@/lib/searchCore";
-import type { Pokemon } from "@/loaders/pokemon";
+import type { Pokemon } from "@/types/pokemon";
 
 let mainThreadInstance: SearchCore | null = null;
 let mainThreadInitPromise: Promise<SearchCore> | null = null;

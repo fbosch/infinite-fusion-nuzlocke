@@ -20,10 +20,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type {
-  EncounterSource,
-  RouteEncounterPokemon,
-} from "@/loaders/encounters";
+import type { RouteEncounterPokemon } from "@/loaders/encounters";
 import {
   isEgg,
   isPokemonEvolution,
@@ -34,6 +31,7 @@ import {
   usePokemonSearch,
 } from "@/loaders/pokemon";
 import { useEncounters, useGameMode } from "@/stores/playthroughs";
+import type { EncounterSource } from "@/types/encounters";
 import { buildCapturedSpeciesIdSet } from "@/utils/encounter-utils";
 import { DraggableComboboxSprite } from "./DraggableComboboxSprite";
 import {

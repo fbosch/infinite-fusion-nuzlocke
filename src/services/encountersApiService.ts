@@ -3,7 +3,7 @@ import { getCacheBuster } from "@/lib/persistence";
 import {
   type RouteEncounterSchema,
   RouteEncountersArraySchema,
-} from "@/loaders/encounters";
+} from "@/types/encounters";
 
 export type RouteEncounter = z.infer<typeof RouteEncounterSchema>;
 

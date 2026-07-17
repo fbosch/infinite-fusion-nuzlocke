@@ -1,6 +1,13 @@
 import { useCallback, useMemo } from "react";
-import { z } from "zod";
 import { encountersData } from "@/lib/queryClient";
+import {
+  EncounterSource,
+  type PokemonEncounter,
+  PokemonEncounterSchema,
+  type RouteEncounter,
+  RouteEncounterSchema,
+  RouteEncountersArraySchema,
+} from "@/types/encounters";
 import { useLocationEncountersById } from "./locations";
 import type { Pokemon, PokemonOptionType } from "./pokemon";
 import { useAllPokemon, usePokemonNameMap } from "./pokemon";
@@ -15,67 +22,6 @@ interface EncounterData {
   body: PokemonOptionType | null;
   isFusion: boolean;
 }
-
-export enum EncounterSource {
-  WILD = "wild", // Generic wild (for backward compatibility)
-  GRASS = "grass", // Wild grass encounters
-  SURF = "surf", // Surfing encounters
-  FISHING = "fishing", // Fishing encounters
-  CAVE = "cave", // Cave encounters
-  ROCK_SMASH = "rock_smash", // Rock Smash encounters
-  POKERADAR = "pokeradar", // Pokéradar encounters
-  GIFT = "gift",
-  TRADE = "trade",
-  QUEST = "quest",
-  NEST = "nest",
-  EGG = "egg",
-  STATIC = "static",
-  LEGENDARY = "legendary", // Legendary Pokémon encounters
-}
-
-// Zod schema for individual Pokemon encounters
-export const PokemonEncounterSchema = z.object({
-  id: z
-    .number()
-    .int()
-    .refine((val) => val > 0 || val === -1, {
-      error: "Pokemon ID must be positive or -1 for egg locations",
-    }),
-  source: z.enum(
-    [
-      EncounterSource.WILD,
-      EncounterSource.GRASS,
-      EncounterSource.SURF,
-      EncounterSource.FISHING,
-      EncounterSource.CAVE,
-      EncounterSource.ROCK_SMASH,
-      EncounterSource.POKERADAR,
-      EncounterSource.GIFT,
-      EncounterSource.TRADE,
-      EncounterSource.QUEST,
-      EncounterSource.NEST,
-      EncounterSource.EGG,
-      EncounterSource.STATIC,
-      EncounterSource.LEGENDARY,
-    ],
-    {
-      error:
-        "Source must be wild, grass, surf, fishing, cave, rock_smash, pokeradar, gift, trade, quest, static, nest, egg, or legendary",
-    },
-  ),
-});
-
-export type PokemonEncounter = z.infer<typeof PokemonEncounterSchema>;
-
-// Zod schema for route encounter data
-export const RouteEncounterSchema = z.object({
-  routeName: z.string().min(1, { error: "Route name is required" }),
-  pokemon: z.array(PokemonEncounterSchema),
-});
-
-export type RouteEncounter = z.infer<typeof RouteEncounterSchema>;
-
-export const RouteEncountersArraySchema = z.array(RouteEncounterSchema);
 
 // Data loaders for encounters using TanStack Query
 export async function getClassicEncounters(): Promise<RouteEncounter[]> {

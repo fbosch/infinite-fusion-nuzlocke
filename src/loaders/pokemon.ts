@@ -10,6 +10,14 @@ import { z } from "zod";
 import { pokemonData, pokemonQueries } from "@/lib/queryClient";
 import { SearchCore } from "@/lib/searchCore";
 import searchService from "@/services/searchService";
+import {
+  type Pokemon,
+  PokemonArraySchema,
+  PokemonSchema,
+} from "@/types/pokemon";
+
+export type { Pokemon } from "@/types/pokemon";
+export { PokemonArraySchema, PokemonSchema } from "@/types/pokemon";
 
 // Utility function to generate unique identifiers
 export function generatePokemonUID(): string {
@@ -92,60 +100,6 @@ export const PokemonOptionSchema = z.object({
 
 // Pokemon option type for search results (inferred from schema)
 export type PokemonOptionType = z.infer<typeof PokemonOptionSchema>;
-
-// Zod schema for Pokemon type
-export const PokemonTypeSchema = z.object({
-  name: z.string().min(1, { error: "Type name is required" }),
-});
-
-// Zod schema for Pokemon species
-export const PokemonSpeciesSchema = z.object({
-  is_legendary: z.boolean(),
-  is_mythical: z.boolean(),
-  generation: z.string().nullable(),
-  evolution_chain: z
-    .object({
-      url: z.string().url({ error: "Invalid evolution chain URL" }),
-    })
-    .nullable(),
-});
-
-// Zod schema for evolution detail
-export const EvolutionDetailSchema = z.object({
-  id: z.number().int().positive({ error: "Evolution ID must be positive" }),
-  name: z.string().min(1, { error: "Evolution name is required" }),
-  min_level: z.number().int().positive().optional(),
-  trigger: z.string().optional(),
-  item: z.string().optional(),
-  location: z.string().optional(),
-  condition: z.string().optional(),
-});
-
-// Zod schema for evolution data
-export const EvolutionDataSchema = z.object({
-  evolves_to: z.array(EvolutionDetailSchema),
-  evolves_from: EvolutionDetailSchema.optional(),
-});
-
-// Zod schema for Pokemon data
-export const PokemonSchema = z.object({
-  id: z.number().int({ error: "Pokemon ID must be an integer" }),
-  nationalDexId: z
-    .number()
-    .int({ error: "National Dex ID must be an integer" }),
-  name: z.string().min(1, { error: "Pokemon name is required" }),
-  types: z.array(PokemonTypeSchema),
-  species: PokemonSpeciesSchema,
-  evolution: EvolutionDataSchema.optional(),
-});
-
-export type Pokemon = z.infer<typeof PokemonSchema>;
-type PokemonType = z.infer<typeof PokemonTypeSchema>;
-type PokemonSpecies = z.infer<typeof PokemonSpeciesSchema>;
-type EvolutionDetail = z.infer<typeof EvolutionDetailSchema>;
-type EvolutionData = z.infer<typeof EvolutionDataSchema>;
-
-export const PokemonArraySchema = z.array(PokemonSchema);
 
 // Evolution helper functions using centralized query client
 export async function getPokemonEvolutionIds(
