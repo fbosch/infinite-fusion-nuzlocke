@@ -5,9 +5,8 @@ import type {
   Playthrough,
   PlaythroughsState,
 } from "@/stores/playthroughs/types";
-import { PlaythroughSchema } from "@/stores/playthroughs/types";
 import { createDefaultPlaythrough } from "./defaultPlaythrough";
-import { migratePlaythrough } from "./migrations";
+import { normalizePersistedPlaythrough } from "./migrations";
 
 // Create a custom store for playthroughs data
 export const playthroughsStore_idb = createStore("playthroughs", "data");
@@ -90,8 +89,7 @@ export const loadPlaythroughById = async (
   try {
     const playthroughData = await get(playthroughId, playthroughsStore_idb);
     if (playthroughData) {
-      const migratedPlaythrough = await migratePlaythrough(playthroughData);
-      return PlaythroughSchema.parse(migratedPlaythrough);
+      return normalizePersistedPlaythrough(playthroughData);
     }
     return null;
   } catch (error) {
@@ -115,8 +113,7 @@ export const loadAllPlaythroughs = async (): Promise<Playthrough[]> => {
     const playthroughPromises = playthroughIds.map(async (id) => {
       const playthroughData = await get(id, playthroughsStore_idb);
       if (playthroughData) {
-        const migratedPlaythrough = await migratePlaythrough(playthroughData);
-        return PlaythroughSchema.parse(migratedPlaythrough);
+        return normalizePersistedPlaythrough(playthroughData);
       }
       return null;
     });
