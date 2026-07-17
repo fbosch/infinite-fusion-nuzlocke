@@ -73,6 +73,11 @@ export const markEncounterAsDeceased = async (
       .every((pokemon) => pokemon.status === PokemonStatus.DECEASED);
 
   if (alreadyDeceased) {
+    removeTeamMembersWithPokemon(
+      [encounterBefore.head?.uid, encounterBefore.body?.uid].filter(
+        (uid): uid is string => uid != null,
+      ),
+    );
     return;
   }
 

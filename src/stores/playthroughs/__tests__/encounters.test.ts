@@ -321,6 +321,22 @@ describe("Basic Encounter Operations", () => {
       });
     });
 
+    it("cleans stale team members on repeated deceased transitions", async () => {
+      const { activePlaythrough } = createTestPlaythrough();
+
+      await updateEncounter("route1", testPokemon.pikachu(), "head", false);
+      await markEncounterAsDeceased("route1");
+
+      activePlaythrough.team.members[0] = {
+        headPokemonUid: "pikachu_route1_123",
+        bodyPokemonUid: "",
+      };
+
+      await markEncounterAsDeceased("route1");
+
+      expect(activePlaythrough.team.members[0]).toBeNull();
+    });
+
     it("should move encounter to box (stored)", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 

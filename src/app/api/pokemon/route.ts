@@ -5,13 +5,19 @@ import { PokemonSchema } from "@/types/pokemon";
 
 // Query parameter schema for filtering
 const QuerySchema = z.object({
-  ids: z.string().optional(), // Comma-separated list of Pokemon IDs
+  ids: z
+    .string()
+    .regex(/^-?\d+(,-?\d+)*$/)
+    .transform((value) => value.split(",").map(Number))
+    .refine((ids) => ids.every(Number.isSafeInteger))
+    .optional(), // Comma-separated list of Pokemon IDs
   search: z.string().optional(), // Search by name
   type: z.string().optional(), // Filter by type
   limit: z
     .string()
     .regex(/^\d+$/)
-    .transform((val) => parseInt(val, 10))
+    .transform(Number)
+    .refine(Number.isSafeInteger)
     .optional(), // Limit results
   v: z.string().optional(), // Cache busting version (ignored)
 });
@@ -45,10 +51,7 @@ const getFilteredPokemon = ({
   >[];
 
   if (ids) {
-    const idList = ids.split(",").map((id) => parseInt(id, 10));
-    filteredData = filteredData.filter((pokemon) =>
-      idList.includes(pokemon.id),
-    );
+    filteredData = filteredData.filter((pokemon) => ids.includes(pokemon.id));
   }
 
   if (search) {

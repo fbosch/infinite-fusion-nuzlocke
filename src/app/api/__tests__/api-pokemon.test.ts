@@ -29,6 +29,30 @@ describe("Pokemon API", () => {
     });
   });
 
+  it("rejects malformed Pokemon IDs", async () => {
+    const response = await GET(
+      new NextRequest("http://localhost:3000/api/pokemon?ids=25,invalid"),
+    );
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({
+      error: "Invalid query parameters",
+    });
+  });
+
+  it("rejects limits outside the safe integer range", async () => {
+    const response = await GET(
+      new NextRequest(
+        "http://localhost:3000/api/pokemon?limit=9007199254740992",
+      ),
+    );
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({
+      error: "Invalid query parameters",
+    });
+  });
+
   it("keeps the same-origin OPTIONS contract", async () => {
     const response = await OPTIONS();
 

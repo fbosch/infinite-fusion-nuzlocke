@@ -56,7 +56,7 @@ Purpose: remove dependency-cycle and state-transition risks before broader clean
 - [x] Inventory high-complexity API processors by request validation, decisions, side effects, and response behavior.
 - [x] Refactor API processors one request path at a time, with success, invalid-input, and downstream-failure coverage.
 
-Phase 2 API inventory: `api/encounters` validates static datasets, merges and caches route data, and returns a sorted schema-validated response; `api/pokemon` validates query input, filters static data, and returns cache/security headers; `api/sprite/artists` validates an ID, fetches FusionDex HTML, extracts credits, and preserves upstream/error status behavior. The routes now isolate their high-decision processing from HTTP orchestration and have direct request-path coverage. `api/sprite/variants` was inventoried as I/O-heavy but has no top-complexity finding; its request, probe, cache, and response contract remains unchanged.
+Phase 2 API inventory: `api/encounters` validates static datasets, merges and caches route data, and returns a sorted schema-validated response; `api/pokemon` validates query input, filters static data, and returns cache/security headers; `api/sprite/artists` requires a nonempty ID parameter, fetches FusionDex HTML, extracts credits, and preserves upstream/error status behavior. The routes now isolate their high-decision processing from HTTP orchestration and have direct request-path coverage. `api/sprite/variants` was inventoried as I/O-heavy but has no top-complexity finding; its request, probe, cache, and response contract remains unchanged.
 
 Acceptance criteria:
 
