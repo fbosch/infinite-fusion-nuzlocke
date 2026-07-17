@@ -9,7 +9,7 @@ import {
 import clsx from "clsx";
 import { X } from "lucide-react";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { useActivePlaythrough } from "@/stores/playthroughs";
+import { useActivePlaythrough } from "@/stores/playthroughs/hooks";
 import { TeamMemberPreviewPanel } from "./TeamMemberPreviewPanel";
 import { TeamMemberSelectionProvider } from "./TeamMemberSelectionContext";
 import { TeamMemberSelectionPanel } from "./TeamMemberSelectionPanel";

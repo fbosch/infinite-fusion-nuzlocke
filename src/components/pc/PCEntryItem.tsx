@@ -6,7 +6,7 @@ import { PokemonContextMenu } from "@/components/PokemonSummaryCard/PokemonConte
 import { getNicknameText } from "@/components/PokemonSummaryCard/utils";
 import { TypePills } from "@/components/TypePills";
 import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
-import { useEncounters } from "@/stores/playthroughs";
+import { useEncounters } from "@/stores/playthroughs/hooks";
 import {
   canFuse,
   isPokemonDeceased,

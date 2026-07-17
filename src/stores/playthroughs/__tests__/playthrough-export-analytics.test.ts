@@ -14,7 +14,7 @@ const playthroughActionMocks = vi.hoisted(() => ({
   getAllPlaythroughs: vi.fn(),
 }));
 
-vi.mock("@/stores/playthroughs", () => ({
+vi.mock("@/stores/playthroughs/index", () => ({
   playthroughActions: playthroughActionMocks,
 }));
 

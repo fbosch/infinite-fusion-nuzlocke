@@ -103,12 +103,15 @@ vi.mock("../ImportErrorContent", () => ({
   ImportErrorContent: () => null,
 }));
 
-vi.mock("@/stores/playthroughs", () => ({
+vi.mock("@/stores/playthroughs/index", () => ({
   playthroughActions: {
     setActivePlaythrough: setActivePlaythroughMock,
     deletePlaythrough: vi.fn(),
     createPlaythrough: vi.fn(),
   },
+}));
+
+vi.mock("@/stores/playthroughs/hooks", () => ({
   useActivePlaythrough: () => playthroughs[0],
   useAllPlaythroughs: () => playthroughs,
   useGameMode: () => "classic",

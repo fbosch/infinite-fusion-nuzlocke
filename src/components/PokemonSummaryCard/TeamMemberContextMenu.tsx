@@ -23,7 +23,7 @@ import {
   PokemonStatus,
   usePokemonEvolutionData,
 } from "@/loaders/pokemon";
-import { playthroughActions } from "@/stores/playthroughs";
+import { playthroughActions } from "@/stores/playthroughs/index";
 import { scrollToLocationById } from "@/utils/scrollToLocation";
 import { PokemonSprite } from "../PokemonSprite";
 

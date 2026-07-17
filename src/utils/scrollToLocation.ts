@@ -1,4 +1,4 @@
-import type { EncounterData } from "@/stores/playthroughs";
+import type { EncounterData } from "@/stores/playthroughs/types";
 
 // Keep teardown timers per overlay element across calls to avoid flicker
 const overlayHideTimers = new WeakMap<HTMLElement, number>();

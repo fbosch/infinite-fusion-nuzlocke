@@ -5,8 +5,10 @@ import { match } from "ts-pattern";
 import { addEvolutionListener } from "@/lib/events";
 import type { CombinedLocation } from "@/loaders/locations";
 import { isCustomLocation } from "@/loaders/locations";
-import { useEncounter } from "@/stores/playthroughs";
-import { useActivePlaythroughId } from "@/stores/playthroughs/hooks";
+import {
+  useActivePlaythroughId,
+  useEncounter,
+} from "@/stores/playthroughs/hooks";
 import { canFuse } from "@/utils/pokemonPredicates";
 import PokemonSummaryCard from "../PokemonSummaryCard";
 import type { FusionSpriteHandle } from "../PokemonSummaryCard/FusionSprite";

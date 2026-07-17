@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
-import type { Playthrough } from "@/stores/playthroughs";
+import type { Playthrough } from "@/stores/playthroughs/types";
 import {
   toCountBucket,
   toDormancyBucket,

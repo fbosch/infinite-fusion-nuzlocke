@@ -95,6 +95,7 @@ vi.mock("@/components/PokemonSummaryCard/FusionSprite", () => ({
 vi.mock("@/stores/playthroughs/hooks", () => ({
   useActivePlaythrough: () =>
     activePlaythroughId ? { id: activePlaythroughId } : null,
+  useEncounters: () => ({}),
 }));
 
 vi.mock("@/components/PokemonSummaryCard/TeamMemberContextMenu", () => ({
@@ -133,7 +134,7 @@ vi.mock("@/loaders/locations", () => ({
   getLocationById: (id: string) => ({ name: id }),
 }));
 
-vi.mock("@/stores/playthroughs", () => ({
+vi.mock("@/stores/playthroughs/index", () => ({
   playthroughActions: {
     moveTeamMemberToBox: moveTeamMemberToBoxMock,
     moveEncounterToBox: moveEncounterToBoxMock,
@@ -142,7 +143,6 @@ vi.mock("@/stores/playthroughs", () => ({
     updatePokemonByUID: updatePokemonByUIDMock,
     updateTeamMember: updateTeamMemberMock,
   },
-  useEncounters: () => ({}),
 }));
 
 vi.mock("@/utils/formatCredits", () => ({

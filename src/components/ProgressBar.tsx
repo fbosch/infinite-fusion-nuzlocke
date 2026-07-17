@@ -7,7 +7,7 @@ import EscapeIcon from "@/assets/images/escape-cloud.svg";
 import PokeballIcon from "@/assets/images/pokeball.svg";
 import { getLocationsSortedWithCustom } from "@/loaders";
 import { PokemonStatus } from "@/loaders/pokemon";
-import { useCustomLocations, useEncounters } from "@/stores/playthroughs";
+import { useCustomLocations, useEncounters } from "@/stores/playthroughs/hooks";
 import { CursorTooltip } from "./CursorTooltip";
 
 interface ProgressBarProps {

@@ -20,11 +20,11 @@ import {
 } from "@/loaders/locations";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import {
-  playthroughActions,
   useActivePlaythrough,
   useCustomLocations,
   useEncounters,
-} from "@/stores/playthroughs";
+} from "@/stores/playthroughs/hooks";
+import { playthroughActions } from "@/stores/playthroughs/index";
 import {
   buildPokemonUidIndex,
   findPokemonByUid,

@@ -12,10 +12,10 @@ import {
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { PokemonStatus } from "@/loaders/pokemon";
 import {
-  playthroughActions,
   useActivePlaythrough,
-} from "@/stores/playthroughs";
-import { useEncounters } from "@/stores/playthroughs/hooks";
+  useEncounters,
+} from "@/stores/playthroughs/hooks";
+import { playthroughActions } from "@/stores/playthroughs/index";
 import {
   findPokemonWithLocation,
   getAllPokemonWithLocations,

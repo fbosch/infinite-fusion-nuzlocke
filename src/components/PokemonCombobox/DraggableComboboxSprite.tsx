@@ -15,11 +15,9 @@ import {
   usePokemonEvolutionData,
 } from "@/loaders/pokemon";
 import { dragActions } from "@/stores/dragStore";
-import {
-  getActivePlaythrough,
-  playthroughActions,
-  useCustomLocations,
-} from "@/stores/playthroughs";
+import { useCustomLocations } from "@/stores/playthroughs/hooks";
+import { playthroughActions } from "@/stores/playthroughs/index";
+import { getActivePlaythrough } from "@/stores/playthroughs/store";
 import type { EncounterData } from "@/stores/playthroughs/types";
 import { settingsStore } from "@/stores/settings";
 import usePokemonTypes from "../../hooks/usePokemonTypes";

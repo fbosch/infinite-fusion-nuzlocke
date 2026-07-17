@@ -1,6 +1,6 @@
 "use client";
 
-import { useActivePlaythrough } from "@/stores/playthroughs";
+import { useActivePlaythrough } from "@/stores/playthroughs/hooks";
 import GameModeToggle from "./GameModeToggle";
 import PlaythroughSelector from "./PlaythroughSelector";
 

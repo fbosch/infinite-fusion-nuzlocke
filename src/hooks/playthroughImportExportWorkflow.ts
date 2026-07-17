@@ -6,12 +6,12 @@ import {
   type MimeGroup,
   trackEvent,
 } from "@/lib/analytics/trackEvent";
-import {
-  type ExportedPlaythrough,
-  type GameMode,
-  type Playthrough,
-  playthroughActions,
-} from "@/stores/playthroughs";
+import { playthroughActions } from "@/stores/playthroughs/index";
+import type {
+  ExportedPlaythrough,
+  GameMode,
+  Playthrough,
+} from "@/stores/playthroughs/types";
 
 const IMPORT_SOURCE = "file_picker" as const;
 

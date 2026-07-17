@@ -6,7 +6,7 @@ import { encountersData, encountersQueries } from "@/lib/queryClient";
 import { getStarterPokemonByGameMode } from "@/loaders/starters";
 import { EncounterSource, type PokemonEncounter } from "@/types/encounters";
 import { generatePrefixedId } from "@/utils/id";
-import type { GameMode } from "../stores/playthroughs";
+import type { GameMode } from "../stores/playthroughs/types";
 
 // Location schema
 export const LocationSchema = z.object({

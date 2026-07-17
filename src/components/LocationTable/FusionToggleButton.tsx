@@ -10,7 +10,7 @@ import { DNA_SPLICER_ICON } from "@/constants/items";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { isEgg, useAllPokemon, usePokemonNameMap } from "@/loaders/pokemon";
 import { dragActions, dragStore } from "@/stores/dragStore";
-import { playthroughActions } from "@/stores/playthroughs";
+import { playthroughActions } from "@/stores/playthroughs/index";
 import { CursorTooltip } from "../CursorTooltip";
 
 interface FusionToggleButtonProps {
