@@ -1,5 +1,5 @@
-# Ensure each new worktree is ready to run
-pre-start = "pnpm install --frozen-lockfile --prefer-offline && sh ./.config/ensure-vercel-link.sh"
+# Ensure each new worktree is ready to run and its directory-specific shell is realized.
+pre-start = "pnpm install --frozen-lockfile --prefer-offline && sh ./.config/ensure-vercel-link.sh && devenv shell -- true"
 
 [[pre-merge]]
 quality = "pnpm quality:pre-push"
