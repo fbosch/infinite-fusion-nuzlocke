@@ -10,6 +10,6 @@ pre-commit:
 pre-push:
   commands:
     badges:
-      run: pnpm badges:staged {staged_files}
+      run: pnpm badges:staged {push_files}
     quality:
       run: pnpm quality:pre-push
