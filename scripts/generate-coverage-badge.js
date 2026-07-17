@@ -1,152 +1,82 @@
 #!/usr/bin/env node
 
-/**
- * Generate a coverage badge for the README
- * Run with: node scripts/generate-coverage-badge.js
- */
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 
-import fs from "node:fs";
-import path from "node:path";
+const coveragePath = "coverage/coverage-summary.json";
+const coverageColors = [
+  [90, "#4c1"],
+  [80, "#97ca00"],
+  [70, "#a4a61d"],
+  [60, "#dfb317"],
+  [50, "#fe7d37"],
+  [0, "#e05d44"],
+];
+const coverage = JSON.parse(await readFile(coveragePath, "utf8"));
+const lineCoverage = coverage.total?.lines?.pct;
 
-function generateCoverageBadge() {
-  try {
-    // Read the coverage summary
-    const coveragePath = path.join(
-      process.cwd(),
-      "coverage",
-      "coverage-final.json",
-    );
-
-    if (!fs.existsSync(coveragePath)) {
-      console.log('Coverage report not found. Run "pnpm test:coverage" first.');
-      return;
-    }
-
-    const coverageData = JSON.parse(fs.readFileSync(coveragePath, "utf8"));
-
-    // Calculate coverage from the coverage-final.json format
-    let totalStatements = 0;
-    let coveredStatements = 0;
-    let totalFunctions = 0;
-    let coveredFunctions = 0;
-    let totalBranches = 0;
-    let coveredBranches = 0;
-    let totalLines = 0;
-    let coveredLines = 0;
-
-    // Process each file's coverage data
-    Object.values(coverageData).forEach((fileData) => {
-      if (fileData.s) {
-        // Statements
-        Object.values(fileData.s).forEach((hit) => {
-          totalStatements++;
-          if (hit > 0) coveredStatements++;
-        });
-      }
-
-      if (fileData.f) {
-        // Functions
-        Object.values(fileData.f).forEach((hit) => {
-          totalFunctions++;
-          if (hit > 0) coveredFunctions++;
-        });
-      }
-
-      if (fileData.b) {
-        // Branches
-        Object.values(fileData.b).forEach((hits) => {
-          if (Array.isArray(hits)) {
-            totalBranches += hits.length;
-            hits.forEach((hit) => {
-              if (hit > 0) coveredBranches++;
-            });
-          }
-        });
-      }
-
-      if (fileData.l) {
-        // Lines (approximate from statements)
-        totalLines += Object.keys(fileData.s || {}).length;
-        coveredLines += Object.values(fileData.s || {}).filter(
-          (hit) => hit > 0,
-        ).length;
-      }
-    });
-
-    // Calculate percentages
-    const statementsPct =
-      totalStatements > 0
-        ? Math.round((coveredStatements / totalStatements) * 100)
-        : 0;
-    const functionsPct =
-      totalFunctions > 0
-        ? Math.round((coveredFunctions / totalFunctions) * 100)
-        : 0;
-    const branchesPct =
-      totalBranches > 0
-        ? Math.round((coveredBranches / totalBranches) * 100)
-        : 0;
-    const linesPct =
-      totalLines > 0 ? Math.round((coveredLines / totalLines) * 100) : 0;
-
-    // Calculate overall coverage percentage
-    const percentage = Math.round(
-      (statementsPct + functionsPct + branchesPct + linesPct) / 4,
-    );
-
-    // Determine badge color
-    let color = "red";
-    if (percentage >= 80) color = "brightgreen";
-    else if (percentage >= 60) color = "yellow";
-    else if (percentage >= 40) color = "orange";
-
-    // Generate badge URL
-    const badgeUrl = `https://img.shields.io/badge/coverage-${percentage}%25-${color}`;
-
-    // Create badge markdown
-    const badgeMarkdown = `![Test Coverage](${badgeUrl})`;
-
-    // Update README.md with the new badge
-    const readmePath = path.join(process.cwd(), "README.md");
-    let readmeContent = fs.readFileSync(readmePath, "utf8");
-
-    // Replace existing badge or add new one after the title
-    const badgeRegex =
-      /!\[Test Coverage\]\(https:\/\/img\.shields\.io\/badge\/coverage-\d+%25-\w+\)/;
-    if (badgeRegex.test(readmeContent)) {
-      // Replace existing badge
-      readmeContent = readmeContent.replace(badgeRegex, badgeMarkdown);
-    } else {
-      // Add badge after the description line
-      const descriptionRegex =
-        /(A Next\.js application for tracking Nuzlocke runs in Pokémon Infinite Fusion, featuring fusion mechanics, encounter tracking, and comprehensive run management\.)/;
-      readmeContent = readmeContent.replace(
-        descriptionRegex,
-        `$1\n\n${badgeMarkdown}`,
-      );
-    }
-
-    fs.writeFileSync(readmePath, readmeContent);
-
-    console.log(`✅ Coverage badge updated in README.md: ${percentage}%`);
-    console.log(`🔗 Badge URL: ${badgeUrl}`);
-
-    // Also log detailed coverage
-    console.log("\n📊 Detailed Coverage:");
-    console.log(`   Lines: ${linesPct}% (${coveredLines}/${totalLines})`);
-    console.log(
-      `   Functions: ${functionsPct}% (${coveredFunctions}/${totalFunctions})`,
-    );
-    console.log(
-      `   Branches: ${branchesPct}% (${coveredBranches}/${totalBranches})`,
-    );
-    console.log(
-      `   Statements: ${statementsPct}% (${coveredStatements}/${totalStatements})`,
-    );
-  } catch (error) {
-    console.error("❌ Error generating coverage badge:", error.message);
-    process.exit(1);
-  }
+if (Number.isFinite(lineCoverage) === false) {
+  throw new Error(
+    `Could not read aggregate line coverage from ${coveragePath}.`,
+  );
 }
 
-generateCoverageBadge();
+await mkdir("docs", { recursive: true });
+await writeFile(
+  "docs/coverage.svg",
+  renderBadge(
+    "coverage",
+    `${lineCoverage.toFixed(2)}%`,
+    coverageColor(lineCoverage),
+  ),
+);
+
+console.log(
+  `Wrote docs/coverage.svg (${lineCoverage.toFixed(2)}% line coverage).`,
+);
+
+function coverageColor(coverage) {
+  return coverageColors.find(([minimum]) => coverage >= minimum)[1];
+}
+
+function renderBadge(label, value, valueColor) {
+  const labelWidth = textWidth(label);
+  const valueWidth = textWidth(value);
+  const width = labelWidth + valueWidth;
+  const labelCenter = labelWidth / 2;
+  const valueCenter = labelWidth + valueWidth / 2;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="20" role="img" aria-label="${escapeXml(label)}: ${escapeXml(value)}">
+  <title>${escapeXml(label)}: ${escapeXml(value)}</title>
+  <linearGradient id="s" x2="0" y2="100%">
+    <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+    <stop offset="1" stop-opacity=".1"/>
+  </linearGradient>
+  <clipPath id="r">
+    <rect width="${width}" height="20" rx="3" fill="#fff"/>
+  </clipPath>
+  <g clip-path="url(#r)">
+    <rect width="${labelWidth}" height="20" fill="#555"/>
+    <rect x="${labelWidth}" width="${valueWidth}" height="20" fill="${valueColor}"/>
+    <rect width="${width}" height="20" fill="url(#s)"/>
+  </g>
+  <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="11">
+    <text x="${labelCenter}" y="15" fill="#010101" fill-opacity=".3">${escapeXml(label)}</text>
+    <text x="${labelCenter}" y="14">${escapeXml(label)}</text>
+    <text x="${valueCenter}" y="15" fill="#010101" fill-opacity=".3">${escapeXml(value)}</text>
+    <text x="${valueCenter}" y="14">${escapeXml(value)}</text>
+  </g>
+</svg>
+`;
+}
+
+function textWidth(text) {
+  return text.length * 7 + 10;
+}
+
+function escapeXml(value) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}

@@ -6,6 +6,8 @@ Track Pokemon Infinite Fusion Nuzlocke runs with encounter logging, team and box
 [![React](https://img.shields.io/badge/React-19-149eca)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-blue)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Coverage](docs/coverage.svg)](https://app.codecov.io/gh/fbosch/infinite-fusion-nuzlocke)
+[![Fallow health](docs/fallow.svg)](https://github.com/fallow-rs/fallow)
 
 Live app: [fusion.nuzlocke.io](https://fusion.nuzlocke.io)  
 Source: [github.com/fbosch/infinite-fusion-nuzlocke](https://github.com/fbosch/infinite-fusion-nuzlocke)
@@ -41,7 +43,7 @@ pnpm dev
 
 Open [http://localhost:4000](http://localhost:4000).
 
-If you use devenv, `devenv shell` provides the pinned Node.js, pnpm, git, GitHub CLI, Worktrunk, and no-mistakes tooling, then runs dependency and git hook setup on entry. Run `devenv tasks run no-mistakes:init` once when setting up the gated push remote.
+If you use devenv, `devenv shell` provides the pinned Node.js, pnpm, git, GitHub CLI, and Worktrunk tooling, then runs dependency and git hook setup on entry.
 
 ## Common Scripts
 
