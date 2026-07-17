@@ -91,9 +91,7 @@ export type {
   EncounterData,
   ExportedPlaythrough,
   GameMode,
-  ImportedPlaythrough,
   Playthrough,
-  PlaythroughsState,
 } from "./types";
 export {
   DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,

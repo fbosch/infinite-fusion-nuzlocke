@@ -8,6 +8,4 @@ export interface SpriteVariantsError {
   error: string;
 }
 
-export type SpriteVariantsApiResponse =
-  | SpriteVariantsResponse
-  | SpriteVariantsError;
+type SpriteVariantsApiResponse = SpriteVariantsResponse | SpriteVariantsError;

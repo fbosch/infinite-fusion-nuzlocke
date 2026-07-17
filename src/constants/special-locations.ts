@@ -8,7 +8,7 @@ export const SPECIAL_LOCATIONS = {
   STARTER_LOCATION: "f47ac10b-58cc-4372-a567-0e02b2c3d479", // Oak's Lab
 } as const;
 
-export type SpecialLocationType =
+type SpecialLocationType =
   (typeof SPECIAL_LOCATIONS)[keyof typeof SPECIAL_LOCATIONS];
 
 /**

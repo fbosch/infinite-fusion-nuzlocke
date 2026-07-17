@@ -6,10 +6,10 @@ pre-commit:
   commands:
     lint-staged:
       run: pnpm exec lint-staged
-    badges:
-      run: pnpm badges:staged {staged_files}
 
 pre-push:
   commands:
+    badges:
+      run: pnpm badges:staged {push_files}
     quality:
       run: pnpm quality:pre-push

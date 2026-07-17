@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-17",
+  "fallowVersion": "3.6.0",
+  "phase1": {
+    "resolved": {
+      "unlistedDependencies": 3,
+      "unusedDependencies": 7,
+      "unusedDependencyOverrides": 4,
+      "unusedFiles": 9,
+      "unusedTypes": 18
+    },
+    "exceptions": {
+      "typescriptJsonAliases": ["@data/classic", "@data/remix", "@data/shared"],
+      "securityOverrides": [
+        "@modelcontextprotocol/sdk",
+        "ajv",
+        "got",
+        "http-cache-semantics",
+        "qs",
+        "semver-regex"
+      ]
+    }
+  },
+  "phase2": {
+    "circularDependencies": 15
+  },
+  "phase3": {
+    "unusedExports": 190,
+    "unusedClassMembers": 7,
+    "unusedComponentProps": 2,
+    "duplicateExports": 2,
+    "devDependenciesInProduction": 4,
+    "healthFindings": 153,
+    "duplicationGroups": 37
+  }
+}

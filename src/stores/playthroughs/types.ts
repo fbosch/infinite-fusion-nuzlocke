@@ -15,14 +15,14 @@ export const TeamMemberSchema = z.object({
   bodyPokemonUid: z.string(), // Reference to body Pokémon by UID
 });
 
-export type TeamMember = z.infer<typeof TeamMemberSchema>;
+type TeamMember = z.infer<typeof TeamMemberSchema>;
 
 // Team schema - represents the complete team
 export const TeamSchema = z.object({
   members: z.array(TeamMemberSchema.nullable()).length(6), // Fixed size 6, null for empty slots
 });
 
-export type Team = z.infer<typeof TeamSchema>;
+type Team = z.infer<typeof TeamSchema>;
 
 export const EncounterDataSchema = z.object({
   head: PokemonOptionSchema.nullable(),
@@ -76,10 +76,10 @@ export const ImportedPlaythroughSchema = z.object({
   playthrough: PlaythroughSchema,
 });
 
-export type ImportedPlaythrough = z.infer<typeof ImportedPlaythroughSchema>;
+type ImportedPlaythrough = z.infer<typeof ImportedPlaythroughSchema>;
 
 // Helper type for creating export data from a Playthrough
-export type ExportablePlaythrough = {
+type ExportablePlaythrough = {
   readonly id: string;
   readonly name: string;
   readonly gameMode: GameMode;

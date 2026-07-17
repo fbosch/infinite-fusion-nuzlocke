@@ -140,10 +140,10 @@ export const PokemonSchema = z.object({
 });
 
 export type Pokemon = z.infer<typeof PokemonSchema>;
-export type PokemonType = z.infer<typeof PokemonTypeSchema>;
-export type PokemonSpecies = z.infer<typeof PokemonSpeciesSchema>;
-export type EvolutionDetail = z.infer<typeof EvolutionDetailSchema>;
-export type EvolutionData = z.infer<typeof EvolutionDataSchema>;
+type PokemonType = z.infer<typeof PokemonTypeSchema>;
+type PokemonSpecies = z.infer<typeof PokemonSpeciesSchema>;
+type EvolutionDetail = z.infer<typeof EvolutionDetailSchema>;
+type EvolutionData = z.infer<typeof EvolutionDataSchema>;
 
 export const PokemonArraySchema = z.array(PokemonSchema);
 
