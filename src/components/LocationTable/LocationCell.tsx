@@ -8,7 +8,7 @@ import { PokemonSprite } from "@/components/PokemonSprite";
 import { isCustomLocation } from "@/loaders";
 import type { CombinedLocation } from "@/loaders/locations";
 import type { PokemonOptionSchema } from "@/loaders/pokemon";
-import { useEncounters } from "@/stores/playthroughs";
+import { useEncounters } from "@/stores/playthroughs/hooks";
 import type { EncounterData } from "@/stores/playthroughs/types";
 import { settingsStore } from "@/stores/settings";
 import { isStarterLocation } from "../../constants/special-locations";

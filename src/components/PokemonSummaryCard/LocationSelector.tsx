@@ -21,10 +21,8 @@ import {
   getLocationsSortedWithCustom,
 } from "@/loaders/locations";
 import { isEggId, type PokemonOptionType } from "@/loaders/pokemon";
-import {
-  getActivePlaythrough,
-  useCustomLocations,
-} from "@/stores/playthroughs";
+import { useCustomLocations } from "@/stores/playthroughs/hooks";
+import { getActivePlaythrough } from "@/stores/playthroughs/store";
 import { canFuse } from "@/utils/pokemonPredicates";
 import { PokemonSprite } from "../PokemonSprite";
 

@@ -13,11 +13,11 @@ import { getLocationById } from "@/loaders/locations";
 import type { PokemonOptionType, PokemonStatusType } from "@/loaders/pokemon";
 import { PokemonStatus } from "@/loaders/pokemon";
 import {
-  playthroughActions,
   useCustomLocations,
   useEncounter,
   useGameMode,
-} from "@/stores/playthroughs";
+} from "@/stores/playthroughs/hooks";
+import { playthroughActions } from "@/stores/playthroughs/index";
 import { EncounterSource } from "@/types/encounters";
 import { FusionToggleButton } from "./FusionToggleButton";
 

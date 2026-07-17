@@ -10,7 +10,8 @@ import clsx from "clsx";
 import { Loader2, Plus, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { getLocationsSortedWithCustom } from "@/loaders";
-import { playthroughActions, useCustomLocations } from "@/stores/playthroughs";
+import { useCustomLocations } from "@/stores/playthroughs/hooks";
+import { playthroughActions } from "@/stores/playthroughs/index";
 
 interface AddCustomLocationModalProps {
   isOpen: boolean;

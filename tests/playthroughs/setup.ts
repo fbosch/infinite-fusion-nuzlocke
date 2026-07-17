@@ -1,12 +1,8 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { z } from "zod";
-import type { PokemonOptionSchema } from "../../src/loaders/pokemon";
-// Import modules after mocks are set up (mocks should be imported in each test file)
+import type { PokemonOptionSchema } from "@/loaders/pokemon";
 import {
-  PlaythroughSchema,
-  playthroughActions,
-  playthroughsStore,
   useActivePlaythrough,
   useEncounters,
   useGameMode,
@@ -16,7 +12,11 @@ import {
   usePlaythroughById,
   usePlaythroughsSnapshot,
   usePreferredVariant,
-} from "../../src/stores/playthroughs";
+} from "@/stores/playthroughs/hooks";
+// Import modules after mocks are set up (mocks should be imported in each test file)
+import { playthroughActions } from "@/stores/playthroughs/index";
+import { playthroughsStore } from "@/stores/playthroughs/store";
+import { PlaythroughSchema } from "@/stores/playthroughs/types";
 
 // Types
 export type PokemonOption = z.infer<typeof PokemonOptionSchema>;

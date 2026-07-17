@@ -2,12 +2,9 @@
 
 import clsx from "clsx";
 import React, { useOptimistic, useTransition } from "react";
-import {
-  type GameMode,
-  playthroughActions,
-  useActivePlaythrough,
-  useGameMode,
-} from "@/stores/playthroughs";
+import { useActivePlaythrough, useGameMode } from "@/stores/playthroughs/hooks";
+import { playthroughActions } from "@/stores/playthroughs/index";
+import type { GameMode } from "@/stores/playthroughs/types";
 
 const GameModeToggle = function GameModeToggle() {
   const activePlaythrough = useActivePlaythrough();

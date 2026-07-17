@@ -1,7 +1,7 @@
 // Import mocks first (must be at top level for Vitest hoisting)
 import "./mocks";
 
-import { migratePlaythrough } from "../../src/stores/playthroughs/migrations";
+import { migratePlaythrough } from "@/stores/playthroughs/migrations";
 // Import shared setup and utilities
 import {
   createMockPokemon,

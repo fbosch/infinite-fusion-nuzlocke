@@ -20,10 +20,13 @@ vi.mock("@/utils/scrollToLocation", () => ({
   flashPokemonOverlaysByUids: vi.fn(),
 }));
 
-vi.mock("@/stores/playthroughs", () => ({
+vi.mock("@/stores/playthroughs/index", () => ({
   playthroughActions: {
     getEncounters: vi.fn(() => ({})),
   },
+}));
+
+vi.mock("@/stores/playthroughs/hooks", () => ({
   useCustomLocations: vi.fn(() => []),
   useEncounters: vi.fn(() => ({})),
   useIsLoading: vi.fn(() => false),

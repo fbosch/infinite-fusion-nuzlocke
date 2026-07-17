@@ -19,13 +19,12 @@ import { usePlaythroughImportExport } from "@/hooks/usePlaythroughImportExport";
 import { getSharedEventProperties } from "@/lib/analytics/playthroughEventData";
 import { trackEvent } from "@/lib/analytics/trackEvent";
 import {
-  type GameMode,
-  type Playthrough,
-  playthroughActions,
   useActivePlaythrough,
   useAllPlaythroughs,
   useIsLoading,
-} from "@/stores/playthroughs";
+} from "@/stores/playthroughs/hooks";
+import { playthroughActions } from "@/stores/playthroughs/index";
+import type { GameMode, Playthrough } from "@/stores/playthroughs/types";
 import CreatePlaythroughModal from "./CreatePlaythroughModal";
 import { ImportErrorContent } from "./ImportErrorContent";
 

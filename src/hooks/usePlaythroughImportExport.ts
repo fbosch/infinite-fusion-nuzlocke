@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { Playthrough } from "@/stores/playthroughs";
+import type { Playthrough } from "@/stores/playthroughs/types";
 import {
   exportPlaythrough,
   getImportErrorMessage,

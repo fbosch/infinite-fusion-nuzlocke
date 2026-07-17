@@ -15,11 +15,8 @@ import { useMounted } from "@/hooks/useMounted";
 import { onFlashUids, onScrollToLocation } from "@/lib/events";
 import { getLocationsSortedWithCustom } from "@/loaders";
 import type { CombinedLocation } from "@/loaders/locations";
-import {
-  playthroughActions,
-  useCustomLocations,
-  useIsLoading,
-} from "@/stores/playthroughs";
+import { useCustomLocations, useIsLoading } from "@/stores/playthroughs/hooks";
+import { playthroughActions } from "@/stores/playthroughs/index";
 import type { EncounterData } from "@/stores/playthroughs/types";
 import {
   flashPokemonOverlaysByUids,

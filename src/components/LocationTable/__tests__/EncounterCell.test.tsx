@@ -116,12 +116,15 @@ vi.mock("@/lib/preferredVariants", () => ({
   setPreferredVariant: vi.fn(),
 }));
 
-vi.mock("@/stores/playthroughs", () => ({
+vi.mock("@/stores/playthroughs/index", () => ({
   playthroughActions: {
     updateEncounter: updateEncounterMock,
     toggleEncounterFusion: toggleEncounterFusionMock,
     flipEncounterFusion: flipEncounterFusionMock,
   },
+}));
+
+vi.mock("@/stores/playthroughs/hooks", () => ({
   useCustomLocations: () => [],
   useEncounter: useEncounterMock,
   useGameMode: () => "classic",

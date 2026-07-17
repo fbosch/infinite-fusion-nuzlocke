@@ -8,10 +8,13 @@ const { setGameModeMock } = vi.hoisted(() => ({
   setGameModeMock: vi.fn(),
 }));
 
-vi.mock("@/stores/playthroughs", () => ({
+vi.mock("@/stores/playthroughs/index", () => ({
   playthroughActions: {
     setGameMode: setGameModeMock,
   },
+}));
+
+vi.mock("@/stores/playthroughs/hooks", () => ({
   useActivePlaythrough: () => ({ id: "playthrough-1" }),
   useGameMode: () => "classic",
 }));

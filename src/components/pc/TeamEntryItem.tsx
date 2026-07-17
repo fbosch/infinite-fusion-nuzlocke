@@ -20,8 +20,11 @@ import { useSpriteCredits } from "@/hooks/useSprite";
 import { getSpriteId } from "@/lib/sprites";
 import { getLocationById } from "@/loaders/locations";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { playthroughActions, useEncounters } from "@/stores/playthroughs";
-import { useActivePlaythrough } from "@/stores/playthroughs/hooks";
+import {
+  useActivePlaythrough,
+  useEncounters,
+} from "@/stores/playthroughs/hooks";
+import { playthroughActions } from "@/stores/playthroughs/index";
 import { formatArtistCredits } from "@/utils/formatCredits";
 import { canFuse, isPokemonActive } from "@/utils/pokemonPredicates";
 import { scrollToLocationById } from "@/utils/scrollToLocation";
