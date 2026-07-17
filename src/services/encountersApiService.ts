@@ -1,21 +1,8 @@
-import type { z } from "zod";
 import { getCacheBuster } from "@/lib/persistence";
 import {
-  type RouteEncounterSchema,
+  type RouteEncounter,
   RouteEncountersArraySchema,
 } from "@/types/encounters";
-
-export type RouteEncounter = z.infer<typeof RouteEncounterSchema>;
-
-export interface EncountersApiResponse {
-  data: RouteEncounter[];
-  count: number;
-  gameMode: "classic" | "remix";
-}
-
-export interface EncountersApiParams {
-  gameMode: "classic" | "remix";
-}
 
 class EncountersApiService {
   private baseUrl: string;
@@ -29,10 +16,10 @@ class EncountersApiService {
   }
 
   private async makeRequest(
-    params: EncountersApiParams,
-  ): Promise<EncountersApiResponse> {
+    gameMode: "classic" | "remix",
+  ): Promise<RouteEncounter[]> {
     const searchParams = new URLSearchParams();
-    searchParams.append("gameMode", params.gameMode);
+    searchParams.append("gameMode", gameMode);
 
     // Add cache busting version parameter
     searchParams.append("v", getCacheBuster().toString());
@@ -62,26 +49,13 @@ class EncountersApiService {
       throw new Error("Invalid API response format");
     }
 
-    const encountersResponse: EncountersApiResponse = {
-      data: validatedData.data,
-      count: validatedData.data.length,
-      gameMode: params.gameMode,
-    };
-
-    return encountersResponse;
+    return validatedData.data;
   }
 
   async getEncounters(
     gameMode: "classic" | "remix",
   ): Promise<RouteEncounter[]> {
-    const response = await this.makeRequest({ gameMode });
-    return response.data;
-  }
-
-  async getEncountersByGameMode(
-    gameMode: "classic" | "remix",
-  ): Promise<EncountersApiResponse> {
-    return await this.makeRequest({ gameMode });
+    return await this.makeRequest(gameMode);
   }
 
   async getEncounterByRouteName(
@@ -95,8 +69,7 @@ class EncountersApiService {
   }
 
   async getEncountersCount(gameMode: "classic" | "remix"): Promise<number> {
-    const response = await this.makeRequest({ gameMode });
-    return response.count;
+    return (await this.makeRequest(gameMode)).length;
   }
 }
 

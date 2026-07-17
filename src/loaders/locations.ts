@@ -225,9 +225,7 @@ export function useLocationEncountersById(
     };
   }
 
-  const encounter = (
-    encounters && "data" in encounters ? encounters.data : encounters
-  )?.find((e) => e.routeName === location?.name);
+  const encounter = encounters.find((e) => e.routeName === location?.name);
 
   return {
     pokemonEncounters: encounter?.pokemon || [],

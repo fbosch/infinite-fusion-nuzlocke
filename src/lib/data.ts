@@ -15,12 +15,8 @@ export const pokemonData = {
 };
 
 export const encountersData = {
-  getEncountersByGameMode: (gameMode: "classic" | "remix") =>
-    queryClient.fetchQuery(encountersQueries.all(gameMode)),
   getAllEncounters: (gameMode: "classic" | "remix") =>
-    queryClient
-      .fetchQuery(encountersQueries.all(gameMode))
-      .then((response) => response.data),
+    queryClient.fetchQuery(encountersQueries.all(gameMode)),
 };
 
 export const spriteData = {
