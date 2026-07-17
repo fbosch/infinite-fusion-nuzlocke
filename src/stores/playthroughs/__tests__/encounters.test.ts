@@ -74,6 +74,28 @@ describe("Basic Encounter Operations", () => {
       );
     });
 
+    it("keeps one canonical encounter and team member per location", async () => {
+      const { activePlaythrough } = createTestPlaythrough();
+
+      await updateEncounter("route1", testPokemon.pikachu(), "head", false);
+      await updateEncounter("route1", testPokemon.charmander(), "head", false);
+
+      expect(Object.keys(activePlaythrough.encounters ?? {})).toEqual([
+        "route1",
+      ]);
+      expect(activePlaythrough.encounters?.route1?.head?.uid).toBe(
+        "charmander_route1_456",
+      );
+      expect(activePlaythrough.team.members).not.toContainEqual({
+        headPokemonUid: "pikachu_route1_123",
+        bodyPokemonUid: "",
+      });
+      expect(activePlaythrough.team.members).toContainEqual({
+        headPokemonUid: "charmander_route1_456",
+        bodyPokemonUid: "",
+      });
+    });
+
     it("should clear encounter field when passed null", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
@@ -224,6 +246,7 @@ describe("Basic Encounter Operations", () => {
         id: 25,
         name: "Pikachu",
         nationalDexId: 25,
+        nickname: "Sparky",
         uid: "pikachu_route1_123",
         originalLocation: "route1",
       };
@@ -234,6 +257,13 @@ describe("Basic Encounter Operations", () => {
       expect(activePlaythrough.encounters?.route1?.head?.status).toBe(
         PokemonStatus.CAPTURED,
       );
+      expect(activePlaythrough.encounters?.route1?.head?.nickname).toBe(
+        "Sparky",
+      );
+      expect(activePlaythrough.team.members[0]).toEqual({
+        headPokemonUid: "pikachu_route1_123",
+        bodyPokemonUid: "",
+      });
     });
 
     it("should mark encounter as received", async () => {
@@ -285,6 +315,10 @@ describe("Basic Encounter Operations", () => {
       expect(activePlaythrough.encounters?.route1?.head?.status).toBe(
         PokemonStatus.DECEASED,
       );
+      expect(activePlaythrough.team.members).not.toContainEqual({
+        headPokemonUid: "pikachu_route1_123",
+        bodyPokemonUid: "",
+      });
     });
 
     it("should move encounter to box (stored)", async () => {
@@ -318,6 +352,10 @@ describe("Basic Encounter Operations", () => {
       expect(activePlaythrough.encounters?.route1?.body?.status).toBe(
         PokemonStatus.DECEASED,
       );
+      expect(activePlaythrough.team.members).not.toContainEqual({
+        headPokemonUid: "pikachu_route1_123",
+        bodyPokemonUid: "charmander_route1_456",
+      });
     });
   });
 

@@ -73,8 +73,53 @@ const EggLocationsSchema = z.object({
   locations: z.array(EggLocationSchema),
 });
 
-// Types for egg location data (inferred from schemas)
-// Use z.infer<typeof EggLocationSchema> and z.infer<typeof EggLocationsSchema> where needed
+type PokemonWithSource = { id: number; source: EncounterSource };
+type RouteData = {
+  encounters?: Array<{ pokemonId: number; encounterType: EncounterType }>;
+  pokemonIds?: number[];
+};
+
+const withSource = (
+  ids: number[],
+  source: EncounterSource,
+): PokemonWithSource[] => ids.map((id) => ({ id, source }));
+
+const getWildPokemon = (
+  routeData: RouteData | undefined,
+): PokemonWithSource[] => {
+  if (routeData?.encounters) {
+    return routeData.encounters.map((encounter) => ({
+      id: encounter.pokemonId,
+      source: mapEncounterTypeToSource(encounter.encounterType),
+    }));
+  }
+
+  return withSource(routeData?.pokemonIds ?? [], EncounterSource.WILD);
+};
+
+const addEggPokemon = (
+  pokemon: PokemonWithSource[],
+  eggLocation: z.infer<typeof EggLocationSchema> | undefined,
+  source: EncounterSource.GIFT | EncounterSource.NEST,
+) => {
+  if (!eggLocation) {
+    return;
+  }
+
+  pokemon.push({ id: -1, source });
+  if (eggLocation.pokemonId && eggLocation.pokemonId > 0) {
+    pokemon.push({ id: eggLocation.pokemonId, source: EncounterSource.EGG });
+  }
+};
+
+const deduplicatePokemon = (pokemon: PokemonWithSource[]) =>
+  pokemon.filter(
+    (entry, index, entries) =>
+      entries.findIndex(
+        (candidate) =>
+          candidate.id === entry.id && candidate.source === entry.source,
+      ) === index,
+  );
 
 // Function to map encounter types to encounter sources
 function mapEncounterTypeToSource(
@@ -252,6 +297,8 @@ export function processGameModeData(gameMode: "classic" | "remix") {
   const legendaryMap = new Map(legendaryData.map((l) => [l.routeName, l]));
 
   // Merge encounters for each route
+  // Per-route aggregation deliberately keeps every source visible before deduplication.
+  // fallow-ignore-next-line complexity
   const mergedEncounters = Array.from(allRouteNames).map((routeName) => {
     const routeData = encountersMap.get(routeName);
     const tradePokemon = tradesMap.get(routeName)?.pokemonIds || [];
@@ -263,84 +310,19 @@ export function processGameModeData(gameMode: "classic" | "remix") {
     const staticPokemon = staticsMap.get(routeName)?.pokemonIds || [];
     const legendaryPokemon = legendaryMap.get(routeName)?.encounters || [];
 
-    // Handle wild Pokemon with encounter types
-    const wildPokemonObjects: Array<{ id: number; source: EncounterSource }> =
-      [];
-
-    if (routeData) {
-      if (routeData.encounters) {
-        wildPokemonObjects.push(
-          ...routeData.encounters.map((encounter) => ({
-            id: encounter.pokemonId,
-            source: mapEncounterTypeToSource(encounter.encounterType),
-          })),
-        );
-      } else if (routeData.pokemonIds) {
-        wildPokemonObjects.push(
-          ...routeData.pokemonIds.map((id) => ({
-            id,
-            source: EncounterSource.WILD as const,
-          })),
-        );
-      }
-    }
-
-    // Create Pokemon objects with source information
-    const pokemon: Array<{ id: number; source: EncounterSource }> = [
-      ...wildPokemonObjects,
-      ...tradePokemon.map((id) => ({
-        id,
-        source: EncounterSource.TRADE as const,
-      })),
-      ...giftPokemon.map((id) => ({
-        id,
-        source: EncounterSource.GIFT as const,
-      })),
-      ...questPokemon.map((id) => ({
-        id,
-        source: EncounterSource.QUEST as const,
-      })),
-      ...staticPokemon.map((id) => ({
-        id,
-        source: EncounterSource.STATIC as const,
-      })),
-      ...legendaryPokemon.map((id: number) => ({
-        id,
-        source: EncounterSource.LEGENDARY as const,
-      })),
+    const pokemon: PokemonWithSource[] = [
+      ...getWildPokemon(routeData),
+      ...withSource(tradePokemon, EncounterSource.TRADE),
+      ...withSource(giftPokemon, EncounterSource.GIFT),
+      ...withSource(questPokemon, EncounterSource.QUEST),
+      ...withSource(staticPokemon, EncounterSource.STATIC),
+      ...withSource(legendaryPokemon, EncounterSource.LEGENDARY),
     ];
 
-    // Add egg encounters
-    if (eggGiftRoutes.has(routeName)) {
-      const eggLocation = eggGiftRoutes.get(routeName)!;
-      pokemon.push({ id: -1, source: EncounterSource.GIFT as const });
-      if (eggLocation.pokemonId && eggLocation.pokemonId > 0) {
-        pokemon.push({
-          id: eggLocation.pokemonId,
-          source: EncounterSource.EGG as const,
-        });
-      }
-    }
-    if (eggNestRoutes.has(routeName)) {
-      const eggLocation = eggNestRoutes.get(routeName)!;
-      pokemon.push({ id: -1, source: EncounterSource.NEST as const });
-      if (eggLocation.pokemonId && eggLocation.pokemonId > 0) {
-        pokemon.push({
-          id: eggLocation.pokemonId,
-          source: EncounterSource.EGG as const,
-        });
-      }
-    }
+    addEggPokemon(pokemon, eggGiftRoutes.get(routeName), EncounterSource.GIFT);
+    addEggPokemon(pokemon, eggNestRoutes.get(routeName), EncounterSource.NEST);
 
-    // Remove duplicates
-    const uniquePokemon = pokemon.filter(
-      (pokemon, index, array) =>
-        array.findIndex(
-          (p) => p.id === pokemon.id && p.source === pokemon.source,
-        ) === index,
-    );
-
-    return { routeName, pokemon: uniquePokemon };
+    return { routeName, pokemon: deduplicatePokemon(pokemon) };
   });
 
   // Sort by route name

@@ -138,74 +138,51 @@ export function migrateTeamMemberSchema(data: MigrationData): MigrationData {
   return data;
 }
 
-/**
- * Migrate Pokémon to include originalReceivalStatus field
- */
+type MigratablePokemon = {
+  originalReceivalStatus?: string;
+  status?: string;
+};
+
+const migratePokemonOriginalReceivalStatus = (
+  pokemon: MigratablePokemon | null | undefined,
+) => {
+  if (!pokemon || pokemon.originalReceivalStatus) {
+    return;
+  }
+
+  if (
+    pokemon.status === PokemonStatus.STORED ||
+    pokemon.status === PokemonStatus.DECEASED
+  ) {
+    pokemon.originalReceivalStatus = PokemonStatus.CAPTURED;
+    return;
+  }
+
+  if (
+    pokemon.status === PokemonStatus.CAPTURED ||
+    pokemon.status === PokemonStatus.RECEIVED ||
+    pokemon.status === PokemonStatus.TRADED
+  ) {
+    pokemon.originalReceivalStatus = pokemon.status;
+  }
+};
+
 export function migrateOriginalReceivalStatus(
   data: MigrationData,
 ): MigrationData {
   if (data.encounters && typeof data.encounters === "object") {
     const encounters = data.encounters as Record<
       string,
-      {
-        head?: {
-          originalReceivalStatus?: string;
-          status?: string;
-        } | null;
-        body?: {
-          originalReceivalStatus?: string;
-          status?: string;
-        } | null;
-      }
+      { head?: MigratablePokemon | null; body?: MigratablePokemon | null }
     >;
 
-    for (const locationId in encounters) {
-      const encounter = encounters[locationId];
-      if (encounter && typeof encounter === "object") {
-        // Migrate head Pokémon
-        if (encounter.head && typeof encounter.head === "object") {
-          if (!encounter.head.originalReceivalStatus) {
-            // Set originalReceivalStatus based on current status
-            if (
-              encounter.head.status === PokemonStatus.STORED ||
-              encounter.head.status === PokemonStatus.DECEASED
-            ) {
-              // Most common case: stored/deceased Pokémon were probably captured
-              encounter.head.originalReceivalStatus = PokemonStatus.CAPTURED;
-            } else if (
-              encounter.head.status === PokemonStatus.CAPTURED ||
-              encounter.head.status === PokemonStatus.RECEIVED ||
-              encounter.head.status === PokemonStatus.TRADED
-            ) {
-              // Active statuses: set as original
-              encounter.head.originalReceivalStatus = encounter.head.status;
-            }
-            // For 'missed' status, don't set originalReceivalStatus
-          }
-        }
-
-        // Migrate body Pokémon
-        if (encounter.body && typeof encounter.body === "object") {
-          if (!encounter.body.originalReceivalStatus) {
-            // Set originalReceivalStatus based on current status
-            if (
-              encounter.body.status === PokemonStatus.STORED ||
-              encounter.body.status === PokemonStatus.DECEASED
-            ) {
-              // Most common case: stored/deceased Pokémon were probably captured
-              encounter.body.originalReceivalStatus = PokemonStatus.CAPTURED;
-            } else if (
-              encounter.body.status === PokemonStatus.CAPTURED ||
-              encounter.body.status === PokemonStatus.RECEIVED ||
-              encounter.body.status === PokemonStatus.TRADED
-            ) {
-              // Active statuses: set as original
-              encounter.body.originalReceivalStatus = encounter.body.status;
-            }
-            // For 'missed' status, don't set originalReceivalStatus
-          }
-        }
+    for (const encounter of Object.values(encounters)) {
+      if (!encounter || typeof encounter !== "object") {
+        continue;
       }
+
+      migratePokemonOriginalReceivalStatus(encounter.head);
+      migratePokemonOriginalReceivalStatus(encounter.body);
     }
   }
 
