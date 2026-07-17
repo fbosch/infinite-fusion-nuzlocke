@@ -10,7 +10,7 @@ export interface SpriteCreditsResponse {
   [spriteId: string]: string[];
 }
 
-export interface SpriteCreditsError {
+interface SpriteCreditsError {
   error: string;
 }
 

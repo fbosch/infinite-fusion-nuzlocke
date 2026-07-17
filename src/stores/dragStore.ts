@@ -1,7 +1,7 @@
 import { proxy } from "valtio";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 
-export interface DragState {
+interface DragState {
   currentDragData: string | null;
   currentDragSource: string | null;
   currentDragValue: PokemonOptionType | null | undefined;

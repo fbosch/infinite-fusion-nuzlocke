@@ -10,7 +10,7 @@ import { getStarterPokemonByGameMode } from "./starters";
  * Type for encounter data with fusion status
  * Used to track Pokemon encounters and their fusion state
  */
-export interface EncounterData {
+interface EncounterData {
   head: PokemonOptionType | null;
   body: PokemonOptionType | null;
   isFusion: boolean;

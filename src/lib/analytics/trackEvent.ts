@@ -3,7 +3,7 @@ import { z } from "zod";
 
 type AnalyticsPrimitive = string | number | boolean;
 
-export type AnalyticsProperties = Record<string, AnalyticsPrimitive>;
+type AnalyticsProperties = Record<string, AnalyticsPrimitive>;
 
 export const ANALYTICS_EVENTS = {
   landingViewed: "landing_viewed",

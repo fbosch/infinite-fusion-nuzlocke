@@ -15,7 +15,7 @@ import { Cookie, X } from "lucide-react";
 import { useState } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
-export interface ConsentPreferences {
+interface ConsentPreferences {
   analytics: boolean;
   speedInsights: boolean;
 }

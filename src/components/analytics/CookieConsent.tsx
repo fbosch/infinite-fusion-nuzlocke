@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useMounted } from "@/hooks/useMounted";
 
-export interface ConsentPreferences {
+interface ConsentPreferences {
   analytics: boolean;
   speedInsights: boolean;
 }

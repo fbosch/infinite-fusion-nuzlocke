@@ -8,7 +8,7 @@ export const SettingsSchema = z.object({
   version: z.string().default("1.0.0"),
 });
 
-export type Settings = z.infer<typeof SettingsSchema>;
+type Settings = z.infer<typeof SettingsSchema>;
 
 // Function to determine if move encounters should be enabled by default
 // Based on whether the current playthrough has a version (old vs new playthroughs)
