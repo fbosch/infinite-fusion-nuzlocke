@@ -4,12 +4,12 @@ import { ComboboxOption } from "@headlessui/react";
 import clsx from "clsx";
 import { Check, Loader2, Search } from "lucide-react";
 import type React from "react";
-import type { EncounterSource } from "@/loaders/encounters";
 import {
   getEncounterDisplayName,
   isEgg,
   type PokemonOptionType,
 } from "@/loaders/pokemon";
+import type { EncounterSource } from "@/types/encounters";
 import { PokemonSprite } from "../PokemonSprite";
 import { SourceTag } from "./SourceTag";
 

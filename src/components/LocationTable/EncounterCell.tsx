@@ -8,10 +8,7 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import { PokemonCombobox } from "@/components/PokemonCombobox/PokemonCombobox";
 import { DNA_REVERSER_ICON } from "@/constants/items";
-import {
-  EncounterSource,
-  useEncountersForLocation,
-} from "@/loaders/encounters";
+import { useEncountersForLocation } from "@/loaders/encounters";
 import { getLocationById } from "@/loaders/locations";
 import type { PokemonOptionType, PokemonStatusType } from "@/loaders/pokemon";
 import { PokemonStatus } from "@/loaders/pokemon";
@@ -21,6 +18,7 @@ import {
   useEncounter,
   useGameMode,
 } from "@/stores/playthroughs";
+import { EncounterSource } from "@/types/encounters";
 import { FusionToggleButton } from "./FusionToggleButton";
 
 interface EncounterCellProps {

@@ -46,10 +46,10 @@ pnpm quality:graph:json
 
 Purpose: remove dependency-cycle and state-transition risks before broader cleanup.
 
-- [ ] Map the query, loader, service, data, and query-client import cycles to their public consumers and select one break point per underlying cycle.
-- [ ] Break the encounters/locations loader cycle with a one-way dependency boundary.
-- [ ] Break the query/loader/service cycle cluster without adding barrel-mediated cycles.
-- [ ] Add focused integration coverage for each changed query or loader request path.
+- [x] Map the query, loader, service, data, and query-client import cycles to their public consumers and select one break point per underlying cycle.
+- [x] Break the encounters/locations loader cycle with a one-way dependency boundary.
+- [x] Break the query/loader/service cycle cluster without adding barrel-mediated cycles.
+- [x] Add focused integration coverage for each changed query or loader request path.
 - [ ] Reconcile this phase with the existing encounter-transition architecture work to avoid parallel ownership changes.
 - [ ] Add outcome-focused tests for encounter CRUD state changes, including duplicate catches, nickname requirements, team placement, and death handling.
 - [ ] Simplify `updateEncounter`, artwork variants, and migration paths while preserving run-state invariants.

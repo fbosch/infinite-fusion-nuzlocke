@@ -57,9 +57,6 @@ vi.mock("@/lib/queryClient", () => {
   return {
     encountersData: {
       getAllEncounters: vi.fn().mockResolvedValue(mockEncountersData),
-      getEncountersByGameMode: vi.fn().mockResolvedValue({
-        data: mockEncountersData,
-      }),
     },
     encountersQueries: {
       all: vi.fn(() => ({

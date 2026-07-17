@@ -4,9 +4,9 @@ import { z } from "zod";
 import { isStarterLocation } from "@/constants/special-locations";
 import { encountersData, encountersQueries } from "@/lib/queryClient";
 import { getStarterPokemonByGameMode } from "@/loaders/starters";
+import { EncounterSource, type PokemonEncounter } from "@/types/encounters";
 import { generatePrefixedId } from "@/utils/id";
 import type { GameMode } from "../stores/playthroughs";
-import { EncounterSource, type PokemonEncounter } from "./encounters";
 
 // Location schema
 export const LocationSchema = z.object({
@@ -225,9 +225,7 @@ export function useLocationEncountersById(
     };
   }
 
-  const encounter = (
-    encounters && "data" in encounters ? encounters.data : encounters
-  )?.find((e) => e.routeName === location?.name);
+  const encounter = encounters.find((e) => e.routeName === location?.name);
 
   return {
     pokemonEncounters: encounter?.pokemon || [],

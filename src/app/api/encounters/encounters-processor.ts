@@ -16,9 +16,10 @@ import legendaryEncounters from "@data/shared/legendary-encounters.json";
 import { z } from "zod";
 import {
   EncounterSource,
+  type EncounterType,
+  EncounterTypeSchema,
   RouteEncountersArraySchema,
-} from "@/loaders/encounters";
-import { type EncounterType, EncounterTypeSchema } from "@/types/encounters";
+} from "@/types/encounters";
 
 // Schema for the new enhanced data format with encounter types
 const NewPokemonEncounterSchema = z.object({

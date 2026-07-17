@@ -23,7 +23,7 @@
     }
   },
   "phase2": {
-    "circularDependencies": 15
+    "circularDependencies": 0
   },
   "phase3": {
     "unusedExports": 190,

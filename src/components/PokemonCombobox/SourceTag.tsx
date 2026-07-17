@@ -19,7 +19,7 @@ import NestIcon from "@/assets/images/nest.svg";
 import PokeballIcon from "@/assets/images/pokeball.svg";
 import WildIcon from "@/assets/images/tall-grass.svg";
 import { isStarterLocation } from "@/constants/special-locations";
-import { EncounterSource } from "@/loaders/encounters";
+import { EncounterSource } from "@/types/encounters";
 
 interface SourceTagProps {
   sources: EncounterSource[];
