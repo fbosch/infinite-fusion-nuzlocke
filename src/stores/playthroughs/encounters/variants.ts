@@ -9,6 +9,25 @@ import { generateSpriteUrl, getArtworkVariants } from "@/lib/sprites";
 import { getCurrentTimestamp } from "../playthroughState";
 import { ensureActivePlaythroughWithEncounters } from "./shared";
 
+const setDisplayPokemonVariant = (
+  displayPokemon: ReturnType<typeof getDisplayPokemon>,
+  variant: string,
+) => {
+  if (displayPokemon.isFusion && displayPokemon.head && displayPokemon.body) {
+    setPreferredVariant(
+      displayPokemon.head.id,
+      displayPokemon.body.id,
+      variant,
+    );
+    return;
+  }
+
+  const pokemon = displayPokemon.head || displayPokemon.body;
+  if (pokemon) {
+    setPreferredVariant(pokemon.id, null, variant);
+  }
+};
+
 // Set artwork variant globally (no longer stored in encounters)
 export const setArtworkVariant = async (
   locationId: string,
@@ -31,18 +50,7 @@ export const setArtworkVariant = async (
   );
 
   try {
-    if (displayPokemon.isFusion && displayPokemon.head && displayPokemon.body) {
-      setPreferredVariant(
-        displayPokemon.head.id,
-        displayPokemon.body.id,
-        variant ?? "",
-      );
-    } else if (displayPokemon.head || displayPokemon.body) {
-      const pokemon = displayPokemon.head || displayPokemon.body;
-      if (pokemon) {
-        setPreferredVariant(pokemon.id, null, variant ?? "");
-      }
-    }
+    setDisplayPokemonVariant(displayPokemon, variant ?? "");
   } catch (error: unknown) {
     console.warn("Failed to set preferred variant in cache:", error);
   }
@@ -101,6 +109,8 @@ export const prefetchAdjacentVariants = async (
 };
 
 // Cycle through artwork variants for encounters (with validation)
+// The cache lookup, selected-variant update, and best-effort prefetch belong to one UI action.
+// fallow-ignore-next-line unused-export, complexity
 export const cycleArtworkVariant = async (
   locationId: string,
   reverse: boolean = false,
@@ -151,18 +161,7 @@ export const cycleArtworkVariant = async (
 
     const newVariant = availableVariants[nextIndex] || "";
 
-    if (displayPokemon.isFusion && displayPokemon.head && displayPokemon.body) {
-      setPreferredVariant(
-        displayPokemon.head.id,
-        displayPokemon.body.id,
-        newVariant,
-      );
-    } else if (displayPokemon.head || displayPokemon.body) {
-      const pokemon = displayPokemon.head || displayPokemon.body;
-      if (pokemon) {
-        setPreferredVariant(pokemon.id, null, newVariant);
-      }
-    }
+    setDisplayPokemonVariant(displayPokemon, newVariant);
 
     encounter.updatedAt = getCurrentTimestamp();
 

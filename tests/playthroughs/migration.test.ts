@@ -1,7 +1,7 @@
 // Import mocks first (must be at top level for Vitest hoisting)
 import "./mocks";
 
-import { migratePlaythrough } from "@/stores/playthroughs/migrations";
+import { normalizePersistedPlaythrough } from "@/stores/playthroughs/migrations";
 // Import shared setup and utilities
 import {
   createMockPokemon,
@@ -24,7 +24,7 @@ describe("Playthroughs Store - Migration Tests", () => {
         updatedAt: Date.now(),
       };
 
-      const result = PlaythroughSchema.parse(migratePlaythrough(legacyData));
+      const result = normalizePersistedPlaythrough(legacyData);
 
       expect(result.gameMode).toBe("remix");
       expect(result.name).toBe("Legacy Remix Run");
@@ -44,7 +44,7 @@ describe("Playthroughs Store - Migration Tests", () => {
         updatedAt: Date.now(),
       };
 
-      const result = PlaythroughSchema.parse(migratePlaythrough(legacyData));
+      const result = normalizePersistedPlaythrough(legacyData);
 
       expect(result.gameMode).toBe("classic");
       expect(result.name).toBe("Legacy Classic Run");
@@ -64,7 +64,7 @@ describe("Playthroughs Store - Migration Tests", () => {
         updatedAt: Date.now(),
       };
 
-      const result = PlaythroughSchema.parse(migratePlaythrough(modernData));
+      const result = normalizePersistedPlaythrough(modernData);
 
       // Should preserve explicit gameMode and remove remixMode
       expect(result.gameMode).toBe("randomized");
@@ -96,9 +96,7 @@ describe("Playthroughs Store - Migration Tests", () => {
         updatedAt: 1234567891,
       };
 
-      const result = PlaythroughSchema.parse(
-        migratePlaythrough(legacyDataWithEncounters),
-      );
+      const result = normalizePersistedPlaythrough(legacyDataWithEncounters);
 
       expect(result.gameMode).toBe("remix");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

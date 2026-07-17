@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { generatePrefixedId } from "@/utils/id";
-import { migrateImportedPlaythroughData } from "./migrations";
+import { normalizeImportedPlaythrough } from "./migrations";
 import { ImportedPlaythroughSchema, type Playthrough } from "./types";
 
 export const prepareImportedPlaythrough = (
@@ -8,7 +8,7 @@ export const prepareImportedPlaythrough = (
   existingIds: Iterable<string>,
 ): Playthrough => {
   try {
-    const migratedImportData = migrateImportedPlaythroughData(importData);
+    const migratedImportData = normalizeImportedPlaythrough(importData);
     const validationResult =
       ImportedPlaythroughSchema.safeParse(migratedImportData);
 

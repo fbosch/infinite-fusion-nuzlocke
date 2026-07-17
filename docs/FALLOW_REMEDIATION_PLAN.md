@@ -50,11 +50,13 @@ Purpose: remove dependency-cycle and state-transition risks before broader clean
 - [x] Break the encounters/locations loader cycle with a one-way dependency boundary.
 - [x] Break the query/loader/service cycle cluster without adding barrel-mediated cycles.
 - [x] Add focused integration coverage for each changed query or loader request path.
-- [ ] Reconcile this phase with the existing encounter-transition architecture work to avoid parallel ownership changes.
-- [ ] Add outcome-focused tests for encounter CRUD state changes, including duplicate catches, nickname requirements, team placement, and death handling.
-- [ ] Simplify `updateEncounter`, artwork variants, and migration paths while preserving run-state invariants.
-- [ ] Inventory high-complexity API processors by request validation, decisions, side effects, and response behavior.
-- [ ] Refactor API processors one request path at a time, with success, invalid-input, and downstream-failure coverage.
+- [x] Reconcile this phase with the existing encounter-transition architecture work to avoid parallel ownership changes.
+- [x] Add outcome-focused tests for encounter CRUD state changes, including duplicate catches, nickname requirements, team placement, and death handling.
+- [x] Simplify `updateEncounter`, artwork variants, and migration paths while preserving run-state invariants.
+- [x] Inventory high-complexity API processors by request validation, decisions, side effects, and response behavior.
+- [x] Refactor API processors one request path at a time, with success, invalid-input, and downstream-failure coverage.
+
+Phase 2 API inventory: `api/encounters` validates static datasets, merges and caches route data, and returns a sorted schema-validated response; `api/pokemon` validates query input, filters static data, and returns cache/security headers; `api/sprite/artists` validates an ID, fetches FusionDex HTML, extracts credits, and preserves upstream/error status behavior. The routes now isolate their high-decision processing from HTTP orchestration and have direct request-path coverage. `api/sprite/variants` was inventoried as I/O-heavy but has no top-complexity finding; its request, probe, cache, and response contract remains unchanged.
 
 Acceptance criteria:
 
