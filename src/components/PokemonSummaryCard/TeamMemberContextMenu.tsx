@@ -21,6 +21,7 @@ import {
   type Pokemon,
   type PokemonOptionType,
   PokemonStatus,
+  type PokemonStatusType,
   usePokemonEvolutionData,
 } from "@/loaders/pokemon";
 import { playthroughActions } from "@/stores/playthroughs/index";
@@ -35,6 +36,13 @@ const ArtworkVariantModal = dynamic(
   },
 );
 
+const BOXABLE_STATUSES = new Set<PokemonStatusType>([
+  PokemonStatus.CAPTURED,
+  PokemonStatus.RECEIVED,
+  PokemonStatus.TRADED,
+  PokemonStatus.DECEASED,
+]);
+
 interface PokemonSectionOptions {
   slot: "head" | "body";
   pokemon: PokemonOptionType | null | undefined;
@@ -44,6 +52,32 @@ interface PokemonSectionOptions {
   onDevolve: () => void;
   onEvolve: (evolution: Pokemon) => void;
   onGoToEncounter: () => void;
+}
+
+interface TeamMemberContextActions {
+  onOpenVariantModal: () => void;
+  onReverseFusion: () => void;
+  onMarkAsDeceased: () => void;
+  onMoveToBox: () => void;
+  onDevolveHead: () => void;
+  onEvolveHead: (evolution: Pokemon) => void;
+  onGoToHeadEncounter: () => void;
+  onDevolveBody: () => void;
+  onEvolveBody: (evolution: Pokemon) => void;
+  onGoToBodyEncounter: () => void;
+}
+
+interface TeamMemberContextItemOptions {
+  headPokemon: PokemonOptionType | null | undefined;
+  bodyPokemon: PokemonOptionType | null | undefined;
+  headEvolutions: Pokemon[] | undefined;
+  headPreEvolution: Pokemon | null;
+  bodyEvolutions: Pokemon[] | undefined;
+  bodyPreEvolution: Pokemon | null;
+  preferredVariant: string | null | undefined;
+  hasArtVariants: boolean | undefined;
+  isLoadingVariants: boolean;
+  actions: TeamMemberContextActions;
 }
 
 function createPokemonActionLabel(pokemon: Pokemon, action: string) {
@@ -143,6 +177,234 @@ function createPokemonSectionItems({
   return items;
 }
 
+function createVariantItem({
+  headPokemon,
+  bodyPokemon,
+  hasArtVariants,
+  isLoadingVariants,
+  onOpenVariantModal,
+}: Pick<
+  TeamMemberContextItemOptions,
+  "headPokemon" | "bodyPokemon" | "hasArtVariants" | "isLoadingVariants"
+> &
+  Pick<TeamMemberContextActions, "onOpenVariantModal">): ContextMenuItem {
+  const unavailable =
+    !hasArtVariants || isEggId(headPokemon?.id) || isEggId(bodyPokemon?.id);
+
+  return {
+    id: "change-variant",
+    label: "Change Preferred Artwork",
+    disabled: unavailable,
+    icon: isLoadingVariants ? Loader2 : Replace,
+    tooltip: unavailable
+      ? isLoadingVariants
+        ? "Loading artwork variants..."
+        : "No artwork variants available"
+      : undefined,
+    iconClassName: isLoadingVariants ? "animate-spin" : "",
+    onClick: onOpenVariantModal,
+  };
+}
+
+function createStatusItems(
+  status: PokemonStatusType | undefined,
+  actions: Pick<TeamMemberContextActions, "onMarkAsDeceased" | "onMoveToBox">,
+): ContextMenuItem[] {
+  const canMarkAsDeceased =
+    status !== PokemonStatus.DECEASED && status !== PokemonStatus.MISSED;
+  const canMoveToBox = status != null && BOXABLE_STATUSES.has(status);
+
+  if (!canMarkAsDeceased && !canMoveToBox) {
+    return [];
+  }
+
+  return [
+    { id: "status-separator", separator: true },
+    ...(canMarkAsDeceased
+      ? [
+          {
+            id: "mark-deceased",
+            label: "Move to Graveyard",
+            icon: Skull,
+            onClick: actions.onMarkAsDeceased,
+          },
+        ]
+      : []),
+    ...(canMoveToBox
+      ? [
+          {
+            id: "move-to-box",
+            label: "Move to Box",
+            icon: Computer,
+            onClick: actions.onMoveToBox,
+          },
+        ]
+      : []),
+  ];
+}
+
+function createReverseFusionItems(
+  headPokemon: PokemonOptionType | null | undefined,
+  bodyPokemon: PokemonOptionType | null | undefined,
+  onReverseFusion: () => void,
+): ContextMenuItem[] {
+  if (!headPokemon || !bodyPokemon || headPokemon.id === bodyPokemon.id) {
+    return [];
+  }
+
+  return [
+    {
+      id: "invert-fusion",
+      label: "Reverse Fusion",
+      icon: ArrowLeftRight,
+      onClick: onReverseFusion,
+      tooltip: "Swap head and body Pokémon positions",
+    },
+  ];
+}
+
+function createPokemonSectionItemsForTeamMember({
+  headPokemon,
+  bodyPokemon,
+  headEvolutions,
+  headPreEvolution,
+  bodyEvolutions,
+  bodyPreEvolution,
+  actions,
+}: Pick<
+  TeamMemberContextItemOptions,
+  | "headPokemon"
+  | "bodyPokemon"
+  | "headEvolutions"
+  | "headPreEvolution"
+  | "bodyEvolutions"
+  | "bodyPreEvolution"
+  | "actions"
+>): ContextMenuItem[] {
+  const hasFusionPair =
+    headPokemon != null &&
+    bodyPokemon != null &&
+    headPokemon.id !== bodyPokemon.id;
+  const items = createPokemonSectionItems({
+    slot: "head",
+    pokemon: headPokemon,
+    evolutions: headEvolutions,
+    preEvolution: headPreEvolution,
+    showHeader: hasFusionPair,
+    onDevolve: actions.onDevolveHead,
+    onEvolve: actions.onEvolveHead,
+    onGoToEncounter: actions.onGoToHeadEncounter,
+  });
+
+  if (bodyPokemon?.id === headPokemon?.id) {
+    return items;
+  }
+
+  return [
+    ...items,
+    ...createPokemonSectionItems({
+      slot: "body",
+      pokemon: bodyPokemon,
+      evolutions: bodyEvolutions,
+      preEvolution: bodyPreEvolution,
+      showHeader: true,
+      onDevolve: actions.onDevolveBody,
+      onEvolve: actions.onEvolveBody,
+      onGoToEncounter: actions.onGoToBodyEncounter,
+    }),
+  ];
+}
+
+function createTeamMemberContextItems({
+  headPokemon,
+  bodyPokemon,
+  headEvolutions,
+  headPreEvolution,
+  bodyEvolutions,
+  bodyPreEvolution,
+  preferredVariant,
+  hasArtVariants,
+  isLoadingVariants,
+  actions,
+}: TeamMemberContextItemOptions): ContextMenuItem[] {
+  const status = headPokemon?.status || bodyPokemon?.status;
+  return [
+    createVariantItem({
+      headPokemon,
+      bodyPokemon,
+      hasArtVariants,
+      isLoadingVariants,
+      onOpenVariantModal: actions.onOpenVariantModal,
+    }),
+    ...createReverseFusionItems(
+      headPokemon,
+      bodyPokemon,
+      actions.onReverseFusion,
+    ),
+    ...createStatusItems(status, actions),
+    ...createPokemonSectionItemsForTeamMember({
+      headPokemon,
+      bodyPokemon,
+      headEvolutions,
+      headPreEvolution,
+      bodyEvolutions,
+      bodyPreEvolution,
+      actions,
+    }),
+    { id: "external-links-separator", separator: true },
+    ...createExternalDexItems(
+      getSpriteId(headPokemon?.id, bodyPokemon?.id),
+      preferredVariant,
+    ),
+  ];
+}
+
+async function evolvePokemon(
+  pokemon: PokemonOptionType | null | undefined,
+  evolution: Pokemon,
+) {
+  if (!pokemon?.uid) return;
+
+  await playthroughActions.updatePokemonByUID(pokemon.uid, {
+    ...pokemon,
+    id: evolution.id,
+    name: evolution.name,
+    nationalDexId: evolution.nationalDexId,
+  });
+
+  if (pokemon.originalLocation) {
+    emitEvolutionEvent(pokemon.originalLocation);
+  }
+}
+
+async function devolvePokemon(
+  pokemon: PokemonOptionType | null | undefined,
+  preEvolution: Pokemon | null,
+) {
+  if (!pokemon?.uid || !preEvolution) return;
+
+  await playthroughActions.updatePokemonByUID(pokemon.uid, {
+    ...pokemon,
+    id: preEvolution.id,
+    name: preEvolution.name,
+    nationalDexId: preEvolution.nationalDexId,
+  });
+}
+
+function scrollToPokemonEncounter(
+  pokemon: PokemonOptionType | null | undefined,
+  onClose: (() => void) | undefined,
+) {
+  if (!pokemon?.originalLocation || !pokemon.uid) return;
+
+  scrollToLocationById(pokemon.originalLocation, {
+    behavior: "smooth",
+    highlightUids: [pokemon.uid],
+    durationMs: 1200,
+  });
+  onClose?.();
+}
+
 interface TeamMemberContextMenuProps {
   children: React.ReactNode;
   teamMember: {
@@ -200,85 +462,25 @@ export function TeamMemberContextMenu({
     await playthroughActions.moveTeamMemberToBox(position);
   }, [position]);
 
-  // Handler to evolve head Pokémon
   const handleEvolveHead = useCallback(
-    async (
-      evolutionId: number,
-      evolutionName: string,
-      evolutionNationalDexId: number,
-    ) => {
-      if (!headPokemon?.uid) return;
-
-      const evolved: PokemonOptionType = {
-        ...headPokemon,
-        id: evolutionId,
-        name: evolutionName,
-        nationalDexId: evolutionNationalDexId,
-      };
-
-      await playthroughActions.updatePokemonByUID(headPokemon.uid, evolved);
-
-      // Emit evolution event for the head Pokémon's original location
-      if (headPokemon.originalLocation) {
-        emitEvolutionEvent(headPokemon.originalLocation);
-      }
-    },
+    (evolution: Pokemon) => evolvePokemon(headPokemon, evolution),
     [headPokemon],
   );
 
-  // Handler to evolve body Pokémon
   const handleEvolveBody = useCallback(
-    async (
-      evolutionId: number,
-      evolutionName: string,
-      evolutionNationalDexId: number,
-    ) => {
-      if (!bodyPokemon?.uid) return;
-
-      const evolved: PokemonOptionType = {
-        ...bodyPokemon,
-        id: evolutionId,
-        name: evolutionName,
-        nationalDexId: evolutionNationalDexId,
-      };
-
-      await playthroughActions.updatePokemonByUID(bodyPokemon.uid, evolved);
-
-      // Emit evolution event for the body Pokémon's original location
-      if (bodyPokemon.originalLocation) {
-        emitEvolutionEvent(bodyPokemon.originalLocation);
-      }
-    },
+    (evolution: Pokemon) => evolvePokemon(bodyPokemon, evolution),
     [bodyPokemon],
   );
 
-  // Handler to devolve head Pokémon
-  const handleDevolveHead = useCallback(async () => {
-    if (!headPokemon?.uid || !headPreEvolution) return;
+  const handleDevolveHead = useCallback(
+    () => devolvePokemon(headPokemon, headPreEvolution),
+    [headPokemon, headPreEvolution],
+  );
 
-    const devolved: PokemonOptionType = {
-      ...headPokemon,
-      id: headPreEvolution.id,
-      name: headPreEvolution.name,
-      nationalDexId: headPreEvolution.nationalDexId,
-    };
-
-    await playthroughActions.updatePokemonByUID(headPokemon.uid, devolved);
-  }, [headPokemon, headPreEvolution]);
-
-  // Handler to devolve body Pokémon
-  const handleDevolveBody = useCallback(async () => {
-    if (!bodyPokemon?.uid || !bodyPreEvolution) return;
-
-    const devolved: PokemonOptionType = {
-      ...bodyPokemon,
-      id: bodyPreEvolution.id,
-      name: bodyPreEvolution.name,
-      nationalDexId: bodyPreEvolution.nationalDexId,
-    };
-
-    await playthroughActions.updatePokemonByUID(bodyPokemon.uid, devolved);
-  }, [bodyPokemon, bodyPreEvolution]);
+  const handleDevolveBody = useCallback(
+    () => devolvePokemon(bodyPokemon, bodyPreEvolution),
+    [bodyPokemon, bodyPreEvolution],
+  );
 
   // Handler to flip fusion (swap head and body)
   const handleFlipFusion = useCallback(async () => {
@@ -287,165 +489,40 @@ export function TeamMemberContextMenu({
     await playthroughActions.flipTeamMemberFusion(position);
   }, [hasFusionPair, position]);
 
-  // Handler to navigate to head encounter
-  const handleGoToHeadEncounter = useCallback(() => {
-    if (!headPokemon?.originalLocation || !headPokemon.uid) return;
+  const handleGoToHeadEncounter = useCallback(
+    () => scrollToPokemonEncounter(headPokemon, onClose),
+    [headPokemon, onClose],
+  );
 
-    scrollToLocationById(headPokemon.originalLocation, {
-      behavior: "smooth",
-      highlightUids: [headPokemon.uid],
-      durationMs: 1200,
-    });
-
-    // Close any parent modal/sheet
-    onClose?.();
-  }, [headPokemon, onClose]);
-
-  // Handler to navigate to body encounter
-  const handleGoToBodyEncounter = useCallback(() => {
-    if (!bodyPokemon?.originalLocation || !bodyPokemon.uid) return;
-
-    scrollToLocationById(bodyPokemon.originalLocation, {
-      behavior: "smooth",
-      highlightUids: [bodyPokemon.uid],
-      durationMs: 1200,
-    });
-
-    // Close any parent modal/sheet
-    onClose?.();
-  }, [bodyPokemon, onClose]);
+  const handleGoToBodyEncounter = useCallback(
+    () => scrollToPokemonEncounter(bodyPokemon, onClose),
+    [bodyPokemon, onClose],
+  );
 
   const contextItems = useMemo<ContextMenuItem[]>(() => {
-    // Use team member Pokémon for links
-    const id = getSpriteId(headPokemon?.id, bodyPokemon?.id);
-
-    // Get current status (check both Pokémon, they should have the same status)
-    const currentStatus = headPokemon?.status || bodyPokemon?.status;
-
-    const items: ContextMenuItem[] = [
-      {
-        id: "change-variant",
-        label: "Change Preferred Artwork",
-        disabled:
-          !hasArtVariants ||
-          isEggId(headPokemon?.id) ||
-          isEggId(bodyPokemon?.id),
-        icon: isLoadingVariants ? Loader2 : Replace,
-        tooltip:
-          !hasArtVariants ||
-          isEggId(headPokemon?.id) ||
-          isEggId(bodyPokemon?.id)
-            ? isLoadingVariants
-              ? "Loading artwork variants..."
-              : "No artwork variants available"
-            : undefined,
-        iconClassName: isLoadingVariants ? "animate-spin" : "",
-        onClick: () => {
-          setIsVariantModalOpen(true);
-        },
+    return createTeamMemberContextItems({
+      headPokemon,
+      bodyPokemon,
+      headEvolutions,
+      headPreEvolution,
+      bodyEvolutions,
+      bodyPreEvolution,
+      preferredVariant,
+      hasArtVariants,
+      isLoadingVariants,
+      actions: {
+        onOpenVariantModal: () => setIsVariantModalOpen(true),
+        onReverseFusion: handleFlipFusion,
+        onMarkAsDeceased: handleMarkAsDeceased,
+        onMoveToBox: handleMoveToBox,
+        onDevolveHead: handleDevolveHead,
+        onEvolveHead: handleEvolveHead,
+        onGoToHeadEncounter: handleGoToHeadEncounter,
+        onDevolveBody: handleDevolveBody,
+        onEvolveBody: handleEvolveBody,
+        onGoToBodyEncounter: handleGoToBodyEncounter,
       },
-    ];
-
-    // Check if this is a fusion (both head and body exist and are different)
-    const isFusionPair =
-      headPokemon && bodyPokemon && headPokemon.id !== bodyPokemon.id;
-
-    // Add inverse fusion option if this is a fusion
-    if (isFusionPair) {
-      items.push({
-        id: "invert-fusion",
-        label: "Reverse Fusion",
-        icon: ArrowLeftRight,
-        onClick: handleFlipFusion,
-        tooltip: "Swap head and body Pokémon positions",
-      });
-    }
-
-    // Add status actions (moved before head/body sections)
-    const canMarkAsDeceased =
-      currentStatus !== PokemonStatus.DECEASED &&
-      currentStatus !== PokemonStatus.MISSED;
-    const canMoveToBox =
-      currentStatus === PokemonStatus.CAPTURED ||
-      currentStatus === PokemonStatus.RECEIVED ||
-      currentStatus === PokemonStatus.TRADED ||
-      currentStatus === PokemonStatus.DECEASED;
-    const hasStatusActions = canMarkAsDeceased || canMoveToBox;
-
-    if (hasStatusActions) {
-      items.push({
-        id: "status-separator",
-        separator: true,
-      });
-
-      // Show "Mark as Deceased" unless already deceased or missed
-      if (canMarkAsDeceased) {
-        items.push({
-          id: "mark-deceased",
-          label: "Move to Graveyard",
-          icon: Skull,
-          onClick: handleMarkAsDeceased,
-        });
-      }
-
-      // Show "Move to Box" only if captured, received, traded, or deceased
-      if (canMoveToBox) {
-        items.push({
-          id: "move-to-box",
-          label: "Move to Box",
-          icon: Computer,
-          onClick: handleMoveToBox,
-        });
-      }
-    }
-
-    items.push(
-      ...createPokemonSectionItems({
-        slot: "head",
-        pokemon: headPokemon,
-        evolutions: headEvolutions,
-        preEvolution: headPreEvolution,
-        showHeader: Boolean(isFusionPair),
-        onDevolve: handleDevolveHead,
-        onEvolve: (evolution) =>
-          handleEvolveHead(
-            evolution.id,
-            evolution.name,
-            evolution.nationalDexId,
-          ),
-        onGoToEncounter: handleGoToHeadEncounter,
-      }),
-    );
-
-    if (bodyPokemon?.id !== headPokemon?.id) {
-      items.push(
-        ...createPokemonSectionItems({
-          slot: "body",
-          pokemon: bodyPokemon,
-          evolutions: bodyEvolutions,
-          preEvolution: bodyPreEvolution,
-          showHeader: true,
-          onDevolve: handleDevolveBody,
-          onEvolve: (evolution) =>
-            handleEvolveBody(
-              evolution.id,
-              evolution.name,
-              evolution.nationalDexId,
-            ),
-          onGoToEncounter: handleGoToBodyEncounter,
-        }),
-      );
-    }
-
-    // Add external links separator
-    items.push({
-      id: "external-links-separator",
-      separator: true,
     });
-
-    items.push(...createExternalDexItems(id, preferredVariant));
-
-    return items;
   }, [
     headPokemon,
     bodyPokemon,
