@@ -42,6 +42,34 @@ type EncounterTemplate = {
   templateName: string;
   args: string[];
 };
+
+type TemplateArgumentDepths = {
+  square: number;
+  curly: number;
+  angle: number;
+};
+
+type RouteHeadingDecision =
+  | { kind: "activate"; routeName: string; uniqueIdentifier: string }
+  | { kind: "flush" }
+  | null;
+
+const HEADER_TEMPLATE_NAMES = new Set([
+  "EncounterTable/Header",
+  "EncounterTable/Header/Time",
+]);
+const FOOTER_TEMPLATE_NAMES = new Set([
+  "EncounterTable/Footer",
+  "EncounterTable/Footer/Time",
+]);
+const PAIR_DEPTH_CHANGES: Readonly<
+  Record<string, readonly [keyof TemplateArgumentDepths, number]>
+> = {
+  "[[": ["square", 1],
+  "]]": ["square", -1],
+  "{{": ["curly", 1],
+  "}}": ["curly", -1],
+};
 const DEFAULT_ROCK_SMASH_POKEMON_ID = 74;
 
 /**
@@ -318,70 +346,56 @@ export function getLocationWikiUrl(locationName: string): string {
   return `https://infinitefusion.fandom.com/wiki/${slug}`;
 }
 
+function consumeBalancedTemplateToken(
+  rawArgs: string,
+  index: number,
+  depths: TemplateArgumentDepths,
+): string | null {
+  const currentPair = rawArgs.slice(index, index + 2);
+  const pairDepthChange = PAIR_DEPTH_CHANGES[currentPair];
+  if (
+    pairDepthChange &&
+    (pairDepthChange[1] > 0 || depths[pairDepthChange[0]] > 0)
+  ) {
+    depths[pairDepthChange[0]] += pairDepthChange[1];
+    return currentPair;
+  }
+
+  const angleDepthChange =
+    rawArgs[index] === "<" ? 1 : rawArgs[index] === ">" ? -1 : 0;
+  if (angleDepthChange > 0 || (angleDepthChange < 0 && depths.angle > 0)) {
+    depths.angle += angleDepthChange;
+    return rawArgs[index];
+  }
+
+  return null;
+}
+
 function splitTemplateArguments(rawArgs: string): string[] {
   const args: string[] = [];
+  const depths: TemplateArgumentDepths = { square: 0, curly: 0, angle: 0 };
   let current = "";
-  let squareDepth = 0;
-  let curlyDepth = 0;
-  let angleDepth = 0;
 
   for (let index = 0; index < rawArgs.length; index += 1) {
-    const currentPair = rawArgs.slice(index, index + 2);
-
-    if (currentPair === "[[") {
-      squareDepth += 1;
-      current += currentPair;
-      index += 1;
-      continue;
-    }
-
-    if (currentPair === "]]" && squareDepth > 0) {
-      squareDepth -= 1;
-      current += currentPair;
-      index += 1;
-      continue;
-    }
-
-    if (currentPair === "{{") {
-      curlyDepth += 1;
-      current += currentPair;
-      index += 1;
-      continue;
-    }
-
-    if (currentPair === "}}" && curlyDepth > 0) {
-      curlyDepth -= 1;
-      current += currentPair;
-      index += 1;
-      continue;
-    }
-
-    const currentChar = rawArgs[index];
-
-    if (currentChar === "<") {
-      angleDepth += 1;
-      current += currentChar;
-      continue;
-    }
-
-    if (currentChar === ">" && angleDepth > 0) {
-      angleDepth -= 1;
-      current += currentChar;
+    const token = consumeBalancedTemplateToken(rawArgs, index, depths);
+    if (token !== null) {
+      current += token;
+      index += token.length - 1;
       continue;
     }
 
     if (
-      currentChar === "|" &&
-      squareDepth === 0 &&
-      curlyDepth === 0 &&
-      angleDepth === 0
+      rawArgs[index] === "|" &&
+      depths.square === 0 &&
+      depths.curly === 0 &&
+      depths.angle === 0
     ) {
       args.push(current.trim());
       current = "";
       continue;
     }
 
-    current += currentChar;
+    current += rawArgs[index];
   }
 
   args.push(current.trim());
@@ -410,31 +424,14 @@ function applyEncounterTemplate(
   pokemonNameMap: PokemonNameMap,
   contextLabel: string,
 ): EncounterType | null {
-  if (
-    template.templateName === "EncounterTable/Header" ||
-    template.templateName === "EncounterTable/Header/Time"
-  ) {
-    return "grass";
-  }
-
-  if (template.templateName === "EncounterTable/Section") {
-    const sectionLabel = cleanTemplateValue(template.args[0] ?? "");
-    const detectedType = detectEncounterType(sectionLabel);
-    return detectedType && isWildEncounterType(detectedType)
-      ? detectedType
-      : null;
-  }
-
-  if (template.templateName === "EncounterTable/RockSmash") {
-    addDefaultRockSmashEncounter(encounters, pokemonNameMap, contextLabel);
-    return "rock_smash";
-  }
-
-  if (
-    template.templateName === "EncounterTable/Footer" ||
-    template.templateName === "EncounterTable/Footer/Time"
-  ) {
-    return null;
+  const nextEncounterType = getEncounterTypeTransition(
+    template,
+    encounters,
+    pokemonNameMap,
+    contextLabel,
+  );
+  if (nextEncounterType !== undefined) {
+    return nextEncounterType;
   }
 
   if (
@@ -454,6 +451,33 @@ function applyEncounterTemplate(
   }
 
   return currentEncounterType;
+}
+
+function getEncounterTypeTransition(
+  template: EncounterTemplate,
+  encounters: PokemonEncounter[],
+  pokemonNameMap: PokemonNameMap,
+  contextLabel: string,
+): EncounterType | null | undefined {
+  if (HEADER_TEMPLATE_NAMES.has(template.templateName)) {
+    return "grass";
+  }
+  if (FOOTER_TEMPLATE_NAMES.has(template.templateName)) {
+    return null;
+  }
+  if (template.templateName === "EncounterTable/Section") {
+    const sectionLabel = cleanTemplateValue(template.args[0] ?? "");
+    const detectedType = detectEncounterType(sectionLabel);
+    return detectedType && isWildEncounterType(detectedType)
+      ? detectedType
+      : null;
+  }
+  if (template.templateName === "EncounterTable/RockSmash") {
+    addDefaultRockSmashEncounter(encounters, pokemonNameMap, contextLabel);
+    return "rock_smash";
+  }
+
+  return undefined;
 }
 
 function cleanTemplateValue(value: string): string {
@@ -576,38 +600,16 @@ export function parseWildEncounterRoutesFromWikitext(
       continue;
     }
 
-    const routeHeadingMatch = line.match(WIKITEXT_ROUTE_HEADING_PATTERN);
-    if (routeHeadingMatch?.[1]) {
-      const routeHeading = routeHeadingMatch[1].trim();
-
-      if (
-        isRoutePattern(routeHeading) === false ||
-        isValidRouteName(routeHeading) === false
-      ) {
-        continue;
-      }
-
+    const routeHeading = classifyRouteHeading(line, routesSeen);
+    if (routeHeading !== null) {
       flushActiveRoute();
-
-      const { cleanName: cleanedRouteName, routeId } =
-        processRouteName(routeHeading);
-      if (isValidRouteName(cleanedRouteName) === false) {
-        continue;
+      if (routeHeading.kind === "activate") {
+        routesSeen.add(routeHeading.uniqueIdentifier);
+        activeRouteName = routeHeading.routeName;
+        activeRouteContext = `route ${routeHeading.routeName}`;
+        activeEncounters = [];
+        currentEncounterType = "grass";
       }
-
-      const uniqueIdentifier = routeId
-        ? `${cleanedRouteName}#${routeId}`
-        : cleanedRouteName;
-
-      if (routesSeen.has(uniqueIdentifier)) {
-        continue;
-      }
-
-      routesSeen.add(uniqueIdentifier);
-      activeRouteName = cleanedRouteName;
-      activeRouteContext = `route ${cleanedRouteName}`;
-      activeEncounters = [];
-      currentEncounterType = "grass";
       continue;
     }
 
@@ -632,6 +634,36 @@ export function parseWildEncounterRoutesFromWikitext(
   flushActiveRoute();
 
   return routes;
+}
+
+function classifyRouteHeading(
+  line: string,
+  routesSeen: Set<string>,
+): RouteHeadingDecision {
+  const routeHeadingMatch = line.match(WIKITEXT_ROUTE_HEADING_PATTERN);
+  if (!routeHeadingMatch?.[1]) {
+    return null;
+  }
+
+  const routeHeading = routeHeadingMatch[1].trim();
+  if (
+    isRoutePattern(routeHeading) === false ||
+    isValidRouteName(routeHeading) === false
+  ) {
+    return null;
+  }
+
+  const { cleanName: routeName, routeId } = processRouteName(routeHeading);
+  if (isValidRouteName(routeName) === false) {
+    return { kind: "flush" };
+  }
+
+  const uniqueIdentifier = routeId ? `${routeName}#${routeId}` : routeName;
+  if (routesSeen.has(uniqueIdentifier)) {
+    return { kind: "flush" };
+  }
+
+  return { kind: "activate", routeName, uniqueIdentifier };
 }
 
 export async function scrapeEncountersFromLocationArticle(

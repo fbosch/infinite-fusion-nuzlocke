@@ -122,7 +122,7 @@ Completed icon batch work: shared generation-batch processing preserves download
 ### Remaining Script Stages
 
 - [x] Complete encounter-scraper terminal reporting. Shared failure formatting, process exit handling, and direct-execution detection removed its clone groups while preserving source-specific summaries, reducing full duplication from 12 to 9 groups.
-- [ ] Refactor wild-wikitext parsing and route-state normalization in `scripts/scrape-wild-encounters.ts` with existing parser fixtures.
+- [x] Refactor wild-wikitext parsing and route-state normalization in `scripts/scrape-wild-encounters.ts`. Nested argument boundaries, encounter-type cancellation, route isolation, and resolution failures remain covered; the health report drops from 113 to 110 findings.
 - [ ] Refactor legendary DOM traversal and route aggregation after adding a deterministic HTML fixture seam.
 - [ ] Refactor spritesheet packing and overlap repair as separate policies, retaining the existing geometry utility boundaries.
 - [ ] Add deterministic fixtures before refactoring data-refresh PR-body normalization in `scripts/generate-data-pr-body.ts`.

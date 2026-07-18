@@ -71,6 +71,47 @@ describe("Wild encounter wikitext parser", () => {
     expect(encounters).toEqual([{ pokemonId: 27, encounterType: "grass" }]);
   });
 
+  it("keeps nested link pipes within their template argument", () => {
+    const wikitext = [
+      "{{EncounterTable/Header}}",
+      "{{EncounterTable/Section|Grass}}",
+      "{{EncounterTable/Data|invalid|[[Psyduck|Psyduck]]|8|100%}}",
+      "{{EncounterTable/Footer}}",
+    ].join("\n");
+
+    expect(
+      parseEncounterTemplatesFromWikitext(
+        wikitext,
+        pokemonNameMap,
+        "unit test",
+      ),
+    ).toEqual([{ pokemonId: 54, encounterType: "grass" }]);
+  });
+
+  it("stops adding data after unsupported sections and footers", () => {
+    const wikitext = [
+      "{{EncounterTable/Header}}",
+      "{{EncounterTable/Data|016|Pidgey|3|100%}}",
+      "{{EncounterTable/Section|Special}}",
+      "{{EncounterTable/Data|027|Sandshrew|3|100%}}",
+      "{{EncounterTable/Header}}",
+      "{{EncounterTable/Data|041|Zubat|3|100%}}",
+      "{{EncounterTable/Footer}}",
+      "{{EncounterTable/Data|054|Psyduck|3|100%}}",
+    ].join("\n");
+
+    expect(
+      parseEncounterTemplatesFromWikitext(
+        wikitext,
+        pokemonNameMap,
+        "unit test",
+      ),
+    ).toEqual([
+      { pokemonId: 16, encounterType: "grass" },
+      { pokemonId: 41, encounterType: "grass" },
+    ]);
+  });
+
   it("throws on unresolved EncounterTable/Data rows to avoid silent partial output", () => {
     const wikitext = [
       "{{EncounterTable/Header}}",
