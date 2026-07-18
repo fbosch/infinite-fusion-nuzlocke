@@ -1,5 +1,4 @@
 import { PokemonStatus } from "@/loaders/pokemon";
-import { flipEncounterFusion } from "./fusion";
 import { ensureActivePlaythroughWithEncounters } from "./shared";
 import { markEncounterAsDeceased } from "./status";
 import {
@@ -46,15 +45,6 @@ export const flipTeamMemberFusion = async (position: number): Promise<void> => {
   const member = activePlaythrough.team.members[position];
   if (!member?.headPokemonUid || !member.bodyPokemonUid) {
     return;
-  }
-
-  const locationId = findCanonicalLocationForUids([
-    member.headPokemonUid,
-    member.bodyPokemonUid,
-  ]);
-
-  if (locationId) {
-    await flipEncounterFusion(locationId);
   }
 
   await updateTeamMember(
