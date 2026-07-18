@@ -7,6 +7,7 @@ import { z } from "zod";
 import type { EncounterType } from "./types/encounters";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
+import { ensureEncounterOutputDirectories } from "./utils/encounter-output-utils";
 import { findPokemonId, type PokemonNameMap } from "./utils/pokemon-name-utils";
 import { isRoutePattern, processRouteName } from "./utils/route-utils";
 import { fetchWikiPageWikitext } from "./utils/wiki-fetch-utils";
@@ -944,13 +945,7 @@ async function main() {
   const startTime = Date.now();
 
   try {
-    const dataDir = path.join(process.cwd(), "data");
-    const classicDir = path.join(dataDir, "classic");
-    const remixDir = path.join(dataDir, "remix");
-
-    // Create directories
-    await fs.mkdir(classicDir, { recursive: true });
-    await fs.mkdir(remixDir, { recursive: true });
+    const { classicDir, remixDir } = await ensureEncounterOutputDirectories();
 
     const pokemonNameMap = await loadPokemonNameMap();
     const [classicRoutes, remixRoutes] = await Promise.all([

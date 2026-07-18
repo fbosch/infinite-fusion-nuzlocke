@@ -6,6 +6,7 @@ import * as cheerio from "cheerio";
 import { extractPokedexSubpageTitles } from "./scrape-pokedex";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
+import { ensureEncounterOutputDirectories } from "./utils/encounter-output-utils";
 import { cleanLocationName } from "./utils/location-utils";
 import {
   findPokemonId,
@@ -526,13 +527,7 @@ async function main() {
   const startTime = Date.now();
 
   try {
-    const dataDir = path.join(process.cwd(), "data");
-    const classicDir = path.join(dataDir, "classic");
-    const remixDir = path.join(dataDir, "remix");
-
-    // Create directories
-    await fs.mkdir(classicDir, { recursive: true });
-    await fs.mkdir(remixDir, { recursive: true });
+    const { classicDir, remixDir } = await ensureEncounterOutputDirectories();
 
     // Scrape both Classic and Remix data
     ConsoleFormatter.info("Scraping Classic and Remix Special Encounters...");
