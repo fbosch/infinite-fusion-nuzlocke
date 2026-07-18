@@ -10,7 +10,7 @@ import {
   useRole,
 } from "@floating-ui/react";
 import { clsx } from "clsx";
-import type { LucideIcon } from "lucide-react";
+import { ChevronRight, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
 import {
@@ -109,65 +109,78 @@ interface ContextMenuSubmenuProps {
   children: ContextMenuItem[];
   menuRef: React.RefObject<HTMLDivElement | null>;
   onClose: () => void;
-  onOpen: () => void;
+  onKeyDown: (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    index: number,
+  ) => void;
   onSelect: (event: React.MouseEvent, item: ContextMenuItem) => void;
+  activeIndex: number;
+  itemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
+  position: { left: number; top: number };
 }
 
 function ContextMenuSubmenu({
   children,
   menuRef,
   onClose,
-  onOpen,
+  onKeyDown,
   onSelect,
+  activeIndex,
+  itemRefs,
+  position,
 }: ContextMenuSubmenuProps) {
   return (
-    <div
-      ref={menuRef}
-      style={{
-        position: "absolute",
-        left: "100%",
-        top: 0,
-        marginLeft: "4px",
-        minWidth: "12rem",
-      }}
-      className={clsx(
-        "z-[9999] rounded-md border border-gray-200 dark:border-gray-800",
-        "bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25",
-        "p-1 backdrop-blur-xl origin-top-left",
-        "overflow-hidden",
-      )}
-      role="menu"
-      onMouseLeave={onClose}
-      onMouseEnter={onOpen}
-    >
-      {children.map((child) => (
-        <button
-          key={child.id}
-          type="button"
-          className={clsx(
-            "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
-            "text-sm transition-colors duration-75 enabled:cursor-pointer",
-            "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-            "text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white",
-            child.disabled && "!opacity-75 !cursor-not-allowed",
-          )}
-          disabled={child.disabled}
-          role="menuitem"
-          tabIndex={-1}
-          onClick={(event) => onSelect(event, child)}
-        >
-          <div className="flex items-center gap-x-2 w-full">
-            {child.icon && (
-              <child.icon
-                className="h-4 w-4 flex-shrink-0"
-                aria-hidden="true"
-              />
+    <FloatingPortal>
+      <div
+        ref={menuRef}
+        style={{
+          position: "fixed",
+          left: position.left,
+          top: position.top,
+          minWidth: "12rem",
+        }}
+        className={clsx(
+          "z-[10000] rounded-md border border-gray-200 dark:border-gray-800",
+          "bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25",
+          "p-1 backdrop-blur-xl origin-top-left",
+          "overflow-hidden",
+        )}
+        role="menu"
+        onMouseLeave={onClose}
+      >
+        {children.map((child, index) => (
+          <button
+            key={child.id}
+            ref={(node) => {
+              itemRefs.current[index] = node;
+            }}
+            type="button"
+            className={clsx(
+              "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
+              "text-sm transition-colors duration-75 enabled:cursor-pointer",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+              "text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white",
+              child.disabled && "!opacity-75 !cursor-not-allowed",
             )}
-            <span className="truncate">{child.label}</span>
-          </div>
-        </button>
-      ))}
-    </div>
+            disabled={child.disabled}
+            role="menuitem"
+            tabIndex={index === activeIndex ? 0 : -1}
+            onClick={(event) => onSelect(event, child)}
+            onKeyDown={(event) => onKeyDown(event, index)}
+          >
+            <div className="flex items-center gap-x-2 w-full">
+              {child.icon && (
+                <child.icon
+                  className="h-4 w-4 flex-shrink-0"
+                  aria-hidden="true"
+                />
+              )}
+              <span className="truncate">{child.label}</span>
+            </div>
+          </button>
+        ))}
+      </div>
+    </FloatingPortal>
   );
 }
 
@@ -268,12 +281,17 @@ export function ContextMenu({
   const listRef = useRef<Array<HTMLElement | null>>([]);
   const menuElementRef = useRef<HTMLDivElement>(null);
   const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
+  const [activeSubmenuIndex, setActiveSubmenuIndex] = useState(0);
+  const [submenuPosition, setSubmenuPosition] = useState({ left: 0, top: 0 });
   const submenuRef = useRef<HTMLDivElement>(null);
+  const submenuItemRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const isOpenRef = useRef(isOpen);
 
   const handleClose = useCallback(() => {
-    if (isOpen) {
+    if (isOpenRef.current) {
       window.dispatchEvent(new Event("context-menu-close"));
     }
+    isOpenRef.current = false;
     closeMenu();
 
     if (menuElementRef.current) {
@@ -284,7 +302,19 @@ export function ContextMenu({
         hideMenu();
       }, 50);
     }
-  }, [isOpen, closeMenu, hideMenu]);
+  }, [closeMenu, hideMenu]);
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (isOpenRef.current) {
+        window.dispatchEvent(new Event("context-menu-close"));
+      }
+    };
+  }, []);
 
   useLayoutEffect(() => {
     if (!isVisible || !menuElementRef.current) return;
@@ -391,6 +421,15 @@ export function ContextMenu({
   }, [isVisible, handleClose, triggerId]);
 
   const openSubmenuForIndex = useCallback((validIndex: number) => {
+    const trigger = listRef.current[validIndex];
+    if (trigger) {
+      const { bottom, right, top } = trigger.getBoundingClientRect();
+      setSubmenuPosition({
+        left: Math.min(right + 4, window.innerWidth - 200),
+        top: Math.min(top, window.innerHeight - Math.max(bottom - top, 1)),
+      });
+    }
+    setActiveSubmenuIndex(0);
     setOpenSubmenuIndex(validIndex);
   }, []);
 
@@ -403,6 +442,7 @@ export function ContextMenu({
 
     event.preventDefault();
     event.stopPropagation();
+    isOpenRef.current = true;
     window.dispatchEvent(new Event("context-menu-open"));
 
     // Calculate position relative to the viewport
@@ -548,7 +588,10 @@ export function ContextMenu({
                         />
                       )}
                       {hasChildren && (
-                        <span className="text-xs opacity-60">›</span>
+                        <ChevronRight
+                          className="h-4 w-4 opacity-60"
+                          aria-hidden="true"
+                        />
                       )}
                     </div>
                   </div>
@@ -559,7 +602,52 @@ export function ContextMenu({
                     <ContextMenuSubmenu
                       menuRef={submenuRef}
                       onClose={closeSubmenu}
-                      onOpen={() => openSubmenuForIndex(validIndex)}
+                      position={submenuPosition}
+                      activeIndex={activeSubmenuIndex}
+                      itemRefs={submenuItemRefs}
+                      onKeyDown={(event, childIndex) => {
+                        const enabledItems = item.children!.filter(
+                          (child) => !child.disabled,
+                        );
+                        const moveFocus = (nextIndex: number) => {
+                          setActiveSubmenuIndex(nextIndex);
+                          submenuItemRefs.current[nextIndex]?.focus();
+                        };
+
+                        if (
+                          event.key === "ArrowDown" ||
+                          event.key === "ArrowUp"
+                        ) {
+                          if (enabledItems.length === 0) return;
+
+                          event.preventDefault();
+                          const direction = event.key === "ArrowDown" ? 1 : -1;
+                          const currentEnabledIndex = enabledItems.findIndex(
+                            (child) =>
+                              child.id === item.children![childIndex]?.id,
+                          );
+                          const nextChild =
+                            enabledItems[
+                              (currentEnabledIndex +
+                                direction +
+                                enabledItems.length) %
+                                enabledItems.length
+                            ];
+                          const nextIndex = item.children!.findIndex(
+                            (child) => child.id === nextChild?.id,
+                          );
+                          moveFocus(nextIndex);
+                        }
+
+                        if (
+                          event.key === "ArrowLeft" ||
+                          event.key === "Escape"
+                        ) {
+                          event.preventDefault();
+                          closeSubmenu();
+                          listRef.current[validIndex]?.focus();
+                        }
+                      }}
                       onSelect={(event, child) => {
                         event.preventDefault();
                         event.stopPropagation();
@@ -584,15 +672,20 @@ export function ContextMenu({
                       target={item.target}
                       href={item.href}
                       className={commonClasses}
-                      onClick={(e) => {
-                        if (!item.disabled) {
-                          item.onClick?.(e);
-                          handleClose();
-                        }
-                      }}
+                      aria-disabled={item.disabled || undefined}
                       role="menuitem"
                       tabIndex={isActive ? 0 : -1}
-                      {...getItemProps()}
+                      {...getItemProps({
+                        onClick: (event) => {
+                          if (item.disabled) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            return;
+                          }
+                          item.onClick?.(event);
+                          handleClose();
+                        },
+                      })}
                     >
                       {content}
                     </a>
@@ -648,7 +741,29 @@ export function ContextMenu({
                         if (hasChildren) openSubmenuForIndex(validIndex);
                         else closeSubmenu();
                       },
+                      onKeyDown: (event) => {
+                        if (hasChildren && event.key === "ArrowRight") {
+                          event.preventDefault();
+                          const firstEnabledChildIndex =
+                            item.children!.findIndex(
+                              (child) => !child.disabled,
+                            );
+                          if (firstEnabledChildIndex === -1) return;
+
+                          openSubmenuForIndex(validIndex);
+                          setActiveSubmenuIndex(firstEnabledChildIndex);
+                          requestAnimationFrame(() => {
+                            submenuItemRefs.current[
+                              firstEnabledChildIndex
+                            ]?.focus();
+                          });
+                        }
+                      },
                     })}
+                    aria-haspopup={hasChildren ? "menu" : undefined}
+                    aria-expanded={
+                      hasChildren ? openSubmenuIndex === validIndex : undefined
+                    }
                   >
                     {content}
                   </button>

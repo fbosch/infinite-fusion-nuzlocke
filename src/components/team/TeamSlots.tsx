@@ -178,6 +178,7 @@ export default function TeamSlots() {
                   }}
                   role="button"
                   tabIndex={0}
+                  aria-label={`Add Pokémon to team slot ${slot.position + 1}`}
                 >
                   <div className="flex flex-col items-center justify-center text-center relative w-full h-full">
                     <div

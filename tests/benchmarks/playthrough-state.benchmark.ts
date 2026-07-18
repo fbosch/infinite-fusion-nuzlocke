@@ -1,5 +1,6 @@
 import { performance } from "node:perf_hooks";
 import { describe, expect, it, vi } from "vitest";
+import { z } from "zod";
 import "../playthroughs/mocks";
 
 vi.mock("@/lib/analytics/selectors", () => ({
@@ -34,9 +35,11 @@ import { getActivePlaythrough } from "@/stores/playthroughs/playthroughState";
 import { playthroughsStore } from "@/stores/playthroughs/store";
 import type { EncounterData, Playthrough } from "@/stores/playthroughs/types";
 
-const ENCOUNTER_COUNT = Number(
-  process.env.PLAYTHROUGH_BENCHMARK_ENCOUNTER_COUNT ?? 512,
-);
+const ENCOUNTER_COUNT = z.coerce
+  .number()
+  .int()
+  .min(2)
+  .parse(process.env.PLAYTHROUGH_BENCHMARK_ENCOUNTER_COUNT ?? 512);
 const WARMUP_ITERATIONS = 10;
 const SAMPLE_COUNT = 30;
 

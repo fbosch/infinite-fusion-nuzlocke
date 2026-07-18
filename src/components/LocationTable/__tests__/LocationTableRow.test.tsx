@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { forwardRef, useImperativeHandle } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import LocationTableRow from "../LocationTableRow";
@@ -10,11 +10,14 @@ const playEvolution = vi.hoisted(() => vi.fn());
 const canFuse = vi.hoisted(() => vi.fn());
 const useEncounter = vi.hoisted(() => vi.fn());
 const useInView = vi.hoisted(() => vi.fn());
+const evolutionListener = vi.hoisted(() => ({
+  current: undefined as undefined | ((event: { locationId: string }) => void),
+}));
 
 const createRow = (index = 0) =>
   ({
     index,
-    original: { id: "route-1" },
+    original: { id: "route-1", name: "Route 1" },
     getVisibleCells: () => [
       {
         id: "sprite-cell",
@@ -33,7 +36,12 @@ vi.mock("@/stores/playthroughs/hooks", () => ({
   useEncounter,
 }));
 
-vi.mock("@/lib/events", () => ({ addEvolutionListener: () => vi.fn() }));
+vi.mock("@/lib/events", () => ({
+  addEvolutionListener: (listener: (event: { locationId: string }) => void) => {
+    evolutionListener.current = listener;
+    return vi.fn();
+  },
+}));
 vi.mock("@/utils/pokemonPredicates", () => ({ canFuse }));
 vi.mock("@/components/PokemonSummaryCard", () => ({
   default: forwardRef((props: unknown, ref) => {
@@ -54,6 +62,7 @@ describe("LocationTableRow", () => {
       isFusion: false,
     });
     useInView.mockReturnValue({ inView: true, ref: vi.fn() });
+    evolutionListener.current = undefined;
   });
 
   it("binds sprite context-menu actions to its encounter location", () => {
@@ -135,6 +144,8 @@ describe("LocationTableRow", () => {
       </table>,
     );
 
+    evolutionListener.current?.({ locationId: "route-1" });
+
     expect(playEvolution).not.toHaveBeenCalled();
   });
 
@@ -150,8 +161,14 @@ describe("LocationTableRow", () => {
     );
 
     expect(
-      view.container.querySelector("[data-location-row-placeholder]"),
-    ).not.toBeNull();
+      view.getByRole("button", { name: "Load encounters for Route 1" }),
+    ).toBeTruthy();
     expect(summaryCardProps).not.toHaveBeenCalled();
+
+    fireEvent.click(
+      view.getByRole("button", { name: "Load encounters for Route 1" }),
+    );
+
+    expect(summaryCardProps).toHaveBeenCalled();
   });
 });

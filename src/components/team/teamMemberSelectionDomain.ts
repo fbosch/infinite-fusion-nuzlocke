@@ -62,7 +62,7 @@ export const initializeExistingTeamMemberSelection = (
   const hasHead = Boolean(existingTeamMember.headPokemon);
   const hasBody = Boolean(existingTeamMember.bodyPokemon);
   const suggestedActiveSlot: TeamSelectionSlot | null | undefined =
-    hasHead && hasBody ? null : hasHead || hasBody ? "body" : undefined;
+    hasHead && hasBody ? null : hasHead ? "body" : hasBody ? "head" : undefined;
 
   return {
     selectedHead,

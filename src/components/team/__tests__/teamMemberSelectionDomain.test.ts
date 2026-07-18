@@ -101,6 +101,15 @@ describe("team member selection domain", () => {
     });
   });
 
+  it("suggests the missing head slot for body-only members", () => {
+    const selection = initializeExistingTeamMemberSelection(
+      { isEmpty: false, bodyPokemon: pokemon("body") },
+      () => null,
+    );
+
+    expect(selection.suggestedActiveSlot).toBe("head");
+  });
+
   it("filters unavailable, inactive, and deceased Pokemon while retaining edited members", () => {
     const selection = (uid: string, status?: PokemonOptionType["status"]) => ({
       pokemon: { ...pokemon(uid), status },

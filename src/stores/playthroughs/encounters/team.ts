@@ -140,16 +140,6 @@ export const autoAssignCapturedPokemonToTeam = async (
     return;
   }
 
-  const availablePositions = getAvailableTeamPositionsForMembers(
-    activePlaythrough.team.members,
-  );
-
-  if (availablePositions.length === 0) {
-    return;
-  }
-
-  const nextAvailablePosition = availablePositions[0];
-
   const headPokemon = getAutoAssignablePokemon(encounter.head ?? {});
   const bodyPokemon = getAutoAssignablePokemon(encounter.body ?? {});
 
@@ -161,6 +151,15 @@ export const autoAssignCapturedPokemonToTeam = async (
     activePlaythrough.team.members,
     [headPokemon, bodyPokemon],
   );
+  const availablePositions = getAvailableTeamPositionsForMembers(
+    activePlaythrough.team.members,
+  );
+
+  if (existingPosition === -1 && availablePositions.length === 0) {
+    return;
+  }
+
+  const nextAvailablePosition = availablePositions[0];
   const targetPosition =
     existingPosition === -1 ? nextAvailablePosition : existingPosition;
 

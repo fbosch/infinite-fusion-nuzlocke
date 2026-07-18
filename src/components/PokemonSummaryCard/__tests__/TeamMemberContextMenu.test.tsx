@@ -4,7 +4,17 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TeamMemberContextMenu } from "../TeamMemberContextMenu";
 
-const flipTeamMemberFusionMock = vi.hoisted(() => vi.fn());
+const {
+  emitEvolutionEventMock,
+  flipTeamMemberFusionMock,
+  updatePokemonByUIDMock,
+  usePokemonEvolutionDataMock,
+} = vi.hoisted(() => ({
+  emitEvolutionEventMock: vi.fn(),
+  flipTeamMemberFusionMock: vi.fn(),
+  updatePokemonByUIDMock: vi.fn().mockResolvedValue(undefined),
+  usePokemonEvolutionDataMock: vi.fn(),
+}));
 
 vi.mock("next/dynamic", () => ({ default: () => () => null }));
 
@@ -43,10 +53,7 @@ vi.mock("@/loaders/pokemon", () => ({
     TRADED: "traded",
   },
   isEggId: () => false,
-  usePokemonEvolutionData: () => ({
-    evolutions: undefined,
-    preEvolution: null,
-  }),
+  usePokemonEvolutionData: usePokemonEvolutionDataMock,
 }));
 
 vi.mock("@/stores/playthroughs/index", () => ({
@@ -54,12 +61,12 @@ vi.mock("@/stores/playthroughs/index", () => ({
     flipTeamMemberFusion: flipTeamMemberFusionMock,
     markTeamMemberAsDeceased: vi.fn(),
     moveTeamMemberToBox: vi.fn(),
-    updatePokemonByUID: vi.fn(),
+    updatePokemonByUID: updatePokemonByUIDMock,
   },
 }));
 
 vi.mock("@/lib/sprites", () => ({ getSpriteId: () => "25.133" }));
-vi.mock("@/lib/events", () => ({ emitEvolutionEvent: vi.fn() }));
+vi.mock("@/lib/events", () => ({ emitEvolutionEvent: emitEvolutionEventMock }));
 vi.mock("@/utils/scrollToLocation", () => ({ scrollToLocationById: vi.fn() }));
 vi.mock("../PokemonContextMenu", () => ({
   createExternalDexItems: () => [],
@@ -77,6 +84,12 @@ describe("TeamMemberContextMenu", () => {
 
   beforeEach(() => {
     flipTeamMemberFusionMock.mockReset();
+    updatePokemonByUIDMock.mockClear();
+    emitEvolutionEventMock.mockClear();
+    usePokemonEvolutionDataMock.mockReturnValue({
+      evolutions: undefined,
+      preEvolution: null,
+    });
   });
 
   it("offers Reverse Fusion only for distinct team members", () => {
@@ -138,5 +151,31 @@ describe("TeamMemberContextMenu", () => {
     fireEvent.click(screen.getByRole("button", { name: "Reverse Fusion" }));
 
     expect(flipTeamMemberFusionMock).toHaveBeenCalledWith(2);
+  });
+
+  it("emits an evolution event after devolution", async () => {
+    usePokemonEvolutionDataMock
+      .mockReturnValueOnce({
+        evolutions: undefined,
+        preEvolution: { id: 172, name: "Pichu", nationalDexId: 172 },
+      })
+      .mockReturnValueOnce({ evolutions: undefined, preEvolution: null });
+
+    render(
+      <TeamMemberContextMenu
+        teamMember={{
+          position: 0,
+          isEmpty: false,
+          headPokemon: { ...pikachu, originalLocation: "route-1" },
+        }}
+      >
+        <span>team member</span>
+      </TeamMemberContextMenu>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Devolve to Pichu/ }));
+
+    await Promise.resolve();
+    expect(emitEvolutionEventMock).toHaveBeenCalledWith("route-1");
   });
 });

@@ -13,14 +13,7 @@
     },
     "helium-devtools": {
       "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "chrome-devtools-mcp@1.2.0",
-        "--autoConnect",
-        "--userDataDir",
-        "/home/fbb/.config/net.imput.helium"
-      ],
+      "command": ["npx", "-y", "chrome-devtools-mcp@1.2.0", "--autoConnect"],
       "enabled": true
     }
   }

@@ -123,6 +123,84 @@ describe("ContextMenu", () => {
     window.removeEventListener("context-menu-close", onClose);
   });
 
+  it("announces a close when an open menu unmounts", () => {
+    const onClose = vi.fn();
+    window.addEventListener("context-menu-close", onClose);
+
+    const view = render(
+      <ContextMenu items={[{ id: "first", label: "First action" }]}>
+        <button type="button">Context trigger</button>
+      </ContextMenu>,
+    );
+
+    fireEvent.contextMenu(
+      screen.getByRole("button", { name: "Context trigger" }),
+    );
+    view.unmount();
+
+    expect(onClose).toHaveBeenCalledOnce();
+    window.removeEventListener("context-menu-close", onClose);
+  });
+
+  it("opens submenus with ArrowRight and returns focus with ArrowLeft", async () => {
+    render(
+      <ContextMenu
+        items={[
+          {
+            id: "parent",
+            label: "Parent action",
+            children: [{ id: "child", label: "Child action" }],
+          },
+        ]}
+      >
+        <button type="button">Context trigger</button>
+      </ContextMenu>,
+    );
+
+    fireEvent.contextMenu(
+      screen.getByRole("button", { name: "Context trigger" }),
+    );
+    const parent = await screen.findByRole("menuitem", {
+      name: /Parent action/,
+    });
+    parent.focus();
+    fireEvent.keyDown(parent, { key: "ArrowRight" });
+
+    const child = await screen.findByRole("menuitem", { name: "Child action" });
+    await waitFor(() => {
+      expect(document.activeElement).toBe(child);
+    });
+    fireEvent.keyDown(child, { key: "ArrowLeft" });
+    expect(document.activeElement).toBe(parent);
+  });
+
+  it("does not navigate disabled links", async () => {
+    render(
+      <ContextMenu
+        items={[
+          {
+            id: "disabled-link",
+            label: "Disabled link",
+            href: "https://example.com",
+            disabled: true,
+          },
+        ]}
+      >
+        <button type="button">Context trigger</button>
+      </ContextMenu>,
+    );
+
+    fireEvent.contextMenu(
+      screen.getByRole("button", { name: "Context trigger" }),
+    );
+    const link = await screen.findByRole("menuitem", { name: "Disabled link" });
+    const event = createEvent.click(link);
+    fireEvent(link, event);
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(link.getAttribute("aria-disabled")).toBe("true");
+  });
+
   it("opens another custom menu instead of showing the native menu", async () => {
     render(
       <>

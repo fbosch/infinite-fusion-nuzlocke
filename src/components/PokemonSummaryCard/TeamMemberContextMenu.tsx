@@ -389,6 +389,10 @@ async function devolvePokemon(
     name: preEvolution.name,
     nationalDexId: preEvolution.nationalDexId,
   });
+
+  if (pokemon.originalLocation) {
+    emitEvolutionEvent(pokemon.originalLocation);
+  }
 }
 
 function scrollToPokemonEncounter(

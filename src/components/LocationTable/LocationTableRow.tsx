@@ -1,5 +1,5 @@
 import { flexRender, type Row } from "@tanstack/react-table";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { match } from "ts-pattern";
 import { addEvolutionListener } from "@/lib/events";
@@ -47,10 +47,12 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
   const { ref, inView } = useInView();
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
   const previousFusionId = useRef<string | null>(null);
+  const hasInitializedFusionId = useRef(false);
   const activePlaythroughId = useActivePlaythroughId();
+  const [isLoadRequested, setIsLoadRequested] = useState(false);
 
   const aboveTheFold = row.index < 8;
-  const shouldLoad = inView || aboveTheFold;
+  const shouldLoad = inView || aboveTheFold || isLoadRequested;
   const visibleCells = row.getVisibleCells();
 
   // Get encounter data directly - only this row will rerender when this encounter changes
@@ -58,6 +60,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
 
   useEffect(() => {
     previousFusionId.current = null;
+    hasInitializedFusionId.current = false;
   }, [activePlaythroughId]);
 
   // Play evolution animation when this location evolves, but only if the Pokémon can form an effective fusion
@@ -91,28 +94,20 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
     encounterData.body,
   ]);
 
-  // Initialize the previous fusion ID on first render to prevent animation on page load
+  // Play evolution animation only when the effective fusion ID changes after initialization.
   useEffect(() => {
     const currentFusionId = getEffectiveFusionId(encounterData);
-    if (currentFusionId && previousFusionId.current === null) {
-      // First time rendering - just set the ID without playing animation
+
+    if (!hasInitializedFusionId.current) {
       previousFusionId.current = currentFusionId;
+      hasInitializedFusionId.current = true;
+      return;
     }
-  }, [encounterData.isFusion, encounterData.head, encounterData.body]);
 
-  // Play evolution animation only when the effective fusion ID changes
-  useEffect(() => {
-    const currentFusionId = getEffectiveFusionId(encounterData);
-
-    // Only play animation if this is a new fusion combination (and not the first render)
-    if (
-      currentFusionId &&
-      previousFusionId.current !== null &&
-      currentFusionId !== previousFusionId.current
-    ) {
-      previousFusionId.current = currentFusionId;
+    if (currentFusionId && currentFusionId !== previousFusionId.current) {
       spriteRef.current?.playEvolution();
     }
+    previousFusionId.current = currentFusionId;
   }, [encounterData.isFusion, encounterData.head, encounterData.body]);
 
   return (
@@ -183,11 +178,18 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
         )
       ) : (
         <td
-          aria-hidden="true"
           className="h-[150px]"
           colSpan={visibleCells.length}
           data-location-row-placeholder
-        />
+        >
+          <button
+            type="button"
+            className="w-full h-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            onClick={() => setIsLoadRequested(true)}
+          >
+            Load encounters for {row.original.name}
+          </button>
+        </td>
       )}
     </tr>
   );

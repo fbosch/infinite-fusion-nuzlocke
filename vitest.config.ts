@@ -6,6 +6,7 @@ import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
 
 const isBrowserTestsEnabled = process.env.VITEST_BROWSER === "true";
+const isBenchmarksEnabled = process.env.VITEST_BENCHMARKS === "true";
 const alias = {
   "@": fileURLToPath(new URL("./src", import.meta.url)),
   "@data": fileURLToPath(new URL("./data", import.meta.url)),
@@ -68,28 +69,32 @@ export default defineConfig({
             },
           ]
         : []),
-      {
-        resolve: {
-          alias,
-        },
-        test: {
-          name: "benchmark",
-          include: ["tests/benchmarks/**/*.benchmark.ts"],
-          environment: "node",
-        },
-      },
-      {
-        resolve: {
-          alias,
-        },
-        plugins: react(),
-        test: {
-          name: "react-benchmark",
-          include: ["tests/benchmarks/**/*.benchmark.tsx"],
-          setupFiles: ["./tests/setup.react-hooks.ts"],
-          environment: "jsdom",
-        },
-      },
+      ...(isBenchmarksEnabled
+        ? [
+            {
+              resolve: {
+                alias,
+              },
+              test: {
+                name: "benchmark",
+                include: ["tests/benchmarks/**/*.benchmark.ts"],
+                environment: "node",
+              },
+            },
+            {
+              resolve: {
+                alias,
+              },
+              plugins: react(),
+              test: {
+                name: "react-benchmark",
+                include: ["tests/benchmarks/**/*.benchmark.tsx"],
+                setupFiles: ["./tests/setup.react-hooks.ts"],
+                environment: "jsdom",
+              },
+            },
+          ]
+        : []),
       {
         resolve: {
           alias,

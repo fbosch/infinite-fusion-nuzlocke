@@ -179,16 +179,10 @@ export async function getNextFallbackUrl(
     artworkVariant,
   );
 
-  const result = await Promise.any(
-    candidateUrls.map(async (url) => {
-      if (await validateImageUrl(url)) {
-        return url;
-      }
-    }),
-  );
-
-  if (result) {
-    return result;
+  for (const url of candidateUrls) {
+    if (await validateImageUrl(url)) {
+      return url;
+    }
   }
 
   return QUESTION_MARK;

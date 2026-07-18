@@ -41,7 +41,7 @@ describe("TeamMemberSelectionProvider", () => {
   });
 
   it("updates a selected Pokemon by identity before returning the selected slot", async () => {
-    const onSelect = vi.fn();
+    const onSelect = vi.fn().mockResolvedValue(true);
     const onClose = vi.fn();
     const wrapper = ({ children }: { children: ReactNode }) => (
       <TeamMemberSelectionProvider
@@ -63,7 +63,7 @@ describe("TeamMemberSelectionProvider", () => {
     });
 
     await act(async () => {
-      result.current.actions.handleUpdateTeamMember();
+      await result.current.actions.handleUpdateTeamMember();
     });
 
     expect(updatePokemonByUIDMock).toHaveBeenCalledWith("pikachu-uid", {

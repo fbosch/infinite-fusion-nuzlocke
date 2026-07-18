@@ -96,8 +96,8 @@ interface TeamMemberSelectionActions {
   resetState: () => void;
 
   // Team member actions
-  handleUpdateTeamMember: () => void;
-  handleClearTeamMember: () => void;
+  handleUpdateTeamMember: () => Promise<void>;
+  handleClearTeamMember: () => Promise<void>;
 }
 
 // Initial state
@@ -179,7 +179,7 @@ interface TeamMemberSelectionProviderProps {
   onSelect: (
     headPokemon: PokemonOptionType | null,
     bodyPokemon: PokemonOptionType | null,
-  ) => void;
+  ) => Promise<boolean>;
   onClose: () => void;
 }
 
@@ -233,7 +233,17 @@ function useTeamSelectionEffects({
       (uid) => findPokemonWithLocation(encounters, uid),
     );
     dispatch({ type: "INITIALIZE_FROM_EXISTING", payload: selection });
+  }, [existingTeamMember, encounters, dispatch]);
 
+  useEffect(() => {
+    if (!existingTeamMember || existingTeamMember.isEmpty || !encounters) {
+      return;
+    }
+
+    const selection = initializeExistingTeamMemberSelection(
+      existingTeamMember,
+      (uid) => findPokemonWithLocation(encounters, uid),
+    );
     if (
       !hasManuallySelectedSlot &&
       selection.suggestedActiveSlot !== undefined
@@ -316,12 +326,14 @@ function useTeamMemberSelectionActionValue({
         nickname: nicknameUpdate.nickname,
       });
     }
-    onSelect(selectedHead?.pokemon ?? null, selectedBody?.pokemon ?? null);
-    onClose();
+    const success = await onSelect(
+      selectedHead?.pokemon ?? null,
+      selectedBody?.pokemon ?? null,
+    );
+    if (success) onClose();
   };
-  const handleClearTeamMember = () => {
-    onSelect(null, null);
-    onClose();
+  const handleClearTeamMember = async () => {
+    if (await onSelect(null, null)) onClose();
   };
 
   return {

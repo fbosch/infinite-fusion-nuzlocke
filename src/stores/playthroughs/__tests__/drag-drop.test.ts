@@ -33,17 +33,25 @@ describe("Encounter drag/drop operations", () => {
     );
   });
 
-  it("updates the source and destination before yielding", () => {
+  it("updates the source and destination before yielding", async () => {
     const { activePlaythrough } = createTestPlaythrough();
     const pikachu = testPokemon.pikachu();
 
-    void updateEncounter("route1", pikachu, "head", false);
-    void moveEncounterAtomic("route1", "head", "route2", "head", pikachu);
+    await updateEncounter("route1", pikachu, "head", false);
+    const movePromise = moveEncounterAtomic(
+      "route1",
+      "head",
+      "route2",
+      "head",
+      pikachu,
+    );
 
     expect(activePlaythrough.encounters?.route1).toBeUndefined();
     expect(activePlaythrough.encounters?.route2?.head?.uid).toBe(
       "pikachu_route1_123",
     );
+
+    await movePromise;
   });
 
   it("relocates to an empty destination slot", async () => {

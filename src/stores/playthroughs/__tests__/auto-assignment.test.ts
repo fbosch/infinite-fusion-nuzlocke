@@ -180,6 +180,28 @@ describe("Auto-Assignment to Team", () => {
     );
   });
 
+  it("completes an existing team member when the team is full", async () => {
+    const { activePlaythrough } = createTestPlaythrough();
+    const pikachu = testPokemon.pikachu();
+    const charmander = testPokemon.charmander();
+
+    await updateEncounter("route1", pikachu, "head", false);
+    for (let index = 1; index < 6; index++) {
+      activePlaythrough.team.members[index] = {
+        headPokemonUid: `pokemon_${index}_123`,
+        bodyPokemonUid: "",
+      };
+    }
+
+    await updateEncounter("route1", charmander, "body", true);
+
+    expectTeamMember(
+      activePlaythrough.team.members[0],
+      "pikachu_route1_123",
+      "charmander_route1_456",
+    );
+  });
+
   it("should work with markEncounterAsCaptured function", async () => {
     const { activePlaythrough } = createTestPlaythrough();
 

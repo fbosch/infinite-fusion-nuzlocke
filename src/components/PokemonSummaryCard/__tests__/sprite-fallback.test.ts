@@ -87,4 +87,41 @@ describe("getNextFallbackUrl", () => {
       "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png",
     ]);
   });
+
+  it("uses a later candidate when the first generated fusion sprite fails", async () => {
+    const loadedUrls: string[] = [];
+    vi.stubGlobal("window", {
+      Image: class {
+        onload: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+
+        set src(url: string) {
+          loadedUrls.push(url);
+          if (loadedUrls.length === 1) this.onerror?.();
+          else this.onload?.();
+        }
+      },
+    });
+
+    await expect(
+      getNextFallbackUrl(
+        "https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/25.133a.png",
+        pikachu,
+        { ...pikachu, id: 133, nationalDexId: 133 },
+        "a",
+      ),
+    ).resolves.toBe(
+      "https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/25.133.png",
+    );
+  });
+
+  it("uses the question-mark fallback when candidates are exhausted", async () => {
+    await expect(
+      getNextFallbackUrl(
+        "https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/25.133.png",
+        pikachu,
+        { ...pikachu, id: 133, nationalDexId: 133 },
+      ),
+    ).resolves.toMatch(/^data:image\/png;base64,/);
+  });
 });
