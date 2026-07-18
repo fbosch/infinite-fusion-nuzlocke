@@ -354,7 +354,7 @@ export function TeamMemberContextMenu({
     if (isFusionPair) {
       items.push({
         id: "invert-fusion",
-        label: "Invert Fusion",
+        label: "Reverse Fusion",
         icon: ArrowLeftRight,
         onClick: handleFlipFusion,
         tooltip: "Swap head and body Pokémon positions",
