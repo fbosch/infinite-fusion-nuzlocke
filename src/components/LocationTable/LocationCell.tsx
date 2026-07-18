@@ -56,37 +56,7 @@ export default function LocationCell({
     return pokemon;
   }, [encounters, location.id]);
 
-  // Check if any Pokémon have been moved from their original locations
-  const hasMovedPokemon = useMemo(() => {
-    if (!encounters) return false;
-
-    // Check all encounters to see if any Pokémon are not in their original location
-    for (const [currentLocationId, encounter] of Object.entries(encounters) as [
-      string,
-      EncounterData,
-    ][]) {
-      // Check head Pokémon
-      if (
-        encounter.head?.originalLocation &&
-        encounter.head.originalLocation !== currentLocationId
-      ) {
-        return true;
-      }
-      // Check body Pokémon
-      if (
-        encounter.body?.originalLocation &&
-        encounter.body.originalLocation !== currentLocationId
-      ) {
-        return true;
-      }
-    }
-
-    return false;
-  }, [encounters]);
-
-  // Determine if we should show detailed original encounter information
-  const shouldShowOriginalEncounter =
-    settings.moveEncountersBetweenLocations || hasMovedPokemon;
+  const shouldShowOriginalEncounter = settings.moveEncountersBetweenLocations;
 
   const encounterUids = locationPokemon
     .map((p) => p.uid)
@@ -120,7 +90,6 @@ export default function LocationCell({
   }, [isTooltipHovered, encounterUids, shouldShowOriginalEncounter]);
 
   const getTooltipContent = useMemo(() => {
-    // Only show detailed original encounter information if setting is enabled or Pokémon have been moved
     if (locationPokemon.length > 0 && shouldShowOriginalEncounter) {
       return (
         <div className="max-w-xs">
