@@ -73,6 +73,16 @@ export default defineConfig({
           alias,
         },
         test: {
+          name: "benchmark",
+          include: ["tests/benchmarks/**/*.benchmark.ts"],
+          environment: "node",
+        },
+      },
+      {
+        resolve: {
+          alias,
+        },
+        test: {
           name: "react-hooks",
           include: ["**/playthroughs.test.ts", "**/playthroughs/**/*.test.ts"],
           setupFiles: ["./tests/setup.react-hooks.ts"],
@@ -92,6 +102,7 @@ export default defineConfig({
             "**/playthroughs.test.ts",
             "**/playthroughs/**/*.test.ts",
             "**/scrollToLocation.test.ts",
+            "tests/benchmarks/**",
             "**/.opencode/**",
             "node_modules",
             "dist",

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-18",
+  "command": "pnpm test:bench",
+  "environment": {
+    "node": "v24.18.0",
+    "pnpm": "10.34.5"
+  },
+  "fixture": {
+    "encounterCount": 512,
+    "warmupIterations": 10,
+    "sampleCount": 30
+  },
+  "results": {
+    "reverse-active": {
+      "p50Ms": 15.617,
+      "p95Ms": 69.036
+    },
+    "reverse-stored": {
+      "p50Ms": 14.784,
+      "p95Ms": 77.573
+    },
+    "drag-empty-target": {
+      "p50Ms": 17.169,
+      "p95Ms": 41.481
+    },
+    "drag-occupied-target": {
+      "p50Ms": 12.992,
+      "p95Ms": 42.181
+    }
+  }
+}

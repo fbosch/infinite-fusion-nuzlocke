@@ -66,11 +66,11 @@ export const updateTeamMember = async (
   }
 
   if (headPokemon?.uid) {
-    await restorePokemonToTeam(headPokemon.uid);
+    void restorePokemonToTeam(headPokemon.uid);
   }
 
   if (bodyPokemon?.uid) {
-    await restorePokemonToTeam(bodyPokemon.uid);
+    void restorePokemonToTeam(bodyPokemon.uid);
   }
 
   activePlaythrough.team.members[position] = createTeamMember(
