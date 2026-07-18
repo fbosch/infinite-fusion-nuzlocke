@@ -51,11 +51,18 @@ function addLegendaryHeadingEncounters(
 ): void {
   const $heading = $(heading);
   const pokemonName = $heading.find("span.mw-headline").text().trim();
-  if (!isPotentialPokemonName(pokemonName)) {
+  const pokemonNames = pokemonName
+    .split("/")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (
+    pokemonNames.length === 0 ||
+    pokemonNames.some((name) => !isPotentialPokemonName(name))
+  ) {
     return;
   }
 
-  for (const name of pokemonName.split("/").map((part) => part.trim())) {
+  for (const name of pokemonNames) {
     const pokemonIds = getLegendaryPokemonIds(name, pokemonNameMap);
     if (pokemonIds.length === 0) {
       ConsoleFormatter.warn(`Could not find any forms for legendary: ${name}`);

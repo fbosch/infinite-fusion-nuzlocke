@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { normalizePokemonNameForSprite } from "./utils/pokemon-name-utils";
+import { runDirectScript } from "./utils/script-runtime-utils";
 import {
   downloadSpriteImage,
   type SpriteDownloadConfig,
@@ -306,7 +307,4 @@ async function scrapePokemonIcons(): Promise<void> {
   }
 }
 
-// fallow-ignore-next-line code-duplication
-if (import.meta.url === `file://${process.argv[1]}`) {
-  void scrapePokemonIcons();
-}
+runDirectScript(import.meta.url, scrapePokemonIcons);

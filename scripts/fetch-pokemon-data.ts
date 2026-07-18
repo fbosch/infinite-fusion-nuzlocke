@@ -69,8 +69,8 @@ function extractEvolutionData(
   }
 
   function getEvolutionCondition(detail: any): string | undefined {
-    if (detail.held_item_type) {
-      return `Holding ${detail.held_item_type.name}`;
+    if (detail.held_item) {
+      return `Holding ${detail.held_item.name}`;
     }
     if (detail.known_move_type) {
       return `Knows ${detail.known_move_type.name} move`;

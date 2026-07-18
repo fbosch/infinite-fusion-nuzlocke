@@ -3,6 +3,8 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { z } from "zod";
+import { runDirectScript } from "./utils/script-runtime-utils";
 
 const DEFAULT_OUTPUT_PATH = ".github/data-refresh-pr-body.md";
 const POKEMON_ICON_BASE_URL =
@@ -74,6 +76,14 @@ interface LocationPokemonEntry {
   source: string;
   pokemonId: number;
 }
+
+const EncounterEntrySchema = z.union([
+  z.number().int(),
+  z.object({
+    pokemonId: z.number().int(),
+    encounterType: z.string().optional(),
+  }),
+]);
 
 function runGitCommand(args: string[]): string {
   try {
@@ -250,21 +260,22 @@ function appendEncounterEntries(
   }
 
   for (const encounter of item.encounters) {
-    if (typeof encounter === "number" && Number.isInteger(encounter)) {
+    const parsedEncounter = EncounterEntrySchema.safeParse(encounter);
+    if (parsedEncounter.success === false) {
+      continue;
+    }
+
+    if (typeof parsedEncounter.data === "number") {
       entries.push({
         location: item.routeName,
         source: defaultSource,
-        pokemonId: encounter,
+        pokemonId: parsedEncounter.data,
       });
-    } else if (
-      typeof encounter === "object" &&
-      typeof encounter.pokemonId === "number" &&
-      Number.isInteger(encounter.pokemonId)
-    ) {
+    } else {
       entries.push({
         location: item.routeName,
-        source: encounter.encounterType ?? defaultSource,
-        pokemonId: encounter.pokemonId,
+        source: parsedEncounter.data.encounterType ?? defaultSource,
+        pokemonId: parsedEncounter.data.pokemonId,
       });
     }
   }
@@ -559,10 +570,12 @@ async function main(): Promise<void> {
   process.stdout.write(`Generated data PR body: ${outputPath}\n`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((error: unknown) => {
+runDirectScript(import.meta.url, async () => {
+  try {
+    await main();
+  } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "unknown error";
     process.stderr.write(`Failed to generate data PR body: ${message}\n`);
     process.exit(1);
-  });
-}
+  }
+});

@@ -1,3 +1,4 @@
+import { pathToFileURL } from "node:url";
 import { ConsoleFormatter } from "./console-utils";
 
 /** Formats an unknown script failure consistently without hiding its message. */
@@ -10,7 +11,9 @@ export function isDirectScriptExecution(
   moduleUrl: string,
   entrypoint = process.argv[1],
 ): boolean {
-  return entrypoint !== undefined && moduleUrl === `file://${entrypoint}`;
+  return (
+    entrypoint !== undefined && moduleUrl === pathToFileURL(entrypoint).href
+  );
 }
 
 /** Reports a fatal script failure and terminates with the established exit code. */
