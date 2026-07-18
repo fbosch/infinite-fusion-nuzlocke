@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17",
+  "generatedAt": "2026-07-18",
   "fallowVersion": "3.6.0",
   "phase1": {
     "resolved": {
@@ -26,12 +26,12 @@
     "circularDependencies": 0
   },
   "phase3": {
-    "unusedExports": 190,
+    "unusedExports": 97,
     "unusedClassMembers": 7,
     "unusedComponentProps": 2,
-    "duplicateExports": 2,
-    "devDependenciesInProduction": 4,
-    "healthFindings": 153,
-    "duplicationGroups": 37
+    "duplicateExports": 1,
+    "devDependenciesInProduction": 0,
+    "healthFindings": 147,
+    "duplicationGroups": 32
   }
 }

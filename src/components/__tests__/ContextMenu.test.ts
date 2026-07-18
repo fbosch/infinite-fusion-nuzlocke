@@ -1,30 +1,6 @@
 import { describe, expect, it } from "vitest";
-
-// We need to import the function directly since it's not exported
-// For testing purposes, we'll redefine it here
-function filterEdgeSeparators(
-  items: Array<{ separator?: boolean; id: string }>,
-) {
-  if (items.length === 0) return items;
-
-  // Find first non-separator item
-  let start = 0;
-  while (start < items.length && items[start]?.separator) {
-    start++;
-  }
-
-  // Find last non-separator item
-  let end = items.length - 1;
-  while (end >= 0 && items[end]?.separator) {
-    end--;
-  }
-
-  // If no non-separator items found, return empty array
-  if (start > end) return [];
-
-  // Return slice from first to last non-separator item
-  return items.slice(start, end + 1);
-}
+import { filterEdgeSeparators } from "../ContextMenu";
+import { createExternalDexItems } from "../PokemonSummaryCard/PokemonContextMenu";
 
 describe("filterEdgeSeparators", () => {
   it("should remove separators at the beginning", () => {
@@ -122,5 +98,24 @@ describe("filterEdgeSeparators", () => {
     const items = [{ id: "sep1", separator: true }];
     const result = filterEdgeSeparators(items);
     expect(result).toHaveLength(0);
+  });
+});
+
+describe("createExternalDexItems", () => {
+  it("keeps both external entries aligned for a preferred artwork variant", () => {
+    const items = createExternalDexItems("25.6", "a");
+
+    expect(items).toMatchObject([
+      {
+        id: "infinitefusiondex",
+        href: "https://infinitefusiondex.com/details/25.6",
+        target: "_blank",
+      },
+      {
+        id: "fusiondex",
+        href: "https://fusiondex.org/sprite/pif/25.6a/",
+        target: "_blank",
+      },
+    ]);
   });
 });

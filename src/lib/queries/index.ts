@@ -2,6 +2,5 @@
 
 // Re-export query client
 export { queryClient } from "../client";
-export { encountersKeys, encountersQueries } from "./encounters";
-export { pokemonKeys, pokemonQueries } from "./pokemon";
-export { spriteKeys, spriteQueries } from "./sprites";
+export { encountersQueries } from "./encounters";
+export { pokemonQueries } from "./pokemon";

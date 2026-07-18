@@ -25,7 +25,7 @@ import * as cliProgress from "cli-progress";
 import { formatDuration, formatFileSize } from "./format-utils";
 
 // Simple color functions using ANSI escape codes
-export const colors = {
+const colors = {
   reset: "\x1b[0m",
   red: (str: string) => `\x1b[31m${str}\x1b[0m`,
   green: (str: string) => `\x1b[32m${str}\x1b[0m`,
@@ -46,7 +46,7 @@ export const colors = {
 };
 
 // Progress bar configurations
-export const progressBarConfigs = {
+const progressBarConfigs = {
   standard: {
     format:
       colors.cyan("{bar}") +

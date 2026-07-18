@@ -11,7 +11,7 @@ export interface UseFusionTypesResult {
   isLoading: boolean;
 }
 
-export function useFusionTypes(
+function useFusionTypes(
   headQuery: TypeQuery | undefined,
   bodyQuery: TypeQuery | undefined,
 ): UseFusionTypesResult {
@@ -68,5 +68,3 @@ export function useFusionTypesFromPokemon(
 
   return useFusionTypes(finalHeadQuery, bodyQuery);
 }
-
-export default useFusionTypes;

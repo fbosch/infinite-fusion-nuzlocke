@@ -163,12 +163,3 @@ export function useControlKey(): boolean {
 export function useAltKey(): boolean {
   return useKeyPressed("Alt");
 }
-
-/**
- * Convenience hook for tracking the Meta key (Cmd on Mac, Windows key on PC) specifically.
- *
- * @returns {boolean} True if meta key is currently pressed, false otherwise
- */
-export function useMetaKey(): boolean {
-  return useKeyPressed("Meta");
-}
