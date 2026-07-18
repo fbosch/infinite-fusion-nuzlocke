@@ -82,6 +82,43 @@ export function isEggLocationName(location: string): boolean {
   );
 }
 
+/** Returns the nest location encoded by a nearby wiki link, when usable. */
+export function getNestLocationName(
+  href: string,
+  parentText: string,
+  hasNestImage: boolean,
+): string | null {
+  if (
+    !href.includes("/wiki/") ||
+    (!parentText.toLowerCase().includes("nest") && !hasNestImage)
+  ) {
+    return null;
+  }
+
+  const urlMatch = href.match(/\/wiki\/([^/]+)/);
+  if (!urlMatch) {
+    return null;
+  }
+
+  const routeName = decodeURIComponent(urlMatch[1])
+    .replace(/_/g, " ")
+    .replace(/%20/g, " ")
+    .trim();
+  const normalizedRouteName = routeName.toLowerCase();
+
+  if (
+    routeName.length <= 2 ||
+    normalizedRouteName.includes("pokemon") ||
+    normalizedRouteName.includes("nest") ||
+    normalizedRouteName.includes("egg") ||
+    normalizedRouteName.includes("file:")
+  ) {
+    return null;
+  }
+
+  return routeName;
+}
+
 /**
  * Loads Pokemon data for name-to-ID mapping
  */
@@ -307,35 +344,12 @@ async function scrapePokemonNestsForEggs(
 
       // Check if this link is near a nest image or nest text
       const $parent = $link.parent();
-      const parentText = $parent.text().toLowerCase();
+      const parentText = $parent.text();
       const hasNestImage = $parent.find('img[alt*="nest"]').length > 0;
 
-      // Look for location links that are near nest content
-      if (
-        href.includes("/wiki/") &&
-        (parentText.includes("nest") || hasNestImage)
-      ) {
-        // Extract the page name from the URL
-        const urlMatch = href.match(/\/wiki\/([^/]+)/);
-        if (urlMatch) {
-          const pageName = decodeURIComponent(urlMatch[1]);
-          const routeName = pageName
-            .replace(/_/g, " ")
-            .replace(/%20/g, " ")
-            .trim();
-
-          // Validate the route name
-          if (
-            routeName &&
-            routeName.length > 2 &&
-            !routeName.toLowerCase().includes("pokemon") &&
-            !routeName.toLowerCase().includes("nest") &&
-            !routeName.toLowerCase().includes("egg") &&
-            !routeName.toLowerCase().includes("file:")
-          ) {
-            locationSet.add(routeName);
-          }
-        }
+      const routeName = getNestLocationName(href, parentText, hasNestImage);
+      if (routeName) {
+        locationSet.add(routeName);
       }
     });
 

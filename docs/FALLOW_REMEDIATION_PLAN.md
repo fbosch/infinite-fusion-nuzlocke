@@ -114,7 +114,7 @@ Completed encounter output work: shared classic/remix directory setup removed tw
 
 Completed runtime sprite helper work: shared suffix and CDN URL generation removed one clone group, reducing full duplication groups from 13 to 12. Server and browser existence checks remain intentionally separate.
 
-Completed egg gift-row classification work: deterministic egg and location predicates preserve the existing keyword rules under direct coverage, removing the scraper callback complexity finding and reducing the health report from 119 to 116 findings.
+Completed egg-location classification work: deterministic egg, location, and nest-link predicates preserve the existing keyword rules and parent-context requirements under direct coverage, removing two scraper callback complexity findings and reducing the health report from 119 to 115 findings.
 
 Acceptance criteria:
 

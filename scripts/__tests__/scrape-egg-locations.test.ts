@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { isEggLocationName, isEggRelated } from "../scrape-egg-locations";
+import {
+  getNestLocationName,
+  isEggLocationName,
+  isEggRelated,
+} from "../scrape-egg-locations";
 
 describe("egg gift row classification", () => {
   it.each([
@@ -27,4 +31,27 @@ describe("egg gift row classification", () => {
       expect(isEggLocationName(location)).toBe(false);
     },
   );
+});
+
+describe("nest location links", () => {
+  it.each([
+    ["/wiki/Route_2", "Pikachu nest", false, "Route 2"],
+    ["/wiki/Mt.%20Moon", "", true, "Mt. Moon"],
+  ])(
+    "extracts %s when the parent indicates a nest",
+    (href, parentText, hasNestImage, expected) => {
+      expect(getNestLocationName(href, parentText, hasNestImage)).toBe(
+        expected,
+      );
+    },
+  );
+
+  it.each([
+    ["/wiki/Route_2", "Pokemon list", false],
+    ["/wiki/Pokemon_Nests", "nest", false],
+    ["/wiki/File:Nest.png", "nest", false],
+    ["/not-a-wiki-link/Route_2", "nest", false],
+  ])("rejects unusable nest link: %s", (href, parentText, hasNestImage) => {
+    expect(getNestLocationName(href, parentText, hasNestImage)).toBeNull();
+  });
 });
