@@ -742,7 +742,12 @@ export function ContextMenu({
                         else closeSubmenu();
                       },
                       onKeyDown: (event) => {
-                        if (hasChildren && event.key === "ArrowRight") {
+                        if (
+                          hasChildren &&
+                          (event.key === "ArrowRight" ||
+                            event.key === "Enter" ||
+                            event.key === " ")
+                        ) {
                           event.preventDefault();
                           const firstEnabledChildIndex =
                             item.children!.findIndex(

@@ -7,6 +7,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import TeamEntryItem from "../TeamEntryItem";
@@ -227,8 +228,9 @@ describe("TeamEntryItem", () => {
     });
   });
 
-  it("supports keyboard selection for existing team member", () => {
+  it("supports keyboard selection for existing team member", async () => {
     const onTeamMemberClick = vi.fn();
+    const user = userEvent.setup();
 
     render(
       <TeamEntryItem
@@ -238,9 +240,8 @@ describe("TeamEntryItem", () => {
       />,
     );
 
-    fireEvent.keyDown(screen.getByLabelText("Team slot 2"), {
-      key: "Enter",
-    });
+    screen.getByLabelText("Team slot 2").focus();
+    await user.keyboard("{Enter}");
 
     expect(onTeamMemberClick).toHaveBeenCalledWith(1, {
       position: 1,
@@ -251,7 +252,7 @@ describe("TeamEntryItem", () => {
     });
   });
 
-  it("opens an empty team slot with the Space key", () => {
+  it("opens an empty team slot from its primary action", () => {
     const onTeamMemberClick = vi.fn();
     const emptyTeamEntry: PCEntry = {
       locationId: "team-slot-1",
@@ -270,7 +271,7 @@ describe("TeamEntryItem", () => {
       />,
     );
 
-    fireEvent.keyDown(screen.getByLabelText("Team slot 2"), { key: " " });
+    fireEvent.click(screen.getByLabelText("Team slot 2"));
 
     expect(onTeamMemberClick).toHaveBeenCalledWith(1, {
       position: 1,
@@ -299,6 +300,43 @@ describe("TeamEntryItem", () => {
     await waitFor(() => {
       expect(markTeamMemberAsDeceasedMock).toHaveBeenCalledWith(1);
     });
+  });
+
+  it("activates nested actions without selecting the team card", async () => {
+    const onTeamMemberClick = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <TeamEntryItem
+        entry={filledTeamEntry}
+        idToName={idToName}
+        onTeamMemberClick={onTeamMemberClick}
+      />,
+    );
+
+    const primaryAction = screen.getByLabelText("Team slot 2");
+    const boxAction = screen.getByRole("button", { name: "Move to Box" });
+    const graveyardAction = screen.getByRole("button", {
+      name: "Move to Graveyard",
+    });
+
+    expect(primaryAction.contains(boxAction)).toBe(false);
+    expect(primaryAction.contains(graveyardAction)).toBe(false);
+
+    boxAction.focus();
+    await user.keyboard("{Enter}");
+    await waitFor(() => {
+      expect(moveTeamMemberToBoxMock).toHaveBeenCalledWith(1);
+    });
+    expect(onTeamMemberClick).not.toHaveBeenCalled();
+
+    graveyardAction.focus();
+    fireEvent.keyDown(graveyardAction, { key: " " });
+    fireEvent.click(graveyardAction);
+    await waitFor(() => {
+      expect(markTeamMemberAsDeceasedMock).toHaveBeenCalledWith(1);
+    });
+    expect(onTeamMemberClick).not.toHaveBeenCalled();
   });
 
   it("does not play evolution animation when active playthrough changes", () => {

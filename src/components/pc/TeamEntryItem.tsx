@@ -148,21 +148,17 @@ export default function TeamEntryItem({
             }
           : undefined
       }
-      onClick={handleClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          handleClick();
-        }
-      }}
-      role="button"
-      tabIndex={0}
-      aria-label={
-        isTeamData && entry.position !== undefined
-          ? `Team slot ${entry.position + 1}`
-          : `Scroll to ${idToName.get(entry.locationId) || "location"} in table`
-      }
     >
+      <button
+        type="button"
+        className="absolute inset-0 z-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        onClick={handleClick}
+        aria-label={
+          isTeamData && entry.position !== undefined
+            ? `Team slot ${entry.position + 1}`
+            : `Scroll to ${idToName.get(entry.locationId) || "location"} in table`
+        }
+      />
       <div className="p-4">
         <div className="flex items-center gap-4">
           <div className="flex flex-shrink-0 items-center justify-center rounded-lg relative group/sprite-container p-2">
@@ -215,7 +211,7 @@ export default function TeamEntryItem({
               <div className="flex items-center h-full">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 rounded-md transition-colors focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1"
+                  className="relative z-10 inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 rounded-md transition-colors focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (isTeamData && entry.position !== undefined) {
@@ -298,7 +294,7 @@ export default function TeamEntryItem({
         </div>
       </div>
       {!isEmpty && (
-        <div className="absolute bottom-2 right-2 flex gap-1.5 transition-opacity md:opacity-0 md:group-hover/pc-entry:opacity-100 md:pointer-events-none md:group-hover/pc-entry:pointer-events-auto">
+        <div className="absolute bottom-2 right-2 z-10 flex gap-1.5 transition-opacity md:pointer-events-none md:opacity-0 md:group-hover/pc-entry:pointer-events-auto md:group-hover/pc-entry:opacity-100 md:group-focus-within/pc-entry:pointer-events-auto md:group-focus-within/pc-entry:opacity-100">
           <CursorTooltip content="Move to Box" placement="top-end" delay={300}>
             <button
               type="button"

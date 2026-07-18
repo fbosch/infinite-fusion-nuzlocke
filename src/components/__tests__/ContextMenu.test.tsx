@@ -174,6 +174,39 @@ describe("ContextMenu", () => {
     expect(document.activeElement).toBe(parent);
   });
 
+  it.each(["Enter", " "])("opens submenus with %s", async (key) => {
+    render(
+      <ContextMenu
+        items={[
+          {
+            id: "parent",
+            label: "Parent action",
+            children: [{ id: "child", label: "Child action" }],
+          },
+        ]}
+      >
+        <button type="button">Context trigger</button>
+      </ContextMenu>,
+    );
+
+    fireEvent.contextMenu(
+      screen.getByRole("button", { name: "Context trigger" }),
+    );
+    const parent = await screen.findByRole("menuitem", {
+      name: /Parent action/,
+    });
+    parent.focus();
+    fireEvent.keyDown(parent, { key });
+
+    const child = await screen.findByRole("menuitem", {
+      name: "Child action",
+    });
+    await waitFor(() => {
+      expect(document.activeElement).toBe(child);
+    });
+    expect(parent.getAttribute("aria-expanded")).toBe("true");
+  });
+
   it("does not navigate disabled links", async () => {
     render(
       <ContextMenu
