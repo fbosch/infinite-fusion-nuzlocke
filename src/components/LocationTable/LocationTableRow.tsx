@@ -51,6 +51,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
 
   const aboveTheFold = row.index < 8;
   const shouldLoad = inView || aboveTheFold;
+  const visibleCells = row.getVisibleCells();
 
   // Get encounter data directly - only this row will rerender when this encounter changes
   const encounterData = useEncounter(locationId) || EMPTY_ENCOUNTER;
@@ -121,63 +122,72 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
       ref={ref}
       data-location-id={locationId}
     >
-      {row.getVisibleCells().map((cell) =>
-        match(cell.column.id)
-          .with("sprite", () => (
-            <td
-              key={cell.id}
-              className="p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group"
-            >
-              <PokemonSummaryCard
-                ref={spriteRef}
-                headPokemon={encounterData.head}
-                bodyPokemon={encounterData.body}
-                isFusion={encounterData.isFusion}
+      {shouldLoad ? (
+        visibleCells.map((cell) =>
+          match(cell.column.id)
+            .with("sprite", () => (
+              <td
+                key={cell.id}
+                className="p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group"
+              >
+                <PokemonSummaryCard
+                  ref={spriteRef}
+                  headPokemon={encounterData.head}
+                  bodyPokemon={encounterData.body}
+                  isFusion={encounterData.isFusion}
+                  locationId={locationId}
+                  shouldLoad={shouldLoad}
+                />
+              </td>
+            ))
+            .with("encounter", () => (
+              <EncounterCell
+                key={cell.id}
                 locationId={locationId}
                 shouldLoad={shouldLoad}
               />
-            </td>
-          ))
-          .with("encounter", () => (
-            <EncounterCell
-              key={cell.id}
-              locationId={locationId}
-              shouldLoad={shouldLoad}
-            />
-          ))
-          .with("actions", () => {
-            const hasEncounter = !!(encounterData.head || encounterData.body);
-            return (
+            ))
+            .with("actions", () => {
+              const hasEncounter = !!(encounterData.head || encounterData.body);
+              return (
+                <td
+                  key={cell.id}
+                  className="p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top"
+                >
+                  <div className="flex flex-col items-center justify-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 group-focus-within/row:opacity-100">
+                    {hasEncounter && (
+                      <ResetEncounterButton
+                        locationId={locationId}
+                        locationName={row.original.name}
+                        hasEncounter={hasEncounter}
+                      />
+                    )}
+                    {isCustomLocation(row.original) && (
+                      <RemoveLocationButton
+                        locationId={locationId}
+                        locationName={row.original.name}
+                      />
+                    )}
+                  </div>
+                </td>
+              );
+            })
+            .otherwise(() => (
               <td
                 key={cell.id}
-                className="p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top"
+                className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
               >
-                <div className="flex flex-col items-center justify-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 group-focus-within/row:opacity-100">
-                  {hasEncounter && (
-                    <ResetEncounterButton
-                      locationId={locationId}
-                      locationName={row.original.name}
-                      hasEncounter={hasEncounter}
-                    />
-                  )}
-                  {isCustomLocation(row.original) && (
-                    <RemoveLocationButton
-                      locationId={locationId}
-                      locationName={row.original.name}
-                    />
-                  )}
-                </div>
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </td>
-            );
-          })
-          .otherwise(() => (
-            <td
-              key={cell.id}
-              className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
-            >
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-            </td>
-          )),
+            )),
+        )
+      ) : (
+        <td
+          aria-hidden="true"
+          className="h-[150px]"
+          colSpan={visibleCells.length}
+          data-location-row-placeholder
+        />
       )}
     </tr>
   );

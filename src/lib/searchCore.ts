@@ -105,17 +105,3 @@ export class SearchCore {
     return this.fuse !== null && this.pokemonData !== null;
   }
 }
-
-/**
- * Utility function to check if a query is numeric
- */
-export function isNumericQuery(query: string): boolean {
-  return /^\d+$/.test(query.trim());
-}
-
-/**
- * Utility function to parse a numeric query
- */
-export function parseNumericQuery(query: string): number {
-  return parseInt(query.trim(), 10);
-}

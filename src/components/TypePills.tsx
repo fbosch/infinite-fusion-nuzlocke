@@ -218,7 +218,7 @@ function TypeEffectivenessSummary({
   );
 }
 
-export function TypeBadge({
+function TypeBadge({
   type,
   size = "md",
   showTooltip = true,
@@ -297,7 +297,7 @@ export function TypeBadge({
   );
 }
 
-export function TypeTooltip({
+function TypeTooltip({
   primary,
   secondary,
   children,

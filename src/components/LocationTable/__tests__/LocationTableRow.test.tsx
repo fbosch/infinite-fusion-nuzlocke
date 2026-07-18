@@ -9,21 +9,23 @@ const summaryCardProps = vi.hoisted(() => vi.fn());
 const playEvolution = vi.hoisted(() => vi.fn());
 const canFuse = vi.hoisted(() => vi.fn());
 const useEncounter = vi.hoisted(() => vi.fn());
+const useInView = vi.hoisted(() => vi.fn());
 
-const row = {
-  index: 0,
-  original: { id: "route-1" },
-  getVisibleCells: () => [
-    {
-      id: "sprite-cell",
-      column: { id: "sprite" },
-      getContext: () => ({}),
-    },
-  ],
-} as never;
+const createRow = (index = 0) =>
+  ({
+    index,
+    original: { id: "route-1" },
+    getVisibleCells: () => [
+      {
+        id: "sprite-cell",
+        column: { id: "sprite" },
+        getContext: () => ({}),
+      },
+    ],
+  }) as never;
 
 vi.mock("react-intersection-observer", () => ({
-  useInView: () => ({ inView: true, ref: vi.fn() }),
+  useInView,
 }));
 
 vi.mock("@/stores/playthroughs/hooks", () => ({
@@ -51,13 +53,14 @@ describe("LocationTableRow", () => {
       body: null,
       isFusion: false,
     });
+    useInView.mockReturnValue({ inView: true, ref: vi.fn() });
   });
 
   it("binds sprite context-menu actions to its encounter location", () => {
     render(
       <table>
         <tbody>
-          <LocationTableRow row={row} />
+          <LocationTableRow row={createRow()} />
         </tbody>
       </table>,
     );
@@ -78,7 +81,7 @@ describe("LocationTableRow", () => {
     render(
       <table>
         <tbody>
-          <LocationTableRow row={row} />
+          <LocationTableRow row={createRow()} />
         </tbody>
       </table>,
     );
@@ -97,7 +100,7 @@ describe("LocationTableRow", () => {
     const view = render(
       <table>
         <tbody>
-          <LocationTableRow row={row} />
+          <LocationTableRow row={createRow()} />
         </tbody>
       </table>,
     );
@@ -109,7 +112,7 @@ describe("LocationTableRow", () => {
     view.rerender(
       <table>
         <tbody>
-          <LocationTableRow row={row} />
+          <LocationTableRow row={createRow()} />
         </tbody>
       </table>,
     );
@@ -127,11 +130,28 @@ describe("LocationTableRow", () => {
     render(
       <table>
         <tbody>
-          <LocationTableRow row={row} />
+          <LocationTableRow row={createRow()} />
         </tbody>
       </table>,
     );
 
     expect(playEvolution).not.toHaveBeenCalled();
+  });
+
+  it("renders an offscreen row as a fixed-height placeholder", () => {
+    useInView.mockReturnValue({ inView: false, ref: vi.fn() });
+
+    const view = render(
+      <table>
+        <tbody>
+          <LocationTableRow row={createRow(8)} />
+        </tbody>
+      </table>,
+    );
+
+    expect(
+      view.container.querySelector("[data-location-row-placeholder]"),
+    ).not.toBeNull();
+    expect(summaryCardProps).not.toHaveBeenCalled();
   });
 });
