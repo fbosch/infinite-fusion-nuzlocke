@@ -4,12 +4,31 @@ import "../playthroughs/mocks";
 
 vi.mock("@/lib/analytics/selectors", () => ({
   getSharedEventProperties: () => ({}),
+  getTeamSizeAfter: () => 0,
+  getViableRosterSize: () => 0,
+}));
+vi.mock("@/lib/analytics/playthroughEventData", () => ({
+  getEncounterCount: () => 0,
+  getNewlyReachedCheckpoints: () => [],
+  markCheckpointEventsTracked: () => {},
 }));
 vi.mock("@/lib/analytics/trackEvent", () => ({ trackEvent: vi.fn() }));
 vi.mock("@/lib/events", () => ({ emitEvolutionEvent: vi.fn() }));
 
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
-import { relocateEncounterSlot } from "@/stores/playthroughs/encounters/dragDrop";
+import { removeCustomLocation } from "@/stores/playthroughs/customLocations";
+import {
+  flipEncounterFusion,
+  markEncounterAsCaptured,
+  markEncounterAsDeceased,
+  moveEncounterToBox,
+  moveToOriginalLocation,
+  relocateEncounterSlot,
+  resetEncounter,
+  toggleEncounterFusion,
+  updateEncounter,
+  updatePokemonInEncounter,
+} from "@/stores/playthroughs/encounters";
 import { flipTeamMemberFusion } from "@/stores/playthroughs/encounters/teamActions";
 import { getActivePlaythrough } from "@/stores/playthroughs/playthroughState";
 import { playthroughsStore } from "@/stores/playthroughs/store";
@@ -24,8 +43,22 @@ const SAMPLE_COUNT = 30;
 type FixtureKind =
   | "reverse-active"
   | "reverse-stored"
+  | "encounter-select-empty"
+  | "encounter-overwrite"
+  | "encounter-clear"
+  | "encounter-nickname-update"
+  | "encounter-status-captured"
+  | "encounter-status-deceased"
+  | "encounter-status-stored"
+  | "encounter-toggle-fusion"
+  | "encounter-flip-fusion"
+  | "encounter-evolve"
+  | "encounter-reset"
+  | "move-original-empty-target"
+  | "move-original-occupied-target"
   | "drag-empty-target"
-  | "drag-occupied-target";
+  | "drag-occupied-target"
+  | "custom-location-remove";
 
 type BenchmarkResult = {
   name: FixtureKind;
@@ -39,6 +72,30 @@ type BenchmarkTiming = {
 };
 
 const routeId = (index: number) => `route-${index.toString().padStart(4, "0")}`;
+const SOURCE_LOCATION_ID = routeId(0);
+const TARGET_LOCATION_ID = routeId(1);
+const EMPTY_LOCATION_ID = routeId(ENCOUNTER_COUNT);
+
+const fixtureKinds: FixtureKind[] = [
+  "reverse-active",
+  "reverse-stored",
+  "encounter-select-empty",
+  "encounter-overwrite",
+  "encounter-clear",
+  "encounter-nickname-update",
+  "encounter-status-captured",
+  "encounter-status-deceased",
+  "encounter-status-stored",
+  "encounter-toggle-fusion",
+  "encounter-flip-fusion",
+  "encounter-evolve",
+  "encounter-reset",
+  "move-original-empty-target",
+  "move-original-occupied-target",
+  "drag-empty-target",
+  "drag-occupied-target",
+  "custom-location-remove",
+];
 
 const createPokemon = (
   uid: string,
@@ -50,7 +107,7 @@ const createPokemon = (
   nationalDexId: id,
   uid,
   status,
-  originalLocation: routeId(0),
+  originalLocation: SOURCE_LOCATION_ID,
 });
 
 const createEncounter = (
@@ -62,12 +119,22 @@ const createEncounter = (
 function createFixture(kind: FixtureKind): Playthrough {
   const reverseStatus =
     kind === "reverse-stored" ? PokemonStatus.STORED : PokemonStatus.CAPTURED;
-  const head = createPokemon("source-head", 25, reverseStatus);
+  const head = {
+    ...createPokemon("source-head", 25, reverseStatus),
+    originalLocation:
+      kind === "move-original-empty-target" ||
+      kind === "move-original-occupied-target"
+        ? TARGET_LOCATION_ID
+        : SOURCE_LOCATION_ID,
+  };
   const body = createPokemon("source-body", 133, reverseStatus);
   const encounters: Record<string, EncounterData> = {
-    [routeId(0)]: createEncounter(head, body, true),
-    [routeId(1)]: createEncounter(
-      kind === "drag-occupied-target" ? createPokemon("target-head", 4) : null,
+    [SOURCE_LOCATION_ID]: createEncounter(head, body, true),
+    [TARGET_LOCATION_ID]: createEncounter(
+      kind === "drag-occupied-target" ||
+        kind === "move-original-occupied-target"
+        ? createPokemon("target-head", 4)
+        : null,
     ),
   };
 
@@ -95,6 +162,16 @@ function createFixture(kind: FixtureKind): Playthrough {
     version: "1.0.0",
     createdAt: 1,
     updatedAt: 1,
+    customLocations:
+      kind === "custom-location-remove"
+        ? [
+            {
+              id: "custom-location",
+              name: "Custom Location",
+              insertAfterLocationId: SOURCE_LOCATION_ID,
+            },
+          ]
+        : undefined,
   };
 }
 
@@ -106,17 +183,85 @@ function installFixture(playthrough: Playthrough) {
 }
 
 async function runFixture(kind: FixtureKind) {
-  if (kind === "reverse-active" || kind === "reverse-stored") {
-    await flipTeamMemberFusion(0);
-    return;
-  }
+  switch (kind) {
+    case "reverse-active":
+    case "reverse-stored":
+      await flipTeamMemberFusion(0);
+      return;
+    case "encounter-select-empty":
+      await updateEncounter(
+        EMPTY_LOCATION_ID,
+        createPokemon("selected-pokemon", 7),
+      );
+      return;
+    case "encounter-overwrite":
+      await updateEncounter(
+        SOURCE_LOCATION_ID,
+        createPokemon("replacement-pokemon", 7),
+      );
+      return;
+    case "encounter-clear":
+      await updateEncounter(SOURCE_LOCATION_ID, null, "head");
+      return;
+    case "encounter-nickname-update":
+      await updatePokemonInEncounter(
+        SOURCE_LOCATION_ID,
+        "source-head",
+        "head",
+        { nickname: "Sparky" },
+      );
+      return;
+    case "encounter-status-captured":
+      await markEncounterAsCaptured(SOURCE_LOCATION_ID);
+      return;
+    case "encounter-status-deceased":
+      await markEncounterAsDeceased(SOURCE_LOCATION_ID);
+      return;
+    case "encounter-status-stored":
+      await moveEncounterToBox(SOURCE_LOCATION_ID);
+      return;
+    case "encounter-toggle-fusion":
+      await toggleEncounterFusion(SOURCE_LOCATION_ID);
+      return;
+    case "encounter-flip-fusion":
+      await flipEncounterFusion(SOURCE_LOCATION_ID);
+      return;
+    case "encounter-evolve":
+      await updateEncounter(
+        SOURCE_LOCATION_ID,
+        createPokemon("source-head", 26),
+        "head",
+      );
+      return;
+    case "encounter-reset":
+      resetEncounter(SOURCE_LOCATION_ID);
+      return;
+    case "move-original-empty-target":
+    case "move-original-occupied-target": {
+      const pokemon =
+        getActivePlaythrough()?.encounters?.[SOURCE_LOCATION_ID]?.head;
+      if (!pokemon) {
+        throw new Error(
+          "Move-to-original benchmark fixture has no source Pokemon",
+        );
+      }
 
-  await relocateEncounterSlot({
-    sourceLocationId: routeId(0),
-    sourceField: "head",
-    targetLocationId: routeId(1),
-    targetField: "head",
-  });
+      await moveToOriginalLocation(SOURCE_LOCATION_ID, "head", pokemon);
+      return;
+    }
+    case "drag-empty-target":
+    case "drag-occupied-target":
+      await relocateEncounterSlot({
+        sourceLocationId: SOURCE_LOCATION_ID,
+        sourceField: "head",
+        targetLocationId: TARGET_LOCATION_ID,
+        targetField: "head",
+      });
+      return;
+    case "custom-location-remove":
+      await removeCustomLocation("custom-location");
+      return;
+  }
 }
 
 function warmFixture(kind: FixtureKind) {
@@ -136,13 +281,18 @@ function warmFixture(kind: FixtureKind) {
     return;
   }
 
+  if (kind === "custom-location-remove") {
+    void activePlaythrough.customLocations?.[0]?.id;
+    return;
+  }
+
   const encounters = activePlaythrough.encounters;
   if (!encounters) {
     throw new Error("Drag benchmark fixture has no encounters");
   }
 
-  void encounters[routeId(0)]?.head?.uid;
-  void encounters[routeId(1)]?.head?.uid;
+  void encounters[SOURCE_LOCATION_ID]?.head?.uid;
+  void encounters[TARGET_LOCATION_ID]?.head?.uid;
 }
 
 function percentile(values: number[], percentileValue: number) {
@@ -193,12 +343,7 @@ async function benchmarkFixture(kind: FixtureKind): Promise<BenchmarkResult> {
 describe("playthrough interaction hot paths", () => {
   it("reports deterministic Reverse Fusion and drag baselines", async () => {
     const results: BenchmarkResult[] = [];
-    for (const kind of [
-      "reverse-active",
-      "reverse-stored",
-      "drag-empty-target",
-      "drag-occupied-target",
-    ] as const) {
+    for (const kind of fixtureKinds) {
       results.push(await benchmarkFixture(kind));
     }
 
@@ -213,6 +358,6 @@ describe("playthrough interaction hot paths", () => {
         2,
       ),
     );
-    expect(results).toHaveLength(4);
+    expect(results).toHaveLength(fixtureKinds.length);
   }, 120_000);
 });
