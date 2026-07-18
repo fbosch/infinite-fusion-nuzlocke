@@ -15,6 +15,7 @@ import {
   getPackedBounds,
 } from "./utils/sprite-packing-utils";
 import {
+  BasePokemonEntrySchema,
   getSpriteSourcePaths,
   loadJsonFile,
 } from "./utils/sprite-source-utils";
@@ -318,7 +319,7 @@ async function loadSpriteData(
   const entriesData = await ConsoleFormatter.withSpinner(
     "Loading Pokemon entries...",
     async () => {
-      return loadJsonFile<PokemonEntry[]>(BASE_ENTRIES_PATH);
+      return loadJsonFile(BASE_ENTRIES_PATH, BasePokemonEntrySchema.array());
     },
   );
 

@@ -79,6 +79,7 @@ describe("Pokemon icon downloads", () => {
     ).resolves.toBe("egg");
     expect(fetchMock).toHaveBeenCalledWith(config.eggSpriteUrl, {
       headers: { "User-Agent": "Infinite-Fusion-Scraper/1.0" },
+      signal: expect.any(AbortSignal),
     });
   });
 
@@ -105,7 +106,10 @@ describe("Pokemon icon downloads", () => {
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
       "https://sprites.example/lycanroc.png",
-      { headers: { "User-Agent": "Infinite-Fusion-Scraper/1.0" } },
+      {
+        headers: { "User-Agent": "Infinite-Fusion-Scraper/1.0" },
+        signal: expect.any(AbortSignal),
+      },
     );
   });
 

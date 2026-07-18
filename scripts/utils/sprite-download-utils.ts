@@ -8,6 +8,7 @@ import {
 const SPRITE_FETCH_HEADERS = {
   "User-Agent": "Infinite-Fusion-Scraper/1.0",
 };
+const SPRITE_FETCH_TIMEOUT_MS = 10_000;
 
 export type SpriteDownloadIcon = {
   id: number;
@@ -36,7 +37,20 @@ export async function spriteFileExists(filePath: string): Promise<boolean> {
 }
 
 async function fetchSprite(url: string): Promise<Response> {
-  return fetch(url, { headers: SPRITE_FETCH_HEADERS });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    SPRITE_FETCH_TIMEOUT_MS,
+  );
+
+  try {
+    return await fetch(url, {
+      headers: SPRITE_FETCH_HEADERS,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 async function saveSprite(response: Response, filePath: string): Promise<void> {
@@ -92,7 +106,6 @@ async function downloadOriginalOrBaseForm(
   icon: SpriteDownloadIcon,
   config: SpriteDownloadConfig,
   filePath: string,
-  attempt: number,
 ): Promise<void> {
   const response = await fetchSprite(icon.url);
   if (response.ok) {
@@ -100,7 +113,7 @@ async function downloadOriginalOrBaseForm(
     return;
   }
 
-  if (response.status === 404 && attempt === 1) {
+  if (response.status === 404) {
     if (await tryDownloadBaseForm(icon, config)) return;
   }
 
@@ -116,7 +129,7 @@ async function downloadWithRetries(
 ): Promise<boolean> {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      await downloadOriginalOrBaseForm(icon, config, filePath, attempt);
+      await downloadOriginalOrBaseForm(icon, config, filePath);
       return true;
     } catch (error) {
       if (attempt === retries) {

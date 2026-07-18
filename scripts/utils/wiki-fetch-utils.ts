@@ -1,20 +1,19 @@
+import { z } from "zod";
+
 const WIKI_ORIGIN = "https://infinitefusion.fandom.com";
 const WIKI_API_URL = `${WIKI_ORIGIN}/api.php`;
 const WIKI_API_TIMEOUT_MS = 10_000;
 const SCRAPER_USER_AGENT =
   "InfiniteFusionNuzlockeScraper/1.0 (+https://github.com/fbb/infinite-fusion-nuzlocke)";
 
-type WikiParseResponse = {
-  parse?: {
-    text?: string;
-    wikitext?: string;
-    title?: string;
-  };
-  error?: {
-    code?: string;
-    info?: string;
-  };
-};
+const WikiParseResponseSchema = z.object({
+  parse: z
+    .object({ text: z.string().optional(), wikitext: z.string().optional() })
+    .optional(),
+  error: z
+    .object({ code: z.string().optional(), info: z.string().optional() })
+    .optional(),
+});
 
 function getPageTitleFromUrl(pageUrl: string): string {
   const parsed = new URL(pageUrl);
@@ -100,12 +99,20 @@ async function fetchWikiApiResponse(
   }
 }
 
+// fallow-ignore-next-line complexity
 function getParsedWikiContent(
   payload: unknown,
   prop: "text" | "wikitext",
   pageTitle: string,
 ): string {
-  const wikiPayload = payload as WikiParseResponse;
+  const result = WikiParseResponseSchema.safeParse(payload);
+  if (result.success === false) {
+    throw new Error(
+      `Wiki API returned invalid payload for page ${pageTitle}: ${z.prettifyError(result.error)}`,
+    );
+  }
+
+  const wikiPayload = result.data;
   if (wikiPayload.error) {
     const code = wikiPayload.error.code ?? "unknown";
     const info = wikiPayload.error.info ?? "Unknown wiki API error";

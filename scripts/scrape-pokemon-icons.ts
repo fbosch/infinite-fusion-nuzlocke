@@ -11,6 +11,7 @@ import {
   spriteFileExists,
 } from "./utils/sprite-download-utils";
 import {
+  BasePokemonEntrySchema,
   getSpriteSourcePaths,
   loadJsonFile,
 } from "./utils/sprite-source-utils";
@@ -143,7 +144,7 @@ async function loadPokemonIcons(): Promise<PokemonIcon[]> {
     const entriesData = await ConsoleFormatter.withSpinner(
       "Loading Pokemon entries...",
       async () => {
-        return loadJsonFile<PokemonEntry[]>(BASE_ENTRIES_PATH);
+        return loadJsonFile(BASE_ENTRIES_PATH, BasePokemonEntrySchema.array());
       },
     );
 
