@@ -101,10 +101,12 @@ Fallow's duplication report groups these findings by pipeline responsibility. Re
 | Encounter extraction and normalization | 10, 12-14 | `scripts/scrape-legendary-encounters.ts`, `scripts/scrape-safari-encounters.ts`, `scripts/scrape-special-encounters.ts`, `scripts/scrape-wild-encounters.ts` | Extract only parsers with matching source markup and output schemas; retain source-specific validation and error messages. |
 | Scraper orchestration and terminal reporting | 8-9 | `scripts/scrape-egg-locations.ts`, `scripts/scrape-special-encounters.ts`, `scripts/scrape-pokemon-icons.ts` | Keep final summaries and process-exit handling local unless a shared runner can preserve each script's result shape and direct-execution guard. |
 | Sprite source setup and acquisition | 3-4, 11 | `scripts/generate-spritesheet.ts`, `scripts/scrape-pokemon-icons.ts` | Share sprite-specific path/configuration and generation download iteration; do not mix with encounter scrapers. |
-| Sprite packing and validation | 5-7 | `scripts/generate-spritesheet.ts` | Extract a rectangle-overlap predicate only after packing and repair behavior has targeted coverage; keep packing and repair policies distinct. |
+| Sprite packing and validation | 5-7 | `scripts/generate-spritesheet.ts` | Clone consolidation completed: shared geometry primitives now cover overlap detection, pair traversal, and packed bounds; packing and repair policies remain distinct and retain their outstanding complexity work. |
 | Runtime sprite delivery | 15-16 | `src/app/api/sprite/variants/route.ts`, `src/lib/sprites.ts` | Track separately from script pipelines because these are request-time behavior and need API coverage. |
 
 Completed source-enrichment work: shared evolution-chain loading and processed-record construction now serve both batch and fallback retrieval in `scripts/fetch-pokemon-data.ts`. This removed clone groups 1-2 and reduced the health report from 126 to 124 complexity findings; the remaining stages stay tracked by the unchecked complexity item.
+
+Completed sprite-packing clone work: targeted geometry tests cover edge contact, overlap detection, pair traversal, and packed bounds. Shared geometry primitives removed clone groups 5-7 and one validation complexity finding, reducing the health report from 124 to 123 complexity findings.
 
 Acceptance criteria:
 
