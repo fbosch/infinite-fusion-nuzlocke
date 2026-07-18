@@ -6,6 +6,7 @@ import * as cheerio from "cheerio";
 import { extractPokedexSubpageTitles } from "./scrape-pokedex";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
+import { cleanLocationName } from "./utils/location-utils";
 import {
   findPokemonId,
   isPotentialPokemonName,
@@ -86,26 +87,6 @@ function findPokemonIdWithSpecialCases(
   }
 
   return null;
-}
-
-/**
- * Cleans location names to match the standard format
- */
-function cleanLocationName(location: string): string {
-  return (
-    location
-      // Remove wiki links
-      .replace(/\[\[([^\]]+)\]\]/g, "$1")
-      .replace(/\[\[([^\]]+)\|([^\]]+)\]\]/g, "$2")
-      // Remove extra context in parentheses
-      .replace(/\s*\([^)]*\)/g, "")
-      // Standardize Pokémon -> Pokemon
-      .replace(/Pokémon/g, "Pokemon")
-      // Standardize S.S. Anne
-      .replace(/S\.S\.\s*Anne/g, "S.S. Anne")
-      // Remove extra whitespace
-      .trim()
-  );
 }
 
 /**

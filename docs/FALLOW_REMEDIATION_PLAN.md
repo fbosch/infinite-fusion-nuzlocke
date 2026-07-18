@@ -86,7 +86,7 @@ Purpose: close the residual first-party findings through behavior-preserving ref
 - [x] Refactor summary-card and PC/team decision surfaces without widening component interfaces unnecessarily.
 - [x] Resolve UI clone groups only where states and accessibility behavior are identical.
 - [ ] Group scraper and sprite clone findings by data-pipeline step.
-- [ ] Add deterministic input/output tests before consolidating script utilities.
+- [x] Add deterministic input/output tests before consolidating script utilities.
 - [ ] Resolve remaining complexity findings by workflow or pipeline stage, prioritizing items with matching duplication findings.
 - [ ] Trace every remaining first-party finding and remove it, refactor it, configure it, or add a narrow reasoned suppression.
 - [ ] Save the resulting first-party baseline and keep the changed-code audit gate enabled.

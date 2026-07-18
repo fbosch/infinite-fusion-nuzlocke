@@ -4,6 +4,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import * as cheerio from "cheerio";
 import { ConsoleFormatter } from "./utils/console-utils";
+import { cleanLocationName } from "./utils/location-utils";
 import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
 
 const GIFTS_AND_TRADES_URL =
@@ -23,26 +24,6 @@ interface EggLocation {
   description: string;
   pokemonName?: string;
   pokemonId?: number;
-}
-
-/**
- * Cleans location names to match the standard format
- */
-function cleanLocationName(location: string): string {
-  return (
-    location
-      // Remove wiki links
-      .replace(/\[\[([^\]]+)\]\]/g, "$1")
-      .replace(/\[\[([^\]]+)\|([^\]]+)\]\]/g, "$2")
-      // Remove extra context in parentheses
-      .replace(/\s*\([^)]*\)/g, "")
-      // Standardize Pokémon -> Pokemon
-      .replace(/Pokémon/g, "Pokemon")
-      // Standardize S.S. Anne
-      .replace(/S\.S\.\s*Anne/g, "S.S. Anne")
-      // Remove extra whitespace
-      .trim()
-  );
 }
 
 /**
