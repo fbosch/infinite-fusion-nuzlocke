@@ -3,6 +3,7 @@ import { ensureActivePlaythroughWithEncounters } from "./shared";
 import { markEncounterAsDeceased } from "./status";
 import {
   findCanonicalLocationForUids,
+  flipTeamMember,
   getTeamMemberUids,
   updatePokemonByUID,
   updateTeamMember,
@@ -33,23 +34,5 @@ export const markTeamMemberAsDeceased = async (
 };
 
 export const flipTeamMemberFusion = async (position: number): Promise<void> => {
-  const activePlaythrough = ensureActivePlaythroughWithEncounters();
-  if (!activePlaythrough?.team) {
-    return;
-  }
-
-  if (position < 0 || position >= activePlaythrough.team.members.length) {
-    return;
-  }
-
-  const member = activePlaythrough.team.members[position];
-  if (!member?.headPokemonUid || !member.bodyPokemonUid) {
-    return;
-  }
-
-  await updateTeamMember(
-    position,
-    { uid: member.bodyPokemonUid },
-    { uid: member.headPokemonUid },
-  );
+  flipTeamMember(position);
 };

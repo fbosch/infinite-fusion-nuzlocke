@@ -52,6 +52,36 @@ const createTeamMember = (
   };
 };
 
+const getAutoAssignablePokemon = (pokemon: {
+  uid?: string;
+  status?: string;
+}) => {
+  if (!pokemon.uid || !shouldAutoAssign(pokemon.status)) {
+    return null;
+  }
+
+  return { uid: pokemon.uid };
+};
+
+const findTeamMemberPosition = (
+  members: ReadonlyArray<{
+    headPokemonUid: string;
+    bodyPokemonUid: string;
+  } | null>,
+  pokemon: ReadonlyArray<{ uid: string } | null>,
+) => {
+  const pokemonUids = new Set(
+    pokemon.flatMap((teamPokemon) => (teamPokemon ? [teamPokemon.uid] : [])),
+  );
+
+  return members.findIndex(
+    (member) =>
+      member &&
+      (pokemonUids.has(member.headPokemonUid) ||
+        pokemonUids.has(member.bodyPokemonUid)),
+  );
+};
+
 export const updateTeamMember = async (
   position: number,
   headPokemon: { uid: string } | null,
@@ -72,6 +102,26 @@ export const updateTeamMember = async (
     headPokemon,
     bodyPokemon,
   );
+  activePlaythrough.updatedAt = Date.now();
+
+  return true;
+};
+
+export const flipTeamMember = (position: number): boolean => {
+  const activePlaythrough = ensureActivePlaythroughWithEncounters();
+  if (!activePlaythrough || !isValidTeamPosition(position)) {
+    return false;
+  }
+
+  const member = activePlaythrough.team.members[position];
+  if (!member?.headPokemonUid || !member.bodyPokemonUid) {
+    return false;
+  }
+
+  activePlaythrough.team.members[position] = {
+    headPokemonUid: member.bodyPokemonUid,
+    bodyPokemonUid: member.headPokemonUid,
+  };
   activePlaythrough.updatedAt = Date.now();
 
   return true;
@@ -100,51 +150,19 @@ export const autoAssignCapturedPokemonToTeam = async (
 
   const nextAvailablePosition = availablePositions[0];
 
-  let headPokemon: { uid: string } | null = null;
-  let bodyPokemon: { uid: string } | null = null;
-
-  const headUid = encounter.head?.uid;
-  if (
-    encounter.head?.status &&
-    shouldAutoAssign(encounter.head.status) &&
-    headUid
-  ) {
-    headPokemon = { uid: headUid };
-  }
-
-  const bodyUid = encounter.body?.uid;
-  if (
-    encounter.body?.status &&
-    shouldAutoAssign(encounter.body.status) &&
-    bodyUid
-  ) {
-    bodyPokemon = { uid: bodyUid };
-  }
+  const headPokemon = getAutoAssignablePokemon(encounter.head ?? {});
+  const bodyPokemon = getAutoAssignablePokemon(encounter.body ?? {});
 
   if (!headPokemon && !bodyPokemon) {
     return;
   }
 
-  let targetPosition = nextAvailablePosition;
-
-  if (headPokemon || bodyPokemon) {
-    for (let i = 0; i < activePlaythrough.team.members.length; i++) {
-      const member = activePlaythrough.team.members[i];
-      if (!member) {
-        continue;
-      }
-
-      if (
-        (headPokemon && member.headPokemonUid === headPokemon.uid) ||
-        (bodyPokemon && member.bodyPokemonUid === bodyPokemon.uid) ||
-        (headPokemon && member.bodyPokemonUid === headPokemon.uid) ||
-        (bodyPokemon && member.headPokemonUid === bodyPokemon.uid)
-      ) {
-        targetPosition = i;
-        break;
-      }
-    }
-  }
+  const existingPosition = findTeamMemberPosition(
+    activePlaythrough.team.members,
+    [headPokemon, bodyPokemon],
+  );
+  const targetPosition =
+    existingPosition === -1 ? nextAvailablePosition : existingPosition;
 
   const success = await updateTeamMember(
     targetPosition,
@@ -178,6 +196,35 @@ const findPokemonByUID = (
   }
 
   return null;
+};
+
+const movePokemonToBox = async (
+  encounters: Record<string, EncounterData>,
+  pokemonUID: string,
+) => {
+  if (!pokemonUID) {
+    return;
+  }
+
+  const pokemon = findPokemonByUID(encounters, pokemonUID);
+  if (!pokemon) {
+    return;
+  }
+
+  const updates: Partial<z.infer<typeof PokemonOptionSchema>> = {
+    status: PokemonStatus.STORED,
+  };
+
+  if (
+    !pokemon.originalReceivalStatus &&
+    (pokemon.status === PokemonStatus.CAPTURED ||
+      pokemon.status === PokemonStatus.RECEIVED ||
+      pokemon.status === PokemonStatus.TRADED)
+  ) {
+    updates.originalReceivalStatus = pokemon.status;
+  }
+
+  await updatePokemonByUID(pokemonUID, updates);
 };
 
 export const getTeamMemberUids = (position: number): string[] => {
@@ -267,53 +314,14 @@ export const moveTeamMemberToBox = async (position: number): Promise<void> => {
     return;
   }
 
-  if (teamMember.headPokemonUid) {
-    const headPokemon = findPokemonByUID(
-      activePlaythrough.encounters,
-      teamMember.headPokemonUid,
-    );
-
-    if (headPokemon) {
-      const updates: Partial<z.infer<typeof PokemonOptionSchema>> = {
-        status: PokemonStatus.STORED,
-      };
-
-      if (
-        !headPokemon.originalReceivalStatus &&
-        (headPokemon.status === PokemonStatus.CAPTURED ||
-          headPokemon.status === PokemonStatus.RECEIVED ||
-          headPokemon.status === PokemonStatus.TRADED)
-      ) {
-        updates.originalReceivalStatus = headPokemon.status;
-      }
-
-      await updatePokemonByUID(teamMember.headPokemonUid, updates);
-    }
-  }
-
-  if (teamMember.bodyPokemonUid) {
-    const bodyPokemon = findPokemonByUID(
-      activePlaythrough.encounters,
-      teamMember.bodyPokemonUid,
-    );
-
-    if (bodyPokemon) {
-      const updates: Partial<z.infer<typeof PokemonOptionSchema>> = {
-        status: PokemonStatus.STORED,
-      };
-
-      if (
-        !bodyPokemon.originalReceivalStatus &&
-        (bodyPokemon.status === PokemonStatus.CAPTURED ||
-          bodyPokemon.status === PokemonStatus.RECEIVED ||
-          bodyPokemon.status === PokemonStatus.TRADED)
-      ) {
-        updates.originalReceivalStatus = bodyPokemon.status;
-      }
-
-      await updatePokemonByUID(teamMember.bodyPokemonUid, updates);
-    }
-  }
+  await movePokemonToBox(
+    activePlaythrough.encounters,
+    teamMember.headPokemonUid,
+  );
+  await movePokemonToBox(
+    activePlaythrough.encounters,
+    teamMember.bodyPokemonUid,
+  );
 
   activePlaythrough.team.members[position] = null;
   activePlaythrough.updatedAt = Date.now();

@@ -27,6 +27,21 @@ const EMPTY_ENCOUNTER = {
   updatedAt: 0,
 };
 
+const getEffectiveFusionId = ({
+  isFusion,
+  head,
+  body,
+}: Pick<
+  NonNullable<ReturnType<typeof useEncounter>>,
+  "isFusion" | "head" | "body"
+>) => {
+  if (!isFusion || !head || !body || !canFuse(head, body)) {
+    return null;
+  }
+
+  return `${head.id}.${body.id}`;
+};
+
 export default function LocationTableRow({ row }: LocationTableRowProps) {
   const locationId = row.original.id;
   const { ref, inView } = useInView();
@@ -77,35 +92,25 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
 
   // Initialize the previous fusion ID on first render to prevent animation on page load
   useEffect(() => {
-    if (encounterData.isFusion && encounterData.head && encounterData.body) {
-      const canActuallyFuse = canFuse(encounterData.head, encounterData.body);
-      if (canActuallyFuse) {
-        const currentFusionId = `${encounterData.head.id}.${encounterData.body.id}`;
-        if (previousFusionId.current === null) {
-          // First time rendering - just set the ID without playing animation
-          previousFusionId.current = currentFusionId;
-        }
-      }
+    const currentFusionId = getEffectiveFusionId(encounterData);
+    if (currentFusionId && previousFusionId.current === null) {
+      // First time rendering - just set the ID without playing animation
+      previousFusionId.current = currentFusionId;
     }
   }, [encounterData.isFusion, encounterData.head, encounterData.body]);
 
   // Play evolution animation only when the effective fusion ID changes
   useEffect(() => {
-    if (encounterData.isFusion && encounterData.head && encounterData.body) {
-      const canActuallyFuse = canFuse(encounterData.head, encounterData.body);
-      if (canActuallyFuse) {
-        // Calculate the effective fusion ID based on current state
-        const currentFusionId = `${encounterData.head.id}.${encounterData.body.id}`;
+    const currentFusionId = getEffectiveFusionId(encounterData);
 
-        // Only play animation if this is a new fusion combination (and not the first render)
-        if (
-          previousFusionId.current !== null &&
-          currentFusionId !== previousFusionId.current
-        ) {
-          previousFusionId.current = currentFusionId;
-          spriteRef.current?.playEvolution();
-        }
-      }
+    // Only play animation if this is a new fusion combination (and not the first render)
+    if (
+      currentFusionId &&
+      previousFusionId.current !== null &&
+      currentFusionId !== previousFusionId.current
+    ) {
+      previousFusionId.current = currentFusionId;
+      spriteRef.current?.playEvolution();
     }
   }, [encounterData.isFusion, encounterData.head, encounterData.body]);
 

@@ -82,6 +82,18 @@ export default defineConfig({
         resolve: {
           alias,
         },
+        plugins: react(),
+        test: {
+          name: "react-benchmark",
+          include: ["tests/benchmarks/**/*.benchmark.tsx"],
+          setupFiles: ["./tests/setup.react-hooks.ts"],
+          environment: "jsdom",
+        },
+      },
+      {
+        resolve: {
+          alias,
+        },
         test: {
           name: "react-hooks",
           include: ["**/playthroughs.test.ts", "**/playthroughs/**/*.test.ts"],

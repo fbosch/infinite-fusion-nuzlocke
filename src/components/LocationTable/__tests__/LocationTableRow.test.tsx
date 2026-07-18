@@ -1,10 +1,26 @@
 /** @vitest-environment jsdom */
 
 import { render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { forwardRef, useImperativeHandle } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import LocationTableRow from "../LocationTableRow";
 
 const summaryCardProps = vi.hoisted(() => vi.fn());
+const playEvolution = vi.hoisted(() => vi.fn());
+const canFuse = vi.hoisted(() => vi.fn());
+const useEncounter = vi.hoisted(() => vi.fn());
+
+const row = {
+  index: 0,
+  original: { id: "route-1" },
+  getVisibleCells: () => [
+    {
+      id: "sprite-cell",
+      column: { id: "sprite" },
+      getContext: () => ({}),
+    },
+  ],
+} as never;
 
 vi.mock("react-intersection-observer", () => ({
   useInView: () => ({ inView: true, ref: vi.fn() }),
@@ -12,42 +28,36 @@ vi.mock("react-intersection-observer", () => ({
 
 vi.mock("@/stores/playthroughs/hooks", () => ({
   useActivePlaythroughId: () => "playthrough-1",
-  useEncounter: () => ({
-    head: { id: 132, name: "Ditto" },
-    body: null,
-    isFusion: false,
-  }),
+  useEncounter,
 }));
 
 vi.mock("@/lib/events", () => ({ addEvolutionListener: () => vi.fn() }));
-vi.mock("@/utils/pokemonPredicates", () => ({ canFuse: () => false }));
+vi.mock("@/utils/pokemonPredicates", () => ({ canFuse }));
 vi.mock("@/components/PokemonSummaryCard", () => ({
-  default: (props: unknown) => {
+  default: forwardRef((props: unknown, ref) => {
     summaryCardProps(props);
+    useImperativeHandle(ref, () => ({ playEvolution }));
     return <div />;
-  },
+  }),
 }));
 
 describe("LocationTableRow", () => {
+  beforeEach(() => {
+    summaryCardProps.mockClear();
+    playEvolution.mockClear();
+    canFuse.mockReturnValue(false);
+    useEncounter.mockReturnValue({
+      head: { id: 132, name: "Ditto" },
+      body: null,
+      isFusion: false,
+    });
+  });
+
   it("binds sprite context-menu actions to its encounter location", () => {
     render(
       <table>
         <tbody>
-          <LocationTableRow
-            row={
-              {
-                index: 0,
-                original: { id: "route-1" },
-                getVisibleCells: () => [
-                  {
-                    id: "sprite-cell",
-                    column: { id: "sprite" },
-                    getContext: () => ({}),
-                  },
-                ],
-              } as never
-            }
-          />
+          <LocationTableRow row={row} />
         </tbody>
       </table>,
     );
@@ -55,5 +65,73 @@ describe("LocationTableRow", () => {
     expect(summaryCardProps).toHaveBeenCalledWith(
       expect.objectContaining({ locationId: "route-1" }),
     );
+  });
+
+  it("does not animate an eligible fusion on initial render", () => {
+    canFuse.mockReturnValue(true);
+    useEncounter.mockReturnValue({
+      head: { id: 25, name: "Pikachu" },
+      body: { id: 4, name: "Charmander" },
+      isFusion: true,
+    });
+
+    render(
+      <table>
+        <tbody>
+          <LocationTableRow row={row} />
+        </tbody>
+      </table>,
+    );
+
+    expect(playEvolution).not.toHaveBeenCalled();
+  });
+
+  it("animates when an eligible fusion changes", () => {
+    canFuse.mockReturnValue(true);
+    useEncounter.mockReturnValue({
+      head: { id: 25, name: "Pikachu" },
+      body: { id: 4, name: "Charmander" },
+      isFusion: true,
+    });
+
+    const view = render(
+      <table>
+        <tbody>
+          <LocationTableRow row={row} />
+        </tbody>
+      </table>,
+    );
+    useEncounter.mockReturnValue({
+      head: { id: 25, name: "Pikachu" },
+      body: { id: 133, name: "Eevee" },
+      isFusion: true,
+    });
+    view.rerender(
+      <table>
+        <tbody>
+          <LocationTableRow row={row} />
+        </tbody>
+      </table>,
+    );
+
+    expect(playEvolution).toHaveBeenCalledOnce();
+  });
+
+  it("does not animate an invalid fusion combination", () => {
+    useEncounter.mockReturnValue({
+      head: { id: 25, name: "Pikachu" },
+      body: { id: 4, name: "Charmander" },
+      isFusion: true,
+    });
+
+    render(
+      <table>
+        <tbody>
+          <LocationTableRow row={row} />
+        </tbody>
+      </table>,
+    );
+
+    expect(playEvolution).not.toHaveBeenCalled();
   });
 });
