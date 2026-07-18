@@ -18,6 +18,7 @@ import {
   isValidElement,
   useCallback,
   useEffect,
+  useId,
   useLayoutEffect,
   useRef,
   useState,
@@ -71,6 +72,37 @@ export function filterEdgeSeparators(
 
   // Return slice from first to last non-separator item
   return items.slice(start, end + 1);
+}
+
+function getContextMenuItemVariantClasses(
+  variant: ContextMenuItem["variant"],
+  isActive: boolean,
+) {
+  return match<[ContextMenuItem["variant"], boolean]>([variant, isActive])
+    .with(
+      ["danger", true],
+      () => "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300",
+    )
+    .with(
+      ["danger", false],
+      () =>
+        "text-red-600 dark:text-red-400 enabled:hover:bg-red-50 enabled:dark:hover:bg-red-900/20 enabled:hover:text-red-700 enabled:dark:hover:text-red-300",
+    )
+    .with(
+      ["warning", true],
+      () =>
+        "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300",
+    )
+    .with(
+      ["warning", false],
+      () =>
+        "text-yellow-600 dark:text-yellow-400 enabled:hover:bg-yellow-50 enabled:dark:hover:bg-yellow-900/20 enabled:hover:text-yellow-700 enabled:dark:hover:text-yellow-300",
+    )
+    .otherwise(([, active]) =>
+      active
+        ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+        : "text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white",
+    );
 }
 
 interface ContextMenuSubmenuProps {
@@ -220,6 +252,7 @@ export function ContextMenu({
   portalRootId = "context-menu-root",
   onOpenChange,
 }: ContextMenuProps) {
+  const triggerId = useId();
   const {
     menuPosition,
     setMenuPosition,
@@ -325,6 +358,35 @@ export function ContextMenu({
     };
   }, [isOpen, handleClose]);
 
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const handleActiveContextMenu = (event: MouseEvent) => {
+      const target = event.target;
+      const contextMenuTrigger =
+        target instanceof Element &&
+        target.closest<HTMLElement>("[data-context-menu-trigger]");
+
+      if (!contextMenuTrigger) {
+        event.preventDefault();
+      } else if (contextMenuTrigger.dataset.contextMenuTrigger === triggerId) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      handleClose();
+    };
+
+    document.addEventListener("contextmenu", handleActiveContextMenu, true);
+    return () => {
+      document.removeEventListener(
+        "contextmenu",
+        handleActiveContextMenu,
+        true,
+      );
+    };
+  }, [isVisible, handleClose, triggerId]);
+
   const openSubmenuForIndex = useCallback((validIndex: number) => {
     setOpenSubmenuIndex(validIndex);
   }, []);
@@ -366,6 +428,7 @@ export function ContextMenu({
             refs.setReference(node);
           },
           onContextMenu: handleContextMenu,
+          "data-context-menu-trigger": disabled ? undefined : triggerId,
         } as React.HTMLAttributes<HTMLElement>)}
 
       {/* Render popover in portal when visible */}
@@ -419,35 +482,10 @@ export function ContextMenu({
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                 );
 
-                const variantClasses = match<[string | undefined, boolean]>([
+                const variantClasses = getContextMenuItemVariantClasses(
                   item.variant,
                   isActive,
-                ])
-                  .with(
-                    ["danger", true],
-                    () =>
-                      "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300",
-                  )
-                  .with(
-                    ["danger", false],
-                    () =>
-                      "text-red-600 dark:text-red-400 enabled:hover:bg-red-50 enabled:dark:hover:bg-red-900/20 enabled:hover:text-red-700 enabled:dark:hover:text-red-300",
-                  )
-                  .with(
-                    ["warning", true],
-                    () =>
-                      "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300",
-                  )
-                  .with(
-                    ["warning", false],
-                    () =>
-                      "text-yellow-600 dark:text-yellow-400 enabled:hover:bg-yellow-50 enabled:dark:hover:bg-yellow-900/20 enabled:hover:text-yellow-700 enabled:dark:hover:text-yellow-300",
-                  )
-                  .otherwise(([, active]) =>
-                    active
-                      ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
-                      : "text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white",
-                  );
+                );
 
                 const commonClasses = clsx(
                   baseClasses,
@@ -639,31 +677,6 @@ export function ContextMenu({
             </div>
           </FloatingFocusManager>
         </FloatingPortal>
-      )}
-
-      {/* Handle outside clicks and escape key */}
-      {isVisible && (
-        <button
-          type="button"
-          className="fixed inset-0 z-40"
-          aria-label="Close context menu"
-          onClick={handleClose}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              handleClose();
-            }
-          }}
-          onMouseMove={(e) => {
-            // Close submenu if moving far away from the menu
-            const withinMenu = menuElementRef.current?.contains(
-              e.target as Node,
-            );
-            const withinSubmenu = document
-              .querySelector('[role="menu"][style*="z-[9999]"]')
-              ?.contains(e.target as Node);
-            if (!withinMenu && !withinSubmenu) closeSubmenu();
-          }}
-        />
       )}
     </>
   );
