@@ -5,14 +5,13 @@ import { CursorTooltip } from "@/components/CursorTooltip";
 import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
 import { usePreferredVariantState, useSpriteCredits } from "@/hooks/useSprite";
 import { getSpriteId } from "@/lib/sprites";
-import { isEggId, type PokemonOptionType } from "@/loaders/pokemon";
+import type { PokemonOptionType } from "@/loaders/pokemon";
 import { formatArtistCredits } from "@/utils/formatCredits";
-import { isPokemonDeceased } from "@/utils/pokemonPredicates";
 import { TypePills } from "../TypePills";
 import { ArtworkVariantButton } from "./ArtworkVariantButton";
 import { FusionSprite, type FusionSpriteHandle } from "./FusionSprite";
 import { PokemonContextMenu } from "./PokemonContextMenu";
-import { getDisplayPokemon, getNicknameText } from "./utils";
+import { getSummaryCardDisplay } from "./summaryCardModel";
 
 interface SummaryCardProps {
   headPokemon?: PokemonOptionType | null;
@@ -45,23 +44,14 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
     const effectiveHeadPokemon = headPokemon;
     const effectiveBodyPokemon = bodyPokemon;
     const effectiveIsFusion = isFusion;
-
-    const eitherPokemonIsEgg =
-      isEggId(effectiveHeadPokemon?.id) || isEggId(effectiveBodyPokemon?.id);
-
-    // For team member selection, bypass encounter logic and always show fusion when requested
-    // For encounters, use the full display logic with canFuse restrictions
-    const displayPokemon = isTeamMember
-      ? {
-          head: effectiveHeadPokemon || null,
-          body: effectiveBodyPokemon || null,
-          isFusion: effectiveIsFusion,
-        }
-      : getDisplayPokemon(
-          effectiveHeadPokemon || null,
-          effectiveBodyPokemon || null,
-          effectiveIsFusion,
-        );
+    const { displayPokemon, eitherPokemonIsEgg, isDeceased, link, name } =
+      getSummaryCardDisplay({
+        headPokemon: effectiveHeadPokemon,
+        bodyPokemon: effectiveBodyPokemon,
+        isFusion: effectiveIsFusion,
+        isTeamMember,
+        nickname,
+      });
 
     // Preload credits for the artwork variants when they exist
     useSpriteCredits(
@@ -108,44 +98,8 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
       return null;
     }
 
-    // Use the nickname prop if provided, otherwise use the Pokémon's existing nickname
-    const name =
-      nickname !== undefined
-        ? nickname ||
-          displayPokemon.head?.name ||
-          displayPokemon.body?.name ||
-          ""
-        : getNicknameText(
-            displayPokemon.head,
-            displayPokemon.body,
-            displayPokemon.isFusion,
-          );
-
-    // Only consider deceased if both Pokemon are dead (for fusion) or the single Pokemon is dead
-    // Note: boxed Pokemon are not considered deceased, only actually dead Pokemon
-    const headDead = isPokemonDeceased(effectiveHeadPokemon);
-    const bodyDead = isPokemonDeceased(effectiveBodyPokemon);
-
-    const isDeceased =
-      effectiveIsFusion && effectiveHeadPokemon && effectiveBodyPokemon
-        ? headDead && bodyDead
-        : headDead || bodyDead;
-
     const head = displayPokemon.head;
     const body = displayPokemon.body;
-
-    // Determine which Pokemon IDs to use for the link based on display state
-    // When fusion is off, use the single Pokemon ID; when fusion is on, use both
-    const linkHeadId = displayPokemon.isFusion
-      ? (displayPokemon.head?.id ?? null)
-      : (displayPokemon.head?.id ?? displayPokemon.body?.id ?? null);
-    const linkBodyId = displayPokemon.isFusion
-      ? (displayPokemon.body?.id ?? null)
-      : null;
-
-    const link = eitherPokemonIsEgg
-      ? "#"
-      : `https://infinitefusiondex.com/details/${linkHeadId && linkBodyId ? `${linkHeadId}.${linkBodyId}` : linkHeadId || linkBodyId}`;
 
     const SpriteWrapper = eitherPokemonIsEgg ? "div" : "a";
     const spriteWrapperProps = eitherPokemonIsEgg

@@ -9,6 +9,7 @@ import { PokemonGridItem } from "./PokemonGridItem";
 import { PokemonSlotSelector } from "./PokemonSlotSelector";
 import { TeamMemberSearchBar } from "./TeamMemberSearchBar";
 import { useTeamMemberSelection } from "./TeamMemberSelectionContext";
+import { flipTeamPokemonSelection } from "./teamMemberSelectionDomain";
 
 export function TeamMemberSelectionPanel() {
   const { state, actions } = useTeamMemberSelection();
@@ -26,55 +27,13 @@ export function TeamMemberSelectionPanel() {
     handlePokemonSelect,
   } = actions;
 
-  // Handler to flip fusion (swap head and body)
-  const handleFlipFusion = React.useCallback(() => {
-    // Always swap the selections, regardless of whether they're filled or empty
-    const tempHead = selectedHead;
-    const tempBody = selectedBody;
-
-    // Swap the selections directly
-    actions.setSelectedHead(tempBody);
-    actions.setSelectedBody(tempHead);
-
-    // Immediately update nickname to reflect the new head Pokémon
-    if (tempBody?.pokemon && tempHead?.pokemon) {
-      // For fusions, always prioritize head Pokémon's nickname (now tempBody)
-      if (tempBody.pokemon.nickname) {
-        actions.setNickname(tempBody.pokemon.nickname);
-        actions.setPreviewNickname(tempBody.pokemon.nickname);
-      } else if (tempHead.pokemon.nickname) {
-        // Fallback to body Pokémon's nickname if head doesn't have one
-        actions.setNickname(tempHead.pokemon.nickname);
-        actions.setPreviewNickname(tempHead.pokemon.nickname);
-      } else {
-        // No nickname available
-        actions.setNickname("");
-        actions.setPreviewNickname("");
-      }
-    } else if (tempBody?.pokemon) {
-      // Single head Pokémon (now tempBody)
-      if (tempBody.pokemon.nickname) {
-        actions.setNickname(tempBody.pokemon.nickname);
-        actions.setPreviewNickname(tempBody.pokemon.nickname);
-      } else {
-        actions.setNickname("");
-        actions.setPreviewNickname("");
-      }
-    } else if (tempHead?.pokemon) {
-      // Single body Pokémon (now tempHead)
-      if (tempHead.pokemon.nickname) {
-        actions.setNickname(tempHead.pokemon.nickname);
-        actions.setPreviewNickname(tempHead.pokemon.nickname);
-      } else {
-        actions.setNickname("");
-        actions.setPreviewNickname("");
-      }
-    } else {
-      // No Pokémon selected
-      actions.setNickname("");
-      actions.setPreviewNickname("");
-    }
-  }, [selectedHead, selectedBody, actions]);
+  const handleFlipFusion = () => {
+    const next = flipTeamPokemonSelection(selectedHead, selectedBody);
+    actions.setSelectedHead(next.selectedHead);
+    actions.setSelectedBody(next.selectedBody);
+    actions.setNickname(next.nickname);
+    actions.setPreviewNickname(next.previewNickname);
+  };
 
   // Filter Pokémon based on search query locally (no need to update state)
   const filteredPokemon = React.useMemo(() => {

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
 import {
   filterAvailableTeamPokemon,
+  flipTeamPokemonSelection,
   getTeamNicknameUpdate,
   getTeamSelectionNickname,
   initializeExistingTeamMemberSelection,
@@ -41,6 +42,32 @@ describe("team member selection domain", () => {
   it("returns empty nickname when no selected pokemon has one", () => {
     expect(getTeamSelectionNickname(pokemon("head"), pokemon("body"))).toBe("");
     expect(getTeamSelectionNickname(null, null)).toBe("");
+  });
+
+  it("flips selections and uses the new head nickname", () => {
+    const head = { pokemon: pokemon("head", "Sparky"), locationId: "route-1" };
+    const body = { pokemon: pokemon("body", "Flame"), locationId: "route-2" };
+
+    expect(flipTeamPokemonSelection(head, body)).toEqual({
+      selectedHead: body,
+      selectedBody: head,
+      nickname: "Flame",
+      previewNickname: "Flame",
+    });
+  });
+
+  it("clears the nickname when flipping unnamed or empty selections", () => {
+    expect(
+      flipTeamPokemonSelection(
+        { pokemon: pokemon("head"), locationId: "route-1" },
+        null,
+      ),
+    ).toMatchObject({
+      selectedHead: null,
+      nickname: "",
+      previewNickname: "",
+    });
+    expect(flipTeamPokemonSelection(null, null).nickname).toBe("");
   });
 
   it("updates the head nickname before the body nickname", () => {

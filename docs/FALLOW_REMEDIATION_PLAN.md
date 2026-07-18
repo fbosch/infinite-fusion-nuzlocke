@@ -83,7 +83,7 @@ Purpose: close the residual first-party findings through behavior-preserving ref
 - [x] Remove remaining verified unused files, exports, and types in coherent module batches.
 - [x] Add behavior and accessibility coverage for context-menu, summary-card, PC, team, and location interaction paths.
 - [x] Refactor context-menu action construction and shared behavior before extracting common code.
-- [ ] Refactor summary-card and PC/team decision surfaces without widening component interfaces unnecessarily.
+- [x] Refactor summary-card and PC/team decision surfaces without widening component interfaces unnecessarily.
 - [ ] Resolve UI clone groups only where states and accessibility behavior are identical.
 - [ ] Group scraper and sprite clone findings by data-pipeline step.
 - [ ] Add deterministic input/output tests before consolidating script utilities.

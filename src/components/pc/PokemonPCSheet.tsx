@@ -14,10 +14,7 @@ import {
 import clsx from "clsx";
 import { Box, Boxes, Skull, Users, X } from "lucide-react";
 import { useCallback, useMemo } from "react";
-import {
-  getLocationById,
-  getLocationsSortedWithCustom,
-} from "@/loaders/locations";
+import { getLocationsSortedWithCustom } from "@/loaders/locations";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import {
   useActivePlaythrough,
@@ -25,13 +22,18 @@ import {
   useEncounters,
 } from "@/stores/playthroughs/hooks";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
-import { isPokemonDeceased, isPokemonStored } from "@/utils/pokemonPredicates";
 import { scrollToLocationById } from "@/utils/scrollToLocation";
 import TeamMemberPickerModal from "../team/TeamMemberPickerModal";
 import { getTeamSlots } from "../team/teamSlots";
 import { useTeamMemberPicker } from "../team/useTeamMemberPicker";
 import { GraveyardGridItem } from "./GraveyardGridItem";
 import PCEntryItem from "./PCEntryItem";
+import {
+  getDeceasedEntries,
+  getPCTab,
+  getPCTabIndex,
+  getStoredEntries,
+} from "./pcSheetDomain";
 import TeamEntryItem from "./TeamEntryItem";
 
 export interface PokemonPCSheetProps {
@@ -122,94 +124,17 @@ export default function PokemonPCSheet({
     [activePlaythrough?.team, encounters, pokemonByUid],
   );
 
-  const deceased: Entry[] = useMemo(() => {
-    const entries: Entry[] = [];
-
-    Object.entries(encounters || {}).forEach(([locationId, data]) => {
-      const headDead = isPokemonDeceased(data?.head);
-      const bodyDead = isPokemonDeceased(data?.body);
-
-      const locationName =
-        idToName.get(locationId) ||
-        getLocationById(locationId)?.name ||
-        "Unknown Location";
-
-      // Create separate entries for each deceased Pokémon
-      if (headDead && data?.head) {
-        entries.push({
-          locationId: `${locationId}-head`,
-          locationName,
-          head: data.head,
-          body: null,
-        });
-      }
-
-      if (bodyDead && data?.body) {
-        entries.push({
-          locationId: `${locationId}-body`,
-          locationName,
-          head: null,
-          body: data.body,
-        });
-      }
-    });
-
-    return entries;
-  }, [encounters, idToName]);
-
-  const stored: Entry[] = useMemo(() => {
-    const entries: Entry[] = [];
-
-    Object.entries(encounters || {}).forEach(([locationId, data]) => {
-      const headStored = isPokemonStored(data?.head);
-      const bodyStored = isPokemonStored(data?.body);
-
-      if (headStored || bodyStored) {
-        entries.push({
-          locationId,
-          locationName:
-            idToName.get(locationId) ||
-            getLocationById(locationId)?.name ||
-            "Unknown Location",
-          head: headStored ? data?.head || null : null,
-          body: bodyStored ? data?.body || null : null,
-        });
-      }
-    });
-
-    return entries;
-  }, [encounters, idToName]);
-
-  const getSelectedIndex = useCallback((tab: "team" | "box" | "graveyard") => {
-    switch (tab) {
-      case "team":
-        return 0;
-      case "box":
-        return 1;
-      case "graveyard":
-        return 2;
-      default:
-        return 0;
-    }
-  }, []);
-
-  const getTabFromIndex = useCallback(
-    (index: number): "team" | "box" | "graveyard" => {
-      switch (index) {
-        case 0:
-          return "team";
-        case 1:
-          return "box";
-        case 2:
-          return "graveyard";
-        default:
-          return "team";
-      }
-    },
-    [],
+  const deceased: Entry[] = useMemo(
+    () => getDeceasedEntries(encounters, idToName),
+    [encounters, idToName],
   );
 
-  const selectedIndex = getSelectedIndex(activeTab);
+  const stored: Entry[] = useMemo(
+    () => getStoredEntries(encounters, idToName),
+    [encounters, idToName],
+  );
+
+  const selectedIndex = getPCTabIndex(activeTab);
 
   // Memoize the onClose handler to prevent unnecessary re-renders
   const handleClose = useCallback(() => {
@@ -219,9 +144,9 @@ export default function PokemonPCSheet({
   // Memoize the onChangeTab handler
   const handleChangeTab = useCallback(
     (index: number) => {
-      onChangeTab(getTabFromIndex(index));
+      onChangeTab(getPCTab(index));
     },
-    [onChangeTab, getTabFromIndex],
+    [onChangeTab],
   );
 
   return (

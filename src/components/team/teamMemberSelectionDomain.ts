@@ -28,6 +28,21 @@ export const getTeamSelectionNickname = (
       ? bodyPokemon.nickname
       : "";
 
+export const flipTeamPokemonSelection = (
+  selectedHead: TeamPokemonSelection | null,
+  selectedBody: TeamPokemonSelection | null,
+) => {
+  const nickname =
+    selectedBody?.pokemon.nickname || selectedHead?.pokemon.nickname || "";
+
+  return {
+    selectedHead: selectedBody,
+    selectedBody: selectedHead,
+    nickname,
+    previewNickname: nickname,
+  };
+};
+
 export const getTeamNicknameUpdate = (
   headPokemon: PokemonOptionType | null | undefined,
   bodyPokemon: PokemonOptionType | null | undefined,
