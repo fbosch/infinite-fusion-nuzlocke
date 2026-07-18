@@ -313,6 +313,9 @@ export function ContextMenu({
   ]);
 
   const handleClose = useCallback(() => {
+    if (isOpen) {
+      window.dispatchEvent(new Event("context-menu-close"));
+    }
     closeMenu();
 
     if (menuElementRef.current) {
@@ -323,7 +326,7 @@ export function ContextMenu({
         hideMenu();
       }, 50);
     }
-  }, [closeMenu, hideMenu]);
+  }, [isOpen, closeMenu, hideMenu]);
 
   // Close menu when window becomes hidden, loses focus, or scrolls
   useEffect(() => {
@@ -400,6 +403,7 @@ export function ContextMenu({
 
     event.preventDefault();
     event.stopPropagation();
+    window.dispatchEvent(new Event("context-menu-open"));
 
     // Calculate position relative to the viewport
     const position = { x: event.clientX, y: event.clientY };

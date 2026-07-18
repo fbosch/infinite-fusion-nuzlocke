@@ -80,6 +80,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
   } = props;
   const instanceId = useId();
   const [isOpen, setIsOpen] = useState(false);
+  const [isPausedByContextMenu, setIsPausedByContextMenu] = useState(false);
   const [animationState, setAnimationState] = useState<
     "entering" | "entered" | "exiting" | null
   >(null);
@@ -92,7 +93,10 @@ export function CursorTooltip(props: CursorTooltipProps) {
   const dragSnapshot = useSnapshot(dragStore);
   const { isAnyTooltipVisible, registerTooltip } = useGlobalTooltip();
   const shouldDisableTooltip =
-    disabled || !isWindowVisible || dragSnapshot.isDragging;
+    disabled ||
+    !isWindowVisible ||
+    dragSnapshot.isDragging ||
+    isPausedByContextMenu;
   const isTooltipVisible = isOpen && shouldDisableTooltip === false;
 
   const {
@@ -208,6 +212,22 @@ export function CursorTooltip(props: CursorTooltipProps) {
       window.removeEventListener("cursor-tooltip-open", handleTooltipOpen);
     };
   }, [instanceId, tooltipId]);
+
+  useEffect(() => {
+    const pauseTooltip = () => {
+      setIsOpen(false);
+      setAnimationState(null);
+      setIsPausedByContextMenu(true);
+    };
+    const resumeTooltip = () => setIsPausedByContextMenu(false);
+
+    window.addEventListener("context-menu-open", pauseTooltip);
+    window.addEventListener("context-menu-close", resumeTooltip);
+    return () => {
+      window.removeEventListener("context-menu-open", pauseTooltip);
+      window.removeEventListener("context-menu-close", resumeTooltip);
+    };
+  }, []);
 
   // Register tooltip with global state when it opens/closes
   useEffect(() => {

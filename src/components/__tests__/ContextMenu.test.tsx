@@ -8,7 +8,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ContextMenu, clampMenuPosition } from "../ContextMenu";
 
 describe("ContextMenu", () => {
@@ -79,6 +79,29 @@ describe("ContextMenu", () => {
     await waitFor(() => {
       expect(screen.queryByText("First action")).toBeNull();
     });
+  });
+
+  it("announces context-menu lifecycle changes for trigger tooltips", async () => {
+    const onOpen = vi.fn();
+    const onClose = vi.fn();
+    window.addEventListener("context-menu-open", onOpen);
+    window.addEventListener("context-menu-close", onClose);
+
+    render(
+      <ContextMenu items={[{ id: "first", label: "First action" }]}>
+        <button type="button">Context trigger</button>
+      </ContextMenu>,
+    );
+
+    const trigger = screen.getByRole("button", { name: "Context trigger" });
+    fireEvent.contextMenu(trigger);
+    expect(onOpen).toHaveBeenCalledOnce();
+
+    fireEvent.contextMenu(trigger);
+    expect(onClose).toHaveBeenCalledOnce();
+
+    window.removeEventListener("context-menu-open", onOpen);
+    window.removeEventListener("context-menu-close", onClose);
   });
 
   it("opens another custom menu instead of showing the native menu", async () => {
