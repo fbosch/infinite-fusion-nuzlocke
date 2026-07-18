@@ -3,10 +3,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { ConsoleFormatter } from "./utils/console-utils";
+import { normalizePokemonNameForSprite } from "./utils/pokemon-name-utils";
 import {
-  normalizePokemonNameForSprite,
-  stripPokemonFormSuffix,
-} from "./utils/pokemon-name-utils";
+  downloadSpriteImage,
+  type SpriteDownloadConfig,
+  type SpriteDownloadIcon,
+  spriteFileExists,
+} from "./utils/sprite-download-utils";
 import {
   getSpriteSourcePaths,
   loadJsonFile,
@@ -30,20 +33,8 @@ export type PokemonEntry = {
   name: string;
 };
 
-export type PokemonIcon = {
-  id: number;
-  name: string;
-  url: string;
-  filename: string;
-  generation: "gen7" | "gen8";
-};
-
-export type GenerationConfig = {
-  name: "gen7" | "gen8";
-  baseUrl: string;
-  spritesDir: string;
-  eggSpriteUrl: string;
-};
+export type PokemonIcon = SpriteDownloadIcon;
+export type GenerationConfig = SpriteDownloadConfig;
 
 const GENERATIONS: GenerationConfig[] = [
   {
@@ -61,121 +52,54 @@ const GENERATIONS: GenerationConfig[] = [
   },
 ];
 
+type DownloadStats = {
+  downloaded: number;
+  skipped: number;
+  errors: number;
+};
+
+function getGenerationConfig(
+  generation: PokemonIcon["generation"],
+): GenerationConfig {
+  const config = GENERATIONS.find((item) => item.name === generation);
+  if (!config)
+    throw new Error(`Missing sprite configuration for ${generation}`);
+  return config;
+}
+
+async function downloadIconBatch(icons: PokemonIcon[]): Promise<DownloadStats> {
+  const results = await Promise.all(
+    icons.map(async (icon) => {
+      const config = getGenerationConfig(icon.generation);
+      const filePath = path.join(config.spritesDir, icon.filename);
+      const skipped = await spriteFileExists(filePath);
+      const success = await downloadSpriteImage(
+        icon,
+        config,
+        ConsoleFormatter.error,
+      );
+      return { skipped, success };
+    }),
+  );
+
+  return results.reduce<DownloadStats>(
+    (stats, { skipped, success }) => {
+      if (success === false) {
+        stats.errors++;
+      } else if (skipped) {
+        stats.skipped++;
+      } else {
+        stats.downloaded++;
+      }
+      return stats;
+    },
+    { downloaded: 0, skipped: 0, errors: 0 },
+  );
+}
+
 /**
  * Check if a file already exists
  */
-async function fileExists(filePath: string): Promise<boolean> {
-  try {
-    await fs.access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Download a single image with retry logic and fallback to base name
- */
-async function downloadImage(
-  icon: PokemonIcon,
-  config: GenerationConfig,
-  retries = 3,
-): Promise<boolean> {
-  const filePath = path.join(config.spritesDir, icon.filename);
-
-  // Check if file already exists
-  if (await fileExists(filePath)) {
-    return true; // Skip download, file already exists
-  }
-
-  // Special handling for egg sprite (ID -1)
-  if (icon.id === -1) {
-    try {
-      const response = await fetch(config.eggSpriteUrl, {
-        headers: {
-          "User-Agent": "Infinite-Fusion-Scraper/1.0",
-        },
-      });
-
-      if (!response.ok) {
-        ConsoleFormatter.error(
-          `Failed to download ${config.name} egg sprite: HTTP ${response.status}`,
-        );
-        return false;
-      }
-
-      const buffer = await response.arrayBuffer();
-      await fs.writeFile(filePath, Buffer.from(buffer));
-      return true;
-    } catch (error) {
-      ConsoleFormatter.error(
-        `Failed to download ${config.name} egg sprite: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
-      return false;
-    }
-  }
-
-  // Try the full form name first
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      const response = await fetch(icon.url, {
-        headers: {
-          "User-Agent": "Infinite-Fusion-Scraper/1.0",
-        },
-      });
-
-      if (!response.ok) {
-        // If it's a 404 and this is the first attempt, try fallback to base name
-        if (response.status === 404 && attempt === 1) {
-          const baseName = stripPokemonFormSuffix(icon.name);
-          if (baseName && baseName !== icon.name) {
-            const baseUrlName = normalizePokemonNameForSprite(baseName);
-            const baseFilename = `${baseUrlName}.png`;
-            const baseUrl = `${config.baseUrl}/${baseFilename}`;
-            const baseFilePath = path.join(config.spritesDir, baseFilename);
-
-            // Try to download the base form
-            try {
-              const baseResponse = await fetch(baseUrl, {
-                headers: {
-                  "User-Agent": "Infinite-Fusion-Scraper/1.0",
-                },
-              });
-
-              if (baseResponse.ok) {
-                const baseBuffer = await baseResponse.arrayBuffer();
-                await fs.writeFile(baseFilePath, Buffer.from(baseBuffer));
-                return true;
-              }
-            } catch {
-              // Continue to retry with original name
-            }
-          }
-        }
-
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const buffer = await response.arrayBuffer();
-      await fs.writeFile(filePath, Buffer.from(buffer));
-      return true;
-    } catch (error) {
-      if (attempt === retries) {
-        ConsoleFormatter.error(
-          `Failed to download ${icon.name} (${config.name}) after ${retries} attempts: ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`,
-        );
-        return false;
-      }
-
-      // Wait before retry with exponential backoff (shorter delays)
-      await new Promise((resolve) => setTimeout(resolve, 2 ** attempt * 200));
-    }
-  }
-  return false;
-}
-
 /**
  * Load Pokemon data and construct icon URLs for both generations
  */
@@ -256,9 +180,7 @@ async function downloadAllIcons(
     `Gen 7 icons: ${gen7Icons.length}, Gen 8 icons: ${gen8Icons.length}`,
   );
 
-  let downloadedCount = 0;
-  let skippedCount = 0;
-  let errorCount = 0;
+  const stats: DownloadStats = { downloaded: 0, skipped: 0, errors: 0 };
 
   const batchSize = 10; // Smaller batch size to be more respectful to the server
   const progressBar = ConsoleFormatter.createProgressBar(icons.length);
@@ -268,30 +190,13 @@ async function downloadAllIcons(
   for (let i = 0; i < gen7Icons.length; i += batchSize) {
     const batch = gen7Icons.slice(i, i + batchSize);
 
-    const results = await Promise.all(
-      batch.map(async (icon) => {
-        const config = GENERATIONS.find((g) => g.name === icon.generation)!;
-        const filePath = path.join(config.spritesDir, icon.filename);
-        const existed = await fileExists(filePath);
-        const success = await downloadImage(icon, config);
-        return { icon, success, wasSkipped: existed };
-      }),
-    );
-
-    results.forEach(({ success, wasSkipped }) => {
-      if (success) {
-        if (wasSkipped) {
-          skippedCount++;
-        } else {
-          downloadedCount++;
-        }
-      } else {
-        errorCount++;
-      }
-    });
+    const batchStats = await downloadIconBatch(batch);
+    stats.downloaded += batchStats.downloaded;
+    stats.skipped += batchStats.skipped;
+    stats.errors += batchStats.errors;
 
     progressBar.update(Math.min(i + batchSize, gen7Icons.length), {
-      status: `Gen 7: New: ${downloadedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}`,
+      status: `Gen 7: New: ${stats.downloaded}, Skipped: ${stats.skipped}, Errors: ${stats.errors}`,
     });
 
     if (i + batchSize < gen7Icons.length) {
@@ -304,32 +209,15 @@ async function downloadAllIcons(
   for (let i = 0; i < gen8Icons.length; i += batchSize) {
     const batch = gen8Icons.slice(i, i + batchSize);
 
-    const results = await Promise.all(
-      batch.map(async (icon) => {
-        const config = GENERATIONS.find((g) => g.name === icon.generation)!;
-        const filePath = path.join(config.spritesDir, icon.filename);
-        const existed = await fileExists(filePath);
-        const success = await downloadImage(icon, config);
-        return { icon, success, wasSkipped: existed };
-      }),
-    );
-
-    results.forEach(({ success, wasSkipped }) => {
-      if (success) {
-        if (wasSkipped) {
-          skippedCount++;
-        } else {
-          downloadedCount++;
-        }
-      } else {
-        errorCount++;
-      }
-    });
+    const batchStats = await downloadIconBatch(batch);
+    stats.downloaded += batchStats.downloaded;
+    stats.skipped += batchStats.skipped;
+    stats.errors += batchStats.errors;
 
     progressBar.update(
       gen7Icons.length + Math.min(i + batchSize, gen8Icons.length),
       {
-        status: `Gen 8: New: ${downloadedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}`,
+        status: `Gen 8: New: ${stats.downloaded}, Skipped: ${stats.skipped}, Errors: ${stats.errors}`,
       },
     );
 
@@ -340,17 +228,13 @@ async function downloadAllIcons(
 
   progressBar.stop();
 
-  if (errorCount > 0) {
-    ConsoleFormatter.warn(`Download completed with ${errorCount} errors`);
+  if (stats.errors > 0) {
+    ConsoleFormatter.warn(`Download completed with ${stats.errors} errors`);
   } else {
     ConsoleFormatter.success("All icons downloaded successfully!");
   }
 
-  return {
-    downloaded: downloadedCount,
-    skipped: skippedCount,
-    errors: errorCount,
-  };
+  return stats;
 }
 
 /**
@@ -422,5 +306,4 @@ async function scrapePokemonIcons(): Promise<void> {
   }
 }
 
-// Run the scraper directly (jiti doesn't set require.main properly)
 scrapePokemonIcons();

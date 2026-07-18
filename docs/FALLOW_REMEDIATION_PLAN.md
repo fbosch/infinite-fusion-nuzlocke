@@ -100,7 +100,7 @@ Fallow's duplication report groups these findings by pipeline responsibility. Re
 | Pokemon source enrichment | 1-2 | `scripts/fetch-pokemon-data.ts` | Share evolution-chain loading and processed-record construction between batch and fallback retrieval. |
 | Encounter extraction and normalization | 10, 12-14 | `scripts/scrape-legendary-encounters.ts`, `scripts/scrape-safari-encounters.ts`, `scripts/scrape-special-encounters.ts`, `scripts/scrape-wild-encounters.ts` | Extract only parsers with matching source markup and output schemas; retain source-specific validation and error messages. |
 | Scraper orchestration and terminal reporting | 8-9 | `scripts/scrape-egg-locations.ts`, `scripts/scrape-special-encounters.ts`, `scripts/scrape-pokemon-icons.ts` | Keep final summaries and process-exit handling local unless a shared runner can preserve each script's result shape and direct-execution guard. |
-| Sprite source setup and acquisition | 3-4, 11 | `scripts/generate-spritesheet.ts`, `scripts/scrape-pokemon-icons.ts` | Setup clone consolidation completed through shared path derivation and JSON loading. Keep download retry policy local to the icon scraper. |
+| Sprite source setup and acquisition | 3-4, 11 | `scripts/generate-spritesheet.ts`, `scripts/scrape-pokemon-icons.ts` | Setup clone consolidation and download retry refactor completed through shared path derivation, JSON loading, and focused retry helpers. The duplicated batch loop remains separate acquisition work. |
 | Sprite packing and validation | 5-7 | `scripts/generate-spritesheet.ts` | Clone consolidation completed: shared geometry primitives now cover overlap detection, pair traversal, and packed bounds; packing and repair policies remain distinct and retain their outstanding complexity work. |
 | Runtime sprite delivery | 15-16 | `src/app/api/sprite/variants/route.ts`, `src/lib/sprites.ts` | Track separately from script pipelines because these are request-time behavior and need API coverage. |
 
@@ -108,7 +108,7 @@ Completed source-enrichment work: shared evolution-chain loading and processed-r
 
 Completed sprite-packing clone work: targeted geometry tests cover edge contact, overlap detection, pair traversal, and packed bounds. Shared geometry primitives removed clone groups 5-7 and one validation complexity finding, reducing the health report from 124 to 123 complexity findings.
 
-Completed sprite-source setup work: shared path derivation and JSON loading removed the two cross-script setup clone groups, reducing full duplication groups from 18 to 16. The icon download retry workflow remains the next complexity target in this stage.
+Completed sprite-source work: shared path derivation and JSON loading removed the two cross-script setup clone groups, reducing full duplication groups from 18 to 16. Focused retry helpers have coverage for existing files, eggs, and base-form fallback; the duplicated batch download loop is now consolidated.
 
 Acceptance criteria:
 
