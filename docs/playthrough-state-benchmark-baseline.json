@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "generatedAt": "2026-07-18",
   "command": "pnpm test:bench",
   "environment": {
@@ -11,22 +11,51 @@
     "warmupIterations": 10,
     "sampleCount": 30
   },
+  "methodology": {
+    "execution": "sequential shared-store fixtures",
+    "cold": "operation immediately after fixture installation",
+    "warm": "operation after resolving its active store paths"
+  },
   "results": {
     "reverse-active": {
-      "p50Ms": 15.617,
-      "p95Ms": 69.036
+      "cold": {
+        "p50Ms": 0.537,
+        "p95Ms": 0.756
+      },
+      "warm": {
+        "p50Ms": 0.488,
+        "p95Ms": 0.751
+      }
     },
     "reverse-stored": {
-      "p50Ms": 14.784,
-      "p95Ms": 77.573
+      "cold": {
+        "p50Ms": 0.545,
+        "p95Ms": 0.838
+      },
+      "warm": {
+        "p50Ms": 0.587,
+        "p95Ms": 0.876
+      }
     },
     "drag-empty-target": {
-      "p50Ms": 17.169,
-      "p95Ms": 41.481
+      "cold": {
+        "p50Ms": 0.083,
+        "p95Ms": 0.128
+      },
+      "warm": {
+        "p50Ms": 0.082,
+        "p95Ms": 0.121
+      }
     },
     "drag-occupied-target": {
-      "p50Ms": 12.992,
-      "p95Ms": 42.181
+      "cold": {
+        "p50Ms": 0.097,
+        "p95Ms": 0.191
+      },
+      "warm": {
+        "p50Ms": 0.087,
+        "p95Ms": 0.119
+      }
     }
   }
 }

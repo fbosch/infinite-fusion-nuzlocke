@@ -65,13 +65,7 @@ export const updateTeamMember = async (
     return false;
   }
 
-  if (headPokemon?.uid) {
-    void restorePokemonToTeam(headPokemon.uid);
-  }
-
-  if (bodyPokemon?.uid) {
-    void restorePokemonToTeam(bodyPokemon.uid);
-  }
+  restorePokemonToTeamMembers([headPokemon?.uid ?? "", bodyPokemon?.uid ?? ""]);
 
   activePlaythrough.team.members[position] = createTeamMember(
     headPokemon,
@@ -325,25 +319,50 @@ export const moveTeamMemberToBox = async (position: number): Promise<void> => {
   activePlaythrough.updatedAt = Date.now();
 };
 
+const restorePokemonToTeamMembers = (pokemonUIDs: string[]) => {
+  const activePlaythrough = ensureActivePlaythroughWithEncounters();
+  const uidsToRestore = new Set(pokemonUIDs.filter(Boolean));
+  if (!activePlaythrough || uidsToRestore.size === 0) {
+    return;
+  }
+
+  let hasChanges = false;
+
+  for (const encounter of Object.values(activePlaythrough.encounters)) {
+    if (
+      encounter.head?.uid &&
+      uidsToRestore.has(encounter.head.uid) &&
+      encounter.head.status === PokemonStatus.STORED
+    ) {
+      encounter.head = {
+        ...encounter.head,
+        status: encounter.head.originalReceivalStatus || PokemonStatus.CAPTURED,
+      };
+      encounter.updatedAt = Date.now();
+      hasChanges = true;
+    }
+
+    if (
+      encounter.body?.uid &&
+      uidsToRestore.has(encounter.body.uid) &&
+      encounter.body.status === PokemonStatus.STORED
+    ) {
+      encounter.body = {
+        ...encounter.body,
+        status: encounter.body.originalReceivalStatus || PokemonStatus.CAPTURED,
+      };
+      encounter.updatedAt = Date.now();
+      hasChanges = true;
+    }
+  }
+
+  if (hasChanges) {
+    activePlaythrough.updatedAt = Date.now();
+  }
+};
+
 export const restorePokemonToTeam = async (
   pokemonUID: string,
 ): Promise<void> => {
-  const activePlaythrough = ensureActivePlaythroughWithEncounters();
-  if (!activePlaythrough) {
-    return;
-  }
-
-  const pokemon = findPokemonByUID(activePlaythrough.encounters, pokemonUID);
-  if (!pokemon) {
-    return;
-  }
-
-  if (pokemon.status === PokemonStatus.STORED) {
-    const statusToRestore =
-      pokemon.originalReceivalStatus || PokemonStatus.CAPTURED;
-
-    await updatePokemonByUID(pokemonUID, {
-      status: statusToRestore,
-    });
-  }
+  restorePokemonToTeamMembers([pokemonUID]);
 };
