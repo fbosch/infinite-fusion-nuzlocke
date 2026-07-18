@@ -84,7 +84,7 @@ Purpose: close the residual first-party findings through behavior-preserving ref
 - [x] Add behavior and accessibility coverage for context-menu, summary-card, PC, team, and location interaction paths.
 - [x] Refactor context-menu action construction and shared behavior before extracting common code.
 - [x] Refactor summary-card and PC/team decision surfaces without widening component interfaces unnecessarily.
-- [ ] Resolve UI clone groups only where states and accessibility behavior are identical.
+- [x] Resolve UI clone groups only where states and accessibility behavior are identical.
 - [ ] Group scraper and sprite clone findings by data-pipeline step.
 - [ ] Add deterministic input/output tests before consolidating script utilities.
 - [ ] Resolve remaining complexity findings by workflow or pipeline stage, prioritizing items with matching duplication findings.
