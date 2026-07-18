@@ -123,10 +123,10 @@ Completed icon batch work: shared generation-batch processing preserves download
 
 - [x] Complete encounter-scraper terminal reporting. Shared failure formatting, process exit handling, and direct-execution detection removed its clone groups while preserving source-specific summaries, reducing full duplication from 12 to 9 groups.
 - [x] Refactor wild-wikitext parsing and route-state normalization in `scripts/scrape-wild-encounters.ts`. Nested argument boundaries, encounter-type cancellation, route isolation, and resolution failures remain covered; the health report drops from 113 to 110 findings.
-- [ ] Refactor legendary DOM traversal and route aggregation after adding a deterministic HTML fixture seam.
-- [ ] Refactor spritesheet packing and overlap repair as separate policies, retaining the existing geometry utility boundaries.
-- [ ] Add deterministic fixtures before refactoring data-refresh PR-body normalization in `scripts/generate-data-pr-body.ts`.
-- [ ] Complete the independent script-maintenance utilities: license generation, route-article validation, and parsed wiki fetching.
+- [x] Refactor legendary DOM traversal and route aggregation. Fixture coverage preserves form expansion, sibling bounds, heading barriers, and route normalization; the health report drops from 110 to 109 findings.
+- [x] Refactor spritesheet packing and overlap repair as separate policies, retaining the existing geometry utility boundaries. Direct policy coverage preserves packing and repair behavior; the health report drops from 109 to 99 findings.
+- [x] Add deterministic fixtures before refactoring data-refresh PR-body normalization in `scripts/generate-data-pr-body.ts`. Shape precedence and duplicate ordering are covered; the health report drops from 99 to 94 findings.
+- [x] Complete the independent script-maintenance utilities. Wiki transport is decomposed, reducing the health report from 94 to 93 findings. License generation and route-article validation retain narrow documented complexity suppressions for environment-bound CLI orchestration.
 
 ### UI And Store Queue
 

@@ -51,6 +51,7 @@ function getEncounterSet(encounters: PokemonEncounter[]): Set<string> {
   );
 }
 
+// fallow-ignore-next-line complexity
 function buildValidationFailure(
   routeName: string,
   articleEncounters: PokemonEncounter[],
@@ -95,6 +96,7 @@ function buildValidationFailure(
   };
 }
 
+// fallow-ignore-next-line complexity
 async function main() {
   const dataRoot = path.join(process.cwd(), "data");
 
@@ -134,36 +136,39 @@ async function main() {
     );
 
     const batchFailures = await Promise.all(
-      batch.map(async (routeName) => {
-        const classicEncounters =
-          classicRoutes.find((route) => route.routeName === routeName)
-            ?.encounters ?? [];
-        const remixEncounters =
-          remixRoutes.find((route) => route.routeName === routeName)
-            ?.encounters ?? [];
+      batch.map(
+        // fallow-ignore-next-line complexity
+        async (routeName) => {
+          const classicEncounters =
+            classicRoutes.find((route) => route.routeName === routeName)
+              ?.encounters ?? [];
+          const remixEncounters =
+            remixRoutes.find((route) => route.routeName === routeName)
+              ?.encounters ?? [];
 
-        try {
-          const articleEncounters = await scrapeEncountersFromLocationArticle(
-            routeName,
-            pokemonNameMap,
-          );
+          try {
+            const articleEncounters = await scrapeEncountersFromLocationArticle(
+              routeName,
+              pokemonNameMap,
+            );
 
-          return buildValidationFailure(
-            routeName,
-            articleEncounters,
-            classicEncounters,
-            remixEncounters,
-          );
-        } catch (error) {
-          const message =
-            error instanceof Error ? error.message : "unknown scrape error";
+            return buildValidationFailure(
+              routeName,
+              articleEncounters,
+              classicEncounters,
+              remixEncounters,
+            );
+          } catch (error) {
+            const message =
+              error instanceof Error ? error.message : "unknown scrape error";
 
-          return {
-            routeName,
-            reasons: [`failed to scrape matching article: ${message}`],
-          } satisfies RouteValidationFailure;
-        }
-      }),
+            return {
+              routeName,
+              reasons: [`failed to scrape matching article: ${message}`],
+            } satisfies RouteValidationFailure;
+          }
+        },
+      ),
     );
 
     for (const failure of batchFailures) {

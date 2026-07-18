@@ -215,7 +215,7 @@ function isLocationPokemonDataRoot(
   return Array.isArray(entry.locations);
 }
 
-function flattenLocationPokemonEntries(
+export function flattenLocationPokemonEntries(
   filePath: string,
   data: unknown,
 ): LocationPokemonEntry[] {
@@ -229,66 +229,91 @@ function flattenLocationPokemonEntries(
   const defaultSource = getSourceFromFilePath(filePath);
 
   for (const item of locationData) {
-    if (isRouteEncounterEntry(item)) {
-      for (const encounter of item.encounters) {
-        if (typeof encounter === "number" && Number.isInteger(encounter)) {
-          entries.push({
-            location: item.routeName,
-            source: defaultSource,
-            pokemonId: encounter,
-          });
-        } else if (
-          typeof encounter === "object" &&
-          typeof encounter.pokemonId === "number" &&
-          Number.isInteger(encounter.pokemonId)
-        ) {
-          entries.push({
-            location: item.routeName,
-            source: encounter.encounterType ?? defaultSource,
-            pokemonId: encounter.pokemonId,
-          });
-        }
-      }
+    if (appendEncounterEntries(entries, item, defaultSource)) {
       continue;
     }
 
-    if (isRoutePokemonIdsEntry(item)) {
-      for (const pokemonId of item.pokemonIds) {
-        if (typeof pokemonId === "number" && Number.isInteger(pokemonId)) {
-          entries.push({
-            location: item.routeName,
-            source: defaultSource,
-            pokemonId,
-          });
-        }
-      }
-    }
-
-    if (
-      typeof item === "object" &&
-      item !== null &&
-      "routeName" in item &&
-      "pokemonId" in item
-    ) {
-      const location = item as Record<string, unknown>;
-      if (
-        typeof location.routeName === "string" &&
-        typeof location.pokemonId === "number" &&
-        Number.isInteger(location.pokemonId)
-      ) {
-        entries.push({
-          location: location.routeName,
-          source:
-            typeof location.source === "string"
-              ? location.source
-              : defaultSource,
-          pokemonId: location.pokemonId,
-        });
-      }
-    }
+    appendPokemonIdEntries(entries, item, defaultSource);
+    appendDirectLocationEntry(entries, item, defaultSource);
   }
 
   return entries;
+}
+
+function appendEncounterEntries(
+  entries: LocationPokemonEntry[],
+  item: unknown,
+  defaultSource: string,
+): boolean {
+  if (!isRouteEncounterEntry(item)) {
+    return false;
+  }
+
+  for (const encounter of item.encounters) {
+    if (typeof encounter === "number" && Number.isInteger(encounter)) {
+      entries.push({
+        location: item.routeName,
+        source: defaultSource,
+        pokemonId: encounter,
+      });
+    } else if (
+      typeof encounter === "object" &&
+      typeof encounter.pokemonId === "number" &&
+      Number.isInteger(encounter.pokemonId)
+    ) {
+      entries.push({
+        location: item.routeName,
+        source: encounter.encounterType ?? defaultSource,
+        pokemonId: encounter.pokemonId,
+      });
+    }
+  }
+
+  return true;
+}
+
+function appendPokemonIdEntries(
+  entries: LocationPokemonEntry[],
+  item: unknown,
+  defaultSource: string,
+): void {
+  if (!isRoutePokemonIdsEntry(item)) {
+    return;
+  }
+
+  for (const pokemonId of item.pokemonIds) {
+    if (typeof pokemonId === "number" && Number.isInteger(pokemonId)) {
+      entries.push({
+        location: item.routeName,
+        source: defaultSource,
+        pokemonId,
+      });
+    }
+  }
+}
+
+function appendDirectLocationEntry(
+  entries: LocationPokemonEntry[],
+  item: unknown,
+  defaultSource: string,
+): void {
+  if (!item || typeof item !== "object") {
+    return;
+  }
+
+  const location = item as Record<string, unknown>;
+  if (
+    typeof location.routeName === "string" &&
+    typeof location.pokemonId === "number" &&
+    Number.isInteger(location.pokemonId)
+  ) {
+    entries.push({
+      location: location.routeName,
+      source:
+        typeof location.source === "string" ? location.source : defaultSource,
+      pokemonId: location.pokemonId,
+    });
+  }
 }
 
 function countEntries(entries: LocationPokemonEntry[]): Map<string, number> {
@@ -534,8 +559,10 @@ async function main(): Promise<void> {
   process.stdout.write(`Generated data PR body: ${outputPath}\n`);
 }
 
-main().catch((error: unknown) => {
-  const message = error instanceof Error ? error.message : "unknown error";
-  process.stderr.write(`Failed to generate data PR body: ${message}\n`);
-  process.exit(1);
-});
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((error: unknown) => {
+    const message = error instanceof Error ? error.message : "unknown error";
+    process.stderr.write(`Failed to generate data PR body: ${message}\n`);
+    process.exit(1);
+  });
+}

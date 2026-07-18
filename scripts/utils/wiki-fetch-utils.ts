@@ -62,12 +62,25 @@ async function fetchWikiPageParsedContent(
     redirects: "1",
   });
 
+  const response = await fetchWikiApiResponse(pageTitle, params);
+  if (response.ok === false) {
+    throw new Error(
+      `Wiki API request failed (${response.status}) for page: ${pageTitle}`,
+    );
+  }
+
+  return getParsedWikiContent(await response.json(), prop, pageTitle);
+}
+
+async function fetchWikiApiResponse(
+  pageTitle: string,
+  params: URLSearchParams,
+): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), WIKI_API_TIMEOUT_MS);
 
-  let response: Response;
   try {
-    response = await fetch(`${WIKI_API_URL}?${params.toString()}`, {
+    return await fetch(`${WIKI_API_URL}?${params.toString()}`, {
       headers: {
         Accept: "application/json",
         "User-Agent": SCRAPER_USER_AGENT,
@@ -85,25 +98,24 @@ async function fetchWikiPageParsedContent(
   } finally {
     clearTimeout(timeoutId);
   }
+}
 
-  if (response.ok === false) {
-    throw new Error(
-      `Wiki API request failed (${response.status}) for page: ${pageTitle}`,
-    );
-  }
-
-  const payload = (await response.json()) as WikiParseResponse;
-
-  if (payload.error) {
-    const code = payload.error.code ?? "unknown";
-    const info = payload.error.info ?? "Unknown wiki API error";
+function getParsedWikiContent(
+  payload: unknown,
+  prop: "text" | "wikitext",
+  pageTitle: string,
+): string {
+  const wikiPayload = payload as WikiParseResponse;
+  if (wikiPayload.error) {
+    const code = wikiPayload.error.code ?? "unknown";
+    const info = wikiPayload.error.info ?? "Unknown wiki API error";
     throw new Error(
       `Wiki API parse error (${code}) for page ${pageTitle}: ${info}`,
     );
   }
 
   const parsedContent =
-    prop === "text" ? payload.parse?.text : payload.parse?.wikitext;
+    prop === "text" ? wikiPayload.parse?.text : wikiPayload.parse?.wikitext;
   if (typeof parsedContent !== "string" || parsedContent.length === 0) {
     throw new Error(
       `Wiki API returned empty ${prop} content for page: ${pageTitle}`,
