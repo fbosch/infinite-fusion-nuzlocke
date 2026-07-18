@@ -10,6 +10,10 @@ import { loadPokemonNameMap } from "./utils/data-loading-utils";
 import { ensureEncounterOutputDirectories } from "./utils/encounter-output-utils";
 import { findPokemonId, type PokemonNameMap } from "./utils/pokemon-name-utils";
 import { isRoutePattern, processRouteName } from "./utils/route-utils";
+import {
+  exitOnScriptError,
+  runDirectScript,
+} from "./utils/script-runtime-utils";
 import { fetchWikiPageWikitext } from "./utils/wiki-fetch-utils";
 
 const WILD_ENCOUNTERS_CLASSIC_URL =
@@ -1012,14 +1016,8 @@ async function main() {
     );
     ConsoleFormatter.info(`Total duration: ${(duration / 1000).toFixed(2)}s`);
   } catch (error) {
-    ConsoleFormatter.error(
-      `Scraping failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-    );
-    process.exit(1);
+    exitOnScriptError("Scraping failed", error);
   }
 }
 
-// Run the script
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
-}
+runDirectScript(import.meta.url, main);

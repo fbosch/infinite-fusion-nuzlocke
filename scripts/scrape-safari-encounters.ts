@@ -11,6 +11,10 @@ import {
   findPokemonId,
   isPotentialPokemonName,
 } from "./utils/pokemon-name-utils";
+import {
+  exitOnScriptError,
+  runDirectScript,
+} from "./utils/script-runtime-utils";
 import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
 
 // Safari Zone area pages
@@ -245,14 +249,8 @@ async function main() {
     );
     ConsoleFormatter.info(`Total duration: ${(duration / 1000).toFixed(2)}s`);
   } catch (error) {
-    ConsoleFormatter.error(
-      `Safari Zone scraping failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-    );
-    process.exit(1);
+    exitOnScriptError("Safari Zone scraping failed", error);
   }
 }
 
-// Run the script
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
-}
+runDirectScript(import.meta.url, main);

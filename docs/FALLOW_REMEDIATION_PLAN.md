@@ -87,7 +87,8 @@ Purpose: close the residual first-party findings through behavior-preserving ref
 - [x] Resolve UI clone groups only where states and accessibility behavior are identical.
 - [x] Group scraper and sprite clone findings by data-pipeline step.
 - [x] Add deterministic input/output tests before consolidating script utilities.
-- [ ] Resolve remaining complexity findings by workflow or pipeline stage, prioritizing items with matching duplication findings.
+- [ ] Resolve remaining script and pipeline findings by the bounded stages below, prioritizing items with matching duplication findings.
+- [ ] After the script stages, address the separately tracked UI and store complexity queue below.
 - [ ] Trace every remaining first-party finding and remove it, refactor it, configure it, or add a narrow reasoned suppression.
 - [ ] Save the resulting first-party baseline and keep the changed-code audit gate enabled.
 
@@ -115,6 +116,26 @@ Completed encounter output work: shared classic/remix directory setup removed tw
 Completed runtime sprite helper work: shared suffix and CDN URL generation removed one clone group, reducing full duplication groups from 13 to 12. Server and browser existence checks remain intentionally separate.
 
 Completed egg-location classification work: deterministic egg, location, and nest-link predicates preserve the existing keyword rules and parent-context requirements under direct coverage, removing two scraper callback complexity findings and reducing the health report from 119 to 115 findings.
+
+Completed icon batch work: shared generation-batch processing preserves download order, cumulative progress, retry behavior, and stats under direct coverage, removing the duplicated Gen 7/Gen 8 loop and reducing the health report from 115 to 113 findings. The scraper now runs only under its direct-execution guard, keeping imports side-effect free; the guard has a narrow Fallow duplicate-line suppression because it must remain adjacent to the script entrypoint.
+
+### Remaining Script Stages
+
+- [x] Complete encounter-scraper terminal reporting. Shared failure formatting, process exit handling, and direct-execution detection removed its clone groups while preserving source-specific summaries, reducing full duplication from 12 to 9 groups.
+- [ ] Refactor wild-wikitext parsing and route-state normalization in `scripts/scrape-wild-encounters.ts` with existing parser fixtures.
+- [ ] Refactor legendary DOM traversal and route aggregation after adding a deterministic HTML fixture seam.
+- [ ] Refactor spritesheet packing and overlap repair as separate policies, retaining the existing geometry utility boundaries.
+- [ ] Add deterministic fixtures before refactoring data-refresh PR-body normalization in `scripts/generate-data-pr-body.ts`.
+- [ ] Complete the independent script-maintenance utilities: license generation, route-article validation, and parsed wiki fetching.
+
+### UI And Store Queue
+
+Start this queue only after the script stages are complete or intentionally suppressed.
+
+- [ ] Location-table encounter rendering and actions: consolidate identical `EncounterCell` states while preserving accessibility behavior.
+- [ ] Combobox selection and drag/drop: separate selection rules from drag/drop state transitions before extracting clone groups.
+- [ ] Encounter store transitions: refactor CRUD and drag/drop operations behind existing state-transition tests.
+- [ ] UI decision surfaces: address context menus, summary cards, PC, and team components as independent behavior slices rather than a shared cleanup batch.
 
 Acceptance criteria:
 

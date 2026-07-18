@@ -5,6 +5,10 @@ import * as path from "node:path";
 import * as cheerio from "cheerio";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { cleanLocationName } from "./utils/location-utils";
+import {
+  exitOnScriptError,
+  runDirectScript,
+} from "./utils/script-runtime-utils";
 import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
 
 const GIFTS_AND_TRADES_URL =
@@ -558,14 +562,8 @@ async function main() {
       },
     ]);
   } catch (error) {
-    ConsoleFormatter.error(
-      `Fatal error: ${error instanceof Error ? error.message : "Unknown error"}`,
-    );
-    process.exit(1);
+    exitOnScriptError("Fatal error", error);
   }
 }
 
-// Check if this script is being run directly
-if (process.argv[1]?.endsWith("scrape-egg-locations.ts")) {
-  main();
-}
+runDirectScript(import.meta.url, main);

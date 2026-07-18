@@ -58,6 +58,9 @@ type DownloadStats = {
   errors: number;
 };
 
+const ICON_BATCH_SIZE = 10;
+const BATCH_DELAY_MS = 50;
+
 function getGenerationConfig(
   generation: PokemonIcon["generation"],
 ): GenerationConfig {
@@ -95,6 +98,35 @@ async function downloadIconBatch(icons: PokemonIcon[]): Promise<DownloadStats> {
     },
     { downloaded: 0, skipped: 0, errors: 0 },
   );
+}
+
+async function downloadGenerationIcons(
+  icons: PokemonIcon[],
+  generationLabel: string,
+  completedIcons: number,
+  stats: DownloadStats,
+  progressBar: ReturnType<typeof ConsoleFormatter.createProgressBar>,
+): Promise<void> {
+  ConsoleFormatter.working(`Downloading ${generationLabel} sprites...`);
+
+  for (let i = 0; i < icons.length; i += ICON_BATCH_SIZE) {
+    const batch = icons.slice(i, i + ICON_BATCH_SIZE);
+    const batchStats = await downloadIconBatch(batch);
+    stats.downloaded += batchStats.downloaded;
+    stats.skipped += batchStats.skipped;
+    stats.errors += batchStats.errors;
+
+    progressBar.update(
+      Math.min(i + ICON_BATCH_SIZE, icons.length) + completedIcons,
+      {
+        status: `${generationLabel}: New: ${stats.downloaded}, Skipped: ${stats.skipped}, Errors: ${stats.errors}`,
+      },
+    );
+
+    if (i + ICON_BATCH_SIZE < icons.length) {
+      await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
+    }
+  }
 }
 
 /**
@@ -165,7 +197,7 @@ async function loadPokemonIcons(): Promise<PokemonIcon[]> {
 /**
  * Download all Pokemon icons with progress tracking
  */
-async function downloadAllIcons(
+export async function downloadAllIcons(
   icons: PokemonIcon[],
 ): Promise<{ downloaded: number; skipped: number; errors: number }> {
   ConsoleFormatter.printSection(
@@ -182,49 +214,16 @@ async function downloadAllIcons(
 
   const stats: DownloadStats = { downloaded: 0, skipped: 0, errors: 0 };
 
-  const batchSize = 10; // Smaller batch size to be more respectful to the server
   const progressBar = ConsoleFormatter.createProgressBar(icons.length);
 
-  // Download Gen 7 icons first
-  ConsoleFormatter.working("Downloading Gen 7 sprites...");
-  for (let i = 0; i < gen7Icons.length; i += batchSize) {
-    const batch = gen7Icons.slice(i, i + batchSize);
-
-    const batchStats = await downloadIconBatch(batch);
-    stats.downloaded += batchStats.downloaded;
-    stats.skipped += batchStats.skipped;
-    stats.errors += batchStats.errors;
-
-    progressBar.update(Math.min(i + batchSize, gen7Icons.length), {
-      status: `Gen 7: New: ${stats.downloaded}, Skipped: ${stats.skipped}, Errors: ${stats.errors}`,
-    });
-
-    if (i + batchSize < gen7Icons.length) {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    }
-  }
-
-  // Download Gen 8 icons
-  ConsoleFormatter.working("Downloading Gen 8 sprites...");
-  for (let i = 0; i < gen8Icons.length; i += batchSize) {
-    const batch = gen8Icons.slice(i, i + batchSize);
-
-    const batchStats = await downloadIconBatch(batch);
-    stats.downloaded += batchStats.downloaded;
-    stats.skipped += batchStats.skipped;
-    stats.errors += batchStats.errors;
-
-    progressBar.update(
-      gen7Icons.length + Math.min(i + batchSize, gen8Icons.length),
-      {
-        status: `Gen 8: New: ${stats.downloaded}, Skipped: ${stats.skipped}, Errors: ${stats.errors}`,
-      },
-    );
-
-    if (i + batchSize < gen8Icons.length) {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    }
-  }
+  await downloadGenerationIcons(gen7Icons, "Gen 7", 0, stats, progressBar);
+  await downloadGenerationIcons(
+    gen8Icons,
+    "Gen 8",
+    gen7Icons.length,
+    stats,
+    progressBar,
+  );
 
   progressBar.stop();
 
@@ -306,4 +305,7 @@ async function scrapePokemonIcons(): Promise<void> {
   }
 }
 
-scrapePokemonIcons();
+// fallow-ignore-next-line code-duplication
+if (import.meta.url === `file://${process.argv[1]}`) {
+  void scrapePokemonIcons();
+}

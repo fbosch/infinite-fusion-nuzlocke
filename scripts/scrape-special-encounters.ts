@@ -13,6 +13,10 @@ import {
   isPotentialPokemonName,
   type PokemonNameMap,
 } from "./utils/pokemon-name-utils";
+import {
+  exitOnScriptError,
+  runDirectScript,
+} from "./utils/script-runtime-utils";
 import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
 
 const CLASSIC_POKEDEX_URL =
@@ -707,13 +711,8 @@ async function main() {
       },
     ]);
   } catch (error) {
-    ConsoleFormatter.error(
-      `Fatal error: ${error instanceof Error ? error.message : "Unknown error"}`,
-    );
-    process.exit(1);
+    exitOnScriptError("Fatal error", error);
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  void main();
-}
+runDirectScript(import.meta.url, main);

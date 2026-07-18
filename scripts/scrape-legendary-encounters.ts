@@ -10,6 +10,10 @@ import {
   isPotentialPokemonName,
 } from "./utils/pokemon-name-utils";
 import { processRouteName } from "./utils/route-utils";
+import {
+  exitOnScriptError,
+  runDirectScript,
+} from "./utils/script-runtime-utils";
 import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
 
 const LEGENDARY_POKEMON_URL =
@@ -204,14 +208,8 @@ async function main() {
     );
     ConsoleFormatter.info(`Total duration: ${(duration / 1000).toFixed(2)}s`);
   } catch (error) {
-    ConsoleFormatter.error(
-      `Legendary scraping failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-    );
-    process.exit(1);
+    exitOnScriptError("Legendary scraping failed", error);
   }
 }
 
-// Run the script
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
-}
+runDirectScript(import.meta.url, main);

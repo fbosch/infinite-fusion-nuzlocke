@@ -2,15 +2,18 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  downloadSpriteImage,
-  type SpriteDownloadConfig,
-  type SpriteDownloadIcon,
+import { downloadAllIcons } from "../scripts/scrape-pokemon-icons";
+import { ConsoleFormatter } from "../scripts/utils/console-utils";
+import type {
+  SpriteDownloadConfig,
+  SpriteDownloadIcon,
 } from "../scripts/utils/sprite-download-utils";
+import * as spriteDownloadUtils from "../scripts/utils/sprite-download-utils";
 
 const temporaryDirectories: string[] = [];
 
 afterEach(async () => {
+  vi.restoreAllMocks();
   vi.unstubAllGlobals();
   await Promise.all(
     temporaryDirectories
@@ -52,9 +55,9 @@ describe("Pokemon icon downloads", () => {
     vi.stubGlobal("fetch", fetchMock);
     await fs.writeFile(path.join(config.spritesDir, icon.filename), "existing");
 
-    await expect(downloadSpriteImage(icon, config, vi.fn())).resolves.toBe(
-      true,
-    );
+    await expect(
+      spriteDownloadUtils.downloadSpriteImage(icon, config, vi.fn()),
+    ).resolves.toBe(true);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -64,7 +67,7 @@ describe("Pokemon icon downloads", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(
-      downloadSpriteImage(
+      spriteDownloadUtils.downloadSpriteImage(
         createIcon({ id: -1, filename: "egg.png" }),
         config,
         vi.fn(),
@@ -92,9 +95,9 @@ describe("Pokemon icon downloads", () => {
       .mockResolvedValueOnce(new Response("base form"));
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(downloadSpriteImage(icon, config, vi.fn(), 1)).resolves.toBe(
-      true,
-    );
+    await expect(
+      spriteDownloadUtils.downloadSpriteImage(icon, config, vi.fn(), 1),
+    ).resolves.toBe(true);
 
     await expect(
       fs.readFile(path.join(config.spritesDir, "lycanroc.png"), "utf-8"),
@@ -104,5 +107,47 @@ describe("Pokemon icon downloads", () => {
       "https://sprites.example/lycanroc.png",
       { headers: { "User-Agent": "Infinite-Fusion-Scraper/1.0" } },
     );
+  });
+
+  it("downloads generation batches in order with cumulative progress", async () => {
+    const progressBar = { stop: vi.fn(), update: vi.fn() };
+    vi.spyOn(ConsoleFormatter, "createProgressBar").mockReturnValue(
+      progressBar as never,
+    );
+    vi.spyOn(ConsoleFormatter, "working").mockImplementation(() => {});
+    vi.spyOn(ConsoleFormatter, "success").mockImplementation(() => {});
+    vi.spyOn(ConsoleFormatter, "warn").mockImplementation(() => {});
+    vi.spyOn(spriteDownloadUtils, "spriteFileExists")
+      .mockResolvedValueOnce(true)
+      .mockResolvedValue(false);
+    vi.spyOn(spriteDownloadUtils, "downloadSpriteImage").mockResolvedValue(
+      true,
+    );
+
+    const gen7Icons = Array.from({ length: 11 }, (_, index) =>
+      createIcon({ filename: `gen7-${index}.png`, generation: "gen7" }),
+    );
+    const gen8Icon = createIcon({ filename: "gen8.png", generation: "gen8" });
+
+    await expect(downloadAllIcons([...gen7Icons, gen8Icon])).resolves.toEqual({
+      downloaded: 11,
+      skipped: 1,
+      errors: 0,
+    });
+    expect(progressBar.update).toHaveBeenNthCalledWith(
+      1,
+      10,
+      expect.objectContaining({
+        status: "Gen 7: New: 9, Skipped: 1, Errors: 0",
+      }),
+    );
+    expect(progressBar.update).toHaveBeenNthCalledWith(
+      3,
+      12,
+      expect.objectContaining({
+        status: "Gen 8: New: 11, Skipped: 1, Errors: 0",
+      }),
+    );
+    expect(progressBar.stop).toHaveBeenCalledOnce();
   });
 });
