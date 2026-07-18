@@ -97,6 +97,37 @@ const fixtureKinds: FixtureKind[] = [
   "custom-location-remove",
 ];
 
+type FixtureOptions = {
+  reverseStatus?: PokemonOptionType["status"];
+  sourceOriginalLocation?: string;
+  targetPokemonId?: number;
+  hasCustomLocation?: boolean;
+};
+
+const fixtureOptions: Record<FixtureKind, FixtureOptions> = {
+  "reverse-active": {},
+  "reverse-stored": { reverseStatus: PokemonStatus.STORED },
+  "encounter-select-empty": {},
+  "encounter-overwrite": {},
+  "encounter-clear": {},
+  "encounter-nickname-update": {},
+  "encounter-status-captured": {},
+  "encounter-status-deceased": {},
+  "encounter-status-stored": {},
+  "encounter-toggle-fusion": {},
+  "encounter-flip-fusion": {},
+  "encounter-evolve": {},
+  "encounter-reset": {},
+  "move-original-empty-target": { sourceOriginalLocation: TARGET_LOCATION_ID },
+  "move-original-occupied-target": {
+    sourceOriginalLocation: TARGET_LOCATION_ID,
+    targetPokemonId: 4,
+  },
+  "drag-empty-target": {},
+  "drag-occupied-target": { targetPokemonId: 4 },
+  "custom-location-remove": { hasCustomLocation: true },
+};
+
 const createPokemon = (
   uid: string,
   id: number,
@@ -117,23 +148,25 @@ const createEncounter = (
 ): EncounterData => ({ head, body, isFusion, updatedAt: 1 });
 
 function createFixture(kind: FixtureKind): Playthrough {
-  const reverseStatus =
-    kind === "reverse-stored" ? PokemonStatus.STORED : PokemonStatus.CAPTURED;
+  const options = fixtureOptions[kind];
   const head = {
-    ...createPokemon("source-head", 25, reverseStatus),
-    originalLocation:
-      kind === "move-original-empty-target" ||
-      kind === "move-original-occupied-target"
-        ? TARGET_LOCATION_ID
-        : SOURCE_LOCATION_ID,
+    ...createPokemon(
+      "source-head",
+      25,
+      options.reverseStatus ?? PokemonStatus.CAPTURED,
+    ),
+    originalLocation: options.sourceOriginalLocation ?? SOURCE_LOCATION_ID,
   };
-  const body = createPokemon("source-body", 133, reverseStatus);
+  const body = createPokemon(
+    "source-body",
+    133,
+    options.reverseStatus ?? PokemonStatus.CAPTURED,
+  );
   const encounters: Record<string, EncounterData> = {
     [SOURCE_LOCATION_ID]: createEncounter(head, body, true),
     [TARGET_LOCATION_ID]: createEncounter(
-      kind === "drag-occupied-target" ||
-        kind === "move-original-occupied-target"
-        ? createPokemon("target-head", 4)
+      options.targetPokemonId
+        ? createPokemon("target-head", options.targetPokemonId)
         : null,
     ),
   };
@@ -162,16 +195,15 @@ function createFixture(kind: FixtureKind): Playthrough {
     version: "1.0.0",
     createdAt: 1,
     updatedAt: 1,
-    customLocations:
-      kind === "custom-location-remove"
-        ? [
-            {
-              id: "custom-location",
-              name: "Custom Location",
-              insertAfterLocationId: SOURCE_LOCATION_ID,
-            },
-          ]
-        : undefined,
+    customLocations: options.hasCustomLocation
+      ? [
+          {
+            id: "custom-location",
+            name: "Custom Location",
+            insertAfterLocationId: SOURCE_LOCATION_ID,
+          },
+        ]
+      : undefined,
   };
 }
 
@@ -182,117 +214,84 @@ function installFixture(playthrough: Playthrough) {
   playthroughsStore.isSaving = false;
 }
 
-async function runFixture(kind: FixtureKind) {
-  switch (kind) {
-    case "reverse-active":
-    case "reverse-stored":
-      await flipTeamMemberFusion(0);
-      return;
-    case "encounter-select-empty":
-      await updateEncounter(
-        EMPTY_LOCATION_ID,
-        createPokemon("selected-pokemon", 7),
-      );
-      return;
-    case "encounter-overwrite":
-      await updateEncounter(
-        SOURCE_LOCATION_ID,
-        createPokemon("replacement-pokemon", 7),
-      );
-      return;
-    case "encounter-clear":
-      await updateEncounter(SOURCE_LOCATION_ID, null, "head");
-      return;
-    case "encounter-nickname-update":
-      await updatePokemonInEncounter(
-        SOURCE_LOCATION_ID,
-        "source-head",
-        "head",
-        { nickname: "Sparky" },
-      );
-      return;
-    case "encounter-status-captured":
-      await markEncounterAsCaptured(SOURCE_LOCATION_ID);
-      return;
-    case "encounter-status-deceased":
-      await markEncounterAsDeceased(SOURCE_LOCATION_ID);
-      return;
-    case "encounter-status-stored":
-      await moveEncounterToBox(SOURCE_LOCATION_ID);
-      return;
-    case "encounter-toggle-fusion":
-      await toggleEncounterFusion(SOURCE_LOCATION_ID);
-      return;
-    case "encounter-flip-fusion":
-      await flipEncounterFusion(SOURCE_LOCATION_ID);
-      return;
-    case "encounter-evolve":
-      await updateEncounter(
-        SOURCE_LOCATION_ID,
-        createPokemon("source-head", 26),
-        "head",
-      );
-      return;
-    case "encounter-reset":
-      resetEncounter(SOURCE_LOCATION_ID);
-      return;
-    case "move-original-empty-target":
-    case "move-original-occupied-target": {
-      const pokemon =
-        getActivePlaythrough()?.encounters?.[SOURCE_LOCATION_ID]?.head;
-      if (!pokemon) {
-        throw new Error(
-          "Move-to-original benchmark fixture has no source Pokemon",
-        );
-      }
-
-      await moveToOriginalLocation(SOURCE_LOCATION_ID, "head", pokemon);
-      return;
-    }
-    case "drag-empty-target":
-    case "drag-occupied-target":
-      await relocateEncounterSlot({
-        sourceLocationId: SOURCE_LOCATION_ID,
-        sourceField: "head",
-        targetLocationId: TARGET_LOCATION_ID,
-        targetField: "head",
-      });
-      return;
-    case "custom-location-remove":
-      await removeCustomLocation("custom-location");
-      return;
+function getSourceHeadPokemon() {
+  const activePlaythrough = getActivePlaythrough();
+  const pokemon = activePlaythrough?.encounters?.[SOURCE_LOCATION_ID]?.head;
+  if (!pokemon) {
+    throw new Error("Move-to-original benchmark fixture has no source Pokemon");
   }
+  return pokemon;
 }
 
-function warmFixture(kind: FixtureKind) {
-  const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough) {
-    throw new Error("Benchmark fixture has no active playthrough");
+const runFixture: Record<FixtureKind, () => Promise<unknown> | void> = {
+  "reverse-active": () => flipTeamMemberFusion(0),
+  "reverse-stored": () => flipTeamMemberFusion(0),
+  "encounter-select-empty": () =>
+    updateEncounter(EMPTY_LOCATION_ID, createPokemon("selected-pokemon", 7)),
+  "encounter-overwrite": () =>
+    updateEncounter(
+      SOURCE_LOCATION_ID,
+      createPokemon("replacement-pokemon", 7),
+    ),
+  "encounter-clear": () => updateEncounter(SOURCE_LOCATION_ID, null, "head"),
+  "encounter-nickname-update": () =>
+    updatePokemonInEncounter(SOURCE_LOCATION_ID, "source-head", "head", {
+      nickname: "Sparky",
+    }),
+  "encounter-status-captured": () =>
+    markEncounterAsCaptured(SOURCE_LOCATION_ID),
+  "encounter-status-deceased": () =>
+    markEncounterAsDeceased(SOURCE_LOCATION_ID),
+  "encounter-status-stored": () => moveEncounterToBox(SOURCE_LOCATION_ID),
+  "encounter-toggle-fusion": () => toggleEncounterFusion(SOURCE_LOCATION_ID),
+  "encounter-flip-fusion": () => flipEncounterFusion(SOURCE_LOCATION_ID),
+  "encounter-evolve": () =>
+    updateEncounter(
+      SOURCE_LOCATION_ID,
+      createPokemon("source-head", 26),
+      "head",
+    ),
+  "encounter-reset": () => resetEncounter(SOURCE_LOCATION_ID),
+  "move-original-empty-target": () =>
+    moveToOriginalLocation(SOURCE_LOCATION_ID, "head", getSourceHeadPokemon()),
+  "move-original-occupied-target": () =>
+    moveToOriginalLocation(SOURCE_LOCATION_ID, "head", getSourceHeadPokemon()),
+  "drag-empty-target": () =>
+    relocateEncounterSlot({
+      sourceLocationId: SOURCE_LOCATION_ID,
+      sourceField: "head",
+      targetLocationId: TARGET_LOCATION_ID,
+      targetField: "head",
+    }),
+  "drag-occupied-target": () =>
+    relocateEncounterSlot({
+      sourceLocationId: SOURCE_LOCATION_ID,
+      sourceField: "head",
+      targetLocationId: TARGET_LOCATION_ID,
+      targetField: "head",
+    }),
+  "custom-location-remove": () => removeCustomLocation("custom-location"),
+};
+
+const warmFixture: Record<FixtureKind, () => void> = Object.fromEntries(
+  fixtureKinds.map((kind) => [kind, () => void getActivePlaythrough()]),
+) as Record<FixtureKind, () => void>;
+
+warmFixture["reverse-active"] = warmTeamMember;
+warmFixture["reverse-stored"] = warmTeamMember;
+warmFixture["custom-location-remove"] = warmCustomLocation;
+
+function warmTeamMember() {
+  const teamMember = getActivePlaythrough()?.team.members[0];
+  if (!teamMember) {
+    throw new Error("Reverse Fusion benchmark fixture has no team member");
   }
+  void teamMember.headPokemonUid;
+  void teamMember.bodyPokemonUid;
+}
 
-  if (kind === "reverse-active" || kind === "reverse-stored") {
-    const teamMember = activePlaythrough.team.members[0];
-    if (!teamMember) {
-      throw new Error("Reverse Fusion benchmark fixture has no team member");
-    }
-
-    void teamMember.headPokemonUid;
-    void teamMember.bodyPokemonUid;
-    return;
-  }
-
-  if (kind === "custom-location-remove") {
-    void activePlaythrough.customLocations?.[0]?.id;
-    return;
-  }
-
-  const encounters = activePlaythrough.encounters;
-  if (!encounters) {
-    throw new Error("Drag benchmark fixture has no encounters");
-  }
-
-  void encounters[SOURCE_LOCATION_ID]?.head?.uid;
-  void encounters[TARGET_LOCATION_ID]?.head?.uid;
+function warmCustomLocation() {
+  void getActivePlaythrough()?.customLocations?.[0]?.id;
 }
 
 function percentile(values: number[], percentileValue: number) {
@@ -311,11 +310,11 @@ function summarizeSamples(samples: number[]): BenchmarkTiming {
 async function benchmarkFixture(kind: FixtureKind): Promise<BenchmarkResult> {
   for (let index = 0; index < WARMUP_ITERATIONS; index += 1) {
     installFixture(createFixture(kind));
-    await runFixture(kind);
+    await runFixture[kind]();
 
     installFixture(createFixture(kind));
-    warmFixture(kind);
-    await runFixture(kind);
+    warmFixture[kind]();
+    await runFixture[kind]();
   }
 
   const coldSamples: number[] = [];
@@ -323,13 +322,13 @@ async function benchmarkFixture(kind: FixtureKind): Promise<BenchmarkResult> {
   for (let sample = 0; sample < SAMPLE_COUNT; sample += 1) {
     installFixture(createFixture(kind));
     const start = performance.now();
-    await runFixture(kind);
+    await runFixture[kind]();
     coldSamples.push(performance.now() - start);
 
     installFixture(createFixture(kind));
-    warmFixture(kind);
+    warmFixture[kind]();
     const warmStart = performance.now();
-    await runFixture(kind);
+    await runFixture[kind]();
     warmSamples.push(performance.now() - warmStart);
   }
 

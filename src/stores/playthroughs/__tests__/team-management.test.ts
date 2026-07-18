@@ -200,6 +200,35 @@ describe("Team Management", () => {
   });
 
   describe("restorePokemonToTeam", () => {
+    it("restores only the selected stored team Pokemon", async () => {
+      const { activePlaythrough } = createTestPlaythrough();
+      activePlaythrough.encounters = {
+        route1: {
+          head: {
+            ...testPokemon.pikachu(),
+            status: PokemonStatus.STORED,
+            originalReceivalStatus: PokemonStatus.RECEIVED,
+          },
+          body: {
+            ...testPokemon.charmander(),
+            status: PokemonStatus.STORED,
+            originalReceivalStatus: PokemonStatus.TRADED,
+          },
+          isFusion: true,
+          updatedAt: Date.now(),
+        },
+      };
+
+      await restorePokemonToTeam("charmander_route1_456");
+
+      expect(activePlaythrough.encounters.route1.head?.status).toBe(
+        PokemonStatus.STORED,
+      );
+      expect(activePlaythrough.encounters.route1.body?.status).toBe(
+        PokemonStatus.TRADED,
+      );
+    });
+
     it("should restore stored Pokémon to original receival status", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 

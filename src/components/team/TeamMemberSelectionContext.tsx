@@ -3,7 +3,6 @@
 import type React from "react";
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -184,6 +183,165 @@ interface TeamMemberSelectionProviderProps {
   onClose: () => void;
 }
 
+function useTeamSelectionEffects({
+  state,
+  dispatch,
+  existingTeamMember,
+  encounters,
+}: {
+  state: TeamMemberSelectionReducerState;
+  dispatch: React.Dispatch<TeamMemberSelectionAction>;
+  existingTeamMember: TeamMemberSelectionProviderProps["existingTeamMember"];
+  encounters: ReturnType<typeof useEncounters>;
+}) {
+  const { selectedHead, selectedBody, activeSlot, hasManuallySelectedSlot } =
+    state;
+
+  useEffect(() => {
+    if (
+      !selectedHead &&
+      !selectedBody &&
+      !activeSlot &&
+      !hasManuallySelectedSlot
+    ) {
+      dispatch({ type: "SET_ACTIVE_SLOT", payload: "head" });
+    }
+  }, [
+    selectedHead,
+    selectedBody,
+    activeSlot,
+    hasManuallySelectedSlot,
+    dispatch,
+  ]);
+
+  useEffect(() => {
+    const nickname = getTeamSelectionNickname(
+      selectedHead?.pokemon,
+      selectedBody?.pokemon,
+    );
+    dispatch({ type: "SET_NICKNAME", payload: nickname });
+    dispatch({ type: "SET_PREVIEW_NICKNAME", payload: nickname });
+  }, [selectedHead, selectedBody, dispatch]);
+
+  useEffect(() => {
+    if (!existingTeamMember || existingTeamMember.isEmpty || !encounters) {
+      return;
+    }
+
+    const selection = initializeExistingTeamMemberSelection(
+      existingTeamMember,
+      (uid) => findPokemonWithLocation(encounters, uid),
+    );
+    dispatch({ type: "INITIALIZE_FROM_EXISTING", payload: selection });
+
+    if (
+      !hasManuallySelectedSlot &&
+      selection.suggestedActiveSlot !== undefined
+    ) {
+      dispatch({
+        type: "SET_ACTIVE_SLOT",
+        payload: selection.suggestedActiveSlot,
+      });
+    }
+  }, [existingTeamMember, encounters, hasManuallySelectedSlot, dispatch]);
+}
+
+function useTeamMemberSelectionActionValue({
+  dispatch,
+  selectedHead,
+  selectedBody,
+  nickname,
+  onSelect,
+  onClose,
+}: {
+  dispatch: React.Dispatch<TeamMemberSelectionAction>;
+  selectedHead: TeamPokemonSelection | null;
+  selectedBody: TeamPokemonSelection | null;
+  nickname: string;
+  onSelect: TeamMemberSelectionProviderProps["onSelect"];
+  onClose: TeamMemberSelectionProviderProps["onClose"];
+}) {
+  "use memo";
+
+  const setSelectedHead = (payload: TeamPokemonSelection | null) =>
+    dispatch({ type: "SET_SELECTED_HEAD", payload });
+  const setSelectedBody = (payload: TeamPokemonSelection | null) =>
+    dispatch({ type: "SET_SELECTED_BODY", payload });
+  const setActiveSlot = (payload: TeamSelectionSlot | null) =>
+    dispatch({ type: "SET_ACTIVE_SLOT", payload });
+  const setHasManuallySelectedSlot = (payload: boolean) =>
+    dispatch({ type: "SET_HAS_MANUALLY_SELECTED_SLOT", payload });
+  const setSearchQuery = (payload: string) =>
+    dispatch({ type: "SET_SEARCH_QUERY", payload });
+  const setNickname = (payload: string) =>
+    dispatch({ type: "SET_NICKNAME", payload });
+  const setPreviewNickname = (payload: string) =>
+    dispatch({ type: "SET_PREVIEW_NICKNAME", payload });
+  const handleSlotSelect = (slot: TeamSelectionSlot) => {
+    dispatch({ type: "SET_ACTIVE_SLOT", payload: slot });
+    dispatch({ type: "SET_HAS_MANUALLY_SELECTED_SLOT", payload: true });
+  };
+  const handlePokemonSelect = (
+    pokemon: PokemonOptionType,
+    locationId: string,
+  ) => {
+    dispatch({
+      type: "APPLY_POKEMON_SELECTION",
+      payload: { pokemon, locationId },
+    });
+  };
+  const handleRemoveHeadPokemon = () => {
+    dispatch({ type: "SET_SELECTED_HEAD", payload: null });
+    dispatch({ type: "SET_ACTIVE_SLOT", payload: "head" });
+    dispatch({ type: "SET_NICKNAME", payload: "" });
+    dispatch({ type: "SET_PREVIEW_NICKNAME", payload: "" });
+  };
+  const handleRemoveBodyPokemon = () => {
+    dispatch({ type: "SET_SELECTED_BODY", payload: null });
+    dispatch({ type: "SET_ACTIVE_SLOT", payload: "body" });
+    dispatch({ type: "SET_NICKNAME", payload: "" });
+    dispatch({ type: "SET_PREVIEW_NICKNAME", payload: "" });
+  };
+  const resetState = () => {
+    dispatch({ type: "RESET_STATE" });
+  };
+  const handleUpdateTeamMember = async () => {
+    const nicknameUpdate = getTeamNicknameUpdate(
+      selectedHead?.pokemon,
+      selectedBody?.pokemon,
+      nickname,
+    );
+    if (nicknameUpdate) {
+      await playthroughActions.updatePokemonByUID(nicknameUpdate.uid, {
+        nickname: nicknameUpdate.nickname,
+      });
+    }
+    onSelect(selectedHead?.pokemon ?? null, selectedBody?.pokemon ?? null);
+    onClose();
+  };
+  const handleClearTeamMember = () => {
+    onSelect(null, null);
+    onClose();
+  };
+
+  return {
+    setSelectedHead,
+    setSelectedBody,
+    setActiveSlot,
+    setHasManuallySelectedSlot,
+    setSearchQuery,
+    setNickname,
+    setPreviewNickname,
+    handleSlotSelect,
+    handlePokemonSelect,
+    handleRemoveHeadPokemon,
+    handleRemoveBodyPokemon,
+    resetState,
+    handleUpdateTeamMember,
+    handleClearTeamMember,
+  };
+}
+
 export function TeamMemberSelectionProvider({
   children,
   position,
@@ -199,63 +357,9 @@ export function TeamMemberSelectionProvider({
     teamMemberSelectionReducer,
     initialState,
   );
-  const {
-    selectedHead,
-    selectedBody,
-    activeSlot,
-    hasManuallySelectedSlot,
-    searchQuery,
-    nickname,
-    previewNickname,
-  } = state;
   const teamMembers = activePlaythrough?.team?.members;
 
-  // Auto-switch to head selection mode when both slots are empty, but only if no manual selection was made
-  useEffect(() => {
-    if (
-      !selectedHead &&
-      !selectedBody &&
-      !activeSlot &&
-      !hasManuallySelectedSlot
-    ) {
-      dispatch({ type: "SET_ACTIVE_SLOT", payload: "head" });
-    }
-  }, [selectedHead, selectedBody, hasManuallySelectedSlot, activeSlot]);
-
-  // Update nickname whenever the fusion order changes (head/body swap)
-  useEffect(() => {
-    const selectionNickname = getTeamSelectionNickname(
-      selectedHead?.pokemon,
-      selectedBody?.pokemon,
-    );
-    dispatch({ type: "SET_NICKNAME", payload: selectionNickname });
-    dispatch({ type: "SET_PREVIEW_NICKNAME", payload: selectionNickname });
-  }, [selectedHead, selectedBody]);
-
-  // Pre-populate selections when editing existing team member
-  useEffect(() => {
-    if (existingTeamMember && !existingTeamMember.isEmpty && encounters) {
-      const selection = initializeExistingTeamMemberSelection(
-        existingTeamMember,
-        (uid) => findPokemonWithLocation(encounters, uid),
-      );
-
-      dispatch({
-        type: "INITIALIZE_FROM_EXISTING",
-        payload: selection,
-      });
-
-      if (
-        !hasManuallySelectedSlot &&
-        selection.suggestedActiveSlot !== undefined
-      ) {
-        dispatch({
-          type: "SET_ACTIVE_SLOT",
-          payload: selection.suggestedActiveSlot,
-        });
-      }
-    }
-  }, [existingTeamMember, encounters, hasManuallySelectedSlot]);
+  useTeamSelectionEffects({ state, dispatch, existingTeamMember, encounters });
 
   // Get all available Pokémon from encounters, filtering out those already in use by other team members
   const allAvailablePokemon = useMemo(() => {
@@ -270,165 +374,23 @@ export function TeamMemberSelectionProvider({
   }, [encounters, teamMembers, position, existingTeamMember]);
 
   // Computed values
-  const canUpdateTeam: boolean =
-    !!(selectedHead || selectedBody) || (!selectedHead && !selectedBody);
-
-  const hasSelection = !!(selectedHead || selectedBody);
-
-  const handleSlotSelect = useCallback((slot: "head" | "body") => {
-    dispatch({ type: "SET_ACTIVE_SLOT", payload: slot });
-    dispatch({ type: "SET_HAS_MANUALLY_SELECTED_SLOT", payload: true });
-  }, []);
-
-  const handlePokemonSelect = useCallback(
-    (pokemon: PokemonOptionType, locationId: string) => {
-      dispatch({
-        type: "APPLY_POKEMON_SELECTION",
-        payload: { pokemon, locationId },
-      });
-    },
-    [],
-  );
-
-  const handleRemoveHeadPokemon = useCallback(() => {
-    dispatch({ type: "SET_SELECTED_HEAD", payload: null });
-    dispatch({ type: "SET_ACTIVE_SLOT", payload: "head" });
-    dispatch({ type: "SET_NICKNAME", payload: "" });
-    dispatch({ type: "SET_PREVIEW_NICKNAME", payload: "" });
-  }, []);
-
-  const handleRemoveBodyPokemon = useCallback(() => {
-    dispatch({ type: "SET_SELECTED_BODY", payload: null });
-    dispatch({ type: "SET_ACTIVE_SLOT", payload: "body" });
-    dispatch({ type: "SET_NICKNAME", payload: "" });
-    dispatch({ type: "SET_PREVIEW_NICKNAME", payload: "" });
-  }, []);
-
-  const resetState = useCallback(() => {
-    dispatch({ type: "RESET_STATE" });
-  }, []);
-
-  const handleUpdateTeamMember = useCallback(async () => {
-    const headPokemon = selectedHead?.pokemon;
-    const bodyPokemon = selectedBody?.pokemon;
-    const nicknameUpdate = getTeamNicknameUpdate(
-      headPokemon,
-      bodyPokemon,
-      nickname,
-    );
-
-    if (nicknameUpdate) {
-      await playthroughActions.updatePokemonByUID(nicknameUpdate.uid, {
-        nickname: nicknameUpdate.nickname,
-      });
-    }
-
-    onSelect(headPokemon ?? null, bodyPokemon ?? null);
-    onClose();
-  }, [selectedHead, selectedBody, nickname, onSelect, onClose]);
-
-  const handleClearTeamMember = useCallback(() => {
-    onSelect(null, null);
-    onClose();
-  }, [onSelect, onClose]);
-
-  // Memoize the state value to prevent unnecessary re-renders
   const stateValue = useMemo(
     () => ({
-      selectedHead,
-      selectedBody,
-      activeSlot,
-      hasManuallySelectedSlot,
-      searchQuery,
-      nickname,
-      previewNickname,
+      ...state,
       availablePokemon: allAvailablePokemon,
-      canUpdateTeam,
-      hasSelection,
+      canUpdateTeam: true,
+      hasSelection: Boolean(state.selectedHead || state.selectedBody),
     }),
-    [
-      selectedHead,
-      selectedBody,
-      activeSlot,
-      hasManuallySelectedSlot,
-      searchQuery,
-      nickname,
-      previewNickname,
-      allAvailablePokemon,
-      canUpdateTeam,
-      hasSelection,
-    ],
+    [state, allAvailablePokemon],
   );
-
-  // Create memoized action functions to prevent recreation on every render
-  const setSelectedHead = useCallback(
-    (payload: TeamPokemonSelection | null) =>
-      dispatch({ type: "SET_SELECTED_HEAD", payload }),
-    [],
-  );
-  const setSelectedBody = useCallback(
-    (payload: TeamPokemonSelection | null) =>
-      dispatch({ type: "SET_SELECTED_BODY", payload }),
-    [],
-  );
-  const setActiveSlot = useCallback(
-    (payload: TeamSelectionSlot | null) =>
-      dispatch({ type: "SET_ACTIVE_SLOT", payload }),
-    [],
-  );
-  const setHasManuallySelectedSlot = useCallback(
-    (payload: boolean) =>
-      dispatch({ type: "SET_HAS_MANUALLY_SELECTED_SLOT", payload }),
-    [],
-  );
-  const setSearchQuery = useCallback(
-    (payload: string) => dispatch({ type: "SET_SEARCH_QUERY", payload }),
-    [],
-  );
-  const setNickname = useCallback(
-    (payload: string) => dispatch({ type: "SET_NICKNAME", payload }),
-    [],
-  );
-  const setPreviewNickname = useCallback(
-    (payload: string) => dispatch({ type: "SET_PREVIEW_NICKNAME", payload }),
-    [],
-  );
-
-  // Memoize the actions to prevent recreation on every render
-  const actionsValue = useMemo(
-    () => ({
-      setSelectedHead,
-      setSelectedBody,
-      setActiveSlot,
-      setHasManuallySelectedSlot,
-      setSearchQuery,
-      setNickname,
-      setPreviewNickname,
-      handleSlotSelect,
-      handlePokemonSelect,
-      handleRemoveHeadPokemon,
-      handleRemoveBodyPokemon,
-      resetState,
-      handleUpdateTeamMember,
-      handleClearTeamMember,
-    }),
-    [
-      setSelectedHead,
-      setSelectedBody,
-      setActiveSlot,
-      setHasManuallySelectedSlot,
-      setSearchQuery,
-      setNickname,
-      setPreviewNickname,
-      handleSlotSelect,
-      handlePokemonSelect,
-      handleRemoveHeadPokemon,
-      handleRemoveBodyPokemon,
-      resetState,
-      handleUpdateTeamMember,
-      handleClearTeamMember,
-    ],
-  );
+  const actionsValue = useTeamMemberSelectionActionValue({
+    dispatch,
+    selectedHead: state.selectedHead,
+    selectedBody: state.selectedBody,
+    nickname: state.nickname,
+    onSelect,
+    onClose,
+  });
 
   return (
     <TeamMemberSelectionStateContext.Provider value={stateValue}>
@@ -440,7 +402,7 @@ export function TeamMemberSelectionProvider({
 }
 
 // Custom hooks for consuming the separate contexts
-export function useTeamMemberSelectionState() {
+function useTeamMemberSelectionState() {
   const context = useContext(TeamMemberSelectionStateContext);
   if (!context) {
     throw new Error(
@@ -450,7 +412,7 @@ export function useTeamMemberSelectionState() {
   return context;
 }
 
-export function useTeamMemberSelectionActions() {
+function useTeamMemberSelectionActions() {
   const context = useContext(TeamMemberSelectionDispatchContext);
   if (!context) {
     throw new Error(

@@ -1,5 +1,6 @@
 import type { z } from "zod";
 import { type PokemonOptionSchema, PokemonStatus } from "@/loaders/pokemon";
+import { getAvailableTeamPositionsForMembers } from "../teamPositions";
 import type { EncounterData } from "../types";
 import { ensureActivePlaythroughWithEncounters } from "./shared";
 
@@ -89,10 +90,9 @@ export const autoAssignCapturedPokemonToTeam = async (
     return;
   }
 
-  const availablePositions = activePlaythrough.team.members
-    .map((member, index) => ({ member, index }))
-    .filter(({ member }) => member === null)
-    .map(({ index }) => index);
+  const availablePositions = getAvailableTeamPositionsForMembers(
+    activePlaythrough.team.members,
+  );
 
   if (availablePositions.length === 0) {
     return;
@@ -329,28 +329,11 @@ const restorePokemonToTeamMembers = (pokemonUIDs: string[]) => {
   let hasChanges = false;
 
   for (const encounter of Object.values(activePlaythrough.encounters)) {
-    if (
-      encounter.head?.uid &&
-      uidsToRestore.has(encounter.head.uid) &&
-      encounter.head.status === PokemonStatus.STORED
-    ) {
-      encounter.head = {
-        ...encounter.head,
-        status: encounter.head.originalReceivalStatus || PokemonStatus.CAPTURED,
-      };
-      encounter.updatedAt = Date.now();
-      hasChanges = true;
-    }
-
-    if (
-      encounter.body?.uid &&
-      uidsToRestore.has(encounter.body.uid) &&
-      encounter.body.status === PokemonStatus.STORED
-    ) {
-      encounter.body = {
-        ...encounter.body,
-        status: encounter.body.originalReceivalStatus || PokemonStatus.CAPTURED,
-      };
+    const restoredHead = restoreStoredPokemon(encounter.head, uidsToRestore);
+    const restoredBody = restoreStoredPokemon(encounter.body, uidsToRestore);
+    if (restoredHead || restoredBody) {
+      encounter.head = restoredHead ?? encounter.head;
+      encounter.body = restoredBody ?? encounter.body;
       encounter.updatedAt = Date.now();
       hasChanges = true;
     }
@@ -359,6 +342,30 @@ const restorePokemonToTeamMembers = (pokemonUIDs: string[]) => {
   if (hasChanges) {
     activePlaythrough.updatedAt = Date.now();
   }
+};
+
+const restoreStoredPokemon = <
+  Pokemon extends {
+    uid?: string;
+    status?: string;
+    originalReceivalStatus?: string;
+  },
+>(
+  pokemon: Pokemon | null,
+  uidsToRestore: ReadonlySet<string>,
+): Pokemon | null => {
+  if (
+    !pokemon?.uid ||
+    !uidsToRestore.has(pokemon.uid) ||
+    pokemon.status !== PokemonStatus.STORED
+  ) {
+    return null;
+  }
+
+  return {
+    ...pokemon,
+    status: pokemon.originalReceivalStatus || PokemonStatus.CAPTURED,
+  };
 };
 
 export const restorePokemonToTeam = async (
