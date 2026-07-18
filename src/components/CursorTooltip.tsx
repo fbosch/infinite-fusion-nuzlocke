@@ -179,7 +179,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
     whileElementsMounted: (reference, floating, update) => {
       const cleanup = autoUpdate(reference, floating, update, {
         layoutShift: true,
-        animationFrame: true,
+        animationFrame: false,
         elementResize: true,
         ancestorScroll: true,
         ancestorResize: true,
