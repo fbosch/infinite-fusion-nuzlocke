@@ -85,11 +85,26 @@ Purpose: close the residual first-party findings through behavior-preserving ref
 - [x] Refactor context-menu action construction and shared behavior before extracting common code.
 - [x] Refactor summary-card and PC/team decision surfaces without widening component interfaces unnecessarily.
 - [x] Resolve UI clone groups only where states and accessibility behavior are identical.
-- [ ] Group scraper and sprite clone findings by data-pipeline step.
+- [x] Group scraper and sprite clone findings by data-pipeline step.
 - [x] Add deterministic input/output tests before consolidating script utilities.
 - [ ] Resolve remaining complexity findings by workflow or pipeline stage, prioritizing items with matching duplication findings.
 - [ ] Trace every remaining first-party finding and remove it, refactor it, configure it, or add a narrow reasoned suppression.
 - [ ] Save the resulting first-party baseline and keep the changed-code audit gate enabled.
+
+### Scraper And Sprite Clone Triage
+
+Fallow's duplication report groups these findings by pipeline responsibility. Refactor only within a stage so that source-specific parsing, failure handling, and output contracts remain explicit.
+
+| Pipeline step | Clone groups | Files | Consolidation boundary |
+| --- | --- | --- | --- |
+| Pokemon source enrichment | 1-2 | `scripts/fetch-pokemon-data.ts` | Share evolution-chain loading and processed-record construction between batch and fallback retrieval. |
+| Encounter extraction and normalization | 10, 12-14 | `scripts/scrape-legendary-encounters.ts`, `scripts/scrape-safari-encounters.ts`, `scripts/scrape-special-encounters.ts`, `scripts/scrape-wild-encounters.ts` | Extract only parsers with matching source markup and output schemas; retain source-specific validation and error messages. |
+| Scraper orchestration and terminal reporting | 8-9 | `scripts/scrape-egg-locations.ts`, `scripts/scrape-special-encounters.ts`, `scripts/scrape-pokemon-icons.ts` | Keep final summaries and process-exit handling local unless a shared runner can preserve each script's result shape and direct-execution guard. |
+| Sprite source setup and acquisition | 3-4, 11 | `scripts/generate-spritesheet.ts`, `scripts/scrape-pokemon-icons.ts` | Share sprite-specific path/configuration and generation download iteration; do not mix with encounter scrapers. |
+| Sprite packing and validation | 5-7 | `scripts/generate-spritesheet.ts` | Extract a rectangle-overlap predicate only after packing and repair behavior has targeted coverage; keep packing and repair policies distinct. |
+| Runtime sprite delivery | 15-16 | `src/app/api/sprite/variants/route.ts`, `src/lib/sprites.ts` | Track separately from script pipelines because these are request-time behavior and need API coverage. |
+
+Completed source-enrichment work: shared evolution-chain loading and processed-record construction now serve both batch and fallback retrieval in `scripts/fetch-pokemon-data.ts`. This removed clone groups 1-2 and reduced the health report from 126 to 124 complexity findings; the remaining stages stay tracked by the unchecked complexity item.
 
 Acceptance criteria:
 

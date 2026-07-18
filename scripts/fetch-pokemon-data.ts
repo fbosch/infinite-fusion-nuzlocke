@@ -6,6 +6,15 @@ import type * as cliProgress from "cli-progress";
 import Pokedex from "pokedex-promise-v2";
 import type { DexEntry } from "./scrape-pokedex";
 import { ConsoleFormatter } from "./utils/console-utils";
+import {
+  createProcessedPokemonData,
+  type EvolutionData,
+  type EvolutionDetail,
+  type PokemonSpeciesApiData,
+  type ProcessedPokemonData,
+} from "./utils/pokemon-data-utils";
+
+export type { ProcessedPokemonData } from "./utils/pokemon-data-utils";
 
 // Optimized configuration for pokedex-promise-v2
 const P = new Pokedex({
@@ -59,33 +68,43 @@ function extractEvolutionData(
     return null;
   }
 
+  function getEvolutionCondition(detail: any): string | undefined {
+    if (detail.held_item_type) {
+      return `Holding ${detail.held_item_type.name}`;
+    }
+    if (detail.known_move_type) {
+      return `Knows ${detail.known_move_type.name} move`;
+    }
+    if (detail.time_of_day) {
+      return `Time: ${detail.time_of_day}`;
+    }
+    if (detail.min_affection) {
+      return `Affection: ${detail.min_affection}`;
+    }
+    if (detail.min_happiness) {
+      return `Happiness: ${detail.min_happiness}`;
+    }
+    return undefined;
+  }
+
+  function addEvolutionDetails(details: EvolutionDetail, detail: any): void {
+    if (detail.min_level) details.min_level = detail.min_level;
+    if (detail.item) details.item = detail.item.name;
+    if (detail.location) details.location = detail.location.name;
+    if (detail.trigger) details.trigger = detail.trigger.name;
+
+    const condition = getEvolutionCondition(detail);
+    if (condition) details.condition = condition;
+  }
+
   // Helper function to get evolution details
   function getEvolutionDetails(evolution: any): EvolutionDetail {
     const details: EvolutionDetail = {
       id: parseInt(evolution.species.url.split("/").slice(-2)[0], 10),
       name: evolution.species.name,
     };
-
-    if (evolution.evolution_details && evolution.evolution_details.length > 0) {
-      const detail = evolution.evolution_details[0];
-
-      if (detail.min_level) details.min_level = detail.min_level;
-      if (detail.item) details.item = detail.item.name;
-      if (detail.location) details.location = detail.location.name;
-      if (detail.trigger) details.trigger = detail.trigger.name;
-
-      // Handle special conditions
-      if (detail.min_happiness)
-        details.condition = `Happiness: ${detail.min_happiness}`;
-      if (detail.min_affection)
-        details.condition = `Affection: ${detail.min_affection}`;
-      if (detail.time_of_day) details.condition = `Time: ${detail.time_of_day}`;
-      if (detail.known_move_type)
-        details.condition = `Knows ${detail.known_move_type.name} move`;
-      if (detail.held_item_type)
-        details.condition = `Holding ${detail.held_item_type.name}`;
-    }
-
+    const detail = evolution.evolution_details?.[0];
+    if (detail) addEvolutionDetails(details, detail);
     return details;
   }
 
@@ -126,41 +145,20 @@ function extractEvolutionData(
   return evolutionData;
 }
 
-interface PokemonType {
-  name: string;
-}
+async function loadEvolutionData(
+  species: PokemonSpeciesApiData,
+  pokemonName: string,
+): Promise<EvolutionData | undefined> {
+  if (!species.evolution_chain?.url) {
+    return undefined;
+  }
 
-interface PokemonSpeciesData {
-  is_legendary: boolean;
-  is_mythical: boolean;
-  generation: string | null;
-  evolution_chain?: {
-    url: string;
-  };
-}
-
-interface EvolutionDetail {
-  id: number;
-  name: string;
-  trigger?: string;
-  min_level?: number;
-  item?: string;
-  location?: string;
-  condition?: string;
-}
-
-interface EvolutionData {
-  evolves_from?: EvolutionDetail;
-  evolves_to: EvolutionDetail[];
-}
-
-export interface ProcessedPokemonData {
-  id: number;
-  nationalDexId: number;
-  name: string;
-  types: PokemonType[];
-  species: PokemonSpeciesData;
-  evolution?: EvolutionData;
+  const chainId = parseInt(
+    species.evolution_chain.url.split("/").slice(-2)[0],
+    10,
+  );
+  const chainData = await fetchEvolutionChain(chainId);
+  return chainData ? extractEvolutionData(chainData, pokemonName) : undefined;
 }
 
 async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
@@ -365,34 +363,13 @@ async function processBatch(
         );
       }
 
-      // Fetch evolution data if available
-      let evolutionData: EvolutionData | undefined;
-      if (species.evolution_chain?.url) {
-        const chainId = parseInt(
-          species.evolution_chain.url.split("/").slice(-2)[0],
-          10,
-        );
-        const chainData = await fetchEvolutionChain(chainId);
-        if (chainData) {
-          evolutionData = extractEvolutionData(chainData, pokemon.species.name);
-        }
-      }
-
-      results.push({
-        id: item.entry.id,
-        nationalDexId: pokemon.id,
-        name: item.entry.name, // Keep original name from Infinite Fusion
-        types: pokemon.types.map((type: any) => ({
-          name: type.type.name,
-        })),
-        species: {
-          is_legendary: species.is_legendary,
-          is_mythical: species.is_mythical,
-          generation: species.generation?.name || null,
-          evolution_chain: species.evolution_chain,
-        },
-        evolution: evolutionData,
-      });
+      const evolutionData = await loadEvolutionData(
+        species,
+        pokemon.species.name,
+      );
+      results.push(
+        createProcessedPokemonData(item.entry, pokemon, species, evolutionData),
+      );
     }
 
     return results;
@@ -425,37 +402,16 @@ async function processBatch(
               status: `Fetched ${item.entry.name}`,
             });
 
-            // Fetch evolution data if available
-            let evolutionData: EvolutionData | undefined;
-            if (species.evolution_chain?.url) {
-              const chainId = parseInt(
-                species.evolution_chain.url.split("/").slice(-2)[0],
-                10,
-              );
-              const chainData = await fetchEvolutionChain(chainId);
-              if (chainData) {
-                evolutionData = extractEvolutionData(
-                  chainData,
-                  pokemon.species.name,
-                );
-              }
-            }
-
-            return {
-              id: item.entry.id,
-              nationalDexId: pokemon.id,
-              name: item.entry.name,
-              types: pokemon.types.map((type: any) => ({
-                name: type.type.name,
-              })),
-              species: {
-                is_legendary: species.is_legendary,
-                is_mythical: species.is_mythical,
-                generation: species.generation?.name || null,
-                evolution_chain: species.evolution_chain,
-              },
-              evolution: evolutionData,
-            };
+            const evolutionData = await loadEvolutionData(
+              species,
+              pokemon.species.name,
+            );
+            return createProcessedPokemonData(
+              item.entry,
+              pokemon,
+              species,
+              evolutionData,
+            );
           } catch (_error) {
             batchProgressBar.update(i + chunkIndex + 1, {
               status: `Failed: ${item.entry.name}`,
