@@ -102,7 +102,7 @@ Fallow's duplication report groups these findings by pipeline responsibility. Re
 | Scraper orchestration and terminal reporting | 8-9 | `scripts/scrape-egg-locations.ts`, `scripts/scrape-special-encounters.ts`, `scripts/scrape-pokemon-icons.ts` | Keep final summaries and process-exit handling local unless a shared runner can preserve each script's result shape and direct-execution guard. |
 | Sprite source setup and acquisition | 3-4, 11 | `scripts/generate-spritesheet.ts`, `scripts/scrape-pokemon-icons.ts` | Setup clone consolidation and download retry refactor completed through shared path derivation, JSON loading, and focused retry helpers. The duplicated batch loop remains separate acquisition work. |
 | Sprite packing and validation | 5-7 | `scripts/generate-spritesheet.ts` | Clone consolidation completed: shared geometry primitives now cover overlap detection, pair traversal, and packed bounds; packing and repair policies remain distinct and retain their outstanding complexity work. |
-| Runtime sprite delivery | 15-16 | `src/app/api/sprite/variants/route.ts`, `src/lib/sprites.ts` | Track separately from script pipelines because these are request-time behavior and need API coverage. |
+| Runtime sprite delivery | 15-16 | `src/app/api/sprite/variants/route.ts`, `src/lib/sprites.ts` | Shared suffix and URL generation is completed under direct coverage. Keep server/browser existence checks separate because their transport behavior differs. |
 
 Completed source-enrichment work: shared evolution-chain loading and processed-record construction now serve both batch and fallback retrieval in `scripts/fetch-pokemon-data.ts`. This removed clone groups 1-2 and reduced the health report from 126 to 124 complexity findings; the remaining stages stay tracked by the unchecked complexity item.
 
@@ -111,6 +111,10 @@ Completed sprite-packing clone work: targeted geometry tests cover edge contact,
 Completed sprite-source work: shared path derivation and JSON loading removed the two cross-script setup clone groups, reducing full duplication groups from 18 to 16. Focused retry helpers have coverage for existing files, eggs, and base-form fallback; the duplicated batch download loop is now consolidated.
 
 Completed encounter output work: shared classic/remix directory setup removed two clone groups across the Safari, wild, and special scrapers. Ordered Safari encounter rules retain classification precedence under focused coverage and reduced the health report from 122 to 119 complexity findings.
+
+Completed runtime sprite helper work: shared suffix and CDN URL generation removed one clone group, reducing full duplication groups from 13 to 12. Server and browser existence checks remain intentionally separate.
+
+Completed egg gift-row classification work: deterministic egg and location predicates preserve the existing keyword rules under direct coverage, removing the scraper callback complexity finding and reducing the health report from 119 to 116 findings.
 
 Acceptance criteria:
 
