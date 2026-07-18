@@ -2,26 +2,22 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { ConsoleFormatter } from "./utils/console-utils";
 import {
   normalizePokemonNameForSprite,
   stripPokemonFormSuffix,
 } from "./utils/pokemon-name-utils";
+import {
+  getSpriteSourcePaths,
+  loadJsonFile,
+} from "./utils/sprite-source-utils";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const BASE_ENTRIES_PATH = path.join(
-  __dirname,
-  "..",
-  "data",
-  "shared",
-  "base-entries.json",
-);
-const SPRITES_BASE_DIR = path.join(__dirname, "sprites");
-const GEN7_SPRITES_DIR = path.join(SPRITES_BASE_DIR, "pokemon-gen7");
-const GEN8_SPRITES_DIR = path.join(SPRITES_BASE_DIR, "pokemon-gen8");
+const {
+  baseEntriesPath: BASE_ENTRIES_PATH,
+  spritesBaseDir: SPRITES_BASE_DIR,
+  gen7SpritesDir: GEN7_SPRITES_DIR,
+  gen8SpritesDir: GEN8_SPRITES_DIR,
+} = getSpriteSourcePaths(import.meta.url);
 const GEN7_ICON_BASE_URL =
   "https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen7x/regular";
 const GEN8_ICON_BASE_URL =
@@ -191,8 +187,7 @@ async function loadPokemonIcons(): Promise<PokemonIcon[]> {
     const entriesData = await ConsoleFormatter.withSpinner(
       "Loading Pokemon entries...",
       async () => {
-        const data = await fs.readFile(BASE_ENTRIES_PATH, "utf-8");
-        return JSON.parse(data) as PokemonEntry[];
+        return loadJsonFile<PokemonEntry[]>(BASE_ENTRIES_PATH);
       },
     );
 

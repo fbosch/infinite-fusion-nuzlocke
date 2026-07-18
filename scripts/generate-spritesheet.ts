@@ -2,7 +2,6 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { ConsoleFormatter } from "./utils/console-utils";
 import {
@@ -14,22 +13,24 @@ import {
   forEachOverlappingPair,
   getPackedBounds,
 } from "./utils/sprite-packing-utils";
+import {
+  getSpriteSourcePaths,
+  loadJsonFile,
+} from "./utils/sprite-source-utils";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const BASE_ENTRIES_PATH = path.join(
-  __dirname,
+const {
+  scriptDirectory,
+  baseEntriesPath: BASE_ENTRIES_PATH,
+  gen7SpritesDir: GEN7_SPRITES_DIR,
+  gen8SpritesDir: GEN8_SPRITES_DIR,
+} = getSpriteSourcePaths(import.meta.url);
+const SPRITESHEET_OUTPUT_DIR = path.join(
+  scriptDirectory,
   "..",
-  "data",
-  "shared",
-  "base-entries.json",
+  "public",
+  "images",
 );
-const SPRITES_BASE_DIR = path.join(__dirname, "sprites");
-const GEN7_SPRITES_DIR = path.join(SPRITES_BASE_DIR, "pokemon-gen7");
-const GEN8_SPRITES_DIR = path.join(SPRITES_BASE_DIR, "pokemon-gen8");
-const SPRITESHEET_OUTPUT_DIR = path.join(__dirname, "..", "public", "images");
-const METADATA_OUTPUT_DIR = path.join(__dirname, "..", "src", "assets");
+const METADATA_OUTPUT_DIR = path.join(scriptDirectory, "..", "src", "assets");
 
 export type PokemonEntry = {
   id: number;
@@ -316,8 +317,7 @@ async function loadSpriteData(
   const entriesData = await ConsoleFormatter.withSpinner(
     "Loading Pokemon entries...",
     async () => {
-      const data = await fs.readFile(BASE_ENTRIES_PATH, "utf-8");
-      return JSON.parse(data) as PokemonEntry[];
+      return loadJsonFile<PokemonEntry[]>(BASE_ENTRIES_PATH);
     },
   );
 
