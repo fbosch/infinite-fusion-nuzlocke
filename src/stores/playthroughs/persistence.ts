@@ -15,23 +15,23 @@ export const playthroughsStore_idb = createStore("playthroughs", "data");
 export const ACTIVE_PLAYTHROUGH_KEY = "activePlaythroughId";
 
 // LocalStorage helpers for active playthrough ID
-export const getActivePlaythroughId = (): string | null => {
+const getActivePlaythroughId = (): string | null => {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(ACTIVE_PLAYTHROUGH_KEY);
 };
 
-export const setActivePlaythroughId = (id: string): void => {
+const setActivePlaythroughId = (id: string): void => {
   if (typeof window === "undefined") return;
   localStorage.setItem(ACTIVE_PLAYTHROUGH_KEY, id);
 };
 
-export const removeActivePlaythroughId = (): void => {
+const removeActivePlaythroughId = (): void => {
   if (typeof window === "undefined") return;
   localStorage.removeItem(ACTIVE_PLAYTHROUGH_KEY);
 };
 
 // Migration function to move activePlaythroughId from IndexedDB to LocalStorage
-export const migrateActivePlaythroughId = async (): Promise<string | null> => {
+const migrateActivePlaythroughId = async (): Promise<string | null> => {
   if (typeof window === "undefined") return null;
 
   // Check if we already have the value in LocalStorage
@@ -70,7 +70,7 @@ export const migrateActivePlaythroughId = async (): Promise<string | null> => {
 };
 
 // More efficient serialization: Use structuredClone when available, fallback to JSON
-export const serializeForStorage = (obj: unknown): unknown => {
+const serializeForStorage = (obj: unknown): unknown => {
   if (typeof structuredClone !== "undefined") {
     try {
       return structuredClone(obj);

@@ -1,5 +1,13 @@
 import * as customLocationActions from "./customLocations";
 import * as encounterActions from "./encounters";
+import { getEncounters } from "./encounters/crud";
+import { updatePokemonByUID } from "./encounters/team";
+import {
+  cycleArtworkVariant,
+  prefetchAdjacentVariants,
+  preloadArtworkVariants,
+  setArtworkVariant,
+} from "./encounters/variants";
 import * as storeActions from "./store";
 
 // The aggregate action API remains the only public entry point for state mutations.
@@ -9,6 +17,12 @@ export const playthroughActions = {
 
   // Encounter actions
   ...encounterActions,
+  getEncounters,
+  updatePokemonByUID,
+  cycleArtworkVariant,
+  prefetchAdjacentVariants,
+  preloadArtworkVariants,
+  setArtworkVariant,
 
   // Custom location actions
   ...customLocationActions,

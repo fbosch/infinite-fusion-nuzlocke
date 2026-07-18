@@ -3,9 +3,7 @@ import { encountersData } from "@/lib/queryClient";
 import {
   EncounterSource,
   type PokemonEncounter,
-  PokemonEncounterSchema,
   type RouteEncounter,
-  RouteEncounterSchema,
   RouteEncountersArraySchema,
 } from "@/types/encounters";
 import { useLocationEncountersById } from "./locations";
@@ -24,7 +22,7 @@ interface EncounterData {
 }
 
 // Data loaders for encounters using TanStack Query
-export async function getClassicEncounters(): Promise<RouteEncounter[]> {
+async function getClassicEncounters(): Promise<RouteEncounter[]> {
   try {
     return await encountersData.getAllEncounters("classic");
   } catch (error) {
@@ -33,7 +31,7 @@ export async function getClassicEncounters(): Promise<RouteEncounter[]> {
   }
 }
 
-export async function getRemixEncounters(): Promise<RouteEncounter[]> {
+async function getRemixEncounters(): Promise<RouteEncounter[]> {
   try {
     return await encountersData.getAllEncounters("remix");
   } catch (error) {
@@ -43,7 +41,7 @@ export async function getRemixEncounters(): Promise<RouteEncounter[]> {
 }
 
 // Get encounters by route name
-export async function getEncountersByRouteName(
+async function getEncountersByRouteName(
   routeName: string | null | undefined,
   gameMode: "classic" | "remix" = "classic",
 ): Promise<RouteEncounter | null> {
@@ -73,7 +71,7 @@ export async function getEncountersByRouteName(
 }
 
 // Get all encounters for a specific game mode
-export async function getEncounters(
+async function getEncounters(
   gameMode: "classic" | "remix" = "classic",
 ): Promise<RouteEncounter[]> {
   return gameMode === "classic"
@@ -82,7 +80,7 @@ export async function getEncounters(
 }
 
 // Create a map of routeName to encounter for quick lookup
-export async function getEncountersMap(
+async function getEncountersMap(
   gameMode: "classic" | "remix" = "classic",
 ): Promise<Map<string, RouteEncounter>> {
   const encounters = await getEncounters(gameMode);
@@ -96,7 +94,7 @@ export async function getEncountersMap(
 }
 
 // Function to clear cache if needed (for testing or data updates)
-export function clearEncountersCache(): void {
+function clearEncountersCache(): void {
   // This will be handled by TanStack Query's cache invalidation
   // You can use queryClient.invalidateQueries(['encounters']) if needed
 }

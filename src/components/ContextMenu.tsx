@@ -270,6 +270,22 @@ export function ContextMenu({
   const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
   const submenuRef = useRef<HTMLDivElement>(null);
 
+  const handleClose = useCallback(() => {
+    if (isOpen) {
+      window.dispatchEvent(new Event("context-menu-close"));
+    }
+    closeMenu();
+
+    if (menuElementRef.current) {
+      menuElementRef.current.classList.remove("tooltip-enter");
+      menuElementRef.current.classList.add("tooltip-exit");
+
+      setTimeout(() => {
+        hideMenu();
+      }, 50);
+    }
+  }, [isOpen, closeMenu, hideMenu]);
+
   useLayoutEffect(() => {
     if (!isVisible || !menuElementRef.current) return;
 
@@ -292,7 +308,7 @@ export function ContextMenu({
   const { refs, context } = useFloating({
     open: isOpen,
     onOpenChange: (open) => {
-      if (!open) closeMenu();
+      if (!open) handleClose();
     },
   });
 
@@ -311,22 +327,6 @@ export function ContextMenu({
     role,
     listNavigation,
   ]);
-
-  const handleClose = useCallback(() => {
-    if (isOpen) {
-      window.dispatchEvent(new Event("context-menu-close"));
-    }
-    closeMenu();
-
-    if (menuElementRef.current) {
-      menuElementRef.current.classList.remove("tooltip-enter");
-      menuElementRef.current.classList.add("tooltip-exit");
-
-      setTimeout(() => {
-        hideMenu();
-      }, 50);
-    }
-  }, [isOpen, closeMenu, hideMenu]);
 
   // Close menu when window becomes hidden, loses focus, or scrolls
   useEffect(() => {

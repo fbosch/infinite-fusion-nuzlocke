@@ -38,11 +38,11 @@ export const getCheckpointStorageKey = (playthroughId: string): string => {
   return `${CHECKPOINT_STORAGE_KEY_PREFIX}${playthroughId}`;
 };
 
-export const getResumeStorageKey = (playthroughId: string): string => {
+const getResumeStorageKey = (playthroughId: string): string => {
   return `${RESUME_STORAGE_KEY_PREFIX}${playthroughId}`;
 };
 
-export const getLandingStorageKey = (playthroughId: string): string => {
+const getLandingStorageKey = (playthroughId: string): string => {
   return `${LANDING_STORAGE_KEY_PREFIX}${playthroughId}`;
 };
 
@@ -208,17 +208,9 @@ export const getDaysSinceLastActive = (
 
 export {
   getCheckpointLabel,
-  toCountBucket,
   toDormancyBucket,
-  toEncounterCountBucket,
-  toViableRosterBucket,
 } from "./buckets";
 export {
-  getBoxedCount,
-  getDeceasedCount,
   getEncounterCount,
-  getFusionCount,
   getSharedEventProperties,
-  getTeamSizeAfter,
-  getViableRosterSize,
 } from "./selectors";

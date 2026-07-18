@@ -10,14 +10,9 @@ import { z } from "zod";
 import { pokemonData, pokemonQueries } from "@/lib/queryClient";
 import { SearchCore } from "@/lib/searchCore";
 import searchService from "@/services/searchService";
-import {
-  type Pokemon,
-  PokemonArraySchema,
-  PokemonSchema,
-} from "@/types/pokemon";
+import { type Pokemon, PokemonSchema } from "@/types/pokemon";
 
 export type { Pokemon } from "@/types/pokemon";
-export { PokemonArraySchema, PokemonSchema } from "@/types/pokemon";
 
 // Utility function to generate unique identifiers
 export function generatePokemonUID(): string {
@@ -66,7 +61,7 @@ export type PokemonStatusType =
   (typeof PokemonStatus)[keyof typeof PokemonStatus];
 
 // Zod schema for Pokemon status
-export const PokemonStatusSchema = z.enum(
+const PokemonStatusSchema = z.enum(
   [
     PokemonStatus.CAPTURED,
     PokemonStatus.RECEIVED,
@@ -224,7 +219,7 @@ export async function getPokemonById(id: number): Promise<Pokemon | null> {
 }
 
 // Legacy function for backward compatibility - uses centralized query client
-export async function getPokemonByType(type: string): Promise<Pokemon[]> {
+async function getPokemonByType(type: string): Promise<Pokemon[]> {
   try {
     return await pokemonData.getPokemonByType(type);
   } catch (error) {
@@ -244,7 +239,7 @@ export async function getPokemonNameMap(): Promise<Map<number, string>> {
   }
 }
 
-export async function getPokemonNamesByIds(ids: number[]): Promise<string[]> {
+async function getPokemonNamesByIds(ids: number[]): Promise<string[]> {
   try {
     const pokemon = await pokemonData.getPokemonByIds(ids);
     return pokemon.map((p) => p.name);
@@ -254,7 +249,7 @@ export async function getPokemonNamesByIds(ids: number[]): Promise<string[]> {
   }
 }
 
-export async function getAllPokemonTypes(): Promise<string[]> {
+async function getAllPokemonTypes(): Promise<string[]> {
   try {
     const pokemon = await pokemonData.getAllPokemon();
     const typeSet = new Set<string>();
@@ -272,7 +267,7 @@ export async function getAllPokemonTypes(): Promise<string[]> {
   }
 }
 
-export async function getNationalDexIdFromInfiniteFusionId(
+async function getNationalDexIdFromInfiniteFusionId(
   infiniteFusionId: number,
 ): Promise<number | null> {
   try {
@@ -285,7 +280,7 @@ export async function getNationalDexIdFromInfiniteFusionId(
   }
 }
 
-export async function getInfiniteFusionIdFromNationalDexId(
+async function getInfiniteFusionIdFromNationalDexId(
   nationalDexId: number,
 ): Promise<number | null> {
   try {
@@ -310,7 +305,7 @@ export async function getPokemonByNationalDexId(
   }
 }
 
-export async function getNationalDexToInfiniteFusionMap(): Promise<
+async function getNationalDexToInfiniteFusionMap(): Promise<
   Map<number, number>
 > {
   try {
@@ -328,7 +323,7 @@ export async function getNationalDexToInfiniteFusionMap(): Promise<
   }
 }
 
-export async function getInfiniteFusionToNationalDexMap(): Promise<
+async function getInfiniteFusionToNationalDexMap(): Promise<
   Map<number, number>
 > {
   try {
@@ -351,11 +346,11 @@ export function useAllPokemon() {
   return useQuery(pokemonQueries.all());
 }
 
-export function usePokemonById(id: number) {
+function usePokemonById(id: number) {
   return useQuery(pokemonQueries.byId(id));
 }
 
-export function usePokemonByType(type: string) {
+function usePokemonByType(type: string) {
   return useQuery(pokemonQueries.byType(type));
 }
 

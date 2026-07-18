@@ -80,7 +80,7 @@ Run browser, API, or migration tests for each affected slice.
 Purpose: close the residual first-party findings through behavior-preserving refactors and verified cleanup.
 
 - [x] Trace and reduce the public export surface in `src/stores/playthroughs/` without removing runtime or external consumers.
-- [ ] Remove remaining verified unused files, exports, and types in coherent module batches.
+- [x] Remove remaining verified unused files, exports, and types in coherent module batches.
 - [ ] Add behavior and accessibility coverage for context-menu, summary-card, PC, team, and location interaction paths.
 - [x] Refactor context-menu action construction and shared behavior before extracting common code.
 - [ ] Refactor summary-card and PC/team decision surfaces without widening component interfaces unnecessarily.

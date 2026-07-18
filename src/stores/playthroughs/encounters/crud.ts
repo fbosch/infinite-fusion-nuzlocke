@@ -35,7 +35,7 @@ const inheritFusionStatus = (
 };
 
 // Create encounter data (variants are managed globally)
-export const createEncounterData = async (
+const createEncounterData = async (
   pokemon: PokemonOption | null,
   field: "head" | "body" = "head",
   shouldCreateFusion: boolean = false,

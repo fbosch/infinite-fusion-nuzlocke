@@ -43,7 +43,7 @@ export function generateSpriteUrl(
 /**
  * Generate variant suffix for index (0='', 1='a', 2='b', etc.)
  */
-export function getVariantSuffix(index: number): string {
+function getVariantSuffix(index: number): string {
   if (index === 0) return "";
 
   let result = "";
@@ -61,7 +61,7 @@ export function getVariantSuffix(index: number): string {
  * Check if a sprite URL exists
  * Works in both main thread (using Image) and web workers (using fetch)
  */
-export async function checkSpriteExists(url: string): Promise<boolean> {
+async function checkSpriteExists(url: string): Promise<boolean> {
   // Try Image approach first in main thread (more reliable for images)
   if (typeof window !== "undefined" && typeof Image !== "undefined") {
     return new Promise<boolean>((resolve) => {
@@ -208,7 +208,7 @@ export async function getSpriteCredits(
 /**
  * Get sprite credits for a specific sprite variant
  */
-export async function getVariantSpriteCredits(
+async function getVariantSpriteCredits(
   headId?: number | null,
   bodyId?: number | null,
   variant = "",
@@ -228,7 +228,7 @@ export async function getVariantSpriteCredits(
  * Get formatted sprite credits for a specific sprite variant
  * Returns a human-readable string like "GameFreak, Artist1 and Artist2"
  */
-export async function getFormattedVariantSpriteCredits(
+async function getFormattedVariantSpriteCredits(
   headId?: number | null,
   bodyId?: number | null,
   variant = "",

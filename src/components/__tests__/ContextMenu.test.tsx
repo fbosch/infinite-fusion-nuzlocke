@@ -81,6 +81,25 @@ describe("ContextMenu", () => {
     });
   });
 
+  it("closes when left-clicking outside the menu", async () => {
+    render(
+      <ContextMenu items={[{ id: "first", label: "First action" }]}>
+        <button type="button">First trigger</button>
+      </ContextMenu>,
+    );
+
+    fireEvent.contextMenu(
+      screen.getByRole("button", { name: "First trigger" }),
+    );
+    expect(await screen.findByText("First action")).not.toBeNull();
+
+    fireEvent.pointerDown(document.body, { button: 0 });
+
+    await waitFor(() => {
+      expect(screen.queryByText("First action")).toBeNull();
+    });
+  });
+
   it("announces context-menu lifecycle changes for trigger tooltips", async () => {
     const onOpen = vi.fn();
     const onClose = vi.fn();
