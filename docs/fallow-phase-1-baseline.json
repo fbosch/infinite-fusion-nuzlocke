@@ -31,7 +31,7 @@
     "unusedComponentProps": 2,
     "duplicateExports": 1,
     "devDependenciesInProduction": 0,
-    "healthFindings": 147,
-    "duplicationGroups": 32
+    "healthFindings": 140,
+    "duplicationGroups": 27
   }
 }
