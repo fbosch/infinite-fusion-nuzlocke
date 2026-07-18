@@ -46,11 +46,3 @@ export const pokemonQueries = {
       gcTime: ms("10m"),
     }),
 };
-
-// Query key factories for consistent key generation
-export const pokemonKeys = {
-  all: ["pokemon", "all"] as const,
-  byId: (id: number) => ["pokemon", "byId", id] as const,
-  byIds: (ids: number[]) => ["pokemon", "byIds", ids] as const,
-  byType: (type: string) => ["pokemon", "byType", type] as const,
-};

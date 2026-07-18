@@ -20,6 +20,7 @@ interface SummaryCardProps {
   isFusion?: boolean;
   shouldLoad?: boolean;
   nickname?: string; // Optional nickname to override the Pokémon's existing nickname
+  locationId?: string;
   showStatusActions?: boolean; // Whether to show status-changing actions in context menu
   isTeamMember?: boolean; // Whether this is for team member selection (bypasses encounter logic)
   ref?: React.Ref<FusionSpriteHandle>;
@@ -33,6 +34,7 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
       isFusion = false,
       shouldLoad = true,
       nickname,
+      locationId = "preview",
       showStatusActions = true,
       isTeamMember = false,
     },
@@ -161,7 +163,7 @@ const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
 
     return (
       <PokemonContextMenu
-        locationId="preview"
+        locationId={locationId}
         encounterData={{
           head: effectiveHeadPokemon,
           body: effectiveBodyPokemon,

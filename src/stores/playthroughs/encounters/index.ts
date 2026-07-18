@@ -1,6 +1,4 @@
 export {
-  createEncounterData,
-  getEncounters,
   resetEncounter,
   updateEncounter,
   updatePokemonInEncounter,
@@ -29,13 +27,6 @@ export {
 export {
   moveTeamMemberToBox,
   restorePokemonToTeam,
-  updatePokemonByUID,
   updateTeamMember,
 } from "./team";
 export { flipTeamMemberFusion, markTeamMemberAsDeceased } from "./teamActions";
-export {
-  cycleArtworkVariant,
-  prefetchAdjacentVariants,
-  preloadArtworkVariants,
-  setArtworkVariant,
-} from "./variants";

@@ -136,7 +136,7 @@ export const moveEncounterAtomic = async (
   const willBeFusion =
     targetField === "body" || existingTargetEncounter?.isFusion === true;
 
-  await clearEncounterFromLocation(sourceLocationId, sourceField, {
+  void clearEncounterFromLocation(sourceLocationId, sourceField, {
     preserveTeamMembership: true,
   });
 

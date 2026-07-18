@@ -227,21 +227,3 @@ export function CookieConsent() {
     </>
   );
 }
-
-// Hook to check if analytics should be loaded
-export function useAnalyticsConsent() {
-  const [preferences] = useLocalStorage<ConsentPreferences>(
-    "cookie-preferences",
-    DEFAULT_PREFERENCES,
-  );
-  return preferences.analytics;
-}
-
-// Hook to check if speed insights should be loaded
-export function useSpeedInsightsConsent() {
-  const [preferences] = useLocalStorage<ConsentPreferences>(
-    "cookie-preferences",
-    DEFAULT_PREFERENCES,
-  );
-  return preferences.speedInsights;
-}

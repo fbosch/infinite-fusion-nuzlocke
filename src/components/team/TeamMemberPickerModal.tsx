@@ -20,7 +20,7 @@ interface TeamMemberPickerModalProps {
   onSelect: (
     headPokemon: PokemonOptionType | null,
     bodyPokemon: PokemonOptionType | null,
-  ) => void;
+  ) => Promise<boolean>;
   position: number;
   existingTeamMember?: {
     position: number;

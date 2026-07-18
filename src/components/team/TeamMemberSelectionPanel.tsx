@@ -113,7 +113,7 @@ export function TeamMemberSelectionPanel() {
                   height={24}
                   className="object-contain object-center image-rendering-pixelated"
                 />
-                <span className="text-sm">Invert Fusion</span>
+                <span className="text-sm">Reverse Fusion</span>
               </div>
             }
             delay={300}

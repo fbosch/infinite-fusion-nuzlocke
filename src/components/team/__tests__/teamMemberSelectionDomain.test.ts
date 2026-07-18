@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { PokemonOptionType } from "@/loaders/pokemon";
+import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
 import {
+  filterAvailableTeamPokemon,
+  getTeamNicknameUpdate,
   getTeamSelectionNickname,
+  initializeExistingTeamMemberSelection,
   selectTeamPokemon,
 } from "../teamMemberSelectionDomain";
 
@@ -38,6 +41,101 @@ describe("team member selection domain", () => {
   it("returns empty nickname when no selected pokemon has one", () => {
     expect(getTeamSelectionNickname(pokemon("head"), pokemon("body"))).toBe("");
     expect(getTeamSelectionNickname(null, null)).toBe("");
+  });
+
+  it("updates the head nickname before the body nickname", () => {
+    expect(
+      getTeamNicknameUpdate(
+        pokemon("head", "Sparky"),
+        pokemon("body", "Flame"),
+        "Fusion",
+      ),
+    ).toEqual({ uid: "head", nickname: "Fusion" });
+  });
+
+  it("updates the body nickname for body-only selections", () => {
+    expect(getTeamNicknameUpdate(null, pokemon("body"), "Flame")).toEqual({
+      uid: "body",
+      nickname: "Flame",
+    });
+  });
+
+  it("skips unchanged and unaddressable nickname updates", () => {
+    expect(
+      getTeamNicknameUpdate(pokemon("head", "Sparky"), null, "Sparky"),
+    ).toBeNull();
+    expect(
+      getTeamNicknameUpdate(
+        { ...pokemon("head"), uid: undefined },
+        null,
+        "Sparky",
+      ),
+    ).toBeNull();
+  });
+
+  it("initializes existing slots from identity-resolved encounter selections", () => {
+    const resolvedHead = {
+      pokemon: pokemon("head", "Encounter Nickname"),
+      locationId: "route-1",
+    };
+    const resolvedBody = {
+      pokemon: pokemon("body", "Body Nickname"),
+      locationId: "route-2",
+    };
+    const selection = initializeExistingTeamMemberSelection(
+      {
+        isEmpty: false,
+        headPokemon: pokemon("head", "Stale Nickname"),
+        bodyPokemon: pokemon("body"),
+      },
+      (uid) =>
+        uid === "head" ? resolvedHead : uid === "body" ? resolvedBody : null,
+    );
+
+    expect(selection).toMatchObject({
+      selectedHead: resolvedHead,
+      selectedBody: resolvedBody,
+      nickname: "Encounter Nickname",
+      previewNickname: "Encounter Nickname",
+      suggestedActiveSlot: null,
+    });
+  });
+
+  it("suggests the missing head slot for body-only members", () => {
+    const selection = initializeExistingTeamMemberSelection(
+      { isEmpty: false, bodyPokemon: pokemon("body") },
+      () => null,
+    );
+
+    expect(selection.suggestedActiveSlot).toBe("head");
+  });
+
+  it("filters unavailable, inactive, and deceased Pokemon while retaining edited members", () => {
+    const selection = (uid: string, status?: PokemonOptionType["status"]) => ({
+      pokemon: { ...pokemon(uid), status },
+      locationId: `${uid}-location`,
+    });
+    const available = filterAvailableTeamPokemon(
+      [
+        selection("current", PokemonStatus.CAPTURED),
+        selection("other", PokemonStatus.CAPTURED),
+        selection("eligible", PokemonStatus.CAPTURED),
+        selection("missed", PokemonStatus.MISSED),
+        selection("deceased", PokemonStatus.DECEASED),
+        selection("missing-status"),
+      ],
+      [
+        { headPokemonUid: "current" },
+        { headPokemonUid: "current", bodyPokemonUid: "other" },
+      ],
+      0,
+      { isEmpty: false, headPokemon: pokemon("current") },
+    );
+
+    expect(available.map(({ pokemon }) => pokemon.uid)).toEqual([
+      "current",
+      "eligible",
+    ]);
   });
 
   it("selects head pokemon and advances to body when body is empty", () => {

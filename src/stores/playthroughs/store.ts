@@ -24,6 +24,7 @@ import {
   getCurrentTimestamp,
   setPlaythroughsStore,
 } from "./playthroughState";
+import { getAvailableTeamPositionsForMembers } from "./teamPositions";
 import {
   DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
   type GameMode,
@@ -455,10 +456,7 @@ const getAvailableTeamPositions = (): number[] => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return [];
 
-  return activePlaythrough.team.members
-    .map((member, index) => ({ member, index }))
-    .filter(({ member }) => member === null)
-    .map(({ index }) => index);
+  return getAvailableTeamPositionsForMembers(activePlaythrough.team.members);
 };
 
 export {

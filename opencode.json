@@ -10,6 +10,11 @@
       "type": "remote",
       "url": "https://mcp.linear.app/mcp",
       "enabled": true
+    },
+    "helium-devtools": {
+      "type": "local",
+      "command": ["npx", "-y", "chrome-devtools-mcp@1.2.0", "--autoConnect"],
+      "enabled": true
     }
   }
 }

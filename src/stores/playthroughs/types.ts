@@ -10,7 +10,7 @@ export type GameMode = z.infer<typeof GameModeSchema>;
 export const DEFAULT_NEW_PLAYTHROUGH_GAME_MODE: GameMode = "randomized";
 
 // Team member schema - represents a single team member
-export const TeamMemberSchema = z.object({
+const TeamMemberSchema = z.object({
   headPokemonUid: z.string(), // Reference to head Pokémon by UID
   bodyPokemonUid: z.string(), // Reference to body Pokémon by UID
 });
@@ -18,7 +18,7 @@ export const TeamMemberSchema = z.object({
 type TeamMember = z.infer<typeof TeamMemberSchema>;
 
 // Team schema - represents the complete team
-export const TeamSchema = z.object({
+const TeamSchema = z.object({
   members: z.array(TeamMemberSchema.nullable()).length(6), // Fixed size 6, null for empty slots
 });
 
@@ -49,7 +49,7 @@ export const PlaythroughSchema = z.object({
 });
 
 // Zod schema for the playthroughs store
-export const PlaythroughsSchema = z.object({
+const PlaythroughsSchema = z.object({
   playthroughs: z.array(PlaythroughSchema),
   activePlaythroughId: z.string().optional(),
 });
@@ -61,7 +61,7 @@ export type PlaythroughsState = z.infer<typeof PlaythroughsSchema> & {
 };
 
 // Schema for exported playthrough data
-export const ExportedPlaythroughSchema = z.object({
+const ExportedPlaythroughSchema = z.object({
   version: z.string(),
   exportedAt: z.string(),
   playthrough: PlaythroughSchema,

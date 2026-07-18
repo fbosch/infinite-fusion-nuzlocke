@@ -17,7 +17,7 @@ export enum EncounterSource {
   LEGENDARY = "legendary",
 }
 
-export const PokemonEncounterSchema = z.object({
+const PokemonEncounterSchema = z.object({
   id: z
     .number()
     .int()
@@ -44,7 +44,7 @@ export const PokemonEncounterSchema = z.object({
 
 export type PokemonEncounter = z.infer<typeof PokemonEncounterSchema>;
 
-export const RouteEncounterSchema = z.object({
+const RouteEncounterSchema = z.object({
   routeName: z.string().min(1, { error: "Route name is required" }),
   pokemon: z.array(PokemonEncounterSchema),
 });
@@ -70,7 +70,7 @@ export type EncounterType = z.infer<typeof EncounterTypeSchema>;
 /**
  * Array of all valid encounter types for validation and iteration
  */
-export const ENCOUNTER_TYPES: EncounterType[] = [
+const ENCOUNTER_TYPES: EncounterType[] = [
   "grass",
   "surf",
   "fishing",
@@ -83,14 +83,14 @@ export const ENCOUNTER_TYPES: EncounterType[] = [
 /**
  * Type guard to check if a value is a valid encounter type
  */
-export function isValidEncounterType(value: unknown): value is EncounterType {
+function isValidEncounterType(value: unknown): value is EncounterType {
   return EncounterTypeSchema.safeParse(value).success;
 }
 
 /**
  * Safely parse an encounter type, returning null if invalid
  */
-export function safeParseEncounterType(value: unknown): EncounterType | null {
+function safeParseEncounterType(value: unknown): EncounterType | null {
   const result = EncounterTypeSchema.safeParse(value);
   return result.success ? result.data : null;
 }

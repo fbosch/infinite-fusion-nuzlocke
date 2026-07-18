@@ -9,7 +9,7 @@ import { generatePrefixedId } from "@/utils/id";
 import type { GameMode } from "../stores/playthroughs/types";
 
 // Location schema
-export const LocationSchema = z.object({
+const LocationSchema = z.object({
   id: z.string().min(1, { error: "Location ID is required" }),
   name: z.string().min(1, { error: "Location name is required" }),
   region: z.string().min(1, { error: "Region is required" }),
@@ -83,7 +83,7 @@ export type CombinedLocation =
   | Location
   | (CustomLocation & { region: string; description: string; isCustom: true });
 
-export const LocationsArraySchema = z.array(LocationSchema);
+const LocationsArraySchema = z.array(LocationSchema);
 
 // Validate and load locations
 function loadLocations(): Location[] {
@@ -106,7 +106,7 @@ export function getLocations(): Location[] {
 }
 
 // Function to clear cache if needed (for testing or data updates)
-export function clearLocationsCache(): void {
+function clearLocationsCache(): void {
   locationsCache = null;
 }
 
@@ -289,7 +289,7 @@ export function generateCustomLocationId(): string {
 }
 
 // Get the index where a custom location should be inserted after a given location
-export function getCustomLocationInsertIndex(
+function getCustomLocationInsertIndex(
   afterLocationId: string,
   customLocations: CustomLocation[] = [],
 ): number {
@@ -389,7 +389,7 @@ export function getLocationsSortedWithCustom(
 }
 
 // Alias function for compatibility with AddCustomLocationModal
-export function getCombinedLocationsSortedByOrder(
+function getCombinedLocationsSortedByOrder(
   customLocations: CustomLocation[] = [],
 ): CombinedLocation[] {
   return getLocationsSortedWithCustom(customLocations);
@@ -528,7 +528,7 @@ export function getAvailableAfterLocations(
 }
 
 // Get merged locations with encounters for a specific game mode
-export async function getMergedLocationsWithEncounters(
+async function getMergedLocationsWithEncounters(
   customLocations: CustomLocation[] = [],
   gameMode: "classic" | "remix" = "classic",
 ): Promise<Array<CombinedLocation & { encounters: PokemonEncounter[] }>> {

@@ -10,7 +10,7 @@ import {
   useRole,
 } from "@floating-ui/react";
 import { clsx } from "clsx";
-import type { LucideIcon } from "lucide-react";
+import { ChevronRight, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
 import {
@@ -18,6 +18,7 @@ import {
   isValidElement,
   useCallback,
   useEffect,
+  useId,
   useLayoutEffect,
   useRef,
   useState,
@@ -49,7 +50,9 @@ export function clampMenuPosition(
   };
 }
 
-function filterEdgeSeparators(items: ContextMenuItem[]): ContextMenuItem[] {
+export function filterEdgeSeparators(
+  items: ContextMenuItem[],
+): ContextMenuItem[] {
   if (items.length === 0) return items;
 
   // Find first non-separator item
@@ -69,6 +72,116 @@ function filterEdgeSeparators(items: ContextMenuItem[]): ContextMenuItem[] {
 
   // Return slice from first to last non-separator item
   return items.slice(start, end + 1);
+}
+
+function getContextMenuItemVariantClasses(
+  variant: ContextMenuItem["variant"],
+  isActive: boolean,
+) {
+  return match<[ContextMenuItem["variant"], boolean]>([variant, isActive])
+    .with(
+      ["danger", true],
+      () => "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300",
+    )
+    .with(
+      ["danger", false],
+      () =>
+        "text-red-600 dark:text-red-400 enabled:hover:bg-red-50 enabled:dark:hover:bg-red-900/20 enabled:hover:text-red-700 enabled:dark:hover:text-red-300",
+    )
+    .with(
+      ["warning", true],
+      () =>
+        "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300",
+    )
+    .with(
+      ["warning", false],
+      () =>
+        "text-yellow-600 dark:text-yellow-400 enabled:hover:bg-yellow-50 enabled:dark:hover:bg-yellow-900/20 enabled:hover:text-yellow-700 enabled:dark:hover:text-yellow-300",
+    )
+    .otherwise(([, active]) =>
+      active
+        ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+        : "text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white",
+    );
+}
+
+interface ContextMenuSubmenuProps {
+  children: ContextMenuItem[];
+  menuRef: React.RefObject<HTMLDivElement | null>;
+  onClose: () => void;
+  onKeyDown: (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    index: number,
+  ) => void;
+  onSelect: (event: React.MouseEvent, item: ContextMenuItem) => void;
+  activeIndex: number;
+  itemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
+  position: { left: number; top: number };
+}
+
+function ContextMenuSubmenu({
+  children,
+  menuRef,
+  onClose,
+  onKeyDown,
+  onSelect,
+  activeIndex,
+  itemRefs,
+  position,
+}: ContextMenuSubmenuProps) {
+  return (
+    <FloatingPortal>
+      <div
+        ref={menuRef}
+        style={{
+          position: "fixed",
+          left: position.left,
+          top: position.top,
+          minWidth: "12rem",
+        }}
+        className={clsx(
+          "z-[10000] rounded-md border border-gray-200 dark:border-gray-800",
+          "bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25",
+          "p-1 backdrop-blur-xl origin-top-left",
+          "overflow-hidden",
+        )}
+        role="menu"
+        onMouseLeave={onClose}
+      >
+        {children.map((child, index) => (
+          <button
+            key={child.id}
+            ref={(node) => {
+              itemRefs.current[index] = node;
+            }}
+            type="button"
+            className={clsx(
+              "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
+              "text-sm transition-colors duration-75 enabled:cursor-pointer",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+              "text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white",
+              child.disabled && "!opacity-75 !cursor-not-allowed",
+            )}
+            disabled={child.disabled}
+            role="menuitem"
+            tabIndex={index === activeIndex ? 0 : -1}
+            onClick={(event) => onSelect(event, child)}
+            onKeyDown={(event) => onKeyDown(event, index)}
+          >
+            <div className="flex items-center gap-x-2 w-full">
+              {child.icon && (
+                <child.icon
+                  className="h-4 w-4 flex-shrink-0"
+                  aria-hidden="true"
+                />
+              )}
+              <span className="truncate">{child.label}</span>
+            </div>
+          </button>
+        ))}
+      </div>
+    </FloatingPortal>
+  );
 }
 
 // Custom hook for context menu state management
@@ -152,6 +265,7 @@ export function ContextMenu({
   portalRootId = "context-menu-root",
   onOpenChange,
 }: ContextMenuProps) {
+  const triggerId = useId();
   const {
     menuPosition,
     setMenuPosition,
@@ -167,7 +281,40 @@ export function ContextMenu({
   const listRef = useRef<Array<HTMLElement | null>>([]);
   const menuElementRef = useRef<HTMLDivElement>(null);
   const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
+  const [activeSubmenuIndex, setActiveSubmenuIndex] = useState(0);
+  const [submenuPosition, setSubmenuPosition] = useState({ left: 0, top: 0 });
   const submenuRef = useRef<HTMLDivElement>(null);
+  const submenuItemRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const isOpenRef = useRef(isOpen);
+
+  const handleClose = useCallback(() => {
+    if (isOpenRef.current) {
+      window.dispatchEvent(new Event("context-menu-close"));
+    }
+    isOpenRef.current = false;
+    closeMenu();
+
+    if (menuElementRef.current) {
+      menuElementRef.current.classList.remove("tooltip-enter");
+      menuElementRef.current.classList.add("tooltip-exit");
+
+      setTimeout(() => {
+        hideMenu();
+      }, 50);
+    }
+  }, [closeMenu, hideMenu]);
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (isOpenRef.current) {
+        window.dispatchEvent(new Event("context-menu-close"));
+      }
+    };
+  }, []);
 
   useLayoutEffect(() => {
     if (!isVisible || !menuElementRef.current) return;
@@ -191,7 +338,7 @@ export function ContextMenu({
   const { refs, context } = useFloating({
     open: isOpen,
     onOpenChange: (open) => {
-      if (!open) closeMenu();
+      if (!open) handleClose();
     },
   });
 
@@ -219,33 +366,13 @@ export function ContextMenu({
       const shouldClose = !isVisible || !isFocused;
 
       if (shouldClose && isOpen) {
-        closeMenu();
-
-        // Start exit animation
-        if (menuElementRef.current) {
-          menuElementRef.current.classList.remove("tooltip-enter");
-          menuElementRef.current.classList.add("tooltip-exit");
-
-          setTimeout(() => {
-            hideMenu();
-          }, 50);
-        }
+        handleClose();
       }
     };
 
     const handleScroll = () => {
       if (isOpen) {
-        closeMenu();
-
-        // Start exit animation
-        if (menuElementRef.current) {
-          menuElementRef.current.classList.remove("tooltip-enter");
-          menuElementRef.current.classList.add("tooltip-exit");
-
-          setTimeout(() => {
-            hideMenu();
-          }, 50);
-        }
+        handleClose();
       }
     };
 
@@ -262,24 +389,47 @@ export function ContextMenu({
       window.removeEventListener("blur", handleVisibilityChange);
       window.removeEventListener("scroll", handleScroll, true);
     };
-  }, [isOpen, closeMenu, hideMenu]);
+  }, [isOpen, handleClose]);
 
-  const handleClose = () => {
-    closeMenu();
+  useEffect(() => {
+    if (!isVisible) return;
 
-    // Start exit animation
-    if (menuElementRef.current) {
-      menuElementRef.current.classList.remove("tooltip-enter");
-      menuElementRef.current.classList.add("tooltip-exit");
+    const handleActiveContextMenu = (event: MouseEvent) => {
+      const target = event.target;
+      const contextMenuTrigger =
+        target instanceof Element &&
+        target.closest<HTMLElement>("[data-context-menu-trigger]");
 
-      // Hide menu after animation completes
-      setTimeout(() => {
-        hideMenu();
-      }, 50); // Match CSS animation duration
-    }
-  };
+      if (!contextMenuTrigger) {
+        event.preventDefault();
+      } else if (contextMenuTrigger.dataset.contextMenuTrigger === triggerId) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      handleClose();
+    };
+
+    document.addEventListener("contextmenu", handleActiveContextMenu, true);
+    return () => {
+      document.removeEventListener(
+        "contextmenu",
+        handleActiveContextMenu,
+        true,
+      );
+    };
+  }, [isVisible, handleClose, triggerId]);
 
   const openSubmenuForIndex = useCallback((validIndex: number) => {
+    const trigger = listRef.current[validIndex];
+    if (trigger) {
+      const { bottom, right, top } = trigger.getBoundingClientRect();
+      setSubmenuPosition({
+        left: Math.min(right + 4, window.innerWidth - 200),
+        top: Math.min(top, window.innerHeight - Math.max(bottom - top, 1)),
+      });
+    }
+    setActiveSubmenuIndex(0);
     setOpenSubmenuIndex(validIndex);
   }, []);
 
@@ -292,6 +442,8 @@ export function ContextMenu({
 
     event.preventDefault();
     event.stopPropagation();
+    isOpenRef.current = true;
+    window.dispatchEvent(new Event("context-menu-open"));
 
     // Calculate position relative to the viewport
     const position = { x: event.clientX, y: event.clientY };
@@ -306,6 +458,11 @@ export function ContextMenu({
     });
   };
 
+  const visibleItems = filterEdgeSeparators(items);
+  const navigableItems = visibleItems.filter(
+    (item) => !item.separator && !item.disabled && !item.visualOnly,
+  );
+
   return (
     <>
       {/* Custom trigger element */}
@@ -315,6 +472,7 @@ export function ContextMenu({
             refs.setReference(node);
           },
           onContextMenu: handleContextMenu,
+          "data-context-menu-trigger": disabled ? undefined : triggerId,
         } as React.HTMLAttributes<HTMLElement>)}
 
       {/* Render popover in portal when visible */}
@@ -347,75 +505,80 @@ export function ContextMenu({
               aria-orientation="vertical"
               {...getFloatingProps()}
             >
-              {filterEdgeSeparators(items).map(
-                (item: ContextMenuItem, _index: number) => {
-                  if (item.separator) {
-                    return (
-                      <hr
-                        key={item.id}
-                        className="my-1 h-px border-0 bg-gray-300 dark:bg-gray-600"
+              {visibleItems.map((item: ContextMenuItem, _index: number) => {
+                if (item.separator) {
+                  return (
+                    <hr
+                      key={item.id}
+                      className="my-1 h-px border-0 bg-gray-300 dark:bg-gray-600"
+                    />
+                  );
+                }
+
+                const validIndex = navigableItems.findIndex(
+                  (validItem) => validItem.id === item.id,
+                );
+                const isActive = activeIndex === validIndex;
+
+                const baseClasses = clsx(
+                  "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
+                  "text-sm transition-colors duration-75 enabled:cursor-pointer",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+                );
+
+                const variantClasses = getContextMenuItemVariantClasses(
+                  item.variant,
+                  isActive,
+                );
+
+                const commonClasses = clsx(
+                  baseClasses,
+                  item.visualOnly
+                    ? "text-gray-500 dark:text-gray-400 cursor-default"
+                    : variantClasses,
+                  item.disabled && "!opacity-75 !cursor-not-allowed",
+                );
+
+                const hasChildren =
+                  Array.isArray(item.children) && item.children.length > 0;
+                const content = (
+                  <div className="flex items-center gap-x-2 w-full">
+                    {item.icon && !item.href && (
+                      <item.icon
+                        className={twMerge(
+                          "h-4 w-4 flex-shrink-0",
+                          item.iconClassName,
+                        )}
+                        aria-hidden="true"
                       />
-                    );
-                  }
-
-                  const filteredItems = filterEdgeSeparators(items);
-                  const validItems = filteredItems.filter(
-                    (i) => !i.separator && !i.disabled && !i.visualOnly,
-                  );
-                  const validIndex = validItems.findIndex(
-                    (validItem) => validItem.id === item.id,
-                  );
-                  const isActive = activeIndex === validIndex;
-
-                  const baseClasses = clsx(
-                    "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
-                    "text-sm transition-colors duration-75 enabled:cursor-pointer",
-                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-                  );
-
-                  const variantClasses = match<[string | undefined, boolean]>([
-                    item.variant,
-                    isActive,
-                  ])
-                    .with(
-                      ["danger", true],
-                      () =>
-                        "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300",
-                    )
-                    .with(
-                      ["danger", false],
-                      () =>
-                        "text-red-600 dark:text-red-400 enabled:hover:bg-red-50 enabled:dark:hover:bg-red-900/20 enabled:hover:text-red-700 enabled:dark:hover:text-red-300",
-                    )
-                    .with(
-                      ["warning", true],
-                      () =>
-                        "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300",
-                    )
-                    .with(
-                      ["warning", false],
-                      () =>
-                        "text-yellow-600 dark:text-yellow-400 enabled:hover:bg-yellow-50 enabled:dark:hover:bg-yellow-900/20 enabled:hover:text-yellow-700 enabled:dark:hover:text-yellow-300",
-                    )
-                    .otherwise(([, active]) =>
-                      active
-                        ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
-                        : "text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white",
-                    );
-
-                  const commonClasses = clsx(
-                    baseClasses,
-                    item.visualOnly
-                      ? "text-gray-500 dark:text-gray-400 cursor-default"
-                      : variantClasses,
-                    item.disabled && "!opacity-75 !cursor-not-allowed",
-                  );
-
-                  const hasChildren =
-                    Array.isArray(item.children) && item.children.length > 0;
-                  const content = (
-                    <div className="flex items-center gap-x-2 w-full">
-                      {item.icon && !item.href && (
+                    )}
+                    <div className="flex items-center gap-x-2 min-w-0">
+                      {item.favicon && item.href && (
+                        <Image
+                          src={item.favicon}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className="h-4 w-4 flex-shrink-0 rounded-sm"
+                          width={16}
+                          height={16}
+                          unoptimized
+                          aria-hidden="true"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      )}
+                      <span className="truncate">{item.label}</span>
+                    </div>
+                    {/* Right: shortcut and icon, always aligned to end */}
+                    <div className="flex items-center gap-x-2 ml-auto">
+                      {item.shortcut && (
+                        <span className="text-xs opacity-60">
+                          {item.shortcut}
+                        </span>
+                      )}
+                      {item.icon && item.href && (
                         <item.icon
                           className={twMerge(
                             "h-4 w-4 flex-shrink-0",
@@ -424,127 +587,108 @@ export function ContextMenu({
                           aria-hidden="true"
                         />
                       )}
-                      <div className="flex items-center gap-x-2 min-w-0">
-                        {item.favicon && item.href && (
-                          <Image
-                            src={item.favicon}
-                            alt=""
-                            loading="lazy"
-                            decoding="async"
-                            className="h-4 w-4 flex-shrink-0 rounded-sm"
-                            width={16}
-                            height={16}
-                            unoptimized
-                            aria-hidden="true"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                            }}
-                          />
-                        )}
-                        <span className="truncate">{item.label}</span>
-                      </div>
-                      {/* Right: shortcut and icon, always aligned to end */}
-                      <div className="flex items-center gap-x-2 ml-auto">
-                        {item.shortcut && (
-                          <span className="text-xs opacity-60">
-                            {item.shortcut}
-                          </span>
-                        )}
-                        {item.icon && item.href && (
-                          <item.icon
-                            className={twMerge(
-                              "h-4 w-4 flex-shrink-0",
-                              item.iconClassName,
-                            )}
-                            aria-hidden="true"
-                          />
-                        )}
-                        {hasChildren && (
-                          <span className="text-xs opacity-60">›</span>
-                        )}
-                      </div>
+                      {hasChildren && (
+                        <ChevronRight
+                          className="h-4 w-4 opacity-60"
+                          aria-hidden="true"
+                        />
+                      )}
                     </div>
-                  );
+                  </div>
+                );
 
-                  // Render as link if href is provided
-                  if (item.href) {
-                    const linkElement = (
-                      <a
-                        key={item.id}
-                        ref={(node) => {
-                          listRef.current[validIndex] = node;
-                        }}
-                        target={item.target}
-                        href={item.href}
-                        className={commonClasses}
-                        onClick={(e) => {
-                          if (!item.disabled) {
-                            item.onClick?.(e);
-                            handleClose();
-                          }
-                        }}
-                        role="menuitem"
-                        tabIndex={isActive ? 0 : -1}
-                        {...getItemProps()}
-                      >
-                        {content}
-                      </a>
-                    );
+                const submenu =
+                  hasChildren && openSubmenuIndex === validIndex ? (
+                    <ContextMenuSubmenu
+                      menuRef={submenuRef}
+                      onClose={closeSubmenu}
+                      position={submenuPosition}
+                      activeIndex={activeSubmenuIndex}
+                      itemRefs={submenuItemRefs}
+                      onKeyDown={(event, childIndex) => {
+                        const enabledItems = item.children!.filter(
+                          (child) => !child.disabled,
+                        );
+                        const moveFocus = (nextIndex: number) => {
+                          setActiveSubmenuIndex(nextIndex);
+                          submenuItemRefs.current[nextIndex]?.focus();
+                        };
 
-                    // Wrap with tooltip if provided
-                    if (item.tooltip) {
-                      return (
-                        <CursorTooltip
-                          key={item.id}
-                          content={item.tooltip}
-                          placement="right"
-                          delay={500}
-                        >
-                          {linkElement}
-                        </CursorTooltip>
-                      );
-                    }
+                        if (
+                          event.key === "ArrowDown" ||
+                          event.key === "ArrowUp"
+                        ) {
+                          if (enabledItems.length === 0) return;
 
-                    return linkElement;
-                  }
+                          event.preventDefault();
+                          const direction = event.key === "ArrowDown" ? 1 : -1;
+                          const currentEnabledIndex = enabledItems.findIndex(
+                            (child) =>
+                              child.id === item.children![childIndex]?.id,
+                          );
+                          const nextChild =
+                            enabledItems[
+                              (currentEnabledIndex +
+                                direction +
+                                enabledItems.length) %
+                                enabledItems.length
+                            ];
+                          const nextIndex = item.children!.findIndex(
+                            (child) => child.id === nextChild?.id,
+                          );
+                          moveFocus(nextIndex);
+                        }
 
-                  // Render as button or visual-only element
-                  const buttonElement = item.visualOnly ? (
-                    <div
-                      key={item.id}
-                      className={commonClasses}
-                      role="presentation"
-                      tabIndex={-1}
+                        if (
+                          event.key === "ArrowLeft" ||
+                          event.key === "Escape"
+                        ) {
+                          event.preventDefault();
+                          closeSubmenu();
+                          listRef.current[validIndex]?.focus();
+                        }
+                      }}
+                      onSelect={(event, child) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (!child.disabled) {
+                          child.onClick?.(event);
+                          handleClose();
+                        }
+                      }}
                     >
-                      {content}
-                    </div>
-                  ) : (
-                    <button
+                      {item.children!}
+                    </ContextMenuSubmenu>
+                  ) : null;
+
+                // Render as link if href is provided
+                if (item.href) {
+                  const linkElement = (
+                    <a
                       key={item.id}
                       ref={(node) => {
                         listRef.current[validIndex] = node;
                       }}
+                      target={item.target}
+                      href={item.href}
                       className={commonClasses}
-                      disabled={item.disabled}
+                      aria-disabled={item.disabled || undefined}
                       role="menuitem"
                       tabIndex={isActive ? 0 : -1}
                       {...getItemProps({
-                        onClick: (e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          if (!item.disabled && !hasChildren) {
-                            item.onClick?.(e);
-                            handleClose();
+                        onClick: (event) => {
+                          if (item.disabled) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            return;
                           }
-                        },
-                        onMouseEnter: () => {
-                          if (hasChildren) openSubmenuForIndex(validIndex);
-                          else closeSubmenu();
+                          item.onClick?.(event);
+                          handleClose();
                         },
                       })}
                     >
                       {content}
-                    </button>
+                    </a>
                   );
 
                   // Wrap with tooltip if provided
@@ -556,174 +700,107 @@ export function ContextMenu({
                         placement="right"
                         delay={500}
                       >
-                        <div className="relative">
-                          {buttonElement}
-                          {hasChildren && openSubmenuIndex === validIndex && (
-                            <div
-                              ref={submenuRef}
-                              style={{
-                                position: "absolute",
-                                left: "100%",
-                                top: 0,
-                                marginLeft: "4px",
-                                minWidth: "12rem",
-                              }}
-                              className={clsx(
-                                "z-[9999] rounded-md border border-gray-200 dark:border-gray-800",
-                                "bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25",
-                                "p-1 backdrop-blur-xl origin-top-left",
-                                "overflow-hidden",
-                              )}
-                              role="menu"
-                              onMouseLeave={closeSubmenu}
-                              onMouseEnter={() => {
-                                // Keep submenu open when hovering over it
-                                if (openSubmenuIndex !== validIndex) {
-                                  setOpenSubmenuIndex(validIndex);
-                                }
-                              }}
-                            >
-                              {item.children?.map((child) => (
-                                <button
-                                  key={child.id}
-                                  type="button"
-                                  className={clsx(
-                                    "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
-                                    "text-sm transition-colors duration-75 enabled:cursor-pointer",
-                                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-                                    "text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white",
-                                    child.disabled &&
-                                      "!opacity-75 !cursor-not-allowed",
-                                  )}
-                                  disabled={child.disabled}
-                                  role="menuitem"
-                                  tabIndex={-1}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    if (!child.disabled) {
-                                      child.onClick?.(e);
-                                      handleClose();
-                                    }
-                                  }}
-                                >
-                                  <div className="flex items-center gap-x-2 w-full">
-                                    {child.icon && (
-                                      <child.icon
-                                        className="h-4 w-4 flex-shrink-0"
-                                        aria-hidden="true"
-                                      />
-                                    )}
-                                    <span className="truncate">
-                                      {child.label}
-                                    </span>
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                        {linkElement}
                       </CursorTooltip>
                     );
                   }
 
+                  return linkElement;
+                }
+
+                // Render as button or visual-only element
+                const buttonElement = item.visualOnly ? (
+                  <div
+                    key={item.id}
+                    className={commonClasses}
+                    role="presentation"
+                    tabIndex={-1}
+                  >
+                    {content}
+                  </div>
+                ) : (
+                  <button
+                    key={item.id}
+                    ref={(node) => {
+                      listRef.current[validIndex] = node;
+                    }}
+                    className={commonClasses}
+                    disabled={item.disabled}
+                    role="menuitem"
+                    tabIndex={isActive ? 0 : -1}
+                    {...getItemProps({
+                      onClick: (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (!item.disabled && !hasChildren) {
+                          item.onClick?.(e);
+                          handleClose();
+                        }
+                      },
+                      onMouseEnter: () => {
+                        if (hasChildren) openSubmenuForIndex(validIndex);
+                        else closeSubmenu();
+                      },
+                      onKeyDown: (event) => {
+                        if (
+                          hasChildren &&
+                          (event.key === "ArrowRight" ||
+                            event.key === "Enter" ||
+                            event.key === " ")
+                        ) {
+                          event.preventDefault();
+                          const firstEnabledChildIndex =
+                            item.children!.findIndex(
+                              (child) => !child.disabled,
+                            );
+                          if (firstEnabledChildIndex === -1) return;
+
+                          openSubmenuForIndex(validIndex);
+                          setActiveSubmenuIndex(firstEnabledChildIndex);
+                          requestAnimationFrame(() => {
+                            submenuItemRefs.current[
+                              firstEnabledChildIndex
+                            ]?.focus();
+                          });
+                        }
+                      },
+                    })}
+                    aria-haspopup={hasChildren ? "menu" : undefined}
+                    aria-expanded={
+                      hasChildren ? openSubmenuIndex === validIndex : undefined
+                    }
+                  >
+                    {content}
+                  </button>
+                );
+
+                // Wrap with tooltip if provided
+                if (item.tooltip) {
                   return (
-                    <div key={item.id} className="relative">
-                      {buttonElement}
-                      {hasChildren && openSubmenuIndex === validIndex && (
-                        <div
-                          ref={submenuRef}
-                          style={{
-                            position: "absolute",
-                            left: "100%",
-                            top: 0,
-                            marginLeft: "4px",
-                            minWidth: "12rem",
-                          }}
-                          className={clsx(
-                            "z-[9999] rounded-md border border-gray-200 dark:border-gray-800",
-                            "bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25",
-                            "p-1 backdrop-blur-xl origin-top-left",
-                            "overflow-hidden",
-                          )}
-                          role="menu"
-                          onMouseLeave={closeSubmenu}
-                          onMouseEnter={() => {
-                            // Keep submenu open when hovering over it
-                            if (openSubmenuIndex !== validIndex) {
-                              setOpenSubmenuIndex(validIndex);
-                            }
-                          }}
-                        >
-                          {item.children?.map((child) => (
-                            <button
-                              key={child.id}
-                              type="button"
-                              className={clsx(
-                                "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
-                                "text-sm transition-colors duration-75 enabled:cursor-pointer",
-                                "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-                                "text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white",
-                                child.disabled &&
-                                  "!opacity-75 !cursor-not-allowed",
-                              )}
-                              disabled={child.disabled}
-                              role="menuitem"
-                              tabIndex={-1}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                if (!child.disabled) {
-                                  child.onClick?.(e);
-                                  handleClose();
-                                }
-                              }}
-                            >
-                              <div className="flex items-center gap-x-2 w-full">
-                                {child.icon && (
-                                  <child.icon
-                                    className="h-4 w-4 flex-shrink-0"
-                                    aria-hidden="true"
-                                  />
-                                )}
-                                <span className="truncate">{child.label}</span>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    <CursorTooltip
+                      key={item.id}
+                      content={item.tooltip}
+                      placement="right"
+                      delay={500}
+                    >
+                      <div className="relative">
+                        {buttonElement}
+                        {submenu}
+                      </div>
+                    </CursorTooltip>
                   );
-                },
-              )}
+                }
+
+                return (
+                  <div key={item.id} className="relative">
+                    {buttonElement}
+                    {submenu}
+                  </div>
+                );
+              })}
             </div>
           </FloatingFocusManager>
         </FloatingPortal>
-      )}
-
-      {/* Handle outside clicks and escape key */}
-      {isVisible && (
-        <button
-          type="button"
-          className="fixed inset-0 z-40"
-          aria-label="Close context menu"
-          onClick={handleClose}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              handleClose();
-            }
-          }}
-          onMouseMove={(e) => {
-            // Close submenu if moving far away from the menu
-            const withinMenu = menuElementRef.current?.contains(
-              e.target as Node,
-            );
-            const withinSubmenu = document
-              .querySelector('[role="menu"][style*="z-[9999]"]')
-              ?.contains(e.target as Node);
-            if (!withinMenu && !withinSubmenu) closeSubmenu();
-          }}
-        />
       )}
     </>
   );

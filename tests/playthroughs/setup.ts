@@ -11,7 +11,6 @@ import {
   useIsRemixMode,
   usePlaythroughById,
   usePlaythroughsSnapshot,
-  usePreferredVariant,
 } from "@/stores/playthroughs/hooks";
 // Import modules after mocks are set up (mocks should be imported in each test file)
 import { playthroughActions } from "@/stores/playthroughs/index";
@@ -72,6 +71,5 @@ export {
   useIsRemixMode,
   usePlaythroughById,
   usePlaythroughsSnapshot,
-  usePreferredVariant,
   vi,
 };

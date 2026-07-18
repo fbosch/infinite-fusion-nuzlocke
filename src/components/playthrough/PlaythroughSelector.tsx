@@ -246,7 +246,7 @@ export default function PlaythroughSelector({
                   <>
                     <div className="px-4 py-3 flex items-center justify-between border-b border-gray-200/50 dark:border-gray-600/50 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/30 dark:to-gray-600/30 rounded-t-xl">
                       <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Your Playthroughs
+                        Playthroughs
                       </span>
                       <button
                         onClick={handleImportClick}

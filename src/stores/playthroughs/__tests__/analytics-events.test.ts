@@ -338,7 +338,7 @@ describe("analytics event instrumentation", () => {
     expect(playthroughsStore.playthroughs[0]?.team.members[0]).toBeNull();
   });
 
-  it("keeps fusion_flipped semantics equivalent across table and team flows", async () => {
+  it("tracks fusion flips only when an encounter is reversed", async () => {
     createTestPlaythrough();
 
     await updateEncounter(
@@ -367,8 +367,13 @@ describe("analytics event instrumentation", () => {
     await flipTeamMemberFusion(0);
 
     const teamFlowEvents = getTrackedEvents("fusion_flipped");
-    expect(teamFlowEvents).toHaveLength(1);
-    expect(teamFlowEvents[0]?.[1]).toMatchObject({ location_id: "route1" });
+    expect(teamFlowEvents).toHaveLength(0);
+    expect(playthroughsStore.playthroughs[0]?.encounters?.route1).toMatchObject(
+      {
+        head: { uid: "flip-1-body" },
+        body: { uid: "flip-1-head" },
+      },
+    );
     expect(playthroughsStore.playthroughs[0]?.team.members[0]).toMatchObject({
       headPokemonUid: "flip-1-head",
       bodyPokemonUid: "flip-1-body",

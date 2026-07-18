@@ -1,5 +1,5 @@
 import { flexRender, type Row } from "@tanstack/react-table";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { match } from "ts-pattern";
 import { addEvolutionListener } from "@/lib/events";
@@ -27,21 +27,40 @@ const EMPTY_ENCOUNTER = {
   updatedAt: 0,
 };
 
+const getEffectiveFusionId = ({
+  isFusion,
+  head,
+  body,
+}: Pick<
+  NonNullable<ReturnType<typeof useEncounter>>,
+  "isFusion" | "head" | "body"
+>) => {
+  if (!isFusion || !head || !body || !canFuse(head, body)) {
+    return null;
+  }
+
+  return `${head.id}.${body.id}`;
+};
+
 export default function LocationTableRow({ row }: LocationTableRowProps) {
   const locationId = row.original.id;
   const { ref, inView } = useInView();
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
   const previousFusionId = useRef<string | null>(null);
+  const hasInitializedFusionId = useRef(false);
   const activePlaythroughId = useActivePlaythroughId();
+  const [isLoadRequested, setIsLoadRequested] = useState(false);
 
   const aboveTheFold = row.index < 8;
-  const shouldLoad = inView || aboveTheFold;
+  const shouldLoad = inView || aboveTheFold || isLoadRequested;
+  const visibleCells = row.getVisibleCells();
 
   // Get encounter data directly - only this row will rerender when this encounter changes
   const encounterData = useEncounter(locationId) || EMPTY_ENCOUNTER;
 
   useEffect(() => {
     previousFusionId.current = null;
+    hasInitializedFusionId.current = false;
   }, [activePlaythroughId]);
 
   // Play evolution animation when this location evolves, but only if the Pokémon can form an effective fusion
@@ -75,38 +94,20 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
     encounterData.body,
   ]);
 
-  // Initialize the previous fusion ID on first render to prevent animation on page load
+  // Play evolution animation only when the effective fusion ID changes after initialization.
   useEffect(() => {
-    if (encounterData.isFusion && encounterData.head && encounterData.body) {
-      const canActuallyFuse = canFuse(encounterData.head, encounterData.body);
-      if (canActuallyFuse) {
-        const currentFusionId = `${encounterData.head.id}.${encounterData.body.id}`;
-        if (previousFusionId.current === null) {
-          // First time rendering - just set the ID without playing animation
-          previousFusionId.current = currentFusionId;
-        }
-      }
-    }
-  }, [encounterData.isFusion, encounterData.head, encounterData.body]);
+    const currentFusionId = getEffectiveFusionId(encounterData);
 
-  // Play evolution animation only when the effective fusion ID changes
-  useEffect(() => {
-    if (encounterData.isFusion && encounterData.head && encounterData.body) {
-      const canActuallyFuse = canFuse(encounterData.head, encounterData.body);
-      if (canActuallyFuse) {
-        // Calculate the effective fusion ID based on current state
-        const currentFusionId = `${encounterData.head.id}.${encounterData.body.id}`;
-
-        // Only play animation if this is a new fusion combination (and not the first render)
-        if (
-          previousFusionId.current !== null &&
-          currentFusionId !== previousFusionId.current
-        ) {
-          previousFusionId.current = currentFusionId;
-          spriteRef.current?.playEvolution();
-        }
-      }
+    if (!hasInitializedFusionId.current) {
+      previousFusionId.current = currentFusionId;
+      hasInitializedFusionId.current = true;
+      return;
     }
+
+    if (currentFusionId && currentFusionId !== previousFusionId.current) {
+      spriteRef.current?.playEvolution();
+    }
+    previousFusionId.current = currentFusionId;
   }, [encounterData.isFusion, encounterData.head, encounterData.body]);
 
   return (
@@ -116,62 +117,79 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
       ref={ref}
       data-location-id={locationId}
     >
-      {row.getVisibleCells().map((cell) =>
-        match(cell.column.id)
-          .with("sprite", () => (
-            <td
-              key={cell.id}
-              className="p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group"
-            >
-              <PokemonSummaryCard
-                ref={spriteRef}
-                headPokemon={encounterData.head}
-                bodyPokemon={encounterData.body}
-                isFusion={encounterData.isFusion}
-                shouldLoad={shouldLoad}
-              />
-            </td>
-          ))
-          .with("encounter", () => (
-            <EncounterCell
-              key={cell.id}
-              locationId={locationId}
-              shouldLoad={shouldLoad}
-            />
-          ))
-          .with("actions", () => {
-            const hasEncounter = !!(encounterData.head || encounterData.body);
-            return (
+      {shouldLoad ? (
+        visibleCells.map((cell) =>
+          match(cell.column.id)
+            .with("sprite", () => (
               <td
                 key={cell.id}
-                className="p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top"
+                className="p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group"
               >
-                <div className="flex flex-col items-center justify-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 group-focus-within/row:opacity-100">
-                  {hasEncounter && (
-                    <ResetEncounterButton
-                      locationId={locationId}
-                      locationName={row.original.name}
-                      hasEncounter={hasEncounter}
-                    />
-                  )}
-                  {isCustomLocation(row.original) && (
-                    <RemoveLocationButton
-                      locationId={locationId}
-                      locationName={row.original.name}
-                    />
-                  )}
-                </div>
+                <PokemonSummaryCard
+                  ref={spriteRef}
+                  headPokemon={encounterData.head}
+                  bodyPokemon={encounterData.body}
+                  isFusion={encounterData.isFusion}
+                  locationId={locationId}
+                  shouldLoad={shouldLoad}
+                />
               </td>
-            );
-          })
-          .otherwise(() => (
-            <td
-              key={cell.id}
-              className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
-            >
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-            </td>
-          )),
+            ))
+            .with("encounter", () => (
+              <EncounterCell
+                key={cell.id}
+                locationId={locationId}
+                shouldLoad={shouldLoad}
+              />
+            ))
+            .with("actions", () => {
+              const hasEncounter = !!(encounterData.head || encounterData.body);
+              return (
+                <td
+                  key={cell.id}
+                  className="p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top"
+                >
+                  <div className="flex flex-col items-center justify-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 group-focus-within/row:opacity-100">
+                    {hasEncounter && (
+                      <ResetEncounterButton
+                        locationId={locationId}
+                        locationName={row.original.name}
+                        hasEncounter={hasEncounter}
+                      />
+                    )}
+                    {isCustomLocation(row.original) && (
+                      <RemoveLocationButton
+                        locationId={locationId}
+                        locationName={row.original.name}
+                      />
+                    )}
+                  </div>
+                </td>
+              );
+            })
+            .otherwise(() => (
+              <td
+                key={cell.id}
+                className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
+              >
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </td>
+            )),
+        )
+      ) : (
+        <td
+          className="h-[150px]"
+          colSpan={visibleCells.length}
+          data-location-row-placeholder
+        >
+          <button
+            type="button"
+            className="w-full h-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            onClick={() => setIsLoadRequested(true)}
+          >
+            Load encounters for {row.original.name}
+          </button>
+        </td>
       )}
     </tr>
   );

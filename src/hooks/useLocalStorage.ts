@@ -3,7 +3,7 @@ import { useCallback, useMemo, useRef, useSyncExternalStore } from "react";
 const callbacks = new Set<(key: string) => void>();
 
 // fallback storage for data that cannot be stored in localStorage
-export const fallbackStorage = new Map<string, unknown>();
+const fallbackStorage = new Map<string, unknown>();
 
 function triggerCallbacks(key: string): void {
   for (const callback of [...callbacks]) {
@@ -115,5 +115,3 @@ export function useLocalStorage<T>(
     [value, setState, stringifiedInitialValue],
   );
 }
-
-export default useLocalStorage;

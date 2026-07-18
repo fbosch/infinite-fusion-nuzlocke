@@ -120,7 +120,7 @@ export const useEncounter = (locationId: string): EncounterData | null => {
   return activePlaythrough?.encounters?.[locationId] || null;
 };
 
-export const useIsSaving = (): boolean => {
+const useIsSaving = (): boolean => {
   const snapshot = useSnapshot(playthroughsStore);
   return snapshot.isSaving;
 };
@@ -136,34 +136,14 @@ export const useCustomLocations = (): z.infer<
   }, [activePlaythrough?.customLocations]);
 };
 
-export const useMergedLocations = () => {
+const useMergedLocations = () => {
   useActivePlaythrough();
 
   return getMergedLocations();
 };
 
-export const useAvailableAfterLocations = () => {
+const useAvailableAfterLocations = () => {
   useActivePlaythrough();
 
   return getAvailableAfterLocations();
-};
-
-// Hook for preferred variants - simplified version
-export const usePreferredVariant = (
-  headId?: number | null,
-  bodyId?: number | null,
-) => {
-  const setPreferredVariant = React.useCallback(
-    async (variant?: string) => {
-      const { setPreferredVariant: setGlobalVariant } = await import(
-        "@/lib/preferredVariants"
-      );
-      setGlobalVariant(headId ?? null, bodyId ?? null, variant ?? "");
-    },
-    [headId, bodyId],
-  );
-
-  return {
-    setPreferredVariant,
-  };
 };

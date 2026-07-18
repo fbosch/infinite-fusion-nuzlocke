@@ -15,7 +15,7 @@ export const encountersQueries = {
 };
 
 // Encounters query keys
-export const encountersKeys = {
+const encountersKeys = {
   all: ["encounters"] as const,
   lists: () => [...encountersKeys.all, "list"] as const,
   list: (gameMode: "classic" | "remix") =>

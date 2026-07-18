@@ -71,13 +71,13 @@ export const getEncounterCount = (playthrough: Playthrough): number => {
   return count;
 };
 
-export const getDeceasedCount = (playthrough: Playthrough): number => {
+const getDeceasedCount = (playthrough: Playthrough): number => {
   return getEncounterPokemon(playthrough).filter(
     (pokemon) => pokemon.status === PokemonStatus.DECEASED,
   ).length;
 };
 
-export const getBoxedCount = (playthrough: Playthrough): number => {
+const getBoxedCount = (playthrough: Playthrough): number => {
   return getEncounterPokemon(playthrough).filter(
     (pokemon) => pokemon.status === PokemonStatus.STORED,
   ).length;

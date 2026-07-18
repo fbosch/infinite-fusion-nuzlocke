@@ -22,7 +22,9 @@
   "entry": [
     "public/sw.js",
     "tests/setup.browser.ts",
-    "tests/setup.react-hooks.ts"
+    "tests/setup.react-hooks.ts",
+    "tests/benchmarks/**/*.benchmark.ts",
+    "tests/benchmarks/**/*.benchmark.tsx"
   ],
   "dynamicallyLoaded": ["src/workers/**/*.ts"],
   // Fallow 3.6 treats JSON imports through this TypeScript path alias as packages.
@@ -47,6 +49,10 @@
   },
   "health": {
     "maxCyclomatic": 20,
-    "maxCognitive": 15
+    "maxCognitive": 15,
+    "ignore": [
+      "tests/benchmarks/**/*.benchmark.ts",
+      "tests/benchmarks/**/*.benchmark.tsx"
+    ]
   }
 }

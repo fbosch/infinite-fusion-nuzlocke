@@ -1,7 +1,6 @@
 import { queryClient } from "./client";
 import { encountersQueries } from "./queries/encounters";
 import { pokemonQueries } from "./queries/pokemon";
-import { spriteQueries } from "./queries/sprites";
 
 // Utility functions for fetching data outside of React components
 export const pokemonData = {
@@ -17,9 +16,4 @@ export const pokemonData = {
 export const encountersData = {
   getAllEncounters: (gameMode: "classic" | "remix") =>
     queryClient.fetchQuery(encountersQueries.all(gameMode)),
-};
-
-export const spriteData = {
-  getArtworkVariants: (headId?: number | null, bodyId?: number | null) =>
-    queryClient.fetchQuery(spriteQueries.variants(headId, bodyId)),
 };

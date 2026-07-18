@@ -1,0 +1,201 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-18",
+  "command": "pnpm test:bench",
+  "environment": {
+    "node": "v24.18.0",
+    "pnpm": "10.34.5"
+  },
+  "fixture": {
+    "encounterCount": 512,
+    "warmupIterations": 10,
+    "sampleCount": 30
+  },
+  "methodology": {
+    "execution": "sequential shared-store fixtures",
+    "cold": "operation immediately after fixture installation",
+    "warm": "operation after resolving its active store paths"
+  },
+  "results": {
+    "reverse-active": {
+      "cold": {
+        "p50Ms": 0.522,
+        "p95Ms": 0.785
+      },
+      "warm": {
+        "p50Ms": 0.474,
+        "p95Ms": 0.782
+      }
+    },
+    "reverse-stored": {
+      "cold": {
+        "p50Ms": 0.555,
+        "p95Ms": 0.774
+      },
+      "warm": {
+        "p50Ms": 0.537,
+        "p95Ms": 0.67
+      }
+    },
+    "encounter-select-empty": {
+      "cold": {
+        "p50Ms": 0.56,
+        "p95Ms": 1.029
+      },
+      "warm": {
+        "p50Ms": 0.561,
+        "p95Ms": 0.843
+      }
+    },
+    "encounter-overwrite": {
+      "cold": {
+        "p50Ms": 0.583,
+        "p95Ms": 0.871
+      },
+      "warm": {
+        "p50Ms": 0.603,
+        "p95Ms": 0.903
+      }
+    },
+    "encounter-clear": {
+      "cold": {
+        "p50Ms": 0.052,
+        "p95Ms": 0.089
+      },
+      "warm": {
+        "p50Ms": 0.041,
+        "p95Ms": 0.075
+      }
+    },
+    "encounter-nickname-update": {
+      "cold": {
+        "p50Ms": 0.051,
+        "p95Ms": 0.077
+      },
+      "warm": {
+        "p50Ms": 0.049,
+        "p95Ms": 0.072
+      }
+    },
+    "encounter-status-captured": {
+      "cold": {
+        "p50Ms": 1.429,
+        "p95Ms": 1.996
+      },
+      "warm": {
+        "p50Ms": 1.478,
+        "p95Ms": 1.901
+      }
+    },
+    "encounter-status-deceased": {
+      "cold": {
+        "p50Ms": 0.635,
+        "p95Ms": 1.021
+      },
+      "warm": {
+        "p50Ms": 0.593,
+        "p95Ms": 1.285
+      }
+    },
+    "encounter-status-stored": {
+      "cold": {
+        "p50Ms": 0.634,
+        "p95Ms": 0.845
+      },
+      "warm": {
+        "p50Ms": 0.642,
+        "p95Ms": 0.884
+      }
+    },
+    "encounter-toggle-fusion": {
+      "cold": {
+        "p50Ms": 0.05,
+        "p95Ms": 0.084
+      },
+      "warm": {
+        "p50Ms": 0.044,
+        "p95Ms": 0.075
+      }
+    },
+    "encounter-flip-fusion": {
+      "cold": {
+        "p50Ms": 0.054,
+        "p95Ms": 0.096
+      },
+      "warm": {
+        "p50Ms": 0.049,
+        "p95Ms": 0.08
+      }
+    },
+    "encounter-evolve": {
+      "cold": {
+        "p50Ms": 0.583,
+        "p95Ms": 0.844
+      },
+      "warm": {
+        "p50Ms": 0.616,
+        "p95Ms": 0.954
+      }
+    },
+    "encounter-reset": {
+      "cold": {
+        "p50Ms": 0.043,
+        "p95Ms": 0.148
+      },
+      "warm": {
+        "p50Ms": 0.035,
+        "p95Ms": 0.05
+      }
+    },
+    "move-original-empty-target": {
+      "cold": {
+        "p50Ms": 0.081,
+        "p95Ms": 0.124
+      },
+      "warm": {
+        "p50Ms": 0.066,
+        "p95Ms": 0.093
+      }
+    },
+    "move-original-occupied-target": {
+      "cold": {
+        "p50Ms": 0.111,
+        "p95Ms": 0.16
+      },
+      "warm": {
+        "p50Ms": 0.092,
+        "p95Ms": 0.14
+      }
+    },
+    "drag-empty-target": {
+      "cold": {
+        "p50Ms": 0.08,
+        "p95Ms": 0.12
+      },
+      "warm": {
+        "p50Ms": 0.07,
+        "p95Ms": 0.112
+      }
+    },
+    "drag-occupied-target": {
+      "cold": {
+        "p50Ms": 0.076,
+        "p95Ms": 0.116
+      },
+      "warm": {
+        "p50Ms": 0.078,
+        "p95Ms": 0.105
+      }
+    },
+    "custom-location-remove": {
+      "cold": {
+        "p50Ms": 0.101,
+        "p95Ms": 0.137
+      },
+      "warm": {
+        "p50Ms": 0.099,
+        "p95Ms": 0.178
+      }
+    }
+  }
+}
