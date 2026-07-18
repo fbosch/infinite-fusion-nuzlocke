@@ -2,29 +2,37 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { ConsoleFormatter } from "./utils/console-utils";
 import {
   normalizePokemonNameForSprite,
   stripPokemonFormSuffix,
 } from "./utils/pokemon-name-utils";
+import { runDirectScript } from "./utils/script-runtime-utils";
+import {
+  findFirstOverlappingPair,
+  forEachOverlappingPair,
+  getPackedBounds,
+} from "./utils/sprite-packing-utils";
+import {
+  BasePokemonEntrySchema,
+  getSpriteSourcePaths,
+  loadJsonFile,
+} from "./utils/sprite-source-utils";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const BASE_ENTRIES_PATH = path.join(
-  __dirname,
+const {
+  scriptDirectory,
+  baseEntriesPath: BASE_ENTRIES_PATH,
+  gen7SpritesDir: GEN7_SPRITES_DIR,
+  gen8SpritesDir: GEN8_SPRITES_DIR,
+} = getSpriteSourcePaths(import.meta.url);
+const SPRITESHEET_OUTPUT_DIR = path.join(
+  scriptDirectory,
   "..",
-  "data",
-  "shared",
-  "base-entries.json",
+  "public",
+  "images",
 );
-const SPRITES_BASE_DIR = path.join(__dirname, "sprites");
-const GEN7_SPRITES_DIR = path.join(SPRITES_BASE_DIR, "pokemon-gen7");
-const GEN8_SPRITES_DIR = path.join(SPRITES_BASE_DIR, "pokemon-gen8");
-const SPRITESHEET_OUTPUT_DIR = path.join(__dirname, "..", "public", "images");
-const METADATA_OUTPUT_DIR = path.join(__dirname, "..", "src", "assets");
+const METADATA_OUTPUT_DIR = path.join(scriptDirectory, "..", "src", "assets");
 
 export type PokemonEntry = {
   id: number;
@@ -311,8 +319,7 @@ async function loadSpriteData(
   const entriesData = await ConsoleFormatter.withSpinner(
     "Loading Pokemon entries...",
     async () => {
-      const data = await fs.readFile(BASE_ENTRIES_PATH, "utf-8");
-      return JSON.parse(data) as PokemonEntry[];
+      return loadJsonFile(BASE_ENTRIES_PATH, BasePokemonEntrySchema.array());
     },
   );
 
@@ -421,7 +428,7 @@ async function loadSpriteData(
 /**
  * Pack sprites using bin packing algorithm
  */
-function packSprites(sprites: SpriteInfo[]): {
+export function packSprites(sprites: SpriteInfo[]): {
   width: number;
   height: number;
   efficiency: number;
@@ -440,118 +447,11 @@ function packSprites(sprites: SpriteInfo[]): {
     return heightDiff !== 0 ? heightDiff : b.width - a.width;
   });
 
-  // Estimate initial canvas size with more padding to prevent overlaps
-  const totalArea = validSprites.reduce(
-    (sum, s) => sum + s.width * s.height,
-    0,
+  const packedBounds = packWithGrowingCanvas(validSprites);
+  const { width: canvasWidth, height: canvasHeight } = resolvePackedOverlaps(
+    validSprites,
+    packedBounds,
   );
-  const avgAspectRatio =
-    validSprites.reduce((sum, s) => sum + s.width / s.height, 0) /
-    validSprites.length;
-
-  let canvasWidth = Math.ceil(Math.sqrt(totalArea * avgAspectRatio)) + 200; // Increased padding
-  let canvasHeight = Math.ceil(totalArea / canvasWidth) + 200;
-
-  // Try packing with progressively larger canvas sizes
-  let packed = false;
-  let attempts = 0;
-  const maxAttempts = 15; // Increased max attempts
-
-  while (!packed && attempts < maxAttempts) {
-    const packer = new BinPacker(canvasWidth, canvasHeight);
-    let allFit = true;
-
-    // Reset positions
-    validSprites.forEach((sprite) => {
-      sprite.x = 0;
-      sprite.y = 0;
-    });
-
-    // Try to pack all sprites
-    for (const sprite of validSprites) {
-      const rect = packer.pack(sprite.width, sprite.height);
-      if (rect) {
-        sprite.x = rect.x;
-        sprite.y = rect.y;
-      } else {
-        allFit = false;
-        break;
-      }
-    }
-
-    if (allFit) {
-      packed = true;
-
-      // Trim canvas to actual used area
-      const maxX = Math.max(...validSprites.map((s) => s.x + s.width));
-      const maxY = Math.max(...validSprites.map((s) => s.y + s.height));
-
-      canvasWidth = maxX;
-      canvasHeight = maxY;
-    } else {
-      // Increase canvas size more aggressively and try again
-      canvasWidth = Math.ceil(canvasWidth * 1.3);
-      canvasHeight = Math.ceil(canvasHeight * 1.3);
-      attempts++;
-    }
-  }
-
-  if (!packed) {
-    throw new Error("Failed to pack all sprites after multiple attempts");
-  }
-
-  // Validate that no sprites overlap
-  const hasOverlap = validateNoOverlap(validSprites);
-  if (hasOverlap) {
-    ConsoleFormatter.warn(
-      "Overlap detected in sprite packing, attempting to fix...",
-    );
-
-    // Try to fix overlaps by adding padding
-    const fixed = fixOverlaps(validSprites);
-    if (fixed) {
-      // Recalculate canvas dimensions after fixing
-      const maxX = Math.max(...validSprites.map((s) => s.x + s.width));
-      const maxY = Math.max(...validSprites.map((s) => s.y + s.height));
-      canvasWidth = maxX;
-      canvasHeight = maxY;
-
-      ConsoleFormatter.success("Successfully fixed sprite overlaps");
-    } else {
-      throw new Error("Failed to fix sprite overlaps");
-    }
-  } else {
-    ConsoleFormatter.success("No sprite overlaps detected");
-  }
-
-  // Final validation
-  const finalOverlapCheck = validateNoOverlap(validSprites);
-  if (finalOverlapCheck) {
-    ConsoleFormatter.error(
-      "Final overlap check failed - sprites still overlap",
-    );
-
-    // Log problematic sprites for debugging
-    for (let i = 0; i < validSprites.length; i++) {
-      for (let j = i + 1; j < validSprites.length; j++) {
-        const a = validSprites[i]!;
-        const b = validSprites[j]!;
-
-        if (
-          a.x < b.x + b.width &&
-          a.x + a.width > b.x &&
-          a.y < b.y + b.height &&
-          a.y + a.height > b.y
-        ) {
-          ConsoleFormatter.error(
-            `Overlap: ${a.name} (${a.x},${a.y},${a.width}x${a.height}) with ${b.name} (${b.x},${b.y},${b.width}x${b.height})`,
-          );
-        }
-      }
-    }
-
-    throw new Error("Sprite overlaps could not be resolved");
-  }
 
   const usedArea = validSprites.reduce((sum, s) => sum + s.width * s.height, 0);
   const efficiency = (usedArea / (canvasWidth * canvasHeight)) * 100;
@@ -564,111 +464,128 @@ function packSprites(sprites: SpriteInfo[]): {
   return { width: canvasWidth, height: canvasHeight, efficiency };
 }
 
+function packWithGrowingCanvas(sprites: SpriteInfo[]): {
+  width: number;
+  height: number;
+} {
+  const totalArea = sprites.reduce((sum, s) => sum + s.width * s.height, 0);
+  const avgAspectRatio =
+    sprites.reduce((sum, s) => sum + s.width / s.height, 0) / sprites.length;
+  let width = Math.ceil(Math.sqrt(totalArea * avgAspectRatio)) + 200;
+  let height = Math.ceil(totalArea / width) + 200;
+
+  for (let attempt = 0; attempt < 15; attempt += 1) {
+    if (packAllSpritesIntoCanvas(sprites, width, height)) {
+      return getPackedBounds(sprites);
+    }
+    width = Math.ceil(width * 1.3);
+    height = Math.ceil(height * 1.3);
+  }
+
+  throw new Error("Failed to pack all sprites after multiple attempts");
+}
+
+function packAllSpritesIntoCanvas(
+  sprites: SpriteInfo[],
+  width: number,
+  height: number,
+): boolean {
+  const packer = new BinPacker(width, height);
+
+  for (const sprite of sprites) {
+    sprite.x = 0;
+    sprite.y = 0;
+  }
+
+  for (const sprite of sprites) {
+    const rect = packer.pack(sprite.width, sprite.height);
+    if (!rect) {
+      return false;
+    }
+    sprite.x = rect.x;
+    sprite.y = rect.y;
+  }
+
+  return true;
+}
+
+function resolvePackedOverlaps(
+  sprites: SpriteInfo[],
+  bounds: { width: number; height: number },
+): { width: number; height: number } {
+  if (!validateNoOverlap(sprites)) {
+    ConsoleFormatter.success("No sprite overlaps detected");
+    return bounds;
+  }
+
+  ConsoleFormatter.warn(
+    "Overlap detected in sprite packing, attempting to fix...",
+  );
+  if (!fixOverlaps(sprites)) {
+    throw new Error("Failed to fix sprite overlaps");
+  }
+
+  ConsoleFormatter.success("Successfully fixed sprite overlaps");
+  const fixedBounds = getPackedBounds(sprites);
+  if (!validateNoOverlap(sprites)) {
+    return fixedBounds;
+  }
+
+  ConsoleFormatter.error("Final overlap check failed - sprites still overlap");
+  logOverlappingSprites(sprites);
+  throw new Error("Sprite overlaps could not be resolved");
+}
+
 /**
  * Check if any sprites overlap
  */
 function validateNoOverlap(sprites: SpriteInfo[]): boolean {
-  for (let i = 0; i < sprites.length; i++) {
-    for (let j = i + 1; j < sprites.length; j++) {
-      const a = sprites[i]!;
-      const b = sprites[j]!;
+  const overlap = findFirstOverlappingPair(sprites);
+  if (!overlap) return false;
 
-      // Check for any overlap using precise mathematical bounds
-      // Two rectangles overlap if and only if:
-      // a.x < b.x + b.width AND a.x + a.width > b.x AND
-      // a.y < b.y + b.height AND a.y + a.height > b.y
-      if (
-        a.x < b.x + b.width &&
-        a.x + a.width > b.x &&
-        a.y < b.y + b.height &&
-        a.y + a.height > b.y
-      ) {
-        ConsoleFormatter.error(
-          `Overlap detected between ${a.name} and ${b.name}`,
-        );
-        ConsoleFormatter.error(
-          `  ${a.name}: (${a.x},${a.y}) ${a.width}x${a.height}`,
-        );
-        ConsoleFormatter.error(
-          `  ${b.name}: (${b.x},${b.y}) ${b.width}x${b.height}`,
-        );
-        ConsoleFormatter.error(
-          `  Overlap area: ${Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x))} x ${Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y))}`,
-        );
-        return true;
-      }
-    }
-  }
-  return false;
+  const [a, b] = overlap;
+  ConsoleFormatter.error(`Overlap detected between ${a.name} and ${b.name}`);
+  ConsoleFormatter.error(`  ${a.name}: (${a.x},${a.y}) ${a.width}x${a.height}`);
+  ConsoleFormatter.error(`  ${b.name}: (${b.x},${b.y}) ${b.width}x${b.height}`);
+  ConsoleFormatter.error(
+    `  Overlap area: ${Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x))} x ${Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y))}`,
+  );
+  return true;
+}
+
+function logOverlappingSprites(sprites: SpriteInfo[]): void {
+  forEachOverlappingPair(sprites, (a, b) => {
+    ConsoleFormatter.error(
+      `Overlap: ${a.name} (${a.x},${a.y},${a.width}x${a.height}) with ${b.name} (${b.x},${b.y},${b.width}x${b.height})`,
+    );
+    return false;
+  });
 }
 
 /**
  * Attempt to fix overlaps by adding padding
  */
-function fixOverlaps(sprites: SpriteInfo[]): boolean {
-  let attempts = 0;
-  const maxAttempts = 10; // Increased attempts
+export function fixOverlaps(sprites: SpriteInfo[]): boolean {
+  const maxAttempts = 10;
 
-  while (attempts < maxAttempts) {
-    let hasOverlap = false;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const hasOverlap = forEachOverlappingPair(sprites, (a, b) => {
+      const overlapX = Math.max(0, a.x + a.width - b.x);
+      const overlapY = Math.max(0, a.y + a.height - b.y);
 
-    for (let i = 0; i < sprites.length; i++) {
-      for (let j = i + 1; j < sprites.length; j++) {
-        const a = sprites[i]!;
-        const b = sprites[j]!;
-
-        if (
-          a.x < b.x + b.width &&
-          a.x + a.width > b.x &&
-          a.y < b.y + b.height &&
-          a.y + a.height > b.y
-        ) {
-          // Calculate overlap amounts
-          const overlapX = Math.max(0, a.x + a.width - b.x);
-          const overlapY = Math.max(0, a.y + a.height - b.y);
-
-          // Move sprite b to avoid overlap with some extra padding
-          if (overlapX > 0) {
-            b.x += overlapX + 1; // Add 1px padding
-          }
-          if (overlapY > 0) {
-            b.y += overlapY + 1; // Add 1px padding
-          }
-
-          hasOverlap = true;
-        }
-      }
-    }
+      if (overlapX > 0) b.x += overlapX + 1;
+      if (overlapY > 0) b.y += overlapY + 1;
+      return false;
+    });
 
     if (!hasOverlap) {
-      ConsoleFormatter.success(`Fixed overlaps in ${attempts + 1} attempts`);
+      ConsoleFormatter.success(`Fixed overlaps in ${attempt + 1} attempts`);
       return true;
     }
 
-    attempts++;
-
-    // If we're taking too long, try a more aggressive approach
-    if (attempts === 5) {
+    if (attempt === 4) {
       ConsoleFormatter.warn("Using aggressive overlap fixing...");
-
-      // Sort sprites by position and ensure minimum spacing
-      sprites.sort((a, b) => {
-        if (a.y !== b.y) return a.y - b.y;
-        return a.x - b.x;
-      });
-
-      for (let i = 1; i < sprites.length; i++) {
-        const prev = sprites[i - 1]!;
-        const curr = sprites[i]!;
-
-        // Ensure minimum spacing between sprites
-        if (curr.x < prev.x + prev.width + 1) {
-          curr.x = prev.x + prev.width + 1;
-        }
-        if (curr.y < prev.y + prev.height + 1) {
-          curr.y = prev.y + prev.height + 1;
-        }
-      }
+      applyAggressiveOverlapSpacing(sprites);
     }
   }
 
@@ -676,6 +593,20 @@ function fixOverlaps(sprites: SpriteInfo[]): boolean {
     `Failed to fix overlaps after ${maxAttempts} attempts`,
   );
   return false;
+}
+
+function applyAggressiveOverlapSpacing(sprites: SpriteInfo[]): void {
+  sprites.sort((a, b) => a.y - b.y || a.x - b.x);
+
+  for (let index = 1; index < sprites.length; index += 1) {
+    const previous = sprites[index - 1];
+    const current = sprites[index];
+    if (!previous || !current) {
+      continue;
+    }
+    current.x = Math.max(current.x, previous.x + previous.width + 1);
+    current.y = Math.max(current.y, previous.y + previous.height + 1);
+  }
 }
 
 /**
@@ -978,5 +909,4 @@ async function generatePokemonSpritesheets(): Promise<void> {
   }
 }
 
-// Run the generator
-generatePokemonSpritesheets();
+runDirectScript(import.meta.url, generatePokemonSpritesheets);

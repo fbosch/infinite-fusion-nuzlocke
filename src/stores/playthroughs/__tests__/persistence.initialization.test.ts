@@ -176,6 +176,21 @@ describe("playthrough persistence initialization regression cases", () => {
     expect(state.isLoading).toBe(false);
   });
 
+  it("keeps the fallback usable when localStorage is only partially implemented", async () => {
+    const state = createState();
+    Object.defineProperty(globalThis, "localStorage", {
+      value: { getItem: () => null },
+      configurable: true,
+    });
+    idbMocks.keys.mockRejectedValue(new Error("indexeddb unavailable"));
+
+    await expect(loadFromIndexedDB(state)).resolves.toBeUndefined();
+
+    expect(state.playthroughs).toHaveLength(1);
+    expect(state.activePlaythroughId).toBeDefined();
+    expect(state.isLoading).toBe(false);
+  });
+
   it("migrates old team-member schema when loading a single playthrough", async () => {
     idbMocks.get.mockResolvedValue({
       id: "legacy",

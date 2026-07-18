@@ -4,6 +4,11 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import * as cheerio from "cheerio";
 import { ConsoleFormatter } from "./utils/console-utils";
+import { cleanLocationName } from "./utils/location-utils";
+import {
+  exitOnScriptError,
+  runDirectScript,
+} from "./utils/script-runtime-utils";
 import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
 
 const GIFTS_AND_TRADES_URL =
@@ -25,24 +30,97 @@ interface EggLocation {
   pokemonId?: number;
 }
 
-/**
- * Cleans location names to match the standard format
- */
-function cleanLocationName(location: string): string {
+const EGG_KEYWORDS = ["egg", "as egg", "daycare egg", "random egg"] as const;
+
+const EGG_POKEMON_NAMES = [
+  "togepi",
+  "azurill",
+  "pichu",
+  "cleffa",
+  "igglybuff",
+  "bonsly",
+  "mantyke",
+  "happiny",
+  "elekid",
+  "magby",
+  "smoochum",
+  "ralts",
+  "pawniard",
+  "bagon",
+] as const;
+
+const LOCATION_KEYWORDS = [
+  "route",
+  "city",
+  "town",
+  "island",
+  "park",
+  "daycare",
+  "mt.",
+  "mountain",
+  "cave",
+  "forest",
+] as const;
+
+/** Returns whether a gift/trade row describes an egg encounter. */
+export function isEggRelated(pokemonCell: string, notesCell: string): boolean {
+  const pokemonText = pokemonCell.toLowerCase();
+  const notesText = notesCell.toLowerCase();
+
   return (
-    location
-      // Remove wiki links
-      .replace(/\[\[([^\]]+)\]\]/g, "$1")
-      .replace(/\[\[([^\]]+)\|([^\]]+)\]\]/g, "$2")
-      // Remove extra context in parentheses
-      .replace(/\s*\([^)]*\)/g, "")
-      // Standardize Pokémon -> Pokemon
-      .replace(/Pokémon/g, "Pokemon")
-      // Standardize S.S. Anne
-      .replace(/S\.S\.\s*Anne/g, "S.S. Anne")
-      // Remove extra whitespace
-      .trim()
+    EGG_KEYWORDS.some(
+      (keyword) => pokemonText.includes(keyword) || notesText.includes(keyword),
+    ) || EGG_POKEMON_NAMES.some((name) => pokemonText.includes(name))
   );
+}
+
+/** Returns whether a cleaned row value is a usable egg-location name. */
+export function isEggLocationName(location: string): boolean {
+  const normalizedLocation = location.toLowerCase();
+
+  return (
+    location.length > 2 &&
+    !normalizedLocation.includes("pokemon") &&
+    !normalizedLocation.includes("egg") &&
+    LOCATION_KEYWORDS.some((keyword) => normalizedLocation.includes(keyword))
+  );
+}
+
+/** Returns the nest location encoded by a nearby wiki link, when usable. */
+export function getNestLocationName(
+  href: string,
+  parentText: string,
+  hasNestImage: boolean,
+): string | null {
+  if (
+    !href.includes("/wiki/") ||
+    (!parentText.toLowerCase().includes("nest") && !hasNestImage)
+  ) {
+    return null;
+  }
+
+  const urlMatch = href.match(/\/wiki\/([^/]+)/);
+  if (!urlMatch) {
+    return null;
+  }
+
+  const routeName = decodeURIComponent(urlMatch[1])
+    .replace(/_/g, " ")
+    .replace(/%20/g, " ")
+    .trim();
+  const normalizedRouteName = routeName.toLowerCase();
+
+  if (
+    routeName.length <= 2 ||
+    normalizedRouteName.includes("pokemon") ||
+    normalizedRouteName.includes("nest") ||
+    normalizedRouteName.includes("egg") ||
+    normalizedRouteName.includes("file:")
+  ) {
+    return null;
+  }
+
+  return routeName;
 }
 
 /**
@@ -171,52 +249,10 @@ async function scrapeGiftsAndTradesForEggs(
         const locationCell = cells.eq(1).text().trim();
         const notesCell = cells.length > 3 ? cells.eq(3).text().trim() : "";
 
-        // Look for egg-related entries with more comprehensive detection
-        const isEggRelated =
-          pokemonCell.toLowerCase().includes("egg") ||
-          notesCell.toLowerCase().includes("egg") ||
-          pokemonCell.toLowerCase().includes("as egg") ||
-          notesCell.toLowerCase().includes("as egg") ||
-          pokemonCell.toLowerCase().includes("daycare egg") ||
-          notesCell.toLowerCase().includes("daycare egg") ||
-          pokemonCell.toLowerCase().includes("random egg") ||
-          notesCell.toLowerCase().includes("random egg") ||
-          // Look for specific egg Pokémon
-          pokemonCell.toLowerCase().includes("togepi") ||
-          pokemonCell.toLowerCase().includes("azurill") ||
-          pokemonCell.toLowerCase().includes("pichu") ||
-          pokemonCell.toLowerCase().includes("cleffa") ||
-          pokemonCell.toLowerCase().includes("igglybuff") ||
-          pokemonCell.toLowerCase().includes("bonsly") ||
-          pokemonCell.toLowerCase().includes("mantyke") ||
-          pokemonCell.toLowerCase().includes("happiny") ||
-          pokemonCell.toLowerCase().includes("elekid") ||
-          pokemonCell.toLowerCase().includes("magby") ||
-          pokemonCell.toLowerCase().includes("smoochum") ||
-          pokemonCell.toLowerCase().includes("ralts") ||
-          pokemonCell.toLowerCase().includes("pawniard") ||
-          pokemonCell.toLowerCase().includes("bagon");
-
-        if (isEggRelated) {
+        if (isEggRelated(pokemonCell, notesCell)) {
           const cleanedLocation = cleanLocationName(locationCell);
           // Validate that this is actually a location name, not a Pokémon name
-          if (
-            cleanedLocation &&
-            cleanedLocation.length > 2 &&
-            !cleanedLocation.toLowerCase().includes("pokemon") &&
-            !cleanedLocation.toLowerCase().includes("egg") &&
-            // Check if it looks like a location (contains route, city, town, etc.)
-            (cleanedLocation.toLowerCase().includes("route") ||
-              cleanedLocation.toLowerCase().includes("city") ||
-              cleanedLocation.toLowerCase().includes("town") ||
-              cleanedLocation.toLowerCase().includes("island") ||
-              cleanedLocation.toLowerCase().includes("park") ||
-              cleanedLocation.toLowerCase().includes("daycare") ||
-              cleanedLocation.toLowerCase().includes("mt.") ||
-              cleanedLocation.toLowerCase().includes("mountain") ||
-              cleanedLocation.toLowerCase().includes("cave") ||
-              cleanedLocation.toLowerCase().includes("forest"))
-          ) {
+          if (cleanedLocation && isEggLocationName(cleanedLocation)) {
             // Extract Pokemon name and get its data
             const extractedPokemonName = extractPokemonName(pokemonCell);
             const pokemonData = extractedPokemonName
@@ -312,35 +348,12 @@ async function scrapePokemonNestsForEggs(
 
       // Check if this link is near a nest image or nest text
       const $parent = $link.parent();
-      const parentText = $parent.text().toLowerCase();
+      const parentText = $parent.text();
       const hasNestImage = $parent.find('img[alt*="nest"]').length > 0;
 
-      // Look for location links that are near nest content
-      if (
-        href.includes("/wiki/") &&
-        (parentText.includes("nest") || hasNestImage)
-      ) {
-        // Extract the page name from the URL
-        const urlMatch = href.match(/\/wiki\/([^/]+)/);
-        if (urlMatch) {
-          const pageName = decodeURIComponent(urlMatch[1]);
-          const routeName = pageName
-            .replace(/_/g, " ")
-            .replace(/%20/g, " ")
-            .trim();
-
-          // Validate the route name
-          if (
-            routeName &&
-            routeName.length > 2 &&
-            !routeName.toLowerCase().includes("pokemon") &&
-            !routeName.toLowerCase().includes("nest") &&
-            !routeName.toLowerCase().includes("egg") &&
-            !routeName.toLowerCase().includes("file:")
-          ) {
-            locationSet.add(routeName);
-          }
-        }
+      const routeName = getNestLocationName(href, parentText, hasNestImage);
+      if (routeName) {
+        locationSet.add(routeName);
       }
     });
 
@@ -549,14 +562,8 @@ async function main() {
       },
     ]);
   } catch (error) {
-    ConsoleFormatter.error(
-      `Fatal error: ${error instanceof Error ? error.message : "Unknown error"}`,
-    );
-    process.exit(1);
+    exitOnScriptError("Fatal error", error);
   }
 }
 
-// Check if this script is being run directly
-if (process.argv[1]?.endsWith("scrape-egg-locations.ts")) {
-  main();
-}
+runDirectScript(import.meta.url, main);

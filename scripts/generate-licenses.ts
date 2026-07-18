@@ -30,6 +30,7 @@ type LicensePackage = {
   noticeText?: string;
 };
 
+// fallow-ignore-next-line complexity
 async function generateLicenses(): Promise<void> {
   try {
     const { stdout } = await exec("pnpm licenses list --prod --json", {

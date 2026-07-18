@@ -6,11 +6,17 @@ import * as cheerio from "cheerio";
 import { extractPokedexSubpageTitles } from "./scrape-pokedex";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
+import { ensureEncounterOutputDirectories } from "./utils/encounter-output-utils";
+import { cleanLocationName } from "./utils/location-utils";
 import {
   findPokemonId,
   isPotentialPokemonName,
   type PokemonNameMap,
 } from "./utils/pokemon-name-utils";
+import {
+  exitOnScriptError,
+  runDirectScript,
+} from "./utils/script-runtime-utils";
 import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
 
 const CLASSIC_POKEDEX_URL =
@@ -86,26 +92,6 @@ function findPokemonIdWithSpecialCases(
   }
 
   return null;
-}
-
-/**
- * Cleans location names to match the standard format
- */
-function cleanLocationName(location: string): string {
-  return (
-    location
-      // Remove wiki links
-      .replace(/\[\[([^\]]+)\]\]/g, "$1")
-      .replace(/\[\[([^\]]+)\|([^\]]+)\]\]/g, "$2")
-      // Remove extra context in parentheses
-      .replace(/\s*\([^)]*\)/g, "")
-      // Standardize Pokémon -> Pokemon
-      .replace(/Pokémon/g, "Pokemon")
-      // Standardize S.S. Anne
-      .replace(/S\.S\.\s*Anne/g, "S.S. Anne")
-      // Remove extra whitespace
-      .trim()
-  );
 }
 
 /**
@@ -545,13 +531,7 @@ async function main() {
   const startTime = Date.now();
 
   try {
-    const dataDir = path.join(process.cwd(), "data");
-    const classicDir = path.join(dataDir, "classic");
-    const remixDir = path.join(dataDir, "remix");
-
-    // Create directories
-    await fs.mkdir(classicDir, { recursive: true });
-    await fs.mkdir(remixDir, { recursive: true });
+    const { classicDir, remixDir } = await ensureEncounterOutputDirectories();
 
     // Scrape both Classic and Remix data
     ConsoleFormatter.info("Scraping Classic and Remix Special Encounters...");
@@ -731,13 +711,8 @@ async function main() {
       },
     ]);
   } catch (error) {
-    ConsoleFormatter.error(
-      `Fatal error: ${error instanceof Error ? error.message : "Unknown error"}`,
-    );
-    process.exit(1);
+    exitOnScriptError("Fatal error", error);
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  void main();
-}
+runDirectScript(import.meta.url, main);

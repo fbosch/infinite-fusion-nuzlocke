@@ -15,19 +15,35 @@ export const playthroughsStore_idb = createStore("playthroughs", "data");
 export const ACTIVE_PLAYTHROUGH_KEY = "activePlaythroughId";
 
 // LocalStorage helpers for active playthrough ID
-const getActivePlaythroughId = (): string | null => {
+const getLocalStorage = (): Storage | null => {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(ACTIVE_PLAYTHROUGH_KEY);
+
+  try {
+    return globalThis.localStorage;
+  } catch {
+    return null;
+  }
+};
+
+const getActivePlaythroughId = (): string | null => {
+  const storage = getLocalStorage();
+  return typeof storage?.getItem === "function"
+    ? storage.getItem(ACTIVE_PLAYTHROUGH_KEY)
+    : null;
 };
 
 const setActivePlaythroughId = (id: string): void => {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(ACTIVE_PLAYTHROUGH_KEY, id);
+  const storage = getLocalStorage();
+  if (typeof storage?.setItem === "function") {
+    storage.setItem(ACTIVE_PLAYTHROUGH_KEY, id);
+  }
 };
 
 const removeActivePlaythroughId = (): void => {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(ACTIVE_PLAYTHROUGH_KEY);
+  const storage = getLocalStorage();
+  if (typeof storage?.removeItem === "function") {
+    storage.removeItem(ACTIVE_PLAYTHROUGH_KEY);
+  }
 };
 
 // Migration function to move activePlaythroughId from IndexedDB to LocalStorage

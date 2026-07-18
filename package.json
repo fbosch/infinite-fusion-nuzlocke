@@ -40,7 +40,7 @@
     "react-doctor:badge": "node scripts/generate-react-doctor-badge.js",
     "coverage:full": "pnpm test:coverage && pnpm coverage:badge",
     "analyze": "ANALYZE=true pnpm build",
-    "scrape": "npm-run-all --sequential scrape:*",
+    "scrape": "npm-run-all --sequential scrape:* && biome format --write data --vcs-use-ignore-file=true --files-ignore-unknown=true",
     "scrape:pokedex": "jiti scripts/scrape-pokedex.ts && jiti scripts/fetch-pokemon-data.ts",
     "scrape:encounters": "jiti scripts/scrape-wild-encounters.ts",
     "validate:route-articles": "jiti scripts/validate-route-article-coverage.ts",
