@@ -13,7 +13,7 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { Box, Boxes, Skull, Users, X } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import {
   getLocationById,
   getLocationsSortedWithCustom,
@@ -24,14 +24,12 @@ import {
   useCustomLocations,
   useEncounters,
 } from "@/stores/playthroughs/hooks";
-import { playthroughActions } from "@/stores/playthroughs/index";
-import {
-  buildPokemonUidIndex,
-  findPokemonByUid,
-} from "@/utils/encounter-utils";
+import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 import { isPokemonDeceased, isPokemonStored } from "@/utils/pokemonPredicates";
 import { scrollToLocationById } from "@/utils/scrollToLocation";
 import TeamMemberPickerModal from "../team/TeamMemberPickerModal";
+import { getTeamSlots } from "../team/teamSlots";
+import { useTeamMemberPicker } from "../team/useTeamMemberPicker";
 import { GraveyardGridItem } from "./GraveyardGridItem";
 import PCEntryItem from "./PCEntryItem";
 import TeamEntryItem from "./TeamEntryItem";
@@ -55,9 +53,13 @@ export default function PokemonPCSheet({
   const encounters = useEncounters();
   const customLocations = useCustomLocations();
 
-  // State for team member picker modal
-  const [pickerModalOpen, setPickerModalOpen] = useState(false);
-  const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
+  const {
+    pickerModalOpen,
+    selectedPosition,
+    openPicker,
+    closePicker,
+    selectTeamMember,
+  } = useTeamMemberPicker();
 
   const mergedLocations = useMemo(
     () => getLocationsSortedWithCustom(customLocations),
@@ -88,97 +90,37 @@ export default function PokemonPCSheet({
         isFusion: boolean;
       },
     ) => {
-      setSelectedPosition(position);
-      setPickerModalOpen(true);
+      openPicker(position);
     },
-    [],
+    [openPicker],
   );
 
-  const handleClosePickerModal = useCallback(() => {
-    setPickerModalOpen(false);
-    setSelectedPosition(null);
-  }, []);
-
-  const handlePokemonSelect = useCallback(
-    async (
-      headPokemon: PokemonOptionType | null,
-      bodyPokemon: PokemonOptionType | null,
-    ) => {
-      if (selectedPosition === null) return;
-
-      // Create team member references
-      const headRef = headPokemon ? { uid: headPokemon.uid! } : null;
-      const bodyRef = bodyPokemon ? { uid: bodyPokemon.uid! } : null;
-
-      const success = await playthroughActions.updateTeamMember(
-        selectedPosition,
-        headRef,
-        bodyRef,
-      );
-
-      if (!success) {
-        console.error(
-          "Failed to update team member at position:",
-          selectedPosition,
-        );
-        return;
-      }
-
-      handleClosePickerModal();
-    },
-    [selectedPosition, handleClosePickerModal],
+  const team: Entry[] = useMemo(
+    () =>
+      activePlaythrough?.team
+        ? getTeamSlots(
+            activePlaythrough.team.members,
+            encounters,
+            pokemonByUid,
+          ).map(
+            ({
+              position,
+              locationName,
+              headPokemon,
+              bodyPokemon,
+              isFusion,
+            }) => ({
+              locationId: `team-slot-${position}`,
+              locationName,
+              head: headPokemon,
+              body: bodyPokemon,
+              position,
+              isFusion,
+            }),
+          )
+        : [],
+    [activePlaythrough?.team, encounters, pokemonByUid],
   );
-
-  const team: Entry[] = useMemo(() => {
-    if (!activePlaythrough?.team) return [];
-
-    return activePlaythrough.team.members.map((member, index) => {
-      if (!member) {
-        return {
-          locationId: `team-slot-${index}`,
-          locationName: `Team Slot ${index + 1}`,
-          head: null,
-          body: null,
-          position: index,
-        };
-      }
-
-      const headPokemon = member.headPokemonUid
-        ? findPokemonByUid(encounters, member.headPokemonUid, pokemonByUid)
-        : null;
-      const bodyPokemon = member.bodyPokemonUid
-        ? findPokemonByUid(encounters, member.bodyPokemonUid, pokemonByUid)
-        : null;
-
-      // A slot is empty only if both UIDs are empty strings
-      if (!member.headPokemonUid && !member.bodyPokemonUid) {
-        return {
-          locationId: `team-slot-${index}`,
-          locationName: `Team Slot ${index + 1}`,
-          head: null,
-          body: null,
-          position: index,
-        };
-      }
-
-      // Get location from the head Pokémon's original location, fallback to body if head doesn't exist
-      const location = getLocationById(
-        headPokemon?.originalLocation || bodyPokemon?.originalLocation || "",
-      );
-
-      // Determine fusion state: true if both Pokémon exist and can form a fusion
-      const isFusion = Boolean(headPokemon && bodyPokemon);
-
-      return {
-        locationId: `team-slot-${index}`,
-        locationName: location?.name || "Unknown Location",
-        head: headPokemon,
-        body: bodyPokemon,
-        position: index,
-        isFusion,
-      };
-    });
-  }, [activePlaythrough?.team, encounters, pokemonByUid]);
 
   const deceased: Entry[] = useMemo(() => {
     const entries: Entry[] = [];
@@ -381,7 +323,7 @@ export default function PokemonPCSheet({
 
               <TabPanels className="flex min-h-0 flex-1 flex-col">
                 <TabPanel className="flex min-h-0 flex-1">
-                  <ul
+                  <div
                     aria-label="Team members list"
                     className="w-full space-y-3 py-2 max-h-[calc(100dvh-6.5rem)] overflow-y-auto"
                   >
@@ -394,7 +336,7 @@ export default function PokemonPCSheet({
                         onTeamMemberClick={handleTeamMemberClick}
                       />
                     ))}
-                  </ul>
+                  </div>
                 </TabPanel>
                 <TabPanel className="flex min-h-0 flex-1">
                   {stored.length === 0 ? (
@@ -410,7 +352,7 @@ export default function PokemonPCSheet({
                       <p className="text-center">No Pokémon in your box.</p>
                     </div>
                   ) : (
-                    <ul
+                    <div
                       aria-label="Boxed Pokémon list"
                       className="grid content-start w-full grid-cols-1 gap-2 py-2 sm:grid-cols-2 h-[calc(100dvh-6.5rem)] overflow-y-auto"
                     >
@@ -426,7 +368,7 @@ export default function PokemonPCSheet({
                           onClose={handleClose}
                         />
                       ))}
-                    </ul>
+                    </div>
                   )}
                 </TabPanel>
                 <TabPanel className="flex min-h-0 flex-1">
@@ -482,8 +424,8 @@ export default function PokemonPCSheet({
       {/* Team Member Picker Modal */}
       <TeamMemberPickerModal
         isOpen={pickerModalOpen}
-        onClose={handleClosePickerModal}
-        onSelect={handlePokemonSelect}
+        onClose={closePicker}
+        onSelect={selectTeamMember}
         position={selectedPosition || 0}
         existingTeamMember={
           selectedPosition !== null

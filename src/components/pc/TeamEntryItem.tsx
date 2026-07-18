@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { Box, MousePointer, Palette, Plus, Skull } from "lucide-react";
+import { Box, Plus, Skull } from "lucide-react";
 import { useEffect, useRef } from "react";
 import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
@@ -16,8 +16,6 @@ import { TeamMemberContextMenu } from "@/components/PokemonSummaryCard/TeamMembe
 import { getNicknameText } from "@/components/PokemonSummaryCard/utils";
 import { TypePills } from "@/components/TypePills";
 import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
-import { useSpriteCredits } from "@/hooks/useSprite";
-import { getSpriteId } from "@/lib/sprites";
 import { getLocationById } from "@/loaders/locations";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import {
@@ -25,9 +23,9 @@ import {
   useEncounters,
 } from "@/stores/playthroughs/hooks";
 import { playthroughActions } from "@/stores/playthroughs/index";
-import { formatArtistCredits } from "@/utils/formatCredits";
 import { canFuse, isPokemonActive } from "@/utils/pokemonPredicates";
-import { scrollToLocationById } from "@/utils/scrollToLocation";
+import { TeamMemberTooltipContent } from "../team/TeamMemberTooltipContent";
+import { scrollToPokemonEntry } from "./entryInteraction";
 import type { PCEntry } from "./types";
 
 interface TeamEntryItemProps {
@@ -44,86 +42,6 @@ interface TeamEntryItemProps {
       isFusion: boolean;
     },
   ) => void;
-}
-
-// Component to create tooltip content for team members
-function TeamMemberTooltipContent({
-  headPokemon,
-  bodyPokemon,
-  isFusion,
-}: {
-  headPokemon: PokemonOptionType | null;
-  bodyPokemon: PokemonOptionType | null;
-  isFusion: boolean;
-}) {
-  const { primary, secondary } = useFusionTypesFromPokemon(
-    headPokemon,
-    bodyPokemon,
-    isFusion,
-  );
-
-  // Get sprite credits
-  const tooltipSpriteId = getSpriteId(headPokemon?.id, bodyPokemon?.id);
-  const { data: tooltipCredits } = useSpriteCredits(
-    headPokemon?.id,
-    bodyPokemon?.id,
-    true,
-  );
-
-  const credit =
-    tooltipSpriteId == null
-      ? undefined
-      : (() => {
-          const credits = tooltipCredits?.[tooltipSpriteId];
-          return credits && Object.keys(credits).length > 0
-            ? formatArtistCredits(credits)
-            : undefined;
-        })();
-
-  return (
-    <div className="min-w-44 max-w-[22rem]">
-      <div className="flex py-0.5">
-        <TypePills primary={primary} secondary={secondary} />
-      </div>
-      {credit && (
-        <>
-          <div className="my-2 flex">
-            <div
-              className="inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400"
-              role="tooltip"
-            >
-              <Palette className="h-3 w-3" aria-hidden="true" />
-              <span className="opacity-80">by</span>
-              <span className="truncate max-w-[14rem]" title={credit}>
-                {credit}
-              </span>
-            </div>
-          </div>
-          <div className="w-full h-px bg-gray-200 dark:bg-gray-700 my-1" />
-        </>
-      )}
-      <div className="flex items-center text-xs gap-2">
-        <div className="flex items-center gap-1">
-          <div className="flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200">
-            <MousePointer className="h-3 w-3" aria-hidden="true" />
-            <span className="font-medium text-xs">L</span>
-          </div>
-          <span className="text-gray-600 dark:text-gray-300 text-xs">
-            Change
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200">
-            <MousePointer className="h-3 w-3" aria-hidden="true" />
-            <span className="font-medium text-xs">R</span>
-          </div>
-          <span className="text-gray-600 dark:text-gray-300 text-xs">
-            Options
-          </span>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export default function TeamEntryItem({
@@ -205,23 +123,13 @@ export default function TeamEntryItem({
       return;
     }
 
-    // For encounter data, scroll to location
-    const highlightUids: string[] = [];
-    if (entry.head?.uid) highlightUids.push(entry.head.uid);
-    if (entry.body?.uid) highlightUids.push(entry.body.uid);
-
-    scrollToLocationById(entry.locationId, {
-      behavior: "smooth",
-      highlightUids,
-      durationMs: 1200,
-    });
-
+    scrollToPokemonEntry(entry.locationId, entry.head, entry.body);
     onClose?.();
   };
 
   // Create the main content that will be wrapped by context menus
   const mainContent = (
-    <li
+    <div
       key={entry.locationId}
       className={clsx(
         "group/pc-entry relative cursor-pointer rounded-lg transition-all duration-200",
@@ -247,6 +155,8 @@ export default function TeamEntryItem({
           handleClick();
         }
       }}
+      role="button"
+      tabIndex={0}
       aria-label={
         isTeamData && entry.position !== undefined
           ? `Team slot ${entry.position + 1}`
@@ -436,7 +346,7 @@ export default function TeamEntryItem({
           </CursorTooltip>
         </div>
       )}
-    </li>
+    </div>
   );
 
   // Only wrap filled team slots with context menu

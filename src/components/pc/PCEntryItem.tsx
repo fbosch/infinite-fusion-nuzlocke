@@ -12,7 +12,7 @@ import {
   isPokemonDeceased,
   isPokemonStored,
 } from "@/utils/pokemonPredicates";
-import { scrollToLocationById } from "@/utils/scrollToLocation";
+import { scrollToPokemonEntry } from "./entryInteraction";
 import type { PCEntry } from "./types";
 
 interface PCEntryItemProps {
@@ -57,16 +57,7 @@ export default function PCEntryItem(props: PCEntryItemProps) {
   );
 
   const handleClick = () => {
-    const highlightUids: string[] = [];
-    if (entry.head?.uid) highlightUids.push(entry.head.uid);
-    if (entry.body?.uid) highlightUids.push(entry.body.uid);
-
-    scrollToLocationById(entry.locationId, {
-      behavior: "smooth",
-      highlightUids,
-      durationMs: 1200,
-    });
-
+    scrollToPokemonEntry(entry.locationId, entry.head, entry.body);
     onClose?.();
   };
 
@@ -80,7 +71,7 @@ export default function PCEntryItem(props: PCEntryItemProps) {
       }}
       shouldLoad={true}
     >
-      <li
+      <div
         key={entry.locationId}
         className={clsx(
           "group/pc-entry h-fit relative cursor-pointer rounded-lg border border-gray-200 bg-white transition-all duration-200 hover:ring-1 dark:border-gray-700 dark:bg-gray-800",
@@ -94,6 +85,8 @@ export default function PCEntryItem(props: PCEntryItemProps) {
             handleClick();
           }
         }}
+        role="button"
+        tabIndex={0}
         aria-label={`Scroll to ${idToName.get(entry.locationId) || "location"} in table`}
       >
         {fusionTypes.primary && (
@@ -135,7 +128,7 @@ export default function PCEntryItem(props: PCEntryItemProps) {
             </div>
           </div>
         </div>
-      </li>
+      </div>
     </PokemonContextMenu>
   );
 }

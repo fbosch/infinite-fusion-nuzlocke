@@ -128,6 +128,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
                 headPokemon={encounterData.head}
                 bodyPokemon={encounterData.body}
                 isFusion={encounterData.isFusion}
+                locationId={locationId}
                 shouldLoad={shouldLoad}
               />
             </td>

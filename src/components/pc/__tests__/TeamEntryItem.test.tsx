@@ -251,6 +251,36 @@ describe("TeamEntryItem", () => {
     });
   });
 
+  it("opens an empty team slot with the Space key", () => {
+    const onTeamMemberClick = vi.fn();
+    const emptyTeamEntry: PCEntry = {
+      locationId: "team-slot-1",
+      locationName: "Team Slot",
+      position: 1,
+      isFusion: false,
+      head: null,
+      body: null,
+    };
+
+    render(
+      <TeamEntryItem
+        entry={emptyTeamEntry}
+        idToName={idToName}
+        onTeamMemberClick={onTeamMemberClick}
+      />,
+    );
+
+    fireEvent.keyDown(screen.getByLabelText("Team slot 2"), { key: " " });
+
+    expect(onTeamMemberClick).toHaveBeenCalledWith(1, {
+      position: 1,
+      isEmpty: true,
+      headPokemon: null,
+      bodyPokemon: null,
+      isFusion: false,
+    });
+  });
+
   it("moves team member to box from action button", async () => {
     render(<TeamEntryItem entry={filledTeamEntry} idToName={idToName} />);
 
