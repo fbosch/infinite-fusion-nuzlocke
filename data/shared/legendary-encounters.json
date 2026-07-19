@@ -44,6 +44,14 @@
     "encounters": [342]
   },
   {
+    "routeName": "Submerged Temple",
+    "encounters": [346, 447, 448, 449]
+  },
+  {
+    "routeName": "All 3 Eggs",
+    "encounters": [343, 344, 345]
+  },
+  {
     "routeName": "Newmoon Island",
     "encounters": [347, 468]
   },

@@ -1807,7 +1807,8 @@
         {
           "id": 186,
           "name": "politoed",
-          "trigger": "trade"
+          "trigger": "trade",
+          "condition": "Holding kings-rock"
         }
       ],
       "evolves_from": {
@@ -2352,7 +2353,8 @@
         {
           "id": 199,
           "name": "slowking",
-          "trigger": "trade"
+          "trigger": "trade",
+          "condition": "Holding kings-rock"
         }
       ]
     }
@@ -2825,7 +2827,8 @@
         {
           "id": 208,
           "name": "steelix",
-          "trigger": "trade"
+          "trigger": "trade",
+          "condition": "Holding metal-coat"
         }
       ]
     }
@@ -3287,7 +3290,8 @@
         {
           "id": 464,
           "name": "rhyperior",
-          "trigger": "trade"
+          "trigger": "trade",
+          "condition": "Holding protector"
         }
       ],
       "evolves_from": {
@@ -3426,7 +3430,8 @@
         {
           "id": 230,
           "name": "kingdra",
-          "trigger": "trade"
+          "trigger": "trade",
+          "condition": "Holding dragon-scale"
         }
       ],
       "evolves_from": {
@@ -3604,7 +3609,8 @@
         {
           "id": 212,
           "name": "scizor",
-          "trigger": "trade"
+          "trigger": "trade",
+          "condition": "Holding metal-coat"
         },
         {
           "id": 900,
@@ -3665,7 +3671,8 @@
         {
           "id": 466,
           "name": "electivire",
-          "trigger": "trade"
+          "trigger": "trade",
+          "condition": "Holding electirizer"
         }
       ],
       "evolves_from": {
@@ -3696,7 +3703,8 @@
         {
           "id": 467,
           "name": "magmortar",
-          "trigger": "trade"
+          "trigger": "trade",
+          "condition": "Holding magmarizer"
         }
       ],
       "evolves_from": {
@@ -4015,7 +4023,8 @@
         {
           "id": 233,
           "name": "porygon2",
-          "trigger": "trade"
+          "trigger": "trade",
+          "condition": "Holding up-grade"
         }
       ]
     }
@@ -6004,7 +6013,7 @@
           "id": 472,
           "name": "gliscor",
           "trigger": "level-up",
-          "condition": "Time: night"
+          "condition": "Holding razor-fang"
         }
       ]
     }
@@ -6222,13 +6231,13 @@
           "id": 461,
           "name": "weavile",
           "trigger": "level-up",
-          "condition": "Time: night"
+          "condition": "Holding razor-claw"
         },
         {
           "id": 903,
           "name": "sneasler",
           "trigger": "level-up",
-          "condition": "Time: day"
+          "condition": "Holding razor-claw"
         }
       ]
     }
@@ -6739,7 +6748,8 @@
         {
           "id": 474,
           "name": "porygon-z",
-          "trigger": "trade"
+          "trigger": "trade",
+          "condition": "Holding dubious-disc"
         }
       ],
       "evolves_from": {
@@ -6992,7 +7002,7 @@
         "id": 113,
         "name": "chansey",
         "trigger": "level-up",
-        "condition": "Time: day"
+        "condition": "Holding oval-stone"
       }
     }
   },
@@ -7444,7 +7454,7 @@
           "id": 113,
           "name": "chansey",
           "trigger": "level-up",
-          "condition": "Time: day"
+          "condition": "Holding oval-stone"
         }
       ]
     }
@@ -7887,7 +7897,8 @@
       "evolves_from": {
         "id": 233,
         "name": "porygon2",
-        "trigger": "trade"
+        "trigger": "trade",
+        "condition": "Holding up-grade"
       }
     }
   },
@@ -8969,7 +8980,8 @@
         {
           "id": 477,
           "name": "dusknoir",
-          "trigger": "trade"
+          "trigger": "trade",
+          "condition": "Holding reaper-cloth"
         }
       ],
       "evolves_from": {
@@ -14003,7 +14015,8 @@
         {
           "id": 685,
           "name": "slurpuff",
-          "trigger": "trade"
+          "trigger": "trade",
+          "condition": "Holding whipped-dream"
         }
       ]
     }
@@ -15941,12 +15954,14 @@
         {
           "id": 367,
           "name": "huntail",
-          "trigger": "trade"
+          "trigger": "trade",
+          "condition": "Holding deep-sea-tooth"
         },
         {
           "id": 368,
           "name": "gorebyss",
-          "trigger": "trade"
+          "trigger": "trade",
+          "condition": "Holding deep-sea-scale"
         }
       ]
     }
