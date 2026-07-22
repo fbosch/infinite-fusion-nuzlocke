@@ -74,7 +74,7 @@ describe("GitHubEngagementCta", () => {
     expect(issueLink.getAttribute("data-show-count")).toBe("true");
   });
 
-  it("emits one impression when half of the CTA becomes visible", () => {
+  it("emits one impression per route when half of the CTA becomes visible", () => {
     const { rerender } = render(<GitHubEngagementCta route="locations" />);
 
     expect(analyticsMock.trackEvent).not.toHaveBeenCalled();
@@ -86,7 +86,7 @@ describe("GitHubEngagementCta", () => {
     expect(analyticsMock.trackEvent).toHaveBeenCalledWith(
       ANALYTICS_EVENTS.githubCtaViewed,
       {
-        source_surface: "above_location_table",
+        source_surface: "fixed_top_bar",
         route: "locations",
       },
     );
@@ -94,5 +94,32 @@ describe("GitHubEngagementCta", () => {
     rerender(<GitHubEngagementCta route="locations" />);
 
     expect(analyticsMock.trackEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it("emits an impression after the CTA remounts for a new route", () => {
+    const { rerender } = render(
+      <GitHubEngagementCta key="home" route="home" />,
+    );
+
+    inViewState.inView = true;
+    rerender(<GitHubEngagementCta key="home" route="home" />);
+    rerender(<GitHubEngagementCta key="locations" route="locations" />);
+
+    expect(analyticsMock.trackEvent).toHaveBeenNthCalledWith(
+      1,
+      ANALYTICS_EVENTS.githubCtaViewed,
+      {
+        source_surface: "fixed_top_bar",
+        route: "home",
+      },
+    );
+    expect(analyticsMock.trackEvent).toHaveBeenNthCalledWith(
+      2,
+      ANALYTICS_EVENTS.githubCtaViewed,
+      {
+        source_surface: "fixed_top_bar",
+        route: "locations",
+      },
+    );
   });
 });

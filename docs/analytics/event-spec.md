@@ -31,7 +31,7 @@ This document is the source of truth for analytics taxonomy, trigger points, pay
 | `fusion_flipped` | `flipEncounterFusion` in `src/stores/playthroughs/encounters/fusion.ts` | A flip operation succeeds on an existing fusion encounter | Encounter is missing, not fusion, or mutation does not run |
 | `encounter_marked_deceased` | `markEncounterAsDeceased` in `src/stores/playthroughs/encounters/status.ts` | Encounter transitions into deceased state for this location | Operation is a no-op or status was already deceased for the encounter |
 | `playthrough_exported` | Export success path in `src/hooks/usePlaythroughImportExport.ts` | Export payload serialization and download setup succeed | Export flow throws before blob URL + download setup completes |
-| `github_cta_viewed` | `GitHubEngagementCta` above the location table | At least 50% of the CTA is visible | CTA is below the visibility threshold or the component already emitted for its mount |
+| `github_cta_viewed` | `GitHubEngagementCta` in the fixed top bar | At least 50% of the CTA is visible | CTA is below the visibility threshold or the component already emitted for its mount |
 
 ## Shared property schema
 
@@ -79,8 +79,8 @@ This event does not include the shared playthrough properties.
 
 | Property | Type | Notes |
 | --- | --- | --- |
-| `source_surface` | `"above_location_table"` | The compact CTA immediately before the table scroll region |
-| `route` | `"home" \| "locations"` | Table route displaying the CTA |
+| `source_surface` | `"fixed_top_bar"` | The compact CTA in the fixed top bar |
+| `route` | `"home" \| "locations"` | Route displaying the CTA |
 
 ### `playthrough_created`
 

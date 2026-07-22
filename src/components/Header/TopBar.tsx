@@ -15,7 +15,9 @@ export default function TopBar({ githubCtaRoute, onOpenModal }: TopBarProps) {
       <div className="mx-auto flex h-10 items-center gap-3 px-2 sm:px-3 md:px-4 2xl:px-0">
         <MenuItems onOpenModal={onOpenModal} />
         <div className="ml-auto flex items-center gap-3">
-          {githubCtaRoute && <GitHubEngagementCta route={githubCtaRoute} />}
+          {githubCtaRoute && (
+            <GitHubEngagementCta key={githubCtaRoute} route={githubCtaRoute} />
+          )}
           <ThemeToggle />
         </div>
       </div>

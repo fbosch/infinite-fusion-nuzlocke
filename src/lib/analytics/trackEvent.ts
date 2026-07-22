@@ -164,7 +164,7 @@ export type AnalyticsEventMap = {
   };
   playthrough_exported: SharedEventProperties;
   github_cta_viewed: {
-    source_surface: "above_location_table";
+    source_surface: "fixed_top_bar";
     route: "home" | "locations";
   };
 };
@@ -391,7 +391,7 @@ const analyticsEventSchemaMap = {
   playthrough_exported: sharedEventPropertiesSchema,
   github_cta_viewed: z
     .object({
-      source_surface: z.literal("above_location_table"),
+      source_surface: z.literal("fixed_top_bar"),
       route: z.enum(["home", "locations"]),
     })
     .strict(),

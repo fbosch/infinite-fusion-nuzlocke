@@ -1,5 +1,5 @@
 import { flexRender, type Row } from "@tanstack/react-table";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import { match } from "ts-pattern";
 import { addEvolutionListener } from "@/lib/events";
@@ -49,10 +49,9 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
   const previousFusionId = useRef<string | null>(null);
   const hasInitializedFusionId = useRef(false);
   const activePlaythroughId = useActivePlaythroughId();
-  const [isLoadRequested, setIsLoadRequested] = useState(false);
 
   const aboveTheFold = row.index < 8;
-  const shouldLoad = inView || aboveTheFold || isLoadRequested;
+  const shouldLoad = inView || aboveTheFold;
   const visibleCells = row.getVisibleCells();
 
   // Get encounter data directly - only this row will rerender when this encounter changes
@@ -117,79 +116,63 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
       ref={ref}
       data-location-id={locationId}
     >
-      {shouldLoad ? (
-        visibleCells.map((cell) =>
-          match(cell.column.id)
-            .with("sprite", () => (
-              <td
-                key={cell.id}
-                className="p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group"
-              >
-                <PokemonSummaryCard
-                  ref={spriteRef}
-                  headPokemon={encounterData.head}
-                  bodyPokemon={encounterData.body}
-                  isFusion={encounterData.isFusion}
-                  locationId={locationId}
-                  shouldLoad={shouldLoad}
-                />
-              </td>
-            ))
-            .with("encounter", () => (
-              <EncounterCell
-                key={cell.id}
+      {visibleCells.map((cell) =>
+        match(cell.column.id)
+          .with("sprite", () => (
+            <td
+              key={cell.id}
+              className="p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group"
+            >
+              <PokemonSummaryCard
+                ref={spriteRef}
+                headPokemon={encounterData.head}
+                bodyPokemon={encounterData.body}
+                isFusion={encounterData.isFusion}
                 locationId={locationId}
                 shouldLoad={shouldLoad}
               />
-            ))
-            .with("actions", () => {
-              const hasEncounter = !!(encounterData.head || encounterData.body);
-              return (
-                <td
-                  key={cell.id}
-                  className="p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top"
-                >
-                  <div className="flex flex-col items-center justify-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 group-focus-within/row:opacity-100">
-                    {hasEncounter && (
-                      <ResetEncounterButton
-                        locationId={locationId}
-                        locationName={row.original.name}
-                        hasEncounter={hasEncounter}
-                      />
-                    )}
-                    {isCustomLocation(row.original) && (
-                      <RemoveLocationButton
-                        locationId={locationId}
-                        locationName={row.original.name}
-                      />
-                    )}
-                  </div>
-                </td>
-              );
-            })
-            .otherwise(() => (
+            </td>
+          ))
+          .with("encounter", () => (
+            <EncounterCell
+              key={cell.id}
+              locationId={locationId}
+              shouldLoad={shouldLoad}
+            />
+          ))
+          .with("actions", () => {
+            const hasEncounter = !!(encounterData.head || encounterData.body);
+            return (
               <td
                 key={cell.id}
-                className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
+                className="p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top"
               >
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                <div className="flex flex-col items-center justify-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 group-focus-within/row:opacity-100">
+                  {hasEncounter && (
+                    <ResetEncounterButton
+                      locationId={locationId}
+                      locationName={row.original.name}
+                      hasEncounter={hasEncounter}
+                    />
+                  )}
+                  {isCustomLocation(row.original) && (
+                    <RemoveLocationButton
+                      locationId={locationId}
+                      locationName={row.original.name}
+                    />
+                  )}
+                </div>
               </td>
-            )),
-        )
-      ) : (
-        <td
-          className="h-[150px]"
-          colSpan={visibleCells.length}
-          data-location-row-placeholder
-        >
-          <button
-            type="button"
-            className="w-full h-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-            onClick={() => setIsLoadRequested(true)}
-          >
-            Load encounters for {row.original.name}
-          </button>
-        </td>
+            );
+          })
+          .otherwise(() => (
+            <td
+              key={cell.id}
+              className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
+            >
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </td>
+          )),
       )}
     </tr>
   );

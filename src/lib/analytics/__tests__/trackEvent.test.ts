@@ -103,7 +103,7 @@ const VALID_EVENT_PAYLOADS: Record<
     ...BASE_SHARED_PROPERTIES,
   },
   github_cta_viewed: {
-    source_surface: "above_location_table",
+    source_surface: "fixed_top_bar",
     route: "home",
   },
 };
@@ -449,7 +449,7 @@ describe("analytics transport wrapper", () => {
     setEnvironment("production", "production");
 
     trackEvent(ANALYTICS_EVENTS.githubCtaViewed, {
-      source_surface: "above_location_table",
+      source_surface: "fixed_top_bar",
       route: "licenses",
     } as never);
 

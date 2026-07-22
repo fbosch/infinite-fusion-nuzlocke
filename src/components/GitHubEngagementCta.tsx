@@ -24,7 +24,7 @@ export function GitHubEngagementCta({ route }: GitHubEngagementCtaProps) {
 
     hasTrackedView.current = true;
     trackEvent(ANALYTICS_EVENTS.githubCtaViewed, {
-      source_surface: "above_location_table",
+      source_surface: "fixed_top_bar",
       route,
     });
   }, [inView, route]);
