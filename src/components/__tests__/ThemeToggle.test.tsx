@@ -43,4 +43,21 @@ describe("ThemeToggle", () => {
 
     expect(themeMock.setTheme).toHaveBeenCalledWith("dark");
   });
+
+  it("uses roving tabindex and wraps arrow-key selection", () => {
+    render(<ThemeToggle />);
+
+    const systemTheme = screen.getByRole("radio", { name: "System theme" });
+    const lightTheme = screen.getByRole("radio", { name: "Light theme" });
+    const darkTheme = screen.getByRole("radio", { name: "Dark theme" });
+
+    expect(systemTheme.getAttribute("tabindex")).toBe("0");
+    expect(lightTheme.getAttribute("tabindex")).toBe("-1");
+    expect(darkTheme.getAttribute("tabindex")).toBe("-1");
+
+    fireEvent.keyDown(systemTheme, { key: "ArrowLeft" });
+
+    expect(themeMock.setTheme).toHaveBeenCalledWith("dark");
+    expect(document.activeElement).toBe(darkTheme);
+  });
 });
