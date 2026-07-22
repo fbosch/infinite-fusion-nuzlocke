@@ -470,6 +470,7 @@ export const PokemonCombobox = ({
         immediate
         onClose={() => setQuery("")}
       >
+        {/* fallow-ignore-next-line complexity -- Headless UI render prop keeps combobox state colocated with its input and options. */}
         {({ open }) => (
           <div key={comboboxId}>
             <div className="relative">
@@ -552,7 +553,7 @@ export const PokemonCombobox = ({
                       : "auto",
                   }}
                   className={clsx(
-                    "max-h-[500px] h-full overflow-y-auto z-40 relative",
+                    "max-h-125 h-full overflow-y-auto z-40 relative",
                     "px-1 text-base shadow-lg focus:outline-none sm:text-sm",
                     "bg-white dark:bg-gray-800 gap-x-2",
                     "border border-gray-300 dark:border-gray-600 scrollbar-thin",
