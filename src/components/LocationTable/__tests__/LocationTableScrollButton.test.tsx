@@ -13,11 +13,13 @@ import { scrollToLocationById } from "@/utils/scrollToLocation";
 
 const {
   locationRowProps,
+  mountedMock,
   scrollToIndexMock,
   scrollToMostRecentLocationMock,
   useVirtualizerMock,
 } = vi.hoisted(() => ({
   locationRowProps: vi.fn(),
+  mountedMock: vi.fn(),
   scrollToMostRecentLocationMock: vi.fn(),
   scrollToIndexMock: vi.fn(),
   useVirtualizerMock: vi.fn(),
@@ -57,7 +59,7 @@ vi.mock("@/loaders/locations", () => ({
 }));
 
 vi.mock("@/hooks/useMounted", () => ({
-  useMounted: vi.fn(() => true),
+  useMounted: mountedMock,
 }));
 
 vi.mock("@/hooks/useBreakpoint", () => ({
@@ -65,9 +67,15 @@ vi.mock("@/hooks/useBreakpoint", () => ({
 }));
 
 vi.mock("../LocationTableRow", () => ({
-  default: ({ row }: { row: { original: { id: string } } }) => {
+  default: ({
+    row,
+    rowIndex,
+  }: {
+    row: { original: { id: string } };
+    rowIndex: number;
+  }) => {
     locationRowProps(row.original.id);
-    return <tr data-testid="location-row" />;
+    return <tr data-testid="location-row" aria-rowindex={rowIndex + 2} />;
   },
 }));
 
@@ -101,6 +109,8 @@ describe("LocationTable scroll-to-recent button", () => {
 
   beforeEach(() => {
     locationRowProps.mockReset();
+    mountedMock.mockReset();
+    mountedMock.mockReturnValue(true);
     scrollToIndexMock.mockReset();
     scrollToMostRecentLocationMock.mockReset();
     useVirtualizerMock.mockReset();
@@ -126,7 +136,7 @@ describe("LocationTable scroll-to-recent button", () => {
     expect(options.estimateSize()).toBe(150);
     expect(options.getScrollElement()).toBeInstanceOf(HTMLDivElement);
     expect(options.overscan).toBe(4);
-    expect(locationRowProps).toHaveBeenCalledExactlyOnceWith("route-2");
+    expect(locationRowProps).toHaveBeenLastCalledWith("route-2");
   });
 
   it("observes the scroll container for layout changes", async () => {
@@ -150,6 +160,52 @@ describe("LocationTable scroll-to-recent button", () => {
     );
 
     vi.unstubAllGlobals();
+  });
+
+  it("starts observing after the table replaces its mounting skeleton", async () => {
+    const observe = vi.fn();
+    class ResizeObserverMock {
+      constructor(_callback: ResizeObserverCallback) {}
+
+      disconnect = vi.fn();
+      observe = observe;
+      unobserve = vi.fn();
+    }
+    vi.stubGlobal("ResizeObserver", ResizeObserverMock);
+    mountedMock.mockReturnValue(false);
+
+    const view = render(<LocationTable />);
+    expect(observe).not.toHaveBeenCalled();
+
+    mountedMock.mockReturnValue(true);
+    await act(async () => {
+      view.rerender(<LocationTable />);
+    });
+
+    expect(observe).toHaveBeenCalledWith(
+      screen.getByRole("table").parentElement,
+    );
+    vi.unstubAllGlobals();
+  });
+
+  it("hides spacers and exposes logical virtual row positions", async () => {
+    useVirtualizerMock.mockReturnValue({
+      getTotalSize: () => 450,
+      getVirtualItems: () => [{ end: 300, index: 1, start: 150 }],
+      scrollToIndex: scrollToIndexMock,
+    });
+
+    await act(async () => {
+      render(<LocationTable />);
+    });
+
+    expect(screen.getByRole("table").getAttribute("aria-rowcount")).toBe("4");
+    expect(
+      screen.getByTestId("location-row").getAttribute("aria-rowindex"),
+    ).toBe("3");
+    expect(
+      document.querySelectorAll('tbody tr[aria-hidden="true"]'),
+    ).toHaveLength(2);
   });
 
   it("scrolls an unmounted location through the virtualizer", async () => {

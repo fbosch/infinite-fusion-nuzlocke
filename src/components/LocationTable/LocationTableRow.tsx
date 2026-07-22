@@ -17,6 +17,7 @@ import ResetEncounterButton from "./ResetEncounterButton";
 
 interface LocationTableRowProps {
   row: Row<CombinedLocation>;
+  rowIndex?: number;
 }
 
 const EMPTY_ENCOUNTER = {
@@ -41,7 +42,10 @@ const getEffectiveFusionId = ({
   return `${head.id}.${body.id}`;
 };
 
-export default function LocationTableRow({ row }: LocationTableRowProps) {
+export default function LocationTableRow({
+  row,
+  rowIndex = row.index,
+}: LocationTableRowProps) {
   const locationId = row.original.id;
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
   const previousFusionId = useRef<string | null>(null);
@@ -110,6 +114,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
       key={row.id}
       className="h-location-row hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors group/row"
       data-location-id={locationId}
+      aria-rowindex={rowIndex + 2}
     >
       {visibleCells.map((cell) =>
         match(cell.column.id)

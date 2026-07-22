@@ -187,7 +187,7 @@ describe("LocationTableRow", () => {
   });
 
   it("renders full cell content for a mounted virtual row", () => {
-    render(
+    const view = render(
       <table>
         <tbody>
           <LocationTableRow row={createRow(8, true)} />
@@ -201,5 +201,8 @@ describe("LocationTableRow", () => {
     expect(encounterCellProps).toHaveBeenCalledWith(
       expect.objectContaining({ locationId: "route-1" }),
     );
+    expect(
+      view.container.querySelector("tr")?.getAttribute("aria-rowindex"),
+    ).toBe("10");
   });
 });

@@ -16,7 +16,7 @@ describe("scrollToLocationById", () => {
     container.appendChild(table);
     document.body.appendChild(container);
 
-    const handler = vi.fn();
+    const handler = vi.fn(() => true);
     const unsubscribe = onScrollToLocation(handler);
 
     expect(
@@ -32,6 +32,14 @@ describe("scrollToLocationById", () => {
       highlightUids: ["pokemon-1"],
       locationId: "route-9",
     });
+
+    unsubscribe();
+  });
+
+  it("returns false when no listener handles the location", () => {
+    const unsubscribe = onScrollToLocation(() => false);
+
+    expect(scrollToLocationById("route-9")).toBe(false);
 
     unsubscribe();
   });

@@ -19,18 +19,17 @@ const LOCATION_ROW_HEIGHT_PX = 150;
 const LOCATION_ROW_OVERSCAN_COUNT = 4;
 
 function useContainerLayoutSnapshot(
-  tableContainerRef: RefObject<HTMLDivElement | null>,
+  tableContainerElement: HTMLDivElement | null,
 ) {
   const subscribe = useCallback(
     (notify: () => void) => {
-      const container = tableContainerRef.current;
-      if (!container) return () => {};
+      if (!tableContainerElement) return () => {};
 
       const resizeObserver =
         typeof ResizeObserver === "undefined"
           ? null
           : new ResizeObserver(notify);
-      resizeObserver?.observe(container);
+      resizeObserver?.observe(tableContainerElement);
       document.fonts?.addEventListener("loadingdone", notify);
 
       return () => {
@@ -38,22 +37,24 @@ function useContainerLayoutSnapshot(
         document.fonts?.removeEventListener("loadingdone", notify);
       };
     },
-    [tableContainerRef],
+    [tableContainerElement],
   );
   const getSnapshot = useCallback(() => {
-    const width = tableContainerRef.current?.clientWidth ?? 0;
+    const width = tableContainerElement?.clientWidth ?? 0;
     return `${width}:${document.fonts?.status ?? "unavailable"}`;
-  }, [tableContainerRef]);
+  }, [tableContainerElement]);
 
   return useSyncExternalStore(subscribe, getSnapshot, () => "0:unavailable");
 }
 
 export function useLocationTableVirtualization({
   table,
+  tableContainerElement,
   tableContainerRef,
   tableRef,
 }: {
   table: Table<CombinedLocation>;
+  tableContainerElement: HTMLDivElement | null;
   tableContainerRef: RefObject<HTMLDivElement | null>;
   tableRef: RefObject<HTMLTableElement | null>;
 }) {
@@ -62,7 +63,7 @@ export function useLocationTableVirtualization({
     snapshot: string;
     width: number;
   } | null>(null);
-  const layoutSnapshot = useContainerLayoutSnapshot(tableContainerRef);
+  const layoutSnapshot = useContainerLayoutSnapshot(tableContainerElement);
   const tableRows = table.getRowModel().rows;
   const visibleColumns = table.getVisibleLeafColumns();
   const rowVirtualizer = useVirtualizer({
@@ -124,19 +125,20 @@ export function useLocationTableVirtualization({
         const index = tableRows.findIndex(
           (row) => row.original.id === locationId,
         );
-        if (index < 0) return;
+        if (index < 0) return false;
 
         rowVirtualizer.scrollToIndex(index, { align: "center", behavior });
-        if (!highlightUids?.length) return;
+        if (!highlightUids?.length) return true;
 
         const flash = () =>
           flashPokemonOverlaysByUids(highlightUids, durationMs);
         const scrollElement = tableContainerRef.current;
         if (behavior === "smooth" && scrollElement) {
           runAfterScrollSettles(scrollElement, flash);
-          return;
+          return true;
         }
         window.requestAnimationFrame(flash);
+        return true;
       },
     );
     const offFlash = onFlashUids(({ uids, durationMs }) => {

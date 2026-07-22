@@ -56,6 +56,12 @@ export default function LocationTable() {
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
+  const [tableContainerElement, setTableContainerElement] =
+    useState<HTMLDivElement | null>(null);
+  const setTableContainerRef = useCallback((element: HTMLDivElement | null) => {
+    tableContainerRef.current = element;
+    setTableContainerElement(element);
+  }, []);
 
   const data = useMemo(() => {
     try {
@@ -222,7 +228,12 @@ export default function LocationTable() {
     virtualPaddingTop,
     virtualRows,
     visibleColumns,
-  } = useLocationTableVirtualization({ table, tableContainerRef, tableRef });
+  } = useLocationTableVirtualization({
+    table,
+    tableContainerElement,
+    tableContainerRef,
+    tableRef,
+  });
 
   // Show skeleton loading state while component is mounting or store is initializing from IndexedDB
   if (mounted === false || isLoading) {
@@ -247,7 +258,7 @@ export default function LocationTable() {
   return (
     <div className="overflow-hidden 2xl:rounded-lg border-y md:border border-gray-200 dark:border-gray-700 xl:shadow-sm">
       <div
-        ref={tableContainerRef}
+        ref={setTableContainerRef}
         className="max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative"
       >
         <table
@@ -255,6 +266,7 @@ export default function LocationTable() {
           className="w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700 overscroll-x-contain overscroll-y-auto"
           data-scroll-container
           aria-label="Locations table"
+          aria-rowcount={tableRows.length + 1}
           style={
             measuredTableLayout
               ? {
@@ -278,7 +290,8 @@ export default function LocationTable() {
             id="location-table"
           >
             {virtualPaddingTop > 0 && (
-              <tr className="border-0">
+              // biome-ignore lint/a11y/noAriaHiddenOnFocusable: virtual spacer rows never receive focus.
+              <tr className="border-0" aria-hidden="true">
                 <td
                   colSpan={visibleColumns.length}
                   style={{ height: virtualPaddingTop }}
@@ -287,10 +300,17 @@ export default function LocationTable() {
             )}
             {virtualRows.map((virtualRow) => {
               const row = tableRows[virtualRow.index];
-              return <LocationTableRow key={row.id} row={row} />;
+              return (
+                <LocationTableRow
+                  key={row.id}
+                  row={row}
+                  rowIndex={virtualRow.index}
+                />
+              );
             })}
             {virtualPaddingBottom > 0 && (
-              <tr className="border-0">
+              // biome-ignore lint/a11y/noAriaHiddenOnFocusable: virtual spacer rows never receive focus.
+              <tr className="border-0" aria-hidden="true">
                 <td
                   colSpan={visibleColumns.length}
                   style={{ height: virtualPaddingBottom }}
