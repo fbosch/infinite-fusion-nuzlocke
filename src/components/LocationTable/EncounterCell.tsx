@@ -52,6 +52,24 @@ type PendingOverwrite =
       body: PokemonOptionType;
     };
 
+const getPokemonDataText = (pokemon: PokemonOptionType): string => {
+  const dataItems: string[] = [];
+  if (pokemon.status) {
+    dataItems.push(
+      `with the status "${pokemon.status.charAt(0).toUpperCase() + pokemon.status.slice(1)}"`,
+    );
+  }
+  if (pokemon.originalLocation) {
+    dataItems.push(
+      `which was encountered at the location: "${getLocationById(pokemon.originalLocation)?.name}"`,
+    );
+  }
+
+  return dataItems.length > 1
+    ? `${dataItems.slice(0, -1).join(", ")} and ${dataItems[dataItems.length - 1]}`
+    : (dataItems[0] ?? "");
+};
+
 interface ConfirmationState {
   showClearConfirmation: boolean;
   showOverwriteConfirmation: boolean;
@@ -185,20 +203,7 @@ export function EncounterCell({
   // Generate confirmation message based on what data would be lost
   const getConfirmationMessage = useCallback(
     (pokemon: PokemonOptionType): string => {
-      const dataItems: string[] = [];
-      if (pokemon.status)
-        dataItems.push(
-          `with the status "${pokemon.status.charAt(0).toUpperCase() + pokemon.status.slice(1)}"`,
-        );
-      if (pokemon.originalLocation)
-        dataItems.push(
-          `which was encountered at the location: "${getLocationById(pokemon.originalLocation)?.name}"`,
-        );
-
-      const dataText =
-        dataItems.length > 1
-          ? `${dataItems.slice(0, -1).join(", ")} and ${dataItems[dataItems.length - 1]}`
-          : dataItems[0];
+      const dataText = getPokemonDataText(pokemon);
 
       return `This will permanently remove ${`${pokemon.nickname} `}the ${pokemon.name}${dataText ? ` ${dataText}` : ""}.`;
     },
@@ -211,20 +216,7 @@ export function EncounterCell({
       currentPokemon: PokemonOptionType,
       newPokemon: PokemonOptionType,
     ): string => {
-      const currentDataItems: string[] = [];
-      if (currentPokemon.status)
-        currentDataItems.push(
-          `with the status "${currentPokemon.status.charAt(0).toUpperCase() + currentPokemon.status.slice(1)}"`,
-        );
-      if (currentPokemon.originalLocation)
-        currentDataItems.push(
-          `which was encountered at the location: "${getLocationById(currentPokemon.originalLocation)?.name}"`,
-        );
-
-      const currentDataText =
-        currentDataItems.length > 1
-          ? `${currentDataItems.slice(0, -1).join(", ")} and ${currentDataItems[currentDataItems.length - 1]}`
-          : currentDataItems[0];
+      const currentDataText = getPokemonDataText(currentPokemon);
 
       return `This will replace ${currentPokemon.nickname ? `${currentPokemon.nickname} the ` : ""}${currentPokemon.name}${currentDataText ? ` ${currentDataText}` : ""} with ${newPokemon.name}?`;
     },
@@ -242,10 +234,8 @@ export function EncounterCell({
           const name = pokemon.nickname
             ? `${pokemon.nickname} the ${pokemon.name}`
             : pokemon.name;
-          const status = pokemon.status
-            ? ` with the status "${pokemon.status.charAt(0).toUpperCase() + pokemon.status.slice(1)}"`
-            : "";
-          return `${name}${status}`;
+          const dataText = getPokemonDataText(pokemon);
+          return `${name}${dataText ? ` ${dataText}` : ""}`;
         })
         .join(" and ");
       return `This will replace ${replacedPokemon} with the fusion ${head.name}/${body.name}?`;

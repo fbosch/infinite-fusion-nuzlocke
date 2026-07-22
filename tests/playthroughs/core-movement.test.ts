@@ -172,6 +172,35 @@ describe("Playthroughs Store - Core Movement Operations", () => {
         bodyPokemonUid: body?.uid,
       });
     });
+
+    it("preserves a manually assigned team slot for non-auto-assignable fusions", async () => {
+      await playthroughActions.updateEncounter("route-1", {
+        ...createMockPokemon("Pikachu", 25),
+        status: PokemonStatus.MISSED,
+      });
+      await playthroughActions.updateEncounter("route-2", {
+        ...createMockPokemon("Charmander", 4),
+        status: PokemonStatus.MISSED,
+      });
+
+      const encounters = playthroughActions.getEncounters();
+      const head = encounters?.["route-1"].head;
+      const body = encounters?.["route-2"].head;
+      await playthroughActions.updateTeamMember(
+        2,
+        { uid: head?.uid ?? "" },
+        { uid: body?.uid ?? "" },
+      );
+
+      await playthroughActions.createFusion("route-1", head!, body!);
+
+      expect(
+        playthroughActions.getActivePlaythrough()?.team.members[2],
+      ).toEqual({
+        headPokemonUid: head?.uid,
+        bodyPokemonUid: body?.uid,
+      });
+    });
   });
 
   describe("swapEncounters", () => {

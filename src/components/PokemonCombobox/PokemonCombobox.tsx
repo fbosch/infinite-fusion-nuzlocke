@@ -553,7 +553,7 @@ export const PokemonCombobox = ({
                       : "auto",
                   }}
                   className={clsx(
-                    "max-h-125 h-full overflow-y-auto z-40 relative",
+                    "max-h-[31.25rem] h-full overflow-y-auto z-40 relative",
                     "px-1 text-base shadow-lg focus:outline-none sm:text-sm",
                     "bg-white dark:bg-gray-800 gap-x-2",
                     "border border-gray-300 dark:border-gray-600 scrollbar-thin",

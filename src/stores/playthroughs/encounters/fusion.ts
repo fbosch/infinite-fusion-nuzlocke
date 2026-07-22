@@ -12,6 +12,7 @@ import {
 import {
   autoAssignCapturedPokemonToTeam,
   removeTeamMembersWithPokemon,
+  updateTeamMember,
 } from "./team";
 import { trackEncounterProgress, trackFusionCreatedIfNew } from "./transition";
 
@@ -118,10 +119,28 @@ export const createFusion = async (
     activePlaythrough.encounters[locationId]?.head?.uid,
     activePlaythrough.encounters[locationId]?.body?.uid,
   ].filter((uid): uid is string => Boolean(uid && !retainedUIDs.has(uid)));
+  const existingTeamPosition = activePlaythrough.team.members.findIndex(
+    (member) =>
+      member &&
+      (retainedUIDs.has(member.headPokemonUid) ||
+        retainedUIDs.has(member.bodyPokemonUid)),
+  );
 
   activePlaythrough.encounters[locationId] = encounter;
   removeTeamMembersWithPokemon([...retainedUIDs, ...discardedUIDs]);
-  await autoAssignCapturedPokemonToTeam(locationId);
+  if (
+    existingTeamPosition === -1 ||
+    !encounter.head.uid ||
+    !encounter.body.uid
+  ) {
+    await autoAssignCapturedPokemonToTeam(locationId);
+  } else {
+    await updateTeamMember(
+      existingTeamPosition,
+      { uid: encounter.head.uid },
+      { uid: encounter.body.uid },
+    );
+  }
   const isCompleteFusion = Boolean(encounter.head && encounter.body);
 
   trackFusionCreatedIfNew(
