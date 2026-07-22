@@ -43,6 +43,7 @@ export default function ThemeToggle() {
       {themes.map(({ value, icon: Icon, label }, index) => (
         <button
           key={value}
+          type="button"
           ref={(element) => {
             themeButtons.current[index] = element;
           }}

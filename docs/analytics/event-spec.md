@@ -11,6 +11,7 @@ This document is the source of truth for analytics taxonomy, trigger points, pay
 - Lifecycle transition properties use paired `previous_*` and `new_*` names for the transitioned dimension.
 - Source attribution uses bounded `source_surface` and `trigger_method` values.
 - All count or time dimensions use the bucket labels in this document.
+- Events dispatch only when analytics consent is granted.
 
 ## Canonical events
 

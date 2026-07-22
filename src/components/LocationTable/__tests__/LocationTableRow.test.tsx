@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import LocationTableRow from "../LocationTableRow";
 
 const summaryCardProps = vi.hoisted(() => vi.fn());
+const encounterCellProps = vi.hoisted(() => vi.fn());
 const playEvolution = vi.hoisted(() => vi.fn());
 const canFuse = vi.hoisted(() => vi.fn());
 const useEncounter = vi.hoisted(() => vi.fn());
@@ -14,7 +15,7 @@ const evolutionListener = vi.hoisted(() => ({
   current: undefined as undefined | ((event: { locationId: string }) => void),
 }));
 
-const createRow = (index = 0) =>
+const createRow = (index = 0, includeEncounter = false) =>
   ({
     index,
     original: { id: "route-1", name: "Route 1" },
@@ -24,6 +25,15 @@ const createRow = (index = 0) =>
         column: { id: "sprite" },
         getContext: () => ({}),
       },
+      ...(includeEncounter
+        ? [
+            {
+              id: "encounter-cell",
+              column: { id: "encounter" },
+              getContext: () => ({}),
+            },
+          ]
+        : []),
     ],
   }) as never;
 
@@ -50,10 +60,17 @@ vi.mock("@/components/PokemonSummaryCard", () => ({
     return <div />;
   }),
 }));
+vi.mock("../EncounterCell", () => ({
+  EncounterCell: (props: unknown) => {
+    encounterCellProps(props);
+    return <td />;
+  },
+}));
 
 describe("LocationTableRow", () => {
   beforeEach(() => {
     summaryCardProps.mockClear();
+    encounterCellProps.mockClear();
     playEvolution.mockClear();
     canFuse.mockReturnValue(false);
     useEncounter.mockReturnValue({
@@ -77,6 +94,7 @@ describe("LocationTableRow", () => {
     expect(summaryCardProps).toHaveBeenCalledWith(
       expect.objectContaining({ locationId: "route-1" }),
     );
+    expect(useInView).toHaveBeenCalledWith({ rootMargin: "600px 0px" });
   });
 
   it("does not animate an eligible fusion on initial render", () => {
@@ -175,19 +193,24 @@ describe("LocationTableRow", () => {
     expect(playEvolution).not.toHaveBeenCalled();
   });
 
-  it("renders offscreen rows with deferred cell content", () => {
+  it("does not mount deferred cell content for offscreen rows", () => {
     useInView.mockReturnValue({ inView: false, ref: vi.fn() });
 
     const view = render(
       <table>
         <tbody>
-          <LocationTableRow row={createRow(8)} />
+          <LocationTableRow row={createRow(8, true)} />
         </tbody>
       </table>,
     );
 
-    expect(summaryCardProps).toHaveBeenCalledWith(
-      expect.objectContaining({ shouldLoad: false }),
+    expect(summaryCardProps).not.toHaveBeenCalled();
+    expect(encounterCellProps).not.toHaveBeenCalled();
+    expect(view.getByDisplayValue("Ditto")).toBeDefined();
+    expect(view.getByPlaceholderText("Enter nickname")).toBeDefined();
+    expect(view.container.querySelector(".shimmer")).toBeNull();
+    expect(view.container.querySelector("tr")?.className).toContain(
+      "h-[150px]",
     );
   });
 });
