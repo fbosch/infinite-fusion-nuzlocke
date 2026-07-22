@@ -54,5 +54,8 @@ describe("PokemonPCSheet", () => {
     expect(document.getElementById("pokemon-pc-sheet")?.className).toContain(
       "data-closed:translate-x-full",
     );
+    expect(
+      document.getElementById("pokemon-pc-sheet")?.parentElement?.className,
+    ).toContain("z-[71]");
   });
 });
