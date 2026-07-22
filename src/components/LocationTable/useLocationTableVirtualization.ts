@@ -60,12 +60,16 @@ export function useLocationTableVirtualization({
 }) {
   const [measuredTableLayout, setMeasuredTableLayout] = useState<{
     columnWidths: number[];
+    columnSizeSnapshot: string;
     snapshot: string;
     width: number;
   } | null>(null);
   const layoutSnapshot = useContainerLayoutSnapshot(tableContainerElement);
   const tableRows = table.getRowModel().rows;
   const visibleColumns = table.getVisibleLeafColumns();
+  const columnSizeSnapshot = visibleColumns
+    .map((column) => `${column.id}:${column.getSize()}`)
+    .join(",");
   const rowVirtualizer = useVirtualizer({
     count: tableRows.length,
     getScrollElement: () => tableContainerRef.current,
@@ -83,7 +87,8 @@ export function useLocationTableVirtualization({
 
     if (
       measuredTableLayout &&
-      measuredTableLayout.snapshot !== layoutSnapshot
+      (measuredTableLayout.snapshot !== layoutSnapshot ||
+        measuredTableLayout.columnSizeSnapshot !== columnSizeSnapshot)
     ) {
       setMeasuredTableLayout(null);
       return;
@@ -111,8 +116,14 @@ export function useLocationTableVirtualization({
       return;
     }
 
-    setMeasuredTableLayout({ columnWidths, snapshot: layoutSnapshot, width });
+    setMeasuredTableLayout({
+      columnWidths,
+      columnSizeSnapshot,
+      snapshot: layoutSnapshot,
+      width,
+    });
   }, [
+    columnSizeSnapshot,
     layoutSnapshot,
     measuredTableLayout,
     virtualRows.length,

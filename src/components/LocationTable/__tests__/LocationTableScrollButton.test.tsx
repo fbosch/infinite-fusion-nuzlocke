@@ -14,12 +14,14 @@ import { scrollToLocationById } from "@/utils/scrollToLocation";
 const {
   locationRowProps,
   mountedMock,
+  smallScreenMock,
   scrollToIndexMock,
   scrollToMostRecentLocationMock,
   useVirtualizerMock,
 } = vi.hoisted(() => ({
   locationRowProps: vi.fn(),
   mountedMock: vi.fn(),
+  smallScreenMock: vi.fn(),
   scrollToMostRecentLocationMock: vi.fn(),
   scrollToIndexMock: vi.fn(),
   useVirtualizerMock: vi.fn(),
@@ -63,7 +65,7 @@ vi.mock("@/hooks/useMounted", () => ({
 }));
 
 vi.mock("@/hooks/useBreakpoint", () => ({
-  useBreakpointSmallerThan: vi.fn(() => false),
+  useBreakpointSmallerThan: smallScreenMock,
 }));
 
 vi.mock("../LocationTableRow", () => ({
@@ -111,6 +113,8 @@ describe("LocationTable scroll-to-recent button", () => {
     locationRowProps.mockReset();
     mountedMock.mockReset();
     mountedMock.mockReturnValue(true);
+    smallScreenMock.mockReset();
+    smallScreenMock.mockReturnValue(false);
     scrollToIndexMock.mockReset();
     scrollToMostRecentLocationMock.mockReset();
     useVirtualizerMock.mockReset();
@@ -186,6 +190,40 @@ describe("LocationTable scroll-to-recent button", () => {
       screen.getByRole("table").parentElement,
     );
     vi.unstubAllGlobals();
+  });
+
+  it("remeasures column widths when breakpoint sizes change without a resize", async () => {
+    const getBoundingClientRect = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function (this: HTMLElement) {
+        const width =
+          this.tagName === "TABLE"
+            ? smallScreenMock() === true
+              ? 700
+              : 1_200
+            : smallScreenMock() === true
+              ? 70
+              : 120;
+        return { height: 0, width } as DOMRect;
+      });
+
+    const view = render(<LocationTable />);
+
+    await act(async () => {});
+    expect(screen.getAllByRole("columnheader")).toHaveLength(5);
+    const initialMeasurementCalls = getBoundingClientRect.mock.calls.length;
+
+    smallScreenMock.mockReturnValue(true);
+    await act(async () => {
+      view.rerender(<LocationTable />);
+    });
+
+    expect(screen.getByRole("table").style.width).toBe("700px");
+    expect(getBoundingClientRect.mock.calls.length).toBeGreaterThan(
+      initialMeasurementCalls,
+    );
+
+    getBoundingClientRect.mockRestore();
   });
 
   it("hides spacers and exposes logical virtual row positions", async () => {
