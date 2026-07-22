@@ -9,18 +9,23 @@ import {
 } from "@testing-library/react";
 import type React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { scrollToLocationById } from "@/utils/scrollToLocation";
 
-const { locationRowProps, scrollToMostRecentLocationMock, useVirtualizerMock } =
-  vi.hoisted(() => ({
-    locationRowProps: vi.fn(),
-    scrollToMostRecentLocationMock: vi.fn(),
-    useVirtualizerMock: vi.fn(),
-  }));
+const {
+  locationRowProps,
+  scrollToIndexMock,
+  scrollToMostRecentLocationMock,
+  useVirtualizerMock,
+} = vi.hoisted(() => ({
+  locationRowProps: vi.fn(),
+  scrollToMostRecentLocationMock: vi.fn(),
+  scrollToIndexMock: vi.fn(),
+  useVirtualizerMock: vi.fn(),
+}));
 
-vi.mock("@/utils/scrollToLocation", () => ({
+vi.mock("@/utils/scrollToLocation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/utils/scrollToLocation")>()),
   scrollToMostRecentLocation: scrollToMostRecentLocationMock,
-  scrollToLocationById: vi.fn(),
-  flashPokemonOverlaysByUids: vi.fn(),
 }));
 
 vi.mock("@/stores/playthroughs/index", () => ({
@@ -49,11 +54,6 @@ vi.mock("@tanstack/react-virtual", () => ({
 
 vi.mock("@/loaders/locations", () => ({
   getLocationById: vi.fn(() => ({ name: "Route 1" })),
-}));
-
-vi.mock("@/lib/events", () => ({
-  onScrollToLocation: vi.fn(() => vi.fn()),
-  onFlashUids: vi.fn(() => vi.fn()),
 }));
 
 vi.mock("@/hooks/useMounted", () => ({
@@ -101,11 +101,13 @@ describe("LocationTable scroll-to-recent button", () => {
 
   beforeEach(() => {
     locationRowProps.mockReset();
+    scrollToIndexMock.mockReset();
     scrollToMostRecentLocationMock.mockReset();
     useVirtualizerMock.mockReset();
     useVirtualizerMock.mockReturnValue({
       getTotalSize: () => 450,
       getVirtualItems: () => [{ end: 150, index: 0, start: 0 }],
+      scrollToIndex: scrollToIndexMock,
     });
   });
 
@@ -125,6 +127,19 @@ describe("LocationTable scroll-to-recent button", () => {
     expect(options.getScrollElement()).toBeInstanceOf(HTMLDivElement);
     expect(options.overscan).toBe(4);
     expect(locationRowProps).toHaveBeenCalledExactlyOnceWith("route-2");
+  });
+
+  it("scrolls an unmounted location through the virtualizer", async () => {
+    await act(async () => {
+      render(<LocationTable />);
+    });
+
+    expect(scrollToLocationById("route-3", { behavior: "smooth" })).toBe(true);
+
+    expect(scrollToIndexMock).toHaveBeenCalledExactlyOnceWith(2, {
+      align: "center",
+      behavior: "smooth",
+    });
   });
 
   it("calls scrollToMostRecentLocation when the button is clicked", async () => {

@@ -11,7 +11,14 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import clsx from "clsx";
 import { LocateIcon, PlusIcon } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useMounted } from "@/hooks/useMounted";
 import { onFlashUids, onScrollToLocation } from "@/lib/events";
 import { getLocationsSortedWithCustom } from "@/loaders";
@@ -54,6 +61,10 @@ export default function LocationTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isCustomLocationModalOpen, setIsCustomLocationModalOpen] =
     useState(false);
+  const [measuredTableLayout, setMeasuredTableLayout] = useState<{
+    columnWidths: number[];
+    width: number;
+  } | null>(null);
   const mounted = useMounted();
   const isLoading = useIsLoading();
   const customLocations = useCustomLocations();
@@ -234,6 +245,33 @@ export default function LocationTable() {
     ? rowVirtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end
     : 0;
 
+  useLayoutEffect(() => {
+    if (measuredTableLayout || virtualRows.length === 0) return;
+
+    const tableElement = tableRef.current;
+    if (!tableElement) return;
+
+    const headerCells = Array.from(
+      tableElement.querySelectorAll<HTMLTableCellElement>(
+        "thead tr:first-child > th",
+      ),
+    );
+    const width = tableElement.getBoundingClientRect().width;
+    const columnWidths = headerCells.map(
+      (headerCell) => headerCell.getBoundingClientRect().width,
+    );
+
+    if (
+      width === 0 ||
+      columnWidths.length !== visibleColumns.length ||
+      columnWidths.some((columnWidth) => columnWidth === 0)
+    ) {
+      return;
+    }
+
+    setMeasuredTableLayout({ columnWidths, width });
+  }, [measuredTableLayout, virtualRows.length, visibleColumns.length]);
+
   // Subscribe to global scroll/flash events
   useEffect(() => {
     const offScroll = onScrollToLocation(
@@ -297,7 +335,23 @@ export default function LocationTable() {
           className="w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700 overscroll-x-contain overscroll-y-auto"
           data-scroll-container
           aria-label="Locations table"
+          style={
+            measuredTableLayout
+              ? {
+                  minWidth: measuredTableLayout.width,
+                  tableLayout: "fixed",
+                  width: measuredTableLayout.width,
+                }
+              : undefined
+          }
         >
+          {measuredTableLayout && (
+            <colgroup>
+              {measuredTableLayout.columnWidths.map((width, index) => (
+                <col key={visibleColumns[index].id} style={{ width }} />
+              ))}
+            </colgroup>
+          )}
           <LocationTableHeader headerGroups={table.getHeaderGroups()} />
           <tbody
             className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700"
