@@ -150,14 +150,18 @@ export default function PokemonPCSheet({
   );
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} className="group relative z-50">
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      className="group relative z-[70]"
+    >
       <DialogBackdrop
         transition
-        className="fixed inset-0 bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ease-out data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/30"
+        className="fixed inset-0 z-[70] bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ease-out data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/30"
         aria-hidden="true"
       />
 
-      <div className="fixed inset-y-0 right-0 flex w-screen items-stretch justify-end p-0">
+      <div className="fixed inset-y-0 right-0 z-[71] flex w-screen items-stretch justify-end p-0">
         <DialogPanel
           transition
           id="pokemon-pc-sheet"

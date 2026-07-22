@@ -1,18 +1,25 @@
 import mitt from "mitt";
 
 const EVOLUTION_EVENT = "pokemon:evolved" as const;
-const LOCATIONS_SCROLL_TO = "locations:scrollTo" as const;
 const LOCATIONS_FLASH_UIDS = "locations:flashUids" as const;
 
 type AppEvents = {
   [EVOLUTION_EVENT]: { locationId: string };
-  [LOCATIONS_SCROLL_TO]: { locationId: string };
   [LOCATIONS_FLASH_UIDS]: { uids: string[]; durationMs?: number };
 };
 
 const emitter = mitt<AppEvents>();
+const scrollToLocationHandlers = new Set<
+  (payload: ScrollToLocationDetail) => boolean
+>();
 
 export type EvolutionEventDetail = { locationId: string };
+export type ScrollToLocationDetail = {
+  locationId: string;
+  behavior?: ScrollBehavior;
+  highlightUids?: string[];
+  durationMs?: number;
+};
 
 export function emitEvolutionEvent(locationId: string): void {
   if (!locationId) return;
@@ -28,10 +35,22 @@ export function addEvolutionListener(
 }
 
 export function onScrollToLocation(
-  handler: (payload: { locationId: string }) => void,
+  handler: (payload: ScrollToLocationDetail) => boolean,
 ): () => void {
-  emitter.on(LOCATIONS_SCROLL_TO, handler);
-  return () => emitter.off(LOCATIONS_SCROLL_TO, handler);
+  scrollToLocationHandlers.add(handler);
+  return () => {
+    scrollToLocationHandlers.delete(handler);
+  };
+}
+
+export function emitScrollToLocation(detail: ScrollToLocationDetail): boolean {
+  if (!detail.locationId || scrollToLocationHandlers.size === 0) return false;
+
+  let wasHandled = false;
+  for (const handler of scrollToLocationHandlers) {
+    wasHandled = handler(detail) || wasHandled;
+  }
+  return wasHandled;
 }
 
 export function onFlashUids(

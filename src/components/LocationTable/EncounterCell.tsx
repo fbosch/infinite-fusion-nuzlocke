@@ -158,7 +158,7 @@ export function EncounterCell({
   const isCustomLocation = customLocations.some((loc) => loc.id === locationId);
   const { routeEncounterData } = useEncountersForLocation({
     locationId,
-    enabled: !isCustomLocation && gameMode !== "randomized",
+    enabled: shouldLoad && !isCustomLocation && gameMode !== "randomized",
     gameMode: gameMode === "randomized" ? "classic" : gameMode,
   });
 
