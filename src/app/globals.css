@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  --spacing-location-row: 150px;
   --color-primary: #3b82f6;
   --color-primary-dark: #1d4ed8;
   --font-family-sans:

@@ -7,28 +7,17 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import clsx from "clsx";
 import { LocateIcon, PlusIcon } from "lucide-react";
 import dynamic from "next/dynamic";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMounted } from "@/hooks/useMounted";
-import { onFlashUids, onScrollToLocation } from "@/lib/events";
 import { getLocationsSortedWithCustom } from "@/loaders";
 import type { CombinedLocation } from "@/loaders/locations";
 import { useCustomLocations, useIsLoading } from "@/stores/playthroughs/hooks";
 import { playthroughActions } from "@/stores/playthroughs/index";
 import type { EncounterData } from "@/stores/playthroughs/types";
 import {
-  flashPokemonOverlaysByUids,
-  runAfterScrollSettles,
   scrollToLocationById,
   scrollToMostRecentLocation,
 } from "@/utils/scrollToLocation";
@@ -38,10 +27,9 @@ import LocationCell from "./LocationCell";
 import LocationTableHeader from "./LocationTableHeader";
 import LocationTableRow from "./LocationTableRow";
 import LocationTableSkeleton from "./LocationTableSkeleton";
+import { useLocationTableVirtualization } from "./useLocationTableVirtualization";
 
 const columnHelper = createColumnHelper<CombinedLocation>();
-const LOCATION_ROW_HEIGHT_PX = 150;
-const LOCATION_ROW_OVERSCAN_COUNT = 4;
 
 // Dynamically import the modal to reduce initial bundle size
 const AddCustomLocationModal = dynamic(
@@ -61,10 +49,6 @@ export default function LocationTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isCustomLocationModalOpen, setIsCustomLocationModalOpen] =
     useState(false);
-  const [measuredTableLayout, setMeasuredTableLayout] = useState<{
-    columnWidths: number[];
-    width: number;
-  } | null>(null);
   const mounted = useMounted();
   const isLoading = useIsLoading();
   const customLocations = useCustomLocations();
@@ -231,78 +215,14 @@ export default function LocationTable() {
     enableColumnFilters: false,
     manualPagination: true,
   });
-  const tableRows = table.getRowModel().rows;
-  const visibleColumns = table.getVisibleLeafColumns();
-  const rowVirtualizer = useVirtualizer({
-    count: tableRows.length,
-    getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => LOCATION_ROW_HEIGHT_PX,
-    overscan: LOCATION_ROW_OVERSCAN_COUNT,
-  });
-  const virtualRows = rowVirtualizer.getVirtualItems();
-  const virtualPaddingTop = virtualRows[0]?.start ?? 0;
-  const virtualPaddingBottom = virtualRows.length
-    ? rowVirtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end
-    : 0;
-
-  useLayoutEffect(() => {
-    if (measuredTableLayout || virtualRows.length === 0) return;
-
-    const tableElement = tableRef.current;
-    if (!tableElement) return;
-
-    const headerCells = Array.from(
-      tableElement.querySelectorAll<HTMLTableCellElement>(
-        "thead tr:first-child > th",
-      ),
-    );
-    const width = tableElement.getBoundingClientRect().width;
-    const columnWidths = headerCells.map(
-      (headerCell) => headerCell.getBoundingClientRect().width,
-    );
-
-    if (
-      width === 0 ||
-      columnWidths.length !== visibleColumns.length ||
-      columnWidths.some((columnWidth) => columnWidth === 0)
-    ) {
-      return;
-    }
-
-    setMeasuredTableLayout({ columnWidths, width });
-  }, [measuredTableLayout, virtualRows.length, visibleColumns.length]);
-
-  // Subscribe to global scroll/flash events
-  useEffect(() => {
-    const offScroll = onScrollToLocation(
-      ({ behavior = "smooth", durationMs, highlightUids, locationId }) => {
-        const index = tableRows.findIndex(
-          (row) => row.original.id === locationId,
-        );
-        if (index < 0) return;
-
-        rowVirtualizer.scrollToIndex(index, { align: "center", behavior });
-
-        if (!highlightUids?.length) return;
-        const flash = () =>
-          flashPokemonOverlaysByUids(highlightUids, durationMs);
-        const scrollElement = tableContainerRef.current;
-        if (behavior === "smooth" && scrollElement) {
-          runAfterScrollSettles(scrollElement, flash);
-          return;
-        }
-        window.requestAnimationFrame(flash);
-      },
-    );
-    const offFlash = onFlashUids(({ uids, durationMs }) => {
-      // Reuse overlay highlighter for comboboxes
-      flashPokemonOverlaysByUids(uids, durationMs);
-    });
-    return () => {
-      offScroll();
-      offFlash();
-    };
-  }, [rowVirtualizer, tableRows]);
+  const {
+    measuredTableLayout,
+    tableRows,
+    virtualPaddingBottom,
+    virtualPaddingTop,
+    virtualRows,
+    visibleColumns,
+  } = useLocationTableVirtualization({ table, tableContainerRef, tableRef });
 
   // Show skeleton loading state while component is mounting or store is initializing from IndexedDB
   if (mounted === false || isLoading) {

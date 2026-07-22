@@ -108,7 +108,7 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
   return (
     <tr
       key={row.id}
-      className="h-[150px] hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors group/row"
+      className="h-location-row hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors group/row"
       data-location-id={locationId}
     >
       {visibleCells.map((cell) =>
