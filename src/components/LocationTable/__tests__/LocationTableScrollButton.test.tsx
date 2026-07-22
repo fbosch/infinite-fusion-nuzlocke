@@ -10,10 +10,12 @@ import {
 import type React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { locationRowProps, scrollToMostRecentLocationMock } = vi.hoisted(() => ({
-  locationRowProps: vi.fn(),
-  scrollToMostRecentLocationMock: vi.fn(),
-}));
+const { locationRowProps, scrollToMostRecentLocationMock, useVirtualizerMock } =
+  vi.hoisted(() => ({
+    locationRowProps: vi.fn(),
+    scrollToMostRecentLocationMock: vi.fn(),
+    useVirtualizerMock: vi.fn(),
+  }));
 
 vi.mock("@/utils/scrollToLocation", () => ({
   scrollToMostRecentLocation: scrollToMostRecentLocationMock,
@@ -36,7 +38,13 @@ vi.mock("@/stores/playthroughs/hooks", () => ({
 vi.mock("@/loaders", () => ({
   getLocationsSortedWithCustom: vi.fn(() => [
     { id: "route-1", name: "Route 1" },
+    { id: "route-2", name: "Route 2" },
+    { id: "route-3", name: "Route 3" },
   ]),
+}));
+
+vi.mock("@tanstack/react-virtual", () => ({
+  useVirtualizer: useVirtualizerMock,
 }));
 
 vi.mock("@/loaders/locations", () => ({
@@ -57,8 +65,8 @@ vi.mock("@/hooks/useBreakpoint", () => ({
 }));
 
 vi.mock("../LocationTableRow", () => ({
-  default: ({ scrollRoot }: { scrollRoot: HTMLDivElement | null }) => {
-    locationRowProps(scrollRoot);
+  default: ({ row }: { row: { original: { id: string } } }) => {
+    locationRowProps(row.original.id);
     return <tr data-testid="location-row" />;
   },
 }));
@@ -94,16 +102,29 @@ describe("LocationTable scroll-to-recent button", () => {
   beforeEach(() => {
     locationRowProps.mockReset();
     scrollToMostRecentLocationMock.mockReset();
+    useVirtualizerMock.mockReset();
+    useVirtualizerMock.mockReturnValue({
+      getTotalSize: () => 450,
+      getVirtualItems: () => [{ end: 150, index: 0, start: 0 }],
+    });
   });
 
-  it("passes the table scroll container to every row", async () => {
+  it("renders only virtual rows with four-row overscan", async () => {
+    useVirtualizerMock.mockReturnValue({
+      getTotalSize: () => 450,
+      getVirtualItems: () => [{ end: 300, index: 1, start: 150 }],
+    });
+
     await act(async () => {
       render(<LocationTable />);
     });
 
-    expect(locationRowProps).toHaveBeenLastCalledWith(
-      expect.any(HTMLDivElement),
-    );
+    const options = useVirtualizerMock.mock.calls[0][0];
+    expect(options.count).toBe(3);
+    expect(options.estimateSize()).toBe(150);
+    expect(options.getScrollElement()).toBeInstanceOf(HTMLDivElement);
+    expect(options.overscan).toBe(4);
+    expect(locationRowProps).toHaveBeenCalledExactlyOnceWith("route-2");
   });
 
   it("calls scrollToMostRecentLocation when the button is clicked", async () => {

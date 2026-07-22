@@ -10,7 +10,6 @@ const encounterCellProps = vi.hoisted(() => vi.fn());
 const playEvolution = vi.hoisted(() => vi.fn());
 const canFuse = vi.hoisted(() => vi.fn());
 const useEncounter = vi.hoisted(() => vi.fn());
-const useInView = vi.hoisted(() => vi.fn());
 const evolutionListener = vi.hoisted(() => ({
   current: undefined as undefined | ((event: { locationId: string }) => void),
 }));
@@ -36,10 +35,6 @@ const createRow = (index = 0, includeEncounter = false) =>
         : []),
     ],
   }) as never;
-
-vi.mock("react-intersection-observer", () => ({
-  useInView,
-}));
 
 vi.mock("@/stores/playthroughs/hooks", () => ({
   useActivePlaythroughId: () => "playthrough-1",
@@ -78,7 +73,6 @@ describe("LocationTableRow", () => {
       body: null,
       isFusion: false,
     });
-    useInView.mockReturnValue({ inView: true, ref: vi.fn() });
     evolutionListener.current = undefined;
   });
 
@@ -94,10 +88,6 @@ describe("LocationTableRow", () => {
     expect(summaryCardProps).toHaveBeenCalledWith(
       expect.objectContaining({ locationId: "route-1" }),
     );
-    expect(useInView).toHaveBeenCalledWith({
-      root: null,
-      rootMargin: "600px 0px",
-    });
   });
 
   it("does not animate an eligible fusion on initial render", () => {
@@ -196,10 +186,8 @@ describe("LocationTableRow", () => {
     expect(playEvolution).not.toHaveBeenCalled();
   });
 
-  it("does not mount deferred cell content for offscreen rows", () => {
-    useInView.mockReturnValue({ inView: false, ref: vi.fn() });
-
-    const view = render(
+  it("renders full cell content for a mounted virtual row", () => {
+    render(
       <table>
         <tbody>
           <LocationTableRow row={createRow(8, true)} />
@@ -207,13 +195,11 @@ describe("LocationTableRow", () => {
       </table>,
     );
 
-    expect(summaryCardProps).not.toHaveBeenCalled();
-    expect(encounterCellProps).not.toHaveBeenCalled();
-    expect(view.getByDisplayValue("Ditto")).toBeDefined();
-    expect(view.getByPlaceholderText("Enter nickname")).toBeDefined();
-    expect(view.container.querySelector(".shimmer")).toBeNull();
-    expect(view.container.querySelector("tr")?.className).toContain(
-      "h-[150px]",
+    expect(summaryCardProps).toHaveBeenCalledWith(
+      expect.objectContaining({ locationId: "route-1" }),
+    );
+    expect(encounterCellProps).toHaveBeenCalledWith(
+      expect.objectContaining({ locationId: "route-1" }),
     );
   });
 });

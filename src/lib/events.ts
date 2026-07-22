@@ -6,13 +6,20 @@ const LOCATIONS_FLASH_UIDS = "locations:flashUids" as const;
 
 type AppEvents = {
   [EVOLUTION_EVENT]: { locationId: string };
-  [LOCATIONS_SCROLL_TO]: { locationId: string };
+  [LOCATIONS_SCROLL_TO]: ScrollToLocationDetail;
   [LOCATIONS_FLASH_UIDS]: { uids: string[]; durationMs?: number };
 };
 
 const emitter = mitt<AppEvents>();
+let scrollToLocationHandlerCount = 0;
 
 export type EvolutionEventDetail = { locationId: string };
+export type ScrollToLocationDetail = {
+  locationId: string;
+  behavior?: ScrollBehavior;
+  highlightUids?: string[];
+  durationMs?: number;
+};
 
 export function emitEvolutionEvent(locationId: string): void {
   if (!locationId) return;
@@ -28,10 +35,20 @@ export function addEvolutionListener(
 }
 
 export function onScrollToLocation(
-  handler: (payload: { locationId: string }) => void,
+  handler: (payload: ScrollToLocationDetail) => void,
 ): () => void {
   emitter.on(LOCATIONS_SCROLL_TO, handler);
-  return () => emitter.off(LOCATIONS_SCROLL_TO, handler);
+  scrollToLocationHandlerCount += 1;
+  return () => {
+    emitter.off(LOCATIONS_SCROLL_TO, handler);
+    scrollToLocationHandlerCount -= 1;
+  };
+}
+
+export function emitScrollToLocation(detail: ScrollToLocationDetail): boolean {
+  if (!detail.locationId || scrollToLocationHandlerCount === 0) return false;
+  emitter.emit(LOCATIONS_SCROLL_TO, detail);
+  return true;
 }
 
 export function onFlashUids(
