@@ -142,6 +142,22 @@ describe("LocationTable scroll-to-recent button", () => {
     });
   });
 
+  it("scrolls to the most recent location without animation on page load", async () => {
+    await act(async () => {
+      render(<LocationTable />);
+    });
+
+    expect(scrollToMostRecentLocationMock).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.any(HTMLDivElement),
+      expect.any(HTMLTableElement),
+      "auto",
+    );
+    expect(screen.getByRole("table").parentElement?.className).not.toContain(
+      "scroll-smooth",
+    );
+  });
+
   it("calls scrollToMostRecentLocation when the button is clicked", async () => {
     await act(async () => {
       render(<LocationTable />);

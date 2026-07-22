@@ -94,7 +94,7 @@ export default function LocationTable() {
         >,
         tableContainerRef.current,
         tableRef.current,
-        "smooth",
+        "auto",
       );
     });
   }, [mounted, isLoading, data.length]);
@@ -328,7 +328,7 @@ export default function LocationTable() {
     <div className="overflow-hidden 2xl:rounded-lg border-y md:border border-gray-200 dark:border-gray-700 xl:shadow-sm">
       <div
         ref={tableContainerRef}
-        className="max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative scroll-smooth"
+        className="max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative"
       >
         <table
           ref={tableRef}
