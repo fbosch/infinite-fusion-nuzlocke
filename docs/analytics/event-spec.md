@@ -31,6 +31,7 @@ This document is the source of truth for analytics taxonomy, trigger points, pay
 | `fusion_flipped` | `flipEncounterFusion` in `src/stores/playthroughs/encounters/fusion.ts` | A flip operation succeeds on an existing fusion encounter | Encounter is missing, not fusion, or mutation does not run |
 | `encounter_marked_deceased` | `markEncounterAsDeceased` in `src/stores/playthroughs/encounters/status.ts` | Encounter transitions into deceased state for this location | Operation is a no-op or status was already deceased for the encounter |
 | `playthrough_exported` | Export success path in `src/hooks/usePlaythroughImportExport.ts` | Export payload serialization and download setup succeed | Export flow throws before blob URL + download setup completes |
+| `github_cta_viewed` | `GitHubEngagementCta` above the location table | At least 50% of the CTA is visible | CTA is below the visibility threshold or the component already emitted for its mount |
 
 ## Shared property schema
 
@@ -71,6 +72,15 @@ Every event includes these shared properties unless noted otherwise.
 | Property | Type | Notes |
 | --- | --- | --- |
 | `location_id` | `string` | Encounter location identifier |
+
+### `github_cta_viewed`
+
+This event does not include the shared playthrough properties.
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `source_surface` | `"above_location_table"` | The compact CTA immediately before the table scroll region |
+| `route` | `"home" \| "locations"` | Table route displaying the CTA |
 
 ### `playthrough_created`
 
@@ -245,9 +255,11 @@ No additional properties beyond the shared schema.
 | `fusion_flipped` | No dedupe required beyond successful operation gating |
 | `encounter_marked_deceased` | Transition dedupe only; emit only when status changes into deceased state |
 | `playthrough_exported` | No storage dedupe required; emit once per successful export action |
+| `github_cta_viewed` | Component-instance dedupe; emit once after 50% visibility for each CTA mount |
 
 ## Implementation notes
 
 - Trigger detection belongs at action/mutation boundaries for mutation-backed events (for example `first_encounter_saved`), while pure UI-intent events such as `playthrough_selector_opened` and `create_playthrough_modal_opened` may emit from their presentational component.
 - Event payload builders should read canonical store state after mutation when the event requires after-state fields.
 - Any contract change in event names, property names, bucket labels, or thresholds must update this document first.
+- `github_cta_viewed` measures visibility only. The embedded GitHub buttons render cross-origin iframes, so their clicks and completed stars are not attributable by this event.

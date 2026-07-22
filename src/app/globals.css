@@ -9,6 +9,12 @@
   --font-family-mono: var(--font-dotgothic16), "Courier New", monospace;
 }
 
+.github-button-control,
+.github-button-control span {
+  display: flex;
+  line-height: 0;
+}
+
 .shadow-elevation-1 {
   /* Subtle elevation - barely off the surface */
   box-shadow:

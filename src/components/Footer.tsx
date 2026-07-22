@@ -1,96 +1,17 @@
 "use client";
 
-import clsx from "clsx";
-import { Monitor, Moon, Sun } from "lucide-react";
 import Link from "next/link";
-import { useTheme } from "next-themes";
 import { useState } from "react";
-import GitHubButton from "react-github-btn";
-import { useInView } from "react-intersection-observer";
 import CookieSettingsButton from "@/components/analytics/CookieSettingsButton";
 import CreditsModal from "@/components/CreditsModal";
-import { useMounted } from "@/hooks/useMounted";
-
-function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const mounted = useMounted();
-
-  if (mounted === false) {
-    return (
-      <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-sm p-0.5">
-        <div className="w-7 h-7 rounded bg-gray-200 dark:bg-gray-700" />
-        <div className="w-7 h-7 rounded" />
-        <div className="w-7 h-7 rounded" />
-      </div>
-    );
-  }
-
-  const themes = [
-    { value: "system", icon: Monitor, label: "System theme" },
-    { value: "light", icon: Sun, label: "Light theme" },
-    { value: "dark", icon: Moon, label: "Dark theme" },
-  ];
-
-  return (
-    <div
-      className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-md p-0.5 content-visibility-auto contain-intrinsic-height-[195px]"
-      role="radiogroup"
-      aria-label="Theme selection"
-    >
-      {themes.map(({ value, icon: Icon, label }) => (
-        <button
-          key={value}
-          onClick={() => setTheme(value)}
-          className={clsx(
-            "flex items-center justify-center w-7 h-7 rounded transition-all duration-200 cursor-pointer",
-            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400",
-            theme === value
-              ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
-              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200",
-          )}
-          aria-label={label}
-          title={label}
-          role="radio"
-          aria-checked={theme === value}
-        >
-          <Icon className="w-3.5 h-3.5" />
-        </button>
-      ))}
-    </div>
-  );
-}
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? "unknown";
-  const { ref, inView } = useInView({
-    threshold: 0.5,
-    triggerOnce: true,
-  });
-  const { resolvedTheme } = useTheme();
-  const mounted = useMounted();
   const [isCreditsOpen, setIsCreditsOpen] = useState(false);
 
-  // Determine the color scheme based on the current theme
-  const getColorScheme = () => {
-    if (mounted === false)
-      return "no-preference: light; light: light; dark: dark;";
-
-    switch (resolvedTheme) {
-      case "light":
-        return "light";
-      case "dark":
-        return "dark";
-      default:
-        return "no-preference: light; light: light; dark: dark;";
-    }
-  };
-
   return (
-    <footer
-      ref={ref}
-      className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 mt-8"
-    >
+    <footer className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 mt-8">
       <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="space-y-4">
           {/* Top section with button on left and links in center */}
@@ -130,34 +51,6 @@ export default function Footer() {
               </a>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-3">
-              <div
-                className={clsx(
-                  "flex gap-x-3 pt-1.5 sm:pr-3 sm:border-r border-gray-200 dark:border-gray-700",
-                  inView ? "opacity-100" : "opacity-0",
-                )}
-              >
-                <GitHubButton
-                  href="https://github.com/fbosch/infinite-fusion-nuzlocke"
-                  data-color-scheme={getColorScheme()}
-                  data-icon="octicon-star"
-                  data-size="large"
-                  data-show-count="true"
-                  aria-label="Star fbosch/infinite-fusion-nuzlocke on GitHub"
-                >
-                  Star
-                </GitHubButton>
-                <GitHubButton
-                  href="https://github.com/fbosch/infinite-fusion-nuzlocke/issues"
-                  data-color-scheme={getColorScheme()}
-                  data-icon="octicon-issue-opened"
-                  data-size="large"
-                  data-show-count="true"
-                  aria-label="Issue fbosch/infinite-fusion-nuzlocke on GitHub"
-                >
-                  Issue
-                </GitHubButton>
-              </div>
-              <ThemeToggle />
               <CookieSettingsButton />
             </div>
           </div>
