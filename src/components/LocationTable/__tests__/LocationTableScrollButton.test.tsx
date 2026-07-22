@@ -129,6 +129,29 @@ describe("LocationTable scroll-to-recent button", () => {
     expect(locationRowProps).toHaveBeenCalledExactlyOnceWith("route-2");
   });
 
+  it("observes the scroll container for layout changes", async () => {
+    const observe = vi.fn();
+    const disconnect = vi.fn();
+    class ResizeObserverMock {
+      constructor(_callback: ResizeObserverCallback) {}
+
+      disconnect = disconnect;
+      observe = observe;
+      unobserve = vi.fn();
+    }
+    vi.stubGlobal("ResizeObserver", ResizeObserverMock);
+
+    await act(async () => {
+      render(<LocationTable />);
+    });
+
+    expect(observe).toHaveBeenCalledWith(
+      screen.getByRole("table").parentElement,
+    );
+
+    vi.unstubAllGlobals();
+  });
+
   it("scrolls an unmounted location through the virtualizer", async () => {
     await act(async () => {
       render(<LocationTable />);
