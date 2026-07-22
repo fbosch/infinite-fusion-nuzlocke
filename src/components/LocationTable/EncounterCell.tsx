@@ -38,11 +38,19 @@ interface PendingClear {
   pokemon: PokemonOptionType;
 }
 
-interface PendingOverwrite {
-  field: "head" | "body";
-  currentPokemon: PokemonOptionType;
-  newPokemon: PokemonOptionType;
-}
+type PendingOverwrite =
+  | {
+      kind: "pokemon";
+      field: "head" | "body";
+      currentPokemon: PokemonOptionType;
+      newPokemon: PokemonOptionType;
+    }
+  | {
+      kind: "fusion";
+      currentPokemon: PokemonOptionType[];
+      head: PokemonOptionType;
+      body: PokemonOptionType;
+    };
 
 interface ConfirmationState {
   showClearConfirmation: boolean;
@@ -223,6 +231,28 @@ export function EncounterCell({
     [],
   );
 
+  const getFusionOverwriteConfirmationMessage = useCallback(
+    (
+      currentPokemon: PokemonOptionType[],
+      head: PokemonOptionType,
+      body: PokemonOptionType,
+    ): string => {
+      const replacedPokemon = currentPokemon
+        .map((pokemon) => {
+          const name = pokemon.nickname
+            ? `${pokemon.nickname} the ${pokemon.name}`
+            : pokemon.name;
+          const status = pokemon.status
+            ? ` with the status "${pokemon.status.charAt(0).toUpperCase() + pokemon.status.slice(1)}"`
+            : "";
+          return `${name}${status}`;
+        })
+        .join(" and ");
+      return `This will replace ${replacedPokemon} with the fusion ${head.name}/${body.name}?`;
+    },
+    [],
+  );
+
   // Handle encounter selection with confirmation for clearing valuable data
   const handleEncounterSelect = useCallback(
     (pokemon: PokemonOptionType | null, field: "head" | "body" = "head") => {
@@ -269,6 +299,31 @@ export function EncounterCell({
     [handleEncounterSelect],
   );
 
+  const handleSingleFusionChange = useCallback(
+    (head: PokemonOptionType, body: PokemonOptionType) => {
+      const existingPokemon = [headPokemon, bodyPokemon].filter(
+        (pokemon): pokemon is PokemonOptionType => pokemon !== null,
+      );
+      const valuablePokemon = existingPokemon.filter(hasValuableData);
+
+      if (valuablePokemon.length > 0) {
+        dispatch({
+          type: "SHOW_OVERWRITE_CONFIRMATION",
+          payload: {
+            kind: "fusion",
+            currentPokemon: existingPokemon,
+            head,
+            body,
+          },
+        });
+        return;
+      }
+
+      playthroughActions.createFusion(locationId, head, body);
+    },
+    [locationId, headPokemon, bodyPokemon, hasValuableData],
+  );
+
   // Handle confirmation dialog confirm action
   const handleConfirmClear = useCallback(() => {
     if (confirmationState.pendingClear) {
@@ -299,6 +354,16 @@ export function EncounterCell({
   // Handle overwrite confirmation dialog confirm action
   const handleConfirmOverwrite = useCallback(() => {
     if (confirmationState.pendingOverwrite) {
+      if (confirmationState.pendingOverwrite.kind === "fusion") {
+        playthroughActions.createFusion(
+          locationId,
+          confirmationState.pendingOverwrite.head,
+          confirmationState.pendingOverwrite.body,
+        );
+        dispatch({ type: "CONFIRM_OVERWRITE" });
+        return;
+      }
+
       let pokemonToUpdate = confirmationState.pendingOverwrite.newPokemon;
 
       // Apply default status based on Pokemon source
@@ -409,6 +474,7 @@ export function EncounterCell({
           dispatch({
             type: "SHOW_OVERWRITE_CONFIRMATION",
             payload: {
+              kind: "pokemon",
               field: "head",
               currentPokemon: currentValue,
               newPokemon: newValue,
@@ -433,6 +499,7 @@ export function EncounterCell({
           dispatch({
             type: "SHOW_OVERWRITE_CONFIRMATION",
             payload: {
+              kind: "pokemon",
               field: "body",
               currentPokemon: currentValue,
               newPokemon: newValue,
@@ -457,6 +524,7 @@ export function EncounterCell({
           dispatch({
             type: "SHOW_OVERWRITE_CONFIRMATION",
             payload: {
+              kind: "pokemon",
               field: "head",
               currentPokemon: currentValue,
               newPokemon: newValue,
@@ -579,6 +647,7 @@ export function EncounterCell({
               isCustomLocation={isCustomLocation}
               value={selectedPokemon}
               onChange={handleSingleChange}
+              onFusionChange={handleSingleFusionChange}
               placeholder="Select Pokémon"
               nicknamePlaceholder="Enter nickname"
               comboboxId={`${locationId}-single`}
@@ -619,10 +688,16 @@ export function EncounterCell({
         title="Replace Encounter?"
         message={
           confirmationState.pendingOverwrite
-            ? getOverwriteConfirmationMessage(
-                confirmationState.pendingOverwrite.currentPokemon,
-                confirmationState.pendingOverwrite.newPokemon,
-              )
+            ? confirmationState.pendingOverwrite.kind === "fusion"
+              ? getFusionOverwriteConfirmationMessage(
+                  confirmationState.pendingOverwrite.currentPokemon,
+                  confirmationState.pendingOverwrite.head,
+                  confirmationState.pendingOverwrite.body,
+                )
+              : getOverwriteConfirmationMessage(
+                  confirmationState.pendingOverwrite.currentPokemon,
+                  confirmationState.pendingOverwrite.newPokemon,
+                )
             : ""
         }
         confirmText="Replace Encounter"

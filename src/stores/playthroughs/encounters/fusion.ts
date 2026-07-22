@@ -9,6 +9,10 @@ import {
   getFusionSpriteIdFromEncounter,
   type PokemonOption,
 } from "./shared";
+import {
+  autoAssignCapturedPokemonToTeam,
+  removeTeamMembersWithPokemon,
+} from "./team";
 import { trackEncounterProgress, trackFusionCreatedIfNew } from "./transition";
 
 // Toggle fusion mode for an encounter
@@ -98,7 +102,6 @@ export const createFusion = async (
   }
 
   const previousEncounterCount = getEncounterCount(activePlaythrough);
-
   const encounter = {
     head: createPokemonWithLocationAndUID(head, locationId),
     body: createPokemonWithLocationAndUID(body, locationId),
@@ -106,11 +109,20 @@ export const createFusion = async (
     updatedAt: getCurrentTimestamp(),
   };
 
+  const retainedUIDs = new Set(
+    [encounter.head.uid, encounter.body.uid].filter((uid): uid is string =>
+      Boolean(uid),
+    ),
+  );
+  const discardedUIDs = [
+    activePlaythrough.encounters[locationId]?.head?.uid,
+    activePlaythrough.encounters[locationId]?.body?.uid,
+  ].filter((uid): uid is string => Boolean(uid && !retainedUIDs.has(uid)));
+
   activePlaythrough.encounters[locationId] = encounter;
+  removeTeamMembersWithPokemon([...retainedUIDs, ...discardedUIDs]);
+  await autoAssignCapturedPokemonToTeam(locationId);
   const isCompleteFusion = Boolean(encounter.head && encounter.body);
-  if (isCompleteFusion) {
-    emitEvolutionEvent(locationId);
-  }
 
   trackFusionCreatedIfNew(
     activePlaythrough,
