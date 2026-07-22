@@ -19,6 +19,7 @@ import ResetEncounterButton from "./ResetEncounterButton";
 
 interface LocationTableRowProps {
   row: Row<CombinedLocation>;
+  scrollRoot?: HTMLDivElement | null;
 }
 
 const EMPTY_ENCOUNTER = {
@@ -99,9 +100,13 @@ const getEffectiveFusionId = ({
   return `${head.id}.${body.id}`;
 };
 
-export default function LocationTableRow({ row }: LocationTableRowProps) {
+export default function LocationTableRow({
+  row,
+  scrollRoot = null,
+}: LocationTableRowProps) {
   const locationId = row.original.id;
   const { ref, inView } = useInView({
+    root: scrollRoot,
     rootMargin: LOCATION_ROW_OVERSCAN_MARGIN,
   });
   const spriteRef = useRef<FusionSpriteHandle | null>(null);

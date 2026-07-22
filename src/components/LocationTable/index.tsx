@@ -57,6 +57,12 @@ export default function LocationTable() {
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
+  const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
+
+  const setTableContainerRef = useCallback((element: HTMLDivElement | null) => {
+    tableContainerRef.current = element;
+    setScrollRoot(element);
+  }, []);
 
   const data = useMemo(() => {
     try {
@@ -256,7 +262,7 @@ export default function LocationTable() {
   return (
     <div className="overflow-hidden 2xl:rounded-lg border-y md:border border-gray-200 dark:border-gray-700 xl:shadow-sm">
       <div
-        ref={tableContainerRef}
+        ref={setTableContainerRef}
         className="max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative scroll-smooth"
       >
         <table
@@ -271,7 +277,11 @@ export default function LocationTable() {
             id="location-table"
           >
             {table.getRowModel().rows.map((row) => (
-              <LocationTableRow key={row.id} row={row} />
+              <LocationTableRow
+                key={row.id}
+                row={row}
+                scrollRoot={scrollRoot}
+              />
             ))}
           </tbody>
         </table>

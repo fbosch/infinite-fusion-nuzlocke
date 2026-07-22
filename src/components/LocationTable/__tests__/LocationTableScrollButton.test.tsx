@@ -10,7 +10,8 @@ import {
 import type React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { scrollToMostRecentLocationMock } = vi.hoisted(() => ({
+const { locationRowProps, scrollToMostRecentLocationMock } = vi.hoisted(() => ({
+  locationRowProps: vi.fn(),
   scrollToMostRecentLocationMock: vi.fn(),
 }));
 
@@ -56,7 +57,10 @@ vi.mock("@/hooks/useBreakpoint", () => ({
 }));
 
 vi.mock("../LocationTableRow", () => ({
-  default: () => <tr data-testid="location-row" />,
+  default: ({ scrollRoot }: { scrollRoot: HTMLDivElement | null }) => {
+    locationRowProps(scrollRoot);
+    return <tr data-testid="location-row" />;
+  },
 }));
 
 vi.mock("../LocationCell", () => ({
@@ -88,7 +92,18 @@ describe("LocationTable scroll-to-recent button", () => {
   });
 
   beforeEach(() => {
+    locationRowProps.mockReset();
     scrollToMostRecentLocationMock.mockReset();
+  });
+
+  it("passes the table scroll container to every row", async () => {
+    await act(async () => {
+      render(<LocationTable />);
+    });
+
+    expect(locationRowProps).toHaveBeenLastCalledWith(
+      expect.any(HTMLDivElement),
+    );
   });
 
   it("calls scrollToMostRecentLocation when the button is clicked", async () => {

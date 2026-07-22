@@ -94,7 +94,10 @@ describe("LocationTableRow", () => {
     expect(summaryCardProps).toHaveBeenCalledWith(
       expect.objectContaining({ locationId: "route-1" }),
     );
-    expect(useInView).toHaveBeenCalledWith({ rootMargin: "600px 0px" });
+    expect(useInView).toHaveBeenCalledWith({
+      root: null,
+      rootMargin: "600px 0px",
+    });
   });
 
   it("does not animate an eligible fusion on initial render", () => {
