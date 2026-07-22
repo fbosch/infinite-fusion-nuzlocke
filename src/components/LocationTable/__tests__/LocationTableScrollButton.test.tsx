@@ -143,6 +143,13 @@ describe("LocationTable scroll-to-recent button", () => {
   });
 
   it("scrolls to the most recent location without animation on page load", async () => {
+    const requestAnimationFrame = vi
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation((callback) => {
+        callback(0);
+        return 0;
+      });
+
     await act(async () => {
       render(<LocationTable />);
     });
@@ -156,6 +163,8 @@ describe("LocationTable scroll-to-recent button", () => {
     expect(screen.getByRole("table").parentElement?.className).not.toContain(
       "scroll-smooth",
     );
+
+    requestAnimationFrame.mockRestore();
   });
 
   it("calls scrollToMostRecentLocation when the button is clicked", async () => {
