@@ -85,6 +85,7 @@ export function FusionToggleButton({
           await playthroughActions.clearEncounterFromLocation(
             sourceLocationId,
             sourceField,
+            { preserveTeamMembership: true },
           );
         })
         .catch((err) => {

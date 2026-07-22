@@ -4,7 +4,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import type React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { PokemonOption } from "../PokemonOptions";
+import { FusionCombinationOption, PokemonOption } from "../PokemonOptions";
 
 vi.mock("@headlessui/react", () => ({
   ComboboxOption: ({
@@ -82,5 +82,32 @@ describe("PokemonOption", () => {
     );
 
     expect(screen.queryByText("Dup")).toBeNull();
+  });
+});
+
+describe("FusionCombinationOption", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("shows both selected Pokémon and their fusion shorthand", () => {
+    render(
+      <FusionCombinationOption
+        pokemon={{
+          id: 11,
+          name: "Metapod",
+          nationalDexId: 11,
+          fusionBody: {
+            id: 200,
+            name: "Misdreavus",
+            nationalDexId: 200,
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Metapod / Misdreavus")).toBeTruthy();
+    expect(screen.getByText("11.200")).toBeTruthy();
+    expect(screen.getAllByTestId("pokemon-sprite")).toHaveLength(2);
   });
 });

@@ -38,11 +38,37 @@ interface PendingClear {
   pokemon: PokemonOptionType;
 }
 
-interface PendingOverwrite {
-  field: "head" | "body";
-  currentPokemon: PokemonOptionType;
-  newPokemon: PokemonOptionType;
-}
+type PendingOverwrite =
+  | {
+      kind: "pokemon";
+      field: "head" | "body";
+      currentPokemon: PokemonOptionType;
+      newPokemon: PokemonOptionType;
+    }
+  | {
+      kind: "fusion";
+      currentPokemon: PokemonOptionType[];
+      head: PokemonOptionType;
+      body: PokemonOptionType;
+    };
+
+const getPokemonDataText = (pokemon: PokemonOptionType): string => {
+  const dataItems: string[] = [];
+  if (pokemon.status) {
+    dataItems.push(
+      `with the status "${pokemon.status.charAt(0).toUpperCase() + pokemon.status.slice(1)}"`,
+    );
+  }
+  if (pokemon.originalLocation) {
+    dataItems.push(
+      `which was encountered at the location: "${getLocationById(pokemon.originalLocation)?.name}"`,
+    );
+  }
+
+  return dataItems.length > 1
+    ? `${dataItems.slice(0, -1).join(", ")} and ${dataItems[dataItems.length - 1]}`
+    : (dataItems[0] ?? "");
+};
 
 interface ConfirmationState {
   showClearConfirmation: boolean;
@@ -177,20 +203,7 @@ export function EncounterCell({
   // Generate confirmation message based on what data would be lost
   const getConfirmationMessage = useCallback(
     (pokemon: PokemonOptionType): string => {
-      const dataItems: string[] = [];
-      if (pokemon.status)
-        dataItems.push(
-          `with the status "${pokemon.status.charAt(0).toUpperCase() + pokemon.status.slice(1)}"`,
-        );
-      if (pokemon.originalLocation)
-        dataItems.push(
-          `which was encountered at the location: "${getLocationById(pokemon.originalLocation)?.name}"`,
-        );
-
-      const dataText =
-        dataItems.length > 1
-          ? `${dataItems.slice(0, -1).join(", ")} and ${dataItems[dataItems.length - 1]}`
-          : dataItems[0];
+      const dataText = getPokemonDataText(pokemon);
 
       return `This will permanently remove ${`${pokemon.nickname} `}the ${pokemon.name}${dataText ? ` ${dataText}` : ""}.`;
     },
@@ -203,22 +216,29 @@ export function EncounterCell({
       currentPokemon: PokemonOptionType,
       newPokemon: PokemonOptionType,
     ): string => {
-      const currentDataItems: string[] = [];
-      if (currentPokemon.status)
-        currentDataItems.push(
-          `with the status "${currentPokemon.status.charAt(0).toUpperCase() + currentPokemon.status.slice(1)}"`,
-        );
-      if (currentPokemon.originalLocation)
-        currentDataItems.push(
-          `which was encountered at the location: "${getLocationById(currentPokemon.originalLocation)?.name}"`,
-        );
-
-      const currentDataText =
-        currentDataItems.length > 1
-          ? `${currentDataItems.slice(0, -1).join(", ")} and ${currentDataItems[currentDataItems.length - 1]}`
-          : currentDataItems[0];
+      const currentDataText = getPokemonDataText(currentPokemon);
 
       return `This will replace ${currentPokemon.nickname ? `${currentPokemon.nickname} the ` : ""}${currentPokemon.name}${currentDataText ? ` ${currentDataText}` : ""} with ${newPokemon.name}?`;
+    },
+    [],
+  );
+
+  const getFusionOverwriteConfirmationMessage = useCallback(
+    (
+      currentPokemon: PokemonOptionType[],
+      head: PokemonOptionType,
+      body: PokemonOptionType,
+    ): string => {
+      const replacedPokemon = currentPokemon
+        .map((pokemon) => {
+          const name = pokemon.nickname
+            ? `${pokemon.nickname} the ${pokemon.name}`
+            : pokemon.name;
+          const dataText = getPokemonDataText(pokemon);
+          return `${name}${dataText ? ` ${dataText}` : ""}`;
+        })
+        .join(" and ");
+      return `This will replace ${replacedPokemon} with the fusion ${head.name}/${body.name}?`;
     },
     [],
   );
@@ -269,6 +289,31 @@ export function EncounterCell({
     [handleEncounterSelect],
   );
 
+  const handleSingleFusionChange = useCallback(
+    (head: PokemonOptionType, body: PokemonOptionType) => {
+      const existingPokemon = [headPokemon, bodyPokemon].filter(
+        (pokemon): pokemon is PokemonOptionType => pokemon !== null,
+      );
+      const valuablePokemon = existingPokemon.filter(hasValuableData);
+
+      if (valuablePokemon.length > 0) {
+        dispatch({
+          type: "SHOW_OVERWRITE_CONFIRMATION",
+          payload: {
+            kind: "fusion",
+            currentPokemon: existingPokemon,
+            head,
+            body,
+          },
+        });
+        return;
+      }
+
+      playthroughActions.createFusion(locationId, head, body);
+    },
+    [locationId, headPokemon, bodyPokemon, hasValuableData],
+  );
+
   // Handle confirmation dialog confirm action
   const handleConfirmClear = useCallback(() => {
     if (confirmationState.pendingClear) {
@@ -299,6 +344,16 @@ export function EncounterCell({
   // Handle overwrite confirmation dialog confirm action
   const handleConfirmOverwrite = useCallback(() => {
     if (confirmationState.pendingOverwrite) {
+      if (confirmationState.pendingOverwrite.kind === "fusion") {
+        playthroughActions.createFusion(
+          locationId,
+          confirmationState.pendingOverwrite.head,
+          confirmationState.pendingOverwrite.body,
+        );
+        dispatch({ type: "CONFIRM_OVERWRITE" });
+        return;
+      }
+
       let pokemonToUpdate = confirmationState.pendingOverwrite.newPokemon;
 
       // Apply default status based on Pokemon source
@@ -346,14 +401,13 @@ export function EncounterCell({
     dispatch({ type: "CLOSE_DIALOGS" });
   }, [confirmationState.wasOverwriteConfirmed]);
 
-  // Create separate handlers for head and body clearing
-  const handleBeforeClearHead = useCallback(
-    (currentValue: PokemonOptionType): Promise<boolean> => {
-      return new Promise((resolve) => {
+  const requestClearConfirmation = useCallback(
+    (field: "head" | "body", currentValue: PokemonOptionType) => {
+      return new Promise<boolean>((resolve) => {
         if (hasValuableData(currentValue)) {
           dispatch({
             type: "SHOW_CLEAR_CONFIRMATION",
-            payload: { field: "head", pokemon: currentValue },
+            payload: { field, pokemon: currentValue },
           });
           pendingClearResolveRef.current = resolve;
         } else {
@@ -362,113 +416,68 @@ export function EncounterCell({
       });
     },
     [hasValuableData],
+  );
+
+  const requestOverwriteConfirmation = useCallback(
+    (
+      field: "head" | "body",
+      currentValue: PokemonOptionType,
+      newValue: PokemonOptionType,
+    ) => {
+      return new Promise<boolean>((resolve) => {
+        if (hasValuableData(currentValue)) {
+          dispatch({
+            type: "SHOW_OVERWRITE_CONFIRMATION",
+            payload: {
+              kind: "pokemon",
+              field,
+              currentPokemon: currentValue,
+              newPokemon: newValue,
+            },
+          });
+          pendingOverwriteResolveRef.current = resolve;
+        } else {
+          resolve(true);
+        }
+      });
+    },
+    [hasValuableData],
+  );
+
+  const handleBeforeClearHead = useCallback(
+    (currentValue: PokemonOptionType) =>
+      requestClearConfirmation("head", currentValue),
+    [requestClearConfirmation],
   );
 
   const handleBeforeClearBody = useCallback(
-    (currentValue: PokemonOptionType): Promise<boolean> => {
-      return new Promise((resolve) => {
-        if (hasValuableData(currentValue)) {
-          dispatch({
-            type: "SHOW_CLEAR_CONFIRMATION",
-            payload: { field: "body", pokemon: currentValue },
-          });
-          pendingClearResolveRef.current = resolve;
-        } else {
-          resolve(true);
-        }
-      });
-    },
-    [hasValuableData],
+    (currentValue: PokemonOptionType) =>
+      requestClearConfirmation("body", currentValue),
+    [requestClearConfirmation],
   );
 
   const handleBeforeClearSingle = useCallback(
-    (currentValue: PokemonOptionType): Promise<boolean> => {
-      return new Promise((resolve) => {
-        if (hasValuableData(currentValue)) {
-          dispatch({
-            type: "SHOW_CLEAR_CONFIRMATION",
-            payload: { field: "head", pokemon: currentValue },
-          });
-          pendingClearResolveRef.current = resolve;
-        } else {
-          resolve(true);
-        }
-      });
-    },
-    [hasValuableData],
+    (currentValue: PokemonOptionType) =>
+      requestClearConfirmation("head", currentValue),
+    [requestClearConfirmation],
   );
 
-  // Create separate handlers for head and body overwrite
   const handleBeforeOverwriteHead = useCallback(
-    (
-      currentValue: PokemonOptionType,
-      newValue: PokemonOptionType,
-    ): Promise<boolean> => {
-      return new Promise((resolve) => {
-        if (hasValuableData(currentValue)) {
-          dispatch({
-            type: "SHOW_OVERWRITE_CONFIRMATION",
-            payload: {
-              field: "head",
-              currentPokemon: currentValue,
-              newPokemon: newValue,
-            },
-          });
-          pendingOverwriteResolveRef.current = resolve;
-        } else {
-          resolve(true);
-        }
-      });
-    },
-    [hasValuableData],
+    (currentValue: PokemonOptionType, newValue: PokemonOptionType) =>
+      requestOverwriteConfirmation("head", currentValue, newValue),
+    [requestOverwriteConfirmation],
   );
 
   const handleBeforeOverwriteBody = useCallback(
-    (
-      currentValue: PokemonOptionType,
-      newValue: PokemonOptionType,
-    ): Promise<boolean> => {
-      return new Promise((resolve) => {
-        if (hasValuableData(currentValue)) {
-          dispatch({
-            type: "SHOW_OVERWRITE_CONFIRMATION",
-            payload: {
-              field: "body",
-              currentPokemon: currentValue,
-              newPokemon: newValue,
-            },
-          });
-          pendingOverwriteResolveRef.current = resolve;
-        } else {
-          resolve(true);
-        }
-      });
-    },
-    [hasValuableData],
+    (currentValue: PokemonOptionType, newValue: PokemonOptionType) =>
+      requestOverwriteConfirmation("body", currentValue, newValue),
+    [requestOverwriteConfirmation],
   );
 
   const handleBeforeOverwriteSingle = useCallback(
-    (
-      currentValue: PokemonOptionType,
-      newValue: PokemonOptionType,
-    ): Promise<boolean> => {
-      return new Promise((resolve) => {
-        if (hasValuableData(currentValue)) {
-          dispatch({
-            type: "SHOW_OVERWRITE_CONFIRMATION",
-            payload: {
-              field: "head",
-              currentPokemon: currentValue,
-              newPokemon: newValue,
-            },
-          });
-          pendingOverwriteResolveRef.current = resolve;
-        } else {
-          resolve(true);
-        }
-      });
-    },
-    [hasValuableData],
+    (currentValue: PokemonOptionType, newValue: PokemonOptionType) =>
+      requestOverwriteConfirmation("head", currentValue, newValue),
+    [requestOverwriteConfirmation],
   );
 
   // Handle fusion toggle
@@ -579,6 +588,7 @@ export function EncounterCell({
               isCustomLocation={isCustomLocation}
               value={selectedPokemon}
               onChange={handleSingleChange}
+              onFusionChange={handleSingleFusionChange}
               placeholder="Select Pokémon"
               nicknamePlaceholder="Enter nickname"
               comboboxId={`${locationId}-single`}
@@ -619,10 +629,16 @@ export function EncounterCell({
         title="Replace Encounter?"
         message={
           confirmationState.pendingOverwrite
-            ? getOverwriteConfirmationMessage(
-                confirmationState.pendingOverwrite.currentPokemon,
-                confirmationState.pendingOverwrite.newPokemon,
-              )
+            ? confirmationState.pendingOverwrite.kind === "fusion"
+              ? getFusionOverwriteConfirmationMessage(
+                  confirmationState.pendingOverwrite.currentPokemon,
+                  confirmationState.pendingOverwrite.head,
+                  confirmationState.pendingOverwrite.body,
+                )
+              : getOverwriteConfirmationMessage(
+                  confirmationState.pendingOverwrite.currentPokemon,
+                  confirmationState.pendingOverwrite.newPokemon,
+                )
             : ""
         }
         confirmText="Replace Encounter"

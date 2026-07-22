@@ -1,6 +1,7 @@
 // Import mocks first (must be at top level for Vitest hoisting)
 import "./mocks";
 
+import { PokemonStatus } from "@/loaders/pokemon";
 // Import shared setup and utilities
 import {
   beforeEach,
@@ -118,6 +119,87 @@ describe("Playthroughs Store - Core Movement Operations", () => {
       expect(encounters?.["route-1"].head?.nickname).toBe("Sparky");
       expect(encounters?.["route-1"].body?.name).toBe("Charmander");
       expect(encounters?.["route-1"].body?.nickname).toBe("Flame");
+    });
+
+    it("removes discarded team identities when replacing an encounter", async () => {
+      const pikachu = createMockPokemon("Pikachu", 25);
+      await playthroughActions.updateEncounter("route-1", {
+        ...pikachu,
+        status: PokemonStatus.CAPTURED,
+      });
+
+      const discardedUid =
+        playthroughActions.getEncounters()?.["route-1"].head?.uid;
+      expect(discardedUid).toBeDefined();
+
+      await playthroughActions.createFusion(
+        "route-1",
+        createMockPokemon("Metapod", 11),
+        createMockPokemon("Misdreavus", 200),
+      );
+
+      const activePlaythrough = playthroughActions.getActivePlaythrough();
+      expect(
+        activePlaythrough?.team.members.some(
+          (member) =>
+            member?.headPokemonUid === discardedUid ||
+            member?.bodyPokemonUid === discardedUid,
+        ),
+      ).toBe(false);
+    });
+
+    it("replaces participating team members with the resulting fusion", async () => {
+      await playthroughActions.updateEncounter("route-1", {
+        ...createMockPokemon("Pikachu", 25),
+        status: PokemonStatus.CAPTURED,
+      });
+      await playthroughActions.updateEncounter("route-2", {
+        ...createMockPokemon("Charmander", 4),
+        status: PokemonStatus.CAPTURED,
+      });
+
+      const encounters = playthroughActions.getEncounters();
+      const head = encounters?.["route-1"].head;
+      const body = encounters?.["route-2"].head;
+      expect(head).toBeDefined();
+      expect(body).toBeDefined();
+
+      await playthroughActions.createFusion("route-1", head!, body!);
+
+      const activePlaythrough = playthroughActions.getActivePlaythrough();
+      expect(activePlaythrough?.team.members).toContainEqual({
+        headPokemonUid: head?.uid,
+        bodyPokemonUid: body?.uid,
+      });
+    });
+
+    it("preserves a manually assigned team slot for non-auto-assignable fusions", async () => {
+      await playthroughActions.updateEncounter("route-1", {
+        ...createMockPokemon("Pikachu", 25),
+        status: PokemonStatus.MISSED,
+      });
+      await playthroughActions.updateEncounter("route-2", {
+        ...createMockPokemon("Charmander", 4),
+        status: PokemonStatus.MISSED,
+      });
+
+      const encounters = playthroughActions.getEncounters();
+      const head = encounters?.["route-1"].head;
+      const body = encounters?.["route-2"].head;
+      await playthroughActions.updateTeamMember(
+        2,
+        { uid: head?.uid ?? "" },
+        { uid: body?.uid ?? "" },
+      );
+
+      await playthroughActions.createFusion("route-1", head!, body!);
+
+      expect(
+        playthroughActions.getActivePlaythrough()?.team.members[2],
+      ).toEqual({
+        headPokemonUid: head?.uid,
+        bodyPokemonUid: body?.uid,
+      });
     });
   });
 

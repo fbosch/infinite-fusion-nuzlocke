@@ -129,6 +129,32 @@ describe("LocationTableRow", () => {
     expect(playEvolution).toHaveBeenCalledOnce();
   });
 
+  it("animates when a singular encounter becomes a fusion", () => {
+    canFuse.mockReturnValue(true);
+    const view = render(
+      <table>
+        <tbody>
+          <LocationTableRow row={createRow()} />
+        </tbody>
+      </table>,
+    );
+    useEncounter.mockReturnValue({
+      head: { id: 11, name: "Metapod" },
+      body: { id: 200, name: "Misdreavus" },
+      isFusion: true,
+    });
+
+    view.rerender(
+      <table>
+        <tbody>
+          <LocationTableRow row={createRow()} />
+        </tbody>
+      </table>,
+    );
+
+    expect(playEvolution).toHaveBeenCalledOnce();
+  });
+
   it("does not animate an invalid fusion combination", () => {
     useEncounter.mockReturnValue({
       head: { id: 25, name: "Pikachu" },
