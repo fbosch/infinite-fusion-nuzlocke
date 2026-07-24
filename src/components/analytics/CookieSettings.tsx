@@ -14,16 +14,11 @@ import clsx from "clsx";
 import { Cookie, X } from "lucide-react";
 import { useState } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-
-interface ConsentPreferences {
-  analytics: boolean;
-  speedInsights: boolean;
-}
-
-const DEFAULT_PREFERENCES: ConsentPreferences = {
-  analytics: false,
-  speedInsights: false,
-};
+import {
+  type ConsentPreferences,
+  consentPreferencesSchema,
+  DEFAULT_CONSENT_PREFERENCES,
+} from "@/lib/consentPreferences";
 
 interface CookieSettingsProps {
   isOpen: boolean;
@@ -40,7 +35,8 @@ export function CookieSettings({ isOpen, onClose }: CookieSettingsProps) {
   const [preferences, setStoredPreferences] =
     useLocalStorage<ConsentPreferences>(
       "cookie-preferences",
-      DEFAULT_PREFERENCES,
+      DEFAULT_CONSENT_PREFERENCES,
+      consentPreferencesSchema,
     );
 
   if (isOpen === false) {
@@ -191,7 +187,7 @@ function CookieSettingsDialog({
             <div className="flex space-x-3">
               <button
                 type="button"
-                onClick={() => savePreferences(DEFAULT_PREFERENCES)}
+                onClick={() => savePreferences(DEFAULT_CONSENT_PREFERENCES)}
                 className="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white  py-3 px-4 rounded-md transition-colors"
               >
                 Reject All

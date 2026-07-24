@@ -4,7 +4,11 @@ let
     glib
     nss
     nspr
+    atk
     at-spi2-core
+    at-spi2-atk
+    cairo
+    cups
     dbus
     libX11
     libXcomposite
@@ -13,10 +17,13 @@ let
     libXfixes
     libXrandr
     libgbm
+    libdrm
     expat
     libxcb
     libxkbcommon
+    pango
     udev
+    wayland
     alsa-lib
   ];
 in {

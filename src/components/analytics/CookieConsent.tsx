@@ -5,16 +5,12 @@ import { Cookie, Settings, X } from "lucide-react";
 import { useState } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useMounted } from "@/hooks/useMounted";
-
-interface ConsentPreferences {
-  analytics: boolean;
-  speedInsights: boolean;
-}
-
-const DEFAULT_PREFERENCES: ConsentPreferences = {
-  analytics: false,
-  speedInsights: false,
-};
+import {
+  type ConsentPreferences,
+  consentGivenSchema,
+  consentPreferencesSchema,
+  DEFAULT_CONSENT_PREFERENCES,
+} from "@/lib/consentPreferences";
 
 interface CookieBannerProps {
   onAcceptAll: () => void;
@@ -166,10 +162,15 @@ function CookieSettings({
 export function CookieConsent() {
   const [showSettings, setShowSettings] = useState(false);
   const mounted = useMounted();
-  const [hasConsent, setHasConsent] = useLocalStorage("cookie-consent", false);
+  const [hasConsent, setHasConsent] = useLocalStorage(
+    "cookie-consent",
+    false,
+    consentGivenSchema,
+  );
   const [preferences, setPreferences] = useLocalStorage<ConsentPreferences>(
     "cookie-preferences",
-    DEFAULT_PREFERENCES,
+    DEFAULT_CONSENT_PREFERENCES,
+    consentPreferencesSchema,
   );
 
   const savePreferences = (newPreferences: ConsentPreferences) => {
@@ -186,7 +187,7 @@ export function CookieConsent() {
   };
 
   const rejectAll = () => {
-    savePreferences(DEFAULT_PREFERENCES);
+    savePreferences(DEFAULT_CONSENT_PREFERENCES);
   };
 
   const handlePreferenceChange = (

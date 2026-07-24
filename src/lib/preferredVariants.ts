@@ -1,8 +1,10 @@
 import { proxyMap } from "valtio/utils";
+import { z } from "zod";
 import { getSpriteId } from "./sprites";
 
 const PREFERRED_VARIANTS_STORAGE_KEY = "preferredVariants:v1";
 const LEGACY_PREFERRED_VARIANTS_STORAGE_KEY = "preferredVariants";
+const preferredVariantsSchema = z.array(z.tuple([z.string(), z.string()]));
 
 // Use Valtio's proxyMap for reactivity
 export const preferredVariants = proxyMap<string, string>();
@@ -11,17 +13,28 @@ export const preferredVariants = proxyMap<string, string>();
 if (typeof window !== "undefined") {
   try {
     const stored = localStorage.getItem(PREFERRED_VARIANTS_STORAGE_KEY);
-    const legacyStored = stored
-      ? null
-      : localStorage.getItem(LEGACY_PREFERRED_VARIANTS_STORAGE_KEY);
-    const persistedVariants = stored || legacyStored;
-    if (persistedVariants) {
-      const entries = JSON.parse(persistedVariants);
+    const legacyStored = localStorage.getItem(
+      LEGACY_PREFERRED_VARIANTS_STORAGE_KEY,
+    );
+    const parseEntries = (value: string | null) => {
+      if (value === null || value === "") return null;
+
+      try {
+        const result = preferredVariantsSchema.safeParse(JSON.parse(value));
+        return result.success ? result.data : null;
+      } catch {
+        return null;
+      }
+    };
+    const storedEntries = parseEntries(stored);
+    const legacyEntries = parseEntries(legacyStored);
+    const entries = storedEntries ?? legacyEntries;
+    if (entries) {
       for (const [key, value] of entries) {
         preferredVariants.set(key, value);
       }
 
-      if (legacyStored) {
+      if (storedEntries === null && legacyEntries !== null && legacyStored) {
         localStorage.setItem(PREFERRED_VARIANTS_STORAGE_KEY, legacyStored);
         localStorage.removeItem(LEGACY_PREFERRED_VARIANTS_STORAGE_KEY);
       }

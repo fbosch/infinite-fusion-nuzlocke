@@ -1,9 +1,10 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react";
+import type { z } from "zod";
 
 const callbacks = new Set<(key: string) => void>();
 
 // fallback storage for data that cannot be stored in localStorage
-const fallbackStorage = new Map<string, unknown>();
+const fallbackStorage = new Map<string, string>();
 
 function triggerCallbacks(key: string): void {
   for (const callback of [...callbacks]) {
@@ -24,19 +25,35 @@ function triggerCallbacks(key: string): void {
 export function useLocalStorage<T>(
   key: string,
   initialValue: T,
+  schema: z.ZodType<T>,
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
-  const stringifiedInitialValue = JSON.stringify(initialValue);
+  const serialize = (value: T): string => JSON.stringify(value) ?? "null";
+  const stringifiedInitialValue = serialize(initialValue);
+
+  const parseSnapshot = (snapshot: string | null): T => {
+    if (snapshot === null) return initialValue;
+
+    try {
+      const parsed = JSON.parse(snapshot);
+      const result = schema.safeParse(parsed);
+      return result.success ? result.data : initialValue;
+    } catch {
+      return initialValue;
+    }
+  };
 
   const getSnapshot = (): string | null => {
-    const item =
-      // Check if the key exists in fallback storage
-      fallbackStorage.has(key)
-        ? fallbackStorage.get(key) // use cached value
-        : typeof window !== "undefined" && globalThis.localStorage
-          ? globalThis.localStorage.getItem(key) // otherwise get from localStorage
-          : null;
+    if (fallbackStorage.has(key)) {
+      return fallbackStorage.get(key) ?? null;
+    }
 
-    return item ? (item as string) : null;
+    try {
+      return typeof window !== "undefined" && globalThis.localStorage
+        ? globalThis.localStorage.getItem(key)
+        : null;
+    } catch {
+      return null;
+    }
   };
 
   const subscribe = useCallback(
@@ -78,34 +95,29 @@ export function useLocalStorage<T>(
       const snapshot = getSnapshot();
       const value =
         typeof newValue === "function"
-          ? (newValue as (prevState: T) => T)(
-              snapshot ? (JSON.parse(snapshot) as T) : initialValue,
-            )
+          ? (newValue as (prevState: T) => T)(parseSnapshot(snapshot))
           : newValue;
 
       try {
         if (typeof window !== "undefined" && globalThis.localStorage) {
-          localStorage.setItem(key, JSON.stringify(value));
+          localStorage.setItem(key, serialize(value));
           fallbackStorage.delete(key);
         } else {
           // Store value in fallback storage if not in browser environment
-          fallbackStorage.set(key, value);
+          fallbackStorage.set(key, serialize(value));
         }
       } catch {
         // Store value in fallback storage if there's an error with localStorage
-        fallbackStorage.set(key, value);
+        fallbackStorage.set(key, serialize(value));
       }
 
       triggerCallbacks(key);
     },
-    [initialValue, key],
+    [initialValue, key, schema],
   );
 
   return useMemo(
-    () => [
-      (JSON.parse(value ? value : stringifiedInitialValue) ?? "{}") as T,
-      setState,
-    ],
+    () => [parseSnapshot(value ?? stringifiedInitialValue), setState],
     [value, setState, stringifiedInitialValue],
   );
 }
