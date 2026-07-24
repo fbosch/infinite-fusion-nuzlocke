@@ -102,11 +102,19 @@ const VALID_EVENT_PAYLOADS: Record<
   playthrough_exported: {
     ...BASE_SHARED_PROPERTIES,
   },
+  github_cta_viewed: {
+    source_surface: "fixed_top_bar",
+    route: "home",
+  },
 };
 
 const eventPayloadEntries = Object.entries(VALID_EVENT_PAYLOADS) as Array<
   [AnalyticsEventName, Record<string, AnalyticsPrimitive>]
 >;
+
+const sharedEventPayloadEntries = eventPayloadEntries.filter(
+  ([eventName]) => eventName !== ANALYTICS_EVENTS.githubCtaViewed,
+);
 
 const analyticsMock = vi.hoisted(() => ({
   track: vi.fn(),
@@ -412,7 +420,7 @@ describe("analytics transport wrapper", () => {
     },
   );
 
-  it.each(eventPayloadEntries)(
+  it.each(sharedEventPayloadEntries)(
     "rejects payload when shared contract field is missing for %s",
     (eventName, payload) => {
       localStorage.setItem(
@@ -432,6 +440,22 @@ describe("analytics transport wrapper", () => {
       expect(counters.byEvent[eventName].blocked).toBe(1);
     },
   );
+
+  it("rejects a GitHub CTA view payload with an unsupported route", () => {
+    localStorage.setItem(
+      "cookie-preferences",
+      JSON.stringify({ analytics: true }),
+    );
+    setEnvironment("production", "production");
+
+    trackEvent(ANALYTICS_EVENTS.githubCtaViewed, {
+      source_surface: "fixed_top_bar",
+      route: "licenses",
+    } as never);
+
+    expect(analyticsMock.track).not.toHaveBeenCalled();
+    expect(getAnalyticsDebugCounters().blockReasons.invalid_payload).toBe(1);
+  });
 
   it("blocks invalid payload shapes without logging payload values", () => {
     localStorage.setItem(

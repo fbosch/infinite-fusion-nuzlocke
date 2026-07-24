@@ -21,6 +21,7 @@ export const ANALYTICS_EVENTS = {
   fusionFlipped: "fusion_flipped",
   encounterMarkedDeceased: "encounter_marked_deceased",
   playthroughExported: "playthrough_exported",
+  githubCtaViewed: "github_cta_viewed",
 } as const;
 
 export type AnalyticsEventName =
@@ -162,6 +163,10 @@ export type AnalyticsEventMap = {
     viable_roster_bucket_after: ViableRosterBucket;
   };
   playthrough_exported: SharedEventProperties;
+  github_cta_viewed: {
+    source_surface: "fixed_top_bar";
+    route: "home" | "locations";
+  };
 };
 
 type BlockReason =
@@ -384,6 +389,12 @@ const analyticsEventSchemaMap = {
     })
     .strict(),
   playthrough_exported: sharedEventPropertiesSchema,
+  github_cta_viewed: z
+    .object({
+      source_surface: z.literal("fixed_top_bar"),
+      route: z.enum(["home", "locations"]),
+    })
+    .strict(),
 } as const satisfies Record<AnalyticsEventName, z.ZodType<unknown>>;
 
 const consentPreferencesSchema = z
@@ -423,6 +434,7 @@ const createByEventCounter = (): Record<AnalyticsEventName, EventCounter> => {
     fusion_flipped: { sent: 0, blocked: 0 },
     encounter_marked_deceased: { sent: 0, blocked: 0 },
     playthrough_exported: { sent: 0, blocked: 0 },
+    github_cta_viewed: { sent: 0, blocked: 0 },
   };
 };
 

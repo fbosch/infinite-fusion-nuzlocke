@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import { cleanup, render, screen } from "@testing-library/react";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Footer from "@/components/Footer";
 
@@ -13,35 +13,12 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("next-themes", () => ({
-  useTheme: () => ({
-    theme: "system",
-    resolvedTheme: "light",
-    setTheme: vi.fn(),
-  }),
-}));
-
-vi.mock("react-intersection-observer", () => ({
-  useInView: () => ({
-    ref: vi.fn(),
-    inView: true,
-  }),
-}));
-
-vi.mock("react-github-btn", () => ({
-  default: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-}));
-
 vi.mock("@/components/analytics/CookieSettingsButton", () => ({
   default: () => <button type="button">Cookie settings</button>,
 }));
 
 vi.mock("@/components/CreditsModal", () => ({
   default: () => null,
-}));
-
-vi.mock("@/hooks/useMounted", () => ({
-  useMounted: () => true,
 }));
 
 describe("Footer", () => {

@@ -12,12 +12,14 @@ const {
   toggleEncounterFusionMock,
   flipEncounterFusionMock,
   useEncounterMock,
+  useEncountersForLocationMock,
 } = vi.hoisted(() => ({
   updateEncounterMock: vi.fn(),
   createFusionMock: vi.fn(),
   toggleEncounterFusionMock: vi.fn(),
   flipEncounterFusionMock: vi.fn(),
   useEncounterMock: vi.fn(),
+  useEncountersForLocationMock: vi.fn(),
 }));
 
 vi.mock("next/image", () => ({
@@ -123,7 +125,7 @@ vi.mock("@/loaders/encounters", () => ({
     GIFT: "gift",
     TRADE: "trade",
   },
-  useEncountersForLocation: () => ({ routeEncounterData: [] }),
+  useEncountersForLocation: useEncountersForLocationMock,
 }));
 
 vi.mock("@/loaders/locations", () => ({
@@ -162,6 +164,31 @@ describe("EncounterCell", () => {
     toggleEncounterFusionMock.mockReset();
     flipEncounterFusionMock.mockReset();
     useEncounterMock.mockReset();
+    useEncountersForLocationMock.mockReset();
+    useEncountersForLocationMock.mockReturnValue({ routeEncounterData: [] });
+  });
+
+  it("does not load route encounters when deferred", () => {
+    useEncounterMock.mockReturnValue({
+      head: null,
+      body: null,
+      isFusion: false,
+      updatedAt: Date.now(),
+    });
+
+    render(
+      <table>
+        <tbody>
+          <tr>
+            <EncounterCell locationId="route-1" shouldLoad={false} />
+          </tr>
+        </tbody>
+      </table>,
+    );
+
+    expect(useEncountersForLocationMock).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: false }),
+    );
   });
 
   it("updates encounter when selecting a pokemon", () => {

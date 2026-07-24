@@ -12,14 +12,12 @@ import { LocateIcon, PlusIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMounted } from "@/hooks/useMounted";
-import { onFlashUids, onScrollToLocation } from "@/lib/events";
 import { getLocationsSortedWithCustom } from "@/loaders";
 import type { CombinedLocation } from "@/loaders/locations";
 import { useCustomLocations, useIsLoading } from "@/stores/playthroughs/hooks";
 import { playthroughActions } from "@/stores/playthroughs/index";
 import type { EncounterData } from "@/stores/playthroughs/types";
 import {
-  flashPokemonOverlaysByUids,
   scrollToLocationById,
   scrollToMostRecentLocation,
 } from "@/utils/scrollToLocation";
@@ -29,6 +27,7 @@ import LocationCell from "./LocationCell";
 import LocationTableHeader from "./LocationTableHeader";
 import LocationTableRow from "./LocationTableRow";
 import LocationTableSkeleton from "./LocationTableSkeleton";
+import { useLocationTableVirtualization } from "./useLocationTableVirtualization";
 
 const columnHelper = createColumnHelper<CombinedLocation>();
 
@@ -57,6 +56,12 @@ export default function LocationTable() {
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
+  const [tableContainerElement, setTableContainerElement] =
+    useState<HTMLDivElement | null>(null);
+  const setTableContainerRef = useCallback((element: HTMLDivElement | null) => {
+    tableContainerRef.current = element;
+    setTableContainerElement(element);
+  }, []);
 
   const data = useMemo(() => {
     try {
@@ -79,7 +84,7 @@ export default function LocationTable() {
         >,
         tableContainerRef.current,
         tableRef.current,
-        "smooth",
+        "auto",
       );
     });
   }, [mounted, isLoading, data.length]);
@@ -95,22 +100,6 @@ export default function LocationTable() {
       tableRef.current,
       "smooth",
     );
-  }, []);
-
-  // Subscribe to global scroll/flash events
-  useEffect(() => {
-    const offScroll = onScrollToLocation(({ locationId }) => {
-      // Use utility that also handles lazy content re-application
-      scrollToLocationById(locationId, { behavior: "smooth" });
-    });
-    const offFlash = onFlashUids(({ uids, durationMs }) => {
-      // Reuse overlay highlighter for comboboxes
-      flashPokemonOverlaysByUids(uids, durationMs);
-    });
-    return () => {
-      offScroll();
-      offFlash();
-    };
   }, []);
 
   const columns = useMemo(
@@ -233,6 +222,19 @@ export default function LocationTable() {
     enableColumnFilters: false,
     manualPagination: true,
   });
+  const {
+    measuredTableLayout,
+    tableRows,
+    virtualPaddingBottom,
+    virtualPaddingTop,
+    virtualRows,
+    visibleColumns,
+  } = useLocationTableVirtualization({
+    table,
+    tableContainerElement,
+    tableContainerRef,
+    tableRef,
+  });
 
   // Show skeleton loading state while component is mounting or store is initializing from IndexedDB
   if (mounted === false || isLoading) {
@@ -257,23 +259,65 @@ export default function LocationTable() {
   return (
     <div className="overflow-hidden 2xl:rounded-lg border-y md:border border-gray-200 dark:border-gray-700 xl:shadow-sm">
       <div
-        ref={tableContainerRef}
-        className="max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative scroll-smooth"
+        ref={setTableContainerRef}
+        className="max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative"
       >
         <table
           ref={tableRef}
           className="w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700 overscroll-x-contain overscroll-y-auto"
           data-scroll-container
           aria-label="Locations table"
+          aria-rowcount={tableRows.length + 1}
+          style={
+            measuredTableLayout
+              ? {
+                  minWidth: measuredTableLayout.width,
+                  tableLayout: "fixed",
+                  width: measuredTableLayout.width,
+                }
+              : undefined
+          }
         >
+          {measuredTableLayout && (
+            <colgroup>
+              {measuredTableLayout.columnWidths.map((width, index) => (
+                <col key={visibleColumns[index].id} style={{ width }} />
+              ))}
+            </colgroup>
+          )}
           <LocationTableHeader headerGroups={table.getHeaderGroups()} />
           <tbody
             className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700"
             id="location-table"
           >
-            {table.getRowModel().rows.map((row) => (
-              <LocationTableRow key={row.id} row={row} />
-            ))}
+            {virtualPaddingTop > 0 && (
+              // biome-ignore lint/a11y/noAriaHiddenOnFocusable: virtual spacer rows never receive focus.
+              <tr className="border-0" aria-hidden="true">
+                <td
+                  colSpan={visibleColumns.length}
+                  style={{ height: virtualPaddingTop }}
+                />
+              </tr>
+            )}
+            {virtualRows.map((virtualRow) => {
+              const row = tableRows[virtualRow.index];
+              return (
+                <LocationTableRow
+                  key={row.id}
+                  row={row}
+                  rowIndex={virtualRow.index}
+                />
+              );
+            })}
+            {virtualPaddingBottom > 0 && (
+              // biome-ignore lint/a11y/noAriaHiddenOnFocusable: virtual spacer rows never receive focus.
+              <tr className="border-0" aria-hidden="true">
+                <td
+                  colSpan={visibleColumns.length}
+                  style={{ height: virtualPaddingBottom }}
+                />
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

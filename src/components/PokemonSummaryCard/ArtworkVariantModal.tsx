@@ -114,7 +114,11 @@ export function ArtworkVariantModal({
   // No cleanup needed
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} className="relative z-50 group">
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      className="relative z-[70] group"
+    >
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 "

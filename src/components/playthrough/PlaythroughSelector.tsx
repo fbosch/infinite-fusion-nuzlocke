@@ -237,7 +237,7 @@ export default function PlaythroughSelector({
                   "bg-white/95 dark:bg-gray-800/95 backdrop-blur-md",
                   "shadow-dropdown",
                   "border border-gray-200/50 dark:border-gray-600/50",
-                  "w-[var(--button-width,100%)] max-w-[calc(100vw-2rem)]",
+                  "w-80 max-w-[calc(100vw-2rem)] sm:w-96",
                   "origin-top-right",
                 )}
               >

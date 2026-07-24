@@ -1,6 +1,5 @@
 import { flexRender, type Row } from "@tanstack/react-table";
 import { useEffect, useRef } from "react";
-import { useInView } from "react-intersection-observer";
 import { match } from "ts-pattern";
 import { addEvolutionListener } from "@/lib/events";
 import type { CombinedLocation } from "@/loaders/locations";
@@ -18,6 +17,7 @@ import ResetEncounterButton from "./ResetEncounterButton";
 
 interface LocationTableRowProps {
   row: Row<CombinedLocation>;
+  rowIndex?: number;
 }
 
 const EMPTY_ENCOUNTER = {
@@ -42,15 +42,15 @@ const getEffectiveFusionId = ({
   return `${head.id}.${body.id}`;
 };
 
-export default function LocationTableRow({ row }: LocationTableRowProps) {
+export default function LocationTableRow({
+  row,
+  rowIndex = row.index,
+}: LocationTableRowProps) {
   const locationId = row.original.id;
-  const { ref, inView } = useInView();
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
   const previousFusionId = useRef<string | null>(null);
   const hasInitializedFusionId = useRef(false);
   const activePlaythroughId = useActivePlaythroughId();
-  const aboveTheFold = row.index < 8;
-  const shouldLoad = inView || aboveTheFold;
   const visibleCells = row.getVisibleCells();
 
   // Get encounter data directly - only this row will rerender when this encounter changes
@@ -111,9 +111,9 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
   return (
     <tr
       key={row.id}
-      className="hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors content-visibility-auto group/row contain-intrinsic-height-[150px]"
-      ref={ref}
+      className="h-location-row hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors group/row"
       data-location-id={locationId}
+      aria-rowindex={rowIndex + 2}
     >
       {visibleCells.map((cell) =>
         match(cell.column.id)
@@ -128,16 +128,11 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
                 bodyPokemon={encounterData.body}
                 isFusion={encounterData.isFusion}
                 locationId={locationId}
-                shouldLoad={shouldLoad}
               />
             </td>
           ))
           .with("encounter", () => (
-            <EncounterCell
-              key={cell.id}
-              locationId={locationId}
-              shouldLoad={shouldLoad}
-            />
+            <EncounterCell key={cell.id} locationId={locationId} />
           ))
           .with("actions", () => {
             const hasEncounter = !!(encounterData.head || encounterData.body);

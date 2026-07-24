@@ -6,15 +6,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import LocationTableRow from "../LocationTableRow";
 
 const summaryCardProps = vi.hoisted(() => vi.fn());
+const encounterCellProps = vi.hoisted(() => vi.fn());
 const playEvolution = vi.hoisted(() => vi.fn());
 const canFuse = vi.hoisted(() => vi.fn());
 const useEncounter = vi.hoisted(() => vi.fn());
-const useInView = vi.hoisted(() => vi.fn());
 const evolutionListener = vi.hoisted(() => ({
   current: undefined as undefined | ((event: { locationId: string }) => void),
 }));
 
-const createRow = (index = 0) =>
+const createRow = (index = 0, includeEncounter = false) =>
   ({
     index,
     original: { id: "route-1", name: "Route 1" },
@@ -24,12 +24,17 @@ const createRow = (index = 0) =>
         column: { id: "sprite" },
         getContext: () => ({}),
       },
+      ...(includeEncounter
+        ? [
+            {
+              id: "encounter-cell",
+              column: { id: "encounter" },
+              getContext: () => ({}),
+            },
+          ]
+        : []),
     ],
   }) as never;
-
-vi.mock("react-intersection-observer", () => ({
-  useInView,
-}));
 
 vi.mock("@/stores/playthroughs/hooks", () => ({
   useActivePlaythroughId: () => "playthrough-1",
@@ -50,10 +55,17 @@ vi.mock("@/components/PokemonSummaryCard", () => ({
     return <div />;
   }),
 }));
+vi.mock("../EncounterCell", () => ({
+  EncounterCell: (props: unknown) => {
+    encounterCellProps(props);
+    return <td />;
+  },
+}));
 
 describe("LocationTableRow", () => {
   beforeEach(() => {
     summaryCardProps.mockClear();
+    encounterCellProps.mockClear();
     playEvolution.mockClear();
     canFuse.mockReturnValue(false);
     useEncounter.mockReturnValue({
@@ -61,7 +73,6 @@ describe("LocationTableRow", () => {
       body: null,
       isFusion: false,
     });
-    useInView.mockReturnValue({ inView: true, ref: vi.fn() });
     evolutionListener.current = undefined;
   });
 
@@ -175,22 +186,23 @@ describe("LocationTableRow", () => {
     expect(playEvolution).not.toHaveBeenCalled();
   });
 
-  it("keeps offscreen row cells mounted while deferring their content", () => {
-    useInView.mockReturnValue({ inView: false, ref: vi.fn() });
-
+  it("renders full cell content for a mounted virtual row", () => {
     const view = render(
       <table>
         <tbody>
-          <LocationTableRow row={createRow(8)} />
+          <LocationTableRow row={createRow(8, true)} />
         </tbody>
       </table>,
     );
 
     expect(summaryCardProps).toHaveBeenCalledWith(
-      expect.objectContaining({ shouldLoad: false }),
+      expect.objectContaining({ locationId: "route-1" }),
+    );
+    expect(encounterCellProps).toHaveBeenCalledWith(
+      expect.objectContaining({ locationId: "route-1" }),
     );
     expect(
-      view.queryByRole("button", { name: "Load encounters for Route 1" }),
-    ).toBeNull();
+      view.container.querySelector("tr")?.getAttribute("aria-rowindex"),
+    ).toBe("10");
   });
 });

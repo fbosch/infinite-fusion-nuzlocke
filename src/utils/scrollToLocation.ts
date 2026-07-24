@@ -1,3 +1,4 @@
+import { emitScrollToLocation } from "@/lib/events";
 import type { EncounterData } from "@/stores/playthroughs/types";
 
 // Keep teardown timers per overlay element across calls to avoid flicker
@@ -79,7 +80,9 @@ export function scrollToMostRecentLocation(
   if (!recentLocationId) return false;
 
   const targetRow = findTableRowByLocationId(tableElement, recentLocationId);
-  if (!targetRow) return false;
+  if (!targetRow) {
+    return emitScrollToLocation({ behavior, locationId: recentLocationId });
+  }
 
   scrollToTableRow(tableContainerElement, targetRow, behavior);
   return true;
@@ -226,7 +229,9 @@ export function scrollToLocationById(
   if (!tableContainerElement) return false;
 
   const targetRow = findTableRowByLocationId(tableElement, locationId);
-  if (!targetRow) return false;
+  if (!targetRow) {
+    return emitScrollToLocation({ locationId, ...options });
+  }
 
   // Determine if target row is already fully visible within container
   const containerHeight = tableContainerElement.clientHeight;
