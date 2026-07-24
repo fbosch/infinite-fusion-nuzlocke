@@ -14,7 +14,7 @@ if (typeof window !== "undefined") {
     const legacyStored = stored
       ? null
       : localStorage.getItem(LEGACY_PREFERRED_VARIANTS_STORAGE_KEY);
-    const persistedVariants = stored ?? legacyStored;
+    const persistedVariants = stored || legacyStored;
     if (persistedVariants) {
       const entries = JSON.parse(persistedVariants);
       for (const [key, value] of entries) {

@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 const callbacks = new Set<(key: string) => void>();
 
@@ -45,12 +39,6 @@ export function useLocalStorage<T>(
     return item ? (item as string) : null;
   };
 
-  const [initialStorageValue] = useState<T>(() => {
-    const snapshot = getSnapshot();
-    return snapshot ? (JSON.parse(snapshot) as T) : initialValue;
-  });
-  const previousValue = useRef(initialStorageValue);
-
   const subscribe = useCallback(
     (onStoreChange: () => void) => {
       // Return early no-op if not in browser environment
@@ -87,13 +75,15 @@ export function useLocalStorage<T>(
 
   const setState = useCallback<React.Dispatch<React.SetStateAction<T>>>(
     (newValue: React.SetStateAction<T>) => {
+      const snapshot = getSnapshot();
       const value =
         typeof newValue === "function"
-          ? (newValue as (prevState: T) => T)(previousValue.current)
+          ? (newValue as (prevState: T) => T)(
+              snapshot ? (JSON.parse(snapshot) as T) : initialValue,
+            )
           : newValue;
 
       try {
-        previousValue.current = value;
         if (typeof window !== "undefined" && globalThis.localStorage) {
           localStorage.setItem(key, JSON.stringify(value));
           fallbackStorage.delete(key);
@@ -108,7 +98,7 @@ export function useLocalStorage<T>(
 
       triggerCallbacks(key);
     },
-    [key],
+    [initialValue, key],
   );
 
   return useMemo(

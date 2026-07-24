@@ -58,12 +58,16 @@ const loadSettings = (): Settings => {
     const legacyStored = stored
       ? null
       : localStorage.getItem(LEGACY_SETTINGS_STORAGE_KEY);
-    const persistedSettings = stored ?? legacyStored;
+    const persistedSettings = stored || legacyStored;
     if (persistedSettings) {
       const parsed = JSON.parse(persistedSettings);
       // Validate and parse with Zod, merging with dynamic defaults for missing fields
       const result = SettingsSchema.safeParse(parsed);
       if (result.success) {
+        if (legacyStored) {
+          localStorage.setItem(SETTINGS_STORAGE_KEY, legacyStored);
+          localStorage.removeItem(LEGACY_SETTINGS_STORAGE_KEY);
+        }
         // If this is the first time loading and moveEncountersBetweenLocations is not set,
         // use the dynamic default based on playthrough version
         if (parsed.moveEncountersBetweenLocations === undefined) {
@@ -72,10 +76,6 @@ const loadSettings = (): Settings => {
             moveEncountersBetweenLocations:
               dynamicDefaults.moveEncountersBetweenLocations,
           };
-        }
-        if (legacyStored) {
-          localStorage.setItem(SETTINGS_STORAGE_KEY, legacyStored);
-          localStorage.removeItem(LEGACY_SETTINGS_STORAGE_KEY);
         }
         return result.data;
       } else {

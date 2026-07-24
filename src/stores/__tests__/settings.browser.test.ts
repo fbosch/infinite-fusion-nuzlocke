@@ -231,6 +231,44 @@ describe("Settings Store", () => {
       expect(localStorage.getItem("settings")).toBeNull();
     });
 
+    it("migrates partial legacy settings after applying dynamic defaults", async () => {
+      const storedSettings = { version: "1.0.0" };
+      localStorage.setItem("settings", JSON.stringify(storedSettings));
+      mockGetActivePlaythrough.mockReturnValue({
+        id: "old-playthrough",
+        name: "Old Run",
+      } as any);
+
+      const { settingsStore: freshStore } = await import(
+        `../settings?t=${Date.now()}`
+      );
+
+      expect(freshStore.moveEncountersBetweenLocations).toBe(true);
+      expect(localStorage.getItem("settings:v1")).toBe(
+        JSON.stringify(storedSettings),
+      );
+      expect(localStorage.getItem("settings")).toBeNull();
+    });
+
+    it("falls back to legacy settings when the versioned key is empty", async () => {
+      const storedSettings = {
+        moveEncountersBetweenLocations: true,
+        version: "1.0.0",
+      };
+      localStorage.setItem("settings:v1", "");
+      localStorage.setItem("settings", JSON.stringify(storedSettings));
+
+      const { settingsStore: freshStore } = await import(
+        `../settings?t=${Date.now()}`
+      );
+
+      expect(freshStore.moveEncountersBetweenLocations).toBe(true);
+      expect(localStorage.getItem("settings:v1")).toBe(
+        JSON.stringify(storedSettings),
+      );
+      expect(localStorage.getItem("settings")).toBeNull();
+    });
+
     it("uses dynamic defaults when localStorage is empty", async () => {
       // localStorage is already cleared in beforeEach
       mockGetActivePlaythrough.mockReturnValue({

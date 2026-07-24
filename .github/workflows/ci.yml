@@ -164,11 +164,15 @@ jobs:
           fi
 
       - name: Run React runtime quality audit
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE_REF: ${{ github.event.before }}
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            pnpm quality:react --base "origin/${{ github.base_ref }}"
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            pnpm quality:react --base "origin/$BASE_REF"
           else
-            pnpm quality:react --base "${{ github.event.before }}"
+            pnpm quality:react --base "$BEFORE_REF"
           fi
 
   release-gate:

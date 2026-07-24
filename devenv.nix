@@ -1,5 +1,25 @@
 { config, pkgs, ... }:
-{
+let
+  chromiumRuntimeLibs = with pkgs; [
+    glib
+    nss
+    nspr
+    at-spi2-core
+    dbus
+    libX11
+    libXcomposite
+    libXdamage
+    libXext
+    libXfixes
+    libXrandr
+    libgbm
+    expat
+    libxcb
+    libxkbcommon
+    udev
+    alsa-lib
+  ];
+in {
   languages.javascript = {
     enable = true;
     package = pkgs.nodejs-slim_24;
@@ -10,7 +30,9 @@
     pkgs.git
     pkgs.gh
     pkgs.worktrunk
-  ];
+  ] ++ chromiumRuntimeLibs;
+
+  env.LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath chromiumRuntimeLibs;
 
   tasks."pnpm:install" = {
     exec = "pnpm install --frozen-lockfile --prefer-offline";
