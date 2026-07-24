@@ -80,6 +80,7 @@ export default function AddCustomLocationModal({
               Add Custom Location
             </DialogTitle>
             <button
+              type="button"
               onClick={handleClose}
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",

@@ -173,6 +173,7 @@ export default function PokemonPCSheet({
                 Pokémon PC
               </DialogTitle>
               <button
+                type="button"
                 onClick={handleClose}
                 className={clsx(
                   "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",

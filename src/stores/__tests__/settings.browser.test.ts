@@ -210,7 +210,7 @@ describe("Settings Store", () => {
   });
 
   describe("localStorage Integration", () => {
-    it("loads settings from localStorage when available", async () => {
+    it("migrates legacy settings to the versioned localStorage key", async () => {
       const storedSettings = {
         moveEncountersBetweenLocations: true,
         version: "1.0.0",
@@ -225,6 +225,10 @@ describe("Settings Store", () => {
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
       expect(freshStore.version).toBe("1.0.0");
+      expect(localStorage.getItem("settings:v1")).toBe(
+        JSON.stringify(storedSettings),
+      );
+      expect(localStorage.getItem("settings")).toBeNull();
     });
 
     it("uses dynamic defaults when localStorage is empty", async () => {
@@ -249,7 +253,7 @@ describe("Settings Store", () => {
         version: "1.0.0",
       };
 
-      localStorage.setItem("settings", JSON.stringify(storedSettings));
+      localStorage.setItem("settings:v1", JSON.stringify(storedSettings));
       mockGetActivePlaythrough.mockReturnValue({
         id: "old-playthrough",
         name: "Old Run",
@@ -271,7 +275,7 @@ describe("Settings Store", () => {
         version: "1.0.0",
       };
 
-      localStorage.setItem("settings", JSON.stringify(storedSettings));
+      localStorage.setItem("settings:v1", JSON.stringify(storedSettings));
       mockGetActivePlaythrough.mockReturnValue({
         id: "old-playthrough",
         name: "Old Run",
@@ -288,7 +292,7 @@ describe("Settings Store", () => {
     });
 
     it("handles corrupted localStorage data gracefully", async () => {
-      localStorage.setItem("settings", "invalid-json");
+      localStorage.setItem("settings:v1", "invalid-json");
 
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
@@ -312,7 +316,7 @@ describe("Settings Store", () => {
         version: 123,
       };
 
-      localStorage.setItem("settings", JSON.stringify(invalidSettings));
+      localStorage.setItem("settings:v1", JSON.stringify(invalidSettings));
 
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
@@ -413,7 +417,7 @@ describe("Settings Store", () => {
     it("refreshes defaults only when setting was undefined", () => {
       // Mock stored settings without moveEncountersBetweenLocations
       const storedSettings = { version: "1.0.0" };
-      localStorage.setItem("settings", JSON.stringify(storedSettings));
+      localStorage.setItem("settings:v1", JSON.stringify(storedSettings));
 
       mockGetActivePlaythrough.mockReturnValue({
         id: "old-playthrough",
@@ -434,7 +438,7 @@ describe("Settings Store", () => {
         moveEncountersBetweenLocations: false,
         version: "1.0.0",
       };
-      localStorage.setItem("settings", JSON.stringify(storedSettings));
+      localStorage.setItem("settings:v1", JSON.stringify(storedSettings));
 
       mockGetActivePlaythrough.mockReturnValue({
         id: "old-playthrough",
@@ -459,7 +463,7 @@ describe("Settings Store", () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Should have saved to localStorage with updated settings
-      const stored = localStorage.getItem("settings");
+      const stored = localStorage.getItem("settings:v1");
       expect(stored).not.toBeNull();
       expect(stored!).toContain('"moveEncountersBetweenLocations":true');
     });

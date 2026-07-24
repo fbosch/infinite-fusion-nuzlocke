@@ -77,6 +77,7 @@ export function PokemonGridItem({
 
   return (
     <button
+      type="button"
       onClick={() => onSelect(pokemon, locationId)}
       disabled={!isActiveSlot && !isSelected}
       className={clsx(

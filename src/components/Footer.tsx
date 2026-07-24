@@ -72,6 +72,7 @@ export default function Footer() {
           </div>
           <div className="mt-2 md:text-center">
             <button
+              type="button"
               onClick={() => setIsCreditsOpen(true)}
               className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm cursor-pointer"
               aria-haspopup="dialog"

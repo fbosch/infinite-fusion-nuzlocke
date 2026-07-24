@@ -1,17 +1,29 @@
 import { proxyMap } from "valtio/utils";
 import { getSpriteId } from "./sprites";
 
+const PREFERRED_VARIANTS_STORAGE_KEY = "preferredVariants:v1";
+const LEGACY_PREFERRED_VARIANTS_STORAGE_KEY = "preferredVariants";
+
 // Use Valtio's proxyMap for reactivity
 export const preferredVariants = proxyMap<string, string>();
 
 // Initialize from localStorage on module load
 if (typeof window !== "undefined") {
   try {
-    const stored = localStorage.getItem("preferredVariants");
-    if (stored) {
-      const entries = JSON.parse(stored);
+    const stored = localStorage.getItem(PREFERRED_VARIANTS_STORAGE_KEY);
+    const legacyStored = stored
+      ? null
+      : localStorage.getItem(LEGACY_PREFERRED_VARIANTS_STORAGE_KEY);
+    const persistedVariants = stored ?? legacyStored;
+    if (persistedVariants) {
+      const entries = JSON.parse(persistedVariants);
       for (const [key, value] of entries) {
         preferredVariants.set(key, value);
+      }
+
+      if (legacyStored) {
+        localStorage.setItem(PREFERRED_VARIANTS_STORAGE_KEY, legacyStored);
+        localStorage.removeItem(LEGACY_PREFERRED_VARIANTS_STORAGE_KEY);
       }
     }
   } catch (error) {
@@ -26,7 +38,10 @@ if (typeof window !== "undefined") {
 const saveToStorage = () => {
   try {
     const entries = Array.from(preferredVariants.entries());
-    localStorage.setItem("preferredVariants", JSON.stringify(entries));
+    localStorage.setItem(
+      PREFERRED_VARIANTS_STORAGE_KEY,
+      JSON.stringify(entries),
+    );
   } catch (error) {
     console.error("Failed to save preferred variants to localStorage:", error);
   }

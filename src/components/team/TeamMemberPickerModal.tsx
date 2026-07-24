@@ -78,6 +78,7 @@ export default function TeamMemberPickerModal({
                 Select Pokémon for Team Slot {position + 1}
               </DialogTitle>
               <button
+                type="button"
                 onClick={onClose}
                 className={clsx(
                   "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",

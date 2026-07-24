@@ -18,6 +18,7 @@ export function TeamMemberActions({
   return (
     <div className="space-y-3">
       <button
+        type="button"
         onClick={onUpdate}
         disabled={!canUpdateTeam}
         className={clsx(
@@ -31,6 +32,7 @@ export function TeamMemberActions({
       </button>
 
       <button
+        type="button"
         onClick={onClear}
         disabled={!hasSelection}
         className={clsx(

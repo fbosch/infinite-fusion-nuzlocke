@@ -139,6 +139,7 @@ export function ArtworkVariantModal({
               Select Artwork Variant
             </DialogTitle>
             <button
+              type="button"
               onClick={handleClose}
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
@@ -265,6 +266,7 @@ export function ArtworkVariantModal({
               </RadioGroup>
               <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button
+                  type="button"
                   onClick={handleClose}
                   className={clsx(
                     "px-4 py-2 text-sm rounded-md transition-colors",
@@ -276,6 +278,7 @@ export function ArtworkVariantModal({
                   Cancel
                 </button>
                 <button
+                  type="button"
                   onClick={handleClearVariant}
                   className={clsx(
                     "px-4 py-2 text-sm rounded-md transition-colors",

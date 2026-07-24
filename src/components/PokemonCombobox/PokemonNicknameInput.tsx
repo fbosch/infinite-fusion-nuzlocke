@@ -62,6 +62,7 @@ export const PokemonNicknameInput = ({
       <input
         type="text"
         value={dragPreview.nickname || ""}
+        aria-label="Pokemon nickname"
         placeholder={placeholder}
         className={clsx(
           "rounded-bl-md border-t-0 border-r-0 rounded-t-none relative",
@@ -86,6 +87,7 @@ export const PokemonNicknameInput = ({
       defaultValue={value?.nickname || ""}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
+      aria-label="Pokemon nickname"
       placeholder={placeholder}
       ref={inputRef}
       className={clsx(

@@ -104,6 +104,7 @@ function CookieSettingsDialog({
                 </DialogTitle>
               </div>
               <button
+                type="button"
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                 aria-label="Close cookie settings"
@@ -189,12 +190,14 @@ function CookieSettingsDialog({
 
             <div className="flex space-x-3">
               <button
+                type="button"
                 onClick={() => savePreferences(DEFAULT_PREFERENCES)}
                 className="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white  py-3 px-4 rounded-md transition-colors"
               >
                 Reject All
               </button>
               <button
+                type="button"
                 onClick={() => savePreferences(localPreferences)}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white  py-3 px-4 rounded-md transition-colors"
               >
