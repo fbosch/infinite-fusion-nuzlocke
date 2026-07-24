@@ -4,7 +4,8 @@ import { afterEach, describe, expect, it } from "vitest";
 
 describe("preferredVariants persistence", () => {
   afterEach(() => {
-    localStorage.clear();
+    localStorage.removeItem("preferredVariants:v1");
+    localStorage.removeItem("preferredVariants");
   });
 
   it("falls back to and migrates legacy data when the versioned key is empty", async () => {
