@@ -44,8 +44,6 @@ pnpm dev
 
 Open [http://localhost:4000](http://localhost:4000).
 
-If you use devenv, `devenv shell` provides the pinned Node.js, pnpm, git, GitHub CLI, and Worktrunk tooling, then runs dependency and git hook setup on entry.
-
 ## Common Scripts
 
 ```bash
@@ -84,14 +82,7 @@ For behavior or run-state changes, run checks in this order:
 pnpm type-check
 pnpm test:run
 pnpm validate
-pnpm quality:pre-push
 ```
-
-`pnpm quality:pre-push` runs Fallow's structural quality gate and React Doctor's
-changed-code runtime diagnostics. React Doctor is limited to bugs, performance,
-accessibility, and security; Fallow owns dependency hygiene, dead code,
-architecture, duplication, and complexity. Run `pnpm react-doctor:badge` manually
-to refresh the informational README score badge.
 
 ## Contributing
 
