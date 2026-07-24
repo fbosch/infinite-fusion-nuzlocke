@@ -4,6 +4,7 @@ Track Pokemon Infinite Fusion Nuzlocke runs with encounter logging, team and box
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-149eca)](https://react.dev/)
+[![React Doctor](https://img.shields.io/badge/React_Doctor-43%2F100-orange)](https://github.com/millionco/react-doctor)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-blue)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Coverage](docs/coverage.svg)](https://app.codecov.io/gh/fbosch/infinite-fusion-nuzlocke)
