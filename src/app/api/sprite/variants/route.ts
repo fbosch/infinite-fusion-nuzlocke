@@ -7,9 +7,6 @@ import type { SpriteVariantsResponse } from "@/types/sprites";
 
 export const revalidate = 86400;
 
-// Request deduplication cache for CDN optimization
-const processingCache = new Map<string, Promise<NextResponse>>();
-
 /**
  * Handle CORS preflight requests
  */
@@ -69,12 +66,6 @@ export async function GET(request: NextRequest) {
     // Ignore cache busting version parameter (v)
     const maxVariants = 50;
 
-    // Check if we're already processing this request (CDN deduplication)
-    const cacheKey = `sprite-variants-${id}`;
-    if (processingCache.has(cacheKey)) {
-      return processingCache.get(cacheKey)!;
-    }
-
     // Validate input
     if (!id) {
       const errorResponse = NextResponse.json(
@@ -98,17 +89,8 @@ export async function GET(request: NextRequest) {
       return errorResponse;
     }
 
-    // Create processing promise and cache it
-    const processingPromise = processSpriteVariants(id, maxVariants);
-    processingCache.set(cacheKey, processingPromise);
-
-    // Clean up cache after completion
-    processingPromise.finally(() => {
-      processingCache.delete(cacheKey);
-    });
-
     // Wrap promise to handle rejections with proper error response and CORS headers
-    return processingPromise.catch((error) => {
+    return processSpriteVariants(id, maxVariants).catch((error) => {
       console.error("Error processing sprite variants:", error);
 
       const errorResponse = NextResponse.json(

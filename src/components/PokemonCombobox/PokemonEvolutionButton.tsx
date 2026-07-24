@@ -97,6 +97,7 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
       </MenuButton>
 
       <FloatingPortal>
+        {/* react-doctor-disable-next-line react-hooks-js/refs -- Floating UI callback refs run during commit, not render. */}
         <MenuItems
           ref={refs.setFloating}
           style={floatingStyles}

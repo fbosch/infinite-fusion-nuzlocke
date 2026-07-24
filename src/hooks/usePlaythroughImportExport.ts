@@ -7,6 +7,32 @@ import {
   trackImportPickerFailure,
 } from "./playthroughImportExportWorkflow";
 
+async function handleImportFileChange(
+  input: HTMLInputElement,
+  event: Event,
+  setImportErrorMessage: React.Dispatch<React.SetStateAction<string>>,
+  setShowImportError: React.Dispatch<React.SetStateAction<boolean>>,
+) {
+  try {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const result = await importPlaythroughFile(file);
+    if (!result.ok) {
+      setImportErrorMessage(result.errorMessage);
+      setShowImportError(true);
+    }
+  } catch (error) {
+    console.error("Failed to import playthrough:", error);
+    setImportErrorMessage(getImportErrorMessage(error, "Import failed"));
+    setShowImportError(true);
+  } finally {
+    input.remove();
+  }
+}
+
 export function usePlaythroughImportExport() {
   const [showImportError, setShowImportError] = useState(false);
   const [importErrorMessage, setImportErrorMessage] = useState("");
@@ -38,27 +64,13 @@ export function usePlaythroughImportExport() {
       input.type = "file";
       input.accept = ".json,application/json,text/plain";
 
-      input.onchange = async (e) => {
-        try {
-          const target = e.target as HTMLInputElement;
-          const file = target.files?.[0];
-
-          if (!file) {
-            return;
-          }
-
-          const result = await importPlaythroughFile(file);
-          if (!result.ok) {
-            setImportErrorMessage(result.errorMessage);
-            setShowImportError(true);
-          }
-        } catch (error) {
-          console.error("Failed to import playthrough:", error);
-          setImportErrorMessage(getImportErrorMessage(error, "Import failed"));
-          setShowImportError(true);
-        } finally {
-          input.remove();
-        }
+      input.onchange = (event) => {
+        void handleImportFileChange(
+          input,
+          event,
+          setImportErrorMessage,
+          setShowImportError,
+        );
       };
 
       input.click();

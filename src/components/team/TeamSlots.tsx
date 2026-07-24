@@ -93,13 +93,9 @@ export default function TeamSlots() {
     previousFusionIds.current = new Array(6).fill(null);
   }, [activePlaythrough?.id]);
 
-  const teamSlots = useMemo(
-    () =>
-      activePlaythrough?.team
-        ? getTeamSlots(activePlaythrough.team.members, encounters, pokemonByUid)
-        : [],
-    [activePlaythrough?.team, encounters, pokemonByUid],
-  );
+  const teamSlots = activePlaythrough?.team
+    ? getTeamSlots(activePlaythrough.team.members, encounters, pokemonByUid)
+    : [];
 
   // Track fusion ID changes and play evolution animations for team members
   useEffect(() => {

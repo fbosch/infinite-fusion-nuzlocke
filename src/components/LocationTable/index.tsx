@@ -213,6 +213,7 @@ export default function LocationTable() {
     [smallScreen, handleScrollToRecent],
   );
 
+  // react-doctor-disable-next-line react-hooks-js/incompatible-library -- TanStack Table is intentionally excluded from compiler memoization above.
   const table = useReactTable({
     data,
     columns,

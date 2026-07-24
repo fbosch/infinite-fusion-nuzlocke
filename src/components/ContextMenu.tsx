@@ -467,6 +467,7 @@ export function ContextMenu({
     <>
       {/* Custom trigger element */}
       {isValidElement(children) &&
+        // react-doctor-disable-next-line react-hooks-js/refs -- Floating UI callback refs run during commit, not render.
         cloneElement(children, {
           ref: (node: HTMLElement | null) => {
             refs.setReference(node);
@@ -505,6 +506,7 @@ export function ContextMenu({
               aria-orientation="vertical"
               {...getFloatingProps()}
             >
+              {/* react-doctor-disable-next-line react-hooks-js/refs -- List refs are populated for commit-time Floating UI navigation. */}
               {visibleItems.map((item: ContextMenuItem, _index: number) => {
                 if (item.separator) {
                   return (

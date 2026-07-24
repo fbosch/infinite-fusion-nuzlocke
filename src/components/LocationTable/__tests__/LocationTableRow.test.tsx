@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 
-import { fireEvent, render } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { forwardRef, useImperativeHandle } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import LocationTableRow from "../LocationTableRow";
@@ -175,7 +175,7 @@ describe("LocationTableRow", () => {
     expect(playEvolution).not.toHaveBeenCalled();
   });
 
-  it("renders an offscreen row as a fixed-height placeholder", () => {
+  it("keeps offscreen row cells mounted while deferring their content", () => {
     useInView.mockReturnValue({ inView: false, ref: vi.fn() });
 
     const view = render(
@@ -186,15 +186,11 @@ describe("LocationTableRow", () => {
       </table>,
     );
 
-    expect(
-      view.getByRole("button", { name: "Load encounters for Route 1" }),
-    ).toBeTruthy();
-    expect(summaryCardProps).not.toHaveBeenCalled();
-
-    fireEvent.click(
-      view.getByRole("button", { name: "Load encounters for Route 1" }),
+    expect(summaryCardProps).toHaveBeenCalledWith(
+      expect.objectContaining({ shouldLoad: false }),
     );
-
-    expect(summaryCardProps).toHaveBeenCalled();
+    expect(
+      view.queryByRole("button", { name: "Load encounters for Route 1" }),
+    ).toBeNull();
   });
 });

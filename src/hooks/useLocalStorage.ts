@@ -1,4 +1,10 @@
-import { useCallback, useMemo, useRef, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 const callbacks = new Set<(key: string) => void>();
 
@@ -39,13 +45,11 @@ export function useLocalStorage<T>(
     return item ? (item as string) : null;
   };
 
-  const initialStorageSnapshot = useRef<string | null>(getSnapshot());
-
-  const initialStorageValue = useRef<T>(
-    initialStorageSnapshot
-      ? (JSON.parse(initialStorageSnapshot.current as string) as T)
-      : initialValue,
-  );
+  const [initialStorageValue] = useState<T>(() => {
+    const snapshot = getSnapshot();
+    return snapshot ? (JSON.parse(snapshot) as T) : initialValue;
+  });
+  const previousValue = useRef(initialStorageValue);
 
   const subscribe = useCallback(
     (onStoreChange: () => void) => {
@@ -85,11 +89,11 @@ export function useLocalStorage<T>(
     (newValue: React.SetStateAction<T>) => {
       const value =
         typeof newValue === "function"
-          ? (newValue as (prevState: T) => T)(initialStorageValue.current)
+          ? (newValue as (prevState: T) => T)(previousValue.current)
           : newValue;
 
       try {
-        initialStorageValue.current = value;
+        previousValue.current = value;
         if (typeof window !== "undefined" && globalThis.localStorage) {
           localStorage.setItem(key, JSON.stringify(value));
           fallbackStorage.delete(key);
