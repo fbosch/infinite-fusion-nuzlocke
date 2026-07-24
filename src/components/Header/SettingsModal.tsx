@@ -51,6 +51,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               Settings
             </DialogTitle>
             <button
+              type="button"
               onClick={onClose}
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
@@ -86,6 +87,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 ].map(({ value, icon: Icon, label }) => (
                   <button
                     key={value}
+                    type="button"
                     onClick={() => setTheme(value)}
                     className={clsx(
                       "flex items-center justify-center w-8 h-8 rounded transition-all duration-200 cursor-pointer",

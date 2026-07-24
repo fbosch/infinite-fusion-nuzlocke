@@ -97,32 +97,22 @@ export default function PokemonPCSheet({
     [openPicker],
   );
 
-  const team: Entry[] = useMemo(
-    () =>
-      activePlaythrough?.team
-        ? getTeamSlots(
-            activePlaythrough.team.members,
-            encounters,
-            pokemonByUid,
-          ).map(
-            ({
-              position,
-              locationName,
-              headPokemon,
-              bodyPokemon,
-              isFusion,
-            }) => ({
-              locationId: `team-slot-${position}`,
-              locationName,
-              head: headPokemon,
-              body: bodyPokemon,
-              position,
-              isFusion,
-            }),
-          )
-        : [],
-    [activePlaythrough?.team, encounters, pokemonByUid],
-  );
+  const team: Entry[] = activePlaythrough?.team
+    ? getTeamSlots(
+        activePlaythrough.team.members,
+        encounters,
+        pokemonByUid,
+      ).map(
+        ({ position, locationName, headPokemon, bodyPokemon, isFusion }) => ({
+          locationId: `team-slot-${position}`,
+          locationName,
+          head: headPokemon,
+          body: bodyPokemon,
+          position,
+          isFusion,
+        }),
+      )
+    : [];
 
   const deceased: Entry[] = useMemo(
     () => getDeceasedEntries(encounters, idToName),
@@ -183,6 +173,7 @@ export default function PokemonPCSheet({
                 Pokémon PC
               </DialogTitle>
               <button
+                type="button"
                 onClick={handleClose}
                 className={clsx(
                   "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",

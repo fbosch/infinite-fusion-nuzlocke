@@ -56,8 +56,6 @@ interface ActionPreviewProps {
   otherFieldPokemon: PokemonOptionType | null;
   remainingPokemon: PokemonOptionType | null;
   movingPokemon: PokemonOptionType | null;
-  targetLocationId: string;
-  sourceLocationId: string;
   selectedTargetField: "head" | "body";
   sourceMoveTargetField: "head" | "body";
 }
@@ -121,8 +119,6 @@ function ActionPreview({
   otherFieldPokemon,
   remainingPokemon,
   movingPokemon,
-  targetLocationId: _targetLocationId, // eslint-disable-line @typescript-eslint/no-unused-vars
-  sourceLocationId: _sourceLocationId, // eslint-disable-line @typescript-eslint/no-unused-vars
   selectedTargetField,
   sourceMoveTargetField,
 }: ActionPreviewProps) {
@@ -351,8 +347,6 @@ function LocationItem({
                 otherFieldPokemon={otherFieldPokemon}
                 remainingPokemon={remainingPokemon}
                 movingPokemon={movingPokemon}
-                targetLocationId={location.id}
-                sourceLocationId={currentLocationId}
                 selectedTargetField={selectedTargetField}
                 sourceMoveTargetField={moveTargetField}
               />
@@ -658,7 +652,11 @@ function LocationSelector({
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-gray-400" />
             </div>
+            <label className="sr-only" htmlFor="location-selector-search">
+              Search locations or Pokemon names
+            </label>
             <input
+              id="location-selector-search"
               type="text"
               placeholder="Search locations or Pokemon names..."
               value={searchQuery}

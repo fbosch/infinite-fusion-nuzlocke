@@ -163,6 +163,18 @@ jobs:
             pnpm exec fallow audit --base "${{ github.event.before }}" --format compact
           fi
 
+      - name: Run React runtime quality audit
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE_REF: ${{ github.event.before }}
+        run: |
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            pnpm quality:react --base "origin/$BASE_REF"
+          else
+            pnpm quality:react --base "$BEFORE_REF"
+          fi
+
   release-gate:
     name: Release Gate
     runs-on: ubuntu-latest

@@ -438,6 +438,7 @@ export const PokemonCombobox = ({
 
   const shouldVirtualize = finalOptions.length > 30;
 
+  // react-doctor-disable-next-line react-hooks-js/incompatible-library -- TanStack Virtual is intentionally excluded from compiler memoization above.
   const virtualizer = useVirtualizer({
     count: finalOptions.length,
     getScrollElement: () => optionsRef.current,

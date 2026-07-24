@@ -46,6 +46,7 @@ export class ErrorBoundary extends React.Component<
               An error occurred while loading this content.
             </p>
             <button
+              type="button"
               onClick={() => this.setState({ hasError: false })}
               className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
             >

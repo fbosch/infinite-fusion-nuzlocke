@@ -346,15 +346,11 @@ export function DraggableComboboxSprite({
     field,
   ]);
 
-  const originalLocationName = useMemo(() => {
-    if (!pokemon?.originalLocation || pokemon.originalLocation === locationId) {
-      return null;
-    }
-    return (
-      getLocationByIdFromMerged(pokemon.originalLocation, customLocations)
-        ?.name || pokemon.originalLocation
-    );
-  }, [pokemon?.originalLocation, locationId, customLocations]);
+  const originalLocationName =
+    !pokemon?.originalLocation || pokemon.originalLocation === locationId
+      ? null
+      : (getLocationByIdFromMerged(pokemon.originalLocation, customLocations)
+          ?.name ?? pokemon.originalLocation);
 
   if (!pokemon) return null;
 

@@ -5,6 +5,9 @@ import {
   playthroughsStore,
 } from "@/stores/playthroughs/store";
 
+const SETTINGS_STORAGE_KEY = "settings:v1";
+const LEGACY_SETTINGS_STORAGE_KEY = "settings";
+
 // Zod schema for settings validation
 export const SettingsSchema = z.object({
   moveEncountersBetweenLocations: z.boolean().default(false),
@@ -51,12 +54,20 @@ const loadSettings = (): Settings => {
   if (typeof window === "undefined") return dynamicDefaults;
 
   try {
-    const stored = localStorage.getItem("settings");
-    if (stored) {
-      const parsed = JSON.parse(stored);
+    const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    const legacyStored = stored
+      ? null
+      : localStorage.getItem(LEGACY_SETTINGS_STORAGE_KEY);
+    const persistedSettings = stored || legacyStored;
+    if (persistedSettings) {
+      const parsed = JSON.parse(persistedSettings);
       // Validate and parse with Zod, merging with dynamic defaults for missing fields
       const result = SettingsSchema.safeParse(parsed);
       if (result.success) {
+        if (legacyStored) {
+          localStorage.setItem(SETTINGS_STORAGE_KEY, legacyStored);
+          localStorage.removeItem(LEGACY_SETTINGS_STORAGE_KEY);
+        }
         // If this is the first time loading and moveEncountersBetweenLocations is not set,
         // use the dynamic default based on playthrough version
         if (parsed.moveEncountersBetweenLocations === undefined) {
@@ -88,7 +99,7 @@ if (typeof window !== "undefined") {
       // Validate settings before saving
       const result = SettingsSchema.safeParse(settingsStore);
       if (result.success) {
-        localStorage.setItem("settings", JSON.stringify(result.data));
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(result.data));
       } else {
         console.error("Invalid settings data, not saving:", result.error);
       }
@@ -132,7 +143,9 @@ export const settingsActions = {
   // Function to re-evaluate defaults when playthrough changes
   // This should be called when switching playthroughs if the setting hasn't been explicitly set
   refreshDefaults: () => {
-    const stored = localStorage.getItem("settings");
+    const stored =
+      localStorage.getItem(SETTINGS_STORAGE_KEY) ??
+      localStorage.getItem(LEGACY_SETTINGS_STORAGE_KEY);
     if (!stored) {
       // No settings stored yet, apply dynamic defaults
       updateSettings(getDefaultSettings());

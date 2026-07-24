@@ -61,62 +61,62 @@ export function PokemonSlotSelector({
   };
 
   return (
-    <div
-      onClick={() => onSlotSelect(slot)}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          onSlotSelect(slot);
-        }
-      }}
-      role="button"
-      tabIndex={0}
-      className={clsx(
-        "border-2 rounded-lg p-2 transition-colors text-left h-24 relative cursor-pointer",
-        getSlotStyles(),
-      )}
-    >
-      <div className="absolute top-2 left-2">
-        <div className="flex items-center space-x-2">
-          <Icon className={`h-5 w-5 ${getIconColor()}`} />
-          <h3 className={clsx("font-medium text-sm", getLabelColor())}>
-            {slotLabel}
-          </h3>
-        </div>
-      </div>
-
-      {selectedPokemon ? (
-        <div className="absolute inset-0 flex items-center justify-center space-x-3 pt-6">
-          <PokemonSprite
-            pokemonId={selectedPokemon.pokemon.id}
-            className="h-12 w-12"
-          />
-          <div>
-            <div className={clsx("font-medium text-sm", getPokemonNameColor())}>
-              {selectedPokemon.pokemon.nickname || selectedPokemon.pokemon.name}
-            </div>
-            {selectedPokemon.pokemon.nickname && (
-              <div className={clsx("text-xs", getPokemonSpeciesColor())}>
-                ({selectedPokemon.pokemon.name})
-              </div>
-            )}
+    <div className="relative h-24">
+      <button
+        type="button"
+        onClick={() => onSlotSelect(slot)}
+        className={clsx(
+          "relative h-full w-full border-2 rounded-lg p-2 text-left transition-colors cursor-pointer",
+          getSlotStyles(),
+        )}
+      >
+        <div className="absolute top-2 left-2">
+          <div className="flex items-center space-x-2">
+            <Icon className={`h-5 w-5 ${getIconColor()}`} />
+            <h3 className={clsx("font-medium text-sm", getLabelColor())}>
+              {slotLabel}
+            </h3>
           </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemovePokemon();
-            }}
-            className="absolute top-2 right-2 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 p-1 bg-white dark:bg-gray-700 rounded-full shadow-sm"
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-500 pt-6">
-          {isActive
-            ? "Click a Pokémon below to assign"
-            : `Click to select ${slot}`}
-        </div>
+
+        {selectedPokemon ? (
+          <div className="absolute inset-0 flex items-center justify-center space-x-3 pt-6">
+            <PokemonSprite
+              pokemonId={selectedPokemon.pokemon.id}
+              className="h-12 w-12"
+            />
+            <div>
+              <div
+                className={clsx("font-medium text-sm", getPokemonNameColor())}
+              >
+                {selectedPokemon.pokemon.nickname ||
+                  selectedPokemon.pokemon.name}
+              </div>
+              {selectedPokemon.pokemon.nickname && (
+                <div className={clsx("text-xs", getPokemonSpeciesColor())}>
+                  ({selectedPokemon.pokemon.name})
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center pt-6 text-gray-400 dark:text-gray-500">
+            {isActive
+              ? "Click a Pokémon below to assign"
+              : `Click to select ${slot}`}
+          </div>
+        )}
+      </button>
+
+      {selectedPokemon && (
+        <button
+          type="button"
+          onClick={onRemovePokemon}
+          aria-label={`Remove ${slotLabel}`}
+          className="absolute top-2 right-2 z-10 rounded-full bg-white p-1 text-gray-400 shadow-sm hover:text-red-600 dark:bg-gray-700 dark:text-gray-500 dark:hover:text-red-400"
+        >
+          <X className="h-4 w-4" />
+        </button>
       )}
     </div>
   );

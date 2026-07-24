@@ -171,6 +171,15 @@ describe("PlaythroughSelector", () => {
     expect(document.activeElement).toBe(newestRow);
   });
 
+  it("keeps row actions outside the playthrough selection button", () => {
+    render(<PlaythroughSelector />);
+
+    const exportButton = screen.getByRole("button", {
+      name: "Export Newest Run",
+    });
+    expect(exportButton.parentElement?.closest("button")).toBeNull();
+  });
+
   it("selects a playthrough with Enter key", async () => {
     render(<PlaythroughSelector />);
 

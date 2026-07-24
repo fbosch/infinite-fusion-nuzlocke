@@ -5,16 +5,12 @@ import { Cookie, Settings, X } from "lucide-react";
 import { useState } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useMounted } from "@/hooks/useMounted";
-
-interface ConsentPreferences {
-  analytics: boolean;
-  speedInsights: boolean;
-}
-
-const DEFAULT_PREFERENCES: ConsentPreferences = {
-  analytics: false,
-  speedInsights: false,
-};
+import {
+  type ConsentPreferences,
+  consentGivenSchema,
+  consentPreferencesSchema,
+  DEFAULT_CONSENT_PREFERENCES,
+} from "@/lib/consentPreferences";
 
 interface CookieBannerProps {
   onAcceptAll: () => void;
@@ -47,18 +43,21 @@ function CookieBanner({
         {/* Actions section */}
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <button
+            type="button"
             onClick={onAcceptAll}
             className="bg-blue-600 hover:bg-blue-700 text-white  py-2 sm:py-1.5 px-4 sm:px-3 rounded text-sm transition-colors whitespace-nowrap order-1 sm:order-1"
           >
             Accept All
           </button>
           <button
+            type="button"
             onClick={onOpenSettings}
             className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white  py-2 sm:py-1.5 px-4 sm:px-3 rounded text-sm transition-colors whitespace-nowrap order-2 sm:order-2"
           >
             Customize
           </button>
           <button
+            type="button"
             onClick={onRejectAll}
             className="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100  py-2 sm:py-1.5 px-4 sm:px-3 text-sm transition-colors whitespace-nowrap border border-gray-300 dark:border-gray-600 sm:border-0 rounded order-3 sm:order-3"
           >
@@ -95,6 +94,7 @@ function CookieSettings({
           </h3>
         </div>
         <button
+          type="button"
           onClick={onClose}
           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
           aria-label="Close settings"
@@ -141,12 +141,14 @@ function CookieSettings({
 
       <div className="flex space-x-3">
         <button
+          type="button"
           onClick={onSavePreferences}
           className="flex-1 bg-blue-600 hover:bg-blue-700 text-white  py-2 px-4 rounded-md transition-colors"
         >
           Save Preferences
         </button>
         <button
+          type="button"
           onClick={onRejectAll}
           className="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white  py-2 px-4 rounded-md transition-colors"
         >
@@ -160,10 +162,15 @@ function CookieSettings({
 export function CookieConsent() {
   const [showSettings, setShowSettings] = useState(false);
   const mounted = useMounted();
-  const [hasConsent, setHasConsent] = useLocalStorage("cookie-consent", false);
+  const [hasConsent, setHasConsent] = useLocalStorage(
+    "cookie-consent",
+    false,
+    consentGivenSchema,
+  );
   const [preferences, setPreferences] = useLocalStorage<ConsentPreferences>(
     "cookie-preferences",
-    DEFAULT_PREFERENCES,
+    DEFAULT_CONSENT_PREFERENCES,
+    consentPreferencesSchema,
   );
 
   const savePreferences = (newPreferences: ConsentPreferences) => {
@@ -180,7 +187,7 @@ export function CookieConsent() {
   };
 
   const rejectAll = () => {
-    savePreferences(DEFAULT_PREFERENCES);
+    savePreferences(DEFAULT_CONSENT_PREFERENCES);
   };
 
   const handlePreferenceChange = (

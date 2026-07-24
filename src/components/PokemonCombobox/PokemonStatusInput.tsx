@@ -130,6 +130,7 @@ export const PokemonStatusInput = ({
                     <MenuItem key={statusValue}>
                       {({ focus }) => (
                         <button
+                          type="button"
                           onClick={() => handleStatusSelect(statusValue)}
                           className={clsx(
                             "group flex w-full items-center px-4 py-2 text-sm cursor-pointer",

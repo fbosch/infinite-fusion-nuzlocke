@@ -12,17 +12,12 @@ import {
   toDormancyBucket,
 } from "@/lib/analytics/playthroughEventData";
 import { trackEvent } from "@/lib/analytics/trackEvent";
+import {
+  type ConsentPreferences,
+  consentPreferencesSchema,
+  DEFAULT_CONSENT_PREFERENCES,
+} from "@/lib/consentPreferences";
 import { useActivePlaythrough, useIsLoading } from "./hooks";
-
-type ConsentPreferences = {
-  analytics: boolean;
-  speedInsights: boolean;
-};
-
-const DEFAULT_CONSENT_PREFERENCES: ConsentPreferences = {
-  analytics: false,
-  speedInsights: false,
-};
 
 export function PlaythroughResumeObserver() {
   const activePlaythrough = useActivePlaythrough();
@@ -32,6 +27,7 @@ export function PlaythroughResumeObserver() {
   const [preferences] = useLocalStorage<ConsentPreferences>(
     "cookie-preferences",
     DEFAULT_CONSENT_PREFERENCES,
+    consentPreferencesSchema,
   );
   const hasAnalyticsConsent = preferences.analytics;
 

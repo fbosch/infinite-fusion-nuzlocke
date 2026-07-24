@@ -44,14 +44,14 @@ const getEffectiveFusionId = ({
 
 export default function LocationTableRow({
   row,
-  rowIndex = row.index,
+  rowIndex,
 }: LocationTableRowProps) {
   const locationId = row.original.id;
+  const resolvedRowIndex = rowIndex ?? row.index;
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
   const previousFusionId = useRef<string | null>(null);
   const hasInitializedFusionId = useRef(false);
   const activePlaythroughId = useActivePlaythroughId();
-
   const visibleCells = row.getVisibleCells();
 
   // Get encounter data directly - only this row will rerender when this encounter changes
@@ -114,7 +114,7 @@ export default function LocationTableRow({
       key={row.id}
       className="h-location-row hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors group/row"
       data-location-id={locationId}
-      aria-rowindex={rowIndex + 2}
+      aria-rowindex={resolvedRowIndex + 2}
     >
       {visibleCells.map((cell) =>
         match(cell.column.id)

@@ -114,6 +114,7 @@ export default function LocationTable() {
                 delay={300}
               >
                 <button
+                  type="button"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.stopPropagation();
@@ -141,6 +142,7 @@ export default function LocationTable() {
               </CursorTooltip>
               <CursorTooltip content={"Add a custom location"} delay={300}>
                 <button
+                  type="button"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.stopPropagation();
@@ -202,6 +204,7 @@ export default function LocationTable() {
     [smallScreen, handleScrollToRecent],
   );
 
+  // react-doctor-disable-next-line react-hooks-js/incompatible-library -- TanStack Table is intentionally excluded from compiler memoization above.
   const table = useReactTable({
     data,
     columns,

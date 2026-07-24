@@ -324,6 +324,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
 
       {isTooltipVisible && (
         <FloatingPortal>
+          {/* react-doctor-disable-next-line react-hooks-js/refs -- Floating UI callback refs run during commit, not render. */}
           <div
             className="z-[9999] pointer-events-none"
             ref={refs.setFloating}

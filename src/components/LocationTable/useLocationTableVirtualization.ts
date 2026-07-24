@@ -66,6 +66,7 @@ export function useLocationTableVirtualization({
   const layoutSnapshot = useContainerLayoutSnapshot(tableContainerElement);
   const tableRows = table.getRowModel().rows;
   const visibleColumns = table.getVisibleLeafColumns();
+  // react-doctor-disable-next-line react-hooks-js/incompatible-library -- TanStack Virtual owns imperative scroll state outside compiler memoization.
   const rowVirtualizer = useVirtualizer({
     count: tableRows.length,
     getScrollElement: () => tableContainerRef.current,
