@@ -1,39 +1,33 @@
 "use client";
 
 import clsx from "clsx";
-import { ArrowDownToDot, ArrowUpRight, Atom, Home, Undo2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import type React from "react";
 import { useState } from "react";
 import { useSnapshot } from "valtio";
 import spritesheetMetadata from "@/assets/pokemon-gen8-spritesheet-metadata.json";
-import { emitEvolutionEvent } from "@/lib/events";
-import { getLocationByIdFromMerged, getLocations } from "@/loaders/locations";
+import { getLocationByIdFromMerged } from "@/loaders/locations";
 import {
-  isEggId,
   type PokemonOptionType,
   usePokemonEvolutionData,
 } from "@/loaders/pokemon";
 import { dragActions } from "@/stores/dragStore";
+import { playthroughActions } from "@/stores/playthroughs";
 import { useCustomLocations } from "@/stores/playthroughs/hooks";
-import { playthroughActions } from "@/stores/playthroughs/index";
-import { getActivePlaythrough } from "@/stores/playthroughs/store";
-import type { EncounterData } from "@/stores/playthroughs/types";
 import { settingsStore } from "@/stores/settings";
 import usePokemonTypes from "../../hooks/usePokemonTypes";
-import ContextMenu, { type ContextMenuItem } from "../ContextMenu";
+import ContextMenu from "../ContextMenu";
 import { CursorTooltip } from "../CursorTooltip";
 import { PokemonSprite } from "../PokemonSprite";
 import { DraggableSpriteTooltipContent } from "./DraggableSpriteTooltipContent";
+import { getDraggableComboboxSpriteMenuOptions } from "./draggableComboboxSpriteMenu";
 
 const LocationSelector = dynamic(
   () =>
     import("../PokemonSummaryCard/LocationSelector").then(
       (mod) => mod.LocationSelector,
     ),
-  {
-    ssr: false,
-  },
+  { ssr: false },
 );
 
 interface DraggableComboboxSpriteProps {
@@ -55,277 +49,23 @@ export function DraggableComboboxSprite({
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const customLocations = useCustomLocations();
   const settings = useSnapshot(settingsStore);
-
   const { primary, secondary } = usePokemonTypes({ id: pokemon?.id });
   const { evolutions, preEvolution } = usePokemonEvolutionData(
     pokemon?.id,
     true,
   );
-
-  // Extract field from comboboxId
   const field = comboboxId?.includes("-body") ? "body" : "head";
 
-  // Get available locations (excluding current one)
-  const availableLocations = locationId
-    ? getLocations().filter((location) => location.id !== locationId)
-    : [];
-
-  // Check if moving to original location would create egg fusion
-  let wouldCreateEggFusionAtOriginal = false;
-  if (value?.originalLocation && locationId) {
-    // Check if the Pokemon is an egg
-    const isPokemonEgg = isEggId(value.id);
-
-    // Check if there's a Pokemon in the opposite slot at the original location
-    const activePlaythrough = getActivePlaythrough();
-    const encounters = activePlaythrough?.encounters as
-      | Record<string, EncounterData>
-      | undefined;
-    const originalEncounter = encounters?.[value.originalLocation];
-    if (originalEncounter) {
-      // If the original location encounter is not a fusion (isFusion = false),
-      // then no fusion will be created regardless of what's in the body slot
-      // UNLESS we're moving an egg or there's an egg in the target location
-      if (!originalEncounter.isFusion) {
-        // For non-fusion encounters, only prevent if there's an egg involved
-        const headPokemon = originalEncounter.head;
-        const bodyPokemon = originalEncounter.body;
-
-        // If moving an egg and there's any Pokemon in the target location
-        if (isPokemonEgg && (headPokemon || bodyPokemon)) {
-          wouldCreateEggFusionAtOriginal = true;
-        }
-
-        // If there's an egg in the target location and we're moving a Pokemon
-        if (
-          (headPokemon && isEggId(headPokemon.id)) ||
-          (bodyPokemon && isEggId(bodyPokemon.id))
-        ) {
-          wouldCreateEggFusionAtOriginal = true;
-        }
-      } else {
-        // For fusion encounters, check the opposite slot
-        const oppositeField = field === "head" ? "body" : "head";
-        const oppositePokemon = originalEncounter[oppositeField];
-
-        // If moving Pokemon is an egg and there's a Pokemon in the opposite slot, it would create egg fusion
-        if (isPokemonEgg && oppositePokemon) {
-          wouldCreateEggFusionAtOriginal = true;
-        }
-
-        // If there's an egg in the opposite slot and we're moving a Pokemon, it would create egg fusion
-        if (oppositePokemon && isEggId(oppositePokemon.id)) {
-          wouldCreateEggFusionAtOriginal = true;
-        }
-      }
-    }
-  }
-
-  // Handle move to location
-  const handleMoveToLocation = async (
-    targetLocationId: string,
-    targetField: "head" | "body",
-  ) => {
-    if (!value || !locationId) return;
-
-    await playthroughActions.relocateEncounterSlot({
-      sourceLocationId: locationId,
-      sourceField: field,
-      targetLocationId,
-      targetField,
-    });
-  };
-
-  // Handle move to original location
-  const handleMoveToOriginalLocation = async () => {
-    if (!value || !locationId) return;
-
-    await playthroughActions.moveToOriginalLocation(locationId, field, value);
-  };
-
-  const menuOptions: ContextMenuItem[] = [];
-
-  // Add move to original location option if Pokemon has an original location and isn't already there
-  if (
-    value &&
-    locationId &&
-    value.originalLocation &&
-    value.originalLocation !== locationId &&
-    settings.moveEncountersBetweenLocations
-  ) {
-    const originalLocation = getLocationByIdFromMerged(
-      value.originalLocation,
-      customLocations,
-    );
-    if (originalLocation) {
-      const isDisabled = wouldCreateEggFusionAtOriginal;
-      menuOptions.push({
-        id: "move-to-original",
-        label: "Move to Original Location",
-        tooltip: isDisabled
-          ? "Cannot move to original location - would create egg fusion"
-          : originalLocation.name,
-        icon: Home,
-        onClick: handleMoveToOriginalLocation,
-        disabled: isDisabled,
-      });
-    }
-  }
-
-  // Add move option if we have a Pokemon and location with available destinations
-  if (
-    value &&
-    locationId &&
-    availableLocations.length > 0 &&
-    settings.moveEncountersBetweenLocations
-  ) {
-    menuOptions.push({
-      id: "move",
-      label: "Move to Location",
-      icon: ArrowDownToDot,
-      onClick: () => setIsMoveModalOpen(true),
-    });
-  }
-
-  if (
-    value &&
-    locationId &&
-    (preEvolution || evolutions?.length) &&
-    settings.moveEncountersBetweenLocations
-  ) {
-    menuOptions.push({
-      id: "evolve-separator",
-      separator: true,
-    });
-  }
-
-  // Add devolve option if pre-evolution exists
-  if (value && locationId && preEvolution) {
-    menuOptions.push({
-      id: "devolve",
-      label: (
-        <div className="flex items-center gap-x-2 w-full">
-          <div className="flex items-center justify-center size-6 flex-shrink-0">
-            <PokemonSprite pokemonId={preEvolution.id} generation="gen7" />
-          </div>
-          <span className="truncate">Devolve to {preEvolution.name}</span>
-        </div>
-      ),
-      icon: Undo2,
-      onClick: async () => {
-        if (!value || !locationId || !preEvolution) return;
-        const devolved: PokemonOptionType = {
-          ...value,
-          id: preEvolution.id,
-          name: preEvolution.name,
-          nationalDexId: preEvolution.nationalDexId,
-        };
-        await playthroughActions.updateEncounter(
-          locationId,
-          devolved,
-          field,
-          false,
-        );
-      },
-    });
-  }
-
-  // Add evolve option(s)
-  if (value && locationId && evolutions && evolutions.length > 0) {
-    if (evolutions.length === 1) {
-      const evo = evolutions[0]!;
-      menuOptions.push({
-        id: `evolve-${evo.id}`,
-        label: (
-          <div className="flex items-center gap-x-2 w-full">
-            <div className="flex items-center justify-center size-6 flex-shrink-0">
-              <PokemonSprite pokemonId={evo.id} generation="gen7" />
-            </div>
-            <span className="truncate">Evolve to {evo.name}</span>
-          </div>
-        ),
-        icon: Atom,
-        onClick: async () => {
-          if (!value || !locationId) return;
-          const evolved: PokemonOptionType = {
-            ...value,
-            id: evo.id,
-            name: evo.name,
-            nationalDexId: evo.nationalDexId,
-          };
-          await playthroughActions.updateEncounter(
-            locationId,
-            evolved,
-            field,
-            false,
-          );
-          const id = locationId ?? value?.originalLocation ?? null;
-          if (id) emitEvolutionEvent(id);
-        },
-      });
-    } else {
-      menuOptions.push({
-        id: "evolve",
-        label: "Evolve to…",
-        icon: Atom,
-        children: evolutions.map((evo) => ({
-          id: `evolve-${evo.id}`,
-          label: (
-            <div className="flex items-center gap-x-2 w-full">
-              <div className="flex items-center justify-center size-6 flex-shrink-0">
-                <PokemonSprite pokemonId={evo.id} generation="gen7" />
-              </div>
-              <span className="truncate">{evo.name}</span>
-            </div>
-          ),
-          onClick: async () => {
-            if (!value || !locationId) return;
-            const evolved: PokemonOptionType = {
-              ...value,
-              id: evo.id,
-              name: evo.name,
-              nationalDexId: evo.nationalDexId,
-            };
-            await playthroughActions.updateEncounter(
-              locationId,
-              evolved,
-              field,
-              false,
-            );
-            const id = locationId ?? value?.originalLocation ?? null;
-            if (id) emitEvolutionEvent(id);
-          },
-        })),
-      });
-    }
-  }
-  const infinitefusiondexLink = `https://infinitefusiondex.com/details/${value?.id}`;
-  const fusiondexLink = `https://fusiondex.org/sprite/pif/${value?.id}/`;
-
-  menuOptions.push(
-    {
-      id: "separator",
-      separator: true,
-    },
-    {
-      id: "infinitefusiondex",
-      label: "Open InfiniteDex entry",
-      href: infinitefusiondexLink,
-      target: "_blank",
-      favicon: "https://infinitefusiondex.com/images/favicon.ico",
-      icon: ArrowUpRight,
-      iconClassName: "dark:text-blue-300 text-blue-400",
-    },
-    {
-      id: "fusiondex",
-      label: "Open FusionDex entry",
-      href: fusiondexLink,
-      target: "_blank",
-      favicon: "https://www.fusiondex.org/favicon.ico",
-      icon: ArrowUpRight,
-      iconClassName: "dark:text-blue-300 text-blue-400",
-    },
-  );
+  const menuOptions = getDraggableComboboxSpriteMenuOptions({
+    value,
+    locationId,
+    field,
+    customLocations,
+    moveEncountersBetweenLocations: settings.moveEncountersBetweenLocations,
+    preEvolution,
+    evolutions,
+    onOpenMoveModal: () => setIsMoveModalOpen(true),
+  });
 
   const originalLocationName =
     !pokemon?.originalLocation || pokemon.originalLocation === locationId
@@ -335,38 +75,38 @@ export function DraggableComboboxSprite({
 
   if (!pokemon) return null;
 
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
     if (disabled || !settingsStore.moveEncountersBetweenLocations) {
-      e.preventDefault();
+      event.preventDefault();
       return;
     }
-    const sprite = e.currentTarget.querySelector("img") as HTMLImageElement;
-    if (sprite && pokemon) {
-      const spriteMetadata = spritesheetMetadata.sprites.find(
-        (s) => s.id === pokemon.id,
+
+    const sprite = event.currentTarget.querySelector("img") as HTMLImageElement;
+    const spriteMetadata = spritesheetMetadata.sprites.find(
+      (metadata) => metadata.id === pokemon.id,
+    );
+    if (sprite && spriteMetadata) {
+      const dragElement = document.createElement("div");
+      dragElement.style.cssText = `
+        width: ${spriteMetadata.width}px;
+        height: ${spriteMetadata.height}px;
+        background-image: url(${sprite.src});
+        background-position: -${spriteMetadata.x}px -${spriteMetadata.y}px;
+        background-repeat: no-repeat;
+        position: absolute;
+        top: -1000px;
+        image-rendering: pixelated;
+      `;
+      document.body.appendChild(dragElement);
+      event.dataTransfer.setDragImage(
+        dragElement,
+        spriteMetadata.width / 2,
+        spriteMetadata.height / 2,
       );
-      if (spriteMetadata) {
-        const dragElement = document.createElement("div");
-        dragElement.style.cssText = `
-          width: ${spriteMetadata.width}px;
-          height: ${spriteMetadata.height}px;
-          background-image: url(${sprite.src});
-          background-position: -${spriteMetadata.x}px -${spriteMetadata.y}px;
-          background-repeat: no-repeat;
-          position: absolute;
-          top: -1000px;
-          image-rendering: pixelated;
-        `;
-        document.body.appendChild(dragElement);
-        e.dataTransfer.setDragImage(
-          dragElement,
-          spriteMetadata.width / 2,
-          spriteMetadata.height / 2,
-        );
-        setTimeout(() => document.body.removeChild(dragElement), 0);
-      }
+      setTimeout(() => document.body.removeChild(dragElement), 0);
     }
-    e.dataTransfer.setData("text/plain", pokemon.name);
+
+    event.dataTransfer.setData("text/plain", pokemon.name);
     dragActions.startDrag(pokemon.name, comboboxId || "", pokemon);
   };
 
@@ -377,10 +117,7 @@ export function DraggableComboboxSprite({
           <CursorTooltip
             disabled={!!dragPreview || disabled}
             delay={500}
-            offset={{
-              mainAxis: 8,
-              crossAxis: 8,
-            }}
+            offset={{ mainAxis: 8, crossAxis: 8 }}
             placement="bottom-start"
             content={
               <DraggableSpriteTooltipContent
@@ -409,7 +146,7 @@ export function DraggableComboboxSprite({
               <PokemonSprite
                 pokemonId={pokemon.id}
                 className={clsx(
-                  dragPreview && "opacity-60 pointer-events-none", // Make preview sprite opaque
+                  dragPreview && "opacity-60 pointer-events-none",
                 )}
                 draggable={false}
               />
@@ -418,16 +155,19 @@ export function DraggableComboboxSprite({
         </div>
       </ContextMenu>
 
-      {/* Location Selector Modal */}
       <LocationSelector
         isOpen={isMoveModalOpen}
         onClose={() => setIsMoveModalOpen(false)}
         currentLocationId={locationId || ""}
-        onSelectLocation={(
-          targetLocationId: string,
-          targetField: "head" | "body",
-        ) => {
-          handleMoveToLocation(targetLocationId, targetField);
+        onSelectLocation={(targetLocationId, targetField) => {
+          if (value && locationId) {
+            void playthroughActions.relocateEncounterSlot({
+              sourceLocationId: locationId,
+              sourceField: field,
+              targetLocationId,
+              targetField,
+            });
+          }
           setIsMoveModalOpen(false);
         }}
         encounterData={value ? { [field]: value } : null}
