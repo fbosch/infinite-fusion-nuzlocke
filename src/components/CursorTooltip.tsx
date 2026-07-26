@@ -28,7 +28,9 @@ import {
 import { twMerge } from "tailwind-merge";
 import { useSnapshot } from "valtio";
 import { useGlobalTooltip } from "@/contexts/GlobalTooltipContext";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useWindowVisibility } from "@/hooks/useWindowVisibility";
+import { settingsStore } from "@/stores/settings";
 import { dragStore } from "../stores/dragStore";
 
 // Helper functions to calculate offsets based on placement
@@ -91,6 +93,8 @@ export function CursorTooltip(props: CursorTooltipProps) {
   }, [animationState]);
   const isWindowVisible = useWindowVisibility();
   const dragSnapshot = useSnapshot(dragStore);
+  const settings = useSnapshot(settingsStore);
+  const reducedMotion = useReducedMotion(settings.reducedMotion);
   const { isAnyTooltipVisible, registerTooltip } = useGlobalTooltip();
   const shouldDisableTooltip =
     disabled ||
@@ -123,8 +127,17 @@ export function CursorTooltip(props: CursorTooltipProps) {
           );
         }
         setIsOpen(true);
+        if (reducedMotion) {
+          setAnimationState(null);
+          return;
+        }
         setAnimationState("entering");
       } else {
+        if (reducedMotion) {
+          setIsOpen(false);
+          setAnimationState(null);
+          return;
+        }
         setAnimationState("exiting");
       }
 
