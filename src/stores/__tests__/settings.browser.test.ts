@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getActivePlaythrough, playthroughsStore } from "../playthroughs/store";
-import { SettingsSchema, settingsActions, settingsStore } from "../settings";
+import {
+  getEffectiveReducedMotion,
+  SettingsSchema,
+  settingsActions,
+  settingsStore,
+} from "../settings";
 
 // Mock the playthroughs store
 vi.mock("../playthroughs/store", async () => {
@@ -35,6 +40,7 @@ describe("Settings Store", () => {
   afterEach(() => {
     // Clear localStorage after each test
     clearLocalStorage();
+    vi.unstubAllGlobals();
   });
 
   describe("SettingsSchema", () => {
@@ -72,6 +78,34 @@ describe("Settings Store", () => {
 
       const result = SettingsSchema.safeParse(invalidSettings);
       expect(result.success).toBe(false);
+    });
+
+    it("preserves an absent reduced-motion override", () => {
+      const result = SettingsSchema.safeParse({});
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.reducedMotion).toBeUndefined();
+      }
+    });
+  });
+
+  describe("Reduced Motion Preference", () => {
+    it("uses the browser preference when no app override exists", () => {
+      const matchMedia = vi.fn().mockReturnValue({ matches: true });
+      vi.stubGlobal("matchMedia", matchMedia);
+
+      expect(getEffectiveReducedMotion(undefined)).toBe(true);
+      expect(matchMedia).toHaveBeenCalledWith(
+        "(prefers-reduced-motion: reduce)",
+      );
+    });
+
+    it("uses an explicit app override over the browser preference", () => {
+      vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
+
+      expect(getEffectiveReducedMotion(false)).toBe(false);
+      expect(getEffectiveReducedMotion(true)).toBe(true);
     });
   });
 
@@ -358,6 +392,7 @@ describe("Settings Store", () => {
       clearLocalStorage();
       Object.assign(settingsStore, {
         moveEncountersBetweenLocations: false,
+        reducedMotion: undefined,
         version: "1.0.0",
       });
     });
@@ -372,9 +407,18 @@ describe("Settings Store", () => {
       expect(settingsStore.moveEncountersBetweenLocations).toBe(false);
     });
 
+    it("sets an explicit reduced-motion override", () => {
+      settingsActions.setReducedMotion(true);
+      expect(settingsStore.reducedMotion).toBe(true);
+
+      settingsActions.setReducedMotion(false);
+      expect(settingsStore.reducedMotion).toBe(false);
+    });
+
     it("resets to dynamic defaults", () => {
       // Set to non-default value
       settingsStore.moveEncountersBetweenLocations = true;
+      settingsStore.reducedMotion = true;
 
       // Mock old playthrough (should default to enabled)
       mockGetActivePlaythrough.mockReturnValue({
@@ -385,6 +429,7 @@ describe("Settings Store", () => {
 
       settingsActions.resetToDefaults();
       expect(settingsStore.moveEncountersBetweenLocations).toBe(true);
+      expect(settingsStore.reducedMotion).toBeUndefined();
 
       // Mock new playthrough (should default to disabled)
       mockGetActivePlaythrough.mockReturnValue({
@@ -483,6 +528,16 @@ describe("Settings Store", () => {
       const stored = localStorage.getItem("settings:v1");
       expect(stored).not.toBeNull();
       expect(stored!).toContain('"moveEncountersBetweenLocations":true');
+    });
+
+    it("persists an explicit reduced-motion override", async () => {
+      settingsActions.setReducedMotion(true);
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(localStorage.getItem("settings:v1")).toContain(
+        '"reducedMotion":true',
+      );
     });
 
     it("validates settings before saving", async () => {

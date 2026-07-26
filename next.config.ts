@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   // Enable React Compiler for automatic performance optimizations
   reactCompiler: true,
 
+  experimental: {
+    // TypeScript 7 has no compiler API for Next's default type checker.
+    useTypeScriptCli: true,
+  },
+
   // Enable Turbopack for faster development builds
   turbopack: {
     // Use default Turbopack configuration
