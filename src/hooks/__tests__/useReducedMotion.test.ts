@@ -46,4 +46,32 @@ describe("useReducedMotion", () => {
 
     expect(result.current).toBe(false);
   });
+
+  it("subscribes through legacy media-query listeners", () => {
+    let legacyListener: ((event: MediaQueryListEvent) => void) | undefined;
+    const addListener = vi.fn(
+      (listener: (event: MediaQueryListEvent) => void) => {
+        legacyListener = listener;
+      },
+    );
+
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn().mockReturnValue({
+        get matches() {
+          return matches;
+        },
+        addListener,
+        removeListener: vi.fn(),
+      }),
+    );
+
+    const { result } = renderHook(() => useReducedMotion(undefined));
+    expect(addListener).toHaveBeenCalledOnce();
+
+    matches = true;
+    act(() => legacyListener?.({} as MediaQueryListEvent));
+
+    expect(result.current).toBe(true);
+  });
 });

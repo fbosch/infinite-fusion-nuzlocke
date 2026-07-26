@@ -73,7 +73,7 @@ const REDUCED_MOTION_INITIALIZER = `
     if (typeof preference === "boolean") {
       document.documentElement.dataset.reducedMotion = String(preference);
     }
-  } catch {}
+  } catch (error) {}
 `;
 
 const STRUCTURED_DATA_JSON = JSON.stringify(STRUCTURED_DATA);

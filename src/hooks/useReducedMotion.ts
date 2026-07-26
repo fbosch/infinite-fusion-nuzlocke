@@ -12,8 +12,13 @@ const subscribeToBrowserReducedMotion = (onStoreChange: () => void) => {
   }
 
   const query = window.matchMedia(mediaQuery);
-  query.addEventListener("change", onStoreChange);
-  return () => query.removeEventListener("change", onStoreChange);
+  if (typeof query.addEventListener === "function") {
+    query.addEventListener("change", onStoreChange);
+    return () => query.removeEventListener("change", onStoreChange);
+  }
+
+  query.addListener(onStoreChange);
+  return () => query.removeListener(onStoreChange);
 };
 
 export function useReducedMotion(preference: boolean | undefined): boolean {
