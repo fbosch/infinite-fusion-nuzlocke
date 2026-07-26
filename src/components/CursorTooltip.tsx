@@ -21,6 +21,7 @@ import {
   isValidElement,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -206,6 +207,12 @@ export function CursorTooltip(props: CursorTooltipProps) {
       return cleanup;
     },
   });
+
+  useLayoutEffect(() => {
+    if (!reducedMotion || !refs.domReference.current) return;
+
+    refs.setPositionReference(refs.domReference.current);
+  }, [reducedMotion, refs]);
 
   useEffect(() => {
     if (!tooltipId) return;
