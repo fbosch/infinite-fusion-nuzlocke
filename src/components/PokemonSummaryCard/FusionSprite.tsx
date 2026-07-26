@@ -5,10 +5,12 @@ import type React from "react";
 import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
 
 import { twMerge } from "tailwind-merge";
+import { useSnapshot } from "valtio";
 import Rays from "@/assets/images/rays.svg";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { usePreferredVariantState } from "@/hooks/useSprite";
-
 import type { PokemonOptionType } from "@/loaders/pokemon";
+import { settingsStore } from "@/stores/settings";
 import { useAnimatedSprite } from "./useAnimatedSprite";
 import {
   getAltText,
@@ -44,6 +46,8 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
     ref,
   ) {
     const hasHovered = useRef(false);
+    const settings = useSnapshot(settingsStore);
+    const reducedMotion = useReducedMotion(settings.reducedMotion);
 
     const head = headPokemon;
     const body = bodyPokemon;
@@ -92,6 +96,7 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
       playEvolutionAnimation,
     } = useAnimatedSprite({
       canAnimate: statusState.canAnimate,
+      reducedMotion,
     });
 
     useImperativeHandle(

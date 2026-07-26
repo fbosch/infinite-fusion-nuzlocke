@@ -1,5 +1,6 @@
 import { proxy, subscribe } from "valtio";
 import { z } from "zod";
+import { getBrowserReducedMotion } from "@/lib/reducedMotion";
 import {
   getActivePlaythrough,
   playthroughsStore,
@@ -11,6 +12,7 @@ const LEGACY_SETTINGS_STORAGE_KEY = "settings";
 // Zod schema for settings validation
 export const SettingsSchema = z.object({
   moveEncountersBetweenLocations: z.boolean().default(false),
+  reducedMotion: z.boolean().optional(),
   version: z.string().default("1.0.0"),
 });
 
@@ -92,6 +94,13 @@ const loadSettings = (): Settings => {
 
 export const settingsStore = proxy<Settings>(loadSettings());
 
+export const getEffectiveReducedMotion = (
+  preference = settingsStore.reducedMotion,
+): boolean => {
+  if (typeof preference === "boolean") return preference;
+  return getBrowserReducedMotion();
+};
+
 // Subscribe to changes and save to localStorage with validation
 if (typeof window !== "undefined") {
   subscribe(settingsStore, () => {
@@ -130,9 +139,13 @@ export const settingsActions = {
     });
   },
 
+  setReducedMotion: (reducedMotion: boolean) => {
+    updateSettings({ reducedMotion });
+  },
+
   // Helper function to reset settings to defaults
   resetToDefaults: () => {
-    updateSettings(getDefaultSettings());
+    updateSettings({ ...getDefaultSettings(), reducedMotion: undefined });
   },
 
   // Helper function to update multiple settings at once

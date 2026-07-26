@@ -1,8 +1,12 @@
 import { emitScrollToLocation } from "@/lib/events";
+import { getDocumentReducedMotion } from "@/lib/reducedMotion";
 import type { EncounterData } from "@/stores/playthroughs/types";
 
 // Keep teardown timers per overlay element across calls to avoid flicker
 const overlayHideTimers = new WeakMap<HTMLElement, number>();
+
+const getScrollBehavior = (behavior: ScrollBehavior): ScrollBehavior =>
+  behavior === "smooth" && getDocumentReducedMotion() ? "auto" : behavior;
 
 /**
  * Find the most recently filled out location based on encounter updatedAt timestamps
@@ -49,7 +53,7 @@ export function scrollToTableRow(
 
   tableContainerElement.scrollTo({
     top: targetTop - containerHeight / 2 + targetHeight / 2,
-    behavior,
+    behavior: getScrollBehavior(behavior),
   });
 }
 
@@ -76,15 +80,19 @@ export function scrollToMostRecentLocation(
 ): boolean {
   if (!tableContainerElement || !tableElement) return false;
 
+  const normalizedBehavior = getScrollBehavior(behavior);
   const recentLocationId = findMostRecentlyFilledLocation(encounters);
   if (!recentLocationId) return false;
 
   const targetRow = findTableRowByLocationId(tableElement, recentLocationId);
   if (!targetRow) {
-    return emitScrollToLocation({ behavior, locationId: recentLocationId });
+    return emitScrollToLocation({
+      behavior: normalizedBehavior,
+      locationId: recentLocationId,
+    });
   }
 
-  scrollToTableRow(tableContainerElement, targetRow, behavior);
+  scrollToTableRow(tableContainerElement, targetRow, normalizedBehavior);
   return true;
 }
 
@@ -217,7 +225,7 @@ export function scrollToLocationById(
 ): boolean {
   if (!locationId) return false;
 
-  const behavior = options?.behavior ?? "smooth";
+  const behavior = getScrollBehavior(options?.behavior ?? "smooth");
 
   const tableElement = document.querySelector(
     'table[aria-label="Locations table"]',
@@ -230,7 +238,7 @@ export function scrollToLocationById(
 
   const targetRow = findTableRowByLocationId(tableElement, locationId);
   if (!targetRow) {
-    return emitScrollToLocation({ locationId, ...options });
+    return emitScrollToLocation({ locationId, ...options, behavior });
   }
 
   // Determine if target row is already fully visible within container

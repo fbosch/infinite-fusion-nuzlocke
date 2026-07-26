@@ -1,6 +1,7 @@
 "use client";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ReducedMotionController } from "@/components/ReducedMotionController";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { GlobalTooltipProvider } from "@/contexts/GlobalTooltipContext";
 import { queryClient } from "@/lib/client";
@@ -14,6 +15,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       )}
       <ThemeProvider>
         <GlobalTooltipProvider>
+          <ReducedMotionController />
           <PlaythroughResumeObserver />
           {children}
         </GlobalTooltipProvider>

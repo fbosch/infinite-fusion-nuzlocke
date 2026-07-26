@@ -1,19 +1,35 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 interface UseAnimatedSpriteOptions {
   canAnimate: boolean;
+  reducedMotion: boolean;
 }
 
-export function useAnimatedSprite({ canAnimate }: UseAnimatedSpriteOptions) {
+export function useAnimatedSprite({
+  canAnimate,
+  reducedMotion,
+}: UseAnimatedSpriteOptions) {
   const imageRef = useRef<HTMLImageElement>(null);
   const shadowRef = useRef<HTMLImageElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const raysSvgRef = useRef<HTMLDivElement>(null);
   const hoverRef = useRef<boolean>(false);
+  const reducedMotionRef = useRef(reducedMotion);
+
+  reducedMotionRef.current = reducedMotion;
+
+  useEffect(() => {
+    if (!reducedMotion) return;
+
+    hoverRef.current = false;
+    [imageRef, shadowRef, overlayRef, raysSvgRef].forEach((ref) => {
+      ref.current?.getAnimations().forEach((animation) => animation.cancel());
+    });
+  }, [reducedMotion]);
 
   const handleMouseEnter = () => {
     hoverRef.current = true;
-    if (imageRef.current && canAnimate) {
+    if (imageRef.current && canAnimate && !reducedMotion) {
       // Cancel any running animations so the new one will replay
       imageRef.current.getAnimations().forEach((anim) => {
         anim.cancel();
@@ -25,6 +41,8 @@ export function useAnimatedSprite({ canAnimate }: UseAnimatedSpriteOptions) {
       }
 
       const animateSprite = () => {
+        if (!hoverRef.current || reducedMotionRef.current) return;
+
         const animation = imageRef.current?.animate(
           [
             { transform: "translateY(0px)" },
@@ -59,7 +77,7 @@ export function useAnimatedSprite({ canAnimate }: UseAnimatedSpriteOptions) {
 
         if (animation) {
           animation.onfinish = () => {
-            if (hoverRef.current) {
+            if (hoverRef.current && !reducedMotionRef.current) {
               window.requestAnimationFrame(animateSprite);
             }
           };
@@ -95,7 +113,8 @@ export function useAnimatedSprite({ canAnimate }: UseAnimatedSpriteOptions) {
   };
 
   const playEvolutionAnimation = () => {
-    // Evolution animations should always play regardless of canAnimate state
+    if (reducedMotion) return;
+
     // Cancel any existing animations
     imageRef.current?.getAnimations().forEach((a) => {
       a.cancel();
