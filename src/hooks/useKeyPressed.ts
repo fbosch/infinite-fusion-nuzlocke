@@ -3,6 +3,8 @@ import { useSyncExternalStore } from "react";
 // Global state for all keys
 const keyStates = new Map<string, boolean>();
 const keyListeners = new Map<string, Set<() => void>>();
+const keySubscriptions = new Map<string, ReturnType<typeof createSubscribe>>();
+const keySnapshots = new Map<string, ReturnType<typeof createGetSnapshot>>();
 
 // Track if global event listeners are attached
 let globalListenersAttached = false;
@@ -50,6 +52,8 @@ function createSubscribe(key: string) {
         if (listeners.size === 0) {
           keyListeners.delete(key);
           keyStates.delete(key);
+          keySubscriptions.delete(key);
+          keySnapshots.delete(key);
         }
       }
 
@@ -71,6 +75,26 @@ function createSubscribe(key: string) {
 // Get current state for a specific key
 function createGetSnapshot(key: string) {
   return () => keyStates.get(key) ?? false;
+}
+
+function getSubscribe(key: string) {
+  let subscribe = keySubscriptions.get(key);
+  if (!subscribe) {
+    subscribe = createSubscribe(key);
+    keySubscriptions.set(key, subscribe);
+  }
+
+  return subscribe;
+}
+
+function getSnapshot(key: string) {
+  let snapshot = keySnapshots.get(key);
+  if (!snapshot) {
+    snapshot = createGetSnapshot(key);
+    keySnapshots.set(key, snapshot);
+  }
+
+  return snapshot;
 }
 
 // Server-side snapshot (always false)
@@ -128,10 +152,11 @@ function notifyListeners(key: string) {
  * @returns {boolean} True if the specified key is currently pressed, false otherwise
  */
 export function useKeyPressed(key: string): boolean {
-  const subscribe = createSubscribe(key);
-  const getSnapshot = createGetSnapshot(key);
-
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return useSyncExternalStore(
+    getSubscribe(key),
+    getSnapshot(key),
+    getServerSnapshot,
+  );
 }
 
 /**
