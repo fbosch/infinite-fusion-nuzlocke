@@ -90,6 +90,12 @@ Purpose: address concrete runtime costs without speculative micro-optimization.
 - [x] Replace JSON parse/stringify cloning only when the data shape, supported values, and copy semantics are known.
 - [x] Address set-state-in-effect findings after confirming their behavior; the remaining mount and analytics updates are browser-only synchronization, not derived state.
 
+Remaining warnings require stronger evidence before a behavior change:
+
+- The three loader and team-action `await` loops need a representative cold-load latency trace before changing ordering or request concurrency.
+- The analytics debug counter refresh needs a source-level subscription before its immediate external-state refresh can be removed.
+- The logo precision warning needs an asset-size budget or visual comparison before altering its path data.
+
 Acceptance criteria:
 
 - Performance changes preserve ordering, cancellation, and rendering semantics.
