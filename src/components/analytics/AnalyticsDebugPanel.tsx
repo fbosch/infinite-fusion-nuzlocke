@@ -41,7 +41,7 @@ export function AnalyticsDebugPanel() {
   const [enabled, setEnabled] = useState(false);
   const [open, setOpen] = useState(true);
   const [counters, setCounters] = useState<AnalyticsDebugCounters>(
-    getAnalyticsDebugCounters(),
+    getAnalyticsDebugCounters,
   );
 
   useEffect(() => {

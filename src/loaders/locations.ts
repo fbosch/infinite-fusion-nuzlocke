@@ -360,8 +360,9 @@ export function mergeLocationsWithCustom(
     }
 
     // Remove placed locations from unplaced list
+    const placedCustoms = new Set(placedInThisPass);
     unplacedCustoms = unplacedCustoms.filter(
-      (custom) => !placedInThisPass.includes(custom),
+      (custom) => !placedCustoms.has(custom),
     );
 
     // If no progress was made, we have circular dependencies or missing references
@@ -462,18 +463,23 @@ export function updateCustomLocationDependencies(
   const parentLocationId = removedLocation.insertAfterLocationId;
 
   // Update all locations that depended on the removed location
-  return customLocations
-    .filter((loc) => loc.id !== removedLocationId) // Remove the target location
-    .map((loc) => {
-      if (loc.insertAfterLocationId === removedLocationId) {
-        // This location depended on the removed one, update it to depend on the parent
-        return {
-          ...loc,
-          insertAfterLocationId: parentLocationId,
-        };
-      }
-      return loc;
-    });
+  const updatedLocations: CustomLocation[] = [];
+  for (const location of customLocations) {
+    if (location.id === removedLocationId) {
+      continue;
+    }
+    if (location.insertAfterLocationId === removedLocationId) {
+      // This location depended on the removed one, update it to depend on the parent.
+      updatedLocations.push({
+        ...location,
+        insertAfterLocationId: parentLocationId,
+      });
+    } else {
+      updatedLocations.push(location);
+    }
+  }
+
+  return updatedLocations;
 }
 
 // Get all custom locations that depend on a given location (directly or indirectly)

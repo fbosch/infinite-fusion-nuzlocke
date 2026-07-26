@@ -83,11 +83,12 @@ Acceptance criteria:
 
 Purpose: address concrete runtime costs without speculative micro-optimization.
 
-- [ ] Review chained array iterations and array lookups in loops; consolidate only on verified hot paths or where the simpler implementation is equally clear.
+- [x] Review chained array iterations and array lookups in loops; consolidate only on verified hot paths or where the simpler implementation is equally clear.
+- [x] Consolidate ordered collection transforms and repeated membership lookups in API routes, loaders, stores, and search helpers while preserving output order and identity.
 - [x] Replace `transition: all` declarations with the specific animated properties.
-- [ ] Review await-in-loop findings for required ordering before introducing concurrency.
-- [ ] Replace JSON parse/stringify cloning only when the data shape, supported values, and copy semantics are known.
-- [ ] Address set-state-in-effect findings after confirming their derived-state behavior.
+- [x] Review await-in-loop findings for required ordering before introducing concurrency; retain sequential loader and team-death updates because their data-source and mutation semantics require ordering.
+- [x] Replace JSON parse/stringify cloning only when the data shape, supported values, and copy semantics are known.
+- [x] Address set-state-in-effect findings after confirming their behavior; the remaining mount and analytics updates are browser-only synchronization, not derived state.
 
 Acceptance criteria:
 

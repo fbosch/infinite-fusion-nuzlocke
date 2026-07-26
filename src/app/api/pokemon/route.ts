@@ -45,10 +45,8 @@ const getFilteredPokemon = ({
   >[];
 
   if (ids) {
-    const idList = ids.split(",").map((id) => parseInt(id, 10));
-    filteredData = filteredData.filter((pokemon) =>
-      idList.includes(pokemon.id),
-    );
+    const idSet = new Set(ids.split(",").map((id) => parseInt(id, 10)));
+    filteredData = filteredData.filter((pokemon) => idSet.has(pokemon.id));
   }
 
   if (search) {

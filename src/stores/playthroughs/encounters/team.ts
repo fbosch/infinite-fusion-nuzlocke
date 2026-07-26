@@ -254,11 +254,13 @@ export const findCanonicalLocationForUids = (uids: string[]) => {
 
   const matches = Object.entries(activePlaythrough.encounters).filter(
     ([, encounter]) => {
-      const encounterUids = [encounter.head?.uid, encounter.body?.uid].filter(
-        (uid) => uid != null,
+      const encounterUids = new Set(
+        [encounter.head?.uid, encounter.body?.uid].filter(
+          (uid): uid is string => uid != null,
+        ),
       );
 
-      return uids.every((uid) => encounterUids.includes(uid));
+      return uids.every((uid) => encounterUids.has(uid));
     },
   );
 
@@ -275,6 +277,7 @@ export const removeTeamMembersWithPokemon = (pokemonUIDs: string[]) => {
     return;
   }
 
+  const removedPokemonUids = new Set(pokemonUIDs);
   let hasChanges = false;
 
   for (let i = 0; i < activePlaythrough.team.members.length; i++) {
@@ -284,8 +287,9 @@ export const removeTeamMembersWithPokemon = (pokemonUIDs: string[]) => {
     }
 
     const hasRemovedPokemon =
-      (member.headPokemonUid && pokemonUIDs.includes(member.headPokemonUid)) ||
-      (member.bodyPokemonUid && pokemonUIDs.includes(member.bodyPokemonUid));
+      (member.headPokemonUid &&
+        removedPokemonUids.has(member.headPokemonUid)) ||
+      (member.bodyPokemonUid && removedPokemonUids.has(member.bodyPokemonUid));
 
     if (hasRemovedPokemon) {
       activePlaythrough.team.members[i] = null;

@@ -386,11 +386,12 @@ export function usePokemonEvolutionData(
         isLoading,
       };
 
-    const evolutionIds =
-      currentPokemon.evolution?.evolves_to.map((e) => e.id) || [];
+    const evolutionIds = new Set(
+      currentPokemon.evolution?.evolves_to.map((e) => e.id) || [],
+    );
     const preEvolutionId = currentPokemon.evolution?.evolves_from?.id || null;
     const evolutions = allPokemon.filter((p) =>
-      evolutionIds.includes(p.nationalDexId),
+      evolutionIds.has(p.nationalDexId),
     );
     const preEvolution = preEvolutionId
       ? allPokemon.find((p) => p.nationalDexId === preEvolutionId) || null
@@ -442,15 +443,18 @@ export function usePokemonSearch({
           "searchService failed, using client-side filtering fallback",
           err,
         );
-        return allPokemon
-          .filter((pokemon) =>
-            pokemon.name.toLowerCase().includes(debouncedQuery.toLowerCase()),
-          )
-          .map((p) => ({
-            id: p.id,
-            name: p.name,
-            nationalDexId: p.nationalDexId,
-          }));
+        const normalizedQuery = debouncedQuery.toLowerCase();
+        const matches: PokemonOptionType[] = [];
+        for (const pokemon of allPokemon) {
+          if (pokemon.name.toLowerCase().includes(normalizedQuery)) {
+            matches.push({
+              id: pokemon.id,
+              name: pokemon.name,
+              nationalDexId: pokemon.nationalDexId,
+            });
+          }
+        }
+        return matches;
       }
     },
     select: (data) => {

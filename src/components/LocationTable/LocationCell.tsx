@@ -58,9 +58,9 @@ export default function LocationCell({
 
   const shouldShowOriginalEncounter = settings.moveEncountersBetweenLocations;
 
-  const encounterUids = locationPokemon
-    .map((p) => p.uid)
-    .filter(Boolean) as string[];
+  const encounterUids = locationPokemon.flatMap((pokemon) =>
+    pokemon.uid ? [pokemon.uid] : [],
+  );
   const hasEncounter = locationPokemon.length > 0;
 
   // Handle hover effect on encounter Pokémon elements - only when moving is relevant

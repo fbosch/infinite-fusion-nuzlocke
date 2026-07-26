@@ -17,6 +17,27 @@ interface ArtworkVariantButtonProps {
   shouldLoad?: boolean;
 }
 
+function ArtworkVariantIcon({
+  hasVariants,
+  isLoading,
+  isShiftPressed,
+}: {
+  hasVariants: boolean;
+  isLoading: boolean;
+  isShiftPressed: boolean;
+}) {
+  if (isLoading) {
+    return <Loader2 className="animate-spin size-3" />;
+  }
+  if (!hasVariants) {
+    return <RefreshCwOff className="size-3" />;
+  }
+  if (isShiftPressed) {
+    return <RefreshCcw className="size-3" />;
+  }
+  return <RefreshCw className="size-3" />;
+}
+
 export function ArtworkVariantButton({
   headId,
   bodyId,
@@ -48,7 +69,7 @@ export function ArtworkVariantButton({
   );
 
   // Determine if variants are available
-  const hasVariants = variants && variants.length > 1;
+  const hasVariants = (variants?.length ?? 0) > 1;
 
   const handleCycleVariant = React.useCallback(
     async (event: React.MouseEvent) => {
@@ -77,19 +98,6 @@ export function ArtworkVariantButton({
       updateVariant,
     ],
   );
-
-  const buttonIcon = useMemo(() => {
-    if (isLoading) {
-      return <Loader2 className="animate-spin size-3" />;
-    }
-    if (!hasVariants) {
-      return <RefreshCwOff className="size-3" />;
-    }
-    if (isShiftPressed) {
-      return <RefreshCcw className="size-3" />;
-    }
-    return <RefreshCw className="size-3" />;
-  }, [hasVariants, isLoading, isShiftPressed]);
 
   const label = useMemo(() => {
     if (isLoading) {
@@ -143,7 +151,13 @@ export function ArtworkVariantButton({
         )}
         aria-label={label}
       >
-        <div className="">{buttonIcon}</div>
+        <div className="">
+          <ArtworkVariantIcon
+            hasVariants={hasVariants}
+            isLoading={isLoading}
+            isShiftPressed={isShiftPressed}
+          />
+        </div>
       </button>
     </CursorTooltip>
   );
