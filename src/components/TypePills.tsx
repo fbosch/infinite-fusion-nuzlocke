@@ -1,7 +1,6 @@
 import clsx from "clsx";
 import { getTypeWeaknesses } from "poke-types";
 import type React from "react";
-import { useMemo } from "react";
 import { twMerge } from "tailwind-merge";
 import type { TypeName } from "@/lib/typings";
 import { ALL_TYPES } from "@/lib/typings";
@@ -97,14 +96,11 @@ function TypeEffectivenessSummary({
 }) {
   // Keep computed groups available for future presentation tweaks (group chips)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _groups = useMemo(
-    () => getDefensiveEffectGroups(primary, secondary),
-    [primary, secondary],
-  );
+  const _groups = getDefensiveEffectGroups(primary, secondary);
 
   const mainType = (primary ?? secondary) as string | undefined;
   const secondType = primary && secondary ? (secondary as string) : undefined;
-  const multiplierByType = useMemo(() => {
+  const multiplierByType = (() => {
     if (!mainType) return {} as Record<TypeName, number>;
     const map = getTypeWeaknesses(mainType, secondType);
     const result: Record<TypeName, number> = {} as Record<TypeName, number>;
@@ -113,7 +109,7 @@ function TypeEffectivenessSummary({
       result[t] = Number.isFinite(v) ? (v as number) : 1;
     });
     return result;
-  }, [mainType, secondType]);
+  })();
 
   const factorLabel = (v: number): string => {
     if (v === 4) return "4x";

@@ -14,9 +14,15 @@ const extractArtists = (html: string): string[] => {
     return [];
   }
 
-  return artistLinks
-    .map((link) => link.match(/<a[^>]*>([^<]+)<\/a>/)?.[1] || "")
-    .filter((name) => name.trim());
+  const artists: string[] = [];
+  for (const link of artistLinks) {
+    const name = link.match(/<a[^>]*>([^<]+)<\/a>/)?.[1] || "";
+    if (name.trim()) {
+      artists.push(name);
+    }
+  }
+
+  return artists;
 };
 
 // Parsing base and gallery credits together preserves the route's single response contract.

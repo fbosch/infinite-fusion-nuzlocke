@@ -218,14 +218,15 @@ export const preloadArtworkVariants = async () => {
 
       const batchPromises = batch.map(([, encounter]) => {
         if (encounter.isFusion && encounter.head && encounter.body) {
-          return getArtworkVariants(encounter.head.id, encounter.body.id).catch(
-            (error: unknown) => {
-              console.warn(
-                `Failed to preload fusion variants ${encounter.head?.id}.${encounter.body?.id}:`,
-                error,
-              );
-            },
-          );
+          const { id: headId } = encounter.head;
+          const { id: bodyId } = encounter.body;
+
+          return getArtworkVariants(headId, bodyId).catch((error: unknown) => {
+            console.warn(
+              `Failed to preload fusion variants ${headId}.${bodyId}:`,
+              error,
+            );
+          });
         }
 
         if (encounter.head) {

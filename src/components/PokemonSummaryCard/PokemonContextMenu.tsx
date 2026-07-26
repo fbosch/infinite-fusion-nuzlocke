@@ -7,7 +7,7 @@ import {
   Skull,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { useSnapshot } from "valtio";
 import BodyIcon from "@/assets/images/body.svg";
 import EscapeIcon from "@/assets/images/escape-cloud.svg";
@@ -191,64 +191,62 @@ export function PokemonContextMenu({
     displayPokemon.body?.id ?? null,
   );
 
-  const [hasContextMenuBeenOpened, setHasContextMenuBeenOpened] =
-    useState(false);
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
   const [isMoveHeadModalOpen, setIsMoveHeadModalOpen] = useState(false);
   const [isMoveBodyModalOpen, setIsMoveBodyModalOpen] = useState(false);
 
   // Handler to mark both Pokemon in the fusion as deceased
-  const handleMarkAsDeceased = useCallback(async () => {
+  const handleMarkAsDeceased = async () => {
     await playthroughActions.markEncounterAsDeceased(locationId);
-  }, [locationId]);
+  };
 
   // Handler to move both Pokemon in the fusion to box (stored status)
-  const handleMoveToBox = useCallback(async () => {
+  const handleMoveToBox = async () => {
     await playthroughActions.moveEncounterToBox(locationId);
-  }, [locationId]);
+  };
 
   // Handler to mark both Pokemon in the fusion as captured
-  const handleMarkAsCaptured = useCallback(async () => {
+  const handleMarkAsCaptured = async () => {
     await playthroughActions.markEncounterAsCaptured(locationId);
-  }, [locationId]);
+  };
 
   // Handler to mark both Pokemon in the fusion as missed
-  const handleMarkAsMissed = useCallback(async () => {
+  const handleMarkAsMissed = async () => {
     await playthroughActions.markEncounterAsMissed(locationId);
-  }, [locationId]);
+  };
 
   // Handler to mark both Pokemon in the fusion as received
-  const handleMarkAsReceived = useCallback(async () => {
+  const handleMarkAsReceived = async () => {
     await playthroughActions.markEncounterAsReceived(locationId);
-  }, [locationId]);
+  };
 
   // Handler for moving head Pokemon
-  const handleMoveHead = useCallback(
-    async (targetLocationId: string, targetField: "head" | "body") => {
-      await playthroughActions.relocateEncounterSlot({
-        sourceLocationId: locationId,
-        sourceField: "head",
-        targetLocationId,
-        targetField,
-      });
-    },
-    [locationId],
-  );
+  const handleMoveHead = async (
+    targetLocationId: string,
+    targetField: "head" | "body",
+  ) => {
+    await playthroughActions.relocateEncounterSlot({
+      sourceLocationId: locationId,
+      sourceField: "head",
+      targetLocationId,
+      targetField,
+    });
+  };
 
   // Handler for moving body Pokemon
-  const handleMoveBody = useCallback(
-    async (targetLocationId: string, targetField: "head" | "body") => {
-      await playthroughActions.relocateEncounterSlot({
-        sourceLocationId: locationId,
-        sourceField: "body",
-        targetLocationId,
-        targetField,
-      });
-    },
-    [locationId],
-  );
+  const handleMoveBody = async (
+    targetLocationId: string,
+    targetField: "head" | "body",
+  ) => {
+    await playthroughActions.relocateEncounterSlot({
+      sourceLocationId: locationId,
+      sourceField: "body",
+      targetLocationId,
+      targetField,
+    });
+  };
 
-  const contextItems = useMemo<ContextMenuItem[]>(() => {
+  const contextItems: ContextMenuItem[] = (() => {
     // Use display Pokemon for links instead of raw encounter data
     const id = getSpriteId(displayPokemon.head?.id, displayPokemon.body?.id);
 
@@ -339,21 +337,7 @@ export function PokemonContextMenu({
     items.push(...createExternalDexItems(id, preferredVariant));
 
     return items;
-  }, [
-    preferredVariant,
-    encounterData,
-    displayPokemon,
-    eitherPokemonIsEgg,
-    hasArtVariants,
-    isLoadingVariants,
-    settings.moveEncountersBetweenLocations,
-    showStatusActions,
-    handleMarkAsDeceased,
-    handleMoveToBox,
-    handleMarkAsCaptured,
-    handleMarkAsMissed,
-    handleMarkAsReceived,
-  ]);
+  })();
 
   return (
     <>
@@ -361,11 +345,6 @@ export function PokemonContextMenu({
         disabled={eitherPokemonIsEgg}
         items={contextItems}
         portalRootId="location-table"
-        onOpenChange={
-          hasContextMenuBeenOpened
-            ? undefined
-            : () => setHasContextMenuBeenOpened(true)
-        }
       >
         {children}
       </ContextMenu>

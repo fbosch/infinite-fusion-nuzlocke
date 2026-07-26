@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import type React from "react";
-import { startTransition, useCallback, useRef } from "react";
+import { startTransition, useRef } from "react";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 
 interface PokemonNicknameInputProps {
@@ -24,7 +24,7 @@ export const PokemonNicknameInput = ({
   const inputKey = `${value?.id ?? "none"}:${value?.nickname ?? ""}`;
 
   // Helper function to commit changes to parent
-  const commitChanges = useCallback(() => {
+  const commitChanges = () => {
     const nextNickname = inputRef.current?.value ?? "";
 
     if (value && nextNickname !== value.nickname) {
@@ -36,26 +36,23 @@ export const PokemonNicknameInput = ({
         onChange(updatedPokemon);
       });
     }
-  }, [value, onChange]);
+  };
 
   // Handle Enter key - commit changes immediately and blur
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === "Enter") {
-        commitChanges();
-        event.currentTarget.blur();
-      } else if (event.key === "Escape") {
-        event.currentTarget.value = value?.nickname || "";
-        event.currentTarget.blur();
-      }
-    },
-    [commitChanges, value],
-  );
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      commitChanges();
+      event.currentTarget.blur();
+    } else if (event.key === "Escape") {
+      event.currentTarget.value = value?.nickname || "";
+      event.currentTarget.blur();
+    }
+  };
 
   // Handle blur - commit changes immediately
-  const handleBlur = useCallback(() => {
+  const handleBlur = () => {
     commitChanges();
-  }, [commitChanges]);
+  };
 
   if (dragPreview) {
     return (

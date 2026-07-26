@@ -167,14 +167,12 @@ describe("Wild encounter wikitext parser", () => {
   });
 
   it("fails validation when wild encounter output contains special encounters", () => {
-    const payload = JSON.parse(
-      JSON.stringify([
-        {
-          routeName: "Route 1",
-          encounters: [{ pokemonId: 16, encounterType: "special" }],
-        },
-      ]),
-    );
+    const payload = structuredClone([
+      {
+        routeName: "Route 1",
+        encounters: [{ pokemonId: 16, encounterType: "special" }],
+      },
+    ]) as never;
 
     expect(() =>
       assertEncounterPayload(payload, pokemonNameMap, "unit test encounters"),
@@ -182,14 +180,12 @@ describe("Wild encounter wikitext parser", () => {
   });
 
   it("returns the normalized payload after validation", () => {
-    const payload = JSON.parse(
-      JSON.stringify([
-        {
-          routeName: " Route 1 ",
-          encounters: [{ pokemonId: 16, encounterType: "grass" }],
-        },
-      ]),
-    );
+    const payload = structuredClone([
+      {
+        routeName: " Route 1 ",
+        encounters: [{ pokemonId: 16, encounterType: "grass" }],
+      },
+    ]) as never;
 
     expect(
       assertEncounterPayload(payload, pokemonNameMap, "unit test encounters"),
@@ -202,15 +198,13 @@ describe("Wild encounter wikitext parser", () => {
   });
 
   it("fails validation when scraped payloads contain unexpected keys", () => {
-    const payload = JSON.parse(
-      JSON.stringify([
-        {
-          routeName: "Route 1",
-          source: "wiki",
-          encounters: [{ pokemonId: 16, encounterType: "grass" }],
-        },
-      ]),
-    );
+    const payload = structuredClone([
+      {
+        routeName: "Route 1",
+        source: "wiki",
+        encounters: [{ pokemonId: 16, encounterType: "grass" }],
+      },
+    ]) as never;
 
     expect(() =>
       assertEncounterPayload(payload, pokemonNameMap, "unit test encounters"),

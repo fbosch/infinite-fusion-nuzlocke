@@ -2,7 +2,6 @@
 
 import { ArrowLeftRight } from "lucide-react";
 import Image from "next/image";
-import React from "react";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import { DNA_REVERSER_ICON } from "@/constants/items";
 import { PokemonGridItem } from "./PokemonGridItem";
@@ -36,7 +35,7 @@ export function TeamMemberSelectionPanel() {
   };
 
   // Filter Pokémon based on search query locally (no need to update state)
-  const filteredPokemon = React.useMemo(() => {
+  const filteredPokemon = (() => {
     if (!searchQuery.trim()) return availablePokemon;
 
     const query = searchQuery.toLowerCase();
@@ -45,7 +44,7 @@ export function TeamMemberSelectionPanel() {
         pokemon.name.toLowerCase().includes(query) ||
         pokemon.nickname?.toLowerCase().includes(query),
     );
-  }, [availablePokemon, searchQuery]);
+  })();
   return (
     <div className="flex-1 flex flex-col space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-4 items-center">
@@ -80,7 +79,7 @@ export function TeamMemberSelectionPanel() {
             <button
               type="button"
               onClick={handleFlipFusion}
-              className="group size-6 flex items-center justify-center p-1 text-gray-600 dark:text-gray-300 rounded-md border border-gray-300 dark:border-gray-600 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-500 hover:border-blue-600 bg-white dark:bg-gray-800"
+              className="group size-6 flex items-center justify-center p-1 text-gray-600 dark:text-gray-300 rounded-md border border-gray-300 dark:border-gray-600 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-500 hover:border-blue-600 bg-white dark:bg-gray-800"
               aria-label="Flip head and body"
             >
               <ArrowLeftRight className="size-4 hover:text-white" />

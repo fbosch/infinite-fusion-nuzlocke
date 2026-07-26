@@ -35,14 +35,12 @@ export function SourceTag({ sources, locationId }: SourceTagProps) {
       <span
         className={clsx(
           "text-xs px-1.5 py-0.5 rounded-sm font-medium leading-none flex items-center gap-1",
-          "transition-all duration-200 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/40 hover:bg-blue-100 dark:hover:bg-blue-900/70",
+          "transition-[padding,gap,color,background-color,border-color] duration-200 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/40 hover:bg-blue-100 dark:hover:bg-blue-900/70",
           "group-hover:px-2 group-hover:gap-2 font-medium",
         )}
         title="Starter"
       >
-        <span className="hidden group-hover:inline transition-all duration-200">
-          Starter
-        </span>
+        <span className="hidden group-hover:inline">Starter</span>
         <PokeballIcon className="size-3" />
       </span>
     );
@@ -55,15 +53,13 @@ export function SourceTag({ sources, locationId }: SourceTagProps) {
       <span
         className={clsx(
           "text-xs px-1.5 py-0.5 rounded-sm font-medium leading-none flex items-center gap-1",
-          "transition-all duration-200",
+          "transition-[padding,gap,color,background-color,border-color] duration-200",
           config.className,
           "group-hover:px-2 group-hover:gap-2",
         )}
         title={config.text}
       >
-        <span className="hidden group-hover:inline transition-all duration-200">
-          {config.text}
-        </span>
+        <span className="hidden group-hover:inline">{config.text}</span>
         {config.icon}
       </span>
     );
@@ -79,15 +75,13 @@ export function SourceTag({ sources, locationId }: SourceTagProps) {
             key={source}
             className={clsx(
               "text-xs px-1.5 py-0.5 rounded-sm font-medium leading-none flex items-center gap-1",
-              "transition-all duration-200",
+              "transition-[padding,gap,color,background-color,border-color] duration-200",
               config.className,
               "group-hover:px-2 group-hover:gap-2",
             )}
             title={config.text}
           >
-            <span className="hidden group-hover:inline transition-all duration-200">
-              {config.text}
-            </span>
+            <span className="hidden group-hover:inline">{config.text}</span>
             {config.icon}
           </span>
         );

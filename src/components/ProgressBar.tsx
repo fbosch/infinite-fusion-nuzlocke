@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { CircleIcon, SkullIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import EscapeIcon from "@/assets/images/escape-cloud.svg";
 import PokeballIcon from "@/assets/images/pokeball.svg";
 import { getLocationsSortedWithCustom } from "@/loaders";
@@ -25,54 +25,53 @@ export default function ProgressBar({ className }: ProgressBarProps) {
     null,
   );
 
-  const { capturedCount, deceasedCount, missedCount, totalCount } =
-    useMemo(() => {
-      const allLocations = getLocationsSortedWithCustom(customLocations);
-      const total = allLocations.length;
+  const { capturedCount, deceasedCount, missedCount, totalCount } = (() => {
+    const allLocations = getLocationsSortedWithCustom(customLocations);
+    const total = allLocations.length;
 
-      let captured = 0;
-      let deceased = 0;
-      let missed = 0;
+    let captured = 0;
+    let deceased = 0;
+    let missed = 0;
 
-      for (const location of allLocations) {
-        const encounter = encounters?.[location.id];
-        if (!encounter || (!encounter.head && !encounter.body)) {
-          continue;
-        }
-
-        const statuses = [encounter.head?.status, encounter.body?.status];
-        const hasMissed = statuses.includes(PokemonStatus.MISSED);
-        const hasDeceased = statuses.includes(PokemonStatus.DECEASED);
-        const hasSuccessfulEncounter = statuses.some(
-          (status) =>
-            status === PokemonStatus.CAPTURED ||
-            status === PokemonStatus.RECEIVED ||
-            status === PokemonStatus.TRADED ||
-            status === PokemonStatus.STORED,
-        );
-
-        if (hasMissed) {
-          missed += 1;
-          continue;
-        }
-
-        if (hasDeceased) {
-          deceased += 1;
-          continue;
-        }
-
-        if (hasSuccessfulEncounter) {
-          captured += 1;
-        }
+    for (const location of allLocations) {
+      const encounter = encounters?.[location.id];
+      if (!encounter || (!encounter.head && !encounter.body)) {
+        continue;
       }
 
-      return {
-        capturedCount: captured,
-        deceasedCount: deceased,
-        missedCount: missed,
-        totalCount: total,
-      };
-    }, [encounters, customLocations]);
+      const statuses = [encounter.head?.status, encounter.body?.status];
+      const hasMissed = statuses.includes(PokemonStatus.MISSED);
+      const hasDeceased = statuses.includes(PokemonStatus.DECEASED);
+      const hasSuccessfulEncounter = statuses.some(
+        (status) =>
+          status === PokemonStatus.CAPTURED ||
+          status === PokemonStatus.RECEIVED ||
+          status === PokemonStatus.TRADED ||
+          status === PokemonStatus.STORED,
+      );
+
+      if (hasMissed) {
+        missed += 1;
+        continue;
+      }
+
+      if (hasDeceased) {
+        deceased += 1;
+        continue;
+      }
+
+      if (hasSuccessfulEncounter) {
+        captured += 1;
+      }
+    }
+
+    return {
+      capturedCount: captured,
+      deceasedCount: deceased,
+      missedCount: missed,
+      totalCount: total,
+    };
+  })();
 
   const completedCount = capturedCount + deceasedCount + missedCount;
   const unencounteredCount = Math.max(totalCount - completedCount, 0);

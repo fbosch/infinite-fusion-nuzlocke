@@ -8,7 +8,7 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { HelpCircle, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import {
   DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
@@ -41,14 +41,14 @@ export default function CreatePlaythroughModal({
     playthroughNameInputRef.current?.focus();
   }, [isOpen]);
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     setNewPlaythroughName("");
     setSelectedGameModeOverride(null);
     onClose();
-  }, [onClose]);
+  };
 
   // Create a new playthrough
-  const handleCreatePlaythrough = useCallback(async () => {
+  const handleCreatePlaythrough = async () => {
     const name = newPlaythroughName.trim();
     if (!name) return;
 
@@ -58,7 +58,7 @@ export default function CreatePlaythroughModal({
     } catch (error) {
       console.error("Failed to create playthrough:", error);
     }
-  }, [newPlaythroughName, selectedGameMode, onCreate, handleClose]);
+  };
 
   return (
     <Dialog

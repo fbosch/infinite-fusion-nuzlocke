@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import React, { useOptimistic, useTransition } from "react";
+import { useOptimistic, useTransition } from "react";
 import { useActivePlaythrough, useGameMode } from "@/stores/playthroughs/hooks";
 import { playthroughActions } from "@/stores/playthroughs/index";
 import type { GameMode } from "@/stores/playthroughs/types";
@@ -17,24 +17,24 @@ const GameModeToggle = function GameModeToggle() {
     (_currentState, newMode: GameMode) => newMode,
   );
 
-  const handleModeSelect = React.useCallback(
-    (targetMode: GameMode, triggerMethod: "click" | "keyboard") => {
-      if (!activePlaythrough || isPending || optimisticMode === targetMode)
-        return;
+  const handleModeSelect = (
+    targetMode: GameMode,
+    triggerMethod: "click" | "keyboard",
+  ) => {
+    if (!activePlaythrough || isPending || optimisticMode === targetMode)
+      return;
 
-      startTransition(() => {
-        // Optimistic update - instant UI response
-        setOptimisticMode(targetMode);
+    startTransition(() => {
+      // Optimistic update - instant UI response
+      setOptimisticMode(targetMode);
 
-        // Actual state update
-        playthroughActions.setGameMode(targetMode, {
-          source_surface: "game_mode_toggle",
-          trigger_method: triggerMethod,
-        });
+      // Actual state update
+      playthroughActions.setGameMode(targetMode, {
+        source_surface: "game_mode_toggle",
+        trigger_method: triggerMethod,
       });
-    },
-    [activePlaythrough, optimisticMode, isPending, setOptimisticMode],
-  );
+    });
+  };
 
   const getBackgroundPosition = (mode: GameMode): string => {
     switch (mode) {
