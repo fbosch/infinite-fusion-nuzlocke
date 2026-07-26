@@ -52,8 +52,6 @@ function createSubscribe(key: string) {
         if (listeners.size === 0) {
           keyListeners.delete(key);
           keyStates.delete(key);
-          keySubscriptions.delete(key);
-          keySnapshots.delete(key);
         }
       }
 

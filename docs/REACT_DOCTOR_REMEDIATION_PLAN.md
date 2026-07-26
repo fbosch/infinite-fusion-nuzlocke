@@ -71,8 +71,8 @@ Purpose: determine whether snapshot reads in callbacks are stale-state risks bef
 - [x] Fix `src/components/LocationTable/FusionToggleButton.tsx`: its drop handlers now capture current drag state at event time and preserve the source across the asynchronous fusion operation; its render snapshot remains limited to the drop affordance.
 - [x] Fix `src/components/PokemonCombobox/useComboboxDragAndDrop.ts`: capture a drop's drag value before async lookup, check current drag data before publishing previews, and preserve the name that scheduled each preview lookup.
 - [x] Fix the remaining callbacks in `src/components/PokemonCombobox/DraggableComboboxSprite.tsx` and `src/stores/playthroughs/hooks.ts` to read the current proxy state when authorizing a drag or deciding whether to load playthroughs.
-- [ ] For each finding, decide whether the callback needs render-time snapshot data or current store state.
-- [ ] Add regression coverage for callbacks whose state source changes.
+- [x] For each finding, decide whether the callback needs render-time snapshot data or current store state; the audit and fixes above retain snapshots only for render-derived values and effect subscriptions.
+- [x] Add regression coverage for callbacks whose state source changes, including drag cleanup during asynchronous lookups and preserving a dropped Pokemon's source through asynchronous fusion.
 
 Acceptance criteria:
 
