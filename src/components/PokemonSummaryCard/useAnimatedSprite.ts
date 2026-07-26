@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 interface UseAnimatedSpriteOptions {
   canAnimate: boolean;
@@ -16,9 +16,8 @@ export function useAnimatedSprite({
   const hoverRef = useRef<boolean>(false);
   const reducedMotionRef = useRef(reducedMotion);
 
-  reducedMotionRef.current = reducedMotion;
-
-  useEffect(() => {
+  useLayoutEffect(() => {
+    reducedMotionRef.current = reducedMotion;
     if (!reducedMotion) return;
 
     hoverRef.current = false;
