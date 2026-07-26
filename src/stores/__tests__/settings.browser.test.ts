@@ -18,6 +18,9 @@ const clearLocalStorage = () => {
   localStorage.clear();
 };
 
+const importFreshSettings = () =>
+  import(/* @vite-ignore */ `../settings.ts?t=${Date.now()}`);
+
 describe("Settings Store", () => {
   beforeEach(() => {
     // Clear all mocks and localStorage
@@ -89,7 +92,7 @@ describe("Settings Store", () => {
         .mockReturnValue(oldPlaythrough);
 
       const { settingsStore: freshStore, settingsActions: freshActions } =
-        await import("../settings.ts?t=" + Date.now());
+        await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
 
@@ -117,7 +120,7 @@ describe("Settings Store", () => {
         .mockReturnValue(oldPlaythrough);
 
       const { settingsStore: freshStore } = await import(
-        `../settings.ts?t=${Date.now()}`
+        /* @vite-ignore */ `../settings.ts?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
@@ -146,7 +149,7 @@ describe("Settings Store", () => {
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        `../settings.ts?t=${Date.now()}`
+        /* @vite-ignore */ `../settings.ts?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
@@ -169,7 +172,7 @@ describe("Settings Store", () => {
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        `../settings.ts?t=${Date.now()}`
+        /* @vite-ignore */ `../settings.ts?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
@@ -180,7 +183,7 @@ describe("Settings Store", () => {
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        `../settings.ts?t=${Date.now()}`
+        /* @vite-ignore */ `../settings.ts?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
@@ -196,7 +199,7 @@ describe("Settings Store", () => {
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        `../settings.ts?t=${Date.now()}`
+        /* @vite-ignore */ `../settings.ts?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
@@ -220,7 +223,7 @@ describe("Settings Store", () => {
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        `../settings.ts?t=${Date.now()}`
+        /* @vite-ignore */ `../settings.ts?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
@@ -240,7 +243,7 @@ describe("Settings Store", () => {
       } as any);
 
       const { settingsStore: freshStore } = await import(
-        `../settings.ts?t=${Date.now()}`
+        /* @vite-ignore */ `../settings.ts?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
@@ -259,7 +262,7 @@ describe("Settings Store", () => {
       localStorage.setItem("settings", JSON.stringify(storedSettings));
 
       const { settingsStore: freshStore } = await import(
-        `../settings.ts?t=${Date.now()}`
+        /* @vite-ignore */ `../settings.ts?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
@@ -279,7 +282,7 @@ describe("Settings Store", () => {
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        `../settings.ts?t=${Date.now()}`
+        /* @vite-ignore */ `../settings.ts?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
@@ -300,7 +303,7 @@ describe("Settings Store", () => {
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        `../settings.ts?t=${Date.now()}`
+        /* @vite-ignore */ `../settings.ts?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
@@ -322,7 +325,7 @@ describe("Settings Store", () => {
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        `../settings.ts?t=${Date.now()}`
+        /* @vite-ignore */ `../settings.ts?t=${Date.now()}`
       );
 
       // Should preserve user's explicit choice
@@ -336,7 +339,7 @@ describe("Settings Store", () => {
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        `../settings.ts?t=${Date.now()}`
+        /* @vite-ignore */ `../settings.ts?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
@@ -360,7 +363,7 @@ describe("Settings Store", () => {
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await import(
-        `../settings.ts?t=${Date.now()}`
+        /* @vite-ignore */ `../settings.ts?t=${Date.now()}`
       );
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
