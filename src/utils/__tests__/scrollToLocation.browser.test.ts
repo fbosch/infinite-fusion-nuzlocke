@@ -129,6 +129,8 @@ describe("scrollToTableRow", () => {
   afterEach(() => {
     document.body.removeChild(container);
     document.body.removeChild(row);
+    delete document.documentElement.dataset.reducedMotion;
+    vi.unstubAllGlobals();
   });
 
   it("should scroll to center the target row in the container", () => {
@@ -145,6 +147,18 @@ describe("scrollToTableRow", () => {
 
     // The actual scroll behavior depends on DOM layout and may not be testable in this environment
     // We're testing that the function completes successfully
+  });
+
+  it("uses immediate scrolling when reduced motion is preferred", () => {
+    const scrollTo = vi.fn();
+    container.scrollTo = scrollTo;
+    document.documentElement.dataset.reducedMotion = "true";
+
+    scrollToTableRow(container, row, "smooth");
+
+    expect(scrollTo).toHaveBeenCalledWith(
+      expect.objectContaining({ behavior: "auto" }),
+    );
   });
 
   it("should handle null elements gracefully", () => {

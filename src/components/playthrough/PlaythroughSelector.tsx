@@ -235,6 +235,7 @@ export default function PlaythroughSelector({
                 />
               </PopoverButton>
               <PopoverPanel
+                transition
                 anchor={{ to: "bottom end", gap: "12px" }}
                 className={clsx(
                   "z-[50] rounded-xl",
@@ -243,6 +244,7 @@ export default function PlaythroughSelector({
                   "border border-gray-200/50 dark:border-gray-600/50",
                   "w-80 max-w-[calc(100vw-2rem)] sm:w-96",
                   "origin-top-right",
+                  "transition-opacity duration-150 data-closed:opacity-0",
                 )}
               >
                 {/* Current playthroughs section */}

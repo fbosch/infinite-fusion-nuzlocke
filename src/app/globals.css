@@ -456,3 +456,29 @@ button:disabled,
 [aria-disabled="true"] {
   @apply cursor-not-allowed;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-reduced-motion]),
+  html:not([data-reduced-motion]) * {
+    scroll-behavior: auto !important;
+  }
+
+  html:not([data-reduced-motion]) *,
+  html:not([data-reduced-motion]) *::before,
+  html:not([data-reduced-motion]) *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+html[data-reduced-motion="true"],
+html[data-reduced-motion="true"] * {
+  scroll-behavior: auto !important;
+}
+
+html[data-reduced-motion="true"] *,
+html[data-reduced-motion="true"] *::before,
+html[data-reduced-motion="true"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
