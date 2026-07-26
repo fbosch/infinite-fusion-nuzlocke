@@ -30,7 +30,7 @@ function PCSheetTab({ icon: Icon, label, count }: PCSheetTabProps) {
     <Tab
       className={({ selected }) =>
         clsx(
-          "inline-flex min-w-[7.25rem] shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors focus:outline-none sm:flex-1",
+          "inline-flex min-w-[7.25rem] shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 sm:flex-1",
           selected
             ? "border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",

@@ -3,6 +3,7 @@
 import { fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DraggableComboboxSprite } from "../DraggableComboboxSprite";
+import { getDraggableComboboxSpriteMenuOptions } from "../draggableComboboxSpriteMenu";
 
 const { startDragMock } = vi.hoisted(() => ({
   startDragMock: vi.fn(),
@@ -99,5 +100,20 @@ describe("DraggableComboboxSprite", () => {
 
     expect(dispatched).toBe(false);
     expect(startDragMock).not.toHaveBeenCalled();
+  });
+
+  it("omits Dex links when no Pokemon is selected", () => {
+    expect(
+      getDraggableComboboxSpriteMenuOptions({
+        value: undefined,
+        locationId: "route-1",
+        field: "head",
+        customLocations: [],
+        moveEncountersBetweenLocations: true,
+        preEvolution: null,
+        evolutions: [],
+        onOpenMoveModal: vi.fn(),
+      }),
+    ).toEqual([]);
   });
 });

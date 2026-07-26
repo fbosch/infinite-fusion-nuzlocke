@@ -264,6 +264,41 @@ describe("EncounterCell", () => {
     );
   });
 
+  it("omits a missing nickname from the clear confirmation", () => {
+    useEncounterMock.mockReturnValue({
+      head: {
+        id: 25,
+        name: "Pikachu",
+        uid: "pikachu-1",
+        nationalDexId: 25,
+        status: "captured",
+      },
+      body: null,
+      isFusion: false,
+      updatedAt: Date.now(),
+    });
+
+    render(
+      <table>
+        <tbody>
+          <tr>
+            <EncounterCell locationId="route-1" />
+          </tr>
+        </tbody>
+      </table>,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "clear-route-1-single" }),
+    );
+
+    expect(
+      screen.getByText(
+        'This will permanently remove the Pikachu with the status "Captured".',
+      ),
+    ).toBeDefined();
+  });
+
   it("toggles fusion mode from the fusion toggle button", () => {
     useEncounterMock.mockReturnValue({
       head: {

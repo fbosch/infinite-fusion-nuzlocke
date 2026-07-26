@@ -198,7 +198,7 @@ export function EncounterCell({
   const getConfirmationMessage = (pokemon: PokemonOptionType): string => {
     const dataText = getPokemonDataText(pokemon);
 
-    return `This will permanently remove ${`${pokemon.nickname} `}the ${pokemon.name}${dataText ? ` ${dataText}` : ""}.`;
+    return `This will permanently remove ${pokemon.nickname ? `${pokemon.nickname} ` : ""}the ${pokemon.name}${dataText ? ` ${dataText}` : ""}.`;
   };
 
   // Generate overwrite confirmation message

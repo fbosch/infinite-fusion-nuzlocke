@@ -5,7 +5,7 @@ import { isEggId, type PokemonOptionType } from "@/loaders/pokemon";
 import { playthroughActions } from "@/stores/playthroughs";
 import { getActivePlaythrough } from "@/stores/playthroughs/store";
 import type { EncounterData } from "@/stores/playthroughs/types";
-import ContextMenu, { type ContextMenuItem } from "../ContextMenu";
+import type { ContextMenuItem } from "../ContextMenu";
 import { PokemonSprite } from "../PokemonSprite";
 
 type EncounterField = "head" | "body";
@@ -266,12 +266,14 @@ export function getDraggableComboboxSpriteMenuOptions({
     }),
   );
 
+  if (!value) return menuOptions;
+
   menuOptions.push(
     { id: "separator", separator: true },
     {
       id: "infinitefusiondex",
       label: "Open InfiniteDex entry",
-      href: `https://infinitefusiondex.com/details/${value?.id}`,
+      href: `https://infinitefusiondex.com/details/${value.id}`,
       target: "_blank",
       favicon: "https://infinitefusiondex.com/images/favicon.ico",
       icon: ArrowUpRight,
@@ -280,7 +282,7 @@ export function getDraggableComboboxSpriteMenuOptions({
     {
       id: "fusiondex",
       label: "Open FusionDex entry",
-      href: `https://fusiondex.org/sprite/pif/${value?.id}/`,
+      href: `https://fusiondex.org/sprite/pif/${value.id}/`,
       target: "_blank",
       favicon: "https://www.fusiondex.org/favicon.ico",
       icon: ArrowUpRight,
