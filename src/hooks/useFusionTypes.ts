@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import type { TypeName } from "@/lib/typings";
 import { getFusionTyping, type TypeQuery } from "@/lib/typings";
 import type { PokemonOptionType } from "@/loaders/pokemon";
@@ -21,34 +20,31 @@ function useFusionTypes(
   const headSingle = usePokemonTypes(headQuery);
   const bodySingle = usePokemonTypes(bodyQuery);
 
-  const result = useMemo<UseFusionTypesResult>(() => {
-    // Fallbacks: if only one query is provided, return that Pokémon's types
-    if (headQuery && !bodyQuery) return headSingle;
-    if (!headQuery && bodyQuery) return bodySingle;
-    if (!headQuery && !bodyQuery) return { isLoading };
-    if (!allPokemon || allPokemon.length === 0) return { isLoading: true };
+  // Fallbacks: if only one query is provided, return that Pokémon's types
+  if (headQuery && !bodyQuery) return headSingle;
+  if (!headQuery && bodyQuery) return bodySingle;
+  if (!headQuery && !bodyQuery) return { isLoading };
+  if (!allPokemon || allPokemon.length === 0) return { isLoading: true };
 
-    const findPokemon = (q: TypeQuery) => {
-      if ("id" in q && q.id) return allPokemon.find((p) => p.id === q.id);
-      if ("nationalDexId" in q && q.nationalDexId)
-        return allPokemon.find((p) => p.nationalDexId === q.nationalDexId);
-      if ("name" in q && q.name)
-        return allPokemon.find(
-          (p) => p.name.toLowerCase() === q.name?.toLowerCase(),
-        );
-      return undefined;
-    };
+  const findPokemon = (q: TypeQuery) => {
+    if ("id" in q && q.id) return allPokemon.find((p) => p.id === q.id);
+    if ("nationalDexId" in q && q.nationalDexId)
+      return allPokemon.find((p) => p.nationalDexId === q.nationalDexId);
+    if ("name" in q && q.name)
+      return allPokemon.find(
+        (p) => p.name.toLowerCase() === q.name?.toLowerCase(),
+      );
+    return undefined;
+  };
 
-    const head = findPokemon(headQuery as TypeQuery);
-    const body = findPokemon(bodyQuery as TypeQuery);
-    if (!head || !body) return { isLoading };
-    const { primary, secondary } = getFusionTyping(head, body);
-    if (primary === secondary)
-      return { primary, secondary: undefined, isLoading: false };
-    return { primary, secondary, isLoading: false };
-  }, [allPokemon, isLoading, headQuery, bodyQuery, headSingle, bodySingle]);
+  const head = findPokemon(headQuery as TypeQuery);
+  const body = findPokemon(bodyQuery as TypeQuery);
+  if (!head || !body) return { isLoading };
+  const { primary, secondary } = getFusionTyping(head, body);
+  if (primary === secondary)
+    return { primary, secondary: undefined, isLoading: false };
 
-  return result;
+  return { primary, secondary, isLoading: false };
 }
 
 /**

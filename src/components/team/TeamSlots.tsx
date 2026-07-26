@@ -1,7 +1,7 @@
 "use client";
 
 import { clsx } from "clsx";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import PokeballIcon from "@/assets/images/pokeball.svg";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import { ArtworkVariantButton } from "@/components/PokemonSummaryCard/ArtworkVariantButton";
@@ -84,10 +84,7 @@ export default function TeamSlots() {
   const teamSpriteRefs = useRef<(FusionSpriteHandle | null)[]>([]);
   const previousFusionIds = useRef<(string | null)[]>([]);
 
-  const pokemonByUid = useMemo(
-    () => buildPokemonUidIndex(encounters),
-    [encounters],
-  );
+  const pokemonByUid = buildPokemonUidIndex(encounters);
 
   useEffect(() => {
     previousFusionIds.current = new Array(6).fill(null);

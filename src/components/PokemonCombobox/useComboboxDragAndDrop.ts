@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSnapshot } from "valtio";
 import { getPokemon, getPokemonNameMap } from "@/loaders";
 import type { PokemonOptionType } from "@/loaders/pokemon";
@@ -33,67 +33,61 @@ export function useComboboxDragAndDrop({
   const dragLeaveAnimationRef = useRef<number | null>(null);
 
   // Helper function to get location info from combobox ID
-  const getLocationInfo = useCallback((id: string) => {
+  const getLocationInfo = (id: string) => {
     return playthroughActions.getLocationFromComboboxId(id);
-  }, []);
+  };
 
   // Helper function to find Pokemon by name
-  const findPokemonByName = useCallback(
-    async (
-      pokemonName: string,
-      dragValue?: PokemonOptionType | null,
-    ): Promise<PokemonOptionType | null> => {
-      try {
-        const allPokemon = await getPokemon();
-        const nameMap = await getPokemonNameMap();
+  const findPokemonByName = async (
+    pokemonName: string,
+    dragValue?: PokemonOptionType | null,
+  ): Promise<PokemonOptionType | null> => {
+    try {
+      const allPokemon = await getPokemon();
+      const nameMap = await getPokemonNameMap();
 
-        const foundPokemon = allPokemon.find(
-          (p) => nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase(),
-        );
+      const foundPokemon = allPokemon.find(
+        (p) => nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase(),
+      );
 
-        if (!foundPokemon) return null;
+      if (!foundPokemon) return null;
 
-        return {
-          id: foundPokemon.id,
-          name: pokemonName,
-          nationalDexId: foundPokemon.nationalDexId,
-          originalLocation: locationId,
-          ...(dragValue && {
-            nickname: dragValue.nickname,
-            status: dragValue.status,
-          }),
-        };
-      } catch (err) {
-        console.error("Error finding Pokemon by name:", err);
-        return null;
-      }
-    },
-    [locationId],
-  );
+      return {
+        id: foundPokemon.id,
+        name: pokemonName,
+        nationalDexId: foundPokemon.nationalDexId,
+        originalLocation: locationId,
+        ...(dragValue && {
+          nickname: dragValue.nickname,
+          status: dragValue.status,
+        }),
+      };
+    } catch (err) {
+      console.error("Error finding Pokemon by name:", err);
+      return null;
+    }
+  };
 
   // Helper function to perform move operations
-  const performMoveOperation = useCallback(
-    (pokemon: PokemonOptionType) => {
-      if (!dragSnapshot.currentDragSource || !comboboxId) {
-        onChange(pokemon);
-        return;
-      }
+  const performMoveOperation = (pokemon: PokemonOptionType) => {
+    if (!dragSnapshot.currentDragSource || !comboboxId) {
+      onChange(pokemon);
+      return;
+    }
 
-      const sourceLocation = getLocationInfo(dragSnapshot.currentDragSource);
-      const targetLocation = getLocationInfo(comboboxId);
+    const sourceLocation = getLocationInfo(dragSnapshot.currentDragSource);
+    const targetLocation = getLocationInfo(comboboxId);
 
-      playthroughActions.relocateEncounterSlot({
-        sourceLocationId: sourceLocation.locationId,
-        sourceField: sourceLocation.field,
-        targetLocationId: targetLocation.locationId,
-        targetField: targetLocation.field,
-      });
-    },
-    [dragSnapshot.currentDragSource, comboboxId, onChange, getLocationInfo],
-  );
+    playthroughActions.relocateEncounterSlot({
+      sourceLocationId: sourceLocation.locationId,
+      sourceField: sourceLocation.field,
+      targetLocationId: targetLocation.locationId,
+      targetField: targetLocation.field,
+    });
+  };
 
   // Helper function to perform swap operations
-  const performSwapOperation = useCallback(() => {
+  const performSwapOperation = () => {
     if (!dragSnapshot.currentDragSource || !comboboxId) return;
 
     const sourceLocation = getLocationInfo(dragSnapshot.currentDragSource);
@@ -105,190 +99,145 @@ export function useComboboxDragAndDrop({
       targetLocationId: targetLocation.locationId,
       targetField: targetLocation.field,
     });
-  }, [dragSnapshot.currentDragSource, comboboxId, getLocationInfo]);
+  };
 
-  // Memoize drag state calculations
-  const dragState = useMemo(() => {
-    if (!comboboxId || !dragSnapshot.currentDragSource) {
-      return { isFromDifferentCombobox: false, canSwitch: false };
-    }
-
-    const isFromDifferentCombobox =
-      dragSnapshot.currentDragSource !== comboboxId;
-    const canSwitch =
-      isFromDifferentCombobox &&
-      dragSnapshot.currentDragValue &&
-      value &&
-      dragSnapshot.currentDragValue.uid !== value.uid;
-
-    return { isFromDifferentCombobox, canSwitch };
-  }, [
-    comboboxId,
-    dragSnapshot.currentDragSource,
-    dragSnapshot.currentDragValue,
-    value,
-  ]);
+  const isFromDifferentCombobox = Boolean(
+    comboboxId &&
+      dragSnapshot.currentDragSource &&
+      dragSnapshot.currentDragSource !== comboboxId,
+  );
+  const canSwitch =
+    isFromDifferentCombobox &&
+    dragSnapshot.currentDragValue &&
+    value &&
+    dragSnapshot.currentDragValue.uid !== value.uid;
 
   // Debounced drag preview setter
-  const setDragPreviewDebounced = useCallback(
-    (preview: PokemonOptionType | null) => {
-      if (dragPreviewTimeout) {
-        clearTimeout(dragPreviewTimeout);
-      }
+  const setDragPreviewDebounced = (preview: PokemonOptionType | null) => {
+    if (dragPreviewTimeout) {
+      clearTimeout(dragPreviewTimeout);
+    }
 
-      dragPreviewTimeout = window.setTimeout(() => {
-        setDragPreview(preview);
-        dragPreviewTimeout = null;
-      }, DRAG_PREVIEW_DEBOUNCE);
-    },
-    [],
-  );
+    dragPreviewTimeout = window.setTimeout(() => {
+      setDragPreview(preview);
+      dragPreviewTimeout = null;
+    }, DRAG_PREVIEW_DEBOUNCE);
+  };
 
   // Handle drop events on the input
-  const handleDrop = useCallback(
-    async (e: React.DragEvent<HTMLDivElement>) => {
-      e.preventDefault();
-      e.stopPropagation();
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-      // Clear debounced preview immediately
-      if (dragPreviewTimeout) {
-        clearTimeout(dragPreviewTimeout);
-        dragPreviewTimeout = null;
-      }
-      setDragPreview(null);
+    // Clear debounced preview immediately
+    if (dragPreviewTimeout) {
+      clearTimeout(dragPreviewTimeout);
+      dragPreviewTimeout = null;
+    }
+    setDragPreview(null);
 
-      const pokemonName = e.dataTransfer.getData("text/plain");
-      if (!pokemonName) return;
+    const pokemonName = e.dataTransfer.getData("text/plain");
+    if (!pokemonName) return;
 
-      // Preserve the drag value that initiated this drop while async lookup runs.
-      const dragValue = dragStore.currentDragValue;
+    // Preserve the drag value that initiated this drop while async lookup runs.
+    const dragValue = dragStore.currentDragValue;
 
-      // Check if move operations are allowed
-      if (
-        dragState.isFromDifferentCombobox &&
-        !settings.moveEncountersBetweenLocations
-      ) {
-        // If trying to move between different locations but setting is disabled, just set the Pokemon
-        let pokemon = dragValue;
-        if (!pokemon) {
-          pokemon = await findPokemonByName(pokemonName, dragValue);
-          if (!pokemon) return;
-        }
-        onChange(pokemon);
-        return;
-      }
-
-      // Handle swap operation if conditions are met
-      if (dragState.canSwitch && settings.moveEncountersBetweenLocations) {
-        performSwapOperation();
-        return;
-      }
-
-      // Determine the Pokemon to use (existing drag value or lookup by name)
+    // Check if move operations are allowed
+    if (isFromDifferentCombobox && !settings.moveEncountersBetweenLocations) {
+      // If trying to move between different locations but setting is disabled, just set the Pokemon
       let pokemon = dragValue;
       if (!pokemon) {
         pokemon = await findPokemonByName(pokemonName, dragValue);
         if (!pokemon) return;
       }
+      onChange(pokemon);
+      return;
+    }
 
-      // Perform move or set operation
-      if (
-        dragState.isFromDifferentCombobox &&
-        settings.moveEncountersBetweenLocations
-      ) {
-        performMoveOperation(pokemon);
-      } else {
-        onChange(pokemon);
-      }
-    },
-    [
-      dragState.canSwitch,
-      dragState.isFromDifferentCombobox,
-      settings.moveEncountersBetweenLocations,
-      performSwapOperation,
-      performMoveOperation,
-      findPokemonByName,
-      onChange,
-    ],
-  );
+    // Handle swap operation if conditions are met
+    if (canSwitch && settings.moveEncountersBetweenLocations) {
+      performSwapOperation();
+      return;
+    }
+
+    // Determine the Pokemon to use (existing drag value or lookup by name)
+    let pokemon = dragValue;
+    if (!pokemon) {
+      pokemon = await findPokemonByName(pokemonName, dragValue);
+      if (!pokemon) return;
+    }
+
+    // Perform move or set operation
+    if (isFromDifferentCombobox && settings.moveEncountersBetweenLocations) {
+      performMoveOperation(pokemon);
+    } else {
+      onChange(pokemon);
+    }
+  };
 
   // Helper function to update preview for drag data
-  const updatePreviewForDragData = useCallback(
-    async (pokemonName: string) => {
-      const pokemon = await findPokemonByName(pokemonName);
-      if (pokemon && dragStore.currentDragData === pokemonName) {
-        setDragPreview(pokemon);
+  const updatePreviewForDragData = async (pokemonName: string) => {
+    const pokemon = await findPokemonByName(pokemonName);
+    if (pokemon && dragStore.currentDragData === pokemonName) {
+      setDragPreview(pokemon);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // If move operations are disabled, show appropriate drop effect
+    if (!settings.moveEncountersBetweenLocations) {
+      e.dataTransfer.dropEffect = "copy";
+    } else {
+      e.dataTransfer.dropEffect = "copy";
+    }
+
+    // Cancel pending drag leave timeout
+    if (dragLeaveAnimationRef.current !== null) {
+      clearTimeout(dragLeaveAnimationRef.current);
+      dragLeaveAnimationRef.current = null;
+    }
+
+    // Early exit if no drag data
+    if (!dragSnapshot.currentDragValue && !dragSnapshot.currentDragData) {
+      return;
+    }
+
+    // Handle existing Pokemon drag value
+    if (dragSnapshot.currentDragValue) {
+      const shouldUpdate =
+        !dragPreview || dragPreview.name !== dragSnapshot.currentDragValue.name;
+
+      if (shouldUpdate) {
+        setDragPreviewDebounced(dragSnapshot.currentDragValue);
       }
-    },
-    [findPokemonByName],
-  );
+      return;
+    }
 
-  const handleDragOver = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
-      e.preventDefault();
-      e.stopPropagation();
+    // Handle Pokemon name drag data
+    if (dragSnapshot.currentDragData) {
+      const dragData = dragSnapshot.currentDragData;
+      const shouldUpdate = !dragPreview || dragPreview.name !== dragData;
 
-      // If move operations are disabled, show appropriate drop effect
-      if (!settings.moveEncountersBetweenLocations) {
-        e.dataTransfer.dropEffect = "copy";
-      } else {
-        e.dataTransfer.dropEffect = "copy";
-      }
+      if (shouldUpdate) {
+        setDragPreviewDebounced(null); // Clear current preview immediately
 
-      // Cancel pending drag leave timeout
-      if (dragLeaveAnimationRef.current !== null) {
-        clearTimeout(dragLeaveAnimationRef.current);
-        dragLeaveAnimationRef.current = null;
-      }
-
-      // Early exit if no drag data
-      if (!dragSnapshot.currentDragValue && !dragSnapshot.currentDragData) {
-        return;
-      }
-
-      // Handle existing Pokemon drag value
-      if (dragSnapshot.currentDragValue) {
-        const shouldUpdate =
-          !dragPreview ||
-          dragPreview.name !== dragSnapshot.currentDragValue.name;
-
-        if (shouldUpdate) {
-          setDragPreviewDebounced(dragSnapshot.currentDragValue);
+        // Debounce the expensive async operation
+        if (dragPreviewTimeout) {
+          clearTimeout(dragPreviewTimeout);
         }
-        return;
+
+        dragPreviewTimeout = window.setTimeout(() => {
+          updatePreviewForDragData(dragData);
+          dragPreviewTimeout = null;
+        }, DRAG_PREVIEW_DEBOUNCE);
       }
+    }
+  };
 
-      // Handle Pokemon name drag data
-      if (dragSnapshot.currentDragData) {
-        const dragData = dragSnapshot.currentDragData;
-        const shouldUpdate = !dragPreview || dragPreview.name !== dragData;
-
-        if (shouldUpdate) {
-          setDragPreviewDebounced(null); // Clear current preview immediately
-
-          // Debounce the expensive async operation
-          if (dragPreviewTimeout) {
-            clearTimeout(dragPreviewTimeout);
-          }
-
-          dragPreviewTimeout = window.setTimeout(() => {
-            updatePreviewForDragData(dragData);
-            dragPreviewTimeout = null;
-          }, DRAG_PREVIEW_DEBOUNCE);
-        }
-      }
-    },
-    [
-      dragPreview,
-      dragSnapshot.currentDragValue,
-      dragSnapshot.currentDragData,
-      setDragPreviewDebounced,
-      updatePreviewForDragData,
-      settings.moveEncountersBetweenLocations,
-    ],
-  );
-
-  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.stopPropagation(); // Prevent event bubbling
 
     // Cancel any pending timeout
@@ -302,14 +251,14 @@ export function useComboboxDragAndDrop({
       setDragPreview(null);
       dragLeaveAnimationRef.current = null;
     }, 50); // Short delay to allow for dragEnter on new targets
-  }, []);
+  };
 
-  const handleDragEnd = useCallback(() => {
+  const handleDragEnd = () => {
     // Clear global drag data when drag ends
     dragActions.clearDrag();
     // Also clear any lingering drag preview
     setDragPreview(null);
-  }, []);
+  };
 
   // Clean up timeouts on unmount
   useEffect(() => {

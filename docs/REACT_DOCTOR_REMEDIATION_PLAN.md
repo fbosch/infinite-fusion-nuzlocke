@@ -105,6 +105,7 @@ Acceptance criteria:
 
 Purpose: retain React Doctor's maintainability observations as optional context without creating a competing gate.
 
+- [x] Remove React Compiler-redundant manual memoization across the app; the full scan no longer reports `react-compiler-no-manual-memoization` findings.
 - [ ] Use Fallow findings and existing architecture plans to prioritize large components and manual memoization patterns.
 - [ ] Consider `src/components/LocationTable/EncounterCell.tsx`, `src/components/PokemonSummaryCard/LocationSelector.tsx`, and `src/components/PokemonCombobox/useComboboxDragAndDrop.ts` only within a focused Fallow-led refactor.
 - [ ] Do not change runtime code solely to improve the React Doctor score.

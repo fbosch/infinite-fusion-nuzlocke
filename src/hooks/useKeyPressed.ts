@@ -1,4 +1,4 @@
-import { useMemo, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
 // Global state for all keys
 const keyStates = new Map<string, boolean>();
@@ -128,11 +128,8 @@ function notifyListeners(key: string) {
  * @returns {boolean} True if the specified key is currently pressed, false otherwise
  */
 export function useKeyPressed(key: string): boolean {
-  // Memoize the subscribe function to prevent re-subscriptions
-  const subscribe = useMemo(() => createSubscribe(key), [key]);
-
-  // Memoize the getSnapshot function to prevent unnecessary re-evaluations
-  const getSnapshot = useMemo(() => createGetSnapshot(key), [key]);
+  const subscribe = createSubscribe(key);
+  const getSnapshot = createGetSnapshot(key);
 
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

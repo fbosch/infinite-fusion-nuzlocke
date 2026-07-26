@@ -13,7 +13,6 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { Box, Boxes, Skull, Users, X } from "lucide-react";
-import { useCallback, useMemo } from "react";
 import { getLocationsSortedWithCustom } from "@/loaders/locations";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import {
@@ -63,39 +62,27 @@ export default function PokemonPCSheet({
     selectTeamMember,
   } = useTeamMemberPicker();
 
-  const mergedLocations = useMemo(
-    () => getLocationsSortedWithCustom(customLocations),
-    [customLocations],
-  );
+  const mergedLocations = getLocationsSortedWithCustom(customLocations);
 
-  const idToName = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const loc of mergedLocations) map.set(loc.id, loc.name);
-    return map;
-  }, [mergedLocations]);
+  const idToName = new Map<string, string>();
+  for (const loc of mergedLocations) idToName.set(loc.id, loc.name);
 
-  const pokemonByUid = useMemo(
-    () => buildPokemonUidIndex(encounters),
-    [encounters],
-  );
+  const pokemonByUid = buildPokemonUidIndex(encounters);
 
   // Handlers for team member picker modal
-  const handleTeamMemberClick = useCallback(
-    (
-      position: number,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _existingTeamMember: {
-        position: number;
-        isEmpty: boolean;
-        headPokemon: PokemonOptionType | null;
-        bodyPokemon: PokemonOptionType | null;
-        isFusion: boolean;
-      },
-    ) => {
-      openPicker(position);
+  const handleTeamMemberClick = (
+    position: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _existingTeamMember: {
+      position: number;
+      isEmpty: boolean;
+      headPokemon: PokemonOptionType | null;
+      bodyPokemon: PokemonOptionType | null;
+      isFusion: boolean;
     },
-    [openPicker],
-  );
+  ) => {
+    openPicker(position);
+  };
 
   const team: Entry[] = activePlaythrough?.team
     ? getTeamSlots(
@@ -114,30 +101,19 @@ export default function PokemonPCSheet({
       )
     : [];
 
-  const deceased: Entry[] = useMemo(
-    () => getDeceasedEntries(encounters, idToName),
-    [encounters, idToName],
-  );
+  const deceased: Entry[] = getDeceasedEntries(encounters, idToName);
 
-  const stored: Entry[] = useMemo(
-    () => getStoredEntries(encounters, idToName),
-    [encounters, idToName],
-  );
+  const stored: Entry[] = getStoredEntries(encounters, idToName);
 
   const selectedIndex = getPCTabIndex(activeTab);
 
-  // Memoize the onClose handler to prevent unnecessary re-renders
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     onClose();
-  }, [onClose]);
+  };
 
-  // Memoize the onChangeTab handler
-  const handleChangeTab = useCallback(
-    (index: number) => {
-      onChangeTab(getPCTab(index));
-    },
-    [onChangeTab],
-  );
+  const handleChangeTab = (index: number) => {
+    onChangeTab(getPCTab(index));
+  };
 
   return (
     <Dialog

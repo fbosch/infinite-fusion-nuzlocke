@@ -9,7 +9,7 @@ import {
   Undo2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
 import { ContextMenu, type ContextMenuItem } from "@/components/ContextMenu";
@@ -457,53 +457,39 @@ export function TeamMemberContextMenu({
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
 
   // Handler to mark team member as deceased
-  const handleMarkAsDeceased = useCallback(async () => {
+  const handleMarkAsDeceased = async () => {
     await playthroughActions.markTeamMemberAsDeceased(position);
-  }, [position]);
+  };
 
   // Handler to move team member to box
-  const handleMoveToBox = useCallback(async () => {
+  const handleMoveToBox = async () => {
     await playthroughActions.moveTeamMemberToBox(position);
-  }, [position]);
+  };
 
-  const handleEvolveHead = useCallback(
-    (evolution: Pokemon) => evolvePokemon(headPokemon, evolution),
-    [headPokemon],
-  );
+  const handleEvolveHead = (evolution: Pokemon) =>
+    evolvePokemon(headPokemon, evolution);
 
-  const handleEvolveBody = useCallback(
-    (evolution: Pokemon) => evolvePokemon(bodyPokemon, evolution),
-    [bodyPokemon],
-  );
+  const handleEvolveBody = (evolution: Pokemon) =>
+    evolvePokemon(bodyPokemon, evolution);
 
-  const handleDevolveHead = useCallback(
-    () => devolvePokemon(headPokemon, headPreEvolution),
-    [headPokemon, headPreEvolution],
-  );
+  const handleDevolveHead = () => devolvePokemon(headPokemon, headPreEvolution);
 
-  const handleDevolveBody = useCallback(
-    () => devolvePokemon(bodyPokemon, bodyPreEvolution),
-    [bodyPokemon, bodyPreEvolution],
-  );
+  const handleDevolveBody = () => devolvePokemon(bodyPokemon, bodyPreEvolution);
 
   // Handler to flip fusion (swap head and body)
-  const handleFlipFusion = useCallback(async () => {
+  const handleFlipFusion = async () => {
     if (hasFusionPair === false) return;
 
     await playthroughActions.flipTeamMemberFusion(position);
-  }, [hasFusionPair, position]);
+  };
 
-  const handleGoToHeadEncounter = useCallback(
-    () => scrollToPokemonEncounter(headPokemon, onClose),
-    [headPokemon, onClose],
-  );
+  const handleGoToHeadEncounter = () =>
+    scrollToPokemonEncounter(headPokemon, onClose);
 
-  const handleGoToBodyEncounter = useCallback(
-    () => scrollToPokemonEncounter(bodyPokemon, onClose),
-    [bodyPokemon, onClose],
-  );
+  const handleGoToBodyEncounter = () =>
+    scrollToPokemonEncounter(bodyPokemon, onClose);
 
-  const contextItems = useMemo<ContextMenuItem[]>(() => {
+  const contextItems: ContextMenuItem[] = (() => {
     return createTeamMemberContextItems({
       headPokemon,
       bodyPokemon,
@@ -527,26 +513,7 @@ export function TeamMemberContextMenu({
         onGoToBodyEncounter: handleGoToBodyEncounter,
       },
     });
-  }, [
-    headPokemon,
-    bodyPokemon,
-    preferredVariant,
-    hasArtVariants,
-    isLoadingVariants,
-    handleMarkAsDeceased,
-    handleMoveToBox,
-    headEvolutions,
-    headPreEvolution,
-    bodyEvolutions,
-    bodyPreEvolution,
-    handleEvolveHead,
-    handleEvolveBody,
-    handleDevolveHead,
-    handleDevolveBody,
-    handleFlipFusion,
-    handleGoToHeadEncounter,
-    handleGoToBodyEncounter,
-  ]);
+  })();
 
   return (
     <>

@@ -1,13 +1,7 @@
 "use client";
 
 import type React from "react";
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useReducer,
-} from "react";
+import { createContext, useContext, useEffect, useReducer } from "react";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import {
   useActivePlaythrough,
@@ -374,7 +368,7 @@ export function TeamMemberSelectionProvider({
   useTeamSelectionEffects({ state, dispatch, existingTeamMember, encounters });
 
   // Get all available Pokémon from encounters, filtering out those already in use by other team members
-  const allAvailablePokemon = useMemo(() => {
+  const allAvailablePokemon = (() => {
     if (!encounters || !teamMembers) return [];
 
     return filterAvailableTeamPokemon(
@@ -383,18 +377,15 @@ export function TeamMemberSelectionProvider({
       position,
       existingTeamMember,
     );
-  }, [encounters, teamMembers, position, existingTeamMember]);
+  })();
 
   // Computed values
-  const stateValue = useMemo(
-    () => ({
-      ...state,
-      availablePokemon: allAvailablePokemon,
-      canUpdateTeam: true,
-      hasSelection: Boolean(state.selectedHead || state.selectedBody),
-    }),
-    [state, allAvailablePokemon],
-  );
+  const stateValue = {
+    ...state,
+    availablePokemon: allAvailablePokemon,
+    canUpdateTeam: true,
+    hasSelection: Boolean(state.selectedHead || state.selectedBody),
+  };
   const actionsValue = useTeamMemberSelectionActionValue({
     dispatch,
     selectedHead: state.selectedHead,

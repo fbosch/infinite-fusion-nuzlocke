@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import type { z } from "zod";
 
 const callbacks = new Set<(key: string) => void>();
@@ -56,32 +56,29 @@ export function useLocalStorage<T>(
     }
   };
 
-  const subscribe = useCallback(
-    (onStoreChange: () => void) => {
-      // Return early no-op if not in browser environment
-      if (typeof window === "undefined") {
-        return () => {};
-      }
+  const subscribe = (onStoreChange: () => void) => {
+    // Return early no-op if not in browser environment
+    if (typeof window === "undefined") {
+      return () => {};
+    }
 
-      const onChange = (localKey: string | null) => {
-        if (localKey === key) {
-          onStoreChange();
-        }
-      };
-      const onStorageChange = (e: StorageEvent) => {
-        if (e.storageArea === localStorage) {
-          onChange(e.key);
-        }
-      };
-      callbacks.add(onChange);
-      window.addEventListener("storage", onStorageChange);
-      return () => {
-        callbacks.delete(onChange);
-        window.removeEventListener("storage", onStorageChange);
-      };
-    },
-    [key],
-  );
+    const onChange = (localKey: string | null) => {
+      if (localKey === key) {
+        onStoreChange();
+      }
+    };
+    const onStorageChange = (e: StorageEvent) => {
+      if (e.storageArea === localStorage) {
+        onChange(e.key);
+      }
+    };
+    callbacks.add(onChange);
+    window.addEventListener("storage", onStorageChange);
+    return () => {
+      callbacks.delete(onChange);
+      window.removeEventListener("storage", onStorageChange);
+    };
+  };
 
   const getServerSnapshot = (): string | null => {
     // On server, always return null since localStorage isn't available

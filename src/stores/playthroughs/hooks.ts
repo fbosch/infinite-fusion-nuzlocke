@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { useSnapshot } from "valtio";
 import type { z } from "zod";
 import type { CustomLocationSchema } from "@/loaders/locations";
@@ -31,25 +31,19 @@ export const useAllPlaythroughs = () => {
     }
   }, [snapshot.isLoading, snapshot.playthroughs.length]);
 
-  return useMemo(() => {
-    return snapshot.playthroughs;
-  }, [snapshot.playthroughs]);
+  return snapshot.playthroughs;
 };
 
 export const useActivePlaythrough = (): Playthrough | null => {
   const snapshot = useSnapshot(playthroughsStore);
 
-  return useMemo(() => {
-    if (!snapshot.activePlaythroughId) return null;
+  if (!snapshot.activePlaythroughId) return null;
 
-    const activePlaythroughData = snapshot.playthroughs.find(
-      (p) => p.id === snapshot.activePlaythroughId,
-    );
+  const activePlaythroughData = snapshot.playthroughs.find(
+    (p) => p.id === snapshot.activePlaythroughId,
+  );
 
-    return activePlaythroughData
-      ? (activePlaythroughData as Playthrough)
-      : null;
-  }, [snapshot.activePlaythroughId, snapshot.playthroughs]);
+  return activePlaythroughData ? (activePlaythroughData as Playthrough) : null;
 };
 
 export const useActivePlaythroughId = (): string | null => {
@@ -91,10 +85,8 @@ export const usePlaythroughById = (
     (p) => p.id === playthroughId,
   );
 
-  return useMemo(() => {
-    if (!playthroughId || !playthroughData) return null;
-    return playthroughData as Playthrough;
-  }, [playthroughId, playthroughData]);
+  if (!playthroughId || !playthroughData) return null;
+  return playthroughData as Playthrough;
 };
 
 export const useIsLoading = (): boolean => {
@@ -134,9 +126,7 @@ export const useCustomLocations = (): z.infer<
 >[] => {
   const activePlaythrough = useActivePlaythrough();
 
-  return useMemo(() => {
-    return activePlaythrough?.customLocations || [];
-  }, [activePlaythrough?.customLocations]);
+  return activePlaythrough?.customLocations || [];
 };
 
 const useMergedLocations = () => {

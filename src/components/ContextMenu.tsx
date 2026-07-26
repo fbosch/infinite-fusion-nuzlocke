@@ -16,8 +16,8 @@ import type React from "react";
 import {
   cloneElement,
   isValidElement,
-  useCallback,
   useEffect,
+  useEffectEvent,
   useId,
   useLayoutEffect,
   useRef,
@@ -195,25 +195,25 @@ function useContextMenuState() {
   const [isVisible, setIsVisible] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  const openMenu = useCallback((position: { x: number; y: number }) => {
+  const openMenu = (position: { x: number; y: number }) => {
     startTransition(() => {
       setMenuPosition(position);
       setIsOpen(true);
       setIsVisible(true);
     });
-  }, []);
+  };
 
-  const closeMenu = useCallback(() => {
+  const closeMenu = () => {
     startTransition(() => {
       setIsOpen(false);
     });
-  }, []);
+  };
 
-  const hideMenu = useCallback(() => {
+  const hideMenu = () => {
     startTransition(() => {
       setIsVisible(false);
     });
-  }, []);
+  };
 
   return {
     menuPosition,
@@ -285,7 +285,7 @@ export function ContextMenu({
   const submenuItemRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const isOpenRef = useRef(isOpen);
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     if (isOpenRef.current) {
       window.dispatchEvent(new Event("context-menu-close"));
     }
@@ -300,7 +300,7 @@ export function ContextMenu({
         hideMenu();
       }, 50);
     }
-  }, [closeMenu, hideMenu]);
+  };
 
   useEffect(() => {
     isOpenRef.current = isOpen;
@@ -328,6 +328,37 @@ export function ContextMenu({
     }
   }, [isVisible, menuPosition, setMenuPosition]);
 
+  const handleVisibilityChange = useEffectEvent(() => {
+    const isVisible = document.visibilityState === "visible";
+    const isFocused = document.hasFocus();
+
+    if ((!isVisible || !isFocused) && isOpen) {
+      handleClose();
+    }
+  });
+
+  const handleScroll = useEffectEvent(() => {
+    if (isOpen) {
+      handleClose();
+    }
+  });
+
+  const handleActiveContextMenu = useEffectEvent((event: MouseEvent) => {
+    const target = event.target;
+    const contextMenuTrigger =
+      target instanceof Element &&
+      target.closest<HTMLElement>("[data-context-menu-trigger]");
+
+    if (!contextMenuTrigger) {
+      event.preventDefault();
+    } else if (contextMenuTrigger.dataset.contextMenuTrigger === triggerId) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    handleClose();
+  });
+
   // Floating UI setup for keyboard navigation
   const { refs, context } = useFloating({
     open: isOpen,
@@ -354,22 +385,6 @@ export function ContextMenu({
 
   // Close menu when window becomes hidden, loses focus, or scrolls
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      const isVisible = document.visibilityState === "visible";
-      const isFocused = document.hasFocus();
-      const shouldClose = !isVisible || !isFocused;
-
-      if (shouldClose && isOpen) {
-        handleClose();
-      }
-    };
-
-    const handleScroll = () => {
-      if (isOpen) {
-        handleClose();
-      }
-    };
-
     // Add event listeners
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("focus", handleVisibilityChange);
@@ -383,26 +398,10 @@ export function ContextMenu({
       window.removeEventListener("blur", handleVisibilityChange);
       window.removeEventListener("scroll", handleScroll, true);
     };
-  }, [isOpen, handleClose]);
+  }, []);
 
   useEffect(() => {
     if (!isVisible) return;
-
-    const handleActiveContextMenu = (event: MouseEvent) => {
-      const target = event.target;
-      const contextMenuTrigger =
-        target instanceof Element &&
-        target.closest<HTMLElement>("[data-context-menu-trigger]");
-
-      if (!contextMenuTrigger) {
-        event.preventDefault();
-      } else if (contextMenuTrigger.dataset.contextMenuTrigger === triggerId) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-
-      handleClose();
-    };
 
     document.addEventListener("contextmenu", handleActiveContextMenu, true);
     return () => {
@@ -412,9 +411,9 @@ export function ContextMenu({
         true,
       );
     };
-  }, [isVisible, handleClose, triggerId]);
+  }, [isVisible]);
 
-  const openSubmenuForIndex = useCallback((validIndex: number) => {
+  const openSubmenuForIndex = (validIndex: number) => {
     const trigger = listRef.current[validIndex];
     if (trigger) {
       const { bottom, right, top } = trigger.getBoundingClientRect();
@@ -425,11 +424,11 @@ export function ContextMenu({
     }
     setActiveSubmenuIndex(0);
     setOpenSubmenuIndex(validIndex);
-  }, []);
+  };
 
-  const closeSubmenu = useCallback(() => {
+  const closeSubmenu = () => {
     setOpenSubmenuIndex(null);
-  }, []);
+  };
 
   const handleContextMenu = (event: React.MouseEvent) => {
     if (disabled) return;

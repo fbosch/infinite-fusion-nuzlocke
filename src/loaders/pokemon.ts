@@ -3,7 +3,6 @@ import {
   type QueryOptions,
   useQuery,
 } from "@tanstack/react-query";
-import { useMemo } from "react";
 import { useDebounce } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
@@ -358,9 +357,7 @@ function usePokemonByType(type: string) {
 export function usePokemonNameMap() {
   const { data: allPokemon = [] } = useAllPokemon();
 
-  const nameMap = useMemo(() => {
-    return new Map(allPokemon.map((p) => [p.id, p.name]));
-  }, [allPokemon]);
+  const nameMap = new Map(allPokemon.map((p) => [p.id, p.name]));
 
   return nameMap;
 }
@@ -374,34 +371,32 @@ export function usePokemonEvolutionData(
     enabled,
   });
 
-  return useMemo(() => {
-    if (!pokemonId || !allPokemon || !enabled)
-      return { evolutions: [], preEvolution: null, isLoading };
+  if (!pokemonId || !allPokemon || !enabled)
+    return { evolutions: [], preEvolution: null, isLoading };
 
-    const currentPokemon = allPokemon.find((p) => p.id === pokemonId);
-    if (!currentPokemon)
-      return {
-        evolutions: [],
-        preEvolution: null,
-        isLoading,
-      };
-
-    const evolutionIds = new Set(
-      currentPokemon.evolution?.evolves_to.map((e) => e.id) || [],
-    );
-    const preEvolutionId = currentPokemon.evolution?.evolves_from?.id || null;
-    const evolutions = allPokemon.filter((p) =>
-      evolutionIds.has(p.nationalDexId),
-    );
-    const preEvolution = preEvolutionId
-      ? allPokemon.find((p) => p.nationalDexId === preEvolutionId) || null
-      : null;
+  const currentPokemon = allPokemon.find((p) => p.id === pokemonId);
+  if (!currentPokemon)
     return {
-      evolutions,
-      preEvolution,
+      evolutions: [],
+      preEvolution: null,
       isLoading,
     };
-  }, [allPokemon, pokemonId, isLoading, enabled]);
+
+  const evolutionIds = new Set(
+    currentPokemon.evolution?.evolves_to.map((e) => e.id) || [],
+  );
+  const preEvolutionId = currentPokemon.evolution?.evolves_from?.id || null;
+  const evolutions = allPokemon.filter((p) =>
+    evolutionIds.has(p.nationalDexId),
+  );
+  const preEvolution = preEvolutionId
+    ? allPokemon.find((p) => p.nationalDexId === preEvolutionId) || null
+    : null;
+  return {
+    evolutions,
+    preEvolution,
+    isLoading,
+  };
 }
 
 // Hook for searching Pokemon with debounced query

@@ -2,7 +2,6 @@ import type { Table } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   type RefObject,
-  useCallback,
   useEffect,
   useLayoutEffect,
   useState,
@@ -21,28 +20,23 @@ const LOCATION_ROW_OVERSCAN_COUNT = 4;
 function useContainerLayoutSnapshot(
   tableContainerElement: HTMLDivElement | null,
 ) {
-  const subscribe = useCallback(
-    (notify: () => void) => {
-      if (!tableContainerElement) return () => {};
+  const subscribe = (notify: () => void) => {
+    if (!tableContainerElement) return () => {};
 
-      const resizeObserver =
-        typeof ResizeObserver === "undefined"
-          ? null
-          : new ResizeObserver(notify);
-      resizeObserver?.observe(tableContainerElement);
-      document.fonts?.addEventListener("loadingdone", notify);
+    const resizeObserver =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(notify);
+    resizeObserver?.observe(tableContainerElement);
+    document.fonts?.addEventListener("loadingdone", notify);
 
-      return () => {
-        resizeObserver?.disconnect();
-        document.fonts?.removeEventListener("loadingdone", notify);
-      };
-    },
-    [tableContainerElement],
-  );
-  const getSnapshot = useCallback(() => {
+    return () => {
+      resizeObserver?.disconnect();
+      document.fonts?.removeEventListener("loadingdone", notify);
+    };
+  };
+  const getSnapshot = () => {
     const width = tableContainerElement?.clientWidth ?? 0;
     return `${width}:${document.fonts?.status ?? "unavailable"}`;
-  }, [tableContainerElement]);
+  };
 
   return useSyncExternalStore(subscribe, getSnapshot, () => "0:unavailable");
 }

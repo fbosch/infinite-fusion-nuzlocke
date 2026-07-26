@@ -8,7 +8,7 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { Loader2, Plus, X } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { getLocationsSortedWithCustom } from "@/loaders";
 import { useCustomLocations } from "@/stores/playthroughs/hooks";
 import { playthroughActions } from "@/stores/playthroughs/index";
@@ -26,17 +26,17 @@ export default function AddCustomLocationModal({
   const [selectedAfterLocationId, setSelectedAfterLocationId] = useState("");
   const customLocations = useCustomLocations();
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     setLocationName("");
     setSelectedAfterLocationId("");
     onClose();
-  }, [onClose]);
+  };
 
   // Only process locations when modal is open to improve performance
-  const allLocations = useMemo(() => {
+  const allLocations = (() => {
     if (!isOpen) return [];
     return getLocationsSortedWithCustom(customLocations);
-  }, [isOpen, customLocations]);
+  })();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

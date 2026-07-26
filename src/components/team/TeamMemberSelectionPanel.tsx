@@ -2,7 +2,6 @@
 
 import { ArrowLeftRight } from "lucide-react";
 import Image from "next/image";
-import React from "react";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import { DNA_REVERSER_ICON } from "@/constants/items";
 import { PokemonGridItem } from "./PokemonGridItem";
@@ -36,7 +35,7 @@ export function TeamMemberSelectionPanel() {
   };
 
   // Filter Pokémon based on search query locally (no need to update state)
-  const filteredPokemon = React.useMemo(() => {
+  const filteredPokemon = (() => {
     if (!searchQuery.trim()) return availablePokemon;
 
     const query = searchQuery.toLowerCase();
@@ -45,7 +44,7 @@ export function TeamMemberSelectionPanel() {
         pokemon.name.toLowerCase().includes(query) ||
         pokemon.nickname?.toLowerCase().includes(query),
     );
-  }, [availablePokemon, searchQuery]);
+  })();
   return (
     <div className="flex-1 flex flex-col space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-4 items-center">
