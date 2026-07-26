@@ -39,7 +39,10 @@ export function useComboboxDragAndDrop({
 
   // Helper function to find Pokemon by name
   const findPokemonByName = useCallback(
-    async (pokemonName: string): Promise<PokemonOptionType | null> => {
+    async (
+      pokemonName: string,
+      dragValue?: PokemonOptionType | null,
+    ): Promise<PokemonOptionType | null> => {
       try {
         const allPokemon = await getPokemon();
         const nameMap = await getPokemonNameMap();
@@ -55,9 +58,9 @@ export function useComboboxDragAndDrop({
           name: pokemonName,
           nationalDexId: foundPokemon.nationalDexId,
           originalLocation: locationId,
-          ...(dragSnapshot.currentDragValue && {
-            nickname: dragSnapshot.currentDragValue.nickname,
-            status: dragSnapshot.currentDragValue.status,
+          ...(dragValue && {
+            nickname: dragValue.nickname,
+            status: dragValue.status,
           }),
         };
       } catch (err) {
@@ -65,7 +68,7 @@ export function useComboboxDragAndDrop({
         return null;
       }
     },
-    [locationId, dragSnapshot.currentDragValue],
+    [locationId],
   );
 
   // Helper function to perform move operations
@@ -157,15 +160,18 @@ export function useComboboxDragAndDrop({
       const pokemonName = e.dataTransfer.getData("text/plain");
       if (!pokemonName) return;
 
+      // Preserve the drag value that initiated this drop while async lookup runs.
+      const dragValue = dragStore.currentDragValue;
+
       // Check if move operations are allowed
       if (
         dragState.isFromDifferentCombobox &&
         !settings.moveEncountersBetweenLocations
       ) {
         // If trying to move between different locations but setting is disabled, just set the Pokemon
-        let pokemon = dragSnapshot.currentDragValue;
+        let pokemon = dragValue;
         if (!pokemon) {
-          pokemon = await findPokemonByName(pokemonName);
+          pokemon = await findPokemonByName(pokemonName, dragValue);
           if (!pokemon) return;
         }
         onChange(pokemon);
@@ -179,9 +185,9 @@ export function useComboboxDragAndDrop({
       }
 
       // Determine the Pokemon to use (existing drag value or lookup by name)
-      let pokemon = dragSnapshot.currentDragValue;
+      let pokemon = dragValue;
       if (!pokemon) {
-        pokemon = await findPokemonByName(pokemonName);
+        pokemon = await findPokemonByName(pokemonName, dragValue);
         if (!pokemon) return;
       }
 
@@ -198,7 +204,6 @@ export function useComboboxDragAndDrop({
     [
       dragState.canSwitch,
       dragState.isFromDifferentCombobox,
-      dragSnapshot.currentDragValue,
       settings.moveEncountersBetweenLocations,
       performSwapOperation,
       performMoveOperation,
@@ -211,11 +216,11 @@ export function useComboboxDragAndDrop({
   const updatePreviewForDragData = useCallback(
     async (pokemonName: string) => {
       const pokemon = await findPokemonByName(pokemonName);
-      if (pokemon && dragSnapshot.currentDragData === pokemonName) {
+      if (pokemon && dragStore.currentDragData === pokemonName) {
         setDragPreview(pokemon);
       }
     },
-    [findPokemonByName, dragSnapshot.currentDragData],
+    [findPokemonByName],
   );
 
   const handleDragOver = useCallback(
@@ -255,8 +260,8 @@ export function useComboboxDragAndDrop({
 
       // Handle Pokemon name drag data
       if (dragSnapshot.currentDragData) {
-        const shouldUpdate =
-          !dragPreview || dragPreview.name !== dragSnapshot.currentDragData;
+        const dragData = dragSnapshot.currentDragData;
+        const shouldUpdate = !dragPreview || dragPreview.name !== dragData;
 
         if (shouldUpdate) {
           setDragPreviewDebounced(null); // Clear current preview immediately
@@ -267,7 +272,7 @@ export function useComboboxDragAndDrop({
           }
 
           dragPreviewTimeout = window.setTimeout(() => {
-            updatePreviewForDragData(dragSnapshot.currentDragData!);
+            updatePreviewForDragData(dragData);
             dragPreviewTimeout = null;
           }, DRAG_PREVIEW_DEBOUNCE);
         }
