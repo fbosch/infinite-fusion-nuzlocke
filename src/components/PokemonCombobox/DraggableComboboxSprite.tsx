@@ -355,7 +355,7 @@ export function DraggableComboboxSprite({
   if (!pokemon) return null;
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    if (disabled || !settings.moveEncountersBetweenLocations) {
+    if (disabled || !settingsStore.moveEncountersBetweenLocations) {
       e.preventDefault();
       return;
     }

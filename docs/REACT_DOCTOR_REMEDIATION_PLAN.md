@@ -59,24 +59,24 @@ Acceptance criteria:
 
 Purpose: determine whether snapshot reads in callbacks are stale-state risks before changing state access patterns.
 
-- [ ] Audit the remaining 3 `valtio-no-snapshot-in-callback` findings individually or by shared callback pattern.
+- [x] Audit all `valtio-no-snapshot-in-callback` findings individually or by shared callback pattern.
 - [x] Fix `src/components/LocationTable/FusionToggleButton.tsx`: its drop handlers now capture current drag state at event time and preserve the source across the asynchronous fusion operation; its render snapshot remains limited to the drop affordance.
 - [x] Fix `src/components/PokemonCombobox/useComboboxDragAndDrop.ts`: capture a drop's drag value before async lookup, check current drag data before publishing previews, and preserve the name that scheduled each preview lookup.
-- [ ] Audit the remaining findings in `src/components/PokemonCombobox/DraggableComboboxSprite.tsx` and `src/stores/playthroughs/hooks.ts`.
+- [x] Fix the remaining callbacks in `src/components/PokemonCombobox/DraggableComboboxSprite.tsx` and `src/stores/playthroughs/hooks.ts` to read the current proxy state when authorizing a drag or deciding whether to load playthroughs.
 - [ ] For each finding, decide whether the callback needs render-time snapshot data or current store state.
 - [ ] Add regression coverage for callbacks whose state source changes.
 
 Acceptance criteria:
 
 - No callback fix changes a state transition without direct behavioral coverage.
-- Remaining findings have an explicit reason for retaining render-time snapshot reads.
+- All callback snapshot findings are resolved; render-time snapshots remain only for render-derived values and effect subscriptions.
 
 ## Phase 4: Targeted Performance Cleanup
 
 Purpose: address concrete runtime costs without speculative micro-optimization.
 
 - [ ] Review chained array iterations and array lookups in loops; consolidate only on verified hot paths or where the simpler implementation is equally clear.
-- [ ] Replace `transition: all` declarations with the specific animated properties.
+- [x] Replace `transition: all` declarations with the specific animated properties.
 - [ ] Review await-in-loop findings for required ordering before introducing concurrency.
 - [ ] Replace JSON parse/stringify cloning only when the data shape, supported values, and copy semantics are known.
 - [ ] Address set-state-in-effect findings after confirming their derived-state behavior.

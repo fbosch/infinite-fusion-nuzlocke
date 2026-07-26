@@ -21,7 +21,10 @@ export const useAllPlaythroughs = () => {
   // Automatically load all playthroughs if we only have one loaded (likely just the active one)
   // and we're not currently loading
   React.useEffect(() => {
-    if (!snapshot.isLoading && snapshot.playthroughs.length <= 1) {
+    if (
+      !playthroughsStore.isLoading &&
+      playthroughsStore.playthroughs.length <= 1
+    ) {
       getAllPlaythroughs().catch((error) => {
         console.error("Failed to load all playthroughs:", error);
       });

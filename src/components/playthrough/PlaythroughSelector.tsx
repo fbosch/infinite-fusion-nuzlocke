@@ -370,7 +370,7 @@ export default function PlaythroughSelector({
                               </div>
                             </div>
                           </button>
-                          <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-1 opacity-0 transition-all duration-200 group-hover/menu-item:opacity-100 group-focus-within/menu-item:opacity-100">
+                          <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-1 opacity-0 transition-opacity duration-200 group-hover/menu-item:opacity-100 group-focus-within/menu-item:opacity-100">
                             <button
                               type="button"
                               onClick={(e) =>
@@ -383,7 +383,7 @@ export default function PlaythroughSelector({
                                 )
                               }
                               className={clsx(
-                                "p-2 rounded-lg transition-all duration-200",
+                                "p-2 rounded-lg transition-colors duration-200",
                                 "border border-transparent",
                                 "hover:bg-blue-100 hover:border-blue-300 dark:hover:bg-blue-900/20 dark:hover:border-blue-600",
                                 "focus:bg-blue-100 focus:border-blue-300 dark:focus:bg-blue-900/20 dark:focus:border-blue-600",
