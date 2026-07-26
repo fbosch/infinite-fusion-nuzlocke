@@ -112,10 +112,12 @@ export function useLocationTableVirtualization({
       return;
     }
 
+    // react-doctor-disable-next-line react-doctor/no-self-updating-effect -- A changed snapshot clears this cache; the following layout pass measures and converges.
     setMeasuredTableLayout({ columnWidths, snapshot: layoutSnapshot, width });
   }, [
     layoutSnapshot,
     measuredTableLayout,
+    tableRef,
     virtualRows.length,
     visibleColumns.length,
   ]);
@@ -149,7 +151,7 @@ export function useLocationTableVirtualization({
       offScroll();
       offFlash();
     };
-  }, [rowVirtualizer, tableRows]);
+  }, [rowVirtualizer, tableContainerRef, tableRows]);
 
   return {
     measuredTableLayout,

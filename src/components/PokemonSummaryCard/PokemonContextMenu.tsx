@@ -191,8 +191,6 @@ export function PokemonContextMenu({
     displayPokemon.body?.id ?? null,
   );
 
-  const [hasContextMenuBeenOpened, setHasContextMenuBeenOpened] =
-    useState(false);
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
   const [isMoveHeadModalOpen, setIsMoveHeadModalOpen] = useState(false);
   const [isMoveBodyModalOpen, setIsMoveBodyModalOpen] = useState(false);
@@ -361,11 +359,6 @@ export function PokemonContextMenu({
         disabled={eitherPokemonIsEgg}
         items={contextItems}
         portalRootId="location-table"
-        onOpenChange={
-          hasContextMenuBeenOpened
-            ? undefined
-            : () => setHasContextMenuBeenOpened(true)
-        }
       >
         {children}
       </ContextMenu>

@@ -253,7 +253,6 @@ export interface ContextMenuProps {
   items: ContextMenuItem[];
   className?: string;
   disabled?: boolean;
-  onOpenChange?: (open: boolean) => void;
   portalRootId?: string;
 }
 
@@ -263,7 +262,6 @@ export function ContextMenu({
   className,
   disabled = false,
   portalRootId = "context-menu-root",
-  onOpenChange,
 }: ContextMenuProps) {
   const triggerId = useId();
   const {
@@ -329,10 +327,6 @@ export function ContextMenu({
       setMenuPosition(nextPosition);
     }
   }, [isVisible, menuPosition, setMenuPosition]);
-
-  useEffect(() => {
-    onOpenChange?.(isOpen);
-  }, [isOpen, onOpenChange]);
 
   // Floating UI setup for keyboard navigation
   const { refs, context } = useFloating({

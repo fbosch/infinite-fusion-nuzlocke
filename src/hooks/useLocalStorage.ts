@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import type { z } from "zod";
 
 const callbacks = new Set<(key: string) => void>();
@@ -90,34 +90,28 @@ export function useLocalStorage<T>(
 
   const value = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  const setState = useCallback<React.Dispatch<React.SetStateAction<T>>>(
-    (newValue: React.SetStateAction<T>) => {
-      const snapshot = getSnapshot();
-      const value =
-        typeof newValue === "function"
-          ? (newValue as (prevState: T) => T)(parseSnapshot(snapshot))
-          : newValue;
+  const setState: React.Dispatch<React.SetStateAction<T>> = (newValue) => {
+    const snapshot = getSnapshot();
+    const value =
+      typeof newValue === "function"
+        ? (newValue as (prevState: T) => T)(parseSnapshot(snapshot))
+        : newValue;
 
-      try {
-        if (typeof window !== "undefined" && globalThis.localStorage) {
-          localStorage.setItem(key, serialize(value));
-          fallbackStorage.delete(key);
-        } else {
-          // Store value in fallback storage if not in browser environment
-          fallbackStorage.set(key, serialize(value));
-        }
-      } catch {
-        // Store value in fallback storage if there's an error with localStorage
+    try {
+      if (typeof window !== "undefined" && globalThis.localStorage) {
+        localStorage.setItem(key, serialize(value));
+        fallbackStorage.delete(key);
+      } else {
+        // Store value in fallback storage if not in browser environment
         fallbackStorage.set(key, serialize(value));
       }
+    } catch {
+      // Store value in fallback storage if there's an error with localStorage
+      fallbackStorage.set(key, serialize(value));
+    }
 
-      triggerCallbacks(key);
-    },
-    [initialValue, key, schema],
-  );
+    triggerCallbacks(key);
+  };
 
-  return useMemo(
-    () => [parseSnapshot(value ?? stringifiedInitialValue), setState],
-    [value, setState, stringifiedInitialValue],
-  );
+  return [parseSnapshot(value ?? stringifiedInitialValue), setState];
 }

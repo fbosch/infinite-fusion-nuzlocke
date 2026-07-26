@@ -108,7 +108,11 @@ export default function TeamSlots() {
     }
     // Use requestAnimationFrame to ensure proper timing
     const animationFrame = requestAnimationFrame(() => {
-      teamSlots.forEach((slot, index) => {
+      const animationSlots = activePlaythrough?.team
+        ? getTeamSlots(activePlaythrough.team.members, encounters, pokemonByUid)
+        : [];
+
+      animationSlots.forEach((slot, index) => {
         if (
           !slot.isEmpty &&
           slot.isFusion &&
@@ -139,7 +143,7 @@ export default function TeamSlots() {
     return () => {
       cancelAnimationFrame(animationFrame);
     };
-  }, [teamSlots]);
+  }, [activePlaythrough?.team, encounters, pokemonByUid]);
 
   // Show skeleton while loading
   if (!activePlaythrough || !encounters) {

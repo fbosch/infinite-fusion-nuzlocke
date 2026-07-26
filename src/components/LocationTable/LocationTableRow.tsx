@@ -56,6 +56,7 @@ export default function LocationTableRow({
 
   // Get encounter data directly - only this row will rerender when this encounter changes
   const encounterData = useEncounter(locationId) || EMPTY_ENCOUNTER;
+  const effectiveFusionId = getEffectiveFusionId(encounterData);
 
   useEffect(() => {
     previousFusionId.current = null;
@@ -95,19 +96,17 @@ export default function LocationTableRow({
 
   // Play evolution animation only when the effective fusion ID changes after initialization.
   useEffect(() => {
-    const currentFusionId = getEffectiveFusionId(encounterData);
-
     if (!hasInitializedFusionId.current) {
-      previousFusionId.current = currentFusionId;
+      previousFusionId.current = effectiveFusionId;
       hasInitializedFusionId.current = true;
       return;
     }
 
-    if (currentFusionId && currentFusionId !== previousFusionId.current) {
+    if (effectiveFusionId && effectiveFusionId !== previousFusionId.current) {
       spriteRef.current?.playEvolution();
     }
-    previousFusionId.current = currentFusionId;
-  }, [encounterData.isFusion, encounterData.head, encounterData.body]);
+    previousFusionId.current = effectiveFusionId;
+  }, [effectiveFusionId]);
 
   return (
     <tr
