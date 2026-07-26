@@ -59,8 +59,9 @@ Acceptance criteria:
 
 Purpose: determine whether snapshot reads in callbacks are stale-state risks before changing state access patterns.
 
-- [ ] Audit the 23 `valtio-no-snapshot-in-callback` findings individually or by shared callback pattern.
-- [ ] Prioritize `src/components/LocationTable/FusionToggleButton.tsx` and `src/components/PokemonCombobox/useComboboxDragAndDrop.ts`, which contain the highest concentrations.
+- [ ] Audit the remaining 8 `valtio-no-snapshot-in-callback` findings individually or by shared callback pattern.
+- [x] Fix `src/components/LocationTable/FusionToggleButton.tsx`: its drop handlers now capture current drag state at event time and preserve the source across the asynchronous fusion operation; its render snapshot remains limited to the drop affordance.
+- [ ] Prioritize `src/components/PokemonCombobox/useComboboxDragAndDrop.ts`, which contains the highest remaining concentration.
 - [ ] For each finding, decide whether the callback needs render-time snapshot data or current store state.
 - [ ] Add regression coverage for callbacks whose state source changes.
 
@@ -106,7 +107,7 @@ pnpm type-check
 pnpm test:run
 pnpm validate
 pnpm quality:graph
-pnpm quality:react --base master
+pnpm quality:react
 ```
 
 Use a full advisory scan to measure baseline progress without changing the enforcement scope:

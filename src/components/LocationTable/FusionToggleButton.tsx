@@ -39,12 +39,17 @@ export function FusionToggleButton({
       const pokemonName = e.dataTransfer.getData("text/plain");
       if (!pokemonName) return;
 
+      // Event handlers must use the drag state that is current for this drop.
+      // Keep it after the async fusion completes because global drop handlers clear it.
+      const dragSource = dragStore.currentDragSource;
+      const dragValue = dragStore.currentDragValue;
+
       // Check if this drop is from a different combobox
       const isFromDifferentCombobox =
-        dragSnapshot.currentDragSource &&
-        dragSnapshot.currentDragSource !== `${locationId}-single` &&
-        dragSnapshot.currentDragSource !== `${locationId}-head` &&
-        dragSnapshot.currentDragSource !== `${locationId}-body`;
+        dragSource &&
+        dragSource !== `${locationId}-single` &&
+        dragSource !== `${locationId}-head` &&
+        dragSource !== `${locationId}-body`;
 
       if (!isFromDifferentCombobox) return;
 
@@ -64,24 +69,21 @@ export function FusionToggleButton({
         id: foundPokemon.id,
         name: pokemonName,
         nationalDexId: foundPokemon.nationalDexId,
-        originalLocation:
-          dragSnapshot.currentDragValue?.originalLocation || locationId,
-        ...(dragSnapshot.currentDragValue && {
-          nickname: dragSnapshot.currentDragValue.nickname,
-          status: dragSnapshot.currentDragValue.status,
-          uid: dragSnapshot.currentDragValue.uid,
+        originalLocation: dragValue?.originalLocation || locationId,
+        ...(dragValue && {
+          nickname: dragValue.nickname,
+          status: dragValue.status,
+          uid: dragValue.uid,
         }),
       };
 
       await playthroughActions
         .createFusion(locationId, selectedPokemon, pokemonOption)
         .then(async () => {
-          if (!dragSnapshot.currentDragSource) return;
+          if (!dragSource) return;
 
           const { locationId: sourceLocationId, field: sourceField } =
-            playthroughActions.getLocationFromComboboxId(
-              dragSnapshot.currentDragSource,
-            );
+            playthroughActions.getLocationFromComboboxId(dragSource);
           await playthroughActions.clearEncounterFromLocation(
             sourceLocationId,
             sourceField,
@@ -92,15 +94,7 @@ export function FusionToggleButton({
           console.error("Error finding Pokemon by name:", err);
         });
     },
-    [
-      isFusion,
-      selectedPokemon,
-      dragSnapshot.currentDragSource,
-      dragSnapshot.currentDragValue,
-      locationId,
-      allPokemon,
-      nameMap,
-    ],
+    [isFusion, selectedPokemon, locationId, allPokemon, nameMap],
   );
 
   // Handle drag over
@@ -122,11 +116,12 @@ export function FusionToggleButton({
       }
 
       // Check if drag is from a different combobox
+      const dragSource = dragStore.currentDragSource;
       const isFromDifferentCombobox =
-        dragSnapshot.currentDragSource &&
-        dragSnapshot.currentDragSource !== `${locationId}-single` &&
-        dragSnapshot.currentDragSource !== `${locationId}-head` &&
-        dragSnapshot.currentDragSource !== `${locationId}-body`;
+        dragSource &&
+        dragSource !== `${locationId}-single` &&
+        dragSource !== `${locationId}-head` &&
+        dragSource !== `${locationId}-body`;
 
       if (isFromDifferentCombobox) {
         e.dataTransfer.dropEffect = "copy";
@@ -134,7 +129,7 @@ export function FusionToggleButton({
         e.dataTransfer.dropEffect = "none";
       }
     },
-    [isFusion, selectedPokemon, dragSnapshot.currentDragSource, locationId],
+    [isFusion, selectedPokemon, locationId],
   );
 
   // Handle drag end
