@@ -34,6 +34,8 @@ Purpose: resolve or classify every blocking diagnostic before broad warning clea
 - [x] Remove compiler-blocking manual memoization from `DraggableComboboxSprite`, `PokemonPCSheet`, and `TeamSlots`; each value is now a direct derivation from its canonical inputs.
 - [x] Retain the existing compiler opt-outs for TanStack Table and Virtual, adding narrow documented incompatible-library exceptions at their boundaries.
 - [x] Move the file-change cleanup handler out of `usePlaythroughImportExport` so its `try`/`finally` is not lowered by React Compiler.
+- [x] Harden package installation with a one-day minimum release age and a no-downgrade trust policy.
+- [x] Scope Vercel preview credentials to the validation, pull, build, and deploy steps so dependency installation runs without secrets. Build steps still receive credentials because the Vercel CLI requires them.
 
 Acceptance criteria:
 
