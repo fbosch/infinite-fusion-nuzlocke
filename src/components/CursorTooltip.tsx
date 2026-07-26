@@ -128,12 +128,14 @@ export function CursorTooltip(props: CursorTooltipProps) {
         }
         setIsOpen(true);
         if (reducedMotion) {
+          animationBatchRef.current += 1;
           setAnimationState(null);
           return;
         }
         setAnimationState("entering");
       } else {
         if (reducedMotion) {
+          animationBatchRef.current += 1;
           setIsOpen(false);
           setAnimationState(null);
           return;
@@ -257,6 +259,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
 
   const clientPointFloating = useClientPoint(context, {
     axis: "both",
+    enabled: !reducedMotion,
   });
 
   // Normalize delay to object format
