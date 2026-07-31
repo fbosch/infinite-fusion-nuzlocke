@@ -31,4 +31,14 @@ describe("resolveFusionCombination", () => {
   it("rejects shorthand with an unknown Pokémon ID", () => {
     expect(resolveFusionCombination("11.999", pokemon)).toBeNull();
   });
+
+  it("rejects a malformed cached Pokémon collection", () => {
+    expect(resolveFusionCombination("11.200", {} as typeof pokemon)).toBeNull();
+  });
+
+  it("ignores malformed cached Pokémon entries", () => {
+    expect(
+      resolveFusionCombination("11.200", [null] as unknown as typeof pokemon),
+    ).toBeNull();
+  });
 });

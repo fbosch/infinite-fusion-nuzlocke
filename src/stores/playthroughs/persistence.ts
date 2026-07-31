@@ -9,7 +9,76 @@ import { createDefaultPlaythrough } from "./defaultPlaythrough";
 import { normalizePersistedPlaythrough } from "./migrations";
 
 // Create a custom store for playthroughs data
-export const playthroughsStore_idb = createStore("playthroughs", "data");
+const PLAYTHROUGHS_DATABASE = "playthroughs";
+const PLAYTHROUGHS_STORE = "data";
+
+export const playthroughsStore_idb = createStore(
+  PLAYTHROUGHS_DATABASE,
+  PLAYTHROUGHS_STORE,
+);
+
+let playthroughsStoreInitialization: Promise<void> | undefined;
+
+const openPlaythroughsDatabase = (version?: number): Promise<IDBDatabase> =>
+  new Promise((resolve, reject) => {
+    let isBlocked = false;
+    const request =
+      version === undefined
+        ? indexedDB.open(PLAYTHROUGHS_DATABASE)
+        : indexedDB.open(PLAYTHROUGHS_DATABASE, version);
+
+    request.onupgradeneeded = () => {
+      if (
+        request.result.objectStoreNames.contains(PLAYTHROUGHS_STORE) === false
+      ) {
+        request.result.createObjectStore(PLAYTHROUGHS_STORE);
+      }
+    };
+    request.onblocked = () => {
+      isBlocked = true;
+      reject(
+        new Error("Playthrough storage upgrade is blocked by another tab"),
+      );
+    };
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      if (isBlocked) {
+        request.result.close();
+        return;
+      }
+
+      resolve(request.result);
+    };
+  });
+
+const ensurePlaythroughsStore = (): Promise<void> => {
+  if (typeof indexedDB === "undefined") {
+    return Promise.resolve();
+  }
+
+  if (playthroughsStoreInitialization) {
+    return playthroughsStoreInitialization;
+  }
+
+  playthroughsStoreInitialization = (async () => {
+    const database = await openPlaythroughsDatabase();
+    if (database.objectStoreNames.contains(PLAYTHROUGHS_STORE)) {
+      database.close();
+      return;
+    }
+
+    const nextVersion = database.version + 1;
+    database.close();
+
+    const upgradedDatabase = await openPlaythroughsDatabase(nextVersion);
+    upgradedDatabase.close();
+  })().catch((error) => {
+    playthroughsStoreInitialization = undefined;
+    throw error;
+  });
+
+  return playthroughsStoreInitialization;
+};
 
 // Storage keys
 export const ACTIVE_PLAYTHROUGH_KEY = "activePlaythroughId";
@@ -57,6 +126,7 @@ const migrateActivePlaythroughId = async (): Promise<string | null> => {
   }
 
   try {
+    await ensurePlaythroughsStore();
     // Try to get the value from IndexedDB
     const indexedDBValue = await get(
       ACTIVE_PLAYTHROUGH_KEY,
@@ -103,6 +173,7 @@ export const loadPlaythroughById = async (
   if (typeof window === "undefined") return null;
 
   try {
+    await ensurePlaythroughsStore();
     const playthroughData = await get(playthroughId, playthroughsStore_idb);
     if (playthroughData) {
       return normalizePersistedPlaythrough(playthroughData);
@@ -118,6 +189,7 @@ export const loadAllPlaythroughs = async (): Promise<Playthrough[]> => {
   if (typeof window === "undefined") return [];
 
   try {
+    await ensurePlaythroughsStore();
     // Get all keys from IndexedDB and filter out non-playthrough keys
     const allKeys = await keys(playthroughsStore_idb);
     const playthroughIds = allKeys.filter(
@@ -159,6 +231,7 @@ export const deletePlaythroughFromIndexedDB = async (
   if (typeof window === "undefined") return;
 
   try {
+    await ensurePlaythroughsStore();
     // Simply delete the playthrough - no need to maintain ID list
     await del(playthroughId, playthroughsStore_idb);
   } catch (error) {
@@ -197,6 +270,7 @@ export const createDebouncedSaveAll = (
       if (typeof window === "undefined") return;
 
       try {
+        await ensurePlaythroughsStore();
         playthroughsStore.isSaving = true;
 
         const activePlaythrough = getActivePlaythrough();
@@ -239,6 +313,7 @@ export const loadFromIndexedDB = async (
   if (typeof window === "undefined") return;
 
   try {
+    await ensurePlaythroughsStore();
     playthroughsStore.isLoading = true;
 
     // Load all playthroughs

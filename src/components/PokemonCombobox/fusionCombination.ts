@@ -12,10 +12,29 @@ type PokemonSearchResult = Pick<
 
 const FUSION_COMBINATION_PATTERN = /^(\d+)\.(\d+)$/;
 
+const isPokemonSearchResult = (
+  pokemon: unknown,
+): pokemon is PokemonSearchResult => {
+  if (!pokemon || typeof pokemon !== "object") {
+    return false;
+  }
+
+  const candidate = pokemon as Record<string, unknown>;
+  return (
+    typeof candidate.id === "number" &&
+    typeof candidate.name === "string" &&
+    typeof candidate.nationalDexId === "number"
+  );
+};
+
 export function resolveFusionCombination(
   query: string,
   pokemon: PokemonSearchResult[],
 ): FusionCombination | null {
+  if (Array.isArray(pokemon) === false) {
+    return null;
+  }
+
   const match = FUSION_COMBINATION_PATTERN.exec(query.trim());
   if (!match) {
     return null;
@@ -23,8 +42,12 @@ export function resolveFusionCombination(
 
   const headId = Number(match[1]);
   const bodyId = Number(match[2]);
-  const head = pokemon.find(({ id }) => id === headId);
-  const body = pokemon.find(({ id }) => id === bodyId);
+  const head = pokemon.find(
+    (candidate) => isPokemonSearchResult(candidate) && candidate.id === headId,
+  );
+  const body = pokemon.find(
+    (candidate) => isPokemonSearchResult(candidate) && candidate.id === bodyId,
+  );
 
   if (!head || !body) {
     return null;
