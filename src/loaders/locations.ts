@@ -225,7 +225,10 @@ export function useLocationEncountersById(
     };
   }
 
-  const encounter = encounters.find((e) => e.routeName === location?.name);
+  const validEncounters = Array.isArray(encounters) ? encounters : [];
+  const encounter = validEncounters.find(
+    (entry) => entry.routeName === location?.name,
+  );
 
   return {
     pokemonEncounters: encounter?.pokemon || [],
