@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.9.0...v0.9.1) (2026-07-31)
+
+
+### Bug Fixes
+
+* **persistence:** recover missing IndexedDB store ([#247](https://github.com/fbosch/infinite-fusion-nuzlocke/issues/247)) ([a84823d](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/a84823df833f2738becf536172d0fb58076e66d6))
+
 ## [0.9.0](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.8.0...v0.9.0) (2026-07-26)
 
 
