@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.9.1...v0.9.2) (2026-07-31)
+
+
+### Bug Fixes
+
+* **persistence:** recover malformed encounter cache ([#249](https://github.com/fbosch/infinite-fusion-nuzlocke/issues/249)) ([67ca878](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/67ca87875a84064be6c16f21a379a76912c0914a))
+
 ## [0.9.1](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.9.0...v0.9.1) (2026-07-31)
 
 
