@@ -1,4 +1,4 @@
-import type { PokemonOptionType } from "@/loaders/pokemon";
+import { PokemonOptionSchema, type PokemonOptionType } from "@/loaders/pokemon";
 
 export interface FusionCombination {
   head: PokemonOptionType;
@@ -12,20 +12,16 @@ type PokemonSearchResult = Pick<
 
 const FUSION_COMBINATION_PATTERN = /^(\d+)\.(\d+)$/;
 
+const PokemonSearchResultSchema = PokemonOptionSchema.pick({
+  id: true,
+  name: true,
+  nationalDexId: true,
+});
+
 const isPokemonSearchResult = (
   pokemon: unknown,
-): pokemon is PokemonSearchResult => {
-  if (!pokemon || typeof pokemon !== "object") {
-    return false;
-  }
-
-  const candidate = pokemon as Record<string, unknown>;
-  return (
-    typeof candidate.id === "number" &&
-    typeof candidate.name === "string" &&
-    typeof candidate.nationalDexId === "number"
-  );
-};
+): pokemon is PokemonSearchResult =>
+  PokemonSearchResultSchema.safeParse(pokemon).success;
 
 export function resolveFusionCombination(
   query: string,

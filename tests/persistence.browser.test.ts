@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { loadFromIndexedDB } from "@/stores/playthroughs/persistence";
 import type { PlaythroughsState } from "@/stores/playthroughs/types";
 
@@ -15,7 +15,22 @@ const openDatabase = (onUpgradeNeeded?: (database: IDBDatabase) => void) =>
     request.onsuccess = () => resolve(request.result);
   });
 
+const deleteDatabase = () =>
+  new Promise<void>((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(PLAYTHROUGHS_DATABASE);
+
+    request.onblocked = () => {
+      reject(new Error("Unable to clear the playthroughs IndexedDB fixture"));
+    };
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve();
+  });
+
 describe("playthrough persistence browser regressions", () => {
+  beforeEach(async () => {
+    await deleteDatabase();
+  });
+
   it("adds the data store when an existing database does not have it", async () => {
     const legacyDatabase = await openDatabase((database) => {
       database.createObjectStore("legacy");

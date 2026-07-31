@@ -41,4 +41,16 @@ describe("resolveFusionCombination", () => {
       resolveFusionCombination("11.200", [null] as unknown as typeof pokemon),
     ).toBeNull();
   });
+
+  it.each([Number.NaN, Infinity, 11.5])(
+    "rejects a cached Pokémon with invalid ID %s",
+    (id) => {
+      expect(
+        resolveFusionCombination("11.200", [
+          { id, name: "Metapod", nationalDexId: 11 },
+          pokemon[1],
+        ]),
+      ).toBeNull();
+    },
+  );
 });
