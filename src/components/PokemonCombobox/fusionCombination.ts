@@ -1,4 +1,4 @@
-import type { PokemonOptionType } from "@/loaders/pokemon";
+import { PokemonOptionSchema, type PokemonOptionType } from "@/loaders/pokemon";
 
 export interface FusionCombination {
   head: PokemonOptionType;
@@ -12,10 +12,25 @@ type PokemonSearchResult = Pick<
 
 const FUSION_COMBINATION_PATTERN = /^(\d+)\.(\d+)$/;
 
+const PokemonSearchResultSchema = PokemonOptionSchema.pick({
+  id: true,
+  name: true,
+  nationalDexId: true,
+});
+
+const isPokemonSearchResult = (
+  pokemon: unknown,
+): pokemon is PokemonSearchResult =>
+  PokemonSearchResultSchema.safeParse(pokemon).success;
+
 export function resolveFusionCombination(
   query: string,
   pokemon: PokemonSearchResult[],
 ): FusionCombination | null {
+  if (Array.isArray(pokemon) === false) {
+    return null;
+  }
+
   const match = FUSION_COMBINATION_PATTERN.exec(query.trim());
   if (!match) {
     return null;
@@ -23,8 +38,12 @@ export function resolveFusionCombination(
 
   const headId = Number(match[1]);
   const bodyId = Number(match[2]);
-  const head = pokemon.find(({ id }) => id === headId);
-  const body = pokemon.find(({ id }) => id === bodyId);
+  const head = pokemon.find(
+    (candidate) => isPokemonSearchResult(candidate) && candidate.id === headId,
+  );
+  const body = pokemon.find(
+    (candidate) => isPokemonSearchResult(candidate) && candidate.id === bodyId,
+  );
 
   if (!head || !body) {
     return null;
