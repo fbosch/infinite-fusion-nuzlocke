@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import type { Playthrough } from "@/stores/playthroughs/types";
 import {
   exportPlaythrough,
@@ -37,27 +37,24 @@ export function usePlaythroughImportExport() {
   const [showImportError, setShowImportError] = useState(false);
   const [importErrorMessage, setImportErrorMessage] = useState("");
 
-  const handleExportClick = useCallback(
-    (playthrough: Playthrough, e: React.MouseEvent) => {
+  const handleExportClick = (playthrough: Playthrough, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    exportPlaythrough(playthrough);
+  };
+
+  const handleExportKeyDown = (
+    playthrough: Playthrough,
+    e: React.KeyboardEvent,
+  ) => {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       e.stopPropagation();
       exportPlaythrough(playthrough);
-    },
-    [],
-  );
+    }
+  };
 
-  const handleExportKeyDown = useCallback(
-    (playthrough: Playthrough, e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        e.stopPropagation();
-        exportPlaythrough(playthrough);
-      }
-    },
-    [],
-  );
-
-  const handleImportClick = useCallback(async () => {
+  const handleImportClick = async () => {
     try {
       // Create file input element
       const input = document.createElement("input");
@@ -83,7 +80,7 @@ export function usePlaythroughImportExport() {
       );
       setShowImportError(true);
     }
-  }, []);
+  };
 
   return {
     showImportError,

@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle, Info } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSnapshot } from "valtio";
 import type { z } from "zod";
 import { PokemonSprite } from "@/components/PokemonSprite";
@@ -38,7 +38,7 @@ export default function LocationCell({
   const [isTooltipHovered, setIsTooltipHovered] = useState(false);
 
   // Find all pokemon that originated from this location
-  const locationPokemon = useMemo(() => {
+  const locationPokemon = (() => {
     if (!encounters) return [];
 
     const pokemon: Pokemon[] = [];
@@ -54,13 +54,13 @@ export default function LocationCell({
     }
 
     return pokemon;
-  }, [encounters, location.id]);
+  })();
 
   const shouldShowOriginalEncounter = settings.moveEncountersBetweenLocations;
 
-  const encounterUids = locationPokemon
-    .map((p) => p.uid)
-    .filter(Boolean) as string[];
+  const encounterUids = locationPokemon.flatMap((pokemon) =>
+    pokemon.uid ? [pokemon.uid] : [],
+  );
   const hasEncounter = locationPokemon.length > 0;
 
   // Handle hover effect on encounter Pokémon elements - only when moving is relevant
@@ -89,7 +89,7 @@ export default function LocationCell({
     });
   }, [isTooltipHovered, encounterUids, shouldShowOriginalEncounter]);
 
-  const getTooltipContent = useMemo(() => {
+  const getTooltipContent = (() => {
     if (locationPokemon.length > 0 && shouldShowOriginalEncounter) {
       return (
         <div className="max-w-xs">
@@ -128,7 +128,7 @@ export default function LocationCell({
     return isCustomLocation(location)
       ? `Custom Location`
       : location.description;
-  }, [locationPokemon, location, shouldShowOriginalEncounter]);
+  })();
 
   return (
     <div className="text-gray-900 dark:text-white flex gap-x-2 items-center">

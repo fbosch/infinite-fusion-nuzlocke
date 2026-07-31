@@ -12,7 +12,7 @@ import {
 import clsx from "clsx";
 import { ArrowUpRight, Check, X } from "lucide-react";
 import Image from "next/image";
-import React, { useMemo } from "react";
+import React from "react";
 import {
   usePreferredVariantState,
   useSpriteCredits,
@@ -84,32 +84,29 @@ export function ArtworkVariantModal({
 
   const isLoading = creditsLoading || variantsLoading;
 
-  const availableVariants = useMemo(() => {
+  const availableVariants = (() => {
     if (!variants || variants.length <= 1) return [];
     return variants;
-  }, [variants]);
+  })();
 
   const selectedVariant = localVariant ?? globalPreferredVariant ?? "";
 
-  const handleClose = React.useCallback(() => {
+  const handleClose = () => {
     setLocalVariant(null);
     onClose();
-  }, [onClose]);
+  };
 
-  const handleSelectVariant = React.useCallback(
-    async (variant: string) => {
-      // Immediately update the local state for instant UI feedback
-      setLocalVariant(variant);
-      await updateVariant(variant);
-    },
-    [updateVariant],
-  );
+  const handleSelectVariant = async (variant: string) => {
+    // Immediately update the local state for instant UI feedback
+    setLocalVariant(variant);
+    await updateVariant(variant);
+  };
 
-  const handleClearVariant = React.useCallback(async () => {
+  const handleClearVariant = async () => {
     setLocalVariant("");
     await updateVariant("");
     handleClose();
-  }, [updateVariant, handleClose]);
+  };
 
   // No cleanup needed
 

@@ -84,9 +84,13 @@ export class SearchCore {
     // Numeric search (by ID) - exact match for better performance
     if (/^\d+$/.test(trimmedQuery)) {
       const queryNum = parseInt(trimmedQuery, 10);
-      return this.pokemonData
-        .filter((p) => p.id === queryNum || p.nationalDexId === queryNum)
-        .map((p) => ({ ...p, score: 0 }));
+      const matches: SearchResult[] = [];
+      for (const pokemon of this.pokemonData) {
+        if (pokemon.id === queryNum || pokemon.nationalDexId === queryNum) {
+          matches.push({ ...pokemon, score: 0 });
+        }
+      }
+      return matches;
     }
 
     // Fuzzy search for names - let Fuse.js handle the ranking

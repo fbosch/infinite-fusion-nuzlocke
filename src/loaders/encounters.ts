@@ -1,4 +1,3 @@
-import { useCallback, useMemo } from "react";
 import { encountersData } from "@/lib/queryClient";
 import {
   EncounterSource,
@@ -125,12 +124,10 @@ export function useEncountersForLocation({
   const { data: allPokemon = [] } = useAllPokemon();
   const nameMap = usePokemonNameMap();
 
-  // Process encounter data using useMemo, merging duplicates with multiple sources
-  const routeEncounterData = useMemo((): RouteEncounterPokemon[] => {
-    if (!enabled || !pokemonEncounters.length || !allPokemon.length) {
-      return [];
-    }
+  // Process encounter data, merging duplicates with multiple sources
+  let routeEncounterData: RouteEncounterPokemon[] = [];
 
+  if (enabled && pokemonEncounters.length && allPokemon.length) {
     // Group encounters by Pokemon ID to merge duplicates
     const encounterMap = new Map<number, EncounterSource[]>();
 
@@ -145,30 +142,27 @@ export function useEncountersForLocation({
     });
 
     // Convert back to array with merged sources
-    return Array.from(encounterMap.entries()).map(([id, sources]) => {
-      const pokemon = allPokemon.find((p: Pokemon) => p.id === id);
-      return {
-        id,
-        name: nameMap.get(id) || `Unknown Pokemon (${id})`,
-        nationalDexId: pokemon?.nationalDexId || 0,
-        originalLocation: locationId,
-        sources,
-      };
-    });
-  }, [pokemonEncounters, allPokemon, nameMap, enabled, locationId]);
+    routeEncounterData = Array.from(encounterMap.entries()).map(
+      ([id, sources]) => {
+        const pokemon = allPokemon.find((p: Pokemon) => p.id === id);
+        return {
+          id,
+          name: nameMap.get(id) || `Unknown Pokemon (${id})`,
+          nationalDexId: pokemon?.nationalDexId || 0,
+          originalLocation: locationId,
+          sources,
+        };
+      },
+    );
+  }
 
-  const routePokemonIds = useMemo(
-    () => new Set(routeEncounterData.map((pokemon) => pokemon.id)),
-    [routeEncounterData],
+  const routePokemonIds = new Set(
+    routeEncounterData.map((pokemon) => pokemon.id),
   );
 
   // Predicate function to check if a Pokemon is in the current route
-  const isRoutePokemon = useCallback(
-    (pokemonId: number): boolean => {
-      return routePokemonIds.has(pokemonId);
-    },
-    [routePokemonIds],
-  );
+  const isRoutePokemon = (pokemonId: number): boolean =>
+    routePokemonIds.has(pokemonId);
 
   return {
     routeEncounterData,

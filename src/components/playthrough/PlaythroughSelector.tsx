@@ -12,7 +12,7 @@ import {
   Upload,
 } from "lucide-react";
 import type React from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import { usePlaythroughImportExport } from "@/hooks/usePlaythroughImportExport";
@@ -90,31 +90,28 @@ export default function PlaythroughSelector({
   }, [allPlaythroughs.length]);
 
   // Switch to a different playthrough
-  const handlePlaythroughSelect = useCallback(
-    async (playthroughId: string, triggerMethod: "click" | "keyboard") => {
-      try {
-        await playthroughActions.setActivePlaythrough(playthroughId, {
-          source_surface: "playthrough_selector",
-          trigger_method: triggerMethod,
-        });
-      } catch (error) {
-        console.error("Failed to switch playthrough:", error);
-      }
-    },
-    [],
-  );
+  const handlePlaythroughSelect = async (
+    playthroughId: string,
+    triggerMethod: "click" | "keyboard",
+  ) => {
+    try {
+      await playthroughActions.setActivePlaythrough(playthroughId, {
+        source_surface: "playthrough_selector",
+        trigger_method: triggerMethod,
+      });
+    } catch (error) {
+      console.error("Failed to switch playthrough:", error);
+    }
+  };
 
   // Handle delete playthrough click
-  const handleDeleteClick = useCallback(
-    (playthrough: { id: string; name: string }) => {
-      setPlaythroughToDelete(playthrough as Playthrough);
-      setShowDeleteConfirm(true);
-    },
-    [],
-  );
+  const handleDeleteClick = (playthrough: { id: string; name: string }) => {
+    setPlaythroughToDelete(playthrough as Playthrough);
+    setShowDeleteConfirm(true);
+  };
 
   // Confirm delete playthrough
-  const handleConfirmDelete = useCallback(async () => {
+  const handleConfirmDelete = async () => {
     if (!playthroughToDelete) return;
 
     try {
@@ -124,7 +121,7 @@ export default function PlaythroughSelector({
     } catch (error) {
       console.error("Failed to delete playthrough:", error);
     }
-  }, [playthroughToDelete]);
+  };
 
   // Cancel delete
   const handleCancelDelete = () => {
@@ -132,7 +129,7 @@ export default function PlaythroughSelector({
     setPlaythroughToDelete(null);
   };
 
-  const trackSelectorOpened = useCallback(() => {
+  const trackSelectorOpened = () => {
     if (!activePlaythrough) {
       return;
     }
@@ -141,56 +138,50 @@ export default function PlaythroughSelector({
       ...getSharedEventProperties(activePlaythrough),
       source_surface: "header",
     });
-  }, [activePlaythrough]);
+  };
 
-  const handleCreateClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.preventDefault();
-      if (activePlaythrough) {
-        trackEvent("create_playthrough_modal_opened", {
-          ...getSharedEventProperties(activePlaythrough),
-          source_surface: "header",
-        });
-      }
-      setShowCreateInput(true);
-    },
-    [activePlaythrough],
-  );
+  const handleCreateClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    if (activePlaythrough) {
+      trackEvent("create_playthrough_modal_opened", {
+        ...getSharedEventProperties(activePlaythrough),
+        source_surface: "header",
+      });
+    }
+    setShowCreateInput(true);
+  };
 
   // Handle arrow key navigation using refs
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent, currentIndex: number) => {
-      e.preventDefault();
+  const handleKeyDown = (e: React.KeyboardEvent, currentIndex: number) => {
+    e.preventDefault();
 
-      switch (e.key) {
-        case "ArrowDown": {
-          const nextIndex =
-            currentIndex < sortedPlaythroughsForRender.length - 1
-              ? currentIndex + 1
-              : 0;
-          playthroughRefs.current[nextIndex]?.focus();
-          break;
-        }
-        case "ArrowUp": {
-          const prevIndex =
-            currentIndex > 0
-              ? currentIndex - 1
-              : sortedPlaythroughsForRender.length - 1;
-          playthroughRefs.current[prevIndex]?.focus();
-          break;
-        }
-        case "Home":
-          playthroughRefs.current[0]?.focus();
-          break;
-        case "End":
-          playthroughRefs.current[
-            sortedPlaythroughsForRender.length - 1
-          ]?.focus();
-          break;
+    switch (e.key) {
+      case "ArrowDown": {
+        const nextIndex =
+          currentIndex < sortedPlaythroughsForRender.length - 1
+            ? currentIndex + 1
+            : 0;
+        playthroughRefs.current[nextIndex]?.focus();
+        break;
       }
-    },
-    [sortedPlaythroughsForRender],
-  );
+      case "ArrowUp": {
+        const prevIndex =
+          currentIndex > 0
+            ? currentIndex - 1
+            : sortedPlaythroughsForRender.length - 1;
+        playthroughRefs.current[prevIndex]?.focus();
+        break;
+      }
+      case "Home":
+        playthroughRefs.current[0]?.focus();
+        break;
+      case "End":
+        playthroughRefs.current[
+          sortedPlaythroughsForRender.length - 1
+        ]?.focus();
+        break;
+    }
+  };
 
   return (
     <>
@@ -372,7 +363,7 @@ export default function PlaythroughSelector({
                               </div>
                             </div>
                           </button>
-                          <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-1 opacity-0 transition-all duration-200 group-hover/menu-item:opacity-100 group-focus-within/menu-item:opacity-100">
+                          <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-1 opacity-0 transition-opacity duration-200 group-hover/menu-item:opacity-100 group-focus-within/menu-item:opacity-100">
                             <button
                               type="button"
                               onClick={(e) =>
@@ -385,7 +376,7 @@ export default function PlaythroughSelector({
                                 )
                               }
                               className={clsx(
-                                "p-2 rounded-lg transition-all duration-200",
+                                "p-2 rounded-lg transition-colors duration-200",
                                 "border border-transparent",
                                 "hover:bg-blue-100 hover:border-blue-300 dark:hover:bg-blue-900/20 dark:hover:border-blue-600",
                                 "focus:bg-blue-100 focus:border-blue-300 dark:focus:bg-blue-900/20 dark:focus:border-blue-600",

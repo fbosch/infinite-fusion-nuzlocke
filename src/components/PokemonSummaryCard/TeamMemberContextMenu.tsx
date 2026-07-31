@@ -9,7 +9,7 @@ import {
   Undo2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
 import { ContextMenu, type ContextMenuItem } from "@/components/ContextMenu";
@@ -78,6 +78,17 @@ interface TeamMemberContextItemOptions {
   hasArtVariants: boolean | undefined;
   isLoadingVariants: boolean;
   actions: TeamMemberContextActions;
+}
+
+interface TeamMemberContextActionOptions {
+  headPokemon: PokemonOptionType | null | undefined;
+  bodyPokemon: PokemonOptionType | null | undefined;
+  headPreEvolution: Pokemon | null;
+  bodyPreEvolution: Pokemon | null;
+  position: number;
+  hasFusionPair: boolean;
+  onClose: (() => void) | undefined;
+  onOpenVariantModal: () => void;
 }
 
 function createPokemonActionLabel(pokemon: Pokemon, action: string) {
@@ -359,35 +370,17 @@ function createTeamMemberContextItems({
   ];
 }
 
-async function evolvePokemon(
+async function updatePokemonToEvolution(
   pokemon: PokemonOptionType | null | undefined,
-  evolution: Pokemon,
+  evolution: Pokemon | null,
 ) {
-  if (!pokemon?.uid) return;
+  if (!pokemon?.uid || !evolution) return;
 
   await playthroughActions.updatePokemonByUID(pokemon.uid, {
     ...pokemon,
     id: evolution.id,
     name: evolution.name,
     nationalDexId: evolution.nationalDexId,
-  });
-
-  if (pokemon.originalLocation) {
-    emitEvolutionEvent(pokemon.originalLocation);
-  }
-}
-
-async function devolvePokemon(
-  pokemon: PokemonOptionType | null | undefined,
-  preEvolution: Pokemon | null,
-) {
-  if (!pokemon?.uid || !preEvolution) return;
-
-  await playthroughActions.updatePokemonByUID(pokemon.uid, {
-    ...pokemon,
-    id: preEvolution.id,
-    name: preEvolution.name,
-    nationalDexId: preEvolution.nationalDexId,
   });
 
   if (pokemon.originalLocation) {
@@ -407,6 +400,58 @@ function scrollToPokemonEncounter(
     durationMs: 1200,
   });
   onClose?.();
+}
+
+function createTeamMemberContextActions({
+  headPokemon,
+  bodyPokemon,
+  headPreEvolution,
+  bodyPreEvolution,
+  position,
+  hasFusionPair,
+  onClose,
+  onOpenVariantModal,
+}: TeamMemberContextActionOptions): TeamMemberContextActions {
+  return {
+    onOpenVariantModal,
+    onReverseFusion: async () => {
+      if (hasFusionPair === false) return;
+
+      await playthroughActions.flipTeamMemberFusion(position);
+    },
+    onMarkAsDeceased: () =>
+      playthroughActions.markTeamMemberAsDeceased(position),
+    onMoveToBox: () => playthroughActions.moveTeamMemberToBox(position),
+    onDevolveHead: () =>
+      updatePokemonToEvolution(headPokemon, headPreEvolution),
+    onEvolveHead: (evolution) =>
+      updatePokemonToEvolution(headPokemon, evolution),
+    onGoToHeadEncounter: () => scrollToPokemonEncounter(headPokemon, onClose),
+    onDevolveBody: () =>
+      updatePokemonToEvolution(bodyPokemon, bodyPreEvolution),
+    onEvolveBody: (evolution) =>
+      updatePokemonToEvolution(bodyPokemon, evolution),
+    onGoToBodyEncounter: () => scrollToPokemonEncounter(bodyPokemon, onClose),
+  };
+}
+
+function useTeamMemberArtworkVariants(
+  headPokemon: PokemonOptionType | null | undefined,
+  bodyPokemon: PokemonOptionType | null | undefined,
+  shouldLoad: boolean,
+): Pick<TeamMemberContextItemOptions, "hasArtVariants" | "isLoadingVariants"> {
+  const headId = headPokemon?.id;
+  const bodyId = bodyPokemon?.id;
+  const { data: variants, isLoading: isLoadingVariants } = useSpriteVariants(
+    headId,
+    bodyId,
+    shouldLoad && !isEggId(headId) && !isEggId(bodyId),
+  );
+
+  return {
+    hasArtVariants: variants && variants.length > 1,
+    isLoadingVariants,
+  };
 }
 
 interface TeamMemberContextMenuProps {
@@ -433,120 +478,41 @@ export function TeamMemberContextMenu({
     headPokemon != null &&
     bodyPokemon != null &&
     headPokemon.id !== bodyPokemon.id;
-
-  // Check for art variants using the team member's Pokémon
-  const { data: variants, isLoading: isLoadingVariants } = useSpriteVariants(
-    headPokemon?.id,
-    bodyPokemon?.id,
-    shouldLoad && !isEggId(headPokemon?.id) && !isEggId(bodyPokemon?.id),
+  const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
+  const { hasArtVariants, isLoadingVariants } = useTeamMemberArtworkVariants(
+    headPokemon,
+    bodyPokemon,
+    shouldLoad,
   );
-  const hasArtVariants = variants && variants.length > 1;
-
-  // Get current preferred variant for the team member
   const { variant: preferredVariant } = usePreferredVariantState(
     headPokemon?.id ?? null,
     bodyPokemon?.id ?? null,
   );
-
-  // Get evolution data for both Pokémon
   const { evolutions: headEvolutions, preEvolution: headPreEvolution } =
     usePokemonEvolutionData(headPokemon?.id, true);
   const { evolutions: bodyEvolutions, preEvolution: bodyPreEvolution } =
     usePokemonEvolutionData(bodyPokemon?.id, true);
-
-  const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
-
-  // Handler to mark team member as deceased
-  const handleMarkAsDeceased = useCallback(async () => {
-    await playthroughActions.markTeamMemberAsDeceased(position);
-  }, [position]);
-
-  // Handler to move team member to box
-  const handleMoveToBox = useCallback(async () => {
-    await playthroughActions.moveTeamMemberToBox(position);
-  }, [position]);
-
-  const handleEvolveHead = useCallback(
-    (evolution: Pokemon) => evolvePokemon(headPokemon, evolution),
-    [headPokemon],
-  );
-
-  const handleEvolveBody = useCallback(
-    (evolution: Pokemon) => evolvePokemon(bodyPokemon, evolution),
-    [bodyPokemon],
-  );
-
-  const handleDevolveHead = useCallback(
-    () => devolvePokemon(headPokemon, headPreEvolution),
-    [headPokemon, headPreEvolution],
-  );
-
-  const handleDevolveBody = useCallback(
-    () => devolvePokemon(bodyPokemon, bodyPreEvolution),
-    [bodyPokemon, bodyPreEvolution],
-  );
-
-  // Handler to flip fusion (swap head and body)
-  const handleFlipFusion = useCallback(async () => {
-    if (hasFusionPair === false) return;
-
-    await playthroughActions.flipTeamMemberFusion(position);
-  }, [hasFusionPair, position]);
-
-  const handleGoToHeadEncounter = useCallback(
-    () => scrollToPokemonEncounter(headPokemon, onClose),
-    [headPokemon, onClose],
-  );
-
-  const handleGoToBodyEncounter = useCallback(
-    () => scrollToPokemonEncounter(bodyPokemon, onClose),
-    [bodyPokemon, onClose],
-  );
-
-  const contextItems = useMemo<ContextMenuItem[]>(() => {
-    return createTeamMemberContextItems({
-      headPokemon,
-      bodyPokemon,
-      headEvolutions,
-      headPreEvolution,
-      bodyEvolutions,
-      bodyPreEvolution,
-      preferredVariant,
-      hasArtVariants,
-      isLoadingVariants,
-      actions: {
-        onOpenVariantModal: () => setIsVariantModalOpen(true),
-        onReverseFusion: handleFlipFusion,
-        onMarkAsDeceased: handleMarkAsDeceased,
-        onMoveToBox: handleMoveToBox,
-        onDevolveHead: handleDevolveHead,
-        onEvolveHead: handleEvolveHead,
-        onGoToHeadEncounter: handleGoToHeadEncounter,
-        onDevolveBody: handleDevolveBody,
-        onEvolveBody: handleEvolveBody,
-        onGoToBodyEncounter: handleGoToBodyEncounter,
-      },
-    });
-  }, [
+  const contextItems = createTeamMemberContextItems({
     headPokemon,
     bodyPokemon,
-    preferredVariant,
-    hasArtVariants,
-    isLoadingVariants,
-    handleMarkAsDeceased,
-    handleMoveToBox,
     headEvolutions,
     headPreEvolution,
     bodyEvolutions,
     bodyPreEvolution,
-    handleEvolveHead,
-    handleEvolveBody,
-    handleDevolveHead,
-    handleDevolveBody,
-    handleFlipFusion,
-    handleGoToHeadEncounter,
-    handleGoToBodyEncounter,
-  ]);
+    preferredVariant,
+    hasArtVariants,
+    isLoadingVariants,
+    actions: createTeamMemberContextActions({
+      headPokemon,
+      bodyPokemon,
+      headPreEvolution,
+      bodyPreEvolution,
+      position,
+      hasFusionPair,
+      onClose,
+      onOpenVariantModal: () => setIsVariantModalOpen(true),
+    }),
+  });
 
   return (
     <>

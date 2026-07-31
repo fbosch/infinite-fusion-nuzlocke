@@ -1,6 +1,9 @@
 packages:
   - .
 
+minimumReleaseAge: 1440
+trustPolicy: no-downgrade
+
 onlyBuiltDependencies:
   - "@tailwindcss/oxide"
   - "@vercel/speed-insights"

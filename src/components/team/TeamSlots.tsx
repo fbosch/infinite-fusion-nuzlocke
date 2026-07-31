@@ -1,7 +1,7 @@
 "use client";
 
 import { clsx } from "clsx";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import PokeballIcon from "@/assets/images/pokeball.svg";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import { ArtworkVariantButton } from "@/components/PokemonSummaryCard/ArtworkVariantButton";
@@ -84,10 +84,7 @@ export default function TeamSlots() {
   const teamSpriteRefs = useRef<(FusionSpriteHandle | null)[]>([]);
   const previousFusionIds = useRef<(string | null)[]>([]);
 
-  const pokemonByUid = useMemo(
-    () => buildPokemonUidIndex(encounters),
-    [encounters],
-  );
+  const pokemonByUid = buildPokemonUidIndex(encounters);
 
   useEffect(() => {
     previousFusionIds.current = new Array(6).fill(null);
@@ -108,7 +105,11 @@ export default function TeamSlots() {
     }
     // Use requestAnimationFrame to ensure proper timing
     const animationFrame = requestAnimationFrame(() => {
-      teamSlots.forEach((slot, index) => {
+      const animationSlots = activePlaythrough?.team
+        ? getTeamSlots(activePlaythrough.team.members, encounters, pokemonByUid)
+        : [];
+
+      animationSlots.forEach((slot, index) => {
         if (
           !slot.isEmpty &&
           slot.isFusion &&
@@ -139,7 +140,7 @@ export default function TeamSlots() {
     return () => {
       cancelAnimationFrame(animationFrame);
     };
-  }, [teamSlots]);
+  }, [activePlaythrough?.team, encounters, pokemonByUid]);
 
   // Show skeleton while loading
   if (!activePlaythrough || !encounters) {

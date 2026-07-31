@@ -34,6 +34,14 @@ Purpose: resolve or classify every blocking diagnostic before broad warning clea
 - [x] Remove compiler-blocking manual memoization from `DraggableComboboxSprite`, `PokemonPCSheet`, and `TeamSlots`; each value is now a direct derivation from its canonical inputs.
 - [x] Retain the existing compiler opt-outs for TanStack Table and Virtual, adding narrow documented incompatible-library exceptions at their boundaries.
 - [x] Move the file-change cleanup handler out of `usePlaythroughImportExport` so its `try`/`finally` is not lowered by React Compiler.
+- [x] Harden package installation with a one-day minimum release age and a no-downgrade trust policy.
+- [x] Scope Vercel preview credentials to the validation, pull, build, and deploy steps so dependency installation runs without secrets. Build steps still receive credentials because the Vercel CLI requires them.
+- [x] Remove `ContextMenu`'s unused open-state callback, which only caused a parent update after every local state transition (including mount).
+- [x] Guard `PokemonGridItem`'s asynchronous Pokémon lookup so stale requests cannot overwrite a newer item's type data.
+- [x] Complete the LocationTable virtualization audit: track replaceable table refs in effect dependencies and retain its convergent measurement pass behind a documented narrow suppression.
+- [x] Derive each LocationTable row's effective fusion ID during render so its animation effect depends only on the transition value it observes.
+- [x] Remove `useLocalStorage`'s routine manual memoization so its validated snapshot parsing and setter derive directly from canonical hook inputs.
+- [x] Derive TeamSlots' animation inputs from canonical team data inside its effect so unrelated renders do not continually reschedule its animation frame.
 
 Acceptance criteria:
 
@@ -59,25 +67,34 @@ Acceptance criteria:
 
 Purpose: determine whether snapshot reads in callbacks are stale-state risks before changing state access patterns.
 
-- [ ] Audit the 23 `valtio-no-snapshot-in-callback` findings individually or by shared callback pattern.
-- [ ] Prioritize `src/components/LocationTable/FusionToggleButton.tsx` and `src/components/PokemonCombobox/useComboboxDragAndDrop.ts`, which contain the highest concentrations.
-- [ ] For each finding, decide whether the callback needs render-time snapshot data or current store state.
-- [ ] Add regression coverage for callbacks whose state source changes.
+- [x] Audit all `valtio-no-snapshot-in-callback` findings individually or by shared callback pattern.
+- [x] Fix `src/components/LocationTable/FusionToggleButton.tsx`: its drop handlers now capture current drag state at event time and preserve the source across the asynchronous fusion operation; its render snapshot remains limited to the drop affordance.
+- [x] Fix `src/components/PokemonCombobox/useComboboxDragAndDrop.ts`: capture a drop's drag value before async lookup, check current drag data before publishing previews, and preserve the name that scheduled each preview lookup.
+- [x] Fix the remaining callbacks in `src/components/PokemonCombobox/DraggableComboboxSprite.tsx` and `src/stores/playthroughs/hooks.ts` to read the current proxy state when authorizing a drag or deciding whether to load playthroughs.
+- [x] For each finding, decide whether the callback needs render-time snapshot data or current store state; the audit and fixes above retain snapshots only for render-derived values and effect subscriptions.
+- [x] Add regression coverage for callbacks whose state source changes, including drag cleanup during asynchronous lookups and preserving a dropped Pokemon's source through asynchronous fusion.
 
 Acceptance criteria:
 
 - No callback fix changes a state transition without direct behavioral coverage.
-- Remaining findings have an explicit reason for retaining render-time snapshot reads.
+- All callback snapshot findings are resolved; render-time snapshots remain only for render-derived values and effect subscriptions.
 
 ## Phase 4: Targeted Performance Cleanup
 
 Purpose: address concrete runtime costs without speculative micro-optimization.
 
-- [ ] Review chained array iterations and array lookups in loops; consolidate only on verified hot paths or where the simpler implementation is equally clear.
-- [ ] Replace `transition: all` declarations with the specific animated properties.
-- [ ] Review await-in-loop findings for required ordering before introducing concurrency.
-- [ ] Replace JSON parse/stringify cloning only when the data shape, supported values, and copy semantics are known.
-- [ ] Address set-state-in-effect findings after confirming their derived-state behavior.
+- [x] Review chained array iterations and array lookups in loops; consolidate only on verified hot paths or where the simpler implementation is equally clear.
+- [x] Consolidate ordered collection transforms and repeated membership lookups in API routes, loaders, stores, and search helpers while preserving output order and identity.
+- [x] Replace `transition: all` declarations with the specific animated properties.
+- [x] Review await-in-loop findings for required ordering before introducing concurrency; retain sequential loader and team-death updates because their data-source and mutation semantics require ordering.
+- [x] Replace JSON parse/stringify cloning only when the data shape, supported values, and copy semantics are known.
+- [x] Address set-state-in-effect findings after confirming their behavior; the remaining mount and analytics updates are browser-only synchronization, not derived state.
+
+Remaining warnings require stronger evidence before a behavior change:
+
+- The three loader and team-action `await` loops need a representative cold-load latency trace before changing ordering or request concurrency.
+- The analytics debug counter refresh needs a source-level subscription before its immediate external-state refresh can be removed.
+- The logo precision warning needs an asset-size budget or visual comparison before altering its path data.
 
 Acceptance criteria:
 
@@ -88,6 +105,7 @@ Acceptance criteria:
 
 Purpose: retain React Doctor's maintainability observations as optional context without creating a competing gate.
 
+- [x] Remove React Compiler-redundant manual memoization across the app; the full scan no longer reports `react-compiler-no-manual-memoization` findings.
 - [ ] Use Fallow findings and existing architecture plans to prioritize large components and manual memoization patterns.
 - [ ] Consider `src/components/LocationTable/EncounterCell.tsx`, `src/components/PokemonSummaryCard/LocationSelector.tsx`, and `src/components/PokemonCombobox/useComboboxDragAndDrop.ts` only within a focused Fallow-led refactor.
 - [ ] Do not change runtime code solely to improve the React Doctor score.
@@ -106,7 +124,7 @@ pnpm type-check
 pnpm test:run
 pnpm validate
 pnpm quality:graph
-pnpm quality:react --base master
+pnpm quality:react
 ```
 
 Use a full advisory scan to measure baseline progress without changing the enforcement scope:

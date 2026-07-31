@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { TrashIcon } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { playthroughActions } from "@/stores/playthroughs";
 import { CursorTooltip } from "../../CursorTooltip";
@@ -16,18 +16,18 @@ export default function RemoveLocationButton({
 }: RemoveLocationButtonProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleButtonClick = useCallback(() => {
+  const handleButtonClick = () => {
     setIsDialogOpen(true);
-  }, []);
+  };
 
-  const handleConfirm = useCallback(async () => {
+  const handleConfirm = async () => {
     await playthroughActions.removeCustomLocation(locationId);
     setIsDialogOpen(false);
-  }, [locationId]);
+  };
 
-  const handleCancel = useCallback(() => {
+  const handleCancel = () => {
     setIsDialogOpen(false);
-  }, []);
+  };
 
   return (
     <>

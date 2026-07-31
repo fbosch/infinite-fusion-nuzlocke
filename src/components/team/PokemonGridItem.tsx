@@ -32,16 +32,23 @@ export function PokemonGridItem({
 
   // Fetch full Pokemon data to get types
   useEffect(() => {
-    const fetchPokemonData = async () => {
-      try {
-        const data = await getPokemonById(pokemon.id);
-        setPokemonData(data);
-      } catch (error) {
-        console.error("Failed to fetch Pokemon data:", error);
-      }
-    };
+    let cancelled = false;
 
-    fetchPokemonData();
+    getPokemonById(pokemon.id)
+      .then((data) => {
+        if (!cancelled) {
+          setPokemonData(data);
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          console.error("Failed to fetch Pokemon data:", error);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [pokemon.id]);
 
   const getButtonStyles = () => {

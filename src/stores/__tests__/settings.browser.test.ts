@@ -23,6 +23,11 @@ const clearLocalStorage = () => {
   localStorage.clear();
 };
 
+let settingsImportVersion = 0;
+
+const importFreshSettings = () =>
+  import(/* @vite-ignore */ `../settings.ts?t=${++settingsImportVersion}`);
+
 describe("Settings Store", () => {
   beforeEach(() => {
     // Clear all mocks and localStorage
@@ -123,7 +128,7 @@ describe("Settings Store", () => {
         .mockReturnValue(oldPlaythrough);
 
       const { settingsStore: freshStore, settingsActions: freshActions } =
-        await import("../settings?t=" + Date.now());
+        await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
 
@@ -150,9 +155,7 @@ describe("Settings Store", () => {
         .mockReturnValueOnce(null)
         .mockReturnValue(oldPlaythrough);
 
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
 
@@ -179,9 +182,7 @@ describe("Settings Store", () => {
       } as any);
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
     });
@@ -202,9 +203,7 @@ describe("Settings Store", () => {
       } as any);
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
     });
@@ -213,9 +212,7 @@ describe("Settings Store", () => {
       mockGetActivePlaythrough.mockReturnValue(null);
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
     });
@@ -229,9 +226,7 @@ describe("Settings Store", () => {
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -253,9 +248,7 @@ describe("Settings Store", () => {
       localStorage.setItem("settings", JSON.stringify(storedSettings));
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
       expect(freshStore.version).toBe("1.0.0");
@@ -273,9 +266,7 @@ describe("Settings Store", () => {
         name: "Old Run",
       } as any);
 
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
       expect(localStorage.getItem("settings:v1")).toBe(
@@ -292,9 +283,7 @@ describe("Settings Store", () => {
       localStorage.setItem("settings:v1", "");
       localStorage.setItem("settings", JSON.stringify(storedSettings));
 
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
       expect(localStorage.getItem("settings:v1")).toBe(
@@ -312,9 +301,7 @@ describe("Settings Store", () => {
       } as any);
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
     });
@@ -333,9 +320,7 @@ describe("Settings Store", () => {
       } as any);
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
     });
@@ -355,9 +340,7 @@ describe("Settings Store", () => {
       } as any);
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       // Should preserve user's explicit choice
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
@@ -369,9 +352,7 @@ describe("Settings Store", () => {
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -393,9 +374,7 @@ describe("Settings Store", () => {
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith(

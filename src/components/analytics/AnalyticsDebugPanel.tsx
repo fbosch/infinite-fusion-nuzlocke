@@ -1,8 +1,7 @@
 "use client";
 
 import { Bug, RotateCcw, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { useMounted } from "@/hooks/useMounted";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import {
   type AnalyticsDebugCounters,
   getAnalyticsDebugCounters,
@@ -12,20 +11,24 @@ import {
 const DEBUG_QUERY_KEY = "analytics_debug";
 const DEBUG_STORAGE_KEY = "analytics-debug-panel";
 
-function isPanelEnabled(): boolean {
+const subscribeToPanelEnabled = () => () => {};
+const getServerPanelEnabledSnapshot = () => false;
+
+function isDebugQueryEnabled(): boolean {
   if (typeof window === "undefined") {
     return false;
   }
 
   const params = new URLSearchParams(window.location.search);
-  const queryEnabled = params.get(DEBUG_QUERY_KEY) === "1";
-  if (queryEnabled) {
-    try {
-      localStorage.setItem(DEBUG_STORAGE_KEY, "1");
-    } catch {
-      // Ignore localStorage write failures.
-    }
+  return params.get(DEBUG_QUERY_KEY) === "1";
+}
 
+function isPanelEnabled(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  if (isDebugQueryEnabled()) {
     return true;
   }
 
@@ -37,20 +40,27 @@ function isPanelEnabled(): boolean {
 }
 
 export function AnalyticsDebugPanel() {
-  const mounted = useMounted();
-  const [enabled, setEnabled] = useState(false);
+  const enabled = useSyncExternalStore(
+    subscribeToPanelEnabled,
+    isPanelEnabled,
+    getServerPanelEnabledSnapshot,
+  );
   const [open, setOpen] = useState(true);
   const [counters, setCounters] = useState<AnalyticsDebugCounters>(
-    getAnalyticsDebugCounters(),
+    getAnalyticsDebugCounters,
   );
 
   useEffect(() => {
-    if (!mounted) {
+    if (!isDebugQueryEnabled()) {
       return;
     }
 
-    setEnabled(isPanelEnabled());
-  }, [mounted]);
+    try {
+      localStorage.setItem(DEBUG_STORAGE_KEY, "1");
+    } catch {
+      // Ignore localStorage write failures.
+    }
+  }, []);
 
   useEffect(() => {
     if (!enabled) {
@@ -80,7 +90,7 @@ export function AnalyticsDebugPanel() {
     return hasConsentBlocks && !hasOtherBlockers;
   }, [counters]);
 
-  if (!mounted || !enabled) {
+  if (!enabled) {
     return null;
   }
 

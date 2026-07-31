@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { Eraser } from "lucide-react";
-import { Fragment, useCallback, useState } from "react";
+import { Fragment, useState } from "react";
 import { playthroughActions } from "@/stores/playthroughs";
 import ConfirmationDialog from "../ConfirmationDialog";
 import { CursorTooltip } from "../CursorTooltip";
@@ -18,18 +18,18 @@ export default function ResetEncounterButton({
 }: ResetEncounterButtonProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleButtonClick = useCallback(() => {
+  const handleButtonClick = () => {
     setIsDialogOpen(true);
-  }, []);
+  };
 
-  const handleConfirm = useCallback(() => {
+  const handleConfirm = () => {
     playthroughActions.resetEncounter(locationId);
     setIsDialogOpen(false);
-  }, [locationId]);
+  };
 
-  const handleCancel = useCallback(() => {
+  const handleCancel = () => {
     setIsDialogOpen(false);
-  }, []);
+  };
 
   return (
     <Fragment>

@@ -201,13 +201,15 @@ export const PokemonCombobox = ({
         if (isAllPokemonLoading) {
           return [];
         }
-        return allPokemon
-          .map((p) => ({
-            id: p.id,
-            name: p.name,
-            nationalDexId: p.nationalDexId,
-          }))
-          .filter((pokemon) => !isFusion || !isEgg(pokemon));
+        return allPokemon.flatMap((pokemon) => {
+          const option = {
+            id: pokemon.id,
+            name: pokemon.name,
+            nationalDexId: pokemon.nationalDexId,
+          };
+
+          return !isFusion || !isEgg(option) ? [option] : [];
+        });
       }
       return routeEncounterData.filter(
         (pokemon) => !isFusion || !isEgg(pokemon),

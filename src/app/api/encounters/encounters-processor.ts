@@ -264,17 +264,16 @@ export function processGameModeData(gameMode: "classic" | "remix") {
   const legendaryData =
     LegendaryRouteEncountersArraySchema.parse(legendaryEncounters);
 
-  // Create maps of route names for egg locations by source type
-  const eggGiftRoutes = new Map(
-    eggLocationsData.locations
-      .filter((location) => location.source === "gift")
-      .map((location) => [location.routeName, location]),
-  );
-  const eggNestRoutes = new Map(
-    eggLocationsData.locations
-      .filter((location) => location.source === "nest")
-      .map((location) => [location.routeName, location]),
-  );
+  // Create maps of route names for egg locations by source type.
+  const eggGiftRoutes = new Map();
+  const eggNestRoutes = new Map();
+  for (const location of eggLocationsData.locations) {
+    if (location.source === "gift") {
+      eggGiftRoutes.set(location.routeName, location);
+    } else if (location.source === "nest") {
+      eggNestRoutes.set(location.routeName, location);
+    }
+  }
 
   // Merge the data by route name
   const allRouteNames = new Set([

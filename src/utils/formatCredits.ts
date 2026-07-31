@@ -14,9 +14,13 @@ export function formatArtistCredits(artists?: string[] | null): string {
   }
 
   // Filter out empty strings and trim whitespace
-  const cleanedArtists = artists
-    .map((artist) => artist.trim())
-    .filter((artist) => artist.length > 0);
+  const cleanedArtists: string[] = [];
+  for (const artist of artists) {
+    const trimmedArtist = artist.trim();
+    if (trimmedArtist.length > 0) {
+      cleanedArtists.push(trimmedArtist);
+    }
+  }
 
   if (cleanedArtists.length === 0) {
     return "Unknown artist";
