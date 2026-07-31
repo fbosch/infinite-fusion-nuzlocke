@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.9.0](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.8.0...v0.9.0) (2026-07-26)
+
+
+### Features
+
+* **fusion:** add combo shorthand ([#241](https://github.com/fbosch/infinite-fusion-nuzlocke/issues/241)) ([05038d6](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/05038d67d98ef4c2cffdf64b10c2d014701bdff4))
+* **header:** move GitHub engagement controls into top bar ([#243](https://github.com/fbosch/infinite-fusion-nuzlocke/issues/243)) ([8de6293](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/8de6293fd3dd2eb46bc40dbd8eb249919678f1b7))
+* **motion:** respect reduced motion ([#245](https://github.com/fbosch/infinite-fusion-nuzlocke/issues/245)) ([da52ed9](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/da52ed945d0f8f62aa371ab02a14c5042c0dc1d9))
+
 ## [0.8.0](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.7.0...v0.8.0) (2026-06-21)
 
 
