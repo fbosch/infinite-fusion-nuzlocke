@@ -26,7 +26,8 @@ let
     wayland
     alsa-lib
   ];
-in {
+in
+{
   languages.javascript = {
     enable = true;
     package = pkgs.nodejs-slim_24;
@@ -37,9 +38,11 @@ in {
     pkgs.git
     pkgs.gh
     pkgs.worktrunk
-  ] ++ chromiumRuntimeLibs;
+  ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux chromiumRuntimeLibs;
 
-  env.LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath chromiumRuntimeLibs;
+  env = pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
+    LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath chromiumRuntimeLibs;
+  };
 
   tasks."pnpm:install" = {
     exec = "pnpm install --frozen-lockfile --prefer-offline";
