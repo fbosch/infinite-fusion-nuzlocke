@@ -3,9 +3,6 @@ import type React from "react";
 import { twMerge } from "tailwind-merge";
 import gen7SpritesheetMetadata from "@/assets/pokemon-gen7-spritesheet-metadata.json";
 import spritesheetMetadata from "@/assets/pokemon-gen8-spritesheet-metadata.json";
-import { getCacheBuster } from "../lib/persistence";
-
-const version = getCacheBuster();
 
 interface PokemonSpriteProps extends React.HTMLAttributes<HTMLImageElement> {
   pokemonId: number;
@@ -17,12 +14,16 @@ interface PokemonSpriteProps extends React.HTMLAttributes<HTMLImageElement> {
   generation?: "gen7" | "gen8";
   className?: string;
   draggable?: boolean;
+  loading?: "eager" | "lazy";
+  priority?: boolean;
 }
 
 export function PokemonSprite({
   pokemonId,
   generation = "gen8",
   className = "",
+  loading = "lazy",
+  priority = false,
   ...rest
 }: PokemonSpriteProps) {
   const metadata =
@@ -36,8 +37,8 @@ export function PokemonSprite({
 
   const spritesheetSrc =
     generation === "gen7"
-      ? `/images/pokemon-gen7-spritesheet.png?v=${version}`
-      : `/images/pokemon-gen8-spritesheet.png?v=${version}`;
+      ? `/images/pokemon-gen7-spritesheet.webp?v=${metadata.spritesheetVersion}`
+      : `/images/pokemon-gen8-spritesheet.webp?v=${metadata.spritesheetVersion}`;
 
   return (
     <Image
@@ -48,8 +49,8 @@ export function PokemonSprite({
       className={twMerge("object-none ", className)}
       unoptimized
       decoding="async"
-      loading="eager"
-      priority={true}
+      loading={loading}
+      priority={priority}
       style={{
         objectPosition: `-${spriteData.x}px -${spriteData.y}px`,
         minWidth: spriteData.width,
