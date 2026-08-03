@@ -56,12 +56,6 @@ export default function LocationTable() {
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
-  const [tableContainerElement, setTableContainerElement] =
-    useState<HTMLDivElement | null>(null);
-  const setTableContainerRef = useCallback((element: HTMLDivElement | null) => {
-    tableContainerRef.current = element;
-    setTableContainerElement(element);
-  }, []);
 
   const data = useMemo(() => {
     try {
@@ -225,7 +219,6 @@ export default function LocationTable() {
     manualPagination: true,
   });
   const {
-    measuredTableLayout,
     tableRows,
     virtualPaddingBottom,
     virtualPaddingTop,
@@ -233,9 +226,7 @@ export default function LocationTable() {
     visibleColumns,
   } = useLocationTableVirtualization({
     table,
-    tableContainerElement,
     tableContainerRef,
-    tableRef,
   });
 
   // Show skeleton loading state while component is mounting or store is initializing from IndexedDB
@@ -261,7 +252,7 @@ export default function LocationTable() {
   return (
     <div className="overflow-hidden 2xl:rounded-lg border-y md:border border-gray-200 dark:border-gray-700 xl:shadow-sm">
       <div
-        ref={setTableContainerRef}
+        ref={tableContainerRef}
         className="max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative"
       >
         <table
@@ -270,23 +261,7 @@ export default function LocationTable() {
           data-scroll-container
           aria-label="Locations table"
           aria-rowcount={tableRows.length + 1}
-          style={
-            measuredTableLayout
-              ? {
-                  minWidth: measuredTableLayout.width,
-                  tableLayout: "fixed",
-                  width: measuredTableLayout.width,
-                }
-              : undefined
-          }
         >
-          {measuredTableLayout && (
-            <colgroup>
-              {measuredTableLayout.columnWidths.map((width, index) => (
-                <col key={visibleColumns[index].id} style={{ width }} />
-              ))}
-            </colgroup>
-          )}
           <LocationTableHeader headerGroups={table.getHeaderGroups()} />
           <tbody
             className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700"

@@ -139,55 +139,6 @@ describe("LocationTable scroll-to-recent button", () => {
     expect(locationRowProps).toHaveBeenLastCalledWith("route-2");
   });
 
-  it("observes the scroll container for layout changes", async () => {
-    const observe = vi.fn();
-    const disconnect = vi.fn();
-    class ResizeObserverMock {
-      constructor(_callback: ResizeObserverCallback) {}
-
-      disconnect = disconnect;
-      observe = observe;
-      unobserve = vi.fn();
-    }
-    vi.stubGlobal("ResizeObserver", ResizeObserverMock);
-
-    await act(async () => {
-      render(<LocationTable />);
-    });
-
-    expect(observe).toHaveBeenCalledWith(
-      screen.getByRole("table").parentElement,
-    );
-
-    vi.unstubAllGlobals();
-  });
-
-  it("starts observing after the table replaces its mounting skeleton", async () => {
-    const observe = vi.fn();
-    class ResizeObserverMock {
-      constructor(_callback: ResizeObserverCallback) {}
-
-      disconnect = vi.fn();
-      observe = observe;
-      unobserve = vi.fn();
-    }
-    vi.stubGlobal("ResizeObserver", ResizeObserverMock);
-    mountedMock.mockReturnValue(false);
-
-    const view = render(<LocationTable />);
-    expect(observe).not.toHaveBeenCalled();
-
-    mountedMock.mockReturnValue(true);
-    await act(async () => {
-      view.rerender(<LocationTable />);
-    });
-
-    expect(observe).toHaveBeenCalledWith(
-      screen.getByRole("table").parentElement,
-    );
-    vi.unstubAllGlobals();
-  });
-
   it("hides spacers and exposes logical virtual row positions", async () => {
     useVirtualizerMock.mockReturnValue({
       getTotalSize: () => 450,

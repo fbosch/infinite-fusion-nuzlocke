@@ -22,10 +22,11 @@ The production load is network-light. Render work, layout stability, and first-i
 
 ## Scope And Order
 
-1. Remove location-table post-render measurement and stabilize the skeleton transition.
-2. Optimize Gen 7 spritesheet delivery on the first combobox interaction.
-3. Reprofile combobox search before changing search or cache behavior.
-4. Profile a populated playthrough before optimizing location-cell or PC-sheet derivations.
+1. Remove location-table post-render measurement. Completed.
+2. Eliminate the hydrated playthrough-menu layout shift. Completed.
+3. Optimize Gen 7 spritesheet delivery on the first combobox interaction.
+4. Reprofile combobox search before changing search or cache behavior.
+5. Profile a populated playthrough before optimizing location-cell or PC-sheet derivations.
 
 Each numbered section is an independently reviewable change. Do not combine them without fresh measurements showing that the combined work is needed.
 
@@ -37,27 +38,48 @@ Each numbered section is an independently reviewable change. Do not combine them
 
 ### Changes
 
-- Replace runtime header-cell measurement with widths derived from the existing TanStack column definitions.
-- Render the real table's `colgroup` and `table-layout: fixed` before first paint in `src/components/LocationTable/index.tsx`.
-- Retain the existing responsive column sizes and horizontal scrolling behavior.
+- Remove the runtime header-cell measurement while preserving the browser's existing automatic table layout.
 - Remove `useContainerLayoutSnapshot`, `measuredTableLayout`, the layout effect, and DOM geometry reads from `useLocationTableVirtualization.ts` once no longer needed.
-- Align `LocationTableSkeleton.tsx` with the loaded table's outer container, scroll height, table layout, column widths, header height, and row height.
+- Avoid changing `LocationTableSkeleton.tsx` unless a separate visual regression is reproduced.
 - Keep virtualization, overscan, scroll-to-location, and row-height behavior unchanged.
 
 ### Tests
 
-- Add focused tests in `src/components/LocationTable/__tests__/` for the rendered fixed-layout and column contract.
-- Verify the skeleton and loaded table preserve the same structural column and row sizing contract.
 - Extend an existing scroll test only if the refactor affects virtual scrolling or scroll-to-location behavior.
 - Do not use jsdom timing assertions. Browser traces are the performance acceptance evidence.
 
 ### Acceptance Criteria
 
 - Initial production trace contains no forced reflow attributable to table/header geometry measurement.
-- Largest CLS cluster is below 0.02 under the baseline viewport and cache conditions.
-- Column widths, mobile overflow, sticky headers, and virtual scrolling retain their existing behavior.
+- Column widths, mobile overflow, sticky headers, skeleton appearance, and virtual scrolling retain their existing behavior.
 
-## 2. Optimize Cold Combobox Sprite Delivery
+### Measurement Outcome
+
+The table measurement path was removed from the forced-reflow trace. CLS remained at 0.0964 because it originates outside the table: after persisted state hydrates, `PlaythroughMenu` adds `GameModeToggle`, moving the selector and main content by 44 px. This requires a separate hydration-layout slice.
+
+## 2. Eliminate The Hydrated Playthrough-Menu Layout Shift
+
+### Problem
+
+The server initially renders `PlaythroughSelector` without an active playthrough. After client persistence hydrates, `src/components/playthrough/PlaythroughMenu.tsx` adds `GameModeToggle`, changing the menu from a 44 px selector to a stacked control and moving the main content. A browser `PerformanceObserver` attributes 0.0882 CLS to this transition.
+
+### Changes
+
+- Establish a stable pre-hydration height for the playthrough-menu area.
+- Keep the server and first client render structurally compatible with persisted active-playthrough state.
+- Avoid changing game-mode behavior, selector behavior, or canonical playthrough state.
+
+### Acceptance Criteria
+
+- The 44 px selector/main-content movement is absent from layout-shift entries.
+- The production cold-load CLS cluster falls materially below 0.0964.
+- Game-mode selection remains unavailable until an active playthrough exists.
+
+### Measurement Outcome
+
+`PlaythroughMenu` now renders `GameModeToggle` before and after hydration. With no active playthrough, its existing disabled state preserves the menu height and prevents selection. The cleared-storage layout-shift probe removed the previous 0.0882 shift; its remaining shifts total 0.0037 and originate from the GitHub CTA. The comparable production trace reports CLS 0.00.
+
+## 3. Optimize Cold Combobox Sprite Delivery
 
 ### Problem
 
@@ -83,7 +105,7 @@ The first combobox open produced 667 ms INP. After required data is warm, search
 - Cold combobox INP improves without delaying visible option sprites.
 - Warm search remains at or below the measured 32 ms interaction baseline.
 
-## 3. Reprofile Search Before Algorithm Changes
+## 4. Reprofile Search Before Algorithm Changes
 
 ### Current Evidence
 
@@ -105,7 +127,7 @@ The first combobox open produced 667 ms INP. After required data is warm, search
 - Preserve route-result priority, search relevance ordering, egg filtering, and duplicate semantics.
 - Demonstrate an interaction or scripting-time improvement in a browser trace before treating this work as complete.
 
-## 4. Profile Populated Playthroughs Before State-Derivation Changes
+## 5. Profile Populated Playthroughs Before State-Derivation Changes
 
 ### Current Evidence
 

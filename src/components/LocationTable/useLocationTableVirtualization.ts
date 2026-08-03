@@ -1,12 +1,6 @@
 import type { Table } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import {
-  type RefObject,
-  useEffect,
-  useLayoutEffect,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { type RefObject, useEffect } from "react";
 import { onFlashUids, onScrollToLocation } from "@/lib/events";
 import type { CombinedLocation } from "@/loaders/locations";
 import {
@@ -17,47 +11,13 @@ import {
 const LOCATION_ROW_HEIGHT_PX = 150;
 const LOCATION_ROW_OVERSCAN_COUNT = 4;
 
-function useContainerLayoutSnapshot(
-  tableContainerElement: HTMLDivElement | null,
-) {
-  const subscribe = (notify: () => void) => {
-    if (!tableContainerElement) return () => {};
-
-    const resizeObserver =
-      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(notify);
-    resizeObserver?.observe(tableContainerElement);
-    document.fonts?.addEventListener("loadingdone", notify);
-
-    return () => {
-      resizeObserver?.disconnect();
-      document.fonts?.removeEventListener("loadingdone", notify);
-    };
-  };
-  const getSnapshot = () => {
-    const width = tableContainerElement?.clientWidth ?? 0;
-    return `${width}:${document.fonts?.status ?? "unavailable"}`;
-  };
-
-  return useSyncExternalStore(subscribe, getSnapshot, () => "0:unavailable");
-}
-
 export function useLocationTableVirtualization({
   table,
-  tableContainerElement,
   tableContainerRef,
-  tableRef,
 }: {
   table: Table<CombinedLocation>;
-  tableContainerElement: HTMLDivElement | null;
   tableContainerRef: RefObject<HTMLDivElement | null>;
-  tableRef: RefObject<HTMLTableElement | null>;
 }) {
-  const [measuredTableLayout, setMeasuredTableLayout] = useState<{
-    columnWidths: number[];
-    snapshot: string;
-    width: number;
-  } | null>(null);
-  const layoutSnapshot = useContainerLayoutSnapshot(tableContainerElement);
   const tableRows = table.getRowModel().rows;
   const visibleColumns = table.getVisibleLeafColumns();
   // react-doctor-disable-next-line react-hooks-js/incompatible-library -- TanStack Virtual owns imperative scroll state outside compiler memoization.
@@ -72,49 +32,6 @@ export function useLocationTableVirtualization({
   const virtualPaddingBottom = virtualRows.length
     ? rowVirtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end
     : 0;
-
-  useLayoutEffect(() => {
-    if (virtualRows.length === 0) return;
-
-    if (
-      measuredTableLayout &&
-      measuredTableLayout.snapshot !== layoutSnapshot
-    ) {
-      setMeasuredTableLayout(null);
-      return;
-    }
-    if (measuredTableLayout) return;
-
-    const tableElement = tableRef.current;
-    if (!tableElement) return;
-
-    const headerCells = Array.from(
-      tableElement.querySelectorAll<HTMLTableCellElement>(
-        "thead tr:first-child > th",
-      ),
-    );
-    const width = tableElement.getBoundingClientRect().width;
-    const columnWidths = headerCells.map(
-      (headerCell) => headerCell.getBoundingClientRect().width,
-    );
-
-    if (
-      width === 0 ||
-      columnWidths.length !== visibleColumns.length ||
-      columnWidths.some((columnWidth) => columnWidth === 0)
-    ) {
-      return;
-    }
-
-    // react-doctor-disable-next-line react-doctor/no-self-updating-effect -- A changed snapshot clears this cache; the following layout pass measures and converges.
-    setMeasuredTableLayout({ columnWidths, snapshot: layoutSnapshot, width });
-  }, [
-    layoutSnapshot,
-    measuredTableLayout,
-    tableRef,
-    virtualRows.length,
-    visibleColumns.length,
-  ]);
 
   useEffect(() => {
     const offScroll = onScrollToLocation(
@@ -148,7 +65,6 @@ export function useLocationTableVirtualization({
   }, [rowVirtualizer, tableContainerRef, tableRows]);
 
   return {
-    measuredTableLayout,
     tableRows,
     virtualPaddingBottom,
     virtualPaddingTop,
