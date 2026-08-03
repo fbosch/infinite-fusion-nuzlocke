@@ -2290,5 +2290,21 @@
   {
     "id": 572,
     "name": "Dragalge"
+  },
+  {
+    "id": 573,
+    "name": "Shellos East"
+  },
+  {
+    "id": 574,
+    "name": "Gastrodon East"
+  },
+  {
+    "id": 575,
+    "name": "Shellos West"
+  },
+  {
+    "id": 576,
+    "name": "Gastrodon West"
   }
 ]
