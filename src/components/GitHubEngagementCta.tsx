@@ -41,7 +41,7 @@ export function GitHubEngagementCta({ route }: GitHubEngagementCtaProps) {
       aria-label="Support the tracker"
       className="flex items-center gap-2"
     >
-      <span className="github-button-control">
+      <span className="github-button-control h-7 w-20">
         <GitHubButton
           href="https://github.com/fbosch/infinite-fusion-nuzlocke"
           data-color-scheme={colorScheme}
@@ -52,7 +52,7 @@ export function GitHubEngagementCta({ route }: GitHubEngagementCtaProps) {
           aria-label="Star fbosch/infinite-fusion-nuzlocke on GitHub"
         />
       </span>
-      <span className="github-button-control">
+      <span className="github-button-control h-7 w-20">
         <GitHubButton
           href="https://github.com/fbosch/infinite-fusion-nuzlocke/issues"
           data-color-scheme={colorScheme}

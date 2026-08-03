@@ -67,11 +67,16 @@ describe("GitHubEngagementCta", () => {
     expect(starLink.getAttribute("data-show-count")).toBe("true");
     expect(starLink.getAttribute("data-color-scheme")).toBe("light");
     expect(starLink.getAttribute("data-text")).toBe("");
-    expect(starLink.parentElement?.className).toBe("github-button-control");
+    expect(starLink.parentElement?.className).toBe(
+      "github-button-control h-7 w-20",
+    );
     expect(issueLink.getAttribute("href")).toBe(
       "https://github.com/fbosch/infinite-fusion-nuzlocke/issues",
     );
     expect(issueLink.getAttribute("data-show-count")).toBe("true");
+    expect(issueLink.parentElement?.className).toBe(
+      "github-button-control h-7 w-20",
+    );
   });
 
   it("emits one impression per route when half of the CTA becomes visible", () => {
