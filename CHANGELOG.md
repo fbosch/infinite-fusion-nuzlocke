@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.3](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.9.2...v0.9.3) (2026-08-03)
+
+
+### Bug Fixes
+
+* commitlint and devenv ([9c3dd2f](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/9c3dd2f7129f2b71f8b97c87cad7742511b9536b))
+
 ## [0.9.2](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.9.1...v0.9.2) (2026-07-31)
 
 
