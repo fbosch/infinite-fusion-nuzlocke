@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
-import { getTeamSlots } from "../teamSlots";
+import { getTeamSlots } from "../team-slots";
 
 vi.mock("@/loaders/locations", () => ({
   getLocationById: (id: string) => (id ? { name: `Location ${id}` } : null),

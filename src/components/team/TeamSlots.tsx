@@ -21,7 +21,7 @@ import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 import TeamMemberPickerModal from "./TeamMemberPickerModal";
 import { TeamMemberTooltipContent } from "./TeamMemberTooltipContent";
 import TeamSlotsSkeleton from "./TeamSlotsSkeleton";
-import { getTeamSlots } from "./teamSlots";
+import { getTeamSlots } from "./team-slots";
 import { useTeamMemberPicker } from "./useTeamMemberPicker";
 
 // Component to display type indicators and nickname

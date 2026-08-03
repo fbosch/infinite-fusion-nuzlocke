@@ -9,7 +9,7 @@ import {
   TeamMemberSelectionProvider,
   useTeamMemberSelection,
 } from "@/components/team/TeamMemberSelectionContext";
-import { getTeamSlots } from "@/components/team/teamSlots";
+import { getTeamSlots } from "@/components/team/team-slots";
 import { getLocationsSortedWithCustom } from "@/loaders/locations";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 
