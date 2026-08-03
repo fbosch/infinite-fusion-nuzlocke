@@ -12,7 +12,7 @@ import {
 import clsx from "clsx";
 import { ArrowUpRight, Check, X } from "lucide-react";
 import Image from "next/image";
-import React, { useMemo } from "react";
+import React from "react";
 import {
   usePreferredVariantState,
   useSpriteCredits,
@@ -84,37 +84,38 @@ export function ArtworkVariantModal({
 
   const isLoading = creditsLoading || variantsLoading;
 
-  const availableVariants = useMemo(() => {
+  const availableVariants = (() => {
     if (!variants || variants.length <= 1) return [];
     return variants;
-  }, [variants]);
+  })();
 
   const selectedVariant = localVariant ?? globalPreferredVariant ?? "";
 
-  const handleClose = React.useCallback(() => {
+  const handleClose = () => {
     setLocalVariant(null);
     onClose();
-  }, [onClose]);
+  };
 
-  const handleSelectVariant = React.useCallback(
-    async (variant: string) => {
-      // Immediately update the local state for instant UI feedback
-      setLocalVariant(variant);
-      await updateVariant(variant);
-    },
-    [updateVariant],
-  );
+  const handleSelectVariant = async (variant: string) => {
+    // Immediately update the local state for instant UI feedback
+    setLocalVariant(variant);
+    await updateVariant(variant);
+  };
 
-  const handleClearVariant = React.useCallback(async () => {
+  const handleClearVariant = async () => {
     setLocalVariant("");
     await updateVariant("");
     handleClose();
-  }, [updateVariant, handleClose]);
+  };
 
   // No cleanup needed
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} className="relative z-50 group">
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      className="relative z-[70] group"
+    >
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 "
@@ -135,6 +136,7 @@ export function ArtworkVariantModal({
               Select Artwork Variant
             </DialogTitle>
             <button
+              type="button"
               onClick={handleClose}
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
@@ -261,6 +263,7 @@ export function ArtworkVariantModal({
               </RadioGroup>
               <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button
+                  type="button"
                   onClick={handleClose}
                   className={clsx(
                     "px-4 py-2 text-sm rounded-md transition-colors",
@@ -272,6 +275,7 @@ export function ArtworkVariantModal({
                   Cancel
                 </button>
                 <button
+                  type="button"
                   onClick={handleClearVariant}
                   className={clsx(
                     "px-4 py-2 text-sm rounded-md transition-colors",

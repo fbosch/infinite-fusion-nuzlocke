@@ -103,5 +103,3 @@ export function useBreakpointBetween(
 }
 
 export type { Breakpoint };
-// Export breakpoint values for reference
-export { breakpoints };

@@ -21,13 +21,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-pnpm
 
       - name: Download fresh Pokemon data
         run: pnpm run scrape
+
+      - name: Format generated data
+        run: pnpm exec biome format --write data --vcs-use-ignore-file=true --files-ignore-unknown=true
 
       - name: Run data integrity tests on fresh data
         run: pnpm vitest run tests/data-integrity.test.ts
@@ -42,7 +45,7 @@ jobs:
           find data -name "*.json" -type f -exec du -h {} \;
 
       - name: Upload data artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: pokemon-data
           path: |

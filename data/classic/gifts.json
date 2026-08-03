@@ -40,6 +40,10 @@
     "pokemonIds": [253]
   },
   {
+    "routeName": "Littleroot Town",
+    "pokemonIds": [276, 279, 282]
+  },
+  {
     "routeName": "Mt. Moon",
     "pokemonIds": [138, 140]
   },

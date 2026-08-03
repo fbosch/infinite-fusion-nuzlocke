@@ -4,8 +4,11 @@ Track Pokemon Infinite Fusion Nuzlocke runs with encounter logging, team and box
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-149eca)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-6-blue)](https://www.typescriptlang.org/)
+[![React Doctor](https://img.shields.io/badge/React_Doctor-49%2F100-orange)](https://github.com/millionco/react-doctor)
+[![TypeScript](https://img.shields.io/badge/TypeScript-7-blue)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Coverage](docs/coverage.svg)](https://app.codecov.io/gh/fbosch/infinite-fusion-nuzlocke)
+[![Fallow health](docs/fallow.svg)](https://github.com/fallow-rs/fallow)
 
 Live app: [fusion.nuzlocke.io](https://fusion.nuzlocke.io)  
 Source: [github.com/fbosch/infinite-fusion-nuzlocke](https://github.com/fbosch/infinite-fusion-nuzlocke)
@@ -29,13 +32,13 @@ Source: [github.com/fbosch/infinite-fusion-nuzlocke](https://github.com/fbosch/i
 
 Requirements:
 
-- Node.js `22.x`
+- Node.js `24.x`
 - Corepack-enabled pnpm `10.x`
 
 ```bash
 corepack enable
 corepack prepare pnpm@10 --activate
-pnpm install
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
@@ -56,6 +59,8 @@ pnpm test
 pnpm test:run
 pnpm test:coverage
 
+devenv test
+
 pnpm data:refresh
 pnpm spritesheet
 ```
@@ -65,6 +70,7 @@ Scraper maintenance checks:
 ```bash
 pnpm test:run tests/scrape-wild-encounters-wikitext.test.ts
 pnpm scrape:encounters
+pnpm exec biome format --write data --vcs-use-ignore-file=true --files-ignore-unknown=true
 pnpm validate:route-articles
 ```
 

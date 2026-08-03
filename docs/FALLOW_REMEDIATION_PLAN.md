@@ -1,0 +1,155 @@
+# Fallow Remediation Plan
+
+## Goal
+
+Resolve every first-party Fallow finding or record a narrow, reasoned exception. Keep vendored agent skills outside the application quality baseline.
+
+The initial full-project audit reported 317 dead-code findings, 365 complexity findings, and 52 duplication groups. The `.opencode/skills/impeccable` vendor subtree accounts for 56 dead-code findings, 211 complexity findings, and 15 duplication groups. The three phases below deliberately separate audit correctness, runtime safety, and broad maintainability work.
+
+## Working Rules
+
+- Trace an export, file, or dependency before removing it.
+- Add outcome-focused coverage before refactoring run-state, API, or interactive UI behavior.
+- Keep dependency direction one-way when breaking cycles; do not replace a cycle with a compatibility barrel.
+- Add a suppression only for an intentionally retained first-party finding and include its reason.
+- Validate each completed slice with the smallest relevant tests, then run the phase checks.
+
+## Phase 1: Trustworthy Audit And Easy Cleanup
+
+Purpose: make Fallow findings actionable and remove low-risk debt before structural refactors.
+
+- [x] Exclude `.opencode/skills/impeccable/**` from first-party Fallow reporting while preserving analysis of product code.
+- [x] Configure Fallow to classify the `@data/*` TypeScript alias rather than report it as an unlisted dependency.
+- [x] Register or otherwise classify dynamic entry points, including the service worker, web worker, browser-test setup, and public runtime assets.
+- [x] Verify the `pnpm-workspace.yaml` dependency override against the lockfile and either retain it with a narrow Fallow exception or remove it.
+- [x] Trace `cheerio`, `cli-progress`, `pokedex-promise-v2`, and `tailwindcss`; move each to the dependency class required by its production execution path.
+- [x] Trace the seven reported unused dependencies across application code, scripts, CI, and release flows; remove only packages with no consumer.
+- [x] Remove verified unused files, types, props, class members, duplicate exports, and small export batches.
+- [x] Record remaining first-party findings in a machine-readable baseline grouped by remediation phase.
+
+Acceptance criteria:
+
+- Vendored skill findings no longer affect the first-party baseline.
+- Dynamic entry points and aliases do not produce known false positives.
+- Every remaining Phase 1 finding is either removed or has a documented disposition.
+
+Validation:
+
+```bash
+pnpm type-check
+pnpm test:run
+pnpm validate
+pnpm quality:graph:json
+```
+
+## Phase 2: Structural And Runtime Safety
+
+Purpose: remove dependency-cycle and state-transition risks before broader cleanup.
+
+- [x] Map the query, loader, service, data, and query-client import cycles to their public consumers and select one break point per underlying cycle.
+- [x] Break the encounters/locations loader cycle with a one-way dependency boundary.
+- [x] Break the query/loader/service cycle cluster without adding barrel-mediated cycles.
+- [x] Add focused integration coverage for each changed query or loader request path.
+- [x] Reconcile this phase with the existing encounter-transition architecture work to avoid parallel ownership changes.
+- [x] Add outcome-focused tests for encounter CRUD state changes, including duplicate catches, nickname requirements, team placement, and death handling.
+- [x] Simplify `updateEncounter`, artwork variants, and migration paths while preserving run-state invariants.
+- [x] Inventory high-complexity API processors by request validation, decisions, side effects, and response behavior.
+- [x] Refactor API processors one request path at a time, with success, invalid-input, and downstream-failure coverage.
+
+Phase 2 API inventory: `api/encounters` validates static datasets, merges and caches route data, and returns a sorted schema-validated response; `api/pokemon` validates query input, filters static data, and returns cache/security headers; `api/sprite/artists` validates an ID, fetches FusionDex HTML, extracts credits, and preserves upstream/error status behavior. The routes now isolate their high-decision processing from HTTP orchestration and have direct request-path coverage. `api/sprite/variants` was inventoried as I/O-heavy but has no top-complexity finding; its request, probe, cache, and response contract remains unchanged.
+
+Acceptance criteria:
+
+- The mapped first-party circular dependencies are removed.
+- State transitions preserve Nuzlocke invariants under focused regression tests.
+- API contracts remain stable and affected complexity findings decrease.
+
+Validation:
+
+```bash
+pnpm type-check
+pnpm test:run
+pnpm validate
+pnpm quality:graph:json
+```
+
+Run browser, API, or migration tests for each affected slice.
+
+## Phase 3: Remaining Maintainability Debt
+
+Purpose: close the residual first-party findings through behavior-preserving refactors and verified cleanup.
+
+- [x] Trace and reduce the public export surface in `src/stores/playthroughs/` without removing runtime or external consumers.
+- [x] Remove remaining verified unused files, exports, and types in coherent module batches.
+- [x] Add behavior and accessibility coverage for context-menu, summary-card, PC, team, and location interaction paths.
+- [x] Refactor context-menu action construction and shared behavior before extracting common code.
+- [x] Refactor summary-card and PC/team decision surfaces without widening component interfaces unnecessarily.
+- [x] Resolve UI clone groups only where states and accessibility behavior are identical.
+- [x] Group scraper and sprite clone findings by data-pipeline step.
+- [x] Add deterministic input/output tests before consolidating script utilities.
+- [ ] Resolve remaining script and pipeline findings by the bounded stages below, prioritizing items with matching duplication findings.
+- [ ] After the script stages, address the separately tracked UI and store complexity queue below.
+- [ ] Trace every remaining first-party finding and remove it, refactor it, configure it, or add a narrow reasoned suppression.
+- [ ] Save the resulting first-party baseline and keep the changed-code audit gate enabled.
+
+### Scraper And Sprite Clone Triage
+
+Fallow's duplication report groups these findings by pipeline responsibility. Refactor only within a stage so that source-specific parsing, failure handling, and output contracts remain explicit.
+
+| Pipeline step | Clone groups | Files | Consolidation boundary |
+| --- | --- | --- | --- |
+| Pokemon source enrichment | 1-2 | `scripts/fetch-pokemon-data.ts` | Share evolution-chain loading and processed-record construction between batch and fallback retrieval. |
+| Encounter extraction and normalization | 10, 12-14 | `scripts/scrape-legendary-encounters.ts`, `scripts/scrape-safari-encounters.ts`, `scripts/scrape-special-encounters.ts`, `scripts/scrape-wild-encounters.ts` | Shared output-directory setup and Safari classification are completed. Extract only parsers with matching source markup and output schemas; retain source-specific validation and error messages. |
+| Scraper orchestration and terminal reporting | 8-9 | `scripts/scrape-egg-locations.ts`, `scripts/scrape-special-encounters.ts`, `scripts/scrape-pokemon-icons.ts` | Keep final summaries and process-exit handling local unless a shared runner can preserve each script's result shape and direct-execution guard. |
+| Sprite source setup and acquisition | 3-4, 11 | `scripts/generate-spritesheet.ts`, `scripts/scrape-pokemon-icons.ts` | Setup clone consolidation and download retry refactor completed through shared path derivation, JSON loading, and focused retry helpers. The duplicated batch loop remains separate acquisition work. |
+| Sprite packing and validation | 5-7 | `scripts/generate-spritesheet.ts` | Clone consolidation completed: shared geometry primitives now cover overlap detection, pair traversal, and packed bounds; packing and repair policies remain distinct and retain their outstanding complexity work. |
+| Runtime sprite delivery | 15-16 | `src/app/api/sprite/variants/route.ts`, `src/lib/sprites.ts` | Shared suffix and URL generation is completed under direct coverage. Keep server/browser existence checks separate because their transport behavior differs. |
+
+Completed source-enrichment work: shared evolution-chain loading and processed-record construction now serve both batch and fallback retrieval in `scripts/fetch-pokemon-data.ts`. This removed clone groups 1-2 and reduced the health report from 126 to 124 complexity findings; the remaining stages stay tracked by the unchecked complexity item.
+
+Completed sprite-packing clone work: targeted geometry tests cover edge contact, overlap detection, pair traversal, and packed bounds. Shared geometry primitives removed clone groups 5-7 and one validation complexity finding, reducing the health report from 124 to 123 complexity findings.
+
+Completed sprite-source work: shared path derivation and JSON loading removed the two cross-script setup clone groups, reducing full duplication groups from 18 to 16. Focused retry helpers have coverage for existing files, eggs, and base-form fallback; the duplicated batch download loop is now consolidated.
+
+Completed encounter output work: shared classic/remix directory setup removed two clone groups across the Safari, wild, and special scrapers. Ordered Safari encounter rules retain classification precedence under focused coverage and reduced the health report from 122 to 119 complexity findings.
+
+Completed runtime sprite helper work: shared suffix and CDN URL generation removed one clone group, reducing full duplication groups from 13 to 12. Server and browser existence checks remain intentionally separate.
+
+Completed egg-location classification work: deterministic egg, location, and nest-link predicates preserve the existing keyword rules and parent-context requirements under direct coverage, removing two scraper callback complexity findings and reducing the health report from 119 to 115 findings.
+
+Completed icon batch work: shared generation-batch processing preserves download order, cumulative progress, retry behavior, and stats under direct coverage, removing the duplicated Gen 7/Gen 8 loop and reducing the health report from 115 to 113 findings. The scraper now runs only under its direct-execution guard, keeping imports side-effect free; the guard has a narrow Fallow duplicate-line suppression because it must remain adjacent to the script entrypoint.
+
+### Remaining Script Stages
+
+- [x] Complete encounter-scraper terminal reporting. Shared failure formatting, process exit handling, and direct-execution detection removed its clone groups while preserving source-specific summaries, reducing full duplication from 12 to 9 groups.
+- [x] Refactor wild-wikitext parsing and route-state normalization in `scripts/scrape-wild-encounters.ts`. Nested argument boundaries, encounter-type cancellation, route isolation, and resolution failures remain covered; the health report drops from 113 to 110 findings.
+- [x] Refactor legendary DOM traversal and route aggregation. Fixture coverage preserves form expansion, sibling bounds, heading barriers, and route normalization; the health report drops from 110 to 109 findings.
+- [x] Refactor spritesheet packing and overlap repair as separate policies, retaining the existing geometry utility boundaries. Direct policy coverage preserves packing and repair behavior; the health report drops from 109 to 99 findings.
+- [x] Add deterministic fixtures before refactoring data-refresh PR-body normalization in `scripts/generate-data-pr-body.ts`. Shape precedence and duplicate ordering are covered; the health report drops from 99 to 94 findings.
+- [x] Complete the independent script-maintenance utilities. Wiki transport is decomposed, reducing the health report from 94 to 93 findings. License generation and route-article validation retain narrow documented complexity suppressions for environment-bound CLI orchestration.
+
+### UI And Store Queue
+
+Start this queue only after the script stages are complete or intentionally suppressed.
+
+- [ ] Location-table encounter rendering and actions: consolidate identical `EncounterCell` states while preserving accessibility behavior.
+- [ ] Combobox selection and drag/drop: separate selection rules from drag/drop state transitions before extracting clone groups.
+- [ ] Encounter store transitions: refactor CRUD and drag/drop operations behind existing state-transition tests.
+- [ ] UI decision surfaces: address context menus, summary cards, PC, and team components as independent behavior slices rather than a shared cleanup batch.
+
+Acceptance criteria:
+
+- No first-party finding remains untriaged.
+- Remaining exceptions are intentional, narrow, and documented.
+- The audit baseline excludes only vendored code and approved exceptions.
+
+Validation:
+
+```bash
+pnpm type-check
+pnpm test:run
+pnpm validate
+pnpm quality:graph:json
+```
+
+Run browser and script checks for every affected workflow before closing the phase.

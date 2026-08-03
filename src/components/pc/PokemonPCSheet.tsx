@@ -5,36 +5,13 @@ import {
   DialogBackdrop,
   DialogPanel,
   DialogTitle,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
 } from "@headlessui/react";
 import clsx from "clsx";
-import { Box, Boxes, Skull, Users, X } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
-import {
-  getLocationById,
-  getLocationsSortedWithCustom,
-} from "@/loaders/locations";
-import type { PokemonOptionType } from "@/loaders/pokemon";
-import {
-  playthroughActions,
-  useActivePlaythrough,
-  useCustomLocations,
-  useEncounters,
-} from "@/stores/playthroughs";
-import {
-  buildPokemonUidIndex,
-  findPokemonByUid,
-} from "@/utils/encounter-utils";
-import { isPokemonDeceased, isPokemonStored } from "@/utils/pokemonPredicates";
-import { scrollToLocationById } from "@/utils/scrollToLocation";
+import { X } from "lucide-react";
 import TeamMemberPickerModal from "../team/TeamMemberPickerModal";
-import { GraveyardGridItem } from "./GraveyardGridItem";
-import PCEntryItem from "./PCEntryItem";
-import TeamEntryItem from "./TeamEntryItem";
+import { useTeamMemberPicker } from "../team/useTeamMemberPicker";
+import { PokemonPCSheetContent } from "./PokemonPCSheetContent";
+import { usePokemonPCSheetData } from "./usePokemonPCSheetData";
 
 export interface PokemonPCSheetProps {
   isOpen: boolean;
@@ -43,254 +20,30 @@ export interface PokemonPCSheetProps {
   onChangeTab: (tab: "team" | "box" | "graveyard") => void;
 }
 
-import type { PCEntry as Entry } from "./types";
-
 export default function PokemonPCSheet({
   isOpen,
   onClose,
   activeTab,
   onChangeTab,
 }: PokemonPCSheetProps) {
-  const activePlaythrough = useActivePlaythrough();
-  const encounters = useEncounters();
-  const customLocations = useCustomLocations();
-
-  // State for team member picker modal
-  const [pickerModalOpen, setPickerModalOpen] = useState(false);
-  const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
-
-  const mergedLocations = useMemo(
-    () => getLocationsSortedWithCustom(customLocations),
-    [customLocations],
-  );
-
-  const idToName = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const loc of mergedLocations) map.set(loc.id, loc.name);
-    return map;
-  }, [mergedLocations]);
-
-  const pokemonByUid = useMemo(
-    () => buildPokemonUidIndex(encounters),
-    [encounters],
-  );
-
-  // Handlers for team member picker modal
-  const handleTeamMemberClick = useCallback(
-    (
-      position: number,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _existingTeamMember: {
-        position: number;
-        isEmpty: boolean;
-        headPokemon: PokemonOptionType | null;
-        bodyPokemon: PokemonOptionType | null;
-        isFusion: boolean;
-      },
-    ) => {
-      setSelectedPosition(position);
-      setPickerModalOpen(true);
-    },
-    [],
-  );
-
-  const handleClosePickerModal = useCallback(() => {
-    setPickerModalOpen(false);
-    setSelectedPosition(null);
-  }, []);
-
-  const handlePokemonSelect = useCallback(
-    async (
-      headPokemon: PokemonOptionType | null,
-      bodyPokemon: PokemonOptionType | null,
-    ) => {
-      if (selectedPosition === null) return;
-
-      // Create team member references
-      const headRef = headPokemon ? { uid: headPokemon.uid! } : null;
-      const bodyRef = bodyPokemon ? { uid: bodyPokemon.uid! } : null;
-
-      const success = await playthroughActions.updateTeamMember(
-        selectedPosition,
-        headRef,
-        bodyRef,
-      );
-
-      if (!success) {
-        console.error(
-          "Failed to update team member at position:",
-          selectedPosition,
-        );
-        return;
-      }
-
-      handleClosePickerModal();
-    },
-    [selectedPosition, handleClosePickerModal],
-  );
-
-  const team: Entry[] = useMemo(() => {
-    if (!activePlaythrough?.team) return [];
-
-    return activePlaythrough.team.members.map((member, index) => {
-      if (!member) {
-        return {
-          locationId: `team-slot-${index}`,
-          locationName: `Team Slot ${index + 1}`,
-          head: null,
-          body: null,
-          position: index,
-        };
-      }
-
-      const headPokemon = member.headPokemonUid
-        ? findPokemonByUid(encounters, member.headPokemonUid, pokemonByUid)
-        : null;
-      const bodyPokemon = member.bodyPokemonUid
-        ? findPokemonByUid(encounters, member.bodyPokemonUid, pokemonByUid)
-        : null;
-
-      // A slot is empty only if both UIDs are empty strings
-      if (!member.headPokemonUid && !member.bodyPokemonUid) {
-        return {
-          locationId: `team-slot-${index}`,
-          locationName: `Team Slot ${index + 1}`,
-          head: null,
-          body: null,
-          position: index,
-        };
-      }
-
-      // Get location from the head Pokémon's original location, fallback to body if head doesn't exist
-      const location = getLocationById(
-        headPokemon?.originalLocation || bodyPokemon?.originalLocation || "",
-      );
-
-      // Determine fusion state: true if both Pokémon exist and can form a fusion
-      const isFusion = Boolean(headPokemon && bodyPokemon);
-
-      return {
-        locationId: `team-slot-${index}`,
-        locationName: location?.name || "Unknown Location",
-        head: headPokemon,
-        body: bodyPokemon,
-        position: index,
-        isFusion,
-      };
-    });
-  }, [activePlaythrough?.team, encounters, pokemonByUid]);
-
-  const deceased: Entry[] = useMemo(() => {
-    const entries: Entry[] = [];
-
-    Object.entries(encounters || {}).forEach(([locationId, data]) => {
-      const headDead = isPokemonDeceased(data?.head);
-      const bodyDead = isPokemonDeceased(data?.body);
-
-      const locationName =
-        idToName.get(locationId) ||
-        getLocationById(locationId)?.name ||
-        "Unknown Location";
-
-      // Create separate entries for each deceased Pokémon
-      if (headDead && data?.head) {
-        entries.push({
-          locationId: `${locationId}-head`,
-          locationName,
-          head: data.head,
-          body: null,
-        });
-      }
-
-      if (bodyDead && data?.body) {
-        entries.push({
-          locationId: `${locationId}-body`,
-          locationName,
-          head: null,
-          body: data.body,
-        });
-      }
-    });
-
-    return entries;
-  }, [encounters, idToName]);
-
-  const stored: Entry[] = useMemo(() => {
-    const entries: Entry[] = [];
-
-    Object.entries(encounters || {}).forEach(([locationId, data]) => {
-      const headStored = isPokemonStored(data?.head);
-      const bodyStored = isPokemonStored(data?.body);
-
-      if (headStored || bodyStored) {
-        entries.push({
-          locationId,
-          locationName:
-            idToName.get(locationId) ||
-            getLocationById(locationId)?.name ||
-            "Unknown Location",
-          head: headStored ? data?.head || null : null,
-          body: bodyStored ? data?.body || null : null,
-        });
-      }
-    });
-
-    return entries;
-  }, [encounters, idToName]);
-
-  const getSelectedIndex = useCallback((tab: "team" | "box" | "graveyard") => {
-    switch (tab) {
-      case "team":
-        return 0;
-      case "box":
-        return 1;
-      case "graveyard":
-        return 2;
-      default:
-        return 0;
-    }
-  }, []);
-
-  const getTabFromIndex = useCallback(
-    (index: number): "team" | "box" | "graveyard" => {
-      switch (index) {
-        case 0:
-          return "team";
-        case 1:
-          return "box";
-        case 2:
-          return "graveyard";
-        default:
-          return "team";
-      }
-    },
-    [],
-  );
-
-  const selectedIndex = getSelectedIndex(activeTab);
-
-  // Memoize the onClose handler to prevent unnecessary re-renders
-  const handleClose = useCallback(() => {
-    onClose();
-  }, [onClose]);
-
-  // Memoize the onChangeTab handler
-  const handleChangeTab = useCallback(
-    (index: number) => {
-      onChangeTab(getTabFromIndex(index));
-    },
-    [onChangeTab, getTabFromIndex],
-  );
+  const { team, stored, deceased, idToName } = usePokemonPCSheetData();
+  const {
+    pickerModalOpen,
+    selectedPosition,
+    openPicker,
+    closePicker,
+    selectTeamMember,
+  } = useTeamMemberPicker();
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} className="group relative z-50">
+    <Dialog open={isOpen} onClose={onClose} className="group relative z-[70]">
       <DialogBackdrop
         transition
-        className="fixed inset-0 bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ease-out data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/30"
+        className="fixed inset-0 z-[70] bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ease-out data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/30"
         aria-hidden="true"
       />
 
-      <div className="fixed inset-y-0 right-0 flex w-screen items-stretch justify-end p-0">
+      <div className="fixed inset-y-0 right-0 z-[71] flex w-screen items-stretch justify-end p-0">
         <DialogPanel
           transition
           id="pokemon-pc-sheet"
@@ -312,7 +65,8 @@ export default function PokemonPCSheet({
                 Pokémon PC
               </DialogTitle>
               <button
-                onClick={handleClose}
+                type="button"
+                onClick={onClose}
                 className={clsx(
                   "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
@@ -325,165 +79,25 @@ export default function PokemonPCSheet({
             </div>
           </div>
 
-          {/* Content area: fills remaining height to allow true vertical centering */}
           <div className="flex min-h-0 flex-1 flex-col px-4 pt-2 pb-3">
-            <TabGroup selectedIndex={selectedIndex} onChange={handleChangeTab}>
-              <TabList className="mb-4 flex w-full flex-nowrap items-center gap-2 overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:none] sm:pb-0 [&::-webkit-scrollbar]:hidden">
-                <Tab
-                  className={({ selected }) =>
-                    clsx(
-                      "inline-flex min-w-[7.25rem] shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors focus:outline-none sm:flex-1",
-                      selected
-                        ? "border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                        : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
-                    )
-                  }
-                >
-                  <Users className="h-4 w-4" />
-                  <span className="font-medium flex-1">Team</span>
-                  <span className="ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100">
-                    {team.filter((entry) => entry.head || entry.body).length}/6
-                  </span>
-                </Tab>
-                <Tab
-                  className={({ selected }) =>
-                    clsx(
-                      "inline-flex min-w-[7.25rem] shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors focus:outline-none sm:flex-1",
-                      selected
-                        ? "border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                        : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
-                    )
-                  }
-                >
-                  <Box className="h-4 w-4" />
-                  <span className="font-medium flex-1">Box</span>
-                  <span className="ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100">
-                    {stored.length}
-                  </span>
-                </Tab>
-                <Tab
-                  className={({ selected }) =>
-                    clsx(
-                      "inline-flex min-w-[7.25rem] shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors focus:outline-none sm:flex-1",
-                      selected
-                        ? "border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                        : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
-                    )
-                  }
-                >
-                  <Skull className="h-4 w-4" />
-                  <span className="font-medium flex-1">Graveyard</span>
-                  <span className="ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100">
-                    {deceased.length}
-                  </span>
-                </Tab>
-              </TabList>
-
-              <TabPanels className="flex min-h-0 flex-1 flex-col">
-                <TabPanel className="flex min-h-0 flex-1">
-                  <ul
-                    aria-label="Team members list"
-                    className="w-full space-y-3 py-2 max-h-[calc(100dvh-6.5rem)] overflow-y-auto"
-                  >
-                    {team.map((entry) => (
-                      <TeamEntryItem
-                        key={entry.locationId}
-                        entry={entry}
-                        idToName={idToName}
-                        onClose={handleClose}
-                        onTeamMemberClick={handleTeamMemberClick}
-                      />
-                    ))}
-                  </ul>
-                </TabPanel>
-                <TabPanel className="flex min-h-0 flex-1">
-                  {stored.length === 0 ? (
-                    <div
-                      className="flex min-h-[60vh] w-full flex-1 flex-col items-center justify-center px-4 text-gray-600 dark:text-gray-300"
-                      role="status"
-                      aria-live="polite"
-                    >
-                      <Boxes
-                        className="mb-3 h-10 w-10 opacity-50"
-                        aria-hidden="true"
-                      />
-                      <p className="text-center">No Pokémon in your box.</p>
-                    </div>
-                  ) : (
-                    <ul
-                      aria-label="Boxed Pokémon list"
-                      className="grid content-start w-full grid-cols-1 gap-2 py-2 sm:grid-cols-2 h-[calc(100dvh-6.5rem)] overflow-y-auto"
-                    >
-                      {stored.map((entry) => (
-                        <PCEntryItem
-                          key={entry.locationId}
-                          entry={entry}
-                          idToName={idToName}
-                          mode="stored"
-                          hoverRingClass="hover:ring-blue-400/30"
-                          fallbackLabel="Boxed Pokémon"
-                          className=""
-                          onClose={handleClose}
-                        />
-                      ))}
-                    </ul>
-                  )}
-                </TabPanel>
-                <TabPanel className="flex min-h-0 flex-1">
-                  {deceased.length === 0 ? (
-                    <div
-                      className="flex min-h-[60vh] w-full flex-1 flex-col items-center justify-center px-4 text-gray-600 dark:text-gray-300"
-                      role="status"
-                      aria-live="polite"
-                    >
-                      <Skull
-                        className="mb-3 h-10 w-10 opacity-50"
-                        aria-hidden="true"
-                      />
-                      <p className="text-center">
-                        No fallen Pokémon. Keep it that way!
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="w-full py-2 h-[calc(100dvh-6.5rem)] overflow-y-auto">
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                        {deceased.map((entry) => (
-                          <GraveyardGridItem
-                            key={entry.locationId}
-                            entry={entry}
-                            onLocationClick={(locationId) => {
-                              // Scroll to location in the encounter table
-                              const highlightUids: string[] = [];
-                              const pokemon = entry.head || entry.body;
-                              if (pokemon?.uid) {
-                                highlightUids.push(pokemon.uid);
-                              }
-
-                              scrollToLocationById(locationId, {
-                                behavior: "smooth",
-                                highlightUids,
-                                durationMs: 1200,
-                              });
-
-                              handleClose();
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </TabPanel>
-              </TabPanels>
-            </TabGroup>
+            <PokemonPCSheetContent
+              activeTab={activeTab}
+              onChangeTab={onChangeTab}
+              team={team}
+              stored={stored}
+              deceased={deceased}
+              idToName={idToName}
+              onClose={onClose}
+              onOpenTeamMemberPicker={openPicker}
+            />
           </div>
         </DialogPanel>
       </div>
 
-      {/* Team Member Picker Modal */}
       <TeamMemberPickerModal
         isOpen={pickerModalOpen}
-        onClose={handleClosePickerModal}
-        onSelect={handlePokemonSelect}
+        onClose={closePicker}
+        onSelect={selectTeamMember}
         position={selectedPosition || 0}
         existingTeamMember={
           selectedPosition !== null

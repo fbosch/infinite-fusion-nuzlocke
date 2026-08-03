@@ -103,12 +103,15 @@ vi.mock("../ImportErrorContent", () => ({
   ImportErrorContent: () => null,
 }));
 
-vi.mock("@/stores/playthroughs", () => ({
+vi.mock("@/stores/playthroughs/index", () => ({
   playthroughActions: {
     setActivePlaythrough: setActivePlaythroughMock,
     deletePlaythrough: vi.fn(),
     createPlaythrough: vi.fn(),
   },
+}));
+
+vi.mock("@/stores/playthroughs/hooks", () => ({
   useActivePlaythrough: () => playthroughs[0],
   useAllPlaythroughs: () => playthroughs,
   useGameMode: () => "classic",
@@ -166,6 +169,15 @@ describe("PlaythroughSelector", () => {
 
     fireEvent.keyDown(olderRow, { key: "Home" });
     expect(document.activeElement).toBe(newestRow);
+  });
+
+  it("keeps row actions outside the playthrough selection button", () => {
+    render(<PlaythroughSelector />);
+
+    const exportButton = screen.getByRole("button", {
+      name: "Export Newest Run",
+    });
+    expect(exportButton.parentElement?.closest("button")).toBeNull();
   });
 
   it("selects a playthrough with Enter key", async () => {

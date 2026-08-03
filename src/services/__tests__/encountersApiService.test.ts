@@ -1,8 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type {
-  EncountersApiParams,
-  EncountersApiResponse,
-} from "../encountersApiService";
 import encountersApiService from "../encountersApiService";
 
 // Mock fetch globally
@@ -14,18 +10,18 @@ vi.mock("@/lib/persistence", () => ({
   getCacheBuster: () => 12345,
 }));
 
-// Mock the encounters loader
-vi.mock("@/loaders/encounters", () => ({
+// Mock the response schema at the service boundary.
+vi.mock("@/types/encounters", () => ({
   RouteEncountersArraySchema: {
     safeParse: vi.fn().mockReturnValue({ success: true, data: [] }),
   },
 }));
 
 // Import the mocked module to access the mock function
-import { RouteEncountersArraySchema } from "@/loaders/encounters";
+import { RouteEncountersArraySchema } from "@/types/encounters";
 
 const encountersApiServicePrivate = encountersApiService as unknown as {
-  makeRequest: (params: EncountersApiParams) => Promise<EncountersApiResponse>;
+  makeRequest: (gameMode: "classic" | "remix") => Promise<unknown>;
 };
 
 // Mock data - using any to avoid type issues in tests
@@ -86,7 +82,7 @@ describe("EncountersApiService", () => {
         json: async () => [mockRouteEncounter, mockRouteEncounter2],
       });
 
-      await encountersApiServicePrivate.makeRequest({ gameMode: "classic" });
+      await encountersApiServicePrivate.makeRequest("classic");
 
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/api/encounters?gameMode=classic&v=12345",
@@ -109,7 +105,7 @@ describe("EncountersApiService", () => {
       });
 
       await expect(
-        encountersApiServicePrivate.makeRequest({ gameMode: "classic" }),
+        encountersApiServicePrivate.makeRequest("classic"),
       ).rejects.toThrow("Invalid API response format");
     });
 
@@ -117,7 +113,7 @@ describe("EncountersApiService", () => {
       mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
       await expect(
-        encountersApiServicePrivate.makeRequest({ gameMode: "classic" }),
+        encountersApiServicePrivate.makeRequest("classic"),
       ).rejects.toThrow("Network error");
     });
   });
@@ -189,67 +185,6 @@ describe("EncountersApiService", () => {
       await expect(
         encountersApiService.getEncounters("classic"),
       ).rejects.toThrow("Encounters API error: 403 Forbidden");
-    });
-  });
-
-  describe("getEncountersByGameMode", () => {
-    it("should return full response for classic game mode", async () => {
-      vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
-        data: [mockRouteEncounter, mockRouteEncounter2],
-      });
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [mockRouteEncounter, mockRouteEncounter2],
-      });
-
-      const result =
-        await encountersApiService.getEncountersByGameMode("classic");
-
-      expect(result).toEqual({
-        data: [mockRouteEncounter, mockRouteEncounter2],
-        count: 2,
-        gameMode: "classic",
-      });
-    });
-
-    it("should return full response for remix game mode", async () => {
-      vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
-        data: [mockRouteEncounter],
-      });
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [mockRouteEncounter],
-      });
-
-      const result =
-        await encountersApiService.getEncountersByGameMode("remix");
-
-      expect(result).toEqual({
-        data: [mockRouteEncounter],
-        count: 1,
-        gameMode: "remix",
-      });
-    });
-
-    it("should calculate correct count from response data", async () => {
-      vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
-        data: [mockRouteEncounter, mockRouteEncounter2],
-      });
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [mockRouteEncounter, mockRouteEncounter2],
-      });
-
-      const result =
-        await encountersApiService.getEncountersByGameMode("classic");
-
-      expect(result.count).toBe(2);
     });
   });
 

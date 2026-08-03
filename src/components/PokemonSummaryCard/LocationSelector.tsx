@@ -8,7 +8,7 @@ import {
 } from "@headlessui/react";
 import { clsx } from "clsx";
 import { ArrowUpDown, Dna, MapPin, Search, X } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
 import { TypePills } from "@/components/TypePills";
@@ -21,10 +21,8 @@ import {
   getLocationsSortedWithCustom,
 } from "@/loaders/locations";
 import { isEggId, type PokemonOptionType } from "@/loaders/pokemon";
-import {
-  getActivePlaythrough,
-  useCustomLocations,
-} from "@/stores/playthroughs";
+import { useCustomLocations } from "@/stores/playthroughs/hooks";
+import { getActivePlaythrough } from "@/stores/playthroughs/store";
 import { canFuse } from "@/utils/pokemonPredicates";
 import { PokemonSprite } from "../PokemonSprite";
 
@@ -58,8 +56,6 @@ interface ActionPreviewProps {
   otherFieldPokemon: PokemonOptionType | null;
   remainingPokemon: PokemonOptionType | null;
   movingPokemon: PokemonOptionType | null;
-  targetLocationId: string;
-  sourceLocationId: string;
   selectedTargetField: "head" | "body";
   sourceMoveTargetField: "head" | "body";
 }
@@ -123,27 +119,25 @@ function ActionPreview({
   otherFieldPokemon,
   remainingPokemon,
   movingPokemon,
-  targetLocationId: _targetLocationId, // eslint-disable-line @typescript-eslint/no-unused-vars
-  sourceLocationId: _sourceLocationId, // eslint-disable-line @typescript-eslint/no-unused-vars
   selectedTargetField,
   sourceMoveTargetField,
 }: ActionPreviewProps) {
   // Compute target and source post-move states for typing previews
-  const { targetHeadAfter, targetBodyAfter } = useMemo(() => {
+  const { targetHeadAfter, targetBodyAfter } = (() => {
     const headAfter =
       selectedTargetField === "head" ? movingPokemon : otherFieldPokemon;
     const bodyAfter =
       selectedTargetField === "body" ? movingPokemon : otherFieldPokemon;
     return { targetHeadAfter: headAfter, targetBodyAfter: bodyAfter };
-  }, [selectedTargetField, movingPokemon, otherFieldPokemon]);
+  })();
 
-  const { sourceHeadAfter, sourceBodyAfter } = useMemo(() => {
+  const { sourceHeadAfter, sourceBodyAfter } = (() => {
     const headAfter =
       sourceMoveTargetField === "head" ? existingPokemon : remainingPokemon;
     const bodyAfter =
       sourceMoveTargetField === "body" ? existingPokemon : remainingPokemon;
     return { sourceHeadAfter: headAfter, sourceBodyAfter: bodyAfter };
-  }, [existingPokemon, remainingPokemon, sourceMoveTargetField]);
+  })();
 
   // Resolve typings with fusion hook (falls back to single when one side is missing)
   const existingTypes = useFusionTypesFromPokemon(existingPokemon, null, false);
@@ -232,25 +226,18 @@ function LocationItem({
   onSelect,
   movingPokemon,
 }: LocationItemProps) {
-  const handleSelect = useCallback(() => {
+  const handleSelect = () => {
     onSelect(location);
-  }, [location, onSelect]);
+  };
 
-  const existingPokemon = useMemo(
-    () => getSlotPokemon(location.id, selectedTargetField),
-    [location.id, selectedTargetField],
+  const existingPokemon = getSlotPokemon(location.id, selectedTargetField);
+
+  const otherFieldPokemon = getSlotPokemon(
+    location.id,
+    selectedTargetField === "head" ? "body" : "head",
   );
 
-  const otherFieldPokemon = useMemo(
-    () =>
-      getSlotPokemon(
-        location.id,
-        selectedTargetField === "head" ? "body" : "head",
-      ),
-    [location.id, selectedTargetField],
-  );
-
-  const remainingPokemon = useMemo(() => {
+  const remainingPokemon = (() => {
     if (!existingPokemon) return null;
     const activePlaythrough = getActivePlaythrough();
     const sourceEncounter = activePlaythrough?.encounters?.[currentLocationId];
@@ -259,10 +246,10 @@ function LocationItem({
         ? sourceEncounter.body
         : sourceEncounter.head
       : null;
-  }, [existingPokemon, currentLocationId, moveTargetField]);
+  })();
 
   // Check if this move would result in egg fusion
-  const wouldCreateEggFusion = useMemo(() => {
+  const wouldCreateEggFusion = (() => {
     if (!movingPokemon) return false;
 
     // Check if the Pokemon being moved is an egg
@@ -313,7 +300,7 @@ function LocationItem({
     }
 
     return false;
-  }, [movingPokemon, location.id, selectedTargetField]);
+  })();
 
   return (
     <li
@@ -353,8 +340,6 @@ function LocationItem({
                 otherFieldPokemon={otherFieldPokemon}
                 remainingPokemon={remainingPokemon}
                 movingPokemon={movingPokemon}
-                targetLocationId={location.id}
-                sourceLocationId={currentLocationId}
                 selectedTargetField={selectedTargetField}
                 sourceMoveTargetField={moveTargetField}
               />
@@ -464,21 +449,21 @@ function useLocationSelector({
     useState<"head" | "body" | null>(null);
   const selectedTargetField = selectedTargetFieldOverride ?? moveTargetField;
 
-  const setSelectedTargetField = useCallback((field: "head" | "body") => {
+  const setSelectedTargetField = (field: "head" | "body") => {
     setSelectedTargetFieldOverride(field);
-  }, []);
+  };
 
   // Get custom locations and create merged locations
   const customLocations = useCustomLocations();
 
   // Get all locations except the current one
-  const availableLocations = useMemo(() => {
+  const availableLocations = (() => {
     const allLocations = getLocationsSortedWithCustom(customLocations);
     return allLocations.filter((location) => location.id !== currentLocationId);
-  }, [customLocations, currentLocationId]);
+  })();
 
   // Filter locations based on search query (including Pokemon names)
-  const filteredLocations = useMemo(() => {
+  const filteredLocations = (() => {
     if (!searchQuery.trim()) {
       return availableLocations;
     }
@@ -512,10 +497,10 @@ function useLocationSelector({
 
       return false;
     });
-  }, [availableLocations, searchQuery]);
+  })();
 
   // Determine what Pokemon is being moved
-  const movingPokemon = useMemo(() => {
+  const movingPokemon = (() => {
     if (!encounterData) return null;
 
     if (moveTargetField === "head" && encounterData.head) {
@@ -525,16 +510,14 @@ function useLocationSelector({
       return encounterData.body;
     }
     return encounterData.head ?? encounterData.body ?? null;
-  }, [encounterData, moveTargetField]);
+  })();
 
   // Check if the Pokemon being moved is an egg
-  const isMovingPokemonEgg = useMemo(() => {
-    return movingPokemon ? isEggId(movingPokemon.id) : false;
-  }, [movingPokemon]);
+  const isMovingPokemonEgg = movingPokemon ? isEggId(movingPokemon.id) : false;
 
   // Determine if this should be treated as a fusion
   // Disable fusion mode when moving an egg to the head slot
-  const isFusion = useMemo(() => {
+  const isFusion = (() => {
     if (!encounterData?.head || !encounterData?.body) return false;
 
     // If moving an egg to head slot, disable fusion mode
@@ -543,17 +526,12 @@ function useLocationSelector({
     }
 
     return true;
-  }, [
-    encounterData?.head,
-    encounterData?.body,
-    moveTargetField,
-    isMovingPokemonEgg,
-  ]);
+  })();
 
-  const resetState = useCallback(() => {
+  const resetState = () => {
     setSearchQuery("");
     setSelectedTargetFieldOverride(null);
-  }, []);
+  };
 
   return {
     searchQuery,
@@ -591,22 +569,23 @@ function LocationSelector({
     encounterData,
   });
 
-  const handleLocationSelect = useCallback(
-    (location: CombinedLocation) => {
-      onSelectLocation(location.id, selectedTargetField);
-      resetState();
-      onClose();
-    },
-    [onSelectLocation, selectedTargetField, resetState, onClose],
-  );
-
-  const handleClose = useCallback(() => {
+  const handleLocationSelect = (location: CombinedLocation) => {
+    onSelectLocation(location.id, selectedTargetField);
     resetState();
     onClose();
-  }, [resetState, onClose]);
+  };
+
+  const handleClose = () => {
+    resetState();
+    onClose();
+  };
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} className="relative z-50 group">
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      className="relative z-[70] group"
+    >
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"
@@ -656,7 +635,11 @@ function LocationSelector({
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-gray-400" />
             </div>
+            <label className="sr-only" htmlFor="location-selector-search">
+              Search locations or Pokemon names
+            </label>
             <input
+              id="location-selector-search"
               type="text"
               placeholder="Search locations or Pokemon names..."
               value={searchQuery}

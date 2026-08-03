@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { PokemonStatus } from "@/loaders/pokemon";
-import { moveTeamMemberToBox, restorePokemonToTeam } from "../encounters";
+import {
+  moveTeamMemberToBox,
+  restorePokemonToTeam,
+  updateTeamMember,
+} from "../encounters";
 import {
   createTestPlaythrough,
   expectTeamMember,
@@ -196,6 +200,35 @@ describe("Team Management", () => {
   });
 
   describe("restorePokemonToTeam", () => {
+    it("restores only the selected stored team Pokemon", async () => {
+      const { activePlaythrough } = createTestPlaythrough();
+      activePlaythrough.encounters = {
+        route1: {
+          head: {
+            ...testPokemon.pikachu(),
+            status: PokemonStatus.STORED,
+            originalReceivalStatus: PokemonStatus.RECEIVED,
+          },
+          body: {
+            ...testPokemon.charmander(),
+            status: PokemonStatus.STORED,
+            originalReceivalStatus: PokemonStatus.TRADED,
+          },
+          isFusion: true,
+          updatedAt: Date.now(),
+        },
+      };
+
+      await restorePokemonToTeam("charmander_route1_456");
+
+      expect(activePlaythrough.encounters.route1.head?.status).toBe(
+        PokemonStatus.STORED,
+      );
+      expect(activePlaythrough.encounters.route1.body?.status).toBe(
+        PokemonStatus.TRADED,
+      );
+    });
+
     it("should restore stored Pokémon to original receival status", async () => {
       const { activePlaythrough } = createTestPlaythrough();
 
@@ -311,6 +344,44 @@ describe("Team Management", () => {
 
       // Verify the playthrough timestamp was updated
       expect(activePlaythrough.updatedAt).toBeGreaterThan(0);
+    });
+  });
+
+  describe("updateTeamMember", () => {
+    it("updates a swapped stored fusion before yielding", () => {
+      const { activePlaythrough } = createTestPlaythrough();
+      activePlaythrough.encounters = {
+        route1: {
+          head: {
+            ...testPokemon.pikachu(),
+            status: PokemonStatus.STORED,
+          },
+          body: {
+            ...testPokemon.charmander(),
+            status: PokemonStatus.STORED,
+          },
+          isFusion: true,
+          updatedAt: Date.now(),
+        },
+      };
+
+      void updateTeamMember(
+        0,
+        { uid: "charmander_route1_456" },
+        { uid: "pikachu_route1_123" },
+      );
+
+      expectTeamMember(
+        activePlaythrough.team.members[0],
+        "charmander_route1_456",
+        "pikachu_route1_123",
+      );
+      expect(activePlaythrough.encounters.route1?.head?.status).toBe(
+        PokemonStatus.CAPTURED,
+      );
+      expect(activePlaythrough.encounters.route1?.body?.status).toBe(
+        PokemonStatus.CAPTURED,
+      );
     });
   });
 });

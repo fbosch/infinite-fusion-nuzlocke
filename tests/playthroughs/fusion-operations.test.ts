@@ -9,6 +9,7 @@ import {
   expect,
   it,
   playthroughActions,
+  playthroughsStore,
   setupPlaythroughTest,
 } from "./setup";
 
@@ -174,6 +175,43 @@ describe("Playthroughs Store - Fusion Operations", () => {
   });
 
   describe("Fusion flip bug prevention", () => {
+    it("should invert a team fusion without changing its source encounter", async () => {
+      const pikachu = createMockPokemon("Pikachu", 25);
+      const charmander = createMockPokemon("Charmander", 4);
+
+      await playthroughActions.updateEncounter(
+        "route-1",
+        pikachu,
+        "head",
+        true,
+      );
+      await playthroughActions.updateEncounter(
+        "route-1",
+        charmander,
+        "body",
+        false,
+      );
+
+      const encounter = playthroughActions.getEncounters()?.["route-1"];
+      await playthroughActions.updateTeamMember(
+        0,
+        { uid: encounter?.head?.uid ?? "" },
+        { uid: encounter?.body?.uid ?? "" },
+      );
+
+      await playthroughActions.flipTeamMemberFusion(0);
+
+      expect(playthroughActions.getEncounters()?.["route-1"]).toMatchObject({
+        head: { name: "Pikachu" },
+        body: { name: "Charmander" },
+        isFusion: true,
+      });
+      expect(playthroughsStore.playthroughs[0]?.team.members[0]).toEqual({
+        headPokemonUid: encounter?.body?.uid,
+        bodyPokemonUid: encounter?.head?.uid,
+      });
+    });
+
     it("should prevent duplication when flipping fusion with head Pokemon and empty body", async () => {
       const pidgey = createMockPokemon("Pidgey", 16);
       pidgey.nickname = "Birdy";

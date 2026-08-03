@@ -3,13 +3,15 @@ import {
   type QueryOptions,
   useQuery,
 } from "@tanstack/react-query";
-import { useMemo } from "react";
 import { useDebounce } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { pokemonData, pokemonQueries } from "@/lib/queryClient";
 import { SearchCore } from "@/lib/searchCore";
 import searchService from "@/services/searchService";
+import { type Pokemon, PokemonSchema } from "@/types/pokemon";
+
+export type { Pokemon } from "@/types/pokemon";
 
 // Utility function to generate unique identifiers
 export function generatePokemonUID(): string {
@@ -58,7 +60,7 @@ export type PokemonStatusType =
   (typeof PokemonStatus)[keyof typeof PokemonStatus];
 
 // Zod schema for Pokemon status
-export const PokemonStatusSchema = z.enum(
+const PokemonStatusSchema = z.enum(
   [
     PokemonStatus.CAPTURED,
     PokemonStatus.RECEIVED,
@@ -92,60 +94,6 @@ export const PokemonOptionSchema = z.object({
 
 // Pokemon option type for search results (inferred from schema)
 export type PokemonOptionType = z.infer<typeof PokemonOptionSchema>;
-
-// Zod schema for Pokemon type
-export const PokemonTypeSchema = z.object({
-  name: z.string().min(1, { error: "Type name is required" }),
-});
-
-// Zod schema for Pokemon species
-export const PokemonSpeciesSchema = z.object({
-  is_legendary: z.boolean(),
-  is_mythical: z.boolean(),
-  generation: z.string().nullable(),
-  evolution_chain: z
-    .object({
-      url: z.string().url({ error: "Invalid evolution chain URL" }),
-    })
-    .nullable(),
-});
-
-// Zod schema for evolution detail
-export const EvolutionDetailSchema = z.object({
-  id: z.number().int().positive({ error: "Evolution ID must be positive" }),
-  name: z.string().min(1, { error: "Evolution name is required" }),
-  min_level: z.number().int().positive().optional(),
-  trigger: z.string().optional(),
-  item: z.string().optional(),
-  location: z.string().optional(),
-  condition: z.string().optional(),
-});
-
-// Zod schema for evolution data
-export const EvolutionDataSchema = z.object({
-  evolves_to: z.array(EvolutionDetailSchema),
-  evolves_from: EvolutionDetailSchema.optional(),
-});
-
-// Zod schema for Pokemon data
-export const PokemonSchema = z.object({
-  id: z.number().int({ error: "Pokemon ID must be an integer" }),
-  nationalDexId: z
-    .number()
-    .int({ error: "National Dex ID must be an integer" }),
-  name: z.string().min(1, { error: "Pokemon name is required" }),
-  types: z.array(PokemonTypeSchema),
-  species: PokemonSpeciesSchema,
-  evolution: EvolutionDataSchema.optional(),
-});
-
-export type Pokemon = z.infer<typeof PokemonSchema>;
-export type PokemonType = z.infer<typeof PokemonTypeSchema>;
-export type PokemonSpecies = z.infer<typeof PokemonSpeciesSchema>;
-export type EvolutionDetail = z.infer<typeof EvolutionDetailSchema>;
-export type EvolutionData = z.infer<typeof EvolutionDataSchema>;
-
-export const PokemonArraySchema = z.array(PokemonSchema);
 
 // Evolution helper functions using centralized query client
 export async function getPokemonEvolutionIds(
@@ -270,7 +218,7 @@ export async function getPokemonById(id: number): Promise<Pokemon | null> {
 }
 
 // Legacy function for backward compatibility - uses centralized query client
-export async function getPokemonByType(type: string): Promise<Pokemon[]> {
+async function getPokemonByType(type: string): Promise<Pokemon[]> {
   try {
     return await pokemonData.getPokemonByType(type);
   } catch (error) {
@@ -290,7 +238,7 @@ export async function getPokemonNameMap(): Promise<Map<number, string>> {
   }
 }
 
-export async function getPokemonNamesByIds(ids: number[]): Promise<string[]> {
+async function getPokemonNamesByIds(ids: number[]): Promise<string[]> {
   try {
     const pokemon = await pokemonData.getPokemonByIds(ids);
     return pokemon.map((p) => p.name);
@@ -300,7 +248,7 @@ export async function getPokemonNamesByIds(ids: number[]): Promise<string[]> {
   }
 }
 
-export async function getAllPokemonTypes(): Promise<string[]> {
+async function getAllPokemonTypes(): Promise<string[]> {
   try {
     const pokemon = await pokemonData.getAllPokemon();
     const typeSet = new Set<string>();
@@ -318,7 +266,7 @@ export async function getAllPokemonTypes(): Promise<string[]> {
   }
 }
 
-export async function getNationalDexIdFromInfiniteFusionId(
+async function getNationalDexIdFromInfiniteFusionId(
   infiniteFusionId: number,
 ): Promise<number | null> {
   try {
@@ -331,7 +279,7 @@ export async function getNationalDexIdFromInfiniteFusionId(
   }
 }
 
-export async function getInfiniteFusionIdFromNationalDexId(
+async function getInfiniteFusionIdFromNationalDexId(
   nationalDexId: number,
 ): Promise<number | null> {
   try {
@@ -356,7 +304,7 @@ export async function getPokemonByNationalDexId(
   }
 }
 
-export async function getNationalDexToInfiniteFusionMap(): Promise<
+async function getNationalDexToInfiniteFusionMap(): Promise<
   Map<number, number>
 > {
   try {
@@ -374,7 +322,7 @@ export async function getNationalDexToInfiniteFusionMap(): Promise<
   }
 }
 
-export async function getInfiniteFusionToNationalDexMap(): Promise<
+async function getInfiniteFusionToNationalDexMap(): Promise<
   Map<number, number>
 > {
   try {
@@ -397,11 +345,11 @@ export function useAllPokemon() {
   return useQuery(pokemonQueries.all());
 }
 
-export function usePokemonById(id: number) {
+function usePokemonById(id: number) {
   return useQuery(pokemonQueries.byId(id));
 }
 
-export function usePokemonByType(type: string) {
+function usePokemonByType(type: string) {
   return useQuery(pokemonQueries.byType(type));
 }
 
@@ -409,9 +357,7 @@ export function usePokemonByType(type: string) {
 export function usePokemonNameMap() {
   const { data: allPokemon = [] } = useAllPokemon();
 
-  const nameMap = useMemo(() => {
-    return new Map(allPokemon.map((p) => [p.id, p.name]));
-  }, [allPokemon]);
+  const nameMap = new Map(allPokemon.map((p) => [p.id, p.name]));
 
   return nameMap;
 }
@@ -425,33 +371,32 @@ export function usePokemonEvolutionData(
     enabled,
   });
 
-  return useMemo(() => {
-    if (!pokemonId || !allPokemon || !enabled)
-      return { evolutions: [], preEvolution: null, isLoading };
+  if (!pokemonId || !allPokemon || !enabled)
+    return { evolutions: [], preEvolution: null, isLoading };
 
-    const currentPokemon = allPokemon.find((p) => p.id === pokemonId);
-    if (!currentPokemon)
-      return {
-        evolutions: [],
-        preEvolution: null,
-        isLoading,
-      };
-
-    const evolutionIds =
-      currentPokemon.evolution?.evolves_to.map((e) => e.id) || [];
-    const preEvolutionId = currentPokemon.evolution?.evolves_from?.id || null;
-    const evolutions = allPokemon.filter((p) =>
-      evolutionIds.includes(p.nationalDexId),
-    );
-    const preEvolution = preEvolutionId
-      ? allPokemon.find((p) => p.nationalDexId === preEvolutionId) || null
-      : null;
+  const currentPokemon = allPokemon.find((p) => p.id === pokemonId);
+  if (!currentPokemon)
     return {
-      evolutions,
-      preEvolution,
+      evolutions: [],
+      preEvolution: null,
       isLoading,
     };
-  }, [allPokemon, pokemonId, isLoading, enabled]);
+
+  const evolutionIds = new Set(
+    currentPokemon.evolution?.evolves_to.map((e) => e.id) || [],
+  );
+  const preEvolutionId = currentPokemon.evolution?.evolves_from?.id || null;
+  const evolutions = allPokemon.filter((p) =>
+    evolutionIds.has(p.nationalDexId),
+  );
+  const preEvolution = preEvolutionId
+    ? allPokemon.find((p) => p.nationalDexId === preEvolutionId) || null
+    : null;
+  return {
+    evolutions,
+    preEvolution,
+    isLoading,
+  };
 }
 
 // Hook for searching Pokemon with debounced query
@@ -493,15 +438,18 @@ export function usePokemonSearch({
           "searchService failed, using client-side filtering fallback",
           err,
         );
-        return allPokemon
-          .filter((pokemon) =>
-            pokemon.name.toLowerCase().includes(debouncedQuery.toLowerCase()),
-          )
-          .map((p) => ({
-            id: p.id,
-            name: p.name,
-            nationalDexId: p.nationalDexId,
-          }));
+        const normalizedQuery = debouncedQuery.toLowerCase();
+        const matches: PokemonOptionType[] = [];
+        for (const pokemon of allPokemon) {
+          if (pokemon.name.toLowerCase().includes(normalizedQuery)) {
+            matches.push({
+              id: pokemon.id,
+              name: pokemon.name,
+              nationalDexId: pokemon.nationalDexId,
+            });
+          }
+        }
+        return matches;
       }
     },
     select: (data) => {

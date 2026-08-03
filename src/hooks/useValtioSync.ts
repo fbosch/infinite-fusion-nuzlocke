@@ -53,19 +53,3 @@ export function useValtioSync<T, S extends object>(
     () => serverSnapshot ?? selector(store),
   );
 }
-
-/**
- * Specialized hook for subscribing to Valtio proxyMap stores
- *
- * @param store - The Valtio proxyMap store
- * @param selector - Function to extract the desired value from the store
- * @param serverSnapshot - Value to use during SSR (optional)
- * @returns The selected value from the store
- */
-export function useValtioMapSync<T, S extends object>(
-  store: S,
-  selector: (store: S) => T,
-  serverSnapshot?: T,
-): T {
-  return useValtioSync(store, selector, serverSnapshot);
-}

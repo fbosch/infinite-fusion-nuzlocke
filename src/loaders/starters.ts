@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // Zod schema for starter Pokémon data
-export const StarterPokemonSchema = z.object({
+const StarterPokemonSchema = z.object({
   classic: z.array(
     z.number().int().positive({ error: "Pokemon ID must be positive" }),
   ),
@@ -10,13 +10,13 @@ export const StarterPokemonSchema = z.object({
   ),
 });
 
-export type StarterPokemon = z.infer<typeof StarterPokemonSchema>;
+type StarterPokemon = z.infer<typeof StarterPokemonSchema>;
 
 // Cache for loaded data
 let starterPokemonCache: StarterPokemon | null = null;
 
 // Data loader for starter Pokémon
-export async function getStarterPokemon(): Promise<StarterPokemon> {
+async function getStarterPokemon(): Promise<StarterPokemon> {
   if (starterPokemonCache) {
     return starterPokemonCache;
   }

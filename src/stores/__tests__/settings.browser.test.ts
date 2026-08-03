@@ -1,11 +1,20 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getActivePlaythrough } from "../playthroughs";
-import { SettingsSchema, settingsActions, settingsStore } from "../settings";
+import { getActivePlaythrough, playthroughsStore } from "../playthroughs/store";
+import {
+  getEffectiveReducedMotion,
+  SettingsSchema,
+  settingsActions,
+  settingsStore,
+} from "../settings";
 
 // Mock the playthroughs store
-vi.mock("../playthroughs", () => ({
-  getActivePlaythrough: vi.fn(),
-}));
+vi.mock("../playthroughs/store", async () => {
+  const { proxy } = await import("valtio");
+  return {
+    getActivePlaythrough: vi.fn(),
+    playthroughsStore: proxy({ isLoading: false }),
+  };
+});
 
 const mockGetActivePlaythrough = vi.mocked(getActivePlaythrough);
 
@@ -14,17 +23,24 @@ const clearLocalStorage = () => {
   localStorage.clear();
 };
 
+let settingsImportVersion = 0;
+
+const importFreshSettings = () =>
+  import(/* @vite-ignore */ `../settings.ts?t=${++settingsImportVersion}`);
+
 describe("Settings Store", () => {
   beforeEach(() => {
     // Clear all mocks and localStorage
     vi.clearAllMocks();
     clearLocalStorage();
+    playthroughsStore.isLoading = false;
     mockGetActivePlaythrough.mockReturnValue(null);
   });
 
   afterEach(() => {
     // Clear localStorage after each test
     clearLocalStorage();
+    vi.unstubAllGlobals();
   });
 
   describe("SettingsSchema", () => {
@@ -63,6 +79,34 @@ describe("Settings Store", () => {
       const result = SettingsSchema.safeParse(invalidSettings);
       expect(result.success).toBe(false);
     });
+
+    it("preserves an absent reduced-motion override", () => {
+      const result = SettingsSchema.safeParse({});
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.reducedMotion).toBeUndefined();
+      }
+    });
+  });
+
+  describe("Reduced Motion Preference", () => {
+    it("uses the browser preference when no app override exists", () => {
+      const matchMedia = vi.fn().mockReturnValue({ matches: true });
+      vi.stubGlobal("matchMedia", matchMedia);
+
+      expect(getEffectiveReducedMotion(undefined)).toBe(true);
+      expect(matchMedia).toHaveBeenCalledWith(
+        "(prefers-reduced-motion: reduce)",
+      );
+    });
+
+    it("uses an explicit app override over the browser preference", () => {
+      vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
+
+      expect(getEffectiveReducedMotion(false)).toBe(false);
+      expect(getEffectiveReducedMotion(true)).toBe(true);
+    });
   });
 
   describe("Version-based Default Logic", () => {
@@ -84,13 +128,42 @@ describe("Settings Store", () => {
         .mockReturnValue(oldPlaythrough);
 
       const { settingsStore: freshStore, settingsActions: freshActions } =
-        await import("../settings?t=" + Date.now());
+        await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
 
       freshActions.refreshDefaults();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
+    });
+
+    it("re-evaluates defaults when the playthrough store finishes loading", async () => {
+      const oldPlaythrough = {
+        id: "old-playthrough",
+        name: "Old Run",
+        gameMode: "classic",
+        encounters: {},
+        team: [],
+        pc: [],
+        customLocations: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      } as any;
+
+      playthroughsStore.isLoading = true;
+      mockGetActivePlaythrough
+        .mockReturnValueOnce(null)
+        .mockReturnValue(oldPlaythrough);
+
+      const { settingsStore: freshStore } = await importFreshSettings();
+
+      expect(freshStore.moveEncountersBetweenLocations).toBe(false);
+
+      playthroughsStore.isLoading = false;
+
+      await vi.waitFor(() => {
+        expect(freshStore.moveEncountersBetweenLocations).toBe(true);
+      });
     });
 
     it("enables move encounters for old playthroughs (no version)", async () => {
@@ -109,9 +182,7 @@ describe("Settings Store", () => {
       } as any);
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
     });
@@ -132,9 +203,7 @@ describe("Settings Store", () => {
       } as any);
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
     });
@@ -143,9 +212,7 @@ describe("Settings Store", () => {
       mockGetActivePlaythrough.mockReturnValue(null);
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
     });
@@ -159,9 +226,7 @@ describe("Settings Store", () => {
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -174,7 +239,7 @@ describe("Settings Store", () => {
   });
 
   describe("localStorage Integration", () => {
-    it("loads settings from localStorage when available", async () => {
+    it("migrates legacy settings to the versioned localStorage key", async () => {
       const storedSettings = {
         moveEncountersBetweenLocations: true,
         version: "1.0.0",
@@ -183,12 +248,48 @@ describe("Settings Store", () => {
       localStorage.setItem("settings", JSON.stringify(storedSettings));
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
       expect(freshStore.version).toBe("1.0.0");
+      expect(localStorage.getItem("settings:v1")).toBe(
+        JSON.stringify(storedSettings),
+      );
+      expect(localStorage.getItem("settings")).toBeNull();
+    });
+
+    it("migrates partial legacy settings after applying dynamic defaults", async () => {
+      const storedSettings = { version: "1.0.0" };
+      localStorage.setItem("settings", JSON.stringify(storedSettings));
+      mockGetActivePlaythrough.mockReturnValue({
+        id: "old-playthrough",
+        name: "Old Run",
+      } as any);
+
+      const { settingsStore: freshStore } = await importFreshSettings();
+
+      expect(freshStore.moveEncountersBetweenLocations).toBe(true);
+      expect(localStorage.getItem("settings:v1")).toBe(
+        JSON.stringify(storedSettings),
+      );
+      expect(localStorage.getItem("settings")).toBeNull();
+    });
+
+    it("falls back to legacy settings when the versioned key is empty", async () => {
+      const storedSettings = {
+        moveEncountersBetweenLocations: true,
+        version: "1.0.0",
+      };
+      localStorage.setItem("settings:v1", "");
+      localStorage.setItem("settings", JSON.stringify(storedSettings));
+
+      const { settingsStore: freshStore } = await importFreshSettings();
+
+      expect(freshStore.moveEncountersBetweenLocations).toBe(true);
+      expect(localStorage.getItem("settings:v1")).toBe(
+        JSON.stringify(storedSettings),
+      );
+      expect(localStorage.getItem("settings")).toBeNull();
     });
 
     it("uses dynamic defaults when localStorage is empty", async () => {
@@ -200,9 +301,7 @@ describe("Settings Store", () => {
       } as any);
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
     });
@@ -213,7 +312,7 @@ describe("Settings Store", () => {
         version: "1.0.0",
       };
 
-      localStorage.setItem("settings", JSON.stringify(storedSettings));
+      localStorage.setItem("settings:v1", JSON.stringify(storedSettings));
       mockGetActivePlaythrough.mockReturnValue({
         id: "old-playthrough",
         name: "Old Run",
@@ -221,9 +320,7 @@ describe("Settings Store", () => {
       } as any);
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(true);
     });
@@ -235,7 +332,7 @@ describe("Settings Store", () => {
         version: "1.0.0",
       };
 
-      localStorage.setItem("settings", JSON.stringify(storedSettings));
+      localStorage.setItem("settings:v1", JSON.stringify(storedSettings));
       mockGetActivePlaythrough.mockReturnValue({
         id: "old-playthrough",
         name: "Old Run",
@@ -243,23 +340,19 @@ describe("Settings Store", () => {
       } as any);
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       // Should preserve user's explicit choice
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
     });
 
     it("handles corrupted localStorage data gracefully", async () => {
-      localStorage.setItem("settings", "invalid-json");
+      localStorage.setItem("settings:v1", "invalid-json");
 
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -276,14 +369,12 @@ describe("Settings Store", () => {
         version: 123,
       };
 
-      localStorage.setItem("settings", JSON.stringify(invalidSettings));
+      localStorage.setItem("settings:v1", JSON.stringify(invalidSettings));
 
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
       // Import fresh instance to trigger initialization
-      const { settingsStore: freshStore } = await import(
-        `../settings?t=${Date.now()}`
-      );
+      const { settingsStore: freshStore } = await importFreshSettings();
 
       expect(freshStore.moveEncountersBetweenLocations).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -301,6 +392,7 @@ describe("Settings Store", () => {
       clearLocalStorage();
       Object.assign(settingsStore, {
         moveEncountersBetweenLocations: false,
+        reducedMotion: undefined,
         version: "1.0.0",
       });
     });
@@ -315,9 +407,18 @@ describe("Settings Store", () => {
       expect(settingsStore.moveEncountersBetweenLocations).toBe(false);
     });
 
+    it("sets an explicit reduced-motion override", () => {
+      settingsActions.setReducedMotion(true);
+      expect(settingsStore.reducedMotion).toBe(true);
+
+      settingsActions.setReducedMotion(false);
+      expect(settingsStore.reducedMotion).toBe(false);
+    });
+
     it("resets to dynamic defaults", () => {
       // Set to non-default value
       settingsStore.moveEncountersBetweenLocations = true;
+      settingsStore.reducedMotion = true;
 
       // Mock old playthrough (should default to enabled)
       mockGetActivePlaythrough.mockReturnValue({
@@ -328,6 +429,7 @@ describe("Settings Store", () => {
 
       settingsActions.resetToDefaults();
       expect(settingsStore.moveEncountersBetweenLocations).toBe(true);
+      expect(settingsStore.reducedMotion).toBeUndefined();
 
       // Mock new playthrough (should default to disabled)
       mockGetActivePlaythrough.mockReturnValue({
@@ -377,7 +479,7 @@ describe("Settings Store", () => {
     it("refreshes defaults only when setting was undefined", () => {
       // Mock stored settings without moveEncountersBetweenLocations
       const storedSettings = { version: "1.0.0" };
-      localStorage.setItem("settings", JSON.stringify(storedSettings));
+      localStorage.setItem("settings:v1", JSON.stringify(storedSettings));
 
       mockGetActivePlaythrough.mockReturnValue({
         id: "old-playthrough",
@@ -398,7 +500,7 @@ describe("Settings Store", () => {
         moveEncountersBetweenLocations: false,
         version: "1.0.0",
       };
-      localStorage.setItem("settings", JSON.stringify(storedSettings));
+      localStorage.setItem("settings:v1", JSON.stringify(storedSettings));
 
       mockGetActivePlaythrough.mockReturnValue({
         id: "old-playthrough",
@@ -423,9 +525,19 @@ describe("Settings Store", () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Should have saved to localStorage with updated settings
-      const stored = localStorage.getItem("settings");
+      const stored = localStorage.getItem("settings:v1");
       expect(stored).not.toBeNull();
       expect(stored!).toContain('"moveEncountersBetweenLocations":true');
+    });
+
+    it("persists an explicit reduced-motion override", async () => {
+      settingsActions.setReducedMotion(true);
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(localStorage.getItem("settings:v1")).toContain(
+        '"reducedMotion":true',
+      );
     });
 
     it("validates settings before saving", async () => {

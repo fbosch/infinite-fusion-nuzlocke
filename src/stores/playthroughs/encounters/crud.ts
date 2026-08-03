@@ -3,7 +3,7 @@ import { getEncounterCount } from "@/lib/analytics/playthroughEventData";
 import { emitEvolutionEvent } from "@/lib/events";
 import type { PokemonOptionSchema, PokemonOptionType } from "@/loaders/pokemon";
 import { getActivePlaythrough, getCurrentTimestamp } from "../playthroughState";
-import type { EncounterDataSchema, Playthrough } from "../types";
+import type { EncounterData, EncounterDataSchema, Playthrough } from "../types";
 import {
   createPokemonWithLocationAndUID,
   ensureActivePlaythroughWithEncounters,
@@ -15,8 +15,27 @@ import {
 } from "./team";
 import { trackEncounterProgress, trackFusionCreatedIfNew } from "./transition";
 
+const isCompleteFusion = (encounter: EncounterData) =>
+  Boolean(encounter.isFusion && encounter.head && encounter.body);
+
+const inheritFusionStatus = (
+  encounter: EncounterData,
+  field: "head" | "body",
+  status: PokemonOptionType["status"],
+) => {
+  if (!status || !encounter.head || !encounter.body) {
+    return;
+  }
+
+  const otherField = field === "head" ? "body" : "head";
+  const otherPokemon = encounter[otherField];
+  if (otherPokemon && !otherPokemon.status) {
+    encounter[otherField] = { ...otherPokemon, status };
+  }
+};
+
 // Create encounter data (variants are managed globally)
-export const createEncounterData = async (
+const createEncounterData = async (
   pokemon: PokemonOption | null,
   field: "head" | "body" = "head",
   shouldCreateFusion: boolean = false,
@@ -109,9 +128,7 @@ export const updateEncounter = async (
     return;
   }
 
-  const wasCompleteFusion = Boolean(
-    encounter.isFusion && encounter.head && encounter.body,
-  );
+  const wasCompleteFusion = isCompleteFusion(encounter);
 
   if (pokemon) {
     const pokemonWithLocationAndUID = createPokemonWithLocationAndUID(
@@ -128,21 +145,7 @@ export const updateEncounter = async (
       encounter[field] = pokemonWithLocationAndUID;
       encounter.isFusion = true;
 
-      if (
-        pokemonWithLocationAndUID.status &&
-        encounter.head &&
-        encounter.body
-      ) {
-        const otherField = field === "head" ? "body" : "head";
-        const otherPokemon = encounter[otherField];
-
-        if (otherPokemon && !otherPokemon.status) {
-          encounter[otherField] = {
-            ...otherPokemon,
-            status: pokemonWithLocationAndUID.status,
-          };
-        }
-      }
+      inheritFusionStatus(encounter, field, pokemonWithLocationAndUID.status);
     } else {
       encounter.head = pokemonWithLocationAndUID;
       encounter.body = null;
@@ -174,14 +177,12 @@ export const updateEncounter = async (
       await autoAssignCapturedPokemonToTeam(locationId);
     }
 
-    const isCompleteFusion = Boolean(
-      encounter.isFusion && encounter.head && encounter.body,
-    );
+    const completeFusion = isCompleteFusion(encounter);
     trackFusionCreatedIfNew(
       activePlaythrough,
       locationId,
       wasCompleteFusion,
-      isCompleteFusion,
+      completeFusion,
       "update_encounter",
     );
 

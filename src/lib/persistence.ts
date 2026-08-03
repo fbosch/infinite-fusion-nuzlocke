@@ -4,6 +4,7 @@ import {
 } from "@tanstack/query-persist-client-core";
 import { createStore, del, get, set } from "idb-keyval";
 import { z } from "zod";
+import { RouteEncountersArraySchema } from "@/types/encounters";
 
 const readEnvVar = (key: "NODE_ENV" | "NEXT_PUBLIC_BUILD_ID") => {
   if (typeof process === "undefined") {
@@ -57,7 +58,17 @@ const PersistedQuerySchema = z.custom<PersistedQuery>((value) => {
 const deserializePersistedQuery = (data: unknown): PersistedQuery => {
   try {
     const parsed = typeof data === "string" ? JSON.parse(data) : data;
-    return PersistedQuerySchema.parse(parsed);
+    const persistedQuery = PersistedQuerySchema.parse(parsed);
+
+    if (
+      persistedQuery.queryKey[0] === "encounters" &&
+      RouteEncountersArraySchema.safeParse(persistedQuery.state.data)
+        .success === false
+    ) {
+      throw new Error("Invalid persisted encounters query payload");
+    }
+
+    return persistedQuery;
   } catch {
     throw new Error("Invalid persisted query payload");
   }

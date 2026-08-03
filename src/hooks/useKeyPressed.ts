@@ -1,8 +1,10 @@
-import { useMemo, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
 // Global state for all keys
 const keyStates = new Map<string, boolean>();
 const keyListeners = new Map<string, Set<() => void>>();
+const keySubscriptions = new Map<string, ReturnType<typeof createSubscribe>>();
+const keySnapshots = new Map<string, ReturnType<typeof createGetSnapshot>>();
 
 // Track if global event listeners are attached
 let globalListenersAttached = false;
@@ -73,6 +75,26 @@ function createGetSnapshot(key: string) {
   return () => keyStates.get(key) ?? false;
 }
 
+function getSubscribe(key: string) {
+  let subscribe = keySubscriptions.get(key);
+  if (!subscribe) {
+    subscribe = createSubscribe(key);
+    keySubscriptions.set(key, subscribe);
+  }
+
+  return subscribe;
+}
+
+function getSnapshot(key: string) {
+  let snapshot = keySnapshots.get(key);
+  if (!snapshot) {
+    snapshot = createGetSnapshot(key);
+    keySnapshots.set(key, snapshot);
+  }
+
+  return snapshot;
+}
+
 // Server-side snapshot (always false)
 function getServerSnapshot() {
   return false;
@@ -128,13 +150,11 @@ function notifyListeners(key: string) {
  * @returns {boolean} True if the specified key is currently pressed, false otherwise
  */
 export function useKeyPressed(key: string): boolean {
-  // Memoize the subscribe function to prevent re-subscriptions
-  const subscribe = useMemo(() => createSubscribe(key), [key]);
-
-  // Memoize the getSnapshot function to prevent unnecessary re-evaluations
-  const getSnapshot = useMemo(() => createGetSnapshot(key), [key]);
-
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return useSyncExternalStore(
+    getSubscribe(key),
+    getSnapshot(key),
+    getServerSnapshot,
+  );
 }
 
 /**
@@ -162,13 +182,4 @@ export function useControlKey(): boolean {
  */
 export function useAltKey(): boolean {
   return useKeyPressed("Alt");
-}
-
-/**
- * Convenience hook for tracking the Meta key (Cmd on Mac, Windows key on PC) specifically.
- *
- * @returns {boolean} True if meta key is currently pressed, false otherwise
- */
-export function useMetaKey(): boolean {
-  return useKeyPressed("Meta");
 }

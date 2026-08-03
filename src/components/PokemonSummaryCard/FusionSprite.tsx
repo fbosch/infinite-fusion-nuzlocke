@@ -2,13 +2,15 @@
 
 import Image from "next/image";
 import type React from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 
 import { twMerge } from "tailwind-merge";
+import { useSnapshot } from "valtio";
 import Rays from "@/assets/images/rays.svg";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { usePreferredVariantState } from "@/hooks/useSprite";
-
 import type { PokemonOptionType } from "@/loaders/pokemon";
+import { settingsStore } from "@/stores/settings";
 import { useAnimatedSprite } from "./useAnimatedSprite";
 import {
   getAltText,
@@ -44,6 +46,8 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
     ref,
   ) {
     const hasHovered = useRef(false);
+    const settings = useSnapshot(settingsStore);
+    const reducedMotion = useReducedMotion(settings.reducedMotion);
 
     const head = headPokemon;
     const body = bodyPokemon;
@@ -60,27 +64,26 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
       variantBodyId,
     );
 
-    const handleImageError = useCallback(
-      async (e: React.SyntheticEvent<HTMLImageElement>) => {
-        const target = e.target as HTMLImageElement;
-        target.style.visibility = "hidden";
-        const failingUrl = target.src;
-        target.src = TRANSPARENT_PIXEL;
-        const newUrl = await getNextFallbackUrl(
-          failingUrl,
-          head,
-          body,
-          preferredVariant,
-        );
-        if (newUrl) {
-          target.src = newUrl;
-        }
-        window.requestAnimationFrame(() => {
-          target.style.visibility = "visible";
-        });
-      },
-      [head, body, preferredVariant],
-    );
+    const handleImageError = async (
+      e: React.SyntheticEvent<HTMLImageElement>,
+    ) => {
+      const target = e.target as HTMLImageElement;
+      target.style.visibility = "hidden";
+      const failingUrl = target.src;
+      target.src = TRANSPARENT_PIXEL;
+      const newUrl = await getNextFallbackUrl(
+        failingUrl,
+        head,
+        body,
+        preferredVariant,
+      );
+      if (newUrl) {
+        target.src = newUrl;
+      }
+      window.requestAnimationFrame(() => {
+        target.style.visibility = "visible";
+      });
+    };
 
     const statusState = getStatusState(head, body);
     const {
@@ -92,6 +95,7 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
       playEvolutionAnimation,
     } = useAnimatedSprite({
       canAnimate: statusState.canAnimate,
+      reducedMotion,
     });
 
     useImperativeHandle(

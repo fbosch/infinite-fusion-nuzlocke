@@ -1,4 +1,5 @@
 import { getCacheBuster } from "@/lib/persistence";
+import { generateSpriteVariantUrl } from "@/lib/spriteVariants";
 import type {
   SpriteVariantsError,
   SpriteVariantsResponse,
@@ -10,7 +11,7 @@ export interface SpriteCreditsResponse {
   [spriteId: string]: string[];
 }
 
-export interface SpriteCreditsError {
+interface SpriteCreditsError {
   error: string;
 }
 
@@ -37,31 +38,14 @@ export function generateSpriteUrl(
   variant = "",
 ): string {
   const id = headId && bodyId ? `${headId}.${bodyId}` : headId || bodyId || "";
-  return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${id}${variant}.png`;
-}
-
-/**
- * Generate variant suffix for index (0='', 1='a', 2='b', etc.)
- */
-export function getVariantSuffix(index: number): string {
-  if (index === 0) return "";
-
-  let result = "";
-  index = index - 1; // Convert to 0-based
-
-  do {
-    result = String.fromCharCode(97 + (index % 26)) + result;
-    index = Math.floor(index / 26);
-  } while (index > 0);
-
-  return result;
+  return generateSpriteVariantUrl(id.toString(), variant);
 }
 
 /**
  * Check if a sprite URL exists
  * Works in both main thread (using Image) and web workers (using fetch)
  */
-export async function checkSpriteExists(url: string): Promise<boolean> {
+async function checkSpriteExists(url: string): Promise<boolean> {
   // Try Image approach first in main thread (more reliable for images)
   if (typeof window !== "undefined" && typeof Image !== "undefined") {
     return new Promise<boolean>((resolve) => {
@@ -208,7 +192,7 @@ export async function getSpriteCredits(
 /**
  * Get sprite credits for a specific sprite variant
  */
-export async function getVariantSpriteCredits(
+async function getVariantSpriteCredits(
   headId?: number | null,
   bodyId?: number | null,
   variant = "",
@@ -228,7 +212,7 @@ export async function getVariantSpriteCredits(
  * Get formatted sprite credits for a specific sprite variant
  * Returns a human-readable string like "GameFreak, Artist1 and Artist2"
  */
-export async function getFormattedVariantSpriteCredits(
+async function getFormattedVariantSpriteCredits(
   headId?: number | null,
   bodyId?: number | null,
   variant = "",

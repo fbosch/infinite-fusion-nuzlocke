@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useRef, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
+import type { z } from "zod";
 
 const callbacks = new Set<(key: string) => void>();
 
 // fallback storage for data that cannot be stored in localStorage
-export const fallbackStorage = new Map<string, unknown>();
+const fallbackStorage = new Map<string, string>();
 
 function triggerCallbacks(key: string): void {
   for (const callback of [...callbacks]) {
@@ -24,55 +25,60 @@ function triggerCallbacks(key: string): void {
 export function useLocalStorage<T>(
   key: string,
   initialValue: T,
+  schema: z.ZodType<T>,
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
-  const stringifiedInitialValue = JSON.stringify(initialValue);
+  const serialize = (value: T): string => JSON.stringify(value) ?? "null";
+  const stringifiedInitialValue = serialize(initialValue);
 
-  const getSnapshot = (): string | null => {
-    const item =
-      // Check if the key exists in fallback storage
-      fallbackStorage.has(key)
-        ? fallbackStorage.get(key) // use cached value
-        : typeof window !== "undefined" && globalThis.localStorage
-          ? globalThis.localStorage.getItem(key) // otherwise get from localStorage
-          : null;
+  const parseSnapshot = (snapshot: string | null): T => {
+    if (snapshot === null) return initialValue;
 
-    return item ? (item as string) : null;
+    try {
+      const parsed = JSON.parse(snapshot);
+      const result = schema.safeParse(parsed);
+      return result.success ? result.data : initialValue;
+    } catch {
+      return initialValue;
+    }
   };
 
-  const initialStorageSnapshot = useRef<string | null>(getSnapshot());
+  const getSnapshot = (): string | null => {
+    if (fallbackStorage.has(key)) {
+      return fallbackStorage.get(key) ?? null;
+    }
 
-  const initialStorageValue = useRef<T>(
-    initialStorageSnapshot
-      ? (JSON.parse(initialStorageSnapshot.current as string) as T)
-      : initialValue,
-  );
+    try {
+      return typeof window !== "undefined" && globalThis.localStorage
+        ? globalThis.localStorage.getItem(key)
+        : null;
+    } catch {
+      return null;
+    }
+  };
 
-  const subscribe = useCallback(
-    (onStoreChange: () => void) => {
-      // Return early no-op if not in browser environment
-      if (typeof window === "undefined") {
-        return () => {};
+  const subscribe = (onStoreChange: () => void) => {
+    // Return early no-op if not in browser environment
+    if (typeof window === "undefined") {
+      return () => {};
+    }
+
+    const onChange = (localKey: string | null) => {
+      if (localKey === key) {
+        onStoreChange();
       }
-
-      const onChange = (localKey: string | null) => {
-        if (localKey === key) {
-          onStoreChange();
-        }
-      };
-      const onStorageChange = (e: StorageEvent) => {
-        if (e.storageArea === localStorage) {
-          onChange(e.key);
-        }
-      };
-      callbacks.add(onChange);
-      window.addEventListener("storage", onStorageChange);
-      return () => {
-        callbacks.delete(onChange);
-        window.removeEventListener("storage", onStorageChange);
-      };
-    },
-    [key],
-  );
+    };
+    const onStorageChange = (e: StorageEvent) => {
+      if (e.storageArea === localStorage) {
+        onChange(e.key);
+      }
+    };
+    callbacks.add(onChange);
+    window.addEventListener("storage", onStorageChange);
+    return () => {
+      callbacks.delete(onChange);
+      window.removeEventListener("storage", onStorageChange);
+    };
+  };
 
   const getServerSnapshot = (): string | null => {
     // On server, always return null since localStorage isn't available
@@ -81,39 +87,28 @@ export function useLocalStorage<T>(
 
   const value = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  const setState = useCallback<React.Dispatch<React.SetStateAction<T>>>(
-    (newValue: React.SetStateAction<T>) => {
-      const value =
-        typeof newValue === "function"
-          ? (newValue as (prevState: T) => T)(initialStorageValue.current)
-          : newValue;
+  const setState: React.Dispatch<React.SetStateAction<T>> = (newValue) => {
+    const snapshot = getSnapshot();
+    const value =
+      typeof newValue === "function"
+        ? (newValue as (prevState: T) => T)(parseSnapshot(snapshot))
+        : newValue;
 
-      try {
-        initialStorageValue.current = value;
-        if (typeof window !== "undefined" && globalThis.localStorage) {
-          localStorage.setItem(key, JSON.stringify(value));
-          fallbackStorage.delete(key);
-        } else {
-          // Store value in fallback storage if not in browser environment
-          fallbackStorage.set(key, value);
-        }
-      } catch {
-        // Store value in fallback storage if there's an error with localStorage
-        fallbackStorage.set(key, value);
+    try {
+      if (typeof window !== "undefined" && globalThis.localStorage) {
+        localStorage.setItem(key, serialize(value));
+        fallbackStorage.delete(key);
+      } else {
+        // Store value in fallback storage if not in browser environment
+        fallbackStorage.set(key, serialize(value));
       }
+    } catch {
+      // Store value in fallback storage if there's an error with localStorage
+      fallbackStorage.set(key, serialize(value));
+    }
 
-      triggerCallbacks(key);
-    },
-    [key],
-  );
+    triggerCallbacks(key);
+  };
 
-  return useMemo(
-    () => [
-      (JSON.parse(value ? value : stringifiedInitialValue) ?? "{}") as T,
-      setState,
-    ],
-    [value, setState, stringifiedInitialValue],
-  );
+  return [parseSnapshot(value ?? stringifiedInitialValue), setState];
 }
-
-export default useLocalStorage;

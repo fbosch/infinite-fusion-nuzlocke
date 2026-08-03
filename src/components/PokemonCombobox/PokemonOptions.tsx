@@ -4,14 +4,24 @@ import { ComboboxOption } from "@headlessui/react";
 import clsx from "clsx";
 import { Check, Loader2, Search } from "lucide-react";
 import type React from "react";
-import type { EncounterSource } from "@/loaders/encounters";
 import {
   getEncounterDisplayName,
   isEgg,
   type PokemonOptionType,
 } from "@/loaders/pokemon";
+import type { EncounterSource } from "@/types/encounters";
 import { PokemonSprite } from "../PokemonSprite";
 import { SourceTag } from "./SourceTag";
+
+export interface FusionCombinationOption extends PokemonOptionType {
+  fusionBody: PokemonOptionType;
+}
+
+export function isFusionCombinationOption(
+  pokemon: PokemonOptionType,
+): pokemon is FusionCombinationOption {
+  return "fusionBody" in pokemon;
+}
 
 interface PokemonOptionsProps {
   finalOptions: PokemonOptionType[];
@@ -169,6 +179,60 @@ export function PokemonOption({
           isActive={active}
           isSelected={selected}
         />
+      )}
+    </ComboboxOption>
+  );
+}
+
+interface FusionCombinationOptionProps {
+  pokemon: FusionCombinationOption;
+}
+
+export function FusionCombinationOption({
+  pokemon,
+}: FusionCombinationOptionProps) {
+  return (
+    <ComboboxOption
+      value={pokemon}
+      className={({ active }) =>
+        clsx(
+          "relative cursor-pointer select-none p-2 my-1 rounded-md w-full flex items-center h-14 group",
+          active
+            ? "bg-blue-600 text-white"
+            : "text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700",
+        )
+      }
+    >
+      {({ active }) => (
+        <div className="gap-4 group w-full flex items-center">
+          <div className="flex -space-x-2" aria-hidden="true">
+            <div className="size-10 flex justify-center items-center">
+              <PokemonSprite
+                pokemonId={pokemon.id}
+                generation="gen7"
+                aria-hidden="true"
+              />
+            </div>
+            <div className="size-10 flex justify-center items-center">
+              <PokemonSprite
+                pokemonId={pokemon.fusionBody.id}
+                generation="gen7"
+                aria-hidden="true"
+              />
+            </div>
+          </div>
+          <span className="block truncate flex-1">
+            {pokemon.name} / {pokemon.fusionBody.name}
+          </span>
+          <span
+            className={clsx(
+              "text-xs dark:text-gray-400 whitespace-nowrap",
+              active && "text-white",
+            )}
+          >
+            {pokemon.id}.{pokemon.fusionBody.id}
+          </span>
+        </div>
       )}
     </ComboboxOption>
   );

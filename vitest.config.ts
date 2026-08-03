@@ -6,6 +6,7 @@ import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
 
 const isBrowserTestsEnabled = process.env.VITEST_BROWSER === "true";
+const isBenchmarksEnabled = process.env.VITEST_BENCHMARKS === "true";
 const alias = {
   "@": fileURLToPath(new URL("./src", import.meta.url)),
   "@data": fileURLToPath(new URL("./data", import.meta.url)),
@@ -16,7 +17,7 @@ export default defineConfig({
     globals: true,
     coverage: {
       provider: "v8",
-      reporter: ["text", "json", "html", "lcov", "cobertura"],
+      reporter: ["text", "json", "json-summary", "html", "lcov", "cobertura"],
       include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "**/node_modules/**",
@@ -68,6 +69,32 @@ export default defineConfig({
             },
           ]
         : []),
+      ...(isBenchmarksEnabled
+        ? [
+            {
+              resolve: {
+                alias,
+              },
+              test: {
+                name: "benchmark",
+                include: ["tests/benchmarks/**/*.benchmark.ts"],
+                environment: "node",
+              },
+            },
+            {
+              resolve: {
+                alias,
+              },
+              plugins: react(),
+              test: {
+                name: "react-benchmark",
+                include: ["tests/benchmarks/**/*.benchmark.tsx"],
+                setupFiles: ["./tests/setup.react-hooks.ts"],
+                environment: "jsdom",
+              },
+            },
+          ]
+        : []),
       {
         resolve: {
           alias,
@@ -92,6 +119,7 @@ export default defineConfig({
             "**/playthroughs.test.ts",
             "**/playthroughs/**/*.test.ts",
             "**/scrollToLocation.test.ts",
+            "tests/benchmarks/**",
             "**/.opencode/**",
             "node_modules",
             "dist",

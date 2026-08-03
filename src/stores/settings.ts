@@ -1,14 +1,22 @@
 import { proxy, subscribe } from "valtio";
 import { z } from "zod";
-import { getActivePlaythrough } from "@/stores/playthroughs";
+import { getBrowserReducedMotion } from "@/lib/reducedMotion";
+import {
+  getActivePlaythrough,
+  playthroughsStore,
+} from "@/stores/playthroughs/store";
+
+const SETTINGS_STORAGE_KEY = "settings:v1";
+const LEGACY_SETTINGS_STORAGE_KEY = "settings";
 
 // Zod schema for settings validation
 export const SettingsSchema = z.object({
   moveEncountersBetweenLocations: z.boolean().default(false),
+  reducedMotion: z.boolean().optional(),
   version: z.string().default("1.0.0"),
 });
 
-export type Settings = z.infer<typeof SettingsSchema>;
+type Settings = z.infer<typeof SettingsSchema>;
 
 // Function to determine if move encounters should be enabled by default
 // Based on whether the current playthrough has a version (old vs new playthroughs)
@@ -48,12 +56,20 @@ const loadSettings = (): Settings => {
   if (typeof window === "undefined") return dynamicDefaults;
 
   try {
-    const stored = localStorage.getItem("settings");
-    if (stored) {
-      const parsed = JSON.parse(stored);
+    const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    const legacyStored = stored
+      ? null
+      : localStorage.getItem(LEGACY_SETTINGS_STORAGE_KEY);
+    const persistedSettings = stored || legacyStored;
+    if (persistedSettings) {
+      const parsed = JSON.parse(persistedSettings);
       // Validate and parse with Zod, merging with dynamic defaults for missing fields
       const result = SettingsSchema.safeParse(parsed);
       if (result.success) {
+        if (legacyStored) {
+          localStorage.setItem(SETTINGS_STORAGE_KEY, legacyStored);
+          localStorage.removeItem(LEGACY_SETTINGS_STORAGE_KEY);
+        }
         // If this is the first time loading and moveEncountersBetweenLocations is not set,
         // use the dynamic default based on playthrough version
         if (parsed.moveEncountersBetweenLocations === undefined) {
@@ -78,6 +94,13 @@ const loadSettings = (): Settings => {
 
 export const settingsStore = proxy<Settings>(loadSettings());
 
+export const getEffectiveReducedMotion = (
+  preference = settingsStore.reducedMotion,
+): boolean => {
+  if (typeof preference === "boolean") return preference;
+  return getBrowserReducedMotion();
+};
+
 // Subscribe to changes and save to localStorage with validation
 if (typeof window !== "undefined") {
   subscribe(settingsStore, () => {
@@ -85,7 +108,7 @@ if (typeof window !== "undefined") {
       // Validate settings before saving
       const result = SettingsSchema.safeParse(settingsStore);
       if (result.success) {
-        localStorage.setItem("settings", JSON.stringify(result.data));
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(result.data));
       } else {
         console.error("Invalid settings data, not saving:", result.error);
       }
@@ -116,9 +139,13 @@ export const settingsActions = {
     });
   },
 
+  setReducedMotion: (reducedMotion: boolean) => {
+    updateSettings({ reducedMotion });
+  },
+
   // Helper function to reset settings to defaults
   resetToDefaults: () => {
-    updateSettings(getDefaultSettings());
+    updateSettings({ ...getDefaultSettings(), reducedMotion: undefined });
   },
 
   // Helper function to update multiple settings at once
@@ -129,7 +156,9 @@ export const settingsActions = {
   // Function to re-evaluate defaults when playthrough changes
   // This should be called when switching playthroughs if the setting hasn't been explicitly set
   refreshDefaults: () => {
-    const stored = localStorage.getItem("settings");
+    const stored =
+      localStorage.getItem(SETTINGS_STORAGE_KEY) ??
+      localStorage.getItem(LEGACY_SETTINGS_STORAGE_KEY);
     if (!stored) {
       // No settings stored yet, apply dynamic defaults
       updateSettings(getDefaultSettings());
@@ -151,3 +180,16 @@ export const settingsActions = {
     }
   },
 };
+
+if (typeof window !== "undefined") {
+  let wasLoading = playthroughsStore.isLoading;
+
+  subscribe(playthroughsStore, () => {
+    const hasFinishedLoading = wasLoading && !playthroughsStore.isLoading;
+    wasLoading = playthroughsStore.isLoading;
+
+    if (hasFinishedLoading) {
+      settingsActions.refreshDefaults();
+    }
+  });
+}

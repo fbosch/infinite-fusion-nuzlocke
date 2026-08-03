@@ -84,9 +84,13 @@ export class SearchCore {
     // Numeric search (by ID) - exact match for better performance
     if (/^\d+$/.test(trimmedQuery)) {
       const queryNum = parseInt(trimmedQuery, 10);
-      return this.pokemonData
-        .filter((p) => p.id === queryNum || p.nationalDexId === queryNum)
-        .map((p) => ({ ...p, score: 0 }));
+      const matches: SearchResult[] = [];
+      for (const pokemon of this.pokemonData) {
+        if (pokemon.id === queryNum || pokemon.nationalDexId === queryNum) {
+          matches.push({ ...pokemon, score: 0 });
+        }
+      }
+      return matches;
     }
 
     // Fuzzy search for names - let Fuse.js handle the ranking
@@ -104,18 +108,4 @@ export class SearchCore {
   isReady(): boolean {
     return this.fuse !== null && this.pokemonData !== null;
   }
-}
-
-/**
- * Utility function to check if a query is numeric
- */
-export function isNumericQuery(query: string): boolean {
-  return /^\d+$/.test(query.trim());
-}
-
-/**
- * Utility function to parse a numeric query
- */
-export function parseNumericQuery(query: string): number {
-  return parseInt(query.trim(), 10);
 }

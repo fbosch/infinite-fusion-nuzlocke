@@ -1,0 +1,19 @@
+output:
+  - failure
+  - summary
+
+pre-commit:
+  commands:
+    lint-staged:
+      run: pnpm exec lint-staged
+
+prepare-commit-msg:
+  commands:
+    commitizen:
+      interactive: true
+      run: pnpm exec cz --hook
+
+pre-push:
+  commands:
+    quality:
+      run: pnpm quality:pre-push

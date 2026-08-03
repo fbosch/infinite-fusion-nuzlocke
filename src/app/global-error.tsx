@@ -21,6 +21,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               Please try refreshing the page.
             </p>
             <button
+              type="button"
               onClick={reset}
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >

@@ -6,6 +6,8 @@ export type PokemonUidIndex = Map<string, PokemonOptionType>;
 export function buildPokemonUidIndex(
   encounters: Record<string, EncounterData> | null | undefined,
 ): PokemonUidIndex {
+  "use memo";
+
   const pokemonByUid: PokemonUidIndex = new Map();
 
   if (!encounters) return pokemonByUid;

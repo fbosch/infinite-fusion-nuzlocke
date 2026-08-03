@@ -1,6 +1,5 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import type React from "react";
 import { isEggId, type PokemonOptionType } from "@/loaders/pokemon";
 import { getFusionOverlayStatus } from "@/utils/fusionStatus";
@@ -14,7 +13,7 @@ function isEgg(pokemon: PokemonOptionType): boolean {
   return isEggId(pokemon.id);
 }
 
-export const QUESTION_MARK =
+const QUESTION_MARK =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgBAMAAADmrbOzAAAAD1BMVEUAAAAAAAD////Ozs6tra07B8SZAAAAAXRSTlMAQObYZgAAAcVJREFUeNrt3F1u4jAUgNGwgzFlA6RsYMgKBnn/axq1QG5TQ9q+xLZ6zhsREt/DjRPlhwEAAAAAAAAAAAAAAKhml27+DG0QtCYVhh8RtJ2oaahJ0DdqGmoStG6XwiFP7/K/FL5YtQVtFFTW5Mu4cMrfaBK0dVBR87RpeEjQtkExQPvxqePKGAmqFjTOXqebc2wT1E7QfYCiJo6phxxNxyd7vqBtg8oBSoXVMRJUJSgGaJ6e6fw2TPMk3cdIUP2gxWnQKd9rYgl4+IVhJqhS0GJE9mMoNgqqHLRb7NUfB2j6m9LL9HGMYl2IPV9QpaD9uPzhiCtDx6OgZoJOeT0oXwTVD4pfuu7nq0HpZfp8fBVUJyiW5vh4yrcVPJaDWLgFtRaU9tcjaCzNgloPuopzVkF9BM0nrIIaDMqXp0EpxMFVUIWg1VPYqCy2xMJ9GN61E3Q7p/5dQa9TWjWdBTUTtLwcs7xOXa7dgqoGlRc9Y1Gel+/qV2EFrd1aKIOauNchqOUbeIJ6vU0uqKOHUQR1+MiXoH4frBTUzePLgjp8SUBQf6/iCOrxhTdBHb5WKqjHl7cF9fgXCYIAAAAAAAAAAAAAAIDH/gPtjijCtkSRDwAAAABJRU5ErkJggg==";
 
 // Transparent 1x1 pixel data URL to prevent empty image flashing
@@ -85,13 +84,80 @@ export function getAltText(
   return `${head.name}/${body.name} fusion`;
 }
 
-export async function validateImageUrl(url: string): Promise<boolean> {
+async function validateImageUrl(url: string): Promise<boolean> {
   return new Promise((resolve) => {
     const img = new window.Image();
     img.onload = () => resolve(true);
     img.onerror = () => resolve(false);
     img.src = url;
   });
+}
+
+function getFusionFallbackUrls(
+  currentSrc: string,
+  head: PokemonOptionType,
+  body: PokemonOptionType,
+  artworkVariant?: string,
+): string[] {
+  if (currentSrc.includes("/generated/")) return [];
+
+  const urls = [
+    `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}${artworkVariant ?? ""}.png`,
+  ];
+  if (artworkVariant) {
+    urls.push(
+      `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}.png`,
+    );
+  }
+  return urls;
+}
+
+function getSingleFallbackUrls(
+  currentSrc: string,
+  pokemon: PokemonOptionType,
+  artworkVariant?: string,
+): string[] {
+  if (currentSrc.includes("/custom/") && artworkVariant) {
+    return [
+      `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${pokemon.id}.png`,
+    ];
+  }
+  if (
+    !currentSrc.includes("/generated/") &&
+    !currentSrc.includes("raw.githubusercontent.com")
+  ) {
+    const urls = [
+      `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${pokemon.id}${artworkVariant ?? ""}.png`,
+    ];
+    if (artworkVariant) {
+      urls.push(
+        `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${pokemon.id}.png`,
+      );
+    }
+    return urls;
+  }
+  if (currentSrc.includes("/generated/")) {
+    return [
+      `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`,
+    ];
+  }
+  return [];
+}
+
+function getFallbackCandidateUrls(
+  currentSrc: string,
+  head: PokemonOptionType | null,
+  body: PokemonOptionType | null,
+  artworkVariant?: string,
+): string[] {
+  if (head && body) {
+    return getFusionFallbackUrls(currentSrc, head, body, artworkVariant);
+  }
+
+  const pokemon = head || body;
+  return pokemon
+    ? getSingleFallbackUrls(currentSrc, pokemon, artworkVariant)
+    : [];
 }
 
 export async function getNextFallbackUrl(
@@ -106,55 +172,17 @@ export async function getNextFallbackUrl(
   // If we're already using the question mark, don't try again
   if (currentSrc === QUESTION_MARK) return null;
 
-  const candidateUrls: string[] = [];
-
-  if (head && body) {
-    // Fusion fallback chain
-    if (!currentSrc.includes("/generated/")) {
-      candidateUrls.push(
-        `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}${artworkVariant ?? ""}.png`,
-      );
-      if (artworkVariant) {
-        candidateUrls.push(
-          `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}.png`,
-        );
-      }
-    }
-  } else {
-    // Single Pokémon fallback chain
-    if (currentSrc.includes("/custom/") && artworkVariant) {
-      candidateUrls.push(
-        `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${pokemon.id}.png`,
-      );
-    } else if (
-      !currentSrc.includes("/generated/") &&
-      !currentSrc.includes("raw.githubusercontent.com")
-    ) {
-      candidateUrls.push(
-        `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${pokemon.id}${artworkVariant ?? ""}.png`,
-      );
-      if (artworkVariant) {
-        candidateUrls.push(
-          `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${pokemon.id}.png`,
-        );
-      }
-    } else if (currentSrc.includes("/generated/")) {
-      candidateUrls.push(
-        `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.nationalDexId}.png`,
-      );
-    }
-  }
-
-  const result = await Promise.any(
-    candidateUrls.map(async (url) => {
-      if (await validateImageUrl(url)) {
-        return url;
-      }
-    }),
+  const candidateUrls = getFallbackCandidateUrls(
+    currentSrc,
+    head,
+    body,
+    artworkVariant,
   );
 
-  if (result) {
-    return result;
+  for (const url of candidateUrls) {
+    if (await validateImageUrl(url)) {
+      return url;
+    }
   }
 
   return QUESTION_MARK;
@@ -276,12 +304,4 @@ export function getDisplayPokemon(
   }
 
   return { head, body, isFusion: true };
-}
-
-export function LoadingSpinner() {
-  return (
-    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
-      <Loader2 className="size-8 animate-spin text-gray-400" />
-    </div>
-  );
 }

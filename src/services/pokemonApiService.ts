@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { getCacheBuster } from "@/lib/persistence";
-import { PokemonSchema } from "@/loaders/pokemon";
+import { PokemonSchema } from "@/types/pokemon";
 
 export type Pokemon = z.infer<typeof PokemonSchema>;
 

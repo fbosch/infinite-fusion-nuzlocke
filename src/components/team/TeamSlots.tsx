@@ -1,8 +1,7 @@
 "use client";
 
 import { clsx } from "clsx";
-import { MousePointer, Palette } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import PokeballIcon from "@/assets/images/pokeball.svg";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import { ArtworkVariantButton } from "@/components/PokemonSummaryCard/ArtworkVariantButton";
@@ -13,22 +12,17 @@ import {
 import { TeamMemberContextMenu } from "@/components/PokemonSummaryCard/TeamMemberContextMenu";
 import { TypePills } from "@/components/TypePills";
 import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
-import { useSpriteCredits } from "@/hooks/useSprite";
-import { getSpriteId } from "@/lib/sprites";
-import { getLocationById } from "@/loaders/locations";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { playthroughActions } from "@/stores/playthroughs";
 import {
   useActivePlaythrough,
   useEncounters,
 } from "@/stores/playthroughs/hooks";
-import {
-  buildPokemonUidIndex,
-  findPokemonByUid,
-} from "@/utils/encounter-utils";
-import { formatArtistCredits } from "@/utils/formatCredits";
+import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 import TeamMemberPickerModal from "./TeamMemberPickerModal";
+import { TeamMemberTooltipContent } from "./TeamMemberTooltipContent";
 import TeamSlotsSkeleton from "./TeamSlotsSkeleton";
+import { getTeamSlots } from "./teamSlots";
+import { useTeamMemberPicker } from "./useTeamMemberPicker";
 
 // Component to display type indicators and nickname
 function TypeIndicators({
@@ -75,158 +69,30 @@ function TypeIndicators({
   );
 }
 
-// Component to create tooltip content for team members
-function TeamMemberTooltipContent({
-  headPokemon,
-  bodyPokemon,
-  isFusion,
-}: {
-  headPokemon: PokemonOptionType | null;
-  bodyPokemon: PokemonOptionType | null;
-  isFusion: boolean;
-}) {
-  const { primary, secondary } = useFusionTypesFromPokemon(
-    headPokemon,
-    bodyPokemon,
-    isFusion,
-  );
-
-  // Get sprite credits
-  const tooltipSpriteId = getSpriteId(headPokemon?.id, bodyPokemon?.id);
-  const { data: tooltipCredits } = useSpriteCredits(
-    headPokemon?.id,
-    bodyPokemon?.id,
-    true,
-  );
-
-  const credit =
-    tooltipSpriteId == null
-      ? undefined
-      : (() => {
-          const credits = tooltipCredits?.[tooltipSpriteId];
-          return credits && Object.keys(credits).length > 0
-            ? formatArtistCredits(credits)
-            : undefined;
-        })();
-
-  return (
-    <div className="min-w-44 max-w-[22rem]" role="tooltip">
-      <div className="flex py-0.5">
-        <TypePills primary={primary} secondary={secondary} />
-      </div>
-      {credit && (
-        <>
-          <div className="my-2 flex">
-            <div className="inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400">
-              <Palette
-                className="h-3 w-3"
-                aria-hidden="true"
-                focusable={false}
-              />
-              <span className="opacity-80">by</span>
-              <span className="truncate max-w-[14rem]" title={credit}>
-                {credit}
-              </span>
-            </div>
-          </div>
-          <div className="w-full h-px bg-gray-200 dark:bg-gray-700 my-1" />
-        </>
-      )}
-      <div className="flex items-center text-xs gap-2">
-        <div className="flex items-center gap-1">
-          <div className="flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200">
-            <MousePointer
-              className="h-3 w-3"
-              aria-hidden="true"
-              focusable={false}
-            />
-            <span className="font-medium text-xs">L</span>
-          </div>
-          <span className="text-gray-600 dark:text-gray-300 text-xs">
-            Change
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200">
-            <MousePointer
-              className="h-3 w-3"
-              aria-hidden="true"
-              focusable={false}
-            />
-            <span className="font-medium text-xs">R</span>
-          </div>
-          <span className="text-gray-600 dark:text-gray-300 text-xs">
-            Options
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function TeamSlots() {
   const activePlaythrough = useActivePlaythrough();
   const encounters = useEncounters();
-  const [pickerModalOpen, setPickerModalOpen] = useState(false);
-  const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
+  const {
+    pickerModalOpen,
+    selectedPosition,
+    openPicker,
+    closePicker,
+    selectTeamMember,
+  } = useTeamMemberPicker();
 
   // Refs for team member sprites to play evolution animations
   const teamSpriteRefs = useRef<(FusionSpriteHandle | null)[]>([]);
   const previousFusionIds = useRef<(string | null)[]>([]);
 
-  const pokemonByUid = useMemo(
-    () => buildPokemonUidIndex(encounters),
-    [encounters],
-  );
+  const pokemonByUid = buildPokemonUidIndex(encounters);
 
   useEffect(() => {
     previousFusionIds.current = new Array(6).fill(null);
   }, [activePlaythrough?.id]);
 
-  const teamSlots = useMemo(() => {
-    if (!activePlaythrough?.team) return [];
-
-    return activePlaythrough.team.members.map((member, index) => {
-      if (!member) {
-        return {
-          position: index,
-          isEmpty: true,
-        };
-      }
-
-      const headPokemon = member.headPokemonUid
-        ? findPokemonByUid(encounters, member.headPokemonUid, pokemonByUid)
-        : null;
-      const bodyPokemon = member.bodyPokemonUid
-        ? findPokemonByUid(encounters, member.bodyPokemonUid, pokemonByUid)
-        : null;
-
-      // A slot is empty only if both UIDs are empty strings
-      if (!member.headPokemonUid && !member.bodyPokemonUid) {
-        return {
-          position: index,
-          isEmpty: true,
-        };
-      }
-
-      // Get location from the head Pokémon's original location, fallback to body if head doesn't exist
-      const location = getLocationById(
-        headPokemon?.originalLocation || bodyPokemon?.originalLocation || "",
-      );
-
-      // Determine fusion state: true if both Pokémon exist and can form a fusion
-      const isFusion = Boolean(headPokemon && bodyPokemon);
-
-      return {
-        position: index,
-        isEmpty: false,
-        location: location?.name || "Unknown Location",
-        headPokemon,
-        bodyPokemon,
-        isFusion,
-      };
-    });
-  }, [activePlaythrough, encounters, pokemonByUid]);
+  const teamSlots = activePlaythrough?.team
+    ? getTeamSlots(activePlaythrough.team.members, encounters, pokemonByUid)
+    : [];
 
   // Track fusion ID changes and play evolution animations for team members
   useEffect(() => {
@@ -239,7 +105,11 @@ export default function TeamSlots() {
     }
     // Use requestAnimationFrame to ensure proper timing
     const animationFrame = requestAnimationFrame(() => {
-      teamSlots.forEach((slot, index) => {
+      const animationSlots = activePlaythrough?.team
+        ? getTeamSlots(activePlaythrough.team.members, encounters, pokemonByUid)
+        : [];
+
+      animationSlots.forEach((slot, index) => {
         if (
           !slot.isEmpty &&
           slot.isFusion &&
@@ -270,49 +140,12 @@ export default function TeamSlots() {
     return () => {
       cancelAnimationFrame(animationFrame);
     };
-  }, [teamSlots]);
+  }, [activePlaythrough?.team, encounters, pokemonByUid]);
 
   // Show skeleton while loading
   if (!activePlaythrough || !encounters) {
     return <TeamSlotsSkeleton />;
   }
-
-  const handleSlotClick = (position: number) => {
-    setSelectedPosition(position);
-    setPickerModalOpen(true);
-  };
-
-  const handlePokemonSelect = async (
-    headPokemon: PokemonOptionType | null,
-    bodyPokemon: PokemonOptionType | null,
-  ) => {
-    if (selectedPosition === null) return;
-
-    // Create team member references
-    const headRef = headPokemon ? { uid: headPokemon.uid! } : null;
-    const bodyRef = bodyPokemon ? { uid: bodyPokemon.uid! } : null;
-
-    const success = await playthroughActions.updateTeamMember(
-      selectedPosition,
-      headRef,
-      bodyRef,
-    );
-
-    if (!success) {
-      console.error(
-        "Failed to update team member at position:",
-        selectedPosition,
-      );
-      return;
-    }
-
-    handleCloseModal();
-  };
-
-  const handleCloseModal = () => {
-    setPickerModalOpen(false);
-    setSelectedPosition(null);
-  };
 
   return (
     <>
@@ -333,15 +166,16 @@ export default function TeamSlots() {
                     "size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200",
                     "border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer",
                   )}
-                  onClick={() => handleSlotClick(slot.position)}
+                  onClick={() => openPicker(slot.position)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault();
-                      handleSlotClick(slot.position);
+                      openPicker(slot.position);
                     }
                   }}
                   role="button"
                   tabIndex={0}
+                  aria-label={`Add Pokémon to team slot ${slot.position + 1}`}
                 >
                   <div className="flex flex-col items-center justify-center text-center relative w-full h-full">
                     <div
@@ -378,14 +212,14 @@ export default function TeamSlots() {
                     "border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                   )}
-                  onClick={() => handleSlotClick(slot.position)}
+                  onClick={() => openPicker(slot.position)}
                   onKeyDown={(e) => {
                     if (
                       e.target === e.currentTarget &&
                       (e.key === "Enter" || e.key === " ")
                     ) {
                       e.preventDefault();
-                      handleSlotClick(slot.position);
+                      openPicker(slot.position);
                     }
                   }}
                 >
@@ -450,8 +284,8 @@ export default function TeamSlots() {
 
       <TeamMemberPickerModal
         isOpen={pickerModalOpen}
-        onClose={handleCloseModal}
-        onSelect={handlePokemonSelect}
+        onClose={closePicker}
+        onSelect={selectTeamMember}
         position={selectedPosition || 0}
         existingTeamMember={
           selectedPosition !== null ? teamSlots[selectedPosition] : null

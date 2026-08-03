@@ -9,7 +9,7 @@ import {
 import clsx from "clsx";
 import { X } from "lucide-react";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { useActivePlaythrough } from "@/stores/playthroughs";
+import { useActivePlaythrough } from "@/stores/playthroughs/hooks";
 import { TeamMemberPreviewPanel } from "./TeamMemberPreviewPanel";
 import { TeamMemberSelectionProvider } from "./TeamMemberSelectionContext";
 import { TeamMemberSelectionPanel } from "./TeamMemberSelectionPanel";
@@ -20,7 +20,7 @@ interface TeamMemberPickerModalProps {
   onSelect: (
     headPokemon: PokemonOptionType | null,
     bodyPokemon: PokemonOptionType | null,
-  ) => void;
+  ) => Promise<boolean>;
   position: number;
   existingTeamMember?: {
     position: number;
@@ -45,15 +45,15 @@ export default function TeamMemberPickerModal({
     <Dialog
       open={isOpen && !!activePlaythrough}
       onClose={onClose}
-      className="relative z-50 group"
+      className="relative z-[80] group"
     >
       <DialogBackdrop
         transition
-        className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"
+        className="fixed inset-0 z-[80] bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"
         aria-hidden="true"
       />
 
-      <div className="fixed inset-0 flex w-screen items-center justify-center p-2 sm:p-4">
+      <div className="fixed inset-0 z-[81] flex w-screen items-center justify-center p-2 sm:p-4">
         <DialogPanel
           transition
           id="team-member-picker-modal"
@@ -78,6 +78,7 @@ export default function TeamMemberPickerModal({
                 Select Pokémon for Team Slot {position + 1}
               </DialogTitle>
               <button
+                type="button"
                 onClick={onClose}
                 className={clsx(
                   "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",

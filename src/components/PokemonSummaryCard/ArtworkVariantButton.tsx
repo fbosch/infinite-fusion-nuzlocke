@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { Loader2, RefreshCcw, RefreshCw, RefreshCwOff } from "lucide-react";
-import React, { useMemo } from "react";
+import type React from "react";
 import { twMerge } from "tailwind-merge";
 import { useShiftKey } from "@/hooks/useKeyPressed";
 import { usePreferredVariantState, useSpriteVariants } from "@/hooks/useSprite";
@@ -15,6 +15,27 @@ interface ArtworkVariantButtonProps {
   disabled?: boolean;
   className?: string;
   shouldLoad?: boolean;
+}
+
+function ArtworkVariantIcon({
+  hasVariants,
+  isLoading,
+  isShiftPressed,
+}: {
+  hasVariants: boolean;
+  isLoading: boolean;
+  isShiftPressed: boolean;
+}) {
+  if (isLoading) {
+    return <Loader2 className="animate-spin size-3" />;
+  }
+  if (!hasVariants) {
+    return <RefreshCwOff className="size-3" />;
+  }
+  if (isShiftPressed) {
+    return <RefreshCcw className="size-3" />;
+  }
+  return <RefreshCw className="size-3" />;
 }
 
 export function ArtworkVariantButton({
@@ -48,50 +69,27 @@ export function ArtworkVariantButton({
   );
 
   // Determine if variants are available
-  const hasVariants = variants && variants.length > 1;
+  const hasVariants = (variants?.length ?? 0) > 1;
 
-  const handleCycleVariant = React.useCallback(
-    async (event: React.MouseEvent) => {
-      // Prevent event bubbling to avoid triggering parent click handlers
-      event.stopPropagation();
+  const handleCycleVariant = async (event: React.MouseEvent) => {
+    // Prevent event bubbling to avoid triggering parent click handlers
+    event.stopPropagation();
 
-      if (disabled || !hasVariants || !variants) return;
+    if (disabled || !hasVariants || !variants) return;
 
-      const currentIndex = variants.indexOf(currentVariant);
-      const nextIndex = isShiftPressed
-        ? (currentIndex - 1 + variants.length) % variants.length
-        : (currentIndex + 1) % variants.length;
+    const currentIndex = variants.indexOf(currentVariant);
+    const nextIndex = isShiftPressed
+      ? (currentIndex - 1 + variants.length) % variants.length
+      : (currentIndex + 1) % variants.length;
 
-      const newVariant = variants[nextIndex] || "";
+    const newVariant = variants[nextIndex] || "";
 
-      await updateVariant(newVariant).catch((error) => {
-        console.error("Failed to cycle artwork variant:", error);
-      });
-    },
-    [
-      disabled,
-      hasVariants,
-      variants,
-      currentVariant,
-      isShiftPressed,
-      updateVariant,
-    ],
-  );
+    await updateVariant(newVariant).catch((error) => {
+      console.error("Failed to cycle artwork variant:", error);
+    });
+  };
 
-  const buttonIcon = useMemo(() => {
-    if (isLoading) {
-      return <Loader2 className="animate-spin size-3" />;
-    }
-    if (!hasVariants) {
-      return <RefreshCwOff className="size-3" />;
-    }
-    if (isShiftPressed) {
-      return <RefreshCcw className="size-3" />;
-    }
-    return <RefreshCw className="size-3" />;
-  }, [hasVariants, isLoading, isShiftPressed]);
-
-  const label = useMemo(() => {
+  const label = (() => {
     if (isLoading) {
       return "Checking for artwork variants...";
     }
@@ -99,7 +97,7 @@ export function ArtworkVariantButton({
       return "No artwork variants available";
     }
     return "Cycle artwork variants (hold Shift to reverse)";
-  }, [hasVariants, isLoading]);
+  })();
 
   // Don't render the button if there are no variants (unless still loading)
   if (!isLoading && !hasVariants) {
@@ -143,7 +141,13 @@ export function ArtworkVariantButton({
         )}
         aria-label={label}
       >
-        <div className="">{buttonIcon}</div>
+        <div className="">
+          <ArtworkVariantIcon
+            hasVariants={hasVariants}
+            isLoading={isLoading}
+            isShiftPressed={isShiftPressed}
+          />
+        </div>
       </button>
     </CursorTooltip>
   );

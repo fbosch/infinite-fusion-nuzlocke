@@ -21,6 +21,7 @@ import {
   isValidElement,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -28,7 +29,9 @@ import {
 import { twMerge } from "tailwind-merge";
 import { useSnapshot } from "valtio";
 import { useGlobalTooltip } from "@/contexts/GlobalTooltipContext";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useWindowVisibility } from "@/hooks/useWindowVisibility";
+import { settingsStore } from "@/stores/settings";
 import { dragStore } from "../stores/dragStore";
 
 // Helper functions to calculate offsets based on placement
@@ -80,6 +83,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
   } = props;
   const instanceId = useId();
   const [isOpen, setIsOpen] = useState(false);
+  const [isPausedByContextMenu, setIsPausedByContextMenu] = useState(false);
   const [animationState, setAnimationState] = useState<
     "entering" | "entered" | "exiting" | null
   >(null);
@@ -90,9 +94,14 @@ export function CursorTooltip(props: CursorTooltipProps) {
   }, [animationState]);
   const isWindowVisible = useWindowVisibility();
   const dragSnapshot = useSnapshot(dragStore);
+  const settings = useSnapshot(settingsStore);
+  const reducedMotion = useReducedMotion(settings.reducedMotion);
   const { isAnyTooltipVisible, registerTooltip } = useGlobalTooltip();
   const shouldDisableTooltip =
-    disabled || !isWindowVisible || dragSnapshot.isDragging;
+    disabled ||
+    !isWindowVisible ||
+    dragSnapshot.isDragging ||
+    isPausedByContextMenu;
   const isTooltipVisible = isOpen && shouldDisableTooltip === false;
 
   const {
@@ -119,8 +128,19 @@ export function CursorTooltip(props: CursorTooltipProps) {
           );
         }
         setIsOpen(true);
+        if (reducedMotion) {
+          animationBatchRef.current += 1;
+          setAnimationState(null);
+          return;
+        }
         setAnimationState("entering");
       } else {
+        if (reducedMotion) {
+          animationBatchRef.current += 1;
+          setIsOpen(false);
+          setAnimationState(null);
+          return;
+        }
         setAnimationState("exiting");
       }
 
@@ -179,7 +199,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
     whileElementsMounted: (reference, floating, update) => {
       const cleanup = autoUpdate(reference, floating, update, {
         layoutShift: true,
-        animationFrame: true,
+        animationFrame: false,
         elementResize: true,
         ancestorScroll: true,
         ancestorResize: true,
@@ -187,6 +207,12 @@ export function CursorTooltip(props: CursorTooltipProps) {
       return cleanup;
     },
   });
+
+  useLayoutEffect(() => {
+    if (!reducedMotion || !refs.domReference.current) return;
+
+    refs.setPositionReference(refs.domReference.current);
+  }, [reducedMotion, refs]);
 
   useEffect(() => {
     if (!tooltipId) return;
@@ -209,6 +235,22 @@ export function CursorTooltip(props: CursorTooltipProps) {
     };
   }, [instanceId, tooltipId]);
 
+  useEffect(() => {
+    const pauseTooltip = () => {
+      setIsOpen(false);
+      setAnimationState(null);
+      setIsPausedByContextMenu(true);
+    };
+    const resumeTooltip = () => setIsPausedByContextMenu(false);
+
+    window.addEventListener("context-menu-open", pauseTooltip);
+    window.addEventListener("context-menu-close", resumeTooltip);
+    return () => {
+      window.removeEventListener("context-menu-open", pauseTooltip);
+      window.removeEventListener("context-menu-close", resumeTooltip);
+    };
+  }, []);
+
   // Register tooltip with global state when it opens/closes
   useEffect(() => {
     if (isTooltipVisible) {
@@ -224,6 +266,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
 
   const clientPointFloating = useClientPoint(context, {
     axis: "both",
+    enabled: !reducedMotion,
   });
 
   // Normalize delay to object format
@@ -304,6 +347,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
 
       {isTooltipVisible && (
         <FloatingPortal>
+          {/* react-doctor-disable-next-line react-hooks-js/refs -- Floating UI callback refs run during commit, not render. */}
           <div
             className="z-[9999] pointer-events-none"
             ref={refs.setFloating}

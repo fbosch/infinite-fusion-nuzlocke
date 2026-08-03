@@ -8,12 +8,12 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { HelpCircle, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import {
   DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
   type GameMode,
-} from "@/stores/playthroughs";
+} from "@/stores/playthroughs/types";
 
 interface CreatePlaythroughModalProps {
   isOpen: boolean;
@@ -41,14 +41,14 @@ export default function CreatePlaythroughModal({
     playthroughNameInputRef.current?.focus();
   }, [isOpen]);
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     setNewPlaythroughName("");
     setSelectedGameModeOverride(null);
     onClose();
-  }, [onClose]);
+  };
 
   // Create a new playthrough
-  const handleCreatePlaythrough = useCallback(async () => {
+  const handleCreatePlaythrough = async () => {
     const name = newPlaythroughName.trim();
     if (!name) return;
 
@@ -58,10 +58,14 @@ export default function CreatePlaythroughModal({
     } catch (error) {
       console.error("Failed to create playthrough:", error);
     }
-  }, [newPlaythroughName, selectedGameMode, onCreate, handleClose]);
+  };
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} className="relative z-50 group">
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      className="relative z-[70] group"
+    >
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"

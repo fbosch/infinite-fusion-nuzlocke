@@ -10,10 +10,11 @@ import {
   Switch,
 } from "@headlessui/react";
 import clsx from "clsx";
-import { Monitor, Moon, Move, Sun, X } from "lucide-react";
+import { Monitor, Moon, Move, Rabbit, Sun, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useSnapshot } from "valtio";
 import { useMounted } from "@/hooks/useMounted";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { settingsActions, settingsStore } from "@/stores/settings";
 
 interface SettingsModalProps {
@@ -25,13 +26,14 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const { theme, setTheme } = useTheme();
   const mounted = useMounted();
   const settings = useSnapshot(settingsStore);
+  const reducedMotion = useReducedMotion(settings.reducedMotion);
 
   if (mounted === false) {
     return null;
   }
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50 group">
+    <Dialog open={isOpen} onClose={onClose} className="relative z-[70] group">
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"
@@ -51,6 +53,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               Settings
             </DialogTitle>
             <button
+              type="button"
               onClick={onClose}
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
@@ -86,6 +89,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 ].map(({ value, icon: Icon, label }) => (
                   <button
                     key={value}
+                    type="button"
                     onClick={() => setTheme(value)}
                     className={clsx(
                       "flex items-center justify-center w-8 h-8 rounded transition-all duration-200 cursor-pointer",
@@ -119,6 +123,29 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <Switch
                 checked={settings.moveEncountersBetweenLocations}
                 onChange={settingsActions.toggleMoveEncountersBetweenLocations}
+                className="group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition data-checked:bg-blue-600"
+              >
+                <span className="size-4 translate-x-1 rounded-full bg-white transition group-data-checked:translate-x-6" />
+              </Switch>
+            </Field>
+
+            <Field className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 p-2 rounded-md bg-gray-100 dark:bg-gray-800">
+                  <Rabbit className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-900 dark:text-white">
+                    Reduced Motion
+                  </Label>
+                  <Description className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Limit animations and smooth scrolling
+                  </Description>
+                </div>
+              </div>
+              <Switch
+                checked={reducedMotion}
+                onChange={settingsActions.setReducedMotion}
                 className="group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition data-checked:bg-blue-600"
               >
                 <span className="size-4 translate-x-1 rounded-full bg-white transition group-data-checked:translate-x-6" />

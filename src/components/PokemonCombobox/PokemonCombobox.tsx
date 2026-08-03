@@ -20,10 +20,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type {
-  EncounterSource,
-  RouteEncounterPokemon,
-} from "@/loaders/encounters";
+import type { RouteEncounterPokemon } from "@/loaders/encounters";
 import {
   isEgg,
   isPokemonEvolution,
@@ -33,16 +30,24 @@ import {
   useAllPokemon,
   usePokemonSearch,
 } from "@/loaders/pokemon";
-import { useEncounters, useGameMode } from "@/stores/playthroughs";
+import { useEncounters, useGameMode } from "@/stores/playthroughs/hooks";
+import type { EncounterSource } from "@/types/encounters";
 import { buildCapturedSpeciesIdSet } from "@/utils/encounter-utils";
 import { DraggableComboboxSprite } from "./DraggableComboboxSprite";
 import {
   applyEncounterDefaultStatus,
   getPokemonSources,
 } from "./encounterSelection";
+import { resolveFusionCombination } from "./fusionCombination";
 import { PokemonEvolutionButton } from "./PokemonEvolutionButton";
 import { PokemonNicknameInput } from "./PokemonNicknameInput";
-import { PokemonOption, PokemonOptions } from "./PokemonOptions";
+import {
+  FusionCombinationOption,
+  type FusionCombinationOption as FusionCombinationOptionType,
+  isFusionCombinationOption,
+  PokemonOption,
+  PokemonOptions,
+} from "./PokemonOptions";
 import { PokemonStatusInput } from "./PokemonStatusInput";
 import { useComboboxDragAndDrop } from "./useComboboxDragAndDrop";
 
@@ -50,6 +55,7 @@ interface PokemonComboboxProps {
   locationId?: string;
   value: PokemonOptionType | null | undefined;
   onChange: (value: PokemonOptionType | null) => void;
+  onFusionChange?: (head: PokemonOptionType, body: PokemonOptionType) => void;
   onBeforeClear?: (
     currentValue: PokemonOptionType,
   ) => Promise<boolean> | boolean;
@@ -77,6 +83,7 @@ export const PokemonCombobox = ({
   locationId,
   value,
   onChange,
+  onFusionChange,
   onBeforeClear,
   onBeforeOverwrite,
   placeholder = "Select Pokemon",
@@ -144,6 +151,14 @@ export const PokemonCombobox = ({
   const { data: allPokemonData, isLoading: isAllPokemonLoading } =
     useAllPokemon();
   const allPokemon = allPokemonData ?? EMPTY_POKEMON_OPTIONS;
+  const fusionCombination =
+    !isFusion && onFusionChange
+      ? resolveFusionCombination(deferredQuery, allPokemon)
+      : null;
+  const fusionCombinationOption: FusionCombinationOptionType | null =
+    fusionCombination
+      ? { ...fusionCombination.head, fusionBody: fusionCombination.body }
+      : null;
 
   // Floating UI setup
   const { refs, floatingStyles, update, placement } = useFloating({
@@ -186,13 +201,15 @@ export const PokemonCombobox = ({
         if (isAllPokemonLoading) {
           return [];
         }
-        return allPokemon
-          .map((p) => ({
-            id: p.id,
-            name: p.name,
-            nationalDexId: p.nationalDexId,
-          }))
-          .filter((pokemon) => !isFusion || !isEgg(pokemon));
+        return allPokemon.flatMap((pokemon) => {
+          const option = {
+            id: pokemon.id,
+            name: pokemon.name,
+            nationalDexId: pokemon.nationalDexId,
+          };
+
+          return !isFusion || !isEgg(option) ? [option] : [];
+        });
       }
       return routeEncounterData.filter(
         (pokemon) => !isFusion || !isEgg(pokemon),
@@ -323,6 +340,15 @@ export const PokemonCombobox = ({
         return;
       }
 
+      if (isFusionCombinationOption(newValue)) {
+        const { fusionBody, ...headOption } = newValue;
+        const head = applyDefaultStatus(headOption);
+        const body = applyDefaultStatus(fusionBody);
+        onFusionChange?.(head, body);
+        setQuery("");
+        return;
+      }
+
       // Early return if no current value or no overwrite callback
       if (!value || !onBeforeOverwrite) {
         const finalValue = applyDefaultStatus(newValue);
@@ -352,6 +378,7 @@ export const PokemonCombobox = ({
       shouldAllowOverwrite,
       applyEggHatchingPreservation,
       applyDefaultStatus,
+      onFusionChange,
     ],
   );
 
@@ -400,7 +427,7 @@ export const PokemonCombobox = ({
         isAllPokemonLoading
       );
     }
-    return isSearchLoading || isAllPokemonLoading;
+    return !fusionCombination && (isSearchLoading || isAllPokemonLoading);
   }, [
     deferredQuery,
     gameMode,
@@ -408,10 +435,12 @@ export const PokemonCombobox = ({
     isAllPokemonLoading,
     isSearchLoading,
     routeEncounterData.length,
+    fusionCombination,
   ]);
 
   const shouldVirtualize = finalOptions.length > 30;
 
+  // react-doctor-disable-next-line react-hooks-js/incompatible-library -- TanStack Virtual is intentionally excluded from compiler memoization above.
   const virtualizer = useVirtualizer({
     count: finalOptions.length,
     getScrollElement: () => optionsRef.current,
@@ -444,6 +473,7 @@ export const PokemonCombobox = ({
         immediate
         onClose={() => setQuery("")}
       >
+        {/* fallow-ignore-next-line complexity -- Headless UI render prop keeps combobox state colocated with its input and options. */}
         {({ open }) => (
           <div key={comboboxId}>
             <div className="relative">
@@ -526,7 +556,7 @@ export const PokemonCombobox = ({
                       : "auto",
                   }}
                   className={clsx(
-                    "max-h-[500px] h-full overflow-y-auto z-40 relative",
+                    "max-h-[31.25rem] h-full overflow-y-auto z-40 relative",
                     "px-1 text-base shadow-lg focus:outline-none sm:text-sm",
                     "bg-white dark:bg-gray-800 gap-x-2",
                     "border border-gray-300 dark:border-gray-600 scrollbar-thin",
@@ -546,7 +576,11 @@ export const PokemonCombobox = ({
                       "pointer-events-none": virtualizer.isScrolling,
                     })}
                   >
-                    {isShowingLoading ? (
+                    {fusionCombinationOption ? (
+                      <FusionCombinationOption
+                        pokemon={fusionCombinationOption}
+                      />
+                    ) : isShowingLoading ? (
                       <div className="relative cursor-default select-none py-2 px-4 text-center">
                         <div className="text-gray-500 dark:text-gray-400">
                           <p className="text-sm flex items-center gap-2 justify-center py-2">

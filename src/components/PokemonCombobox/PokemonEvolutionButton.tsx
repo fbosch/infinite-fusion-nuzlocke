@@ -11,7 +11,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import clsx from "clsx";
 import { Atom, ChevronDown, Undo2 } from "lucide-react";
 import type React from "react";
-import { Fragment, useCallback, useMemo } from "react";
+import { Fragment } from "react";
 import { useShiftKey } from "@/hooks/useKeyPressed";
 import { emitEvolutionEvent } from "@/lib/events";
 import {
@@ -32,6 +32,13 @@ interface EvolutionDropdownProps {
   availableEvolutions: PokemonOptionType[];
   onSelectEvolution: (evolution: PokemonOptionType) => void;
   isLoadingEvolutions: boolean;
+}
+
+interface DirectEvolutionButtonProps {
+  pokemon: PokemonOptionType;
+  isDevolutionMode: boolean;
+  showDevolutionHint: boolean;
+  onClick: () => void;
 }
 
 // Evolution Dropdown Component
@@ -97,6 +104,7 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
       </MenuButton>
 
       <FloatingPortal>
+        {/* react-doctor-disable-next-line react-hooks-js/refs -- Floating UI callback refs run during commit, not render. */}
         <MenuItems
           ref={refs.setFloating}
           style={floatingStyles}
@@ -150,6 +158,74 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
   );
 };
 
+const DirectEvolutionButton: React.FC<DirectEvolutionButtonProps> = ({
+  pokemon,
+  isDevolutionMode,
+  showDevolutionHint,
+  onClick,
+}) => (
+  <div className="absolute inset-y-0 right-4 flex items-center">
+    <CursorTooltip
+      content={
+        <div className="flex items-center gap-x-4">
+          <div className="flex items-center justify-center w-8 h-8">
+            <PokemonSprite pokemonId={pokemon.id} generation="gen7" />
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <span>
+              {isDevolutionMode ? (
+                <Fragment>
+                  Devolve to{" "}
+                  <span className="font-semibold">{pokemon.name}</span>
+                </Fragment>
+              ) : (
+                <Fragment>
+                  Evolve to{" "}
+                  <span className="font-semibold">{pokemon.name}</span>
+                </Fragment>
+              )}
+            </span>
+            {showDevolutionHint && (
+              <span className="text-xs text-gray-400">
+                Hold shift to devolve
+              </span>
+            )}
+          </div>
+        </div>
+      }
+      delay={300}
+    >
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={isDevolutionMode ? "Devolve Pokemon" : "Evolve Pokemon"}
+        className={clsx(
+          "flex items-center justify-center gap-1 px-2 py-1 rounded-md",
+          "bg-gray-100 text-gray-600 text-xs ",
+          "border border-gray-300 hover:border-blue-300 dark:border-gray-600 dark:hover:border-blue-400",
+          "transition-colors duration-200",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
+          "disabled:opacity-50 disabled:cursor-not-allowed",
+          "dark:bg-gray-700 dark:hover:bg-blue-900/20 dark:text-gray-400 dark:hover:text-blue-400",
+          "hover:cursor-pointer",
+          {
+            "hover:bg-orange-100 hover:text-orange-600 hover:border-orange-300 dark:hover:bg-orange-900/20 dark:hover:text-orange-400 dark:hover:border-orange-400":
+              isDevolutionMode,
+            "hover:bg-blue-100 hover:text-blue-600 hover:border-blue-300 dark:bg-blue-900/20 dark:hover:text-blue-400 dark:hover:border-blue-400":
+              !isDevolutionMode,
+          },
+        )}
+      >
+        {isDevolutionMode ? (
+          <Undo2 className="w-3 h-3" />
+        ) : (
+          <Atom className="w-3 h-3" />
+        )}
+      </button>
+    </CursorTooltip>
+  </div>
+);
+
 export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   value,
   onChange,
@@ -162,73 +238,42 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
     shouldLoad,
   );
 
-  // Transform Pokemon data to PokemonOptionType with originalLocation
-  const availableEvolutions = useMemo(() => {
-    return evolutions.map((pokemon) => ({
-      id: pokemon.id,
-      name: pokemon.name,
-      nationalDexId: pokemon.nationalDexId,
-      originalLocation: value?.originalLocation,
-    }));
-  }, [evolutions, value?.originalLocation]);
-
-  const availablePreEvolution = useMemo(() => {
-    if (!preEvolution) return null;
-
-    return {
-      id: preEvolution.id,
-      name: preEvolution.name,
-      nationalDexId: preEvolution.nationalDexId,
-      originalLocation: value?.originalLocation,
-    };
-  }, [preEvolution, value?.originalLocation]);
+  const availableEvolutions = evolutions.map((pokemon) => ({
+    id: pokemon.id,
+    name: pokemon.name,
+    nationalDexId: pokemon.nationalDexId,
+    originalLocation: value?.originalLocation,
+  }));
+  const availablePreEvolution = preEvolution
+    ? {
+        id: preEvolution.id,
+        name: preEvolution.name,
+        nationalDexId: preEvolution.nationalDexId,
+        originalLocation: value?.originalLocation,
+      }
+    : null;
 
   const hasEvolutions = availableEvolutions.length > 0;
   const hasPreEvolution = !!availablePreEvolution;
   const isDevolutionMode = isShiftPressed && hasPreEvolution;
 
-  // Handle evolution/devolution selection
-  const handleEvolution = useCallback(
-    (evolutionPokemon?: PokemonOptionType, isDevolution = false) => {
-      if (evolutionPokemon) {
-        // Specific evolution/devolution selected
-        const evolvedPokemon: PokemonOptionType = {
-          ...value,
-          ...evolutionPokemon,
-        };
-        onChange(evolvedPokemon);
-        if (!isDevolution) {
-          const id = locationId ?? value?.originalLocation ?? null;
-          if (id) emitEvolutionEvent(id);
-        }
-      } else if (isDevolution && availablePreEvolution) {
-        // Devolution - go to pre-evolution
-        const devolvedPokemon: PokemonOptionType = {
-          ...value,
-          ...availablePreEvolution,
-        };
-        onChange(devolvedPokemon);
-      } else if (availableEvolutions.length === 1) {
-        // Single evolution - directly evolve
-        const evolution = availableEvolutions.at(0)!;
-        const evolvedPokemon: PokemonOptionType = {
-          ...value,
-          ...evolution,
-        };
-        onChange(evolvedPokemon);
-        if (!isDevolution) {
-          const id = locationId ?? value?.originalLocation ?? null;
-          if (id) emitEvolutionEvent(id);
-        }
-      }
-    },
-    [availableEvolutions, availablePreEvolution, value, onChange, locationId],
-  );
+  const handleEvolution = (
+    selectedEvolution?: PokemonOptionType,
+    isDevolution = false,
+  ) => {
+    const nextPokemon =
+      selectedEvolution ??
+      (isDevolution ? availablePreEvolution : availableEvolutions.at(0));
 
-  // Handle evolution button click for single evolution or devolution
-  const handleDirectAction = useCallback(() => {
-    handleEvolution(undefined, isDevolutionMode);
-  }, [handleEvolution, isDevolutionMode]);
+    if (!nextPokemon) return;
+
+    onChange({ ...value, ...nextPokemon });
+
+    if (isDevolution) return;
+
+    const id = locationId ?? value?.originalLocation ?? null;
+    if (id) emitEvolutionEvent(id);
+  };
 
   // Don't render if no Pokemon is selected or no evolutions/devolutions available
   if (!value || (!hasEvolutions && !isDevolutionMode) || isLoading) {
@@ -238,77 +283,14 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   // For single evolution or devolution mode, render a simple button
   if (isDevolutionMode || availableEvolutions.length === 1) {
     return (
-      <div className="absolute inset-y-0 right-4 flex items-center">
-        <CursorTooltip
-          content={
-            <div className="flex items-center gap-x-4">
-              <div className="flex items-center justify-center w-8 h-8">
-                <PokemonSprite
-                  pokemonId={
-                    isDevolutionMode
-                      ? availablePreEvolution?.id
-                      : availableEvolutions[0]?.id
-                  }
-                  generation="gen7"
-                />
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <span>
-                  {isDevolutionMode ? (
-                    <Fragment>
-                      Devolve to{" "}
-                      <span className="font-semibold">
-                        {availablePreEvolution?.name}
-                      </span>
-                    </Fragment>
-                  ) : (
-                    <Fragment>
-                      Evolve to{" "}
-                      <span className="font-semibold">
-                        {availableEvolutions[0]?.name}
-                      </span>
-                    </Fragment>
-                  )}
-                </span>
-                {!isDevolutionMode && availablePreEvolution && (
-                  <span className="text-xs text-gray-400">
-                    Hold shift to devolve
-                  </span>
-                )}
-              </div>
-            </div>
-          }
-          delay={300}
-        >
-          <button
-            type="button"
-            onClick={handleDirectAction}
-            disabled={isLoading}
-            className={clsx(
-              "flex items-center justify-center gap-1 px-2 py-1 rounded-md",
-              "bg-gray-100 text-gray-600 text-xs ",
-              "border border-gray-300 hover:border-blue-300 dark:border-gray-600 dark:hover:border-blue-400",
-              "transition-colors duration-200",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
-              "dark:bg-gray-700 dark:hover:bg-blue-900/20 dark:text-gray-400 dark:hover:text-blue-400",
-              "hover:cursor-pointer",
-              {
-                "hover:bg-orange-100 hover:text-orange-600 hover:border-orange-300 dark:hover:bg-orange-900/20 dark:hover:text-orange-400 dark:hover:border-orange-400":
-                  isDevolutionMode,
-                "hover:bg-blue-100 hover:text-blue-600 hover:border-blue-300 dark:bg-blue-900/20 dark:hover:text-blue-400 dark:hover:border-blue-400":
-                  !isDevolutionMode,
-              },
-            )}
-          >
-            {isDevolutionMode ? (
-              <Undo2 className="w-3 h-3" />
-            ) : (
-              <Atom className="w-3 h-3" />
-            )}
-          </button>
-        </CursorTooltip>
-      </div>
+      <DirectEvolutionButton
+        pokemon={
+          isDevolutionMode ? availablePreEvolution! : availableEvolutions[0]!
+        }
+        isDevolutionMode={isDevolutionMode}
+        showDevolutionHint={!isDevolutionMode && !!availablePreEvolution}
+        onClick={() => handleEvolution(undefined, isDevolutionMode)}
+      />
     );
   }
 

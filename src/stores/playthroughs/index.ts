@@ -1,120 +1,28 @@
-// Export types
-
-// Export custom location actions
-export {
-  addCustomLocation,
-  getAvailableAfterLocations,
-  getCustomLocations,
-  getMergedLocations,
-  removeCustomLocation,
-  updateCustomLocationName,
-  validateCustomLocationPlacement,
-} from "./customLocations";
-// Export encounter actions
-export {
-  clearEncounterFromLocation,
-  createEncounterData,
-  createFusion,
-  cycleArtworkVariant,
-  flipEncounterFusion,
-  flipTeamMemberFusion,
-  getEncounters,
-  getLocationFromComboboxId,
-  markEncounterAsCaptured,
-  markEncounterAsDeceased,
-  markEncounterAsMissed,
-  markEncounterAsReceived,
-  markTeamMemberAsDeceased,
-  moveEncounter,
-  moveEncounterAtomic,
-  moveEncounterToBox,
-  moveTeamMemberToBox,
-  moveToOriginalLocation,
-  prefetchAdjacentVariants,
-  preloadArtworkVariants,
-  resetEncounter,
-  restorePokemonToTeam,
-  setArtworkVariant,
-  swapEncounters,
-  toggleEncounterFusion,
-  updateEncounter,
-  updatePokemonByUID,
-  updatePokemonInEncounter,
-} from "./encounters";
-// Export React hooks
-export {
-  useActivePlaythrough,
-  useAllPlaythroughs,
-  useAvailableAfterLocations,
-  useCustomLocations,
-  useEncounter,
-  useEncounters,
-  useGameMode,
-  useIsLoading,
-  useIsRandomizedMode,
-  useIsRemixMode,
-  useIsSaving,
-  useMergedLocations,
-  usePlaythroughById,
-  usePlaythroughsSnapshot,
-  usePreferredVariant,
-} from "./hooks";
-// Export persistence utilities (may be needed for testing or advanced usage)
-export {
-  deletePlaythroughFromIndexedDB,
-  loadAllPlaythroughs,
-  loadPlaythroughById,
-  saveToIndexedDB,
-} from "./persistence";
-// Export store and core actions
-export {
-  createPlaythrough,
-  cycleGameMode,
-  deletePlaythrough,
-  forceSave,
-  getActivePlaythrough,
-  getAllPlaythroughs,
-  getCurrentlyLoadedPlaythroughs,
-  getGameMode,
-  isRandomizedModeEnabled,
-  isRemixModeEnabled,
-  playthroughsStore,
-  resetAllPlaythroughs,
-  setActivePlaythrough,
-  setGameMode,
-  setRemixMode,
-  toggleRemixMode,
-  updatePlaythroughName,
-} from "./store";
-export type {
-  EncounterData,
-  ExportedPlaythrough,
-  GameMode,
-  ImportedPlaythrough,
-  Playthrough,
-  PlaythroughsState,
-} from "./types";
-export {
-  DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
-  EncounterDataSchema,
-  ExportedPlaythroughSchema,
-  GameModeSchema,
-  ImportedPlaythroughSchema,
-  PlaythroughSchema,
-  PlaythroughsSchema,
-} from "./types";
-
 import * as customLocationActions from "./customLocations";
 import * as encounterActions from "./encounters";
-// Create a combined actions object for easier usage (similar to the original playthroughActions)
+import { getEncounters } from "./encounters/crud";
+import { updatePokemonByUID } from "./encounters/team";
+import {
+  cycleArtworkVariant,
+  prefetchAdjacentVariants,
+  preloadArtworkVariants,
+  setArtworkVariant,
+} from "./encounters/variants";
 import * as storeActions from "./store";
 
+// The aggregate action API remains the only public entry point for state mutations.
 export const playthroughActions = {
   // Core store actions
   ...storeActions,
 
   // Encounter actions
   ...encounterActions,
+  getEncounters,
+  updatePokemonByUID,
+  cycleArtworkVariant,
+  prefetchAdjacentVariants,
+  preloadArtworkVariants,
+  setArtworkVariant,
 
   // Custom location actions
   ...customLocationActions,

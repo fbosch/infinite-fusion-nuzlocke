@@ -12,20 +12,19 @@ import {
   Upload,
 } from "lucide-react";
 import type React from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import { usePlaythroughImportExport } from "@/hooks/usePlaythroughImportExport";
 import { getSharedEventProperties } from "@/lib/analytics/playthroughEventData";
 import { trackEvent } from "@/lib/analytics/trackEvent";
 import {
-  type GameMode,
-  type Playthrough,
-  playthroughActions,
   useActivePlaythrough,
   useAllPlaythroughs,
   useIsLoading,
-} from "@/stores/playthroughs";
+} from "@/stores/playthroughs/hooks";
+import { playthroughActions } from "@/stores/playthroughs/index";
+import type { GameMode, Playthrough } from "@/stores/playthroughs/types";
 import CreatePlaythroughModal from "./CreatePlaythroughModal";
 import { ImportErrorContent } from "./ImportErrorContent";
 
@@ -77,7 +76,10 @@ export default function PlaythroughSelector({
   } = usePlaythroughImportExport();
 
   const allPlaythroughs = useAllPlaythroughs();
-  const playthroughRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const sortedPlaythroughsForRender = allPlaythroughs.toSorted(
+    (a, b) => b.createdAt - a.createdAt,
+  );
+  const playthroughRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   // Initialize refs array when playthroughs change
   useEffect(() => {
@@ -88,31 +90,28 @@ export default function PlaythroughSelector({
   }, [allPlaythroughs.length]);
 
   // Switch to a different playthrough
-  const handlePlaythroughSelect = useCallback(
-    async (playthroughId: string, triggerMethod: "click" | "keyboard") => {
-      try {
-        await playthroughActions.setActivePlaythrough(playthroughId, {
-          source_surface: "playthrough_selector",
-          trigger_method: triggerMethod,
-        });
-      } catch (error) {
-        console.error("Failed to switch playthrough:", error);
-      }
-    },
-    [],
-  );
+  const handlePlaythroughSelect = async (
+    playthroughId: string,
+    triggerMethod: "click" | "keyboard",
+  ) => {
+    try {
+      await playthroughActions.setActivePlaythrough(playthroughId, {
+        source_surface: "playthrough_selector",
+        trigger_method: triggerMethod,
+      });
+    } catch (error) {
+      console.error("Failed to switch playthrough:", error);
+    }
+  };
 
   // Handle delete playthrough click
-  const handleDeleteClick = useCallback(
-    (playthrough: { id: string; name: string }) => {
-      setPlaythroughToDelete(playthrough as Playthrough);
-      setShowDeleteConfirm(true);
-    },
-    [],
-  );
+  const handleDeleteClick = (playthrough: { id: string; name: string }) => {
+    setPlaythroughToDelete(playthrough as Playthrough);
+    setShowDeleteConfirm(true);
+  };
 
   // Confirm delete playthrough
-  const handleConfirmDelete = useCallback(async () => {
+  const handleConfirmDelete = async () => {
     if (!playthroughToDelete) return;
 
     try {
@@ -122,7 +121,7 @@ export default function PlaythroughSelector({
     } catch (error) {
       console.error("Failed to delete playthrough:", error);
     }
-  }, [playthroughToDelete]);
+  };
 
   // Cancel delete
   const handleCancelDelete = () => {
@@ -130,7 +129,7 @@ export default function PlaythroughSelector({
     setPlaythroughToDelete(null);
   };
 
-  const trackSelectorOpened = useCallback(() => {
+  const trackSelectorOpened = () => {
     if (!activePlaythrough) {
       return;
     }
@@ -139,55 +138,50 @@ export default function PlaythroughSelector({
       ...getSharedEventProperties(activePlaythrough),
       source_surface: "header",
     });
-  }, [activePlaythrough]);
+  };
 
-  const handleCreateClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.preventDefault();
-      if (activePlaythrough) {
-        trackEvent("create_playthrough_modal_opened", {
-          ...getSharedEventProperties(activePlaythrough),
-          source_surface: "header",
-        });
-      }
-      setShowCreateInput(true);
-    },
-    [activePlaythrough],
-  );
+  const handleCreateClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    if (activePlaythrough) {
+      trackEvent("create_playthrough_modal_opened", {
+        ...getSharedEventProperties(activePlaythrough),
+        source_surface: "header",
+      });
+    }
+    setShowCreateInput(true);
+  };
 
   // Handle arrow key navigation using refs
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent, currentIndex: number) => {
-      e.preventDefault();
+  const handleKeyDown = (e: React.KeyboardEvent, currentIndex: number) => {
+    e.preventDefault();
 
-      // Get the sorted playthroughs (newest first)
-      const sortedPlaythroughs = allPlaythroughs.toSorted(
-        (a, b) => b.createdAt - a.createdAt,
-      );
-
-      switch (e.key) {
-        case "ArrowDown": {
-          const nextIndex =
-            currentIndex < sortedPlaythroughs.length - 1 ? currentIndex + 1 : 0;
-          playthroughRefs.current[nextIndex]?.focus();
-          break;
-        }
-        case "ArrowUp": {
-          const prevIndex =
-            currentIndex > 0 ? currentIndex - 1 : sortedPlaythroughs.length - 1;
-          playthroughRefs.current[prevIndex]?.focus();
-          break;
-        }
-        case "Home":
-          playthroughRefs.current[0]?.focus();
-          break;
-        case "End":
-          playthroughRefs.current[sortedPlaythroughs.length - 1]?.focus();
-          break;
+    switch (e.key) {
+      case "ArrowDown": {
+        const nextIndex =
+          currentIndex < sortedPlaythroughsForRender.length - 1
+            ? currentIndex + 1
+            : 0;
+        playthroughRefs.current[nextIndex]?.focus();
+        break;
       }
-    },
-    [allPlaythroughs],
-  );
+      case "ArrowUp": {
+        const prevIndex =
+          currentIndex > 0
+            ? currentIndex - 1
+            : sortedPlaythroughsForRender.length - 1;
+        playthroughRefs.current[prevIndex]?.focus();
+        break;
+      }
+      case "Home":
+        playthroughRefs.current[0]?.focus();
+        break;
+      case "End":
+        playthroughRefs.current[
+          sortedPlaythroughsForRender.length - 1
+        ]?.focus();
+        break;
+    }
+  };
 
   return (
     <>
@@ -232,14 +226,16 @@ export default function PlaythroughSelector({
                 />
               </PopoverButton>
               <PopoverPanel
+                transition
                 anchor={{ to: "bottom end", gap: "12px" }}
                 className={clsx(
                   "z-[50] rounded-xl",
                   "bg-white/95 dark:bg-gray-800/95 backdrop-blur-md",
                   "shadow-dropdown",
                   "border border-gray-200/50 dark:border-gray-600/50",
-                  "w-[var(--button-width,100%)] max-w-[calc(100vw-2rem)]",
+                  "w-80 max-w-[calc(100vw-2rem)] sm:w-96",
                   "origin-top-right",
+                  "transition-opacity duration-150 data-closed:opacity-0",
                 )}
               >
                 {/* Current playthroughs section */}
@@ -247,9 +243,10 @@ export default function PlaythroughSelector({
                   <>
                     <div className="px-4 py-3 flex items-center justify-between border-b border-gray-200/50 dark:border-gray-600/50 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/30 dark:to-gray-600/30 rounded-t-xl">
                       <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Your Playthroughs
+                        Playthroughs
                       </span>
                       <button
+                        type="button"
                         onClick={handleImportClick}
                         className={clsx(
                           "px-2 py-1 text-xs font-medium rounded-md flex items-center gap-1.5",
@@ -268,195 +265,182 @@ export default function PlaythroughSelector({
                         Import
                       </button>
                     </div>
-                    {allPlaythroughs
-                      .toSorted((a, b) => b.createdAt - a.createdAt)
-                      .map((playthrough) => {
-                        const gameModeInfo = getGameModeInfo(
-                          playthrough.gameMode as GameMode,
-                        );
-                        const isActive =
-                          activePlaythrough?.id === playthrough.id;
+                    {sortedPlaythroughsForRender.map((playthrough) => {
+                      const gameModeInfo = getGameModeInfo(
+                        playthrough.gameMode as GameMode,
+                      );
+                      const isActive = activePlaythrough?.id === playthrough.id;
 
-                        return (
-                          <div
-                            key={playthrough.id}
-                            className={clsx(
-                              "relative",
-                              "hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100/50 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 text-gray-900 dark:text-gray-100",
-                              isActive &&
-                                "bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/20 text-blue-700 dark:text-blue-300",
-                            )}
-                          >
-                            <div
-                              ref={(el) => {
-                                // Use the index in the sorted array (newest first)
-                                const sortedPlaythroughs =
-                                  allPlaythroughs.toSorted(
-                                    (a, b) => b.createdAt - a.createdAt,
-                                  );
-                                const index = sortedPlaythroughs.findIndex(
+                      return (
+                        <div
+                          key={playthrough.id}
+                          className={clsx(
+                            "group/menu-item relative",
+                            "hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100/50 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 text-gray-900 dark:text-gray-100",
+                            isActive &&
+                              "bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/20 text-blue-700 dark:text-blue-300",
+                          )}
+                        >
+                          <button
+                            type="button"
+                            ref={(el) => {
+                              const index =
+                                sortedPlaythroughsForRender.findIndex(
                                   (p) => p.id === playthrough.id,
                                 );
-                                if (index >= 0) {
-                                  playthroughRefs.current[index] = el;
-                                }
-                              }}
-                              onClick={() =>
-                                handlePlaythroughSelect(playthrough.id, "click")
+                              if (index >= 0) {
+                                playthroughRefs.current[index] = el;
                               }
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter" || e.key === " ") {
-                                  e.preventDefault();
-                                  handlePlaythroughSelect(
-                                    playthrough.id,
-                                    "keyboard",
-                                  );
-                                } else if (
-                                  e.key === "ArrowDown" ||
-                                  e.key === "ArrowUp" ||
-                                  e.key === "Home" ||
-                                  e.key === "End"
-                                ) {
-                                  // Use the index in the sorted array (newest first)
-                                  const sortedPlaythroughs =
-                                    allPlaythroughs.toSorted(
-                                      (a, b) => b.createdAt - a.createdAt,
-                                    );
-                                  const index = sortedPlaythroughs.findIndex(
+                            }}
+                            onClick={() =>
+                              handlePlaythroughSelect(playthrough.id, "click")
+                            }
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                handlePlaythroughSelect(
+                                  playthrough.id,
+                                  "keyboard",
+                                );
+                              } else if (
+                                e.key === "ArrowDown" ||
+                                e.key === "ArrowUp" ||
+                                e.key === "Home" ||
+                                e.key === "End"
+                              ) {
+                                const index =
+                                  sortedPlaythroughsForRender.findIndex(
                                     (p) => p.id === playthrough.id,
                                   );
-                                  handleKeyDown(e, index);
-                                }
-                              }}
-                              tabIndex={0}
-                              role="button"
-                              aria-label={`Select playthrough: ${playthrough.name}`}
-                              data-playthrough-index={allPlaythroughs
-                                .toSorted((a, b) => b.createdAt - a.createdAt)
-                                .findIndex((p) => p.id === playthrough.id)}
-                              className={clsx(
-                                "group/menu-item flex w-full items-center justify-between px-4 py-3.5 text-sm",
-                                "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset text-left transition-all duration-200 ease-out",
-                                "cursor-pointer",
-                              )}
-                            >
-                              <div className="flex items-center gap-3 flex-1 min-w-0">
-                                <div
-                                  className={clsx(
-                                    "w-2.5 h-2.5 rounded-full flex-shrink-0",
-                                    isActive
-                                      ? "bg-blue-500 shadow-sm"
-                                      : "bg-gray-400 dark:bg-gray-500",
-                                  )}
-                                />
-                                <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <span className="truncate font-semibold">
-                                      {playthrough.name}
+                                handleKeyDown(e, index);
+                              }
+                            }}
+                            aria-label={`Select playthrough: ${playthrough.name}`}
+                            data-playthrough-index={sortedPlaythroughsForRender.findIndex(
+                              (p) => p.id === playthrough.id,
+                            )}
+                            className={clsx(
+                              "flex w-full items-center justify-between px-4 py-3.5 pr-24 text-sm",
+                              "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset text-left transition-all duration-200 ease-out",
+                              "cursor-pointer",
+                            )}
+                          >
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div
+                                className={clsx(
+                                  "w-2.5 h-2.5 rounded-full flex-shrink-0",
+                                  isActive
+                                    ? "bg-blue-500 shadow-sm"
+                                    : "bg-gray-400 dark:bg-gray-500",
+                                )}
+                              />
+                              <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="truncate font-semibold">
+                                    {playthrough.name}
+                                  </span>
+                                  {gameModeInfo && (
+                                    <span
+                                      className={clsx(
+                                        "text-xs px-2 py-1 rounded-full font-medium",
+                                        gameModeInfo.className,
+                                      )}
+                                    >
+                                      {gameModeInfo.label}
                                     </span>
-                                    {gameModeInfo && (
-                                      <span
-                                        className={clsx(
-                                          "text-xs px-2 py-1 rounded-full font-medium",
-                                          gameModeInfo.className,
-                                        )}
-                                      >
-                                        {gameModeInfo.label}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                                    <div className="flex items-center gap-1">
-                                      <Calendar className="w-3 h-3" />
-                                      <span>
-                                        {new Date(
-                                          playthrough.createdAt,
-                                        ).toLocaleDateString()}
-                                      </span>
-                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    <span>
+                                      {new Date(
+                                        playthrough.createdAt,
+                                      ).toLocaleDateString()}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1 opacity-0 group-hover/menu-item:opacity-100 group-focus-within/menu-item:opacity-100 transition-all duration-200">
-                                <button
-                                  onClick={(e) =>
-                                    handleExportClick(
-                                      playthrough as Playthrough,
-                                      e,
-                                    )
-                                  }
-                                  onKeyDown={(e) =>
-                                    handleExportKeyDown(
-                                      playthrough as Playthrough,
-                                      e,
-                                    )
-                                  }
-                                  className={clsx(
-                                    "p-2 rounded-lg transition-all duration-200",
-                                    "border border-transparent",
-                                    "hover:bg-blue-100 hover:border-blue-300 dark:hover:bg-blue-900/20 dark:hover:border-blue-600",
-                                    "focus:bg-blue-100 focus:border-blue-300 dark:focus:bg-blue-900/20 dark:focus:border-blue-600",
-                                    "text-gray-400 hover:text-blue-600 dark:hover:text-blue-400",
-                                    "focus:text-blue-600 dark:focus:text-blue-400",
-                                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset",
-                                    "cursor-pointer",
-                                  )}
-                                  aria-label={`Export ${playthrough.name}`}
-                                  tabIndex={0}
-                                >
-                                  <div className="relative z-[1000]">
-                                    <CursorTooltip
-                                      delay={200}
-                                      content="Export playthrough"
-                                      placement="bottom-start"
-                                    >
-                                      <Download className="w-4 h-4" />
-                                    </CursorTooltip>
-                                  </div>
-                                </button>
-                                {allPlaythroughs.length > 1 && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      handleDeleteClick(playthrough);
-                                    }}
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter" || e.key === " ") {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        handleDeleteClick(playthrough);
-                                      }
-                                    }}
-                                    className={clsx(
-                                      "p-2 rounded-lg transition-all duration-200",
-                                      "border border-transparent",
-                                      "hover:bg-red-100 hover:border-red-300 dark:hover:bg-red-900/20 dark:hover:border-red-600",
-                                      "focus:bg-red-100 focus:border-red-300 dark:focus:bg-red-900/20 dark:focus:border-red-600",
-                                      "text-gray-400 hover:text-red-600 dark:hover:text-red-400",
-                                      "focus:text-red-600 dark:focus:text-red-400",
-                                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-inset",
-                                      "cursor-pointer",
-                                    )}
-                                    aria-label={`Delete ${playthrough.name}`}
-                                    tabIndex={0}
-                                  >
-                                    <div className="relative z-[1000]">
-                                      <CursorTooltip
-                                        delay={200}
-                                        content="Delete playthrough"
-                                        placement="bottom-start"
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </CursorTooltip>
-                                    </div>
-                                  </button>
-                                )}
-                              </div>
                             </div>
+                          </button>
+                          <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-1 opacity-0 transition-opacity duration-200 group-hover/menu-item:opacity-100 group-focus-within/menu-item:opacity-100">
+                            <button
+                              type="button"
+                              onClick={(e) =>
+                                handleExportClick(playthrough as Playthrough, e)
+                              }
+                              onKeyDown={(e) =>
+                                handleExportKeyDown(
+                                  playthrough as Playthrough,
+                                  e,
+                                )
+                              }
+                              className={clsx(
+                                "p-2 rounded-lg transition-colors duration-200",
+                                "border border-transparent",
+                                "hover:bg-blue-100 hover:border-blue-300 dark:hover:bg-blue-900/20 dark:hover:border-blue-600",
+                                "focus:bg-blue-100 focus:border-blue-300 dark:focus:bg-blue-900/20 dark:focus:border-blue-600",
+                                "text-gray-400 hover:text-blue-600 dark:hover:text-blue-400",
+                                "focus:text-blue-600 dark:focus:text-blue-400",
+                                "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset",
+                                "cursor-pointer",
+                              )}
+                              aria-label={`Export ${playthrough.name}`}
+                              tabIndex={0}
+                            >
+                              <div className="relative z-[1000]">
+                                <CursorTooltip
+                                  delay={200}
+                                  content="Export playthrough"
+                                  placement="bottom-start"
+                                >
+                                  <Download className="w-4 h-4" />
+                                </CursorTooltip>
+                              </div>
+                            </button>
+                            {allPlaythroughs.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleDeleteClick(playthrough);
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleDeleteClick(playthrough);
+                                  }
+                                }}
+                                className={clsx(
+                                  "p-2 rounded-lg transition-all duration-200",
+                                  "border border-transparent",
+                                  "hover:bg-red-100 hover:border-red-300 dark:hover:bg-red-900/20 dark:hover:border-red-600",
+                                  "focus:bg-red-100 focus:border-red-300 dark:focus:bg-red-900/20 dark:focus:border-red-600",
+                                  "text-gray-400 hover:text-red-600 dark:hover:text-red-400",
+                                  "focus:text-red-600 dark:focus:text-red-400",
+                                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-inset",
+                                  "cursor-pointer",
+                                )}
+                                aria-label={`Delete ${playthrough.name}`}
+                                tabIndex={0}
+                              >
+                                <div className="relative z-[1000]">
+                                  <CursorTooltip
+                                    delay={200}
+                                    content="Delete playthrough"
+                                    placement="bottom-start"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </CursorTooltip>
+                                </div>
+                              </button>
+                            )}
                           </div>
-                        );
-                      })}
+                        </div>
+                      );
+                    })}
                   </>
                 )}
 
@@ -479,6 +463,7 @@ export default function PlaythroughSelector({
                 >
                   <div className="relative">
                     <button
+                      type="button"
                       onClick={handleCreateClick}
                       className={clsx(
                         "group flex w-full items-center gap-3 px-4 py-3.5 text-sm",

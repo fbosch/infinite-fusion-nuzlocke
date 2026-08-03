@@ -3,6 +3,61 @@ import { type NextRequest, NextResponse } from "next/server";
 // Cache for 2 weeks (artists update monthly, so 2 weeks is safe)
 const CACHE_DURATION = 60 * 60 * 24 * 14; // 14 days in seconds
 
+const extractArtists = (html: string): string[] => {
+  const artistsMatch = html.match(/<span class="artists">([\s\S]*?)<\/span>/);
+  if (!artistsMatch) {
+    return [];
+  }
+
+  const artistLinks = artistsMatch[1].match(/<a[^>]*>([^<]+)<\/a>/g);
+  if (!artistLinks) {
+    return [];
+  }
+
+  const artists: string[] = [];
+  for (const link of artistLinks) {
+    const name = link.match(/<a[^>]*>([^<]+)<\/a>/)?.[1] || "";
+    if (name.trim()) {
+      artists.push(name);
+    }
+  }
+
+  return artists;
+};
+
+// Parsing base and gallery credits together preserves the route's single response contract.
+// fallow-ignore-next-line complexity
+const extractArtistCredits = (html: string, id: string) => {
+  const artistCredits: Record<string, string[]> = {};
+  const baseDexEntryMatch = html.match(
+    /<article class="dex-entry sprite-variant-main">[\s\S]*?<figcaption>[\s\S]*?<\/figcaption>/,
+  );
+  if (baseDexEntryMatch) {
+    const baseArtists = extractArtists(baseDexEntryMatch[0]);
+    if (baseArtists.length > 0) {
+      artistCredits[id] = baseArtists;
+    }
+  }
+
+  const spriteArticles = html.match(
+    /<article class="sprite-preview[^"]*">[\s\S]*?<\/article>/g,
+  );
+  for (const article of spriteArticles ?? []) {
+    const spriteId = article.match(/href="\/sprite\/pif\/([^"/]+)/)?.[1];
+    const figcaption = article.match(/<figcaption>[\s\S]*?<\/figcaption>/)?.[0];
+    if (!spriteId || !figcaption) {
+      continue;
+    }
+
+    const artists = extractArtists(figcaption);
+    if (artists.length > 0) {
+      artistCredits[spriteId] = artists;
+    }
+  }
+
+  return artistCredits;
+};
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
@@ -14,21 +69,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Construct the FusionDex URL from the ID
   const url = `https://www.fusiondex.org/sprite/pif/${id}/`;
-
-  // Helper function to extract artists from HTML
-  const extractArtists = (html: string): string[] => {
-    const artistsMatch = html.match(/<span class="artists">([\s\S]*?)<\/span>/);
-    if (!artistsMatch) return [];
-
-    const artistLinks = artistsMatch[1].match(/<a[^>]*>([^<]+)<\/a>/g);
-    if (!artistLinks) return [];
-
-    return artistLinks
-      .map((link) => link.match(/<a[^>]*>([^<]+)<\/a>/)?.[1] || "")
-      .filter((name) => name.trim());
-  };
 
   try {
     // Fetch only the first part of the page (where gallery content is)
@@ -56,40 +97,7 @@ export async function GET(request: NextRequest) {
     }
 
     const html = await response.text();
-    const artistCredits: Record<string, string[]> = {};
-
-    // Extract base sprite credit
-    const baseDexEntryMatch = html.match(
-      /<article class="dex-entry sprite-variant-main">[\s\S]*?<figcaption>[\s\S]*?<\/figcaption>/,
-    );
-    if (baseDexEntryMatch) {
-      const baseArtists = extractArtists(baseDexEntryMatch[0]);
-      if (baseArtists.length > 0) {
-        artistCredits[id] = baseArtists;
-      }
-    }
-
-    // Extract all gallery sprite variants
-    const spriteArticles = html.match(
-      /<article class="sprite-preview[^"]*">[\s\S]*?<\/article>/g,
-    );
-    if (spriteArticles) {
-      for (const article of spriteArticles) {
-        const spriteIdMatch = article.match(/href="\/sprite\/pif\/([^"/]+)/);
-        const figcaptionMatch = article.match(
-          /<figcaption>[\s\S]*?<\/figcaption>/,
-        );
-
-        if (spriteIdMatch && figcaptionMatch) {
-          const spriteId = spriteIdMatch[1];
-          const artists = extractArtists(figcaptionMatch[0]);
-
-          if (artists.length > 0) {
-            artistCredits[spriteId] = artists;
-          }
-        }
-      }
-    }
+    const artistCredits = extractArtistCredits(html, id);
 
     if (Object.keys(artistCredits).length === 0) {
       return NextResponse.json(

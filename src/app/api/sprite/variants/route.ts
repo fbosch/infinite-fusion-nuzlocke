@@ -1,34 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
+import {
+  generateSpriteVariantUrl,
+  getSpriteVariantSuffix,
+} from "@/lib/spriteVariants";
 import type { SpriteVariantsResponse } from "@/types/sprites";
 
 export const revalidate = 86400;
-
-// Request deduplication cache for CDN optimization
-const processingCache = new Map<string, Promise<NextResponse>>();
-
-/**
- * Generate variant suffix for index (0='', 1='a', 2='b', etc.)
- */
-function getVariantSuffix(index: number): string {
-  if (index === 0) return "";
-
-  let result = "";
-  index = index - 1; // Convert to 0-based
-
-  do {
-    result = String.fromCharCode(97 + (index % 26)) + result;
-    index = Math.floor(index / 26);
-  } while (index > 0);
-
-  return result;
-}
-
-/**
- * Generate sprite URL for a fusion or single Pokémon
- */
-function generateSpriteUrl(id: string, variant = ""): string {
-  return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${id}${variant}.png`;
-}
 
 /**
  * Handle CORS preflight requests
@@ -89,12 +66,6 @@ export async function GET(request: NextRequest) {
     // Ignore cache busting version parameter (v)
     const maxVariants = 50;
 
-    // Check if we're already processing this request (CDN deduplication)
-    const cacheKey = `sprite-variants-${id}`;
-    if (processingCache.has(cacheKey)) {
-      return processingCache.get(cacheKey)!;
-    }
-
     // Validate input
     if (!id) {
       const errorResponse = NextResponse.json(
@@ -118,17 +89,8 @@ export async function GET(request: NextRequest) {
       return errorResponse;
     }
 
-    // Create processing promise and cache it
-    const processingPromise = processSpriteVariants(id, maxVariants);
-    processingCache.set(cacheKey, processingPromise);
-
-    // Clean up cache after completion
-    processingPromise.finally(() => {
-      processingCache.delete(cacheKey);
-    });
-
     // Wrap promise to handle rejections with proper error response and CORS headers
-    return processingPromise.catch((error) => {
+    return processSpriteVariants(id, maxVariants).catch((error) => {
       console.error("Error processing sprite variants:", error);
 
       const errorResponse = NextResponse.json(
@@ -171,8 +133,8 @@ async function processSpriteVariants(
 
   // Check variants sequentially to maintain order and break early
   for (let i = 0; i < maxVariants; i++) {
-    const variant = getVariantSuffix(i);
-    const url = generateSpriteUrl(id, variant);
+    const variant = getSpriteVariantSuffix(i);
+    const url = generateSpriteVariantUrl(id, variant);
 
     if (await checkSpriteExists(url)) {
       variants.push(variant);

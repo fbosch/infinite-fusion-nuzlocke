@@ -1,19 +1,19 @@
 import { PokemonStatus } from "@/loaders/pokemon";
-import type { GameMode } from "./types";
+import { type GameMode, type Playthrough, PlaythroughSchema } from "./types";
 
 /**
  * Migration data type for playthrough migrations
  */
-export interface MigrationData {
-  id: string;
-  name: string;
+interface MigrationData {
+  id?: string;
+  name?: string;
   customLocations?: unknown[];
   encounters?: Record<string, unknown>;
   team?: unknown;
   gameMode?: GameMode;
   remixMode?: boolean;
-  createdAt: number;
-  updatedAt: number;
+  createdAt?: number;
+  updatedAt?: number;
   version?: string;
   [key: string]: unknown;
 }
@@ -21,7 +21,7 @@ export interface MigrationData {
 /**
  * Migrate remixMode to gameMode field
  */
-export function migrateRemixMode(data: MigrationData): MigrationData {
+const migrateRemixMode = (data: MigrationData): MigrationData => {
   if (
     data.remixMode !== undefined &&
     (data.gameMode === undefined || data.gameMode === "classic")
@@ -34,12 +34,12 @@ export function migrateRemixMode(data: MigrationData): MigrationData {
     };
   }
   return data;
-}
+};
 
 /**
  * Ensure team field exists with default empty team
  */
-export function migrateTeamField(data: MigrationData): MigrationData {
+const migrateTeamField = (data: MigrationData): MigrationData => {
   let team = data.team;
 
   if (!team) {
@@ -79,31 +79,31 @@ export function migrateTeamField(data: MigrationData): MigrationData {
   }
 
   return { ...data, team };
-}
+};
 
 /**
  * Ensure version field exists with default
  */
-export function migrateVersion(data: MigrationData): MigrationData {
+const migrateVersion = (data: MigrationData): MigrationData => {
   if (data.version === undefined) {
     return { ...data, version: "1.0.0" };
   }
   return data;
-}
+};
 
 /**
  * Clean up old remixMode field
  */
-export function cleanupRemixMode(data: MigrationData): MigrationData {
+const cleanupRemixMode = (data: MigrationData): MigrationData => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { remixMode, ...cleanData } = data;
   return cleanData;
-}
+};
 
 /**
  * Migrate team member schema from encounter IDs to Pokémon UIDs
  */
-export function migrateTeamMemberSchema(data: MigrationData): MigrationData {
+const migrateTeamMemberSchema = (data: MigrationData): MigrationData => {
   if (data.team && typeof data.team === "object" && "members" in data.team) {
     const team = data.team as Record<string, unknown>;
     const members = team.members;
@@ -136,85 +136,73 @@ export function migrateTeamMemberSchema(data: MigrationData): MigrationData {
     }
   }
   return data;
-}
+};
 
-/**
- * Migrate Pokémon to include originalReceivalStatus field
- */
-export function migrateOriginalReceivalStatus(
-  data: MigrationData,
-): MigrationData {
+type MigratablePokemon = {
+  originalReceivalStatus?: string;
+  status?: string;
+};
+
+const normalizePokemonOriginalReceivalStatus = (
+  pokemon: MigratablePokemon | null | undefined,
+) => {
+  if (!pokemon || pokemon.originalReceivalStatus) {
+    return pokemon;
+  }
+
+  const normalizedPokemon = { ...pokemon };
+
+  if (
+    normalizedPokemon.status === PokemonStatus.STORED ||
+    normalizedPokemon.status === PokemonStatus.DECEASED
+  ) {
+    normalizedPokemon.originalReceivalStatus = PokemonStatus.CAPTURED;
+    return normalizedPokemon;
+  }
+
+  if (
+    normalizedPokemon.status === PokemonStatus.CAPTURED ||
+    normalizedPokemon.status === PokemonStatus.RECEIVED ||
+    normalizedPokemon.status === PokemonStatus.TRADED
+  ) {
+    normalizedPokemon.originalReceivalStatus = normalizedPokemon.status;
+  }
+
+  return normalizedPokemon;
+};
+
+const migrateOriginalReceivalStatus = (data: MigrationData): MigrationData => {
   if (data.encounters && typeof data.encounters === "object") {
     const encounters = data.encounters as Record<
       string,
-      {
-        head?: {
-          originalReceivalStatus?: string;
-          status?: string;
-        } | null;
-        body?: {
-          originalReceivalStatus?: string;
-          status?: string;
-        } | null;
-      }
+      { head?: MigratablePokemon | null; body?: MigratablePokemon | null }
     >;
 
-    for (const locationId in encounters) {
-      const encounter = encounters[locationId];
-      if (encounter && typeof encounter === "object") {
-        // Migrate head Pokémon
-        if (encounter.head && typeof encounter.head === "object") {
-          if (!encounter.head.originalReceivalStatus) {
-            // Set originalReceivalStatus based on current status
-            if (
-              encounter.head.status === PokemonStatus.STORED ||
-              encounter.head.status === PokemonStatus.DECEASED
-            ) {
-              // Most common case: stored/deceased Pokémon were probably captured
-              encounter.head.originalReceivalStatus = PokemonStatus.CAPTURED;
-            } else if (
-              encounter.head.status === PokemonStatus.CAPTURED ||
-              encounter.head.status === PokemonStatus.RECEIVED ||
-              encounter.head.status === PokemonStatus.TRADED
-            ) {
-              // Active statuses: set as original
-              encounter.head.originalReceivalStatus = encounter.head.status;
-            }
-            // For 'missed' status, don't set originalReceivalStatus
+    return {
+      ...data,
+      encounters: Object.fromEntries(
+        Object.entries(encounters).map(([locationId, encounter]) => {
+          if (!encounter || typeof encounter !== "object") {
+            return [locationId, encounter];
           }
-        }
 
-        // Migrate body Pokémon
-        if (encounter.body && typeof encounter.body === "object") {
-          if (!encounter.body.originalReceivalStatus) {
-            // Set originalReceivalStatus based on current status
-            if (
-              encounter.body.status === PokemonStatus.STORED ||
-              encounter.body.status === PokemonStatus.DECEASED
-            ) {
-              // Most common case: stored/deceased Pokémon were probably captured
-              encounter.body.originalReceivalStatus = PokemonStatus.CAPTURED;
-            } else if (
-              encounter.body.status === PokemonStatus.CAPTURED ||
-              encounter.body.status === PokemonStatus.RECEIVED ||
-              encounter.body.status === PokemonStatus.TRADED
-            ) {
-              // Active statuses: set as original
-              encounter.body.originalReceivalStatus = encounter.body.status;
-            }
-            // For 'missed' status, don't set originalReceivalStatus
-          }
-        }
-      }
-    }
+          return [
+            locationId,
+            {
+              ...encounter,
+              head: normalizePokemonOriginalReceivalStatus(encounter.head),
+              body: normalizePokemonOriginalReceivalStatus(encounter.body),
+            },
+          ];
+        }),
+      ),
+    };
   }
 
   return data;
-}
+};
 
-export function cleanupEncounterArtworkVariant(
-  data: MigrationData,
-): MigrationData {
+const cleanupEncounterArtworkVariant = (data: MigrationData): MigrationData => {
   if (!data.encounters || typeof data.encounters !== "object") {
     return data;
   }
@@ -234,12 +222,12 @@ export function cleanupEncounterArtworkVariant(
       }),
     ),
   };
-}
+};
 
 /**
  * Ensure required fields exist with proper types
  */
-export function migrateRequiredFields(data: MigrationData): MigrationData {
+const migrateRequiredFields = (data: unknown): MigrationData => {
   const now = Date.now();
 
   // Handle completely malformed data
@@ -254,6 +242,8 @@ export function migrateRequiredFields(data: MigrationData): MigrationData {
       team: { members: Array.from({ length: 6 }, () => null) },
     };
   }
+
+  const migrationData = data as MigrationData;
 
   // Helper function to safely convert to number
   const toNumber = (value: unknown, fallback: number): number => {
@@ -276,26 +266,25 @@ export function migrateRequiredFields(data: MigrationData): MigrationData {
   return {
     ...data,
     id:
-      typeof data.id === "string" && data.id.length > 0
-        ? data.id
+      typeof migrationData.id === "string" && migrationData.id.length > 0
+        ? migrationData.id
         : `playthrough_${now}_${Math.random().toString(36).substr(2, 9)}`,
     name:
-      typeof data.name === "string" && data.name.length > 0
-        ? data.name
+      typeof migrationData.name === "string" && migrationData.name.length > 0
+        ? migrationData.name
         : "Playthrough",
-    createdAt: toNumber(data.createdAt, now),
-    updatedAt: toNumber(data.updatedAt, now),
+    createdAt: toNumber(migrationData.createdAt, now),
+    updatedAt: toNumber(migrationData.updatedAt, now),
   };
-}
+};
 
 /**
  * Apply all migrations to a playthrough in sequence
  */
-export function migratePlaythrough(data: MigrationData): MigrationData {
-  let migratedData = data;
+const applyPlaythroughMigrations = (data: unknown): MigrationData => {
+  let migratedData = migrateRequiredFields(data);
 
-  // Apply migrations in order
-  migratedData = migrateRequiredFields(migratedData);
+  // Migration order is part of the persisted-data contract.
   migratedData = migrateRemixMode(migratedData);
   migratedData = migrateVersion(migratedData);
   migratedData = migrateTeamField(migratedData);
@@ -305,9 +294,12 @@ export function migratePlaythrough(data: MigrationData): MigrationData {
   migratedData = cleanupRemixMode(migratedData);
 
   return migratedData;
-}
+};
 
-export function migrateImportedPlaythroughData(data: unknown): unknown {
+export const normalizePersistedPlaythrough = (data: unknown): Playthrough =>
+  PlaythroughSchema.parse(applyPlaythroughMigrations(data));
+
+export const normalizeImportedPlaythrough = (data: unknown): unknown => {
   if (!data || typeof data !== "object" || !("playthrough" in data)) {
     return data;
   }
@@ -324,6 +316,6 @@ export function migrateImportedPlaythroughData(data: unknown): unknown {
 
   return {
     ...data,
-    playthrough: migratePlaythrough(playthrough as MigrationData),
+    playthrough: normalizePersistedPlaythrough(playthrough),
   };
-}
+};

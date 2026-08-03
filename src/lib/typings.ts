@@ -79,7 +79,7 @@ function getDominantType(pokemon: Pokemon): TypeName | undefined {
 
 // INTERNAL: Effective order with swaps/dominant rules.
 // Use ONLY for fusion calculation. Do not use for single-Pokémon displays.
-export function getEffectiveTypeOrder(pokemon: Pokemon): EffectiveTypes {
+function getEffectiveTypeOrder(pokemon: Pokemon): EffectiveTypes {
   const id = pokemon.nationalDexId;
   const types = pokemon.types.map((t) => t.name.toLowerCase());
 
@@ -171,7 +171,7 @@ export type TypeQuery =
  * Helper to resolve a Pokemon by name, Infinite Fusion ID, or National Dex ID
  * and return its effective types.
  */
-export async function getPokemonTypes(
+async function getPokemonTypes(
   query: TypeQuery,
 ): Promise<{ primary: TypeName; secondary?: TypeName } | null> {
   let pokemon: Pokemon | null = null;

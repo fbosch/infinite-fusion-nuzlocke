@@ -1,6 +1,5 @@
 import { proxy, subscribe } from "valtio";
 import { devtools } from "valtio/utils";
-import { z } from "zod";
 import { getSharedEventProperties } from "@/lib/analytics/selectors";
 import {
   type SourceSurface,
@@ -11,7 +10,7 @@ import type { PokemonOptionType } from "@/loaders/pokemon";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 import { generatePrefixedId } from "@/utils/id";
 import { createDefaultPlaythrough } from "./defaultPlaythrough";
-import { migrateImportedPlaythroughData } from "./migrations";
+import { prepareImportedPlaythrough } from "./importPipeline";
 import {
   createDebouncedSaveAll,
   deletePlaythroughFromIndexedDB,
@@ -25,6 +24,7 @@ import {
   getCurrentTimestamp,
   setPlaythroughsStore,
 } from "./playthroughState";
+import { getAvailableTeamPositionsForMembers } from "./teamPositions";
 import {
   DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
   type GameMode,
@@ -66,30 +66,16 @@ if (typeof window !== "undefined") {
   // Client-side: Initialize with default state first, then load from IndexedDB
   playthroughsStore = proxy<PlaythroughsState>(defaultState);
 
-  const refreshSettingsDefaultsAfterPlaythroughLoad = async () => {
-    try {
-      const { settingsActions } = await import("@/stores/settings");
-      settingsActions.refreshDefaults();
-    } catch (error) {
-      console.warn(
-        "Failed to refresh settings defaults after playthrough load:",
-        error,
-      );
-    }
-  };
-
   // Add devtools integration for debugging
   if (process.env.NODE_ENV === "development") {
     devtools(playthroughsStore, { name: "Playthroughs Store" });
   }
 
   // Load data from IndexedDB asynchronously
-  loadFromIndexedDB(playthroughsStore)
-    .then(refreshSettingsDefaultsAfterPlaythroughLoad)
-    .finally(() => {
-      // Keep this explicit for callers that rely on the store-level flag.
-      playthroughsStore.isLoading = false;
-    });
+  loadFromIndexedDB(playthroughsStore).finally(() => {
+    // Keep this explicit for callers that rely on the store-level flag.
+    playthroughsStore.isLoading = false;
+  });
 
   // Create debounced save function with store dependencies
   const debouncedSaveAll = createDebouncedSaveAll(playthroughsStore, () =>
@@ -326,80 +312,19 @@ const getGameMode = (): GameMode => {
 };
 
 const importPlaythrough = async (importData: unknown): Promise<string> => {
-  try {
-    const { ImportedPlaythroughSchema } = await import("./types");
-    const migratedImportData = migrateImportedPlaythroughData(importData);
-    const validationResult =
-      ImportedPlaythroughSchema.safeParse(migratedImportData);
+  const persistedIds = (await loadAllPlaythroughs()).map((p) => p.id);
+  const newPlaythrough = prepareImportedPlaythrough(
+    importData,
+    new Set([
+      ...persistedIds,
+      ...playthroughsStore.playthroughs.map((p) => p.id),
+    ]),
+  );
 
-    if (!validationResult.success) {
-      throw validationResult.error;
-    }
+  playthroughsStore.playthroughs.push(newPlaythrough);
+  playthroughsStore.activePlaythroughId = newPlaythrough.id;
 
-    const validatedData = validationResult.data;
-
-    // Extract the playthrough data - the transform ensures proper typing
-    const importedPlaythrough = validatedData.playthrough;
-
-    // Check for ID conflicts and generate new ID if needed
-    const existingIds = new Set(
-      playthroughsStore.playthroughs.map((p) => p.id),
-    );
-    let finalId = importedPlaythrough.id;
-
-    if (existingIds.has(finalId)) {
-      // Generate a new unique ID with timestamp and crypto-secure random suffix
-      finalId = generatePrefixedId("playthrough");
-    }
-
-    // Create the new playthrough with migrated data
-    const newPlaythrough: Playthrough = {
-      id: finalId,
-      name: importedPlaythrough.name,
-      gameMode: importedPlaythrough.gameMode,
-      version: importedPlaythrough.version || "1.0.0",
-      createdAt: importedPlaythrough.createdAt,
-      updatedAt: Date.now(), // Update to current time
-      customLocations: importedPlaythrough.customLocations || [],
-      encounters: importedPlaythrough.encounters || {},
-      team: importedPlaythrough.team || {
-        members: [null, null, null, null, null, null],
-      }, // Fixed size 6 with null values
-    };
-
-    // Add to store
-    playthroughsStore.playthroughs.push(newPlaythrough);
-
-    // Set as active playthrough
-    playthroughsStore.activePlaythroughId = finalId;
-
-    return finalId;
-  } catch (error) {
-    console.error("Failed to import playthrough:", error);
-
-    // Handle Zod validation errors specifically
-    if (error && typeof error === "object" && "issues" in error) {
-      try {
-        const prettyError = z.prettifyError(error as z.ZodError);
-        throw new Error(`Validation failed:\n\n${prettyError}`);
-      } catch {
-        const zodError = error as z.ZodError;
-        if (zodError.issues && zodError.issues.length > 0) {
-          const errorDetails = zodError.issues
-            .map((issue: z.ZodIssue) => {
-              const path =
-                issue.path.length > 0 ? ` at ${issue.path.join(".")}` : "";
-              return `• ${issue.message}${path}`;
-            })
-            .join("\n");
-          throw new Error(`Validation failed:\n\n${errorDetails}`);
-        }
-        throw new Error("Data validation failed");
-      }
-    }
-
-    throw new Error("Invalid playthrough data format");
-  }
+  return newPlaythrough.id;
 };
 
 const isRandomizedModeEnabled = (): boolean => {
@@ -531,10 +456,7 @@ const getAvailableTeamPositions = (): number[] => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) return [];
 
-  return activePlaythrough.team.members
-    .map((member, index) => ({ member, index }))
-    .filter(({ member }) => member === null)
-    .map(({ index }) => index);
+  return getAvailableTeamPositionsForMembers(activePlaythrough.team.members);
 };
 
 export {

@@ -62,6 +62,52 @@ export const clearEncounterFromLocation = async (
   }
 };
 
+export const relocateEncounterSlot = async ({
+  sourceLocationId,
+  sourceField,
+  targetLocationId,
+  targetField,
+}: {
+  sourceLocationId: string;
+  sourceField: "head" | "body";
+  targetLocationId: string;
+  targetField: "head" | "body";
+}) => {
+  if (sourceLocationId === targetLocationId && sourceField === targetField) {
+    return;
+  }
+
+  const activePlaythrough = ensureActivePlaythroughWithEncounters();
+  if (!activePlaythrough) {
+    return;
+  }
+
+  const sourceEncounter = activePlaythrough.encounters[sourceLocationId];
+  const pokemon = sourceEncounter?.[sourceField];
+  if (!pokemon) {
+    return;
+  }
+
+  const targetEncounter = activePlaythrough.encounters[targetLocationId];
+  if (targetEncounter?.[targetField]) {
+    await swapEncounters(
+      sourceLocationId,
+      targetLocationId,
+      sourceField,
+      targetField,
+    );
+    return;
+  }
+
+  await moveEncounterAtomic(
+    sourceLocationId,
+    sourceField,
+    targetLocationId,
+    targetField,
+    pokemon,
+  );
+};
+
 // Move encounter atomically from source to destination (for drag and drop)
 export const moveEncounterAtomic = async (
   sourceLocationId: string,
@@ -90,7 +136,7 @@ export const moveEncounterAtomic = async (
   const willBeFusion =
     targetField === "body" || existingTargetEncounter?.isFusion === true;
 
-  await clearEncounterFromLocation(sourceLocationId, sourceField, {
+  void clearEncounterFromLocation(sourceLocationId, sourceField, {
     preserveTeamMembership: true,
   });
 

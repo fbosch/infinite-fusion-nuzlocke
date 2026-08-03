@@ -1,12 +1,13 @@
 import { flexRender, type Row } from "@tanstack/react-table";
 import { useEffect, useRef } from "react";
-import { useInView } from "react-intersection-observer";
 import { match } from "ts-pattern";
 import { addEvolutionListener } from "@/lib/events";
 import type { CombinedLocation } from "@/loaders/locations";
 import { isCustomLocation } from "@/loaders/locations";
-import { useEncounter } from "@/stores/playthroughs";
-import { useActivePlaythroughId } from "@/stores/playthroughs/hooks";
+import {
+  useActivePlaythroughId,
+  useEncounter,
+} from "@/stores/playthroughs/hooks";
 import { canFuse } from "@/utils/pokemonPredicates";
 import PokemonSummaryCard from "../PokemonSummaryCard";
 import type { FusionSpriteHandle } from "../PokemonSummaryCard/FusionSprite";
@@ -16,6 +17,7 @@ import ResetEncounterButton from "./ResetEncounterButton";
 
 interface LocationTableRowProps {
   row: Row<CombinedLocation>;
+  rowIndex?: number;
 }
 
 const EMPTY_ENCOUNTER = {
@@ -25,21 +27,40 @@ const EMPTY_ENCOUNTER = {
   updatedAt: 0,
 };
 
-export default function LocationTableRow({ row }: LocationTableRowProps) {
+const getEffectiveFusionId = ({
+  isFusion,
+  head,
+  body,
+}: Pick<
+  NonNullable<ReturnType<typeof useEncounter>>,
+  "isFusion" | "head" | "body"
+>) => {
+  if (!isFusion || !head || !body || !canFuse(head, body)) {
+    return null;
+  }
+
+  return `${head.id}.${body.id}`;
+};
+
+export default function LocationTableRow({
+  row,
+  rowIndex,
+}: LocationTableRowProps) {
   const locationId = row.original.id;
-  const { ref, inView } = useInView();
+  const resolvedRowIndex = rowIndex ?? row.index;
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
   const previousFusionId = useRef<string | null>(null);
+  const hasInitializedFusionId = useRef(false);
   const activePlaythroughId = useActivePlaythroughId();
-
-  const aboveTheFold = row.index < 8;
-  const shouldLoad = inView || aboveTheFold;
+  const visibleCells = row.getVisibleCells();
 
   // Get encounter data directly - only this row will rerender when this encounter changes
   const encounterData = useEncounter(locationId) || EMPTY_ENCOUNTER;
+  const effectiveFusionId = getEffectiveFusionId(encounterData);
 
   useEffect(() => {
     previousFusionId.current = null;
+    hasInitializedFusionId.current = false;
   }, [activePlaythroughId]);
 
   // Play evolution animation when this location evolves, but only if the Pokémon can form an effective fusion
@@ -73,48 +94,28 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
     encounterData.body,
   ]);
 
-  // Initialize the previous fusion ID on first render to prevent animation on page load
+  // Play evolution animation only when the effective fusion ID changes after initialization.
   useEffect(() => {
-    if (encounterData.isFusion && encounterData.head && encounterData.body) {
-      const canActuallyFuse = canFuse(encounterData.head, encounterData.body);
-      if (canActuallyFuse) {
-        const currentFusionId = `${encounterData.head.id}.${encounterData.body.id}`;
-        if (previousFusionId.current === null) {
-          // First time rendering - just set the ID without playing animation
-          previousFusionId.current = currentFusionId;
-        }
-      }
+    if (!hasInitializedFusionId.current) {
+      previousFusionId.current = effectiveFusionId;
+      hasInitializedFusionId.current = true;
+      return;
     }
-  }, [encounterData.isFusion, encounterData.head, encounterData.body]);
 
-  // Play evolution animation only when the effective fusion ID changes
-  useEffect(() => {
-    if (encounterData.isFusion && encounterData.head && encounterData.body) {
-      const canActuallyFuse = canFuse(encounterData.head, encounterData.body);
-      if (canActuallyFuse) {
-        // Calculate the effective fusion ID based on current state
-        const currentFusionId = `${encounterData.head.id}.${encounterData.body.id}`;
-
-        // Only play animation if this is a new fusion combination (and not the first render)
-        if (
-          previousFusionId.current !== null &&
-          currentFusionId !== previousFusionId.current
-        ) {
-          previousFusionId.current = currentFusionId;
-          spriteRef.current?.playEvolution();
-        }
-      }
+    if (effectiveFusionId && effectiveFusionId !== previousFusionId.current) {
+      spriteRef.current?.playEvolution();
     }
-  }, [encounterData.isFusion, encounterData.head, encounterData.body]);
+    previousFusionId.current = effectiveFusionId;
+  }, [effectiveFusionId]);
 
   return (
     <tr
       key={row.id}
-      className="hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors content-visibility-auto group/row contain-intrinsic-height-[150px]"
-      ref={ref}
+      className="h-location-row hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors group/row"
       data-location-id={locationId}
+      aria-rowindex={resolvedRowIndex + 2}
     >
-      {row.getVisibleCells().map((cell) =>
+      {visibleCells.map((cell) =>
         match(cell.column.id)
           .with("sprite", () => (
             <td
@@ -126,16 +127,12 @@ export default function LocationTableRow({ row }: LocationTableRowProps) {
                 headPokemon={encounterData.head}
                 bodyPokemon={encounterData.body}
                 isFusion={encounterData.isFusion}
-                shouldLoad={shouldLoad}
+                locationId={locationId}
               />
             </td>
           ))
           .with("encounter", () => (
-            <EncounterCell
-              key={cell.id}
-              locationId={locationId}
-              shouldLoad={shouldLoad}
-            />
+            <EncounterCell key={cell.id} locationId={locationId} />
           ))
           .with("actions", () => {
             const hasEncounter = !!(encounterData.head || encounterData.body);

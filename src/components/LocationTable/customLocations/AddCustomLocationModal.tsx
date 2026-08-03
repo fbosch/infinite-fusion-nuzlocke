@@ -8,9 +8,10 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { Loader2, Plus, X } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { getLocationsSortedWithCustom } from "@/loaders";
-import { playthroughActions, useCustomLocations } from "@/stores/playthroughs";
+import { useCustomLocations } from "@/stores/playthroughs/hooks";
+import { playthroughActions } from "@/stores/playthroughs/index";
 
 interface AddCustomLocationModalProps {
   isOpen: boolean;
@@ -25,17 +26,17 @@ export default function AddCustomLocationModal({
   const [selectedAfterLocationId, setSelectedAfterLocationId] = useState("");
   const customLocations = useCustomLocations();
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     setLocationName("");
     setSelectedAfterLocationId("");
     onClose();
-  }, [onClose]);
+  };
 
   // Only process locations when modal is open to improve performance
-  const allLocations = useMemo(() => {
+  const allLocations = (() => {
     if (!isOpen) return [];
     return getLocationsSortedWithCustom(customLocations);
-  }, [isOpen, customLocations]);
+  })();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +56,11 @@ export default function AddCustomLocationModal({
   };
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} className="relative z-70 group">
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      className="relative z-[70] group"
+    >
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"
@@ -75,6 +80,7 @@ export default function AddCustomLocationModal({
               Add Custom Location
             </DialogTitle>
             <button
+              type="button"
               onClick={handleClose}
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",

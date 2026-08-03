@@ -8,8 +8,13 @@ import { loadPokemonNameMap } from "./utils/data-loading-utils";
 import {
   findPokemonId,
   isPotentialPokemonName,
+  type PokemonNameMap,
 } from "./utils/pokemon-name-utils";
 import { processRouteName } from "./utils/route-utils";
+import {
+  exitOnScriptError,
+  runDirectScript,
+} from "./utils/script-runtime-utils";
 import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
 
 const LEGENDARY_POKEMON_URL =
@@ -18,6 +23,126 @@ const LEGENDARY_POKEMON_URL =
 interface LegendaryRoute {
   routeName: string;
   encounters: number[]; // Array of Pokémon IDs
+}
+
+type CheerioInput = Parameters<ReturnType<typeof cheerio.load>>[0];
+
+export function collectLegendaryRouteMapFromHtml(
+  html: string,
+  pokemonNameMap: PokemonNameMap,
+): Map<string, number[]> {
+  const $ = cheerio.load(html);
+  const routeMap = new Map<string, number[]>();
+  const headings = $(".mw-parser-output").find("h3");
+
+  ConsoleFormatter.info(`Found ${headings.length} h3 headings`);
+  headings.each((_index, heading) => {
+    addLegendaryHeadingEncounters($, heading, pokemonNameMap, routeMap);
+  });
+
+  return routeMap;
+}
+
+function addLegendaryHeadingEncounters(
+  $: ReturnType<typeof cheerio.load>,
+  heading: CheerioInput,
+  pokemonNameMap: PokemonNameMap,
+  routeMap: Map<string, number[]>,
+): void {
+  const $heading = $(heading);
+  const pokemonName = $heading.find("span.mw-headline").text().trim();
+  const pokemonNames = pokemonName
+    .split("/")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (
+    pokemonNames.length === 0 ||
+    pokemonNames.some((name) => !isPotentialPokemonName(name))
+  ) {
+    return;
+  }
+
+  for (const name of pokemonNames) {
+    const pokemonIds = getLegendaryPokemonIds(name, pokemonNameMap);
+    if (pokemonIds.length === 0) {
+      ConsoleFormatter.warn(`Could not find any forms for legendary: ${name}`);
+      continue;
+    }
+
+    const routeName = findLegendaryRouteName($heading);
+    if (routeName) {
+      addLegendaryIdsToRoute(routeMap, routeName, pokemonIds);
+      ConsoleFormatter.success(
+        `Added ${pokemonIds.length} forms of ${name} to route: ${routeName}`,
+      );
+    }
+  }
+}
+
+function getLegendaryPokemonIds(
+  name: string,
+  pokemonNameMap: PokemonNameMap,
+): number[] {
+  const pokemonIds: number[] = [];
+  const exactMatch = findPokemonId(name, pokemonNameMap);
+  if (exactMatch) {
+    pokemonIds.push(exactMatch);
+  }
+
+  for (const [pokemonName, id] of pokemonNameMap.nameToId.entries()) {
+    if (pokemonName.startsWith(`${name} `) && pokemonName !== name) {
+      pokemonIds.push(id);
+    }
+  }
+
+  return pokemonIds;
+}
+
+function findLegendaryRouteName(
+  $heading: ReturnType<ReturnType<typeof cheerio.load>>,
+): string {
+  let nextElement = $heading.next();
+
+  for (
+    let siblingsChecked = 0;
+    nextElement.length > 0 && siblingsChecked < 10;
+    siblingsChecked += 1, nextElement = nextElement.next()
+  ) {
+    if (nextElement.is("table.article-table")) {
+      return getRouteNameFromLegendaryTable(nextElement);
+    }
+    if (nextElement.is("h3")) {
+      return "";
+    }
+  }
+
+  return "";
+}
+
+function getRouteNameFromLegendaryTable(
+  $table: ReturnType<ReturnType<typeof cheerio.load>>,
+): string {
+  const $cell = $table.find("tr").first().find("td").first();
+  if ($cell.length === 0) {
+    return "";
+  }
+
+  const anchors = $cell.find("a");
+  const rawRouteName =
+    anchors.length > 0 ? anchors.last().text().trim() : $cell.text().trim();
+  const { cleanName } = processRouteName(rawRouteName);
+
+  return cleanName === "Location" ? "" : cleanName;
+}
+
+function addLegendaryIdsToRoute(
+  routeMap: Map<string, number[]>,
+  routeName: string,
+  pokemonIds: number[],
+): void {
+  const encounters = routeMap.get(routeName) ?? [];
+  encounters.push(...pokemonIds);
+  routeMap.set(routeName, encounters);
 }
 
 async function scrapeLegendaryEncounters(): Promise<LegendaryRoute[]> {
@@ -33,128 +158,8 @@ async function scrapeLegendaryEncounters(): Promise<LegendaryRoute[]> {
       () => fetchWikiPageHtml(LEGENDARY_POKEMON_URL),
     );
 
-    const $ = cheerio.load(html);
     const pokemonNameMap = await loadPokemonNameMap();
-
-    // Focus on main content area
-    const mainContent = $(".mw-parser-output");
-    const routeMap = new Map<string, number[]>(); // routeName -> array of pokemon IDs
-
-    // Find all h3 headings with mw-headline spans (legendary names)
-    const headings = mainContent.find("h3");
-
-    ConsoleFormatter.info(`Found ${headings.length} h3 headings`);
-
-    headings.each((_index: number, heading: any) => {
-      const $heading = $(heading);
-      const headlineSpan = $heading.find("span.mw-headline");
-
-      if (headlineSpan.length === 0) {
-        return; // Skip if no mw-headline span
-      }
-
-      const pokemonName = headlineSpan.text().trim();
-
-      // Skip if it's not a Pokémon name
-      if (!isPotentialPokemonName(pokemonName)) {
-        return;
-      }
-
-      // Handle multiple Pokémon names separated by " / "
-      const pokemonNames = pokemonName.split("/").map((name) => name.trim());
-
-      for (const name of pokemonNames) {
-        // Try to find all forms of this Pokémon
-        const pokemonIds: number[] = [];
-
-        // Look for exact match first
-        const exactMatch = findPokemonId(name, pokemonNameMap);
-        if (exactMatch) {
-          pokemonIds.push(exactMatch);
-        }
-
-        // Also look for entries that start with the name (for forms)
-        for (const [pokemonName, id] of pokemonNameMap.nameToId.entries()) {
-          if (pokemonName.startsWith(`${name} `) && pokemonName !== name) {
-            pokemonIds.push(id);
-          }
-        }
-
-        if (pokemonIds.length === 0) {
-          ConsoleFormatter.warn(
-            `Could not find any forms for legendary: ${name}`,
-          );
-          continue;
-        }
-
-        let nextElement = $heading.next();
-        let tablesChecked = 0;
-
-        while (nextElement.length > 0 && tablesChecked < 10) {
-          if (nextElement.is("table.article-table")) {
-            // Process the table - extract route name from first row
-            let routeName = "";
-
-            $(nextElement)
-              .find("tr")
-              .each((rowIndex: number, row: any) => {
-                const $row = $(row);
-                const cells = $row.find("td");
-
-                // Get the route name from the first row, first cell
-                if (rowIndex === 0 && cells.length >= 1) {
-                  const $cell = $(cells[0]);
-                  const anchors = $cell.find("a");
-                  let rawRouteName = "";
-
-                  if (anchors.length > 0) {
-                    // Use the text from the last anchor tag
-                    rawRouteName = anchors.last().text().trim();
-                  } else {
-                    // Fallback to cell text if no anchors found
-                    rawRouteName = $cell.text().trim();
-                  }
-
-                  const { cleanName } = processRouteName(rawRouteName);
-                  routeName = cleanName;
-                }
-              });
-
-            // If we have a valid route name, add all pokemon forms to that route
-            if (routeName && routeName !== "Location" && routeName !== "") {
-              if (!routeMap.has(routeName)) {
-                routeMap.set(routeName, []);
-              }
-
-              const routeEncounters = routeMap.get(routeName);
-              if (routeEncounters === undefined) {
-                throw new Error(
-                  `Failed to initialize route encounters for ${routeName}`,
-                );
-              }
-
-              // Add all forms of this pokemon
-              for (const id of pokemonIds) {
-                routeEncounters.push(id);
-              }
-              ConsoleFormatter.success(
-                `Added ${pokemonIds.length} forms of ${name} to route: ${routeName}`,
-              );
-            }
-
-            break; // Found and processed one table, stop looking
-          }
-
-          // Stop if we hit another h3 heading
-          if (nextElement.is("h3")) {
-            break;
-          }
-
-          tablesChecked++;
-          nextElement = nextElement.next();
-        }
-      }
-    });
+    const routeMap = collectLegendaryRouteMapFromHtml(html, pokemonNameMap);
 
     // Convert map to array format
     const routes: LegendaryRoute[] = Array.from(routeMap.entries()).map(
@@ -204,14 +209,8 @@ async function main() {
     );
     ConsoleFormatter.info(`Total duration: ${(duration / 1000).toFixed(2)}s`);
   } catch (error) {
-    ConsoleFormatter.error(
-      `Legendary scraping failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-    );
-    process.exit(1);
+    exitOnScriptError("Legendary scraping failed", error);
   }
 }
 
-// Run the script
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
-}
+runDirectScript(import.meta.url, main);

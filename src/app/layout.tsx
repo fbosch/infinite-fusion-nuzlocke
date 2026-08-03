@@ -65,6 +65,17 @@ const STRUCTURED_DATA = {
   ],
 };
 
+const REDUCED_MOTION_INITIALIZER = `
+  try {
+    const versioned = localStorage.getItem("settings:v1");
+    const stored = versioned || localStorage.getItem("settings");
+    const preference = stored ? JSON.parse(stored).reducedMotion : undefined;
+    if (typeof preference === "boolean") {
+      document.documentElement.dataset.reducedMotion = String(preference);
+    }
+  } catch (error) {}
+`;
+
 const STRUCTURED_DATA_JSON = JSON.stringify(STRUCTURED_DATA);
 
 export const metadata: Metadata = {
@@ -159,6 +170,7 @@ export default function RootLayout({
           content="Infinite Fusion Nuzlocke Tracker"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script>{REDUCED_MOTION_INITIALIZER}</script>
         <script type="application/ld+json">{STRUCTURED_DATA_JSON}</script>
       </head>
       <body className="antialiased font-sans">

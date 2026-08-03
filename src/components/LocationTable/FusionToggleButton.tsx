@@ -4,13 +4,12 @@ import clsx from "clsx";
 import { Dna, DnaOff } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
-import { useCallback } from "react";
 import { useSnapshot } from "valtio";
 import { DNA_SPLICER_ICON } from "@/constants/items";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { isEgg, useAllPokemon, usePokemonNameMap } from "@/loaders/pokemon";
 import { dragActions, dragStore } from "@/stores/dragStore";
-import { playthroughActions } from "@/stores/playthroughs";
+import { playthroughActions } from "@/stores/playthroughs/index";
 import { CursorTooltip } from "../CursorTooltip";
 
 interface FusionToggleButtonProps {
@@ -31,115 +30,105 @@ export function FusionToggleButton({
   const nameMap = usePokemonNameMap();
 
   // Handle drop on fusion button
-  const handleFusionDrop = useCallback(
-    async (e: React.DragEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      e.stopPropagation();
+  const handleFusionDrop = async (e: React.DragEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-      const pokemonName = e.dataTransfer.getData("text/plain");
-      if (!pokemonName) return;
+    const pokemonName = e.dataTransfer.getData("text/plain");
+    if (!pokemonName) return;
 
-      // Check if this drop is from a different combobox
-      const isFromDifferentCombobox =
-        dragSnapshot.currentDragSource &&
-        dragSnapshot.currentDragSource !== `${locationId}-single` &&
-        dragSnapshot.currentDragSource !== `${locationId}-head` &&
-        dragSnapshot.currentDragSource !== `${locationId}-body`;
+    // Event handlers must use the drag state that is current for this drop.
+    // Keep it after the async fusion completes because global drop handlers clear it.
+    const dragSource = dragStore.currentDragSource;
+    const dragValue = dragStore.currentDragValue;
 
-      if (!isFromDifferentCombobox) return;
+    // Check if this drop is from a different combobox
+    const isFromDifferentCombobox =
+      dragSource &&
+      dragSource !== `${locationId}-single` &&
+      dragSource !== `${locationId}-head` &&
+      dragSource !== `${locationId}-body`;
 
-      // Only allow dropping if this row is not already a fusion and has an existing encounter
-      if (isFusion || !selectedPokemon) return;
+    if (!isFromDifferentCombobox) return;
 
-      // Prevent dropping if the button is disabled (Egg in non-fusion mode)
-      if (!isFusion && selectedPokemon && isEgg(selectedPokemon)) return;
+    // Only allow dropping if this row is not already a fusion and has an existing encounter
+    if (isFusion || !selectedPokemon) return;
 
-      const foundPokemon = allPokemon.find(
-        (p) => nameMap?.get(p.id)?.toLowerCase() === pokemonName.toLowerCase(),
-      );
+    // Prevent dropping if the button is disabled (Egg in non-fusion mode)
+    if (!isFusion && selectedPokemon && isEgg(selectedPokemon)) return;
 
-      if (!foundPokemon) return;
+    const foundPokemon = allPokemon.find(
+      (p) => nameMap?.get(p.id)?.toLowerCase() === pokemonName.toLowerCase(),
+    );
 
-      const pokemonOption: PokemonOptionType = {
-        id: foundPokemon.id,
-        name: pokemonName,
-        nationalDexId: foundPokemon.nationalDexId,
-        originalLocation:
-          dragSnapshot.currentDragValue?.originalLocation || locationId,
-        ...(dragSnapshot.currentDragValue && {
-          nickname: dragSnapshot.currentDragValue.nickname,
-          status: dragSnapshot.currentDragValue.status,
-          uid: dragSnapshot.currentDragValue.uid,
-        }),
-      };
+    if (!foundPokemon) return;
 
-      await playthroughActions
-        .createFusion(locationId, selectedPokemon, pokemonOption)
-        .then(async () => {
-          if (!dragSnapshot.currentDragSource) return;
+    const pokemonOption: PokemonOptionType = {
+      id: foundPokemon.id,
+      name: pokemonName,
+      nationalDexId: foundPokemon.nationalDexId,
+      originalLocation: dragValue?.originalLocation || locationId,
+      ...(dragValue && {
+        nickname: dragValue.nickname,
+        status: dragValue.status,
+        uid: dragValue.uid,
+      }),
+    };
 
-          const { locationId: sourceLocationId, field: sourceField } =
-            playthroughActions.getLocationFromComboboxId(
-              dragSnapshot.currentDragSource,
-            );
-          await playthroughActions.clearEncounterFromLocation(
-            sourceLocationId,
-            sourceField,
-          );
-        })
-        .catch((err) => {
-          console.error("Error finding Pokemon by name:", err);
-        });
-    },
-    [
-      isFusion,
-      selectedPokemon,
-      dragSnapshot.currentDragSource,
-      dragSnapshot.currentDragValue,
-      locationId,
-      allPokemon,
-      nameMap,
-    ],
-  );
+    await playthroughActions
+      .createFusion(locationId, selectedPokemon, pokemonOption)
+      .then(async () => {
+        if (!dragSource) return;
+
+        const { locationId: sourceLocationId, field: sourceField } =
+          playthroughActions.getLocationFromComboboxId(dragSource);
+        await playthroughActions.clearEncounterFromLocation(
+          sourceLocationId,
+          sourceField,
+          { preserveTeamMembership: true },
+        );
+      })
+      .catch((err) => {
+        console.error("Error finding Pokemon by name:", err);
+      });
+  };
 
   // Handle drag over
-  const handleFusionDragOver = useCallback(
-    (e: React.DragEvent<HTMLButtonElement>) => {
-      // Always prevent default to allow drop events to fire
-      e.preventDefault();
+  const handleFusionDragOver = (e: React.DragEvent<HTMLButtonElement>) => {
+    // Always prevent default to allow drop events to fire
+    e.preventDefault();
 
-      // Only allow drop if this row is not already a fusion and has an existing encounter
-      if (isFusion || !selectedPokemon) {
-        e.dataTransfer.dropEffect = "none";
-        return;
-      }
+    // Only allow drop if this row is not already a fusion and has an existing encounter
+    if (isFusion || !selectedPokemon) {
+      e.dataTransfer.dropEffect = "none";
+      return;
+    }
 
-      // Prevent drop if the button is disabled (Egg in non-fusion mode)
-      if (!isFusion && selectedPokemon && isEgg(selectedPokemon)) {
-        e.dataTransfer.dropEffect = "none";
-        return;
-      }
+    // Prevent drop if the button is disabled (Egg in non-fusion mode)
+    if (!isFusion && selectedPokemon && isEgg(selectedPokemon)) {
+      e.dataTransfer.dropEffect = "none";
+      return;
+    }
 
-      // Check if drag is from a different combobox
-      const isFromDifferentCombobox =
-        dragSnapshot.currentDragSource &&
-        dragSnapshot.currentDragSource !== `${locationId}-single` &&
-        dragSnapshot.currentDragSource !== `${locationId}-head` &&
-        dragSnapshot.currentDragSource !== `${locationId}-body`;
+    // Check if drag is from a different combobox
+    const dragSource = dragStore.currentDragSource;
+    const isFromDifferentCombobox =
+      dragSource &&
+      dragSource !== `${locationId}-single` &&
+      dragSource !== `${locationId}-head` &&
+      dragSource !== `${locationId}-body`;
 
-      if (isFromDifferentCombobox) {
-        e.dataTransfer.dropEffect = "copy";
-      } else {
-        e.dataTransfer.dropEffect = "none";
-      }
-    },
-    [isFusion, selectedPokemon, dragSnapshot.currentDragSource, locationId],
-  );
+    if (isFromDifferentCombobox) {
+      e.dataTransfer.dropEffect = "copy";
+    } else {
+      e.dataTransfer.dropEffect = "none";
+    }
+  };
 
   // Handle drag end
-  const handleFusionDragEnd = useCallback(() => {
+  const handleFusionDragEnd = () => {
     dragActions.clearDrag();
-  }, []);
+  };
 
   const isDropAllowed =
     !isFusion &&

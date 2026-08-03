@@ -1,11 +1,11 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { usePlaythroughImportExport } from "@/hooks/usePlaythroughImportExport";
-import type { Playthrough } from "@/stores/playthroughs";
-import { playthroughActions } from "@/stores/playthroughs";
+import { playthroughActions } from "@/stores/playthroughs/index";
+import type { Playthrough } from "@/stores/playthroughs/types";
 
 // Mock the playthrough actions
-vi.mock("@/stores/playthroughs", () => ({
+vi.mock("@/stores/playthroughs/index", () => ({
   playthroughActions: {
     importPlaythrough: vi.fn(),
   },

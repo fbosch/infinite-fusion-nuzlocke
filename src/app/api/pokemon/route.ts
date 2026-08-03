@@ -1,7 +1,7 @@
 import pokemonData from "@data/shared/pokemon-data.json";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { PokemonSchema } from "@/loaders/pokemon";
+import { PokemonSchema } from "@/types/pokemon";
 
 // Query parameter schema for filtering
 const QuerySchema = z.object({
@@ -10,6 +10,7 @@ const QuerySchema = z.object({
   type: z.string().optional(), // Filter by type
   limit: z
     .string()
+    .regex(/^\d+$/)
     .transform((val) => parseInt(val, 10))
     .optional(), // Limit results
   v: z.string().optional(), // Cache busting version (ignored)
@@ -33,6 +34,44 @@ const EGG_POKEMON = {
   },
 };
 
+const getFilteredPokemon = ({
+  ids,
+  search,
+  type,
+  limit,
+}: z.infer<typeof QuerySchema>) => {
+  let filteredData = [...pokemonData, EGG_POKEMON] as z.infer<
+    typeof PokemonSchema
+  >[];
+
+  if (ids) {
+    const idSet = new Set(ids.split(",").map((id) => parseInt(id, 10)));
+    filteredData = filteredData.filter((pokemon) => idSet.has(pokemon.id));
+  }
+
+  if (search) {
+    const searchLower = search.toLowerCase();
+    filteredData = filteredData.filter((pokemon) =>
+      pokemon.name.toLowerCase().includes(searchLower),
+    );
+  }
+
+  if (type) {
+    const typeLower = type.toLowerCase();
+    filteredData = filteredData.filter((pokemon) =>
+      pokemon.types.some(
+        (pokemonType) => pokemonType.name.toLowerCase() === typeLower,
+      ),
+    );
+  }
+
+  if (limit && limit > 0) {
+    filteredData = filteredData.slice(0, limit);
+  }
+
+  return filteredData;
+};
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -50,40 +89,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { ids, search, type, limit } = validatedQuery.data;
-
-    // Start with regular Pokemon data and add the Egg
-    let filteredData = [...pokemonData, EGG_POKEMON] as z.infer<
-      typeof PokemonSchema
-    >[];
-
-    // Filter by IDs if provided
-    if (ids) {
-      const idList = ids.split(",").map((id) => parseInt(id, 10));
-      filteredData = filteredData.filter((pokemon) =>
-        idList.includes(pokemon.id),
-      );
-    }
-
-    // Filter by search term if provided
-    if (search) {
-      const searchLower = search.toLowerCase();
-      filteredData = filteredData.filter((pokemon) =>
-        pokemon.name.toLowerCase().includes(searchLower),
-      );
-    }
-
-    // Filter by type if provided
-    if (type) {
-      filteredData = filteredData.filter((pokemon) =>
-        pokemon.types.some((t) => t.name.toLowerCase() === type.toLowerCase()),
-      );
-    }
-
-    // Apply limit if provided
-    if (limit && limit > 0) {
-      filteredData = filteredData.slice(0, limit);
-    }
+    const filteredData = getFilteredPokemon(validatedQuery.data);
 
     // Validate the filtered data
     const validatedData = z.array(PokemonSchema).safeParse(filteredData);

@@ -174,13 +174,12 @@ describe("PlaythroughResumeObserver", () => {
       "cookie-preferences",
       JSON.stringify({ analytics: true, speedInsights: false }),
     );
-    window.dispatchEvent(
-      new StorageEvent("storage", {
-        key: "cookie-preferences",
-        newValue: JSON.stringify({ analytics: true, speedInsights: false }),
-        storageArea: localStorage,
-      }),
-    );
+    const storageEvent = new Event("storage");
+    Object.defineProperties(storageEvent, {
+      key: { value: "cookie-preferences" },
+      storageArea: { value: localStorage },
+    });
+    window.dispatchEvent(storageEvent);
 
     await waitFor(() => {
       expect(

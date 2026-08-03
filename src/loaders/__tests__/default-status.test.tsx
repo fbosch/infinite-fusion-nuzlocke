@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { EncounterSource } from "@/loaders/encounters";
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
+import { EncounterSource } from "@/types/encounters";
 
 // Helper function to simulate the default status logic from PokemonCombobox
 function applyDefaultStatus(

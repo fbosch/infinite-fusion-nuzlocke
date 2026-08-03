@@ -1,5 +1,10 @@
 import { proxyMap } from "valtio/utils";
+import { z } from "zod";
 import { getSpriteId } from "./sprites";
+
+const PREFERRED_VARIANTS_STORAGE_KEY = "preferredVariants:v1";
+const LEGACY_PREFERRED_VARIANTS_STORAGE_KEY = "preferredVariants";
+const preferredVariantsSchema = z.array(z.tuple([z.string(), z.string()]));
 
 // Use Valtio's proxyMap for reactivity
 export const preferredVariants = proxyMap<string, string>();
@@ -7,11 +12,31 @@ export const preferredVariants = proxyMap<string, string>();
 // Initialize from localStorage on module load
 if (typeof window !== "undefined") {
   try {
-    const stored = localStorage.getItem("preferredVariants");
-    if (stored) {
-      const entries = JSON.parse(stored);
+    const stored = localStorage.getItem(PREFERRED_VARIANTS_STORAGE_KEY);
+    const legacyStored = localStorage.getItem(
+      LEGACY_PREFERRED_VARIANTS_STORAGE_KEY,
+    );
+    const parseEntries = (value: string | null) => {
+      if (value === null || value === "") return null;
+
+      try {
+        const result = preferredVariantsSchema.safeParse(JSON.parse(value));
+        return result.success ? result.data : null;
+      } catch {
+        return null;
+      }
+    };
+    const storedEntries = parseEntries(stored);
+    const legacyEntries = parseEntries(legacyStored);
+    const entries = storedEntries ?? legacyEntries;
+    if (entries) {
       for (const [key, value] of entries) {
         preferredVariants.set(key, value);
+      }
+
+      if (storedEntries === null && legacyEntries !== null && legacyStored) {
+        localStorage.setItem(PREFERRED_VARIANTS_STORAGE_KEY, legacyStored);
+        localStorage.removeItem(LEGACY_PREFERRED_VARIANTS_STORAGE_KEY);
       }
     }
   } catch (error) {
@@ -26,7 +51,10 @@ if (typeof window !== "undefined") {
 const saveToStorage = () => {
   try {
     const entries = Array.from(preferredVariants.entries());
-    localStorage.setItem("preferredVariants", JSON.stringify(entries));
+    localStorage.setItem(
+      PREFERRED_VARIANTS_STORAGE_KEY,
+      JSON.stringify(entries),
+    );
   } catch (error) {
     console.error("Failed to save preferred variants to localStorage:", error);
   }

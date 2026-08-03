@@ -1,12 +1,19 @@
 @import "tailwindcss";
 
 @theme {
+  --spacing-location-row: 150px;
   --color-primary: #3b82f6;
   --color-primary-dark: #1d4ed8;
   --font-family-sans:
     var(--font-ibmplex), system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, sans-serif;
   --font-family-mono: var(--font-dotgothic16), "Courier New", monospace;
+}
+
+.github-button-control,
+.github-button-control span {
+  display: flex;
+  line-height: 0;
 }
 
 .shadow-elevation-1 {
@@ -448,4 +455,30 @@ button {
 button:disabled,
 [aria-disabled="true"] {
   @apply cursor-not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-reduced-motion]),
+  html:not([data-reduced-motion]) * {
+    scroll-behavior: auto !important;
+  }
+
+  html:not([data-reduced-motion]) *,
+  html:not([data-reduced-motion]) *::before,
+  html:not([data-reduced-motion]) *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+html[data-reduced-motion="true"],
+html[data-reduced-motion="true"] * {
+  scroll-behavior: auto !important;
+}
+
+html[data-reduced-motion="true"] *,
+html[data-reduced-motion="true"] *::before,
+html[data-reduced-motion="true"] *::after {
+  animation: none !important;
+  transition: none !important;
 }

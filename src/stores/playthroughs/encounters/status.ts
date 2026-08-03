@@ -8,7 +8,10 @@ import { trackEvent } from "@/lib/analytics/trackEvent";
 import { PokemonStatus } from "@/loaders/pokemon";
 import { updateEncounter } from "./crud";
 import { ensureActivePlaythroughWithEncounters } from "./shared";
-import { autoAssignCapturedPokemonToTeam } from "./team";
+import {
+  autoAssignCapturedPokemonToTeam,
+  removeTeamMembersWithPokemon,
+} from "./team";
 
 /**
  * Update both Pokemon in an encounter to the specified status
@@ -91,6 +94,12 @@ export const markEncounterAsDeceased = async (
   if (!nowDeceased) {
     return;
   }
+
+  removeTeamMembersWithPokemon(
+    [encounterAfter.head?.uid, encounterAfter.body?.uid].filter(
+      (uid): uid is string => uid != null,
+    ),
+  );
 
   trackEvent("encounter_marked_deceased", {
     ...getSharedEventProperties(activePlaythrough),

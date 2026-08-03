@@ -7,7 +7,7 @@ import {
   Skull,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { useSnapshot } from "valtio";
 import BodyIcon from "@/assets/images/body.svg";
 import EscapeIcon from "@/assets/images/escape-cloud.svg";
@@ -19,6 +19,7 @@ import {
   isEggId,
   type PokemonOptionType,
   PokemonStatus,
+  type PokemonStatusType,
 } from "@/loaders/pokemon";
 import { playthroughActions } from "@/stores/playthroughs";
 import { settingsStore } from "@/stores/settings";
@@ -38,6 +39,112 @@ const ArtworkVariantModal = dynamic(
     ssr: false,
   },
 );
+
+export function createExternalDexItems(
+  spriteId: string,
+  preferredVariant: string | null | undefined,
+): ContextMenuItem[] {
+  const variantSuffix = preferredVariant ?? "";
+
+  return [
+    {
+      id: "infinitefusiondex",
+      label: "Open InfiniteDex entry",
+      href: `https://infinitefusiondex.com/details/${spriteId}`,
+      target: "_blank",
+      favicon: "https://infinitefusiondex.com/images/favicon.ico",
+      icon: ArrowUpRight,
+      iconClassName: "dark:text-blue-300 text-blue-400",
+    },
+    {
+      id: "fusiondex",
+      label: "Open FusionDex entry",
+      href: `https://fusiondex.org/sprite/pif/${spriteId}${variantSuffix}/`,
+      target: "_blank",
+      favicon: "https://www.fusiondex.org/favicon.ico",
+      icon: ArrowUpRight,
+      iconClassName: "dark:text-blue-300 text-blue-400",
+    },
+  ];
+}
+
+interface EncounterStatusActions {
+  onMarkAsDeceased: () => void;
+  onMoveToBox: () => void;
+  onMarkAsCaptured: () => void;
+  onMarkAsMissed: () => void;
+  onMarkAsReceived: () => void;
+}
+
+// The five status transitions form the fixed Nuzlocke encounter status matrix.
+// fallow-ignore-next-line complexity
+function createEncounterStatusItems(
+  currentStatus: PokemonStatusType | undefined,
+  actions: EncounterStatusActions,
+): ContextMenuItem[] {
+  const items: ContextMenuItem[] = [{ id: "separator-1", separator: true }];
+
+  if (
+    currentStatus !== PokemonStatus.DECEASED &&
+    currentStatus !== PokemonStatus.MISSED
+  ) {
+    items.push({
+      id: "mark-deceased",
+      label: "Mark as Deceased",
+      icon: Skull,
+      onClick: actions.onMarkAsDeceased,
+    });
+  }
+
+  if (
+    currentStatus === PokemonStatus.CAPTURED ||
+    currentStatus === PokemonStatus.RECEIVED ||
+    currentStatus === PokemonStatus.TRADED ||
+    currentStatus === PokemonStatus.DECEASED
+  ) {
+    items.push({
+      id: "move-to-box",
+      label: "Move to Box",
+      icon: Computer,
+      onClick: actions.onMoveToBox,
+    });
+  }
+
+  if (
+    currentStatus !== PokemonStatus.CAPTURED &&
+    currentStatus !== PokemonStatus.RECEIVED
+  ) {
+    items.push({
+      id: "mark-captured",
+      label: "Mark as Captured",
+      icon: PokeballIcon,
+      onClick: actions.onMarkAsCaptured,
+    });
+  }
+
+  if (!currentStatus) {
+    items.push({
+      id: "mark-missed",
+      label: "Mark as Missed",
+      icon: EscapeIcon,
+      onClick: actions.onMarkAsMissed,
+    });
+  }
+
+  if (
+    currentStatus !== PokemonStatus.RECEIVED &&
+    currentStatus !== PokemonStatus.CAPTURED
+  ) {
+    items.push({
+      id: "mark-received",
+      label: "Mark as Received",
+      icon: Gift,
+      onClick: actions.onMarkAsReceived,
+    });
+  }
+
+  return items;
+}
 
 interface PokemonContextMenuProps {
   children: React.ReactNode;
@@ -84,114 +191,64 @@ export function PokemonContextMenu({
     displayPokemon.body?.id ?? null,
   );
 
-  const [hasContextMenuBeenOpened, setHasContextMenuBeenOpened] =
-    useState(false);
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
   const [isMoveHeadModalOpen, setIsMoveHeadModalOpen] = useState(false);
   const [isMoveBodyModalOpen, setIsMoveBodyModalOpen] = useState(false);
 
   // Handler to mark both Pokemon in the fusion as deceased
-  const handleMarkAsDeceased = useCallback(async () => {
+  const handleMarkAsDeceased = async () => {
     await playthroughActions.markEncounterAsDeceased(locationId);
-  }, [locationId]);
+  };
 
   // Handler to move both Pokemon in the fusion to box (stored status)
-  const handleMoveToBox = useCallback(async () => {
+  const handleMoveToBox = async () => {
     await playthroughActions.moveEncounterToBox(locationId);
-  }, [locationId]);
+  };
 
   // Handler to mark both Pokemon in the fusion as captured
-  const handleMarkAsCaptured = useCallback(async () => {
+  const handleMarkAsCaptured = async () => {
     await playthroughActions.markEncounterAsCaptured(locationId);
-  }, [locationId]);
+  };
 
   // Handler to mark both Pokemon in the fusion as missed
-  const handleMarkAsMissed = useCallback(async () => {
+  const handleMarkAsMissed = async () => {
     await playthroughActions.markEncounterAsMissed(locationId);
-  }, [locationId]);
+  };
 
   // Handler to mark both Pokemon in the fusion as received
-  const handleMarkAsReceived = useCallback(async () => {
+  const handleMarkAsReceived = async () => {
     await playthroughActions.markEncounterAsReceived(locationId);
-  }, [locationId]);
+  };
 
   // Handler for moving head Pokemon
-  const handleMoveHead = useCallback(
-    async (targetLocationId: string, targetField: "head" | "body") => {
-      if (!encounterData?.head) return;
-
-      // Check if there's already a Pokemon in the target slot
-      const activePlaythrough = playthroughActions.getActivePlaythrough();
-      const targetEncounter = activePlaythrough?.encounters?.[targetLocationId];
-      const existingPokemon = targetEncounter
-        ? targetField === "head"
-          ? targetEncounter.head
-          : targetEncounter.body
-        : null;
-
-      if (existingPokemon) {
-        // If there's already a Pokemon in the target slot, swap them
-        await playthroughActions.swapEncounters(
-          locationId,
-          targetLocationId,
-          "head",
-          targetField,
-        );
-      } else {
-        // If the target slot is empty, use atomic move to preserve other Pokemon at source
-        await playthroughActions.moveEncounterAtomic(
-          locationId,
-          "head",
-          targetLocationId,
-          targetField,
-          encounterData.head,
-        );
-      }
-    },
-    [encounterData, locationId],
-  );
+  const handleMoveHead = async (
+    targetLocationId: string,
+    targetField: "head" | "body",
+  ) => {
+    await playthroughActions.relocateEncounterSlot({
+      sourceLocationId: locationId,
+      sourceField: "head",
+      targetLocationId,
+      targetField,
+    });
+  };
 
   // Handler for moving body Pokemon
-  const handleMoveBody = useCallback(
-    async (targetLocationId: string, targetField: "head" | "body") => {
-      if (!encounterData?.body) return;
+  const handleMoveBody = async (
+    targetLocationId: string,
+    targetField: "head" | "body",
+  ) => {
+    await playthroughActions.relocateEncounterSlot({
+      sourceLocationId: locationId,
+      sourceField: "body",
+      targetLocationId,
+      targetField,
+    });
+  };
 
-      // Check if there's already a Pokemon in the target slot
-      const activePlaythrough = playthroughActions.getActivePlaythrough();
-      const targetEncounter = activePlaythrough?.encounters?.[targetLocationId];
-      const existingPokemon = targetEncounter
-        ? targetField === "head"
-          ? targetEncounter.head
-          : targetEncounter.body
-        : null;
-
-      if (existingPokemon) {
-        // If there's already a Pokemon in the target slot, swap them
-        await playthroughActions.swapEncounters(
-          locationId,
-          targetLocationId,
-          "body",
-          targetField,
-        );
-      } else {
-        // If the target slot is empty, use atomic move to preserve other Pokemon at source
-        await playthroughActions.moveEncounterAtomic(
-          locationId,
-          "body",
-          targetLocationId,
-          targetField,
-          encounterData.body,
-        );
-      }
-    },
-    [encounterData, locationId],
-  );
-
-  const contextItems = useMemo<ContextMenuItem[]>(() => {
+  const contextItems: ContextMenuItem[] = (() => {
     // Use display Pokemon for links instead of raw encounter data
     const id = getSpriteId(displayPokemon.head?.id, displayPokemon.body?.id);
-    const infinitefusiondexLink = `https://infinitefusiondex.com/details/${id}`;
-    const fusiondexLink = `https://fusiondex.org/sprite/pif/${id}${preferredVariant ? `${preferredVariant}` : ""}/`;
 
     // Get current status (both Pokemon should have the same status in a fusion)
     const currentStatus =
@@ -219,79 +276,15 @@ export function PokemonContextMenu({
 
     // Only show status options if there are Pokemon, they're not eggs, and status actions are enabled
     if (hasPokemon && !eitherPokemonIsEgg && showStatusActions) {
-      items.push({
-        id: "separator-1",
-        separator: true,
-      });
-
-      // Show "Mark as Deceased" unless already deceased or missed
-      if (
-        currentStatus !== PokemonStatus.DECEASED &&
-        currentStatus !== PokemonStatus.MISSED
-      ) {
-        items.push({
-          id: "mark-deceased",
-          label: "Mark as Deceased",
-          icon: Skull,
-
-          onClick: handleMarkAsDeceased,
-        });
-      }
-
-      // Show "Move to Box" only if captured, received, or traded
-      if (
-        currentStatus === PokemonStatus.CAPTURED ||
-        currentStatus === PokemonStatus.RECEIVED ||
-        currentStatus === PokemonStatus.TRADED ||
-        currentStatus === PokemonStatus.DECEASED
-      ) {
-        items.push({
-          id: "move-to-box",
-          label: "Move to Box",
-          icon: Computer,
-
-          onClick: handleMoveToBox,
-        });
-      }
-
-      // Show "Mark as Captured" unless already captured or received
-      if (
-        currentStatus !== PokemonStatus.CAPTURED &&
-        currentStatus !== PokemonStatus.RECEIVED
-      ) {
-        items.push({
-          id: "mark-captured",
-          label: "Mark as Captured",
-          icon: PokeballIcon,
-
-          onClick: handleMarkAsCaptured,
-        });
-      }
-
-      // Show "Mark as Missed" only when no status is set on either Pokemon
-      if (!currentStatus) {
-        items.push({
-          id: "mark-missed",
-          label: "Mark as Missed",
-          icon: EscapeIcon,
-
-          onClick: handleMarkAsMissed,
-        });
-      }
-
-      // Show "Mark as Received" unless already received or captured
-      if (
-        currentStatus !== PokemonStatus.RECEIVED &&
-        currentStatus !== PokemonStatus.CAPTURED
-      ) {
-        items.push({
-          id: "mark-received",
-          label: "Mark as Received",
-          icon: Gift,
-
-          onClick: handleMarkAsReceived,
-        });
-      }
+      items.push(
+        ...createEncounterStatusItems(currentStatus, {
+          onMarkAsDeceased: handleMarkAsDeceased,
+          onMoveToBox: handleMoveToBox,
+          onMarkAsCaptured: handleMarkAsCaptured,
+          onMarkAsMissed: handleMarkAsMissed,
+          onMarkAsReceived: handleMarkAsReceived,
+        }),
+      );
 
       // Add move actions if there are Pokemon and setting is enabled
       if (
@@ -341,44 +334,10 @@ export function PokemonContextMenu({
       separator: true,
     });
 
-    // Add external links
-    items.push(
-      {
-        id: "infinitefusiondex",
-        label: "Open InfiniteDex entry",
-        href: infinitefusiondexLink,
-        target: "_blank",
-        favicon: "https://infinitefusiondex.com/images/favicon.ico",
-        icon: ArrowUpRight,
-        iconClassName: "dark:text-blue-300 text-blue-400",
-      },
-      {
-        id: "fusiondex",
-        label: "Open FusionDex entry",
-        href: fusiondexLink,
-        target: "_blank",
-        favicon: "https://www.fusiondex.org/favicon.ico",
-        icon: ArrowUpRight,
-        iconClassName: "dark:text-blue-300 text-blue-400",
-      },
-    );
+    items.push(...createExternalDexItems(id, preferredVariant));
 
     return items;
-  }, [
-    preferredVariant,
-    encounterData,
-    displayPokemon,
-    eitherPokemonIsEgg,
-    hasArtVariants,
-    isLoadingVariants,
-    settings.moveEncountersBetweenLocations,
-    showStatusActions,
-    handleMarkAsDeceased,
-    handleMoveToBox,
-    handleMarkAsCaptured,
-    handleMarkAsMissed,
-    handleMarkAsReceived,
-  ]);
+  })();
 
   return (
     <>
@@ -386,11 +345,6 @@ export function PokemonContextMenu({
         disabled={eitherPokemonIsEgg}
         items={contextItems}
         portalRootId="location-table"
-        onOpenChange={
-          hasContextMenuBeenOpened
-            ? undefined
-            : () => setHasContextMenuBeenOpened(true)
-        }
       >
         {children}
       </ContextMenu>

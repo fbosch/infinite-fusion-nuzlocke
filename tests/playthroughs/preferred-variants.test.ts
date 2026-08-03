@@ -4,7 +4,7 @@ import "./mocks";
 // Mock preferredVariants module
 import { vi } from "vitest";
 
-vi.mock("../../src/lib/preferredVariants", () => ({
+vi.mock("@/lib/preferredVariants", () => ({
   getPreferredVariant: vi.fn(),
   setPreferredVariant: vi.fn(),
   clearPreferredVariants: vi.fn(),
@@ -15,7 +15,7 @@ vi.mock("../../src/lib/preferredVariants", () => ({
 import {
   getPreferredVariant,
   setPreferredVariant,
-} from "../../src/lib/preferredVariants";
+} from "@/lib/preferredVariants";
 
 const mockedGetPreferredVariant = vi.mocked(getPreferredVariant);
 const mockedSetPreferredVariant = vi.mocked(setPreferredVariant);
@@ -46,7 +46,7 @@ import {
 } from "./setup";
 
 // Mock sprites module methods that are used in the tests
-vi.mock("../../src/lib/sprites", () => ({
+vi.mock("@/lib/sprites", () => ({
   generateSpriteUrl: vi.fn(
     (headId, bodyId, variant = "") =>
       `mock-sprite-url-${headId || "unknown"}-${bodyId || "unknown"}${variant ? `-${variant}` : ""}`,
@@ -168,7 +168,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
     it("should cycle through available variants forward", async () => {
       // Mock current preferred variant and available variants
       mockedGetPreferredVariant.mockReturnValue("");
-      const sprites = await import("../../src/lib/sprites");
+      const sprites = await import("@/lib/sprites");
       vi.mocked(sprites.getArtworkVariants).mockResolvedValue([
         "",
         "variant-1",
@@ -195,7 +195,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
     it("should cycle through available variants backward", async () => {
       // Mock current preferred variant and available variants
       mockedGetPreferredVariant.mockReturnValue("");
-      const sprites = await import("../../src/lib/sprites");
+      const sprites = await import("@/lib/sprites");
       vi.mocked(sprites.getArtworkVariants).mockResolvedValue([
         "",
         "variant-1",
@@ -215,7 +215,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
     });
 
     it("should handle single variant gracefully", async () => {
-      const sprites = await import("../../src/lib/sprites");
+      const sprites = await import("@/lib/sprites");
       vi.mocked(sprites.getArtworkVariants).mockResolvedValue([""]);
 
       await act(async () => {
@@ -227,7 +227,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
     });
 
     it("should handle no variants gracefully", async () => {
-      const sprites = await import("../../src/lib/sprites");
+      const sprites = await import("@/lib/sprites");
       vi.mocked(sprites.getArtworkVariants).mockResolvedValue([]);
 
       await act(async () => {
@@ -241,7 +241,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       const consoleErrorSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
-      const sprites = await import("../../src/lib/sprites");
+      const sprites = await import("@/lib/sprites");
       vi.mocked(sprites.getArtworkVariants).mockRejectedValue(
         new Error("Service error"),
       );
@@ -265,7 +265,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       global.Image = mockImage as unknown as typeof Image;
 
       // Mock generateSpriteUrl to return valid URLs
-      const sprites = await import("../../src/lib/sprites");
+      const sprites = await import("@/lib/sprites");
       vi.mocked(sprites.generateSpriteUrl).mockReturnValue("mock-url");
 
       await act(async () => {
@@ -291,7 +291,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       global.Image = mockImage as unknown as typeof Image;
 
       // Mock generateSpriteUrl to throw error
-      const sprites = await import("../../src/lib/sprites");
+      const sprites = await import("@/lib/sprites");
       vi.mocked(sprites.generateSpriteUrl).mockImplementation(() => {
         throw new Error("URL generation error");
       });
@@ -330,7 +330,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       const consoleDebugSpy = vi
         .spyOn(console, "debug")
         .mockImplementation(() => {});
-      const sprites = await import("../../src/lib/sprites");
+      const sprites = await import("@/lib/sprites");
       vi.mocked(sprites.getArtworkVariants).mockResolvedValue([
         "",
         "variant-1",
@@ -353,7 +353,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       const consoleWarnSpy = vi
         .spyOn(console, "warn")
         .mockImplementation(() => {});
-      const sprites = await import("../../src/lib/sprites");
+      const sprites = await import("@/lib/sprites");
       vi.mocked(sprites.getArtworkVariants)
         .mockResolvedValueOnce(["", "variant-1"]) // Single Pokémon
         .mockRejectedValueOnce(new Error("Fusion error")); // Fusion
@@ -381,7 +381,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       });
       consoleDebugSpy.mockRestore();
 
-      const sprites = await import("../../src/lib/sprites");
+      const sprites = await import("@/lib/sprites");
       expect(vi.mocked(sprites.getArtworkVariants)).not.toHaveBeenCalled();
     });
   });

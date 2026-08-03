@@ -6,10 +6,15 @@ import * as cheerio from "cheerio";
 import type { EncounterType } from "./types/encounters";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
+import { ensureEncounterOutputDirectories } from "./utils/encounter-output-utils";
 import {
   findPokemonId,
   isPotentialPokemonName,
 } from "./utils/pokemon-name-utils";
+import {
+  exitOnScriptError,
+  runDirectScript,
+} from "./utils/script-runtime-utils";
 import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
 
 // Safari Zone area pages
@@ -31,66 +36,57 @@ interface RouteEncounters {
   encounters: PokemonEncounter[];
 }
 
-/**
- * Detects encounter type from text content like "Surf", "Old Rod", etc.
- */
-function detectEncounterType(text: string): EncounterType | null {
+const ENCOUNTER_TYPE_RULES: Array<{
+  type: EncounterType;
+  matches: (text: string) => boolean;
+}> = [
+  {
+    type: "surf",
+    matches: (text) =>
+      text === "surf" ||
+      text.includes("surfing") ||
+      (text.includes("surf") && !text.includes("rod")),
+  },
+  {
+    type: "fishing",
+    matches: (text) =>
+      ["old rod", "good rod", "super rod", "fishing rod", "rod fishing"].some(
+        (term) => text.includes(term),
+      ),
+  },
+  {
+    type: "rock_smash",
+    matches: (text) =>
+      ["rock smash", "smash rock", "headbutt"].some((term) =>
+        text.includes(term),
+      ),
+  },
+  {
+    type: "cave",
+    matches: (text) =>
+      ["cave", "underground", "depths"].some((term) => text.includes(term)),
+  },
+  {
+    type: "special",
+    matches: (text) =>
+      ["gift", "trade", "static", "overworld"].some((term) =>
+        text.includes(term),
+      ),
+  },
+];
+
+/** Detects encounter type from text content like "Surf" or "Old Rod". */
+export function detectEncounterType(text: string): EncounterType | null {
   if (!text || typeof text !== "string") {
     return null;
   }
 
   const normalizedText = text.toLowerCase().trim();
 
-  // Surf encounters
-  if (
-    normalizedText === "surf" ||
-    normalizedText.includes("surfing") ||
-    (normalizedText.includes("surf") && !normalizedText.includes("rod"))
-  ) {
-    return "surf";
-  }
-
-  // Fishing encounters
-  if (
-    normalizedText.includes("old rod") ||
-    normalizedText.includes("good rod") ||
-    normalizedText.includes("super rod") ||
-    normalizedText.includes("fishing rod") ||
-    normalizedText.includes("rod fishing")
-  ) {
-    return "fishing";
-  }
-
-  // Rock Smash encounters
-  if (
-    normalizedText.includes("rock smash") ||
-    normalizedText.includes("smash rock") ||
-    normalizedText.includes("headbutt")
-  ) {
-    return "rock_smash";
-  }
-
-  // Cave encounters
-  if (
-    normalizedText.includes("cave") ||
-    normalizedText.includes("underground") ||
-    normalizedText.includes("depths")
-  ) {
-    return "cave";
-  }
-
-  // Special encounters (might include gift, trade, etc.)
-  if (
-    normalizedText.includes("gift") ||
-    normalizedText.includes("trade") ||
-    normalizedText.includes("static") ||
-    normalizedText.includes("overworld")
-  ) {
-    return "special";
-  }
-
-  // Default to grass if we can't determine the type
-  return "grass";
+  return (
+    ENCOUNTER_TYPE_RULES.find((rule) => rule.matches(normalizedText))?.type ??
+    "grass"
+  );
 }
 
 /**
@@ -188,13 +184,7 @@ async function main() {
       "Scraping Safari Zone area encounters from individual wiki pages",
     );
 
-    const dataDir = path.join(process.cwd(), "data");
-    const classicDir = path.join(dataDir, "classic");
-    const remixDir = path.join(dataDir, "remix");
-
-    // Create directories
-    await fs.mkdir(classicDir, { recursive: true });
-    await fs.mkdir(remixDir, { recursive: true });
+    const { classicDir, remixDir } = await ensureEncounterOutputDirectories();
 
     // Scrape all Safari Zone area pages
     const safariEncounters: RouteEncounters[] = [];
@@ -259,14 +249,8 @@ async function main() {
     );
     ConsoleFormatter.info(`Total duration: ${(duration / 1000).toFixed(2)}s`);
   } catch (error) {
-    ConsoleFormatter.error(
-      `Safari Zone scraping failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-    );
-    process.exit(1);
+    exitOnScriptError("Safari Zone scraping failed", error);
   }
 }
 
-// Run the script
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
-}
+runDirectScript(import.meta.url, main);

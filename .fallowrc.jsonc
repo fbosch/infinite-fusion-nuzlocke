@@ -1,0 +1,58 @@
+{
+  "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+  "rules": {
+    "unresolved-imports": "error",
+    "unlisted-dependencies": "error",
+    "unused-files": "warn",
+    "unused-exports": "warn",
+    "unused-types": "warn",
+    "unused-dependencies": "warn",
+    "unused-dev-dependencies": "warn",
+    "unused-enum-members": "warn",
+    "unused-class-members": "warn",
+    "duplicate-exports": "warn",
+    "circular-dependencies": "warn",
+    "boundary-violation": "warn",
+    "coverage-gaps": "warn",
+    "stale-suppressions": "warn"
+  },
+  "audit": {
+    "gate": "new-only"
+  },
+  "entry": [
+    "public/sw.js",
+    "tests/setup.browser.ts",
+    "tests/setup.react-hooks.ts",
+    "tests/benchmarks/**/*.benchmark.ts",
+    "tests/benchmarks/**/*.benchmark.tsx"
+  ],
+  "dynamicallyLoaded": ["src/workers/**/*.ts"],
+  // Fallow 3.6 treats JSON imports through this TypeScript path alias as packages.
+  "ignoreDependencies": ["@data/classic", "@data/remix", "@data/shared"],
+  // Retain inactive security guards so future transitive resolutions remain patched.
+  "ignoreDependencyOverrides": [
+    { "package": "@modelcontextprotocol/sdk", "source": "pnpm-workspace.yaml" },
+    { "package": "ajv", "source": "pnpm-workspace.yaml" },
+    { "package": "body-parser", "source": "pnpm-workspace.yaml" },
+    { "package": "glob", "source": "pnpm-workspace.yaml" },
+    { "package": "got", "source": "pnpm-workspace.yaml" },
+    { "package": "http-cache-semantics", "source": "pnpm-workspace.yaml" },
+    { "package": "path-to-regexp", "source": "pnpm-workspace.yaml" },
+    { "package": "qs", "source": "pnpm-workspace.yaml" },
+    { "package": "semver-regex", "source": "pnpm-workspace.yaml" }
+  ],
+  "ignorePatterns": [".opencode/skills/impeccable/**"],
+  "duplicates": {
+    "mode": "mild",
+    "minTokens": 50,
+    "minLines": 5
+  },
+  "health": {
+    "maxCyclomatic": 20,
+    "maxCognitive": 15,
+    "ignore": [
+      "tests/benchmarks/**/*.benchmark.ts",
+      "tests/benchmarks/**/*.benchmark.tsx"
+    ]
+  }
+}
