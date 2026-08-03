@@ -717,7 +717,10 @@ async function generateSpritesheet(
   ConsoleFormatter.success(`Spritesheet saved to: ${spritesheetPath}`);
 
   // Create metadata
-  const metadataWithoutVersion = {
+  const metadataWithoutVersion: Omit<
+    SpritesheetMetadata,
+    "spritesheetVersion"
+  > = {
     algorithm: "compact-bin-packing",
     version: "2.0",
     generation: generation.name,
