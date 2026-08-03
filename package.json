@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "commit": "cz",
     "licenses:generate": "jiti scripts/generate-licenses.ts",
     "dev": "next dev --turbopack --port 4000",
     "build": "next build",
@@ -112,6 +113,8 @@
     "@vitest/coverage-v8": "4.1.10",
     "@vitest/ui": "^4.1.10",
     "babel-plugin-react-compiler": "1.0.0",
+    "commitizen": "4.3.2",
+    "cz-conventional-changelog": "3.3.0",
     "fallow": "^3.9.1",
     "happy-dom": "^20.11.1",
     "jiti": "^2.7.0",
@@ -135,5 +138,10 @@
     "*": [
       "biome check --write --diagnostic-level=error --max-diagnostics=2000 --no-errors-on-unmatched --files-ignore-unknown=true --vcs-use-ignore-file=true"
     ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }

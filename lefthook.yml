@@ -7,6 +7,12 @@ pre-commit:
     lint-staged:
       run: pnpm exec lint-staged
 
+prepare-commit-msg:
+  commands:
+    commitizen:
+      interactive: true
+      run: pnpm exec cz --hook
+
 pre-push:
   commands:
     quality:
