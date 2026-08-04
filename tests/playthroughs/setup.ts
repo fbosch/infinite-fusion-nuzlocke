@@ -1,7 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { z } from "zod";
-import type { PokemonOptionSchema } from "@/loaders/pokemon";
+import type { PokemonOptionType } from "@/loaders/pokemon";
 import {
   useActivePlaythrough,
   useEncounters,
@@ -15,10 +14,9 @@ import {
 // Import modules after mocks are set up (mocks should be imported in each test file)
 import { playthroughActions } from "@/stores/playthroughs/index";
 import { playthroughsStore } from "@/stores/playthroughs/store";
-import { PlaythroughSchema } from "@/stores/playthroughs/types";
 
 // Types
-export type PokemonOption = z.infer<typeof PokemonOptionSchema>;
+export type PokemonOption = PokemonOptionType;
 
 // Utility functions
 export const createMockPokemon = (name: string, id: number): PokemonOption => ({
@@ -59,7 +57,6 @@ export {
   describe,
   expect,
   it,
-  PlaythroughSchema,
   playthroughActions,
   playthroughsStore,
   renderHook,

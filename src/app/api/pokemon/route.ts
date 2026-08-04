@@ -1,7 +1,7 @@
 import pokemonData from "@data/shared/pokemon-data.json";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { PokemonSchema } from "@/types/pokemon";
+import { PokemonSchema } from "@/validation/pokemon";
 
 // Query parameter schema for filtering
 const QuerySchema = z.object({

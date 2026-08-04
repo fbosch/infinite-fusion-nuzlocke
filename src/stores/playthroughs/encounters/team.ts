@@ -1,5 +1,4 @@
-import type { z } from "zod";
-import { type PokemonOptionSchema, PokemonStatus } from "@/loaders/pokemon";
+import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
 import { getAvailableTeamPositionsForMembers } from "../teamPositions";
 import type { EncounterData } from "../types";
 import { ensureActivePlaythroughWithEncounters } from "./shared";
@@ -12,7 +11,7 @@ const isValidTeamPosition = (position: number) =>
 // Update a Pokemon's properties by UID across all encounters
 export const updatePokemonByUID = async (
   pokemonUID: string,
-  updates: Partial<z.infer<typeof PokemonOptionSchema>>,
+  updates: Partial<PokemonOptionType>,
 ) => {
   const activePlaythrough = ensureActivePlaythroughWithEncounters();
   if (!activePlaythrough) {
@@ -210,7 +209,7 @@ const movePokemonToBox = async (
     return;
   }
 
-  const updates: Partial<z.infer<typeof PokemonOptionSchema>> = {
+  const updates: Partial<PokemonOptionType> = {
     status: PokemonStatus.STORED,
   };
 

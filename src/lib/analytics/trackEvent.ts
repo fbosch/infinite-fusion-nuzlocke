@@ -1,5 +1,4 @@
 import { track } from "@vercel/analytics";
-import { z } from "zod";
 
 type AnalyticsPrimitive = string | number | boolean;
 
@@ -192,217 +191,6 @@ export type AnalyticsDebugCounters = {
 const COOKIE_PREFERENCES_KEY = "cookie-preferences";
 const DISABLE_ANALYTICS_VALUES = new Set(["1", "true", "yes", "on"]);
 
-const sharedEventPropertiesSchema = z
-  .object({
-    playthrough_id: z.string().min(1),
-    game_mode: z.enum(["classic", "remix", "randomized"]),
-    encounter_count_bucket: z.enum([
-      "e_0",
-      "e_1",
-      "e_2_4",
-      "e_5_9",
-      "e_10_19",
-      "e_20_39",
-      "e_40_79",
-      "e_80_plus",
-    ]),
-    deceased_count_bucket: z.enum([
-      "c_0",
-      "c_1",
-      "c_2_3",
-      "c_4_7",
-      "c_8_15",
-      "c_16_plus",
-    ]),
-    boxed_count_bucket: z.enum([
-      "c_0",
-      "c_1",
-      "c_2_3",
-      "c_4_7",
-      "c_8_15",
-      "c_16_plus",
-    ]),
-    fusion_count_bucket: z.enum([
-      "c_0",
-      "c_1",
-      "c_2_3",
-      "c_4_7",
-      "c_8_15",
-      "c_16_plus",
-    ]),
-    viable_roster_bucket: z.enum(["v_0", "v_1", "v_2_3", "v_4_5", "v_6_plus"]),
-  })
-  .strict();
-
-const analyticsEventSchemaMap = {
-  landing_viewed: sharedEventPropertiesSchema
-    .extend({
-      entry_route: z.enum(["home", "locations", "other"]),
-    })
-    .strict(),
-  playthrough_selector_opened: sharedEventPropertiesSchema
-    .extend({
-      source_surface: z.literal("header"),
-    })
-    .strict(),
-  create_playthrough_modal_opened: sharedEventPropertiesSchema
-    .extend({
-      source_surface: z.literal("header"),
-    })
-    .strict(),
-  first_encounter_saved: sharedEventPropertiesSchema
-    .extend({
-      location_id: z.string().min(1),
-    })
-    .strict(),
-  playthrough_created: sharedEventPropertiesSchema
-    .extend({
-      has_existing_playthroughs: z.boolean(),
-    })
-    .strict(),
-  playthrough_switched: sharedEventPropertiesSchema
-    .extend({
-      previous_playthrough_id: z.string().min(1),
-      new_playthrough_id: z.string().min(1),
-      source_surface: z.enum([
-        "header",
-        "playthrough_selector",
-        "create_playthrough_modal",
-        "game_mode_toggle",
-        "store",
-      ]),
-      trigger_method: z.enum(["click", "keyboard", "submit", "programmatic"]),
-    })
-    .strict(),
-  playthrough_imported: sharedEventPropertiesSchema
-    .extend({
-      import_source: z.literal("file_picker"),
-      file_extension_group: z.enum(["json", "other"]),
-      mime_group: z.enum(["application_json", "text_plain", "empty", "other"]),
-    })
-    .strict(),
-  playthrough_import_failed: sharedEventPropertiesSchema
-    .extend({
-      import_source: z.literal("file_picker"),
-      failure_stage: z.enum([
-        "file_selection",
-        "file_read",
-        "json_parse",
-        "schema_validation",
-        "store_import",
-        "unknown",
-      ]),
-      error_category: z.enum([
-        "unsupported_file_type",
-        "invalid_json",
-        "invalid_schema",
-        "duplicate_id",
-        "storage_failure",
-        "unexpected",
-      ]),
-      has_file: z.boolean(),
-      file_extension_group: z.enum(["json", "other"]),
-      mime_group: z.enum(["application_json", "text_plain", "empty", "other"]),
-    })
-    .strict(),
-  run_checkpoint_reached: sharedEventPropertiesSchema
-    .extend({
-      checkpoint: z.union([
-        z.literal(1),
-        z.literal(5),
-        z.literal(10),
-        z.literal(20),
-        z.literal(40),
-        z.literal(80),
-      ]),
-      checkpoint_label: z.enum([
-        "cp_1",
-        "cp_5",
-        "cp_10",
-        "cp_20",
-        "cp_40",
-        "cp_80",
-      ]),
-    })
-    .strict(),
-  playthrough_resumed: sharedEventPropertiesSchema
-    .extend({
-      days_since_last_active_bucket: z.enum([
-        "d_same_day",
-        "d_1_2_days",
-        "d_3_6_days",
-        "d_7_13_days",
-        "d_14_29_days",
-        "d_30_plus_days",
-      ]),
-    })
-    .strict(),
-  game_mode_changed: sharedEventPropertiesSchema
-    .extend({
-      previous_game_mode: z.enum(["classic", "remix", "randomized"]),
-      new_game_mode: z.enum(["classic", "remix", "randomized"]),
-      source_surface: z.enum([
-        "header",
-        "playthrough_selector",
-        "create_playthrough_modal",
-        "game_mode_toggle",
-        "store",
-      ]),
-      trigger_method: z.enum(["click", "keyboard", "submit", "programmatic"]),
-    })
-    .strict(),
-  fusion_created: sharedEventPropertiesSchema
-    .extend({
-      location_id: z.string().min(1),
-      creation_method: z.enum([
-        "create_fusion",
-        "update_encounter",
-        "drag_drop",
-      ]),
-    })
-    .strict(),
-  fusion_flipped: sharedEventPropertiesSchema
-    .extend({
-      location_id: z.string().min(1),
-    })
-    .strict(),
-  encounter_marked_deceased: sharedEventPropertiesSchema
-    .extend({
-      location_id: z.string().min(1),
-      was_fused: z.boolean(),
-      team_size_after: z.union([
-        z.literal(0),
-        z.literal(1),
-        z.literal(2),
-        z.literal(3),
-        z.literal(4),
-        z.literal(5),
-        z.literal(6),
-      ]),
-      viable_roster_bucket_after: z.enum([
-        "v_0",
-        "v_1",
-        "v_2_3",
-        "v_4_5",
-        "v_6_plus",
-      ]),
-    })
-    .strict(),
-  playthrough_exported: sharedEventPropertiesSchema,
-  github_cta_viewed: z
-    .object({
-      source_surface: z.literal("fixed_top_bar"),
-      route: z.enum(["home", "locations"]),
-    })
-    .strict(),
-} as const satisfies Record<AnalyticsEventName, z.ZodType<unknown>>;
-
-const consentPreferencesSchema = z
-  .object({
-    analytics: z.boolean().optional(),
-  })
-  .passthrough();
-
 type AppEnvironment = {
   NODE_ENV?: string;
   NEXT_PUBLIC_VERCEL_ENV?: string;
@@ -537,25 +325,270 @@ function debugLog(
   console.debug(message, metadata);
 }
 
+// fallow-ignore-next-line complexity -- This is the single exhaustive boundary validator for analytics event payloads.
 function isValidEventPayload<EventName extends AnalyticsEventName>(
   eventName: EventName,
   properties: AnalyticsEventMap[EventName],
 ): properties is AnalyticsEventMap[EventName] {
-  const schema = analyticsEventSchemaMap[eventName];
-  const result = schema.safeParse(properties);
-  if (result.success) {
-    return true;
+  const sharedKeys = [
+    "playthrough_id",
+    "game_mode",
+    "encounter_count_bucket",
+    "deceased_count_bucket",
+    "boxed_count_bucket",
+    "fusion_count_bucket",
+    "viable_roster_bucket",
+  ];
+  const eventKeys: Record<AnalyticsEventName, string[]> = {
+    landing_viewed: ["entry_route"],
+    playthrough_selector_opened: ["source_surface"],
+    create_playthrough_modal_opened: ["source_surface"],
+    first_encounter_saved: ["location_id"],
+    playthrough_created: ["has_existing_playthroughs"],
+    playthrough_switched: [
+      "previous_playthrough_id",
+      "new_playthrough_id",
+      "source_surface",
+      "trigger_method",
+    ],
+    playthrough_imported: [
+      "import_source",
+      "file_extension_group",
+      "mime_group",
+    ],
+    playthrough_import_failed: [
+      "import_source",
+      "failure_stage",
+      "error_category",
+      "has_file",
+      "file_extension_group",
+      "mime_group",
+    ],
+    run_checkpoint_reached: ["checkpoint", "checkpoint_label"],
+    playthrough_resumed: ["days_since_last_active_bucket"],
+    game_mode_changed: [
+      "previous_game_mode",
+      "new_game_mode",
+      "source_surface",
+      "trigger_method",
+    ],
+    fusion_created: ["location_id", "creation_method"],
+    fusion_flipped: ["location_id"],
+    encounter_marked_deceased: [
+      "location_id",
+      "was_fused",
+      "team_size_after",
+      "viable_roster_bucket_after",
+    ],
+    playthrough_exported: [],
+    github_cta_viewed: ["source_surface", "route"],
+  };
+  const candidate = properties as Record<string, unknown>;
+  const allowedKeys =
+    eventName === "github_cta_viewed"
+      ? eventKeys[eventName]
+      : [...sharedKeys, ...eventKeys[eventName]];
+  const hasOnlyAllowedKeys = Object.keys(candidate).every((key) =>
+    allowedKeys.includes(key),
+  );
+  const isNonEmptyString = (value: unknown) =>
+    typeof value === "string" && value.length > 0;
+  const isOneOf = (
+    value: unknown,
+    values: readonly string[] | readonly number[],
+  ) => values.includes(value as never);
+  const valid =
+    hasOnlyAllowedKeys &&
+    (eventName === "github_cta_viewed" ||
+      (isNonEmptyString(candidate.playthrough_id) &&
+        isOneOf(candidate.game_mode, ["classic", "remix", "randomized"]) &&
+        isOneOf(candidate.encounter_count_bucket, [
+          "e_0",
+          "e_1",
+          "e_2_4",
+          "e_5_9",
+          "e_10_19",
+          "e_20_39",
+          "e_40_79",
+          "e_80_plus",
+        ]) &&
+        isOneOf(candidate.deceased_count_bucket, [
+          "c_0",
+          "c_1",
+          "c_2_3",
+          "c_4_7",
+          "c_8_15",
+          "c_16_plus",
+        ]) &&
+        isOneOf(candidate.boxed_count_bucket, [
+          "c_0",
+          "c_1",
+          "c_2_3",
+          "c_4_7",
+          "c_8_15",
+          "c_16_plus",
+        ]) &&
+        isOneOf(candidate.fusion_count_bucket, [
+          "c_0",
+          "c_1",
+          "c_2_3",
+          "c_4_7",
+          "c_8_15",
+          "c_16_plus",
+        ]) &&
+        isOneOf(candidate.viable_roster_bucket, [
+          "v_0",
+          "v_1",
+          "v_2_3",
+          "v_4_5",
+          "v_6_plus",
+        ])));
+  if (valid === false) {
+    debugLog("Analytics payload blocked by schema", {
+      eventName,
+      issues: [{ path: [], message: "Invalid event payload" }],
+    });
+    return false;
   }
 
-  debugLog("Analytics payload blocked by schema", {
-    eventName,
-    issues: result.error.issues.map((issue) => ({
-      path: issue.path,
-      message: issue.message,
-    })),
-  });
+  if (eventName === "github_cta_viewed") {
+    return (
+      candidate.source_surface === "fixed_top_bar" &&
+      isOneOf(candidate.route, ["home", "locations"])
+    );
+  }
 
-  return false;
+  if (
+    (eventName === "landing_viewed" &&
+      !isOneOf(candidate.entry_route, ["home", "locations", "other"])) ||
+    ((eventName === "playthrough_selector_opened" ||
+      eventName === "create_playthrough_modal_opened") &&
+      candidate.source_surface !== "header") ||
+    ((eventName === "first_encounter_saved" ||
+      eventName === "fusion_flipped") &&
+      !isNonEmptyString(candidate.location_id)) ||
+    (eventName === "playthrough_created" &&
+      typeof candidate.has_existing_playthroughs !== "boolean") ||
+    (eventName === "run_checkpoint_reached" &&
+      (!isOneOf(candidate.checkpoint, [1, 5, 10, 20, 40, 80]) ||
+        candidate.checkpoint_label !== `cp_${candidate.checkpoint}`)) ||
+    (eventName === "encounter_marked_deceased" &&
+      (!isNonEmptyString(candidate.location_id) ||
+        typeof candidate.was_fused !== "boolean" ||
+        !isOneOf(candidate.team_size_after, [0, 1, 2, 3, 4, 5, 6]) ||
+        !isOneOf(candidate.viable_roster_bucket_after, [
+          "v_0",
+          "v_1",
+          "v_2_3",
+          "v_4_5",
+          "v_6_plus",
+        ])))
+  ) {
+    debugLog("Analytics payload blocked by schema", {
+      eventName,
+      issues: [{ path: [], message: "Invalid event payload" }],
+    });
+    return false;
+  }
+
+  if (
+    eventName === "playthrough_switched" ||
+    eventName === "game_mode_changed"
+  ) {
+    if (
+      !isOneOf(candidate.source_surface, [
+        "header",
+        "playthrough_selector",
+        "create_playthrough_modal",
+        "game_mode_toggle",
+        "store",
+      ]) ||
+      !isOneOf(candidate.trigger_method, [
+        "click",
+        "keyboard",
+        "submit",
+        "programmatic",
+      ])
+    )
+      return false;
+
+    if (
+      eventName === "playthrough_switched" &&
+      (!isNonEmptyString(candidate.previous_playthrough_id) ||
+        !isNonEmptyString(candidate.new_playthrough_id))
+    )
+      return false;
+
+    if (
+      eventName === "game_mode_changed" &&
+      (!isOneOf(candidate.previous_game_mode, [
+        "classic",
+        "remix",
+        "randomized",
+      ]) ||
+        !isOneOf(candidate.new_game_mode, ["classic", "remix", "randomized"]))
+    )
+      return false;
+  }
+
+  if (
+    eventName === "fusion_created" &&
+    (!isNonEmptyString(candidate.location_id) ||
+      !isOneOf(candidate.creation_method, [
+        "create_fusion",
+        "update_encounter",
+        "drag_drop",
+      ]))
+  )
+    return false;
+  if (
+    eventName === "playthrough_resumed" &&
+    !isOneOf(candidate.days_since_last_active_bucket, [
+      "d_same_day",
+      "d_1_2_days",
+      "d_3_6_days",
+      "d_7_13_days",
+      "d_14_29_days",
+      "d_30_plus_days",
+    ])
+  )
+    return false;
+  if (
+    (eventName === "playthrough_imported" ||
+      eventName === "playthrough_import_failed") &&
+    (candidate.import_source !== "file_picker" ||
+      !isOneOf(candidate.file_extension_group, ["json", "other"]) ||
+      !isOneOf(candidate.mime_group, [
+        "application_json",
+        "text_plain",
+        "empty",
+        "other",
+      ]))
+  )
+    return false;
+  if (
+    eventName === "playthrough_import_failed" &&
+    (typeof candidate.has_file !== "boolean" ||
+      !isOneOf(candidate.failure_stage, [
+        "file_selection",
+        "file_read",
+        "json_parse",
+        "schema_validation",
+        "store_import",
+        "unknown",
+      ]) ||
+      !isOneOf(candidate.error_category, [
+        "unsupported_file_type",
+        "invalid_json",
+        "invalid_schema",
+        "duplicate_id",
+        "storage_failure",
+        "unexpected",
+      ]))
+  )
+    return false;
+
+  return true;
 }
 
 export function isAnalyticsProductionEnvironment(
@@ -616,9 +649,11 @@ export function hasAnalyticsConsent(
 
   try {
     const parsed: unknown = JSON.parse(value);
-    const parsedConsent = consentPreferencesSchema.safeParse(parsed);
-
-    return parsedConsent.success && parsedConsent.data.analytics === true;
+    return (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      (parsed as { analytics?: unknown }).analytics === true
+    );
   } catch {
     return false;
   }

@@ -43,7 +43,8 @@ function useFusionTypes(
   headQuery: TypeQuery | undefined,
   bodyQuery: TypeQuery | undefined,
 ): UseFusionTypesResult {
-  const { data: allPokemon = [], isLoading } = useAllPokemon();
+  const hasPokemonQuery = Boolean(headQuery || bodyQuery);
+  const { data: allPokemon = [], isLoading } = useAllPokemon(hasPokemonQuery);
 
   const headSingle = usePokemonTypes(headQuery);
   const bodySingle = usePokemonTypes(bodyQuery);

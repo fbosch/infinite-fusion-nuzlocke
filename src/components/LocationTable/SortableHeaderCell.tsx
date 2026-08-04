@@ -5,10 +5,12 @@ import type { CombinedLocation } from "@/loaders/locations";
 
 interface SortableHeaderCellProps {
   header: Header<CombinedLocation, unknown>;
+  className?: string;
 }
 
 export default function SortableHeaderCell({
   header,
+  className,
 }: SortableHeaderCellProps) {
   const isSorted = header.column.getIsSorted();
   const sortingEnabled = header.column.getCanSort();
@@ -26,11 +28,8 @@ export default function SortableHeaderCell({
         "sticky top-0 z-20 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-300 uppercase tracking-wider transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset",
         sortingEnabled &&
           "cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700",
+        className,
       )}
-      style={{
-        width: `${header.column.getSize()}px`,
-        minWidth: `${header.column.getSize()}px`,
-      }}
       onClick={
         sortingEnabled ? header.column.getToggleSortingHandler() : undefined
       }

@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import { ArrowLeftRight } from "lucide-react";
 import Image from "next/image";
-import { useReducer, useRef } from "react";
+import { useReducer, useRef, useState } from "react";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import { PokemonCombobox } from "@/components/PokemonCombobox/PokemonCombobox";
@@ -156,11 +156,17 @@ export function EncounterCell({
   const gameMode = useGameMode();
   const customLocations = useCustomLocations();
   const isCustomLocation = customLocations.some((loc) => loc.id === locationId);
-  const { routeEncounterData } = useEncountersForLocation({
-    locationId,
-    enabled: shouldLoad && !isCustomLocation && gameMode !== "randomized",
-    gameMode: gameMode === "randomized" ? "classic" : gameMode,
-  });
+  const [isPokemonDataEnabled, setIsPokemonDataEnabled] = useState(false);
+  const { routeEncounterData, isLoading: isRouteEncounterDataLoading } =
+    useEncountersForLocation({
+      locationId,
+      enabled:
+        shouldLoad &&
+        isPokemonDataEnabled &&
+        !isCustomLocation &&
+        gameMode !== "randomized",
+      gameMode: gameMode === "randomized" ? "classic" : gameMode,
+    });
 
   // Function to get Pokemon source information
   const getPokemonSource = (pokemonId: number): EncounterSource | null => {
@@ -480,6 +486,7 @@ export function EncounterCell({
                   key={`${locationId}-head`}
                   locationId={locationId}
                   routeEncounterData={routeEncounterData}
+                  isRouteEncounterDataLoading={isRouteEncounterDataLoading}
                   isCustomLocation={isCustomLocation}
                   value={headPokemon}
                   onChange={handleHeadChange}
@@ -490,6 +497,7 @@ export function EncounterCell({
                   onBeforeOverwrite={handleBeforeOverwriteHead}
                   isFusion={isFusion}
                   shouldLoad={shouldLoad}
+                  onActivate={() => setIsPokemonDataEnabled(true)}
                 />
               </div>
               <CursorTooltip
@@ -526,6 +534,7 @@ export function EncounterCell({
                   key={`${locationId}-body`}
                   locationId={locationId}
                   routeEncounterData={routeEncounterData}
+                  isRouteEncounterDataLoading={isRouteEncounterDataLoading}
                   isCustomLocation={isCustomLocation}
                   value={bodyPokemon}
                   onChange={handleBodyChange}
@@ -537,6 +546,7 @@ export function EncounterCell({
                   onBeforeOverwrite={handleBeforeOverwriteBody}
                   isFusion={isFusion}
                   shouldLoad={shouldLoad}
+                  onActivate={() => setIsPokemonDataEnabled(true)}
                 />
               </div>
             </div>
@@ -545,6 +555,7 @@ export function EncounterCell({
               key={`${locationId}-single`}
               locationId={locationId}
               routeEncounterData={routeEncounterData}
+              isRouteEncounterDataLoading={isRouteEncounterDataLoading}
               isCustomLocation={isCustomLocation}
               value={selectedPokemon}
               onChange={handleSingleChange}
@@ -556,6 +567,7 @@ export function EncounterCell({
               onBeforeOverwrite={handleBeforeOverwriteSingle}
               isFusion={isFusion}
               shouldLoad={shouldLoad}
+              onActivate={() => setIsPokemonDataEnabled(true)}
             />
           )}
         </div>

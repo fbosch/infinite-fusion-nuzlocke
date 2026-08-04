@@ -27,4 +27,21 @@ describe("useLocationEncountersById", () => {
 
     expect(result.current.pokemonEncounters).toEqual([]);
   });
+
+  it("does not fetch encounters without a location ID", () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+
+    renderHook(() => useLocationEncountersById(undefined, "classic"), {
+      wrapper,
+    });
+
+    expect(
+      queryClient.getQueryState(["encounters", "all", "classic"])?.fetchStatus,
+    ).toBe("idle");
+  });
 });

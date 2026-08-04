@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-22T07:55:19.415Z",
+  "generatedAt": "2026-08-04T13:20:13.391Z",
   "packages": [
     {
       "name": "@floating-ui/react",
@@ -20,7 +20,7 @@
     },
     {
       "name": "@tanstack/query-persist-client-core",
-      "version": "5.101.2",
+      "version": "5.101.4",
       "license": "MIT",
       "homepage": "https://tanstack.com/query",
       "author": "tannerlinsley",
@@ -29,7 +29,7 @@
     },
     {
       "name": "@tanstack/react-query",
-      "version": "5.101.2",
+      "version": "5.101.4",
       "license": "MIT",
       "homepage": "https://tanstack.com/query",
       "author": "tannerlinsley",
@@ -38,7 +38,7 @@
     },
     {
       "name": "@tanstack/react-query-devtools",
-      "version": "5.101.2",
+      "version": "5.101.4",
       "license": "MIT",
       "homepage": "https://tanstack.com/query",
       "author": "tannerlinsley",
@@ -56,7 +56,7 @@
     },
     {
       "name": "@tanstack/react-virtual",
-      "version": "3.14.6",
+      "version": "3.14.8",
       "license": "MIT",
       "homepage": "https://tanstack.com/virtual",
       "author": "Tanner Linsley",
@@ -117,7 +117,7 @@
     },
     {
       "name": "es-toolkit",
-      "version": "1.49.0",
+      "version": "1.50.0",
       "license": "MIT",
       "homepage": "https://es-toolkit.dev",
       "description": "A state-of-the-art, high-performance JavaScript utility library with a small bundle size and strong type annotations.",
@@ -143,7 +143,7 @@
     },
     {
       "name": "lucide-react",
-      "version": "1.24.0",
+      "version": "1.26.0",
       "license": "ISC",
       "homepage": "https://lucide.dev",
       "author": "Eric Fennis",
@@ -168,7 +168,7 @@
     },
     {
       "name": "next",
-      "version": "16.2.10",
+      "version": "16.3.0",
       "license": "MIT",
       "homepage": "https://nextjs.org",
       "description": "The React Framework",

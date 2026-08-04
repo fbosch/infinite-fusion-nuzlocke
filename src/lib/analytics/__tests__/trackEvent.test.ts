@@ -441,6 +441,38 @@ describe("analytics transport wrapper", () => {
     },
   );
 
+  it.each([
+    [
+      ANALYTICS_EVENTS.encounterMarkedDeceased,
+      { viable_roster_bucket_after: "invalid" },
+    ],
+    [
+      ANALYTICS_EVENTS.playthroughSwitched,
+      { previous_playthrough_id: "", new_playthrough_id: "pt-2" },
+    ],
+    [
+      ANALYTICS_EVENTS.gameModeChanged,
+      { previous_game_mode: "invalid", new_game_mode: "classic" },
+    ],
+  ] as const)(
+    "rejects invalid event-specific values for %s",
+    (eventName, invalidProperties) => {
+      localStorage.setItem(
+        "cookie-preferences",
+        JSON.stringify({ analytics: true }),
+      );
+      setEnvironment("production", "production");
+
+      trackEvent(eventName, {
+        ...VALID_EVENT_PAYLOADS[eventName],
+        ...invalidProperties,
+      } as never);
+
+      expect(analyticsMock.track).not.toHaveBeenCalled();
+      expect(getAnalyticsDebugCounters().blockReasons.invalid_payload).toBe(1);
+    },
+  );
+
   it("rejects a GitHub CTA view payload with an unsupported route", () => {
     localStorage.setItem(
       "cookie-preferences",

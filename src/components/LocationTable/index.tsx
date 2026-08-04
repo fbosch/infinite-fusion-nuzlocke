@@ -21,8 +21,8 @@ import {
   scrollToLocationById,
   scrollToMostRecentLocation,
 } from "@/utils/scrollToLocation";
-import { useBreakpointSmallerThan } from "../../hooks/useBreakpoint";
 import { CursorTooltip } from "../CursorTooltip";
+import { locationTableColumnWidths } from "./columnWidths";
 import LocationCell from "./LocationCell";
 import LocationTableHeader from "./LocationTableHeader";
 import LocationTableRow from "./LocationTableRow";
@@ -52,16 +52,9 @@ export default function LocationTable() {
   const mounted = useMounted();
   const isLoading = useIsLoading();
   const customLocations = useCustomLocations();
-  const smallScreen = useBreakpointSmallerThan("2xl");
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
-  const [tableContainerElement, setTableContainerElement] =
-    useState<HTMLDivElement | null>(null);
-  const setTableContainerRef = useCallback((element: HTMLDivElement | null) => {
-    tableContainerRef.current = element;
-    setTableContainerElement(element);
-  }, []);
 
   const data = useMemo(() => {
     try {
@@ -184,24 +177,21 @@ export default function LocationTable() {
         header: "",
         enableSorting: false,
         cell: () => null, // Handled in render loop
-        size: smallScreen ? 125 : 200, // Width for sprite column
       }),
       columnHelper.display({
         id: "encounter",
         header: "Encounter",
         cell: () => null, // Handled in render loop
         enableSorting: false,
-        size: smallScreen ? 400 : 900, // Optimized width for fusion comboboxes
       }),
       columnHelper.display({
         id: "actions",
         header: "",
         enableSorting: false,
         cell: () => null, // Handled in render loop
-        size: 60, // Width for reset column
       }),
     ],
-    [smallScreen, handleScrollToRecent],
+    [handleScrollToRecent],
   );
 
   // react-doctor-disable-next-line react-hooks-js/incompatible-library -- TanStack Table is intentionally excluded from compiler memoization above.
@@ -225,7 +215,6 @@ export default function LocationTable() {
     manualPagination: true,
   });
   const {
-    measuredTableLayout,
     tableRows,
     virtualPaddingBottom,
     virtualPaddingTop,
@@ -233,9 +222,7 @@ export default function LocationTable() {
     visibleColumns,
   } = useLocationTableVirtualization({
     table,
-    tableContainerElement,
     tableContainerRef,
-    tableRef,
   });
 
   // Show skeleton loading state while component is mounting or store is initializing from IndexedDB
@@ -261,32 +248,28 @@ export default function LocationTable() {
   return (
     <div className="overflow-hidden 2xl:rounded-lg border-y md:border border-gray-200 dark:border-gray-700 xl:shadow-sm">
       <div
-        ref={setTableContainerRef}
+        ref={tableContainerRef}
         className="max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative"
       >
         <table
           ref={tableRef}
-          className="w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700 overscroll-x-contain overscroll-y-auto"
+          className="w-full min-w-full table-fixed divide-y divide-gray-200 dark:divide-gray-700 overscroll-x-contain overscroll-y-auto"
           data-scroll-container
           aria-label="Locations table"
           aria-rowcount={tableRows.length + 1}
-          style={
-            measuredTableLayout
-              ? {
-                  minWidth: measuredTableLayout.width,
-                  tableLayout: "fixed",
-                  width: measuredTableLayout.width,
-                }
-              : undefined
-          }
         >
-          {measuredTableLayout && (
-            <colgroup>
-              {measuredTableLayout.columnWidths.map((width, index) => (
-                <col key={visibleColumns[index].id} style={{ width }} />
-              ))}
-            </colgroup>
-          )}
+          <colgroup>
+            {visibleColumns.map((column) => (
+              <col
+                key={column.id}
+                className={
+                  column.id === "encounter"
+                    ? undefined
+                    : locationTableColumnWidths[column.id]
+                }
+              />
+            ))}
+          </colgroup>
           <LocationTableHeader headerGroups={table.getHeaderGroups()} />
           <tbody
             className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700"

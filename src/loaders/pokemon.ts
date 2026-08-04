@@ -5,11 +5,10 @@ import {
 } from "@tanstack/react-query";
 import { useDebounce } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
-import { z } from "zod";
 import { pokemonData, pokemonQueries } from "@/lib/queryClient";
 import { SearchCore } from "@/lib/searchCore";
 import searchService from "@/services/searchService";
-import { type Pokemon, PokemonSchema } from "@/types/pokemon";
+import type { Pokemon } from "@/types/pokemon";
 
 export type { Pokemon } from "@/types/pokemon";
 
@@ -59,41 +58,19 @@ export const PokemonStatus = {
 export type PokemonStatusType =
   (typeof PokemonStatus)[keyof typeof PokemonStatus];
 
-// Zod schema for Pokemon status
-const PokemonStatusSchema = z.enum(
-  [
-    PokemonStatus.CAPTURED,
-    PokemonStatus.RECEIVED,
-    PokemonStatus.TRADED,
-    PokemonStatus.MISSED,
-    PokemonStatus.STORED,
-    PokemonStatus.DECEASED,
-  ],
-  { error: "Invalid Pokemon status" },
-);
-
-// Zod schema for Pokemon option (search results)
-export const PokemonOptionSchema = z.object({
-  id: z.number().int({ error: "Pokemon ID must be an integer" }),
-  name: z.string().min(1, { error: "Pokemon name is required" }),
-  nationalDexId: z
-    .number()
-    .int({ error: "National Dex ID must be an integer" }),
-  nickname: z.string().optional(),
-  originalLocation: z.string().optional(),
-  status: PokemonStatusSchema.optional(),
-  originalReceivalStatus: z
-    .enum([
-      PokemonStatus.CAPTURED,
-      PokemonStatus.RECEIVED,
-      PokemonStatus.TRADED,
-    ])
-    .optional(), // Track original status when Pokémon was first received (captured, traded, or received)
-  uid: z.string().optional(), // Unique identifier for React reconciliation
-});
-
-// Pokemon option type for search results (inferred from schema)
-export type PokemonOptionType = z.infer<typeof PokemonOptionSchema>;
+export type PokemonOptionType = {
+  id: number;
+  name: string;
+  nationalDexId: number;
+  nickname?: string;
+  originalLocation?: string;
+  status?: PokemonStatusType;
+  originalReceivalStatus?:
+    | typeof PokemonStatus.CAPTURED
+    | typeof PokemonStatus.RECEIVED
+    | typeof PokemonStatus.TRADED;
+  uid?: string;
+};
 
 // Evolution helper functions using centralized query client
 export async function getPokemonEvolutionIds(
@@ -341,8 +318,11 @@ async function getInfiniteFusionToNationalDexMap(): Promise<
 }
 
 // React Query hooks using centralized query options
-export function useAllPokemon() {
-  return useQuery(pokemonQueries.all());
+export function useAllPokemon(enabled = true) {
+  return useQuery({
+    ...pokemonQueries.all(),
+    enabled,
+  });
 }
 
 function usePokemonById(id: number) {
@@ -354,8 +334,8 @@ function usePokemonByType(type: string) {
 }
 
 // Name map hook that transforms existing Pokemon data
-export function usePokemonNameMap() {
-  const { data: allPokemon = [] } = useAllPokemon();
+export function usePokemonNameMap(enabled = true) {
+  const { data: allPokemon = [] } = useAllPokemon(enabled);
 
   const nameMap = new Map(allPokemon.map((p) => [p.id, p.name]));
 
@@ -402,6 +382,7 @@ export function usePokemonEvolutionData(
 // Hook for searching Pokemon with debounced query
 interface UsePokemonSearchOptions {
   query: string;
+  enabled?: boolean;
   queryOptions?: Omit<
     QueryOptions<PokemonOptionType[], Error>,
     "queryKey" | "queryFn"
@@ -410,9 +391,10 @@ interface UsePokemonSearchOptions {
 
 export function usePokemonSearch({
   query,
+  enabled = true,
   queryOptions = {},
 }: UsePokemonSearchOptions) {
-  const { data: allPokemon = [] } = useAllPokemon();
+  const { data: allPokemon = [] } = useAllPokemon(enabled);
 
   // Debounce the query to reduce search frequency
   const [debouncedQuery] = useDebounce(query, 50, {
@@ -455,7 +437,7 @@ export function usePokemonSearch({
     select: (data) => {
       return data?.filter((p) => p.id !== 0) ?? [];
     },
-    enabled: allPokemon.length > 0 && debouncedQuery !== "",
+    enabled: enabled && allPokemon.length > 0 && debouncedQuery !== "",
     placeholderData: keepPreviousData,
     staleTime: 0, // Don't cache - always fetch fresh data
     gcTime: 0, // Don't keep in garbage collection

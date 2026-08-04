@@ -1,6 +1,5 @@
-import type { z } from "zod";
 import {
-  type CustomLocationSchema,
+  type CustomLocation,
   createCustomLocation,
   getAvailableAfterLocations as getAvailableAfterLocationsFromLoader,
   getLocationsSortedWithCustom,
@@ -98,9 +97,7 @@ export const updateCustomLocationName = (
 };
 
 // Get custom locations for the active playthrough
-export const getCustomLocations = (): z.infer<
-  typeof CustomLocationSchema
->[] => {
+export const getCustomLocations = (): CustomLocation[] => {
   const activePlaythrough = getActivePlaythrough();
   return activePlaythrough?.customLocations || [];
 };

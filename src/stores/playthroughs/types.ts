@@ -1,96 +1,54 @@
-import { z } from "zod";
-import { CustomLocationSchema } from "@/loaders/locations";
-import { PokemonOptionSchema } from "@/loaders/pokemon";
+import type { CustomLocation } from "@/loaders/locations";
+import type { PokemonOptionType } from "@/loaders/pokemon";
 
-// Game mode enum schema
-export const GameModeSchema = z.enum(["classic", "remix", "randomized"]);
-
-export type GameMode = z.infer<typeof GameModeSchema>;
+export type GameMode = "classic" | "remix" | "randomized";
 
 export const DEFAULT_NEW_PLAYTHROUGH_GAME_MODE: GameMode = "randomized";
 
-// Team member schema - represents a single team member
-const TeamMemberSchema = z.object({
-  headPokemonUid: z.string(), // Reference to head Pokémon by UID
-  bodyPokemonUid: z.string(), // Reference to body Pokémon by UID
-});
+export type TeamMember = {
+  headPokemonUid: string;
+  bodyPokemonUid: string;
+};
 
-type TeamMember = z.infer<typeof TeamMemberSchema>;
+export type Team = { members: Array<TeamMember | null> };
 
-// Team schema - represents the complete team
-const TeamSchema = z.object({
-  members: z.array(TeamMemberSchema.nullable()).length(6), // Fixed size 6, null for empty slots
-});
+export type EncounterData = {
+  head: PokemonOptionType | null;
+  body: PokemonOptionType | null;
+  isFusion: boolean;
+  updatedAt: number;
+};
 
-type Team = z.infer<typeof TeamSchema>;
+export type Playthrough = {
+  id: string;
+  name: string;
+  customLocations?: CustomLocation[];
+  encounters?: Record<string, EncounterData>;
+  team: Team;
+  gameMode: GameMode;
+  createdAt: number;
+  updatedAt: number;
+  version: string;
+};
 
-export const EncounterDataSchema = z.object({
-  head: PokemonOptionSchema.nullable(),
-  body: PokemonOptionSchema.nullable(),
-  isFusion: z.boolean(),
-  updatedAt: z.number(),
-});
-
-export type EncounterData = z.infer<typeof EncounterDataSchema>;
-
-// Zod schema for a single playthrough
-export const PlaythroughSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  customLocations: z.array(CustomLocationSchema).optional(),
-  encounters: z.record(z.string(), EncounterDataSchema).optional(),
-  team: TeamSchema.default({
-    members: Array.from({ length: 6 }, () => null),
-  }), // Fixed size 6 with null values
-  gameMode: GameModeSchema.default("classic"),
-  createdAt: z.number(),
-  updatedAt: z.number(),
-  version: z.string().default("1.0.0"),
-});
-
-// Zod schema for the playthroughs store
-const PlaythroughsSchema = z.object({
-  playthroughs: z.array(PlaythroughSchema),
-  activePlaythroughId: z.string().optional(),
-});
-
-export type Playthrough = z.infer<typeof PlaythroughSchema>;
-export type PlaythroughsState = z.infer<typeof PlaythroughsSchema> & {
+export type PlaythroughsState = {
+  playthroughs: Playthrough[];
+  activePlaythroughId?: string;
   isLoading: boolean;
   isSaving: boolean;
 };
 
-// Schema for exported playthrough data
-const ExportedPlaythroughSchema = z.object({
-  version: z.string(),
-  exportedAt: z.string(),
-  playthrough: PlaythroughSchema,
-});
-
-export type ExportedPlaythrough = z.infer<typeof ExportedPlaythroughSchema>;
-
-// Schema for importing playthrough data with migration support
-export const ImportedPlaythroughSchema = z.object({
-  version: z.string().optional(),
-  exportedAt: z.string().optional(),
-  playthrough: PlaythroughSchema,
-});
-
-type ImportedPlaythrough = z.infer<typeof ImportedPlaythroughSchema>;
-
-// Helper type for creating export data from a Playthrough
-type ExportablePlaythrough = {
-  readonly id: string;
-  readonly name: string;
-  readonly gameMode: GameMode;
-  readonly createdAt: number;
-  readonly updatedAt: number;
-  readonly version: string;
-  readonly customLocations?: readonly {
-    readonly id: string;
-    readonly name: string;
-    readonly insertAfterLocationId: string;
-  }[];
-  readonly encounters?: Record<string, EncounterData>;
-  readonly team: Team; // NEW: Include team in exports
+export type ExportedPlaythrough = {
+  version: string;
+  exportedAt: string;
+  playthrough: Playthrough;
 };
+
+export type ImportedPlaythrough = {
+  version?: string;
+  exportedAt?: string;
+  playthrough: Playthrough;
+};
+
+export const isGameMode = (value: unknown): value is GameMode =>
+  value === "classic" || value === "remix" || value === "randomized";

@@ -1,19 +1,21 @@
 import clsx from "clsx";
+import { locationTableColumnWidths } from "./columnWidths";
 
 export default function LocationTableSkeleton() {
   return (
-    <div className="overflow-hidden sm:rounded-lg sm:border sm:border-gray-200 sm:dark:border-gray-700 sm:shadow-sm">
-      <div className="max-h-[90dvh] overflow-hidden">
+    <div className="overflow-hidden 2xl:rounded-lg border-y md:border border-gray-200 dark:border-gray-700 xl:shadow-sm">
+      {/* fallow-ignore-next-line css-token-drift -- Matches the live table viewport constraint. */}
+      <div className="max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative">
         <table
           className="w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700"
           aria-label="Loading locations table"
         >
-          <thead className="bg-gray-50 dark:bg-gray-800">
+          <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0 z-50 shadow-[0_0.5px_0_0_rgb(229,231,235)] dark:shadow-[0_0.5px_0_0_rgb(55,65,81)]">
             <tr>
               <th
                 className={clsx(
                   "px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider",
-                  "w-[125px]",
+                  locationTableColumnWidths.name,
                 )}
               >
                 Location
@@ -21,13 +23,13 @@ export default function LocationTableSkeleton() {
               <th
                 className={clsx(
                   "px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider",
-                  "w-[155px] 2xl:w-[195px] ",
+                  locationTableColumnWidths.sprite,
                 )}
               ></th>
               <th
                 className={clsx(
                   "px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider",
-                  "w-[62.5vw] 2xl:w-[900px]",
+                  locationTableColumnWidths.encounter,
                 )}
               >
                 Encounter
@@ -35,16 +37,21 @@ export default function LocationTableSkeleton() {
               <th
                 className={clsx(
                   "px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider",
-                  "w-[60px]",
+                  locationTableColumnWidths.actions,
                 )}
               ></th>
+            </tr>
+            <tr>
+              <th colSpan={4} className="p-0">
+                <div className="h-0.5 translate-y-px" aria-hidden="true" />
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700 opacity-10">
             {Array.from({ length: 18 }).map((_, index) => (
               <tr
                 key={index}
-                className="hover:bg-gray-50 h-[150px] dark:hover:bg-gray-800 transition-colors"
+                className="hover:bg-gray-50 h-location-row dark:hover:bg-gray-800 transition-colors"
                 style={{ containIntrinsicHeight: "150px" }}
               >
                 {/* Location name column */}
@@ -54,7 +61,7 @@ export default function LocationTableSkeleton() {
 
                 {/* Sprite column */}
                 <td className="whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                  <div className="size-22 -translate-y-2 translate-x-3 rounded-lg mx-auto shimmer"></div>
+                  <div className="size-22 -translate-y-2 rounded-lg mx-auto shimmer"></div>
                 </td>
 
                 {/* Encounter column */}

@@ -4,7 +4,10 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import GameModeToggle from "../GameModeToggle";
 
-const { setGameModeMock } = vi.hoisted(() => ({
+const { activePlaythrough, setGameModeMock } = vi.hoisted(() => ({
+  activePlaythrough: {
+    current: { id: "playthrough-1" } as { id: string } | null,
+  },
   setGameModeMock: vi.fn(),
 }));
 
@@ -15,7 +18,7 @@ vi.mock("@/stores/playthroughs/index", () => ({
 }));
 
 vi.mock("@/stores/playthroughs/hooks", () => ({
-  useActivePlaythrough: () => ({ id: "playthrough-1" }),
+  useActivePlaythrough: () => activePlaythrough.current,
   useGameMode: () => "classic",
 }));
 
@@ -25,7 +28,30 @@ describe("GameModeToggle", () => {
   });
 
   beforeEach(() => {
+    activePlaythrough.current = { id: "playthrough-1" };
     setGameModeMock.mockClear();
+  });
+
+  it("disables mode selection without an active playthrough", () => {
+    activePlaythrough.current = null;
+
+    render(<GameModeToggle />);
+
+    expect(
+      screen
+        .getByRole("button", { name: /switch to classic/i })
+        .getAttribute("disabled"),
+    ).not.toBeNull();
+    expect(
+      screen
+        .getByRole("button", { name: /switch to remix/i })
+        .getAttribute("disabled"),
+    ).not.toBeNull();
+    expect(
+      screen
+        .getByRole("button", { name: /switch to randomized/i })
+        .getAttribute("disabled"),
+    ).not.toBeNull();
   });
 
   it("reports pointer mode changes as click-triggered", () => {

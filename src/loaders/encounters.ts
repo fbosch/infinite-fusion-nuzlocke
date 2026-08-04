@@ -3,7 +3,6 @@ import {
   EncounterSource,
   type PokemonEncounter,
   type RouteEncounter,
-  RouteEncountersArraySchema,
 } from "@/types/encounters";
 import { useLocationEncountersById } from "./locations";
 import type { Pokemon, PokemonOptionType } from "./pokemon";
@@ -121,8 +120,8 @@ export function useEncountersForLocation({
   );
 
   // Use existing hooks for Pokemon data and name map
-  const { data: allPokemon = [] } = useAllPokemon();
-  const nameMap = usePokemonNameMap();
+  const { data: allPokemon = [] } = useAllPokemon(enabled);
+  const nameMap = usePokemonNameMap(enabled);
 
   // Process encounter data, merging duplicates with multiple sources
   let routeEncounterData: RouteEncounterPokemon[] = [];

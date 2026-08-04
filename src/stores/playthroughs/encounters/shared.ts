@@ -1,13 +1,9 @@
-import type { z } from "zod";
 import { getSpriteId } from "@/lib/sprites";
-import {
-  generatePokemonUID,
-  type PokemonOptionSchema,
-} from "@/loaders/pokemon";
+import { generatePokemonUID, type PokemonOptionType } from "@/loaders/pokemon";
 import { getActivePlaythrough } from "../playthroughState";
 import type { Playthrough } from "../types";
 
-export type PokemonOption = z.infer<typeof PokemonOptionSchema>;
+export type PokemonOption = PokemonOptionType;
 export type PlaythroughWithEncounters = Playthrough & {
   encounters: NonNullable<Playthrough["encounters"]>;
 };

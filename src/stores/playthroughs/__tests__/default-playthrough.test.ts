@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PlaythroughSchema } from "@/stores/playthroughs/types";
+import { ImportedPlaythroughSchema } from "@/stores/playthroughs/importSchema";
 import { createDefaultPlaythrough } from "../defaultPlaythrough";
 
 describe("createDefaultPlaythrough", () => {
@@ -13,7 +13,9 @@ describe("createDefaultPlaythrough", () => {
     expect(playthrough.team.members).toHaveLength(6);
     expect(playthrough.createdAt).toBe(playthrough.updatedAt);
 
-    expect(() => PlaythroughSchema.parse(playthrough)).not.toThrow();
+    expect(() =>
+      ImportedPlaythroughSchema.parse({ playthrough }),
+    ).not.toThrow();
   });
 
   it("creates unique ids for new defaults", () => {

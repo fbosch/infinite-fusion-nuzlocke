@@ -28,7 +28,7 @@ import { getAvailableTeamPositionsForMembers } from "./teamPositions";
 import {
   DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
   type GameMode,
-  GameModeSchema,
+  isGameMode,
   type Playthrough,
   type PlaythroughsState,
 } from "./types";
@@ -169,14 +169,10 @@ const changeActiveGameMode = (
     return;
   }
 
-  const previousGameModeResult = GameModeSchema.safeParse(
-    activePlaythrough.gameMode,
-  );
-  if (!previousGameModeResult.success) {
+  if (isGameMode(activePlaythrough.gameMode) === false) {
     return;
   }
-
-  const previousGameMode = previousGameModeResult.data;
+  const previousGameMode = activePlaythrough.gameMode;
   if (previousGameMode === nextGameMode) {
     return;
   }
@@ -199,14 +195,11 @@ const cycleGameMode = (sourceContext?: AnalyticsSourceContext) => {
   const activePlaythrough = getActivePlaythrough();
   if (activePlaythrough) {
     const modes = ["classic", "remix", "randomized"] as const;
-    const currentModeResult = GameModeSchema.safeParse(
-      activePlaythrough.gameMode,
-    );
-    if (!currentModeResult.success) {
+    if (isGameMode(activePlaythrough.gameMode) === false) {
       return;
     }
 
-    const currentIndex = modes.indexOf(currentModeResult.data);
+    const currentIndex = modes.indexOf(activePlaythrough.gameMode);
     const nextIndex = (currentIndex + 1) % modes.length;
     const nextMode = modes[nextIndex];
     changeActiveGameMode(nextMode, false, sourceContext);
@@ -313,7 +306,7 @@ const getGameMode = (): GameMode => {
 
 const importPlaythrough = async (importData: unknown): Promise<string> => {
   const persistedIds = (await loadAllPlaythroughs()).map((p) => p.id);
-  const newPlaythrough = prepareImportedPlaythrough(
+  const newPlaythrough = await prepareImportedPlaythrough(
     importData,
     new Set([
       ...persistedIds,

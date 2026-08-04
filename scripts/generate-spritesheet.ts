@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
@@ -68,6 +69,7 @@ export type SpritesheetMetadata = {
   algorithm: "compact-bin-packing";
   version: "2.0";
   generation: "gen7" | "gen8";
+  spritesheetVersion: string;
   totalSprites: number;
   includedSprites: number;
   sheetWidth: number;
@@ -80,6 +82,7 @@ export type GenerationConfig = {
   name: "gen7" | "gen8";
   spritesDir: string;
   outputFilename: string;
+  outputFormat: "png" | "webp";
   metadataFilename: string;
 };
 
@@ -87,13 +90,15 @@ const GENERATIONS: GenerationConfig[] = [
   {
     name: "gen7",
     spritesDir: GEN7_SPRITES_DIR,
-    outputFilename: "pokemon-gen7-spritesheet.png",
+    outputFilename: "pokemon-gen7-spritesheet.webp",
+    outputFormat: "webp",
     metadataFilename: "pokemon-gen7-spritesheet-metadata.json",
   },
   {
     name: "gen8",
     spritesDir: GEN8_SPRITES_DIR,
-    outputFilename: "pokemon-gen8-spritesheet.png",
+    outputFilename: "pokemon-gen8-spritesheet.webp",
+    outputFormat: "webp",
     metadataFilename: "pokemon-gen8-spritesheet-metadata.json",
   },
 ];
@@ -700,15 +705,22 @@ async function generateSpritesheet(
     SPRITESHEET_OUTPUT_DIR,
     generation.outputFilename,
   );
-  await baseImage
-    .composite(compositeOps)
-    .png({ compressionLevel: 9 })
-    .toFile(spritesheetPath);
+  const spritesheet = baseImage.composite(compositeOps);
+  if (generation.outputFormat === "webp") {
+    await spritesheet
+      .webp({ lossless: true, effort: 6 })
+      .toFile(spritesheetPath);
+  } else {
+    await spritesheet.png({ compressionLevel: 9 }).toFile(spritesheetPath);
+  }
 
   ConsoleFormatter.success(`Spritesheet saved to: ${spritesheetPath}`);
 
   // Create metadata
-  const metadata: SpritesheetMetadata = {
+  const metadataWithoutVersion: Omit<
+    SpritesheetMetadata,
+    "spritesheetVersion"
+  > = {
     algorithm: "compact-bin-packing",
     version: "2.0",
     generation: generation.name,
@@ -718,6 +730,13 @@ async function generateSpritesheet(
     sheetHeight,
     spaceEfficiency: efficiency,
     sprites: spriteInfos, // Include all sprites, even missing ones for order preservation
+  };
+  const metadata: SpritesheetMetadata = {
+    ...metadataWithoutVersion,
+    spritesheetVersion: createHash("sha256")
+      .update(await fs.readFile(spritesheetPath))
+      .digest("hex")
+      .slice(0, 12),
   };
 
   // Save metadata

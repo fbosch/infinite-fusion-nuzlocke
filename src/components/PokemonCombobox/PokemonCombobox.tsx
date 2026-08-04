@@ -72,7 +72,9 @@ interface PokemonComboboxProps {
   isFusion?: boolean;
   shouldLoad?: boolean;
   routeEncounterData?: RouteEncounterPokemon[];
+  isRouteEncounterDataLoading?: boolean;
   isCustomLocation?: boolean;
+  onActivate?: () => void;
 }
 
 const DEFAULT_ROUTE_ENCOUNTER_DATA: RouteEncounterPokemon[] = [];
@@ -94,14 +96,22 @@ export const PokemonCombobox = ({
   isFusion = false,
   shouldLoad = true,
   routeEncounterData = DEFAULT_ROUTE_ENCOUNTER_DATA,
+  isRouteEncounterDataLoading = false,
   isCustomLocation = false,
+  onActivate,
 }: PokemonComboboxProps) => {
   "use no memo";
 
   const [query, setQuery] = useState("");
+  const [isPokemonDataEnabled, setIsPokemonDataEnabled] = useState(false);
   const deferredQuery = useDeferredValue(query);
   const gameMode = useGameMode();
   const encounters = useEncounters();
+
+  const activatePokemonData = () => {
+    setIsPokemonDataEnabled(true);
+    onActivate?.();
+  };
 
   // Ref to maintain focus on input
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -144,12 +154,13 @@ export const PokemonCombobox = ({
   // Use the search hook
   const { data: resultsData, isLoading: isSearchLoading } = usePokemonSearch({
     query: deferredQuery,
+    enabled: isPokemonDataEnabled,
   });
   const results = resultsData ?? EMPTY_POKEMON_OPTIONS;
 
   // Get all Pokemon for randomized mode
   const { data: allPokemonData, isLoading: isAllPokemonLoading } =
-    useAllPokemon();
+    useAllPokemon(isPokemonDataEnabled);
   const allPokemon = allPokemonData ?? EMPTY_POKEMON_OPTIONS;
   const fusionCombination =
     !isFusion && onFusionChange
@@ -187,7 +198,12 @@ export const PokemonCombobox = ({
   );
 
   // Combine route matches with smart search results
+  // fallow-ignore-next-line complexity -- Filtering, ordering, and deduplication must share one memoized option source.
   const finalOptions = useMemo(() => {
+    if (isRouteEncounterDataLoading) {
+      return [];
+    }
+
     // Early return for empty query
     if (deferredQuery === "") {
       const shouldShowAllPokemon =
@@ -272,6 +288,7 @@ export const PokemonCombobox = ({
       );
   }, [
     routeEncounterData,
+    isRouteEncounterDataLoading,
     results,
     deferredQuery,
     isRoutePokemon,
@@ -421,10 +438,11 @@ export const PokemonCombobox = ({
     // 2. There's a query and search is loading, or all Pokemon are loading
     if (deferredQuery === "") {
       return (
-        (gameMode === "randomized" ||
+        isRouteEncounterDataLoading ||
+        ((gameMode === "randomized" ||
           isCustomLocation ||
           routeEncounterData.length === 0) &&
-        isAllPokemonLoading
+          isAllPokemonLoading)
       );
     }
     return !fusionCombination && (isSearchLoading || isAllPokemonLoading);
@@ -435,6 +453,7 @@ export const PokemonCombobox = ({
     isAllPokemonLoading,
     isSearchLoading,
     routeEncounterData.length,
+    isRouteEncounterDataLoading,
     fusionCombination,
   ]);
 
@@ -516,6 +535,8 @@ export const PokemonCombobox = ({
                 spellCheck={false}
                 autoComplete="off"
                 onChange={handleInputChange}
+                onFocus={activatePokemonData}
+                onPointerEnter={activatePokemonData}
               />
               <DraggableComboboxSprite
                 value={value}
@@ -529,7 +550,7 @@ export const PokemonCombobox = ({
                 <PokemonEvolutionButton
                   value={value}
                   onChange={onChange}
-                  shouldLoad={shouldLoad}
+                  shouldLoad={shouldLoad && isPokemonDataEnabled}
                   locationId={locationId}
                 />
               )}
@@ -556,6 +577,7 @@ export const PokemonCombobox = ({
                       : "auto",
                   }}
                   className={clsx(
+                    // fallow-ignore-next-line css-token-drift -- Floating UI caps the list at 500px to match its middleware.
                     "max-h-[31.25rem] h-full overflow-y-auto z-40 relative",
                     "px-1 text-base shadow-lg focus:outline-none sm:text-sm",
                     "bg-white dark:bg-gray-800 gap-x-2",

@@ -1,5 +1,5 @@
 import { PokemonStatus } from "@/loaders/pokemon";
-import { type GameMode, type Playthrough, PlaythroughSchema } from "./types";
+import { type GameMode, isGameMode, type Playthrough } from "./types";
 
 /**
  * Migration data type for playthrough migrations
@@ -69,13 +69,7 @@ const migrateTeamField = (data: MigrationData): MigrationData => {
         },
       );
       team = { members: fixedMembers };
-    } else {
-      // Invalid members structure, reset to default
-      team = { members: Array.from({ length: 6 }, () => null) };
     }
-  } else {
-    // Invalid team structure, reset to default
-    team = { members: Array.from({ length: 6 }, () => null) };
   }
 
   return { ...data, team };
@@ -273,6 +267,7 @@ const migrateRequiredFields = (data: unknown): MigrationData => {
       typeof migrationData.name === "string" && migrationData.name.length > 0
         ? migrationData.name
         : "Playthrough",
+    gameMode: migrationData.gameMode ?? "classic",
     createdAt: toNumber(migrationData.createdAt, now),
     updatedAt: toNumber(migrationData.updatedAt, now),
   };
@@ -296,8 +291,111 @@ const applyPlaythroughMigrations = (data: unknown): MigrationData => {
   return migratedData;
 };
 
-export const normalizePersistedPlaythrough = (data: unknown): Playthrough =>
-  PlaythroughSchema.parse(applyPlaythroughMigrations(data));
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && Array.isArray(value) === false;
+
+// fallow-ignore-next-line complexity -- Validates every persisted Pokemon option field before state migration.
+const isPokemonOption = (value: unknown): boolean => {
+  if (isRecord(value) === false) return false;
+
+  const validStatus =
+    value.status === undefined ||
+    value.status === "captured" ||
+    value.status === "received" ||
+    value.status === "traded" ||
+    value.status === "missed" ||
+    value.status === "stored" ||
+    value.status === "deceased";
+  const validOriginalReceivalStatus =
+    value.originalReceivalStatus === undefined ||
+    value.originalReceivalStatus === "captured" ||
+    value.originalReceivalStatus === "received" ||
+    value.originalReceivalStatus === "traded";
+
+  return (
+    Number.isInteger(value.id) &&
+    typeof value.name === "string" &&
+    value.name.length > 0 &&
+    Number.isInteger(value.nationalDexId) &&
+    (value.nickname === undefined || typeof value.nickname === "string") &&
+    (value.originalLocation === undefined ||
+      typeof value.originalLocation === "string") &&
+    validStatus &&
+    validOriginalReceivalStatus &&
+    (value.uid === undefined || typeof value.uid === "string")
+  );
+};
+
+// fallow-ignore-next-line complexity -- Validates the complete persisted run boundary before canonical state installation.
+const isValidPersistedPlaythrough = (
+  playthrough: MigrationData,
+): playthrough is Playthrough => {
+  if (
+    typeof playthrough.id !== "string" ||
+    typeof playthrough.name !== "string" ||
+    isGameMode(playthrough.gameMode) === false ||
+    typeof playthrough.createdAt !== "number" ||
+    typeof playthrough.updatedAt !== "number" ||
+    typeof playthrough.version !== "string" ||
+    isRecord(playthrough.team) === false ||
+    Array.isArray(playthrough.team.members) === false ||
+    playthrough.team.members.length !== 6 ||
+    playthrough.team.members.some(
+      (member) =>
+        member !== null &&
+        (isRecord(member) === false ||
+          typeof member.headPokemonUid !== "string" ||
+          typeof member.bodyPokemonUid !== "string"),
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    playthrough.customLocations !== undefined &&
+    (Array.isArray(playthrough.customLocations) === false ||
+      playthrough.customLocations.some(
+        (location) =>
+          isRecord(location) === false ||
+          typeof location.id !== "string" ||
+          location.id.length === 0 ||
+          typeof location.name !== "string" ||
+          location.name.length === 0 ||
+          typeof location.insertAfterLocationId !== "string" ||
+          location.insertAfterLocationId.length === 0,
+      ))
+  ) {
+    return false;
+  }
+
+  if (
+    playthrough.encounters !== undefined &&
+    (isRecord(playthrough.encounters) === false ||
+      Object.values(playthrough.encounters).some(
+        (encounter) =>
+          isRecord(encounter) === false ||
+          (encounter.head !== null &&
+            isPokemonOption(encounter.head) === false) ||
+          (encounter.body !== null &&
+            isPokemonOption(encounter.body) === false) ||
+          typeof encounter.isFusion !== "boolean" ||
+          typeof encounter.updatedAt !== "number",
+      ))
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+export const normalizePersistedPlaythrough = (data: unknown): Playthrough => {
+  const playthrough = applyPlaythroughMigrations(data);
+  if (isValidPersistedPlaythrough(playthrough) === false) {
+    throw new Error("Invalid persisted playthrough");
+  }
+
+  return playthrough;
+};
 
 export const normalizeImportedPlaythrough = (data: unknown): unknown => {
   if (!data || typeof data !== "object" || !("playthrough" in data)) {
@@ -316,6 +414,6 @@ export const normalizeImportedPlaythrough = (data: unknown): unknown => {
 
   return {
     ...data,
-    playthrough: normalizePersistedPlaythrough(playthrough),
+    playthrough: applyPlaythroughMigrations(playthrough),
   };
 };

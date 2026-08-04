@@ -1,6 +1,5 @@
 import locationsData from "@data/shared/locations.json";
 import { useQuery } from "@tanstack/react-query";
-import { z } from "zod";
 import { isStarterLocation } from "@/constants/special-locations";
 import { encountersData, encountersQueries } from "@/lib/queryClient";
 import { getStarterPokemonByGameMode } from "@/loaders/starters";
@@ -8,48 +7,24 @@ import { EncounterSource, type PokemonEncounter } from "@/types/encounters";
 import { generatePrefixedId } from "@/utils/id";
 import type { GameMode } from "../stores/playthroughs/types";
 
-// Location schema
-const LocationSchema = z.object({
-  id: z.string().min(1, { error: "Location ID is required" }),
-  name: z.string().min(1, { error: "Location name is required" }),
-  region: z.string().min(1, { error: "Region is required" }),
-  description: z.string().min(1, { error: "Description is required" }),
-});
+export type Location = {
+  id: string;
+  name: string;
+  region: string;
+  description: string;
+};
 
-export type Location = z.infer<typeof LocationSchema>;
-
-// Legacy custom location schema for migration
-const LegacyCustomLocationSchema = z.object({
-  id: z.string().min(1, { error: "Location ID is required" }),
-  name: z.string().min(1, { error: "Location name is required" }),
-  order: z.number().positive({ error: "Order must be a positive number" }),
-});
-
-// Modern custom location schema
-const ModernCustomLocationSchema = z.object({
-  id: z.string().min(1, { error: "Location ID is required" }),
-  name: z.string().min(1, { error: "Location name is required" }),
-  insertAfterLocationId: z
-    .string()
-    .min(1, { error: "Insert after location ID is required" }),
-});
-
-// Custom location schema with migration support
-export const CustomLocationSchema = z
-  .union([LegacyCustomLocationSchema, ModernCustomLocationSchema])
-  .transform((data) => {
-    // If it's a legacy location with order, migrate it
-    if ("order" in data) {
-      return migrateCustomLocationFromOrder(data);
-    }
-    // Otherwise, it's already in the modern format
-    return data as z.infer<typeof ModernCustomLocationSchema>;
-  });
+type LegacyCustomLocation = { id: string; name: string; order: number };
+export type CustomLocation = {
+  id: string;
+  name: string;
+  insertAfterLocationId: string;
+};
 
 // Migration function to convert order-based custom locations
 function migrateCustomLocationFromOrder(
-  legacyLocation: z.infer<typeof LegacyCustomLocationSchema>,
-): z.infer<typeof ModernCustomLocationSchema> {
+  legacyLocation: LegacyCustomLocation,
+): CustomLocation {
   const defaultLocations = getLocations();
 
   // Find the location that would have been "before" this custom location based on order
@@ -76,23 +51,37 @@ function migrateCustomLocationFromOrder(
   };
 }
 
-export type CustomLocation = z.infer<typeof CustomLocationSchema>;
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0;
+}
+
+function isLocation(value: unknown): value is Location {
+  if (typeof value !== "object" || value === null) return false;
+
+  const candidate = value as Record<string, unknown>;
+  return (
+    isNonEmptyString(candidate.id) &&
+    isNonEmptyString(candidate.name) &&
+    isNonEmptyString(candidate.region) &&
+    isNonEmptyString(candidate.description)
+  );
+}
 
 // Combined type for locations that can be either default or custom
 export type CombinedLocation =
   | Location
   | (CustomLocation & { region: string; description: string; isCustom: true });
 
-const LocationsArraySchema = z.array(LocationSchema);
-
 // Validate and load locations
 function loadLocations(): Location[] {
-  const result = z.array(LocationSchema).safeParse(locationsData);
-  if (!result.success) {
-    console.error("Invalid locations data:", result.error.issues);
+  if (
+    Array.isArray(locationsData) === false ||
+    locationsData.every(isLocation) === false
+  ) {
+    console.error("Invalid locations data");
     throw new Error("Invalid locations data");
   }
-  return result.data;
+  return locationsData;
 }
 
 // Cache the locations
@@ -190,7 +179,7 @@ export function useLocationEncountersById(
     error,
   } = useQuery({
     ...encountersQueries.all(gameMode as "remix" | "classic"),
-    enabled: !isStarter && !isRandomized,
+    enabled: Boolean(locationId) && !isStarter && !isRandomized,
   });
 
   // Get starter Pokemon data (always call this hook)

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { ImportedPlaythroughSchema } from "../importSchema";
 import {
   normalizeImportedPlaythrough,
   normalizePersistedPlaythrough,
 } from "../migrations";
-import { ImportedPlaythroughSchema } from "../types";
 
 describe("Playthrough normalization", () => {
   it("repairs a legacy persisted shape without mutating its input", () => {
@@ -161,6 +161,62 @@ describe("Playthrough normalization", () => {
       isFusion: false,
       updatedAt: 1,
     });
+  });
+
+  it.each(["team", "gameMode", "version"] as const)(
+    "fills a missing %s in an import without remixMode",
+    (field) => {
+      const legacyImport = {
+        playthrough: {
+          id: "legacy-import",
+          name: "Legacy Import",
+          gameMode: "classic",
+          version: "1.0.0",
+          team: { members: [null, null, null, null, null, null] },
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      };
+      delete legacyImport.playthrough[field];
+
+      expect(() =>
+        ImportedPlaythroughSchema.parse(
+          normalizeImportedPlaythrough(legacyImport),
+        ),
+      ).not.toThrow();
+    },
+  );
+
+  it("rejects malformed nested persisted data after migration", () => {
+    const validPlaythrough = {
+      id: "current",
+      name: "Current Run",
+      gameMode: "classic",
+      version: "1.0.0",
+      team: { members: [null, null, null, null, null, null] },
+      encounters: {},
+      createdAt: 1,
+      updatedAt: 1,
+    };
+
+    expect(() =>
+      normalizePersistedPlaythrough({
+        ...validPlaythrough,
+        customLocations: ["invalid"],
+      }),
+    ).toThrow("Invalid persisted playthrough");
+    expect(() =>
+      normalizePersistedPlaythrough({
+        ...validPlaythrough,
+        encounters: { route1: { head: null, body: null } },
+      }),
+    ).toThrow("Invalid persisted playthrough");
+    expect(() =>
+      normalizePersistedPlaythrough({
+        ...validPlaythrough,
+        team: { members: ["invalid", null, null, null, null, null] },
+      }),
+    ).toThrow("Invalid persisted playthrough");
   });
 
   it("leaves malformed import envelopes for their adapter to reject", () => {

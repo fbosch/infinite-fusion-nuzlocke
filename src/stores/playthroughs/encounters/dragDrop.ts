@@ -1,10 +1,9 @@
-import type { z } from "zod";
 import { getSharedEventProperties } from "@/lib/analytics/selectors";
 import { trackEvent } from "@/lib/analytics/trackEvent";
 import { emitEvolutionEvent } from "@/lib/events";
-import type { PokemonOptionSchema } from "@/loaders/pokemon";
+import type { PokemonOptionType } from "@/loaders/pokemon";
 import { getCurrentTimestamp } from "../playthroughState";
-import type { EncounterDataSchema } from "../types";
+import type { EncounterData } from "../types";
 import {
   createPokemonWithLocationAndUID,
   ensureActivePlaythroughWithEncounters,
@@ -114,7 +113,7 @@ export const moveEncounterAtomic = async (
   sourceField: "head" | "body",
   targetLocationId: string,
   targetField: "head" | "body",
-  pokemon: z.infer<typeof PokemonOptionSchema>,
+  pokemon: PokemonOptionType,
 ) => {
   const activePlaythrough = ensureActivePlaythroughWithEncounters();
   if (!activePlaythrough) {
@@ -140,7 +139,7 @@ export const moveEncounterAtomic = async (
     preserveTeamMembership: true,
   });
 
-  const newEncounter: z.infer<typeof EncounterDataSchema> = {
+  const newEncounter: EncounterData = {
     head:
       targetField === "head"
         ? pokemonWithLocationAndUID
@@ -174,7 +173,7 @@ export const moveEncounterAtomic = async (
 export const moveEncounter = async (
   fromLocationId: string,
   toLocationId: string,
-  pokemon: z.infer<typeof PokemonOptionSchema>,
+  pokemon: PokemonOptionType,
   toField: "head" | "body" = "head",
 ) => {
   if (fromLocationId === toLocationId) {
@@ -213,7 +212,7 @@ export const moveEncounter = async (
     sourceEncounter.head &&
     sourceEncounter.body
   ) {
-    const movedEncounter: z.infer<typeof EncounterDataSchema> = {
+    const movedEncounter: EncounterData = {
       head: createPokemonWithLocationAndUID(sourceEncounter.head, toLocationId),
       body: createPokemonWithLocationAndUID(sourceEncounter.body, toLocationId),
       isFusion: true,
@@ -233,7 +232,7 @@ export const moveEncounter = async (
     toLocationId,
   );
 
-  const movedEncounter: z.infer<typeof EncounterDataSchema> = {
+  const movedEncounter: EncounterData = {
     head: toField === "head" ? pokemonWithLocationAndUID : null,
     body: toField === "body" ? pokemonWithLocationAndUID : null,
     isFusion: toField === "body",
@@ -337,7 +336,7 @@ export const getLocationFromComboboxId = (
 export const moveToOriginalLocation = async (
   sourceLocationId: string,
   sourceField: "head" | "body",
-  pokemon: z.infer<typeof PokemonOptionSchema>,
+  pokemon: PokemonOptionType,
 ) => {
   if (!pokemon.originalLocation) {
     return;

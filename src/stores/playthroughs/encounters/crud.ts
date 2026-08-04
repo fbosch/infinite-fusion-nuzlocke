@@ -1,9 +1,8 @@
-import type { z } from "zod";
 import { getEncounterCount } from "@/lib/analytics/playthroughEventData";
 import { emitEvolutionEvent } from "@/lib/events";
-import type { PokemonOptionSchema, PokemonOptionType } from "@/loaders/pokemon";
+import type { PokemonOptionType } from "@/loaders/pokemon";
 import { getActivePlaythrough, getCurrentTimestamp } from "../playthroughState";
-import type { EncounterData, EncounterDataSchema, Playthrough } from "../types";
+import type { EncounterData, Playthrough } from "../types";
 import {
   createPokemonWithLocationAndUID,
   ensureActivePlaythroughWithEncounters,
@@ -40,12 +39,12 @@ const createEncounterData = async (
   field: "head" | "body" = "head",
   shouldCreateFusion: boolean = false,
   locationId?: string,
-): Promise<z.infer<typeof EncounterDataSchema>> => {
+): Promise<EncounterData> => {
   const pokemonWithLocationAndUID = pokemon
     ? createPokemonWithLocationAndUID(pokemon, locationId ?? "")
     : null;
 
-  const encounterData: z.infer<typeof EncounterDataSchema> = {
+  const encounterData: EncounterData = {
     head: field === "head" ? pokemonWithLocationAndUID : null,
     body: field === "body" ? pokemonWithLocationAndUID : null,
     isFusion: shouldCreateFusion,
@@ -66,7 +65,7 @@ export const updatePokemonInEncounter = async (
   locationId: string,
   pokemonUID: string,
   field: "head" | "body",
-  updates: Partial<z.infer<typeof PokemonOptionSchema>>,
+  updates: Partial<PokemonOptionType>,
 ) => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough?.encounters?.[locationId]) {

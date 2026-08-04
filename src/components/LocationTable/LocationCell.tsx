@@ -3,11 +3,10 @@
 import { CheckCircle, Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSnapshot } from "valtio";
-import type { z } from "zod";
 import { PokemonSprite } from "@/components/PokemonSprite";
 import { isCustomLocation } from "@/loaders";
 import type { CombinedLocation } from "@/loaders/locations";
-import type { PokemonOptionSchema } from "@/loaders/pokemon";
+import type { PokemonOptionType } from "@/loaders/pokemon";
 import { useEncounters } from "@/stores/playthroughs/hooks";
 import type { EncounterData } from "@/stores/playthroughs/types";
 import { settingsStore } from "@/stores/settings";
@@ -19,7 +18,7 @@ interface LocationCellProps {
   locationName: string;
 }
 
-type Pokemon = z.infer<typeof PokemonOptionSchema>;
+type Pokemon = PokemonOptionType;
 
 function getLocationPokemonKey(pokemon: Pokemon): string {
   if (pokemon.uid) {

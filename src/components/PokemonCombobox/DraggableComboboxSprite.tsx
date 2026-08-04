@@ -49,10 +49,12 @@ export function DraggableComboboxSprite({
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const customLocations = useCustomLocations();
   const settings = useSnapshot(settingsStore);
-  const { primary, secondary } = usePokemonTypes({ id: pokemon?.id });
+  const { primary, secondary } = usePokemonTypes(
+    pokemon ? { id: pokemon.id } : undefined,
+  );
   const { evolutions, preEvolution } = usePokemonEvolutionData(
     pokemon?.id,
-    true,
+    Boolean(pokemon),
   );
   const field = comboboxId?.includes("-body") ? "body" : "head";
 

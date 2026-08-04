@@ -11,7 +11,7 @@ export interface UsePokemonTypesResult {
 export function usePokemonTypes(
   query: TypeQuery | undefined,
 ): UsePokemonTypesResult {
-  const { data: allPokemon = [], isLoading } = useAllPokemon();
+  const { data: allPokemon = [], isLoading } = useAllPokemon(Boolean(query));
 
   if (!query) return { isLoading };
   if (!allPokemon || allPokemon.length === 0) return { isLoading: true };

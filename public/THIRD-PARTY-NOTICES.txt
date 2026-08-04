@@ -1,7 +1,7 @@
 Third-Party Notices
 
 This file lists open source packages included in this application along with their licenses.
-Generated: 2026-07-22T07:55:19.415Z
+Generated: 2026-08-04T13:20:13.391Z
 
 @floating-ui/react@0.27.20 — MIT
 Homepage: https://floating-ui.com/docs/react
@@ -60,7 +60,7 @@ SOFTWARE.
 
 ----------------------------------------
 
-@tanstack/query-persist-client-core@5.101.2 — MIT
+@tanstack/query-persist-client-core@5.101.4 — MIT
 Homepage: https://tanstack.com/query
 
 ----- LICENSE TEXT -----
@@ -89,7 +89,7 @@ SOFTWARE.
 
 ----------------------------------------
 
-@tanstack/react-query@5.101.2 — MIT
+@tanstack/react-query@5.101.4 — MIT
 Homepage: https://tanstack.com/query
 
 ----- LICENSE TEXT -----
@@ -118,7 +118,7 @@ SOFTWARE.
 
 ----------------------------------------
 
-@tanstack/react-query-devtools@5.101.2 — MIT
+@tanstack/react-query-devtools@5.101.4 — MIT
 Homepage: https://tanstack.com/query
 
 ----- LICENSE TEXT -----
@@ -176,7 +176,7 @@ SOFTWARE.
 
 ----------------------------------------
 
-@tanstack/react-virtual@3.14.6 — MIT
+@tanstack/react-virtual@3.14.8 — MIT
 Homepage: https://tanstack.com/virtual
 
 ----- LICENSE TEXT -----
@@ -719,7 +719,7 @@ Apache License
 
 ----------------------------------------
 
-es-toolkit@1.49.0 — MIT
+es-toolkit@1.50.0 — MIT
 Homepage: https://es-toolkit.dev
 
 ----- LICENSE TEXT -----
@@ -978,7 +978,7 @@ limitations under the License.
 
 ----------------------------------------
 
-lucide-react@1.24.0 — ISC
+lucide-react@1.26.0 — ISC
 Homepage: https://lucide.dev
 
 ----- LICENSE TEXT -----
@@ -1087,7 +1087,7 @@ SOFTWARE.
 
 ----------------------------------------
 
-next@16.2.10 — MIT
+next@16.3.0 — MIT
 Homepage: https://nextjs.org
 
 ----- LICENSE TEXT -----
