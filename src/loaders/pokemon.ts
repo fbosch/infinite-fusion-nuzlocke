@@ -341,8 +341,11 @@ async function getInfiniteFusionToNationalDexMap(): Promise<
 }
 
 // React Query hooks using centralized query options
-export function useAllPokemon() {
-  return useQuery(pokemonQueries.all());
+export function useAllPokemon(enabled = true) {
+  return useQuery({
+    ...pokemonQueries.all(),
+    enabled,
+  });
 }
 
 function usePokemonById(id: number) {
@@ -354,8 +357,8 @@ function usePokemonByType(type: string) {
 }
 
 // Name map hook that transforms existing Pokemon data
-export function usePokemonNameMap() {
-  const { data: allPokemon = [] } = useAllPokemon();
+export function usePokemonNameMap(enabled = true) {
+  const { data: allPokemon = [] } = useAllPokemon(enabled);
 
   const nameMap = new Map(allPokemon.map((p) => [p.id, p.name]));
 
@@ -402,6 +405,7 @@ export function usePokemonEvolutionData(
 // Hook for searching Pokemon with debounced query
 interface UsePokemonSearchOptions {
   query: string;
+  enabled?: boolean;
   queryOptions?: Omit<
     QueryOptions<PokemonOptionType[], Error>,
     "queryKey" | "queryFn"
@@ -410,9 +414,10 @@ interface UsePokemonSearchOptions {
 
 export function usePokemonSearch({
   query,
+  enabled = true,
   queryOptions = {},
 }: UsePokemonSearchOptions) {
-  const { data: allPokemon = [] } = useAllPokemon();
+  const { data: allPokemon = [] } = useAllPokemon(enabled);
 
   // Debounce the query to reduce search frequency
   const [debouncedQuery] = useDebounce(query, 50, {
@@ -455,7 +460,7 @@ export function usePokemonSearch({
     select: (data) => {
       return data?.filter((p) => p.id !== 0) ?? [];
     },
-    enabled: allPokemon.length > 0 && debouncedQuery !== "",
+    enabled: enabled && allPokemon.length > 0 && debouncedQuery !== "",
     placeholderData: keepPreviousData,
     staleTime: 0, // Don't cache - always fetch fresh data
     gcTime: 0, // Don't keep in garbage collection

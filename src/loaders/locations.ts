@@ -190,7 +190,7 @@ export function useLocationEncountersById(
     error,
   } = useQuery({
     ...encountersQueries.all(gameMode as "remix" | "classic"),
-    enabled: !isStarter && !isRandomized,
+    enabled: Boolean(locationId) && !isStarter && !isRandomized,
   });
 
   // Get starter Pokemon data (always call this hook)

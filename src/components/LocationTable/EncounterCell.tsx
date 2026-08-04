@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import { ArrowLeftRight } from "lucide-react";
 import Image from "next/image";
-import { useReducer, useRef } from "react";
+import { useReducer, useRef, useState } from "react";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import { PokemonCombobox } from "@/components/PokemonCombobox/PokemonCombobox";
@@ -156,9 +156,14 @@ export function EncounterCell({
   const gameMode = useGameMode();
   const customLocations = useCustomLocations();
   const isCustomLocation = customLocations.some((loc) => loc.id === locationId);
+  const [isPokemonDataEnabled, setIsPokemonDataEnabled] = useState(false);
   const { routeEncounterData } = useEncountersForLocation({
     locationId,
-    enabled: shouldLoad && !isCustomLocation && gameMode !== "randomized",
+    enabled:
+      shouldLoad &&
+      isPokemonDataEnabled &&
+      !isCustomLocation &&
+      gameMode !== "randomized",
     gameMode: gameMode === "randomized" ? "classic" : gameMode,
   });
 
@@ -490,6 +495,7 @@ export function EncounterCell({
                   onBeforeOverwrite={handleBeforeOverwriteHead}
                   isFusion={isFusion}
                   shouldLoad={shouldLoad}
+                  onActivate={() => setIsPokemonDataEnabled(true)}
                 />
               </div>
               <CursorTooltip
@@ -537,6 +543,7 @@ export function EncounterCell({
                   onBeforeOverwrite={handleBeforeOverwriteBody}
                   isFusion={isFusion}
                   shouldLoad={shouldLoad}
+                  onActivate={() => setIsPokemonDataEnabled(true)}
                 />
               </div>
             </div>
@@ -556,6 +563,7 @@ export function EncounterCell({
               onBeforeOverwrite={handleBeforeOverwriteSingle}
               isFusion={isFusion}
               shouldLoad={shouldLoad}
+              onActivate={() => setIsPokemonDataEnabled(true)}
             />
           )}
         </div>

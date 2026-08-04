@@ -74,10 +74,12 @@ vi.mock("@/components/PokemonCombobox/PokemonCombobox", () => ({
     comboboxId,
     onChange,
     onFusionChange,
+    onActivate,
   }: {
     comboboxId: string;
     onChange: (pokemon: PokemonOptionType | null) => void;
     onFusionChange?: (head: PokemonOptionType, body: PokemonOptionType) => void;
+    onActivate?: () => void;
   }) => {
     const selectedPokemon: PokemonOptionType = {
       id: 133,
@@ -93,6 +95,9 @@ vi.mock("@/components/PokemonCombobox/PokemonCombobox", () => ({
         </button>
         <button type="button" onClick={() => onChange(null)}>
           {`clear-${comboboxId}`}
+        </button>
+        <button type="button" onClick={onActivate}>
+          {`activate-${comboboxId}`}
         </button>
         <button
           type="button"
@@ -188,6 +193,37 @@ describe("EncounterCell", () => {
 
     expect(useEncountersForLocationMock).toHaveBeenCalledWith(
       expect.objectContaining({ enabled: false }),
+    );
+  });
+
+  it("loads route encounters when a combobox activates", () => {
+    useEncounterMock.mockReturnValue({
+      head: null,
+      body: null,
+      isFusion: false,
+      updatedAt: Date.now(),
+    });
+
+    render(
+      <table>
+        <tbody>
+          <tr>
+            <EncounterCell locationId="route-1" />
+          </tr>
+        </tbody>
+      </table>,
+    );
+
+    expect(useEncountersForLocationMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false }),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "activate-route-1-single" }),
+    );
+
+    expect(useEncountersForLocationMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: true }),
     );
   });
 

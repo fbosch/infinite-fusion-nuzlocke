@@ -2,13 +2,13 @@ import clsx from "clsx";
 
 export default function LocationTableSkeleton() {
   return (
-    <div className="overflow-hidden sm:rounded-lg sm:border sm:border-gray-200 sm:dark:border-gray-700 sm:shadow-sm">
-      <div className="max-h-[90dvh] overflow-hidden">
+    <div className="overflow-hidden 2xl:rounded-lg border-y md:border border-gray-200 dark:border-gray-700 xl:shadow-sm">
+      <div className="max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative">
         <table
           className="w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700"
           aria-label="Loading locations table"
         >
-          <thead className="bg-gray-50 dark:bg-gray-800">
+          <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0 z-50 shadow-[0_0.5px_0_0_rgb(229,231,235)] dark:shadow-[0_0.5px_0_0_rgb(55,65,81)]">
             <tr>
               <th
                 className={clsx(
@@ -38,6 +38,11 @@ export default function LocationTableSkeleton() {
                   "w-[60px]",
                 )}
               ></th>
+            </tr>
+            <tr>
+              <th colSpan={4} className="p-0">
+                <div className="h-0.5 translate-y-px" aria-hidden="true" />
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700 opacity-10">

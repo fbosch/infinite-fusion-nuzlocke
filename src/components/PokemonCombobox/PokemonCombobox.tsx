@@ -73,6 +73,7 @@ interface PokemonComboboxProps {
   shouldLoad?: boolean;
   routeEncounterData?: RouteEncounterPokemon[];
   isCustomLocation?: boolean;
+  onActivate?: () => void;
 }
 
 const DEFAULT_ROUTE_ENCOUNTER_DATA: RouteEncounterPokemon[] = [];
@@ -95,10 +96,12 @@ export const PokemonCombobox = ({
   shouldLoad = true,
   routeEncounterData = DEFAULT_ROUTE_ENCOUNTER_DATA,
   isCustomLocation = false,
+  onActivate,
 }: PokemonComboboxProps) => {
   "use no memo";
 
   const [query, setQuery] = useState("");
+  const [isPokemonDataEnabled, setIsPokemonDataEnabled] = useState(false);
   const deferredQuery = useDeferredValue(query);
   const gameMode = useGameMode();
   const encounters = useEncounters();
@@ -144,12 +147,13 @@ export const PokemonCombobox = ({
   // Use the search hook
   const { data: resultsData, isLoading: isSearchLoading } = usePokemonSearch({
     query: deferredQuery,
+    enabled: isPokemonDataEnabled,
   });
   const results = resultsData ?? EMPTY_POKEMON_OPTIONS;
 
   // Get all Pokemon for randomized mode
   const { data: allPokemonData, isLoading: isAllPokemonLoading } =
-    useAllPokemon();
+    useAllPokemon(isPokemonDataEnabled);
   const allPokemon = allPokemonData ?? EMPTY_POKEMON_OPTIONS;
   const fusionCombination =
     !isFusion && onFusionChange
@@ -516,6 +520,10 @@ export const PokemonCombobox = ({
                 spellCheck={false}
                 autoComplete="off"
                 onChange={handleInputChange}
+                onFocus={() => {
+                  setIsPokemonDataEnabled(true);
+                  onActivate?.();
+                }}
               />
               <DraggableComboboxSprite
                 value={value}
@@ -529,7 +537,7 @@ export const PokemonCombobox = ({
                 <PokemonEvolutionButton
                   value={value}
                   onChange={onChange}
-                  shouldLoad={shouldLoad}
+                  shouldLoad={shouldLoad && isPokemonDataEnabled}
                   locationId={locationId}
                 />
               )}

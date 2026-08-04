@@ -1,13 +1,15 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { Dna, DnaOff } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
 import { useSnapshot } from "valtio";
 import { DNA_SPLICER_ICON } from "@/constants/items";
+import { pokemonQueries } from "@/lib/queries/pokemon";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { isEgg, useAllPokemon, usePokemonNameMap } from "@/loaders/pokemon";
+import { isEgg } from "@/loaders/pokemon";
 import { dragActions, dragStore } from "@/stores/dragStore";
 import { playthroughActions } from "@/stores/playthroughs/index";
 import { CursorTooltip } from "../CursorTooltip";
@@ -26,8 +28,7 @@ export function FusionToggleButton({
   onToggleFusion,
 }: FusionToggleButtonProps) {
   const dragSnapshot = useSnapshot(dragStore);
-  const { data: allPokemon = [] } = useAllPokemon();
-  const nameMap = usePokemonNameMap();
+  const queryClient = useQueryClient();
 
   // Handle drop on fusion button
   const handleFusionDrop = async (e: React.DragEvent<HTMLButtonElement>) => {
@@ -57,8 +58,9 @@ export function FusionToggleButton({
     // Prevent dropping if the button is disabled (Egg in non-fusion mode)
     if (!isFusion && selectedPokemon && isEgg(selectedPokemon)) return;
 
+    const allPokemon = await queryClient.fetchQuery(pokemonQueries.all());
     const foundPokemon = allPokemon.find(
-      (p) => nameMap?.get(p.id)?.toLowerCase() === pokemonName.toLowerCase(),
+      (pokemon) => pokemon.name.toLowerCase() === pokemonName.toLowerCase(),
     );
 
     if (!foundPokemon) return;
