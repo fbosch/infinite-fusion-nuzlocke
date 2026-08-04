@@ -294,6 +294,7 @@ const applyPlaythroughMigrations = (data: unknown): MigrationData => {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && Array.isArray(value) === false;
 
+// fallow-ignore-next-line complexity -- Validates every persisted Pokemon option field before state migration.
 const isPokemonOption = (value: unknown): boolean => {
   if (isRecord(value) === false) return false;
 
@@ -325,6 +326,7 @@ const isPokemonOption = (value: unknown): boolean => {
   );
 };
 
+// fallow-ignore-next-line complexity -- Validates the complete persisted run boundary before canonical state installation.
 const isValidPersistedPlaythrough = (
   playthrough: MigrationData,
 ): playthrough is Playthrough => {
