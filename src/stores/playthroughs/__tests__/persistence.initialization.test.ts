@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ACTIVE_PLAYTHROUGH_KEY,
+  loadAllPlaythroughs,
   loadFromIndexedDB,
   loadPlaythroughById,
 } from "../persistence";
@@ -215,5 +216,41 @@ describe("playthrough persistence initialization regression cases", () => {
       headPokemonUid: "",
       bodyPokemonUid: "",
     });
+  });
+
+  it("keeps valid playthroughs when another stored record is malformed", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    idbMocks.keys.mockResolvedValue(["valid", "invalid"]);
+    idbMocks.get.mockImplementation(async (key: string) => {
+      if (key === "valid") {
+        return {
+          id: "valid",
+          name: "Valid Run",
+          gameMode: "classic",
+          version: "1.0.0",
+          team: { members: Array.from({ length: 6 }, () => null) },
+          encounters: {},
+          createdAt: 1,
+          updatedAt: 1,
+        };
+      }
+
+      return {
+        id: "invalid",
+        name: "Invalid Run",
+        gameMode: "classic",
+        version: "1.0.0",
+        team: { members: ["invalid", null, null, null, null, null] },
+        createdAt: 1,
+        updatedAt: 1,
+      };
+    });
+
+    await expect(loadAllPlaythroughs()).resolves.toMatchObject([
+      { id: "valid" },
+    ]);
+    consoleErrorSpy.mockRestore();
   });
 });

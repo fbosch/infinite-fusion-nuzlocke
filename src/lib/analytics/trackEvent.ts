@@ -475,7 +475,14 @@ function isValidEventPayload<EventName extends AnalyticsEventName>(
     (eventName === "encounter_marked_deceased" &&
       (!isNonEmptyString(candidate.location_id) ||
         typeof candidate.was_fused !== "boolean" ||
-        !isOneOf(candidate.team_size_after, [0, 1, 2, 3, 4, 5, 6])))
+        !isOneOf(candidate.team_size_after, [0, 1, 2, 3, 4, 5, 6]) ||
+        !isOneOf(candidate.viable_roster_bucket_after, [
+          "v_0",
+          "v_1",
+          "v_2_3",
+          "v_4_5",
+          "v_6_plus",
+        ])))
   ) {
     debugLog("Analytics payload blocked by schema", {
       eventName,
@@ -502,6 +509,24 @@ function isValidEventPayload<EventName extends AnalyticsEventName>(
         "submit",
         "programmatic",
       ])
+    )
+      return false;
+
+    if (
+      eventName === "playthrough_switched" &&
+      (!isNonEmptyString(candidate.previous_playthrough_id) ||
+        !isNonEmptyString(candidate.new_playthrough_id))
+    )
+      return false;
+
+    if (
+      eventName === "game_mode_changed" &&
+      (!isOneOf(candidate.previous_game_mode, [
+        "classic",
+        "remix",
+        "randomized",
+      ]) ||
+        !isOneOf(candidate.new_game_mode, ["classic", "remix", "randomized"]))
     )
       return false;
   }

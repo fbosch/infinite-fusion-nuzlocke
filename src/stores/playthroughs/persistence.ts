@@ -198,10 +198,15 @@ export const loadAllPlaythroughs = async (): Promise<Playthrough[]> => {
 
     // Load all playthroughs in parallel
     const playthroughPromises = playthroughIds.map(async (id) => {
-      const playthroughData = await get(id, playthroughsStore_idb);
-      if (playthroughData) {
-        return normalizePersistedPlaythrough(playthroughData);
+      try {
+        const playthroughData = await get(id, playthroughsStore_idb);
+        if (playthroughData) {
+          return normalizePersistedPlaythrough(playthroughData);
+        }
+      } catch (error) {
+        console.error(`Failed to load playthrough ${id}:`, error);
       }
+
       return null;
     });
 
