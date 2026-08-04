@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.4](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.9.3...v0.9.4) (2026-08-04)
+
+
+### Performance Improvements
+
+* reduce layout work and sprite transfer ([#256](https://github.com/fbosch/infinite-fusion-nuzlocke/issues/256)) ([ac00941](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/ac00941e68b778cca7831e6c2ea8de1a93982f85))
+
 ## [0.9.3](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.9.2...v0.9.3) (2026-08-03)
 
 
