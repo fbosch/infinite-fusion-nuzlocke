@@ -198,6 +198,7 @@ export const PokemonCombobox = ({
   );
 
   // Combine route matches with smart search results
+  // fallow-ignore-next-line complexity -- Filtering, ordering, and deduplication must share one memoized option source.
   const finalOptions = useMemo(() => {
     if (isRouteEncounterDataLoading) {
       return [];
@@ -576,6 +577,7 @@ export const PokemonCombobox = ({
                       : "auto",
                   }}
                   className={clsx(
+                    // fallow-ignore-next-line css-token-drift -- Floating UI caps the list at 500px to match its middleware.
                     "max-h-[31.25rem] h-full overflow-y-auto z-40 relative",
                     "px-1 text-base shadow-lg focus:outline-none sm:text-sm",
                     "bg-white dark:bg-gray-800 gap-x-2",

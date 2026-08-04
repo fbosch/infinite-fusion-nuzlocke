@@ -4,6 +4,7 @@ import { locationTableColumnWidths } from "./columnWidths";
 export default function LocationTableSkeleton() {
   return (
     <div className="overflow-hidden 2xl:rounded-lg border-y md:border border-gray-200 dark:border-gray-700 xl:shadow-sm">
+      {/* fallow-ignore-next-line css-token-drift -- Matches the live table viewport constraint. */}
       <div className="max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative">
         <table
           className="w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700"
@@ -50,7 +51,7 @@ export default function LocationTableSkeleton() {
             {Array.from({ length: 18 }).map((_, index) => (
               <tr
                 key={index}
-                className="hover:bg-gray-50 h-[150px] dark:hover:bg-gray-800 transition-colors"
+                className="hover:bg-gray-50 h-location-row dark:hover:bg-gray-800 transition-colors"
                 style={{ containIntrinsicHeight: "150px" }}
               >
                 {/* Location name column */}
@@ -60,7 +61,7 @@ export default function LocationTableSkeleton() {
 
                 {/* Sprite column */}
                 <td className="whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                  <div className="size-22 -translate-y-2 translate-x-3 rounded-lg mx-auto shimmer"></div>
+                  <div className="size-22 -translate-y-2 rounded-lg mx-auto shimmer"></div>
                 </td>
 
                 {/* Encounter column */}
