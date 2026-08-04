@@ -21,8 +21,8 @@ import {
   scrollToLocationById,
   scrollToMostRecentLocation,
 } from "@/utils/scrollToLocation";
-import { useBreakpointSmallerThan } from "../../hooks/useBreakpoint";
 import { CursorTooltip } from "../CursorTooltip";
+import { locationTableColumnWidths } from "./columnWidths";
 import LocationCell from "./LocationCell";
 import LocationTableHeader from "./LocationTableHeader";
 import LocationTableRow from "./LocationTableRow";
@@ -52,7 +52,6 @@ export default function LocationTable() {
   const mounted = useMounted();
   const isLoading = useIsLoading();
   const customLocations = useCustomLocations();
-  const smallScreen = useBreakpointSmallerThan("2xl");
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
@@ -178,24 +177,21 @@ export default function LocationTable() {
         header: "",
         enableSorting: false,
         cell: () => null, // Handled in render loop
-        size: smallScreen ? 125 : 200, // Width for sprite column
       }),
       columnHelper.display({
         id: "encounter",
         header: "Encounter",
         cell: () => null, // Handled in render loop
         enableSorting: false,
-        size: smallScreen ? 400 : 900, // Optimized width for fusion comboboxes
       }),
       columnHelper.display({
         id: "actions",
         header: "",
         enableSorting: false,
         cell: () => null, // Handled in render loop
-        size: 60, // Width for reset column
       }),
     ],
-    [smallScreen, handleScrollToRecent],
+    [handleScrollToRecent],
   );
 
   // react-doctor-disable-next-line react-hooks-js/incompatible-library -- TanStack Table is intentionally excluded from compiler memoization above.
@@ -264,7 +260,14 @@ export default function LocationTable() {
         >
           <colgroup>
             {visibleColumns.map((column) => (
-              <col key={column.id} style={{ width: column.getSize() }} />
+              <col
+                key={column.id}
+                className={
+                  column.id === "encounter"
+                    ? undefined
+                    : locationTableColumnWidths[column.id]
+                }
+              />
             ))}
           </colgroup>
           <LocationTableHeader headerGroups={table.getHeaderGroups()} />

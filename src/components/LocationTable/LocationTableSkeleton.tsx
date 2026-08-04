@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { locationTableColumnWidths } from "./columnWidths";
 
 export default function LocationTableSkeleton() {
   return (
@@ -13,7 +14,7 @@ export default function LocationTableSkeleton() {
               <th
                 className={clsx(
                   "px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider",
-                  "w-[125px]",
+                  locationTableColumnWidths.name,
                 )}
               >
                 Location
@@ -21,13 +22,13 @@ export default function LocationTableSkeleton() {
               <th
                 className={clsx(
                   "px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider",
-                  "w-[155px] 2xl:w-[195px] ",
+                  locationTableColumnWidths.sprite,
                 )}
               ></th>
               <th
                 className={clsx(
                   "px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider",
-                  "w-[62.5vw] 2xl:w-[900px]",
+                  locationTableColumnWidths.encounter,
                 )}
               >
                 Encounter
@@ -35,7 +36,7 @@ export default function LocationTableSkeleton() {
               <th
                 className={clsx(
                   "px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider",
-                  "w-[60px]",
+                  locationTableColumnWidths.actions,
                 )}
               ></th>
             </tr>
