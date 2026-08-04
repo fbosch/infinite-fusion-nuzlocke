@@ -58,7 +58,14 @@ export function FusionToggleButton({
     // Prevent dropping if the button is disabled (Egg in non-fusion mode)
     if (!isFusion && selectedPokemon && isEgg(selectedPokemon)) return;
 
-    const allPokemon = await queryClient.fetchQuery(pokemonQueries.all());
+    let allPokemon: PokemonOptionType[];
+    try {
+      allPokemon = await queryClient.fetchQuery(pokemonQueries.all());
+    } catch (error) {
+      console.error("Error loading Pokemon:", error);
+      return;
+    }
+
     const foundPokemon = allPokemon.find(
       (pokemon) => pokemon.name.toLowerCase() === pokemonName.toLowerCase(),
     );

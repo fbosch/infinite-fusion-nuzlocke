@@ -257,11 +257,16 @@ export default function LocationTable() {
       >
         <table
           ref={tableRef}
-          className="w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700 overscroll-x-contain overscroll-y-auto"
+          className="w-full min-w-full table-fixed divide-y divide-gray-200 dark:divide-gray-700 overscroll-x-contain overscroll-y-auto"
           data-scroll-container
           aria-label="Locations table"
           aria-rowcount={tableRows.length + 1}
         >
+          <colgroup>
+            {visibleColumns.map((column) => (
+              <col key={column.id} style={{ width: column.getSize() }} />
+            ))}
+          </colgroup>
           <LocationTableHeader headerGroups={table.getHeaderGroups()} />
           <tbody
             className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700"

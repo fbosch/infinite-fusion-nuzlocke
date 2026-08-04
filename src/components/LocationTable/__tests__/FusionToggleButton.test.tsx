@@ -135,4 +135,38 @@ describe("FusionToggleButton", () => {
       );
     });
   });
+
+  it("handles a rejected Pokemon lookup before creating a fusion", async () => {
+    const error = new Error("Pokemon query failed");
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    fetchQueryMock.mockRejectedValue(error);
+    dragActions.startDrag("Pikachu", "route-2-single", {
+      id: 25,
+      name: "Pikachu",
+      nationalDexId: 25,
+    });
+
+    render(
+      <FusionToggleButton
+        locationId="route-1"
+        isFusion={false}
+        selectedPokemon={{ id: 1, name: "Bulbasaur", nationalDexId: 1 }}
+        onToggleFusion={vi.fn()}
+      />,
+    );
+
+    fireEvent.drop(screen.getByRole("button"), {
+      dataTransfer: { getData: () => "Pikachu" },
+    });
+
+    await waitFor(() => {
+      expect(consoleError).toHaveBeenCalledWith(
+        "Error loading Pokemon:",
+        error,
+      );
+    });
+    expect(createFusionMock).not.toHaveBeenCalled();
+  });
 });

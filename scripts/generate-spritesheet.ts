@@ -734,16 +734,7 @@ async function generateSpritesheet(
   const metadata: SpritesheetMetadata = {
     ...metadataWithoutVersion,
     spritesheetVersion: createHash("sha256")
-      .update(
-        JSON.stringify({
-          metadata: metadataWithoutVersion,
-          outputFormat: generation.outputFormat,
-          outputOptions:
-            generation.outputFormat === "webp"
-              ? { lossless: true, effort: 6 }
-              : null,
-        }),
-      )
+      .update(await fs.readFile(spritesheetPath))
       .digest("hex")
       .slice(0, 12),
   };

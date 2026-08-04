@@ -157,15 +157,16 @@ export function EncounterCell({
   const customLocations = useCustomLocations();
   const isCustomLocation = customLocations.some((loc) => loc.id === locationId);
   const [isPokemonDataEnabled, setIsPokemonDataEnabled] = useState(false);
-  const { routeEncounterData } = useEncountersForLocation({
-    locationId,
-    enabled:
-      shouldLoad &&
-      isPokemonDataEnabled &&
-      !isCustomLocation &&
-      gameMode !== "randomized",
-    gameMode: gameMode === "randomized" ? "classic" : gameMode,
-  });
+  const { routeEncounterData, isLoading: isRouteEncounterDataLoading } =
+    useEncountersForLocation({
+      locationId,
+      enabled:
+        shouldLoad &&
+        isPokemonDataEnabled &&
+        !isCustomLocation &&
+        gameMode !== "randomized",
+      gameMode: gameMode === "randomized" ? "classic" : gameMode,
+    });
 
   // Function to get Pokemon source information
   const getPokemonSource = (pokemonId: number): EncounterSource | null => {
@@ -485,6 +486,7 @@ export function EncounterCell({
                   key={`${locationId}-head`}
                   locationId={locationId}
                   routeEncounterData={routeEncounterData}
+                  isRouteEncounterDataLoading={isRouteEncounterDataLoading}
                   isCustomLocation={isCustomLocation}
                   value={headPokemon}
                   onChange={handleHeadChange}
@@ -532,6 +534,7 @@ export function EncounterCell({
                   key={`${locationId}-body`}
                   locationId={locationId}
                   routeEncounterData={routeEncounterData}
+                  isRouteEncounterDataLoading={isRouteEncounterDataLoading}
                   isCustomLocation={isCustomLocation}
                   value={bodyPokemon}
                   onChange={handleBodyChange}
@@ -552,6 +555,7 @@ export function EncounterCell({
               key={`${locationId}-single`}
               locationId={locationId}
               routeEncounterData={routeEncounterData}
+              isRouteEncounterDataLoading={isRouteEncounterDataLoading}
               isCustomLocation={isCustomLocation}
               value={selectedPokemon}
               onChange={handleSingleChange}

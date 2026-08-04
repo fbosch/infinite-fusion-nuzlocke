@@ -24,7 +24,7 @@ The production load is network-light. Render work, layout stability, and first-i
 
 1. Remove location-table post-render measurement. Completed.
 2. Eliminate the hydrated playthrough-menu layout shift. Completed.
-3. Optimize Gen 7 spritesheet delivery on the first combobox interaction.
+3. Optimize Gen 7 and Gen 8 spritesheet delivery on the first combobox interaction.
 4. Reprofile combobox search before changing search or cache behavior.
 5. Profile a populated playthrough before optimizing location-cell or PC-sheet derivations.
 
@@ -87,21 +87,21 @@ The first combobox open produced 667 ms INP. After required data is warm, search
 
 ### Changes
 
-- Use the existing Sharp spritesheet generator to create a lossless WebP candidate for the Gen 7 sheet.
-- Compare byte size and pixel output against the current PNG. Adopt WebP only when visual fidelity and metadata coordinates remain unchanged.
+- Use the existing Sharp spritesheet generator to create lossless WebP candidates for the Gen 7 and Gen 8 sheets.
+- Compare byte size and pixel output against the current PNGs. Adopt WebP only when visual fidelity and metadata coordinates remain unchanged.
 - Update `scripts/generate-spritesheet.ts` and `src/components/PokemonSprite.tsx` together if the format changes.
 - Restrict high-priority/eager loading to sprites visible in the opened combobox viewport. Preserve immediate rendering for visible sprites.
 - Keep generated files deterministic and regenerate only the assets required by the approved format change.
 
 ### Tests
 
-- Add or extend generator tests to assert the expected generated filename and metadata contract.
-- Exercise Gen 7 sprite rendering and option-list behavior through existing Pokemon combobox tests.
-- Verify sprite dimensions, offsets, pixelated rendering, and missing-sprite behavior remain unchanged.
+- Add or extend generator tests to assert the expected Gen 7 and Gen 8 generated filenames and metadata contracts.
+- Exercise Gen 7 and Gen 8 sprite rendering and option-list behavior through existing Pokemon combobox tests.
+- Verify both sheets retain sprite dimensions, offsets, pixelated rendering, and missing-sprite behavior.
 
 ### Acceptance Criteria
 
-- The sprite transfer falls materially below the current PNG baseline.
+- Each spritesheet transfer falls materially below its current PNG baseline.
 - Cold combobox INP improves without delaying visible option sprites.
 - Warm search remains at or below the measured 32 ms interaction baseline.
 
