@@ -21,10 +21,10 @@ describe("playthrough import pipeline", () => {
     vi.restoreAllMocks();
   });
 
-  it("normalizes valid imported data", () => {
+  it("normalizes valid imported data", async () => {
     vi.spyOn(Date, "now").mockReturnValue(1234);
 
-    const playthrough = prepareImportedPlaythrough(validImportData(), []);
+    const playthrough = await prepareImportedPlaythrough(validImportData(), []);
 
     expect(playthrough).toMatchObject({
       id: "playthrough_existing",
@@ -37,8 +37,8 @@ describe("playthrough import pipeline", () => {
     });
   });
 
-  it("generates a new id when the imported id already exists", () => {
-    const playthrough = prepareImportedPlaythrough(validImportData(), [
+  it("generates a new id when the imported id already exists", async () => {
+    const playthrough = await prepareImportedPlaythrough(validImportData(), [
       "playthrough_existing",
     ]);
 
@@ -46,13 +46,13 @@ describe("playthrough import pipeline", () => {
     expect(playthrough.id).toMatch(/^playthrough_/);
   });
 
-  it("throws a validation error for invalid import data", () => {
+  it("throws a validation error for invalid import data", async () => {
     const invalidImportData = validImportData();
     (invalidImportData.playthrough as Record<string, unknown>).customLocations =
       [{ bad: "location" }];
 
-    expect(() => prepareImportedPlaythrough(invalidImportData, [])).toThrow(
-      "Validation failed:",
-    );
+    await expect(
+      prepareImportedPlaythrough(invalidImportData, []),
+    ).rejects.toThrow("Validation failed:");
   });
 });

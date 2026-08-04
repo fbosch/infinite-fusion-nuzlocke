@@ -5,11 +5,10 @@ import {
 } from "@tanstack/react-query";
 import { useDebounce } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
-import { z } from "zod";
 import { pokemonData, pokemonQueries } from "@/lib/queryClient";
 import { SearchCore } from "@/lib/searchCore";
 import searchService from "@/services/searchService";
-import { type Pokemon, PokemonSchema } from "@/types/pokemon";
+import type { Pokemon } from "@/types/pokemon";
 
 export type { Pokemon } from "@/types/pokemon";
 
@@ -59,41 +58,19 @@ export const PokemonStatus = {
 export type PokemonStatusType =
   (typeof PokemonStatus)[keyof typeof PokemonStatus];
 
-// Zod schema for Pokemon status
-const PokemonStatusSchema = z.enum(
-  [
-    PokemonStatus.CAPTURED,
-    PokemonStatus.RECEIVED,
-    PokemonStatus.TRADED,
-    PokemonStatus.MISSED,
-    PokemonStatus.STORED,
-    PokemonStatus.DECEASED,
-  ],
-  { error: "Invalid Pokemon status" },
-);
-
-// Zod schema for Pokemon option (search results)
-export const PokemonOptionSchema = z.object({
-  id: z.number().int({ error: "Pokemon ID must be an integer" }),
-  name: z.string().min(1, { error: "Pokemon name is required" }),
-  nationalDexId: z
-    .number()
-    .int({ error: "National Dex ID must be an integer" }),
-  nickname: z.string().optional(),
-  originalLocation: z.string().optional(),
-  status: PokemonStatusSchema.optional(),
-  originalReceivalStatus: z
-    .enum([
-      PokemonStatus.CAPTURED,
-      PokemonStatus.RECEIVED,
-      PokemonStatus.TRADED,
-    ])
-    .optional(), // Track original status when Pokémon was first received (captured, traded, or received)
-  uid: z.string().optional(), // Unique identifier for React reconciliation
-});
-
-// Pokemon option type for search results (inferred from schema)
-export type PokemonOptionType = z.infer<typeof PokemonOptionSchema>;
+export type PokemonOptionType = {
+  id: number;
+  name: string;
+  nationalDexId: number;
+  nickname?: string;
+  originalLocation?: string;
+  status?: PokemonStatusType;
+  originalReceivalStatus?:
+    | typeof PokemonStatus.CAPTURED
+    | typeof PokemonStatus.RECEIVED
+    | typeof PokemonStatus.TRADED;
+  uid?: string;
+};
 
 // Evolution helper functions using centralized query client
 export async function getPokemonEvolutionIds(

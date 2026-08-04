@@ -1,16 +1,14 @@
-import { z } from "zod";
+type StarterPokemon = { classic: number[]; remix: number[] };
 
-// Zod schema for starter Pokémon data
-const StarterPokemonSchema = z.object({
-  classic: z.array(
-    z.number().int().positive({ error: "Pokemon ID must be positive" }),
-  ),
-  remix: z.array(
-    z.number().int().positive({ error: "Pokemon ID must be positive" }),
-  ),
-});
+function isStarterPokemon(value: unknown): value is StarterPokemon {
+  if (typeof value !== "object" || value === null) return false;
 
-type StarterPokemon = z.infer<typeof StarterPokemonSchema>;
+  const candidate = value as { classic?: unknown; remix?: unknown };
+  const isValidIds = (ids: unknown): ids is number[] =>
+    Array.isArray(ids) && ids.every((id) => Number.isInteger(id) && id > 0);
+
+  return isValidIds(candidate.classic) && isValidIds(candidate.remix);
+}
 
 // Cache for loaded data
 let starterPokemonCache: StarterPokemon | null = null;
@@ -25,7 +23,10 @@ async function getStarterPokemon(): Promise<StarterPokemon> {
     const starterPokemonData = await import(
       "@data/shared/starter-pokemon.json"
     );
-    const data = StarterPokemonSchema.parse(starterPokemonData.default);
+    const data = starterPokemonData.default;
+    if (!isStarterPokemon(data)) {
+      throw new Error("Invalid starter Pokémon data format");
+    }
     starterPokemonCache = data;
     return data;
   } catch (error) {

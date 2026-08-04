@@ -3,7 +3,6 @@ import {
   EncounterSource,
   type PokemonEncounter,
   type RouteEncounter,
-  RouteEncountersArraySchema,
 } from "@/types/encounters";
 import { useLocationEncountersById } from "./locations";
 import type { Pokemon, PokemonOptionType } from "./pokemon";

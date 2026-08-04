@@ -3,13 +3,7 @@ import "./mocks";
 
 import { normalizePersistedPlaythrough } from "@/stores/playthroughs/migrations";
 // Import shared setup and utilities
-import {
-  createMockPokemon,
-  describe,
-  expect,
-  it,
-  PlaythroughSchema,
-} from "./setup";
+import { createMockPokemon, describe, expect, it } from "./setup";
 
 describe("Playthroughs Store - Migration Tests", () => {
   describe("remixMode to gameMode migration", () => {
@@ -122,7 +116,7 @@ describe("Playthroughs Store - Migration Tests", () => {
         updatedAt: Date.now(),
       };
 
-      const result = PlaythroughSchema.parse(modernData);
+      const result = normalizePersistedPlaythrough(modernData);
 
       expect(result.gameMode).toBe("randomized");
       expect("remixMode" in result).toBe(false);
@@ -138,7 +132,7 @@ describe("Playthroughs Store - Migration Tests", () => {
         updatedAt: Date.now(),
       };
 
-      const result = PlaythroughSchema.parse(validData);
+      const result = normalizePersistedPlaythrough(validData);
       expect(result.gameMode).toBe("classic");
     });
 
@@ -154,7 +148,7 @@ describe("Playthroughs Store - Migration Tests", () => {
         updatedAt: Date.now(),
       };
 
-      expect(() => PlaythroughSchema.parse(corruptedData)).toThrow();
+      expect(() => normalizePersistedPlaythrough(corruptedData)).toThrow();
     });
 
     it("should successfully create new playthroughs with current schema", () => {
@@ -167,7 +161,7 @@ describe("Playthroughs Store - Migration Tests", () => {
         updatedAt: Date.now(),
       };
 
-      const result = PlaythroughSchema.parse(newPlaythrough);
+      const result = normalizePersistedPlaythrough(newPlaythrough);
       expect(result.gameMode).toBe("remix");
       expect(result.name).toBe("New Test Run");
       expect("remixMode" in result).toBe(false);

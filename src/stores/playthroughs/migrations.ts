@@ -1,5 +1,5 @@
 import { PokemonStatus } from "@/loaders/pokemon";
-import { type GameMode, type Playthrough, PlaythroughSchema } from "./types";
+import { type GameMode, isGameMode, type Playthrough } from "./types";
 
 /**
  * Migration data type for playthrough migrations
@@ -296,8 +296,24 @@ const applyPlaythroughMigrations = (data: unknown): MigrationData => {
   return migratedData;
 };
 
-export const normalizePersistedPlaythrough = (data: unknown): Playthrough =>
-  PlaythroughSchema.parse(applyPlaythroughMigrations(data));
+export const normalizePersistedPlaythrough = (data: unknown): Playthrough => {
+  const playthrough = applyPlaythroughMigrations(data);
+  if (
+    typeof playthrough.id !== "string" ||
+    typeof playthrough.name !== "string" ||
+    isGameMode(playthrough.gameMode) === false ||
+    typeof playthrough.createdAt !== "number" ||
+    typeof playthrough.updatedAt !== "number" ||
+    typeof playthrough.version !== "string" ||
+    typeof playthrough.team !== "object" ||
+    playthrough.team === null ||
+    Array.isArray((playthrough.team as { members?: unknown }).members) === false
+  ) {
+    throw new Error("Invalid persisted playthrough");
+  }
+
+  return playthrough as Playthrough;
+};
 
 export const normalizeImportedPlaythrough = (data: unknown): unknown => {
   if (!data || typeof data !== "object" || !("playthrough" in data)) {

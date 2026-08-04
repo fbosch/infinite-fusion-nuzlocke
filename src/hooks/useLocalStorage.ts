@@ -1,5 +1,8 @@
 import { useSyncExternalStore } from "react";
-import type { z } from "zod";
+
+export type SafeParser<T> = {
+  safeParse(value: unknown): { success: true; data: T } | { success: false };
+};
 
 const callbacks = new Set<(key: string) => void>();
 
@@ -25,7 +28,7 @@ function triggerCallbacks(key: string): void {
 export function useLocalStorage<T>(
   key: string,
   initialValue: T,
-  schema: z.ZodType<T>,
+  schema: SafeParser<T>,
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
   const serialize = (value: T): string => JSON.stringify(value) ?? "null";
   const stringifiedInitialValue = serialize(initialValue);

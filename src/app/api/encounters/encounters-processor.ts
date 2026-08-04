@@ -14,12 +14,11 @@ import remixTrades from "@data/remix/trades.json";
 import eggLocations from "@data/shared/egg-locations.json";
 import legendaryEncounters from "@data/shared/legendary-encounters.json";
 import { z } from "zod";
+import { EncounterSource, type EncounterType } from "@/types/encounters";
 import {
-  EncounterSource,
-  type EncounterType,
   EncounterTypeSchema,
   RouteEncountersArraySchema,
-} from "@/types/encounters";
+} from "@/validation/encounters";
 
 // Schema for the new enhanced data format with encounter types
 const NewPokemonEncounterSchema = z.object({

@@ -1,5 +1,4 @@
 import { proxy, subscribe } from "valtio";
-import { z } from "zod";
 import { getBrowserReducedMotion } from "@/lib/reducedMotion";
 import {
   getActivePlaythrough,
@@ -9,14 +8,45 @@ import {
 const SETTINGS_STORAGE_KEY = "settings:v1";
 const LEGACY_SETTINGS_STORAGE_KEY = "settings";
 
-// Zod schema for settings validation
-export const SettingsSchema = z.object({
-  moveEncountersBetweenLocations: z.boolean().default(false),
-  reducedMotion: z.boolean().optional(),
-  version: z.string().default("1.0.0"),
-});
+type Settings = {
+  moveEncountersBetweenLocations: boolean;
+  reducedMotion?: boolean;
+  version: string;
+};
 
-type Settings = z.infer<typeof SettingsSchema>;
+// fallow-ignore-next-line complexity -- Validates every persisted setting field before applying defaults.
+const parseSettings = (value: unknown): Settings | null => {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return null;
+  }
+
+  const settings = value as Record<string, unknown>;
+  if (
+    (settings.moveEncountersBetweenLocations !== undefined &&
+      typeof settings.moveEncountersBetweenLocations !== "boolean") ||
+    (settings.reducedMotion !== undefined &&
+      typeof settings.reducedMotion !== "boolean") ||
+    (settings.version !== undefined && typeof settings.version !== "string")
+  ) {
+    return null;
+  }
+
+  return {
+    moveEncountersBetweenLocations:
+      settings.moveEncountersBetweenLocations ?? false,
+    reducedMotion: settings.reducedMotion,
+    version: settings.version ?? "1.0.0",
+  };
+};
+
+export const SettingsSchema = {
+  safeParse(value: unknown) {
+    const data = parseSettings(value);
+    return data
+      ? { success: true as const, data }
+      : { success: false as const };
+  },
+};
 
 // Function to determine if move encounters should be enabled by default
 // Based on whether the current playthrough has a version (old vs new playthroughs)
@@ -63,9 +93,8 @@ const loadSettings = (): Settings => {
     const persistedSettings = stored || legacyStored;
     if (persistedSettings) {
       const parsed = JSON.parse(persistedSettings);
-      // Validate and parse with Zod, merging with dynamic defaults for missing fields
-      const result = SettingsSchema.safeParse(parsed);
-      if (result.success) {
+      const result = parseSettings(parsed);
+      if (result) {
         if (legacyStored) {
           localStorage.setItem(SETTINGS_STORAGE_KEY, legacyStored);
           localStorage.removeItem(LEGACY_SETTINGS_STORAGE_KEY);
@@ -74,14 +103,14 @@ const loadSettings = (): Settings => {
         // use the dynamic default based on playthrough version
         if (parsed.moveEncountersBetweenLocations === undefined) {
           return {
-            ...result.data,
+            ...result,
             moveEncountersBetweenLocations:
               dynamicDefaults.moveEncountersBetweenLocations,
           };
         }
-        return result.data;
+        return result;
       } else {
-        console.warn("Invalid settings data, using defaults:", result.error);
+        console.warn("Invalid settings data, using defaults:", parsed);
         return dynamicDefaults;
       }
     }
@@ -105,12 +134,11 @@ export const getEffectiveReducedMotion = (
 if (typeof window !== "undefined") {
   subscribe(settingsStore, () => {
     try {
-      // Validate settings before saving
-      const result = SettingsSchema.safeParse(settingsStore);
-      if (result.success) {
-        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(result.data));
+      const result = parseSettings(settingsStore);
+      if (result) {
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(result));
       } else {
-        console.error("Invalid settings data, not saving:", result.error);
+        console.error("Invalid settings data, not saving:", settingsStore);
       }
     } catch (error) {
       console.warn("Failed to save settings to localStorage:", error);
@@ -121,12 +149,12 @@ if (typeof window !== "undefined") {
 // Helper function to safely update settings with validation
 const updateSettings = (updates: Partial<Settings>) => {
   const newSettings = { ...settingsStore, ...updates };
-  const result = SettingsSchema.safeParse(newSettings);
+  const result = parseSettings(newSettings);
 
-  if (result.success) {
-    Object.assign(settingsStore, result.data);
+  if (result) {
+    Object.assign(settingsStore, result);
   } else {
-    console.error("Invalid settings update:", result.error);
+    console.error("Invalid settings update:", updates);
   }
 };
 

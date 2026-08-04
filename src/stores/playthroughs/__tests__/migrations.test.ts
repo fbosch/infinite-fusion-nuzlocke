@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { ImportedPlaythroughSchema } from "../importSchema";
 import {
   normalizeImportedPlaythrough,
   normalizePersistedPlaythrough,
 } from "../migrations";
-import { ImportedPlaythroughSchema } from "../types";
 
 describe("Playthrough normalization", () => {
   it("repairs a legacy persisted shape without mutating its input", () => {

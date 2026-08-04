@@ -3,8 +3,7 @@ import {
   type PersistedQuery,
 } from "@tanstack/query-persist-client-core";
 import { createStore, del, get, set } from "idb-keyval";
-import { z } from "zod";
-import { RouteEncountersArraySchema } from "@/types/encounters";
+import { EncounterSource } from "@/types/encounters";
 
 const readEnvVar = (key: "NODE_ENV" | "NEXT_PUBLIC_BUILD_ID") => {
   if (typeof process === "undefined") {
@@ -34,7 +33,7 @@ const idbStorage = {
   removeItem: (key: string) => del(key, queryStore),
 };
 
-const PersistedQuerySchema = z.custom<PersistedQuery>((value) => {
+const isPersistedQuery = (value: unknown): value is PersistedQuery => {
   if (typeof value !== "object" || value === null) {
     return false;
   }
@@ -53,17 +52,46 @@ const PersistedQuerySchema = z.custom<PersistedQuery>((value) => {
     typeof candidate.state === "object" &&
     candidate.state !== null
   );
-});
+};
+
+const isRouteEncounters = (value: unknown): boolean =>
+  Array.isArray(value) &&
+  value.every(
+    (route) =>
+      typeof route === "object" &&
+      route !== null &&
+      typeof (route as { routeName?: unknown }).routeName === "string" &&
+      Array.isArray((route as { pokemon?: unknown }).pokemon) &&
+      (route as { pokemon: unknown[] }).pokemon.every((pokemon) => {
+        if (typeof pokemon !== "object" || pokemon === null) {
+          return false;
+        }
+
+        const { id, source } = pokemon as {
+          id?: unknown;
+          source?: unknown;
+        };
+        return (
+          typeof id === "number" &&
+          Number.isInteger(id) &&
+          (id === -1 || id > 0) &&
+          typeof source === "string" &&
+          Object.values(EncounterSource).includes(source as EncounterSource)
+        );
+      }),
+  );
 
 const deserializePersistedQuery = (data: unknown): PersistedQuery => {
   try {
     const parsed = typeof data === "string" ? JSON.parse(data) : data;
-    const persistedQuery = PersistedQuerySchema.parse(parsed);
+    if (isPersistedQuery(parsed) === false) {
+      throw new Error("Invalid persisted query payload");
+    }
+    const persistedQuery = parsed;
 
     if (
       persistedQuery.queryKey[0] === "encounters" &&
-      RouteEncountersArraySchema.safeParse(persistedQuery.state.data)
-        .success === false
+      isRouteEncounters(persistedQuery.state.data) === false
     ) {
       throw new Error("Invalid persisted encounters query payload");
     }

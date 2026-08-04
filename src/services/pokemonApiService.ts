@@ -1,8 +1,7 @@
-import { z } from "zod";
 import { getCacheBuster } from "@/lib/persistence";
-import { PokemonSchema } from "@/types/pokemon";
+import type { Pokemon } from "@/types/pokemon";
 
-export type Pokemon = z.infer<typeof PokemonSchema>;
+export type { Pokemon } from "@/types/pokemon";
 
 export interface PokemonApiResponse {
   data: Pokemon[];
@@ -69,14 +68,10 @@ class PokemonApiService {
 
     const data = await response.json();
 
+    // fallow-ignore-next-line code-duplication -- Each service validates its own deferred response schema.
     // Validate the response
-    const validatedData = z
-      .object({
-        data: z.array(PokemonSchema),
-        count: z.number(),
-        total: z.number(),
-      })
-      .safeParse(data);
+    const { PokemonApiResponseSchema } = await import("@/validation/pokemon");
+    const validatedData = PokemonApiResponseSchema.safeParse(data);
 
     if (!validatedData.success) {
       console.error("Invalid API response:", validatedData.error.issues);

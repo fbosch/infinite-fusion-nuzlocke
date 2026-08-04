@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
 import { GET } from "@/app/api/encounters/route";
-import { RouteEncountersArraySchema } from "@/types/encounters";
+import { RouteEncountersArraySchema } from "@/validation/encounters";
 
 describe("Encounters API", () => {
   it("should include egg locations with -1 ID", async () => {

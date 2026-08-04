@@ -1,14 +1,17 @@
 import React from "react";
 import { useSnapshot } from "valtio";
-import type { z } from "zod";
-import type { CustomLocationSchema } from "@/loaders/locations";
+import type { CustomLocation } from "@/loaders/locations";
 import {
   getAvailableAfterLocations,
   getMergedLocations,
 } from "./customLocations";
 import { getAllPlaythroughs, playthroughsStore } from "./store";
-import type { EncounterData, GameMode, Playthrough } from "./types";
-import { GameModeSchema } from "./types";
+import {
+  type EncounterData,
+  type GameMode,
+  isGameMode,
+  type Playthrough,
+} from "./types";
 
 // Reusable hooks for components
 export const usePlaythroughsSnapshot = () => {
@@ -65,8 +68,9 @@ export const useGameMode = (): GameMode => {
     (p) => p.id === snapshot.activePlaythroughId,
   );
 
-  const result = GameModeSchema.safeParse(activePlaythrough?.gameMode);
-  return result.success ? result.data : "classic";
+  return isGameMode(activePlaythrough?.gameMode)
+    ? activePlaythrough.gameMode
+    : "classic";
 };
 
 export const useIsRandomizedMode = (): boolean => {
@@ -121,9 +125,7 @@ const useIsSaving = (): boolean => {
 };
 
 // Custom location hooks
-export const useCustomLocations = (): z.infer<
-  typeof CustomLocationSchema
->[] => {
+export const useCustomLocations = (): CustomLocation[] => {
   const activePlaythrough = useActivePlaythrough();
 
   return activePlaythrough?.customLocations || [];

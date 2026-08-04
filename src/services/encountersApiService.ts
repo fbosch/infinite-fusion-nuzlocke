@@ -1,8 +1,5 @@
 import { getCacheBuster } from "@/lib/persistence";
-import {
-  type RouteEncounter,
-  RouteEncountersArraySchema,
-} from "@/types/encounters";
+import type { RouteEncounter } from "@/types/encounters";
 
 class EncountersApiService {
   private baseUrl: string;
@@ -41,7 +38,11 @@ class EncountersApiService {
 
     const data = await response.json();
 
+    // fallow-ignore-next-line code-duplication -- Each service validates its own deferred response schema.
     // Validate the response
+    const { RouteEncountersArraySchema } = await import(
+      "@/validation/encounters"
+    );
     const validatedData = RouteEncountersArraySchema.safeParse(data);
 
     if (!validatedData.success) {

@@ -1,14 +1,14 @@
-import { z } from "zod";
 import { generatePrefixedId } from "@/utils/id";
 import { normalizeImportedPlaythrough } from "./migrations";
-import { ImportedPlaythroughSchema, type Playthrough } from "./types";
+import type { Playthrough } from "./types";
 
-export const prepareImportedPlaythrough = (
+export const prepareImportedPlaythrough = async (
   importData: unknown,
   existingIds: Iterable<string>,
-): Playthrough => {
+): Promise<Playthrough> => {
   try {
     const migratedImportData = normalizeImportedPlaythrough(importData);
+    const { ImportedPlaythroughSchema } = await import("./importSchema");
     const validationResult =
       ImportedPlaythroughSchema.safeParse(migratedImportData);
 
@@ -39,11 +39,14 @@ export const prepareImportedPlaythrough = (
     console.error("Failed to import playthrough:", error);
 
     if (error && typeof error === "object" && "issues" in error) {
-      const zodError = error as z.ZodError;
+      const zodError = error as {
+        issues: Array<{ path: PropertyKey[]; message: string }>;
+      };
       let prettyError: string | null = null;
 
       try {
-        prettyError = z.prettifyError(zodError);
+        const { z } = await import("zod");
+        prettyError = z.prettifyError(zodError as never);
       } catch {
         // Fall back to manual issue formatting.
       }
@@ -54,7 +57,7 @@ export const prepareImportedPlaythrough = (
 
       if (zodError.issues.length > 0) {
         const errorDetails = zodError.issues
-          .map((issue: z.ZodIssue) => {
+          .map((issue) => {
             const path =
               issue.path.length > 0 ? ` at ${issue.path.join(".")}` : "";
             return `• ${issue.message}${path}`;

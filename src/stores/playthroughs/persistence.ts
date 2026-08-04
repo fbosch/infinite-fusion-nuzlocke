@@ -1,6 +1,5 @@
 import { debounce } from "es-toolkit";
 import { createStore, del, get, keys, set } from "idb-keyval";
-import { ZodError, z } from "zod";
 import type {
   Playthrough,
   PlaythroughsState,
@@ -214,11 +213,7 @@ export const loadAllPlaythroughs = async (): Promise<Playthrough[]> => {
   } catch (error) {
     console.error(
       "Failed to load all playthroughs:",
-      error instanceof ZodError
-        ? z.prettifyError(error)
-        : error instanceof Error
-          ? error.message
-          : String(error),
+      error instanceof Error ? error.message : String(error),
     );
     return [];
   }

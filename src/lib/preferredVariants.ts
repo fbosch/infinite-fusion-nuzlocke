@@ -1,10 +1,20 @@
 import { proxyMap } from "valtio/utils";
-import { z } from "zod";
 import { getSpriteId } from "./sprites";
 
 const PREFERRED_VARIANTS_STORAGE_KEY = "preferredVariants:v1";
 const LEGACY_PREFERRED_VARIANTS_STORAGE_KEY = "preferredVariants";
-const preferredVariantsSchema = z.array(z.tuple([z.string(), z.string()]));
+
+const isPreferredVariantEntries = (
+  value: unknown,
+): value is Array<[string, string]> =>
+  Array.isArray(value) &&
+  value.every(
+    (entry) =>
+      Array.isArray(entry) &&
+      entry.length === 2 &&
+      typeof entry[0] === "string" &&
+      typeof entry[1] === "string",
+  );
 
 // Use Valtio's proxyMap for reactivity
 export const preferredVariants = proxyMap<string, string>();
@@ -20,8 +30,8 @@ if (typeof window !== "undefined") {
       if (value === null || value === "") return null;
 
       try {
-        const result = preferredVariantsSchema.safeParse(JSON.parse(value));
-        return result.success ? result.data : null;
+        const parsed: unknown = JSON.parse(value);
+        return isPreferredVariantEntries(parsed) ? parsed : null;
       } catch {
         return null;
       }

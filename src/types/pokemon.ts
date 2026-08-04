@@ -1,44 +1,28 @@
-import { z } from "zod";
+export type PokemonType = { name: string };
 
-const PokemonTypeSchema = z.object({
-  name: z.string().min(1, { error: "Type name is required" }),
-});
+export type EvolutionDetail = {
+  id: number;
+  name: string;
+  min_level?: number;
+  trigger?: string;
+  item?: string;
+  location?: string;
+  condition?: string;
+};
 
-const PokemonSpeciesSchema = z.object({
-  is_legendary: z.boolean(),
-  is_mythical: z.boolean(),
-  generation: z.string().nullable(),
-  evolution_chain: z
-    .object({
-      url: z.string().url({ error: "Invalid evolution chain URL" }),
-    })
-    .nullable(),
-});
-
-const EvolutionDetailSchema = z.object({
-  id: z.number().int().positive({ error: "Evolution ID must be positive" }),
-  name: z.string().min(1, { error: "Evolution name is required" }),
-  min_level: z.number().int().positive().optional(),
-  trigger: z.string().optional(),
-  item: z.string().optional(),
-  location: z.string().optional(),
-  condition: z.string().optional(),
-});
-
-const EvolutionDataSchema = z.object({
-  evolves_to: z.array(EvolutionDetailSchema),
-  evolves_from: EvolutionDetailSchema.optional(),
-});
-
-export const PokemonSchema = z.object({
-  id: z.number().int({ error: "Pokemon ID must be an integer" }),
-  nationalDexId: z
-    .number()
-    .int({ error: "National Dex ID must be an integer" }),
-  name: z.string().min(1, { error: "Pokemon name is required" }),
-  types: z.array(PokemonTypeSchema),
-  species: PokemonSpeciesSchema,
-  evolution: EvolutionDataSchema.optional(),
-});
-
-export type Pokemon = z.infer<typeof PokemonSchema>;
+export type Pokemon = {
+  id: number;
+  nationalDexId: number;
+  name: string;
+  types: PokemonType[];
+  species: {
+    is_legendary: boolean;
+    is_mythical: boolean;
+    generation: string | null;
+    evolution_chain: { url: string } | null;
+  };
+  evolution?: {
+    evolves_to: EvolutionDetail[];
+    evolves_from?: EvolutionDetail;
+  };
+};
