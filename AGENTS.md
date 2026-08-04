@@ -21,6 +21,13 @@ Pokemon Infinite Fusion Nuzlocke tracker with strict run-state invariants.
 - Validation workflow for changed work: run `pnpm type-check`, then `pnpm test:run`, then `pnpm validate` when scope is broad/cross-cutting.
 - React Compiler is enabled: omit routine `useCallback`, `useMemo`, and `React.memo` in compiler-covered components and hooks. For a hook-shaped helper without Hooks or JSX that needs referential stability (such as a context value), add a `"use memo"` directive.
 
+## Browser Debugging
+
+- Use Helium against a production build on an isolated local port; record CPU/network/cache conditions when measuring performance.
+- Clear the app origin's local/session storage, IndexedDB, Cache Storage, and service-worker registration before reproducing cold-state behavior.
+- For CLS investigations, use a `PerformanceObserver` to capture shifted DOM sources; do not attribute shifts from Lighthouse output alone.
+- If Helium cannot attach on Nix, launch its Playwright Chromium through `devenv shell` with remote debugging port `0`; direct launches can fail on missing runtime libraries.
+
 ---
 
 <!-- fallow:setup-hooks:start -->
