@@ -9,7 +9,7 @@ import {
 } from "@/utils/scrollToLocation";
 
 const LOCATION_ROW_HEIGHT_PX = 150;
-const LOCATION_ROW_OVERSCAN_COUNT = 4;
+const LOCATION_ROW_OVERSCAN_COUNT = 12;
 
 export function useLocationTableVirtualization({
   table,

@@ -121,7 +121,7 @@ describe("LocationTable scroll-to-recent button", () => {
     });
   });
 
-  it("renders only virtual rows with four-row overscan", async () => {
+  it("renders only virtual rows with twelve-row overscan", async () => {
     useVirtualizerMock.mockReturnValue({
       getTotalSize: () => 450,
       getVirtualItems: () => [{ end: 300, index: 1, start: 150 }],
@@ -135,7 +135,7 @@ describe("LocationTable scroll-to-recent button", () => {
     expect(options.count).toBe(3);
     expect(options.estimateSize()).toBe(150);
     expect(options.getScrollElement()).toBeInstanceOf(HTMLDivElement);
-    expect(options.overscan).toBe(4);
+    expect(options.overscan).toBe(12);
     expect(locationRowProps).toHaveBeenLastCalledWith("route-2");
   });
 
