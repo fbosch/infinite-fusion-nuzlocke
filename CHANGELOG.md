@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.5](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.9.4...v0.9.5) (2026-08-05)
+
+
+### Bug Fixes
+
+* prevent location table scroll shifts ([#258](https://github.com/fbosch/infinite-fusion-nuzlocke/issues/258)) ([4df91cc](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/4df91cc933e127a229b6e4684b6adfda130f61bd))
+
 ## [0.9.4](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.9.3...v0.9.4) (2026-08-04)
 
 
