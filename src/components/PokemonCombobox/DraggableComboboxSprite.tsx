@@ -16,7 +16,7 @@ import { playthroughActions } from "@/stores/playthroughs";
 import { useCustomLocations } from "@/stores/playthroughs/hooks";
 import { settingsStore } from "@/stores/settings";
 import usePokemonTypes from "../../hooks/usePokemonTypes";
-import ContextMenu from "../ContextMenu";
+import ContextMenu from "../context-menu";
 import { CursorTooltip } from "../CursorTooltip";
 import { PokemonSprite } from "../PokemonSprite";
 import { DraggableSpriteTooltipContent } from "./DraggableSpriteTooltipContent";

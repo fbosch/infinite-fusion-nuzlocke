@@ -8,9 +8,7 @@ import type {
   SpriteDownloadConfig,
   SpriteDownloadIcon,
 } from "../scripts/utils/sprite-download-utils";
-import {
-  downloadSpriteImage,
-} from "../scripts/utils/sprite-download-utils";
+import { downloadSpriteImage } from "../scripts/utils/sprite-download-utils";
 
 const temporaryDirectories: string[] = [];
 
@@ -57,9 +55,9 @@ describe("Pokemon icon downloads", () => {
     vi.stubGlobal("fetch", fetchMock);
     await fs.writeFile(path.join(config.spritesDir, icon.filename), "existing");
 
-    await expect(
-      downloadSpriteImage(icon, config, vi.fn()),
-    ).resolves.toBe(true);
+    await expect(downloadSpriteImage(icon, config, vi.fn())).resolves.toBe(
+      true,
+    );
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -98,9 +96,9 @@ describe("Pokemon icon downloads", () => {
       .mockResolvedValueOnce(new Response("base form"));
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(
-      downloadSpriteImage(icon, config, vi.fn(), 1),
-    ).resolves.toBe(true);
+    await expect(downloadSpriteImage(icon, config, vi.fn(), 1)).resolves.toBe(
+      true,
+    );
 
     await expect(
       fs.readFile(path.join(config.spritesDir, "lycanroc.png"), "utf-8"),

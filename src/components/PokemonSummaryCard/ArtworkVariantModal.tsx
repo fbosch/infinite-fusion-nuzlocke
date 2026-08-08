@@ -23,7 +23,7 @@ import {
   getFormattedCreditsFromResponse,
 } from "@/lib/sprites";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import ContextMenu from "../ContextMenu";
+import ContextMenu from "../context-menu";
 import { getDisplayPokemon } from "./utils";
 
 interface ArtworkVariantModalProps {

@@ -16,7 +16,7 @@ import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 const SAMPLE_COUNT = 20;
 const WARMUP_ITERATIONS = 5;
 let activeProfilerDurations: number[] = [];
-let selectPokemon = () => {};
+let selectPokemon: () => void;
 
 function handleProfilerRender(
   _id: string,
@@ -31,7 +31,7 @@ const updatePokemonByUIDMock = vi.hoisted(() =>
 );
 
 vi.mock("next/dynamic", () => ({ default: () => () => null }));
-vi.mock("@/components/ContextMenu", () => ({
+vi.mock("@/components/context-menu", () => ({
   ContextMenu: ({
     children,
     items,
@@ -151,19 +151,11 @@ const filledTeamEntry = {
 function profileRender(ui: React.ReactElement) {
   const durations: number[] = [];
   activeProfilerDurations = durations;
-  const result = render(
-    <ProfiledBenchmark durations={durations}>{ui}</ProfiledBenchmark>,
-  );
+  const result = render(<ProfiledBenchmark>{ui}</ProfiledBenchmark>);
   return { ...result, durations };
 }
 
-function ProfiledBenchmark({
-  children,
-  durations,
-}: {
-  children: ReactNode;
-  durations: number[];
-}) {
+function ProfiledBenchmark({ children }: { children: ReactNode }) {
   return (
     <Profiler id="benchmark" onRender={handleProfilerRender}>
       {children}

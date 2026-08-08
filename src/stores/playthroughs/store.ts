@@ -96,15 +96,16 @@ const createPlaythrough = (
   gameMode: GameMode = DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
 ): string => {
   const hasExistingPlaythroughs = playthroughsStore.playthroughs.length > 0;
+  const timestamp = getCurrentTimestamp();
 
   const newPlaythrough: Playthrough = {
-    createdAt: getCurrentTimestamp(),
+    createdAt: timestamp,
     encounters: {},
     gameMode,
     id: generatePlaythroughId(),
     name,
     team: { members: Array.from({ length: 6 }, () => null) },
-    updatedAt: getCurrentTimestamp(),
+    updatedAt: timestamp,
     version: "1.0.0",
   };
 

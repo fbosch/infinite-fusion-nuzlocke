@@ -5,7 +5,7 @@ import { isEggId, type PokemonOptionType } from "@/loaders/pokemon";
 import { playthroughActions } from "@/stores/playthroughs";
 import { getActivePlaythrough } from "@/stores/playthroughs/store";
 import type { EncounterData } from "@/stores/playthroughs/types";
-import type { ContextMenuItem } from "../ContextMenu";
+import type { ContextMenuItem } from "../context-menu";
 import { PokemonSprite } from "../PokemonSprite";
 
 type EncounterField = "head" | "body";

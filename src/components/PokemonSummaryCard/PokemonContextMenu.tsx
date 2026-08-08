@@ -13,7 +13,7 @@ import BodyIcon from "@/assets/images/body.svg";
 import EscapeIcon from "@/assets/images/escape-cloud.svg";
 import HeadIcon from "@/assets/images/head.svg";
 import PokeballIcon from "@/assets/images/pokeball.svg";
-import { ContextMenu, type ContextMenuItem } from "@/components/ContextMenu";
+import { ContextMenu, type ContextMenuItem } from "@/components/context-menu";
 import { usePreferredVariantState, useSpriteVariants } from "@/hooks/useSprite";
 import {
   isEggId,

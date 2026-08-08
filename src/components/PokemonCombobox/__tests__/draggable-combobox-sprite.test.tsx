@@ -11,7 +11,7 @@ const { startDragMock } = vi.hoisted(() => ({
 
 vi.mock("next/dynamic", () => ({ default: () => () => null }));
 
-vi.mock("@/components/ContextMenu", () => ({
+vi.mock("@/components/context-menu", () => ({
   default: ({ children }: { children: React.ReactNode }) => children,
 }));
 

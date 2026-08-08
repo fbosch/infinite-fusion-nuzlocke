@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterEdgeSeparators } from "../ContextMenu";
+import { filterEdgeSeparators } from "../context-menu";
 import { createExternalDexItems } from "../PokemonSummaryCard/PokemonContextMenu";
 
 describe("filterEdgeSeparators", () => {

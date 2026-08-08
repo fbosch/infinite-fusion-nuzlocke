@@ -16,6 +16,7 @@ import type React from "react";
 import {
   cloneElement,
   isValidElement,
+  useCallback,
   useEffect,
   useEffectEvent,
   useId,
@@ -60,13 +61,13 @@ export function filterEdgeSeparators(
   // Find first non-separator item
   let start = 0;
   while (start < items.length && items[start]?.separator) {
-    start++;
+    start += 1;
   }
 
   // Find last non-separator item
   let end = items.length - 1;
   while (end >= 0 && items[end]?.separator) {
-    end--;
+    end -= 1;
   }
 
   // If no non-separator items found, return empty array
@@ -109,10 +110,14 @@ function getContextMenuItemVariantClasses(
     );
 }
 
+function hideBrokenImage(event: React.SyntheticEvent<HTMLImageElement>) {
+  event.currentTarget.style.display = "none";
+}
+
 interface ContextMenuSubmenuProps {
   activeIndex: number;
-  children: ContextMenuItem[];
   itemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
+  items: ContextMenuItem[];
   menuRef: React.RefObject<HTMLDivElement | null>;
   onClose: () => void;
   onKeyDown: (
@@ -124,7 +129,7 @@ interface ContextMenuSubmenuProps {
 }
 
 function ContextMenuSubmenu({
-  children,
+  items,
   menuRef,
   onClose,
   onKeyDown,
@@ -152,39 +157,80 @@ function ContextMenuSubmenu({
           top: position.top,
         }}
       >
-        {children.map((child, index) => (
-          <button
-            className={clsx(
-              "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
-              "text-sm transition-colors duration-75 enabled:cursor-pointer",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-              "text-gray-700 enabled:hover:bg-gray-100 enabled:hover:text-gray-900 dark:text-gray-200 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white",
-              child.disabled && "!opacity-75 !cursor-not-allowed",
-            )}
-            disabled={child.disabled}
+        {items.map((child, index) => (
+          <ContextMenuSubmenuItem
+            active={index === activeIndex}
+            child={child}
+            index={index}
+            itemRefs={itemRefs}
             key={child.id}
-            onClick={(event) => onSelect(event, child)}
-            onKeyDown={(event) => onKeyDown(event, index)}
-            ref={(node) => {
-              itemRefs.current[index] = node;
-            }}
-            role="menuitem"
-            tabIndex={index === activeIndex ? 0 : -1}
-            type="button"
-          >
-            <div className="flex w-full items-center gap-x-2">
-              {child.icon && (
-                <child.icon
-                  aria-hidden="true"
-                  className="h-4 w-4 flex-shrink-0"
-                />
-              )}
-              <span className="truncate">{child.label}</span>
-            </div>
-          </button>
+            onKeyDown={onKeyDown}
+            onSelect={onSelect}
+          />
         ))}
       </div>
     </FloatingPortal>
+  );
+}
+
+interface ContextMenuSubmenuItemProps {
+  active: boolean;
+  child: ContextMenuItem;
+  index: number;
+  itemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
+  onKeyDown: ContextMenuSubmenuProps["onKeyDown"];
+  onSelect: ContextMenuSubmenuProps["onSelect"];
+}
+
+function ContextMenuSubmenuItem({
+  active,
+  child,
+  index,
+  itemRefs,
+  onKeyDown,
+  onSelect,
+}: ContextMenuSubmenuItemProps) {
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => onSelect(event, child),
+    [child, onSelect],
+  );
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>) => onKeyDown(event, index),
+    [index, onKeyDown],
+  );
+  const setItemRef = useCallback(
+    (node: HTMLButtonElement | null) => {
+      itemRefs.current[index] = node;
+    },
+    [index, itemRefs],
+  );
+
+  const Icon = child.icon;
+
+  return (
+    <button
+      className={clsx(
+        "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
+        "text-sm transition-colors duration-75 enabled:cursor-pointer",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+        "text-gray-700 enabled:hover:bg-gray-100 enabled:hover:text-gray-900 dark:text-gray-200 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white",
+        child.disabled ? "!opacity-75 !cursor-not-allowed" : undefined,
+      )}
+      disabled={child.disabled}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      ref={setItemRef}
+      role="menuitem"
+      tabIndex={active ? 0 : -1}
+      type="button"
+    >
+      <div className="flex w-full items-center gap-x-2">
+        {Icon ? (
+          <Icon aria-hidden="true" className="h-4 w-4 flex-shrink-0" />
+        ) : null}
+        <span className="truncate">{child.label}</span>
+      </div>
+    </button>
   );
 }
 
@@ -241,8 +287,7 @@ export interface ContextMenuItem {
   iconClassName?: string;
   id: string;
   label?: React.ReactNode;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onClick?: (event: React.MouseEvent<any>) => void;
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
   separator?: boolean;
   shortcut?: string;
   target?: string;
@@ -258,6 +303,376 @@ export interface ContextMenuProps {
   disabled?: boolean;
   items: ContextMenuItem[];
   portalRootId?: string;
+}
+
+type MenuItemPropsGetter = ReturnType<typeof useInteractions>["getItemProps"];
+
+interface ContextMenuItemContentProps {
+  hasChildren: boolean;
+  item: ContextMenuItem;
+}
+
+function ContextMenuItemContent({
+  hasChildren,
+  item,
+}: ContextMenuItemContentProps) {
+  const Icon = item.icon;
+  const favicon =
+    item.favicon && item.href ? (
+      <Image
+        alt=""
+        aria-hidden="true"
+        className="h-4 w-4 flex-shrink-0 rounded-sm"
+        decoding="async"
+        height={16}
+        loading="lazy"
+        onError={hideBrokenImage}
+        src={item.favicon}
+        unoptimized
+        width={16}
+      />
+    ) : null;
+  const leadingIcon =
+    Icon && !item.href ? (
+      <Icon
+        aria-hidden="true"
+        className={twMerge("h-4 w-4 flex-shrink-0", item.iconClassName)}
+      />
+    ) : null;
+  const trailingIcon =
+    Icon && item.href ? (
+      <Icon
+        aria-hidden="true"
+        className={twMerge("h-4 w-4 flex-shrink-0", item.iconClassName)}
+      />
+    ) : null;
+
+  return (
+    <div className="flex w-full items-center gap-x-2">
+      {leadingIcon}
+      <div className="flex min-w-0 items-center gap-x-2">
+        {favicon}
+        <span className="truncate">{item.label}</span>
+      </div>
+      <div className="ml-auto flex items-center gap-x-2">
+        {item.shortcut ? (
+          <span className="text-xs opacity-60">{item.shortcut}</span>
+        ) : null}
+        {trailingIcon}
+        {hasChildren ? (
+          <ChevronRight aria-hidden="true" className="h-4 w-4 opacity-60" />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function ContextMenuItemTooltip({
+  children,
+  tooltip,
+}: Pick<ContextMenuItem, "tooltip"> & {
+  children: React.ReactNode;
+}): React.ReactNode {
+  return tooltip ? (
+    <CursorTooltip content={tooltip} delay={500} placement="right">
+      {children}
+    </CursorTooltip>
+  ) : (
+    children
+  );
+}
+
+interface ContextMenuSubmenuControllerProps {
+  activeIndex: number;
+  closeMenu: () => void;
+  closeSubmenu: () => void;
+  itemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
+  items: ContextMenuItem[];
+  menuRef: React.RefObject<HTMLDivElement | null>;
+  parentIndex: number;
+  parentItemRef: React.RefObject<Array<HTMLElement | null>>;
+  position: { left: number; top: number };
+  setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
+}
+
+function ContextMenuSubmenuController({
+  activeIndex,
+  items,
+  closeMenu,
+  closeSubmenu,
+  itemRefs,
+  menuRef,
+  parentIndex,
+  parentItemRef,
+  position,
+  setActiveIndex,
+}: ContextMenuSubmenuControllerProps) {
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>, childIndex: number) => {
+      const enabledItems = items.filter((child) => !child.disabled);
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        if (enabledItems.length === 0) {
+          return;
+        }
+
+        event.preventDefault();
+        const direction = event.key === "ArrowDown" ? 1 : -1;
+        const currentEnabledIndex = enabledItems.findIndex(
+          (child) => child.id === items[childIndex]?.id,
+        );
+        const nextChild =
+          enabledItems[
+            (currentEnabledIndex + direction + enabledItems.length) %
+              enabledItems.length
+          ];
+        const nextIndex = items.findIndex(
+          (child) => child.id === nextChild?.id,
+        );
+        setActiveIndex(nextIndex);
+        itemRefs.current[nextIndex]?.focus();
+        return;
+      }
+
+      if (event.key === "ArrowLeft" || event.key === "Escape") {
+        event.preventDefault();
+        closeSubmenu();
+        parentItemRef.current[parentIndex]?.focus();
+      }
+    },
+    [items, closeSubmenu, itemRefs, parentIndex, parentItemRef, setActiveIndex],
+  );
+  const handleSelect = useCallback(
+    (event: React.MouseEvent<HTMLElement>, child: ContextMenuItem) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (child.disabled) {
+        return;
+      }
+
+      child.onClick?.(event);
+      closeMenu();
+    },
+    [closeMenu],
+  );
+
+  return (
+    <ContextMenuSubmenu
+      activeIndex={activeIndex}
+      itemRefs={itemRefs}
+      items={items}
+      menuRef={menuRef}
+      onClose={closeSubmenu}
+      onKeyDown={handleKeyDown}
+      onSelect={handleSelect}
+      position={position}
+    />
+  );
+}
+
+interface ContextMenuItemRendererProps {
+  activeIndex: number | null;
+  activeSubmenuIndex: number;
+  closeMenu: () => void;
+  closeSubmenu: () => void;
+  getItemProps: MenuItemPropsGetter;
+  item: ContextMenuItem;
+  itemIndex: number;
+  listRef: React.RefObject<Array<HTMLElement | null>>;
+  openSubmenuForIndex: (index: number) => void;
+  openSubmenuIndex: number | null;
+  setActiveSubmenuIndex: React.Dispatch<React.SetStateAction<number>>;
+  submenuItemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
+  submenuPosition: { left: number; top: number };
+  submenuRef: React.RefObject<HTMLDivElement | null>;
+}
+
+function ContextMenuItemRenderer({
+  activeIndex,
+  activeSubmenuIndex,
+  closeMenu,
+  closeSubmenu,
+  getItemProps,
+  item,
+  itemIndex,
+  listRef,
+  openSubmenuForIndex,
+  openSubmenuIndex,
+  setActiveSubmenuIndex,
+  submenuItemRefs,
+  submenuPosition,
+  submenuRef,
+}: ContextMenuItemRendererProps) {
+  const isNavigable = !(item.disabled || item.visualOnly);
+  const isActive = activeIndex === itemIndex;
+  const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+  const classes = clsx(
+    "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
+    "text-sm transition-colors duration-75 enabled:cursor-pointer",
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+    item.visualOnly
+      ? "cursor-default text-gray-500 dark:text-gray-400"
+      : getContextMenuItemVariantClasses(item.variant, isActive),
+    item.disabled ? "!opacity-75 !cursor-not-allowed" : undefined,
+  );
+  const setItemRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (isNavigable) {
+        listRef.current[itemIndex] = node;
+      }
+    },
+    [isNavigable, itemIndex, listRef],
+  );
+  const handleLinkClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (item.disabled) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
+      item.onClick?.(event);
+      closeMenu();
+    },
+    [closeMenu, item],
+  );
+  const handleButtonClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (item.disabled || hasChildren) {
+        return;
+      }
+
+      item.onClick?.(event);
+      closeMenu();
+    },
+    [closeMenu, hasChildren, item],
+  );
+  const handleButtonKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+      if (
+        !hasChildren ||
+        (event.key !== "ArrowRight" &&
+          event.key !== "Enter" &&
+          event.key !== " ")
+      ) {
+        return;
+      }
+
+      const firstEnabledChildIndex = item.children?.findIndex(
+        (child) => !child.disabled,
+      );
+      if (
+        firstEnabledChildIndex === undefined ||
+        firstEnabledChildIndex === -1
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      openSubmenuForIndex(itemIndex);
+      setActiveSubmenuIndex(firstEnabledChildIndex);
+      requestAnimationFrame(() => {
+        submenuItemRefs.current[firstEnabledChildIndex]?.focus();
+      });
+    },
+    [
+      hasChildren,
+      item.children,
+      itemIndex,
+      openSubmenuForIndex,
+      setActiveSubmenuIndex,
+      submenuItemRefs,
+    ],
+  );
+  const handleMouseEnter = useCallback(() => {
+    if (hasChildren) {
+      openSubmenuForIndex(itemIndex);
+      return;
+    }
+
+    closeSubmenu();
+  }, [closeSubmenu, hasChildren, itemIndex, openSubmenuForIndex]);
+
+  if (item.separator) {
+    return <hr className="my-1 h-px border-0 bg-gray-300 dark:bg-gray-600" />;
+  }
+
+  const content = (
+    <ContextMenuItemContent hasChildren={hasChildren} item={item} />
+  );
+  const submenu =
+    hasChildren && openSubmenuIndex === itemIndex ? (
+      <ContextMenuSubmenuController
+        activeIndex={activeSubmenuIndex}
+        items={item.children}
+        closeMenu={closeMenu}
+        closeSubmenu={closeSubmenu}
+        itemRefs={submenuItemRefs}
+        menuRef={submenuRef}
+        parentIndex={itemIndex}
+        parentItemRef={listRef}
+        position={submenuPosition}
+        setActiveIndex={setActiveSubmenuIndex}
+      />
+    ) : null;
+
+  if (item.href) {
+    const link = (
+      <a
+        aria-disabled={item.disabled || undefined}
+        className={classes}
+        href={item.href}
+        ref={setItemRef}
+        role="menuitem"
+        tabIndex={isActive ? 0 : -1}
+        target={item.target}
+        {...getItemProps({ onClick: handleLinkClick })}
+      >
+        {content}
+      </a>
+    );
+    return (
+      <ContextMenuItemTooltip tooltip={item.tooltip}>
+        {link}
+      </ContextMenuItemTooltip>
+    );
+  }
+
+  const control = item.visualOnly ? (
+    <div className={classes} role="presentation">
+      {content}
+    </div>
+  ) : (
+    <button
+      aria-expanded={hasChildren ? openSubmenuIndex === itemIndex : undefined}
+      aria-haspopup={hasChildren ? "menu" : undefined}
+      className={classes}
+      disabled={item.disabled}
+      ref={setItemRef}
+      role="menuitem"
+      tabIndex={isActive ? 0 : -1}
+      {...getItemProps({
+        onClick: handleButtonClick,
+        onKeyDown: handleButtonKeyDown,
+        onMouseEnter: handleMouseEnter,
+      })}
+    >
+      {content}
+    </button>
+  );
+  const menuItem = (
+    <div className="relative">
+      {control}
+      {submenu}
+    </div>
+  );
+
+  return (
+    <ContextMenuItemTooltip tooltip={item.tooltip}>
+      {menuItem}
+    </ContextMenuItemTooltip>
+  );
 }
 
 export function ContextMenu({
@@ -281,30 +696,29 @@ export function ContextMenu({
   } = useContextMenuState();
 
   const listRef = useRef<Array<HTMLElement | null>>([]);
-  const menuElementRef = useRef<HTMLDivElement>(null);
+  const menuElementRef = useRef<HTMLDivElement | null>(null);
   const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
   const [activeSubmenuIndex, setActiveSubmenuIndex] = useState(0);
   const [submenuPosition, setSubmenuPosition] = useState({ left: 0, top: 0 });
-  const submenuRef = useRef<HTMLDivElement>(null);
+  const submenuRef = useRef<HTMLDivElement | null>(null);
   const submenuItemRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const isOpenRef = useRef(isOpen);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (isOpenRef.current) {
       window.dispatchEvent(new Event("context-menu-close"));
     }
     isOpenRef.current = false;
     closeMenu();
 
-    if (menuElementRef.current) {
-      menuElementRef.current.classList.remove("tooltip-enter");
-      menuElementRef.current.classList.add("tooltip-exit");
+    const menuElement = menuElementRef.current;
+    menuElement?.classList.remove("tooltip-enter");
+    menuElement?.classList.add("tooltip-exit");
 
-      setTimeout(() => {
-        hideMenu();
-      }, 50);
-    }
-  };
+    setTimeout(() => {
+      hideMenu();
+    }, 50);
+  }, [closeMenu, hideMenu]);
 
   useEffect(() => {
     isOpenRef.current = isOpen;
@@ -336,10 +750,10 @@ export function ContextMenu({
   }, [isVisible, menuPosition, setMenuPosition]);
 
   const handleVisibilityChange = useEffectEvent(() => {
-    const isVisible = document.visibilityState === "visible";
+    const pageIsVisible = document.visibilityState === "visible";
     const isFocused = document.hasFocus();
 
-    if (!(isVisible && isFocused) && isOpen) {
+    if (!(pageIsVisible && isFocused) && isOpen) {
       handleClose();
     }
   });
@@ -351,7 +765,7 @@ export function ContextMenu({
   });
 
   const handleActiveContextMenu = useEffectEvent((event: MouseEvent) => {
-    const target = event.target;
+    const { target } = event;
     const contextMenuTrigger =
       target instanceof Element &&
       target.closest<HTMLElement>("[data-context-menu-trigger]");
@@ -424,7 +838,7 @@ export function ContextMenu({
     };
   }, [isVisible]);
 
-  const openSubmenuForIndex = (validIndex: number) => {
+  const openSubmenuForIndex = useCallback((validIndex: number) => {
     const trigger = listRef.current[validIndex];
     if (trigger) {
       const { bottom, right, top } = trigger.getBoundingClientRect();
@@ -435,34 +849,47 @@ export function ContextMenu({
     }
     setActiveSubmenuIndex(0);
     setOpenSubmenuIndex(validIndex);
-  };
+  }, []);
 
-  const closeSubmenu = () => {
-    setOpenSubmenuIndex(null);
-  };
+  const closeSubmenu = useCallback(() => setOpenSubmenuIndex(null), []);
 
-  const handleContextMenu = (event: React.MouseEvent) => {
-    if (disabled) {
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-    isOpenRef.current = true;
-    window.dispatchEvent(new Event("context-menu-open"));
-
-    // Calculate position relative to the viewport
-    const position = { x: event.clientX, y: event.clientY };
-    openMenu(position);
-
-    // Add enter animation class after a frame
-    requestAnimationFrame(() => {
-      if (menuElementRef.current) {
-        menuElementRef.current.classList.remove("tooltip-exit");
-        menuElementRef.current.classList.add("tooltip-enter");
+  const handleContextMenu = useCallback(
+    (event: React.MouseEvent) => {
+      if (disabled) {
+        return;
       }
-    });
-  };
+
+      event.preventDefault();
+      event.stopPropagation();
+      isOpenRef.current = true;
+      window.dispatchEvent(new Event("context-menu-open"));
+
+      // Calculate position relative to the viewport
+      const position = { x: event.clientX, y: event.clientY };
+      openMenu(position);
+
+      // Add enter animation class after a frame
+      requestAnimationFrame(() => {
+        const menuElement = menuElementRef.current;
+        menuElement?.classList.remove("tooltip-exit");
+        menuElement?.classList.add("tooltip-enter");
+      });
+    },
+    [disabled, openMenu],
+  );
+  const setReferenceRef = useCallback(
+    (node: HTMLElement | null) => {
+      refs.setReference(node);
+    },
+    [refs],
+  );
+  const setFloatingRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      refs.setFloating(node);
+      menuElementRef.current = node;
+    },
+    [refs],
+  );
 
   const visibleItems = filterEdgeSeparators(items);
   const navigableItems = visibleItems.filter(
@@ -473,17 +900,14 @@ export function ContextMenu({
     <>
       {/* Custom trigger element */}
       {isValidElement(children) &&
-        // react-doctor-disable-next-line react-hooks-js/refs -- Floating UI callback refs run during commit, not render.
         cloneElement(children, {
           "data-context-menu-trigger": disabled ? undefined : triggerId,
           onContextMenu: handleContextMenu,
-          ref: (node: HTMLElement | null) => {
-            refs.setReference(node);
-          },
+          ref: setReferenceRef,
         } as React.HTMLAttributes<HTMLElement>)}
 
       {/* Render popover in portal when visible */}
-      {isVisible && (
+      {isVisible ? (
         <FloatingPortal id={portalRootId}>
           <FloatingFocusManager context={context} modal={false}>
             <div
@@ -498,10 +922,7 @@ export function ContextMenu({
                 "pointer-events-auto",
                 className,
               )}
-              ref={(node) => {
-                refs.setFloating(node);
-                menuElementRef.current = node;
-              }}
+              ref={setFloatingRef}
               role="menu"
               style={{
                 left: menuPosition.x,
@@ -512,7 +933,31 @@ export function ContextMenu({
               }}
               {...getFloatingProps()}
             >
-              {/* react-doctor-disable-next-line react-hooks-js/refs -- List refs are populated for commit-time Floating UI navigation. */}
+              {visibleItems.map((item) => {
+                const itemIndex = navigableItems.findIndex(
+                  (navigableItem) => navigableItem.id === item.id,
+                );
+                return (
+                  <ContextMenuItemRenderer
+                    activeIndex={activeIndex}
+                    activeSubmenuIndex={activeSubmenuIndex}
+                    closeMenu={handleClose}
+                    closeSubmenu={closeSubmenu}
+                    getItemProps={getItemProps}
+                    item={item}
+                    itemIndex={itemIndex}
+                    key={item.id}
+                    listRef={listRef}
+                    openSubmenuForIndex={openSubmenuForIndex}
+                    openSubmenuIndex={openSubmenuIndex}
+                    setActiveSubmenuIndex={setActiveSubmenuIndex}
+                    submenuItemRefs={submenuItemRefs}
+                    submenuPosition={submenuPosition}
+                    submenuRef={submenuRef}
+                  />
+                );
+              })}
+              {/* Legacy item renderer retained during the ContextMenu migration.
               {visibleItems.map((item: ContextMenuItem, _index: number) => {
                 if (item.separator) {
                   return (
@@ -569,9 +1014,7 @@ export function ContextMenu({
                           decoding="async"
                           height={16}
                           loading="lazy"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                          }}
+                          onError={hideBrokenImage}
                           src={item.favicon}
                           unoptimized
                           width={16}
@@ -579,7 +1022,6 @@ export function ContextMenu({
                       )}
                       <span className="truncate">{item.label}</span>
                     </div>
-                    {/* Right: shortcut and icon, always aligned to end */}
                     <div className="ml-auto flex items-center gap-x-2">
                       {item.shortcut && (
                         <span className="text-xs opacity-60">
@@ -613,7 +1055,7 @@ export function ContextMenu({
                       menuRef={submenuRef}
                       onClose={closeSubmenu}
                       onKeyDown={(event, childIndex) => {
-                        const enabledItems = item.children!.filter(
+                        const enabledItems = item.children?.filter(
                           (child) => !child.disabled,
                         );
                         const moveFocus = (nextIndex: number) => {
@@ -633,7 +1075,7 @@ export function ContextMenu({
                           const direction = event.key === "ArrowDown" ? 1 : -1;
                           const currentEnabledIndex = enabledItems.findIndex(
                             (child) =>
-                              child.id === item.children![childIndex]?.id,
+                              child.id === item.children?.[childIndex]?.id,
                           );
                           const nextChild =
                             enabledItems[
@@ -642,7 +1084,7 @@ export function ContextMenu({
                                 enabledItems.length) %
                                 enabledItems.length
                             ];
-                          const nextIndex = item.children!.findIndex(
+                          const nextIndex = item.children?.findIndex(
                             (child) => child.id === nextChild?.id,
                           );
                           moveFocus(nextIndex);
@@ -756,7 +1198,7 @@ export function ContextMenu({
                         ) {
                           event.preventDefault();
                           const firstEnabledChildIndex =
-                            item.children!.findIndex(
+                            item.children?.findIndex(
                               (child) => !child.disabled,
                             );
                           if (firstEnabledChildIndex === -1) {
@@ -813,12 +1255,15 @@ export function ContextMenu({
                   </div>
                 );
               })}
+              */}
             </div>
           </FloatingFocusManager>
         </FloatingPortal>
-      )}
+      ) : null}
     </>
   );
 }
 
-export default ContextMenu;
+export default function DefaultContextMenu(props: ContextMenuProps) {
+  return <ContextMenu {...props} />;
+}

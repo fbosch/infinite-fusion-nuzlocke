@@ -20,7 +20,7 @@ const {
 
 vi.mock("next/dynamic", () => ({ default: () => () => null }));
 
-vi.mock("@/components/ContextMenu", () => ({
+vi.mock("@/components/context-menu", () => ({
   ContextMenu: ({
     children,
     items,
