@@ -24,9 +24,11 @@ export const markTeamMemberAsDeceased = async (
   if (locationId) {
     await markEncounterAsDeceased(locationId);
   } else {
-    for (const uid of uids) {
-      await updatePokemonByUID(uid, { status: PokemonStatus.DECEASED });
-    }
+    await Promise.all(
+      uids.map((uid) =>
+        updatePokemonByUID(uid, { status: PokemonStatus.DECEASED }),
+      ),
+    );
   }
 
   await updateTeamMember(position, null, null);
@@ -34,4 +36,5 @@ export const markTeamMemberAsDeceased = async (
 
 export const flipTeamMemberFusion = async (position: number): Promise<void> => {
   flipTeamMember(position);
+  await Promise.resolve();
 };

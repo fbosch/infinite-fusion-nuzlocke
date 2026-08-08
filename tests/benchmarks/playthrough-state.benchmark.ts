@@ -19,18 +19,24 @@ vi.mock("@/lib/events", () => ({ emitEvolutionEvent: vi.fn() }));
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
 import { removeCustomLocation } from "@/stores/playthroughs/customLocations";
 import {
+  resetEncounter,
+  updateEncounter,
+  updatePokemonInEncounter,
+} from "@/stores/playthroughs/encounters/crud";
+import {
+  moveToOriginalLocation,
+  relocateEncounterSlot,
+} from "@/stores/playthroughs/encounters/drag-drop";
+import {
   flipEncounterFusion,
+  toggleEncounterFusion,
+} from "@/stores/playthroughs/encounters/fusion";
+import {
   markEncounterAsCaptured,
   markEncounterAsDeceased,
   moveEncounterToBox,
-  moveToOriginalLocation,
-  relocateEncounterSlot,
-  resetEncounter,
-  toggleEncounterFusion,
-  updateEncounter,
-  updatePokemonInEncounter,
-} from "@/stores/playthroughs/encounters";
-import { flipTeamMemberFusion } from "@/stores/playthroughs/encounters/teamActions";
+} from "@/stores/playthroughs/encounters/status";
+import { flipTeamMemberFusion } from "@/stores/playthroughs/encounters/team-actions";
 import { getActivePlaythrough } from "@/stores/playthroughs/playthroughState";
 import { playthroughsStore } from "@/stores/playthroughs/store";
 import type { EncounterData, Playthrough } from "@/stores/playthroughs/types";
@@ -226,7 +232,7 @@ function getSourceHeadPokemon() {
   return pokemon;
 }
 
-const runFixture: Record<FixtureKind, () => Promise<unknown> | void> = {
+const runFixture: Record<FixtureKind, () => Promise<unknown> | undefined> = {
   "custom-location-remove": () => removeCustomLocation("custom-location"),
   "drag-empty-target": () =>
     relocateEncounterSlot({
@@ -259,7 +265,9 @@ const runFixture: Record<FixtureKind, () => Promise<unknown> | void> = {
       SOURCE_LOCATION_ID,
       createPokemon("replacement-pokemon", 7),
     ),
-  "encounter-reset": () => resetEncounter(SOURCE_LOCATION_ID),
+  "encounter-reset": () => {
+    resetEncounter(SOURCE_LOCATION_ID);
+  },
   "encounter-select-empty": () =>
     updateEncounter(EMPTY_LOCATION_ID, createPokemon("selected-pokemon", 7)),
   "encounter-status-captured": () =>
@@ -287,7 +295,9 @@ warmFixture["custom-location-remove"] = warmCustomLocation;
 function warmTeamMember() {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) {
-    throw new Error("Reverse Fusion benchmark fixture has no active playthrough");
+    throw new Error(
+      "Reverse Fusion benchmark fixture has no active playthrough",
+    );
   }
 
   const [teamMember] = activePlaythrough.team.members;
@@ -300,7 +310,9 @@ function warmTeamMember() {
 function warmCustomLocation() {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) {
-    throw new Error("Custom location benchmark fixture has no active playthrough");
+    throw new Error(
+      "Custom location benchmark fixture has no active playthrough",
+    );
   }
 
   return activePlaythrough.customLocations?.[0]?.id;

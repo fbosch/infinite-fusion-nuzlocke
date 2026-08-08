@@ -90,7 +90,8 @@ export function getAllPokemonWithLocations(
   }
 
   return Object.entries(encounters).flatMap(([locationId, encounter]) => {
-    const pokemon = [];
+    const pokemon: Array<{ pokemon: PokemonOptionType; locationId: string }> =
+      [];
 
     // Always include head Pokémon
     if (encounter.head) {

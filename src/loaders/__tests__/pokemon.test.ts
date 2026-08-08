@@ -157,17 +157,15 @@ vi.mock("@/lib/searchCore", () => ({
 }));
 
 describe("Pokemon Loader with Evolution Data", () => {
-  function getRequiredPokemonId(name: string): Promise<number> {
-    return searchPokemon(name).then((results) => {
-      const option = results.find((pokemon) => pokemon.name === name);
-      expect(option).toBeDefined();
+  async function getRequiredPokemonId(name: string): Promise<number> {
+    const results = await searchPokemon(name);
+    const option = results.find((pokemon) => pokemon.name === name);
 
-      if (option === undefined) {
-        throw new Error(`Expected to find Pokemon option for ${name}`);
-      }
+    if (option === undefined) {
+      throw new Error(`Expected to find Pokemon option for ${name}`);
+    }
 
-      return option.id;
-    });
+    return option.id;
   }
 
   it("should get evolution IDs for specific Pokemon", async () => {
@@ -237,9 +235,9 @@ describe("Pokemon Loader with Evolution Data", () => {
 
     // Check that it includes some known Eevee evolutions
     const expectedEvolutions = [134, 135, 136]; // Vaporeon, Jolteon, Flareon
-    expectedEvolutions.forEach((evolutionId) => {
+    for (const evolutionId of expectedEvolutions) {
       expect(evolutionIds).toContain(evolutionId);
-    });
+    }
   });
 
   it("should handle Pokemon with no evolution data", async () => {

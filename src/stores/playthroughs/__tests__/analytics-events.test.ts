@@ -1,15 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PokemonStatus } from "@/loaders/pokemon";
+import { updateEncounter } from "../encounters/crud";
+import { moveEncounterAtomic } from "../encounters/drag-drop";
+import { createFusion, flipEncounterFusion } from "../encounters/fusion";
+import { markEncounterAsDeceased } from "../encounters/status";
+import { updateTeamMember } from "../encounters/team";
 import {
-  createFusion,
-  flipEncounterFusion,
   flipTeamMemberFusion,
-  markEncounterAsDeceased,
   markTeamMemberAsDeceased,
-  moveEncounterAtomic,
-  updateEncounter,
-  updateTeamMember,
-} from "../encounters";
+} from "../encounters/team-actions";
 import {
   createPlaythrough,
   cycleGameMode,
@@ -201,16 +200,33 @@ describe("analytics event instrumentation", () => {
     );
     analyticsMocks.trackEvent.mockClear();
 
-    const sourcePokemon =
-      playthroughsStore.playthroughs[0]?.encounters?.route3?.head;
+    const [playthrough] = playthroughsStore.playthroughs;
+    expect(playthrough).toBeDefined();
+
+    if (playthrough === undefined) {
+      throw new Error("Expected a playthrough");
+    }
+
+    const { encounters } = playthrough;
+    expect(encounters).toBeDefined();
+
+    if (encounters === undefined) {
+      throw new Error("Expected playthrough encounters");
+    }
+
+    const sourcePokemon = encounters.route3.head;
     expect(sourcePokemon).toBeDefined();
+
+    if (!sourcePokemon) {
+      throw new Error("Expected a source Pokémon at route3");
+    }
 
     await moveEncounterAtomic(
       "route3",
       "head",
       "route4",
       "body",
-      sourcePokemon!,
+      sourcePokemon,
     );
 
     const fusionCreatedEvents = getTrackedEvents("fusion_created");
@@ -299,7 +315,7 @@ describe("analytics event instrumentation", () => {
       was_fused: true,
     });
 
-    expect(playthroughsStore.playthroughs[0]?.team.members[0]).toBeNull();
+    expect(playthroughsStore.playthroughs[0].team.members[0]).toBeNull();
   });
 
   it("does not mark non-team partner as deceased for single-uid team slot", async () => {
@@ -329,10 +345,31 @@ describe("analytics event instrumentation", () => {
     const deceasedEvents = getTrackedEvents("encounter_marked_deceased");
     expect(deceasedEvents).toHaveLength(0);
 
-    const encounter = playthroughsStore.playthroughs[0]?.encounters?.route1;
-    expect(encounter?.head?.status).toBe(PokemonStatus.DECEASED);
-    expect(encounter?.body?.status).toBe(PokemonStatus.CAPTURED);
-    expect(playthroughsStore.playthroughs[0]?.team.members[0]).toBeNull();
+    const [playthrough] = playthroughsStore.playthroughs;
+    expect(playthrough).toBeDefined();
+
+    if (playthrough === undefined) {
+      throw new Error("Expected a playthrough");
+    }
+
+    const { encounters } = playthrough;
+    expect(encounters).toBeDefined();
+
+    if (encounters === undefined) {
+      throw new Error("Expected playthrough encounters");
+    }
+
+    const encounter = encounters.route1;
+    expect(encounter.head).not.toBeNull();
+    expect(encounter.body).not.toBeNull();
+
+    if (encounter.head === null || encounter.body === null) {
+      throw new Error("Expected both Pokémon in route1");
+    }
+
+    expect(encounter.head.status).toBe(PokemonStatus.DECEASED);
+    expect(encounter.body.status).toBe(PokemonStatus.CAPTURED);
+    expect(playthroughsStore.playthroughs[0].team.members[0]).toBeNull();
   });
 
   it("tracks fusion flips only when an encounter is reversed", async () => {
@@ -365,13 +402,25 @@ describe("analytics event instrumentation", () => {
 
     const teamFlowEvents = getTrackedEvents("fusion_flipped");
     expect(teamFlowEvents).toHaveLength(0);
-    expect(playthroughsStore.playthroughs[0]?.encounters?.route1).toMatchObject(
-      {
-        body: { uid: "flip-1-head" },
-        head: { uid: "flip-1-body" },
-      },
-    );
-    expect(playthroughsStore.playthroughs[0]?.team.members[0]).toMatchObject({
+    const [playthrough] = playthroughsStore.playthroughs;
+    expect(playthrough).toBeDefined();
+
+    if (playthrough === undefined) {
+      throw new Error("Expected a playthrough");
+    }
+
+    const { encounters } = playthrough;
+    expect(encounters).toBeDefined();
+
+    if (encounters === undefined) {
+      throw new Error("Expected playthrough encounters");
+    }
+
+    expect(encounters.route1).toMatchObject({
+      body: { uid: "flip-1-head" },
+      head: { uid: "flip-1-body" },
+    });
+    expect(playthroughsStore.playthroughs[0].team.members[0]).toMatchObject({
       bodyPokemonUid: "flip-1-body",
       headPokemonUid: "flip-1-head",
     });

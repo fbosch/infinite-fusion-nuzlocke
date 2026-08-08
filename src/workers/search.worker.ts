@@ -1,4 +1,4 @@
-import * as Comlink from "comlink";
+import { expose } from "comlink";
 import { SearchCore } from "@/lib/searchCore";
 import type { Pokemon } from "@/loaders/pokemon";
 
@@ -17,8 +17,8 @@ const searchAPI = {
     if (!searchCore.isReady()) {
       throw new Error("SearchCore not initialized. Call initialize() first.");
     }
-    return searchCore.search(query);
+    return await searchCore.search(query);
   },
 };
 
-Comlink.expose(searchAPI);
+expose(searchAPI);

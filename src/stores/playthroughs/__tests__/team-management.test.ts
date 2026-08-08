@@ -4,7 +4,7 @@ import {
   moveTeamMemberToBox,
   restorePokemonToTeam,
   updateTeamMember,
-} from "../encounters";
+} from "../encounters/team";
 import {
   createTestPlaythrough,
   expectTeamMember,
@@ -348,7 +348,7 @@ describe("Team Management", () => {
   });
 
   describe("updateTeamMember", () => {
-    it("updates a swapped stored fusion before yielding", () => {
+    it("updates a swapped stored fusion before yielding", async () => {
       const { activePlaythrough } = createTestPlaythrough();
       activePlaythrough.encounters = {
         route1: {
@@ -365,7 +365,7 @@ describe("Team Management", () => {
         },
       };
 
-      void updateTeamMember(
+      const update = updateTeamMember(
         0,
         { uid: "charmander_route1_456" },
         { uid: "pikachu_route1_123" },
@@ -382,6 +382,8 @@ describe("Team Management", () => {
       expect(activePlaythrough.encounters.route1?.body?.status).toBe(
         PokemonStatus.CAPTURED,
       );
+
+      await update;
     });
   });
 });

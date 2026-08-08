@@ -80,7 +80,7 @@ describe("playthrough persistence initialization regression cases", () => {
     localStorage.setItem(ACTIVE_PLAYTHROUGH_KEY, "pt-old");
 
     idbMocks.keys.mockResolvedValue(["pt-new", "pt-old"]);
-    idbMocks.get.mockImplementation(async (key: string) => {
+    idbMocks.get.mockImplementation((key: string) => {
       if (key === "pt-new") {
         return {
           createdAt: 100,
@@ -161,7 +161,7 @@ describe("playthrough persistence initialization regression cases", () => {
   it("uses deterministic fallback when IndexedDB load fails", async () => {
     const consoleErrorSpy = vi
       .spyOn(console, "error")
-      .mockImplementation(() => {});
+      .mockImplementation(() => undefined);
     const state = createState();
 
     idbMocks.keys.mockRejectedValue(new Error("indexeddb unavailable"));
@@ -210,9 +210,13 @@ describe("playthrough persistence initialization regression cases", () => {
     const loaded = await loadPlaythroughById("legacy");
 
     expect(loaded).not.toBeNull();
-    expect(loaded?.version).toBe("1.0.0");
-    expect(loaded?.team.members).toHaveLength(6);
-    expect(loaded?.team.members[2]).toEqual({
+    if (loaded === null) {
+      throw new Error("Expected legacy playthrough to load");
+    }
+
+    expect(loaded.version).toBe("1.0.0");
+    expect(loaded.team.members).toHaveLength(6);
+    expect(loaded.team.members[2]).toEqual({
       bodyPokemonUid: "",
       headPokemonUid: "",
     });
@@ -221,9 +225,9 @@ describe("playthrough persistence initialization regression cases", () => {
   it("keeps valid playthroughs when another stored record is malformed", async () => {
     const consoleErrorSpy = vi
       .spyOn(console, "error")
-      .mockImplementation(() => {});
+      .mockImplementation(() => undefined);
     idbMocks.keys.mockResolvedValue(["valid", "invalid"]);
-    idbMocks.get.mockImplementation(async (key: string) => {
+    idbMocks.get.mockImplementation((key: string) => {
       if (key === "valid") {
         return {
           createdAt: 1,

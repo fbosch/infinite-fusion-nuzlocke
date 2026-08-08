@@ -81,7 +81,7 @@ describe("Locations", () => {
 
     it("should return locations with required properties", () => {
       const locations = getLocations();
-      const location = locations[0];
+      const [location] = locations;
 
       expect(location).toHaveProperty("id");
       expect(location).toHaveProperty("name");
@@ -110,9 +110,9 @@ describe("Locations", () => {
     it("should return locations for a specific region", () => {
       const kantoLocations = getLocationsByRegion("Kanto");
       expect(kantoLocations.length).toBeGreaterThan(0);
-      kantoLocations.forEach((location) => {
+      for (const location of kantoLocations) {
         expect(location.region).toBe("Kanto");
-      });
+      }
     });
 
     it("should return empty array for non-existent region", () => {
@@ -125,9 +125,9 @@ describe("Locations", () => {
     it("should return locations for a specific region (case-insensitive)", () => {
       const kantoLocations = getLocationsBySpecificRegion("kanto");
       expect(kantoLocations.length).toBeGreaterThan(0);
-      kantoLocations.forEach((location) => {
+      for (const location of kantoLocations) {
         expect(location.region.toLowerCase()).toBe("kanto");
-      });
+      }
     });
 
     it("should return empty array for non-existent region", () => {

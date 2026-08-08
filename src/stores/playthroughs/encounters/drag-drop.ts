@@ -5,12 +5,35 @@ import type { EncounterData } from "../types";
 import {
   createPokemonWithLocationAndUID,
   ensureActivePlaythroughWithEncounters,
+  type PlaythroughWithEncounters,
 } from "./shared";
 import { removeTeamMembersWithPokemon } from "./team";
 import { trackFusionCreatedIfNew } from "./transition";
 
-// Clear encounter from a specific location (replaces clearCombobox event)
-export const clearEncounterFromLocation = async (
+const getPokemonUID = (pokemon: PokemonOptionType | null) => pokemon?.uid;
+
+const clearEncounterField = (
+  activePlaythrough: PlaythroughWithEncounters,
+  locationId: string,
+  encounter: EncounterData,
+  field: "head" | "body",
+) => {
+  encounter[field] = null;
+
+  if (encounter.isFusion) {
+    encounter.updatedAt = getCurrentTimestamp();
+    return;
+  }
+
+  if (field === "head" || !(encounter.head || encounter.body)) {
+    delete activePlaythrough.encounters[locationId];
+    return;
+  }
+
+  encounter.updatedAt = getCurrentTimestamp();
+};
+
+const clearEncounter = (
   locationId: string,
   field?: "head" | "body",
   options?: { preserveTeamMembership?: boolean },
@@ -25,36 +48,54 @@ export const clearEncounterFromLocation = async (
     return;
   }
 
-  const removedUIDs: string[] = [];
-
   if (field) {
-    if (encounter[field]?.uid) {
-      removedUIDs.push(encounter[field].uid);
-    }
+    const removedUID = getPokemonUID(encounter[field]);
+    clearEncounterField(activePlaythrough, locationId, encounter, field);
 
-    encounter[field] = null;
-
-    if (encounter.isFusion) {
-      encounter.updatedAt = getCurrentTimestamp();
-    } else if (field === "head" || !(encounter.head || encounter.body)) {
-      delete activePlaythrough.encounters[locationId];
-    } else {
-      encounter.updatedAt = getCurrentTimestamp();
+    if (options?.preserveTeamMembership !== true) {
+      removeTeamMembersWithPokemon(removedUID ? [removedUID] : []);
     }
-  } else {
-    if (encounter.head?.uid) {
-      removedUIDs.push(encounter.head.uid);
-    }
-    if (encounter.body?.uid) {
-      removedUIDs.push(encounter.body.uid);
-    }
-
-    delete activePlaythrough.encounters[locationId];
+    return;
   }
+
+  const removedUIDs = [
+    getPokemonUID(encounter.head),
+    getPokemonUID(encounter.body),
+  ].filter((uid): uid is string => Boolean(uid));
+  delete activePlaythrough.encounters[locationId];
 
   if (options?.preserveTeamMembership !== true) {
     removeTeamMembersWithPokemon(removedUIDs);
   }
+};
+
+const withOriginalLocation = (
+  pokemon: PokemonOptionType,
+  fallbackLocationId: string,
+) => ({
+  ...pokemon,
+  originalLocation: pokemon.originalLocation ?? fallbackLocationId,
+});
+
+const setEncounterPokemon = (
+  encounter: EncounterData,
+  field: "head" | "body",
+  pokemon: PokemonOptionType,
+) => {
+  encounter[field] = pokemon;
+};
+
+const isCompleteFusion = (encounter: EncounterData) =>
+  Boolean(encounter.isFusion && encounter.head && encounter.body);
+
+// Clear encounter from a specific location (replaces clearCombobox event)
+export const clearEncounterFromLocation = async (
+  locationId: string,
+  field?: "head" | "body",
+  options?: { preserveTeamMembership?: boolean },
+) => {
+  clearEncounter(locationId, field, options);
+  await Promise.resolve();
 };
 
 export const relocateEncounterSlot = async ({
@@ -131,7 +172,7 @@ export const moveEncounterAtomic = async (
   const willBeFusion =
     targetField === "body" || existingTargetEncounter?.isFusion === true;
 
-  void clearEncounterFromLocation(sourceLocationId, sourceField, {
+  clearEncounter(sourceLocationId, sourceField, {
     preserveTeamMembership: true,
   });
 
@@ -149,10 +190,10 @@ export const moveEncounterAtomic = async (
   };
 
   activePlaythrough.encounters[targetLocationId] = newEncounter;
-  const isCompleteFusion = Boolean(
+  const newEncounterIsCompleteFusion = Boolean(
     newEncounter.isFusion && newEncounter.head && newEncounter.body,
   );
-  if (isCompleteFusion) {
+  if (newEncounterIsCompleteFusion) {
     emitEvolutionEvent(targetLocationId);
   }
 
@@ -160,9 +201,11 @@ export const moveEncounterAtomic = async (
     activePlaythrough,
     targetLocationId,
     targetWasCompleteFusion,
-    isCompleteFusion,
+    newEncounterIsCompleteFusion,
     "drag_drop",
   );
+
+  await Promise.resolve();
 };
 
 // Move encounter from one location to another
@@ -186,16 +229,16 @@ export const moveEncounter = async (
     return;
   }
 
-  const sourceField: "head" | "body" =
-    sourceEncounter.head?.uid === pokemon.uid
-      ? "head"
-      : sourceEncounter.body?.uid === pokemon.uid
-        ? "body"
-        : sourceEncounter[toField]
-          ? toField
-          : sourceEncounter.head
-            ? "head"
-            : "body";
+  let sourceField: "head" | "body";
+  if (sourceEncounter.head?.uid === pokemon.uid) {
+    sourceField = "head";
+  } else if (sourceEncounter.body?.uid === pokemon.uid) {
+    sourceField = "body";
+  } else if (sourceEncounter[toField]) {
+    sourceField = toField;
+  } else {
+    sourceField = sourceEncounter.head ? "head" : "body";
+  }
 
   const targetEncounter = activePlaythrough.encounters[toLocationId];
   if (targetEncounter?.[toField]) {
@@ -256,41 +299,29 @@ export const swapEncounters = async (
     return;
   }
 
-  const pokemon1 = field1 === "head" ? encounter1.head : encounter1.body;
-  const pokemon2 = field2 === "head" ? encounter2.head : encounter2.body;
+  const pokemon1 = encounter1[field1];
+  const pokemon2 = encounter2[field2];
   if (!(pokemon1 && pokemon2)) {
     return;
   }
 
-  const pokemon1WithLocation = {
-    ...pokemon1,
-    originalLocation: pokemon1.originalLocation ?? locationId1,
-  };
-  const pokemon2WithLocation = {
-    ...pokemon2,
-    originalLocation: pokemon2.originalLocation ?? locationId2,
-  };
-
-  if (field1 === "head") {
-    encounter1.head = pokemon2WithLocation;
-  } else {
-    encounter1.body = pokemon2WithLocation;
-  }
-
-  if (field2 === "head") {
-    encounter2.head = pokemon1WithLocation;
-  } else {
-    encounter2.body = pokemon1WithLocation;
-  }
+  setEncounterPokemon(
+    encounter1,
+    field1,
+    withOriginalLocation(pokemon2, locationId2),
+  );
+  setEncounterPokemon(
+    encounter2,
+    field2,
+    withOriginalLocation(pokemon1, locationId1),
+  );
 
   const timestamp = getCurrentTimestamp();
   encounter1.updatedAt = timestamp;
   encounter2.updatedAt = timestamp;
 
-  const encounter1NowFusion =
-    encounter1.isFusion && encounter1.head && encounter1.body;
-  const encounter2NowFusion =
-    encounter2.isFusion && encounter2.head && encounter2.body;
+  const encounter1NowFusion = isCompleteFusion(encounter1);
+  const encounter2NowFusion = isCompleteFusion(encounter2);
 
   if (encounter1NowFusion) {
     emitEvolutionEvent(locationId1);
@@ -298,6 +329,8 @@ export const swapEncounters = async (
   if (encounter2NowFusion) {
     emitEvolutionEvent(locationId2);
   }
+
+  await Promise.resolve();
 };
 
 // Get location ID from combobox ID (helper for drag operations)

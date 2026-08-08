@@ -57,6 +57,8 @@ export const toggleEncounterFusion = async (locationId: string) => {
     isFusion: newIsFusion,
     updatedAt: getCurrentTimestamp(),
   };
+
+  await Promise.resolve();
 };
 
 // Flip head and body in a fusion encounter atomically
@@ -89,6 +91,8 @@ export const flipEncounterFusion = async (locationId: string) => {
     ...getSharedEventProperties(activePlaythrough),
     location_id: locationId,
   });
+
+  await Promise.resolve();
 };
 
 // Create fusion from drag and drop

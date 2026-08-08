@@ -1,3 +1,4 @@
+// biome-ignore lint/style/useFilenamingConvention: File name is an established import path.
 import { emitScrollToLocation } from "@/lib/events";
 import { getDocumentReducedMotion } from "@/lib/reducedMotion";
 import type { EncounterData } from "@/stores/playthroughs/types";
@@ -14,7 +15,7 @@ const getScrollBehavior = (behavior: ScrollBehavior): ScrollBehavior =>
 export function findMostRecentlyFilledLocation(
   encounters: Record<string, EncounterData>,
 ): string | null {
-  if (!encounters || Object.keys(encounters).length === 0) {
+  if (Object.keys(encounters).length === 0) {
     return null;
   }
 
@@ -130,26 +131,26 @@ export function flashPokemonOverlaysByUids(
   uids: string[],
   durationMs = 1200,
 ): void {
-  if (!uids || uids.length === 0) {
+  if (uids.length === 0) {
     return;
   }
 
   const apply = () => {
-    uids.forEach((uid) => {
+    for (const uid of uids) {
       if (!uid) {
-        return;
+        continue;
       }
       const root = document.querySelector(
         `[data-uid="${CSS.escape(uid)}"]`,
       ) as HTMLElement | null;
       if (!root) {
-        return;
+        continue;
       }
       const overlay = root.querySelector(
         ".location-highlight-overlay",
       ) as HTMLElement | null;
       if (!overlay) {
-        return;
+        continue;
       }
 
       // Inline style overrides Tailwind opacity classes; do not toggle classes
@@ -165,7 +166,7 @@ export function flashPokemonOverlaysByUids(
         overlay.style.removeProperty("opacity");
       }, durationMs);
       overlayHideTimers.set(overlay, timeout);
-    });
+    }
   };
 
   // Apply now and on next frame to cover DOM updates during smooth scroll

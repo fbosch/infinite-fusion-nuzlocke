@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { updateEncounter } from "../encounters/crud";
 import {
   getLocationFromComboboxId,
   moveEncounter,
   moveEncounterAtomic,
   relocateEncounterSlot,
   swapEncounters,
-  updateEncounter,
-} from "../encounters";
+} from "../encounters/drag-drop";
 import {
   createTestPlaythrough,
   expectTeamMember,

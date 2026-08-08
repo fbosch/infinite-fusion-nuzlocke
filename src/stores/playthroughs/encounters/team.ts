@@ -30,6 +30,8 @@ export const updatePokemonByUID = async (
   }
 
   activePlaythrough.updatedAt = Date.now();
+
+  await Promise.resolve();
 };
 
 const shouldAutoAssign = (status: string | undefined) =>
@@ -95,13 +97,15 @@ export const updateTeamMember = async (
     return false;
   }
 
-  restorePokemonToTeamMembers([headPokemon?.uid ?? "", bodyPokemon?.uid ?? ""]);
+  restorePokemonToTeamMembers([headPokemon?.uid || "", bodyPokemon?.uid || ""]);
 
   activePlaythrough.team.members[position] = createTeamMember(
     headPokemon,
     bodyPokemon,
   );
   activePlaythrough.updatedAt = Date.now();
+
+  await Promise.resolve();
 
   return true;
 };
@@ -158,7 +162,7 @@ export const autoAssignCapturedPokemonToTeam = async (
     return;
   }
 
-  const nextAvailablePosition = availablePositions[0];
+  const [nextAvailablePosition] = availablePositions;
   const targetPosition =
     existingPosition === -1 ? nextAvailablePosition : existingPosition;
 
@@ -279,7 +283,7 @@ export const removeTeamMembersWithPokemon = (pokemonUIDs: string[]) => {
   const removedPokemonUids = new Set(pokemonUIDs);
   let hasChanges = false;
 
-  for (let i = 0; i < activePlaythrough.team.members.length; i++) {
+  for (let i = 0; i < activePlaythrough.team.members.length; i += 1) {
     const member = activePlaythrough.team.members[i];
     if (!member) {
       continue;
@@ -381,4 +385,5 @@ export const restorePokemonToTeam = async (
   pokemonUID: string,
 ): Promise<void> => {
   restorePokemonToTeamMembers([pokemonUID]);
+  await Promise.resolve();
 };

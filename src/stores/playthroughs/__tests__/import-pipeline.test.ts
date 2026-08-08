@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { prepareImportedPlaythrough } from "../importPipeline";
 
+const playthroughIdPattern = /^playthrough_/;
+
 const validImportData = (id = "playthrough_existing") => ({
   exportedAt: new Date(0).toISOString(),
   playthrough: {
@@ -43,7 +45,7 @@ describe("playthrough import pipeline", () => {
     ]);
 
     expect(playthrough.id).not.toBe("playthrough_existing");
-    expect(playthrough.id).toMatch(/^playthrough_/);
+    expect(playthrough.id).toMatch(playthroughIdPattern);
   });
 
   it("throws a validation error for invalid import data", async () => {

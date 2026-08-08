@@ -40,8 +40,8 @@ export const getFusionSpriteIdFromEncounter = (enc?: {
     return null;
   }
 
-  const headId = enc.head.id ?? null;
-  const bodyId = enc.body.id ?? null;
+  const headId = enc.head.id;
+  const bodyId = enc.body.id;
   if (!(headId && bodyId)) {
     return null;
   }

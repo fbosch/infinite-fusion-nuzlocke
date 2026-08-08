@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  clearEncounterFromLocation,
-  resetEncounter,
-  updateEncounter,
-} from "../encounters";
+import { resetEncounter, updateEncounter } from "../encounters/crud";
+import { clearEncounterFromLocation } from "../encounters/drag-drop";
 import {
   createTestPlaythrough,
   expectTeamMember,

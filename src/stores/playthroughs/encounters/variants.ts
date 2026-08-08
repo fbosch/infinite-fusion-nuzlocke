@@ -28,6 +28,8 @@ const setDisplayPokemonVariant = (
   }
 };
 
+const toNullableId = (id: number | undefined) => (id === undefined ? null : id);
+
 // Set artwork variant globally (no longer stored in encounters)
 export const setArtworkVariant = async (
   locationId: string,
@@ -56,6 +58,7 @@ export const setArtworkVariant = async (
   }
 
   encounter.updatedAt = getCurrentTimestamp();
+  await Promise.resolve();
 };
 
 // Prefetch adjacent artwork variants for better UX
@@ -99,9 +102,9 @@ export const prefetchAdjacentVariants = async (
     });
 
     window.requestAnimationFrame(() => {
-      prefetchPromises.forEach((prefetch) => {
+      for (const prefetch of prefetchPromises) {
         prefetch();
-      });
+      }
     });
   } catch (error) {
     console.warn("Failed to prefetch adjacent variants:", error);
@@ -153,7 +156,7 @@ export const cycleArtworkVariant = async (
     const bodyId = displayPokemon.body?.id;
 
     const currentVariant =
-      getPreferredVariant(headId ?? null, bodyId ?? null) || "";
+      getPreferredVariant(toNullableId(headId), toNullableId(bodyId)) || "";
     const currentIndex = availableVariants.indexOf(currentVariant);
     const nextIndex = reverse
       ? (currentIndex - 1 + availableVariants.length) % availableVariants.length
@@ -167,8 +170,8 @@ export const cycleArtworkVariant = async (
 
     if (availableVariants.length > 2) {
       prefetchAdjacentVariants(
-        headId ?? undefined,
-        bodyId ?? undefined,
+        headId,
+        bodyId,
         newVariant,
         availableVariants,
       ).catch((error) => {
@@ -213,8 +216,11 @@ export const preloadArtworkVariants = async () => {
 
   try {
     const batchSize = 3;
-    for (let i = 0; i < encountersToPreload.length; i += batchSize) {
-      const batch = encountersToPreload.slice(i, i + batchSize);
+    const preloadNextBatch = async (startIndex: number): Promise<void> => {
+      const batch = encountersToPreload.slice(
+        startIndex,
+        startIndex + batchSize,
+      );
 
       const batchPromises = batch.map(([, encounter]) => {
         if (encounter.isFusion && encounter.head && encounter.body) {
@@ -245,10 +251,14 @@ export const preloadArtworkVariants = async () => {
 
       await Promise.all(batchPromises);
 
-      if (i + batchSize < encountersToPreload.length) {
+      const nextStartIndex = startIndex + batchSize;
+      if (nextStartIndex < encountersToPreload.length) {
         await new Promise((resolve) => setTimeout(resolve, 200));
+        await preloadNextBatch(nextStartIndex);
       }
-    }
+    };
+
+    await preloadNextBatch(0);
 
     console.debug("Artwork variant preloading completed");
   } catch (error) {

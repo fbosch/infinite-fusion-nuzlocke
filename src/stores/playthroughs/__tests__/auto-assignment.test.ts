@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { updateEncounter } from "../encounters/crud";
 import {
   markEncounterAsCaptured,
   markEncounterAsReceived,
-  updateEncounter,
-} from "../encounters";
+} from "../encounters/status";
 import {
   createTestPlaythrough,
   expectTeamMember,
@@ -150,7 +150,7 @@ describe("Auto-Assignment to Team", () => {
     const { activePlaythrough } = createTestPlaythrough();
 
     // Fill all team slots
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 6; i += 1) {
       activePlaythrough.team.members[i] = {
         bodyPokemonUid: "",
         headPokemonUid: `pokemon_${i}_123`,
@@ -186,7 +186,7 @@ describe("Auto-Assignment to Team", () => {
     const charmander = testPokemon.charmander();
 
     await updateEncounter("route1", pikachu, "head", false);
-    for (let index = 1; index < 6; index++) {
+    for (let index = 1; index < 6; index += 1) {
       activePlaythrough.team.members[index] = {
         bodyPokemonUid: "",
         headPokemonUid: `pokemon_${index}_123`,
@@ -268,9 +268,9 @@ describe("Auto-Assignment to Team", () => {
     ];
 
     // Add them one by one
-    for (let i = 0; i < pokemon.length; i++) {
-      await updateEncounter(`route${i + 1}`, pokemon[i], "head", false);
-    }
+    await updateEncounter("route1", pokemon[0], "head", false);
+    await updateEncounter("route2", pokemon[1], "head", false);
+    await updateEncounter("route3", pokemon[2], "head", false);
 
     // Verify they were assigned to consecutive slots
     expectTeamMember(activePlaythrough.team.members[0], "pikachu_route1_123");

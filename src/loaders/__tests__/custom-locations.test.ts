@@ -10,6 +10,9 @@ import {
   wouldOrphanLocations,
 } from "../locations";
 
+const customLocationIdPattern =
+  /^custom_\d+_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
 // Mock data for testing
 const mockDefaultLocations: Location[] = [
   {
@@ -39,12 +42,8 @@ describe("Custom Location Functionality", () => {
       const id2 = generateCustomLocationId();
 
       // New format: custom_<timestamp>_<uuid>
-      expect(id1).toMatch(
-        /^custom_\d+_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
-      );
-      expect(id2).toMatch(
-        /^custom_\d+_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
-      );
+      expect(id1).toMatch(customLocationIdPattern);
+      expect(id2).toMatch(customLocationIdPattern);
       expect(id1).not.toBe(id2);
     });
   });
@@ -98,13 +97,18 @@ describe("Custom Location Functionality", () => {
 
       const customLocation = merged.find((l) => l.id === "custom-1");
       expect(customLocation).toBeDefined();
-      expect(isCustomLocation(customLocation!)).toBe(true);
+      if (customLocation === undefined) {
+        throw new Error(
+          "Expected custom location to be present in merged locations",
+        );
+      }
+      expect(isCustomLocation(customLocation)).toBe(true);
     });
   });
 
   describe("isCustomLocation", () => {
     it("should identify custom locations", () => {
-      const defaultLocation = mockDefaultLocations[0];
+      const [defaultLocation] = mockDefaultLocations;
       const customLocation = {
         description: "Custom location",
         id: "custom-1",
@@ -205,7 +209,9 @@ describe("Custom Location Functionality", () => {
       ];
 
       // Capture console.warn calls
-      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => undefined);
 
       const merged = mergeLocationsWithCustom(
         mockDefaultLocations,
@@ -238,7 +244,9 @@ describe("Custom Location Functionality", () => {
         { id: "custom-2", insertAfterLocationId: "route-1", name: "Custom B" }, // This should work
       ];
 
-      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => undefined);
 
       const merged = mergeLocationsWithCustom(
         mockDefaultLocations,
@@ -275,7 +283,9 @@ describe("Custom Location Functionality", () => {
         { id: "custom-4", insertAfterLocationId: "custom-2", name: "Custom D" }, // Valid (depends on B)
       ];
 
-      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => undefined);
 
       const merged = mergeLocationsWithCustom(
         mockDefaultLocations,
@@ -545,11 +555,11 @@ describe("Custom Location Functionality", () => {
         );
 
         expect(dependents).toHaveLength(3);
-        expect(dependents.map((d) => d.id).sort()).toEqual([
-          "custom-B",
-          "custom-C",
-          "custom-D",
-        ]);
+        expect(
+          dependents
+            .map((d) => d.id)
+            .sort((left, right) => left.localeCompare(right)),
+        ).toEqual(["custom-B", "custom-C", "custom-D"]);
       });
 
       it("should handle complex dependency trees", () => {
@@ -587,12 +597,11 @@ describe("Custom Location Functionality", () => {
         );
 
         expect(dependents).toHaveLength(4);
-        expect(dependents.map((d) => d.id).sort()).toEqual([
-          "custom-B",
-          "custom-C",
-          "custom-D",
-          "custom-E",
-        ]);
+        expect(
+          dependents
+            .map((d) => d.id)
+            .sort((left, right) => left.localeCompare(right)),
+        ).toEqual(["custom-B", "custom-C", "custom-D", "custom-E"]);
       });
 
       it("should return empty array if no dependents", () => {

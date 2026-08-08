@@ -1,3 +1,4 @@
+// biome-ignore lint/style/useFilenamingConvention: File name is an established import path.
 // Service Worker registration utility
 export class ServiceWorkerManager {
   private static instance: ServiceWorkerManager | null = null;
@@ -142,7 +143,7 @@ export class ServiceWorkerManager {
   }
 
   async getCacheSize(): Promise<string> {
-    return new Promise((resolve) => {
+    const cacheSize = await new Promise<string>((resolve) => {
       if (!navigator.serviceWorker.controller) {
         resolve("Service worker not active");
         return;
@@ -160,6 +161,7 @@ export class ServiceWorkerManager {
         [messageChannel.port2],
       );
     });
+    return cacheSize;
   }
 
   async getPokemonCacheStatus(): Promise<{
@@ -168,7 +170,12 @@ export class ServiceWorkerManager {
     percentage: number;
     error?: string;
   }> {
-    return new Promise((resolve) => {
+    const cacheStatus = await new Promise<{
+      total: number;
+      cached: number;
+      percentage: number;
+      error?: string;
+    }>((resolve) => {
       if (!navigator.serviceWorker.controller) {
         resolve({
           cached: 0,
@@ -191,6 +198,7 @@ export class ServiceWorkerManager {
         [messageChannel.port2],
       );
     });
+    return cacheStatus;
   }
 
   async getApiCacheStatus(): Promise<{
@@ -198,7 +206,11 @@ export class ServiceWorkerManager {
     endpoints: string[];
     error?: string;
   }> {
-    return new Promise((resolve) => {
+    const cacheStatus = await new Promise<{
+      total: number;
+      endpoints: string[];
+      error?: string;
+    }>((resolve) => {
       if (!navigator.serviceWorker.controller) {
         resolve({
           endpoints: [],
@@ -220,13 +232,17 @@ export class ServiceWorkerManager {
         [messageChannel.port2],
       );
     });
+    return cacheStatus;
   }
 
   async checkApiEndpointCache(endpoint: string): Promise<{
     cached: boolean;
     error?: string;
   }> {
-    return new Promise((resolve) => {
+    const cacheStatus = await new Promise<{
+      cached: boolean;
+      error?: string;
+    }>((resolve) => {
       if (!navigator.serviceWorker.controller) {
         resolve({
           cached: false,
@@ -247,10 +263,11 @@ export class ServiceWorkerManager {
         [messageChannel.port2],
       );
     });
+    return cacheStatus;
   }
 
   async clearApiCache(): Promise<void> {
-    return new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       if (!navigator.serviceWorker.controller) {
         resolve();
         return;

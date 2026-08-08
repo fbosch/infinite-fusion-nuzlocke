@@ -5,6 +5,8 @@ import {
   normalizePersistedPlaythrough,
 } from "../migrations";
 
+const playthroughIdPattern = /^playthrough_/;
+
 describe("Playthrough normalization", () => {
   it("repairs a legacy persisted shape without mutating its input", () => {
     const legacyData = {
@@ -47,7 +49,7 @@ describe("Playthrough normalization", () => {
 
     const normalized = normalizePersistedPlaythrough(legacyData);
 
-    expect(normalized.id).toMatch(/^playthrough_/);
+    expect(normalized.id).toMatch(playthroughIdPattern);
     expect(normalized.name).toBe("Playthrough");
     expect(normalized.gameMode).toBe("remix");
     expect(normalized.version).toBe("1.0.0");
@@ -105,7 +107,7 @@ describe("Playthrough normalization", () => {
   it("retains the current recovery behavior for malformed persisted data", () => {
     const normalized = normalizePersistedPlaythrough(null);
 
-    expect(normalized.id).toMatch(/^playthrough_/);
+    expect(normalized.id).toMatch(playthroughIdPattern);
     expect(normalized.name).toBe("Playthrough");
     expect(normalized.gameMode).toBe("classic");
     expect(normalized.team.members).toEqual([

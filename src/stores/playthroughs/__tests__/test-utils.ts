@@ -1,4 +1,4 @@
-import { beforeEach, expect } from "vitest";
+import { beforeEach } from "vitest";
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
 import { createPlaythrough, playthroughsStore } from "../store";
 
@@ -108,6 +108,14 @@ export const testPokemon = {
 export const waitForTimestamp = (ms = 10) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
+const verifySameValue = (actual: unknown, expected: unknown) => {
+  if (!Object.is(actual, expected)) {
+    throw new Error(
+      `Expected ${String(expected)} but received ${String(actual)}`,
+    );
+  }
+};
+
 /**
  * Helper to verify team member structure
  */
@@ -117,17 +125,20 @@ export const expectTeamMember = (
   expectedBodyUid: string | null = null,
 ) => {
   if (expectedHeadUid === null) {
-    expect(teamMember).toBeNull();
+    verifySameValue(teamMember, null);
     return;
   }
 
-  expect(teamMember).toBeDefined();
+  if (teamMember === undefined) {
+    throw new Error("Expected a team member to be defined");
+  }
+
   const member = teamMember as {
     headPokemonUid?: string;
     bodyPokemonUid?: string;
   };
-  expect(member.headPokemonUid).toBe(expectedHeadUid);
-  expect(member.bodyPokemonUid).toBe(expectedBodyUid || "");
+  verifySameValue(member.headPokemonUid, expectedHeadUid);
+  verifySameValue(member.bodyPokemonUid, expectedBodyUid || "");
 };
 
 /**
@@ -140,27 +151,30 @@ export const expectEncounter = (
   isFusion = false,
 ) => {
   if (expectedHeadUid === null && expectedBodyUid === null) {
-    expect(encounter).toBeUndefined();
+    verifySameValue(encounter, undefined);
     return;
   }
 
-  expect(encounter).toBeDefined();
+  if (encounter === undefined) {
+    throw new Error("Expected an encounter to be defined");
+  }
+
   const enc = encounter as {
     isFusion: boolean;
     head?: { uid: string } | null;
     body?: { uid: string } | null;
   };
-  expect(enc.isFusion).toBe(isFusion);
+  verifySameValue(enc.isFusion, isFusion);
 
   if (expectedHeadUid) {
-    expect(enc.head?.uid).toBe(expectedHeadUid);
+    verifySameValue(enc.head?.uid, expectedHeadUid);
   } else {
-    expect(enc.head).toBeNull();
+    verifySameValue(enc.head, null);
   }
 
   if (expectedBodyUid) {
-    expect(enc.body?.uid).toBe(expectedBodyUid);
+    verifySameValue(enc.body?.uid, expectedBodyUid);
   } else {
-    expect(enc.body).toBeNull();
+    verifySameValue(enc.body, null);
   }
 };

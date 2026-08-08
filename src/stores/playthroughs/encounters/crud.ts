@@ -6,6 +6,7 @@ import type { EncounterData, Playthrough } from "../types";
 import {
   createPokemonWithLocationAndUID,
   ensureActivePlaythroughWithEncounters,
+  type PlaythroughWithEncounters,
   type PokemonOption,
 } from "./shared";
 import {
@@ -34,12 +35,12 @@ const inheritFusionStatus = (
 };
 
 // Create encounter data (variants are managed globally)
-const createEncounterData = async (
+const createEncounterData = (
   pokemon: PokemonOption | null,
   field: "head" | "body" = "head",
   shouldCreateFusion = false,
   locationId?: string,
-): Promise<EncounterData> => {
+): EncounterData => {
   const pokemonWithLocationAndUID = pokemon
     ? createPokemonWithLocationAndUID(pokemon, locationId ?? "")
     : null;
@@ -52,6 +53,131 @@ const createEncounterData = async (
   };
 
   return encounterData;
+};
+
+const createAndTrackEncounter = async (
+  activePlaythrough: PlaythroughWithEncounters,
+  locationId: string,
+  pokemon: PokemonOptionType | null,
+  field: "head" | "body",
+  shouldCreateFusion: boolean,
+  previousEncounterCount: number,
+) => {
+  const encounter = createEncounterData(
+    pokemon,
+    field,
+    shouldCreateFusion,
+    locationId,
+  );
+  activePlaythrough.encounters[locationId] = encounter;
+
+  if (
+    encounter.isFusion &&
+    (encounter.head !== null || encounter.body !== null)
+  ) {
+    emitEvolutionEvent(locationId);
+  }
+
+  if (pokemon?.status) {
+    await autoAssignCapturedPokemonToTeam(locationId);
+  }
+
+  trackEncounterProgress(activePlaythrough, locationId, previousEncounterCount);
+};
+
+const replacePokemonInEncounter = (
+  encounter: EncounterData,
+  pokemon: PokemonOptionType,
+  locationId: string,
+  field: "head" | "body",
+  shouldCreateFusion: boolean,
+) => {
+  const previousPokemon = encounter[field];
+  const pokemonWithLocationAndUID = createPokemonWithLocationAndUID(
+    pokemon,
+    locationId,
+  );
+
+  if (shouldCreateFusion || encounter.isFusion || field === "body") {
+    encounter[field] = pokemonWithLocationAndUID;
+    encounter.isFusion = true;
+    inheritFusionStatus(encounter, field, pokemonWithLocationAndUID.status);
+  } else {
+    encounter.head = pokemonWithLocationAndUID;
+    encounter.body = null;
+    encounter.isFusion = false;
+  }
+
+  encounter.updatedAt = getCurrentTimestamp();
+  return { pokemonWithLocationAndUID, previousPokemon };
+};
+
+const emitEvolutionForUpdatedFusion = (
+  encounter: EncounterData,
+  previousPokemon: PokemonOptionType | null,
+  field: "head" | "body",
+  locationId: string,
+) => {
+  if (
+    isCompleteFusion(encounter) &&
+    previousPokemon?.id !== encounter[field]?.id
+  ) {
+    emitEvolutionEvent(locationId);
+  }
+};
+
+const updateEncounterWithPokemon = async (
+  activePlaythrough: PlaythroughWithEncounters,
+  locationId: string,
+  encounter: EncounterData,
+  pokemon: PokemonOptionType,
+  field: "head" | "body",
+  shouldCreateFusion: boolean,
+  previousEncounterCount: number,
+) => {
+  const wasCompleteFusion = isCompleteFusion(encounter);
+  const { pokemonWithLocationAndUID, previousPokemon } =
+    replacePokemonInEncounter(
+      encounter,
+      pokemon,
+      locationId,
+      field,
+      shouldCreateFusion,
+    );
+
+  emitEvolutionForUpdatedFusion(encounter, previousPokemon, field, locationId);
+
+  if (previousPokemon?.uid && previousPokemon.uid !== encounter[field]?.uid) {
+    removeTeamMembersWithPokemon([previousPokemon.uid]);
+  }
+
+  if (pokemonWithLocationAndUID.status) {
+    await autoAssignCapturedPokemonToTeam(locationId);
+  }
+
+  trackFusionCreatedIfNew(
+    activePlaythrough,
+    locationId,
+    wasCompleteFusion,
+    isCompleteFusion(encounter),
+    "update_encounter",
+  );
+  trackEncounterProgress(activePlaythrough, locationId, previousEncounterCount);
+};
+
+const clearEncounterField = (
+  activePlaythrough: PlaythroughWithEncounters,
+  locationId: string,
+  encounter: EncounterData,
+  field: "head" | "body",
+  previousEncounterCount: number,
+) => {
+  const removedUID = encounter[field]?.uid;
+  encounter[field] = null;
+  encounter.updatedAt = getCurrentTimestamp();
+
+  removeTeamMembersWithPokemon(removedUID ? [removedUID] : []);
+  trackEncounterProgress(activePlaythrough, locationId, previousEncounterCount);
 };
 
 // Get encounters for active playthrough
@@ -80,6 +206,8 @@ export const updatePokemonInEncounter = async (
     encounter.updatedAt = getCurrentTimestamp();
     activePlaythrough.updatedAt = getCurrentTimestamp();
   }
+
+  await Promise.resolve();
 };
 
 // Update encounter for a location
@@ -96,115 +224,39 @@ export const updateEncounter = async (
 
   const previousEncounterCount = getEncounterCount(activePlaythrough);
 
-  let encounter = activePlaythrough.encounters[locationId];
+  const encounter = activePlaythrough.encounters[locationId];
   if (!encounter) {
-    const encounterData = await createEncounterData(
+    await createAndTrackEncounter(
+      activePlaythrough,
+      locationId,
       pokemon,
       field,
       shouldCreateFusion,
-      locationId,
-    );
-    encounter = encounterData;
-    activePlaythrough.encounters[locationId] = encounter;
-
-    if (
-      encounterData.isFusion &&
-      (encounterData.head !== null || encounterData.body !== null)
-    ) {
-      emitEvolutionEvent(locationId);
-    }
-
-    if (pokemon?.status) {
-      await autoAssignCapturedPokemonToTeam(locationId);
-    }
-
-    trackEncounterProgress(
-      activePlaythrough,
-      locationId,
       previousEncounterCount,
     );
-
     return;
   }
-
-  const wasCompleteFusion = isCompleteFusion(encounter);
 
   if (pokemon) {
-    const pokemonWithLocationAndUID = createPokemonWithLocationAndUID(
+    await updateEncounterWithPokemon(
+      activePlaythrough,
+      locationId,
+      encounter,
       pokemon,
-      locationId,
-    );
-
-    const willBeFusion =
-      shouldCreateFusion || encounter.isFusion || field === "body";
-
-    const previousFieldUid = encounter[field]?.uid ?? null;
-    const previousFieldId = encounter[field]?.id ?? null;
-    if (willBeFusion) {
-      encounter[field] = pokemonWithLocationAndUID;
-      encounter.isFusion = true;
-
-      inheritFusionStatus(encounter, field, pokemonWithLocationAndUID.status);
-    } else {
-      encounter.head = pokemonWithLocationAndUID;
-      encounter.body = null;
-      encounter.isFusion = false;
-    }
-
-    encounter.updatedAt = getCurrentTimestamp();
-
-    const newFieldId = encounter[field]?.id ?? null;
-    const fieldChanged = previousFieldId !== newFieldId;
-    if (
-      encounter.isFusion &&
-      encounter.head &&
-      encounter.body &&
-      fieldChanged
-    ) {
-      emitEvolutionEvent(locationId);
-    }
-
-    if (
-      previousFieldUid &&
-      encounter[field]?.uid &&
-      previousFieldUid !== encounter[field]?.uid
-    ) {
-      removeTeamMembersWithPokemon([previousFieldUid]);
-    }
-
-    if (pokemonWithLocationAndUID.status) {
-      await autoAssignCapturedPokemonToTeam(locationId);
-    }
-
-    const completeFusion = isCompleteFusion(encounter);
-    trackFusionCreatedIfNew(
-      activePlaythrough,
-      locationId,
-      wasCompleteFusion,
-      completeFusion,
-      "update_encounter",
-    );
-
-    trackEncounterProgress(
-      activePlaythrough,
-      locationId,
+      field,
+      shouldCreateFusion,
       previousEncounterCount,
     );
-
     return;
   }
 
-  const removedUIDs: string[] = [];
-  if (encounter[field]?.uid) {
-    removedUIDs.push(encounter[field].uid);
-  }
-
-  encounter[field] = null;
-  encounter.updatedAt = getCurrentTimestamp();
-
-  removeTeamMembersWithPokemon(removedUIDs);
-
-  trackEncounterProgress(activePlaythrough, locationId, previousEncounterCount);
+  clearEncounterField(
+    activePlaythrough,
+    locationId,
+    encounter,
+    field,
+    previousEncounterCount,
+  );
 };
 
 // Reset encounter for a location
