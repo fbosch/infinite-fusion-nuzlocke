@@ -1,17 +1,35 @@
 "use client";
 
-import { useCallback } from "react";
+import { type ChangeEvent, type ComponentProps, useCallback } from "react";
 import PokemonSummaryCard from "@/components/PokemonSummaryCard";
 import { TypePills } from "@/components/TypePills";
 import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
+import type { PokemonOptionType } from "@/loaders/pokemon";
 import { TeamMemberActions } from "./team-member-actions";
 import { useTeamMemberSelection } from "./team-member-selection-context";
+
+type FusionTypeProps = Pick<
+  ComponentProps<typeof TypePills>,
+  "primary" | "secondary"
+>;
+
+interface TeamMemberPreviewProps extends FusionTypeProps {
+  bodyPokemon: PokemonOptionType | null;
+  canUpdateTeam: boolean;
+  hasSelection: boolean;
+  headPokemon: PokemonOptionType | null;
+  nickname: string;
+  onClear: () => void;
+  onNicknameBlur: () => void;
+  onNicknameChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onUpdate: () => void;
+  previewNickname: string;
+}
 
 export function TeamMemberPreviewPanel() {
   const { state, actions } = useTeamMemberSelection();
   const {
     selectedHead,
-
     selectedBody,
     nickname,
     previewNickname,
@@ -19,11 +37,12 @@ export function TeamMemberPreviewPanel() {
     hasSelection,
   } = state;
 
-  // Get fusion types using the existing hook
+  const headPokemon = selectedHead?.pokemon ?? null;
+  const bodyPokemon = selectedBody?.pokemon ?? null;
   const { primary, secondary } = useFusionTypesFromPokemon(
-    selectedHead?.pokemon || null,
-    selectedBody?.pokemon || null,
-    Boolean(selectedHead?.pokemon && selectedBody?.pokemon),
+    headPokemon,
+    bodyPokemon,
+    Boolean(headPokemon && bodyPokemon),
   );
   const {
     setNickname,
@@ -31,27 +50,55 @@ export function TeamMemberPreviewPanel() {
     handleUpdateTeamMember,
     handleClearTeamMember,
   } = actions;
-  const hasType = Boolean(primary || secondary);
-  const hasSelectedPokemon = Boolean(
-    selectedHead?.pokemon || selectedBody?.pokemon,
-  );
-
   const handleNicknameBlur = useCallback(
     () => setPreviewNickname(nickname),
     [nickname, setPreviewNickname],
   );
 
   const handleNicknameChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) =>
-      setNickname(event.target.value),
+    (event: ChangeEvent<HTMLInputElement>) => setNickname(event.target.value),
     [setNickname],
   );
+
+  return (
+    <TeamMemberPreview
+      bodyPokemon={bodyPokemon}
+      canUpdateTeam={canUpdateTeam}
+      hasSelection={hasSelection}
+      headPokemon={headPokemon}
+      nickname={nickname}
+      onClear={handleClearTeamMember}
+      onNicknameBlur={handleNicknameBlur}
+      onNicknameChange={handleNicknameChange}
+      onUpdate={handleUpdateTeamMember}
+      previewNickname={previewNickname}
+      primary={primary}
+      secondary={secondary}
+    />
+  );
+}
+
+function TeamMemberPreview({
+  bodyPokemon,
+  canUpdateTeam,
+  hasSelection,
+  headPokemon,
+  nickname,
+  onClear,
+  onNicknameBlur,
+  onNicknameChange,
+  onUpdate,
+  previewNickname,
+  primary,
+  secondary,
+}: TeamMemberPreviewProps) {
+  const hasType = Boolean(primary || secondary);
+  const hasSelectedPokemon = Boolean(headPokemon || bodyPokemon);
 
   return (
     <div className="flex w-full flex-col justify-between lg:w-72">
       <div className="flex min-h-0 flex-1 items-center justify-center py-4">
         <div className="relative flex flex-col items-center space-y-8">
-          {/* Type indicators above the fusion sprite */}
           {hasType ? (
             <div className="flex justify-center">
               <TypePills
@@ -65,9 +112,9 @@ export function TeamMemberPreviewPanel() {
 
           <div className="relative">
             <PokemonSummaryCard
-              bodyPokemon={selectedBody?.pokemon || null}
-              headPokemon={selectedHead?.pokemon || null}
-              isFusion={Boolean(selectedHead?.pokemon && selectedBody?.pokemon)}
+              bodyPokemon={bodyPokemon}
+              headPokemon={headPokemon}
+              isFusion={Boolean(headPokemon && bodyPokemon)}
               isTeamMember={true}
               nickname={previewNickname || undefined}
               shouldLoad={true}
@@ -78,7 +125,6 @@ export function TeamMemberPreviewPanel() {
       </div>
 
       <div className="mt-auto space-y-4">
-        {/* Nickname Input */}
         {hasSelectedPokemon ? (
           <div className="space-y-2">
             <label
@@ -91,8 +137,8 @@ export function TeamMemberPreviewPanel() {
               className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 transition-colors duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
               id="nickname"
               maxLength={12}
-              onBlur={handleNicknameBlur}
-              onChange={handleNicknameChange}
+              onBlur={onNicknameBlur}
+              onChange={onNicknameChange}
               placeholder="Enter nickname..."
               type="text"
               value={nickname}
@@ -103,8 +149,8 @@ export function TeamMemberPreviewPanel() {
         <TeamMemberActions
           canUpdateTeam={canUpdateTeam}
           hasSelection={hasSelection}
-          onClear={handleClearTeamMember}
-          onUpdate={handleUpdateTeamMember}
+          onClear={onClear}
+          onUpdate={onUpdate}
         />
       </div>
     </div>

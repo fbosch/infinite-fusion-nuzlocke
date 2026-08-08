@@ -107,52 +107,52 @@ const initialState: TeamMemberSelectionReducerState = {
   selectedHead: null,
 };
 
+const stateFieldByAction = {
+  SET_ACTIVE_SLOT: "activeSlot",
+  SET_HAS_MANUALLY_SELECTED_SLOT: "hasManuallySelectedSlot",
+  SET_NICKNAME: "nickname",
+  SET_PREVIEW_NICKNAME: "previewNickname",
+  SET_SEARCH_QUERY: "searchQuery",
+  SET_SELECTED_BODY: "selectedBody",
+  SET_SELECTED_HEAD: "selectedHead",
+} as const;
+
 // Reducer function
 function teamMemberSelectionReducer(
   state: TeamMemberSelectionReducerState,
   action: TeamMemberSelectionAction,
 ): TeamMemberSelectionReducerState {
-  switch (action.type) {
-    case "SET_SELECTED_HEAD":
-      return { ...state, selectedHead: action.payload };
-    case "SET_SELECTED_BODY":
-      return { ...state, selectedBody: action.payload };
-    case "SET_ACTIVE_SLOT":
-      return { ...state, activeSlot: action.payload };
-    case "SET_HAS_MANUALLY_SELECTED_SLOT":
-      return { ...state, hasManuallySelectedSlot: action.payload };
-    case "SET_SEARCH_QUERY":
-      return { ...state, searchQuery: action.payload };
-    case "SET_NICKNAME":
-      return { ...state, nickname: action.payload };
-    case "SET_PREVIEW_NICKNAME":
-      return { ...state, previewNickname: action.payload };
-    case "RESET_STATE":
-      return { ...initialState, activeSlot: "head" };
-    case "APPLY_POKEMON_SELECTION":
-      return {
-        ...state,
-        ...selectTeamPokemon({
-          activeSlot: state.activeSlot,
-          locationId: action.payload.locationId,
-          nickname: state.nickname,
-          pokemon: action.payload.pokemon,
-          previewNickname: state.previewNickname,
-          selectedBody: state.selectedBody,
-          selectedHead: state.selectedHead,
-        }),
-      };
-    case "INITIALIZE_FROM_EXISTING":
-      return {
-        ...state,
-        nickname: action.payload.nickname,
-        previewNickname: action.payload.previewNickname,
-        selectedBody: action.payload.selectedBody,
-        selectedHead: action.payload.selectedHead,
-      };
-    default:
-      return state;
+  if (action.type === "RESET_STATE") {
+    return { ...initialState, activeSlot: "head" };
   }
+
+  if (action.type === "APPLY_POKEMON_SELECTION") {
+    return {
+      ...state,
+      ...selectTeamPokemon({
+        activeSlot: state.activeSlot,
+        locationId: action.payload.locationId,
+        nickname: state.nickname,
+        pokemon: action.payload.pokemon,
+        previewNickname: state.previewNickname,
+        selectedBody: state.selectedBody,
+        selectedHead: state.selectedHead,
+      }),
+    };
+  }
+
+  if (action.type === "INITIALIZE_FROM_EXISTING") {
+    return {
+      ...state,
+      nickname: action.payload.nickname,
+      previewNickname: action.payload.previewNickname,
+      selectedBody: action.payload.selectedBody,
+      selectedHead: action.payload.selectedHead,
+    };
+  }
+
+  const stateField = stateFieldByAction[action.type];
+  return { ...state, [stateField]: action.payload };
 }
 
 // Create separate contexts for state and dispatch to optimize re-renders

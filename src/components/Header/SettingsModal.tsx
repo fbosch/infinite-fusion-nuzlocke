@@ -43,7 +43,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
         <DialogPanel
           className={clsx(
-            "w-full max-w-md space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800",
+            "w-full max-w-md space-y-4 rounded-lg border p-6 shadow-xl",
+            "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800",
             "transition duration-150 ease-out data-closed:scale-98 data-closed:opacity-0",
           )}
           transition

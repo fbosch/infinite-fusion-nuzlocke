@@ -26,7 +26,8 @@ export function useTeamMemberPicker() {
 
     const headUid = headPokemon?.uid;
     const bodyUid = bodyPokemon?.uid;
-    if ((headPokemon && !headUid) || (bodyPokemon && !bodyUid)) {
+    const selectedPokemon = [headPokemon, bodyPokemon];
+    if (selectedPokemon.some((pokemon) => pokemon && !pokemon.uid)) {
       return false;
     }
 
