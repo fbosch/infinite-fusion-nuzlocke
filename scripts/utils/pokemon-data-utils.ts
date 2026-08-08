@@ -73,7 +73,7 @@ export function createProcessedPokemonData(
     nationalDexId: pokemon.id,
     species: {
       evolution_chain: species.evolution_chain,
-      generation: species.generation?.name ?? null,
+      generation: species.generation ? species.generation.name : null,
       is_legendary: species.is_legendary,
       is_mythical: species.is_mythical,
     },

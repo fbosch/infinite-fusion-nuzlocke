@@ -5,7 +5,7 @@ import { processGameModeData } from "./encounters-processor";
 // Enable ISR caching - revalidate every hour
 export const revalidate = 3600;
 
-export async function GET(request: NextRequest) {
+export function GET(request: NextRequest) {
   try {
     // Parse query parameters
     const { searchParams } = new URL(request.url);

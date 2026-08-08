@@ -9,6 +9,8 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
   const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? "unknown";
   const [isCreditsOpen, setIsCreditsOpen] = useState(false);
+  const openCredits = () => setIsCreditsOpen(true);
+  const closeCredits = () => setIsCreditsOpen(false);
 
   return (
     <footer className="mt-8 border-gray-200 border-t bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
@@ -75,7 +77,7 @@ export default function Footer() {
               aria-controls="credits-modal"
               aria-haspopup="dialog"
               className="cursor-pointer text-blue-600 text-sm transition-colors duration-200 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-              onClick={() => setIsCreditsOpen(true)}
+              onClick={openCredits}
               type="button"
             >
               Credits
@@ -88,10 +90,7 @@ export default function Footer() {
               Open source licenses
             </Link>
           </div>
-          <CreditsModal
-            isOpen={isCreditsOpen}
-            onClose={() => setIsCreditsOpen(false)}
-          />
+          <CreditsModal isOpen={isCreditsOpen} onClose={closeCredits} />
         </div>
       </div>
     </footer>

@@ -108,7 +108,7 @@ export default async function LicensesPage() {
                           <summary className="cursor-pointer text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
                             View
                           </summary>
-                          {pkg.licenseText && (
+                          {pkg.licenseText ? (
                             <div className="mt-2">
                               <div className="font-semibold text-gray-900 text-xs dark:text-gray-200">
                                 License
@@ -117,8 +117,8 @@ export default async function LicensesPage() {
                                 {pkg.licenseText}
                               </pre>
                             </div>
-                          )}
-                          {pkg.noticeText && (
+                          ) : null}
+                          {pkg.noticeText ? (
                             <div className="mt-3">
                               <div className="font-semibold text-gray-900 text-xs dark:text-gray-200">
                                 Notice
@@ -127,7 +127,7 @@ export default async function LicensesPage() {
                                 {pkg.noticeText}
                               </pre>
                             </div>
-                          )}
+                          ) : null}
                         </details>
                       ) : (
                         <span className="text-gray-500 dark:text-gray-400">

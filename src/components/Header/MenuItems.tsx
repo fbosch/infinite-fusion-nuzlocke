@@ -60,9 +60,9 @@ export default function MenuItems({ onOpenModal }: MenuItemsProps) {
               type="button"
             >
               <Icon className="h-4 w-4" />
-              {showLabel && (
+              {showLabel ? (
                 <span className="hidden text-xs lg:inline">{label}</span>
-              )}
+              ) : null}
             </button>
           </CursorTooltip>
         ),

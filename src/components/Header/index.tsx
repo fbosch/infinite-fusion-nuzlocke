@@ -22,8 +22,15 @@ export default function Header() {
   const [activeTopBarModal, setActiveTopBarModal] =
     useState<TopBarModal | null>(null);
   const [pcTab, setPCTab] = useState<"team" | "box" | "graveyard">("team");
-  const githubCtaRoute: "home" | "locations" | null =
-    pathname === "/" ? "home" : pathname === "/locations" ? "locations" : null;
+  let githubCtaRoute: "home" | "locations" | null = null;
+
+  if (pathname === "/") {
+    githubCtaRoute = "home";
+  } else if (pathname === "/locations") {
+    githubCtaRoute = "locations";
+  }
+
+  const closeTopBarModal = () => setActiveTopBarModal(null);
   const topBarProps = {
     githubCtaRoute,
     onOpenModal: setActiveTopBarModal,
@@ -42,13 +49,13 @@ export default function Header() {
 
       <SettingsModal
         isOpen={activeTopBarModal === "settings"}
-        onClose={() => setActiveTopBarModal(null)}
+        onClose={closeTopBarModal}
       />
       <PokemonPCSheet
         activeTab={pcTab}
         isOpen={activeTopBarModal === "pc"}
         onChangeTab={setPCTab}
-        onClose={() => setActiveTopBarModal(null)}
+        onClose={closeTopBarModal}
       />
 
       <div className="mx-auto max-w-[1500px] px-4 md:px-6 2xl:px-0">

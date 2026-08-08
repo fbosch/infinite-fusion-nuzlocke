@@ -72,7 +72,7 @@ const getFilteredPokemon = ({
   return filteredData;
 };
 
-export async function GET(request: NextRequest) {
+export function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const query = Object.fromEntries(searchParams.entries());
@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Handle OPTIONS for CORS - only allow same origin
-export async function OPTIONS() {
+export function OPTIONS() {
   return new NextResponse(null, {
     headers: {
       "Access-Control-Allow-Headers": "Content-Type",

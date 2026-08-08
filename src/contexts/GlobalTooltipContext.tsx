@@ -10,6 +10,7 @@ interface GlobalTooltipContextType {
 const GlobalTooltipContext = createContext<GlobalTooltipContextType | null>(
   null,
 );
+const noop = () => undefined;
 
 interface GlobalTooltipProviderProps {
   children: ReactNode;
@@ -46,10 +47,9 @@ export function GlobalTooltipProvider({
 export function useGlobalTooltip() {
   const context = useContext(GlobalTooltipContext);
   if (!context) {
-    // Return default values when not within provider
     return {
       isAnyTooltipVisible: false,
-      registerTooltip: () => {},
+      registerTooltip: noop,
     };
   }
   return context;

@@ -27,6 +27,14 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const mounted = useMounted();
   const settings = useSnapshot(settingsStore);
   const reducedMotion = useReducedMotion(settings.reducedMotion);
+  const themeOptions = [
+    { icon: Monitor, label: "System", value: "system" },
+    { icon: Sun, label: "Light", value: "light" },
+    { icon: Moon, label: "Dark", value: "dark" },
+  ].map((themeOption) => ({
+    ...themeOption,
+    onClick: () => setTheme(themeOption.value),
+  }));
 
   if (mounted === false) {
     return null;
@@ -83,11 +91,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 </div>
               </div>
               <div className="flex items-center rounded-md bg-gray-100 p-0.5 dark:bg-gray-800">
-                {[
-                  { icon: Monitor, label: "System", value: "system" },
-                  { icon: Sun, label: "Light", value: "light" },
-                  { icon: Moon, label: "Dark", value: "dark" },
-                ].map(({ value, icon: Icon, label }) => (
+                {themeOptions.map(({ value, icon: Icon, label, onClick }) => (
                   <button
                     aria-label={label}
                     className={clsx(
@@ -97,7 +101,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200",
                     )}
                     key={value}
-                    onClick={() => setTheme(value)}
+                    onClick={onClick}
                     title={label}
                     type="button"
                   >

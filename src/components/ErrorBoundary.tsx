@@ -20,6 +20,7 @@ export class ErrorBoundary extends React.Component<
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
+    this.handleRetry = this.handleRetry.bind(this);
   }
 
   static getDerivedStateFromError(): ErrorBoundaryState {
@@ -28,6 +29,10 @@ export class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error) {
     console.error("Error caught by boundary:", error);
+  }
+
+  handleRetry() {
+    this.setState({ hasError: false });
   }
 
   render() {
@@ -47,7 +52,7 @@ export class ErrorBoundary extends React.Component<
             </p>
             <button
               className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
-              onClick={() => this.setState({ hasError: false })}
+              onClick={this.handleRetry}
               type="button"
             >
               <RefreshCw className="h-4 w-4" />

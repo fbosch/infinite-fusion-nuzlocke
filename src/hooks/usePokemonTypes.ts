@@ -8,9 +8,7 @@ export interface UsePokemonTypesResult {
   secondary?: TypeName;
 }
 
-export function usePokemonTypes(
-  query: TypeQuery | undefined,
-): UsePokemonTypesResult {
+function usePokemonTypes(query: TypeQuery | undefined): UsePokemonTypesResult {
   const { data: allPokemon = [], isLoading } = useAllPokemon(Boolean(query));
 
   if (!query) {
@@ -41,4 +39,6 @@ export function usePokemonTypes(
   return types ? { ...types, isLoading: false } : { isLoading };
 }
 
-export default usePokemonTypes;
+const defaultUsePokemonTypes = usePokemonTypes;
+
+export { defaultUsePokemonTypes as default, usePokemonTypes };
