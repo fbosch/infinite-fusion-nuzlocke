@@ -1,9 +1,6 @@
 import { useSyncExternalStore } from "react";
-import {
-  type Breakpoint,
-  breakpoints,
-  getBreakpoint,
-} from "@/utils/breakpoints";
+import type { Breakpoint } from "@/utils/breakpoints";
+import { breakpoints, getBreakpoint } from "@/utils/breakpoints";
 
 // Create a simple store that uses matchMedia for breakpoint detection
 const createBreakpointStore = () => {
@@ -104,4 +101,4 @@ export function useBreakpointBetween(
   return currentIndex >= minIndex && currentIndex <= maxIndex;
 }
 
-export type { Breakpoint };
+export type { Breakpoint } from "@/utils/breakpoints";

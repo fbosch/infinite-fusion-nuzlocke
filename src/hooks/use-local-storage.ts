@@ -32,7 +32,7 @@ export function useLocalStorage<T>(
   initialValue: T,
   schema: SafeParser<T>,
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
-  const serialize = (value: T): string => JSON.stringify(value);
+  const serialize = (item: T): string => JSON.stringify(item);
   const stringifiedInitialValue = serialize(initialValue);
 
   const parseSnapshot = (snapshot: string | null): T => {

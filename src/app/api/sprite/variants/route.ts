@@ -60,7 +60,7 @@ async function checkSpriteExists(url: string): Promise<boolean> {
   }
 }
 
-export async function GET(request: NextRequest) {
+export function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -132,18 +132,7 @@ async function processSpriteVariants(
 ): Promise<NextResponse> {
   const variants: string[] = [];
 
-  // Check variants sequentially to maintain order and break early
-  for (let i = 0; i < maxVariants; i += 1) {
-    const variant = getSpriteVariantSuffix(i);
-    const url = generateSpriteVariantUrl(id, variant);
-
-    if (await checkSpriteExists(url)) {
-      variants.push(variant);
-    } else {
-      // No more variants available, break early
-      break;
-    }
-  }
+  await collectSpriteVariants(id, maxVariants, variants);
 
   const responseData: SpriteVariantsResponse = {
     cacheKey: id,
@@ -168,4 +157,23 @@ async function processSpriteVariants(
   response.headers.set("Vary", "Accept-Encoding"); // Enable compression
 
   return response;
+}
+
+async function collectSpriteVariants(
+  id: string,
+  maxVariants: number,
+  variants: string[],
+  index = 0,
+): Promise<void> {
+  if (index >= maxVariants) {
+    return;
+  }
+
+  const variant = getSpriteVariantSuffix(index);
+  const url = generateSpriteVariantUrl(id, variant);
+
+  if (await checkSpriteExists(url)) {
+    variants.push(variant);
+    await collectSpriteVariants(id, maxVariants, variants, index + 1);
+  }
 }

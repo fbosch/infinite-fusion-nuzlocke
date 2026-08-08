@@ -42,7 +42,6 @@ import {
 const NUMERIC_QUERY_REGEX = /^\d+$/;
 
 import { resolveFusionCombination } from "./fusionCombination";
-import { PokemonEvolutionButton } from "./pokemon-evolution-button";
 import { PokemonNicknameInput } from "./PokemonNicknameInput";
 import {
   FusionCombinationOption,
@@ -52,6 +51,7 @@ import {
   PokemonOptions,
 } from "./PokemonOptions";
 import { PokemonStatusInput } from "./PokemonStatusInput";
+import { PokemonEvolutionButton } from "./pokemon-evolution-button";
 import { useComboboxDragAndDrop } from "./useComboboxDragAndDrop";
 
 interface PokemonComboboxProps {
@@ -441,6 +441,46 @@ export const PokemonCombobox = ({
     [onChange, value, onBeforeClear],
   );
 
+  const handleClose = useCallback(() => {
+    setQuery("");
+  }, []);
+
+  const displayValue = useCallback(
+    (pokemon: PokemonOptionType | null | undefined) => {
+      const displayPokemon = dragPreview || pokemon;
+      return displayPokemon?.name || "";
+    },
+    [dragPreview],
+  );
+
+  const setInputReference = useCallback(
+    (comboRef: HTMLInputElement | null) => {
+      if (!comboRef) {
+        return;
+      }
+
+      inputRef.current = comboRef;
+      refs.setReference(comboRef);
+      update();
+      if (ref && "current" in ref) {
+        ref.current = comboRef;
+      }
+    },
+    [ref, refs, update],
+  );
+
+  const setOptionsReference = useCallback(
+    (optionsElement: HTMLDivElement | null) => {
+      if (!optionsElement) {
+        return;
+      }
+
+      optionsRef.current = optionsElement;
+      refs.setFloating(optionsElement);
+    },
+    [refs],
+  );
+
   const isShowingLoading = useMemo(() => {
     // Show loading when:
     // 1. No query and all Pokemon are loading (for randomized/custom/empty-route locations)
@@ -480,15 +520,67 @@ export const PokemonCombobox = ({
     scrollPaddingStart: 16,
   });
 
+  let optionsContent: React.ReactNode;
+  if (fusionCombinationOption) {
+    optionsContent = (
+      <FusionCombinationOption pokemon={fusionCombinationOption} />
+    );
+  } else if (isShowingLoading) {
+    optionsContent = (
+      <div className="relative cursor-default select-none px-4 py-2 text-center">
+        <div className="text-gray-500 dark:text-gray-400">
+          <p className="flex items-center justify-center gap-2 py-2 text-sm">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Loading Pokémon...</span>
+          </p>
+        </div>
+      </div>
+    );
+  } else if (shouldVirtualize) {
+    optionsContent = virtualizer.getVirtualItems().map((virtualItem) => (
+      <PokemonOption
+        comboboxId={comboboxId || ""}
+        disabled={virtualizer.isScrolling}
+        gameMode={gameMode}
+        getPokemonSource={getPokemonSource}
+        index={virtualItem.index}
+        isDuplicatePokemon={isDuplicatePokemon}
+        isRoutePokemon={isRoutePokemon}
+        key={virtualItem.key}
+        locationId={locationId}
+        pokemon={finalOptions[virtualItem.index]}
+        style={{
+          height: `${virtualItem.size}px`,
+          left: "0.25rem",
+          pointerEvents: virtualizer.isScrolling ? "none" : "auto",
+          position: "absolute",
+          top: "0",
+          transform: `translateY(${virtualItem.start}px)`,
+          width: "calc(100% - 8px)",
+        }}
+      />
+    ));
+  } else {
+    optionsContent = (
+      <PokemonOptions
+        comboboxId={comboboxId || ""}
+        deferredQuery={deferredQuery}
+        finalOptions={finalOptions}
+        gameMode={gameMode}
+        getPokemonSource={getPokemonSource}
+        isDuplicatePokemon={isDuplicatePokemon}
+        isLoading={isShowingLoading}
+        isRoutePokemon={isRoutePokemon}
+        locationId={locationId}
+      />
+    );
+  }
+
   return (
     <div
       className="relative"
       data-uid={dragPreview?.uid || value?.uid}
       id={value?.uid}
-      onDragEnd={handleDragEnd}
-      onDragLeave={handleDragLeave}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
     >
       <div
         className="location-highlight-overlay pointer-events-none absolute inset-0 z-10 max-w-screen rounded-lg border-2 border-blue-500/60 bg-blue-500/20 opacity-0 transition-opacity duration-200 ease-in-out"
@@ -498,7 +590,11 @@ export const PokemonCombobox = ({
         disabled={disabled}
         immediate
         onChange={handleChange}
-        onClose={() => setQuery("")}
+        onClose={handleClose}
+        onDragEnd={handleDragEnd}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
         value={value || null}
       >
         {/* fallow-ignore-next-line complexity -- Headless UI render prop keeps combobox state colocated with its input and options. */}
@@ -526,26 +622,12 @@ export const PokemonCombobox = ({
                       open && placement.startsWith("top"),
                   },
                 )}
-                displayValue={(
-                  pokemon: PokemonOptionType | null | undefined,
-                ) => {
-                  const displayPokemon = dragPreview || pokemon;
-                  return displayPokemon?.name || "";
-                }}
+                displayValue={displayValue}
                 onChange={handleInputChange}
                 onFocus={activatePokemonData}
                 onPointerEnter={activatePokemonData}
                 placeholder={placeholder}
-                ref={(comboRef) => {
-                  if (comboRef) {
-                    inputRef.current = comboRef;
-                    refs.setReference(comboRef);
-                    update();
-                    if (ref && "current" in ref) {
-                      ref.current = comboRef;
-                    }
-                  }
-                }}
+                ref={setInputReference}
                 spellCheck={false}
               />
               <DraggableComboboxSprite
@@ -571,7 +653,7 @@ export const PokemonCombobox = ({
                 />
               ) : null}
             </div>
-            {open && (
+            {open ? (
               <FloatingPortal id="location-table">
                 <div
                   className={clsx(
@@ -591,12 +673,7 @@ export const PokemonCombobox = ({
                         placement.startsWith("bottom"),
                     },
                   )}
-                  ref={(optionsElement) => {
-                    if (optionsElement) {
-                      optionsRef.current = optionsElement;
-                      refs.setFloating(optionsElement);
-                    }
-                  }}
+                  ref={setOptionsReference}
                   style={{
                     ...floatingStyles,
                     height: shouldVirtualize
@@ -609,62 +686,11 @@ export const PokemonCombobox = ({
                       "pointer-events-none": virtualizer.isScrolling,
                     })}
                   >
-                    {fusionCombinationOption ? (
-                      <FusionCombinationOption
-                        pokemon={fusionCombinationOption}
-                      />
-                    ) : isShowingLoading ? (
-                      <div className="relative cursor-default select-none px-4 py-2 text-center">
-                        <div className="text-gray-500 dark:text-gray-400">
-                          <p className="flex items-center justify-center gap-2 py-2 text-sm">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span>Loading Pokémon...</span>
-                          </p>
-                        </div>
-                      </div>
-                    ) : shouldVirtualize ? (
-                      virtualizer.getVirtualItems().map((virtualItem) => (
-                        <PokemonOption
-                          comboboxId={comboboxId || ""}
-                          disabled={virtualizer.isScrolling}
-                          gameMode={gameMode}
-                          getPokemonSource={getPokemonSource}
-                          index={virtualItem.index}
-                          isDuplicatePokemon={isDuplicatePokemon}
-                          isRoutePokemon={isRoutePokemon}
-                          key={virtualItem.key}
-                          locationId={locationId}
-                          pokemon={finalOptions[virtualItem.index]}
-                          style={{
-                            height: `${virtualItem.size}px`,
-                            left: "0.25rem",
-                            pointerEvents: virtualizer.isScrolling
-                              ? "none"
-                              : "auto",
-                            position: "absolute",
-                            top: "0",
-                            transform: `translateY(${virtualItem.start}px)`,
-                            width: "calc(100% - 8px)",
-                          }}
-                        />
-                      ))
-                    ) : (
-                      <PokemonOptions
-                        comboboxId={comboboxId || ""}
-                        deferredQuery={deferredQuery}
-                        finalOptions={finalOptions}
-                        gameMode={gameMode}
-                        getPokemonSource={getPokemonSource}
-                        isDuplicatePokemon={isDuplicatePokemon}
-                        isLoading={isShowingLoading}
-                        isRoutePokemon={isRoutePokemon}
-                        locationId={locationId}
-                      />
-                    )}
+                    {optionsContent}
                   </ComboboxOptions>
                 </div>
               </FloatingPortal>
-            )}
+            ) : null}
           </div>
         )}
       </Combobox>

@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { useCallback } from "react";
 import { PokemonSprite } from "@/components/PokemonSprite";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 
@@ -21,14 +22,13 @@ export function GraveyardGridItem({
   // Since we now create separate entries for each Pokémon, only one will be present
   const pokemon = entry.head || entry.body;
 
-  const handleClick = () => {
-    // Extract the original location ID by removing the -head or -body suffix
+  const handleClick = useCallback(() => {
     const originalLocationId = entry.locationId.replace(
       GRAVEYARD_LOCATION_SUFFIX_REGEX,
       "",
     );
     onLocationClick(originalLocationId);
-  };
+  }, [entry.locationId, onLocationClick]);
 
   if (!pokemon) {
     return null;

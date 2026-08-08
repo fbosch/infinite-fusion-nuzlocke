@@ -6,7 +6,7 @@ import {
   getPCTab,
   getPCTabIndex,
   getStoredEntries,
-} from "../pcSheetDomain";
+} from "../pc-sheet-domain";
 
 const pokemon = (
   id: number,

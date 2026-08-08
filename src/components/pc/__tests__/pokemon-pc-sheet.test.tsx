@@ -24,7 +24,7 @@ vi.mock("@/components/team/useTeamMemberPicker", () => ({
   }),
 }));
 
-vi.mock("@/components/pc/pcSheetDomain", () => ({
+vi.mock("@/components/pc/pc-sheet-domain", () => ({
   getDeceasedEntries: () => [],
   getPCTab: () => "team",
   getPCTabIndex: () => 0,

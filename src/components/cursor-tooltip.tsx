@@ -22,7 +22,6 @@ import {
   useEffect,
   useId,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -59,6 +58,38 @@ function getCrossAxisOffset(placement: Placement): number {
     return -16;
   }
   return 0; // Default for center alignments
+}
+
+const transformOriginClasses = {
+  bottom: {
+    center: "origin-top",
+    end: "origin-top-right",
+    start: "origin-top-left",
+  },
+  left: {
+    center: "origin-right",
+    end: "origin-bottom-right",
+    start: "origin-top-right",
+  },
+  right: {
+    center: "origin-left",
+    end: "origin-bottom-left",
+    start: "origin-top-left",
+  },
+  top: {
+    center: "origin-bottom",
+    end: "origin-bottom-right",
+    start: "origin-bottom-left",
+  },
+} as const;
+
+function getTransformOriginClass(placement: Placement): string {
+  const [side, alignment = "center"] = placement.split("-");
+  return (
+    transformOriginClasses[side as keyof typeof transformOriginClasses]?.[
+      alignment as "center" | "end" | "start"
+    ] ?? "origin-center"
+  );
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -108,7 +139,9 @@ export function CursorTooltip(props: CursorTooltipProps) {
   const dragSnapshot = useSnapshot(dragStore);
   const settings = useSnapshot(settingsStore);
   const reducedMotion = useReducedMotion(settings.reducedMotion);
-  const { isAnyTooltipVisible, registerTooltip } = useGlobalTooltip();
+  const { isAnyTooltipVisible: tooltipVisible, registerTooltip } =
+    useGlobalTooltip();
+  const isAnyTooltipVisible = Boolean(tooltipVisible);
   const shouldDisableTooltip =
     disabled ||
     !isWindowVisible ||
@@ -325,51 +358,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
     role,
   ]);
 
-  const originClass = useMemo(() => {
-    const p = resolvedPlacement || placement;
-    const [side, align] = p.split("-") as [
-      "top" | "bottom" | "left" | "right" | (string & {}),
-      "start" | "end" | (string & {}),
-    ];
-
-    if (side === "top") {
-      if (align === "start") {
-        return "origin-bottom-left";
-      }
-      if (align === "end") {
-        return "origin-bottom-right";
-      }
-      return "origin-bottom";
-    }
-    if (side === "bottom") {
-      if (align === "start") {
-        return "origin-top-left";
-      }
-      if (align === "end") {
-        return "origin-top-right";
-      }
-      return "origin-top";
-    }
-    if (side === "left") {
-      if (align === "start") {
-        return "origin-top-right";
-      }
-      if (align === "end") {
-        return "origin-bottom-right";
-      }
-      return "origin-right";
-    }
-    if (side === "right") {
-      if (align === "start") {
-        return "origin-top-left";
-      }
-      if (align === "end") {
-        return "origin-bottom-left";
-      }
-      return "origin-left";
-    }
-    return "origin-center";
-  }, [resolvedPlacement, placement]);
+  const originClass = getTransformOriginClass(resolvedPlacement || placement);
 
   if (!content) {
     return children;
@@ -387,7 +376,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
           }),
         })}
 
-      {isTooltipVisible && (
+      {isTooltipVisible ? (
         <FloatingPortal>
           {/* react-doctor-disable-next-line react-hooks-js/refs -- Floating UI callback refs run during commit, not render. */}
           <div
@@ -425,7 +414,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
             </div>
           </div>
         </FloatingPortal>
-      )}
+      ) : null}
     </>
   );
 }

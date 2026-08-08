@@ -4,7 +4,7 @@ import { Box, Boxes, type LucideIcon, Skull, Users } from "lucide-react";
 import { scrollToLocationById } from "@/utils/scrollToLocation";
 import { GraveyardGridItem } from "./graveyard-grid-item";
 import PCEntryItem from "./pc-entry-item";
-import { getPCTab, getPCTabIndex, type PCTab } from "./pcSheetDomain";
+import { getPCTab, getPCTabIndex, type PCTab } from "./pc-sheet-domain";
 import TeamEntryItem from "./team-entry-item";
 import type { PCEntry } from "./types";
 

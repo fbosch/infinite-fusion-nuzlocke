@@ -75,7 +75,7 @@ function getEvolutionLabel(pokemon: PokemonOptionType, action: string) {
         <PokemonSprite generation="gen7" pokemonId={pokemon.id} />
       </div>
       <span className="truncate">
-        {action && `${action} `}
+        {action ? `${action} ` : ""}
         {pokemon.name}
       </span>
     </div>

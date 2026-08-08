@@ -6,7 +6,7 @@ import {
 } from "@/stores/playthroughs/hooks";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 import { getTeamSlots } from "../team/team-slots-model";
-import { getDeceasedEntries, getStoredEntries } from "./pcSheetDomain";
+import { getDeceasedEntries, getStoredEntries } from "./pc-sheet-domain";
 import type { PCEntry } from "./types";
 
 function toTeamEntry({

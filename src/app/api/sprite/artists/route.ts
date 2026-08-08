@@ -8,7 +8,8 @@ const ARTISTS_SPAN_REGEX = /<span class="artists">([\s\S]*?)<\/span>/;
 const BASE_DEX_ENTRY_REGEX =
   /<article class="dex-entry sprite-variant-main">[\s\S]*?<figcaption>[\s\S]*?<\/figcaption>/;
 const FIGCAPTION_REGEX = /<figcaption>[\s\S]*?<\/figcaption>/;
-const SPRITE_ARTICLE_REGEX = /<article class="sprite-preview[^"]*">[\s\S]*?<\/article>/g;
+const SPRITE_ARTICLE_REGEX =
+  /<article class="sprite-preview[^"]*">[\s\S]*?<\/article>/g;
 const SPRITE_ID_REGEX = /href="\/sprite\/pif\/([^"/]+)/;
 
 const extractArtists = (html: string): string[] => {
@@ -33,13 +34,9 @@ const extractArtists = (html: string): string[] => {
   return artists;
 };
 
-// Parsing base and gallery credits together preserves the route's single response contract.
-// fallow-ignore-next-line complexity
 const extractArtistCredits = (html: string, id: string) => {
   const artistCredits: Record<string, string[]> = {};
-  const baseDexEntryMatch = html.match(
-    BASE_DEX_ENTRY_REGEX,
-  );
+  const baseDexEntryMatch = html.match(BASE_DEX_ENTRY_REGEX);
   if (baseDexEntryMatch) {
     const baseArtists = extractArtists(baseDexEntryMatch[0]);
     if (baseArtists.length > 0) {
@@ -47,9 +44,7 @@ const extractArtistCredits = (html: string, id: string) => {
     }
   }
 
-  const spriteArticles = html.match(
-    SPRITE_ARTICLE_REGEX,
-  );
+  const spriteArticles = html.match(SPRITE_ARTICLE_REGEX);
   for (const article of spriteArticles ?? []) {
     const spriteId = article.match(SPRITE_ID_REGEX)?.[1];
     const figcaption = article.match(FIGCAPTION_REGEX)?.[0];

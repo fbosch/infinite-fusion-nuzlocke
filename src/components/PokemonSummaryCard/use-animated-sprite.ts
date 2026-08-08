@@ -1,8 +1,29 @@
-import { useLayoutEffect, useRef } from "react";
+import { type RefObject, useLayoutEffect, useRef } from "react";
 
 interface UseAnimatedSpriteOptions {
   canAnimate: boolean;
   reducedMotion: boolean;
+}
+
+function cancelAnimations(element: Element | null) {
+  for (const animation of element?.getAnimations() ?? []) {
+    animation.cancel();
+  }
+}
+
+function reverseRunningAnimations(animations: Animation[] | undefined) {
+  for (const animation of animations ?? []) {
+    if (animation.playState === "running") {
+      animation.updatePlaybackRate(-1);
+    }
+  }
+}
+
+function isAnimationActive(
+  hoverRef: RefObject<boolean>,
+  reducedMotionRef: RefObject<boolean>,
+) {
+  return hoverRef.current === true && reducedMotionRef.current === false;
 }
 
 export function useAnimatedSprite({
@@ -13,7 +34,7 @@ export function useAnimatedSprite({
   const shadowRef = useRef<HTMLImageElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const raysSvgRef = useRef<HTMLDivElement>(null);
-  const hoverRef = useRef<boolean>(false);
+  const hoverRef = useRef(false);
   const reducedMotionRef = useRef(reducedMotion);
 
   useLayoutEffect(() => {
@@ -24,96 +45,73 @@ export function useAnimatedSprite({
 
     hoverRef.current = false;
     for (const ref of [imageRef, shadowRef, overlayRef, raysSvgRef]) {
-      for (const animation of ref.current?.getAnimations() ?? []) {
-        animation.cancel();
-      }
+      cancelAnimations(ref.current);
     }
   }, [reducedMotion]);
 
   const handleMouseEnter = () => {
     hoverRef.current = true;
-    if (imageRef.current && canAnimate && !reducedMotion) {
-      // Cancel any running animations so the new one will replay
-      for (const anim of imageRef.current.getAnimations()) {
-        anim.cancel();
-      }
-      if (shadowRef.current) {
-        for (const anim of shadowRef.current.getAnimations()) {
-          anim.cancel();
-        }
-      }
-
-      const animateSprite = () => {
-        if (!hoverRef.current || reducedMotionRef.current) {
-          return;
-        }
-
-        const animation = imageRef.current?.animate(
-          [
-            { transform: "translateY(0px)" },
-            { transform: "translateY(-4px)" },
-            { transform: "translateY(0px)" },
-          ],
-          {
-            duration: 400,
-            easing: "linear",
-            iterations: 1,
-            playbackRate: 1,
-          },
-        );
-
-        shadowRef.current?.animate(
-          [
-            { transform: "skewX(-5deg) skewY(-30deg) scale(1) " },
-            {
-              blur: "0.2px",
-              transform:
-                "skewX(-5deg) skewY(-30deg) scale(1.03) translateY(-5%)",
-            },
-            { transform: "skewX(-5deg) skewY(-30deg) scale(1)" },
-          ],
-          {
-            duration: 400,
-            easing: "linear",
-            iterations: 1,
-            playbackRate: 1,
-          },
-        );
-
-        if (animation) {
-          animation.onfinish = () => {
-            if (hoverRef.current && !reducedMotionRef.current) {
-              window.requestAnimationFrame(animateSprite);
-            }
-          };
-        }
-      };
-
-      window.requestAnimationFrame(animateSprite);
+    if (canAnimate === false || reducedMotion) {
+      return;
     }
+
+    cancelAnimations(imageRef.current);
+    cancelAnimations(shadowRef.current);
+
+    const animateSprite = () => {
+      if (isAnimationActive(hoverRef, reducedMotionRef) === false) {
+        return;
+      }
+
+      const animation = imageRef.current?.animate(
+        [
+          { transform: "translateY(0px)" },
+          { transform: "translateY(-4px)" },
+          { transform: "translateY(0px)" },
+        ],
+        {
+          duration: 400,
+          easing: "linear",
+          iterations: 1,
+          playbackRate: 1,
+        },
+      );
+
+      shadowRef.current?.animate(
+        [
+          { transform: "skewX(-5deg) skewY(-30deg) scale(1) " },
+          {
+            blur: "0.2px",
+            transform: "skewX(-5deg) skewY(-30deg) scale(1.03) translateY(-5%)",
+          },
+          { transform: "skewX(-5deg) skewY(-30deg) scale(1)" },
+        ],
+        {
+          duration: 400,
+          easing: "linear",
+          iterations: 1,
+          playbackRate: 1,
+        },
+      );
+
+      animation?.addEventListener("finish", () => {
+        if (isAnimationActive(hoverRef, reducedMotionRef)) {
+          window.requestAnimationFrame(animateSprite);
+        }
+      });
+    };
+
+    window.requestAnimationFrame(animateSprite);
   };
 
   const handleMouseLeave = () => {
     hoverRef.current = false;
-    const animation = imageRef.current?.getAnimations();
-    const shadowAnimation = shadowRef.current?.getAnimations();
+    const animations = imageRef.current?.getAnimations();
+    const shadowAnimations = shadowRef.current?.getAnimations();
 
     window.requestAnimationFrame(() => {
-      if (animation) {
-        for (const a of animation) {
-          if (a.playState === "running") {
-            a.updatePlaybackRate(-1);
-          }
-        }
-      }
-
-      if (shadowAnimation) {
-        for (const a of shadowAnimation) {
-          if (a.playState === "running") {
-            a.updatePlaybackRate(-1);
-          }
-        }
-      }
+      reverseRunningAnimations(animations);
+      reverseRunningAnimations(shadowAnimations);
     });
   };
 
@@ -122,16 +120,13 @@ export function useAnimatedSprite({
       return;
     }
 
-    // Cancel any existing animations
     for (const element of [
       imageRef.current,
       shadowRef.current,
       overlayRef.current,
       raysSvgRef.current,
     ]) {
-      for (const animation of element?.getAnimations() ?? []) {
-        animation.cancel();
-      }
+      cancelAnimations(element);
     }
 
     // Sprite pulsing + brightness flashes without overriding base scale/transform

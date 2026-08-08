@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle, Info } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSnapshot } from "valtio";
 import { PokemonSprite } from "@/components/PokemonSprite";
 import { isCustomLocation } from "@/loaders";
@@ -58,6 +58,18 @@ export default function LocationCell({
   })();
 
   const shouldShowOriginalEncounter = settings.moveEncountersBetweenLocations;
+
+  const handleTooltipMouseEnter = useCallback(() => {
+    if (shouldShowOriginalEncounter) {
+      setIsTooltipHovered(true);
+    }
+  }, [shouldShowOriginalEncounter]);
+
+  const handleTooltipMouseLeave = useCallback(() => {
+    if (shouldShowOriginalEncounter) {
+      setIsTooltipHovered(false);
+    }
+  }, [shouldShowOriginalEncounter]);
 
   const encounterUids = locationPokemon.flatMap((pokemon) =>
     pokemon.uid ? [pokemon.uid] : [],
@@ -138,12 +150,8 @@ export default function LocationCell({
       <CursorTooltip
         content={getTooltipContent}
         delay={300}
-        onMouseEnter={() =>
-          shouldShowOriginalEncounter && setIsTooltipHovered(true)
-        }
-        onMouseLeave={() =>
-          shouldShowOriginalEncounter && setIsTooltipHovered(false)
-        }
+        onMouseEnter={handleTooltipMouseEnter}
+        onMouseLeave={handleTooltipMouseLeave}
       >
         {hasEncounter ? (
           <CheckCircle className="size-4 cursor-help text-green-600" />

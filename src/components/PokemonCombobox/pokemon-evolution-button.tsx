@@ -65,6 +65,19 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
     whileElementsMounted: autoUpdate,
   });
 
+  const handleSelectEvolution = (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    const { evolutionId } = event.currentTarget.dataset;
+    const evolution = availableEvolutions.find(({ id }) => id === evolutionId);
+
+    if (!evolution) {
+      return;
+    }
+
+    onSelectEvolution(evolution);
+  };
+
   return (
     <Menu>
       <MenuButton
@@ -81,7 +94,7 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
           "data-[open]:border-blue-300 data-[open]:bg-blue-100 data-[open]:text-blue-600 dark:data-[open]:border-blue-400 dark:data-[open]:bg-blue-900/20 dark:data-[open]:text-blue-400",
         )}
         disabled={isLoadingEvolutions}
-        onFocus={() => update()}
+        onFocus={update}
         ref={refs.setReference}
       >
         <CursorTooltip
@@ -136,7 +149,8 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
                         "hover:bg-gray-100 dark:hover:bg-gray-700": !focus,
                       },
                     )}
-                    onClick={() => onSelectEvolution(evolution)}
+                    data-evolution-id={evolution.id}
+                    onClick={handleSelectEvolution}
                     type="button"
                   >
                     <div className="flex size-8 items-center justify-center">
@@ -184,11 +198,11 @@ const DirectEvolutionButton: React.FC<DirectEvolutionButtonProps> = ({
                 </>
               )}
             </span>
-            {showDevolutionHint && (
+            {showDevolutionHint ? (
               <span className="text-gray-400 text-xs">
                 Hold shift to devolve
               </span>
-            )}
+            ) : null}
           </div>
         </div>
       }
@@ -280,6 +294,10 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
     }
   };
 
+  const handleDirectEvolution = () => {
+    handleEvolution(undefined, isDevolutionMode);
+  };
+
   // Don't render if no Pokemon is selected or no evolutions/devolutions available
   if (!(value && (hasEvolutions || isDevolutionMode)) || isLoading) {
     return null;
@@ -290,7 +308,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
     return (
       <DirectEvolutionButton
         isDevolutionMode={isDevolutionMode}
-        onClick={() => handleEvolution(undefined, isDevolutionMode)}
+        onClick={handleDirectEvolution}
         pokemon={availablePreEvolution}
         showDevolutionHint={false}
       />
@@ -301,7 +319,7 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
     return (
       <DirectEvolutionButton
         isDevolutionMode={isDevolutionMode}
-        onClick={() => handleEvolution(undefined, isDevolutionMode)}
+        onClick={handleDirectEvolution}
         pokemon={availableEvolutions[0]}
         showDevolutionHint={!isDevolutionMode && !!availablePreEvolution}
       />
