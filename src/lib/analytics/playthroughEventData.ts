@@ -9,7 +9,7 @@ type StorageValue = Storage | null | undefined;
 const pendingCheckpointEvents = new Map<string, Set<Checkpoint>>();
 
 const isUsableStorage = (value: StorageValue): value is Storage => {
-  if (value == null) {
+  if (value === null || value === undefined) {
     return false;
   }
 

@@ -115,13 +115,13 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
 
     const clickSpy = vi
       .spyOn(HTMLAnchorElement.prototype, "click")
-      .mockImplementation(() => {});
+      .mockImplementation(vi.fn());
     const createObjectUrlSpy = vi
       .spyOn(URL, "createObjectURL")
       .mockReturnValue("blob:test");
     const revokeObjectUrlSpy = vi
       .spyOn(URL, "revokeObjectURL")
-      .mockImplementation(() => {});
+      .mockImplementation(vi.fn());
 
     const { result } = renderHook(() => usePlaythroughImportExport());
 
@@ -149,7 +149,7 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
 
   it("does not track playthrough_exported when export fails", () => {
     const playthrough = createPlaythrough();
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(vi.fn());
     const createObjectUrlSpy = vi
       .spyOn(URL, "createObjectURL")
       .mockImplementation(() => {
@@ -285,7 +285,7 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
   it("tracks schema-validation failures with normalized taxonomy", async () => {
     const consoleErrorSpy = vi
       .spyOn(console, "error")
-      .mockImplementation(() => {});
+      .mockImplementation(vi.fn());
     const { input, createElementSpy } = mockInputCreation();
     const validJsonFile = {
       name: "save.json",

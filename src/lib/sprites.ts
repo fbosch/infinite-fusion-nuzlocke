@@ -139,7 +139,7 @@ export async function getArtworkVariants(
       throw new Error(data.error);
     }
 
-    return data.variants || [];
+    return data.variants;
   } catch (error) {
     console.warn("Failed to get artwork variants from API:", error);
 

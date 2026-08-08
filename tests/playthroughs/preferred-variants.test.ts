@@ -98,7 +98,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       // Should update encounter timestamp for reactivity
       const encounter =
         playthroughActions.getActivePlaythrough()?.encounters?.["route-1"];
-      expect(encounter?.updatedAt).toBeGreaterThan(0);
+      expect(encounter.updatedAt).toBeGreaterThan(0);
     });
 
     it("should set global preferred variant for fusion", async () => {
@@ -143,7 +143,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       // Should still update encounter timestamp
       const encounter =
         playthroughActions.getActivePlaythrough()?.encounters?.["route-1"];
-      expect(encounter?.updatedAt).toBeGreaterThan(0);
+      expect(encounter.updatedAt).toBeGreaterThan(0);
     });
 
     it("should clear global preferred variant when setting to undefined", () => {
@@ -189,7 +189,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       // Should update encounter timestamp for reactivity
       const encounter =
         playthroughActions.getActivePlaythrough()?.encounters?.["route-1"];
-      expect(encounter?.updatedAt).toBeGreaterThan(0);
+      expect(encounter.updatedAt).toBeGreaterThan(0);
     });
 
     it("should cycle through available variants backward", async () => {
@@ -254,7 +254,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       // Should still update encounter timestamp
       const encounter =
         playthroughActions.getActivePlaythrough()?.encounters?.["route-1"];
-      expect(encounter?.updatedAt).toBeGreaterThan(0);
+      expect(encounter.updatedAt).toBeGreaterThan(0);
     });
   });
 
@@ -403,10 +403,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
 
       // Encounter should not have an artworkVariant field anymore
       expect(encounter).toBeDefined();
-      if (encounter === undefined) {
-        throw new Error("Expected encounter to be created");
-      }
-      expect(encounter?.head?.id).toBe(25);
+      expect(encounter.head?.id).toBe(25);
       expect("artworkVariant" in encounter).toBe(false);
     });
 
@@ -425,12 +422,9 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
 
       // Encounter should not have an artworkVariant field anymore
       expect(encounter).toBeDefined();
-      if (encounter === undefined) {
-        throw new Error("Expected encounter to be created");
-      }
-      expect(encounter?.head?.id).toBe(25);
-      expect(encounter?.body?.id).toBe(4);
-      expect(encounter?.isFusion).toBe(true);
+      expect(encounter.head?.id).toBe(25);
+      expect(encounter.body?.id).toBe(4);
+      expect(encounter.isFusion).toBe(true);
       expect("artworkVariant" in encounter).toBe(false);
     });
   });

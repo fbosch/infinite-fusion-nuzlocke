@@ -140,7 +140,7 @@ describe("Playthroughs Store - Core Movement Operations", () => {
 
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       expect(
-        activePlaythrough?.team.members.some(
+        activePlaythrough.team.members.some(
           (member) =>
             member?.headPokemonUid === discardedUid ||
             member?.bodyPokemonUid === discardedUid,
@@ -175,7 +175,7 @@ describe("Playthroughs Store - Core Movement Operations", () => {
       await playthroughActions.createFusion("route-1", head, body);
 
       const activePlaythrough = playthroughActions.getActivePlaythrough();
-      expect(activePlaythrough?.team.members).toContainEqual({
+      expect(activePlaythrough.team.members).toContainEqual({
         bodyPokemonUid: body.uid,
         headPokemonUid: head.uid,
       });
@@ -215,12 +215,12 @@ describe("Playthroughs Store - Core Movement Operations", () => {
 
       await playthroughActions.createFusion("route-1", head, body);
 
-      expect(
-        playthroughActions.getActivePlaythrough()?.team.members[2],
-      ).toEqual({
-        bodyPokemonUid: body.uid,
-        headPokemonUid: head.uid,
-      });
+      expect(playthroughActions.getActivePlaythrough().team.members[2]).toEqual(
+        {
+          bodyPokemonUid: body.uid,
+          headPokemonUid: head.uid,
+        },
+      );
     });
   });
 

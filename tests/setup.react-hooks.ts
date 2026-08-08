@@ -4,14 +4,12 @@ const indexedDbStore = new Map<string, unknown>();
 
 vi.mock("idb-keyval", () => ({
   createStore: vi.fn(() => ({ name: "mock-store" })),
-  del: vi.fn(async (key: string) => {
-    indexedDbStore.delete(String(key));
-  }),
+  del: vi.fn((key: string) => Promise.resolve(indexedDbStore.delete(String(key)))),
   get: vi.fn(async (key: string) => indexedDbStore.get(String(key))),
   keys: vi.fn(async () => Array.from(indexedDbStore.keys())),
-  set: vi.fn(async (key: string, value: unknown) => {
-    indexedDbStore.set(String(key), value);
-  }),
+  set: vi.fn((key: string, value: unknown) =>
+    Promise.resolve(indexedDbStore.set(String(key), value)),
+  ),
 }));
 
 beforeEach(() => {

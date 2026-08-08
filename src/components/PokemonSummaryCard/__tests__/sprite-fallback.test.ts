@@ -9,6 +9,8 @@ const pikachu: PokemonOptionType = {
   status: "captured",
 };
 
+const dataImageUrlPattern = /^data:image\/png;base64,/;
+
 afterEach(() => {
   vi.unstubAllGlobals();
 });
@@ -125,6 +127,6 @@ describe("getNextFallbackUrl", () => {
         pikachu,
         { ...pikachu, id: 133, nationalDexId: 133 },
       ),
-    ).resolves.toMatch(/^data:image\/png;base64,/);
+    ).resolves.toMatch(dataImageUrlPattern);
   });
 });

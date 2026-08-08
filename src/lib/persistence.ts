@@ -97,8 +97,8 @@ const deserializePersistedQuery = (data: unknown): PersistedQuery => {
     }
 
     return persistedQuery;
-  } catch {
-    throw new Error("Invalid persisted query payload");
+  } catch (error) {
+    throw new Error("Invalid persisted query payload", { cause: error });
   }
 };
 

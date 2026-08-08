@@ -1,4 +1,4 @@
-import { PokemonStatus } from "@/loaders/pokemon";
+import { PokemonStatus, type PokemonOptionType } from "@/loaders/pokemon";
 import type { Playthrough } from "@/stores/playthroughs/types";
 import {
   toCountBucket,
@@ -8,7 +8,7 @@ import {
 import type { SharedEventProperties } from "./trackEvent";
 
 const getEncounterEntries = (playthrough: Playthrough) => {
-  if (playthrough.encounters == null) {
+  if (playthrough.encounters === null || playthrough.encounters === undefined) {
     return [];
   }
 
@@ -16,7 +16,7 @@ const getEncounterEntries = (playthrough: Playthrough) => {
 };
 
 const getEncounterPokemon = (playthrough: Playthrough) => {
-  const pokemon = [];
+  const pokemon: PokemonOptionType[] = [];
 
   for (const encounter of getEncounterEntries(playthrough)) {
     if (encounter.head) {
@@ -91,12 +91,12 @@ export const getViableRosterSize = (playthrough: Playthrough): number => {
 
   let count = 0;
   for (const member of playthrough.team.members) {
-    if (member == null) {
+    if (member === null || member === undefined) {
       continue;
     }
 
     const headPokemon = pokemonByUid.get(member.headPokemonUid);
-    if (headPokemon == null) {
+    if (headPokemon === null || headPokemon === undefined) {
       continue;
     }
 

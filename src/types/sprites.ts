@@ -7,5 +7,3 @@ export interface SpriteVariantsResponse {
 export interface SpriteVariantsError {
   error: string;
 }
-
-type SpriteVariantsApiResponse = SpriteVariantsResponse | SpriteVariantsError;
