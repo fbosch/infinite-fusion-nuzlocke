@@ -3,7 +3,7 @@ import mitt from "mitt";
 const EVOLUTION_EVENT = "pokemon:evolved" as const;
 const LOCATIONS_FLASH_UIDS = "locations:flashUids" as const;
 
-interface AppEvents extends Record<string, unknown> {
+interface AppEvents extends Record<string | symbol, unknown> {
   [EVOLUTION_EVENT]: { locationId: string };
   [LOCATIONS_FLASH_UIDS]: { uids: string[]; durationMs?: number };
 }

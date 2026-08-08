@@ -2,15 +2,21 @@ import { describe, expect, it } from "vitest";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { canFuse } from "@/utils/pokemonPredicates";
 import {
+  type DisplayPokemon,
   getDisplayPokemon,
   getNicknameText,
-  type DisplayPokemon,
 } from "../utils";
+
+function getPokemonId(pokemon: DisplayPokemon["head"]) {
+  return pokemon ? pokemon.id : null;
+}
 
 function getDisplayIds({ body, head, isFusion }: DisplayPokemon) {
   return {
-    bodyId: isFusion ? (body?.id ?? null) : null,
-    headId: isFusion ? (head?.id ?? null) : (head?.id ?? body?.id ?? null),
+    bodyId: isFusion ? getPokemonId(body) : null,
+    headId: isFusion
+      ? getPokemonId(head)
+      : getPokemonId(head) ?? getPokemonId(body),
   };
 }
 

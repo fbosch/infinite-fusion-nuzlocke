@@ -5,6 +5,14 @@ import { normalizePersistedPlaythrough } from "@/stores/playthroughs/migrations"
 // Import shared setup and utilities
 import { createMockPokemon, describe, expect, it } from "./setup";
 
+const requireValue = <T>(value: T | null | undefined, message: string): T => {
+  if (value === null || value === undefined) {
+    throw new Error(message);
+  }
+
+  return value;
+};
+
 describe("Playthroughs Store - Migration Tests", () => {
   describe("remixMode to gameMode migration", () => {
     it("should migrate remixMode: true to gameMode: remix", () => {
@@ -93,14 +101,20 @@ describe("Playthroughs Store - Migration Tests", () => {
       expect(result.gameMode).toBe("remix");
       expect("remixMode" in result).toBe(false);
       expect(result.encounters).toBeDefined();
-      const routeOneEncounter = result.encounters?.["route-1"];
-      expect(routeOneEncounter).toBeDefined();
-      if (!routeOneEncounter.head) {
+      const routeOneEncounter = requireValue(
+        result.encounters,
+        "Expected migrated encounters",
+      )["route-1"];
+      const encounteredPokemon = requireValue(
+        routeOneEncounter,
+        "Expected a migrated route-1 encounter",
+      );
+      if (!encounteredPokemon.head) {
         throw new Error(
           "Expected migrated route-1 encounter with a head Pokemon",
         );
       }
-      expect(routeOneEncounter.head.name).toBe("Pikachu");
+      expect(encounteredPokemon.head.name).toBe("Pikachu");
       expect(result.customLocations).toBeDefined();
       expect(result.customLocations?.[0].name).toBe("Custom Route");
       expect(result.createdAt).toBe(1_234_567_890);

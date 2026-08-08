@@ -20,6 +20,17 @@ import {
 const mockedGetPreferredVariant = vi.mocked(getPreferredVariant);
 const mockedSetPreferredVariant = vi.mocked(setPreferredVariant);
 
+const getEncounterOrFail = (locationId: string) => {
+  const encounter =
+    playthroughActions.getActivePlaythrough()?.encounters?.[locationId];
+
+  if (encounter === undefined) {
+    throw new Error(`Expected an encounter at ${locationId}`);
+  }
+
+  return encounter;
+};
+
 const createImageConstructorMock = () =>
   vi.fn(function MockImage(this: {
     setAttribute: ReturnType<typeof vi.fn>;
@@ -96,8 +107,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       );
 
       // Should update encounter timestamp for reactivity
-      const encounter =
-        playthroughActions.getActivePlaythrough()?.encounters?.["route-1"];
+      const encounter = getEncounterOrFail("route-1");
       expect(encounter.updatedAt).toBeGreaterThan(0);
     });
 
@@ -141,8 +151,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       });
 
       // Should still update encounter timestamp
-      const encounter =
-        playthroughActions.getActivePlaythrough()?.encounters?.["route-1"];
+      const encounter = getEncounterOrFail("route-1");
       expect(encounter.updatedAt).toBeGreaterThan(0);
     });
 
@@ -187,8 +196,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       );
 
       // Should update encounter timestamp for reactivity
-      const encounter =
-        playthroughActions.getActivePlaythrough()?.encounters?.["route-1"];
+      const encounter = getEncounterOrFail("route-1");
       expect(encounter.updatedAt).toBeGreaterThan(0);
     });
 
@@ -252,8 +260,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       consoleErrorSpy.mockRestore();
 
       // Should still update encounter timestamp
-      const encounter =
-        playthroughActions.getActivePlaythrough()?.encounters?.["route-1"];
+      const encounter = getEncounterOrFail("route-1");
       expect(encounter.updatedAt).toBeGreaterThan(0);
     });
   });
@@ -398,8 +405,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
         await playthroughActions.updateEncounter("route-1", pikachu);
       });
 
-      const encounter =
-        playthroughActions.getActivePlaythrough()?.encounters?.["route-1"];
+      const encounter = getEncounterOrFail("route-1");
 
       // Encounter should not have an artworkVariant field anymore
       expect(encounter).toBeDefined();
@@ -417,8 +423,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
         await playthroughActions.createFusion("route-1", pikachu, charmander);
       });
 
-      const encounter =
-        playthroughActions.getActivePlaythrough()?.encounters?.["route-1"];
+      const encounter = getEncounterOrFail("route-1");
 
       // Encounter should not have an artworkVariant field anymore
       expect(encounter).toBeDefined();

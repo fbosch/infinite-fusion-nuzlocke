@@ -1,4 +1,4 @@
-import { PokemonStatus, type PokemonOptionType } from "@/loaders/pokemon";
+import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
 import type { Playthrough } from "@/stores/playthroughs/types";
 import {
   toCountBucket,

@@ -65,19 +65,6 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
     whileElementsMounted: autoUpdate,
   });
 
-  const handleSelectEvolution = (
-    event: React.MouseEvent<HTMLButtonElement>,
-  ) => {
-    const { evolutionId } = event.currentTarget.dataset;
-    const evolution = availableEvolutions.find(({ id }) => id === evolutionId);
-
-    if (!evolution) {
-      return;
-    }
-
-    onSelectEvolution(evolution);
-  };
-
   return (
     <Menu>
       <MenuButton
@@ -149,8 +136,7 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
                         "hover:bg-gray-100 dark:hover:bg-gray-700": !focus,
                       },
                     )}
-                    data-evolution-id={evolution.id}
-                    onClick={handleSelectEvolution}
+                    onClick={() => onSelectEvolution(evolution)}
                     type="button"
                   >
                     <div className="flex size-8 items-center justify-center">

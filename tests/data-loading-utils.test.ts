@@ -313,14 +313,16 @@ describe("Data Loading Utilities", () => {
 
     it("should handle missing files", async () => {
       // Mock some files as missing
-      mockFs.access.mockImplementation(async (filePath) => {
+      mockFs.access.mockImplementation((filePath) => {
         const pathStr = String(filePath);
         if (
           pathStr.includes("pokemon-data.json") ||
           pathStr.includes("locations.json")
         ) {
-          throw new Error("File not found");
+          return Promise.reject(new Error("File not found"));
         }
+
+        return Promise.resolve();
       });
 
       const result = await checkDataFiles();

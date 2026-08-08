@@ -139,6 +139,9 @@ describe("Playthroughs Store - Core Movement Operations", () => {
       );
 
       const activePlaythrough = playthroughActions.getActivePlaythrough();
+      if (activePlaythrough === null) {
+        throw new Error("Expected an active playthrough");
+      }
       expect(
         activePlaythrough.team.members.some(
           (member) =>
@@ -175,6 +178,9 @@ describe("Playthroughs Store - Core Movement Operations", () => {
       await playthroughActions.createFusion("route-1", head, body);
 
       const activePlaythrough = playthroughActions.getActivePlaythrough();
+      if (activePlaythrough === null) {
+        throw new Error("Expected an active playthrough");
+      }
       expect(activePlaythrough.team.members).toContainEqual({
         bodyPokemonUid: body.uid,
         headPokemonUid: head.uid,
@@ -215,12 +221,14 @@ describe("Playthroughs Store - Core Movement Operations", () => {
 
       await playthroughActions.createFusion("route-1", head, body);
 
-      expect(playthroughActions.getActivePlaythrough().team.members[2]).toEqual(
-        {
-          bodyPokemonUid: body.uid,
-          headPokemonUid: head.uid,
-        },
-      );
+      const activePlaythrough = playthroughActions.getActivePlaythrough();
+      if (activePlaythrough === null) {
+        throw new Error("Expected an active playthrough");
+      }
+      expect(activePlaythrough.team.members[2]).toEqual({
+        bodyPokemonUid: body.uid,
+        headPokemonUid: head.uid,
+      });
     });
   });
 
