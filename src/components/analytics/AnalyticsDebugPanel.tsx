@@ -1,7 +1,13 @@
 "use client";
 
 import { Bug, RotateCcw, X } from "lucide-react";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   type AnalyticsDebugCounters,
   getAnalyticsDebugCounters,
@@ -11,7 +17,7 @@ import {
 const DEBUG_QUERY_KEY = "analytics_debug";
 const DEBUG_STORAGE_KEY = "analytics-debug-panel";
 
-const subscribeToPanelEnabled = () => () => {};
+const subscribeToPanelEnabled = () => () => undefined;
 const getServerPanelEnabledSnapshot = () => false;
 
 function isDebugQueryEnabled(): boolean {
@@ -49,6 +55,13 @@ export function AnalyticsDebugPanel() {
   const [counters, setCounters] = useState<AnalyticsDebugCounters>(
     getAnalyticsDebugCounters,
   );
+
+  const handleOpen = useCallback(() => setOpen(true), []);
+  const handleReset = useCallback(() => {
+    resetAnalyticsDebugCounters();
+    setCounters(getAnalyticsDebugCounters());
+  }, []);
+  const handleCollapse = useCallback(() => setOpen(false), []);
 
   useEffect(() => {
     if (!isDebugQueryEnabled()) {
@@ -99,7 +112,7 @@ export function AnalyticsDebugPanel() {
       <button
         aria-label="Open analytics debug panel"
         className="fixed right-4 bottom-4 z-[60] inline-flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 font-medium text-amber-900 text-xs shadow-sm"
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
         type="button"
       >
         <Bug aria-hidden="true" className="h-4 w-4" />
@@ -122,10 +135,7 @@ export function AnalyticsDebugPanel() {
           <button
             aria-label="Reset analytics counters"
             className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-50"
-            onClick={() => {
-              resetAnalyticsDebugCounters();
-              setCounters(getAnalyticsDebugCounters());
-            }}
+            onClick={handleReset}
             type="button"
           >
             <RotateCcw aria-hidden="true" className="h-3.5 w-3.5" />
@@ -133,7 +143,7 @@ export function AnalyticsDebugPanel() {
           <button
             aria-label="Collapse analytics debug panel"
             className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-50"
-            onClick={() => setOpen(false)}
+            onClick={handleCollapse}
             type="button"
           >
             <X aria-hidden="true" className="h-3.5 w-3.5" />

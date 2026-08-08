@@ -42,59 +42,6 @@ const typeColors: Record<TypeName, string> = {
 
 export type PillSize = "xxs" | "xs" | "sm" | "md";
 
-type FactorKey = "4" | "2" | "0.5" | "0.25" | "0";
-
-function getDefensiveEffectGroups(
-  primary?: TypeName,
-  secondary?: TypeName,
-): Record<FactorKey, TypeName[]> {
-  const empty: Record<FactorKey, TypeName[]> = {
-    "0": [],
-    "0.5": [],
-    "0.25": [],
-    "2": [],
-    "4": [],
-  };
-  if (!(primary || secondary)) {
-    return empty;
-  }
-  const mainType = (primary ?? secondary) as string;
-  const secondType = primary && secondary ? (secondary as string) : undefined;
-  const map = getTypeWeaknesses(mainType, secondType);
-  const isTypeName = (t: string): t is TypeName =>
-    (ALL_TYPES as readonly string[]).includes(t);
-  const groups: Record<FactorKey, TypeName[]> = {
-    "0": [],
-    "0.5": [],
-    "0.25": [],
-    "2": [],
-    "4": [],
-  };
-  Object.entries(map).forEach(([type, multValue]) => {
-    if (!isTypeName(type)) {
-      return;
-    }
-    const mult = Number(multValue);
-    if (mult === 4) {
-      groups["4"].push(type);
-    } else if (mult === 2) {
-      groups["2"].push(type);
-    } else if (mult === 0.5) {
-      groups["0.5"].push(type);
-    } else if (mult === 0.25) {
-      groups["0.25"].push(type);
-    } else if (mult === 0) {
-      groups["0"].push(type);
-    }
-  });
-  const byOrder = (a: TypeName, b: TypeName) =>
-    ALL_TYPES.indexOf(a) - ALL_TYPES.indexOf(b);
-  (Object.keys(groups) as FactorKey[]).forEach((k) => {
-    groups[k] = groups[k].sort(byOrder);
-  });
-  return groups;
-}
-
 function TypeEffectivenessSummary({
   primary,
   secondary,
@@ -104,10 +51,6 @@ function TypeEffectivenessSummary({
   secondary?: TypeName;
   hideNeutral?: boolean;
 }) {
-  // Keep computed groups available for future presentation tweaks (group chips)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _groups = getDefensiveEffectGroups(primary, secondary);
-
   const mainType = (primary ?? secondary) as string | undefined;
   const secondType = primary && secondary ? (secondary as string) : undefined;
   const multiplierByType = (() => {
@@ -116,10 +59,10 @@ function TypeEffectivenessSummary({
     }
     const map = getTypeWeaknesses(mainType, secondType);
     const result: Record<TypeName, number> = {} as Record<TypeName, number>;
-    (ALL_TYPES as readonly TypeName[]).forEach((t) => {
+    for (const t of ALL_TYPES as readonly TypeName[]) {
       const v = Number(map[t]);
       result[t] = Number.isFinite(v) ? (v as number) : 1;
-    });
+    }
     return result;
   })();
 
@@ -167,25 +110,21 @@ function TypeEffectivenessSummary({
   }
 
   return (
-    <div aria-label="type effectiveness" className="w-full max-w-full">
+    <section aria-label="type effectiveness" className="w-full max-w-full">
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] opacity-70">Defenses</span>
-        <div
-          aria-label="types"
-          className="inline-flex items-center gap-1.5"
-          role="group"
-        >
-          {primary && (
+        <div className="inline-flex items-center gap-1.5">
+          {primary ? (
             <TypeBadge showTooltip={false} size="sm" type={primary} />
-          )}
-          {secondary && (
+          ) : null}
+          {secondary ? (
             <TypeBadge showTooltip={false} size="sm" type={secondary} />
-          )}
+          ) : null}
         </div>
       </div>
       <div className="my-2 h-px w-full bg-gray-200 dark:bg-gray-600/60" />
       {/* Grid of all attacking types with multipliers */}
-      {mainType && (
+      {mainType ? (
         <div className="space-y-2">
           {(() => {
             const allVisible = (ALL_TYPES as readonly TypeName[]).filter(
@@ -206,7 +145,7 @@ function TypeEffectivenessSummary({
                         typeColors[t],
                       )}
                       key={`head-${key}-${t}`}
-                      role="columnheader"
+                      role="img"
                       title={`${t} attack`}
                     >
                       {t.slice(0, 3)}
@@ -225,7 +164,7 @@ function TypeEffectivenessSummary({
                           factorClass(v),
                         )}
                         key={`val-${key}-${t}`}
-                        role="cell"
+                        role="img"
                       >
                         {label}
                       </div>
@@ -243,8 +182,8 @@ function TypeEffectivenessSummary({
             );
           })()}
         </div>
-      )}
-    </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -257,36 +196,26 @@ function TypeBadge({
   size?: PillSize;
   showTooltip?: boolean;
 }) {
-  const core =
-    size === "xxs" ? (
+  const title = showTooltip
+    ? `${type.charAt(0).toUpperCase()}${type.slice(1)} type`
+    : undefined;
+  let core: React.ReactElement;
+
+  if (size === "xxs" || size === "xs") {
+    core = (
       <span
         aria-label={`${type} type`}
         className={clsx(
-          "inline-block h-2 w-2 rounded-full border border-white/20",
+          "inline-block rounded-full border border-white/20",
+          size === "xxs" ? "h-2 w-2" : "h-3 w-3",
           typeColors[type],
         )}
         role="status"
-        title={
-          showTooltip
-            ? `${type.charAt(0).toUpperCase()}${type.slice(1)} type`
-            : undefined
-        }
+        title={title}
       />
-    ) : size === "xs" ? (
-      <span
-        aria-label={`${type} type`}
-        className={clsx(
-          "inline-block h-3 w-3 rounded-full border border-white/20",
-          typeColors[type],
-        )}
-        role="status"
-        title={
-          showTooltip
-            ? `${type.charAt(0).toUpperCase()}${type.slice(1)} type`
-            : undefined
-        }
-      />
-    ) : (
+    );
+  } else {
+    core = (
       <span
         aria-label={`${type} type`}
         className={clsx(
@@ -295,11 +224,7 @@ function TypeBadge({
           typeColors[type],
         )}
         role="status"
-        title={
-          showTooltip
-            ? `${type.charAt(0).toUpperCase()}${type.slice(1)} type`
-            : undefined
-        }
+        title={title}
       >
         <span
           className={clsx(
@@ -311,6 +236,7 @@ function TypeBadge({
         </span>
       </span>
     );
+  }
 
   if (!showTooltip) {
     return core;
@@ -379,22 +305,22 @@ export function TypePills({
   showTooltip?: boolean;
   hideNeutral?: boolean;
 }) {
+  let gapClass = "gap-1.5";
+  if (size === "xxs") {
+    gapClass = "gap-0.5";
+  } else if (size === "xs") {
+    gapClass = "gap-1";
+  }
+
   const pills = (
-    <div
-      aria-label="pokemon types"
-      className={twMerge(
-        clsx(
-          "flex",
-          size === "xxs" ? "gap-0.5" : size === "xs" ? "gap-1" : "gap-1.5",
-        ),
-        className,
-      )}
-    >
-      {primary && <TypeBadge showTooltip={false} size={size} type={primary} />}
-      {secondary && (
+    <section className={twMerge(clsx("flex", gapClass), className)}>
+      {primary ? (
+        <TypeBadge showTooltip={false} size={size} type={primary} />
+      ) : null}
+      {secondary ? (
         <TypeBadge showTooltip={false} size={size} type={secondary} />
-      )}
-    </div>
+      ) : null}
+    </section>
   );
 
   if (showTooltip) {
@@ -412,4 +338,6 @@ export function TypePills({
   return pills;
 }
 
-export default TypePills;
+const DefaultTypePills = TypePills;
+
+export default DefaultTypePills;

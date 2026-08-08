@@ -8,7 +8,7 @@ import {
 } from "@headlessui/react";
 import { clsx } from "clsx";
 import { ArrowUpDown, Dna, MapPin, Search, X } from "lucide-react";
-import { useState } from "react";
+import { type ChangeEvent, useCallback, useState } from "react";
 import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
 import { TypePills } from "@/components/TypePills";
@@ -62,18 +62,66 @@ interface ActionPreviewProps {
 
 export { LocationSelector };
 
-// Helper function to get Pokemon in a specific slot
 function getSlotPokemon(
   locationId: string,
   field: "head" | "body",
 ): PokemonOptionType | null {
   const activePlaythrough = getActivePlaythrough();
   const targetEncounter = activePlaythrough?.encounters?.[locationId];
-  return targetEncounter
-    ? field === "head"
-      ? targetEncounter.head
-      : targetEncounter.body
-    : null;
+  if (!targetEncounter) {
+    return null;
+  }
+
+  return field === "head" ? targetEncounter.head : targetEncounter.body;
+}
+
+function isEggPokemon(pokemon: PokemonOptionType | null | undefined) {
+  return pokemon ? isEggId(pokemon.id) : false;
+}
+
+function wouldCreateEggFusionInSingleEncounter(
+  isMovingPokemonEgg: boolean,
+  targetPokemon: ReadonlyArray<PokemonOptionType | null | undefined>,
+) {
+  if (isMovingPokemonEgg && targetPokemon.some(Boolean)) {
+    return true;
+  }
+
+  return targetPokemon.some(isEggPokemon);
+}
+
+function wouldCreateEggFusionInFusion(
+  isMovingPokemonEgg: boolean,
+  oppositeFieldPokemon: PokemonOptionType | null,
+) {
+  if (!oppositeFieldPokemon) {
+    return false;
+  }
+
+  return isMovingPokemonEgg || isEggPokemon(oppositeFieldPokemon);
+}
+
+function wouldCreateEggFusion(
+  movingPokemon: PokemonOptionType | null,
+  targetLocationId: string,
+  oppositeFieldPokemon: PokemonOptionType | null,
+) {
+  if (!movingPokemon) {
+    return false;
+  }
+
+  const isMovingPokemonEgg = isEggId(movingPokemon.id);
+  const activePlaythrough = getActivePlaythrough();
+  const targetEncounter = activePlaythrough?.encounters?.[targetLocationId];
+
+  if (targetEncounter && !targetEncounter.isFusion) {
+    return wouldCreateEggFusionInSingleEncounter(isMovingPokemonEgg, [
+      targetEncounter.head,
+      targetEncounter.body,
+    ]);
+  }
+
+  return wouldCreateEggFusionInFusion(isMovingPokemonEgg, oppositeFieldPokemon);
 }
 
 // Reusable component for action preview items
@@ -99,7 +147,7 @@ function ActionPreviewItem({
         <Icon className={`h-3 w-3 ${iconColor} flex-shrink-0`} />
         <span>{text}</span>
       </p>
-      {types.primary && (
+      {types.primary ? (
         <div className="ml-auto">
           <TypePills
             primary={types.primary}
@@ -108,7 +156,7 @@ function ActionPreviewItem({
             size="xs"
           />
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -178,7 +226,7 @@ function ActionPreview({
           types={existingTypes}
         />
 
-        {targetFusionTypes.primary && otherFieldPokemon && (
+        {targetFusionTypes.primary && otherFieldPokemon ? (
           <ActionPreviewItem
             icon={Dna}
             iconColor="text-purple-600 dark:text-purple-400"
@@ -186,9 +234,9 @@ function ActionPreview({
             text={`Will fuse with ${otherFieldPokemon.name} here`}
             types={targetFusionTypes}
           />
-        )}
+        ) : null}
 
-        {sourceFusionTypes.primary && remainingPokemon && (
+        {sourceFusionTypes.primary && remainingPokemon ? (
           <ActionPreviewItem
             icon={Dna}
             iconColor="text-green-600 dark:text-green-400"
@@ -196,7 +244,7 @@ function ActionPreview({
             text={`${existingPokemon.name} will fuse with ${remainingPokemon.name} at source`}
             types={sourceFusionTypes}
           />
-        )}
+        ) : null}
       </div>
     );
   }
@@ -230,9 +278,9 @@ function LocationItem({
   onSelect,
   movingPokemon,
 }: LocationItemProps) {
-  const handleSelect = () => {
+  const handleSelect = useCallback(() => {
     onSelect(location);
-  };
+  }, [location, onSelect]);
 
   const existingPokemon = getSlotPokemon(location.id, selectedTargetField);
 
@@ -245,70 +293,23 @@ function LocationItem({
     if (!existingPokemon) {
       return null;
     }
+
     const activePlaythrough = getActivePlaythrough();
     const sourceEncounter = activePlaythrough?.encounters?.[currentLocationId];
-    return sourceEncounter
-      ? moveTargetField === "head"
-        ? sourceEncounter.body
-        : sourceEncounter.head
-      : null;
+    if (!sourceEncounter) {
+      return null;
+    }
+
+    return moveTargetField === "head"
+      ? sourceEncounter.body
+      : sourceEncounter.head;
   })();
 
-  // Check if this move would result in egg fusion
-  const wouldCreateEggFusion = (() => {
-    if (!movingPokemon) {
-      return false;
-    }
-
-    // Check if the Pokemon being moved is an egg
-    const isMovingPokemonEgg = isEggId(movingPokemon.id);
-
-    // Get the encounter at the target location to check fusion status
-    const activePlaythrough = getActivePlaythrough();
-    const targetEncounter = activePlaythrough?.encounters?.[location.id];
-
-    // If the target encounter is not a fusion (isFusion = false),
-    // then no fusion will be created regardless of what's in the body slot
-    // UNLESS we're moving an egg or there's an egg in the target location
-    if (targetEncounter && !targetEncounter.isFusion) {
-      // For non-fusion encounters, only prevent if there's an egg involved
-      const headPokemon = targetEncounter.head;
-      const bodyPokemon = targetEncounter.body;
-
-      // If moving an egg and there's any Pokemon in the target location
-      if (isMovingPokemonEgg && (headPokemon || bodyPokemon)) {
-        return true;
-      }
-
-      // If there's an egg in the target location and we're moving a Pokemon
-      if (
-        (headPokemon && isEggId(headPokemon.id)) ||
-        (bodyPokemon && isEggId(bodyPokemon.id))
-      ) {
-        return true;
-      }
-
-      return false;
-    }
-
-    // For fusion encounters, check the opposite slot
-    const oppositeFieldPokemon = getSlotPokemon(
-      location.id,
-      selectedTargetField === "head" ? "body" : "head",
-    );
-
-    // If moving Pokemon is an egg and there's a Pokemon in the opposite slot, it would create egg fusion
-    if (isMovingPokemonEgg && oppositeFieldPokemon) {
-      return true;
-    }
-
-    // If there's an egg in the opposite slot and we're moving a Pokemon, it would create egg fusion
-    if (oppositeFieldPokemon && isEggId(oppositeFieldPokemon.id)) {
-      return true;
-    }
-
-    return false;
-  })();
+  const wouldCreateEggFusionAtTarget = wouldCreateEggFusion(
+    movingPokemon,
+    location.id,
+    otherFieldPokemon,
+  );
 
   return (
     <li
@@ -320,9 +321,9 @@ function LocationItem({
     >
       <button
         className={clsx("w-full p-3 text-left focus:outline-none", {
-          "cursor-not-allowed opacity-50": wouldCreateEggFusion,
+          "cursor-not-allowed opacity-50": wouldCreateEggFusionAtTarget,
         })}
-        disabled={wouldCreateEggFusion}
+        disabled={wouldCreateEggFusionAtTarget}
         onClick={handleSelect}
         type="button"
       >
@@ -337,12 +338,12 @@ function LocationItem({
                 ? "Custom location"
                 : `${location.region} • ${location.description}`}
             </p>
-            {wouldCreateEggFusion && (
+            {wouldCreateEggFusionAtTarget && (
               <p className="mt-1 text-red-500 text-xs dark:text-red-400">
                 Cannot fuse with egg
               </p>
             )}
-            {!wouldCreateEggFusion && (
+            {wouldCreateEggFusionAtTarget === false && (
               <ActionPreview
                 existingPokemon={existingPokemon}
                 movingPokemon={movingPokemon}
@@ -379,16 +380,18 @@ function MovingPokemonInfo({
         </div>
         <p className="font-medium text-gray-900 text-sm dark:text-white">
           Moving: {movingPokemon.name}
-          {isFusion && <> ({moveTargetField === "head" ? "Head" : "Body"})</>}
+          {isFusion ? (
+            <> ({moveTargetField === "head" ? "Head" : "Body"})</>
+          ) : null}
         </p>
         <div className="ml-auto">
-          {fusionTypes.primary && (
+          {fusionTypes.primary ? (
             <TypePills
               primary={fusionTypes.primary}
               secondary={fusionTypes.secondary}
               size="md"
             />
-          )}
+          ) : null}
         </div>
       </div>
     </div>
@@ -403,6 +406,13 @@ function TargetFieldSelector({
   selectedTargetField: "head" | "body";
   onTargetFieldChange: (field: "head" | "body") => void;
 }) {
+  const selectHead = useCallback(() => {
+    onTargetFieldChange("head");
+  }, [onTargetFieldChange]);
+  const selectBody = useCallback(() => {
+    onTargetFieldChange("body");
+  }, [onTargetFieldChange]);
+
   return (
     <fieldset>
       <legend className="mb-2 block font-medium text-gray-700 text-sm dark:text-gray-300">
@@ -417,7 +427,7 @@ function TargetFieldSelector({
               ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500",
           )}
-          onClick={() => onTargetFieldChange("head")}
+          onClick={selectHead}
           type="button"
         >
           <HeadIcon className="size-5" />
@@ -431,7 +441,7 @@ function TargetFieldSelector({
               ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500",
           )}
-          onClick={() => onTargetFieldChange("body")}
+          onClick={selectBody}
           type="button"
         >
           <BodyIcon className="size-5" />
@@ -585,16 +595,26 @@ function LocationSelector({
     moveTargetField,
   });
 
-  const handleLocationSelect = (location: CombinedLocation) => {
-    onSelectLocation(location.id, selectedTargetField);
-    resetState();
-    onClose();
-  };
+  const handleLocationSelect = useCallback(
+    (location: CombinedLocation) => {
+      onSelectLocation(location.id, selectedTargetField);
+      resetState();
+      onClose();
+    },
+    [onClose, onSelectLocation, resetState, selectedTargetField],
+  );
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     resetState();
     onClose();
-  };
+  }, [onClose, resetState]);
+
+  const handleSearchChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setSearchQuery(event.target.value);
+    },
+    [setSearchQuery],
+  );
 
   return (
     <Dialog
@@ -634,13 +654,13 @@ function LocationSelector({
             </button>
           </div>
 
-          {movingPokemon && (
+          {movingPokemon ? (
             <MovingPokemonInfo
               isFusion={isFusion}
               moveTargetField={moveTargetField}
               movingPokemon={movingPokemon}
             />
-          )}
+          ) : null}
 
           <TargetFieldSelector
             onTargetFieldChange={setSelectedTargetField}
@@ -657,7 +677,7 @@ function LocationSelector({
             <input
               className="w-full rounded-md border border-gray-300 py-2 pr-3 pl-10 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               id="location-selector-search"
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchChange}
               placeholder="Search locations or Pokemon names..."
               type="text"
               value={searchQuery}

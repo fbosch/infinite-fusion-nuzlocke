@@ -25,6 +25,13 @@ export default function ProgressBar({ className }: ProgressBarProps) {
     null,
   );
 
+  const handleCapturedMouseEnter = () => setHoveredSegment("captured");
+  const handleDeceasedMouseEnter = () => setHoveredSegment("deceased");
+  const handleMissedMouseEnter = () => setHoveredSegment("missed");
+  const handleUnencounteredMouseEnter = () =>
+    setHoveredSegment("unencountered");
+  const handleMouseLeave = () => setHoveredSegment(null);
+
   const { capturedCount, deceasedCount, missedCount, totalCount } = (() => {
     const allLocations = getLocationsSortedWithCustom(customLocations);
     const total = allLocations.length;
@@ -134,8 +141,8 @@ export default function ProgressBar({ className }: ProgressBarProps) {
               <span className="tabular-nums">{capturedCount}</span>
             </span>
           }
-          onMouseEnter={() => setHoveredSegment("captured")}
-          onMouseLeave={() => setHoveredSegment(null)}
+          onMouseEnter={handleCapturedMouseEnter}
+          onMouseLeave={handleMouseLeave}
           placement="bottom"
           tooltipId="encounter-progress-bar"
         >
@@ -161,8 +168,8 @@ export default function ProgressBar({ className }: ProgressBarProps) {
               <span className="tabular-nums">{deceasedCount}</span>
             </span>
           }
-          onMouseEnter={() => setHoveredSegment("deceased")}
-          onMouseLeave={() => setHoveredSegment(null)}
+          onMouseEnter={handleDeceasedMouseEnter}
+          onMouseLeave={handleMouseLeave}
           placement="bottom"
           tooltipId="encounter-progress-bar"
         >
@@ -188,8 +195,8 @@ export default function ProgressBar({ className }: ProgressBarProps) {
               <span className="tabular-nums">{missedCount}</span>
             </span>
           }
-          onMouseEnter={() => setHoveredSegment("missed")}
-          onMouseLeave={() => setHoveredSegment(null)}
+          onMouseEnter={handleMissedMouseEnter}
+          onMouseLeave={handleMouseLeave}
           placement="bottom"
           tooltipId="encounter-progress-bar"
         >
@@ -212,8 +219,8 @@ export default function ProgressBar({ className }: ProgressBarProps) {
               <span className="tabular-nums">{unencounteredCount}</span>
             </span>
           }
-          onMouseEnter={() => setHoveredSegment("unencountered")}
-          onMouseLeave={() => setHoveredSegment(null)}
+          onMouseEnter={handleUnencounteredMouseEnter}
+          onMouseLeave={handleMouseLeave}
           placement="bottom"
           tooltipId="encounter-progress-bar"
         >
