@@ -173,9 +173,9 @@ function consolidateSafariZoneAreas(
     encounterType: EncounterType;
   }> = [];
 
-  safariEncounters.forEach((area) => {
+  for (const area of safariEncounters) {
     allSafariEncounters.push(...area.encounters);
-  });
+  }
 
   // Remove duplicates based on both pokemonId and encounterType
   const uniqueEncounters = allSafariEncounters.filter(

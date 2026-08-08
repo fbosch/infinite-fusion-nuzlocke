@@ -3,7 +3,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { StrictMode } from "react";
 import { describe, expect, it } from "vitest";
-import { useKeyPressed } from "../useKeyPressed";
+import { useKeyPressed } from "../use-key-pressed";
 
 describe("useKeyPressed", () => {
   it("keeps a key pressed across the external-store update", () => {

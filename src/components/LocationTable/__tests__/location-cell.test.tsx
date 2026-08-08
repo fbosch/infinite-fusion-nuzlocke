@@ -36,7 +36,7 @@ vi.mock("@/loaders", () => ({
   isCustomLocation: () => false,
 }));
 
-vi.mock("@/components/CursorTooltip", () => ({
+vi.mock("@/components/cursor-tooltip", () => ({
   CursorTooltip: ({
     children,
     content,
@@ -59,7 +59,7 @@ vi.mock("@/constants/special-locations", () => ({
   isStarterLocation: () => false,
 }));
 
-import LocationCell from "../LocationCell";
+import LocationCell from "../location-cell";
 
 const location = {
   description: "A quiet starting route.",

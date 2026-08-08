@@ -1,6 +1,6 @@
 import * as Comlink from "comlink";
 import { pokemonData } from "@/lib/data";
-import { SearchCore } from "@/lib/searchCore";
+import { SearchCore } from "@/lib/search-core";
 import type { Pokemon } from "@/types/pokemon";
 
 let mainThreadInstance: SearchCore | null = null;

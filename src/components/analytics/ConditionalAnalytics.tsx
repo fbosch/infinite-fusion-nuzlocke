@@ -1,8 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { useMounted } from "@/hooks/useMounted";
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useMounted } from "@/hooks/use-mounted";
 import { isAnalyticsProductionEnvironment } from "@/lib/analytics/trackEvent";
 import {
   type ConsentPreferences,

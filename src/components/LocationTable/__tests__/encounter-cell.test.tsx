@@ -4,7 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { EncounterCell } from "../EncounterCell";
+import { EncounterCell } from "../encounter-cell";
 
 const valuableEncounterText =
   /Pikachu and Charmander with the status "Captured"/;
@@ -31,7 +31,7 @@ vi.mock("next/image", () => ({
   ),
 }));
 
-vi.mock("@/components/CursorTooltip", () => ({
+vi.mock("@/components/cursor-tooltip", () => ({
   CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
 }));
 
@@ -72,7 +72,7 @@ vi.mock("@/components/ConfirmationDialog", () => ({
   },
 }));
 
-vi.mock("@/components/PokemonCombobox/PokemonCombobox", () => ({
+vi.mock("@/components/PokemonCombobox/pokemon-combobox", () => ({
   PokemonCombobox: ({
     comboboxId,
     onChange,

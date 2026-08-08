@@ -12,7 +12,7 @@ import type { PokemonOptionType } from "@/loaders/pokemon";
 import { isEgg } from "@/loaders/pokemon";
 import { dragActions, dragStore } from "@/stores/dragStore";
 import { playthroughActions } from "@/stores/playthroughs/index";
-import { CursorTooltip } from "../CursorTooltip";
+import { CursorTooltip } from "../cursor-tooltip";
 
 interface FusionToggleButtonProps {
   isFusion: boolean;

@@ -11,13 +11,13 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import clsx from "clsx";
 import { Atom, ChevronDown, Undo2 } from "lucide-react";
 import type React from "react";
-import { useShiftKey } from "@/hooks/useKeyPressed";
+import { useShiftKey } from "@/hooks/use-key-pressed";
 import { emitEvolutionEvent } from "@/lib/events";
 import {
   type PokemonOptionType,
   usePokemonEvolutionData,
 } from "@/loaders/pokemon";
-import { CursorTooltip } from "../CursorTooltip";
+import { CursorTooltip } from "../cursor-tooltip";
 import { PokemonSprite } from "../PokemonSprite";
 
 interface PokemonEvolutionButtonProps {
@@ -286,14 +286,23 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   }
 
   // For single evolution or devolution mode, render a simple button
-  if (isDevolutionMode || availableEvolutions.length === 1) {
+  if (isDevolutionMode && availablePreEvolution) {
     return (
       <DirectEvolutionButton
         isDevolutionMode={isDevolutionMode}
         onClick={() => handleEvolution(undefined, isDevolutionMode)}
-        pokemon={
-          isDevolutionMode ? availablePreEvolution! : availableEvolutions[0]!
-        }
+        pokemon={availablePreEvolution}
+        showDevolutionHint={false}
+      />
+    );
+  }
+
+  if (availableEvolutions.length === 1) {
+    return (
+      <DirectEvolutionButton
+        isDevolutionMode={isDevolutionMode}
+        onClick={() => handleEvolution(undefined, isDevolutionMode)}
+        pokemon={availableEvolutions[0]}
         showDevolutionHint={!isDevolutionMode && !!availablePreEvolution}
       />
     );

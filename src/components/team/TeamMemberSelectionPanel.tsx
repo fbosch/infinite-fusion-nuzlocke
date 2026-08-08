@@ -2,7 +2,7 @@
 
 import { ArrowLeftRight } from "lucide-react";
 import Image from "next/image";
-import { CursorTooltip } from "@/components/CursorTooltip";
+import { CursorTooltip } from "@/components/cursor-tooltip";
 import { DNA_REVERSER_ICON } from "@/constants/items";
 import { PokemonGridItem } from "./PokemonGridItem";
 import { PokemonSlotSelector } from "./PokemonSlotSelector";

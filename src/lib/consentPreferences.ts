@@ -1,4 +1,4 @@
-import type { SafeParser } from "@/hooks/useLocalStorage";
+import type { SafeParser } from "@/hooks/use-local-storage";
 
 export interface ConsentPreferences {
   analytics: boolean;

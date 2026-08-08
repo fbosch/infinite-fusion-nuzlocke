@@ -17,10 +17,10 @@ import { useCustomLocations } from "@/stores/playthroughs/hooks";
 import { settingsStore } from "@/stores/settings";
 import usePokemonTypes from "../../hooks/usePokemonTypes";
 import ContextMenu from "../context-menu";
-import { CursorTooltip } from "../CursorTooltip";
+import { CursorTooltip } from "../cursor-tooltip";
 import { PokemonSprite } from "../PokemonSprite";
 import { DraggableSpriteTooltipContent } from "./DraggableSpriteTooltipContent";
-import { getDraggableComboboxSpriteMenuOptions } from "./draggableComboboxSpriteMenu";
+import { getDraggableComboboxSpriteMenuOptions } from "./draggable-combobox-sprite-menu";
 
 const LocationSelector = dynamic(
   () =>

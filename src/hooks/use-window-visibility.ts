@@ -20,25 +20,30 @@ function subscribe(callback: () => void) {
     }
   }
 
-  listeners.add(callback);
+  const subscribedListeners = listeners;
+  subscribedListeners.add(callback);
 
   // Return cleanup function
   return () => {
-    listeners?.delete(callback);
+    subscribedListeners.delete(callback);
   };
 }
 
 function notifyListeners() {
-  if (typeof document !== "undefined") {
-    const newIsVisible = document.visibilityState === "visible";
-    const newIsFocused = document.hasFocus();
+  if (typeof document === "undefined" || listeners === null) {
+    return;
+  }
 
-    // Always update and notify, even if values haven't changed
-    // This ensures React gets notified of all state changes
-    isVisible = newIsVisible;
-    isFocused = newIsFocused;
+  const newIsVisible = document.visibilityState === "visible";
+  const newIsFocused = document.hasFocus();
 
-    listeners?.forEach((listener) => listener());
+  // Always update and notify, even if values haven't changed
+  // This ensures React gets notified of all state changes
+  isVisible = newIsVisible;
+  isFocused = newIsFocused;
+
+  for (const listener of listeners) {
+    listener();
   }
 }
 

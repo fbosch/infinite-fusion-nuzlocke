@@ -5,8 +5,8 @@ import { ArrowLeftRight } from "lucide-react";
 import Image from "next/image";
 import { useReducer, useRef, useState } from "react";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
-import { CursorTooltip } from "@/components/CursorTooltip";
-import { PokemonCombobox } from "@/components/PokemonCombobox/PokemonCombobox";
+import { CursorTooltip } from "@/components/cursor-tooltip";
+import { PokemonCombobox } from "@/components/PokemonCombobox/pokemon-combobox";
 import { DNA_REVERSER_ICON } from "@/constants/items";
 import { useEncountersForLocation } from "@/loaders/encounters";
 import { getLocationById } from "@/loaders/locations";
@@ -173,7 +173,7 @@ export function EncounterCell({
     const pokemonData = routeEncounterData.find((p) => p.id === pokemonId);
     return pokemonData?.sources?.[0] || null;
   };
-  const isFusion = encounterData.isFusion;
+  const { isFusion } = encounterData;
 
   // Use reducer for confirmation dialog state
   const [confirmationState, dispatch] = useReducer(
@@ -195,7 +195,9 @@ export function EncounterCell({
   );
 
   // Check if a pokemon has valuable data that would be lost when clearing
-  const hasValuableData = (pokemon: PokemonOptionType | null): boolean => {
+  const hasValuableData = (
+    pokemon: PokemonOptionType | null,
+  ): pokemon is PokemonOptionType => {
     if (!pokemon) {
       return false;
     }
@@ -249,7 +251,7 @@ export function EncounterCell({
       if (hasValuableData(currentPokemon)) {
         // Show confirmation dialog
         dispatch({
-          payload: { field, pokemon: currentPokemon! },
+          payload: { field, pokemon: currentPokemon },
           type: "SHOW_CLEAR_CONFIRMATION",
         });
         return;

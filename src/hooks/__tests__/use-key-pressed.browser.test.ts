@@ -5,7 +5,7 @@ import {
   useControlKey,
   useKeyPressed,
   useShiftKey,
-} from "../useKeyPressed";
+} from "../use-key-pressed";
 
 // Helper functions to simulate real keyboard events
 function dispatchKeyDown(key: string) {

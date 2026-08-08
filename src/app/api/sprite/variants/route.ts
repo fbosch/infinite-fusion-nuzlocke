@@ -6,11 +6,12 @@ import {
 import type { SpriteVariantsResponse } from "@/types/sprites";
 
 export const revalidate = 86_400;
+const SPRITE_ID_REGEX = /^\d+(\.\d+)?$/;
 
 /**
  * Handle CORS preflight requests
  */
-export async function OPTIONS() {
+export function OPTIONS() {
   const response = new NextResponse(null, { status: 200 });
 
   // Set CORS headers
@@ -77,7 +78,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Validate id format (should be like "25.125" or just "25")
-    if (!/^\d+(\.\d+)?$/.test(id)) {
+    if (!SPRITE_ID_REGEX.test(id)) {
       const errorResponse = NextResponse.json(
         {
           error:
@@ -132,7 +133,7 @@ async function processSpriteVariants(
   const variants: string[] = [];
 
   // Check variants sequentially to maintain order and break early
-  for (let i = 0; i < maxVariants; i++) {
+  for (let i = 0; i < maxVariants; i += 1) {
     const variant = getSpriteVariantSuffix(i);
     const url = generateSpriteVariantUrl(id, variant);
 

@@ -19,7 +19,7 @@ export const pokemonQueries = {
       gcTime: Number.POSITIVE_INFINITY,
       queryFn: async () => {
         // Always use API for individual lookups to avoid circular dependency
-        return pokemonApiService.getPokemonById(id);
+        return await pokemonApiService.getPokemonById(id);
       },
       queryKey: ["pokemon", "byId", id],
       staleTime: Number.POSITIVE_INFINITY,
@@ -31,7 +31,7 @@ export const pokemonQueries = {
       gcTime: Number.POSITIVE_INFINITY,
       queryFn: async () => {
         // Always use API for multiple lookups to avoid circular dependency
-        return pokemonApiService.getPokemonByIds(ids);
+        return await pokemonApiService.getPokemonByIds(ids);
       },
       queryKey: ["pokemon", "byIds", ids],
       staleTime: Number.POSITIVE_INFINITY,

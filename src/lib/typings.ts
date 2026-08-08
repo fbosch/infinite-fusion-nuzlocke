@@ -88,8 +88,9 @@ function getEffectiveTypeOrder(pokemon: Pokemon): EffectiveTypes {
   const id = pokemon.nationalDexId;
   const types = pokemon.types.map((t) => t.name.toLowerCase());
 
-  if (id in latestSwappedTypeMap) {
-    const [p, s] = latestSwappedTypeMap[id]!;
+  const swappedTypes = latestSwappedTypeMap[id];
+  if (swappedTypes) {
+    const [p, s] = swappedTypes;
     return { primary: p, secondary: s };
   }
 

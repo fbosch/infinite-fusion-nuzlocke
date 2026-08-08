@@ -26,7 +26,7 @@ import {
 } from "react";
 import { twMerge } from "tailwind-merge";
 import { match } from "ts-pattern";
-import { CursorTooltip } from "./CursorTooltip";
+import { CursorTooltip } from "./cursor-tooltip";
 
 // Filter out separators at the beginning and end of the items array
 const VIEWPORT_EDGE_PADDING = 8;

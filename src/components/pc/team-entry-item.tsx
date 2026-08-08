@@ -12,12 +12,12 @@ import {
 import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
 import PokeballIcon from "@/assets/images/pokeball.svg";
-import { CursorTooltip } from "@/components/CursorTooltip";
+import { CursorTooltip } from "@/components/cursor-tooltip";
 import { ArtworkVariantButton } from "@/components/PokemonSummaryCard/ArtworkVariantButton";
 import {
   FusionSprite,
   type FusionSpriteHandle,
-} from "@/components/PokemonSummaryCard/FusionSprite";
+} from "@/components/PokemonSummaryCard/fusion-sprite";
 import { TeamMemberContextMenu } from "@/components/PokemonSummaryCard/team-member-context-menu";
 import { getNicknameText } from "@/components/PokemonSummaryCard/utils";
 import { TypePills } from "@/components/TypePills";

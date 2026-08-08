@@ -1,6 +1,8 @@
 import Fuse, { type IFuseOptions } from "fuse.js";
 import type { Pokemon } from "@/loaders/pokemon";
 
+const NUMERIC_QUERY_REGEX = /^\d+$/;
+
 export interface PokemonData {
   id: number;
   name: string;
@@ -62,6 +64,7 @@ export class SearchCore {
         }));
 
         this.fuse = new Fuse(this.pokemonData, this.fuseOptions);
+        await Promise.resolve();
       } catch (error) {
         console.error("Failed to initialize SearchCore:", error);
         throw error;
@@ -77,14 +80,14 @@ export class SearchCore {
    * Search for Pokemon by name or ID
    */
   search(query: string): SearchResult[] {
-    if (!(this.fuse && this.pokemonData && query?.trim())) {
+    if (!(this.fuse && this.pokemonData && query.trim())) {
       return [];
     }
 
     const trimmedQuery = query.trim();
 
     // Numeric search (by ID) - exact match for better performance
-    if (/^\d+$/.test(trimmedQuery)) {
+    if (NUMERIC_QUERY_REGEX.test(trimmedQuery)) {
       const queryNum = Number.parseInt(trimmedQuery, 10);
       const matches: SearchResult[] = [];
       for (const pokemon of this.pokemonData) {

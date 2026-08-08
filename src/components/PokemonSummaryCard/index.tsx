@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { MousePointer, Palette, SquareArrowUpRight } from "lucide-react";
 import type React from "react";
 import { useRef } from "react";
-import { CursorTooltip } from "@/components/CursorTooltip";
+import { CursorTooltip } from "@/components/cursor-tooltip";
 import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
 import { usePreferredVariantState, useSpriteCredits } from "@/hooks/useSprite";
 import { getSpriteId } from "@/lib/sprites";
@@ -10,7 +10,7 @@ import type { PokemonOptionType } from "@/loaders/pokemon";
 import { formatArtistCredits } from "@/utils/formatCredits";
 import { TypePills } from "../TypePills";
 import { ArtworkVariantButton } from "./ArtworkVariantButton";
-import { FusionSprite, type FusionSpriteHandle } from "./FusionSprite";
+import { FusionSprite, type FusionSpriteHandle } from "./fusion-sprite";
 import { PokemonContextMenu } from "./pokemon-context-menu";
 import { getSummaryCardDisplay } from "./summaryCardModel";
 

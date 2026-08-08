@@ -13,8 +13,8 @@ import clsx from "clsx";
 import { Monitor, Moon, Move, Rabbit, Sun, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useSnapshot } from "valtio";
-import { useMounted } from "@/hooks/useMounted";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useMounted } from "@/hooks/use-mounted";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { settingsActions, settingsStore } from "@/stores/settings";
 
 interface SettingsModalProps {

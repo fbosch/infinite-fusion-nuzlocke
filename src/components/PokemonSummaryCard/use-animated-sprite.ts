@@ -23,22 +23,24 @@ export function useAnimatedSprite({
     }
 
     hoverRef.current = false;
-    [imageRef, shadowRef, overlayRef, raysSvgRef].forEach((ref) => {
-      ref.current?.getAnimations().forEach((animation) => animation.cancel());
-    });
+    for (const ref of [imageRef, shadowRef, overlayRef, raysSvgRef]) {
+      for (const animation of ref.current?.getAnimations() ?? []) {
+        animation.cancel();
+      }
+    }
   }, [reducedMotion]);
 
   const handleMouseEnter = () => {
     hoverRef.current = true;
     if (imageRef.current && canAnimate && !reducedMotion) {
       // Cancel any running animations so the new one will replay
-      imageRef.current.getAnimations().forEach((anim) => {
+      for (const anim of imageRef.current.getAnimations()) {
         anim.cancel();
-      });
+      }
       if (shadowRef.current) {
-        shadowRef.current.getAnimations().forEach((anim) => {
+        for (const anim of shadowRef.current.getAnimations()) {
           anim.cancel();
-        });
+        }
       }
 
       const animateSprite = () => {
@@ -98,19 +100,19 @@ export function useAnimatedSprite({
 
     window.requestAnimationFrame(() => {
       if (animation) {
-        animation.forEach((a) => {
+        for (const a of animation) {
           if (a.playState === "running") {
             a.updatePlaybackRate(-1);
           }
-        });
+        }
       }
 
       if (shadowAnimation) {
-        shadowAnimation.forEach((a) => {
+        for (const a of shadowAnimation) {
           if (a.playState === "running") {
             a.updatePlaybackRate(-1);
           }
-        });
+        }
       }
     });
   };
@@ -121,18 +123,16 @@ export function useAnimatedSprite({
     }
 
     // Cancel any existing animations
-    imageRef.current?.getAnimations().forEach((a) => {
-      a.cancel();
-    });
-    shadowRef.current?.getAnimations().forEach((a) => {
-      a.cancel();
-    });
-    overlayRef.current?.getAnimations().forEach((a) => {
-      a.cancel();
-    });
-    raysSvgRef.current?.getAnimations().forEach((a) => {
-      a.cancel();
-    });
+    for (const element of [
+      imageRef.current,
+      shadowRef.current,
+      overlayRef.current,
+      raysSvgRef.current,
+    ]) {
+      for (const animation of element?.getAnimations() ?? []) {
+        animation.cancel();
+      }
+    }
 
     // Sprite pulsing + brightness flashes without overriding base scale/transform
     imageRef.current?.animate(

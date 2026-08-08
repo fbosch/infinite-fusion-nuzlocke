@@ -2,6 +2,14 @@ interface ImportErrorContentProps {
   errorMessage: string;
 }
 
+const BULLET_PREFIX_REGEX = /^•\s*/;
+const FINAL_FIELD_PATH_REGEX = /at\s+.*\.([^.]+)$/;
+const SINGLE_FIELD_PATH_REGEX = /at\s+([^.]+)$/;
+const EXPECTED_ONE_OF_REGEX = /expected\s+one\s+of\s+/;
+const INVALID_OPTION_REGEX = /Invalid\s+option:\s*/;
+const INVALID_TYPE_REGEX = /Invalid\s+type:\s*/;
+const QUOTED_OPTION_REGEX = /"([^"]+)"\|"([^"]+)"\|"([^"]+)"/;
+
 export function ImportErrorContent({ errorMessage }: ImportErrorContentProps) {
   // Check if this is a Zod validation error or a general import error
   if (errorMessage.includes("Validation failed:")) {
@@ -32,14 +40,14 @@ export function ImportErrorContent({ errorMessage }: ImportErrorContentProps) {
     const formatErrorMessage = (error: string): string => {
       // Remove Zod's technical formatting
       const formatted = error
-        .replace(/^•\s*/, "") // Remove bullet point
-        .replace(/at\s+.*\.([^.]+)$/, "in the $1 field") // Extract final field name after last dot
-        .replace(/at\s+([^.]+)$/, "in the $1 field") // Handle single-level paths
-        .replace(/expected\s+one\s+of\s+/, "must be one of: ") // Make enum errors clearer
-        .replace(/Invalid\s+option:\s*/, "Invalid value: ") // Simplify invalid option message
-        .replace(/Invalid\s+type:\s*/, "Invalid value: ") // Simplify invalid type message
+        .replace(BULLET_PREFIX_REGEX, "") // Remove bullet point
+        .replace(FINAL_FIELD_PATH_REGEX, "in the $1 field") // Extract final field name after last dot
+        .replace(SINGLE_FIELD_PATH_REGEX, "in the $1 field") // Handle single-level paths
+        .replace(EXPECTED_ONE_OF_REGEX, "must be one of: ") // Make enum errors clearer
+        .replace(INVALID_OPTION_REGEX, "Invalid value: ") // Simplify invalid option message
+        .replace(INVALID_TYPE_REGEX, "Invalid value: ") // Simplify invalid type message
         .replace(/Required/, "This field is required") // Make required field errors clearer
-        .replace(/"([^"]+)"\|"([^"]+)"\|"([^"]+)"/, "$1, $2, $3"); // Convert pipe-separated to comma-separated
+        .replace(QUOTED_OPTION_REGEX, "$1, $2, $3"); // Convert pipe-separated to comma-separated
 
       return formatted;
     };

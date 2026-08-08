@@ -4,9 +4,9 @@ import clsx from "clsx";
 import { Loader2, RefreshCcw, RefreshCw, RefreshCwOff } from "lucide-react";
 import type React from "react";
 import { twMerge } from "tailwind-merge";
-import { useShiftKey } from "@/hooks/useKeyPressed";
+import { useShiftKey } from "@/hooks/use-key-pressed";
 import { usePreferredVariantState, useSpriteVariants } from "@/hooks/useSprite";
-import { CursorTooltip } from "../CursorTooltip";
+import { CursorTooltip } from "../cursor-tooltip";
 
 interface ArtworkVariantButtonProps {
   bodyId?: number;

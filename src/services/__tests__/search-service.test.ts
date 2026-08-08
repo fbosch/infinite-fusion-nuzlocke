@@ -93,7 +93,7 @@ describe("SearchService", () => {
 
   describe("search functionality", () => {
     it("should perform search successfully", async () => {
-      const { SearchCore } = await import("@/lib/searchCore");
+      const { SearchCore } = await import("@/lib/search-core");
       const mockInstance = {
         initialize: vi.fn().mockResolvedValue(undefined),
         isReady: vi.fn().mockReturnValue(true),
@@ -111,7 +111,7 @@ describe("SearchService", () => {
     });
 
     it("should return empty array on search failure", async () => {
-      const { SearchCore } = await import("@/lib/searchCore");
+      const { SearchCore } = await import("@/lib/search-core");
       const mockInstance = {
         initialize: vi.fn().mockResolvedValue(undefined),
         isReady: vi.fn().mockReturnValue(true),
@@ -130,7 +130,7 @@ describe("SearchService", () => {
     });
 
     it("should handle empty query", async () => {
-      const { SearchCore } = await import("@/lib/searchCore");
+      const { SearchCore } = await import("@/lib/search-core");
       const mockInstance = {
         initialize: vi.fn().mockResolvedValue(undefined),
         isReady: vi.fn().mockReturnValue(true),
@@ -148,7 +148,7 @@ describe("SearchService", () => {
     });
 
     it("should handle special characters in query", async () => {
-      const { SearchCore } = await import("@/lib/searchCore");
+      const { SearchCore } = await import("@/lib/search-core");
       const mockInstance = {
         initialize: vi.fn().mockResolvedValue(undefined),
         isReady: vi.fn().mockReturnValue(true),
@@ -168,7 +168,7 @@ describe("SearchService", () => {
 
   describe("error handling", () => {
     it("should handle search method errors gracefully", async () => {
-      const { SearchCore } = await import("@/lib/searchCore");
+      const { SearchCore } = await import("@/lib/search-core");
       const mockInstance = {
         initialize: vi.fn().mockResolvedValue(undefined),
         isReady: vi.fn().mockReturnValue(true),
@@ -187,7 +187,7 @@ describe("SearchService", () => {
     });
 
     it("should handle async search errors gracefully", async () => {
-      const { SearchCore } = await import("@/lib/searchCore");
+      const { SearchCore } = await import("@/lib/search-core");
       const mockInstance = {
         initialize: vi.fn().mockResolvedValue(undefined),
         isReady: vi.fn().mockReturnValue(true),
@@ -208,7 +208,7 @@ describe("SearchService", () => {
 
   describe("edge cases", () => {
     it("should handle null/undefined query gracefully", async () => {
-      const { SearchCore } = await import("@/lib/searchCore");
+      const { SearchCore } = await import("@/lib/search-core");
       const mockInstance = {
         initialize: vi.fn().mockResolvedValue(undefined),
         isReady: vi.fn().mockReturnValue(true),
@@ -229,7 +229,7 @@ describe("SearchService", () => {
     });
 
     it("should handle very long queries", async () => {
-      const { SearchCore } = await import("@/lib/searchCore");
+      const { SearchCore } = await import("@/lib/search-core");
       const mockInstance = {
         initialize: vi.fn().mockResolvedValue(undefined),
         isReady: vi.fn().mockReturnValue(true),
@@ -248,7 +248,7 @@ describe("SearchService", () => {
     });
 
     it("should handle unicode characters in query", async () => {
-      const { SearchCore } = await import("@/lib/searchCore");
+      const { SearchCore } = await import("@/lib/search-core");
       const mockInstance = {
         initialize: vi.fn().mockResolvedValue(undefined),
         isReady: vi.fn().mockReturnValue(true),

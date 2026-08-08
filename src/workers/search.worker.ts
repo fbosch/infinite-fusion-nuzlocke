@@ -1,5 +1,5 @@
 import { expose } from "comlink";
-import { SearchCore } from "@/lib/searchCore";
+import { SearchCore } from "@/lib/search-core";
 import type { Pokemon } from "@/loaders/pokemon";
 
 const searchCore = new SearchCore();

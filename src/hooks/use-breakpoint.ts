@@ -7,7 +7,7 @@ import {
 
 // Create a simple store that uses matchMedia for breakpoint detection
 const createBreakpointStore = () => {
-  let listeners: (() => void)[] = [];
+  let listeners: Array<() => void> = [];
   const mediaQueries: MediaQueryList[] = [];
 
   const subscribe = (listener: () => void) => {
@@ -16,11 +16,11 @@ const createBreakpointStore = () => {
     // Set up matchMedia listeners if not already done
     if (mediaQueries.length === 0 && typeof window !== "undefined") {
       // Create media queries for each breakpoint
-      Object.values(breakpoints).forEach((width) => {
+      for (const width of Object.values(breakpoints)) {
         const query = window.matchMedia(`(min-width: ${width}px)`);
         query.addEventListener("change", notify);
         mediaQueries.push(query);
-      });
+      }
     }
 
     return () => {
@@ -37,7 +37,9 @@ const createBreakpointStore = () => {
   };
 
   const notify = () => {
-    listeners.forEach((listener) => listener());
+    for (const listener of listeners) {
+      listener();
+    }
   };
 
   return { getSnapshot, subscribe };

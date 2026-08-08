@@ -4,7 +4,7 @@ import type React from "react";
 import { twMerge } from "tailwind-merge";
 import type { TypeName } from "@/lib/typings";
 import { ALL_TYPES } from "@/lib/typings";
-import { CursorTooltip } from "./CursorTooltip";
+import { CursorTooltip } from "./cursor-tooltip";
 
 const typeColors: Record<TypeName, string> = {
   bug: "bg-gradient-to-b from-[#A4B235] to-[#C8D840] dark:from-[#849215] dark:to-[#A8B820]",

@@ -1,6 +1,6 @@
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { useMounted } from "../useMounted";
+import { useMounted } from "../use-mounted";
 
 function MountedValue() {
   return (

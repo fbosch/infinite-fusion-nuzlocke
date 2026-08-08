@@ -6,7 +6,7 @@ import {
 import { useDebounce } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 import { pokemonData, pokemonQueries } from "@/lib/queryClient";
-import { SearchCore } from "@/lib/searchCore";
+import { SearchCore } from "@/lib/search-core";
 import searchService from "@/services/searchService";
 import type { Pokemon } from "@/types/pokemon";
 

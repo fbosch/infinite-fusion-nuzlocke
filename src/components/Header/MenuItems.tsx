@@ -1,7 +1,7 @@
 "use client";
 import clsx from "clsx";
 import { Computer, Settings } from "lucide-react";
-import { CursorTooltip } from "@/components/CursorTooltip";
+import { CursorTooltip } from "@/components/cursor-tooltip";
 
 const menuActionClassName = clsx(
   "inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-[3px] border font-semibold text-xs lg:w-auto lg:gap-1.5 lg:px-1.5",

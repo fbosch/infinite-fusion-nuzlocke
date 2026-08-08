@@ -3,7 +3,7 @@ import { TrashIcon } from "lucide-react";
 import { useState } from "react";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { playthroughActions } from "@/stores/playthroughs";
-import { CursorTooltip } from "../../CursorTooltip";
+import { CursorTooltip } from "../../cursor-tooltip";
 
 interface RemoveLocationButtonProps {
   locationId: string;

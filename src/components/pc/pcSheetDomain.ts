@@ -22,7 +22,7 @@ export function getDeceasedEntries(
 ): PCEntry[] {
   const entries: PCEntry[] = [];
 
-  Object.entries(encounters || {}).forEach(([locationId, data]) => {
+  for (const [locationId, data] of Object.entries(encounters || {})) {
     const locationName = getPCEntryLocationName(locationId, idToName);
 
     if (isPokemonDeceased(data.head)) {
@@ -42,7 +42,7 @@ export function getDeceasedEntries(
         locationName,
       });
     }
-  });
+  }
 
   return entries;
 }
@@ -53,7 +53,7 @@ export function getStoredEntries(
 ): PCEntry[] {
   const entries: PCEntry[] = [];
 
-  Object.entries(encounters || {}).forEach(([locationId, data]) => {
+  for (const [locationId, data] of Object.entries(encounters || {})) {
     const headStored = isPokemonStored(data.head);
     const bodyStored = isPokemonStored(data.body);
 
@@ -65,7 +65,7 @@ export function getStoredEntries(
         locationName: getPCEntryLocationName(locationId, idToName),
       });
     }
-  });
+  }
 
   return entries;
 }

@@ -2,6 +2,8 @@ import clsx from "clsx";
 import { PokemonSprite } from "@/components/PokemonSprite";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 
+const GRAVEYARD_LOCATION_SUFFIX_REGEX = /-head$|-body$/;
+
 interface GraveyardGridItemProps {
   entry: {
     locationId: string;
@@ -21,7 +23,10 @@ export function GraveyardGridItem({
 
   const handleClick = () => {
     // Extract the original location ID by removing the -head or -body suffix
-    const originalLocationId = entry.locationId.replace(/-head$|-body$/, "");
+    const originalLocationId = entry.locationId.replace(
+      GRAVEYARD_LOCATION_SUFFIX_REGEX,
+      "",
+    );
     onLocationClick(originalLocationId);
   };
 

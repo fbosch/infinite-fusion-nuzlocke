@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { useLocalStorage } from "../useLocalStorage";
+import { useLocalStorage } from "../use-local-storage";
 
 describe("useLocalStorage", () => {
   afterEach(() => {

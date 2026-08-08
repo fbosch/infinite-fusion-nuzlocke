@@ -11,7 +11,7 @@ import { useEncounters } from "@/stores/playthroughs/hooks";
 import type { EncounterData } from "@/stores/playthroughs/types";
 import { settingsStore } from "@/stores/settings";
 import { isStarterLocation } from "../../constants/special-locations";
-import { CursorTooltip } from "../CursorTooltip";
+import { CursorTooltip } from "../cursor-tooltip";
 
 interface LocationCellProps {
   location: CombinedLocation;
@@ -71,7 +71,7 @@ export default function LocationCell({
       return;
     }
 
-    encounterUids.forEach((uid) => {
+    for (const uid of encounterUids) {
       const element = document.querySelector(
         `[data-uid="${uid}"]`,
       ) as HTMLElement;
@@ -89,7 +89,7 @@ export default function LocationCell({
           }
         }
       }
-    });
+    }
   }, [isTooltipHovered, encounterUids, shouldShowOriginalEncounter]);
 
   const getTooltipContent = (() => {

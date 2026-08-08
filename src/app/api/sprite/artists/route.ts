@@ -2,21 +2,29 @@ import { type NextRequest, NextResponse } from "next/server";
 
 // Cache for 2 weeks (artists update monthly, so 2 weeks is safe)
 const CACHE_DURATION = 60 * 60 * 24 * 14; // 14 days in seconds
+const ARTIST_LINK_REGEX = /<a[^>]*>([^<]+)<\/a>/g;
+const ARTIST_NAME_REGEX = /<a[^>]*>([^<]+)<\/a>/;
+const ARTISTS_SPAN_REGEX = /<span class="artists">([\s\S]*?)<\/span>/;
+const BASE_DEX_ENTRY_REGEX =
+  /<article class="dex-entry sprite-variant-main">[\s\S]*?<figcaption>[\s\S]*?<\/figcaption>/;
+const FIGCAPTION_REGEX = /<figcaption>[\s\S]*?<\/figcaption>/;
+const SPRITE_ARTICLE_REGEX = /<article class="sprite-preview[^"]*">[\s\S]*?<\/article>/g;
+const SPRITE_ID_REGEX = /href="\/sprite\/pif\/([^"/]+)/;
 
 const extractArtists = (html: string): string[] => {
-  const artistsMatch = html.match(/<span class="artists">([\s\S]*?)<\/span>/);
+  const artistsMatch = html.match(ARTISTS_SPAN_REGEX);
   if (!artistsMatch) {
     return [];
   }
 
-  const artistLinks = artistsMatch[1].match(/<a[^>]*>([^<]+)<\/a>/g);
+  const artistLinks = artistsMatch[1].match(ARTIST_LINK_REGEX);
   if (!artistLinks) {
     return [];
   }
 
   const artists: string[] = [];
   for (const link of artistLinks) {
-    const name = link.match(/<a[^>]*>([^<]+)<\/a>/)?.[1] || "";
+    const name = link.match(ARTIST_NAME_REGEX)?.[1] || "";
     if (name.trim()) {
       artists.push(name);
     }
@@ -30,7 +38,7 @@ const extractArtists = (html: string): string[] => {
 const extractArtistCredits = (html: string, id: string) => {
   const artistCredits: Record<string, string[]> = {};
   const baseDexEntryMatch = html.match(
-    /<article class="dex-entry sprite-variant-main">[\s\S]*?<figcaption>[\s\S]*?<\/figcaption>/,
+    BASE_DEX_ENTRY_REGEX,
   );
   if (baseDexEntryMatch) {
     const baseArtists = extractArtists(baseDexEntryMatch[0]);
@@ -40,11 +48,11 @@ const extractArtistCredits = (html: string, id: string) => {
   }
 
   const spriteArticles = html.match(
-    /<article class="sprite-preview[^"]*">[\s\S]*?<\/article>/g,
+    SPRITE_ARTICLE_REGEX,
   );
   for (const article of spriteArticles ?? []) {
-    const spriteId = article.match(/href="\/sprite\/pif\/([^"/]+)/)?.[1];
-    const figcaption = article.match(/<figcaption>[\s\S]*?<\/figcaption>/)?.[0];
+    const spriteId = article.match(SPRITE_ID_REGEX)?.[1];
+    const figcaption = article.match(FIGCAPTION_REGEX)?.[0];
     if (!(spriteId && figcaption)) {
       continue;
     }

@@ -14,7 +14,7 @@ import {
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
-import { CursorTooltip } from "@/components/CursorTooltip";
+import { CursorTooltip } from "@/components/cursor-tooltip";
 import { usePlaythroughImportExport } from "@/hooks/usePlaythroughImportExport";
 import { getSharedEventProperties } from "@/lib/analytics/playthroughEventData";
 import { trackEvent } from "@/lib/analytics/trackEvent";
@@ -26,7 +26,7 @@ import {
 import { playthroughActions } from "@/stores/playthroughs/index";
 import type { GameMode, Playthrough } from "@/stores/playthroughs/types";
 import CreatePlaythroughModal from "./CreatePlaythroughModal";
-import { ImportErrorContent } from "./ImportErrorContent";
+import { ImportErrorContent } from "./import-error-content";
 
 interface PlaythroughSelectorProps {
   className?: string;

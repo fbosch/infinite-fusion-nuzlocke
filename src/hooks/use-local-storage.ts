@@ -32,7 +32,7 @@ export function useLocalStorage<T>(
   initialValue: T,
   schema: SafeParser<T>,
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
-  const serialize = (value: T): string => JSON.stringify(value) ?? "null";
+  const serialize = (value: T): string => JSON.stringify(value);
   const stringifiedInitialValue = serialize(initialValue);
 
   const parseSnapshot = (snapshot: string | null): T => {
@@ -66,7 +66,9 @@ export function useLocalStorage<T>(
   const subscribe = (onStoreChange: () => void) => {
     // Return early no-op if not in browser environment
     if (typeof window === "undefined") {
-      return () => {};
+      return () => {
+        // No browser subscription is needed during server rendering.
+      };
     }
 
     const onChange = (localKey: string | null) => {
@@ -96,22 +98,22 @@ export function useLocalStorage<T>(
 
   const setState: React.Dispatch<React.SetStateAction<T>> = (newValue) => {
     const snapshot = getSnapshot();
-    const value =
+    const nextValue =
       typeof newValue === "function"
         ? (newValue as (prevState: T) => T)(parseSnapshot(snapshot))
         : newValue;
 
     try {
       if (typeof window !== "undefined" && globalThis.localStorage) {
-        localStorage.setItem(key, serialize(value));
+        localStorage.setItem(key, serialize(nextValue));
         fallbackStorage.delete(key);
       } else {
         // Store value in fallback storage if not in browser environment
-        fallbackStorage.set(key, serialize(value));
+        fallbackStorage.set(key, serialize(nextValue));
       }
     } catch {
       // Store value in fallback storage if there's an error with localStorage
-      fallbackStorage.set(key, serialize(value));
+      fallbackStorage.set(key, serialize(nextValue));
     }
 
     triggerCallbacks(key);

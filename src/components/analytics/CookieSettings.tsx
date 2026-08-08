@@ -13,7 +13,7 @@ import {
 import clsx from "clsx";
 import { Cookie, X } from "lucide-react";
 import { useState } from "react";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import {
   type ConsentPreferences,
   consentPreferencesSchema,

@@ -8,7 +8,9 @@ const subscribeToBrowserReducedMotion = (onStoreChange: () => void) => {
     typeof window === "undefined" ||
     typeof window.matchMedia !== "function"
   ) {
-    return () => {};
+    return () => {
+      // No media query listener was registered outside the browser.
+    };
   }
 
   const query = window.matchMedia(mediaQuery);

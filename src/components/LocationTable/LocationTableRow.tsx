@@ -10,9 +10,9 @@ import {
 } from "@/stores/playthroughs/hooks";
 import { canFuse } from "@/utils/pokemonPredicates";
 import PokemonSummaryCard from "../PokemonSummaryCard";
-import type { FusionSpriteHandle } from "../PokemonSummaryCard/FusionSprite";
+import type { FusionSpriteHandle } from "../PokemonSummaryCard/fusion-sprite";
 import RemoveLocationButton from "./customLocations/RemoveLocationButton";
-import { EncounterCell } from "./EncounterCell";
+import { EncounterCell } from "./encounter-cell";
 import ResetEncounterButton from "./ResetEncounterButton";
 
 interface LocationTableRowProps {

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { ImportErrorContent } from "@/components/playthrough/ImportErrorContent";
+import { ImportErrorContent } from "@/components/playthrough/import-error-content";
 
 describe("ImportErrorContent", () => {
   describe("Zod validation errors", () => {

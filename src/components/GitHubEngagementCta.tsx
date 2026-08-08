@@ -4,7 +4,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
 import GitHubButton from "react-github-btn";
 import { useInView } from "react-intersection-observer";
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/hooks/use-mounted";
 import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics/trackEvent";
 
 interface GitHubEngagementCtaProps {

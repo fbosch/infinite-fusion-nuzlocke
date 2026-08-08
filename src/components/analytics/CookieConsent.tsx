@@ -3,8 +3,8 @@
 import { Description, Field, Label, Switch } from "@headlessui/react";
 import { Cookie, Settings, X } from "lucide-react";
 import { useState } from "react";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { useMounted } from "@/hooks/useMounted";
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useMounted } from "@/hooks/use-mounted";
 import {
   type ConsentPreferences,
   consentGivenSchema,

@@ -3,7 +3,7 @@
 import { fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DraggableComboboxSprite } from "../DraggableComboboxSprite";
-import { getDraggableComboboxSpriteMenuOptions } from "../draggableComboboxSpriteMenu";
+import { getDraggableComboboxSpriteMenuOptions } from "../draggable-combobox-sprite-menu";
 
 const { startDragMock } = vi.hoisted(() => ({
   startDragMock: vi.fn(),
@@ -15,7 +15,7 @@ vi.mock("@/components/context-menu", () => ({
   default: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-vi.mock("@/components/CursorTooltip", () => ({
+vi.mock("@/components/cursor-tooltip", () => ({
   CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
 }));
 

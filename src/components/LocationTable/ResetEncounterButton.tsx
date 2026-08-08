@@ -3,7 +3,7 @@ import { Eraser } from "lucide-react";
 import { useState } from "react";
 import { playthroughActions } from "@/stores/playthroughs";
 import ConfirmationDialog from "../ConfirmationDialog";
-import { CursorTooltip } from "../CursorTooltip";
+import { CursorTooltip } from "../cursor-tooltip";
 
 interface ResetEncounterButtonProps {
   hasEncounter: boolean;

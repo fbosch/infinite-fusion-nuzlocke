@@ -29,8 +29,8 @@ import {
 import { twMerge } from "tailwind-merge";
 import { useSnapshot } from "valtio";
 import { useGlobalTooltip } from "@/contexts/GlobalTooltipContext";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useWindowVisibility } from "@/hooks/useWindowVisibility";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useWindowVisibility } from "@/hooks/use-window-visibility";
 import { settingsStore } from "@/stores/settings";
 import { dragStore } from "../stores/dragStore";
 
@@ -161,7 +161,8 @@ export function CursorTooltip(props: CursorTooltipProps) {
         setAnimationState("exiting");
       }
 
-      const currentBatchId = ++animationBatchRef.current;
+      animationBatchRef.current += 1;
+      const currentBatchId = animationBatchRef.current;
       // Wait for the element to mount/update, then observe running animations/transitions
       window.requestAnimationFrame(() => {
         const node = refs.floating.current as HTMLElement | null;
@@ -172,8 +173,9 @@ export function CursorTooltip(props: CursorTooltipProps) {
 
         // Consider only finite animations/transitions (ignore infinite/unknown)
         const finiteAnimations = allAnimations.filter((a) => {
-          const effect = (a as Animation & { effect?: KeyframeEffect | null })
-            .effect;
+          const { effect } = a as Animation & {
+            effect?: KeyframeEffect | null;
+          };
           if (!effect || typeof effect.getTiming !== "function") {
             return false;
           }

@@ -5,7 +5,7 @@ import {
   useBreakpointAtLeast,
   useBreakpointBetween,
   useBreakpointSmallerThan,
-} from "@/hooks/useBreakpoint";
+} from "@/hooks/use-breakpoint";
 
 describe("useBreakpoint Browser Tests", () => {
   let originalInnerWidth: number;

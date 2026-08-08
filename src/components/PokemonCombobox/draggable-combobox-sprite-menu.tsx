@@ -221,27 +221,30 @@ function getEvolutionMenuOptions({
       true,
     ),
   );
-  menuOptions.push(
-    evolutions.length === 1
-      ? getEvolutionMenuItem(
-          evolutions[0]!,
-          value,
-          locationId,
-          field,
-          "Evolve to",
-          true,
-          Atom,
-        )
-      : {
-          children: evolutionItems.map((item, index) => ({
-            ...item,
-            label: getEvolutionLabel(evolutions[index]!, ""),
-          })),
-          icon: Atom,
-          id: "evolve",
-          label: "Evolve to…",
-        },
-  );
+  if (evolutions.length === 1) {
+    const [evolution] = evolutions;
+    menuOptions.push(
+      getEvolutionMenuItem(
+        evolution,
+        value,
+        locationId,
+        field,
+        "Evolve to",
+        true,
+        Atom,
+      ),
+    );
+  } else {
+    menuOptions.push({
+      children: evolutionItems.map((item, index) => ({
+        ...item,
+        label: getEvolutionLabel(evolutions[index], ""),
+      })),
+      icon: Atom,
+      id: "evolve",
+      label: "Evolve to…",
+    });
+  }
   return menuOptions;
 }
 

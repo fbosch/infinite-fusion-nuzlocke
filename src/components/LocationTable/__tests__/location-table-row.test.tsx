@@ -3,7 +3,7 @@
 import { render } from "@testing-library/react";
 import { type Ref, useImperativeHandle } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { FusionSpriteHandle } from "../../PokemonSummaryCard/FusionSprite";
+import type { FusionSpriteHandle } from "../../PokemonSummaryCard/fusion-sprite";
 import LocationTableRow from "../LocationTableRow";
 
 const summaryCardProps = vi.hoisted(() => vi.fn());
@@ -56,7 +56,7 @@ vi.mock("@/components/PokemonSummaryCard", () => ({
     return <div />;
   },
 }));
-vi.mock("../EncounterCell", () => ({
+vi.mock("../encounter-cell", () => ({
   EncounterCell: (props: unknown) => {
     encounterCellProps(props);
     return <td />;

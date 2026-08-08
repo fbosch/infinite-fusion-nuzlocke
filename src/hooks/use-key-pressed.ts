@@ -137,7 +137,9 @@ function handleWindowBlur() {
 function notifyListeners(key: string) {
   const listeners = keyListeners.get(key);
   if (listeners) {
-    listeners.forEach((listener) => listener());
+    for (const listener of listeners) {
+      listener();
+    }
   }
 }
 

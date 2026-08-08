@@ -9,7 +9,7 @@ import {
 import clsx from "clsx";
 import { HelpCircle, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { CursorTooltip } from "@/components/CursorTooltip";
+import { CursorTooltip } from "@/components/cursor-tooltip";
 import {
   DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
   type GameMode,

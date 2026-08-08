@@ -38,8 +38,11 @@ import {
   applyEncounterDefaultStatus,
   getPokemonSources,
 } from "./encounterSelection";
+
+const NUMERIC_QUERY_REGEX = /^\d+$/;
+
 import { resolveFusionCombination } from "./fusionCombination";
-import { PokemonEvolutionButton } from "./PokemonEvolutionButton";
+import { PokemonEvolutionButton } from "./pokemon-evolution-button";
 import { PokemonNicknameInput } from "./PokemonNicknameInput";
 import {
   FusionCombinationOption,
@@ -237,7 +240,7 @@ export const PokemonCombobox = ({
     }
 
     // Check if query is numeric for route Pokemon
-    const isNumericQuery = /^\d+$/.test(deferredQuery.trim());
+    const isNumericQuery = NUMERIC_QUERY_REGEX.test(deferredQuery.trim());
 
     let routeMatches: PokemonOptionType[] = [];
 
@@ -588,10 +591,10 @@ export const PokemonCombobox = ({
                         placement.startsWith("bottom"),
                     },
                   )}
-                  ref={(ref) => {
-                    if (ref) {
-                      optionsRef.current = ref;
-                      refs.setFloating(ref);
+                  ref={(optionsElement) => {
+                    if (optionsElement) {
+                      optionsRef.current = optionsElement;
+                      refs.setFloating(optionsElement);
                     }
                   }}
                   style={{

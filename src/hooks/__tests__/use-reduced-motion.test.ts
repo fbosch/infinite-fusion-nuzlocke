@@ -2,7 +2,7 @@
 
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useReducedMotion } from "../useReducedMotion";
+import { useReducedMotion } from "../use-reduced-motion";
 
 describe("useReducedMotion", () => {
   let matches = false;

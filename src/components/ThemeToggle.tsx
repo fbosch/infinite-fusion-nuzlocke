@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRef } from "react";
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/hooks/use-mounted";
 
 const themes = [
   { icon: Monitor, label: "System theme", value: "system" },

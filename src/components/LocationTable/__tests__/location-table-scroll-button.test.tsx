@@ -58,11 +58,11 @@ vi.mock("@/loaders/locations", () => ({
   getLocationById: vi.fn(() => ({ name: "Route 1" })),
 }));
 
-vi.mock("@/hooks/useMounted", () => ({
+vi.mock("@/hooks/use-mounted", () => ({
   useMounted: mountedMock,
 }));
 
-vi.mock("@/hooks/useBreakpoint", () => ({
+vi.mock("@/hooks/use-breakpoint", () => ({
   useBreakpointSmallerThan: vi.fn(() => false),
 }));
 
@@ -79,7 +79,7 @@ vi.mock("../LocationTableRow", () => ({
   },
 }));
 
-vi.mock("../LocationCell", () => ({
+vi.mock("../location-cell", () => ({
   default: () => <td data-testid="location-cell" />,
 }));
 
@@ -96,7 +96,7 @@ vi.mock("next/dynamic", () => ({
 }));
 
 // Pass-through: render children directly so button handlers are preserved
-vi.mock("@/components/CursorTooltip", () => ({
+vi.mock("@/components/cursor-tooltip", () => ({
   CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
 }));
 
