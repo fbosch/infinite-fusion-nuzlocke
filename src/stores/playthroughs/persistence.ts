@@ -253,11 +253,9 @@ export const deletePlaythroughFromIndexedDB = async (
 };
 
 // Immediate save function for critical operations
-export const saveToIndexedDB = async (
-  state: PlaythroughsState,
-): Promise<void> => {
+export const saveToIndexedDB = (state: PlaythroughsState): Promise<void> => {
   if (typeof window === "undefined") {
-    return;
+    return Promise.resolve();
   }
 
   try {
@@ -270,6 +268,8 @@ export const saveToIndexedDB = async (
   } catch (error) {
     console.error("Failed to save playthroughs to IndexedDB:", error);
   }
+
+  return Promise.resolve();
 };
 
 // Factory function to create debounced save function

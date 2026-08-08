@@ -46,12 +46,12 @@ export function PlaythroughResumeObserver() {
     }
 
     const pathname = globalThis.location?.pathname;
-    const entryRoute =
-      pathname === "/"
-        ? "home"
-        : pathname === "/locations"
-          ? "locations"
-          : "other";
+    let entryRoute: "home" | "locations" | "other" = "other";
+    if (pathname === "/") {
+      entryRoute = "home";
+    } else if (pathname === "/locations") {
+      entryRoute = "locations";
+    }
 
     const wasTracked = trackEvent("landing_viewed", {
       ...getSharedEventProperties(activePlaythrough),

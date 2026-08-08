@@ -56,8 +56,9 @@ export function usePreferredVariantState(
   );
 
   // Update function that immediately updates the Valtio store
-  const updateVariant = async (newVariant: string) => {
+  const updateVariant = (newVariant: string): Promise<void> => {
     setPreferredVariant(headId, bodyId, newVariant);
+    return Promise.resolve();
   };
 
   return {

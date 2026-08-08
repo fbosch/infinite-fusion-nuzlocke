@@ -20,8 +20,8 @@ import {
   saveToIndexedDB,
 } from "./persistence";
 import {
-  getActivePlaythrough,
-  getCurrentTimestamp,
+  getActivePlaythrough as getActivePlaythroughFromState,
+  getCurrentTimestamp as getCurrentTimestampFromState,
   setPlaythroughsStore,
 } from "./playthroughState";
 import { getAvailableTeamPositionsForMembers } from "./teamPositions";
@@ -32,6 +32,9 @@ import {
   type Playthrough,
   type PlaythroughsState,
 } from "./types";
+
+export const getActivePlaythrough = getActivePlaythroughFromState;
+export const getCurrentTimestamp = getCurrentTimestampFromState;
 
 // Default state
 const defaultState: PlaythroughsState = {
@@ -478,11 +481,9 @@ export {
   cycleGameMode,
   deletePlaythrough,
   forceSave,
-  getActivePlaythrough,
   getAllPlaythroughs,
   getAvailableTeamPositions,
   getCurrentlyLoadedPlaythroughs,
-  getCurrentTimestamp,
   getGameMode,
   getTeamMemberDetails,
   importPlaythrough,

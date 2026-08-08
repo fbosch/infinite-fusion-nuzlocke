@@ -83,7 +83,7 @@ export const getImportErrorMessage = (error: unknown, fallback: string) => {
   return fallback;
 };
 
-const resolvePlaythroughForImportAnalytics = async (playthroughId?: string) => {
+const resolvePlaythroughForImportAnalytics = (playthroughId?: string) => {
   if (typeof playthroughActions.getActivePlaythrough === "function") {
     const activePlaythrough = playthroughActions.getActivePlaythrough();
     if (!playthroughId || activePlaythrough?.id === playthroughId) {
@@ -92,6 +92,42 @@ const resolvePlaythroughForImportAnalytics = async (playthroughId?: string) => {
   }
 
   return null;
+};
+
+const getImportFailureDetails = (
+  error: unknown,
+  failureStage: ImportFailureStage,
+) => {
+  if (!(error instanceof Error)) {
+    return {
+      errorCategory: "unexpected" as ImportErrorCategory,
+      errorMessage: "Import failed",
+      failureStage,
+    };
+  }
+
+  if (
+    failureStage === "store_import" &&
+    error.message.startsWith("Validation failed:")
+  ) {
+    return {
+      errorCategory: "invalid_schema" as ImportErrorCategory,
+      errorMessage: error.message,
+      failureStage: "schema_validation" as ImportFailureStage,
+    };
+  }
+
+  const isStorageFailure =
+    (failureStage === "store_import" || failureStage === "file_read") &&
+    isStorageFailureMessage(error.message);
+
+  return {
+    errorCategory: (isStorageFailure
+      ? "storage_failure"
+      : "unexpected") as ImportErrorCategory,
+    errorMessage: error.message,
+    failureStage,
+  };
 };
 
 const trackImportFailure = async ({
@@ -235,26 +271,12 @@ export const importPlaythroughFile = async (
     return { ok: true };
   } catch (error) {
     console.error("Failed to import playthrough:", error);
-
-    let errorMessage = "Import failed";
-
-    if (error instanceof Error) {
-      errorMessage = error.message;
-
-      if (importFailureStage === "store_import") {
-        if (error.message.startsWith("Validation failed:")) {
-          importFailureStage = "schema_validation";
-          importErrorCategory = "invalid_schema";
-        } else if (isStorageFailureMessage(error.message)) {
-          importErrorCategory = "storage_failure";
-        }
-      } else if (
-        importFailureStage === "file_read" &&
-        isStorageFailureMessage(error.message)
-      ) {
-        importErrorCategory = "storage_failure";
-      }
-    }
+    const importFailureDetails = getImportFailureDetails(
+      error,
+      importFailureStage,
+    );
+    importFailureStage = importFailureDetails.failureStage;
+    importErrorCategory = importFailureDetails.errorCategory;
 
     await trackImportFailure({
       errorCategory: importErrorCategory,
@@ -262,7 +284,7 @@ export const importPlaythroughFile = async (
       fileContext,
     });
 
-    return { errorMessage, ok: false };
+    return { errorMessage: importFailureDetails.errorMessage, ok: false };
   }
 };
 

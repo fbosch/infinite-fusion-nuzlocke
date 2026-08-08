@@ -21,19 +21,26 @@ export type TeamMemberUsage = {
 export const getTeamSelectionNickname = (
   headPokemon: PokemonOptionType | null | undefined,
   bodyPokemon: PokemonOptionType | null | undefined,
-) =>
-  headPokemon?.nickname?.trim()
-    ? headPokemon.nickname
-    : bodyPokemon?.nickname?.trim()
-      ? bodyPokemon.nickname
-      : "";
+) => {
+  if (headPokemon?.nickname?.trim()) {
+    return headPokemon.nickname;
+  }
+
+  if (bodyPokemon?.nickname?.trim()) {
+    return bodyPokemon.nickname;
+  }
+
+  return "";
+};
 
 export const flipTeamPokemonSelection = (
   selectedHead: TeamPokemonSelection | null,
   selectedBody: TeamPokemonSelection | null,
 ) => {
   const nickname =
-    selectedBody?.pokemon.nickname || selectedHead?.pokemon.nickname || "";
+    (selectedBody === null ? undefined : selectedBody.pokemon.nickname) ||
+    (selectedHead === null ? undefined : selectedHead.pokemon.nickname) ||
+    "";
 
   return {
     nickname,
@@ -76,8 +83,15 @@ export const initializeExistingTeamMemberSelection = (
   );
   const hasHead = Boolean(existingTeamMember.headPokemon);
   const hasBody = Boolean(existingTeamMember.bodyPokemon);
-  const suggestedActiveSlot: TeamSelectionSlot | null | undefined =
-    hasHead && hasBody ? null : hasHead ? "body" : hasBody ? "head" : undefined;
+  let suggestedActiveSlot: TeamSelectionSlot | null | undefined;
+
+  if (hasHead && hasBody) {
+    suggestedActiveSlot = null;
+  } else if (hasHead) {
+    suggestedActiveSlot = "body";
+  } else if (hasBody) {
+    suggestedActiveSlot = "head";
+  }
 
   return {
     nickname,
@@ -145,7 +159,7 @@ export const selectTeamPokemon = ({
   nickname: string;
   previewNickname: string;
 }) => {
-  if (selectedHead?.pokemon.uid === pokemon.uid) {
+  if (selectedHead !== null && selectedHead.pokemon.uid === pokemon.uid) {
     return {
       activeSlot: "head" as const,
       nickname: "",
@@ -155,7 +169,7 @@ export const selectTeamPokemon = ({
     };
   }
 
-  if (selectedBody?.pokemon.uid === pokemon.uid) {
+  if (selectedBody !== null && selectedBody.pokemon.uid === pokemon.uid) {
     return {
       activeSlot: "body" as const,
       nickname: "",
@@ -167,12 +181,15 @@ export const selectTeamPokemon = ({
 
   if (activeSlot === "head") {
     const nextSelectedHead = { locationId, pokemon };
-    const nickname = getTeamSelectionNickname(pokemon, selectedBody?.pokemon);
+    const selectionNickname = getTeamSelectionNickname(
+      pokemon,
+      selectedBody?.pokemon,
+    );
 
     return {
       activeSlot: selectedBody ? activeSlot : ("body" as const),
-      nickname,
-      previewNickname: nickname,
+      nickname: selectionNickname,
+      previewNickname: selectionNickname,
       selectedBody,
       selectedHead: nextSelectedHead,
     };
@@ -180,12 +197,15 @@ export const selectTeamPokemon = ({
 
   if (activeSlot === "body") {
     const nextSelectedBody = { locationId, pokemon };
-    const nickname = getTeamSelectionNickname(selectedHead?.pokemon, pokemon);
+    const selectionNickname = getTeamSelectionNickname(
+      selectedHead?.pokemon,
+      pokemon,
+    );
 
     return {
       activeSlot: "body" as const,
-      nickname,
-      previewNickname: nickname,
+      nickname: selectionNickname,
+      previewNickname: selectionNickname,
       selectedBody: nextSelectedBody,
       selectedHead,
     };

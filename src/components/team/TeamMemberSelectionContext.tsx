@@ -364,7 +364,9 @@ export function TeamMemberSelectionProvider({
     teamMemberSelectionReducer,
     initialState,
   );
-  const teamMembers = activePlaythrough?.team?.members;
+  const teamMembers = activePlaythrough
+    ? activePlaythrough.team.members
+    : undefined;
 
   useTeamSelectionEffects({ dispatch, encounters, existingTeamMember, state });
 

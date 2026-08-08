@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { X } from "lucide-react";
+import { useCallback } from "react";
 import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
 import { PokemonSprite } from "@/components/PokemonSprite";
@@ -57,6 +58,11 @@ export function PokemonSlotSelector({
       ? "text-blue-700 dark:text-blue-300"
       : "text-green-700 dark:text-green-300";
 
+  const handleSlotSelect = useCallback(
+    () => onSlotSelect(slot),
+    [onSlotSelect, slot],
+  );
+
   return (
     <div className="relative h-24">
       <button
@@ -64,7 +70,7 @@ export function PokemonSlotSelector({
           "relative h-full w-full cursor-pointer rounded-lg border-2 p-2 text-left transition-colors",
           getSlotStyles(),
         )}
-        onClick={() => onSlotSelect(slot)}
+        onClick={handleSlotSelect}
         type="button"
       >
         <div className="absolute top-2 left-2">
@@ -89,11 +95,11 @@ export function PokemonSlotSelector({
                 {selectedPokemon.pokemon.nickname ||
                   selectedPokemon.pokemon.name}
               </div>
-              {selectedPokemon.pokemon.nickname && (
+              {selectedPokemon.pokemon.nickname ? (
                 <div className={clsx("text-xs", getPokemonSpeciesColor())}>
                   ({selectedPokemon.pokemon.name})
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         ) : (
@@ -105,7 +111,7 @@ export function PokemonSlotSelector({
         )}
       </button>
 
-      {selectedPokemon && (
+      {selectedPokemon ? (
         <button
           aria-label={`Remove ${slotLabel}`}
           className="absolute top-2 right-2 z-10 rounded-full bg-white p-1 text-gray-400 shadow-sm hover:text-red-600 dark:bg-gray-700 dark:text-gray-500 dark:hover:text-red-400"
@@ -114,7 +120,7 @@ export function PokemonSlotSelector({
         >
           <X className="h-4 w-4" />
         </button>
-      )}
+      ) : null}
     </div>
   );
 }

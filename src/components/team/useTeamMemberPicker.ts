@@ -24,10 +24,16 @@ export function useTeamMemberPicker() {
       return false;
     }
 
+    const headUid = headPokemon?.uid;
+    const bodyUid = bodyPokemon?.uid;
+    if ((headPokemon && !headUid) || (bodyPokemon && !bodyUid)) {
+      return false;
+    }
+
     const success = await playthroughActions.updateTeamMember(
       selectedPosition,
-      headPokemon ? { uid: headPokemon.uid! } : null,
-      bodyPokemon ? { uid: bodyPokemon.uid! } : null,
+      headUid ? { uid: headUid } : null,
+      bodyUid ? { uid: bodyUid } : null,
     );
 
     if (success) {

@@ -16,7 +16,7 @@ function getDisplayIds({ body, head, isFusion }: DisplayPokemon) {
     bodyId: isFusion ? getPokemonId(body) : null,
     headId: isFusion
       ? getPokemonId(head)
-      : getPokemonId(head) ?? getPokemonId(body),
+      : (getPokemonId(head) ?? getPokemonId(body)),
   };
 }
 

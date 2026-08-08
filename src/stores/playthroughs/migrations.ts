@@ -39,36 +39,42 @@ const migrateRemixMode = (data: MigrationData): MigrationData => {
 /**
  * Ensure team field exists with default empty team
  */
+const createEmptyTeamMembers = () => new Array(6).fill(null);
+
+const normalizeTeamMembers = (members: unknown) => {
+  const fixedMembers = createEmptyTeamMembers();
+
+  if (Array.isArray(members)) {
+    for (const [index, member] of members.entries()) {
+      if (index < 6 && member !== null) {
+        fixedMembers[index] = member;
+      }
+    }
+    return fixedMembers;
+  }
+
+  if (typeof members === "object" && members !== null) {
+    for (const [key, member] of Object.entries(members)) {
+      const index = Number.parseInt(key, 10);
+      if (index >= 0 && index < 6 && member !== null) {
+        fixedMembers[index] = member;
+      }
+    }
+    return fixedMembers;
+  }
+};
+
 const migrateTeamField = (data: MigrationData): MigrationData => {
   let { team } = data;
 
   if (!team) {
-    // No team field exists, create default
-    team = { members: Array.from({ length: 6 }, () => null) };
-  } else if (team && typeof team === "object" && "members" in team) {
-    // Team exists, ensure it has the right structure
-    const { members } = team as Record<string, unknown>;
-    if (Array.isArray(members)) {
-      // Ensure it's the right length and has null values for empty slots
-      const fixedMembers = new Array(6).fill(null);
-      for (const [index, member] of members.entries()) {
-        if (index < 6 && member !== null) {
-          fixedMembers[index] = member;
-        }
-      }
-      team = { members: fixedMembers };
-    } else if (typeof members === "object" && members !== null) {
-      // Members is a record/object, convert to array format
-      const fixedMembers = new Array(6).fill(null);
-      for (const [key, member] of Object.entries(
-        members as Record<string, unknown>,
-      )) {
-        const index = Number.parseInt(key, 10);
-        if (index >= 0 && index < 6 && member !== null) {
-          fixedMembers[index] = member;
-        }
-      }
-      team = { members: fixedMembers };
+    team = { members: createEmptyTeamMembers() };
+  } else if (typeof team === "object" && "members" in team) {
+    const members = normalizeTeamMembers(
+      (team as Record<string, unknown>).members,
+    );
+    if (members) {
+      team = { members };
     }
   }
 

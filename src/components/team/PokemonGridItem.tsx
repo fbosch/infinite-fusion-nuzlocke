@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
 import { PokemonSprite } from "@/components/PokemonSprite";
@@ -82,6 +82,11 @@ export function PokemonGridItem({
     return null;
   };
 
+  const handleSelect = useCallback(
+    () => onSelect(pokemon, locationId),
+    [locationId, onSelect, pokemon],
+  );
+
   return (
     <button
       className={clsx(
@@ -89,7 +94,7 @@ export function PokemonGridItem({
         getButtonStyles(),
       )}
       disabled={!(isActiveSlot || isSelected)}
-      onClick={() => onSelect(pokemon, locationId)}
+      onClick={handleSelect}
       type="button"
     >
       <div className="mb-1 flex h-12 w-12 items-center justify-center">
@@ -104,15 +109,15 @@ export function PokemonGridItem({
         <div className="truncate font-medium text-gray-900 text-xs dark:text-white">
           {pokemon.nickname || pokemon.name}
         </div>
-        {pokemon.nickname && (
+        {pokemon.nickname ? (
           <div className="truncate text-gray-500 text-xs dark:text-gray-400">
             ({pokemon.name})
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Type indicators in top left corner */}
-      {pokemonData && (
+      {pokemonData ? (
         <div className="absolute top-1 left-1">
           <TypePills
             primary={
@@ -161,7 +166,7 @@ export function PokemonGridItem({
             size="xxs"
           />
         </div>
-      )}
+      ) : null}
 
       {/* Status badge in top right corner */}
       <div className="absolute top-1 right-1">{getStatusBadge()}</div>

@@ -28,7 +28,7 @@ export function TeamMemberTooltipContent({
     bodyPokemon?.id,
     true,
   );
-  const credits = spriteId === null ? undefined : creditsBySpriteId?.[spriteId];
+  const credits = creditsBySpriteId?.[spriteId];
   const credit =
     credits && Object.keys(credits).length > 0
       ? formatArtistCredits(credits)
@@ -39,7 +39,7 @@ export function TeamMemberTooltipContent({
       <div className="flex py-0.5">
         <TypePills primary={primary} secondary={secondary} />
       </div>
-      {credit && (
+      {credit ? (
         <>
           <div className="my-2 flex">
             <div className="inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400">
@@ -56,7 +56,7 @@ export function TeamMemberTooltipContent({
           </div>
           <div className="my-1 h-px w-full bg-gray-200 dark:bg-gray-700" />
         </>
-      )}
+      ) : null}
       <div className="flex items-center gap-2 text-xs">
         {[
           ["L", "Change"],

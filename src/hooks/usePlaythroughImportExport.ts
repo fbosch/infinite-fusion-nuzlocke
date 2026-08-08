@@ -61,8 +61,8 @@ export function usePlaythroughImportExport() {
       input.type = "file";
       input.accept = ".json,application/json,text/plain";
 
-      input.onchange = (event) => {
-        void handleImportFileChange(
+      input.onchange = async (event) => {
+        await handleImportFileChange(
           input,
           event,
           setImportErrorMessage,
