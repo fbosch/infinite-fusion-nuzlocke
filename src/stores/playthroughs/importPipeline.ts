@@ -52,7 +52,9 @@ export const prepareImportedPlaythrough = async (
       }
 
       if (prettyError) {
-        throw new Error(`Validation failed:\n\n${prettyError}`);
+        throw new Error(`Validation failed:\n\n${prettyError}`, {
+          cause: error,
+        });
       }
 
       if (zodError.issues.length > 0) {
@@ -63,12 +65,14 @@ export const prepareImportedPlaythrough = async (
             return `• ${issue.message}${path}`;
           })
           .join("\n");
-        throw new Error(`Validation failed:\n\n${errorDetails}`);
+        throw new Error(`Validation failed:\n\n${errorDetails}`, {
+          cause: error,
+        });
       }
 
-      throw new Error("Data validation failed");
+      throw new Error("Data validation failed", { cause: error });
     }
 
-    throw new Error("Invalid playthrough data format");
+    throw new Error("Invalid playthrough data format", { cause: error });
   }
 };

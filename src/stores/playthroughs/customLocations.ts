@@ -7,13 +7,13 @@ import {
 import { getActivePlaythrough, getCurrentTimestamp } from "./playthroughState";
 
 // Add a custom location to the active playthrough
-export const addCustomLocation = async (
+export const addCustomLocation = (
   name: string,
   afterLocationId: string,
 ): Promise<string | null> => {
   const activePlaythrough = getActivePlaythrough();
   if (!activePlaythrough) {
-    return null;
+    return Promise.resolve(null);
   }
 
   try {
@@ -35,10 +35,10 @@ export const addCustomLocation = async (
     ];
     activePlaythrough.updatedAt = getCurrentTimestamp();
 
-    return newCustomLocation.id;
+    return Promise.resolve(newCustomLocation.id);
   } catch (error) {
     console.error("Failed to add custom location:", error);
-    return null;
+    return Promise.resolve(null);
   }
 };
 
@@ -55,28 +55,28 @@ export const removeCustomLocation = async (
     (loc) => loc.id === customLocationId,
   );
 
-  if (index !== -1) {
-    // Import the dependency update function
-    const { updateCustomLocationDependencies } = await import(
-      "@/loaders/locations"
-    );
-
-    // Update dependencies and remove the location in one operation
-    activePlaythrough.customLocations = updateCustomLocationDependencies(
-      customLocationId,
-      activePlaythrough.customLocations,
-    );
-
-    // Also remove any encounters associated with this custom location
-    if (activePlaythrough.encounters?.[customLocationId]) {
-      delete activePlaythrough.encounters[customLocationId];
-    }
-
-    activePlaythrough.updatedAt = getCurrentTimestamp();
-    return true;
+  if (index < 0) {
+    return false;
   }
 
-  return false;
+  // Import the dependency update function
+  const { updateCustomLocationDependencies } = await import(
+    "@/loaders/locations"
+  );
+
+  // Update dependencies and remove the location in one operation
+  activePlaythrough.customLocations = updateCustomLocationDependencies(
+    customLocationId,
+    activePlaythrough.customLocations,
+  );
+
+  // Also remove any encounters associated with this custom location
+  if (activePlaythrough.encounters?.[customLocationId]) {
+    delete activePlaythrough.encounters[customLocationId];
+  }
+
+  activePlaythrough.updatedAt = getCurrentTimestamp();
+  return true;
 };
 
 // Update a custom location's name
@@ -118,10 +118,10 @@ export const validateCustomLocationPlacement = async (
   }
 
   try {
-    const { validateCustomLocationPlacement } = await import(
+    const { validateCustomLocationPlacement: validatePlacement } = await import(
       "@/loaders/locations"
     );
-    return validateCustomLocationPlacement(
+    return validatePlacement(
       afterLocationId,
       activePlaythrough.customLocations || [],
     );

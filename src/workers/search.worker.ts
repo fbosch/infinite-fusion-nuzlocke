@@ -5,8 +5,8 @@ import type { Pokemon } from "@/loaders/pokemon";
 const searchCore = new SearchCore();
 
 const searchAPI = {
-  async initialize(pokemonData: Pokemon[]) {
-    await searchCore.initialize(pokemonData);
+  async initialize(pokemon: Pokemon[]) {
+    await searchCore.initialize(pokemon);
   },
 
   isReady() {

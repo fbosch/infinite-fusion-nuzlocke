@@ -63,7 +63,7 @@ export type SourceSurface =
   | "store";
 export type TriggerMethod = "click" | "keyboard" | "submit" | "programmatic";
 
-export type SharedEventProperties = {
+export interface SharedEventProperties extends AnalyticsProperties {
   boxed_count_bucket: CountBucket;
   deceased_count_bucket: CountBucket;
   encounter_count_bucket: EncounterCountBucket;
@@ -71,7 +71,7 @@ export type SharedEventProperties = {
   game_mode: GameMode;
   playthrough_id: string;
   viable_roster_bucket: ViableRosterBucket;
-};
+}
 
 export type Checkpoint = 1 | 5 | 10 | 20 | 40 | 80;
 export type CheckpointLabel =
@@ -100,7 +100,8 @@ export type ImportErrorCategory =
   | "storage_failure"
   | "unexpected";
 
-export type AnalyticsEventMap = {
+export interface AnalyticsEventMap
+  extends Record<AnalyticsEventName, AnalyticsProperties> {
   create_playthrough_modal_opened: SharedEventProperties & {
     source_surface: "header";
   };
@@ -166,7 +167,7 @@ export type AnalyticsEventMap = {
     checkpoint: Checkpoint;
     checkpoint_label: CheckpointLabel;
   };
-};
+}
 
 type BlockReason =
   | "non_browser"
@@ -275,7 +276,7 @@ function isAnalyticsDebugEnabled(
 ): boolean {
   const value =
     environment.NEXT_PUBLIC_ANALYTICS_DEBUG ?? environment.ANALYTICS_DEBUG;
-  if (value == null) {
+  if (value === undefined) {
     return false;
   }
 
@@ -288,7 +289,7 @@ function isCustomEventKillSwitchEnabled(
   const value =
     environment.NEXT_PUBLIC_DISABLE_CUSTOM_ANALYTICS ??
     environment.DISABLE_CUSTOM_ANALYTICS;
-  if (value == null) {
+  if (value === undefined) {
     return false;
   }
 
@@ -621,7 +622,7 @@ export function isAnalyticsProductionEnvironment(
     browserHostname ??
     (typeof window === "undefined" ? undefined : globalThis.location?.hostname);
 
-  if (hostname == null) {
+  if (hostname === undefined) {
     return false;
   }
 

@@ -280,7 +280,7 @@ const getAllPlaythroughs = async (): Promise<Playthrough[]> => {
 
   // Remove playthroughs that no longer exist
   const loadedIds = new Set(allPlaythroughs.map((p) => p.id));
-  for (let i = playthroughsStore.playthroughs.length - 1; i >= 0; i--) {
+  for (let i = playthroughsStore.playthroughs.length - 1; i >= 0; i -= 1) {
     if (!loadedIds.has(playthroughsStore.playthroughs[i].id)) {
       playthroughsStore.playthroughs.splice(i, 1);
     }

@@ -40,6 +40,44 @@ interface DirectEvolutionButtonProps {
   showDevolutionHint: boolean;
 }
 
+interface EvolutionDropdownItemProps {
+  evolution: PokemonOptionType;
+  focus: boolean;
+  onSelectEvolution: (evolution: PokemonOptionType) => void;
+}
+
+const EvolutionDropdownItem: React.FC<EvolutionDropdownItemProps> = ({
+  evolution,
+  focus,
+  onSelectEvolution,
+}) => {
+  const handleSelectEvolution = () => {
+    onSelectEvolution(evolution);
+  };
+
+  return (
+    <button
+      aria-label={`Evolve to ${evolution.name}`}
+      className={clsx(
+        "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:cursor-pointer",
+        "text-left text-gray-900 dark:text-gray-100",
+        "focus:outline-none",
+        {
+          "bg-blue-600 text-white": focus,
+          "hover:bg-gray-100 dark:hover:bg-gray-700": !focus,
+        },
+      )}
+      onClick={handleSelectEvolution}
+      type="button"
+    >
+      <div className="flex size-8 items-center justify-center">
+        <PokemonSprite generation="gen7" pokemonId={evolution.id} />
+      </div>
+      <span className="">{evolution.name}</span>
+    </button>
+  );
+};
+
 // Evolution Dropdown Component
 const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
   availableEvolutions,
@@ -125,28 +163,11 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
             {availableEvolutions.map((evolution) => (
               <MenuItem key={evolution.id}>
                 {({ focus }) => (
-                  <button
-                    aria-label={`Evolve to ${evolution.name}`}
-                    className={clsx(
-                      "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:cursor-pointer",
-                      "text-left text-gray-900 dark:text-gray-100",
-                      "focus:outline-none",
-                      {
-                        "bg-blue-600 text-white": focus,
-                        "hover:bg-gray-100 dark:hover:bg-gray-700": !focus,
-                      },
-                    )}
-                    onClick={() => onSelectEvolution(evolution)}
-                    type="button"
-                  >
-                    <div className="flex size-8 items-center justify-center">
-                      <PokemonSprite
-                        generation="gen7"
-                        pokemonId={evolution.id}
-                      />
-                    </div>
-                    <span className="">{evolution.name}</span>
-                  </button>
+                  <EvolutionDropdownItem
+                    evolution={evolution}
+                    focus={focus}
+                    onSelectEvolution={onSelectEvolution}
+                  />
                 )}
               </MenuItem>
             ))}

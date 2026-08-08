@@ -51,11 +51,11 @@ const migrateTeamField = (data: MigrationData): MigrationData => {
     if (Array.isArray(members)) {
       // Ensure it's the right length and has null values for empty slots
       const fixedMembers = new Array(6).fill(null);
-      members.forEach((member, index) => {
+      for (const [index, member] of members.entries()) {
         if (index < 6 && member !== null) {
           fixedMembers[index] = member;
         }
-      });
+      }
       team = { members: fixedMembers };
     } else if (typeof members === "object" && members !== null) {
       // Members is a record/object, convert to array format

@@ -585,6 +585,7 @@ export const PokemonCombobox = ({
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
+      role="presentation"
     >
       <div
         className="location-highlight-overlay pointer-events-none absolute inset-0 z-10 max-w-screen rounded-lg border-2 border-blue-500/60 bg-blue-500/20 opacity-0 transition-opacity duration-200 ease-in-out"
