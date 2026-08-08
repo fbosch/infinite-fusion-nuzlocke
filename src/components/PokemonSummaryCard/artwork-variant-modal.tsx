@@ -189,6 +189,11 @@ interface ArtworkVariantModalContentProps {
   spriteId: string | number | null;
 }
 
+interface ArtworkVariantModalDialogProps
+  extends ArtworkVariantModalContentProps {
+  isOpen: boolean;
+}
+
 function ArtworkVariantModalContent({
   availableVariants,
   credits,
@@ -299,6 +304,53 @@ function ArtworkVariantList({
   );
 }
 
+function ArtworkVariantModalDialog({
+  isOpen,
+  onClose,
+  ...contentProps
+}: ArtworkVariantModalDialogProps) {
+  return (
+    <Dialog className="group relative z-[70]" onClose={onClose} open={isOpen}>
+      <DialogBackdrop
+        aria-hidden="true"
+        className="fixed inset-0 bg-black/30 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/50"
+        transition
+      />
+
+      <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
+        <DialogPanel
+          className={clsx(
+            "flex max-h-[80vh] w-full max-w-5xl flex-col space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800",
+            "transition duration-150 ease-out data-closed:scale-98 data-closed:opacity-0",
+          )}
+          id="artwork-variant-modal"
+          transition
+        >
+          <div className="flex items-center justify-between">
+            <DialogTitle className="font-semibold text-gray-900 text-xl dark:text-white">
+              Select Artwork Variant
+            </DialogTitle>
+            <button
+              aria-label="Close modal"
+              className={clsx(
+                "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
+                "rounded-md p-1 transition-colors",
+              )}
+              onClick={onClose}
+              type="button"
+            >
+              <X aria-hidden="true" className="h-5 w-5" />
+            </button>
+          </div>
+
+          <ArtworkVariantModalContent {...contentProps} onClose={onClose} />
+        </DialogPanel>
+      </div>
+    </Dialog>
+  );
+}
+
 export function ArtworkVariantModal({
   isOpen,
   onClose,
@@ -359,58 +411,18 @@ export function ArtworkVariantModal({
   }, [handleClose, updateVariant]);
 
   return (
-    <Dialog
-      className="group relative z-[70]"
+    <ArtworkVariantModalDialog
+      availableVariants={availableVariants}
+      credits={credits}
+      effectiveBodyId={effectiveBodyId}
+      effectiveHeadId={effectiveHeadId}
+      isLoading={isLoading}
+      isOpen={isOpen}
+      onClearVariant={handleClearVariant}
       onClose={handleClose}
-      open={isOpen}
-    >
-      <DialogBackdrop
-        aria-hidden="true"
-        className="fixed inset-0 bg-black/30 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/50"
-        transition
-      />
-
-      <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-        <DialogPanel
-          className={clsx(
-            "flex max-h-[80vh] w-full max-w-5xl flex-col space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800",
-            "transition duration-150 ease-out data-closed:scale-98 data-closed:opacity-0",
-          )}
-          id="artwork-variant-modal"
-          transition
-        >
-          <div className="flex items-center justify-between">
-            <DialogTitle className="font-semibold text-gray-900 text-xl dark:text-white">
-              Select Artwork Variant
-            </DialogTitle>
-            <button
-              aria-label="Close modal"
-              className={clsx(
-                "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
-                "rounded-md p-1 transition-colors",
-              )}
-              onClick={handleClose}
-              type="button"
-            >
-              <X aria-hidden="true" className="h-5 w-5" />
-            </button>
-          </div>
-
-          <ArtworkVariantModalContent
-            availableVariants={availableVariants}
-            credits={credits}
-            effectiveBodyId={effectiveBodyId}
-            effectiveHeadId={effectiveHeadId}
-            isLoading={isLoading}
-            onClearVariant={handleClearVariant}
-            onClose={handleClose}
-            onSelectVariant={handleSelectVariant}
-            selectedVariant={selectedVariant}
-            spriteId={spriteId}
-          />
-        </DialogPanel>
-      </div>
-    </Dialog>
+      onSelectVariant={handleSelectVariant}
+      selectedVariant={selectedVariant}
+      spriteId={spriteId}
+    />
   );
 }

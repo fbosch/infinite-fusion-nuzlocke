@@ -77,156 +77,175 @@ function TypeIndicators({
 
 type TeamSlot = ReturnType<typeof getTeamSlots>[number];
 
+const teamSlotClassName = clsx(
+  "group/team-slot relative flex flex-col items-center justify-center",
+  "size-16 rounded-full border transition-all duration-200 sm:size-18 md:size-20",
+  "cursor-pointer border-gray-100 bg-white hover:border-gray-200 dark:border-gray-800/30 dark:bg-gray-900 dark:hover:border-gray-700/50",
+);
+
 const handleContextMenuClose = () => {
   // No action is needed when this context menu closes.
 };
 
-function TeamSlot({
-  openPicker,
-  slot,
-  teamSpriteRefs,
-}: {
+interface TeamSlotProps {
   openPicker: (position: number) => void;
   slot: TeamSlot;
   teamSpriteRefs: MutableRefObject<(FusionSpriteHandle | null)[]>;
-}) {
-  const openSlotPicker = useCallback(() => {
-    openPicker(slot.position);
-  }, [openPicker, slot.position]);
+}
 
-  const handleEmptySlotKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== "Enter" && event.key !== " ") {
-      return;
-    }
+function EmptyTeamSlot({
+  openPicker,
+  slot,
+}: Omit<TeamSlotProps, "teamSpriteRefs">) {
+  const openSlotPicker = useCallback(
+    () => openPicker(slot.position),
+    [openPicker, slot.position],
+  );
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key !== "Enter" && event.key !== " ") {
+        return;
+      }
 
-    event.preventDefault();
-    openSlotPicker();
-  }, [openSlotPicker]);
-
-  const handleFilledSlotKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
-    if (
-      event.target !== event.currentTarget ||
-      (event.key !== "Enter" && event.key !== " ")
-    ) {
-      return;
-    }
-
-    event.preventDefault();
-    openSlotPicker();
-  }, [openSlotPicker]);
-
-  const setSpriteRef = useCallback((ref: FusionSpriteHandle | null) => {
-    teamSpriteRefs.current[slot.position] = ref;
-  }, [slot.position, teamSpriteRefs]);
-
-  if (slot.isEmpty) {
-    return (
-      <CursorTooltip
-        content="Click to add a Pokémon"
-        delay={300}
-        offset={{ mainAxis: 16 }}
-        placement="bottom-start"
-      >
-        <div
-          aria-label={`Add Pokémon to team slot ${slot.position + 1}`}
-          className={clsx(
-            "group/team-slot relative flex flex-col items-center justify-center",
-            "size-16 rounded-full border transition-all duration-200 sm:size-18 md:size-20",
-            "cursor-pointer border-gray-100 bg-white hover:border-gray-200 dark:border-gray-800/30 dark:bg-gray-900 dark:hover:border-gray-700/50",
-          )}
-          onClick={openSlotPicker}
-          onKeyDown={handleEmptySlotKeyDown}
-          role="button"
-          tabIndex={0}
-        >
-          <div className="relative flex h-full w-full flex-col items-center justify-center text-center">
-            <div
-              className="absolute h-full w-full rounded-full border border-gray-100 text-gray-300 opacity-30 dark:border-gray-800/20 dark:text-gray-600"
-              style={{
-                background:
-                  "repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)",
-              }}
-            />
-            <div className="relative z-10 flex items-center justify-center">
-              <PokeballIcon
-                aria-hidden="true"
-                className="h-8 w-8 text-gray-400 opacity-60 dark:text-gray-500"
-                focusable={false}
-              />
-            </div>
-          </div>
-        </div>
-      </CursorTooltip>
-    );
-  }
+      event.preventDefault();
+      openSlotPicker();
+    },
+    [openSlotPicker],
+  );
 
   return (
-    <TeamMemberContextMenu
-      onClose={handleContextMenuClose}
-      shouldLoad={!slot.isEmpty}
-      teamMember={slot}
+    <CursorTooltip
+      content="Click to add a Pokémon"
+      delay={300}
+      offset={{ mainAxis: 16 }}
+      placement="bottom-start"
     >
       <div
-        className={clsx(
-          "group/team-slot relative flex flex-col items-center justify-center",
-          "size-16 rounded-full border transition-all duration-200 sm:size-18 md:size-20",
-          "cursor-pointer border-gray-100 bg-white hover:border-gray-200 dark:border-gray-800/30 dark:bg-gray-900 dark:hover:border-gray-700/50",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-        )}
+        aria-label={`Add Pokémon to team slot ${slot.position + 1}`}
+        className={teamSlotClassName}
         onClick={openSlotPicker}
-        onKeyDown={handleFilledSlotKeyDown}
+        onKeyDown={handleKeyDown}
         role="button"
         tabIndex={0}
       >
-        {slot.headPokemon !== undefined &&
-        slot.bodyPokemon !== undefined &&
-        slot.isFusion !== undefined ? (
-          <TypeIndicators
-            bodyPokemon={slot.bodyPokemon}
-            headPokemon={slot.headPokemon}
-            isFusion={slot.isFusion}
-          />
-        ) : null}
-        <div className="relative flex h-full w-full flex-col items-center justify-center">
+        <div className="relative flex h-full w-full flex-col items-center justify-center text-center">
           <div
-            className="absolute h-full w-full rounded-full border border-gray-200 text-gray-300 opacity-30 dark:border-gray-600 dark:text-gray-600"
+            className="absolute h-full w-full rounded-full border border-gray-100 text-gray-300 opacity-30 dark:border-gray-800/20 dark:text-gray-600"
             style={{
               background:
                 "repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)",
             }}
           />
-          <div className="relative z-10">
-            <CursorTooltip
-              content={
-                <TeamMemberTooltipContent
-                  bodyPokemon={slot.bodyPokemon || null}
-                  headPokemon={slot.headPokemon || null}
-                  isFusion={slot.isFusion === true}
-                />
-              }
-              delay={500}
-            >
-              <div>
-                <FusionSprite
-                  bodyPokemon={slot.bodyPokemon || null}
-                  headPokemon={slot.headPokemon || null}
-                  isFusion={slot.isFusion}
-                  ref={setSpriteRef}
-                  shouldLoad={true}
-                  showStatusOverlay={true}
-                />
-              </div>
-            </CursorTooltip>
+          <div className="relative z-10 flex items-center justify-center">
+            <PokeballIcon
+              aria-hidden="true"
+              className="h-8 w-8 text-gray-400 opacity-60 dark:text-gray-500"
+              focusable={false}
+            />
           </div>
-          <ArtworkVariantButton
-            bodyId={slot.bodyPokemon?.id}
-            className="absolute right-1/2 bottom-0 z-20 -translate-x-6 opacity-0 transition-opacity duration-200 focus:opacity-100 group-hover/team-slot:opacity-50"
-            headId={slot.headPokemon?.id}
-            isFusion={slot.isFusion}
-            shouldLoad={true}
-          />
         </div>
       </div>
+    </CursorTooltip>
+  );
+}
+
+function TeamSlotContent({ openPicker, slot, teamSpriteRefs }: TeamSlotProps) {
+  const openSlotPicker = useCallback(
+    () => openPicker(slot.position),
+    [openPicker, slot.position],
+  );
+  const setSpriteRef = useCallback(
+    (ref: FusionSpriteHandle | null) => {
+      teamSpriteRefs.current[slot.position] = ref;
+    },
+    [slot.position, teamSpriteRefs],
+  );
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (
+        event.target !== event.currentTarget ||
+        (event.key !== "Enter" && event.key !== " ")
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      openSlotPicker();
+    },
+    [openSlotPicker],
+  );
+
+  return (
+    <div
+      className={clsx(
+        teamSlotClassName,
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+      )}
+      onClick={openSlotPicker}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+    >
+      <TypeIndicators
+        bodyPokemon={slot.bodyPokemon ?? null}
+        headPokemon={slot.headPokemon ?? null}
+        isFusion={slot.isFusion === true}
+      />
+      <div className="relative flex h-full w-full flex-col items-center justify-center">
+        <div
+          className="absolute h-full w-full rounded-full border border-gray-200 text-gray-300 opacity-30 dark:border-gray-600 dark:text-gray-600"
+          style={{
+            background:
+              "repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)",
+          }}
+        />
+        <div className="relative z-10">
+          <CursorTooltip
+            content={
+              <TeamMemberTooltipContent
+                bodyPokemon={slot.bodyPokemon ?? null}
+                headPokemon={slot.headPokemon ?? null}
+                isFusion={slot.isFusion === true}
+              />
+            }
+            delay={500}
+          >
+            <div>
+              <FusionSprite
+                bodyPokemon={slot.bodyPokemon ?? null}
+                headPokemon={slot.headPokemon ?? null}
+                isFusion={slot.isFusion}
+                ref={setSpriteRef}
+                shouldLoad
+                showStatusOverlay
+              />
+            </div>
+          </CursorTooltip>
+        </div>
+        <ArtworkVariantButton
+          bodyId={slot.bodyPokemon?.id}
+          className="absolute right-1/2 bottom-0 z-20 -translate-x-6 opacity-0 transition-opacity duration-200 focus:opacity-100 group-hover/team-slot:opacity-50"
+          headId={slot.headPokemon?.id}
+          isFusion={slot.isFusion}
+          shouldLoad
+        />
+      </div>
+    </div>
+  );
+}
+
+function TeamSlot(props: TeamSlotProps) {
+  if (props.slot.isEmpty) {
+    return <EmptyTeamSlot openPicker={props.openPicker} slot={props.slot} />;
+  }
+
+  return (
+    <TeamMemberContextMenu
+      onClose={handleContextMenuClose}
+      shouldLoad
+      teamMember={props.slot}
+    >
+      <TeamSlotContent {...props} />
     </TeamMemberContextMenu>
   );
 }

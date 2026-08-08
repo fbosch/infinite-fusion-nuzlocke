@@ -7,7 +7,7 @@ import {
   Skull,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useSnapshot } from "valtio";
 import BodyIcon from "@/assets/images/body.svg";
 import EscapeIcon from "@/assets/images/escape-cloud.svg";
@@ -268,6 +268,45 @@ interface PokemonContextItemOptions {
   showStatusActions: boolean;
 }
 
+function getPokemonContextItemData({
+  displayPokemon,
+  encounterData,
+  eitherPokemonIsEgg,
+  hasArtVariants,
+}: Pick<
+  PokemonContextItemOptions,
+  "displayPokemon" | "encounterData" | "eitherPokemonIsEgg" | "hasArtVariants"
+>) {
+  return {
+    currentStatus: getEncounterStatus(encounterData),
+    hasPokemon: hasEncounterPokemon(encounterData),
+    isVariantUnavailable: isArtworkVariantUnavailable(
+      eitherPokemonIsEgg,
+      hasArtVariants,
+    ),
+    spriteId: getSpriteId(displayPokemon.head?.id, displayPokemon.body?.id),
+  };
+}
+
+function getEncounterStatus(
+  encounterData: PokemonContextMenuProps["encounterData"],
+) {
+  return encounterData?.head?.status || encounterData?.body?.status;
+}
+
+function hasEncounterPokemon(
+  encounterData: PokemonContextMenuProps["encounterData"],
+) {
+  return Boolean(encounterData?.head || encounterData?.body);
+}
+
+function isArtworkVariantUnavailable(
+  eitherPokemonIsEgg: boolean,
+  hasArtVariants: boolean | undefined,
+) {
+  return eitherPokemonIsEgg || !hasArtVariants;
+}
+
 function createPokemonContextItems({
   actions,
   displayPokemon,
@@ -279,14 +318,13 @@ function createPokemonContextItems({
   preferredVariant,
   showStatusActions,
 }: PokemonContextItemOptions): ContextMenuItem[] {
-  const spriteId = getSpriteId(
-    displayPokemon.head?.id,
-    displayPokemon.body?.id,
-  );
-  const currentStatus =
-    encounterData?.head?.status || encounterData?.body?.status;
-  const hasPokemon = Boolean(encounterData?.head || encounterData?.body);
-  const isVariantUnavailable = eitherPokemonIsEgg || !hasArtVariants;
+  const { currentStatus, hasPokemon, isVariantUnavailable, spriteId } =
+    getPokemonContextItemData({
+      displayPokemon,
+      eitherPokemonIsEgg,
+      encounterData,
+      hasArtVariants,
+    });
   return [
     createVariantItem(
       isVariantUnavailable,
@@ -364,6 +402,148 @@ interface PokemonContextMenuProps {
   showStatusActions?: boolean; // Whether to show status-changing actions in context menu
 }
 
+interface PokemonContextMenuDialogsProps {
+  displayPokemon: ReturnType<typeof getDisplayPokemon>;
+  encounterData: PokemonContextMenuProps["encounterData"];
+  handleMoveBody: (
+    targetLocationId: string,
+    targetField: "head" | "body",
+  ) => void;
+  handleMoveHead: (
+    targetLocationId: string,
+    targetField: "head" | "body",
+  ) => void;
+  isMoveBodyModalOpen: boolean;
+  isMoveHeadModalOpen: boolean;
+  isVariantModalOpen: boolean;
+  locationId: string;
+  onCloseMoveBody: () => void;
+  onCloseMoveHead: () => void;
+  onCloseVariant: () => void;
+}
+
+function PokemonContextMenuDialogs({
+  displayPokemon,
+  encounterData,
+  handleMoveBody,
+  handleMoveHead,
+  isMoveBodyModalOpen,
+  isMoveHeadModalOpen,
+  isVariantModalOpen,
+  locationId,
+  onCloseMoveBody,
+  onCloseMoveHead,
+  onCloseVariant,
+}: PokemonContextMenuDialogsProps) {
+  return (
+    <>
+      <ArtworkVariantModal
+        bodyId={displayPokemon.body?.id}
+        headId={displayPokemon.head?.id}
+        isFusion={encounterData?.isFusion}
+        isOpen={isVariantModalOpen}
+        onClose={onCloseVariant}
+      />
+
+      {encounterData?.head ? (
+        <LocationSelector
+          currentLocationId={locationId}
+          encounterData={{ head: encounterData.head }}
+          isOpen={isMoveHeadModalOpen}
+          moveTargetField="head"
+          onClose={onCloseMoveHead}
+          onSelectLocation={handleMoveHead}
+        />
+      ) : null}
+
+      {encounterData?.body ? (
+        <LocationSelector
+          currentLocationId={locationId}
+          encounterData={{ body: encounterData.body }}
+          isOpen={isMoveBodyModalOpen}
+          moveTargetField="body"
+          onClose={onCloseMoveBody}
+          onSelectLocation={handleMoveBody}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function usePokemonContextActions(
+  locationId: string,
+  setIsVariantModalOpen: (isOpen: boolean) => void,
+  setIsMoveHeadModalOpen: (isOpen: boolean) => void,
+  setIsMoveBodyModalOpen: (isOpen: boolean) => void,
+) {
+  const handleMoveHead = (
+    targetLocationId: string,
+    targetField: "head" | "body",
+  ) =>
+    playthroughActions.relocateEncounterSlot({
+      sourceField: "head",
+      sourceLocationId: locationId,
+      targetField,
+      targetLocationId,
+    });
+  const handleMoveBody = (
+    targetLocationId: string,
+    targetField: "head" | "body",
+  ) =>
+    playthroughActions.relocateEncounterSlot({
+      sourceField: "body",
+      sourceLocationId: locationId,
+      targetField,
+      targetLocationId,
+    });
+  const closeVariantModal = () => setIsVariantModalOpen(false);
+  const closeMoveHeadModal = () => setIsMoveHeadModalOpen(false);
+  const closeMoveBodyModal = () => setIsMoveBodyModalOpen(false);
+  const openVariantModal = () => setIsVariantModalOpen(true);
+  const openMoveHeadModal = () => setIsMoveHeadModalOpen(true);
+  const openMoveBodyModal = () => setIsMoveBodyModalOpen(true);
+
+  return {
+    actions: {
+      onMarkAsCaptured: () =>
+        playthroughActions.markEncounterAsCaptured(locationId),
+      onMarkAsDeceased: () =>
+        playthroughActions.markEncounterAsDeceased(locationId),
+      onMarkAsMissed: () =>
+        playthroughActions.markEncounterAsMissed(locationId),
+      onMarkAsReceived: () =>
+        playthroughActions.markEncounterAsReceived(locationId),
+      onMoveToBox: () => playthroughActions.moveEncounterToBox(locationId),
+      onOpenMoveBodyModal: openMoveBodyModal,
+      onOpenMoveHeadModal: openMoveHeadModal,
+      onOpenVariantModal: openVariantModal,
+    },
+    closeMoveBodyModal,
+    closeMoveHeadModal,
+    closeVariantModal,
+    handleMoveBody,
+    handleMoveHead,
+  };
+}
+
+function usePokemonContextMenuState(locationId: string) {
+  const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
+  const [isMoveHeadModalOpen, setIsMoveHeadModalOpen] = useState(false);
+  const [isMoveBodyModalOpen, setIsMoveBodyModalOpen] = useState(false);
+
+  return {
+    isMoveBodyModalOpen,
+    isMoveHeadModalOpen,
+    isVariantModalOpen,
+    ...usePokemonContextActions(
+      locationId,
+      setIsVariantModalOpen,
+      setIsMoveHeadModalOpen,
+      setIsMoveBodyModalOpen,
+    ),
+  };
+}
+
 export function PokemonContextMenu({
   children,
   locationId,
@@ -399,64 +579,20 @@ export function PokemonContextMenu({
     displayBodyId,
   );
 
-  const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
-  const [isMoveHeadModalOpen, setIsMoveHeadModalOpen] = useState(false);
-  const [isMoveBodyModalOpen, setIsMoveBodyModalOpen] = useState(false);
-
-  // Handler to mark both Pokemon in the fusion as deceased
-  const handleMarkAsDeceased = () =>
-    playthroughActions.markEncounterAsDeceased(locationId);
-  const handleMoveToBox = () =>
-    playthroughActions.moveEncounterToBox(locationId);
-  const handleMarkAsCaptured = () =>
-    playthroughActions.markEncounterAsCaptured(locationId);
-  const handleMarkAsMissed = () =>
-    playthroughActions.markEncounterAsMissed(locationId);
-  const handleMarkAsReceived = () =>
-    playthroughActions.markEncounterAsReceived(locationId);
-
-  // Handler for moving head Pokemon
-  const handleMoveHead = useCallback(
-    (targetLocationId: string, targetField: "head" | "body") =>
-      playthroughActions.relocateEncounterSlot({
-        sourceField: "head",
-        sourceLocationId: locationId,
-        targetField,
-        targetLocationId,
-      }),
-    [locationId],
-  );
-
-  // Handler for moving body Pokemon
-  const handleMoveBody = useCallback(
-    (targetLocationId: string, targetField: "head" | "body") =>
-      playthroughActions.relocateEncounterSlot({
-        sourceField: "body",
-        sourceLocationId: locationId,
-        targetField,
-        targetLocationId,
-      }),
-    [locationId],
-  );
-
-  const closeVariantModal = useCallback(() => setIsVariantModalOpen(false), []);
-  const closeMoveHeadModal = useCallback(() => setIsMoveHeadModalOpen(false), []);
-  const closeMoveBodyModal = useCallback(() => setIsMoveBodyModalOpen(false), []);
-  const openVariantModal = useCallback(() => setIsVariantModalOpen(true), []);
-  const openMoveHeadModal = useCallback(() => setIsMoveHeadModalOpen(true), []);
-  const openMoveBodyModal = useCallback(() => setIsMoveBodyModalOpen(true), []);
+  const {
+    actions,
+    closeMoveBodyModal,
+    closeMoveHeadModal,
+    closeVariantModal,
+    handleMoveBody,
+    handleMoveHead,
+    isMoveBodyModalOpen,
+    isMoveHeadModalOpen,
+    isVariantModalOpen,
+  } = usePokemonContextMenuState(locationId);
 
   const contextItems = createPokemonContextItems({
-    actions: {
-      onMarkAsCaptured: handleMarkAsCaptured,
-      onMarkAsDeceased: handleMarkAsDeceased,
-      onMarkAsMissed: handleMarkAsMissed,
-      onMarkAsReceived: handleMarkAsReceived,
-      onMoveToBox: handleMoveToBox,
-      onOpenMoveBodyModal: openMoveBodyModal,
-      onOpenMoveHeadModal: openMoveHeadModal,
-      onOpenVariantModal: openVariantModal,
-    },
+    actions,
     displayPokemon,
     eitherPokemonIsEgg,
     encounterData,
@@ -468,44 +604,51 @@ export function PokemonContextMenu({
   });
 
   return (
+    <PokemonContextMenuContent
+      contextItems={contextItems}
+      dialogs={{
+        displayPokemon,
+        encounterData,
+        handleMoveBody,
+        handleMoveHead,
+        isMoveBodyModalOpen,
+        isMoveHeadModalOpen,
+        isVariantModalOpen,
+        locationId,
+        onCloseMoveBody: closeMoveBodyModal,
+        onCloseMoveHead: closeMoveHeadModal,
+        onCloseVariant: closeVariantModal,
+      }}
+      disabled={eitherPokemonIsEgg}
+    >
+      {children}
+    </PokemonContextMenuContent>
+  );
+}
+
+interface PokemonContextMenuContentProps {
+  children: React.ReactNode;
+  contextItems: ContextMenuItem[];
+  dialogs: PokemonContextMenuDialogsProps;
+  disabled: boolean;
+}
+
+function PokemonContextMenuContent({
+  children,
+  contextItems,
+  dialogs,
+  disabled,
+}: PokemonContextMenuContentProps) {
+  return (
     <>
       <ContextMenu
-        disabled={eitherPokemonIsEgg}
+        disabled={disabled}
         items={contextItems}
         portalRootId="location-table"
       >
         {children}
       </ContextMenu>
-
-      <ArtworkVariantModal
-        bodyId={displayPokemon.body?.id}
-        headId={displayPokemon.head?.id}
-        isFusion={encounterData?.isFusion}
-        isOpen={isVariantModalOpen}
-        onClose={closeVariantModal}
-      />
-
-      {encounterData?.head ? (
-        <LocationSelector
-          currentLocationId={locationId}
-          encounterData={{ head: encounterData.head }}
-          isOpen={isMoveHeadModalOpen}
-          moveTargetField="head"
-          onClose={closeMoveHeadModal}
-          onSelectLocation={handleMoveHead}
-        />
-      ) : null}
-
-      {encounterData?.body ? (
-        <LocationSelector
-          currentLocationId={locationId}
-          encounterData={{ body: encounterData.body }}
-          isOpen={isMoveBodyModalOpen}
-          moveTargetField="body"
-          onClose={closeMoveBodyModal}
-          onSelectLocation={handleMoveBody}
-        />
-      ) : null}
+      <PokemonContextMenuDialogs {...dialogs} />
     </>
   );
 }

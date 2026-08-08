@@ -106,6 +106,65 @@ function createPokemonActionLabel(pokemon: Pokemon, action: string) {
   );
 }
 
+function createSectionHeader(
+  slot: PokemonSectionOptions["slot"],
+): ContextMenuItem {
+  const isHead = slot === "head";
+  const SectionIcon = isHead ? HeadIcon : BodyIcon;
+  const sectionName = isHead ? "Head" : "Body";
+
+  return {
+    id: `${slot}-section-header`,
+    label: (
+      <div className="flex items-center gap-1.5 px-1 py-0.5">
+        <SectionIcon className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+        <span className="font-medium text-gray-500 text-xs uppercase tracking-wide dark:text-gray-400">
+          {sectionName}
+        </span>
+      </div>
+    ),
+    visualOnly: true,
+  };
+}
+
+function createEvolutionItems({
+  evolutions,
+  onEvolve,
+  slot,
+}: Pick<
+  PokemonSectionOptions,
+  "evolutions" | "onEvolve" | "slot"
+>): ContextMenuItem[] {
+  if (evolutions === undefined || evolutions.length === 0) {
+    return [];
+  }
+
+  if (evolutions.length === 1) {
+    const [evolution] = evolutions;
+    return [
+      {
+        icon: Atom,
+        id: `evolve-${slot}-${evolution.id}`,
+        label: createPokemonActionLabel(evolution, "Evolve to"),
+        onClick: () => onEvolve(evolution),
+      },
+    ];
+  }
+
+  return [
+    {
+      children: evolutions.map((evolution) => ({
+        id: `evolve-${slot}-${evolution.id}`,
+        label: createPokemonActionLabel(evolution, ""),
+        onClick: () => onEvolve(evolution),
+      })),
+      icon: Atom,
+      id: `evolve-${slot}`,
+      label: "Evolve to…",
+    },
+  ];
+}
+
 function createPokemonSectionItems({
   slot,
   pokemon,
@@ -116,77 +175,66 @@ function createPokemonSectionItems({
   onEvolve,
   onGoToEncounter,
 }: PokemonSectionOptions): ContextMenuItem[] {
-  if (
-    !(
-      pokemon &&
-      (evolutions?.length || preEvolution || pokemon.originalLocation)
-    )
-  ) {
+  const hasActions = Boolean(
+    evolutions?.length || preEvolution || pokemon?.originalLocation,
+  );
+  if (!(pokemon && hasActions)) {
     return [];
   }
 
-  const sectionName = slot === "head" ? "Head" : "Body";
-  const SectionIcon = slot === "head" ? HeadIcon : BodyIcon;
-  const items: ContextMenuItem[] = [
-    { id: `${slot}-section-separator`, separator: true },
+  return [
+    ...createSectionStartItems(slot, showHeader),
+    ...createDevolutionItems(slot, preEvolution, onDevolve),
+    ...createEvolutionItems({ evolutions, onEvolve, slot }),
+    ...createEncounterNavigationItems(slot, pokemon, onGoToEncounter),
   ];
+}
 
-  if (showHeader) {
-    items.push({
-      id: `${slot}-section-header`,
-      label: (
-        <div className="flex items-center gap-1.5 px-1 py-0.5">
-          <SectionIcon className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
-          <span className="font-medium text-gray-500 text-xs uppercase tracking-wide dark:text-gray-400">
-            {sectionName}
-          </span>
-        </div>
-      ),
-      visualOnly: true,
-    });
+function createSectionStartItems(
+  slot: PokemonSectionOptions["slot"],
+  showHeader: boolean,
+): ContextMenuItem[] {
+  const separator = { id: `${slot}-section-separator`, separator: true };
+  return showHeader ? [separator, createSectionHeader(slot)] : [separator];
+}
+
+function createDevolutionItems(
+  slot: PokemonSectionOptions["slot"],
+  preEvolution: Pokemon | null,
+  onDevolve: () => void,
+): ContextMenuItem[] {
+  if (!preEvolution) {
+    return [];
   }
 
-  if (preEvolution) {
-    items.push({
+  return [
+    {
       icon: Undo2,
       id: `devolve-${slot}`,
       label: createPokemonActionLabel(preEvolution, "Devolve to"),
       onClick: onDevolve,
-    });
+    },
+  ];
+}
+
+function createEncounterNavigationItems(
+  slot: PokemonSectionOptions["slot"],
+  pokemon: PokemonOptionType,
+  onGoToEncounter: () => void,
+): ContextMenuItem[] {
+  if (!pokemon.originalLocation) {
+    return [];
   }
 
-  const [singleEvolution] = evolutions ?? [];
-  if (singleEvolution) {
-    items.push({
-      icon: Atom,
-      id: `evolve-${slot}-${singleEvolution.id}`,
-      label: createPokemonActionLabel(singleEvolution, "Evolve to"),
-      onClick: () => onEvolve(singleEvolution),
-    });
-  } else if (evolutions && evolutions.length > 1) {
-    items.push({
-      children: evolutions.map((evolution) => ({
-        id: `evolve-${slot}-${evolution.id}`,
-        label: createPokemonActionLabel(evolution, ""),
-        onClick: () => onEvolve(evolution),
-      })),
-      icon: Atom,
-      id: `evolve-${slot}`,
-      label: "Evolve to…",
-    });
-  }
-
-  if (pokemon.originalLocation) {
-    items.push({
+  return [
+    {
       icon: MapPin,
       id: `go-to-${slot}-encounter`,
       label: "Go to Encounter",
       onClick: onGoToEncounter,
       tooltip: "Navigate to the location where this Pokémon was encountered",
-    });
-  }
-
-  return items;
+    },
+  ];
 }
 
 function getVariantTooltip(isUnavailable: boolean, isLoadingVariants: boolean) {
