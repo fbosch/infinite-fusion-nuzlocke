@@ -1,10 +1,10 @@
 import { getDisplayPokemon } from "@/components/PokemonSummaryCard/utils";
+import { queryClient } from "@/lib/client";
 import {
   getPreferredVariant,
   setPreferredVariant,
 } from "@/lib/preferred-variants";
 import { spriteKeys } from "@/lib/queries/sprites";
-import { queryClient } from "@/lib/query-client";
 import { generateSpriteUrl, getArtworkVariants } from "@/lib/sprites";
 import { getCurrentTimestamp } from "../playthrough-state";
 import { ensureActivePlaythroughWithEncounters } from "./shared";

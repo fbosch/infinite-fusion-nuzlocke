@@ -2,16 +2,16 @@
 
 import { useEffect, useRef } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { toDormancyBucket } from "@/lib/analytics/buckets";
 import {
   getDaysSinceLastActive,
-  getSharedEventProperties,
   markLandingViewedTracked,
   markPlaythroughResumedTracked,
   shouldTrackLandingViewed,
   shouldTrackPlaythroughResumed,
-  toDormancyBucket,
-} from "@/lib/analytics/playthroughEventData";
-import { trackEvent } from "@/lib/analytics/trackEvent";
+} from "@/lib/analytics/playthrough-event-data";
+import { getSharedEventProperties } from "@/lib/analytics/selectors";
+import { trackEvent } from "@/lib/analytics/track-event";
 import {
   type ConsentPreferences,
   consentPreferencesSchema,

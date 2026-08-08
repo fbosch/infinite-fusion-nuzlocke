@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { TrashIcon } from "lucide-react";
 import { useState } from "react";
-import ConfirmationDialog from "@/components/ConfirmationDialog";
+import ConfirmationDialog from "@/components/confirmation-dialog";
 import { playthroughActions } from "@/stores/playthroughs";
 import { CursorTooltip } from "../../cursor-tooltip";
 

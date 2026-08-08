@@ -1,4 +1,4 @@
-import type { Checkpoint } from "./trackEvent";
+import type { Checkpoint } from "./track-event";
 
 const CHECKPOINTS: readonly Checkpoint[] = [1, 5, 10, 20, 40, 80];
 const CHECKPOINT_STORAGE_KEY_PREFIX = "analytics:checkpoints:";
@@ -202,12 +202,3 @@ export const getDaysSinceLastActive = (
 
   return Math.floor(elapsedMs / 86_400_000);
 };
-
-export {
-  getCheckpointLabel,
-  toDormancyBucket,
-} from "./buckets";
-export {
-  getEncounterCount,
-  getSharedEventProperties,
-} from "./selectors";

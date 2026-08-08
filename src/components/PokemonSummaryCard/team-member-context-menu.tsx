@@ -29,7 +29,7 @@ import {
 } from "@/loaders/pokemon";
 import { playthroughActions } from "@/stores/playthroughs/index";
 import { scrollToLocationById } from "@/utils/scrollToLocation";
-import { PokemonSprite } from "../PokemonSprite";
+import { PokemonSprite } from "../pokemon-sprite";
 import { createExternalDexItems } from "./pokemon-context-menu";
 
 const ArtworkVariantModal = dynamic(

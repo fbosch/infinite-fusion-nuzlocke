@@ -14,7 +14,7 @@ vi.mock("next/image", () => ({
   },
 }));
 
-import { PokemonSprite } from "../PokemonSprite";
+import { PokemonSprite } from "../pokemon-sprite";
 
 describe("PokemonSprite", () => {
   it.each([

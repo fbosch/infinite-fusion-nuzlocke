@@ -32,7 +32,7 @@ vi.mock("@/stores/settings", () => ({
   settingsStore: { moveEncountersBetweenLocations: false },
 }));
 
-vi.mock("@/loaders", () => ({
+vi.mock("@/loaders/locations", () => ({
   isCustomLocation: () => false,
 }));
 
@@ -51,7 +51,7 @@ vi.mock("@/components/cursor-tooltip", () => ({
   ),
 }));
 
-vi.mock("@/components/PokemonSprite", () => ({
+vi.mock("@/components/pokemon-sprite", () => ({
   PokemonSprite: () => null,
 }));
 

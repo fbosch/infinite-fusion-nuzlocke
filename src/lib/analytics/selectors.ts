@@ -5,7 +5,7 @@ import {
   toEncounterCountBucket,
   toViableRosterBucket,
 } from "./buckets";
-import type { SharedEventProperties } from "./trackEvent";
+import type { SharedEventProperties } from "./track-event";
 
 const getEncounterEntries = (playthrough: Playthrough) => {
   if (playthrough.encounters === null || playthrough.encounters === undefined) {

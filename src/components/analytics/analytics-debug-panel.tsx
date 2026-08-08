@@ -12,7 +12,7 @@ import {
   type AnalyticsDebugCounters,
   getAnalyticsDebugCounters,
   resetAnalyticsDebugCounters,
-} from "@/lib/analytics/trackEvent";
+} from "@/lib/analytics/track-event";
 
 const DEBUG_QUERY_KEY = "analytics_debug";
 const DEBUG_STORAGE_KEY = "analytics-debug-panel";

@@ -22,7 +22,7 @@ vi.mock("@/lib/analytics/selectors", () => ({
   getSharedEventProperties: analyticsMocks.getSharedEventProperties,
 }));
 
-vi.mock("@/lib/analytics/trackEvent", () => ({
+vi.mock("@/lib/analytics/track-event", () => ({
   trackEvent: analyticsMocks.trackEvent,
 }));
 

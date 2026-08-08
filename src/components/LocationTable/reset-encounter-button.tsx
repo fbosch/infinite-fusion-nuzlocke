@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { Eraser } from "lucide-react";
 import { useState } from "react";
 import { playthroughActions } from "@/stores/playthroughs";
-import ConfirmationDialog from "../ConfirmationDialog";
+import ConfirmationDialog from "../confirmation-dialog";
 import { CursorTooltip } from "../cursor-tooltip";
 
 interface ResetEncounterButtonProps {

@@ -19,7 +19,7 @@ vi.mock("@/components/cursor-tooltip", () => ({
   CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-vi.mock("@/components/PokemonSprite", () => ({
+vi.mock("@/components/pokemon-sprite", () => ({
   PokemonSprite: ({
     pokemonId: _pokemonId,
     ...props

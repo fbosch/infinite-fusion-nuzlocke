@@ -5,7 +5,8 @@ import {
 } from "@tanstack/react-query";
 import { useDebounce } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
-import { pokemonData, pokemonQueries } from "@/lib/query-client";
+import { pokemonData } from "@/lib/data";
+import { pokemonQueries } from "@/lib/queries/pokemon";
 import { SearchCore } from "@/lib/search-core";
 import searchService from "@/services/search-service";
 import type { Pokemon } from "@/types/pokemon";

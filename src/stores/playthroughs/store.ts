@@ -5,7 +5,7 @@ import {
   type SourceSurface,
   type TriggerMethod,
   trackEvent,
-} from "@/lib/analytics/trackEvent";
+} from "@/lib/analytics/track-event";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 import { generatePrefixedId } from "@/utils/id";

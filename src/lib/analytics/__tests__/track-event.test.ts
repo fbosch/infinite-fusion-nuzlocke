@@ -7,7 +7,7 @@ import {
   isAnalyticsProductionEnvironment,
   resetAnalyticsDebugCounters,
   trackEvent,
-} from "../trackEvent";
+} from "../track-event";
 
 type AnalyticsPrimitive = string | number | boolean;
 

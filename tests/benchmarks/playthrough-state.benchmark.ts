@@ -4,16 +4,16 @@ import { z } from "zod";
 import "../playthroughs/mocks";
 
 vi.mock("@/lib/analytics/selectors", () => ({
+  getEncounterCount: () => 0,
   getSharedEventProperties: () => ({}),
   getTeamSizeAfter: () => 0,
   getViableRosterSize: () => 0,
 }));
-vi.mock("@/lib/analytics/playthroughEventData", () => ({
-  getEncounterCount: () => 0,
+vi.mock("@/lib/analytics/playthrough-event-data", () => ({
   getNewlyReachedCheckpoints: () => [],
   markCheckpointEventsTracked: () => undefined,
 }));
-vi.mock("@/lib/analytics/trackEvent", () => ({ trackEvent: vi.fn() }));
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 vi.mock("@/lib/events", () => ({ emitEvolutionEvent: vi.fn() }));
 
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";

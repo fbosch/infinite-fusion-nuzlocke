@@ -13,7 +13,7 @@ vi.mock("@/loaders/pokemon", () => ({
   getPokemonById: getPokemonByIdMock,
 }));
 
-vi.mock("@/components/PokemonSprite", () => ({
+vi.mock("@/components/pokemon-sprite", () => ({
   PokemonSprite: () => null,
 }));
 

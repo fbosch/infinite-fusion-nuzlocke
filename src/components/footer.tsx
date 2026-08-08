@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import CookieSettingsButton from "@/components/analytics/cookie-settings-button";
-import CreditsModal from "@/components/CreditsModal";
+import CreditsModal from "@/components/credits-modal";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();

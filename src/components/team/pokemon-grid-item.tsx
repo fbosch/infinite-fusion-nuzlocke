@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { useCallback, useEffect, useState } from "react";
 import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
-import { PokemonSprite } from "@/components/PokemonSprite";
+import { PokemonSprite } from "@/components/pokemon-sprite";
 import { TypePills } from "@/components/type-pills";
 import {
   getPokemonById,

@@ -5,7 +5,7 @@ import { CircleIcon, SkullIcon } from "lucide-react";
 import { useState } from "react";
 import EscapeIcon from "@/assets/images/escape-cloud.svg";
 import PokeballIcon from "@/assets/images/pokeball.svg";
-import { getLocationsSortedWithCustom } from "@/loaders";
+import { getLocationsSortedWithCustom } from "@/loaders/locations";
 import { PokemonStatus } from "@/loaders/pokemon";
 import { useCustomLocations, useEncounters } from "@/stores/playthroughs/hooks";
 import { CursorTooltip } from "./cursor-tooltip";

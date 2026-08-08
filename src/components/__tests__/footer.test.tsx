@@ -17,7 +17,7 @@ vi.mock("@/components/analytics/cookie-settings-button", () => ({
   default: () => <button type="button">Cookie settings</button>,
 }));
 
-vi.mock("@/components/CreditsModal", () => ({
+vi.mock("@/components/credits-modal", () => ({
   default: () => null,
 }));
 

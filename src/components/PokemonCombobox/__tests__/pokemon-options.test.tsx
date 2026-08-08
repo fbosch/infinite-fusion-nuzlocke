@@ -49,7 +49,7 @@ vi.mock("../source-tag", () => ({
   SourceTag: () => <span>Route</span>,
 }));
 
-vi.mock("@/components/PokemonSprite", () => ({
+vi.mock("@/components/pokemon-sprite", () => ({
   PokemonSprite: () => <div data-testid="pokemon-sprite" />,
 }));
 

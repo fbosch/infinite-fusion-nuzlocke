@@ -35,7 +35,7 @@ vi.mock("@/components/cursor-tooltip", () => ({
   CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-vi.mock("@/components/ConfirmationDialog", () => ({
+vi.mock("@/components/confirmation-dialog", () => ({
   default: ({
     isOpen,
     title,

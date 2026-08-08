@@ -19,13 +19,13 @@ vi.mock("next/navigation", () => ({
   usePathname: () => pathnameState.pathname,
 }));
 
-vi.mock("@/components/GitHubEngagementCta", () => ({
+vi.mock("@/components/git-hub-engagement-cta", () => ({
   GitHubEngagementCta: ({ route }: { route: string }) => (
     <div data-testid="github-engagement-cta">{route}</div>
   ),
 }));
 
-vi.mock("@/components/Logo", () => ({
+vi.mock("@/components/logo", () => ({
   default: () => <svg aria-hidden="true" />,
 }));
 

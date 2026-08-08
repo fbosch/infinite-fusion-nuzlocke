@@ -6,8 +6,8 @@ import {
   searchPokemon,
 } from "../pokemon";
 
-// Mock the query client and SearchCore
-vi.mock("@/lib/query-client", () => {
+// Mock Pokemon data and SearchCore
+vi.mock("@/lib/data", () => {
   const mockPokemonData = [
     {
       evolution: {

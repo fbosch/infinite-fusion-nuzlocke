@@ -51,11 +51,11 @@ export const FusionSprite = function FusionSprite({
 
   // Determine which Pokemon IDs to use for preferred variant based on fusion state
   // When fusion is off, use the single Pokemon ID; when fusion is on, use both
-  let variantHeadId = head?.id ?? null;
+  let variantHeadId = head ? head.id : null;
   if (isFusion === false && head === null) {
-    variantHeadId = body?.id ?? null;
+    variantHeadId = body ? body.id : null;
   }
-  const variantBodyId = isFusion ? (body?.id ?? null) : null;
+  const variantBodyId = isFusion && body ? body.id : null;
 
   const { variant: preferredVariant } = usePreferredVariantState(
     variantHeadId,

@@ -18,7 +18,7 @@ import {
   usePokemonEvolutionData,
 } from "@/loaders/pokemon";
 import { CursorTooltip } from "../cursor-tooltip";
-import { PokemonSprite } from "../PokemonSprite";
+import { PokemonSprite } from "../pokemon-sprite";
 
 interface PokemonEvolutionButtonProps {
   locationId?: string;

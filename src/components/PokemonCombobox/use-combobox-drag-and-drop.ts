@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSnapshot } from "valtio";
-import { getPokemon, getPokemonNameMap } from "@/loaders";
 import type { PokemonOptionType } from "@/loaders/pokemon";
+import { getPokemon, getPokemonNameMap } from "@/loaders/pokemon";
 import { dragActions, dragStore } from "@/stores/drag-store";
 import { playthroughActions } from "@/stores/playthroughs";
 import { settingsStore } from "@/stores/settings";

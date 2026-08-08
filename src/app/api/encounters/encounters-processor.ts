@@ -102,7 +102,7 @@ const getWildPokemon = (
 const addEggPokemon = (
   pokemon: PokemonWithSource[],
   eggLocation: z.infer<typeof EggLocationSchema> | undefined,
-  source: EncounterSource.GIFT | EncounterSource.NEST,
+  source: typeof EncounterSource.GIFT | typeof EncounterSource.NEST,
 ) => {
   if (!eggLocation) {
     return;

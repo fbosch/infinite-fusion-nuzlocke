@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useMounted } from "@/hooks/use-mounted";
-import { isAnalyticsProductionEnvironment } from "@/lib/analytics/trackEvent";
+import { isAnalyticsProductionEnvironment } from "@/lib/analytics/track-event";
 import {
   type ConsentPreferences,
   consentPreferencesSchema,

@@ -63,7 +63,7 @@ vi.mock("@headlessui/react", () => ({
   ),
 }));
 
-vi.mock("@/components/ConfirmationDialog", () => ({
+vi.mock("@/components/confirmation-dialog", () => ({
   default: () => null,
 }));
 
@@ -82,7 +82,7 @@ vi.mock("@/hooks/use-playthrough-import-export", () => ({
   }),
 }));
 
-vi.mock("@/lib/analytics/playthroughEventData", () => ({
+vi.mock("@/lib/analytics/selectors", () => ({
   getSharedEventProperties: () => ({
     boxed_count_bucket: "c_0",
     deceased_count_bucket: "c_0",
@@ -94,7 +94,7 @@ vi.mock("@/lib/analytics/playthroughEventData", () => ({
   }),
 }));
 
-vi.mock("@/lib/analytics/trackEvent", () => ({
+vi.mock("@/lib/analytics/track-event", () => ({
   trackEvent: trackEventMock,
 }));
 

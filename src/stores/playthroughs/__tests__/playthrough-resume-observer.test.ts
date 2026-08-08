@@ -9,7 +9,7 @@ const analyticsMocks = vi.hoisted(() => ({
   trackEvent: vi.fn(),
 }));
 
-vi.mock("@/lib/analytics/trackEvent", () => ({
+vi.mock("@/lib/analytics/track-event", () => ({
   trackEvent: analyticsMocks.trackEvent,
 }));
 

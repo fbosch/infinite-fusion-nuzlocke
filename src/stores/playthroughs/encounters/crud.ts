@@ -1,7 +1,10 @@
-import { getEncounterCount } from "@/lib/analytics/playthroughEventData";
+import { getEncounterCount } from "@/lib/analytics/selectors";
 import { emitEvolutionEvent } from "@/lib/events";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { getActivePlaythrough, getCurrentTimestamp } from "../playthrough-state";
+import {
+  getActivePlaythrough,
+  getCurrentTimestamp,
+} from "../playthrough-state";
 import type { EncounterData, Playthrough } from "../types";
 import {
   createPokemonWithLocationAndUID,

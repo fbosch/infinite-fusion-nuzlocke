@@ -2,20 +2,20 @@ import { describe, expect, it } from "vitest";
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
 import type { Playthrough } from "@/stores/playthroughs/types";
 import {
+  getCheckpointLabel,
   toCountBucket,
   toDormancyBucket,
   toEncounterCountBucket,
   toViableRosterBucket,
 } from "../buckets";
 import {
-  getCheckpointLabel,
   getCheckpointStorageKey,
   getDaysSinceLastActive,
   getNewlyReachedCheckpoints,
   markCheckpointEventsTracked,
   markPlaythroughResumedTracked,
   shouldTrackPlaythroughResumed,
-} from "../playthroughEventData";
+} from "../playthrough-event-data";
 import {
   getEncounterCount,
   getFusionCount,

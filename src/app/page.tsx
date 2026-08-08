@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ActivePlaythroughTitle } from "@/components/ActivePlaythroughTitle";
+import { ActivePlaythroughTitle } from "@/components/active-playthrough-title";
 import { ErrorBoundary } from "@/components/error-boundary";
 import LocationTable from "@/components/LocationTable";
 

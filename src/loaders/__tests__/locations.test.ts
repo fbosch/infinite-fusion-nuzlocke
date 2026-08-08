@@ -17,8 +17,8 @@ vi.mock("../starters", () => ({
   getStarterPokemonByGameMode: vi.fn(),
 }));
 
-// Mock the query client encounters data
-vi.mock("@/lib/query-client", () => {
+// Mock encounter data and queries
+vi.mock("@/lib/data", () => {
   const mockEncountersData = [
     {
       pokemon: [
@@ -58,14 +58,17 @@ vi.mock("@/lib/query-client", () => {
     encountersData: {
       getAllEncounters: vi.fn().mockResolvedValue(mockEncountersData),
     },
-    encountersQueries: {
-      all: vi.fn(() => ({
-        queryFn: vi.fn().mockResolvedValue(mockEncountersData),
-        queryKey: ["encounters", "classic"],
-      })),
-    },
   };
 });
+
+vi.mock("@/lib/queries/encounters", () => ({
+  encountersQueries: {
+    all: vi.fn(() => ({
+      queryFn: vi.fn(),
+      queryKey: ["encounters", "classic"],
+    })),
+  },
+}));
 
 describe("Locations", () => {
   beforeEach(() => {

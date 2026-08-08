@@ -20,8 +20,8 @@ import {
   useState,
 } from "react";
 import { useMounted } from "@/hooks/use-mounted";
-import { getLocationsSortedWithCustom } from "@/loaders";
 import type { CombinedLocation } from "@/loaders/locations";
+import { getLocationsSortedWithCustom } from "@/loaders/locations";
 import { useCustomLocations, useIsLoading } from "@/stores/playthroughs/hooks";
 import { playthroughActions } from "@/stores/playthroughs/index";
 import type { EncounterData } from "@/stores/playthroughs/types";

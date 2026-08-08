@@ -5,7 +5,7 @@ import {
   type ImportFailureStage,
   type MimeGroup,
   trackEvent,
-} from "@/lib/analytics/trackEvent";
+} from "@/lib/analytics/track-event";
 import { playthroughActions } from "@/stores/playthroughs/index";
 import type {
   ExportedPlaythrough,

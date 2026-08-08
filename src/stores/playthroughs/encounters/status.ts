@@ -4,7 +4,7 @@ import {
   getTeamSizeAfter,
   getViableRosterSize,
 } from "@/lib/analytics/selectors";
-import { trackEvent } from "@/lib/analytics/trackEvent";
+import { trackEvent } from "@/lib/analytics/track-event";
 import { PokemonStatus } from "@/loaders/pokemon";
 import { updateEncounter } from "./crud";
 import { ensureActivePlaythroughWithEncounters } from "./shared";

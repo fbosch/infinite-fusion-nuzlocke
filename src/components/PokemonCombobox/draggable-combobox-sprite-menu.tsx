@@ -6,7 +6,7 @@ import { playthroughActions } from "@/stores/playthroughs";
 import { getActivePlaythrough } from "@/stores/playthroughs/store";
 import type { EncounterData } from "@/stores/playthroughs/types";
 import type { ContextMenuItem } from "../context-menu";
-import { PokemonSprite } from "../PokemonSprite";
+import { PokemonSprite } from "../pokemon-sprite";
 
 type EncounterField = "head" | "body";
 

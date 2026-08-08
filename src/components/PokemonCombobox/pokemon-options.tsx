@@ -11,7 +11,7 @@ import {
   type PokemonOptionType,
 } from "@/loaders/pokemon";
 import type { EncounterSource } from "@/types/encounters";
-import { PokemonSprite } from "../PokemonSprite";
+import { PokemonSprite } from "../pokemon-sprite";
 import { SourceTag } from "./source-tag";
 
 export interface FusionCombinationOption extends PokemonOptionType {

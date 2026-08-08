@@ -13,11 +13,11 @@ import {
 } from "lucide-react";
 import type { KeyboardEvent, MouseEvent } from "react";
 import { useEffect, useRef, useState } from "react";
-import ConfirmationDialog from "@/components/ConfirmationDialog";
+import ConfirmationDialog from "@/components/confirmation-dialog";
 import { CursorTooltip } from "@/components/cursor-tooltip";
 import { usePlaythroughImportExport } from "@/hooks/use-playthrough-import-export";
-import { getSharedEventProperties } from "@/lib/analytics/playthroughEventData";
-import { trackEvent } from "@/lib/analytics/trackEvent";
+import { getSharedEventProperties } from "@/lib/analytics/selectors";
+import { trackEvent } from "@/lib/analytics/track-event";
 import {
   useActivePlaythrough,
   useAllPlaythroughs,

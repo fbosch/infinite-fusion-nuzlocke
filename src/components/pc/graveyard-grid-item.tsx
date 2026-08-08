@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { useCallback } from "react";
-import { PokemonSprite } from "@/components/PokemonSprite";
+import { PokemonSprite } from "@/components/pokemon-sprite";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 
 const GRAVEYARD_LOCATION_SUFFIX_REGEX = /-head$|-body$/;

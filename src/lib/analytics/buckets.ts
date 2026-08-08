@@ -5,7 +5,7 @@ import type {
   DormancyBucket,
   EncounterCountBucket,
   ViableRosterBucket,
-} from "./trackEvent";
+} from "./track-event";
 
 export const toEncounterCountBucket = (count: number): EncounterCountBucket => {
   if (count <= 0) {

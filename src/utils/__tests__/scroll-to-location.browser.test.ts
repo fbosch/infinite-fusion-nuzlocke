@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { PokemonOptionType } from "@/loaders";
+import type { PokemonOptionType } from "@/loaders/pokemon";
 import type { EncounterData } from "@/stores/playthroughs/types";
 import {
   findMostRecentlyFilledLocation,

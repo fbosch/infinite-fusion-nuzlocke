@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import Logo from "@/components/Logo";
+import Logo from "@/components/logo";
 import PlaythroughMenu from "@/components/playthrough/playthrough-menu";
 import TeamSlots from "@/components/team/team-slots";
 import type { TopBarModal } from "./menu-items";

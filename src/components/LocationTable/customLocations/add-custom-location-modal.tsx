@@ -9,7 +9,7 @@ import {
 import clsx from "clsx";
 import { Loader2, Plus, X } from "lucide-react";
 import { type ChangeEvent, useCallback, useState } from "react";
-import { getLocationsSortedWithCustom } from "@/loaders";
+import { getLocationsSortedWithCustom } from "@/loaders/locations";
 import { useCustomLocations } from "@/stores/playthroughs/hooks";
 import { playthroughActions } from "@/stores/playthroughs/index";
 

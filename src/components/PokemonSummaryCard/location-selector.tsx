@@ -24,7 +24,7 @@ import { isEggId, type PokemonOptionType } from "@/loaders/pokemon";
 import { useCustomLocations } from "@/stores/playthroughs/hooks";
 import { getActivePlaythrough } from "@/stores/playthroughs/store";
 import { canFuse } from "@/utils/pokemon-predicates";
-import { PokemonSprite } from "../PokemonSprite";
+import { PokemonSprite } from "../pokemon-sprite";
 
 interface LocationSelectorProps {
   currentLocationId: string;
@@ -58,6 +58,20 @@ interface ActionPreviewProps {
   remainingPokemon: PokemonOptionType | null;
   selectedTargetField: "head" | "body";
   sourceMoveTargetField: "head" | "body";
+}
+
+interface PostMovePokemon {
+  body: PokemonOptionType | null;
+  head: PokemonOptionType | null;
+}
+
+interface SwapActionPreviewProps {
+  existingPokemon: PokemonOptionType;
+  existingTypes: UseFusionTypesResult;
+  otherFieldPokemon: PokemonOptionType | null;
+  remainingPokemon: PokemonOptionType | null;
+  sourceFusionTypes: UseFusionTypesResult;
+  targetFusionTypes: UseFusionTypesResult;
 }
 
 export { LocationSelector };
@@ -124,6 +138,25 @@ function wouldCreateEggFusion(
   return wouldCreateEggFusionInFusion(isMovingPokemonEgg, oppositeFieldPokemon);
 }
 
+function getPostMovePokemon(
+  targetField: "head" | "body",
+  targetPokemon: PokemonOptionType | null,
+  otherPokemon: PokemonOptionType | null,
+): PostMovePokemon {
+  return targetField === "head"
+    ? { body: otherPokemon, head: targetPokemon }
+    : { body: targetPokemon, head: otherPokemon };
+}
+
+function canCreateFusion(
+  headPokemon: PokemonOptionType | null,
+  bodyPokemon: PokemonOptionType | null,
+) {
+  return Boolean(
+    headPokemon && bodyPokemon && canFuse(headPokemon, bodyPokemon),
+  );
+}
+
 // Reusable component for action preview items
 function ActionPreviewItem({
   pokemon,
@@ -161,6 +194,47 @@ function ActionPreviewItem({
   );
 }
 
+function SwapActionPreview({
+  existingPokemon,
+  existingTypes,
+  otherFieldPokemon,
+  remainingPokemon,
+  sourceFusionTypes,
+  targetFusionTypes,
+}: SwapActionPreviewProps) {
+  return (
+    <div className="mt-2 space-y-2.5">
+      <ActionPreviewItem
+        icon={ArrowUpDown}
+        iconColor="text-amber-600 dark:text-amber-400"
+        pokemon={existingPokemon}
+        text={`Will swap with ${existingPokemon.name}`}
+        types={existingTypes}
+      />
+
+      {targetFusionTypes.primary && otherFieldPokemon ? (
+        <ActionPreviewItem
+          icon={Dna}
+          iconColor="text-purple-600 dark:text-purple-400"
+          pokemon={otherFieldPokemon}
+          text={`Will fuse with ${otherFieldPokemon.name} here`}
+          types={targetFusionTypes}
+        />
+      ) : null}
+
+      {sourceFusionTypes.primary && remainingPokemon ? (
+        <ActionPreviewItem
+          icon={Dna}
+          iconColor="text-green-600 dark:text-green-400"
+          pokemon={remainingPokemon}
+          text={`${existingPokemon.name} will fuse with ${remainingPokemon.name} at source`}
+          types={sourceFusionTypes}
+        />
+      ) : null}
+    </div>
+  );
+}
+
 // Component for rendering action preview (swap/fusion indicators)
 function ActionPreview({
   existingPokemon,
@@ -170,91 +244,38 @@ function ActionPreview({
   selectedTargetField,
   sourceMoveTargetField,
 }: ActionPreviewProps) {
-  // Compute target and source post-move states for typing previews
-  const { targetHeadAfter, targetBodyAfter } = (() => {
-    const headAfter =
-      selectedTargetField === "head" ? movingPokemon : otherFieldPokemon;
-    const bodyAfter =
-      selectedTargetField === "body" ? movingPokemon : otherFieldPokemon;
-    return { targetBodyAfter: bodyAfter, targetHeadAfter: headAfter };
-  })();
+  const targetAfterMove = getPostMovePokemon(
+    selectedTargetField,
+    movingPokemon,
+    otherFieldPokemon,
+  );
+  const sourceAfterMove = getPostMovePokemon(
+    sourceMoveTargetField,
+    existingPokemon,
+    remainingPokemon,
+  );
 
-  const { sourceHeadAfter, sourceBodyAfter } = (() => {
-    const headAfter =
-      sourceMoveTargetField === "head" ? existingPokemon : remainingPokemon;
-    const bodyAfter =
-      sourceMoveTargetField === "body" ? existingPokemon : remainingPokemon;
-    return { sourceBodyAfter: bodyAfter, sourceHeadAfter: headAfter };
-  })();
-
-  // Resolve typings with fusion hook (falls back to single when one side is missing)
   const existingTypes = useFusionTypesFromPokemon(existingPokemon, null, false);
-
-  // Compute fusion types conditionally but always at the top level
   const targetFusionTypes = useFusionTypesFromPokemon(
-    targetHeadAfter,
-    targetBodyAfter,
-    Boolean(
-      targetHeadAfter &&
-        targetBodyAfter &&
-        canFuse(targetHeadAfter, targetBodyAfter),
-    ),
+    targetAfterMove.head,
+    targetAfterMove.body,
+    canCreateFusion(targetAfterMove.head, targetAfterMove.body),
   );
   const sourceFusionTypes = useFusionTypesFromPokemon(
-    sourceHeadAfter,
-    sourceBodyAfter,
-    Boolean(
-      sourceHeadAfter &&
-        sourceBodyAfter &&
-        canFuse(sourceHeadAfter, sourceBodyAfter),
-    ),
+    sourceAfterMove.head,
+    sourceAfterMove.body,
+    canCreateFusion(sourceAfterMove.head, sourceAfterMove.body),
   );
 
   if (!(existingPokemon || otherFieldPokemon)) {
     return null;
   }
 
-  if (existingPokemon) {
-    // This is a swap operation - types are already computed above
-    return (
-      <div className="mt-2 space-y-2.5">
-        <ActionPreviewItem
-          icon={ArrowUpDown}
-          iconColor="text-amber-600 dark:text-amber-400"
-          pokemon={existingPokemon}
-          text={`Will swap with ${existingPokemon.name}`}
-          types={existingTypes}
-        />
-
-        {targetFusionTypes.primary && otherFieldPokemon ? (
-          <ActionPreviewItem
-            icon={Dna}
-            iconColor="text-purple-600 dark:text-purple-400"
-            pokemon={otherFieldPokemon}
-            text={`Will fuse with ${otherFieldPokemon.name} here`}
-            types={targetFusionTypes}
-          />
-        ) : null}
-
-        {sourceFusionTypes.primary && remainingPokemon ? (
-          <ActionPreviewItem
-            icon={Dna}
-            iconColor="text-green-600 dark:text-green-400"
-            pokemon={remainingPokemon}
-            text={`${existingPokemon.name} will fuse with ${remainingPokemon.name} at source`}
-            types={sourceFusionTypes}
-          />
-        ) : null}
-      </div>
-    );
-  }
-
-  // Simple fusion case (no existing Pokemon in target slot): simulate post-move target
-  if (movingPokemon && otherFieldPokemon) {
-    // Only show if fusion types were computed (meaning fusion is possible)
-    if (!targetFusionTypes.primary) {
+  if (!existingPokemon) {
+    if (!(movingPokemon && otherFieldPokemon && targetFusionTypes.primary)) {
       return null;
     }
+
     return (
       <ActionPreviewItem
         icon={Dna}
@@ -266,7 +287,16 @@ function ActionPreview({
     );
   }
 
-  return null;
+  return (
+    <SwapActionPreview
+      existingPokemon={existingPokemon}
+      existingTypes={existingTypes}
+      otherFieldPokemon={otherFieldPokemon}
+      remainingPokemon={remainingPokemon}
+      sourceFusionTypes={sourceFusionTypes}
+      targetFusionTypes={targetFusionTypes}
+    />
+  );
 }
 
 // Individual location item component

@@ -1,6 +1,8 @@
-import { getEncounterCount } from "@/lib/analytics/playthroughEventData";
-import { getSharedEventProperties } from "@/lib/analytics/selectors";
-import { trackEvent } from "@/lib/analytics/trackEvent";
+import {
+  getEncounterCount,
+  getSharedEventProperties,
+} from "@/lib/analytics/selectors";
+import { trackEvent } from "@/lib/analytics/track-event";
 import { emitEvolutionEvent } from "@/lib/events";
 import { getCurrentTimestamp } from "../playthrough-state";
 import {

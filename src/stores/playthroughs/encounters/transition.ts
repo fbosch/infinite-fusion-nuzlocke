@@ -1,11 +1,13 @@
 import { getCheckpointLabel } from "@/lib/analytics/buckets";
 import {
-  getEncounterCount,
   getNewlyReachedCheckpoints,
   markCheckpointEventsTracked,
-} from "@/lib/analytics/playthroughEventData";
-import { getSharedEventProperties } from "@/lib/analytics/selectors";
-import { trackEvent } from "@/lib/analytics/trackEvent";
+} from "@/lib/analytics/playthrough-event-data";
+import {
+  getEncounterCount,
+  getSharedEventProperties,
+} from "@/lib/analytics/selectors";
+import { trackEvent } from "@/lib/analytics/track-event";
 import type { Playthrough } from "../types";
 
 export const trackEncounterProgress = (

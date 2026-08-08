@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { ArrowLeftRight } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useReducer, useRef, useState } from "react";
-import ConfirmationDialog from "@/components/ConfirmationDialog";
+import ConfirmationDialog from "@/components/confirmation-dialog";
 import { CursorTooltip } from "@/components/cursor-tooltip";
 import { PokemonCombobox } from "@/components/PokemonCombobox/pokemon-combobox";
 import { DNA_REVERSER_ICON } from "@/constants/items";

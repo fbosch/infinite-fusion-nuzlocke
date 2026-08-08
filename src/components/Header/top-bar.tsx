@@ -1,6 +1,6 @@
 "use client";
 
-import { GitHubEngagementCta } from "@/components/GitHubEngagementCta";
+import { GitHubEngagementCta } from "@/components/git-hub-engagement-cta";
 import ThemeToggle from "@/components/theme-toggle";
 import MenuItems, { type TopBarModal } from "./menu-items";
 

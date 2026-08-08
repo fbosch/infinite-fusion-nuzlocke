@@ -3,8 +3,8 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { GitHubEngagementCta } from "@/components/GitHubEngagementCta";
-import { ANALYTICS_EVENTS } from "@/lib/analytics/trackEvent";
+import { GitHubEngagementCta } from "@/components/git-hub-engagement-cta";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/track-event";
 
 const inViewState = vi.hoisted(() => ({
   inView: false,
@@ -33,7 +33,7 @@ vi.mock("@/hooks/useMounted", () => ({
   useMounted: () => true,
 }));
 
-vi.mock("@/lib/analytics/trackEvent", () => ({
+vi.mock("@/lib/analytics/track-event", () => ({
   ANALYTICS_EVENTS: {
     githubCtaViewed: "github_cta_viewed",
   },

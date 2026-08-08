@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { useCallback } from "react";
 import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
-import { PokemonSprite } from "@/components/PokemonSprite";
+import { PokemonSprite } from "@/components/pokemon-sprite";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 
 interface PokemonSlotSelectorProps {

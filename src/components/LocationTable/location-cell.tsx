@@ -3,9 +3,9 @@
 import { CheckCircle, Info } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useSnapshot } from "valtio";
-import { PokemonSprite } from "@/components/PokemonSprite";
-import { isCustomLocation } from "@/loaders";
+import { PokemonSprite } from "@/components/pokemon-sprite";
 import type { CombinedLocation } from "@/loaders/locations";
+import { isCustomLocation } from "@/loaders/locations";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { useEncounters } from "@/stores/playthroughs/hooks";
 import type { EncounterData } from "@/stores/playthroughs/types";
