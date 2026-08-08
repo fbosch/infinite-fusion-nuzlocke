@@ -2,7 +2,7 @@
 
 import { Description, Field, Label, Switch } from "@headlessui/react";
 import { Cookie, Settings, X } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useMounted } from "@/hooks/use-mounted";
 import {
@@ -84,6 +84,15 @@ function CookieSettings({
   onRejectAll,
   onClose,
 }: CookieSettingsProps) {
+  const handleAnalyticsChange = useCallback(
+    (checked: boolean) => onPreferenceChange("analytics", checked),
+    [onPreferenceChange],
+  );
+  const handleSpeedInsightsChange = useCallback(
+    (checked: boolean) => onPreferenceChange("speedInsights", checked),
+    [onPreferenceChange],
+  );
+
   return (
     <div className="p-6">
       <div className="mb-6 flex items-center justify-between">
@@ -114,7 +123,7 @@ function CookieSettings({
           <Switch
             checked={preferences.analytics}
             className="group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition data-checked:bg-blue-600 dark:bg-gray-700"
-            onChange={(checked) => onPreferenceChange("analytics", checked)}
+            onChange={handleAnalyticsChange}
           >
             <span className="size-4 translate-x-1 rounded-full bg-white transition group-data-checked:translate-x-6" />
           </Switch>
@@ -132,7 +141,7 @@ function CookieSettings({
           <Switch
             checked={preferences.speedInsights}
             className="group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition data-checked:bg-blue-600 dark:bg-gray-700"
-            onChange={(checked) => onPreferenceChange("speedInsights", checked)}
+            onChange={handleSpeedInsightsChange}
           >
             <span className="size-4 translate-x-1 rounded-full bg-white transition group-data-checked:translate-x-6" />
           </Switch>
@@ -173,36 +182,41 @@ export function CookieConsent() {
     consentPreferencesSchema,
   );
 
-  const savePreferences = (newPreferences: ConsentPreferences) => {
-    setPreferences(newPreferences);
-    setHasConsent(true);
-    setShowSettings(false);
-  };
-
-  const acceptAll = () => {
+  const savePreferences = useCallback(
+    (newPreferences: ConsentPreferences) => {
+      setPreferences(newPreferences);
+      setHasConsent(true);
+      setShowSettings(false);
+    },
+    [setHasConsent, setPreferences],
+  );
+  const acceptAll = useCallback(() => {
     savePreferences({
       analytics: true,
       speedInsights: true,
     });
-  };
-
-  const rejectAll = () => {
+  }, [savePreferences]);
+  const rejectAll = useCallback(() => {
     savePreferences(DEFAULT_CONSENT_PREFERENCES);
-  };
-
-  const handlePreferenceChange = (
-    key: keyof ConsentPreferences,
-    value: boolean,
-  ) => {
-    setPreferences((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
-  const handleSavePreferences = () => {
+  }, [savePreferences]);
+  const handlePreferenceChange = useCallback(
+    (key: keyof ConsentPreferences, value: boolean) => {
+      setPreferences((prev) => ({
+        ...prev,
+        [key]: value,
+      }));
+    },
+    [setPreferences],
+  );
+  const handleSavePreferences = useCallback(() => {
     savePreferences(preferences);
-  };
+  }, [preferences, savePreferences]);
+  const closeSettings = useCallback(() => {
+    setShowSettings(false);
+  }, []);
+  const openSettings = useCallback(() => {
+    setShowSettings(true);
+  }, []);
 
   // Don't show banner if user has already given consent or component hasn't mounted yet
   if (mounted === false || hasConsent) {
@@ -218,7 +232,7 @@ export function CookieConsent() {
         <div className="pointer-events-auto w-full border-gray-200 border-t bg-white shadow-xl lg:rounded-md lg:border dark:border-gray-700 dark:bg-gray-800">
           {showSettings ? (
             <CookieSettings
-              onClose={() => setShowSettings(false)}
+              onClose={closeSettings}
               onPreferenceChange={handlePreferenceChange}
               onRejectAll={rejectAll}
               onSavePreferences={handleSavePreferences}
@@ -227,7 +241,7 @@ export function CookieConsent() {
           ) : (
             <CookieBanner
               onAcceptAll={acceptAll}
-              onOpenSettings={() => setShowSettings(true)}
+              onOpenSettings={openSettings}
               onRejectAll={rejectAll}
             />
           )}

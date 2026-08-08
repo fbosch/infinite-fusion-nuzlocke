@@ -31,7 +31,7 @@ import {
 import { playthroughActions } from "@/stores/playthroughs/index";
 import { canFuse, isPokemonActive } from "@/utils/pokemonPredicates";
 import { TeamMemberTooltipContent } from "../team/TeamMemberTooltipContent";
-import { scrollToPokemonEntry } from "./entryInteraction";
+import { scrollToPokemonEntry } from "./entry-interaction";
 import type { PCEntry } from "./types";
 
 interface TeamEntryItemProps {

@@ -2,7 +2,7 @@
 
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import PokemonPCSheet from "@/components/pc/PokemonPCSheet";
+import PokemonPCSheet from "@/components/pc/pokemon-pc-sheet";
 
 vi.mock("@/stores/playthroughs/hooks", () => ({
   useActivePlaythrough: () => null,

@@ -9,7 +9,7 @@ import {
 } from "@testing-library/react";
 import type React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import PlaythroughSelector from "../PlaythroughSelector";
+import PlaythroughSelector from "../playthrough-selector";
 
 const olderRun = /^older run$/i;
 const createNew = /create new/i;
@@ -98,7 +98,7 @@ vi.mock("@/lib/analytics/trackEvent", () => ({
   trackEvent: trackEventMock,
 }));
 
-vi.mock("../CreatePlaythroughModal", () => ({
+vi.mock("../create-playthrough-modal", () => ({
   default: () => null,
 }));
 

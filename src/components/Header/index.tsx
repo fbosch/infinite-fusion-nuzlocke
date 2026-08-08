@@ -4,15 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Logo from "@/components/Logo";
-import PlaythroughMenu from "@/components/playthrough/PlaythroughMenu";
+import PlaythroughMenu from "@/components/playthrough/playthrough-menu";
 import TeamSlots from "@/components/team/team-slots";
 import type { TopBarModal } from "./MenuItems";
 import SettingsModal from "./SettingsModal";
 import TopBar from "./TopBar";
 
-const PokemonPCSheet = dynamic(() => import("@/components/pc/PokemonPCSheet"), {
-  ssr: false,
-});
+const PokemonPCSheet = dynamic(
+  () => import("@/components/pc/pokemon-pc-sheet"),
+  {
+    ssr: false,
+  },
+);
 
 export default function Header() {
   const pathname = usePathname();

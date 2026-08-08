@@ -8,7 +8,14 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { HelpCircle, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  type KeyboardEvent,
+  type MouseEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { CursorTooltip } from "@/components/cursor-tooltip";
 import {
   DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
@@ -20,6 +27,24 @@ interface CreatePlaythroughModalProps {
   onClose: () => void;
   onCreate: (name: string, gameMode: GameMode) => Promise<void>;
 }
+
+const gameModeLabels: Record<GameMode, string> = {
+  classic: "Classic",
+  randomized: "Randomized",
+  remix: "Remix",
+};
+
+const selectedGameModeClasses: Record<GameMode, string> = {
+  classic:
+    "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300",
+  randomized:
+    "border-orange-500 bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300",
+  remix:
+    "border-purple-500 bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300",
+};
+
+const unselectedGameModeClasses =
+  "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600";
 
 export default function CreatePlaythroughModal({
   isOpen,
@@ -60,6 +85,23 @@ export default function CreatePlaythroughModal({
     } catch (error) {
       console.error("Failed to create playthrough:", error);
     }
+  };
+
+  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setNewPlaythroughName(event.target.value);
+  };
+
+  const handleNameKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== "Enter") {
+      return;
+    }
+
+    event.preventDefault();
+    handleCreatePlaythrough();
+  };
+
+  const handleGameModeSelect = (event: MouseEvent<HTMLButtonElement>) => {
+    setSelectedGameModeOverride(event.currentTarget.value as GameMode);
   };
 
   return (
@@ -120,13 +162,8 @@ export default function CreatePlaythroughModal({
                 )}
                 id="playthrough-name"
                 maxLength={50}
-                onChange={(e) => setNewPlaythroughName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleCreatePlaythrough();
-                  }
-                }}
+                onChange={handleNameChange}
+                onKeyDown={handleNameKeyDown}
                 placeholder="Enter a memorable name"
                 ref={playthroughNameInputRef}
                 spellCheck={false}
@@ -196,20 +233,15 @@ export default function CreatePlaythroughModal({
                       "rounded-lg border px-3 py-2.5 font-medium text-sm transition-all duration-200",
                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                       selectedGameMode === mode
-                        ? mode === "classic"
-                          ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
-                          : mode === "remix"
-                            ? "border-purple-500 bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300"
-                            : "border-orange-500 bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300"
-                        : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600",
+                        ? selectedGameModeClasses[mode]
+                        : unselectedGameModeClasses,
                     )}
                     key={mode}
-                    onClick={() => setSelectedGameModeOverride(mode)}
+                    onClick={handleGameModeSelect}
                     type="button"
+                    value={mode}
                   >
-                    {mode === "classic" && "Classic"}
-                    {mode === "remix" && "Remix"}
-                    {mode === "randomized" && "Randomized"}
+                    {gameModeLabels[mode]}
                   </button>
                 ))}
               </div>

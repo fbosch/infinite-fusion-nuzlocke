@@ -12,7 +12,7 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { Cookie, X } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import {
   type ConsentPreferences,
@@ -60,20 +60,36 @@ function CookieSettingsDialog({
   const [localPreferences, setLocalPreferences] =
     useState<ConsentPreferences>(initialPreferences);
 
-  const savePreferences = (newPreferences: ConsentPreferences) => {
-    onSave(newPreferences);
-    onClose();
-  };
-
-  const handlePreferenceChange = (
-    key: keyof ConsentPreferences,
-    value: boolean,
-  ) => {
-    setLocalPreferences((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+  const savePreferences = useCallback(
+    (newPreferences: ConsentPreferences) => {
+      onSave(newPreferences);
+      onClose();
+    },
+    [onClose, onSave],
+  );
+  const handlePreferenceChange = useCallback(
+    (key: keyof ConsentPreferences, value: boolean) => {
+      setLocalPreferences((prev) => ({
+        ...prev,
+        [key]: value,
+      }));
+    },
+    [],
+  );
+  const handleAnalyticsChange = useCallback(
+    (checked: boolean) => handlePreferenceChange("analytics", checked),
+    [handlePreferenceChange],
+  );
+  const handleSpeedInsightsChange = useCallback(
+    (checked: boolean) => handlePreferenceChange("speedInsights", checked),
+    [handlePreferenceChange],
+  );
+  const rejectAll = useCallback(() => {
+    savePreferences(DEFAULT_CONSENT_PREFERENCES);
+  }, [savePreferences]);
+  const saveLocalPreferences = useCallback(() => {
+    savePreferences(localPreferences);
+  }, [localPreferences, savePreferences]);
 
   return (
     <Dialog className="group relative z-[70]" onClose={onClose} open>
@@ -146,9 +162,7 @@ function CookieSettingsDialog({
                     <Switch
                       checked={localPreferences.analytics}
                       className="group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition data-checked:bg-blue-600 dark:bg-gray-700"
-                      onChange={(checked) =>
-                        handlePreferenceChange("analytics", checked)
-                      }
+                      onChange={handleAnalyticsChange}
                     >
                       <span className="size-4 translate-x-1 rounded-full bg-white transition group-data-checked:translate-x-6" />
                     </Switch>
@@ -168,9 +182,7 @@ function CookieSettingsDialog({
                     <Switch
                       checked={localPreferences.speedInsights}
                       className="group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition data-checked:bg-blue-600 dark:bg-gray-700"
-                      onChange={(checked) =>
-                        handlePreferenceChange("speedInsights", checked)
-                      }
+                      onChange={handleSpeedInsightsChange}
                     >
                       <span className="size-4 translate-x-1 rounded-full bg-white transition group-data-checked:translate-x-6" />
                     </Switch>
@@ -187,14 +199,14 @@ function CookieSettingsDialog({
             <div className="flex space-x-3">
               <button
                 className="flex-1 rounded-md bg-gray-200 px-4 py-3 text-gray-900 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
-                onClick={() => savePreferences(DEFAULT_CONSENT_PREFERENCES)}
+                onClick={rejectAll}
                 type="button"
               >
                 Reject All
               </button>
               <button
                 className="flex-1 rounded-md bg-blue-600 px-4 py-3 text-white transition-colors hover:bg-blue-700"
-                onClick={() => savePreferences(localPreferences)}
+                onClick={saveLocalPreferences}
                 type="button"
               >
                 Save Preferences

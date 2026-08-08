@@ -29,7 +29,7 @@ vi.mock("@/components/Logo", () => ({
   default: () => <svg aria-hidden="true" />,
 }));
 
-vi.mock("@/components/playthrough/PlaythroughMenu", () => ({
+vi.mock("@/components/playthrough/playthrough-menu", () => ({
   default: () => <div>Playthrough selector</div>,
 }));
 

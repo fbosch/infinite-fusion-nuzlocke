@@ -1,7 +1,7 @@
 "use client";
 
-import GameModeToggle from "./GameModeToggle";
-import PlaythroughSelector from "./PlaythroughSelector";
+import GameModeToggle from "./game-mode-toggle";
+import PlaythroughSelector from "./playthrough-selector";
 
 export default function PlaythroughMenu() {
   return (

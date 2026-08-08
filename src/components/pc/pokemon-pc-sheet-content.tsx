@@ -1,6 +1,7 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import clsx from "clsx";
 import { Box, Boxes, type LucideIcon, Skull, Users } from "lucide-react";
+import { useCallback } from "react";
 import { scrollToLocationById } from "@/utils/scrollToLocation";
 import { GraveyardGridItem } from "./graveyard-grid-item";
 import PCEntryItem from "./pc-entry-item";
@@ -25,24 +26,46 @@ interface PCSheetTabProps {
   label: string;
 }
 
+function getPCSheetTabClassName({ selected }: { selected: boolean }) {
+  return clsx(
+    "inline-flex min-w-[7.25rem] shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 sm:flex-1",
+    selected
+      ? "border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+      : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
+  );
+}
+
 function PCSheetTab({ icon: Icon, label, count }: PCSheetTabProps) {
   return (
-    <Tab
-      className={({ selected }) =>
-        clsx(
-          "inline-flex min-w-[7.25rem] shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 sm:flex-1",
-          selected
-            ? "border-gray-300 bg-white text-gray-900 shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-            : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
-        )
-      }
-    >
+    <Tab className={getPCSheetTabClassName}>
       <Icon className="h-4 w-4" />
       <span className="flex-1 font-medium">{label}</span>
       <span className="ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100">
         {count}
       </span>
     </Tab>
+  );
+}
+
+function GraveyardEntry({
+  entry,
+  onClose,
+}: Pick<PokemonPCSheetContentProps, "onClose"> & { entry: PCEntry }) {
+  const handleLocationClick = useCallback(
+    (locationId: string) => {
+      const pokemon = entry.head || entry.body;
+      scrollToLocationById(locationId, {
+        behavior: "smooth",
+        durationMs: 1200,
+        highlightUids: pokemon?.uid ? [pokemon.uid] : [],
+      });
+      onClose();
+    },
+    [entry.body, entry.head, onClose],
+  );
+
+  return (
+    <GraveyardGridItem entry={entry} onLocationClick={handleLocationClick} />
   );
 }
 
@@ -76,10 +99,14 @@ export function PokemonPCSheetContent({
   onOpenTeamMemberPicker,
 }: PokemonPCSheetContentProps) {
   const teamCount = team.filter((entry) => entry.head || entry.body).length;
+  const handleTabChange = useCallback(
+    (index: number) => onChangeTab(getPCTab(index)),
+    [onChangeTab],
+  );
 
   return (
     <TabGroup
-      onChange={(index) => onChangeTab(getPCTab(index))}
+      onChange={handleTabChange}
       selectedIndex={getPCTabIndex(activeTab)}
     >
       <TabList className="mb-4 flex w-full flex-nowrap items-center gap-2 overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:none] sm:pb-0 [&::-webkit-scrollbar]:hidden">
@@ -90,7 +117,7 @@ export function PokemonPCSheetContent({
 
       <TabPanels className="flex min-h-0 flex-1 flex-col">
         <TabPanel className="flex min-h-0 flex-1">
-          <div
+          <section
             aria-label="Team members list"
             className="max-h-[calc(100dvh-6.5rem)] w-full space-y-3 overflow-y-auto py-2"
           >
@@ -103,13 +130,13 @@ export function PokemonPCSheetContent({
                 onTeamMemberClick={onOpenTeamMemberPicker}
               />
             ))}
-          </div>
+          </section>
         </TabPanel>
         <TabPanel className="flex min-h-0 flex-1">
           {stored.length === 0 ? (
             <EmptyPCPanel icon={Boxes} message="No Pokémon in your box." />
           ) : (
-            <div
+            <section
               aria-label="Boxed Pokémon list"
               className="grid h-[calc(100dvh-6.5rem)] w-full grid-cols-1 content-start gap-2 overflow-y-auto py-2 sm:grid-cols-2"
             >
@@ -125,7 +152,7 @@ export function PokemonPCSheetContent({
                   onClose={onClose}
                 />
               ))}
-            </div>
+            </section>
           )}
         </TabPanel>
         <TabPanel className="flex min-h-0 flex-1">
@@ -138,18 +165,10 @@ export function PokemonPCSheetContent({
             <div className="h-[calc(100dvh-6.5rem)] w-full overflow-y-auto py-2">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                 {deceased.map((entry) => (
-                  <GraveyardGridItem
+                  <GraveyardEntry
                     entry={entry}
                     key={entry.locationId}
-                    onLocationClick={(locationId) => {
-                      const pokemon = entry.head || entry.body;
-                      scrollToLocationById(locationId, {
-                        behavior: "smooth",
-                        durationMs: 1200,
-                        highlightUids: pokemon?.uid ? [pokemon.uid] : [],
-                      });
-                      onClose();
-                    }}
+                    onClose={onClose}
                   />
                 ))}
               </div>

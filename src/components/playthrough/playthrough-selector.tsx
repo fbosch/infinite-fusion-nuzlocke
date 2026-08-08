@@ -11,7 +11,7 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import type React from "react";
+import type { KeyboardEvent, MouseEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { CursorTooltip } from "@/components/cursor-tooltip";
@@ -25,7 +25,7 @@ import {
 } from "@/stores/playthroughs/hooks";
 import { playthroughActions } from "@/stores/playthroughs/index";
 import type { GameMode, Playthrough } from "@/stores/playthroughs/types";
-import CreatePlaythroughModal from "./CreatePlaythroughModal";
+import CreatePlaythroughModal from "./create-playthrough-modal";
 import { ImportErrorContent } from "./import-error-content";
 
 interface PlaythroughSelectorProps {
@@ -142,7 +142,7 @@ export default function PlaythroughSelector({
     });
   };
 
-  const handleCreateClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleCreateClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     if (activePlaythrough) {
       trackEvent("create_playthrough_modal_opened", {
@@ -154,10 +154,10 @@ export default function PlaythroughSelector({
   };
 
   // Handle arrow key navigation using refs
-  const handleKeyDown = (e: React.KeyboardEvent, currentIndex: number) => {
-    e.preventDefault();
+  const handleKeyDown = (event: KeyboardEvent, currentIndex: number) => {
+    event.preventDefault();
 
-    switch (e.key) {
+    switch (event.key) {
       case "ArrowDown": {
         const nextIndex =
           currentIndex < sortedPlaythroughsForRender.length - 1
@@ -182,7 +182,126 @@ export default function PlaythroughSelector({
           sortedPlaythroughsForRender.length - 1
         ]?.focus();
         break;
+      default:
+        return;
     }
+  };
+
+  const handleSelectorClick = () => {
+    trackSelectorOpened();
+  };
+
+  const handlePlaythroughClick = (event: MouseEvent<HTMLButtonElement>) => {
+    handlePlaythroughSelect(event.currentTarget.value, "click");
+  };
+
+  const handlePlaythroughKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+  ) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handlePlaythroughSelect(event.currentTarget.value, "keyboard");
+      return;
+    }
+
+    if (
+      event.key === "ArrowDown" ||
+      event.key === "ArrowUp" ||
+      event.key === "Home" ||
+      event.key === "End"
+    ) {
+      handleKeyDown(
+        event,
+        Number(event.currentTarget.dataset.playthroughIndex),
+      );
+    }
+  };
+
+  const handlePlaythroughRef = (element: HTMLButtonElement | null) => {
+    if (element === null) {
+      return;
+    }
+
+    const index = Number(element.dataset.playthroughIndex);
+    if (Number.isNaN(index)) {
+      return;
+    }
+
+    playthroughRefs.current[index] = element;
+  };
+
+  const handleExportClickForPlaythrough = (
+    event: MouseEvent<HTMLButtonElement>,
+  ) => {
+    const playthrough = allPlaythroughs.find(
+      ({ id }) => id === event.currentTarget.value,
+    );
+    if (!playthrough) {
+      return;
+    }
+
+    handleExportClick(playthrough as Playthrough, event);
+  };
+
+  const handleExportKeyDownForPlaythrough = (
+    event: KeyboardEvent<HTMLButtonElement>,
+  ) => {
+    const playthrough = allPlaythroughs.find(
+      ({ id }) => id === event.currentTarget.value,
+    );
+    if (!playthrough) {
+      return;
+    }
+
+    handleExportKeyDown(playthrough as Playthrough, event);
+  };
+
+  const handleDeleteClickForPlaythrough = (
+    event: MouseEvent<HTMLButtonElement>,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const playthrough = allPlaythroughs.find(
+      ({ id }) => id === event.currentTarget.value,
+    );
+    if (playthrough) {
+      handleDeleteClick(playthrough);
+    }
+  };
+
+  const handleDeleteKeyDownForPlaythrough = (
+    event: KeyboardEvent<HTMLButtonElement>,
+  ) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const playthrough = allPlaythroughs.find(
+      ({ id }) => id === event.currentTarget.value,
+    );
+    if (playthrough) {
+      handleDeleteClick(playthrough);
+    }
+  };
+
+  const handleCreateModalClose = () => {
+    setShowCreateInput(false);
+  };
+
+  const handleCreatePlaythrough = async (name: string, gameMode: GameMode) => {
+    const newId = playthroughActions.createPlaythrough(name, gameMode);
+    await playthroughActions.setActivePlaythrough(newId, {
+      source_surface: "create_playthrough_modal",
+      trigger_method: "submit",
+    });
+  };
+
+  const handleImportErrorClose = () => {
+    setShowImportError(false);
   };
 
   return (
@@ -206,11 +325,7 @@ export default function PlaythroughSelector({
                   "h-11",
                 )}
                 disabled={isLoading}
-                onClick={() => {
-                  if (!open) {
-                    trackSelectorOpened();
-                  }
-                }}
+                onClick={open ? undefined : handleSelectorClick}
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
                   <div className="flex size-6 items-center justify-center rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-700/60 dark:text-slate-300">
@@ -267,7 +382,7 @@ export default function PlaythroughSelector({
                         Import
                       </button>
                     </div>
-                    {sortedPlaythroughsForRender.map((playthrough) => {
+                    {sortedPlaythroughsForRender.map((playthrough, index) => {
                       const gameModeInfo = getGameModeInfo(
                         playthrough.gameMode as GameMode,
                       );
@@ -290,42 +405,12 @@ export default function PlaythroughSelector({
                               "text-left transition-all duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset",
                               "cursor-pointer",
                             )}
-                            data-playthrough-index={sortedPlaythroughsForRender.findIndex(
-                              (p) => p.id === playthrough.id,
-                            )}
-                            onClick={() =>
-                              handlePlaythroughSelect(playthrough.id, "click")
-                            }
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                e.preventDefault();
-                                handlePlaythroughSelect(
-                                  playthrough.id,
-                                  "keyboard",
-                                );
-                              } else if (
-                                e.key === "ArrowDown" ||
-                                e.key === "ArrowUp" ||
-                                e.key === "Home" ||
-                                e.key === "End"
-                              ) {
-                                const index =
-                                  sortedPlaythroughsForRender.findIndex(
-                                    (p) => p.id === playthrough.id,
-                                  );
-                                handleKeyDown(e, index);
-                              }
-                            }}
-                            ref={(el) => {
-                              const index =
-                                sortedPlaythroughsForRender.findIndex(
-                                  (p) => p.id === playthrough.id,
-                                );
-                              if (index >= 0) {
-                                playthroughRefs.current[index] = el;
-                              }
-                            }}
+                            data-playthrough-index={index}
+                            onClick={handlePlaythroughClick}
+                            onKeyDown={handlePlaythroughKeyDown}
+                            ref={handlePlaythroughRef}
                             type="button"
+                            value={playthrough.id}
                           >
                             <div className="flex min-w-0 flex-1 items-center gap-3">
                               <div
@@ -378,17 +463,11 @@ export default function PlaythroughSelector({
                                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset",
                                 "cursor-pointer",
                               )}
-                              onClick={(e) =>
-                                handleExportClick(playthrough as Playthrough, e)
-                              }
-                              onKeyDown={(e) =>
-                                handleExportKeyDown(
-                                  playthrough as Playthrough,
-                                  e,
-                                )
-                              }
+                              onClick={handleExportClickForPlaythrough}
+                              onKeyDown={handleExportKeyDownForPlaythrough}
                               tabIndex={0}
                               type="button"
+                              value={playthrough.id}
                             >
                               <div className="relative z-[1000]">
                                 <CursorTooltip
@@ -413,20 +492,11 @@ export default function PlaythroughSelector({
                                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-inset",
                                   "cursor-pointer",
                                 )}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  handleDeleteClick(playthrough);
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" || e.key === " ") {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    handleDeleteClick(playthrough);
-                                  }
-                                }}
+                                onClick={handleDeleteClickForPlaythrough}
+                                onKeyDown={handleDeleteKeyDownForPlaythrough}
                                 tabIndex={0}
                                 type="button"
+                                value={playthrough.id}
                               >
                                 <div className="relative z-[1000]">
                                   <CursorTooltip
@@ -494,14 +564,8 @@ export default function PlaythroughSelector({
       {/* Create Playthrough Modal */}
       <CreatePlaythroughModal
         isOpen={showCreateInput}
-        onClose={() => setShowCreateInput(false)}
-        onCreate={async (name: string, gameMode: GameMode) => {
-          const newId = playthroughActions.createPlaythrough(name, gameMode);
-          await playthroughActions.setActivePlaythrough(newId, {
-            source_surface: "create_playthrough_modal",
-            trigger_method: "submit",
-          });
-        }}
+        onClose={handleCreateModalClose}
+        onCreate={handleCreatePlaythrough}
       />
 
       {/* Delete confirmation dialog */}
@@ -522,8 +586,8 @@ export default function PlaythroughSelector({
         confirmText="OK"
         isOpen={showImportError}
         message=""
-        onClose={() => setShowImportError(false)}
-        onConfirm={() => setShowImportError(false)}
+        onClose={handleImportErrorClose}
+        onConfirm={handleImportErrorClose}
         title="Import Error"
         variant="danger"
       >

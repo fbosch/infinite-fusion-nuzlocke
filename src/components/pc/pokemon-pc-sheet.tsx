@@ -10,8 +10,8 @@ import clsx from "clsx";
 import { X } from "lucide-react";
 import TeamMemberPickerModal from "../team/TeamMemberPickerModal";
 import { useTeamMemberPicker } from "../team/useTeamMemberPicker";
-import { PokemonPCSheetContent } from "./PokemonPCSheetContent";
-import { usePokemonPCSheetData } from "./usePokemonPCSheetData";
+import { PokemonPCSheetContent } from "./pokemon-pc-sheet-content";
+import { usePokemonPCSheetData } from "./use-pokemon-pc-sheet-data";
 
 export interface PokemonPCSheetProps {
   activeTab: "team" | "box" | "graveyard";

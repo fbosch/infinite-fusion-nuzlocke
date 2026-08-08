@@ -8,7 +8,7 @@ vi.mock("@/utils/scrollToLocation", () => ({
   scrollToLocationById: scrollToLocationByIdMock,
 }));
 
-import { scrollToPokemonEntry } from "../entryInteraction";
+import { scrollToPokemonEntry } from "../entry-interaction";
 
 describe("scrollToPokemonEntry", () => {
   it("scrolls to and highlights each available Pokemon identity", () => {

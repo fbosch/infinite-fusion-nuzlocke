@@ -12,7 +12,7 @@ import {
   isPokemonDeceased,
   isPokemonStored,
 } from "@/utils/pokemonPredicates";
-import { scrollToPokemonEntry } from "./entryInteraction";
+import { scrollToPokemonEntry } from "./entry-interaction";
 import type { PCEntry } from "./types";
 
 interface PCEntryItemProps {

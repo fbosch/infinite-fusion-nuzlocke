@@ -9,6 +9,7 @@ const EXPECTED_ONE_OF_REGEX = /expected\s+one\s+of\s+/;
 const INVALID_OPTION_REGEX = /Invalid\s+option:\s*/;
 const INVALID_TYPE_REGEX = /Invalid\s+type:\s*/;
 const QUOTED_OPTION_REGEX = /"([^"]+)"\|"([^"]+)"\|"([^"]+)"/;
+const REQUIRED_FIELD_REGEX = /Required/;
 
 export function ImportErrorContent({ errorMessage }: ImportErrorContentProps) {
   // Check if this is a Zod validation error or a general import error
@@ -46,7 +47,7 @@ export function ImportErrorContent({ errorMessage }: ImportErrorContentProps) {
         .replace(EXPECTED_ONE_OF_REGEX, "must be one of: ") // Make enum errors clearer
         .replace(INVALID_OPTION_REGEX, "Invalid value: ") // Simplify invalid option message
         .replace(INVALID_TYPE_REGEX, "Invalid value: ") // Simplify invalid type message
-        .replace(/Required/, "This field is required") // Make required field errors clearer
+        .replace(REQUIRED_FIELD_REGEX, "This field is required") // Make required field errors clearer
         .replace(QUOTED_OPTION_REGEX, "$1, $2, $3"); // Convert pipe-separated to comma-separated
 
       return formatted;

@@ -2,7 +2,7 @@
 
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import GameModeToggle from "../GameModeToggle";
+import GameModeToggle from "../game-mode-toggle";
 
 const switchToClassic = /switch to classic/i;
 const switchToRemix = /switch to remix/i;

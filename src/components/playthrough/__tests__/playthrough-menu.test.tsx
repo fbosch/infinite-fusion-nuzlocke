@@ -2,7 +2,7 @@
 
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import PlaythroughMenu from "../PlaythroughMenu";
+import PlaythroughMenu from "../playthrough-menu";
 
 const { activePlaythrough, selectorProps } = vi.hoisted(() => ({
   activePlaythrough: { current: null as { id: string } | null },
@@ -13,11 +13,11 @@ vi.mock("@/stores/playthroughs/hooks", () => ({
   useActivePlaythrough: () => activePlaythrough.current,
 }));
 
-vi.mock("../GameModeToggle", () => ({
+vi.mock("../game-mode-toggle", () => ({
   default: () => <div data-testid="game-mode-toggle" />,
 }));
 
-vi.mock("../PlaythroughSelector", () => ({
+vi.mock("../playthrough-selector", () => ({
   default: (props: unknown) => {
     selectorProps(props);
     return <div data-testid="playthrough-selector" />;

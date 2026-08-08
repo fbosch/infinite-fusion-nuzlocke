@@ -9,7 +9,7 @@ import {
 } from "@testing-library/react";
 import type React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import CreatePlaythroughModal from "../CreatePlaythroughModal";
+import CreatePlaythroughModal from "../create-playthrough-modal";
 
 vi.mock("@/components/CursorTooltip", () => ({
   CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
