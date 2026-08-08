@@ -4,6 +4,7 @@ import { ComboboxOption } from "@headlessui/react";
 import clsx from "clsx";
 import { Check, Loader2, Search } from "lucide-react";
 import type React from "react";
+import { useCallback } from "react";
 import {
   getEncounterDisplayName,
   isEgg,
@@ -149,21 +150,24 @@ export function PokemonOption({
     "group h-14",
     className,
   );
+  const getClassName = useCallback(
+    ({ active }: { active: boolean }) =>
+      clsx(
+        baseClassName,
+        {
+          // Disable active state when user is scrolling to prevent auto-scroll
+          "bg-blue-600 text-white": active,
+          "text-gray-900 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700":
+            !active,
+        },
+        className,
+      ),
+    [baseClassName, className],
+  );
 
   return (
     <ComboboxOption
-      className={({ active }) =>
-        clsx(
-          baseClassName,
-          {
-            // Disable active state when user is scrolling to prevent auto-scroll
-            "bg-blue-600 text-white": active,
-            "text-gray-900 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700":
-              !active,
-          },
-          className,
-        )
-      }
+      className={getClassName}
       disabled={disabled}
       style={style}
       value={pokemon}
@@ -188,21 +192,19 @@ interface FusionCombinationOptionProps {
   pokemon: FusionCombinationOption;
 }
 
+const getFusionCombinationClassName = ({ active }: { active: boolean }) =>
+  clsx(
+    "group relative my-1 flex h-14 w-full cursor-pointer select-none items-center rounded-md p-2",
+    active
+      ? "bg-blue-600 text-white"
+      : "text-gray-900 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700",
+  );
+
 export function FusionCombinationOption({
   pokemon,
 }: FusionCombinationOptionProps) {
   return (
-    <ComboboxOption
-      className={({ active }) =>
-        clsx(
-          "group relative my-1 flex h-14 w-full cursor-pointer select-none items-center rounded-md p-2",
-          active
-            ? "bg-blue-600 text-white"
-            : "text-gray-900 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700",
-        )
-      }
-      value={pokemon}
-    >
+    <ComboboxOption className={getFusionCombinationClassName} value={pokemon}>
       {({ active }) => (
         <div className="group flex w-full items-center gap-4">
           <div aria-hidden="true" className="flex -space-x-2">

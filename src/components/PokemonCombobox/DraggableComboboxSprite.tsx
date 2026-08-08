@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import dynamic from "next/dynamic";
 import type React from "react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useSnapshot } from "valtio";
 import spritesheetMetadata from "@/assets/pokemon-gen8-spritesheet-metadata.json";
 import { getLocationByIdFromMerged } from "@/loaders/locations";
@@ -72,47 +72,72 @@ export function DraggableComboboxSprite({
   const originalLocationName =
     !pokemon?.originalLocation || pokemon.originalLocation === locationId
       ? null
-      : (getLocationByIdFromMerged(pokemon.originalLocation, customLocations)
-          ?.name ?? pokemon.originalLocation);
+      : getLocationByIdFromMerged(pokemon.originalLocation, customLocations)
+          .name;
 
-  if (!pokemon) {
-    return null;
-  }
+  const handleDragStart = useCallback(
+    (event: React.DragEvent<HTMLImageElement>) => {
+      if (
+        !pokemon ||
+        disabled ||
+        !settingsStore.moveEncountersBetweenLocations
+      ) {
+        event.preventDefault();
+        return;
+      }
 
-  const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
-    if (disabled || !settingsStore.moveEncountersBetweenLocations) {
-      event.preventDefault();
-      return;
-    }
-
-    const sprite = event.currentTarget.querySelector("img") as HTMLImageElement;
-    const spriteMetadata = spritesheetMetadata.sprites.find(
-      (metadata) => metadata.id === pokemon.id,
-    );
-    if (sprite && spriteMetadata) {
-      const dragElement = document.createElement("div");
-      dragElement.style.cssText = `
+      const spriteMetadata = spritesheetMetadata.sprites.find(
+        (metadata) => metadata.id === pokemon.id,
+      );
+      if (spriteMetadata) {
+        const dragElement = document.createElement("div");
+        dragElement.style.cssText = `
         width: ${spriteMetadata.width}px;
         height: ${spriteMetadata.height}px;
-        background-image: url(${sprite.src});
+        background-image: url(${event.currentTarget.src});
         background-position: -${spriteMetadata.x}px -${spriteMetadata.y}px;
         background-repeat: no-repeat;
         position: absolute;
         top: -1000px;
         image-rendering: pixelated;
       `;
-      document.body.appendChild(dragElement);
-      event.dataTransfer.setDragImage(
-        dragElement,
-        spriteMetadata.width / 2,
-        spriteMetadata.height / 2,
-      );
-      setTimeout(() => document.body.removeChild(dragElement), 0);
-    }
+        document.body.appendChild(dragElement);
+        event.dataTransfer.setDragImage(
+          dragElement,
+          spriteMetadata.width / 2,
+          spriteMetadata.height / 2,
+        );
+        setTimeout(() => document.body.removeChild(dragElement), 0);
+      }
 
-    event.dataTransfer.setData("text/plain", pokemon.name);
-    dragActions.startDrag(pokemon.name, comboboxId || "", pokemon);
-  };
+      event.dataTransfer.setData("text/plain", pokemon.name);
+      dragActions.startDrag(pokemon.name, comboboxId || "", pokemon);
+    },
+    [comboboxId, disabled, pokemon],
+  );
+
+  const handleCloseMoveModal = useCallback(() => {
+    setIsMoveModalOpen(false);
+  }, []);
+
+  const handleSelectLocation = useCallback(
+    (targetLocationId: string, targetField: "body" | "head") => {
+      if (value && locationId) {
+        playthroughActions.relocateEncounterSlot({
+          sourceField: field,
+          sourceLocationId: locationId,
+          targetField,
+          targetLocationId,
+        });
+      }
+      setIsMoveModalOpen(false);
+    },
+    [field, locationId, value],
+  );
+
+  if (!pokemon) {
+    return null;
+  }
 
   return (
     <>
@@ -145,13 +170,13 @@ export function DraggableComboboxSprite({
                 },
               )}
               draggable={!disabled && settings.moveEncountersBetweenLocations}
-              onDragStart={handleDragStart}
             >
               <PokemonSprite
                 className={clsx(
                   dragPreview && "pointer-events-none opacity-60",
                 )}
-                draggable={false}
+                draggable={!disabled && settings.moveEncountersBetweenLocations}
+                onDragStart={handleDragStart}
                 pokemonId={pokemon.id}
               />
             </div>
@@ -164,18 +189,8 @@ export function DraggableComboboxSprite({
         encounterData={value ? { [field]: value } : null}
         isOpen={isMoveModalOpen}
         moveTargetField={field}
-        onClose={() => setIsMoveModalOpen(false)}
-        onSelectLocation={(targetLocationId, targetField) => {
-          if (value && locationId) {
-            void playthroughActions.relocateEncounterSlot({
-              sourceField: field,
-              sourceLocationId: locationId,
-              targetField,
-              targetLocationId,
-            });
-          }
-          setIsMoveModalOpen(false);
-        }}
+        onClose={handleCloseMoveModal}
+        onSelectLocation={handleSelectLocation}
       />
     </>
   );

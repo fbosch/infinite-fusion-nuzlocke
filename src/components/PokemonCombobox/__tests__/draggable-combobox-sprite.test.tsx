@@ -20,7 +20,12 @@ vi.mock("@/components/cursor-tooltip", () => ({
 }));
 
 vi.mock("@/components/PokemonSprite", () => ({
-  PokemonSprite: () => <span aria-label="Pokemon" role="img" />,
+  PokemonSprite: ({
+    pokemonId: _pokemonId,
+    ...props
+  }: { pokemonId: number } & React.ComponentProps<"img">) => (
+    <span aria-label="Pokemon" role="img" {...props} />
+  ),
 }));
 
 vi.mock("@/components/PokemonCombobox/DraggableSpriteTooltipContent", () => ({
@@ -87,7 +92,7 @@ describe("DraggableComboboxSprite", () => {
         value={{ id: 25, name: "Pikachu", nationalDexId: 25 }}
       />,
     );
-    const sprite = container.querySelector('[draggable="true"]');
+    const sprite = container.querySelector('span[draggable="true"]');
     expect(sprite).not.toBeNull();
 
     settingsStore.moveEncountersBetweenLocations = false;

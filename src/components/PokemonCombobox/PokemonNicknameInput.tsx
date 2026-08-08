@@ -21,7 +21,7 @@ export const PokemonNicknameInput = ({
   dragPreview,
 }: PokemonNicknameInputProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const inputKey = `${value?.id ?? "none"}:${value?.nickname ?? ""}`;
+  const inputKey = value ? `${value.id}:${value.nickname}` : "none:";
 
   // Helper function to commit changes to parent
   const commitChanges = () => {

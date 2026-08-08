@@ -77,11 +77,11 @@ function getSummaryCardLink(
 
   const headId = displayPokemon.head?.id;
   const bodyId = displayPokemon.body?.id;
-  const pokemonId = displayPokemon.isFusion
-    ? headId && bodyId
+  const singlePokemonId = headId || bodyId;
+  const pokemonId =
+    displayPokemon.isFusion && headId && bodyId
       ? `${headId}.${bodyId}`
-      : headId || bodyId
-    : headId || bodyId;
+      : singlePokemonId;
 
   return `https://infinitefusiondex.com/details/${pokemonId}`;
 }

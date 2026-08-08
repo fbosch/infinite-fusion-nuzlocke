@@ -10,7 +10,15 @@ import {
 import clsx from "clsx";
 import { LocateIcon, PlusIcon } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type KeyboardEvent,
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useMounted } from "@/hooks/use-mounted";
 import { getLocationsSortedWithCustom } from "@/loaders";
 import type { CombinedLocation } from "@/loaders/locations";
@@ -20,10 +28,10 @@ import type { EncounterData } from "@/stores/playthroughs/types";
 import { scrollToMostRecentLocation } from "@/utils/scrollToLocation";
 import { CursorTooltip } from "../cursor-tooltip";
 import { locationTableColumnWidths } from "./columnWidths";
-import LocationCell from "./location-cell";
 import LocationTableHeader from "./LocationTableHeader";
 import LocationTableRow from "./LocationTableRow";
 import LocationTableSkeleton from "./LocationTableSkeleton";
+import LocationCell from "./location-cell";
 import { useLocationTableVirtualization } from "./useLocationTableVirtualization";
 
 const columnHelper = createColumnHelper<CombinedLocation>();
@@ -93,6 +101,44 @@ export default function LocationTable() {
       "smooth",
     );
   }, []);
+  const handleScrollToRecentClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      handleScrollToRecent();
+    },
+    [handleScrollToRecent],
+  );
+  const handleScrollToRecentKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLButtonElement>) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.stopPropagation();
+        handleScrollToRecent();
+      }
+    },
+    [handleScrollToRecent],
+  );
+  const openCustomLocationModal = useCallback(() => {
+    setIsCustomLocationModalOpen(true);
+  }, []);
+  const handleOpenCustomLocationModalClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      openCustomLocationModal();
+    },
+    [openCustomLocationModal],
+  );
+  const handleOpenCustomLocationModalKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLButtonElement>) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.stopPropagation();
+        openCustomLocationModal();
+      }
+    },
+    [openCustomLocationModal],
+  );
+  const closeCustomLocationModal = useCallback(() => {
+    setIsCustomLocationModalOpen(false);
+  }, []);
 
   const columns = useMemo(
     () => [
@@ -124,16 +170,8 @@ export default function LocationTable() {
                     "cursor-pointer",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1",
                   )}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleScrollToRecent();
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.stopPropagation();
-                      handleScrollToRecent();
-                    }
-                  }}
+                  onClick={handleScrollToRecentClick}
+                  onKeyDown={handleScrollToRecentKeyDown}
                   type="button"
                 >
                   <LocateIcon className="size-2.5" />
@@ -152,16 +190,8 @@ export default function LocationTable() {
                     "cursor-pointer",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
                   )}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsCustomLocationModalOpen(true);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.stopPropagation();
-                      setIsCustomLocationModalOpen(true);
-                    }
-                  }}
+                  onClick={handleOpenCustomLocationModalClick}
+                  onKeyDown={handleOpenCustomLocationModalKeyDown}
                   type="button"
                 >
                   <PlusIcon className="size-2.5" />
@@ -307,7 +337,7 @@ export default function LocationTable() {
       </div>
       <AddCustomLocationModal
         isOpen={isCustomLocationModalOpen}
-        onClose={() => setIsCustomLocationModalOpen(false)}
+        onClose={closeCustomLocationModal}
       />
     </div>
   );

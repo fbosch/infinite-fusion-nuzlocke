@@ -8,7 +8,7 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { Loader2, Plus, X } from "lucide-react";
-import { useState } from "react";
+import { type ChangeEvent, useCallback, useState } from "react";
 import { getLocationsSortedWithCustom } from "@/loaders";
 import { useCustomLocations } from "@/stores/playthroughs/hooks";
 import { playthroughActions } from "@/stores/playthroughs/index";
@@ -56,6 +56,19 @@ export default function AddCustomLocationModal({
       handleClose();
     }
   };
+
+  const handleLocationNameChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setLocationName(event.target.value);
+    },
+    [],
+  );
+  const handleSelectedAfterLocationChange = useCallback(
+    (event: ChangeEvent<HTMLSelectElement>) => {
+      setSelectedAfterLocationId(event.target.value);
+    },
+    [],
+  );
 
   return (
     <Dialog
@@ -114,7 +127,7 @@ export default function AddCustomLocationModal({
                   "dark:focus:border-blue-400 dark:focus:ring-blue-400",
                 )}
                 id="locationName"
-                onChange={(e) => setLocationName(e.target.value)}
+                onChange={handleLocationNameChange}
                 placeholder="e.g., Hidden Grotto, Secret Cave"
                 required
                 type="text"
@@ -141,7 +154,7 @@ export default function AddCustomLocationModal({
                 )}
                 disabled={allLocations.length === 0}
                 id="afterLocation"
-                onChange={(e) => setSelectedAfterLocationId(e.target.value)}
+                onChange={handleSelectedAfterLocationChange}
                 required
                 value={selectedAfterLocationId}
               >

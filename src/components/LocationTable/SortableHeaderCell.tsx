@@ -1,6 +1,7 @@
 import { flexRender, type Header } from "@tanstack/react-table";
 import clsx from "clsx";
 import { ChevronDown, ChevronsUpDown, ChevronUp } from "lucide-react";
+import { type KeyboardEvent, useCallback } from "react";
 import type { CombinedLocation } from "@/loaders/locations";
 
 interface SortableHeaderCellProps {
@@ -14,12 +15,29 @@ export default function SortableHeaderCell({
 }: SortableHeaderCellProps) {
   const isSorted = header.column.getIsSorted();
   const sortingEnabled = header.column.getCanSort();
-  const sortDirection =
-    isSorted === "asc"
-      ? "ascending"
-      : isSorted === "desc"
-        ? "descending"
-        : "none";
+  let sortDirection: "ascending" | "descending" | "none" = "none";
+  let sortIcon = <ChevronsUpDown className="h-4 w-4" />;
+  if (isSorted === "asc") {
+    sortDirection = "ascending";
+    sortIcon = <ChevronUp className="h-4 w-4" />;
+  } else if (isSorted === "desc") {
+    sortDirection = "descending";
+    sortIcon = <ChevronDown className="h-4 w-4" />;
+  }
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLTableCellElement>) => {
+      if (sortingEnabled === false || event.target !== event.currentTarget) {
+        return;
+      }
+
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        header.column.getToggleSortingHandler()?.(event);
+      }
+    },
+    [header, sortingEnabled],
+  );
 
   return (
     <th
@@ -35,16 +53,7 @@ export default function SortableHeaderCell({
       onClick={
         sortingEnabled ? header.column.getToggleSortingHandler() : undefined
       }
-      onKeyDown={(e) => {
-        if (sortingEnabled === false || e.target !== e.currentTarget) {
-          return;
-        }
-
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          header.column.getToggleSortingHandler()?.(e);
-        }
-      }}
+      onKeyDown={handleKeyDown}
       role="columnheader"
       tabIndex={sortingEnabled ? 0 : -1}
     >
@@ -52,13 +61,7 @@ export default function SortableHeaderCell({
         {flexRender(header.column.columnDef.header, header.getContext())}
         {header.column.getCanSort() && (
           <span aria-hidden="true" className="text-gray-400">
-            {header.column.getIsSorted() === "asc" ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : header.column.getIsSorted() === "desc" ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronsUpDown className="h-4 w-4" />
-            )}
+            {sortIcon}
           </span>
         )}
       </div>

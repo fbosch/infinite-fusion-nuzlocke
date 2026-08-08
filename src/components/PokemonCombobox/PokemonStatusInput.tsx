@@ -9,7 +9,7 @@ import {
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import clsx from "clsx";
 import { ArrowUpDown, ChevronDown, Computer, Gift, Skull } from "lucide-react";
-import { startTransition } from "react";
+import { startTransition, useCallback } from "react";
 import { match } from "ts-pattern";
 import EscapeIcon from "@/assets/images/escape-cloud.svg";
 import PokeballIcon from "@/assets/images/pokeball.svg";
@@ -48,6 +48,47 @@ const getStatusIcon = (status: PokemonStatusType) =>
     ))
     .otherwise(() => null);
 
+interface PokemonStatusMenuItemProps {
+  isSelected: boolean;
+  onSelect: (status: PokemonStatusType) => void;
+  status: PokemonStatusType;
+}
+
+function PokemonStatusMenuItem({
+  isSelected,
+  onSelect,
+  status,
+}: PokemonStatusMenuItemProps) {
+  const handleClick = useCallback(() => {
+    onSelect(status);
+  }, [onSelect, status]);
+
+  return (
+    <MenuItem>
+      {({ focus }) => (
+        <button
+          className={clsx(
+            "group flex w-full cursor-pointer items-center px-4 py-2 text-sm",
+            "text-left focus:outline-none",
+            {
+              "bg-gray-100 ring-inset focus-visible:ring-1 focus-visible:ring-blue-500 dark:bg-gray-700":
+                focus,
+              "bg-gray-200 dark:bg-gray-600": isSelected && !focus,
+            },
+          )}
+          onClick={handleClick}
+          type="button"
+        >
+          <div className="flex items-center gap-2">
+            {getStatusIcon(status)}
+            <span>{status.charAt(0).toUpperCase() + status.slice(1)}</span>
+          </div>
+        </button>
+      )}
+    </MenuItem>
+  );
+}
+
 export const PokemonStatusInput = ({
   value,
   onChange,
@@ -64,18 +105,21 @@ export const PokemonStatusInput = ({
   });
 
   // Handle status selection
-  const handleStatusSelect = (newStatus: PokemonStatusType) => {
-    if (value) {
-      // Use startTransition to defer the state update
-      startTransition(() => {
-        const updatedPokemon: PokemonOptionType = {
-          ...value,
-          status: newStatus,
-        };
-        onChange(updatedPokemon);
-      });
-    }
-  };
+  const handleStatusSelect = useCallback(
+    (newStatus: PokemonStatusType) => {
+      if (value) {
+        // Use startTransition to defer the state update
+        startTransition(() => {
+          const updatedPokemon: PokemonOptionType = {
+            ...value,
+            status: newStatus,
+          };
+          onChange(updatedPokemon);
+        });
+      }
+    },
+    [onChange, value],
+  );
 
   return (
     <Menu>
@@ -102,13 +146,13 @@ export const PokemonStatusInput = ({
             ref={refs.setReference}
           >
             <div className="flex items-center gap-2">
-              {selectedStatus && getStatusIcon(selectedStatus)}
+              {selectedStatus ? getStatusIcon(selectedStatus) : null}
               <span>{selectedStatus || "Status"}</span>
             </div>
             <ChevronDown aria-hidden="true" className="h-4 w-4 text-gray-400" />
           </MenuButton>
 
-          {open && (
+          {open ? (
             <FloatingPortal>
               <MenuItems
                 className={clsx(
@@ -124,39 +168,17 @@ export const PokemonStatusInput = ({
                 ref={refs.setFloating}
                 style={floatingStyles}
               >
-                {Object.values(PokemonStatus).map(
-                  (statusValue: PokemonStatusType) => (
-                    <MenuItem key={statusValue}>
-                      {({ focus }) => (
-                        <button
-                          className={clsx(
-                            "group flex w-full cursor-pointer items-center px-4 py-2 text-sm",
-                            "text-left focus:outline-none",
-                            {
-                              "bg-gray-100 ring-inset focus-visible:ring-1 focus-visible:ring-blue-500 dark:bg-gray-700":
-                                focus,
-                              "bg-gray-200 dark:bg-gray-600":
-                                selectedStatus === statusValue && !focus,
-                            },
-                          )}
-                          onClick={() => handleStatusSelect(statusValue)}
-                          type="button"
-                        >
-                          <div className="flex items-center gap-2">
-                            {getStatusIcon(statusValue)}
-                            <span>
-                              {statusValue.charAt(0).toUpperCase() +
-                                statusValue.slice(1)}
-                            </span>
-                          </div>
-                        </button>
-                      )}
-                    </MenuItem>
-                  ),
-                )}
+                {Object.values(PokemonStatus).map((statusValue) => (
+                  <PokemonStatusMenuItem
+                    isSelected={selectedStatus === statusValue}
+                    key={statusValue}
+                    onSelect={handleStatusSelect}
+                    status={statusValue}
+                  />
+                ))}
               </MenuItems>
             </FloatingPortal>
-          )}
+          ) : null}
         </div>
       )}
     </Menu>

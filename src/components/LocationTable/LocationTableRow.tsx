@@ -49,19 +49,13 @@ export default function LocationTableRow({
   const locationId = row.original.id;
   const resolvedRowIndex = rowIndex ?? row.index;
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
-  const previousFusionId = useRef<string | null>(null);
-  const hasInitializedFusionId = useRef(false);
+  const previousFusionId = useRef<string | null | undefined>(undefined);
   const _activePlaythroughId = useActivePlaythroughId();
   const visibleCells = row.getVisibleCells();
 
   // Get encounter data directly - only this row will rerender when this encounter changes
   const encounterData = useEncounter(locationId) || EMPTY_ENCOUNTER;
   const effectiveFusionId = getEffectiveFusionId(encounterData);
-
-  useEffect(() => {
-    previousFusionId.current = null;
-    hasInitializedFusionId.current = false;
-  }, []);
 
   // Play evolution animation when this location evolves, but only if the Pokémon can form an effective fusion
   useEffect(() => {
@@ -96,9 +90,8 @@ export default function LocationTableRow({
 
   // Play evolution animation only when the effective fusion ID changes after initialization.
   useEffect(() => {
-    if (!hasInitializedFusionId.current) {
+    if (previousFusionId.current === undefined) {
       previousFusionId.current = effectiveFusionId;
-      hasInitializedFusionId.current = true;
       return;
     }
 

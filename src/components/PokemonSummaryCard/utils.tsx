@@ -96,7 +96,7 @@ export function getAltText(
   return `${head.name}/${body.name} fusion`;
 }
 
-async function validateImageUrl(url: string): Promise<boolean> {
+function validateImageUrl(url: string): Promise<boolean> {
   return new Promise((resolve) => {
     const img = new window.Image();
     img.onload = () => resolve(true);
@@ -199,13 +199,19 @@ export async function getNextFallbackUrl(
     artworkVariant,
   );
 
-  for (const url of candidateUrls) {
-    if (await validateImageUrl(url)) {
-      return url;
-    }
-  }
+  const validUrl = await candidateUrls.reduce<Promise<string | null>>(
+    async (fallbackUrl, url) => {
+      const resolvedUrl = await fallbackUrl;
+      if (resolvedUrl) {
+        return resolvedUrl;
+      }
 
-  return QUESTION_MARK;
+      return (await validateImageUrl(url)) ? url : null;
+    },
+    Promise.resolve(null),
+  );
+
+  return validUrl ?? QUESTION_MARK;
 }
 
 interface StatusState {

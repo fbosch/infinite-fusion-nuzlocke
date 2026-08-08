@@ -29,8 +29,9 @@ export function useLocationTableVirtualization({
   });
   const virtualRows = rowVirtualizer.getVirtualItems();
   const virtualPaddingTop = virtualRows[0]?.start ?? 0;
-  const virtualPaddingBottom = virtualRows.length
-    ? rowVirtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end
+  const lastVirtualRow = virtualRows.at(-1);
+  const virtualPaddingBottom = lastVirtualRow
+    ? rowVirtualizer.getTotalSize() - lastVirtualRow.end
     : 0;
 
   useEffect(() => {

@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import { Loader2, RefreshCcw, RefreshCw, RefreshCwOff } from "lucide-react";
 import type React from "react";
+import { useCallback } from "react";
 import { twMerge } from "tailwind-merge";
 import { useShiftKey } from "@/hooks/use-key-pressed";
 import { usePreferredVariantState, useSpriteVariants } from "@/hooks/useSprite";
@@ -71,25 +72,35 @@ export function ArtworkVariantButton({
   // Determine if variants are available
   const hasVariants = (variants?.length ?? 0) > 1;
 
-  const handleCycleVariant = async (event: React.MouseEvent) => {
-    // Prevent event bubbling to avoid triggering parent click handlers
-    event.stopPropagation();
+  const handleCycleVariant = useCallback(
+    async (event: React.MouseEvent) => {
+      // Prevent event bubbling to avoid triggering parent click handlers
+      event.stopPropagation();
 
-    if (disabled || !hasVariants || !variants) {
-      return;
-    }
+      if (disabled || !hasVariants || !variants) {
+        return;
+      }
 
-    const currentIndex = variants.indexOf(currentVariant);
-    const nextIndex = isShiftPressed
-      ? (currentIndex - 1 + variants.length) % variants.length
-      : (currentIndex + 1) % variants.length;
+      const currentIndex = variants.indexOf(currentVariant);
+      const nextIndex = isShiftPressed
+        ? (currentIndex - 1 + variants.length) % variants.length
+        : (currentIndex + 1) % variants.length;
 
-    const newVariant = variants[nextIndex] || "";
+      const newVariant = variants[nextIndex] || "";
 
-    await updateVariant(newVariant).catch((error) => {
-      console.error("Failed to cycle artwork variant:", error);
-    });
-  };
+      await updateVariant(newVariant).catch((error) => {
+        console.error("Failed to cycle artwork variant:", error);
+      });
+    },
+    [
+      currentVariant,
+      disabled,
+      hasVariants,
+      isShiftPressed,
+      updateVariant,
+      variants,
+    ],
+  );
 
   const label = (() => {
     if (isLoading) {
