@@ -322,6 +322,69 @@ function debugLog(
   console.debug(message, metadata);
 }
 
+const isNonEmptyString = (value: unknown) =>
+  typeof value === "string" && value.length > 0;
+
+const isOneOf = (
+  value: unknown,
+  values: readonly string[] | readonly number[],
+) => values.includes(value as never);
+
+function hasValidSharedProperties(
+  eventName: AnalyticsEventName,
+  candidate: Record<string, unknown>,
+): boolean {
+  if (eventName === "github_cta_viewed") {
+    return true;
+  }
+
+  return [
+    isNonEmptyString(candidate.playthrough_id),
+    isOneOf(candidate.game_mode, ["classic", "remix", "randomized"]),
+    isOneOf(candidate.encounter_count_bucket, [
+      "e_0",
+      "e_1",
+      "e_2_4",
+      "e_5_9",
+      "e_10_19",
+      "e_20_39",
+      "e_40_79",
+      "e_80_plus",
+    ]),
+    isOneOf(candidate.deceased_count_bucket, [
+      "c_0",
+      "c_1",
+      "c_2_3",
+      "c_4_7",
+      "c_8_15",
+      "c_16_plus",
+    ]),
+    isOneOf(candidate.boxed_count_bucket, [
+      "c_0",
+      "c_1",
+      "c_2_3",
+      "c_4_7",
+      "c_8_15",
+      "c_16_plus",
+    ]),
+    isOneOf(candidate.fusion_count_bucket, [
+      "c_0",
+      "c_1",
+      "c_2_3",
+      "c_4_7",
+      "c_8_15",
+      "c_16_plus",
+    ]),
+    isOneOf(candidate.viable_roster_bucket, [
+      "v_0",
+      "v_1",
+      "v_2_3",
+      "v_4_5",
+      "v_6_plus",
+    ]),
+  ].every(Boolean);
+}
+
 function isValidEventPayload<EventName extends AnalyticsEventName>(
   eventName: EventName,
   properties: AnalyticsEventMap[EventName],
@@ -379,12 +442,6 @@ function isValidEventPayload<EventName extends AnalyticsEventName>(
     ],
     run_checkpoint_reached: ["checkpoint", "checkpoint_label"],
   };
-  const isNonEmptyString = (value: unknown) =>
-    typeof value === "string" && value.length > 0;
-  const isOneOf = (
-    value: unknown,
-    values: readonly string[] | readonly number[],
-  ) => values.includes(value as never);
   const candidate = properties as Record<string, unknown>;
   const allowedKeys =
     eventName === "github_cta_viewed"
@@ -393,52 +450,8 @@ function isValidEventPayload<EventName extends AnalyticsEventName>(
   const hasOnlyAllowedKeys = Object.keys(candidate).every((key) =>
     allowedKeys.includes(key),
   );
-  const hasValidSharedProperties =
-    eventName === "github_cta_viewed" ||
-    (isNonEmptyString(candidate.playthrough_id) &&
-      isOneOf(candidate.game_mode, ["classic", "remix", "randomized"]) &&
-      isOneOf(candidate.encounter_count_bucket, [
-        "e_0",
-        "e_1",
-        "e_2_4",
-        "e_5_9",
-        "e_10_19",
-        "e_20_39",
-        "e_40_79",
-        "e_80_plus",
-      ]) &&
-      isOneOf(candidate.deceased_count_bucket, [
-        "c_0",
-        "c_1",
-        "c_2_3",
-        "c_4_7",
-        "c_8_15",
-        "c_16_plus",
-      ]) &&
-      isOneOf(candidate.boxed_count_bucket, [
-        "c_0",
-        "c_1",
-        "c_2_3",
-        "c_4_7",
-        "c_8_15",
-        "c_16_plus",
-      ]) &&
-      isOneOf(candidate.fusion_count_bucket, [
-        "c_0",
-        "c_1",
-        "c_2_3",
-        "c_4_7",
-        "c_8_15",
-        "c_16_plus",
-      ]) &&
-      isOneOf(candidate.viable_roster_bucket, [
-        "v_0",
-        "v_1",
-        "v_2_3",
-        "v_4_5",
-        "v_6_plus",
-      ]));
-  if (hasOnlyAllowedKeys === false || hasValidSharedProperties === false) {
+  const hasSharedProperties = hasValidSharedProperties(eventName, candidate);
+  if (hasOnlyAllowedKeys === false || hasSharedProperties === false) {
     debugLog("Analytics payload blocked by schema", {
       eventName,
       issues: [{ message: "Invalid event payload", path: [] }],

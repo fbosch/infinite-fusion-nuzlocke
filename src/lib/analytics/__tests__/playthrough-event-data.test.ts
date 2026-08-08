@@ -194,6 +194,19 @@ describe("playthroughEventData", () => {
     );
   });
 
+  it("ignores invalid checkpoint markers restored from storage", () => {
+    const storage = createStorage();
+    const playthroughId = "playthrough-invalid-markers";
+    storage.setItem(
+      getCheckpointStorageKey(playthroughId),
+      JSON.stringify([1, 2, 80, "5"]),
+    );
+
+    expect(getNewlyReachedCheckpoints(playthroughId, 0, 10, storage)).toEqual([
+      5, 10,
+    ]);
+  });
+
   it("dedupes playthrough resume once per session", () => {
     const storage = createStorage();
 

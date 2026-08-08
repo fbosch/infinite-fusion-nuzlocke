@@ -43,6 +43,9 @@ const getResumeStorageKey = (playthroughId: string): string =>
 const getLandingStorageKey = (playthroughId: string): string =>
   `${LANDING_STORAGE_KEY_PREFIX}${playthroughId}`;
 
+const isCheckpoint = (value: unknown): value is Checkpoint =>
+  CHECKPOINTS.some((checkpoint) => checkpoint === value);
+
 const parseStoredCheckpoints = (value: string | null): Set<Checkpoint> => {
   if (value === null) {
     return new Set();
@@ -56,14 +59,7 @@ const parseStoredCheckpoints = (value: string | null): Set<Checkpoint> => {
 
     const checkpoints = new Set<Checkpoint>();
     for (const entry of parsed) {
-      if (
-        entry === 1 ||
-        entry === 5 ||
-        entry === 10 ||
-        entry === 20 ||
-        entry === 40 ||
-        entry === 80
-      ) {
+      if (isCheckpoint(entry)) {
         checkpoints.add(entry);
       }
     }
