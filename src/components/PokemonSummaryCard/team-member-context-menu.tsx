@@ -13,7 +13,10 @@ import { useCallback, useState } from "react";
 import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
 import { ContextMenu, type ContextMenuItem } from "@/components/context-menu";
-import { usePreferredVariantState, useSpriteVariants } from "@/hooks/useSprite";
+import {
+  usePreferredVariantState,
+  useSpriteVariants,
+} from "@/hooks/use-sprite";
 import { emitEvolutionEvent } from "@/lib/events";
 import { getSpriteId } from "@/lib/sprites";
 import {

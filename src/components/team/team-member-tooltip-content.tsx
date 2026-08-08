@@ -1,10 +1,10 @@
 import { MousePointer, Palette } from "lucide-react";
 import { TypePills } from "@/components/type-pills";
-import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
-import { useSpriteCredits } from "@/hooks/useSprite";
+import { useFusionTypesFromPokemon } from "@/hooks/use-fusion-types";
+import { useSpriteCredits } from "@/hooks/use-sprite";
 import { getSpriteId } from "@/lib/sprites";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { formatArtistCredits } from "@/utils/formatCredits";
+import { formatArtistCredits } from "@/utils/format-credits";
 
 interface TeamMemberTooltipContentProps {
   bodyPokemon: PokemonOptionType | null;

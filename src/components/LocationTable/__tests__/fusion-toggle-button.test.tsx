@@ -8,8 +8,8 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { dragActions } from "@/stores/dragStore";
-import { FusionToggleButton } from "../FusionToggleButton";
+import { dragActions } from "@/stores/drag-store";
+import { FusionToggleButton } from "../fusion-toggle-button";
 
 const {
   clearEncounterFromLocationMock,

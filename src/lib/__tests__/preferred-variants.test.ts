@@ -14,7 +14,7 @@ describe("preferredVariants persistence", () => {
     localStorage.setItem("preferredVariants:v1", "");
     localStorage.setItem("preferredVariants", JSON.stringify(entries));
 
-    const { preferredVariants } = await import("../preferredVariants");
+    const { preferredVariants } = await import("../preferred-variants");
 
     expect(preferredVariants.get("25")).toBe("variant-a");
     expect(localStorage.getItem("preferredVariants:v1")).toBe(
@@ -28,7 +28,7 @@ describe("preferredVariants persistence", () => {
     localStorage.setItem("preferredVariants:v1", "not json");
     localStorage.setItem("preferredVariants", JSON.stringify(entries));
 
-    const { preferredVariants } = await import("../preferredVariants");
+    const { preferredVariants } = await import("../preferred-variants");
 
     expect(preferredVariants.get("25")).toBe("variant-a");
     expect(localStorage.getItem("preferredVariants:v1")).toBe(
@@ -41,7 +41,7 @@ describe("preferredVariants persistence", () => {
     const entries = [["25", "variant-a"]];
     localStorage.setItem("preferredVariants", JSON.stringify(entries));
 
-    const { preferredVariants } = await import("../preferredVariants");
+    const { preferredVariants } = await import("../preferred-variants");
 
     expect(preferredVariants.get("25")).toBe("variant-a");
     expect(localStorage.getItem("preferredVariants:v1")).toBe(
@@ -59,7 +59,7 @@ describe("preferredVariants persistence", () => {
       ]),
     );
 
-    const { preferredVariants } = await import("../preferredVariants");
+    const { preferredVariants } = await import("../preferred-variants");
 
     expect(preferredVariants.size).toBe(0);
   });

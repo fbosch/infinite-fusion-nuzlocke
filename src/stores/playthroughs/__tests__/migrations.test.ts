@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ImportedPlaythroughSchema } from "../importSchema";
+import { ImportedPlaythroughSchema } from "../import-schema";
 import {
   normalizeImportedPlaythrough,
   normalizePersistedPlaythrough,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { canFuse } from "@/utils/pokemonPredicates";
+import { canFuse } from "@/utils/pokemon-predicates";
 import {
   type DisplayPokemon,
   getDisplayPokemon,

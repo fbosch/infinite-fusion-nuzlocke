@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
-import { getSummaryCardDisplay } from "../summaryCardModel";
+import { getSummaryCardDisplay } from "../summary-card-model";
 
 const pokemon = (
   id: number,

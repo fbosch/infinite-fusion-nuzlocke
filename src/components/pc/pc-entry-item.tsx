@@ -5,13 +5,13 @@ import { FusionSprite } from "@/components/PokemonSummaryCard/fusion-sprite";
 import { PokemonContextMenu } from "@/components/PokemonSummaryCard/pokemon-context-menu";
 import { getNicknameText } from "@/components/PokemonSummaryCard/utils";
 import { TypePills } from "@/components/type-pills";
-import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
+import { useFusionTypesFromPokemon } from "@/hooks/use-fusion-types";
 import { useEncounters } from "@/stores/playthroughs/hooks";
 import {
   canFuse,
   isPokemonDeceased,
   isPokemonStored,
-} from "@/utils/pokemonPredicates";
+} from "@/utils/pokemon-predicates";
 import { scrollToPokemonEntry } from "./entry-interaction";
 import type { PCEntry } from "./types";
 

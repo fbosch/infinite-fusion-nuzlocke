@@ -41,7 +41,7 @@ vi.mock("@/components/context-menu", () => ({
   ),
 }));
 
-vi.mock("@/hooks/useSprite", () => ({
+vi.mock("@/hooks/use-sprite", () => ({
   usePreferredVariantState: () => ({ variant: null }),
   useSpriteVariants: () => ({ data: [], isLoading: false }),
 }));

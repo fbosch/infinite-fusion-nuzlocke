@@ -15,7 +15,7 @@ import type { KeyboardEvent, MouseEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { CursorTooltip } from "@/components/cursor-tooltip";
-import { usePlaythroughImportExport } from "@/hooks/usePlaythroughImportExport";
+import { usePlaythroughImportExport } from "@/hooks/use-playthrough-import-export";
 import { getSharedEventProperties } from "@/lib/analytics/playthroughEventData";
 import { trackEvent } from "@/lib/analytics/trackEvent";
 import {

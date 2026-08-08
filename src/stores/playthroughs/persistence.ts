@@ -4,7 +4,7 @@ import type {
   Playthrough,
   PlaythroughsState,
 } from "@/stores/playthroughs/types";
-import { createDefaultPlaythrough } from "./defaultPlaythrough";
+import { createDefaultPlaythrough } from "./default-playthrough";
 import { normalizePersistedPlaythrough } from "./migrations";
 
 // Create a custom store for playthroughs data

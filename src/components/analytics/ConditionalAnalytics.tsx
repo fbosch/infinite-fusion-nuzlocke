@@ -8,7 +8,7 @@ import {
   type ConsentPreferences,
   consentPreferencesSchema,
   DEFAULT_CONSENT_PREFERENCES,
-} from "@/lib/consentPreferences";
+} from "@/lib/consent-preferences";
 
 const SpeedInsights = dynamic(
   () => import("@vercel/speed-insights/next").then((mod) => mod.SpeedInsights),

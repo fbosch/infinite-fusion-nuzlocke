@@ -57,7 +57,7 @@ vi.mock("@/components/CursorTooltip", () => ({
   CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-vi.mock("@/components/PokemonSummaryCard/ArtworkVariantButton", () => ({
+vi.mock("@/components/PokemonSummaryCard/artwork-variant-button", () => ({
   ArtworkVariantButton: () => null,
 }));
 
@@ -112,11 +112,11 @@ vi.mock("@/components/type-pills", () => ({
   TypePills: () => null,
 }));
 
-vi.mock("@/hooks/useFusionTypes", () => ({
+vi.mock("@/hooks/use-fusion-types", () => ({
   useFusionTypesFromPokemon: () => ({ primary: "Electric", secondary: null }),
 }));
 
-vi.mock("@/hooks/useSprite", () => ({
+vi.mock("@/hooks/use-sprite", () => ({
   useSpriteCredits: () => ({ data: {} }),
 }));
 
@@ -124,7 +124,7 @@ vi.mock("@/lib/sprites", () => ({
   getSpriteId: () => null,
 }));
 
-vi.mock("@/lib/preferredVariants", () => ({
+vi.mock("@/lib/preferred-variants", () => ({
   getPreferredVariant: () => null,
   preferredVariants: new Map(),
   setPreferredVariant: vi.fn(),
@@ -145,11 +145,11 @@ vi.mock("@/stores/playthroughs/index", () => ({
   },
 }));
 
-vi.mock("@/utils/formatCredits", () => ({
+vi.mock("@/utils/format-credits", () => ({
   formatArtistCredits: () => "artist",
 }));
 
-vi.mock("@/utils/pokemonPredicates", () => ({
+vi.mock("@/utils/pokemon-predicates", () => ({
   canFuse: () => true,
   isPokemonActive: (pokemon: unknown) => Boolean(pokemon),
 }));

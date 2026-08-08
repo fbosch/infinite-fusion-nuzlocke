@@ -1,7 +1,7 @@
 import locationsData from "@data/shared/locations.json";
 import { useQuery } from "@tanstack/react-query";
 import { isStarterLocation } from "@/constants/special-locations";
-import { encountersData, encountersQueries } from "@/lib/queryClient";
+import { encountersData, encountersQueries } from "@/lib/query-client";
 import { getStarterPokemonByGameMode } from "@/loaders/starters";
 import { EncounterSource, type PokemonEncounter } from "@/types/encounters";
 import { generatePrefixedId } from "@/utils/id";

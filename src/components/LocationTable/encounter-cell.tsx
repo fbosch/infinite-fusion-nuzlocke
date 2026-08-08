@@ -19,7 +19,7 @@ import {
 } from "@/stores/playthroughs/hooks";
 import { playthroughActions } from "@/stores/playthroughs/index";
 import { EncounterSource } from "@/types/encounters";
-import { FusionToggleButton } from "./FusionToggleButton";
+import { FusionToggleButton } from "./fusion-toggle-button";
 
 interface EncounterCellProps {
   locationId: string;

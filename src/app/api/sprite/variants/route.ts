@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
   generateSpriteVariantUrl,
   getSpriteVariantSuffix,
-} from "@/lib/spriteVariants";
+} from "@/lib/sprite-variants";
 import type { SpriteVariantsResponse } from "@/types/sprites";
 
 export const revalidate = 86_400;

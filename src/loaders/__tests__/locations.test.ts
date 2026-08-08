@@ -18,7 +18,7 @@ vi.mock("../starters", () => ({
 }));
 
 // Mock the query client encounters data
-vi.mock("@/lib/queryClient", () => {
+vi.mock("@/lib/query-client", () => {
   const mockEncountersData = [
     {
       pokemon: [

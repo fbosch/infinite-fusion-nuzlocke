@@ -12,7 +12,7 @@ import {
 } from "@/loaders/pokemon";
 import type { EncounterSource } from "@/types/encounters";
 import { PokemonSprite } from "../PokemonSprite";
-import { SourceTag } from "./SourceTag";
+import { SourceTag } from "./source-tag";
 
 export interface FusionCombinationOption extends PokemonOptionType {
   fusionBody: PokemonOptionType;

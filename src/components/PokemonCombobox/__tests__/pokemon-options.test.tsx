@@ -4,7 +4,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import type React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { FusionCombinationOption, PokemonOption } from "../PokemonOptions";
+import { FusionCombinationOption, PokemonOption } from "../pokemon-options";
 
 const getNoPokemonSource = () => [];
 const isDuplicatePokemon = () => true;
@@ -45,7 +45,7 @@ vi.mock("@headlessui/react", () => ({
   },
 }));
 
-vi.mock("../SourceTag", () => ({
+vi.mock("../source-tag", () => ({
   SourceTag: () => <span>Route</span>,
 }));
 

@@ -6,7 +6,7 @@ import {
   removeCustomLocation,
   updateCustomLocationName,
   validateCustomLocationPlacement,
-} from "./customLocations";
+} from "./custom-locations";
 import {
   getEncounters,
   resetEncounter,

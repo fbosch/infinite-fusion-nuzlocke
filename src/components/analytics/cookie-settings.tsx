@@ -18,7 +18,7 @@ import {
   type ConsentPreferences,
   consentPreferencesSchema,
   DEFAULT_CONSENT_PREFERENCES,
-} from "@/lib/consentPreferences";
+} from "@/lib/consent-preferences";
 
 interface CookieSettingsProps {
   isOpen: boolean;

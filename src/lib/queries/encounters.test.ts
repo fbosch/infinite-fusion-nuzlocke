@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import encountersApiService from "@/services/encountersApiService";
+import encountersApiService from "@/services/encounters-api-service";
 import { EncounterSource } from "@/types/encounters";
 import { encountersQueries } from "./encounters";
 
-vi.mock("@/services/encountersApiService", () => ({
+vi.mock("@/services/encounters-api-service", () => ({
   default: {
     getEncounters: vi.fn(),
   },

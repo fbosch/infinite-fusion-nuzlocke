@@ -4,7 +4,7 @@ import "./mocks";
 // Mock preferredVariants module
 import { vi } from "vitest";
 
-vi.mock("@/lib/preferredVariants", () => ({
+vi.mock("@/lib/preferred-variants", () => ({
   clearPreferredVariants: vi.fn(),
   getPreferredVariant: vi.fn(),
   reloadPreferredVariants: vi.fn(),
@@ -15,7 +15,7 @@ vi.mock("@/lib/preferredVariants", () => ({
 import {
   getPreferredVariant,
   setPreferredVariant,
-} from "@/lib/preferredVariants";
+} from "@/lib/preferred-variants";
 
 const mockedGetPreferredVariant = vi.mocked(getPreferredVariant);
 const mockedSetPreferredVariant = vi.mocked(setPreferredVariant);

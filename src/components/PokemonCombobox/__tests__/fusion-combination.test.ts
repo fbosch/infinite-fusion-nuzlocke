@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveFusionCombination } from "../fusionCombination";
+import { resolveFusionCombination } from "../fusion-combination";
 
 const pokemon = [
   { id: 11, name: "Metapod", nationalDexId: 11 },

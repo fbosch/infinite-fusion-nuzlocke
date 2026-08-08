@@ -2,12 +2,12 @@
 
 import type React from "react";
 import { isEggId, type PokemonOptionType } from "@/loaders/pokemon";
-import { getFusionOverlayStatus } from "@/utils/fusionStatus";
+import { getFusionOverlayStatus } from "@/utils/fusion-status";
 import {
   canFuse,
   isPokemonActive,
   isPokemonInactive,
-} from "@/utils/pokemonPredicates";
+} from "@/utils/pokemon-predicates";
 
 function isEgg(pokemon: PokemonOptionType): boolean {
   return isEggId(pokemon.id);

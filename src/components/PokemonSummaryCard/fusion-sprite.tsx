@@ -8,7 +8,7 @@ import { twMerge } from "tailwind-merge";
 import { useSnapshot } from "valtio";
 import Rays from "@/assets/images/rays.svg";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
-import { usePreferredVariantState } from "@/hooks/useSprite";
+import { usePreferredVariantState } from "@/hooks/use-sprite";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { settingsStore } from "@/stores/settings";
 import { useAnimatedSprite } from "./use-animated-sprite";
@@ -51,11 +51,11 @@ export const FusionSprite = function FusionSprite({
 
   // Determine which Pokemon IDs to use for preferred variant based on fusion state
   // When fusion is off, use the single Pokemon ID; when fusion is on, use both
-  let variantHeadId = head?.id;
+  let variantHeadId = head?.id ?? null;
   if (isFusion === false && head === null) {
-    variantHeadId = body?.id;
+    variantHeadId = body?.id ?? null;
   }
-  const variantBodyId = isFusion ? body?.id : null;
+  const variantBodyId = isFusion ? (body?.id ?? null) : null;
 
   const { variant: preferredVariant } = usePreferredVariantState(
     variantHeadId,

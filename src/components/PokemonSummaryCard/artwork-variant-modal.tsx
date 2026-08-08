@@ -23,7 +23,7 @@ import {
   usePreferredVariantState,
   useSpriteCredits,
   useSpriteVariants,
-} from "@/hooks/useSprite";
+} from "@/hooks/use-sprite";
 import {
   generateSpriteUrl,
   getFormattedCreditsFromResponse,

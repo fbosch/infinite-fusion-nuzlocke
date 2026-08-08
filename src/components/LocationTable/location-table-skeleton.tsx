@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { locationTableColumnWidths } from "./columnWidths";
+import { locationTableColumnWidths } from "./column-widths";
 
 export default function LocationTableSkeleton() {
   return (

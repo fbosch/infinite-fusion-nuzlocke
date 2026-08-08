@@ -4,7 +4,7 @@ import {
   isMissedStatus,
   isPokemonActive,
   isStoredStatus,
-} from "@/utils/pokemonPredicates";
+} from "@/utils/pokemon-predicates";
 
 export type FusionOverlayStatus = "normal" | "missed" | "deceased" | "stored";
 

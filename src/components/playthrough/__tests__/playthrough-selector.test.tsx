@@ -71,7 +71,7 @@ vi.mock("@/components/CursorTooltip", () => ({
   CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-vi.mock("@/hooks/usePlaythroughImportExport", () => ({
+vi.mock("@/hooks/use-playthrough-import-export", () => ({
   usePlaythroughImportExport: () => ({
     handleExportClick: vi.fn(),
     handleExportKeyDown: vi.fn(),

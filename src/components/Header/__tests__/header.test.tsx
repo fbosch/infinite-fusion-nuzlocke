@@ -37,7 +37,7 @@ vi.mock("@/components/team/team-slots", () => ({
   default: () => <div>Team slots</div>,
 }));
 
-vi.mock("@/components/ThemeToggle", () => ({
+vi.mock("@/components/theme-toggle", () => ({
   default: () => (
     <button data-testid="theme-toggle" type="button">
       Theme toggle

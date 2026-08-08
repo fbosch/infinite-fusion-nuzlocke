@@ -3,8 +3,8 @@ import type {
   Pokemon,
   PokemonApiParams,
   PokemonApiResponse,
-} from "../pokemonApiService";
-import pokemonApiService from "../pokemonApiService";
+} from "../pokemon-api-service";
+import pokemonApiService from "../pokemon-api-service";
 
 // Mock fetch globally
 const mockFetch = vi.fn();

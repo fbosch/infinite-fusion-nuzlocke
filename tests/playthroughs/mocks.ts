@@ -14,7 +14,7 @@ vi.mock("idb-keyval", () => ({
 }));
 
 // Mock search service to avoid Worker issues in tests
-vi.mock("@/services/searchService", () => ({
+vi.mock("@/services/search-service", () => ({
   default: {
     search: vi.fn().mockResolvedValue([]),
   },

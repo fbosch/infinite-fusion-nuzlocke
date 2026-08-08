@@ -3,9 +3,9 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ReducedMotionController } from "@/components/ReducedMotionController";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import { GlobalTooltipProvider } from "@/contexts/GlobalTooltipContext";
+import { GlobalTooltipProvider } from "@/contexts/global-tooltip-context";
 import { queryClient } from "@/lib/client";
-import { PlaythroughResumeObserver } from "@/stores/playthroughs/PlaythroughResumeObserver";
+import { PlaythroughResumeObserver } from "@/stores/playthroughs/playthrough-resume-observer";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (

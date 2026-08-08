@@ -8,7 +8,7 @@ export const prepareImportedPlaythrough = async (
 ): Promise<Playthrough> => {
   try {
     const migratedImportData = normalizeImportedPlaythrough(importData);
-    const { ImportedPlaythroughSchema } = await import("./importSchema");
+    const { ImportedPlaythroughSchema } = await import("./import-schema");
     const validationResult =
       ImportedPlaythroughSchema.safeParse(migratedImportData);
 

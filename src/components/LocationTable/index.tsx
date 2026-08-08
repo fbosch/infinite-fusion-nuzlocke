@@ -27,19 +27,19 @@ import { playthroughActions } from "@/stores/playthroughs/index";
 import type { EncounterData } from "@/stores/playthroughs/types";
 import { scrollToMostRecentLocation } from "@/utils/scrollToLocation";
 import { CursorTooltip } from "../cursor-tooltip";
-import { locationTableColumnWidths } from "./columnWidths";
-import LocationTableHeader from "./LocationTableHeader";
-import LocationTableRow from "./LocationTableRow";
-import LocationTableSkeleton from "./LocationTableSkeleton";
+import { locationTableColumnWidths } from "./column-widths";
 import LocationCell from "./location-cell";
-import { useLocationTableVirtualization } from "./useLocationTableVirtualization";
+import LocationTableHeader from "./location-table-header";
+import LocationTableRow from "./location-table-row";
+import LocationTableSkeleton from "./location-table-skeleton";
+import { useLocationTableVirtualization } from "./use-location-table-virtualization";
 
 const columnHelper = createColumnHelper<CombinedLocation>();
 
 // Dynamically import the modal to reduce initial bundle size
 const AddCustomLocationModal = dynamic(
   () =>
-    import("./customLocations/AddCustomLocationModal").then(
+    import("./customLocations/add-custom-location-modal").then(
       (mod) => mod.default,
     ),
   {

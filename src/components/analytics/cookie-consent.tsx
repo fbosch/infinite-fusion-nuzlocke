@@ -10,7 +10,7 @@ import {
   consentGivenSchema,
   consentPreferencesSchema,
   DEFAULT_CONSENT_PREFERENCES,
-} from "@/lib/consentPreferences";
+} from "@/lib/consent-preferences";
 
 interface CookieBannerProps {
   onAcceptAll: () => void;

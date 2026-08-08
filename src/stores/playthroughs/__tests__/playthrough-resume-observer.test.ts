@@ -1,7 +1,7 @@
 import { render, waitFor } from "@testing-library/react";
 import { createElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { PlaythroughResumeObserver } from "../PlaythroughResumeObserver";
+import { PlaythroughResumeObserver } from "../playthrough-resume-observer";
 import { playthroughsStore } from "../store";
 import { createTestPlaythrough, resetPlaythroughsStore } from "./test-utils";
 

@@ -1,10 +1,10 @@
 import { getCacheBuster } from "@/lib/persistence";
-import { generateSpriteVariantUrl } from "@/lib/spriteVariants";
+import { generateSpriteVariantUrl } from "@/lib/sprite-variants";
 import type {
   SpriteVariantsError,
   SpriteVariantsResponse,
 } from "@/types/sprites";
-import { formatArtistCredits } from "@/utils/formatCredits";
+import { formatArtistCredits } from "@/utils/format-credits";
 
 // Types for sprite credits API
 export interface SpriteCreditsResponse {

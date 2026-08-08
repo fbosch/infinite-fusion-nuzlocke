@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorBoundary } from "@/components/error-boundary";
 import LocationTable from "@/components/LocationTable";
 
 export const metadata: Metadata = {

@@ -1,5 +1,5 @@
 import { isEggId, type PokemonOptionType } from "@/loaders/pokemon";
-import { isPokemonDeceased } from "@/utils/pokemonPredicates";
+import { isPokemonDeceased } from "@/utils/pokemon-predicates";
 import {
   type DisplayPokemon,
   getDisplayPokemon,

@@ -33,26 +33,26 @@ import {
 import { useEncounters, useGameMode } from "@/stores/playthroughs/hooks";
 import type { EncounterSource } from "@/types/encounters";
 import { buildCapturedSpeciesIdSet } from "@/utils/encounter-utils";
-import { DraggableComboboxSprite } from "./DraggableComboboxSprite";
+import { DraggableComboboxSprite } from "./draggable-combobox-sprite";
 import {
   applyEncounterDefaultStatus,
   getPokemonSources,
-} from "./encounterSelection";
+} from "./encounter-selection";
 
 const NUMERIC_QUERY_REGEX = /^\d+$/;
 
-import { resolveFusionCombination } from "./fusionCombination";
-import { PokemonNicknameInput } from "./PokemonNicknameInput";
+import { resolveFusionCombination } from "./fusion-combination";
+import { PokemonEvolutionButton } from "./pokemon-evolution-button";
+import { PokemonNicknameInput } from "./pokemon-nickname-input";
 import {
   FusionCombinationOption,
   type FusionCombinationOption as FusionCombinationOptionType,
   isFusionCombinationOption,
   PokemonOption,
   PokemonOptions,
-} from "./PokemonOptions";
-import { PokemonStatusInput } from "./PokemonStatusInput";
-import { PokemonEvolutionButton } from "./pokemon-evolution-button";
-import { useComboboxDragAndDrop } from "./useComboboxDragAndDrop";
+} from "./pokemon-options";
+import { PokemonStatusInput } from "./pokemon-status-input";
+import { useComboboxDragAndDrop } from "./use-combobox-drag-and-drop";
 
 interface PokemonComboboxProps {
   comboboxId?: string;

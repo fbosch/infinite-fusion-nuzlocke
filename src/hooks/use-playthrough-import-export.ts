@@ -5,7 +5,7 @@ import {
   getImportErrorMessage,
   importPlaythroughFile,
   trackImportPickerFailure,
-} from "./playthroughImportExportWorkflow";
+} from "./playthrough-import-export-workflow";
 
 async function handleImportFileChange(
   input: HTMLInputElement,

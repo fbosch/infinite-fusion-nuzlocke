@@ -2,11 +2,11 @@ import { getDisplayPokemon } from "@/components/PokemonSummaryCard/utils";
 import {
   getPreferredVariant,
   setPreferredVariant,
-} from "@/lib/preferredVariants";
+} from "@/lib/preferred-variants";
 import { spriteKeys } from "@/lib/queries/sprites";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/query-client";
 import { generateSpriteUrl, getArtworkVariants } from "@/lib/sprites";
-import { getCurrentTimestamp } from "../playthroughState";
+import { getCurrentTimestamp } from "../playthrough-state";
 import { ensureActivePlaythroughWithEncounters } from "./shared";
 
 const setDisplayPokemonVariant = (

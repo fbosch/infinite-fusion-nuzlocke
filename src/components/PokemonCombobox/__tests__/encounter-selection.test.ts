@@ -4,7 +4,7 @@ import { EncounterSource } from "@/types/encounters";
 import {
   applyEncounterDefaultStatus,
   getPokemonSources,
-} from "../encounterSelection";
+} from "../encounter-selection";
 
 const basePokemon: PokemonOptionType = {
   id: 25,

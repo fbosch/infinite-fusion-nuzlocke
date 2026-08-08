@@ -14,7 +14,7 @@ import EscapeIcon from "@/assets/images/escape-cloud.svg";
 import HeadIcon from "@/assets/images/head.svg";
 import PokeballIcon from "@/assets/images/pokeball.svg";
 import { ContextMenu, type ContextMenuItem } from "@/components/context-menu";
-import { usePreferredVariantState, useSpriteVariants } from "@/hooks/useSprite";
+import { usePreferredVariantState, useSpriteVariants } from "@/hooks/use-sprite";
 import {
   isEggId,
   type PokemonOptionType,

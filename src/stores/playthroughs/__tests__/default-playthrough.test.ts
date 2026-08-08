@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ImportedPlaythroughSchema } from "@/stores/playthroughs/importSchema";
-import { createDefaultPlaythrough } from "../defaultPlaythrough";
+import { ImportedPlaythroughSchema } from "@/stores/playthroughs/import-schema";
+import { createDefaultPlaythrough } from "../default-playthrough";
 
 describe("createDefaultPlaythrough", () => {
   it("creates a schema-valid default playthrough", () => {

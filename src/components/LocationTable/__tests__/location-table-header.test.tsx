@@ -2,8 +2,8 @@
 
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { locationTableColumnWidths } from "../columnWidths";
-import LocationTableHeader from "../LocationTableHeader";
+import { locationTableColumnWidths } from "../column-widths";
+import LocationTableHeader from "../location-table-header";
 
 const sortableHeaderCellProps = vi.hoisted(() => vi.fn());
 
@@ -11,7 +11,7 @@ vi.mock("@/components/progress-bar", () => ({
   default: () => <div />,
 }));
 
-vi.mock("../SortableHeaderCell", () => ({
+vi.mock("../sortable-header-cell", () => ({
   default: (props: unknown) => {
     sortableHeaderCellProps(props);
     return <th />;

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Pokemon } from "@/loaders/pokemon";
 
-let searchService: typeof import("../searchService").default;
+let searchService: typeof import("../search-service").default;
 
 // Mock the dependencies
 vi.mock("@/lib/searchCore", () => ({
@@ -84,7 +84,7 @@ describe("SearchService", () => {
     vi.resetModules();
     vi.spyOn(console, "warn").mockImplementation(() => undefined);
     vi.spyOn(console, "error").mockImplementation(() => undefined);
-    ({ default: searchService } = await import("../searchService"));
+    ({ default: searchService } = await import("../search-service"));
   });
 
   afterEach(() => {

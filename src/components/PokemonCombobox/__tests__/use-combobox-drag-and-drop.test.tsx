@@ -3,8 +3,8 @@
 import { act, renderHook } from "@testing-library/react";
 import type React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { dragActions } from "@/stores/dragStore";
-import { useComboboxDragAndDrop } from "../useComboboxDragAndDrop";
+import { dragActions } from "@/stores/drag-store";
+import { useComboboxDragAndDrop } from "../use-combobox-drag-and-drop";
 
 const { getPokemonMock, getPokemonNameMapMock } = vi.hoisted(() => ({
   getPokemonMock: vi.fn(),

@@ -1,5 +1,5 @@
 import { proxy, subscribe } from "valtio";
-import { getBrowserReducedMotion } from "@/lib/reducedMotion";
+import { getBrowserReducedMotion } from "@/lib/reduced-motion";
 import {
   getActivePlaythrough,
   playthroughsStore,

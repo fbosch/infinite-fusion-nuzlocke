@@ -8,8 +8,8 @@ import {
   ConditionalSpeedInsights,
 } from "@/components/analytics/ConditionalAnalytics";
 import { CookieConsent } from "@/components/analytics/cookie-consent";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import Footer from "@/components/Footer";
+import { ErrorBoundary } from "@/components/error-boundary";
+import Footer from "@/components/footer";
 import Header from "@/components/Header";
 import { ServiceWorkerInit } from "@/components/ServiceWorkerInit";
 import { APP_TITLE, APP_TITLE_TEMPLATE } from "@/lib/metadata";

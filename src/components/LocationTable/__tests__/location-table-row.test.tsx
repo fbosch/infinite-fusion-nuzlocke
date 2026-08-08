@@ -4,7 +4,7 @@ import { render } from "@testing-library/react";
 import { type Ref, useImperativeHandle } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { FusionSpriteHandle } from "../../PokemonSummaryCard/fusion-sprite";
-import LocationTableRow from "../LocationTableRow";
+import LocationTableRow from "../location-table-row";
 
 const summaryCardProps = vi.hoisted(() => vi.fn());
 const encounterCellProps = vi.hoisted(() => vi.fn());
@@ -48,7 +48,7 @@ vi.mock("@/lib/events", () => ({
     return vi.fn();
   },
 }));
-vi.mock("@/utils/pokemonPredicates", () => ({ canFuse }));
+vi.mock("@/utils/pokemon-predicates", () => ({ canFuse }));
 vi.mock("@/components/PokemonSummaryCard", () => ({
   default: ({ ref, ...props }: { ref: Ref<FusionSpriteHandle> }) => {
     summaryCardProps(props);

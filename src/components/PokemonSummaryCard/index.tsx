@@ -3,16 +3,16 @@ import { MousePointer, Palette, SquareArrowUpRight } from "lucide-react";
 import type React from "react";
 import { useRef } from "react";
 import { CursorTooltip } from "@/components/cursor-tooltip";
-import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
-import { usePreferredVariantState, useSpriteCredits } from "@/hooks/useSprite";
+import { useFusionTypesFromPokemon } from "@/hooks/use-fusion-types";
+import { usePreferredVariantState, useSpriteCredits } from "@/hooks/use-sprite";
 import { getSpriteId } from "@/lib/sprites";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { formatArtistCredits } from "@/utils/formatCredits";
+import { formatArtistCredits } from "@/utils/format-credits";
 import { TypePills } from "../type-pills";
-import { ArtworkVariantButton } from "./ArtworkVariantButton";
+import { ArtworkVariantButton } from "./artwork-variant-button";
 import { FusionSprite, type FusionSpriteHandle } from "./fusion-sprite";
 import { PokemonContextMenu } from "./pokemon-context-menu";
-import { getSummaryCardDisplay } from "./summaryCardModel";
+import { getSummaryCardDisplay } from "./summary-card-model";
 
 interface SummaryCardProps {
   bodyPokemon?: PokemonOptionType | null;

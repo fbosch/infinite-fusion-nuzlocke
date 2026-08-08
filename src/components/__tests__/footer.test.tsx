@@ -3,7 +3,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import Footer from "@/components/Footer";
+import Footer from "@/components/footer";
 
 vi.mock("next/link", () => ({
   default: ({ children, href, ...props }: ComponentProps<"a">) => (

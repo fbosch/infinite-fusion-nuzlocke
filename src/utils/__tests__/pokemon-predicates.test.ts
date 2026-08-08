@@ -20,7 +20,7 @@ import {
   isPokemonInactive,
   isPokemonStored,
   isStoredStatus,
-} from "../pokemonPredicates";
+} from "../pokemon-predicates";
 
 // Helper function to create test Pokemon data
 function createTestPokemon(

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   generateSpriteVariantUrl,
   getSpriteVariantSuffix,
-} from "../spriteVariants";
+} from "../sprite-variants";
 
 describe("sprite variants", () => {
   it.each([

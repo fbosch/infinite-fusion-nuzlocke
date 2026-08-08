@@ -2,7 +2,7 @@
 
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import SettingsModal from "../SettingsModal";
+import SettingsModal from "../settings-modal";
 
 vi.mock("next-themes", () => ({
   useTheme: () => ({ setTheme: vi.fn(), theme: "system" }),

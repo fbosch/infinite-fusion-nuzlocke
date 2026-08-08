@@ -6,9 +6,9 @@ import { useState } from "react";
 import Logo from "@/components/Logo";
 import PlaythroughMenu from "@/components/playthrough/playthrough-menu";
 import TeamSlots from "@/components/team/team-slots";
-import type { TopBarModal } from "./MenuItems";
-import SettingsModal from "./SettingsModal";
-import TopBar from "./TopBar";
+import type { TopBarModal } from "./menu-items";
+import SettingsModal from "./settings-modal";
+import TopBar from "./top-bar";
 
 const PokemonPCSheet = dynamic(
   () => import("@/components/pc/pokemon-pc-sheet"),

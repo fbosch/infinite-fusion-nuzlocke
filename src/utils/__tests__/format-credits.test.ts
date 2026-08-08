@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatArtistCredits } from "../formatCredits";
+import { formatArtistCredits } from "../format-credits";
 
 describe("formatArtistCredits", () => {
   describe("empty and invalid input", () => {

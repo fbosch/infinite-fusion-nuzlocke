@@ -1,6 +1,6 @@
 import { getLocationById } from "@/loaders/locations";
 import type { EncounterData } from "@/stores/playthroughs/types";
-import { isPokemonDeceased, isPokemonStored } from "@/utils/pokemonPredicates";
+import { isPokemonDeceased, isPokemonStored } from "@/utils/pokemon-predicates";
 import type { PCEntry } from "./types";
 
 export type PCTab = "team" | "box" | "graveyard";

@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import ms from "ms";
-import { getPreferredVariant } from "@/lib/preferredVariants";
+import { getPreferredVariant } from "@/lib/preferred-variants";
 import {
   getArtworkVariants,
   getSpriteCredits,

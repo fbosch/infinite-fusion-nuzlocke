@@ -1,6 +1,6 @@
 // biome-ignore lint/style/useFilenamingConvention: File name is an established import path.
 import { emitScrollToLocation } from "@/lib/events";
-import { getDocumentReducedMotion } from "@/lib/reducedMotion";
+import { getDocumentReducedMotion } from "@/lib/reduced-motion";
 import type { EncounterData } from "@/stores/playthroughs/types";
 
 // Keep teardown timers per overlay element across calls to avoid flicker

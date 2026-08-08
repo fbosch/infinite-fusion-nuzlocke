@@ -2,7 +2,7 @@
 
 import { fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DraggableComboboxSprite } from "../DraggableComboboxSprite";
+import { DraggableComboboxSprite } from "../draggable-combobox-sprite";
 import { getDraggableComboboxSpriteMenuOptions } from "../draggable-combobox-sprite-menu";
 
 const { startDragMock } = vi.hoisted(() => ({
@@ -28,11 +28,14 @@ vi.mock("@/components/PokemonSprite", () => ({
   ),
 }));
 
-vi.mock("@/components/PokemonCombobox/DraggableSpriteTooltipContent", () => ({
-  DraggableSpriteTooltipContent: () => null,
-}));
+vi.mock(
+  "@/components/PokemonCombobox/draggable-sprite-tooltip-content",
+  () => ({
+    DraggableSpriteTooltipContent: () => null,
+  }),
+);
 
-vi.mock("@/hooks/usePokemonTypes", () => ({
+vi.mock("@/hooks/use-pokemon-types", () => ({
   default: () => ({ primary: null, secondary: null }),
 }));
 
@@ -46,7 +49,7 @@ vi.mock("@/loaders/pokemon", () => ({
   usePokemonEvolutionData: () => ({ evolutions: [], preEvolution: null }),
 }));
 
-vi.mock("@/stores/dragStore", () => ({
+vi.mock("@/stores/drag-store", () => ({
   dragActions: { startDrag: startDragMock },
 }));
 

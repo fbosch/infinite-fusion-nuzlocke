@@ -1,6 +1,6 @@
 import { keepPreviousData, queryOptions } from "@tanstack/react-query";
 import ms from "ms";
-import pokemonApiService from "@/services/pokemonApiService";
+import pokemonApiService from "@/services/pokemon-api-service";
 
 // Pokemon query options
 export const pokemonQueries = {

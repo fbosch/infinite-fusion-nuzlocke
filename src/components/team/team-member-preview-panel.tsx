@@ -3,7 +3,7 @@
 import { type ChangeEvent, type ComponentProps, useCallback } from "react";
 import PokemonSummaryCard from "@/components/PokemonSummaryCard";
 import { TypePills } from "@/components/type-pills";
-import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
+import { useFusionTypesFromPokemon } from "@/hooks/use-fusion-types";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { TeamMemberActions } from "./team-member-actions";
 import { useTeamMemberSelection } from "./team-member-selection-context";

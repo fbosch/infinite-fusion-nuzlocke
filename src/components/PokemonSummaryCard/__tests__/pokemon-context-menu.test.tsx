@@ -22,7 +22,7 @@ vi.mock("@/assets/images/escape-cloud.svg", () => ({
 vi.mock("@/assets/images/head.svg", () => ({ default: () => <svg /> }));
 vi.mock("@/assets/images/body.svg", () => ({ default: () => <svg /> }));
 
-vi.mock("@/hooks/useSprite", () => ({
+vi.mock("@/hooks/use-sprite", () => ({
   usePreferredVariantState: () => ({ variant: null }),
   useSpriteVariants: () => ({ data: [], isLoading: false }),
 }));

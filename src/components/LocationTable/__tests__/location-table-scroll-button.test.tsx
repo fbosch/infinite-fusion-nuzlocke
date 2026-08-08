@@ -66,7 +66,7 @@ vi.mock("@/hooks/use-breakpoint", () => ({
   useBreakpointSmallerThan: vi.fn(() => false),
 }));
 
-vi.mock("../LocationTableRow", () => ({
+vi.mock("../location-table-row", () => ({
   default: ({
     row,
     rowIndex,
@@ -83,11 +83,11 @@ vi.mock("../location-cell", () => ({
   default: () => <td data-testid="location-cell" />,
 }));
 
-vi.mock("../LocationTableSkeleton", () => ({
+vi.mock("../location-table-skeleton", () => ({
   default: () => <div data-testid="skeleton" />,
 }));
 
-vi.mock("../customLocations/AddCustomLocationModal", () => ({
+vi.mock("../customLocations/add-custom-location-modal", () => ({
   default: () => null,
 }));
 

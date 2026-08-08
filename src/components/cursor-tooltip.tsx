@@ -27,11 +27,11 @@ import {
 } from "react";
 import { twMerge } from "tailwind-merge";
 import { useSnapshot } from "valtio";
-import { useGlobalTooltip } from "@/contexts/GlobalTooltipContext";
+import { useGlobalTooltip } from "@/contexts/global-tooltip-context";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useWindowVisibility } from "@/hooks/use-window-visibility";
 import { settingsStore } from "@/stores/settings";
-import { dragStore } from "../stores/dragStore";
+import { dragStore } from "../stores/drag-store";
 
 // Helper functions to calculate offsets based on placement
 function getMainAxisOffset(placement: Placement): number {

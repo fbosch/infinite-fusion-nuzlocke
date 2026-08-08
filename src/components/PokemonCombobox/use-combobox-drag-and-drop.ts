@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSnapshot } from "valtio";
 import { getPokemon, getPokemonNameMap } from "@/loaders";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { dragActions, dragStore } from "@/stores/dragStore";
+import { dragActions, dragStore } from "@/stores/drag-store";
 import { playthroughActions } from "@/stores/playthroughs";
 import { settingsStore } from "@/stores/settings";
 
@@ -104,6 +104,11 @@ export function useComboboxDragAndDrop({
     });
   };
 
+  const resolveDropPokemon = async (
+    pokemonName: string,
+    dragValue: PokemonOptionType | null | undefined,
+  ) => dragValue ?? findPokemonByName(pokemonName, dragValue);
+
   const isFromDifferentCombobox = Boolean(
     comboboxId &&
       dragSnapshot.currentDragSource &&
@@ -147,41 +152,24 @@ export function useComboboxDragAndDrop({
     // Preserve the drag value that initiated this drop while async lookup runs.
     const dragValue = dragStore.currentDragValue;
 
-    // Check if move operations are allowed
-    if (isFromDifferentCombobox && !settings.moveEncountersBetweenLocations) {
-      // If trying to move between different locations but setting is disabled, just set the Pokemon
-      let pokemon = dragValue;
-      if (!pokemon) {
-        pokemon = await findPokemonByName(pokemonName, dragValue);
-        if (!pokemon) {
-          return;
-        }
-      }
-      onChange(pokemon);
-      return;
-    }
-
-    // Handle swap operation if conditions are met
-    if (canSwitch && settings.moveEncountersBetweenLocations) {
+    const canMoveEncounters =
+      isFromDifferentCombobox && settings.moveEncountersBetweenLocations;
+    if (canSwitch && canMoveEncounters) {
       performSwapOperation();
       return;
     }
 
-    // Determine the Pokemon to use (existing drag value or lookup by name)
-    let pokemon = dragValue;
+    const pokemon = await resolveDropPokemon(pokemonName, dragValue);
     if (!pokemon) {
-      pokemon = await findPokemonByName(pokemonName, dragValue);
-      if (!pokemon) {
-        return;
-      }
+      return;
     }
 
-    // Perform move or set operation
-    if (isFromDifferentCombobox && settings.moveEncountersBetweenLocations) {
+    if (canMoveEncounters) {
       performMoveOperation(pokemon);
-    } else {
-      onChange(pokemon);
+      return;
     }
+
+    onChange(pokemon);
   };
 
   // Helper function to update preview for drag data

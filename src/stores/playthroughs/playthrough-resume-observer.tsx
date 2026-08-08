@@ -16,7 +16,7 @@ import {
   type ConsentPreferences,
   consentPreferencesSchema,
   DEFAULT_CONSENT_PREFERENCES,
-} from "@/lib/consentPreferences";
+} from "@/lib/consent-preferences";
 import { useActivePlaythrough, useIsLoading } from "./hooks";
 
 export function PlaythroughResumeObserver() {

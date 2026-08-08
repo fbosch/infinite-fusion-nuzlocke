@@ -4,9 +4,9 @@ import {
   getPreferredVariant,
   preferredVariants,
   setPreferredVariant,
-} from "@/lib/preferredVariants";
+} from "@/lib/preferred-variants";
 import { spriteQueries } from "@/lib/queries/sprites";
-import { useValtioSync } from "./useValtioSync";
+import { useValtioSync } from "./use-valtio-sync";
 
 /**
  * Hook to get artwork variants for a Pokémon or fusion

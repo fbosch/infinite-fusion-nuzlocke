@@ -8,12 +8,12 @@ import {
   useActivePlaythroughId,
   useEncounter,
 } from "@/stores/playthroughs/hooks";
-import { canFuse } from "@/utils/pokemonPredicates";
+import { canFuse } from "@/utils/pokemon-predicates";
 import PokemonSummaryCard from "../PokemonSummaryCard";
 import type { FusionSpriteHandle } from "../PokemonSummaryCard/fusion-sprite";
-import RemoveLocationButton from "./customLocations/RemoveLocationButton";
+import RemoveLocationButton from "./customLocations/remove-location-button";
 import { EncounterCell } from "./encounter-cell";
-import ResetEncounterButton from "./ResetEncounterButton";
+import ResetEncounterButton from "./reset-encounter-button";
 
 interface LocationTableRowProps {
   row: Row<CombinedLocation>;

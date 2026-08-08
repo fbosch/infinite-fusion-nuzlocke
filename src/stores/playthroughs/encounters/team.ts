@@ -1,5 +1,5 @@
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
-import { getAvailableTeamPositionsForMembers } from "../teamPositions";
+import { getAvailableTeamPositionsForMembers } from "../team-positions";
 import type { EncounterData } from "../types";
 import { ensureActivePlaythroughWithEncounters } from "./shared";
 

@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { getBrowserReducedMotion } from "@/lib/reducedMotion";
+import { getBrowserReducedMotion } from "@/lib/reduced-motion";
 
 const mediaQuery = "(prefers-reduced-motion: reduce)";
 

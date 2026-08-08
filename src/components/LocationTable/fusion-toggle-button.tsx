@@ -10,7 +10,7 @@ import { DNA_SPLICER_ICON } from "@/constants/items";
 import { pokemonQueries } from "@/lib/queries/pokemon";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { isEgg } from "@/loaders/pokemon";
-import { dragActions, dragStore } from "@/stores/dragStore";
+import { dragActions, dragStore } from "@/stores/drag-store";
 import { playthroughActions } from "@/stores/playthroughs/index";
 import { CursorTooltip } from "../cursor-tooltip";
 

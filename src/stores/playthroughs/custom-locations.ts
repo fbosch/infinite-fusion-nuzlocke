@@ -4,7 +4,7 @@ import {
   getAvailableAfterLocations as getAvailableAfterLocationsFromLoader,
   getLocationsSortedWithCustom,
 } from "@/loaders/locations";
-import { getActivePlaythrough, getCurrentTimestamp } from "./playthroughState";
+import { getActivePlaythrough, getCurrentTimestamp } from "./playthrough-state";
 
 // Add a custom location to the active playthrough
 export const addCustomLocation = (

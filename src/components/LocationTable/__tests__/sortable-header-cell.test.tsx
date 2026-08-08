@@ -5,7 +5,7 @@ import { createEvent, fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { CombinedLocation } from "@/loaders/locations";
-import SortableHeaderCell from "../SortableHeaderCell";
+import SortableHeaderCell from "../sortable-header-cell";
 
 interface BuildHeaderOptions {
   canSort?: boolean;

@@ -11,16 +11,16 @@ import {
   type PokemonOptionType,
   usePokemonEvolutionData,
 } from "@/loaders/pokemon";
-import { dragActions } from "@/stores/dragStore";
+import { dragActions } from "@/stores/drag-store";
 import { playthroughActions } from "@/stores/playthroughs";
 import { useCustomLocations } from "@/stores/playthroughs/hooks";
 import { settingsStore } from "@/stores/settings";
-import usePokemonTypes from "../../hooks/usePokemonTypes";
+import usePokemonTypes from "../../hooks/use-pokemon-types";
 import ContextMenu from "../context-menu";
 import { CursorTooltip } from "../cursor-tooltip";
 import { PokemonSprite } from "../PokemonSprite";
-import { DraggableSpriteTooltipContent } from "./DraggableSpriteTooltipContent";
 import { getDraggableComboboxSpriteMenuOptions } from "./draggable-combobox-sprite-menu";
+import { DraggableSpriteTooltipContent } from "./draggable-sprite-tooltip-content";
 
 const LocationSelector = dynamic(
   () =>
@@ -69,11 +69,12 @@ export function DraggableComboboxSprite({
     value,
   });
 
-  const originalLocationName =
-    !pokemon?.originalLocation || pokemon.originalLocation === locationId
-      ? null
-      : getLocationByIdFromMerged(pokemon.originalLocation, customLocations)
-          .name;
+  const originalLocationId = pokemon?.originalLocation;
+  const originalLocation =
+    originalLocationId && originalLocationId !== locationId
+      ? getLocationByIdFromMerged(originalLocationId, customLocations)
+      : null;
+  const originalLocationName = originalLocation ? originalLocation.name : null;
 
   const handleDragStart = useCallback(
     (event: React.DragEvent<HTMLImageElement>) => {

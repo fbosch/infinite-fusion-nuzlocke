@@ -8,7 +8,7 @@ vi.mock("@/components/CursorTooltip", () => ({
   CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-vi.mock("@/components/PokemonSummaryCard/ArtworkVariantButton", () => ({
+vi.mock("@/components/PokemonSummaryCard/artwork-variant-button", () => ({
   ArtworkVariantButton: () => <button type="button">Change artwork</button>,
 }));
 
@@ -22,11 +22,11 @@ vi.mock("@/components/PokemonSummaryCard/pokemon-context-menu", () => ({
 
 vi.mock("@/components/type-pills", () => ({ TypePills: () => null }));
 
-vi.mock("@/hooks/useFusionTypes", () => ({
+vi.mock("@/hooks/use-fusion-types", () => ({
   useFusionTypesFromPokemon: () => ({ primary: null, secondary: null }),
 }));
 
-vi.mock("@/hooks/useSprite", () => ({
+vi.mock("@/hooks/use-sprite", () => ({
   usePreferredVariantState: () => ({ variant: null }),
   useSpriteCredits: () => ({ data: {} }),
 }));

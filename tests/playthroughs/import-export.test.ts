@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { usePlaythroughImportExport } from "@/hooks/usePlaythroughImportExport";
+import { usePlaythroughImportExport } from "@/hooks/use-playthrough-import-export";
 import { playthroughActions } from "@/stores/playthroughs/index";
 import type { Playthrough } from "@/stores/playthroughs/types";
 

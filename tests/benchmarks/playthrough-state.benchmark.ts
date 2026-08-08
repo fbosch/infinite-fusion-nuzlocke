@@ -17,7 +17,7 @@ vi.mock("@/lib/analytics/trackEvent", () => ({ trackEvent: vi.fn() }));
 vi.mock("@/lib/events", () => ({ emitEvolutionEvent: vi.fn() }));
 
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
-import { removeCustomLocation } from "@/stores/playthroughs/customLocations";
+import { removeCustomLocation } from "@/stores/playthroughs/custom-locations";
 import {
   resetEncounter,
   updateEncounter,
@@ -37,7 +37,7 @@ import {
   moveEncounterToBox,
 } from "@/stores/playthroughs/encounters/status";
 import { flipTeamMemberFusion } from "@/stores/playthroughs/encounters/team-actions";
-import { getActivePlaythrough } from "@/stores/playthroughs/playthroughState";
+import { getActivePlaythrough } from "@/stores/playthroughs/playthrough-state";
 import { playthroughsStore } from "@/stores/playthroughs/store";
 import type { EncounterData, Playthrough } from "@/stores/playthroughs/types";
 

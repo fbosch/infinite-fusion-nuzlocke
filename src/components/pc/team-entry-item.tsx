@@ -13,7 +13,7 @@ import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
 import PokeballIcon from "@/assets/images/pokeball.svg";
 import { CursorTooltip } from "@/components/cursor-tooltip";
-import { ArtworkVariantButton } from "@/components/PokemonSummaryCard/ArtworkVariantButton";
+import { ArtworkVariantButton } from "@/components/PokemonSummaryCard/artwork-variant-button";
 import {
   FusionSprite,
   type FusionSpriteHandle,
@@ -21,7 +21,7 @@ import {
 import { TeamMemberContextMenu } from "@/components/PokemonSummaryCard/team-member-context-menu";
 import { getNicknameText } from "@/components/PokemonSummaryCard/utils";
 import { TypePills } from "@/components/type-pills";
-import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
+import { useFusionTypesFromPokemon } from "@/hooks/use-fusion-types";
 import { getLocationById } from "@/loaders/locations";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import {
@@ -29,7 +29,7 @@ import {
   useEncounters,
 } from "@/stores/playthroughs/hooks";
 import { playthroughActions } from "@/stores/playthroughs/index";
-import { canFuse, isPokemonActive } from "@/utils/pokemonPredicates";
+import { canFuse, isPokemonActive } from "@/utils/pokemon-predicates";
 import { TeamMemberTooltipContent } from "../team/team-member-tooltip-content";
 import { scrollToPokemonEntry } from "./entry-interaction";
 import type { PCEntry } from "./types";

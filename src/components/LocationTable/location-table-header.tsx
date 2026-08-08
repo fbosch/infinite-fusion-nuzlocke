@@ -1,8 +1,8 @@
 import type { HeaderGroup } from "@tanstack/react-table";
 import ProgressBar from "@/components/progress-bar";
 import type { CombinedLocation } from "@/loaders/locations";
-import { locationTableColumnWidths } from "./columnWidths";
-import SortableHeaderCell from "./SortableHeaderCell";
+import { locationTableColumnWidths } from "./column-widths";
+import SortableHeaderCell from "./sortable-header-cell";
 
 interface LocationTableHeaderProps {
   headerGroups: HeaderGroup<CombinedLocation>[];

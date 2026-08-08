@@ -1,6 +1,6 @@
 import { getSpriteId } from "@/lib/sprites";
 import { generatePokemonUID, type PokemonOptionType } from "@/loaders/pokemon";
-import { getActivePlaythrough } from "../playthroughState";
+import { getActivePlaythrough } from "../playthrough-state";
 import type { Playthrough } from "../types";
 
 export type PokemonOption = PokemonOptionType;

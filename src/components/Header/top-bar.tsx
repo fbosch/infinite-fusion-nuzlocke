@@ -1,8 +1,8 @@
 "use client";
 
 import { GitHubEngagementCta } from "@/components/GitHubEngagementCta";
-import ThemeToggle from "@/components/ThemeToggle";
-import MenuItems, { type TopBarModal } from "./MenuItems";
+import ThemeToggle from "@/components/theme-toggle";
+import MenuItems, { type TopBarModal } from "./menu-items";
 
 interface TopBarProps {
   githubCtaRoute: "home" | "locations" | null;

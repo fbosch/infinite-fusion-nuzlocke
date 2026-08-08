@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { dragActions, dragStore } from "../dragStore";
+import { dragActions, dragStore } from "../drag-store";
 
 describe("Drag Store", () => {
   beforeEach(() => {

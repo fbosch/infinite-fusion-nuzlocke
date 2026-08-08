@@ -2,7 +2,7 @@ import type { TypeName } from "@/lib/typings";
 import { getFusionTyping, type TypeQuery } from "@/lib/typings";
 import type { Pokemon, PokemonOptionType } from "@/loaders/pokemon";
 import { useAllPokemon } from "@/loaders/pokemon";
-import { usePokemonTypes } from "./usePokemonTypes";
+import { usePokemonTypes } from "./use-pokemon-types";
 
 export interface UseFusionTypesResult {
   isLoading: boolean;

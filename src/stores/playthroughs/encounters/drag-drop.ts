@@ -1,6 +1,6 @@
 import { emitEvolutionEvent } from "@/lib/events";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { getCurrentTimestamp } from "../playthroughState";
+import { getCurrentTimestamp } from "../playthrough-state";
 import type { EncounterData } from "../types";
 import {
   createPokemonWithLocationAndUID,

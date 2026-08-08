@@ -4,14 +4,14 @@ import { clsx } from "clsx";
 import { type KeyboardEvent, useCallback, useEffect, useRef } from "react";
 import PokeballIcon from "@/assets/images/pokeball.svg";
 import { CursorTooltip } from "@/components/cursor-tooltip";
-import { ArtworkVariantButton } from "@/components/PokemonSummaryCard/ArtworkVariantButton";
+import { ArtworkVariantButton } from "@/components/PokemonSummaryCard/artwork-variant-button";
 import {
   FusionSprite,
   type FusionSpriteHandle,
 } from "@/components/PokemonSummaryCard/fusion-sprite";
 import { TeamMemberContextMenu } from "@/components/PokemonSummaryCard/team-member-context-menu";
 import { TypePills } from "@/components/type-pills";
-import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
+import { useFusionTypesFromPokemon } from "@/hooks/use-fusion-types";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import {
   useActivePlaythrough,

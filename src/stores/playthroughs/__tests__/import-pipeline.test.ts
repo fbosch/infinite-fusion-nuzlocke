@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { prepareImportedPlaythrough } from "../importPipeline";
+import { prepareImportedPlaythrough } from "../import-pipeline";
 
 const playthroughIdPattern = /^playthrough_/;
 

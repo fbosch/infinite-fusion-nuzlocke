@@ -1,4 +1,4 @@
-import { encountersData } from "@/lib/queryClient";
+import { encountersData } from "@/lib/query-client";
 import { EncounterSource, type RouteEncounter } from "@/types/encounters";
 import { useLocationEncountersById } from "./locations";
 import type { Pokemon, PokemonOptionType } from "./pokemon";

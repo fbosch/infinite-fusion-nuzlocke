@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import ms from "ms";
-import encountersApiService from "@/services/encountersApiService";
+import encountersApiService from "@/services/encounters-api-service";
 
 // Encounters query options
 export const encountersQueries = {

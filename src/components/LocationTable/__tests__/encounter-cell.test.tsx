@@ -119,7 +119,7 @@ vi.mock("@/components/PokemonCombobox/pokemon-combobox", () => ({
   },
 }));
 
-vi.mock("../FusionToggleButton", () => ({
+vi.mock("../fusion-toggle-button", () => ({
   FusionToggleButton: ({ onToggleFusion }: { onToggleFusion: () => void }) => (
     <button onClick={onToggleFusion} type="button">
       Toggle Fusion
@@ -139,7 +139,7 @@ vi.mock("@/loaders/locations", () => ({
   getLocationById: () => ({ name: "Route 1" }),
 }));
 
-vi.mock("@/lib/preferredVariants", () => ({
+vi.mock("@/lib/preferred-variants", () => ({
   getPreferredVariant: () => null,
   preferredVariants: new Map(),
   setPreferredVariant: vi.fn(),

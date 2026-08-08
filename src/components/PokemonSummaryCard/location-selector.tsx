@@ -15,7 +15,7 @@ import { TypePills } from "@/components/type-pills";
 import {
   type UseFusionTypesResult,
   useFusionTypesFromPokemon,
-} from "@/hooks/useFusionTypes";
+} from "@/hooks/use-fusion-types";
 import {
   type CombinedLocation,
   getLocationsSortedWithCustom,
@@ -23,7 +23,7 @@ import {
 import { isEggId, type PokemonOptionType } from "@/loaders/pokemon";
 import { useCustomLocations } from "@/stores/playthroughs/hooks";
 import { getActivePlaythrough } from "@/stores/playthroughs/store";
-import { canFuse } from "@/utils/pokemonPredicates";
+import { canFuse } from "@/utils/pokemon-predicates";
 import { PokemonSprite } from "../PokemonSprite";
 
 interface LocationSelectorProps {

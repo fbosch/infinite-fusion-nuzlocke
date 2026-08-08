@@ -2,7 +2,7 @@ import { getEncounterCount } from "@/lib/analytics/playthroughEventData";
 import { getSharedEventProperties } from "@/lib/analytics/selectors";
 import { trackEvent } from "@/lib/analytics/trackEvent";
 import { emitEvolutionEvent } from "@/lib/events";
-import { getCurrentTimestamp } from "../playthroughState";
+import { getCurrentTimestamp } from "../playthrough-state";
 import {
   createPokemonWithLocationAndUID,
   ensureActivePlaythroughWithEncounters,

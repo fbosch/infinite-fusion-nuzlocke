@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ActivePlaythroughTitle } from "@/components/ActivePlaythroughTitle";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorBoundary } from "@/components/error-boundary";
 import LocationTable from "@/components/LocationTable";
 
 export const metadata: Metadata = {
