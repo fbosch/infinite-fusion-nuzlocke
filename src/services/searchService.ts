@@ -1,11 +1,10 @@
-import * as Comlink from "comlink";
+import { type Remote, wrap } from "comlink";
 import { pokemonData } from "@/lib/data";
 import { SearchCore } from "@/lib/search-core";
-import type { Pokemon } from "@/types/pokemon";
 
 let mainThreadInstance: SearchCore | null = null;
 let mainThreadInitPromise: Promise<SearchCore> | null = null;
-let instance: Comlink.Remote<SearchCore> | SearchCore | null = null;
+let instance: Remote<SearchCore> | SearchCore | null = null;
 
 const getMainThreadInstance = async () => {
   if (mainThreadInstance?.isReady()) {
@@ -47,11 +46,7 @@ const getInstance = async (mainThread = false) => {
     const worker = new Worker(
       new URL("@/workers/search.worker", import.meta.url),
     );
-    const wrappedInstance = Comlink.wrap(worker) as {
-      initialize: (pokemonData: Pokemon[]) => Promise<void>;
-      search: (query: string) => Promise<Pokemon[]>;
-      isReady: () => Promise<boolean>;
-    };
+    const wrappedInstance = wrap<SearchCore>(worker);
 
     // Initialize the worker with Pokemon data
     try {
@@ -65,7 +60,7 @@ const getInstance = async (mainThread = false) => {
       return await getMainThreadInstance();
     }
 
-    instance = wrappedInstance as unknown as SearchCore;
+    instance = wrappedInstance;
   } catch (error) {
     console.error(
       "Failed to initialize search worker, falling back to main thread:",
@@ -74,14 +69,14 @@ const getInstance = async (mainThread = false) => {
     instance = await getMainThreadInstance();
   }
 
-  return instance as SearchCore;
+  return instance;
 };
 
 const service = {
   search: async (query: string) => {
     try {
-      const instance = await getInstance();
-      return instance.search(query);
+      const searchInstance = await getInstance();
+      return searchInstance.search(query);
     } catch (error) {
       console.error("Search service failed:", error);
       return [];

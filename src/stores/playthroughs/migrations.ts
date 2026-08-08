@@ -40,14 +40,14 @@ const migrateRemixMode = (data: MigrationData): MigrationData => {
  * Ensure team field exists with default empty team
  */
 const migrateTeamField = (data: MigrationData): MigrationData => {
-  let team = data.team;
+  let { team } = data;
 
   if (!team) {
     // No team field exists, create default
     team = { members: Array.from({ length: 6 }, () => null) };
   } else if (team && typeof team === "object" && "members" in team) {
     // Team exists, ensure it has the right structure
-    const members = (team as Record<string, unknown>).members;
+    const { members } = team as Record<string, unknown>;
     if (Array.isArray(members)) {
       // Ensure it's the right length and has null values for empty slots
       const fixedMembers = new Array(6).fill(null);
@@ -60,14 +60,14 @@ const migrateTeamField = (data: MigrationData): MigrationData => {
     } else if (typeof members === "object" && members !== null) {
       // Members is a record/object, convert to array format
       const fixedMembers = new Array(6).fill(null);
-      Object.entries(members as Record<string, unknown>).forEach(
-        ([key, member]) => {
-          const index = Number.parseInt(key, 10);
-          if (index >= 0 && index < 6 && member !== null) {
-            fixedMembers[index] = member;
-          }
-        },
-      );
+      for (const [key, member] of Object.entries(
+        members as Record<string, unknown>,
+      )) {
+        const index = Number.parseInt(key, 10);
+        if (index >= 0 && index < 6 && member !== null) {
+          fixedMembers[index] = member;
+        }
+      }
       team = { members: fixedMembers };
     }
   }
@@ -89,8 +89,7 @@ const migrateVersion = (data: MigrationData): MigrationData => {
  * Clean up old remixMode field
  */
 const cleanupRemixMode = (data: MigrationData): MigrationData => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { remixMode, ...cleanData } = data;
+  const { remixMode: _remixMode, ...cleanData } = data;
   return cleanData;
 };
 
@@ -100,7 +99,7 @@ const cleanupRemixMode = (data: MigrationData): MigrationData => {
 const migrateTeamMemberSchema = (data: MigrationData): MigrationData => {
   if (data.team && typeof data.team === "object" && "members" in data.team) {
     const team = data.team as Record<string, unknown>;
-    const members = team.members;
+    const { members } = team;
 
     if (Array.isArray(members)) {
       const migratedMembers = members.map((member: unknown) => {
@@ -229,7 +228,7 @@ const migrateRequiredFields = (data: unknown): MigrationData => {
     return {
       createdAt: now,
       gameMode: "classic",
-      id: `playthrough_${now}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `playthrough_${now}_${Math.random().toString(36).slice(2, 11)}`,
       name: "Playthrough",
       team: { members: Array.from({ length: 6 }, () => null) },
       updatedAt: now,
@@ -264,7 +263,7 @@ const migrateRequiredFields = (data: unknown): MigrationData => {
     id:
       typeof migrationData.id === "string" && migrationData.id.length > 0
         ? migrationData.id
-        : `playthrough_${now}_${Math.random().toString(36).substr(2, 9)}`,
+        : `playthrough_${now}_${Math.random().toString(36).slice(2, 11)}`,
     name:
       typeof migrationData.name === "string" && migrationData.name.length > 0
         ? migrationData.name

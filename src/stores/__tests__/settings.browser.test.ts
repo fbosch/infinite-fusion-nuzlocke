@@ -25,8 +25,10 @@ const clearLocalStorage = () => {
 
 let settingsImportVersion = 0;
 
-const importFreshSettings = () =>
-  import(/* @vite-ignore */ `../settings.ts?t=${++settingsImportVersion}`);
+const importFreshSettings = () => {
+  settingsImportVersion += 1;
+  return import(/* @vite-ignore */ `../settings.ts?t=${settingsImportVersion}`);
+};
 
 describe("Settings Store", () => {
   beforeEach(() => {
@@ -223,7 +225,9 @@ describe("Settings Store", () => {
       });
 
       // Spy on console.warn to verify error logging
-      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {
+        // Suppress expected warning output.
+      });
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await importFreshSettings();
@@ -349,7 +353,9 @@ describe("Settings Store", () => {
     it("handles corrupted localStorage data gracefully", async () => {
       localStorage.setItem("settings:v1", "invalid-json");
 
-      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {
+        // Suppress expected warning output.
+      });
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await importFreshSettings();
@@ -371,7 +377,9 @@ describe("Settings Store", () => {
 
       localStorage.setItem("settings:v1", JSON.stringify(invalidSettings));
 
-      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {
+        // Suppress expected warning output.
+      });
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await importFreshSettings();
@@ -527,7 +535,7 @@ describe("Settings Store", () => {
       // Should have saved to localStorage with updated settings
       const stored = localStorage.getItem("settings:v1");
       expect(stored).not.toBeNull();
-      expect(stored!).toContain('"moveEncountersBetweenLocations":true');
+      expect(stored).toContain('"moveEncountersBetweenLocations":true');
     });
 
     it("persists an explicit reduced-motion override", async () => {
@@ -540,10 +548,10 @@ describe("Settings Store", () => {
       );
     });
 
-    it("validates settings before saving", async () => {
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+    it("validates settings before saving", () => {
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {
+        // Suppress expected error output.
+      });
 
       // Try to use updateSettings with invalid data
       try {

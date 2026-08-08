@@ -42,8 +42,7 @@ describe("Playthroughs Store - Migration Tests", () => {
       expect(result.gameMode).toBe("classic");
       expect(result.name).toBe("Legacy Classic Run");
       expect(result.id).toBe("test-migration-2");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((result as any).remixMode).toBeUndefined();
+      expect("remixMode" in result).toBe(false);
     });
 
     it("should not migrate when gameMode is explicitly set to non-default", () => {
@@ -92,13 +91,14 @@ describe("Playthroughs Store - Migration Tests", () => {
       const result = normalizePersistedPlaythrough(legacyDataWithEncounters);
 
       expect(result.gameMode).toBe("remix");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((result as any).remixMode).toBeUndefined();
+      expect("remixMode" in result).toBe(false);
       expect(result.encounters).toBeDefined();
       const routeOneEncounter = result.encounters?.["route-1"];
       expect(routeOneEncounter).toBeDefined();
-      if (!routeOneEncounter?.head) {
-        throw new Error("Expected migrated route-1 encounter with a head Pokemon");
+      if (!routeOneEncounter.head) {
+        throw new Error(
+          "Expected migrated route-1 encounter with a head Pokemon",
+        );
       }
       expect(routeOneEncounter.head.name).toBe("Pikachu");
       expect(result.customLocations).toBeDefined();
@@ -143,8 +143,7 @@ describe("Playthroughs Store - Migration Tests", () => {
       const corruptedData = {
         createdAt: Date.now(),
         encounters: {},
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        gameMode: "invalid" as any, // Invalid enum value
+        gameMode: "invalid", // Invalid enum value
         id: "test-corrupted",
         name: "Test Run",
         remixMode: "invalid", // Invalid type
