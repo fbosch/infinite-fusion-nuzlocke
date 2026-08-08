@@ -7,7 +7,7 @@ import {
   ConditionalAnalytics,
   ConditionalSpeedInsights,
 } from "@/components/analytics/ConditionalAnalytics";
-import { CookieConsent } from "@/components/analytics/CookieConsent";
+import { CookieConsent } from "@/components/analytics/cookie-consent";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";

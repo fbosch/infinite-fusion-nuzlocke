@@ -2,7 +2,7 @@
 
 import { Cookie } from "lucide-react";
 import { useCallback, useState } from "react";
-import { CookieSettings } from "@/components/analytics/CookieSettings";
+import { CookieSettings } from "@/components/analytics/cookie-settings";
 
 export default function CookieSettingsButton() {
   const [isOpen, setIsOpen] = useState(false);

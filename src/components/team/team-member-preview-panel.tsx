@@ -4,8 +4,8 @@ import { useCallback } from "react";
 import PokemonSummaryCard from "@/components/PokemonSummaryCard";
 import { TypePills } from "@/components/TypePills";
 import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
-import { TeamMemberActions } from "./TeamMemberActions";
-import { useTeamMemberSelection } from "./TeamMemberSelectionContext";
+import { TeamMemberActions } from "./team-member-actions";
+import { useTeamMemberSelection } from "./team-member-selection-context";
 
 export function TeamMemberPreviewPanel() {
   const { state, actions } = useTeamMemberSelection();

@@ -14,13 +14,14 @@ import {
 } from "@/utils/encounter-utils";
 import {
   filterAvailableTeamPokemon,
+  flipTeamPokemonSelection,
   getTeamNicknameUpdate,
   getTeamSelectionNickname,
   initializeExistingTeamMemberSelection,
   selectTeamPokemon,
   type TeamPokemonSelection,
   type TeamSelectionSlot,
-} from "./teamMemberSelectionDomain";
+} from "./team-member-selection-domain";
 
 // Action types
 type TeamMemberSelectionAction =
@@ -72,6 +73,7 @@ type TeamMemberSelectionReducerState = Omit<
 
 interface TeamMemberSelectionActions {
   handleClearTeamMember: () => Promise<void>;
+  handleFlipFusion: () => void;
   handlePokemonSelect: (pokemon: PokemonOptionType, locationId: string) => void;
   handleRemoveBodyPokemon: () => void;
   handleRemoveHeadPokemon: () => void;
@@ -318,8 +320,8 @@ function useTeamMemberSelectionActionValue({
       });
     }
     const success = await onSelect(
-      selectedHead?.pokemon ?? null,
-      selectedBody?.pokemon ?? null,
+      selectedHead ? selectedHead.pokemon : null,
+      selectedBody ? selectedBody.pokemon : null,
     );
     if (success) {
       onClose();
@@ -330,9 +332,17 @@ function useTeamMemberSelectionActionValue({
       onClose();
     }
   };
+  const handleFlipFusion = () => {
+    const next = flipTeamPokemonSelection(selectedHead, selectedBody);
+    dispatch({ payload: next.selectedHead, type: "SET_SELECTED_HEAD" });
+    dispatch({ payload: next.selectedBody, type: "SET_SELECTED_BODY" });
+    dispatch({ payload: next.nickname, type: "SET_NICKNAME" });
+    dispatch({ payload: next.previewNickname, type: "SET_PREVIEW_NICKNAME" });
+  };
 
   return {
     handleClearTeamMember,
+    handleFlipFusion,
     handlePokemonSelect,
     handleRemoveBodyPokemon,
     handleRemoveHeadPokemon,

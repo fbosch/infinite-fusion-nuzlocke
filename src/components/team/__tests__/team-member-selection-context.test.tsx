@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   TeamMemberSelectionProvider,
   useTeamMemberSelection,
-} from "../TeamMemberSelectionContext";
+} from "../team-member-selection-context";
 
 const { updatePokemonByUIDMock } = vi.hoisted(() => ({
   updatePokemonByUIDMock: vi.fn().mockResolvedValue(undefined),

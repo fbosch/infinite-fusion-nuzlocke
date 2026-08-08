@@ -14,7 +14,7 @@ vi.mock("@/utils/encounter-utils", () => ({
   buildPokemonUidIndex: () => new Map(),
 }));
 
-vi.mock("@/components/team/useTeamMemberPicker", () => ({
+vi.mock("@/components/team/use-team-member-picker", () => ({
   useTeamMemberPicker: () => ({
     closePicker: vi.fn(),
     openPicker: vi.fn(),
@@ -31,7 +31,7 @@ vi.mock("@/components/pc/pc-sheet-domain", () => ({
   getStoredEntries: () => [],
 }));
 
-vi.mock("@/components/team/TeamMemberPickerModal", () => ({
+vi.mock("@/components/team/team-member-picker-modal", () => ({
   default: () => null,
 }));
 

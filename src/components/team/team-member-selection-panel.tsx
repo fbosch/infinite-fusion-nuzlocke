@@ -4,11 +4,10 @@ import { ArrowLeftRight } from "lucide-react";
 import Image from "next/image";
 import { CursorTooltip } from "@/components/cursor-tooltip";
 import { DNA_REVERSER_ICON } from "@/constants/items";
-import { PokemonGridItem } from "./PokemonGridItem";
-import { PokemonSlotSelector } from "./PokemonSlotSelector";
-import { TeamMemberSearchBar } from "./TeamMemberSearchBar";
-import { useTeamMemberSelection } from "./TeamMemberSelectionContext";
-import { flipTeamPokemonSelection } from "./teamMemberSelectionDomain";
+import { PokemonGridItem } from "./pokemon-grid-item";
+import { PokemonSlotSelector } from "./pokemon-slot-selector";
+import { TeamMemberSearchBar } from "./team-member-search-bar";
+import { useTeamMemberSelection } from "./team-member-selection-context";
 
 export function TeamMemberSelectionPanel() {
   const { state, actions } = useTeamMemberSelection();
@@ -24,15 +23,8 @@ export function TeamMemberSelectionPanel() {
     handleRemoveHeadPokemon,
     handleRemoveBodyPokemon,
     handlePokemonSelect,
+    handleFlipFusion,
   } = actions;
-
-  const handleFlipFusion = () => {
-    const next = flipTeamPokemonSelection(selectedHead, selectedBody);
-    actions.setSelectedHead(next.selectedHead);
-    actions.setSelectedBody(next.selectedBody);
-    actions.setNickname(next.nickname);
-    actions.setPreviewNickname(next.previewNickname);
-  };
 
   // Filter Pokémon based on search query locally (no need to update state)
   const filteredPokemon = (() => {

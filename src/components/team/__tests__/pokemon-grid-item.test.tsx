@@ -3,7 +3,7 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { Pokemon, PokemonOptionType } from "@/loaders/pokemon";
-import { PokemonGridItem } from "../PokemonGridItem";
+import { PokemonGridItem } from "../pokemon-grid-item";
 
 const { getPokemonByIdMock } = vi.hoisted(() => ({
   getPokemonByIdMock: vi.fn(),

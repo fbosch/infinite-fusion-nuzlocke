@@ -7,7 +7,7 @@ import {
   getTeamSelectionNickname,
   initializeExistingTeamMemberSelection,
   selectTeamPokemon,
-} from "../teamMemberSelectionDomain";
+} from "../team-member-selection-domain";
 
 const pokemon = (uid: string, nickname?: string): PokemonOptionType => ({
   id: 25,

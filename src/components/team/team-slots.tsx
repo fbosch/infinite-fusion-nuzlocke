@@ -18,11 +18,11 @@ import {
   useEncounters,
 } from "@/stores/playthroughs/hooks";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
-import TeamMemberPickerModal from "./TeamMemberPickerModal";
-import { TeamMemberTooltipContent } from "./TeamMemberTooltipContent";
-import TeamSlotsSkeleton from "./TeamSlotsSkeleton";
+import TeamMemberPickerModal from "./team-member-picker-modal";
+import { TeamMemberTooltipContent } from "./team-member-tooltip-content";
 import { getTeamSlots } from "./team-slots-model";
-import { useTeamMemberPicker } from "./useTeamMemberPicker";
+import TeamSlotsSkeleton from "./team-slots-skeleton";
+import { useTeamMemberPicker } from "./use-team-member-picker";
 
 // Component to display type indicators and nickname
 function TypeIndicators({

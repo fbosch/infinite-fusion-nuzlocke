@@ -30,7 +30,7 @@ import {
 } from "@/stores/playthroughs/hooks";
 import { playthroughActions } from "@/stores/playthroughs/index";
 import { canFuse, isPokemonActive } from "@/utils/pokemonPredicates";
-import { TeamMemberTooltipContent } from "../team/TeamMemberTooltipContent";
+import { TeamMemberTooltipContent } from "../team/team-member-tooltip-content";
 import { scrollToPokemonEntry } from "./entry-interaction";
 import type { PCEntry } from "./types";
 

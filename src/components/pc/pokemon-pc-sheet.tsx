@@ -8,8 +8,8 @@ import {
 } from "@headlessui/react";
 import clsx from "clsx";
 import { X } from "lucide-react";
-import TeamMemberPickerModal from "../team/TeamMemberPickerModal";
-import { useTeamMemberPicker } from "../team/useTeamMemberPicker";
+import TeamMemberPickerModal from "../team/team-member-picker-modal";
+import { useTeamMemberPicker } from "../team/use-team-member-picker";
 import { PokemonPCSheetContent } from "./pokemon-pc-sheet-content";
 import { usePokemonPCSheetData } from "./use-pokemon-pc-sheet-data";
 

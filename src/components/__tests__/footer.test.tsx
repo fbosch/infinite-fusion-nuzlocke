@@ -13,7 +13,7 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("@/components/analytics/CookieSettingsButton", () => ({
+vi.mock("@/components/analytics/cookie-settings-button", () => ({
   default: () => <button type="button">Cookie settings</button>,
 }));
 

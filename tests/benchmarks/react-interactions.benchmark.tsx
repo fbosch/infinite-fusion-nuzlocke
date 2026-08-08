@@ -8,7 +8,7 @@ import TeamEntryItem from "@/components/pc/team-entry-item";
 import {
   TeamMemberSelectionProvider,
   useTeamMemberSelection,
-} from "@/components/team/TeamMemberSelectionContext";
+} from "@/components/team/team-member-selection-context";
 import { getTeamSlots } from "@/components/team/team-slots-model";
 import { getLocationsSortedWithCustom } from "@/loaders/locations";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";

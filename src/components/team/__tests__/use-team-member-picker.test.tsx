@@ -2,7 +2,7 @@
 
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useTeamMemberPicker } from "../useTeamMemberPicker";
+import { useTeamMemberPicker } from "../use-team-member-picker";
 
 const updateTeamMemberMock = vi.hoisted(() => vi.fn());
 

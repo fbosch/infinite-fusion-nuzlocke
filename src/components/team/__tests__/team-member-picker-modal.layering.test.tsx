@@ -2,22 +2,22 @@
 
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import TeamMemberPickerModal from "@/components/team/TeamMemberPickerModal";
+import TeamMemberPickerModal from "@/components/team/team-member-picker-modal";
 
 vi.mock("@/stores/playthroughs/hooks", () => ({
   useActivePlaythrough: () => ({ id: "playthrough-1" }),
 }));
 
-vi.mock("@/components/team/TeamMemberSelectionContext", () => ({
+vi.mock("@/components/team/team-member-selection-context", () => ({
   TeamMemberSelectionProvider: ({ children }: { children: React.ReactNode }) =>
     children,
 }));
 
-vi.mock("@/components/team/TeamMemberSelectionPanel", () => ({
+vi.mock("@/components/team/team-member-selection-panel", () => ({
   TeamMemberSelectionPanel: () => <div>Selection panel</div>,
 }));
 
-vi.mock("@/components/team/TeamMemberPreviewPanel", () => ({
+vi.mock("@/components/team/team-member-preview-panel", () => ({
   TeamMemberPreviewPanel: () => <div>Preview panel</div>,
 }));
 

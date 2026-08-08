@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import CookieSettingsButton from "@/components/analytics/CookieSettingsButton";
+import CookieSettingsButton from "@/components/analytics/cookie-settings-button";
 import CreditsModal from "@/components/CreditsModal";
 
 export default function Footer() {
