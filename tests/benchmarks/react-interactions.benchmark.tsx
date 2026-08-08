@@ -81,7 +81,7 @@ vi.mock("lucide-react", () => ({
   Skull: () => <span />,
   SquareArrowUpRight: () => <span />,
 }));
-vi.mock("@/components/TypePills", () => ({ TypePills: () => null }));
+vi.mock("@/components/type-pills", () => ({ TypePills: () => null }));
 vi.mock("@/hooks/useFusionTypes", () => ({
   useFusionTypesFromPokemon: () => ({ primary: "Electric", secondary: null }),
 }));

@@ -8,7 +8,7 @@ import { usePreferredVariantState, useSpriteCredits } from "@/hooks/useSprite";
 import { getSpriteId } from "@/lib/sprites";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { formatArtistCredits } from "@/utils/formatCredits";
-import { TypePills } from "../TypePills";
+import { TypePills } from "../type-pills";
 import { ArtworkVariantButton } from "./ArtworkVariantButton";
 import { FusionSprite, type FusionSpriteHandle } from "./fusion-sprite";
 import { PokemonContextMenu } from "./pokemon-context-menu";

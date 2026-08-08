@@ -1,6 +1,6 @@
 import { Hand, Home, MousePointer } from "lucide-react";
 import type { TypeName } from "@/lib/typings";
-import TypePills from "../TypePills";
+import TypePills from "../type-pills";
 
 interface DraggableSpriteTooltipContentProps {
   originalLocationName: string | null;

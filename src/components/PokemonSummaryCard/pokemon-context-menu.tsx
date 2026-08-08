@@ -27,7 +27,7 @@ import { getSpriteId } from "../../lib/sprites";
 import { getDisplayPokemon } from "./utils";
 
 const LocationSelector = dynamic(
-  () => import("./LocationSelector").then((mod) => mod.LocationSelector),
+  () => import("./location-selector").then((mod) => mod.LocationSelector),
   {
     ssr: false,
   },

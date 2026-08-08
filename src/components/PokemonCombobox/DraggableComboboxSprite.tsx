@@ -24,7 +24,7 @@ import { getDraggableComboboxSpriteMenuOptions } from "./draggable-combobox-spri
 
 const LocationSelector = dynamic(
   () =>
-    import("../PokemonSummaryCard/LocationSelector").then(
+    import("../PokemonSummaryCard/location-selector").then(
       (mod) => mod.LocationSelector,
     ),
   { ssr: false },

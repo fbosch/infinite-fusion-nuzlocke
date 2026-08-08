@@ -10,7 +10,7 @@ import {
   type FusionSpriteHandle,
 } from "@/components/PokemonSummaryCard/fusion-sprite";
 import { TeamMemberContextMenu } from "@/components/PokemonSummaryCard/team-member-context-menu";
-import { TypePills } from "@/components/TypePills";
+import { TypePills } from "@/components/type-pills";
 import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import {

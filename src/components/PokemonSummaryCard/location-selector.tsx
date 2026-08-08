@@ -11,7 +11,7 @@ import { ArrowUpDown, Dna, MapPin, Search, X } from "lucide-react";
 import { type ChangeEvent, useCallback, useState } from "react";
 import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
-import { TypePills } from "@/components/TypePills";
+import { TypePills } from "@/components/type-pills";
 import {
   type UseFusionTypesResult,
   useFusionTypesFromPokemon,

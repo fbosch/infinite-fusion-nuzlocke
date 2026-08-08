@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { FusionSprite } from "@/components/PokemonSummaryCard/fusion-sprite";
 import { PokemonContextMenu } from "@/components/PokemonSummaryCard/pokemon-context-menu";
 import { getNicknameText } from "@/components/PokemonSummaryCard/utils";
-import { TypePills } from "@/components/TypePills";
+import { TypePills } from "@/components/type-pills";
 import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
 import { useEncounters } from "@/stores/playthroughs/hooks";
 import {

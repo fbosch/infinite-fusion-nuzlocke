@@ -1,5 +1,5 @@
 import { MousePointer, Palette } from "lucide-react";
-import { TypePills } from "@/components/TypePills";
+import { TypePills } from "@/components/type-pills";
 import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
 import { useSpriteCredits } from "@/hooks/useSprite";
 import { getSpriteId } from "@/lib/sprites";

@@ -17,7 +17,7 @@ vi.mock("@/components/PokemonSprite", () => ({
   PokemonSprite: () => null,
 }));
 
-vi.mock("@/components/TypePills", () => ({
+vi.mock("@/components/type-pills", () => ({
   TypePills: ({ primary }: { primary: string }) => (
     <span data-testid="primary-type">{primary}</span>
   ),

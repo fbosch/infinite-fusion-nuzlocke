@@ -20,7 +20,7 @@ import {
 } from "@/components/PokemonSummaryCard/fusion-sprite";
 import { TeamMemberContextMenu } from "@/components/PokemonSummaryCard/team-member-context-menu";
 import { getNicknameText } from "@/components/PokemonSummaryCard/utils";
-import { TypePills } from "@/components/TypePills";
+import { TypePills } from "@/components/type-pills";
 import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
 import { getLocationById } from "@/loaders/locations";
 import type { PokemonOptionType } from "@/loaders/pokemon";

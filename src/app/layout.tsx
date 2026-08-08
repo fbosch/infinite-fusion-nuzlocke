@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Karla as Font } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import { AnalyticsDebugPanel } from "@/components/analytics/AnalyticsDebugPanel";
+import { AnalyticsDebugPanel } from "@/components/analytics/analytics-debug-panel";
 import {
   ConditionalAnalytics,
   ConditionalSpeedInsights,

@@ -7,7 +7,7 @@ import LocationTableHeader from "../LocationTableHeader";
 
 const sortableHeaderCellProps = vi.hoisted(() => vi.fn());
 
-vi.mock("@/components/ProgressBar", () => ({
+vi.mock("@/components/progress-bar", () => ({
   default: () => <div />,
 }));
 

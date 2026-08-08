@@ -108,7 +108,7 @@ vi.mock("@/components/PokemonSummaryCard/utils", () => ({
   getNicknameText: () => "Pikachu",
 }));
 
-vi.mock("@/components/TypePills", () => ({
+vi.mock("@/components/type-pills", () => ({
   TypePills: () => null,
 }));
 

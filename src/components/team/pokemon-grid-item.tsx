@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
 import { PokemonSprite } from "@/components/PokemonSprite";
-import { TypePills } from "@/components/TypePills";
+import { TypePills } from "@/components/type-pills";
 import {
   getPokemonById,
   type Pokemon,

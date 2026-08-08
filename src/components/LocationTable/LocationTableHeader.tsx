@@ -1,5 +1,5 @@
 import type { HeaderGroup } from "@tanstack/react-table";
-import ProgressBar from "@/components/ProgressBar";
+import ProgressBar from "@/components/progress-bar";
 import type { CombinedLocation } from "@/loaders/locations";
 import { locationTableColumnWidths } from "./columnWidths";
 import SortableHeaderCell from "./SortableHeaderCell";
