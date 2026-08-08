@@ -16,7 +16,6 @@ import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 const SAMPLE_COUNT = 20;
 const WARMUP_ITERATIONS = 5;
 let activeProfilerDurations: number[] = [];
-let selectPokemon: () => void;
 
 function handleProfilerRender(
   _id: string,
@@ -225,9 +224,9 @@ async function measureInteraction(
 
 function SelectionProbe() {
   const selection = useTeamMemberSelection();
-  selectPokemon = () => {
+  const selectPokemon = React.useCallback(() => {
     selection.actions.handlePokemonSelect(pikachu, "route-1");
-  };
+  }, [selection]);
 
   return (
     <button onClick={selectPokemon} type="button">

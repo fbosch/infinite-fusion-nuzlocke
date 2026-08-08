@@ -176,6 +176,33 @@ describe("ContextMenu", () => {
     expect(document.activeElement).toBe(parent);
   });
 
+  it("moves focus between menu items with arrow keys", async () => {
+    render(
+      <ContextMenu
+        items={[
+          { id: "first", label: "First action" },
+          { id: "second", label: "Second action" },
+        ]}
+      >
+        <button type="button">Context trigger</button>
+      </ContextMenu>,
+    );
+
+    fireEvent.contextMenu(
+      screen.getByRole("button", { name: "Context trigger" }),
+    );
+    const first = await screen.findByRole("menuitem", {
+      name: "First action",
+    });
+    const second = screen.getByRole("menuitem", { name: "Second action" });
+    first.focus();
+    fireEvent.keyDown(first, { key: "ArrowDown" });
+
+    await waitFor(() => {
+      expect(document.activeElement).toBe(second);
+    });
+  });
+
   it.each(["Enter", " "])("opens submenus with %s", async (key) => {
     render(
       <ContextMenu

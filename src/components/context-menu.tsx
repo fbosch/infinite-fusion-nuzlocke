@@ -14,7 +14,6 @@ import { ChevronRight, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
 import {
-  cloneElement,
   isValidElement,
   useCallback,
   useEffect,
@@ -116,7 +115,6 @@ function hideBrokenImage(event: React.SyntheticEvent<HTMLImageElement>) {
 
 interface ContextMenuSubmenuProps {
   activeIndex: number;
-  itemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
   items: ContextMenuItem[];
   menuRef: React.RefObject<HTMLDivElement | null>;
   onClose: () => void;
@@ -124,8 +122,12 @@ interface ContextMenuSubmenuProps {
     event: React.KeyboardEvent<HTMLButtonElement>,
     index: number,
   ) => void;
-  onSelect: (event: React.MouseEvent<HTMLElement>, item: ContextMenuItem) => void;
+  onSelect: (
+    event: React.MouseEvent<HTMLElement>,
+    item: ContextMenuItem,
+  ) => void;
   position: { left: number; top: number };
+  setItemRef: (index: number, node: HTMLButtonElement | null) => void;
 }
 
 function ContextMenuSubmenu({
@@ -135,8 +137,8 @@ function ContextMenuSubmenu({
   onKeyDown,
   onSelect,
   activeIndex,
-  itemRefs,
   position,
+  setItemRef,
 }: ContextMenuSubmenuProps) {
   return (
     <FloatingPortal>
@@ -162,10 +164,10 @@ function ContextMenuSubmenu({
             active={index === activeIndex}
             child={child}
             index={index}
-            itemRefs={itemRefs}
             key={child.id}
             onKeyDown={onKeyDown}
             onSelect={onSelect}
+            setItemRef={setItemRef}
           />
         ))}
       </div>
@@ -177,18 +179,18 @@ interface ContextMenuSubmenuItemProps {
   active: boolean;
   child: ContextMenuItem;
   index: number;
-  itemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
   onKeyDown: ContextMenuSubmenuProps["onKeyDown"];
   onSelect: ContextMenuSubmenuProps["onSelect"];
+  setItemRef: ContextMenuSubmenuProps["setItemRef"];
 }
 
 function ContextMenuSubmenuItem({
   active,
   child,
   index,
-  itemRefs,
   onKeyDown,
   onSelect,
+  setItemRef,
 }: ContextMenuSubmenuItemProps) {
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => onSelect(event, child),
@@ -198,11 +200,9 @@ function ContextMenuSubmenuItem({
     (event: React.KeyboardEvent<HTMLButtonElement>) => onKeyDown(event, index),
     [index, onKeyDown],
   );
-  const setItemRef = useCallback(
-    (node: HTMLButtonElement | null) => {
-      itemRefs.current[index] = node;
-    },
-    [index, itemRefs],
+  const registerItemRef = useCallback(
+    (node: HTMLButtonElement | null) => setItemRef(index, node),
+    [index, setItemRef],
   );
 
   const Icon = child.icon;
@@ -219,7 +219,7 @@ function ContextMenuSubmenuItem({
       disabled={child.disabled}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      ref={setItemRef}
+      ref={registerItemRef}
       role="menuitem"
       tabIndex={active ? 0 : -1}
       type="button"
@@ -393,6 +393,7 @@ interface ContextMenuSubmenuControllerProps {
   parentItemRef: React.RefObject<Array<HTMLElement | null>>;
   position: { left: number; top: number };
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
+  setItemRef: (index: number, node: HTMLButtonElement | null) => void;
 }
 
 function ContextMenuSubmenuController({
@@ -406,6 +407,7 @@ function ContextMenuSubmenuController({
   parentItemRef,
   position,
   setActiveIndex,
+  setItemRef,
 }: ContextMenuSubmenuControllerProps) {
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>, childIndex: number) => {
@@ -458,13 +460,13 @@ function ContextMenuSubmenuController({
   return (
     <ContextMenuSubmenu
       activeIndex={activeIndex}
-      itemRefs={itemRefs}
       items={items}
       menuRef={menuRef}
       onClose={closeSubmenu}
       onKeyDown={handleKeyDown}
       onSelect={handleSelect}
       position={position}
+      setItemRef={setItemRef}
     />
   );
 }
@@ -481,6 +483,8 @@ interface ContextMenuItemRendererProps {
   openSubmenuForIndex: (index: number) => void;
   openSubmenuIndex: number | null;
   setActiveSubmenuIndex: React.Dispatch<React.SetStateAction<number>>;
+  setItemRef: (index: number, node: HTMLElement | null) => void;
+  setSubmenuItemRef: (index: number, node: HTMLButtonElement | null) => void;
   submenuItemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
   submenuPosition: { left: number; top: number };
   submenuRef: React.RefObject<HTMLDivElement | null>;
@@ -501,6 +505,8 @@ function ContextMenuItemRenderer({
   submenuItemRefs,
   submenuPosition,
   submenuRef,
+  setItemRef,
+  setSubmenuItemRef,
 }: ContextMenuItemRendererProps) {
   const isNavigable = !(item.disabled || item.visualOnly);
   const isActive = activeIndex === itemIndex;
@@ -514,13 +520,13 @@ function ContextMenuItemRenderer({
       : getContextMenuItemVariantClasses(item.variant, isActive),
     item.disabled ? "!opacity-75 !cursor-not-allowed" : undefined,
   );
-  const setItemRef = useCallback(
+  const registerItemRef = useCallback(
     (node: HTMLElement | null) => {
       if (isNavigable) {
-        listRef.current[itemIndex] = node;
+        setItemRef(itemIndex, node);
       }
     },
-    [isNavigable, itemIndex, listRef],
+    [isNavigable, itemIndex, setItemRef],
   );
   const handleLinkClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -614,6 +620,7 @@ function ContextMenuItemRenderer({
         parentItemRef={listRef}
         position={submenuPosition}
         setActiveIndex={setActiveSubmenuIndex}
+        setItemRef={setSubmenuItemRef}
       />
     ) : null;
 
@@ -623,7 +630,7 @@ function ContextMenuItemRenderer({
         aria-disabled={item.disabled || undefined}
         className={classes}
         href={item.href}
-        ref={setItemRef}
+        ref={registerItemRef}
         role="menuitem"
         tabIndex={isActive ? 0 : -1}
         target={item.target}
@@ -649,7 +656,7 @@ function ContextMenuItemRenderer({
       aria-haspopup={hasChildren ? "menu" : undefined}
       className={classes}
       disabled={item.disabled}
-      ref={setItemRef}
+      ref={registerItemRef}
       role="menuitem"
       tabIndex={isActive ? 0 : -1}
       {...getItemProps({
@@ -696,13 +703,57 @@ export function ContextMenu({
   } = useContextMenuState();
 
   const listRef = useRef<Array<HTMLElement | null>>([]);
+  const [listItems, setListItems] = useState<Array<HTMLElement | null>>([]);
   const menuElementRef = useRef<HTMLDivElement | null>(null);
   const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
   const [activeSubmenuIndex, setActiveSubmenuIndex] = useState(0);
   const [submenuPosition, setSubmenuPosition] = useState({ left: 0, top: 0 });
   const submenuRef = useRef<HTMLDivElement | null>(null);
   const submenuItemRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [submenuItems, setSubmenuItems] = useState<
+    Array<HTMLButtonElement | null>
+  >([]);
+  const [triggerWrapper, setTriggerWrapper] = useState<HTMLElement | null>(
+    null,
+  );
   const isOpenRef = useRef(isOpen);
+
+  useLayoutEffect(() => {
+    listRef.current = listItems;
+  }, [listItems]);
+
+  useLayoutEffect(() => {
+    submenuItemRefs.current = submenuItems;
+  }, [submenuItems]);
+
+  const registerListItem = useCallback(
+    (index: number, node: HTMLElement | null) => {
+      setListItems((currentItems) => {
+        if (currentItems[index] === node) {
+          return currentItems;
+        }
+
+        const nextItems = [...currentItems];
+        nextItems[index] = node;
+        return nextItems;
+      });
+    },
+    [],
+  );
+  const registerSubmenuItem = useCallback(
+    (index: number, node: HTMLButtonElement | null) => {
+      setSubmenuItems((currentItems) => {
+        if (currentItems[index] === node) {
+          return currentItems;
+        }
+
+        const nextItems = [...currentItems];
+        nextItems[index] = node;
+        return nextItems;
+      });
+    },
+    [],
+  );
 
   const handleClose = useCallback(() => {
     if (isOpenRef.current) {
@@ -790,6 +841,11 @@ export function ContextMenu({
     open: isOpen,
   });
 
+  useLayoutEffect(() => {
+    const trigger = triggerWrapper?.firstElementChild;
+    refs.setReference(trigger instanceof HTMLElement ? trigger : null);
+  }, [refs, triggerWrapper]);
+
   const dismiss = useDismiss(context);
   const role = useRole(context, { role: "menu" });
   const listNavigation = useListNavigation(context, {
@@ -854,7 +910,7 @@ export function ContextMenu({
   const closeSubmenu = useCallback(() => setOpenSubmenuIndex(null), []);
 
   const handleContextMenu = useCallback(
-    (event: React.MouseEvent) => {
+    (event: MouseEvent) => {
       if (disabled) {
         return;
       }
@@ -877,12 +933,18 @@ export function ContextMenu({
     },
     [disabled, openMenu],
   );
-  const setReferenceRef = useCallback(
-    (node: HTMLElement | null) => {
-      refs.setReference(node);
-    },
-    [refs],
-  );
+
+  useEffect(() => {
+    if (!triggerWrapper) {
+      return;
+    }
+
+    triggerWrapper.addEventListener("contextmenu", handleContextMenu);
+    return () => {
+      triggerWrapper.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, [handleContextMenu, triggerWrapper]);
+
   const setFloatingRef = useCallback(
     (node: HTMLDivElement | null) => {
       refs.setFloating(node);
@@ -898,13 +960,17 @@ export function ContextMenu({
 
   return (
     <>
-      {/* Custom trigger element */}
-      {isValidElement(children) &&
-        cloneElement(children, {
-          "data-context-menu-trigger": disabled ? undefined : triggerId,
-          onContextMenu: handleContextMenu,
-          ref: setReferenceRef,
-        } as React.HTMLAttributes<HTMLElement>)}
+      {isValidElement(children) ? (
+        <span
+          className="contents"
+          data-context-menu-trigger={disabled ? undefined : triggerId}
+          ref={setTriggerWrapper}
+        >
+          {children}
+        </span>
+      ) : (
+        children
+      )}
 
       {/* Render popover in portal when visible */}
       {isVisible ? (
@@ -954,6 +1020,8 @@ export function ContextMenu({
                     submenuItemRefs={submenuItemRefs}
                     submenuPosition={submenuPosition}
                     submenuRef={submenuRef}
+                    setItemRef={registerListItem}
+                    setSubmenuItemRef={registerSubmenuItem}
                   />
                 );
               })}

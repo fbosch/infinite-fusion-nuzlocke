@@ -1,10 +1,6 @@
 import React from "react";
 import { useSnapshot } from "valtio";
 import type { CustomLocation } from "@/loaders/locations";
-import {
-  getAvailableAfterLocations,
-  getMergedLocations,
-} from "./customLocations";
 import { getAllPlaythroughs, playthroughsStore } from "./store";
 import {
   type EncounterData,
@@ -131,16 +127,4 @@ export const useCustomLocations = (): CustomLocation[] => {
   const activePlaythrough = useActivePlaythrough();
 
   return activePlaythrough?.customLocations || [];
-};
-
-const _useMergedLocations = () => {
-  useActivePlaythrough();
-
-  return getMergedLocations();
-};
-
-const _useAvailableAfterLocations = () => {
-  useActivePlaythrough();
-
-  return getAvailableAfterLocations();
 };

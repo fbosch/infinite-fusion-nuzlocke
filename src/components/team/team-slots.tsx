@@ -1,13 +1,7 @@
 "use client";
 
 import { clsx } from "clsx";
-import {
-  type KeyboardEvent,
-  type MutableRefObject,
-  useCallback,
-  useEffect,
-  useRef,
-} from "react";
+import { type KeyboardEvent, useCallback, useEffect, useRef } from "react";
 import PokeballIcon from "@/assets/images/pokeball.svg";
 import { CursorTooltip } from "@/components/CursorTooltip";
 import { ArtworkVariantButton } from "@/components/PokemonSummaryCard/ArtworkVariantButton";
@@ -89,14 +83,17 @@ const handleContextMenuClose = () => {
 
 interface TeamSlotProps {
   openPicker: (position: number) => void;
+  setTeamSpriteRef: (
+    position: number,
+    spriteRef: FusionSpriteHandle | null,
+  ) => void;
   slot: TeamSlot;
-  teamSpriteRefs: MutableRefObject<(FusionSpriteHandle | null)[]>;
 }
 
 function EmptyTeamSlot({
   openPicker,
   slot,
-}: Omit<TeamSlotProps, "teamSpriteRefs">) {
+}: Omit<TeamSlotProps, "setTeamSpriteRef">) {
   const openSlotPicker = useCallback(
     () => openPicker(slot.position),
     [openPicker, slot.position],
@@ -149,16 +146,20 @@ function EmptyTeamSlot({
   );
 }
 
-function TeamSlotContent({ openPicker, slot, teamSpriteRefs }: TeamSlotProps) {
+function TeamSlotContent({
+  openPicker,
+  setTeamSpriteRef,
+  slot,
+}: TeamSlotProps) {
   const openSlotPicker = useCallback(
     () => openPicker(slot.position),
     [openPicker, slot.position],
   );
   const setSpriteRef = useCallback(
     (ref: FusionSpriteHandle | null) => {
-      teamSpriteRefs.current[slot.position] = ref;
+      setTeamSpriteRef(slot.position, ref);
     },
-    [slot.position, teamSpriteRefs],
+    [setTeamSpriteRef, slot.position],
   );
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -264,6 +265,12 @@ export default function TeamSlots() {
   // Refs for team member sprites to play evolution animations
   const teamSpriteRefs = useRef<(FusionSpriteHandle | null)[]>([]);
   const previousFusionIds = useRef<(string | null)[]>([]);
+  const setTeamSpriteRef = (
+    position: number,
+    ref: FusionSpriteHandle | null,
+  ) => {
+    teamSpriteRefs.current[position] = ref;
+  };
 
   const pokemonByUid = buildPokemonUidIndex(encounters);
 
@@ -336,8 +343,8 @@ export default function TeamSlots() {
             <TeamSlot
               key={slot.position}
               openPicker={openPicker}
+              setTeamSpriteRef={setTeamSpriteRef}
               slot={slot}
-              teamSpriteRefs={teamSpriteRefs}
             />
           ))}
         </div>
