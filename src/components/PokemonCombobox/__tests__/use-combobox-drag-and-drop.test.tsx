@@ -82,10 +82,12 @@ describe("useComboboxDragAndDrop", () => {
     expect(getPokemonMock).toHaveBeenCalledOnce();
 
     dragActions.clearDrag();
-    await act(async () => {
-      resolvePokemon!([{ id: 25, nationalDexId: 25 }]);
-      resolveNameMap!(new Map([[25, "pikachu"]]));
-    });
+    await act(() =>
+      Promise.resolve().then(() => {
+        resolvePokemon?.([{ id: 25, nationalDexId: 25 }]);
+        resolveNameMap?.(new Map([[25, "pikachu"]]));
+      }),
+    );
 
     expect(result.current.dragPreview).toBeNull();
   });

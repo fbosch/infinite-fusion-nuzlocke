@@ -40,7 +40,7 @@ describe("sprite packing geometry", () => {
       { height: 10, width: 10, x: 9, y: 0 },
       { height: 10, width: 10, x: 30, y: 0 },
     ];
-    const visited: Array<[number, number]> = [];
+    const visited: [number, number][] = [];
 
     expect(
       forEachOverlappingPair(rectangles, (a, b) => {

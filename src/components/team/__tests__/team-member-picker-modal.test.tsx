@@ -22,14 +22,14 @@ describe("TeamMemberPickerModal Business Logic", () => {
     const validPositions = [0, 1, 2, 3, 4, 5];
     const invalidPositions = [-1, 6, 10];
 
-    validPositions.forEach((position) => {
+    for (const position of validPositions) {
       expect(position).toBeGreaterThanOrEqual(0);
       expect(position).toBeLessThan(6);
-    });
+    }
 
-    invalidPositions.forEach((position) => {
+    for (const position of invalidPositions) {
       expect(position < 0 || position >= 6).toBe(true);
-    });
+    }
   });
 
   it("should handle existing team member structure", () => {

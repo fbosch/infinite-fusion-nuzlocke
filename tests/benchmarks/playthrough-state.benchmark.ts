@@ -11,7 +11,7 @@ vi.mock("@/lib/analytics/selectors", () => ({
 vi.mock("@/lib/analytics/playthroughEventData", () => ({
   getEncounterCount: () => 0,
   getNewlyReachedCheckpoints: () => [],
-  markCheckpointEventsTracked: () => {},
+  markCheckpointEventsTracked: () => undefined,
 }));
 vi.mock("@/lib/analytics/trackEvent", () => ({ trackEvent: vi.fn() }));
 vi.mock("@/lib/events", () => ({ emitEvolutionEvent: vi.fn() }));
@@ -63,16 +63,16 @@ type FixtureKind =
   | "drag-occupied-target"
   | "custom-location-remove";
 
-type BenchmarkResult = {
-  name: FixtureKind;
+interface BenchmarkResult {
   cold: BenchmarkTiming;
+  name: FixtureKind;
   warm: BenchmarkTiming;
-};
+}
 
-type BenchmarkTiming = {
+interface BenchmarkTiming {
   p50Ms: number;
   p95Ms: number;
-};
+}
 
 const routeId = (index: number) => `route-${index.toString().padStart(4, "0")}`;
 const SOURCE_LOCATION_ID = routeId(0);
@@ -100,12 +100,12 @@ const fixtureKinds: FixtureKind[] = [
   "custom-location-remove",
 ];
 
-type FixtureOptions = {
+interface FixtureOptions {
+  hasCustomLocation?: boolean;
   reverseStatus?: PokemonOptionType["status"];
   sourceOriginalLocation?: string;
   targetPokemonId?: number;
-  hasCustomLocation?: boolean;
-};
+}
 
 const fixtureOptions: Record<FixtureKind, FixtureOptions> = {
   "custom-location-remove": { hasCustomLocation: true },
@@ -226,7 +226,7 @@ function getSourceHeadPokemon() {
   return pokemon;
 }
 
-const runFixture: Record<FixtureKind, () => Promise<unknown> | void> = {
+const runFixture: Record<FixtureKind, () => Promise<unknown> | undefined> = {
   "custom-location-remove": () => removeCustomLocation("custom-location"),
   "drag-empty-target": () =>
     relocateEncounterSlot({
@@ -276,25 +276,37 @@ const runFixture: Record<FixtureKind, () => Promise<unknown> | void> = {
   "reverse-stored": () => flipTeamMemberFusion(0),
 };
 
-const warmFixture: Record<FixtureKind, () => void> = Object.fromEntries(
-  fixtureKinds.map((kind) => [kind, () => void getActivePlaythrough()]),
-) as Record<FixtureKind, () => void>;
+const warmFixture: Record<FixtureKind, () => unknown> = Object.fromEntries(
+  fixtureKinds.map((kind) => [kind, () => getActivePlaythrough()]),
+) as Record<FixtureKind, () => unknown>;
 
 warmFixture["reverse-active"] = warmTeamMember;
 warmFixture["reverse-stored"] = warmTeamMember;
 warmFixture["custom-location-remove"] = warmCustomLocation;
 
 function warmTeamMember() {
-  const teamMember = getActivePlaythrough()?.team.members[0];
+  const [teamMember] = getActivePlaythrough().team.members;
   if (!teamMember) {
     throw new Error("Reverse Fusion benchmark fixture has no team member");
   }
-  void teamMember.headPokemonUid;
-  void teamMember.bodyPokemonUid;
+  return [teamMember.headPokemonUid, teamMember.bodyPokemonUid];
 }
 
 function warmCustomLocation() {
-  void getActivePlaythrough()?.customLocations?.[0]?.id;
+  return getActivePlaythrough().customLocations?.[0]?.id;
+}
+
+async function repeatSequentially(
+  count: number,
+  action: (index: number) => Promise<void>,
+  index = 0,
+): Promise<void> {
+  if (index === count) {
+    return;
+  }
+
+  await action(index);
+  await repeatSequentially(count, action, index + 1);
 }
 
 function percentile(values: number[], percentileValue: number) {
@@ -311,18 +323,18 @@ function summarizeSamples(samples: number[]): BenchmarkTiming {
 }
 
 async function benchmarkFixture(kind: FixtureKind): Promise<BenchmarkResult> {
-  for (let index = 0; index < WARMUP_ITERATIONS; index += 1) {
+  await repeatSequentially(WARMUP_ITERATIONS, async () => {
     installFixture(createFixture(kind));
     await runFixture[kind]();
 
     installFixture(createFixture(kind));
     warmFixture[kind]();
     await runFixture[kind]();
-  }
+  });
 
   const coldSamples: number[] = [];
   const warmSamples: number[] = [];
-  for (let sample = 0; sample < SAMPLE_COUNT; sample += 1) {
+  await repeatSequentially(SAMPLE_COUNT, async () => {
     installFixture(createFixture(kind));
     const start = performance.now();
     await runFixture[kind]();
@@ -333,7 +345,7 @@ async function benchmarkFixture(kind: FixtureKind): Promise<BenchmarkResult> {
     const warmStart = performance.now();
     await runFixture[kind]();
     warmSamples.push(performance.now() - warmStart);
-  }
+  });
 
   return {
     cold: summarizeSamples(coldSamples),
@@ -345,9 +357,13 @@ async function benchmarkFixture(kind: FixtureKind): Promise<BenchmarkResult> {
 describe("playthrough interaction hot paths", () => {
   it("reports deterministic Reverse Fusion and drag baselines", async () => {
     const results: BenchmarkResult[] = [];
-    for (const kind of fixtureKinds) {
+    await repeatSequentially(fixtureKinds.length, async (index) => {
+      const kind = fixtureKinds[index];
+      if (!kind) {
+        throw new Error("Benchmark fixture kind is missing");
+      }
       results.push(await benchmarkFixture(kind));
-    }
+    });
 
     console.info(
       JSON.stringify(

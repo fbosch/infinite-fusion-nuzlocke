@@ -1,9 +1,9 @@
-export type SpriteRectangle = {
+export interface SpriteRectangle {
+  height: number;
+  width: number;
   x: number;
   y: number;
-  width: number;
-  height: number;
-};
+}
 
 export function rectanglesOverlap(
   a: SpriteRectangle,
@@ -37,8 +37,8 @@ export function forEachOverlappingPair<T extends SpriteRectangle>(
 ): boolean {
   let foundOverlap = false;
 
-  for (let i = 0; i < rectangles.length; i++) {
-    for (let j = i + 1; j < rectangles.length; j++) {
+  for (let i = 0; i < rectangles.length; i += 1) {
+    for (let j = i + 1; j < rectangles.length; j += 1) {
       const a = rectangles[i];
       const b = rectangles[j];
 

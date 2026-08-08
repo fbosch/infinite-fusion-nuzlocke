@@ -44,10 +44,10 @@ const defaultState: PlaythroughsState = {
 // Helper functions
 const generatePlaythroughId = (): string => generatePrefixedId("playthrough");
 
-type AnalyticsSourceContext = {
+interface AnalyticsSourceContext {
   source_surface?: SourceSurface;
   trigger_method?: TriggerMethod;
-};
+}
 
 const getAnalyticsSourceContext = ({
   source_surface = "store",

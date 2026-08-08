@@ -208,13 +208,13 @@ export async function getNextFallbackUrl(
   return QUESTION_MARK;
 }
 
-type StatusState = {
-  type: "normal" | "missed" | "deceased" | "stored";
-  wrapperClasses: string;
+interface StatusState {
+  canAnimate: boolean;
   imageClasses: string;
   overlayContent: React.ReactNode | null;
-  canAnimate: boolean;
-};
+  type: "normal" | "missed" | "deceased" | "stored";
+  wrapperClasses: string;
+}
 
 export function getStatusState(
   head: PokemonOptionType | null,

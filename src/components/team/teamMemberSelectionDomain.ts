@@ -1,17 +1,17 @@
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
 
-export type TeamPokemonSelection = {
-  pokemon: PokemonOptionType;
+export interface TeamPokemonSelection {
   locationId: string;
-};
+  pokemon: PokemonOptionType;
+}
 
 export type TeamSelectionSlot = "head" | "body";
 
-export type ExistingTeamMemberSelection = {
-  isEmpty: boolean;
-  headPokemon?: PokemonOptionType | null;
+export interface ExistingTeamMemberSelection {
   bodyPokemon?: PokemonOptionType | null;
-};
+  headPokemon?: PokemonOptionType | null;
+  isEmpty: boolean;
+}
 
 export type TeamMemberUsage = {
   headPokemonUid?: string;

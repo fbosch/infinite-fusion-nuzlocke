@@ -3,19 +3,22 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import * as cheerio from "cheerio";
+import { load } from "cheerio";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { fetchWikiPageHtml } from "./utils/wiki-fetch-utils";
 
 const POKEDEX_URL = "https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex";
 
-export type DexEntry = { id: number; name: string };
+export interface DexEntry {
+  id: number;
+  name: string;
+}
 
 export function parseDexEntriesFromHtml(html: string): DexEntry[] {
-  const $ = cheerio.load(html);
+  const $ = load(html);
   const dexEntries: DexEntry[] = [];
 
-  $("table tr").each((_index: number, element: any) => {
+  $("table tr").each((_index, element) => {
     const cells = $(element).find("td");
     const dexNumber = Number.parseInt(cells.first().text().trim(), 10);
     const nameText = cells.eq(2).text().trim();
@@ -32,10 +35,10 @@ export function parseDexEntriesFromHtml(html: string): DexEntry[] {
 }
 
 export function extractPokedexSubpageTitles(html: string): string[] {
-  const $ = cheerio.load(html);
+  const $ = load(html);
   const titles = new Set<string>();
 
-  $('a[href^="/wiki/Pok%C3%A9dex/"]').each((_index: number, element: any) => {
+  $('a[href^="/wiki/Pok%C3%A9dex/"]').each((_index, element) => {
     const title = $(element).attr("title")?.trim();
     if (title?.startsWith("Pokédex/") === true) {
       titles.add(title);
@@ -71,6 +74,16 @@ function mergeDexEntries(entries: DexEntry[]): DexEntry[] {
     .sort((a, b) => a.id - b.id);
 }
 
+async function fetchPokedexSubpages(titles: string[]): Promise<string[]> {
+  const [title, ...remainingTitles] = titles;
+  if (title === undefined) {
+    return [];
+  }
+
+  const pageHtml = await fetchWikiPageHtml(getPokedexPageUrl(title));
+  return [pageHtml, ...(await fetchPokedexSubpages(remainingTitles))];
+}
+
 async function scrapeDexEntries(): Promise<DexEntry[]> {
   ConsoleFormatter.printHeader(
     "Scraping Pokédex",
@@ -91,10 +104,10 @@ async function scrapeDexEntries(): Promise<DexEntry[]> {
         : "Extracting Pokédex entries from landing page...",
     );
 
-    const pageHtml = [landingPageHtml];
-    for (const title of subpageTitles) {
-      pageHtml.push(await fetchWikiPageHtml(getPokedexPageUrl(title)));
-    }
+    const pageHtml = [
+      landingPageHtml,
+      ...(await fetchPokedexSubpages(subpageTitles)),
+    ];
 
     const dexEntries = mergeDexEntries(
       pageHtml.flatMap((html) => parseDexEntriesFromHtml(html)),

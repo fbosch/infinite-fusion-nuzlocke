@@ -69,7 +69,7 @@ export const markEncounterAsDeceased = async (
   const alreadyDeceased =
     hasPokemonBefore &&
     [encounterBefore.head, encounterBefore.body]
-      .filter((pokemon) => pokemon != null)
+      .filter((pokemon) => pokemon !== null)
       .every((pokemon) => pokemon.status === PokemonStatus.DECEASED);
 
   if (alreadyDeceased) {
@@ -88,7 +88,7 @@ export const markEncounterAsDeceased = async (
   }
 
   const nowDeceased = [encounterAfter.head, encounterAfter.body]
-    .filter((pokemon) => pokemon != null)
+    .filter((pokemon) => pokemon !== null)
     .every((pokemon) => pokemon.status === PokemonStatus.DECEASED);
 
   if (!nowDeceased) {
@@ -97,7 +97,7 @@ export const markEncounterAsDeceased = async (
 
   removeTeamMembersWithPokemon(
     [encounterAfter.head?.uid, encounterAfter.body?.uid].filter(
-      (uid): uid is string => uid != null,
+      (uid): uid is string => uid !== null,
     ),
   );
 

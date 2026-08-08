@@ -48,7 +48,7 @@ export interface ProcessedPokemonData {
   types: PokemonType[];
 }
 
-type PokemonApiData = {
+interface PokemonApiData {
   id: number;
   species: {
     name: string;
@@ -58,7 +58,7 @@ type PokemonApiData = {
       name: string;
     };
   }>;
-};
+}
 
 export function createProcessedPokemonData(
   entry: DexEntry,

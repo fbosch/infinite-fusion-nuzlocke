@@ -66,7 +66,7 @@ const getPokemonDataText = (pokemon: PokemonOptionType): string => {
   }
 
   return dataItems.length > 1
-    ? `${dataItems.slice(0, -1).join(", ")} and ${dataItems[dataItems.length - 1]}`
+    ? `${dataItems.slice(0, -1).join(", ")} and ${dataItems.at(-1)}`
     : (dataItems[0] ?? "");
 };
 

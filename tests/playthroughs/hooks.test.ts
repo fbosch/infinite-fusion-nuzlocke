@@ -106,7 +106,7 @@ describe("Playthroughs Store - React Hooks", () => {
     });
 
     it("should update when active playthrough is modified", () => {
-      let playthroughId: string;
+      let playthroughId = "";
 
       act(() => {
         playthroughId = playthroughActions.createPlaythrough(
@@ -624,7 +624,7 @@ describe("Playthroughs Store - React Hooks", () => {
       });
 
       const { result, rerender } = renderHook(() =>
-        usePlaythroughById(playthroughId!),
+        usePlaythroughById(playthroughId),
       );
 
       rerender();
@@ -632,26 +632,28 @@ describe("Playthroughs Store - React Hooks", () => {
 
       // Update the playthrough name
       act(() => {
-        playthroughActions.updatePlaythroughName(playthroughId!, "Updated Run");
+        playthroughActions.updatePlaythroughName(playthroughId, "Updated Run");
       });
 
       // Use retry mechanism for flaky CI tests
       await act(async () => {
-        // Wait for state to update with retry logic
-        let attempts = 0;
         const maxAttempts = 10;
-
-        while (attempts < maxAttempts) {
+        const waitForUpdate = async (attempts: number): Promise<void> => {
           rerender();
 
-          if (result.current?.name === "Updated Run") {
-            break;
+          if (
+            result.current?.name === "Updated Run" ||
+            attempts === maxAttempts
+          ) {
+            return;
           }
 
           // Small delay before next attempt
           await new Promise((resolve) => setTimeout(resolve, 10));
-          attempts++;
-        }
+          await waitForUpdate(attempts + 1);
+        };
+
+        await waitForUpdate(0);
       });
 
       // Verify the playthrough was updated
@@ -711,7 +713,7 @@ describe("Playthroughs Store - React Hooks", () => {
       const { result } = renderHook(() => useEncounters());
 
       expect(result.current).toBeDefined();
-      expect(Object.keys(result.current!)).toHaveLength(2);
+      expect(Object.keys(result.current ?? {})).toHaveLength(2);
       expect(result.current?.["route-1"]?.head?.name).toBe("Pikachu");
       expect(result.current?.["route-2"]?.head?.name).toBe("Charmander");
     });
@@ -732,7 +734,7 @@ describe("Playthroughs Store - React Hooks", () => {
 
       // Initially empty
       expect(result.current).toBeDefined();
-      expect(Object.keys(result.current!)).toHaveLength(0);
+      expect(Object.keys(result.current ?? {})).toHaveLength(0);
 
       // Add an encounter
       await act(async () => {
@@ -740,7 +742,7 @@ describe("Playthroughs Store - React Hooks", () => {
       });
 
       rerender();
-      expect(Object.keys(result.current!)).toHaveLength(1);
+      expect(Object.keys(result.current ?? {})).toHaveLength(1);
       expect(result.current?.["route-1"]?.head?.name).toBe("Pikachu");
 
       // Update the encounter
@@ -757,7 +759,7 @@ describe("Playthroughs Store - React Hooks", () => {
       });
 
       rerender();
-      expect(Object.keys(result.current!)).toHaveLength(0);
+      expect(Object.keys(result.current ?? {})).toHaveLength(0);
     });
 
     it("should handle fusion encounters correctly", async () => {
@@ -808,7 +810,7 @@ describe("Playthroughs Store - React Hooks", () => {
       });
 
       const { result } = renderHook(() => {
-        renderCount++;
+        renderCount += 1;
         return useIsRemixMode();
       });
 
@@ -839,7 +841,7 @@ describe("Playthroughs Store - React Hooks", () => {
       });
 
       const { result } = renderHook(() => {
-        renderCount++;
+        renderCount += 1;
         return useEncounters();
       });
 

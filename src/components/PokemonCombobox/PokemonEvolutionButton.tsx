@@ -11,7 +11,6 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import clsx from "clsx";
 import { Atom, ChevronDown, Undo2 } from "lucide-react";
 import type React from "react";
-import { Fragment } from "react";
 import { useShiftKey } from "@/hooks/useKeyPressed";
 import { emitEvolutionEvent } from "@/lib/events";
 import {
@@ -174,15 +173,15 @@ const DirectEvolutionButton: React.FC<DirectEvolutionButtonProps> = ({
           <div className="flex flex-col gap-0.5">
             <span>
               {isDevolutionMode ? (
-                <Fragment>
+                <>
                   Devolve to{" "}
                   <span className="font-semibold">{pokemon.name}</span>
-                </Fragment>
+                </>
               ) : (
-                <Fragment>
+                <>
                   Evolve to{" "}
                   <span className="font-semibold">{pokemon.name}</span>
-                </Fragment>
+                </>
               )}
             </span>
             {showDevolutionHint && (

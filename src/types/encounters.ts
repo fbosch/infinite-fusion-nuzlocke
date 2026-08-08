@@ -15,15 +15,15 @@ export enum EncounterSource {
   LEGENDARY = "legendary",
 }
 
-export type PokemonEncounter = {
+export interface PokemonEncounter {
   id: number;
   source: EncounterSource;
-};
+}
 
-export type RouteEncounter = {
-  routeName: string;
+export interface RouteEncounter {
   pokemon: PokemonEncounter[];
-};
+  routeName: string;
+}
 
 /**
  * Shared encounter type definition for consistency across the codebase.

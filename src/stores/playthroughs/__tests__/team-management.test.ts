@@ -159,7 +159,7 @@ describe("Team Management", () => {
       const { activePlaythrough } = createTestPlaythrough();
 
       // Remove team property
-      delete (activePlaythrough as any).team;
+      (activePlaythrough as any).team = undefined;
 
       // Try to move team member
       await moveTeamMemberToBox(0);

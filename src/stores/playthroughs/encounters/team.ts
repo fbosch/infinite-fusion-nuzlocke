@@ -255,7 +255,7 @@ export const findCanonicalLocationForUids = (uids: string[]) => {
     ([, encounter]) => {
       const encounterUids = new Set(
         [encounter.head?.uid, encounter.body?.uid].filter(
-          (uid): uid is string => uid != null,
+          (uid): uid is string => uid !== null,
         ),
       );
 

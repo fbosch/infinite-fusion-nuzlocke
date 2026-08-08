@@ -20,7 +20,7 @@ vi.mock("@/components/CursorTooltip", () => ({
 }));
 
 vi.mock("@/components/PokemonSprite", () => ({
-  PokemonSprite: () => <img alt="Pokemon" />,
+  PokemonSprite: () => <span aria-label="Pokemon" role="img" />,
 }));
 
 vi.mock("@/components/PokemonCombobox/DraggableSpriteTooltipContent", () => ({
@@ -91,7 +91,11 @@ describe("DraggableComboboxSprite", () => {
     expect(sprite).not.toBeNull();
 
     settingsStore.moveEncountersBetweenLocations = false;
-    const dispatched = fireEvent.dragStart(sprite!, {
+    if (sprite === null) {
+      throw new Error("Expected a draggable Pokemon sprite");
+    }
+
+    const dispatched = fireEvent.dragStart(sprite, {
       dataTransfer: {
         setData: vi.fn(),
         setDragImage: vi.fn(),

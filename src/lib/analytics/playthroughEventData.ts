@@ -44,7 +44,7 @@ const getLandingStorageKey = (playthroughId: string): string =>
   `${LANDING_STORAGE_KEY_PREFIX}${playthroughId}`;
 
 const parseStoredCheckpoints = (value: string | null): Set<Checkpoint> => {
-  if (value == null) {
+  if (value === null) {
     return new Set();
   }
 

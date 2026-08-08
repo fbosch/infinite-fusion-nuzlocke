@@ -189,6 +189,9 @@ importers:
       babel-plugin-react-compiler:
         specifier: 1.0.0
         version: 1.0.0
+      domhandler:
+        specifier: 5.0.3
+        version: 5.0.3
       fallow:
         specifier: ^3.9.1
         version: 3.9.1

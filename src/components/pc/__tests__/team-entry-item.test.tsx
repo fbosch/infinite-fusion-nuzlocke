@@ -63,8 +63,8 @@ vi.mock("@/components/PokemonSummaryCard/ArtworkVariantButton", () => ({
 
 vi.mock("@/components/PokemonSummaryCard/FusionSprite", () => ({
   FusionSprite: (() => {
-    const React = require("react") as typeof import("react");
-    return React.forwardRef<
+    const ReactRuntime = require("react") as typeof import("react");
+    return ReactRuntime.forwardRef<
       { playEvolution: typeof playEvolutionMock },
       FusionSpriteMockProps
     >(
@@ -79,7 +79,7 @@ vi.mock("@/components/PokemonSummaryCard/FusionSprite", () => ({
         },
         ref,
       ) => {
-        React.useImperativeHandle(
+        ReactRuntime.useImperativeHandle(
           ref,
           () => ({
             playEvolution: playEvolutionMock,
@@ -94,8 +94,7 @@ vi.mock("@/components/PokemonSummaryCard/FusionSprite", () => ({
 }));
 
 vi.mock("@/stores/playthroughs/hooks", () => ({
-  useActivePlaythrough: () =>
-    activePlaythroughId ? { id: activePlaythroughId } : null,
+  useActivePlaythrough: () => ({ id: activePlaythroughId }),
   useEncounters: () => ({}),
 }));
 
@@ -340,19 +339,21 @@ describe("TeamEntryItem", () => {
   });
 
   it("does not play evolution animation when active playthrough changes", () => {
+    const filledBody = filledTeamEntry.body as NonNullable<PCEntry["body"]>;
+    const filledHead = filledTeamEntry.head as NonNullable<PCEntry["head"]>;
     const entryA: PCEntry = {
       ...filledTeamEntry,
     };
     const entryB: PCEntry = {
       ...filledTeamEntry,
       body: {
-        ...filledTeamEntry.body!,
+        ...filledBody,
         id: 2,
         name: "Ivysaur",
         uid: "ivysaur-uid",
       },
       head: {
-        ...filledTeamEntry.head!,
+        ...filledHead,
         id: 1,
         name: "Bulbasaur",
         uid: "bulbasaur-uid",
@@ -361,13 +362,13 @@ describe("TeamEntryItem", () => {
     const entryC: PCEntry = {
       ...filledTeamEntry,
       body: {
-        ...filledTeamEntry.body!,
+        ...filledBody,
         id: 7,
         name: "Squirtle",
         uid: "squirtle-uid",
       },
       head: {
-        ...filledTeamEntry.head!,
+        ...filledHead,
         id: 4,
         name: "Charmander",
         uid: "charmander-uid",

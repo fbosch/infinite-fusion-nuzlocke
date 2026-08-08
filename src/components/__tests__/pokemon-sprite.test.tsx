@@ -10,7 +10,7 @@ const imageProps = vi.hoisted(() => vi.fn());
 vi.mock("next/image", () => ({
   default: (props: unknown) => {
     imageProps(props);
-    return <img alt="Pokemon sprite" />;
+    return <span aria-label="Pokemon sprite" role="img" />;
   },
 }));
 

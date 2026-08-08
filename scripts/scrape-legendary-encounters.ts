@@ -2,7 +2,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import * as cheerio from "cheerio";
+import { load } from "cheerio";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
 import {
@@ -25,13 +25,13 @@ interface LegendaryRoute {
   routeName: string;
 }
 
-type CheerioInput = Parameters<ReturnType<typeof cheerio.load>>[0];
+type CheerioInput = Parameters<ReturnType<typeof load>>[0];
 
 export function collectLegendaryRouteMapFromHtml(
   html: string,
   pokemonNameMap: PokemonNameMap,
 ): Map<string, number[]> {
-  const $ = cheerio.load(html);
+  const $ = load(html);
   const routeMap = new Map<string, number[]>();
   const headings = $(".mw-parser-output").find("h3");
 
@@ -44,7 +44,7 @@ export function collectLegendaryRouteMapFromHtml(
 }
 
 function addLegendaryHeadingEncounters(
-  $: ReturnType<typeof cheerio.load>,
+  $: ReturnType<typeof load>,
   heading: CheerioInput,
   pokemonNameMap: PokemonNameMap,
   routeMap: Map<string, number[]>,
@@ -99,7 +99,7 @@ function getLegendaryPokemonIds(
 }
 
 function findLegendaryRouteName(
-  $heading: ReturnType<ReturnType<typeof cheerio.load>>,
+  $heading: ReturnType<ReturnType<typeof load>>,
 ): string {
   let nextElement = $heading.next();
 
@@ -120,7 +120,7 @@ function findLegendaryRouteName(
 }
 
 function getRouteNameFromLegendaryTable(
-  $table: ReturnType<ReturnType<typeof cheerio.load>>,
+  $table: ReturnType<ReturnType<typeof load>>,
 ): string {
   const $cell = $table.find("tr").first().find("td").first();
   if ($cell.length === 0) {

@@ -57,7 +57,7 @@ export async function loadPokemonData(
     return pokemonArray;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
-    throw new Error(`Error loading Pokemon data: ${message}`);
+    throw new Error(`Error loading Pokemon data: ${message}`, { cause: error });
   }
 }
 
@@ -113,7 +113,7 @@ export async function loadDexEntries(forceReload = false): Promise<DexEntry[]> {
     return entries;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
-    throw new Error(`Error loading dex entries: ${message}`);
+    throw new Error(`Error loading dex entries: ${message}`, { cause: error });
   }
 }
 

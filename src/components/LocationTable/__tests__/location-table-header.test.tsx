@@ -39,10 +39,10 @@ describe("LocationTableHeader", () => {
     );
 
     expect(sortableHeaderCellProps).toHaveBeenCalledTimes(4);
-    Object.values(locationTableColumnWidths).forEach((className) => {
+    for (const className of Object.values(locationTableColumnWidths)) {
       expect(sortableHeaderCellProps).toHaveBeenCalledWith(
         expect.objectContaining({ className }),
       );
-    });
+    }
   });
 });

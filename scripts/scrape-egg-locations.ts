@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import * as fs from "node:fs/promises";
-import * as path from "node:path";
-import * as cheerio from "cheerio";
+import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { load, type CheerioAPI } from "cheerio";
+import type { Element } from "domhandler";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { cleanLocationName } from "./utils/location-utils";
 import {
@@ -61,6 +62,12 @@ const LOCATION_KEYWORDS = [
   "cave",
   "forest",
 ] as const;
+const WIKI_PATH_PATTERN = /\/wiki\/([^/]+)/;
+const EGG_PREFIX_PATTERN = /^(Gift|Egg|Trade|As Egg|Daycare Egg|Random Egg)\s*[-:]?\s*/i;
+const EGG_SUFFIX_PATTERN = /\s*[-:]\s*(Gift|Egg|Trade|As Egg|Daycare Egg|Random Egg)$/i;
+const EGG_LOCATION_SUFFIX_PATTERN = /\s*[-:]\s*(brought with Heart Scales|from.*|in.*|at.*)$/i;
+const EGG_NAME_SEPARATOR = /[-:,]/;
+const POKEMON_NAME_PATTERN = /^[A-Z][a-zA-Z]*$/;
 
 /** Returns whether a gift/trade row describes an egg encounter. */
 export function isEggRelated(pokemonCell: string, notesCell: string): boolean {
@@ -101,7 +108,7 @@ export function getNestLocationName(
     return null;
   }
 
-  const urlMatch = href.match(/\/wiki\/([^/]+)/);
+  const urlMatch = href.match(WIKI_PATH_PATTERN);
   if (!urlMatch) {
     return null;
   }
@@ -130,21 +137,21 @@ export function getNestLocationName(
  */
 async function loadPokemonData(): Promise<Map<string, PokemonData>> {
   try {
-    const pokemonDataPath = path.join(
+    const pokemonDataPath = join(
       process.cwd(),
       "data",
       "shared",
       "pokemon-data.json",
     );
-    const pokemonDataContent = await fs.readFile(pokemonDataPath, "utf8");
+    const pokemonDataContent = await readFile(pokemonDataPath, "utf8");
     const pokemonArray: PokemonData[] = JSON.parse(pokemonDataContent);
 
     const pokemonMap = new Map<string, PokemonData>();
 
-    pokemonArray.forEach((pokemon) => {
+    for (const pokemon of pokemonArray) {
       // Store by lowercase name for case-insensitive lookup
       pokemonMap.set(pokemon.name.toLowerCase(), pokemon);
-    });
+    }
 
     ConsoleFormatter.success(
       `Loaded ${pokemonMap.size} Pokemon for name mapping`,
@@ -168,19 +175,19 @@ function extractPokemonName(text: string): string | null {
 
   // Remove common prefixes and suffixes
   const cleanedText = text
-    .replace(/^(Gift|Egg|Trade|As Egg|Daycare Egg|Random Egg)\s*[-:]?\s*/i, "")
-    .replace(/\s*[-:]\s*(Gift|Egg|Trade|As Egg|Daycare Egg|Random Egg)$/i, "")
+    .replace(EGG_PREFIX_PATTERN, "")
+    .replace(EGG_SUFFIX_PATTERN, "")
     // Remove wiki links
     .replace(/\[\[([^\]]+)\]\]/g, "$1")
     .replace(/\[\[([^\]]+)\|([^\]]+)\]\]/g, "$2")
     // Remove parenthetical content
     .replace(/\s*\([^)]*\)/g, "")
     // Remove common suffixes
-    .replace(/\s*[-:]\s*(brought with Heart Scales|from.*|in.*|at.*)$/i, "")
+    .replace(EGG_LOCATION_SUFFIX_PATTERN, "")
     .trim();
 
   // Split on common separators and take the first part (which should be the Pokemon name)
-  const parts = cleanedText.split(/[-:,]/);
+  const parts = cleanedText.split(EGG_NAME_SEPARATOR);
   const pokemonName = parts[0].trim();
 
   // Validate that it looks like a Pokemon name (starts with capital letter, reasonable length)
@@ -188,7 +195,7 @@ function extractPokemonName(text: string): string | null {
     pokemonName &&
     pokemonName.length >= 3 &&
     pokemonName.length <= 20 &&
-    /^[A-Z][a-zA-Z]*$/.test(pokemonName)
+    POKEMON_NAME_PATTERN.test(pokemonName)
   ) {
     return pokemonName;
   }
@@ -211,6 +218,40 @@ function getPokemonByName(
   return pokemon || null;
 }
 
+function extractGiftEggLocation(
+  $: CheerioAPI,
+  row: Element,
+  pokemonMap: Map<string, PokemonData>,
+): EggLocation | null {
+  const cells = $(row).find("td");
+  if (cells.length < 3) {
+    return null;
+  }
+
+  const pokemonCell = cells.eq(0).text().trim();
+  const locationCell = cells.eq(1).text().trim();
+  const notesCell = cells.length > 3 ? cells.eq(3).text().trim() : "";
+  if (isEggRelated(pokemonCell, notesCell) === false) {
+    return null;
+  }
+
+  const routeName = cleanLocationName(locationCell);
+  if (!(routeName && isEggLocationName(routeName))) {
+    return null;
+  }
+
+  const pokemon = getPokemonByName(
+    extractPokemonName(pokemonCell) ?? "",
+    pokemonMap,
+  );
+  return {
+    description: `${pokemonCell} - ${notesCell}`.trim(),
+    ...(pokemon && { pokemonId: pokemon.id, pokemonName: pokemon.name }),
+    routeName,
+    source: "gift",
+  };
+}
+
 /**
  * Extracts egg-related locations from the gifts and trades page
  */
@@ -228,55 +269,20 @@ async function scrapeGiftsAndTradesForEggs(
       () => fetchWikiPageHtml(GIFTS_AND_TRADES_URL),
     );
 
-    const $ = cheerio.load(html);
+    const $ = load(html);
     const eggLocations: EggLocation[] = [];
 
     // Find tables that might contain egg information
     const tables = $("table");
 
-    tables.each((_tableIndex: number, table: any) => {
+    tables.each((_tableIndex: number, table: Element) => {
       const $table = $(table);
       const rows = $table.find("tr");
 
-      rows.each((_rowIndex: number, row: any) => {
-        const $row = $(row);
-        const cells = $row.find("td");
-
-        // Skip header rows and rows with insufficient data
-        if (cells.length < 3) {
-          return;
-        }
-
-        // Based on the web search results, the table structure is:
-        // Pokemon | Location | Level | Notes
-        const pokemonCell = cells.eq(0).text().trim();
-        const locationCell = cells.eq(1).text().trim();
-        const notesCell = cells.length > 3 ? cells.eq(3).text().trim() : "";
-
-        if (isEggRelated(pokemonCell, notesCell)) {
-          const cleanedLocation = cleanLocationName(locationCell);
-          // Validate that this is actually a location name, not a Pokémon name
-          if (cleanedLocation && isEggLocationName(cleanedLocation)) {
-            // Extract Pokemon name and get its data
-            const extractedPokemonName = extractPokemonName(pokemonCell);
-            const pokemonData = extractedPokemonName
-              ? getPokemonByName(extractedPokemonName, pokemonMap)
-              : null;
-
-            const eggLocation: EggLocation = {
-              description: `${pokemonCell} - ${notesCell}`.trim(),
-              routeName: cleanedLocation,
-              source: "gift",
-            };
-
-            // Add Pokemon info if found
-            if (pokemonData) {
-              eggLocation.pokemonName = pokemonData.name;
-              eggLocation.pokemonId = pokemonData.id;
-            }
-
-            eggLocations.push(eggLocation);
-          }
+      rows.each((_rowIndex: number, row: Element) => {
+        const eggLocation = extractGiftEggLocation($, row, pokemonMap);
+        if (eggLocation) {
+          eggLocations.push(eggLocation);
         }
       });
     });
@@ -310,7 +316,7 @@ async function scrapePokemonNestsForEggs(
       () => fetchWikiPageHtml(POKEMON_NESTS_URL),
     );
 
-    const $ = cheerio.load(html);
+    const $ = load(html);
     const eggLocations: EggLocation[] = [];
 
     // Look for all text that contains "nest" to find Pokemon nests
@@ -346,7 +352,7 @@ async function scrapePokemonNestsForEggs(
     const links = $('a[href*="/wiki/"]');
     const locationSet = new Set<string>();
 
-    links.each((_index: number, link: any) => {
+    links.each((_index: number, link: Element) => {
       const $link = $(link);
       const href = $link.attr("href") || "";
 
@@ -363,16 +369,16 @@ async function scrapePokemonNestsForEggs(
 
     // Process Pokemon nest matches
     const pokemonNestMap = new Map<string, string>();
-    nestMatches.forEach((match) => {
-      const pokemonName = match[1];
+    for (const match of nestMatches) {
+      const [, pokemonName] = match;
       if (pokemonName && pokemonName.length >= 3) {
         // Look for location context around this match
         const matchIndex = combinedContent.indexOf(match[0]);
-        const contextBefore = combinedContent.substring(
+        const contextBefore = combinedContent.slice(
           Math.max(0, matchIndex - 100),
           matchIndex,
         );
-        const contextAfter = combinedContent.substring(
+        const contextAfter = combinedContent.slice(
           matchIndex,
           Math.min(combinedContent.length, matchIndex + 100),
         );
@@ -388,10 +394,10 @@ async function scrapePokemonNestsForEggs(
           pokemonNestMap.set(locationMatches[0], pokemonName);
         }
       }
-    });
+    }
 
     // Create egg locations from all found locations
-    locationSet.forEach((routeName) => {
+    for (const routeName of locationSet) {
       const pokemonName = pokemonNestMap.get(routeName);
       const pokemonData = pokemonName
         ? getPokemonByName(pokemonName, pokemonMap)
@@ -412,7 +418,7 @@ async function scrapePokemonNestsForEggs(
       }
 
       eggLocations.push(eggLocation);
-    });
+    }
 
     ConsoleFormatter.success(
       `Found ${eggLocations.length} egg locations from Pokémon nests`,
@@ -436,12 +442,12 @@ function mergeEggLocations(
   const merged = new Map<string, EggLocation>();
 
   // Add all locations from both sources
-  [...giftsLocations, ...nestsLocations].forEach((location) => {
+  for (const location of [...giftsLocations, ...nestsLocations]) {
     const key = location.routeName.toLowerCase();
 
-    if (merged.has(key)) {
+    const existing = merged.get(key);
+    if (existing) {
       // If we already have this location, merge the sources
-      const existing = merged.get(key)!;
       if (existing.source !== location.source) {
         // Update description to include both sources
         existing.description = `${existing.description} | ${location.description}`;
@@ -449,7 +455,7 @@ function mergeEggLocations(
     } else {
       merged.set(key, location);
     }
-  });
+  }
 
   // Convert back to array, sort, and filter out invalid entries
   return Array.from(merged.values())
@@ -469,8 +475,8 @@ async function main() {
   const startTime = Date.now();
 
   try {
-    const dataDir = path.join(process.cwd(), "data");
-    await fs.mkdir(dataDir, { recursive: true });
+  const dataDir = join(process.cwd(), "data");
+  await mkdir(dataDir, { recursive: true });
 
     ConsoleFormatter.info("Loading Pokemon data for name mapping...");
     const pokemonMap = await loadPokemonData();
@@ -514,11 +520,11 @@ async function main() {
 
     // Write to file
     ConsoleFormatter.info("Saving egg locations data...");
-    const outputPath = path.join(dataDir, "shared", "egg-locations.json");
-    await fs.writeFile(outputPath, JSON.stringify(eggLocationsData, null, 2));
+  const outputPath = join(dataDir, "shared", "egg-locations.json");
+  await writeFile(outputPath, JSON.stringify(eggLocationsData, null, 2));
 
     // Get file stats
-    const fileStats = await fs.stat(outputPath);
+  const fileStats = await stat(outputPath);
     const duration = Date.now() - startTime;
 
     // Success summary

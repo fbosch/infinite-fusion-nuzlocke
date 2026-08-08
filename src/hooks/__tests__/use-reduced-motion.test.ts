@@ -50,8 +50,8 @@ describe("useReducedMotion", () => {
   it("subscribes through legacy media-query listeners", () => {
     let legacyListener: ((event: MediaQueryListEvent) => void) | undefined;
     const addListener = vi.fn(
-      (listener: (event: MediaQueryListEvent) => void) => {
-        legacyListener = listener;
+      (callback: (event: MediaQueryListEvent) => void) => {
+        legacyListener = callback;
       },
     );
 

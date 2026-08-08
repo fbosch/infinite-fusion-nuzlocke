@@ -23,7 +23,9 @@ describe("encountersQueries", () => {
     ];
     vi.mocked(encountersApiService.getEncounters).mockResolvedValue(encounters);
 
-    const result = await encountersQueries.all("classic").queryFn!({} as never);
+    const result = await encountersQueries
+      .all("classic")
+      .queryFn?.({} as never);
 
     expect(result).toEqual(encounters);
     expect(encountersApiService.getEncounters).toHaveBeenCalledWith("classic");

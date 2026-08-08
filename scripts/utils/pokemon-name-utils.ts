@@ -11,6 +11,51 @@ export interface PokemonNameMap {
   nameToId: Map<string, number>;
 }
 
+const API_FORM_REPLACEMENTS = [
+  [/^aegislash.*$/i, "aegislash-shield"],
+  [/^oricorio.*$/i, "oricorio-baile"],
+  [/^deoxys.*$/i, "deoxys-normal"],
+  [/^gourgeist.*$/i, "gourgeist-average"],
+  [/^pumpkaboo.*$/i, "pumpkaboo-average"],
+  [/^castform.*$/i, "castform"],
+  [/^mimikyu.*$/i, "mimikyu-disguised"],
+  [/^giratina.*$/i, "giratina-altered"],
+  [/^minior.*$/i, "minior-red-meteor"],
+  [/^meloetta.*$/i, "meloetta-aria"],
+  [/^lycanroc.*$/i, "lycanroc-midday"],
+  [/^necrozma.*$/i, "necrozma"],
+] as const;
+
+const FORM_SUFFIX_PATTERNS = [
+  /\s+(baile|pom-pom|pau|sensu)\s+style$/i,
+  /\s+(midday|midnight|dusk)\s+form$/i,
+  /\s+(aria|pirouette)\s+form$/i,
+  /\s+(meteor|core)\s+form$/i,
+  /\s+(ordinary|resolute)\s+form$/i,
+  /\s+(plant|sandy|trash)\s+cloak$/i,
+  /\s+(heat|wash|frost|fan|mow)\s+rotom$/i,
+  /\s+(land|sky)\s+forme$/i,
+  /\s+(altered|origin)\s+forme$/i,
+  /\s+(incarnate|therian)\s+forme$/i,
+  /\s+(red|blue|yellow|green|orange|indigo|violet)\s+(meteor|core)$/i,
+  /\s+style$/i,
+  /\s+form$/i,
+  /\s+forme$/i,
+  /\s+cloak$/i,
+  /\s+rotom$/i,
+] as const;
+
+const POKEMON_NAME_EXCLUDE_PATTERNS = [
+  /Level/i,
+  /Rate/i,
+  /%/,
+  /Type/i,
+  /Pokémon/i,
+  /^\d+$/,
+  /^\d+-\d+$/,
+  /^\d+%$/,
+] as const;
+
 /**
  * Creates variations of a Pokemon name for fuzzy matching
  */
@@ -94,8 +139,9 @@ export function findPokemonId(
   const variations = createNameVariations(searchName);
 
   for (const variation of variations) {
-    if (nameMap.nameToId.has(variation)) {
-      return nameMap.nameToId.get(variation)!;
+    const pokemonId = nameMap.nameToId.get(variation);
+    if (pokemonId !== undefined) {
+      return pokemonId;
     }
   }
 
@@ -110,7 +156,8 @@ export function normalizePokemonNameForAPI(name: string): string {
     return "";
   }
 
-  return (
+  return API_FORM_REPLACEMENTS.reduce(
+    (normalizedName, [pattern, replacement]) => normalizedName.replace(pattern, replacement),
     name
       .toLowerCase()
       .replace(/♀/g, "-f")
@@ -119,19 +166,7 @@ export function normalizePokemonNameForAPI(name: string): string {
       .replace(/'/g, "")
       .replace(/\s+/g, "-")
       .replace(/é/g, "e")
-      // Handle specific Pokemon forms that need special API names
-      .replace(/^aegislash.*$/i, "aegislash-shield")
-      .replace(/^oricorio.*$/i, "oricorio-baile")
-      .replace(/^deoxys.*$/i, "deoxys-normal")
-      .replace(/^gourgeist.*$/i, "gourgeist-average")
-      .replace(/^pumpkaboo.*$/i, "pumpkaboo-average")
-      .replace(/^castform.*$/i, "castform")
-      .replace(/^mimikyu.*$/i, "mimikyu-disguised")
-      .replace(/^giratina.*$/i, "giratina-altered")
-      .replace(/^minior.*$/i, "minior-red-meteor")
-      .replace(/^meloetta.*$/i, "meloetta-aria")
-      .replace(/^lycanroc.*$/i, "lycanroc-midday")
-      .replace(/^necrozma.*$/i, "necrozma")
+      ,
   );
 }
 
@@ -144,27 +179,10 @@ export function stripPokemonFormSuffix(name: string): string {
     return "";
   }
 
-  return name
-    .replace(/\s+(baile|pom-pom|pau|sensu)\s+style$/i, "")
-    .replace(/\s+(midday|midnight|dusk)\s+form$/i, "")
-    .replace(/\s+(aria|pirouette)\s+form$/i, "")
-    .replace(/\s+(meteor|core)\s+form$/i, "")
-    .replace(/\s+(ordinary|resolute)\s+form$/i, "")
-    .replace(/\s+(plant|sandy|trash)\s+cloak$/i, "")
-    .replace(/\s+(heat|wash|frost|fan|mow)\s+rotom$/i, "")
-    .replace(/\s+(land|sky)\s+forme$/i, "")
-    .replace(/\s+(altered|origin)\s+forme$/i, "")
-    .replace(/\s+(incarnate|therian)\s+forme$/i, "")
-    .replace(
-      /\s+(red|blue|yellow|green|orange|indigo|violet)\s+(meteor|core)$/i,
-      "",
-    )
-    .replace(/\s+style$/i, "")
-    .replace(/\s+form$/i, "")
-    .replace(/\s+forme$/i, "")
-    .replace(/\s+cloak$/i, "")
-    .replace(/\s+rotom$/i, "")
-    .trim();
+  return FORM_SUFFIX_PATTERNS.reduce(
+    (normalizedName, pattern) => normalizedName.replace(pattern, ""),
+    name,
+  ).trim();
 }
 
 /**
@@ -249,17 +267,5 @@ export function isPotentialPokemonName(text: string): boolean {
     return false;
   }
 
-  // Exclude common metadata patterns
-  const excludePatterns = [
-    /Level/i,
-    /Rate/i,
-    /%/,
-    /Type/i,
-    /Pokémon/i,
-    /^\d+$/, // Pure numbers (but not mixed alphanumeric)
-    /^\d+-\d+$/, // Number ranges
-    /^\d+%$/, // Percentages
-  ];
-
-  return !excludePatterns.some((pattern) => pattern.test(trimmed));
+  return !POKEMON_NAME_EXCLUDE_PATTERNS.some((pattern) => pattern.test(trimmed));
 }

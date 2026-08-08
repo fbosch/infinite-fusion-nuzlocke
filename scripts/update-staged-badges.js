@@ -105,7 +105,9 @@ function runOutput(command) {
     let output = "";
 
     proc.stdout.setEncoding("utf8");
-    proc.stdout.on("data", (chunk) => (output += chunk));
+    proc.stdout.on("data", (chunk) => {
+      output += chunk;
+    });
     proc.once("close", (exitCode) => {
       if (exitCode === 0) {
         resolve(output);

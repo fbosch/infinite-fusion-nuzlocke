@@ -121,17 +121,17 @@ describe("LocationTable scroll-to-recent button", () => {
     });
   });
 
-  it("renders only virtual rows with twelve-row overscan", async () => {
+  it("renders only virtual rows with twelve-row overscan", () => {
     useVirtualizerMock.mockReturnValue({
       getTotalSize: () => 450,
       getVirtualItems: () => [{ end: 300, index: 1, start: 150 }],
     });
 
-    await act(async () => {
+    act(() => {
       render(<LocationTable />);
     });
 
-    const options = useVirtualizerMock.mock.calls[0][0];
+    const [[options]] = useVirtualizerMock.mock.calls;
     expect(options.count).toBe(3);
     expect(options.estimateSize()).toBe(150);
     expect(options.getScrollElement()).toBeInstanceOf(HTMLDivElement);
@@ -139,14 +139,14 @@ describe("LocationTable scroll-to-recent button", () => {
     expect(locationRowProps).toHaveBeenLastCalledWith("route-2");
   });
 
-  it("hides spacers and exposes logical virtual row positions", async () => {
+  it("hides spacers and exposes logical virtual row positions", () => {
     useVirtualizerMock.mockReturnValue({
       getTotalSize: () => 450,
       getVirtualItems: () => [{ end: 300, index: 1, start: 150 }],
       scrollToIndex: scrollToIndexMock,
     });
 
-    await act(async () => {
+    act(() => {
       render(<LocationTable />);
     });
 
@@ -159,8 +159,8 @@ describe("LocationTable scroll-to-recent button", () => {
     ).toHaveLength(2);
   });
 
-  it("scrolls an unmounted location through the virtualizer", async () => {
-    await act(async () => {
+  it("scrolls an unmounted location through the virtualizer", () => {
+    act(() => {
       render(<LocationTable />);
     });
 
@@ -172,7 +172,7 @@ describe("LocationTable scroll-to-recent button", () => {
     });
   });
 
-  it("scrolls to the most recent location without animation on page load", async () => {
+  it("scrolls to the most recent location without animation on page load", () => {
     const requestAnimationFrame = vi
       .spyOn(window, "requestAnimationFrame")
       .mockImplementation((callback) => {
@@ -180,7 +180,7 @@ describe("LocationTable scroll-to-recent button", () => {
         return 0;
       });
 
-    await act(async () => {
+    act(() => {
       render(<LocationTable />);
     });
 
@@ -197,8 +197,8 @@ describe("LocationTable scroll-to-recent button", () => {
     requestAnimationFrame.mockRestore();
   });
 
-  it("calls scrollToMostRecentLocation when the button is clicked", async () => {
-    await act(async () => {
+  it("calls scrollToMostRecentLocation when the button is clicked", () => {
+    act(() => {
       render(<LocationTable />);
     });
 
@@ -215,8 +215,8 @@ describe("LocationTable scroll-to-recent button", () => {
     );
   });
 
-  it("calls scrollToMostRecentLocation when Enter is pressed on the button", async () => {
-    await act(async () => {
+  it("calls scrollToMostRecentLocation when Enter is pressed on the button", () => {
+    act(() => {
       render(<LocationTable />);
     });
 
@@ -233,8 +233,8 @@ describe("LocationTable scroll-to-recent button", () => {
     );
   });
 
-  it("calls scrollToMostRecentLocation when Space is pressed on the button", async () => {
-    await act(async () => {
+  it("calls scrollToMostRecentLocation when Space is pressed on the button", () => {
+    act(() => {
       render(<LocationTable />);
     });
 

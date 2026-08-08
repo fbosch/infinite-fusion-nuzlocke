@@ -73,8 +73,14 @@ export default function TeamEntryItem({
   // Ref for the sprite to play evolution animations
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
   const previousFusionId = useRef<string | null>(null);
+  const previousPlaythroughId = useRef(activePlaythrough?.id);
 
   useEffect(() => {
+    if (previousPlaythroughId.current === activePlaythrough?.id) {
+      return;
+    }
+
+    previousPlaythroughId.current = activePlaythrough?.id;
     previousFusionId.current = null;
   }, [activePlaythrough?.id]);
 

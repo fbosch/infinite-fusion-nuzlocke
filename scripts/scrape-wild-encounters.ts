@@ -37,17 +37,19 @@ const WILD_ENCOUNTER_TYPES = [
 const WIKITEXT_ROUTE_HEADING_PATTERN = /^'''(.+?)'''$/;
 const ENCOUNTER_TEMPLATE_PATTERN =
   /^\{\{\s*(EncounterTable\/[A-Za-z]+(?:\/[A-Za-z]+)?)\s*(?:\|(.*))?\}\}$/;
+const WIKITEXT_LINE_BREAK_PATTERN = /\r?\n/u;
+const ROUTE_NAME_PATTERN = /^Route \d+$/i;
 
-type EncounterTemplate = {
-  templateName: string;
+interface EncounterTemplate {
   args: string[];
-};
+  templateName: string;
+}
 
-type TemplateArgumentDepths = {
-  square: number;
-  curly: number;
+interface TemplateArgumentDepths {
   angle: number;
-};
+  curly: number;
+  square: number;
+}
 
 type RouteHeadingDecision =
   | { kind: "activate"; routeName: string; uniqueIdentifier: string }
@@ -89,8 +91,9 @@ export function detectEncounterType(text: string): EncounterType | null {
     customCheck?: (text: string) => boolean;
   }> = [
     {
-      customCheck: (text) =>
-        text === "surf" || (text.includes("surf") && !text.includes("rod")),
+      customCheck: (candidateText) =>
+        candidateText === "surf" ||
+        (candidateText.includes("surf") && !candidateText.includes("rod")),
       patterns: ["surfing"],
       type: "surf",
     },
@@ -212,16 +215,16 @@ const RouteEncountersSchema = z.array(
   }),
 );
 
-type EncounterParitySummary = {
-  routeCount: number;
+interface EncounterParitySummary {
   encounterCount: number;
-  pokemonIds: string;
   encounterTypes: string;
-};
+  pokemonIds: string;
+  routeCount: number;
+}
 
-type ValidateEncounterOutputOptions = {
+interface ValidateEncounterOutputOptions {
   skipParity?: boolean;
-};
+}
 
 function formatZodIssues(error: z.ZodError): string {
   return error.issues
@@ -363,8 +366,12 @@ function consumeBalancedTemplateToken(
     return currentPair;
   }
 
-  const angleDepthChange =
-    rawArgs[index] === "<" ? 1 : rawArgs[index] === ">" ? -1 : 0;
+  let angleDepthChange = 0;
+  if (rawArgs[index] === "<") {
+    angleDepthChange = 1;
+  } else if (rawArgs[index] === ">") {
+    angleDepthChange = -1;
+  }
   if (angleDepthChange > 0 || (angleDepthChange < 0 && depths.angle > 0)) {
     depths.angle += angleDepthChange;
     return rawArgs[index];
@@ -410,8 +417,7 @@ function extractEncounterTemplate(line: string): EncounterTemplate | null {
     return null;
   }
 
-  const templateName = templateMatch[1];
-  const rawArgs = templateMatch[2] ?? "";
+  const [, templateName, rawArgs = ""] = templateMatch;
 
   return {
     args: rawArgs.length > 0 ? splitTemplateArguments(rawArgs) : [],
@@ -540,7 +546,7 @@ export function parseEncounterTemplatesFromWikitext(
   const encounters: PokemonEncounter[] = [];
   let currentEncounterType: EncounterType | null = null;
 
-  for (const rawLine of wikitext.split(/\r?\n/u)) {
+  for (const rawLine of wikitext.split(WIKITEXT_LINE_BREAK_PATTERN)) {
     const line = rawLine.trim();
     if (line.length === 0) {
       continue;
@@ -594,7 +600,7 @@ export function parseWildEncounterRoutesFromWikitext(
     currentEncounterType = null;
   };
 
-  for (const rawLine of wikitext.split(/\r?\n/u)) {
+  for (const rawLine of wikitext.split(WIKITEXT_LINE_BREAK_PATTERN)) {
     const line = rawLine.trim();
     if (line.length === 0) {
       continue;
@@ -703,7 +709,7 @@ async function backfillMissingRouteArticles(
     .map((location) => location.name)
     .filter(
       (locationName) =>
-        /^Route \d+$/i.test(locationName) &&
+        ROUTE_NAME_PATTERN.test(locationName) &&
         scrapedRouteNames.has(locationName) === false,
     );
 
@@ -725,15 +731,15 @@ async function backfillMissingRouteArticles(
 
   const recoveredRoutes: RouteEncounters[] = [];
 
-  for (
-    let i = 0;
-    i < routeNamesForArticleBackfill.length;
-    i += ROUTE_ARTICLE_BATCH_SIZE
-  ) {
+  const scrapeBatch = async (index: number): Promise<void> => {
     const batch = routeNamesForArticleBackfill.slice(
-      i,
-      i + ROUTE_ARTICLE_BATCH_SIZE,
+      index,
+      index + ROUTE_ARTICLE_BATCH_SIZE,
     );
+    if (batch.length === 0) {
+      return;
+    }
+
     const batchResults = await Promise.all(
       batch.map(async (routeName) => {
         try {
@@ -764,7 +770,11 @@ async function backfillMissingRouteArticles(
         recoveredRoutes.push(result);
       }
     }
-  }
+
+    await scrapeBatch(index + ROUTE_ARTICLE_BATCH_SIZE);
+  };
+
+  await scrapeBatch(0);
 
   if (recoveredRoutes.length > 0) {
     ConsoleFormatter.success(
@@ -787,8 +797,10 @@ function consolidateSubLocations(routes: RouteEncounters[]): RouteEncounters[] {
     "shared",
     "locations.json",
   );
-  const locationsData = JSON.parse(readFileSync(locationsPath, "utf-8"));
-  const existingLocationNames = locationsData.map((loc: any) => loc.name);
+  const locationsData = JSON.parse(
+    readFileSync(locationsPath, "utf-8"),
+  ) as Array<{ name: string }>;
+  const existingLocationNames = locationsData.map((location) => location.name);
 
   const locationGroups = new Map<string, PokemonEncounter[]>();
 
@@ -912,7 +924,7 @@ function findParentLocation(
   for (const location of existingLocations) {
     if (routeName.startsWith(location) && routeName !== location) {
       // Get the remainder after the location name
-      const remainder = routeName.substring(location.length).trim();
+      const remainder = routeName.slice(location.length).trim();
 
       // Only consolidate if the remainder is a valid sub-location suffix
       if (
@@ -985,7 +997,7 @@ async function main() {
 
     const pokemonNameMap = await loadPokemonNameMap();
     const [classicRoutes, remixRoutes] = await Promise.all([
-      (async () => {
+      (() => {
         ConsoleFormatter.info("Scraping Classic Mode encounters...");
         return scrapeWildEncounters(
           WILD_ENCOUNTERS_CLASSIC_URL,
@@ -993,7 +1005,7 @@ async function main() {
           false,
         );
       })(),
-      (async () => {
+      (() => {
         ConsoleFormatter.info("Scraping Remix Mode encounters...");
         return scrapeWildEncounters(
           WILD_ENCOUNTERS_REMIX_URL,

@@ -51,7 +51,7 @@ export default function LocationTableRow({
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
   const previousFusionId = useRef<string | null>(null);
   const hasInitializedFusionId = useRef(false);
-  const activePlaythroughId = useActivePlaythroughId();
+  const _activePlaythroughId = useActivePlaythroughId();
   const visibleCells = row.getVisibleCells();
 
   // Get encounter data directly - only this row will rerender when this encounter changes
@@ -61,7 +61,7 @@ export default function LocationTableRow({
   useEffect(() => {
     previousFusionId.current = null;
     hasInitializedFusionId.current = false;
-  }, [activePlaythroughId]);
+  }, []);
 
   // Play evolution animation when this location evolves, but only if the Pokémon can form an effective fusion
   useEffect(() => {

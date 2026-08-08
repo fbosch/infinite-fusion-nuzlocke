@@ -7,9 +7,9 @@ import { useInView } from "react-intersection-observer";
 import { useMounted } from "@/hooks/useMounted";
 import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics/trackEvent";
 
-type GitHubEngagementCtaProps = {
+interface GitHubEngagementCtaProps {
   route: "home" | "locations";
-};
+}
 
 export function GitHubEngagementCta({ route }: GitHubEngagementCtaProps) {
   const { ref, inView } = useInView({ threshold: 0.5, triggerOnce: true });

@@ -115,8 +115,15 @@ describe("team member selection domain", () => {
         headPokemon: pokemon("head", "Stale Nickname"),
         isEmpty: false,
       },
-      (uid) =>
-        uid === "head" ? resolvedHead : uid === "body" ? resolvedBody : null,
+      (uid) => {
+        if (uid === "head") {
+          return resolvedHead;
+        }
+        if (uid === "body") {
+          return resolvedBody;
+        }
+        return null;
+      },
     );
 
     expect(selection).toMatchObject({
@@ -159,10 +166,9 @@ describe("team member selection domain", () => {
       { headPokemon: pokemon("current"), isEmpty: false },
     );
 
-    expect(available.map(({ pokemon }) => pokemon.uid)).toEqual([
-      "current",
-      "eligible",
-    ]);
+    expect(
+      available.map(({ pokemon: availablePokemon }) => availablePokemon.uid),
+    ).toEqual(["current", "eligible"]);
   });
 
   it("selects head pokemon and advances to body when body is empty", () => {
@@ -176,7 +182,7 @@ describe("team member selection domain", () => {
       selectedHead: null,
     });
 
-    expect(selected.selectedHead?.pokemon.uid).toBe("head");
+    expect(selected.selectedHead.pokemon.uid).toBe("head");
     expect(selected.selectedHead?.locationId).toBe("route1");
     expect(selected.selectedBody).toBeNull();
     expect(selected.activeSlot).toBe("body");
@@ -198,8 +204,8 @@ describe("team member selection domain", () => {
       },
     });
 
-    expect(selected.selectedHead?.pokemon.uid).toBe("head");
-    expect(selected.selectedBody?.pokemon.uid).toBe("body");
+    expect(selected.selectedHead.pokemon.uid).toBe("head");
+    expect(selected.selectedBody.pokemon.uid).toBe("body");
     expect(selected.selectedBody?.locationId).toBe("route2");
     expect(selected.activeSlot).toBe("body");
     expect(selected.nickname).toBe("Sparky");
@@ -223,7 +229,7 @@ describe("team member selection domain", () => {
     });
 
     expect(selected.selectedHead).toBeNull();
-    expect(selected.selectedBody?.pokemon.uid).toBe("body");
+    expect(selected.selectedBody.pokemon.uid).toBe("body");
     expect(selected.activeSlot).toBe("head");
     expect(selected.nickname).toBe("");
   });
@@ -245,8 +251,8 @@ describe("team member selection domain", () => {
       },
     });
 
-    expect(selected.selectedHead?.pokemon.uid).toBe("head");
-    expect(selected.selectedBody?.pokemon.uid).toBe("body");
+    expect(selected.selectedHead.pokemon.uid).toBe("head");
+    expect(selected.selectedBody.pokemon.uid).toBe("body");
     expect(selected.activeSlot).toBeNull();
     expect(selected.nickname).toBe("Custom Fusion");
   });

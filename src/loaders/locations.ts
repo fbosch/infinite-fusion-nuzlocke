@@ -7,22 +7,26 @@ import { EncounterSource, type PokemonEncounter } from "@/types/encounters";
 import { generatePrefixedId } from "@/utils/id";
 import type { GameMode } from "../stores/playthroughs/types";
 
-export type Location = {
+export interface Location {
+  description: string;
   id: string;
   name: string;
   region: string;
-  description: string;
-};
+}
 
-type LegacyCustomLocation = { id: string; name: string; order: number };
-export type CustomLocation = {
+interface LegacyCustomLocation {
   id: string;
   name: string;
+  order: number;
+}
+export interface CustomLocation {
+  id: string;
   insertAfterLocationId: string;
-};
+  name: string;
+}
 
 // Migration function to convert order-based custom locations
-function migrateCustomLocationFromOrder(
+function _migrateCustomLocationFromOrder(
   legacyLocation: LegacyCustomLocation,
 ): CustomLocation {
   const defaultLocations = getLocations();
@@ -97,7 +101,7 @@ export function getLocations(): Location[] {
 }
 
 // Function to clear cache if needed (for testing or data updates)
-function clearLocationsCache(): void {
+function _clearLocationsCache(): void {
   locationsCache = null;
 }
 
@@ -384,7 +388,7 @@ export function getLocationsSortedWithCustom(
 }
 
 // Alias function for compatibility with AddCustomLocationModal
-function getCombinedLocationsSortedByOrder(
+function _getCombinedLocationsSortedByOrder(
   customLocations: CustomLocation[] = [],
 ): CombinedLocation[] {
   return getLocationsSortedWithCustom(customLocations);
@@ -528,7 +532,7 @@ export function getAvailableAfterLocations(
 }
 
 // Get merged locations with encounters for a specific game mode
-async function getMergedLocationsWithEncounters(
+async function _getMergedLocationsWithEncounters(
   customLocations: CustomLocation[] = [],
   gameMode: "classic" | "remix" = "classic",
 ): Promise<Array<CombinedLocation & { encounters: PokemonEncounter[] }>> {

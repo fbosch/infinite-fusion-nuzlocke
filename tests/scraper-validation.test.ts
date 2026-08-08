@@ -230,10 +230,10 @@ describe("Mt. Moon Scraping Validation", () => {
 
       // If cave encounters exist, they should have valid Pokemon IDs
       if (caveEncounters.length > 0) {
-        caveEncounters.forEach((encounter) => {
+        for (const encounter of caveEncounters) {
           expect(encounter.pokemonId).toBeGreaterThan(0);
           expect(typeof encounter.pokemonId).toBe("number");
-        });
+        }
       }
     });
 
@@ -249,10 +249,10 @@ describe("Mt. Moon Scraping Validation", () => {
 
       // If rock_smash encounters exist, they should have valid Pokemon IDs
       if (rockSmashEncounters.length > 0) {
-        rockSmashEncounters.forEach((encounter) => {
+        for (const encounter of rockSmashEncounters) {
           expect(encounter.pokemonId).toBeGreaterThan(0);
           expect(typeof encounter.pokemonId).toBe("number");
-        });
+        }
       }
     });
 
@@ -268,11 +268,11 @@ describe("Mt. Moon Scraping Validation", () => {
         "rock_smash",
       ];
 
-      allEncounters.forEach((route) => {
-        route.encounters.forEach((encounter) => {
+      for (const route of allEncounters) {
+        for (const encounter of route.encounters) {
           expect(validTypes).toContain(encounter.encounterType);
-        });
-      });
+        }
+      }
     });
   });
 

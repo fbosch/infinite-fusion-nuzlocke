@@ -100,6 +100,8 @@ const LOCATION_SUFFIXES = [
   "Hidden",
   "Dark Room",
 ] as const;
+const GYM_PERSON_TITLE_PATTERN = /\bgym\s+(leader|trainer|master|champion|elite|four|gym\s+leader)/i;
+const LOCATION_FLOOR_SUFFIX_PATTERN = /^(.*?)\s+(B?\d+F|F\d+|A\d+|Summit|Square|Entrance|Exit|Top|Bottom|Upper|Lower|North|South|East|West|Interior|Exterior|Depths|Hidden|Center|Dark Room|Route \d+ Exit|\(Area \d+\))$/i;
 
 // Common location prefixes
 const LOCATION_PREFIXES = [
@@ -157,13 +159,13 @@ export function isRoutePattern(text: string): boolean {
     const matches = suffixRegex.test(lowerText);
 
     // Additional validation: if the suffix is "Gym", make sure it's not followed by a person's title
-    if (suffix.toLowerCase() === "gym" && matches) {
-      // Check if "Gym" is followed by common person/title words
-      const personTitleRegex =
-        /\bgym\s+(leader|trainer|master|champion|elite|four|gym\s+leader)/i;
-      if (personTitleRegex.test(lowerText)) {
-        return false;
-      }
+    // Check if "Gym" is followed by common person/title words
+    if (
+      suffix.toLowerCase() === "gym" &&
+      matches &&
+      GYM_PERSON_TITLE_PATTERN.test(lowerText)
+    ) {
+      return false;
     }
 
     return matches;
@@ -246,7 +248,7 @@ export function isRoutePattern(text: string): boolean {
 
   // Check for locations with floor indicators (B1F, B2F, F1, etc.)
   if (
-    /^(.*?)\s+(B?\d+F|F\d+|A\d+|Summit|Square|Entrance|Exit|Top|Bottom|Upper|Lower|North|South|East|West|Interior|Exterior|Depths|Hidden|Center|Dark Room|Route \d+ Exit|\(Area \d+\))$/i.test(
+    LOCATION_FLOOR_SUFFIX_PATTERN.test(
       cleanText,
     )
   ) {

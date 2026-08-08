@@ -21,7 +21,7 @@
  * ```
  */
 
-import * as cliProgress from "cli-progress";
+import { Presets, SingleBar } from "cli-progress";
 import { formatDuration, formatFileSize } from "./format-utils";
 
 // Simple color functions using ANSI escape codes
@@ -71,6 +71,7 @@ const progressBarConfigs = {
 
 // Console formatting utilities
 export class ConsoleFormatter {
+  private constructor() {}
   /**
    * Print a beautiful header for a script
    */
@@ -140,12 +141,12 @@ export class ConsoleFormatter {
     console.debug(colors.bold.green(`🎉 ${title}`));
     console.debug(colors.gray("═".repeat(50)));
 
-    items.forEach(({ label, value, color = "white" }) => {
+    for (const { label, value, color = "white" } of items) {
       const colorFunc = colors[color as keyof typeof colors] as (
         str: string,
       ) => string;
       console.debug(colors.white(`${label}: ${colorFunc(value.toString())}`));
-    });
+    }
 
     console.debug(colors.gray("═".repeat(50)));
   }
@@ -156,10 +157,10 @@ export class ConsoleFormatter {
   static createProgressBar(
     total: number,
     status = "Starting...",
-  ): cliProgress.SingleBar {
-    const bar = new cliProgress.SingleBar(
+  ): SingleBar {
+    const bar = new SingleBar(
       progressBarConfigs.standard,
-      cliProgress.Presets.shades_classic,
+      Presets.shades_classic,
     );
     bar.start(total, 0, { status });
     return bar;
@@ -171,10 +172,10 @@ export class ConsoleFormatter {
   static createMiniProgressBar(
     total: number,
     status = "Processing...",
-  ): cliProgress.SingleBar {
-    const bar = new cliProgress.SingleBar(
+  ): SingleBar {
+    const bar = new SingleBar(
       progressBarConfigs.mini,
-      cliProgress.Presets.shades_grey,
+      Presets.shades_grey,
     );
     bar.start(total, 0, { status });
     return bar;

@@ -1,4 +1,7 @@
-type StarterPokemon = { classic: number[]; remix: number[] };
+interface StarterPokemon {
+  classic: number[];
+  remix: number[];
+}
 
 function isStarterPokemon(value: unknown): value is StarterPokemon {
   if (typeof value !== "object" || value === null) {

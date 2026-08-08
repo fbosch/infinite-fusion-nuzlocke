@@ -15,11 +15,11 @@ import type {
 
 const IMPORT_SOURCE = "file_picker" as const;
 
-type ImportFileContext = {
-  hasFile: boolean;
+interface ImportFileContext {
   fileExtensionGroup: FileExtensionGroup;
+  hasFile: boolean;
   mimeGroup: MimeGroup;
-};
+}
 
 type ImportPlaythroughFileResult =
   | { ok: true }

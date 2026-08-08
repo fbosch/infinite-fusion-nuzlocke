@@ -46,7 +46,7 @@ describe("useTeamMemberPicker", () => {
   it("keeps the picker open when the validated update fails", async () => {
     const consoleError = vi
       .spyOn(console, "error")
-      .mockImplementation(() => {});
+      .mockImplementation(() => undefined);
     updateTeamMemberMock.mockResolvedValue(false);
     const { result } = renderHook(() => useTeamMemberPicker());
 

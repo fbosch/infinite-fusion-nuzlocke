@@ -38,7 +38,7 @@ export function formatArtistCredits(artists?: string[] | null): string {
 
   // Three or more artists
   const allButLast = cleanedArtists.slice(0, -1);
-  const lastArtist = cleanedArtists[cleanedArtists.length - 1];
+  const lastArtist = cleanedArtists.at(-1);
 
   return `${allButLast.join(", ")} and ${lastArtist}`;
 }

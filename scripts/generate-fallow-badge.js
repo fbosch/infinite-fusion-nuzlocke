@@ -38,7 +38,9 @@ function readStream(stream) {
   return new Promise((resolve, reject) => {
     let output = "";
     stream.setEncoding("utf8");
-    stream.on("data", (chunk) => (output += chunk));
+    stream.on("data", (chunk) => {
+      output += chunk;
+    });
     stream.on("end", () => resolve(output));
     stream.on("error", reject);
   });

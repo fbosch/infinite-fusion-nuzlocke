@@ -132,10 +132,10 @@ const migrateTeamMemberSchema = (data: MigrationData): MigrationData => {
   return data;
 };
 
-type MigratablePokemon = {
+interface MigratablePokemon {
   originalReceivalStatus?: string;
   status?: string;
-};
+}
 
 const normalizePokemonOriginalReceivalStatus = (
   pokemon: MigratablePokemon | null | undefined,
@@ -331,7 +331,7 @@ const isPokemonOption = (value: unknown): boolean => {
 // fallow-ignore-next-line complexity -- Validates the complete persisted run boundary before canonical state installation.
 const isValidPersistedPlaythrough = (
   playthrough: MigrationData,
-): playthrough is Playthrough => {
+): playthrough is Playthrough & MigrationData => {
   if (
     typeof playthrough.id !== "string" ||
     typeof playthrough.name !== "string" ||

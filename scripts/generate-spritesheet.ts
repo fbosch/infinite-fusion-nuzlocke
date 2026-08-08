@@ -3,7 +3,7 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import sharp from "sharp";
+import sharp, { type OverlayOptions } from "sharp";
 import { ConsoleFormatter } from "./utils/console-utils";
 import {
   normalizePokemonNameForSprite,
@@ -35,56 +35,56 @@ const SPRITESHEET_OUTPUT_DIR = path.join(
 );
 const METADATA_OUTPUT_DIR = path.join(scriptDirectory, "..", "src", "assets");
 
-export type PokemonEntry = {
+export interface PokemonEntry {
   id: number;
   name: string;
-};
+}
 
-export type SpriteBounds = {
+export interface SpriteBounds {
+  height: number;
+  width: number;
   x: number;
   y: number;
-  width: number;
-  height: number;
-};
+}
 
-export type SpriteInfo = {
-  id: number;
-  name: string;
-  filename: string;
-  exists: boolean;
-  generation: "gen7" | "gen8";
-  // Original sprite dimensions
-  originalWidth: number;
-  originalHeight: number;
+export interface SpriteInfo {
   // Actual content bounds within original sprite
   contentBounds: SpriteBounds | null;
+  exists: boolean;
+  filename: string;
+  generation: "gen7" | "gen8";
+  height: number;
+  id: number;
+  name: string;
+  originalHeight: number;
+  // Original sprite dimensions
+  originalWidth: number;
+  width: number;
   // Position in the packed spritesheet
   x: number;
   y: number;
-  width: number;
-  height: number;
-};
+}
 
-export type SpritesheetMetadata = {
+export interface SpritesheetMetadata {
   algorithm: "compact-bin-packing";
-  version: "2.0";
   generation: "gen7" | "gen8";
-  spritesheetVersion: string;
-  totalSprites: number;
   includedSprites: number;
-  sheetWidth: number;
   sheetHeight: number;
+  sheetWidth: number;
   spaceEfficiency: number;
   sprites: SpriteInfo[];
-};
+  spritesheetVersion: string;
+  totalSprites: number;
+  version: "2.0";
+}
 
-export type GenerationConfig = {
+export interface GenerationConfig {
+  metadataFilename: string;
   name: "gen7" | "gen8";
-  spritesDir: string;
   outputFilename: string;
   outputFormat: "png" | "webp";
-  metadataFilename: string;
-};
+  spritesDir: string;
+}
 
 const GENERATIONS: GenerationConfig[] = [
   {
@@ -106,15 +106,15 @@ const GENERATIONS: GenerationConfig[] = [
 /**
  * Rectangle for bin packing algorithm
  */
-type Rectangle = {
+interface Rectangle {
+  down?: Rectangle;
+  height: number;
+  right?: Rectangle;
+  used: boolean;
+  width: number;
   x: number;
   y: number;
-  width: number;
-  height: number;
-  used: boolean;
-  right?: Rectangle;
-  down?: Rectangle;
-};
+}
 
 /**
  * Simple bin packing algorithm implementation
@@ -128,7 +128,7 @@ type Rectangle = {
  * 6. No gaps are added, maximizing space efficiency
  */
 class BinPacker {
-  private root: Rectangle;
+  private readonly root: Rectangle;
 
   constructor(width: number, height: number) {
     this.root = { height, used: false, width, x: 0, y: 0 };
@@ -148,9 +148,13 @@ class BinPacker {
     height: number,
   ): Rectangle | null {
     if (root.used) {
+      const { down, right } = root;
+      if (!(right && down)) {
+        return null;
+      }
       return (
-        this.findNode(root.right!, width, height) ||
-        this.findNode(root.down!, width, height)
+        this.findNode(right, width, height) ||
+        this.findNode(down, width, height)
       );
     }
     if (width <= root.width && height <= root.height) {
@@ -254,8 +258,8 @@ async function analyzeSpriteContent(
     // Find bounds of non-transparent pixels with precise alpha detection
     // Since there's no anti-aliasing, we can use a strict alpha > 0 threshold
 
-    for (let y = 0; y < info.height; y++) {
-      for (let x = 0; x < info.width; x++) {
+    for (let y = 0; y < info.height; y += 1) {
+      for (let x = 0; x < info.width; x += 1) {
         const pixelIndex = (y * info.width + x) * info.channels;
         const alpha = data[pixelIndex + 3];
 
@@ -342,8 +346,11 @@ async function loadSpriteData(
   let missingCount = 0;
   let totalEfficiency = 0;
 
-  for (let i = 0; i < entriesData.length; i++) {
-    const entry = entriesData[i];
+  async function processEntry(index: number): Promise<void> {
+    const entry = entriesData[index];
+    if (!entry) {
+      return;
+    }
     const filename = await findSpriteFile(entry.name, generation.spritesDir);
 
     if (filename) {
@@ -351,8 +358,10 @@ async function loadSpriteData(
 
       // Get original dimensions
       const metadata = await sharp(spritePath).metadata();
-      const originalWidth = metadata.width!;
-      const originalHeight = metadata.height!;
+      const { height: originalHeight, width: originalWidth } = metadata;
+      if (originalWidth === undefined || originalHeight === undefined) {
+        throw new Error(`Sprite dimensions unavailable: ${spritePath}`);
+      }
 
       // Analyze content bounds
       const contentBounds = await analyzeSpriteContent(spritePath);
@@ -362,7 +371,7 @@ async function loadSpriteData(
           (contentBounds.width * contentBounds.height) /
           (originalWidth * originalHeight);
         totalEfficiency += efficiency;
-        foundCount++;
+        foundCount += 1;
 
         spriteInfos.push({
           contentBounds,
@@ -380,7 +389,7 @@ async function loadSpriteData(
         });
       } else {
         // Transparent or invalid sprite
-        missingCount++;
+        missingCount += 1;
         spriteInfos.push({
           contentBounds: null,
           exists: false,
@@ -397,7 +406,7 @@ async function loadSpriteData(
         });
       }
     } else {
-      missingCount++;
+      missingCount += 1;
       spriteInfos.push({
         contentBounds: null,
         exists: false,
@@ -414,10 +423,13 @@ async function loadSpriteData(
       });
     }
 
-    progressBar.update(i + 1, {
+    progressBar.update(index + 1, {
       status: `Found: ${foundCount}, Missing: ${missingCount}`,
     });
+    await processEntry(index + 1);
   }
+
+  await processEntry(0);
 
   progressBar.stop();
 
@@ -662,13 +674,17 @@ async function generateSpritesheet(
   });
 
   // Prepare composite operations for cropped sprites
-  const compositeOps: any[] = [];
+  const compositeOps: OverlayOptions[] = [];
   const progressBar = ConsoleFormatter.createProgressBar(validSprites.length);
 
-  for (let i = 0; i < validSprites.length; i++) {
-    const sprite = validSprites[i];
+  async function processSprite(index: number): Promise<void> {
+    const sprite = validSprites[index];
+    if (!sprite) {
+      return;
+    }
     if (!sprite.contentBounds) {
-      continue;
+      await processSprite(index + 1);
+      return;
     }
 
     try {
@@ -701,11 +717,15 @@ async function generateSpritesheet(
         `Failed to process sprite ${sprite.name}: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
       // Skip this sprite but continue with others
-      continue;
+      await processSprite(index + 1);
+      return;
     }
 
-    progressBar.update(i + 1, { status: `Processing ${sprite.name}` });
+    progressBar.update(index + 1, { status: `Processing ${sprite.name}` });
+    await processSprite(index + 1);
   }
+
+  await processSprite(0);
 
   progressBar.stop();
 
@@ -892,17 +912,26 @@ async function generatePokemonSpritesheets(): Promise<void> {
 
   try {
     // Generate spritesheets for each generation
-    for (const generation of GENERATIONS) {
+    async function processGeneration(index: number): Promise<void> {
+      const generation = GENERATIONS[index];
+      if (!generation) {
+        return;
+      }
+
       try {
         await generateGenerationSpritesheet(generation);
-        successCount++;
+        successCount += 1;
       } catch (error) {
-        errorCount++;
+        errorCount += 1;
         ConsoleFormatter.error(
           `Failed to generate ${generation.name} spritesheet: ${error instanceof Error ? error.message : "Unknown error"}`,
         );
       }
+
+      await processGeneration(index + 1);
     }
+
+    await processGeneration(0);
 
     // Final summary
     const duration = Date.now() - startTime;

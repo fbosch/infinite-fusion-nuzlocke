@@ -29,7 +29,7 @@ export function PlaythroughResumeObserver() {
     DEFAULT_CONSENT_PREFERENCES,
     consentPreferencesSchema,
   );
-  const hasAnalyticsConsent = preferences.analytics;
+  const _hasAnalyticsConsent = preferences.analytics;
 
   useEffect(() => {
     if (isLoading || !activePlaythrough) {
@@ -62,7 +62,7 @@ export function PlaythroughResumeObserver() {
       markLandingViewedTracked(activePlaythrough.id);
       lastTrackedLandingPlaythroughId.current = activePlaythrough.id;
     }
-  }, [activePlaythrough, hasAnalyticsConsent, isLoading]);
+  }, [activePlaythrough, isLoading]);
 
   useEffect(() => {
     if (isLoading || !activePlaythrough) {
@@ -89,7 +89,7 @@ export function PlaythroughResumeObserver() {
       markPlaythroughResumedTracked(activePlaythrough.id);
       lastTrackedPlaythroughId.current = activePlaythrough.id;
     }
-  }, [activePlaythrough, hasAnalyticsConsent, isLoading]);
+  }, [activePlaythrough, isLoading]);
 
   return null;
 }

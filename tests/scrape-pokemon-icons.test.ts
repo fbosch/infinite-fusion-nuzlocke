@@ -8,7 +8,9 @@ import type {
   SpriteDownloadConfig,
   SpriteDownloadIcon,
 } from "../scripts/utils/sprite-download-utils";
-import * as spriteDownloadUtils from "../scripts/utils/sprite-download-utils";
+import {
+  downloadSpriteImage,
+} from "../scripts/utils/sprite-download-utils";
 
 const temporaryDirectories: string[] = [];
 
@@ -56,7 +58,7 @@ describe("Pokemon icon downloads", () => {
     await fs.writeFile(path.join(config.spritesDir, icon.filename), "existing");
 
     await expect(
-      spriteDownloadUtils.downloadSpriteImage(icon, config, vi.fn()),
+      downloadSpriteImage(icon, config, vi.fn()),
     ).resolves.toBe(true);
     expect(fetchMock).not.toHaveBeenCalled();
   });
@@ -67,7 +69,7 @@ describe("Pokemon icon downloads", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(
-      spriteDownloadUtils.downloadSpriteImage(
+      downloadSpriteImage(
         createIcon({ filename: "egg.png", id: -1 }),
         config,
         vi.fn(),
@@ -97,7 +99,7 @@ describe("Pokemon icon downloads", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(
-      spriteDownloadUtils.downloadSpriteImage(icon, config, vi.fn(), 1),
+      downloadSpriteImage(icon, config, vi.fn(), 1),
     ).resolves.toBe(true);
 
     await expect(
@@ -115,12 +117,15 @@ describe("Pokemon icon downloads", () => {
 
   it("downloads generation batches in order with cumulative progress", async () => {
     const progressBar = { stop: vi.fn(), update: vi.fn() };
+    const spriteDownloadUtils = await import(
+      "../scripts/utils/sprite-download-utils"
+    );
     vi.spyOn(ConsoleFormatter, "createProgressBar").mockReturnValue(
       progressBar as never,
     );
-    vi.spyOn(ConsoleFormatter, "working").mockImplementation(() => {});
-    vi.spyOn(ConsoleFormatter, "success").mockImplementation(() => {});
-    vi.spyOn(ConsoleFormatter, "warn").mockImplementation(() => {});
+    vi.spyOn(ConsoleFormatter, "working").mockImplementation(() => undefined);
+    vi.spyOn(ConsoleFormatter, "success").mockImplementation(() => undefined);
+    vi.spyOn(ConsoleFormatter, "warn").mockImplementation(() => undefined);
     vi.spyOn(spriteDownloadUtils, "spriteFileExists")
       .mockResolvedValueOnce(true)
       .mockResolvedValue(false);

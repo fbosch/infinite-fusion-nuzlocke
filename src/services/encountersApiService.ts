@@ -2,7 +2,7 @@ import { getCacheBuster } from "@/lib/persistence";
 import type { RouteEncounter } from "@/types/encounters";
 
 class EncountersApiService {
-  private baseUrl: string;
+  private readonly baseUrl: string;
 
   constructor() {
     // Use absolute URL in test environment, relative in browser

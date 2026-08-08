@@ -30,10 +30,10 @@ const GEN8_ICON_BASE_URL =
 const EGG_SPRITE_URL =
   "https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/egg.png";
 
-export type PokemonEntry = {
+export interface PokemonEntry {
   id: number;
   name: string;
-};
+}
 
 export type PokemonIcon = SpriteDownloadIcon;
 export type GenerationConfig = SpriteDownloadConfig;
@@ -54,11 +54,11 @@ const GENERATIONS: GenerationConfig[] = [
   },
 ];
 
-type DownloadStats = {
+interface DownloadStats {
   downloaded: number;
-  skipped: number;
   errors: number;
-};
+  skipped: number;
+}
 
 const ICON_BATCH_SIZE = 10;
 const BATCH_DELAY_MS = 50;
@@ -91,11 +91,11 @@ async function downloadIconBatch(icons: PokemonIcon[]): Promise<DownloadStats> {
   return results.reduce<DownloadStats>(
     (stats, { skipped, success }) => {
       if (success === false) {
-        stats.errors++;
+        stats.errors += 1;
       } else if (skipped) {
-        stats.skipped++;
+        stats.skipped += 1;
       } else {
-        stats.downloaded++;
+        stats.downloaded += 1;
       }
       return stats;
     },
@@ -112,24 +112,32 @@ async function downloadGenerationIcons(
 ): Promise<void> {
   ConsoleFormatter.working(`Downloading ${generationLabel} sprites...`);
 
-  for (let i = 0; i < icons.length; i += ICON_BATCH_SIZE) {
-    const batch = icons.slice(i, i + ICON_BATCH_SIZE);
-    const batchStats = await downloadIconBatch(batch);
-    stats.downloaded += batchStats.downloaded;
-    stats.skipped += batchStats.skipped;
-    stats.errors += batchStats.errors;
+  const batches = Array.from(
+    { length: Math.ceil(icons.length / ICON_BATCH_SIZE) },
+    (_, index) => icons.slice(index * ICON_BATCH_SIZE, (index + 1) * ICON_BATCH_SIZE),
+  );
+  await batches.reduce(
+    async (previousBatch, batch, batchIndex) => {
+      await previousBatch;
+      const batchStats = await downloadIconBatch(batch);
+      stats.downloaded += batchStats.downloaded;
+      stats.skipped += batchStats.skipped;
+      stats.errors += batchStats.errors;
 
-    progressBar.update(
-      Math.min(i + ICON_BATCH_SIZE, icons.length) + completedIcons,
-      {
+      const processedIcons = Math.min(
+        (batchIndex + 1) * ICON_BATCH_SIZE,
+        icons.length,
+      );
+      progressBar.update(processedIcons + completedIcons, {
         status: `${generationLabel}: New: ${stats.downloaded}, Skipped: ${stats.skipped}, Errors: ${stats.errors}`,
-      },
-    );
+      });
 
-    if (i + ICON_BATCH_SIZE < icons.length) {
-      await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
-    }
-  }
+      if (processedIcons < icons.length) {
+        await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
+      }
+    },
+    Promise.resolve(),
+  );
 }
 
 /**
@@ -252,9 +260,9 @@ async function scrapePokemonIcons(): Promise<void> {
   try {
     // Ensure output directories exist
     await fs.mkdir(SPRITES_BASE_DIR, { recursive: true });
-    for (const config of GENERATIONS) {
-      await fs.mkdir(config.spritesDir, { recursive: true });
-    }
+    await Promise.all(
+      GENERATIONS.map((config) => fs.mkdir(config.spritesDir, { recursive: true })),
+    );
 
     // Load Pokemon data and construct icon URLs
     const icons = await loadPokemonIcons();

@@ -2,7 +2,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import * as cheerio from "cheerio";
+import { load } from "cheerio";
 import type { EncounterType } from "./types/encounters";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
@@ -105,7 +105,7 @@ async function scrapeSafariAreaPage(
 
   try {
     const html = await fetchWikiPageHtml(url);
-    const $ = cheerio.load(html);
+    const $ = load(html);
     const pokemonNameMap = await loadPokemonNameMap();
 
     // Get the location name from the page title
@@ -192,7 +192,12 @@ async function main() {
       `Scraping ${SAFARI_ZONE_PAGES.length} Safari Zone areas...`,
     );
 
-    for (const url of SAFARI_ZONE_PAGES) {
+    const scrapeSafariAreas = async (urls: string[]): Promise<void> => {
+      const [url, ...remainingUrls] = urls;
+      if (url === undefined) {
+        return;
+      }
+
       const encounters = await scrapeSafariAreaPage(url);
       if (encounters) {
         safariEncounters.push(encounters);
@@ -200,7 +205,11 @@ async function main() {
           `✓ ${encounters.routeName}: ${encounters.encounters.length} encounters`,
         );
       }
-    }
+
+      await scrapeSafariAreas(remainingUrls);
+    };
+
+    await scrapeSafariAreas(SAFARI_ZONE_PAGES);
 
     if (safariEncounters.length === 0) {
       ConsoleFormatter.warn("No Safari Zone encounters found!");

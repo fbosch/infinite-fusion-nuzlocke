@@ -30,7 +30,7 @@ export const useAllPlaythroughs = () => {
         console.error("Failed to load all playthroughs:", error);
       });
     }
-  }, [snapshot.isLoading, snapshot.playthroughs.length]);
+  }, []);
 
   return snapshot.playthroughs;
 };
@@ -121,7 +121,7 @@ export const useEncounter = (locationId: string): EncounterData | null => {
   return activePlaythrough?.encounters?.[locationId] || null;
 };
 
-const useIsSaving = (): boolean => {
+const _useIsSaving = (): boolean => {
   const snapshot = useSnapshot(playthroughsStore);
   return snapshot.isSaving;
 };
@@ -133,13 +133,13 @@ export const useCustomLocations = (): CustomLocation[] => {
   return activePlaythrough?.customLocations || [];
 };
 
-const useMergedLocations = () => {
+const _useMergedLocations = () => {
   useActivePlaythrough();
 
   return getMergedLocations();
 };
 
-const useAvailableAfterLocations = () => {
+const _useAvailableAfterLocations = () => {
   useActivePlaythrough();
 
   return getAvailableAfterLocations();

@@ -45,7 +45,7 @@ export function generateSpriteUrl(
  * Check if a sprite URL exists
  * Works in both main thread (using Image) and web workers (using fetch)
  */
-async function checkSpriteExists(url: string): Promise<boolean> {
+async function _checkSpriteExists(url: string): Promise<boolean> {
   // Try Image approach first in main thread (more reliable for images)
   if (typeof window !== "undefined" && typeof Image !== "undefined") {
     return new Promise<boolean>((resolve) => {
@@ -218,7 +218,7 @@ async function getVariantSpriteCredits(
  * Get formatted sprite credits for a specific sprite variant
  * Returns a human-readable string like "GameFreak, Artist1 and Artist2"
  */
-async function getFormattedVariantSpriteCredits(
+async function _getFormattedVariantSpriteCredits(
   headId?: number | null,
   bodyId?: number | null,
   variant = "",

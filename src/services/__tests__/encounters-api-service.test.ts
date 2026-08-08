@@ -91,7 +91,7 @@ describe("EncountersApiService", () => {
     });
 
     it("should throw error on invalid response format", async () => {
-      vi.spyOn(console, "error").mockImplementation(() => {});
+      vi.spyOn(console, "error").mockImplementation(() => undefined);
 
       // Mock the schema validation to fail
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({

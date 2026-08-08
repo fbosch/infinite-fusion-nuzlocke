@@ -6,6 +6,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { FusionCombinationOption, PokemonOption } from "../PokemonOptions";
 
+const getNoPokemonSource = () => [];
+const isDuplicatePokemon = () => true;
+const isNotDuplicatePokemon = () => false;
+const isRoutePokemon = () => true;
+const isNotRoutePokemon = () => false;
+
 vi.mock("@headlessui/react", () => ({
   ComboboxOption: ({
     children,
@@ -18,20 +24,25 @@ vi.mock("@headlessui/react", () => ({
       | ((state: { active: boolean; selected: boolean }) => React.ReactNode);
     className?: string | ((state: { active: boolean }) => string);
     value?: unknown;
-  } & Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "className">) => (
-    <div
-      {...props}
-      className={
-        typeof className === "function"
-          ? className({ active: false })
-          : className
-      }
-    >
-      {typeof children === "function"
+  } & Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "className">) => {
+    const renderedChildren =
+      typeof children === "function"
         ? children({ active: false, selected: false })
-        : children}
-    </div>
-  ),
+        : children;
+
+    return (
+      <div
+        {...props}
+        className={
+          typeof className === "function"
+            ? className({ active: false })
+            : className
+        }
+      >
+        {renderedChildren}
+      </div>
+    );
+  },
 }));
 
 vi.mock("../SourceTag", () => ({
@@ -57,9 +68,9 @@ describe("PokemonOption", () => {
     render(
       <PokemonOption
         gameMode="classic"
-        getPokemonSource={() => []}
-        isDuplicatePokemon={() => true}
-        isRoutePokemon={() => true}
+        getPokemonSource={getNoPokemonSource}
+        isDuplicatePokemon={isDuplicatePokemon}
+        isRoutePokemon={isRoutePokemon}
         locationId="route-1"
         pokemon={mockPokemon}
       />,
@@ -73,9 +84,9 @@ describe("PokemonOption", () => {
     render(
       <PokemonOption
         gameMode="classic"
-        getPokemonSource={() => []}
-        isDuplicatePokemon={() => false}
-        isRoutePokemon={() => false}
+        getPokemonSource={getNoPokemonSource}
+        isDuplicatePokemon={isNotDuplicatePokemon}
+        isRoutePokemon={isNotRoutePokemon}
         locationId="route-1"
         pokemon={mockPokemon}
       />,

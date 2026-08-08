@@ -32,8 +32,8 @@ describe("playthrough persistence browser regressions", () => {
   });
 
   it("adds the data store when an existing database does not have it", async () => {
-    const legacyDatabase = await openDatabase((database) => {
-      database.createObjectStore("legacy");
+    const legacyDatabase = await openDatabase((upgradeDatabase) => {
+      upgradeDatabase.createObjectStore("legacy");
     });
     legacyDatabase.close();
 

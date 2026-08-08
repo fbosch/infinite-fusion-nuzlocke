@@ -3,16 +3,16 @@ import Link from "next/link";
 
 // Load license data without relying on filesystem access at runtime
 
-type LicensePackage = {
-  name: string;
-  version: string;
-  license: string;
-  homepage?: string;
+interface LicensePackage {
   author?: string;
   description?: string;
+  homepage?: string;
+  license: string;
   licenseText?: string;
+  name: string;
   noticeText?: string;
-};
+  version: string;
+}
 
 async function loadLicenses(): Promise<{
   generatedAt: string;

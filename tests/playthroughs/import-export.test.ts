@@ -22,7 +22,7 @@ describe("usePlaythroughImportExport", () => {
     vi.clearAllMocks();
     anchorClickSpy = vi
       .spyOn(HTMLAnchorElement.prototype, "click")
-      .mockImplementation(() => {});
+      .mockImplementation(vi.fn());
   });
 
   afterEach(() => {
@@ -30,7 +30,7 @@ describe("usePlaythroughImportExport", () => {
   });
 
   describe("Export functionality", () => {
-    it("should handle export button click without crashing", async () => {
+    it("should handle export button click without crashing", () => {
       const mockPlaythrough: Playthrough = {
         createdAt: 1_234_567_890,
         customLocations: [],
@@ -51,7 +51,7 @@ describe("usePlaythroughImportExport", () => {
       } as unknown as React.MouseEvent;
 
       // Test that the function doesn't crash
-      await act(async () => {
+      act(() => {
         expect(() => {
           result.current.handleExportClick(mockPlaythrough, mockEvent);
         }).not.toThrow();
@@ -62,7 +62,7 @@ describe("usePlaythroughImportExport", () => {
       expect(mockEvent.stopPropagation).toHaveBeenCalled();
     });
 
-    it("should handle keyboard events correctly", async () => {
+    it("should handle keyboard events correctly", () => {
       const mockPlaythrough: Playthrough = {
         createdAt: 1_234_567_890,
         customLocations: [],
@@ -84,7 +84,7 @@ describe("usePlaythroughImportExport", () => {
         stopPropagation: vi.fn(),
       } as unknown as React.KeyboardEvent;
 
-      await act(async () => {
+      act(() => {
         expect(() => {
           result.current.handleExportKeyDown(mockPlaythrough, enterEvent);
         }).not.toThrow();
@@ -102,7 +102,7 @@ describe("usePlaythroughImportExport", () => {
         stopPropagation: vi.fn(),
       } as unknown as React.KeyboardEvent;
 
-      await act(async () => {
+      act(() => {
         expect(() => {
           result.current.handleExportKeyDown(mockPlaythrough, spaceEvent);
         }).not.toThrow();
@@ -120,7 +120,7 @@ describe("usePlaythroughImportExport", () => {
         stopPropagation: vi.fn(),
       } as unknown as React.KeyboardEvent;
 
-      await act(async () => {
+      act(() => {
         expect(() => {
           result.current.handleExportKeyDown(mockPlaythrough, otherEvent);
         }).not.toThrow();
@@ -132,10 +132,10 @@ describe("usePlaythroughImportExport", () => {
   });
 
   describe("Import functionality", () => {
-    it("should handle file type validation correctly", async () => {
+    it("should handle file type validation correctly", () => {
       const { result } = renderHook(() => usePlaythroughImportExport());
 
-      await act(async () => {
+      act(() => {
         result.current.handleImportClick();
       });
 
@@ -146,10 +146,10 @@ describe("usePlaythroughImportExport", () => {
       expect(result.current.importErrorMessage).toBe("");
     });
 
-    it("should handle JSON syntax errors", async () => {
+    it("should handle JSON syntax errors", () => {
       const { result } = renderHook(() => usePlaythroughImportExport());
 
-      await act(async () => {
+      act(() => {
         result.current.handleImportClick();
       });
 
@@ -158,7 +158,7 @@ describe("usePlaythroughImportExport", () => {
       expect(result.current.importErrorMessage).toBe("");
     });
 
-    it("should handle successful import", async () => {
+    it("should handle successful import", () => {
       const { result } = renderHook(() => usePlaythroughImportExport());
 
       // Mock successful import
@@ -166,7 +166,7 @@ describe("usePlaythroughImportExport", () => {
         "new-id",
       );
 
-      await act(async () => {
+      act(() => {
         result.current.handleImportClick();
       });
 
@@ -175,7 +175,7 @@ describe("usePlaythroughImportExport", () => {
       expect(result.current.importErrorMessage).toBe("");
     });
 
-    it("should handle import errors from playthroughActions", async () => {
+    it("should handle import errors from playthroughActions", () => {
       const { result } = renderHook(() => usePlaythroughImportExport());
 
       // Mock import failure
@@ -183,7 +183,7 @@ describe("usePlaythroughImportExport", () => {
         new Error("Validation failed"),
       );
 
-      await act(async () => {
+      act(() => {
         result.current.handleImportClick();
       });
 
@@ -192,10 +192,10 @@ describe("usePlaythroughImportExport", () => {
       expect(result.current.importErrorMessage).toBe("");
     });
 
-    it("should handle missing file gracefully", async () => {
+    it("should handle missing file gracefully", () => {
       const { result } = renderHook(() => usePlaythroughImportExport());
 
-      await act(async () => {
+      act(() => {
         result.current.handleImportClick();
       });
 

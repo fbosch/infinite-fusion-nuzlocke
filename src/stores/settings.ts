@@ -8,11 +8,11 @@ import {
 const SETTINGS_STORAGE_KEY = "settings:v1";
 const LEGACY_SETTINGS_STORAGE_KEY = "settings";
 
-type Settings = {
+interface Settings {
   moveEncountersBetweenLocations: boolean;
   reducedMotion?: boolean;
   version: string;
-};
+}
 
 // fallow-ignore-next-line complexity -- Validates every persisted setting field before applying defaults.
 const parseSettings = (value: unknown): Settings | null => {

@@ -23,8 +23,7 @@ describe("Playthroughs Store - Migration Tests", () => {
       expect(result.gameMode).toBe("remix");
       expect(result.name).toBe("Legacy Remix Run");
       expect(result.id).toBe("test-migration-1");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((result as any).remixMode).toBeUndefined();
+      expect(result).not.toHaveProperty("remixMode");
     });
 
     it("should migrate remixMode: false to gameMode: classic", () => {
@@ -97,7 +96,7 @@ describe("Playthroughs Store - Migration Tests", () => {
       expect((result as any).remixMode).toBeUndefined();
       expect(result.encounters).toBeDefined();
       expect(result.encounters?.["route-1"]).toBeDefined();
-      expect(result.encounters?.["route-1"].head?.name).toBe("Pikachu");
+      expect(result.encounters["route-1"].head.name).toBe("Pikachu");
       expect(result.customLocations).toBeDefined();
       expect(result.customLocations?.[0].name).toBe("Custom Route");
       expect(result.createdAt).toBe(1_234_567_890);

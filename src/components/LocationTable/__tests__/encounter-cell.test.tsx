@@ -6,6 +6,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { EncounterCell } from "../EncounterCell";
 
+const valuableEncounterText =
+  /Pikachu and Charmander with the status "Captured"/;
+
 const {
   updateEncounterMock,
   createFusionMock,
@@ -87,29 +90,28 @@ vi.mock("@/components/PokemonCombobox/PokemonCombobox", () => ({
       nationalDexId: 133,
       uid: "eevee-1",
     };
+    const selectPokemon = () => onChange(selectedPokemon);
+    const clearPokemon = () => onChange(null);
+    const createFusion = () =>
+      onFusionChange?.(selectedPokemon, {
+        id: 200,
+        name: "Misdreavus",
+        nationalDexId: 200,
+        uid: "misdreavus-1",
+      });
 
     return (
       <div>
-        <button onClick={() => onChange(selectedPokemon)} type="button">
+        <button onClick={selectPokemon} type="button">
           {`select-${comboboxId}`}
         </button>
-        <button onClick={() => onChange(null)} type="button">
+        <button onClick={clearPokemon} type="button">
           {`clear-${comboboxId}`}
         </button>
         <button onClick={onActivate} type="button">
           {`activate-${comboboxId}`}
         </button>
-        <button
-          onClick={() =>
-            onFusionChange?.(selectedPokemon, {
-              id: 200,
-              name: "Misdreavus",
-              nationalDexId: 200,
-              uid: "misdreavus-1",
-            })
-          }
-          type="button"
-        >
+        <button onClick={createFusion} type="button">
           {`fuse-${comboboxId}`}
         </button>
       </div>
@@ -468,8 +470,6 @@ describe("EncounterCell", () => {
     );
 
     expect(createFusionMock).not.toHaveBeenCalled();
-    expect(
-      screen.getByText(/Pikachu and Charmander with the status "Captured"/),
-    ).toBeDefined();
+    expect(screen.getByText(valuableEncounterText)).toBeDefined();
   });
 });

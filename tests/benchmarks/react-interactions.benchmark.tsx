@@ -15,6 +15,16 @@ import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 
 const SAMPLE_COUNT = 20;
 const WARMUP_ITERATIONS = 5;
+let activeProfilerDurations: number[] = [];
+let selectPokemon = () => {};
+
+function handleProfilerRender(
+  _id: string,
+  _phase: string,
+  actualDuration: number,
+) {
+  activeProfilerDurations.push(actualDuration);
+}
 
 const updatePokemonByUIDMock = vi.hoisted(() =>
   vi.fn().mockResolvedValue(undefined),
@@ -48,7 +58,7 @@ vi.mock("@/components/PokemonSummaryCard/ArtworkVariantButton", () => ({
   ArtworkVariantButton: () => null,
 }));
 vi.mock("@/components/PokemonSummaryCard/FusionSprite", () => ({
-  FusionSprite: React.forwardRef(() => <div data-testid="fusion-sprite" />),
+  FusionSprite: () => <div data-testid="fusion-sprite" />,
 }));
 vi.mock("@/components/PokemonSummaryCard/TeamMemberContextMenu", () => ({
   TeamMemberContextMenu: ({ children }: { children: ReactNode }) => (
@@ -140,15 +150,25 @@ const filledTeamEntry = {
 
 function profileRender(ui: React.ReactElement) {
   const durations: number[] = [];
+  activeProfilerDurations = durations;
   const result = render(
-    <Profiler
-      id="benchmark"
-      onRender={(_id, _phase, actualDuration) => durations.push(actualDuration)}
-    >
-      {ui}
-    </Profiler>,
+    <ProfiledBenchmark durations={durations}>{ui}</ProfiledBenchmark>,
   );
   return { ...result, durations };
+}
+
+function ProfiledBenchmark({
+  children,
+  durations,
+}: {
+  children: ReactNode;
+  durations: number[];
+}) {
+  return (
+    <Profiler id="benchmark" onRender={handleProfilerRender}>
+      {children}
+    </Profiler>
+  );
 }
 
 function summarize(values: number[]) {
@@ -158,11 +178,10 @@ function summarize(values: number[]) {
   return { p50Ms: at(0.5), p95Ms: at(0.95) };
 }
 
-async function measureRender(ui: React.ReactElement) {
+function measureRender(ui: React.ReactElement) {
   for (let i = 0; i < WARMUP_ITERATIONS; i += 1) {
-    const mounted = profileRender(ui);
+    profileRender(ui);
     cleanup();
-    void mounted;
   }
   const wall: number[] = [];
   const profiler: number[] = [];
@@ -176,18 +195,31 @@ async function measureRender(ui: React.ReactElement) {
   return { profiler: summarize(profiler), wall: summarize(wall) };
 }
 
+async function repeatSequentially(
+  count: number,
+  action: () => Promise<void>,
+  index = 0,
+): Promise<void> {
+  if (index === count) {
+    return;
+  }
+
+  await action();
+  await repeatSequentially(count, action, index + 1);
+}
+
 async function measureInteraction(
   factory: () => ReturnType<typeof profileRender>,
   interaction: (root: ReturnType<typeof profileRender>) => void,
 ) {
-  for (let i = 0; i < WARMUP_ITERATIONS; i += 1) {
+  await repeatSequentially(WARMUP_ITERATIONS, async () => {
     const root = factory();
     await act(async () => interaction(root));
     cleanup();
-  }
+  });
   const wall: number[] = [];
   const profiler: number[] = [];
-  for (let i = 0; i < SAMPLE_COUNT; i += 1) {
+  await repeatSequentially(SAMPLE_COUNT, async () => {
     const root = factory();
     root.durations.length = 0;
     const start = performance.now();
@@ -195,17 +227,18 @@ async function measureInteraction(
     wall.push(performance.now() - start);
     profiler.push(...root.durations);
     cleanup();
-  }
+  });
   return { profiler: summarize(profiler), wall: summarize(wall) };
 }
 
 function SelectionProbe() {
   const selection = useTeamMemberSelection();
+  selectPokemon = () => {
+    selection.actions.handlePokemonSelect(pikachu, "route-1");
+  };
+
   return (
-    <button
-      onClick={() => selection.actions.handlePokemonSelect(pikachu, "route-1")}
-      type="button"
-    >
+    <button onClick={selectPokemon} type="button">
       Select
     </button>
   );
@@ -266,12 +299,12 @@ describe("deterministic React interaction baselines", () => {
 
   it("reports pure derivation timings for TeamSlots and locations", () => {
     const encounters = Object.fromEntries(
-      Array.from({ length: 512 }, (_, index) => [
-        `route-${index}`,
+      Array.from({ length: 512 }, (_, routeIndex) => [
+        `route-${routeIndex}`,
         {
-          body: index === 1 ? eevee : null,
-          head: index === 0 ? pikachu : null,
-          isFusion: index === 0,
+          body: routeIndex === 1 ? eevee : null,
+          head: routeIndex === 0 ? pikachu : null,
+          isFusion: routeIndex === 0,
           updatedAt: 0,
         },
       ]),
@@ -284,16 +317,16 @@ describe("deterministic React interaction baselines", () => {
       null,
       null,
     ];
-    const index = buildPokemonUidIndex(encounters);
+    const pokemonUidIndex = buildPokemonUidIndex(encounters);
     const samples: number[] = [];
     const locationSamples: number[] = [];
     for (let i = 0; i < WARMUP_ITERATIONS; i += 1) {
-      getTeamSlots(members, encounters, index);
+      getTeamSlots(members, encounters, pokemonUidIndex);
       getLocationsSortedWithCustom([]);
     }
     for (let i = 0; i < SAMPLE_COUNT; i += 1) {
       let start = performance.now();
-      getTeamSlots(members, encounters, index);
+      getTeamSlots(members, encounters, pokemonUidIndex);
       samples.push(performance.now() - start);
       start = performance.now();
       getLocationsSortedWithCustom([]);
@@ -311,7 +344,7 @@ describe("deterministic React interaction baselines", () => {
         2,
       ),
     );
-    expect(getTeamSlots(members, encounters, index)).toHaveLength(6);
+    expect(getTeamSlots(members, encounters, pokemonUidIndex)).toHaveLength(6);
     expect(getLocationsSortedWithCustom([]).length).toBeGreaterThan(0);
   });
 });

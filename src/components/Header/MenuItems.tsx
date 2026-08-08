@@ -13,9 +13,9 @@ const menuActionClassName = clsx(
 
 export type TopBarModal = "settings" | "pc";
 
-type MenuItemsProps = {
+interface MenuItemsProps {
   onOpenModal: (modal: TopBarModal) => void;
-};
+}
 
 export default function MenuItems({ onOpenModal }: MenuItemsProps) {
   const menuActions = [

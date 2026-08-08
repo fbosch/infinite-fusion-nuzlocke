@@ -83,8 +83,8 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       await playthroughActions.updateEncounter("route-1", pikachu);
     });
 
-    it("should set global preferred variant for single Pokemon", async () => {
-      await act(async () => {
+    it("should set global preferred variant for single Pokemon", () => {
+      act(() => {
         playthroughActions.setArtworkVariant("route-1", "new-variant");
       });
 
@@ -121,7 +121,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
         );
       });
 
-      await act(async () => {
+      act(() => {
         playthroughActions.setArtworkVariant("route-2", "fusion-variant");
       });
 
@@ -133,10 +133,10 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       );
     });
 
-    it("should handle errors when updating global preferred variant cache", async () => {
+    it("should handle errors when updating global preferred variant cache", () => {
       mockedSetPreferredVariant.mockRejectedValue(new Error("Service error"));
 
-      await act(async () => {
+      act(() => {
         playthroughActions.setArtworkVariant("route-1", "new-variant");
       });
 
@@ -146,8 +146,8 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
       expect(encounter?.updatedAt).toBeGreaterThan(0);
     });
 
-    it("should clear global preferred variant when setting to undefined", async () => {
-      await act(async () => {
+    it("should clear global preferred variant when setting to undefined", () => {
+      act(() => {
         playthroughActions.setArtworkVariant("route-1", undefined);
       });
 
@@ -240,7 +240,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
     it("should handle errors gracefully", async () => {
       const consoleErrorSpy = vi
         .spyOn(console, "error")
-        .mockImplementation(() => {});
+        .mockImplementation(vi.fn());
       const sprites = await import("@/lib/sprites");
       vi.mocked(sprites.getArtworkVariants).mockRejectedValue(
         new Error("Service error"),
@@ -286,7 +286,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
     it("should handle errors gracefully during prefetching", async () => {
       const consoleWarnSpy = vi
         .spyOn(console, "warn")
-        .mockImplementation(() => {});
+        .mockImplementation(vi.fn());
       const mockImage = createImageConstructorMock();
       global.Image = mockImage as unknown as typeof Image;
 
@@ -329,7 +329,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
     it("should preload variants for all encounters in the playthrough", async () => {
       const consoleDebugSpy = vi
         .spyOn(console, "debug")
-        .mockImplementation(() => {});
+        .mockImplementation(vi.fn());
       const sprites = await import("@/lib/sprites");
       vi.mocked(sprites.getArtworkVariants).mockResolvedValue([
         "",
@@ -349,10 +349,10 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
     it("should handle errors gracefully for individual encounters", async () => {
       const consoleDebugSpy = vi
         .spyOn(console, "debug")
-        .mockImplementation(() => {});
+        .mockImplementation(vi.fn());
       const consoleWarnSpy = vi
         .spyOn(console, "warn")
-        .mockImplementation(() => {});
+        .mockImplementation(vi.fn());
       const sprites = await import("@/lib/sprites");
       vi.mocked(sprites.getArtworkVariants)
         .mockResolvedValueOnce(["", "variant-1"]) // Single Pokémon
@@ -371,7 +371,7 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
     it("should handle playthroughs with no encounters", async () => {
       const consoleDebugSpy = vi
         .spyOn(console, "debug")
-        .mockImplementation(() => {});
+        .mockImplementation(vi.fn());
       // Create a new playthrough with no encounters
       const playthroughId = playthroughActions.createPlaythrough("Empty Run");
       await playthroughActions.setActivePlaythrough(playthroughId);
@@ -403,8 +403,11 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
 
       // Encounter should not have an artworkVariant field anymore
       expect(encounter).toBeDefined();
+      if (encounter === undefined) {
+        throw new Error("Expected encounter to be created");
+      }
       expect(encounter?.head?.id).toBe(25);
-      expect("artworkVariant" in encounter!).toBe(false);
+      expect("artworkVariant" in encounter).toBe(false);
     });
 
     it("should work with global preferred variants when creating fusions", async () => {
@@ -422,10 +425,13 @@ describe("Playthroughs Store - Preferred Variants (Global System)", () => {
 
       // Encounter should not have an artworkVariant field anymore
       expect(encounter).toBeDefined();
+      if (encounter === undefined) {
+        throw new Error("Expected encounter to be created");
+      }
       expect(encounter?.head?.id).toBe(25);
       expect(encounter?.body?.id).toBe(4);
       expect(encounter?.isFusion).toBe(true);
-      expect("artworkVariant" in encounter!).toBe(false);
+      expect("artworkVariant" in encounter).toBe(false);
     });
   });
 });

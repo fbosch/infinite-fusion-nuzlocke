@@ -11,6 +11,9 @@ import type React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import PlaythroughSelector from "../PlaythroughSelector";
 
+const olderRun = /^older run$/i;
+const createNew = /create new/i;
+
 const { setActivePlaythroughMock, trackEventMock } = vi.hoisted(() => ({
   setActivePlaythroughMock: vi.fn().mockResolvedValue(undefined),
   trackEventMock: vi.fn(),
@@ -131,7 +134,7 @@ describe("PlaythroughSelector", () => {
   it("tracks when the playthrough selector opens", () => {
     render(<PlaythroughSelector />);
 
-    fireEvent.click(screen.getByRole("button", { name: /^older run$/i }));
+    fireEvent.click(screen.getByRole("button", { name: olderRun }));
 
     expect(trackEventMock).toHaveBeenCalledWith(
       "playthrough_selector_opened",
@@ -142,7 +145,7 @@ describe("PlaythroughSelector", () => {
   it("tracks when the create playthrough modal opens", () => {
     render(<PlaythroughSelector />);
 
-    fireEvent.click(screen.getByRole("button", { name: /create new/i }));
+    fireEvent.click(screen.getByRole("button", { name: createNew }));
 
     expect(trackEventMock).toHaveBeenCalledWith(
       "create_playthrough_modal_opened",

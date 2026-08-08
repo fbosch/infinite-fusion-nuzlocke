@@ -176,7 +176,7 @@ export type TypeQuery =
  * Helper to resolve a Pokemon by name, Infinite Fusion ID, or National Dex ID
  * and return its effective types.
  */
-async function getPokemonTypes(
+async function _getPokemonTypes(
   query: TypeQuery,
 ): Promise<{ primary: TypeName; secondary?: TypeName } | null> {
   let pokemon: Pokemon | null = null;

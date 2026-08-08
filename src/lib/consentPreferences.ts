@@ -1,9 +1,9 @@
 import type { SafeParser } from "@/hooks/useLocalStorage";
 
-export type ConsentPreferences = {
+export interface ConsentPreferences {
   analytics: boolean;
   speedInsights: boolean;
-};
+}
 
 const isConsentPreferences = (value: unknown): value is ConsentPreferences =>
   typeof value === "object" &&

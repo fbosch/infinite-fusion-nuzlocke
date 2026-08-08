@@ -96,6 +96,7 @@ function runGitCommand(args: string[]): string {
     const message = error instanceof Error ? error.message : "unknown error";
     throw new Error(
       `Failed to execute git command 'git ${args.join(" ")}': ${message}`,
+      { cause: error },
     );
   }
 }
@@ -105,7 +106,9 @@ function readJsonWithContext<T>(jsonText: string, source: string): T {
     return JSON.parse(jsonText) as T;
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown error";
-    throw new Error(`Failed to parse JSON from ${source}: ${message}`);
+    throw new Error(`Failed to parse JSON from ${source}: ${message}`, {
+      cause: error,
+    });
   }
 }
 
@@ -515,6 +518,53 @@ async function createPokemonDataMap(): Promise<
   return pokemonDataMap;
 }
 
+async function collectLocationDeltas(
+  fileStats: FileChangeStats[],
+): Promise<LocationPokemonDelta[]> {
+  const [fileStat, ...remainingFileStats] = fileStats;
+  if (fileStat === undefined) {
+    return [];
+  }
+
+  const { filePath } = fileStat;
+  const nextContent = await fs.readFile(
+    path.resolve(process.cwd(), filePath),
+    "utf8",
+  );
+  const nextJson = readJsonWithContext<unknown>(nextContent, filePath);
+  const nextEntries = flattenLocationPokemonEntries(filePath, nextJson);
+  let previousEntries: LocationPokemonEntry[] = [];
+
+  try {
+    const previousContent = runGitCommand(["show", `HEAD:${filePath}`]);
+    const previousJson = readJsonWithContext<unknown>(
+      previousContent,
+      `HEAD:${filePath}`,
+    );
+    previousEntries = flattenLocationPokemonEntries(filePath, previousJson);
+  } catch {
+    previousEntries = [];
+  }
+
+  const version = getVersionFromFilePath(filePath);
+  const currentDeltas = [
+    ...diffLocationPokemonEntries(
+      "Added",
+      version,
+      previousEntries,
+      nextEntries,
+    ),
+    ...diffLocationPokemonEntries(
+      "Removed",
+      version,
+      previousEntries,
+      nextEntries,
+    ),
+  ];
+
+  return [...currentDeltas, ...(await collectLocationDeltas(remainingFileStats))];
+}
+
 async function main(): Promise<void> {
   const cliArgs = process.argv.slice(2).filter((arg) => arg !== "--");
   const outputPathArg = cliArgs[0] ?? DEFAULT_OUTPUT_PATH;
@@ -523,44 +573,7 @@ async function main(): Promise<void> {
   const fileStats = getFileChangeStats();
 
   const pokemonDataMap = await createPokemonDataMap();
-  const locationDeltas: LocationPokemonDelta[] = [];
-
-  for (const { filePath } of fileStats) {
-    const nextContent = await fs.readFile(
-      path.resolve(process.cwd(), filePath),
-      "utf8",
-    );
-    const nextJson = readJsonWithContext<unknown>(nextContent, filePath);
-    const nextEntries = flattenLocationPokemonEntries(filePath, nextJson);
-    let previousEntries: LocationPokemonEntry[] = [];
-
-    try {
-      const previousContent = runGitCommand(["show", `HEAD:${filePath}`]);
-      const previousJson = readJsonWithContext<unknown>(
-        previousContent,
-        `HEAD:${filePath}`,
-      );
-      previousEntries = flattenLocationPokemonEntries(filePath, previousJson);
-    } catch {
-      previousEntries = [];
-    }
-
-    const version = getVersionFromFilePath(filePath);
-    locationDeltas.push(
-      ...diffLocationPokemonEntries(
-        "Added",
-        version,
-        previousEntries,
-        nextEntries,
-      ),
-      ...diffLocationPokemonEntries(
-        "Removed",
-        version,
-        previousEntries,
-        nextEntries,
-      ),
-    );
-  }
+  const locationDeltas = await collectLocationDeltas(fileStats);
 
   const body = buildBody(fileStats, locationDeltas, pokemonDataMap);
 

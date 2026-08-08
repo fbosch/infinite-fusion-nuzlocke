@@ -6,21 +6,21 @@ import {
   getNicknameText,
 } from "./utils";
 
-type SummaryCardDisplayInput = {
-  headPokemon?: PokemonOptionType | null;
+interface SummaryCardDisplayInput {
   bodyPokemon?: PokemonOptionType | null;
+  headPokemon?: PokemonOptionType | null;
   isFusion: boolean;
   isTeamMember: boolean;
   nickname?: string;
-};
+}
 
-export type SummaryCardDisplay = {
+export interface SummaryCardDisplay {
   displayPokemon: DisplayPokemon;
   eitherPokemonIsEgg: boolean;
   isDeceased: boolean;
   link: string;
   name: string;
-};
+}
 
 function getDisplayPokemonForSummary(
   headPokemon: PokemonOptionType | null | undefined,

@@ -13,13 +13,15 @@ const scrollToLocationHandlers = new Set<
   (payload: ScrollToLocationDetail) => boolean
 >();
 
-export type EvolutionEventDetail = { locationId: string };
-export type ScrollToLocationDetail = {
+export interface EvolutionEventDetail {
   locationId: string;
+}
+export interface ScrollToLocationDetail {
   behavior?: ScrollBehavior;
-  highlightUids?: string[];
   durationMs?: number;
-};
+  highlightUids?: string[];
+  locationId: string;
+}
 
 export function emitEvolutionEvent(locationId: string): void {
   if (!locationId) {

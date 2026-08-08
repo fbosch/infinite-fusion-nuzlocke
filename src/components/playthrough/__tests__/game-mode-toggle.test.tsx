@@ -4,6 +4,10 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import GameModeToggle from "../GameModeToggle";
 
+const switchToClassic = /switch to classic/i;
+const switchToRemix = /switch to remix/i;
+const switchToRandomized = /switch to randomized/i;
+
 const { activePlaythrough, setGameModeMock } = vi.hoisted(() => ({
   activePlaythrough: {
     current: { id: "playthrough-1" } as { id: string } | null,
@@ -39,17 +43,17 @@ describe("GameModeToggle", () => {
 
     expect(
       screen
-        .getByRole("button", { name: /switch to classic/i })
+        .getByRole("button", { name: switchToClassic })
         .getAttribute("disabled"),
     ).not.toBeNull();
     expect(
       screen
-        .getByRole("button", { name: /switch to remix/i })
+        .getByRole("button", { name: switchToRemix })
         .getAttribute("disabled"),
     ).not.toBeNull();
     expect(
       screen
-        .getByRole("button", { name: /switch to randomized/i })
+        .getByRole("button", { name: switchToRandomized })
         .getAttribute("disabled"),
     ).not.toBeNull();
   });
@@ -57,7 +61,7 @@ describe("GameModeToggle", () => {
   it("reports pointer mode changes as click-triggered", () => {
     render(<GameModeToggle />);
 
-    fireEvent.click(screen.getByRole("button", { name: /switch to remix/i }), {
+    fireEvent.click(screen.getByRole("button", { name: switchToRemix }), {
       detail: 1,
     });
 
@@ -70,7 +74,7 @@ describe("GameModeToggle", () => {
   it("reports keyboard mode changes as keyboard-triggered", () => {
     render(<GameModeToggle />);
 
-    fireEvent.click(screen.getByRole("button", { name: /switch to remix/i }), {
+    fireEvent.click(screen.getByRole("button", { name: switchToRemix }), {
       detail: 0,
     });
 

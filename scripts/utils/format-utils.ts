@@ -93,48 +93,42 @@ export function formatPercentage(value: number, decimals = 1): string {
 /**
  * Truncates text to a maximum length with ellipsis
  */
-export function truncateText(text: string, maxLength: number): string {
-  if (typeof text !== "string") {
-    if (text == null) {
-      return "";
-    }
-    text = String(text);
+export function truncateText(text: unknown, maxLength: number): string {
+  const normalizedText =
+    text === null || text === undefined ? "" : String(text);
+
+  if (normalizedText.length <= maxLength) {
+    return normalizedText;
   }
 
-  if (text.length <= maxLength) {
-    return text;
-  }
-
-  return `${text.slice(0, maxLength - 3)}...`;
+  return `${normalizedText.slice(0, maxLength - 3)}...`;
 }
 
 /**
  * Pads a string to a minimum width with spaces
  */
 export function padString(
-  str: string,
+  str: unknown,
   width: number,
   align: "left" | "right" | "center" = "left",
 ): string {
-  if (typeof str !== "string") {
-    str = String(str);
+  const normalizedString = String(str);
+
+  if (normalizedString.length >= width) {
+    return normalizedString;
   }
 
-  if (str.length >= width) {
-    return str;
-  }
-
-  const padding = width - str.length;
+  const padding = width - normalizedString.length;
 
   switch (align) {
     case "right":
-      return " ".repeat(padding) + str;
+      return " ".repeat(padding) + normalizedString;
     case "center": {
       const leftPad = Math.floor(padding / 2);
       const rightPad = padding - leftPad;
-      return " ".repeat(leftPad) + str + " ".repeat(rightPad);
+      return " ".repeat(leftPad) + normalizedString + " ".repeat(rightPad);
     }
     default:
-      return str + " ".repeat(padding);
+      return normalizedString + " ".repeat(padding);
   }
 }

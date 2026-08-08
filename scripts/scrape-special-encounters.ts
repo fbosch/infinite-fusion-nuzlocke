@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import * as fs from "node:fs/promises";
-import * as path from "node:path";
-import * as cheerio from "cheerio";
+import { stat as getFileStat, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { type Cheerio, load } from "cheerio";
+import type { Element } from "domhandler";
 import { extractPokedexSubpageTitles } from "./scrape-pokedex";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
@@ -23,6 +24,9 @@ const CLASSIC_POKEDEX_URL =
   "https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex";
 const REMIX_POKEDEX_URL =
   "https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex/Remix";
+const ROUTE_NUMBER_PATTERN = /^\d+$/;
+const SAFARI_ZONE_AREA_PATTERN = /^[A-Z]\d+$/i;
+const TRASH_CAN_LOCATION_PATTERN = /^trash\s*cans?$/i;
 
 function getPokedexPageUrl(title: string): string {
   const pathSegments = title
@@ -154,8 +158,8 @@ interface SpecialEncounterResult {
 
 const SPECIAL_ENCOUNTER_MARKERS = ["(gift)", "(trade)", "(quest)", "(static)"];
 
-function findLocationCellText(cells: cheerio.Cheerio<any>): string {
-  for (let index = 0; index < cells.length; index++) {
+function findLocationCellText(cells: Cheerio<Element>): string {
+  for (let index = 0; index < cells.length; index += 1) {
     const text = cells.eq(index).text().trim();
     const normalized = text.toLowerCase();
     if (
@@ -218,12 +222,15 @@ function expandLocationShorthand(
   location: string,
   previousLocation: string | null,
 ): string {
-  if (/^\d+$/.test(location) && previousLocation?.startsWith("Route ")) {
+  if (
+    ROUTE_NUMBER_PATTERN.test(location) &&
+    previousLocation?.startsWith("Route ")
+  ) {
     return `Route ${location}`;
   }
 
   if (
-    /^[A-Z]\d+$/i.test(location) &&
+    SAFARI_ZONE_AREA_PATTERN.test(location) &&
     previousLocation?.startsWith("Safari Zone ")
   ) {
     return `Safari Zone ${location.toUpperCase()}`;
@@ -241,7 +248,7 @@ export function extractStaticEncounterLocations(
     .filter((part) => part.length > 0);
 
   const isTrashCanLocation = (location: string): boolean =>
-    /^trash\s*cans?$/i.test(location.trim());
+    TRASH_CAN_LOCATION_PATTERN.test(location.trim());
 
   const hasTrashCanStatic = parts.some((part) => {
     const cleanedLocation = cleanLocationName(extractBaseLocation(part));
@@ -379,7 +386,7 @@ function addStaticEncounters(
 }
 
 function addSpecialEncounterRow(
-  cells: cheerio.Cheerio<any>,
+  cells: Cheerio<Element>,
   pokemonNameMap: PokemonNameMap,
   accumulator: SpecialEncounterAccumulator,
 ): void {
@@ -432,9 +439,9 @@ function addSpecialEncountersFromHtml(
   pokemonNameMap: PokemonNameMap,
   accumulator: SpecialEncounterAccumulator,
 ): void {
-  const $ = cheerio.load(html);
+  const $ = load(html);
 
-  $("table tr").each((_rowIndex: number, row: any) => {
+  $("table tr").each((_rowIndex, row) => {
     addSpecialEncounterRow($(row).find("td"), pokemonNameMap, accumulator);
   });
 }
@@ -457,12 +464,9 @@ async function fetchSpecialEncounterPokedexPages(
     `Fetching ${pokedexUrls.length} ${mode} Pokédex subpages...`,
   );
 
-  const pageHtml: string[] = [];
-  for (const pokedexUrl of pokedexUrls) {
-    pageHtml.push(await fetchWikiPageHtml(pokedexUrl));
-  }
-
-  return pageHtml;
+  return Promise.all(
+    pokedexUrls.map((pokedexUrl) => fetchWikiPageHtml(pokedexUrl)),
+  );
 }
 
 function assertHasSpecialEncounters(
@@ -544,28 +548,28 @@ async function main() {
     ConsoleFormatter.info("Saving data to files...");
 
     const files = [
-      { data: classicData.gifts, path: path.join(classicDir, "gifts.json") },
-      { data: remixData.gifts, path: path.join(remixDir, "gifts.json") },
-      { data: classicData.trades, path: path.join(classicDir, "trades.json") },
-      { data: remixData.trades, path: path.join(remixDir, "trades.json") },
-      { data: classicData.quests, path: path.join(classicDir, "quests.json") },
-      { data: remixData.quests, path: path.join(remixDir, "quests.json") },
+      { data: classicData.gifts, path: join(classicDir, "gifts.json") },
+      { data: remixData.gifts, path: join(remixDir, "gifts.json") },
+      { data: classicData.trades, path: join(classicDir, "trades.json") },
+      { data: remixData.trades, path: join(remixDir, "trades.json") },
+      { data: classicData.quests, path: join(classicDir, "quests.json") },
+      { data: remixData.quests, path: join(remixDir, "quests.json") },
       {
         data: classicData.statics,
-        path: path.join(classicDir, "statics.json"),
+        path: join(classicDir, "statics.json"),
       },
-      { data: remixData.statics, path: path.join(remixDir, "statics.json") },
+      { data: remixData.statics, path: join(remixDir, "statics.json") },
     ];
 
     await Promise.all(
       files.map((file) =>
-        fs.writeFile(file.path, JSON.stringify(file.data, null, 2)),
+        writeFile(file.path, JSON.stringify(file.data, null, 2)),
       ),
     );
 
     // Get file stats
     const fileStats = await Promise.all(
-      files.map((file) => fs.stat(file.path)),
+      files.map((file) => getFileStat(file.path)),
     );
 
     const duration = Date.now() - startTime;

@@ -6,19 +6,19 @@ import {
   type PokemonUidIndex,
 } from "@/utils/encounter-utils";
 
-type TeamMemberReference = {
-  headPokemonUid: string;
+interface TeamMemberReference {
   bodyPokemonUid: string;
-};
+  headPokemonUid: string;
+}
 
-export type TeamSlot = {
-  position: number;
-  isEmpty: boolean;
-  locationName: string;
-  headPokemon: PokemonOptionType | null;
+export interface TeamSlot {
   bodyPokemon: PokemonOptionType | null;
+  headPokemon: PokemonOptionType | null;
+  isEmpty: boolean;
   isFusion: boolean;
-};
+  locationName: string;
+  position: number;
+}
 
 export function getTeamSlots(
   members: (TeamMemberReference | null)[],

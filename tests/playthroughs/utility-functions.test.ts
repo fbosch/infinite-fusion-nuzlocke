@@ -176,7 +176,7 @@ describe("Playthroughs Store - Utility Functions", () => {
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
       // Should not throw errors, and encounters should still be defined but empty
-      expect(Object.keys(encounters!)).toHaveLength(0);
+      expect(Object.keys(encounters ?? {})).toHaveLength(0);
     });
 
     it("should preserve other encounters when clearing specific location", async () => {

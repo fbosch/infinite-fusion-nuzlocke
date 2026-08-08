@@ -14,6 +14,8 @@ import {
   vi,
 } from "./setup";
 
+const customLocationIdPattern = /^custom_/;
+
 describe("Playthroughs Store - Custom Locations", () => {
   beforeEach(() => {
     setupPlaythroughTest();
@@ -35,7 +37,7 @@ describe("Playthroughs Store - Custom Locations", () => {
 
       expect(customLocationId).toBeTruthy();
       if (customLocationId) {
-        expect(customLocationId).toMatch(/^custom_/);
+        expect(customLocationId).toMatch(customLocationIdPattern);
 
         const activePlaythrough = playthroughActions.getActivePlaythrough();
         expect(activePlaythrough?.customLocations).toHaveLength(1);
@@ -51,7 +53,7 @@ describe("Playthroughs Store - Custom Locations", () => {
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       // Ensure customLocations is undefined initially
       if (activePlaythrough) {
-        delete activePlaythrough.customLocations;
+        activePlaythrough.customLocations = undefined;
       }
 
       // Use real location ID from locations.json (Route 1)
@@ -179,7 +181,7 @@ describe("Playthroughs Store - Custom Locations", () => {
     it("should return false if customLocations array does not exist", async () => {
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       if (activePlaythrough) {
-        delete activePlaythrough.customLocations;
+        activePlaythrough.customLocations = undefined;
       }
 
       const result = await playthroughActions.removeCustomLocation("custom-id");
@@ -334,7 +336,7 @@ describe("Playthroughs Store - Custom Locations", () => {
     it("should return empty array if customLocations does not exist", () => {
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       if (activePlaythrough) {
-        delete activePlaythrough.customLocations;
+        activePlaythrough.customLocations = undefined;
       }
 
       const result = playthroughActions.getCustomLocations();
@@ -412,7 +414,7 @@ describe("Playthroughs Store - Custom Locations", () => {
         const customLocations = playthroughActions.getCustomLocations();
         expect(customLocations).toHaveLength(1);
         expect(customLocations[0]).toMatchObject({
-          id: expect.stringMatching(/^custom_/),
+          id: expect.stringMatching(customLocationIdPattern),
           insertAfterLocationId: expect.any(String),
           name: "Test Route",
         });

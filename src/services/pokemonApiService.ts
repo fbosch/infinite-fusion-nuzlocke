@@ -17,7 +17,7 @@ export interface PokemonApiParams {
 }
 
 class PokemonApiService {
-  private baseUrl: string;
+  private readonly baseUrl: string;
 
   constructor() {
     // Use absolute URL in test environment, relative in browser

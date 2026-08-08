@@ -4,6 +4,8 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TeamMemberContextMenu } from "../TeamMemberContextMenu";
 
+const devolveToPichu = /Devolve to Pichu/;
+
 const {
   emitEvolutionEventMock,
   flipTeamMemberFusionMock,
@@ -173,7 +175,7 @@ describe("TeamMemberContextMenu", () => {
       </TeamMemberContextMenu>,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /Devolve to Pichu/ }));
+    fireEvent.click(screen.getByRole("button", { name: devolveToPichu }));
 
     await Promise.resolve();
     expect(emitEvolutionEventMock).toHaveBeenCalledWith("route-1");

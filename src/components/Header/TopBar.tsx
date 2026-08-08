@@ -4,10 +4,10 @@ import { GitHubEngagementCta } from "@/components/GitHubEngagementCta";
 import ThemeToggle from "@/components/ThemeToggle";
 import MenuItems, { type TopBarModal } from "./MenuItems";
 
-type TopBarProps = {
+interface TopBarProps {
   githubCtaRoute: "home" | "locations" | null;
   onOpenModal: (modal: TopBarModal) => void;
-};
+}
 
 export default function TopBar({ githubCtaRoute, onOpenModal }: TopBarProps) {
   return (

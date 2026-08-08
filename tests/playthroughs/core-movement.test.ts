@@ -163,8 +163,11 @@ describe("Playthroughs Store - Core Movement Operations", () => {
       const body = encounters?.["route-2"].head;
       expect(head).toBeDefined();
       expect(body).toBeDefined();
+      if (head === undefined || body === undefined) {
+        throw new Error("Expected encounters to be created");
+      }
 
-      await playthroughActions.createFusion("route-1", head!, body!);
+      await playthroughActions.createFusion("route-1", head, body);
 
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       expect(activePlaythrough?.team.members).toContainEqual({
@@ -186,13 +189,16 @@ describe("Playthroughs Store - Core Movement Operations", () => {
       const encounters = playthroughActions.getEncounters();
       const head = encounters?.["route-1"].head;
       const body = encounters?.["route-2"].head;
+      if (head === undefined || body === undefined) {
+        throw new Error("Expected encounters to be created");
+      }
       await playthroughActions.updateTeamMember(
         2,
         { uid: head?.uid ?? "" },
         { uid: body?.uid ?? "" },
       );
 
-      await playthroughActions.createFusion("route-1", head!, body!);
+      await playthroughActions.createFusion("route-1", head, body);
 
       expect(
         playthroughActions.getActivePlaythrough()?.team.members[2],

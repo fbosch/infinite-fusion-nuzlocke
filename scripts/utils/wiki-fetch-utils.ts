@@ -3,6 +3,7 @@ import { z } from "zod";
 const WIKI_ORIGIN = "https://infinitefusion.fandom.com";
 const WIKI_API_URL = `${WIKI_ORIGIN}/api.php`;
 const WIKI_API_TIMEOUT_MS = 10_000;
+const TRAILING_SLASHES = /\/+$/;
 const SCRAPER_USER_AGENT =
   "InfiniteFusionNuzlockeScraper/1.0 (+https://github.com/fbb/infinite-fusion-nuzlocke)";
 
@@ -33,10 +34,11 @@ function getPageTitleFromUrl(pageUrl: string): string {
   } catch (error) {
     throw new Error(
       `Invalid wiki page URL encoding for ${pageUrl}: ${error instanceof Error ? error.message : "unknown decode error"}`,
+      { cause: error },
     );
   }
   const normalizedTitle = rawTitle
-    .replace(/\/+$/, "")
+    .replace(TRAILING_SLASHES, "")
     .replace(/_/g, " ")
     .trim();
 
@@ -90,6 +92,7 @@ async function fetchWikiApiResponse(
     if (error instanceof Error && error.name === "AbortError") {
       throw new Error(
         `Wiki API request timed out after ${WIKI_API_TIMEOUT_MS}ms for page: ${pageTitle}`,
+        { cause: error },
       );
     }
 
@@ -132,10 +135,10 @@ function getParsedWikiContent(
   return parsedContent;
 }
 
-export async function fetchWikiPageHtml(pageUrl: string): Promise<string> {
+export function fetchWikiPageHtml(pageUrl: string): Promise<string> {
   return fetchWikiPageParsedContent(pageUrl, "text");
 }
 
-export async function fetchWikiPageWikitext(pageUrl: string): Promise<string> {
+export function fetchWikiPageWikitext(pageUrl: string): Promise<string> {
   return fetchWikiPageParsedContent(pageUrl, "wikitext");
 }

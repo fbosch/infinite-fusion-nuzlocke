@@ -15,6 +15,12 @@ const pokemonNameMap = buildPokemonNameMap([
   { id: 74, name: "Geodude" },
   { id: 478, name: "Carbink" },
 ]);
+const unresolvedPokemonPattern = /Unable to resolve Pokemon/;
+const pokemonIdIntegrityPattern = /Pokemon ID integrity/;
+const encounterTypePattern = /encounterType/;
+const unrecognizedKeyPattern = /Unrecognized key/;
+const routeCountOneToTwoPattern = /routeCount: baseline=1 next=2/;
+const routeCountZeroToOnePattern = /routeCount: baseline=0 next=1/;
 
 describe("Wild encounter wikitext parser", () => {
   it("parses Mt. Moon from scoped route blocks without Route 4 leakage", () => {
@@ -126,7 +132,7 @@ describe("Wild encounter wikitext parser", () => {
         pokemonNameMap,
         "unit test",
       ),
-    ).toThrow(/Unable to resolve Pokemon/);
+    ).toThrow(unresolvedPokemonPattern);
   });
 
   it("does not flush an active route on non-route bold lines", () => {
@@ -163,7 +169,7 @@ describe("Wild encounter wikitext parser", () => {
         pokemonNameMap,
         "unit test encounters",
       ),
-    ).toThrow(/Pokemon ID integrity/);
+    ).toThrow(pokemonIdIntegrityPattern);
   });
 
   it("fails validation when wild encounter output contains special encounters", () => {
@@ -176,7 +182,7 @@ describe("Wild encounter wikitext parser", () => {
 
     expect(() =>
       assertEncounterPayload(payload, pokemonNameMap, "unit test encounters"),
-    ).toThrow(/encounterType/);
+    ).toThrow(encounterTypePattern);
   });
 
   it("returns the normalized payload after validation", () => {
@@ -208,7 +214,7 @@ describe("Wild encounter wikitext parser", () => {
 
     expect(() =>
       assertEncounterPayload(payload, pokemonNameMap, "unit test encounters"),
-    ).toThrow(/Unrecognized key/);
+    ).toThrow(unrecognizedKeyPattern);
   });
 
   it("fails parity when route and encounter aggregates diverge", () => {
@@ -232,7 +238,7 @@ describe("Wild encounter wikitext parser", () => {
         ],
         "unit test encounters",
       ),
-    ).toThrow(/routeCount: baseline=1 next=2/);
+    ).toThrow(routeCountOneToTwoPattern);
   });
 
   it("preserves zero values in parity mismatch messages", () => {
@@ -247,6 +253,6 @@ describe("Wild encounter wikitext parser", () => {
         [],
         "unit test encounters",
       ),
-    ).toThrow(/routeCount: baseline=0 next=1/);
+    ).toThrow(routeCountZeroToOnePattern);
   });
 });

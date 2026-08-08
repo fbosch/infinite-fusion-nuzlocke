@@ -29,6 +29,6 @@ export function runDirectScript(
   entrypoint = process.argv[1],
 ): void {
   if (isDirectScriptExecution(moduleUrl, entrypoint)) {
-    void main();
+    main();
   }
 }

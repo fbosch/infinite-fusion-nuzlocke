@@ -64,12 +64,12 @@ export type SourceSurface =
 export type TriggerMethod = "click" | "keyboard" | "submit" | "programmatic";
 
 export type SharedEventProperties = {
-  playthrough_id: string;
-  game_mode: GameMode;
-  encounter_count_bucket: EncounterCountBucket;
-  deceased_count_bucket: CountBucket;
   boxed_count_bucket: CountBucket;
+  deceased_count_bucket: CountBucket;
+  encounter_count_bucket: EncounterCountBucket;
   fusion_count_bucket: CountBucket;
+  game_mode: GameMode;
+  playthrough_id: string;
   viable_roster_bucket: ViableRosterBucket;
 };
 
@@ -101,52 +101,17 @@ export type ImportErrorCategory =
   | "unexpected";
 
 export type AnalyticsEventMap = {
-  landing_viewed: SharedEventProperties & {
-    entry_route: "home" | "locations" | "other";
-  };
-  playthrough_selector_opened: SharedEventProperties & {
-    source_surface: "header";
-  };
   create_playthrough_modal_opened: SharedEventProperties & {
     source_surface: "header";
   };
+  encounter_marked_deceased: SharedEventProperties & {
+    location_id: string;
+    was_fused: boolean;
+    team_size_after: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+    viable_roster_bucket_after: ViableRosterBucket;
+  };
   first_encounter_saved: SharedEventProperties & {
     location_id: string;
-  };
-  playthrough_created: SharedEventProperties & {
-    has_existing_playthroughs: boolean;
-  };
-  playthrough_switched: SharedEventProperties & {
-    previous_playthrough_id: string;
-    new_playthrough_id: string;
-    source_surface: SourceSurface;
-    trigger_method: TriggerMethod;
-  };
-  playthrough_imported: SharedEventProperties & {
-    import_source: ImportSource;
-    file_extension_group: FileExtensionGroup;
-    mime_group: MimeGroup;
-  };
-  playthrough_import_failed: SharedEventProperties & {
-    import_source: ImportSource;
-    failure_stage: ImportFailureStage;
-    error_category: ImportErrorCategory;
-    has_file: boolean;
-    file_extension_group: FileExtensionGroup;
-    mime_group: MimeGroup;
-  };
-  run_checkpoint_reached: SharedEventProperties & {
-    checkpoint: Checkpoint;
-    checkpoint_label: CheckpointLabel;
-  };
-  playthrough_resumed: SharedEventProperties & {
-    days_since_last_active_bucket: DormancyBucket;
-  };
-  game_mode_changed: SharedEventProperties & {
-    previous_game_mode: GameMode;
-    new_game_mode: GameMode;
-    source_surface: SourceSurface;
-    trigger_method: TriggerMethod;
   };
   fusion_created: SharedEventProperties & {
     location_id: string;
@@ -155,16 +120,51 @@ export type AnalyticsEventMap = {
   fusion_flipped: SharedEventProperties & {
     location_id: string;
   };
-  encounter_marked_deceased: SharedEventProperties & {
-    location_id: string;
-    was_fused: boolean;
-    team_size_after: 0 | 1 | 2 | 3 | 4 | 5 | 6;
-    viable_roster_bucket_after: ViableRosterBucket;
+  game_mode_changed: SharedEventProperties & {
+    previous_game_mode: GameMode;
+    new_game_mode: GameMode;
+    source_surface: SourceSurface;
+    trigger_method: TriggerMethod;
   };
-  playthrough_exported: SharedEventProperties;
   github_cta_viewed: {
     source_surface: "fixed_top_bar";
     route: "home" | "locations";
+  };
+  landing_viewed: SharedEventProperties & {
+    entry_route: "home" | "locations" | "other";
+  };
+  playthrough_created: SharedEventProperties & {
+    has_existing_playthroughs: boolean;
+  };
+  playthrough_exported: SharedEventProperties;
+  playthrough_import_failed: SharedEventProperties & {
+    import_source: ImportSource;
+    failure_stage: ImportFailureStage;
+    error_category: ImportErrorCategory;
+    has_file: boolean;
+    file_extension_group: FileExtensionGroup;
+    mime_group: MimeGroup;
+  };
+  playthrough_imported: SharedEventProperties & {
+    import_source: ImportSource;
+    file_extension_group: FileExtensionGroup;
+    mime_group: MimeGroup;
+  };
+  playthrough_resumed: SharedEventProperties & {
+    days_since_last_active_bucket: DormancyBucket;
+  };
+  playthrough_selector_opened: SharedEventProperties & {
+    source_surface: "header";
+  };
+  playthrough_switched: SharedEventProperties & {
+    previous_playthrough_id: string;
+    new_playthrough_id: string;
+    source_surface: SourceSurface;
+    trigger_method: TriggerMethod;
+  };
+  run_checkpoint_reached: SharedEventProperties & {
+    checkpoint: Checkpoint;
+    checkpoint_label: CheckpointLabel;
   };
 };
 
@@ -176,29 +176,29 @@ type BlockReason =
   | "invalid_payload"
   | "track_error";
 
-type EventCounter = {
-  sent: number;
+interface EventCounter {
   blocked: number;
-};
+  sent: number;
+}
 
-export type AnalyticsDebugCounters = {
-  sent: number;
+export interface AnalyticsDebugCounters {
   blocked: number;
-  byEvent: Record<AnalyticsEventName, EventCounter>;
   blockReasons: Record<BlockReason, number>;
-};
+  byEvent: Record<AnalyticsEventName, EventCounter>;
+  sent: number;
+}
 
 const COOKIE_PREFERENCES_KEY = "cookie-preferences";
 const DISABLE_ANALYTICS_VALUES = new Set(["1", "true", "yes", "on"]);
 
-type AppEnvironment = {
-  NODE_ENV?: string;
-  NEXT_PUBLIC_VERCEL_ENV?: string;
-  NEXT_PUBLIC_DISABLE_CUSTOM_ANALYTICS?: string;
+interface AppEnvironment {
+  ANALYTICS_DEBUG?: string;
   DISABLE_CUSTOM_ANALYTICS?: string;
   NEXT_PUBLIC_ANALYTICS_DEBUG?: string;
-  ANALYTICS_DEBUG?: string;
-};
+  NEXT_PUBLIC_DISABLE_CUSTOM_ANALYTICS?: string;
+  NEXT_PUBLIC_VERCEL_ENV?: string;
+  NODE_ENV?: string;
+}
 
 const ANALYTICS_PRODUCTION_HOSTNAMES = new Set([
   "fusion.nuzlocke.io",
@@ -643,7 +643,7 @@ function getBrowserStorage(): Pick<Storage, "getItem"> | null {
 export function hasAnalyticsConsent(
   storage: Pick<Storage, "getItem"> | null | undefined = getBrowserStorage(),
 ): boolean {
-  if (storage == null) {
+  if (storage === null) {
     return false;
   }
 
@@ -654,7 +654,7 @@ export function hasAnalyticsConsent(
     return false;
   }
 
-  if (value == null) {
+  if (value === null) {
     return false;
   }
 

@@ -28,7 +28,7 @@ export function TeamMemberTooltipContent({
     bodyPokemon?.id,
     true,
   );
-  const credits = spriteId == null ? undefined : creditsBySpriteId?.[spriteId];
+  const credits = spriteId === null ? undefined : creditsBySpriteId?.[spriteId];
   const credit =
     credits && Object.keys(credits).length > 0
       ? formatArtistCredits(credits)

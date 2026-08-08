@@ -529,7 +529,7 @@ describe("runAfterScrollSettles", () => {
     vi.useRealTimers();
   });
 
-  it("should only run callback once", async () => {
+  it("should only run callback once", () => {
     vi.useFakeTimers();
     const callback = vi.fn();
 

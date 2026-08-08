@@ -6,7 +6,7 @@ const LEGACY_PREFERRED_VARIANTS_STORAGE_KEY = "preferredVariants";
 
 const isPreferredVariantEntries = (
   value: unknown,
-): value is Array<[string, string]> =>
+): value is [string, string][] =>
   Array.isArray(value) &&
   value.every(
     (entry) =>

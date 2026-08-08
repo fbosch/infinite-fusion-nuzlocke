@@ -35,7 +35,7 @@ async function getRemixEncounters(): Promise<RouteEncounter[]> {
 }
 
 // Get encounters by route name
-async function getEncountersByRouteName(
+async function _getEncountersByRouteName(
   routeName: string | null | undefined,
   gameMode: "classic" | "remix" = "classic",
 ): Promise<RouteEncounter | null> {
@@ -74,7 +74,7 @@ async function getEncounters(
 }
 
 // Create a map of routeName to encounter for quick lookup
-async function getEncountersMap(
+async function _getEncountersMap(
   gameMode: "classic" | "remix" = "classic",
 ): Promise<Map<string, RouteEncounter>> {
   const encounters = await getEncounters(gameMode);
@@ -88,7 +88,7 @@ async function getEncountersMap(
 }
 
 // Function to clear cache if needed (for testing or data updates)
-function clearEncountersCache(): void {
+function _clearEncountersCache(): void {
   // This will be handled by TanStack Query's cache invalidation
   // You can use queryClient.invalidateQueries(['encounters']) if needed
 }

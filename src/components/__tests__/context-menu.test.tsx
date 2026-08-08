@@ -11,6 +11,8 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ContextMenu, clampMenuPosition } from "../ContextMenu";
 
+const parentAction = /Parent action/;
+
 describe("ContextMenu", () => {
   afterEach(cleanup);
 
@@ -100,7 +102,7 @@ describe("ContextMenu", () => {
     });
   });
 
-  it("announces context-menu lifecycle changes for trigger tooltips", async () => {
+  it("announces context-menu lifecycle changes for trigger tooltips", () => {
     const onOpen = vi.fn();
     const onClose = vi.fn();
     window.addEventListener("context-menu-open", onOpen);
@@ -161,7 +163,7 @@ describe("ContextMenu", () => {
       screen.getByRole("button", { name: "Context trigger" }),
     );
     const parent = await screen.findByRole("menuitem", {
-      name: /Parent action/,
+      name: parentAction,
     });
     parent.focus();
     fireEvent.keyDown(parent, { key: "ArrowRight" });
@@ -193,7 +195,7 @@ describe("ContextMenu", () => {
       screen.getByRole("button", { name: "Context trigger" }),
     );
     const parent = await screen.findByRole("menuitem", {
-      name: /Parent action/,
+      name: parentAction,
     });
     parent.focus();
     fireEvent.keyDown(parent, { key });

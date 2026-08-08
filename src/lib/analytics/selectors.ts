@@ -136,7 +136,7 @@ export const getTeamSizeAfter = (
   playthrough: Playthrough,
 ): 0 | 1 | 2 | 3 | 4 | 5 | 6 => {
   const size = playthrough.team.members.filter(
-    (member) => member != null,
+    (member) => member !== null,
   ).length;
 
   if (size <= 0) {

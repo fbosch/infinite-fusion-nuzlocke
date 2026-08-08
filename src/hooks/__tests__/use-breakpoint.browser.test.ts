@@ -74,7 +74,7 @@ describe("useBreakpoint Browser Tests", () => {
       expect(result7.current).toBe("2xl");
     });
 
-    it("should update breakpoint when window is resized", async () => {
+    it("should update breakpoint when window is resized", () => {
       setWindowWidth(375);
       const { result, rerender } = renderHook(() => useBreakpoint());
       expect(result.current).toBe("sm");
@@ -136,7 +136,7 @@ describe("useBreakpoint Browser Tests", () => {
       expect(result3.current).toBe(false);
     });
 
-    it("should update when window is resized", async () => {
+    it("should update when window is resized", () => {
       setWindowWidth(375);
       const { result, rerender } = renderHook(() => useBreakpointAtLeast("md"));
       expect(result.current).toBe(false);

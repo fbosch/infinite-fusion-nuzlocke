@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+const standardRoutePattern = /^Route \d+(\s*\(ID\s+-?\d+(?:\.\d+)?\))?$/i;
+
 /**
  * Tests for route name validation logic.
  * This replicates the fixed isValidRouteName function to prevent regressions.
@@ -90,9 +92,7 @@ function isValidRouteNameBroken(text: string): boolean {
 
   // This was the problematic check that filtered out Mt. Moon entries
   const alphaCount = (trimmedText.match(/[a-zA-Z]/g) || []).length;
-  const isValidRoute = /^Route \d+(\s*\(ID\s+-?\d+(?:\.\d+)?\))?$/i.test(
-    trimmedText,
-  );
+  const isValidRoute = standardRoutePattern.test(trimmedText);
   if (!isValidRoute && alphaCount < trimmedText.length / 2) {
     return false; // <-- This was the problem!
   }

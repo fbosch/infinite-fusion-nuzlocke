@@ -4,13 +4,13 @@ export const SITE_URL = "https://fusion.nuzlocke.io";
 
 type IndexableRoutePath = "/" | "/locations" | "/licenses";
 
-type IndexableRoute = {
-  path: IndexableRoutePath;
+interface IndexableRoute {
   changeFrequency: NonNullable<
     MetadataRoute.Sitemap[number]["changeFrequency"]
   >;
+  path: IndexableRoutePath;
   priority: number;
-};
+}
 
 const INDEXABLE_ROUTES: readonly IndexableRoute[] = [
   {

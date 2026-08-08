@@ -72,16 +72,16 @@ describe("PokemonGridItem", () => {
       />,
     );
 
-    await act(async () => {
-      resolveSecond!(pokemonData(4, "fire"));
-    });
+    await act(() =>
+      Promise.resolve().then(() => resolveSecond?.(pokemonData(4, "fire"))),
+    );
     await waitFor(() => {
       expect(screen.getByTestId("primary-type").textContent).toBe("fire");
     });
 
-    await act(async () => {
-      resolveFirst!(pokemonData(1, "grass"));
-    });
+    await act(() =>
+      Promise.resolve().then(() => resolveFirst?.(pokemonData(1, "grass"))),
+    );
 
     expect(screen.getByTestId("primary-type").textContent).toBe("fire");
   });

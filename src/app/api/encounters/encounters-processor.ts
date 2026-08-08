@@ -72,11 +72,14 @@ const EggLocationsSchema = z.object({
   totalLocations: z.number(),
 });
 
-type PokemonWithSource = { id: number; source: EncounterSource };
-type RouteData = {
+interface PokemonWithSource {
+  id: number;
+  source: EncounterSource;
+}
+interface RouteData {
   encounters?: Array<{ pokemonId: number; encounterType: EncounterType }>;
   pokemonIds?: number[];
-};
+}
 
 const withSource = (
   ids: number[],

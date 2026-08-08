@@ -1,8 +1,10 @@
 import { useSyncExternalStore } from "react";
 
-export type SafeParser<T> = {
-  safeParse(value: unknown): { success: true; data: T } | { success: false };
-};
+export interface SafeParser<T> {
+  safeParse: (
+    value: unknown,
+  ) => { success: true; data: T } | { success: false };
+}
 
 const callbacks = new Set<(key: string) => void>();
 

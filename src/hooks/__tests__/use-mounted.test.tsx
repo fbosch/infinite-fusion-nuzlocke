@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import { useMounted } from "../useMounted";
 
 function MountedValue() {
-  return <span>{useMounted() ? "mounted" : "unmounted"}</span>;
+  return (
+    <span>{String(useMounted()) === "true" ? "mounted" : "unmounted"}</span>
+  );
 }
 
 describe("useMounted", () => {

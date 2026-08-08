@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { Eraser } from "lucide-react";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { playthroughActions } from "@/stores/playthroughs";
 import ConfirmationDialog from "../ConfirmationDialog";
 import { CursorTooltip } from "../CursorTooltip";
@@ -32,7 +32,7 @@ export default function ResetEncounterButton({
   };
 
   return (
-    <Fragment>
+    <>
       <CursorTooltip
         className="origin-top-right"
         content={"Reset the encounter for this location"}
@@ -66,6 +66,6 @@ export default function ResetEncounterButton({
         title="Reset Encounter"
         variant="warning"
       />
-    </Fragment>
+    </>
   );
 }

@@ -206,7 +206,7 @@ describe("Playthroughs Store - Fusion Operations", () => {
         head: { name: "Pikachu" },
         isFusion: true,
       });
-      expect(playthroughsStore.playthroughs[0]?.team.members[0]).toEqual({
+      expect(playthroughsStore.playthroughs[0].team.members[0]).toEqual({
         bodyPokemonUid: encounter?.head?.uid,
         headPokemonUid: encounter?.body?.uid,
       });

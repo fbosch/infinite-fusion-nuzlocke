@@ -67,7 +67,7 @@ describe("FusionToggleButton", () => {
   });
 
   it("uses the active drag state and preserves its source through async fusion", async () => {
-    let resolveFusion: () => void;
+    let resolveFusion: (() => void) | undefined;
     createFusionMock.mockImplementation(
       () =>
         new Promise<void>((resolve) => {
@@ -122,7 +122,7 @@ describe("FusionToggleButton", () => {
     });
 
     dragActions.clearDrag();
-    resolveFusion!();
+    resolveFusion?.();
 
     await waitFor(() => {
       expect(getLocationFromComboboxIdMock).toHaveBeenCalledWith(
@@ -140,7 +140,7 @@ describe("FusionToggleButton", () => {
     const error = new Error("Pokemon query failed");
     const consoleError = vi
       .spyOn(console, "error")
-      .mockImplementation(() => {});
+      .mockImplementation(() => undefined);
     fetchQueryMock.mockRejectedValue(error);
     dragActions.startDrag("Pikachu", "route-2-single", {
       id: 25,

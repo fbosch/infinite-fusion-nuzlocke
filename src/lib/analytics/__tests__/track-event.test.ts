@@ -108,9 +108,10 @@ const VALID_EVENT_PAYLOADS: Record<
   },
 };
 
-const eventPayloadEntries = Object.entries(VALID_EVENT_PAYLOADS) as Array<
-  [AnalyticsEventName, Record<string, AnalyticsPrimitive>]
->;
+const eventPayloadEntries = Object.entries(VALID_EVENT_PAYLOADS) as [
+  AnalyticsEventName,
+  Record<string, AnalyticsPrimitive>,
+][];
 
 const sharedEventPayloadEntries = eventPayloadEntries.filter(
   ([eventName]) => eventName !== ANALYTICS_EVENTS.githubCtaViewed,
@@ -149,7 +150,7 @@ const createLocalStorageMock = () => {
 
 const setEnvironment = (nodeEnv: string, vercelEnv?: string) => {
   vi.stubEnv("NODE_ENV", nodeEnv);
-  if (vercelEnv == null) {
+  if (vercelEnv === null) {
     vi.unstubAllEnvs();
     vi.stubEnv("NODE_ENV", nodeEnv);
     return;
@@ -429,8 +430,7 @@ describe("analytics transport wrapper", () => {
       );
       setEnvironment("production", "production");
 
-      const invalidPayload = { ...payload };
-      delete invalidPayload.playthrough_id;
+      const { playthrough_id: _playthroughId, ...invalidPayload } = payload;
 
       trackEvent(eventName, invalidPayload as never);
 
@@ -496,7 +496,9 @@ describe("analytics transport wrapper", () => {
     );
     setEnvironment("production", "production");
     vi.stubEnv("NEXT_PUBLIC_ANALYTICS_DEBUG", "true");
-    const debugSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+    const debugSpy = vi
+      .spyOn(console, "debug")
+      .mockImplementation(() => undefined);
 
     trackEvent(ANALYTICS_EVENTS.playthroughExported, {
       boxed_count_bucket: "c_0",

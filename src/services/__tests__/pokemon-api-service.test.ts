@@ -157,7 +157,7 @@ describe("PokemonApiService", () => {
     });
 
     it("should throw error on invalid response format", async () => {
-      vi.spyOn(console, "error").mockImplementation(() => {});
+      vi.spyOn(console, "error").mockImplementation(() => undefined);
 
       const invalidResponse = {
         count: "not a number",
@@ -385,9 +385,7 @@ describe("PokemonApiService", () => {
 
     it("should handle malformed JSON responses", async () => {
       mockFetch.mockResolvedValueOnce({
-        json: async () => {
-          throw new Error("Invalid JSON");
-        },
+        json: () => Promise.reject(new Error("Invalid JSON")),
         ok: true,
       });
 
