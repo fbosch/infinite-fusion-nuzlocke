@@ -12,7 +12,9 @@ export const addCustomLocation = async (
   afterLocationId: string,
 ): Promise<string | null> => {
   const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough) return null;
+  if (!activePlaythrough) {
+    return null;
+  }
 
   try {
     // Ensure customLocations array exists
@@ -45,7 +47,9 @@ export const removeCustomLocation = async (
   customLocationId: string,
 ): Promise<boolean> => {
   const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough?.customLocations) return false;
+  if (!activePlaythrough?.customLocations) {
+    return false;
+  }
 
   const index = activePlaythrough.customLocations.findIndex(
     (loc) => loc.id === customLocationId,
@@ -81,7 +85,9 @@ export const updateCustomLocationName = (
   newName: string,
 ): boolean => {
   const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough?.customLocations) return false;
+  if (!activePlaythrough?.customLocations) {
+    return false;
+  }
 
   const customLocation = activePlaythrough.customLocations.find(
     (loc) => loc.id === customLocationId,
@@ -107,7 +113,9 @@ export const validateCustomLocationPlacement = async (
   afterLocationId: string,
 ): Promise<boolean> => {
   const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough) return false;
+  if (!activePlaythrough) {
+    return false;
+  }
 
   try {
     const { validateCustomLocationPlacement } = await import(

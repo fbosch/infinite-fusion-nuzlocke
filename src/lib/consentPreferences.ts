@@ -14,14 +14,14 @@ const isConsentPreferences = (value: unknown): value is ConsentPreferences =>
 export const consentPreferencesSchema: SafeParser<ConsentPreferences> = {
   safeParse: (value) =>
     isConsentPreferences(value)
-      ? { success: true, data: value }
+      ? { data: value, success: true }
       : { success: false },
 };
 
 export const consentGivenSchema: SafeParser<boolean> = {
   safeParse: (value) =>
     typeof value === "boolean"
-      ? { success: true, data: value }
+      ? { data: value, success: true }
       : { success: false },
 };
 

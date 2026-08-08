@@ -35,9 +35,6 @@ function createLocalStorageMock(): Storage {
   const store = new Map<string, string>();
 
   return {
-    get length() {
-      return store.size;
-    },
     clear() {
       store.clear();
     },
@@ -46,6 +43,9 @@ function createLocalStorageMock(): Storage {
     },
     key(index: number) {
       return Array.from(store.keys())[index] ?? null;
+    },
+    get length() {
+      return store.size;
     },
     removeItem(key: string) {
       store.delete(String(key));
@@ -60,16 +60,16 @@ if (hasUsableLocalStorage() === false) {
   const localStorageMock = createLocalStorageMock();
 
   Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
     value: localStorageMock,
     writable: true,
-    configurable: true,
   });
 
   if (typeof window !== "undefined") {
     Object.defineProperty(window, "localStorage", {
+      configurable: true,
       value: localStorageMock,
       writable: true,
-      configurable: true,
     });
   }
 }

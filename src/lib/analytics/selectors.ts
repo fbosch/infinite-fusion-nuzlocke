@@ -71,23 +71,20 @@ export const getEncounterCount = (playthrough: Playthrough): number => {
   return count;
 };
 
-const getDeceasedCount = (playthrough: Playthrough): number => {
-  return getEncounterPokemon(playthrough).filter(
+const getDeceasedCount = (playthrough: Playthrough): number =>
+  getEncounterPokemon(playthrough).filter(
     (pokemon) => pokemon.status === PokemonStatus.DECEASED,
   ).length;
-};
 
-const getBoxedCount = (playthrough: Playthrough): number => {
-  return getEncounterPokemon(playthrough).filter(
+const getBoxedCount = (playthrough: Playthrough): number =>
+  getEncounterPokemon(playthrough).filter(
     (pokemon) => pokemon.status === PokemonStatus.STORED,
   ).length;
-};
 
-export const getFusionCount = (playthrough: Playthrough): number => {
-  return getEncounterEntries(playthrough).filter(
+export const getFusionCount = (playthrough: Playthrough): number =>
+  getEncounterEntries(playthrough).filter(
     (encounter) => encounter.isFusion && encounter.head && encounter.body,
   ).length;
-};
 
 export const getViableRosterSize = (playthrough: Playthrough): number => {
   const pokemonByUid = getPokemonByUid(playthrough);
@@ -125,12 +122,12 @@ export const getSharedEventProperties = (
   const viableRosterSize = getViableRosterSize(playthrough);
 
   return {
-    playthrough_id: playthrough.id,
-    game_mode: toAnalyticsGameMode(playthrough.gameMode),
-    encounter_count_bucket: toEncounterCountBucket(encounterCount),
-    deceased_count_bucket: toCountBucket(deceasedCount),
     boxed_count_bucket: toCountBucket(boxedCount),
+    deceased_count_bucket: toCountBucket(deceasedCount),
+    encounter_count_bucket: toEncounterCountBucket(encounterCount),
     fusion_count_bucket: toCountBucket(fusionCount),
+    game_mode: toAnalyticsGameMode(playthrough.gameMode),
+    playthrough_id: playthrough.id,
     viable_roster_bucket: toViableRosterBucket(viableRosterSize),
   };
 };
@@ -142,11 +139,23 @@ export const getTeamSizeAfter = (
     (member) => member != null,
   ).length;
 
-  if (size <= 0) return 0;
-  if (size === 1) return 1;
-  if (size === 2) return 2;
-  if (size === 3) return 3;
-  if (size === 4) return 4;
-  if (size === 5) return 5;
+  if (size <= 0) {
+    return 0;
+  }
+  if (size === 1) {
+    return 1;
+  }
+  if (size === 2) {
+    return 2;
+  }
+  if (size === 3) {
+    return 3;
+  }
+  if (size === 4) {
+    return 4;
+  }
+  if (size === 5) {
+    return 5;
+  }
   return 6;
 };

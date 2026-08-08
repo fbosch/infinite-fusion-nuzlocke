@@ -7,24 +7,23 @@
 
 // Simple patterns for route validation
 export const ROUTE_PATTERNS = {
-  // Basic route pattern: "Route" followed by a number
-  ROUTE_NUMBER: /^Route\s+\d+(?:\s*-\s*.+|\s+Gate)?$/i,
-
-  // Safari Zone pattern: "Safari Zone" followed by optional area
-  SAFARI_ZONE: /^Safari Zone(?:\s+\(Area\s+\d+\))?$/i,
+  // ID cleanup pattern
+  ROUTE_ID_CLEAN: /\s*\(ID\s+-?\d+(?:\.\d+)?\)\s*$/i,
 
   // ID extraction pattern
   ROUTE_ID_EXTRACT: /\(ID\s+(-?\d+(?:\.\d+)?)\)/i,
 
-  // ID cleanup pattern
-  ROUTE_ID_CLEAN: /\s*\(ID\s+-?\d+(?:\.\d+)?\)\s*$/i,
+  // Legacy pattern for test compatibility
+  ROUTE_MATCH: /^Route\s+\d+$/i,
+  // Basic route pattern: "Route" followed by a number
+  ROUTE_NUMBER: /^Route\s+\d+(?:\s*-\s*.+|\s+Gate)?$/i,
 
   // Route variant cleanup patterns
   ROUTE_VARIANT_BILLS_HOUSE_CLEAN: /^(Route\s+\d+)\s*-\s*Bill'?s\s+House$/i,
   ROUTE_VARIANT_GATE_CLEAN: /^(Route\s+\d+)\s+Gate$/i,
 
-  // Legacy pattern for test compatibility
-  ROUTE_MATCH: /^Route\s+\d+$/i,
+  // Safari Zone pattern: "Safari Zone" followed by optional area
+  SAFARI_ZONE: /^Safari Zone(?:\s+\(Area\s+\d+\))?$/i,
 } as const;
 
 // Common location suffixes that indicate valid locations
@@ -291,15 +290,15 @@ export function cleanRouteName(routeName: string): string {
  */
 export function extractRouteId(routeName: string): number | undefined {
   if (!routeName || typeof routeName !== "string") {
-    return undefined;
+    return;
   }
 
   const match = routeName.match(ROUTE_PATTERNS.ROUTE_ID_EXTRACT);
   if (!match?.[1]) {
-    return undefined;
+    return;
   }
 
-  const id = parseInt(match[1], 10);
+  const id = Number.parseInt(match[1], 10);
   return Number.isNaN(id) ? undefined : id;
 }
 

@@ -53,7 +53,9 @@ export function clampMenuPosition(
 export function filterEdgeSeparators(
   items: ContextMenuItem[],
 ): ContextMenuItem[] {
-  if (items.length === 0) return items;
+  if (items.length === 0) {
+    return items;
+  }
 
   // Find first non-separator item
   let start = 0;
@@ -68,7 +70,9 @@ export function filterEdgeSeparators(
   }
 
   // If no non-separator items found, return empty array
-  if (start > end) return [];
+  if (start > end) {
+    return [];
+  }
 
   // Return slice from first to last non-separator item
   return items.slice(start, end + 1);
@@ -106,7 +110,9 @@ function getContextMenuItemVariantClasses(
 }
 
 interface ContextMenuSubmenuProps {
+  activeIndex: number;
   children: ContextMenuItem[];
+  itemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
   menuRef: React.RefObject<HTMLDivElement | null>;
   onClose: () => void;
   onKeyDown: (
@@ -114,8 +120,6 @@ interface ContextMenuSubmenuProps {
     index: number,
   ) => void;
   onSelect: (event: React.MouseEvent, item: ContextMenuItem) => void;
-  activeIndex: number;
-  itemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
   position: { left: number; top: number };
 }
 
@@ -132,47 +136,47 @@ function ContextMenuSubmenu({
   return (
     <FloatingPortal>
       <div
-        ref={menuRef}
-        style={{
-          position: "fixed",
-          left: position.left,
-          top: position.top,
-          minWidth: "12rem",
-        }}
         className={clsx(
           "z-[10000] rounded-md border border-gray-200 dark:border-gray-800",
-          "bg-white dark:bg-gray-900/80 shadow-xl shadow-black/5 dark:shadow-black/25",
-          "p-1 backdrop-blur-xl origin-top-left",
+          "bg-white shadow-black/5 shadow-xl dark:bg-gray-900/80 dark:shadow-black/25",
+          "origin-top-left p-1 backdrop-blur-xl",
           "overflow-hidden",
         )}
-        role="menu"
         onMouseLeave={onClose}
+        ref={menuRef}
+        role="menu"
+        style={{
+          left: position.left,
+          minWidth: "12rem",
+          position: "fixed",
+          top: position.top,
+        }}
       >
         {children.map((child, index) => (
           <button
-            key={child.id}
-            ref={(node) => {
-              itemRefs.current[index] = node;
-            }}
-            type="button"
             className={clsx(
               "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
               "text-sm transition-colors duration-75 enabled:cursor-pointer",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-              "text-gray-700 dark:text-gray-200 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-900 enabled:dark:hover:text-white",
+              "text-gray-700 enabled:hover:bg-gray-100 enabled:hover:text-gray-900 dark:text-gray-200 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white",
               child.disabled && "!opacity-75 !cursor-not-allowed",
             )}
             disabled={child.disabled}
-            role="menuitem"
-            tabIndex={index === activeIndex ? 0 : -1}
+            key={child.id}
             onClick={(event) => onSelect(event, child)}
             onKeyDown={(event) => onKeyDown(event, index)}
+            ref={(node) => {
+              itemRefs.current[index] = node;
+            }}
+            role="menuitem"
+            tabIndex={index === activeIndex ? 0 : -1}
+            type="button"
           >
-            <div className="flex items-center gap-x-2 w-full">
+            <div className="flex w-full items-center gap-x-2">
               {child.icon && (
                 <child.icon
-                  className="h-4 w-4 flex-shrink-0"
                   aria-hidden="true"
+                  className="h-4 w-4 flex-shrink-0"
                 />
               )}
               <span className="truncate">{child.label}</span>
@@ -216,43 +220,43 @@ function useContextMenuState() {
   };
 
   return {
-    menuPosition,
-    setMenuPosition,
-    isOpen,
-    isVisible,
     activeIndex,
-    setActiveIndex,
-    openMenu,
     closeMenu,
     hideMenu,
+    isOpen,
+    isVisible,
+    menuPosition,
+    openMenu,
+    setActiveIndex,
+    setMenuPosition,
   };
 }
 
 export interface ContextMenuItem {
-  id: string;
-  label?: React.ReactNode;
+  children?: ContextMenuItem[];
+  disabled?: boolean;
+  favicon?: string;
+  href?: string;
   icon?: LucideIcon;
   iconClassName?: string;
-  favicon?: string;
+  id: string;
+  label?: React.ReactNode;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onClick?: (event: React.MouseEvent<any>) => void;
-  href?: string;
-  target?: string;
-  disabled?: boolean;
-  visualOnly?: boolean;
-  variant?: "default" | "danger" | "warning";
-  shortcut?: string;
   separator?: boolean;
+  shortcut?: string;
+  target?: string;
   tooltip?: React.ReactNode;
-  children?: ContextMenuItem[];
+  variant?: "default" | "danger" | "warning";
+  visualOnly?: boolean;
   // Remove customContent since we're using ReactNode for label now
 }
 
 export interface ContextMenuProps {
   children: React.ReactNode;
-  items: ContextMenuItem[];
   className?: string;
   disabled?: boolean;
+  items: ContextMenuItem[];
   portalRootId?: string;
 }
 
@@ -306,19 +310,22 @@ export function ContextMenu({
     isOpenRef.current = isOpen;
   }, [isOpen]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (isOpenRef.current) {
         window.dispatchEvent(new Event("context-menu-close"));
       }
-    };
-  }, []);
+    },
+    [],
+  );
 
   useLayoutEffect(() => {
-    if (!isVisible || !menuElementRef.current) return;
+    if (!(isVisible && menuElementRef.current)) {
+      return;
+    }
 
     const { width, height } = menuElementRef.current.getBoundingClientRect();
-    const nextPosition = clampMenuPosition(menuPosition, { width, height });
+    const nextPosition = clampMenuPosition(menuPosition, { height, width });
 
     if (
       nextPosition.x !== menuPosition.x ||
@@ -332,7 +339,7 @@ export function ContextMenu({
     const isVisible = document.visibilityState === "visible";
     const isFocused = document.hasFocus();
 
-    if ((!isVisible || !isFocused) && isOpen) {
+    if (!(isVisible && isFocused) && isOpen) {
       handleClose();
     }
   });
@@ -361,20 +368,22 @@ export function ContextMenu({
 
   // Floating UI setup for keyboard navigation
   const { refs, context } = useFloating({
-    open: isOpen,
     onOpenChange: (open) => {
-      if (!open) handleClose();
+      if (!open) {
+        handleClose();
+      }
     },
+    open: isOpen,
   });
 
   const dismiss = useDismiss(context);
   const role = useRole(context, { role: "menu" });
   const listNavigation = useListNavigation(context, {
-    listRef,
     activeIndex,
-    selectedIndex: null,
-    onNavigate: setActiveIndex,
+    listRef,
     loop: true,
+    onNavigate: setActiveIndex,
+    selectedIndex: null,
   });
 
   const { getFloatingProps, getItemProps } = useInteractions([
@@ -401,7 +410,9 @@ export function ContextMenu({
   }, []);
 
   useEffect(() => {
-    if (!isVisible) return;
+    if (!isVisible) {
+      return;
+    }
 
     document.addEventListener("contextmenu", handleActiveContextMenu, true);
     return () => {
@@ -431,7 +442,9 @@ export function ContextMenu({
   };
 
   const handleContextMenu = (event: React.MouseEvent) => {
-    if (disabled) return;
+    if (disabled) {
+      return;
+    }
 
     event.preventDefault();
     event.stopPropagation();
@@ -453,7 +466,7 @@ export function ContextMenu({
 
   const visibleItems = filterEdgeSeparators(items);
   const navigableItems = visibleItems.filter(
-    (item) => !item.separator && !item.disabled && !item.visualOnly,
+    (item) => !(item.separator || item.disabled || item.visualOnly),
   );
 
   return (
@@ -462,11 +475,11 @@ export function ContextMenu({
       {isValidElement(children) &&
         // react-doctor-disable-next-line react-hooks-js/refs -- Floating UI callback refs run during commit, not render.
         cloneElement(children, {
+          "data-context-menu-trigger": disabled ? undefined : triggerId,
+          onContextMenu: handleContextMenu,
           ref: (node: HTMLElement | null) => {
             refs.setReference(node);
           },
-          onContextMenu: handleContextMenu,
-          "data-context-menu-trigger": disabled ? undefined : triggerId,
         } as React.HTMLAttributes<HTMLElement>)}
 
       {/* Render popover in portal when visible */}
@@ -474,29 +487,29 @@ export function ContextMenu({
         <FloatingPortal id={portalRootId}>
           <FloatingFocusManager context={context} modal={false}>
             <div
-              ref={(node) => {
-                refs.setFloating(node);
-                menuElementRef.current = node;
-              }}
-              style={{
-                position: "fixed",
-                left: menuPosition.x,
-                top: menuPosition.y,
-                transformOrigin: "top left",
-                zIndex: 9999,
-              }}
+              aria-orientation="vertical"
               className={clsx(
                 "min-w-[12rem] rounded-md border border-gray-200 dark:border-gray-800",
                 "max-h-[calc(100vh-1rem)] max-w-[calc(100vw-1rem)] overflow-y-auto",
-                "bg-white dark:bg-gray-900/80 shadow-elevation-3",
-                "p-1 backdrop-blur-xl tooltip-enter",
+                "bg-white shadow-elevation-3 dark:bg-gray-900/80",
+                "tooltip-enter p-1 backdrop-blur-xl",
                 "origin-top-left backdrop-blur-xl",
                 "focus:outline-none",
                 "pointer-events-auto",
                 className,
               )}
+              ref={(node) => {
+                refs.setFloating(node);
+                menuElementRef.current = node;
+              }}
               role="menu"
-              aria-orientation="vertical"
+              style={{
+                left: menuPosition.x,
+                position: "fixed",
+                top: menuPosition.y,
+                transformOrigin: "top left",
+                zIndex: 9999,
+              }}
               {...getFloatingProps()}
             >
               {/* react-doctor-disable-next-line react-hooks-js/refs -- List refs are populated for commit-time Floating UI navigation. */}
@@ -504,8 +517,8 @@ export function ContextMenu({
                 if (item.separator) {
                   return (
                     <hr
-                      key={item.id}
                       className="my-1 h-px border-0 bg-gray-300 dark:bg-gray-600"
+                      key={item.id}
                     />
                   );
                 }
@@ -529,7 +542,7 @@ export function ContextMenu({
                 const commonClasses = clsx(
                   baseClasses,
                   item.visualOnly
-                    ? "text-gray-500 dark:text-gray-400 cursor-default"
+                    ? "cursor-default text-gray-500 dark:text-gray-400"
                     : variantClasses,
                   item.disabled && "!opacity-75 !cursor-not-allowed",
                 );
@@ -537,37 +550,37 @@ export function ContextMenu({
                 const hasChildren =
                   Array.isArray(item.children) && item.children.length > 0;
                 const content = (
-                  <div className="flex items-center gap-x-2 w-full">
+                  <div className="flex w-full items-center gap-x-2">
                     {item.icon && !item.href && (
                       <item.icon
+                        aria-hidden="true"
                         className={twMerge(
                           "h-4 w-4 flex-shrink-0",
                           item.iconClassName,
                         )}
-                        aria-hidden="true"
                       />
                     )}
-                    <div className="flex items-center gap-x-2 min-w-0">
+                    <div className="flex min-w-0 items-center gap-x-2">
                       {item.favicon && item.href && (
                         <Image
-                          src={item.favicon}
                           alt=""
-                          loading="lazy"
-                          decoding="async"
-                          className="h-4 w-4 flex-shrink-0 rounded-sm"
-                          width={16}
-                          height={16}
-                          unoptimized
                           aria-hidden="true"
+                          className="h-4 w-4 flex-shrink-0 rounded-sm"
+                          decoding="async"
+                          height={16}
+                          loading="lazy"
                           onError={(e) => {
                             e.currentTarget.style.display = "none";
                           }}
+                          src={item.favicon}
+                          unoptimized
+                          width={16}
                         />
                       )}
                       <span className="truncate">{item.label}</span>
                     </div>
                     {/* Right: shortcut and icon, always aligned to end */}
-                    <div className="flex items-center gap-x-2 ml-auto">
+                    <div className="ml-auto flex items-center gap-x-2">
                       {item.shortcut && (
                         <span className="text-xs opacity-60">
                           {item.shortcut}
@@ -575,17 +588,17 @@ export function ContextMenu({
                       )}
                       {item.icon && item.href && (
                         <item.icon
+                          aria-hidden="true"
                           className={twMerge(
                             "h-4 w-4 flex-shrink-0",
                             item.iconClassName,
                           )}
-                          aria-hidden="true"
                         />
                       )}
                       {hasChildren && (
                         <ChevronRight
-                          className="h-4 w-4 opacity-60"
                           aria-hidden="true"
+                          className="h-4 w-4 opacity-60"
                         />
                       )}
                     </div>
@@ -595,11 +608,10 @@ export function ContextMenu({
                 const submenu =
                   hasChildren && openSubmenuIndex === validIndex ? (
                     <ContextMenuSubmenu
-                      menuRef={submenuRef}
-                      onClose={closeSubmenu}
-                      position={submenuPosition}
                       activeIndex={activeSubmenuIndex}
                       itemRefs={submenuItemRefs}
+                      menuRef={submenuRef}
+                      onClose={closeSubmenu}
                       onKeyDown={(event, childIndex) => {
                         const enabledItems = item.children!.filter(
                           (child) => !child.disabled,
@@ -613,7 +625,9 @@ export function ContextMenu({
                           event.key === "ArrowDown" ||
                           event.key === "ArrowUp"
                         ) {
-                          if (enabledItems.length === 0) return;
+                          if (enabledItems.length === 0) {
+                            return;
+                          }
 
                           event.preventDefault();
                           const direction = event.key === "ArrowDown" ? 1 : -1;
@@ -651,6 +665,7 @@ export function ContextMenu({
                           handleClose();
                         }
                       }}
+                      position={submenuPosition}
                     >
                       {item.children!}
                     </ContextMenuSubmenu>
@@ -660,16 +675,16 @@ export function ContextMenu({
                 if (item.href) {
                   const linkElement = (
                     <a
+                      aria-disabled={item.disabled || undefined}
+                      className={commonClasses}
+                      href={item.href}
                       key={item.id}
                       ref={(node) => {
                         listRef.current[validIndex] = node;
                       }}
-                      target={item.target}
-                      href={item.href}
-                      className={commonClasses}
-                      aria-disabled={item.disabled || undefined}
                       role="menuitem"
                       tabIndex={isActive ? 0 : -1}
+                      target={item.target}
                       {...getItemProps({
                         onClick: (event) => {
                           if (item.disabled) {
@@ -690,10 +705,10 @@ export function ContextMenu({
                   if (item.tooltip) {
                     return (
                       <CursorTooltip
-                        key={item.id}
                         content={item.tooltip}
-                        placement="right"
                         delay={500}
+                        key={item.id}
+                        placement="right"
                       >
                         {linkElement}
                       </CursorTooltip>
@@ -706,8 +721,8 @@ export function ContextMenu({
                 // Render as button or visual-only element
                 const buttonElement = item.visualOnly ? (
                   <div
-                    key={item.id}
                     className={commonClasses}
+                    key={item.id}
                     role="presentation"
                     tabIndex={-1}
                   >
@@ -715,26 +730,22 @@ export function ContextMenu({
                   </div>
                 ) : (
                   <button
+                    className={commonClasses}
+                    disabled={item.disabled}
                     key={item.id}
                     ref={(node) => {
                       listRef.current[validIndex] = node;
                     }}
-                    className={commonClasses}
-                    disabled={item.disabled}
                     role="menuitem"
                     tabIndex={isActive ? 0 : -1}
                     {...getItemProps({
                       onClick: (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (!item.disabled && !hasChildren) {
+                        if (!(item.disabled || hasChildren)) {
                           item.onClick?.(e);
                           handleClose();
                         }
-                      },
-                      onMouseEnter: () => {
-                        if (hasChildren) openSubmenuForIndex(validIndex);
-                        else closeSubmenu();
                       },
                       onKeyDown: (event) => {
                         if (
@@ -748,7 +759,9 @@ export function ContextMenu({
                             item.children!.findIndex(
                               (child) => !child.disabled,
                             );
-                          if (firstEnabledChildIndex === -1) return;
+                          if (firstEnabledChildIndex === -1) {
+                            return;
+                          }
 
                           openSubmenuForIndex(validIndex);
                           setActiveSubmenuIndex(firstEnabledChildIndex);
@@ -759,11 +772,18 @@ export function ContextMenu({
                           });
                         }
                       },
+                      onMouseEnter: () => {
+                        if (hasChildren) {
+                          openSubmenuForIndex(validIndex);
+                        } else {
+                          closeSubmenu();
+                        }
+                      },
                     })}
-                    aria-haspopup={hasChildren ? "menu" : undefined}
                     aria-expanded={
                       hasChildren ? openSubmenuIndex === validIndex : undefined
                     }
+                    aria-haspopup={hasChildren ? "menu" : undefined}
                   >
                     {content}
                   </button>
@@ -773,10 +793,10 @@ export function ContextMenu({
                 if (item.tooltip) {
                   return (
                     <CursorTooltip
-                      key={item.id}
                       content={item.tooltip}
-                      placement="right"
                       delay={500}
+                      key={item.id}
+                      placement="right"
                     >
                       <div className="relative">
                         {buttonElement}
@@ -787,7 +807,7 @@ export function ContextMenu({
                 }
 
                 return (
-                  <div key={item.id} className="relative">
+                  <div className="relative" key={item.id}>
                     {buttonElement}
                     {submenu}
                   </div>

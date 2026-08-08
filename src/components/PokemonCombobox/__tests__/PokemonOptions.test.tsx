@@ -56,12 +56,12 @@ describe("PokemonOption", () => {
   it("shows the duplicate badge for already captured species", () => {
     render(
       <PokemonOption
-        pokemon={mockPokemon}
-        locationId="route-1"
-        isRoutePokemon={() => true}
-        isDuplicatePokemon={() => true}
-        getPokemonSource={() => []}
         gameMode="classic"
+        getPokemonSource={() => []}
+        isDuplicatePokemon={() => true}
+        isRoutePokemon={() => true}
+        locationId="route-1"
+        pokemon={mockPokemon}
       />,
     );
 
@@ -72,12 +72,12 @@ describe("PokemonOption", () => {
   it("omits the duplicate badge for uncaptured species", () => {
     render(
       <PokemonOption
-        pokemon={mockPokemon}
-        locationId="route-1"
-        isRoutePokemon={() => false}
-        isDuplicatePokemon={() => false}
-        getPokemonSource={() => []}
         gameMode="classic"
+        getPokemonSource={() => []}
+        isDuplicatePokemon={() => false}
+        isRoutePokemon={() => false}
+        locationId="route-1"
+        pokemon={mockPokemon}
       />,
     );
 
@@ -94,14 +94,14 @@ describe("FusionCombinationOption", () => {
     render(
       <FusionCombinationOption
         pokemon={{
-          id: 11,
-          name: "Metapod",
-          nationalDexId: 11,
           fusionBody: {
             id: 200,
             name: "Misdreavus",
             nationalDexId: 200,
           },
+          id: 11,
+          name: "Metapod",
+          nationalDexId: 11,
         }}
       />,
     );

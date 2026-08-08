@@ -40,7 +40,7 @@ describe("Format Utilities", () => {
 
     it("should handle invalid input", () => {
       expect(formatFileSize(-1)).toBe("0 B");
-      expect(formatFileSize(NaN)).toBe("0 B");
+      expect(formatFileSize(Number.NaN)).toBe("0 B");
       expect(formatFileSize(null as any)).toBe("0 B");
       expect(formatFileSize(undefined as any)).toBe("0 B");
       expect(formatFileSize("string" as any)).toBe("0 B");
@@ -62,32 +62,32 @@ describe("Format Utilities", () => {
     it("should format seconds correctly", () => {
       expect(formatDuration(1000)).toBe("1.0s");
       expect(formatDuration(1500)).toBe("1.5s");
-      expect(formatDuration(30000)).toBe("30.0s");
-      expect(formatDuration(59999)).toBe("60.0s");
+      expect(formatDuration(30_000)).toBe("30.0s");
+      expect(formatDuration(59_999)).toBe("60.0s");
     });
 
     it("should format minutes correctly", () => {
-      expect(formatDuration(60000)).toBe("1m");
-      expect(formatDuration(90000)).toBe("1m 30s");
-      expect(formatDuration(120000)).toBe("2m");
-      expect(formatDuration(125000)).toBe("2m 5s");
+      expect(formatDuration(60_000)).toBe("1m");
+      expect(formatDuration(90_000)).toBe("1m 30s");
+      expect(formatDuration(120_000)).toBe("2m");
+      expect(formatDuration(125_000)).toBe("2m 5s");
     });
 
     it("should format hours correctly", () => {
-      expect(formatDuration(3600000)).toBe("1h"); // 1 hour
-      expect(formatDuration(3660000)).toBe("1h 1m"); // 1h 1m
-      expect(formatDuration(3665000)).toBe("1h 1m 5s"); // 1h 1m 5s
-      expect(formatDuration(7200000)).toBe("2h"); // 2 hours
+      expect(formatDuration(3_600_000)).toBe("1h"); // 1 hour
+      expect(formatDuration(3_660_000)).toBe("1h 1m"); // 1h 1m
+      expect(formatDuration(3_665_000)).toBe("1h 1m 5s"); // 1h 1m 5s
+      expect(formatDuration(7_200_000)).toBe("2h"); // 2 hours
     });
 
     it("should handle edge cases", () => {
-      expect(formatDuration(3600000 + 5000)).toBe("1h 5s"); // 1h 0m 5s -> 1h 5s
-      expect(formatDuration(3600000 + 60000)).toBe("1h 1m"); // 1h 1m 0s -> 1h 1m
+      expect(formatDuration(3_600_000 + 5000)).toBe("1h 5s"); // 1h 0m 5s -> 1h 5s
+      expect(formatDuration(3_600_000 + 60_000)).toBe("1h 1m"); // 1h 1m 0s -> 1h 1m
     });
 
     it("should handle invalid input", () => {
       expect(formatDuration(-1)).toBe("0ms");
-      expect(formatDuration(NaN)).toBe("0ms");
+      expect(formatDuration(Number.NaN)).toBe("0ms");
       expect(formatDuration(null as any)).toBe("0ms");
       expect(formatDuration(undefined as any)).toBe("0ms");
       expect(formatDuration("string" as any)).toBe("0ms");
@@ -102,8 +102,8 @@ describe("Format Utilities", () => {
   describe("formatNumber", () => {
     it("should format numbers with commas", () => {
       expect(formatNumber(1000)).toBe("1,000");
-      expect(formatNumber(1234567)).toBe("1,234,567");
-      expect(formatNumber(1000000)).toBe("1,000,000");
+      expect(formatNumber(1_234_567)).toBe("1,234,567");
+      expect(formatNumber(1_000_000)).toBe("1,000,000");
     });
 
     it("should handle small numbers", () => {
@@ -114,16 +114,16 @@ describe("Format Utilities", () => {
 
     it("should handle negative numbers", () => {
       expect(formatNumber(-1000)).toBe("-1,000");
-      expect(formatNumber(-1234567)).toBe("-1,234,567");
+      expect(formatNumber(-1_234_567)).toBe("-1,234,567");
     });
 
     it("should handle decimal numbers", () => {
       expect(formatNumber(1000.5)).toBe("1,000.5");
-      expect(formatNumber(1234567.89)).toBe("1,234,567.89");
+      expect(formatNumber(1_234_567.89)).toBe("1,234,567.89");
     });
 
     it("should handle invalid input", () => {
-      expect(formatNumber(NaN)).toBe("0");
+      expect(formatNumber(Number.NaN)).toBe("0");
       expect(formatNumber(null as any)).toBe("0");
       expect(formatNumber(undefined as any)).toBe("0");
       expect(formatNumber("string" as any)).toBe("0");
@@ -139,9 +139,9 @@ describe("Format Utilities", () => {
     });
 
     it("should respect custom decimal places", () => {
-      expect(formatPercentage(33.33333, 0)).toBe("33%");
-      expect(formatPercentage(33.33333, 2)).toBe("33.33%");
-      expect(formatPercentage(33.33333, 3)).toBe("33.333%");
+      expect(formatPercentage(33.333_33, 0)).toBe("33%");
+      expect(formatPercentage(33.333_33, 2)).toBe("33.33%");
+      expect(formatPercentage(33.333_33, 3)).toBe("33.333%");
     });
 
     it("should handle edge cases", () => {
@@ -150,7 +150,7 @@ describe("Format Utilities", () => {
     });
 
     it("should handle invalid input", () => {
-      expect(formatPercentage(NaN)).toBe("0%");
+      expect(formatPercentage(Number.NaN)).toBe("0%");
       expect(formatPercentage(null as any)).toBe("0%");
       expect(formatPercentage(undefined as any)).toBe("0%");
       expect(formatPercentage("string" as any)).toBe("0%");

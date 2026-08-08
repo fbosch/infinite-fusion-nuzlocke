@@ -14,6 +14,7 @@ vi.mock("valtio", async (importOriginal) => ({
 vi.mock("@/stores/playthroughs/hooks", () => ({
   useEncounters: () => ({
     "route-2": {
+      body: null,
       head: {
         id: 25,
         name: "Pikachu",
@@ -21,7 +22,6 @@ vi.mock("@/stores/playthroughs/hooks", () => ({
         originalLocation: "route-1",
         status: PokemonStatus.CAPTURED,
       },
-      body: null,
       isFusion: false,
       updatedAt: 0,
     },
@@ -62,9 +62,9 @@ vi.mock("@/constants/special-locations", () => ({
 import LocationCell from "../LocationCell";
 
 const location = {
+  description: "A quiet starting route.",
   id: "route-1",
   name: "Route 1",
-  description: "A quiet starting route.",
 } as CombinedLocation;
 
 describe("LocationCell", () => {

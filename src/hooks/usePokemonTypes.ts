@@ -3,9 +3,9 @@ import { getTypesForPokemon, type TypeQuery } from "@/lib/typings";
 import { useAllPokemon } from "@/loaders/pokemon";
 
 export interface UsePokemonTypesResult {
+  isLoading: boolean;
   primary?: TypeName;
   secondary?: TypeName;
-  isLoading: boolean;
 }
 
 export function usePokemonTypes(
@@ -13,8 +13,12 @@ export function usePokemonTypes(
 ): UsePokemonTypesResult {
   const { data: allPokemon = [], isLoading } = useAllPokemon(Boolean(query));
 
-  if (!query) return { isLoading };
-  if (!allPokemon || allPokemon.length === 0) return { isLoading: true };
+  if (!query) {
+    return { isLoading };
+  }
+  if (!allPokemon || allPokemon.length === 0) {
+    return { isLoading: true };
+  }
 
   const resolveBy = (q: TypeQuery) => {
     if ("name" in q) {
@@ -31,7 +35,6 @@ export function usePokemonTypes(
       const p = allPokemon.find((x) => x.nationalDexId === q.nationalDexId);
       return p ? getTypesForPokemon(p) : undefined;
     }
-    return undefined;
   };
 
   const types = resolveBy(query);

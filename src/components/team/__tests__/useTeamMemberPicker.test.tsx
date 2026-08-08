@@ -13,8 +13,8 @@ vi.mock("@/stores/playthroughs", () => ({
 const pokemon = {
   id: 25,
   name: "Pikachu",
-  uid: "pikachu-uid",
   nationalDexId: 25,
+  uid: "pikachu-uid",
 };
 
 describe("useTeamMemberPicker", () => {

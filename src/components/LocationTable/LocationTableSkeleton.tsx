@@ -3,18 +3,18 @@ import { locationTableColumnWidths } from "./columnWidths";
 
 export default function LocationTableSkeleton() {
   return (
-    <div className="overflow-hidden 2xl:rounded-lg border-y md:border border-gray-200 dark:border-gray-700 xl:shadow-sm">
+    <div className="overflow-hidden border-gray-200 border-y md:border xl:shadow-sm 2xl:rounded-lg dark:border-gray-700">
       {/* fallow-ignore-next-line css-token-drift -- Matches the live table viewport constraint. */}
-      <div className="max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative">
+      <div className="scrollbar-thin relative max-h-[93.5vh] overflow-auto overscroll-x-none">
         <table
-          className="w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700"
           aria-label="Loading locations table"
+          className="w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700"
         >
-          <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0 z-50 shadow-[0_0.5px_0_0_rgb(229,231,235)] dark:shadow-[0_0.5px_0_0_rgb(55,65,81)]">
+          <thead className="sticky top-0 z-50 bg-gray-50 shadow-[0_0.5px_0_0_rgb(229,231,235)] dark:bg-gray-800 dark:shadow-[0_0.5px_0_0_rgb(55,65,81)]">
             <tr>
               <th
                 className={clsx(
-                  "px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider",
+                  "px-4 py-3 text-left text-gray-500 text-xs uppercase tracking-wider dark:text-gray-400",
                   locationTableColumnWidths.name,
                 )}
               >
@@ -22,13 +22,13 @@ export default function LocationTableSkeleton() {
               </th>
               <th
                 className={clsx(
-                  "px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider",
+                  "px-4 py-3 text-left text-gray-500 text-xs uppercase tracking-wider dark:text-gray-400",
                   locationTableColumnWidths.sprite,
                 )}
-              ></th>
+              />
               <th
                 className={clsx(
-                  "px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider",
+                  "px-4 py-3 text-left text-gray-500 text-xs uppercase tracking-wider dark:text-gray-400",
                   locationTableColumnWidths.encounter,
                 )}
               >
@@ -36,48 +36,48 @@ export default function LocationTableSkeleton() {
               </th>
               <th
                 className={clsx(
-                  "px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-400 uppercase tracking-wider",
+                  "px-4 py-3 text-left text-gray-500 text-xs uppercase tracking-wider dark:text-gray-400",
                   locationTableColumnWidths.actions,
                 )}
-              ></th>
+              />
             </tr>
             <tr>
-              <th colSpan={4} className="p-0">
-                <div className="h-0.5 translate-y-px" aria-hidden="true" />
+              <th className="p-0" colSpan={4}>
+                <div aria-hidden="true" className="h-0.5 translate-y-px" />
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700 opacity-10">
+          <tbody className="divide-y divide-gray-200 bg-white opacity-10 dark:divide-gray-700 dark:bg-gray-900">
             {Array.from({ length: 18 }).map((_, index) => (
               <tr
+                className="h-location-row transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                 key={index}
-                className="hover:bg-gray-50 h-location-row dark:hover:bg-gray-800 transition-colors"
                 style={{ containIntrinsicHeight: "150px" }}
               >
                 {/* Location name column */}
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                  <div className="h-6 rounded w-19 shimmer"></div>
+                <td className="whitespace-nowrap px-4 py-3 text-gray-900 text-sm dark:text-gray-100">
+                  <div className="shimmer h-6 w-19 rounded" />
                 </td>
 
                 {/* Sprite column */}
-                <td className="whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                  <div className="size-22 -translate-y-2 rounded-lg mx-auto shimmer"></div>
+                <td className="whitespace-nowrap text-gray-900 text-sm dark:text-gray-100">
+                  <div className="shimmer mx-auto size-22 -translate-y-2 rounded-lg" />
                 </td>
 
                 {/* Encounter column */}
-                <td className="px-4 pt-8.5 pb-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                  <div className="flex flex-row justify-center gap-4 items-center">
+                <td className="whitespace-nowrap px-4 pt-8.5 pb-4 text-gray-900 text-sm dark:text-gray-100">
+                  <div className="flex flex-row items-center justify-center gap-4">
                     <div className="flex-1">
                       <div className="relative">
-                        <div className="h-24 rounded shimmer"></div>
+                        <div className="shimmer h-24 rounded" />
                       </div>
                     </div>
-                    <div className="size-10 rounded shimmer"></div>
+                    <div className="shimmer size-10 rounded" />
                   </div>
                 </td>
 
                 {/* Reset column */}
-                <td className="p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top"></td>
+                <td className="whitespace-nowrap p-2 align-top text-gray-900 text-sm dark:text-gray-100" />
               </tr>
             ))}
           </tbody>

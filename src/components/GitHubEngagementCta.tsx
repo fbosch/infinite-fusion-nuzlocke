@@ -24,8 +24,8 @@ export function GitHubEngagementCta({ route }: GitHubEngagementCtaProps) {
 
     hasTrackedView.current = true;
     trackEvent(ANALYTICS_EVENTS.githubCtaViewed, {
-      source_surface: "fixed_top_bar",
       route,
+      source_surface: "fixed_top_bar",
     });
   }, [inView, route]);
 
@@ -36,31 +36,31 @@ export function GitHubEngagementCta({ route }: GitHubEngagementCtaProps) {
 
   return (
     <div
-      ref={ref}
-      role="group"
       aria-label="Support the tracker"
       className="flex items-center gap-2"
+      ref={ref}
+      role="group"
     >
       <span className="github-button-control h-7 w-20">
         <GitHubButton
-          href="https://github.com/fbosch/infinite-fusion-nuzlocke"
+          aria-label="Star fbosch/infinite-fusion-nuzlocke on GitHub"
           data-color-scheme={colorScheme}
           data-icon="octicon-star"
-          data-size="large"
           data-show-count="true"
+          data-size="large"
           data-text=""
-          aria-label="Star fbosch/infinite-fusion-nuzlocke on GitHub"
+          href="https://github.com/fbosch/infinite-fusion-nuzlocke"
         />
       </span>
       <span className="github-button-control h-7 w-20">
         <GitHubButton
-          href="https://github.com/fbosch/infinite-fusion-nuzlocke/issues"
+          aria-label="View issues for fbosch/infinite-fusion-nuzlocke on GitHub"
           data-color-scheme={colorScheme}
           data-icon="octicon-issue-opened"
-          data-size="large"
           data-show-count="true"
+          data-size="large"
           data-text=""
-          aria-label="View issues for fbosch/infinite-fusion-nuzlocke on GitHub"
+          href="https://github.com/fbosch/infinite-fusion-nuzlocke/issues"
         />
       </span>
     </div>

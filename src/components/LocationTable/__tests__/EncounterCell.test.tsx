@@ -14,17 +14,17 @@ const {
   useEncounterMock,
   useEncountersForLocationMock,
 } = vi.hoisted(() => ({
-  updateEncounterMock: vi.fn(),
   createFusionMock: vi.fn(),
-  toggleEncounterFusionMock: vi.fn(),
   flipEncounterFusionMock: vi.fn(),
+  toggleEncounterFusionMock: vi.fn(),
+  updateEncounterMock: vi.fn(),
   useEncounterMock: vi.fn(),
   useEncountersForLocationMock: vi.fn(),
 }));
 
 vi.mock("next/image", () => ({
   default: (props: { alt: string }) => (
-    <span role="img" aria-label={props.alt} data-testid="next-image-mock" />
+    <span aria-label={props.alt} data-testid="next-image-mock" role="img" />
   ),
 }));
 
@@ -55,13 +55,13 @@ vi.mock("@/components/ConfirmationDialog", () => ({
     }
 
     return (
-      <div role="dialog" aria-label={title}>
+      <div aria-label={title} role="dialog">
         <h2>{title}</h2>
         <p>{message}</p>
-        <button type="button" onClick={onConfirm}>
+        <button onClick={onConfirm} type="button">
           {confirmText}
         </button>
-        <button type="button" onClick={onClose}>
+        <button onClick={onClose} type="button">
           {cancelText}
         </button>
       </div>
@@ -84,31 +84,31 @@ vi.mock("@/components/PokemonCombobox/PokemonCombobox", () => ({
     const selectedPokemon: PokemonOptionType = {
       id: 133,
       name: "Eevee",
-      uid: "eevee-1",
       nationalDexId: 133,
+      uid: "eevee-1",
     };
 
     return (
       <div>
-        <button type="button" onClick={() => onChange(selectedPokemon)}>
+        <button onClick={() => onChange(selectedPokemon)} type="button">
           {`select-${comboboxId}`}
         </button>
-        <button type="button" onClick={() => onChange(null)}>
+        <button onClick={() => onChange(null)} type="button">
           {`clear-${comboboxId}`}
         </button>
-        <button type="button" onClick={onActivate}>
+        <button onClick={onActivate} type="button">
           {`activate-${comboboxId}`}
         </button>
         <button
-          type="button"
           onClick={() =>
             onFusionChange?.(selectedPokemon, {
               id: 200,
               name: "Misdreavus",
-              uid: "misdreavus-1",
               nationalDexId: 200,
+              uid: "misdreavus-1",
             })
           }
+          type="button"
         >
           {`fuse-${comboboxId}`}
         </button>
@@ -119,7 +119,7 @@ vi.mock("@/components/PokemonCombobox/PokemonCombobox", () => ({
 
 vi.mock("../FusionToggleButton", () => ({
   FusionToggleButton: ({ onToggleFusion }: { onToggleFusion: () => void }) => (
-    <button type="button" onClick={onToggleFusion}>
+    <button onClick={onToggleFusion} type="button">
       Toggle Fusion
     </button>
   ),
@@ -138,17 +138,17 @@ vi.mock("@/loaders/locations", () => ({
 }));
 
 vi.mock("@/lib/preferredVariants", () => ({
-  preferredVariants: new Map(),
   getPreferredVariant: () => null,
+  preferredVariants: new Map(),
   setPreferredVariant: vi.fn(),
 }));
 
 vi.mock("@/stores/playthroughs/index", () => ({
   playthroughActions: {
-    updateEncounter: updateEncounterMock,
     createFusion: createFusionMock,
-    toggleEncounterFusion: toggleEncounterFusionMock,
     flipEncounterFusion: flipEncounterFusionMock,
+    toggleEncounterFusion: toggleEncounterFusionMock,
+    updateEncounter: updateEncounterMock,
   },
 }));
 
@@ -175,8 +175,8 @@ describe("EncounterCell", () => {
 
   it("does not load route encounters when deferred", () => {
     useEncounterMock.mockReturnValue({
-      head: null,
       body: null,
+      head: null,
       isFusion: false,
       updatedAt: Date.now(),
     });
@@ -198,8 +198,8 @@ describe("EncounterCell", () => {
 
   it("loads route encounters when a combobox activates", () => {
     useEncounterMock.mockReturnValue({
-      head: null,
       body: null,
+      head: null,
       isFusion: false,
       updatedAt: Date.now(),
     });
@@ -229,8 +229,8 @@ describe("EncounterCell", () => {
 
   it("updates encounter when selecting a pokemon", () => {
     useEncounterMock.mockReturnValue({
-      head: null,
       body: null,
+      head: null,
       isFusion: false,
       updatedAt: Date.now(),
     });
@@ -259,14 +259,14 @@ describe("EncounterCell", () => {
 
   it("prompts before clearing pokemon with valuable data", () => {
     useEncounterMock.mockReturnValue({
+      body: null,
       head: {
         id: 25,
         name: "Pikachu",
-        uid: "pikachu-1",
         nationalDexId: 25,
         nickname: "Sparky",
+        uid: "pikachu-1",
       },
-      body: null,
       isFusion: false,
       updatedAt: Date.now(),
     });
@@ -302,14 +302,14 @@ describe("EncounterCell", () => {
 
   it("omits a missing nickname from the clear confirmation", () => {
     useEncounterMock.mockReturnValue({
+      body: null,
       head: {
         id: 25,
         name: "Pikachu",
-        uid: "pikachu-1",
         nationalDexId: 25,
         status: "captured",
+        uid: "pikachu-1",
       },
-      body: null,
       isFusion: false,
       updatedAt: Date.now(),
     });
@@ -337,13 +337,13 @@ describe("EncounterCell", () => {
 
   it("toggles fusion mode from the fusion toggle button", () => {
     useEncounterMock.mockReturnValue({
+      body: null,
       head: {
         id: 25,
         name: "Pikachu",
-        uid: "pikachu-1",
         nationalDexId: 25,
+        uid: "pikachu-1",
       },
-      body: null,
       isFusion: false,
       updatedAt: Date.now(),
     });
@@ -365,8 +365,8 @@ describe("EncounterCell", () => {
 
   it("creates a fusion from shorthand selection in a singular combobox", () => {
     useEncounterMock.mockReturnValue({
-      head: null,
       body: null,
+      head: null,
       isFusion: false,
       updatedAt: Date.now(),
     });
@@ -394,14 +394,14 @@ describe("EncounterCell", () => {
 
   it("confirms before replacing valuable singular data with shorthand fusion", () => {
     useEncounterMock.mockReturnValue({
+      body: null,
       head: {
         id: 25,
         name: "Pikachu",
-        uid: "pikachu-1",
         nationalDexId: 25,
         nickname: "Sparky",
+        uid: "pikachu-1",
       },
-      body: null,
       isFusion: false,
       updatedAt: Date.now(),
     });
@@ -436,18 +436,18 @@ describe("EncounterCell", () => {
 
   it("confirms before replacing valuable body data preserved in singular mode", () => {
     useEncounterMock.mockReturnValue({
-      head: {
-        id: 25,
-        name: "Pikachu",
-        uid: "pikachu-1",
-        nationalDexId: 25,
-      },
       body: {
         id: 4,
         name: "Charmander",
-        uid: "charmander-1",
         nationalDexId: 4,
         status: "captured",
+        uid: "charmander-1",
+      },
+      head: {
+        id: 25,
+        name: "Pikachu",
+        nationalDexId: 25,
+        uid: "pikachu-1",
       },
       isFusion: false,
       updatedAt: Date.now(),

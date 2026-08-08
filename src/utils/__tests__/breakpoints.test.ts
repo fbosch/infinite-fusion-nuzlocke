@@ -12,11 +12,11 @@ describe("Breakpoint Utilities", () => {
   describe("breakpoints", () => {
     it("should have correct Tailwind CSS v4 default values", () => {
       expect(breakpoints).toEqual({
-        sm: 640,
-        md: 768,
-        lg: 1024,
-        xl: 1280,
         "2xl": 1536,
+        lg: 1024,
+        md: 768,
+        sm: 640,
+        xl: 1280,
       });
     });
 

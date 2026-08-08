@@ -14,9 +14,7 @@ import {
 } from "./types";
 
 // Reusable hooks for components
-export const usePlaythroughsSnapshot = () => {
-  return useSnapshot(playthroughsStore);
-};
+export const usePlaythroughsSnapshot = () => useSnapshot(playthroughsStore);
 
 export const useAllPlaythroughs = () => {
   const snapshot = useSnapshot(playthroughsStore);
@@ -40,7 +38,9 @@ export const useAllPlaythroughs = () => {
 export const useActivePlaythrough = (): Playthrough | null => {
   const snapshot = useSnapshot(playthroughsStore);
 
-  if (!snapshot.activePlaythroughId) return null;
+  if (!snapshot.activePlaythroughId) {
+    return null;
+  }
 
   const activePlaythroughData = snapshot.playthroughs.find(
     (p) => p.id === snapshot.activePlaythroughId,
@@ -89,7 +89,9 @@ export const usePlaythroughById = (
     (p) => p.id === playthroughId,
   );
 
-  if (!playthroughId || !playthroughData) return null;
+  if (!(playthroughId && playthroughData)) {
+    return null;
+  }
   return playthroughData as Playthrough;
 };
 

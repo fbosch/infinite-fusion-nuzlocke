@@ -42,58 +42,58 @@ describe("Data Loading Utilities", () => {
   describe("loadPokemonData", () => {
     const mockPokemonData = [
       {
-        id: 1,
-        nationalDexId: 1,
-        name: "Bulbasaur",
-        types: [{ name: "grass" }],
-        species: {
-          is_legendary: false,
-          is_mythical: false,
-          generation: "generation-i",
-          evolution_chain: {
-            url: "https://pokeapi.co/api/v2/evolution-chain/1/",
-          },
-        },
         evolution: {
           evolves_to: [
             {
               id: 2,
-              name: "ivysaur",
               min_level: 16,
+              name: "ivysaur",
               trigger: "level-up",
             },
           ],
         },
-      },
-      {
-        id: 25,
-        nationalDexId: 25,
-        name: "Pikachu",
-        types: [{ name: "electric" }],
+        id: 1,
+        name: "Bulbasaur",
+        nationalDexId: 1,
         species: {
+          evolution_chain: {
+            url: "https://pokeapi.co/api/v2/evolution-chain/1/",
+          },
+          generation: "generation-i",
           is_legendary: false,
           is_mythical: false,
-          generation: "generation-i",
-          evolution_chain: {
-            url: "https://pokeapi.co/api/v2/evolution-chain/10/",
-          },
         },
+        types: [{ name: "grass" }],
+      },
+      {
         evolution: {
+          evolves_from: {
+            id: 172,
+            min_level: 10,
+            name: "pichu",
+            trigger: "level-up",
+          },
           evolves_to: [
             {
               id: 26,
-              name: "raichu",
               item: "thunder-stone",
+              name: "raichu",
               trigger: "use-item",
             },
           ],
-          evolves_from: {
-            id: 172,
-            name: "pichu",
-            min_level: 10,
-            trigger: "level-up",
-          },
         },
+        id: 25,
+        name: "Pikachu",
+        nationalDexId: 25,
+        species: {
+          evolution_chain: {
+            url: "https://pokeapi.co/api/v2/evolution-chain/10/",
+          },
+          generation: "generation-i",
+          is_legendary: false,
+          is_mythical: false,
+        },
+        types: [{ name: "electric" }],
       },
     ];
 
@@ -174,20 +174,20 @@ describe("Data Loading Utilities", () => {
   describe("loadPokemonNameMap", () => {
     const mockPokemonData = [
       {
-        id: 1,
-        nationalDexId: 1,
-        name: "Bulbasaur",
-        types: [],
-        species: {},
         evolution: {},
+        id: 1,
+        name: "Bulbasaur",
+        nationalDexId: 1,
+        species: {},
+        types: [],
       },
       {
-        id: 25,
-        nationalDexId: 25,
-        name: "Pikachu",
-        types: [],
-        species: {},
         evolution: {},
+        id: 25,
+        name: "Pikachu",
+        nationalDexId: 25,
+        species: {},
+        types: [],
       },
     ];
 
@@ -286,11 +286,11 @@ describe("Data Loading Utilities", () => {
       const result = await checkDataFiles();
 
       expect(result).toEqual({
-        pokemonData: true,
-        dexEntries: true,
         classicEncounters: true,
-        remixEncounters: true,
+        dexEntries: true,
         locations: true,
+        pokemonData: true,
+        remixEncounters: true,
       });
 
       expect(mockFs.access).toHaveBeenCalledTimes(5);
@@ -321,17 +321,16 @@ describe("Data Loading Utilities", () => {
         ) {
           throw new Error("File not found");
         }
-        return undefined;
       });
 
       const result = await checkDataFiles();
 
       expect(result).toEqual({
-        pokemonData: false,
-        dexEntries: true,
         classicEncounters: true,
-        remixEncounters: true,
+        dexEntries: true,
         locations: false,
+        pokemonData: false,
+        remixEncounters: true,
       });
     });
   });
@@ -366,9 +365,9 @@ describe("Data Loading Utilities", () => {
       // Initial state
       let status = getCacheStatus();
       expect(status).toEqual({
+        dexEntries: false,
         pokemonData: false,
         pokemonNameMap: false,
-        dexEntries: false,
       });
 
       // Load Pokemon data

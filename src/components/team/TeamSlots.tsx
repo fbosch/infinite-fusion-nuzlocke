@@ -47,20 +47,20 @@ function TypeIndicators({
     <>
       {/* Type indicators above the slot */}
       {(primary || secondary) && (
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
+        <div className="absolute -top-4 left-1/2 z-20 -translate-x-1/2 transform">
           <TypePills
             primary={primary}
             secondary={secondary}
-            size="xxs"
             showTooltip={true}
+            size="xxs"
           />
         </div>
       )}
 
       {/* Nickname below the slot */}
       {nickname && (
-        <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 z-20">
-          <span className="text-sm font-ds text-gray-700 dark:text-gray-200 pixel-shadow">
+        <div className="absolute -bottom-6 left-1/2 z-20 -translate-x-1/2 transform">
+          <span className="pixel-shadow font-ds text-gray-700 text-sm dark:text-gray-200">
             {nickname}
           </span>
         </div>
@@ -143,28 +143,29 @@ export default function TeamSlots() {
   }, [activePlaythrough?.team, encounters, pokemonByUid]);
 
   // Show skeleton while loading
-  if (!activePlaythrough || !encounters) {
+  if (!(activePlaythrough && encounters)) {
     return <TeamSlotsSkeleton />;
   }
 
   return (
     <>
-      <div className="hidden lg:flex flex-col items-center">
+      <div className="hidden flex-col items-center lg:flex">
         <div className="flex gap-3 sm:gap-4 md:gap-5">
           {teamSlots.map((slot) =>
             slot.isEmpty ? (
               <CursorTooltip
-                key={slot.position}
                 content="Click to add a Pokémon"
-                placement="bottom-start"
                 delay={300}
+                key={slot.position}
                 offset={{ mainAxis: 16 }}
+                placement="bottom-start"
               >
                 <div
+                  aria-label={`Add Pokémon to team slot ${slot.position + 1}`}
                   className={clsx(
-                    "flex flex-col items-center justify-center relative group/team-slot",
-                    "size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200",
-                    "border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer",
+                    "group/team-slot relative flex flex-col items-center justify-center",
+                    "size-16 rounded-full border transition-all duration-200 sm:size-18 md:size-20",
+                    "cursor-pointer border-gray-100 bg-white hover:border-gray-200 dark:border-gray-800/30 dark:bg-gray-900 dark:hover:border-gray-700/50",
                   )}
                   onClick={() => openPicker(slot.position)}
                   onKeyDown={(event) => {
@@ -175,19 +176,19 @@ export default function TeamSlots() {
                   }}
                   role="button"
                   tabIndex={0}
-                  aria-label={`Add Pokémon to team slot ${slot.position + 1}`}
                 >
-                  <div className="flex flex-col items-center justify-center text-center relative w-full h-full">
+                  <div className="relative flex h-full w-full flex-col items-center justify-center text-center">
                     <div
-                      className="w-full h-full absolute rounded-full opacity-30 border border-gray-100 dark:border-gray-800/20 text-gray-300 dark:text-gray-600"
+                      className="absolute h-full w-full rounded-full border border-gray-100 text-gray-300 opacity-30 dark:border-gray-800/20 dark:text-gray-600"
                       style={{
-                        background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
+                        background:
+                          "repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)",
                       }}
                     />
-                    <div className="flex items-center justify-center relative z-10">
+                    <div className="relative z-10 flex items-center justify-center">
                       <PokeballIcon
-                        className="h-8 w-8 text-gray-400 dark:text-gray-500 opacity-60"
                         aria-hidden="true"
+                        className="h-8 w-8 text-gray-400 opacity-60 dark:text-gray-500"
                         focusable={false}
                       />
                     </div>
@@ -197,19 +198,17 @@ export default function TeamSlots() {
             ) : (
               <TeamMemberContextMenu
                 key={slot.position}
-                teamMember={slot}
-                shouldLoad={!slot.isEmpty}
                 onClose={() => {
                   // Context menu closed, no specific action needed
                 }}
+                shouldLoad={!slot.isEmpty}
+                teamMember={slot}
               >
                 <div
-                  role="button"
-                  tabIndex={0}
                   className={clsx(
-                    "flex flex-col items-center justify-center relative group/team-slot",
-                    "size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200",
-                    "border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700/50 cursor-pointer",
+                    "group/team-slot relative flex flex-col items-center justify-center",
+                    "size-16 rounded-full border transition-all duration-200 sm:size-18 md:size-20",
+                    "cursor-pointer border-gray-100 bg-white hover:border-gray-200 dark:border-gray-800/30 dark:bg-gray-900 dark:hover:border-gray-700/50",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                   )}
                   onClick={() => openPicker(slot.position)}
@@ -222,44 +221,47 @@ export default function TeamSlots() {
                       openPicker(slot.position);
                     }
                   }}
+                  role="button"
+                  tabIndex={0}
                 >
                   {slot.headPokemon !== undefined &&
                     slot.bodyPokemon !== undefined &&
                     slot.isFusion !== undefined && (
                       <TypeIndicators
-                        headPokemon={slot.headPokemon}
                         bodyPokemon={slot.bodyPokemon}
+                        headPokemon={slot.headPokemon}
                         isFusion={slot.isFusion}
                       />
                     )}
 
-                  <div className="flex flex-col items-center justify-center relative w-full h-full">
+                  <div className="relative flex h-full w-full flex-col items-center justify-center">
                     <div
-                      className="w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600"
+                      className="absolute h-full w-full rounded-full border border-gray-200 text-gray-300 opacity-30 dark:border-gray-600 dark:text-gray-600"
                       style={{
-                        background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
+                        background:
+                          "repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)",
                       }}
                     />
 
                     <div className="relative z-10">
                       <CursorTooltip
-                        delay={500}
                         content={
                           <TeamMemberTooltipContent
-                            headPokemon={slot.headPokemon || null}
                             bodyPokemon={slot.bodyPokemon || null}
-                            isFusion={slot.isFusion || false}
+                            headPokemon={slot.headPokemon || null}
+                            isFusion={slot.isFusion === true}
                           />
                         }
+                        delay={500}
                       >
                         <div>
                           <FusionSprite
+                            bodyPokemon={slot.bodyPokemon || null}
+                            headPokemon={slot.headPokemon || null}
+                            isFusion={slot.isFusion}
                             ref={(ref) => {
                               teamSpriteRefs.current[slot.position] = ref;
                             }}
-                            headPokemon={slot.headPokemon || null}
-                            bodyPokemon={slot.bodyPokemon || null}
-                            isFusion={slot.isFusion}
                             shouldLoad={true}
                             showStatusOverlay={true}
                           />
@@ -268,11 +270,11 @@ export default function TeamSlots() {
                     </div>
 
                     <ArtworkVariantButton
-                      headId={slot.headPokemon?.id}
                       bodyId={slot.bodyPokemon?.id}
+                      className="absolute right-1/2 bottom-0 z-20 -translate-x-6 opacity-0 transition-opacity duration-200 focus:opacity-100 group-hover/team-slot:opacity-50"
+                      headId={slot.headPokemon?.id}
                       isFusion={slot.isFusion}
                       shouldLoad={true}
-                      className="absolute bottom-0 right-1/2 -translate-x-6 z-20 opacity-0 group-hover/team-slot:opacity-50 focus:opacity-100 transition-opacity duration-200"
                     />
                   </div>
                 </div>
@@ -283,13 +285,13 @@ export default function TeamSlots() {
       </div>
 
       <TeamMemberPickerModal
+        existingTeamMember={
+          selectedPosition === null ? null : teamSlots[selectedPosition]
+        }
         isOpen={pickerModalOpen}
         onClose={closePicker}
         onSelect={selectTeamMember}
         position={selectedPosition || 0}
-        existingTeamMember={
-          selectedPosition !== null ? teamSlots[selectedPosition] : null
-        }
       />
     </>
   );

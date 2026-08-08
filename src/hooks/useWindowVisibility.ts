@@ -3,10 +3,10 @@ import { useSyncExternalStore } from "react";
 // Shared store for window visibility state
 let listeners: Set<() => void> | null = null;
 let isVisible =
-  typeof document !== "undefined"
-    ? document.visibilityState === "visible"
-    : true;
-let isFocused = typeof window !== "undefined" ? document.hasFocus() : true;
+  typeof document === "undefined"
+    ? true
+    : document.visibilityState === "visible";
+let isFocused = typeof window === "undefined" ? true : document.hasFocus();
 
 function subscribe(callback: () => void) {
   if (!listeners) {

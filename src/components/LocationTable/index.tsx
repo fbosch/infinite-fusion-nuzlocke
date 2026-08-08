@@ -17,10 +17,7 @@ import type { CombinedLocation } from "@/loaders/locations";
 import { useCustomLocations, useIsLoading } from "@/stores/playthroughs/hooks";
 import { playthroughActions } from "@/stores/playthroughs/index";
 import type { EncounterData } from "@/stores/playthroughs/types";
-import {
-  scrollToLocationById,
-  scrollToMostRecentLocation,
-} from "@/utils/scrollToLocation";
+import { scrollToMostRecentLocation } from "@/utils/scrollToLocation";
 import { CursorTooltip } from "../CursorTooltip";
 import { locationTableColumnWidths } from "./columnWidths";
 import LocationCell from "./LocationCell";
@@ -38,8 +35,8 @@ const AddCustomLocationModal = dynamic(
       (mod) => mod.default,
     ),
   {
-    ssr: false,
     loading: () => null,
+    ssr: false,
   },
 );
 
@@ -67,7 +64,9 @@ export default function LocationTable() {
 
   // Auto-scroll to recent encounter on page load
   useEffect(() => {
-    if (mounted === false || isLoading || data.length === 0) return;
+    if (mounted === false || isLoading || data.length === 0) {
+      return;
+    }
 
     window.requestAnimationFrame(() => {
       scrollToMostRecentLocation(
@@ -98,72 +97,6 @@ export default function LocationTable() {
   const columns = useMemo(
     () => [
       columnHelper.accessor("name", {
-        header: () => (
-          <div className="flex items-center w-full">
-            <span>Location</span>
-            <div className="flex items-center gap-1 ml-2">
-              <CursorTooltip
-                content={"Scroll to most recent encounter"}
-                delay={300}
-              >
-                <button
-                  type="button"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.stopPropagation();
-                      handleScrollToRecent();
-                    }
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleScrollToRecent();
-                  }}
-                  className={clsx(
-                    "p-0.5 rounded-sm transition-colors duration-200",
-                    "bg-gray-100 text-gray-600",
-                    "border border-gray-200",
-                    "dark:bg-gray-700 dark:text-gray-400",
-                    "dark:border-gray-600",
-                    "hover:text-white hover:border-green-500 hover:bg-green-600",
-                    "cursor-pointer",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1",
-                  )}
-                  aria-label="Scroll to most recent encounter"
-                >
-                  <LocateIcon className="size-2.5" />
-                </button>
-              </CursorTooltip>
-              <CursorTooltip content={"Add a custom location"} delay={300}>
-                <button
-                  type="button"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.stopPropagation();
-                      setIsCustomLocationModalOpen(true);
-                    }
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsCustomLocationModalOpen(true);
-                  }}
-                  className={clsx(
-                    "p-0.5 rounded-sm transition-colors duration-200",
-                    "bg-gray-100 text-gray-600",
-                    "border border-gray-200",
-                    "dark:bg-gray-700 dark:text-gray-400",
-                    "dark:border-gray-600",
-                    "hover:text-white hover:border-blue-500 hover:bg-blue-600",
-                    "cursor-pointer",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
-                  )}
-                  aria-label="Add custom location"
-                >
-                  <PlusIcon className="size-2.5" />
-                </button>
-              </CursorTooltip>
-            </div>
-          </div>
-        ),
         cell: (info) => (
           <LocationCell
             location={info.row.original}
@@ -171,24 +104,90 @@ export default function LocationTable() {
           />
         ),
         enableSorting: true,
+        header: () => (
+          <div className="flex w-full items-center">
+            <span>Location</span>
+            <div className="ml-2 flex items-center gap-1">
+              <CursorTooltip
+                content={"Scroll to most recent encounter"}
+                delay={300}
+              >
+                <button
+                  aria-label="Scroll to most recent encounter"
+                  className={clsx(
+                    "rounded-sm p-0.5 transition-colors duration-200",
+                    "bg-gray-100 text-gray-600",
+                    "border border-gray-200",
+                    "dark:bg-gray-700 dark:text-gray-400",
+                    "dark:border-gray-600",
+                    "hover:border-green-500 hover:bg-green-600 hover:text-white",
+                    "cursor-pointer",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1",
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleScrollToRecent();
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.stopPropagation();
+                      handleScrollToRecent();
+                    }
+                  }}
+                  type="button"
+                >
+                  <LocateIcon className="size-2.5" />
+                </button>
+              </CursorTooltip>
+              <CursorTooltip content={"Add a custom location"} delay={300}>
+                <button
+                  aria-label="Add custom location"
+                  className={clsx(
+                    "rounded-sm p-0.5 transition-colors duration-200",
+                    "bg-gray-100 text-gray-600",
+                    "border border-gray-200",
+                    "dark:bg-gray-700 dark:text-gray-400",
+                    "dark:border-gray-600",
+                    "hover:border-blue-500 hover:bg-blue-600 hover:text-white",
+                    "cursor-pointer",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsCustomLocationModalOpen(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.stopPropagation();
+                      setIsCustomLocationModalOpen(true);
+                    }
+                  }}
+                  type="button"
+                >
+                  <PlusIcon className="size-2.5" />
+                </button>
+              </CursorTooltip>
+            </div>
+          </div>
+        ),
       }),
       columnHelper.display({
+        cell: () => null, // Handled in render loop
+        enableSorting: false,
+        header: "",
         id: "sprite",
-        header: "",
-        enableSorting: false,
-        cell: () => null, // Handled in render loop
       }),
       columnHelper.display({
-        id: "encounter",
+        cell: () => null, // Handled in render loop
+        enableSorting: false,
         header: "Encounter",
-        cell: () => null, // Handled in render loop
-        enableSorting: false,
+        id: "encounter",
       }),
       columnHelper.display({
-        id: "actions",
-        header: "",
-        enableSorting: false,
         cell: () => null, // Handled in render loop
+        enableSorting: false,
+        header: "",
+        id: "actions",
       }),
     ],
     [handleScrollToRecent],
@@ -196,23 +195,23 @@ export default function LocationTable() {
 
   // react-doctor-disable-next-line react-hooks-js/incompatible-library -- TanStack Table is intentionally excluded from compiler memoization above.
   const table = useReactTable({
-    data,
     columns,
+    data,
+    enableColumnFilters: false,
+    // Performance optimizations
+    enableColumnResizing: false,
+    // Disable features we don't use to reduce bundle size
+    enableGlobalFilter: false,
+    enableMultiSort: false,
+    enableRowSelection: false,
+    enableSorting: false,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
+    onSortingChange: setSorting,
     state: {
       sorting,
     },
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    enableSorting: false,
-    // Performance optimizations
-    enableColumnResizing: false,
-    enableRowSelection: false,
-    enableMultiSort: false,
-    // Disable features we don't use to reduce bundle size
-    enableGlobalFilter: false,
-    enableColumnFilters: false,
-    manualPagination: true,
   });
   const {
     tableRows,
@@ -234,9 +233,9 @@ export default function LocationTable() {
   if (data.length === 0) {
     return (
       <div
+        aria-live="polite"
         className="flex items-center justify-center p-8"
         role="status"
-        aria-live="polite"
       >
         <div className="text-gray-500 dark:text-gray-400">
           No location data available
@@ -246,38 +245,38 @@ export default function LocationTable() {
   }
 
   return (
-    <div className="overflow-hidden 2xl:rounded-lg border-y md:border border-gray-200 dark:border-gray-700 xl:shadow-sm">
+    <div className="overflow-hidden border-gray-200 border-y md:border xl:shadow-sm 2xl:rounded-lg dark:border-gray-700">
       <div
+        className="scrollbar-thin relative max-h-[93.5vh] overflow-auto overscroll-x-none"
         ref={tableContainerRef}
-        className="max-h-[93.5vh] overflow-auto scrollbar-thin overscroll-x-none relative"
       >
         <table
-          ref={tableRef}
-          className="w-full min-w-full table-fixed divide-y divide-gray-200 dark:divide-gray-700 overscroll-x-contain overscroll-y-auto"
-          data-scroll-container
           aria-label="Locations table"
           aria-rowcount={tableRows.length + 1}
+          className="w-full min-w-full table-fixed divide-y divide-gray-200 overscroll-y-auto overscroll-x-contain dark:divide-gray-700"
+          data-scroll-container
+          ref={tableRef}
         >
           <colgroup>
             {visibleColumns.map((column) => (
               <col
-                key={column.id}
                 className={
                   column.id === "encounter"
                     ? undefined
                     : locationTableColumnWidths[column.id]
                 }
+                key={column.id}
               />
             ))}
           </colgroup>
           <LocationTableHeader headerGroups={table.getHeaderGroups()} />
           <tbody
-            className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700"
+            className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900"
             id="location-table"
           >
             {virtualPaddingTop > 0 && (
               // biome-ignore lint/a11y/noAriaHiddenOnFocusable: virtual spacer rows never receive focus.
-              <tr className="border-0" aria-hidden="true">
+              <tr aria-hidden="true" className="border-0">
                 <td
                   colSpan={visibleColumns.length}
                   style={{ height: virtualPaddingTop }}
@@ -296,7 +295,7 @@ export default function LocationTable() {
             })}
             {virtualPaddingBottom > 0 && (
               // biome-ignore lint/a11y/noAriaHiddenOnFocusable: virtual spacer rows never receive focus.
-              <tr className="border-0" aria-hidden="true">
+              <tr aria-hidden="true" className="border-0">
                 <td
                   colSpan={visibleColumns.length}
                   style={{ height: virtualPaddingBottom }}

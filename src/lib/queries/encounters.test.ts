@@ -17,8 +17,8 @@ describe("encountersQueries", () => {
   it("returns the validated encounter collection without a transport wrapper", async () => {
     const encounters = [
       {
-        routeName: "Route 1",
         pokemon: [{ id: 1, source: EncounterSource.WILD }],
+        routeName: "Route 1",
       },
     ];
     vi.mocked(encountersApiService.getEncounters).mockResolvedValue(encounters);

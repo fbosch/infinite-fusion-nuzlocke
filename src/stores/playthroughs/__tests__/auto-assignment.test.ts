@@ -104,8 +104,8 @@ describe("Auto-Assignment to Team", () => {
 
     // Fill first team slot manually
     activePlaythrough.team.members[0] = {
-      headPokemonUid: "existing_pokemon_123",
       bodyPokemonUid: "",
+      headPokemonUid: "existing_pokemon_123",
     };
 
     // Create a captured Pokémon encounter
@@ -133,8 +133,8 @@ describe("Auto-Assignment to Team", () => {
       id: 25,
       name: "Pikachu",
       nationalDexId: 25,
-      uid: "pikachu_route1_123",
       originalLocation: "route1",
+      uid: "pikachu_route1_123",
     };
 
     // Add encounter without status
@@ -152,8 +152,8 @@ describe("Auto-Assignment to Team", () => {
     // Fill all team slots
     for (let i = 0; i < 6; i++) {
       activePlaythrough.team.members[i] = {
-        headPokemonUid: `pokemon_${i}_123`,
         bodyPokemonUid: "",
+        headPokemonUid: `pokemon_${i}_123`,
       };
     }
 
@@ -188,8 +188,8 @@ describe("Auto-Assignment to Team", () => {
     await updateEncounter("route1", pikachu, "head", false);
     for (let index = 1; index < 6; index++) {
       activePlaythrough.team.members[index] = {
-        headPokemonUid: `pokemon_${index}_123`,
         bodyPokemonUid: "",
+        headPokemonUid: `pokemon_${index}_123`,
       };
     }
 
@@ -210,8 +210,8 @@ describe("Auto-Assignment to Team", () => {
       id: 25,
       name: "Pikachu",
       nationalDexId: 25,
-      uid: "pikachu_route1_123",
       originalLocation: "route1",
+      uid: "pikachu_route1_123",
     };
 
     await updateEncounter("route1", pikachu, "head", false);
@@ -236,8 +236,8 @@ describe("Auto-Assignment to Team", () => {
       id: 1,
       name: "Bulbasaur",
       nationalDexId: 1,
-      uid: "charmander_starter_456",
       originalLocation: "starter",
+      uid: "charmander_starter_456",
     };
 
     await updateEncounter("starter", charmander, "head", false);

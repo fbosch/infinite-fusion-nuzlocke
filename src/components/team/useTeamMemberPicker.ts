@@ -20,7 +20,9 @@ export function useTeamMemberPicker() {
     headPokemon: PokemonOptionType | null,
     bodyPokemon: PokemonOptionType | null,
   ) => {
-    if (selectedPosition === null) return false;
+    if (selectedPosition === null) {
+      return false;
+    }
 
     const success = await playthroughActions.updateTeamMember(
       selectedPosition,
@@ -28,23 +30,23 @@ export function useTeamMemberPicker() {
       bodyPokemon ? { uid: bodyPokemon.uid! } : null,
     );
 
-    if (!success) {
+    if (success) {
+      closePicker();
+    } else {
       console.error(
         "Failed to update team member at position:",
         selectedPosition,
       );
-    } else {
-      closePicker();
     }
 
     return success;
   };
 
   return {
+    closePicker,
+    openPicker,
     pickerModalOpen,
     selectedPosition,
-    openPicker,
-    closePicker,
     selectTeamMember,
   };
 }

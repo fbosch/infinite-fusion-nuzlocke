@@ -22,7 +22,9 @@ export type ScrollToLocationDetail = {
 };
 
 export function emitEvolutionEvent(locationId: string): void {
-  if (!locationId) return;
+  if (!locationId) {
+    return;
+  }
   emitter.emit(EVOLUTION_EVENT, { locationId });
 }
 
@@ -44,7 +46,9 @@ export function onScrollToLocation(
 }
 
 export function emitScrollToLocation(detail: ScrollToLocationDetail): boolean {
-  if (!detail.locationId || scrollToLocationHandlers.size === 0) return false;
+  if (!detail.locationId || scrollToLocationHandlers.size === 0) {
+    return false;
+  }
 
   let wasHandled = false;
   for (const handler of scrollToLocationHandlers) {

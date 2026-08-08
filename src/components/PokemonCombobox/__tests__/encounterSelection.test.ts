@@ -9,8 +9,8 @@ import {
 const basePokemon: PokemonOptionType = {
   id: 25,
   name: "Pikachu",
-  uid: "pikachu-1",
   nationalDexId: 25,
+  uid: "pikachu-1",
 };
 
 describe("encounter selection helpers", () => {

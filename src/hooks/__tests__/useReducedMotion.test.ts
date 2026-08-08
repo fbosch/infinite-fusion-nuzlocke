@@ -14,11 +14,11 @@ describe("useReducedMotion", () => {
     vi.stubGlobal(
       "matchMedia",
       vi.fn().mockImplementation(() => ({
-        get matches() {
-          return matches;
-        },
         addEventListener: (_event: string, callback: () => void) => {
           listener = callback;
+        },
+        get matches() {
+          return matches;
         },
         removeEventListener: vi.fn(),
       })),
@@ -58,10 +58,10 @@ describe("useReducedMotion", () => {
     vi.stubGlobal(
       "matchMedia",
       vi.fn().mockReturnValue({
+        addListener,
         get matches() {
           return matches;
         },
-        addListener,
         removeListener: vi.fn(),
       }),
     );

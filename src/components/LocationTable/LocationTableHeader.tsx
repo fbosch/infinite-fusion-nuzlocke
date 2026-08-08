@@ -15,22 +15,22 @@ export default function LocationTableHeader({
     <thead
       className={
         // fallow-ignore-next-line css-token-drift -- The half-pixel separator matches the table skeleton.
-        "bg-gray-50 dark:bg-gray-800 sticky top-0 z-50 shadow-[0_0.5px_0_0_rgb(229,231,235)] dark:shadow-[0_0.5px_0_0_rgb(55,65,81)]"
+        "sticky top-0 z-50 bg-gray-50 shadow-[0_0.5px_0_0_rgb(229,231,235)] dark:bg-gray-800 dark:shadow-[0_0.5px_0_0_rgb(55,65,81)]"
       }
     >
       {headerGroups.map((headerGroup) => (
         <tr key={headerGroup.id}>
           {headerGroup.headers.map((header) => (
             <SortableHeaderCell
-              key={header.id}
-              header={header}
               className={locationTableColumnWidths[header.column.id]}
+              header={header}
+              key={header.id}
             />
           ))}
         </tr>
       ))}
       <tr>
-        <th colSpan={headerGroups[0]?.headers.length ?? 1} className="p-0">
+        <th className="p-0" colSpan={headerGroups[0]?.headers.length ?? 1}>
           <ProgressBar className="translate-y-px" />
         </th>
       </tr>

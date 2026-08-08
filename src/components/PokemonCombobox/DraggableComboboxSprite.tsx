@@ -31,11 +31,11 @@ const LocationSelector = dynamic(
 );
 
 interface DraggableComboboxSpriteProps {
-  value: PokemonOptionType | null | undefined;
-  dragPreview: PokemonOptionType | null;
   comboboxId?: string;
   disabled?: boolean;
+  dragPreview: PokemonOptionType | null;
   locationId?: string;
+  value: PokemonOptionType | null | undefined;
 }
 
 export function DraggableComboboxSprite({
@@ -59,14 +59,14 @@ export function DraggableComboboxSprite({
   const field = comboboxId?.includes("-body") ? "body" : "head";
 
   const menuOptions = getDraggableComboboxSpriteMenuOptions({
-    value,
-    locationId,
-    field,
     customLocations,
-    moveEncountersBetweenLocations: settings.moveEncountersBetweenLocations,
-    preEvolution,
     evolutions,
+    field,
+    locationId,
+    moveEncountersBetweenLocations: settings.moveEncountersBetweenLocations,
     onOpenMoveModal: () => setIsMoveModalOpen(true),
+    preEvolution,
+    value,
   });
 
   const originalLocationName =
@@ -75,7 +75,9 @@ export function DraggableComboboxSprite({
       : (getLocationByIdFromMerged(pokemon.originalLocation, customLocations)
           ?.name ?? pokemon.originalLocation);
 
-  if (!pokemon) return null;
+  if (!pokemon) {
+    return null;
+  }
 
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
     if (disabled || !settingsStore.moveEncountersBetweenLocations) {
@@ -117,23 +119,23 @@ export function DraggableComboboxSprite({
       <ContextMenu items={menuOptions}>
         <div>
           <CursorTooltip
-            disabled={!!dragPreview || disabled}
-            delay={500}
-            offset={{ mainAxis: 8, crossAxis: 8 }}
-            placement="bottom-start"
             content={
               <DraggableSpriteTooltipContent
+                originalLocationName={originalLocationName}
                 primary={primary}
                 secondary={secondary}
-                originalLocationName={originalLocationName}
                 showGrabHint={settings.moveEncountersBetweenLocations}
               />
             }
+            delay={500}
+            disabled={!!dragPreview || disabled}
+            offset={{ crossAxis: 8, mainAxis: 8 }}
+            placement="bottom-start"
           >
             <div
               className={clsx(
-                "absolute inset-y-0 px-1.5 flex items-center bg-gray-300/20 border-r border-gray-300 dark:bg-gray-500/20 dark:border-gray-600 rounded-tl-md",
-                "size-12.5 flex items-center justify-center",
+                "absolute inset-y-0 flex items-center rounded-tl-md border-gray-300 border-r bg-gray-300/20 px-1.5 dark:border-gray-600 dark:bg-gray-500/20",
+                "flex size-12.5 items-center justify-center",
                 "group-focus-within/input:border-blue-500",
                 {
                   "cursor-grab active:cursor-grabbing":
@@ -146,11 +148,11 @@ export function DraggableComboboxSprite({
               onDragStart={handleDragStart}
             >
               <PokemonSprite
-                pokemonId={pokemon.id}
                 className={clsx(
-                  dragPreview && "opacity-60 pointer-events-none",
+                  dragPreview && "pointer-events-none opacity-60",
                 )}
                 draggable={false}
+                pokemonId={pokemon.id}
               />
             </div>
           </CursorTooltip>
@@ -158,22 +160,22 @@ export function DraggableComboboxSprite({
       </ContextMenu>
 
       <LocationSelector
-        isOpen={isMoveModalOpen}
-        onClose={() => setIsMoveModalOpen(false)}
         currentLocationId={locationId || ""}
+        encounterData={value ? { [field]: value } : null}
+        isOpen={isMoveModalOpen}
+        moveTargetField={field}
+        onClose={() => setIsMoveModalOpen(false)}
         onSelectLocation={(targetLocationId, targetField) => {
           if (value && locationId) {
             void playthroughActions.relocateEncounterSlot({
-              sourceLocationId: locationId,
               sourceField: field,
-              targetLocationId,
+              sourceLocationId: locationId,
               targetField,
+              targetLocationId,
             });
           }
           setIsMoveModalOpen(false);
         }}
-        encounterData={value ? { [field]: value } : null}
-        moveTargetField={field}
       />
     </>
   );

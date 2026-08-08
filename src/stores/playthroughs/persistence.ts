@@ -84,7 +84,9 @@ export const ACTIVE_PLAYTHROUGH_KEY = "activePlaythroughId";
 
 // LocalStorage helpers for active playthrough ID
 const getLocalStorage = (): Storage | null => {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") {
+    return null;
+  }
 
   try {
     return globalThis.localStorage;
@@ -116,7 +118,9 @@ const removeActivePlaythroughId = (): void => {
 
 // Migration function to move activePlaythroughId from IndexedDB to LocalStorage
 const migrateActivePlaythroughId = async (): Promise<string | null> => {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") {
+    return null;
+  }
 
   // Check if we already have the value in LocalStorage
   const localStorageValue = getActivePlaythroughId();
@@ -169,7 +173,9 @@ const serializeForStorage = (obj: unknown): unknown => {
 export const loadPlaythroughById = async (
   playthroughId: string,
 ): Promise<Playthrough | null> => {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") {
+    return null;
+  }
 
   try {
     await ensurePlaythroughsStore();
@@ -185,7 +191,9 @@ export const loadPlaythroughById = async (
 };
 
 export const loadAllPlaythroughs = async (): Promise<Playthrough[]> => {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") {
+    return [];
+  }
 
   try {
     await ensurePlaythroughsStore();
@@ -228,7 +236,9 @@ export const loadAllPlaythroughs = async (): Promise<Playthrough[]> => {
 export const deletePlaythroughFromIndexedDB = async (
   playthroughId: string,
 ): Promise<void> => {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   try {
     await ensurePlaythroughsStore();
@@ -246,7 +256,9 @@ export const deletePlaythroughFromIndexedDB = async (
 export const saveToIndexedDB = async (
   state: PlaythroughsState,
 ): Promise<void> => {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   try {
     // Save active playthrough ID to LocalStorage for faster access
@@ -267,7 +279,9 @@ export const createDebouncedSaveAll = (
 ) => {
   return debounce(
     async (state: PlaythroughsState): Promise<void> => {
-      if (typeof window === "undefined") return;
+      if (typeof window === "undefined") {
+        return;
+      }
 
       try {
         await ensurePlaythroughsStore();
@@ -310,7 +324,9 @@ export const createDebouncedSaveAll = (
 export const loadFromIndexedDB = async (
   playthroughsStore: PlaythroughsState,
 ): Promise<void> => {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   try {
     await ensurePlaythroughsStore();

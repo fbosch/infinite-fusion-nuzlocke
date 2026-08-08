@@ -9,12 +9,12 @@ describe("Playthroughs Store - Migration Tests", () => {
   describe("remixMode to gameMode migration", () => {
     it("should migrate remixMode: true to gameMode: remix", () => {
       const legacyData = {
+        createdAt: Date.now(),
+        encounters: {},
+        gameMode: "classic" as const, // Default value
         id: "test-migration-1",
         name: "Legacy Remix Run",
         remixMode: true,
-        gameMode: "classic" as const, // Default value
-        encounters: {},
-        createdAt: Date.now(),
         updatedAt: Date.now(),
       };
 
@@ -29,12 +29,12 @@ describe("Playthroughs Store - Migration Tests", () => {
 
     it("should migrate remixMode: false to gameMode: classic", () => {
       const legacyData = {
+        createdAt: Date.now(),
+        encounters: {},
+        gameMode: "classic" as const, // Default value
         id: "test-migration-2",
         name: "Legacy Classic Run",
         remixMode: false,
-        gameMode: "classic" as const, // Default value
-        encounters: {},
-        createdAt: Date.now(),
         updatedAt: Date.now(),
       };
 
@@ -49,12 +49,12 @@ describe("Playthroughs Store - Migration Tests", () => {
 
     it("should not migrate when gameMode is explicitly set to non-default", () => {
       const modernData = {
+        createdAt: Date.now(),
+        encounters: {},
+        gameMode: "randomized" as const,
         id: "test-migration-3",
         name: "Modern Randomized Run",
         remixMode: true, // Should be ignored
-        gameMode: "randomized" as const,
-        encounters: {},
-        createdAt: Date.now(),
         updatedAt: Date.now(),
       };
 
@@ -67,27 +67,27 @@ describe("Playthroughs Store - Migration Tests", () => {
 
     it("should preserve all other fields during migration", () => {
       const legacyDataWithEncounters = {
-        id: "test-migration-6",
-        name: "Legacy Run with Data",
-        remixMode: true,
-        gameMode: "classic" as const,
+        createdAt: 1_234_567_890,
+        customLocations: [
+          {
+            id: "custom-1",
+            insertAfterLocationId: "some-location-id",
+            name: "Custom Route",
+          },
+        ],
         encounters: {
           "route-1": {
-            head: createMockPokemon("Pikachu", 25),
             body: null,
+            head: createMockPokemon("Pikachu", 25),
             isFusion: false,
             updatedAt: Date.now(),
           },
         },
-        customLocations: [
-          {
-            id: "custom-1",
-            name: "Custom Route",
-            insertAfterLocationId: "some-location-id",
-          },
-        ],
-        createdAt: 1234567890,
-        updatedAt: 1234567891,
+        gameMode: "classic" as const,
+        id: "test-migration-6",
+        name: "Legacy Run with Data",
+        remixMode: true,
+        updatedAt: 1_234_567_891,
       };
 
       const result = normalizePersistedPlaythrough(legacyDataWithEncounters);
@@ -100,19 +100,19 @@ describe("Playthroughs Store - Migration Tests", () => {
       expect(result.encounters?.["route-1"].head?.name).toBe("Pikachu");
       expect(result.customLocations).toBeDefined();
       expect(result.customLocations?.[0].name).toBe("Custom Route");
-      expect(result.createdAt).toBe(1234567890);
-      expect(result.updatedAt).toBe(1234567891);
+      expect(result.createdAt).toBe(1_234_567_890);
+      expect(result.updatedAt).toBe(1_234_567_891);
     });
   });
 
   describe("Schema validation edge cases", () => {
     it("should handle data without remixMode field (modern format)", () => {
       const modernData = {
+        createdAt: Date.now(),
+        encounters: {},
+        gameMode: "randomized" as const,
         id: "test-missing",
         name: "Test Run",
-        gameMode: "randomized" as const,
-        encounters: {},
-        createdAt: Date.now(),
         updatedAt: Date.now(),
       };
 
@@ -124,11 +124,11 @@ describe("Playthroughs Store - Migration Tests", () => {
 
     it("should validate gameMode enum values correctly", () => {
       const validData = {
+        createdAt: Date.now(),
+        encounters: {},
+        gameMode: "classic" as const,
         id: "test-enum",
         name: "Test Run",
-        gameMode: "classic" as const,
-        encounters: {},
-        createdAt: Date.now(),
         updatedAt: Date.now(),
       };
 
@@ -138,13 +138,13 @@ describe("Playthroughs Store - Migration Tests", () => {
 
     it("should handle corrupted migration data gracefully", () => {
       const corruptedData = {
+        createdAt: Date.now(),
+        encounters: {},
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        gameMode: "invalid" as any, // Invalid enum value
         id: "test-corrupted",
         name: "Test Run",
         remixMode: "invalid", // Invalid type
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        gameMode: "invalid" as any, // Invalid enum value
-        encounters: {},
-        createdAt: Date.now(),
         updatedAt: Date.now(),
       };
 
@@ -153,11 +153,11 @@ describe("Playthroughs Store - Migration Tests", () => {
 
     it("should successfully create new playthroughs with current schema", () => {
       const newPlaythrough = {
+        createdAt: Date.now(),
+        encounters: {},
+        gameMode: "remix" as const,
         id: "test-new",
         name: "New Test Run",
-        gameMode: "remix" as const,
-        encounters: {},
-        createdAt: Date.now(),
         updatedAt: Date.now(),
       };
 

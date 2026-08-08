@@ -23,11 +23,11 @@ interface PokemonData {
 }
 
 interface EggLocation {
+  description: string;
+  pokemonId?: number;
+  pokemonName?: string;
   routeName: string;
   source: "gift" | "nest";
-  description: string;
-  pokemonName?: string;
-  pokemonId?: number;
 }
 
 const EGG_KEYWORDS = ["egg", "as egg", "daycare egg", "random egg"] as const;
@@ -93,8 +93,10 @@ export function getNestLocationName(
   hasNestImage: boolean,
 ): string | null {
   if (
-    !href.includes("/wiki/") ||
-    (!parentText.toLowerCase().includes("nest") && !hasNestImage)
+    !(
+      href.includes("/wiki/") &&
+      (parentText.toLowerCase().includes("nest") || hasNestImage)
+    )
   ) {
     return null;
   }
@@ -201,7 +203,9 @@ function getPokemonByName(
   name: string,
   pokemonMap: Map<string, PokemonData>,
 ): PokemonData | null {
-  if (!name) return null;
+  if (!name) {
+    return null;
+  }
 
   const pokemon = pokemonMap.get(name.toLowerCase());
   return pokemon || null;
@@ -260,9 +264,9 @@ async function scrapeGiftsAndTradesForEggs(
               : null;
 
             const eggLocation: EggLocation = {
+              description: `${pokemonCell} - ${notesCell}`.trim(),
               routeName: cleanedLocation,
               source: "gift",
-              description: `${pokemonCell} - ${notesCell}`.trim(),
             };
 
             // Add Pokemon info if found
@@ -394,11 +398,11 @@ async function scrapePokemonNestsForEggs(
         : null;
 
       const eggLocation: EggLocation = {
-        routeName: routeName,
-        source: "nest",
         description: pokemonName
           ? `${pokemonName} nest location: ${routeName}`
           : `Nest location: ${routeName}`,
+        routeName,
+        source: "nest",
       };
 
       // Add Pokemon info if found
@@ -435,15 +439,15 @@ function mergeEggLocations(
   [...giftsLocations, ...nestsLocations].forEach((location) => {
     const key = location.routeName.toLowerCase();
 
-    if (!merged.has(key)) {
-      merged.set(key, location);
-    } else {
+    if (merged.has(key)) {
       // If we already have this location, merge the sources
       const existing = merged.get(key)!;
       if (existing.source !== location.source) {
         // Update description to include both sources
         existing.description = `${existing.description} | ${location.description}`;
       }
+    } else {
+      merged.set(key, location);
     }
   });
 
@@ -495,17 +499,17 @@ async function main() {
 
     // Create the output data structure
     const eggLocationsData = {
-      totalLocations: mergedLocations.length,
+      locations: mergedLocations,
+      pokemonIdentified: {
+        fromGifts: giftsWithPokemon.length,
+        fromNests: nestsWithPokemon.length,
+        total: locationsWithPokemon.length,
+      },
       sources: {
         gifts: giftsLocations.length,
         nests: nestsLocations.length,
       },
-      pokemonIdentified: {
-        total: locationsWithPokemon.length,
-        fromGifts: giftsWithPokemon.length,
-        fromNests: nestsWithPokemon.length,
-      },
-      locations: mergedLocations,
+      totalLocations: mergedLocations.length,
     };
 
     // Write to file
@@ -520,45 +524,45 @@ async function main() {
     // Success summary
     ConsoleFormatter.printSummary("Egg Locations Scraping Complete!", [
       {
+        color: "yellow",
         label: "Total egg locations found",
         value: mergedLocations.length,
-        color: "yellow",
       },
       {
+        color: "cyan",
         label: "From gifts and trades",
         value: giftsLocations.length,
-        color: "cyan",
       },
       {
+        color: "cyan",
         label: "From Pokémon nests",
         value: nestsLocations.length,
-        color: "cyan",
       },
       {
+        color: "green",
         label: "Pokémon identified",
         value: `${locationsWithPokemon.length}/${mergedLocations.length}`,
-        color: "green",
       },
       {
+        color: "cyan",
         label: "From gifts (with Pokémon)",
         value: `${giftsWithPokemon.length}/${giftsLocations.length}`,
-        color: "cyan",
       },
       {
+        color: "cyan",
         label: "From nests (with Pokémon)",
         value: `${nestsWithPokemon.length}/${nestsLocations.length}`,
-        color: "cyan",
       },
-      { label: "File saved", value: outputPath, color: "green" },
+      { color: "green", label: "File saved", value: outputPath },
       {
+        color: "cyan",
         label: "File size",
         value: ConsoleFormatter.formatFileSize(fileStats.size),
-        color: "cyan",
       },
       {
+        color: "yellow",
         label: "Duration",
         value: ConsoleFormatter.formatDuration(duration),
-        color: "yellow",
       },
     ]);
   } catch (error) {

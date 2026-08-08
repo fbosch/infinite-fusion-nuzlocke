@@ -132,17 +132,17 @@ async function scrapeDexEntries(): Promise<DexEntry[]> {
 
     // Success summary
     ConsoleFormatter.printSummary("Pokédex Scraping Complete!", [
-      { label: "Output saved to", value: outputPath, color: "cyan" },
-      { label: "Total entries", value: dexEntries.length, color: "green" },
+      { color: "cyan", label: "Output saved to", value: outputPath },
+      { color: "green", label: "Total entries", value: dexEntries.length },
       {
+        color: "cyan",
         label: "File size",
         value: ConsoleFormatter.formatFileSize(fileStats.size),
-        color: "cyan",
       },
       {
+        color: "yellow",
         label: "Duration",
         value: ConsoleFormatter.formatDuration(duration),
-        color: "yellow",
       },
     ]);
 

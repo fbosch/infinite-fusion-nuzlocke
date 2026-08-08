@@ -15,10 +15,15 @@ export function getFusionOverlayStatus(
   const headStatus = head?.status ?? null;
   const bodyStatus = body?.status ?? null;
 
-  if (isMissedStatus(headStatus) || isMissedStatus(bodyStatus)) return "missed";
-  if (isDeceasedStatus(headStatus) || isDeceasedStatus(bodyStatus))
+  if (isMissedStatus(headStatus) || isMissedStatus(bodyStatus)) {
+    return "missed";
+  }
+  if (isDeceasedStatus(headStatus) || isDeceasedStatus(bodyStatus)) {
     return "deceased";
-  if (isStoredStatus(headStatus) || isStoredStatus(bodyStatus)) return "stored";
+  }
+  if (isStoredStatus(headStatus) || isStoredStatus(bodyStatus)) {
+    return "stored";
+  }
   return "normal";
 }
 
@@ -30,7 +35,11 @@ export function getFusionActivity(
 ): FusionActivity {
   const headActive = isPokemonActive(head);
   const bodyActive = isPokemonActive(body);
-  if (headActive && bodyActive) return "both-active";
-  if (headActive || bodyActive) return "one-active";
+  if (headActive && bodyActive) {
+    return "both-active";
+  }
+  if (headActive || bodyActive) {
+    return "one-active";
+  }
   return "none-active";
 }

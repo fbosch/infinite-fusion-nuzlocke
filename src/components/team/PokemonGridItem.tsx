@@ -11,12 +11,12 @@ import {
 } from "@/loaders/pokemon";
 
 interface PokemonGridItemProps {
-  pokemon: PokemonOptionType;
-  locationId: string;
-  isSelectedHead: boolean;
-  isSelectedBody: boolean;
   isActiveSlot: boolean;
+  isSelectedBody: boolean;
+  isSelectedHead: boolean;
+  locationId: string;
   onSelect: (pokemon: PokemonOptionType, locationId: string) => void;
+  pokemon: PokemonOptionType;
 }
 
 export function PokemonGridItem({
@@ -67,14 +67,14 @@ export function PokemonGridItem({
   const getStatusBadge = () => {
     if (isSelectedHead) {
       return (
-        <div className="px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded-full flex items-center space-x-1">
+        <div className="flex items-center space-x-1 rounded-full bg-blue-600 px-2 py-1 font-medium text-white text-xs">
           <HeadIcon className="h-3 w-3" />
         </div>
       );
     }
     if (isSelectedBody) {
       return (
-        <div className="px-2 py-1 bg-green-600 text-white text-xs font-medium rounded-full flex items-center space-x-1">
+        <div className="flex items-center space-x-1 rounded-full bg-green-600 px-2 py-1 font-medium text-white text-xs">
           <BodyIcon className="h-3 w-3" />
         </div>
       );
@@ -84,28 +84,28 @@ export function PokemonGridItem({
 
   return (
     <button
-      type="button"
-      onClick={() => onSelect(pokemon, locationId)}
-      disabled={!isActiveSlot && !isSelected}
       className={clsx(
-        "flex flex-col items-center justify-center p-2 rounded-lg border transition-colors h-20 relative",
+        "relative flex h-20 flex-col items-center justify-center rounded-lg border p-2 transition-colors",
         getButtonStyles(),
       )}
+      disabled={!(isActiveSlot || isSelected)}
+      onClick={() => onSelect(pokemon, locationId)}
+      type="button"
     >
-      <div className="h-12 w-12 flex items-center justify-center mb-1">
+      <div className="mb-1 flex h-12 w-12 items-center justify-center">
         <PokemonSprite
-          pokemonId={pokemon.id}
-          generation="gen7"
           className="h-12 w-12"
+          generation="gen7"
+          pokemonId={pokemon.id}
         />
       </div>
 
-      <div className="text-center min-w-0">
-        <div className="font-medium text-gray-900 dark:text-white text-xs truncate">
+      <div className="min-w-0 text-center">
+        <div className="truncate font-medium text-gray-900 text-xs dark:text-white">
           {pokemon.nickname || pokemon.name}
         </div>
         {pokemon.nickname && (
-          <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+          <div className="truncate text-gray-500 text-xs dark:text-gray-400">
             ({pokemon.name})
           </div>
         )}
@@ -157,8 +157,8 @@ export function PokemonGridItem({
                 | "dragon"
                 | "dark"
             }
-            size="xxs"
             showTooltip={false}
+            size="xxs"
           />
         </div>
       )}

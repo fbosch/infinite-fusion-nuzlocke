@@ -75,26 +75,26 @@ describe("FusionToggleButton", () => {
         }),
     );
     getLocationFromComboboxIdMock.mockReturnValue({
-      locationId: "route-2",
       field: "single",
+      locationId: "route-2",
     });
     clearEncounterFromLocationMock.mockResolvedValue(undefined);
     dragActions.startDrag("Pikachu", "route-2-single", {
       id: 25,
       name: "Pikachu",
       nationalDexId: 25,
-      originalLocation: "Route 2",
       nickname: "Sparky",
+      originalLocation: "Route 2",
       status: "captured",
       uid: "pikachu-1",
     });
 
     render(
       <FusionToggleButton
-        locationId="route-1"
         isFusion={false}
-        selectedPokemon={{ id: 1, name: "Bulbasaur", nationalDexId: 1 }}
+        locationId="route-1"
         onToggleFusion={vi.fn()}
+        selectedPokemon={{ id: 1, name: "Bulbasaur", nationalDexId: 1 }}
       />,
     );
 
@@ -113,8 +113,8 @@ describe("FusionToggleButton", () => {
         "route-1",
         { id: 1, name: "Bulbasaur", nationalDexId: 1 },
         expect.objectContaining({
-          originalLocation: "Route 2",
           nickname: "Sparky",
+          originalLocation: "Route 2",
           status: "captured",
           uid: "pikachu-1",
         }),
@@ -150,10 +150,10 @@ describe("FusionToggleButton", () => {
 
     render(
       <FusionToggleButton
-        locationId="route-1"
         isFusion={false}
-        selectedPokemon={{ id: 1, name: "Bulbasaur", nationalDexId: 1 }}
+        locationId="route-1"
         onToggleFusion={vi.fn()}
+        selectedPokemon={{ id: 1, name: "Bulbasaur", nationalDexId: 1 }}
       />,
     );
 

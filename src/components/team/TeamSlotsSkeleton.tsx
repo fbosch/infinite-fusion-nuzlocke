@@ -2,23 +2,24 @@ import clsx from "clsx";
 
 export default function TeamSlotsSkeleton() {
   return (
-    <div className="hidden lg:flex flex-col items-center">
+    <div className="hidden flex-col items-center lg:flex">
       <div className="flex gap-3 sm:gap-4 md:gap-5">
         {Array.from({ length: 6 }).map((_, index) => (
           <div
-            key={index}
             className={clsx(
-              "flex flex-col items-center justify-center relative group/team-slot",
-              "size-16 sm:size-18 md:size-20 rounded-full border transition-all duration-200",
-              "border-gray-100 dark:border-gray-800/30 bg-white dark:bg-gray-900",
+              "group/team-slot relative flex flex-col items-center justify-center",
+              "size-16 rounded-full border transition-all duration-200 sm:size-18 md:size-20",
+              "border-gray-100 bg-white dark:border-gray-800/30 dark:bg-gray-900",
             )}
+            key={index}
           >
             {/* Sprite skeleton */}
-            <div className="flex flex-col items-center justify-center relative w-full h-full">
+            <div className="relative flex h-full w-full flex-col items-center justify-center">
               <div
-                className="w-full h-full absolute rounded-full opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600"
+                className="absolute h-full w-full rounded-full border border-gray-200 text-gray-300 opacity-30 dark:border-gray-600 dark:text-gray-600"
                 style={{
-                  background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
+                  background:
+                    "repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)",
                 }}
               />
             </div>

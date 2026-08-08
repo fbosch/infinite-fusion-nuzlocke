@@ -23,17 +23,17 @@ export const prepareImportedPlaythrough = async (
       : importedPlaythrough.id;
 
     return {
-      id: finalId,
-      name: importedPlaythrough.name,
-      gameMode: importedPlaythrough.gameMode,
-      version: importedPlaythrough.version || "1.0.0",
       createdAt: importedPlaythrough.createdAt,
-      updatedAt: Date.now(),
       customLocations: importedPlaythrough.customLocations || [],
       encounters: importedPlaythrough.encounters || {},
+      gameMode: importedPlaythrough.gameMode,
+      id: finalId,
+      name: importedPlaythrough.name,
       team: importedPlaythrough.team || {
         members: [null, null, null, null, null, null],
       },
+      updatedAt: Date.now(),
+      version: importedPlaythrough.version || "1.0.0",
     };
   } catch (error) {
     console.error("Failed to import playthrough:", error);

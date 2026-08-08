@@ -41,13 +41,13 @@ const createTeamMember = (
   head: { uid: string } | null,
   body: { uid: string } | null,
 ) => {
-  if (!head && !body) {
+  if (!(head || body)) {
     return null;
   }
 
   return {
-    headPokemonUid: head?.uid || "",
     bodyPokemonUid: body?.uid || "",
+    headPokemonUid: head?.uid || "",
   };
 };
 
@@ -55,7 +55,7 @@ const getAutoAssignablePokemon = (pokemon: {
   uid?: string;
   status?: string;
 }) => {
-  if (!pokemon.uid || !shouldAutoAssign(pokemon.status)) {
+  if (!(pokemon.uid && shouldAutoAssign(pokemon.status))) {
     return null;
   }
 
@@ -108,18 +108,18 @@ export const updateTeamMember = async (
 
 export const flipTeamMember = (position: number): boolean => {
   const activePlaythrough = ensureActivePlaythroughWithEncounters();
-  if (!activePlaythrough || !isValidTeamPosition(position)) {
+  if (!(activePlaythrough && isValidTeamPosition(position))) {
     return false;
   }
 
   const member = activePlaythrough.team.members[position];
-  if (!member?.headPokemonUid || !member.bodyPokemonUid) {
+  if (!(member?.headPokemonUid && member.bodyPokemonUid)) {
     return false;
   }
 
   activePlaythrough.team.members[position] = {
-    headPokemonUid: member.bodyPokemonUid,
     bodyPokemonUid: member.headPokemonUid,
+    headPokemonUid: member.bodyPokemonUid,
   };
   activePlaythrough.updatedAt = Date.now();
 
@@ -142,7 +142,7 @@ export const autoAssignCapturedPokemonToTeam = async (
   const headPokemon = getAutoAssignablePokemon(encounter.head ?? {});
   const bodyPokemon = getAutoAssignablePokemon(encounter.body ?? {});
 
-  if (!headPokemon && !bodyPokemon) {
+  if (!(headPokemon || bodyPokemon)) {
     return;
   }
 
@@ -365,8 +365,7 @@ const restoreStoredPokemon = <
   uidsToRestore: ReadonlySet<string>,
 ): Pokemon | null => {
   if (
-    !pokemon?.uid ||
-    !uidsToRestore.has(pokemon.uid) ||
+    !(pokemon?.uid && uidsToRestore.has(pokemon.uid)) ||
     pokemon.status !== PokemonStatus.STORED
   ) {
     return null;

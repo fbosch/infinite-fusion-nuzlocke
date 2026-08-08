@@ -6,11 +6,11 @@ import { startTransition, useRef } from "react";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 
 interface PokemonNicknameInputProps {
-  value: PokemonOptionType | null | undefined;
-  onChange: (value: PokemonOptionType | null) => void;
-  placeholder?: string;
   disabled?: boolean;
   dragPreview?: PokemonOptionType | null;
+  onChange: (value: PokemonOptionType | null) => void;
+  placeholder?: string;
+  value: PokemonOptionType | null | undefined;
 }
 
 export const PokemonNicknameInput = ({
@@ -57,46 +57,46 @@ export const PokemonNicknameInput = ({
   if (dragPreview) {
     return (
       <input
-        type="text"
-        value={dragPreview.nickname || ""}
         aria-label="Pokemon nickname"
-        placeholder={placeholder}
+        autoComplete="off"
         className={clsx(
-          "rounded-bl-md border-t-0 border-r-0 rounded-t-none relative",
-          "flex-1 px-3 py-3.5 text-sm border bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:cursor-not-allowed",
+          "relative rounded-t-none rounded-bl-md border-t-0 border-r-0",
+          "flex-1 border bg-white px-3 py-3.5 text-gray-900 text-sm outline-none focus:outline-none focus-visible:border-blue-500 focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-not-allowed",
           "border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400",
           "placeholder-gray-500 dark:placeholder-gray-400",
           "opacity-60",
         )}
-        maxLength={12}
         disabled
+        maxLength={12}
+        placeholder={placeholder}
         readOnly
         spellCheck={false}
-        autoComplete="off"
+        type="text"
+        value={dragPreview.nickname || ""}
       />
     );
   }
 
   return (
     <input
-      key={inputKey}
-      type="text"
-      defaultValue={value?.nickname || ""}
-      onBlur={handleBlur}
-      onKeyDown={handleKeyDown}
       aria-label="Pokemon nickname"
-      placeholder={placeholder}
-      ref={inputRef}
+      autoComplete="off"
       className={clsx(
-        "rounded-bl-md border-t-0 border-r-0 rounded-t-none relative",
-        "flex-1 px-3 py-3.5 text-sm border bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:cursor-not-allowed",
+        "relative rounded-t-none rounded-bl-md border-t-0 border-r-0",
+        "flex-1 border bg-white px-3 py-3.5 text-gray-900 text-sm outline-none focus:outline-none focus-visible:border-blue-500 focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-not-allowed",
         "border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400",
         "placeholder-gray-500 dark:placeholder-gray-400",
       )}
-      maxLength={12}
+      defaultValue={value?.nickname || ""}
       disabled={!value || disabled}
+      key={inputKey}
+      maxLength={12}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      placeholder={placeholder}
+      ref={inputRef}
       spellCheck={false}
-      autoComplete="off"
+      type="text"
     />
   );
 };

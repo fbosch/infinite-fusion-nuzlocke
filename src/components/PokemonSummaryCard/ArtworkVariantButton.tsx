@@ -9,11 +9,11 @@ import { usePreferredVariantState, useSpriteVariants } from "@/hooks/useSprite";
 import { CursorTooltip } from "../CursorTooltip";
 
 interface ArtworkVariantButtonProps {
-  headId?: number;
   bodyId?: number;
-  isFusion?: boolean;
-  disabled?: boolean;
   className?: string;
+  disabled?: boolean;
+  headId?: number;
+  isFusion?: boolean;
   shouldLoad?: boolean;
 }
 
@@ -27,7 +27,7 @@ function ArtworkVariantIcon({
   isShiftPressed: boolean;
 }) {
   if (isLoading) {
-    return <Loader2 className="animate-spin size-3" />;
+    return <Loader2 className="size-3 animate-spin" />;
   }
   if (!hasVariants) {
     return <RefreshCwOff className="size-3" />;
@@ -75,7 +75,9 @@ export function ArtworkVariantButton({
     // Prevent event bubbling to avoid triggering parent click handlers
     event.stopPropagation();
 
-    if (disabled || !hasVariants || !variants) return;
+    if (disabled || !hasVariants || !variants) {
+      return;
+    }
 
     const currentIndex = variants.indexOf(currentVariant);
     const nextIndex = isShiftPressed
@@ -100,7 +102,7 @@ export function ArtworkVariantButton({
   })();
 
   // Don't render the button if there are no variants (unless still loading)
-  if (!isLoading && !hasVariants) {
+  if (!(isLoading || hasVariants)) {
     return null;
   }
 
@@ -108,38 +110,38 @@ export function ArtworkVariantButton({
 
   return (
     <CursorTooltip
-      disabled={!hasVariants}
       content={
-        <div className="text-sm flex flex-col gap-1">
+        <div className="flex flex-col gap-1 text-sm">
           <div className="font-normal">Cycle artwork variants</div>
-          <span className="text-xs text-gray-400">Hold Shift to reverse</span>
+          <span className="text-gray-400 text-xs">Hold Shift to reverse</span>
         </div>
       }
       delay={1000}
+      disabled={!hasVariants}
     >
       <button
-        type="button"
-        onClick={handleCycleVariant}
-        disabled={isButtonDisabled}
+        aria-label={label}
         className={twMerge(
           clsx(
-            "group-hover:opacity-50 opacity-0 focus:opacity-100",
+            "opacity-0 focus:opacity-100 group-hover:opacity-50",
             "transition-opacity duration-200",
-            "size-4 cursor-pointer flex items-center justify-center",
+            "flex size-4 cursor-pointer items-center justify-center",
             "rounded-full text-gray-600 dark:text-white",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
-            "disabled:cursor-not-allowed enabled:hover:opacity-100 enabled:hover:text-white",
+            "enabled:hover:text-white enabled:hover:opacity-100 disabled:cursor-not-allowed",
             {
-              "group-hover:opacity-100": isLoading,
-              "enabled:hover:bg-blue-400 enabled:focus:bg-blue-400 enabled:dark:hover:bg-blue-600 enabled:dark:focus:bg-blue-600 enabled:focus:text-white":
+              "enabled:focus:bg-blue-400 enabled:focus:text-white enabled:hover:bg-blue-400 enabled:dark:focus:bg-blue-600 enabled:dark:hover:bg-blue-600":
                 !isShiftPressed,
-              "enabled:hover:bg-orange-400 enabled:focus:bg-orange-400 enabled:dark:hover:bg-orange-700 enabled:dark:focus:bg-orange-700":
+              "enabled:focus:bg-orange-400 enabled:hover:bg-orange-400 enabled:dark:focus:bg-orange-700 enabled:dark:hover:bg-orange-700":
                 isShiftPressed,
+              "group-hover:opacity-100": isLoading,
             },
           ),
           className,
         )}
-        aria-label={label}
+        disabled={isButtonDisabled}
+        onClick={handleCycleVariant}
+        type="button"
       >
         <div className="">
           <ArtworkVariantIcon

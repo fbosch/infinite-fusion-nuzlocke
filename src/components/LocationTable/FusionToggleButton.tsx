@@ -15,10 +15,10 @@ import { playthroughActions } from "@/stores/playthroughs/index";
 import { CursorTooltip } from "../CursorTooltip";
 
 interface FusionToggleButtonProps {
-  locationId: string;
   isFusion: boolean;
-  selectedPokemon: PokemonOptionType | null;
+  locationId: string;
   onToggleFusion: () => void;
+  selectedPokemon: PokemonOptionType | null;
 }
 
 export function FusionToggleButton({
@@ -36,7 +36,9 @@ export function FusionToggleButton({
     e.stopPropagation();
 
     const pokemonName = e.dataTransfer.getData("text/plain");
-    if (!pokemonName) return;
+    if (!pokemonName) {
+      return;
+    }
 
     // Event handlers must use the drag state that is current for this drop.
     // Keep it after the async fusion completes because global drop handlers clear it.
@@ -50,13 +52,19 @@ export function FusionToggleButton({
       dragSource !== `${locationId}-head` &&
       dragSource !== `${locationId}-body`;
 
-    if (!isFromDifferentCombobox) return;
+    if (!isFromDifferentCombobox) {
+      return;
+    }
 
     // Only allow dropping if this row is not already a fusion and has an existing encounter
-    if (isFusion || !selectedPokemon) return;
+    if (isFusion || !selectedPokemon) {
+      return;
+    }
 
     // Prevent dropping if the button is disabled (Egg in non-fusion mode)
-    if (!isFusion && selectedPokemon && isEgg(selectedPokemon)) return;
+    if (!isFusion && selectedPokemon && isEgg(selectedPokemon)) {
+      return;
+    }
 
     let allPokemon: PokemonOptionType[];
     try {
@@ -70,7 +78,9 @@ export function FusionToggleButton({
       (pokemon) => pokemon.name.toLowerCase() === pokemonName.toLowerCase(),
     );
 
-    if (!foundPokemon) return;
+    if (!foundPokemon) {
+      return;
+    }
 
     const pokemonOption: PokemonOptionType = {
       id: foundPokemon.id,
@@ -87,7 +97,9 @@ export function FusionToggleButton({
     await playthroughActions
       .createFusion(locationId, selectedPokemon, pokemonOption)
       .then(async () => {
-        if (!dragSource) return;
+        if (!dragSource) {
+          return;
+        }
 
         const { locationId: sourceLocationId, field: sourceField } =
           playthroughActions.getLocationFromComboboxId(dragSource);
@@ -156,47 +168,47 @@ export function FusionToggleButton({
 
   return (
     <button
-      type="button"
-      onClick={onToggleFusion}
-      onDrop={handleFusionDrop}
-      onDragOver={handleFusionDragOver}
-      onDragEnd={handleFusionDragEnd}
-      disabled={isDisabled}
-      className={clsx(
-        "group",
-        "size-10 flex items-center justify-center self-center",
-        "p-2 rounded-md border transition-all duration-200",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-        {
-          // Fusion mode (enabled)
-          "cursor-pointer bg-white border-gray-300 text-gray-700 hover:bg-red-500 hover:border-red-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300":
-            isFusion,
-          // Non-fusion mode (enabled)
-          "cursor-pointer bg-white border-gray-300 text-gray-700 hover:bg-green-700 hover:border-green-600 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-green-700":
-            !isFusion && !isDisabled,
-          // Disabled state
-          "cursor-not-allowed bg-gray-100 border-gray-200 text-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-500":
-            isDisabled,
-          // Drop allowed indicator
-          "ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20":
-            isDropAllowed && !isDisabled,
-        },
-      )}
       aria-label={
         isDisabled
           ? "Cannot fuse Eggs"
           : `Toggle fusion for ${selectedPokemon?.name || "Pokemon"}`
       }
+      className={clsx(
+        "group",
+        "flex size-10 items-center justify-center self-center",
+        "rounded-md border p-2 transition-all duration-200",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+        {
+          // Drop allowed indicator
+          "bg-blue-50 ring-2 ring-blue-500 ring-opacity-50 dark:bg-blue-900/20":
+            isDropAllowed && !isDisabled,
+          // Disabled state
+          "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500":
+            isDisabled,
+          // Non-fusion mode (enabled)
+          "cursor-pointer border-gray-300 bg-white text-gray-700 hover:border-green-600 hover:bg-green-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-green-700":
+            !(isFusion || isDisabled),
+          // Fusion mode (enabled)
+          "cursor-pointer border-gray-300 bg-white text-gray-700 hover:border-red-600 hover:bg-red-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300":
+            isFusion,
+        },
+      )}
+      disabled={isDisabled}
+      onClick={onToggleFusion}
+      onDragEnd={handleFusionDragEnd}
+      onDragOver={handleFusionDragOver}
+      onDrop={handleFusionDrop}
+      type="button"
     >
       <CursorTooltip
         content={
           <div className="flex items-center gap-2">
             <Image
-              src={DNA_SPLICER_ICON}
               alt="DNA Splicer"
-              width={24}
+              className="image-rendering-pixelated object-contain object-center"
               height={24}
-              className="object-contain object-center image-rendering-pixelated"
+              src={DNA_SPLICER_ICON}
+              width={24}
             />
             <span className="text-sm">
               {isDisabled ? "Cannot fuse Eggs" : isFusion ? "Unfuse" : "Fuse"}

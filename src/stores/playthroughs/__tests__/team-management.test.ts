@@ -23,8 +23,8 @@ describe("Team Management", () => {
       // Set up encounters with Pokémon
       activePlaythrough.encounters = {
         route1: {
-          head: testPokemon.pikachu(),
           body: testPokemon.charmander(),
+          head: testPokemon.pikachu(),
           isFusion: true,
           updatedAt: Date.now(),
         },
@@ -32,8 +32,8 @@ describe("Team Management", () => {
 
       // Add team member
       activePlaythrough.team.members[0] = {
-        headPokemonUid: "pikachu_route1_123",
         bodyPokemonUid: "charmander_route1_456",
+        headPokemonUid: "pikachu_route1_123",
       };
 
       // Verify team member exists
@@ -63,8 +63,8 @@ describe("Team Management", () => {
       // Set up encounters with only head Pokémon
       activePlaythrough.encounters = {
         route1: {
-          head: testPokemon.pikachu(),
           body: null,
+          head: testPokemon.pikachu(),
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -72,8 +72,8 @@ describe("Team Management", () => {
 
       // Add team member with only head Pokémon
       activePlaythrough.team.members[0] = {
-        headPokemonUid: "pikachu_route1_123",
         bodyPokemonUid: "",
+        headPokemonUid: "pikachu_route1_123",
       };
 
       // Verify team member exists
@@ -100,8 +100,8 @@ describe("Team Management", () => {
       // Set up encounters with only body Pokémon
       activePlaythrough.encounters = {
         route1: {
-          head: null,
           body: testPokemon.charmander(),
+          head: null,
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -109,8 +109,8 @@ describe("Team Management", () => {
 
       // Add team member with only body Pokémon
       activePlaythrough.team.members[0] = {
-        headPokemonUid: "",
         bodyPokemonUid: "charmander_route1_456",
+        headPokemonUid: "",
       };
 
       // Verify team member exists
@@ -174,16 +174,16 @@ describe("Team Management", () => {
       // Set up encounters and team member
       activePlaythrough.encounters = {
         route1: {
-          head: testPokemon.pikachu(),
           body: null,
+          head: testPokemon.pikachu(),
           isFusion: false,
           updatedAt: Date.now(),
         },
       };
 
       activePlaythrough.team.members[0] = {
-        headPokemonUid: "pikachu_route1_123",
         bodyPokemonUid: "",
+        headPokemonUid: "pikachu_route1_123",
       };
 
       const originalTimestamp = activePlaythrough.updatedAt;
@@ -204,15 +204,15 @@ describe("Team Management", () => {
       const { activePlaythrough } = createTestPlaythrough();
       activePlaythrough.encounters = {
         route1: {
-          head: {
-            ...testPokemon.pikachu(),
-            status: PokemonStatus.STORED,
-            originalReceivalStatus: PokemonStatus.RECEIVED,
-          },
           body: {
             ...testPokemon.charmander(),
-            status: PokemonStatus.STORED,
             originalReceivalStatus: PokemonStatus.TRADED,
+            status: PokemonStatus.STORED,
+          },
+          head: {
+            ...testPokemon.pikachu(),
+            originalReceivalStatus: PokemonStatus.RECEIVED,
+            status: PokemonStatus.STORED,
           },
           isFusion: true,
           updatedAt: Date.now(),
@@ -235,12 +235,12 @@ describe("Team Management", () => {
       // Set up encounters with stored Pokémon that has originalReceivalStatus
       activePlaythrough.encounters = {
         route1: {
+          body: null,
           head: {
             ...testPokemon.pikachu(),
-            status: PokemonStatus.STORED,
             originalReceivalStatus: PokemonStatus.CAPTURED,
+            status: PokemonStatus.STORED,
           },
-          body: null,
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -260,12 +260,12 @@ describe("Team Management", () => {
       // Set up encounters with stored Pokémon without originalReceivalStatus
       activePlaythrough.encounters = {
         route1: {
+          body: null,
           head: {
             ...testPokemon.pikachu(),
             status: PokemonStatus.STORED,
             // No originalReceivalStatus
           },
-          body: null,
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -285,8 +285,8 @@ describe("Team Management", () => {
       // Set up encounters with captured Pokémon
       activePlaythrough.encounters = {
         route1: {
-          head: testPokemon.pikachu(),
           body: null,
+          head: testPokemon.pikachu(),
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -318,12 +318,12 @@ describe("Team Management", () => {
       // Set up encounters with stored Pokémon
       activePlaythrough.encounters = {
         route1: {
+          body: null,
           head: {
             ...testPokemon.pikachu(),
-            status: PokemonStatus.STORED,
             originalReceivalStatus: PokemonStatus.CAPTURED,
+            status: PokemonStatus.STORED,
           },
-          body: null,
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -352,12 +352,12 @@ describe("Team Management", () => {
       const { activePlaythrough } = createTestPlaythrough();
       activePlaythrough.encounters = {
         route1: {
-          head: {
-            ...testPokemon.pikachu(),
-            status: PokemonStatus.STORED,
-          },
           body: {
             ...testPokemon.charmander(),
+            status: PokemonStatus.STORED,
+          },
+          head: {
+            ...testPokemon.pikachu(),
             status: PokemonStatus.STORED,
           },
           isFusion: true,

@@ -7,11 +7,11 @@ const SCRAPER_USER_AGENT =
   "InfiniteFusionNuzlockeScraper/1.0 (+https://github.com/fbb/infinite-fusion-nuzlocke)";
 
 const WikiParseResponseSchema = z.object({
-  parse: z
-    .object({ text: z.string().optional(), wikitext: z.string().optional() })
-    .optional(),
   error: z
     .object({ code: z.string().optional(), info: z.string().optional() })
+    .optional(),
+  parse: z
+    .object({ text: z.string().optional(), wikitext: z.string().optional() })
     .optional(),
 });
 
@@ -56,8 +56,8 @@ async function fetchWikiPageParsedContent(
     action: "parse",
     format: "json",
     formatversion: "2",
-    prop,
     page: pageTitle,
+    prop,
     redirects: "1",
   });
 

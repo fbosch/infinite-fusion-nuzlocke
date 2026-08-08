@@ -108,27 +108,27 @@ type FixtureOptions = {
 };
 
 const fixtureOptions: Record<FixtureKind, FixtureOptions> = {
-  "reverse-active": {},
-  "reverse-stored": { reverseStatus: PokemonStatus.STORED },
-  "encounter-select-empty": {},
-  "encounter-overwrite": {},
+  "custom-location-remove": { hasCustomLocation: true },
+  "drag-empty-target": {},
+  "drag-occupied-target": { targetPokemonId: 4 },
   "encounter-clear": {},
+  "encounter-evolve": {},
+  "encounter-flip-fusion": {},
   "encounter-nickname-update": {},
+  "encounter-overwrite": {},
+  "encounter-reset": {},
+  "encounter-select-empty": {},
   "encounter-status-captured": {},
   "encounter-status-deceased": {},
   "encounter-status-stored": {},
   "encounter-toggle-fusion": {},
-  "encounter-flip-fusion": {},
-  "encounter-evolve": {},
-  "encounter-reset": {},
   "move-original-empty-target": { sourceOriginalLocation: TARGET_LOCATION_ID },
   "move-original-occupied-target": {
     sourceOriginalLocation: TARGET_LOCATION_ID,
     targetPokemonId: 4,
   },
-  "drag-empty-target": {},
-  "drag-occupied-target": { targetPokemonId: 4 },
-  "custom-location-remove": { hasCustomLocation: true },
+  "reverse-active": {},
+  "reverse-stored": { reverseStatus: PokemonStatus.STORED },
 };
 
 const createPokemon = (
@@ -139,16 +139,16 @@ const createPokemon = (
   id,
   name: `Pokemon ${id}`,
   nationalDexId: id,
-  uid,
-  status,
   originalLocation: SOURCE_LOCATION_ID,
+  status,
+  uid,
 });
 
 const createEncounter = (
   head: PokemonOptionType | null,
   body: PokemonOptionType | null = null,
   isFusion = false,
-): EncounterData => ({ head, body, isFusion, updatedAt: 1 });
+): EncounterData => ({ body, head, isFusion, updatedAt: 1 });
 
 function createFixture(kind: FixtureKind): Playthrough {
   const options = fixtureOptions[kind];
@@ -181,12 +181,23 @@ function createFixture(kind: FixtureKind): Playthrough {
   }
 
   return {
+    createdAt: 1,
+    customLocations: options.hasCustomLocation
+      ? [
+          {
+            id: "custom-location",
+            insertAfterLocationId: SOURCE_LOCATION_ID,
+            name: "Custom Location",
+          },
+        ]
+      : undefined,
+    encounters,
+    gameMode: "randomized",
     id: "benchmark-playthrough",
     name: "Benchmark",
-    encounters,
     team: {
       members: [
-        { headPokemonUid: head.uid ?? "", bodyPokemonUid: body.uid ?? "" },
+        { bodyPokemonUid: body.uid ?? "", headPokemonUid: head.uid ?? "" },
         null,
         null,
         null,
@@ -194,19 +205,8 @@ function createFixture(kind: FixtureKind): Playthrough {
         null,
       ],
     },
-    gameMode: "randomized",
-    version: "1.0.0",
-    createdAt: 1,
     updatedAt: 1,
-    customLocations: options.hasCustomLocation
-      ? [
-          {
-            id: "custom-location",
-            name: "Custom Location",
-            insertAfterLocationId: SOURCE_LOCATION_ID,
-          },
-        ]
-      : undefined,
+    version: "1.0.0",
   };
 }
 
@@ -227,53 +227,53 @@ function getSourceHeadPokemon() {
 }
 
 const runFixture: Record<FixtureKind, () => Promise<unknown> | void> = {
-  "reverse-active": () => flipTeamMemberFusion(0),
-  "reverse-stored": () => flipTeamMemberFusion(0),
-  "encounter-select-empty": () =>
-    updateEncounter(EMPTY_LOCATION_ID, createPokemon("selected-pokemon", 7)),
-  "encounter-overwrite": () =>
-    updateEncounter(
-      SOURCE_LOCATION_ID,
-      createPokemon("replacement-pokemon", 7),
-    ),
-  "encounter-clear": () => updateEncounter(SOURCE_LOCATION_ID, null, "head"),
-  "encounter-nickname-update": () =>
-    updatePokemonInEncounter(SOURCE_LOCATION_ID, "source-head", "head", {
-      nickname: "Sparky",
+  "custom-location-remove": () => removeCustomLocation("custom-location"),
+  "drag-empty-target": () =>
+    relocateEncounterSlot({
+      sourceField: "head",
+      sourceLocationId: SOURCE_LOCATION_ID,
+      targetField: "head",
+      targetLocationId: TARGET_LOCATION_ID,
     }),
-  "encounter-status-captured": () =>
-    markEncounterAsCaptured(SOURCE_LOCATION_ID),
-  "encounter-status-deceased": () =>
-    markEncounterAsDeceased(SOURCE_LOCATION_ID),
-  "encounter-status-stored": () => moveEncounterToBox(SOURCE_LOCATION_ID),
-  "encounter-toggle-fusion": () => toggleEncounterFusion(SOURCE_LOCATION_ID),
-  "encounter-flip-fusion": () => flipEncounterFusion(SOURCE_LOCATION_ID),
+  "drag-occupied-target": () =>
+    relocateEncounterSlot({
+      sourceField: "head",
+      sourceLocationId: SOURCE_LOCATION_ID,
+      targetField: "head",
+      targetLocationId: TARGET_LOCATION_ID,
+    }),
+  "encounter-clear": () => updateEncounter(SOURCE_LOCATION_ID, null, "head"),
   "encounter-evolve": () =>
     updateEncounter(
       SOURCE_LOCATION_ID,
       createPokemon("source-head", 26),
       "head",
     ),
+  "encounter-flip-fusion": () => flipEncounterFusion(SOURCE_LOCATION_ID),
+  "encounter-nickname-update": () =>
+    updatePokemonInEncounter(SOURCE_LOCATION_ID, "source-head", "head", {
+      nickname: "Sparky",
+    }),
+  "encounter-overwrite": () =>
+    updateEncounter(
+      SOURCE_LOCATION_ID,
+      createPokemon("replacement-pokemon", 7),
+    ),
   "encounter-reset": () => resetEncounter(SOURCE_LOCATION_ID),
+  "encounter-select-empty": () =>
+    updateEncounter(EMPTY_LOCATION_ID, createPokemon("selected-pokemon", 7)),
+  "encounter-status-captured": () =>
+    markEncounterAsCaptured(SOURCE_LOCATION_ID),
+  "encounter-status-deceased": () =>
+    markEncounterAsDeceased(SOURCE_LOCATION_ID),
+  "encounter-status-stored": () => moveEncounterToBox(SOURCE_LOCATION_ID),
+  "encounter-toggle-fusion": () => toggleEncounterFusion(SOURCE_LOCATION_ID),
   "move-original-empty-target": () =>
     moveToOriginalLocation(SOURCE_LOCATION_ID, "head", getSourceHeadPokemon()),
   "move-original-occupied-target": () =>
     moveToOriginalLocation(SOURCE_LOCATION_ID, "head", getSourceHeadPokemon()),
-  "drag-empty-target": () =>
-    relocateEncounterSlot({
-      sourceLocationId: SOURCE_LOCATION_ID,
-      sourceField: "head",
-      targetLocationId: TARGET_LOCATION_ID,
-      targetField: "head",
-    }),
-  "drag-occupied-target": () =>
-    relocateEncounterSlot({
-      sourceLocationId: SOURCE_LOCATION_ID,
-      sourceField: "head",
-      targetLocationId: TARGET_LOCATION_ID,
-      targetField: "head",
-    }),
-  "custom-location-remove": () => removeCustomLocation("custom-location"),
+  "reverse-active": () => flipTeamMemberFusion(0),
+  "reverse-stored": () => flipTeamMemberFusion(0),
 };
 
 const warmFixture: Record<FixtureKind, () => void> = Object.fromEntries(
@@ -336,8 +336,8 @@ async function benchmarkFixture(kind: FixtureKind): Promise<BenchmarkResult> {
   }
 
   return {
-    name: kind,
     cold: summarizeSamples(coldSamples),
+    name: kind,
     warm: summarizeSamples(warmSamples),
   };
 }
@@ -353,8 +353,8 @@ describe("playthrough interaction hot paths", () => {
       JSON.stringify(
         {
           encounterCount: ENCOUNTER_COUNT,
-          sampleCount: SAMPLE_COUNT,
           results,
+          sampleCount: SAMPLE_COUNT,
         },
         null,
         2,

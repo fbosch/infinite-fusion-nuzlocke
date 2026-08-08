@@ -5,10 +5,10 @@ import "./mocks";
 import { vi } from "vitest";
 
 vi.mock("@/lib/preferredVariants", () => ({
-  getPreferredVariant: vi.fn(),
-  setPreferredVariant: vi.fn(),
   clearPreferredVariants: vi.fn(),
+  getPreferredVariant: vi.fn(),
   reloadPreferredVariants: vi.fn(),
+  setPreferredVariant: vi.fn(),
 }));
 
 // Import the mocked functions
@@ -47,21 +47,21 @@ import {
 
 // Mock sprites module methods that are used in the tests
 vi.mock("@/lib/sprites", () => ({
+  checkSpriteExists: vi.fn().mockResolvedValue(true),
   generateSpriteUrl: vi.fn(
     (headId, bodyId, variant = "") =>
       `mock-sprite-url-${headId || "unknown"}-${bodyId || "unknown"}${variant ? `-${variant}` : ""}`,
   ),
   getArtworkVariants: vi.fn().mockResolvedValue([""]),
-  getSpriteId: vi.fn((headId, bodyId) => {
-    return headId && bodyId
-      ? `${headId}.${bodyId}`
-      : (headId || bodyId || "").toString();
-  }),
-  checkSpriteExists: vi.fn().mockResolvedValue(true),
-  getSpriteCredits: vi.fn().mockResolvedValue(null),
-  getVariantSpriteCredits: vi.fn().mockResolvedValue(null),
-  getFormattedVariantSpriteCredits: vi.fn().mockResolvedValue(""),
   getFormattedCreditsFromResponse: vi.fn(() => ""),
+  getFormattedVariantSpriteCredits: vi.fn().mockResolvedValue(""),
+  getSpriteCredits: vi.fn().mockResolvedValue(null),
+  getSpriteId: vi.fn((headId, bodyId) =>
+    headId && bodyId
+      ? `${headId}.${bodyId}`
+      : (headId || bodyId || "").toString(),
+  ),
+  getVariantSpriteCredits: vi.fn().mockResolvedValue(null),
   getVariantSuffix: vi.fn((index) =>
     index === 0 ? "" : String.fromCharCode(97 + index - 1),
   ),

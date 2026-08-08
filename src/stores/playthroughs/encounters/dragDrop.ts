@@ -1,5 +1,3 @@
-import { getSharedEventProperties } from "@/lib/analytics/selectors";
-import { trackEvent } from "@/lib/analytics/trackEvent";
 import { emitEvolutionEvent } from "@/lib/events";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { getCurrentTimestamp } from "../playthroughState";
@@ -29,7 +27,21 @@ export const clearEncounterFromLocation = async (
 
   const removedUIDs: string[] = [];
 
-  if (!field) {
+  if (field) {
+    if (encounter[field]?.uid) {
+      removedUIDs.push(encounter[field].uid);
+    }
+
+    encounter[field] = null;
+
+    if (encounter.isFusion) {
+      encounter.updatedAt = getCurrentTimestamp();
+    } else if (field === "head" || !(encounter.head || encounter.body)) {
+      delete activePlaythrough.encounters[locationId];
+    } else {
+      encounter.updatedAt = getCurrentTimestamp();
+    }
+  } else {
     if (encounter.head?.uid) {
       removedUIDs.push(encounter.head.uid);
     }
@@ -38,22 +50,6 @@ export const clearEncounterFromLocation = async (
     }
 
     delete activePlaythrough.encounters[locationId];
-  } else {
-    if (encounter[field]?.uid) {
-      removedUIDs.push(encounter[field].uid);
-    }
-
-    encounter[field] = null;
-
-    if (!encounter.isFusion) {
-      if (field === "head" || (!encounter.head && !encounter.body)) {
-        delete activePlaythrough.encounters[locationId];
-      } else {
-        encounter.updatedAt = getCurrentTimestamp();
-      }
-    } else {
-      encounter.updatedAt = getCurrentTimestamp();
-    }
   }
 
   if (options?.preserveTeamMembership !== true) {
@@ -140,14 +136,14 @@ export const moveEncounterAtomic = async (
   });
 
   const newEncounter: EncounterData = {
-    head:
-      targetField === "head"
-        ? pokemonWithLocationAndUID
-        : existingTargetEncounter?.head || null,
     body:
       targetField === "body"
         ? pokemonWithLocationAndUID
         : existingTargetEncounter?.body || null,
+    head:
+      targetField === "head"
+        ? pokemonWithLocationAndUID
+        : existingTargetEncounter?.head || null,
     isFusion: willBeFusion,
     updatedAt: getCurrentTimestamp(),
   };
@@ -213,8 +209,8 @@ export const moveEncounter = async (
     sourceEncounter.body
   ) {
     const movedEncounter: EncounterData = {
-      head: createPokemonWithLocationAndUID(sourceEncounter.head, toLocationId),
       body: createPokemonWithLocationAndUID(sourceEncounter.body, toLocationId),
+      head: createPokemonWithLocationAndUID(sourceEncounter.head, toLocationId),
       isFusion: true,
       updatedAt: getCurrentTimestamp(),
     };
@@ -233,8 +229,8 @@ export const moveEncounter = async (
   );
 
   const movedEncounter: EncounterData = {
-    head: toField === "head" ? pokemonWithLocationAndUID : null,
     body: toField === "body" ? pokemonWithLocationAndUID : null,
+    head: toField === "head" ? pokemonWithLocationAndUID : null,
     isFusion: toField === "body",
     updatedAt: getCurrentTimestamp(),
   };
@@ -256,13 +252,13 @@ export const swapEncounters = async (
 
   const encounter1 = activePlaythrough.encounters[locationId1];
   const encounter2 = activePlaythrough.encounters[locationId2];
-  if (!encounter1 || !encounter2) {
+  if (!(encounter1 && encounter2)) {
     return;
   }
 
   const pokemon1 = field1 === "head" ? encounter1.head : encounter1.body;
   const pokemon2 = field2 === "head" ? encounter2.head : encounter2.body;
-  if (!pokemon1 || !pokemon2) {
+  if (!(pokemon1 && pokemon2)) {
     return;
   }
 
@@ -310,26 +306,26 @@ export const getLocationFromComboboxId = (
 ): { locationId: string; field: "head" | "body" } => {
   if (comboboxId.endsWith("-head")) {
     return {
-      locationId: comboboxId.slice(0, -"-head".length),
       field: "head",
+      locationId: comboboxId.slice(0, -"-head".length),
     };
   }
 
   if (comboboxId.endsWith("-body")) {
     return {
-      locationId: comboboxId.slice(0, -"-body".length),
       field: "body",
+      locationId: comboboxId.slice(0, -"-body".length),
     };
   }
 
   if (comboboxId.endsWith("-single")) {
     return {
-      locationId: comboboxId.slice(0, -"-single".length),
       field: "head",
+      locationId: comboboxId.slice(0, -"-single".length),
     };
   }
 
-  return { locationId: comboboxId, field: "head" };
+  return { field: "head", locationId: comboboxId };
 };
 
 // Move Pokemon to its original location with smart slot selection

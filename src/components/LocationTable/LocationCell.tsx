@@ -38,7 +38,9 @@ export default function LocationCell({
 
   // Find all pokemon that originated from this location
   const locationPokemon = (() => {
-    if (!encounters) return [];
+    if (!encounters) {
+      return [];
+    }
 
     const pokemon: Pokemon[] = [];
 
@@ -65,7 +67,9 @@ export default function LocationCell({
   // Handle hover effect on encounter Pokémon elements - only when moving is relevant
   useEffect(() => {
     // Only apply hover effects if we should show original encounter information
-    if (!shouldShowOriginalEncounter) return;
+    if (!shouldShowOriginalEncounter) {
+      return;
+    }
 
     encounterUids.forEach((uid) => {
       const element = document.querySelector(
@@ -92,31 +96,31 @@ export default function LocationCell({
     if (locationPokemon.length > 0 && shouldShowOriginalEncounter) {
       return (
         <div className="max-w-xs">
-          <div className="text-xs dark:text-gray-400 uppercase tracking-wide mb-2.5 font-medium">
+          <div className="mb-2.5 font-medium text-xs uppercase tracking-wide dark:text-gray-400">
             Original Encounter
           </div>
 
           <div className="flex flex-row divide-x divide-gray-200 dark:divide-gray-600">
             {locationPokemon.map((pokemon) => (
               <div
+                className="flex items-center px-2 first:pl-0"
                 key={getLocationPokemonKey(pokemon)}
-                className="flex items-center first:pl-0 px-2"
               >
-                <div className="flex-shrink-0 size-9 justify-center items-center flex">
-                  <PokemonSprite pokemonId={pokemon.id} generation="gen7" />
+                <div className="flex size-9 flex-shrink-0 items-center justify-center">
+                  <PokemonSprite generation="gen7" pokemonId={pokemon.id} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <span className="font-medium dark:text-white text-gray-900">
+                <div className="min-w-0 flex-1">
+                  <span className="font-medium text-gray-900 dark:text-white">
                     {pokemon.nickname || pokemon.name}
                   </span>
                 </div>
               </div>
             ))}
           </div>
-          <hr className="my-2 dark:border-gray-600 border-gray-200" />
-          <div className="text-xs dark:text-gray-400 text-gray-400">
+          <hr className="my-2 border-gray-200 dark:border-gray-600" />
+          <div className="text-gray-400 text-xs dark:text-gray-400">
             {isCustomLocation(location)
-              ? `Custom Location`
+              ? "Custom Location"
               : location.description}
           </div>
         </div>
@@ -125,12 +129,12 @@ export default function LocationCell({
 
     // Always show basic location description as fallback
     return isCustomLocation(location)
-      ? `Custom Location`
+      ? "Custom Location"
       : location.description;
   })();
 
   return (
-    <div className="text-gray-900 dark:text-white flex gap-x-2 items-center">
+    <div className="flex items-center gap-x-2 text-gray-900 dark:text-white">
       <CursorTooltip
         content={getTooltipContent}
         delay={300}
@@ -142,24 +146,24 @@ export default function LocationCell({
         }
       >
         {hasEncounter ? (
-          <CheckCircle className="size-4 text-green-600 cursor-help" />
+          <CheckCircle className="size-4 cursor-help text-green-600" />
         ) : (
-          <Info className="size-4 text-gray-400 dark:text-gray-600 cursor-help" />
+          <Info className="size-4 cursor-help text-gray-400 dark:text-gray-600" />
         )}
       </CursorTooltip>
-      <h2 className="text-sm truncate rounded-md focus-within:ring-2 focus-within:ring-blue-400 focus-within:ring-offset-0.5 break-words block">
+      <h2 className="block truncate break-words rounded-md text-sm focus-within:ring-2 focus-within:ring-blue-400 focus-within:ring-offset-0.5">
         {isCustomLocation(location) ? (
           locationName
         ) : (
           <a
+            className="px-0.5 hover:underline focus:outline-none"
             href={
               isStarterLocation(location.id)
-                ? `https://infinitefusion.fandom.com/wiki/Pallet_Town`
+                ? "https://infinitefusion.fandom.com/wiki/Pallet_Town"
                 : `https://infinitefusion.fandom.com/wiki/${locationName.replaceAll(" ", "_")}`
             }
-            target="_blank"
             rel="noopener noreferrer"
-            className="hover:underline focus:outline-none px-0.5"
+            target="_blank"
           >
             {locationName}
           </a>

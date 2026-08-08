@@ -6,32 +6,32 @@ import { PokemonSchema } from "@/validation/pokemon";
 // Query parameter schema for filtering
 const QuerySchema = z.object({
   ids: z.string().optional(), // Comma-separated list of Pokemon IDs
-  search: z.string().optional(), // Search by name
-  type: z.string().optional(), // Filter by type
   limit: z
     .string()
     .regex(/^\d+$/)
-    .transform((val) => parseInt(val, 10))
+    .transform((val) => Number.parseInt(val, 10))
     .optional(), // Limit results
+  search: z.string().optional(), // Search by name
+  type: z.string().optional(), // Filter by type
   v: z.string().optional(), // Cache busting version (ignored)
 });
 
 // Special Egg Pokemon entry
 const EGG_POKEMON = {
+  evolution: {
+    evolves_from: undefined,
+    evolves_to: [],
+  },
   id: -1,
-  nationalDexId: -1,
   name: "Egg",
-  types: [{ name: "Normal" }],
+  nationalDexId: -1,
   species: {
+    evolution_chain: null,
+    generation: null,
     is_legendary: false,
     is_mythical: false,
-    generation: null,
-    evolution_chain: null,
   },
-  evolution: {
-    evolves_to: [],
-    evolves_from: undefined,
-  },
+  types: [{ name: "Normal" }],
 };
 
 const getFilteredPokemon = ({
@@ -45,7 +45,7 @@ const getFilteredPokemon = ({
   >[];
 
   if (ids) {
-    const idSet = new Set(ids.split(",").map((id) => parseInt(id, 10)));
+    const idSet = new Set(ids.split(",").map((id) => Number.parseInt(id, 10)));
     filteredData = filteredData.filter((pokemon) => idSet.has(pokemon.id));
   }
 
@@ -82,8 +82,8 @@ export async function GET(request: NextRequest) {
     if (!validatedQuery.success) {
       return NextResponse.json(
         {
-          error: "Invalid query parameters",
           details: validatedQuery.error.issues,
+          error: "Invalid query parameters",
         },
         { status: 400 },
       );
@@ -105,8 +105,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       {
-        data: validatedData.data,
         count: validatedData.data.length,
+        data: validatedData.data,
         total: pokemonData.length + 1, // +1 for the Egg
       },
       {
@@ -132,11 +132,11 @@ export async function GET(request: NextRequest) {
 // Handle OPTIONS for CORS - only allow same origin
 export async function OPTIONS() {
   return new NextResponse(null, {
-    status: 200,
     headers: {
-      "Access-Control-Allow-Origin": "same-origin",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Origin": "same-origin",
     },
+    status: 200,
   });
 }

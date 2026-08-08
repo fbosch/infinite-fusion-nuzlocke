@@ -36,16 +36,28 @@ import { dragStore } from "../stores/dragStore";
 
 // Helper functions to calculate offsets based on placement
 function getMainAxisOffset(placement: Placement): number {
-  if (placement.startsWith("top")) return -16;
-  if (placement.startsWith("bottom")) return 8;
-  if (placement.startsWith("left")) return 0;
-  if (placement.startsWith("right")) return 16;
+  if (placement.startsWith("top")) {
+    return -16;
+  }
+  if (placement.startsWith("bottom")) {
+    return 8;
+  }
+  if (placement.startsWith("left")) {
+    return 0;
+  }
+  if (placement.startsWith("right")) {
+    return 16;
+  }
   return 8; // Default fallback
 }
 
 function getCrossAxisOffset(placement: Placement): number {
-  if (placement.includes("start")) return 16;
-  if (placement.includes("end")) return -16;
+  if (placement.includes("start")) {
+    return 16;
+  }
+  if (placement.includes("end")) {
+    return -16;
+  }
   return 0; // Default for center alignments
 }
 
@@ -54,19 +66,19 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 interface CursorTooltipProps {
-  content: React.ReactNode;
   children: React.ReactElement;
   className?: string;
+  content: React.ReactNode;
   delay?: number;
   disabled?: boolean;
-  placement?: Placement;
-  tooltipId?: string;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
   offset?: {
     mainAxis?: number;
     crossAxis?: number;
   };
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+  placement?: Placement;
+  tooltipId?: string;
 }
 
 export function CursorTooltip(props: CursorTooltipProps) {
@@ -110,8 +122,13 @@ export function CursorTooltip(props: CursorTooltipProps) {
     context,
     placement: resolvedPlacement,
   } = useFloating({
-    placement,
-    open: isTooltipVisible,
+    middleware: [
+      offset({
+        crossAxis: props.offset?.crossAxis ?? getCrossAxisOffset(placement),
+        mainAxis: props.offset?.mainAxis ?? getMainAxisOffset(placement),
+      }),
+      shift(),
+    ],
     onOpenChange: (open) => {
       if (shouldDisableTooltip) {
         setIsOpen(false);
@@ -123,7 +140,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
         if (tooltipId) {
           window.dispatchEvent(
             new CustomEvent("cursor-tooltip-open", {
-              detail: { tooltipId, instanceId },
+              detail: { instanceId, tooltipId },
             }),
           );
         }
@@ -148,14 +165,18 @@ export function CursorTooltip(props: CursorTooltipProps) {
       // Wait for the element to mount/update, then observe running animations/transitions
       window.requestAnimationFrame(() => {
         const node = refs.floating.current as HTMLElement | null;
-        if (!node) return;
+        if (!node) {
+          return;
+        }
         const allAnimations = node.getAnimations({ subtree: true });
 
         // Consider only finite animations/transitions (ignore infinite/unknown)
         const finiteAnimations = allAnimations.filter((a) => {
           const effect = (a as Animation & { effect?: KeyframeEffect | null })
             .effect;
-          if (!effect || typeof effect.getTiming !== "function") return false;
+          if (!effect || typeof effect.getTiming !== "function") {
+            return false;
+          }
           const t = effect.getTiming() as KeyframeEffectOptions & {
             duration?: number | string;
             iterations?: number;
@@ -179,7 +200,9 @@ export function CursorTooltip(props: CursorTooltipProps) {
         }
 
         Promise.allSettled(finiteAnimations.map((a) => a.finished)).then(() => {
-          if (animationBatchRef.current !== currentBatchId) return; // stale
+          if (animationBatchRef.current !== currentBatchId) {
+            return; // stale
+          }
           const state = animationStateRef.current;
           if (state === "entering") {
             setAnimationState("entered");
@@ -189,33 +212,32 @@ export function CursorTooltip(props: CursorTooltipProps) {
         });
       });
     },
-    middleware: [
-      offset({
-        mainAxis: props.offset?.mainAxis ?? getMainAxisOffset(placement),
-        crossAxis: props.offset?.crossAxis ?? getCrossAxisOffset(placement),
-      }),
-      shift(),
-    ],
+    open: isTooltipVisible,
+    placement,
     whileElementsMounted: (reference, floating, update) => {
       const cleanup = autoUpdate(reference, floating, update, {
-        layoutShift: true,
+        ancestorResize: true,
+        ancestorScroll: true,
         animationFrame: false,
         elementResize: true,
-        ancestorScroll: true,
-        ancestorResize: true,
+        layoutShift: true,
       });
       return cleanup;
     },
   });
 
   useLayoutEffect(() => {
-    if (!reducedMotion || !refs.domReference.current) return;
+    if (!(reducedMotion && refs.domReference.current)) {
+      return;
+    }
 
     refs.setPositionReference(refs.domReference.current);
   }, [reducedMotion, refs]);
 
   useEffect(() => {
-    if (!tooltipId) return;
+    if (!tooltipId) {
+      return;
+    }
 
     const handleTooltipOpen = (event: Event) => {
       const detail = (event as CustomEvent).detail as
@@ -271,7 +293,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
 
   // Normalize delay to object format
   const normalizedDelay =
-    typeof delay === "number" ? { open: delay, close: 50 } : delay;
+    typeof delay === "number" ? { close: 50, open: delay } : delay;
 
   // Use delay group context if available, otherwise use the provided delay
   const { delay: delayGroupDelay } = useDelayGroup(context);
@@ -279,7 +301,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
 
   // If any tooltip is visible globally, skip the open delay
   const effectiveDelay = isAnyTooltipVisible
-    ? { open: 0, close: typeof groupDelay === "number" ? 50 : groupDelay.close }
+    ? { close: typeof groupDelay === "number" ? 50 : groupDelay.close, open: 0 }
     : groupDelay;
 
   const hover = useHover(context, {
@@ -309,29 +331,47 @@ export function CursorTooltip(props: CursorTooltipProps) {
     ];
 
     if (side === "top") {
-      if (align === "start") return "origin-bottom-left";
-      if (align === "end") return "origin-bottom-right";
+      if (align === "start") {
+        return "origin-bottom-left";
+      }
+      if (align === "end") {
+        return "origin-bottom-right";
+      }
       return "origin-bottom";
     }
     if (side === "bottom") {
-      if (align === "start") return "origin-top-left";
-      if (align === "end") return "origin-top-right";
+      if (align === "start") {
+        return "origin-top-left";
+      }
+      if (align === "end") {
+        return "origin-top-right";
+      }
       return "origin-top";
     }
     if (side === "left") {
-      if (align === "start") return "origin-top-right";
-      if (align === "end") return "origin-bottom-right";
+      if (align === "start") {
+        return "origin-top-right";
+      }
+      if (align === "end") {
+        return "origin-bottom-right";
+      }
       return "origin-right";
     }
     if (side === "right") {
-      if (align === "start") return "origin-top-left";
-      if (align === "end") return "origin-bottom-left";
+      if (align === "start") {
+        return "origin-top-left";
+      }
+      if (align === "end") {
+        return "origin-bottom-left";
+      }
       return "origin-left";
     }
     return "origin-center";
   }, [resolvedPlacement, placement]);
 
-  if (!content) return children;
+  if (!content) {
+    return children;
+  }
 
   return (
     <>
@@ -339,9 +379,9 @@ export function CursorTooltip(props: CursorTooltipProps) {
         cloneElement(children, {
           ...getReferenceProps({
             ...(isRecord(children.props) ? children.props : {}),
+            onMouseEnter,
+            onMouseLeave,
             ref: refs.setReference,
-            onMouseEnter: onMouseEnter,
-            onMouseLeave: onMouseLeave,
           }),
         })}
 
@@ -349,7 +389,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
         <FloatingPortal>
           {/* react-doctor-disable-next-line react-hooks-js/refs -- Floating UI callback refs run during commit, not render. */}
           <div
-            className="z-[9999] pointer-events-none"
+            className="pointer-events-none z-[9999]"
             ref={refs.setFloating}
             style={floatingStyles}
             {...getFloatingProps()}
@@ -357,19 +397,19 @@ export function CursorTooltip(props: CursorTooltipProps) {
             <div
               className={twMerge(
                 clsx(
-                  "rounded-md px-3 py-2 text-sm shadow-elevation-4 w-max max-w-sm dark:pixel-shadow-black-25",
+                  "dark:pixel-shadow-black-25 w-max max-w-sm rounded-md px-3 py-2 text-sm shadow-elevation-4",
                   "pointer-events-none transform-gpu bg-white/75",
-                  "dark:bg-gray-700/80 background-blur dark:text-white text-gray-700",
-                  "border dark:border-gray-600 border-gray-200",
+                  "background-blur text-gray-700 dark:bg-gray-700/80 dark:text-white",
+                  "border border-gray-200 dark:border-gray-600",
                   originClass,
                   "backdrop-blur-xl",
                   "transition duration-150 ease-out",
                   {
-                    "opacity-0 scale-95 tooltip-exit":
-                      animationState === "exiting",
-                    "opacity-0 scale-95": animationState === "entering",
-                    "opacity-100 scale-100 tooltip-enter":
+                    "scale-95 opacity-0": animationState === "entering",
+                    "tooltip-enter scale-100 opacity-100":
                       animationState === "entered",
+                    "tooltip-exit scale-95 opacity-0":
+                      animationState === "exiting",
                   },
                 ),
                 className,

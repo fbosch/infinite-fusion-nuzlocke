@@ -35,7 +35,7 @@ export default function ProgressBar({ className }: ProgressBarProps) {
 
     for (const location of allLocations) {
       const encounter = encounters?.[location.id];
-      if (!encounter || (!encounter.head && !encounter.body)) {
+      if (!(encounter && (encounter.head || encounter.body))) {
         continue;
       }
 
@@ -91,9 +91,15 @@ export default function ProgressBar({ className }: ProgressBarProps) {
       "light-dark(var(--color-gray-100), var(--color-gray-800))";
     const isHovered = hoveredSegment === segment;
     if (!shouldDimOthers || isHovered) {
-      if (segment === "captured") return "var(--color-emerald-600)";
-      if (segment === "deceased") return "var(--color-rose-600)";
-      if (segment === "missed") return "var(--color-amber-600)";
+      if (segment === "captured") {
+        return "var(--color-emerald-600)";
+      }
+      if (segment === "deceased") {
+        return "var(--color-rose-600)";
+      }
+      if (segment === "missed") {
+        return "var(--color-amber-600)";
+      }
       return "light-dark(var(--color-gray-300), var(--color-gray-700))";
     }
 
@@ -111,15 +117,16 @@ export default function ProgressBar({ className }: ProgressBarProps) {
 
   return (
     <div
+      aria-label={`Encounter progress: ${capturedCount} captured, ${deceasedCount} deceased, ${missedCount} missed, ${unencounteredCount} unencountered`}
       className={clsx(
-        "group relative w-full h-0.5 overflow-visible",
+        "group relative h-0.5 w-full overflow-visible",
         className,
       )}
       role="img"
-      aria-label={`Encounter progress: ${capturedCount} captured, ${deceasedCount} deceased, ${missedCount} missed, ${unencounteredCount} unencountered`}
     >
-      <div className="group/bar absolute left-0 right-0 top-1/2 flex h-10 -translate-y-1/2 overflow-visible">
+      <div className="group/bar absolute top-1/2 right-0 left-0 flex h-10 -translate-y-1/2 overflow-visible">
         <CursorTooltip
+          className={progressTooltipClassName}
           content={
             <span className="inline-flex items-center gap-1.5 leading-none">
               <PokeballIcon className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
@@ -127,18 +134,17 @@ export default function ProgressBar({ className }: ProgressBarProps) {
               <span className="tabular-nums">{capturedCount}</span>
             </span>
           }
-          placement="bottom"
-          tooltipId="encounter-progress-bar"
-          className={progressTooltipClassName}
           onMouseEnter={() => setHoveredSegment("captured")}
           onMouseLeave={() => setHoveredSegment(null)}
+          placement="bottom"
+          tooltipId="encounter-progress-bar"
         >
           <div
             className="relative h-full"
             style={{ width: `${capturedWidth}%` }}
           >
             <div
-              className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 origin-center transition-[background-color,transform] duration-150 ease-out"
+              className="absolute top-1/2 right-0 left-0 h-0.5 origin-center -translate-y-1/2 transition-[background-color,transform] duration-150 ease-out"
               style={{
                 backgroundColor: getBg("captured"),
                 transform: `translateY(-50%) scaleY(${hoveredSegment ? 7 : 1})`,
@@ -147,6 +153,7 @@ export default function ProgressBar({ className }: ProgressBarProps) {
           </div>
         </CursorTooltip>
         <CursorTooltip
+          className={progressTooltipClassName}
           content={
             <span className="inline-flex items-center gap-1.5 leading-none">
               <SkullIcon className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
@@ -154,18 +161,17 @@ export default function ProgressBar({ className }: ProgressBarProps) {
               <span className="tabular-nums">{deceasedCount}</span>
             </span>
           }
-          placement="bottom"
-          tooltipId="encounter-progress-bar"
-          className={progressTooltipClassName}
           onMouseEnter={() => setHoveredSegment("deceased")}
           onMouseLeave={() => setHoveredSegment(null)}
+          placement="bottom"
+          tooltipId="encounter-progress-bar"
         >
           <div
             className="relative h-full"
             style={{ width: `${deceasedWidth}%` }}
           >
             <div
-              className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 origin-center transition-[background-color,transform] duration-150 ease-out"
+              className="absolute top-1/2 right-0 left-0 h-0.5 origin-center -translate-y-1/2 transition-[background-color,transform] duration-150 ease-out"
               style={{
                 backgroundColor: getBg("deceased"),
                 transform: `translateY(-50%) scaleY(${hoveredSegment ? 7 : 1})`,
@@ -174,6 +180,7 @@ export default function ProgressBar({ className }: ProgressBarProps) {
           </div>
         </CursorTooltip>
         <CursorTooltip
+          className={progressTooltipClassName}
           content={
             <span className="inline-flex items-center gap-1.5 leading-none">
               <EscapeIcon className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
@@ -181,15 +188,14 @@ export default function ProgressBar({ className }: ProgressBarProps) {
               <span className="tabular-nums">{missedCount}</span>
             </span>
           }
-          placement="bottom"
-          tooltipId="encounter-progress-bar"
-          className={progressTooltipClassName}
           onMouseEnter={() => setHoveredSegment("missed")}
           onMouseLeave={() => setHoveredSegment(null)}
+          placement="bottom"
+          tooltipId="encounter-progress-bar"
         >
           <div className="relative h-full" style={{ width: `${missedWidth}%` }}>
             <div
-              className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 origin-center transition-[background-color,transform] duration-150 ease-out"
+              className="absolute top-1/2 right-0 left-0 h-0.5 origin-center -translate-y-1/2 transition-[background-color,transform] duration-150 ease-out"
               style={{
                 backgroundColor: getBg("missed"),
                 transform: `translateY(-50%) scaleY(${hoveredSegment ? 7 : 1})`,
@@ -198,6 +204,7 @@ export default function ProgressBar({ className }: ProgressBarProps) {
           </div>
         </CursorTooltip>
         <CursorTooltip
+          className={progressTooltipClassName}
           content={
             <span className="inline-flex items-center gap-1.5 leading-none">
               <CircleIcon className="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400" />
@@ -205,18 +212,17 @@ export default function ProgressBar({ className }: ProgressBarProps) {
               <span className="tabular-nums">{unencounteredCount}</span>
             </span>
           }
-          placement="bottom"
-          tooltipId="encounter-progress-bar"
-          className={progressTooltipClassName}
           onMouseEnter={() => setHoveredSegment("unencountered")}
           onMouseLeave={() => setHoveredSegment(null)}
+          placement="bottom"
+          tooltipId="encounter-progress-bar"
         >
           <div
             className="relative h-full"
             style={{ width: `${unencounteredWidth}%` }}
           >
             <div
-              className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 origin-center transition-[background-color,transform] duration-150 ease-out"
+              className="absolute top-1/2 right-0 left-0 h-0.5 origin-center -translate-y-1/2 transition-[background-color,transform] duration-150 ease-out"
               style={{
                 backgroundColor: getBg("unencountered"),
                 transform: `translateY(-50%) scaleY(${hoveredSegment ? 7 : 1})`,

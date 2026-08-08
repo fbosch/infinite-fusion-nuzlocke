@@ -4,8 +4,8 @@ import { ChevronDown, ChevronsUpDown, ChevronUp } from "lucide-react";
 import type { CombinedLocation } from "@/loaders/locations";
 
 interface SortableHeaderCellProps {
-  header: Header<CombinedLocation, unknown>;
   className?: string;
+  header: Header<CombinedLocation, unknown>;
 }
 
 export default function SortableHeaderCell({
@@ -23,13 +23,15 @@ export default function SortableHeaderCell({
 
   return (
     <th
-      key={header.id}
+      aria-label={sortingEnabled ? "Click to sort." : " No sorting available."}
+      aria-sort={sortingEnabled ? sortDirection : undefined}
       className={clsx(
-        "sticky top-0 z-20 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-left text-xs  text-gray-500 dark:text-gray-300 uppercase tracking-wider transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset",
+        "sticky top-0 z-20 bg-gray-50 px-4 py-3 text-left text-gray-500 text-xs uppercase tracking-wider transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset dark:bg-gray-800 dark:text-gray-300",
         sortingEnabled &&
           "cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700",
         className,
       )}
+      key={header.id}
       onClick={
         sortingEnabled ? header.column.getToggleSortingHandler() : undefined
       }
@@ -43,15 +45,13 @@ export default function SortableHeaderCell({
           header.column.getToggleSortingHandler()?.(e);
         }
       }}
-      tabIndex={sortingEnabled ? 0 : -1}
       role="columnheader"
-      aria-sort={sortingEnabled ? sortDirection : undefined}
-      aria-label={sortingEnabled ? `Click to sort.` : ` No sorting available.`}
+      tabIndex={sortingEnabled ? 0 : -1}
     >
       <div className="flex items-center space-x-1">
         {flexRender(header.column.columnDef.header, header.getContext())}
         {header.column.getCanSort() && (
-          <span className="text-gray-400" aria-hidden="true">
+          <span aria-hidden="true" className="text-gray-400">
             {header.column.getIsSorted() === "asc" ? (
               <ChevronUp className="h-4 w-4" />
             ) : header.column.getIsSorted() === "desc" ? (

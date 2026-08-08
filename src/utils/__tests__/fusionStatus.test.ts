@@ -6,8 +6,8 @@ import { getFusionActivity, getFusionOverlayStatus } from "../fusionStatus";
 // Helper function to create test Pokemon data
 function createTestPokemon(
   status?: PokemonStatusType,
-  id: number = 1,
-  name: string = "TestPokemon",
+  id = 1,
+  name = "TestPokemon",
 ): PokemonOptionType {
   return {
     id,

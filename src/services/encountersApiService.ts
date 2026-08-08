@@ -24,10 +24,10 @@ class EncountersApiService {
     const url = `${this.baseUrl}?${searchParams.toString()}`;
 
     const response = await fetch(url, {
-      method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
+      method: "GET",
     });
 
     if (!response.ok) {

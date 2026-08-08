@@ -33,11 +33,8 @@ vi.mock("@/lib/analytics/trackEvent", () => ({
   trackEvent: analyticsMocks.trackEvent,
 }));
 
-const getTrackedEvents = (eventName: string) => {
-  return analyticsMocks.trackEvent.mock.calls.filter(
-    (call) => call[0] === eventName,
-  );
-};
+const getTrackedEvents = (eventName: string) =>
+  analyticsMocks.trackEvent.mock.calls.filter((call) => call[0] === eventName);
 
 describe("analytics event instrumentation", () => {
   resetPlaythroughsStore();
@@ -78,22 +75,22 @@ describe("analytics event instrumentation", () => {
     expect(modeEvents).toHaveLength(3);
     expect(modeEvents[0]?.[1]).toMatchObject({
       game_mode: "remix",
-      previous_game_mode: "classic",
       new_game_mode: "remix",
+      previous_game_mode: "classic",
       source_surface: "store",
       trigger_method: "programmatic",
     });
     expect(modeEvents[1]?.[1]).toMatchObject({
       game_mode: "classic",
-      previous_game_mode: "remix",
       new_game_mode: "classic",
+      previous_game_mode: "remix",
       source_surface: "store",
       trigger_method: "programmatic",
     });
     expect(modeEvents[2]?.[1]).toMatchObject({
       game_mode: "remix",
-      previous_game_mode: "classic",
       new_game_mode: "remix",
+      previous_game_mode: "classic",
       source_surface: "store",
       trigger_method: "programmatic",
     });
@@ -113,10 +110,10 @@ describe("analytics event instrumentation", () => {
     const switchedEvents = getTrackedEvents("playthrough_switched");
     expect(switchedEvents).toHaveLength(1);
     expect(switchedEvents[0]?.[1]).toMatchObject({
-      playthrough_id: secondId,
       game_mode: "remix",
-      previous_playthrough_id: firstId,
       new_playthrough_id: secondId,
+      playthrough_id: secondId,
+      previous_playthrough_id: firstId,
       source_surface: "playthrough_selector",
       trigger_method: "keyboard",
     });
@@ -370,13 +367,13 @@ describe("analytics event instrumentation", () => {
     expect(teamFlowEvents).toHaveLength(0);
     expect(playthroughsStore.playthroughs[0]?.encounters?.route1).toMatchObject(
       {
-        head: { uid: "flip-1-body" },
         body: { uid: "flip-1-head" },
+        head: { uid: "flip-1-body" },
       },
     );
     expect(playthroughsStore.playthroughs[0]?.team.members[0]).toMatchObject({
-      headPokemonUid: "flip-1-head",
       bodyPokemonUid: "flip-1-body",
+      headPokemonUid: "flip-1-head",
     });
   });
 });

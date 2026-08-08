@@ -6,9 +6,9 @@ import ConfirmationDialog from "../ConfirmationDialog";
 import { CursorTooltip } from "../CursorTooltip";
 
 interface ResetEncounterButtonProps {
+  hasEncounter: boolean;
   locationId: string;
   locationName: string;
-  hasEncounter: boolean;
 }
 
 export default function ResetEncounterButton({
@@ -34,36 +34,36 @@ export default function ResetEncounterButton({
   return (
     <Fragment>
       <CursorTooltip
-        placement={"bottom-end"}
         className="origin-top-right"
-        delay={300}
         content={"Reset the encounter for this location"}
+        delay={300}
+        placement={"bottom-end"}
       >
         <button
-          type="button"
-          onClick={handleButtonClick}
-          disabled={!hasEncounter}
-          className={clsx(
-            "size-8 flex items-center justify-center rounded-md transition-colors cursor-pointer",
-            "focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2",
-            "disabled:opacity-30 disabled:cursor-not-allowed",
-            "text-gray-400 enabled:hover:text-orange-600 enabled:hover:bg-orange-50",
-            "dark:text-gray-500 dark:enabled:hover:text-orange-400 dark:enabled:hover:bg-orange-900/20",
-          )}
           aria-label={`Reset encounter for ${locationName}`}
+          className={clsx(
+            "flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2",
+            "disabled:cursor-not-allowed disabled:opacity-30",
+            "text-gray-400 enabled:hover:bg-orange-50 enabled:hover:text-orange-600",
+            "dark:text-gray-500 dark:enabled:hover:bg-orange-900/20 dark:enabled:hover:text-orange-400",
+          )}
+          disabled={!hasEncounter}
+          onClick={handleButtonClick}
+          type="button"
         >
           <Eraser className="size-4" />
         </button>
       </CursorTooltip>
 
       <ConfirmationDialog
+        cancelText="Cancel"
+        confirmText="Reset"
         isOpen={isDialogOpen}
+        message={`Are you sure you want to reset the encounter for ${locationName}?`}
         onClose={handleCancel}
         onConfirm={handleConfirm}
         title="Reset Encounter"
-        message={`Are you sure you want to reset the encounter for ${locationName}?`}
-        confirmText="Reset"
-        cancelText="Cancel"
         variant="warning"
       />
     </Fragment>

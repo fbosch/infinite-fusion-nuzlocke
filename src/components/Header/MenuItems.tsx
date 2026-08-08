@@ -4,7 +4,7 @@ import { Computer, Settings } from "lucide-react";
 import { CursorTooltip } from "@/components/CursorTooltip";
 
 const menuActionClassName = clsx(
-  "inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-[3px] border text-xs font-semibold lg:w-auto lg:gap-1.5 lg:px-1.5",
+  "inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-[3px] border font-semibold text-xs lg:w-auto lg:gap-1.5 lg:px-1.5",
   "border-[#d0d7de] bg-white text-gray-700 dark:border-[#30363d] dark:bg-[#1a1e23] dark:text-gray-300",
   "hover:bg-gray-100 dark:hover:bg-[#22262c]",
   "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0969da] focus-visible:ring-offset-1",
@@ -20,18 +20,18 @@ type MenuItemsProps = {
 export default function MenuItems({ onOpenModal }: MenuItemsProps) {
   const menuActions = [
     {
-      label: "Settings",
-      description: "Configure app preferences and options",
       ariaLabel: "Open Settings",
+      description: "Configure app preferences and options",
       icon: Settings,
+      label: "Settings",
       onClick: () => onOpenModal("settings"),
       showLabel: false,
     },
     {
-      label: "Pokémon PC",
-      description: "Manage your team, box, and graveyard",
       ariaLabel: "Open Pokémon PC",
+      description: "Manage your team, box, and graveyard",
       icon: Computer,
+      label: "Pokémon PC",
       onClick: () => onOpenModal("pc"),
       showLabel: true,
     },
@@ -42,22 +42,22 @@ export default function MenuItems({ onOpenModal }: MenuItemsProps) {
       {menuActions.map(
         ({ label, description, ariaLabel, icon: Icon, onClick, showLabel }) => (
           <CursorTooltip
-            key={label}
             content={
-              <div className="flex flex-col gap-1 min-w-32">
+              <div className="flex min-w-32 flex-col gap-1">
                 <div className="font-medium text-sm">{label}</div>
-                <div className="text-xs text-gray-600 dark:text-gray-300">
+                <div className="text-gray-600 text-xs dark:text-gray-300">
                   {description}
                 </div>
               </div>
             }
             delay={300}
+            key={label}
           >
             <button
-              type="button"
-              className={menuActionClassName}
               aria-label={ariaLabel}
+              className={menuActionClassName}
               onClick={onClick}
+              type="button"
             >
               <Icon className="h-4 w-4" />
               {showLabel && (

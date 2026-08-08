@@ -20,19 +20,19 @@ describe("Playthroughs Store - Utility Functions", () => {
   describe("getLocationFromComboboxId", () => {
     it("should extract location from simple combobox id", () => {
       const result = playthroughActions.getLocationFromComboboxId("route-1");
-      expect(result).toEqual({ locationId: "route-1", field: "head" });
+      expect(result).toEqual({ field: "head", locationId: "route-1" });
     });
 
     it("should extract location from head combobox id", () => {
       const result =
         playthroughActions.getLocationFromComboboxId("route-1-head");
-      expect(result).toEqual({ locationId: "route-1", field: "head" });
+      expect(result).toEqual({ field: "head", locationId: "route-1" });
     });
 
     it("should extract location from body combobox id", () => {
       const result =
         playthroughActions.getLocationFromComboboxId("route-1-body");
-      expect(result).toEqual({ locationId: "route-1", field: "body" });
+      expect(result).toEqual({ field: "body", locationId: "route-1" });
     });
 
     it("should handle complex location ids with head suffix", () => {
@@ -40,8 +40,8 @@ describe("Playthroughs Store - Utility Functions", () => {
         "viridian-city-gym-head",
       );
       expect(result).toEqual({
-        locationId: "viridian-city-gym",
         field: "head",
+        locationId: "viridian-city-gym",
       });
     });
 
@@ -50,8 +50,8 @@ describe("Playthroughs Store - Utility Functions", () => {
         "viridian-city-gym-body",
       );
       expect(result).toEqual({
-        locationId: "viridian-city-gym",
         field: "body",
+        locationId: "viridian-city-gym",
       });
     });
 
@@ -60,8 +60,8 @@ describe("Playthroughs Store - Utility Functions", () => {
         "some-complex-location-name",
       );
       expect(result).toEqual({
-        locationId: "some-complex-location-name",
         field: "head",
+        locationId: "some-complex-location-name",
       });
     });
 
@@ -69,18 +69,18 @@ describe("Playthroughs Store - Utility Functions", () => {
       // If a location name actually contains "head" or "body" but isn't a suffix
       const result =
         playthroughActions.getLocationFromComboboxId("headbutt-tree-1");
-      expect(result).toEqual({ locationId: "headbutt-tree-1", field: "head" });
+      expect(result).toEqual({ field: "head", locationId: "headbutt-tree-1" });
     });
 
     it("should handle empty string", () => {
       const result = playthroughActions.getLocationFromComboboxId("");
-      expect(result).toEqual({ locationId: "", field: "head" });
+      expect(result).toEqual({ field: "head", locationId: "" });
     });
 
     it("should handle single suffix correctly", () => {
       const result =
         playthroughActions.getLocationFromComboboxId("route-1-single");
-      expect(result).toEqual({ locationId: "route-1", field: "head" });
+      expect(result).toEqual({ field: "head", locationId: "route-1" });
     });
   });
 

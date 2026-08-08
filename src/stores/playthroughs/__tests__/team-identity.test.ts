@@ -16,8 +16,8 @@ describe("Team identity helpers", () => {
     const { activePlaythrough } = createTestPlaythrough();
 
     activePlaythrough.team.members[1] = {
-      headPokemonUid: "pikachu_route1_123",
       bodyPokemonUid: "charmander_route1_456",
+      headPokemonUid: "pikachu_route1_123",
     };
 
     expect(getTeamMemberUids(1)).toEqual([
@@ -34,14 +34,14 @@ describe("Team identity helpers", () => {
 
     activePlaythrough.encounters = {
       route1: {
-        head: testPokemon.pikachu("pikachu_route1_123"),
         body: testPokemon.charmander("charmander_route1_456"),
+        head: testPokemon.pikachu("pikachu_route1_123"),
         isFusion: true,
         updatedAt: Date.now(),
       },
       route2: {
-        head: testPokemon.squirtle("squirtle_route2_789"),
         body: null,
+        head: testPokemon.squirtle("squirtle_route2_789"),
         isFusion: false,
         updatedAt: Date.now(),
       },
@@ -60,14 +60,14 @@ describe("Team identity helpers", () => {
 
     activePlaythrough.encounters = {
       route1: {
-        head: testPokemon.pikachu("shared_uid"),
         body: null,
+        head: testPokemon.pikachu("shared_uid"),
         isFusion: false,
         updatedAt: Date.now(),
       },
       route2: {
-        head: testPokemon.charmander("shared_uid"),
         body: null,
+        head: testPokemon.charmander("shared_uid"),
         isFusion: false,
         updatedAt: Date.now(),
       },

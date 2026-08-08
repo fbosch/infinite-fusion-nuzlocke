@@ -48,11 +48,11 @@ export function getEncounterDisplayName(encounter: PokemonOptionType): string {
 // Status enum for Pokemon tracking
 export const PokemonStatus = {
   CAPTURED: "captured",
-  RECEIVED: "received",
-  TRADED: "traded",
-  MISSED: "missed",
-  STORED: "stored",
   DECEASED: "deceased",
+  MISSED: "missed",
+  RECEIVED: "received",
+  STORED: "stored",
+  TRADED: "traded",
 } as const;
 
 export type PokemonStatusType =
@@ -344,23 +344,25 @@ export function usePokemonNameMap(enabled = true) {
 
 export function usePokemonEvolutionData(
   pokemonId: number | undefined,
-  enabled: boolean = true,
+  enabled = true,
 ) {
   const { data: allPokemon, isLoading } = useQuery({
     ...pokemonQueries.all(),
     enabled,
   });
 
-  if (!pokemonId || !allPokemon || !enabled)
-    return { evolutions: [], preEvolution: null, isLoading };
+  if (!(pokemonId && allPokemon && enabled)) {
+    return { evolutions: [], isLoading, preEvolution: null };
+  }
 
   const currentPokemon = allPokemon.find((p) => p.id === pokemonId);
-  if (!currentPokemon)
+  if (!currentPokemon) {
     return {
       evolutions: [],
-      preEvolution: null,
       isLoading,
+      preEvolution: null,
     };
+  }
 
   const evolutionIds = new Set(
     currentPokemon.evolution?.evolves_to.map((e) => e.id) || [],
@@ -374,15 +376,15 @@ export function usePokemonEvolutionData(
     : null;
   return {
     evolutions,
-    preEvolution,
     isLoading,
+    preEvolution,
   };
 }
 
 // Hook for searching Pokemon with debounced query
 interface UsePokemonSearchOptions {
-  query: string;
   enabled?: boolean;
+  query: string;
   queryOptions?: Omit<
     QueryOptions<PokemonOptionType[], Error>,
     "queryKey" | "queryFn"
@@ -398,15 +400,19 @@ export function usePokemonSearch({
 
   // Debounce the query to reduce search frequency
   const [debouncedQuery] = useDebounce(query, 50, {
-    maxWait: 250,
     leading: true,
+    maxWait: 250,
     trailing: true,
   });
 
   return useQuery<PokemonOptionType[], Error>({
-    queryKey: ["pokemon", "search", debouncedQuery],
+    enabled: enabled && allPokemon.length > 0 && debouncedQuery !== "",
+    gcTime: 0, // Don't keep in garbage collection
+    placeholderData: keepPreviousData,
     queryFn: async () => {
-      if (debouncedQuery === "") return [];
+      if (debouncedQuery === "") {
+        return [];
+      }
 
       try {
         const searchResults = await searchService.search(debouncedQuery);
@@ -434,13 +440,9 @@ export function usePokemonSearch({
         return matches;
       }
     },
-    select: (data) => {
-      return data?.filter((p) => p.id !== 0) ?? [];
-    },
-    enabled: enabled && allPokemon.length > 0 && debouncedQuery !== "",
-    placeholderData: keepPreviousData,
+    queryKey: ["pokemon", "search", debouncedQuery],
+    select: (data) => data?.filter((p) => p.id !== 0) ?? [],
     staleTime: 0, // Don't cache - always fetch fresh data
-    gcTime: 0, // Don't keep in garbage collection
     ...queryOptions,
     persister: undefined,
   });

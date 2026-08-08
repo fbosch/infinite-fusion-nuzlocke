@@ -64,8 +64,8 @@ describe("useComboboxDragAndDrop", () => {
       useComboboxDragAndDrop({
         comboboxId: "route-1-single",
         locationId: "route-1",
-        value: null,
         onChange: vi.fn(),
+        value: null,
       }),
     );
     const event = {

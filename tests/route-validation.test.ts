@@ -209,12 +209,12 @@ describe("Route Name Validation", () => {
   describe("Alpha character ratio analysis", () => {
     it("should calculate alpha ratios correctly for Mt. Moon variants", () => {
       const testCases = [
-        { text: "Mt. Moon (ID 767)", expectedAlpha: 8, expectedTotal: 17 },
-        { text: "Mt. Moon B1F (ID 103)", expectedAlpha: 10, expectedTotal: 21 },
+        { expectedAlpha: 8, expectedTotal: 17, text: "Mt. Moon (ID 767)" },
+        { expectedAlpha: 10, expectedTotal: 21, text: "Mt. Moon B1F (ID 103)" },
         {
-          text: "Mt. Moon Summit (ID 827)",
           expectedAlpha: 14,
           expectedTotal: 24,
+          text: "Mt. Moon Summit (ID 827)",
         },
       ];
 

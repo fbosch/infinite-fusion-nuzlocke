@@ -7,8 +7,8 @@ import type { PokemonOptionType } from "@/loaders/pokemon";
 import { formatArtistCredits } from "@/utils/formatCredits";
 
 interface TeamMemberTooltipContentProps {
-  headPokemon: PokemonOptionType | null;
   bodyPokemon: PokemonOptionType | null;
+  headPokemon: PokemonOptionType | null;
   isFusion: boolean;
 }
 
@@ -44,8 +44,8 @@ export function TeamMemberTooltipContent({
           <div className="my-2 flex">
             <div className="inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400">
               <Palette
-                className="h-3 w-3"
                 aria-hidden="true"
+                className="h-3 w-3"
                 focusable={false}
               />
               <span className="opacity-80">by</span>
@@ -62,16 +62,16 @@ export function TeamMemberTooltipContent({
           ["L", "Change"],
           ["R", "Options"],
         ].map(([button, label]) => (
-          <div key={button} className="flex items-center gap-1">
+          <div className="flex items-center gap-1" key={button}>
             <div className="flex items-center gap-0.5 rounded border border-gray-200 bg-gray-50 px-1 py-px text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
               <MousePointer
-                className="h-3 w-3"
                 aria-hidden="true"
+                className="h-3 w-3"
                 focusable={false}
               />
-              <span className="text-xs font-medium">{button}</span>
+              <span className="font-medium text-xs">{button}</span>
             </div>
-            <span className="text-xs text-gray-600 dark:text-gray-300">
+            <span className="text-gray-600 text-xs dark:text-gray-300">
               {label}
             </span>
           </div>

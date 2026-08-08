@@ -17,21 +17,21 @@ const mockPokemon: PokemonOptionType = {
   id: 1,
   name: "Test Pokemon",
   nationalDexId: 1,
-  status: "captured",
   nickname: "Test",
+  status: "captured",
   uid: "test-uid-1",
 };
 
 const mockEncounters: Record<string, EncounterData> = {
   "route-1": {
-    head: mockPokemon,
     body: null,
+    head: mockPokemon,
     isFusion: false,
     updatedAt: new Date("2024-01-01T10:00:00Z").getTime(),
   },
   "route-2": {
-    head: mockPokemon,
     body: mockPokemon,
+    head: mockPokemon,
     isFusion: true,
     updatedAt: new Date("2024-01-02T10:00:00Z").getTime(),
   },
@@ -46,8 +46,8 @@ describe("findMostRecentlyFilledLocation", () => {
   it("should return null for encounters with no Pokemon", () => {
     const emptyEncounters: Record<string, EncounterData> = {
       "route-1": {
-        head: null,
         body: null,
+        head: null,
         isFusion: false,
         updatedAt: Date.now(),
       },
@@ -64,14 +64,14 @@ describe("findMostRecentlyFilledLocation", () => {
   it("should prioritize encounters with both head and body over single Pokemon", () => {
     const mixedEncounters: Record<string, EncounterData> = {
       "route-1": {
-        head: mockPokemon,
         body: null,
+        head: mockPokemon,
         isFusion: false,
         updatedAt: new Date("2024-01-03T10:00:00Z").getTime(),
       },
       "route-2": {
-        head: mockPokemon,
         body: mockPokemon,
+        head: mockPokemon,
         isFusion: true,
         updatedAt: new Date("2024-01-02T10:00:00Z").getTime(),
       },
@@ -83,8 +83,8 @@ describe("findMostRecentlyFilledLocation", () => {
   it("should handle encounters with only head Pokemon", () => {
     const headOnlyEncounters: Record<string, EncounterData> = {
       "route-1": {
-        head: mockPokemon,
         body: null,
+        head: mockPokemon,
         isFusion: false,
         updatedAt: new Date("2024-01-01T10:00:00Z").getTime(),
       },
@@ -96,8 +96,8 @@ describe("findMostRecentlyFilledLocation", () => {
   it("should handle encounters with only body Pokemon", () => {
     const bodyOnlyEncounters: Record<string, EncounterData> = {
       "route-1": {
-        head: null,
         body: mockPokemon,
+        head: null,
         isFusion: false,
         updatedAt: new Date("2024-01-01T10:00:00Z").getTime(),
       },
@@ -654,8 +654,8 @@ describe("scrollToLocationById", () => {
 
   it("should highlight UIDs when provided", () => {
     const result = scrollToLocationById("route-1", {
-      highlightUids: ["test-uid"],
       durationMs: 500,
+      highlightUids: ["test-uid"],
     });
 
     expect(result).toBe(true);

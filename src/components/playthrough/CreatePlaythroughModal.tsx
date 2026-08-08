@@ -50,7 +50,9 @@ export default function CreatePlaythroughModal({
   // Create a new playthrough
   const handleCreatePlaythrough = async () => {
     const name = newPlaythroughName.trim();
-    if (!name) return;
+    if (!name) {
+      return;
+    }
 
     try {
       await onCreate(name, selectedGameMode);
@@ -62,37 +64,37 @@ export default function CreatePlaythroughModal({
 
   return (
     <Dialog
-      open={isOpen}
+      className="group relative z-[70]"
       onClose={handleClose}
-      className="relative z-[70] group"
+      open={isOpen}
     >
       <DialogBackdrop
-        transition
-        className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"
         aria-hidden="true"
+        className="fixed inset-0 bg-black/30 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/50"
+        transition
       />
 
       <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
         <DialogPanel
-          transition
           className={clsx(
-            "max-w-md w-full space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6",
-            "transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98",
+            "w-full max-w-md space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800",
+            "transition duration-150 ease-out data-closed:scale-98 data-closed:opacity-0",
           )}
+          transition
         >
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+            <DialogTitle className="font-semibold text-gray-900 text-xl dark:text-white">
               Create New Playthrough
             </DialogTitle>
             <button
-              type="button"
-              onClick={handleClose}
+              aria-label="Close modal"
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
-                "p-1 rounded-md transition-colors cursor-pointer",
+                "cursor-pointer rounded-md p-1 transition-colors",
               )}
-              aria-label="Close modal"
+              onClick={handleClose}
+              type="button"
             >
               <X className="h-5 w-5" />
             </button>
@@ -101,16 +103,23 @@ export default function CreatePlaythroughModal({
           <div className="space-y-4 pt-2">
             <div>
               <label
+                className="mb-2 block font-medium text-gray-700 text-sm dark:text-gray-300"
                 htmlFor="playthrough-name"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Playthrough Name
               </label>
               <input
-                ref={playthroughNameInputRef}
+                autoComplete="off"
+                className={clsx(
+                  "w-full px-3 py-2.5 text-sm",
+                  "rounded-lg border border-gray-300 dark:border-gray-600",
+                  "bg-white text-gray-900 dark:bg-gray-700 dark:text-white",
+                  "placeholder-gray-500 dark:placeholder-gray-400",
+                  "focus:outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500",
+                  "transition-all duration-200",
+                )}
                 id="playthrough-name"
-                type="text"
-                value={newPlaythroughName}
+                maxLength={50}
                 onChange={(e) => setNewPlaythroughName(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -119,28 +128,20 @@ export default function CreatePlaythroughModal({
                   }
                 }}
                 placeholder="Enter a memorable name"
-                className={clsx(
-                  "w-full px-3 py-2.5 text-sm",
-                  "border border-gray-300 dark:border-gray-600 rounded-lg",
-                  "bg-white dark:bg-gray-700 text-gray-900 dark:text-white",
-                  "placeholder-gray-500 dark:placeholder-gray-400",
-                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500",
-                  "transition-all duration-200",
-                )}
-                maxLength={50}
+                ref={playthroughNameInputRef}
                 spellCheck={false}
-                autoComplete="off"
+                type="text"
+                value={newPlaythroughName}
               />
             </div>
 
             <fieldset>
-              <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <legend className="mb-2 block font-medium text-gray-700 text-sm dark:text-gray-300">
                 <span className="flex items-center gap-2">
                   <span>Game Mode</span>
                   <CursorTooltip
-                    delay={300}
                     content={
-                      <div className="max-w-sm text-sm font-normal leading-5 space-y-2 divide-y divide-gray-200 dark:divide-gray-600 gap-y-4">
+                      <div className="max-w-sm gap-y-4 space-y-2 divide-y divide-gray-200 font-normal text-sm leading-5 dark:divide-gray-600">
                         <div>
                           <strong className="text-gray-900 dark:text-gray-100">
                             Classic
@@ -172,17 +173,18 @@ export default function CreatePlaythroughModal({
                           </p>
                         </div>
                         <div className="pt-2">
-                          <p className="text-gray-600 dark:text-gray-400 italic">
+                          <p className="text-gray-600 italic dark:text-gray-400">
                             You can change the game mode at any time during your
                             playthrough.
                           </p>
                         </div>
                       </div>
                     }
+                    delay={300}
                     placement="bottom-start"
                   >
-                    <span className="w-4 h-4 text-gray-400 dark:text-gray-500 cursor-help inline-flex">
-                      <HelpCircle className="w-4 h-4" />
+                    <span className="inline-flex h-4 w-4 cursor-help text-gray-400 dark:text-gray-500">
+                      <HelpCircle className="h-4 w-4" />
                     </span>
                   </CursorTooltip>
                 </span>
@@ -190,20 +192,20 @@ export default function CreatePlaythroughModal({
               <div className="grid grid-cols-3 gap-2">
                 {(["classic", "remix", "randomized"] as const).map((mode) => (
                   <button
-                    key={mode}
-                    type="button"
-                    onClick={() => setSelectedGameModeOverride(mode)}
                     className={clsx(
-                      "px-3 py-2.5 text-sm font-medium rounded-lg border transition-all duration-200",
+                      "rounded-lg border px-3 py-2.5 font-medium text-sm transition-all duration-200",
                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                       selectedGameMode === mode
                         ? mode === "classic"
-                          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
+                          ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
                           : mode === "remix"
-                            ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300"
-                            : "border-orange-500 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300"
-                        : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600",
+                            ? "border-purple-500 bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300"
+                            : "border-orange-500 bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300"
+                        : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600",
                     )}
+                    key={mode}
+                    onClick={() => setSelectedGameModeOverride(mode)}
+                    type="button"
                   >
                     {mode === "classic" && "Classic"}
                     {mode === "remix" && "Remix"}
@@ -216,30 +218,30 @@ export default function CreatePlaythroughModal({
 
           <div className="flex items-center gap-3 pt-4">
             <button
-              type="button"
-              onClick={handleClose}
               className={clsx(
-                "flex-1 px-4 py-2.5 text-sm font-medium",
-                "border border-gray-300 dark:border-gray-600 rounded-lg",
-                "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300",
-                "hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200",
+                "flex-1 px-4 py-2.5 font-medium text-sm",
+                "rounded-lg border border-gray-300 dark:border-gray-600",
+                "bg-white text-gray-700 dark:bg-gray-700 dark:text-gray-300",
+                "transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-600",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
               )}
+              onClick={handleClose}
+              type="button"
             >
               Cancel
             </button>
             <button
-              type="button"
-              onClick={handleCreatePlaythrough}
-              disabled={!newPlaythroughName.trim()}
               className={clsx(
-                "flex-1 px-4 py-2.5 text-sm font-medium text-white rounded-lg",
+                "flex-1 rounded-lg px-4 py-2.5 font-medium text-sm text-white",
                 "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800",
-                "transition-all duration-200 shadow-sm hover:shadow-md",
+                "shadow-sm transition-all duration-200 hover:shadow-md",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-                "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-green-600 disabled:hover:to-green-800",
+                "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:from-green-600 disabled:hover:to-green-800",
                 "cursor-pointer",
               )}
+              disabled={!newPlaythroughName.trim()}
+              onClick={handleCreatePlaythrough}
+              type="button"
             >
               Create Playthrough
             </button>

@@ -10,8 +10,8 @@ describe("sprite packing geometry", () => {
   it("treats shared edges as non-overlapping", () => {
     expect(
       rectanglesOverlap(
-        { x: 0, y: 0, width: 10, height: 10 },
-        { x: 10, y: 0, width: 10, height: 10 },
+        { height: 10, width: 10, x: 0, y: 0 },
+        { height: 10, width: 10, x: 10, y: 0 },
       ),
     ).toBe(false);
   });
@@ -19,8 +19,8 @@ describe("sprite packing geometry", () => {
   it("detects intersecting rectangles", () => {
     expect(
       rectanglesOverlap(
-        { x: 0, y: 0, width: 10, height: 10 },
-        { x: 9, y: 9, width: 10, height: 10 },
+        { height: 10, width: 10, x: 0, y: 0 },
+        { height: 10, width: 10, x: 9, y: 9 },
       ),
     ).toBe(true);
   });
@@ -28,17 +28,17 @@ describe("sprite packing geometry", () => {
   it("returns the outer bounds of packed rectangles", () => {
     expect(
       getPackedBounds([
-        { x: 0, y: 0, width: 12, height: 8 },
-        { x: 12, y: 3, width: 10, height: 11 },
+        { height: 8, width: 12, x: 0, y: 0 },
+        { height: 11, width: 10, x: 12, y: 3 },
       ]),
-    ).toEqual({ width: 22, height: 14 });
+    ).toEqual({ height: 14, width: 22 });
   });
 
   it("finds and visits overlapping pairs without visiting disjoint rectangles", () => {
     const rectangles = [
-      { x: 0, y: 0, width: 10, height: 10 },
-      { x: 9, y: 0, width: 10, height: 10 },
-      { x: 30, y: 0, width: 10, height: 10 },
+      { height: 10, width: 10, x: 0, y: 0 },
+      { height: 10, width: 10, x: 9, y: 0 },
+      { height: 10, width: 10, x: 30, y: 0 },
     ];
     const visited: Array<[number, number]> = [];
 

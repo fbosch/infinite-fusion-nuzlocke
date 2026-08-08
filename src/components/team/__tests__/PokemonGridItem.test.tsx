@@ -36,10 +36,10 @@ const pokemonData = (id: number, type: string) =>
   }) as Pokemon;
 
 const defaultProps = {
-  locationId: "route-1",
-  isSelectedHead: false,
-  isSelectedBody: false,
   isActiveSlot: true,
+  isSelectedBody: false,
+  isSelectedHead: false,
+  locationId: "route-1",
   onSelect: vi.fn(),
 };
 

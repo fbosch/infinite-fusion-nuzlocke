@@ -27,8 +27,8 @@ interface EncounterCellProps {
 }
 
 const EMPTY_ENCOUNTER = {
-  head: null,
   body: null,
+  head: null,
   isFusion: false,
   updatedAt: 0,
 };
@@ -71,10 +71,10 @@ const getPokemonDataText = (pokemon: PokemonOptionType): string => {
 };
 
 interface ConfirmationState {
-  showClearConfirmation: boolean;
-  showOverwriteConfirmation: boolean;
   pendingClear: PendingClear | null;
   pendingOverwrite: PendingOverwrite | null;
+  showClearConfirmation: boolean;
+  showOverwriteConfirmation: boolean;
   wasConfirmed: boolean;
   wasOverwriteConfirmed: boolean;
 }
@@ -94,15 +94,15 @@ const confirmationReducer = (
     case "SHOW_CLEAR_CONFIRMATION":
       return {
         ...state,
-        showClearConfirmation: true,
         pendingClear: action.payload,
+        showClearConfirmation: true,
         wasConfirmed: false,
       };
     case "SHOW_OVERWRITE_CONFIRMATION":
       return {
         ...state,
-        showOverwriteConfirmation: true,
         pendingOverwrite: action.payload,
+        showOverwriteConfirmation: true,
         wasOverwriteConfirmed: false,
       };
     case "CONFIRM_CLEAR":
@@ -118,10 +118,10 @@ const confirmationReducer = (
     case "CLOSE_DIALOGS":
       return {
         ...state,
-        showClearConfirmation: false,
-        showOverwriteConfirmation: false,
         pendingClear: null,
         pendingOverwrite: null,
+        showClearConfirmation: false,
+        showOverwriteConfirmation: false,
         wasConfirmed: false,
         wasOverwriteConfirmed: false,
       };
@@ -131,10 +131,10 @@ const confirmationReducer = (
 };
 
 const initialState: ConfirmationState = {
-  showClearConfirmation: false,
-  showOverwriteConfirmation: false,
   pendingClear: null,
   pendingOverwrite: null,
+  showClearConfirmation: false,
+  showOverwriteConfirmation: false,
   wasConfirmed: false,
   wasOverwriteConfirmed: false,
 };
@@ -159,13 +159,13 @@ export function EncounterCell({
   const [isPokemonDataEnabled, setIsPokemonDataEnabled] = useState(false);
   const { routeEncounterData, isLoading: isRouteEncounterDataLoading } =
     useEncountersForLocation({
-      locationId,
       enabled:
         shouldLoad &&
         isPokemonDataEnabled &&
         !isCustomLocation &&
         gameMode !== "randomized",
       gameMode: gameMode === "randomized" ? "classic" : gameMode,
+      locationId,
     });
 
   // Function to get Pokemon source information
@@ -196,7 +196,9 @@ export function EncounterCell({
 
   // Check if a pokemon has valuable data that would be lost when clearing
   const hasValuableData = (pokemon: PokemonOptionType | null): boolean => {
-    if (!pokemon) return false;
+    if (!pokemon) {
+      return false;
+    }
     return !!(pokemon.nickname || pokemon.status);
   };
 
@@ -247,8 +249,8 @@ export function EncounterCell({
       if (hasValuableData(currentPokemon)) {
         // Show confirmation dialog
         dispatch({
-          type: "SHOW_CLEAR_CONFIRMATION",
           payload: { field, pokemon: currentPokemon! },
+          type: "SHOW_CLEAR_CONFIRMATION",
         });
         return;
       }
@@ -281,13 +283,13 @@ export function EncounterCell({
 
     if (valuablePokemon.length > 0) {
       dispatch({
-        type: "SHOW_OVERWRITE_CONFIRMATION",
         payload: {
-          kind: "fusion",
+          body,
           currentPokemon: existingPokemon,
           head,
-          body,
+          kind: "fusion",
         },
+        type: "SHOW_OVERWRITE_CONFIRMATION",
       });
       return;
     }
@@ -385,42 +387,40 @@ export function EncounterCell({
   const requestClearConfirmation = (
     field: "head" | "body",
     currentValue: PokemonOptionType,
-  ) => {
-    return new Promise<boolean>((resolve) => {
+  ) =>
+    new Promise<boolean>((resolve) => {
       if (hasValuableData(currentValue)) {
         dispatch({
-          type: "SHOW_CLEAR_CONFIRMATION",
           payload: { field, pokemon: currentValue },
+          type: "SHOW_CLEAR_CONFIRMATION",
         });
         pendingClearResolveRef.current = resolve;
       } else {
         resolve(true);
       }
     });
-  };
 
   const requestOverwriteConfirmation = (
     field: "head" | "body",
     currentValue: PokemonOptionType,
     newValue: PokemonOptionType,
-  ) => {
-    return new Promise<boolean>((resolve) => {
+  ) =>
+    new Promise<boolean>((resolve) => {
       if (hasValuableData(currentValue)) {
         dispatch({
-          type: "SHOW_OVERWRITE_CONFIRMATION",
           payload: {
-            kind: "pokemon",
-            field,
             currentPokemon: currentValue,
+            field,
+            kind: "pokemon",
             newPokemon: newValue,
           },
+          type: "SHOW_OVERWRITE_CONFIRMATION",
         });
         pendingOverwriteResolveRef.current = resolve;
       } else {
         resolve(true);
       }
     });
-  };
 
   const handleBeforeClearHead = (currentValue: PokemonOptionType) =>
     requestClearConfirmation("head", currentValue);
@@ -461,7 +461,9 @@ export function EncounterCell({
 
   // Handle flip button click
   const handleFlip = () => {
-    if (!isFusion) return;
+    if (!isFusion) {
+      return;
+    }
 
     // Use the atomic flip function to avoid duplicate preferred variant lookups
     playthroughActions.flipEncounterFusion(locationId);
@@ -471,134 +473,133 @@ export function EncounterCell({
     <td
       className={clsx(
         "w-full overflow-x-auto",
-        "px-4 pt-8.5 pb-4 text-sm text-gray-900 dark:text-gray-100 ",
+        "px-4 pt-8.5 pb-4 text-gray-900 text-sm dark:text-gray-100",
       )}
     >
-      <div className="flex flex-row justify-center gap-4 w-full ">
-        <div className="flex-1 min-w-0 max-w-full ">
+      <div className="flex w-full flex-row justify-center gap-4">
+        <div className="min-w-0 max-w-full flex-1">
           {isFusion ? (
-            <div className="flex items-center gap-2 ">
-              <div className="flex-1 relative ">
-                <span className="absolute -top-6 left-0 text-xs  text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <span className="absolute -top-6 left-0 text-gray-500 text-xs dark:text-gray-400">
                   Head
                 </span>
                 <PokemonCombobox
+                  comboboxId={`${locationId}-head`}
+                  isCustomLocation={isCustomLocation}
+                  isFusion={isFusion}
+                  isRouteEncounterDataLoading={isRouteEncounterDataLoading}
                   key={`${locationId}-head`}
                   locationId={locationId}
-                  routeEncounterData={routeEncounterData}
-                  isRouteEncounterDataLoading={isRouteEncounterDataLoading}
-                  isCustomLocation={isCustomLocation}
-                  value={headPokemon}
-                  onChange={handleHeadChange}
-                  placeholder="Select Pokémon"
                   nicknamePlaceholder="Enter nickname"
-                  comboboxId={`${locationId}-head`}
+                  onActivate={() => setIsPokemonDataEnabled(true)}
                   onBeforeClear={handleBeforeClearHead}
                   onBeforeOverwrite={handleBeforeOverwriteHead}
-                  isFusion={isFusion}
+                  onChange={handleHeadChange}
+                  placeholder="Select Pokémon"
+                  routeEncounterData={routeEncounterData}
                   shouldLoad={shouldLoad}
-                  onActivate={() => setIsPokemonDataEnabled(true)}
+                  value={headPokemon}
                 />
               </div>
               <CursorTooltip
-                placement="bottom"
                 className="origin-top"
                 content={
                   <div className="flex items-center gap-2">
                     <Image
-                      src={DNA_REVERSER_ICON}
                       alt="DNA Reverser"
-                      width={24}
+                      className="image-rendering-pixelated object-contain object-center"
                       height={24}
-                      className="object-contain object-center image-rendering-pixelated "
+                      src={DNA_REVERSER_ICON}
+                      width={24}
                     />
                     <span className="text-sm">Reverse Fusion</span>
                   </div>
                 }
                 delay={300}
+                placement="bottom"
               >
                 <button
-                  type="button"
-                  onClick={handleFlip}
-                  className="group size-6 flex items-center justify-center p-1 rounded-md border border-gray-300 dark:border-gray-600 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-500 hover:border-blue-600 bg-white dark:bg-gray-800"
                   aria-label="Flip head and body"
+                  className="group flex size-6 items-center justify-center rounded-md border border-gray-300 bg-white p-1 transition-colors duration-200 hover:border-blue-600 hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:border-gray-600 dark:bg-gray-800"
+                  onClick={handleFlip}
+                  type="button"
                 >
-                  <ArrowLeftRight className="size-4 text-gray-600 dark:text-gray-300 group-hover:text-white" />
+                  <ArrowLeftRight className="size-4 text-gray-600 group-hover:text-white dark:text-gray-300" />
                 </button>
               </CursorTooltip>
-              <div className="flex-1 relative min-w-0 max-w-full">
-                <span className="absolute -top-6 left-0 text-xs  text-gray-500 dark:text-gray-400">
+              <div className="relative min-w-0 max-w-full flex-1">
+                <span className="absolute -top-6 left-0 text-gray-500 text-xs dark:text-gray-400">
                   Body
                 </span>
                 <PokemonCombobox
+                  comboboxId={`${locationId}-body`}
+                  isCustomLocation={isCustomLocation}
+                  isFusion={isFusion}
+                  isRouteEncounterDataLoading={isRouteEncounterDataLoading}
                   key={`${locationId}-body`}
                   locationId={locationId}
-                  routeEncounterData={routeEncounterData}
-                  isRouteEncounterDataLoading={isRouteEncounterDataLoading}
-                  isCustomLocation={isCustomLocation}
-                  value={bodyPokemon}
-                  onChange={handleBodyChange}
-                  placeholder="Select Pokémon"
                   nicknamePlaceholder="Enter nickname"
-                  comboboxId={`${locationId}-body`}
-                  ref={bodyComboboxRef}
+                  onActivate={() => setIsPokemonDataEnabled(true)}
                   onBeforeClear={handleBeforeClearBody}
                   onBeforeOverwrite={handleBeforeOverwriteBody}
-                  isFusion={isFusion}
+                  onChange={handleBodyChange}
+                  placeholder="Select Pokémon"
+                  ref={bodyComboboxRef}
+                  routeEncounterData={routeEncounterData}
                   shouldLoad={shouldLoad}
-                  onActivate={() => setIsPokemonDataEnabled(true)}
+                  value={bodyPokemon}
                 />
               </div>
             </div>
           ) : (
             <PokemonCombobox
+              comboboxId={`${locationId}-single`}
+              isCustomLocation={isCustomLocation}
+              isFusion={isFusion}
+              isRouteEncounterDataLoading={isRouteEncounterDataLoading}
               key={`${locationId}-single`}
               locationId={locationId}
-              routeEncounterData={routeEncounterData}
-              isRouteEncounterDataLoading={isRouteEncounterDataLoading}
-              isCustomLocation={isCustomLocation}
-              value={selectedPokemon}
+              nicknamePlaceholder="Enter nickname"
+              onActivate={() => setIsPokemonDataEnabled(true)}
+              onBeforeClear={handleBeforeClearSingle}
+              onBeforeOverwrite={handleBeforeOverwriteSingle}
               onChange={handleSingleChange}
               onFusionChange={handleSingleFusionChange}
               placeholder="Select Pokémon"
-              nicknamePlaceholder="Enter nickname"
-              comboboxId={`${locationId}-single`}
-              onBeforeClear={handleBeforeClearSingle}
-              onBeforeOverwrite={handleBeforeOverwriteSingle}
-              isFusion={isFusion}
+              routeEncounterData={routeEncounterData}
               shouldLoad={shouldLoad}
-              onActivate={() => setIsPokemonDataEnabled(true)}
+              value={selectedPokemon}
             />
           )}
         </div>
-        <div className="flex flex-col gap-2 justify-center">
+        <div className="flex flex-col justify-center gap-2">
           <FusionToggleButton
-            locationId={locationId}
             isFusion={isFusion}
-            selectedPokemon={selectedPokemon}
+            locationId={locationId}
             onToggleFusion={handleFusionToggle}
+            selectedPokemon={selectedPokemon}
           />
         </div>
       </div>
       <ConfirmationDialog
+        cancelText="Keep Data"
+        confirmText="Clear Encounter"
         isOpen={confirmationState.showClearConfirmation}
-        onClose={handleDialogClose}
-        onConfirm={handleConfirmClear}
-        title="Clear Encounter?"
         message={
           confirmationState.pendingClear
             ? getConfirmationMessage(confirmationState.pendingClear.pokemon)
             : ""
         }
-        confirmText="Clear Encounter"
-        cancelText="Keep Data"
+        onClose={handleDialogClose}
+        onConfirm={handleConfirmClear}
+        title="Clear Encounter?"
         variant="warning"
       />
       <ConfirmationDialog
+        cancelText="Keep Current"
+        confirmText="Replace Encounter"
         isOpen={confirmationState.showOverwriteConfirmation}
-        onClose={handleOverwriteDialogClose}
-        onConfirm={handleConfirmOverwrite}
-        title="Replace Encounter?"
         message={
           confirmationState.pendingOverwrite
             ? confirmationState.pendingOverwrite.kind === "fusion"
@@ -613,8 +614,9 @@ export function EncounterCell({
                 )
             : ""
         }
-        confirmText="Replace Encounter"
-        cancelText="Keep Current"
+        onClose={handleOverwriteDialogClose}
+        onConfirm={handleConfirmOverwrite}
+        title="Replace Encounter?"
         variant="warning"
       />
     </td>

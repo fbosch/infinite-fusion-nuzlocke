@@ -168,8 +168,8 @@ describe("Playthroughs Store - Core Movement Operations", () => {
 
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       expect(activePlaythrough?.team.members).toContainEqual({
-        headPokemonUid: head?.uid,
         bodyPokemonUid: body?.uid,
+        headPokemonUid: head?.uid,
       });
     });
 
@@ -197,8 +197,8 @@ describe("Playthroughs Store - Core Movement Operations", () => {
       expect(
         playthroughActions.getActivePlaythrough()?.team.members[2],
       ).toEqual({
-        headPokemonUid: head?.uid,
         bodyPokemonUid: body?.uid,
+        headPokemonUid: head?.uid,
       });
     });
   });

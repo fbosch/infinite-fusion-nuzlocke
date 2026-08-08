@@ -32,43 +32,38 @@ async function loadLicenses(): Promise<{
 }
 
 export const metadata: Metadata = {
-  title: "Open Source Licenses",
   alternates: {
     canonical: "/licenses",
   },
+  title: "Open Source Licenses",
 };
 
 export default async function LicensesPage() {
   const data = await loadLicenses();
 
   return (
-    <main className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+    <main className="mx-auto max-w-[1100px] px-4 py-10 sm:px-6 lg:px-8">
+      <h1 className="font-semibold text-2xl text-gray-900 dark:text-gray-100">
         Open Source Licenses
       </h1>
-      {!data ? (
-        <p className="mt-4 text-gray-700 dark:text-gray-300">
-          License data not found. Generate it with:{" "}
-          <code>pnpm licenses:generate</code>.
-        </p>
-      ) : (
+      {data ? (
         <>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-gray-600 text-sm dark:text-gray-400">
             Generated at {new Date(data.generatedAt).toLocaleString()}.
           </p>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-gray-600 text-sm dark:text-gray-400">
             Combined notices:{" "}
             <Link
+              className="text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
               href="/THIRD-PARTY-NOTICES.txt"
-              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
             >
               THIRD-PARTY-NOTICES.txt
             </Link>
           </p>
           <div className="mt-6 overflow-x-auto">
-            <table className="min-w-full text-sm align-top">
+            <table className="min-w-full align-top text-sm">
               <thead>
-                <tr className="text-left border-b border-gray-200 dark:border-gray-700">
+                <tr className="border-gray-200 border-b text-left dark:border-gray-700">
                   <th className="py-2 pr-4 align-top">Package</th>
                   <th className="py-2 pr-4 align-top">Version</th>
                   <th className="py-2 pr-4 align-top">License</th>
@@ -79,25 +74,25 @@ export default async function LicensesPage() {
               <tbody>
                 {data.packages.map((pkg) => (
                   <tr
+                    className="border-gray-100 border-b dark:border-gray-800"
                     key={`${pkg.name}@${pkg.version}`}
-                    className="border-b border-gray-100 dark:border-gray-800"
                   >
-                    <td className="py-2 pr-4 text-gray-900 dark:text-gray-100 align-top">
+                    <td className="py-2 pr-4 align-top text-gray-900 dark:text-gray-100">
                       {pkg.name}
                     </td>
-                    <td className="py-2 pr-4 text-gray-700 dark:text-gray-300 align-top">
+                    <td className="py-2 pr-4 align-top text-gray-700 dark:text-gray-300">
                       {pkg.version}
                     </td>
-                    <td className="py-2 pr-4 text-gray-700 dark:text-gray-300 align-top">
+                    <td className="py-2 pr-4 align-top text-gray-700 dark:text-gray-300">
                       {pkg.license}
                     </td>
                     <td className="py-2 pr-4 align-top">
                       {pkg.homepage ? (
                         <a
+                          className="text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                           href={pkg.homepage}
-                          target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                          target="_blank"
                         >
                           {pkg.homepage}
                         </a>
@@ -110,25 +105,25 @@ export default async function LicensesPage() {
                     <td className="py-2 pr-4 align-top">
                       {pkg.licenseText || pkg.noticeText ? (
                         <details>
-                          <summary className="cursor-pointer text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                          <summary className="cursor-pointer text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
                             View
                           </summary>
                           {pkg.licenseText && (
                             <div className="mt-2">
-                              <div className="text-xs font-semibold text-gray-900 dark:text-gray-200">
+                              <div className="font-semibold text-gray-900 text-xs dark:text-gray-200">
                                 License
                               </div>
-                              <pre className="mt-1 whitespace-pre-wrap text-[11px] leading-snug text-gray-700 dark:text-gray-300 max-h-64 overflow-y-auto scrollbar-thin border border-gray-200 dark:border-gray-700 rounded p-2 bg-white dark:bg-gray-900/40">
+                              <pre className="scrollbar-thin mt-1 max-h-64 overflow-y-auto whitespace-pre-wrap rounded border border-gray-200 bg-white p-2 text-[11px] text-gray-700 leading-snug dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300">
                                 {pkg.licenseText}
                               </pre>
                             </div>
                           )}
                           {pkg.noticeText && (
                             <div className="mt-3">
-                              <div className="text-xs font-semibold text-gray-900 dark:text-gray-200">
+                              <div className="font-semibold text-gray-900 text-xs dark:text-gray-200">
                                 Notice
                               </div>
-                              <pre className="mt-1 whitespace-pre-wrap text-[11px] leading-snug text-gray-700 dark:text-gray-300 max-h-64 overflow-y-auto scrollbar-thin border border-gray-200 dark:border-gray-700 rounded p-2 bg-white dark:bg-gray-900/40">
+                              <pre className="scrollbar-thin mt-1 max-h-64 overflow-y-auto whitespace-pre-wrap rounded border border-gray-200 bg-white p-2 text-[11px] text-gray-700 leading-snug dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300">
                                 {pkg.noticeText}
                               </pre>
                             </div>
@@ -146,6 +141,11 @@ export default async function LicensesPage() {
             </table>
           </div>
         </>
+      ) : (
+        <p className="mt-4 text-gray-700 dark:text-gray-300">
+          License data not found. Generate it with:{" "}
+          <code>pnpm licenses:generate</code>.
+        </p>
       )}
     </main>
   );

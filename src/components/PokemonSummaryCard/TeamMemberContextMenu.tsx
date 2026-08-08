@@ -44,58 +44,58 @@ const BOXABLE_STATUSES = new Set<PokemonStatusType>([
 ]);
 
 interface PokemonSectionOptions {
-  slot: "head" | "body";
-  pokemon: PokemonOptionType | null | undefined;
   evolutions: Pokemon[] | undefined;
-  preEvolution: Pokemon | null;
-  showHeader: boolean;
   onDevolve: () => void;
   onEvolve: (evolution: Pokemon) => void;
   onGoToEncounter: () => void;
+  pokemon: PokemonOptionType | null | undefined;
+  preEvolution: Pokemon | null;
+  showHeader: boolean;
+  slot: "head" | "body";
 }
 
 interface TeamMemberContextActions {
-  onOpenVariantModal: () => void;
-  onReverseFusion: () => void;
+  onDevolveBody: () => void;
+  onDevolveHead: () => void;
+  onEvolveBody: (evolution: Pokemon) => void;
+  onEvolveHead: (evolution: Pokemon) => void;
+  onGoToBodyEncounter: () => void;
+  onGoToHeadEncounter: () => void;
   onMarkAsDeceased: () => void;
   onMoveToBox: () => void;
-  onDevolveHead: () => void;
-  onEvolveHead: (evolution: Pokemon) => void;
-  onGoToHeadEncounter: () => void;
-  onDevolveBody: () => void;
-  onEvolveBody: (evolution: Pokemon) => void;
-  onGoToBodyEncounter: () => void;
+  onOpenVariantModal: () => void;
+  onReverseFusion: () => void;
 }
 
 interface TeamMemberContextItemOptions {
-  headPokemon: PokemonOptionType | null | undefined;
-  bodyPokemon: PokemonOptionType | null | undefined;
-  headEvolutions: Pokemon[] | undefined;
-  headPreEvolution: Pokemon | null;
-  bodyEvolutions: Pokemon[] | undefined;
-  bodyPreEvolution: Pokemon | null;
-  preferredVariant: string | null | undefined;
-  hasArtVariants: boolean | undefined;
-  isLoadingVariants: boolean;
   actions: TeamMemberContextActions;
+  bodyEvolutions: Pokemon[] | undefined;
+  bodyPokemon: PokemonOptionType | null | undefined;
+  bodyPreEvolution: Pokemon | null;
+  hasArtVariants: boolean | undefined;
+  headEvolutions: Pokemon[] | undefined;
+  headPokemon: PokemonOptionType | null | undefined;
+  headPreEvolution: Pokemon | null;
+  isLoadingVariants: boolean;
+  preferredVariant: string | null | undefined;
 }
 
 interface TeamMemberContextActionOptions {
-  headPokemon: PokemonOptionType | null | undefined;
   bodyPokemon: PokemonOptionType | null | undefined;
-  headPreEvolution: Pokemon | null;
   bodyPreEvolution: Pokemon | null;
-  position: number;
   hasFusionPair: boolean;
+  headPokemon: PokemonOptionType | null | undefined;
+  headPreEvolution: Pokemon | null;
   onClose: (() => void) | undefined;
   onOpenVariantModal: () => void;
+  position: number;
 }
 
 function createPokemonActionLabel(pokemon: Pokemon, action: string) {
   return (
-    <div className="flex items-center gap-x-2 w-full">
-      <div className="flex items-center justify-center size-6 flex-shrink-0">
-        <PokemonSprite pokemonId={pokemon.id} generation="gen7" />
+    <div className="flex w-full items-center gap-x-2">
+      <div className="flex size-6 flex-shrink-0 items-center justify-center">
+        <PokemonSprite generation="gen7" pokemonId={pokemon.id} />
       </div>
       <span className="truncate">
         {action && `${action} `}
@@ -118,8 +118,10 @@ function createPokemonSectionItems({
   onGoToEncounter,
 }: PokemonSectionOptions): ContextMenuItem[] {
   if (
-    !pokemon ||
-    (!evolutions?.length && !preEvolution && !pokemon.originalLocation)
+    !(
+      pokemon &&
+      (evolutions?.length || preEvolution || pokemon.originalLocation)
+    )
   ) {
     return [];
   }
@@ -136,7 +138,7 @@ function createPokemonSectionItems({
       label: (
         <div className="flex items-center gap-1.5 px-1 py-0.5">
           <SectionIcon className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
-          <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          <span className="font-medium text-gray-500 text-xs uppercase tracking-wide dark:text-gray-400">
             {sectionName}
           </span>
         </div>
@@ -147,9 +149,9 @@ function createPokemonSectionItems({
 
   if (preEvolution) {
     items.push({
+      icon: Undo2,
       id: `devolve-${slot}`,
       label: createPokemonActionLabel(preEvolution, "Devolve to"),
-      icon: Undo2,
       onClick: onDevolve,
     });
   }
@@ -157,29 +159,29 @@ function createPokemonSectionItems({
   if (evolutions?.length === 1) {
     const evolution = evolutions[0]!;
     items.push({
+      icon: Atom,
       id: `evolve-${slot}-${evolution.id}`,
       label: createPokemonActionLabel(evolution, "Evolve to"),
-      icon: Atom,
       onClick: () => onEvolve(evolution),
     });
   } else if (evolutions && evolutions.length > 1) {
     items.push({
-      id: `evolve-${slot}`,
-      label: "Evolve to…",
-      icon: Atom,
       children: evolutions.map((evolution) => ({
         id: `evolve-${slot}-${evolution.id}`,
         label: createPokemonActionLabel(evolution, ""),
         onClick: () => onEvolve(evolution),
       })),
+      icon: Atom,
+      id: `evolve-${slot}`,
+      label: "Evolve to…",
     });
   }
 
   if (pokemon.originalLocation) {
     items.push({
+      icon: MapPin,
       id: `go-to-${slot}-encounter`,
       label: "Go to Encounter",
-      icon: MapPin,
       onClick: onGoToEncounter,
       tooltip: "Navigate to the location where this Pokémon was encountered",
     });
@@ -203,17 +205,17 @@ function createVariantItem({
     !hasArtVariants || isEggId(headPokemon?.id) || isEggId(bodyPokemon?.id);
 
   return {
-    id: "change-variant",
-    label: "Change Preferred Artwork",
     disabled: unavailable,
     icon: isLoadingVariants ? Loader2 : Replace,
+    iconClassName: isLoadingVariants ? "animate-spin" : "",
+    id: "change-variant",
+    label: "Change Preferred Artwork",
+    onClick: onOpenVariantModal,
     tooltip: unavailable
       ? isLoadingVariants
         ? "Loading artwork variants..."
         : "No artwork variants available"
       : undefined,
-    iconClassName: isLoadingVariants ? "animate-spin" : "",
-    onClick: onOpenVariantModal,
   };
 }
 
@@ -225,7 +227,7 @@ function createStatusItems(
     status !== PokemonStatus.DECEASED && status !== PokemonStatus.MISSED;
   const canMoveToBox = status != null && BOXABLE_STATUSES.has(status);
 
-  if (!canMarkAsDeceased && !canMoveToBox) {
+  if (!(canMarkAsDeceased || canMoveToBox)) {
     return [];
   }
 
@@ -234,9 +236,9 @@ function createStatusItems(
     ...(canMarkAsDeceased
       ? [
           {
+            icon: Skull,
             id: "mark-deceased",
             label: "Move to Graveyard",
-            icon: Skull,
             onClick: actions.onMarkAsDeceased,
           },
         ]
@@ -244,9 +246,9 @@ function createStatusItems(
     ...(canMoveToBox
       ? [
           {
+            icon: Computer,
             id: "move-to-box",
             label: "Move to Box",
-            icon: Computer,
             onClick: actions.onMoveToBox,
           },
         ]
@@ -259,15 +261,15 @@ function createReverseFusionItems(
   bodyPokemon: PokemonOptionType | null | undefined,
   onReverseFusion: () => void,
 ): ContextMenuItem[] {
-  if (!headPokemon || !bodyPokemon || headPokemon.id === bodyPokemon.id) {
+  if (!(headPokemon && bodyPokemon) || headPokemon.id === bodyPokemon.id) {
     return [];
   }
 
   return [
     {
+      icon: ArrowLeftRight,
       id: "invert-fusion",
       label: "Reverse Fusion",
-      icon: ArrowLeftRight,
       onClick: onReverseFusion,
       tooltip: "Swap head and body Pokémon positions",
     },
@@ -297,14 +299,14 @@ function createPokemonSectionItemsForTeamMember({
     bodyPokemon != null &&
     headPokemon.id !== bodyPokemon.id;
   const items = createPokemonSectionItems({
-    slot: "head",
-    pokemon: headPokemon,
     evolutions: headEvolutions,
-    preEvolution: headPreEvolution,
-    showHeader: hasFusionPair,
     onDevolve: actions.onDevolveHead,
     onEvolve: actions.onEvolveHead,
     onGoToEncounter: actions.onGoToHeadEncounter,
+    pokemon: headPokemon,
+    preEvolution: headPreEvolution,
+    showHeader: hasFusionPair,
+    slot: "head",
   });
 
   if (bodyPokemon?.id === headPokemon?.id) {
@@ -314,14 +316,14 @@ function createPokemonSectionItemsForTeamMember({
   return [
     ...items,
     ...createPokemonSectionItems({
-      slot: "body",
-      pokemon: bodyPokemon,
       evolutions: bodyEvolutions,
-      preEvolution: bodyPreEvolution,
-      showHeader: true,
       onDevolve: actions.onDevolveBody,
       onEvolve: actions.onEvolveBody,
       onGoToEncounter: actions.onGoToBodyEncounter,
+      pokemon: bodyPokemon,
+      preEvolution: bodyPreEvolution,
+      showHeader: true,
+      slot: "body",
     }),
   ];
 }
@@ -341,9 +343,9 @@ function createTeamMemberContextItems({
   const status = headPokemon?.status || bodyPokemon?.status;
   return [
     createVariantItem({
-      headPokemon,
       bodyPokemon,
       hasArtVariants,
+      headPokemon,
       isLoadingVariants,
       onOpenVariantModal: actions.onOpenVariantModal,
     }),
@@ -354,13 +356,13 @@ function createTeamMemberContextItems({
     ),
     ...createStatusItems(status, actions),
     ...createPokemonSectionItemsForTeamMember({
-      headPokemon,
-      bodyPokemon,
-      headEvolutions,
-      headPreEvolution,
-      bodyEvolutions,
-      bodyPreEvolution,
       actions,
+      bodyEvolutions,
+      bodyPokemon,
+      bodyPreEvolution,
+      headEvolutions,
+      headPokemon,
+      headPreEvolution,
     }),
     { id: "external-links-separator", separator: true },
     ...createExternalDexItems(
@@ -374,7 +376,9 @@ async function updatePokemonToEvolution(
   pokemon: PokemonOptionType | null | undefined,
   evolution: Pokemon | null,
 ) {
-  if (!pokemon?.uid || !evolution) return;
+  if (!(pokemon?.uid && evolution)) {
+    return;
+  }
 
   await playthroughActions.updatePokemonByUID(pokemon.uid, {
     ...pokemon,
@@ -392,12 +396,14 @@ function scrollToPokemonEncounter(
   pokemon: PokemonOptionType | null | undefined,
   onClose: (() => void) | undefined,
 ) {
-  if (!pokemon?.originalLocation || !pokemon.uid) return;
+  if (!(pokemon?.originalLocation && pokemon.uid)) {
+    return;
+  }
 
   scrollToLocationById(pokemon.originalLocation, {
     behavior: "smooth",
-    highlightUids: [pokemon.uid],
     durationMs: 1200,
+    highlightUids: [pokemon.uid],
   });
   onClose?.();
 }
@@ -413,25 +419,27 @@ function createTeamMemberContextActions({
   onOpenVariantModal,
 }: TeamMemberContextActionOptions): TeamMemberContextActions {
   return {
-    onOpenVariantModal,
-    onReverseFusion: async () => {
-      if (hasFusionPair === false) return;
-
-      await playthroughActions.flipTeamMemberFusion(position);
-    },
+    onDevolveBody: () =>
+      updatePokemonToEvolution(bodyPokemon, bodyPreEvolution),
+    onDevolveHead: () =>
+      updatePokemonToEvolution(headPokemon, headPreEvolution),
+    onEvolveBody: (evolution) =>
+      updatePokemonToEvolution(bodyPokemon, evolution),
+    onEvolveHead: (evolution) =>
+      updatePokemonToEvolution(headPokemon, evolution),
+    onGoToBodyEncounter: () => scrollToPokemonEncounter(bodyPokemon, onClose),
+    onGoToHeadEncounter: () => scrollToPokemonEncounter(headPokemon, onClose),
     onMarkAsDeceased: () =>
       playthroughActions.markTeamMemberAsDeceased(position),
     onMoveToBox: () => playthroughActions.moveTeamMemberToBox(position),
-    onDevolveHead: () =>
-      updatePokemonToEvolution(headPokemon, headPreEvolution),
-    onEvolveHead: (evolution) =>
-      updatePokemonToEvolution(headPokemon, evolution),
-    onGoToHeadEncounter: () => scrollToPokemonEncounter(headPokemon, onClose),
-    onDevolveBody: () =>
-      updatePokemonToEvolution(bodyPokemon, bodyPreEvolution),
-    onEvolveBody: (evolution) =>
-      updatePokemonToEvolution(bodyPokemon, evolution),
-    onGoToBodyEncounter: () => scrollToPokemonEncounter(bodyPokemon, onClose),
+    onOpenVariantModal,
+    onReverseFusion: async () => {
+      if (hasFusionPair === false) {
+        return;
+      }
+
+      await playthroughActions.flipTeamMemberFusion(position);
+    },
   };
 }
 
@@ -456,6 +464,8 @@ function useTeamMemberArtworkVariants(
 
 interface TeamMemberContextMenuProps {
   children: React.ReactNode;
+  onClose?: () => void;
+  shouldLoad?: boolean;
   teamMember: {
     position: number;
     isEmpty: boolean;
@@ -463,8 +473,6 @@ interface TeamMemberContextMenuProps {
     bodyPokemon?: PokemonOptionType | null;
     isFusion?: boolean;
   };
-  shouldLoad?: boolean;
-  onClose?: () => void;
 }
 
 export function TeamMemberContextMenu({
@@ -493,25 +501,25 @@ export function TeamMemberContextMenu({
   const { evolutions: bodyEvolutions, preEvolution: bodyPreEvolution } =
     usePokemonEvolutionData(bodyPokemon?.id, true);
   const contextItems = createTeamMemberContextItems({
-    headPokemon,
-    bodyPokemon,
-    headEvolutions,
-    headPreEvolution,
-    bodyEvolutions,
-    bodyPreEvolution,
-    preferredVariant,
-    hasArtVariants,
-    isLoadingVariants,
     actions: createTeamMemberContextActions({
-      headPokemon,
       bodyPokemon,
-      headPreEvolution,
       bodyPreEvolution,
-      position,
       hasFusionPair,
+      headPokemon,
+      headPreEvolution,
       onClose,
       onOpenVariantModal: () => setIsVariantModalOpen(true),
+      position,
     }),
+    bodyEvolutions,
+    bodyPokemon,
+    bodyPreEvolution,
+    hasArtVariants,
+    headEvolutions,
+    headPokemon,
+    headPreEvolution,
+    isLoadingVariants,
+    preferredVariant,
   });
 
   return (
@@ -525,11 +533,11 @@ export function TeamMemberContextMenu({
       </ContextMenu>
 
       <ArtworkVariantModal
+        bodyId={bodyPokemon?.id}
+        headId={headPokemon?.id}
+        isFusion={hasFusionPair}
         isOpen={isVariantModalOpen}
         onClose={() => setIsVariantModalOpen(false)}
-        headId={headPokemon?.id}
-        bodyId={bodyPokemon?.id}
-        isFusion={hasFusionPair}
       />
     </>
   );

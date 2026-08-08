@@ -41,8 +41,8 @@ describe("Playthroughs Store - Custom Locations", () => {
         expect(activePlaythrough?.customLocations).toHaveLength(1);
         expect(activePlaythrough?.customLocations?.[0]).toMatchObject({
           id: customLocationId,
-          name: "Custom Route",
           insertAfterLocationId: expect.any(String),
+          name: "Custom Route",
         });
       }
     });
@@ -140,13 +140,13 @@ describe("Playthroughs Store - Custom Locations", () => {
             activePlaythrough.encounters = {};
           }
           activePlaythrough.encounters[customLocationId] = {
+            body: null,
             head: {
               id: 1,
               name: "Bulbasaur",
               nationalDexId: 1,
               uid: "test-uid",
             },
-            body: null,
             isFusion: false,
             updatedAt: Date.now(),
           };
@@ -413,8 +413,8 @@ describe("Playthroughs Store - Custom Locations", () => {
         expect(customLocations).toHaveLength(1);
         expect(customLocations[0]).toMatchObject({
           id: expect.stringMatching(/^custom_/),
-          name: "Test Route",
           insertAfterLocationId: expect.any(String),
+          name: "Test Route",
         });
 
         // Verify the playthrough structure is intact

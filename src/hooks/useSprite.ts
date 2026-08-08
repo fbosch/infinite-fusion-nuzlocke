@@ -14,13 +14,13 @@ import { useValtioSync } from "./useValtioSync";
 export function useSpriteVariants(
   headId?: number | null,
   bodyId?: number | null,
-  enabled: boolean = true,
+  enabled = true,
 ) {
   return useQuery({
     ...spriteQueries.variants(headId, bodyId),
-    staleTime: ms("24h"), // Cache variants for 24 hours
-    gcTime: ms("48h"),
     enabled: !!(headId || bodyId) && enabled,
+    gcTime: ms("48h"),
+    staleTime: ms("24h"), // Cache variants for 24 hours
   });
 }
 
@@ -30,13 +30,13 @@ export function useSpriteVariants(
 export function useSpriteCredits(
   headId?: number | null,
   bodyId?: number | null,
-  enabled: boolean = true,
+  enabled = true,
 ) {
   return useQuery({
     ...spriteQueries.credits(headId, bodyId),
-    staleTime: ms("3d"),
-    gcTime: ms("48h"),
     enabled: !!(headId || bodyId) && enabled,
+    gcTime: ms("48h"),
+    staleTime: ms("3d"),
   });
 }
 
@@ -61,8 +61,8 @@ export function usePreferredVariantState(
   };
 
   return {
-    variant,
-    updateVariant,
     isLoading: false,
+    updateVariant,
+    variant,
   };
 }

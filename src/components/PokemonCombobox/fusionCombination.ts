@@ -1,8 +1,8 @@
 import type { PokemonOptionType } from "@/loaders/pokemon";
 
 export interface FusionCombination {
-  head: PokemonOptionType;
   body: PokemonOptionType;
+  head: PokemonOptionType;
 }
 
 type PokemonSearchResult = Pick<
@@ -44,13 +44,13 @@ export function resolveFusionCombination(
     (candidate) => isPokemonSearchResult(candidate) && candidate.id === bodyId,
   );
 
-  if (!head || !body) {
+  if (!(head && body)) {
     return null;
   }
 
   return {
-    head: toPokemonOption(head),
     body: toPokemonOption(body),
+    head: toPokemonOption(head),
   };
 }
 

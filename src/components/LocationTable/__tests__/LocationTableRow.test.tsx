@@ -16,24 +16,24 @@ const evolutionListener = vi.hoisted(() => ({
 
 const createRow = (index = 0, includeEncounter = false) =>
   ({
-    index,
-    original: { id: "route-1", name: "Route 1" },
     getVisibleCells: () => [
       {
-        id: "sprite-cell",
         column: { id: "sprite" },
         getContext: () => ({}),
+        id: "sprite-cell",
       },
       ...(includeEncounter
         ? [
             {
-              id: "encounter-cell",
               column: { id: "encounter" },
               getContext: () => ({}),
+              id: "encounter-cell",
             },
           ]
         : []),
     ],
+    index,
+    original: { id: "route-1", name: "Route 1" },
   }) as never;
 
 vi.mock("@/stores/playthroughs/hooks", () => ({
@@ -69,8 +69,8 @@ describe("LocationTableRow", () => {
     playEvolution.mockClear();
     canFuse.mockReturnValue(false);
     useEncounter.mockReturnValue({
-      head: { id: 132, name: "Ditto" },
       body: null,
+      head: { id: 132, name: "Ditto" },
       isFusion: false,
     });
     evolutionListener.current = undefined;
@@ -93,8 +93,8 @@ describe("LocationTableRow", () => {
   it("does not animate an eligible fusion on initial render", () => {
     canFuse.mockReturnValue(true);
     useEncounter.mockReturnValue({
-      head: { id: 25, name: "Pikachu" },
       body: { id: 4, name: "Charmander" },
+      head: { id: 25, name: "Pikachu" },
       isFusion: true,
     });
 
@@ -112,8 +112,8 @@ describe("LocationTableRow", () => {
   it("animates when an eligible fusion changes", () => {
     canFuse.mockReturnValue(true);
     useEncounter.mockReturnValue({
-      head: { id: 25, name: "Pikachu" },
       body: { id: 4, name: "Charmander" },
+      head: { id: 25, name: "Pikachu" },
       isFusion: true,
     });
 
@@ -125,8 +125,8 @@ describe("LocationTableRow", () => {
       </table>,
     );
     useEncounter.mockReturnValue({
-      head: { id: 25, name: "Pikachu" },
       body: { id: 133, name: "Eevee" },
+      head: { id: 25, name: "Pikachu" },
       isFusion: true,
     });
     view.rerender(
@@ -150,8 +150,8 @@ describe("LocationTableRow", () => {
       </table>,
     );
     useEncounter.mockReturnValue({
-      head: { id: 11, name: "Metapod" },
       body: { id: 200, name: "Misdreavus" },
+      head: { id: 11, name: "Metapod" },
       isFusion: true,
     });
 
@@ -168,8 +168,8 @@ describe("LocationTableRow", () => {
 
   it("does not animate an invalid fusion combination", () => {
     useEncounter.mockReturnValue({
-      head: { id: 25, name: "Pikachu" },
       body: { id: 4, name: "Charmander" },
+      head: { id: 25, name: "Pikachu" },
       isFusion: true,
     });
 

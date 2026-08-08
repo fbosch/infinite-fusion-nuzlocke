@@ -49,12 +49,12 @@ async function generateLicenses(): Promise<void> {
             : entry.author?.name || undefined;
         for (const version of entry.versions) {
           packages.push({
-            name: entry.name,
-            version,
-            license,
-            homepage: entry.homepage,
             author: authorName,
             description: entry.description,
+            homepage: entry.homepage,
+            license,
+            name: entry.name,
+            version,
           });
         }
       }
@@ -81,7 +81,9 @@ async function generateLicenses(): Promise<void> {
           );
           const content = await fs.readFile(pkgPath, "utf8");
           const parsed = JSON.parse(content) as { version?: string };
-          if (parsed.version) installedVersions.set(dep, parsed.version);
+          if (parsed.version) {
+            installedVersions.set(dep, parsed.version);
+          }
         } catch {
           // ignore missing
         }
@@ -102,9 +104,7 @@ async function generateLicenses(): Promise<void> {
         const content = await fs.readFile(filePath, "utf8");
         // Normalize newlines
         return content.replace(/\r\n/g, "\n");
-      } catch {
-        return undefined;
-      }
+      } catch {}
     }
 
     async function collectLicenseInfo(
@@ -139,12 +139,11 @@ async function generateLicenses(): Promise<void> {
           }, {});
           for (const cand of candidates) {
             const match = lower[cand.toLowerCase()];
-            if (match) return path.join(pkgDir, match);
+            if (match) {
+              return path.join(pkgDir, match);
+            }
           }
-          return undefined;
-        } catch {
-          return undefined;
-        }
+        } catch {}
       }
 
       const licensePath = await findCandidate(licenseCandidates);
@@ -163,7 +162,9 @@ async function generateLicenses(): Promise<void> {
     // Deduplicate by package name (keep first occurrence)
     const dedupedMap = new Map<string, LicensePackage>();
     for (const p of withTexts) {
-      if (!dedupedMap.has(p.name)) dedupedMap.set(p.name, p);
+      if (!dedupedMap.has(p.name)) {
+        dedupedMap.set(p.name, p);
+      }
     }
     const deduped = Array.from(dedupedMap.values());
 

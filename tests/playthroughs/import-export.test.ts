@@ -32,15 +32,15 @@ describe("usePlaythroughImportExport", () => {
   describe("Export functionality", () => {
     it("should handle export button click without crashing", async () => {
       const mockPlaythrough: Playthrough = {
-        id: "test-id",
-        name: "Test Playthrough",
-        gameMode: "classic",
-        version: "1.0.0",
-        createdAt: 1234567890,
-        updatedAt: 1234567890,
-        team: emptyTeam,
+        createdAt: 1_234_567_890,
         customLocations: [],
         encounters: {},
+        gameMode: "classic",
+        id: "test-id",
+        name: "Test Playthrough",
+        team: emptyTeam,
+        updatedAt: 1_234_567_890,
+        version: "1.0.0",
       };
 
       const { result } = renderHook(() => usePlaythroughImportExport());
@@ -64,15 +64,15 @@ describe("usePlaythroughImportExport", () => {
 
     it("should handle keyboard events correctly", async () => {
       const mockPlaythrough: Playthrough = {
-        id: "test-id",
-        name: "Test Playthrough",
-        gameMode: "classic",
-        version: "1.0.0",
-        createdAt: 1234567890,
-        updatedAt: 1234567890,
-        team: emptyTeam,
+        createdAt: 1_234_567_890,
         customLocations: [],
         encounters: {},
+        gameMode: "classic",
+        id: "test-id",
+        name: "Test Playthrough",
+        team: emptyTeam,
+        updatedAt: 1_234_567_890,
+        version: "1.0.0",
       };
 
       const { result } = renderHook(() => usePlaythroughImportExport());

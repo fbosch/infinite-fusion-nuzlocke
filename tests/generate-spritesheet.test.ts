@@ -8,18 +8,18 @@ import { rectanglesOverlap } from "../scripts/utils/sprite-packing-utils";
 
 function createSprite(overrides: Partial<SpriteInfo> = {}): SpriteInfo {
   return {
+    contentBounds: { height: 20, width: 20, x: 0, y: 0 },
+    exists: true,
+    filename: "pikachu.png",
+    generation: "gen7",
+    height: 20,
     id: 1,
     name: "Pikachu",
-    filename: "pikachu.png",
-    exists: true,
-    generation: "gen7",
-    originalWidth: 20,
     originalHeight: 20,
-    contentBounds: { x: 0, y: 0, width: 20, height: 20 },
+    originalWidth: 20,
+    width: 20,
     x: 0,
     y: 0,
-    width: 20,
-    height: 20,
     ...overrides,
   };
 }
@@ -27,9 +27,9 @@ function createSprite(overrides: Partial<SpriteInfo> = {}): SpriteInfo {
 describe("spritesheet packing policies", () => {
   it("packs valid sprites without moving missing records", () => {
     const sprites = [
-      createSprite({ id: 1, width: 40, height: 20 }),
-      createSprite({ id: 2, width: 20, height: 30 }),
-      createSprite({ id: 3, exists: false, contentBounds: null, x: 9, y: 9 }),
+      createSprite({ height: 20, id: 1, width: 40 }),
+      createSprite({ height: 30, id: 2, width: 20 }),
+      createSprite({ contentBounds: null, exists: false, id: 3, x: 9, y: 9 }),
     ];
 
     const result = packSprites(sprites);
@@ -44,8 +44,8 @@ describe("spritesheet packing policies", () => {
 
   it("repairs a pair by its overlap plus one pixel", () => {
     const sprites = [
-      createSprite({ x: 0, y: 0, width: 10, height: 10 }),
-      createSprite({ id: 2, x: 5, y: 6, width: 10, height: 10 }),
+      createSprite({ height: 10, width: 10, x: 0, y: 0 }),
+      createSprite({ height: 10, id: 2, width: 10, x: 5, y: 6 }),
     ];
 
     expect(fixOverlaps(sprites)).toBe(true);

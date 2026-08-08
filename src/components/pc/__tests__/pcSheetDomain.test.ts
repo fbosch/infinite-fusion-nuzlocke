@@ -20,8 +20,8 @@ const pokemon = (
 
 const encounters: Record<string, EncounterData> = {
   "route-1": {
-    head: pokemon(25, PokemonStatus.DECEASED),
     body: pokemon(1, PokemonStatus.STORED),
+    head: pokemon(25, PokemonStatus.DECEASED),
     isFusion: true,
     updatedAt: 0,
   },
@@ -33,18 +33,18 @@ describe("PC sheet domain", () => {
 
     expect(getDeceasedEntries(encounters, locations)).toMatchObject([
       {
+        body: null,
+        head: { id: 25 },
         locationId: "route-1-head",
         locationName: "Route 1",
-        head: { id: 25 },
-        body: null,
       },
     ]);
     expect(getStoredEntries(encounters, locations)).toMatchObject([
       {
+        body: { id: 1 },
+        head: null,
         locationId: "route-1",
         locationName: "Route 1",
-        head: null,
-        body: { id: 1 },
       },
     ]);
   });

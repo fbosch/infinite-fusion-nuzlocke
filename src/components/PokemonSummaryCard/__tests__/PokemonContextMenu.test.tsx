@@ -29,8 +29,8 @@ vi.mock("@/hooks/useSprite", () => ({
 
 vi.mock("@/stores/playthroughs", () => ({
   playthroughActions: {
-    markEncounterAsDeceased: markEncounterAsDeceasedMock,
     markEncounterAsCaptured: vi.fn(),
+    markEncounterAsDeceased: markEncounterAsDeceasedMock,
     markEncounterAsMissed: vi.fn(),
     markEncounterAsReceived: vi.fn(),
     moveEncounterToBox: vi.fn(),
@@ -48,16 +48,16 @@ describe("PokemonContextMenu", () => {
   it("executes location-bound status actions", async () => {
     render(
       <PokemonContextMenu
-        locationId="route-1"
         encounterData={{
           head: {
             id: 25,
             name: "Pikachu",
-            uid: "pikachu-uid",
             nationalDexId: 25,
+            uid: "pikachu-uid",
           },
           isFusion: false,
         }}
+        locationId="route-1"
       >
         <button type="button">Pikachu</button>
       </PokemonContextMenu>,
@@ -76,17 +76,17 @@ describe("PokemonContextMenu", () => {
   it("does not expose status actions for eggs", () => {
     render(
       <PokemonContextMenu
-        locationId="route-1"
         encounterData={{
           head: {
             id: -1,
             name: "Egg",
-            uid: "egg-uid",
             nationalDexId: 0,
             status: PokemonStatus.CAPTURED,
+            uid: "egg-uid",
           },
           isFusion: false,
         }}
+        locationId="route-1"
       >
         <button type="button">Egg</button>
       </PokemonContextMenu>,

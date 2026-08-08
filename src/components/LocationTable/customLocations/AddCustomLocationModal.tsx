@@ -34,14 +34,16 @@ export default function AddCustomLocationModal({
 
   // Only process locations when modal is open to improve performance
   const allLocations = (() => {
-    if (!isOpen) return [];
+    if (!isOpen) {
+      return [];
+    }
     return getLocationsSortedWithCustom(customLocations);
   })();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!locationName.trim() || !selectedAfterLocationId) {
+    if (!(locationName.trim() && selectedAfterLocationId)) {
       return;
     }
 
@@ -57,91 +59,91 @@ export default function AddCustomLocationModal({
 
   return (
     <Dialog
-      open={isOpen}
+      className="group relative z-[70]"
       onClose={handleClose}
-      className="relative z-[70] group"
+      open={isOpen}
     >
       <DialogBackdrop
-        transition
-        className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"
         aria-hidden="true"
+        className="fixed inset-0 bg-black/30 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/50"
+        transition
       />
 
       <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
         <DialogPanel
-          transition
           className={clsx(
-            "max-w-md w-full space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6",
-            "transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98",
+            "w-full max-w-md space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800",
+            "transition duration-150 ease-out data-closed:scale-98 data-closed:opacity-0",
           )}
+          transition
         >
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl  text-gray-900 dark:text-white">
+            <DialogTitle className="text-gray-900 text-xl dark:text-white">
               Add Custom Location
             </DialogTitle>
             <button
-              type="button"
-              onClick={handleClose}
+              aria-label="Close modal"
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
-                "p-1 rounded-md transition-colors cursor-pointer",
+                "cursor-pointer rounded-md p-1 transition-colors",
               )}
-              aria-label="Close modal"
+              onClick={handleClose}
+              type="button"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          <form className="space-y-4 pt-2" onSubmit={handleSubmit}>
             <div>
               <label
+                className="mb-1 block text-gray-700 text-sm dark:text-gray-300"
                 htmlFor="locationName"
-                className="block text-sm  text-gray-700 dark:text-gray-300 mb-1"
               >
                 Location Name
               </label>
               <input
-                type="text"
-                id="locationName"
-                value={locationName}
-                onChange={(e) => setLocationName(e.target.value)}
-                required
                 className={clsx(
-                  "w-full px-3 py-2 border rounded-md transition-colors",
+                  "w-full rounded-md border px-3 py-2 transition-colors",
                   "border-gray-300 dark:border-gray-600",
                   "bg-white dark:bg-gray-700",
                   "text-gray-900 dark:text-white",
                   "placeholder-gray-500 dark:placeholder-gray-400",
-                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                  "dark:focus:ring-blue-400 dark:focus:border-blue-400",
+                  "focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500",
+                  "dark:focus:border-blue-400 dark:focus:ring-blue-400",
                 )}
+                id="locationName"
+                onChange={(e) => setLocationName(e.target.value)}
                 placeholder="e.g., Hidden Grotto, Secret Cave"
+                required
+                type="text"
+                value={locationName}
               />
             </div>
 
             <div>
               <label
+                className="mb-1 block text-gray-700 text-sm dark:text-gray-300"
                 htmlFor="afterLocation"
-                className="block text-sm  text-gray-700 dark:text-gray-300 mb-1"
               >
                 Place After
               </label>
               <select
-                id="afterLocation"
-                value={selectedAfterLocationId}
-                onChange={(e) => setSelectedAfterLocationId(e.target.value)}
-                required
-                disabled={allLocations.length === 0}
                 className={clsx(
-                  "w-full px-3 py-2 border rounded-md transition-colors cursor-pointer",
+                  "w-full cursor-pointer rounded-md border px-3 py-2 transition-colors",
                   "border-gray-300 dark:border-gray-600",
                   "bg-white dark:bg-gray-700",
                   "text-gray-900 dark:text-white",
-                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                  "dark:focus:ring-blue-400 dark:focus:border-blue-400",
-                  "disabled:opacity-50 disabled:cursor-not-allowed",
+                  "focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500",
+                  "dark:focus:border-blue-400 dark:focus:ring-blue-400",
+                  "disabled:cursor-not-allowed disabled:opacity-50",
                 )}
+                disabled={allLocations.length === 0}
+                id="afterLocation"
+                onChange={(e) => setSelectedAfterLocationId(e.target.value)}
+                required
+                value={selectedAfterLocationId}
               >
                 <option value="">Select location to place after...</option>
                 {allLocations.map((location) => (
@@ -153,17 +155,17 @@ export default function AddCustomLocationModal({
               </select>
             </div>
 
-            <div className="flex pt-4 flex-row-reverse gap-x-3">
+            <div className="flex flex-row-reverse gap-x-3 pt-4">
               <button
-                type="submit"
-                disabled={allLocations.length === 0}
                 className={clsx(
-                  "flex-1 px-4 py-2 text-sm  rounded-md transition-colors",
-                  "bg-blue-600 hover:bg-blue-700 text-white",
+                  "flex-1 rounded-md px-4 py-2 text-sm transition-colors",
+                  "bg-blue-600 text-white hover:bg-blue-700",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                   "flex items-center justify-center space-x-2",
-                  "disabled:opacity-50 disabled:cursor-not-allowed",
+                  "disabled:cursor-not-allowed disabled:opacity-50",
                 )}
+                disabled={allLocations.length === 0}
+                type="submit"
               >
                 {allLocations.length === 0 ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -173,14 +175,14 @@ export default function AddCustomLocationModal({
                 <span>Add Location</span>
               </button>
               <button
-                type="button"
-                onClick={handleClose}
                 className={clsx(
-                  "flex-1 px-4 py-2 text-sm  rounded-md transition-colors",
-                  "bg-gray-100 hover:bg-gray-200 text-gray-900",
-                  "dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100",
+                  "flex-1 rounded-md px-4 py-2 text-sm transition-colors",
+                  "bg-gray-100 text-gray-900 hover:bg-gray-200",
+                  "dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
                 )}
+                onClick={handleClose}
+                type="button"
               >
                 Cancel
               </button>

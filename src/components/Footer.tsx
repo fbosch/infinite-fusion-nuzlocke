@@ -11,52 +11,52 @@ export default function Footer() {
   const [isCreditsOpen, setIsCreditsOpen] = useState(false);
 
   return (
-    <footer className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 mt-8">
-      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <footer className="mt-8 border-gray-200 border-t bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
+      <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
         <div className="space-y-4">
           {/* Top section with button on left and links in center */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex flex-col md:flex-row justify-center space-x-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col justify-center space-x-6 md:flex-row">
               <a
+                className="text-blue-600 text-sm transition-colors duration-200 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                 href="https://discord.gg/infinitefusion"
-                target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm "
+                target="_blank"
               >
                 Join Discord Community
               </a>
               <a
+                className="text-blue-600 text-sm transition-colors duration-200 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                 href="https://infinitefusion.fandom.com/wiki/Pok%C3%A9mon_Infinite_Fusion_Wiki"
-                target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm "
+                target="_blank"
               >
                 Wiki
               </a>
               <a
+                className="text-blue-600 text-sm transition-colors duration-200 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                 href="https://infinitefusiondex.com/"
-                target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm "
+                target="_blank"
               >
                 InfiniteDex
               </a>
               <a
+                className="text-blue-600 text-sm transition-colors duration-200 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                 href="https://www.fusiondex.org/"
-                target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm "
+                target="_blank"
               >
                 FusionDex
               </a>
             </div>
-            <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="flex flex-col items-center gap-3 sm:flex-row">
               <CookieSettingsButton />
             </div>
           </div>
 
           {/* Disclaimer */}
-          <div className="md:text-center text-sm text-gray-600 dark:text-gray-400 space-y-1">
+          <div className="space-y-1 text-gray-600 text-sm md:text-center dark:text-gray-400">
             <p>
               Pokémon and Pokémon character names are trademarks of Nintendo.
             </p>
@@ -72,18 +72,18 @@ export default function Footer() {
           </div>
           <div className="mt-2 md:text-center">
             <button
-              type="button"
-              onClick={() => setIsCreditsOpen(true)}
-              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm cursor-pointer"
-              aria-haspopup="dialog"
               aria-controls="credits-modal"
+              aria-haspopup="dialog"
+              className="cursor-pointer text-blue-600 text-sm transition-colors duration-200 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              onClick={() => setIsCreditsOpen(true)}
+              type="button"
             >
               Credits
             </button>
             <span className="mx-2 text-gray-400">·</span>
             <Link
+              className="text-blue-600 text-sm transition-colors duration-200 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
               href="/licenses"
-              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-sm"
             >
               Open source licenses
             </Link>

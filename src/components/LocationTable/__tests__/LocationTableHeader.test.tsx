@@ -26,11 +26,11 @@ describe("LocationTableHeader", () => {
           headerGroups={
             [
               {
-                id: "header-group",
                 headers: Object.keys(locationTableColumnWidths).map((id) => ({
-                  id,
                   column: { id },
+                  id,
                 })),
+                id: "header-group",
               },
             ] as never
           }

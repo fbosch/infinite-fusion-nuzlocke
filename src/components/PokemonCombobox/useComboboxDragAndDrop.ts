@@ -9,8 +9,8 @@ import { settingsStore } from "@/stores/settings";
 interface UseComboboxDragAndDropProps {
   comboboxId?: string;
   locationId?: string;
-  value: PokemonOptionType | null | undefined;
   onChange: (value: PokemonOptionType | null) => void;
+  value: PokemonOptionType | null | undefined;
 }
 
 // Debounce drag preview updates to reduce expensive operations
@@ -33,9 +33,8 @@ export function useComboboxDragAndDrop({
   const dragLeaveAnimationRef = useRef<number | null>(null);
 
   // Helper function to get location info from combobox ID
-  const getLocationInfo = (id: string) => {
-    return playthroughActions.getLocationFromComboboxId(id);
-  };
+  const getLocationInfo = (id: string) =>
+    playthroughActions.getLocationFromComboboxId(id);
 
   // Helper function to find Pokemon by name
   const findPokemonByName = async (
@@ -50,7 +49,9 @@ export function useComboboxDragAndDrop({
         (p) => nameMap.get(p.id)?.toLowerCase() === pokemonName.toLowerCase(),
       );
 
-      if (!foundPokemon) return null;
+      if (!foundPokemon) {
+        return null;
+      }
 
       return {
         id: foundPokemon.id,
@@ -70,7 +71,7 @@ export function useComboboxDragAndDrop({
 
   // Helper function to perform move operations
   const performMoveOperation = (pokemon: PokemonOptionType) => {
-    if (!dragSnapshot.currentDragSource || !comboboxId) {
+    if (!(dragSnapshot.currentDragSource && comboboxId)) {
       onChange(pokemon);
       return;
     }
@@ -79,25 +80,27 @@ export function useComboboxDragAndDrop({
     const targetLocation = getLocationInfo(comboboxId);
 
     playthroughActions.relocateEncounterSlot({
-      sourceLocationId: sourceLocation.locationId,
       sourceField: sourceLocation.field,
-      targetLocationId: targetLocation.locationId,
+      sourceLocationId: sourceLocation.locationId,
       targetField: targetLocation.field,
+      targetLocationId: targetLocation.locationId,
     });
   };
 
   // Helper function to perform swap operations
   const performSwapOperation = () => {
-    if (!dragSnapshot.currentDragSource || !comboboxId) return;
+    if (!(dragSnapshot.currentDragSource && comboboxId)) {
+      return;
+    }
 
     const sourceLocation = getLocationInfo(dragSnapshot.currentDragSource);
     const targetLocation = getLocationInfo(comboboxId);
 
     playthroughActions.relocateEncounterSlot({
-      sourceLocationId: sourceLocation.locationId,
       sourceField: sourceLocation.field,
-      targetLocationId: targetLocation.locationId,
+      sourceLocationId: sourceLocation.locationId,
       targetField: targetLocation.field,
+      targetLocationId: targetLocation.locationId,
     });
   };
 
@@ -137,7 +140,9 @@ export function useComboboxDragAndDrop({
     setDragPreview(null);
 
     const pokemonName = e.dataTransfer.getData("text/plain");
-    if (!pokemonName) return;
+    if (!pokemonName) {
+      return;
+    }
 
     // Preserve the drag value that initiated this drop while async lookup runs.
     const dragValue = dragStore.currentDragValue;
@@ -148,7 +153,9 @@ export function useComboboxDragAndDrop({
       let pokemon = dragValue;
       if (!pokemon) {
         pokemon = await findPokemonByName(pokemonName, dragValue);
-        if (!pokemon) return;
+        if (!pokemon) {
+          return;
+        }
       }
       onChange(pokemon);
       return;
@@ -164,7 +171,9 @@ export function useComboboxDragAndDrop({
     let pokemon = dragValue;
     if (!pokemon) {
       pokemon = await findPokemonByName(pokemonName, dragValue);
-      if (!pokemon) return;
+      if (!pokemon) {
+        return;
+      }
     }
 
     // Perform move or set operation
@@ -188,7 +197,7 @@ export function useComboboxDragAndDrop({
     e.stopPropagation();
 
     // If move operations are disabled, show appropriate drop effect
-    if (!settings.moveEncountersBetweenLocations) {
+    if (settings.moveEncountersBetweenLocations) {
       e.dataTransfer.dropEffect = "copy";
     } else {
       e.dataTransfer.dropEffect = "copy";
@@ -201,7 +210,7 @@ export function useComboboxDragAndDrop({
     }
 
     // Early exit if no drag data
-    if (!dragSnapshot.currentDragValue && !dragSnapshot.currentDragData) {
+    if (!(dragSnapshot.currentDragValue || dragSnapshot.currentDragData)) {
       return;
     }
 
@@ -261,8 +270,8 @@ export function useComboboxDragAndDrop({
   };
 
   // Clean up timeouts on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (dragLeaveAnimationRef.current !== null) {
         clearTimeout(dragLeaveAnimationRef.current);
       }
@@ -270,14 +279,15 @@ export function useComboboxDragAndDrop({
         clearTimeout(dragPreviewTimeout);
         dragPreviewTimeout = null;
       }
-    };
-  }, []);
+    },
+    [],
+  );
 
   return {
     dragPreview,
-    handleDrop,
-    handleDragOver,
-    handleDragLeave,
     handleDragEnd,
+    handleDragLeave,
+    handleDragOver,
+    handleDrop,
   };
 }

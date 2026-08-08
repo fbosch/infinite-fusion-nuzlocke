@@ -113,7 +113,7 @@ export const prefetchAdjacentVariants = async (
 // fallow-ignore-next-line unused-export, complexity
 export const cycleArtworkVariant = async (
   locationId: string,
-  reverse: boolean = false,
+  reverse = false,
 ) => {
   const activePlaythrough = ensureActivePlaythroughWithEncounters();
   if (!activePlaythrough) {

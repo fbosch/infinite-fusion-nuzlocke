@@ -40,7 +40,7 @@ const createBreakpointStore = () => {
     listeners.forEach((listener) => listener());
   };
 
-  return { subscribe, getSnapshot };
+  return { getSnapshot, subscribe };
 };
 
 // Create singleton store instance

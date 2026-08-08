@@ -36,7 +36,7 @@ function getTeamSlot(
   encounters: Record<string, EncounterData> | null | undefined,
   pokemonByUid: PokemonUidIndex,
 ): TeamSlot {
-  if (!member?.headPokemonUid && !member?.bodyPokemonUid) {
+  if (!(member?.headPokemonUid || member?.bodyPokemonUid)) {
     return createEmptyTeamSlot(position);
   }
 
@@ -52,12 +52,12 @@ function getTeamSlot(
   );
 
   return {
-    position,
-    isEmpty: false,
-    locationName: getTeamSlotLocationName(headPokemon, bodyPokemon),
-    headPokemon,
     bodyPokemon,
+    headPokemon,
+    isEmpty: false,
     isFusion: Boolean(headPokemon && bodyPokemon),
+    locationName: getTeamSlotLocationName(headPokemon, bodyPokemon),
+    position,
   };
 }
 
@@ -80,11 +80,11 @@ function getTeamSlotLocationName(
 
 function createEmptyTeamSlot(position: number): TeamSlot {
   return {
-    position,
-    isEmpty: true,
-    locationName: `Team Slot ${position + 1}`,
-    headPokemon: null,
     bodyPokemon: null,
+    headPokemon: null,
+    isEmpty: true,
     isFusion: false,
+    locationName: `Team Slot ${position + 1}`,
+    position,
   };
 }

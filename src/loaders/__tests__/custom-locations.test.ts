@@ -13,22 +13,22 @@ import {
 // Mock data for testing
 const mockDefaultLocations: Location[] = [
   {
+    description: "Starting town",
     id: "pallet-town",
     name: "Pallet Town",
     region: "Kanto",
-    description: "Starting town",
   },
   {
+    description: "First route",
     id: "route-1",
     name: "Route 1",
     region: "Kanto",
-    description: "First route",
   },
   {
+    description: "Green city",
     id: "viridian-city",
     name: "Viridian City",
     region: "Kanto",
-    description: "Green city",
   },
 ];
 
@@ -54,13 +54,13 @@ describe("Custom Location Functionality", () => {
       const customLocations: CustomLocation[] = [
         {
           id: "custom-1",
-          name: "Custom Route A",
           insertAfterLocationId: "route-1",
+          name: "Custom Route A",
         },
         {
           id: "custom-2",
-          name: "Custom Route B",
           insertAfterLocationId: "viridian-city",
+          name: "Custom Route B",
         },
       ];
 
@@ -86,8 +86,8 @@ describe("Custom Location Functionality", () => {
       const customLocations: CustomLocation[] = [
         {
           id: "custom-1",
-          name: "Custom Route A",
           insertAfterLocationId: "route-1",
+          name: "Custom Route A",
         },
       ];
 
@@ -106,11 +106,11 @@ describe("Custom Location Functionality", () => {
     it("should identify custom locations", () => {
       const defaultLocation = mockDefaultLocations[0];
       const customLocation = {
+        description: "Custom location",
         id: "custom-1",
+        isCustom: true as const,
         name: "Custom",
         region: "Custom",
-        description: "Custom location",
-        isCustom: true as const,
       };
 
       expect(isCustomLocation(defaultLocation)).toBe(false);
@@ -119,10 +119,10 @@ describe("Custom Location Functionality", () => {
 
     it("should return false for locations without isCustom flag", () => {
       const normalLocation = {
+        description: "Test location",
         id: "test",
         name: "Test",
         region: "Kanto",
-        description: "Test location",
       };
 
       expect(isCustomLocation(normalLocation as any)).toBe(false);
@@ -134,13 +134,13 @@ describe("Custom Location Functionality", () => {
       const customLocations: CustomLocation[] = [
         {
           id: "custom-1",
-          name: "Custom Route A",
           insertAfterLocationId: "route-1",
+          name: "Custom Route A",
         },
         {
           id: "custom-2",
-          name: "Custom Route B",
           insertAfterLocationId: "custom-1",
+          name: "Custom Route B",
         },
       ];
 
@@ -167,11 +167,11 @@ describe("Custom Location Functionality", () => {
       const customLocations: CustomLocation[] = [
         {
           id: "custom-1",
-          name: "Custom A",
           insertAfterLocationId: "pallet-town",
+          name: "Custom A",
         },
-        { id: "custom-2", name: "Custom B", insertAfterLocationId: "custom-1" },
-        { id: "custom-3", name: "Custom C", insertAfterLocationId: "custom-2" },
+        { id: "custom-2", insertAfterLocationId: "custom-1", name: "Custom B" },
+        { id: "custom-3", insertAfterLocationId: "custom-2", name: "Custom C" },
       ];
 
       const merged = mergeLocationsWithCustom(
@@ -200,8 +200,8 @@ describe("Custom Location Functionality", () => {
 
     it("should handle circular dependencies gracefully", () => {
       const customLocations: CustomLocation[] = [
-        { id: "custom-1", name: "Custom A", insertAfterLocationId: "custom-2" },
-        { id: "custom-2", name: "Custom B", insertAfterLocationId: "custom-1" },
+        { id: "custom-1", insertAfterLocationId: "custom-2", name: "Custom A" },
+        { id: "custom-2", insertAfterLocationId: "custom-1", name: "Custom B" },
       ];
 
       // Capture console.warn calls
@@ -232,10 +232,10 @@ describe("Custom Location Functionality", () => {
       const customLocations: CustomLocation[] = [
         {
           id: "custom-1",
-          name: "Custom A",
           insertAfterLocationId: "non-existent-id",
+          name: "Custom A",
         },
-        { id: "custom-2", name: "Custom B", insertAfterLocationId: "route-1" }, // This should work
+        { id: "custom-2", insertAfterLocationId: "route-1", name: "Custom B" }, // This should work
       ];
 
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -265,14 +265,14 @@ describe("Custom Location Functionality", () => {
 
     it("should handle mixed valid and invalid dependencies", () => {
       const customLocations: CustomLocation[] = [
-        { id: "custom-1", name: "Custom A", insertAfterLocationId: "route-1" }, // Valid
-        { id: "custom-2", name: "Custom B", insertAfterLocationId: "custom-1" }, // Valid (depends on A)
+        { id: "custom-1", insertAfterLocationId: "route-1", name: "Custom A" }, // Valid
+        { id: "custom-2", insertAfterLocationId: "custom-1", name: "Custom B" }, // Valid (depends on A)
         {
           id: "custom-3",
-          name: "Custom C",
           insertAfterLocationId: "non-existent",
+          name: "Custom C",
         }, // Invalid
-        { id: "custom-4", name: "Custom D", insertAfterLocationId: "custom-2" }, // Valid (depends on B)
+        { id: "custom-4", insertAfterLocationId: "custom-2", name: "Custom D" }, // Valid (depends on B)
       ];
 
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -307,18 +307,18 @@ describe("Custom Location Functionality", () => {
         const customLocations: CustomLocation[] = [
           {
             id: "custom-A",
-            name: "Custom A",
             insertAfterLocationId: "route-1",
+            name: "Custom A",
           },
           {
             id: "custom-B",
-            name: "Custom B",
             insertAfterLocationId: "custom-A",
+            name: "Custom B",
           },
           {
             id: "custom-C",
-            name: "Custom C",
             insertAfterLocationId: "custom-B",
+            name: "Custom C",
           },
         ];
 
@@ -346,23 +346,23 @@ describe("Custom Location Functionality", () => {
         const customLocations: CustomLocation[] = [
           {
             id: "custom-A",
-            name: "Custom A",
             insertAfterLocationId: "route-1",
+            name: "Custom A",
           },
           {
             id: "custom-B",
-            name: "Custom B",
             insertAfterLocationId: "custom-A",
+            name: "Custom B",
           },
           {
             id: "custom-C",
-            name: "Custom C",
             insertAfterLocationId: "custom-B",
+            name: "Custom C",
           },
           {
             id: "custom-D",
-            name: "Custom D",
             insertAfterLocationId: "custom-C",
+            name: "Custom D",
           },
         ];
 
@@ -393,23 +393,23 @@ describe("Custom Location Functionality", () => {
         const customLocations: CustomLocation[] = [
           {
             id: "custom-A",
-            name: "Custom A",
             insertAfterLocationId: "route-1",
+            name: "Custom A",
           },
           {
             id: "custom-B",
-            name: "Custom B",
             insertAfterLocationId: "custom-A",
+            name: "Custom B",
           },
           {
             id: "custom-C",
-            name: "Custom C",
             insertAfterLocationId: "custom-A",
+            name: "Custom C",
           },
           {
             id: "custom-D",
-            name: "Custom D",
             insertAfterLocationId: "custom-A",
+            name: "Custom D",
           },
         ];
 
@@ -435,8 +435,8 @@ describe("Custom Location Functionality", () => {
         const customLocations: CustomLocation[] = [
           {
             id: "custom-A",
-            name: "Custom A",
             insertAfterLocationId: "route-1",
+            name: "Custom A",
           },
         ];
 
@@ -454,18 +454,18 @@ describe("Custom Location Functionality", () => {
         const customLocations: CustomLocation[] = [
           {
             id: "custom-A",
-            name: "Custom A",
             insertAfterLocationId: "route-1",
+            name: "Custom A",
           },
           {
             id: "custom-B",
-            name: "Custom B",
             insertAfterLocationId: "custom-A",
+            name: "Custom B",
           },
           {
             id: "custom-C",
-            name: "Custom C",
             insertAfterLocationId: "route-1",
+            name: "Custom C",
           },
         ];
 
@@ -482,23 +482,23 @@ describe("Custom Location Functionality", () => {
         const customLocations: CustomLocation[] = [
           {
             id: "custom-A",
-            name: "Custom A",
             insertAfterLocationId: "route-1",
+            name: "Custom A",
           },
           {
             id: "custom-B",
-            name: "Custom B",
             insertAfterLocationId: "custom-A",
+            name: "Custom B",
           },
           {
             id: "custom-C",
-            name: "Custom C",
             insertAfterLocationId: "custom-B",
+            name: "Custom C",
           },
           {
             id: "custom-D",
-            name: "Custom D",
             insertAfterLocationId: "custom-C",
+            name: "Custom D",
           },
         ];
 
@@ -519,23 +519,23 @@ describe("Custom Location Functionality", () => {
         const customLocations: CustomLocation[] = [
           {
             id: "custom-A",
-            name: "Custom A",
             insertAfterLocationId: "route-1",
+            name: "Custom A",
           },
           {
             id: "custom-B",
-            name: "Custom B",
             insertAfterLocationId: "custom-A",
+            name: "Custom B",
           },
           {
             id: "custom-C",
-            name: "Custom C",
             insertAfterLocationId: "custom-A",
+            name: "Custom C",
           },
           {
             id: "custom-D",
-            name: "Custom D",
             insertAfterLocationId: "custom-A",
+            name: "Custom D",
           },
         ];
 
@@ -556,28 +556,28 @@ describe("Custom Location Functionality", () => {
         const customLocations: CustomLocation[] = [
           {
             id: "custom-A",
-            name: "Custom A",
             insertAfterLocationId: "route-1",
+            name: "Custom A",
           },
           {
             id: "custom-B",
-            name: "Custom B",
             insertAfterLocationId: "custom-A",
+            name: "Custom B",
           },
           {
             id: "custom-C",
-            name: "Custom C",
             insertAfterLocationId: "custom-A",
+            name: "Custom C",
           },
           {
             id: "custom-D",
-            name: "Custom D",
             insertAfterLocationId: "custom-B",
+            name: "Custom D",
           },
           {
             id: "custom-E",
-            name: "Custom E",
             insertAfterLocationId: "custom-C",
+            name: "Custom E",
           },
         ];
 
@@ -599,13 +599,13 @@ describe("Custom Location Functionality", () => {
         const customLocations: CustomLocation[] = [
           {
             id: "custom-A",
-            name: "Custom A",
             insertAfterLocationId: "route-1",
+            name: "Custom A",
           },
           {
             id: "custom-B",
-            name: "Custom B",
             insertAfterLocationId: "route-1",
+            name: "Custom B",
           },
         ];
 
@@ -621,13 +621,13 @@ describe("Custom Location Functionality", () => {
         const customLocations: CustomLocation[] = [
           {
             id: "custom-A",
-            name: "Custom A",
             insertAfterLocationId: "custom-B",
+            name: "Custom A",
           },
           {
             id: "custom-B",
-            name: "Custom B",
             insertAfterLocationId: "custom-A",
+            name: "Custom B",
           },
         ];
 
@@ -648,13 +648,13 @@ describe("Custom Location Functionality", () => {
         const customLocations: CustomLocation[] = [
           {
             id: "custom-A",
-            name: "Custom A",
             insertAfterLocationId: "route-1",
+            name: "Custom A",
           },
           {
             id: "custom-B",
-            name: "Custom B",
             insertAfterLocationId: "custom-A",
+            name: "Custom B",
           },
         ];
 
@@ -669,13 +669,13 @@ describe("Custom Location Functionality", () => {
         const customLocations: CustomLocation[] = [
           {
             id: "custom-A",
-            name: "Custom A",
             insertAfterLocationId: "route-1",
+            name: "Custom A",
           },
           {
             id: "custom-B",
-            name: "Custom B",
             insertAfterLocationId: "route-1",
+            name: "Custom B",
           },
         ];
 
@@ -689,18 +689,18 @@ describe("Custom Location Functionality", () => {
         const customLocations: CustomLocation[] = [
           {
             id: "custom-A",
-            name: "Custom A",
             insertAfterLocationId: "route-1",
+            name: "Custom A",
           },
           {
             id: "custom-B",
-            name: "Custom B",
             insertAfterLocationId: "custom-A",
+            name: "Custom B",
           },
           {
             id: "custom-C",
-            name: "Custom C",
             insertAfterLocationId: "custom-B",
+            name: "Custom C",
           },
         ];
 

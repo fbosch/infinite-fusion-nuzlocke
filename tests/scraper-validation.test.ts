@@ -7,13 +7,13 @@ import { beforeAll, describe, expect, it } from "vitest";
 import type { EncounterType } from "../scripts/types/encounters";
 
 interface PokemonEncounter {
-  pokemonId: number;
   encounterType: EncounterType;
+  pokemonId: number;
 }
 
 interface RouteEncounters {
-  routeName: string;
   encounters: PokemonEncounter[];
+  routeName: string;
 }
 
 describe("Mt. Moon Scraping Validation", () => {

@@ -52,15 +52,15 @@ const getMimeGroup = (mimeType?: string): MimeGroup => {
 const createFileContext = (file?: File): ImportFileContext => {
   if (!file) {
     return {
-      hasFile: false,
       fileExtensionGroup: "other",
+      hasFile: false,
       mimeGroup: "empty",
     };
   }
 
   return {
-    hasFile: true,
     fileExtensionGroup: getFileExtensionGroup(file.name),
+    hasFile: true,
     mimeGroup: getMimeGroup(file.type),
   };
 };
@@ -113,11 +113,11 @@ const trackImportFailure = async ({
 
   trackEvent("playthrough_import_failed", {
     ...getSharedEventProperties(analyticsPlaythrough),
-    import_source: IMPORT_SOURCE,
-    failure_stage: failureStage,
     error_category: errorCategory,
-    has_file: fileContext.hasFile,
+    failure_stage: failureStage,
     file_extension_group: fileContext.fileExtensionGroup,
+    has_file: fileContext.hasFile,
+    import_source: IMPORT_SOURCE,
     mime_group: fileContext.mimeGroup,
   });
 };
@@ -137,8 +137,8 @@ const trackImportSuccess = async ({
 
   trackEvent("playthrough_imported", {
     ...getSharedEventProperties(analyticsPlaythrough),
-    import_source: IMPORT_SOURCE,
     file_extension_group: fileContext.fileExtensionGroup,
+    import_source: IMPORT_SOURCE,
     mime_group: fileContext.mimeGroup,
   });
 };
@@ -146,19 +146,19 @@ const trackImportSuccess = async ({
 export const exportPlaythrough = (playthrough: Playthrough) => {
   try {
     const exportData: ExportedPlaythrough = {
-      version: "1.0.0",
       exportedAt: new Date().toISOString(),
       playthrough: {
-        id: playthrough.id,
-        name: playthrough.name,
-        gameMode: playthrough.gameMode as GameMode,
         createdAt: playthrough.createdAt,
-        updatedAt: playthrough.updatedAt,
-        version: playthrough.version || "1.0.0",
         customLocations: playthrough.customLocations,
         encounters: playthrough.encounters,
+        gameMode: playthrough.gameMode as GameMode,
+        id: playthrough.id,
+        name: playthrough.name,
         team: playthrough.team,
+        updatedAt: playthrough.updatedAt,
+        version: playthrough.version || "1.0.0",
       },
+      version: "1.0.0",
     };
 
     const jsonString = JSON.stringify(exportData, null, 2);
@@ -189,11 +189,11 @@ export const importPlaythroughFile = async (
   try {
     if (!file.name.toLowerCase().endsWith(".json")) {
       await trackImportFailure({
-        failureStage: "file_selection",
         errorCategory: "unsupported_file_type",
+        failureStage: "file_selection",
         fileContext,
       });
-      return { ok: false, errorMessage: "File must have a .json extension" };
+      return { errorMessage: "File must have a .json extension", ok: false };
     }
 
     if (
@@ -202,11 +202,11 @@ export const importPlaythroughFile = async (
       file.type !== "text/plain"
     ) {
       await trackImportFailure({
-        failureStage: "file_selection",
         errorCategory: "unsupported_file_type",
+        failureStage: "file_selection",
         fileContext,
       });
-      return { ok: false, errorMessage: "File is not a valid JSON file" };
+      return { errorMessage: "File is not a valid JSON file", ok: false };
     }
 
     importFailureStage = "file_read";
@@ -218,18 +218,18 @@ export const importPlaythroughFile = async (
       data = JSON.parse(text);
     } catch {
       await trackImportFailure({
-        failureStage: importFailureStage,
         errorCategory: "invalid_json",
+        failureStage: importFailureStage,
         fileContext,
       });
-      return { ok: false, errorMessage: "Invalid JSON syntax" };
+      return { errorMessage: "Invalid JSON syntax", ok: false };
     }
 
     importFailureStage = "store_import";
     const newId = await playthroughActions.importPlaythrough(data);
     await trackImportSuccess({
-      playthroughId: newId,
       fileContext,
+      playthroughId: newId,
     });
 
     return { ok: true };
@@ -257,19 +257,19 @@ export const importPlaythroughFile = async (
     }
 
     await trackImportFailure({
-      failureStage: importFailureStage,
       errorCategory: importErrorCategory,
+      failureStage: importFailureStage,
       fileContext,
     });
 
-    return { ok: false, errorMessage };
+    return { errorMessage, ok: false };
   }
 };
 
 export const trackImportPickerFailure = async () => {
   await trackImportFailure({
-    failureStage: "unknown",
     errorCategory: "unexpected",
+    failureStage: "unknown",
     fileContext: createFileContext(),
   });
 };

@@ -61,7 +61,7 @@ export const trackFusionCreatedIfNew = (
 
   trackEvent("fusion_created", {
     ...getSharedEventProperties(activePlaythrough),
-    location_id: locationId,
     creation_method: creationMethod,
+    location_id: locationId,
   });
 };

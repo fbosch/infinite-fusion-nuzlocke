@@ -23,8 +23,8 @@ export function useLocationTableVirtualization({
   // react-doctor-disable-next-line react-hooks-js/incompatible-library -- TanStack Virtual owns imperative scroll state outside compiler memoization.
   const rowVirtualizer = useVirtualizer({
     count: tableRows.length,
-    getScrollElement: () => tableContainerRef.current,
     estimateSize: () => LOCATION_ROW_HEIGHT_PX,
+    getScrollElement: () => tableContainerRef.current,
     overscan: LOCATION_ROW_OVERSCAN_COUNT,
   });
   const virtualRows = rowVirtualizer.getVirtualItems();
@@ -39,10 +39,14 @@ export function useLocationTableVirtualization({
         const index = tableRows.findIndex(
           (row) => row.original.id === locationId,
         );
-        if (index < 0) return false;
+        if (index < 0) {
+          return false;
+        }
 
         rowVirtualizer.scrollToIndex(index, { align: "center", behavior });
-        if (!highlightUids?.length) return true;
+        if (!highlightUids?.length) {
+          return true;
+        }
 
         const flash = () =>
           flashPokemonOverlaysByUids(highlightUids, durationMs);

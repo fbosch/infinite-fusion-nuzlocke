@@ -17,7 +17,9 @@ export const applyEncounterDefaultStatus = (
   sources: EncounterSource[],
 ): PokemonOptionType => {
   if (sources.includes(EncounterSource.GIFT)) {
-    if (pokemon.status === PokemonStatus.RECEIVED) return pokemon;
+    if (pokemon.status === PokemonStatus.RECEIVED) {
+      return pokemon;
+    }
     return {
       ...pokemon,
       status: PokemonStatus.RECEIVED,
@@ -25,7 +27,9 @@ export const applyEncounterDefaultStatus = (
   }
 
   if (sources.includes(EncounterSource.TRADE)) {
-    if (pokemon.status === PokemonStatus.TRADED) return pokemon;
+    if (pokemon.status === PokemonStatus.TRADED) {
+      return pokemon;
+    }
     return {
       ...pokemon,
       status: PokemonStatus.TRADED,

@@ -88,18 +88,18 @@ export type GenerationConfig = {
 
 const GENERATIONS: GenerationConfig[] = [
   {
+    metadataFilename: "pokemon-gen7-spritesheet-metadata.json",
     name: "gen7",
-    spritesDir: GEN7_SPRITES_DIR,
     outputFilename: "pokemon-gen7-spritesheet.webp",
     outputFormat: "webp",
-    metadataFilename: "pokemon-gen7-spritesheet-metadata.json",
+    spritesDir: GEN7_SPRITES_DIR,
   },
   {
+    metadataFilename: "pokemon-gen8-spritesheet-metadata.json",
     name: "gen8",
-    spritesDir: GEN8_SPRITES_DIR,
     outputFilename: "pokemon-gen8-spritesheet.webp",
     outputFormat: "webp",
-    metadataFilename: "pokemon-gen8-spritesheet-metadata.json",
+    spritesDir: GEN8_SPRITES_DIR,
   },
 ];
 
@@ -131,7 +131,7 @@ class BinPacker {
   private root: Rectangle;
 
   constructor(width: number, height: number) {
-    this.root = { x: 0, y: 0, width, height, used: false };
+    this.root = { height, used: false, width, x: 0, y: 0 };
   }
 
   pack(width: number, height: number): Rectangle | null {
@@ -152,7 +152,8 @@ class BinPacker {
         this.findNode(root.right!, width, height) ||
         this.findNode(root.down!, width, height)
       );
-    } else if (width <= root.width && height <= root.height) {
+    }
+    if (width <= root.width && height <= root.height) {
       return root;
     }
     return null;
@@ -163,29 +164,29 @@ class BinPacker {
 
     // Create the down rectangle (below the placed sprite)
     node.down = {
-      x: node.x,
-      y: node.y + height,
-      width: node.width,
       height: node.height - height,
       used: false,
+      width: node.width,
+      x: node.x,
+      y: node.y + height,
     };
 
     // Create the right rectangle (to the right of the placed sprite)
     node.right = {
+      height,
+      used: false,
+      width: node.width - width,
       x: node.x + width,
       y: node.y,
-      width: node.width - width,
-      height: height,
-      used: false,
     };
 
     // Return the node with the exact dimensions requested
     return {
-      x: node.x,
-      y: node.y,
-      width,
       height,
       used: true,
+      width,
+      x: node.x,
+      y: node.y,
     };
   }
 
@@ -203,15 +204,19 @@ class BinPacker {
       const actualHeight = node.down ? node.down.y - node.y : node.height;
 
       rectangles.push({
-        x: node.x,
-        y: node.y,
-        width: actualWidth,
         height: actualHeight,
         used: true,
+        width: actualWidth,
+        x: node.x,
+        y: node.y,
       });
 
-      if (node.right) this.collectRectangles(node.right, rectangles);
-      if (node.down) this.collectRectangles(node.down, rectangles);
+      if (node.right) {
+        this.collectRectangles(node.right, rectangles);
+      }
+      if (node.down) {
+        this.collectRectangles(node.down, rectangles);
+      }
     }
   }
 }
@@ -269,10 +274,10 @@ async function analyzeSpriteContent(
 
     // Return exact content bounds without padding
     return {
+      height: maxY - minY + 1,
+      width: maxX - minX + 1,
       x: minX,
       y: minY,
-      width: maxX - minX + 1,
-      height: maxY - minY + 1,
     };
   } catch {
     return null;
@@ -323,9 +328,7 @@ async function loadSpriteData(
   // Load Pokemon entries
   const entriesData = await ConsoleFormatter.withSpinner(
     "Loading Pokemon entries...",
-    async () => {
-      return loadJsonFile(BASE_ENTRIES_PATH, BasePokemonEntrySchema.array());
-    },
+    async () => loadJsonFile(BASE_ENTRIES_PATH, BasePokemonEntrySchema.array()),
   );
 
   ConsoleFormatter.success(`Loaded ${entriesData.length} Pokemon entries`);
@@ -362,52 +365,52 @@ async function loadSpriteData(
         foundCount++;
 
         spriteInfos.push({
+          contentBounds,
+          exists: true,
+          filename,
+          generation: generation.name,
+          height: contentBounds.height,
           id: entry.id,
           name: entry.name,
-          filename,
-          exists: true,
-          generation: generation.name,
-          originalWidth,
           originalHeight,
-          contentBounds,
+          originalWidth,
+          width: contentBounds.width,
           x: 0, // Will be set during packing
           y: 0,
-          width: contentBounds.width,
-          height: contentBounds.height,
         });
       } else {
         // Transparent or invalid sprite
         missingCount++;
         spriteInfos.push({
+          contentBounds: null,
+          exists: false,
+          filename,
+          generation: generation.name,
+          height: 0,
           id: entry.id,
           name: entry.name,
-          filename,
-          exists: false,
-          generation: generation.name,
-          originalWidth,
           originalHeight,
-          contentBounds: null,
+          originalWidth,
+          width: 0,
           x: 0,
           y: 0,
-          width: 0,
-          height: 0,
         });
       }
     } else {
       missingCount++;
       spriteInfos.push({
+        contentBounds: null,
+        exists: false,
+        filename: "",
+        generation: generation.name,
+        height: 0,
         id: entry.id,
         name: entry.name,
-        filename: "",
-        exists: false,
-        generation: generation.name,
-        originalWidth: 0,
         originalHeight: 0,
-        contentBounds: null,
+        originalWidth: 0,
+        width: 0,
         x: 0,
         y: 0,
-        width: 0,
-        height: 0,
       });
     }
 
@@ -449,7 +452,7 @@ export function packSprites(sprites: SpriteInfo[]): {
   // Sort by height descending, then by width descending (improves packing efficiency)
   validSprites.sort((a, b) => {
     const heightDiff = b.height - a.height;
-    return heightDiff !== 0 ? heightDiff : b.width - a.width;
+    return heightDiff === 0 ? b.width - a.width : heightDiff;
   });
 
   const packedBounds = packWithGrowingCanvas(validSprites);
@@ -466,7 +469,7 @@ export function packSprites(sprites: SpriteInfo[]): {
   );
   ConsoleFormatter.info(`Packing efficiency: ${efficiency.toFixed(1)}%`);
 
-  return { width: canvasWidth, height: canvasHeight, efficiency };
+  return { efficiency, height: canvasHeight, width: canvasWidth };
 }
 
 function packWithGrowingCanvas(sprites: SpriteInfo[]): {
@@ -546,7 +549,9 @@ function resolvePackedOverlaps(
  */
 function validateNoOverlap(sprites: SpriteInfo[]): boolean {
   const overlap = findFirstOverlappingPair(sprites);
-  if (!overlap) return false;
+  if (!overlap) {
+    return false;
+  }
 
   const [a, b] = overlap;
   ConsoleFormatter.error(`Overlap detected between ${a.name} and ${b.name}`);
@@ -578,8 +583,12 @@ export function fixOverlaps(sprites: SpriteInfo[]): boolean {
       const overlapX = Math.max(0, a.x + a.width - b.x);
       const overlapY = Math.max(0, a.y + a.height - b.y);
 
-      if (overlapX > 0) b.x += overlapX + 1;
-      if (overlapY > 0) b.y += overlapY + 1;
+      if (overlapX > 0) {
+        b.x += overlapX + 1;
+      }
+      if (overlapY > 0) {
+        b.y += overlapY + 1;
+      }
       return false;
     });
 
@@ -606,7 +615,7 @@ function applyAggressiveOverlapSpacing(sprites: SpriteInfo[]): void {
   for (let index = 1; index < sprites.length; index += 1) {
     const previous = sprites[index - 1];
     const current = sprites[index];
-    if (!previous || !current) {
+    if (!(previous && current)) {
       continue;
     }
     current.x = Math.max(current.x, previous.x + previous.width + 1);
@@ -645,10 +654,10 @@ async function generateSpritesheet(
   // Create base image
   const baseImage = sharp({
     create: {
-      width: sheetWidth,
-      height: sheetHeight,
+      background: { alpha: 0, b: 0, g: 0, r: 0 },
       channels: 4,
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
+      height: sheetHeight,
+      width: sheetWidth,
     },
   });
 
@@ -658,7 +667,9 @@ async function generateSpritesheet(
 
   for (let i = 0; i < validSprites.length; i++) {
     const sprite = validSprites[i];
-    if (!sprite.contentBounds) continue;
+    if (!sprite.contentBounds) {
+      continue;
+    }
 
     try {
       const spritePath = path.join(generation.spritesDir, sprite.filename);
@@ -666,15 +677,15 @@ async function generateSpritesheet(
       // Extract only the content area from the original sprite
       const croppedSprite = await sharp(spritePath)
         .extract({
+          height: Math.min(
+            sprite.contentBounds.height,
+            sprite.originalHeight - sprite.contentBounds.y,
+          ),
           left: Math.max(0, sprite.contentBounds.x),
           top: Math.max(0, sprite.contentBounds.y),
           width: Math.min(
             sprite.contentBounds.width,
             sprite.originalWidth - sprite.contentBounds.x,
-          ),
-          height: Math.min(
-            sprite.contentBounds.height,
-            sprite.originalHeight - sprite.contentBounds.y,
           ),
         })
         .png()
@@ -708,7 +719,7 @@ async function generateSpritesheet(
   const spritesheet = baseImage.composite(compositeOps);
   if (generation.outputFormat === "webp") {
     await spritesheet
-      .webp({ lossless: true, effort: 6 })
+      .webp({ effort: 6, lossless: true })
       .toFile(spritesheetPath);
   } else {
     await spritesheet.png({ compressionLevel: 9 }).toFile(spritesheetPath);
@@ -722,14 +733,14 @@ async function generateSpritesheet(
     "spritesheetVersion"
   > = {
     algorithm: "compact-bin-packing",
-    version: "2.0",
     generation: generation.name,
-    totalSprites: spriteInfos.length,
     includedSprites: validSprites.length,
-    sheetWidth,
     sheetHeight,
+    sheetWidth,
     spaceEfficiency: efficiency,
     sprites: spriteInfos, // Include all sprites, even missing ones for order preservation
+    totalSprites: spriteInfos.length,
+    version: "2.0",
   };
   const metadata: SpritesheetMetadata = {
     ...metadataWithoutVersion,
@@ -808,51 +819,51 @@ async function generateGenerationSpritesheet(
       `${generation.name.toUpperCase()} Compact Spritesheet Generation Complete!`,
       [
         {
+          color: "cyan",
           label: "Generation",
           value: generation.name.toUpperCase(),
-          color: "cyan",
         },
-        { label: "Total Pokemon", value: spriteInfos.length, color: "blue" },
+        { color: "blue", label: "Total Pokemon", value: spriteInfos.length },
         {
+          color: "green",
           label: "Sprites included",
           value: metadata.includedSprites,
-          color: "green",
         },
         {
+          color: "yellow",
           label: "Missing sprites",
           value: metadata.totalSprites - metadata.includedSprites,
-          color: "yellow",
         },
         {
+          color: "cyan",
           label: "New dimensions",
           value: `${metadata.sheetWidth}x${metadata.sheetHeight}px`,
-          color: "cyan",
         },
         {
+          color: "red",
           label: "Old dimensions",
           value: `${oldSheetWidth}x${oldSheetHeight}px`,
-          color: "red",
         },
         {
+          color: "green",
           label: "Space efficiency",
           value: `${metadata.spaceEfficiency.toFixed(1)}%`,
-          color: "green",
         },
         {
+          color: "green",
           label: "Space saved",
           value: `${spaceSaving.toFixed(1)}%`,
-          color: "green",
         },
         {
+          color: "green",
           label: "File size",
           value: ConsoleFormatter.formatFileSize(outputFile.size),
-          color: "green",
         },
-        { label: "Algorithm", value: metadata.algorithm, color: "cyan" },
+        { color: "cyan", label: "Algorithm", value: metadata.algorithm },
         {
+          color: "yellow",
           label: "Duration",
           value: ConsoleFormatter.formatDuration(duration),
-          color: "yellow",
         },
       ],
     );
@@ -899,20 +910,20 @@ async function generatePokemonSpritesheets(): Promise<void> {
       "Multi-Generation Spritesheet Generation Complete!",
       [
         {
+          color: "blue",
           label: "Generations processed",
           value: GENERATIONS.length,
-          color: "blue",
         },
         {
+          color: "green",
           label: "Successful generations",
           value: successCount,
-          color: "green",
         },
-        { label: "Failed generations", value: errorCount, color: "red" },
+        { color: "red", label: "Failed generations", value: errorCount },
         {
+          color: "yellow",
           label: "Total duration",
           value: ConsoleFormatter.formatDuration(duration),
-          color: "yellow",
         },
       ],
     );

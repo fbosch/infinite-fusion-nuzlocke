@@ -6,11 +6,11 @@ import { PokemonSprite } from "@/components/PokemonSprite";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 
 interface PokemonSlotSelectorProps {
-  slot: "head" | "body";
-  selectedPokemon: { pokemon: PokemonOptionType; locationId: string } | null;
   isActive: boolean;
-  onSlotSelect: (slot: "head" | "body") => void;
   onRemovePokemon: () => void;
+  onSlotSelect: (slot: "head" | "body") => void;
+  selectedPokemon: { pokemon: PokemonOptionType; locationId: string } | null;
+  slot: "head" | "body";
 }
 
 export function PokemonSlotSelector({
@@ -33,11 +33,10 @@ export function PokemonSlotSelector({
     return "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500";
   };
 
-  const getIconColor = () => {
-    return isHead
+  const getIconColor = () =>
+    isHead
       ? "text-blue-600 dark:text-blue-400"
       : "text-green-600 dark:text-green-400";
-  };
 
   const getLabelColor = () => {
     if (selectedPokemon) {
@@ -48,27 +47,25 @@ export function PokemonSlotSelector({
     return "text-gray-500 dark:text-gray-400";
   };
 
-  const getPokemonNameColor = () => {
-    return isHead
+  const getPokemonNameColor = () =>
+    isHead
       ? "text-blue-900 dark:text-blue-100"
       : "text-green-900 dark:text-green-100";
-  };
 
-  const getPokemonSpeciesColor = () => {
-    return isHead
+  const getPokemonSpeciesColor = () =>
+    isHead
       ? "text-blue-700 dark:text-blue-300"
       : "text-green-700 dark:text-green-300";
-  };
 
   return (
     <div className="relative h-24">
       <button
-        type="button"
-        onClick={() => onSlotSelect(slot)}
         className={clsx(
-          "relative h-full w-full border-2 rounded-lg p-2 text-left transition-colors cursor-pointer",
+          "relative h-full w-full cursor-pointer rounded-lg border-2 p-2 text-left transition-colors",
           getSlotStyles(),
         )}
+        onClick={() => onSlotSelect(slot)}
+        type="button"
       >
         <div className="absolute top-2 left-2">
           <div className="flex items-center space-x-2">
@@ -82,8 +79,8 @@ export function PokemonSlotSelector({
         {selectedPokemon ? (
           <div className="absolute inset-0 flex items-center justify-center space-x-3 pt-6">
             <PokemonSprite
-              pokemonId={selectedPokemon.pokemon.id}
               className="h-12 w-12"
+              pokemonId={selectedPokemon.pokemon.id}
             />
             <div>
               <div
@@ -110,10 +107,10 @@ export function PokemonSlotSelector({
 
       {selectedPokemon && (
         <button
-          type="button"
-          onClick={onRemovePokemon}
           aria-label={`Remove ${slotLabel}`}
           className="absolute top-2 right-2 z-10 rounded-full bg-white p-1 text-gray-400 shadow-sm hover:text-red-600 dark:bg-gray-700 dark:text-gray-500 dark:hover:text-red-400"
+          onClick={onRemovePokemon}
+          type="button"
         >
           <X className="h-4 w-4" />
         </button>

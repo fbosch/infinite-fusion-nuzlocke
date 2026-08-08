@@ -5,7 +5,9 @@ const stagedPaths = process.argv
   .slice(2)
   .map((path) => (isAbsolute(path) ? relative(process.cwd(), path) : path));
 
-if (stagedPaths.length === 0) process.exit(0);
+if (stagedPaths.length === 0) {
+  process.exit(0);
+}
 
 const shouldUpdateCoverageBadge = stagedPaths.some((path) =>
   matchesAny(path, [
@@ -43,9 +45,13 @@ try {
     generatedBadges.push("docs/fallow.svg");
   }
 
-  if (generatedBadges.length > 0) await run(["git", "add", ...generatedBadges]);
+  if (generatedBadges.length > 0) {
+    await run(["git", "add", ...generatedBadges]);
+  }
 } finally {
-  if (stashedUnstagedChanges) await run(["git", "stash", "pop"]);
+  if (stashedUnstagedChanges) {
+    await run(["git", "stash", "pop"]);
+  }
 }
 
 function matchesAny(path, patterns) {
@@ -61,7 +67,9 @@ async function stashUnstagedChanges() {
     .filter((line) => line.length > 0)
     .some((line) => line.startsWith("??") || line[1] !== " ");
 
-  if (hasUnstagedChanges === false) return false;
+  if (hasUnstagedChanges === false) {
+    return false;
+  }
 
   // Leave the index checked out so badges describe the staged snapshot.
   await run([
@@ -80,8 +88,11 @@ function run(command) {
   return new Promise((resolve, reject) => {
     const proc = spawn(command[0], command.slice(1), { stdio: "inherit" });
     proc.once("close", (exitCode) => {
-      if (exitCode === 0) resolve();
-      else reject(new Error(`${command.join(" ")} exited with ${exitCode}.`));
+      if (exitCode === 0) {
+        resolve();
+      } else {
+        reject(new Error(`${command.join(" ")} exited with ${exitCode}.`));
+      }
     });
   });
 }
@@ -96,8 +107,11 @@ function runOutput(command) {
     proc.stdout.setEncoding("utf8");
     proc.stdout.on("data", (chunk) => (output += chunk));
     proc.once("close", (exitCode) => {
-      if (exitCode === 0) resolve(output);
-      else reject(new Error(`${command.join(" ")} exited with ${exitCode}.`));
+      if (exitCode === 0) {
+        resolve(output);
+      } else {
+        reject(new Error(`${command.join(" ")} exited with ${exitCode}.`));
+      }
     });
   });
 }

@@ -82,7 +82,7 @@ export function formatNumber(num: number): string {
 /**
  * Formats a percentage to a fixed number of decimal places
  */
-export function formatPercentage(value: number, decimals: number = 1): string {
+export function formatPercentage(value: number, decimals = 1): string {
   if (typeof value !== "number" || Number.isNaN(value)) {
     return "0%";
   }

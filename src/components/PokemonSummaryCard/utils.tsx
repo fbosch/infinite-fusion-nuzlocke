@@ -28,14 +28,18 @@ export function getNicknameText(
   if (!isFusion) {
     // Single Pokémon - show nickname if available, otherwise show name
     const pokemon = head || body;
-    if (!pokemon) return "";
+    if (!pokemon) {
+      return "";
+    }
     return pokemon.nickname || pokemon.name;
   }
 
   // Fusion case
-  if (!head || !body) {
+  if (!(head && body)) {
     const pokemon = head || body;
-    if (!pokemon) return "";
+    if (!pokemon) {
+      return "";
+    }
     return pokemon.nickname || pokemon.name;
   }
 
@@ -55,14 +59,16 @@ export function getSpriteUrl(
   artworkVariant?: string,
 ): string {
   const pokemon = head || body;
-  if (!pokemon) return TRANSPARENT_PIXEL;
+  if (!pokemon) {
+    return TRANSPARENT_PIXEL;
+  }
   if (isEgg(pokemon)) {
     return "/images/egg.png";
   }
 
   const variantSuffix = artworkVariant ? artworkVariant : "";
 
-  if (!isFusion || !body || !head) {
+  if (!(isFusion && body && head)) {
     // For single Pokémon, use the same sprite source with variants support
     return `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/${pokemon.id}${variantSuffix}.png`;
   }
@@ -77,10 +83,16 @@ export function getAltText(
   isFusion: boolean,
 ): string {
   const pokemon = head || body;
-  if (!pokemon) return "";
+  if (!pokemon) {
+    return "";
+  }
 
-  if (!isFusion) return pokemon.name;
-  if (!body || !head) return `${pokemon.name} (fusion preview)`;
+  if (!isFusion) {
+    return pokemon.name;
+  }
+  if (!(body && head)) {
+    return `${pokemon.name} (fusion preview)`;
+  }
   return `${head.name}/${body.name} fusion`;
 }
 
@@ -99,7 +111,9 @@ function getFusionFallbackUrls(
   body: PokemonOptionType,
   artworkVariant?: string,
 ): string[] {
-  if (currentSrc.includes("/generated/")) return [];
+  if (currentSrc.includes("/generated/")) {
+    return [];
+  }
 
   const urls = [
     `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${head.id}.${body.id}${artworkVariant ?? ""}.png`,
@@ -123,8 +137,10 @@ function getSingleFallbackUrls(
     ];
   }
   if (
-    !currentSrc.includes("/generated/") &&
-    !currentSrc.includes("raw.githubusercontent.com")
+    !(
+      currentSrc.includes("/generated/") ||
+      currentSrc.includes("raw.githubusercontent.com")
+    )
   ) {
     const urls = [
       `https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/generated/${pokemon.id}${artworkVariant ?? ""}.png`,
@@ -167,10 +183,14 @@ export async function getNextFallbackUrl(
   artworkVariant?: string,
 ): Promise<string | null> {
   const pokemon = head || body;
-  if (!pokemon) return null;
+  if (!pokemon) {
+    return null;
+  }
 
   // If we're already using the question mark, don't try again
-  if (currentSrc === QUESTION_MARK) return null;
+  if (currentSrc === QUESTION_MARK) {
+    return null;
+  }
 
   const candidateUrls = getFallbackCandidateUrls(
     currentSrc,
@@ -205,12 +225,11 @@ export function getStatusState(
   switch (overlayStatus) {
     case "missed":
       return {
-        type: "missed",
-        wrapperClasses: "opacity-50",
+        canAnimate: false,
         imageClasses: "",
         overlayContent: (
           <div
-            className="absolute -right-1.5 bottom-0 z-20 pl-1.5 rounded-sm flex items-center justify-center pointer-events-none font-ds"
+            className="pointer-events-none absolute -right-1.5 bottom-0 z-20 flex items-center justify-center rounded-sm pl-1.5 font-ds"
             title="Missed!"
           >
             <span className="dark:pixel-shadow text-gray-500 text-xs dark:text-gray-200">
@@ -218,19 +237,20 @@ export function getStatusState(
             </span>
           </div>
         ),
-        canAnimate: false,
+        type: "missed",
+        wrapperClasses: "opacity-50",
       };
     case "deceased":
       return {
-        type: "deceased",
-        wrapperClasses: "opacity-50",
+        canAnimate: false,
         imageClasses: "saturate-30",
         overlayContent: (
-          <div className="absolute pixel-shadow -right-2 bottom-0 z-10 bg-red-500 flex items-center justify-center pointer-events-none dark:bg-red-900 h-fit w-fit px-1 rounded-xs">
-            <span className="pixel-shadow text-xs text-white font-ds">FNT</span>
+          <div className="pixel-shadow pointer-events-none absolute -right-2 bottom-0 z-10 flex h-fit w-fit items-center justify-center rounded-xs bg-red-500 px-1 dark:bg-red-900">
+            <span className="pixel-shadow font-ds text-white text-xs">FNT</span>
           </div>
         ),
-        canAnimate: false,
+        type: "deceased",
+        wrapperClasses: "opacity-50",
       };
     default: {
       // Allow animation for active Pokemon (CAPTURED, RECEIVED, TRADED)
@@ -251,19 +271,19 @@ export function getStatusState(
       );
 
       return {
-        type: "normal",
-        wrapperClasses: "",
+        canAnimate,
         imageClasses: "",
         overlayContent: null,
-        canAnimate,
+        type: "normal",
+        wrapperClasses: "",
       };
     }
   }
 }
 
 export interface DisplayPokemon {
-  head: PokemonOptionType | null;
   body: PokemonOptionType | null;
+  head: PokemonOptionType | null;
   isFusion: boolean;
 }
 
@@ -277,8 +297,8 @@ export function getDisplayPokemon(
   isFusion: boolean,
 ): DisplayPokemon {
   // If either slot missing, or fusion not requested, return as-is
-  if (!isFusion || !head || !body) {
-    return { head, body, isFusion };
+  if (!(isFusion && head && body)) {
+    return { body, head, isFusion };
   }
 
   // Enforce fusion gating: both must have statuses and be both active or both inactive
@@ -290,18 +310,22 @@ export function getDisplayPokemon(
     const bodyIsInactive = isPokemonInactive(body);
 
     // Prefer showing a single with a known status; prioritize active over inactive
-    if (headIsActive && !bodyIsActive)
-      return { head, body: null, isFusion: false };
-    if (bodyIsActive && !headIsActive)
-      return { head: null, body, isFusion: false };
-    if (headIsInactive && !bodyIsInactive)
-      return { head, body: null, isFusion: false };
-    if (bodyIsInactive && headIsActive)
-      return { head, body: null, isFusion: false };
+    if (headIsActive && !bodyIsActive) {
+      return { body: null, head, isFusion: false };
+    }
+    if (bodyIsActive && !headIsActive) {
+      return { body, head: null, isFusion: false };
+    }
+    if (headIsInactive && !bodyIsInactive) {
+      return { body: null, head, isFusion: false };
+    }
+    if (bodyIsInactive && headIsActive) {
+      return { body: null, head, isFusion: false };
+    }
 
     // If statuses are missing or ambiguous, default to showing head only when present
-    return { head, body: null, isFusion: false };
+    return { body: null, head, isFusion: false };
   }
 
-  return { head, body, isFusion: true };
+  return { body, head, isFusion: true };
 }

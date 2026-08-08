@@ -46,8 +46,8 @@ function migrateCustomLocationFromOrder(
 
   return {
     id: legacyLocation.id,
-    name: legacyLocation.name,
     insertAfterLocationId,
+    name: legacyLocation.name,
   };
 }
 
@@ -56,7 +56,9 @@ function isNonEmptyString(value: unknown): value is string {
 }
 
 function isLocation(value: unknown): value is Location {
-  if (typeof value !== "object" || value === null) return false;
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
 
   const candidate = value as Record<string, unknown>;
   return (
@@ -188,29 +190,29 @@ export function useLocationEncountersById(
     isLoading: starterLoading,
     error: starterError,
   } = useQuery({
-    queryKey: ["starter-pokemon", gameMode],
-    queryFn: () => getStarterPokemonByGameMode(gameMode as "remix" | "classic"),
     enabled: isStarter && !isRandomized,
-    staleTime: Infinity,
-    gcTime: Infinity,
+    gcTime: Number.POSITIVE_INFINITY,
+    queryFn: () => getStarterPokemonByGameMode(gameMode as "remix" | "classic"),
+    queryKey: ["starter-pokemon", gameMode],
+    staleTime: Number.POSITIVE_INFINITY,
   });
 
   if (gameMode === "randomized") {
     return {
-      pokemonEncounters: [],
-      isLoading: false,
       error: null,
+      isLoading: false,
+      pokemonEncounters: [],
     };
   }
 
   if (isStarter) {
     return {
+      error: starterError,
+      isLoading: starterLoading,
       pokemonEncounters: starterPokemon.map((id) => ({
         id,
         source: EncounterSource.GIFT,
       })),
-      isLoading: starterLoading,
-      error: starterError,
     };
   }
 
@@ -220,9 +222,9 @@ export function useLocationEncountersById(
   );
 
   return {
-    pokemonEncounters: encounter?.pokemon || [],
-    isLoading,
     error,
+    isLoading,
+    pokemonEncounters: encounter?.pokemon || [],
   };
 }
 
@@ -299,7 +301,7 @@ function getCustomLocationInsertIndex(
     (loc) => loc.id === afterLocationId,
   );
 
-  if (!defaultLocationExists && !customLocationExists) {
+  if (!(defaultLocationExists || customLocationExists)) {
     throw new Error(`Location with ID ${afterLocationId} not found`);
   }
 
@@ -340,11 +342,11 @@ export function mergeLocationsWithCustom(
       if (afterIndex !== -1) {
         // Found the location to insert after, place this custom location
         const customLocation: CombinedLocation = {
+          description: "Custom location",
           id: custom.id,
+          isCustom: true as const,
           name: custom.name,
           region: "Custom",
-          description: "Custom location",
-          isCustom: true as const,
         };
         result.splice(afterIndex + 1, 0, customLocation);
         placedInThisPass.push(custom);
@@ -420,8 +422,8 @@ export function createCustomLocation(
 ): CustomLocation {
   return {
     id: generateCustomLocationId(),
-    name: name.trim(),
     insertAfterLocationId: afterLocationId,
+    name: name.trim(),
   };
 }
 
@@ -508,8 +510,8 @@ export function wouldOrphanLocations(
 ): { wouldOrphan: boolean; dependents: CustomLocation[] } {
   const dependents = getCustomLocationDependents(locationId, customLocations);
   return {
-    wouldOrphan: dependents.length > 0,
     dependents,
+    wouldOrphan: dependents.length > 0,
   };
 }
 

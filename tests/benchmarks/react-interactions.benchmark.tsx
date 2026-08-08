@@ -33,7 +33,7 @@ vi.mock("@/components/ContextMenu", () => ({
       {children}
       {items.map((item) =>
         item.onClick ? (
-          <button key={item.id} type="button" onClick={item.onClick}>
+          <button key={item.id} onClick={item.onClick} type="button">
             {item.label}
           </button>
         ) : null,
@@ -66,10 +66,10 @@ vi.mock("@/assets/images/pokeball.svg", () => ({ default: () => <svg /> }));
 
 vi.mock("lucide-react", () => ({
   Box: () => <span />,
-  Plus: () => <span />,
-  Skull: () => <span />,
   MousePointer: () => <span />,
   Palette: () => <span />,
+  Plus: () => <span />,
+  Skull: () => <span />,
   SquareArrowUpRight: () => <span />,
 }));
 vi.mock("@/components/TypePills", () => ({ TypePills: () => null }));
@@ -87,9 +87,9 @@ vi.mock("@/utils/formatCredits", () => ({
 }));
 vi.mock("@/utils/pokemonPredicates", () => ({
   canFuse: () => true,
+  isPokemonActive: (pokemon: unknown) => Boolean(pokemon),
   isPokemonDeceased: () => false,
   isPokemonStored: () => false,
-  isPokemonActive: (pokemon: unknown) => Boolean(pokemon),
 }));
 vi.mock("@/loaders/pokemon", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/loaders/pokemon")>();
@@ -103,14 +103,14 @@ vi.mock("@/loaders/locations", async () => {
 });
 vi.mock("@/stores/playthroughs/hooks", () => ({
   useActivePlaythrough: () => ({ team: { members: [] } }),
-  useEncounters: () => ({}),
   useActivePlaythroughId: () => "playthrough-1",
+  useEncounters: () => ({}),
 }));
 vi.mock("@/stores/playthroughs/index", () => ({
   playthroughActions: {
-    updatePokemonByUID: updatePokemonByUIDMock,
-    moveTeamMemberToBox: vi.fn(),
     markTeamMemberAsDeceased: vi.fn(),
+    moveTeamMemberToBox: vi.fn(),
+    updatePokemonByUID: updatePokemonByUIDMock,
   },
 }));
 vi.mock("@/utils/scrollToLocation", () => ({ scrollToLocationById: vi.fn() }));
@@ -119,23 +119,23 @@ const pikachu = {
   id: 25,
   name: "Pikachu",
   nationalDexId: 25,
-  uid: "pikachu-uid",
   originalLocation: "route-1",
+  uid: "pikachu-uid",
 };
 const eevee = {
   id: 133,
   name: "Eevee",
   nationalDexId: 133,
-  uid: "eevee-uid",
   originalLocation: "route-2",
+  uid: "eevee-uid",
 };
 const filledTeamEntry = {
+  body: eevee,
+  head: pikachu,
+  isFusion: true,
   locationId: "team-slot-1",
   locationName: "Team Slot",
   position: 1,
-  isFusion: true,
-  head: pikachu,
-  body: eevee,
 };
 
 function profileRender(ui: React.ReactElement) {
@@ -173,7 +173,7 @@ async function measureRender(ui: React.ReactElement) {
     profiler.push(...mounted.durations);
     cleanup();
   }
-  return { wall: summarize(wall), profiler: summarize(profiler) };
+  return { profiler: summarize(profiler), wall: summarize(wall) };
 }
 
 async function measureInteraction(
@@ -196,15 +196,15 @@ async function measureInteraction(
     profiler.push(...root.durations);
     cleanup();
   }
-  return { wall: summarize(wall), profiler: summarize(profiler) };
+  return { profiler: summarize(profiler), wall: summarize(wall) };
 }
 
 function SelectionProbe() {
   const selection = useTeamMemberSelection();
   return (
     <button
-      type="button"
       onClick={() => selection.actions.handlePokemonSelect(pikachu, "route-1")}
+      type="button"
     >
       Select
     </button>
@@ -236,9 +236,9 @@ describe("deterministic React interaction baselines", () => {
       () =>
         profileRender(
           <TeamMemberSelectionProvider
-            position={0}
-            onSelect={vi.fn()}
             onClose={vi.fn()}
+            onSelect={vi.fn()}
+            position={0}
           >
             <SelectionProbe />
           </TeamMemberSelectionProvider>,
@@ -250,12 +250,12 @@ describe("deterministic React interaction baselines", () => {
       JSON.stringify(
         {
           sampleCount: SAMPLE_COUNT,
-          warmupIterations: WARMUP_ITERATIONS,
           timings: {
-            pokemonSummaryCard: summaryCard,
             pcTeamEntryMoveToBox: pcTeamEntry,
-            teamSelection: teamSelection,
+            pokemonSummaryCard: summaryCard,
+            teamSelection,
           },
+          warmupIterations: WARMUP_ITERATIONS,
         },
         null,
         2,
@@ -269,16 +269,16 @@ describe("deterministic React interaction baselines", () => {
       Array.from({ length: 512 }, (_, index) => [
         `route-${index}`,
         {
-          head: index === 0 ? pikachu : null,
           body: index === 1 ? eevee : null,
+          head: index === 0 ? pikachu : null,
           isFusion: index === 0,
           updatedAt: 0,
         },
       ]),
     );
     const members = [
-      { headPokemonUid: pikachu.uid, bodyPokemonUid: "" },
-      { headPokemonUid: "", bodyPokemonUid: eevee.uid },
+      { bodyPokemonUid: "", headPokemonUid: pikachu.uid },
+      { bodyPokemonUid: eevee.uid, headPokemonUid: "" },
       null,
       null,
       null,
@@ -303,8 +303,8 @@ describe("deterministic React interaction baselines", () => {
       JSON.stringify(
         {
           derivations: {
-            teamSlots512: summarize(samples),
             locations: summarize(locationSamples),
+            teamSlots512: summarize(samples),
           },
         },
         null,

@@ -25,10 +25,10 @@ export interface FusionSpriteHandle {
 }
 
 interface FusionSpriteProps {
-  headPokemon: PokemonOptionType | null;
   bodyPokemon: PokemonOptionType | null;
-  isFusion?: boolean;
   className?: string;
+  headPokemon: PokemonOptionType | null;
+  isFusion?: boolean;
   shouldLoad?: boolean;
   showStatusOverlay?: boolean;
 }
@@ -106,7 +106,9 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
       [playEvolutionAnimation],
     );
 
-    if (!head && !body) return null;
+    if (!(head || body)) {
+      return null;
+    }
 
     const spriteUrl = getSpriteUrl(head, body, isFusion, preferredVariant);
     const altText = getAltText(head, body, isFusion);
@@ -114,22 +116,22 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
       "object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none transform-gpu";
 
     const imageProps = {
-      src: spriteUrl,
-      width: 64,
-      height: 64,
-      loading: shouldLoad ? ("eager" as const) : ("lazy" as const),
-      unoptimized: true,
+      blurDataURL: TRANSPARENT_PIXEL,
       decoding: shouldLoad ? ("auto" as const) : ("async" as const),
       draggable: false,
-      placeholder: "blur" as const,
-      blurDataURL: TRANSPARENT_PIXEL,
+      height: 64,
+      loading: shouldLoad ? ("eager" as const) : ("lazy" as const),
       onError: handleImageError,
+      placeholder: "blur" as const,
+      src: spriteUrl,
+      unoptimized: true,
+      width: 64,
     };
 
     return (
-      <div className="flex flex-col items-center relative">
+      <div className="relative flex flex-col items-center">
         <div
-          className={twMerge("relative w-full flex justify-center", className)}
+          className={twMerge("relative flex w-full justify-center", className)}
           onMouseEnter={() => {
             if (!hasHovered.current) {
               hasHovered.current = true;
@@ -145,29 +147,29 @@ export const FusionSprite = forwardRef<FusionSpriteHandle, FusionSpriteProps>(
             )}
           >
             <div
-              ref={raysSvgRef}
               aria-hidden="true"
-              className="absolute size-35 left-1/2 top-2/3 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 bg-radial from-5% to-35% from-white/50 to-transparent"
+              className="pointer-events-none absolute top-2/3 left-1/2 size-35 -translate-x-1/2 -translate-y-1/2 bg-radial from-5% from-white/50 to-35% to-transparent opacity-0"
+              ref={raysSvgRef}
             >
-              <Rays className="w-full h-full dark:text-white/50 text-sky-300" />
+              <Rays className="h-full w-full text-sky-300 dark:text-white/50" />
             </div>
             <Image
-              ref={shadowRef}
               aria-hidden={true}
               className={twMerge(
                 baseImageClasses,
-                "absolute translate-x-[45%] translate-y-[35%] skew-x-[-5deg] skew-y-[-30deg] scale-100 rotate-[24deg] brightness-0 opacity-10 dark:opacity-15",
+                "absolute translate-x-[45%] translate-y-[35%] rotate-[24deg] skew-x-[-5deg] skew-y-[-30deg] scale-100 opacity-10 brightness-0 dark:opacity-15",
               )}
+              ref={shadowRef}
               {...imageProps}
               alt={altText}
             />
             <Image
-              ref={imageRef}
               className={twMerge(
                 baseImageClasses,
                 statusState.imageClasses,
                 "rounded-md",
               )}
+              ref={imageRef}
               {...imageProps}
               alt={altText}
             />

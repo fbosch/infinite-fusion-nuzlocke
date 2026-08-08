@@ -37,9 +37,9 @@ export class ServiceWorkerManager {
       );
 
       console.debug("ServiceWorkerManager: Current service worker state:", {
+        active: this.swRegistration.active?.state,
         installing: this.swRegistration.installing?.state,
         waiting: this.swRegistration.waiting?.state,
-        active: this.swRegistration.active?.state,
       });
 
       // Handle updates
@@ -171,10 +171,10 @@ export class ServiceWorkerManager {
     return new Promise((resolve) => {
       if (!navigator.serviceWorker.controller) {
         resolve({
-          total: 0,
           cached: 0,
-          percentage: 0,
           error: "Service worker not active",
+          percentage: 0,
+          total: 0,
         });
         return;
       }
@@ -201,9 +201,9 @@ export class ServiceWorkerManager {
     return new Promise((resolve) => {
       if (!navigator.serviceWorker.controller) {
         resolve({
-          total: 0,
           endpoints: [],
           error: "Service worker not active",
+          total: 0,
         });
         return;
       }
@@ -243,7 +243,7 @@ export class ServiceWorkerManager {
       };
 
       navigator.serviceWorker.controller.postMessage(
-        { type: "CHECK_API_ENDPOINT_CACHE", endpoint },
+        { endpoint, type: "CHECK_API_ENDPOINT_CACHE" },
         [messageChannel.port2],
       );
     });

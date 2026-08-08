@@ -44,9 +44,9 @@ describe("Wild encounter wikitext parser", () => {
     expect(mtMoon).toBeDefined();
     expect(mtMoon?.encounters).toEqual(
       expect.arrayContaining([
-        { pokemonId: 27, encounterType: "cave" },
-        { pokemonId: 41, encounterType: "cave" },
-        { pokemonId: 478, encounterType: "rock_smash" },
+        { encounterType: "cave", pokemonId: 27 },
+        { encounterType: "cave", pokemonId: 41 },
+        { encounterType: "rock_smash", pokemonId: 478 },
       ]),
     );
     expect(mtMoon?.encounters.some((entry) => entry.pokemonId === 54)).toBe(
@@ -68,7 +68,7 @@ describe("Wild encounter wikitext parser", () => {
       "unit test",
     );
 
-    expect(encounters).toEqual([{ pokemonId: 27, encounterType: "grass" }]);
+    expect(encounters).toEqual([{ encounterType: "grass", pokemonId: 27 }]);
   });
 
   it("keeps nested link pipes within their template argument", () => {
@@ -85,7 +85,7 @@ describe("Wild encounter wikitext parser", () => {
         pokemonNameMap,
         "unit test",
       ),
-    ).toEqual([{ pokemonId: 54, encounterType: "grass" }]);
+    ).toEqual([{ encounterType: "grass", pokemonId: 54 }]);
   });
 
   it("stops adding data after unsupported sections and footers", () => {
@@ -107,8 +107,8 @@ describe("Wild encounter wikitext parser", () => {
         "unit test",
       ),
     ).toEqual([
-      { pokemonId: 16, encounterType: "grass" },
-      { pokemonId: 41, encounterType: "grass" },
+      { encounterType: "grass", pokemonId: 16 },
+      { encounterType: "grass", pokemonId: 41 },
     ]);
   });
 
@@ -147,7 +147,7 @@ describe("Wild encounter wikitext parser", () => {
     expect(routes).toHaveLength(1);
     expect(routes[0]?.routeName).toBe("Route 2");
     expect(routes[0]?.encounters).toEqual([
-      { pokemonId: 16, encounterType: "grass" },
+      { encounterType: "grass", pokemonId: 16 },
     ]);
   });
 
@@ -156,8 +156,8 @@ describe("Wild encounter wikitext parser", () => {
       assertEncounterPayload(
         [
           {
+            encounters: [{ encounterType: "grass", pokemonId: 9999 }],
             routeName: "Route 1",
-            encounters: [{ pokemonId: 9999, encounterType: "grass" }],
           },
         ],
         pokemonNameMap,
@@ -169,8 +169,8 @@ describe("Wild encounter wikitext parser", () => {
   it("fails validation when wild encounter output contains special encounters", () => {
     const payload = structuredClone([
       {
+        encounters: [{ encounterType: "special", pokemonId: 16 }],
         routeName: "Route 1",
-        encounters: [{ pokemonId: 16, encounterType: "special" }],
       },
     ]) as never;
 
@@ -182,8 +182,8 @@ describe("Wild encounter wikitext parser", () => {
   it("returns the normalized payload after validation", () => {
     const payload = structuredClone([
       {
+        encounters: [{ encounterType: "grass", pokemonId: 16 }],
         routeName: " Route 1 ",
-        encounters: [{ pokemonId: 16, encounterType: "grass" }],
       },
     ]) as never;
 
@@ -191,8 +191,8 @@ describe("Wild encounter wikitext parser", () => {
       assertEncounterPayload(payload, pokemonNameMap, "unit test encounters"),
     ).toEqual([
       {
+        encounters: [{ encounterType: "grass", pokemonId: 16 }],
         routeName: "Route 1",
-        encounters: [{ pokemonId: 16, encounterType: "grass" }],
       },
     ]);
   });
@@ -200,9 +200,9 @@ describe("Wild encounter wikitext parser", () => {
   it("fails validation when scraped payloads contain unexpected keys", () => {
     const payload = structuredClone([
       {
+        encounters: [{ encounterType: "grass", pokemonId: 16 }],
         routeName: "Route 1",
         source: "wiki",
-        encounters: [{ pokemonId: 16, encounterType: "grass" }],
       },
     ]) as never;
 
@@ -216,18 +216,18 @@ describe("Wild encounter wikitext parser", () => {
       assertEncounterParity(
         [
           {
+            encounters: [{ encounterType: "grass", pokemonId: 16 }],
             routeName: "Route 1",
-            encounters: [{ pokemonId: 16, encounterType: "grass" }],
           },
           {
+            encounters: [{ encounterType: "cave", pokemonId: 27 }],
             routeName: "Route 2",
-            encounters: [{ pokemonId: 27, encounterType: "cave" }],
           },
         ],
         [
           {
+            encounters: [{ encounterType: "grass", pokemonId: 16 }],
             routeName: "Route 1",
-            encounters: [{ pokemonId: 16, encounterType: "grass" }],
           },
         ],
         "unit test encounters",
@@ -240,8 +240,8 @@ describe("Wild encounter wikitext parser", () => {
       assertEncounterParity(
         [
           {
+            encounters: [{ encounterType: "grass", pokemonId: 16 }],
             routeName: "Route 1",
-            encounters: [{ pokemonId: 16, encounterType: "grass" }],
           },
         ],
         [],

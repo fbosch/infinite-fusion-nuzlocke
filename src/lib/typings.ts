@@ -29,13 +29,17 @@ export const ALL_TYPES = [
 export type TypeName = (typeof ALL_TYPES)[number];
 
 function isTypeName(value: string | undefined): value is TypeName {
-  if (!value) return false;
+  if (!value) {
+    return false;
+  }
   return (ALL_TYPES as readonly string[]).includes(value.toLowerCase());
 }
 
 function ensureTypeName(value: string | undefined): TypeName {
   const lowered = value?.toLowerCase();
-  if (isTypeName(lowered)) return lowered;
+  if (isTypeName(lowered)) {
+    return lowered;
+  }
   throw new Error(`Unknown Pokemon type: ${String(value)}`);
 }
 
@@ -51,9 +55,9 @@ const latestSwappedTypeMap: Record<number, [TypeName, TypeName]> = {
   // Steel/Electric line
   81: ["steel", "electric"], // Magnemite
   82: ["steel", "electric"], // Magneton
-  462: ["steel", "electric"], // Magnezone (v6.1+)
   // Spiritomb
   442: ["dark", "ghost"],
+  462: ["steel", "electric"], // Magnezone (v6.1+)
   // Ferroseed line (v6.3+)
   597: ["steel", "grass"], // Ferroseed
   598: ["steel", "grass"], // Ferrothorn
@@ -73,8 +77,9 @@ function hasTypes(pokemon: Pokemon, a: TypeName, b: TypeName): boolean {
 
 function getDominantType(pokemon: Pokemon): TypeName | undefined {
   // Dominant type rule for latest ruleset: only Normal/Flying always passes Flying
-  if (hasTypes(pokemon, "normal", "flying")) return "flying";
-  return undefined;
+  if (hasTypes(pokemon, "normal", "flying")) {
+    return "flying";
+  }
 }
 
 // INTERNAL: Effective order with swaps/dominant rules.
@@ -184,7 +189,9 @@ async function getPokemonTypes(
     pokemon = await getPokemonByNationalDexId(query.nationalDexId);
   }
 
-  if (!pokemon) return null;
+  if (!pokemon) {
+    return null;
+  }
   // Return base types for a single Pokémon (no swaps/dominant)
   return getTypesForPokemon(pokemon);
 }

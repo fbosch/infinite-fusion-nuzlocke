@@ -61,10 +61,10 @@ describe("Encounter drag/drop operations", () => {
     await updateEncounter("route1", pikachu, "head", false);
 
     await relocateEncounterSlot({
-      sourceLocationId: "route1",
       sourceField: "head",
-      targetLocationId: "route2",
+      sourceLocationId: "route1",
       targetField: "head",
+      targetLocationId: "route2",
     });
 
     expect(activePlaythrough.encounters?.route1).toBeUndefined();
@@ -83,10 +83,10 @@ describe("Encounter drag/drop operations", () => {
     await updateEncounter("route2", charmander, "head", false);
 
     await relocateEncounterSlot({
-      sourceLocationId: "route1",
       sourceField: "head",
-      targetLocationId: "route2",
+      sourceLocationId: "route1",
       targetField: "head",
+      targetLocationId: "route2",
     });
 
     expect(activePlaythrough.encounters?.route1?.head?.uid).toBe(
@@ -120,24 +120,24 @@ describe("Encounter drag/drop operations", () => {
 
     activePlaythrough.encounters = {
       route1: {
+        body: null,
         head: {
           id: 25,
           name: "Pikachu",
           nationalDexId: 25,
           uid: "pikachu_no_origin",
         },
-        body: null,
         isFusion: false,
         updatedAt: Date.now(),
       },
       route2: {
+        body: null,
         head: {
           id: 4,
           name: "Charmander",
           nationalDexId: 4,
           uid: "charmander_no_origin",
         },
-        body: null,
         isFusion: false,
         updatedAt: Date.now(),
       },
@@ -155,16 +155,16 @@ describe("Encounter drag/drop operations", () => {
 
   it("parses combobox ids by trimming only trailing suffix", () => {
     expect(getLocationFromComboboxId("dragon-head-cave-head")).toEqual({
-      locationId: "dragon-head-cave",
       field: "head",
+      locationId: "dragon-head-cave",
     });
     expect(getLocationFromComboboxId("dragon-body-cave-body")).toEqual({
-      locationId: "dragon-body-cave",
       field: "body",
+      locationId: "dragon-body-cave",
     });
     expect(getLocationFromComboboxId("dragon-single-cave-single")).toEqual({
-      locationId: "dragon-single-cave",
       field: "head",
+      locationId: "dragon-single-cave",
     });
   });
 });

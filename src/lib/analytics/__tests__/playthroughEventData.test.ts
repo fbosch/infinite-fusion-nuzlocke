@@ -28,9 +28,6 @@ const createStorage = (): Storage => {
   const values = new Map<string, string>();
 
   return {
-    get length() {
-      return values.size;
-    },
     clear() {
       values.clear();
     },
@@ -39,6 +36,9 @@ const createStorage = (): Storage => {
     },
     key(index: number) {
       return Array.from(values.keys())[index] ?? null;
+    },
+    get length() {
+      return values.size;
     },
     removeItem(key: string) {
       values.delete(key);
@@ -56,52 +56,52 @@ const makePokemon = (
   id: 25,
   name: "Pikachu",
   nationalDexId: 25,
-  uid,
-  status,
   originalLocation: "route-1",
+  status,
+  uid,
 });
 
 const makePlaythrough = (): Playthrough => ({
-  id: "playthrough-1",
-  name: "Test",
-  gameMode: "classic",
-  team: {
-    members: [
-      { headPokemonUid: "alive-a", bodyPokemonUid: "" },
-      { headPokemonUid: "alive-b", bodyPokemonUid: "" },
-      { headPokemonUid: "stored-a", bodyPokemonUid: "" },
-      { headPokemonUid: "deceased-a", bodyPokemonUid: "" },
-      null,
-      null,
-    ],
-  },
+  createdAt: Date.now(),
   encounters: {
     "route-1": {
-      head: makePokemon("alive-a", PokemonStatus.CAPTURED),
       body: null,
+      head: makePokemon("alive-a", PokemonStatus.CAPTURED),
       isFusion: false,
       updatedAt: Date.now(),
     },
     "route-2": {
-      head: makePokemon("alive-b", PokemonStatus.RECEIVED),
       body: makePokemon("deceased-a", PokemonStatus.DECEASED),
+      head: makePokemon("alive-b", PokemonStatus.RECEIVED),
       isFusion: true,
       updatedAt: Date.now(),
     },
     "route-3": {
-      head: makePokemon("stored-a", PokemonStatus.STORED),
       body: makePokemon("deceased-b", PokemonStatus.DECEASED),
+      head: makePokemon("stored-a", PokemonStatus.STORED),
       isFusion: false,
       updatedAt: Date.now(),
     },
     "route-4": {
-      head: null,
       body: null,
+      head: null,
       isFusion: false,
       updatedAt: Date.now(),
     },
   },
-  createdAt: Date.now(),
+  gameMode: "classic",
+  id: "playthrough-1",
+  name: "Test",
+  team: {
+    members: [
+      { bodyPokemonUid: "", headPokemonUid: "alive-a" },
+      { bodyPokemonUid: "", headPokemonUid: "alive-b" },
+      { bodyPokemonUid: "", headPokemonUid: "stored-a" },
+      { bodyPokemonUid: "", headPokemonUid: "deceased-a" },
+      null,
+      null,
+    ],
+  },
   updatedAt: Date.now(),
   version: "1.0.0",
 });
@@ -115,12 +115,12 @@ describe("playthroughEventData", () => {
     expect(getViableRosterSize(playthrough)).toBe(2);
 
     expect(getSharedEventProperties(playthrough)).toEqual({
-      playthrough_id: "playthrough-1",
-      game_mode: "classic",
-      encounter_count_bucket: "e_2_4",
-      deceased_count_bucket: "c_2_3",
       boxed_count_bucket: "c_1",
+      deceased_count_bucket: "c_2_3",
+      encounter_count_bucket: "e_2_4",
       fusion_count_bucket: "c_1",
+      game_mode: "classic",
+      playthrough_id: "playthrough-1",
       viable_roster_bucket: "v_2_3",
     });
   });
@@ -250,10 +250,10 @@ describe("playthroughEventData", () => {
   });
 
   it("computes days since active and team size", () => {
-    const now = 86400000 * 10;
+    const now = 86_400_000 * 10;
 
     expect(getDaysSinceLastActive(now, now)).toBe(0);
-    expect(getDaysSinceLastActive(now - 86400000 * 2 - 50, now)).toBe(2);
+    expect(getDaysSinceLastActive(now - 86_400_000 * 2 - 50, now)).toBe(2);
 
     const playthrough = makePlaythrough();
     expect(getTeamSizeAfter(playthrough)).toBe(4);

@@ -35,20 +35,20 @@ export class ErrorBoundary extends React.Component<
       return (
         <div
           className={clsx(
-            "p-8 flex justify-center flex-col text-center",
+            "flex flex-col justify-center p-8 text-center",
             this.props.className,
           )}
         >
           <div>
-            <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
-            <h2 className="text-lg  mb-2">Something went wrong</h2>
-            <p className="text-muted-foreground mb-4">
+            <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-destructive" />
+            <h2 className="mb-2 text-lg">Something went wrong</h2>
+            <p className="mb-4 text-muted-foreground">
               An error occurred while loading this content.
             </p>
             <button
-              type="button"
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
               onClick={() => this.setState({ hasError: false })}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+              type="button"
             >
               <RefreshCw className="h-4 w-4" />
               Try again

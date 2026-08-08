@@ -15,8 +15,8 @@ const pokemon = (
 describe("getSummaryCardDisplay", () => {
   it("uses displayed IDs for a non-fusion Pokédex link", () => {
     const display = getSummaryCardDisplay({
-      headPokemon: pokemon(25),
       bodyPokemon: pokemon(1),
+      headPokemon: pokemon(25),
       isFusion: false,
       isTeamMember: false,
     });
@@ -26,8 +26,8 @@ describe("getSummaryCardDisplay", () => {
 
   it("keeps requested team fusions visible even when one member is stored", () => {
     const display = getSummaryCardDisplay({
-      headPokemon: pokemon(25),
       bodyPokemon: pokemon(1, PokemonStatus.STORED),
+      headPokemon: pokemon(25),
       isFusion: true,
       isTeamMember: true,
     });
@@ -38,8 +38,8 @@ describe("getSummaryCardDisplay", () => {
 
   it("only marks a fusion deceased when both original members are deceased", () => {
     const display = getSummaryCardDisplay({
-      headPokemon: pokemon(25, PokemonStatus.DECEASED),
       bodyPokemon: pokemon(1),
+      headPokemon: pokemon(25, PokemonStatus.DECEASED),
       isFusion: true,
       isTeamMember: false,
     });

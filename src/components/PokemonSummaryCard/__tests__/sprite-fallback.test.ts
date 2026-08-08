@@ -97,8 +97,11 @@ describe("getNextFallbackUrl", () => {
 
         set src(url: string) {
           loadedUrls.push(url);
-          if (loadedUrls.length === 1) this.onerror?.();
-          else this.onload?.();
+          if (loadedUrls.length === 1) {
+            this.onerror?.();
+          } else {
+            this.onload?.();
+          }
         }
       },
     });

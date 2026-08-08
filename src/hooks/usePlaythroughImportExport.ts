@@ -83,11 +83,11 @@ export function usePlaythroughImportExport() {
   };
 
   return {
-    showImportError,
-    setShowImportError,
-    importErrorMessage,
     handleExportClick,
     handleExportKeyDown,
     handleImportClick,
+    importErrorMessage,
+    setShowImportError,
+    showImportError,
   };
 }

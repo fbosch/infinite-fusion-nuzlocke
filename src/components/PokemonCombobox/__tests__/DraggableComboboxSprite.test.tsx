@@ -81,10 +81,10 @@ describe("DraggableComboboxSprite", () => {
     const { settingsStore } = await import("@/stores/settings");
     const { container } = render(
       <DraggableComboboxSprite
-        value={{ id: 25, name: "Pikachu", nationalDexId: 25 }}
-        dragPreview={null}
         comboboxId="route-1-single"
+        dragPreview={null}
         locationId="route-1"
+        value={{ id: 25, name: "Pikachu", nationalDexId: 25 }}
       />,
     );
     const sprite = container.querySelector('[draggable="true"]');
@@ -105,14 +105,14 @@ describe("DraggableComboboxSprite", () => {
   it("omits Dex links when no Pokemon is selected", () => {
     expect(
       getDraggableComboboxSpriteMenuOptions({
-        value: undefined,
-        locationId: "route-1",
-        field: "head",
         customLocations: [],
-        moveEncountersBetweenLocations: true,
-        preEvolution: null,
         evolutions: [],
+        field: "head",
+        locationId: "route-1",
+        moveEncountersBetweenLocations: true,
         onOpenMoveModal: vi.fn(),
+        preEvolution: null,
+        value: undefined,
       }),
     ).toEqual([]);
   });

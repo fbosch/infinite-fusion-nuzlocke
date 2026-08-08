@@ -14,46 +14,45 @@ const INFINITE_FUSION_DEX_DETAILS_BASE_URL =
 
 interface PokemonDataEntry {
   id: number;
-  nationalDexId: number;
   name: string;
+  nationalDexId: number;
 }
 
 interface PokemonDisplayData {
-  nationalDexId: number;
   name: string;
+  nationalDexId: number;
 }
 
 interface FileChangeStats {
-  filePath: string;
   additions: number;
   deletions: number;
+  filePath: string;
 }
 
 type PokemonChangeStatus = "Added" | "Removed";
 
 interface LocationPokemonDelta {
+  location: string;
+  pokemonId: number;
+  source: string;
   status: PokemonChangeStatus;
   version: string;
-  location: string;
-  source: string;
-  pokemonId: number;
 }
 
 interface GroupedLocationPokemonDelta {
+  location: string;
+  pokemonIds: number[];
+  source: string;
   status: PokemonChangeStatus;
   version: string;
-  location: string;
-  source: string;
-  pokemonIds: number[];
 }
 
 interface RoutePokemonIdsEntry {
-  routeName: string;
   pokemonIds: number[];
+  routeName: string;
 }
 
 interface RouteEncounterEntry {
-  routeName: string;
   encounters: Array<
     | number
     | {
@@ -61,6 +60,7 @@ interface RouteEncounterEntry {
         encounterType?: string;
       }
   >;
+  routeName: string;
 }
 
 interface LocationPokemonDataRoot {
@@ -73,15 +73,15 @@ interface LocationPokemonDataRoot {
 
 interface LocationPokemonEntry {
   location: string;
-  source: string;
   pokemonId: number;
+  source: string;
 }
 
 const EncounterEntrySchema = z.union([
   z.number().int(),
   z.object({
-    pokemonId: z.number().int(),
     encounterType: z.string().optional(),
+    pokemonId: z.number().int(),
   }),
 ]);
 
@@ -172,14 +172,14 @@ function getFileChangeStats(): FileChangeStats[] {
     .filter((line) => line.length > 0)
     .map((line) => {
       const [additions, deletions, filePath] = line.split("\t");
-      if (!additions || !deletions || !filePath) {
+      if (!(additions && deletions && filePath)) {
         throw new Error(`Unexpected git diff --numstat output: ${line}`);
       }
 
       return {
-        filePath,
         additions: additions === "-" ? 0 : Number.parseInt(additions, 10),
         deletions: deletions === "-" ? 0 : Number.parseInt(deletions, 10),
+        filePath,
       };
     })
     .filter((stats) => stats.filePath.endsWith(".json"))
@@ -268,14 +268,14 @@ function appendEncounterEntries(
     if (typeof parsedEncounter.data === "number") {
       entries.push({
         location: item.routeName,
-        source: defaultSource,
         pokemonId: parsedEncounter.data,
+        source: defaultSource,
       });
     } else {
       entries.push({
         location: item.routeName,
-        source: parsedEncounter.data.encounterType ?? defaultSource,
         pokemonId: parsedEncounter.data.pokemonId,
+        source: parsedEncounter.data.encounterType ?? defaultSource,
       });
     }
   }
@@ -296,8 +296,8 @@ function appendPokemonIdEntries(
     if (typeof pokemonId === "number" && Number.isInteger(pokemonId)) {
       entries.push({
         location: item.routeName,
-        source: defaultSource,
         pokemonId,
+        source: defaultSource,
       });
     }
   }
@@ -320,9 +320,9 @@ function appendDirectLocationEntry(
   ) {
     entries.push({
       location: location.routeName,
+      pokemonId: location.pokemonId,
       source:
         typeof location.source === "string" ? location.source : defaultSource,
-      pokemonId: location.pokemonId,
     });
   }
 }
@@ -376,11 +376,11 @@ function groupLocationPokemonDeltas(
       delta.source,
     ].join("\u0000");
     const group = grouped.get(key) ?? {
+      location: delta.location,
+      pokemonIds: [],
+      source: delta.source,
       status: delta.status,
       version: delta.version,
-      location: delta.location,
-      source: delta.source,
-      pokemonIds: [],
     };
 
     group.pokemonIds.push(delta.pokemonId);
@@ -507,8 +507,8 @@ async function createPokemonDataMap(): Promise<
     }
 
     pokemonDataMap.set(entry.id, {
-      nationalDexId: entry.nationalDexId,
       name: entry.name,
+      nationalDexId: entry.nationalDexId,
     });
   }
 

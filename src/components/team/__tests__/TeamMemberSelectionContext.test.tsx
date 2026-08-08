@@ -45,9 +45,9 @@ describe("TeamMemberSelectionProvider", () => {
     const onClose = vi.fn();
     const wrapper = ({ children }: { children: ReactNode }) => (
       <TeamMemberSelectionProvider
-        position={0}
-        onSelect={onSelect}
         onClose={onClose}
+        onSelect={onSelect}
+        position={0}
       >
         {children}
       </TeamMemberSelectionProvider>

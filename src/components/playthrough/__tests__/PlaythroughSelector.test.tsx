@@ -18,22 +18,22 @@ const { setActivePlaythroughMock, trackEventMock } = vi.hoisted(() => ({
 
 const playthroughs = [
   {
+    createdAt: 100,
+    gameMode: "classic",
     id: "older",
     name: "Older Run",
-    gameMode: "classic",
-    createdAt: 100,
   },
   {
+    createdAt: 300,
+    gameMode: "remix",
     id: "newest",
     name: "Newest Run",
-    gameMode: "remix",
-    createdAt: 300,
   },
   {
+    createdAt: 200,
+    gameMode: "randomized",
     id: "middle",
     name: "Middle Run",
-    gameMode: "randomized",
-    createdAt: 200,
   },
 ];
 
@@ -70,23 +70,23 @@ vi.mock("@/components/CursorTooltip", () => ({
 
 vi.mock("@/hooks/usePlaythroughImportExport", () => ({
   usePlaythroughImportExport: () => ({
-    showImportError: false,
-    setShowImportError: vi.fn(),
-    importErrorMessage: "",
     handleExportClick: vi.fn(),
     handleExportKeyDown: vi.fn(),
     handleImportClick: vi.fn(),
+    importErrorMessage: "",
+    setShowImportError: vi.fn(),
+    showImportError: false,
   }),
 }));
 
 vi.mock("@/lib/analytics/playthroughEventData", () => ({
   getSharedEventProperties: () => ({
-    playthrough_id: "older",
-    game_mode: "classic",
-    encounter_count_bucket: "e_0",
-    deceased_count_bucket: "c_0",
     boxed_count_bucket: "c_0",
+    deceased_count_bucket: "c_0",
+    encounter_count_bucket: "e_0",
     fusion_count_bucket: "c_0",
+    game_mode: "classic",
+    playthrough_id: "older",
     viable_roster_bucket: "v_0",
   }),
 }));
@@ -105,9 +105,9 @@ vi.mock("../ImportErrorContent", () => ({
 
 vi.mock("@/stores/playthroughs/index", () => ({
   playthroughActions: {
-    setActivePlaythrough: setActivePlaythroughMock,
-    deletePlaythrough: vi.fn(),
     createPlaythrough: vi.fn(),
+    deletePlaythrough: vi.fn(),
+    setActivePlaythrough: setActivePlaythroughMock,
   },
 }));
 

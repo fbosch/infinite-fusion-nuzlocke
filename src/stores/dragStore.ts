@@ -20,19 +20,10 @@ let globalHandlersCleanup: (() => void) | null = null;
 
 // Simple actions for managing drag state
 export const dragActions = {
-  startDrag: (
-    data: string,
-    source: string,
-    value: PokemonOptionType | null | undefined,
-  ) => {
-    // Initialize global handlers on first use
-    initializeGlobalHandlers();
-
-    // Update all drag state at once
-    dragStore.currentDragData = data;
-    dragStore.currentDragSource = source;
-    dragStore.currentDragValue = value;
-    dragStore.isDragging = true;
+  // Cleanup for testing or hot reloading
+  cleanup: () => {
+    globalHandlersCleanup?.();
+    dragActions.clearDrag();
   },
 
   clearDrag: () => {
@@ -58,17 +49,27 @@ export const dragActions = {
   setIsDragging: (dragging: boolean) => {
     dragStore.isDragging = dragging;
   },
+  startDrag: (
+    data: string,
+    source: string,
+    value: PokemonOptionType | null | undefined,
+  ) => {
+    // Initialize global handlers on first use
+    initializeGlobalHandlers();
 
-  // Cleanup for testing or hot reloading
-  cleanup: () => {
-    globalHandlersCleanup?.();
-    dragActions.clearDrag();
+    // Update all drag state at once
+    dragStore.currentDragData = data;
+    dragStore.currentDragSource = source;
+    dragStore.currentDragValue = value;
+    dragStore.isDragging = true;
   },
 };
 
 // Initialize global drag end handlers (called automatically on first drag)
 function initializeGlobalHandlers() {
-  if (typeof window === "undefined" || globalHandlersCleanup) return;
+  if (typeof window === "undefined" || globalHandlersCleanup) {
+    return;
+  }
 
   const abortController = new AbortController();
   const { signal } = abortController;

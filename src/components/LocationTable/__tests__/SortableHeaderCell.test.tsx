@@ -17,7 +17,6 @@ function buildHeader(options: BuildHeaderOptions = {}) {
   const toggleSortingHandler = vi.fn();
 
   const header = {
-    id: "location-name",
     column: {
       columnDef: {
         header: content,
@@ -28,6 +27,7 @@ function buildHeader(options: BuildHeaderOptions = {}) {
       getToggleSortingHandler: () => toggleSortingHandler,
     },
     getContext: () => ({}),
+    id: "location-name",
   } as unknown as Header<CombinedLocation, unknown>;
 
   return { header, toggleSortingHandler };

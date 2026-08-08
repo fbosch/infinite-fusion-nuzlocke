@@ -24,7 +24,7 @@ export function ImportErrorContent({ errorMessage }: ImportErrorContentProps) {
         line.trim() &&
         !line.includes("Expected format:")
       ) {
-        validationErrors.push({ message: line.trim(), lineNumber });
+        validationErrors.push({ lineNumber, message: line.trim() });
       }
     }
 
@@ -47,17 +47,17 @@ export function ImportErrorContent({ errorMessage }: ImportErrorContentProps) {
     return (
       <div className="space-y-4">
         <div>
-          <h3 className="font-medium text-red-600 dark:text-red-400 mb-3">
+          <h3 className="mb-3 font-medium text-red-600 dark:text-red-400">
             The imported file has some issues:
           </h3>
           {validationErrors.length > 0 && (
             <div className="space-y-3">
               {validationErrors.map((error) => (
                 <div
+                  className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20"
                   key={error.lineNumber}
-                  className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800"
                 >
-                  <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+                  <p className="text-gray-800 text-sm leading-relaxed dark:text-gray-200">
                     {formatErrorMessage(error.message)}
                   </p>
                 </div>
@@ -71,8 +71,8 @@ export function ImportErrorContent({ errorMessage }: ImportErrorContentProps) {
 
   // Handle general import errors (file type, JSON syntax, etc.)
   return (
-    <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-      <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+    <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
+      <p className="text-gray-800 text-sm leading-relaxed dark:text-gray-200">
         {errorMessage}
       </p>
     </div>

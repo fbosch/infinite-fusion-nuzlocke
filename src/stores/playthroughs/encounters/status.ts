@@ -104,11 +104,11 @@ export const markEncounterAsDeceased = async (
   trackEvent("encounter_marked_deceased", {
     ...getSharedEventProperties(activePlaythrough),
     location_id: locationId,
-    was_fused: wasFused,
     team_size_after: getTeamSizeAfter(activePlaythrough),
     viable_roster_bucket_after: toViableRosterBucket(
       getViableRosterSize(activePlaythrough),
     ),
+    was_fused: wasFused,
   });
 };
 

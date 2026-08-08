@@ -40,15 +40,15 @@ const getGameModeInfo = (gameMode: GameMode) => {
       return null; // Don't show indicator for classic mode
     case "remix":
       return {
-        label: "Remix",
         className:
           "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400",
+        label: "Remix",
       };
     case "randomized":
       return {
-        label: "Random",
         className:
           "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400",
+        label: "Random",
       };
     default:
       return null;
@@ -112,7 +112,9 @@ export default function PlaythroughSelector({
 
   // Confirm delete playthrough
   const handleConfirmDelete = async () => {
-    if (!playthroughToDelete) return;
+    if (!playthroughToDelete) {
+      return;
+    }
 
     try {
       await playthroughActions.deletePlaythrough(playthroughToDelete.id);
@@ -185,7 +187,7 @@ export default function PlaythroughSelector({
 
   return (
     <>
-      <div className={clsx("relative w-full group", className)}>
+      <div className={clsx("group relative w-full", className)}>
         {/* Playthrough Selector Dropdown */}
         <Popover className="relative w-full">
           {({ open }) => (
@@ -193,14 +195,14 @@ export default function PlaythroughSelector({
               <PopoverButton
                 className={clsx(
                   "flex items-center justify-between gap-2 px-3 py-2.5 text-sm sm:gap-3 sm:px-4",
-                  "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700",
+                  "bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700",
                   "border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500",
                   standalone ? "rounded-xl" : "rounded-b-xl",
                   "transition-all duration-200 ease-out",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                   "focus-visible:border-blue-500 dark:focus-visible:border-blue-400",
                   "text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100",
-                  "disabled:opacity-50 disabled:cursor-not-allowed w-full cursor-pointer font-medium backdrop-blur-sm",
+                  "w-full cursor-pointer font-medium backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-50",
                   "h-11",
                 )}
                 disabled={isLoading}
@@ -210,58 +212,58 @@ export default function PlaythroughSelector({
                   }
                 }}
               >
-                <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
+                <div className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
                   <div className="flex size-6 items-center justify-center rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-700/60 dark:text-slate-300">
                     <Album className="size-4" />
                   </div>
-                  <span className="truncate min-w-0">
+                  <span className="min-w-0 truncate">
                     {activePlaythrough?.name || "Select Playthrough"}
                   </span>
                 </div>
                 <ChevronDown
                   className={clsx(
-                    "w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform duration-200",
+                    "h-4 w-4 text-gray-400 transition-transform duration-200 dark:text-gray-500",
                     open && "rotate-180",
                   )}
                 />
               </PopoverButton>
               <PopoverPanel
-                transition
-                anchor={{ to: "bottom end", gap: "12px" }}
+                anchor={{ gap: "12px", to: "bottom end" }}
                 className={clsx(
                   "z-[50] rounded-xl",
-                  "bg-white/95 dark:bg-gray-800/95 backdrop-blur-md",
+                  "bg-white/95 backdrop-blur-md dark:bg-gray-800/95",
                   "shadow-dropdown",
                   "border border-gray-200/50 dark:border-gray-600/50",
                   "w-80 max-w-[calc(100vw-2rem)] sm:w-96",
                   "origin-top-right",
                   "transition-opacity duration-150 data-closed:opacity-0",
                 )}
+                transition
               >
                 {/* Current playthroughs section */}
                 {allPlaythroughs.length > 0 && (
                   <>
-                    <div className="px-4 py-3 flex items-center justify-between border-b border-gray-200/50 dark:border-gray-600/50 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/30 dark:to-gray-600/30 rounded-t-xl">
-                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <div className="flex items-center justify-between rounded-t-xl border-gray-200/50 border-b bg-gradient-to-r from-gray-50 to-gray-100/50 px-4 py-3 dark:border-gray-600/50 dark:from-gray-700/30 dark:to-gray-600/30">
+                      <span className="font-semibold text-gray-500 text-xs uppercase tracking-wider dark:text-gray-400">
                         Playthroughs
                       </span>
                       <button
-                        type="button"
-                        onClick={handleImportClick}
+                        aria-label="Import playthrough"
                         className={clsx(
-                          "px-2 py-1 text-xs font-medium rounded-md flex items-center gap-1.5",
-                          "bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400",
+                          "flex items-center gap-1.5 rounded-md px-2 py-1 font-medium text-xs",
+                          "bg-gray-100 text-gray-600 dark:bg-gray-700/50 dark:text-gray-400",
                           "border border-gray-300 dark:border-gray-600",
-                          "hover:bg-blue-100 hover:text-blue-700 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-300 dark:hover:border-blue-600",
-                          "focus:bg-blue-100 focus:text-blue-700 focus:border-blue-300 dark:focus:bg-blue-900/30 dark:focus:text-blue-300 dark:focus:border-blue-600",
+                          "hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 dark:hover:border-blue-600 dark:hover:bg-blue-900/30 dark:hover:text-blue-300",
+                          "focus:border-blue-300 focus:bg-blue-100 focus:text-blue-700 dark:focus:border-blue-600 dark:focus:bg-blue-900/30 dark:focus:text-blue-300",
                           "transition-colors duration-200",
                           "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset",
                           "cursor-pointer",
                         )}
+                        onClick={handleImportClick}
                         title="Import playthrough from file"
-                        aria-label="Import playthrough"
+                        type="button"
                       >
-                        <Upload className="w-3 h-3" />
+                        <Upload className="h-3 w-3" />
                         Import
                       </button>
                     </div>
@@ -273,25 +275,24 @@ export default function PlaythroughSelector({
 
                       return (
                         <div
-                          key={playthrough.id}
                           className={clsx(
                             "group/menu-item relative",
-                            "hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100/50 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 text-gray-900 dark:text-gray-100",
+                            "text-gray-900 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100/50 dark:text-gray-100 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30",
                             isActive &&
-                              "bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/20 text-blue-700 dark:text-blue-300",
+                              "bg-gradient-to-r from-blue-50 to-blue-100/50 text-blue-700 dark:from-blue-900/20 dark:to-blue-800/20 dark:text-blue-300",
                           )}
+                          key={playthrough.id}
                         >
                           <button
-                            type="button"
-                            ref={(el) => {
-                              const index =
-                                sortedPlaythroughsForRender.findIndex(
-                                  (p) => p.id === playthrough.id,
-                                );
-                              if (index >= 0) {
-                                playthroughRefs.current[index] = el;
-                              }
-                            }}
+                            aria-label={`Select playthrough: ${playthrough.name}`}
+                            className={clsx(
+                              "flex w-full items-center justify-between px-4 py-3.5 pr-24 text-sm",
+                              "text-left transition-all duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset",
+                              "cursor-pointer",
+                            )}
+                            data-playthrough-index={sortedPlaythroughsForRender.findIndex(
+                              (p) => p.id === playthrough.id,
+                            )}
                             onClick={() =>
                               handlePlaythroughSelect(playthrough.id, "click")
                             }
@@ -315,26 +316,27 @@ export default function PlaythroughSelector({
                                 handleKeyDown(e, index);
                               }
                             }}
-                            aria-label={`Select playthrough: ${playthrough.name}`}
-                            data-playthrough-index={sortedPlaythroughsForRender.findIndex(
-                              (p) => p.id === playthrough.id,
-                            )}
-                            className={clsx(
-                              "flex w-full items-center justify-between px-4 py-3.5 pr-24 text-sm",
-                              "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset text-left transition-all duration-200 ease-out",
-                              "cursor-pointer",
-                            )}
+                            ref={(el) => {
+                              const index =
+                                sortedPlaythroughsForRender.findIndex(
+                                  (p) => p.id === playthrough.id,
+                                );
+                              if (index >= 0) {
+                                playthroughRefs.current[index] = el;
+                              }
+                            }}
+                            type="button"
                           >
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="flex min-w-0 flex-1 items-center gap-3">
                               <div
                                 className={clsx(
-                                  "w-2.5 h-2.5 rounded-full flex-shrink-0",
+                                  "h-2.5 w-2.5 flex-shrink-0 rounded-full",
                                   isActive
                                     ? "bg-blue-500 shadow-sm"
                                     : "bg-gray-400 dark:bg-gray-500",
                                 )}
                               />
-                              <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                                 <div className="flex items-center gap-2">
                                   <span className="truncate font-semibold">
                                     {playthrough.name}
@@ -342,7 +344,7 @@ export default function PlaythroughSelector({
                                   {gameModeInfo && (
                                     <span
                                       className={clsx(
-                                        "text-xs px-2 py-1 rounded-full font-medium",
+                                        "rounded-full px-2 py-1 font-medium text-xs",
                                         gameModeInfo.className,
                                       )}
                                     >
@@ -350,9 +352,9 @@ export default function PlaythroughSelector({
                                     </span>
                                   )}
                                 </div>
-                                <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                <div className="flex items-center gap-3 text-gray-500 text-xs dark:text-gray-400">
                                   <div className="flex items-center gap-1">
-                                    <Calendar className="w-3 h-3" />
+                                    <Calendar className="h-3 w-3" />
                                     <span>
                                       {new Date(
                                         playthrough.createdAt,
@@ -363,9 +365,19 @@ export default function PlaythroughSelector({
                               </div>
                             </div>
                           </button>
-                          <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-1 opacity-0 transition-opacity duration-200 group-hover/menu-item:opacity-100 group-focus-within/menu-item:opacity-100">
+                          <div className="absolute top-1/2 right-4 flex -translate-y-1/2 items-center gap-1 opacity-0 transition-opacity duration-200 group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100">
                             <button
-                              type="button"
+                              aria-label={`Export ${playthrough.name}`}
+                              className={clsx(
+                                "rounded-lg p-2 transition-colors duration-200",
+                                "border border-transparent",
+                                "hover:border-blue-300 hover:bg-blue-100 dark:hover:border-blue-600 dark:hover:bg-blue-900/20",
+                                "focus:border-blue-300 focus:bg-blue-100 dark:focus:border-blue-600 dark:focus:bg-blue-900/20",
+                                "text-gray-400 hover:text-blue-600 dark:hover:text-blue-400",
+                                "focus:text-blue-600 dark:focus:text-blue-400",
+                                "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset",
+                                "cursor-pointer",
+                              )}
                               onClick={(e) =>
                                 handleExportClick(playthrough as Playthrough, e)
                               }
@@ -375,32 +387,32 @@ export default function PlaythroughSelector({
                                   e,
                                 )
                               }
-                              className={clsx(
-                                "p-2 rounded-lg transition-colors duration-200",
-                                "border border-transparent",
-                                "hover:bg-blue-100 hover:border-blue-300 dark:hover:bg-blue-900/20 dark:hover:border-blue-600",
-                                "focus:bg-blue-100 focus:border-blue-300 dark:focus:bg-blue-900/20 dark:focus:border-blue-600",
-                                "text-gray-400 hover:text-blue-600 dark:hover:text-blue-400",
-                                "focus:text-blue-600 dark:focus:text-blue-400",
-                                "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset",
-                                "cursor-pointer",
-                              )}
-                              aria-label={`Export ${playthrough.name}`}
                               tabIndex={0}
+                              type="button"
                             >
                               <div className="relative z-[1000]">
                                 <CursorTooltip
-                                  delay={200}
                                   content="Export playthrough"
+                                  delay={200}
                                   placement="bottom-start"
                                 >
-                                  <Download className="w-4 h-4" />
+                                  <Download className="h-4 w-4" />
                                 </CursorTooltip>
                               </div>
                             </button>
                             {allPlaythroughs.length > 1 && (
                               <button
-                                type="button"
+                                aria-label={`Delete ${playthrough.name}`}
+                                className={clsx(
+                                  "rounded-lg p-2 transition-all duration-200",
+                                  "border border-transparent",
+                                  "hover:border-red-300 hover:bg-red-100 dark:hover:border-red-600 dark:hover:bg-red-900/20",
+                                  "focus:border-red-300 focus:bg-red-100 dark:focus:border-red-600 dark:focus:bg-red-900/20",
+                                  "text-gray-400 hover:text-red-600 dark:hover:text-red-400",
+                                  "focus:text-red-600 dark:focus:text-red-400",
+                                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-inset",
+                                  "cursor-pointer",
+                                )}
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
@@ -413,26 +425,16 @@ export default function PlaythroughSelector({
                                     handleDeleteClick(playthrough);
                                   }
                                 }}
-                                className={clsx(
-                                  "p-2 rounded-lg transition-all duration-200",
-                                  "border border-transparent",
-                                  "hover:bg-red-100 hover:border-red-300 dark:hover:bg-red-900/20 dark:hover:border-red-600",
-                                  "focus:bg-red-100 focus:border-red-300 dark:focus:bg-red-900/20 dark:focus:border-red-600",
-                                  "text-gray-400 hover:text-red-600 dark:hover:text-red-400",
-                                  "focus:text-red-600 dark:focus:text-red-400",
-                                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-inset",
-                                  "cursor-pointer",
-                                )}
-                                aria-label={`Delete ${playthrough.name}`}
                                 tabIndex={0}
+                                type="button"
                               >
                                 <div className="relative z-[1000]">
                                   <CursorTooltip
-                                    delay={200}
                                     content="Delete playthrough"
+                                    delay={200}
                                     placement="bottom-start"
                                   >
-                                    <Trash2 className="w-4 h-4" />
+                                    <Trash2 className="h-4 w-4" />
                                   </CursorTooltip>
                                 </div>
                               </button>
@@ -445,9 +447,9 @@ export default function PlaythroughSelector({
                 )}
 
                 {isLoading && (
-                  <div className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+                  <div className="px-4 py-4 text-center text-gray-500 text-sm dark:text-gray-400">
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin" />
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
                       Loading playthroughs...
                     </div>
                   </div>
@@ -456,26 +458,26 @@ export default function PlaythroughSelector({
                 {/* Create new playthrough section - Now inside the dropdown as well */}
                 <div
                   className={clsx(
-                    "border-t border-gray-200/50 dark:border-gray-600/50",
+                    "border-gray-200/50 border-t dark:border-gray-600/50",
                     "hover:bg-green-50 dark:hover:bg-green-900/20",
-                    "focus-within:outline-none focus-within:bg-green-50 focus-within:dark:bg-green-900/20",
+                    "focus-within:bg-green-50 focus-within:outline-none focus-within:dark:bg-green-900/20",
                   )}
                 >
                   <div className="relative">
                     <button
-                      type="button"
-                      onClick={handleCreateClick}
                       className={clsx(
                         "group flex w-full items-center gap-3 px-4 py-3.5 text-sm",
-                        "text-gray-700 dark:text-gray-300 transition-all duration-200",
+                        "text-gray-700 transition-all duration-200 dark:text-gray-300",
                         "cursor-pointer",
                         "rounded-b-xl",
                         "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset",
                         "focus-visible:bg-green-50 dark:focus-visible:bg-green-900/20",
                       )}
+                      onClick={handleCreateClick}
+                      type="button"
                     >
-                      <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30">
-                        <Plus className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30">
+                        <Plus className="h-4 w-4 text-green-600 dark:text-green-400" />
                       </div>
                       <span className="font-semibold">
                         Create New Playthrough
@@ -504,25 +506,25 @@ export default function PlaythroughSelector({
 
       {/* Delete confirmation dialog */}
       <ConfirmationDialog
+        cancelText="Cancel"
+        confirmText="Delete"
         isOpen={showDeleteConfirm}
+        message={`Are you sure you want to delete "${playthroughToDelete?.name}"? This action cannot be undone and all progress will be lost.`}
         onClose={handleCancelDelete}
         onConfirm={handleConfirmDelete}
         title="Delete Playthrough"
-        message={`Are you sure you want to delete "${playthroughToDelete?.name}"? This action cannot be undone and all progress will be lost.`}
-        confirmText="Delete"
-        cancelText="Cancel"
         variant="danger"
       />
 
       {/* Import error modal */}
       <ConfirmationDialog
+        cancelText="Cancel"
+        confirmText="OK"
         isOpen={showImportError}
+        message=""
         onClose={() => setShowImportError(false)}
         onConfirm={() => setShowImportError(false)}
         title="Import Error"
-        message=""
-        confirmText="OK"
-        cancelText="Cancel"
         variant="danger"
       >
         <ImportErrorContent errorMessage={importErrorMessage} />

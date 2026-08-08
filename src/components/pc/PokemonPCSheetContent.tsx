@@ -10,19 +10,19 @@ import type { PCEntry } from "./types";
 
 interface PokemonPCSheetContentProps {
   activeTab: PCTab;
-  onChangeTab: (tab: PCTab) => void;
-  team: PCEntry[];
-  stored: PCEntry[];
   deceased: PCEntry[];
   idToName: Map<string, string>;
+  onChangeTab: (tab: PCTab) => void;
   onClose: () => void;
   onOpenTeamMemberPicker: (position: number) => void;
+  stored: PCEntry[];
+  team: PCEntry[];
 }
 
 interface PCSheetTabProps {
+  count: string | number;
   icon: LucideIcon;
   label: string;
-  count: string | number;
 }
 
 function PCSheetTab({ icon: Icon, label, count }: PCSheetTabProps) {
@@ -38,7 +38,7 @@ function PCSheetTab({ icon: Icon, label, count }: PCSheetTabProps) {
       }
     >
       <Icon className="h-4 w-4" />
-      <span className="font-medium flex-1">{label}</span>
+      <span className="flex-1 font-medium">{label}</span>
       <span className="ml-1 rounded bg-gray-200 px-1 text-[10px] text-gray-800 dark:bg-gray-600 dark:text-gray-100">
         {count}
       </span>
@@ -55,11 +55,11 @@ function EmptyPCPanel({
 }) {
   return (
     <div
+      aria-live="polite"
       className="flex min-h-[60vh] w-full flex-1 flex-col items-center justify-center px-4 text-gray-600 dark:text-gray-300"
       role="status"
-      aria-live="polite"
     >
-      <Icon className="mb-3 h-10 w-10 opacity-50" aria-hidden="true" />
+      <Icon aria-hidden="true" className="mb-3 h-10 w-10 opacity-50" />
       <p className="text-center">{message}</p>
     </div>
   );
@@ -79,26 +79,26 @@ export function PokemonPCSheetContent({
 
   return (
     <TabGroup
-      selectedIndex={getPCTabIndex(activeTab)}
       onChange={(index) => onChangeTab(getPCTab(index))}
+      selectedIndex={getPCTabIndex(activeTab)}
     >
       <TabList className="mb-4 flex w-full flex-nowrap items-center gap-2 overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:none] sm:pb-0 [&::-webkit-scrollbar]:hidden">
-        <PCSheetTab icon={Users} label="Team" count={`${teamCount}/6`} />
-        <PCSheetTab icon={Box} label="Box" count={stored.length} />
-        <PCSheetTab icon={Skull} label="Graveyard" count={deceased.length} />
+        <PCSheetTab count={`${teamCount}/6`} icon={Users} label="Team" />
+        <PCSheetTab count={stored.length} icon={Box} label="Box" />
+        <PCSheetTab count={deceased.length} icon={Skull} label="Graveyard" />
       </TabList>
 
       <TabPanels className="flex min-h-0 flex-1 flex-col">
         <TabPanel className="flex min-h-0 flex-1">
           <div
             aria-label="Team members list"
-            className="w-full space-y-3 py-2 max-h-[calc(100dvh-6.5rem)] overflow-y-auto"
+            className="max-h-[calc(100dvh-6.5rem)] w-full space-y-3 overflow-y-auto py-2"
           >
             {team.map((entry) => (
               <TeamEntryItem
-                key={entry.locationId}
                 entry={entry}
                 idToName={idToName}
+                key={entry.locationId}
                 onClose={onClose}
                 onTeamMemberClick={onOpenTeamMemberPicker}
               />
@@ -111,17 +111,17 @@ export function PokemonPCSheetContent({
           ) : (
             <div
               aria-label="Boxed Pokémon list"
-              className="grid content-start w-full grid-cols-1 gap-2 py-2 sm:grid-cols-2 h-[calc(100dvh-6.5rem)] overflow-y-auto"
+              className="grid h-[calc(100dvh-6.5rem)] w-full grid-cols-1 content-start gap-2 overflow-y-auto py-2 sm:grid-cols-2"
             >
               {stored.map((entry) => (
                 <PCEntryItem
-                  key={entry.locationId}
-                  entry={entry}
-                  idToName={idToName}
-                  mode="stored"
-                  hoverRingClass="hover:ring-blue-400/30"
-                  fallbackLabel="Boxed Pokémon"
                   className=""
+                  entry={entry}
+                  fallbackLabel="Boxed Pokémon"
+                  hoverRingClass="hover:ring-blue-400/30"
+                  idToName={idToName}
+                  key={entry.locationId}
+                  mode="stored"
                   onClose={onClose}
                 />
               ))}
@@ -135,18 +135,18 @@ export function PokemonPCSheetContent({
               message="No fallen Pokémon. Keep it that way!"
             />
           ) : (
-            <div className="w-full py-2 h-[calc(100dvh-6.5rem)] overflow-y-auto">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            <div className="h-[calc(100dvh-6.5rem)] w-full overflow-y-auto py-2">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                 {deceased.map((entry) => (
                   <GraveyardGridItem
-                    key={entry.locationId}
                     entry={entry}
+                    key={entry.locationId}
                     onLocationClick={(locationId) => {
                       const pokemon = entry.head || entry.body;
                       scrollToLocationById(locationId, {
                         behavior: "smooth",
-                        highlightUids: pokemon?.uid ? [pokemon.uid] : [],
                         durationMs: 1200,
+                        highlightUids: pokemon?.uid ? [pokemon.uid] : [],
                       });
                       onClose();
                     }}

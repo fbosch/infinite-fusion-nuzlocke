@@ -2,7 +2,9 @@ const SPRITE_CDN_BASE_URL =
   "https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom";
 
 export function getSpriteVariantSuffix(index: number): string {
-  if (index === 0) return "";
+  if (index === 0) {
+    return "";
+  }
 
   let suffix = "";
   let remaining = index - 1;

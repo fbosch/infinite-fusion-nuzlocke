@@ -21,36 +21,36 @@ vi.mock("../starters", () => ({
 vi.mock("@/lib/queryClient", () => {
   const mockEncountersData = [
     {
-      routeName: "Route 1",
       pokemon: [
         { id: 1, source: "wild" },
         { id: 2, source: "wild" },
         { id: 3, source: "gift" },
       ],
+      routeName: "Route 1",
     },
     {
-      routeName: "Route 2",
       pokemon: [
         { id: 4, source: "wild" },
         { id: 5, source: "trade" },
         { id: 6, source: "wild" },
       ],
+      routeName: "Route 2",
     },
     {
-      routeName: "Viridian Forest",
       pokemon: [
         { id: 7, source: "wild" },
         { id: 8, source: "wild" },
         { id: 9, source: "wild" },
       ],
+      routeName: "Viridian Forest",
     },
     {
-      routeName: "Pewter City",
       pokemon: [
         { id: 10, source: "gift" },
         { id: 11, source: "trade" },
         { id: 12, source: "wild" },
       ],
+      routeName: "Pewter City",
     },
   ];
 
@@ -60,8 +60,8 @@ vi.mock("@/lib/queryClient", () => {
     },
     encountersQueries: {
       all: vi.fn(() => ({
-        queryKey: ["encounters", "classic"],
         queryFn: vi.fn().mockResolvedValue(mockEncountersData),
+        queryKey: ["encounters", "classic"],
       })),
     },
   };
@@ -246,10 +246,10 @@ describe("Locations", () => {
       it("should return false for non-starter locations", async () => {
         // Create a mock location that we know doesn't have encounters
         const mockLocation = {
+          description: "A mock location for testing",
           id: "mock-location-id",
           name: "Mock City",
           region: "Kanto",
-          description: "A mock location for testing",
         };
 
         const hasEncounters = await hasLocationEncounters(

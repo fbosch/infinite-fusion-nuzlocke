@@ -24,7 +24,7 @@ let dexEntriesCache: DexEntry[] | null = null;
  * Loads Pokemon data from the JSON file with caching
  */
 export async function loadPokemonData(
-  forceReload: boolean = false,
+  forceReload = false,
 ): Promise<ProcessedPokemonData[]> {
   if (pokemonDataCache && !forceReload) {
     return pokemonDataCache;
@@ -46,7 +46,7 @@ export async function loadPokemonData(
     }
 
     for (const pokemon of pokemonArray) {
-      if (!pokemon.id || !pokemon.name) {
+      if (!(pokemon.id && pokemon.name)) {
         throw new Error(
           `Invalid Pokemon data entry: missing id or name - ${JSON.stringify(pokemon)}`,
         );
@@ -65,7 +65,7 @@ export async function loadPokemonData(
  * Loads and builds Pokemon name map with caching
  */
 export async function loadPokemonNameMap(
-  forceReload: boolean = false,
+  forceReload = false,
 ): Promise<PokemonNameMap> {
   if (pokemonNameMapCache && !forceReload) {
     return pokemonNameMapCache;
@@ -81,9 +81,7 @@ export async function loadPokemonNameMap(
 /**
  * Loads dex entries from the JSON file with caching
  */
-export async function loadDexEntries(
-  forceReload: boolean = false,
-): Promise<DexEntry[]> {
+export async function loadDexEntries(forceReload = false): Promise<DexEntry[]> {
   if (dexEntriesCache && !forceReload) {
     return dexEntriesCache;
   }
@@ -104,7 +102,7 @@ export async function loadDexEntries(
     }
 
     for (const entry of entries) {
-      if (!entry.id || !entry.name) {
+      if (!(entry.id && entry.name)) {
         throw new Error(
           `Invalid dex entry: missing id or name - ${JSON.stringify(entry)}`,
         );
@@ -141,11 +139,11 @@ export async function checkDataFiles(): Promise<{
   };
 
   return {
-    pokemonData: await checkFile("shared/pokemon-data.json"),
-    dexEntries: await checkFile("shared/base-entries.json"),
     classicEncounters: await checkFile("classic/encounters.json"),
-    remixEncounters: await checkFile("remix/encounters.json"),
+    dexEntries: await checkFile("shared/base-entries.json"),
     locations: await checkFile("shared/locations.json"),
+    pokemonData: await checkFile("shared/pokemon-data.json"),
+    remixEncounters: await checkFile("remix/encounters.json"),
   };
 }
 
@@ -167,8 +165,8 @@ export function getCacheStatus(): {
   dexEntries: boolean;
 } {
   return {
+    dexEntries: dexEntriesCache !== null,
     pokemonData: pokemonDataCache !== null,
     pokemonNameMap: pokemonNameMapCache !== null,
-    dexEntries: dexEntriesCache !== null,
   };
 }

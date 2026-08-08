@@ -17,9 +17,6 @@ const createStorageMock = (): Storage => {
   const storage = new Map<string, string>();
 
   return {
-    get length() {
-      return storage.size;
-    },
     clear() {
       storage.clear();
     },
@@ -28,6 +25,9 @@ const createStorageMock = (): Storage => {
     },
     key(index: number) {
       return Array.from(storage.keys())[index] ?? null;
+    },
+    get length() {
+      return storage.size;
     },
     removeItem(key: string) {
       storage.delete(key);
@@ -45,8 +45,8 @@ describe("PlaythroughResumeObserver", () => {
     analyticsMocks.trackEvent.mockReset();
     analyticsMocks.trackEvent.mockReturnValue(true);
     Object.defineProperty(globalThis, "sessionStorage", {
-      value: createStorageMock(),
       configurable: true,
+      value: createStorageMock(),
       writable: true,
     });
     sessionStorage.clear();
@@ -79,8 +79,8 @@ describe("PlaythroughResumeObserver", () => {
       expect(analyticsMocks.trackEvent).toHaveBeenCalledWith(
         "playthrough_resumed",
         expect.objectContaining({
-          playthrough_id: activePlaythrough.id,
           days_since_last_active_bucket: "d_7_13_days",
+          playthrough_id: activePlaythrough.id,
         }),
       );
     });
@@ -106,8 +106,8 @@ describe("PlaythroughResumeObserver", () => {
       expect(analyticsMocks.trackEvent).toHaveBeenCalledWith(
         "landing_viewed",
         expect.objectContaining({
-          playthrough_id: activePlaythrough.id,
           entry_route: "home",
+          playthrough_id: activePlaythrough.id,
         }),
       );
     });

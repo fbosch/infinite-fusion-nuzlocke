@@ -260,10 +260,9 @@
 }
 
 body {
+  min-height: 100vh;
   font-family: var(--font-family-sans);
   background-color: #f9fafb;
-  /* bg-gray-50 */
-  min-height: 100vh;
 }
 
 .dark body {
@@ -282,8 +281,8 @@ body {
 
 /* Custom scrollbar styles for virtualized components */
 .scrollbar-thin {
-  scrollbar-width: thin;
   scrollbar-color: #d1d5db transparent;
+  scrollbar-width: thin;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -323,9 +322,9 @@ body {
 
 /* Ensure absolutely positioned canvas overlays match container size */
 .absolute > canvas.w-full.h-full {
+  display: block;
   width: 100%;
   height: 100%;
-  display: block;
 }
 
 .image-render-crisp-edges {
@@ -362,12 +361,12 @@ body {
 }
 
 .shimmer::before {
-  content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  content: "";
   background: linear-gradient(
     90deg,
     transparent 0%,
@@ -466,8 +465,8 @@ button:disabled,
   html:not([data-reduced-motion]) *,
   html:not([data-reduced-motion]) *::before,
   html:not([data-reduced-motion]) *::after {
-    animation: none !important;
     transition: none !important;
+    animation: none !important;
   }
 }
 
@@ -479,6 +478,6 @@ html[data-reduced-motion="true"] * {
 html[data-reduced-motion="true"] *,
 html[data-reduced-motion="true"] *::before,
 html[data-reduced-motion="true"] *::after {
-  animation: none !important;
   transition: none !important;
+  animation: none !important;
 }

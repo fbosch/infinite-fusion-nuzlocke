@@ -7,8 +7,8 @@
  */
 
 export interface PokemonNameMap {
-  nameToId: Map<string, number>;
   idToName: Map<number, string>;
+  nameToId: Map<string, number>;
 }
 
 /**
@@ -63,7 +63,7 @@ export function buildPokemonNameMap(
   const idToName = new Map<number, string>();
 
   for (const pokemon of pokemonData) {
-    if (!pokemon.name || !pokemon.id) {
+    if (!(pokemon.name && pokemon.id)) {
       continue;
     }
 
@@ -77,7 +77,7 @@ export function buildPokemonNameMap(
     }
   }
 
-  return { nameToId, idToName };
+  return { idToName, nameToId };
 }
 
 /**

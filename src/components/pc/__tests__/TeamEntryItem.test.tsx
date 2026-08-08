@@ -24,13 +24,13 @@ const {
   updateTeamMemberMock,
   playEvolutionMock,
 } = vi.hoisted(() => ({
-  moveTeamMemberToBoxMock: vi.fn().mockResolvedValue(undefined),
-  moveEncounterToBoxMock: vi.fn().mockResolvedValue(undefined),
   markEncounterAsDeceasedMock: vi.fn().mockResolvedValue(undefined),
   markTeamMemberAsDeceasedMock: vi.fn().mockResolvedValue(undefined),
+  moveEncounterToBoxMock: vi.fn().mockResolvedValue(undefined),
+  moveTeamMemberToBoxMock: vi.fn().mockResolvedValue(undefined),
+  playEvolutionMock: vi.fn(),
   updatePokemonByUIDMock: vi.fn().mockResolvedValue(undefined),
   updateTeamMemberMock: vi.fn().mockResolvedValue(undefined),
-  playEvolutionMock: vi.fn(),
 }));
 
 type FusionSpriteMockProps = React.HTMLAttributes<HTMLDivElement> & {
@@ -126,8 +126,8 @@ vi.mock("@/lib/sprites", () => ({
 }));
 
 vi.mock("@/lib/preferredVariants", () => ({
-  preferredVariants: new Map(),
   getPreferredVariant: () => null,
+  preferredVariants: new Map(),
   setPreferredVariant: vi.fn(),
 }));
 
@@ -137,10 +137,10 @@ vi.mock("@/loaders/locations", () => ({
 
 vi.mock("@/stores/playthroughs/index", () => ({
   playthroughActions: {
-    moveTeamMemberToBox: moveTeamMemberToBoxMock,
-    moveEncounterToBox: moveEncounterToBoxMock,
     markEncounterAsDeceased: markEncounterAsDeceasedMock,
     markTeamMemberAsDeceased: markTeamMemberAsDeceasedMock,
+    moveEncounterToBox: moveEncounterToBoxMock,
+    moveTeamMemberToBox: moveTeamMemberToBoxMock,
     updatePokemonByUID: updatePokemonByUIDMock,
     updateTeamMember: updateTeamMemberMock,
   },
@@ -162,24 +162,24 @@ vi.mock("@/utils/scrollToLocation", () => ({
 const idToName = new Map([["team-slot-1", "Team Slot"]]);
 
 const filledTeamEntry: PCEntry = {
-  locationId: "team-slot-1",
-  locationName: "Team Slot",
-  position: 1,
-  isFusion: true,
-  head: {
-    id: 25,
-    name: "Pikachu",
-    uid: "pikachu-uid",
-    nationalDexId: 25,
-    originalLocation: "route-1",
-  },
   body: {
     id: 133,
     name: "Eevee",
-    uid: "eevee-uid",
     nationalDexId: 133,
     originalLocation: "route-2",
+    uid: "eevee-uid",
   },
+  head: {
+    id: 25,
+    name: "Pikachu",
+    nationalDexId: 25,
+    originalLocation: "route-1",
+    uid: "pikachu-uid",
+  },
+  isFusion: true,
+  locationId: "team-slot-1",
+  locationName: "Team Slot",
+  position: 1,
 };
 
 describe("TeamEntryItem", () => {
@@ -201,12 +201,12 @@ describe("TeamEntryItem", () => {
   it("opens team assignment from empty team slot", () => {
     const onTeamMemberClick = vi.fn();
     const emptyTeamEntry: PCEntry = {
+      body: null,
+      head: null,
+      isFusion: false,
       locationId: "team-slot-1",
       locationName: "Team Slot",
       position: 1,
-      isFusion: false,
-      head: null,
-      body: null,
     };
 
     render(
@@ -220,11 +220,11 @@ describe("TeamEntryItem", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
 
     expect(onTeamMemberClick).toHaveBeenCalledWith(1, {
-      position: 1,
-      isEmpty: true,
-      headPokemon: null,
       bodyPokemon: null,
+      headPokemon: null,
+      isEmpty: true,
       isFusion: false,
+      position: 1,
     });
   });
 
@@ -244,23 +244,23 @@ describe("TeamEntryItem", () => {
     await user.keyboard("{Enter}");
 
     expect(onTeamMemberClick).toHaveBeenCalledWith(1, {
-      position: 1,
-      isEmpty: false,
-      headPokemon: filledTeamEntry.head,
       bodyPokemon: filledTeamEntry.body,
+      headPokemon: filledTeamEntry.head,
+      isEmpty: false,
       isFusion: true,
+      position: 1,
     });
   });
 
   it("opens an empty team slot from its primary action", () => {
     const onTeamMemberClick = vi.fn();
     const emptyTeamEntry: PCEntry = {
+      body: null,
+      head: null,
+      isFusion: false,
       locationId: "team-slot-1",
       locationName: "Team Slot",
       position: 1,
-      isFusion: false,
-      head: null,
-      body: null,
     };
 
     render(
@@ -274,11 +274,11 @@ describe("TeamEntryItem", () => {
     fireEvent.click(screen.getByLabelText("Team slot 2"));
 
     expect(onTeamMemberClick).toHaveBeenCalledWith(1, {
-      position: 1,
-      isEmpty: true,
-      headPokemon: null,
       bodyPokemon: null,
+      headPokemon: null,
+      isEmpty: true,
       isFusion: false,
+      position: 1,
     });
   });
 
@@ -345,32 +345,32 @@ describe("TeamEntryItem", () => {
     };
     const entryB: PCEntry = {
       ...filledTeamEntry,
-      head: {
-        ...filledTeamEntry.head!,
-        id: 1,
-        name: "Bulbasaur",
-        uid: "bulbasaur-uid",
-      },
       body: {
         ...filledTeamEntry.body!,
         id: 2,
         name: "Ivysaur",
         uid: "ivysaur-uid",
       },
+      head: {
+        ...filledTeamEntry.head!,
+        id: 1,
+        name: "Bulbasaur",
+        uid: "bulbasaur-uid",
+      },
     };
     const entryC: PCEntry = {
       ...filledTeamEntry,
-      head: {
-        ...filledTeamEntry.head!,
-        id: 4,
-        name: "Charmander",
-        uid: "charmander-uid",
-      },
       body: {
         ...filledTeamEntry.body!,
         id: 7,
         name: "Squirtle",
         uid: "squirtle-uid",
+      },
+      head: {
+        ...filledTeamEntry.head!,
+        id: 4,
+        name: "Charmander",
+        uid: "charmander-uid",
       },
     };
 

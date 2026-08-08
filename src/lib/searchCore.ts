@@ -20,25 +20,27 @@ export class SearchCore {
   private initializationPromise: Promise<void> | null = null;
 
   private readonly fuseOptions: IFuseOptions<PokemonData> = {
+    distance: 50,
+    findAllMatches: true,
+    ignoreLocation: false,
+    includeScore: true,
     // Search in both name and ID fields
     keys: [
       {
         name: "name",
       },
     ],
-    threshold: 0.3,
-    includeScore: true,
-    minMatchCharLength: 1,
     location: 0,
-    distance: 50,
-    useExtendedSearch: false,
-    findAllMatches: true,
+    minMatchCharLength: 1,
     shouldSort: true,
-    ignoreLocation: false,
+    threshold: 0.3,
+    useExtendedSearch: false,
   };
 
   async initialize(rawPokemonData?: Pokemon[]): Promise<void> {
-    if (this.fuse) return; // Already initialized
+    if (this.fuse) {
+      return; // Already initialized
+    }
 
     if (this.initializationPromise) {
       await this.initializationPromise;
@@ -75,7 +77,7 @@ export class SearchCore {
    * Search for Pokemon by name or ID
    */
   search(query: string): SearchResult[] {
-    if (!this.fuse || !this.pokemonData || !query?.trim()) {
+    if (!(this.fuse && this.pokemonData && query?.trim())) {
       return [];
     }
 
@@ -83,7 +85,7 @@ export class SearchCore {
 
     // Numeric search (by ID) - exact match for better performance
     if (/^\d+$/.test(trimmedQuery)) {
-      const queryNum = parseInt(trimmedQuery, 10);
+      const queryNum = Number.parseInt(trimmedQuery, 10);
       const matches: SearchResult[] = [];
       for (const pokemon of this.pokemonData) {
         if (pokemon.id === queryNum || pokemon.nationalDexId === queryNum) {

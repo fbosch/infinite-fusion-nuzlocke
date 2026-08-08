@@ -5,33 +5,33 @@ interface PokemonType {
 }
 
 export interface PokemonSpeciesData {
-  is_legendary: boolean;
-  is_mythical: boolean;
-  generation: string | null;
   evolution_chain?: {
     url: string;
   };
+  generation: string | null;
+  is_legendary: boolean;
+  is_mythical: boolean;
 }
 
 export interface PokemonSpeciesApiData {
-  is_legendary: boolean;
-  is_mythical: boolean;
-  generation?: {
-    name: string;
-  } | null;
   evolution_chain?: {
     url: string;
   };
+  generation?: {
+    name: string;
+  } | null;
+  is_legendary: boolean;
+  is_mythical: boolean;
 }
 
 export interface EvolutionDetail {
+  condition?: string;
   id: number;
-  name: string;
-  trigger?: string;
-  min_level?: number;
   item?: string;
   location?: string;
-  condition?: string;
+  min_level?: number;
+  name: string;
+  trigger?: string;
 }
 
 export interface EvolutionData {
@@ -40,12 +40,12 @@ export interface EvolutionData {
 }
 
 export interface ProcessedPokemonData {
-  id: number;
-  nationalDexId: number;
-  name: string;
-  types: PokemonType[];
-  species: PokemonSpeciesData;
   evolution?: EvolutionData;
+  id: number;
+  name: string;
+  nationalDexId: number;
+  species: PokemonSpeciesData;
+  types: PokemonType[];
 }
 
 type PokemonApiData = {
@@ -67,16 +67,16 @@ export function createProcessedPokemonData(
   evolution: EvolutionData | undefined,
 ): ProcessedPokemonData {
   return {
+    evolution,
     id: entry.id,
-    nationalDexId: pokemon.id,
     name: entry.name,
-    types: pokemon.types.map((type) => ({ name: type.type.name })),
+    nationalDexId: pokemon.id,
     species: {
+      evolution_chain: species.evolution_chain,
+      generation: species.generation?.name ?? null,
       is_legendary: species.is_legendary,
       is_mythical: species.is_mythical,
-      generation: species.generation?.name ?? null,
-      evolution_chain: species.evolution_chain,
     },
-    evolution,
+    types: pokemon.types.map((type) => ({ name: type.type.name })),
   };
 }

@@ -27,19 +27,19 @@ export function getDeceasedEntries(
 
     if (isPokemonDeceased(data.head)) {
       entries.push({
+        body: null,
+        head: data.head,
         locationId: `${locationId}-head`,
         locationName,
-        head: data.head,
-        body: null,
       });
     }
 
     if (isPokemonDeceased(data.body)) {
       entries.push({
+        body: data.body,
+        head: null,
         locationId: `${locationId}-body`,
         locationName,
-        head: null,
-        body: data.body,
       });
     }
   });
@@ -59,10 +59,10 @@ export function getStoredEntries(
 
     if (headStored || bodyStored) {
       entries.push({
+        body: bodyStored ? data.body : null,
+        head: headStored ? data.head : null,
         locationId,
         locationName: getPCEntryLocationName(locationId, idToName),
-        head: headStored ? data.head : null,
-        body: bodyStored ? data.body : null,
       });
     }
   });

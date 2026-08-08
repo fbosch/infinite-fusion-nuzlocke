@@ -6,43 +6,43 @@ import pokemonApiService from "@/services/pokemonApiService";
 export const pokemonQueries = {
   all: () =>
     queryOptions({
-      queryKey: ["pokemon", "all"],
-      queryFn: () => pokemonApiService.getAllPokemon(),
-      staleTime: ms("7d"),
       gcTime: ms("30m"),
       placeholderData: keepPreviousData,
+      queryFn: () => pokemonApiService.getAllPokemon(),
+      queryKey: ["pokemon", "all"],
+      staleTime: ms("7d"),
     }),
 
   byId: (id: number) =>
     queryOptions({
-      queryKey: ["pokemon", "byId", id],
+      enabled: !!id,
+      gcTime: Number.POSITIVE_INFINITY,
       queryFn: async () => {
         // Always use API for individual lookups to avoid circular dependency
         return pokemonApiService.getPokemonById(id);
       },
-      enabled: !!id,
-      staleTime: Infinity,
-      gcTime: Infinity,
+      queryKey: ["pokemon", "byId", id],
+      staleTime: Number.POSITIVE_INFINITY,
     }),
 
   byIds: (ids: number[]) =>
     queryOptions({
-      queryKey: ["pokemon", "byIds", ids],
+      enabled: ids.length > 0,
+      gcTime: Number.POSITIVE_INFINITY,
       queryFn: async () => {
         // Always use API for multiple lookups to avoid circular dependency
         return pokemonApiService.getPokemonByIds(ids);
       },
-      enabled: ids.length > 0,
-      staleTime: Infinity,
-      gcTime: Infinity,
+      queryKey: ["pokemon", "byIds", ids],
+      staleTime: Number.POSITIVE_INFINITY,
     }),
 
   byType: (type: string) =>
     queryOptions({
-      queryKey: ["pokemon", "byType", type],
-      queryFn: () => pokemonApiService.getPokemonByType(type),
       enabled: !!type,
-      staleTime: ms("5m"),
       gcTime: ms("10m"),
+      queryFn: () => pokemonApiService.getPokemonByType(type),
+      queryKey: ["pokemon", "byType", type],
+      staleTime: ms("5m"),
     }),
 };

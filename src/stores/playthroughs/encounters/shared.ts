@@ -11,13 +11,11 @@ export type PlaythroughWithEncounters = Playthrough & {
 export const createPokemonWithLocationAndUID = (
   pokemon: PokemonOption,
   locationId: string,
-): PokemonOption => {
-  return {
-    ...pokemon,
-    originalLocation: pokemon.originalLocation ?? locationId,
-    uid: pokemon.uid || generatePokemonUID(),
-  };
-};
+): PokemonOption => ({
+  ...pokemon,
+  originalLocation: pokemon.originalLocation ?? locationId,
+  uid: pokemon.uid || generatePokemonUID(),
+});
 
 export const ensureActivePlaythroughWithEncounters =
   (): PlaythroughWithEncounters | null => {
@@ -38,11 +36,15 @@ export const getFusionSpriteIdFromEncounter = (enc?: {
   body: PokemonOption | null;
   isFusion?: boolean;
 }) => {
-  if (!enc?.isFusion || !enc.head || !enc.body) return null;
+  if (!(enc?.isFusion && enc.head && enc.body)) {
+    return null;
+  }
 
   const headId = enc.head.id ?? null;
   const bodyId = enc.body.id ?? null;
-  if (!headId || !bodyId) return null;
+  if (!(headId && bodyId)) {
+    return null;
+  }
 
   try {
     return getSpriteId(headId, bodyId);

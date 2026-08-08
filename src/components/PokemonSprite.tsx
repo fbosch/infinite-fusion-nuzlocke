@@ -5,16 +5,16 @@ import gen7SpritesheetMetadata from "@/assets/pokemon-gen7-spritesheet-metadata.
 import spritesheetMetadata from "@/assets/pokemon-gen8-spritesheet-metadata.json";
 
 interface PokemonSpriteProps extends React.HTMLAttributes<HTMLImageElement> {
-  pokemonId: number;
+  className?: string;
+  draggable?: boolean;
   /**
    * Sprite generation to use.
    * - 'gen8': Standard size sprites (default)
    * - 'gen7': More compact sprites for space efficiency
    */
   generation?: "gen7" | "gen8";
-  className?: string;
-  draggable?: boolean;
   loading?: "eager" | "lazy";
+  pokemonId: number;
   priority?: boolean;
 }
 
@@ -42,23 +42,23 @@ export function PokemonSprite({
 
   return (
     <Image
-      src={spritesheetSrc}
       alt={`${spriteData.name} sprite (${generation})`}
-      width={spriteData.width}
-      height={spriteData.height}
-      className={twMerge("object-none ", className)}
-      unoptimized
+      className={twMerge("object-none", className)}
       decoding="async"
+      height={spriteData.height}
       loading={loading}
       priority={priority}
+      src={spritesheetSrc}
       style={{
-        objectPosition: `-${spriteData.x}px -${spriteData.y}px`,
-        minWidth: spriteData.width,
-        minHeight: spriteData.height,
         height: spriteData.height,
-        width: spriteData.width,
         imageRendering: "pixelated",
+        minHeight: spriteData.height,
+        minWidth: spriteData.width,
+        objectPosition: `-${spriteData.x}px -${spriteData.y}px`,
+        width: spriteData.width,
       }}
+      unoptimized
+      width={spriteData.width}
       {...rest}
     />
   );

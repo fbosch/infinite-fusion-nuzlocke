@@ -34,7 +34,9 @@ export function useLocalStorage<T>(
   const stringifiedInitialValue = serialize(initialValue);
 
   const parseSnapshot = (snapshot: string | null): T => {
-    if (snapshot === null) return initialValue;
+    if (snapshot === null) {
+      return initialValue;
+    }
 
     try {
       const parsed = JSON.parse(snapshot);

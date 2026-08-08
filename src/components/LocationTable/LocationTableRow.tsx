@@ -21,8 +21,8 @@ interface LocationTableRowProps {
 }
 
 const EMPTY_ENCOUNTER = {
-  head: null,
   body: null,
+  head: null,
   isFusion: false,
   updatedAt: 0,
 };
@@ -35,7 +35,7 @@ const getEffectiveFusionId = ({
   NonNullable<ReturnType<typeof useEncounter>>,
   "isFusion" | "head" | "body"
 >) => {
-  if (!isFusion || !head || !body || !canFuse(head, body)) {
+  if (!(isFusion && head && body && canFuse(head, body))) {
     return null;
   }
 
@@ -110,24 +110,24 @@ export default function LocationTableRow({
 
   return (
     <tr
-      key={row.id}
-      className="h-location-row hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors group/row"
-      data-location-id={locationId}
       aria-rowindex={resolvedRowIndex + 2}
+      className="group/row h-location-row transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-800/60"
+      data-location-id={locationId}
+      key={row.id}
     >
       {visibleCells.map((cell) =>
         match(cell.column.id)
           .with("sprite", () => (
             <td
+              className="group relative whitespace-nowrap p-1 text-gray-900 text-sm dark:text-gray-100"
               key={cell.id}
-              className="p-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 relative group"
             >
               <PokemonSummaryCard
-                ref={spriteRef}
-                headPokemon={encounterData.head}
                 bodyPokemon={encounterData.body}
+                headPokemon={encounterData.head}
                 isFusion={encounterData.isFusion}
                 locationId={locationId}
+                ref={spriteRef}
               />
             </td>
           ))
@@ -138,15 +138,15 @@ export default function LocationTableRow({
             const hasEncounter = !!(encounterData.head || encounterData.body);
             return (
               <td
+                className="whitespace-nowrap p-2 align-top text-gray-900 text-sm dark:text-gray-100"
                 key={cell.id}
-                className="p-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-top"
               >
-                <div className="flex flex-col items-center justify-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 group-focus-within/row:opacity-100">
+                <div className="flex flex-col items-center justify-center gap-1 opacity-0 transition-opacity duration-200 group-focus-within/row:opacity-100 group-hover/row:opacity-100">
                   {hasEncounter && (
                     <ResetEncounterButton
+                      hasEncounter={hasEncounter}
                       locationId={locationId}
                       locationName={row.original.name}
-                      hasEncounter={hasEncounter}
                     />
                   )}
                   {isCustomLocation(row.original) && (
@@ -161,8 +161,8 @@ export default function LocationTableRow({
           })
           .otherwise(() => (
             <td
+              className="whitespace-nowrap px-4 py-3 text-gray-900 text-sm dark:text-gray-100"
               key={cell.id}
-              className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
             >
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </td>

@@ -76,7 +76,9 @@ const DEFAULT_ROCK_SMASH_POKEMON_ID = 74;
  * Detects encounter type from text content like "Surf", "Old Rod", etc.
  */
 export function detectEncounterType(text: string): EncounterType | null {
-  if (!text || typeof text !== "string") return null;
+  if (!text || typeof text !== "string") {
+    return null;
+  }
 
   const normalizedText = text.toLowerCase().trim();
 
@@ -87,13 +89,12 @@ export function detectEncounterType(text: string): EncounterType | null {
     customCheck?: (text: string) => boolean;
   }> = [
     {
-      type: "surf",
-      patterns: ["surfing"],
       customCheck: (text) =>
         text === "surf" || (text.includes("surf") && !text.includes("rod")),
+      patterns: ["surfing"],
+      type: "surf",
     },
     {
-      type: "fishing",
       patterns: [
         "old rod",
         "good rod",
@@ -101,26 +102,27 @@ export function detectEncounterType(text: string): EncounterType | null {
         "fishing rod",
         "rod fishing",
       ],
+      type: "fishing",
     },
     {
-      type: "rock_smash",
       patterns: ["rock smash", "smash rock", "breaking rocks", "break rock"],
+      type: "rock_smash",
     },
     {
-      type: "cave",
       patterns: ["cave", "cavern", "underground", "tunnel", "mine", "grotto"],
+      type: "cave",
     },
     {
-      type: "grass",
       patterns: ["grass", "walking", "wild grass", "overworld", "lilypads"],
+      type: "grass",
     },
     {
-      type: "special",
       patterns: ["gift", "trade", "special", "event"],
+      type: "special",
     },
     {
-      type: "pokeradar",
       patterns: ["pokeradar", "pokéradar", "radar"],
+      type: "pokeradar",
     },
   ];
 
@@ -185,28 +187,28 @@ function isValidRouteName(text: string): boolean {
 }
 
 export interface PokemonEncounter {
-  pokemonId: number; // Custom Infinite Fusion ID
   encounterType: EncounterType;
+  pokemonId: number; // Custom Infinite Fusion ID
 }
 
 interface RouteEncounters {
-  routeName: string;
   encounters: PokemonEncounter[];
+  routeName: string;
 }
 
 const EncounterTypeSchema = z.enum(WILD_ENCOUNTER_TYPES);
 
 const RouteEncountersSchema = z.array(
   z.strictObject({
-    routeName: z.string().trim().min(1),
     encounters: z
       .array(
         z.strictObject({
-          pokemonId: z.number().int().positive(),
           encounterType: EncounterTypeSchema,
+          pokemonId: z.number().int().positive(),
         }),
       )
       .min(1),
+    routeName: z.string().trim().min(1),
   }),
 );
 
@@ -236,18 +238,18 @@ function summarizeEncounterParity(
   const encounters = routes.flatMap((route) => route.encounters);
 
   return {
-    routeCount: routes.length,
     encounterCount: encounters.length,
-    pokemonIds: Array.from(
-      new Set(encounters.map((encounter) => encounter.pokemonId)),
-    )
-      .sort((a, b) => a - b)
-      .join(","),
     encounterTypes: Array.from(
       new Set(encounters.map((encounter) => encounter.encounterType)),
     )
       .sort()
       .join(","),
+    pokemonIds: Array.from(
+      new Set(encounters.map((encounter) => encounter.pokemonId)),
+    )
+      .sort((a, b) => a - b)
+      .join(","),
+    routeCount: routes.length,
   };
 }
 
@@ -373,7 +375,7 @@ function consumeBalancedTemplateToken(
 
 function splitTemplateArguments(rawArgs: string): string[] {
   const args: string[] = [];
-  const depths: TemplateArgumentDepths = { square: 0, curly: 0, angle: 0 };
+  const depths: TemplateArgumentDepths = { angle: 0, curly: 0, square: 0 };
   let current = "";
 
   for (let index = 0; index < rawArgs.length; index += 1) {
@@ -412,8 +414,8 @@ function extractEncounterTemplate(line: string): EncounterTemplate | null {
   const rawArgs = templateMatch[2] ?? "";
 
   return {
-    templateName,
     args: rawArgs.length > 0 ? splitTemplateArguments(rawArgs) : [],
+    templateName,
   };
 }
 
@@ -445,8 +447,8 @@ function applyEncounterTemplate(
     );
 
     encounters.push({
-      pokemonId,
       encounterType: currentEncounterType,
+      pokemonId,
     });
   }
 
@@ -476,8 +478,6 @@ function getEncounterTypeTransition(
     addDefaultRockSmashEncounter(encounters, pokemonNameMap, contextLabel);
     return "rock_smash";
   }
-
-  return undefined;
 }
 
 function cleanTemplateValue(value: string): string {
@@ -501,8 +501,8 @@ function addDefaultRockSmashEncounter(
   }
 
   encounters.push({
-    pokemonId: DEFAULT_ROCK_SMASH_POKEMON_ID,
     encounterType: "rock_smash",
+    pokemonId: DEFAULT_ROCK_SMASH_POKEMON_ID,
   });
 }
 
@@ -584,8 +584,8 @@ export function parseWildEncounterRoutesFromWikitext(
     }
 
     routes.push({
-      routeName: activeRouteName,
       encounters: deduplicateEncounters(activeEncounters),
+      routeName: activeRouteName,
     });
 
     activeRouteName = null;
@@ -749,7 +749,7 @@ async function backfillMissingRouteArticles(
             return null;
           }
 
-          return { routeName, encounters } satisfies RouteEncounters;
+          return { encounters, routeName } satisfies RouteEncounters;
         } catch (error) {
           ConsoleFormatter.warn(
             `Failed to scrape article for ${routeName}: ${error instanceof Error ? error.message : "unknown error"}`,
@@ -821,24 +821,24 @@ function consolidateSubLocations(routes: RouteEncounters[]): RouteEncounters[] {
     }
 
     return {
-      routeName,
       encounters: Array.from(uniqueEncounters.values()).sort((a, b) => {
         // Sort by encounter type first, then by pokemon ID
         const typeOrder = {
-          grass: 0,
           cave: 1,
-          rock_smash: 2,
-          surf: 3,
           fishing: 4,
-          special: 5,
+          grass: 0,
           pokeradar: 6,
+          rock_smash: 2,
+          special: 5,
+          surf: 3,
         };
         const typeComparison =
           typeOrder[a.encounterType] - typeOrder[b.encounterType];
-        return typeComparison !== 0
-          ? typeComparison
-          : a.pokemonId - b.pokemonId;
+        return typeComparison === 0
+          ? a.pokemonId - b.pokemonId
+          : typeComparison;
       }),
+      routeName,
     };
   });
 }
@@ -930,7 +930,7 @@ function findParentLocation(
 async function scrapeWildEncounters(
   url: string,
   pokemonNameMap: PokemonNameMap,
-  isRemix: boolean = false,
+  isRemix = false,
 ): Promise<RouteEncounters[]> {
   ConsoleFormatter.printHeader(
     "Scraping Wild Encounters",
@@ -1039,7 +1039,7 @@ async function main() {
 
     const duration = Date.now() - startTime;
 
-    ConsoleFormatter.success(`Scraping completed successfully!`);
+    ConsoleFormatter.success("Scraping completed successfully!");
     ConsoleFormatter.info(
       `Classic encounters: ${classicRoutes.length} routes (${(classicStats.size / 1024).toFixed(1)} KB)`,
     );

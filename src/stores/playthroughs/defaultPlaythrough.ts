@@ -8,13 +8,13 @@ export const createDefaultPlaythrough = (): Playthrough => {
   const timestamp = Date.now();
 
   return {
+    createdAt: timestamp,
+    encounters: {},
+    gameMode: DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
     id: generatePrefixedId("playthrough"),
     name: DEFAULT_PLAYTHROUGH_NAME,
-    encounters: {},
     team: { members: Array.from({ length: 6 }, () => null) },
-    gameMode: DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
-    version: DEFAULT_PLAYTHROUGH_VERSION,
-    createdAt: timestamp,
     updatedAt: timestamp,
+    version: DEFAULT_PLAYTHROUGH_VERSION,
   };
 };

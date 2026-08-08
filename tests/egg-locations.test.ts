@@ -2,18 +2,18 @@ import { describe, expect, it } from "vitest";
 import eggLocationsData from "../data/shared/egg-locations.json";
 
 interface EggLocation {
+  description: string;
   routeName: string;
   source: "gift" | "nest";
-  description: string;
 }
 
 interface EggLocationsData {
-  totalLocations: number;
+  locations: EggLocation[];
   sources: {
     gifts: number;
     nests: number;
   };
-  locations: EggLocation[];
+  totalLocations: number;
 }
 
 describe("Egg Locations Data Integrity", () => {

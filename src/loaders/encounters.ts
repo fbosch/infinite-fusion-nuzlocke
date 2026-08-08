@@ -1,9 +1,5 @@
 import { encountersData } from "@/lib/queryClient";
-import {
-  EncounterSource,
-  type PokemonEncounter,
-  type RouteEncounter,
-} from "@/types/encounters";
+import { EncounterSource, type RouteEncounter } from "@/types/encounters";
 import { useLocationEncountersById } from "./locations";
 import type { Pokemon, PokemonOptionType } from "./pokemon";
 import { useAllPokemon, usePokemonNameMap } from "./pokemon";
@@ -14,8 +10,8 @@ import { getStarterPokemonByGameMode } from "./starters";
  * Used to track Pokemon encounters and their fusion state
  */
 interface EncounterData {
-  head: PokemonOptionType | null;
   body: PokemonOptionType | null;
+  head: PokemonOptionType | null;
   isFusion: boolean;
 }
 
@@ -51,8 +47,8 @@ async function getEncountersByRouteName(
   if (routeName === "Starter") {
     const starterIds = await getStarterPokemonByGameMode(gameMode);
     return {
-      routeName: "Starter",
       pokemon: starterIds.map((id) => ({ id, source: EncounterSource.GIFT })),
+      routeName: "Starter",
     };
   }
 
@@ -99,9 +95,9 @@ function clearEncountersCache(): void {
 
 // Hook to get processed encounter data for a location
 interface UseEncounterDataOptions {
-  locationId?: string;
   enabled?: boolean;
   gameMode?: "classic" | "remix";
+  locationId?: string;
 }
 
 export type RouteEncounterPokemon = PokemonOptionType & {
@@ -164,9 +160,9 @@ export function useEncountersForLocation({
     routePokemonIds.has(pokemonId);
 
   return {
-    routeEncounterData,
-    isLoading,
     error,
+    isLoading,
     isRoutePokemon,
+    routeEncounterData,
   };
 }

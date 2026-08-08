@@ -29,7 +29,7 @@ function getDisplayPokemonForSummary(
   isTeamMember: boolean,
 ) {
   if (isTeamMember) {
-    return { head: headPokemon ?? null, body: bodyPokemon ?? null, isFusion };
+    return { body: bodyPokemon ?? null, head: headPokemon ?? null, isFusion };
   }
 
   return getDisplayPokemon(headPokemon ?? null, bodyPokemon ?? null, isFusion);
@@ -71,7 +71,9 @@ function getSummaryCardLink(
   displayPokemon: DisplayPokemon,
   eitherPokemonIsEgg: boolean,
 ) {
-  if (eitherPokemonIsEgg) return "#";
+  if (eitherPokemonIsEgg) {
+    return "#";
+  }
 
   const headId = displayPokemon.head?.id;
   const bodyId = displayPokemon.body?.id;

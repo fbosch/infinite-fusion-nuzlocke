@@ -10,11 +10,17 @@ export const getBrowserReducedMotion = (): boolean => {
 };
 
 export const getDocumentReducedMotion = (): boolean => {
-  if (typeof document === "undefined") return getBrowserReducedMotion();
+  if (typeof document === "undefined") {
+    return getBrowserReducedMotion();
+  }
 
   const preference = document.documentElement.dataset.reducedMotion;
-  if (preference === "true") return true;
-  if (preference === "false") return false;
+  if (preference === "true") {
+    return true;
+  }
+  if (preference === "false") {
+    return false;
+  }
 
   return getBrowserReducedMotion();
 };

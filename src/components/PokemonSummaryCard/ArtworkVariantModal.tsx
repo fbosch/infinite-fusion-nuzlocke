@@ -27,11 +27,11 @@ import ContextMenu from "../ContextMenu";
 import { getDisplayPokemon } from "./utils";
 
 interface ArtworkVariantModalProps {
+  bodyId?: number | null;
+  headId?: number | null;
+  isFusion?: boolean;
   isOpen: boolean;
   onClose: () => void;
-  headId?: number | null;
-  bodyId?: number | null;
-  isFusion?: boolean;
 }
 
 export function ArtworkVariantModal({
@@ -85,7 +85,9 @@ export function ArtworkVariantModal({
   const isLoading = creditsLoading || variantsLoading;
 
   const availableVariants = (() => {
-    if (!variants || variants.length <= 1) return [];
+    if (!variants || variants.length <= 1) {
+      return [];
+    }
     return variants;
   })();
 
@@ -112,52 +114,52 @@ export function ArtworkVariantModal({
 
   return (
     <Dialog
-      open={isOpen}
+      className="group relative z-[70]"
       onClose={handleClose}
-      className="relative z-[70] group"
+      open={isOpen}
     >
       <DialogBackdrop
-        transition
-        className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 "
         aria-hidden="true"
+        className="fixed inset-0 bg-black/30 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/50"
+        transition
       />
 
       <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
         <DialogPanel
-          transition
-          id="artwork-variant-modal"
           className={clsx(
-            "max-w-5xl w-full max-h-[80vh] space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col",
-            "transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98",
+            "flex max-h-[80vh] w-full max-w-5xl flex-col space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800",
+            "transition duration-150 ease-out data-closed:scale-98 data-closed:opacity-0",
           )}
+          id="artwork-variant-modal"
+          transition
         >
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+            <DialogTitle className="font-semibold text-gray-900 text-xl dark:text-white">
               Select Artwork Variant
             </DialogTitle>
             <button
-              type="button"
-              onClick={handleClose}
+              aria-label="Close modal"
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
-                "p-1 rounded-md transition-colors",
+                "rounded-md p-1 transition-colors",
               )}
-              aria-label="Close modal"
+              onClick={handleClose}
+              type="button"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-8 flex-1">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="flex flex-1 items-center justify-center py-8">
+              <div className="h-8 w-8 animate-spin rounded-full border-blue-600 border-b-2" />
               <span className="ml-3 text-gray-600 dark:text-gray-300">
                 Loading variants...
               </span>
             </div>
           ) : availableVariants.length === 0 ? (
-            <div className="text-center py-8 flex-1">
+            <div className="flex-1 py-8 text-center">
               <p className="text-gray-600 dark:text-gray-300">
                 No artwork variants available for this Pokémon.
               </p>
@@ -165,11 +167,11 @@ export function ArtworkVariantModal({
           ) : (
             <>
               <RadioGroup
-                value={selectedVariant}
-                onChange={handleSelectVariant}
-                data-scroll-container
-                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-y-auto overflow-x-hidden flex-1 min-h-0 scrollbar-thin p-3 relative"
                 aria-label="Artwork variant options"
+                className="scrollbar-thin relative grid min-h-0 flex-1 grid-cols-2 gap-4 overflow-y-auto overflow-x-hidden p-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+                data-scroll-container
+                onChange={handleSelectVariant}
+                value={selectedVariant}
               >
                 {availableVariants.map((variant) => {
                   const spriteUrl = generateSpriteUrl(
@@ -178,13 +180,11 @@ export function ArtworkVariantModal({
                     variant,
                   );
                   return (
-                    <Field key={variant} className="contents">
+                    <Field className="contents" key={variant}>
                       <Radio
-                        value={variant}
-                        id={`artwork-variant-${variant}`}
                         className={({ checked }) =>
                           clsx(
-                            "relative group p-2 rounded-lg border-2 transition-color duration-200 cursor-pointer flex flex-col",
+                            "group relative flex cursor-pointer flex-col rounded-lg border-2 p-2 transition-color duration-200",
                             "hover:border-blue-500 hover:shadow-md",
                             "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                             {
@@ -194,53 +194,55 @@ export function ArtworkVariantModal({
                             },
                           )
                         }
+                        id={`artwork-variant-${variant}`}
+                        value={variant}
                       >
                         {({ checked }) => (
-                          <figure className="flex flex-col items-center space-y-2 relative user-select-none group/figure">
+                          <figure className="user-select-none group/figure relative flex flex-col items-center space-y-2">
                             <div className="">
                               <Image
-                                src={spriteUrl}
                                 alt={`Artwork variant ${variant || "default"}`}
-                                className="w-24 h-24 object-fill image-render-pixelated"
-                                width={100}
+                                className="image-render-pixelated h-24 w-24 object-fill"
+                                decoding="async"
                                 height={100}
                                 loading="lazy"
-                                decoding="async"
+                                src={spriteUrl}
                                 unoptimized
+                                width={100}
                               />
                               {checked && (
-                                <div className="absolute top-0.5 right-0.5 bg-blue-500 text-white rounded-full p-1.5 shadow-lg">
+                                <div className="absolute top-0.5 right-0.5 rounded-full bg-blue-500 p-1.5 text-white shadow-lg">
                                   <Check className="h-3 w-3" />
                                 </div>
                               )}
                               <ContextMenu
                                 items={[
                                   {
-                                    label: "View on FusionDex",
-                                    id: "artist",
+                                    favicon:
+                                      "https://www.fusiondex.org/favicon.ico",
                                     href: `https://www.fusiondex.org/sprite/pif/${spriteId}${variant}`,
-                                    target: "_blank",
                                     icon: ArrowUpRight,
                                     iconClassName:
                                       "dark:text-blue-300 text-blue-400",
-                                    favicon:
-                                      "https://www.fusiondex.org/favicon.ico",
+                                    id: "artist",
+                                    label: "View on FusionDex",
                                     onClick: (
                                       event: React.MouseEvent<HTMLAnchorElement>,
                                     ) => {
                                       event.stopPropagation();
                                     },
+                                    target: "_blank",
                                   },
                                 ]}
                               >
                                 <div className="absolute inset-0 bg-transparent" />
                               </ContextMenu>
                             </div>
-                            <figcaption className="w-full text-center px-1">
-                              <div className="text-xs font-normal text-gray-500 dark:text-gray-400 cursor-pointer block leading-tight break-words select-none">
+                            <figcaption className="w-full px-1 text-center">
+                              <div className="block cursor-pointer select-none break-words font-normal text-gray-500 text-xs leading-tight dark:text-gray-400">
                                 <div
-                                  className="text-lg transition-colors uppercase absolute -top-1 left-0.5 text-gray-500/40 dark:text-gray-400/30 group-hover/figure:text-blue-500/80 dark:group-hover/figure:text-gray-400/30 pointer-events-none"
                                   aria-hidden="true"
+                                  className="pointer-events-none absolute -top-1 left-0.5 text-gray-500/40 text-lg uppercase transition-colors group-hover/figure:text-blue-500/80 dark:text-gray-400/30 dark:group-hover/figure:text-gray-400/30"
                                 >
                                   {variant}
                                 </div>
@@ -261,28 +263,28 @@ export function ArtworkVariantModal({
                   );
                 })}
               </RadioGroup>
-              <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between border-gray-200 border-t pt-4 dark:border-gray-700">
                 <button
-                  type="button"
-                  onClick={handleClose}
                   className={clsx(
-                    "px-4 py-2 text-sm rounded-md transition-colors",
-                    "bg-gray-100 hover:bg-gray-200 text-gray-900",
-                    "dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100",
+                    "rounded-md px-4 py-2 text-sm transition-colors",
+                    "bg-gray-100 text-gray-900 hover:bg-gray-200",
+                    "dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600",
                     "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
                   )}
+                  onClick={handleClose}
+                  type="button"
                 >
                   Cancel
                 </button>
                 <button
-                  type="button"
-                  onClick={handleClearVariant}
                   className={clsx(
-                    "px-4 py-2 text-sm rounded-md transition-colors",
-                    "bg-gray-100 hover:bg-gray-200 text-gray-900",
-                    "dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100",
+                    "rounded-md px-4 py-2 text-sm transition-colors",
+                    "bg-gray-100 text-gray-900 hover:bg-gray-200",
+                    "dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600",
                     "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                   )}
+                  onClick={handleClearVariant}
+                  type="button"
                 >
                   Use Default
                 </button>

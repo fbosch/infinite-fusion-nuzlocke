@@ -3,22 +3,22 @@ import { ServiceWorkerManager } from "@/utils/serviceWorker";
 
 // Mock the service worker API
 const mockServiceWorker = {
-  register: vi.fn(),
   addEventListener: vi.fn(),
   controller: null as ServiceWorker | null,
+  register: vi.fn(),
 };
 
 const mockCache = {
+  delete: vi.fn(),
+  keys: vi.fn(),
   match: vi.fn(),
   put: vi.fn(),
-  keys: vi.fn(),
-  delete: vi.fn(),
 };
 
 const mockCaches = {
-  open: vi.fn().mockResolvedValue(mockCache),
   keys: vi.fn(),
   match: vi.fn(),
+  open: vi.fn().mockResolvedValue(mockCache),
 };
 
 // Mock fetch
@@ -80,12 +80,12 @@ describe("ServiceWorkerManager", () => {
       setTimeout(() => {
         mockPort.onmessage({
           data: {
-            type: "API_CACHE_STATUS",
             status: {
-              total: 10,
               cached: 8,
               percentage: 80,
+              total: 10,
             },
+            type: "API_CACHE_STATUS",
           },
         });
       }, 0);
@@ -93,9 +93,9 @@ describe("ServiceWorkerManager", () => {
       const status = await manager.getApiCacheStatus();
 
       expect(status).toEqual({
-        total: 10,
         cached: 8,
         percentage: 80,
+        total: 10,
       });
       expect(mockController.postMessage).toHaveBeenCalledWith(
         { type: "GET_API_CACHE_STATUS" },
@@ -110,9 +110,9 @@ describe("ServiceWorkerManager", () => {
       const status = await manager.getApiCacheStatus();
 
       expect(status).toEqual({
-        total: 0,
         endpoints: [],
         error: "Service worker not active",
+        total: 0,
       });
     });
   });

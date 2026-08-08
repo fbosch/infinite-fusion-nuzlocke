@@ -4,16 +4,16 @@ import { AlertTriangle } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 interface ConfirmationDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title: string;
-  message: string;
+  cancelText?: string;
   children?: React.ReactNode;
   confirmText?: string;
-  cancelText?: string;
-  variant?: "danger" | "warning" | "info";
+  isOpen: boolean;
+  message: string;
+  onClose: () => void;
+  onConfirm: () => void;
   showCancel?: boolean;
+  title: string;
+  variant?: "danger" | "warning" | "info";
 }
 
 export default function ConfirmationDialog({
@@ -44,41 +44,41 @@ export default function ConfirmationDialog({
 
   const variantStyles = {
     danger: {
-      icon: "text-red-600 dark:text-red-400",
       confirmButton:
         "bg-red-600 hover:bg-red-700 focus-visible:ring-red-500 text-white",
-    },
-    warning: {
-      icon: "text-yellow-600 dark:text-yellow-400",
-      confirmButton:
-        "bg-yellow-600 hover:bg-yellow-700 focus-visible:ring-yellow-500 text-white",
+      icon: "text-red-600 dark:text-red-400",
     },
     info: {
-      icon: "text-blue-600 dark:text-blue-400",
       confirmButton:
         "bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500 text-white",
+      icon: "text-blue-600 dark:text-blue-400",
+    },
+    warning: {
+      confirmButton:
+        "bg-yellow-600 hover:bg-yellow-700 focus-visible:ring-yellow-500 text-white",
+      icon: "text-yellow-600 dark:text-yellow-400",
     },
   };
 
   const styles = variantStyles[variant];
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-[70] group">
+    <Dialog className="group relative z-[70]" onClose={onClose} open={isOpen}>
       <DialogBackdrop
-        transition
-        className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"
         aria-hidden="true"
+        className="fixed inset-0 bg-black/30 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/50"
+        transition
       />
 
       <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
         <div
           className={clsx(
             children ? "max-w-2xl" : "max-w-md",
-            "space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-modal border border-gray-200 dark:border-gray-700 p-6",
+            "space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-modal dark:border-gray-700 dark:bg-gray-800",
             "transform transition-all duration-200 ease-out",
             isOpen
-              ? "opacity-100 scale-100 translate-y-0"
-              : "opacity-0 scale-95 translate-y-4",
+              ? "translate-y-0 scale-100 opacity-100"
+              : "translate-y-4 scale-95 opacity-0",
           )}
         >
           <div className="flex items-start space-x-3">
@@ -86,35 +86,35 @@ export default function ConfirmationDialog({
               <AlertTriangle className="h-6 w-6" />
             </div>
             <div className="flex-1">
-              <DialogTitle className="text-lg  text-gray-900 dark:text-white">
+              <DialogTitle className="text-gray-900 text-lg dark:text-white">
                 {title}
               </DialogTitle>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 break-words max-w-inherit">
+              <p className="mt-2 max-w-inherit break-words text-gray-600 text-sm dark:text-gray-300">
                 {children || message}
               </p>
             </div>
           </div>
 
-          <div className="flex space-x-3 justify-end pt-4">
+          <div className="flex justify-end space-x-3 pt-4">
             <Button
-              onClick={onClose}
               className={clsx(
-                "px-4 py-2 text-sm  rounded-md transition-colors",
-                "bg-gray-100 hover:bg-gray-200 text-gray-900",
-                "dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100",
+                "rounded-md px-4 py-2 text-sm transition-colors",
+                "bg-gray-100 text-gray-900 hover:bg-gray-200",
+                "dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
               )}
+              onClick={onClose}
             >
               {cancelText}
             </Button>
             <Button
-              ref={confirmButtonRef}
-              onClick={handleConfirm}
               className={clsx(
-                "px-4 py-2 text-sm  rounded-md transition-colors",
+                "rounded-md px-4 py-2 text-sm transition-colors",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
                 styles.confirmButton,
               )}
+              onClick={handleConfirm}
+              ref={confirmButtonRef}
             >
               {confirmText}
             </Button>

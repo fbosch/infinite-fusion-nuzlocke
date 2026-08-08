@@ -20,14 +20,14 @@ import {
 } from "@/loaders/pokemon";
 
 interface PokemonStatusInputProps {
-  value: PokemonOptionType | null | undefined;
-  onChange: (value: PokemonOptionType | null) => void;
   disabled?: boolean;
   dragPreview?: PokemonOptionType | null;
+  onChange: (value: PokemonOptionType | null) => void;
+  value: PokemonOptionType | null | undefined;
 }
 
-const getStatusIcon = (status: PokemonStatusType) => {
-  return match(status)
+const getStatusIcon = (status: PokemonStatusType) =>
+  match(status)
     .with(PokemonStatus.CAPTURED, () => (
       <PokeballIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
     ))
@@ -47,7 +47,6 @@ const getStatusIcon = (status: PokemonStatusType) => {
       <Skull className="h-4 w-4 text-gray-600 dark:text-gray-300" />
     ))
     .otherwise(() => null);
-};
 
 export const PokemonStatusInput = ({
   value,
@@ -59,8 +58,8 @@ export const PokemonStatusInput = ({
 
   // Floating UI setup
   const { refs, floatingStyles, placement } = useFloating({
-    placement: "bottom-end",
     middleware: [flip()],
+    placement: "bottom-end",
     whileElementsMounted: autoUpdate,
   });
 
@@ -83,65 +82,65 @@ export const PokemonStatusInput = ({
       {({ open }) => (
         <div className="relative">
           <MenuButton
-            ref={refs.setReference}
             className={clsx(
               "border-t-0 capitalize",
-              "flex items-center justify-between px-4 py-3.5 text-sm border bg-white dark:text-gray-400 focus:outline-none focus-visible:ring-1",
+              "flex items-center justify-between border bg-white px-4 py-3.5 text-sm focus:outline-none focus-visible:ring-1 dark:text-gray-400",
               "focus:outline-none",
-              "focus:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:cursor-not-allowed",
+              "focus:ring-inset focus-visible:border-blue-500 focus-visible:ring-blue-500 disabled:cursor-not-allowed",
               "border-gray-300 dark:border-gray-600 dark:bg-gray-800 enabled:dark:text-white dark:focus-visible:ring-blue-400",
               "enabled:hover:bg-gray-50 dark:enabled:hover:bg-gray-700",
               "min-w-[140px] enabled:hover:cursor-pointer",
-              dragPreview && "opacity-60 pointer-events-none",
+              dragPreview && "pointer-events-none opacity-60",
               {
-                "rounded-none border-t-0 rounded-b-none":
-                  open && placement.startsWith("bottom"),
                 "rounded-br-md": open && placement.startsWith("top"),
-                "rounded-br-md rounded-t-none": !open,
+                "rounded-none rounded-b-none border-t-0":
+                  open && placement.startsWith("bottom"),
+                "rounded-t-none rounded-br-md": !open,
               },
             )}
             disabled={!value || disabled}
+            ref={refs.setReference}
           >
             <div className="flex items-center gap-2">
               {selectedStatus && getStatusIcon(selectedStatus)}
               <span>{selectedStatus || "Status"}</span>
             </div>
-            <ChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+            <ChevronDown aria-hidden="true" className="h-4 w-4 text-gray-400" />
           </MenuButton>
 
           {open && (
             <FloatingPortal>
               <MenuItems
-                ref={refs.setFloating}
-                style={floatingStyles}
                 className={clsx(
                   "z-50 overflow-hidden text-base focus:outline-none sm:text-sm",
                   "bg-white dark:bg-gray-800",
-                  "border-gray-300 dark:border-gray-600 border-1",
+                  "border-1 border-gray-300 dark:border-gray-600",
                   "min-w-[140px]",
                   {
                     "rounded-b-md border-t-0": placement.startsWith("bottom"),
                     "rounded-t-md": placement.startsWith("top"),
                   },
                 )}
+                ref={refs.setFloating}
+                style={floatingStyles}
               >
                 {Object.values(PokemonStatus).map(
                   (statusValue: PokemonStatusType) => (
                     <MenuItem key={statusValue}>
                       {({ focus }) => (
                         <button
-                          type="button"
-                          onClick={() => handleStatusSelect(statusValue)}
                           className={clsx(
-                            "group flex w-full items-center px-4 py-2 text-sm cursor-pointer",
-                            "focus:outline-none text-left",
+                            "group flex w-full cursor-pointer items-center px-4 py-2 text-sm",
+                            "text-left focus:outline-none",
                             {
-                              "bg-gray-100 dark:bg-gray-700 focus-visible:ring-1 focus-visible:ring-blue-500 ring-inset":
+                              "bg-gray-100 ring-inset focus-visible:ring-1 focus-visible:ring-blue-500 dark:bg-gray-700":
                                 focus,
                               "bg-gray-200 dark:bg-gray-600":
                                 selectedStatus === statusValue && !focus,
                             },
                           )}
+                          onClick={() => handleStatusSelect(statusValue)}
+                          type="button"
                         >
                           <div className="flex items-center gap-2">
                             {getStatusIcon(statusValue)}

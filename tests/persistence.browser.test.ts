@@ -38,10 +38,10 @@ describe("playthrough persistence browser regressions", () => {
     legacyDatabase.close();
 
     const state: PlaythroughsState = {
-      playthroughs: [],
       activePlaythroughId: undefined,
       isLoading: false,
       isSaving: false,
+      playthroughs: [],
     };
 
     await loadFromIndexedDB(state);

@@ -112,14 +112,14 @@ describe("Settings Store", () => {
   describe("Version-based Default Logic", () => {
     it("re-evaluates defaults after playthrough load completes", async () => {
       const oldPlaythrough = {
+        createdAt: Date.now(),
+        customLocations: [],
+        encounters: {},
+        gameMode: "classic",
         id: "old-playthrough",
         name: "Old Run",
-        gameMode: "classic",
-        encounters: {},
-        team: [],
         pc: [],
-        customLocations: [],
-        createdAt: Date.now(),
+        team: [],
         updatedAt: Date.now(),
       } as any;
 
@@ -139,14 +139,14 @@ describe("Settings Store", () => {
 
     it("re-evaluates defaults when the playthrough store finishes loading", async () => {
       const oldPlaythrough = {
+        createdAt: Date.now(),
+        customLocations: [],
+        encounters: {},
+        gameMode: "classic",
         id: "old-playthrough",
         name: "Old Run",
-        gameMode: "classic",
-        encounters: {},
-        team: [],
         pc: [],
-        customLocations: [],
-        createdAt: Date.now(),
+        team: [],
         updatedAt: Date.now(),
       } as any;
 
@@ -169,14 +169,14 @@ describe("Settings Store", () => {
     it("enables move encounters for old playthroughs (no version)", async () => {
       // Mock old playthrough without version field
       mockGetActivePlaythrough.mockReturnValue({
+        createdAt: Date.now(),
+        customLocations: [],
+        encounters: {},
+        gameMode: "classic",
         id: "old-playthrough",
         name: "Old Run",
-        gameMode: "classic",
-        encounters: {},
-        team: [],
         pc: [],
-        customLocations: [],
-        createdAt: Date.now(),
+        team: [],
         updatedAt: Date.now(),
         // No version field - this indicates old playthrough
       } as any);
@@ -190,14 +190,14 @@ describe("Settings Store", () => {
     it("disables move encounters for new playthroughs (with version)", async () => {
       // Mock new playthrough with version field
       mockGetActivePlaythrough.mockReturnValue({
+        createdAt: Date.now(),
+        customLocations: [],
+        encounters: {},
+        gameMode: "classic",
         id: "new-playthrough",
         name: "New Run",
-        gameMode: "classic",
-        encounters: {},
-        team: [],
         pc: [],
-        customLocations: [],
-        createdAt: Date.now(),
+        team: [],
         updatedAt: Date.now(),
         version: "1.0.0", // Has version - this indicates new playthrough
       } as any);

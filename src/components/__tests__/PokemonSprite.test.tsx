@@ -29,7 +29,7 @@ describe("PokemonSprite", () => {
   ] as const)(
     "uses the lossless %s sheet without priority loading by default",
     (generation, src) => {
-      render(<PokemonSprite pokemonId={25} generation={generation} />);
+      render(<PokemonSprite generation={generation} pokemonId={25} />);
 
       expect(imageProps).toHaveBeenCalledWith(
         expect.objectContaining({

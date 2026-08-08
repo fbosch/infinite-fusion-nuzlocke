@@ -13,8 +13,8 @@ describe("Pokemon API", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({
       count: 1,
-      total: expect.any(Number),
       data: [{ id: -1, name: "Egg" }],
+      total: expect.any(Number),
     });
   });
 

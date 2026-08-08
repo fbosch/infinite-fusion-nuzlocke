@@ -27,7 +27,9 @@ if (typeof window !== "undefined") {
       LEGACY_PREFERRED_VARIANTS_STORAGE_KEY,
     );
     const parseEntries = (value: string | null) => {
-      if (value === null || value === "") return null;
+      if (value === null || value === "") {
+        return null;
+      }
 
       try {
         const parsed: unknown = JSON.parse(value);
@@ -82,7 +84,9 @@ export function getPreferredVariant(
   headId: number | null,
   bodyId: number | null,
 ): string | null {
-  if (!headId && !bodyId) return null;
+  if (!(headId || bodyId)) {
+    return null;
+  }
 
   const key = getSpriteId(headId, bodyId);
   return preferredVariants.get(key) ?? null;
@@ -96,7 +100,9 @@ export function setPreferredVariant(
   bodyId: number | null,
   variant: string,
 ): void {
-  if (!headId && !bodyId) return;
+  if (!(headId || bodyId)) {
+    return;
+  }
 
   const key = getSpriteId(headId, bodyId);
   if (variant) {

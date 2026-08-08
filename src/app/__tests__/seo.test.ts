@@ -21,10 +21,10 @@ describe("seo sitemap strategy", () => {
     for (const route of getIndexableRoutes()) {
       expect(sitemapEntries).toContainEqual(
         expect.objectContaining({
-          url: getCanonicalUrl(route.path),
           changeFrequency: route.changeFrequency,
-          priority: route.priority,
           lastModified: fixedDate,
+          priority: route.priority,
+          url: getCanonicalUrl(route.path),
         }),
       );
     }

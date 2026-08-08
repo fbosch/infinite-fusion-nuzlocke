@@ -4,57 +4,57 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { SPECIAL_LOCATIONS } from "@/constants/special-locations";
 
 interface Location {
+  description: string;
   id: string;
   name: string;
   region: string;
-  description: string;
 }
 
 import type { EncounterType } from "../scripts/types/encounters";
 
 // New encounter structure with types
 interface PokemonEncounter {
-  pokemonId: number;
   encounterType: EncounterType;
+  pokemonId: number;
 }
 
 interface EnhancedRouteEncounter {
-  routeName: string;
   encounters: PokemonEncounter[];
+  routeName: string;
 }
 
 // Legacy structure for backward compatibility
 interface LegacyRouteEncounter {
-  routeName: string;
   pokemonIds: number[];
+  routeName: string;
 }
 
 // Union type to handle both formats during migration
 type RouteEncounter = EnhancedRouteEncounter | LegacyRouteEncounter;
 
 interface LocationGifts {
-  routeName: string;
   pokemonIds: number[];
+  routeName: string;
 }
 
 interface LocationTrades {
-  routeName: string;
   pokemonIds: number[];
+  routeName: string;
 }
 
 interface EggLocation {
+  description: string;
   routeName: string;
   source: "gift" | "nest";
-  description: string;
 }
 
 interface EggLocationsData {
-  totalLocations: number;
+  locations: EggLocation[];
   sources: {
     gifts: number;
     nests: number;
   };
-  locations: EggLocation[];
+  totalLocations: number;
 }
 
 describe("Data Integrity Tests", () => {
@@ -98,8 +98,8 @@ describe("Data Integrity Tests", () => {
 
     return [
       {
-        routeName: "Safari Zone",
         encounters: uniqueEncounters,
+        routeName: "Safari Zone",
       },
     ];
   }
@@ -191,7 +191,8 @@ describe("Data Integrity Tests", () => {
   function getAllPokemonIds(encounter: RouteEncounter): number[] {
     if (isEnhancedEncounter(encounter)) {
       return encounter.encounters.map((e) => e.pokemonId);
-    } else if (isLegacyEncounter(encounter)) {
+    }
+    if (isLegacyEncounter(encounter)) {
       return encounter.pokemonIds;
     }
     return [];
@@ -290,7 +291,7 @@ describe("Data Integrity Tests", () => {
           const isSpecialLocation =
             loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION;
           const hasNoEncounters = locationsWithoutEncounters.includes(loc.name);
-          return !isStarter && !isSpecialLocation && !hasNoEncounters;
+          return !(isStarter || isSpecialLocation || hasNoEncounters);
         })
         .map((loc) => loc.name);
 
@@ -319,7 +320,7 @@ describe("Data Integrity Tests", () => {
         const hasGifts = classicGiftMap.has(locationName);
         const hasTrades = classicTradeMap.has(locationName);
 
-        if (!hasWildEncounters && !hasGifts && !hasTrades) {
+        if (!(hasWildEncounters || hasGifts || hasTrades)) {
           missingEncounters.push(locationName);
         }
       });
@@ -346,7 +347,7 @@ describe("Data Integrity Tests", () => {
           const isSpecialLocation =
             loc.id === SPECIAL_LOCATIONS.STARTER_LOCATION;
           const hasNoEncounters = locationsWithoutEncounters.includes(loc.name);
-          return !isStarter && !isSpecialLocation && !hasNoEncounters;
+          return !(isStarter || isSpecialLocation || hasNoEncounters);
         })
         .map((loc) => loc.name);
 
@@ -375,7 +376,7 @@ describe("Data Integrity Tests", () => {
         const hasGifts = remixGiftMap.has(locationName);
         const hasTrades = remixTradeMap.has(locationName);
 
-        if (!hasWildEncounters && !hasGifts && !hasTrades) {
+        if (!(hasWildEncounters || hasGifts || hasTrades)) {
           missingEncounters.push(locationName);
         }
       });
@@ -470,19 +471,19 @@ describe("Data Integrity Tests", () => {
           // Enhanced format: encounters should be sorted by encounter type, then by pokemon ID
           const sorted = [...encounter.encounters].sort((a, b) => {
             const typeOrder = {
-              grass: 0,
               cave: 1,
-              rock_smash: 2,
-              surf: 3,
               fishing: 4,
-              special: 5,
+              grass: 0,
               pokeradar: 6,
+              rock_smash: 2,
+              special: 5,
+              surf: 3,
             };
             const typeComparison =
               typeOrder[a.encounterType] - typeOrder[b.encounterType];
-            return typeComparison !== 0
-              ? typeComparison
-              : a.pokemonId - b.pokemonId;
+            return typeComparison === 0
+              ? a.pokemonId - b.pokemonId
+              : typeComparison;
           });
           expect(encounter.encounters).toEqual(sorted);
         } else if (isLegacyEncounter(encounter)) {
@@ -692,14 +693,14 @@ describe("Data Integrity Tests", () => {
       // Flatten the location-based structure to individual Pokemon entries for validation
       const classicGiftEntries = classicGifts.flatMap((location) =>
         location.pokemonIds.map((pokemonId) => ({
-          pokemonId,
           location: location.routeName,
+          pokemonId,
         })),
       );
       const remixGiftEntries = remixGifts.flatMap((location) =>
         location.pokemonIds.map((pokemonId) => ({
-          pokemonId,
           location: location.routeName,
+          pokemonId,
         })),
       );
 
@@ -772,14 +773,14 @@ describe("Data Integrity Tests", () => {
       // Flatten the location-based structure to individual Pokemon entries for validation
       const classicGiftEntries = classicGifts.flatMap((location) =>
         location.pokemonIds.map((pokemonId) => ({
-          pokemonId,
           location: location.routeName,
+          pokemonId,
         })),
       );
       const remixGiftEntries = remixGifts.flatMap((location) =>
         location.pokemonIds.map((pokemonId) => ({
-          pokemonId,
           location: location.routeName,
+          pokemonId,
         })),
       );
 
@@ -803,11 +804,7 @@ describe("Data Integrity Tests", () => {
             `Classic Gift ${index}: routeName is not a string`,
           );
         }
-        if (!Array.isArray(location.pokemonIds)) {
-          invalidStructure.push(
-            `Classic Gift ${index}: pokemonIds is not an array`,
-          );
-        } else {
+        if (Array.isArray(location.pokemonIds)) {
           location.pokemonIds.forEach((pokemonId, pokemonIndex) => {
             if (typeof pokemonId !== "number") {
               invalidStructure.push(
@@ -815,6 +812,10 @@ describe("Data Integrity Tests", () => {
               );
             }
           });
+        } else {
+          invalidStructure.push(
+            `Classic Gift ${index}: pokemonIds is not an array`,
+          );
         }
       });
 
@@ -824,11 +825,7 @@ describe("Data Integrity Tests", () => {
             `Remix Gift ${index}: routeName is not a string`,
           );
         }
-        if (!Array.isArray(location.pokemonIds)) {
-          invalidStructure.push(
-            `Remix Gift ${index}: pokemonIds is not an array`,
-          );
-        } else {
+        if (Array.isArray(location.pokemonIds)) {
           location.pokemonIds.forEach((pokemonId, pokemonIndex) => {
             if (typeof pokemonId !== "number") {
               invalidStructure.push(
@@ -836,6 +833,10 @@ describe("Data Integrity Tests", () => {
               );
             }
           });
+        } else {
+          invalidStructure.push(
+            `Remix Gift ${index}: pokemonIds is not an array`,
+          );
         }
       });
 
@@ -856,14 +857,14 @@ describe("Data Integrity Tests", () => {
       // Flatten the location-based structure to individual Pokemon entries for validation
       const classicTradeEntries = classicTrades.flatMap((location) =>
         location.pokemonIds.map((pokemonId) => ({
-          pokemonId,
           location: location.routeName,
+          pokemonId,
         })),
       );
       const remixTradeEntries = remixTrades.flatMap((location) =>
         location.pokemonIds.map((pokemonId) => ({
-          pokemonId,
           location: location.routeName,
+          pokemonId,
         })),
       );
 
@@ -935,11 +936,7 @@ describe("Data Integrity Tests", () => {
             `Classic Trade ${index}: routeName is not a string`,
           );
         }
-        if (!Array.isArray(location.pokemonIds)) {
-          invalidStructure.push(
-            `Classic Trade ${index}: pokemonIds is not an array`,
-          );
-        } else {
+        if (Array.isArray(location.pokemonIds)) {
           location.pokemonIds.forEach((pokemonId, pokemonIndex) => {
             if (typeof pokemonId !== "number") {
               invalidStructure.push(
@@ -947,6 +944,10 @@ describe("Data Integrity Tests", () => {
               );
             }
           });
+        } else {
+          invalidStructure.push(
+            `Classic Trade ${index}: pokemonIds is not an array`,
+          );
         }
       });
 
@@ -956,11 +957,7 @@ describe("Data Integrity Tests", () => {
             `Remix Trade ${index}: routeName is not a string`,
           );
         }
-        if (!Array.isArray(location.pokemonIds)) {
-          invalidStructure.push(
-            `Remix Trade ${index}: pokemonIds is not an array`,
-          );
-        } else {
+        if (Array.isArray(location.pokemonIds)) {
           location.pokemonIds.forEach((pokemonId, pokemonIndex) => {
             if (typeof pokemonId !== "number") {
               invalidStructure.push(
@@ -968,6 +965,10 @@ describe("Data Integrity Tests", () => {
               );
             }
           });
+        } else {
+          invalidStructure.push(
+            `Remix Trade ${index}: pokemonIds is not an array`,
+          );
         }
       });
 
@@ -1128,7 +1129,9 @@ describe("Data Integrity Tests", () => {
       const locationPatterns = new Set<string>();
 
       allLocations.forEach((location) => {
-        if (!location) return; // Skip undefined/null locations
+        if (!location) {
+          return; // Skip undefined/null locations
+        }
 
         // Try to find similar names in the locations data
         const normalizedLocation = location

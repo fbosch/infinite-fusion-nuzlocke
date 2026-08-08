@@ -24,40 +24,40 @@ export function isFusionCombinationOption(
 }
 
 interface PokemonOptionsProps {
-  finalOptions: PokemonOptionType[];
-  deferredQuery: string;
-  locationId: string | undefined;
-  isRoutePokemon: (pokemonId: number) => boolean;
-  isDuplicatePokemon: (pokemonId: number) => boolean;
-  getPokemonSource: (pokemonId: number) => EncounterSource[];
   comboboxId: string;
+  deferredQuery: string;
+  finalOptions: PokemonOptionType[];
   gameMode: "classic" | "remix" | "randomized";
+  getPokemonSource: (pokemonId: number) => EncounterSource[];
+  isDuplicatePokemon: (pokemonId: number) => boolean;
   isLoading?: boolean;
+  isRoutePokemon: (pokemonId: number) => boolean;
+  locationId: string | undefined;
 }
 
 interface PokemonOptionProps {
-  pokemon: PokemonOptionType;
-  index?: number;
-  locationId: string | undefined;
-  isRoutePokemon: (pokemonId: number) => boolean;
-  isDuplicatePokemon: (pokemonId: number) => boolean;
-  getPokemonSource: (pokemonId: number) => EncounterSource[];
-  comboboxId?: string;
-  gameMode: "classic" | "remix" | "randomized";
-  style?: React.CSSProperties;
-  disabled?: boolean;
   className?: string;
+  comboboxId?: string;
+  disabled?: boolean;
+  gameMode: "classic" | "remix" | "randomized";
+  getPokemonSource: (pokemonId: number) => EncounterSource[];
+  index?: number;
+  isDuplicatePokemon: (pokemonId: number) => boolean;
+  isRoutePokemon: (pokemonId: number) => boolean;
+  locationId: string | undefined;
+  pokemon: PokemonOptionType;
+  style?: React.CSSProperties;
 }
 
 interface PokemonOptionContentProps {
-  pokemon: PokemonOptionType;
-  locationId: string | undefined;
-  isRoutePokemon: (pokemonId: number) => boolean;
-  isDuplicatePokemon: (pokemonId: number) => boolean;
-  getPokemonSource: (pokemonId: number) => EncounterSource[];
   gameMode: "classic" | "remix" | "randomized";
+  getPokemonSource: (pokemonId: number) => EncounterSource[];
   isActive?: boolean;
+  isDuplicatePokemon: (pokemonId: number) => boolean;
+  isRoutePokemon: (pokemonId: number) => boolean;
   isSelected?: boolean;
+  locationId: string | undefined;
+  pokemon: PokemonOptionType;
 }
 
 function PokemonOptionContent({
@@ -74,13 +74,13 @@ function PokemonOptionContent({
   const isDuplicate = isDuplicatePokemon(pokemon.id);
 
   return (
-    <div className={"gap-4 group w-full flex items-center"}>
-      <div className="size-10 flex justify-center items-center">
-        <PokemonSprite pokemonId={pokemon.id} generation="gen7" />
+    <div className={"group flex w-full items-center gap-4"}>
+      <div className="flex size-10 items-center justify-center">
+        <PokemonSprite generation="gen7" pokemonId={pokemon.id} />
       </div>
       <span
         className={clsx(
-          "block truncate flex-1",
+          "block flex-1 truncate",
           "group-data-selected:",
           "not:group-data-selected:font-normal",
           isSelected && "",
@@ -88,20 +88,20 @@ function PokemonOptionContent({
       >
         {displayName}
       </span>
-      <div className="flex items-center gap-2 group">
+      <div className="group flex items-center gap-2">
         {gameMode !== "randomized" && isRoutePokemon(pokemon.id) && (
           <SourceTag
-            sources={getPokemonSource(pokemon.id)}
             locationId={locationId}
+            sources={getPokemonSource(pokemon.id)}
           />
         )}
         {isDuplicate && (
           <span
             className={clsx(
-              "text-xs px-1.5 py-0.5 rounded-sm font-medium leading-none",
-              "text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/20",
+              "rounded-sm px-1.5 py-0.5 font-medium text-xs leading-none",
+              "bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-200",
               "border border-amber-200/60 dark:border-amber-700/40",
-              isActive && "group-hover:text-white group-hover:border-white/60",
+              isActive && "group-hover:border-white/60 group-hover:text-white",
             )}
             title="Already captured"
           >
@@ -110,21 +110,21 @@ function PokemonOptionContent({
         )}
         <span
           className={clsx(
-            "text-xs dark:text-gray-400 w-8 text-right inline-block",
+            "inline-block w-8 text-right text-xs dark:text-gray-400",
             isActive &&
               "group-hover:text-white group-data-selected:group-hover:text-white",
           )}
         >
           {isEgg(pokemon) ? "???" : pokemon.id.toString().padStart(3, "0")}
         </span>
-        <div className="w-5 h-5 flex items-center justify-center">
+        <div className="flex h-5 w-5 items-center justify-center">
           <Check
+            aria-hidden="true"
             className={clsx(
               "size-5 text-blue-400 dark:text-white",
               isActive && "group-hover:text-white",
               isSelected ? "visible" : "invisible group-data-selected:visible",
             )}
-            aria-hidden="true"
           />
         </div>
       </div>
@@ -144,40 +144,40 @@ export function PokemonOption({
   className,
 }: PokemonOptionProps) {
   const baseClassName = clsx(
-    "relative cursor-pointer select-none p-2 my-1 content-visibility-auto",
-    "rounded-md w-full flex items-center",
-    "h-14 group",
+    "relative my-1 cursor-pointer select-none p-2 content-visibility-auto",
+    "flex w-full items-center rounded-md",
+    "group h-14",
     className,
   );
 
   return (
     <ComboboxOption
-      value={pokemon}
       className={({ active }) =>
         clsx(
           baseClassName,
           {
             // Disable active state when user is scrolling to prevent auto-scroll
-            "bg-blue-600 text-white ": active,
-            "text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700":
+            "bg-blue-600 text-white": active,
+            "text-gray-900 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700":
               !active,
           },
           className,
         )
       }
-      style={style}
       disabled={disabled}
+      style={style}
+      value={pokemon}
     >
       {({ active, selected }) => (
         <PokemonOptionContent
+          gameMode={gameMode}
+          getPokemonSource={getPokemonSource}
+          isActive={active}
+          isDuplicatePokemon={isDuplicatePokemon}
+          isRoutePokemon={isRoutePokemon}
+          isSelected={selected}
           locationId={locationId}
           pokemon={pokemon}
-          isRoutePokemon={isRoutePokemon}
-          isDuplicatePokemon={isDuplicatePokemon}
-          getPokemonSource={getPokemonSource}
-          gameMode={gameMode}
-          isActive={active}
-          isSelected={selected}
         />
       )}
     </ComboboxOption>
@@ -193,40 +193,40 @@ export function FusionCombinationOption({
 }: FusionCombinationOptionProps) {
   return (
     <ComboboxOption
-      value={pokemon}
       className={({ active }) =>
         clsx(
-          "relative cursor-pointer select-none p-2 my-1 rounded-md w-full flex items-center h-14 group",
+          "group relative my-1 flex h-14 w-full cursor-pointer select-none items-center rounded-md p-2",
           active
             ? "bg-blue-600 text-white"
-            : "text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700",
+            : "text-gray-900 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700",
         )
       }
+      value={pokemon}
     >
       {({ active }) => (
-        <div className="gap-4 group w-full flex items-center">
-          <div className="flex -space-x-2" aria-hidden="true">
-            <div className="size-10 flex justify-center items-center">
+        <div className="group flex w-full items-center gap-4">
+          <div aria-hidden="true" className="flex -space-x-2">
+            <div className="flex size-10 items-center justify-center">
               <PokemonSprite
-                pokemonId={pokemon.id}
-                generation="gen7"
                 aria-hidden="true"
+                generation="gen7"
+                pokemonId={pokemon.id}
               />
             </div>
-            <div className="size-10 flex justify-center items-center">
+            <div className="flex size-10 items-center justify-center">
               <PokemonSprite
-                pokemonId={pokemon.fusionBody.id}
-                generation="gen7"
                 aria-hidden="true"
+                generation="gen7"
+                pokemonId={pokemon.fusionBody.id}
               />
             </div>
           </div>
-          <span className="block truncate flex-1">
+          <span className="block flex-1 truncate">
             {pokemon.name} / {pokemon.fusionBody.name}
           </span>
           <span
             className={clsx(
-              "text-xs dark:text-gray-400 whitespace-nowrap",
+              "whitespace-nowrap text-xs dark:text-gray-400",
               active && "text-white",
             )}
           >
@@ -252,8 +252,8 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
     return (
       <div className="relative cursor-default select-none p-2 text-center">
         <div className="text-gray-500 dark:text-gray-400">
-          <p className="text-sm flex items-center gap-2 justify-center py-2">
-            <Loader2 className="w-4 h-4 animate-spin" />
+          <p className="flex items-center justify-center gap-2 py-2 text-sm">
+            <Loader2 className="h-4 w-4 animate-spin" />
             <span>Loading Pokémon...</span>
           </p>
         </div>
@@ -270,11 +270,11 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
               <p className="text-sm">
                 No Pokémon found for &quot;{deferredQuery}&quot;
               </p>
-              <p className="text-xs mt-1">Try a different search term</p>
+              <p className="mt-1 text-xs">Try a different search term</p>
             </>
           ) : (
-            <p className="text-sm flex items-center gap-2 justify-center py-2">
-              <Search className="w-4 h-4" />
+            <p className="flex items-center justify-center gap-2 py-2 text-sm">
+              <Search className="h-4 w-4" />
               <span>Search for Pokémon</span>
             </p>
           )}
@@ -286,15 +286,15 @@ export const PokemonOptions: React.FC<PokemonOptionsProps> = ({
   // Use the PokemonOption component
   return finalOptions.map((pokemon) => (
     <PokemonOption
+      gameMode={gameMode}
+      getPokemonSource={getPokemonSource}
+      isDuplicatePokemon={isDuplicatePokemon}
+      isRoutePokemon={isRoutePokemon}
       key={
         pokemon.uid ?? `${pokemon.id}-${pokemon.nationalDexId}-${pokemon.name}`
       }
-      pokemon={pokemon}
       locationId={locationId}
-      isRoutePokemon={isRoutePokemon}
-      isDuplicatePokemon={isDuplicatePokemon}
-      getPokemonSource={getPokemonSource}
-      gameMode={gameMode}
+      pokemon={pokemon}
     />
   ));
 };

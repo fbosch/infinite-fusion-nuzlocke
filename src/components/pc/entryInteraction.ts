@@ -12,7 +12,7 @@ export function scrollToPokemonEntry(
 
   scrollToLocationById(locationId, {
     behavior: "smooth",
-    highlightUids,
     durationMs: 1200,
+    highlightUids,
   });
 }

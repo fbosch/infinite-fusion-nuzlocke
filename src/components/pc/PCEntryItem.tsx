@@ -16,12 +16,12 @@ import { scrollToPokemonEntry } from "./entryInteraction";
 import type { PCEntry } from "./types";
 
 interface PCEntryItemProps {
+  className?: string;
   entry: PCEntry;
+  fallbackLabel: string;
+  hoverRingClass: string;
   idToName: Map<string, string>;
   mode: "stored" | "graveyard";
-  hoverRingClass: string;
-  fallbackLabel: string;
-  className?: string;
   onClose?: () => void;
 }
 
@@ -63,21 +63,22 @@ export default function PCEntryItem(props: PCEntryItemProps) {
 
   return (
     <PokemonContextMenu
-      locationId={entry.locationId}
       encounterData={{
-        head: entry.head,
         body: entry.body,
-        isFusion: currentEncounter?.isFusion || false,
+        head: entry.head,
+        isFusion: currentEncounter?.isFusion,
       }}
+      locationId={entry.locationId}
       shouldLoad={true}
     >
       <div
-        key={entry.locationId}
+        aria-label={`Scroll to ${idToName.get(entry.locationId) || "location"} in table`}
         className={clsx(
-          "group/pc-entry h-fit relative cursor-pointer rounded-lg border border-gray-200 bg-white transition-all duration-200 hover:ring-1 dark:border-gray-700 dark:bg-gray-800",
+          "group/pc-entry relative h-fit cursor-pointer rounded-lg border border-gray-200 bg-white transition-all duration-200 hover:ring-1 dark:border-gray-700 dark:bg-gray-800",
           hoverRingClass,
           className,
         )}
+        key={entry.locationId}
         onClick={handleClick}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
@@ -87,10 +88,9 @@ export default function PCEntryItem(props: PCEntryItemProps) {
         }}
         role="button"
         tabIndex={0}
-        aria-label={`Scroll to ${idToName.get(entry.locationId) || "location"} in table`}
       >
         {fusionTypes.primary && (
-          <div className="absolute right-2 top-2">
+          <div className="absolute top-2 right-2">
             <TypePills
               primary={fusionTypes.primary}
               secondary={fusionTypes.secondary}
@@ -100,18 +100,19 @@ export default function PCEntryItem(props: PCEntryItemProps) {
           </div>
         )}
         <div className="flex items-center gap-3 p-3">
-          <div className="flex flex-shrink-0 items-center justify-center rounded-md relative">
+          <div className="relative flex flex-shrink-0 items-center justify-center rounded-md">
             {hasAny && (
               <>
                 <div
-                  className="w-full h-full absolute rounded-md opacity-30 border border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-600"
+                  className="absolute h-full w-full rounded-md border border-gray-200 text-gray-300 opacity-30 dark:border-gray-600 dark:text-gray-600"
                   style={{
-                    background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
+                    background:
+                      "repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(156, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)",
                   }}
                 />
                 <FusionSprite
-                  headPokemon={entry.head ?? null}
                   bodyPokemon={entry.body ?? null}
+                  headPokemon={entry.head ?? null}
                   isFusion={isFusion}
                   shouldLoad
                   showStatusOverlay={false}
@@ -120,10 +121,10 @@ export default function PCEntryItem(props: PCEntryItemProps) {
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+            <div className="truncate font-medium text-gray-900 text-sm dark:text-gray-100">
               {label || fallbackLabel}
             </div>
-            <div className="truncate text-xs text-gray-500 dark:text-gray-400">
+            <div className="truncate text-gray-500 text-xs dark:text-gray-400">
               {idToName.get(entry.locationId) || "Unknown Location"}
             </div>
           </div>

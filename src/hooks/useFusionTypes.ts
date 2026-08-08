@@ -5,9 +5,9 @@ import { useAllPokemon } from "@/loaders/pokemon";
 import { usePokemonTypes } from "./usePokemonTypes";
 
 export interface UseFusionTypesResult {
+  isLoading: boolean;
   primary?: TypeName;
   secondary?: TypeName;
-  isLoading: boolean;
 }
 
 function findPokemonByQuery(
@@ -33,9 +33,9 @@ function getFusionTypesResult(
 ): UseFusionTypesResult {
   const { primary, secondary } = getFusionTyping(head, body);
   return {
+    isLoading: false,
     primary,
     secondary: primary === secondary ? undefined : secondary,
-    isLoading: false,
   };
 }
 
@@ -52,12 +52,18 @@ function useFusionTypes(
   if (!headQuery) {
     return bodyQuery ? bodySingle : { isLoading };
   }
-  if (!bodyQuery) return headSingle;
-  if (!allPokemon || allPokemon.length === 0) return { isLoading: true };
+  if (!bodyQuery) {
+    return headSingle;
+  }
+  if (!allPokemon || allPokemon.length === 0) {
+    return { isLoading: true };
+  }
 
   const head = findPokemonByQuery(allPokemon, headQuery);
   const body = findPokemonByQuery(allPokemon, bodyQuery);
-  if (!head || !body) return { isLoading };
+  if (!(head && body)) {
+    return { isLoading };
+  }
 
   return getFusionTypesResult(head, body);
 }

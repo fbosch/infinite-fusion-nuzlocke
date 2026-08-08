@@ -12,12 +12,12 @@ describe("Pokemon data processing", () => {
           types: [{ type: { name: "electric" } }],
         },
         {
-          is_legendary: false,
-          is_mythical: false,
-          generation: { name: "generation-i" },
           evolution_chain: {
             url: "https://pokeapi.co/api/v2/evolution-chain/10/",
           },
+          generation: { name: "generation-i" },
+          is_legendary: false,
+          is_mythical: false,
         },
         {
           evolves_from: { id: 172, name: "pichu" },
@@ -25,22 +25,22 @@ describe("Pokemon data processing", () => {
         },
       ),
     ).toEqual({
-      id: 25,
-      nationalDexId: 25,
-      name: "Pikachu",
-      types: [{ name: "electric" }],
-      species: {
-        is_legendary: false,
-        is_mythical: false,
-        generation: "generation-i",
-        evolution_chain: {
-          url: "https://pokeapi.co/api/v2/evolution-chain/10/",
-        },
-      },
       evolution: {
         evolves_from: { id: 172, name: "pichu" },
         evolves_to: [{ id: 26, name: "raichu" }],
       },
+      id: 25,
+      name: "Pikachu",
+      nationalDexId: 25,
+      species: {
+        evolution_chain: {
+          url: "https://pokeapi.co/api/v2/evolution-chain/10/",
+        },
+        generation: "generation-i",
+        is_legendary: false,
+        is_mythical: false,
+      },
+      types: [{ name: "electric" }],
     });
   });
 });

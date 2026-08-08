@@ -12,7 +12,7 @@ global.fetch = mockFetch;
 
 // Mock the persistence module
 vi.mock("@/lib/persistence", () => ({
-  getCacheBuster: () => 12345,
+  getCacheBuster: () => 12_345,
 }));
 
 // Mock data
@@ -20,35 +20,35 @@ const mockPokemon: Pokemon = {
   id: 1,
   name: "Bulbasaur",
   nationalDexId: 1,
-  types: [{ name: "grass" }, { name: "poison" }],
   species: {
-    is_legendary: false,
-    is_mythical: false,
-    generation: "1",
     evolution_chain: {
       url: "https://pokeapi.co/api/v2/evolution-chain/1/",
     },
+    generation: "1",
+    is_legendary: false,
+    is_mythical: false,
   },
+  types: [{ name: "grass" }, { name: "poison" }],
 };
 
 const mockPokemon2: Pokemon = {
   id: 2,
   name: "Ivysaur",
   nationalDexId: 2,
-  types: [{ name: "grass" }, { name: "poison" }],
   species: {
-    is_legendary: false,
-    is_mythical: false,
-    generation: "1",
     evolution_chain: {
       url: "https://pokeapi.co/api/v2/evolution-chain/1/",
     },
+    generation: "1",
+    is_legendary: false,
+    is_mythical: false,
   },
+  types: [{ name: "grass" }, { name: "poison" }],
 };
 
 const mockApiResponse = {
-  data: [mockPokemon, mockPokemon2],
   count: 2,
+  data: [mockPokemon, mockPokemon2],
   total: 151,
 };
 
@@ -81,15 +81,15 @@ describe("PokemonApiService", () => {
   describe("makeRequest", () => {
     it("should make request with correct URL and parameters", async () => {
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => mockApiResponse,
+        ok: true,
       });
 
       const params = {
         ids: [1, 2],
+        limit: 10,
         search: "bulba",
         type: "grass",
-        limit: 10,
       };
 
       await pokemonApiServicePrivate.makeRequest(params);
@@ -97,18 +97,18 @@ describe("PokemonApiService", () => {
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/api/pokemon?ids=1%2C2&search=bulba&type=grass&limit=10&v=12345",
         {
-          method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
+          method: "GET",
         },
       );
     });
 
     it("should handle empty parameters", async () => {
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => mockApiResponse,
+        ok: true,
       });
 
       await pokemonApiServicePrivate.makeRequest();
@@ -116,18 +116,18 @@ describe("PokemonApiService", () => {
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/api/pokemon?v=12345",
         {
-          method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
+          method: "GET",
         },
       );
     });
 
     it("should handle partial parameters", async () => {
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => mockApiResponse,
+        ok: true,
       });
 
       const params = { search: "bulba" };
@@ -136,10 +136,10 @@ describe("PokemonApiService", () => {
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/api/pokemon?search=bulba&v=12345",
         {
-          method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
+          method: "GET",
         },
       );
     });
@@ -160,14 +160,14 @@ describe("PokemonApiService", () => {
       vi.spyOn(console, "error").mockImplementation(() => {});
 
       const invalidResponse = {
-        data: "invalid data",
         count: "not a number",
+        data: "invalid data",
         total: "also not a number",
       };
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => invalidResponse,
+        ok: true,
       });
 
       await expect(pokemonApiServicePrivate.makeRequest()).rejects.toThrow(
@@ -187,8 +187,8 @@ describe("PokemonApiService", () => {
   describe("getAllPokemon", () => {
     it("should return all pokemon", async () => {
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => mockApiResponse,
+        ok: true,
       });
 
       const result = await pokemonApiService.getAllPokemon();
@@ -201,10 +201,10 @@ describe("PokemonApiService", () => {
     });
 
     it("should handle empty response", async () => {
-      const emptyResponse = { data: [], count: 0, total: 0 };
+      const emptyResponse = { count: 0, data: [], total: 0 };
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => emptyResponse,
+        ok: true,
       });
 
       const result = await pokemonApiService.getAllPokemon();
@@ -216,8 +216,8 @@ describe("PokemonApiService", () => {
   describe("getPokemonByIds", () => {
     it("should return pokemon by IDs", async () => {
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => mockApiResponse,
+        ok: true,
       });
 
       const result = await pokemonApiService.getPokemonByIds([1, 2]);
@@ -231,8 +231,8 @@ describe("PokemonApiService", () => {
 
     it("should handle empty IDs array", async () => {
       mockFetch.mockResolvedValueOnce({
+        json: async () => ({ count: 0, data: [], total: 0 }),
         ok: true,
-        json: async () => ({ data: [], count: 0, total: 0 }),
       });
 
       const result = await pokemonApiService.getPokemonByIds([]);
@@ -245,10 +245,10 @@ describe("PokemonApiService", () => {
     });
 
     it("should handle single ID", async () => {
-      const singleResponse = { data: [mockPokemon], count: 1, total: 1 };
+      const singleResponse = { count: 1, data: [mockPokemon], total: 1 };
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => singleResponse,
+        ok: true,
       });
 
       const result = await pokemonApiService.getPokemonByIds([1]);
@@ -259,10 +259,10 @@ describe("PokemonApiService", () => {
 
   describe("getPokemonById", () => {
     it("should return pokemon by single ID", async () => {
-      const singleResponse = { data: [mockPokemon], count: 1, total: 1 };
+      const singleResponse = { count: 1, data: [mockPokemon], total: 1 };
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => singleResponse,
+        ok: true,
       });
 
       const result = await pokemonApiService.getPokemonById(1);
@@ -271,10 +271,10 @@ describe("PokemonApiService", () => {
     });
 
     it("should return null when pokemon not found", async () => {
-      const emptyResponse = { data: [], count: 0, total: 0 };
+      const emptyResponse = { count: 0, data: [], total: 0 };
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => emptyResponse,
+        ok: true,
       });
 
       const result = await pokemonApiService.getPokemonById(999);
@@ -286,8 +286,8 @@ describe("PokemonApiService", () => {
   describe("searchPokemon", () => {
     it("should search pokemon by query", async () => {
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => mockApiResponse,
+        ok: true,
       });
 
       const result = await pokemonApiService.searchPokemon("bulba");
@@ -301,8 +301,8 @@ describe("PokemonApiService", () => {
 
     it("should search pokemon with limit", async () => {
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => mockApiResponse,
+        ok: true,
       });
 
       const result = await pokemonApiService.searchPokemon("bulba", 5);
@@ -315,10 +315,10 @@ describe("PokemonApiService", () => {
     });
 
     it("should handle empty search results", async () => {
-      const emptyResponse = { data: [], count: 0, total: 0 };
+      const emptyResponse = { count: 0, data: [], total: 0 };
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => emptyResponse,
+        ok: true,
       });
 
       const result = await pokemonApiService.searchPokemon("nonexistent");
@@ -330,8 +330,8 @@ describe("PokemonApiService", () => {
   describe("getPokemonByType", () => {
     it("should return pokemon by type", async () => {
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => mockApiResponse,
+        ok: true,
       });
 
       const result = await pokemonApiService.getPokemonByType("grass");
@@ -344,10 +344,10 @@ describe("PokemonApiService", () => {
     });
 
     it("should handle empty type results", async () => {
-      const emptyResponse = { data: [], count: 0, total: 0 };
+      const emptyResponse = { count: 0, data: [], total: 0 };
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => emptyResponse,
+        ok: true,
       });
 
       const result = await pokemonApiService.getPokemonByType("nonexistent");
@@ -358,10 +358,10 @@ describe("PokemonApiService", () => {
 
   describe("getPokemonCount", () => {
     it("should return total pokemon count", async () => {
-      const countResponse = { data: [mockPokemon], count: 1, total: 151 };
+      const countResponse = { count: 1, data: [mockPokemon], total: 151 };
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => countResponse,
+        ok: true,
       });
 
       const result = await pokemonApiService.getPokemonCount();
@@ -385,10 +385,10 @@ describe("PokemonApiService", () => {
 
     it("should handle malformed JSON responses", async () => {
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => {
           throw new Error("Invalid JSON");
         },
+        ok: true,
       });
 
       await expect(pokemonApiService.getAllPokemon()).rejects.toThrow(
@@ -413,8 +413,8 @@ describe("PokemonApiService", () => {
   describe("URL construction", () => {
     it("should properly encode special characters in search", async () => {
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => mockApiResponse,
+        ok: true,
       });
 
       await pokemonApiService.searchPokemon("bulba & ivy");
@@ -427,8 +427,8 @@ describe("PokemonApiService", () => {
 
     it("should handle type with special characters", async () => {
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => mockApiResponse,
+        ok: true,
       });
 
       await pokemonApiService.getPokemonByType("fire/flying");

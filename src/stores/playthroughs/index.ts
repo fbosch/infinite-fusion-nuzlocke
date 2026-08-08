@@ -17,19 +17,21 @@ export const playthroughActions = {
 
   // Encounter actions
   ...encounterActions,
-  getEncounters,
-  updatePokemonByUID,
   cycleArtworkVariant,
+  getEncounters,
   prefetchAdjacentVariants,
   preloadArtworkVariants,
   setArtworkVariant,
+  updatePokemonByUID,
 
   // Custom location actions
   ...customLocationActions,
 
   // Add back getAvailablePlaythroughIds that was in the original store
   getAvailablePlaythroughIds: async (): Promise<string[]> => {
-    if (typeof window === "undefined") return [];
+    if (typeof window === "undefined") {
+      return [];
+    }
 
     try {
       const { get } = await import("idb-keyval");

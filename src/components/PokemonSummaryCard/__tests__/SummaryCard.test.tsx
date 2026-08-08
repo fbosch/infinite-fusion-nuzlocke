@@ -40,8 +40,8 @@ describe("SummaryCard", () => {
         headPokemon={{
           id: 25,
           name: "Pikachu",
-          uid: "pikachu-uid",
           nationalDexId: 25,
+          uid: "pikachu-uid",
         }}
       />,
     );
@@ -63,8 +63,8 @@ describe("SummaryCard", () => {
         headPokemon={{
           id: -1,
           name: "Egg",
-          uid: "egg-uid",
           nationalDexId: 0,
+          uid: "egg-uid",
         }}
       />,
     );

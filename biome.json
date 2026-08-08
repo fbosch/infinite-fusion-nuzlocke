@@ -21,6 +21,13 @@
       "enabled": false
     }
   },
+  "assist": {
+    "actions": {
+      "source": {
+        "useSortedAttributes": "off"
+      }
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {

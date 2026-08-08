@@ -24,9 +24,8 @@ export function GlobalTooltipProvider({
     setVisibleTooltipCount((prev) => {
       if (isVisible) {
         return prev + 1;
-      } else {
-        return Math.max(0, prev - 1);
       }
+      return Math.max(0, prev - 1);
     });
   };
 

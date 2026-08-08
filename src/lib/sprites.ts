@@ -111,7 +111,9 @@ export async function getArtworkVariants(
   headId?: number | null,
   bodyId?: number | null,
 ): Promise<string[]> {
-  if (!headId && !bodyId) return [""];
+  if (!(headId || bodyId)) {
+    return [""];
+  }
 
   try {
     // Use edge function to get variants (avoids CORS issues)
@@ -154,7 +156,9 @@ export async function getSpriteCredits(
   headId?: number | null,
   bodyId?: number | null,
 ): Promise<SpriteCreditsResponse | null> {
-  if (!headId && !bodyId) return null;
+  if (!(headId || bodyId)) {
+    return null;
+  }
 
   try {
     // Generate the sprite ID (same format as other methods)
@@ -198,7 +202,9 @@ async function getVariantSpriteCredits(
   variant = "",
 ): Promise<string[] | null> {
   const allCredits = await getSpriteCredits(headId, bodyId);
-  if (!allCredits) return null;
+  if (!allCredits) {
+    return null;
+  }
 
   // Generate the variant key
   const baseId =
@@ -231,7 +237,9 @@ export function getFormattedCreditsFromResponse(
   bodyId?: number | null,
   variant = "",
 ): string {
-  if (!credits) return formatArtistCredits(null);
+  if (!credits) {
+    return formatArtistCredits(null);
+  }
 
   // Generate the variant key
   const baseId =

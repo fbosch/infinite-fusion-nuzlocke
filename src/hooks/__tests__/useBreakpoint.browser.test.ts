@@ -18,9 +18,9 @@ describe("useBreakpoint Browser Tests", () => {
   afterEach(() => {
     // Restore original window width
     Object.defineProperty(window, "innerWidth", {
-      writable: true,
       configurable: true,
       value: originalInnerWidth,
+      writable: true,
     });
     // Trigger resize event to update the hook
     window.dispatchEvent(new Event("resize"));
@@ -28,9 +28,9 @@ describe("useBreakpoint Browser Tests", () => {
 
   const setWindowWidth = (width: number) => {
     Object.defineProperty(window, "innerWidth", {
-      writable: true,
       configurable: true,
       value: width,
+      writable: true,
     });
     // Trigger resize event to update the hook
     window.dispatchEvent(new Event("resize"));

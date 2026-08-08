@@ -36,7 +36,9 @@ export function TeamMemberSelectionPanel() {
 
   // Filter Pokémon based on search query locally (no need to update state)
   const filteredPokemon = (() => {
-    if (!searchQuery.trim()) return availablePokemon;
+    if (!searchQuery.trim()) {
+      return availablePokemon;
+    }
 
     const query = searchQuery.toLowerCase();
     return availablePokemon.filter(
@@ -46,41 +48,41 @@ export function TeamMemberSelectionPanel() {
     );
   })();
   return (
-    <div className="flex-1 flex flex-col space-y-5">
-      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-4 items-center">
+    <div className="flex flex-1 flex-col space-y-5">
+      <div className="grid grid-cols-1 items-center gap-4 sm:grid-cols-[1fr_auto_1fr]">
         {/* Head Slot */}
         <PokemonSlotSelector
-          slot="head"
-          selectedPokemon={selectedHead}
           isActive={activeSlot === "head"}
-          onSlotSelect={handleSlotSelect}
           onRemovePokemon={handleRemoveHeadPokemon}
+          onSlotSelect={handleSlotSelect}
+          selectedPokemon={selectedHead}
+          slot="head"
         />
 
         {/* Inverse Fusion Button - always visible */}
         <div className="flex items-center justify-center">
           <CursorTooltip
-            placement="bottom"
             className="origin-top"
             content={
               <div className="flex items-center gap-2">
                 <Image
-                  src={DNA_REVERSER_ICON}
                   alt="DNA Reverser"
-                  width={24}
+                  className="image-rendering-pixelated object-contain object-center"
                   height={24}
-                  className="object-contain object-center image-rendering-pixelated"
+                  src={DNA_REVERSER_ICON}
+                  width={24}
                 />
                 <span className="text-sm">Reverse Fusion</span>
               </div>
             }
             delay={300}
+            placement="bottom"
           >
             <button
-              type="button"
-              onClick={handleFlipFusion}
-              className="group size-6 flex items-center justify-center p-1 text-gray-600 dark:text-gray-300 rounded-md border border-gray-300 dark:border-gray-600 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-500 hover:border-blue-600 bg-white dark:bg-gray-800"
               aria-label="Flip head and body"
+              className="group flex size-6 items-center justify-center rounded-md border border-gray-300 bg-white p-1 text-gray-600 transition-colors duration-200 hover:border-blue-600 hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+              onClick={handleFlipFusion}
+              type="button"
             >
               <ArrowLeftRight className="size-4 hover:text-white" />
             </button>
@@ -89,22 +91,22 @@ export function TeamMemberSelectionPanel() {
 
         {/* Body Slot */}
         <PokemonSlotSelector
-          slot="body"
-          selectedPokemon={selectedBody}
           isActive={activeSlot === "body"}
-          onSlotSelect={handleSlotSelect}
           onRemovePokemon={handleRemoveBodyPokemon}
+          onSlotSelect={handleSlotSelect}
+          selectedPokemon={selectedBody}
+          slot="body"
         />
       </div>
 
       <TeamMemberSearchBar
-        searchQuery={searchQuery}
         onSearchChange={actions.setSearchQuery}
+        searchQuery={searchQuery}
       />
 
-      <div className="h-72 overflow-y-auto scrollbar-thin pr-1">
+      <div className="scrollbar-thin h-72 overflow-y-auto pr-1">
         <div
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 h-full"
+          className="grid h-full grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
           style={{ gridTemplateRows: "repeat(4, 1fr)" }}
         >
           {filteredPokemon.length > 0 ? (
@@ -116,18 +118,18 @@ export function TeamMemberSelectionPanel() {
 
               return (
                 <PokemonGridItem
-                  key={`${pokemon.uid}-${locationId}`}
-                  pokemon={pokemon}
-                  locationId={locationId}
-                  isSelectedHead={isSelectedHead}
-                  isSelectedBody={isSelectedBody}
                   isActiveSlot={isActiveSlot}
+                  isSelectedBody={isSelectedBody}
+                  isSelectedHead={isSelectedHead}
+                  key={`${pokemon.uid}-${locationId}`}
+                  locationId={locationId}
                   onSelect={handlePokemonSelect}
+                  pokemon={pokemon}
                 />
               );
             })
           ) : (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400 col-span-full row-span-full flex items-center justify-center">
+            <div className="col-span-full row-span-full flex items-center justify-center py-8 text-center text-gray-500 dark:text-gray-400">
               {searchQuery.trim()
                 ? "No Pokémon found matching your search."
                 : "No Pokémon available."}

@@ -19,8 +19,8 @@ vi.mock("@/components/team/useTeamMemberPicker", () => ({
     closePicker: vi.fn(),
     openPicker: vi.fn(),
     pickerModalOpen: false,
-    selectTeamMember: vi.fn(),
     selectedPosition: null,
+    selectTeamMember: vi.fn(),
   }),
 }));
 
@@ -43,10 +43,10 @@ describe("PokemonPCSheet", () => {
   it("renders an animated modal sidebar", () => {
     render(
       <PokemonPCSheet
-        isOpen
-        onClose={vi.fn()}
         activeTab="team"
+        isOpen
         onChangeTab={vi.fn()}
+        onClose={vi.fn()}
       />,
     );
 

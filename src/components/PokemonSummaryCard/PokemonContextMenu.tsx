@@ -48,32 +48,32 @@ export function createExternalDexItems(
 
   return [
     {
+      favicon: "https://infinitefusiondex.com/images/favicon.ico",
+      href: `https://infinitefusiondex.com/details/${spriteId}`,
+      icon: ArrowUpRight,
+      iconClassName: "dark:text-blue-300 text-blue-400",
       id: "infinitefusiondex",
       label: "Open InfiniteDex entry",
-      href: `https://infinitefusiondex.com/details/${spriteId}`,
       target: "_blank",
-      favicon: "https://infinitefusiondex.com/images/favicon.ico",
-      icon: ArrowUpRight,
-      iconClassName: "dark:text-blue-300 text-blue-400",
     },
     {
-      id: "fusiondex",
-      label: "Open FusionDex entry",
-      href: `https://fusiondex.org/sprite/pif/${spriteId}${variantSuffix}/`,
-      target: "_blank",
       favicon: "https://www.fusiondex.org/favicon.ico",
+      href: `https://fusiondex.org/sprite/pif/${spriteId}${variantSuffix}/`,
       icon: ArrowUpRight,
       iconClassName: "dark:text-blue-300 text-blue-400",
+      id: "fusiondex",
+      label: "Open FusionDex entry",
+      target: "_blank",
     },
   ];
 }
 
 interface EncounterStatusActions {
-  onMarkAsDeceased: () => void;
-  onMoveToBox: () => void;
   onMarkAsCaptured: () => void;
+  onMarkAsDeceased: () => void;
   onMarkAsMissed: () => void;
   onMarkAsReceived: () => void;
+  onMoveToBox: () => void;
 }
 
 // The five status transitions form the fixed Nuzlocke encounter status matrix.
@@ -89,9 +89,9 @@ function createEncounterStatusItems(
     currentStatus !== PokemonStatus.MISSED
   ) {
     items.push({
+      icon: Skull,
       id: "mark-deceased",
       label: "Mark as Deceased",
-      icon: Skull,
       onClick: actions.onMarkAsDeceased,
     });
   }
@@ -103,9 +103,9 @@ function createEncounterStatusItems(
     currentStatus === PokemonStatus.DECEASED
   ) {
     items.push({
+      icon: Computer,
       id: "move-to-box",
       label: "Move to Box",
-      icon: Computer,
       onClick: actions.onMoveToBox,
     });
   }
@@ -115,18 +115,18 @@ function createEncounterStatusItems(
     currentStatus !== PokemonStatus.RECEIVED
   ) {
     items.push({
+      icon: PokeballIcon,
       id: "mark-captured",
       label: "Mark as Captured",
-      icon: PokeballIcon,
       onClick: actions.onMarkAsCaptured,
     });
   }
 
   if (!currentStatus) {
     items.push({
+      icon: EscapeIcon,
       id: "mark-missed",
       label: "Mark as Missed",
-      icon: EscapeIcon,
       onClick: actions.onMarkAsMissed,
     });
   }
@@ -136,9 +136,9 @@ function createEncounterStatusItems(
     currentStatus !== PokemonStatus.CAPTURED
   ) {
     items.push({
+      icon: Gift,
       id: "mark-received",
       label: "Mark as Received",
-      icon: Gift,
       onClick: actions.onMarkAsReceived,
     });
   }
@@ -148,12 +148,12 @@ function createEncounterStatusItems(
 
 interface PokemonContextMenuProps {
   children: React.ReactNode;
-  locationId: string;
   encounterData: {
     head?: PokemonOptionType | null;
     body?: PokemonOptionType | null;
     isFusion?: boolean;
   } | null;
+  locationId: string;
   shouldLoad?: boolean;
   showStatusActions?: boolean; // Whether to show status-changing actions in context menu
 }
@@ -226,10 +226,10 @@ export function PokemonContextMenu({
     targetField: "head" | "body",
   ) => {
     await playthroughActions.relocateEncounterSlot({
-      sourceLocationId: locationId,
       sourceField: "head",
-      targetLocationId,
+      sourceLocationId: locationId,
       targetField,
+      targetLocationId,
     });
   };
 
@@ -239,10 +239,10 @@ export function PokemonContextMenu({
     targetField: "head" | "body",
   ) => {
     await playthroughActions.relocateEncounterSlot({
-      sourceLocationId: locationId,
       sourceField: "body",
-      targetLocationId,
+      sourceLocationId: locationId,
       targetField,
+      targetLocationId,
     });
   };
 
@@ -257,20 +257,20 @@ export function PokemonContextMenu({
 
     const items: ContextMenuItem[] = [
       {
-        id: "change-variant",
-        label: "Change Preferred Artwork",
         disabled: eitherPokemonIsEgg || !hasArtVariants,
         icon: isLoadingVariants ? Loader2 : Replace,
+        iconClassName: isLoadingVariants ? "animate-spin" : "",
+        id: "change-variant",
+        label: "Change Preferred Artwork",
+        onClick: () => {
+          setIsVariantModalOpen(true);
+        },
         tooltip:
           eitherPokemonIsEgg || !hasArtVariants
             ? isLoadingVariants
               ? "Loading artwork variants..."
               : "No artwork variants available"
             : undefined,
-        iconClassName: isLoadingVariants ? "animate-spin" : "",
-        onClick: () => {
-          setIsVariantModalOpen(true);
-        },
       },
     ];
 
@@ -278,11 +278,11 @@ export function PokemonContextMenu({
     if (hasPokemon && !eitherPokemonIsEgg && showStatusActions) {
       items.push(
         ...createEncounterStatusItems(currentStatus, {
-          onMarkAsDeceased: handleMarkAsDeceased,
-          onMoveToBox: handleMoveToBox,
           onMarkAsCaptured: handleMarkAsCaptured,
+          onMarkAsDeceased: handleMarkAsDeceased,
           onMarkAsMissed: handleMarkAsMissed,
           onMarkAsReceived: handleMarkAsReceived,
+          onMoveToBox: handleMoveToBox,
         }),
       );
 
@@ -297,9 +297,9 @@ export function PokemonContextMenu({
         // Show "Move Head" if head Pokemon exists
         if (encounterData?.head) {
           moveActions.push({
+            icon: HeadIcon,
             id: "move-head",
             label: "Move Head",
-            icon: HeadIcon,
             onClick: () => {
               setIsMoveHeadModalOpen(true);
             },
@@ -309,9 +309,9 @@ export function PokemonContextMenu({
         // Show "Move Body" if body Pokemon exists
         if (encounterData?.body) {
           moveActions.push({
+            icon: BodyIcon,
             id: "move-body",
             label: "Move Body",
-            icon: BodyIcon,
             onClick: () => {
               setIsMoveBodyModalOpen(true);
             },
@@ -350,36 +350,36 @@ export function PokemonContextMenu({
       </ContextMenu>
 
       <ArtworkVariantModal
+        bodyId={displayPokemon.body?.id}
+        headId={displayPokemon.head?.id}
+        isFusion={encounterData?.isFusion}
         isOpen={isVariantModalOpen}
         onClose={() => setIsVariantModalOpen(false)}
-        headId={displayPokemon.head?.id}
-        bodyId={displayPokemon.body?.id}
-        isFusion={encounterData?.isFusion}
       />
 
       {encounterData?.head && (
         <LocationSelector
-          isOpen={isMoveHeadModalOpen}
-          onClose={() => setIsMoveHeadModalOpen(false)}
           currentLocationId={locationId}
-          onSelectLocation={handleMoveHead}
           encounterData={
             encounterData?.head ? { head: encounterData.head } : null
           }
+          isOpen={isMoveHeadModalOpen}
           moveTargetField="head"
+          onClose={() => setIsMoveHeadModalOpen(false)}
+          onSelectLocation={handleMoveHead}
         />
       )}
 
       {encounterData?.body && (
         <LocationSelector
-          isOpen={isMoveBodyModalOpen}
-          onClose={() => setIsMoveBodyModalOpen(false)}
           currentLocationId={locationId}
-          onSelectLocation={handleMoveBody}
           encounterData={
             encounterData?.body ? { body: encounterData.body } : null
           }
+          isOpen={isMoveBodyModalOpen}
           moveTargetField="body"
+          onClose={() => setIsMoveBodyModalOpen(false)}
+          onSelectLocation={handleMoveBody}
         />
       )}
     </>

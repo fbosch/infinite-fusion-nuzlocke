@@ -43,7 +43,7 @@ export const SettingsSchema = {
   safeParse(value: unknown) {
     const data = parseSettings(value);
     return data
-      ? { success: true as const, data }
+      ? { data, success: true as const }
       : { success: false as const };
   },
 };
@@ -51,17 +51,23 @@ export const SettingsSchema = {
 // Function to determine if move encounters should be enabled by default
 // Based on whether the current playthrough has a version (old vs new playthroughs)
 const shouldEnableMoveEncountersByDefault = (): boolean => {
-  if (typeof window === "undefined") return false; // SSR safety
+  if (typeof window === "undefined") {
+    return false; // SSR safety
+  }
 
   try {
     const activePlaythrough = getActivePlaythrough();
 
     // If no active playthrough, default to disabled (new user)
-    if (!activePlaythrough) return false;
+    if (!activePlaythrough) {
+      return false;
+    }
 
     // If playthrough has no version field, it's an old playthrough
     // Enable move encounters to maintain backward compatibility
-    if (!activePlaythrough.version) return true;
+    if (!activePlaythrough.version) {
+      return true;
+    }
 
     // For new playthroughs (with version), default to disabled
     return false;
@@ -83,7 +89,9 @@ const getDefaultSettings = (): Settings => ({
 const loadSettings = (): Settings => {
   const dynamicDefaults = getDefaultSettings();
 
-  if (typeof window === "undefined") return dynamicDefaults;
+  if (typeof window === "undefined") {
+    return dynamicDefaults;
+  }
 
   try {
     const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
@@ -109,10 +117,9 @@ const loadSettings = (): Settings => {
           };
         }
         return result;
-      } else {
-        console.warn("Invalid settings data, using defaults:", parsed);
-        return dynamicDefaults;
       }
+      console.warn("Invalid settings data, using defaults:", parsed);
+      return dynamicDefaults;
     }
   } catch (error) {
     console.warn("Failed to load settings from localStorage:", error);
@@ -126,7 +133,9 @@ export const settingsStore = proxy<Settings>(loadSettings());
 export const getEffectiveReducedMotion = (
   preference = settingsStore.reducedMotion,
 ): boolean => {
-  if (typeof preference === "boolean") return preference;
+  if (typeof preference === "boolean") {
+    return preference;
+  }
   return getBrowserReducedMotion();
 };
 
@@ -160,27 +169,6 @@ const updateSettings = (updates: Partial<Settings>) => {
 
 // Actions for updating settings
 export const settingsActions = {
-  toggleMoveEncountersBetweenLocations: () => {
-    updateSettings({
-      moveEncountersBetweenLocations:
-        !settingsStore.moveEncountersBetweenLocations,
-    });
-  },
-
-  setReducedMotion: (reducedMotion: boolean) => {
-    updateSettings({ reducedMotion });
-  },
-
-  // Helper function to reset settings to defaults
-  resetToDefaults: () => {
-    updateSettings({ ...getDefaultSettings(), reducedMotion: undefined });
-  },
-
-  // Helper function to update multiple settings at once
-  updateMultiple: (updates: Partial<Settings>) => {
-    updateSettings(updates);
-  },
-
   // Function to re-evaluate defaults when playthrough changes
   // This should be called when switching playthroughs if the setting hasn't been explicitly set
   refreshDefaults: () => {
@@ -206,6 +194,26 @@ export const settingsActions = {
     } catch (error) {
       console.warn("Failed to refresh settings defaults:", error);
     }
+  },
+
+  // Helper function to reset settings to defaults
+  resetToDefaults: () => {
+    updateSettings({ ...getDefaultSettings(), reducedMotion: undefined });
+  },
+
+  setReducedMotion: (reducedMotion: boolean) => {
+    updateSettings({ reducedMotion });
+  },
+  toggleMoveEncountersBetweenLocations: () => {
+    updateSettings({
+      moveEncountersBetweenLocations:
+        !settingsStore.moveEncountersBetweenLocations,
+    });
+  },
+
+  // Helper function to update multiple settings at once
+  updateMultiple: (updates: Partial<Settings>) => {
+    updateSettings(updates);
   },
 };
 

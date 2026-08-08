@@ -22,23 +22,23 @@ import { CursorTooltip } from "../CursorTooltip";
 import { PokemonSprite } from "../PokemonSprite";
 
 interface PokemonEvolutionButtonProps {
-  value: PokemonOptionType | null | undefined;
+  locationId?: string;
   onChange: (value: PokemonOptionType | null) => void;
   shouldLoad?: boolean;
-  locationId?: string;
+  value: PokemonOptionType | null | undefined;
 }
 
 interface EvolutionDropdownProps {
   availableEvolutions: PokemonOptionType[];
-  onSelectEvolution: (evolution: PokemonOptionType) => void;
   isLoadingEvolutions: boolean;
+  onSelectEvolution: (evolution: PokemonOptionType) => void;
 }
 
 interface DirectEvolutionButtonProps {
-  pokemon: PokemonOptionType;
   isDevolutionMode: boolean;
-  showDevolutionHint: boolean;
   onClick: () => void;
+  pokemon: PokemonOptionType;
+  showDevolutionHint: boolean;
 }
 
 // Evolution Dropdown Component
@@ -49,47 +49,47 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
 }) => {
   // Floating UI setup for portal positioning
   const { refs, floatingStyles, update } = useFloating({
-    placement: "bottom-end",
     middleware: [
       flip({ padding: 8 }),
       size({
         apply({ elements, availableHeight, availableWidth }) {
           Object.assign(elements.floating.style, {
             maxHeight: `${Math.min(300, availableHeight - 8)}px`,
-            minWidth: "200px",
             maxWidth: `${availableWidth - 16}px`,
+            minWidth: "200px",
           });
         },
         padding: 8,
       }),
     ],
+    placement: "bottom-end",
     whileElementsMounted: autoUpdate,
   });
 
   return (
     <Menu>
       <MenuButton
-        ref={refs.setReference}
-        disabled={isLoadingEvolutions}
         className={clsx(
-          "flex items-center justify-center gap-1 px-2 py-1 rounded-md",
-          "bg-gray-100 text-gray-600 text-xs ",
+          "flex items-center justify-center gap-1 rounded-md px-2 py-1",
+          "bg-gray-100 text-gray-600 text-xs",
           "border border-gray-300 hover:border-blue-300 dark:border-gray-600 dark:hover:border-blue-400",
           "transition-colors duration-200",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
-          "disabled:opacity-50 disabled:cursor-not-allowed",
-          "dark:bg-gray-700 dark:hover:bg-blue-900/20 dark:text-gray-400 dark:hover:text-blue-400",
+          "disabled:cursor-not-allowed disabled:opacity-50",
+          "dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-400",
           "hover:cursor-pointer",
-          "hover:bg-blue-100 hover:text-blue-600 hover:border-blue-300 dark:bg-blue-900/20 dark:hover:text-blue-400 dark:hover:border-blue-400",
-          "data-[open]:bg-blue-100 data-[open]:text-blue-600 data-[open]:border-blue-300 dark:data-[open]:bg-blue-900/20 dark:data-[open]:text-blue-400 dark:data-[open]:border-blue-400",
+          "hover:border-blue-300 hover:bg-blue-100 hover:text-blue-600 dark:bg-blue-900/20 dark:hover:border-blue-400 dark:hover:text-blue-400",
+          "data-[open]:border-blue-300 data-[open]:bg-blue-100 data-[open]:text-blue-600 dark:data-[open]:border-blue-400 dark:data-[open]:bg-blue-900/20 dark:data-[open]:text-blue-400",
         )}
+        disabled={isLoadingEvolutions}
         onFocus={() => update()}
+        ref={refs.setReference}
       >
         <CursorTooltip
           content={
             <div className="flex items-center gap-2 text-sm">
               <span className="text-sm">Choose evolution</span>
-              <span className="text-xs text-gray-400">
+              <span className="text-gray-400 text-xs">
                 ({availableEvolutions.length} options)
               </span>
             </div>
@@ -97,8 +97,8 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
           delay={300}
         >
           <div className="flex items-center gap-1">
-            <Atom className="w-3 h-3" />
-            <ChevronDown className="w-3 h-3" />
+            <Atom className="h-3 w-3" />
+            <ChevronDown className="h-3 w-3" />
           </div>
         </CursorTooltip>
       </MenuButton>
@@ -106,18 +106,18 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
       <FloatingPortal>
         {/* react-doctor-disable-next-line react-hooks-js/refs -- Floating UI callback refs run during commit, not render. */}
         <MenuItems
-          ref={refs.setFloating}
-          style={floatingStyles}
           className={clsx(
             "z-50 text-base shadow-lg focus:outline-none sm:text-sm",
             "bg-white dark:bg-gray-800",
             "border border-gray-300 dark:border-gray-600",
-            "rounded-md mt-1 overflow-y-auto scrollbar-thin",
+            "scrollbar-thin mt-1 overflow-y-auto rounded-md",
           )}
+          ref={refs.setFloating}
+          style={floatingStyles}
         >
           <div
             className={clsx(
-              "px-3 pb-2 pt-2 text-xs  text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600 sticky top-0 bg-white dark:bg-gray-800",
+              "sticky top-0 border-gray-200 border-b bg-white px-3 pt-2 pb-2 text-gray-500 text-xs dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400",
             )}
           >
             Choose Evolution
@@ -127,23 +127,23 @@ const EvolutionDropdown: React.FC<EvolutionDropdownProps> = ({
               <MenuItem key={evolution.id}>
                 {({ focus }) => (
                   <button
-                    type="button"
                     aria-label={`Evolve to ${evolution.name}`}
-                    onClick={() => onSelectEvolution(evolution)}
                     className={clsx(
-                      "w-full flex items-center gap-3 px-3 py-2 text-sm hover:cursor-pointer rounded-md",
-                      "text-gray-900 dark:text-gray-100 text-left",
+                      "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:cursor-pointer",
+                      "text-left text-gray-900 dark:text-gray-100",
                       "focus:outline-none",
                       {
                         "bg-blue-600 text-white": focus,
                         "hover:bg-gray-100 dark:hover:bg-gray-700": !focus,
                       },
                     )}
+                    onClick={() => onSelectEvolution(evolution)}
+                    type="button"
                   >
-                    <div className="flex items-center justify-center size-8">
+                    <div className="flex size-8 items-center justify-center">
                       <PokemonSprite
-                        pokemonId={evolution.id}
                         generation="gen7"
+                        pokemonId={evolution.id}
                       />
                     </div>
                     <span className="">{evolution.name}</span>
@@ -168,8 +168,8 @@ const DirectEvolutionButton: React.FC<DirectEvolutionButtonProps> = ({
     <CursorTooltip
       content={
         <div className="flex items-center gap-x-4">
-          <div className="flex items-center justify-center w-8 h-8">
-            <PokemonSprite pokemonId={pokemon.id} generation="gen7" />
+          <div className="flex h-8 w-8 items-center justify-center">
+            <PokemonSprite generation="gen7" pokemonId={pokemon.id} />
           </div>
           <div className="flex flex-col gap-0.5">
             <span>
@@ -186,7 +186,7 @@ const DirectEvolutionButton: React.FC<DirectEvolutionButtonProps> = ({
               )}
             </span>
             {showDevolutionHint && (
-              <span className="text-xs text-gray-400">
+              <span className="text-gray-400 text-xs">
                 Hold shift to devolve
               </span>
             )}
@@ -196,30 +196,30 @@ const DirectEvolutionButton: React.FC<DirectEvolutionButtonProps> = ({
       delay={300}
     >
       <button
-        type="button"
-        onClick={onClick}
         aria-label={isDevolutionMode ? "Devolve Pokemon" : "Evolve Pokemon"}
         className={clsx(
-          "flex items-center justify-center gap-1 px-2 py-1 rounded-md",
-          "bg-gray-100 text-gray-600 text-xs ",
+          "flex items-center justify-center gap-1 rounded-md px-2 py-1",
+          "bg-gray-100 text-gray-600 text-xs",
           "border border-gray-300 hover:border-blue-300 dark:border-gray-600 dark:hover:border-blue-400",
           "transition-colors duration-200",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
-          "disabled:opacity-50 disabled:cursor-not-allowed",
-          "dark:bg-gray-700 dark:hover:bg-blue-900/20 dark:text-gray-400 dark:hover:text-blue-400",
+          "disabled:cursor-not-allowed disabled:opacity-50",
+          "dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-400",
           "hover:cursor-pointer",
           {
-            "hover:bg-orange-100 hover:text-orange-600 hover:border-orange-300 dark:hover:bg-orange-900/20 dark:hover:text-orange-400 dark:hover:border-orange-400":
-              isDevolutionMode,
-            "hover:bg-blue-100 hover:text-blue-600 hover:border-blue-300 dark:bg-blue-900/20 dark:hover:text-blue-400 dark:hover:border-blue-400":
+            "hover:border-blue-300 hover:bg-blue-100 hover:text-blue-600 dark:bg-blue-900/20 dark:hover:border-blue-400 dark:hover:text-blue-400":
               !isDevolutionMode,
+            "hover:border-orange-300 hover:bg-orange-100 hover:text-orange-600 dark:hover:border-orange-400 dark:hover:bg-orange-900/20 dark:hover:text-orange-400":
+              isDevolutionMode,
           },
         )}
+        onClick={onClick}
+        type="button"
       >
         {isDevolutionMode ? (
-          <Undo2 className="w-3 h-3" />
+          <Undo2 className="h-3 w-3" />
         ) : (
-          <Atom className="w-3 h-3" />
+          <Atom className="h-3 w-3" />
         )}
       </button>
     </CursorTooltip>
@@ -265,18 +265,24 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
       selectedEvolution ??
       (isDevolution ? availablePreEvolution : availableEvolutions.at(0));
 
-    if (!nextPokemon) return;
+    if (!nextPokemon) {
+      return;
+    }
 
     onChange({ ...value, ...nextPokemon });
 
-    if (isDevolution) return;
+    if (isDevolution) {
+      return;
+    }
 
     const id = locationId ?? value?.originalLocation ?? null;
-    if (id) emitEvolutionEvent(id);
+    if (id) {
+      emitEvolutionEvent(id);
+    }
   };
 
   // Don't render if no Pokemon is selected or no evolutions/devolutions available
-  if (!value || (!hasEvolutions && !isDevolutionMode) || isLoading) {
+  if (!(value && (hasEvolutions || isDevolutionMode)) || isLoading) {
     return null;
   }
 
@@ -284,12 +290,12 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
   if (isDevolutionMode || availableEvolutions.length === 1) {
     return (
       <DirectEvolutionButton
+        isDevolutionMode={isDevolutionMode}
+        onClick={() => handleEvolution(undefined, isDevolutionMode)}
         pokemon={
           isDevolutionMode ? availablePreEvolution! : availableEvolutions[0]!
         }
-        isDevolutionMode={isDevolutionMode}
         showDevolutionHint={!isDevolutionMode && !!availablePreEvolution}
-        onClick={() => handleEvolution(undefined, isDevolutionMode)}
       />
     );
   }
@@ -299,8 +305,8 @@ export const PokemonEvolutionButton: React.FC<PokemonEvolutionButtonProps> = ({
     <div className="absolute inset-y-0 right-4 flex items-center">
       <EvolutionDropdown
         availableEvolutions={availableEvolutions}
-        onSelectEvolution={handleEvolution}
         isLoadingEvolutions={isLoading}
+        onSelectEvolution={handleEvolution}
       />
     </div>
   );

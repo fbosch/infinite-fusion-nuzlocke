@@ -18,7 +18,9 @@ export function useAnimatedSprite({
 
   useLayoutEffect(() => {
     reducedMotionRef.current = reducedMotion;
-    if (!reducedMotion) return;
+    if (!reducedMotion) {
+      return;
+    }
 
     hoverRef.current = false;
     [imageRef, shadowRef, overlayRef, raysSvgRef].forEach((ref) => {
@@ -40,7 +42,9 @@ export function useAnimatedSprite({
       }
 
       const animateSprite = () => {
-        if (!hoverRef.current || reducedMotionRef.current) return;
+        if (!hoverRef.current || reducedMotionRef.current) {
+          return;
+        }
 
         const animation = imageRef.current?.animate(
           [
@@ -51,8 +55,8 @@ export function useAnimatedSprite({
           {
             duration: 400,
             easing: "linear",
-            playbackRate: 1,
             iterations: 1,
+            playbackRate: 1,
           },
         );
 
@@ -60,17 +64,17 @@ export function useAnimatedSprite({
           [
             { transform: "skewX(-5deg) skewY(-30deg) scale(1) " },
             {
+              blur: "0.2px",
               transform:
                 "skewX(-5deg) skewY(-30deg) scale(1.03) translateY(-5%)",
-              blur: "0.2px",
             },
             { transform: "skewX(-5deg) skewY(-30deg) scale(1)" },
           ],
           {
             duration: 400,
             easing: "linear",
-            playbackRate: 1,
             iterations: 1,
+            playbackRate: 1,
           },
         );
 
@@ -112,7 +116,9 @@ export function useAnimatedSprite({
   };
 
   const playEvolutionAnimation = () => {
-    if (reducedMotion) return;
+    if (reducedMotion) {
+      return;
+    }
 
     // Cancel any existing animations
     imageRef.current?.getAnimations().forEach((a) => {
@@ -154,16 +160,16 @@ export function useAnimatedSprite({
     shadowRef.current?.animate(
       [
         {
-          transform: "skewX(-5deg) skewY(-30deg) scale(1)",
           opacity: 0.12,
+          transform: "skewX(-5deg) skewY(-30deg) scale(1)",
         },
         {
-          transform: "skewX(-5deg) skewY(-30deg) scale(1.06)",
           opacity: 0.18,
+          transform: "skewX(-5deg) skewY(-30deg) scale(1.06)",
         },
         {
-          transform: "skewX(-5deg) skewY(-30deg) scale(1)",
           opacity: 0.12,
+          transform: "skewX(-5deg) skewY(-30deg) scale(1)",
         },
       ],
       {
@@ -206,12 +212,12 @@ export function useAnimatedSprite({
   };
 
   return {
-    imageRef,
-    shadowRef,
-    overlayRef,
-    raysSvgRef,
     handleMouseEnter,
     handleMouseLeave,
+    imageRef,
+    overlayRef,
     playEvolutionAnimation,
+    raysSvgRef,
+    shadowRef,
   };
 }

@@ -5,22 +5,22 @@ type AnalyticsPrimitive = string | number | boolean;
 type AnalyticsProperties = Record<string, AnalyticsPrimitive>;
 
 export const ANALYTICS_EVENTS = {
-  landingViewed: "landing_viewed",
-  playthroughSelectorOpened: "playthrough_selector_opened",
   createPlaythroughModalOpened: "create_playthrough_modal_opened",
+  encounterMarkedDeceased: "encounter_marked_deceased",
   firstEncounterSaved: "first_encounter_saved",
-  playthroughCreated: "playthrough_created",
-  playthroughSwitched: "playthrough_switched",
-  playthroughImported: "playthrough_imported",
-  playthroughImportFailed: "playthrough_import_failed",
-  runCheckpointReached: "run_checkpoint_reached",
-  playthroughResumed: "playthrough_resumed",
-  gameModeChanged: "game_mode_changed",
   fusionCreated: "fusion_created",
   fusionFlipped: "fusion_flipped",
-  encounterMarkedDeceased: "encounter_marked_deceased",
-  playthroughExported: "playthrough_exported",
+  gameModeChanged: "game_mode_changed",
   githubCtaViewed: "github_cta_viewed",
+  landingViewed: "landing_viewed",
+  playthroughCreated: "playthrough_created",
+  playthroughExported: "playthrough_exported",
+  playthroughImported: "playthrough_imported",
+  playthroughImportFailed: "playthrough_import_failed",
+  playthroughResumed: "playthrough_resumed",
+  playthroughSelectorOpened: "playthrough_selector_opened",
+  playthroughSwitched: "playthrough_switched",
+  runCheckpointReached: "run_checkpoint_reached",
 } as const;
 
 export type AnalyticsEventName =
@@ -205,43 +205,39 @@ const ANALYTICS_PRODUCTION_HOSTNAMES = new Set([
   "www.fusion.nuzlocke.io",
 ]);
 
-const createByEventCounter = (): Record<AnalyticsEventName, EventCounter> => {
-  return {
-    landing_viewed: { sent: 0, blocked: 0 },
-    playthrough_selector_opened: { sent: 0, blocked: 0 },
-    create_playthrough_modal_opened: { sent: 0, blocked: 0 },
-    first_encounter_saved: { sent: 0, blocked: 0 },
-    playthrough_created: { sent: 0, blocked: 0 },
-    playthrough_switched: { sent: 0, blocked: 0 },
-    playthrough_imported: { sent: 0, blocked: 0 },
-    playthrough_import_failed: { sent: 0, blocked: 0 },
-    run_checkpoint_reached: { sent: 0, blocked: 0 },
-    playthrough_resumed: { sent: 0, blocked: 0 },
-    game_mode_changed: { sent: 0, blocked: 0 },
-    fusion_created: { sent: 0, blocked: 0 },
-    fusion_flipped: { sent: 0, blocked: 0 },
-    encounter_marked_deceased: { sent: 0, blocked: 0 },
-    playthrough_exported: { sent: 0, blocked: 0 },
-    github_cta_viewed: { sent: 0, blocked: 0 },
-  };
-};
+const createByEventCounter = (): Record<AnalyticsEventName, EventCounter> => ({
+  create_playthrough_modal_opened: { blocked: 0, sent: 0 },
+  encounter_marked_deceased: { blocked: 0, sent: 0 },
+  first_encounter_saved: { blocked: 0, sent: 0 },
+  fusion_created: { blocked: 0, sent: 0 },
+  fusion_flipped: { blocked: 0, sent: 0 },
+  game_mode_changed: { blocked: 0, sent: 0 },
+  github_cta_viewed: { blocked: 0, sent: 0 },
+  landing_viewed: { blocked: 0, sent: 0 },
+  playthrough_created: { blocked: 0, sent: 0 },
+  playthrough_exported: { blocked: 0, sent: 0 },
+  playthrough_import_failed: { blocked: 0, sent: 0 },
+  playthrough_imported: { blocked: 0, sent: 0 },
+  playthrough_resumed: { blocked: 0, sent: 0 },
+  playthrough_selector_opened: { blocked: 0, sent: 0 },
+  playthrough_switched: { blocked: 0, sent: 0 },
+  run_checkpoint_reached: { blocked: 0, sent: 0 },
+});
 
-const createBlockReasonCounter = (): Record<BlockReason, number> => {
-  return {
-    non_browser: 0,
-    non_production: 0,
-    no_consent: 0,
-    kill_switch: 0,
-    invalid_payload: 0,
-    track_error: 0,
-  };
-};
+const createBlockReasonCounter = (): Record<BlockReason, number> => ({
+  invalid_payload: 0,
+  kill_switch: 0,
+  no_consent: 0,
+  non_browser: 0,
+  non_production: 0,
+  track_error: 0,
+});
 
 const analyticsDebugCounters: AnalyticsDebugCounters = {
-  sent: 0,
   blocked: 0,
-  byEvent: createByEventCounter(),
   blockReasons: createBlockReasonCounter(),
+  byEvent: createByEventCounter(),
+  sent: 0,
 };
 
 export function resetAnalyticsDebugCounters(): void {
@@ -257,20 +253,20 @@ export function getAnalyticsDebugCounters(): AnalyticsDebugCounters {
       ([eventName, counts]) => [
         eventName,
         {
-          sent: counts.sent,
           blocked: counts.blocked,
+          sent: counts.sent,
         },
       ],
     ),
   ) as Record<AnalyticsEventName, EventCounter>;
 
   return {
-    sent: analyticsDebugCounters.sent,
     blocked: analyticsDebugCounters.blocked,
-    byEvent,
     blockReasons: {
       ...analyticsDebugCounters.blockReasons,
     },
+    byEvent,
+    sent: analyticsDebugCounters.sent,
   };
 }
 
@@ -340,22 +336,26 @@ function isValidEventPayload<EventName extends AnalyticsEventName>(
     "viable_roster_bucket",
   ];
   const eventKeys: Record<AnalyticsEventName, string[]> = {
-    landing_viewed: ["entry_route"],
-    playthrough_selector_opened: ["source_surface"],
     create_playthrough_modal_opened: ["source_surface"],
+    encounter_marked_deceased: [
+      "location_id",
+      "was_fused",
+      "team_size_after",
+      "viable_roster_bucket_after",
+    ],
     first_encounter_saved: ["location_id"],
-    playthrough_created: ["has_existing_playthroughs"],
-    playthrough_switched: [
-      "previous_playthrough_id",
-      "new_playthrough_id",
+    fusion_created: ["location_id", "creation_method"],
+    fusion_flipped: ["location_id"],
+    game_mode_changed: [
+      "previous_game_mode",
+      "new_game_mode",
       "source_surface",
       "trigger_method",
     ],
-    playthrough_imported: [
-      "import_source",
-      "file_extension_group",
-      "mime_group",
-    ],
+    github_cta_viewed: ["source_surface", "route"],
+    landing_viewed: ["entry_route"],
+    playthrough_created: ["has_existing_playthroughs"],
+    playthrough_exported: [],
     playthrough_import_failed: [
       "import_source",
       "failure_stage",
@@ -364,24 +364,20 @@ function isValidEventPayload<EventName extends AnalyticsEventName>(
       "file_extension_group",
       "mime_group",
     ],
-    run_checkpoint_reached: ["checkpoint", "checkpoint_label"],
+    playthrough_imported: [
+      "import_source",
+      "file_extension_group",
+      "mime_group",
+    ],
     playthrough_resumed: ["days_since_last_active_bucket"],
-    game_mode_changed: [
-      "previous_game_mode",
-      "new_game_mode",
+    playthrough_selector_opened: ["source_surface"],
+    playthrough_switched: [
+      "previous_playthrough_id",
+      "new_playthrough_id",
       "source_surface",
       "trigger_method",
     ],
-    fusion_created: ["location_id", "creation_method"],
-    fusion_flipped: ["location_id"],
-    encounter_marked_deceased: [
-      "location_id",
-      "was_fused",
-      "team_size_after",
-      "viable_roster_bucket_after",
-    ],
-    playthrough_exported: [],
-    github_cta_viewed: ["source_surface", "route"],
+    run_checkpoint_reached: ["checkpoint", "checkpoint_label"],
   };
   const candidate = properties as Record<string, unknown>;
   const allowedKeys =
@@ -446,7 +442,7 @@ function isValidEventPayload<EventName extends AnalyticsEventName>(
   if (valid === false) {
     debugLog("Analytics payload blocked by schema", {
       eventName,
-      issues: [{ path: [], message: "Invalid event payload" }],
+      issues: [{ message: "Invalid event payload", path: [] }],
     });
     return false;
   }
@@ -486,7 +482,7 @@ function isValidEventPayload<EventName extends AnalyticsEventName>(
   ) {
     debugLog("Analytics payload blocked by schema", {
       eventName,
-      issues: [{ path: [], message: "Invalid event payload" }],
+      issues: [{ message: "Invalid event payload", path: [] }],
     });
     return false;
   }
@@ -496,51 +492,63 @@ function isValidEventPayload<EventName extends AnalyticsEventName>(
     eventName === "game_mode_changed"
   ) {
     if (
-      !isOneOf(candidate.source_surface, [
-        "header",
-        "playthrough_selector",
-        "create_playthrough_modal",
-        "game_mode_toggle",
-        "store",
-      ]) ||
-      !isOneOf(candidate.trigger_method, [
-        "click",
-        "keyboard",
-        "submit",
-        "programmatic",
-      ])
-    )
+      !(
+        isOneOf(candidate.source_surface, [
+          "header",
+          "playthrough_selector",
+          "create_playthrough_modal",
+          "game_mode_toggle",
+          "store",
+        ]) &&
+        isOneOf(candidate.trigger_method, [
+          "click",
+          "keyboard",
+          "submit",
+          "programmatic",
+        ])
+      )
+    ) {
       return false;
+    }
 
     if (
       eventName === "playthrough_switched" &&
-      (!isNonEmptyString(candidate.previous_playthrough_id) ||
-        !isNonEmptyString(candidate.new_playthrough_id))
-    )
+      !(
+        isNonEmptyString(candidate.previous_playthrough_id) &&
+        isNonEmptyString(candidate.new_playthrough_id)
+      )
+    ) {
       return false;
+    }
 
     if (
       eventName === "game_mode_changed" &&
-      (!isOneOf(candidate.previous_game_mode, [
-        "classic",
-        "remix",
-        "randomized",
-      ]) ||
-        !isOneOf(candidate.new_game_mode, ["classic", "remix", "randomized"]))
-    )
+      !(
+        isOneOf(candidate.previous_game_mode, [
+          "classic",
+          "remix",
+          "randomized",
+        ]) &&
+        isOneOf(candidate.new_game_mode, ["classic", "remix", "randomized"])
+      )
+    ) {
       return false;
+    }
   }
 
   if (
     eventName === "fusion_created" &&
-    (!isNonEmptyString(candidate.location_id) ||
-      !isOneOf(candidate.creation_method, [
+    !(
+      isNonEmptyString(candidate.location_id) &&
+      isOneOf(candidate.creation_method, [
         "create_fusion",
         "update_encounter",
         "drag_drop",
-      ]))
-  )
+      ])
+    )
+  ) {
     return false;
+  }
   if (
     eventName === "playthrough_resumed" &&
     !isOneOf(candidate.days_since_last_active_bucket, [
@@ -551,8 +559,9 @@ function isValidEventPayload<EventName extends AnalyticsEventName>(
       "d_14_29_days",
       "d_30_plus_days",
     ])
-  )
+  ) {
     return false;
+  }
   if (
     (eventName === "playthrough_imported" ||
       eventName === "playthrough_import_failed") &&
@@ -564,8 +573,9 @@ function isValidEventPayload<EventName extends AnalyticsEventName>(
         "empty",
         "other",
       ]))
-  )
+  ) {
     return false;
+  }
   if (
     eventName === "playthrough_import_failed" &&
     (typeof candidate.has_file !== "boolean" ||
@@ -585,8 +595,9 @@ function isValidEventPayload<EventName extends AnalyticsEventName>(
         "storage_failure",
         "unexpected",
       ]))
-  )
+  ) {
     return false;
+  }
 
   return true;
 }

@@ -17,26 +17,26 @@ describe("ContextMenu", () => {
   beforeEach(() => {
     Object.defineProperty(window, "innerWidth", {
       configurable: true,
-      writable: true,
       value: 300,
+      writable: true,
     });
 
     Object.defineProperty(window, "innerHeight", {
       configurable: true,
-      writable: true,
       value: 200,
+      writable: true,
     });
   });
 
   it("keeps the context menu inside the viewport near bottom-right edges", () => {
     expect(
-      clampMenuPosition({ x: 280, y: 190 }, { width: 120, height: 80 }),
+      clampMenuPosition({ x: 280, y: 190 }, { height: 80, width: 120 }),
     ).toEqual({ x: 172, y: 112 });
   });
 
   it("keeps the requested position when enough viewport space exists", () => {
     expect(
-      clampMenuPosition({ x: 100, y: 60 }, { width: 120, height: 80 }),
+      clampMenuPosition({ x: 100, y: 60 }, { height: 80, width: 120 }),
     ).toEqual({ x: 100, y: 60 });
   });
 
@@ -147,9 +147,9 @@ describe("ContextMenu", () => {
       <ContextMenu
         items={[
           {
+            children: [{ id: "child", label: "Child action" }],
             id: "parent",
             label: "Parent action",
-            children: [{ id: "child", label: "Child action" }],
           },
         ]}
       >
@@ -179,9 +179,9 @@ describe("ContextMenu", () => {
       <ContextMenu
         items={[
           {
+            children: [{ id: "child", label: "Child action" }],
             id: "parent",
             label: "Parent action",
-            children: [{ id: "child", label: "Child action" }],
           },
         ]}
       >
@@ -212,10 +212,10 @@ describe("ContextMenu", () => {
       <ContextMenu
         items={[
           {
+            disabled: true,
+            href: "https://example.com",
             id: "disabled-link",
             label: "Disabled link",
-            href: "https://example.com",
-            disabled: true,
           },
         ]}
       >

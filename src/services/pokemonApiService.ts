@@ -4,16 +4,16 @@ import type { Pokemon } from "@/types/pokemon";
 export type { Pokemon } from "@/types/pokemon";
 
 export interface PokemonApiResponse {
-  data: Pokemon[];
   count: number;
+  data: Pokemon[];
   total: number;
 }
 
 export interface PokemonApiParams {
   ids?: number[];
+  limit?: number;
   search?: string;
   type?: string;
-  limit?: number;
 }
 
 class PokemonApiService {
@@ -54,10 +54,10 @@ class PokemonApiService {
     const url = `${this.baseUrl}?${searchParams.toString()}`;
 
     const response = await fetch(url, {
-      method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
+      method: "GET",
     });
 
     if (!response.ok) {
@@ -97,7 +97,7 @@ class PokemonApiService {
   }
 
   async searchPokemon(query: string, limit?: number): Promise<Pokemon[]> {
-    const response = await this.makeRequest({ search: query, limit });
+    const response = await this.makeRequest({ limit, search: query });
     return response.data;
   }
 

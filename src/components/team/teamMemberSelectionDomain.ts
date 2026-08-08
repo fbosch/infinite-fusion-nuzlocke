@@ -36,10 +36,10 @@ export const flipTeamPokemonSelection = (
     selectedBody?.pokemon.nickname || selectedHead?.pokemon.nickname || "";
 
   return {
-    selectedHead: selectedBody,
-    selectedBody: selectedHead,
     nickname,
     previewNickname: nickname,
+    selectedBody: selectedHead,
+    selectedHead: selectedBody,
   };
 };
 
@@ -55,8 +55,8 @@ export const getTeamNicknameUpdate = (
   }
 
   return {
-    uid: pokemon.uid,
     nickname: nickname === "" ? undefined : nickname,
+    uid: pokemon.uid,
   };
 };
 
@@ -80,10 +80,10 @@ export const initializeExistingTeamMemberSelection = (
     hasHead && hasBody ? null : hasHead ? "body" : hasBody ? "head" : undefined;
 
   return {
-    selectedHead,
-    selectedBody,
     nickname,
     previewNickname: nickname,
+    selectedBody,
+    selectedHead,
     suggestedActiveSlot,
   };
 };
@@ -97,10 +97,16 @@ export const filterAvailableTeamPokemon = (
   const usedPokemonUids = new Set<string>();
 
   teamMembers.forEach((member, index) => {
-    if (index === position || !member) return;
+    if (index === position || !member) {
+      return;
+    }
 
-    if (member.headPokemonUid) usedPokemonUids.add(member.headPokemonUid);
-    if (member.bodyPokemonUid) usedPokemonUids.add(member.bodyPokemonUid);
+    if (member.headPokemonUid) {
+      usedPokemonUids.add(member.headPokemonUid);
+    }
+    if (member.bodyPokemonUid) {
+      usedPokemonUids.add(member.bodyPokemonUid);
+    }
   });
 
   if (!existingTeamMember?.isEmpty) {
@@ -141,55 +147,55 @@ export const selectTeamPokemon = ({
 }) => {
   if (selectedHead?.pokemon.uid === pokemon.uid) {
     return {
-      selectedHead: null,
-      selectedBody,
       activeSlot: "head" as const,
       nickname: "",
       previewNickname: "",
+      selectedBody,
+      selectedHead: null,
     };
   }
 
   if (selectedBody?.pokemon.uid === pokemon.uid) {
     return {
-      selectedHead,
-      selectedBody: null,
       activeSlot: "body" as const,
       nickname: "",
       previewNickname: "",
+      selectedBody: null,
+      selectedHead,
     };
   }
 
   if (activeSlot === "head") {
-    const nextSelectedHead = { pokemon, locationId };
+    const nextSelectedHead = { locationId, pokemon };
     const nickname = getTeamSelectionNickname(pokemon, selectedBody?.pokemon);
 
     return {
-      selectedHead: nextSelectedHead,
-      selectedBody,
       activeSlot: selectedBody ? activeSlot : ("body" as const),
       nickname,
       previewNickname: nickname,
+      selectedBody,
+      selectedHead: nextSelectedHead,
     };
   }
 
   if (activeSlot === "body") {
-    const nextSelectedBody = { pokemon, locationId };
+    const nextSelectedBody = { locationId, pokemon };
     const nickname = getTeamSelectionNickname(selectedHead?.pokemon, pokemon);
 
     return {
-      selectedHead,
-      selectedBody: nextSelectedBody,
       activeSlot: "body" as const,
       nickname,
       previewNickname: nickname,
+      selectedBody: nextSelectedBody,
+      selectedHead,
     };
   }
 
   return {
-    selectedHead,
-    selectedBody,
     activeSlot,
     nickname,
     previewNickname,
+    selectedBody,
+    selectedHead,
   };
 };

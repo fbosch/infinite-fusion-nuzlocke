@@ -7,13 +7,13 @@ global.fetch = mockFetch;
 
 // Mock the persistence module
 vi.mock("@/lib/persistence", () => ({
-  getCacheBuster: () => 12345,
+  getCacheBuster: () => 12_345,
 }));
 
 // Mock the response schema loaded at the service boundary.
 vi.mock("@/validation/encounters", () => ({
   RouteEncountersArraySchema: {
-    safeParse: vi.fn().mockReturnValue({ success: true, data: [] }),
+    safeParse: vi.fn().mockReturnValue({ data: [], success: true }),
   },
 }));
 
@@ -26,23 +26,23 @@ const encountersApiServicePrivate = encountersApiService as unknown as {
 
 // Mock data - using any to avoid type issues in tests
 const mockRouteEncounter = {
-  routeName: "Route 1",
   pokemon: [
     {
       id: 1,
       source: "wild",
     },
   ],
+  routeName: "Route 1",
 } as any;
 
 const mockRouteEncounter2 = {
-  routeName: "Route 2",
   pokemon: [
     {
       id: 2,
       source: "wild",
     },
   ],
+  routeName: "Route 2",
 } as any;
 
 describe("EncountersApiService", () => {
@@ -50,8 +50,8 @@ describe("EncountersApiService", () => {
     vi.clearAllMocks();
     // Reset the mock to return success by default
     vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValue({
-      success: true,
       data: [],
+      success: true,
     });
   });
 
@@ -73,13 +73,13 @@ describe("EncountersApiService", () => {
   describe("makeRequest", () => {
     it("should make request with correct URL and gameMode parameter", async () => {
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
         data: [mockRouteEncounter, mockRouteEncounter2],
+        success: true,
       });
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => [mockRouteEncounter, mockRouteEncounter2],
+        ok: true,
       });
 
       await encountersApiServicePrivate.makeRequest("classic");
@@ -95,13 +95,13 @@ describe("EncountersApiService", () => {
 
       // Mock the schema validation to fail
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: false,
         error: { issues: ["Invalid format"] } as any,
+        success: false,
       });
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => "invalid data",
+        ok: true,
       });
 
       await expect(
@@ -121,13 +121,13 @@ describe("EncountersApiService", () => {
   describe("getEncounters", () => {
     it("should return encounters for classic game mode", async () => {
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
         data: [mockRouteEncounter, mockRouteEncounter2],
+        success: true,
       });
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => [mockRouteEncounter, mockRouteEncounter2],
+        ok: true,
       });
 
       const result = await encountersApiService.getEncounters("classic");
@@ -141,13 +141,13 @@ describe("EncountersApiService", () => {
 
     it("should return encounters for remix game mode", async () => {
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
         data: [mockRouteEncounter],
+        success: true,
       });
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => [mockRouteEncounter],
+        ok: true,
       });
 
       const result = await encountersApiService.getEncounters("remix");
@@ -161,13 +161,13 @@ describe("EncountersApiService", () => {
 
     it("should handle empty response", async () => {
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
         data: [],
+        success: true,
       });
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => [],
+        ok: true,
       });
 
       const result = await encountersApiService.getEncounters("classic");
@@ -191,13 +191,13 @@ describe("EncountersApiService", () => {
   describe("getEncounterByRouteName", () => {
     it("should return encounter for existing route", async () => {
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
         data: [mockRouteEncounter, mockRouteEncounter2],
+        success: true,
       });
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => [mockRouteEncounter, mockRouteEncounter2],
+        ok: true,
       });
 
       const result = await encountersApiService.getEncounterByRouteName(
@@ -210,13 +210,13 @@ describe("EncountersApiService", () => {
 
     it("should return null for non-existing route", async () => {
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
         data: [mockRouteEncounter],
+        success: true,
       });
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => [mockRouteEncounter],
+        ok: true,
       });
 
       const result = await encountersApiService.getEncounterByRouteName(
@@ -231,13 +231,13 @@ describe("EncountersApiService", () => {
   describe("getEncountersCount", () => {
     it("should return correct count for classic game mode", async () => {
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
         data: [mockRouteEncounter, mockRouteEncounter2],
+        success: true,
       });
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => [mockRouteEncounter, mockRouteEncounter2],
+        ok: true,
       });
 
       const result = await encountersApiService.getEncountersCount("classic");
@@ -247,13 +247,13 @@ describe("EncountersApiService", () => {
 
     it("should return correct count for remix game mode", async () => {
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
         data: [mockRouteEncounter],
+        success: true,
       });
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => [mockRouteEncounter],
+        ok: true,
       });
 
       const result = await encountersApiService.getEncountersCount("remix");
@@ -265,13 +265,13 @@ describe("EncountersApiService", () => {
   describe("URL construction", () => {
     it("should properly encode gameMode parameter", async () => {
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
         data: [mockRouteEncounter],
+        success: true,
       });
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => [mockRouteEncounter],
+        ok: true,
       });
 
       await encountersApiService.getEncounters("classic");
@@ -284,13 +284,13 @@ describe("EncountersApiService", () => {
 
     it("should include cache buster parameter", async () => {
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
         data: [mockRouteEncounter],
+        success: true,
       });
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => [mockRouteEncounter],
+        ok: true,
       });
 
       await encountersApiService.getEncounters("remix");
@@ -315,22 +315,22 @@ describe("EncountersApiService", () => {
     it("should handle complete workflow from getEncounters to getEncounterByRouteName", async () => {
       // Mock the schema validation for both calls
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
         data: [mockRouteEncounter, mockRouteEncounter2],
+        success: true,
       });
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
         data: [mockRouteEncounter, mockRouteEncounter2],
+        success: true,
       });
 
       // Mock fetch for both calls
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => [mockRouteEncounter, mockRouteEncounter2],
+        ok: true,
       });
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => [mockRouteEncounter, mockRouteEncounter2],
+        ok: true,
       });
 
       // First get all encounters
@@ -352,13 +352,13 @@ describe("EncountersApiService", () => {
     it("should handle different game modes independently", async () => {
       // Mock classic mode response
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
         data: [mockRouteEncounter],
+        success: true,
       });
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => [mockRouteEncounter],
+        ok: true,
       });
 
       const classicEncounters =
@@ -367,13 +367,13 @@ describe("EncountersApiService", () => {
 
       // Mock remix mode response
       vi.mocked(RouteEncountersArraySchema.safeParse).mockReturnValueOnce({
-        success: true,
         data: [mockRouteEncounter2],
+        success: true,
       });
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
         json: async () => [mockRouteEncounter2],
+        ok: true,
       });
 
       const remixEncounters = await encountersApiService.getEncounters("remix");

@@ -44,9 +44,7 @@ export function useValtioSync<T, S extends object>(
 ): T {
   return useSyncExternalStore(
     // Subscribe function
-    (callback) => {
-      return subscribe(store, callback);
-    },
+    (callback) => subscribe(store, callback),
     // Get snapshot function
     () => selector(store),
     // Server snapshot function

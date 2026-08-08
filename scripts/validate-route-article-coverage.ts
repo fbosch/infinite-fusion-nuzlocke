@@ -11,13 +11,13 @@ const ROUTE_VALIDATION_BATCH_SIZE = 6;
 const ROUTES_WITHOUT_ARTICLE_WILD_ROWS = new Set(["Route 10"]);
 
 interface PokemonEncounter {
-  pokemonId: number;
   encounterType: EncounterType;
+  pokemonId: number;
 }
 
 interface RouteEncounters {
-  routeName: string;
   encounters: PokemonEncounter[];
+  routeName: string;
 }
 
 interface LocationEntry {
@@ -25,8 +25,8 @@ interface LocationEntry {
 }
 
 interface RouteValidationFailure {
-  routeName: string;
   reasons: string[];
+  routeName: string;
 }
 
 function loadJsonFile<T>(filePath: string): T {
@@ -91,8 +91,8 @@ function buildValidationFailure(
   }
 
   return {
-    routeName,
     reasons,
+    routeName,
   };
 }
 
@@ -163,8 +163,8 @@ async function main() {
               error instanceof Error ? error.message : "unknown scrape error";
 
             return {
-              routeName,
               reasons: [`failed to scrape matching article: ${message}`],
+              routeName,
             } satisfies RouteValidationFailure;
           }
         },

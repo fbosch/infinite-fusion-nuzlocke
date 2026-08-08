@@ -30,7 +30,7 @@ vi.mock("@/components/ContextMenu", () => ({
       {children}
       {items.map((item) =>
         item.onClick ? (
-          <button key={item.id} type="button" onClick={item.onClick}>
+          <button key={item.id} onClick={item.onClick} type="button">
             {item.label}
           </button>
         ) : null,
@@ -45,6 +45,7 @@ vi.mock("@/hooks/useSprite", () => ({
 }));
 
 vi.mock("@/loaders/pokemon", () => ({
+  isEggId: () => false,
   PokemonStatus: {
     CAPTURED: "captured",
     DECEASED: "deceased",
@@ -52,7 +53,6 @@ vi.mock("@/loaders/pokemon", () => ({
     RECEIVED: "received",
     TRADED: "traded",
   },
-  isEggId: () => false,
   usePokemonEvolutionData: usePokemonEvolutionDataMock,
 }));
 
@@ -96,10 +96,10 @@ describe("TeamMemberContextMenu", () => {
     const { rerender } = render(
       <TeamMemberContextMenu
         teamMember={{
-          position: 2,
-          isEmpty: false,
-          headPokemon: pikachu,
           bodyPokemon: { ...pikachu },
+          headPokemon: pikachu,
+          isEmpty: false,
+          position: 2,
         }}
       >
         <span>team member</span>
@@ -111,15 +111,15 @@ describe("TeamMemberContextMenu", () => {
     rerender(
       <TeamMemberContextMenu
         teamMember={{
-          position: 2,
-          isEmpty: false,
-          headPokemon: pikachu,
           bodyPokemon: {
             id: 133,
             name: "Eevee",
             nationalDexId: 133,
             uid: "eevee-uid",
           },
+          headPokemon: pikachu,
+          isEmpty: false,
+          position: 2,
         }}
       >
         <span>team member</span>
@@ -133,15 +133,15 @@ describe("TeamMemberContextMenu", () => {
     render(
       <TeamMemberContextMenu
         teamMember={{
-          position: 2,
-          isEmpty: false,
-          headPokemon: pikachu,
           bodyPokemon: {
             id: 133,
             name: "Eevee",
             nationalDexId: 133,
             uid: "eevee-uid",
           },
+          headPokemon: pikachu,
+          isEmpty: false,
+          position: 2,
         }}
       >
         <span>team member</span>
@@ -164,9 +164,9 @@ describe("TeamMemberContextMenu", () => {
     render(
       <TeamMemberContextMenu
         teamMember={{
-          position: 0,
-          isEmpty: false,
           headPokemon: { ...pikachu, originalLocation: "route-1" },
+          isEmpty: false,
+          position: 0,
         }}
       >
         <span>team member</span>

@@ -97,12 +97,12 @@ export function AnalyticsDebugPanel() {
   if (!open) {
     return (
       <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="fixed bottom-4 right-4 z-[60] inline-flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900 shadow-sm"
         aria-label="Open analytics debug panel"
+        className="fixed right-4 bottom-4 z-[60] inline-flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 font-medium text-amber-900 text-xs shadow-sm"
+        onClick={() => setOpen(true)}
+        type="button"
       >
-        <Bug className="h-4 w-4" aria-hidden="true" />
+        <Bug aria-hidden="true" className="h-4 w-4" />
         Analytics Debug
       </button>
     );
@@ -110,33 +110,33 @@ export function AnalyticsDebugPanel() {
 
   return (
     <section
-      className="fixed bottom-4 right-4 z-[60] w-[22rem] rounded-lg border border-gray-300 bg-white p-3 text-xs text-gray-900 shadow-lg"
       aria-label="Analytics debug panel"
+      className="fixed right-4 bottom-4 z-[60] w-[22rem] rounded-lg border border-gray-300 bg-white p-3 text-gray-900 text-xs shadow-lg"
     >
       <div className="mb-2 flex items-center justify-between">
         <div className="inline-flex items-center gap-2 font-semibold">
-          <Bug className="h-4 w-4" aria-hidden="true" />
+          <Bug aria-hidden="true" className="h-4 w-4" />
           Analytics Debug
         </div>
         <div className="inline-flex items-center gap-1">
           <button
-            type="button"
+            aria-label="Reset analytics counters"
+            className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-50"
             onClick={() => {
               resetAnalyticsDebugCounters();
               setCounters(getAnalyticsDebugCounters());
             }}
-            className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-50"
-            aria-label="Reset analytics counters"
+            type="button"
           >
-            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+            <RotateCcw aria-hidden="true" className="h-3.5 w-3.5" />
           </button>
           <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-50"
             aria-label="Collapse analytics debug panel"
+            className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-50"
+            onClick={() => setOpen(false)}
+            type="button"
           >
-            <X className="h-3.5 w-3.5" aria-hidden="true" />
+            <X aria-hidden="true" className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>

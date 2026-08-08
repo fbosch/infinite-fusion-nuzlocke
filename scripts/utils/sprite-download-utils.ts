@@ -62,14 +62,18 @@ async function tryDownloadBaseForm(
   config: SpriteDownloadConfig,
 ): Promise<boolean> {
   const baseName = stripPokemonFormSuffix(icon.name);
-  if (!baseName || baseName === icon.name) return false;
+  if (!baseName || baseName === icon.name) {
+    return false;
+  }
 
   const baseFilename = `${normalizePokemonNameForSprite(baseName)}.png`;
   const baseFilePath = path.join(config.spritesDir, baseFilename);
 
   try {
     const response = await fetchSprite(`${config.baseUrl}/${baseFilename}`);
-    if (!response.ok) return false;
+    if (!response.ok) {
+      return false;
+    }
 
     await saveSprite(response, baseFilePath);
     return true;
@@ -113,8 +117,8 @@ async function downloadOriginalOrBaseForm(
     return;
   }
 
-  if (response.status === 404) {
-    if (await tryDownloadBaseForm(icon, config)) return;
+  if (response.status === 404 && (await tryDownloadBaseForm(icon, config))) {
+    return;
   }
 
   throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -155,7 +159,9 @@ export async function downloadSpriteImage(
   retries = 3,
 ): Promise<boolean> {
   const filePath = path.join(config.spritesDir, icon.filename);
-  if (await spriteFileExists(filePath)) return true;
+  if (await spriteFileExists(filePath)) {
+    return true;
+  }
 
   if (icon.id === -1) {
     return downloadEggSprite(config, filePath, reportError);

@@ -1,5 +1,4 @@
 import { PokemonStatus } from "@/loaders/pokemon";
-import { ensureActivePlaythroughWithEncounters } from "./shared";
 import { markEncounterAsDeceased } from "./status";
 import {
   findCanonicalLocationForUids,

@@ -45,7 +45,7 @@ const extractArtistCredits = (html: string, id: string) => {
   for (const article of spriteArticles ?? []) {
     const spriteId = article.match(/href="\/sprite\/pif\/([^"/]+)/)?.[1];
     const figcaption = article.match(/<figcaption>[\s\S]*?<\/figcaption>/)?.[0];
-    if (!spriteId || !figcaption) {
+    if (!(spriteId && figcaption)) {
       continue;
     }
 
@@ -75,13 +75,13 @@ export async function GET(request: NextRequest) {
     // Fetch only the first part of the page (where gallery content is)
     const response = await fetch(url, {
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         Accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
         "Accept-Encoding": "gzip, deflate",
+        "Accept-Language": "en-US,en;q=0.5",
         Range: "bytes=0-1048576", // First 1MB to handle Pokémon with up to 50 variants
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
       next: {
         revalidate: CACHE_DURATION,

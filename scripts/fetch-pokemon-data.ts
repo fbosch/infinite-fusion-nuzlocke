@@ -47,7 +47,7 @@ function extractEvolutionData(
   pokemonName: string,
 ): EvolutionData | undefined {
   if (!chainData?.chain) {
-    return undefined;
+    return;
   }
 
   const evolutionData: EvolutionData = {
@@ -62,7 +62,9 @@ function extractEvolutionData(
 
     for (const evolution of chain.evolves_to || []) {
       const found = findPokemonInChain(evolution, targetName);
-      if (found) return found;
+      if (found) {
+        return found;
+      }
     }
 
     return null;
@@ -84,34 +86,45 @@ function extractEvolutionData(
     if (detail.min_happiness) {
       return `Happiness: ${detail.min_happiness}`;
     }
-    return undefined;
   }
 
   function addEvolutionDetails(details: EvolutionDetail, detail: any): void {
-    if (detail.min_level) details.min_level = detail.min_level;
-    if (detail.item) details.item = detail.item.name;
-    if (detail.location) details.location = detail.location.name;
-    if (detail.trigger) details.trigger = detail.trigger.name;
+    if (detail.min_level) {
+      details.min_level = detail.min_level;
+    }
+    if (detail.item) {
+      details.item = detail.item.name;
+    }
+    if (detail.location) {
+      details.location = detail.location.name;
+    }
+    if (detail.trigger) {
+      details.trigger = detail.trigger.name;
+    }
 
     const condition = getEvolutionCondition(detail);
-    if (condition) details.condition = condition;
+    if (condition) {
+      details.condition = condition;
+    }
   }
 
   // Helper function to get evolution details
   function getEvolutionDetails(evolution: any): EvolutionDetail {
     const details: EvolutionDetail = {
-      id: parseInt(evolution.species.url.split("/").slice(-2)[0], 10),
+      id: Number.parseInt(evolution.species.url.split("/").slice(-2)[0], 10),
       name: evolution.species.name,
     };
     const detail = evolution.evolution_details?.[0];
-    if (detail) addEvolutionDetails(details, detail);
+    if (detail) {
+      addEvolutionDetails(details, detail);
+    }
     return details;
   }
 
   // Find the Pokemon in the chain
   const pokemonInChain = findPokemonInChain(chainData.chain, pokemonName);
   if (!pokemonInChain) {
-    return undefined;
+    return;
   }
 
   // Get evolutions from this Pokemon
@@ -131,7 +144,9 @@ function extractEvolutionData(
 
     for (const evolution of chain.evolves_to || []) {
       const found = findPreEvolution(evolution, targetName, chain);
-      if (found) return found;
+      if (found) {
+        return found;
+      }
     }
 
     return null;
@@ -150,10 +165,10 @@ async function loadEvolutionData(
   pokemonName: string,
 ): Promise<EvolutionData | undefined> {
   if (!species.evolution_chain?.url) {
-    return undefined;
+    return;
   }
 
-  const chainId = parseInt(
+  const chainId = Number.parseInt(
     species.evolution_chain.url.split("/").slice(-2)[0],
     10,
   );
@@ -280,17 +295,17 @@ async function fetchPokemonData(): Promise<ProcessedPokemonData[]> {
 
     // Success summary
     ConsoleFormatter.printSummary("Pokemon Data Fetch Complete!", [
-      { label: "Pokemon data saved to", value: outputPath, color: "cyan" },
-      { label: "Total Pokemon", value: pokemonData.length, color: "green" },
+      { color: "cyan", label: "Pokemon data saved to", value: outputPath },
+      { color: "green", label: "Total Pokemon", value: pokemonData.length },
       {
+        color: "cyan",
         label: "File size",
         value: ConsoleFormatter.formatFileSize(fileStats.size),
-        color: "cyan",
       },
       {
+        color: "yellow",
         label: "Duration",
         value: ConsoleFormatter.formatDuration(duration),
-        color: "yellow",
       },
     ]);
 
@@ -357,7 +372,7 @@ async function processBatch(
       const pokemon = pokemonResults[index];
       const species = speciesResults[index];
 
-      if (!pokemon || !species) {
+      if (!(pokemon && species)) {
         throw new Error(
           `Missing data for "${item.entry.name}" (API name: ${item.normalizedName}) (ID ${item.entry.id})`,
         );

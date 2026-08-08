@@ -202,13 +202,13 @@ describe("Playthroughs Store - Fusion Operations", () => {
       await playthroughActions.flipTeamMemberFusion(0);
 
       expect(playthroughActions.getEncounters()?.["route-1"]).toMatchObject({
-        head: { name: "Pikachu" },
         body: { name: "Charmander" },
+        head: { name: "Pikachu" },
         isFusion: true,
       });
       expect(playthroughsStore.playthroughs[0]?.team.members[0]).toEqual({
-        headPokemonUid: encounter?.body?.uid,
         bodyPokemonUid: encounter?.head?.uid,
+        headPokemonUid: encounter?.body?.uid,
       });
     });
 

@@ -9,15 +9,15 @@ const pokemon = [
 describe("resolveFusionCombination", () => {
   it("resolves two Infinite Fusion IDs in their entered order", () => {
     expect(resolveFusionCombination("11.200", pokemon)).toEqual({
-      head: pokemon[0],
       body: pokemon[1],
+      head: pokemon[0],
     });
   });
 
   it("accepts surrounding whitespace and self-fusions", () => {
     expect(resolveFusionCombination(" 11.11 ", pokemon)).toEqual({
-      head: pokemon[0],
       body: pokemon[0],
+      head: pokemon[0],
     });
   });
 
@@ -42,7 +42,7 @@ describe("resolveFusionCombination", () => {
     ).toBeNull();
   });
 
-  it.each([Number.NaN, Infinity, 11.5])(
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, 11.5])(
     "rejects a cached Pokémon with invalid ID %s",
     (id) => {
       expect(

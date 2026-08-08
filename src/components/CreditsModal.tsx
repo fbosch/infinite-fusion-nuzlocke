@@ -17,56 +17,56 @@ interface CreditsModalProps {
 
 export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-[70] group">
+    <Dialog className="group relative z-[70]" onClose={onClose} open={isOpen}>
       <DialogBackdrop
-        transition
-        className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"
         aria-hidden="true"
+        className="fixed inset-0 bg-black/30 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/50"
+        transition
       />
 
       <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
         <DialogPanel
-          transition
-          id="credits-modal"
           aria-labelledby="credits-modal-title"
           className={clsx(
-            "max-w-2xl w-full max-h-[80vh] space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col",
-            "transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98",
+            "flex max-h-[80vh] w-full max-w-2xl flex-col space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800",
+            "transition duration-150 ease-out data-closed:scale-98 data-closed:opacity-0",
           )}
+          id="credits-modal"
+          transition
         >
           <div className="flex items-center justify-between">
             <DialogTitle
+              className="font-semibold text-gray-900 text-xl dark:text-white"
               id="credits-modal-title"
-              className="text-xl font-semibold text-gray-900 dark:text-white"
             >
               Credits & Licensing
             </DialogTitle>
             <button
-              type="button"
-              onClick={onClose}
+              aria-label="Close modal"
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
-                "p-1 rounded-md transition-colors cursor-pointer",
+                "cursor-pointer rounded-md p-1 transition-colors",
               )}
-              aria-label="Close modal"
+              onClick={onClose}
+              type="button"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto scrollbar-thin min-h-0">
+          <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto">
             <section className="space-y-2">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+              <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100">
                 Data Sources & Credits
               </h3>
-              <ul className="list-disc list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300">
+              <ul className="list-inside list-disc space-y-2 text-gray-700 text-sm dark:text-gray-300">
                 <li>
                   <a
+                    className="text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                     href="https://discord.gg/infinitefusion"
-                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                    target="_blank"
                   >
                     Pokemon Infinite Fusion Community
                   </a>
@@ -76,10 +76,10 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
                 </li>
                 <li>
                   <a
+                    className="text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                     href="https://infinitefusion.fandom.com/wiki/"
-                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                    target="_blank"
                   >
                     Infinite Fusion Wiki (Fandom)
                   </a>
@@ -90,10 +90,10 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
                 </li>
                 <li>
                   <a
+                    className="text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                     href="https://pokeapi.co/"
-                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                    target="_blank"
                   >
                     PokéAPI
                   </a>
@@ -103,10 +103,10 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
                 </li>
                 <li>
                   <a
+                    className="text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                     href="https://infinitefusiondex.com/"
-                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                    target="_blank"
                   >
                     Infinite Fusion Dex
                   </a>
@@ -116,10 +116,10 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
                 </li>
                 <li>
                   <a
+                    className="text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                     href="https://github.com/msikma/pokesprite"
-                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                    target="_blank"
                   >
                     PokéSprite (msikma/pokesprite)
                   </a>
@@ -129,10 +129,10 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
                 </li>
                 <li>
                   <a
+                    className="text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                     href="https://www.fusiondex.org/"
-                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                    target="_blank"
                   >
                     FusionDex
                   </a>
@@ -143,43 +143,43 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
               </ul>
             </section>
 
-            <section className="space-y-2 mt-4">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+            <section className="mt-4 space-y-2">
+              <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100">
                 Trademarks
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
+              <p className="text-gray-600 text-sm dark:text-gray-300">
                 Pokémon and related names are trademarks of their respective
                 owners. This project is unaffiliated with Nintendo, Game Freak,
                 Creatures Inc., or The Pokémon Company.
               </p>
             </section>
-            <section className="space-y-2 mt-4">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+            <section className="mt-4 space-y-2">
+              <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100">
                 Licensing
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
+              <p className="text-gray-600 text-sm dark:text-gray-300">
                 This project is licensed under the MIT License.
               </p>
               <Link
+                className="text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                 href="/licenses"
                 onClick={onClose}
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
               >
                 View Open Source Licenses
               </Link>
             </section>
           </div>
 
-          <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex justify-end border-gray-200 border-t pt-4 dark:border-gray-700">
             <button
-              type="button"
-              onClick={onClose}
               className={clsx(
-                "px-4 py-2 text-sm rounded-md transition-colors cursor-pointer",
-                "bg-gray-100 hover:bg-gray-200 text-gray-900",
-                "dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100",
+                "cursor-pointer rounded-md px-4 py-2 text-sm transition-colors",
+                "bg-gray-100 text-gray-900 hover:bg-gray-200",
+                "dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
               )}
+              onClick={onClose}
+              type="button"
             >
               Close
             </button>

@@ -6,9 +6,7 @@ export const setPlaythroughsStore = (store: PlaythroughsState) => {
   playthroughsStoreRef = store;
 };
 
-const getPlaythroughsStore = () => {
-  return playthroughsStoreRef;
-};
+const getPlaythroughsStore = () => playthroughsStoreRef;
 
 export const getActivePlaythrough = (): Playthrough | null => {
   const playthroughsStore = getPlaythroughsStore();
@@ -24,6 +22,4 @@ export const getActivePlaythrough = (): Playthrough | null => {
   );
 };
 
-export const getCurrentTimestamp = (): number => {
-  return Date.now();
-};
+export const getCurrentTimestamp = (): number => Date.now();

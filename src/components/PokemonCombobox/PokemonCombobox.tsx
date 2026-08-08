@@ -52,10 +52,15 @@ import { PokemonStatusInput } from "./PokemonStatusInput";
 import { useComboboxDragAndDrop } from "./useComboboxDragAndDrop";
 
 interface PokemonComboboxProps {
+  comboboxId?: string;
+  disabled?: boolean;
+  gameMode?: "classic" | "remix";
+  isCustomLocation?: boolean;
+  isFusion?: boolean;
+  isRouteEncounterDataLoading?: boolean;
   locationId?: string;
-  value: PokemonOptionType | null | undefined;
-  onChange: (value: PokemonOptionType | null) => void;
-  onFusionChange?: (head: PokemonOptionType, body: PokemonOptionType) => void;
+  nicknamePlaceholder?: string;
+  onActivate?: () => void;
   onBeforeClear?: (
     currentValue: PokemonOptionType,
   ) => Promise<boolean> | boolean;
@@ -63,18 +68,13 @@ interface PokemonComboboxProps {
     currentValue: PokemonOptionType,
     newValue: PokemonOptionType,
   ) => Promise<boolean> | boolean;
+  onChange: (value: PokemonOptionType | null) => void;
+  onFusionChange?: (head: PokemonOptionType, body: PokemonOptionType) => void;
   placeholder?: string;
-  nicknamePlaceholder?: string;
-  disabled?: boolean;
-  gameMode?: "classic" | "remix";
-  comboboxId?: string;
   ref?: React.RefObject<HTMLInputElement | null>;
-  isFusion?: boolean;
-  shouldLoad?: boolean;
   routeEncounterData?: RouteEncounterPokemon[];
-  isRouteEncounterDataLoading?: boolean;
-  isCustomLocation?: boolean;
-  onActivate?: () => void;
+  shouldLoad?: boolean;
+  value: PokemonOptionType | null | undefined;
 }
 
 const DEFAULT_ROUTE_ENCOUNTER_DATA: RouteEncounterPokemon[] = [];
@@ -127,8 +127,8 @@ export const PokemonCombobox = ({
   } = useComboboxDragAndDrop({
     comboboxId,
     locationId,
-    value,
     onChange,
+    value,
   });
 
   const routePokemonIds = useMemo(
@@ -153,8 +153,8 @@ export const PokemonCombobox = ({
 
   // Use the search hook
   const { data: resultsData, isLoading: isSearchLoading } = usePokemonSearch({
-    query: deferredQuery,
     enabled: isPokemonDataEnabled,
+    query: deferredQuery,
   });
   const results = resultsData ?? EMPTY_POKEMON_OPTIONS;
 
@@ -173,7 +173,6 @@ export const PokemonCombobox = ({
 
   // Floating UI setup
   const { refs, floatingStyles, update, placement } = useFloating({
-    placement: "bottom-start",
     middleware: [
       flip({ padding: 8 }),
       size({
@@ -186,14 +185,14 @@ export const PokemonCombobox = ({
         padding: 8,
       }),
     ],
+    placement: "bottom-start",
     whileElementsMounted: autoUpdate,
   });
 
   // Function to get Pokemon source information
   const getPokemonSource = useCallback(
-    (pokemonId: number): EncounterSource[] => {
-      return getPokemonSources(routeEncounterData, pokemonId);
-    },
+    (pokemonId: number): EncounterSource[] =>
+      getPokemonSources(routeEncounterData, pokemonId),
     [routeEncounterData],
   );
 
@@ -224,11 +223,11 @@ export const PokemonCombobox = ({
             nationalDexId: pokemon.nationalDexId,
           };
 
-          return !isFusion || !isEgg(option) ? [option] : [];
+          return isFusion && isEgg(option) ? [] : [option];
         });
       }
       return routeEncounterData.filter(
-        (pokemon) => !isFusion || !isEgg(pokemon),
+        (pokemon) => !(isFusion && isEgg(pokemon)),
       );
     }
 
@@ -244,24 +243,24 @@ export const PokemonCombobox = ({
 
     if (isNumericQuery) {
       // For numeric queries, check both ID and National Dex ID
-      const queryNum = parseInt(deferredQuery, 10);
+      const queryNum = Number.parseInt(deferredQuery, 10);
       routeMatches = routeEncounterData.filter(
         (pokemon) =>
           (pokemon.id === queryNum || pokemon.nationalDexId === queryNum) &&
-          (!isFusion || !isEgg(pokemon)),
+          !(isFusion && isEgg(pokemon)),
       );
     } else {
       // For text queries, use name matching
       routeMatches = routeEncounterData.filter(
         (pokemon) =>
           pokemon.name.toLowerCase().includes(deferredQuery.toLowerCase()) &&
-          (!isFusion || !isEgg(pokemon)),
+          !(isFusion && isEgg(pokemon)),
       );
     }
 
     // Filter search results to exclude eggs when in fusion mode
     const filteredResults = results.filter(
-      (pokemon) => !isFusion || !isEgg(pokemon),
+      (pokemon) => !(isFusion && isEgg(pokemon)),
     );
 
     // Combine results: route matches first, then smart search results
@@ -274,13 +273,16 @@ export const PokemonCombobox = ({
         if (gameMode === "randomized") {
           // In randomized mode, maintain search relevance order
           return 0;
-        } else {
-          // In classic/remix modes, prioritize route Pokemon
-          if (isRoutePokemon(a.id) && !isRoutePokemon(b.id)) return -1;
-          if (!isRoutePokemon(a.id) && isRoutePokemon(b.id)) return 1;
-          // For non-route Pokemon, maintain search order (already sorted by relevance)
-          return 0;
         }
+        // In classic/remix modes, prioritize route Pokemon
+        if (isRoutePokemon(a.id) && !isRoutePokemon(b.id)) {
+          return -1;
+        }
+        if (!isRoutePokemon(a.id) && isRoutePokemon(b.id)) {
+          return 1;
+        }
+        // For non-route Pokemon, maintain search order (already sorted by relevance)
+        return 0;
       })
       .filter(
         (pokemon, index, self) =>
@@ -328,7 +330,9 @@ export const PokemonCombobox = ({
       oldValue: PokemonOptionType,
       newValue: PokemonOptionType,
     ): PokemonOptionType => {
-      if (!isEgg(oldValue) || isEgg(newValue)) return newValue;
+      if (!isEgg(oldValue) || isEgg(newValue)) {
+        return newValue;
+      }
 
       return {
         ...newValue,
@@ -367,7 +371,7 @@ export const PokemonCombobox = ({
       }
 
       // Early return if no current value or no overwrite callback
-      if (!value || !onBeforeOverwrite) {
+      if (!(value && onBeforeOverwrite)) {
         const finalValue = applyDefaultStatus(newValue);
         onChange(finalValue);
         setQuery("");
@@ -378,7 +382,9 @@ export const PokemonCombobox = ({
       const allowOverwrite = await shouldAllowOverwrite(value, newValue);
       if (!allowOverwrite) {
         const shouldOverwrite = await onBeforeOverwrite(value, newValue);
-        if (!shouldOverwrite) return;
+        if (!shouldOverwrite) {
+          return;
+        }
       }
 
       // Apply transformations in order
@@ -462,41 +468,71 @@ export const PokemonCombobox = ({
   // react-doctor-disable-next-line react-hooks-js/incompatible-library -- TanStack Virtual is intentionally excluded from compiler memoization above.
   const virtualizer = useVirtualizer({
     count: finalOptions.length,
-    getScrollElement: () => optionsRef.current,
-    estimateSize: () => 56,
     enabled: shouldVirtualize,
-    overscan: 10,
+    estimateSize: () => 56,
     gap: 4,
+    getScrollElement: () => optionsRef.current,
+    overscan: 10,
     scrollPaddingEnd: 16,
     scrollPaddingStart: 16,
   });
 
   return (
     <div
-      id={value?.uid}
       className="relative"
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDragEnd={handleDragEnd}
       data-uid={dragPreview?.uid || value?.uid}
+      id={value?.uid}
+      onDragEnd={handleDragEnd}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
     >
       <div
-        className="absolute inset-0 bg-blue-500/20 border-2 border-blue-500/60 rounded-lg pointer-events-none z-10 opacity-0 transition-opacity duration-200 ease-in-out location-highlight-overlay max-w-screen"
+        className="location-highlight-overlay pointer-events-none absolute inset-0 z-10 max-w-screen rounded-lg border-2 border-blue-500/60 bg-blue-500/20 opacity-0 transition-opacity duration-200 ease-in-out"
         data-combobox-id={comboboxId}
       />
       <Combobox
-        value={value || null}
-        onChange={handleChange}
         disabled={disabled}
         immediate
+        onChange={handleChange}
         onClose={() => setQuery("")}
+        value={value || null}
       >
         {/* fallow-ignore-next-line complexity -- Headless UI render prop keeps combobox state colocated with its input and options. */}
         {({ open }) => (
           <div key={comboboxId}>
             <div className="relative">
               <ComboboxInput
+                autoComplete="off"
+                className={clsx(
+                  "group/input rounded-t-md rounded-b-none border",
+                  "w-full bg-white px-3 py-3.5 text-gray-900 text-sm outline-none focus:outline-none focus-visible:border-blue-500 focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-not-allowed disabled:opacity-50",
+                  "border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400",
+                  "hover:cursor-pointer focus:cursor-text",
+                  (value || dragPreview) && "pl-16", // Add padding for sprite when value is selected or previewing
+                  dragPreview &&
+                    "border-blue-500 bg-blue-50 opacity-60 dark:bg-blue-900/20", // Highlight when showing preview with opacity,
+                  {
+                    "rounded-md": !(
+                      placement.startsWith("bottom") ||
+                      placement.startsWith("top")
+                    ),
+                    "rounded-t-md rounded-b-none":
+                      open && placement.startsWith("bottom"),
+                    "rounded-t-none rounded-b-md":
+                      open && placement.startsWith("top"),
+                  },
+                )}
+                displayValue={(
+                  pokemon: PokemonOptionType | null | undefined,
+                ) => {
+                  const displayPokemon = dragPreview || pokemon;
+                  return displayPokemon?.name || "";
+                }}
+                onChange={handleInputChange}
+                onFocus={activatePokemonData}
+                onPointerEnter={activatePokemonData}
+                placeholder={placeholder}
                 ref={(comboRef) => {
                   if (comboRef) {
                     inputRef.current = comboRef;
@@ -507,63 +543,51 @@ export const PokemonCombobox = ({
                     }
                   }
                 }}
-                className={clsx(
-                  "rounded-t-md rounded-b-none border group/input",
-                  "w-full px-3 py-3.5 text-sm  bg-white text-gray-900 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-blue-500 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed",
-                  "border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400",
-                  "focus:cursor-text hover:cursor-pointer",
-                  (value || dragPreview) && "pl-16", // Add padding for sprite when value is selected or previewing
-                  dragPreview &&
-                    "border-blue-500 bg-blue-50 dark:bg-blue-900/20 opacity-60", // Highlight when showing preview with opacity,
-                  {
-                    "rounded-t-md rounded-b-none ":
-                      open && placement.startsWith("bottom"),
-                    "rounded-b-md rounded-t-none ":
-                      open && placement.startsWith("top"),
-                    "rounded-md":
-                      !placement.startsWith("bottom") &&
-                      !placement.startsWith("top"),
-                  },
-                )}
-                placeholder={placeholder}
-                displayValue={(
-                  pokemon: PokemonOptionType | null | undefined,
-                ) => {
-                  const displayPokemon = dragPreview || pokemon;
-                  return displayPokemon?.name || "";
-                }}
                 spellCheck={false}
-                autoComplete="off"
-                onChange={handleInputChange}
-                onFocus={activatePokemonData}
-                onPointerEnter={activatePokemonData}
               />
               <DraggableComboboxSprite
-                value={value}
-                dragPreview={dragPreview}
                 comboboxId={comboboxId}
+                dragPreview={dragPreview}
                 locationId={locationId}
+                value={value}
               />
               {open ||
               value?.status === PokemonStatus.DECEASED ||
               value?.status === PokemonStatus.MISSED ? null : (
                 <PokemonEvolutionButton
-                  value={value}
+                  locationId={locationId}
                   onChange={onChange}
                   shouldLoad={shouldLoad && isPokemonDataEnabled}
-                  locationId={locationId}
+                  value={value}
                 />
               )}
               {open ? (
                 <Search
-                  className="absolute right-4 top-1/2 -translate-y-1/2 size-4 text-gray-400 dark:text-gray-600 pointer-events-none"
                   aria-hidden={true}
+                  className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-gray-400 dark:text-gray-600"
                 />
               ) : null}
             </div>
             {open && (
               <FloatingPortal id="location-table">
                 <div
+                  className={clsx(
+                    // fallow-ignore-next-line css-token-drift -- Floating UI caps the list at 500px to match its middleware.
+                    "relative z-40 h-full max-h-[31.25rem] overflow-y-auto",
+                    "px-1 text-base shadow-lg focus:outline-none sm:text-sm",
+                    "gap-x-2 bg-white dark:bg-gray-800",
+                    "scrollbar-thin border border-gray-300 dark:border-gray-600",
+                    {
+                      "rounded-md": !(
+                        placement.startsWith("bottom") ||
+                        placement.startsWith("top")
+                      ),
+                      "rounded-t-md rounded-b-none border-b-0":
+                        placement.startsWith("top"),
+                      "rounded-t-none rounded-b-md border-t-0":
+                        placement.startsWith("bottom"),
+                    },
+                  )}
                   ref={(ref) => {
                     if (ref) {
                       optionsRef.current = ref;
@@ -576,22 +600,6 @@ export const PokemonCombobox = ({
                       ? `${virtualizer.getTotalSize()}px`
                       : "auto",
                   }}
-                  className={clsx(
-                    // fallow-ignore-next-line css-token-drift -- Floating UI caps the list at 500px to match its middleware.
-                    "max-h-[31.25rem] h-full overflow-y-auto z-40 relative",
-                    "px-1 text-base shadow-lg focus:outline-none sm:text-sm",
-                    "bg-white dark:bg-gray-800 gap-x-2",
-                    "border border-gray-300 dark:border-gray-600 scrollbar-thin",
-                    {
-                      "rounded-b-md rounded-t-none border-t-0":
-                        placement.startsWith("bottom"),
-                      "rounded-t-md rounded-b-none border-b-0":
-                        placement.startsWith("top"),
-                      "rounded-md":
-                        !placement.startsWith("bottom") &&
-                        !placement.startsWith("top"),
-                    },
-                  )}
                 >
                   <ComboboxOptions
                     className={clsx("h-full", {
@@ -603,10 +611,10 @@ export const PokemonCombobox = ({
                         pokemon={fusionCombinationOption}
                       />
                     ) : isShowingLoading ? (
-                      <div className="relative cursor-default select-none py-2 px-4 text-center">
+                      <div className="relative cursor-default select-none px-4 py-2 text-center">
                         <div className="text-gray-500 dark:text-gray-400">
-                          <p className="text-sm flex items-center gap-2 justify-center py-2">
-                            <Loader2 className="w-4 h-4 animate-spin" />
+                          <p className="flex items-center justify-center gap-2 py-2 text-sm">
+                            <Loader2 className="h-4 w-4 animate-spin" />
                             <span>Loading Pokémon...</span>
                           </p>
                         </div>
@@ -614,40 +622,40 @@ export const PokemonCombobox = ({
                     ) : shouldVirtualize ? (
                       virtualizer.getVirtualItems().map((virtualItem) => (
                         <PokemonOption
-                          locationId={locationId}
-                          key={virtualItem.key}
-                          pokemon={finalOptions[virtualItem.index]}
-                          index={virtualItem.index}
-                          disabled={virtualizer.isScrolling}
-                          isRoutePokemon={isRoutePokemon}
-                          isDuplicatePokemon={isDuplicatePokemon}
-                          getPokemonSource={getPokemonSource}
                           comboboxId={comboboxId || ""}
+                          disabled={virtualizer.isScrolling}
                           gameMode={gameMode}
+                          getPokemonSource={getPokemonSource}
+                          index={virtualItem.index}
+                          isDuplicatePokemon={isDuplicatePokemon}
+                          isRoutePokemon={isRoutePokemon}
+                          key={virtualItem.key}
+                          locationId={locationId}
+                          pokemon={finalOptions[virtualItem.index]}
                           style={{
-                            position: "absolute",
-                            top: "0",
-                            left: "0.25rem",
-                            width: "calc(100% - 8px)",
                             height: `${virtualItem.size}px`,
-                            transform: `translateY(${virtualItem.start}px)`,
+                            left: "0.25rem",
                             pointerEvents: virtualizer.isScrolling
                               ? "none"
                               : "auto",
+                            position: "absolute",
+                            top: "0",
+                            transform: `translateY(${virtualItem.start}px)`,
+                            width: "calc(100% - 8px)",
                           }}
                         />
                       ))
                     ) : (
                       <PokemonOptions
-                        locationId={locationId}
                         comboboxId={comboboxId || ""}
-                        finalOptions={finalOptions}
                         deferredQuery={deferredQuery}
-                        isRoutePokemon={isRoutePokemon}
-                        isDuplicatePokemon={isDuplicatePokemon}
-                        getPokemonSource={getPokemonSource}
+                        finalOptions={finalOptions}
                         gameMode={gameMode}
+                        getPokemonSource={getPokemonSource}
+                        isDuplicatePokemon={isDuplicatePokemon}
                         isLoading={isShowingLoading}
+                        isRoutePokemon={isRoutePokemon}
+                        locationId={locationId}
                       />
                     )}
                   </ComboboxOptions>
@@ -659,19 +667,19 @@ export const PokemonCombobox = ({
       </Combobox>
       <div className="flex">
         <PokemonNicknameInput
+          disabled={disabled}
+          dragPreview={dragPreview}
           key={`${value?.uid}-${value?.nickname || "no-nickname"}`}
-          value={value}
           onChange={onChange}
           placeholder={nicknamePlaceholder}
-          disabled={disabled}
-          dragPreview={dragPreview}
+          value={value}
         />
         <PokemonStatusInput
-          value={value}
-          key={`${value?.uid}status`}
-          onChange={onChange}
           disabled={disabled}
           dragPreview={dragPreview}
+          key={`${value?.uid}status`}
+          onChange={onChange}
+          value={value}
         />
       </div>
     </div>

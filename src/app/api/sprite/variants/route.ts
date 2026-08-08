@@ -5,7 +5,7 @@ import {
 } from "@/lib/spriteVariants";
 import type { SpriteVariantsResponse } from "@/types/sprites";
 
-export const revalidate = 86400;
+export const revalidate = 86_400;
 
 /**
  * Handle CORS preflight requests
@@ -43,11 +43,11 @@ async function checkSpriteExists(url: string): Promise<boolean> {
       const timeoutId = setTimeout(() => controller.abort(), 3000);
 
       const response = await fetch(url, {
-        method: "GET",
-        signal: controller.signal,
         headers: {
           Range: "bytes=0-1023", // Only fetch first 1KB to minimize data transfer
         },
+        method: "GET",
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
@@ -145,9 +145,9 @@ async function processSpriteVariants(
   }
 
   const responseData: SpriteVariantsResponse = {
-    variants,
     cacheKey: id,
     timestamp: Date.now(),
+    variants,
   };
 
   const response = NextResponse.json(responseData);

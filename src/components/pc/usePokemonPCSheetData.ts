@@ -17,12 +17,12 @@ function toTeamEntry({
   isFusion,
 }: ReturnType<typeof getTeamSlots>[number]): PCEntry {
   return {
+    body: bodyPokemon,
+    head: headPokemon,
+    isFusion,
     locationId: `team-slot-${position}`,
     locationName,
-    head: headPokemon,
-    body: bodyPokemon,
     position,
-    isFusion,
   };
 }
 
@@ -46,9 +46,9 @@ export function usePokemonPCSheetData() {
     : [];
 
   return {
-    team,
-    stored: getStoredEntries(encounters, idToName),
     deceased: getDeceasedEntries(encounters, idToName),
     idToName,
+    stored: getStoredEntries(encounters, idToName),
+    team,
   };
 }

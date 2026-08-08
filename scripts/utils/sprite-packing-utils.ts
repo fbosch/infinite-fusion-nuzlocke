@@ -22,11 +22,11 @@ export function getPackedBounds(rectangles: SpriteRectangle[]): {
   height: number;
 } {
   return {
-    width: Math.max(
-      ...rectangles.map((rectangle) => rectangle.x + rectangle.width),
-    ),
     height: Math.max(
       ...rectangles.map((rectangle) => rectangle.y + rectangle.height),
+    ),
+    width: Math.max(
+      ...rectangles.map((rectangle) => rectangle.x + rectangle.width),
     ),
   };
 }
@@ -42,11 +42,15 @@ export function forEachOverlappingPair<T extends SpriteRectangle>(
       const a = rectangles[i];
       const b = rectangles[j];
 
-      if (!a || !b) continue;
+      if (!(a && b)) {
+        continue;
+      }
 
       if (rectanglesOverlap(a, b)) {
         foundOverlap = true;
-        if (visit(a, b)) return true;
+        if (visit(a, b)) {
+          return true;
+        }
       }
     }
   }

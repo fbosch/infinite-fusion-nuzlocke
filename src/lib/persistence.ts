@@ -7,7 +7,7 @@ import { EncounterSource } from "@/types/encounters";
 
 const readEnvVar = (key: "NODE_ENV" | "NEXT_PUBLIC_BUILD_ID") => {
   if (typeof process === "undefined") {
-    return undefined;
+    return;
   }
 
   return process.env[key];
@@ -29,8 +29,8 @@ const queryStore = createStore("query-client", "queries");
 
 const idbStorage = {
   getItem: (key: string) => get(key, queryStore),
-  setItem: (key: string, value: string) => set(key, value, queryStore),
   removeItem: (key: string) => del(key, queryStore),
+  setItem: (key: string, value: string) => set(key, value, queryStore),
 };
 
 const isPersistedQuery = (value: unknown): value is PersistedQuery => {
@@ -103,12 +103,12 @@ const deserializePersistedQuery = (data: unknown): PersistedQuery => {
 };
 
 export const queryPersister = experimental_createQueryPersister({
-  storage: idbStorage,
-  prefix: `query:`,
   buster: getCacheBuster().toString(),
   deserialize: deserializePersistedQuery,
-  serialize: JSON.stringify,
   maxAge: isDevelopment
     ? 1000 * 60 * 5 // 5 minutes in dev
     : 1000 * 60 * 60 * 24 * 7, // 1 week in production
+  prefix: "query:",
+  serialize: JSON.stringify,
+  storage: idbStorage,
 });

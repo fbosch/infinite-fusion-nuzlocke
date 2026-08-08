@@ -20,8 +20,8 @@ const {
 } = vi.hoisted(() => ({
   locationRowProps: vi.fn(),
   mountedMock: vi.fn(),
-  scrollToMostRecentLocationMock: vi.fn(),
   scrollToIndexMock: vi.fn(),
+  scrollToMostRecentLocationMock: vi.fn(),
   useVirtualizerMock: vi.fn(),
 }));
 
@@ -75,7 +75,7 @@ vi.mock("../LocationTableRow", () => ({
     rowIndex: number;
   }) => {
     locationRowProps(row.original.id);
-    return <tr data-testid="location-row" aria-rowindex={rowIndex + 2} />;
+    return <tr aria-rowindex={rowIndex + 2} data-testid="location-row" />;
   },
 }));
 

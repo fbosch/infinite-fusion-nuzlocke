@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import SettingsModal from "../SettingsModal";
 
 vi.mock("next-themes", () => ({
-  useTheme: () => ({ theme: "system", setTheme: vi.fn() }),
+  useTheme: () => ({ setTheme: vi.fn(), theme: "system" }),
 }));
 
 vi.mock("@/hooks/useMounted", () => ({
@@ -20,7 +20,6 @@ vi.mock("@/stores/settings", async () => {
   });
 
   return {
-    settingsStore,
     settingsActions: {
       setReducedMotion: (reducedMotion: boolean) => {
         settingsStore.reducedMotion = reducedMotion;
@@ -30,6 +29,7 @@ vi.mock("@/stores/settings", async () => {
           !settingsStore.moveEncountersBetweenLocations;
       },
     },
+    settingsStore,
   };
 });
 
@@ -45,8 +45,8 @@ describe("SettingsModal", () => {
       vi.stubGlobal(
         "matchMedia",
         vi.fn().mockReturnValue({
-          matches,
           addEventListener: vi.fn(),
+          matches,
           removeEventListener: vi.fn(),
         }),
       );

@@ -22,7 +22,7 @@ const inheritFusionStatus = (
   field: "head" | "body",
   status: PokemonOptionType["status"],
 ) => {
-  if (!status || !encounter.head || !encounter.body) {
+  if (!(status && encounter.head && encounter.body)) {
     return;
   }
 
@@ -37,7 +37,7 @@ const inheritFusionStatus = (
 const createEncounterData = async (
   pokemon: PokemonOption | null,
   field: "head" | "body" = "head",
-  shouldCreateFusion: boolean = false,
+  shouldCreateFusion = false,
   locationId?: string,
 ): Promise<EncounterData> => {
   const pokemonWithLocationAndUID = pokemon
@@ -45,8 +45,8 @@ const createEncounterData = async (
     : null;
 
   const encounterData: EncounterData = {
-    head: field === "head" ? pokemonWithLocationAndUID : null,
     body: field === "body" ? pokemonWithLocationAndUID : null,
+    head: field === "head" ? pokemonWithLocationAndUID : null,
     isFusion: shouldCreateFusion,
     updatedAt: getCurrentTimestamp(),
   };
@@ -87,7 +87,7 @@ export const updateEncounter = async (
   locationId: string,
   pokemon: PokemonOptionType | null,
   field: "head" | "body" = "head",
-  shouldCreateFusion: boolean = false,
+  shouldCreateFusion = false,
 ) => {
   const activePlaythrough = ensureActivePlaythroughWithEncounters();
   if (!activePlaythrough) {

@@ -12,12 +12,12 @@ import {
 type AnalyticsPrimitive = string | number | boolean;
 
 const BASE_SHARED_PROPERTIES = {
-  playthrough_id: "pt-1",
-  game_mode: "classic",
-  encounter_count_bucket: "e_1",
-  deceased_count_bucket: "c_0",
   boxed_count_bucket: "c_0",
+  deceased_count_bucket: "c_0",
+  encounter_count_bucket: "e_1",
   fusion_count_bucket: "c_0",
+  game_mode: "classic",
+  playthrough_id: "pt-1",
   viable_roster_bucket: "v_6_plus",
 } as const;
 
@@ -25,86 +25,86 @@ const VALID_EVENT_PAYLOADS: Record<
   AnalyticsEventName,
   Record<string, AnalyticsPrimitive>
 > = {
-  landing_viewed: {
-    ...BASE_SHARED_PROPERTIES,
-    entry_route: "home",
-  },
-  playthrough_selector_opened: {
-    ...BASE_SHARED_PROPERTIES,
-    source_surface: "header",
-  },
   create_playthrough_modal_opened: {
     ...BASE_SHARED_PROPERTIES,
     source_surface: "header",
+  },
+  encounter_marked_deceased: {
+    ...BASE_SHARED_PROPERTIES,
+    location_id: "route-1",
+    team_size_after: 5,
+    viable_roster_bucket_after: "v_4_5",
+    was_fused: true,
   },
   first_encounter_saved: {
     ...BASE_SHARED_PROPERTIES,
     location_id: "route-1",
   },
-  playthrough_created: {
-    ...BASE_SHARED_PROPERTIES,
-    has_existing_playthroughs: false,
-  },
-  playthrough_switched: {
-    ...BASE_SHARED_PROPERTIES,
-    previous_playthrough_id: "pt-1",
-    new_playthrough_id: "pt-2",
-    source_surface: "playthrough_selector",
-    trigger_method: "click",
-  },
-  playthrough_imported: {
-    ...BASE_SHARED_PROPERTIES,
-    import_source: "file_picker",
-    file_extension_group: "json",
-    mime_group: "application_json",
-  },
-  playthrough_import_failed: {
-    ...BASE_SHARED_PROPERTIES,
-    import_source: "file_picker",
-    failure_stage: "json_parse",
-    error_category: "invalid_json",
-    has_file: true,
-    file_extension_group: "json",
-    mime_group: "application_json",
-  },
-  run_checkpoint_reached: {
-    ...BASE_SHARED_PROPERTIES,
-    checkpoint: 5,
-    checkpoint_label: "cp_5",
-  },
-  playthrough_resumed: {
-    ...BASE_SHARED_PROPERTIES,
-    days_since_last_active_bucket: "d_1_2_days",
-  },
-  game_mode_changed: {
-    ...BASE_SHARED_PROPERTIES,
-    previous_game_mode: "classic",
-    new_game_mode: "randomized",
-    source_surface: "game_mode_toggle",
-    trigger_method: "click",
-  },
   fusion_created: {
     ...BASE_SHARED_PROPERTIES,
-    location_id: "route-1",
     creation_method: "create_fusion",
+    location_id: "route-1",
   },
   fusion_flipped: {
     ...BASE_SHARED_PROPERTIES,
     location_id: "route-1",
   },
-  encounter_marked_deceased: {
+  game_mode_changed: {
     ...BASE_SHARED_PROPERTIES,
-    location_id: "route-1",
-    was_fused: true,
-    team_size_after: 5,
-    viable_roster_bucket_after: "v_4_5",
+    new_game_mode: "randomized",
+    previous_game_mode: "classic",
+    source_surface: "game_mode_toggle",
+    trigger_method: "click",
+  },
+  github_cta_viewed: {
+    route: "home",
+    source_surface: "fixed_top_bar",
+  },
+  landing_viewed: {
+    ...BASE_SHARED_PROPERTIES,
+    entry_route: "home",
+  },
+  playthrough_created: {
+    ...BASE_SHARED_PROPERTIES,
+    has_existing_playthroughs: false,
   },
   playthrough_exported: {
     ...BASE_SHARED_PROPERTIES,
   },
-  github_cta_viewed: {
-    source_surface: "fixed_top_bar",
-    route: "home",
+  playthrough_import_failed: {
+    ...BASE_SHARED_PROPERTIES,
+    error_category: "invalid_json",
+    failure_stage: "json_parse",
+    file_extension_group: "json",
+    has_file: true,
+    import_source: "file_picker",
+    mime_group: "application_json",
+  },
+  playthrough_imported: {
+    ...BASE_SHARED_PROPERTIES,
+    file_extension_group: "json",
+    import_source: "file_picker",
+    mime_group: "application_json",
+  },
+  playthrough_resumed: {
+    ...BASE_SHARED_PROPERTIES,
+    days_since_last_active_bucket: "d_1_2_days",
+  },
+  playthrough_selector_opened: {
+    ...BASE_SHARED_PROPERTIES,
+    source_surface: "header",
+  },
+  playthrough_switched: {
+    ...BASE_SHARED_PROPERTIES,
+    new_playthrough_id: "pt-2",
+    previous_playthrough_id: "pt-1",
+    source_surface: "playthrough_selector",
+    trigger_method: "click",
+  },
+  run_checkpoint_reached: {
+    ...BASE_SHARED_PROPERTIES,
+    checkpoint: 5,
+    checkpoint_label: "cp_5",
   },
 };
 
@@ -128,20 +128,20 @@ const createLocalStorageMock = () => {
   const store = new Map<string, string>();
 
   const storage: Storage = {
-    get length() {
-      return store.size;
+    clear: () => {
+      store.clear();
     },
     getItem: (key: string) => store.get(key) ?? null,
-    setItem: (key: string, value: string) => {
-      store.set(key, value);
+    key: (index: number) => Array.from(store.keys())[index] ?? null,
+    get length() {
+      return store.size;
     },
     removeItem: (key: string) => {
       store.delete(key);
     },
-    clear: () => {
-      store.clear();
+    setItem: (key: string, value: string) => {
+      store.set(key, value);
     },
-    key: (index: number) => Array.from(store.keys())[index] ?? null,
   };
 
   return storage;
@@ -164,34 +164,34 @@ describe("analytics transport wrapper", () => {
     vi.unstubAllEnvs();
     resetAnalyticsDebugCounters();
     Object.defineProperty(globalThis, "window", {
-      value: {},
       configurable: true,
+      value: {},
     });
     Object.defineProperty(globalThis, "localStorage", {
-      value: createLocalStorageMock(),
       configurable: true,
+      value: createLocalStorageMock(),
     });
   });
 
   it("checks production environment with safe hostname fallback", () => {
     expect(
       isAnalyticsProductionEnvironment({
-        NODE_ENV: "production",
         NEXT_PUBLIC_VERCEL_ENV: "production",
+        NODE_ENV: "production",
       }),
     ).toBe(true);
 
     expect(
       isAnalyticsProductionEnvironment({
+        NEXT_PUBLIC_VERCEL_ENV: "production",
         NODE_ENV: "development",
-        NEXT_PUBLIC_VERCEL_ENV: "production",
       }),
     ).toBe(true);
 
     expect(
       isAnalyticsProductionEnvironment({
-        NODE_ENV: "production",
         NEXT_PUBLIC_VERCEL_ENV: "preview",
+        NODE_ENV: "production",
       }),
     ).toBe(false);
 
@@ -260,12 +260,12 @@ describe("analytics transport wrapper", () => {
     setEnvironment("development", "development");
 
     trackEvent(ANALYTICS_EVENTS.playthroughExported, {
-      playthrough_id: "pt-1",
-      game_mode: "classic",
-      encounter_count_bucket: "e_1",
-      deceased_count_bucket: "c_0",
       boxed_count_bucket: "c_0",
+      deceased_count_bucket: "c_0",
+      encounter_count_bucket: "e_1",
       fusion_count_bucket: "c_0",
+      game_mode: "classic",
+      playthrough_id: "pt-1",
       viable_roster_bucket: "v_6_plus",
     });
 
@@ -281,12 +281,12 @@ describe("analytics transport wrapper", () => {
     setEnvironment("production", "production");
 
     trackEvent(ANALYTICS_EVENTS.playthroughExported, {
-      playthrough_id: "pt-1",
-      game_mode: "classic",
-      encounter_count_bucket: "e_1",
-      deceased_count_bucket: "c_0",
       boxed_count_bucket: "c_0",
+      deceased_count_bucket: "c_0",
+      encounter_count_bucket: "e_1",
       fusion_count_bucket: "c_0",
+      game_mode: "classic",
+      playthrough_id: "pt-1",
       viable_roster_bucket: "v_6_plus",
     });
 
@@ -303,12 +303,12 @@ describe("analytics transport wrapper", () => {
     vi.stubEnv("NEXT_PUBLIC_DISABLE_CUSTOM_ANALYTICS", "true");
 
     trackEvent(ANALYTICS_EVENTS.playthroughExported, {
-      playthrough_id: "pt-1",
-      game_mode: "classic",
-      encounter_count_bucket: "e_1",
-      deceased_count_bucket: "c_0",
       boxed_count_bucket: "c_0",
+      deceased_count_bucket: "c_0",
+      encounter_count_bucket: "e_1",
       fusion_count_bucket: "c_0",
+      game_mode: "classic",
+      playthrough_id: "pt-1",
       viable_roster_bucket: "v_6_plus",
     });
 
@@ -324,15 +324,15 @@ describe("analytics transport wrapper", () => {
     setEnvironment("production", "production");
 
     trackEvent(ANALYTICS_EVENTS.runCheckpointReached, {
-      playthrough_id: "pt-1",
-      game_mode: "classic",
-      encounter_count_bucket: "e_5_9",
-      deceased_count_bucket: "c_1",
       boxed_count_bucket: "c_0",
-      fusion_count_bucket: "c_0",
-      viable_roster_bucket: "v_4_5",
       checkpoint: 5,
       checkpoint_label: "cp_5",
+      deceased_count_bucket: "c_1",
+      encounter_count_bucket: "e_5_9",
+      fusion_count_bucket: "c_0",
+      game_mode: "classic",
+      playthrough_id: "pt-1",
+      viable_roster_bucket: "v_4_5",
     });
 
     expect(analyticsMock.track).toHaveBeenCalledTimes(1);
@@ -351,26 +351,26 @@ describe("analytics transport wrapper", () => {
     setEnvironment("production", "production");
 
     trackEvent(ANALYTICS_EVENTS.playthroughImportFailed, {
-      playthrough_id: "pt-1",
-      game_mode: "classic",
-      encounter_count_bucket: "e_1",
-      deceased_count_bucket: "c_0",
       boxed_count_bucket: "c_0",
-      fusion_count_bucket: "c_0",
-      viable_roster_bucket: "v_6_plus",
-      import_source: "file_picker",
-      failure_stage: "json_parse",
+      deceased_count_bucket: "c_0",
+      encounter_count_bucket: "e_1",
       error_category: "invalid_json",
-      has_file: true,
+      failure_stage: "json_parse",
       file_extension_group: "json",
+      fusion_count_bucket: "c_0",
+      game_mode: "classic",
+      has_file: true,
+      import_source: "file_picker",
       mime_group: "application_json",
+      playthrough_id: "pt-1",
+      viable_roster_bucket: "v_6_plus",
     });
 
     expect(analyticsMock.track).toHaveBeenCalledWith(
       "playthrough_import_failed",
       expect.objectContaining({
-        failure_stage: "json_parse",
         error_category: "invalid_json",
+        failure_stage: "json_parse",
       }),
     );
   });
@@ -383,20 +383,20 @@ describe("analytics transport wrapper", () => {
     setEnvironment("production", "production");
 
     trackEvent(ANALYTICS_EVENTS.playthroughImportFailed, {
-      playthrough_id: "pt-1",
-      game_mode: "classic",
-      encounter_count_bucket: "e_1",
-      deceased_count_bucket: "c_0",
       boxed_count_bucket: "c_0",
-      fusion_count_bucket: "c_0",
-      viable_roster_bucket: "v_6_plus",
-      import_source: "file_picker",
-      failure_stage: "store_import",
+      deceased_count_bucket: "c_0",
+      encounter_count_bucket: "e_1",
       error_category: "unexpected",
-      has_file: true,
+      failure_stage: "store_import",
       file_extension_group: "json",
+      fusion_count_bucket: "c_0",
+      game_mode: "classic",
+      has_file: true,
+      import_source: "file_picker",
       mime_group: "application_json",
+      playthrough_id: "pt-1",
       raw_error_message: "schema exploded",
+      viable_roster_bucket: "v_6_plus",
     } as never);
 
     expect(analyticsMock.track).not.toHaveBeenCalled();
@@ -448,11 +448,11 @@ describe("analytics transport wrapper", () => {
     ],
     [
       ANALYTICS_EVENTS.playthroughSwitched,
-      { previous_playthrough_id: "", new_playthrough_id: "pt-2" },
+      { new_playthrough_id: "pt-2", previous_playthrough_id: "" },
     ],
     [
       ANALYTICS_EVENTS.gameModeChanged,
-      { previous_game_mode: "invalid", new_game_mode: "classic" },
+      { new_game_mode: "classic", previous_game_mode: "invalid" },
     ],
   ] as const)(
     "rejects invalid event-specific values for %s",
@@ -481,8 +481,8 @@ describe("analytics transport wrapper", () => {
     setEnvironment("production", "production");
 
     trackEvent(ANALYTICS_EVENTS.githubCtaViewed, {
-      source_surface: "fixed_top_bar",
       route: "licenses",
+      source_surface: "fixed_top_bar",
     } as never);
 
     expect(analyticsMock.track).not.toHaveBeenCalled();
@@ -499,14 +499,14 @@ describe("analytics transport wrapper", () => {
     const debugSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
 
     trackEvent(ANALYTICS_EVENTS.playthroughExported, {
-      playthrough_id: "pt-1",
-      game_mode: "classic",
-      encounter_count_bucket: "e_1",
-      deceased_count_bucket: "c_0",
       boxed_count_bucket: "c_0",
+      deceased_count_bucket: "c_0",
+      encounter_count_bucket: "e_1",
       fusion_count_bucket: "c_0",
-      viable_roster_bucket: "v_6_plus",
+      game_mode: "classic",
       player_email: "secret@example.com",
+      playthrough_id: "pt-1",
+      viable_roster_bucket: "v_6_plus",
     } as never);
 
     expect(analyticsMock.track).not.toHaveBeenCalled();
@@ -524,14 +524,14 @@ describe("analytics transport wrapper", () => {
     setEnvironment("development", "preview");
 
     trackEvent(ANALYTICS_EVENTS.playthroughExported, {
-      playthrough_id: "pt-1",
-      game_mode: "classic",
-      encounter_count_bucket: "e_1",
-      deceased_count_bucket: "c_0",
       boxed_count_bucket: "c_0",
+      deceased_count_bucket: "c_0",
+      encounter_count_bucket: "e_1",
       fusion_count_bucket: "c_0",
-      viable_roster_bucket: "v_6_plus",
+      game_mode: "classic",
+      playthrough_id: "pt-1",
       unexpected: "value",
+      viable_roster_bucket: "v_6_plus",
     } as never);
 
     const counters = getAnalyticsDebugCounters();
@@ -548,12 +548,12 @@ describe("analytics transport wrapper", () => {
     setEnvironment("production", "production");
 
     trackEvent(ANALYTICS_EVENTS.playthroughExported, {
-      playthrough_id: "pt-1",
-      game_mode: "classic",
-      encounter_count_bucket: "e_1",
-      deceased_count_bucket: "c_0",
       boxed_count_bucket: "c_0",
+      deceased_count_bucket: "c_0",
+      encounter_count_bucket: "e_1",
       fusion_count_bucket: "c_0",
+      game_mode: "classic",
+      playthrough_id: "pt-1",
       viable_roster_bucket: "v_6_plus",
     });
 
@@ -578,12 +578,12 @@ describe("analytics transport wrapper", () => {
 
     expect(() => {
       trackEvent(ANALYTICS_EVENTS.playthroughExported, {
-        playthrough_id: "pt-1",
-        game_mode: "classic",
-        encounter_count_bucket: "e_1",
-        deceased_count_bucket: "c_0",
         boxed_count_bucket: "c_0",
+        deceased_count_bucket: "c_0",
+        encounter_count_bucket: "e_1",
         fusion_count_bucket: "c_0",
+        game_mode: "classic",
+        playthrough_id: "pt-1",
         viable_roster_bucket: "v_6_plus",
       });
     }).not.toThrow();

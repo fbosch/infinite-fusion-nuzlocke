@@ -14,10 +14,10 @@ import { PokemonPCSheetContent } from "./PokemonPCSheetContent";
 import { usePokemonPCSheetData } from "./usePokemonPCSheetData";
 
 export interface PokemonPCSheetProps {
-  isOpen: boolean;
-  onClose: () => void;
   activeTab: "team" | "box" | "graveyard";
+  isOpen: boolean;
   onChangeTab: (tab: "team" | "box" | "graveyard") => void;
+  onClose: () => void;
 }
 
 export default function PokemonPCSheet({
@@ -36,43 +36,43 @@ export default function PokemonPCSheet({
   } = useTeamMemberPicker();
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="group relative z-[70]">
+    <Dialog className="group relative z-[70]" onClose={onClose} open={isOpen}>
       <DialogBackdrop
-        transition
-        className="fixed inset-0 z-[70] bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ease-out data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/30"
         aria-hidden="true"
+        className="fixed inset-0 z-[70] bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ease-out data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/30"
+        transition
       />
 
       <div className="fixed inset-y-0 right-0 z-[71] flex w-screen items-stretch justify-end p-0">
         <DialogPanel
-          transition
-          id="pokemon-pc-sheet"
           aria-labelledby="pokemon-pc-title"
           className={clsx(
-            "h-full w-full max-w-lg border-l border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800",
+            "h-full w-full max-w-lg border-gray-200 border-l bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800",
             "transform-gpu will-change-transform",
             "transition-all duration-200 ease-out",
-            "data-closed:translate-x-full data-closed:opacity-0 data-leave:translate-x-full",
+            "data-closed:translate-x-full data-leave:translate-x-full data-closed:opacity-0",
             "flex flex-col",
           )}
+          id="pokemon-pc-sheet"
+          transition
         >
           <div className="px-4 py-2.5">
             <div className="flex items-center justify-between">
               <DialogTitle
+                className="font-semibold text-gray-900 text-sm dark:text-white"
                 id="pokemon-pc-title"
-                className="text-sm font-semibold text-gray-900 dark:text-white"
               >
                 Pokémon PC
               </DialogTitle>
               <button
-                type="button"
-                onClick={onClose}
+                aria-label="Close drawer"
                 className={clsx(
                   "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
-                  "rounded-md p-1 transition-colors cursor-pointer",
+                  "cursor-pointer rounded-md p-1 transition-colors",
                 )}
-                aria-label="Close drawer"
+                onClick={onClose}
+                type="button"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -82,34 +82,34 @@ export default function PokemonPCSheet({
           <div className="flex min-h-0 flex-1 flex-col px-4 pt-2 pb-3">
             <PokemonPCSheetContent
               activeTab={activeTab}
-              onChangeTab={onChangeTab}
-              team={team}
-              stored={stored}
               deceased={deceased}
               idToName={idToName}
+              onChangeTab={onChangeTab}
               onClose={onClose}
               onOpenTeamMemberPicker={openPicker}
+              stored={stored}
+              team={team}
             />
           </div>
         </DialogPanel>
       </div>
 
       <TeamMemberPickerModal
+        existingTeamMember={
+          selectedPosition === null
+            ? null
+            : {
+                bodyPokemon: team[selectedPosition]?.body || null,
+                headPokemon: team[selectedPosition]?.head || null,
+                isEmpty: false,
+                isFusion: team[selectedPosition]?.isFusion,
+                position: selectedPosition,
+              }
+        }
         isOpen={pickerModalOpen}
         onClose={closePicker}
         onSelect={selectTeamMember}
         position={selectedPosition || 0}
-        existingTeamMember={
-          selectedPosition !== null
-            ? {
-                position: selectedPosition,
-                isEmpty: false,
-                headPokemon: team[selectedPosition]?.head || null,
-                bodyPokemon: team[selectedPosition]?.body || null,
-                isFusion: team[selectedPosition]?.isFusion || false,
-              }
-            : null
-        }
       />
     </Dialog>
   );

@@ -25,8 +25,8 @@ export const toggleEncounterFusion = async (locationId: string) => {
 
   const currentEncounter = activePlaythrough.encounters[locationId];
   const existingEncounter = currentEncounter || {
-    head: null,
     body: null,
+    head: null,
     isFusion: false,
     updatedAt: getCurrentTimestamp(),
   };
@@ -36,8 +36,8 @@ export const toggleEncounterFusion = async (locationId: string) => {
   if (existingEncounter.isFusion && newIsFusion === false) {
     if (!existingEncounter.head && existingEncounter.body) {
       activePlaythrough.encounters[locationId] = {
-        head: existingEncounter.body,
         body: null,
+        head: existingEncounter.body,
         isFusion: false,
         updatedAt: getCurrentTimestamp(),
       };
@@ -104,8 +104,8 @@ export const createFusion = async (
 
   const previousEncounterCount = getEncounterCount(activePlaythrough);
   const encounter = {
-    head: createPokemonWithLocationAndUID(head, locationId),
     body: createPokemonWithLocationAndUID(body, locationId),
+    head: createPokemonWithLocationAndUID(head, locationId),
     isFusion: true,
     updatedAt: getCurrentTimestamp(),
   };

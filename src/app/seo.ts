@@ -14,37 +14,34 @@ type IndexableRoute = {
 
 const INDEXABLE_ROUTES: readonly IndexableRoute[] = [
   {
-    path: "/",
     changeFrequency: "daily",
+    path: "/",
     priority: 1,
   },
   {
-    path: "/locations",
     changeFrequency: "daily",
+    path: "/locations",
     priority: 0.9,
   },
   {
-    path: "/licenses",
     changeFrequency: "monthly",
+    path: "/licenses",
     priority: 0.3,
   },
 ];
 
-export const getIndexableRoutes = (): readonly IndexableRoute[] => {
-  return INDEXABLE_ROUTES;
-};
+export const getIndexableRoutes = (): readonly IndexableRoute[] =>
+  INDEXABLE_ROUTES;
 
-export const getCanonicalUrl = (path: string): string => {
-  return new URL(path, SITE_URL).toString();
-};
+export const getCanonicalUrl = (path: string): string =>
+  new URL(path, SITE_URL).toString();
 
 export const buildSitemapEntries = (
   lastModified: Date = new Date(),
-): MetadataRoute.Sitemap => {
-  return INDEXABLE_ROUTES.map((route) => ({
-    url: getCanonicalUrl(route.path),
-    lastModified,
+): MetadataRoute.Sitemap =>
+  INDEXABLE_ROUTES.map((route) => ({
     changeFrequency: route.changeFrequency,
+    lastModified,
     priority: route.priority,
+    url: getCanonicalUrl(route.path),
   }));
-};

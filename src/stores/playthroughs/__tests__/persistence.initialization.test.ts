@@ -8,40 +8,40 @@ import {
 import type { PlaythroughsState } from "../types";
 
 const idbMocks = vi.hoisted(() => ({
-  get: vi.fn(),
-  set: vi.fn(),
   del: vi.fn(),
+  get: vi.fn(),
   keys: vi.fn(),
+  set: vi.fn(),
 }));
 
 vi.mock("idb-keyval", () => ({
-  get: idbMocks.get,
-  set: idbMocks.set,
-  del: idbMocks.del,
-  keys: idbMocks.keys,
   createStore: vi.fn(() => ({ name: "mock-store" })),
+  del: idbMocks.del,
+  get: idbMocks.get,
+  keys: idbMocks.keys,
+  set: idbMocks.set,
 }));
 
 const createState = (): PlaythroughsState => ({
-  playthroughs: [],
   activePlaythroughId: undefined,
   isLoading: false,
   isSaving: false,
+  playthroughs: [],
 });
 
 const createLocalStorageMock = () => {
   const store = new Map<string, string>();
 
   return {
-    getItem: (key: string) => store.get(key) ?? null,
-    setItem: (key: string, value: string) => {
-      store.set(key, value);
+    clear: () => {
+      store.clear();
     },
+    getItem: (key: string) => store.get(key) ?? null,
     removeItem: (key: string) => {
       store.delete(key);
     },
-    clear: () => {
-      store.clear();
+    setItem: (key: string, value: string) => {
+      store.set(key, value);
     },
   };
 };
@@ -50,8 +50,8 @@ describe("playthrough persistence initialization regression cases", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     Object.defineProperty(globalThis, "localStorage", {
-      value: createLocalStorageMock(),
       configurable: true,
+      value: createLocalStorageMock(),
     });
     localStorage.clear();
   });
@@ -83,32 +83,32 @@ describe("playthrough persistence initialization regression cases", () => {
     idbMocks.get.mockImplementation(async (key: string) => {
       if (key === "pt-new") {
         return {
+          createdAt: 100,
+          encounters: {},
+          gameMode: "classic",
           id: "pt-new",
           name: "New",
-          gameMode: "classic",
-          version: "1.0.0",
           team: { members: Array.from({ length: 6 }, () => null) },
-          encounters: {},
-          createdAt: 100,
           updatedAt: 100,
+          version: "1.0.0",
         };
       }
 
       if (key === "pt-old") {
         return {
+          createdAt: 50,
+          encounters: {},
+          gameMode: "classic",
           id: "pt-old",
           name: "Old",
-          gameMode: "classic",
           team: {
             members: {
               0: {
-                headEncounterId: "route1:head",
                 bodyEncounterId: "route1:body",
+                headEncounterId: "route1:head",
               },
             },
           },
-          encounters: {},
-          createdAt: 50,
           updatedAt: 50,
         };
       }
@@ -128,8 +128,8 @@ describe("playthrough persistence initialization regression cases", () => {
     expect(oldPlaythrough?.version).toBe("1.0.0");
     expect(oldPlaythrough?.team.members).toHaveLength(6);
     expect(oldPlaythrough?.team.members[0]).toEqual({
-      headPokemonUid: "",
       bodyPokemonUid: "",
+      headPokemonUid: "",
     });
     expect(state.isLoading).toBe(false);
   });
@@ -141,14 +141,14 @@ describe("playthrough persistence initialization regression cases", () => {
 
     idbMocks.keys.mockResolvedValue(["pt-a"]);
     idbMocks.get.mockResolvedValue({
+      createdAt: 1,
+      encounters: {},
+      gameMode: "classic",
       id: "pt-a",
       name: "Run A",
-      gameMode: "classic",
-      version: "1.0.0",
       team: { members: Array.from({ length: 6 }, () => null) },
-      encounters: {},
-      createdAt: 1,
       updatedAt: 1,
+      version: "1.0.0",
     });
 
     await loadFromIndexedDB(state);
@@ -180,8 +180,8 @@ describe("playthrough persistence initialization regression cases", () => {
   it("keeps the fallback usable when localStorage is only partially implemented", async () => {
     const state = createState();
     Object.defineProperty(globalThis, "localStorage", {
-      value: { getItem: () => null },
       configurable: true,
+      value: { getItem: () => null },
     });
     idbMocks.keys.mockRejectedValue(new Error("indexeddb unavailable"));
 
@@ -194,16 +194,16 @@ describe("playthrough persistence initialization regression cases", () => {
 
   it("migrates old team-member schema when loading a single playthrough", async () => {
     idbMocks.get.mockResolvedValue({
+      createdAt: 10,
+      encounters: {},
+      gameMode: "classic",
       id: "legacy",
       name: "Legacy Run",
-      gameMode: "classic",
       team: {
         members: {
-          2: { headEncounterId: "route3:head", bodyEncounterId: "route3:body" },
+          2: { bodyEncounterId: "route3:body", headEncounterId: "route3:head" },
         },
       },
-      encounters: {},
-      createdAt: 10,
       updatedAt: 10,
     });
 
@@ -213,8 +213,8 @@ describe("playthrough persistence initialization regression cases", () => {
     expect(loaded?.version).toBe("1.0.0");
     expect(loaded?.team.members).toHaveLength(6);
     expect(loaded?.team.members[2]).toEqual({
-      headPokemonUid: "",
       bodyPokemonUid: "",
+      headPokemonUid: "",
     });
   });
 
@@ -226,25 +226,25 @@ describe("playthrough persistence initialization regression cases", () => {
     idbMocks.get.mockImplementation(async (key: string) => {
       if (key === "valid") {
         return {
+          createdAt: 1,
+          encounters: {},
+          gameMode: "classic",
           id: "valid",
           name: "Valid Run",
-          gameMode: "classic",
-          version: "1.0.0",
           team: { members: Array.from({ length: 6 }, () => null) },
-          encounters: {},
-          createdAt: 1,
           updatedAt: 1,
+          version: "1.0.0",
         };
       }
 
       return {
+        createdAt: 1,
+        gameMode: "classic",
         id: "invalid",
         name: "Invalid Run",
-        gameMode: "classic",
-        version: "1.0.0",
         team: { members: ["invalid", null, null, null, null, null] },
-        createdAt: 1,
         updatedAt: 1,
+        version: "1.0.0",
       };
     });
 

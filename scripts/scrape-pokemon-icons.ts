@@ -40,17 +40,17 @@ export type GenerationConfig = SpriteDownloadConfig;
 
 const GENERATIONS: GenerationConfig[] = [
   {
-    name: "gen7",
     baseUrl: GEN7_ICON_BASE_URL,
-    spritesDir: GEN7_SPRITES_DIR,
     eggSpriteUrl:
       "https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen7x/egg.png",
+    name: "gen7",
+    spritesDir: GEN7_SPRITES_DIR,
   },
   {
-    name: "gen8",
     baseUrl: GEN8_ICON_BASE_URL,
-    spritesDir: GEN8_SPRITES_DIR,
     eggSpriteUrl: EGG_SPRITE_URL,
+    name: "gen8",
+    spritesDir: GEN8_SPRITES_DIR,
   },
 ];
 
@@ -67,8 +67,9 @@ function getGenerationConfig(
   generation: PokemonIcon["generation"],
 ): GenerationConfig {
   const config = GENERATIONS.find((item) => item.name === generation);
-  if (!config)
+  if (!config) {
     throw new Error(`Missing sprite configuration for ${generation}`);
+  }
   return config;
 }
 
@@ -98,7 +99,7 @@ async function downloadIconBatch(icons: PokemonIcon[]): Promise<DownloadStats> {
       }
       return stats;
     },
-    { downloaded: 0, skipped: 0, errors: 0 },
+    { downloaded: 0, errors: 0, skipped: 0 },
   );
 }
 
@@ -144,9 +145,8 @@ async function loadPokemonIcons(): Promise<PokemonIcon[]> {
     // Load Pokemon entries from JSON file
     const entriesData = await ConsoleFormatter.withSpinner(
       "Loading Pokemon entries...",
-      async () => {
-        return loadJsonFile(BASE_ENTRIES_PATH, BasePokemonEntrySchema.array());
-      },
+      async () =>
+        loadJsonFile(BASE_ENTRIES_PATH, BasePokemonEntrySchema.array()),
     );
 
     ConsoleFormatter.success(`Loaded ${entriesData.length} Pokemon entries`);
@@ -164,21 +164,21 @@ async function loadPokemonIcons(): Promise<PokemonIcon[]> {
         const url = `${config.baseUrl}/${filename}`;
 
         return {
+          filename,
+          generation: config.name,
           id: entry.id,
           name: entry.name,
-          url: url,
-          filename: filename,
-          generation: config.name,
+          url,
         };
       });
 
       // Add the special egg entry for this generation
       generationIcons.unshift({
+        filename: "egg.png",
+        generation: config.name,
         id: -1,
         name: "Egg",
         url: config.eggSpriteUrl,
-        filename: "egg.png",
-        generation: config.name,
       });
 
       icons.push(...generationIcons);
@@ -214,7 +214,7 @@ export async function downloadAllIcons(
     `Gen 7 icons: ${gen7Icons.length}, Gen 8 icons: ${gen8Icons.length}`,
   );
 
-  const stats: DownloadStats = { downloaded: 0, skipped: 0, errors: 0 };
+  const stats: DownloadStats = { downloaded: 0, errors: 0, skipped: 0 };
 
   const progressBar = ConsoleFormatter.createProgressBar(icons.length);
 
@@ -281,22 +281,22 @@ async function scrapePokemonIcons(): Promise<void> {
     // Success summary
     ConsoleFormatter.printSummary("Pokemon Icons Download Complete!", [
       {
+        color: "blue",
         label: "Total Pokemon",
         value: icons.length / GENERATIONS.length,
-        color: "blue",
       },
-      { label: "Generations", value: GENERATIONS.length, color: "cyan" },
-      { label: "New downloads", value: stats.downloaded, color: "green" },
-      { label: "Already existed", value: stats.skipped, color: "yellow" },
-      { label: "Failed downloads", value: stats.errors, color: "red" },
-      { label: "Gen 7 files", value: gen7FileCount, color: "green" },
-      { label: "Gen 8 files", value: gen8FileCount, color: "green" },
-      { label: "Gen 7 directory", value: GEN7_SPRITES_DIR, color: "cyan" },
-      { label: "Gen 8 directory", value: GEN8_SPRITES_DIR, color: "cyan" },
+      { color: "cyan", label: "Generations", value: GENERATIONS.length },
+      { color: "green", label: "New downloads", value: stats.downloaded },
+      { color: "yellow", label: "Already existed", value: stats.skipped },
+      { color: "red", label: "Failed downloads", value: stats.errors },
+      { color: "green", label: "Gen 7 files", value: gen7FileCount },
+      { color: "green", label: "Gen 8 files", value: gen8FileCount },
+      { color: "cyan", label: "Gen 7 directory", value: GEN7_SPRITES_DIR },
+      { color: "cyan", label: "Gen 8 directory", value: GEN8_SPRITES_DIR },
       {
+        color: "yellow",
         label: "Duration",
         value: ConsoleFormatter.formatDuration(duration),
-        color: "yellow",
       },
     ]);
   } catch (error) {

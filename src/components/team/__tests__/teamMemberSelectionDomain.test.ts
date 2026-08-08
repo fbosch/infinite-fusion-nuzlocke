@@ -13,8 +13,8 @@ const pokemon = (uid: string, nickname?: string): PokemonOptionType => ({
   id: 25,
   name: "Pikachu",
   nationalDexId: 25,
-  uid,
   nickname,
+  uid,
 });
 
 describe("team member selection domain", () => {
@@ -45,27 +45,27 @@ describe("team member selection domain", () => {
   });
 
   it("flips selections and uses the new head nickname", () => {
-    const head = { pokemon: pokemon("head", "Sparky"), locationId: "route-1" };
-    const body = { pokemon: pokemon("body", "Flame"), locationId: "route-2" };
+    const head = { locationId: "route-1", pokemon: pokemon("head", "Sparky") };
+    const body = { locationId: "route-2", pokemon: pokemon("body", "Flame") };
 
     expect(flipTeamPokemonSelection(head, body)).toEqual({
-      selectedHead: body,
-      selectedBody: head,
       nickname: "Flame",
       previewNickname: "Flame",
+      selectedBody: head,
+      selectedHead: body,
     });
   });
 
   it("clears the nickname when flipping unnamed or empty selections", () => {
     expect(
       flipTeamPokemonSelection(
-        { pokemon: pokemon("head"), locationId: "route-1" },
+        { locationId: "route-1", pokemon: pokemon("head") },
         null,
       ),
     ).toMatchObject({
-      selectedHead: null,
       nickname: "",
       previewNickname: "",
+      selectedHead: null,
     });
     expect(flipTeamPokemonSelection(null, null).nickname).toBe("");
   });
@@ -77,13 +77,13 @@ describe("team member selection domain", () => {
         pokemon("body", "Flame"),
         "Fusion",
       ),
-    ).toEqual({ uid: "head", nickname: "Fusion" });
+    ).toEqual({ nickname: "Fusion", uid: "head" });
   });
 
   it("updates the body nickname for body-only selections", () => {
     expect(getTeamNicknameUpdate(null, pokemon("body"), "Flame")).toEqual({
-      uid: "body",
       nickname: "Flame",
+      uid: "body",
     });
   });
 
@@ -102,35 +102,35 @@ describe("team member selection domain", () => {
 
   it("initializes existing slots from identity-resolved encounter selections", () => {
     const resolvedHead = {
-      pokemon: pokemon("head", "Encounter Nickname"),
       locationId: "route-1",
+      pokemon: pokemon("head", "Encounter Nickname"),
     };
     const resolvedBody = {
-      pokemon: pokemon("body", "Body Nickname"),
       locationId: "route-2",
+      pokemon: pokemon("body", "Body Nickname"),
     };
     const selection = initializeExistingTeamMemberSelection(
       {
-        isEmpty: false,
-        headPokemon: pokemon("head", "Stale Nickname"),
         bodyPokemon: pokemon("body"),
+        headPokemon: pokemon("head", "Stale Nickname"),
+        isEmpty: false,
       },
       (uid) =>
         uid === "head" ? resolvedHead : uid === "body" ? resolvedBody : null,
     );
 
     expect(selection).toMatchObject({
-      selectedHead: resolvedHead,
-      selectedBody: resolvedBody,
       nickname: "Encounter Nickname",
       previewNickname: "Encounter Nickname",
+      selectedBody: resolvedBody,
+      selectedHead: resolvedHead,
       suggestedActiveSlot: null,
     });
   });
 
   it("suggests the missing head slot for body-only members", () => {
     const selection = initializeExistingTeamMemberSelection(
-      { isEmpty: false, bodyPokemon: pokemon("body") },
+      { bodyPokemon: pokemon("body"), isEmpty: false },
       () => null,
     );
 
@@ -139,8 +139,8 @@ describe("team member selection domain", () => {
 
   it("filters unavailable, inactive, and deceased Pokemon while retaining edited members", () => {
     const selection = (uid: string, status?: PokemonOptionType["status"]) => ({
-      pokemon: { ...pokemon(uid), status },
       locationId: `${uid}-location`,
+      pokemon: { ...pokemon(uid), status },
     });
     const available = filterAvailableTeamPokemon(
       [
@@ -153,10 +153,10 @@ describe("team member selection domain", () => {
       ],
       [
         { headPokemonUid: "current" },
-        { headPokemonUid: "current", bodyPokemonUid: "other" },
+        { bodyPokemonUid: "other", headPokemonUid: "current" },
       ],
       0,
-      { isEmpty: false, headPokemon: pokemon("current") },
+      { headPokemon: pokemon("current"), isEmpty: false },
     );
 
     expect(available.map(({ pokemon }) => pokemon.uid)).toEqual([
@@ -167,13 +167,13 @@ describe("team member selection domain", () => {
 
   it("selects head pokemon and advances to body when body is empty", () => {
     const selected = selectTeamPokemon({
-      selectedHead: null,
-      selectedBody: null,
       activeSlot: "head",
-      pokemon: pokemon("head", "Sparky"),
       locationId: "route1",
       nickname: "",
+      pokemon: pokemon("head", "Sparky"),
       previewNickname: "",
+      selectedBody: null,
+      selectedHead: null,
     });
 
     expect(selected.selectedHead?.pokemon.uid).toBe("head");
@@ -186,16 +186,16 @@ describe("team member selection domain", () => {
 
   it("selects body pokemon while preserving head nickname priority", () => {
     const selected = selectTeamPokemon({
-      selectedHead: {
-        pokemon: pokemon("head", "Sparky"),
-        locationId: "route1",
-      },
-      selectedBody: null,
       activeSlot: "body",
-      pokemon: pokemon("body", "Flame"),
       locationId: "route2",
       nickname: "Sparky",
+      pokemon: pokemon("body", "Flame"),
       previewNickname: "Sparky",
+      selectedBody: null,
+      selectedHead: {
+        locationId: "route1",
+        pokemon: pokemon("head", "Sparky"),
+      },
     });
 
     expect(selected.selectedHead?.pokemon.uid).toBe("head");
@@ -207,19 +207,19 @@ describe("team member selection domain", () => {
 
   it("unselects an already selected head pokemon", () => {
     const selected = selectTeamPokemon({
-      selectedHead: {
-        pokemon: pokemon("head", "Sparky"),
-        locationId: "route1",
-      },
-      selectedBody: {
-        pokemon: pokemon("body", "Flame"),
-        locationId: "route2",
-      },
       activeSlot: "body",
-      pokemon: pokemon("head", "Sparky"),
       locationId: "route1",
       nickname: "Sparky",
+      pokemon: pokemon("head", "Sparky"),
       previewNickname: "Sparky",
+      selectedBody: {
+        locationId: "route2",
+        pokemon: pokemon("body", "Flame"),
+      },
+      selectedHead: {
+        locationId: "route1",
+        pokemon: pokemon("head", "Sparky"),
+      },
     });
 
     expect(selected.selectedHead).toBeNull();
@@ -230,19 +230,19 @@ describe("team member selection domain", () => {
 
   it("keeps current state when selecting a new pokemon without an active slot", () => {
     const selected = selectTeamPokemon({
-      selectedHead: {
-        pokemon: pokemon("head", "Sparky"),
-        locationId: "route1",
-      },
-      selectedBody: {
-        pokemon: pokemon("body", "Flame"),
-        locationId: "route2",
-      },
       activeSlot: null,
-      pokemon: pokemon("new", "Leaf"),
       locationId: "route3",
       nickname: "Custom Fusion",
+      pokemon: pokemon("new", "Leaf"),
       previewNickname: "Custom Fusion",
+      selectedBody: {
+        locationId: "route2",
+        pokemon: pokemon("body", "Flame"),
+      },
+      selectedHead: {
+        locationId: "route1",
+        pokemon: pokemon("head", "Sparky"),
+      },
     });
 
     expect(selected.selectedHead?.pokemon.uid).toBe("head");

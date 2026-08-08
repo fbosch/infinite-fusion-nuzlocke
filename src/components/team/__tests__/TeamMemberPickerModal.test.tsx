@@ -4,11 +4,11 @@ import { describe, expect, it, vi } from "vitest";
 describe("TeamMemberPickerModal Business Logic", () => {
   it("should have correct default props structure", () => {
     const defaultProps = {
+      existingTeamMember: null,
       isOpen: true,
       onClose: vi.fn(),
       onSelect: vi.fn(),
       position: 0,
-      existingTeamMember: null,
     };
 
     expect(defaultProps.isOpen).toBe(true);
@@ -34,12 +34,12 @@ describe("TeamMemberPickerModal Business Logic", () => {
 
   it("should handle existing team member structure", () => {
     const existingTeamMember = {
-      position: 0,
-      isEmpty: false,
-      location: "route-1",
-      headPokemon: { id: 25, name: "Pikachu", uid: "pikachu_123" },
       bodyPokemon: null,
+      headPokemon: { id: 25, name: "Pikachu", uid: "pikachu_123" },
+      isEmpty: false,
       isFusion: false,
+      location: "route-1",
+      position: 0,
     };
 
     expect(existingTeamMember.position).toBe(0);

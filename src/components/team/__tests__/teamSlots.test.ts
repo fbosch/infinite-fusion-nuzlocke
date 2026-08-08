@@ -9,31 +9,31 @@ vi.mock("@/loaders/locations", () => ({
 const headPokemon = {
   id: 25,
   name: "Pikachu",
-  uid: "head-uid",
   nationalDexId: 25,
   originalLocation: "route-1",
+  uid: "head-uid",
 };
 
 const bodyPokemon = {
   id: 133,
   name: "Eevee",
-  uid: "body-uid",
   nationalDexId: 133,
   originalLocation: "route-2",
+  uid: "body-uid",
 };
 
 describe("getTeamSlots", () => {
   it("resolves members by UID and leaves missing references in their UI slot", () => {
     const encounters = {
       "route-1": {
-        head: headPokemon,
         body: null,
+        head: headPokemon,
         isFusion: false,
         updatedAt: 0,
       },
       "route-2": {
-        head: null,
         body: bodyPokemon,
+        head: null,
         isFusion: false,
         updatedAt: 0,
       },
@@ -41,8 +41,8 @@ describe("getTeamSlots", () => {
 
     const slots = getTeamSlots(
       [
-        { headPokemonUid: "head-uid", bodyPokemonUid: "body-uid" },
-        { headPokemonUid: "missing-uid", bodyPokemonUid: "" },
+        { bodyPokemonUid: "body-uid", headPokemonUid: "head-uid" },
+        { bodyPokemonUid: "", headPokemonUid: "missing-uid" },
         null,
       ],
       encounters,
@@ -51,27 +51,27 @@ describe("getTeamSlots", () => {
 
     expect(slots).toMatchObject([
       {
-        position: 0,
-        isEmpty: false,
-        locationName: "Location route-1",
-        headPokemon,
         bodyPokemon,
-        isFusion: true,
-      },
-      {
-        position: 1,
+        headPokemon,
         isEmpty: false,
-        headPokemon: null,
-        bodyPokemon: null,
-        isFusion: false,
+        isFusion: true,
+        locationName: "Location route-1",
+        position: 0,
       },
       {
-        position: 2,
-        isEmpty: true,
-        locationName: "Team Slot 3",
-        headPokemon: null,
         bodyPokemon: null,
+        headPokemon: null,
+        isEmpty: false,
         isFusion: false,
+        position: 1,
+      },
+      {
+        bodyPokemon: null,
+        headPokemon: null,
+        isEmpty: true,
+        isFusion: false,
+        locationName: "Team Slot 3",
+        position: 2,
       },
     ]);
   });

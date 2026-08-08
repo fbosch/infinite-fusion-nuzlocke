@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import { cleanup, render, screen } from "@testing-library/react";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GitHubEngagementCta } from "@/components/GitHubEngagementCta";
 import { ANALYTICS_EVENTS } from "@/lib/analytics/trackEvent";
@@ -91,8 +91,8 @@ describe("GitHubEngagementCta", () => {
     expect(analyticsMock.trackEvent).toHaveBeenCalledWith(
       ANALYTICS_EVENTS.githubCtaViewed,
       {
-        source_surface: "fixed_top_bar",
         route: "locations",
+        source_surface: "fixed_top_bar",
       },
     );
 
@@ -114,16 +114,16 @@ describe("GitHubEngagementCta", () => {
       1,
       ANALYTICS_EVENTS.githubCtaViewed,
       {
-        source_surface: "fixed_top_bar",
         route: "home",
+        source_surface: "fixed_top_bar",
       },
     );
     expect(analyticsMock.trackEvent).toHaveBeenNthCalledWith(
       2,
       ANALYTICS_EVENTS.githubCtaViewed,
       {
-        source_surface: "fixed_top_bar",
         route: "locations",
+        source_surface: "fixed_top_bar",
       },
     );
   });

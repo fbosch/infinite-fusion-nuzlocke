@@ -34,17 +34,14 @@ const safeSetItem = (storage: Storage, key: string, value: string): void => {
   }
 };
 
-export const getCheckpointStorageKey = (playthroughId: string): string => {
-  return `${CHECKPOINT_STORAGE_KEY_PREFIX}${playthroughId}`;
-};
+export const getCheckpointStorageKey = (playthroughId: string): string =>
+  `${CHECKPOINT_STORAGE_KEY_PREFIX}${playthroughId}`;
 
-const getResumeStorageKey = (playthroughId: string): string => {
-  return `${RESUME_STORAGE_KEY_PREFIX}${playthroughId}`;
-};
+const getResumeStorageKey = (playthroughId: string): string =>
+  `${RESUME_STORAGE_KEY_PREFIX}${playthroughId}`;
 
-const getLandingStorageKey = (playthroughId: string): string => {
-  return `${LANDING_STORAGE_KEY_PREFIX}${playthroughId}`;
-};
+const getLandingStorageKey = (playthroughId: string): string =>
+  `${LANDING_STORAGE_KEY_PREFIX}${playthroughId}`;
 
 const parseStoredCheckpoints = (value: string | null): Set<Checkpoint> => {
   if (value == null) {
@@ -100,7 +97,7 @@ export const getNewlyReachedCheckpoints = (
   const existing = parseStoredCheckpoints(safeGetItem(storage, key));
   const pending = pendingCheckpointEvents.get(playthroughId) ?? new Set();
   const unsent = crossed.filter(
-    (checkpoint) => !existing.has(checkpoint) && !pending.has(checkpoint),
+    (checkpoint) => !(existing.has(checkpoint) || pending.has(checkpoint)),
   );
 
   if (unsent.length > 0) {

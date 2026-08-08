@@ -107,13 +107,13 @@ describe("createExternalDexItems", () => {
 
     expect(items).toMatchObject([
       {
-        id: "infinitefusiondex",
         href: "https://infinitefusiondex.com/details/25.6",
+        id: "infinitefusiondex",
         target: "_blank",
       },
       {
-        id: "fusiondex",
         href: "https://fusiondex.org/sprite/pif/25.6a/",
+        id: "fusiondex",
         target: "_blank",
       },
     ]);

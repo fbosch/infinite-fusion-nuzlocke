@@ -31,30 +31,30 @@ export function GraveyardGridItem({
 
   return (
     <button
-      type="button"
-      onClick={handleClick}
       aria-label={`View graveyard entry for ${pokemon.nickname || pokemon.name} from ${entry.locationName}`}
       className={clsx(
-        "flex flex-col items-center justify-center p-2 rounded-lg border transition-colors h-20",
-        "border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer",
+        "flex h-20 flex-col items-center justify-center rounded-lg border p-2 transition-colors",
+        "cursor-pointer border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700",
         "hover:ring-2 hover:ring-gray-300 dark:hover:ring-gray-600",
       )}
+      onClick={handleClick}
+      type="button"
     >
       {/* Pokémon sprite */}
-      <div className="h-10 w-10 flex items-center justify-center mb-1">
+      <div className="mb-1 flex h-10 w-10 items-center justify-center">
         <PokemonSprite
-          pokemonId={pokemon.id}
-          generation="gen7"
           className="h-10 w-10 opacity-80"
+          generation="gen7"
+          pokemonId={pokemon.id}
         />
       </div>
 
       {/* Nickname and location info */}
-      <div className="text-center min-w-0">
-        <div className="font-medium text-gray-900 dark:text-white text-xs truncate">
+      <div className="min-w-0 text-center">
+        <div className="truncate font-medium text-gray-900 text-xs dark:text-white">
           {pokemon.nickname || pokemon.name || "Unknown"}
         </div>
-        <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+        <div className="truncate text-gray-500 text-xs dark:text-gray-400">
           {entry.locationName}
         </div>
       </div>

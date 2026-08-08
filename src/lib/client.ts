@@ -6,18 +6,18 @@ import { queryPersister } from "./persistence";
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Conservative default - most data changes occasionally
-      staleTime: ms("5m"),
       gcTime: ms("30m"), // Increased for better UX
-      retry: 2,
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       persister:
-        process.env.NODE_ENV !== "test"
-          ? queryPersister.persisterFn
-          : undefined,
+        process.env.NODE_ENV === "test"
+          ? undefined
+          : queryPersister.persisterFn,
+      refetchOnReconnect: "always",
       // Network-first in dev, cache-first in prod for better DX
       refetchOnWindowFocus: process.env.NODE_ENV === "production",
-      refetchOnReconnect: "always",
+      retry: 2,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30_000),
+      // Conservative default - most data changes occasionally
+      staleTime: ms("5m"),
     },
   },
 });

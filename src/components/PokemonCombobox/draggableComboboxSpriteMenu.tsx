@@ -11,14 +11,14 @@ import { PokemonSprite } from "../PokemonSprite";
 type EncounterField = "head" | "body";
 
 interface DraggableComboboxSpriteMenuOptions {
-  value: PokemonOptionType | null | undefined;
-  locationId?: string;
-  field: EncounterField;
   customLocations: Parameters<typeof getLocationByIdFromMerged>[1];
-  moveEncountersBetweenLocations: boolean;
-  preEvolution: PokemonOptionType | null;
   evolutions: PokemonOptionType[];
+  field: EncounterField;
+  locationId?: string;
+  moveEncountersBetweenLocations: boolean;
   onOpenMoveModal: () => void;
+  preEvolution: PokemonOptionType | null;
+  value: PokemonOptionType | null | undefined;
 }
 
 function wouldCreateEggFusionAtOriginalLocation(
@@ -26,13 +26,17 @@ function wouldCreateEggFusionAtOriginalLocation(
   locationId: string | undefined,
   field: EncounterField,
 ) {
-  if (!value?.originalLocation || !locationId) return false;
+  if (!(value?.originalLocation && locationId)) {
+    return false;
+  }
 
   const encounters = getActivePlaythrough()?.encounters as
     | Record<string, EncounterData>
     | undefined;
   const originalEncounter = encounters?.[value.originalLocation];
-  if (!originalEncounter) return false;
+  if (!originalEncounter) {
+    return false;
+  }
 
   return originalEncounter.isFusion
     ? wouldCreateEggFusionInFusion(originalEncounter, value.id, field)
@@ -66,9 +70,9 @@ function wouldCreateEggFusionInSingleEncounter(
 
 function getEvolutionLabel(pokemon: PokemonOptionType, action: string) {
   return (
-    <div className="flex items-center gap-x-2 w-full">
-      <div className="flex items-center justify-center size-6 flex-shrink-0">
-        <PokemonSprite pokemonId={pokemon.id} generation="gen7" />
+    <div className="flex w-full items-center gap-x-2">
+      <div className="flex size-6 flex-shrink-0 items-center justify-center">
+        <PokemonSprite generation="gen7" pokemonId={pokemon.id} />
       </div>
       <span className="truncate">
         {action && `${action} `}
@@ -97,7 +101,9 @@ async function updateEvolution(
     false,
   );
 
-  if (emitEvent) emitEvolutionEvent(locationId);
+  if (emitEvent) {
+    emitEvolutionEvent(locationId);
+  }
 }
 
 function getEvolutionMenuItem(
@@ -128,7 +134,9 @@ function getMoveMenuOptions({
   DraggableComboboxSpriteMenuOptions,
   "value" | "locationId" | "field" | "customLocations" | "onOpenMoveModal"
 >) {
-  if (!value || !locationId) return [];
+  if (!(value && locationId)) {
+    return [];
+  }
 
   const menuOptions: ContextMenuItem[] = [];
   if (value.originalLocation && value.originalLocation !== locationId) {
@@ -143,24 +151,24 @@ function getMoveMenuOptions({
         field,
       );
       menuOptions.push({
+        disabled,
+        icon: Home,
         id: "move-to-original",
         label: "Move to Original Location",
+        onClick: () =>
+          playthroughActions.moveToOriginalLocation(locationId, field, value),
         tooltip: disabled
           ? "Cannot move to original location - would create egg fusion"
           : originalLocation.name,
-        icon: Home,
-        onClick: () =>
-          playthroughActions.moveToOriginalLocation(locationId, field, value),
-        disabled,
       });
     }
   }
 
   if (getLocations().some((location) => location.id !== locationId)) {
     menuOptions.push({
+      icon: ArrowDownToDot,
       id: "move",
       label: "Move to Location",
-      icon: ArrowDownToDot,
       onClick: onOpenMoveModal,
     });
   }
@@ -178,7 +186,9 @@ function getEvolutionMenuOptions({
   DraggableComboboxSpriteMenuOptions,
   "value" | "locationId" | "field" | "preEvolution" | "evolutions"
 > & { includeSeparator: boolean }) {
-  if (!value || !locationId) return [];
+  if (!(value && locationId)) {
+    return [];
+  }
 
   const menuOptions: ContextMenuItem[] = [];
   if (includeSeparator && (preEvolution || evolutions.length > 0)) {
@@ -197,7 +207,9 @@ function getEvolutionMenuOptions({
       ),
     );
   }
-  if (evolutions.length === 0) return menuOptions;
+  if (evolutions.length === 0) {
+    return menuOptions;
+  }
 
   const evolutionItems = evolutions.map((evolution) =>
     getEvolutionMenuItem(
@@ -221,13 +233,13 @@ function getEvolutionMenuOptions({
           Atom,
         )
       : {
-          id: "evolve",
-          label: "Evolve to…",
-          icon: Atom,
           children: evolutionItems.map((item, index) => ({
             ...item,
             label: getEvolutionLabel(evolutions[index]!, ""),
           })),
+          icon: Atom,
+          id: "evolve",
+          label: "Evolve to…",
         },
   );
   return menuOptions;
@@ -247,46 +259,48 @@ export function getDraggableComboboxSpriteMenuOptions({
   if (moveEncountersBetweenLocations) {
     menuOptions.push(
       ...getMoveMenuOptions({
-        value,
-        locationId,
-        field,
         customLocations,
+        field,
+        locationId,
         onOpenMoveModal,
+        value,
       }),
     );
   }
   menuOptions.push(
     ...getEvolutionMenuOptions({
-      value,
-      locationId,
-      field,
-      preEvolution,
       evolutions,
+      field,
       includeSeparator: moveEncountersBetweenLocations,
+      locationId,
+      preEvolution,
+      value,
     }),
   );
 
-  if (!value) return menuOptions;
+  if (!value) {
+    return menuOptions;
+  }
 
   menuOptions.push(
     { id: "separator", separator: true },
     {
+      favicon: "https://infinitefusiondex.com/images/favicon.ico",
+      href: `https://infinitefusiondex.com/details/${value.id}`,
+      icon: ArrowUpRight,
+      iconClassName: "dark:text-blue-300 text-blue-400",
       id: "infinitefusiondex",
       label: "Open InfiniteDex entry",
-      href: `https://infinitefusiondex.com/details/${value.id}`,
       target: "_blank",
-      favicon: "https://infinitefusiondex.com/images/favicon.ico",
-      icon: ArrowUpRight,
-      iconClassName: "dark:text-blue-300 text-blue-400",
     },
     {
-      id: "fusiondex",
-      label: "Open FusionDex entry",
-      href: `https://fusiondex.org/sprite/pif/${value.id}/`,
-      target: "_blank",
       favicon: "https://www.fusiondex.org/favicon.ico",
+      href: `https://fusiondex.org/sprite/pif/${value.id}/`,
       icon: ArrowUpRight,
       iconClassName: "dark:text-blue-300 text-blue-400",
+      id: "fusiondex",
+      label: "Open FusionDex entry",
+      target: "_blank",
     },
   );
 

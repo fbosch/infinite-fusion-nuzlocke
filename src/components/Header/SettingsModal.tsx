@@ -33,120 +33,120 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   }
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-[70] group">
+    <Dialog className="group relative z-[70]" onClose={onClose} open={isOpen}>
       <DialogBackdrop
-        transition
-        className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100"
         aria-hidden="true"
+        className="fixed inset-0 bg-black/30 backdrop-blur-[2px] data-closed:opacity-0 data-enter:opacity-100 dark:bg-black/50"
+        transition
       />
 
       <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
         <DialogPanel
-          transition
           className={clsx(
-            "max-w-md w-full space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6",
-            "transition duration-150 ease-out data-closed:opacity-0 data-closed:scale-98",
+            "w-full max-w-md space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800",
+            "transition duration-150 ease-out data-closed:scale-98 data-closed:opacity-0",
           )}
+          transition
         >
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+            <DialogTitle className="font-semibold text-gray-900 text-xl dark:text-white">
               Settings
             </DialogTitle>
             <button
-              type="button"
-              onClick={onClose}
+              aria-label="Close modal"
               className={clsx(
                 "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2",
-                "p-1 rounded-md transition-colors cursor-pointer",
+                "cursor-pointer rounded-md p-1 transition-colors",
               )}
-              aria-label="Close modal"
+              onClick={onClose}
+              type="button"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
           <div className="space-y-4 pt-2">
-            <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between rounded-lg border border-gray-200 p-3 dark:border-gray-700">
               <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 p-2 rounded-md bg-gray-100 dark:bg-gray-800">
+                <div className="flex-shrink-0 rounded-md bg-gray-100 p-2 dark:bg-gray-800">
                   <Monitor className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                  <h3 className="font-medium text-gray-900 text-sm dark:text-white">
                     Theme
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="mt-1 text-gray-500 text-xs dark:text-gray-400">
                     Choose your preferred color scheme
                   </p>
                 </div>
               </div>
-              <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-md p-0.5">
+              <div className="flex items-center rounded-md bg-gray-100 p-0.5 dark:bg-gray-800">
                 {[
-                  { value: "system", icon: Monitor, label: "System" },
-                  { value: "light", icon: Sun, label: "Light" },
-                  { value: "dark", icon: Moon, label: "Dark" },
+                  { icon: Monitor, label: "System", value: "system" },
+                  { icon: Sun, label: "Light", value: "light" },
+                  { icon: Moon, label: "Dark", value: "dark" },
                 ].map(({ value, icon: Icon, label }) => (
                   <button
-                    key={value}
-                    type="button"
-                    onClick={() => setTheme(value)}
+                    aria-label={label}
                     className={clsx(
-                      "flex items-center justify-center w-8 h-8 rounded transition-all duration-200 cursor-pointer",
+                      "flex h-8 w-8 cursor-pointer items-center justify-center rounded transition-all duration-200",
                       theme === value
-                        ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
+                        ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100"
                         : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200",
                     )}
-                    aria-label={label}
+                    key={value}
+                    onClick={() => setTheme(value)}
                     title={label}
+                    type="button"
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="h-4 w-4" />
                   </button>
                 ))}
               </div>
             </div>
 
-            <Field className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+            <Field className="flex items-center justify-between rounded-lg border border-gray-200 p-3 dark:border-gray-700">
               <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 p-2 rounded-md bg-gray-100 dark:bg-gray-800">
+                <div className="flex-shrink-0 rounded-md bg-gray-100 p-2 dark:bg-gray-800">
                   <Move className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-900 dark:text-white">
+                  <Label className="font-medium text-gray-900 text-sm dark:text-white">
                     Move Encounters
                   </Label>
-                  <Description className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <Description className="mt-1 text-gray-500 text-xs dark:text-gray-400">
                     Allow moving encounters between locations
                   </Description>
                 </div>
               </div>
               <Switch
                 checked={settings.moveEncountersBetweenLocations}
+                className="group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition data-checked:bg-blue-600 dark:bg-gray-700"
                 onChange={settingsActions.toggleMoveEncountersBetweenLocations}
-                className="group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition data-checked:bg-blue-600"
               >
                 <span className="size-4 translate-x-1 rounded-full bg-white transition group-data-checked:translate-x-6" />
               </Switch>
             </Field>
 
-            <Field className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+            <Field className="flex items-center justify-between rounded-lg border border-gray-200 p-3 dark:border-gray-700">
               <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 p-2 rounded-md bg-gray-100 dark:bg-gray-800">
+                <div className="flex-shrink-0 rounded-md bg-gray-100 p-2 dark:bg-gray-800">
                   <Rabbit className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-900 dark:text-white">
+                  <Label className="font-medium text-gray-900 text-sm dark:text-white">
                     Reduced Motion
                   </Label>
-                  <Description className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <Description className="mt-1 text-gray-500 text-xs dark:text-gray-400">
                     Limit animations and smooth scrolling
                   </Description>
                 </div>
               </div>
               <Switch
                 checked={reducedMotion}
+                className="group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition data-checked:bg-blue-600 dark:bg-gray-700"
                 onChange={settingsActions.setReducedMotion}
-                className="group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition data-checked:bg-blue-600"
               >
                 <span className="size-4 translate-x-1 rounded-full bg-white transition group-data-checked:translate-x-6" />
               </Switch>
@@ -155,9 +155,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
           <div className="flex justify-end pt-4">
             <button
-              type="button"
+              className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               onClick={onClose}
-              className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              type="button"
             >
               Done
             </button>
