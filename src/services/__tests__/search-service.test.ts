@@ -4,7 +4,7 @@ import type { Pokemon } from "@/loaders/pokemon";
 let searchService: typeof import("../search-service").default;
 
 // Mock the dependencies
-vi.mock("@/lib/searchCore", () => ({
+vi.mock("@/lib/search-core", () => ({
   SearchCore: vi.fn(function MockSearchCore() {
     return {
       initialize: vi.fn().mockResolvedValue(undefined),

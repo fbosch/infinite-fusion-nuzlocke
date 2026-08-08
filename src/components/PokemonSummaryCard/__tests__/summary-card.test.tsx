@@ -4,7 +4,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import SummaryCard from "..";
 
-vi.mock("@/components/CursorTooltip", () => ({
+vi.mock("@/components/cursor-tooltip", () => ({
   CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
 }));
 
@@ -12,7 +12,7 @@ vi.mock("@/components/PokemonSummaryCard/artwork-variant-button", () => ({
   ArtworkVariantButton: () => <button type="button">Change artwork</button>,
 }));
 
-vi.mock("@/components/PokemonSummaryCard/FusionSprite", () => ({
+vi.mock("@/components/PokemonSummaryCard/fusion-sprite", () => ({
   FusionSprite: () => <div data-testid="fusion-sprite" />,
 }));
 

@@ -42,7 +42,8 @@ vi.mock("@/stores/playthroughs/hooks", () => ({
   useIsLoading: vi.fn(() => false),
 }));
 
-vi.mock("@/loaders", () => ({
+vi.mock("@/loaders/locations", () => ({
+  getLocationById: vi.fn(() => ({ name: "Route 1" })),
   getLocationsSortedWithCustom: vi.fn(() => [
     { id: "route-1", name: "Route 1" },
     { id: "route-2", name: "Route 2" },
@@ -52,10 +53,6 @@ vi.mock("@/loaders", () => ({
 
 vi.mock("@tanstack/react-virtual", () => ({
   useVirtualizer: useVirtualizerMock,
-}));
-
-vi.mock("@/loaders/locations", () => ({
-  getLocationById: vi.fn(() => ({ name: "Route 1" })),
 }));
 
 vi.mock("@/hooks/use-mounted", () => ({

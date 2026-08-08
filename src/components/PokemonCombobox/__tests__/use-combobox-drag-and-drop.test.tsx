@@ -11,7 +11,7 @@ const { getPokemonMock, getPokemonNameMapMock } = vi.hoisted(() => ({
   getPokemonNameMapMock: vi.fn(),
 }));
 
-vi.mock("@/loaders", () => ({
+vi.mock("@/loaders/pokemon", () => ({
   getPokemon: getPokemonMock,
   getPokemonNameMap: getPokemonNameMapMock,
 }));

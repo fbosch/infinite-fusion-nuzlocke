@@ -53,7 +53,7 @@ vi.mock("@/assets/images/pokeball.svg", () => ({
   default: () => <svg data-testid="pokeball-icon" />,
 }));
 
-vi.mock("@/components/CursorTooltip", () => ({
+vi.mock("@/components/cursor-tooltip", () => ({
   CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
 }));
 
@@ -61,7 +61,7 @@ vi.mock("@/components/PokemonSummaryCard/artwork-variant-button", () => ({
   ArtworkVariantButton: () => null,
 }));
 
-vi.mock("@/components/PokemonSummaryCard/FusionSprite", () => ({
+vi.mock("@/components/PokemonSummaryCard/fusion-sprite", () => ({
   FusionSprite: (() => {
     const ReactRuntime = require("react") as typeof import("react");
     return ReactRuntime.forwardRef<
@@ -117,6 +117,7 @@ vi.mock("@/hooks/use-fusion-types", () => ({
 }));
 
 vi.mock("@/hooks/use-sprite", () => ({
+  usePreferredVariantState: () => ({ variant: null }),
   useSpriteCredits: () => ({ data: {} }),
 }));
 

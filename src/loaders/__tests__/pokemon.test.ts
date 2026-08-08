@@ -131,7 +131,7 @@ vi.mock("@/lib/data", () => {
   };
 });
 
-vi.mock("@/lib/searchCore", () => ({
+vi.mock("@/lib/search-core", () => ({
   SearchCore: vi.fn(function MockSearchCore() {
     return {
       initialize: vi.fn().mockResolvedValue(undefined),
