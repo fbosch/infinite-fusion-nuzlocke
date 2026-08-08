@@ -313,7 +313,7 @@ describe("Data Loading Utilities", () => {
 
     it("should handle missing files", async () => {
       // Mock some files as missing
-      mockFs.access.mockImplementation((filePath) => {
+      mockFs.access.mockImplementation(async (filePath) => {
         const pathStr = String(filePath);
         if (
           pathStr.includes("pokemon-data.json") ||

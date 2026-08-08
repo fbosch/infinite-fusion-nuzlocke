@@ -10,7 +10,7 @@ import {
 import userEvent from "@testing-library/user-event";
 import type React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import TeamEntryItem from "../TeamEntryItem";
+import TeamEntryItem from "../team-entry-item";
 import type { PCEntry } from "../types";
 
 let activePlaythroughId = "playthrough-1";
@@ -98,7 +98,7 @@ vi.mock("@/stores/playthroughs/hooks", () => ({
   useEncounters: () => ({}),
 }));
 
-vi.mock("@/components/PokemonSummaryCard/TeamMemberContextMenu", () => ({
+vi.mock("@/components/PokemonSummaryCard/team-member-context-menu", () => ({
   TeamMemberContextMenu: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
   ),

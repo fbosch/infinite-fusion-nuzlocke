@@ -9,7 +9,7 @@ import {
   Undo2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import BodyIcon from "@/assets/images/body.svg";
 import HeadIcon from "@/assets/images/head.svg";
 import { ContextMenu, type ContextMenuItem } from "@/components/context-menu";
@@ -27,10 +27,11 @@ import {
 import { playthroughActions } from "@/stores/playthroughs/index";
 import { scrollToLocationById } from "@/utils/scrollToLocation";
 import { PokemonSprite } from "../PokemonSprite";
-import { createExternalDexItems } from "./PokemonContextMenu";
+import { createExternalDexItems } from "./pokemon-context-menu";
 
 const ArtworkVariantModal = dynamic(
-  () => import("./ArtworkVariantModal").then((mod) => mod.ArtworkVariantModal),
+  () =>
+    import("./artwork-variant-modal").then((mod) => mod.ArtworkVariantModal),
   {
     ssr: false,
   },
@@ -98,15 +99,13 @@ function createPokemonActionLabel(pokemon: Pokemon, action: string) {
         <PokemonSprite generation="gen7" pokemonId={pokemon.id} />
       </div>
       <span className="truncate">
-        {action && `${action} `}
+        {action ? `${action} ` : null}
         {pokemon.name}
       </span>
     </div>
   );
 }
 
-// The action list intentionally mirrors the fixed head/body state matrix.
-// fallow-ignore-next-line complexity
 function createPokemonSectionItems({
   slot,
   pokemon,
@@ -156,13 +155,13 @@ function createPokemonSectionItems({
     });
   }
 
-  if (evolutions?.length === 1) {
-    const evolution = evolutions[0]!;
+  const [singleEvolution] = evolutions ?? [];
+  if (singleEvolution) {
     items.push({
       icon: Atom,
-      id: `evolve-${slot}-${evolution.id}`,
-      label: createPokemonActionLabel(evolution, "Evolve to"),
-      onClick: () => onEvolve(evolution),
+      id: `evolve-${slot}-${singleEvolution.id}`,
+      label: createPokemonActionLabel(singleEvolution, "Evolve to"),
+      onClick: () => onEvolve(singleEvolution),
     });
   } else if (evolutions && evolutions.length > 1) {
     items.push({
@@ -190,6 +189,18 @@ function createPokemonSectionItems({
   return items;
 }
 
+function getVariantTooltip(isUnavailable: boolean, isLoadingVariants: boolean) {
+  if (isUnavailable === false) {
+    return;
+  }
+
+  if (isLoadingVariants) {
+    return "Loading artwork variants...";
+  }
+
+  return "No artwork variants available";
+}
+
 function createVariantItem({
   headPokemon,
   bodyPokemon,
@@ -211,11 +222,7 @@ function createVariantItem({
     id: "change-variant",
     label: "Change Preferred Artwork",
     onClick: onOpenVariantModal,
-    tooltip: unavailable
-      ? isLoadingVariants
-        ? "Loading artwork variants..."
-        : "No artwork variants available"
-      : undefined,
+    tooltip: getVariantTooltip(unavailable, isLoadingVariants),
   };
 }
 
@@ -225,7 +232,7 @@ function createStatusItems(
 ): ContextMenuItem[] {
   const canMarkAsDeceased =
     status !== PokemonStatus.DECEASED && status !== PokemonStatus.MISSED;
-  const canMoveToBox = status != null && BOXABLE_STATUSES.has(status);
+  const canMoveToBox = status !== undefined && BOXABLE_STATUSES.has(status);
 
   if (!(canMarkAsDeceased || canMoveToBox)) {
     return [];
@@ -294,10 +301,9 @@ function createPokemonSectionItemsForTeamMember({
   | "bodyPreEvolution"
   | "actions"
 >): ContextMenuItem[] {
-  const hasFusionPair =
-    headPokemon != null &&
-    bodyPokemon != null &&
-    headPokemon.id !== bodyPokemon.id;
+  const hasFusionPair = Boolean(
+    headPokemon && bodyPokemon && headPokemon.id !== bodyPokemon.id,
+  );
   const items = createPokemonSectionItems({
     evolutions: headEvolutions,
     onDevolve: actions.onDevolveHead,
@@ -482,24 +488,31 @@ export function TeamMemberContextMenu({
   onClose,
 }: TeamMemberContextMenuProps) {
   const { headPokemon, bodyPokemon, position } = teamMember;
-  const hasFusionPair =
-    headPokemon != null &&
-    bodyPokemon != null &&
-    headPokemon.id !== bodyPokemon.id;
+  const hasFusionPair = Boolean(
+    headPokemon && bodyPokemon && headPokemon.id !== bodyPokemon.id,
+  );
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
   const { hasArtVariants, isLoadingVariants } = useTeamMemberArtworkVariants(
     headPokemon,
     bodyPokemon,
     shouldLoad,
   );
+  const headPokemonId = headPokemon ? headPokemon.id : null;
+  const bodyPokemonId = bodyPokemon ? bodyPokemon.id : null;
   const { variant: preferredVariant } = usePreferredVariantState(
-    headPokemon?.id ?? null,
-    bodyPokemon?.id ?? null,
+    headPokemonId,
+    bodyPokemonId,
   );
   const { evolutions: headEvolutions, preEvolution: headPreEvolution } =
     usePokemonEvolutionData(headPokemon?.id, true);
   const { evolutions: bodyEvolutions, preEvolution: bodyPreEvolution } =
     usePokemonEvolutionData(bodyPokemon?.id, true);
+  const closeVariantModal = useCallback(() => {
+    setIsVariantModalOpen(false);
+  }, []);
+  const openVariantModal = useCallback(() => {
+    setIsVariantModalOpen(true);
+  }, []);
   const contextItems = createTeamMemberContextItems({
     actions: createTeamMemberContextActions({
       bodyPokemon,
@@ -508,7 +521,7 @@ export function TeamMemberContextMenu({
       headPokemon,
       headPreEvolution,
       onClose,
-      onOpenVariantModal: () => setIsVariantModalOpen(true),
+      onOpenVariantModal: openVariantModal,
       position,
     }),
     bodyEvolutions,
@@ -537,7 +550,7 @@ export function TeamMemberContextMenu({
         headId={headPokemon?.id}
         isFusion={hasFusionPair}
         isOpen={isVariantModalOpen}
-        onClose={() => setIsVariantModalOpen(false)}
+        onClose={closeVariantModal}
       />
     </>
   );

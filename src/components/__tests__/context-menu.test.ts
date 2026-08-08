@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { filterEdgeSeparators } from "../context-menu";
-import { createExternalDexItems } from "../PokemonSummaryCard/PokemonContextMenu";
+import { createExternalDexItems } from "../PokemonSummaryCard/pokemon-context-menu";
 
 describe("filterEdgeSeparators", () => {
   it("should remove separators at the beginning", () => {

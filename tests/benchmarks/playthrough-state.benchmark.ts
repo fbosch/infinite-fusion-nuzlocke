@@ -226,7 +226,7 @@ function getSourceHeadPokemon() {
   return pokemon;
 }
 
-const runFixture: Record<FixtureKind, () => Promise<unknown> | undefined> = {
+const runFixture: Record<FixtureKind, () => Promise<unknown> | void> = {
   "custom-location-remove": () => removeCustomLocation("custom-location"),
   "drag-empty-target": () =>
     relocateEncounterSlot({
@@ -285,7 +285,12 @@ warmFixture["reverse-stored"] = warmTeamMember;
 warmFixture["custom-location-remove"] = warmCustomLocation;
 
 function warmTeamMember() {
-  const [teamMember] = getActivePlaythrough().team.members;
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough) {
+    throw new Error("Reverse Fusion benchmark fixture has no active playthrough");
+  }
+
+  const [teamMember] = activePlaythrough.team.members;
   if (!teamMember) {
     throw new Error("Reverse Fusion benchmark fixture has no team member");
   }
@@ -293,7 +298,12 @@ function warmTeamMember() {
 }
 
 function warmCustomLocation() {
-  return getActivePlaythrough().customLocations?.[0]?.id;
+  const activePlaythrough = getActivePlaythrough();
+  if (!activePlaythrough) {
+    throw new Error("Custom location benchmark fixture has no active playthrough");
+  }
+
+  return activePlaythrough.customLocations?.[0]?.id;
 }
 
 async function repeatSequentially(

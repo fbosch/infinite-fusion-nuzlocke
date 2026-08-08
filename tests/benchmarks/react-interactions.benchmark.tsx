@@ -4,12 +4,12 @@ import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import React, { Profiler, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import SummaryCard from "@/components/PokemonSummaryCard";
-import TeamEntryItem from "@/components/pc/TeamEntryItem";
+import TeamEntryItem from "@/components/pc/team-entry-item";
 import {
   TeamMemberSelectionProvider,
   useTeamMemberSelection,
 } from "@/components/team/TeamMemberSelectionContext";
-import { getTeamSlots } from "@/components/team/team-slots";
+import { getTeamSlots } from "@/components/team/team-slots-model";
 import { getLocationsSortedWithCustom } from "@/loaders/locations";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 
@@ -60,12 +60,12 @@ vi.mock("@/components/PokemonSummaryCard/ArtworkVariantButton", () => ({
 vi.mock("@/components/PokemonSummaryCard/FusionSprite", () => ({
   FusionSprite: () => <div data-testid="fusion-sprite" />,
 }));
-vi.mock("@/components/PokemonSummaryCard/TeamMemberContextMenu", () => ({
+vi.mock("@/components/PokemonSummaryCard/team-member-context-menu", () => ({
   TeamMemberContextMenu: ({ children }: { children: ReactNode }) => (
     <>{children}</>
   ),
 }));
-vi.mock("@/components/PokemonSummaryCard/PokemonContextMenu", () => ({
+vi.mock("@/components/PokemonSummaryCard/pokemon-context-menu", () => ({
   PokemonContextMenu: ({ children }: { children: ReactNode }) => (
     <>{children}</>
   ),

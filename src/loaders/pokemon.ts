@@ -180,7 +180,7 @@ export async function getPokemon(): Promise<Pokemon[]> {
     return await pokemonData.getAllPokemon();
   } catch (error) {
     console.error("Failed to fetch Pokemon data:", error);
-    throw new Error("Failed to load Pokemon data");
+    throw new Error("Failed to load Pokemon data", { cause: error });
   }
 }
 
@@ -230,11 +230,11 @@ async function _getAllPokemonTypes(): Promise<string[]> {
     const pokemon = await pokemonData.getAllPokemon();
     const typeSet = new Set<string>();
 
-    pokemon.forEach((p) => {
-      p.types.forEach((type) => {
+    for (const p of pokemon) {
+      for (const type of p.types) {
         typeSet.add(type.name);
-      });
-    });
+      }
+    }
 
     return Array.from(typeSet).sort();
   } catch (error) {
@@ -288,9 +288,9 @@ async function _getNationalDexToInfiniteFusionMap(): Promise<
     const pokemon = await pokemonData.getAllPokemon();
     const map = new Map<number, number>();
 
-    pokemon.forEach((p) => {
+    for (const p of pokemon) {
       map.set(p.nationalDexId, p.id);
-    });
+    }
 
     return map;
   } catch (error) {
@@ -306,9 +306,9 @@ async function _getInfiniteFusionToNationalDexMap(): Promise<
     const pokemon = await pokemonData.getAllPokemon();
     const map = new Map<number, number>();
 
-    pokemon.forEach((p) => {
+    for (const p of pokemon) {
       map.set(p.id, p.nationalDexId);
-    });
+    }
 
     return map;
   } catch (error) {
@@ -323,14 +323,6 @@ export function useAllPokemon(enabled = true) {
     ...pokemonQueries.all(),
     enabled,
   });
-}
-
-function _usePokemonById(id: number) {
-  return useQuery(pokemonQueries.byId(id));
-}
-
-function _usePokemonByType(type: string) {
-  return useQuery(pokemonQueries.byType(type));
 }
 
 // Name map hook that transforms existing Pokemon data

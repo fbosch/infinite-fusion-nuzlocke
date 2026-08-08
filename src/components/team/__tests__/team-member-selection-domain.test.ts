@@ -182,6 +182,10 @@ describe("team member selection domain", () => {
       selectedHead: null,
     });
 
+    expect(selected.selectedHead).not.toBeNull();
+    if (selected.selectedHead === null) {
+      throw new Error("Expected selected head Pokemon");
+    }
     expect(selected.selectedHead.pokemon.uid).toBe("head");
     expect(selected.selectedHead?.locationId).toBe("route1");
     expect(selected.selectedBody).toBeNull();
@@ -204,6 +208,11 @@ describe("team member selection domain", () => {
       },
     });
 
+    expect(selected.selectedHead).not.toBeNull();
+    expect(selected.selectedBody).not.toBeNull();
+    if (selected.selectedHead === null || selected.selectedBody === null) {
+      throw new Error("Expected selected head and body Pokemon");
+    }
     expect(selected.selectedHead.pokemon.uid).toBe("head");
     expect(selected.selectedBody.pokemon.uid).toBe("body");
     expect(selected.selectedBody?.locationId).toBe("route2");
@@ -229,6 +238,10 @@ describe("team member selection domain", () => {
     });
 
     expect(selected.selectedHead).toBeNull();
+    expect(selected.selectedBody).not.toBeNull();
+    if (selected.selectedBody === null) {
+      throw new Error("Expected selected body Pokemon");
+    }
     expect(selected.selectedBody.pokemon.uid).toBe("body");
     expect(selected.activeSlot).toBe("head");
     expect(selected.nickname).toBe("");
@@ -251,6 +264,11 @@ describe("team member selection domain", () => {
       },
     });
 
+    expect(selected.selectedHead).not.toBeNull();
+    expect(selected.selectedBody).not.toBeNull();
+    if (selected.selectedHead === null || selected.selectedBody === null) {
+      throw new Error("Expected selected head and body Pokemon");
+    }
     expect(selected.selectedHead.pokemon.uid).toBe("head");
     expect(selected.selectedBody.pokemon.uid).toBe("body");
     expect(selected.activeSlot).toBeNull();

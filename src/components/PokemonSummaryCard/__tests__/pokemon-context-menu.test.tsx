@@ -3,7 +3,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PokemonStatus } from "@/loaders/pokemon";
-import { PokemonContextMenu } from "../PokemonContextMenu";
+import { PokemonContextMenu } from "../pokemon-context-menu";
 
 const { markEncounterAsDeceasedMock } = vi.hoisted(() => ({
   markEncounterAsDeceasedMock: vi.fn().mockResolvedValue(undefined),

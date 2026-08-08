@@ -33,7 +33,7 @@ vi.mock("@/components/playthrough/PlaythroughMenu", () => ({
   default: () => <div>Playthrough selector</div>,
 }));
 
-vi.mock("@/components/team/TeamSlots", () => ({
+vi.mock("@/components/team/team-slots", () => ({
   default: () => <div>Team slots</div>,
 }));
 

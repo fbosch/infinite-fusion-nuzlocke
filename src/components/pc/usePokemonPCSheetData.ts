@@ -5,7 +5,7 @@ import {
   useEncounters,
 } from "@/stores/playthroughs/hooks";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
-import { getTeamSlots } from "../team/team-slots";
+import { getTeamSlots } from "../team/team-slots-model";
 import { getDeceasedEntries, getStoredEntries } from "./pcSheetDomain";
 import type { PCEntry } from "./types";
 

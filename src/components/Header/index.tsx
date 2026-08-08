@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Logo from "@/components/Logo";
 import PlaythroughMenu from "@/components/playthrough/PlaythroughMenu";
-import TeamSlots from "@/components/team/TeamSlots";
+import TeamSlots from "@/components/team/team-slots";
 import type { TopBarModal } from "./MenuItems";
 import SettingsModal from "./SettingsModal";
 import TopBar from "./TopBar";

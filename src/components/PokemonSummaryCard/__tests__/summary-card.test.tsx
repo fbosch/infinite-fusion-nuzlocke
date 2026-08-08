@@ -16,7 +16,7 @@ vi.mock("@/components/PokemonSummaryCard/FusionSprite", () => ({
   FusionSprite: () => <div data-testid="fusion-sprite" />,
 }));
 
-vi.mock("@/components/PokemonSummaryCard/PokemonContextMenu", () => ({
+vi.mock("@/components/PokemonSummaryCard/pokemon-context-menu", () => ({
   PokemonContextMenu: ({ children }: { children: React.ReactNode }) => children,
 }));
 

@@ -237,21 +237,16 @@ export async function getLocationsWithEncounters(
   gameMode: "classic" | "remix" = "classic",
 ): Promise<Array<Location & { encounters: PokemonEncounter[] }>> {
   const locations = getLocations();
-  const locationsWithEncounters: Array<
-    Location & { encounters: PokemonEncounter[] }
-  > = [];
+  const locationsWithEncounters = await Promise.all(
+    locations.map(async (location) => ({
+      ...location,
+      encounters: await getLocationEncountersById(location.id, gameMode),
+    })),
+  );
 
-  for (const location of locations) {
-    const encounters = await getLocationEncountersById(location.id, gameMode);
-    if (encounters.length > 0) {
-      locationsWithEncounters.push({
-        ...location,
-        encounters,
-      });
-    }
-  }
-
-  return locationsWithEncounters;
+  return locationsWithEncounters.filter(
+    (location) => location.encounters.length > 0,
+  );
 }
 
 // Check if a location has encounters
@@ -374,7 +369,7 @@ export function mergeLocationsWithCustom(
       break;
     }
 
-    passCount++;
+    passCount += 1;
   }
 
   return result;
@@ -537,23 +532,14 @@ async function _getMergedLocationsWithEncounters(
   gameMode: "classic" | "remix" = "classic",
 ): Promise<Array<CombinedLocation & { encounters: PokemonEncounter[] }>> {
   const mergedLocations = getLocationsSortedWithCustom(customLocations);
-  const locationsWithEncounters = [];
-
-  for (const location of mergedLocations) {
-    let encounters: PokemonEncounter[] = [];
-
-    // Only default locations have encounters (custom locations are user-defined)
-    if (!isCustomLocation(location)) {
-      encounters = await getLocationEncountersByName(location.name, gameMode);
-    }
-
-    locationsWithEncounters.push({
+  return await Promise.all(
+    mergedLocations.map(async (location) => ({
       ...location,
-      encounters,
-    });
-  }
-
-  return locationsWithEncounters;
+      encounters: isCustomLocation(location)
+        ? []
+        : await getLocationEncountersByName(location.name, gameMode),
+    })),
+  );
 }
 
 export function getLocationById(id?: string) {

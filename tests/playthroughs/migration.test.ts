@@ -95,8 +95,12 @@ describe("Playthroughs Store - Migration Tests", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result as any).remixMode).toBeUndefined();
       expect(result.encounters).toBeDefined();
-      expect(result.encounters?.["route-1"]).toBeDefined();
-      expect(result.encounters["route-1"].head.name).toBe("Pikachu");
+      const routeOneEncounter = result.encounters?.["route-1"];
+      expect(routeOneEncounter).toBeDefined();
+      if (!routeOneEncounter?.head) {
+        throw new Error("Expected migrated route-1 encounter with a head Pokemon");
+      }
+      expect(routeOneEncounter.head.name).toBe("Pikachu");
       expect(result.customLocations).toBeDefined();
       expect(result.customLocations?.[0].name).toBe("Custom Route");
       expect(result.createdAt).toBe(1_234_567_890);

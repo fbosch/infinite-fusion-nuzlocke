@@ -36,7 +36,7 @@ async function getStarterPokemon(): Promise<StarterPokemon> {
     return data;
   } catch (error) {
     console.error("Failed to validate starter Pokémon data:", error);
-    throw new Error("Invalid starter Pokémon data format");
+    throw new Error("Invalid starter Pokémon data format", { cause: error });
   }
 }
 

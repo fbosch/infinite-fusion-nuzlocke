@@ -5,23 +5,13 @@ import type { Pokemon, PokemonOptionType } from "./pokemon";
 import { useAllPokemon, usePokemonNameMap } from "./pokemon";
 import { getStarterPokemonByGameMode } from "./starters";
 
-/**
- * Type for encounter data with fusion status
- * Used to track Pokemon encounters and their fusion state
- */
-interface EncounterData {
-  body: PokemonOptionType | null;
-  head: PokemonOptionType | null;
-  isFusion: boolean;
-}
-
 // Data loaders for encounters using TanStack Query
 async function getClassicEncounters(): Promise<RouteEncounter[]> {
   try {
     return await encountersData.getAllEncounters("classic");
   } catch (error) {
     console.error("Failed to fetch classic encounters:", error);
-    throw new Error("Failed to load classic encounters data");
+    throw new Error("Failed to load classic encounters data", { cause: error });
   }
 }
 
@@ -30,7 +20,7 @@ async function getRemixEncounters(): Promise<RouteEncounter[]> {
     return await encountersData.getAllEncounters("remix");
   } catch (error) {
     console.error("Failed to fetch remix encounters:", error);
-    throw new Error("Failed to load remix encounters data");
+    throw new Error("Failed to load remix encounters data", { cause: error });
   }
 }
 
@@ -80,9 +70,9 @@ async function _getEncountersMap(
   const encounters = await getEncounters(gameMode);
   const encounterMap = new Map<string, RouteEncounter>();
 
-  encounters.forEach((encounter) => {
+  for (const encounter of encounters) {
     encounterMap.set(encounter.routeName, encounter);
-  });
+  }
 
   return encounterMap;
 }
@@ -126,15 +116,13 @@ export function useEncountersForLocation({
     // Group encounters by Pokemon ID to merge duplicates
     const encounterMap = new Map<number, EncounterSource[]>();
 
-    pokemonEncounters.forEach(({ id, source }) => {
-      if (!encounterMap.has(id)) {
-        encounterMap.set(id, []);
-      }
-      const sources = encounterMap.get(id)!;
+    for (const { id, source } of pokemonEncounters) {
+      const sources = encounterMap.get(id) ?? [];
       if (!sources.includes(source as EncounterSource)) {
         sources.push(source as EncounterSource);
       }
-    });
+      encounterMap.set(id, sources);
+    }
 
     // Convert back to array with merged sources
     routeEncounterData = Array.from(encounterMap.entries()).map(

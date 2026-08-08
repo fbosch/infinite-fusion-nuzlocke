@@ -2,7 +2,7 @@
 
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { TeamMemberContextMenu } from "../TeamMemberContextMenu";
+import { TeamMemberContextMenu } from "../team-member-context-menu";
 
 const devolveToPichu = /Devolve to Pichu/;
 
@@ -70,7 +70,7 @@ vi.mock("@/stores/playthroughs/index", () => ({
 vi.mock("@/lib/sprites", () => ({ getSpriteId: () => "25.133" }));
 vi.mock("@/lib/events", () => ({ emitEvolutionEvent: emitEvolutionEventMock }));
 vi.mock("@/utils/scrollToLocation", () => ({ scrollToLocationById: vi.fn() }));
-vi.mock("../PokemonContextMenu", () => ({
+vi.mock("../pokemon-context-menu", () => ({
   createExternalDexItems: () => [],
 }));
 

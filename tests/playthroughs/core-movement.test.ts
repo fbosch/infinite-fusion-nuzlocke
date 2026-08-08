@@ -163,7 +163,12 @@ describe("Playthroughs Store - Core Movement Operations", () => {
       const body = encounters?.["route-2"].head;
       expect(head).toBeDefined();
       expect(body).toBeDefined();
-      if (head === undefined || body === undefined) {
+      if (
+        head === null ||
+        head === undefined ||
+        body === null ||
+        body === undefined
+      ) {
         throw new Error("Expected encounters to be created");
       }
 
@@ -171,8 +176,8 @@ describe("Playthroughs Store - Core Movement Operations", () => {
 
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       expect(activePlaythrough?.team.members).toContainEqual({
-        bodyPokemonUid: body?.uid,
-        headPokemonUid: head?.uid,
+        bodyPokemonUid: body.uid,
+        headPokemonUid: head.uid,
       });
     });
 
@@ -189,13 +194,23 @@ describe("Playthroughs Store - Core Movement Operations", () => {
       const encounters = playthroughActions.getEncounters();
       const head = encounters?.["route-1"].head;
       const body = encounters?.["route-2"].head;
-      if (head === undefined || body === undefined) {
+      if (
+        head === null ||
+        head === undefined ||
+        body === null ||
+        body === undefined
+      ) {
         throw new Error("Expected encounters to be created");
+      }
+      expect(head.uid).toBeDefined();
+      expect(body.uid).toBeDefined();
+      if (head.uid === undefined || body.uid === undefined) {
+        throw new Error("Expected encounters to have Pokemon identities");
       }
       await playthroughActions.updateTeamMember(
         2,
-        { uid: head?.uid ?? "" },
-        { uid: body?.uid ?? "" },
+        { uid: head.uid },
+        { uid: body.uid },
       );
 
       await playthroughActions.createFusion("route-1", head, body);
@@ -203,8 +218,8 @@ describe("Playthroughs Store - Core Movement Operations", () => {
       expect(
         playthroughActions.getActivePlaythrough()?.team.members[2],
       ).toEqual({
-        bodyPokemonUid: body?.uid,
-        headPokemonUid: head?.uid,
+        bodyPokemonUid: body.uid,
+        headPokemonUid: head.uid,
       });
     });
   });
