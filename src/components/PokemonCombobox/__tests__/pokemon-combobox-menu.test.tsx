@@ -20,7 +20,6 @@ vi.mock("@headlessui/react", () => ({
 
 describe("PokemonComboboxMenu", () => {
   it("sizes a virtual canvas inside the scroll viewport", () => {
-    const measure = vi.fn();
     const setOptionsReference = vi.fn();
     render(
       <PokemonComboboxMenu
@@ -38,7 +37,6 @@ describe("PokemonComboboxMenu", () => {
     expect(setOptionsReference).toHaveBeenCalledWith(
       expect.any(HTMLDivElement),
     );
-    expect(measure).not.toHaveBeenCalled();
     const optionsCanvas = screen.getByText("Pikachu").parentElement;
     const scrollContainer = optionsCanvas?.parentElement;
 
@@ -63,7 +61,6 @@ describe("PokemonComboboxMenu", () => {
         count: 100,
         estimateSize: () => 56,
         getScrollElement: () => scrollElement,
-        initialRect: { height: 500, width: 0 },
         observeElementOffset: (_instance, callback) => {
           reportScrollOffset = callback;
           return unsubscribe;
@@ -95,13 +92,18 @@ describe("PokemonComboboxMenu", () => {
 
     render(<VirtualizedPortalMenu />);
 
-    expect(screen.getByText("Option 0")).toBeTruthy();
-    expect(screen.getByText("Option 18")).toBeTruthy();
     expect(reportViewportRect).toBeTruthy();
     expect(reportScrollOffset).toBeTruthy();
 
     act(() => {
       reportViewportRect?.({ height: 500, width: 0 });
+      reportScrollOffset?.(0, false);
+    });
+
+    expect(screen.getByText("Option 0")).toBeTruthy();
+    expect(screen.getByText("Option 18")).toBeTruthy();
+
+    act(() => {
       reportScrollOffset?.(1200, false);
     });
 

@@ -5,12 +5,10 @@ import type { PokemonOptionType } from "@/loaders/pokemon";
 interface UseComboboxInputHandlersProps {
   dragPreview: PokemonOptionType | null;
   inputRef: React.RefObject<HTMLInputElement | null>;
-  onActivate: (() => void) | undefined;
   onBeforeClear:
     | ((currentValue: PokemonOptionType) => Promise<boolean> | boolean)
     | undefined;
   onChange: (value: PokemonOptionType | null) => void;
-  setIsPokemonDataEnabled: (enabled: boolean) => void;
   setQuery: (query: string) => void;
   value: PokemonOptionType | null | undefined;
 }
@@ -18,17 +16,11 @@ interface UseComboboxInputHandlersProps {
 export function useComboboxInputHandlers({
   dragPreview,
   inputRef,
-  onActivate,
   onBeforeClear,
   onChange,
-  setIsPokemonDataEnabled,
   setQuery,
   value,
 }: UseComboboxInputHandlersProps) {
-  const activatePokemonData = useCallback(() => {
-    setIsPokemonDataEnabled(true);
-    onActivate?.();
-  }, [onActivate, setIsPokemonDataEnabled]);
   const handleClose = useCallback(() => setQuery(""), [setQuery]);
   const displayValue = useCallback(
     (pokemon: PokemonOptionType | null | undefined) =>
@@ -55,5 +47,5 @@ export function useComboboxInputHandlers({
     [inputRef, onBeforeClear, onChange, setQuery, value],
   );
 
-  return { activatePokemonData, displayValue, handleClose, handleInputChange };
+  return { displayValue, handleClose, handleInputChange };
 }

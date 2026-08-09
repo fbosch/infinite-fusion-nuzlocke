@@ -23,7 +23,6 @@ interface PokemonComboboxConfig {
   isRouteEncounterDataLoading?: boolean;
   locationId?: string;
   nicknamePlaceholder?: string;
-  onActivate?: () => void;
   onBeforeClear?: (
     currentValue: PokemonOptionType,
   ) => Promise<boolean> | boolean;
@@ -66,11 +65,9 @@ export const PokemonCombobox = ({
     routeEncounterData = DEFAULT_ROUTE_ENCOUNTER_DATA,
     isRouteEncounterDataLoading = false,
     isCustomLocation = false,
-    onActivate,
   } = config;
 
   const [query, setQuery] = useState("");
-  const [isPokemonDataEnabled, setIsPokemonDataEnabled] = useState(true);
   const deferredQuery = useDeferredValue(query);
 
   // Use the drag and drop hook
@@ -119,7 +116,6 @@ export const PokemonCombobox = ({
     deferredQuery,
     isCustomLocation,
     isFusion,
-    isPokemonDataEnabled,
     isRouteEncounterDataLoading,
     onFusionChange,
     routeEncounterData,
@@ -134,14 +130,12 @@ export const PokemonCombobox = ({
     value,
   });
 
-  const { activatePokemonData, displayValue, handleClose, handleInputChange } =
+  const { displayValue, handleClose, handleInputChange } =
     useComboboxInputHandlers({
       dragPreview,
       inputRef,
-      onActivate,
       onBeforeClear,
       onChange,
-      setIsPokemonDataEnabled,
       setQuery,
       value,
     });
@@ -192,7 +186,6 @@ export const PokemonCombobox = ({
         dragPreview,
         floatingStyles,
         locationId,
-        onActivate: activatePokemonData,
         onChange,
         onInputChange: handleInputChange,
         optionsContent,
@@ -200,7 +193,7 @@ export const PokemonCombobox = ({
         placement,
         setInputReference,
         setOptionsReference,
-        shouldLoad: shouldLoad && isPokemonDataEnabled,
+        shouldLoad,
         shouldVirtualize,
         value,
         virtualization: { isScrolling: isVirtualizerScrolling, totalSize },

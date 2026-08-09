@@ -24,7 +24,6 @@ export function EncounterCell({
     isCustomLocation,
     isRouteEncounterDataLoading,
     routeEncounterData,
-    setIsPokemonDataEnabled,
   } = useEncounterCellData(locationId, shouldLoad);
   const headPokemon = encounterData.head;
   const bodyPokemon = encounterData.body;
@@ -55,10 +54,6 @@ export function EncounterCell({
     headPokemon,
     locationId,
   });
-
-  const handlePokemonDataActivation = useCallback(() => {
-    setIsPokemonDataEnabled(true);
-  }, []);
 
   // Handle fusion toggle
   const handleFusionToggle = useCallback(() => {
@@ -100,7 +95,6 @@ export function EncounterCell({
             isFusion={isFusion}
             isRouteEncounterDataLoading={isRouteEncounterDataLoading}
             locationId={locationId}
-            onActivate={handlePokemonDataActivation}
             onBeforeBodyClear={requestBodyClearConfirmation}
             onBeforeBodyOverwrite={requestBodyOverwriteConfirmation}
             onBeforeHeadClear={requestHeadClearConfirmation}

@@ -16,7 +16,6 @@ interface EncounterPokemonSelectorsProps {
   isFusion: boolean;
   isRouteEncounterDataLoading: boolean;
   locationId: string;
-  onActivate: () => void;
   onBeforeBodyClear: (pokemon: PokemonOptionType) => Promise<boolean>;
   onBeforeBodyOverwrite: (
     currentPokemon: PokemonOptionType,
@@ -46,7 +45,6 @@ export function EncounterPokemonSelectors({
   isFusion,
   isRouteEncounterDataLoading,
   locationId,
-  onActivate,
   onBeforeBodyClear,
   onBeforeBodyOverwrite,
   onBeforeHeadClear,
@@ -64,7 +62,6 @@ export function EncounterPokemonSelectors({
     isRouteEncounterDataLoading,
     locationId,
     nicknamePlaceholder: "Enter nickname",
-    onActivate,
     placeholder: "Select Pokémon",
     routeEncounterData,
     shouldLoad,

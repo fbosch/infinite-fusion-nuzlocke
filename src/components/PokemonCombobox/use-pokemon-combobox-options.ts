@@ -21,7 +21,6 @@ interface UsePokemonComboboxOptionsProps {
   deferredQuery: string;
   isCustomLocation: boolean;
   isFusion: boolean;
-  isPokemonDataEnabled: boolean;
   isRouteEncounterDataLoading: boolean;
   onFusionChange:
     | ((head: PokemonOptionType, body: PokemonOptionType) => void)
@@ -33,7 +32,6 @@ export function usePokemonComboboxOptions({
   deferredQuery,
   isCustomLocation,
   isFusion,
-  isPokemonDataEnabled,
   isRouteEncounterDataLoading,
   onFusionChange,
   routeEncounterData,
@@ -61,11 +59,10 @@ export function usePokemonComboboxOptions({
     [routeEncounterData],
   );
   const { data: resultsData, isLoading: isSearchLoading } = usePokemonSearch({
-    enabled: isPokemonDataEnabled,
     query: deferredQuery,
   });
   const { data: allPokemonData, isLoading: isAllPokemonLoading } =
-    useAllPokemon(isPokemonDataEnabled);
+    useAllPokemon();
   const results = resultsData ?? EMPTY_POKEMON_OPTIONS;
   const allPokemon = allPokemonData ?? EMPTY_POKEMON_OPTIONS;
   const fusionCombination =

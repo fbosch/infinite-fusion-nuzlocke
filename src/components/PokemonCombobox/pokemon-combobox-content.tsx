@@ -9,7 +9,6 @@ interface PokemonComboboxContentProps {
   dragPreview: PokemonOptionType | null;
   floatingStyles: React.CSSProperties;
   locationId?: string;
-  onActivate: () => void;
   onChange: (value: PokemonOptionType | null) => void;
   onInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   open: boolean;
@@ -36,7 +35,6 @@ export function PokemonComboboxContent({
   dragPreview,
   floatingStyles,
   locationId,
-  onActivate,
   onChange,
   onInputChange,
   open,
@@ -59,7 +57,6 @@ export function PokemonComboboxContent({
         dragPreview={dragPreview}
         hasRoundedEdges={hasRoundedEdges}
         locationId={locationId}
-        onActivate={onActivate}
         onChange={onChange}
         onInputChange={onInputChange}
         open={open}

@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useEncountersForLocation } from "@/loaders/encounters";
 import {
   useCustomLocations,
@@ -21,14 +21,9 @@ export function useEncounterCellData(locationId: string, shouldLoad: boolean) {
   const isCustomLocation = customLocations.some(
     (location) => location.id === locationId,
   );
-  const [isPokemonDataEnabled, setIsPokemonDataEnabled] = useState(true);
   const { routeEncounterData, isLoading: isRouteEncounterDataLoading } =
     useEncountersForLocation({
-      enabled:
-        shouldLoad &&
-        isPokemonDataEnabled &&
-        !isCustomLocation &&
-        gameMode !== "randomized",
+      enabled: shouldLoad && !isCustomLocation && gameMode !== "randomized",
       gameMode: gameMode === "randomized" ? "classic" : gameMode,
       locationId,
     });
@@ -45,6 +40,5 @@ export function useEncounterCellData(locationId: string, shouldLoad: boolean) {
     isCustomLocation,
     isRouteEncounterDataLoading,
     routeEncounterData,
-    setIsPokemonDataEnabled,
   };
 }

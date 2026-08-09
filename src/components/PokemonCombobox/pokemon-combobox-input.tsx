@@ -12,7 +12,6 @@ interface PokemonComboboxInputProps {
   dragPreview: PokemonOptionType | null;
   hasRoundedEdges: boolean;
   locationId?: string;
-  onActivate: () => void;
   onChange: (value: PokemonOptionType | null) => void;
   onInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   open: boolean;
@@ -87,7 +86,6 @@ export function PokemonComboboxInput({
   dragPreview,
   hasRoundedEdges,
   locationId,
-  onActivate,
   onChange,
   onInputChange,
   open,
@@ -110,8 +108,6 @@ export function PokemonComboboxInput({
         })}
         displayValue={displayValue}
         onChange={onInputChange}
-        onFocus={onActivate}
-        onPointerEnter={onActivate}
         placeholder={placeholder}
         ref={setInputReference}
         spellCheck={false}

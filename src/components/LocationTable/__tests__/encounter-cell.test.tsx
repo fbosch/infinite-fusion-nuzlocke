@@ -74,13 +74,7 @@ vi.mock("@/components/confirmation-dialog", () => ({
 
 vi.mock("@/components/PokemonCombobox/pokemon-combobox", () => ({
   PokemonCombobox: ({
-    config: {
-      comboboxId,
-      onChange,
-      onFusionChange,
-      onActivate,
-      onBeforeOverwrite,
-    },
+    config: { comboboxId, onChange, onFusionChange, onBeforeOverwrite },
   }: {
     config: {
       comboboxId: string;
@@ -89,7 +83,6 @@ vi.mock("@/components/PokemonCombobox/pokemon-combobox", () => ({
         head: PokemonOptionType,
         body: PokemonOptionType,
       ) => void;
-      onActivate?: () => void;
       onBeforeOverwrite?: (
         currentPokemon: PokemonOptionType,
         nextPokemon: PokemonOptionType,
@@ -130,9 +123,6 @@ vi.mock("@/components/PokemonCombobox/pokemon-combobox", () => ({
         </button>
         <button onClick={clearPokemon} type="button">
           {`clear-${comboboxId}`}
-        </button>
-        <button onClick={onActivate} type="button">
-          {`activate-${comboboxId}`}
         </button>
         <button onClick={createFusion} type="button">
           {`fuse-${comboboxId}`}
@@ -224,7 +214,7 @@ describe("EncounterCell", () => {
     );
   });
 
-  it("preloads route encounters before a combobox activates", () => {
+  it("preloads route encounters on mount", () => {
     useEncounterMock.mockReturnValue({
       body: null,
       head: null,
