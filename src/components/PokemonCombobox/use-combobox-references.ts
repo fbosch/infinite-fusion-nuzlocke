@@ -13,35 +13,34 @@ export function useComboboxReferences({
   refs,
   update,
 }: UseComboboxReferencesProps) {
-  const forwardedRefRef = useRef(forwardedRef);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const optionsRef = useRef<HTMLDivElement | null>(null);
-  const refsRef = useRef(refs);
-  const updateRef = useRef(update);
   const [optionsElement, setOptionsElement] = useState<HTMLDivElement | null>(
     null,
   );
-  forwardedRefRef.current = forwardedRef;
-  refsRef.current = refs;
-  updateRef.current = update;
-  const setInputReference = useCallback((element: HTMLInputElement | null) => {
-    if (!element) {
-      return;
-    }
+  const setInputReference = useCallback(
+    (element: HTMLInputElement | null) => {
+      if (!element) {
+        return;
+      }
 
-    inputRef.current = element;
-    refsRef.current.setReference(element);
-    updateRef.current();
-    const currentForwardedRef = forwardedRefRef.current;
-    if (currentForwardedRef && "current" in currentForwardedRef) {
-      currentForwardedRef.current = element;
-    }
-  }, []);
-  const setOptionsReference = useCallback((element: HTMLDivElement | null) => {
-    optionsRef.current = element;
-    setOptionsElement((current) => (current === element ? current : element));
-    refsRef.current.setFloating(element);
-  }, []);
+      inputRef.current = element;
+      refs.setReference(element);
+      update();
+      if (forwardedRef && "current" in forwardedRef) {
+        forwardedRef.current = element;
+      }
+    },
+    [forwardedRef, refs, update],
+  );
+  const setOptionsReference = useCallback(
+    (element: HTMLDivElement | null) => {
+      optionsRef.current = element;
+      setOptionsElement((current) => (current === element ? current : element));
+      refs.setFloating(element);
+    },
+    [refs],
+  );
 
   return {
     inputRef,
