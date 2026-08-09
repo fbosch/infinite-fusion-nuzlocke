@@ -71,7 +71,7 @@ export const PokemonCombobox = ({
   } = config;
 
   const [query, setQuery] = useState("");
-  const [isPokemonDataEnabled, setIsPokemonDataEnabled] = useState(false);
+  const [isPokemonDataEnabled, setIsPokemonDataEnabled] = useState(true);
   const deferredQuery = useDeferredValue(query);
 
   // Use the drag and drop hook

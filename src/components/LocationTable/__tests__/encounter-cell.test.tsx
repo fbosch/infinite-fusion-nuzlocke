@@ -224,7 +224,7 @@ describe("EncounterCell", () => {
     );
   });
 
-  it("loads route encounters when a combobox activates", () => {
+  it("preloads route encounters before a combobox activates", () => {
     useEncounterMock.mockReturnValue({
       body: null,
       head: null,
@@ -240,14 +240,6 @@ describe("EncounterCell", () => {
           </tr>
         </tbody>
       </table>,
-    );
-
-    expect(useEncountersForLocationMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ enabled: false }),
-    );
-
-    fireEvent.click(
-      screen.getByRole("button", { name: "activate-route-1-single" }),
     );
 
     expect(useEncountersForLocationMock).toHaveBeenLastCalledWith(

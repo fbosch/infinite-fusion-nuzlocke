@@ -21,7 +21,7 @@ export function useEncounterCellData(locationId: string, shouldLoad: boolean) {
   const isCustomLocation = customLocations.some(
     (location) => location.id === locationId,
   );
-  const [isPokemonDataEnabled, setIsPokemonDataEnabled] = useState(false);
+  const [isPokemonDataEnabled, setIsPokemonDataEnabled] = useState(true);
   const { routeEncounterData, isLoading: isRouteEncounterDataLoading } =
     useEncountersForLocation({
       enabled:
