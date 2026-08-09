@@ -16,6 +16,7 @@ import {
   getPreferredVariant,
   setPreferredVariant,
 } from "@/lib/preferred-variants";
+import { playthroughActions } from "@/stores/playthroughs";
 
 const mockedGetPreferredVariant = vi.mocked(getPreferredVariant);
 const mockedSetPreferredVariant = vi.mocked(setPreferredVariant);
@@ -52,7 +53,6 @@ import {
   describe,
   expect,
   it,
-  playthroughActions,
   setupPlaythroughTest,
 } from "./setup";
 

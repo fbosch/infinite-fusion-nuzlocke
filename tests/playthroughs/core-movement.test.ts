@@ -2,6 +2,7 @@
 import "./mocks";
 
 import { PokemonStatus } from "@/loaders/pokemon";
+import { playthroughActions } from "@/stores/playthroughs";
 // Import shared setup and utilities
 import {
   beforeEach,
@@ -9,7 +10,6 @@ import {
   describe,
   expect,
   it,
-  playthroughActions,
   setupPlaythroughTest,
 } from "./setup";
 

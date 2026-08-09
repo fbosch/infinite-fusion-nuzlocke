@@ -11,16 +11,6 @@ import {
   vi as vitestVi,
 } from "vitest";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import {
-  useActivePlaythrough as playthroughUseActivePlaythrough,
-  useEncounters as playthroughUseEncounters,
-  useGameMode as playthroughUseGameMode,
-  useIsLoading as playthroughUseIsLoading,
-  useIsRandomizedMode as playthroughUseIsRandomizedMode,
-  useIsRemixMode as playthroughUseIsRemixMode,
-  usePlaythroughById as playthroughUsePlaythroughById,
-  usePlaythroughsSnapshot as playthroughUsePlaythroughsSnapshot,
-} from "@/stores/playthroughs/hooks";
 // Import modules after mocks are set up (mocks should be imported in each test file)
 import { playthroughActions as storePlaythroughActions } from "@/stores/playthroughs/index";
 import { playthroughsStore as storePlaythroughsStore } from "@/stores/playthroughs/store";
@@ -31,17 +21,7 @@ export const beforeEach = vitestBeforeEach;
 export const describe = vitestDescribe;
 export const expect = vitestExpect;
 export const it = vitestIt;
-export const playthroughActions = storePlaythroughActions;
-export const playthroughsStore = storePlaythroughsStore;
 export const renderHook = testingRenderHook;
-export const useActivePlaythrough = playthroughUseActivePlaythrough;
-export const useEncounters = playthroughUseEncounters;
-export const useGameMode = playthroughUseGameMode;
-export const useIsLoading = playthroughUseIsLoading;
-export const useIsRandomizedMode = playthroughUseIsRandomizedMode;
-export const useIsRemixMode = playthroughUseIsRemixMode;
-export const usePlaythroughById = playthroughUsePlaythroughById;
-export const usePlaythroughsSnapshot = playthroughUsePlaythroughsSnapshot;
 export const vi = vitestVi;
 
 // Types

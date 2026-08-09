@@ -55,6 +55,15 @@ interface EntryDisplay {
   isTeamData: boolean;
 }
 
+interface EntryActionHandlers {
+  handleAddClick: (event: MouseEvent<HTMLButtonElement>) => void;
+  handleClick: () => void;
+  handleMoveToBox: (event: MouseEvent<HTMLButtonElement>) => Promise<void>;
+  handleMoveToGraveyard: (
+    event: MouseEvent<HTMLButtonElement>,
+  ) => Promise<void>;
+}
+
 function getTeamMemberSelection(
   entry: PCEntry,
   isEmpty: boolean,
@@ -225,6 +234,157 @@ function EntryActions({
   );
 }
 
+function EntryDetails({
+  entry,
+  isEmpty,
+  isFusion,
+  onAddClick,
+}: {
+  entry: PCEntry;
+  isEmpty: boolean;
+  isFusion: boolean;
+  onAddClick: EntryActionHandlers["handleAddClick"];
+}) {
+  if (isEmpty) {
+    return (
+      <div className="flex h-full items-center">
+        <button
+          className="relative z-10 inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-3 py-1.5 font-medium text-gray-500 text-sm transition-colors hover:border-gray-300 hover:text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 dark:border-gray-600 dark:text-gray-400 dark:hover:border-gray-500 dark:hover:text-gray-200"
+          onClick={onAddClick}
+          type="button"
+        >
+          <Plus className="h-3 w-3" />
+          Add
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-2">
+        <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100">
+          {getNicknameText(entry.head, entry.body, isFusion)}
+        </h3>
+      </div>
+      {entry.head ? (
+        <PokemonInfo
+          icon={
+            entry.body ? (
+              <HeadIcon className="h-4 w-4 flex-shrink-0" />
+            ) : undefined
+          }
+          pokemon={entry.head}
+        />
+      ) : null}
+      {entry.body ? (
+        <PokemonInfo
+          icon={
+            entry.head ? (
+              <BodyIcon className="h-4 w-4 flex-shrink-0" />
+            ) : undefined
+          }
+          pokemon={entry.body}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function EntryCard({
+  actions,
+  entry,
+  idToName,
+  isEmpty,
+  isFusion,
+  isTeamData,
+  primary,
+  secondary,
+  spriteRef,
+}: {
+  actions: EntryActionHandlers;
+  entry: PCEntry;
+  idToName: TeamEntryItemProps["idToName"];
+  isEmpty: boolean;
+  isFusion: boolean;
+  isTeamData: boolean;
+  primary: Parameters<typeof TypePills>[0]["primary"];
+  secondary: Parameters<typeof TypePills>[0]["secondary"];
+  spriteRef: RefObject<FusionSpriteHandle | null>;
+}) {
+  const actionLabel =
+    isTeamData && entry.position !== undefined
+      ? `Team slot ${entry.position + 1}`
+      : `Scroll to ${idToName.get(entry.locationId) || "location"} in table`;
+
+  return (
+    <div
+      className={clsx(
+        "group/pc-entry relative cursor-pointer rounded-lg transition-all duration-200",
+        {
+          "bg-gray-50 hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-900":
+            isEmpty,
+          "border border-gray-200 bg-white hover:ring-1 hover:ring-blue-400/30 dark:border-gray-700 dark:bg-gray-800":
+            !isEmpty,
+        },
+      )}
+      key={entry.locationId}
+      style={
+        isEmpty
+          ? {
+              boxShadow:
+                "inset 0 1px 3px rgba(0, 0, 0, 0.05), inset 0 1px 2px rgba(0, 0, 0, 0.08)",
+            }
+          : undefined
+      }
+    >
+      <button
+        aria-label={actionLabel}
+        className="absolute inset-0 z-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        onClick={actions.handleClick}
+        type="button"
+      />
+      <div className="p-4">
+        <div className="flex items-center gap-4">
+          <div className="group/sprite-container relative flex flex-shrink-0 items-center justify-center rounded-lg p-2">
+            <EntrySprite
+              bodyPokemon={entry.body}
+              headPokemon={entry.head}
+              isEmpty={isEmpty}
+              isFusion={isFusion}
+              spriteRef={spriteRef}
+            />
+          </div>
+          <div className="min-w-0 flex-1">
+            <EntryDetails
+              entry={entry}
+              isEmpty={isEmpty}
+              isFusion={isFusion}
+              onAddClick={actions.handleAddClick}
+            />
+          </div>
+          {primary ? (
+            <div className="ml-auto">
+              <TypePills
+                primary={primary}
+                secondary={secondary}
+                showTooltip
+                size="sm"
+              />
+            </div>
+          ) : null}
+        </div>
+      </div>
+      {isEmpty ? null : (
+        <EntryActions
+          onMoveToBox={actions.handleMoveToBox}
+          onMoveToGraveyard={actions.handleMoveToGraveyard}
+        />
+      )}
+    </div>
+  );
+}
+
 function createEntryActions({
   entry,
   isTeamData,
@@ -293,7 +453,7 @@ function createEntryActions({
     handleClick,
     handleMoveToBox,
     handleMoveToGraveyard,
-  };
+  } satisfies EntryActionHandlers;
 }
 
 export default function TeamEntryItem({
@@ -349,12 +509,7 @@ export default function TeamEntryItem({
     isFusion,
   );
   const teamMemberSelection = getTeamMemberSelection(entry, isEmpty, isFusion);
-  const {
-    handleAddClick,
-    handleClick,
-    handleMoveToBox,
-    handleMoveToGraveyard,
-  } = createEntryActions({
+  const actions = createEntryActions({
     entry,
     isTeamData,
     onClose,
@@ -363,108 +518,17 @@ export default function TeamEntryItem({
   });
 
   const mainContent = (
-    <div
-      className={clsx(
-        "group/pc-entry relative cursor-pointer rounded-lg transition-all duration-200",
-        {
-          "bg-gray-50 hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-900":
-            isEmpty,
-          "border border-gray-200 bg-white hover:ring-1 hover:ring-blue-400/30 dark:border-gray-700 dark:bg-gray-800":
-            !isEmpty,
-        },
-      )}
-      key={entry.locationId}
-      style={
-        isEmpty
-          ? {
-              boxShadow:
-                "inset 0 1px 3px rgba(0, 0, 0, 0.05), inset 0 1px 2px rgba(0, 0, 0, 0.08)",
-            }
-          : undefined
-      }
-    >
-      <button
-        aria-label={
-          isTeamData && entry.position !== undefined
-            ? `Team slot ${entry.position + 1}`
-            : `Scroll to ${idToName.get(entry.locationId) || "location"} in table`
-        }
-        className="absolute inset-0 z-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-        onClick={handleClick}
-        type="button"
-      />
-      <div className="p-4">
-        <div className="flex items-center gap-4">
-          <div className="group/sprite-container relative flex flex-shrink-0 items-center justify-center rounded-lg p-2">
-            <EntrySprite
-              bodyPokemon={entry.body}
-              headPokemon={entry.head}
-              isEmpty={isEmpty}
-              isFusion={isFusion}
-              spriteRef={spriteRef}
-            />
-          </div>
-          <div className="min-w-0 flex-1">
-            {isEmpty ? (
-              <div className="flex h-full items-center">
-                <button
-                  className="relative z-10 inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-3 py-1.5 font-medium text-gray-500 text-sm transition-colors hover:border-gray-300 hover:text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 dark:border-gray-600 dark:text-gray-400 dark:hover:border-gray-500 dark:hover:text-gray-200"
-                  onClick={handleAddClick}
-                  type="button"
-                >
-                  <Plus className="h-3 w-3" />
-                  Add
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100">
-                    {getNicknameText(entry.head, entry.body, isFusion)}
-                  </h3>
-                </div>
-                {entry.head ? (
-                  <PokemonInfo
-                    icon={
-                      entry.body ? (
-                        <HeadIcon className="h-4 w-4 flex-shrink-0" />
-                      ) : undefined
-                    }
-                    pokemon={entry.head}
-                  />
-                ) : null}
-                {entry.body ? (
-                  <PokemonInfo
-                    icon={
-                      entry.head ? (
-                        <BodyIcon className="h-4 w-4 flex-shrink-0" />
-                      ) : undefined
-                    }
-                    pokemon={entry.body}
-                  />
-                ) : null}
-              </div>
-            )}
-          </div>
-          {primary ? (
-            <div className="ml-auto">
-              <TypePills
-                primary={primary}
-                secondary={secondary}
-                showTooltip
-                size="sm"
-              />
-            </div>
-          ) : null}
-        </div>
-      </div>
-      {isEmpty ? null : (
-        <EntryActions
-          onMoveToBox={handleMoveToBox}
-          onMoveToGraveyard={handleMoveToGraveyard}
-        />
-      )}
-    </div>
+    <EntryCard
+      actions={actions}
+      entry={entry}
+      idToName={idToName}
+      isEmpty={isEmpty}
+      isFusion={isFusion}
+      isTeamData={isTeamData}
+      primary={primary}
+      secondary={secondary}
+      spriteRef={spriteRef}
+    />
   );
 
   // Only wrap filled team slots with context menu

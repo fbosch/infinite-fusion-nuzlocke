@@ -225,6 +225,296 @@ function useTooltipAnimation({
   };
 }
 
+function useExclusiveTooltip(
+  tooltipId: string | undefined,
+  instanceId: string,
+  closeImmediately: () => void,
+) {
+  useEffect(() => {
+    if (!tooltipId) {
+      return;
+    }
+
+    const handleTooltipOpen = (event: Event) => {
+      const detail = (event as CustomEvent).detail as
+        | { tooltipId?: string; instanceId?: string }
+        | undefined;
+      if (detail?.tooltipId !== tooltipId || detail.instanceId === instanceId) {
+        return;
+      }
+
+      closeImmediately();
+    };
+
+    window.addEventListener("cursor-tooltip-open", handleTooltipOpen);
+    return () => {
+      window.removeEventListener("cursor-tooltip-open", handleTooltipOpen);
+    };
+  }, [closeImmediately, instanceId, tooltipId]);
+}
+
+function useContextMenuTooltipPause(
+  closeImmediately: () => void,
+  setIsPaused: (isPaused: boolean) => void,
+) {
+  useEffect(() => {
+    const pauseTooltip = () => {
+      closeImmediately();
+      setIsPaused(true);
+    };
+    const resumeTooltip = () => setIsPaused(false);
+
+    window.addEventListener("context-menu-open", pauseTooltip);
+    window.addEventListener("context-menu-close", resumeTooltip);
+    return () => {
+      window.removeEventListener("context-menu-open", pauseTooltip);
+      window.removeEventListener("context-menu-close", resumeTooltip);
+    };
+  }, [closeImmediately, setIsPaused]);
+}
+
+function useGlobalTooltipRegistration(
+  isTooltipVisible: boolean,
+  registerTooltip: (isVisible: boolean) => void,
+) {
+  useEffect(() => {
+    if (isTooltipVisible) {
+      registerTooltip(true);
+    }
+
+    return () => {
+      if (isTooltipVisible) {
+        registerTooltip(false);
+      }
+    };
+  }, [isTooltipVisible, registerTooltip]);
+}
+
+function useTooltipFloating({
+  floatingElementRef,
+  isTooltipVisible,
+  onOpenChange,
+  placement,
+  reducedMotion,
+  tooltipOffset,
+}: {
+  floatingElementRef: ReturnType<
+    typeof useTooltipAnimation
+  >["floatingElementRef"];
+  isTooltipVisible: boolean;
+  onOpenChange: ReturnType<typeof useTooltipAnimation>["onOpenChange"];
+  placement: Placement;
+  reducedMotion: boolean;
+  tooltipOffset: CursorTooltipProps["offset"];
+}) {
+  const {
+    refs,
+    floatingStyles,
+    context,
+    placement: resolvedPlacement,
+  } = useFloating({
+    middleware: [
+      offset({
+        crossAxis: tooltipOffset?.crossAxis ?? getCrossAxisOffset(placement),
+        mainAxis: tooltipOffset?.mainAxis ?? getMainAxisOffset(placement),
+      }),
+      shift(),
+    ],
+    onOpenChange,
+    open: isTooltipVisible,
+    placement,
+    whileElementsMounted: (reference, floating, update) =>
+      autoUpdate(reference, floating, update, {
+        ancestorResize: true,
+        ancestorScroll: true,
+        animationFrame: false,
+        elementResize: true,
+        layoutShift: true,
+      }),
+  });
+  const setFloatingRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      floatingElementRef.current = node;
+      refs.setFloating(node);
+    },
+    [floatingElementRef, refs],
+  );
+
+  useLayoutEffect(() => {
+    if (!(reducedMotion && refs.domReference.current)) {
+      return;
+    }
+
+    refs.setPositionReference(refs.domReference.current);
+  }, [reducedMotion, refs]);
+
+  return {
+    context,
+    floatingStyles,
+    refs,
+    resolvedPlacement,
+    setFloatingRef,
+  };
+}
+
+function getEffectiveDelay(
+  delay: number | { close?: number; open?: number },
+  delayGroupDelay: number | { close?: number; open?: number } | undefined,
+  isAnyTooltipVisible: boolean,
+) {
+  const normalizedDelay =
+    typeof delay === "number" ? { close: 50, open: delay } : delay;
+  const groupDelay = delayGroupDelay ?? normalizedDelay;
+
+  if (isAnyTooltipVisible === false) {
+    return groupDelay;
+  }
+
+  return {
+    close: typeof groupDelay === "number" ? 50 : groupDelay.close,
+    open: 0,
+  };
+}
+
+function useTooltipInteractions({
+  context,
+  delay,
+  isAnyTooltipVisible,
+  reducedMotion,
+  shouldDisableTooltip,
+}: {
+  context: ReturnType<typeof useFloating>["context"];
+  delay: number;
+  isAnyTooltipVisible: boolean;
+  reducedMotion: boolean;
+  shouldDisableTooltip: boolean;
+}) {
+  const clientPointFloating = useClientPoint(context, {
+    axis: "both",
+    enabled: !reducedMotion,
+  });
+  const { delay: delayGroupDelay } = useDelayGroup(context);
+  const hover = useHover(context, {
+    delay: getEffectiveDelay(delay, delayGroupDelay, isAnyTooltipVisible),
+    enabled: shouldDisableTooltip === false,
+    move: true,
+    restMs: 16,
+  });
+  const focus = useFocus(context);
+  const dismiss = useDismiss(context);
+  const role = useRole(context);
+
+  return useInteractions([clientPointFloating, hover, focus, dismiss, role]);
+}
+
+function useTooltipState(disabled: boolean, isPausedByContextMenu: boolean) {
+  const isWindowVisible = useWindowVisibility();
+  const dragSnapshot = useSnapshot(dragStore);
+  const settings = useSnapshot(settingsStore);
+  const reducedMotion = useReducedMotion(settings.reducedMotion);
+  const { isAnyTooltipVisible: tooltipVisible, registerTooltip } =
+    useGlobalTooltip();
+
+  return {
+    isAnyTooltipVisible: Boolean(tooltipVisible),
+    reducedMotion,
+    registerTooltip,
+    shouldDisableTooltip:
+      disabled ||
+      !isWindowVisible ||
+      dragSnapshot.isDragging ||
+      isPausedByContextMenu,
+  };
+}
+
+interface TooltipSurfaceProps {
+  animationState: "entering" | "entered" | "exiting" | null;
+  className?: string;
+  content: React.ReactNode;
+  floatingStyles: React.CSSProperties;
+  getFloatingProps: () => Record<string, unknown>;
+  originClass: string;
+  setFloatingRef: (node: HTMLDivElement | null) => void;
+}
+
+function TooltipSurface({
+  animationState,
+  className,
+  content,
+  floatingStyles,
+  getFloatingProps,
+  originClass,
+  setFloatingRef,
+}: TooltipSurfaceProps) {
+  return (
+    <FloatingPortal>
+      {/* react-doctor-disable-next-line react-hooks-js/refs -- Floating UI callback refs run during commit, not render. */}
+      <div
+        className="pointer-events-none z-[9999]"
+        ref={setFloatingRef}
+        style={floatingStyles}
+        {...getFloatingProps()}
+      >
+        <div
+          className={twMerge(
+            clsx(
+              "dark:pixel-shadow-black-25 w-max max-w-sm rounded-md px-3 py-2 text-sm shadow-elevation-4",
+              "pointer-events-none transform-gpu bg-white/75",
+              "background-blur text-gray-700 dark:bg-gray-700/80 dark:text-white",
+              "border border-gray-200 dark:border-gray-600",
+              originClass,
+              "backdrop-blur-xl",
+              "transition duration-150 ease-out",
+              {
+                "scale-95 opacity-0": animationState === "entering",
+                "tooltip-enter scale-100 opacity-100":
+                  animationState === "entered",
+                "tooltip-exit scale-95 opacity-0": animationState === "exiting",
+              },
+            ),
+            className,
+          )}
+          style={{
+            position: "relative",
+            zIndex: 1000,
+          }}
+        >
+          {content}
+        </div>
+      </div>
+    </FloatingPortal>
+  );
+}
+
+interface TooltipReferenceProps {
+  children: React.ReactElement;
+  getReferenceProps: ReturnType<typeof useInteractions>["getReferenceProps"];
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+  setReference: ReturnType<typeof useFloating>["refs"]["setReference"];
+}
+
+function TooltipReference({
+  children,
+  getReferenceProps,
+  onMouseEnter,
+  onMouseLeave,
+  setReference,
+}: TooltipReferenceProps) {
+  if (isValidElement(children) === false) {
+    return null;
+  }
+
+  return cloneElement(children, {
+    ...getReferenceProps({
+      ...(isRecord(children.props) ? children.props : {}),
+      onMouseEnter,
+      onMouseLeave,
+      ref: setReference,
+    }),
+  });
+}
+
 interface CursorTooltipProps {
   children: React.ReactElement;
   className?: string;
@@ -255,18 +545,12 @@ export function CursorTooltip(props: CursorTooltipProps) {
   } = props;
   const instanceId = useId();
   const [isPausedByContextMenu, setIsPausedByContextMenu] = useState(false);
-  const isWindowVisible = useWindowVisibility();
-  const dragSnapshot = useSnapshot(dragStore);
-  const settings = useSnapshot(settingsStore);
-  const reducedMotion = useReducedMotion(settings.reducedMotion);
-  const { isAnyTooltipVisible: tooltipVisible, registerTooltip } =
-    useGlobalTooltip();
-  const isAnyTooltipVisible = Boolean(tooltipVisible);
-  const shouldDisableTooltip =
-    disabled ||
-    !isWindowVisible ||
-    dragSnapshot.isDragging ||
-    isPausedByContextMenu;
+  const {
+    isAnyTooltipVisible,
+    reducedMotion,
+    registerTooltip,
+    shouldDisableTooltip,
+  } = useTooltipState(disabled, isPausedByContextMenu);
   const {
     animationState,
     closeImmediately,
@@ -281,135 +565,27 @@ export function CursorTooltip(props: CursorTooltipProps) {
   });
   const isTooltipVisible = isOpen && shouldDisableTooltip === false;
 
-  const {
-    refs,
-    floatingStyles,
+  const { context, floatingStyles, refs, resolvedPlacement, setFloatingRef } =
+    useTooltipFloating({
+      floatingElementRef,
+      isTooltipVisible,
+      onOpenChange,
+      placement,
+      reducedMotion,
+      tooltipOffset: props.offset,
+    });
+
+  useExclusiveTooltip(tooltipId, instanceId, closeImmediately);
+  useContextMenuTooltipPause(closeImmediately, setIsPausedByContextMenu);
+  useGlobalTooltipRegistration(isTooltipVisible, registerTooltip);
+
+  const { getReferenceProps, getFloatingProps } = useTooltipInteractions({
     context,
-    placement: resolvedPlacement,
-  } = useFloating({
-    middleware: [
-      offset({
-        crossAxis: props.offset?.crossAxis ?? getCrossAxisOffset(placement),
-        mainAxis: props.offset?.mainAxis ?? getMainAxisOffset(placement),
-      }),
-      shift(),
-    ],
-    onOpenChange,
-    open: isTooltipVisible,
-    placement,
-    whileElementsMounted: (reference, floating, update) => {
-      const cleanup = autoUpdate(reference, floating, update, {
-        ancestorResize: true,
-        ancestorScroll: true,
-        animationFrame: false,
-        elementResize: true,
-        layoutShift: true,
-      });
-      return cleanup;
-    },
+    delay,
+    isAnyTooltipVisible,
+    reducedMotion,
+    shouldDisableTooltip,
   });
-  const setFloatingRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      floatingElementRef.current = node;
-      refs.setFloating(node);
-    },
-    [floatingElementRef, refs],
-  );
-
-  useLayoutEffect(() => {
-    if (!(reducedMotion && refs.domReference.current)) {
-      return;
-    }
-
-    refs.setPositionReference(refs.domReference.current);
-  }, [reducedMotion, refs]);
-
-  useEffect(() => {
-    if (!tooltipId) {
-      return;
-    }
-
-    const handleTooltipOpen = (event: Event) => {
-      const detail = (event as CustomEvent).detail as
-        | { tooltipId?: string; instanceId?: string }
-        | undefined;
-      if (detail?.tooltipId !== tooltipId || detail.instanceId === instanceId) {
-        return;
-      }
-
-      closeImmediately();
-    };
-
-    window.addEventListener("cursor-tooltip-open", handleTooltipOpen);
-    return () => {
-      window.removeEventListener("cursor-tooltip-open", handleTooltipOpen);
-    };
-  }, [closeImmediately, instanceId, tooltipId]);
-
-  useEffect(() => {
-    const pauseTooltip = () => {
-      closeImmediately();
-      setIsPausedByContextMenu(true);
-    };
-    const resumeTooltip = () => setIsPausedByContextMenu(false);
-
-    window.addEventListener("context-menu-open", pauseTooltip);
-    window.addEventListener("context-menu-close", resumeTooltip);
-    return () => {
-      window.removeEventListener("context-menu-open", pauseTooltip);
-      window.removeEventListener("context-menu-close", resumeTooltip);
-    };
-  }, [closeImmediately]);
-
-  // Register tooltip with global state when it opens/closes
-  useEffect(() => {
-    if (isTooltipVisible) {
-      registerTooltip(true);
-    }
-
-    return () => {
-      if (isTooltipVisible) {
-        registerTooltip(false);
-      }
-    };
-  }, [isTooltipVisible, registerTooltip]);
-
-  const clientPointFloating = useClientPoint(context, {
-    axis: "both",
-    enabled: !reducedMotion,
-  });
-
-  // Normalize delay to object format
-  const normalizedDelay =
-    typeof delay === "number" ? { close: 50, open: delay } : delay;
-
-  // Use delay group context if available, otherwise use the provided delay
-  const { delay: delayGroupDelay } = useDelayGroup(context);
-  const groupDelay = delayGroupDelay ?? normalizedDelay;
-
-  // If any tooltip is visible globally, skip the open delay
-  const effectiveDelay = isAnyTooltipVisible
-    ? { close: typeof groupDelay === "number" ? 50 : groupDelay.close, open: 0 }
-    : groupDelay;
-
-  const hover = useHover(context, {
-    delay: effectiveDelay,
-    enabled: shouldDisableTooltip === false,
-    move: true,
-    restMs: 16,
-  });
-
-  const focus = useFocus(context);
-  const dismiss = useDismiss(context);
-  const role = useRole(context);
-
-  const { getReferenceProps, getFloatingProps } = useInteractions([
-    clientPointFloating, // ensure pointer tracking is active alongside hover
-    hover,
-    focus,
-    dismiss,
-    role,
-  ]);
 
   const originClass = getTransformOriginClass(resolvedPlacement || placement);
 
@@ -419,54 +595,25 @@ export function CursorTooltip(props: CursorTooltipProps) {
 
   return (
     <>
-      {isValidElement(children) &&
-        cloneElement(children, {
-          ...getReferenceProps({
-            ...(isRecord(children.props) ? children.props : {}),
-            onMouseEnter,
-            onMouseLeave,
-            ref: refs.setReference,
-          }),
-        })}
+      <TooltipReference
+        getReferenceProps={getReferenceProps}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        setReference={refs.setReference}
+      >
+        {children}
+      </TooltipReference>
 
       {isTooltipVisible ? (
-        <FloatingPortal>
-          {/* react-doctor-disable-next-line react-hooks-js/refs -- Floating UI callback refs run during commit, not render. */}
-          <div
-            className="pointer-events-none z-[9999]"
-            ref={setFloatingRef}
-            style={floatingStyles}
-            {...getFloatingProps()}
-          >
-            <div
-              className={twMerge(
-                clsx(
-                  "dark:pixel-shadow-black-25 w-max max-w-sm rounded-md px-3 py-2 text-sm shadow-elevation-4",
-                  "pointer-events-none transform-gpu bg-white/75",
-                  "background-blur text-gray-700 dark:bg-gray-700/80 dark:text-white",
-                  "border border-gray-200 dark:border-gray-600",
-                  originClass,
-                  "backdrop-blur-xl",
-                  "transition duration-150 ease-out",
-                  {
-                    "scale-95 opacity-0": animationState === "entering",
-                    "tooltip-enter scale-100 opacity-100":
-                      animationState === "entered",
-                    "tooltip-exit scale-95 opacity-0":
-                      animationState === "exiting",
-                  },
-                ),
-                className,
-              )}
-              style={{
-                position: "relative",
-                zIndex: 1000,
-              }}
-            >
-              {content}
-            </div>
-          </div>
-        </FloatingPortal>
+        <TooltipSurface
+          animationState={animationState}
+          className={className}
+          content={content}
+          floatingStyles={floatingStyles}
+          getFloatingProps={getFloatingProps}
+          originClass={originClass}
+          setFloatingRef={setFloatingRef}
+        />
       ) : null}
     </>
   );

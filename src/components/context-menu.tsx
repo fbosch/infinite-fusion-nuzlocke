@@ -278,6 +278,353 @@ function useContextMenuState() {
   };
 }
 
+function useMenuItemRefs() {
+  const listRef = useRef<Array<HTMLElement | null>>([]);
+  const [listItems, setListItems] = useState<Array<HTMLElement | null>>([]);
+  const submenuItemRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [submenuItems, setSubmenuItems] = useState<
+    Array<HTMLButtonElement | null>
+  >([]);
+
+  useLayoutEffect(() => {
+    listRef.current = listItems;
+  }, [listItems]);
+
+  useLayoutEffect(() => {
+    submenuItemRefs.current = submenuItems;
+  }, [submenuItems]);
+
+  const registerListItem = useCallback(
+    (index: number, node: HTMLElement | null) => {
+      setListItems((currentItems) => {
+        if (currentItems[index] === node) {
+          return currentItems;
+        }
+
+        const nextItems = [...currentItems];
+        nextItems[index] = node;
+        return nextItems;
+      });
+    },
+    [],
+  );
+  const registerSubmenuItem = useCallback(
+    (index: number, node: HTMLButtonElement | null) => {
+      setSubmenuItems((currentItems) => {
+        if (currentItems[index] === node) {
+          return currentItems;
+        }
+
+        const nextItems = [...currentItems];
+        nextItems[index] = node;
+        return nextItems;
+      });
+    },
+    [],
+  );
+
+  return {
+    listRef,
+    registerListItem,
+    registerSubmenuItem,
+    submenuItemRefs,
+  };
+}
+
+function useSubmenuState(listRef: React.RefObject<Array<HTMLElement | null>>) {
+  const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
+  const [activeSubmenuIndex, setActiveSubmenuIndex] = useState(0);
+  const [submenuPosition, setSubmenuPosition] = useState({ left: 0, top: 0 });
+  const submenuRef = useRef<HTMLDivElement | null>(null);
+
+  const openSubmenuForIndex = useCallback(
+    (validIndex: number) => {
+      const trigger = listRef.current[validIndex];
+      if (trigger) {
+        const { bottom, right, top } = trigger.getBoundingClientRect();
+        setSubmenuPosition({
+          left: Math.min(right + 4, window.innerWidth - 200),
+          top: Math.min(top, window.innerHeight - Math.max(bottom - top, 1)),
+        });
+      }
+      setActiveSubmenuIndex(0);
+      setOpenSubmenuIndex(validIndex);
+    },
+    [listRef],
+  );
+  const closeSubmenu = useCallback(() => setOpenSubmenuIndex(null), []);
+
+  return {
+    activeSubmenuIndex,
+    closeSubmenu,
+    openSubmenuForIndex,
+    openSubmenuIndex,
+    setActiveSubmenuIndex,
+    submenuPosition,
+    submenuRef,
+  };
+}
+
+interface ContextMenuLifecycleOptions {
+  closeMenu: () => void;
+  hideMenu: () => void;
+  isOpen: boolean;
+  menuElementRef: React.RefObject<HTMLDivElement | null>;
+}
+
+function useContextMenuLifecycle({
+  closeMenu,
+  hideMenu,
+  isOpen,
+  menuElementRef,
+}: ContextMenuLifecycleOptions) {
+  const isOpenRef = useRef(isOpen);
+
+  const handleClose = useCallback(() => {
+    if (isOpenRef.current) {
+      window.dispatchEvent(new Event("context-menu-close"));
+    }
+    isOpenRef.current = false;
+    closeMenu();
+
+    const menuElement = menuElementRef.current;
+    menuElement?.classList.remove("tooltip-enter");
+    menuElement?.classList.add("tooltip-exit");
+
+    setTimeout(() => {
+      hideMenu();
+    }, 50);
+  }, [closeMenu, hideMenu, menuElementRef]);
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
+
+  useEffect(
+    () => () => {
+      if (isOpenRef.current) {
+        window.dispatchEvent(new Event("context-menu-close"));
+      }
+    },
+    [],
+  );
+
+  return { handleClose, isOpenRef };
+}
+
+interface ContextMenuCloseListenersOptions {
+  handleClose: () => void;
+  isOpen: boolean;
+  isVisible: boolean;
+  triggerId: string;
+}
+
+function useContextMenuCloseListeners({
+  handleClose,
+  isOpen,
+  isVisible,
+  triggerId,
+}: ContextMenuCloseListenersOptions) {
+  const handleVisibilityChange = useEffectEvent(() => {
+    const pageIsVisible = document.visibilityState === "visible";
+    const isFocused = document.hasFocus();
+
+    if (!(pageIsVisible && isFocused) && isOpen) {
+      handleClose();
+    }
+  });
+  const handleScroll = useEffectEvent(() => {
+    if (isOpen) {
+      handleClose();
+    }
+  });
+  const handleActiveContextMenu = useEffectEvent((event: MouseEvent) => {
+    const { target } = event;
+    const contextMenuTrigger =
+      target instanceof Element &&
+      target.closest<HTMLElement>("[data-context-menu-trigger]");
+
+    if (!contextMenuTrigger) {
+      event.preventDefault();
+    } else if (contextMenuTrigger.dataset.contextMenuTrigger === triggerId) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    handleClose();
+  });
+
+  useEffect(() => {
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleVisibilityChange);
+    window.addEventListener("blur", handleVisibilityChange);
+    window.addEventListener("scroll", handleScroll, true);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleVisibilityChange);
+      window.removeEventListener("blur", handleVisibilityChange);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) {
+      return;
+    }
+
+    document.addEventListener("contextmenu", handleActiveContextMenu, true);
+    return () => {
+      document.removeEventListener(
+        "contextmenu",
+        handleActiveContextMenu,
+        true,
+      );
+    };
+  }, [isVisible]);
+}
+
+interface ContextMenuTriggerOptions {
+  disabled: boolean;
+  isOpenRef: React.RefObject<boolean>;
+  menuElementRef: React.RefObject<HTMLDivElement | null>;
+  openMenu: (position: { x: number; y: number }) => void;
+}
+
+function useContextMenuTrigger({
+  disabled,
+  isOpenRef,
+  menuElementRef,
+  openMenu,
+}: ContextMenuTriggerOptions) {
+  const [triggerWrapper, setTriggerWrapper] = useState<HTMLElement | null>(
+    null,
+  );
+  const handleContextMenu = useCallback(
+    (event: MouseEvent) => {
+      if (disabled) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      isOpenRef.current = true;
+      window.dispatchEvent(new Event("context-menu-open"));
+      openMenu({ x: event.clientX, y: event.clientY });
+
+      requestAnimationFrame(() => {
+        const menuElement = menuElementRef.current;
+        menuElement?.classList.remove("tooltip-exit");
+        menuElement?.classList.add("tooltip-enter");
+      });
+    },
+    [disabled, isOpenRef, menuElementRef, openMenu],
+  );
+
+  useEffect(() => {
+    if (!triggerWrapper) {
+      return;
+    }
+
+    triggerWrapper.addEventListener("contextmenu", handleContextMenu);
+    return () => {
+      triggerWrapper.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, [handleContextMenu, triggerWrapper]);
+
+  return { setTriggerWrapper, triggerWrapper };
+}
+
+interface ClampedMenuPositionOptions {
+  isVisible: boolean;
+  menuElementRef: React.RefObject<HTMLDivElement | null>;
+  menuPosition: { x: number; y: number };
+  setMenuPosition: React.Dispatch<
+    React.SetStateAction<{ x: number; y: number }>
+  >;
+}
+
+function useClampedMenuPosition({
+  isVisible,
+  menuElementRef,
+  menuPosition,
+  setMenuPosition,
+}: ClampedMenuPositionOptions) {
+  useLayoutEffect(() => {
+    if (!(isVisible && menuElementRef.current)) {
+      return;
+    }
+
+    const { width, height } = menuElementRef.current.getBoundingClientRect();
+    const nextPosition = clampMenuPosition(menuPosition, { height, width });
+
+    if (
+      nextPosition.x !== menuPosition.x ||
+      nextPosition.y !== menuPosition.y
+    ) {
+      setMenuPosition(nextPosition);
+    }
+  }, [isVisible, menuElementRef, menuPosition, setMenuPosition]);
+}
+
+interface ContextMenuFloatingOptions {
+  activeIndex: number | null;
+  handleClose: () => void;
+  isOpen: boolean;
+  listRef: React.RefObject<Array<HTMLElement | null>>;
+  menuElementRef: React.RefObject<HTMLDivElement | null>;
+  setActiveIndex: React.Dispatch<React.SetStateAction<number | null>>;
+  triggerWrapper: HTMLElement | null;
+}
+
+function useContextMenuFloating({
+  activeIndex,
+  handleClose,
+  isOpen,
+  listRef,
+  menuElementRef,
+  setActiveIndex,
+  triggerWrapper,
+}: ContextMenuFloatingOptions) {
+  const { refs, context } = useFloating({
+    onOpenChange: (open) => {
+      if (!open) {
+        handleClose();
+      }
+    },
+    open: isOpen,
+  });
+
+  useLayoutEffect(() => {
+    const trigger = triggerWrapper?.firstElementChild;
+    refs.setReference(trigger instanceof HTMLElement ? trigger : null);
+  }, [refs, triggerWrapper]);
+
+  const dismiss = useDismiss(context);
+  const role = useRole(context, { role: "menu" });
+  const listNavigation = useListNavigation(context, {
+    activeIndex,
+    listRef,
+    loop: true,
+    onNavigate: setActiveIndex,
+    selectedIndex: null,
+  });
+  const { getFloatingProps, getItemProps } = useInteractions([
+    dismiss,
+    role,
+    listNavigation,
+  ]);
+  const setFloatingRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      refs.setFloating(node);
+      menuElementRef.current = node;
+    },
+    [menuElementRef, refs],
+  );
+
+  return { context, getFloatingProps, getItemProps, setFloatingRef };
+}
+
 export interface ContextMenuItem {
   children?: ContextMenuItem[];
   disabled?: boolean;
@@ -781,6 +1128,173 @@ function ContextMenuItemRenderer({
   );
 }
 
+type FloatingPropsGetter = ReturnType<
+  typeof useInteractions
+>["getFloatingProps"];
+
+interface ContextMenuTriggerProps {
+  children: React.ReactNode;
+  disabled: boolean;
+  setTriggerWrapper: React.Dispatch<React.SetStateAction<HTMLElement | null>>;
+  triggerId: string;
+}
+
+function ContextMenuTrigger({
+  children,
+  disabled,
+  setTriggerWrapper,
+  triggerId,
+}: ContextMenuTriggerProps) {
+  if (!isValidElement(children)) {
+    return children;
+  }
+
+  return (
+    <span
+      className="contents"
+      data-context-menu-trigger={disabled ? undefined : triggerId}
+      ref={setTriggerWrapper}
+    >
+      {children}
+    </span>
+  );
+}
+
+interface ContextMenuPanelProps {
+  activeIndex: number | null;
+  className?: string;
+  context: ReturnType<typeof useFloating>["context"];
+  getFloatingProps: FloatingPropsGetter;
+  items: ContextMenuItem[];
+  menu: ContextMenuItemRendererProps["menu"];
+  menuPosition: { x: number; y: number };
+  portalRootId: string;
+  setFloatingRef: (node: HTMLDivElement | null) => void;
+  submenu: ContextMenuItemRendererProps["submenu"];
+  visible: boolean;
+}
+
+function ContextMenuPanel({
+  activeIndex,
+  className,
+  context,
+  getFloatingProps,
+  items,
+  menu,
+  menuPosition,
+  portalRootId,
+  setFloatingRef,
+  submenu,
+  visible,
+}: ContextMenuPanelProps) {
+  if (!visible) {
+    return null;
+  }
+
+  const visibleItems = filterEdgeSeparators(items);
+  const navigableItems = visibleItems.filter(
+    (item) => !(item.separator || item.disabled || item.visualOnly),
+  );
+
+  return (
+    <FloatingPortal id={portalRootId}>
+      <FloatingFocusManager context={context} modal={false}>
+        <div
+          aria-orientation="vertical"
+          className={clsx(
+            "min-w-[12rem] rounded-md border border-gray-200 dark:border-gray-800",
+            "max-h-[calc(100vh-1rem)] max-w-[calc(100vw-1rem)] overflow-y-auto",
+            "bg-white shadow-elevation-3 dark:bg-gray-900/80",
+            "tooltip-enter p-1 backdrop-blur-xl",
+            "origin-top-left backdrop-blur-xl",
+            "focus:outline-none",
+            "pointer-events-auto",
+            className,
+          )}
+          ref={setFloatingRef}
+          role="menu"
+          style={{
+            left: menuPosition.x,
+            position: "fixed",
+            top: menuPosition.y,
+            transformOrigin: "top left",
+            zIndex: 9999,
+          }}
+          {...getFloatingProps()}
+        >
+          {visibleItems.map((item) => {
+            const itemIndex = navigableItems.findIndex(
+              (navigableItem) => navigableItem.id === item.id,
+            );
+            return (
+              <ContextMenuItemRenderer
+                activeIndex={activeIndex}
+                item={item}
+                itemIndex={itemIndex}
+                key={item.id}
+                menu={menu}
+                submenu={submenu}
+              />
+            );
+          })}
+        </div>
+      </FloatingFocusManager>
+    </FloatingPortal>
+  );
+}
+
+interface ContextMenuRendererPropsOptions {
+  activeSubmenuIndex: number;
+  closeMenu: () => void;
+  closeSubmenu: () => void;
+  getItemProps: MenuItemPropsGetter;
+  listRef: React.RefObject<Array<HTMLElement | null>>;
+  openSubmenuForIndex: (index: number) => void;
+  openSubmenuIndex: number | null;
+  registerListItem: (index: number, node: HTMLElement | null) => void;
+  registerSubmenuItem: (index: number, node: HTMLButtonElement | null) => void;
+  setActiveSubmenuIndex: React.Dispatch<React.SetStateAction<number>>;
+  submenuItemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
+  submenuPosition: { left: number; top: number };
+  submenuRef: React.RefObject<HTMLDivElement | null>;
+}
+
+function createContextMenuRendererProps({
+  activeSubmenuIndex,
+  closeMenu,
+  closeSubmenu,
+  getItemProps,
+  listRef,
+  openSubmenuForIndex,
+  openSubmenuIndex,
+  registerListItem,
+  registerSubmenuItem,
+  setActiveSubmenuIndex,
+  submenuItemRefs,
+  submenuPosition,
+  submenuRef,
+}: ContextMenuRendererPropsOptions) {
+  return {
+    menu: {
+      closeMenu,
+      getItemProps,
+      listRef,
+      setItemRef: registerListItem,
+    },
+    submenu: {
+      activeIndex: activeSubmenuIndex,
+      close: closeSubmenu,
+      itemRefs: submenuItemRefs,
+      menuRef: submenuRef,
+      openForIndex: openSubmenuForIndex,
+      openIndex: openSubmenuIndex,
+      position: submenuPosition,
+      setActiveIndex: setActiveSubmenuIndex,
+      setItemRef: registerSubmenuItem,
+    },
+  };
+}
+
 export function ContextMenu({
   children,
   items,
@@ -801,337 +1315,93 @@ export function ContextMenu({
     hideMenu,
   } = useContextMenuState();
 
-  const listRef = useRef<Array<HTMLElement | null>>([]);
-  const [listItems, setListItems] = useState<Array<HTMLElement | null>>([]);
   const menuElementRef = useRef<HTMLDivElement | null>(null);
-  const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
-  const [activeSubmenuIndex, setActiveSubmenuIndex] = useState(0);
-  const [submenuPosition, setSubmenuPosition] = useState({ left: 0, top: 0 });
-  const submenuRef = useRef<HTMLDivElement | null>(null);
-  const submenuItemRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const [submenuItems, setSubmenuItems] = useState<
-    Array<HTMLButtonElement | null>
-  >([]);
-  const [triggerWrapper, setTriggerWrapper] = useState<HTMLElement | null>(
-    null,
-  );
-  const isOpenRef = useRef(isOpen);
-
-  useLayoutEffect(() => {
-    listRef.current = listItems;
-  }, [listItems]);
-
-  useLayoutEffect(() => {
-    submenuItemRefs.current = submenuItems;
-  }, [submenuItems]);
-
-  const registerListItem = useCallback(
-    (index: number, node: HTMLElement | null) => {
-      setListItems((currentItems) => {
-        if (currentItems[index] === node) {
-          return currentItems;
-        }
-
-        const nextItems = [...currentItems];
-        nextItems[index] = node;
-        return nextItems;
-      });
-    },
-    [],
-  );
-  const registerSubmenuItem = useCallback(
-    (index: number, node: HTMLButtonElement | null) => {
-      setSubmenuItems((currentItems) => {
-        if (currentItems[index] === node) {
-          return currentItems;
-        }
-
-        const nextItems = [...currentItems];
-        nextItems[index] = node;
-        return nextItems;
-      });
-    },
-    [],
-  );
-
-  const handleClose = useCallback(() => {
-    if (isOpenRef.current) {
-      window.dispatchEvent(new Event("context-menu-close"));
-    }
-    isOpenRef.current = false;
-    closeMenu();
-
-    const menuElement = menuElementRef.current;
-    menuElement?.classList.remove("tooltip-enter");
-    menuElement?.classList.add("tooltip-exit");
-
-    setTimeout(() => {
-      hideMenu();
-    }, 50);
-  }, [closeMenu, hideMenu]);
-
-  useEffect(() => {
-    isOpenRef.current = isOpen;
-  }, [isOpen]);
-
-  useEffect(
-    () => () => {
-      if (isOpenRef.current) {
-        window.dispatchEvent(new Event("context-menu-close"));
-      }
-    },
-    [],
-  );
-
-  useLayoutEffect(() => {
-    if (!(isVisible && menuElementRef.current)) {
-      return;
-    }
-
-    const { width, height } = menuElementRef.current.getBoundingClientRect();
-    const nextPosition = clampMenuPosition(menuPosition, { height, width });
-
-    if (
-      nextPosition.x !== menuPosition.x ||
-      nextPosition.y !== menuPosition.y
-    ) {
-      setMenuPosition(nextPosition);
-    }
-  }, [isVisible, menuPosition, setMenuPosition]);
-
-  const handleVisibilityChange = useEffectEvent(() => {
-    const pageIsVisible = document.visibilityState === "visible";
-    const isFocused = document.hasFocus();
-
-    if (!(pageIsVisible && isFocused) && isOpen) {
-      handleClose();
-    }
+  const { listRef, registerListItem, registerSubmenuItem, submenuItemRefs } =
+    useMenuItemRefs();
+  const {
+    activeSubmenuIndex,
+    closeSubmenu,
+    openSubmenuForIndex,
+    openSubmenuIndex,
+    setActiveSubmenuIndex,
+    submenuPosition,
+    submenuRef,
+  } = useSubmenuState(listRef);
+  const { handleClose, isOpenRef } = useContextMenuLifecycle({
+    closeMenu,
+    hideMenu,
+    isOpen,
+    menuElementRef,
   });
 
-  const handleScroll = useEffectEvent(() => {
-    if (isOpen) {
-      handleClose();
-    }
+  useContextMenuCloseListeners({
+    handleClose,
+    isOpen,
+    isVisible,
+    triggerId,
+  });
+  const { setTriggerWrapper, triggerWrapper } = useContextMenuTrigger({
+    disabled,
+    isOpenRef,
+    menuElementRef,
+    openMenu,
   });
 
-  const handleActiveContextMenu = useEffectEvent((event: MouseEvent) => {
-    const { target } = event;
-    const contextMenuTrigger =
-      target instanceof Element &&
-      target.closest<HTMLElement>("[data-context-menu-trigger]");
-
-    if (!contextMenuTrigger) {
-      event.preventDefault();
-    } else if (contextMenuTrigger.dataset.contextMenuTrigger === triggerId) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
-    handleClose();
+  useClampedMenuPosition({
+    isVisible,
+    menuElementRef,
+    menuPosition,
+    setMenuPosition,
   });
 
-  // Floating UI setup for keyboard navigation
-  const { refs, context } = useFloating({
-    onOpenChange: (open) => {
-      if (!open) {
-        handleClose();
-      }
-    },
-    open: isOpen,
-  });
-
-  useLayoutEffect(() => {
-    const trigger = triggerWrapper?.firstElementChild;
-    refs.setReference(trigger instanceof HTMLElement ? trigger : null);
-  }, [refs, triggerWrapper]);
-
-  const dismiss = useDismiss(context);
-  const role = useRole(context, { role: "menu" });
-  const listNavigation = useListNavigation(context, {
-    activeIndex,
+  const { context, getFloatingProps, getItemProps, setFloatingRef } =
+    useContextMenuFloating({
+      activeIndex,
+      handleClose,
+      isOpen,
+      listRef,
+      menuElementRef,
+      setActiveIndex,
+      triggerWrapper,
+    });
+  const { menu, submenu } = createContextMenuRendererProps({
+    activeSubmenuIndex,
+    closeMenu: handleClose,
+    closeSubmenu,
+    getItemProps,
     listRef,
-    loop: true,
-    onNavigate: setActiveIndex,
-    selectedIndex: null,
+    openSubmenuForIndex,
+    openSubmenuIndex,
+    registerListItem,
+    registerSubmenuItem,
+    setActiveSubmenuIndex,
+    submenuItemRefs,
+    submenuPosition,
+    submenuRef,
   });
-
-  const { getFloatingProps, getItemProps } = useInteractions([
-    dismiss,
-    role,
-    listNavigation,
-  ]);
-
-  // Close menu when window becomes hidden, loses focus, or scrolls
-  useEffect(() => {
-    // Add event listeners
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", handleVisibilityChange);
-    window.addEventListener("blur", handleVisibilityChange);
-    window.addEventListener("scroll", handleScroll, true); // Use capture phase to catch all scroll events
-
-    // Cleanup
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", handleVisibilityChange);
-      window.removeEventListener("blur", handleVisibilityChange);
-      window.removeEventListener("scroll", handleScroll, true);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isVisible) {
-      return;
-    }
-
-    document.addEventListener("contextmenu", handleActiveContextMenu, true);
-    return () => {
-      document.removeEventListener(
-        "contextmenu",
-        handleActiveContextMenu,
-        true,
-      );
-    };
-  }, [isVisible]);
-
-  const openSubmenuForIndex = useCallback((validIndex: number) => {
-    const trigger = listRef.current[validIndex];
-    if (trigger) {
-      const { bottom, right, top } = trigger.getBoundingClientRect();
-      setSubmenuPosition({
-        left: Math.min(right + 4, window.innerWidth - 200),
-        top: Math.min(top, window.innerHeight - Math.max(bottom - top, 1)),
-      });
-    }
-    setActiveSubmenuIndex(0);
-    setOpenSubmenuIndex(validIndex);
-  }, []);
-
-  const closeSubmenu = useCallback(() => setOpenSubmenuIndex(null), []);
-
-  const handleContextMenu = useCallback(
-    (event: MouseEvent) => {
-      if (disabled) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-      isOpenRef.current = true;
-      window.dispatchEvent(new Event("context-menu-open"));
-
-      // Calculate position relative to the viewport
-      const position = { x: event.clientX, y: event.clientY };
-      openMenu(position);
-
-      // Add enter animation class after a frame
-      requestAnimationFrame(() => {
-        const menuElement = menuElementRef.current;
-        menuElement?.classList.remove("tooltip-exit");
-        menuElement?.classList.add("tooltip-enter");
-      });
-    },
-    [disabled, openMenu],
-  );
-
-  useEffect(() => {
-    if (!triggerWrapper) {
-      return;
-    }
-
-    triggerWrapper.addEventListener("contextmenu", handleContextMenu);
-    return () => {
-      triggerWrapper.removeEventListener("contextmenu", handleContextMenu);
-    };
-  }, [handleContextMenu, triggerWrapper]);
-
-  const setFloatingRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      refs.setFloating(node);
-      menuElementRef.current = node;
-    },
-    [refs],
-  );
-
-  const visibleItems = filterEdgeSeparators(items);
-  const navigableItems = visibleItems.filter(
-    (item) => !(item.separator || item.disabled || item.visualOnly),
-  );
 
   return (
     <>
-      {isValidElement(children) ? (
-        <span
-          className="contents"
-          data-context-menu-trigger={disabled ? undefined : triggerId}
-          ref={setTriggerWrapper}
-        >
-          {children}
-        </span>
-      ) : (
-        children
-      )}
-
-      {/* Render popover in portal when visible */}
-      {isVisible ? (
-        <FloatingPortal id={portalRootId}>
-          <FloatingFocusManager context={context} modal={false}>
-            <div
-              aria-orientation="vertical"
-              className={clsx(
-                "min-w-[12rem] rounded-md border border-gray-200 dark:border-gray-800",
-                "max-h-[calc(100vh-1rem)] max-w-[calc(100vw-1rem)] overflow-y-auto",
-                "bg-white shadow-elevation-3 dark:bg-gray-900/80",
-                "tooltip-enter p-1 backdrop-blur-xl",
-                "origin-top-left backdrop-blur-xl",
-                "focus:outline-none",
-                "pointer-events-auto",
-                className,
-              )}
-              ref={setFloatingRef}
-              role="menu"
-              style={{
-                left: menuPosition.x,
-                position: "fixed",
-                top: menuPosition.y,
-                transformOrigin: "top left",
-                zIndex: 9999,
-              }}
-              {...getFloatingProps()}
-            >
-              {visibleItems.map((item) => {
-                const itemIndex = navigableItems.findIndex(
-                  (navigableItem) => navigableItem.id === item.id,
-                );
-                return (
-                  <ContextMenuItemRenderer
-                    activeIndex={activeIndex}
-                    item={item}
-                    itemIndex={itemIndex}
-                    key={item.id}
-                    menu={{
-                      closeMenu: handleClose,
-                      getItemProps,
-                      listRef,
-                      setItemRef: registerListItem,
-                    }}
-                    submenu={{
-                      activeIndex: activeSubmenuIndex,
-                      close: closeSubmenu,
-                      itemRefs: submenuItemRefs,
-                      menuRef: submenuRef,
-                      openForIndex: openSubmenuForIndex,
-                      openIndex: openSubmenuIndex,
-                      position: submenuPosition,
-                      setActiveIndex: setActiveSubmenuIndex,
-                      setItemRef: registerSubmenuItem,
-                    }}
-                  />
-                );
-              })}
-            </div>
-          </FloatingFocusManager>
-        </FloatingPortal>
-      ) : null}
+      <ContextMenuTrigger
+        disabled={disabled}
+        setTriggerWrapper={setTriggerWrapper}
+        triggerId={triggerId}
+      >
+        {children}
+      </ContextMenuTrigger>
+      <ContextMenuPanel
+        activeIndex={activeIndex}
+        className={className}
+        context={context}
+        getFloatingProps={getFloatingProps}
+        items={items}
+        menu={menu}
+        menuPosition={menuPosition}
+        portalRootId={portalRootId}
+        setFloatingRef={setFloatingRef}
+        submenu={submenu}
+        visible={isVisible}
+      />
     </>
   );
 }

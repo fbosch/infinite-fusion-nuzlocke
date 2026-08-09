@@ -23,12 +23,14 @@ const {
   updatePokemonByUIDMock,
   updateTeamMemberMock,
   playEvolutionMock,
+  scrollToLocationByIdMock,
 } = vi.hoisted(() => ({
   markEncounterAsDeceasedMock: vi.fn().mockResolvedValue(undefined),
   markTeamMemberAsDeceasedMock: vi.fn().mockResolvedValue(undefined),
   moveEncounterToBoxMock: vi.fn().mockResolvedValue(undefined),
   moveTeamMemberToBoxMock: vi.fn().mockResolvedValue(undefined),
   playEvolutionMock: vi.fn(),
+  scrollToLocationByIdMock: vi.fn(),
   updatePokemonByUIDMock: vi.fn().mockResolvedValue(undefined),
   updateTeamMemberMock: vi.fn().mockResolvedValue(undefined),
 }));
@@ -156,7 +158,7 @@ vi.mock("@/utils/pokemon-predicates", () => ({
 }));
 
 vi.mock("@/utils/scrollToLocation", () => ({
-  scrollToLocationById: vi.fn(),
+  scrollToLocationById: scrollToLocationByIdMock,
 }));
 
 const idToName = new Map([["team-slot-1", "Team Slot"]]);
@@ -182,6 +184,14 @@ const filledTeamEntry: PCEntry = {
   position: 1,
 };
 
+const filledEncounterEntry: PCEntry = {
+  body: filledTeamEntry.body,
+  head: filledTeamEntry.head,
+  isFusion: true,
+  locationId: "route-1",
+  locationName: "Route 1",
+};
+
 describe("TeamEntryItem", () => {
   afterEach(() => {
     cleanup();
@@ -196,6 +206,7 @@ describe("TeamEntryItem", () => {
     updatePokemonByUIDMock.mockClear();
     updateTeamMemberMock.mockClear();
     playEvolutionMock.mockClear();
+    scrollToLocationByIdMock.mockClear();
   });
 
   it("opens team assignment from empty team slot", () => {
@@ -337,6 +348,39 @@ describe("TeamEntryItem", () => {
       expect(markTeamMemberAsDeceasedMock).toHaveBeenCalledWith(1);
     });
     expect(onTeamMemberClick).not.toHaveBeenCalled();
+  });
+
+  it("scrolls to an encounter and closes the sheet", () => {
+    const onClose = vi.fn();
+
+    render(
+      <TeamEntryItem
+        entry={filledEncounterEntry}
+        idToName={idToName}
+        onClose={onClose}
+      />,
+    );
+
+    fireEvent.click(screen.getByLabelText("Scroll to location in table"));
+
+    expect(scrollToLocationByIdMock).toHaveBeenCalledWith("route-1", {
+      behavior: "smooth",
+      durationMs: 1200,
+      highlightUids: ["pikachu-uid", "eevee-uid"],
+    });
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("moves an encounter using encounter actions", async () => {
+    render(<TeamEntryItem entry={filledEncounterEntry} idToName={idToName} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Move to Box" }));
+    fireEvent.click(screen.getByRole("button", { name: "Move to Graveyard" }));
+
+    await waitFor(() => {
+      expect(moveEncounterToBoxMock).toHaveBeenCalledWith("route-1");
+      expect(markEncounterAsDeceasedMock).toHaveBeenCalledWith("route-1");
+    });
   });
 
   it("does not play evolution animation when active playthrough changes", () => {

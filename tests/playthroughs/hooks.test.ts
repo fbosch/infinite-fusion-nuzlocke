@@ -1,19 +1,8 @@
 // Import mocks first (must be at top level for Vitest hoisting)
 import "./mocks";
 
-// Import shared setup and utilities
+import { playthroughActions } from "@/stores/playthroughs";
 import {
-  act,
-  beforeEach,
-  createMockPokemon,
-  describe,
-  expect,
-  it,
-  playthroughActions,
-  playthroughsStore,
-  renderHook,
-  setupCleanSlate,
-  setupPlaythroughTest,
   useActivePlaythrough,
   useEncounters,
   useGameMode,
@@ -22,6 +11,19 @@ import {
   useIsRemixMode,
   usePlaythroughById,
   usePlaythroughsSnapshot,
+} from "@/stores/playthroughs/hooks";
+import { playthroughsStore } from "@/stores/playthroughs/store";
+// Import shared setup and utilities
+import {
+  act,
+  beforeEach,
+  createMockPokemon,
+  describe,
+  expect,
+  it,
+  renderHook,
+  setupCleanSlate,
+  setupPlaythroughTest,
 } from "./setup";
 
 describe("Playthroughs Store - React Hooks", () => {
