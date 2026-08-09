@@ -2,7 +2,7 @@
 
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { load, type CheerioAPI } from "cheerio";
+import { type CheerioAPI, load } from "cheerio";
 import type { Element } from "domhandler";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { cleanLocationName } from "./utils/location-utils";
@@ -63,9 +63,12 @@ const LOCATION_KEYWORDS = [
   "forest",
 ] as const;
 const WIKI_PATH_PATTERN = /\/wiki\/([^/]+)/;
-const EGG_PREFIX_PATTERN = /^(Gift|Egg|Trade|As Egg|Daycare Egg|Random Egg)\s*[-:]?\s*/i;
-const EGG_SUFFIX_PATTERN = /\s*[-:]\s*(Gift|Egg|Trade|As Egg|Daycare Egg|Random Egg)$/i;
-const EGG_LOCATION_SUFFIX_PATTERN = /\s*[-:]\s*(brought with Heart Scales|from.*|in.*|at.*)$/i;
+const EGG_PREFIX_PATTERN =
+  /^(Gift|Egg|Trade|As Egg|Daycare Egg|Random Egg)\s*[-:]?\s*/i;
+const EGG_SUFFIX_PATTERN =
+  /\s*[-:]\s*(Gift|Egg|Trade|As Egg|Daycare Egg|Random Egg)$/i;
+const EGG_LOCATION_SUFFIX_PATTERN =
+  /\s*[-:]\s*(brought with Heart Scales|from.*|in.*|at.*)$/i;
 const EGG_NAME_SEPARATOR = /[-:,]/;
 const POKEMON_NAME_PATTERN = /^[A-Z][a-zA-Z]*$/;
 
@@ -475,8 +478,8 @@ async function main() {
   const startTime = Date.now();
 
   try {
-  const dataDir = join(process.cwd(), "data");
-  await mkdir(dataDir, { recursive: true });
+    const dataDir = join(process.cwd(), "data");
+    await mkdir(dataDir, { recursive: true });
 
     ConsoleFormatter.info("Loading Pokemon data for name mapping...");
     const pokemonMap = await loadPokemonData();
@@ -520,11 +523,11 @@ async function main() {
 
     // Write to file
     ConsoleFormatter.info("Saving egg locations data...");
-  const outputPath = join(dataDir, "shared", "egg-locations.json");
-  await writeFile(outputPath, JSON.stringify(eggLocationsData, null, 2));
+    const outputPath = join(dataDir, "shared", "egg-locations.json");
+    await writeFile(outputPath, JSON.stringify(eggLocationsData, null, 2));
 
     // Get file stats
-  const fileStats = await stat(outputPath);
+    const fileStats = await stat(outputPath);
     const duration = Date.now() - startTime;
 
     // Success summary

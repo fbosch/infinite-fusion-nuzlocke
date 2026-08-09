@@ -114,30 +114,28 @@ async function downloadGenerationIcons(
 
   const batches = Array.from(
     { length: Math.ceil(icons.length / ICON_BATCH_SIZE) },
-    (_, index) => icons.slice(index * ICON_BATCH_SIZE, (index + 1) * ICON_BATCH_SIZE),
+    (_, index) =>
+      icons.slice(index * ICON_BATCH_SIZE, (index + 1) * ICON_BATCH_SIZE),
   );
-  await batches.reduce(
-    async (previousBatch, batch, batchIndex) => {
-      await previousBatch;
-      const batchStats = await downloadIconBatch(batch);
-      stats.downloaded += batchStats.downloaded;
-      stats.skipped += batchStats.skipped;
-      stats.errors += batchStats.errors;
+  await batches.reduce(async (previousBatch, batch, batchIndex) => {
+    await previousBatch;
+    const batchStats = await downloadIconBatch(batch);
+    stats.downloaded += batchStats.downloaded;
+    stats.skipped += batchStats.skipped;
+    stats.errors += batchStats.errors;
 
-      const processedIcons = Math.min(
-        (batchIndex + 1) * ICON_BATCH_SIZE,
-        icons.length,
-      );
-      progressBar.update(processedIcons + completedIcons, {
-        status: `${generationLabel}: New: ${stats.downloaded}, Skipped: ${stats.skipped}, Errors: ${stats.errors}`,
-      });
+    const processedIcons = Math.min(
+      (batchIndex + 1) * ICON_BATCH_SIZE,
+      icons.length,
+    );
+    progressBar.update(processedIcons + completedIcons, {
+      status: `${generationLabel}: New: ${stats.downloaded}, Skipped: ${stats.skipped}, Errors: ${stats.errors}`,
+    });
 
-      if (processedIcons < icons.length) {
-        await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
-      }
-    },
-    Promise.resolve(),
-  );
+    if (processedIcons < icons.length) {
+      await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
+    }
+  }, Promise.resolve());
 }
 
 /**
@@ -261,7 +259,9 @@ async function scrapePokemonIcons(): Promise<void> {
     // Ensure output directories exist
     await fs.mkdir(SPRITES_BASE_DIR, { recursive: true });
     await Promise.all(
-      GENERATIONS.map((config) => fs.mkdir(config.spritesDir, { recursive: true })),
+      GENERATIONS.map((config) =>
+        fs.mkdir(config.spritesDir, { recursive: true }),
+      ),
     );
 
     // Load Pokemon data and construct icon URLs

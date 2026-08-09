@@ -128,10 +128,10 @@ export function flashTableRow(
  * Temporarily highlight Pokemon combobox overlays by their data-uid
  */
 export function flashPokemonOverlaysByUids(
-  uids: string[],
+  uids: readonly string[] | null,
   durationMs = 1200,
 ): void {
-  if (uids.length === 0) {
+  if (uids === null || uids.length === 0) {
     return;
   }
 

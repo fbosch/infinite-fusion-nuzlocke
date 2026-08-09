@@ -154,10 +154,7 @@ export class ConsoleFormatter {
   /**
    * Create a standard progress bar
    */
-  static createProgressBar(
-    total: number,
-    status = "Starting...",
-  ): SingleBar {
+  static createProgressBar(total: number, status = "Starting..."): SingleBar {
     const bar = new SingleBar(
       progressBarConfigs.standard,
       Presets.shades_classic,
@@ -173,10 +170,7 @@ export class ConsoleFormatter {
     total: number,
     status = "Processing...",
   ): SingleBar {
-    const bar = new SingleBar(
-      progressBarConfigs.mini,
-      Presets.shades_grey,
-    );
+    const bar = new SingleBar(progressBarConfigs.mini, Presets.shades_grey);
     bar.start(total, 0, { status });
     return bar;
   }

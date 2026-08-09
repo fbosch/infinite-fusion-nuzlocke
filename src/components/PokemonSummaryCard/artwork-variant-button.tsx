@@ -6,7 +6,10 @@ import type React from "react";
 import { useCallback } from "react";
 import { twMerge } from "tailwind-merge";
 import { useShiftKey } from "@/hooks/use-key-pressed";
-import { usePreferredVariantState, useSpriteVariants } from "@/hooks/use-sprite";
+import {
+  usePreferredVariantState,
+  useSpriteVariants,
+} from "@/hooks/use-sprite";
 import { CursorTooltip } from "../cursor-tooltip";
 
 interface ArtworkVariantButtonProps {

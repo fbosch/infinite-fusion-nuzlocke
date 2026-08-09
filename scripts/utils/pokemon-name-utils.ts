@@ -157,7 +157,8 @@ export function normalizePokemonNameForAPI(name: string): string {
   }
 
   return API_FORM_REPLACEMENTS.reduce(
-    (normalizedName, [pattern, replacement]) => normalizedName.replace(pattern, replacement),
+    (normalizedName, [pattern, replacement]) =>
+      normalizedName.replace(pattern, replacement),
     name
       .toLowerCase()
       .replace(/♀/g, "-f")
@@ -165,8 +166,7 @@ export function normalizePokemonNameForAPI(name: string): string {
       .replace(/\./g, "")
       .replace(/'/g, "")
       .replace(/\s+/g, "-")
-      .replace(/é/g, "e")
-      ,
+      .replace(/é/g, "e"),
   );
 }
 
@@ -267,5 +267,7 @@ export function isPotentialPokemonName(text: string): boolean {
     return false;
   }
 
-  return !POKEMON_NAME_EXCLUDE_PATTERNS.some((pattern) => pattern.test(trimmed));
+  return !POKEMON_NAME_EXCLUDE_PATTERNS.some((pattern) =>
+    pattern.test(trimmed),
+  );
 }

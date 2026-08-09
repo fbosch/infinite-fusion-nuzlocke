@@ -3,8 +3,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type * as cliProgress from "cli-progress";
-import Pokedex from "pokedex-promise-v2";
 import type PokeAPI from "pokedex-promise-v2";
+import Pokedex from "pokedex-promise-v2";
 import type { DexEntry } from "./scrape-pokedex";
 import { ConsoleFormatter } from "./utils/console-utils";
 import {
@@ -144,7 +144,9 @@ function extractEvolutionData(
   function getEvolutionDetails(evolution: PokeAPI.Chain): EvolutionDetail {
     const speciesId = evolution.species.url.split("/").at(-2);
     if (speciesId === undefined) {
-      throw new Error(`Invalid evolution species URL: ${evolution.species.url}`);
+      throw new Error(
+        `Invalid evolution species URL: ${evolution.species.url}`,
+      );
     }
 
     const details: EvolutionDetail = {

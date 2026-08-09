@@ -100,8 +100,10 @@ const LOCATION_SUFFIXES = [
   "Hidden",
   "Dark Room",
 ] as const;
-const GYM_PERSON_TITLE_PATTERN = /\bgym\s+(leader|trainer|master|champion|elite|four|gym\s+leader)/i;
-const LOCATION_FLOOR_SUFFIX_PATTERN = /^(.*?)\s+(B?\d+F|F\d+|A\d+|Summit|Square|Entrance|Exit|Top|Bottom|Upper|Lower|North|South|East|West|Interior|Exterior|Depths|Hidden|Center|Dark Room|Route \d+ Exit|\(Area \d+\))$/i;
+const GYM_PERSON_TITLE_PATTERN =
+  /\bgym\s+(leader|trainer|master|champion|elite|four|gym\s+leader)/i;
+const LOCATION_FLOOR_SUFFIX_PATTERN =
+  /^(.*?)\s+(B?\d+F|F\d+|A\d+|Summit|Square|Entrance|Exit|Top|Bottom|Upper|Lower|North|South|East|West|Interior|Exterior|Depths|Hidden|Center|Dark Room|Route \d+ Exit|\(Area \d+\))$/i;
 
 // Common location prefixes
 const LOCATION_PREFIXES = [
@@ -247,11 +249,7 @@ export function isRoutePattern(text: string): boolean {
   }
 
   // Check for locations with floor indicators (B1F, B2F, F1, etc.)
-  if (
-    LOCATION_FLOOR_SUFFIX_PATTERN.test(
-      cleanText,
-    )
-  ) {
+  if (LOCATION_FLOOR_SUFFIX_PATTERN.test(cleanText)) {
     return true;
   }
 

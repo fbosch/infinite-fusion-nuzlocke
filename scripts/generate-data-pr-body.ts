@@ -562,7 +562,10 @@ async function collectLocationDeltas(
     ),
   ];
 
-  return [...currentDeltas, ...(await collectLocationDeltas(remainingFileStats))];
+  return [
+    ...currentDeltas,
+    ...(await collectLocationDeltas(remainingFileStats)),
+  ];
 }
 
 async function main(): Promise<void> {
