@@ -24,6 +24,7 @@ interface PokemonComboboxContentProps {
   virtualizer: {
     getTotalSize: () => number;
     isScrolling: boolean;
+    measure: () => void;
   };
 }
 
