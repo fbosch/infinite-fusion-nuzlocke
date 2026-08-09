@@ -473,21 +473,25 @@ function ContextMenuSubmenuController({
 
 interface ContextMenuItemRendererProps {
   activeIndex: number | null;
-  activeSubmenuIndex: number;
-  closeMenu: () => void;
-  closeSubmenu: () => void;
-  getItemProps: MenuItemPropsGetter;
   item: ContextMenuItem;
   itemIndex: number;
-  listRef: React.RefObject<Array<HTMLElement | null>>;
-  openSubmenuForIndex: (index: number) => void;
-  openSubmenuIndex: number | null;
-  setActiveSubmenuIndex: React.Dispatch<React.SetStateAction<number>>;
-  setItemRef: (index: number, node: HTMLElement | null) => void;
-  setSubmenuItemRef: (index: number, node: HTMLButtonElement | null) => void;
-  submenuItemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
-  submenuPosition: { left: number; top: number };
-  submenuRef: React.RefObject<HTMLDivElement | null>;
+  menu: {
+    closeMenu: () => void;
+    getItemProps: MenuItemPropsGetter;
+    listRef: React.RefObject<Array<HTMLElement | null>>;
+    setItemRef: (index: number, node: HTMLElement | null) => void;
+  };
+  submenu: {
+    activeIndex: number;
+    close: () => void;
+    itemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
+    menuRef: React.RefObject<HTMLDivElement | null>;
+    openIndex: number | null;
+    openForIndex: (index: number) => void;
+    position: { left: number; top: number };
+    setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
+    setItemRef: (index: number, node: HTMLButtonElement | null) => void;
+  };
 }
 
 interface ContextMenuItemControlProps {
@@ -647,32 +651,37 @@ function ContextMenuButtonItem({
 }
 
 interface ContextMenuItemRendererContentProps
-  extends Omit<ContextMenuItemRendererProps, "activeIndex"> {
+  extends Pick<
+    ContextMenuItemRendererProps,
+    "item" | "itemIndex" | "menu" | "submenu"
+  > {
   hasChildren: boolean;
   isActive: boolean;
   registerItemRef: (node: HTMLElement | null) => void;
 }
 
 function ContextMenuItemRendererContent({
-  activeSubmenuIndex,
-  closeMenu,
-  closeSubmenu,
-  getItemProps,
   hasChildren,
   isActive,
   item,
   itemIndex,
-  listRef,
-  openSubmenuForIndex,
-  openSubmenuIndex,
+  menu,
   registerItemRef,
-  setActiveSubmenuIndex,
-  setSubmenuItemRef,
-  submenuItemRefs,
-  submenuPosition,
-  submenuRef,
+  submenu,
 }: ContextMenuItemRendererContentProps) {
-  const submenu =
+  const { closeMenu, getItemProps, listRef } = menu;
+  const {
+    activeIndex: activeSubmenuIndex,
+    close: closeSubmenu,
+    itemRefs: submenuItemRefs,
+    menuRef: submenuRef,
+    openForIndex: openSubmenuForIndex,
+    openIndex: openSubmenuIndex,
+    position: submenuPosition,
+    setActiveIndex: setActiveSubmenuIndex,
+    setItemRef: setSubmenuItemRef,
+  } = submenu;
+  const submenuContent =
     hasChildren && openSubmenuIndex === itemIndex ? (
       <ContextMenuSubmenuController
         activeIndex={activeSubmenuIndex}
@@ -730,7 +739,7 @@ function ContextMenuItemRendererContent({
     <ContextMenuItemTooltip tooltip={item.tooltip}>
       <div className="relative">
         {control}
-        {submenu}
+        {submenuContent}
       </div>
     </ContextMenuItemTooltip>
   );
@@ -738,22 +747,12 @@ function ContextMenuItemRendererContent({
 
 function ContextMenuItemRenderer({
   activeIndex,
-  activeSubmenuIndex,
-  closeMenu,
-  closeSubmenu,
-  getItemProps,
   item,
   itemIndex,
-  listRef,
-  openSubmenuForIndex,
-  openSubmenuIndex,
-  setActiveSubmenuIndex,
-  submenuItemRefs,
-  submenuPosition,
-  submenuRef,
-  setItemRef,
-  setSubmenuItemRef,
+  menu,
+  submenu,
 }: ContextMenuItemRendererProps) {
+  const { setItemRef } = menu;
   const isNavigable = !(item.disabled || item.visualOnly);
   const isActive = activeIndex === itemIndex;
   const hasChildren = Array.isArray(item.children) && item.children.length > 0;
@@ -771,24 +770,13 @@ function ContextMenuItemRenderer({
 
   return (
     <ContextMenuItemRendererContent
-      activeSubmenuIndex={activeSubmenuIndex}
-      closeMenu={closeMenu}
-      closeSubmenu={closeSubmenu}
-      getItemProps={getItemProps}
       hasChildren={hasChildren}
       isActive={isActive}
       item={item}
       itemIndex={itemIndex}
-      listRef={listRef}
-      openSubmenuForIndex={openSubmenuForIndex}
-      openSubmenuIndex={openSubmenuIndex}
+      menu={menu}
       registerItemRef={registerItemRef}
-      setActiveSubmenuIndex={setActiveSubmenuIndex}
-      setItemRef={setItemRef}
-      setSubmenuItemRef={setSubmenuItemRef}
-      submenuItemRefs={submenuItemRefs}
-      submenuPosition={submenuPosition}
-      submenuRef={submenuRef}
+      submenu={submenu}
     />
   );
 }
@@ -1117,22 +1105,26 @@ export function ContextMenu({
                 return (
                   <ContextMenuItemRenderer
                     activeIndex={activeIndex}
-                    activeSubmenuIndex={activeSubmenuIndex}
-                    closeMenu={handleClose}
-                    closeSubmenu={closeSubmenu}
-                    getItemProps={getItemProps}
                     item={item}
                     itemIndex={itemIndex}
                     key={item.id}
-                    listRef={listRef}
-                    openSubmenuForIndex={openSubmenuForIndex}
-                    openSubmenuIndex={openSubmenuIndex}
-                    setActiveSubmenuIndex={setActiveSubmenuIndex}
-                    submenuItemRefs={submenuItemRefs}
-                    submenuPosition={submenuPosition}
-                    submenuRef={submenuRef}
-                    setItemRef={registerListItem}
-                    setSubmenuItemRef={registerSubmenuItem}
+                    menu={{
+                      closeMenu: handleClose,
+                      getItemProps,
+                      listRef,
+                      setItemRef: registerListItem,
+                    }}
+                    submenu={{
+                      activeIndex: activeSubmenuIndex,
+                      close: closeSubmenu,
+                      itemRefs: submenuItemRefs,
+                      menuRef: submenuRef,
+                      openForIndex: openSubmenuForIndex,
+                      openIndex: openSubmenuIndex,
+                      position: submenuPosition,
+                      setActiveIndex: setActiveSubmenuIndex,
+                      setItemRef: registerSubmenuItem,
+                    }}
                   />
                 );
               })}
