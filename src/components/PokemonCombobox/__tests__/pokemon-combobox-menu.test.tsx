@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { PokemonComboboxMenu } from "../pokemon-combobox-menu";
@@ -54,6 +54,9 @@ describe("PokemonComboboxMenu", () => {
     let reportViewportRect:
       | ((rect: { height: number; width: number }) => void)
       | undefined;
+    let reportScrollOffset:
+      | ((offset: number, isScrolling: boolean) => void)
+      | undefined;
 
     function VirtualizedPortalMenu() {
       const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(
@@ -64,24 +67,45 @@ describe("PokemonComboboxMenu", () => {
         estimateSize: () => 56,
         getScrollElement: () => scrollElement,
         initialRect: { height: 500, width: 0 },
+        observeElementOffset: (_instance, callback) => {
+          reportScrollOffset = callback;
+          return unsubscribe;
+        },
         observeElementRect: (_instance, callback) => {
           reportViewportRect = callback;
           return unsubscribe;
         },
+        overscan: 10,
       });
 
       return (
-        <div ref={setScrollElement}>
-          {virtualizer.getVirtualItems().map((item) => (
-            <span key={item.key}>Option {item.index}</span>
-          ))}
-        </div>
+        <PokemonComboboxMenu
+          floatingStyles={{}}
+          hasRoundedEdges={false}
+          optionsContent={virtualizer
+            .getVirtualItems()
+            .map((item) => <span key={item.key}>Option {item.index}</span>)}
+          placement="bottom-start"
+          setOptionsReference={setScrollElement}
+          shouldVirtualize={true}
+          virtualizer={virtualizer}
+        />
       );
     }
 
     render(<VirtualizedPortalMenu />);
 
     expect(screen.getByText("Option 0")).toBeTruthy();
+    expect(screen.getByText("Option 18")).toBeTruthy();
     expect(reportViewportRect).toBeTruthy();
+    expect(reportScrollOffset).toBeTruthy();
+
+    act(() => {
+      reportViewportRect?.({ height: 500, width: 0 });
+      reportScrollOffset?.(1200, false);
+    });
+
+    expect(screen.getByText("Option 20")).toBeTruthy();
+    expect(screen.queryByText("Option 0")).toBeNull();
   });
 });
