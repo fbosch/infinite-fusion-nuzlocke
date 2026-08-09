@@ -3,7 +3,7 @@ import { emitEvolutionEvent } from "@/lib/events";
 import { getLocationByIdFromMerged, getLocations } from "@/loaders/locations";
 import { isEggId, type PokemonOptionType } from "@/loaders/pokemon";
 import { playthroughActions } from "@/stores/playthroughs";
-import { getActivePlaythrough } from "@/stores/playthroughs/store";
+import { getActivePlaythrough } from "@/stores/playthroughs/playthrough-state";
 import type { EncounterData } from "@/stores/playthroughs/types";
 import type { ContextMenuItem } from "../context-menu";
 import { PokemonSprite } from "../pokemon-sprite";

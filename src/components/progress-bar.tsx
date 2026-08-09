@@ -2,11 +2,15 @@
 
 import clsx from "clsx";
 import { CircleIcon, SkullIcon } from "lucide-react";
-import { useState } from "react";
+import { type ElementType, useState } from "react";
 import EscapeIcon from "@/assets/images/escape-cloud.svg";
 import PokeballIcon from "@/assets/images/pokeball.svg";
 import { getLocationsSortedWithCustom } from "@/loaders/locations";
-import { PokemonStatus } from "@/loaders/pokemon";
+import {
+  type PokemonOptionType,
+  PokemonStatus,
+  type PokemonStatusType,
+} from "@/loaders/pokemon";
 import { useCustomLocations, useEncounters } from "@/stores/playthroughs/hooks";
 import { CursorTooltip } from "./cursor-tooltip";
 
@@ -17,6 +21,172 @@ interface ProgressBarProps {
 type ProgressSegment = "captured" | "deceased" | "missed" | "unencountered";
 
 const progressTooltipClassName = "px-2 py-1 text-xs leading-none";
+const segmentOrder: ProgressSegment[] = [
+  "captured",
+  "deceased",
+  "missed",
+  "unencountered",
+];
+const dimNeutral = "light-dark(var(--color-gray-100), var(--color-gray-800))";
+const successfulEncounterStatuses = new Set<PokemonStatusType | undefined>([
+  PokemonStatus.CAPTURED,
+  PokemonStatus.RECEIVED,
+  PokemonStatus.TRADED,
+  PokemonStatus.STORED,
+]);
+
+const segmentDetails: Record<
+  ProgressSegment,
+  {
+    backgroundColor: string;
+    dimmedBackgroundColor: string;
+    icon: ElementType;
+    iconClassName: string;
+    label: string;
+  }
+> = {
+  captured: {
+    backgroundColor: "var(--color-emerald-600)",
+    dimmedBackgroundColor: `color-mix(in oklab, var(--color-emerald-600) 25%, ${dimNeutral})`,
+    icon: PokeballIcon,
+    iconClassName: "text-emerald-600 dark:text-emerald-400",
+    label: "Captured",
+  },
+  deceased: {
+    backgroundColor: "var(--color-rose-600)",
+    dimmedBackgroundColor: `color-mix(in oklab, var(--color-rose-600) 25%, ${dimNeutral})`,
+    icon: SkullIcon,
+    iconClassName: "text-rose-600 dark:text-rose-400",
+    label: "Deceased",
+  },
+  missed: {
+    backgroundColor: "var(--color-amber-600)",
+    dimmedBackgroundColor: `color-mix(in oklab, var(--color-amber-600) 25%, ${dimNeutral})`,
+    icon: EscapeIcon,
+    iconClassName: "text-amber-600 dark:text-amber-400",
+    label: "Missed",
+  },
+  unencountered: {
+    backgroundColor: "light-dark(var(--color-gray-300), var(--color-gray-700))",
+    dimmedBackgroundColor: `color-mix(in oklab, light-dark(var(--color-gray-300), var(--color-gray-700)) 45%, ${dimNeutral})`,
+    icon: CircleIcon,
+    iconClassName: "text-gray-500 dark:text-gray-400",
+    label: "Unencountered",
+  },
+};
+
+interface ProgressCounts {
+  captured: number;
+  deceased: number;
+  missed: number;
+  total: number;
+}
+
+function getEncounterProgressSegment(
+  head: PokemonOptionType | null | undefined,
+  body: PokemonOptionType | null | undefined,
+): Exclude<ProgressSegment, "unencountered"> | null {
+  if (!(head || body)) {
+    return null;
+  }
+
+  const statuses = [head?.status, body?.status];
+  if (statuses.includes(PokemonStatus.MISSED)) {
+    return "missed";
+  }
+
+  if (statuses.includes(PokemonStatus.DECEASED)) {
+    return "deceased";
+  }
+
+  return statuses.some((status) => successfulEncounterStatuses.has(status))
+    ? "captured"
+    : null;
+}
+
+function getProgressCounts(
+  encounters: ReturnType<typeof useEncounters>,
+  customLocations: ReturnType<typeof useCustomLocations>,
+): ProgressCounts {
+  const locations = getLocationsSortedWithCustom(customLocations);
+  const counts: ProgressCounts = {
+    captured: 0,
+    deceased: 0,
+    missed: 0,
+    total: locations.length,
+  };
+
+  for (const location of locations) {
+    const encounter = encounters?.[location.id];
+    const segment = getEncounterProgressSegment(
+      encounter?.head,
+      encounter?.body,
+    );
+    if (segment === null) {
+      continue;
+    }
+
+    counts[segment] += 1;
+  }
+
+  return counts;
+}
+
+function ProgressBarSegment({
+  count,
+  hoveredSegment,
+  segment,
+  totalCount,
+  onMouseEnter,
+  onMouseLeave,
+}: {
+  count: number;
+  hoveredSegment: ProgressSegment | null;
+  segment: ProgressSegment;
+  totalCount: number;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+}) {
+  const {
+    backgroundColor,
+    dimmedBackgroundColor,
+    icon: Icon,
+    iconClassName,
+    label,
+  } = segmentDetails[segment];
+  const isHovered = hoveredSegment === segment;
+  const shouldDim =
+    hoveredSegment !== null && hoveredSegment !== "unencountered";
+  const width = totalCount > 0 ? (count / totalCount) * 100 : 0;
+
+  return (
+    <CursorTooltip
+      className={progressTooltipClassName}
+      content={
+        <span className="inline-flex items-center gap-1.5 leading-none">
+          <Icon className={`h-4 w-4 shrink-0 ${iconClassName}`} />
+          <span>{label}</span>
+          <span className="tabular-nums">{count}</span>
+        </span>
+      }
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      placement="bottom"
+      tooltipId="encounter-progress-bar"
+    >
+      <div className="relative h-full" style={{ width: `${width}%` }}>
+        <div
+          className="absolute top-1/2 right-0 left-0 h-0.5 origin-center -translate-y-1/2 transition-[background-color,transform] duration-150 ease-out"
+          style={{
+            backgroundColor:
+              shouldDim && !isHovered ? dimmedBackgroundColor : backgroundColor,
+            transform: `translateY(-50%) scaleY(${hoveredSegment ? 7 : 1})`,
+          }}
+        />
+      </div>
+    </CursorTooltip>
+  );
+}
 
 export default function ProgressBar({ className }: ProgressBarProps) {
   const encounters = useEncounters();
@@ -25,106 +195,33 @@ export default function ProgressBar({ className }: ProgressBarProps) {
     null,
   );
 
-  const handleCapturedMouseEnter = () => setHoveredSegment("captured");
-  const handleDeceasedMouseEnter = () => setHoveredSegment("deceased");
-  const handleMissedMouseEnter = () => setHoveredSegment("missed");
-  const handleUnencounteredMouseEnter = () =>
-    setHoveredSegment("unencountered");
   const handleMouseLeave = () => setHoveredSegment(null);
+  const segmentMouseEnterHandlers: Record<ProgressSegment, () => void> = {
+    captured: () => setHoveredSegment("captured"),
+    deceased: () => setHoveredSegment("deceased"),
+    missed: () => setHoveredSegment("missed"),
+    unencountered: () => setHoveredSegment("unencountered"),
+  };
 
-  const { capturedCount, deceasedCount, missedCount, totalCount } = (() => {
-    const allLocations = getLocationsSortedWithCustom(customLocations);
-    const total = allLocations.length;
+  const {
+    captured,
+    deceased,
+    missed,
+    total: totalCount,
+  } = getProgressCounts(encounters, customLocations);
 
-    let captured = 0;
-    let deceased = 0;
-    let missed = 0;
-
-    for (const location of allLocations) {
-      const encounter = encounters?.[location.id];
-      if (!(encounter && (encounter.head || encounter.body))) {
-        continue;
-      }
-
-      const statuses = [encounter.head?.status, encounter.body?.status];
-      const hasMissed = statuses.includes(PokemonStatus.MISSED);
-      const hasDeceased = statuses.includes(PokemonStatus.DECEASED);
-      const hasSuccessfulEncounter = statuses.some(
-        (status) =>
-          status === PokemonStatus.CAPTURED ||
-          status === PokemonStatus.RECEIVED ||
-          status === PokemonStatus.TRADED ||
-          status === PokemonStatus.STORED,
-      );
-
-      if (hasMissed) {
-        missed += 1;
-        continue;
-      }
-
-      if (hasDeceased) {
-        deceased += 1;
-        continue;
-      }
-
-      if (hasSuccessfulEncounter) {
-        captured += 1;
-      }
-    }
-
-    return {
-      capturedCount: captured,
-      deceasedCount: deceased,
-      missedCount: missed,
-      totalCount: total,
-    };
-  })();
-
-  const completedCount = capturedCount + deceasedCount + missedCount;
+  const completedCount = captured + deceased + missed;
   const unencounteredCount = Math.max(totalCount - completedCount, 0);
-  const capturedWidth = totalCount > 0 ? (capturedCount / totalCount) * 100 : 0;
-  const deceasedWidth = totalCount > 0 ? (deceasedCount / totalCount) * 100 : 0;
-  const missedWidth = totalCount > 0 ? (missedCount / totalCount) * 100 : 0;
-  const unencounteredWidth =
-    totalCount > 0 ? (unencounteredCount / totalCount) * 100 : 0;
-
-  const shouldDimOthers =
-    hoveredSegment === "captured" ||
-    hoveredSegment === "deceased" ||
-    hoveredSegment === "missed";
-
-  const getBg = (segment: ProgressSegment): string => {
-    const dimNeutral =
-      "light-dark(var(--color-gray-100), var(--color-gray-800))";
-    const isHovered = hoveredSegment === segment;
-    if (!shouldDimOthers || isHovered) {
-      if (segment === "captured") {
-        return "var(--color-emerald-600)";
-      }
-      if (segment === "deceased") {
-        return "var(--color-rose-600)";
-      }
-      if (segment === "missed") {
-        return "var(--color-amber-600)";
-      }
-      return "light-dark(var(--color-gray-300), var(--color-gray-700))";
-    }
-
-    if (segment === "captured") {
-      return `color-mix(in oklab, var(--color-emerald-600) 25%, ${dimNeutral})`;
-    }
-    if (segment === "deceased") {
-      return `color-mix(in oklab, var(--color-rose-600) 25%, ${dimNeutral})`;
-    }
-    if (segment === "missed") {
-      return `color-mix(in oklab, var(--color-amber-600) 25%, ${dimNeutral})`;
-    }
-    return `color-mix(in oklab, light-dark(var(--color-gray-300), var(--color-gray-700)) 45%, ${dimNeutral})`;
+  const counts: Record<ProgressSegment, number> = {
+    captured,
+    deceased,
+    missed,
+    unencountered: unencounteredCount,
   };
 
   return (
     <div
-      aria-label={`Encounter progress: ${capturedCount} captured, ${deceasedCount} deceased, ${missedCount} missed, ${unencounteredCount} unencountered`}
+      aria-label={`Encounter progress: ${captured} captured, ${deceased} deceased, ${missed} missed, ${unencounteredCount} unencountered`}
       className={clsx(
         "group relative h-0.5 w-full overflow-visible",
         className,
@@ -132,111 +229,17 @@ export default function ProgressBar({ className }: ProgressBarProps) {
       role="img"
     >
       <div className="group/bar absolute top-1/2 right-0 left-0 flex h-10 -translate-y-1/2 overflow-visible">
-        <CursorTooltip
-          className={progressTooltipClassName}
-          content={
-            <span className="inline-flex items-center gap-1.5 leading-none">
-              <PokeballIcon className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-              <span>Captured</span>
-              <span className="tabular-nums">{capturedCount}</span>
-            </span>
-          }
-          onMouseEnter={handleCapturedMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          placement="bottom"
-          tooltipId="encounter-progress-bar"
-        >
-          <div
-            className="relative h-full"
-            style={{ width: `${capturedWidth}%` }}
-          >
-            <div
-              className="absolute top-1/2 right-0 left-0 h-0.5 origin-center -translate-y-1/2 transition-[background-color,transform] duration-150 ease-out"
-              style={{
-                backgroundColor: getBg("captured"),
-                transform: `translateY(-50%) scaleY(${hoveredSegment ? 7 : 1})`,
-              }}
-            />
-          </div>
-        </CursorTooltip>
-        <CursorTooltip
-          className={progressTooltipClassName}
-          content={
-            <span className="inline-flex items-center gap-1.5 leading-none">
-              <SkullIcon className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
-              <span>Deceased</span>
-              <span className="tabular-nums">{deceasedCount}</span>
-            </span>
-          }
-          onMouseEnter={handleDeceasedMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          placement="bottom"
-          tooltipId="encounter-progress-bar"
-        >
-          <div
-            className="relative h-full"
-            style={{ width: `${deceasedWidth}%` }}
-          >
-            <div
-              className="absolute top-1/2 right-0 left-0 h-0.5 origin-center -translate-y-1/2 transition-[background-color,transform] duration-150 ease-out"
-              style={{
-                backgroundColor: getBg("deceased"),
-                transform: `translateY(-50%) scaleY(${hoveredSegment ? 7 : 1})`,
-              }}
-            />
-          </div>
-        </CursorTooltip>
-        <CursorTooltip
-          className={progressTooltipClassName}
-          content={
-            <span className="inline-flex items-center gap-1.5 leading-none">
-              <EscapeIcon className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-              <span>Missed</span>
-              <span className="tabular-nums">{missedCount}</span>
-            </span>
-          }
-          onMouseEnter={handleMissedMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          placement="bottom"
-          tooltipId="encounter-progress-bar"
-        >
-          <div className="relative h-full" style={{ width: `${missedWidth}%` }}>
-            <div
-              className="absolute top-1/2 right-0 left-0 h-0.5 origin-center -translate-y-1/2 transition-[background-color,transform] duration-150 ease-out"
-              style={{
-                backgroundColor: getBg("missed"),
-                transform: `translateY(-50%) scaleY(${hoveredSegment ? 7 : 1})`,
-              }}
-            />
-          </div>
-        </CursorTooltip>
-        <CursorTooltip
-          className={progressTooltipClassName}
-          content={
-            <span className="inline-flex items-center gap-1.5 leading-none">
-              <CircleIcon className="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400" />
-              <span>Unencountered</span>
-              <span className="tabular-nums">{unencounteredCount}</span>
-            </span>
-          }
-          onMouseEnter={handleUnencounteredMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          placement="bottom"
-          tooltipId="encounter-progress-bar"
-        >
-          <div
-            className="relative h-full"
-            style={{ width: `${unencounteredWidth}%` }}
-          >
-            <div
-              className="absolute top-1/2 right-0 left-0 h-0.5 origin-center -translate-y-1/2 transition-[background-color,transform] duration-150 ease-out"
-              style={{
-                backgroundColor: getBg("unencountered"),
-                transform: `translateY(-50%) scaleY(${hoveredSegment ? 7 : 1})`,
-              }}
-            />
-          </div>
-        </CursorTooltip>
+        {segmentOrder.map((segment) => (
+          <ProgressBarSegment
+            count={counts[segment]}
+            hoveredSegment={hoveredSegment}
+            key={segment}
+            onMouseEnter={segmentMouseEnterHandlers[segment]}
+            onMouseLeave={handleMouseLeave}
+            segment={segment}
+            totalCount={totalCount}
+          />
+        ))}
       </div>
     </div>
   );

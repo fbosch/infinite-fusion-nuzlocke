@@ -39,6 +39,4 @@ function usePokemonTypes(query: TypeQuery | undefined): UsePokemonTypesResult {
   return types ? { ...types, isLoading: false } : { isLoading };
 }
 
-const defaultUsePokemonTypes = usePokemonTypes;
-
-export { defaultUsePokemonTypes as default, usePokemonTypes };
+export { usePokemonTypes };

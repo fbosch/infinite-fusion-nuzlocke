@@ -26,6 +26,8 @@ interface PokemonStatusInputProps {
   value: PokemonOptionType | null | undefined;
 }
 
+const statusMenuMinWidth = 140;
+
 const getStatusIcon = (status: PokemonStatusType) =>
   match(status)
     .with(PokemonStatus.CAPTURED, () => (
@@ -133,7 +135,7 @@ export const PokemonStatusInput = ({
               "focus:ring-inset focus-visible:border-blue-500 focus-visible:ring-blue-500 disabled:cursor-not-allowed",
               "border-gray-300 dark:border-gray-600 dark:bg-gray-800 enabled:dark:text-white dark:focus-visible:ring-blue-400",
               "enabled:hover:bg-gray-50 dark:enabled:hover:bg-gray-700",
-              "min-w-[140px] enabled:hover:cursor-pointer",
+              "enabled:hover:cursor-pointer",
               dragPreview && "pointer-events-none opacity-60",
               {
                 "rounded-br-md": open && placement.startsWith("top"),
@@ -144,6 +146,7 @@ export const PokemonStatusInput = ({
             )}
             disabled={!value || disabled}
             ref={refs.setReference}
+            style={{ minWidth: statusMenuMinWidth }}
           >
             <div className="flex items-center gap-2">
               {selectedStatus ? getStatusIcon(selectedStatus) : null}
@@ -159,14 +162,13 @@ export const PokemonStatusInput = ({
                   "z-50 overflow-hidden text-base focus:outline-none sm:text-sm",
                   "bg-white dark:bg-gray-800",
                   "border-1 border-gray-300 dark:border-gray-600",
-                  "min-w-[140px]",
                   {
                     "rounded-b-md border-t-0": placement.startsWith("bottom"),
                     "rounded-t-md": placement.startsWith("top"),
                   },
                 )}
                 ref={refs.setFloating}
-                style={floatingStyles}
+                style={{ ...floatingStyles, minWidth: statusMenuMinWidth }}
               >
                 {Object.values(PokemonStatus).map((statusValue) => (
                   <PokemonStatusMenuItem

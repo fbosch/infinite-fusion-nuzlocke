@@ -34,6 +34,81 @@ interface FusionSpriteProps {
   showStatusOverlay?: boolean;
 }
 
+function getVariantIds(
+  head: PokemonOptionType | null,
+  body: PokemonOptionType | null,
+  isFusion: boolean,
+) {
+  if (isFusion) {
+    return {
+      bodyId: body ? body.id : null,
+      headId: head ? head.id : null,
+    };
+  }
+
+  if (head) {
+    return { bodyId: null, headId: head.id };
+  }
+
+  return { bodyId: null, headId: body ? body.id : null };
+}
+
+function SpriteImages({
+  altText,
+  imageProps,
+  imageRef,
+  raysSvgRef,
+  shadowRef,
+  statusState,
+}: {
+  altText: string;
+  imageProps: Omit<React.ComponentProps<typeof Image>, "alt">;
+  imageRef: React.RefObject<HTMLImageElement | null>;
+  raysSvgRef: React.RefObject<HTMLDivElement | null>;
+  shadowRef: React.RefObject<HTMLImageElement | null>;
+  statusState: ReturnType<typeof getStatusState>;
+}) {
+  const baseImageClasses =
+    "object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none transform-gpu";
+
+  return (
+    <div
+      className={twMerge(
+        "relative z-10 -translate-y-6",
+        statusState.wrapperClasses,
+      )}
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-2/3 left-1/2 size-35 -translate-x-1/2 -translate-y-1/2 bg-radial from-5% from-white/50 to-35% to-transparent opacity-0"
+        ref={raysSvgRef}
+      >
+        <Rays className="h-full w-full text-sky-300 dark:text-white/50" />
+      </div>
+      <Image
+        aria-hidden={true}
+        className={twMerge(
+          baseImageClasses,
+          "absolute translate-x-[45%] translate-y-[35%] rotate-[24deg] skew-x-[-5deg] skew-y-[-30deg] scale-100 opacity-10 brightness-0 dark:opacity-15",
+        )}
+        ref={shadowRef}
+        {...imageProps}
+        alt={altText}
+      />
+      <Image
+        className={twMerge(
+          baseImageClasses,
+          statusState.imageClasses,
+          "rounded-md",
+        )}
+        ref={imageRef}
+        {...imageProps}
+        alt={altText}
+      />
+    </div>
+  );
+}
+
 export const FusionSprite = function FusionSprite({
   headPokemon,
   bodyPokemon,
@@ -48,14 +123,11 @@ export const FusionSprite = function FusionSprite({
 
   const head = headPokemon;
   const body = bodyPokemon;
-
-  // Determine which Pokemon IDs to use for preferred variant based on fusion state
-  // When fusion is off, use the single Pokemon ID; when fusion is on, use both
-  let variantHeadId = head ? head.id : null;
-  if (isFusion === false && head === null) {
-    variantHeadId = body ? body.id : null;
-  }
-  const variantBodyId = isFusion && body ? body.id : null;
+  const { bodyId: variantBodyId, headId: variantHeadId } = getVariantIds(
+    head,
+    body,
+    isFusion,
+  );
 
   const { variant: preferredVariant } = usePreferredVariantState(
     variantHeadId,
@@ -110,9 +182,6 @@ export const FusionSprite = function FusionSprite({
 
   const spriteUrl = getSpriteUrl(head, body, isFusion, preferredVariant);
   const altText = getAltText(head, body, isFusion);
-  const baseImageClasses =
-    "object-fill object-center image-render-pixelated origin-top transition-all duration-200 scale-150 select-none transform-gpu";
-
   const imageProps = {
     blurDataURL: TRANSPARENT_PIXEL,
     decoding: shouldLoad ? ("auto" as const) : ("async" as const),
@@ -133,40 +202,14 @@ export const FusionSprite = function FusionSprite({
         onPointerEnter={handleMouseEnter}
         onPointerLeave={handleMouseLeave}
       >
-        <div
-          className={twMerge(
-            "relative z-10 -translate-y-6",
-            statusState.wrapperClasses,
-          )}
-        >
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute top-2/3 left-1/2 size-35 -translate-x-1/2 -translate-y-1/2 bg-radial from-5% from-white/50 to-35% to-transparent opacity-0"
-            ref={raysSvgRef}
-          >
-            <Rays className="h-full w-full text-sky-300 dark:text-white/50" />
-          </div>
-          <Image
-            aria-hidden={true}
-            className={twMerge(
-              baseImageClasses,
-              "absolute translate-x-[45%] translate-y-[35%] rotate-[24deg] skew-x-[-5deg] skew-y-[-30deg] scale-100 opacity-10 brightness-0 dark:opacity-15",
-            )}
-            ref={shadowRef}
-            {...imageProps}
-            alt={altText}
-          />
-          <Image
-            className={twMerge(
-              baseImageClasses,
-              statusState.imageClasses,
-              "rounded-md",
-            )}
-            ref={imageRef}
-            {...imageProps}
-            alt={altText}
-          />
-        </div>
+        <SpriteImages
+          altText={altText}
+          imageProps={imageProps}
+          imageRef={imageRef}
+          raysSvgRef={raysSvgRef}
+          shadowRef={shadowRef}
+          statusState={statusState}
+        />
         {showStatusOverlay ? statusState.overlayContent : null}
       </div>
     </div>

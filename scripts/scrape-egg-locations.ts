@@ -71,6 +71,7 @@ const EGG_LOCATION_SUFFIX_PATTERN =
   /\s*[-:]\s*(brought with Heart Scales|from.*|in.*|at.*)$/i;
 const EGG_NAME_SEPARATOR = /[-:,]/;
 const POKEMON_NAME_PATTERN = /^[A-Z][a-zA-Z]*$/;
+const NEST_PATTERN = /([A-Z][a-zA-Z]+)\s+nest/gi;
 
 /** Returns whether a gift/trade row describes an egg encounter. */
 export function isEggRelated(pokemonCell: string, notesCell: string): boolean {
@@ -255,6 +256,100 @@ function extractGiftEggLocation(
   };
 }
 
+const getNestPageContent = ($: CheerioAPI): string => {
+  const textContent = $("*")
+    .contents()
+    .filter(function () {
+      return this.nodeType === 3;
+    })
+    .map(function () {
+      return $(this).text();
+    })
+    .get()
+    .join(" ");
+  const attributeContent = $("*")
+    .map(function () {
+      const alt = $(this).attr("alt") || "";
+      const title = $(this).attr("title") || "";
+      const text = $(this).text() || "";
+      return `${alt} ${title} ${text}`;
+    })
+    .get()
+    .join(" ");
+
+  return `${textContent} ${attributeContent}`;
+};
+
+const collectNestLocations = ($: CheerioAPI): Set<string> => {
+  const locations = new Set<string>();
+
+  $('a[href*="/wiki/"]').each((_index: number, link: Element) => {
+    const $link = $(link);
+    const parent = $link.parent();
+    const routeName = getNestLocationName(
+      $link.attr("href") || "",
+      parent.text(),
+      parent.find('img[alt*="nest"]').length > 0,
+    );
+
+    if (routeName) {
+      locations.add(routeName);
+    }
+  });
+
+  return locations;
+};
+
+const collectPokemonNestLocations = (
+  content: string,
+  locations: Set<string>,
+): Map<string, string> => {
+  const pokemonNests = new Map<string, string>();
+
+  for (const match of content.matchAll(NEST_PATTERN)) {
+    const [, pokemonName] = match;
+    if (!pokemonName || pokemonName.length < 3) {
+      continue;
+    }
+
+    const matchIndex = content.indexOf(match[0]);
+    const contextBefore = content.slice(
+      Math.max(0, matchIndex - 100),
+      matchIndex,
+    );
+    const contextAfter = content.slice(matchIndex, matchIndex + 100);
+    const context = `${contextBefore} ${contextAfter}`;
+    const location = Array.from(locations).find((candidate) =>
+      context.toLowerCase().includes(candidate.toLowerCase()),
+    );
+
+    if (location) {
+      pokemonNests.set(location, pokemonName);
+    }
+  }
+
+  return pokemonNests;
+};
+
+const createNestEggLocation = (
+  routeName: string,
+  pokemonName: string | undefined,
+  pokemonMap: Map<string, PokemonData>,
+): EggLocation => {
+  const pokemon = pokemonName
+    ? getPokemonByName(pokemonName, pokemonMap)
+    : null;
+
+  return {
+    description: pokemonName
+      ? `${pokemonName} nest location: ${routeName}`
+      : `Nest location: ${routeName}`,
+    ...(pokemon && { pokemonId: pokemon.id, pokemonName: pokemon.name }),
+    routeName,
+    source: "nest",
+  };
+};
+
 /**
  * Extracts egg-related locations from the gifts and trades page
  */
@@ -320,108 +415,12 @@ async function scrapePokemonNestsForEggs(
     );
 
     const $ = load(html);
-    const eggLocations: EggLocation[] = [];
-
-    // Look for all text that contains "nest" to find Pokemon nests
-    const allText = $("*")
-      .contents()
-      .filter(function () {
-        return this.nodeType === 3; // Text nodes only
-      })
-      .map(function () {
-        return $(this).text();
-      })
-      .get()
-      .join(" ");
-
-    // Also look for alt attributes and titles that contain "nest"
-    const allAttributes = $("*")
-      .map(function () {
-        const alt = $(this).attr("alt") || "";
-        const title = $(this).attr("title") || "";
-        const text = $(this).text() || "";
-        return `${alt} ${title} ${text}`;
-      })
-      .get()
-      .join(" ");
-
-    const combinedContent = `${allText} ${allAttributes}`;
-
-    // Find patterns like "[PokemonName] nest" in the content
-    const nestPattern = /([A-Z][a-zA-Z]+)\s+nest/gi;
-    const nestMatches = [...combinedContent.matchAll(nestPattern)];
-
-    // Also look for links that contain location names (existing logic)
-    const links = $('a[href*="/wiki/"]');
-    const locationSet = new Set<string>();
-
-    links.each((_index: number, link: Element) => {
-      const $link = $(link);
-      const href = $link.attr("href") || "";
-
-      // Check if this link is near a nest image or nest text
-      const $parent = $link.parent();
-      const parentText = $parent.text();
-      const hasNestImage = $parent.find('img[alt*="nest"]').length > 0;
-
-      const routeName = getNestLocationName(href, parentText, hasNestImage);
-      if (routeName) {
-        locationSet.add(routeName);
-      }
-    });
-
-    // Process Pokemon nest matches
-    const pokemonNestMap = new Map<string, string>();
-    for (const match of nestMatches) {
-      const [, pokemonName] = match;
-      if (pokemonName && pokemonName.length >= 3) {
-        // Look for location context around this match
-        const matchIndex = combinedContent.indexOf(match[0]);
-        const contextBefore = combinedContent.slice(
-          Math.max(0, matchIndex - 100),
-          matchIndex,
-        );
-        const contextAfter = combinedContent.slice(
-          matchIndex,
-          Math.min(combinedContent.length, matchIndex + 100),
-        );
-        const context = `${contextBefore} ${contextAfter}`;
-
-        // Try to find location names in the context
-        const locationMatches = Array.from(locationSet).filter((location) =>
-          context.toLowerCase().includes(location.toLowerCase()),
-        );
-
-        if (locationMatches.length > 0) {
-          // Use the first location found in context
-          pokemonNestMap.set(locationMatches[0], pokemonName);
-        }
-      }
-    }
-
-    // Create egg locations from all found locations
-    for (const routeName of locationSet) {
-      const pokemonName = pokemonNestMap.get(routeName);
-      const pokemonData = pokemonName
-        ? getPokemonByName(pokemonName, pokemonMap)
-        : null;
-
-      const eggLocation: EggLocation = {
-        description: pokemonName
-          ? `${pokemonName} nest location: ${routeName}`
-          : `Nest location: ${routeName}`,
-        routeName,
-        source: "nest",
-      };
-
-      // Add Pokemon info if found
-      if (pokemonData) {
-        eggLocation.pokemonName = pokemonData.name;
-        eggLocation.pokemonId = pokemonData.id;
-      }
-
-      eggLocations.push(eggLocation);
-    }
+    const content = getNestPageContent($);
+    const locations = collectNestLocations($);
+    const pokemonNests = collectPokemonNestLocations(content, locations);
+    const eggLocations = Array.from(locations, (routeName) =>
+      createNestEggLocation(routeName, pokemonNests.get(routeName), pokemonMap),
+    );
 
     ConsoleFormatter.success(
       `Found ${eggLocations.length} egg locations from Pokémon nests`,

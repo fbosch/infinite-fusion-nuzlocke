@@ -42,26 +42,25 @@ const migrateRemixMode = (data: MigrationData): MigrationData => {
 const createEmptyTeamMembers = () => new Array(6).fill(null);
 
 const normalizeTeamMembers = (members: unknown) => {
+  if (members === null || typeof members !== "object") {
+    return;
+  }
+
   const fixedMembers = createEmptyTeamMembers();
+  const entries = Array.isArray(members)
+    ? members.entries()
+    : Object.entries(members).map(([key, member]) => [
+        Number.parseInt(key, 10),
+        member,
+      ]);
 
-  if (Array.isArray(members)) {
-    for (const [index, member] of members.entries()) {
-      if (index < 6 && member !== null) {
-        fixedMembers[index] = member;
-      }
+  for (const [index, member] of entries) {
+    if (index >= 0 && index < fixedMembers.length && member !== null) {
+      fixedMembers[index] = member;
     }
-    return fixedMembers;
   }
 
-  if (typeof members === "object" && members !== null) {
-    for (const [key, member] of Object.entries(members)) {
-      const index = Number.parseInt(key, 10);
-      if (index >= 0 && index < 6 && member !== null) {
-        fixedMembers[index] = member;
-      }
-    }
-    return fixedMembers;
-  }
+  return fixedMembers;
 };
 
 const migrateTeamField = (data: MigrationData): MigrationData => {

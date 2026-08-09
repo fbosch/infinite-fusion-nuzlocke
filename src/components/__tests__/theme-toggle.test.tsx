@@ -13,7 +13,7 @@ vi.mock("next-themes", () => ({
   useTheme: () => themeMock,
 }));
 
-vi.mock("@/hooks/useMounted", () => ({
+vi.mock("@/hooks/use-mounted", () => ({
   useMounted: () => true,
 }));
 

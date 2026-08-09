@@ -32,10 +32,6 @@ export function useComboboxDragAndDrop({
   // Ref to track pending timeout for drag leave operations
   const dragLeaveAnimationRef = useRef<number | null>(null);
 
-  // Helper function to get location info from combobox ID
-  const getLocationInfo = (id: string) =>
-    playthroughActions.getLocationFromComboboxId(id);
-
   // Helper function to find Pokemon by name
   const findPokemonByName = async (
     pokemonName: string,
@@ -69,15 +65,16 @@ export function useComboboxDragAndDrop({
     }
   };
 
-  // Helper function to perform move operations
-  const performMoveOperation = (pokemon: PokemonOptionType) => {
+  const relocateEncounterSlot = () => {
     if (!(dragSnapshot.currentDragSource && comboboxId)) {
-      onChange(pokemon);
-      return;
+      return false;
     }
 
-    const sourceLocation = getLocationInfo(dragSnapshot.currentDragSource);
-    const targetLocation = getLocationInfo(comboboxId);
+    const sourceLocation = playthroughActions.getLocationFromComboboxId(
+      dragSnapshot.currentDragSource,
+    );
+    const targetLocation =
+      playthroughActions.getLocationFromComboboxId(comboboxId);
 
     playthroughActions.relocateEncounterSlot({
       sourceField: sourceLocation.field,
@@ -85,23 +82,19 @@ export function useComboboxDragAndDrop({
       targetField: targetLocation.field,
       targetLocationId: targetLocation.locationId,
     });
+    return true;
+  };
+
+  // Helper function to perform move operations
+  const performMoveOperation = (pokemon: PokemonOptionType) => {
+    if (relocateEncounterSlot() === false) {
+      onChange(pokemon);
+    }
   };
 
   // Helper function to perform swap operations
   const performSwapOperation = () => {
-    if (!(dragSnapshot.currentDragSource && comboboxId)) {
-      return;
-    }
-
-    const sourceLocation = getLocationInfo(dragSnapshot.currentDragSource);
-    const targetLocation = getLocationInfo(comboboxId);
-
-    playthroughActions.relocateEncounterSlot({
-      sourceField: sourceLocation.field,
-      sourceLocationId: sourceLocation.locationId,
-      targetField: targetLocation.field,
-      targetLocationId: targetLocation.locationId,
-    });
+    relocateEncounterSlot();
   };
 
   const resolveDropPokemon = async (
@@ -180,16 +173,33 @@ export function useComboboxDragAndDrop({
     }
   };
 
+  const updatePreviewForDragValue = (pokemon: PokemonOptionType) => {
+    if (!dragPreview || dragPreview.name !== pokemon.name) {
+      setDragPreviewDebounced(pokemon);
+    }
+  };
+
+  const schedulePreviewForDragData = (pokemonName: string) => {
+    if (dragPreview?.name === pokemonName) {
+      return;
+    }
+
+    setDragPreviewDebounced(null);
+    if (dragPreviewTimeout) {
+      clearTimeout(dragPreviewTimeout);
+    }
+
+    dragPreviewTimeout = window.setTimeout(() => {
+      updatePreviewForDragData(pokemonName);
+      dragPreviewTimeout = null;
+    }, DRAG_PREVIEW_DEBOUNCE);
+  };
+
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // If move operations are disabled, show appropriate drop effect
-    if (settings.moveEncountersBetweenLocations) {
-      e.dataTransfer.dropEffect = "copy";
-    } else {
-      e.dataTransfer.dropEffect = "copy";
-    }
+    e.dataTransfer.dropEffect = "copy";
 
     // Cancel pending drag leave timeout
     if (dragLeaveAnimationRef.current !== null) {
@@ -197,40 +207,14 @@ export function useComboboxDragAndDrop({
       dragLeaveAnimationRef.current = null;
     }
 
-    // Early exit if no drag data
-    if (!(dragSnapshot.currentDragValue || dragSnapshot.currentDragData)) {
+    const { currentDragData, currentDragValue } = dragSnapshot;
+    if (currentDragValue) {
+      updatePreviewForDragValue(currentDragValue);
       return;
     }
 
-    // Handle existing Pokemon drag value
-    if (dragSnapshot.currentDragValue) {
-      const shouldUpdate =
-        !dragPreview || dragPreview.name !== dragSnapshot.currentDragValue.name;
-
-      if (shouldUpdate) {
-        setDragPreviewDebounced(dragSnapshot.currentDragValue);
-      }
-      return;
-    }
-
-    // Handle Pokemon name drag data
-    if (dragSnapshot.currentDragData) {
-      const dragData = dragSnapshot.currentDragData;
-      const shouldUpdate = !dragPreview || dragPreview.name !== dragData;
-
-      if (shouldUpdate) {
-        setDragPreviewDebounced(null); // Clear current preview immediately
-
-        // Debounce the expensive async operation
-        if (dragPreviewTimeout) {
-          clearTimeout(dragPreviewTimeout);
-        }
-
-        dragPreviewTimeout = window.setTimeout(() => {
-          updatePreviewForDragData(dragData);
-          dragPreviewTimeout = null;
-        }, DRAG_PREVIEW_DEBOUNCE);
-      }
+    if (currentDragData) {
+      schedulePreviewForDragData(currentDragData);
     }
   };
 

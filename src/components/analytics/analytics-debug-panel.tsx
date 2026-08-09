@@ -1,13 +1,7 @@
 "use client";
 
 import { Bug, RotateCcw, X } from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import {
   type AnalyticsDebugCounters,
   getAnalyticsDebugCounters,
@@ -16,6 +10,13 @@ import {
 
 const DEBUG_QUERY_KEY = "analytics_debug";
 const DEBUG_STORAGE_KEY = "analytics-debug-panel";
+const NON_CONSENT_BLOCK_REASONS = [
+  "non_browser",
+  "non_production",
+  "kill_switch",
+  "invalid_payload",
+  "track_error",
+] as const;
 
 const subscribeToPanelEnabled = () => () => undefined;
 const getServerPanelEnabledSnapshot = () => false;
@@ -43,6 +44,15 @@ function isPanelEnabled(): boolean {
   } catch {
     return false;
   }
+}
+
+function hasOnlyConsentBlocks({
+  blockReasons,
+}: AnalyticsDebugCounters): boolean {
+  return (
+    blockReasons.no_consent > 0 &&
+    NON_CONSENT_BLOCK_REASONS.every((reason) => blockReasons[reason] === 0)
+  );
 }
 
 export function AnalyticsDebugPanel() {
@@ -90,18 +100,7 @@ export function AnalyticsDebugPanel() {
     };
   }, [enabled]);
 
-  const consentIsOnlyBlocker = useMemo(() => {
-    const { blockReasons } = counters;
-    const hasConsentBlocks = blockReasons.no_consent > 0;
-    const hasOtherBlockers =
-      blockReasons.non_browser > 0 ||
-      blockReasons.non_production > 0 ||
-      blockReasons.kill_switch > 0 ||
-      blockReasons.invalid_payload > 0 ||
-      blockReasons.track_error > 0;
-
-    return hasConsentBlocks && !hasOtherBlockers;
-  }, [counters]);
+  const consentIsOnlyBlocker = hasOnlyConsentBlocks(counters);
 
   if (!enabled) {
     return null;

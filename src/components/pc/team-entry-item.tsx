@@ -55,6 +55,20 @@ interface EntryDisplay {
   isTeamData: boolean;
 }
 
+function getTeamMemberSelection(
+  entry: PCEntry,
+  isEmpty: boolean,
+  isFusion: boolean,
+): TeamMemberSelection {
+  return {
+    bodyPokemon: entry.body,
+    headPokemon: entry.head,
+    isEmpty,
+    isFusion,
+    position: entry.position || 0,
+  };
+}
+
 function getEntryDisplay(
   entry: PCEntry,
   encounters: ReturnType<typeof useEncounters>,
@@ -211,6 +225,77 @@ function EntryActions({
   );
 }
 
+function createEntryActions({
+  entry,
+  isTeamData,
+  onClose,
+  onTeamMemberClick,
+  teamMemberSelection,
+}: {
+  entry: PCEntry;
+  isTeamData: boolean;
+  onClose: TeamEntryItemProps["onClose"];
+  onTeamMemberClick: TeamEntryItemProps["onTeamMemberClick"];
+  teamMemberSelection: TeamMemberSelection;
+}) {
+  const handleClick = () => {
+    if (isTeamData && entry.position !== undefined) {
+      onTeamMemberClick?.(entry.position, teamMemberSelection);
+      return;
+    }
+
+    scrollToPokemonEntry(entry.locationId, entry.head, entry.body);
+    onClose?.();
+  };
+
+  const handleAddClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+
+    if (!isTeamData || entry.position === undefined) {
+      return;
+    }
+
+    onTeamMemberClick?.(entry.position, {
+      bodyPokemon: null,
+      headPokemon: null,
+      isEmpty: true,
+      isFusion: false,
+      position: entry.position,
+    });
+  };
+
+  const handleMoveToBox = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+
+    if (isTeamData && entry.position !== undefined) {
+      await playthroughActions.moveTeamMemberToBox(entry.position);
+      return;
+    }
+
+    await playthroughActions.moveEncounterToBox(entry.locationId);
+  };
+
+  const handleMoveToGraveyard = async (
+    event: MouseEvent<HTMLButtonElement>,
+  ) => {
+    event.stopPropagation();
+
+    if (isTeamData && entry.position !== undefined) {
+      await playthroughActions.markTeamMemberAsDeceased(entry.position);
+      return;
+    }
+
+    await playthroughActions.markEncounterAsDeceased(entry.locationId);
+  };
+
+  return {
+    handleAddClick,
+    handleClick,
+    handleMoveToBox,
+    handleMoveToGraveyard,
+  };
+}
+
 export default function TeamEntryItem({
   entry,
   idToName,
@@ -263,64 +348,19 @@ export default function TeamEntryItem({
     entry.body,
     isFusion,
   );
-
-  const handleClick = () => {
-    if (isTeamData && entry.position !== undefined) {
-      // For team data, open the team member picker modal
-      const existingTeamMember = {
-        bodyPokemon: entry.body,
-        headPokemon: entry.head,
-        isEmpty,
-        isFusion,
-        position: entry.position,
-      };
-      onTeamMemberClick?.(entry.position, existingTeamMember);
-      return;
-    }
-
-    scrollToPokemonEntry(entry.locationId, entry.head, entry.body);
-    onClose?.();
-  };
-
-  const handleAddClick = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-
-    if (!isTeamData || entry.position === undefined) {
-      return;
-    }
-
-    onTeamMemberClick?.(entry.position, {
-      bodyPokemon: null,
-      headPokemon: null,
-      isEmpty: true,
-      isFusion: false,
-      position: entry.position,
-    });
-  };
-
-  const handleMoveToBox = async (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-
-    if (isTeamData && entry.position !== undefined) {
-      await playthroughActions.moveTeamMemberToBox(entry.position);
-      return;
-    }
-
-    await playthroughActions.moveEncounterToBox(entry.locationId);
-  };
-
-  const handleMoveToGraveyard = async (
-    event: MouseEvent<HTMLButtonElement>,
-  ) => {
-    event.stopPropagation();
-
-    if (isTeamData && entry.position !== undefined) {
-      await playthroughActions.markTeamMemberAsDeceased(entry.position);
-      return;
-    }
-
-    await playthroughActions.markEncounterAsDeceased(entry.locationId);
-  };
+  const teamMemberSelection = getTeamMemberSelection(entry, isEmpty, isFusion);
+  const {
+    handleAddClick,
+    handleClick,
+    handleMoveToBox,
+    handleMoveToGraveyard,
+  } = createEntryActions({
+    entry,
+    isTeamData,
+    onClose,
+    onTeamMemberClick,
+    teamMemberSelection,
+  });
 
   const mainContent = (
     <div
@@ -433,13 +473,7 @@ export default function TeamEntryItem({
       <TeamMemberContextMenu
         onClose={onClose}
         shouldLoad={!isEmpty}
-        teamMember={{
-          bodyPokemon: entry.body,
-          headPokemon: entry.head,
-          isEmpty,
-          isFusion,
-          position: entry.position || 0,
-        }}
+        teamMember={teamMemberSelection}
       >
         {mainContent}
       </TeamMemberContextMenu>

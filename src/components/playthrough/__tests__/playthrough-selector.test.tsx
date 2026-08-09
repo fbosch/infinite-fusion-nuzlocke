@@ -67,7 +67,7 @@ vi.mock("@/components/confirmation-dialog", () => ({
   default: () => null,
 }));
 
-vi.mock("@/components/CursorTooltip", () => ({
+vi.mock("@/components/cursor-tooltip", () => ({
   CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
 }));
 
@@ -102,7 +102,7 @@ vi.mock("../create-playthrough-modal", () => ({
   default: () => null,
 }));
 
-vi.mock("../ImportErrorContent", () => ({
+vi.mock("../import-error-content", () => ({
   ImportErrorContent: () => null,
 }));
 

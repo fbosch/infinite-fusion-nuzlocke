@@ -351,6 +351,40 @@ function ArtworkVariantModalDialog({
   );
 }
 
+function getPokemonOption(id: number | null | undefined) {
+  return id ? ({ id } as PokemonOptionType) : null;
+}
+
+function getSpriteId(headId: number | null, bodyId: number | null) {
+  if (headId && bodyId) {
+    return `${headId}.${bodyId}`;
+  }
+
+  return headId || bodyId;
+}
+
+function getArtworkVariantIds(
+  headId: number | null | undefined,
+  bodyId: number | null | undefined,
+  isFusion: boolean,
+) {
+  const displayPokemon = getDisplayPokemon(
+    getPokemonOption(headId),
+    getPokemonOption(bodyId),
+    isFusion,
+  );
+  const effectiveHeadId = displayPokemon.head?.id || null;
+  const effectiveBodyId = displayPokemon.isFusion
+    ? displayPokemon.body?.id || null
+    : null;
+
+  return {
+    effectiveBodyId,
+    effectiveHeadId,
+    spriteId: getSpriteId(effectiveHeadId, effectiveBodyId),
+  };
+}
+
 export function ArtworkVariantModal({
   isOpen,
   onClose,
@@ -358,20 +392,11 @@ export function ArtworkVariantModal({
   bodyId,
   isFusion = false,
 }: ArtworkVariantModalProps) {
-  const displayPokemon = getDisplayPokemon(
-    headId ? ({ id: headId } as PokemonOptionType) : null,
-    bodyId ? ({ id: bodyId } as PokemonOptionType) : null,
+  const { effectiveBodyId, effectiveHeadId, spriteId } = getArtworkVariantIds(
+    headId,
+    bodyId,
     isFusion,
   );
-
-  const effectiveHeadId = displayPokemon.head?.id || null;
-  const effectiveBodyId = displayPokemon.isFusion
-    ? displayPokemon.body?.id || null
-    : null;
-  const spriteId =
-    effectiveHeadId && effectiveBodyId
-      ? `${effectiveHeadId}.${effectiveBodyId}`
-      : effectiveHeadId || effectiveBodyId;
 
   const { variant: globalPreferredVariant, updateVariant } =
     usePreferredVariantState(effectiveHeadId, effectiveBodyId);

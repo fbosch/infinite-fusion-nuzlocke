@@ -45,7 +45,7 @@ vi.mock("@/components/theme-toggle", () => ({
   ),
 }));
 
-vi.mock("@/components/Header/MenuItems", () => ({
+vi.mock("@/components/Header/menu-items", () => ({
   default: () => <div data-testid="menu-items">Menu items</div>,
 }));
 

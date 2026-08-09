@@ -16,18 +16,20 @@ const {
   createFusionMock,
   fetchQueryMock,
   getLocationFromComboboxIdMock,
+  isEggMock,
 } = vi.hoisted(() => ({
   clearEncounterFromLocationMock: vi.fn(),
   createFusionMock: vi.fn(),
   fetchQueryMock: vi.fn(),
   getLocationFromComboboxIdMock: vi.fn(),
+  isEggMock: vi.fn(),
 }));
 
 vi.mock("next/image", () => ({
   default: () => null,
 }));
 
-vi.mock("@/components/CursorTooltip", () => ({
+vi.mock("@/components/cursor-tooltip", () => ({
   CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
 }));
 
@@ -42,7 +44,7 @@ vi.mock("@/lib/queries/pokemon", () => ({
 }));
 
 vi.mock("@/loaders/pokemon", () => ({
-  isEgg: () => false,
+  isEgg: isEggMock,
 }));
 
 vi.mock("@/stores/playthroughs/index", () => ({
@@ -55,6 +57,7 @@ vi.mock("@/stores/playthroughs/index", () => ({
 
 describe("FusionToggleButton", () => {
   beforeEach(() => {
+    isEggMock.mockReturnValue(false);
     fetchQueryMock.mockResolvedValue([
       { id: 25, name: "Pikachu", nationalDexId: 25 },
     ]);
@@ -167,6 +170,84 @@ describe("FusionToggleButton", () => {
         error,
       );
     });
+    expect(createFusionMock).not.toHaveBeenCalled();
+  });
+
+  it("ignores drops without a Pokemon name or a different source", () => {
+    dragActions.startDrag("Pikachu", "route-1-single", {
+      id: 25,
+      name: "Pikachu",
+      nationalDexId: 25,
+    });
+
+    render(
+      <FusionToggleButton
+        isFusion={false}
+        locationId="route-1"
+        onToggleFusion={vi.fn()}
+        selectedPokemon={{ id: 1, name: "Bulbasaur", nationalDexId: 1 }}
+      />,
+    );
+
+    fireEvent.drop(screen.getByRole("button"), {
+      dataTransfer: { getData: () => "" },
+    });
+    fireEvent.drop(screen.getByRole("button"), {
+      dataTransfer: { getData: () => "Pikachu" },
+    });
+
+    expect(fetchQueryMock).not.toHaveBeenCalled();
+    expect(createFusionMock).not.toHaveBeenCalled();
+  });
+
+  it("does not create or clear an encounter when the dropped Pokemon is unavailable", async () => {
+    fetchQueryMock.mockResolvedValue([]);
+    dragActions.startDrag("Pikachu", "route-2-single", {
+      id: 25,
+      name: "Pikachu",
+      nationalDexId: 25,
+    });
+
+    render(
+      <FusionToggleButton
+        isFusion={false}
+        locationId="route-1"
+        onToggleFusion={vi.fn()}
+        selectedPokemon={{ id: 1, name: "Bulbasaur", nationalDexId: 1 }}
+      />,
+    );
+
+    fireEvent.drop(screen.getByRole("button"), {
+      dataTransfer: { getData: () => "Pikachu" },
+    });
+
+    await waitFor(() => expect(fetchQueryMock).toHaveBeenCalled());
+    expect(createFusionMock).not.toHaveBeenCalled();
+    expect(clearEncounterFromLocationMock).not.toHaveBeenCalled();
+  });
+
+  it("does not process drops when fusion is disabled", () => {
+    isEggMock.mockReturnValue(true);
+    dragActions.startDrag("Pikachu", "route-2-single", {
+      id: 25,
+      name: "Pikachu",
+      nationalDexId: 25,
+    });
+
+    render(
+      <FusionToggleButton
+        isFusion={false}
+        locationId="route-1"
+        onToggleFusion={vi.fn()}
+        selectedPokemon={{ id: 1, name: "Togepi", nationalDexId: 175 }}
+      />,
+    );
+
+    fireEvent.drop(screen.getByRole("button"), {
+      dataTransfer: { getData: () => "Pikachu" },
+    });
+
+    expect(fetchQueryMock).not.toHaveBeenCalled();
     expect(createFusionMock).not.toHaveBeenCalled();
   });
 });

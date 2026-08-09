@@ -1,9 +1,7 @@
 import { proxy, subscribe } from "valtio";
 import { getBrowserReducedMotion } from "@/lib/reduced-motion";
-import {
-  getActivePlaythrough,
-  playthroughsStore,
-} from "@/stores/playthroughs/store";
+import { getActivePlaythrough } from "@/stores/playthroughs/playthrough-state";
+import { playthroughsStore } from "@/stores/playthroughs/store";
 
 const SETTINGS_STORAGE_KEY = "settings:v1";
 const LEGACY_SETTINGS_STORAGE_KEY = "settings";

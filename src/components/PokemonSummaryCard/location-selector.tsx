@@ -22,7 +22,7 @@ import {
 } from "@/loaders/locations";
 import { isEggId, type PokemonOptionType } from "@/loaders/pokemon";
 import { useCustomLocations } from "@/stores/playthroughs/hooks";
-import { getActivePlaythrough } from "@/stores/playthroughs/store";
+import { getActivePlaythrough } from "@/stores/playthroughs/playthrough-state";
 import { canFuse } from "@/utils/pokemon-predicates";
 import { PokemonSprite } from "../pokemon-sprite";
 
@@ -154,6 +154,40 @@ function canCreateFusion(
 ) {
   return Boolean(
     headPokemon && bodyPokemon && canFuse(headPokemon, bodyPokemon),
+  );
+}
+
+function matchesPokemonName(
+  pokemon: PokemonOptionType | null | undefined,
+  query: string,
+) {
+  if (!pokemon) {
+    return false;
+  }
+
+  return (
+    pokemon.name.toLowerCase().includes(query) ||
+    pokemon.nickname?.toLowerCase().includes(query)
+  );
+}
+
+function matchesLocationSearch(
+  location: CombinedLocation,
+  query: string,
+  activePlaythrough: ReturnType<typeof getActivePlaythrough>,
+) {
+  const locationMatches =
+    location.name.toLowerCase().includes(query) ||
+    location.region.toLowerCase().includes(query) ||
+    location.description.toLowerCase().includes(query);
+  if (locationMatches) {
+    return true;
+  }
+
+  const encounter = activePlaythrough?.encounters?.[location.id];
+  return (
+    matchesPokemonName(encounter?.head, query) ||
+    matchesPokemonName(encounter?.body, query)
   );
 }
 
@@ -519,36 +553,9 @@ function useLocationSelector({
     const query = searchQuery.toLowerCase();
     const activePlaythrough = getActivePlaythrough();
 
-    return availableLocations.filter((location) => {
-      // Search by location properties
-      const locationMatch =
-        location.name.toLowerCase().includes(query) ||
-        location.region.toLowerCase().includes(query) ||
-        location.description.toLowerCase().includes(query);
-
-      if (locationMatch) {
-        return true;
-      }
-
-      // Search by Pokemon names at this location
-      const encounter = activePlaythrough?.encounters?.[location.id];
-      if (encounter) {
-        const headPokemon = encounter.head;
-        const bodyPokemon = encounter.body;
-
-        const pokemonMatch =
-          headPokemon?.name?.toLowerCase().includes(query) ||
-          headPokemon?.nickname?.toLowerCase().includes(query) ||
-          bodyPokemon?.name?.toLowerCase().includes(query) ||
-          bodyPokemon?.nickname?.toLowerCase().includes(query);
-
-        if (pokemonMatch) {
-          return true;
-        }
-      }
-
-      return false;
-    });
+    return availableLocations.filter((location) =>
+      matchesLocationSearch(location, query, activePlaythrough),
+    );
   })();
 
   // Determine what Pokemon is being moved

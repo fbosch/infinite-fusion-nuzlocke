@@ -34,14 +34,22 @@ const extractArtists = (html: string): string[] => {
   return artists;
 };
 
+const addArtistCredits = (
+  artistCredits: Record<string, string[]>,
+  id: string,
+  html: string,
+) => {
+  const artists = extractArtists(html);
+  if (artists.length > 0) {
+    artistCredits[id] = artists;
+  }
+};
+
 const extractArtistCredits = (html: string, id: string) => {
   const artistCredits: Record<string, string[]> = {};
   const baseDexEntryMatch = html.match(BASE_DEX_ENTRY_REGEX);
   if (baseDexEntryMatch) {
-    const baseArtists = extractArtists(baseDexEntryMatch[0]);
-    if (baseArtists.length > 0) {
-      artistCredits[id] = baseArtists;
-    }
+    addArtistCredits(artistCredits, id, baseDexEntryMatch[0]);
   }
 
   const spriteArticles = html.match(SPRITE_ARTICLE_REGEX);
@@ -52,10 +60,7 @@ const extractArtistCredits = (html: string, id: string) => {
       continue;
     }
 
-    const artists = extractArtists(figcaption);
-    if (artists.length > 0) {
-      artistCredits[spriteId] = artists;
-    }
+    addArtistCredits(artistCredits, spriteId, figcaption);
   }
 
   return artistCredits;

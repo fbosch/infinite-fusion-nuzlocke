@@ -29,7 +29,7 @@ vi.mock("react-intersection-observer", () => ({
   useInView: () => inViewState,
 }));
 
-vi.mock("@/hooks/useMounted", () => ({
+vi.mock("@/hooks/use-mounted", () => ({
   useMounted: () => true,
 }));
 

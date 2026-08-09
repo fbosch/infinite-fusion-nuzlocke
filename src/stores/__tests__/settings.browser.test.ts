@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getActivePlaythrough, playthroughsStore } from "../playthroughs/store";
+import { getActivePlaythrough } from "../playthroughs/playthrough-state";
+import { playthroughsStore } from "../playthroughs/store";
 import {
   getEffectiveReducedMotion,
   SettingsSchema,
@@ -7,11 +8,13 @@ import {
   settingsStore,
 } from "../settings";
 
-// Mock the playthroughs store
+vi.mock("../playthroughs/playthrough-state", () => ({
+  getActivePlaythrough: vi.fn(),
+}));
+
 vi.mock("../playthroughs/store", async () => {
   const { proxy } = await import("valtio");
   return {
-    getActivePlaythrough: vi.fn(),
     playthroughsStore: proxy({ isLoading: false }),
   };
 });

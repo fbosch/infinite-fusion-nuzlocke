@@ -26,6 +26,10 @@ interface SourceTagProps {
   sources: EncounterSource[];
 }
 
+const sourceTagTransition = {
+  transitionProperty: "padding, gap, color, background-color, border-color",
+};
+
 export function SourceTag({ sources, locationId }: SourceTagProps) {
   if (!sources.length) {
     return null;
@@ -37,9 +41,10 @@ export function SourceTag({ sources, locationId }: SourceTagProps) {
       <span
         className={clsx(
           "flex items-center gap-1 rounded-sm px-1.5 py-0.5 font-medium text-xs leading-none",
-          "border border-blue-200/60 bg-blue-50 text-blue-700 transition-[padding,gap,color,background-color,border-color] duration-200 hover:bg-blue-100 dark:border-blue-700/40 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/70",
+          "border border-blue-200/60 bg-blue-50 text-blue-700 duration-200 hover:bg-blue-100 dark:border-blue-700/40 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/70",
           "font-medium group-hover:gap-2 group-hover:px-2",
         )}
+        style={sourceTagTransition}
         title="Starter"
       >
         <span className="hidden group-hover:inline">Starter</span>
@@ -55,10 +60,11 @@ export function SourceTag({ sources, locationId }: SourceTagProps) {
       <span
         className={clsx(
           "flex items-center gap-1 rounded-sm px-1.5 py-0.5 font-medium text-xs leading-none",
-          "transition-[padding,gap,color,background-color,border-color] duration-200",
+          "duration-200",
           config.className,
           "group-hover:gap-2 group-hover:px-2",
         )}
+        style={sourceTagTransition}
         title={config.text}
       >
         <span className="hidden group-hover:inline">{config.text}</span>
@@ -76,11 +82,12 @@ export function SourceTag({ sources, locationId }: SourceTagProps) {
           <span
             className={clsx(
               "flex items-center gap-1 rounded-sm px-1.5 py-0.5 font-medium text-xs leading-none",
-              "transition-[padding,gap,color,background-color,border-color] duration-200",
+              "duration-200",
               config.className,
               "group-hover:gap-2 group-hover:px-2",
             )}
             key={source}
+            style={sourceTagTransition}
             title={config.text}
           >
             <span className="hidden group-hover:inline">{config.text}</span>

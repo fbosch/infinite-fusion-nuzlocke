@@ -3,6 +3,7 @@ import {
   generateSpriteVariantUrl,
   getSpriteVariantSuffix,
 } from "@/lib/sprite-variants";
+import { checkSpriteExists } from "@/lib/sprites";
 import type { SpriteVariantsResponse } from "@/types/sprites";
 
 export const revalidate = 86_400;
@@ -20,44 +21,6 @@ export function OPTIONS() {
   response.headers.set("Access-Control-Allow-Headers", "Content-Type");
 
   return response;
-}
-
-/**
- * Check if a sprite URL exists using fetch
- */
-async function checkSpriteExists(url: string): Promise<boolean> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-    const response = await fetch(url, {
-      method: "HEAD",
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-    return response.ok;
-  } catch (error) {
-    // If HEAD fails, try GET (some servers don't support HEAD)
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-      const response = await fetch(url, {
-        headers: {
-          Range: "bytes=0-1023", // Only fetch first 1KB to minimize data transfer
-        },
-        method: "GET",
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-      return response.ok;
-    } catch (getError) {
-      console.warn("Failed to check sprite exists:", error, getError);
-      return false;
-    }
-  }
 }
 
 export function GET(request: NextRequest) {
@@ -172,7 +135,7 @@ async function collectSpriteVariants(
   const variant = getSpriteVariantSuffix(index);
   const url = generateSpriteVariantUrl(id, variant);
 
-  if (await checkSpriteExists(url)) {
+  if (await checkSpriteExists(url, { Range: "bytes=0-1023" })) {
     variants.push(variant);
     await collectSpriteVariants(id, maxVariants, variants, index + 1);
   }

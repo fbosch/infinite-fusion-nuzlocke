@@ -277,8 +277,9 @@ export default function LocationTable() {
   return (
     <div className="overflow-hidden border-gray-200 border-y md:border xl:shadow-sm 2xl:rounded-lg dark:border-gray-700">
       <div
-        className="scrollbar-thin relative max-h-[93.5vh] overflow-auto overscroll-x-none"
+        className="scrollbar-thin relative overflow-auto overscroll-x-none"
         ref={tableContainerRef}
+        style={{ maxHeight: "93.5vh" }}
       >
         <table
           aria-label="Locations table"

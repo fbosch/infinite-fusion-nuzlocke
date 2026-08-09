@@ -1,4 +1,5 @@
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
+import { findPokemonByUid } from "@/utils/encounter-utils";
 import { getAvailableTeamPositionsForMembers } from "../team-positions";
 import type { EncounterData } from "../types";
 import { ensureActivePlaythroughWithEncounters } from "./shared";
@@ -179,27 +180,6 @@ export const autoAssignCapturedPokemonToTeam = async (
   }
 };
 
-const findPokemonByUID = (
-  encounters: Record<string, EncounterData> | undefined,
-  uid: string,
-) => {
-  if (!encounters) {
-    return null;
-  }
-
-  for (const encounter of Object.values(encounters)) {
-    if (encounter?.head?.uid === uid) {
-      return encounter.head;
-    }
-
-    if (encounter?.body?.uid === uid) {
-      return encounter.body;
-    }
-  }
-
-  return null;
-};
-
 const movePokemonToBox = async (
   encounters: Record<string, EncounterData>,
   pokemonUID: string,
@@ -208,7 +188,7 @@ const movePokemonToBox = async (
     return;
   }
 
-  const pokemon = findPokemonByUID(encounters, pokemonUID);
+  const pokemon = findPokemonByUid(encounters, pokemonUID);
   if (!pokemon) {
     return;
   }

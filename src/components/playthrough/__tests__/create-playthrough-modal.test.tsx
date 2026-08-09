@@ -11,7 +11,7 @@ import type React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import CreatePlaythroughModal from "../create-playthrough-modal";
 
-vi.mock("@/components/CursorTooltip", () => ({
+vi.mock("@/components/cursor-tooltip", () => ({
   CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
 }));
 

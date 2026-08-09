@@ -19,6 +19,7 @@ import { clsx } from "clsx";
 import {
   cloneElement,
   isValidElement,
+  useCallback,
   useEffect,
   useId,
   useLayoutEffect,
@@ -96,6 +97,134 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+function getFiniteAnimations(node: HTMLElement): Animation[] {
+  return node.getAnimations({ subtree: true }).filter((animation) => {
+    const { effect } = animation as Animation & {
+      effect?: KeyframeEffect | null;
+    };
+    if (!effect || typeof effect.getTiming !== "function") {
+      return false;
+    }
+
+    const timing = effect.getTiming() as KeyframeEffectOptions & {
+      duration?: number | string;
+      iterations?: number;
+    };
+    const duration = typeof timing.duration === "number" ? timing.duration : 0;
+    const iterations =
+      typeof timing.iterations === "number" ? timing.iterations : 1;
+    return Number.isFinite(duration) && Number.isFinite(iterations);
+  });
+}
+
+function useTooltipAnimation({
+  instanceId,
+  reducedMotion,
+  shouldDisableTooltip,
+  tooltipId,
+}: {
+  instanceId: string;
+  reducedMotion: boolean;
+  shouldDisableTooltip: boolean;
+  tooltipId?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [animationState, setAnimationState] = useState<
+    "entering" | "entered" | "exiting" | null
+  >(null);
+  const animationBatchRef = useRef(0);
+  const animationStateRef = useRef<typeof animationState>(animationState);
+  const floatingElementRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    animationStateRef.current = animationState;
+  }, [animationState]);
+
+  const finishAnimation = useCallback(() => {
+    if (animationStateRef.current === "entering") {
+      setAnimationState("entered");
+      return;
+    }
+
+    if (animationStateRef.current === "exiting") {
+      setIsOpen(false);
+    }
+  }, []);
+  const waitForAnimation = useCallback(() => {
+    const batchId = animationBatchRef.current;
+    window.requestAnimationFrame(() => {
+      const node = floatingElementRef.current;
+      const animations = getFiniteAnimations(node as HTMLElement);
+      if (animations.length === 0) {
+        finishAnimation();
+        return;
+      }
+
+      Promise.allSettled(
+        animations.map((animation) => animation.finished),
+      ).then(() => {
+        if (animationBatchRef.current === batchId) {
+          finishAnimation();
+        }
+      });
+    });
+  }, [finishAnimation]);
+  const onOpenChange = useCallback(
+    (open: boolean) => {
+      if (shouldDisableTooltip) {
+        setIsOpen(false);
+        setAnimationState(null);
+        return;
+      }
+
+      if (open && tooltipId) {
+        window.dispatchEvent(
+          new CustomEvent("cursor-tooltip-open", {
+            detail: { instanceId, tooltipId },
+          }),
+        );
+      }
+
+      if (reducedMotion) {
+        animationBatchRef.current += 1;
+        setIsOpen(open);
+        setAnimationState(null);
+        return;
+      }
+
+      if (open) {
+        setIsOpen(true);
+        setAnimationState("entering");
+      } else {
+        setAnimationState("exiting");
+      }
+
+      animationBatchRef.current += 1;
+      waitForAnimation();
+    },
+    [
+      instanceId,
+      reducedMotion,
+      shouldDisableTooltip,
+      tooltipId,
+      waitForAnimation,
+    ],
+  );
+
+  const closeImmediately = useCallback(() => {
+    setIsOpen(false);
+    setAnimationState(null);
+  }, []);
+
+  return {
+    animationState,
+    closeImmediately,
+    floatingElementRef,
+    isOpen,
+    onOpenChange,
+  };
+}
+
 interface CursorTooltipProps {
   children: React.ReactElement;
   className?: string;
@@ -125,16 +254,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
     onMouseLeave,
   } = props;
   const instanceId = useId();
-  const [isOpen, setIsOpen] = useState(false);
   const [isPausedByContextMenu, setIsPausedByContextMenu] = useState(false);
-  const [animationState, setAnimationState] = useState<
-    "entering" | "entered" | "exiting" | null
-  >(null);
-  const animationBatchRef = useRef(0);
-  const animationStateRef = useRef<typeof animationState>(animationState);
-  useEffect(() => {
-    animationStateRef.current = animationState;
-  }, [animationState]);
   const isWindowVisible = useWindowVisibility();
   const dragSnapshot = useSnapshot(dragStore);
   const settings = useSnapshot(settingsStore);
@@ -147,6 +267,18 @@ export function CursorTooltip(props: CursorTooltipProps) {
     !isWindowVisible ||
     dragSnapshot.isDragging ||
     isPausedByContextMenu;
+  const {
+    animationState,
+    closeImmediately,
+    floatingElementRef,
+    isOpen,
+    onOpenChange,
+  } = useTooltipAnimation({
+    instanceId,
+    reducedMotion,
+    shouldDisableTooltip,
+    tooltipId,
+  });
   const isTooltipVisible = isOpen && shouldDisableTooltip === false;
 
   const {
@@ -162,91 +294,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
       }),
       shift(),
     ],
-    onOpenChange: (open) => {
-      if (shouldDisableTooltip) {
-        setIsOpen(false);
-        setAnimationState(null);
-        return;
-      }
-
-      if (open) {
-        if (tooltipId) {
-          window.dispatchEvent(
-            new CustomEvent("cursor-tooltip-open", {
-              detail: { instanceId, tooltipId },
-            }),
-          );
-        }
-        setIsOpen(true);
-        if (reducedMotion) {
-          animationBatchRef.current += 1;
-          setAnimationState(null);
-          return;
-        }
-        setAnimationState("entering");
-      } else {
-        if (reducedMotion) {
-          animationBatchRef.current += 1;
-          setIsOpen(false);
-          setAnimationState(null);
-          return;
-        }
-        setAnimationState("exiting");
-      }
-
-      animationBatchRef.current += 1;
-      const currentBatchId = animationBatchRef.current;
-      // Wait for the element to mount/update, then observe running animations/transitions
-      window.requestAnimationFrame(() => {
-        const node = refs.floating.current as HTMLElement | null;
-        if (!node) {
-          return;
-        }
-        const allAnimations = node.getAnimations({ subtree: true });
-
-        // Consider only finite animations/transitions (ignore infinite/unknown)
-        const finiteAnimations = allAnimations.filter((a) => {
-          const { effect } = a as Animation & {
-            effect?: KeyframeEffect | null;
-          };
-          if (!effect || typeof effect.getTiming !== "function") {
-            return false;
-          }
-          const t = effect.getTiming() as KeyframeEffectOptions & {
-            duration?: number | string;
-            iterations?: number;
-          };
-          const duration: number =
-            typeof t.duration === "number" ? (t.duration as number) : 0;
-          const iterations: number =
-            typeof t.iterations === "number" ? (t.iterations as number) : 1;
-          return Number.isFinite(duration) && Number.isFinite(iterations);
-        });
-
-        if (!finiteAnimations.length) {
-          // No finite animations; finalize immediately
-          const state = animationStateRef.current;
-          if (state === "entering") {
-            setAnimationState("entered");
-          } else if (state === "exiting") {
-            setIsOpen(false);
-          }
-          return;
-        }
-
-        Promise.allSettled(finiteAnimations.map((a) => a.finished)).then(() => {
-          if (animationBatchRef.current !== currentBatchId) {
-            return; // stale
-          }
-          const state = animationStateRef.current;
-          if (state === "entering") {
-            setAnimationState("entered");
-          } else if (state === "exiting") {
-            setIsOpen(false);
-          }
-        });
-      });
-    },
+    onOpenChange,
     open: isTooltipVisible,
     placement,
     whileElementsMounted: (reference, floating, update) => {
@@ -260,6 +308,13 @@ export function CursorTooltip(props: CursorTooltipProps) {
       return cleanup;
     },
   });
+  const setFloatingRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      floatingElementRef.current = node;
+      refs.setFloating(node);
+    },
+    [floatingElementRef, refs],
+  );
 
   useLayoutEffect(() => {
     if (!(reducedMotion && refs.domReference.current)) {
@@ -282,20 +337,18 @@ export function CursorTooltip(props: CursorTooltipProps) {
         return;
       }
 
-      setIsOpen(false);
-      setAnimationState(null);
+      closeImmediately();
     };
 
     window.addEventListener("cursor-tooltip-open", handleTooltipOpen);
     return () => {
       window.removeEventListener("cursor-tooltip-open", handleTooltipOpen);
     };
-  }, [instanceId, tooltipId]);
+  }, [closeImmediately, instanceId, tooltipId]);
 
   useEffect(() => {
     const pauseTooltip = () => {
-      setIsOpen(false);
-      setAnimationState(null);
+      closeImmediately();
       setIsPausedByContextMenu(true);
     };
     const resumeTooltip = () => setIsPausedByContextMenu(false);
@@ -306,7 +359,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
       window.removeEventListener("context-menu-open", pauseTooltip);
       window.removeEventListener("context-menu-close", resumeTooltip);
     };
-  }, []);
+  }, [closeImmediately]);
 
   // Register tooltip with global state when it opens/closes
   useEffect(() => {
@@ -381,7 +434,7 @@ export function CursorTooltip(props: CursorTooltipProps) {
           {/* react-doctor-disable-next-line react-hooks-js/refs -- Floating UI callback refs run during commit, not render. */}
           <div
             className="pointer-events-none z-[9999]"
-            ref={refs.setFloating}
+            ref={setFloatingRef}
             style={floatingStyles}
             {...getFloatingProps()}
           >

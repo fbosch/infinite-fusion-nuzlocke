@@ -36,7 +36,7 @@ vi.mock(
 );
 
 vi.mock("@/hooks/use-pokemon-types", () => ({
-  default: () => ({ primary: null, secondary: null }),
+  usePokemonTypes: () => ({ primary: null, secondary: null }),
 }));
 
 vi.mock("@/loaders/locations", () => ({
@@ -61,7 +61,7 @@ vi.mock("@/stores/playthroughs/index", () => ({
   playthroughActions: {},
 }));
 
-vi.mock("@/stores/playthroughs/store", () => ({
+vi.mock("@/stores/playthroughs/playthrough-state", () => ({
   getActivePlaythrough: () => null,
 }));
 

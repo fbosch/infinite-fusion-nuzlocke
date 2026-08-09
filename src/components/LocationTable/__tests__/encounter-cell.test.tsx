@@ -74,15 +74,27 @@ vi.mock("@/components/confirmation-dialog", () => ({
 
 vi.mock("@/components/PokemonCombobox/pokemon-combobox", () => ({
   PokemonCombobox: ({
-    comboboxId,
-    onChange,
-    onFusionChange,
-    onActivate,
+    config: {
+      comboboxId,
+      onChange,
+      onFusionChange,
+      onActivate,
+      onBeforeOverwrite,
+    },
   }: {
-    comboboxId: string;
-    onChange: (pokemon: PokemonOptionType | null) => void;
-    onFusionChange?: (head: PokemonOptionType, body: PokemonOptionType) => void;
-    onActivate?: () => void;
+    config: {
+      comboboxId: string;
+      onChange: (pokemon: PokemonOptionType | null) => void;
+      onFusionChange?: (
+        head: PokemonOptionType,
+        body: PokemonOptionType,
+      ) => void;
+      onActivate?: () => void;
+      onBeforeOverwrite?: (
+        currentPokemon: PokemonOptionType,
+        nextPokemon: PokemonOptionType,
+      ) => Promise<boolean>;
+    };
   }) => {
     const selectedPokemon: PokemonOptionType = {
       id: 133,
@@ -99,6 +111,17 @@ vi.mock("@/components/PokemonCombobox/pokemon-combobox", () => ({
         nationalDexId: 200,
         uid: "misdreavus-1",
       });
+    const requestOverwrite = () =>
+      onBeforeOverwrite?.(
+        {
+          id: 25,
+          name: "Pikachu",
+          nationalDexId: 25,
+          nickname: "Sparky",
+          uid: "pikachu-1",
+        },
+        selectedPokemon,
+      );
 
     return (
       <div>
@@ -113,6 +136,9 @@ vi.mock("@/components/PokemonCombobox/pokemon-combobox", () => ({
         </button>
         <button onClick={createFusion} type="button">
           {`fuse-${comboboxId}`}
+        </button>
+        <button onClick={requestOverwrite} type="button">
+          {`overwrite-${comboboxId}`}
         </button>
       </div>
     );
@@ -472,4 +498,52 @@ describe("EncounterCell", () => {
     expect(createFusionMock).not.toHaveBeenCalled();
     expect(screen.getByText(valuableEncounterText)).toBeDefined();
   });
+
+  it.each([
+    ["Gift", "gift", "received"],
+    ["Trade", "trade", "traded"],
+  ])(
+    "applies the %s status after confirming an overwrite",
+    (_, source, status) => {
+      useEncounterMock.mockReturnValue({
+        body: null,
+        head: {
+          id: 25,
+          name: "Pikachu",
+          nationalDexId: 25,
+          nickname: "Sparky",
+          uid: "pikachu-1",
+        },
+        isFusion: false,
+        updatedAt: Date.now(),
+      });
+      useEncountersForLocationMock.mockReturnValue({
+        routeEncounterData: [{ id: 133, sources: [source] }],
+      });
+
+      render(
+        <table>
+          <tbody>
+            <tr>
+              <EncounterCell locationId="route-1" />
+            </tr>
+          </tbody>
+        </table>,
+      );
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "overwrite-route-1-single" }),
+      );
+      fireEvent.click(
+        screen.getByRole("button", { name: "Replace Encounter" }),
+      );
+
+      expect(updateEncounterMock).toHaveBeenCalledWith(
+        "route-1",
+        expect.objectContaining({ id: 133, status }),
+        "head",
+        false,
+      );
+    },
+  );
 });

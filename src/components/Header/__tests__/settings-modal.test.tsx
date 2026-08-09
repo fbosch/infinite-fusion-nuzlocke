@@ -8,7 +8,7 @@ vi.mock("next-themes", () => ({
   useTheme: () => ({ setTheme: vi.fn(), theme: "system" }),
 }));
 
-vi.mock("@/hooks/useMounted", () => ({
+vi.mock("@/hooks/use-mounted", () => ({
   useMounted: () => true,
 }));
 

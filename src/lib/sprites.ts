@@ -45,7 +45,10 @@ export function generateSpriteUrl(
  * Check if a sprite URL exists
  * Works in both main thread (using Image) and web workers (using fetch)
  */
-async function _checkSpriteExists(url: string): Promise<boolean> {
+export async function checkSpriteExists(
+  url: string,
+  getHeaders?: HeadersInit,
+): Promise<boolean> {
   // Try Image approach first in main thread (more reliable for images)
   if (typeof window !== "undefined" && typeof Image !== "undefined") {
     return new Promise<boolean>((resolve) => {
@@ -91,6 +94,7 @@ async function _checkSpriteExists(url: string): Promise<boolean> {
       const timeoutId = setTimeout(() => controller.abort(), 3000);
 
       const response = await fetch(url, {
+        ...(getHeaders ? { headers: getHeaders } : {}),
         method: "GET",
         signal: controller.signal,
       });

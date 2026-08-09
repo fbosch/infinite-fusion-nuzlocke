@@ -2,6 +2,42 @@ import { generatePrefixedId } from "@/utils/id";
 import { normalizeImportedPlaythrough } from "./migrations";
 import type { Playthrough } from "./types";
 
+interface ValidationError {
+  issues: Array<{ path: PropertyKey[]; message: string }>;
+}
+
+const isValidationError = (error: unknown): error is ValidationError =>
+  error !== null && typeof error === "object" && "issues" in error;
+
+const createImportError = async (error: unknown): Promise<Error> => {
+  if (isValidationError(error) === false) {
+    return new Error("Invalid playthrough data format", { cause: error });
+  }
+
+  try {
+    const { z } = await import("zod");
+    const prettyError = z.prettifyError(error as never);
+    if (prettyError) {
+      return new Error(`Validation failed:\n\n${prettyError}`, {
+        cause: error,
+      });
+    }
+  } catch {
+    // Fall back to manual issue formatting.
+  }
+
+  const errorDetails = error.issues
+    .map((issue) => {
+      const path = issue.path.length > 0 ? ` at ${issue.path.join(".")}` : "";
+      return `• ${issue.message}${path}`;
+    })
+    .join("\n");
+
+  return errorDetails
+    ? new Error(`Validation failed:\n\n${errorDetails}`, { cause: error })
+    : new Error("Data validation failed", { cause: error });
+};
+
 export const prepareImportedPlaythrough = async (
   importData: unknown,
   existingIds: Iterable<string>,
@@ -37,42 +73,6 @@ export const prepareImportedPlaythrough = async (
     };
   } catch (error) {
     console.error("Failed to import playthrough:", error);
-
-    if (error && typeof error === "object" && "issues" in error) {
-      const zodError = error as {
-        issues: Array<{ path: PropertyKey[]; message: string }>;
-      };
-      let prettyError: string | null = null;
-
-      try {
-        const { z } = await import("zod");
-        prettyError = z.prettifyError(zodError as never);
-      } catch {
-        // Fall back to manual issue formatting.
-      }
-
-      if (prettyError) {
-        throw new Error(`Validation failed:\n\n${prettyError}`, {
-          cause: error,
-        });
-      }
-
-      if (zodError.issues.length > 0) {
-        const errorDetails = zodError.issues
-          .map((issue) => {
-            const path =
-              issue.path.length > 0 ? ` at ${issue.path.join(".")}` : "";
-            return `• ${issue.message}${path}`;
-          })
-          .join("\n");
-        throw new Error(`Validation failed:\n\n${errorDetails}`, {
-          cause: error,
-        });
-      }
-
-      throw new Error("Data validation failed", { cause: error });
-    }
-
-    throw new Error("Invalid playthrough data format", { cause: error });
+    throw await createImportError(error);
   }
 };

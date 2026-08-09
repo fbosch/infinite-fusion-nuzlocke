@@ -490,45 +490,31 @@ interface ContextMenuItemRendererProps {
   submenuRef: React.RefObject<HTMLDivElement | null>;
 }
 
-function ContextMenuItemRenderer({
-  activeIndex,
-  activeSubmenuIndex,
+interface ContextMenuItemControlProps {
+  closeMenu: () => void;
+  closeSubmenu: () => void;
+  getItemProps: MenuItemPropsGetter;
+  isActive: boolean;
+  item: ContextMenuItem;
+  itemIndex: number;
+  openSubmenuForIndex: (index: number) => void;
+  openSubmenuIndex: number | null;
+  registerItemRef: (node: HTMLElement | null) => void;
+  setActiveSubmenuIndex: React.Dispatch<React.SetStateAction<number>>;
+  submenuItemRefs: React.RefObject<Array<HTMLButtonElement | null>>;
+}
+
+function ContextMenuLinkItem({
   closeMenu,
-  closeSubmenu,
   getItemProps,
+  isActive,
   item,
-  itemIndex,
-  listRef,
-  openSubmenuForIndex,
-  openSubmenuIndex,
-  setActiveSubmenuIndex,
-  submenuItemRefs,
-  submenuPosition,
-  submenuRef,
-  setItemRef,
-  setSubmenuItemRef,
-}: ContextMenuItemRendererProps) {
-  const isNavigable = !(item.disabled || item.visualOnly);
-  const isActive = activeIndex === itemIndex;
-  const hasChildren = Array.isArray(item.children) && item.children.length > 0;
-  const classes = clsx(
-    "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
-    "text-sm transition-colors duration-75 enabled:cursor-pointer",
-    "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-    item.visualOnly
-      ? "cursor-default text-gray-500 dark:text-gray-400"
-      : getContextMenuItemVariantClasses(item.variant, isActive),
-    item.disabled ? "!opacity-75 !cursor-not-allowed" : undefined,
-  );
-  const registerItemRef = useCallback(
-    (node: HTMLElement | null) => {
-      if (isNavigable) {
-        setItemRef(itemIndex, node);
-      }
-    },
-    [isNavigable, itemIndex, setItemRef],
-  );
-  const handleLinkClick = useCallback(
+  registerItemRef,
+}: Pick<
+  ContextMenuItemControlProps,
+  "closeMenu" | "getItemProps" | "isActive" | "item" | "registerItemRef"
+>) {
+  const handleClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
       if (item.disabled) {
         event.preventDefault();
@@ -541,7 +527,49 @@ function ContextMenuItemRenderer({
     },
     [closeMenu, item],
   );
-  const handleButtonClick = useCallback(
+  return (
+    <a
+      aria-disabled={item.disabled || undefined}
+      className={getContextMenuItemClasses(item, isActive)}
+      href={item.href}
+      ref={registerItemRef}
+      role="menuitem"
+      tabIndex={isActive ? 0 : -1}
+      target={item.target}
+      {...getItemProps({ onClick: handleClick })}
+    >
+      <ContextMenuItemContent hasChildren={false} item={item} />
+    </a>
+  );
+}
+
+function getContextMenuItemClasses(item: ContextMenuItem, isActive: boolean) {
+  return clsx(
+    "group flex w-full items-center justify-between rounded-sm px-2 py-1.5",
+    "text-sm transition-colors duration-75 enabled:cursor-pointer",
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+    item.visualOnly
+      ? "cursor-default text-gray-500 dark:text-gray-400"
+      : getContextMenuItemVariantClasses(item.variant, isActive),
+    item.disabled ? "!opacity-75 !cursor-not-allowed" : undefined,
+  );
+}
+
+function ContextMenuButtonItem({
+  closeMenu,
+  closeSubmenu,
+  getItemProps,
+  isActive,
+  item,
+  itemIndex,
+  openSubmenuForIndex,
+  openSubmenuIndex,
+  registerItemRef,
+  setActiveSubmenuIndex,
+  submenuItemRefs,
+}: ContextMenuItemControlProps) {
+  const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+  const handleClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
       event.stopPropagation();
@@ -554,14 +582,13 @@ function ContextMenuItemRenderer({
     },
     [closeMenu, hasChildren, item],
   );
-  const handleButtonKeyDown = useCallback(
+  const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>) => {
-      if (
-        !hasChildren ||
-        (event.key !== "ArrowRight" &&
-          event.key !== "Enter" &&
-          event.key !== " ")
-      ) {
+      const opensSubmenu =
+        event.key === "ArrowRight" ||
+        event.key === "Enter" ||
+        event.key === " ";
+      if (!(hasChildren && opensSubmenu)) {
         return;
       }
 
@@ -599,14 +626,52 @@ function ContextMenuItemRenderer({
 
     closeSubmenu();
   }, [closeSubmenu, hasChildren, itemIndex, openSubmenuForIndex]);
-
-  if (item.separator) {
-    return <hr className="my-1 h-px border-0 bg-gray-300 dark:bg-gray-600" />;
-  }
-
-  const content = (
-    <ContextMenuItemContent hasChildren={hasChildren} item={item} />
+  return (
+    <button
+      aria-expanded={hasChildren ? openSubmenuIndex === itemIndex : undefined}
+      aria-haspopup={hasChildren ? "menu" : undefined}
+      className={getContextMenuItemClasses(item, isActive)}
+      disabled={item.disabled}
+      ref={registerItemRef}
+      role="menuitem"
+      tabIndex={isActive ? 0 : -1}
+      {...getItemProps({
+        onClick: handleClick,
+        onKeyDown: handleKeyDown,
+        onMouseEnter: handleMouseEnter,
+      })}
+    >
+      <ContextMenuItemContent hasChildren={hasChildren} item={item} />
+    </button>
   );
+}
+
+interface ContextMenuItemRendererContentProps
+  extends Omit<ContextMenuItemRendererProps, "activeIndex"> {
+  hasChildren: boolean;
+  isActive: boolean;
+  registerItemRef: (node: HTMLElement | null) => void;
+}
+
+function ContextMenuItemRendererContent({
+  activeSubmenuIndex,
+  closeMenu,
+  closeSubmenu,
+  getItemProps,
+  hasChildren,
+  isActive,
+  item,
+  itemIndex,
+  listRef,
+  openSubmenuForIndex,
+  openSubmenuIndex,
+  registerItemRef,
+  setActiveSubmenuIndex,
+  setSubmenuItemRef,
+  submenuItemRefs,
+  submenuPosition,
+  submenuRef,
+}: ContextMenuItemRendererContentProps) {
   const submenu =
     hasChildren && openSubmenuIndex === itemIndex ? (
       <ContextMenuSubmenuController
@@ -625,60 +690,106 @@ function ContextMenuItemRenderer({
     ) : null;
 
   if (item.href) {
-    const link = (
-      <a
-        aria-disabled={item.disabled || undefined}
-        className={classes}
-        href={item.href}
-        ref={registerItemRef}
-        role="menuitem"
-        tabIndex={isActive ? 0 : -1}
-        target={item.target}
-        {...getItemProps({ onClick: handleLinkClick })}
-      >
-        {content}
-      </a>
-    );
     return (
       <ContextMenuItemTooltip tooltip={item.tooltip}>
-        {link}
+        <ContextMenuLinkItem
+          closeMenu={closeMenu}
+          getItemProps={getItemProps}
+          isActive={isActive}
+          item={item}
+          registerItemRef={registerItemRef}
+        />
       </ContextMenuItemTooltip>
     );
   }
 
   const control = item.visualOnly ? (
-    <div className={classes} role="presentation">
-      {content}
+    <div
+      className={getContextMenuItemClasses(item, isActive)}
+      role="presentation"
+    >
+      <ContextMenuItemContent hasChildren={hasChildren} item={item} />
     </div>
   ) : (
-    <button
-      aria-expanded={hasChildren ? openSubmenuIndex === itemIndex : undefined}
-      aria-haspopup={hasChildren ? "menu" : undefined}
-      className={classes}
-      disabled={item.disabled}
-      ref={registerItemRef}
-      role="menuitem"
-      tabIndex={isActive ? 0 : -1}
-      {...getItemProps({
-        onClick: handleButtonClick,
-        onKeyDown: handleButtonKeyDown,
-        onMouseEnter: handleMouseEnter,
-      })}
-    >
-      {content}
-    </button>
-  );
-  const menuItem = (
-    <div className="relative">
-      {control}
-      {submenu}
-    </div>
+    <ContextMenuButtonItem
+      closeMenu={closeMenu}
+      closeSubmenu={closeSubmenu}
+      getItemProps={getItemProps}
+      isActive={isActive}
+      item={item}
+      itemIndex={itemIndex}
+      openSubmenuForIndex={openSubmenuForIndex}
+      openSubmenuIndex={openSubmenuIndex}
+      registerItemRef={registerItemRef}
+      setActiveSubmenuIndex={setActiveSubmenuIndex}
+      submenuItemRefs={submenuItemRefs}
+    />
   );
 
   return (
     <ContextMenuItemTooltip tooltip={item.tooltip}>
-      {menuItem}
+      <div className="relative">
+        {control}
+        {submenu}
+      </div>
     </ContextMenuItemTooltip>
+  );
+}
+
+function ContextMenuItemRenderer({
+  activeIndex,
+  activeSubmenuIndex,
+  closeMenu,
+  closeSubmenu,
+  getItemProps,
+  item,
+  itemIndex,
+  listRef,
+  openSubmenuForIndex,
+  openSubmenuIndex,
+  setActiveSubmenuIndex,
+  submenuItemRefs,
+  submenuPosition,
+  submenuRef,
+  setItemRef,
+  setSubmenuItemRef,
+}: ContextMenuItemRendererProps) {
+  const isNavigable = !(item.disabled || item.visualOnly);
+  const isActive = activeIndex === itemIndex;
+  const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+  const registerItemRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (isNavigable) {
+        setItemRef(itemIndex, node);
+      }
+    },
+    [isNavigable, itemIndex, setItemRef],
+  );
+  if (item.separator) {
+    return <hr className="my-1 h-px border-0 bg-gray-300 dark:bg-gray-600" />;
+  }
+
+  return (
+    <ContextMenuItemRendererContent
+      activeSubmenuIndex={activeSubmenuIndex}
+      closeMenu={closeMenu}
+      closeSubmenu={closeSubmenu}
+      getItemProps={getItemProps}
+      hasChildren={hasChildren}
+      isActive={isActive}
+      item={item}
+      itemIndex={itemIndex}
+      listRef={listRef}
+      openSubmenuForIndex={openSubmenuForIndex}
+      openSubmenuIndex={openSubmenuIndex}
+      registerItemRef={registerItemRef}
+      setActiveSubmenuIndex={setActiveSubmenuIndex}
+      setItemRef={setItemRef}
+      setSubmenuItemRef={setSubmenuItemRef}
+      submenuItemRefs={submenuItemRefs}
+      submenuPosition={submenuPosition}
+      submenuRef={submenuRef}
+    />
   );
 }
 

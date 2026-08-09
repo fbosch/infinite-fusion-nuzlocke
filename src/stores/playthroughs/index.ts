@@ -50,16 +50,15 @@ import {
   preloadArtworkVariants,
   setArtworkVariant,
 } from "./encounters/variants";
+import { getActivePlaythrough, getCurrentTimestamp } from "./playthrough-state";
 import {
   createPlaythrough,
   cycleGameMode,
   deletePlaythrough,
   forceSave,
-  getActivePlaythrough,
   getAllPlaythroughs,
   getAvailableTeamPositions,
   getCurrentlyLoadedPlaythroughs,
-  getCurrentTimestamp,
   getGameMode,
   getTeamMemberDetails,
   importPlaythrough,

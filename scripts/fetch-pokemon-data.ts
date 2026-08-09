@@ -14,6 +14,7 @@ import {
   type PokemonSpeciesApiData,
   type ProcessedPokemonData,
 } from "./utils/pokemon-data-utils";
+import { normalizePokemonNameForAPI } from "./utils/pokemon-name-utils";
 
 export type { ProcessedPokemonData } from "./utils/pokemon-data-utils";
 
@@ -22,27 +23,6 @@ const P = new Pokedex({
   cacheLimit: 24 * 60 * 60 * 1000, // 24 hours cache
   timeout: 30 * 1000, // 30 second timeout
 });
-
-const FEMALE_SYMBOL_PATTERN = /♀/g;
-const MALE_SYMBOL_PATTERN = /♂/g;
-const PERIOD_PATTERN = /\./g;
-const APOSTROPHE_PATTERN = /'/g;
-const WHITESPACE_PATTERN = /\s+/g;
-const ACCENTED_E_PATTERN = /é/g;
-const POKEMON_NAME_REPLACEMENTS = [
-  [/^aegislash.*$/i, "aegislash-shield"],
-  [/^oricorio.*$/i, "oricorio-baile"],
-  [/^deoxys.*$/i, "deoxys-normal"],
-  [/^gourgeist.*$/i, "gourgeist-average"],
-  [/^pumpkaboo.*$/i, "pumpkaboo-average"],
-  [/^castform.*$/i, "castform"],
-  [/^mimikyu.*$/i, "mimikyu-disguised"],
-  [/^giratina.*$/i, "giratina-altered"],
-  [/^minior.*$/i, "minior-red-meteor"],
-  [/^meloetta.*$/i, "meloetta-aria"],
-  [/^lycanroc.*$/i, "lycanroc-midday"],
-  [/^necrozma.*$/i, "necrozma"],
-] as const;
 
 // Cache for evolution chains to avoid duplicate API calls
 const evolutionChainCache = new Map<number, PokeAPI.EvolutionChain>();
@@ -374,17 +354,7 @@ async function processBatch(
 ): Promise<ProcessedPokemonData[]> {
   // Prepare normalized names for batch API call
   const batchEntries = batch.map((entry) => {
-    const normalizedName = POKEMON_NAME_REPLACEMENTS.reduce(
-      (name, [pattern, replacement]) => name.replace(pattern, replacement),
-      entry.name
-        .toLowerCase()
-        .replace(FEMALE_SYMBOL_PATTERN, "-f")
-        .replace(MALE_SYMBOL_PATTERN, "-m")
-        .replace(PERIOD_PATTERN, "")
-        .replace(APOSTROPHE_PATTERN, "")
-        .replace(WHITESPACE_PATTERN, "-")
-        .replace(ACCENTED_E_PATTERN, "e"),
-    );
+    const normalizedName = normalizePokemonNameForAPI(entry.name);
 
     return { entry, normalizedName };
   });

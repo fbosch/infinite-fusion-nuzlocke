@@ -84,7 +84,6 @@ function PokemonOptionContent({
           "block flex-1 truncate",
           "group-data-selected:",
           "not:group-data-selected:font-normal",
-          isSelected && "",
         )}
       >
         {displayName}
@@ -152,17 +151,13 @@ export function PokemonOption({
   );
   const getClassName = useCallback(
     ({ active }: { active: boolean }) =>
-      clsx(
-        baseClassName,
-        {
-          // Disable active state when user is scrolling to prevent auto-scroll
-          "bg-blue-600 text-white": active,
-          "text-gray-900 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700":
-            !active,
-        },
-        className,
-      ),
-    [baseClassName, className],
+      clsx(baseClassName, {
+        // Disable active state when user is scrolling to prevent auto-scroll
+        "bg-blue-600 text-white": active,
+        "text-gray-900 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700":
+          !active,
+      }),
+    [baseClassName],
   );
 
   return (

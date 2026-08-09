@@ -50,13 +50,13 @@ vi.mock("@/components/context-menu", () => ({
     </>
   ),
 }));
-vi.mock("@/components/CursorTooltip", () => ({
+vi.mock("@/components/cursor-tooltip", () => ({
   CursorTooltip: ({ children }: { children: ReactNode }) => children,
 }));
 vi.mock("@/components/PokemonSummaryCard/artwork-variant-button", () => ({
   ArtworkVariantButton: () => null,
 }));
-vi.mock("@/components/PokemonSummaryCard/FusionSprite", () => ({
+vi.mock("@/components/PokemonSummaryCard/fusion-sprite", () => ({
   FusionSprite: () => <div data-testid="fusion-sprite" />,
 }));
 vi.mock("@/components/PokemonSummaryCard/team-member-context-menu", () => ({

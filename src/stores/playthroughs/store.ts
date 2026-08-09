@@ -20,8 +20,8 @@ import {
   saveToIndexedDB,
 } from "./persistence";
 import {
-  getActivePlaythrough as getActivePlaythroughFromState,
-  getCurrentTimestamp as getCurrentTimestampFromState,
+  getActivePlaythrough,
+  getCurrentTimestamp,
   setPlaythroughsStore,
 } from "./playthrough-state";
 import { getAvailableTeamPositionsForMembers } from "./team-positions";
@@ -32,9 +32,6 @@ import {
   type Playthrough,
   type PlaythroughsState,
 } from "./types";
-
-export const getActivePlaythrough = getActivePlaythroughFromState;
-export const getCurrentTimestamp = getCurrentTimestampFromState;
 
 // Default state
 const defaultState: PlaythroughsState = {
