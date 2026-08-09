@@ -159,6 +159,9 @@ export const PokemonCombobox = ({
     scrollPaddingEnd: 16,
     scrollPaddingStart: 16,
   });
+  const isVirtualizerScrolling = virtualizer.isScrolling;
+  const totalSize = virtualizer.getTotalSize();
+  const virtualItems = virtualizer.getVirtualItems();
 
   const optionsContent = (
     <PokemonComboboxOptionContent
@@ -173,7 +176,10 @@ export const PokemonCombobox = ({
       isShowingLoading={isShowingLoading}
       locationId={locationId}
       shouldVirtualize={shouldVirtualize}
-      virtualizer={virtualizer}
+      virtualization={{
+        isScrolling: isVirtualizerScrolling,
+        items: virtualItems,
+      }}
     />
   );
 
@@ -197,7 +203,7 @@ export const PokemonCombobox = ({
         shouldLoad: shouldLoad && isPokemonDataEnabled,
         shouldVirtualize,
         value,
-        virtualizer,
+        virtualization: { isScrolling: isVirtualizerScrolling, totalSize },
       }}
       details={{
         disabled,

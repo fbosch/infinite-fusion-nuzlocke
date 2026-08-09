@@ -10,9 +10,9 @@ interface PokemonComboboxMenuProps {
   placement: string;
   setOptionsReference: (element: HTMLDivElement | null) => void;
   shouldVirtualize: boolean;
-  virtualizer: {
-    getTotalSize: () => number;
+  virtualization: {
     isScrolling: boolean;
+    totalSize: number;
   };
 }
 
@@ -23,7 +23,7 @@ export function PokemonComboboxMenu({
   placement,
   setOptionsReference,
   shouldVirtualize,
-  virtualizer,
+  virtualization,
 }: PokemonComboboxMenuProps) {
   return (
     <FloatingPortal id="location-table">
@@ -44,12 +44,12 @@ export function PokemonComboboxMenu({
         ref={setOptionsReference}
         style={{
           ...floatingStyles,
-          height: shouldVirtualize ? `${virtualizer.getTotalSize()}px` : "auto",
+          height: shouldVirtualize ? `${virtualization.totalSize}px` : "auto",
         }}
       >
         <ComboboxOptions
           className={clsx("h-full", {
-            "pointer-events-none": virtualizer.isScrolling,
+            "pointer-events-none": virtualization.isScrolling,
           })}
         >
           {optionsContent}

@@ -22,9 +22,9 @@ interface PokemonComboboxOptionContentProps {
   isShowingLoading: boolean;
   locationId?: string;
   shouldVirtualize: boolean;
-  virtualizer: {
-    getVirtualItems: () => VirtualItem[];
+  virtualization: {
     isScrolling: boolean;
+    items: VirtualItem[];
   };
 }
 
@@ -53,7 +53,7 @@ export function PokemonComboboxOptionContent({
   isShowingLoading,
   locationId,
   shouldVirtualize,
-  virtualizer,
+  virtualization,
 }: PokemonComboboxOptionContentProps) {
   if (fusionCombinationOption) {
     return <FusionCombinationOption pokemon={fusionCombinationOption} />;
@@ -73,23 +73,21 @@ export function PokemonComboboxOptionContent({
   }
 
   if (shouldVirtualize) {
-    return virtualizer
-      .getVirtualItems()
-      .map((item) => (
-        <PokemonOption
-          comboboxId={comboboxId || ""}
-          disabled={virtualizer.isScrolling}
-          gameMode={gameMode}
-          getPokemonSource={getPokemonSource}
-          index={item.index}
-          isDuplicatePokemon={isDuplicatePokemon}
-          isRoutePokemon={isRoutePokemon}
-          key={item.key}
-          locationId={locationId}
-          pokemon={finalOptions[item.index]}
-          style={getVirtualOptionStyle(item, virtualizer.isScrolling)}
-        />
-      ));
+    return virtualization.items.map((item) => (
+      <PokemonOption
+        comboboxId={comboboxId || ""}
+        disabled={virtualization.isScrolling}
+        gameMode={gameMode}
+        getPokemonSource={getPokemonSource}
+        index={item.index}
+        isDuplicatePokemon={isDuplicatePokemon}
+        isRoutePokemon={isRoutePokemon}
+        key={item.key}
+        locationId={locationId}
+        pokemon={finalOptions[item.index]}
+        style={getVirtualOptionStyle(item, virtualization.isScrolling)}
+      />
+    ));
   }
 
   return (

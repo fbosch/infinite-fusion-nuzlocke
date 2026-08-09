@@ -21,9 +21,9 @@ interface PokemonComboboxContentProps {
   shouldLoad: boolean;
   shouldVirtualize: boolean;
   value: PokemonOptionType | null | undefined;
-  virtualizer: {
-    getTotalSize: () => number;
+  virtualization: {
     isScrolling: boolean;
+    totalSize: number;
   };
 }
 
@@ -48,7 +48,7 @@ export function PokemonComboboxContent({
   shouldLoad,
   shouldVirtualize,
   value,
-  virtualizer,
+  virtualization,
 }: PokemonComboboxContentProps) {
   const hasRoundedEdges = hasRoundedEdge(placement);
   return (
@@ -77,7 +77,7 @@ export function PokemonComboboxContent({
           placement={placement}
           setOptionsReference={setOptionsReference}
           shouldVirtualize={shouldVirtualize}
-          virtualizer={virtualizer}
+          virtualization={virtualization}
         />
       ) : null}
     </div>

@@ -22,12 +22,6 @@ describe("PokemonComboboxMenu", () => {
   it("attaches the virtualizer scroll container without imperatively measuring it", () => {
     const measure = vi.fn();
     const setOptionsReference = vi.fn();
-    const virtualizer = {
-      getTotalSize: () => 5600,
-      isScrolling: false,
-      measure,
-    };
-
     render(
       <PokemonComboboxMenu
         floatingStyles={{}}
@@ -36,7 +30,7 @@ describe("PokemonComboboxMenu", () => {
         placement="bottom-start"
         setOptionsReference={setOptionsReference}
         shouldVirtualize={true}
-        virtualizer={virtualizer}
+        virtualization={{ isScrolling: false, totalSize: 5600 }}
       />,
     );
 
@@ -90,7 +84,10 @@ describe("PokemonComboboxMenu", () => {
           placement="bottom-start"
           setOptionsReference={setScrollElement}
           shouldVirtualize={true}
-          virtualizer={virtualizer}
+          virtualization={{
+            isScrolling: virtualizer.isScrolling,
+            totalSize: virtualizer.getTotalSize(),
+          }}
         />
       );
     }
