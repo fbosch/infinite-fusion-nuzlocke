@@ -19,7 +19,7 @@ vi.mock("@headlessui/react", () => ({
 }));
 
 describe("PokemonComboboxMenu", () => {
-  it("attaches the virtualizer scroll container without imperatively measuring it", () => {
+  it("sizes a virtual canvas inside the scroll viewport", () => {
     const measure = vi.fn();
     const setOptionsReference = vi.fn();
     render(
@@ -42,8 +42,9 @@ describe("PokemonComboboxMenu", () => {
     const optionsCanvas = screen.getByText("Pikachu").parentElement;
     const scrollContainer = optionsCanvas?.parentElement;
 
-    expect(scrollContainer?.style.height).toBe("5600px");
-    expect(optionsCanvas?.className).toContain("h-full");
+    expect(scrollContainer?.style.height).toBe("");
+    expect(optionsCanvas?.style.height).toBe("5600px");
+    expect(optionsCanvas?.style.position).toBe("relative");
   });
 
   it("renders the initial virtual range when its portal viewport mounts", () => {

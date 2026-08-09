@@ -29,7 +29,7 @@ export function PokemonComboboxMenu({
     <FloatingPortal id="location-table">
       <div
         className={clsx(
-          "relative z-40 h-full max-h-[31.25rem] overflow-y-auto",
+          "relative z-40 max-h-[31.25rem] overflow-y-auto",
           "px-1 text-base shadow-lg focus:outline-none sm:text-sm",
           "gap-x-2 bg-white dark:bg-gray-800",
           "scrollbar-thin border border-gray-300 dark:border-gray-600",
@@ -42,15 +42,20 @@ export function PokemonComboboxMenu({
           },
         )}
         ref={setOptionsReference}
-        style={{
-          ...floatingStyles,
-          height: shouldVirtualize ? `${virtualization.totalSize}px` : "auto",
-        }}
+        style={floatingStyles}
       >
         <ComboboxOptions
-          className={clsx("h-full", {
+          className={clsx({
             "pointer-events-none": virtualization.isScrolling,
           })}
+          style={
+            shouldVirtualize
+              ? {
+                  height: `${virtualization.totalSize}px`,
+                  position: "relative",
+                }
+              : undefined
+          }
         >
           {optionsContent}
         </ComboboxOptions>
