@@ -46,8 +46,10 @@ describe("PokemonComboboxMenu", () => {
     );
     expect(measure).not.toHaveBeenCalled();
     const optionsCanvas = screen.getByText("Pikachu").parentElement;
-    expect(optionsCanvas?.style.height).toBe("5600px");
-    expect(optionsCanvas?.style.position).toBe("relative");
+    const scrollContainer = optionsCanvas?.parentElement;
+
+    expect(scrollContainer?.style.height).toBe("5600px");
+    expect(optionsCanvas?.className).toContain("h-full");
   });
 
   it("renders the initial virtual range when its portal viewport mounts", () => {
