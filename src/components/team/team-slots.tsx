@@ -276,7 +276,7 @@ export default function TeamSlots() {
 
   useEffect(() => {
     previousFusionIds.current = new Array(6).fill(null);
-  }, []);
+  }, [activePlaythrough?.id]);
 
   const teamSlots = activePlaythrough?.team
     ? getTeamSlots(activePlaythrough.team.members, encounters, pokemonByUid)

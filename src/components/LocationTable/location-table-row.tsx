@@ -49,8 +49,11 @@ export default function LocationTableRow({
   const locationId = row.original.id;
   const resolvedRowIndex = rowIndex ?? row.index;
   const spriteRef = useRef<FusionSpriteHandle | null>(null);
-  const previousFusionId = useRef<string | null | undefined>(undefined);
-  const _activePlaythroughId = useActivePlaythroughId();
+  const previousEncounter = useRef<{
+    fusionId: string | null;
+    playthroughId: string | null;
+  } | null>(null);
+  const activePlaythroughId = useActivePlaythroughId();
   const visibleCells = row.getVisibleCells();
 
   // Get encounter data directly - only this row will rerender when this encounter changes
@@ -88,18 +91,25 @@ export default function LocationTableRow({
     encounterData.body,
   ]);
 
-  // Play evolution animation only when the effective fusion ID changes after initialization.
+  // Play evolution animation only when the effective fusion ID changes within one playthrough.
   useEffect(() => {
-    if (previousFusionId.current === undefined) {
-      previousFusionId.current = effectiveFusionId;
+    const previous = previousEncounter.current;
+    if (previous === null || previous.playthroughId !== activePlaythroughId) {
+      previousEncounter.current = {
+        fusionId: effectiveFusionId,
+        playthroughId: activePlaythroughId,
+      };
       return;
     }
 
-    if (effectiveFusionId && effectiveFusionId !== previousFusionId.current) {
+    if (effectiveFusionId && effectiveFusionId !== previous.fusionId) {
       spriteRef.current?.playEvolution();
     }
-    previousFusionId.current = effectiveFusionId;
-  }, [effectiveFusionId]);
+    previousEncounter.current = {
+      fusionId: effectiveFusionId,
+      playthroughId: activePlaythroughId,
+    };
+  }, [activePlaythroughId, effectiveFusionId]);
 
   return (
     <tr

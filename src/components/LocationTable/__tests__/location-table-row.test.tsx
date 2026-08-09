@@ -11,6 +11,7 @@ const encounterCellProps = vi.hoisted(() => vi.fn());
 const playEvolution = vi.hoisted(() => vi.fn());
 const canFuse = vi.hoisted(() => vi.fn());
 const useEncounter = vi.hoisted(() => vi.fn());
+let activePlaythroughId = "playthrough-1";
 const evolutionListener = vi.hoisted(() => ({
   current: undefined as undefined | ((event: { locationId: string }) => void),
 }));
@@ -38,7 +39,7 @@ const createRow = (index = 0, includeEncounter = false) =>
   }) as never;
 
 vi.mock("@/stores/playthroughs/hooks", () => ({
-  useActivePlaythroughId: () => "playthrough-1",
+  useActivePlaythroughId: () => activePlaythroughId,
   useEncounter,
 }));
 
@@ -69,6 +70,7 @@ describe("LocationTableRow", () => {
     encounterCellProps.mockClear();
     playEvolution.mockClear();
     canFuse.mockReturnValue(false);
+    activePlaythroughId = "playthrough-1";
     useEncounter.mockReturnValue({
       body: null,
       head: { id: 132, name: "Ditto" },
@@ -119,6 +121,78 @@ describe("LocationTableRow", () => {
     });
 
     const view = render(
+      <table>
+        <tbody>
+          <LocationTableRow row={createRow()} />
+        </tbody>
+      </table>,
+    );
+    useEncounter.mockReturnValue({
+      body: { id: 133, name: "Eevee" },
+      head: { id: 25, name: "Pikachu" },
+      isFusion: true,
+    });
+    view.rerender(
+      <table>
+        <tbody>
+          <LocationTableRow row={createRow()} />
+        </tbody>
+      </table>,
+    );
+
+    expect(playEvolution).toHaveBeenCalledOnce();
+  });
+
+  it("does not animate when switching playthroughs", () => {
+    canFuse.mockReturnValue(true);
+    useEncounter.mockReturnValue({
+      body: { id: 4, name: "Charmander" },
+      head: { id: 25, name: "Pikachu" },
+      isFusion: true,
+    });
+
+    const view = render(
+      <table>
+        <tbody>
+          <LocationTableRow row={createRow()} />
+        </tbody>
+      </table>,
+    );
+    activePlaythroughId = "playthrough-2";
+    useEncounter.mockReturnValue({
+      body: { id: 133, name: "Eevee" },
+      head: { id: 25, name: "Pikachu" },
+      isFusion: true,
+    });
+
+    view.rerender(
+      <table>
+        <tbody>
+          <LocationTableRow row={createRow()} />
+        </tbody>
+      </table>,
+    );
+
+    expect(playEvolution).not.toHaveBeenCalled();
+  });
+
+  it("animates a later fusion change after switching to the same fusion", () => {
+    canFuse.mockReturnValue(true);
+    useEncounter.mockReturnValue({
+      body: { id: 4, name: "Charmander" },
+      head: { id: 25, name: "Pikachu" },
+      isFusion: true,
+    });
+
+    const view = render(
+      <table>
+        <tbody>
+          <LocationTableRow row={createRow()} />
+        </tbody>
+      </table>,
+    );
+    activePlaythroughId = "playthrough-2";
+    view.rerender(
       <table>
         <tbody>
           <LocationTableRow row={createRow()} />

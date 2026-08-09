@@ -35,7 +35,7 @@
     "test:coverage:ui": "vitest --ui --coverage",
     "test:coverage:watch": "vitest --coverage",
     "test:coverage:html": "vitest run --coverage --reporter=html",
-    "ultracite:check": "ultracite check",
+    "ultracite:check": "ultracite check src tests scripts data --diagnostic-level=error --max-diagnostics=500 --vcs-use-ignore-file=true --files-ignore-unknown=true",
     "coverage:badge": "node scripts/generate-coverage-badge.js",
     "fallow:badge": "node scripts/generate-fallow-badge.js",
     "badges:staged": "node scripts/update-staged-badges.js",

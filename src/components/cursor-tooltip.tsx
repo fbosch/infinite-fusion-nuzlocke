@@ -154,7 +154,11 @@ function useTooltipAnimation({
     const batchId = animationBatchRef.current;
     window.requestAnimationFrame(() => {
       const node = floatingElementRef.current;
-      const animations = getFiniteAnimations(node as HTMLElement);
+      if (node === null) {
+        return;
+      }
+
+      const animations = getFiniteAnimations(node);
       if (animations.length === 0) {
         finishAnimation();
         return;

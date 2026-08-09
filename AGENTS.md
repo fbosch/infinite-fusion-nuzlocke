@@ -9,7 +9,7 @@ Pokemon Infinite Fusion Nuzlocke tracker with strict run-state invariants.
 ## Ultracite
 
 - This repository uses Ultracite's Biome presets. The local `biome.json` remains authoritative for formatter and file-scope overrides.
-- Follow the reusable standards in `.agents/skills/ultracite/SKILL.md`; repository guidance takes precedence where they differ.
+- Follow the reusable standards in `.claude/skills/ultracite/SKILL.md`; repository guidance takes precedence where they differ.
 - Run `pnpm format:check` and `pnpm lint` for targeted quality checks. Use write-mode commands only when formatting or fixes are intentional.
 
 ## Runtime stack
