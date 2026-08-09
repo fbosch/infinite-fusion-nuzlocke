@@ -1,6 +1,6 @@
 import type { useFloating } from "@floating-ui/react";
 import type React from "react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 
 interface UseComboboxReferencesProps {
   forwardedRef: React.RefObject<HTMLInputElement | null> | undefined;
@@ -15,9 +15,6 @@ export function useComboboxReferences({
 }: UseComboboxReferencesProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const optionsRef = useRef<HTMLDivElement | null>(null);
-  const [optionsElement, setOptionsElement] = useState<HTMLDivElement | null>(
-    null,
-  );
   const setInputReference = useCallback(
     (element: HTMLInputElement | null) => {
       if (!element) {
@@ -36,7 +33,6 @@ export function useComboboxReferences({
   const setOptionsReference = useCallback(
     (element: HTMLDivElement | null) => {
       optionsRef.current = element;
-      setOptionsElement((current) => (current === element ? current : element));
       refs.setFloating(element);
     },
     [refs],
@@ -44,7 +40,6 @@ export function useComboboxReferences({
 
   return {
     inputRef,
-    optionsElement,
     optionsRef,
     setInputReference,
     setOptionsReference,
