@@ -41,6 +41,7 @@ interface PokemonComboboxConfig {
 }
 
 const DEFAULT_ROUTE_ENCOUNTER_DATA: RouteEncounterPokemon[] = [];
+const INITIAL_OPTIONS_VIEWPORT_HEIGHT = 500;
 
 export const PokemonCombobox = ({
   config,
@@ -155,6 +156,7 @@ export const PokemonCombobox = ({
     estimateSize: () => 56,
     gap: 4,
     getScrollElement: () => optionsElement,
+    initialRect: { height: INITIAL_OPTIONS_VIEWPORT_HEIGHT, width: 0 },
     overscan: 10,
     scrollPaddingEnd: 16,
     scrollPaddingStart: 16,
