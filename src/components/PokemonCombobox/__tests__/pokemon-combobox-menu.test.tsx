@@ -9,8 +9,8 @@ vi.mock("@floating-ui/react", () => ({
 }));
 
 vi.mock("@headlessui/react", () => ({
-  ComboboxOptions: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
+  ComboboxOptions: ({ children, ...props }: React.ComponentProps<"div">) => (
+    <div {...props}>{children}</div>
   ),
 }));
 
@@ -41,5 +41,8 @@ describe("PokemonComboboxMenu", () => {
       expect.any(HTMLDivElement),
     );
     expect(measure).not.toHaveBeenCalled();
+    const optionsCanvas = screen.getByText("Pikachu").parentElement;
+    expect(optionsCanvas?.style.height).toBe("5600px");
+    expect(optionsCanvas?.style.position).toBe("relative");
   });
 });

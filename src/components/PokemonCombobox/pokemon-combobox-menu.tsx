@@ -42,15 +42,20 @@ export function PokemonComboboxMenu({
           },
         )}
         ref={setOptionsReference}
-        style={{
-          ...floatingStyles,
-          height: shouldVirtualize ? `${virtualizer.getTotalSize()}px` : "auto",
-        }}
+        style={floatingStyles}
       >
         <ComboboxOptions
           className={clsx("h-full", {
             "pointer-events-none": virtualizer.isScrolling,
           })}
+          style={
+            shouldVirtualize
+              ? {
+                  height: `${virtualizer.getTotalSize()}px`,
+                  position: "relative",
+                }
+              : undefined
+          }
         >
           {optionsContent}
         </ComboboxOptions>
