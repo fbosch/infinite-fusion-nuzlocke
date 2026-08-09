@@ -1,0 +1,89 @@
+interface ImportErrorContentProps {
+  errorMessage: string;
+}
+
+const BULLET_PREFIX_REGEX = /^•\s*/;
+const FINAL_FIELD_PATH_REGEX = /at\s+.*\.([^.]+)$/;
+const SINGLE_FIELD_PATH_REGEX = /at\s+([^.]+)$/;
+const EXPECTED_ONE_OF_REGEX = /expected\s+one\s+of\s+/;
+const INVALID_OPTION_REGEX = /Invalid\s+option:\s*/;
+const INVALID_TYPE_REGEX = /Invalid\s+type:\s*/;
+const QUOTED_OPTION_REGEX = /"([^"]+)"\|"([^"]+)"\|"([^"]+)"/;
+const REQUIRED_FIELD_REGEX = /Required/;
+
+export function ImportErrorContent({ errorMessage }: ImportErrorContentProps) {
+  // Check if this is a Zod validation error or a general import error
+  if (errorMessage.includes("Validation failed:")) {
+    // Parse the error message to extract validation errors
+    const lines = errorMessage.split("\n");
+    const validationErrors: Array<{ message: string; lineNumber: number }> = [];
+    let currentSection: "validation" | null = null;
+
+    for (const [lineNumber, line] of lines.entries()) {
+      if (line.includes("Validation failed:")) {
+        currentSection = "validation";
+        continue;
+      }
+      if (line.includes("Expected format:")) {
+        break; // Stop parsing when we hit the format guide
+      }
+
+      if (
+        currentSection === "validation" &&
+        line.trim() &&
+        !line.includes("Expected format:")
+      ) {
+        validationErrors.push({ lineNumber, message: line.trim() });
+      }
+    }
+
+    // Function to make error messages more user-friendly
+    const formatErrorMessage = (error: string): string => {
+      // Remove Zod's technical formatting
+      const formatted = error
+        .replace(BULLET_PREFIX_REGEX, "") // Remove bullet point
+        .replace(FINAL_FIELD_PATH_REGEX, "in the $1 field") // Extract final field name after last dot
+        .replace(SINGLE_FIELD_PATH_REGEX, "in the $1 field") // Handle single-level paths
+        .replace(EXPECTED_ONE_OF_REGEX, "must be one of: ") // Make enum errors clearer
+        .replace(INVALID_OPTION_REGEX, "Invalid value: ") // Simplify invalid option message
+        .replace(INVALID_TYPE_REGEX, "Invalid value: ") // Simplify invalid type message
+        .replace(REQUIRED_FIELD_REGEX, "This field is required") // Make required field errors clearer
+        .replace(QUOTED_OPTION_REGEX, "$1, $2, $3"); // Convert pipe-separated to comma-separated
+
+      return formatted;
+    };
+
+    return (
+      <div className="space-y-4">
+        <div>
+          <h3 className="mb-3 font-medium text-red-600 dark:text-red-400">
+            The imported file has some issues:
+          </h3>
+          {validationErrors.length > 0 && (
+            <div className="space-y-3">
+              {validationErrors.map((error) => (
+                <div
+                  className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20"
+                  key={error.lineNumber}
+                >
+                  <p className="text-gray-800 text-sm leading-relaxed dark:text-gray-200">
+                    {formatErrorMessage(error.message)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Handle general import errors (file type, JSON syntax, etc.)
+  return (
+    <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
+      <p className="text-gray-800 text-sm leading-relaxed dark:text-gray-200">
+        {errorMessage}
+      </p>
+    </div>
+  );
+}

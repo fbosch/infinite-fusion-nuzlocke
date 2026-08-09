@@ -1,9 +1,32 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": [
+    "ultracite/biome/core",
+    "ultracite/biome/react",
+    "ultracite/biome/next",
+    "ultracite/biome/vitest"
+  ],
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
     "indentWidth": 2
+  },
+  "javascript": {
+    "formatter": {
+      "trailingCommas": "all"
+    }
+  },
+  "html": {
+    "formatter": {
+      "enabled": false
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "useSortedAttributes": "off"
+      }
+    }
   },
   "linter": {
     "enabled": true,
@@ -39,6 +62,6 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!.opencode/skills"]
+    "includes": ["!.opencode/skills"]
   }
 }

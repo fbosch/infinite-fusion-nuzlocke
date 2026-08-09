@@ -32,16 +32,16 @@ describe("playthrough persistence browser regressions", () => {
   });
 
   it("adds the data store when an existing database does not have it", async () => {
-    const legacyDatabase = await openDatabase((database) => {
-      database.createObjectStore("legacy");
+    const legacyDatabase = await openDatabase((upgradeDatabase) => {
+      upgradeDatabase.createObjectStore("legacy");
     });
     legacyDatabase.close();
 
     const state: PlaythroughsState = {
-      playthroughs: [],
       activePlaythroughId: undefined,
       isLoading: false,
       isSaving: false,
+      playthroughs: [],
     };
 
     await loadFromIndexedDB(state);

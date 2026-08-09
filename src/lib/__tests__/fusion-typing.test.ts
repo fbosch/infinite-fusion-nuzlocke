@@ -10,15 +10,15 @@ function makePokemon(
   // For tests, we set id == nationalDexId for simplicity
   return {
     id: nationalDexId,
-    nationalDexId,
     name,
-    types: types.map((t) => ({ name: t.toLowerCase() })),
+    nationalDexId,
     species: {
+      evolution_chain: null,
+      generation: null,
       is_legendary: false,
       is_mythical: false,
-      generation: null,
-      evolution_chain: null,
     },
+    types: types.map((t) => ({ name: t.toLowerCase() })),
   } as Pokemon;
 }
 

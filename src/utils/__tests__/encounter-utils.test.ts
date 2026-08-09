@@ -53,8 +53,8 @@ describe("encounter-utils", () => {
     it("should include head Pokémon from single Pokémon encounters", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: mockPikachu,
           body: null,
+          head: mockPikachu,
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -63,16 +63,16 @@ describe("encounter-utils", () => {
       const result = getAllPokemonWithLocations(encounters);
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
-        pokemon: mockPikachu,
         locationId: "route1",
+        pokemon: mockPikachu,
       });
     });
 
     it("should include both Pokémon from fusion encounters", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: mockPikachu,
           body: mockCharmander,
+          head: mockPikachu,
           isFusion: true,
           updatedAt: Date.now(),
         },
@@ -81,20 +81,20 @@ describe("encounter-utils", () => {
       const result = getAllPokemonWithLocations(encounters);
       expect(result).toHaveLength(2);
       expect(result).toContainEqual({
-        pokemon: mockPikachu,
         locationId: "route1",
+        pokemon: mockPikachu,
       });
       expect(result).toContainEqual({
-        pokemon: mockCharmander,
         locationId: "route1",
+        pokemon: mockCharmander,
       });
     });
 
     it("should exclude body Pokémon when isFusion is false", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: mockPikachu,
           body: mockCharmander, // This should be excluded
+          head: mockPikachu,
           isFusion: false, // Fusion toggled off
           updatedAt: Date.now(),
         },
@@ -103,8 +103,8 @@ describe("encounter-utils", () => {
       const result = getAllPokemonWithLocations(encounters);
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
-        pokemon: mockPikachu,
         locationId: "route1",
+        pokemon: mockPikachu,
       });
       // Body Pokémon should not be included
       expect(
@@ -115,14 +115,14 @@ describe("encounter-utils", () => {
     it("should handle multiple encounters correctly", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: mockPikachu,
           body: mockCharmander,
+          head: mockPikachu,
           isFusion: true, // Fusion enabled
           updatedAt: Date.now(),
         },
         route2: {
-          head: mockBulbasaur,
           body: null,
+          head: mockBulbasaur,
           isFusion: false, // Single Pokémon
           updatedAt: Date.now(),
         },
@@ -131,24 +131,24 @@ describe("encounter-utils", () => {
       const result = getAllPokemonWithLocations(encounters);
       expect(result).toHaveLength(3); // Pikachu, Charmander, Bulbasaur
       expect(result).toContainEqual({
+        locationId: "route1",
         pokemon: mockPikachu,
-        locationId: "route1",
       });
       expect(result).toContainEqual({
+        locationId: "route1",
         pokemon: mockCharmander,
-        locationId: "route1",
       });
       expect(result).toContainEqual({
-        pokemon: mockBulbasaur,
         locationId: "route2",
+        pokemon: mockBulbasaur,
       });
     });
 
     it("should handle encounters with null head and body", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: null,
           body: null,
+          head: null,
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -163,8 +163,8 @@ describe("encounter-utils", () => {
     it("should find Pokémon in head slot", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: mockPikachu,
           body: null,
+          head: mockPikachu,
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -177,8 +177,8 @@ describe("encounter-utils", () => {
     it("should find Pokémon in body slot", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: mockPikachu,
           body: mockCharmander,
+          head: mockPikachu,
           isFusion: true,
           updatedAt: Date.now(),
         },
@@ -191,8 +191,8 @@ describe("encounter-utils", () => {
     it("should return null for non-existent UID", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: mockPikachu,
           body: null,
+          head: mockPikachu,
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -205,8 +205,8 @@ describe("encounter-utils", () => {
     it("should use uid index when provided", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: mockPikachu,
           body: mockCharmander,
+          head: mockPikachu,
           isFusion: true,
           updatedAt: Date.now(),
         },
@@ -226,8 +226,8 @@ describe("encounter-utils", () => {
     it("should fall back to encounter scan when uid is missing from provided index", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: mockPikachu,
           body: mockCharmander,
+          head: mockPikachu,
           isFusion: true,
           updatedAt: Date.now(),
         },
@@ -251,14 +251,14 @@ describe("encounter-utils", () => {
     it("should index head and body pokemon by uid", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: mockPikachu,
           body: mockCharmander,
+          head: mockPikachu,
           isFusion: true,
           updatedAt: Date.now(),
         },
         route2: {
-          head: mockBulbasaur,
           body: null,
+          head: mockBulbasaur,
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -282,12 +282,12 @@ describe("encounter-utils", () => {
     it("includes species captured directly or via original capture provenance", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: mockPikachu,
           body: {
             ...mockCharmander,
-            status: "deceased",
             originalReceivalStatus: "captured",
+            status: "deceased",
           },
+          head: mockPikachu,
           isFusion: true,
           updatedAt: Date.now(),
         },
@@ -299,15 +299,15 @@ describe("encounter-utils", () => {
     it("keeps legacy stored or deceased species when provenance is missing", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: {
-            ...mockPikachu,
-            status: "stored",
-            originalReceivalStatus: undefined,
-          },
           body: {
             ...mockCharmander,
-            status: "deceased",
             originalReceivalStatus: undefined,
+            status: "deceased",
+          },
+          head: {
+            ...mockPikachu,
+            originalReceivalStatus: undefined,
+            status: "stored",
           },
           isFusion: true,
           updatedAt: Date.now(),
@@ -320,22 +320,22 @@ describe("encounter-utils", () => {
     it("ignores non-captured provenance and hidden non-fusion body pokemon", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
+          body: mockCharmander,
           head: {
             ...mockPikachu,
-            status: "received",
             originalReceivalStatus: "received",
+            status: "received",
           },
-          body: mockCharmander,
           isFusion: false,
           updatedAt: Date.now(),
         },
         route2: {
+          body: null,
           head: {
             ...mockBulbasaur,
-            status: "traded",
             originalReceivalStatus: "traded",
+            status: "traded",
           },
-          body: null,
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -349,8 +349,8 @@ describe("encounter-utils", () => {
     it("should find Pokémon with location info", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: mockPikachu,
           body: null,
+          head: mockPikachu,
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -358,16 +358,16 @@ describe("encounter-utils", () => {
 
       const result = findPokemonWithLocation(encounters, "pikachu_route1_123");
       expect(result).toEqual({
-        pokemon: mockPikachu,
         locationId: "route1",
+        pokemon: mockPikachu,
       });
     });
 
     it("should return null for non-existent UID", () => {
       const encounters: Record<string, EncounterData> = {
         route1: {
-          head: mockPikachu,
           body: null,
+          head: mockPikachu,
           isFusion: false,
           updatedAt: Date.now(),
         },

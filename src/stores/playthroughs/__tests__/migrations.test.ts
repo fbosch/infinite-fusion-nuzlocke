@@ -1,28 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { ImportedPlaythroughSchema } from "../importSchema";
+import { ImportedPlaythroughSchema } from "../import-schema";
 import {
   normalizeImportedPlaythrough,
   normalizePersistedPlaythrough,
 } from "../migrations";
 
+const playthroughIdPattern = /^playthrough_/;
+
 describe("Playthrough normalization", () => {
   it("repairs a legacy persisted shape without mutating its input", () => {
     const legacyData = {
-      id: "",
-      name: "",
-      remixMode: true,
-      gameMode: "classic",
       createdAt: Number.NaN,
-      updatedAt: Number.POSITIVE_INFINITY,
       encounters: {
         route1: {
-          head: {
-            id: 25,
-            name: "Pikachu",
-            nationalDexId: 25,
-            status: "stored",
-            uid: "pikachu-route1",
-          },
+          artworkVariant: "legacy-sprite-key",
           body: {
             id: 4,
             name: "Charmander",
@@ -30,47 +21,58 @@ describe("Playthrough normalization", () => {
             status: "deceased",
             uid: "charmander-route1",
           },
+          head: {
+            id: 25,
+            name: "Pikachu",
+            nationalDexId: 25,
+            status: "stored",
+            uid: "pikachu-route1",
+          },
           isFusion: true,
           updatedAt: 1_700_000_000,
-          artworkVariant: "legacy-sprite-key",
         },
       },
+      gameMode: "classic",
+      id: "",
+      name: "",
+      remixMode: true,
       team: {
         members: {
           0: {
-            headEncounterId: "route1:head",
             bodyEncounterId: "route1:body",
+            headEncounterId: "route1:head",
           },
         },
       },
+      updatedAt: Number.POSITIVE_INFINITY,
     };
 
     const normalized = normalizePersistedPlaythrough(legacyData);
 
-    expect(normalized.id).toMatch(/^playthrough_/);
+    expect(normalized.id).toMatch(playthroughIdPattern);
     expect(normalized.name).toBe("Playthrough");
     expect(normalized.gameMode).toBe("remix");
     expect(normalized.version).toBe("1.0.0");
     expect(normalized.team.members[0]).toEqual({
-      headPokemonUid: "",
       bodyPokemonUid: "",
+      headPokemonUid: "",
     });
     expect(normalized.encounters?.route1).toEqual({
-      head: {
-        id: 25,
-        name: "Pikachu",
-        nationalDexId: 25,
-        status: "stored",
-        originalReceivalStatus: "captured",
-        uid: "pikachu-route1",
-      },
       body: {
         id: 4,
         name: "Charmander",
         nationalDexId: 4,
-        status: "deceased",
         originalReceivalStatus: "captured",
+        status: "deceased",
         uid: "charmander-route1",
+      },
+      head: {
+        id: 25,
+        name: "Pikachu",
+        nationalDexId: 25,
+        originalReceivalStatus: "captured",
+        status: "stored",
+        uid: "pikachu-route1",
       },
       isFusion: true,
       updatedAt: 1_700_000_000,
@@ -85,14 +87,14 @@ describe("Playthrough normalization", () => {
 
   it("is idempotent for a current Playthrough and preserves classic mode", () => {
     const current = {
+      createdAt: 1,
+      encounters: {},
+      gameMode: "classic",
       id: "current",
       name: "Current Run",
-      gameMode: "classic",
-      version: "1.0.0",
       team: { members: [null, null, null, null, null, null] },
-      encounters: {},
-      createdAt: 1,
       updatedAt: 1,
+      version: "1.0.0",
     };
 
     const normalized = normalizePersistedPlaythrough(current);
@@ -105,7 +107,7 @@ describe("Playthrough normalization", () => {
   it("retains the current recovery behavior for malformed persisted data", () => {
     const normalized = normalizePersistedPlaythrough(null);
 
-    expect(normalized.id).toMatch(/^playthrough_/);
+    expect(normalized.id).toMatch(playthroughIdPattern);
     expect(normalized.name).toBe("Playthrough");
     expect(normalized.gameMode).toBe("classic");
     expect(normalized.team.members).toEqual([
@@ -122,28 +124,28 @@ describe("Playthrough normalization", () => {
     const normalizedImport = normalizeImportedPlaythrough({
       exportedAt: "2026-05-11T00:00:00.000Z",
       playthrough: {
+        createdAt: 1,
+        encounters: {
+          route1: {
+            artworkVariant: "legacy-sprite-key",
+            body: null,
+            head: null,
+            isFusion: false,
+            updatedAt: 1,
+          },
+        },
+        gameMode: "classic",
         id: "legacy-import",
         name: "Legacy Import",
         remixMode: true,
-        gameMode: "classic",
         team: {
           members: {
             0: {
-              headEncounterId: "route1:head",
               bodyEncounterId: "route1:body",
+              headEncounterId: "route1:head",
             },
           },
         },
-        encounters: {
-          route1: {
-            head: null,
-            body: null,
-            isFusion: false,
-            updatedAt: 1,
-            artworkVariant: "legacy-sprite-key",
-          },
-        },
-        createdAt: 1,
         updatedAt: 1,
       },
     });
@@ -152,12 +154,12 @@ describe("Playthrough normalization", () => {
 
     expect(parsed.playthrough.gameMode).toBe("remix");
     expect(parsed.playthrough.team.members[0]).toEqual({
-      headPokemonUid: "",
       bodyPokemonUid: "",
+      headPokemonUid: "",
     });
     expect(parsed.playthrough.encounters?.route1).toEqual({
-      head: null,
       body: null,
+      head: null,
       isFusion: false,
       updatedAt: 1,
     });
@@ -168,13 +170,13 @@ describe("Playthrough normalization", () => {
     (field) => {
       const legacyImport = {
         playthrough: {
+          createdAt: 1,
+          gameMode: "classic",
           id: "legacy-import",
           name: "Legacy Import",
-          gameMode: "classic",
-          version: "1.0.0",
           team: { members: [null, null, null, null, null, null] },
-          createdAt: 1,
           updatedAt: 1,
+          version: "1.0.0",
         },
       };
       delete legacyImport.playthrough[field];
@@ -189,14 +191,14 @@ describe("Playthrough normalization", () => {
 
   it("rejects malformed nested persisted data after migration", () => {
     const validPlaythrough = {
+      createdAt: 1,
+      encounters: {},
+      gameMode: "classic",
       id: "current",
       name: "Current Run",
-      gameMode: "classic",
-      version: "1.0.0",
       team: { members: [null, null, null, null, null, null] },
-      encounters: {},
-      createdAt: 1,
       updatedAt: 1,
+      version: "1.0.0",
     };
 
     expect(() =>
@@ -208,7 +210,7 @@ describe("Playthrough normalization", () => {
     expect(() =>
       normalizePersistedPlaythrough({
         ...validPlaythrough,
-        encounters: { route1: { head: null, body: null } },
+        encounters: { route1: { body: null, head: null } },
       }),
     ).toThrow("Invalid persisted playthrough");
     expect(() =>

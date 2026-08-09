@@ -6,102 +6,102 @@ import {
   searchPokemon,
 } from "../pokemon";
 
-// Mock the query client and SearchCore
-vi.mock("@/lib/queryClient", () => {
+// Mock Pokemon data and SearchCore
+vi.mock("@/lib/data", () => {
   const mockPokemonData = [
     {
-      id: 1,
-      nationalDexId: 1,
-      name: "Bulbasaur",
-      types: [{ name: "grass" }, { name: "poison" }],
       evolution: {
+        evolves_from: null,
         evolves_to: [{ id: 2 }],
-        evolves_from: null,
       },
+      id: 1,
+      name: "Bulbasaur",
+      nationalDexId: 1,
+      types: [{ name: "grass" }, { name: "poison" }],
     },
     {
-      id: 2,
-      nationalDexId: 2,
-      name: "Ivysaur",
-      types: [{ name: "grass" }, { name: "poison" }],
       evolution: {
-        evolves_to: [{ id: 3 }],
         evolves_from: { id: 1 },
+        evolves_to: [{ id: 3 }],
       },
-    },
-    {
-      id: 3,
-      nationalDexId: 3,
-      name: "Venusaur",
+      id: 2,
+      name: "Ivysaur",
+      nationalDexId: 2,
       types: [{ name: "grass" }, { name: "poison" }],
+    },
+    {
       evolution: {
-        evolves_to: [],
         evolves_from: { id: 2 },
-      },
-    },
-    {
-      id: 25,
-      nationalDexId: 25,
-      name: "Pikachu",
-      types: [{ name: "electric" }],
-      evolution: {
-        evolves_to: [{ id: 26 }],
-        evolves_from: null,
-      },
-    },
-    {
-      id: 26,
-      nationalDexId: 26,
-      name: "Raichu",
-      types: [{ name: "electric" }],
-      evolution: {
         evolves_to: [],
-        evolves_from: { id: 25 },
       },
+      id: 3,
+      name: "Venusaur",
+      nationalDexId: 3,
+      types: [{ name: "grass" }, { name: "poison" }],
     },
     {
-      id: 133,
-      nationalDexId: 133,
-      name: "Eevee",
-      types: [{ name: "normal" }],
       evolution: {
+        evolves_from: null,
+        evolves_to: [{ id: 26 }],
+      },
+      id: 25,
+      name: "Pikachu",
+      nationalDexId: 25,
+      types: [{ name: "electric" }],
+    },
+    {
+      evolution: {
+        evolves_from: { id: 25 },
+        evolves_to: [],
+      },
+      id: 26,
+      name: "Raichu",
+      nationalDexId: 26,
+      types: [{ name: "electric" }],
+    },
+    {
+      evolution: {
+        evolves_from: null,
         evolves_to: [
           { id: 134 }, // Vaporeon
           { id: 135 }, // Jolteon
           { id: 136 }, // Flareon
         ],
-        evolves_from: null,
       },
+      id: 133,
+      name: "Eevee",
+      nationalDexId: 133,
+      types: [{ name: "normal" }],
     },
     {
+      evolution: {
+        evolves_from: { id: 133 },
+        evolves_to: [],
+      },
       id: 134,
-      nationalDexId: 134,
       name: "Vaporeon",
+      nationalDexId: 134,
       types: [{ name: "water" }],
-      evolution: {
-        evolves_to: [],
-        evolves_from: { id: 133 },
-      },
     },
     {
+      evolution: {
+        evolves_from: { id: 133 },
+        evolves_to: [],
+      },
       id: 135,
-      nationalDexId: 135,
       name: "Jolteon",
+      nationalDexId: 135,
       types: [{ name: "electric" }],
-      evolution: {
-        evolves_to: [],
-        evolves_from: { id: 133 },
-      },
     },
     {
-      id: 136,
-      nationalDexId: 136,
-      name: "Flareon",
-      types: [{ name: "fire" }],
       evolution: {
-        evolves_to: [],
         evolves_from: { id: 133 },
+        evolves_to: [],
       },
+      id: 136,
+      name: "Flareon",
+      nationalDexId: 136,
+      types: [{ name: "fire" }],
     },
   ];
 
@@ -131,45 +131,41 @@ vi.mock("@/lib/queryClient", () => {
   };
 });
 
-vi.mock("@/lib/searchCore", () => {
-  return {
-    SearchCore: vi.fn(function MockSearchCore() {
-      return {
-        initialize: vi.fn().mockResolvedValue(undefined),
-        search: vi.fn().mockImplementation((query: string) => {
-          const mockPokemonData = [
-            { id: 1, name: "Bulbasaur", nationalDexId: 1 },
-            { id: 2, name: "Ivysaur", nationalDexId: 2 },
-            { id: 3, name: "Venusaur", nationalDexId: 3 },
-            { id: 25, name: "Pikachu", nationalDexId: 25 },
-            { id: 26, name: "Raichu", nationalDexId: 26 },
-            { id: 133, name: "Eevee", nationalDexId: 133 },
-            { id: 134, name: "Vaporeon", nationalDexId: 134 },
-            { id: 135, name: "Jolteon", nationalDexId: 135 },
-            { id: 136, name: "Flareon", nationalDexId: 136 },
-          ];
+vi.mock("@/lib/search-core", () => ({
+  SearchCore: vi.fn(function MockSearchCore() {
+    return {
+      initialize: vi.fn().mockResolvedValue(undefined),
+      search: vi.fn().mockImplementation((query: string) => {
+        const mockPokemonData = [
+          { id: 1, name: "Bulbasaur", nationalDexId: 1 },
+          { id: 2, name: "Ivysaur", nationalDexId: 2 },
+          { id: 3, name: "Venusaur", nationalDexId: 3 },
+          { id: 25, name: "Pikachu", nationalDexId: 25 },
+          { id: 26, name: "Raichu", nationalDexId: 26 },
+          { id: 133, name: "Eevee", nationalDexId: 133 },
+          { id: 134, name: "Vaporeon", nationalDexId: 134 },
+          { id: 135, name: "Jolteon", nationalDexId: 135 },
+          { id: 136, name: "Flareon", nationalDexId: 136 },
+        ];
 
-          return mockPokemonData.filter((p) =>
-            p.name.toLowerCase().includes(query.toLowerCase()),
-          );
-        }),
-      };
-    }),
-  };
-});
+        return mockPokemonData.filter((p) =>
+          p.name.toLowerCase().includes(query.toLowerCase()),
+        );
+      }),
+    };
+  }),
+}));
 
 describe("Pokemon Loader with Evolution Data", () => {
-  function getRequiredPokemonId(name: string): Promise<number> {
-    return searchPokemon(name).then((results) => {
-      const option = results.find((pokemon) => pokemon.name === name);
-      expect(option).toBeDefined();
+  async function getRequiredPokemonId(name: string): Promise<number> {
+    const results = await searchPokemon(name);
+    const option = results.find((pokemon) => pokemon.name === name);
 
-      if (option === undefined) {
-        throw new Error(`Expected to find Pokemon option for ${name}`);
-      }
+    if (option === undefined) {
+      throw new Error(`Expected to find Pokemon option for ${name}`);
+    }
 
-      return option.id;
-    });
+    return option.id;
   }
 
   it("should get evolution IDs for specific Pokemon", async () => {
@@ -239,9 +235,9 @@ describe("Pokemon Loader with Evolution Data", () => {
 
     // Check that it includes some known Eevee evolutions
     const expectedEvolutions = [134, 135, 136]; // Vaporeon, Jolteon, Flareon
-    expectedEvolutions.forEach((evolutionId) => {
+    for (const evolutionId of expectedEvolutions) {
       expect(evolutionIds).toContain(evolutionId);
-    });
+    }
   });
 
   it("should handle Pokemon with no evolution data", async () => {

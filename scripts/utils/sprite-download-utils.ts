@@ -10,20 +10,20 @@ const SPRITE_FETCH_HEADERS = {
 };
 const SPRITE_FETCH_TIMEOUT_MS = 10_000;
 
-export type SpriteDownloadIcon = {
+export interface SpriteDownloadIcon {
+  filename: string;
+  generation: "gen7" | "gen8";
   id: number;
   name: string;
   url: string;
-  filename: string;
-  generation: "gen7" | "gen8";
-};
+}
 
-export type SpriteDownloadConfig = {
-  name: "gen7" | "gen8";
+export interface SpriteDownloadConfig {
   baseUrl: string;
-  spritesDir: string;
   eggSpriteUrl: string;
-};
+  name: "gen7" | "gen8";
+  spritesDir: string;
+}
 
 type ReportError = (message: string) => void;
 
@@ -62,14 +62,18 @@ async function tryDownloadBaseForm(
   config: SpriteDownloadConfig,
 ): Promise<boolean> {
   const baseName = stripPokemonFormSuffix(icon.name);
-  if (!baseName || baseName === icon.name) return false;
+  if (!baseName || baseName === icon.name) {
+    return false;
+  }
 
   const baseFilename = `${normalizePokemonNameForSprite(baseName)}.png`;
   const baseFilePath = path.join(config.spritesDir, baseFilename);
 
   try {
     const response = await fetchSprite(`${config.baseUrl}/${baseFilename}`);
-    if (!response.ok) return false;
+    if (!response.ok) {
+      return false;
+    }
 
     await saveSprite(response, baseFilePath);
     return true;
@@ -113,21 +117,21 @@ async function downloadOriginalOrBaseForm(
     return;
   }
 
-  if (response.status === 404) {
-    if (await tryDownloadBaseForm(icon, config)) return;
+  if (response.status === 404 && (await tryDownloadBaseForm(icon, config))) {
+    return;
   }
 
   throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 }
 
-async function downloadWithRetries(
+function downloadWithRetries(
   icon: SpriteDownloadIcon,
   config: SpriteDownloadConfig,
   filePath: string,
   retries: number,
   reportError: ReportError,
 ): Promise<boolean> {
-  for (let attempt = 1; attempt <= retries; attempt++) {
+  const tryDownload = async (attempt: number): Promise<boolean> => {
     try {
       await downloadOriginalOrBaseForm(icon, config, filePath);
       return true;
@@ -142,10 +146,11 @@ async function downloadWithRetries(
       }
 
       await new Promise((resolve) => setTimeout(resolve, 2 ** attempt * 200));
+      return tryDownload(attempt + 1);
     }
-  }
+  };
 
-  return false;
+  return tryDownload(1);
 }
 
 export async function downloadSpriteImage(
@@ -155,7 +160,9 @@ export async function downloadSpriteImage(
   retries = 3,
 ): Promise<boolean> {
   const filePath = path.join(config.spritesDir, icon.filename);
-  if (await spriteFileExists(filePath)) return true;
+  if (await spriteFileExists(filePath)) {
+    return true;
+  }
 
   if (icon.id === -1) {
     return downloadEggSprite(config, filePath, reportError);

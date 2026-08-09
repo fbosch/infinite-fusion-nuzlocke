@@ -7,24 +7,23 @@
 
 // Simple patterns for route validation
 export const ROUTE_PATTERNS = {
-  // Basic route pattern: "Route" followed by a number
-  ROUTE_NUMBER: /^Route\s+\d+(?:\s*-\s*.+|\s+Gate)?$/i,
-
-  // Safari Zone pattern: "Safari Zone" followed by optional area
-  SAFARI_ZONE: /^Safari Zone(?:\s+\(Area\s+\d+\))?$/i,
+  // ID cleanup pattern
+  ROUTE_ID_CLEAN: /\s*\(ID\s+-?\d+(?:\.\d+)?\)\s*$/i,
 
   // ID extraction pattern
   ROUTE_ID_EXTRACT: /\(ID\s+(-?\d+(?:\.\d+)?)\)/i,
 
-  // ID cleanup pattern
-  ROUTE_ID_CLEAN: /\s*\(ID\s+-?\d+(?:\.\d+)?\)\s*$/i,
+  // Legacy pattern for test compatibility
+  ROUTE_MATCH: /^Route\s+\d+$/i,
+  // Basic route pattern: "Route" followed by a number
+  ROUTE_NUMBER: /^Route\s+\d+(?:\s*-\s*.+|\s+Gate)?$/i,
 
   // Route variant cleanup patterns
   ROUTE_VARIANT_BILLS_HOUSE_CLEAN: /^(Route\s+\d+)\s*-\s*Bill'?s\s+House$/i,
   ROUTE_VARIANT_GATE_CLEAN: /^(Route\s+\d+)\s+Gate$/i,
 
-  // Legacy pattern for test compatibility
-  ROUTE_MATCH: /^Route\s+\d+$/i,
+  // Safari Zone pattern: "Safari Zone" followed by optional area
+  SAFARI_ZONE: /^Safari Zone(?:\s+\(Area\s+\d+\))?$/i,
 } as const;
 
 // Common location suffixes that indicate valid locations
@@ -101,6 +100,10 @@ const LOCATION_SUFFIXES = [
   "Hidden",
   "Dark Room",
 ] as const;
+const GYM_PERSON_TITLE_PATTERN =
+  /\bgym\s+(leader|trainer|master|champion|elite|four|gym\s+leader)/i;
+const LOCATION_FLOOR_SUFFIX_PATTERN =
+  /^(.*?)\s+(B?\d+F|F\d+|A\d+|Summit|Square|Entrance|Exit|Top|Bottom|Upper|Lower|North|South|East|West|Interior|Exterior|Depths|Hidden|Center|Dark Room|Route \d+ Exit|\(Area \d+\))$/i;
 
 // Common location prefixes
 const LOCATION_PREFIXES = [
@@ -158,13 +161,13 @@ export function isRoutePattern(text: string): boolean {
     const matches = suffixRegex.test(lowerText);
 
     // Additional validation: if the suffix is "Gym", make sure it's not followed by a person's title
-    if (suffix.toLowerCase() === "gym" && matches) {
-      // Check if "Gym" is followed by common person/title words
-      const personTitleRegex =
-        /\bgym\s+(leader|trainer|master|champion|elite|four|gym\s+leader)/i;
-      if (personTitleRegex.test(lowerText)) {
-        return false;
-      }
+    // Check if "Gym" is followed by common person/title words
+    if (
+      suffix.toLowerCase() === "gym" &&
+      matches &&
+      GYM_PERSON_TITLE_PATTERN.test(lowerText)
+    ) {
+      return false;
     }
 
     return matches;
@@ -246,11 +249,7 @@ export function isRoutePattern(text: string): boolean {
   }
 
   // Check for locations with floor indicators (B1F, B2F, F1, etc.)
-  if (
-    /^(.*?)\s+(B?\d+F|F\d+|A\d+|Summit|Square|Entrance|Exit|Top|Bottom|Upper|Lower|North|South|East|West|Interior|Exterior|Depths|Hidden|Center|Dark Room|Route \d+ Exit|\(Area \d+\))$/i.test(
-      cleanText,
-    )
-  ) {
+  if (LOCATION_FLOOR_SUFFIX_PATTERN.test(cleanText)) {
     return true;
   }
 
@@ -291,15 +290,15 @@ export function cleanRouteName(routeName: string): string {
  */
 export function extractRouteId(routeName: string): number | undefined {
   if (!routeName || typeof routeName !== "string") {
-    return undefined;
+    return;
   }
 
   const match = routeName.match(ROUTE_PATTERNS.ROUTE_ID_EXTRACT);
   if (!match?.[1]) {
-    return undefined;
+    return;
   }
 
-  const id = parseInt(match[1], 10);
+  const id = Number.parseInt(match[1], 10);
   return Number.isNaN(id) ? undefined : id;
 }
 

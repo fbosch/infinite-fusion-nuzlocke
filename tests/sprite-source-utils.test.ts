@@ -8,11 +8,11 @@ describe("sprite source paths", () => {
         "file:///tmp/project/scripts/generate-spritesheet.ts",
       ),
     ).toEqual({
-      scriptDirectory: "/tmp/project/scripts",
       baseEntriesPath: "/tmp/project/data/shared/base-entries.json",
-      spritesBaseDir: "/tmp/project/scripts/sprites",
       gen7SpritesDir: "/tmp/project/scripts/sprites/pokemon-gen7",
       gen8SpritesDir: "/tmp/project/scripts/sprites/pokemon-gen8",
+      scriptDirectory: "/tmp/project/scripts",
+      spritesBaseDir: "/tmp/project/scripts/sprites",
     });
   });
 });

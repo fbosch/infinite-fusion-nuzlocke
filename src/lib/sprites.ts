@@ -1,10 +1,10 @@
 import { getCacheBuster } from "@/lib/persistence";
-import { generateSpriteVariantUrl } from "@/lib/spriteVariants";
+import { generateSpriteVariantUrl } from "@/lib/sprite-variants";
 import type {
   SpriteVariantsError,
   SpriteVariantsResponse,
 } from "@/types/sprites";
-import { formatArtistCredits } from "@/utils/formatCredits";
+import { formatArtistCredits } from "@/utils/format-credits";
 
 // Types for sprite credits API
 export interface SpriteCreditsResponse {
@@ -45,7 +45,10 @@ export function generateSpriteUrl(
  * Check if a sprite URL exists
  * Works in both main thread (using Image) and web workers (using fetch)
  */
-async function checkSpriteExists(url: string): Promise<boolean> {
+export async function checkSpriteExists(
+  url: string,
+  getHeaders?: HeadersInit,
+): Promise<boolean> {
   // Try Image approach first in main thread (more reliable for images)
   if (typeof window !== "undefined" && typeof Image !== "undefined") {
     return new Promise<boolean>((resolve) => {
@@ -91,6 +94,7 @@ async function checkSpriteExists(url: string): Promise<boolean> {
       const timeoutId = setTimeout(() => controller.abort(), 3000);
 
       const response = await fetch(url, {
+        ...(getHeaders ? { headers: getHeaders } : {}),
         method: "GET",
         signal: controller.signal,
       });
@@ -111,7 +115,9 @@ export async function getArtworkVariants(
   headId?: number | null,
   bodyId?: number | null,
 ): Promise<string[]> {
-  if (!headId && !bodyId) return [""];
+  if (!(headId || bodyId)) {
+    return [""];
+  }
 
   try {
     // Use edge function to get variants (avoids CORS issues)
@@ -137,7 +143,7 @@ export async function getArtworkVariants(
       throw new Error(data.error);
     }
 
-    return data.variants || [];
+    return data.variants;
   } catch (error) {
     console.warn("Failed to get artwork variants from API:", error);
 
@@ -154,7 +160,9 @@ export async function getSpriteCredits(
   headId?: number | null,
   bodyId?: number | null,
 ): Promise<SpriteCreditsResponse | null> {
-  if (!headId && !bodyId) return null;
+  if (!(headId || bodyId)) {
+    return null;
+  }
 
   try {
     // Generate the sprite ID (same format as other methods)
@@ -198,7 +206,9 @@ async function getVariantSpriteCredits(
   variant = "",
 ): Promise<string[] | null> {
   const allCredits = await getSpriteCredits(headId, bodyId);
-  if (!allCredits) return null;
+  if (!allCredits) {
+    return null;
+  }
 
   // Generate the variant key
   const baseId =
@@ -212,7 +222,7 @@ async function getVariantSpriteCredits(
  * Get formatted sprite credits for a specific sprite variant
  * Returns a human-readable string like "GameFreak, Artist1 and Artist2"
  */
-async function getFormattedVariantSpriteCredits(
+async function _getFormattedVariantSpriteCredits(
   headId?: number | null,
   bodyId?: number | null,
   variant = "",
@@ -231,7 +241,9 @@ export function getFormattedCreditsFromResponse(
   bodyId?: number | null,
   variant = "",
 ): string {
-  if (!credits) return formatArtistCredits(null);
+  if (!credits) {
+    return formatArtistCredits(null);
+  }
 
   // Generate the variant key
   const baseId =

@@ -7,7 +7,9 @@ function applyDefaultStatus(
   pokemon: PokemonOptionType,
   source: EncounterSource | null,
 ): PokemonOptionType {
-  if (!pokemon) return pokemon;
+  if (!pokemon) {
+    return pokemon;
+  }
 
   let defaultStatus = pokemon.status;
 
@@ -192,8 +194,8 @@ describe("Pokemon Default Status Logic", () => {
         nationalDexId: 102,
         nickname: "Eggy",
         originalLocation: "test-location",
-        uid: "unique-id-123",
         status: PokemonStatus.CAPTURED,
+        uid: "unique-id-123",
       };
 
       const result = applyDefaultStatus(
@@ -207,8 +209,8 @@ describe("Pokemon Default Status Logic", () => {
         nationalDexId: 102,
         nickname: "Eggy",
         originalLocation: "test-location",
-        uid: "unique-id-123",
         status: PokemonStatus.RECEIVED,
+        uid: "unique-id-123",
       });
     });
   });

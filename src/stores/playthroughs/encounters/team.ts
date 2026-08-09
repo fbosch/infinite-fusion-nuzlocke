@@ -1,5 +1,6 @@
 import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
-import { getAvailableTeamPositionsForMembers } from "../teamPositions";
+import { findPokemonByUid } from "@/utils/encounter-utils";
+import { getAvailableTeamPositionsForMembers } from "../team-positions";
 import type { EncounterData } from "../types";
 import { ensureActivePlaythroughWithEncounters } from "./shared";
 
@@ -30,6 +31,8 @@ export const updatePokemonByUID = async (
   }
 
   activePlaythrough.updatedAt = Date.now();
+
+  await Promise.resolve();
 };
 
 const shouldAutoAssign = (status: string | undefined) =>
@@ -41,13 +44,13 @@ const createTeamMember = (
   head: { uid: string } | null,
   body: { uid: string } | null,
 ) => {
-  if (!head && !body) {
+  if (!(head || body)) {
     return null;
   }
 
   return {
-    headPokemonUid: head?.uid || "",
     bodyPokemonUid: body?.uid || "",
+    headPokemonUid: head?.uid || "",
   };
 };
 
@@ -55,7 +58,7 @@ const getAutoAssignablePokemon = (pokemon: {
   uid?: string;
   status?: string;
 }) => {
-  if (!pokemon.uid || !shouldAutoAssign(pokemon.status)) {
+  if (!(pokemon.uid && shouldAutoAssign(pokemon.status))) {
     return null;
   }
 
@@ -95,7 +98,7 @@ export const updateTeamMember = async (
     return false;
   }
 
-  restorePokemonToTeamMembers([headPokemon?.uid ?? "", bodyPokemon?.uid ?? ""]);
+  restorePokemonToTeamMembers([headPokemon?.uid || "", bodyPokemon?.uid || ""]);
 
   activePlaythrough.team.members[position] = createTeamMember(
     headPokemon,
@@ -103,23 +106,25 @@ export const updateTeamMember = async (
   );
   activePlaythrough.updatedAt = Date.now();
 
+  await Promise.resolve();
+
   return true;
 };
 
 export const flipTeamMember = (position: number): boolean => {
   const activePlaythrough = ensureActivePlaythroughWithEncounters();
-  if (!activePlaythrough || !isValidTeamPosition(position)) {
+  if (!(activePlaythrough && isValidTeamPosition(position))) {
     return false;
   }
 
   const member = activePlaythrough.team.members[position];
-  if (!member?.headPokemonUid || !member.bodyPokemonUid) {
+  if (!(member?.headPokemonUid && member.bodyPokemonUid)) {
     return false;
   }
 
   activePlaythrough.team.members[position] = {
-    headPokemonUid: member.bodyPokemonUid,
     bodyPokemonUid: member.headPokemonUid,
+    headPokemonUid: member.bodyPokemonUid,
   };
   activePlaythrough.updatedAt = Date.now();
 
@@ -142,7 +147,7 @@ export const autoAssignCapturedPokemonToTeam = async (
   const headPokemon = getAutoAssignablePokemon(encounter.head ?? {});
   const bodyPokemon = getAutoAssignablePokemon(encounter.body ?? {});
 
-  if (!headPokemon && !bodyPokemon) {
+  if (!(headPokemon || bodyPokemon)) {
     return;
   }
 
@@ -158,7 +163,7 @@ export const autoAssignCapturedPokemonToTeam = async (
     return;
   }
 
-  const nextAvailablePosition = availablePositions[0];
+  const [nextAvailablePosition] = availablePositions;
   const targetPosition =
     existingPosition === -1 ? nextAvailablePosition : existingPosition;
 
@@ -175,27 +180,6 @@ export const autoAssignCapturedPokemonToTeam = async (
   }
 };
 
-const findPokemonByUID = (
-  encounters: Record<string, EncounterData> | undefined,
-  uid: string,
-) => {
-  if (!encounters) {
-    return null;
-  }
-
-  for (const encounter of Object.values(encounters)) {
-    if (encounter?.head?.uid === uid) {
-      return encounter.head;
-    }
-
-    if (encounter?.body?.uid === uid) {
-      return encounter.body;
-    }
-  }
-
-  return null;
-};
-
 const movePokemonToBox = async (
   encounters: Record<string, EncounterData>,
   pokemonUID: string,
@@ -204,7 +188,7 @@ const movePokemonToBox = async (
     return;
   }
 
-  const pokemon = findPokemonByUID(encounters, pokemonUID);
+  const pokemon = findPokemonByUid(encounters, pokemonUID);
   if (!pokemon) {
     return;
   }
@@ -255,7 +239,7 @@ export const findCanonicalLocationForUids = (uids: string[]) => {
     ([, encounter]) => {
       const encounterUids = new Set(
         [encounter.head?.uid, encounter.body?.uid].filter(
-          (uid): uid is string => uid != null,
+          (uid): uid is string => uid !== null,
         ),
       );
 
@@ -279,7 +263,7 @@ export const removeTeamMembersWithPokemon = (pokemonUIDs: string[]) => {
   const removedPokemonUids = new Set(pokemonUIDs);
   let hasChanges = false;
 
-  for (let i = 0; i < activePlaythrough.team.members.length; i++) {
+  for (let i = 0; i < activePlaythrough.team.members.length; i += 1) {
     const member = activePlaythrough.team.members[i];
     if (!member) {
       continue;
@@ -365,8 +349,7 @@ const restoreStoredPokemon = <
   uidsToRestore: ReadonlySet<string>,
 ): Pokemon | null => {
   if (
-    !pokemon?.uid ||
-    !uidsToRestore.has(pokemon.uid) ||
+    !(pokemon?.uid && uidsToRestore.has(pokemon.uid)) ||
     pokemon.status !== PokemonStatus.STORED
   ) {
     return null;
@@ -382,4 +365,5 @@ export const restorePokemonToTeam = async (
   pokemonUID: string,
 ): Promise<void> => {
   restorePokemonToTeamMembers([pokemonUID]);
+  await Promise.resolve();
 };

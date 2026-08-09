@@ -1,11 +1,9 @@
 export interface SpriteVariantsResponse {
-  variants: string[];
   cacheKey: string;
   timestamp: number;
+  variants: string[];
 }
 
 export interface SpriteVariantsError {
   error: string;
 }
-
-type SpriteVariantsApiResponse = SpriteVariantsResponse | SpriteVariantsError;

@@ -1,7 +1,12 @@
-type StarterPokemon = { classic: number[]; remix: number[] };
+interface StarterPokemon {
+  classic: number[];
+  remix: number[];
+}
 
 function isStarterPokemon(value: unknown): value is StarterPokemon {
-  if (typeof value !== "object" || value === null) return false;
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
 
   const candidate = value as { classic?: unknown; remix?: unknown };
   const isValidIds = (ids: unknown): ids is number[] =>
@@ -31,7 +36,7 @@ async function getStarterPokemon(): Promise<StarterPokemon> {
     return data;
   } catch (error) {
     console.error("Failed to validate starter Pokémon data:", error);
-    throw new Error("Invalid starter Pokémon data format");
+    throw new Error("Invalid starter Pokémon data format", { cause: error });
   }
 }
 

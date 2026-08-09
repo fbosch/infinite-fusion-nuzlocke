@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import encountersApiService from "@/services/encountersApiService";
+import encountersApiService from "@/services/encounters-api-service";
 import { EncounterSource } from "@/types/encounters";
 import { encountersQueries } from "./encounters";
 
-vi.mock("@/services/encountersApiService", () => ({
+vi.mock("@/services/encounters-api-service", () => ({
   default: {
     getEncounters: vi.fn(),
   },
@@ -17,13 +17,15 @@ describe("encountersQueries", () => {
   it("returns the validated encounter collection without a transport wrapper", async () => {
     const encounters = [
       {
-        routeName: "Route 1",
         pokemon: [{ id: 1, source: EncounterSource.WILD }],
+        routeName: "Route 1",
       },
     ];
     vi.mocked(encountersApiService.getEncounters).mockResolvedValue(encounters);
 
-    const result = await encountersQueries.all("classic").queryFn!({} as never);
+    const result = await encountersQueries
+      .all("classic")
+      .queryFn?.({} as never);
 
     expect(result).toEqual(encounters);
     expect(encountersApiService.getEncounters).toHaveBeenCalledWith("classic");

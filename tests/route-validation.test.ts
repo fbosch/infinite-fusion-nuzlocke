@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+const standardRoutePattern = /^Route \d+(\s*\(ID\s+-?\d+(?:\.\d+)?\))?$/i;
+
 /**
  * Tests for route name validation logic.
  * This replicates the fixed isValidRouteName function to prevent regressions.
@@ -90,9 +92,7 @@ function isValidRouteNameBroken(text: string): boolean {
 
   // This was the problematic check that filtered out Mt. Moon entries
   const alphaCount = (trimmedText.match(/[a-zA-Z]/g) || []).length;
-  const isValidRoute = /^Route \d+(\s*\(ID\s+-?\d+(?:\.\d+)?\))?$/i.test(
-    trimmedText,
-  );
+  const isValidRoute = standardRoutePattern.test(trimmedText);
   if (!isValidRoute && alphaCount < trimmedText.length / 2) {
     return false; // <-- This was the problem!
   }
@@ -209,12 +209,12 @@ describe("Route Name Validation", () => {
   describe("Alpha character ratio analysis", () => {
     it("should calculate alpha ratios correctly for Mt. Moon variants", () => {
       const testCases = [
-        { text: "Mt. Moon (ID 767)", expectedAlpha: 8, expectedTotal: 17 },
-        { text: "Mt. Moon B1F (ID 103)", expectedAlpha: 10, expectedTotal: 21 },
+        { expectedAlpha: 8, expectedTotal: 17, text: "Mt. Moon (ID 767)" },
+        { expectedAlpha: 10, expectedTotal: 21, text: "Mt. Moon B1F (ID 103)" },
         {
-          text: "Mt. Moon Summit (ID 827)",
           expectedAlpha: 14,
           expectedTotal: 24,
+          text: "Mt. Moon Summit (ID 827)",
         },
       ];
 

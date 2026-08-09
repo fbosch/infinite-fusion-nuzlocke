@@ -1,10 +1,6 @@
 import React from "react";
 import { useSnapshot } from "valtio";
 import type { CustomLocation } from "@/loaders/locations";
-import {
-  getAvailableAfterLocations,
-  getMergedLocations,
-} from "./customLocations";
 import { getAllPlaythroughs, playthroughsStore } from "./store";
 import {
   type EncounterData,
@@ -14,9 +10,7 @@ import {
 } from "./types";
 
 // Reusable hooks for components
-export const usePlaythroughsSnapshot = () => {
-  return useSnapshot(playthroughsStore);
-};
+export const usePlaythroughsSnapshot = () => useSnapshot(playthroughsStore);
 
 export const useAllPlaythroughs = () => {
   const snapshot = useSnapshot(playthroughsStore);
@@ -32,7 +26,7 @@ export const useAllPlaythroughs = () => {
         console.error("Failed to load all playthroughs:", error);
       });
     }
-  }, [snapshot.isLoading, snapshot.playthroughs.length]);
+  }, []);
 
   return snapshot.playthroughs;
 };
@@ -40,7 +34,9 @@ export const useAllPlaythroughs = () => {
 export const useActivePlaythrough = (): Playthrough | null => {
   const snapshot = useSnapshot(playthroughsStore);
 
-  if (!snapshot.activePlaythroughId) return null;
+  if (!snapshot.activePlaythroughId) {
+    return null;
+  }
 
   const activePlaythroughData = snapshot.playthroughs.find(
     (p) => p.id === snapshot.activePlaythroughId,
@@ -89,7 +85,9 @@ export const usePlaythroughById = (
     (p) => p.id === playthroughId,
   );
 
-  if (!playthroughId || !playthroughData) return null;
+  if (!(playthroughId && playthroughData)) {
+    return null;
+  }
   return playthroughData as Playthrough;
 };
 
@@ -119,7 +117,7 @@ export const useEncounter = (locationId: string): EncounterData | null => {
   return activePlaythrough?.encounters?.[locationId] || null;
 };
 
-const useIsSaving = (): boolean => {
+const _useIsSaving = (): boolean => {
   const snapshot = useSnapshot(playthroughsStore);
   return snapshot.isSaving;
 };
@@ -129,16 +127,4 @@ export const useCustomLocations = (): CustomLocation[] => {
   const activePlaythrough = useActivePlaythrough();
 
   return activePlaythrough?.customLocations || [];
-};
-
-const useMergedLocations = () => {
-  useActivePlaythrough();
-
-  return getMergedLocations();
-};
-
-const useAvailableAfterLocations = () => {
-  useActivePlaythrough();
-
-  return getAvailableAfterLocations();
 };

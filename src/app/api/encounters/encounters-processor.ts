@@ -22,28 +22,28 @@ import {
 
 // Schema for the new enhanced data format with encounter types
 const NewPokemonEncounterSchema = z.object({
-  pokemonId: z.number().int(),
   encounterType: EncounterTypeSchema,
+  pokemonId: z.number().int(),
 });
 
 const NewRouteEncounterSchema = z.object({
-  routeName: z.string().min(1, { error: "Route name is required" }),
   encounters: z.array(NewPokemonEncounterSchema),
+  routeName: z.string().min(1, { error: "Route name is required" }),
 });
 
 const NewRouteEncountersArraySchema = z.array(NewRouteEncounterSchema);
 
 // Temporary schema for the old data format during migration
 const OldRouteEncounterSchema = z.object({
-  routeName: z.string().min(1, { error: "Route name is required" }),
   pokemonIds: z.array(z.number().int()),
+  routeName: z.string().min(1, { error: "Route name is required" }),
 });
 const OldRouteEncountersArraySchema = z.array(OldRouteEncounterSchema);
 
 // Schema for legendary encounters data format
 const LegendaryRouteEncounterSchema = z.object({
-  routeName: z.string().min(1, { error: "Route name is required" }),
   encounters: z.array(z.number().int()),
+  routeName: z.string().min(1, { error: "Route name is required" }),
 });
 const LegendaryRouteEncountersArraySchema = z.array(
   LegendaryRouteEncounterSchema,
@@ -51,32 +51,35 @@ const LegendaryRouteEncountersArraySchema = z.array(
 
 // Schema for egg location data
 const EggLocationSchema = z.object({
+  description: z.string(),
+  pokemonId: z.number().optional(),
+  pokemonName: z.string().optional(),
   routeName: z.string(),
   source: z.enum(["gift", "nest"]),
-  description: z.string(),
-  pokemonName: z.string().optional(),
-  pokemonId: z.number().optional(),
 });
 
 const EggLocationsSchema = z.object({
-  totalLocations: z.number(),
+  locations: z.array(EggLocationSchema),
+  pokemonIdentified: z.object({
+    fromGifts: z.number(),
+    fromNests: z.number(),
+    total: z.number(),
+  }),
   sources: z.object({
     gifts: z.number(),
     nests: z.number(),
   }),
-  pokemonIdentified: z.object({
-    total: z.number(),
-    fromGifts: z.number(),
-    fromNests: z.number(),
-  }),
-  locations: z.array(EggLocationSchema),
+  totalLocations: z.number(),
 });
 
-type PokemonWithSource = { id: number; source: EncounterSource };
-type RouteData = {
+interface PokemonWithSource {
+  id: number;
+  source: EncounterSource;
+}
+interface RouteData {
   encounters?: Array<{ pokemonId: number; encounterType: EncounterType }>;
   pokemonIds?: number[];
-};
+}
 
 const withSource = (
   ids: number[],
@@ -99,7 +102,7 @@ const getWildPokemon = (
 const addEggPokemon = (
   pokemon: PokemonWithSource[],
   eggLocation: z.infer<typeof EggLocationSchema> | undefined,
-  source: EncounterSource.GIFT | EncounterSource.NEST,
+  source: typeof EncounterSource.GIFT | typeof EncounterSource.NEST,
 ) => {
   if (!eggLocation) {
     return;
@@ -170,9 +173,9 @@ function consolidateSafariZoneAreas(
     encounterType: EncounterType;
   }> = [];
 
-  safariEncounters.forEach((area) => {
+  for (const area of safariEncounters) {
     allSafariEncounters.push(...area.encounters);
-  });
+  }
 
   // Remove duplicates based on both pokemonId and encounterType
   const uniqueEncounters = allSafariEncounters.filter(
@@ -186,8 +189,8 @@ function consolidateSafariZoneAreas(
 
   return [
     {
-      routeName: "Safari Zone",
       encounters: uniqueEncounters,
+      routeName: "Safari Zone",
     },
   ];
 }
@@ -211,19 +214,19 @@ export function processGameModeData(gameMode: "classic" | "remix") {
     gameMode === "remix"
       ? {
           encounters: remixEncounters,
-          safari: remixSafari,
-          trades: remixTrades,
           gifts: remixGifts,
           quests: remixQuests,
+          safari: remixSafari,
           statics: remixStatics,
+          trades: remixTrades,
         }
       : {
           encounters: classicEncounters,
-          safari: classicSafari,
-          trades: classicTrades,
           gifts: classicGifts,
           quests: classicQuests,
+          safari: classicSafari,
           statics: classicStatics,
+          trades: classicTrades,
         };
 
   // Process Safari Zone encounters and consolidate them
@@ -248,8 +251,8 @@ export function processGameModeData(gameMode: "classic" | "remix") {
   } else {
     const oldWildFormat = OldRouteEncountersArraySchema.parse(data.encounters);
     const oldFormatEncounters = oldWildFormat.map((route) => ({
-      routeName: route.routeName,
       pokemonIds: route.pokemonIds,
+      routeName: route.routeName,
     }));
     encounters = [...oldFormatEncounters, ...consolidatedSafari];
   }
@@ -320,7 +323,7 @@ export function processGameModeData(gameMode: "classic" | "remix") {
     addEggPokemon(pokemon, eggGiftRoutes.get(routeName), EncounterSource.GIFT);
     addEggPokemon(pokemon, eggNestRoutes.get(routeName), EncounterSource.NEST);
 
-    return { routeName, pokemon: deduplicatePokemon(pokemon) };
+    return { pokemon: deduplicatePokemon(pokemon), routeName };
   });
 
   // Sort by route name

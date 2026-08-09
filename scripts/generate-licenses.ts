@@ -7,28 +7,28 @@ import { promisify } from "node:util";
 
 const exec = promisify(execCb);
 
-type PnpmLicenseEntry = {
-  name: string;
-  versions: string[];
-  paths: string[];
-  license: string;
+interface PnpmLicenseEntry {
   author?: string | { name?: string };
-  homepage?: string;
   description?: string;
-};
+  homepage?: string;
+  license: string;
+  name: string;
+  paths: string[];
+  versions: string[];
+}
 
 type PnpmLicensesOutput = Record<string, PnpmLicenseEntry[]>; // license -> entries
 
-type LicensePackage = {
-  name: string;
-  version: string;
-  license: string;
-  homepage?: string;
+interface LicensePackage {
   author?: string;
   description?: string;
+  homepage?: string;
+  license: string;
   licenseText?: string;
+  name: string;
   noticeText?: string;
-};
+  version: string;
+}
 
 // fallow-ignore-next-line complexity
 async function generateLicenses(): Promise<void> {
@@ -49,12 +49,12 @@ async function generateLicenses(): Promise<void> {
             : entry.author?.name || undefined;
         for (const version of entry.versions) {
           packages.push({
-            name: entry.name,
-            version,
-            license,
-            homepage: entry.homepage,
             author: authorName,
             description: entry.description,
+            homepage: entry.homepage,
+            license,
+            name: entry.name,
+            version,
           });
         }
       }
@@ -80,8 +80,10 @@ async function generateLicenses(): Promise<void> {
             "package.json",
           );
           const content = await fs.readFile(pkgPath, "utf8");
-          const parsed = JSON.parse(content) as { version?: string };
-          if (parsed.version) installedVersions.set(dep, parsed.version);
+          const installedPackage = JSON.parse(content) as { version?: string };
+          if (installedPackage.version) {
+            installedVersions.set(dep, installedPackage.version);
+          }
         } catch {
           // ignore missing
         }
@@ -103,7 +105,7 @@ async function generateLicenses(): Promise<void> {
         // Normalize newlines
         return content.replace(/\r\n/g, "\n");
       } catch {
-        return undefined;
+        // A missing candidate file has no license text to include.
       }
     }
 
@@ -139,11 +141,12 @@ async function generateLicenses(): Promise<void> {
           }, {});
           for (const cand of candidates) {
             const match = lower[cand.toLowerCase()];
-            if (match) return path.join(pkgDir, match);
+            if (match) {
+              return path.join(pkgDir, match);
+            }
           }
-          return undefined;
         } catch {
-          return undefined;
+          // Packages without readable directories have no matching candidate.
         }
       }
 
@@ -163,7 +166,9 @@ async function generateLicenses(): Promise<void> {
     // Deduplicate by package name (keep first occurrence)
     const dedupedMap = new Map<string, LicensePackage>();
     for (const p of withTexts) {
-      if (!dedupedMap.has(p.name)) dedupedMap.set(p.name, p);
+      if (!dedupedMap.has(p.name)) {
+        dedupedMap.set(p.name, p);
+      }
     }
     const deduped = Array.from(dedupedMap.values());
 

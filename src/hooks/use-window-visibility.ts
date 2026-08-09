@@ -1,0 +1,66 @@
+import { useSyncExternalStore } from "react";
+
+// Shared store for window visibility state
+let listeners: Set<() => void> | null = null;
+let isVisible =
+  typeof document === "undefined"
+    ? true
+    : document.visibilityState === "visible";
+let isFocused = typeof window === "undefined" ? true : document.hasFocus();
+
+function subscribe(callback: () => void) {
+  if (!listeners) {
+    listeners = new Set();
+
+    // Add event listeners only once
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", notifyListeners);
+      window.addEventListener("focus", notifyListeners);
+      window.addEventListener("blur", notifyListeners);
+    }
+  }
+
+  const subscribedListeners = listeners;
+  subscribedListeners.add(callback);
+
+  // Return cleanup function
+  return () => {
+    subscribedListeners.delete(callback);
+  };
+}
+
+function notifyListeners() {
+  if (typeof document === "undefined" || listeners === null) {
+    return;
+  }
+
+  const newIsVisible = document.visibilityState === "visible";
+  const newIsFocused = document.hasFocus();
+
+  // Always update and notify, even if values haven't changed
+  // This ensures React gets notified of all state changes
+  isVisible = newIsVisible;
+  isFocused = newIsFocused;
+
+  for (const listener of listeners) {
+    listener();
+  }
+}
+
+function getSnapshot() {
+  return isVisible && isFocused;
+}
+
+/**
+ * Hook to subscribe to window visibility changes using useSyncExternalStore
+ * @returns boolean indicating if the window is currently visible
+ */
+export function useWindowVisibility(): boolean {
+  return useSyncExternalStore(
+    subscribe,
+    // Server-side snapshot
+    () => true,
+    // Client-side snapshot
+    getSnapshot,
+  );
+}

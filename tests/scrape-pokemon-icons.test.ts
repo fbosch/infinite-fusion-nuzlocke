@@ -8,7 +8,7 @@ import type {
   SpriteDownloadConfig,
   SpriteDownloadIcon,
 } from "../scripts/utils/sprite-download-utils";
-import * as spriteDownloadUtils from "../scripts/utils/sprite-download-utils";
+import { downloadSpriteImage } from "../scripts/utils/sprite-download-utils";
 
 const temporaryDirectories: string[] = [];
 
@@ -27,10 +27,10 @@ async function createConfig(): Promise<SpriteDownloadConfig> {
   temporaryDirectories.push(spritesDir);
 
   return {
-    name: "gen8",
     baseUrl: "https://sprites.example",
-    spritesDir,
     eggSpriteUrl: "https://sprites.example/egg.png",
+    name: "gen8",
+    spritesDir,
   };
 }
 
@@ -38,11 +38,11 @@ function createIcon(
   overrides: Partial<SpriteDownloadIcon> = {},
 ): SpriteDownloadIcon {
   return {
+    filename: "pikachu.png",
+    generation: "gen8",
     id: 25,
     name: "Pikachu",
     url: "https://sprites.example/pikachu.png",
-    filename: "pikachu.png",
-    generation: "gen8",
     ...overrides,
   };
 }
@@ -55,9 +55,9 @@ describe("Pokemon icon downloads", () => {
     vi.stubGlobal("fetch", fetchMock);
     await fs.writeFile(path.join(config.spritesDir, icon.filename), "existing");
 
-    await expect(
-      spriteDownloadUtils.downloadSpriteImage(icon, config, vi.fn()),
-    ).resolves.toBe(true);
+    await expect(downloadSpriteImage(icon, config, vi.fn())).resolves.toBe(
+      true,
+    );
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -67,8 +67,8 @@ describe("Pokemon icon downloads", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(
-      spriteDownloadUtils.downloadSpriteImage(
-        createIcon({ id: -1, filename: "egg.png" }),
+      downloadSpriteImage(
+        createIcon({ filename: "egg.png", id: -1 }),
         config,
         vi.fn(),
       ),
@@ -86,9 +86,9 @@ describe("Pokemon icon downloads", () => {
   it("falls back to the base form after a first-attempt 404", async () => {
     const config = await createConfig();
     const icon = createIcon({
+      filename: "lycanroc-midday.png",
       name: "Lycanroc Midday Form",
       url: "https://sprites.example/lycanroc-midday.png",
-      filename: "lycanroc-midday.png",
     });
     const fetchMock = vi
       .fn()
@@ -96,9 +96,9 @@ describe("Pokemon icon downloads", () => {
       .mockResolvedValueOnce(new Response("base form"));
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(
-      spriteDownloadUtils.downloadSpriteImage(icon, config, vi.fn(), 1),
-    ).resolves.toBe(true);
+    await expect(downloadSpriteImage(icon, config, vi.fn(), 1)).resolves.toBe(
+      true,
+    );
 
     await expect(
       fs.readFile(path.join(config.spritesDir, "lycanroc.png"), "utf-8"),
@@ -115,12 +115,15 @@ describe("Pokemon icon downloads", () => {
 
   it("downloads generation batches in order with cumulative progress", async () => {
     const progressBar = { stop: vi.fn(), update: vi.fn() };
+    const spriteDownloadUtils = await import(
+      "../scripts/utils/sprite-download-utils"
+    );
     vi.spyOn(ConsoleFormatter, "createProgressBar").mockReturnValue(
       progressBar as never,
     );
-    vi.spyOn(ConsoleFormatter, "working").mockImplementation(() => {});
-    vi.spyOn(ConsoleFormatter, "success").mockImplementation(() => {});
-    vi.spyOn(ConsoleFormatter, "warn").mockImplementation(() => {});
+    vi.spyOn(ConsoleFormatter, "working").mockImplementation(() => undefined);
+    vi.spyOn(ConsoleFormatter, "success").mockImplementation(() => undefined);
+    vi.spyOn(ConsoleFormatter, "warn").mockImplementation(() => undefined);
     vi.spyOn(spriteDownloadUtils, "spriteFileExists")
       .mockResolvedValueOnce(true)
       .mockResolvedValue(false);
@@ -135,8 +138,8 @@ describe("Pokemon icon downloads", () => {
 
     await expect(downloadAllIcons([...gen7Icons, gen8Icon])).resolves.toEqual({
       downloaded: 11,
-      skipped: 1,
       errors: 0,
+      skipped: 1,
     });
     expect(progressBar.update).toHaveBeenNthCalledWith(
       1,

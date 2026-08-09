@@ -1,0 +1,26 @@
+"use client";
+
+import { GitHubEngagementCta } from "@/components/git-hub-engagement-cta";
+import ThemeToggle from "@/components/theme-toggle";
+import MenuItems, { type TopBarModal } from "./menu-items";
+
+interface TopBarProps {
+  githubCtaRoute: "home" | "locations" | null;
+  onOpenModal: (modal: TopBarModal) => void;
+}
+
+export default function TopBar({ githubCtaRoute, onOpenModal }: TopBarProps) {
+  return (
+    <div className="fixed inset-x-0 top-0 z-[60] border-gray-200 border-b bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
+      <div className="mx-auto flex h-10 items-center gap-3 px-2 sm:px-3 md:px-4">
+        <MenuItems onOpenModal={onOpenModal} />
+        <div className="ml-auto flex items-center gap-3">
+          {githubCtaRoute ? (
+            <GitHubEngagementCta key={githubCtaRoute} route={githubCtaRoute} />
+          ) : null}
+          <ThemeToggle />
+        </div>
+      </div>
+    </div>
+  );
+}

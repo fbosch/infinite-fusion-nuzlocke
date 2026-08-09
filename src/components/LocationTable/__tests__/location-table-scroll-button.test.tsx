@@ -1,0 +1,250 @@
+/** @vitest-environment jsdom */
+
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+import type React from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { scrollToLocationById } from "@/utils/scrollToLocation";
+
+const {
+  locationRowProps,
+  mountedMock,
+  scrollToIndexMock,
+  scrollToMostRecentLocationMock,
+  useVirtualizerMock,
+} = vi.hoisted(() => ({
+  locationRowProps: vi.fn(),
+  mountedMock: vi.fn(),
+  scrollToIndexMock: vi.fn(),
+  scrollToMostRecentLocationMock: vi.fn(),
+  useVirtualizerMock: vi.fn(),
+}));
+
+vi.mock("@/utils/scrollToLocation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/utils/scrollToLocation")>()),
+  scrollToMostRecentLocation: scrollToMostRecentLocationMock,
+}));
+
+vi.mock("@/stores/playthroughs/index", () => ({
+  playthroughActions: {
+    getEncounters: vi.fn(() => ({})),
+  },
+}));
+
+vi.mock("@/stores/playthroughs/hooks", () => ({
+  useCustomLocations: vi.fn(() => []),
+  useEncounters: vi.fn(() => ({})),
+  useIsLoading: vi.fn(() => false),
+}));
+
+vi.mock("@/loaders/locations", () => ({
+  getLocationById: vi.fn(() => ({ name: "Route 1" })),
+  getLocationsSortedWithCustom: vi.fn(() => [
+    { id: "route-1", name: "Route 1" },
+    { id: "route-2", name: "Route 2" },
+    { id: "route-3", name: "Route 3" },
+  ]),
+}));
+
+vi.mock("@tanstack/react-virtual", () => ({
+  useVirtualizer: useVirtualizerMock,
+}));
+
+vi.mock("@/hooks/use-mounted", () => ({
+  useMounted: mountedMock,
+}));
+
+vi.mock("@/hooks/use-breakpoint", () => ({
+  useBreakpointSmallerThan: vi.fn(() => false),
+}));
+
+vi.mock("../location-table-row", () => ({
+  default: ({
+    row,
+    rowIndex,
+  }: {
+    row: { original: { id: string } };
+    rowIndex: number;
+  }) => {
+    locationRowProps(row.original.id);
+    return <tr aria-rowindex={rowIndex + 2} data-testid="location-row" />;
+  },
+}));
+
+vi.mock("../location-cell", () => ({
+  default: () => <td data-testid="location-cell" />,
+}));
+
+vi.mock("../location-table-skeleton", () => ({
+  default: () => <div data-testid="skeleton" />,
+}));
+
+vi.mock("../customLocations/add-custom-location-modal", () => ({
+  default: () => null,
+}));
+
+vi.mock("next/dynamic", () => ({
+  default: () => () => null,
+}));
+
+// Pass-through: render children directly so button handlers are preserved
+vi.mock("@/components/cursor-tooltip", () => ({
+  CursorTooltip: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+import LocationTable from "../index";
+
+describe("LocationTable scroll-to-recent button", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  beforeEach(() => {
+    locationRowProps.mockReset();
+    mountedMock.mockReset();
+    mountedMock.mockReturnValue(true);
+    scrollToIndexMock.mockReset();
+    scrollToMostRecentLocationMock.mockReset();
+    useVirtualizerMock.mockReset();
+    useVirtualizerMock.mockReturnValue({
+      getTotalSize: () => 450,
+      getVirtualItems: () => [{ end: 150, index: 0, start: 0 }],
+      scrollToIndex: scrollToIndexMock,
+    });
+  });
+
+  it("renders only virtual rows with twelve-row overscan", () => {
+    useVirtualizerMock.mockReturnValue({
+      getTotalSize: () => 450,
+      getVirtualItems: () => [{ end: 300, index: 1, start: 150 }],
+    });
+
+    act(() => {
+      render(<LocationTable />);
+    });
+
+    const [[options]] = useVirtualizerMock.mock.calls;
+    expect(options.count).toBe(3);
+    expect(options.estimateSize()).toBe(150);
+    expect(options.getScrollElement()).toBeInstanceOf(HTMLDivElement);
+    expect(options.overscan).toBe(12);
+    expect(locationRowProps).toHaveBeenLastCalledWith("route-2");
+  });
+
+  it("hides spacers and exposes logical virtual row positions", () => {
+    useVirtualizerMock.mockReturnValue({
+      getTotalSize: () => 450,
+      getVirtualItems: () => [{ end: 300, index: 1, start: 150 }],
+      scrollToIndex: scrollToIndexMock,
+    });
+
+    act(() => {
+      render(<LocationTable />);
+    });
+
+    expect(screen.getByRole("table").getAttribute("aria-rowcount")).toBe("4");
+    expect(
+      screen.getByTestId("location-row").getAttribute("aria-rowindex"),
+    ).toBe("3");
+    expect(
+      document.querySelectorAll('tbody tr[aria-hidden="true"]'),
+    ).toHaveLength(2);
+  });
+
+  it("scrolls an unmounted location through the virtualizer", () => {
+    act(() => {
+      render(<LocationTable />);
+    });
+
+    expect(scrollToLocationById("route-3", { behavior: "smooth" })).toBe(true);
+
+    expect(scrollToIndexMock).toHaveBeenCalledExactlyOnceWith(2, {
+      align: "center",
+      behavior: "smooth",
+    });
+  });
+
+  it("scrolls to the most recent location without animation on page load", () => {
+    const requestAnimationFrame = vi
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation((callback) => {
+        callback(0);
+        return 0;
+      });
+
+    act(() => {
+      render(<LocationTable />);
+    });
+
+    expect(scrollToMostRecentLocationMock).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.any(HTMLDivElement),
+      expect.any(HTMLTableElement),
+      "auto",
+    );
+    expect(screen.getByRole("table").parentElement?.className).not.toContain(
+      "scroll-smooth",
+    );
+
+    requestAnimationFrame.mockRestore();
+  });
+
+  it("calls scrollToMostRecentLocation when the button is clicked", () => {
+    act(() => {
+      render(<LocationTable />);
+    });
+
+    const button = screen.getByRole("button", {
+      name: "Scroll to most recent encounter",
+    });
+
+    const baselineCalls = scrollToMostRecentLocationMock.mock.calls.length;
+
+    fireEvent.click(button);
+
+    expect(scrollToMostRecentLocationMock.mock.calls.length).toBe(
+      baselineCalls + 1,
+    );
+  });
+
+  it("calls scrollToMostRecentLocation when Enter is pressed on the button", () => {
+    act(() => {
+      render(<LocationTable />);
+    });
+
+    const button = screen.getByRole("button", {
+      name: "Scroll to most recent encounter",
+    });
+
+    const baselineCalls = scrollToMostRecentLocationMock.mock.calls.length;
+
+    fireEvent.keyDown(button, { key: "Enter" });
+
+    expect(scrollToMostRecentLocationMock.mock.calls.length).toBe(
+      baselineCalls + 1,
+    );
+  });
+
+  it("calls scrollToMostRecentLocation when Space is pressed on the button", () => {
+    act(() => {
+      render(<LocationTable />);
+    });
+
+    const button = screen.getByRole("button", {
+      name: "Scroll to most recent encounter",
+    });
+
+    const baselineCalls = scrollToMostRecentLocationMock.mock.calls.length;
+
+    fireEvent.keyDown(button, { key: " " });
+
+    expect(scrollToMostRecentLocationMock.mock.calls.length).toBe(
+      baselineCalls + 1,
+    );
+  });
+});

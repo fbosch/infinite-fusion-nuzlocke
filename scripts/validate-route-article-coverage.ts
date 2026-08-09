@@ -9,15 +9,17 @@ import { loadPokemonNameMap } from "./utils/data-loading-utils";
 
 const ROUTE_VALIDATION_BATCH_SIZE = 6;
 const ROUTES_WITHOUT_ARTICLE_WILD_ROWS = new Set(["Route 10"]);
+const ROUTE_NAME_REGEX = /^Route \d+$/i;
+const NON_DIGIT_REGEX = /\D+/g;
 
 interface PokemonEncounter {
-  pokemonId: number;
   encounterType: EncounterType;
+  pokemonId: number;
 }
 
 interface RouteEncounters {
-  routeName: string;
   encounters: PokemonEncounter[];
+  routeName: string;
 }
 
 interface LocationEntry {
@@ -25,8 +27,8 @@ interface LocationEntry {
 }
 
 interface RouteValidationFailure {
-  routeName: string;
   reasons: string[];
+  routeName: string;
 }
 
 function loadJsonFile<T>(filePath: string): T {
@@ -37,10 +39,13 @@ function loadJsonFile<T>(filePath: string): T {
 function getRouteLocations(locations: LocationEntry[]): string[] {
   return locations
     .map((location) => location.name)
-    .filter((name) => /^Route \d+$/i.test(name))
+    .filter((name) => ROUTE_NAME_REGEX.test(name))
     .sort((left, right) => {
-      const leftNumber = Number.parseInt(left.replace(/\D+/g, ""), 10);
-      const rightNumber = Number.parseInt(right.replace(/\D+/g, ""), 10);
+      const leftNumber = Number.parseInt(left.replace(NON_DIGIT_REGEX, ""), 10);
+      const rightNumber = Number.parseInt(
+        right.replace(NON_DIGIT_REGEX, ""),
+        10,
+      );
       return leftNumber - rightNumber;
     });
 }
@@ -91,8 +96,8 @@ function buildValidationFailure(
   }
 
   return {
-    routeName,
     reasons,
+    routeName,
   };
 }
 
@@ -125,11 +130,11 @@ async function main() {
   const pokemonNameMap = await loadPokemonNameMap();
   const validationFailures: RouteValidationFailure[] = [];
 
-  for (
-    let offset = 0;
-    offset < routeLocations.length;
-    offset += ROUTE_VALIDATION_BATCH_SIZE
-  ) {
+  const validateBatches = async (offset: number): Promise<void> => {
+    if (offset >= routeLocations.length) {
+      return;
+    }
+
     const batch = routeLocations.slice(
       offset,
       offset + ROUTE_VALIDATION_BATCH_SIZE,
@@ -163,8 +168,8 @@ async function main() {
               error instanceof Error ? error.message : "unknown scrape error";
 
             return {
-              routeName,
               reasons: [`failed to scrape matching article: ${message}`],
+              routeName,
             } satisfies RouteValidationFailure;
           }
         },
@@ -176,7 +181,11 @@ async function main() {
         validationFailures.push(failure);
       }
     }
-  }
+
+    await validateBatches(offset + ROUTE_VALIDATION_BATCH_SIZE);
+  };
+
+  await validateBatches(0);
 
   if (validationFailures.length > 0) {
     ConsoleFormatter.error(

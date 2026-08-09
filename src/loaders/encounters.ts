@@ -1,23 +1,9 @@
-import { encountersData } from "@/lib/queryClient";
-import {
-  EncounterSource,
-  type PokemonEncounter,
-  type RouteEncounter,
-} from "@/types/encounters";
+import { encountersData } from "@/lib/data";
+import { EncounterSource, type RouteEncounter } from "@/types/encounters";
 import { useLocationEncountersById } from "./locations";
 import type { Pokemon, PokemonOptionType } from "./pokemon";
 import { useAllPokemon, usePokemonNameMap } from "./pokemon";
 import { getStarterPokemonByGameMode } from "./starters";
-
-/**
- * Type for encounter data with fusion status
- * Used to track Pokemon encounters and their fusion state
- */
-interface EncounterData {
-  head: PokemonOptionType | null;
-  body: PokemonOptionType | null;
-  isFusion: boolean;
-}
 
 // Data loaders for encounters using TanStack Query
 async function getClassicEncounters(): Promise<RouteEncounter[]> {
@@ -25,7 +11,7 @@ async function getClassicEncounters(): Promise<RouteEncounter[]> {
     return await encountersData.getAllEncounters("classic");
   } catch (error) {
     console.error("Failed to fetch classic encounters:", error);
-    throw new Error("Failed to load classic encounters data");
+    throw new Error("Failed to load classic encounters data", { cause: error });
   }
 }
 
@@ -34,12 +20,12 @@ async function getRemixEncounters(): Promise<RouteEncounter[]> {
     return await encountersData.getAllEncounters("remix");
   } catch (error) {
     console.error("Failed to fetch remix encounters:", error);
-    throw new Error("Failed to load remix encounters data");
+    throw new Error("Failed to load remix encounters data", { cause: error });
   }
 }
 
 // Get encounters by route name
-async function getEncountersByRouteName(
+async function _getEncountersByRouteName(
   routeName: string | null | undefined,
   gameMode: "classic" | "remix" = "classic",
 ): Promise<RouteEncounter | null> {
@@ -51,8 +37,8 @@ async function getEncountersByRouteName(
   if (routeName === "Starter") {
     const starterIds = await getStarterPokemonByGameMode(gameMode);
     return {
-      routeName: "Starter",
       pokemon: starterIds.map((id) => ({ id, source: EncounterSource.GIFT })),
+      routeName: "Starter",
     };
   }
 
@@ -78,30 +64,30 @@ async function getEncounters(
 }
 
 // Create a map of routeName to encounter for quick lookup
-async function getEncountersMap(
+async function _getEncountersMap(
   gameMode: "classic" | "remix" = "classic",
 ): Promise<Map<string, RouteEncounter>> {
   const encounters = await getEncounters(gameMode);
   const encounterMap = new Map<string, RouteEncounter>();
 
-  encounters.forEach((encounter) => {
+  for (const encounter of encounters) {
     encounterMap.set(encounter.routeName, encounter);
-  });
+  }
 
   return encounterMap;
 }
 
 // Function to clear cache if needed (for testing or data updates)
-function clearEncountersCache(): void {
+function _clearEncountersCache(): void {
   // This will be handled by TanStack Query's cache invalidation
   // You can use queryClient.invalidateQueries(['encounters']) if needed
 }
 
 // Hook to get processed encounter data for a location
 interface UseEncounterDataOptions {
-  locationId?: string;
   enabled?: boolean;
   gameMode?: "classic" | "remix";
+  locationId?: string;
 }
 
 export type RouteEncounterPokemon = PokemonOptionType & {
@@ -130,15 +116,13 @@ export function useEncountersForLocation({
     // Group encounters by Pokemon ID to merge duplicates
     const encounterMap = new Map<number, EncounterSource[]>();
 
-    pokemonEncounters.forEach(({ id, source }) => {
-      if (!encounterMap.has(id)) {
-        encounterMap.set(id, []);
-      }
-      const sources = encounterMap.get(id)!;
+    for (const { id, source } of pokemonEncounters) {
+      const sources = encounterMap.get(id) ?? [];
       if (!sources.includes(source as EncounterSource)) {
         sources.push(source as EncounterSource);
       }
-    });
+      encounterMap.set(id, sources);
+    }
 
     // Convert back to array with merged sources
     routeEncounterData = Array.from(encounterMap.entries()).map(
@@ -164,9 +148,9 @@ export function useEncountersForLocation({
     routePokemonIds.has(pokemonId);
 
   return {
-    routeEncounterData,
-    isLoading,
     error,
+    isLoading,
     isRoutePokemon,
+    routeEncounterData,
   };
 }

@@ -29,14 +29,14 @@ describe("Encounters API", () => {
       "Route 8",
     ];
 
-    eggGiftRouteNames.forEach((routeName) => {
+    for (const routeName of eggGiftRouteNames) {
       const route = data.find((r) => r.routeName === routeName);
       if (route) {
         const eggPokemon = route.pokemon.find((p) => p.id === -1);
         expect(eggPokemon).toBeTruthy();
         expect(eggPokemon?.source).toBe("gift");
       }
-    });
+    }
 
     // Check that routes with egg nest locations include -1 with 'nest' source
     const eggNestRouteNames = [
@@ -51,24 +51,24 @@ describe("Encounters API", () => {
       "Viridian Forest",
     ];
 
-    eggNestRouteNames.forEach((routeName) => {
+    for (const routeName of eggNestRouteNames) {
       const route = data.find((r) => r.routeName === routeName);
       if (route) {
         const eggPokemon = route.pokemon.find((p) => p.id === -1);
         expect(eggPokemon).toBeTruthy();
         expect(eggPokemon?.source).toBe("nest");
       }
-    });
+    }
 
     // Check that routes without egg locations don't have -1
     const allEggRoutes = [...eggGiftRouteNames, ...eggNestRouteNames];
     const nonEggRoutes = data.filter(
       (route) => allEggRoutes.includes(route.routeName) === false,
     );
-    nonEggRoutes.forEach((route) => {
+    for (const route of nonEggRoutes) {
       const eggPokemon = route.pokemon.find((p) => p.id === -1);
       expect(eggPokemon).toBeFalsy();
-    });
+    }
   });
 
   it("should work for both classic and remix modes", async () => {
@@ -104,13 +104,13 @@ describe("Encounters API", () => {
     const response = await GET(request);
     const data = RouteEncountersArraySchema.parse(await response.json());
 
-    data.forEach((route) => {
+    for (const route of data) {
       expect(route).toHaveProperty("routeName");
       expect(route).toHaveProperty("pokemon");
       expect(Array.isArray(route.pokemon)).toBe(true);
 
       // All Pokemon should have valid id and source
-      route.pokemon.forEach((pokemon) => {
+      for (const pokemon of route.pokemon) {
         expect(pokemon).toHaveProperty("id");
         expect(pokemon).toHaveProperty("source");
         expect(typeof pokemon.id).toBe("number");
@@ -130,8 +130,8 @@ describe("Encounters API", () => {
           "legendary",
           "pokeradar",
         ]).toContain(pokemon.source);
-      });
-    });
+      }
+    }
   });
 
   it("should not have duplicate Pokemon with same ID and source within routes", async () => {
@@ -141,10 +141,10 @@ describe("Encounters API", () => {
     const response = await GET(request);
     const data = RouteEncountersArraySchema.parse(await response.json());
 
-    data.forEach((route) => {
+    for (const route of data) {
       const pokemonKeys = route.pokemon.map((p) => `${p.id}-${p.source}`);
       const uniqueKeys = new Set(pokemonKeys);
       expect(uniqueKeys.size).toBe(route.pokemon.length);
-    });
+    }
   });
 });

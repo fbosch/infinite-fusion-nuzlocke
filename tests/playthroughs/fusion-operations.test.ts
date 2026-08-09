@@ -1,6 +1,8 @@
 // Import mocks first (must be at top level for Vitest hoisting)
 import "./mocks";
 
+import { playthroughActions } from "@/stores/playthroughs";
+import { playthroughsStore } from "@/stores/playthroughs/store";
 // Import shared setup and utilities
 import {
   beforeEach,
@@ -8,8 +10,6 @@ import {
   describe,
   expect,
   it,
-  playthroughActions,
-  playthroughsStore,
   setupPlaythroughTest,
 } from "./setup";
 
@@ -202,13 +202,13 @@ describe("Playthroughs Store - Fusion Operations", () => {
       await playthroughActions.flipTeamMemberFusion(0);
 
       expect(playthroughActions.getEncounters()?.["route-1"]).toMatchObject({
-        head: { name: "Pikachu" },
         body: { name: "Charmander" },
+        head: { name: "Pikachu" },
         isFusion: true,
       });
-      expect(playthroughsStore.playthroughs[0]?.team.members[0]).toEqual({
-        headPokemonUid: encounter?.body?.uid,
+      expect(playthroughsStore.playthroughs[0].team.members[0]).toEqual({
         bodyPokemonUid: encounter?.head?.uid,
+        headPokemonUid: encounter?.body?.uid,
       });
     });
 

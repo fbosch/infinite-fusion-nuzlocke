@@ -2,15 +2,17 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
   generateSpriteVariantUrl,
   getSpriteVariantSuffix,
-} from "@/lib/spriteVariants";
+} from "@/lib/sprite-variants";
+import { checkSpriteExists } from "@/lib/sprites";
 import type { SpriteVariantsResponse } from "@/types/sprites";
 
-export const revalidate = 86400;
+export const revalidate = 86_400;
+const SPRITE_ID_REGEX = /^\d+(\.\d+)?$/;
 
 /**
  * Handle CORS preflight requests
  */
-export async function OPTIONS() {
+export function OPTIONS() {
   const response = new NextResponse(null, { status: 200 });
 
   // Set CORS headers
@@ -21,45 +23,7 @@ export async function OPTIONS() {
   return response;
 }
 
-/**
- * Check if a sprite URL exists using fetch
- */
-async function checkSpriteExists(url: string): Promise<boolean> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-    const response = await fetch(url, {
-      method: "HEAD",
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-    return response.ok;
-  } catch (error) {
-    // If HEAD fails, try GET (some servers don't support HEAD)
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-      const response = await fetch(url, {
-        method: "GET",
-        signal: controller.signal,
-        headers: {
-          Range: "bytes=0-1023", // Only fetch first 1KB to minimize data transfer
-        },
-      });
-
-      clearTimeout(timeoutId);
-      return response.ok;
-    } catch (getError) {
-      console.warn("Failed to check sprite exists:", error, getError);
-      return false;
-    }
-  }
-}
-
-export async function GET(request: NextRequest) {
+export function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -77,7 +41,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Validate id format (should be like "25.125" or just "25")
-    if (!/^\d+(\.\d+)?$/.test(id)) {
+    if (!SPRITE_ID_REGEX.test(id)) {
       const errorResponse = NextResponse.json(
         {
           error:
@@ -131,23 +95,12 @@ async function processSpriteVariants(
 ): Promise<NextResponse> {
   const variants: string[] = [];
 
-  // Check variants sequentially to maintain order and break early
-  for (let i = 0; i < maxVariants; i++) {
-    const variant = getSpriteVariantSuffix(i);
-    const url = generateSpriteVariantUrl(id, variant);
-
-    if (await checkSpriteExists(url)) {
-      variants.push(variant);
-    } else {
-      // No more variants available, break early
-      break;
-    }
-  }
+  await collectSpriteVariants(id, maxVariants, variants);
 
   const responseData: SpriteVariantsResponse = {
-    variants,
     cacheKey: id,
     timestamp: Date.now(),
+    variants,
   };
 
   const response = NextResponse.json(responseData);
@@ -167,4 +120,23 @@ async function processSpriteVariants(
   response.headers.set("Vary", "Accept-Encoding"); // Enable compression
 
   return response;
+}
+
+async function collectSpriteVariants(
+  id: string,
+  maxVariants: number,
+  variants: string[],
+  index = 0,
+): Promise<void> {
+  if (index >= maxVariants) {
+    return;
+  }
+
+  const variant = getSpriteVariantSuffix(index);
+  const url = generateSpriteVariantUrl(id, variant);
+
+  if (await checkSpriteExists(url, { Range: "bytes=0-1023" })) {
+    variants.push(variant);
+    await collectSpriteVariants(id, maxVariants, variants, index + 1);
+  }
 }

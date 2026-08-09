@@ -1,28 +1,30 @@
-export type PokemonType = { name: string };
-
-export type EvolutionDetail = {
-  id: number;
+export interface PokemonType {
   name: string;
-  min_level?: number;
-  trigger?: string;
+}
+
+export interface EvolutionDetail {
+  condition?: string;
+  id: number;
   item?: string;
   location?: string;
-  condition?: string;
-};
-
-export type Pokemon = {
-  id: number;
-  nationalDexId: number;
+  min_level?: number;
   name: string;
-  types: PokemonType[];
+  trigger?: string;
+}
+
+export interface Pokemon {
+  evolution?: {
+    evolves_to: EvolutionDetail[];
+    evolves_from?: EvolutionDetail;
+  };
+  id: number;
+  name: string;
+  nationalDexId: number;
   species: {
     is_legendary: boolean;
     is_mythical: boolean;
     generation: string | null;
     evolution_chain: { url: string } | null;
   };
-  evolution?: {
-    evolves_to: EvolutionDetail[];
-    evolves_from?: EvolutionDetail;
-  };
-};
+  types: PokemonType[];
+}

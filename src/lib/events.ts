@@ -3,26 +3,30 @@ import mitt from "mitt";
 const EVOLUTION_EVENT = "pokemon:evolved" as const;
 const LOCATIONS_FLASH_UIDS = "locations:flashUids" as const;
 
-type AppEvents = {
+interface AppEvents extends Record<string | symbol, unknown> {
   [EVOLUTION_EVENT]: { locationId: string };
   [LOCATIONS_FLASH_UIDS]: { uids: string[]; durationMs?: number };
-};
+}
 
 const emitter = mitt<AppEvents>();
 const scrollToLocationHandlers = new Set<
   (payload: ScrollToLocationDetail) => boolean
 >();
 
-export type EvolutionEventDetail = { locationId: string };
-export type ScrollToLocationDetail = {
+export interface EvolutionEventDetail {
   locationId: string;
+}
+export interface ScrollToLocationDetail {
   behavior?: ScrollBehavior;
-  highlightUids?: string[];
   durationMs?: number;
-};
+  highlightUids?: string[];
+  locationId: string;
+}
 
 export function emitEvolutionEvent(locationId: string): void {
-  if (!locationId) return;
+  if (!locationId) {
+    return;
+  }
   emitter.emit(EVOLUTION_EVENT, { locationId });
 }
 
@@ -44,7 +48,9 @@ export function onScrollToLocation(
 }
 
 export function emitScrollToLocation(detail: ScrollToLocationDetail): boolean {
-  if (!detail.locationId || scrollToLocationHandlers.size === 0) return false;
+  if (!detail.locationId || scrollToLocationHandlers.size === 0) {
+    return false;
+  }
 
   let wasHandled = false;
   for (const handler of scrollToLocationHandlers) {

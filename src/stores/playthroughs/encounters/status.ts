@@ -4,7 +4,7 @@ import {
   getTeamSizeAfter,
   getViableRosterSize,
 } from "@/lib/analytics/selectors";
-import { trackEvent } from "@/lib/analytics/trackEvent";
+import { trackEvent } from "@/lib/analytics/track-event";
 import { PokemonStatus } from "@/loaders/pokemon";
 import { updateEncounter } from "./crud";
 import { ensureActivePlaythroughWithEncounters } from "./shared";
@@ -69,7 +69,7 @@ export const markEncounterAsDeceased = async (
   const alreadyDeceased =
     hasPokemonBefore &&
     [encounterBefore.head, encounterBefore.body]
-      .filter((pokemon) => pokemon != null)
+      .filter((pokemon) => pokemon !== null)
       .every((pokemon) => pokemon.status === PokemonStatus.DECEASED);
 
   if (alreadyDeceased) {
@@ -88,7 +88,7 @@ export const markEncounterAsDeceased = async (
   }
 
   const nowDeceased = [encounterAfter.head, encounterAfter.body]
-    .filter((pokemon) => pokemon != null)
+    .filter((pokemon) => pokemon !== null)
     .every((pokemon) => pokemon.status === PokemonStatus.DECEASED);
 
   if (!nowDeceased) {
@@ -97,18 +97,18 @@ export const markEncounterAsDeceased = async (
 
   removeTeamMembersWithPokemon(
     [encounterAfter.head?.uid, encounterAfter.body?.uid].filter(
-      (uid): uid is string => uid != null,
+      (uid): uid is string => uid !== null,
     ),
   );
 
   trackEvent("encounter_marked_deceased", {
     ...getSharedEventProperties(activePlaythrough),
     location_id: locationId,
-    was_fused: wasFused,
     team_size_after: getTeamSizeAfter(activePlaythrough),
     viable_roster_bucket_after: toViableRosterBucket(
       getViableRosterSize(activePlaythrough),
     ),
+    was_fused: wasFused,
   });
 };
 

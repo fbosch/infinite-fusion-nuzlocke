@@ -7,24 +7,24 @@ describe("data refresh location normalization", () => {
       flattenLocationPokemonEntries("data/classic/safari-encounters.json", {
         locations: [
           {
-            routeName: "Route 1",
-            encounters: [16, { pokemonId: 27, encounterType: "cave" }],
-            pokemonIds: [41],
+            encounters: [16, { encounterType: "cave", pokemonId: 27 }],
             pokemonId: 54,
+            pokemonIds: [41],
+            routeName: "Route 1",
           },
           {
-            routeName: "Route 2",
-            pokemonIds: [41],
             pokemonId: 54,
+            pokemonIds: [41],
+            routeName: "Route 2",
             source: "Gift",
           },
         ],
       }),
     ).toEqual([
-      { location: "Route 1", source: "Safari Encounters", pokemonId: 16 },
-      { location: "Route 1", source: "cave", pokemonId: 27 },
-      { location: "Route 2", source: "Safari Encounters", pokemonId: 41 },
-      { location: "Route 2", source: "Gift", pokemonId: 54 },
+      { location: "Route 1", pokemonId: 16, source: "Safari Encounters" },
+      { location: "Route 1", pokemonId: 27, source: "cave" },
+      { location: "Route 2", pokemonId: 41, source: "Safari Encounters" },
+      { location: "Route 2", pokemonId: 54, source: "Gift" },
     ]);
   });
 

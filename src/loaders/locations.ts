@@ -1,28 +1,33 @@
 import locationsData from "@data/shared/locations.json";
 import { useQuery } from "@tanstack/react-query";
 import { isStarterLocation } from "@/constants/special-locations";
-import { encountersData, encountersQueries } from "@/lib/queryClient";
+import { encountersData } from "@/lib/data";
+import { encountersQueries } from "@/lib/queries/encounters";
 import { getStarterPokemonByGameMode } from "@/loaders/starters";
 import { EncounterSource, type PokemonEncounter } from "@/types/encounters";
 import { generatePrefixedId } from "@/utils/id";
 import type { GameMode } from "../stores/playthroughs/types";
 
-export type Location = {
+export interface Location {
+  description: string;
   id: string;
   name: string;
   region: string;
-  description: string;
-};
+}
 
-type LegacyCustomLocation = { id: string; name: string; order: number };
-export type CustomLocation = {
+interface LegacyCustomLocation {
   id: string;
   name: string;
+  order: number;
+}
+export interface CustomLocation {
+  id: string;
   insertAfterLocationId: string;
-};
+  name: string;
+}
 
 // Migration function to convert order-based custom locations
-function migrateCustomLocationFromOrder(
+function _migrateCustomLocationFromOrder(
   legacyLocation: LegacyCustomLocation,
 ): CustomLocation {
   const defaultLocations = getLocations();
@@ -46,8 +51,8 @@ function migrateCustomLocationFromOrder(
 
   return {
     id: legacyLocation.id,
-    name: legacyLocation.name,
     insertAfterLocationId,
+    name: legacyLocation.name,
   };
 }
 
@@ -56,7 +61,9 @@ function isNonEmptyString(value: unknown): value is string {
 }
 
 function isLocation(value: unknown): value is Location {
-  if (typeof value !== "object" || value === null) return false;
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
 
   const candidate = value as Record<string, unknown>;
   return (
@@ -95,7 +102,7 @@ export function getLocations(): Location[] {
 }
 
 // Function to clear cache if needed (for testing or data updates)
-function clearLocationsCache(): void {
+function _clearLocationsCache(): void {
   locationsCache = null;
 }
 
@@ -188,29 +195,29 @@ export function useLocationEncountersById(
     isLoading: starterLoading,
     error: starterError,
   } = useQuery({
-    queryKey: ["starter-pokemon", gameMode],
-    queryFn: () => getStarterPokemonByGameMode(gameMode as "remix" | "classic"),
     enabled: isStarter && !isRandomized,
-    staleTime: Infinity,
-    gcTime: Infinity,
+    gcTime: Number.POSITIVE_INFINITY,
+    queryFn: () => getStarterPokemonByGameMode(gameMode as "remix" | "classic"),
+    queryKey: ["starter-pokemon", gameMode],
+    staleTime: Number.POSITIVE_INFINITY,
   });
 
   if (gameMode === "randomized") {
     return {
-      pokemonEncounters: [],
-      isLoading: false,
       error: null,
+      isLoading: false,
+      pokemonEncounters: [],
     };
   }
 
   if (isStarter) {
     return {
+      error: starterError,
+      isLoading: starterLoading,
       pokemonEncounters: starterPokemon.map((id) => ({
         id,
         source: EncounterSource.GIFT,
       })),
-      isLoading: starterLoading,
-      error: starterError,
     };
   }
 
@@ -220,9 +227,9 @@ export function useLocationEncountersById(
   );
 
   return {
-    pokemonEncounters: encounter?.pokemon || [],
-    isLoading,
     error,
+    isLoading,
+    pokemonEncounters: encounter?.pokemon || [],
   };
 }
 
@@ -231,21 +238,16 @@ export async function getLocationsWithEncounters(
   gameMode: "classic" | "remix" = "classic",
 ): Promise<Array<Location & { encounters: PokemonEncounter[] }>> {
   const locations = getLocations();
-  const locationsWithEncounters: Array<
-    Location & { encounters: PokemonEncounter[] }
-  > = [];
+  const locationsWithEncounters = await Promise.all(
+    locations.map(async (location) => ({
+      ...location,
+      encounters: await getLocationEncountersById(location.id, gameMode),
+    })),
+  );
 
-  for (const location of locations) {
-    const encounters = await getLocationEncountersById(location.id, gameMode);
-    if (encounters.length > 0) {
-      locationsWithEncounters.push({
-        ...location,
-        encounters,
-      });
-    }
-  }
-
-  return locationsWithEncounters;
+  return locationsWithEncounters.filter(
+    (location) => location.encounters.length > 0,
+  );
 }
 
 // Check if a location has encounters
@@ -299,7 +301,7 @@ function getCustomLocationInsertIndex(
     (loc) => loc.id === afterLocationId,
   );
 
-  if (!defaultLocationExists && !customLocationExists) {
+  if (!(defaultLocationExists || customLocationExists)) {
     throw new Error(`Location with ID ${afterLocationId} not found`);
   }
 
@@ -340,11 +342,11 @@ export function mergeLocationsWithCustom(
       if (afterIndex !== -1) {
         // Found the location to insert after, place this custom location
         const customLocation: CombinedLocation = {
+          description: "Custom location",
           id: custom.id,
+          isCustom: true as const,
           name: custom.name,
           region: "Custom",
-          description: "Custom location",
-          isCustom: true as const,
         };
         result.splice(afterIndex + 1, 0, customLocation);
         placedInThisPass.push(custom);
@@ -368,7 +370,7 @@ export function mergeLocationsWithCustom(
       break;
     }
 
-    passCount++;
+    passCount += 1;
   }
 
   return result;
@@ -382,7 +384,7 @@ export function getLocationsSortedWithCustom(
 }
 
 // Alias function for compatibility with AddCustomLocationModal
-function getCombinedLocationsSortedByOrder(
+function _getCombinedLocationsSortedByOrder(
   customLocations: CustomLocation[] = [],
 ): CombinedLocation[] {
   return getLocationsSortedWithCustom(customLocations);
@@ -420,8 +422,8 @@ export function createCustomLocation(
 ): CustomLocation {
   return {
     id: generateCustomLocationId(),
-    name: name.trim(),
     insertAfterLocationId: afterLocationId,
+    name: name.trim(),
   };
 }
 
@@ -508,8 +510,8 @@ export function wouldOrphanLocations(
 ): { wouldOrphan: boolean; dependents: CustomLocation[] } {
   const dependents = getCustomLocationDependents(locationId, customLocations);
   return {
-    wouldOrphan: dependents.length > 0,
     dependents,
+    wouldOrphan: dependents.length > 0,
   };
 }
 
@@ -526,28 +528,19 @@ export function getAvailableAfterLocations(
 }
 
 // Get merged locations with encounters for a specific game mode
-async function getMergedLocationsWithEncounters(
+async function _getMergedLocationsWithEncounters(
   customLocations: CustomLocation[] = [],
   gameMode: "classic" | "remix" = "classic",
 ): Promise<Array<CombinedLocation & { encounters: PokemonEncounter[] }>> {
   const mergedLocations = getLocationsSortedWithCustom(customLocations);
-  const locationsWithEncounters = [];
-
-  for (const location of mergedLocations) {
-    let encounters: PokemonEncounter[] = [];
-
-    // Only default locations have encounters (custom locations are user-defined)
-    if (!isCustomLocation(location)) {
-      encounters = await getLocationEncountersByName(location.name, gameMode);
-    }
-
-    locationsWithEncounters.push({
+  return await Promise.all(
+    mergedLocations.map(async (location) => ({
       ...location,
-      encounters,
-    });
-  }
-
-  return locationsWithEncounters;
+      encounters: isCustomLocation(location)
+        ? []
+        : await getLocationEncountersByName(location.name, gameMode),
+    })),
+  );
 }
 
 export function getLocationById(id?: string) {

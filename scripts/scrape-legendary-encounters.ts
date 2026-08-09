@@ -2,7 +2,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import * as cheerio from "cheerio";
+import { load } from "cheerio";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
 import {
@@ -21,17 +21,17 @@ const LEGENDARY_POKEMON_URL =
   "https://infinitefusion.fandom.com/wiki/Legendary_Pok%C3%A9mon";
 
 interface LegendaryRoute {
-  routeName: string;
   encounters: number[]; // Array of Pokémon IDs
+  routeName: string;
 }
 
-type CheerioInput = Parameters<ReturnType<typeof cheerio.load>>[0];
+type CheerioInput = Parameters<ReturnType<typeof load>>[0];
 
 export function collectLegendaryRouteMapFromHtml(
   html: string,
   pokemonNameMap: PokemonNameMap,
 ): Map<string, number[]> {
-  const $ = cheerio.load(html);
+  const $ = load(html);
   const routeMap = new Map<string, number[]>();
   const headings = $(".mw-parser-output").find("h3");
 
@@ -44,7 +44,7 @@ export function collectLegendaryRouteMapFromHtml(
 }
 
 function addLegendaryHeadingEncounters(
-  $: ReturnType<typeof cheerio.load>,
+  $: ReturnType<typeof load>,
   heading: CheerioInput,
   pokemonNameMap: PokemonNameMap,
   routeMap: Map<string, number[]>,
@@ -99,7 +99,7 @@ function getLegendaryPokemonIds(
 }
 
 function findLegendaryRouteName(
-  $heading: ReturnType<ReturnType<typeof cheerio.load>>,
+  $heading: ReturnType<ReturnType<typeof load>>,
 ): string {
   let nextElement = $heading.next();
 
@@ -120,7 +120,7 @@ function findLegendaryRouteName(
 }
 
 function getRouteNameFromLegendaryTable(
-  $table: ReturnType<ReturnType<typeof cheerio.load>>,
+  $table: ReturnType<ReturnType<typeof load>>,
 ): string {
   const $cell = $table.find("tr").first().find("td").first();
   if ($cell.length === 0) {
@@ -164,8 +164,8 @@ async function scrapeLegendaryEncounters(): Promise<LegendaryRoute[]> {
     // Convert map to array format
     const routes: LegendaryRoute[] = Array.from(routeMap.entries()).map(
       ([routeName, encounters]) => ({
-        routeName,
         encounters: encounters.sort((a, b) => a - b), // Sort by ID
+        routeName,
       }),
     );
 
@@ -203,7 +203,7 @@ async function main() {
     const stats = await fs.stat(outputPath);
     const duration = Date.now() - startTime;
 
-    ConsoleFormatter.success(`Legendary scraping completed successfully!`);
+    ConsoleFormatter.success("Legendary scraping completed successfully!");
     ConsoleFormatter.info(
       `Legendaries: ${legendaries.length} (${(stats.size / 1024).toFixed(1)} KB)`,
     );

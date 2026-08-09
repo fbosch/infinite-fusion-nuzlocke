@@ -1,7 +1,24 @@
 import { describe, expect, it } from "vitest";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { canFuse } from "@/utils/pokemonPredicates";
-import { getDisplayPokemon, getNicknameText } from "../utils";
+import { canFuse } from "@/utils/pokemon-predicates";
+import {
+  type DisplayPokemon,
+  getDisplayPokemon,
+  getNicknameText,
+} from "../utils";
+
+function getPokemonId(pokemon: DisplayPokemon["head"]) {
+  return pokemon ? pokemon.id : null;
+}
+
+function getDisplayIds({ body, head, isFusion }: DisplayPokemon) {
+  return {
+    bodyId: isFusion ? getPokemonId(body) : null,
+    headId: isFusion
+      ? getPokemonId(head)
+      : (getPokemonId(head) ?? getPokemonId(body)),
+  };
+}
 
 describe("Display Pokemon Logic - Artwork Variant Bug Prevention", () => {
   const mockPikachu: PokemonOptionType = {
@@ -48,12 +65,7 @@ describe("Display Pokemon Logic - Artwork Variant Bug Prevention", () => {
       );
 
       // Apply the same logic used in components for ID selection
-      const headId = displayPokemon.isFusion
-        ? (displayPokemon.head?.id ?? null)
-        : (displayPokemon.head?.id ?? displayPokemon.body?.id ?? null);
-      const bodyId = displayPokemon.isFusion
-        ? (displayPokemon.body?.id ?? null)
-        : null;
+      const { bodyId, headId } = getDisplayIds(displayPokemon);
 
       expect(headId).toBe(25); // Pikachu
       expect(bodyId).toBe(1); // Bulbasaur
@@ -68,12 +80,7 @@ describe("Display Pokemon Logic - Artwork Variant Bug Prevention", () => {
       );
 
       // Apply the same logic used in components for ID selection
-      const headId = displayPokemon.isFusion
-        ? (displayPokemon.head?.id ?? null)
-        : (displayPokemon.head?.id ?? displayPokemon.body?.id ?? null);
-      const bodyId = displayPokemon.isFusion
-        ? (displayPokemon.body?.id ?? null)
-        : null;
+      const { bodyId, headId } = getDisplayIds(displayPokemon);
 
       expect(headId).toBe(25); // Should use head Pokemon (Pikachu)
       expect(bodyId).toBe(null); // Should be null for single Pokemon
@@ -84,12 +91,7 @@ describe("Display Pokemon Logic - Artwork Variant Bug Prevention", () => {
       const displayPokemon = getDisplayPokemon(null, mockBulbasaur, false);
 
       // Apply the same logic used in components for ID selection
-      const headId = displayPokemon.isFusion
-        ? (displayPokemon.head?.id ?? null)
-        : (displayPokemon.head?.id ?? displayPokemon.body?.id ?? null);
-      const bodyId = displayPokemon.isFusion
-        ? (displayPokemon.body?.id ?? null)
-        : null;
+      const { bodyId, headId } = getDisplayIds(displayPokemon);
 
       expect(headId).toBe(1); // Should use body Pokemon (Bulbasaur)
       expect(bodyId).toBe(null); // Should be null for single Pokemon
@@ -105,12 +107,7 @@ describe("Display Pokemon Logic - Artwork Variant Bug Prevention", () => {
       );
 
       // Apply the same logic used in components for ID selection
-      const headId = displayPokemon.isFusion
-        ? (displayPokemon.head?.id ?? null)
-        : (displayPokemon.head?.id ?? displayPokemon.body?.id ?? null);
-      const bodyId = displayPokemon.isFusion
-        ? (displayPokemon.body?.id ?? null)
-        : null;
+      const { bodyId, headId } = getDisplayIds(displayPokemon);
 
       expect(headId).toBe(25); // Should use active Pokemon (Pikachu)
       expect(bodyId).toBe(null); // Should be null for single Pokemon
@@ -132,12 +129,7 @@ describe("Display Pokemon Logic - Artwork Variant Bug Prevention", () => {
       );
 
       // Apply the same logic used in components for ID selection
-      const headId = displayPokemon.isFusion
-        ? (displayPokemon.head?.id ?? null)
-        : (displayPokemon.head?.id ?? displayPokemon.body?.id ?? null);
-      const bodyId = displayPokemon.isFusion
-        ? (displayPokemon.body?.id ?? null)
-        : null;
+      const { bodyId, headId } = getDisplayIds(displayPokemon);
 
       // Critical assertion: When fusion is off, should NOT use fusion IDs (25, 1)
       // Should use single Pokemon ID instead (25, null)
@@ -153,44 +145,44 @@ describe("Display Pokemon Logic - Artwork Variant Bug Prevention", () => {
     it("should use consistent logic across different scenarios", () => {
       const testScenarios = [
         {
-          name: "fusion enabled",
-          head: mockPikachu,
           body: mockBulbasaur,
-          isFusion: true,
-          expectedHeadId: 25,
           expectedBodyId: 1,
+          expectedHeadId: 25,
           expectedKey: "25.1",
+          head: mockPikachu,
+          isFusion: true,
+          name: "fusion enabled",
         },
         {
+          body: mockBulbasaur,
+          expectedBodyId: null,
+          expectedHeadId: 25,
+          expectedKey: "25",
+          head: mockPikachu,
+          isFusion: false,
           name: "fusion disabled with head",
-          head: mockPikachu,
-          body: mockBulbasaur,
-          isFusion: false,
-          expectedHeadId: 25,
-          expectedBodyId: null,
-          expectedKey: "25",
         },
         {
-          name: "fusion disabled with body only",
-          head: null,
           body: mockBulbasaur,
-          isFusion: false,
+          expectedBodyId: null,
           expectedHeadId: 1,
-          expectedBodyId: null,
           expectedKey: "1",
+          head: null,
+          isFusion: false,
+          name: "fusion disabled with body only",
         },
         {
-          name: "fusion disabled head only",
-          head: mockPikachu,
           body: null,
-          isFusion: false,
-          expectedHeadId: 25,
           expectedBodyId: null,
+          expectedHeadId: 25,
           expectedKey: "25",
+          head: mockPikachu,
+          isFusion: false,
+          name: "fusion disabled head only",
         },
       ];
 
-      testScenarios.forEach((scenario) => {
+      for (const scenario of testScenarios) {
         const displayPokemon = getDisplayPokemon(
           scenario.head,
           scenario.body,
@@ -198,12 +190,7 @@ describe("Display Pokemon Logic - Artwork Variant Bug Prevention", () => {
         );
 
         // Apply the same logic used in components
-        const headId = displayPokemon.isFusion
-          ? (displayPokemon.head?.id ?? null)
-          : (displayPokemon.head?.id ?? displayPokemon.body?.id ?? null);
-        const bodyId = displayPokemon.isFusion
-          ? (displayPokemon.body?.id ?? null)
-          : null;
+        const { bodyId, headId } = getDisplayIds(displayPokemon);
 
         // Generate the key that would be used for preferred variants
         const key =
@@ -218,7 +205,7 @@ describe("Display Pokemon Logic - Artwork Variant Bug Prevention", () => {
           scenario.expectedBodyId,
         );
         expect(key, `${scenario.name}: variant key`).toBe(scenario.expectedKey);
-      });
+      }
     });
   });
 
@@ -226,12 +213,7 @@ describe("Display Pokemon Logic - Artwork Variant Bug Prevention", () => {
     it("should handle null/undefined Pokemon gracefully", () => {
       const displayPokemon = getDisplayPokemon(null, null, false);
 
-      const headId = displayPokemon.isFusion
-        ? (displayPokemon.head?.id ?? null)
-        : (displayPokemon.head?.id ?? displayPokemon.body?.id ?? null);
-      const bodyId = displayPokemon.isFusion
-        ? (displayPokemon.body?.id ?? null)
-        : null;
+      const { bodyId, headId } = getDisplayIds(displayPokemon);
 
       expect(headId).toBe(null);
       expect(bodyId).toBe(null);
@@ -241,12 +223,7 @@ describe("Display Pokemon Logic - Artwork Variant Bug Prevention", () => {
     it("should handle fusion request with missing Pokemon", () => {
       const displayPokemon = getDisplayPokemon(mockPikachu, null, true);
 
-      const headId = displayPokemon.isFusion
-        ? (displayPokemon.head?.id ?? null)
-        : (displayPokemon.head?.id ?? displayPokemon.body?.id ?? null);
-      const bodyId = displayPokemon.isFusion
-        ? (displayPokemon.body?.id ?? null)
-        : null;
+      const { bodyId, headId } = getDisplayIds(displayPokemon);
 
       // Should fall back to single Pokemon mode
       expect(headId).toBe(25);

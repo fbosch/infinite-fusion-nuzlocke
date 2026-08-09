@@ -1,17 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { PokemonStatus } from "@/loaders/pokemon";
+import { resetEncounter, updateEncounter } from "../encounters/crud";
+import { clearEncounterFromLocation } from "../encounters/drag-drop";
 import {
-  clearEncounterFromLocation,
   flipEncounterFusion,
+  toggleEncounterFusion,
+} from "../encounters/fusion";
+import {
   markEncounterAsCaptured,
   markEncounterAsDeceased,
   markEncounterAsMissed,
   markEncounterAsReceived,
   moveEncounterToBox,
-  resetEncounter,
-  toggleEncounterFusion,
-  updateEncounter,
-} from "../encounters";
+} from "../encounters/status";
 import {
   createTestPlaythrough,
   expectEncounter,
@@ -87,12 +88,12 @@ describe("Basic Encounter Operations", () => {
         "charmander_route1_456",
       );
       expect(activePlaythrough.team.members).not.toContainEqual({
-        headPokemonUid: "pikachu_route1_123",
         bodyPokemonUid: "",
+        headPokemonUid: "pikachu_route1_123",
       });
       expect(activePlaythrough.team.members).toContainEqual({
-        headPokemonUid: "charmander_route1_456",
         bodyPokemonUid: "",
+        headPokemonUid: "charmander_route1_456",
       });
     });
 
@@ -160,7 +161,11 @@ describe("Basic Encounter Operations", () => {
       await updateEncounter("route1", charmander, "body", true);
 
       const newTimestamp = activePlaythrough.encounters?.route1?.updatedAt;
-      expect(newTimestamp).toBeGreaterThan(timestamp!);
+      expect(timestamp).toBeDefined();
+      if (timestamp === undefined) {
+        throw new Error("Initial encounter timestamp is missing");
+      }
+      expect(newTimestamp).toBeGreaterThan(timestamp);
     });
   });
 
@@ -171,8 +176,8 @@ describe("Basic Encounter Operations", () => {
       // Set up encounter
       activePlaythrough.encounters = {
         route1: {
-          head: testPokemon.pikachu(),
           body: null,
+          head: testPokemon.pikachu(),
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -197,8 +202,8 @@ describe("Basic Encounter Operations", () => {
       // Set up fusion encounter
       activePlaythrough.encounters = {
         route1: {
-          head: testPokemon.pikachu(),
           body: testPokemon.charmander(),
+          head: testPokemon.pikachu(),
           isFusion: true,
           updatedAt: Date.now(),
         },
@@ -216,8 +221,8 @@ describe("Basic Encounter Operations", () => {
       // Set up encounter
       activePlaythrough.encounters = {
         route1: {
-          head: testPokemon.pikachu(),
           body: null,
+          head: testPokemon.pikachu(),
           isFusion: false,
           updatedAt: Date.now(),
         },
@@ -247,8 +252,8 @@ describe("Basic Encounter Operations", () => {
         name: "Pikachu",
         nationalDexId: 25,
         nickname: "Sparky",
-        uid: "pikachu_route1_123",
         originalLocation: "route1",
+        uid: "pikachu_route1_123",
       };
       await updateEncounter("route1", pikachu, "head", false);
 
@@ -261,8 +266,8 @@ describe("Basic Encounter Operations", () => {
         "Sparky",
       );
       expect(activePlaythrough.team.members[0]).toEqual({
-        headPokemonUid: "pikachu_route1_123",
         bodyPokemonUid: "",
+        headPokemonUid: "pikachu_route1_123",
       });
     });
 
@@ -273,8 +278,8 @@ describe("Basic Encounter Operations", () => {
         id: 25,
         name: "Pikachu",
         nationalDexId: 25,
-        uid: "pikachu_route1_123",
         originalLocation: "route1",
+        uid: "pikachu_route1_123",
       };
       await updateEncounter("route1", pikachu, "head", false);
 
@@ -292,8 +297,8 @@ describe("Basic Encounter Operations", () => {
         id: 25,
         name: "Pikachu",
         nationalDexId: 25,
-        uid: "pikachu_route1_123",
         originalLocation: "route1",
+        uid: "pikachu_route1_123",
       };
       await updateEncounter("route1", pikachu, "head", false);
 
@@ -316,8 +321,8 @@ describe("Basic Encounter Operations", () => {
         PokemonStatus.DECEASED,
       );
       expect(activePlaythrough.team.members).not.toContainEqual({
-        headPokemonUid: "pikachu_route1_123",
         bodyPokemonUid: "",
+        headPokemonUid: "pikachu_route1_123",
       });
     });
 
@@ -353,8 +358,8 @@ describe("Basic Encounter Operations", () => {
         PokemonStatus.DECEASED,
       );
       expect(activePlaythrough.team.members).not.toContainEqual({
-        headPokemonUid: "pikachu_route1_123",
         bodyPokemonUid: "charmander_route1_456",
+        headPokemonUid: "pikachu_route1_123",
       });
     });
   });
@@ -380,8 +385,8 @@ describe("Basic Encounter Operations", () => {
       // Set up fusion encounter
       activePlaythrough.encounters = {
         route1: {
-          head: testPokemon.pikachu(),
           body: testPokemon.charmander(),
+          head: testPokemon.pikachu(),
           isFusion: true,
           updatedAt: Date.now(),
         },
@@ -398,8 +403,8 @@ describe("Basic Encounter Operations", () => {
       // Set up fusion encounter
       activePlaythrough.encounters = {
         route1: {
-          head: testPokemon.pikachu(),
           body: testPokemon.charmander(),
+          head: testPokemon.pikachu(),
           isFusion: true,
           updatedAt: Date.now(),
         },
@@ -421,14 +426,14 @@ describe("Basic Encounter Operations", () => {
       // Set up regular encounter
       activePlaythrough.encounters = {
         route1: {
-          head: testPokemon.pikachu(),
           body: null,
+          head: testPokemon.pikachu(),
           isFusion: false,
           updatedAt: Date.now(),
         },
       };
 
-      expect(async () => await flipEncounterFusion("route1")).not.toThrow();
+      await expect(flipEncounterFusion("route1")).resolves.toBeUndefined();
 
       // Should remain unchanged
       expect(activePlaythrough.encounters?.route1?.head?.uid).toBe(

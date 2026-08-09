@@ -17,40 +17,40 @@ vi.mock("../starters", () => ({
   getStarterPokemonByGameMode: vi.fn(),
 }));
 
-// Mock the query client encounters data
-vi.mock("@/lib/queryClient", () => {
+// Mock encounter data and queries
+vi.mock("@/lib/data", () => {
   const mockEncountersData = [
     {
-      routeName: "Route 1",
       pokemon: [
         { id: 1, source: "wild" },
         { id: 2, source: "wild" },
         { id: 3, source: "gift" },
       ],
+      routeName: "Route 1",
     },
     {
-      routeName: "Route 2",
       pokemon: [
         { id: 4, source: "wild" },
         { id: 5, source: "trade" },
         { id: 6, source: "wild" },
       ],
+      routeName: "Route 2",
     },
     {
-      routeName: "Viridian Forest",
       pokemon: [
         { id: 7, source: "wild" },
         { id: 8, source: "wild" },
         { id: 9, source: "wild" },
       ],
+      routeName: "Viridian Forest",
     },
     {
-      routeName: "Pewter City",
       pokemon: [
         { id: 10, source: "gift" },
         { id: 11, source: "trade" },
         { id: 12, source: "wild" },
       ],
+      routeName: "Pewter City",
     },
   ];
 
@@ -58,14 +58,17 @@ vi.mock("@/lib/queryClient", () => {
     encountersData: {
       getAllEncounters: vi.fn().mockResolvedValue(mockEncountersData),
     },
-    encountersQueries: {
-      all: vi.fn(() => ({
-        queryKey: ["encounters", "classic"],
-        queryFn: vi.fn().mockResolvedValue(mockEncountersData),
-      })),
-    },
   };
 });
+
+vi.mock("@/lib/queries/encounters", () => ({
+  encountersQueries: {
+    all: vi.fn(() => ({
+      queryFn: vi.fn(),
+      queryKey: ["encounters", "classic"],
+    })),
+  },
+}));
 
 describe("Locations", () => {
   beforeEach(() => {
@@ -81,7 +84,7 @@ describe("Locations", () => {
 
     it("should return locations with required properties", () => {
       const locations = getLocations();
-      const location = locations[0];
+      const [location] = locations;
 
       expect(location).toHaveProperty("id");
       expect(location).toHaveProperty("name");
@@ -110,9 +113,9 @@ describe("Locations", () => {
     it("should return locations for a specific region", () => {
       const kantoLocations = getLocationsByRegion("Kanto");
       expect(kantoLocations.length).toBeGreaterThan(0);
-      kantoLocations.forEach((location) => {
+      for (const location of kantoLocations) {
         expect(location.region).toBe("Kanto");
-      });
+      }
     });
 
     it("should return empty array for non-existent region", () => {
@@ -125,9 +128,9 @@ describe("Locations", () => {
     it("should return locations for a specific region (case-insensitive)", () => {
       const kantoLocations = getLocationsBySpecificRegion("kanto");
       expect(kantoLocations.length).toBeGreaterThan(0);
-      kantoLocations.forEach((location) => {
+      for (const location of kantoLocations) {
         expect(location.region.toLowerCase()).toBe("kanto");
-      });
+      }
     });
 
     it("should return empty array for non-existent region", () => {
@@ -246,10 +249,10 @@ describe("Locations", () => {
       it("should return false for non-starter locations", async () => {
         // Create a mock location that we know doesn't have encounters
         const mockLocation = {
+          description: "A mock location for testing",
           id: "mock-location-id",
           name: "Mock City",
           region: "Kanto",
-          description: "A mock location for testing",
         };
 
         const hasEncounters = await hasLocationEncounters(

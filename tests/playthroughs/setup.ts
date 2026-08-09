@@ -1,19 +1,28 @@
-import { act, renderHook } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { PokemonOptionType } from "@/loaders/pokemon";
 import {
-  useActivePlaythrough,
-  useEncounters,
-  useGameMode,
-  useIsLoading,
-  useIsRandomizedMode,
-  useIsRemixMode,
-  usePlaythroughById,
-  usePlaythroughsSnapshot,
-} from "@/stores/playthroughs/hooks";
+  act as testingAct,
+  renderHook as testingRenderHook,
+} from "@testing-library/react";
+import {
+  afterEach as vitestAfterEach,
+  beforeEach as vitestBeforeEach,
+  describe as vitestDescribe,
+  expect as vitestExpect,
+  it as vitestIt,
+  vi as vitestVi,
+} from "vitest";
+import type { PokemonOptionType } from "@/loaders/pokemon";
 // Import modules after mocks are set up (mocks should be imported in each test file)
-import { playthroughActions } from "@/stores/playthroughs/index";
-import { playthroughsStore } from "@/stores/playthroughs/store";
+import { playthroughActions as storePlaythroughActions } from "@/stores/playthroughs/index";
+import { playthroughsStore as storePlaythroughsStore } from "@/stores/playthroughs/store";
+
+export const act = testingAct;
+export const afterEach = vitestAfterEach;
+export const beforeEach = vitestBeforeEach;
+export const describe = vitestDescribe;
+export const expect = vitestExpect;
+export const it = vitestIt;
+export const renderHook = testingRenderHook;
+export const vi = vitestVi;
 
 // Types
 export type PokemonOption = PokemonOptionType;
@@ -29,13 +38,13 @@ export const createMockPokemon = (name: string, id: number): PokemonOption => ({
 // Clean slate setup function - resets everything to empty state
 export const setupCleanSlate = () => {
   // Clear all mocks
-  vi.clearAllMocks();
+  vitestVi.clearAllMocks();
 
   // Reset store state completely
-  playthroughsStore.playthroughs = [];
-  playthroughsStore.activePlaythroughId = undefined;
-  playthroughsStore.isLoading = false;
-  playthroughsStore.isSaving = false;
+  storePlaythroughsStore.playthroughs = [];
+  storePlaythroughsStore.activePlaythroughId = undefined;
+  storePlaythroughsStore.isLoading = false;
+  storePlaythroughsStore.isSaving = false;
 };
 
 // Common test setup function that creates a playthrough
@@ -43,30 +52,8 @@ export const setupPlaythroughTest = () => {
   setupCleanSlate();
 
   // Create a test playthrough
-  const playthroughId = playthroughActions.createPlaythrough("Test Run");
-  playthroughActions.setActivePlaythrough(playthroughId);
+  const playthroughId = storePlaythroughActions.createPlaythrough("Test Run");
+  storePlaythroughActions.setActivePlaythrough(playthroughId);
 
   return playthroughId;
-};
-
-// Export everything needed by test files
-export {
-  act,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  playthroughActions,
-  playthroughsStore,
-  renderHook,
-  useActivePlaythrough,
-  useEncounters,
-  useGameMode,
-  useIsLoading,
-  useIsRandomizedMode,
-  useIsRemixMode,
-  usePlaythroughById,
-  usePlaythroughsSnapshot,
-  vi,
 };

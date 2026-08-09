@@ -34,8 +34,8 @@ console.log(
   `Wrote docs/coverage.svg (${lineCoverage.toFixed(2)}% line coverage).`,
 );
 
-function coverageColor(coverage) {
-  return coverageColors.find(([minimum]) => coverage >= minimum)[1];
+function coverageColor(coveragePercent) {
+  return coverageColors.find(([minimum]) => coveragePercent >= minimum)[1];
 }
 
 function renderBadge(label, value, valueColor) {

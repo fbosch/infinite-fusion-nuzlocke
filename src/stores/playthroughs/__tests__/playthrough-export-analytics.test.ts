@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { usePlaythroughImportExport } from "@/hooks/usePlaythroughImportExport";
+import { usePlaythroughImportExport } from "@/hooks/use-playthrough-import-export";
 import type { Playthrough } from "@/stores/playthroughs/types";
 
 const analyticsMocks = vi.hoisted(() => ({
@@ -9,9 +9,9 @@ const analyticsMocks = vi.hoisted(() => ({
 }));
 
 const playthroughActionMocks = vi.hoisted(() => ({
-  importPlaythrough: vi.fn(),
   getActivePlaythrough: vi.fn(),
   getAllPlaythroughs: vi.fn(),
+  importPlaythrough: vi.fn(),
 }));
 
 vi.mock("@/stores/playthroughs/index", () => ({
@@ -22,27 +22,27 @@ vi.mock("@/lib/analytics/selectors", () => ({
   getSharedEventProperties: analyticsMocks.getSharedEventProperties,
 }));
 
-vi.mock("@/lib/analytics/trackEvent", () => ({
+vi.mock("@/lib/analytics/track-event", () => ({
   trackEvent: analyticsMocks.trackEvent,
 }));
 
 const sharedProperties = {
-  playthrough_id: "playthrough-1",
-  game_mode: "classic",
-  encounter_count_bucket: "e_1",
-  deceased_count_bucket: "c_0",
   boxed_count_bucket: "c_0",
+  deceased_count_bucket: "c_0",
+  encounter_count_bucket: "e_1",
   fusion_count_bucket: "c_0",
+  game_mode: "classic",
+  playthrough_id: "playthrough-1",
   viable_roster_bucket: "v_1",
 } as const;
 
 const createPlaythrough = (): Playthrough => ({
+  createdAt: 1,
+  encounters: {},
+  gameMode: "classic",
   id: "playthrough-1",
   name: "Test Run",
-  gameMode: "classic",
-  encounters: {},
   team: { members: [null, null, null, null, null, null] },
-  createdAt: 1,
   updatedAt: 1,
   version: "1.0.0",
 });
@@ -54,12 +54,12 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
 
   const mockInputCreation = () => {
     const input = {
-      type: "",
       accept: "",
-      onchange: null,
       click: vi.fn(),
-      remove: vi.fn(),
       files: null,
+      onchange: null,
+      remove: vi.fn(),
+      type: "",
     } as unknown as HTMLInputElement;
 
     const createElementSpy = vi
@@ -75,7 +75,7 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
         return originalCreateElement(tagName, options);
       }) as typeof document.createElement);
 
-    return { input, createElementSpy };
+    return { createElementSpy, input };
   };
 
   const triggerInputChange = async (input: HTMLInputElement, file: File) => {
@@ -115,13 +115,13 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
 
     const clickSpy = vi
       .spyOn(HTMLAnchorElement.prototype, "click")
-      .mockImplementation(() => {});
+      .mockImplementation(vi.fn());
     const createObjectUrlSpy = vi
       .spyOn(URL, "createObjectURL")
       .mockReturnValue("blob:test");
     const revokeObjectUrlSpy = vi
       .spyOn(URL, "revokeObjectURL")
-      .mockImplementation(() => {});
+      .mockImplementation(vi.fn());
 
     const { result } = renderHook(() => usePlaythroughImportExport());
 
@@ -149,7 +149,7 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
 
   it("does not track playthrough_exported when export fails", () => {
     const playthrough = createPlaythrough();
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(vi.fn());
     const createObjectUrlSpy = vi
       .spyOn(URL, "createObjectURL")
       .mockImplementation(() => {
@@ -180,8 +180,8 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
     };
     const importFile = {
       name: "save.json",
-      type: "application/json",
       text: vi.fn().mockResolvedValue('{"playthrough":{}}'),
+      type: "application/json",
     } as unknown as File;
 
     playthroughActionMocks.importPlaythrough.mockResolvedValue(
@@ -207,8 +207,8 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
       "playthrough_imported",
       {
         ...sharedProperties,
-        import_source: "file_picker",
         file_extension_group: "json",
+        import_source: "file_picker",
         mime_group: "application_json",
       },
     );
@@ -220,8 +220,8 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
     const { input, createElementSpy } = mockInputCreation();
     const invalidFile = {
       name: "save.txt",
-      type: "text/plain",
       text: vi.fn().mockResolvedValue("not-used"),
+      type: "text/plain",
     } as unknown as File;
 
     const { result } = renderHook(() => usePlaythroughImportExport());
@@ -237,11 +237,11 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
       "playthrough_import_failed",
       {
         ...sharedProperties,
-        import_source: "file_picker",
-        failure_stage: "file_selection",
         error_category: "unsupported_file_type",
-        has_file: true,
+        failure_stage: "file_selection",
         file_extension_group: "other",
+        has_file: true,
+        import_source: "file_picker",
         mime_group: "text_plain",
       },
     );
@@ -253,8 +253,8 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
     const { input, createElementSpy } = mockInputCreation();
     const malformedJsonFile = {
       name: "save.json",
-      type: "application/json",
       text: vi.fn().mockResolvedValue("{oops"),
+      type: "application/json",
     } as unknown as File;
 
     const { result } = renderHook(() => usePlaythroughImportExport());
@@ -270,11 +270,11 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
       "playthrough_import_failed",
       {
         ...sharedProperties,
-        import_source: "file_picker",
-        failure_stage: "json_parse",
         error_category: "invalid_json",
-        has_file: true,
+        failure_stage: "json_parse",
         file_extension_group: "json",
+        has_file: true,
+        import_source: "file_picker",
         mime_group: "application_json",
       },
     );
@@ -285,12 +285,12 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
   it("tracks schema-validation failures with normalized taxonomy", async () => {
     const consoleErrorSpy = vi
       .spyOn(console, "error")
-      .mockImplementation(() => {});
+      .mockImplementation(vi.fn());
     const { input, createElementSpy } = mockInputCreation();
     const validJsonFile = {
       name: "save.json",
-      type: "application/json",
       text: vi.fn().mockResolvedValue('{"playthrough":{}}'),
+      type: "application/json",
     } as unknown as File;
 
     playthroughActionMocks.importPlaythrough.mockRejectedValue(
@@ -309,11 +309,11 @@ describe("usePlaythroughImportExport lifecycle analytics", () => {
       "playthrough_import_failed",
       {
         ...sharedProperties,
-        import_source: "file_picker",
-        failure_stage: "schema_validation",
         error_category: "invalid_schema",
-        has_file: true,
+        failure_stage: "schema_validation",
         file_extension_group: "json",
+        has_file: true,
+        import_source: "file_picker",
         mime_group: "application_json",
       },
     );

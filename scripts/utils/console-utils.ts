@@ -21,57 +21,57 @@
  * ```
  */
 
-import * as cliProgress from "cli-progress";
+import { Presets, SingleBar } from "cli-progress";
 import { formatDuration, formatFileSize } from "./format-utils";
 
 // Simple color functions using ANSI escape codes
 const colors = {
-  reset: "\x1b[0m",
-  red: (str: string) => `\x1b[31m${str}\x1b[0m`,
-  green: (str: string) => `\x1b[32m${str}\x1b[0m`,
-  yellow: (str: string) => `\x1b[33m${str}\x1b[0m`,
   blue: (str: string) => `\x1b[34m${str}\x1b[0m`,
-  magenta: (str: string) => `\x1b[35m${str}\x1b[0m`,
-  cyan: (str: string) => `\x1b[36m${str}\x1b[0m`,
-  white: (str: string) => `\x1b[37m${str}\x1b[0m`,
-  gray: (str: string) => `\x1b[90m${str}\x1b[0m`,
   bold: {
+    blue: (str: string) => `\x1b[1m\x1b[34m${str}\x1b[0m`,
     green: (str: string) => `\x1b[1m\x1b[32m${str}\x1b[0m`,
     magenta: (str: string) => `\x1b[1m\x1b[35m${str}\x1b[0m`,
     red: (str: string) => `\x1b[1m\x1b[31m${str}\x1b[0m`,
-    yellow: (str: string) => `\x1b[1m\x1b[33m${str}\x1b[0m`,
-    blue: (str: string) => `\x1b[1m\x1b[34m${str}\x1b[0m`,
     white: (str: string) => `\x1b[1m\x1b[37m${str}\x1b[0m`,
+    yellow: (str: string) => `\x1b[1m\x1b[33m${str}\x1b[0m`,
   },
+  cyan: (str: string) => `\x1b[36m${str}\x1b[0m`,
+  gray: (str: string) => `\x1b[90m${str}\x1b[0m`,
+  green: (str: string) => `\x1b[32m${str}\x1b[0m`,
+  magenta: (str: string) => `\x1b[35m${str}\x1b[0m`,
+  red: (str: string) => `\x1b[31m${str}\x1b[0m`,
+  reset: "\x1b[0m",
+  white: (str: string) => `\x1b[37m${str}\x1b[0m`,
+  yellow: (str: string) => `\x1b[33m${str}\x1b[0m`,
 };
 
 // Progress bar configurations
 const progressBarConfigs = {
-  standard: {
-    format:
-      colors.cyan("{bar}") +
-      " | {percentage}% | {value}/{total} | ETA: {eta}s | {status}",
+  mini: {
     barCompleteChar: "\u2588",
     barIncompleteChar: "\u2591",
-    hideCursor: true,
-    stopOnComplete: true,
-    clearOnComplete: false,
-  },
-
-  mini: {
+    clearOnComplete: true,
     format:
       colors.yellow("  {bar}") +
       " | {percentage}% | {value}/{total} | {status}",
-    barCompleteChar: "\u2588",
-    barIncompleteChar: "\u2591",
     hideCursor: true,
     stopOnComplete: true,
-    clearOnComplete: true,
+  },
+  standard: {
+    barCompleteChar: "\u2588",
+    barIncompleteChar: "\u2591",
+    clearOnComplete: false,
+    format:
+      colors.cyan("{bar}") +
+      " | {percentage}% | {value}/{total} | ETA: {eta}s | {status}",
+    hideCursor: true,
+    stopOnComplete: true,
   },
 };
 
 // Console formatting utilities
 export class ConsoleFormatter {
+  private constructor() {}
   /**
    * Print a beautiful header for a script
    */
@@ -141,12 +141,12 @@ export class ConsoleFormatter {
     console.debug(colors.bold.green(`🎉 ${title}`));
     console.debug(colors.gray("═".repeat(50)));
 
-    items.forEach(({ label, value, color = "white" }) => {
+    for (const { label, value, color = "white" } of items) {
       const colorFunc = colors[color as keyof typeof colors] as (
         str: string,
       ) => string;
       console.debug(colors.white(`${label}: ${colorFunc(value.toString())}`));
-    });
+    }
 
     console.debug(colors.gray("═".repeat(50)));
   }
@@ -154,13 +154,10 @@ export class ConsoleFormatter {
   /**
    * Create a standard progress bar
    */
-  static createProgressBar(
-    total: number,
-    status = "Starting...",
-  ): cliProgress.SingleBar {
-    const bar = new cliProgress.SingleBar(
+  static createProgressBar(total: number, status = "Starting..."): SingleBar {
+    const bar = new SingleBar(
       progressBarConfigs.standard,
-      cliProgress.Presets.shades_classic,
+      Presets.shades_classic,
     );
     bar.start(total, 0, { status });
     return bar;
@@ -172,11 +169,8 @@ export class ConsoleFormatter {
   static createMiniProgressBar(
     total: number,
     status = "Processing...",
-  ): cliProgress.SingleBar {
-    const bar = new cliProgress.SingleBar(
-      progressBarConfigs.mini,
-      cliProgress.Presets.shades_grey,
-    );
+  ): SingleBar {
+    const bar = new SingleBar(progressBarConfigs.mini, Presets.shades_grey);
     bar.start(total, 0, { status });
     return bar;
   }

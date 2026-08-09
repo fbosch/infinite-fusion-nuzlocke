@@ -12,6 +12,8 @@ export const SPECIAL_LOCATIONS = {
  * Check if a location ID is the starter location
  */
 export function isStarterLocation(locationId: string | undefined): boolean {
-  if (!locationId) return false;
+  if (!locationId) {
+    return false;
+  }
   return locationId === SPECIAL_LOCATIONS.STARTER_LOCATION;
 }

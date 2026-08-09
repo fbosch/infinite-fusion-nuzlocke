@@ -1,8 +1,10 @@
-import { getEncounterCount } from "@/lib/analytics/playthroughEventData";
-import { getSharedEventProperties } from "@/lib/analytics/selectors";
-import { trackEvent } from "@/lib/analytics/trackEvent";
+import {
+  getEncounterCount,
+  getSharedEventProperties,
+} from "@/lib/analytics/selectors";
+import { trackEvent } from "@/lib/analytics/track-event";
 import { emitEvolutionEvent } from "@/lib/events";
-import { getCurrentTimestamp } from "../playthroughState";
+import { getCurrentTimestamp } from "../playthrough-state";
 import {
   createPokemonWithLocationAndUID,
   ensureActivePlaythroughWithEncounters,
@@ -25,8 +27,8 @@ export const toggleEncounterFusion = async (locationId: string) => {
 
   const currentEncounter = activePlaythrough.encounters[locationId];
   const existingEncounter = currentEncounter || {
-    head: null,
     body: null,
+    head: null,
     isFusion: false,
     updatedAt: getCurrentTimestamp(),
   };
@@ -36,8 +38,8 @@ export const toggleEncounterFusion = async (locationId: string) => {
   if (existingEncounter.isFusion && newIsFusion === false) {
     if (!existingEncounter.head && existingEncounter.body) {
       activePlaythrough.encounters[locationId] = {
-        head: existingEncounter.body,
         body: null,
+        head: existingEncounter.body,
         isFusion: false,
         updatedAt: getCurrentTimestamp(),
       };
@@ -57,6 +59,8 @@ export const toggleEncounterFusion = async (locationId: string) => {
     isFusion: newIsFusion,
     updatedAt: getCurrentTimestamp(),
   };
+
+  await Promise.resolve();
 };
 
 // Flip head and body in a fusion encounter atomically
@@ -89,6 +93,8 @@ export const flipEncounterFusion = async (locationId: string) => {
     ...getSharedEventProperties(activePlaythrough),
     location_id: locationId,
   });
+
+  await Promise.resolve();
 };
 
 // Create fusion from drag and drop
@@ -104,8 +110,8 @@ export const createFusion = async (
 
   const previousEncounterCount = getEncounterCount(activePlaythrough);
   const encounter = {
-    head: createPokemonWithLocationAndUID(head, locationId),
     body: createPokemonWithLocationAndUID(body, locationId),
+    head: createPokemonWithLocationAndUID(head, locationId),
     isFusion: true,
     updatedAt: getCurrentTimestamp(),
   };

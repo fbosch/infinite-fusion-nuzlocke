@@ -4,14 +4,14 @@ const indexedDbStore = new Map<string, unknown>();
 
 vi.mock("idb-keyval", () => ({
   createStore: vi.fn(() => ({ name: "mock-store" })),
-  del: vi.fn(async (key: string) => {
-    indexedDbStore.delete(String(key));
-  }),
+  del: vi.fn((key: string) =>
+    Promise.resolve(indexedDbStore.delete(String(key))),
+  ),
   get: vi.fn(async (key: string) => indexedDbStore.get(String(key))),
   keys: vi.fn(async () => Array.from(indexedDbStore.keys())),
-  set: vi.fn(async (key: string, value: unknown) => {
-    indexedDbStore.set(String(key), value);
-  }),
+  set: vi.fn((key: string, value: unknown) =>
+    Promise.resolve(indexedDbStore.set(String(key), value)),
+  ),
 }));
 
 beforeEach(() => {
@@ -35,9 +35,6 @@ function createLocalStorageMock(): Storage {
   const store = new Map<string, string>();
 
   return {
-    get length() {
-      return store.size;
-    },
     clear() {
       store.clear();
     },
@@ -46,6 +43,9 @@ function createLocalStorageMock(): Storage {
     },
     key(index: number) {
       return Array.from(store.keys())[index] ?? null;
+    },
+    get length() {
+      return store.size;
     },
     removeItem(key: string) {
       store.delete(String(key));
@@ -60,16 +60,16 @@ if (hasUsableLocalStorage() === false) {
   const localStorageMock = createLocalStorageMock();
 
   Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
     value: localStorageMock,
     writable: true,
-    configurable: true,
   });
 
   if (typeof window !== "undefined") {
     Object.defineProperty(window, "localStorage", {
+      configurable: true,
       value: localStorageMock,
       writable: true,
-      configurable: true,
     });
   }
 }

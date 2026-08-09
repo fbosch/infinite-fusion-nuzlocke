@@ -1,0 +1,449 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type {
+  Pokemon,
+  PokemonApiParams,
+  PokemonApiResponse,
+} from "../pokemon-api-service";
+import pokemonApiService from "../pokemon-api-service";
+
+// Mock fetch globally
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
+
+// Mock the persistence module
+vi.mock("@/lib/persistence", () => ({
+  getCacheBuster: () => 12_345,
+}));
+
+// Mock data
+const mockPokemon: Pokemon = {
+  id: 1,
+  name: "Bulbasaur",
+  nationalDexId: 1,
+  species: {
+    evolution_chain: {
+      url: "https://pokeapi.co/api/v2/evolution-chain/1/",
+    },
+    generation: "1",
+    is_legendary: false,
+    is_mythical: false,
+  },
+  types: [{ name: "grass" }, { name: "poison" }],
+};
+
+const mockPokemon2: Pokemon = {
+  id: 2,
+  name: "Ivysaur",
+  nationalDexId: 2,
+  species: {
+    evolution_chain: {
+      url: "https://pokeapi.co/api/v2/evolution-chain/1/",
+    },
+    generation: "1",
+    is_legendary: false,
+    is_mythical: false,
+  },
+  types: [{ name: "grass" }, { name: "poison" }],
+};
+
+const mockApiResponse = {
+  count: 2,
+  data: [mockPokemon, mockPokemon2],
+  total: 151,
+};
+
+const pokemonApiServicePrivate = pokemonApiService as unknown as {
+  makeRequest: (params?: PokemonApiParams) => Promise<PokemonApiResponse>;
+};
+
+describe("PokemonApiService", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Reset the service instance for each test
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  describe("constructor", () => {
+    it("should set correct base URL for test environment", () => {
+      // In test environment, window is undefined
+      expect(typeof window).toBe("undefined");
+
+      // The service should use localhost URL in test environment
+      // We can't test the constructor directly, but we can verify the behavior
+      expect(pokemonApiService).toBeDefined();
+    });
+  });
+
+  describe("makeRequest", () => {
+    it("should make request with correct URL and parameters", async () => {
+      mockFetch.mockResolvedValueOnce({
+        json: async () => mockApiResponse,
+        ok: true,
+      });
+
+      const params = {
+        ids: [1, 2],
+        limit: 10,
+        search: "bulba",
+        type: "grass",
+      };
+
+      await pokemonApiServicePrivate.makeRequest(params);
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/pokemon?ids=1%2C2&search=bulba&type=grass&limit=10&v=12345",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "GET",
+        },
+      );
+    });
+
+    it("should handle empty parameters", async () => {
+      mockFetch.mockResolvedValueOnce({
+        json: async () => mockApiResponse,
+        ok: true,
+      });
+
+      await pokemonApiServicePrivate.makeRequest();
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/pokemon?v=12345",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "GET",
+        },
+      );
+    });
+
+    it("should handle partial parameters", async () => {
+      mockFetch.mockResolvedValueOnce({
+        json: async () => mockApiResponse,
+        ok: true,
+      });
+
+      const params = { search: "bulba" };
+      await pokemonApiServicePrivate.makeRequest(params);
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/pokemon?search=bulba&v=12345",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "GET",
+        },
+      );
+    });
+
+    it("should throw error on non-OK response", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+      });
+
+      await expect(pokemonApiServicePrivate.makeRequest()).rejects.toThrow(
+        "Pokemon API error: 404 Not Found",
+      );
+    });
+
+    it("should throw error on invalid response format", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+      const invalidResponse = {
+        count: "not a number",
+        data: "invalid data",
+        total: "also not a number",
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        json: async () => invalidResponse,
+        ok: true,
+      });
+
+      await expect(pokemonApiServicePrivate.makeRequest()).rejects.toThrow(
+        "Invalid API response format",
+      );
+    });
+
+    it("should handle fetch errors gracefully", async () => {
+      mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+      await expect(pokemonApiServicePrivate.makeRequest()).rejects.toThrow(
+        "Network error",
+      );
+    });
+  });
+
+  describe("getAllPokemon", () => {
+    it("should return all pokemon", async () => {
+      mockFetch.mockResolvedValueOnce({
+        json: async () => mockApiResponse,
+        ok: true,
+      });
+
+      const result = await pokemonApiService.getAllPokemon();
+
+      expect(result).toEqual([mockPokemon, mockPokemon2]);
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/pokemon?v=12345",
+        expect.any(Object),
+      );
+    });
+
+    it("should handle empty response", async () => {
+      const emptyResponse = { count: 0, data: [], total: 0 };
+      mockFetch.mockResolvedValueOnce({
+        json: async () => emptyResponse,
+        ok: true,
+      });
+
+      const result = await pokemonApiService.getAllPokemon();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe("getPokemonByIds", () => {
+    it("should return pokemon by IDs", async () => {
+      mockFetch.mockResolvedValueOnce({
+        json: async () => mockApiResponse,
+        ok: true,
+      });
+
+      const result = await pokemonApiService.getPokemonByIds([1, 2]);
+
+      expect(result).toEqual([mockPokemon, mockPokemon2]);
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/pokemon?ids=1%2C2&v=12345",
+        expect.any(Object),
+      );
+    });
+
+    it("should handle empty IDs array", async () => {
+      mockFetch.mockResolvedValueOnce({
+        json: async () => ({ count: 0, data: [], total: 0 }),
+        ok: true,
+      });
+
+      const result = await pokemonApiService.getPokemonByIds([]);
+
+      expect(result).toEqual([]);
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/pokemon?v=12345",
+        expect.any(Object),
+      );
+    });
+
+    it("should handle single ID", async () => {
+      const singleResponse = { count: 1, data: [mockPokemon], total: 1 };
+      mockFetch.mockResolvedValueOnce({
+        json: async () => singleResponse,
+        ok: true,
+      });
+
+      const result = await pokemonApiService.getPokemonByIds([1]);
+
+      expect(result).toEqual([mockPokemon]);
+    });
+  });
+
+  describe("getPokemonById", () => {
+    it("should return pokemon by single ID", async () => {
+      const singleResponse = { count: 1, data: [mockPokemon], total: 1 };
+      mockFetch.mockResolvedValueOnce({
+        json: async () => singleResponse,
+        ok: true,
+      });
+
+      const result = await pokemonApiService.getPokemonById(1);
+
+      expect(result).toEqual(mockPokemon);
+    });
+
+    it("should return null when pokemon not found", async () => {
+      const emptyResponse = { count: 0, data: [], total: 0 };
+      mockFetch.mockResolvedValueOnce({
+        json: async () => emptyResponse,
+        ok: true,
+      });
+
+      const result = await pokemonApiService.getPokemonById(999);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe("searchPokemon", () => {
+    it("should search pokemon by query", async () => {
+      mockFetch.mockResolvedValueOnce({
+        json: async () => mockApiResponse,
+        ok: true,
+      });
+
+      const result = await pokemonApiService.searchPokemon("bulba");
+
+      expect(result).toEqual([mockPokemon, mockPokemon2]);
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/pokemon?search=bulba&v=12345",
+        expect.any(Object),
+      );
+    });
+
+    it("should search pokemon with limit", async () => {
+      mockFetch.mockResolvedValueOnce({
+        json: async () => mockApiResponse,
+        ok: true,
+      });
+
+      const result = await pokemonApiService.searchPokemon("bulba", 5);
+
+      expect(result).toEqual([mockPokemon, mockPokemon2]);
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/pokemon?search=bulba&limit=5&v=12345",
+        expect.any(Object),
+      );
+    });
+
+    it("should handle empty search results", async () => {
+      const emptyResponse = { count: 0, data: [], total: 0 };
+      mockFetch.mockResolvedValueOnce({
+        json: async () => emptyResponse,
+        ok: true,
+      });
+
+      const result = await pokemonApiService.searchPokemon("nonexistent");
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe("getPokemonByType", () => {
+    it("should return pokemon by type", async () => {
+      mockFetch.mockResolvedValueOnce({
+        json: async () => mockApiResponse,
+        ok: true,
+      });
+
+      const result = await pokemonApiService.getPokemonByType("grass");
+
+      expect(result).toEqual([mockPokemon, mockPokemon2]);
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/pokemon?type=grass&v=12345",
+        expect.any(Object),
+      );
+    });
+
+    it("should handle empty type results", async () => {
+      const emptyResponse = { count: 0, data: [], total: 0 };
+      mockFetch.mockResolvedValueOnce({
+        json: async () => emptyResponse,
+        ok: true,
+      });
+
+      const result = await pokemonApiService.getPokemonByType("nonexistent");
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe("getPokemonCount", () => {
+    it("should return total pokemon count", async () => {
+      const countResponse = { count: 1, data: [mockPokemon], total: 151 };
+      mockFetch.mockResolvedValueOnce({
+        json: async () => countResponse,
+        ok: true,
+      });
+
+      const result = await pokemonApiService.getPokemonCount();
+
+      expect(result).toBe(151);
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/pokemon?limit=1&v=12345",
+        expect.any(Object),
+      );
+    });
+  });
+
+  describe("error handling", () => {
+    it("should handle network errors", async () => {
+      mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+      await expect(pokemonApiService.getAllPokemon()).rejects.toThrow(
+        "Network error",
+      );
+    });
+
+    it("should handle malformed JSON responses", async () => {
+      mockFetch.mockResolvedValueOnce({
+        json: () => Promise.reject(new Error("Invalid JSON")),
+        ok: true,
+      });
+
+      await expect(pokemonApiService.getAllPokemon()).rejects.toThrow(
+        "Invalid JSON",
+      );
+    });
+
+    it("should handle timeout scenarios", async () => {
+      mockFetch.mockImplementationOnce(
+        () =>
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Timeout")), 100),
+          ),
+      );
+
+      await expect(pokemonApiService.getAllPokemon()).rejects.toThrow(
+        "Timeout",
+      );
+    });
+  });
+
+  describe("URL construction", () => {
+    it("should properly encode special characters in search", async () => {
+      mockFetch.mockResolvedValueOnce({
+        json: async () => mockApiResponse,
+        ok: true,
+      });
+
+      await pokemonApiService.searchPokemon("bulba & ivy");
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/pokemon?search=bulba+%26+ivy&v=12345",
+        expect.any(Object),
+      );
+    });
+
+    it("should handle type with special characters", async () => {
+      mockFetch.mockResolvedValueOnce({
+        json: async () => mockApiResponse,
+        ok: true,
+      });
+
+      await pokemonApiService.getPokemonByType("fire/flying");
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/pokemon?type=fire%2Fflying&v=12345",
+        expect.any(Object),
+      );
+    });
+  });
+
+  describe("singleton pattern", () => {
+    it("should maintain singleton instance", () => {
+      const instance1 = pokemonApiService;
+      const instance2 = pokemonApiService;
+
+      expect(instance1).toBe(instance2);
+    });
+  });
+});

@@ -1,6 +1,8 @@
 // Import mocks first (must be at top level for Vitest hoisting)
 import "./mocks";
 
+import { playthroughActions } from "@/stores/playthroughs";
+import { playthroughsStore } from "@/stores/playthroughs/store";
 // Import shared setup and utilities
 import {
   afterEach,
@@ -8,11 +10,11 @@ import {
   describe,
   expect,
   it,
-  playthroughActions,
-  playthroughsStore,
   setupPlaythroughTest,
   vi,
 } from "./setup";
+
+const customLocationIdPattern = /^custom_/;
 
 describe("Playthroughs Store - Custom Locations", () => {
   beforeEach(() => {
@@ -35,14 +37,14 @@ describe("Playthroughs Store - Custom Locations", () => {
 
       expect(customLocationId).toBeTruthy();
       if (customLocationId) {
-        expect(customLocationId).toMatch(/^custom_/);
+        expect(customLocationId).toMatch(customLocationIdPattern);
 
         const activePlaythrough = playthroughActions.getActivePlaythrough();
         expect(activePlaythrough?.customLocations).toHaveLength(1);
         expect(activePlaythrough?.customLocations?.[0]).toMatchObject({
           id: customLocationId,
-          name: "Custom Route",
           insertAfterLocationId: expect.any(String),
+          name: "Custom Route",
         });
       }
     });
@@ -51,7 +53,7 @@ describe("Playthroughs Store - Custom Locations", () => {
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       // Ensure customLocations is undefined initially
       if (activePlaythrough) {
-        delete activePlaythrough.customLocations;
+        activePlaythrough.customLocations = undefined;
       }
 
       // Use real location ID from locations.json (Route 1)
@@ -140,13 +142,13 @@ describe("Playthroughs Store - Custom Locations", () => {
             activePlaythrough.encounters = {};
           }
           activePlaythrough.encounters[customLocationId] = {
+            body: null,
             head: {
               id: 1,
               name: "Bulbasaur",
               nationalDexId: 1,
               uid: "test-uid",
             },
-            body: null,
             isFusion: false,
             updatedAt: Date.now(),
           };
@@ -179,7 +181,7 @@ describe("Playthroughs Store - Custom Locations", () => {
     it("should return false if customLocations array does not exist", async () => {
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       if (activePlaythrough) {
-        delete activePlaythrough.customLocations;
+        activePlaythrough.customLocations = undefined;
       }
 
       const result = await playthroughActions.removeCustomLocation("custom-id");
@@ -334,7 +336,7 @@ describe("Playthroughs Store - Custom Locations", () => {
     it("should return empty array if customLocations does not exist", () => {
       const activePlaythrough = playthroughActions.getActivePlaythrough();
       if (activePlaythrough) {
-        delete activePlaythrough.customLocations;
+        activePlaythrough.customLocations = undefined;
       }
 
       const result = playthroughActions.getCustomLocations();
@@ -412,9 +414,9 @@ describe("Playthroughs Store - Custom Locations", () => {
         const customLocations = playthroughActions.getCustomLocations();
         expect(customLocations).toHaveLength(1);
         expect(customLocations[0]).toMatchObject({
-          id: expect.stringMatching(/^custom_/),
-          name: "Test Route",
+          id: expect.stringMatching(customLocationIdPattern),
           insertAfterLocationId: expect.any(String),
+          name: "Test Route",
         });
 
         // Verify the playthrough structure is intact

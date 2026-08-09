@@ -6,6 +6,9 @@ import path from "node:path";
 
 const README_PATH = path.join(process.cwd(), "README.md");
 const BADGE_DOCS_URL = "https://github.com/millionco/react-doctor";
+const REACT_DOCTOR_BADGE_REGEX =
+  /\[!\[React Doctor\]\(https:\/\/img\.shields\.io\/badge\/React_Doctor-\d{1,3}%2F100-[a-z]+\)\]\(https:\/\/github\.com\/millionco\/react-doctor\)/;
+const REACT_BADGE_REGEX = /(\[!\[React\]\([^\n]+\)\]\([^\n]+\))/;
 
 function getBadgeColor(score) {
   if (score >= 90) {
@@ -43,7 +46,7 @@ function readReactDoctorScore() {
   }
 
   const scoreMatches = result.stdout.match(/\b(?:100|[1-9]?\d)\b/g);
-  if (scoreMatches == null || scoreMatches.length === 0) {
+  if (scoreMatches === null || scoreMatches.length === 0) {
     throw new Error(
       `Could not parse react-doctor score from output:\n${result.stdout}`,
     );
@@ -57,20 +60,14 @@ function upsertBadge(score) {
   const badgeMarkdown = `[![React Doctor](https://img.shields.io/badge/React_Doctor-${score}%2F100-${color})](${BADGE_DOCS_URL})`;
 
   const content = fs.readFileSync(README_PATH, "utf8");
-  const reactDoctorBadgeRegex =
-    /\[!\[React Doctor\]\(https:\/\/img\.shields\.io\/badge\/React_Doctor-\d{1,3}%2F100-[a-z]+\)\]\(https:\/\/github\.com\/millionco\/react-doctor\)/;
-
   let nextContent = content;
 
-  if (reactDoctorBadgeRegex.test(content)) {
-    nextContent = content.replace(reactDoctorBadgeRegex, badgeMarkdown);
+  if (REACT_DOCTOR_BADGE_REGEX.test(content)) {
+    nextContent = content.replace(REACT_DOCTOR_BADGE_REGEX, badgeMarkdown);
+  } else if (REACT_BADGE_REGEX.test(content)) {
+    nextContent = content.replace(REACT_BADGE_REGEX, `$1\n${badgeMarkdown}`);
   } else {
-    const reactBadgeRegex = /(\[!\[React\]\([^\n]+\)\]\([^\n]+\))/;
-    if (reactBadgeRegex.test(content)) {
-      nextContent = content.replace(reactBadgeRegex, `$1\n${badgeMarkdown}`);
-    } else {
-      nextContent = `${content.trimEnd()}\n\n${badgeMarkdown}\n`;
-    }
+    nextContent = `${content.trimEnd()}\n\n${badgeMarkdown}\n`;
   }
 
   if (nextContent !== content) {

@@ -2,7 +2,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import * as cheerio from "cheerio";
+import { load } from "cheerio";
 import type { EncounterType } from "./types/encounters";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
@@ -27,13 +27,13 @@ const SAFARI_ZONE_PAGES = [
 ];
 
 interface PokemonEncounter {
-  pokemonId: number;
   encounterType: EncounterType;
+  pokemonId: number;
 }
 
 interface RouteEncounters {
-  routeName: string;
   encounters: PokemonEncounter[];
+  routeName: string;
 }
 
 const ENCOUNTER_TYPE_RULES: Array<{
@@ -41,37 +41,37 @@ const ENCOUNTER_TYPE_RULES: Array<{
   matches: (text: string) => boolean;
 }> = [
   {
-    type: "surf",
     matches: (text) =>
       text === "surf" ||
       text.includes("surfing") ||
       (text.includes("surf") && !text.includes("rod")),
+    type: "surf",
   },
   {
-    type: "fishing",
     matches: (text) =>
       ["old rod", "good rod", "super rod", "fishing rod", "rod fishing"].some(
         (term) => text.includes(term),
       ),
+    type: "fishing",
   },
   {
-    type: "rock_smash",
     matches: (text) =>
       ["rock smash", "smash rock", "headbutt"].some((term) =>
         text.includes(term),
       ),
+    type: "rock_smash",
   },
   {
-    type: "cave",
     matches: (text) =>
       ["cave", "underground", "depths"].some((term) => text.includes(term)),
+    type: "cave",
   },
   {
-    type: "special",
     matches: (text) =>
       ["gift", "trade", "static", "overworld"].some((term) =>
         text.includes(term),
       ),
+    type: "special",
   },
 ];
 
@@ -105,7 +105,7 @@ async function scrapeSafariAreaPage(
 
   try {
     const html = await fetchWikiPageHtml(url);
-    const $ = cheerio.load(html);
+    const $ = load(html);
     const pokemonNameMap = await loadPokemonNameMap();
 
     // Get the location name from the page title
@@ -146,8 +146,8 @@ async function scrapeSafariAreaPage(
 
             if (pokemonId) {
               encounters.push({
-                pokemonId,
                 encounterType: currentEncounterType,
+                pokemonId,
               });
             }
           }
@@ -157,13 +157,12 @@ async function scrapeSafariAreaPage(
 
     if (encounters.length > 0) {
       return {
+        encounters,
         routeName: pageTitle,
-        encounters: encounters,
       };
-    } else {
-      ConsoleFormatter.warn(`No encounters found in ${pageTitle}`);
-      return null;
     }
+    ConsoleFormatter.warn(`No encounters found in ${pageTitle}`);
+    return null;
   } catch (error) {
     ConsoleFormatter.error(
       `Error scraping ${areaName}: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -193,7 +192,12 @@ async function main() {
       `Scraping ${SAFARI_ZONE_PAGES.length} Safari Zone areas...`,
     );
 
-    for (const url of SAFARI_ZONE_PAGES) {
+    const scrapeSafariAreas = async (urls: string[]): Promise<void> => {
+      const [url, ...remainingUrls] = urls;
+      if (url === undefined) {
+        return;
+      }
+
       const encounters = await scrapeSafariAreaPage(url);
       if (encounters) {
         safariEncounters.push(encounters);
@@ -201,7 +205,11 @@ async function main() {
           `✓ ${encounters.routeName}: ${encounters.encounters.length} encounters`,
         );
       }
-    }
+
+      await scrapeSafariAreas(remainingUrls);
+    };
+
+    await scrapeSafariAreas(SAFARI_ZONE_PAGES);
 
     if (safariEncounters.length === 0) {
       ConsoleFormatter.warn("No Safari Zone encounters found!");
@@ -237,7 +245,7 @@ async function main() {
 
     const duration = Date.now() - startTime;
 
-    ConsoleFormatter.success(`Safari Zone scraping completed successfully!`);
+    ConsoleFormatter.success("Safari Zone scraping completed successfully!");
     ConsoleFormatter.info(
       `Safari encounters: ${safariEncounters.length} areas`,
     );

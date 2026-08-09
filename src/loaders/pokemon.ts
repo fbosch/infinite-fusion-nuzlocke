@@ -5,9 +5,10 @@ import {
 } from "@tanstack/react-query";
 import { useDebounce } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
-import { pokemonData, pokemonQueries } from "@/lib/queryClient";
-import { SearchCore } from "@/lib/searchCore";
-import searchService from "@/services/searchService";
+import { pokemonData } from "@/lib/data";
+import { pokemonQueries } from "@/lib/queries/pokemon";
+import { SearchCore } from "@/lib/search-core";
+import searchService from "@/services/search-service";
 import type { Pokemon } from "@/types/pokemon";
 
 export type { Pokemon } from "@/types/pokemon";
@@ -48,29 +49,29 @@ export function getEncounterDisplayName(encounter: PokemonOptionType): string {
 // Status enum for Pokemon tracking
 export const PokemonStatus = {
   CAPTURED: "captured",
-  RECEIVED: "received",
-  TRADED: "traded",
-  MISSED: "missed",
-  STORED: "stored",
   DECEASED: "deceased",
+  MISSED: "missed",
+  RECEIVED: "received",
+  STORED: "stored",
+  TRADED: "traded",
 } as const;
 
 export type PokemonStatusType =
   (typeof PokemonStatus)[keyof typeof PokemonStatus];
 
-export type PokemonOptionType = {
+export interface PokemonOptionType {
   id: number;
   name: string;
   nationalDexId: number;
   nickname?: string;
   originalLocation?: string;
-  status?: PokemonStatusType;
   originalReceivalStatus?:
     | typeof PokemonStatus.CAPTURED
     | typeof PokemonStatus.RECEIVED
     | typeof PokemonStatus.TRADED;
+  status?: PokemonStatusType;
   uid?: string;
-};
+}
 
 // Evolution helper functions using centralized query client
 export async function getPokemonEvolutionIds(
@@ -180,7 +181,7 @@ export async function getPokemon(): Promise<Pokemon[]> {
     return await pokemonData.getAllPokemon();
   } catch (error) {
     console.error("Failed to fetch Pokemon data:", error);
-    throw new Error("Failed to load Pokemon data");
+    throw new Error("Failed to load Pokemon data", { cause: error });
   }
 }
 
@@ -195,7 +196,7 @@ export async function getPokemonById(id: number): Promise<Pokemon | null> {
 }
 
 // Legacy function for backward compatibility - uses centralized query client
-async function getPokemonByType(type: string): Promise<Pokemon[]> {
+async function _getPokemonByType(type: string): Promise<Pokemon[]> {
   try {
     return await pokemonData.getPokemonByType(type);
   } catch (error) {
@@ -215,7 +216,7 @@ export async function getPokemonNameMap(): Promise<Map<number, string>> {
   }
 }
 
-async function getPokemonNamesByIds(ids: number[]): Promise<string[]> {
+async function _getPokemonNamesByIds(ids: number[]): Promise<string[]> {
   try {
     const pokemon = await pokemonData.getPokemonByIds(ids);
     return pokemon.map((p) => p.name);
@@ -225,16 +226,16 @@ async function getPokemonNamesByIds(ids: number[]): Promise<string[]> {
   }
 }
 
-async function getAllPokemonTypes(): Promise<string[]> {
+async function _getAllPokemonTypes(): Promise<string[]> {
   try {
     const pokemon = await pokemonData.getAllPokemon();
     const typeSet = new Set<string>();
 
-    pokemon.forEach((p) => {
-      p.types.forEach((type) => {
+    for (const p of pokemon) {
+      for (const type of p.types) {
         typeSet.add(type.name);
-      });
-    });
+      }
+    }
 
     return Array.from(typeSet).sort();
   } catch (error) {
@@ -243,7 +244,7 @@ async function getAllPokemonTypes(): Promise<string[]> {
   }
 }
 
-async function getNationalDexIdFromInfiniteFusionId(
+async function _getNationalDexIdFromInfiniteFusionId(
   infiniteFusionId: number,
 ): Promise<number | null> {
   try {
@@ -256,7 +257,7 @@ async function getNationalDexIdFromInfiniteFusionId(
   }
 }
 
-async function getInfiniteFusionIdFromNationalDexId(
+async function _getInfiniteFusionIdFromNationalDexId(
   nationalDexId: number,
 ): Promise<number | null> {
   try {
@@ -281,16 +282,16 @@ export async function getPokemonByNationalDexId(
   }
 }
 
-async function getNationalDexToInfiniteFusionMap(): Promise<
+async function _getNationalDexToInfiniteFusionMap(): Promise<
   Map<number, number>
 > {
   try {
     const pokemon = await pokemonData.getAllPokemon();
     const map = new Map<number, number>();
 
-    pokemon.forEach((p) => {
+    for (const p of pokemon) {
       map.set(p.nationalDexId, p.id);
-    });
+    }
 
     return map;
   } catch (error) {
@@ -299,16 +300,16 @@ async function getNationalDexToInfiniteFusionMap(): Promise<
   }
 }
 
-async function getInfiniteFusionToNationalDexMap(): Promise<
+async function _getInfiniteFusionToNationalDexMap(): Promise<
   Map<number, number>
 > {
   try {
     const pokemon = await pokemonData.getAllPokemon();
     const map = new Map<number, number>();
 
-    pokemon.forEach((p) => {
+    for (const p of pokemon) {
       map.set(p.id, p.nationalDexId);
-    });
+    }
 
     return map;
   } catch (error) {
@@ -325,14 +326,6 @@ export function useAllPokemon(enabled = true) {
   });
 }
 
-function usePokemonById(id: number) {
-  return useQuery(pokemonQueries.byId(id));
-}
-
-function usePokemonByType(type: string) {
-  return useQuery(pokemonQueries.byType(type));
-}
-
 // Name map hook that transforms existing Pokemon data
 export function usePokemonNameMap(enabled = true) {
   const { data: allPokemon = [] } = useAllPokemon(enabled);
@@ -344,23 +337,25 @@ export function usePokemonNameMap(enabled = true) {
 
 export function usePokemonEvolutionData(
   pokemonId: number | undefined,
-  enabled: boolean = true,
+  enabled = true,
 ) {
   const { data: allPokemon, isLoading } = useQuery({
     ...pokemonQueries.all(),
     enabled,
   });
 
-  if (!pokemonId || !allPokemon || !enabled)
-    return { evolutions: [], preEvolution: null, isLoading };
+  if (!(pokemonId && allPokemon && enabled)) {
+    return { evolutions: [], isLoading, preEvolution: null };
+  }
 
   const currentPokemon = allPokemon.find((p) => p.id === pokemonId);
-  if (!currentPokemon)
+  if (!currentPokemon) {
     return {
       evolutions: [],
-      preEvolution: null,
       isLoading,
+      preEvolution: null,
     };
+  }
 
   const evolutionIds = new Set(
     currentPokemon.evolution?.evolves_to.map((e) => e.id) || [],
@@ -374,15 +369,15 @@ export function usePokemonEvolutionData(
     : null;
   return {
     evolutions,
-    preEvolution,
     isLoading,
+    preEvolution,
   };
 }
 
 // Hook for searching Pokemon with debounced query
 interface UsePokemonSearchOptions {
-  query: string;
   enabled?: boolean;
+  query: string;
   queryOptions?: Omit<
     QueryOptions<PokemonOptionType[], Error>,
     "queryKey" | "queryFn"
@@ -398,15 +393,19 @@ export function usePokemonSearch({
 
   // Debounce the query to reduce search frequency
   const [debouncedQuery] = useDebounce(query, 50, {
-    maxWait: 250,
     leading: true,
+    maxWait: 250,
     trailing: true,
   });
 
   return useQuery<PokemonOptionType[], Error>({
-    queryKey: ["pokemon", "search", debouncedQuery],
+    enabled: enabled && allPokemon.length > 0 && debouncedQuery !== "",
+    gcTime: 0, // Don't keep in garbage collection
+    placeholderData: keepPreviousData,
     queryFn: async () => {
-      if (debouncedQuery === "") return [];
+      if (debouncedQuery === "") {
+        return [];
+      }
 
       try {
         const searchResults = await searchService.search(debouncedQuery);
@@ -434,13 +433,9 @@ export function usePokemonSearch({
         return matches;
       }
     },
-    select: (data) => {
-      return data?.filter((p) => p.id !== 0) ?? [];
-    },
-    enabled: enabled && allPokemon.length > 0 && debouncedQuery !== "",
-    placeholderData: keepPreviousData,
+    queryKey: ["pokemon", "search", debouncedQuery],
+    select: (data) => data?.filter((p) => p.id !== 0) ?? [],
     staleTime: 0, // Don't cache - always fetch fresh data
-    gcTime: 0, // Don't keep in garbage collection
     ...queryOptions,
     persister: undefined,
   });

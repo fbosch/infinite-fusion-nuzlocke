@@ -5,12 +5,12 @@ import {
   type SourceSurface,
   type TriggerMethod,
   trackEvent,
-} from "@/lib/analytics/trackEvent";
+} from "@/lib/analytics/track-event";
 import type { PokemonOptionType } from "@/loaders/pokemon";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 import { generatePrefixedId } from "@/utils/id";
-import { createDefaultPlaythrough } from "./defaultPlaythrough";
-import { prepareImportedPlaythrough } from "./importPipeline";
+import { createDefaultPlaythrough } from "./default-playthrough";
+import { prepareImportedPlaythrough } from "./import-pipeline";
 import {
   createDebouncedSaveAll,
   deletePlaythroughFromIndexedDB,
@@ -23,8 +23,8 @@ import {
   getActivePlaythrough,
   getCurrentTimestamp,
   setPlaythroughsStore,
-} from "./playthroughState";
-import { getAvailableTeamPositionsForMembers } from "./teamPositions";
+} from "./playthrough-state";
+import { getAvailableTeamPositionsForMembers } from "./team-positions";
 import {
   DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
   type GameMode,
@@ -35,21 +35,19 @@ import {
 
 // Default state
 const defaultState: PlaythroughsState = {
-  playthroughs: [],
   activePlaythroughId: undefined,
   isLoading: true, // Start in loading state
   isSaving: false,
+  playthroughs: [],
 };
 
 // Helper functions
-const generatePlaythroughId = (): string => {
-  return generatePrefixedId("playthrough");
-};
+const generatePlaythroughId = (): string => generatePrefixedId("playthrough");
 
-type AnalyticsSourceContext = {
+interface AnalyticsSourceContext {
   source_surface?: SourceSurface;
   trigger_method?: TriggerMethod;
-};
+}
 
 const getAnalyticsSourceContext = ({
   source_surface = "store",
@@ -62,7 +60,10 @@ const getAnalyticsSourceContext = ({
 // Create the playthroughs store with proper SSR handling
 let playthroughsStore: PlaythroughsState;
 
-if (typeof window !== "undefined") {
+if (typeof window === "undefined") {
+  // Server-side: Create a dummy store
+  playthroughsStore = proxy<PlaythroughsState>(defaultState);
+} else {
   // Client-side: Initialize with default state first, then load from IndexedDB
   playthroughsStore = proxy<PlaythroughsState>(defaultState);
 
@@ -86,9 +87,6 @@ if (typeof window !== "undefined") {
   subscribe(playthroughsStore, () => {
     debouncedSaveAll(playthroughsStore);
   });
-} else {
-  // Server-side: Create a dummy store
-  playthroughsStore = proxy<PlaythroughsState>(defaultState);
 }
 
 setPlaythroughsStore(playthroughsStore);
@@ -98,16 +96,17 @@ const createPlaythrough = (
   gameMode: GameMode = DEFAULT_NEW_PLAYTHROUGH_GAME_MODE,
 ): string => {
   const hasExistingPlaythroughs = playthroughsStore.playthroughs.length > 0;
+  const timestamp = getCurrentTimestamp();
 
   const newPlaythrough: Playthrough = {
+    createdAt: timestamp,
+    encounters: {},
+    gameMode,
     id: generatePlaythroughId(),
     name,
-    encounters: {},
     team: { members: Array.from({ length: 6 }, () => null) },
-    gameMode,
+    updatedAt: timestamp,
     version: "1.0.0",
-    createdAt: getCurrentTimestamp(),
-    updatedAt: getCurrentTimestamp(),
   };
 
   playthroughsStore.playthroughs.push(newPlaythrough);
@@ -151,8 +150,8 @@ const setActivePlaythrough = async (
     if (previousPlaythroughId && previousPlaythroughId !== playthroughId) {
       trackEvent("playthrough_switched", {
         ...getSharedEventProperties(playthrough),
-        previous_playthrough_id: previousPlaythroughId,
         new_playthrough_id: playthroughId,
+        previous_playthrough_id: previousPlaythroughId,
         ...getAnalyticsSourceContext(sourceContext),
       });
     }
@@ -185,8 +184,8 @@ const changeActiveGameMode = (
 
   trackEvent("game_mode_changed", {
     ...getSharedEventProperties(activePlaythrough),
-    previous_game_mode: previousGameMode,
     new_game_mode: nextGameMode,
+    previous_game_mode: previousGameMode,
     ...getAnalyticsSourceContext(sourceContext),
   });
 };
@@ -281,7 +280,7 @@ const getAllPlaythroughs = async (): Promise<Playthrough[]> => {
 
   // Remove playthroughs that no longer exist
   const loadedIds = new Set(allPlaythroughs.map((p) => p.id));
-  for (let i = playthroughsStore.playthroughs.length - 1; i >= 0; i--) {
+  for (let i = playthroughsStore.playthroughs.length - 1; i >= 0; i -= 1) {
     if (!loadedIds.has(playthroughsStore.playthroughs[i].id)) {
       playthroughsStore.playthroughs.splice(i, 1);
     }
@@ -290,9 +289,9 @@ const getAllPlaythroughs = async (): Promise<Playthrough[]> => {
   return [...allPlaythroughs];
 };
 
-const getCurrentlyLoadedPlaythroughs = (): Playthrough[] => {
-  return [...playthroughsStore.playthroughs];
-};
+const getCurrentlyLoadedPlaythroughs = (): Playthrough[] => [
+  ...playthroughsStore.playthroughs,
+];
 
 const isRemixModeEnabled = (): boolean => {
   const activePlaythrough = getActivePlaythrough();
@@ -339,19 +338,27 @@ const resetAllPlaythroughs = async () => {
 };
 
 const forceSave = async () => {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
   await saveToIndexedDB(playthroughsStore);
 };
 
 const removeFromTeam = (position: number): boolean => {
   const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough) return false;
+  if (!activePlaythrough) {
+    return false;
+  }
 
   // Validate position
-  if (position < 0 || position >= 6) return false;
+  if (position < 0 || position >= 6) {
+    return false;
+  }
 
   // Check if position is occupied
-  if (activePlaythrough.team.members[position] === null) return false;
+  if (activePlaythrough.team.members[position] === null) {
+    return false;
+  }
 
   // Remove from team
   activePlaythrough.team.members[position] = null;
@@ -362,7 +369,9 @@ const removeFromTeam = (position: number): boolean => {
 
 const reorderTeam = (fromPosition: number, toPosition: number): boolean => {
   const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough) return false;
+  if (!activePlaythrough) {
+    return false;
+  }
 
   // Validate positions
   if (
@@ -375,10 +384,14 @@ const reorderTeam = (fromPosition: number, toPosition: number): boolean => {
   }
 
   // Check if source position is occupied
-  if (activePlaythrough.team.members[fromPosition] === null) return false;
+  if (activePlaythrough.team.members[fromPosition] === null) {
+    return false;
+  }
 
   // If moving to the same position, no change needed
-  if (fromPosition === toPosition) return true;
+  if (fromPosition === toPosition) {
+    return true;
+  }
 
   // Get the team member to move
   const teamMember = activePlaythrough.team.members[fromPosition];
@@ -399,10 +412,14 @@ const getTeamMemberDetails = (
   pokemonByUid?: ReadonlyMap<string, PokemonOptionType>,
 ) => {
   const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough || position < 0 || position >= 6) return null;
+  if (!activePlaythrough || position < 0 || position >= 6) {
+    return null;
+  }
 
   const teamMember = activePlaythrough.team.members[position];
-  if (!teamMember) return null;
+  if (!teamMember) {
+    return null;
+  }
 
   const uidIndex =
     pokemonByUid ?? buildPokemonUidIndex(activePlaythrough.encounters);
@@ -415,7 +432,7 @@ const getTeamMemberDetails = (
       ? (uidIndex.get(teamMember.bodyPokemonUid) ?? null)
       : null;
 
-  if (!headPokemon && !bodyPokemon) {
+  if (!(headPokemon || bodyPokemon)) {
     return null;
   }
 
@@ -423,15 +440,15 @@ const getTeamMemberDetails = (
   // A team member is a fusion only if both head and body Pokémon exist
   const isFusion = Boolean(headPokemon && bodyPokemon);
   const combinedEncounter = {
-    head: headPokemon,
     body: bodyPokemon,
+    head: headPokemon,
     isFusion,
     updatedAt: getCurrentTimestamp(), // Use current timestamp since Pokémon don't have updatedAt
   };
 
   return {
-    position,
     encounter: combinedEncounter,
+    position,
     teamMember,
   };
 };
@@ -439,7 +456,9 @@ const getTeamMemberDetails = (
 // Helper function to check if team is full
 const isTeamFull = (): boolean => {
   const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough) return true;
+  if (!activePlaythrough) {
+    return true;
+  }
 
   return activePlaythrough.team.members.every((member) => member !== null);
 };
@@ -447,7 +466,9 @@ const isTeamFull = (): boolean => {
 // Helper function to get available team positions
 const getAvailableTeamPositions = (): number[] => {
   const activePlaythrough = getActivePlaythrough();
-  if (!activePlaythrough) return [];
+  if (!activePlaythrough) {
+    return [];
+  }
 
   return getAvailableTeamPositionsForMembers(activePlaythrough.team.members);
 };
@@ -457,11 +478,9 @@ export {
   cycleGameMode,
   deletePlaythrough,
   forceSave,
-  getActivePlaythrough,
   getAllPlaythroughs,
   getAvailableTeamPositions,
   getCurrentlyLoadedPlaythroughs,
-  getCurrentTimestamp,
   getGameMode,
   getTeamMemberDetails,
   importPlaythrough,

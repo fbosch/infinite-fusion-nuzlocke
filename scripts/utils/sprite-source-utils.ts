@@ -19,7 +19,6 @@ export function getSpriteSourcePaths(moduleUrl: string): {
   const spritesBaseDir = path.join(scriptDirectory, "sprites");
 
   return {
-    scriptDirectory,
     baseEntriesPath: path.join(
       scriptDirectory,
       "..",
@@ -27,9 +26,10 @@ export function getSpriteSourcePaths(moduleUrl: string): {
       "shared",
       "base-entries.json",
     ),
-    spritesBaseDir,
     gen7SpritesDir: path.join(spritesBaseDir, "pokemon-gen7"),
     gen8SpritesDir: path.join(spritesBaseDir, "pokemon-gen8"),
+    scriptDirectory,
+    spritesBaseDir,
   };
 }
 

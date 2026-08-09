@@ -5,7 +5,7 @@ import { processGameModeData } from "./encounters-processor";
 // Enable ISR caching - revalidate every hour
 export const revalidate = 3600;
 
-export async function GET(request: NextRequest) {
+export function GET(request: NextRequest) {
   try {
     // Parse query parameters
     const { searchParams } = new URL(request.url);
@@ -22,10 +22,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(processedData, {
       headers: {
-        "Content-Type": "application/json",
         "Cache-Control": isDevelopment
           ? "public, max-age=30" // 30 seconds in dev for quick iteration
           : "public, max-age=3600", // 1 hour in production
+        "Content-Type": "application/json",
       },
     });
   } catch (error) {
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid encounters data format", details: error.issues },
+        { details: error.issues, error: "Invalid encounters data format" },
         { status: 500 },
       );
     }

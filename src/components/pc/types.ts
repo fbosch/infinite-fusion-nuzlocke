@@ -2,11 +2,11 @@
 
 import type { PokemonOptionType } from "@/loaders/pokemon";
 
-export type PCEntry = {
+export interface PCEntry {
+  body: PokemonOptionType | null;
+  head: PokemonOptionType | null;
+  isFusion?: boolean;
   locationId: string;
   locationName: string;
-  head: PokemonOptionType | null;
-  body: PokemonOptionType | null;
   position?: number;
-  isFusion?: boolean;
-};
+}

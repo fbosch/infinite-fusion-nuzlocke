@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getActivePlaythrough, playthroughsStore } from "../playthroughs/store";
+import { getActivePlaythrough } from "../playthroughs/playthrough-state";
+import { playthroughsStore } from "../playthroughs/store";
 import {
   getEffectiveReducedMotion,
   SettingsSchema,
@@ -7,11 +8,13 @@ import {
   settingsStore,
 } from "../settings";
 
-// Mock the playthroughs store
+vi.mock("../playthroughs/playthrough-state", () => ({
+  getActivePlaythrough: vi.fn(),
+}));
+
 vi.mock("../playthroughs/store", async () => {
   const { proxy } = await import("valtio");
   return {
-    getActivePlaythrough: vi.fn(),
     playthroughsStore: proxy({ isLoading: false }),
   };
 });
@@ -25,8 +28,10 @@ const clearLocalStorage = () => {
 
 let settingsImportVersion = 0;
 
-const importFreshSettings = () =>
-  import(/* @vite-ignore */ `../settings.ts?t=${++settingsImportVersion}`);
+const importFreshSettings = () => {
+  settingsImportVersion += 1;
+  return import(/* @vite-ignore */ `../settings.ts?t=${settingsImportVersion}`);
+};
 
 describe("Settings Store", () => {
   beforeEach(() => {
@@ -112,14 +117,14 @@ describe("Settings Store", () => {
   describe("Version-based Default Logic", () => {
     it("re-evaluates defaults after playthrough load completes", async () => {
       const oldPlaythrough = {
+        createdAt: Date.now(),
+        customLocations: [],
+        encounters: {},
+        gameMode: "classic",
         id: "old-playthrough",
         name: "Old Run",
-        gameMode: "classic",
-        encounters: {},
-        team: [],
         pc: [],
-        customLocations: [],
-        createdAt: Date.now(),
+        team: [],
         updatedAt: Date.now(),
       } as any;
 
@@ -139,14 +144,14 @@ describe("Settings Store", () => {
 
     it("re-evaluates defaults when the playthrough store finishes loading", async () => {
       const oldPlaythrough = {
+        createdAt: Date.now(),
+        customLocations: [],
+        encounters: {},
+        gameMode: "classic",
         id: "old-playthrough",
         name: "Old Run",
-        gameMode: "classic",
-        encounters: {},
-        team: [],
         pc: [],
-        customLocations: [],
-        createdAt: Date.now(),
+        team: [],
         updatedAt: Date.now(),
       } as any;
 
@@ -169,14 +174,14 @@ describe("Settings Store", () => {
     it("enables move encounters for old playthroughs (no version)", async () => {
       // Mock old playthrough without version field
       mockGetActivePlaythrough.mockReturnValue({
+        createdAt: Date.now(),
+        customLocations: [],
+        encounters: {},
+        gameMode: "classic",
         id: "old-playthrough",
         name: "Old Run",
-        gameMode: "classic",
-        encounters: {},
-        team: [],
         pc: [],
-        customLocations: [],
-        createdAt: Date.now(),
+        team: [],
         updatedAt: Date.now(),
         // No version field - this indicates old playthrough
       } as any);
@@ -190,14 +195,14 @@ describe("Settings Store", () => {
     it("disables move encounters for new playthroughs (with version)", async () => {
       // Mock new playthrough with version field
       mockGetActivePlaythrough.mockReturnValue({
+        createdAt: Date.now(),
+        customLocations: [],
+        encounters: {},
+        gameMode: "classic",
         id: "new-playthrough",
         name: "New Run",
-        gameMode: "classic",
-        encounters: {},
-        team: [],
         pc: [],
-        customLocations: [],
-        createdAt: Date.now(),
+        team: [],
         updatedAt: Date.now(),
         version: "1.0.0", // Has version - this indicates new playthrough
       } as any);
@@ -223,7 +228,9 @@ describe("Settings Store", () => {
       });
 
       // Spy on console.warn to verify error logging
-      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {
+        // Suppress expected warning output.
+      });
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await importFreshSettings();
@@ -349,7 +356,9 @@ describe("Settings Store", () => {
     it("handles corrupted localStorage data gracefully", async () => {
       localStorage.setItem("settings:v1", "invalid-json");
 
-      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {
+        // Suppress expected warning output.
+      });
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await importFreshSettings();
@@ -371,7 +380,9 @@ describe("Settings Store", () => {
 
       localStorage.setItem("settings:v1", JSON.stringify(invalidSettings));
 
-      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {
+        // Suppress expected warning output.
+      });
 
       // Import fresh instance to trigger initialization
       const { settingsStore: freshStore } = await importFreshSettings();
@@ -527,7 +538,7 @@ describe("Settings Store", () => {
       // Should have saved to localStorage with updated settings
       const stored = localStorage.getItem("settings:v1");
       expect(stored).not.toBeNull();
-      expect(stored!).toContain('"moveEncountersBetweenLocations":true');
+      expect(stored).toContain('"moveEncountersBetweenLocations":true');
     });
 
     it("persists an explicit reduced-motion override", async () => {
@@ -540,10 +551,10 @@ describe("Settings Store", () => {
       );
     });
 
-    it("validates settings before saving", async () => {
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+    it("validates settings before saving", () => {
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {
+        // Suppress expected error output.
+      });
 
       // Try to use updateSettings with invalid data
       try {

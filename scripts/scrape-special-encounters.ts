@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import * as fs from "node:fs/promises";
-import * as path from "node:path";
-import * as cheerio from "cheerio";
+import { stat as getFileStat, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { type Cheerio, load } from "cheerio";
+import type { Element } from "domhandler";
 import { extractPokedexSubpageTitles } from "./scrape-pokedex";
 import { ConsoleFormatter } from "./utils/console-utils";
 import { loadPokemonNameMap } from "./utils/data-loading-utils";
@@ -23,6 +24,9 @@ const CLASSIC_POKEDEX_URL =
   "https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex";
 const REMIX_POKEDEX_URL =
   "https://infinitefusion.fandom.com/wiki/Pok%C3%A9dex/Remix";
+const ROUTE_NUMBER_PATTERN = /^\d+$/;
+const SAFARI_ZONE_AREA_PATTERN = /^[A-Z]\d+$/i;
+const TRASH_CAN_LOCATION_PATTERN = /^trash\s*cans?$/i;
 
 function getPokedexPageUrl(title: string): string {
   const pathSegments = title
@@ -59,8 +63,8 @@ function findPokemonIdWithSpecialCases(
 
   // Handle special cases
   const specialCases: Record<string, number> = {
-    oricorio: 741, // Oricorio (Baile form)
     egg: -1, // Special case for eggs
+    oricorio: 741, // Oricorio (Baile form)
   };
 
   // Handle common typos
@@ -107,30 +111,30 @@ function extractBaseLocation(location: string): string {
 }
 
 interface LocationGifts {
-  routeName: string;
   pokemonIds: number[];
+  routeName: string;
 }
 
 interface LocationTrades {
-  routeName: string;
   pokemonIds: number[];
+  routeName: string;
 }
 
 interface LocationQuests {
-  routeName: string;
   pokemonIds: number[];
+  routeName: string;
 }
 
 interface LocationStatics {
-  routeName: string;
   pokemonIds: number[];
+  routeName: string;
 }
 
 type SpecialEncounterKind = "gift" | "trade" | "quest" | "static";
 
 interface SpecialEncounterItem {
-  pokemonId: number;
   location: string;
+  pokemonId: number;
 }
 
 interface SpecialEncounterCollection {
@@ -140,22 +144,22 @@ interface SpecialEncounterCollection {
 
 interface SpecialEncounterAccumulator {
   gift: SpecialEncounterCollection;
-  trade: SpecialEncounterCollection;
   quest: SpecialEncounterCollection;
   static: SpecialEncounterCollection;
+  trade: SpecialEncounterCollection;
 }
 
 interface SpecialEncounterResult {
   gifts: LocationGifts[];
-  trades: LocationTrades[];
   quests: LocationQuests[];
   statics: LocationStatics[];
+  trades: LocationTrades[];
 }
 
 const SPECIAL_ENCOUNTER_MARKERS = ["(gift)", "(trade)", "(quest)", "(static)"];
 
-function findLocationCellText(cells: cheerio.Cheerio<any>): string {
-  for (let index = 0; index < cells.length; index++) {
+function findLocationCellText(cells: Cheerio<Element>): string {
+  for (let index = 0; index < cells.length; index += 1) {
     const text = cells.eq(index).text().trim();
     const normalized = text.toLowerCase();
     if (
@@ -218,12 +222,15 @@ function expandLocationShorthand(
   location: string,
   previousLocation: string | null,
 ): string {
-  if (/^\d+$/.test(location) && previousLocation?.startsWith("Route ")) {
+  if (
+    ROUTE_NUMBER_PATTERN.test(location) &&
+    previousLocation?.startsWith("Route ")
+  ) {
     return `Route ${location}`;
   }
 
   if (
-    /^[A-Z]\d+$/i.test(location) &&
+    SAFARI_ZONE_AREA_PATTERN.test(location) &&
     previousLocation?.startsWith("Safari Zone ")
   ) {
     return `Safari Zone ${location.toUpperCase()}`;
@@ -241,7 +248,7 @@ export function extractStaticEncounterLocations(
     .filter((part) => part.length > 0);
 
   const isTrashCanLocation = (location: string): boolean =>
-    /^trash\s*cans?$/i.test(location.trim());
+    TRASH_CAN_LOCATION_PATTERN.test(location.trim());
 
   const hasTrashCanStatic = parts.some((part) => {
     const cleanedLocation = cleanLocationName(extractBaseLocation(part));
@@ -264,8 +271,8 @@ export function extractStaticEncounterLocations(
     previousLocation = expandedLocation;
 
     expandedParts.push({
-      location: expandedLocation,
       isStatic,
+      location: expandedLocation,
     });
   }
 
@@ -312,8 +319,8 @@ function groupPokemonByLocation<
   // Convert to array and sort by location name
   return Array.from(locationMap.entries())
     .map(([routeName, pokemonIds]) => ({
-      routeName,
       pokemonIds: pokemonIds.sort((a, b) => a - b), // Sort Pokémon IDs numerically
+      routeName,
     }))
     .sort((a, b) => a.routeName.localeCompare(b.routeName)); // Sort locations alphabetically
 }
@@ -321,9 +328,9 @@ function groupPokemonByLocation<
 function createSpecialEncounterAccumulator(): SpecialEncounterAccumulator {
   return {
     gift: { items: [], seen: new Set<string>() },
-    trade: { items: [], seen: new Set<string>() },
     quest: { items: [], seen: new Set<string>() },
     static: { items: [], seen: new Set<string>() },
+    trade: { items: [], seen: new Set<string>() },
   };
 }
 
@@ -339,7 +346,7 @@ function addSpecialEncounterItem(
   }
 
   collection.seen.add(uniqueKey);
-  collection.items.push({ pokemonId, location });
+  collection.items.push({ location, pokemonId });
 }
 
 function addLocationEncounter(
@@ -379,7 +386,7 @@ function addStaticEncounters(
 }
 
 function addSpecialEncounterRow(
-  cells: cheerio.Cheerio<any>,
+  cells: Cheerio<Element>,
   pokemonNameMap: PokemonNameMap,
   accumulator: SpecialEncounterAccumulator,
 ): void {
@@ -389,8 +396,7 @@ function addSpecialEncounterRow(
 
   const pokemonCell = cells.eq(2).text().trim();
   if (
-    !pokemonCell ||
-    !isPotentialPokemonName(pokemonCell) ||
+    !(pokemonCell && isPotentialPokemonName(pokemonCell)) ||
     pokemonCell.toLowerCase().includes("pokemon")
   ) {
     return;
@@ -433,9 +439,9 @@ function addSpecialEncountersFromHtml(
   pokemonNameMap: PokemonNameMap,
   accumulator: SpecialEncounterAccumulator,
 ): void {
-  const $ = cheerio.load(html);
+  const $ = load(html);
 
-  $("table tr").each((_rowIndex: number, row: any) => {
+  $("table tr").each((_rowIndex, row) => {
     addSpecialEncounterRow($(row).find("td"), pokemonNameMap, accumulator);
   });
 }
@@ -458,12 +464,9 @@ async function fetchSpecialEncounterPokedexPages(
     `Fetching ${pokedexUrls.length} ${mode} Pokédex subpages...`,
   );
 
-  const pageHtml: string[] = [];
-  for (const pokedexUrl of pokedexUrls) {
-    pageHtml.push(await fetchWikiPageHtml(pokedexUrl));
-  }
-
-  return pageHtml;
+  return Promise.all(
+    pokedexUrls.map((pokedexUrl) => fetchWikiPageHtml(pokedexUrl)),
+  );
 }
 
 function assertHasSpecialEncounters(
@@ -507,9 +510,9 @@ async function scrapePokedexForSpecialEncounters(
     const groupedStatics = groupPokemonByLocation(accumulator.static.items);
     const result = {
       gifts: groupedGifts,
-      trades: groupedTrades,
       quests: groupedQuests,
       statics: groupedStatics,
+      trades: groupedTrades,
     };
 
     assertHasSpecialEncounters(mode, result);
@@ -545,28 +548,28 @@ async function main() {
     ConsoleFormatter.info("Saving data to files...");
 
     const files = [
-      { path: path.join(classicDir, "gifts.json"), data: classicData.gifts },
-      { path: path.join(remixDir, "gifts.json"), data: remixData.gifts },
-      { path: path.join(classicDir, "trades.json"), data: classicData.trades },
-      { path: path.join(remixDir, "trades.json"), data: remixData.trades },
-      { path: path.join(classicDir, "quests.json"), data: classicData.quests },
-      { path: path.join(remixDir, "quests.json"), data: remixData.quests },
+      { data: classicData.gifts, path: join(classicDir, "gifts.json") },
+      { data: remixData.gifts, path: join(remixDir, "gifts.json") },
+      { data: classicData.trades, path: join(classicDir, "trades.json") },
+      { data: remixData.trades, path: join(remixDir, "trades.json") },
+      { data: classicData.quests, path: join(classicDir, "quests.json") },
+      { data: remixData.quests, path: join(remixDir, "quests.json") },
       {
-        path: path.join(classicDir, "statics.json"),
         data: classicData.statics,
+        path: join(classicDir, "statics.json"),
       },
-      { path: path.join(remixDir, "statics.json"), data: remixData.statics },
+      { data: remixData.statics, path: join(remixDir, "statics.json") },
     ];
 
     await Promise.all(
       files.map((file) =>
-        fs.writeFile(file.path, JSON.stringify(file.data, null, 2)),
+        writeFile(file.path, JSON.stringify(file.data, null, 2)),
       ),
     );
 
     // Get file stats
     const fileStats = await Promise.all(
-      files.map((file) => fs.stat(file.path)),
+      files.map((file) => getFileStat(file.path)),
     );
 
     const duration = Date.now() - startTime;
@@ -617,97 +620,97 @@ async function main() {
     // Success summary
     ConsoleFormatter.printSummary("Special Encounters Scraping Complete!", [
       {
+        color: "yellow",
         label: "Classic gift locations",
         value: classicGiftLocations,
-        color: "yellow",
       },
       {
+        color: "yellow",
         label: "Classic gift Pokémon",
         value: classicGiftPokemon,
-        color: "yellow",
       },
       {
+        color: "yellow",
         label: "Classic trade locations",
         value: classicTradeLocations,
-        color: "yellow",
       },
       {
+        color: "yellow",
         label: "Classic trade Pokémon",
         value: classicTradePokemon,
-        color: "yellow",
       },
       {
+        color: "yellow",
         label: "Classic quest locations",
         value: classicQuestLocations,
-        color: "yellow",
       },
       {
+        color: "yellow",
         label: "Classic quest Pokémon",
         value: classicQuestPokemon,
-        color: "yellow",
       },
       {
+        color: "yellow",
         label: "Classic static locations",
         value: classicStaticLocations,
-        color: "yellow",
       },
       {
+        color: "yellow",
         label: "Classic static Pokémon",
         value: classicStaticPokemon,
-        color: "yellow",
       },
       {
+        color: "yellow",
         label: "Remix gift locations",
         value: remixGiftLocations,
-        color: "yellow",
       },
-      { label: "Remix gift Pokémon", value: remixGiftPokemon, color: "yellow" },
+      { color: "yellow", label: "Remix gift Pokémon", value: remixGiftPokemon },
       {
+        color: "yellow",
         label: "Remix trade locations",
         value: remixTradeLocations,
-        color: "yellow",
       },
       {
+        color: "yellow",
         label: "Remix trade Pokémon",
         value: remixTradePokemon,
-        color: "yellow",
       },
       {
+        color: "yellow",
         label: "Remix quest locations",
         value: remixQuestLocations,
-        color: "yellow",
       },
       {
+        color: "yellow",
         label: "Remix quest Pokémon",
         value: remixQuestPokemon,
-        color: "yellow",
       },
       {
+        color: "yellow",
         label: "Remix static locations",
         value: remixStaticLocations,
-        color: "yellow",
       },
       {
+        color: "yellow",
         label: "Remix static Pokémon",
         value: remixStaticPokemon,
-        color: "yellow",
       },
       {
+        color: "cyan",
         label: "Files saved",
         value: files.map((f) => f.path).join(", "),
-        color: "cyan",
       },
       {
+        color: "cyan",
         label: "Total file size",
         value: ConsoleFormatter.formatFileSize(
           fileStats.reduce((sum, stat) => sum + stat.size, 0),
         ),
-        color: "cyan",
       },
       {
+        color: "yellow",
         label: "Duration",
         value: ConsoleFormatter.formatDuration(duration),
-        color: "yellow",
       },
     ]);
   } catch (error) {

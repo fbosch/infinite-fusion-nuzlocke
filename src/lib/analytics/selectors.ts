@@ -1,14 +1,14 @@
-import { PokemonStatus } from "@/loaders/pokemon";
+import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
 import type { Playthrough } from "@/stores/playthroughs/types";
 import {
   toCountBucket,
   toEncounterCountBucket,
   toViableRosterBucket,
 } from "./buckets";
-import type { SharedEventProperties } from "./trackEvent";
+import type { SharedEventProperties } from "./track-event";
 
 const getEncounterEntries = (playthrough: Playthrough) => {
-  if (playthrough.encounters == null) {
+  if (playthrough.encounters === null || playthrough.encounters === undefined) {
     return [];
   }
 
@@ -16,7 +16,7 @@ const getEncounterEntries = (playthrough: Playthrough) => {
 };
 
 const getEncounterPokemon = (playthrough: Playthrough) => {
-  const pokemon = [];
+  const pokemon: PokemonOptionType[] = [];
 
   for (const encounter of getEncounterEntries(playthrough)) {
     if (encounter.head) {
@@ -71,35 +71,32 @@ export const getEncounterCount = (playthrough: Playthrough): number => {
   return count;
 };
 
-const getDeceasedCount = (playthrough: Playthrough): number => {
-  return getEncounterPokemon(playthrough).filter(
+const getDeceasedCount = (playthrough: Playthrough): number =>
+  getEncounterPokemon(playthrough).filter(
     (pokemon) => pokemon.status === PokemonStatus.DECEASED,
   ).length;
-};
 
-const getBoxedCount = (playthrough: Playthrough): number => {
-  return getEncounterPokemon(playthrough).filter(
+const getBoxedCount = (playthrough: Playthrough): number =>
+  getEncounterPokemon(playthrough).filter(
     (pokemon) => pokemon.status === PokemonStatus.STORED,
   ).length;
-};
 
-export const getFusionCount = (playthrough: Playthrough): number => {
-  return getEncounterEntries(playthrough).filter(
+export const getFusionCount = (playthrough: Playthrough): number =>
+  getEncounterEntries(playthrough).filter(
     (encounter) => encounter.isFusion && encounter.head && encounter.body,
   ).length;
-};
 
 export const getViableRosterSize = (playthrough: Playthrough): number => {
   const pokemonByUid = getPokemonByUid(playthrough);
 
   let count = 0;
   for (const member of playthrough.team.members) {
-    if (member == null) {
+    if (member === null || member === undefined) {
       continue;
     }
 
     const headPokemon = pokemonByUid.get(member.headPokemonUid);
-    if (headPokemon == null) {
+    if (headPokemon === null || headPokemon === undefined) {
       continue;
     }
 
@@ -125,12 +122,12 @@ export const getSharedEventProperties = (
   const viableRosterSize = getViableRosterSize(playthrough);
 
   return {
-    playthrough_id: playthrough.id,
-    game_mode: toAnalyticsGameMode(playthrough.gameMode),
-    encounter_count_bucket: toEncounterCountBucket(encounterCount),
-    deceased_count_bucket: toCountBucket(deceasedCount),
     boxed_count_bucket: toCountBucket(boxedCount),
+    deceased_count_bucket: toCountBucket(deceasedCount),
+    encounter_count_bucket: toEncounterCountBucket(encounterCount),
     fusion_count_bucket: toCountBucket(fusionCount),
+    game_mode: toAnalyticsGameMode(playthrough.gameMode),
+    playthrough_id: playthrough.id,
     viable_roster_bucket: toViableRosterBucket(viableRosterSize),
   };
 };
@@ -139,14 +136,26 @@ export const getTeamSizeAfter = (
   playthrough: Playthrough,
 ): 0 | 1 | 2 | 3 | 4 | 5 | 6 => {
   const size = playthrough.team.members.filter(
-    (member) => member != null,
+    (member) => member !== null,
   ).length;
 
-  if (size <= 0) return 0;
-  if (size === 1) return 1;
-  if (size === 2) return 2;
-  if (size === 3) return 3;
-  if (size === 4) return 4;
-  if (size === 5) return 5;
+  if (size <= 0) {
+    return 0;
+  }
+  if (size === 1) {
+    return 1;
+  }
+  if (size === 2) {
+    return 2;
+  }
+  if (size === 3) {
+    return 3;
+  }
+  if (size === 4) {
+    return 4;
+  }
+  if (size === 5) {
+    return 5;
+  }
   return 6;
 };

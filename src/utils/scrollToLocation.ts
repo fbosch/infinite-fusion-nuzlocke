@@ -1,5 +1,6 @@
+// biome-ignore lint/style/useFilenamingConvention: File name is an established import path.
 import { emitScrollToLocation } from "@/lib/events";
-import { getDocumentReducedMotion } from "@/lib/reducedMotion";
+import { getDocumentReducedMotion } from "@/lib/reduced-motion";
 import type { EncounterData } from "@/stores/playthroughs/types";
 
 // Keep teardown timers per overlay element across calls to avoid flicker
@@ -14,7 +15,7 @@ const getScrollBehavior = (behavior: ScrollBehavior): ScrollBehavior =>
 export function findMostRecentlyFilledLocation(
   encounters: Record<string, EncounterData>,
 ): string | null {
-  if (!encounters || Object.keys(encounters).length === 0) {
+  if (Object.keys(encounters).length === 0) {
     return null;
   }
 
@@ -42,7 +43,7 @@ export function scrollToTableRow(
   targetRowElement: HTMLElement,
   behavior: ScrollBehavior = "smooth",
 ): void {
-  if (!tableContainerElement || !targetRowElement) {
+  if (!(tableContainerElement && targetRowElement)) {
     return;
   }
 
@@ -52,8 +53,8 @@ export function scrollToTableRow(
   const targetHeight = targetRowElement.offsetHeight;
 
   tableContainerElement.scrollTo({
-    top: targetTop - containerHeight / 2 + targetHeight / 2,
     behavior: getScrollBehavior(behavior),
+    top: targetTop - containerHeight / 2 + targetHeight / 2,
   });
 }
 
@@ -78,11 +79,15 @@ export function scrollToMostRecentLocation(
   tableElement: HTMLElement | null,
   behavior: ScrollBehavior = "smooth",
 ): boolean {
-  if (!tableContainerElement || !tableElement) return false;
+  if (!(tableContainerElement && tableElement)) {
+    return false;
+  }
 
   const normalizedBehavior = getScrollBehavior(behavior);
   const recentLocationId = findMostRecentlyFilledLocation(encounters);
-  if (!recentLocationId) return false;
+  if (!recentLocationId) {
+    return false;
+  }
 
   const targetRow = findTableRowByLocationId(tableElement, recentLocationId);
   if (!targetRow) {
@@ -101,9 +106,11 @@ export function scrollToMostRecentLocation(
  */
 export function flashTableRow(
   rowElement: HTMLElement,
-  durationMs: number = 1200,
+  durationMs = 1200,
 ): void {
-  if (!rowElement) return;
+  if (!rowElement) {
+    return;
+  }
   const highlightClasses = [
     "ring-2",
     "ring-green-500/60",
@@ -121,22 +128,30 @@ export function flashTableRow(
  * Temporarily highlight Pokemon combobox overlays by their data-uid
  */
 export function flashPokemonOverlaysByUids(
-  uids: string[],
-  durationMs: number = 1200,
+  uids: readonly string[] | null,
+  durationMs = 1200,
 ): void {
-  if (!uids || uids.length === 0) return;
+  if (uids === null || uids.length === 0) {
+    return;
+  }
 
   const apply = () => {
-    uids.forEach((uid) => {
-      if (!uid) return;
+    for (const uid of uids) {
+      if (!uid) {
+        continue;
+      }
       const root = document.querySelector(
         `[data-uid="${CSS.escape(uid)}"]`,
       ) as HTMLElement | null;
-      if (!root) return;
+      if (!root) {
+        continue;
+      }
       const overlay = root.querySelector(
         ".location-highlight-overlay",
       ) as HTMLElement | null;
-      if (!overlay) return;
+      if (!overlay) {
+        continue;
+      }
 
       // Inline style overrides Tailwind opacity classes; do not toggle classes
       overlay.style.transition =
@@ -144,12 +159,14 @@ export function flashPokemonOverlaysByUids(
       overlay.style.opacity = "1";
 
       const prev = overlayHideTimers.get(overlay);
-      if (prev) window.clearTimeout(prev);
+      if (prev) {
+        window.clearTimeout(prev);
+      }
       const timeout = window.setTimeout(() => {
         overlay.style.removeProperty("opacity");
       }, durationMs);
       overlayHideTimers.set(overlay, timeout);
-    });
+    }
   };
 
   // Apply now and on next frame to cover DOM updates during smooth scroll
@@ -163,8 +180,8 @@ export function flashPokemonOverlaysByUids(
 export function runAfterScrollSettles(
   container: HTMLElement,
   callback: () => void,
-  settleDelayMs: number = 150,
-  maxWaitMs: number = 1200,
+  settleDelayMs = 150,
+  maxWaitMs = 1200,
 ): void {
   let timeoutId: number | null = null;
   let intervalId: number | null = null;
@@ -172,7 +189,9 @@ export function runAfterScrollSettles(
   let hasCompleted = false;
 
   const done = () => {
-    if (hasCompleted) return;
+    if (hasCompleted) {
+      return;
+    }
     hasCompleted = true;
 
     // Cleanup listeners and timers
@@ -190,7 +209,9 @@ export function runAfterScrollSettles(
   };
 
   const onScroll = () => {
-    if (timeoutId) window.clearTimeout(timeoutId);
+    if (timeoutId) {
+      window.clearTimeout(timeoutId);
+    }
     timeoutId = window.setTimeout(() => done(), settleDelayMs);
   };
 
@@ -223,18 +244,24 @@ export function scrollToLocationById(
     durationMs?: number;
   },
 ): boolean {
-  if (!locationId) return false;
+  if (!locationId) {
+    return false;
+  }
 
   const behavior = getScrollBehavior(options?.behavior ?? "smooth");
 
   const tableElement = document.querySelector(
     'table[aria-label="Locations table"]',
   ) as HTMLElement | null;
-  if (!tableElement) return false;
+  if (!tableElement) {
+    return false;
+  }
 
   const tableContainerElement =
     tableElement.parentElement as HTMLElement | null;
-  if (!tableContainerElement) return false;
+  if (!tableContainerElement) {
+    return false;
+  }
 
   const targetRow = findTableRowByLocationId(tableElement, locationId);
   if (!targetRow) {

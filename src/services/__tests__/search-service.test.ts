@@ -1,0 +1,278 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Pokemon } from "@/loaders/pokemon";
+
+let searchService: typeof import("../search-service").default;
+
+// Mock the dependencies
+vi.mock("@/lib/search-core", () => ({
+  SearchCore: vi.fn(function MockSearchCore() {
+    return {
+      initialize: vi.fn().mockResolvedValue(undefined),
+      isReady: vi.fn().mockReturnValue(true),
+      search: vi.fn().mockResolvedValue([]),
+    } as any;
+  }),
+}));
+
+vi.mock("@/lib/data", () => ({
+  pokemonData: {
+    getAllPokemon: vi.fn().mockResolvedValue([]),
+  },
+}));
+
+vi.mock("comlink", () => ({
+  wrap: vi.fn(),
+}));
+
+// Mock Worker
+global.Worker = vi.fn(function MockWorker() {
+  return {
+    postMessage: vi.fn(),
+    terminate: vi.fn(),
+  };
+}) as any;
+
+// Mock data
+const mockPokemon: Pokemon[] = [
+  {
+    id: 1,
+    name: "Bulbasaur",
+    nationalDexId: 1,
+    species: {
+      evolution_chain: {
+        url: "https://pokeapi.co/api/v2/evolution-chain/1/",
+      },
+      generation: "1",
+      is_legendary: false,
+      is_mythical: false,
+    },
+    types: [{ name: "grass" }, { name: "poison" }],
+  },
+  {
+    id: 2,
+    name: "Ivysaur",
+    nationalDexId: 2,
+    species: {
+      evolution_chain: {
+        url: "https://pokeapi.co/api/v2/evolution-chain/1/",
+      },
+      generation: "1",
+      is_legendary: false,
+      is_mythical: false,
+    },
+    types: [{ name: "grass" }, { name: "poison" }],
+  },
+  {
+    id: 3,
+    name: "Venusaur",
+    nationalDexId: 3,
+    species: {
+      evolution_chain: {
+        url: "https://pokeapi.co/api/v2/evolution-chain/1/",
+      },
+      generation: "1",
+      is_legendary: false,
+      is_mythical: false,
+    },
+    types: [{ name: "grass" }, { name: "poison" }],
+  },
+];
+
+describe("SearchService", () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    ({ default: searchService } = await import("../search-service"));
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  describe("search functionality", () => {
+    it("should perform search successfully", async () => {
+      const { SearchCore } = await import("@/lib/search-core");
+      const mockInstance = {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        isReady: vi.fn().mockReturnValue(true),
+        search: vi.fn().mockResolvedValue([mockPokemon[0]]),
+      } as any;
+
+      vi.mocked(SearchCore).mockImplementation(function MockSearchCore() {
+        return mockInstance as any;
+      });
+
+      const results = await searchService.search("bulba");
+
+      expect(results).toEqual([mockPokemon[0]]);
+      expect(mockInstance.search).toHaveBeenCalledWith("bulba");
+    });
+
+    it("should return empty array on search failure", async () => {
+      const { SearchCore } = await import("@/lib/search-core");
+      const mockInstance = {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        isReady: vi.fn().mockReturnValue(true),
+        search: vi.fn().mockImplementation(() => {
+          throw new Error("Search failed");
+        }),
+      } as any;
+
+      vi.mocked(SearchCore).mockImplementation(function MockSearchCore() {
+        return mockInstance as any;
+      });
+
+      const results = await searchService.search("bulba");
+
+      expect(results).toEqual([]);
+    });
+
+    it("should handle empty query", async () => {
+      const { SearchCore } = await import("@/lib/search-core");
+      const mockInstance = {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        isReady: vi.fn().mockReturnValue(true),
+        search: vi.fn().mockResolvedValue([]),
+      };
+
+      vi.mocked(SearchCore).mockImplementation(function MockSearchCore() {
+        return mockInstance as any;
+      });
+
+      const results = await searchService.search("");
+
+      expect(results).toEqual([]);
+      expect(mockInstance.search).toHaveBeenCalledWith("");
+    });
+
+    it("should handle special characters in query", async () => {
+      const { SearchCore } = await import("@/lib/search-core");
+      const mockInstance = {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        isReady: vi.fn().mockReturnValue(true),
+        search: vi.fn().mockResolvedValue([]),
+      };
+
+      vi.mocked(SearchCore).mockImplementation(function MockSearchCore() {
+        return mockInstance as any;
+      });
+
+      const results = await searchService.search("bulba & ivy");
+
+      expect(results).toEqual([]);
+      expect(mockInstance.search).toHaveBeenCalledWith("bulba & ivy");
+    });
+  });
+
+  describe("error handling", () => {
+    it("should handle search method errors gracefully", async () => {
+      const { SearchCore } = await import("@/lib/search-core");
+      const mockInstance = {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        isReady: vi.fn().mockReturnValue(true),
+        search: vi.fn().mockImplementation(() => {
+          throw new Error("Method error");
+        }),
+      };
+
+      vi.mocked(SearchCore).mockImplementation(function MockSearchCore() {
+        return mockInstance as any;
+      });
+
+      const results = await searchService.search("bulba");
+
+      expect(results).toEqual([]);
+    });
+
+    it("should handle async search errors gracefully", async () => {
+      const { SearchCore } = await import("@/lib/search-core");
+      const mockInstance = {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        isReady: vi.fn().mockReturnValue(true),
+        search: vi.fn().mockImplementation(() => {
+          throw new Error("Async error");
+        }),
+      } as any;
+
+      vi.mocked(SearchCore).mockImplementation(function MockSearchCore() {
+        return mockInstance as any;
+      });
+
+      const results = await searchService.search("bulba");
+
+      expect(results).toEqual([]);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("should handle null/undefined query gracefully", async () => {
+      const { SearchCore } = await import("@/lib/search-core");
+      const mockInstance = {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        isReady: vi.fn().mockReturnValue(true),
+        search: vi.fn().mockResolvedValue([]),
+      };
+
+      vi.mocked(SearchCore).mockImplementation(function MockSearchCore() {
+        return mockInstance as any;
+      });
+
+      // @ts-expect-error - Testing edge case
+      const results = await searchService.search(null);
+      expect(results).toEqual([]);
+
+      // @ts-expect-error - Testing edge case
+      const results2 = await searchService.search(undefined);
+      expect(results2).toEqual([]);
+    });
+
+    it("should handle very long queries", async () => {
+      const { SearchCore } = await import("@/lib/search-core");
+      const mockInstance = {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        isReady: vi.fn().mockReturnValue(true),
+        search: vi.fn().mockResolvedValue([]),
+      };
+
+      vi.mocked(SearchCore).mockImplementation(function MockSearchCore() {
+        return mockInstance as any;
+      });
+
+      const longQuery = "a".repeat(1000);
+      const results = await searchService.search(longQuery);
+
+      expect(results).toEqual([]);
+      expect(mockInstance.search).toHaveBeenCalledWith(longQuery);
+    });
+
+    it("should handle unicode characters in query", async () => {
+      const { SearchCore } = await import("@/lib/search-core");
+      const mockInstance = {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        isReady: vi.fn().mockReturnValue(true),
+        search: vi.fn().mockResolvedValue([]),
+      };
+
+      vi.mocked(SearchCore).mockImplementation(function MockSearchCore() {
+        return mockInstance as any;
+      });
+
+      const unicodeQuery = "Pokémon 🎮 ポケモン";
+      const results = await searchService.search(unicodeQuery);
+
+      expect(results).toEqual([]);
+      expect(mockInstance.search).toHaveBeenCalledWith(unicodeQuery);
+    });
+  });
+
+  describe("singleton pattern", () => {
+    it("should maintain singleton instance", () => {
+      const instance1 = searchService;
+      const instance2 = searchService;
+
+      expect(instance1).toBe(instance2);
+    });
+  });
+});

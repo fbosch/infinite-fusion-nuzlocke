@@ -1,29 +1,36 @@
-export enum EncounterSource {
-  WILD = "wild",
-  GRASS = "grass",
-  SURF = "surf",
-  FISHING = "fishing",
-  CAVE = "cave",
-  ROCK_SMASH = "rock_smash",
-  POKERADAR = "pokeradar",
-  GIFT = "gift",
-  TRADE = "trade",
-  QUEST = "quest",
-  NEST = "nest",
-  EGG = "egg",
-  STATIC = "static",
-  LEGENDARY = "legendary",
-}
+const ENCOUNTER_SOURCE_ENTRIES = [
+  ["WILD", "wild"],
+  ["GRASS", "grass"],
+  ["SURF", "surf"],
+  ["FISHING", "fishing"],
+  ["CAVE", "cave"],
+  ["ROCK_SMASH", "rock_smash"],
+  ["POKERADAR", "pokeradar"],
+  ["GIFT", "gift"],
+  ["TRADE", "trade"],
+  ["QUEST", "quest"],
+  ["NEST", "nest"],
+  ["EGG", "egg"],
+  ["STATIC", "static"],
+  ["LEGENDARY", "legendary"],
+] as const;
 
-export type PokemonEncounter = {
+export const EncounterSource = Object.fromEntries(ENCOUNTER_SOURCE_ENTRIES) as {
+  [Entry in (typeof ENCOUNTER_SOURCE_ENTRIES)[number] as Entry[0]]: Entry[1];
+};
+
+export type EncounterSource =
+  (typeof EncounterSource)[keyof typeof EncounterSource];
+
+export interface PokemonEncounter {
   id: number;
   source: EncounterSource;
-};
+}
 
-export type RouteEncounter = {
-  routeName: string;
+export interface RouteEncounter {
   pokemon: PokemonEncounter[];
-};
+  routeName: string;
+}
 
 /**
  * Shared encounter type definition for consistency across the codebase.

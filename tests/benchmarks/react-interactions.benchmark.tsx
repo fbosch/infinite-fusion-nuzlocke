@@ -4,24 +4,33 @@ import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import React, { Profiler, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import SummaryCard from "@/components/PokemonSummaryCard";
-import TeamEntryItem from "@/components/pc/TeamEntryItem";
+import TeamEntryItem from "@/components/pc/team-entry-item";
 import {
   TeamMemberSelectionProvider,
   useTeamMemberSelection,
-} from "@/components/team/TeamMemberSelectionContext";
-import { getTeamSlots } from "@/components/team/team-slots";
+} from "@/components/team/team-member-selection-context";
+import { getTeamSlots } from "@/components/team/team-slots-model";
 import { getLocationsSortedWithCustom } from "@/loaders/locations";
 import { buildPokemonUidIndex } from "@/utils/encounter-utils";
 
 const SAMPLE_COUNT = 20;
 const WARMUP_ITERATIONS = 5;
+let activeProfilerDurations: number[] = [];
+
+function handleProfilerRender(
+  _id: string,
+  _phase: string,
+  actualDuration: number,
+) {
+  activeProfilerDurations.push(actualDuration);
+}
 
 const updatePokemonByUIDMock = vi.hoisted(() =>
   vi.fn().mockResolvedValue(undefined),
 );
 
 vi.mock("next/dynamic", () => ({ default: () => () => null }));
-vi.mock("@/components/ContextMenu", () => ({
+vi.mock("@/components/context-menu", () => ({
   ContextMenu: ({
     children,
     items,
@@ -33,7 +42,7 @@ vi.mock("@/components/ContextMenu", () => ({
       {children}
       {items.map((item) =>
         item.onClick ? (
-          <button key={item.id} type="button" onClick={item.onClick}>
+          <button key={item.id} onClick={item.onClick} type="button">
             {item.label}
           </button>
         ) : null,
@@ -41,21 +50,21 @@ vi.mock("@/components/ContextMenu", () => ({
     </>
   ),
 }));
-vi.mock("@/components/CursorTooltip", () => ({
+vi.mock("@/components/cursor-tooltip", () => ({
   CursorTooltip: ({ children }: { children: ReactNode }) => children,
 }));
-vi.mock("@/components/PokemonSummaryCard/ArtworkVariantButton", () => ({
+vi.mock("@/components/PokemonSummaryCard/artwork-variant-button", () => ({
   ArtworkVariantButton: () => null,
 }));
-vi.mock("@/components/PokemonSummaryCard/FusionSprite", () => ({
-  FusionSprite: React.forwardRef(() => <div data-testid="fusion-sprite" />),
+vi.mock("@/components/PokemonSummaryCard/fusion-sprite", () => ({
+  FusionSprite: () => <div data-testid="fusion-sprite" />,
 }));
-vi.mock("@/components/PokemonSummaryCard/TeamMemberContextMenu", () => ({
+vi.mock("@/components/PokemonSummaryCard/team-member-context-menu", () => ({
   TeamMemberContextMenu: ({ children }: { children: ReactNode }) => (
     <>{children}</>
   ),
 }));
-vi.mock("@/components/PokemonSummaryCard/PokemonContextMenu", () => ({
+vi.mock("@/components/PokemonSummaryCard/pokemon-context-menu", () => ({
   PokemonContextMenu: ({ children }: { children: ReactNode }) => (
     <>{children}</>
   ),
@@ -66,30 +75,30 @@ vi.mock("@/assets/images/pokeball.svg", () => ({ default: () => <svg /> }));
 
 vi.mock("lucide-react", () => ({
   Box: () => <span />,
-  Plus: () => <span />,
-  Skull: () => <span />,
   MousePointer: () => <span />,
   Palette: () => <span />,
+  Plus: () => <span />,
+  Skull: () => <span />,
   SquareArrowUpRight: () => <span />,
 }));
-vi.mock("@/components/TypePills", () => ({ TypePills: () => null }));
-vi.mock("@/hooks/useFusionTypes", () => ({
+vi.mock("@/components/type-pills", () => ({ TypePills: () => null }));
+vi.mock("@/hooks/use-fusion-types", () => ({
   useFusionTypesFromPokemon: () => ({ primary: "Electric", secondary: null }),
 }));
-vi.mock("@/hooks/useSprite", () => ({
+vi.mock("@/hooks/use-sprite", () => ({
   usePreferredVariantState: () => ({ variant: null }),
   useSpriteCredits: () => ({ data: {} }),
   useSpriteVariants: () => ({ data: [], isLoading: false }),
 }));
 vi.mock("@/lib/sprites", () => ({ getSpriteId: () => null }));
-vi.mock("@/utils/formatCredits", () => ({
+vi.mock("@/utils/format-credits", () => ({
   formatArtistCredits: () => "artist",
 }));
-vi.mock("@/utils/pokemonPredicates", () => ({
+vi.mock("@/utils/pokemon-predicates", () => ({
   canFuse: () => true,
+  isPokemonActive: (pokemon: unknown) => Boolean(pokemon),
   isPokemonDeceased: () => false,
   isPokemonStored: () => false,
-  isPokemonActive: (pokemon: unknown) => Boolean(pokemon),
 }));
 vi.mock("@/loaders/pokemon", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/loaders/pokemon")>();
@@ -103,14 +112,14 @@ vi.mock("@/loaders/locations", async () => {
 });
 vi.mock("@/stores/playthroughs/hooks", () => ({
   useActivePlaythrough: () => ({ team: { members: [] } }),
-  useEncounters: () => ({}),
   useActivePlaythroughId: () => "playthrough-1",
+  useEncounters: () => ({}),
 }));
 vi.mock("@/stores/playthroughs/index", () => ({
   playthroughActions: {
-    updatePokemonByUID: updatePokemonByUIDMock,
-    moveTeamMemberToBox: vi.fn(),
     markTeamMemberAsDeceased: vi.fn(),
+    moveTeamMemberToBox: vi.fn(),
+    updatePokemonByUID: updatePokemonByUIDMock,
   },
 }));
 vi.mock("@/utils/scrollToLocation", () => ({ scrollToLocationById: vi.fn() }));
@@ -119,36 +128,38 @@ const pikachu = {
   id: 25,
   name: "Pikachu",
   nationalDexId: 25,
-  uid: "pikachu-uid",
   originalLocation: "route-1",
+  uid: "pikachu-uid",
 };
 const eevee = {
   id: 133,
   name: "Eevee",
   nationalDexId: 133,
-  uid: "eevee-uid",
   originalLocation: "route-2",
+  uid: "eevee-uid",
 };
 const filledTeamEntry = {
+  body: eevee,
+  head: pikachu,
+  isFusion: true,
   locationId: "team-slot-1",
   locationName: "Team Slot",
   position: 1,
-  isFusion: true,
-  head: pikachu,
-  body: eevee,
 };
 
 function profileRender(ui: React.ReactElement) {
   const durations: number[] = [];
-  const result = render(
-    <Profiler
-      id="benchmark"
-      onRender={(_id, _phase, actualDuration) => durations.push(actualDuration)}
-    >
-      {ui}
-    </Profiler>,
-  );
+  activeProfilerDurations = durations;
+  const result = render(<ProfiledBenchmark>{ui}</ProfiledBenchmark>);
   return { ...result, durations };
+}
+
+function ProfiledBenchmark({ children }: { children: ReactNode }) {
+  return (
+    <Profiler id="benchmark" onRender={handleProfilerRender}>
+      {children}
+    </Profiler>
+  );
 }
 
 function summarize(values: number[]) {
@@ -158,11 +169,10 @@ function summarize(values: number[]) {
   return { p50Ms: at(0.5), p95Ms: at(0.95) };
 }
 
-async function measureRender(ui: React.ReactElement) {
+function measureRender(ui: React.ReactElement) {
   for (let i = 0; i < WARMUP_ITERATIONS; i += 1) {
-    const mounted = profileRender(ui);
+    profileRender(ui);
     cleanup();
-    void mounted;
   }
   const wall: number[] = [];
   const profiler: number[] = [];
@@ -173,21 +183,34 @@ async function measureRender(ui: React.ReactElement) {
     profiler.push(...mounted.durations);
     cleanup();
   }
-  return { wall: summarize(wall), profiler: summarize(profiler) };
+  return { profiler: summarize(profiler), wall: summarize(wall) };
+}
+
+async function repeatSequentially(
+  count: number,
+  action: () => Promise<void>,
+  index = 0,
+): Promise<void> {
+  if (index === count) {
+    return;
+  }
+
+  await action();
+  await repeatSequentially(count, action, index + 1);
 }
 
 async function measureInteraction(
   factory: () => ReturnType<typeof profileRender>,
   interaction: (root: ReturnType<typeof profileRender>) => void,
 ) {
-  for (let i = 0; i < WARMUP_ITERATIONS; i += 1) {
+  await repeatSequentially(WARMUP_ITERATIONS, async () => {
     const root = factory();
     await act(async () => interaction(root));
     cleanup();
-  }
+  });
   const wall: number[] = [];
   const profiler: number[] = [];
-  for (let i = 0; i < SAMPLE_COUNT; i += 1) {
+  await repeatSequentially(SAMPLE_COUNT, async () => {
     const root = factory();
     root.durations.length = 0;
     const start = performance.now();
@@ -195,17 +218,18 @@ async function measureInteraction(
     wall.push(performance.now() - start);
     profiler.push(...root.durations);
     cleanup();
-  }
-  return { wall: summarize(wall), profiler: summarize(profiler) };
+  });
+  return { profiler: summarize(profiler), wall: summarize(wall) };
 }
 
 function SelectionProbe() {
   const selection = useTeamMemberSelection();
+  const selectPokemon = React.useCallback(() => {
+    selection.actions.handlePokemonSelect(pikachu, "route-1");
+  }, [selection]);
+
   return (
-    <button
-      type="button"
-      onClick={() => selection.actions.handlePokemonSelect(pikachu, "route-1")}
-    >
+    <button onClick={selectPokemon} type="button">
       Select
     </button>
   );
@@ -236,9 +260,9 @@ describe("deterministic React interaction baselines", () => {
       () =>
         profileRender(
           <TeamMemberSelectionProvider
-            position={0}
-            onSelect={vi.fn()}
             onClose={vi.fn()}
+            onSelect={vi.fn()}
+            position={0}
           >
             <SelectionProbe />
           </TeamMemberSelectionProvider>,
@@ -250,12 +274,12 @@ describe("deterministic React interaction baselines", () => {
       JSON.stringify(
         {
           sampleCount: SAMPLE_COUNT,
-          warmupIterations: WARMUP_ITERATIONS,
           timings: {
-            pokemonSummaryCard: summaryCard,
             pcTeamEntryMoveToBox: pcTeamEntry,
-            teamSelection: teamSelection,
+            pokemonSummaryCard: summaryCard,
+            teamSelection,
           },
+          warmupIterations: WARMUP_ITERATIONS,
         },
         null,
         2,
@@ -266,34 +290,34 @@ describe("deterministic React interaction baselines", () => {
 
   it("reports pure derivation timings for TeamSlots and locations", () => {
     const encounters = Object.fromEntries(
-      Array.from({ length: 512 }, (_, index) => [
-        `route-${index}`,
+      Array.from({ length: 512 }, (_, routeIndex) => [
+        `route-${routeIndex}`,
         {
-          head: index === 0 ? pikachu : null,
-          body: index === 1 ? eevee : null,
-          isFusion: index === 0,
+          body: routeIndex === 1 ? eevee : null,
+          head: routeIndex === 0 ? pikachu : null,
+          isFusion: routeIndex === 0,
           updatedAt: 0,
         },
       ]),
     );
     const members = [
-      { headPokemonUid: pikachu.uid, bodyPokemonUid: "" },
-      { headPokemonUid: "", bodyPokemonUid: eevee.uid },
+      { bodyPokemonUid: "", headPokemonUid: pikachu.uid },
+      { bodyPokemonUid: eevee.uid, headPokemonUid: "" },
       null,
       null,
       null,
       null,
     ];
-    const index = buildPokemonUidIndex(encounters);
+    const pokemonUidIndex = buildPokemonUidIndex(encounters);
     const samples: number[] = [];
     const locationSamples: number[] = [];
     for (let i = 0; i < WARMUP_ITERATIONS; i += 1) {
-      getTeamSlots(members, encounters, index);
+      getTeamSlots(members, encounters, pokemonUidIndex);
       getLocationsSortedWithCustom([]);
     }
     for (let i = 0; i < SAMPLE_COUNT; i += 1) {
       let start = performance.now();
-      getTeamSlots(members, encounters, index);
+      getTeamSlots(members, encounters, pokemonUidIndex);
       samples.push(performance.now() - start);
       start = performance.now();
       getLocationsSortedWithCustom([]);
@@ -303,15 +327,15 @@ describe("deterministic React interaction baselines", () => {
       JSON.stringify(
         {
           derivations: {
-            teamSlots512: summarize(samples),
             locations: summarize(locationSamples),
+            teamSlots512: summarize(samples),
           },
         },
         null,
         2,
       ),
     );
-    expect(getTeamSlots(members, encounters, index)).toHaveLength(6);
+    expect(getTeamSlots(members, encounters, pokemonUidIndex)).toHaveLength(6);
     expect(getLocationsSortedWithCustom([]).length).toBeGreaterThan(0);
   });
 });

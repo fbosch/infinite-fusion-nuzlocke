@@ -1,11 +1,11 @@
 // Tailwind CSS v4 default breakpoints
 // These match the default Tailwind CSS breakpoints
 export const breakpoints = {
-  sm: 640,
-  md: 768,
-  lg: 1024,
-  xl: 1280,
   "2xl": 1536,
+  lg: 1024,
+  md: 768,
+  sm: 640,
+  xl: 1280,
 } as const;
 
 export type Breakpoint = keyof typeof breakpoints;
@@ -16,11 +16,21 @@ export type Breakpoint = keyof typeof breakpoints;
  * @returns Current breakpoint
  */
 export function getBreakpoint(width: number): Breakpoint {
-  if (width >= breakpoints["2xl"]) return "2xl";
-  if (width >= breakpoints.xl) return "xl";
-  if (width >= breakpoints.lg) return "lg";
-  if (width >= breakpoints.md) return "md";
-  if (width >= breakpoints.sm) return "sm";
+  if (width >= breakpoints["2xl"]) {
+    return "2xl";
+  }
+  if (width >= breakpoints.xl) {
+    return "xl";
+  }
+  if (width >= breakpoints.lg) {
+    return "lg";
+  }
+  if (width >= breakpoints.md) {
+    return "md";
+  }
+  if (width >= breakpoints.sm) {
+    return "sm";
+  }
   return "sm";
 }
 

@@ -1,272 +1,456 @@
 import clsx from "clsx";
 import { MousePointer, Palette, SquareArrowUpRight } from "lucide-react";
-import React, { useRef } from "react";
-import { CursorTooltip } from "@/components/CursorTooltip";
-import { useFusionTypesFromPokemon } from "@/hooks/useFusionTypes";
-import { usePreferredVariantState, useSpriteCredits } from "@/hooks/useSprite";
+import type React from "react";
+import { useRef } from "react";
+import { CursorTooltip } from "@/components/cursor-tooltip";
+import { useFusionTypesFromPokemon } from "@/hooks/use-fusion-types";
+import { usePreferredVariantState, useSpriteCredits } from "@/hooks/use-sprite";
 import { getSpriteId } from "@/lib/sprites";
 import type { PokemonOptionType } from "@/loaders/pokemon";
-import { formatArtistCredits } from "@/utils/formatCredits";
-import { TypePills } from "../TypePills";
-import { ArtworkVariantButton } from "./ArtworkVariantButton";
-import { FusionSprite, type FusionSpriteHandle } from "./FusionSprite";
-import { PokemonContextMenu } from "./PokemonContextMenu";
-import { getSummaryCardDisplay } from "./summaryCardModel";
+import { formatArtistCredits } from "@/utils/format-credits";
+import { TypePills } from "../type-pills";
+import { ArtworkVariantButton } from "./artwork-variant-button";
+import { FusionSprite, type FusionSpriteHandle } from "./fusion-sprite";
+import { PokemonContextMenu } from "./pokemon-context-menu";
+import { getSummaryCardDisplay } from "./summary-card-model";
 
 interface SummaryCardProps {
-  headPokemon?: PokemonOptionType | null;
   bodyPokemon?: PokemonOptionType | null;
+  headPokemon?: PokemonOptionType | null;
   isFusion?: boolean;
-  shouldLoad?: boolean;
-  nickname?: string; // Optional nickname to override the Pokémon's existing nickname
-  locationId?: string;
-  showStatusActions?: boolean; // Whether to show status-changing actions in context menu
   isTeamMember?: boolean; // Whether this is for team member selection (bypasses encounter logic)
+  locationId?: string;
+  nickname?: string; // Optional nickname to override the Pokémon's existing nickname
   ref?: React.Ref<FusionSpriteHandle>;
+  shouldLoad?: boolean;
+  showStatusActions?: boolean; // Whether to show status-changing actions in context menu
 }
 
-const SummaryCard = React.forwardRef<FusionSpriteHandle, SummaryCardProps>(
-  (
-    {
-      headPokemon,
-      bodyPokemon,
-      isFusion = false,
-      shouldLoad = true,
-      nickname,
-      locationId = "preview",
-      showStatusActions = true,
-      isTeamMember = false,
-    },
-    ref,
-  ) => {
-    const spriteRef = useRef<FusionSpriteHandle | null>(null);
-
-    const effectiveHeadPokemon = headPokemon;
-    const effectiveBodyPokemon = bodyPokemon;
-    const effectiveIsFusion = isFusion;
-    const { displayPokemon, eitherPokemonIsEgg, isDeceased, link, name } =
-      getSummaryCardDisplay({
-        headPokemon: effectiveHeadPokemon,
-        bodyPokemon: effectiveBodyPokemon,
-        isFusion: effectiveIsFusion,
-        isTeamMember,
-        nickname,
-      });
-
-    // Preload credits for the artwork variants when they exist
-    useSpriteCredits(
-      displayPokemon.head?.id,
-      displayPokemon.body?.id,
-      shouldLoad && !eitherPokemonIsEgg,
-    );
-
-    // Get sprite credits and types for tooltip (using displayPokemon values)
-    const { variant: preferredVariant } = usePreferredVariantState(
-      displayPokemon.head?.id ?? null,
-      displayPokemon.body?.id ?? null,
-    );
-    const tooltipSpriteId = getSpriteId(
-      displayPokemon.head?.id,
-      displayPokemon.body?.id,
-    );
-    const variantSpriteId =
-      tooltipSpriteId != null
-        ? tooltipSpriteId + (preferredVariant ?? "")
-        : undefined;
-    const { data: tooltipCredits } = useSpriteCredits(
-      displayPokemon.head?.id,
-      displayPokemon.body?.id,
-      shouldLoad && !eitherPokemonIsEgg,
-    );
-    const { primary, secondary } = useFusionTypesFromPokemon(
-      displayPokemon.head,
-      displayPokemon.body,
-      effectiveIsFusion,
-    );
-    const credit =
-      eitherPokemonIsEgg || variantSpriteId == null
-        ? undefined
-        : (() => {
-            const credits = tooltipCredits?.[variantSpriteId];
-            return credits && Object.keys(credits).length > 0
-              ? formatArtistCredits(credits)
-              : undefined;
-          })();
-
-    // If no Pokémon are provided and no encounter data exists, don't render
-    if (!effectiveHeadPokemon && !effectiveBodyPokemon) {
-      return null;
-    }
-
-    const head = displayPokemon.head;
-    const body = displayPokemon.body;
-
-    const SpriteWrapper = eitherPokemonIsEgg ? "div" : "a";
-    const spriteWrapperProps = eitherPokemonIsEgg
-      ? {
-          className: "group/fusion focus:outline-none",
-          draggable: false,
-        }
-      : {
-          href: link,
-          target: "_blank",
-          rel: "noopener noreferrer",
-          className: "group/fusion focus:outline-none relative",
-          draggable: false,
-        };
-
-    return (
-      <PokemonContextMenu
-        locationId={locationId}
-        encounterData={{
-          head: effectiveHeadPokemon,
-          body: effectiveBodyPokemon,
-          isFusion: effectiveIsFusion,
-        }}
-        shouldLoad={shouldLoad}
-        showStatusActions={showStatusActions}
-      >
-        <div className="flex flex-col items-center justify-center relative">
-          <div
-            className={clsx(
-              "size-22 absolute -translate-y-2 rounded-lg opacity-30 border border-gray-200 dark:border-gray-400 ",
-              {
-                "text-rose-200 dark:text-red-700 dark:mix-blend-color-dodge opacity-90 dark:border-red-800":
-                  isDeceased,
-                "dark:mix-blend-soft-light text-white": !isDeceased,
-              },
-            )}
-            style={{
-              background: `repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)`,
-            }}
-          />
-          <SpriteWrapper {...spriteWrapperProps}>
-            <CursorTooltip
-              delay={500}
-              content={
-                credit ? (
-                  <div className="min-w-44 max-w-[22rem]">
-                    <div className="flex py-0.5">
-                      <TypePills primary={primary} secondary={secondary} />
-                    </div>
-                    <div className="my-2 flex">
-                      <div className="inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400">
-                        <Palette className="size-3" />
-                        <span className="opacity-80">by</span>
-                        <span className="truncate max-w-[14rem]" title={credit}>
-                          {credit}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="w-full h-px bg-gray-200 dark:bg-gray-700 my-1" />
-                    <div className="flex items-center text-xs gap-2">
-                      <div className="flex items-center gap-1">
-                        <div className="flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200">
-                          <MousePointer className="size-2.5" />
-                          <span className="font-medium text-xs">L</span>
-                        </div>
-                        <span className="text-gray-600 dark:text-gray-300 text-xs">
-                          Pokédex
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200">
-                          <MousePointer className="size-2.5" />
-                          <span className="font-medium text-xs">R</span>
-                        </div>
-                        <span className="text-gray-600 dark:text-gray-300 text-xs">
-                          Options
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="min-w-44 max-w-[22rem]">
-                    <div className="my-2 flex">
-                      <div className="inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400">
-                        <span className="opacity-80">Pokémon sprite</span>
-                      </div>
-                    </div>
-                    <div className="w-full h-px bg-gray-200 dark:bg-gray-700 my-1" />
-                    <div className="flex items-center text-xs gap-2">
-                      <div className="flex items-center gap-1">
-                        <div className="flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200">
-                          <span className="font-medium text-xs">L</span>
-                        </div>
-                        <span className="text-gray-600 dark:text-gray-300 text-xs">
-                          Pokédex
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="flex items-center gap-0.5 px-1 py-px bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-200">
-                          <span className="font-medium text-xs">R</span>
-                        </div>
-                        <span className="text-gray-600 dark:text-gray-300 text-xs">
-                          Options
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )
-              }
-            >
-              <div>
-                <FusionSprite
-                  ref={ref || spriteRef}
-                  headPokemon={head}
-                  bodyPokemon={body}
-                  isFusion={effectiveIsFusion}
-                  shouldLoad={shouldLoad}
-                />
-              </div>
-            </CursorTooltip>
-
-            {!eitherPokemonIsEgg && (
-              <CursorTooltip
-                delay={1000}
-                content={
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm">
-                      Open Pokédex entry in new tab
-                    </span>
-                    <span className="text-xs text-gray-400">{link}</span>
-                  </div>
-                }
-              >
-                <div
-                  className={clsx(
-                    "absolute -top-4 -right-2 text-blue-400 dark:text-blue-300 z-10 bg-gray-200 dark:bg-gray-800 rounded-sm opacity-0",
-                    "group-focus-visible/fusion:opacity-100 group-hover/fusion:opacity-100 transition-opacity duration-200",
-                    "group-focus-visible/fusion:ring-1 group-focus-visible/fusion:ring-blue-400",
-                  )}
-                >
-                  <SquareArrowUpRight className="size-4" />
-                </div>
-              </CursorTooltip>
-            )}
-          </SpriteWrapper>
-          {eitherPokemonIsEgg ? null : (
-            <ArtworkVariantButton
-              key={`${effectiveHeadPokemon?.id}-${effectiveBodyPokemon?.id}`}
-              className="absolute bottom-0 right-1/2 -translate-x-6 z-10"
-              headId={effectiveHeadPokemon?.id}
-              bodyId={effectiveBodyPokemon?.id}
-              isFusion={effectiveIsFusion}
-              shouldLoad={shouldLoad}
-            />
-          )}
-          {name && (
-            <div className="z-5 p-0.5 text-center absolute bottom-0 translate-y-8.5 rounded-sm">
-              <span className="text-md dark:font-normal font-ds truncate max-w-full block px-1 rounded text-gray-900 dark:text-white dark:pixel-shadow-black tracking-[0.0025em] pixel-shadow-gray-300">
-                {name}
-              </span>
-            </div>
-          )}
+function SpriteTooltipContent({
+  credit,
+  primary,
+  secondary,
+}: {
+  credit: string | undefined;
+  primary: ReturnType<typeof useFusionTypesFromPokemon>["primary"];
+  secondary: ReturnType<typeof useFusionTypesFromPokemon>["secondary"];
+}) {
+  const shortcutHint = (showMousePointer: boolean) => (
+    <div className="flex items-center gap-2 text-xs">
+      <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 rounded border border-gray-200 bg-gray-50 px-1 py-px text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
+          {showMousePointer ? <MousePointer className="size-2.5" /> : null}
+          <span className="font-medium text-xs">L</span>
         </div>
-      </PokemonContextMenu>
+        <span className="text-gray-600 text-xs dark:text-gray-300">
+          Pokédex
+        </span>
+      </div>
+      <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 rounded border border-gray-200 bg-gray-50 px-1 py-px text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
+          {showMousePointer ? <MousePointer className="size-2.5" /> : null}
+          <span className="font-medium text-xs">R</span>
+        </div>
+        <span className="text-gray-600 text-xs dark:text-gray-300">
+          Options
+        </span>
+      </div>
+    </div>
+  );
+
+  if (!credit) {
+    return (
+      <div className="min-w-44 max-w-[22rem]">
+        <div className="my-2 flex">
+          <div className="inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400">
+            <span className="opacity-80">Pokémon sprite</span>
+          </div>
+        </div>
+        <div className="my-1 h-px w-full bg-gray-200 dark:bg-gray-700" />
+        {shortcutHint(false)}
+      </div>
     );
-  },
-);
+  }
+
+  return (
+    <div className="min-w-44 max-w-[22rem]">
+      <div className="flex py-0.5">
+        <TypePills primary={primary} secondary={secondary} />
+      </div>
+      <div className="my-2 flex">
+        <div className="inline-flex items-center gap-1.5 text-[11px] text-gray-700 dark:text-gray-400">
+          <Palette className="size-3" />
+          <span className="opacity-80">by</span>
+          <span className="max-w-[14rem] truncate" title={credit}>
+            {credit}
+          </span>
+        </div>
+      </div>
+      <div className="my-1 h-px w-full bg-gray-200 dark:bg-gray-700" />
+      {shortcutHint(true)}
+    </div>
+  );
+}
+
+interface SummaryCardContentProps {
+  bodyPokemon: PokemonOptionType | null | undefined;
+  credit: string | undefined;
+  displayPokemon: ReturnType<typeof getSummaryCardDisplay>["displayPokemon"];
+  eitherPokemonIsEgg: boolean;
+  headPokemon: PokemonOptionType | null | undefined;
+  isDeceased: boolean;
+  isFusion: boolean;
+  link: string;
+  locationId: string;
+  name: string | undefined;
+  primary: ReturnType<typeof useFusionTypesFromPokemon>["primary"];
+  ref: React.Ref<FusionSpriteHandle> | undefined;
+  secondary: ReturnType<typeof useFusionTypesFromPokemon>["secondary"];
+  shouldLoad: boolean;
+  showStatusActions: boolean;
+  spriteRef: React.RefObject<FusionSpriteHandle | null>;
+}
+
+function SummaryCardContent(props: SummaryCardContentProps) {
+  return (
+    <PokemonContextMenu
+      encounterData={{
+        body: props.bodyPokemon,
+        head: props.headPokemon,
+        isFusion: props.isFusion,
+      }}
+      locationId={props.locationId}
+      shouldLoad={props.shouldLoad}
+      showStatusActions={props.showStatusActions}
+    >
+      <SummaryCardSprite {...props} />
+    </PokemonContextMenu>
+  );
+}
+
+function SummaryCardSprite({
+  bodyPokemon,
+  credit,
+  displayPokemon,
+  eitherPokemonIsEgg,
+  headPokemon,
+  isDeceased,
+  isFusion,
+  link,
+  name,
+  primary,
+  ref,
+  secondary,
+  shouldLoad,
+  spriteRef,
+}: SummaryCardContentProps) {
+  return (
+    <div className="relative flex flex-col items-center justify-center">
+      <PokemonSpriteBackground isDeceased={isDeceased} />
+      <PokemonSpriteLink isEgg={eitherPokemonIsEgg} link={link}>
+        <SpriteDetails
+          credit={credit}
+          displayPokemon={displayPokemon}
+          isEgg={eitherPokemonIsEgg}
+          isFusion={isFusion}
+          link={link}
+          primary={primary}
+          ref={ref || spriteRef}
+          secondary={secondary}
+          shouldLoad={shouldLoad}
+        />
+      </PokemonSpriteLink>
+      {eitherPokemonIsEgg ? null : (
+        <ArtworkVariantButton
+          bodyId={bodyPokemon?.id}
+          className="absolute right-1/2 bottom-0 z-10 -translate-x-6"
+          headId={headPokemon?.id}
+          isFusion={isFusion}
+          key={`${headPokemon?.id}-${bodyPokemon?.id}`}
+          shouldLoad={shouldLoad}
+        />
+      )}
+      <SpriteName name={name} />
+    </div>
+  );
+}
+
+function PokemonSpriteBackground({ isDeceased }: { isDeceased: boolean }) {
+  return (
+    <div
+      className={clsx(
+        "absolute size-22 -translate-y-2 rounded-lg border border-gray-200 opacity-30 dark:border-gray-400",
+        {
+          "text-rose-200 opacity-90 dark:border-red-800 dark:text-red-700 dark:mix-blend-color-dodge":
+            isDeceased,
+          "text-white dark:mix-blend-soft-light": !isDeceased,
+        },
+      )}
+      style={{
+        background:
+          "repeating-linear-gradient(currentColor 0px, currentColor 2px, rgba(154, 163, 175, 0.3) 1px, rgba(156, 163, 175, 0.3) 3px)",
+      }}
+    />
+  );
+}
+
+function PokemonSpriteLink({
+  children,
+  isEgg,
+  link,
+}: {
+  children: React.ReactNode;
+  isEgg: boolean;
+  link: string;
+}) {
+  if (isEgg) {
+    return (
+      <div className="group/fusion focus:outline-none" draggable={false}>
+        {children}
+      </div>
+    );
+  }
+
+  return (
+    <a
+      className="group/fusion relative focus:outline-none"
+      draggable={false}
+      href={link}
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      {children}
+    </a>
+  );
+}
+
+interface SpriteDetailsProps {
+  credit: string | undefined;
+  displayPokemon: ReturnType<typeof getSummaryCardDisplay>["displayPokemon"];
+  isEgg: boolean;
+  isFusion: boolean;
+  link: string;
+  primary: ReturnType<typeof useFusionTypesFromPokemon>["primary"];
+  ref:
+    | React.Ref<FusionSpriteHandle>
+    | React.RefObject<FusionSpriteHandle | null>;
+  secondary: ReturnType<typeof useFusionTypesFromPokemon>["secondary"];
+  shouldLoad: boolean;
+}
+
+function SpriteDetails({
+  credit,
+  displayPokemon,
+  isEgg,
+  isFusion,
+  link,
+  primary,
+  ref,
+  secondary,
+  shouldLoad,
+}: SpriteDetailsProps) {
+  return (
+    <>
+      <CursorTooltip
+        content={
+          <SpriteTooltipContent
+            credit={credit}
+            primary={primary}
+            secondary={secondary}
+          />
+        }
+        delay={500}
+      >
+        <div>
+          <FusionSprite
+            bodyPokemon={displayPokemon.body}
+            headPokemon={displayPokemon.head}
+            isFusion={isFusion}
+            ref={ref}
+            shouldLoad={shouldLoad}
+          />
+        </div>
+      </CursorTooltip>
+      {isEgg ? null : <PokedexLinkIndicator link={link} />}
+    </>
+  );
+}
+
+function PokedexLinkIndicator({ link }: { link: string }) {
+  return (
+    <CursorTooltip
+      content={
+        <div className="flex flex-col gap-1">
+          <span className="text-sm">Open Pokédex entry in new tab</span>
+          <span className="text-gray-400 text-xs">{link}</span>
+        </div>
+      }
+      delay={1000}
+    >
+      <div
+        className={clsx(
+          "absolute -top-4 -right-2 z-10 rounded-sm bg-gray-200 text-blue-400 opacity-0 dark:bg-gray-800 dark:text-blue-300",
+          "transition-opacity duration-200 group-hover/fusion:opacity-100 group-focus-visible/fusion:opacity-100",
+          "group-focus-visible/fusion:ring-1 group-focus-visible/fusion:ring-blue-400",
+        )}
+      >
+        <SquareArrowUpRight className="size-4" />
+      </div>
+    </CursorTooltip>
+  );
+}
+
+function SpriteName({ name }: { name: string | undefined }) {
+  if (!name) {
+    return null;
+  }
+
+  return (
+    <div className="absolute bottom-0 z-5 translate-y-8.5 rounded-sm p-0.5 text-center">
+      <span className="dark:pixel-shadow-black pixel-shadow-gray-300 block max-w-full truncate rounded px-1 font-ds text-gray-900 text-md tracking-[0.0025em] dark:font-normal dark:text-white">
+        {name}
+      </span>
+    </div>
+  );
+}
+
+function getSpriteCredit(
+  isEgg: boolean,
+  creditsBySpriteId: ReturnType<typeof useSpriteCredits>["data"],
+  spriteId: string,
+) {
+  if (isEgg) {
+    return;
+  }
+
+  const credits = creditsBySpriteId?.[spriteId];
+  if (!credits || Object.keys(credits).length === 0) {
+    return;
+  }
+
+  return formatArtistCredits(credits);
+}
+
+function useSummaryCardData({
+  bodyPokemon,
+  headPokemon,
+  isFusion = false,
+  isTeamMember = false,
+  nickname,
+  shouldLoad = true,
+}: Pick<
+  SummaryCardProps,
+  | "bodyPokemon"
+  | "headPokemon"
+  | "isFusion"
+  | "isTeamMember"
+  | "nickname"
+  | "shouldLoad"
+>) {
+  const { displayPokemon, eitherPokemonIsEgg, isDeceased, link, name } =
+    getSummaryCardDisplay({
+      bodyPokemon,
+      headPokemon,
+      isFusion,
+      isTeamMember,
+      nickname,
+    });
+  const headId = displayPokemon.head ? displayPokemon.head.id : null;
+  const bodyId = displayPokemon.body ? displayPokemon.body.id : null;
+  const shouldLoadCredits = shouldLoad && !eitherPokemonIsEgg;
+
+  // Preload credits for the artwork variants when they exist
+  useSpriteCredits(headId, bodyId, shouldLoadCredits);
+
+  // Get sprite credits and types for tooltip (using displayPokemon values)
+  const { variant: preferredVariant } = usePreferredVariantState(
+    headId,
+    bodyId,
+  );
+  const tooltipSpriteId = getSpriteId(headId, bodyId);
+  const { data: tooltipCredits } = useSpriteCredits(
+    headId,
+    bodyId,
+    shouldLoadCredits,
+  );
+  const { primary, secondary } = useFusionTypesFromPokemon(
+    displayPokemon.head,
+    displayPokemon.body,
+    isFusion,
+  );
+
+  return {
+    credit: getSpriteCredit(
+      eitherPokemonIsEgg,
+      tooltipCredits,
+      tooltipSpriteId + preferredVariant,
+    ),
+    displayPokemon,
+    eitherPokemonIsEgg,
+    isDeceased,
+    link,
+    name,
+    primary,
+    secondary,
+  };
+}
+
+const SummaryCard = ({
+  headPokemon,
+  bodyPokemon,
+  isFusion = false,
+  shouldLoad = true,
+  nickname,
+  locationId = "preview",
+  showStatusActions = true,
+  isTeamMember = false,
+  ref,
+}: SummaryCardProps) => {
+  const spriteRef = useRef<FusionSpriteHandle | null>(null);
+  const {
+    credit,
+    displayPokemon,
+    eitherPokemonIsEgg,
+    isDeceased,
+    link,
+    name,
+    primary,
+    secondary,
+  } = useSummaryCardData({
+    bodyPokemon,
+    headPokemon,
+    isFusion,
+    isTeamMember,
+    nickname,
+    shouldLoad,
+  });
+
+  // If no Pokémon are provided and no encounter data exists, don't render
+  if (!(headPokemon || bodyPokemon)) {
+    return null;
+  }
+
+  return (
+    <SummaryCardContent
+      bodyPokemon={bodyPokemon}
+      credit={credit}
+      displayPokemon={displayPokemon}
+      eitherPokemonIsEgg={eitherPokemonIsEgg}
+      headPokemon={headPokemon}
+      isDeceased={isDeceased}
+      isFusion={isFusion}
+      link={link}
+      locationId={locationId}
+      name={name}
+      primary={primary}
+      ref={ref}
+      secondary={secondary}
+      shouldLoad={shouldLoad}
+      showStatusActions={showStatusActions}
+      spriteRef={spriteRef}
+    />
+  );
+};
 
 SummaryCard.displayName = "SummaryCard";
 

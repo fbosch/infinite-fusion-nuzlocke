@@ -5,14 +5,14 @@ import { type GameMode, isGameMode, type Playthrough } from "./types";
  * Migration data type for playthrough migrations
  */
 interface MigrationData {
-  id?: string;
-  name?: string;
+  createdAt?: number;
   customLocations?: unknown[];
   encounters?: Record<string, unknown>;
-  team?: unknown;
   gameMode?: GameMode;
+  id?: string;
+  name?: string;
   remixMode?: boolean;
-  createdAt?: number;
+  team?: unknown;
   updatedAt?: number;
   version?: string;
   [key: string]: unknown;
@@ -39,36 +39,41 @@ const migrateRemixMode = (data: MigrationData): MigrationData => {
 /**
  * Ensure team field exists with default empty team
  */
+const createEmptyTeamMembers = () => new Array(6).fill(null);
+
+const normalizeTeamMembers = (members: unknown) => {
+  if (members === null || typeof members !== "object") {
+    return;
+  }
+
+  const fixedMembers = createEmptyTeamMembers();
+  const entries = Array.isArray(members)
+    ? members.entries()
+    : Object.entries(members).map(([key, member]) => [
+        Number.parseInt(key, 10),
+        member,
+      ]);
+
+  for (const [index, member] of entries) {
+    if (index >= 0 && index < fixedMembers.length && member !== null) {
+      fixedMembers[index] = member;
+    }
+  }
+
+  return fixedMembers;
+};
+
 const migrateTeamField = (data: MigrationData): MigrationData => {
-  let team = data.team;
+  let { team } = data;
 
   if (!team) {
-    // No team field exists, create default
-    team = { members: Array.from({ length: 6 }, () => null) };
-  } else if (team && typeof team === "object" && "members" in team) {
-    // Team exists, ensure it has the right structure
-    const members = (team as Record<string, unknown>).members;
-    if (Array.isArray(members)) {
-      // Ensure it's the right length and has null values for empty slots
-      const fixedMembers = new Array(6).fill(null);
-      members.forEach((member, index) => {
-        if (index < 6 && member !== null) {
-          fixedMembers[index] = member;
-        }
-      });
-      team = { members: fixedMembers };
-    } else if (typeof members === "object" && members !== null) {
-      // Members is a record/object, convert to array format
-      const fixedMembers = new Array(6).fill(null);
-      Object.entries(members as Record<string, unknown>).forEach(
-        ([key, member]) => {
-          const index = parseInt(key, 10);
-          if (index >= 0 && index < 6 && member !== null) {
-            fixedMembers[index] = member;
-          }
-        },
-      );
-      team = { members: fixedMembers };
+    team = { members: createEmptyTeamMembers() };
+  } else if (typeof team === "object" && "members" in team) {
+    const members = normalizeTeamMembers(
+      (team as Record<string, unknown>).members,
+    );
+    if (members) {
+      team = { members };
     }
   }
 
@@ -89,8 +94,7 @@ const migrateVersion = (data: MigrationData): MigrationData => {
  * Clean up old remixMode field
  */
 const cleanupRemixMode = (data: MigrationData): MigrationData => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { remixMode, ...cleanData } = data;
+  const { remixMode: _remixMode, ...cleanData } = data;
   return cleanData;
 };
 
@@ -100,7 +104,7 @@ const cleanupRemixMode = (data: MigrationData): MigrationData => {
 const migrateTeamMemberSchema = (data: MigrationData): MigrationData => {
   if (data.team && typeof data.team === "object" && "members" in data.team) {
     const team = data.team as Record<string, unknown>;
-    const members = team.members;
+    const { members } = team;
 
     if (Array.isArray(members)) {
       const migratedMembers = members.map((member: unknown) => {
@@ -110,8 +114,8 @@ const migrateTeamMemberSchema = (data: MigrationData): MigrationData => {
             // Convert to new format - for now, we'll set empty UIDs
             // since we can't reliably reconstruct the old UIDs
             return {
-              headPokemonUid: "",
               bodyPokemonUid: "",
+              headPokemonUid: "",
             };
           }
           // Already in new format
@@ -132,10 +136,10 @@ const migrateTeamMemberSchema = (data: MigrationData): MigrationData => {
   return data;
 };
 
-type MigratablePokemon = {
+interface MigratablePokemon {
   originalReceivalStatus?: string;
   status?: string;
-};
+}
 
 const normalizePokemonOriginalReceivalStatus = (
   pokemon: MigratablePokemon | null | undefined,
@@ -184,8 +188,8 @@ const migrateOriginalReceivalStatus = (data: MigrationData): MigrationData => {
             locationId,
             {
               ...encounter,
-              head: normalizePokemonOriginalReceivalStatus(encounter.head),
               body: normalizePokemonOriginalReceivalStatus(encounter.body),
+              head: normalizePokemonOriginalReceivalStatus(encounter.head),
             },
           ];
         }),
@@ -227,13 +231,13 @@ const migrateRequiredFields = (data: unknown): MigrationData => {
   // Handle completely malformed data
   if (!data || typeof data !== "object") {
     return {
-      id: `playthrough_${now}_${Math.random().toString(36).substr(2, 9)}`,
-      name: "Playthrough",
       createdAt: now,
-      updatedAt: now,
       gameMode: "classic",
-      version: "1.0.0",
+      id: `playthrough_${now}_${Math.random().toString(36).slice(2, 11)}`,
+      name: "Playthrough",
       team: { members: Array.from({ length: 6 }, () => null) },
+      updatedAt: now,
+      version: "1.0.0",
     };
   }
 
@@ -249,7 +253,7 @@ const migrateRequiredFields = (data: unknown): MigrationData => {
       return value;
     }
     if (typeof value === "string") {
-      const parsed = parseInt(value, 10);
+      const parsed = Number.parseInt(value, 10);
       if (!Number.isNaN(parsed) && Number.isFinite(parsed)) {
         return parsed;
       }
@@ -259,16 +263,16 @@ const migrateRequiredFields = (data: unknown): MigrationData => {
 
   return {
     ...data,
+    createdAt: toNumber(migrationData.createdAt, now),
+    gameMode: migrationData.gameMode ?? "classic",
     id:
       typeof migrationData.id === "string" && migrationData.id.length > 0
         ? migrationData.id
-        : `playthrough_${now}_${Math.random().toString(36).substr(2, 9)}`,
+        : `playthrough_${now}_${Math.random().toString(36).slice(2, 11)}`,
     name:
       typeof migrationData.name === "string" && migrationData.name.length > 0
         ? migrationData.name
         : "Playthrough",
-    gameMode: migrationData.gameMode ?? "classic",
-    createdAt: toNumber(migrationData.createdAt, now),
     updatedAt: toNumber(migrationData.updatedAt, now),
   };
 };
@@ -296,7 +300,9 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 // fallow-ignore-next-line complexity -- Validates every persisted Pokemon option field before state migration.
 const isPokemonOption = (value: unknown): boolean => {
-  if (isRecord(value) === false) return false;
+  if (isRecord(value) === false) {
+    return false;
+  }
 
   const validStatus =
     value.status === undefined ||
@@ -329,7 +335,7 @@ const isPokemonOption = (value: unknown): boolean => {
 // fallow-ignore-next-line complexity -- Validates the complete persisted run boundary before canonical state installation.
 const isValidPersistedPlaythrough = (
   playthrough: MigrationData,
-): playthrough is Playthrough => {
+): playthrough is Playthrough & MigrationData => {
   if (
     typeof playthrough.id !== "string" ||
     typeof playthrough.name !== "string" ||

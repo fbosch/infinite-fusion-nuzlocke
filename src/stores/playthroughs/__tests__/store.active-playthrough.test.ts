@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { getActivePlaythrough } from "../playthrough-state";
 import {
   createPlaythrough,
   deletePlaythrough,
-  getActivePlaythrough,
   playthroughsStore,
   setActivePlaythrough,
 } from "../store";

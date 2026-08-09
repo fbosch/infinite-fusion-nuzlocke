@@ -9,7 +9,6 @@ export const EncounterTypeSchema = z.enum(ENCOUNTER_TYPES);
 
 export const RouteEncountersArraySchema = z.array(
   z.object({
-    routeName: z.string().min(1),
     pokemon: z.array(
       z.object({
         id: z
@@ -19,5 +18,6 @@ export const RouteEncountersArraySchema = z.array(
         source: z.enum(EncounterSource),
       }),
     ),
+    routeName: z.string().min(1),
   }),
 ) satisfies z.ZodType<RouteEncounter[]>;

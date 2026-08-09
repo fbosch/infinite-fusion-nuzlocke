@@ -1,6 +1,8 @@
 // Import mocks first (must be at top level for Vitest hoisting)
 import "./mocks";
 
+import { playthroughActions } from "@/stores/playthroughs";
+import { playthroughsStore } from "@/stores/playthroughs/store";
 // Import shared setup and utilities
 import {
   beforeEach,
@@ -8,8 +10,6 @@ import {
   describe,
   expect,
   it,
-  playthroughActions,
-  playthroughsStore,
   setupPlaythroughTest,
 } from "./setup";
 
@@ -32,7 +32,7 @@ describe("Playthroughs Store - Edge Cases and Error Handling", () => {
       // No encounters should be created
       const encounters = playthroughActions.getEncounters();
       expect(encounters).toBeDefined();
-      expect(Object.keys(encounters!)).toHaveLength(0);
+      expect(Object.keys(encounters ?? {})).toHaveLength(0);
     });
 
     it("should preserve encounter structure when performing multiple operations", async () => {

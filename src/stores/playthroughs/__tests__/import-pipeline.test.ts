@@ -1,19 +1,21 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { prepareImportedPlaythrough } from "../importPipeline";
+import { prepareImportedPlaythrough } from "../import-pipeline";
+
+const playthroughIdPattern = /^playthrough_/;
 
 const validImportData = (id = "playthrough_existing") => ({
-  version: "1.0.0",
   exportedAt: new Date(0).toISOString(),
   playthrough: {
+    createdAt: 1,
+    encounters: {},
+    gameMode: "classic",
     id,
     name: "Imported Run",
-    gameMode: "classic",
-    version: "1.0.0",
-    createdAt: 1,
-    updatedAt: 2,
-    encounters: {},
     team: { members: [null, null, null, null, null, null] },
+    updatedAt: 2,
+    version: "1.0.0",
   },
+  version: "1.0.0",
 });
 
 describe("playthrough import pipeline", () => {
@@ -27,13 +29,13 @@ describe("playthrough import pipeline", () => {
     const playthrough = await prepareImportedPlaythrough(validImportData(), []);
 
     expect(playthrough).toMatchObject({
-      id: "playthrough_existing",
-      name: "Imported Run",
-      gameMode: "classic",
-      updatedAt: 1234,
       customLocations: [],
       encounters: {},
+      gameMode: "classic",
+      id: "playthrough_existing",
+      name: "Imported Run",
       team: { members: [null, null, null, null, null, null] },
+      updatedAt: 1234,
     });
   });
 
@@ -43,7 +45,7 @@ describe("playthrough import pipeline", () => {
     ]);
 
     expect(playthrough.id).not.toBe("playthrough_existing");
-    expect(playthrough.id).toMatch(/^playthrough_/);
+    expect(playthrough.id).toMatch(playthroughIdPattern);
   });
 
   it("throws a validation error for invalid import data", async () => {
