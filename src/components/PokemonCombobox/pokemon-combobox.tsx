@@ -104,7 +104,7 @@ export const PokemonCombobox = ({
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
   });
-  const { inputRef, optionsRef, setInputReference, setOptionsReference } =
+  const { inputRef, optionsElement, setInputReference, setOptionsReference } =
     useComboboxReferences({ forwardedRef: ref, refs, update });
 
   const {
@@ -154,7 +154,7 @@ export const PokemonCombobox = ({
     enabled: shouldVirtualize,
     estimateSize: () => 56,
     gap: 4,
-    getScrollElement: () => optionsRef.current,
+    getScrollElement: () => optionsElement,
     overscan: 10,
     scrollPaddingEnd: 16,
     scrollPaddingStart: 16,
