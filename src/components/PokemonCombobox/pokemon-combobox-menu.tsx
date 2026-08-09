@@ -2,7 +2,7 @@ import { FloatingPortal } from "@floating-ui/react";
 import { ComboboxOptions } from "@headlessui/react";
 import clsx from "clsx";
 import type React from "react";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 interface PokemonComboboxMenuProps {
   floatingStyles: React.CSSProperties;
@@ -30,10 +30,13 @@ export function PokemonComboboxMenu({
   const setMenuReference = useCallback(
     (element: HTMLDivElement | null) => {
       setOptionsReference(element);
-      virtualizer.measure();
     },
-    [setOptionsReference, virtualizer],
+    [setOptionsReference],
   );
+
+  useEffect(() => {
+    virtualizer.measure();
+  }, [virtualizer.measure]);
 
   return (
     <FloatingPortal id="location-table">

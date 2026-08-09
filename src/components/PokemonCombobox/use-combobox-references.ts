@@ -3,13 +3,15 @@ import type React from "react";
 import { useCallback, useRef } from "react";
 
 interface UseComboboxReferencesProps {
-  floating: Pick<ReturnType<typeof useFloating>, "refs" | "update">;
   forwardedRef: React.RefObject<HTMLInputElement | null> | undefined;
+  refs: ReturnType<typeof useFloating>["refs"];
+  update: ReturnType<typeof useFloating>["update"];
 }
 
 export function useComboboxReferences({
-  floating,
   forwardedRef,
+  refs,
+  update,
 }: UseComboboxReferencesProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const optionsRef = useRef<HTMLDivElement | null>(null);
@@ -20,13 +22,13 @@ export function useComboboxReferences({
       }
 
       inputRef.current = element;
-      floating.refs.setReference(element);
-      floating.update();
+      refs.setReference(element);
+      update();
       if (forwardedRef && "current" in forwardedRef) {
         forwardedRef.current = element;
       }
     },
-    [floating, forwardedRef],
+    [forwardedRef, refs, update],
   );
   const setOptionsReference = useCallback(
     (element: HTMLDivElement | null) => {
@@ -35,9 +37,9 @@ export function useComboboxReferences({
       }
 
       optionsRef.current = element;
-      floating.refs.setFloating(element);
+      refs.setFloating(element);
     },
-    [floating],
+    [refs],
   );
 
   return { inputRef, optionsRef, setInputReference, setOptionsReference };

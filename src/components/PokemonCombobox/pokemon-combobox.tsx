@@ -105,7 +105,7 @@ export const PokemonCombobox = ({
     whileElementsMounted: autoUpdate,
   });
   const { inputRef, optionsRef, setInputReference, setOptionsReference } =
-    useComboboxReferences({ floating: { refs, update }, forwardedRef: ref });
+    useComboboxReferences({ forwardedRef: ref, refs, update });
 
   const {
     finalOptions,
