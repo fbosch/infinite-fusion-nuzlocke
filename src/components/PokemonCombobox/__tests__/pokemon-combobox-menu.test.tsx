@@ -15,9 +15,14 @@ vi.mock("@headlessui/react", () => ({
 }));
 
 describe("PokemonComboboxMenu", () => {
-  it("measures the virtualized menu after its scroll container mounts", () => {
+  it("attaches the virtualizer scroll container without imperatively measuring it", () => {
     const measure = vi.fn();
     const setOptionsReference = vi.fn();
+    const virtualizer = {
+      getTotalSize: () => 5600,
+      isScrolling: false,
+      measure,
+    };
 
     render(
       <PokemonComboboxMenu
@@ -27,7 +32,7 @@ describe("PokemonComboboxMenu", () => {
         placement="bottom-start"
         setOptionsReference={setOptionsReference}
         shouldVirtualize={true}
-        virtualizer={{ getTotalSize: () => 5600, isScrolling: false, measure }}
+        virtualizer={virtualizer}
       />,
     );
 
@@ -35,6 +40,6 @@ describe("PokemonComboboxMenu", () => {
     expect(setOptionsReference).toHaveBeenCalledWith(
       expect.any(HTMLDivElement),
     );
-    expect(measure).toHaveBeenCalledOnce();
+    expect(measure).not.toHaveBeenCalled();
   });
 });

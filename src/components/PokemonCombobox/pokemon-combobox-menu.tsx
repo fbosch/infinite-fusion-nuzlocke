@@ -2,7 +2,6 @@ import { FloatingPortal } from "@floating-ui/react";
 import { ComboboxOptions } from "@headlessui/react";
 import clsx from "clsx";
 import type React from "react";
-import { useCallback, useEffect } from "react";
 
 interface PokemonComboboxMenuProps {
   floatingStyles: React.CSSProperties;
@@ -14,7 +13,6 @@ interface PokemonComboboxMenuProps {
   virtualizer: {
     getTotalSize: () => number;
     isScrolling: boolean;
-    measure: () => void;
   };
 }
 
@@ -27,17 +25,6 @@ export function PokemonComboboxMenu({
   shouldVirtualize,
   virtualizer,
 }: PokemonComboboxMenuProps) {
-  const setMenuReference = useCallback(
-    (element: HTMLDivElement | null) => {
-      setOptionsReference(element);
-    },
-    [setOptionsReference],
-  );
-
-  useEffect(() => {
-    virtualizer.measure();
-  }, [virtualizer.measure]);
-
   return (
     <FloatingPortal id="location-table">
       <div
@@ -54,7 +41,7 @@ export function PokemonComboboxMenu({
               placement.startsWith("bottom"),
           },
         )}
-        ref={setMenuReference}
+        ref={setOptionsReference}
         style={{
           ...floatingStyles,
           height: shouldVirtualize ? `${virtualizer.getTotalSize()}px` : "auto",
