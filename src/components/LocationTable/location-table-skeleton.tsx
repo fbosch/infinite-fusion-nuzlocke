@@ -4,8 +4,7 @@ import { locationTableColumnWidths } from "./column-widths";
 export default function LocationTableSkeleton() {
   return (
     <div className="overflow-hidden border-gray-200 border-y md:border xl:shadow-sm 2xl:rounded-lg dark:border-gray-700">
-      {/* fallow-ignore-next-line css-token-drift -- Matches the live table viewport constraint. */}
-      <div className="scrollbar-thin relative max-h-[93.5vh] overflow-auto overscroll-x-none">
+      <div className="scrollbar-thin relative max-h-[calc(100dvh-2.5rem)] overflow-auto overscroll-x-none sm:max-h-[93.5vh]">
         <table
           aria-label="Loading locations table"
           className="w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700"

@@ -11,6 +11,7 @@ interface PokemonComboboxInputProps {
   displayValue: (pokemon: PokemonOptionType | null | undefined) => string;
   dragPreview: PokemonOptionType | null;
   hasRoundedEdges: boolean;
+  isCompact: boolean;
   locationId?: string;
   onChange: (value: PokemonOptionType | null) => void;
   onInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -25,16 +26,23 @@ interface PokemonComboboxInputProps {
 const getInputClassName = ({
   dragPreview,
   hasRoundedEdges,
+  isCompact,
   open,
   placement,
   value,
 }: Pick<
   PokemonComboboxInputProps,
-  "dragPreview" | "hasRoundedEdges" | "open" | "placement" | "value"
+  | "dragPreview"
+  | "hasRoundedEdges"
+  | "isCompact"
+  | "open"
+  | "placement"
+  | "value"
 >) =>
   clsx(
     "group/input rounded-t-md rounded-b-none border",
-    "w-full bg-white px-3 py-3.5 text-gray-900 text-sm outline-none focus:outline-none focus-visible:border-blue-500 focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-not-allowed disabled:opacity-50",
+    "w-full bg-white py-3.5 text-gray-900 text-sm outline-none focus:outline-none focus-visible:border-blue-500 focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-not-allowed disabled:opacity-50",
+    isCompact ? "pr-14 pl-3 sm:pr-3" : "px-3",
     "border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400",
     "hover:cursor-pointer focus:cursor-text",
     (value || dragPreview) && "pl-16",
@@ -85,6 +93,7 @@ export function PokemonComboboxInput({
   displayValue,
   dragPreview,
   hasRoundedEdges,
+  isCompact,
   locationId,
   onChange,
   onInputChange,
@@ -102,6 +111,7 @@ export function PokemonComboboxInput({
         className={getInputClassName({
           dragPreview,
           hasRoundedEdges,
+          isCompact,
           open,
           placement,
           value,

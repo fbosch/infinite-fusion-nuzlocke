@@ -668,7 +668,7 @@ function LocationSelector({
       <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
         <DialogPanel
           className={clsx(
-            "max-h-[80vh] w-full max-w-lg space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800",
+            "max-h-[calc(100dvh-2rem)] w-full max-w-lg space-y-4 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 shadow-xl sm:max-h-[80vh] sm:p-6 dark:border-gray-700 dark:bg-gray-800",
             "transition duration-150 ease-out data-closed:scale-98 data-closed:opacity-0",
           )}
           transition
@@ -721,7 +721,7 @@ function LocationSelector({
             />
           </div>
 
-          <ul className="scrollbar-thin h-[46vh] min-h-96 overflow-y-auto rounded-lg border border-gray-200 dark:border-gray-600">
+          <ul className="scrollbar-thin h-[46dvh] min-h-0 overflow-y-auto rounded-lg border border-gray-200 sm:min-h-96 dark:border-gray-600">
             {filteredLocations.length === 0 ? (
               <li className="list-none p-4 text-center text-gray-500 dark:text-gray-400">
                 {searchQuery.trim()

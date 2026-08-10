@@ -1,4 +1,5 @@
 import { flexRender, type Row } from "@tanstack/react-table";
+import clsx from "clsx";
 import { useEffect, useRef } from "react";
 import { match } from "ts-pattern";
 import { addEvolutionListener } from "@/lib/events";
@@ -16,6 +17,7 @@ import { EncounterCell } from "./encounter-cell";
 import ResetEncounterButton from "./reset-encounter-button";
 
 interface LocationTableRowProps {
+  measureElement?: (element: HTMLElement | null) => void;
   row: Row<CombinedLocation>;
   rowIndex?: number;
 }
@@ -43,6 +45,7 @@ const getEffectiveFusionId = ({
 };
 
 export default function LocationTableRow({
+  measureElement,
   row,
   rowIndex,
 }: LocationTableRowProps) {
@@ -114,9 +117,16 @@ export default function LocationTableRow({
   return (
     <tr
       aria-rowindex={resolvedRowIndex + 2}
-      className="group/row h-location-row transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-800/60"
+      className={clsx(
+        "group/row transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-800/60",
+        encounterData.isFusion
+          ? "h-[432px] sm:h-location-row"
+          : "h-[200px] sm:h-location-row",
+      )}
       data-location-id={locationId}
+      data-index={resolvedRowIndex}
       key={row.id}
+      ref={measureElement}
     >
       {visibleCells.map((cell) =>
         match(cell.column.id)
@@ -144,7 +154,7 @@ export default function LocationTableRow({
                 className="whitespace-nowrap p-2 align-top text-gray-900 text-sm dark:text-gray-100"
                 key={cell.id}
               >
-                <div className="flex flex-col items-center justify-center gap-1 opacity-0 transition-opacity duration-200 group-focus-within/row:opacity-100 group-hover/row:opacity-100">
+                <div className="flex flex-col items-center justify-center gap-1 opacity-100 transition-opacity duration-200 sm:opacity-0 sm:group-hover/row:opacity-100 sm:group-focus-within/row:opacity-100">
                   {hasEncounter && (
                     <ResetEncounterButton
                       hasEncounter={hasEncounter}

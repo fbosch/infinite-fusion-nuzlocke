@@ -244,6 +244,7 @@ export default function LocationTable() {
     },
   });
   const {
+    measureElement,
     tableRows,
     virtualPaddingBottom,
     virtualPaddingTop,
@@ -277,9 +278,8 @@ export default function LocationTable() {
   return (
     <div className="overflow-hidden border-gray-200 border-y md:border xl:shadow-sm 2xl:rounded-lg dark:border-gray-700">
       <div
-        className="scrollbar-thin relative overflow-auto overscroll-x-none"
+        className="scrollbar-thin relative max-h-[calc(100dvh-2.5rem)] overflow-auto overscroll-x-none sm:max-h-[93.5vh]"
         ref={tableContainerRef}
-        style={{ maxHeight: "93.5vh" }}
       >
         <table
           aria-label="Locations table"
@@ -319,6 +319,7 @@ export default function LocationTable() {
               return (
                 <LocationTableRow
                   key={row.id}
+                  measureElement={measureElement}
                   row={row}
                   rowIndex={virtualRow.index}
                 />

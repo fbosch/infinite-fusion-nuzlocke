@@ -77,6 +77,9 @@ describe("GitHubEngagementCta", () => {
     expect(issueLink.parentElement?.className).toBe(
       "github-button-control h-7 w-20",
     );
+    expect(starLink.parentElement?.parentElement?.className).toBe(
+      "hidden items-center gap-2 sm:flex",
+    );
   });
 
   it("emits one impression per route when half of the CTA becomes visible", () => {

@@ -102,7 +102,7 @@ function CookieSettingsDialog({
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel
           className={clsx(
-            "w-full max-w-lg rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800",
+            "max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl sm:max-h-none dark:border-gray-700 dark:bg-gray-800",
             "transition duration-150 ease-out data-closed:scale-98 data-closed:opacity-0",
           )}
           transition

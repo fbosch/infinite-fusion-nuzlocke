@@ -57,7 +57,7 @@ export function PokemonComboboxShell({
       >
         {({ open }) => <PokemonComboboxContent {...content} open={open} />}
       </Combobox>
-      <div className="flex">
+      <div className="flex min-w-0 flex-col sm:flex-row">
         <PokemonNicknameInput
           disabled={details.disabled}
           dragPreview={details.dragPreview}

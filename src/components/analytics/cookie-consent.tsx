@@ -228,7 +228,7 @@ export function CookieConsent() {
       {/* Backdrop overlay - only bottom area */}
       <div className="pointer-events-none fixed right-0 bottom-0 left-0 z-40 h-64 bg-gradient-to-t from-gray-800/10 to-transparent dark:from-gray-800/20 dark:to-transparent" />
 
-      <div className="fixed bottom-0 w-full lg:bottom-2 lg:left-1/2 lg:max-w-[1000px] lg:-translate-x-1/2">
+      <div className="fixed bottom-0 max-h-[calc(100dvh-1rem)] w-full overflow-y-auto lg:bottom-2 lg:left-1/2 lg:max-h-none lg:max-w-[1000px] lg:-translate-x-1/2 lg:overflow-visible">
         <div className="pointer-events-auto w-full border-gray-200 border-t bg-white shadow-xl lg:rounded-md lg:border dark:border-gray-700 dark:bg-gray-800">
           {showSettings ? (
             <CookieSettings

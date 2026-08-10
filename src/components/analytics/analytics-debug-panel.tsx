@@ -123,7 +123,7 @@ export function AnalyticsDebugPanel() {
   return (
     <section
       aria-label="Analytics debug panel"
-      className="fixed right-4 bottom-4 z-[60] w-[22rem] rounded-lg border border-gray-300 bg-white p-3 text-gray-900 text-xs shadow-lg"
+      className="fixed right-4 bottom-4 z-[60] w-[calc(100vw-2rem)] max-w-[22rem] rounded-lg border border-gray-300 bg-white p-3 text-gray-900 text-xs shadow-lg"
     >
       <div className="mb-2 flex items-center justify-between">
         <div className="inline-flex items-center gap-2 font-semibold">

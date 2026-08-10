@@ -126,11 +126,11 @@ export const PokemonStatusInput = ({
   return (
     <Menu>
       {({ open }) => (
-        <div className="relative">
+        <div className="relative w-full shrink-0 sm:w-[min(8.75rem,64%)]">
           <MenuButton
             className={clsx(
               "border-t-0 capitalize",
-              "flex items-center justify-between border bg-white px-4 py-3.5 text-sm focus:outline-none focus-visible:ring-1 dark:text-gray-400",
+              "flex w-full items-center justify-between border bg-white px-4 py-3.5 text-sm focus:outline-none focus-visible:ring-1 dark:text-gray-400",
               "focus:outline-none",
               "focus:ring-inset focus-visible:border-blue-500 focus-visible:ring-blue-500 disabled:cursor-not-allowed",
               "border-gray-300 dark:border-gray-600 dark:bg-gray-800 enabled:dark:text-white dark:focus-visible:ring-blue-400",
@@ -138,15 +138,15 @@ export const PokemonStatusInput = ({
               "enabled:hover:cursor-pointer",
               dragPreview && "pointer-events-none opacity-60",
               {
+                "rounded-b-md sm:rounded-t-none sm:rounded-br-md sm:rounded-bl-none":
+                  !open,
                 "rounded-br-md": open && placement.startsWith("top"),
                 "rounded-none rounded-b-none border-t-0":
                   open && placement.startsWith("bottom"),
-                "rounded-t-none rounded-br-md": !open,
               },
             )}
             disabled={!value || disabled}
             ref={refs.setReference}
-            style={{ minWidth: statusMenuMinWidth }}
           >
             <div className="flex items-center gap-2">
               {selectedStatus ? getStatusIcon(selectedStatus) : null}
