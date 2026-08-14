@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { ErrorBoundary } from "@/components/error-boundary";
-import LocationTable from "@/components/LocationTable";
+import { LocationTable } from "@/features/encounters";
+import { ErrorBoundary } from "@/shared/ui/error-boundary";
 
 export const metadata: Metadata = {
   alternates: {
