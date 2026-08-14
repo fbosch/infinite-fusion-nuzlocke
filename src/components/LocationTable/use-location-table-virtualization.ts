@@ -70,6 +70,7 @@ export function useLocationTableVirtualization({
   }, [rowVirtualizer, tableContainerRef, tableRows]);
 
   return {
+    measureElement: rowVirtualizer.measureElement,
     tableRows,
     virtualPaddingBottom,
     virtualPaddingTop,

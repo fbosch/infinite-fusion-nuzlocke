@@ -85,8 +85,8 @@ export function EncounterCell({
         "px-4 pt-8.5 pb-4 text-gray-900 text-sm dark:text-gray-100",
       )}
     >
-      <div className="flex w-full flex-row justify-center gap-4">
-        <div className="min-w-0 max-w-full flex-1">
+      <div className="relative w-full sm:flex sm:flex-row sm:justify-center sm:gap-4">
+        <div className="w-full sm:min-w-0 sm:max-w-full sm:flex-1">
           <EncounterPokemonSelectors
             bodyComboboxRef={bodyComboboxRef}
             bodyPokemon={bodyPokemon}
@@ -107,7 +107,7 @@ export function EncounterCell({
             shouldLoad={shouldLoad}
           />
         </div>
-        <div className="flex flex-col justify-center gap-2">
+        <div className="absolute top-1 right-1 flex sm:static sm:flex-col sm:justify-center sm:gap-2">
           <FusionToggleButton
             isFusion={isFusion}
             locationId={locationId}

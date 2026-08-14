@@ -74,7 +74,7 @@ export default function ConfirmationDialog({
         <div
           className={clsx(
             children ? "max-w-2xl" : "max-w-md",
-            "space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-modal dark:border-gray-700 dark:bg-gray-800",
+            "max-h-[calc(100dvh-2rem)] w-full space-y-4 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 shadow-modal sm:max-h-none sm:p-6 dark:border-gray-700 dark:bg-gray-800",
             "transform transition-all duration-200 ease-out",
             isOpen
               ? "translate-y-0 scale-100 opacity-100"

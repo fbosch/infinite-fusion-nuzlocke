@@ -37,7 +37,7 @@ export function GitHubEngagementCta({ route }: GitHubEngagementCtaProps) {
   return (
     <div
       aria-label="Support the tracker"
-      className="flex items-center gap-2"
+      className="hidden items-center gap-2 sm:flex"
       ref={ref}
       role="group"
     >

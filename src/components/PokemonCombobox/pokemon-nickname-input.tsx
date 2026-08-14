@@ -60,8 +60,8 @@ export const PokemonNicknameInput = ({
         aria-label="Pokemon nickname"
         autoComplete="off"
         className={clsx(
-          "relative rounded-t-none rounded-bl-md border-t-0 border-r-0",
-          "flex-1 border bg-white px-3 py-3.5 text-gray-900 text-sm outline-none focus:outline-none focus-visible:border-blue-500 focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-not-allowed",
+          "relative w-full rounded-none border-t-0 sm:w-auto sm:rounded-bl-md sm:border-r-0",
+          "min-w-0 flex-1 border bg-white px-3 py-3.5 text-gray-900 text-sm outline-none focus:outline-none focus-visible:border-blue-500 focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-not-allowed",
           "border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400",
           "placeholder-gray-500 dark:placeholder-gray-400",
           "opacity-60",
@@ -82,8 +82,8 @@ export const PokemonNicknameInput = ({
       aria-label="Pokemon nickname"
       autoComplete="off"
       className={clsx(
-        "relative rounded-t-none rounded-bl-md border-t-0 border-r-0",
-        "flex-1 border bg-white px-3 py-3.5 text-gray-900 text-sm outline-none focus:outline-none focus-visible:border-blue-500 focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-not-allowed",
+        "relative w-full rounded-none border-t-0 sm:w-auto sm:rounded-bl-md sm:border-r-0",
+        "min-w-0 flex-1 border bg-white px-3 py-3.5 text-gray-900 text-sm outline-none focus:outline-none focus-visible:border-blue-500 focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-not-allowed",
         "border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-visible:ring-blue-400",
         "placeholder-gray-500 dark:placeholder-gray-400",
       )}

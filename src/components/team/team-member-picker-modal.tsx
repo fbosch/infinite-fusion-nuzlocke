@@ -57,7 +57,7 @@ export default function TeamMemberPickerModal({
         <DialogPanel
           aria-labelledby="team-member-picker-title"
           className={clsx(
-            "flex max-h-[95vh] w-full max-w-6xl flex-col space-y-3 rounded-lg border border-gray-200 bg-white p-3 shadow-xl sm:max-h-[80vh] sm:space-y-4 sm:p-6 dark:border-gray-700 dark:bg-gray-800",
+            "flex max-h-[calc(100dvh-1rem)] w-full max-w-6xl flex-col space-y-3 rounded-lg border border-gray-200 bg-white p-3 shadow-xl sm:max-h-[80vh] sm:space-y-4 sm:p-6 dark:border-gray-700 dark:bg-gray-800",
             "transition duration-150 ease-out data-closed:scale-98 data-closed:opacity-0",
           )}
           id="team-member-picker-modal"
@@ -91,7 +91,7 @@ export default function TeamMemberPickerModal({
               </button>
             </div>
 
-            <div className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-6 lg:flex-row">
+            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto sm:gap-6 lg:flex-row lg:overflow-visible">
               <TeamMemberSelectionPanel />
               <div className="hidden w-px bg-gray-200 lg:block dark:bg-gray-600" />
               <TeamMemberPreviewPanel />

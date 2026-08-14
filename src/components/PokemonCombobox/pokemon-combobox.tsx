@@ -18,6 +18,7 @@ interface PokemonComboboxConfig {
   comboboxId?: string;
   disabled?: boolean;
   gameMode?: "classic" | "remix";
+  isCompact?: boolean;
   isCustomLocation?: boolean;
   isFusion?: boolean;
   isRouteEncounterDataLoading?: boolean;
@@ -65,6 +66,7 @@ export const PokemonCombobox = ({
     routeEncounterData = DEFAULT_ROUTE_ENCOUNTER_DATA,
     isRouteEncounterDataLoading = false,
     isCustomLocation = false,
+    isCompact = false,
   } = config;
 
   const [query, setQuery] = useState("");
@@ -185,6 +187,7 @@ export const PokemonCombobox = ({
         displayValue,
         dragPreview,
         floatingStyles,
+        isCompact,
         locationId,
         onChange,
         onInputChange: handleInputChange,

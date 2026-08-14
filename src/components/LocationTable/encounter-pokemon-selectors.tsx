@@ -57,6 +57,7 @@ export function EncounterPokemonSelectors({
   shouldLoad,
 }: EncounterPokemonSelectorsProps) {
   const comboboxProps = {
+    isCompact: true,
     isCustomLocation,
     isFusion,
     isRouteEncounterDataLoading,
@@ -85,7 +86,7 @@ export function EncounterPokemonSelectors({
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="mt-6 flex flex-col gap-4 sm:mt-0 sm:flex-row sm:items-center sm:gap-2">
       <LabeledPokemonCombobox
         config={{
           ...comboboxProps,
@@ -97,7 +98,9 @@ export function EncounterPokemonSelectors({
         }}
         label="Head"
       />
-      <FusionFlipButton onClick={onFlip} />
+      <div className="flex justify-center sm:contents">
+        <FusionFlipButton onClick={onFlip} />
+      </div>
       <LabeledPokemonCombobox
         config={{
           ...comboboxProps,
