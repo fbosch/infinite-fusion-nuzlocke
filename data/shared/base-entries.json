@@ -2306,5 +2306,29 @@
   {
     "id": 576,
     "name": "Gastrodon West"
+  },
+  {
+    "id": 577,
+    "name": "Tornadus"
+  },
+  {
+    "id": 578,
+    "name": "Tornadus (Therian)"
+  },
+  {
+    "id": 579,
+    "name": "Thundurus"
+  },
+  {
+    "id": 580,
+    "name": "Thundurus (Therian)"
+  },
+  {
+    "id": 581,
+    "name": "Landorus"
+  },
+  {
+    "id": 582,
+    "name": "Landorus (Therian)"
   }
 ]

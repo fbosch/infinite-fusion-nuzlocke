@@ -1,98 +1,98 @@
 [
   {
-    "routeName": "Seafoam Island (Route 20)",
-    "encounters": [144]
+    "encounters": [144],
+    "routeName": "Seafoam Island (Route 20)"
   },
   {
-    "routeName": "Power Plant",
-    "encounters": [145]
+    "encounters": [145],
+    "routeName": "Power Plant"
   },
   {
-    "routeName": "Mt. Ember",
-    "encounters": [146, 341]
+    "encounters": [146, 341],
+    "routeName": "Mt. Ember"
   },
   {
-    "routeName": "Cerulean Cave",
-    "encounters": [150]
+    "encounters": [150],
+    "routeName": "Cerulean Cave"
   },
   {
-    "routeName": "Mt. Moon Summit",
-    "encounters": [151]
+    "encounters": [151],
+    "routeName": "Mt. Moon Summit"
   },
   {
-    "routeName": "Victory Road",
-    "encounters": [244]
+    "encounters": [244],
+    "routeName": "Victory Road"
   },
   {
-    "routeName": "Roaming (Johto)",
-    "encounters": [243, 245]
+    "encounters": [243, 245],
+    "routeName": "Roaming (Johto)"
   },
   {
-    "routeName": "Navel Rock",
-    "encounters": [249, 250]
+    "encounters": [249, 250],
+    "routeName": "Navel Rock"
   },
   {
-    "routeName": "Ilex Forest",
-    "encounters": [251]
+    "encounters": [251],
+    "routeName": "Ilex Forest"
   },
   {
-    "routeName": "Deep Sea",
-    "encounters": [340]
+    "encounters": [340],
+    "routeName": "Deep Sea"
   },
   {
-    "routeName": "Sky Pillar",
-    "encounters": [342]
+    "encounters": [342],
+    "routeName": "Sky Pillar"
   },
   {
-    "routeName": "Submerged Temple",
-    "encounters": [346, 447, 448, 449]
+    "encounters": [346, 447, 448, 449],
+    "routeName": "Submerged Temple"
   },
   {
-    "routeName": "All 3 Eggs",
-    "encounters": [343, 344, 345]
+    "encounters": [343, 344, 345],
+    "routeName": "All 3 Eggs"
   },
   {
-    "routeName": "Newmoon Island",
-    "encounters": [347, 468]
+    "encounters": [347, 468],
+    "routeName": "Newmoon Island"
   },
   {
-    "routeName": "Hall of Origin",
-    "encounters": [315]
+    "encounters": [315],
+    "routeName": "Hall of Origin"
   },
   {
-    "routeName": "P2 Laboratory",
-    "encounters": [348]
+    "encounters": [348],
+    "routeName": "P2 Laboratory"
   },
   {
-    "routeName": "Bell Tower",
-    "encounters": [349, 350]
+    "encounters": [349, 350],
+    "routeName": "Bell Tower"
   },
   {
-    "routeName": "Lake of Rage",
-    "encounters": [351]
+    "encounters": [351],
+    "routeName": "Lake of Rage"
   },
   {
-    "routeName": "Roaming (Sevii Islands)",
-    "encounters": [378, 379]
+    "encounters": [378, 379],
+    "routeName": "Roaming (Sevii Islands)"
   },
   {
-    "routeName": "Birth Island",
-    "encounters": [380]
+    "encounters": [380],
+    "routeName": "Birth Island"
   },
   {
-    "routeName": "Dream",
-    "encounters": [381]
+    "encounters": [381],
+    "routeName": "Dream"
   },
   {
-    "routeName": "Mt. Moon",
-    "encounters": [450, 470]
+    "encounters": [450, 470],
+    "routeName": "Mt. Moon"
   },
   {
-    "routeName": "Saffron City",
-    "encounters": [466, 467]
+    "encounters": [466, 467],
+    "routeName": "Saffron City"
   },
   {
-    "routeName": "Pinkan Hollow",
-    "encounters": [500]
+    "encounters": [500],
+    "routeName": "Pinkan Hollow"
   }
 ]
