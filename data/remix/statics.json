@@ -1,289 +1,289 @@
 [
   {
-    "routeName": "Berry Forest",
-    "pokemonIds": [338]
+    "pokemonIds": [338],
+    "routeName": "Berry Forest"
   },
   {
-    "routeName": "Blackthorn City",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Blackthorn City"
   },
   {
-    "routeName": "Celadon City",
-    "pokemonIds": [358, 434]
+    "pokemonIds": [358, 434],
+    "routeName": "Celadon City"
   },
   {
-    "routeName": "Celadon Sewers",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Celadon Sewers"
   },
   {
-    "routeName": "Cerulean Cape",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Cerulean Cape"
   },
   {
-    "routeName": "Cerulean Cave",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Cerulean Cave"
   },
   {
-    "routeName": "Cerulean City",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Cerulean City"
   },
   {
-    "routeName": "Cerulean Team Rocket HQ",
-    "pokemonIds": [474]
+    "pokemonIds": [474],
+    "routeName": "Cerulean Team Rocket HQ"
   },
   {
-    "routeName": "Cinnabar Island",
-    "pokemonIds": [310, 434]
+    "pokemonIds": [310, 434],
+    "routeName": "Cinnabar Island"
   },
   {
-    "routeName": "Creepy House",
-    "pokemonIds": [357, 373]
+    "pokemonIds": [357, 373],
+    "routeName": "Creepy House"
   },
   {
-    "routeName": "Crimson City",
-    "pokemonIds": [300, 421, 434]
+    "pokemonIds": [300, 421, 434],
+    "routeName": "Crimson City"
   },
   {
-    "routeName": "Dark Cave",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Dark Cave"
   },
   {
-    "routeName": "Deep Sea",
-    "pokemonIds": [91, 117, 119, 130, 170, 171, 226]
+    "pokemonIds": [91, 117, 119, 130, 170, 171, 226],
+    "routeName": "Deep Sea"
   },
   {
-    "routeName": "Destroying Sandcastles",
-    "pokemonIds": [459]
+    "pokemonIds": [459],
+    "routeName": "Destroying Sandcastles"
   },
   {
-    "routeName": "Flowers",
-    "pokemonIds": [476]
+    "pokemonIds": [476],
+    "routeName": "Flowers"
   },
   {
-    "routeName": "Goldenrod City",
-    "pokemonIds": [358]
+    "pokemonIds": [358],
+    "routeName": "Goldenrod City"
   },
   {
-    "routeName": "Ice Cavern",
-    "pokemonIds": [429]
+    "pokemonIds": [429],
+    "routeName": "Ice Cavern"
   },
   {
-    "routeName": "Ilex Forest",
-    "pokemonIds": [289, 434]
+    "pokemonIds": [289, 434],
+    "routeName": "Ilex Forest"
   },
   {
-    "routeName": "Mt. Moon Summit",
-    "pokemonIds": [498]
+    "pokemonIds": [498],
+    "routeName": "Mt. Moon Summit"
   },
   {
-    "routeName": "Mt. Mortar",
     "pokemonIds": [
       20, 42, 67, 75, 80, 95, 105, 169, 184, 195, 202, 217, 292, 300, 310, 325,
       332, 333
-    ]
+    ],
+    "routeName": "Mt. Mortar"
   },
   {
-    "routeName": "Navel Rock",
-    "pokemonIds": [17, 21, 22]
+    "pokemonIds": [17, 21, 22],
+    "routeName": "Navel Rock"
   },
   {
-    "routeName": "Odd Keystone",
-    "pokemonIds": [295]
+    "pokemonIds": [295],
+    "routeName": "Odd Keystone"
   },
   {
-    "routeName": "Offshore Road",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Offshore Road"
   },
   {
-    "routeName": "Old Shipwreck",
-    "pokemonIds": [453]
+    "pokemonIds": [453],
+    "routeName": "Old Shipwreck"
   },
   {
-    "routeName": "Pallet Town",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Pallet Town"
   },
   {
-    "routeName": "Pokemon Mansion",
-    "pokemonIds": [126]
+    "pokemonIds": [126],
+    "routeName": "Pokemon Mansion"
   },
   {
-    "routeName": "Power Plant",
-    "pokemonIds": [125, 434]
+    "pokemonIds": [125, 434],
+    "routeName": "Power Plant"
   },
   {
-    "routeName": "Roaming Sevii Islands",
-    "pokemonIds": [394]
+    "pokemonIds": [394],
+    "routeName": "Roaming Sevii Islands"
   },
   {
-    "routeName": "Rock Smash",
-    "pokemonIds": [74]
+    "pokemonIds": [74],
+    "routeName": "Rock Smash"
   },
   {
-    "routeName": "Rocket Warehouse",
-    "pokemonIds": [337]
+    "pokemonIds": [337],
+    "routeName": "Rocket Warehouse"
   },
   {
-    "routeName": "Route 10",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 10"
   },
   {
-    "routeName": "Route 12",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 12"
   },
   {
-    "routeName": "Route 13",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 13"
   },
   {
-    "routeName": "Route 16",
-    "pokemonIds": [143]
+    "pokemonIds": [143],
+    "routeName": "Route 16"
   },
   {
-    "routeName": "Route 17",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 17"
   },
   {
-    "routeName": "Route 18",
-    "pokemonIds": [434, 489]
+    "pokemonIds": [434, 489],
+    "routeName": "Route 18"
   },
   {
-    "routeName": "Route 19",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 19"
   },
   {
-    "routeName": "Route 20",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 20"
   },
   {
-    "routeName": "Route 21",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 21"
   },
   {
-    "routeName": "Route 22",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 22"
   },
   {
-    "routeName": "Route 23",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 23"
   },
   {
-    "routeName": "Route 24",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 24"
   },
   {
-    "routeName": "Route 26",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 26"
   },
   {
-    "routeName": "Route 27",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 27"
   },
   {
-    "routeName": "Route 30",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 30"
   },
   {
-    "routeName": "Route 31",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 31"
   },
   {
-    "routeName": "Route 32",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 32"
   },
   {
-    "routeName": "Route 34",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 34"
   },
   {
-    "routeName": "Route 35",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 35"
   },
   {
-    "routeName": "Route 36",
-    "pokemonIds": [185]
+    "pokemonIds": [185],
+    "routeName": "Route 36"
   },
   {
-    "routeName": "Route 4",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 4"
   },
   {
-    "routeName": "Route 46",
-    "pokemonIds": [309]
+    "pokemonIds": [309],
+    "routeName": "Route 46"
   },
   {
-    "routeName": "Route 5",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Route 5"
   },
   {
-    "routeName": "Ruby Chamber",
-    "pokemonIds": [218, 219]
+    "pokemonIds": [218, 219],
+    "routeName": "Ruby Chamber"
   },
   {
-    "routeName": "Ruins of Alph",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Ruins of Alph"
   },
   {
-    "routeName": "Safari Zone A1",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Safari Zone A1"
   },
   {
-    "routeName": "Safari Zone A2",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Safari Zone A2"
   },
   {
-    "routeName": "Safari Zone A3",
-    "pokemonIds": [424, 434]
+    "pokemonIds": [424, 434],
+    "routeName": "Safari Zone A3"
   },
   {
-    "routeName": "Safari Zone A4",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Safari Zone A4"
   },
   {
-    "routeName": "Safari Zone A5",
-    "pokemonIds": [50, 392, 409, 434]
+    "pokemonIds": [50, 392, 409, 434],
+    "routeName": "Safari Zone A5"
   },
   {
-    "routeName": "Safari Zone Temple",
-    "pokemonIds": [362, 374, 416]
+    "pokemonIds": [362, 374, 416],
+    "routeName": "Safari Zone Temple"
   },
   {
-    "routeName": "Saffron City",
-    "pokemonIds": [358, 451]
+    "pokemonIds": [358, 451],
+    "routeName": "Saffron City"
   },
   {
-    "routeName": "Seafoam Islands",
-    "pokemonIds": [124, 434]
+    "pokemonIds": [124, 434],
+    "routeName": "Seafoam Islands"
   },
   {
-    "routeName": "Slowpoke Well",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Slowpoke Well"
   },
   {
-    "routeName": "Tohjo Falls",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Tohjo Falls"
   },
   {
-    "routeName": "Treasure Beach",
-    "pokemonIds": [370, 434]
+    "pokemonIds": [370, 434],
+    "routeName": "Treasure Beach"
   },
   {
-    "routeName": "Union Cave",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Union Cave"
   },
   {
-    "routeName": "Vermillion City",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Vermillion City"
   },
   {
-    "routeName": "Violet City",
-    "pokemonIds": [434]
+    "pokemonIds": [434],
+    "routeName": "Violet City"
   },
   {
-    "routeName": "Viridian Forest",
-    "pokemonIds": [46, 167, 168]
+    "pokemonIds": [46, 167, 168],
+    "routeName": "Viridian Forest"
   },
   {
-    "routeName": "Viridian River",
-    "pokemonIds": [434, 479, 482, 485]
+    "pokemonIds": [434, 479, 482, 485],
+    "routeName": "Viridian River"
   }
 ]
