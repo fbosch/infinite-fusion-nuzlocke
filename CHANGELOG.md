@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.6](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.9.5...v0.9.6) (2026-10-06)
+
+
+### Bug Fixes
+
+* prevent mobile layout overflow ([#263](https://github.com/fbosch/infinite-fusion-nuzlocke/issues/263)) ([ab7a028](https://github.com/fbosch/infinite-fusion-nuzlocke/commit/ab7a028eb0cce84515a70b32a48fe6c4154e448e))
+
 ## [0.9.5](https://github.com/fbosch/infinite-fusion-nuzlocke/compare/v0.9.4...v0.9.5) (2026-08-05)
 
 
