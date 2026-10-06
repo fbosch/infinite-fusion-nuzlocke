@@ -10,10 +10,12 @@ import {
   it as vitestIt,
   vi as vitestVi,
 } from "vitest";
-import type { PokemonOptionType } from "@/loaders/pokemon";
 // Import modules after mocks are set up (mocks should be imported in each test file)
-import { playthroughActions as storePlaythroughActions } from "@/stores/playthroughs/index";
-import { playthroughsStore as storePlaythroughsStore } from "@/stores/playthroughs/store";
+import {
+  playthroughActions as storePlaythroughActions,
+  playthroughsStore as storePlaythroughsStore,
+} from "@/features/playthroughs";
+import type { PokemonOptionType } from "@/features/pokemon";
 
 export const act = testingAct;
 export const afterEach = vitestAfterEach;

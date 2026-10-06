@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { loadFromIndexedDB } from "@/stores/playthroughs/persistence";
-import type { PlaythroughsState } from "@/stores/playthroughs/types";
+import type { PlaythroughsState } from "@/features/playthroughs";
+import { loadFromIndexedDB } from "@/features/playthroughs/persistence/persistence";
 
 const PLAYTHROUGHS_DATABASE = "playthroughs";
 

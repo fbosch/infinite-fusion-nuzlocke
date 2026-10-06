@@ -1,0 +1,12 @@
+"use client";
+
+import type { PokemonOptionType } from "@/features/pokemon";
+
+export interface PCEntry {
+  body: PokemonOptionType | null;
+  head: PokemonOptionType | null;
+  isFusion?: boolean;
+  locationId: string;
+  locationName: string;
+  position?: number;
+}

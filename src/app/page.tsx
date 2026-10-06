@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { ActivePlaythroughTitle } from "@/components/active-playthrough-title";
-import { ErrorBoundary } from "@/components/error-boundary";
-import LocationTable from "@/components/LocationTable";
+import { LocationTable } from "@/features/encounters";
+import { ActivePlaythroughTitle } from "@/features/playthroughs";
+import { ErrorBoundary } from "@/shared/ui/error-boundary";
 
 export const metadata: Metadata = {
   alternates: {

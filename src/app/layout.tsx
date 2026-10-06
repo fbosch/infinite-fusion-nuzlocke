@@ -2,18 +2,18 @@ import type { Metadata } from "next";
 import { Karla as Font } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import { AnalyticsDebugPanel } from "@/components/analytics/analytics-debug-panel";
+import { AnalyticsDebugPanel } from "@/app/_components/analytics-debug-panel";
+import Footer from "@/app/_components/footer";
+import Header from "@/app/_components/header";
+import { APP_TITLE, APP_TITLE_TEMPLATE } from "@/app/_infrastructure/metadata";
+import { ServiceWorkerInit } from "@/app/_infrastructure/service-worker-init";
 import {
   ConditionalAnalytics,
   ConditionalSpeedInsights,
-} from "@/components/analytics/conditional-analytics";
-import { CookieConsent } from "@/components/analytics/cookie-consent";
-import { ErrorBoundary } from "@/components/error-boundary";
-import Footer from "@/components/footer";
-import Header from "@/components/Header";
-import { ServiceWorkerInit } from "@/components/service-worker-init";
-import { APP_TITLE, APP_TITLE_TEMPLATE } from "@/lib/metadata";
-import { Providers } from "./providers";
+  CookieConsent,
+} from "@/features/preferences";
+import { ErrorBoundary } from "@/shared/ui/error-boundary";
+import { Providers } from "./_infrastructure/providers";
 
 // Primary sans-serif font for body text
 const font = Font({

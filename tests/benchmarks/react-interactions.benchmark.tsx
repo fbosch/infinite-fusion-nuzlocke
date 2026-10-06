@@ -3,15 +3,17 @@
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import React, { Profiler, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import SummaryCard from "@/components/PokemonSummaryCard";
-import TeamEntryItem from "@/components/pc/team-entry-item";
+import {
+  getLocationsSortedWithCustom,
+  PokemonSummaryCard as SummaryCard,
+} from "@/features/encounters";
+import { buildPokemonUidIndex } from "@/features/playthroughs";
+import TeamEntryItem from "@/features/roster/components/team-entry-item";
 import {
   TeamMemberSelectionProvider,
   useTeamMemberSelection,
-} from "@/components/team/team-member-selection-context";
-import { getTeamSlots } from "@/components/team/team-slots-model";
-import { getLocationsSortedWithCustom } from "@/loaders/locations";
-import { buildPokemonUidIndex } from "@/utils/encounter-utils";
+} from "@/features/roster/components/team-member-selection-context";
+import { getTeamSlots } from "@/features/roster/model/team-slots-model";
 
 const SAMPLE_COUNT = 20;
 const WARMUP_ITERATIONS = 5;
@@ -30,7 +32,7 @@ const updatePokemonByUIDMock = vi.hoisted(() =>
 );
 
 vi.mock("next/dynamic", () => ({ default: () => () => null }));
-vi.mock("@/components/context-menu", () => ({
+vi.mock("@/shared/ui/context-menu", () => ({
   ContextMenu: ({
     children,
     items,
@@ -50,21 +52,21 @@ vi.mock("@/components/context-menu", () => ({
     </>
   ),
 }));
-vi.mock("@/components/cursor-tooltip", () => ({
+vi.mock("@/shared/ui/cursor-tooltip", () => ({
   CursorTooltip: ({ children }: { children: ReactNode }) => children,
 }));
-vi.mock("@/components/PokemonSummaryCard/artwork-variant-button", () => ({
+vi.mock("@/features/encounters", () => ({
   ArtworkVariantButton: () => null,
 }));
-vi.mock("@/components/PokemonSummaryCard/fusion-sprite", () => ({
+vi.mock("@/features/encounters", () => ({
   FusionSprite: () => <div data-testid="fusion-sprite" />,
 }));
-vi.mock("@/components/PokemonSummaryCard/team-member-context-menu", () => ({
+vi.mock("@/features/encounters", () => ({
   TeamMemberContextMenu: ({ children }: { children: ReactNode }) => (
     <>{children}</>
   ),
 }));
-vi.mock("@/components/PokemonSummaryCard/pokemon-context-menu", () => ({
+vi.mock("@/features/encounters", () => ({
   PokemonContextMenu: ({ children }: { children: ReactNode }) => (
     <>{children}</>
   ),
@@ -81,48 +83,44 @@ vi.mock("lucide-react", () => ({
   Skull: () => <span />,
   SquareArrowUpRight: () => <span />,
 }));
-vi.mock("@/components/type-pills", () => ({ TypePills: () => null }));
-vi.mock("@/hooks/use-fusion-types", () => ({
+vi.mock("@/features/pokemon", () => ({
+  getSpriteId: () => null,
+  TypePills: () => null,
   useFusionTypesFromPokemon: () => ({ primary: "Electric", secondary: null }),
-}));
-vi.mock("@/hooks/use-sprite", () => ({
   usePreferredVariantState: () => ({ variant: null }),
   useSpriteCredits: () => ({ data: {} }),
   useSpriteVariants: () => ({ data: [], isLoading: false }),
 }));
-vi.mock("@/lib/sprites", () => ({ getSpriteId: () => null }));
-vi.mock("@/utils/format-credits", () => ({
+vi.mock("@/features/pokemon/model/format-credits", () => ({
   formatArtistCredits: () => "artist",
 }));
-vi.mock("@/utils/pokemon-predicates", () => ({
+vi.mock("@/features/pokemon", () => ({
   canFuse: () => true,
   isPokemonActive: (pokemon: unknown) => Boolean(pokemon),
   isPokemonDeceased: () => false,
   isPokemonStored: () => false,
 }));
-vi.mock("@/loaders/pokemon", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/loaders/pokemon")>();
+vi.mock("@/features/pokemon", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/features/pokemon")>();
   return { ...actual, isEggId: () => false };
 });
-vi.mock("@/loaders/locations", async () => {
-  const actual = await vi.importActual<typeof import("@/loaders/locations")>(
-    "@/loaders/locations",
+vi.mock("@/features/encounters", async () => {
+  const actual = await vi.importActual<typeof import("@/features/encounters")>(
+    "@/features/encounters",
   );
   return { ...actual, getLocationById: (id: string) => ({ name: id }) };
 });
-vi.mock("@/stores/playthroughs/hooks", () => ({
-  useActivePlaythrough: () => ({ team: { members: [] } }),
-  useActivePlaythroughId: () => "playthrough-1",
-  useEncounters: () => ({}),
-}));
-vi.mock("@/stores/playthroughs/index", () => ({
+vi.mock("@/features/playthroughs", () => ({
   playthroughActions: {
     markTeamMemberAsDeceased: vi.fn(),
     moveTeamMemberToBox: vi.fn(),
     updatePokemonByUID: updatePokemonByUIDMock,
   },
+  useActivePlaythrough: () => ({ team: { members: [] } }),
+  useActivePlaythroughId: () => "playthrough-1",
+  useEncounters: () => ({}),
 }));
-vi.mock("@/utils/scrollToLocation", () => ({ scrollToLocationById: vi.fn() }));
+vi.mock("@/features/encounters", () => ({ scrollToLocationById: vi.fn() }));
 
 const pikachu = {
   id: 25,
