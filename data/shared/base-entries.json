@@ -2330,5 +2330,37 @@
   {
     "id": 582,
     "name": "Landorus (Therian)"
+  },
+  {
+    "id": 583,
+    "name": "Salandit"
+  },
+  {
+    "id": 584,
+    "name": "Salazzle"
+  },
+  {
+    "id": 585,
+    "name": "Inkay"
+  },
+  {
+    "id": 586,
+    "name": "Malamar"
+  },
+  {
+    "id": 587,
+    "name": "Archen"
+  },
+  {
+    "id": 588,
+    "name": "Archeops"
+  },
+  {
+    "id": 589,
+    "name": "Tirtouga"
+  },
+  {
+    "id": 590,
+    "name": "Carracosta"
   }
 ]
