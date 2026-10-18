@@ -16245,5 +16245,241 @@
         "name": "dragon"
       }
     ]
+  },
+  {
+    "evolution": {
+      "evolves_to": [
+        {
+          "id": 758,
+          "name": "salazzle",
+          "min_level": 33,
+          "trigger": "level-up"
+        }
+      ]
+    },
+    "id": 583,
+    "name": "Salandit",
+    "nationalDexId": 757,
+    "species": {
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/390/"
+      },
+      "generation": "generation-vii",
+      "is_legendary": false,
+      "is_mythical": false
+    },
+    "types": [
+      {
+        "name": "poison"
+      },
+      {
+        "name": "fire"
+      }
+    ]
+  },
+  {
+    "evolution": {
+      "evolves_to": [],
+      "evolves_from": {
+        "id": 757,
+        "name": "salandit"
+      }
+    },
+    "id": 584,
+    "name": "Salazzle",
+    "nationalDexId": 758,
+    "species": {
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/390/"
+      },
+      "generation": "generation-vii",
+      "is_legendary": false,
+      "is_mythical": false
+    },
+    "types": [
+      {
+        "name": "poison"
+      },
+      {
+        "name": "fire"
+      }
+    ]
+  },
+  {
+    "evolution": {
+      "evolves_to": [
+        {
+          "id": 687,
+          "name": "malamar",
+          "min_level": 30,
+          "trigger": "level-up"
+        }
+      ]
+    },
+    "id": 585,
+    "name": "Inkay",
+    "nationalDexId": 686,
+    "species": {
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/352/"
+      },
+      "generation": "generation-vi",
+      "is_legendary": false,
+      "is_mythical": false
+    },
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "psychic"
+      }
+    ]
+  },
+  {
+    "evolution": {
+      "evolves_to": [],
+      "evolves_from": {
+        "id": 686,
+        "name": "inkay"
+      }
+    },
+    "id": 586,
+    "name": "Malamar",
+    "nationalDexId": 687,
+    "species": {
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/352/"
+      },
+      "generation": "generation-vi",
+      "is_legendary": false,
+      "is_mythical": false
+    },
+    "types": [
+      {
+        "name": "dark"
+      },
+      {
+        "name": "psychic"
+      }
+    ]
+  },
+  {
+    "evolution": {
+      "evolves_to": [
+        {
+          "id": 567,
+          "name": "archeops",
+          "min_level": 37,
+          "trigger": "level-up"
+        }
+      ]
+    },
+    "id": 587,
+    "name": "Archen",
+    "nationalDexId": 566,
+    "species": {
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/289/"
+      },
+      "generation": "generation-v",
+      "is_legendary": false,
+      "is_mythical": false
+    },
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "flying"
+      }
+    ]
+  },
+  {
+    "evolution": {
+      "evolves_to": [],
+      "evolves_from": {
+        "id": 566,
+        "name": "archen"
+      }
+    },
+    "id": 588,
+    "name": "Archeops",
+    "nationalDexId": 567,
+    "species": {
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/289/"
+      },
+      "generation": "generation-v",
+      "is_legendary": false,
+      "is_mythical": false
+    },
+    "types": [
+      {
+        "name": "rock"
+      },
+      {
+        "name": "flying"
+      }
+    ]
+  },
+  {
+    "evolution": {
+      "evolves_to": [
+        {
+          "id": 565,
+          "name": "carracosta",
+          "min_level": 37,
+          "trigger": "level-up"
+        }
+      ]
+    },
+    "id": 589,
+    "name": "Tirtouga",
+    "nationalDexId": 564,
+    "species": {
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/288/"
+      },
+      "generation": "generation-v",
+      "is_legendary": false,
+      "is_mythical": false
+    },
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "rock"
+      }
+    ]
+  },
+  {
+    "evolution": {
+      "evolves_to": [],
+      "evolves_from": {
+        "id": 564,
+        "name": "tirtouga"
+      }
+    },
+    "id": 590,
+    "name": "Carracosta",
+    "nationalDexId": 565,
+    "species": {
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/288/"
+      },
+      "generation": "generation-v",
+      "is_legendary": false,
+      "is_mythical": false
+    },
+    "types": [
+      {
+        "name": "water"
+      },
+      {
+        "name": "rock"
+      }
+    ]
   }
 ]
