@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
-import { SPECIAL_LOCATIONS } from "@/constants/special-locations";
+import { SPECIAL_LOCATIONS } from "@/features/encounters";
 
 interface Location {
   description: string;

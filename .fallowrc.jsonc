@@ -12,7 +12,7 @@
     "unused-class-members": "warn",
     "duplicate-exports": "warn",
     "circular-dependencies": "warn",
-    "boundary-violation": "warn",
+    "boundary-violation": "error",
     "coverage-gaps": "warn",
     "stale-suppressions": "warn"
   },
@@ -26,7 +26,61 @@
     "tests/benchmarks/**/*.benchmark.ts",
     "tests/benchmarks/**/*.benchmark.tsx"
   ],
-  "dynamicallyLoaded": ["src/workers/**/*.ts"],
+  "dynamicallyLoaded": ["src/features/pokemon/search/*.worker.ts"],
+  "boundaries": {
+    "zones": [
+      {
+        "name": "tests",
+        "patterns": [
+          "tests/**",
+          "src/**/__tests__/**",
+          "src/**/*.test.ts",
+          "src/**/*.test.tsx"
+        ]
+      },
+      { "name": "app", "patterns": ["src/app/**"] },
+      { "name": "shared", "patterns": ["src/shared/**"] },
+      { "name": "pokemon", "patterns": ["src/features/pokemon/**"] },
+      { "name": "playthroughs", "patterns": ["src/features/playthroughs/**"] },
+      { "name": "encounters", "patterns": ["src/features/encounters/**"] },
+      { "name": "roster", "patterns": ["src/features/roster/**"] },
+      { "name": "preferences", "patterns": ["src/features/preferences/**"] }
+    ],
+    "rules": [
+      { "from": "shared" },
+      { "from": "pokemon", "allow": ["shared"] },
+      { "from": "playthroughs", "allow": ["pokemon", "shared"] },
+      { "from": "encounters", "allow": ["pokemon", "playthroughs", "shared"] },
+      {
+        "from": "roster",
+        "allow": ["encounters", "pokemon", "playthroughs", "shared"]
+      },
+      { "from": "preferences", "allow": ["playthroughs", "shared"] },
+      {
+        "from": "app",
+        "allow": [
+          "encounters",
+          "playthroughs",
+          "pokemon",
+          "preferences",
+          "roster",
+          "shared"
+        ]
+      },
+      {
+        "from": "tests",
+        "allow": [
+          "app",
+          "encounters",
+          "playthroughs",
+          "pokemon",
+          "preferences",
+          "roster",
+          "shared"
+        ]
+      }
+    ]
+  },
   // Fallow 3.6 treats JSON imports through this TypeScript path alias as packages.
   "ignoreDependencies": ["@data/classic", "@data/remix", "@data/shared"],
   // Retain inactive security guards so future transitive resolutions remain patched.

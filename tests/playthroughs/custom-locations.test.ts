@@ -1,8 +1,7 @@
 // Import mocks first (must be at top level for Vitest hoisting)
 import "./mocks";
 
-import { playthroughActions } from "@/stores/playthroughs";
-import { playthroughsStore } from "@/stores/playthroughs/store";
+import { playthroughActions, playthroughsStore } from "@/features/playthroughs";
 // Import shared setup and utilities
 import {
   afterEach,

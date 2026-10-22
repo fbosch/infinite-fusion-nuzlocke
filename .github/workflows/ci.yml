@@ -158,10 +158,13 @@ jobs:
       - name: Run graph quality audit
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            pnpm exec fallow audit --base "origin/${{ github.base_ref }}" --format compact
+            base="origin/${{ github.base_ref }}"
           else
-            pnpm exec fallow audit --base "${{ github.event.before }}" --format compact
+            base="${{ github.event.before }}"
           fi
+
+          git diff --find-renames=50% "$base"...HEAD \
+            | pnpm exec fallow audit --base "$base" --diff-stdin --format compact
 
       - name: Run React runtime quality audit
         env:

@@ -3,43 +3,46 @@ import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import "../playthroughs/mocks";
 
-vi.mock("@/lib/analytics/selectors", () => ({
+vi.mock("@/features/playthroughs/model/analytics-selectors", () => ({
   getEncounterCount: () => 0,
   getSharedEventProperties: () => ({}),
   getTeamSizeAfter: () => 0,
   getViableRosterSize: () => 0,
 }));
-vi.mock("@/lib/analytics/playthrough-event-data", () => ({
+vi.mock("@/features/playthroughs/model/playthrough-event-data", () => ({
   getNewlyReachedCheckpoints: () => [],
   markCheckpointEventsTracked: () => undefined,
 }));
-vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
-vi.mock("@/lib/events", () => ({ emitEvolutionEvent: vi.fn() }));
+vi.mock("@/shared/analytics/track-event", () => ({ trackEvent: vi.fn() }));
+vi.mock("@/features/encounters", () => ({ emitEvolutionEvent: vi.fn() }));
 
-import { type PokemonOptionType, PokemonStatus } from "@/loaders/pokemon";
-import { removeCustomLocation } from "@/stores/playthroughs/custom-locations";
+import {
+  type EncounterData,
+  getActivePlaythrough,
+  type Playthrough,
+  playthroughsStore,
+} from "@/features/playthroughs";
+import { removeCustomLocation } from "@/features/playthroughs/model/custom-locations";
 import {
   resetEncounter,
   updateEncounter,
   updatePokemonInEncounter,
-} from "@/stores/playthroughs/encounters/crud";
+} from "@/features/playthroughs/model/encounters/crud";
 import {
   moveToOriginalLocation,
   relocateEncounterSlot,
-} from "@/stores/playthroughs/encounters/drag-drop";
+} from "@/features/playthroughs/model/encounters/drag-drop";
 import {
   flipEncounterFusion,
   toggleEncounterFusion,
-} from "@/stores/playthroughs/encounters/fusion";
+} from "@/features/playthroughs/model/encounters/fusion";
 import {
   markEncounterAsCaptured,
   markEncounterAsDeceased,
   moveEncounterToBox,
-} from "@/stores/playthroughs/encounters/status";
-import { flipTeamMemberFusion } from "@/stores/playthroughs/encounters/team-actions";
-import { getActivePlaythrough } from "@/stores/playthroughs/playthrough-state";
-import { playthroughsStore } from "@/stores/playthroughs/store";
-import type { EncounterData, Playthrough } from "@/stores/playthroughs/types";
+} from "@/features/playthroughs/model/encounters/status";
+import { flipTeamMemberFusion } from "@/features/playthroughs/model/encounters/team-actions";
+import { type PokemonOptionType, PokemonStatus } from "@/features/pokemon";
 
 const ENCOUNTER_COUNT = z.coerce
   .number()

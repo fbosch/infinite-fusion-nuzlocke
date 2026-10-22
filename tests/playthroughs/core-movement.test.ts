@@ -1,8 +1,8 @@
 // Import mocks first (must be at top level for Vitest hoisting)
 import "./mocks";
 
-import { PokemonStatus } from "@/loaders/pokemon";
-import { playthroughActions } from "@/stores/playthroughs";
+import { playthroughActions } from "@/features/playthroughs";
+import { PokemonStatus } from "@/features/pokemon";
 // Import shared setup and utilities
 import {
   beforeEach,
