@@ -1,38 +1,38 @@
 [
   {
-    "routeName": "Blackthorn City",
-    "pokemonIds": [296]
+    "pokemonIds": [296],
+    "routeName": "Blackthorn City"
   },
   {
-    "routeName": "Celadon City",
-    "pokemonIds": [133]
+    "pokemonIds": [133],
+    "routeName": "Celadon City"
   },
   {
-    "routeName": "Pewter City",
-    "pokemonIds": [142, 430, 432, 433]
+    "pokemonIds": [142, 430, 432, 433],
+    "routeName": "Pewter City"
   },
   {
-    "routeName": "Route 17",
-    "pokemonIds": [88, 89]
+    "pokemonIds": [88, 89],
+    "routeName": "Route 17"
   },
   {
-    "routeName": "Route 22",
-    "pokemonIds": [493]
+    "pokemonIds": [493],
+    "routeName": "Route 22"
   },
   {
-    "routeName": "S.S. Anne",
-    "pokemonIds": [491]
+    "pokemonIds": [491],
+    "routeName": "S.S. Anne"
   },
   {
-    "routeName": "Saffron City",
-    "pokemonIds": [290]
+    "pokemonIds": [290],
+    "routeName": "Saffron City"
   },
   {
-    "routeName": "Saffron Nightclub",
-    "pokemonIds": [235]
+    "pokemonIds": [235],
+    "routeName": "Saffron Nightclub"
   },
   {
-    "routeName": "Viridian Forest",
-    "pokemonIds": [15]
+    "pokemonIds": [15],
+    "routeName": "Viridian Forest"
   }
 ]
