@@ -16,6 +16,10 @@
     "routeName": "Route 104"
   },
   {
+    "pokemonIds": [559],
+    "routeName": "Route 109"
+  },
+  {
     "pokemonIds": [88, 89],
     "routeName": "Route 17"
   },
@@ -38,10 +42,6 @@
   {
     "pokemonIds": [235],
     "routeName": "Saffron Nightclub"
-  },
-  {
-    "pokemonIds": [559],
-    "routeName": "Slateport Beach"
   },
   {
     "pokemonIds": [15],
